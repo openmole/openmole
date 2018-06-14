@@ -67,8 +67,12 @@ case class Trajectory(
 
 object MorrisSampling {
 
-  def apply(repetitions: FromContext[Int], levels: FromContext[Int], factors: ScalarOrSequenceOfDouble[_]*) =
-    new MorrisSampling(repetitions, levels, factors: _*)
+  def apply(
+    repetitions: FromContext[Int],
+    levels:      FromContext[Int],
+    verbose:     Boolean                          = false,
+    factors:     Seq[ScalarOrSequenceOfDouble[_]]) =
+    new MorrisSampling(repetitions, levels, verbose, factors)
 
   /**
    * Namespace for the variables peculiar to this Morris sampling
@@ -155,7 +159,8 @@ object MorrisSampling {
 sealed class MorrisSampling(
   val repetitions: FromContext[Int],
   val levels:      FromContext[Int],
-  val factors:     ScalarOrSequenceOfDouble[_]*) extends Sampling {
+  val verbose:     Boolean                          = false,
+  val factors:     Seq[ScalarOrSequenceOfDouble[_]]) extends Sampling {
 
   override def inputs = factors.flatMap(_.inputs)
   override def prototypes = factors.map { _.prototype } ++ Seq(
@@ -200,9 +205,15 @@ sealed class MorrisSampling(
     val r: Int = repetitions.from(context)
     val p: Int = levels.from(context)
     val k: Int = factors.length
-    System.out.println("should explore a " + k + "-dimensions " + p + "-levels grid with " + r + " repetitions")
+
     val trajectoriesRaw: List[Trajectory] = MorrisSampling.trajectories(k, p, r, random())
-    System.out.println("will work on " + trajectoriesRaw.length + " trajectories")
+
+    if (verbose) {
+      System.out.println("should explore a " + k + "-dimensions " +
+        p + "-levels grid with " +
+        r + " repetitions => " +
+        trajectoriesRaw.length + " trajectories")
+    }
 
     trajectoriesRaw.zipWithIndex.flatMap {
       case (t, idTraj) ⇒

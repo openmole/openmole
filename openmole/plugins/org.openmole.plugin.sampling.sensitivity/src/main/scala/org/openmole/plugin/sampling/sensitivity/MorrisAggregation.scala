@@ -41,21 +41,18 @@ object MorrisAggregation {
    */
   val namespace = Namespace("morris")
 
-  val varInputName = Val[Array[String]]("input", namespace = MorrisSampling.namespace)
-  val varOutputName = Val[Array[String]]("output", namespace = MorrisSampling.namespace)
-  val varMu = Val[Array[Double]]("mu", namespace = MorrisSampling.namespace)
-  val varMuStar = Val[Array[Double]]("mustar", namespace = MorrisSampling.namespace)
-  val varSigma = Val[Array[Double]]("sigma", namespace = MorrisSampling.namespace)
-
-  val varFactorNames = Val[Array[String]]("factorname", namespace = MorrisSampling.namespace)
-  val varDeltas = Val[Array[Double]]("delta", namespace = MorrisSampling.namespace)
+  val varInputName = Val[Array[String]]("input", namespace = namespace)
+  val varOutputName = Val[Array[String]]("output", namespace = namespace)
+  val varMu = Val[Array[Double]]("mu", namespace = namespace)
+  val varMuStar = Val[Array[Double]]("mustar", namespace = namespace)
+  val varSigma = Val[Array[Double]]("sigma", namespace = namespace)
 
   /**
    * Takes lists for trajectories:
-   * idtraj:   [0,   0,    0,  0,  1,  1,  1,  1]
-   * idpoint:  [0,   1,    2,  3,  0,  1,  2,  3]
    * factor:   [,    a,    b,  c,  ,   c,  a,  b]
    * deltas:   [0.,  0.2,  -1, 0.1,0,  -1, 0.1, 2]
+   * so for each result, we are able to now which factor was changed compared to the previous one, and of how much
+   *
    *
    * Also receives the list of all the ouputs to analyze:
    * List(
@@ -81,16 +78,20 @@ object MorrisAggregation {
   def elementaryEffect(
     inputName:     String,
     outputValues:  Array[Double],
-    factorChanged: Array[String], deltas: Array[Double]): (Double, Double, Double) = {
+    factorChanged: Array[String],
+    deltas:        Array[Double],
+    verbose:       Boolean       = false): (Double, Double, Double) = {
 
     // indices of results in which the input had been changed
     val indicesWithEffect: Array[Int] = factorChanged.zipWithIndex
       .collect { case (name, idx) if (inputName == name) ⇒ idx }
     val r: Int = indicesWithEffect.length
 
-    System.out.println("searching for " + inputName + " in factorChanges " + factorChanged.toList)
-    System.out.println("found " + r + " repetitions: " + indicesWithEffect.toList)
-    System.out.println("will use them in " + outputValues.toList)
+    if (verbose) {
+      System.out.println("searching for " + inputName + " in factorChanges " + factorChanged.toList)
+      System.out.println("found " + r + " repetitions: " + indicesWithEffect.toList)
+      System.out.println("will use them in " + outputValues.toList)
+    }
 
     // ... so we know each index - 1 leads to the case before changing the factor
     // elementary effects
@@ -112,21 +113,18 @@ object MorrisAggregation {
    * Receives at execution time the lists of
    */
 
-  def apply[T](subspaces: SubspaceToAnalyze*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
-
-    // the list of all the user inputs corresponding to model inputs we tuned
-    //val allInputsForModelInputs: List[Val[Array[Double]]] = subspaces.map(s ⇒ s.input.toArray).toList.distinct
+  def apply[T](
+    verbose:   Boolean                = false,
+    subspaces: Seq[SubspaceToAnalyze])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
 
     // the list of all the user inputs corresponding to model outputs
     val allInputsForModelOutputs: List[Val[Array[Double]]] = subspaces.map(s ⇒ s.output.toArray).toList.distinct
 
-    // the list of all the indicators produces by the aggregation task
-    // TODO remove val allOutputIndicators: List[Val[Double]] = subspaces.flatMap(s ⇒ List(s.indicatorMu, s.indicatorMuStar, s.indicatorSigma)).toList
-
-    System.out.println("in apply with parameters: " + subspaces)
-
     ClosureTask("MorrisAggregation") { (context, _, _) ⇒
-      System.out.println("received context " + context)
+
+      if (verbose) {
+        System.out.println("received context " + context)
+      }
 
       // retrieve the metadata passed by the sampling method
       val factorChanged: Array[String] = context(MorrisSampling.varFactorName.toArray)
@@ -141,14 +139,21 @@ object MorrisAggregation {
         val outputValues: Array[Double] = context(subspace.output.toArray)
         val outputName: String = subspace.output.name
 
-        System.out.println("Processing the elementary change for input " + inputName + " on " + outputName)
+        if (verbose) {
+          System.out.println("Processing the elementary change for input " + inputName + " on " + outputName)
+        }
 
-        val (mu: Double, muStar: Double, sigma: Double) = elementaryEffect(inputName, outputValues, factorChanged, deltas)
+        val (mu: Double, muStar: Double, sigma: Double) = elementaryEffect(inputName, outputValues, factorChanged, deltas, verbose)
 
-        System.out.println("Processed the elementary change for input " + inputName + " on " + outputName + " => mu=" + mu + ", mu*=" + muStar + ", sigma=" + sigma)
+        if (verbose) {
+          System.out.println("Processed the elementary change for input " + inputName +
+            " on " + outputName +
+            " => mu=" + mu + ", mu*=" + muStar + ", sigma=" + sigma)
+        }
         List(inputName, outputName, mu, muStar, sigma)
       }.transpose
 
+      // cast the variables and return them as Arrays for each variable
       List(
         Variable(MorrisAggregation.varInputName, transposed(0).map(_.asInstanceOf[String]).toArray),
         Variable(MorrisAggregation.varOutputName, transposed(1).map(_.asInstanceOf[String]).toArray),

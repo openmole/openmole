@@ -29,6 +29,7 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
 import org.openmole.core.workflow.validation.DataflowProblem._
 import org.openmole.core.workflow.validation._
+import org.openmole.core.workflow.transition.Slot
 
 package object sensitivity {
 
@@ -71,12 +72,14 @@ package object sensitivity {
     inputs:      Seq[ScalarOrSequenceOfDouble[_]],
     outputs:     Seq[Val[Double]],
     repetitions: Int,
-    levels:      Int): Puzzle = {
+    levels:      Int,
+    verbose:     Boolean                          = false): Puzzle = {
 
     // the sampling for Morris is a One At a Time one,
     // with respect to the user settings for repetitions, levels and inputs
-    val sampling = MorrisSampling(repetitions, levels, inputs: _*)
+    val sampling = MorrisSampling(repetitions, levels, verbose, inputs)
     val exploration = ExplorationTask(sampling)
+    val cExploration = Capsule(exploration, strain = true)
 
     // generate the space of to analyze for outputs:
     // for each input, for each output, add to the space
@@ -84,18 +87,19 @@ package object sensitivity {
     val space: Seq[SubspaceToAnalyze] = inputs.flatMap(
       input ⇒ outputs.map(
         output ⇒ subspaceForInputOutput(
-          toValDouble(input.prototype), //TODO ??? .asInstanceOf(Val[Double]),
+          toValDouble(input.prototype),
           output))).toSeq
 
     // the aggregation obviously is a Morris aggregation!
     // it collects all the specific inputs added from the sampling
     // to interpret the results
-    val aggregation = MorrisAggregation(space: _*)
+    val aggregation = MorrisAggregation(verbose, space)
+    val cAggregation = Capsule(aggregation)
+    val sAggregation = Slot(cAggregation)
 
-    // TODO Strain !!!
+    ((cExploration -< evaluation >- sAggregation) &
+      (cExploration -- sAggregation))
 
-    (exploration -< evaluation >- aggregation) // &
-    // TODO !!! (exploration -- aggregation)
   }
 
 }
