@@ -27,9 +27,9 @@ import scalatags.Text.TypedTag
 
 object UserGuide {
 
-  val firstModel = DocumentationPages.model
-  val firstMethod = DocumentationPages.method
-  val firstEnvironment = DocumentationPages.environment
+  val firstModel = DocumentationPages.run
+  val firstMethod = DocumentationPages.explore
+  val firstEnvironment = DocumentationPages.scale
 
   val line = hr(classIs("line"), width := "90%", marginTop := 10)
 
@@ -38,21 +38,31 @@ object UserGuide {
       div(stepHeader)(sp),
       line
     )
+
   def headerModel(model: String) = header(span(
-    tools.to(DocumentationPages.model)(img(src := Resource.img.model.codeAnimated.file, headerImg)),
+    tools.to(DocumentationPages.run)(img(src := Resource.img.model.codeAnimated.file, headerImg)),
     span(s"Run your own $model model", h1Like)
   ))
 
-  def headerMethod(method: String) = header(span(
-    tools.to(DocumentationPages.method)(img(src := Resource.img.method.exploreMapAnimated.file, headerImg)),
-    span(s"Explore with $method", h1Like)
-  ))
-
-  def headerEnvironment(env: String) = header(span(
-    tools.to(DocumentationPages.environment)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
-    span(s"Scale on $env "), h1Like
-  ))
-
+  def headerMethod(method: String) = method match {
+    case "Explore" ⇒ header(span(
+      tools.to(DocumentationPages.explore)(img(src := Resource.img.method.exploreMapAnimated.file, headerImg)),
+      span(s"Explore your model", h1Like)
+    ))
+    case _ ⇒ header(span(
+      tools.to(DocumentationPages.explore)(img(src := Resource.img.method.exploreMapAnimated.file, headerImg)),
+      span(s"Explore with $method", h1Like)
+    ))
+  }
+  def headerEnvironment(env: String) = env match {
+    case "Scale" ⇒ header(span(
+      tools.to(DocumentationPages.scale)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
+      span(s"Scale on different environments "), h1Like))
+    case _ ⇒ header(span(
+      tools.to(DocumentationPages.scale)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
+      span(s"Scale on $env "), h1Like
+    ))
+  }
   lazy val imgStyle = Seq(
     width := 100,
     paddingRight := 15
@@ -62,29 +72,29 @@ object UserGuide {
   def currentStep(current: Page): SitePage = {
 
     val currentStep = {
-      if (DocumentationPages.topPages.contains(current)) {
-        if ((DocumentationPages.modelPages :+ DocumentationPages.model).contains(current)) {
+      if (DocumentationPages.docPages.contains(current)) {
+        if ((DocumentationPages.runPages :+ DocumentationPages.run).contains(current)) {
           val name = if (current == firstModel) "" else current.name
           StepPage(
             headerModel(name),
             div(current.content),
-            SideMenu.left(SideMenu.model),
+            SideMenu.left(SideMenu.run),
             SideMenu.right(SideMenu.more.insert(current.details)),
             firstModel, firstEnvironment, firstMethod
           )
         }
-        else if ((DocumentationPages.methodPages :+ DocumentationPages.method).contains(current))
+        else if ((DocumentationPages.explorePages :+ DocumentationPages.explore).contains(current))
           StepPage(
             headerMethod(current.name),
             div(current.content),
-            SideMenu.left(SideMenu.method),
+            SideMenu.left(SideMenu.explore),
             SideMenu.right(SideMenu.more.insert(current.details)),
             firstMethod, firstModel, firstEnvironment
           )
         else StepPage(
           headerEnvironment(current.name),
           div(current.content),
-          SideMenu.left(SideMenu.environment),
+          SideMenu.left(SideMenu.scale),
           SideMenu.right(SideMenu.more.insert(current.details)),
           firstEnvironment, firstMethod, firstModel
         )

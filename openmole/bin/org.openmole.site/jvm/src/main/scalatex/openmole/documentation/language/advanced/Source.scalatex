@@ -8,7 +8,7 @@ Sources have been designed as a possible way to inject data in the dataflow from
 databases, sensors...
 
 @p At the moment, only file-based Sources are available in OpenMOLE. If you need to interface OpenMOLE with an
-external datasource, check the @a("contact information page", href := Pages.whoAreWe.file) to see how to reach the
+external datasource, check the @a("contact information page", href := DocumentationPages.whoWeAre.file) to see how to reach the
 OpenMOLE development team.
 
 @h2{Plug a source}

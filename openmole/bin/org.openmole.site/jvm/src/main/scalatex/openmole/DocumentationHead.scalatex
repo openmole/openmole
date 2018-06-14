@@ -1,0 +1,41 @@
+@import org.openmole.site.tools._
+@import org.openmole.site._
+@import DocumentationPages._
+
+@h1{Doc Site Map}
+
+@h2{@a("Documentation", href := documentationHead.file, style := "color:#a6bf26")}
+
+@ol(style := "list-style-type: upper-roman")
+  @li
+    @a("Run", href := run.file)
+    @ol
+      @sitemap.siteMapSection(runPages)
+  @li
+    @a("Explore", href := explore.file)
+    @ol
+      @sitemap.siteMapSection(explorePages)
+  @li
+    @a("Scale", href := scale.file)
+    @ol
+      @sitemap.siteMapSection(scalePages)
+  @li
+    @a("Language", href := language.file)
+    @ol
+      @sitemap.siteMapSection(languagePages.diff(advancedPages))
+      @li
+        @a("Advanced", href := advanced.file)
+        @ol(style := "list-style-type: lower-alpha")
+          @sitemap.siteMapSection(advancedPages)
+  @li
+    @a("Advanced Concepts", href := advancedConcepts.file)
+    @ol
+      @sitemap.siteMapSection(advancedConceptsPages.diff(gaPages))
+      @li
+        @a("Genetic Algorithms", href := geneticAlgorithm.file)
+        @ol(style := "list-style-type: lower-alpha")
+          @sitemap.siteMapSection(gaPages)
+  @li
+    @a("Developers", href := developers.file)
+    @ol
+      @sitemap.siteMapSection(developersPages)

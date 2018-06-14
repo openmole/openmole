@@ -1,0 +1,141 @@
+@import org.openmole.site.tools._
+@import org.openmole.site._
+@import org.openmole.site.tools.api._
+@import org.openmole.site.content.Native._
+
+@h1{Native Code Packaging}
+
+When your model is written in a language for which a specific OpenMOLE task doesn't exist, or if it uses an assembly of tools, libraries, binaries, etc..  you have to package it in a single piece of executable code, so that you can send it to any machine (with potentially varying OS installations). To make your code portable from machine to machine (Linux to Linux) you may either use @a("containers", href := DocumentationPages.container.file) or the CARE packaging tool. In this page, you will learn how to use the CARE packaging tool.
+@p
+  This section intend to be general and seeks to explain how to embed any native code into OpenMOLE. More specific documentation pages on how to package some languages/platforms with CARE are available for:
+@ul
+  @li{@a(href := DocumentationPages.packagedPython.file, "python")}
+  @li{@a(href := DocumentationPages.packagedCCplusplus.file, "C++")}
+  @li{@a(href := DocumentationPages.r.file, "R")}
+
+@br If you have an example of a successful packaging for a language or software that may benefit to other users, share it ! For that check @a("how to contribute", href := DocumentationPages.howToContribute.file).
+
+@h2{Packaging with CARE}
+
+@preamble
+@installCARE
+
+@paragraphEmbed
+@firstStep
+@listOptionsCARE
+
+@secondStep
+@importantAspectCARE
+
+@h2{Advanced Options}
+
+@p @h3{Return value}
+The @i{CARETask} can be customised to fit the needs of a specific application. For instance, some applications disregarding standards might not return the expected 0 value upon completion. The return value of the application is used by OpenMOLE to determine whether the task has been successfully executed, or needs to be re-executed. Setting the boolean flag @hl.openmoleNoTest("errorOnReturnValue") to @i{false} will prevent OpenMOLE from re-scheduling a @i{CARETask} that has reported a return code different from 0. You can also get the return code in a variable using the @hl.openmoleNoTest("returnValue") setting.
+
+@p @h3{Standard and error outputs}
+ Another default behaviour is to print the standard and error outputs of each task in the OpenMOLE console. Such raw prints might not be suitable when a very large number of tasks is involved or that further processing are to be performed on the outputs. A @i{CARETask}'s standard and error outputs can be assigned to OpenMOLE variable and thus injected in the dataflow by summoning respectively the @hl.openmoleNoTest("stdOut") and @hl.openmoleNoTest("stdErr") actions on the task.
+
+@p @h3{Environment variables}
+ As any other process, the applications contained in OpenMOLE's native tasks accept environment variables to influence their behaviour.
+Variables from the dataflow can be injected as environment variables using the @hl.openmoleNoTest{environmentVariable += (variable, "variableName")} field.
+If no name is specified, the environment variable is named after the OpenMOLE variable.
+Environment variables injected from the dataflow are @b{inserted in the pre-existing set of environment variables from the execution host}. This shows particularly useful to preserve
+the behaviour of some toolkits when executed on local environments (ssh, clusters, ...) where users control their work environment.
+
+@p The following snippet creates a task that employs the features described in this section:
+@br @hl.openmole("""
+// Declare the variable
+val output = Val[String]
+val error  = Val[String]
+val value = Val[Int]
+
+// Any task
+val pythonTask =
+  CARETask("hello.tgz.bin", "python hello.py") set (
+    stdOut := output,
+    stdErr := error,
+    returnValue := value,
+    environmentVariable += (value, "I_AM_AN_ENV_VAR")
+  )""")
+
+@p You will note that @b{options holding a single value} are set using the @hl.openmoleNoTest(":=") operator. Also, the OpenMOLE variables containing the standard and error outputs are @b{automatically marked as outputs} of the task, and must not be added to the @hl.openmoleNoTest("outputs") list.
+
+@h2{Native API}
+
+You can configure the execution of the @hl.openmoleNoTest{CARETask} using the @hl.openmoleNoTest{set} operator on a freshly defined task.
+
+ @hl.openmole{
+   val out = Val[Int]
+
+   val careTask = CARETask("care.tgz.bin", "executable arg1 arg2 /path/to/my/file /virtual/path arg4") set (
+     hostFiles += ("/path/to/my/file"),
+     customWorkDirectory := "/tmp",
+     returnValue := out
+   )
+ }
+
+The available options are described hereafter:
+
+@ul
+   @li{@apiEntryTitle{hostFiles} takes the path of a file on the execution host and binds it to the same path in the CARE filesystem. Optionally you can provide a second argument to specify the path explicitly. @i{Example:} @hl.openmoleNoTest{hostFiles += ("/etc/hosts")} @i{or with a specific path} @hl.openmoleNoTest{hostFiles += ("/etc/bash.bashrc", "/home/foo/.bashrc")}}
+   @li{@apiEntryTitle{environmentVariables} is used to set the value of an environment variable within the context of the execution. @i{Example:} @hl.openmoleNoTest{environmentVariables += ("VARIABLE1", "42")}. Multiple @hl.openmoleNoTest{hostFiles} entries can be used within the same @hl.openmoleNoTest{set} block.}
+   @li{@apiEntryTitle{workDirectory} sets the directory within the archive where to start the execution from. @i{Example:} @hl.openmoleNoTest{workDirectory := "/tmp"}}
+   @li{@apiEntryTitle{returnValue} captures the return code of the execution in an OpenMOLE @hl.openmoleNoTest{Val[Int]} variable. @i{Example:} @hl.openmoleNoTest{returnValue := out}}
+   @li{@apiEntryTitle{errorOnReturnValue} tells OpenMOLE to ignore a return code different from 0. The task won't be resubmitted. @i{Example:} @hl.openmoleNoTest{errorOnReturnValue := false}}
+   @li{@apiEntryTitle{stdOut} captures the standard output of the execution in an OpenMOLE @hl.openmoleNoTest{Val[String]} variable. @i{Example:} @hl.openmoleNoTest{stdOut := output}}
+   @li{@apiEntryTitle{stdErr} captures the error ouput of the execution in an OpenMOLE @hl.openmoleNoTest{Val[String]} variable. @i{Example:} @hl.openmoleNoTest{stdErr := error}}
+
+@h2{Using local Resources}
+
+To access data present on the execution node (outside the CARE filesystem) you should use a dedicated option of the @hl.openmoleNoTest{CARETask}: @hl.openmoleNoTest{hostFiles}. This option takes the path of a file on the execution host and binds it to the same path in the CARE filesystem. Optionally you can provide a second argument to specify the path explicitly. For instance:
+@br @hl.openmole("""
+  val careTask = CARETask("care.tgz.bin", "executable arg1 arg2 /path/to/my/file /virtual/path arg4") set (
+    hostFiles += ("/path/to/my/file"),
+    hostFiles += ("/path/to/another/file", "/virtual/path")
+  )""")
+
+@p This @hl.openmoleNoTest{CAREtask} will thus have access to @i{/path/to/my/file} and @i{/virtual/path}.
+
+@h2{Using local executable}
+
+The @i{CARETask} was designed to be portable from one machine to another. However, some use-cases require executing specific commands installed on a given cluster. To achieve that you should use another task called @hl.openmoleNoTest{SystemExecTask}. This task is made to launch native commands on the execution host. There is two modes for using this task:
+@ul
+  @li{Calling a command that is @b{assumed to be available on any execution node of the environment}. The command will be looked for in the system as it would from a traditional command line: searching in the default @i{PATH} or an absolute location.}
+  @li{Copying a @b{local script not installed on the remote environment}. Applications and scripts can be copied to the task's work directory using the @hl.openmoleNoTest("resources") field. Please note that contrary to the @hl.openmoleNoTest{CARETask}, there is @b{no guarantee that an application passed as a resource to a @hl.openmoleNoTest{SystemExecTask} will re-execute successfully on a remote environment}}.
+
+@p The @hl.openmoleNoTest{SystemExecTask} accepts an arbitrary number of commands. These commands will be @b{executed sequentially on the same execution node} where the task is instantiated. In other words, it is not possible to split the execution of multiple commands grouped in the same @hl.openmoleNoTest{SystemExecTask}.
+
+@p The following example first copies and runs a bash script on the remote host, before calling the remote's host @hl.highlight("/bin/hostname", "plain"). Both commands' standard and error outputs are gathered and concatenated to a single OpenMOLE variable: respectively @hl.openmoleNoTest("stdOut") and @hl.openmoleNoTest("stdErr"):
+ @br @hl.openmole("""
+  // Declare the variable
+  val output = Val[String]
+  val error  = Val[String]
+
+  // Any task
+  val scriptTask =
+    SystemExecTask("bash script.sh", "hostname") set (
+      resources += workDirectory / "script.sh",
+      stdOut := output,
+      stdErr := error
+    )
+
+   scriptTask hook ToStringHook()""")
+
+@p In this case the bash script might depend on applications installed on the remote host. Similarly, we @b{assume the presence} of @hl.highlight("/bin/hostname", "plain") on the execution node. Therefore this task cannot be considered as portable.
+
+@p Note that each execution is isolated in a separate folder on the execution host and that the task execution is considered as failed if the script returns a value different from 0. If you need another behaviour you can use the @b{same advanced options as the @i{CARETask}} regarding the return code.
+
+@h2{CARE Troubleshooting}
+
+You should always try to re-execute your application outside of OpenMOLE first. This allows you to ensure the packaging process with CARE was successful. If something goes wrong at this stage, you should check the official @a("CARE documentation", href := shared.link.CAREsite) or the archives of the @a("CARE mailing list", href := shared.link.CAREmailing).
+@p If the packaged application re-executes as you'd expect, but you still struggle to embed it in OpenMOLE, then get in touch with our user community via our the @a("OpenMOLE user forum", href := shared.link.mailingList) or @a("chat", href:=shared.link.chat).
+
+@h2{File management}
+
+To provide files as input of a @code{CARETask} or @code{SystemExecTask} and to get file produced by these task you should use the @code{inputFiles} and @code{outputFiles} keywords. See the @a("documentation on file management", href := DocumentationPages.fileManagement.file).
+
+@h2{Research paper}
+
+Using CARE and OpenMOLE for reproducible science has been covered in the following paper :
+@br @Papers.frontiers2017
+
