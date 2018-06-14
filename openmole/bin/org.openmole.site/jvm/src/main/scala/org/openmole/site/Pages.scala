@@ -192,7 +192,7 @@ object DocumentationPages {
   lazy val container = DocumentationPage.fromScalatex(name = "Container", content = scalatex.documentation.run.Container)
   lazy val java = DocumentationPage.fromScalatex(name = "Java", content = scalatex.documentation.run.Java)
   lazy val netLogo = DocumentationPage.fromScalatex(name = "NetLogo", content = scalatex.documentation.run.NetLogo)
-  lazy val packagedCCplusplus = DocumentationPage.fromScalatex(name = "PackagedCCplusplus", content = scalatex.documentation.run.PackagedCCplusplus)
+  lazy val packagedCCplusplus = DocumentationPage.fromScalatex(name = "Packaged C/C++", content = scalatex.documentation.run.PackagedCCplusplus)
   lazy val packagedPython = DocumentationPage.fromScalatex(name = "Packaged Python", content = scalatex.documentation.run.PackagedPython)
   lazy val r = DocumentationPage.fromScalatex(name = "R", content = scalatex.documentation.run.R)
   lazy val scala = DocumentationPage.fromScalatex(name = "Scala", content = scalatex.documentation.run.Scala)
@@ -220,7 +220,7 @@ object DocumentationPages {
   lazy val ssh = DocumentationPage.fromScalatex(name = "SSH", content = scalatex.documentation.scale.SSH)
 
   // Advanced Concepts
-  lazy val advancedConcepts = DocumentationPage.fromScalatex(name = "AdvancedConcepts", content = scalatex.documentation.advancedConcepts.AdvancedConcepts)
+  lazy val advancedConcepts = DocumentationPage.fromScalatex(name = "Advanced Concepts", content = scalatex.documentation.advancedConcepts.AdvancedConcepts)
 
   def advancedConceptsPages = gaPages :+ resumableWorkflow
 
@@ -240,7 +240,7 @@ object DocumentationPages {
   lazy val console = DocumentationPage.fromScalatex(name = "Console", content = scalatex.documentation.developers.Console)
   lazy val pluginDevelopment = DocumentationPage.fromScalatex(name = "Plugin Development", content = scalatex.documentation.developers.PluginDevelopment)
   lazy val serverRESTAPI = DocumentationPage.fromScalatex(name = "Server RESTAPI", content = scalatex.documentation.developers.ServerRESTAPI)
-  lazy val webServer = DocumentationPage.fromScalatex(name = "WebServer", content = scalatex.documentation.developers.WebServer)
+  lazy val webServer = DocumentationPage.fromScalatex(name = "Web Server", content = scalatex.documentation.developers.WebServer)
 
   // Tutorials
   lazy val tutorials = DocumentationPage.fromScalatex(name = "Tutorials", content = scalatex.tutorials.Tutorials)

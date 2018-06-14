@@ -39,3 +39,4 @@
     @a("Developers", href := developers.file)
     @ol
       @sitemap.siteMapSection(developersPages)
+  @sitemap.siteMapSection(docLonelyPages)

@@ -9,6 +9,8 @@
 @h3{What is OpenMOLE?}
 
 @div(stylesheet.centerJustify(100)){
+  OpenMOLE has been developed since 2008 as a @b{free and open-source} platform.
+@br
   OpenMOLE offers tools to run, explore, diagnose and optimize your numerical model, taking advantage of distributed computing environments.
   @br
   With OpenMOLE you can @b{embed your already developed model}, in any language (Java, Binary exe, NetLogo, R, SciLab, Python, C++...).
@@ -53,10 +55,6 @@
   Have a look at the @a("Getting Started", href := stepByStepIntro.file) section, check out the @a("GUI guide", href := gui.file), dive into the @a("documentation", href := documentationHead.file), and lastly explore some @a("advanced concepts", href := advancedConcepts.file).
 @br
   There is also a full @a("site map", href := siteMap.file) to see all the resources on the website.
-}
-
-@div(stylesheet.centerJustify(100)){
-  OpenMOLE has been developed since 2008 as a @b{free and open-source} platform.
 }
 
 @div(stylesheet.centerJustify(100), id := shared.newsPosts)
