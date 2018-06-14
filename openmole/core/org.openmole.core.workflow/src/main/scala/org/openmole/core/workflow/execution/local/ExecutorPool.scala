@@ -24,6 +24,7 @@ import org.openmole.core.threadprovider.ThreadProvider
 import collection.mutable
 import scala.ref.WeakReference
 import org.openmole.core.workflow.execution._
+import org.openmole.core.workflow.task.MoleTask
 import org.openmole.tool.collection._
 
 object ExecutorPool {
@@ -39,7 +40,7 @@ object ExecutorPool {
 
 class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment], threadProvider: ThreadProvider) {
 
-  def priority(localExecutionJob: LocalExecutionJob) = localExecutionJob.moleJobs.count(mj ⇒ LocalExecutor.containsMoleTask(mj))
+  def priority(localExecutionJob: LocalExecutionJob) = localExecutionJob.moleJobs.count(mj ⇒ MoleTask.containsMoleTask(mj))
   private val jobs = PriorityQueue[LocalExecutionJob]()
 
   private val executors = {

@@ -108,10 +108,8 @@ object CARETask extends JavaLogger {
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
     import executionContext._
-    External.withWorkDir(executionContext) { taskWorkDirectory ⇒
+    parameters.newFile.withTmpDir { taskWorkDirectory ⇒
       import parameters._
-
-      taskWorkDirectory.mkdirs()
 
       val context = parameters.context + (External.PWD → taskWorkDirectory.getAbsolutePath)
 
@@ -201,8 +199,6 @@ object CARETask extends JavaLogger {
       def outputPathResolver = container.outputPathResolver(preparedFileBindings, hostFileBindings, inputDirectory, userWorkDirectory, rootDirectory) _
 
       val retContext = External.fetchOutputFiles(external, outputs, preparedContext, outputPathResolver, taskWorkDirectory)
-
-      External.cleanWorkDirectory(outputs, retContext, taskWorkDirectory)
 
       retContext ++
         List(

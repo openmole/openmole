@@ -25,6 +25,7 @@ public interface NetLogo {
   void command(String cmd) throws Exception;
   boolean isNetLogoException(Throwable exception);
   Object report(String variable) throws Exception;
+  void setGlobal(String variable,Object value) throws Exception;
   void dispose() throws Exception;
   ClassLoader getNetLogoClassLoader();
 }

@@ -33,7 +33,7 @@ import org.openmole.core.workflow.job
 import org.openmole.core.workflow.job.State._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole.MoleExecution.{ AggregationTransitionRegistry, MoleExecutionFailed, SubMoleExecutionState }
-import org.openmole.core.workflow.task.TaskExecutionContext
+import org.openmole.core.workflow.task.{ MoleTask, TaskExecutionContext }
 import org.openmole.core.workflow.tools.{ OptionalArgument ⇒ _, _ }
 import org.openmole.core.workflow.transition.{ DataChannel, IAggregationTransition, ITransition }
 import org.openmole.core.workflow.validation._
@@ -95,7 +95,9 @@ object MoleExecution extends JavaLogger {
     defaultEnvironment:          OptionalArgument[LocalEnvironmentProvider] = None,
     cleanOnFinish:               Boolean                                    = true,
     executionContext:            OptionalArgument[MoleExecutionContext]     = None,
-    startStopDefaultEnvironment: Boolean                                    = true
+    startStopDefaultEnvironment: Boolean                                    = true,
+    taskCache:                   KeyValueCache                              = KeyValueCache(),
+    lockRepository:              LockRepository[LockKey]                    = LockRepository()
   )(implicit moleServices: MoleServices): MoleExecution = {
     import moleServices._
 
@@ -113,7 +115,9 @@ object MoleExecution extends JavaLogger {
       implicits,
       executionContext.getOrElse(MoleExecutionContext()),
       startStopDefaultEnvironment,
-      id = UUID.randomUUID().toString
+      id = UUID.randomUUID().toString,
+      taskCache = taskCache,
+      lockRepository = lockRepository
     )
   }
 
@@ -308,11 +312,13 @@ object MoleExecution extends JavaLogger {
       finally {
         moleExecution._finished = true
         moleExecution._endTime = Some(System.currentTimeMillis)
-        if (moleExecution.cleanOnFinish) moleExecution.executionContext.services.newFile.baseDir.recursiveDelete
+        if (moleExecution.cleanOnFinish) {
+          moleExecution.executionContext.services.newFile.baseDir.recursiveDelete
+          moleExecution.taskCache.close()
+        }
         moleExecution.executionContext.services.eventDispatcher.trigger(moleExecution, MoleExecution.Finished(canceled = canceled))
       }
 
-      moleExecution.taskCache.close()
     }
 
   def cancel(moleExecution: MoleExecution, t: Option[MoleExecutionFailed]): Unit =
@@ -544,7 +550,9 @@ class MoleExecution(
   val implicits:                   Context,
   val executionContext:            MoleExecutionContext,
   val startStopDefaultEnvironment: Boolean,
-  val id:                          String
+  val id:                          String,
+  val taskCache:                   KeyValueCache,
+  val lockRepository:              LockRepository[LockKey]
 ) {
 
   val messageQueue = PriorityQueue[MoleExecutionMessage](fifo = true)
@@ -584,9 +592,6 @@ class MoleExecution(
   lazy val subMoleExecutions = collection.mutable.TreeMap[SubMoleExecution, SubMoleExecutionState]()
 
   private[mole] var currentSubMoleExecutionId = 0L
-
-  private[mole] val taskCache = KeyValueCache()
-  private[mole] val lockRepository = LockRepository[LockKey]()
 
   private[workflow] val dataChannelRegistry = new RegistryWithTicket[DataChannel, Buffer[Variable[_]]]
   private[mole] var _exception = Option.empty[MoleExecutionFailed]

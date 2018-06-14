@@ -27,6 +27,7 @@ import org.openmole.core.expansion._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow._
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.job.MoleJob
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workspace.NewFile
@@ -55,6 +56,13 @@ object MoleTask {
       isTask.defaults.set(mole.root.task.defaults)
     )
   }
+
+  def containsMoleTask(moleJob: MoleJob) =
+    moleJob.task match {
+      case _: MoleTask              ⇒ true
+      case t: StrainerTaskDecorator ⇒ classOf[MoleTask].isAssignableFrom(t.task.getClass)
+      case _                        ⇒ false
+    }
 
 }
 
@@ -86,7 +94,9 @@ object MoleTask {
         defaultEnvironment = () ⇒ executionContext.localEnvironment,
         executionContext = MoleExecutionContext(),
         cleanOnFinish = false,
-        startStopDefaultEnvironment = false
+        startStopDefaultEnvironment = false,
+        taskCache = executionContext.cache,
+        lockRepository = executionContext.lockRepository
       )
 
     @volatile var lastContext: Option[Context] = None

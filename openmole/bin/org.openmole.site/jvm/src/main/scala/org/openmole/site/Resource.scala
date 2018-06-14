@@ -254,11 +254,14 @@ object Resource {
 
     val frontierBib = bibtexResource("passerat2017frontier.bib")
 
+    val urbanDynamicsBib = bibtexResource("urbanDynamics.bib")
+
   }
 
   object paper {
     val fgcs2013 = paperResource("FGCS2013.pdf")
     val hpcs2010 = paperResource("hpcs2010.pdf")
+    val urbanDynamics = paperResource("urbanDynamics.pdf") // TODO add pdf
   }
 
   val api = fileResource("api")

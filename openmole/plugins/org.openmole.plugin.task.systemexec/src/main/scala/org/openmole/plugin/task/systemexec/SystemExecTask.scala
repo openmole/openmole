@@ -126,7 +126,7 @@ object SystemExecTask {
   override protected def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
     import p._
 
-    External.withWorkDir(executionContext) { tmpDir ⇒
+    newFile.withTmpDir { tmpDir ⇒
       val workDir =
         workDirectory match {
           case None    ⇒ tmpDir
@@ -165,7 +165,6 @@ object SystemExecTask {
         )
 
       val retContext: Context = External.fetchOutputFiles(external, outputs, preparedContext, External.relativeResolver(workDir), tmpDir)
-      External.cleanWorkDirectory(outputs, retContext, tmpDir)
 
       retContext ++
         List(
