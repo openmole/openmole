@@ -44,6 +44,7 @@
       @a("Developers", href := developers.file)
       @ol
         @sitemap.siteMapSection(developersPages)
+    @sitemap.siteMapSection(docLonelyPages)
 
   @h2{@a("Tutorials", href := tutorials.file, style := "color:#a6bf26")}
 
