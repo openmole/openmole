@@ -48,8 +48,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
       environment.get match {
         case Some(environment) ⇒
           def jobGoneIdle() = {
-            environment.pool().removeExecuter(this)
-            environment.pool().addExecuter()
+            environment.pool().idle(this)
             stop = true
           }
 

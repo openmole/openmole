@@ -41,6 +41,7 @@ object ExecutorPool {
 class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment], threadProvider: ThreadProvider) {
 
   def priority(localExecutionJob: LocalExecutionJob) = localExecutionJob.moleJobs.count(mj ⇒ MoleTask.containsMoleTask(mj))
+
   private val jobs = PriorityQueue[LocalExecutionJob]()
 
   private val executors = {
@@ -49,32 +50,49 @@ class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment],
     map
   }
 
+  private val idleThreads = mutable.WeakHashMap[Thread, Unit]()
+
   override def finalize = executors.foreach {
     case (exe, thread) ⇒ exe.stop = true; thread.interrupt
   }
 
-  private[local] def addExecuter() = executors.synchronized { executors += ExecutorPool.createExecutor(environment, threadProvider) }
+  private[local] def addExecuter() = executors.synchronized {
+    executors += ExecutorPool.createExecutor(environment, threadProvider)
+  }
 
-  private[local] def removeExecuter(ex: LocalExecutor) = executors.synchronized { executors.remove(ex) }
+  private[local] def removeExecuter(ex: LocalExecutor) = executors.synchronized {
+    executors.remove(ex)
+  }
 
   private[local] def takeNextjob: LocalExecutionJob = jobs.dequeue
+
+  private[local] def idle(localExecutor: LocalExecutor) = {
+    val thread = executors.synchronized { executors.remove(localExecutor) }.get
+    idleThreads.synchronized { idleThreads.put(thread, Unit) }
+    addExecuter()
+  }
 
   def enqueue(job: LocalExecutionJob) = jobs.enqueue(job, priority(job))
 
   def waiting: Int = jobs.size
+
   def running: Int =
     executors.synchronized {
       executors.toList.count { case (e, t) ⇒ (t.getState == Thread.State.RUNNABLE) && !e.stop }
     }
 
-  def stop() = executors.synchronized {
-    executors.foreach {
-      case (exe, thread) ⇒
-        exe.stop = true
-        thread.stop()
+  def stop() = {
+    executors.synchronized {
+      executors.foreach {
+        case (exe, thread) ⇒
+          exe.stop = true
+          thread.stop()
+      }
+      executors.clear()
     }
-    executors.clear()
+
     jobs.clear()
+    idleThreads.synchronized { idleThreads.keys.foreach(_.stop()) }
   }
 
 }
