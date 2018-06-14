@@ -145,7 +145,7 @@ object DocumentationPages {
   lazy val siteMap = DocumentationPage.fromScalatex(name = "Site Map", content = scalatex.SiteMap)
 
   def headPages =
-    Seq(documentationHead, tutorials, OMcommunity)
+    Seq(documentationHead, run, explore, scale, language, advanced, advancedConcepts, developers, tutorials, OMcommunity)
 
   // Documentation
   lazy val documentationHead = DocumentationPage.fromScalatex(name = "Documentation", content = scalatex.DocumentationHead)
@@ -156,7 +156,9 @@ object DocumentationPages {
       scalePages ++
       languagePages ++
       advancedConceptsPages ++
-      Seq(run, explore, scale, language, advanced, advancedConcepts, developers, gui, market, commandOptions)
+      docLonelyPages
+
+  def docLonelyPages = Seq(gui, market, commandOptions)
 
   lazy val gui = DocumentationPage.fromScalatex(name = "GUI", content = scalatex.documentation.GUI)
   lazy val market = DocumentationPage.fromScalatex(name = "Market", content = scalatex.documentation.Market)
