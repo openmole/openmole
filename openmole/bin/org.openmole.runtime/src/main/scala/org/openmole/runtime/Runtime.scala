@@ -147,7 +147,7 @@ class Runtime {
 
       try {
         val outputRedirection = OutputRedirection(outSt)
-        val taskExecutionContext = TaskExecutionContext(newFile.makeNewDir("runtime"), environment, preference, threadProvider, fileService, workspace, outputRedirection, KeyValueCache(), LockRepository[LockKey]())
+        val taskExecutionContext = TaskExecutionContext(newFile.makeNewDir("runtime"), environment, preference, threadProvider, fileService, workspace, outputRedirection, KeyValueCache(), LockRepository[LockKey](), eventDispatcher)
         for (toProcess ← allMoleJobs) environment.submit(toProcess, taskExecutionContext)
         saver.waitAllFinished
       }

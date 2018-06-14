@@ -24,6 +24,7 @@ import org.openmole.core.context._
 import org.openmole.core.event._
 import org.openmole.core.exception._
 import org.openmole.core.expansion._
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow._
 import org.openmole.core.workflow.dsl._
@@ -78,17 +79,21 @@ object MoleTask {
 
   protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { p ⇒
     import p._
-    val implicitsValues = implicits.flatMap(i ⇒ context.get(i))
-    implicit val seeder = Seeder(random().nextLong())
-    implicit val eventDispatcher = EventDispatcher()
-    implicit val newFile = NewFile(executionContext.tmpDirectory.newDir("moletask"))
-    import executionContext.preference
-    import executionContext.threadProvider
-    import executionContext.workspace
-    import executionContext.outputRedirection
 
-    val execution =
-      MoleExecution(
+    @volatile var lastContext: Option[Context] = None
+    val lastContextLock = new ReentrantLock()
+
+    val execution = {
+      implicit val eventDispatcher = EventDispatcher()
+      val implicitsValues = implicits.flatMap(i ⇒ context.get(i))
+      implicit val seeder = Seeder(random().nextLong())
+      implicit val newFile = NewFile(executionContext.tmpDirectory.newDir("moletask"))
+      import executionContext.preference
+      import executionContext.threadProvider
+      import executionContext.workspace
+      import executionContext.outputRedirection
+
+      val execution = MoleExecution(
         mole,
         implicits = implicitsValues,
         defaultEnvironment = () ⇒ executionContext.localEnvironment,
@@ -99,12 +104,20 @@ object MoleTask {
         lockRepository = executionContext.lockRepository
       )
 
-    @volatile var lastContext: Option[Context] = None
-    val lastContextLock = new ReentrantLock()
+      execution listen {
+        case (_, ev: MoleExecution.JobFinished) ⇒
+          lastContextLock { if (ev.capsule == last) lastContext = Some(ev.moleJob.context) }
+      }
 
-    execution listen {
-      case (_, ev: MoleExecution.JobFinished) ⇒
-        lastContextLock { if (ev.capsule == last) lastContext = Some(ev.moleJob.context) }
+      execution
+    }
+
+    executionContext.moleExecution.foreach { parentExecution ⇒
+      implicit val ev = executionContext.eventDispatcher
+      parentExecution listen {
+        case (_, ev: MoleExecution.Finished) ⇒
+          MoleExecution.cancel(execution, Some(MoleExecution.MoleExecutionError(new InterruptedException("Parent execution has been canceled"))))
+      }
     }
 
     try execution.run(Some(context), validate = false)

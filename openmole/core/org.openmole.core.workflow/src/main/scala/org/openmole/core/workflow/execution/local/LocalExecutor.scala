@@ -52,7 +52,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
             stop = true
           }
 
-          val executionJob = environment.pool().takeNextjob
+          val executionJob = environment.pool().takeNextJob
           val beginTime = System.currentTimeMillis
 
           try {

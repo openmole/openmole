@@ -50,8 +50,6 @@ class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment],
     map
   }
 
-  private val idleThreads = mutable.WeakHashMap[Thread, Unit]()
-
   override def finalize = executors.foreach {
     case (exe, thread) ⇒ exe.stop = true; thread.interrupt
   }
@@ -64,11 +62,10 @@ class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment],
     executors.remove(ex)
   }
 
-  private[local] def takeNextjob: LocalExecutionJob = jobs.dequeue
+  private[local] def takeNextJob: LocalExecutionJob = jobs.dequeue
 
   private[local] def idle(localExecutor: LocalExecutor) = {
     val thread = executors.synchronized { executors.remove(localExecutor) }.get
-    idleThreads.synchronized { idleThreads.put(thread, Unit) }
     addExecuter()
   }
 
@@ -92,7 +89,6 @@ class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment],
     }
 
     jobs.clear()
-    idleThreads.synchronized { idleThreads.keys.foreach(_.stop()) }
   }
 
 }

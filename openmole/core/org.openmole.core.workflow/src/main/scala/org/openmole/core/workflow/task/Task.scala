@@ -20,6 +20,7 @@ package org.openmole.core.workflow.task
 import java.io.File
 
 import org.openmole.core.context._
+import org.openmole.core.event.EventDispatcher
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.outputredirection._
@@ -27,6 +28,7 @@ import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder.{ InfoConfig, InputOutputConfig }
 import org.openmole.core.workflow.execution._
+import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.tool.cache._
@@ -44,7 +46,9 @@ case class TaskExecutionContext(
   implicit val workspace:         Workspace,
   implicit val outputRedirection: OutputRedirection,
   cache:                          KeyValueCache,
-  lockRepository:                 LockRepository[LockKey]
+  lockRepository:                 LockRepository[LockKey],
+  eventDispatcher:                EventDispatcher,
+  moleExecution:                  Option[MoleExecution]   = None
 )
 
 object Task {

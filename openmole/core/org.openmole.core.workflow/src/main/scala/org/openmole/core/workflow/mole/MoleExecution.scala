@@ -77,9 +77,7 @@ object MoleExecution extends JavaLogger {
   }
 
   case class ExceptionRaised(moleJob: MoleJob, capsule: Capsule, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
-
   case class SourceExceptionRaised(source: Source, capsule: Capsule, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
-
   case class HookExceptionRaised(hook: Hook, capsule: Capsule, moleJob: MoleJob, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
   case class MoleExecutionError(exception: Throwable) extends MoleExecutionFailed
 
@@ -181,7 +179,20 @@ object MoleExecution extends JavaLogger {
             val moleJob: MoleJob = MoleJob(capsule.task, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, stateChanged)
             eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
             MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.RegisterJob(subMoleExecutionState, moleJob, capsule))
-            val taskContext = TaskExecutionContext(newFile.baseDir, subMoleExecutionState.moleExecution.defaultEnvironment, preference, threadProvider, fileService, workspace, outputRedirection, subMoleExecutionState.moleExecution.taskCache, subMoleExecutionState.moleExecution.lockRepository)
+            val taskContext =
+              TaskExecutionContext(
+                newFile.baseDir,
+                subMoleExecutionState.moleExecution.defaultEnvironment,
+                preference,
+                threadProvider,
+                fileService,
+                workspace,
+                outputRedirection,
+                subMoleExecutionState.moleExecution.taskCache,
+                subMoleExecutionState.moleExecution.lockRepository,
+                eventDispatcher,
+                moleExecution = Some(subMoleExecutionState.moleExecution)
+              )
             moleJob.perform(taskContext)
             subMoleExecutionState.masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(moleJob.context))
             MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(moleJob, moleJob.state, capsule, ticket))
@@ -366,7 +377,22 @@ object MoleExecution extends JavaLogger {
       env match {
         case env: SubmissionEnvironment ⇒ env.submit(job)
         case env: LocalEnvironment ⇒
-          env.submit(job, TaskExecutionContext(newFile.baseDir, env, preference, threadProvider, fileService, workspace, outputRedirection, moleExecution.taskCache, moleExecution.lockRepository))
+          env.submit(
+            job,
+            TaskExecutionContext(
+              newFile.baseDir,
+              env,
+              preference,
+              threadProvider,
+              fileService,
+              workspace,
+              outputRedirection,
+              moleExecution.taskCache,
+              moleExecution.lockRepository,
+              eventDispatcher,
+              moleExecution = Some(moleExecution)
+            )
+          )
       }
 
       eventDispatcher.trigger(moleExecution, MoleExecution.JobSubmitted(job, capsule, env))
@@ -620,7 +646,6 @@ class MoleExecution(
       MoleExecutionMessage.send(this)(MoleExecutionMessage.StartMoleExecution(context))
       MoleExecutionMessage.dispatcher(this)
       _exception.foreach(e ⇒ throw e.exception)
-
       this
     }
     else this
