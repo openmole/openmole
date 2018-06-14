@@ -20,6 +20,8 @@ package org.openmole.plugin.task.netlogo
 import java.util.AbstractCollection
 import java.lang.Class
 
+import scala.reflect.ClassTag
+
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion._
@@ -142,7 +144,34 @@ trait NetLogoTask extends Task with ValidateTask {
   override def validate = Validate { p ⇒
     import p._
     val allInputs = External.PWD :: inputs.toList
-    launchingCommands.flatMap(_.validate(allInputs)) ++ External.validate(external)(allInputs).apply
+
+    def acceptedType(c: Class[_]): Boolean = {
+      if (c.isArray()) {
+        acceptedType(c.getComponentType)
+      }
+      else {
+        Seq(classOf[String], classOf[Int], classOf[Double], classOf[Long], classOf[Float], classOf[File]).contains(c)
+      }
+    }
+
+    val testTypes = allInputs.flatMap {
+      case v ⇒
+        v.`type`.runtimeClass.asInstanceOf[Class[_]] match {
+          case c if acceptedType(c) ⇒ None
+          case _                    ⇒ Some(new UserBadDataError(s"""Error for netLogoInput "${v.name} : type "${v.`type`.runtimeClass.toString()} is not managed by NetLogo."""))
+        }
+    }
+    /*
+    // dirty version using Val assignement
+    val testTypes = allInputs.flatMap {
+      case v if v.isAssignableFrom(Val[String]("")) ||
+        v.isAssignableFrom(Val[Int]("")) ||
+        v.isAssignableFrom(Val[Double]("")) ||
+        v.isAssignableFrom(Val[Long]("")) ⇒ None
+      case v ⇒ Some(new UserBadDataError(s"""Error for netLogoInput "${v.name} : type "${v.`type`.runtimeClass} is not managed by NetLogo."""))
+    }
+    */
+    launchingCommands.flatMap(_.validate(allInputs)) ++ External.validate(external)(allInputs).apply ++ testTypes
   }
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
@@ -165,10 +194,12 @@ trait NetLogoTask extends Task with ValidateTask {
       }
 
       def safeType(x: AnyRef): AnyRef = {
-        val v = x match {
-          case i: Integer ⇒ i.toDouble
-          case f: File    ⇒ f.getAbsolutePath
-          case x: AnyRef  ⇒ x
+        val v = x.asInstanceOf[Any] match {
+          case i: Int    ⇒ i.toDouble
+          case l: Long   ⇒ l.toDouble
+          case fl: Float ⇒ fl.toDouble
+          case f: File   ⇒ f.getAbsolutePath
+          case x: AnyRef ⇒ x // Double and String are unchanged
         }
         v.asInstanceOf[AnyRef]
       }
