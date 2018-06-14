@@ -64,8 +64,12 @@ public class NetLogo5 implements NetLogo {
 
     @Override
     public void setGlobal(String variable, Object value) throws Exception {
-        if(value instanceof Object[]){workspace.world().setObserverVariableByName(variable,arrayToList((Object[]) value));}
-        else{workspace.world().setObserverVariableByName(variable,value);}
+        if(value instanceof Object[]){
+            workspace.world().setObserverVariableByName(variable,arrayToList((Object[]) value));
+        }
+        else{
+            workspace.world().setObserverVariableByName(variable,value);
+        }
     }
 
     @Override

@@ -161,15 +161,23 @@ trait NetLogoTask extends Task with ValidateTask {
       // FIXME this could be very costly since it wraps primitives values in objects
       def convertArray(x: AnyRef): AnyRef = x match {
         case a: Array[_] ⇒ a.asInstanceOf[Array[_]].map { x ⇒ convertArray(x.asInstanceOf[AnyRef]) }
-        case x           ⇒ x.asInstanceOf[AnyRef]
+        case x           ⇒ safeType(x)
+      }
+
+      def safeType(x: AnyRef): AnyRef = {
+        val v = x match {
+          case i: Integer ⇒ i.toDouble
+          case f: File    ⇒ f.getAbsolutePath
+          case x: AnyRef  ⇒ x
+        }
+        v.asInstanceOf[AnyRef]
       }
 
       for (inBinding ← netLogoInputs) {
         val v =
           preparedContext(inBinding._1) match {
             case x: Array[_] ⇒ convertArray(x)
-            case x: File     ⇒ x.getAbsolutePath
-            case x: AnyRef   ⇒ x
+            case x: AnyRef   ⇒ safeType(x)
           }
         NetLogoTask.setGlobal(instance.netLogo, inBinding._2, v)
       }
