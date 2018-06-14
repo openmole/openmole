@@ -142,8 +142,8 @@ package object shared {
       lazy val jass2015 = "http://jasss.soc.surrey.ac.uk/18/4/9.html"
       lazy val mdpi2015 = "http://www.mdpi.com/2079-8954/3/4/348"
       lazy val frontier2017 = "http://journal.frontiersin.org/article/10.3389/fninf.2017.00021/full#"
-      lazy val urbanDynamics = "https://hal.archives-ouvertes.fr/view/index/docid/1583528"
-      lazy val urbanDynamicsBib = "https://hal.archives-ouvertes.fr/hal-01583528v1/bibtex"
+      //lazy val urbanDynamics = "https://hal.archives-ouvertes.fr/view/index/docid/1583528"// TODO erroneous hal id ?
+      //lazy val urbanDynamicsBib = "https://hal.archives-ouvertes.fr/hal-01583528v1/bibtex"
       lazy val epb2018 = "http://journals.sagepub.com/doi/abs/10.1177/2399808318774335"
       lazy val epb2018arxiv = "https://arxiv.org/pdf/1804.09416.pdf"
     }
@@ -197,8 +197,8 @@ package object shared {
     paper.jass2015,
     paper.mdpi2015,
     paper.frontier2017,
-    paper.urbanDynamics,
-    paper.urbanDynamicsBib,
+    //paper.urbanDynamics,
+    //paper.urbanDynamicsBib,
     repo.openmole,
     repo.market,
     repo.gridscale,

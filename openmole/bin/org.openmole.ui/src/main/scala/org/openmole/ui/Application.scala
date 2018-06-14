@@ -282,6 +282,7 @@ object Application extends JavaLogger {
               val server = new GUIServer(port, config.remote, useHTTP, services, config.password, extraHeader, !config.unoptimizedJS, config.httpSubDirectory)
               server.start()
               if (config.browse && !config.remote) browse(url)
+              server.launchApplication()
               logger.info(s"Server listening on port $port.")
               server.join() match {
                 case GUIServer.Ok      ⇒ Console.ExitCodes.ok

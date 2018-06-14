@@ -22,6 +22,7 @@ import org.openmole.core.context.Val
 
 trait NetLogoTaskBuilder[T] {
   def netLogoInputs: Lens[T, Vector[(Val[_], String)]]
+  def netLogoArrayInputs: Lens[T, Vector[(Val[_], String)]]
   def netLogoOutputs: Lens[T, Vector[(String, Val[_])]]
   def netLogoArrayOutputs: Lens[T, Vector[(String, Int, Val[_])]]
 }

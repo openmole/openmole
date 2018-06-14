@@ -1,8 +1,6 @@
 import scalariform.formatter.preferences._
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 
-scalacOptions += "-optimize"
-
 sbtPlugin := true
 
 name := "openmole-buildsystem-plugin"

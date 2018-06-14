@@ -35,16 +35,7 @@ import org.openmole.core.workflow.mole.{ MoleExecution, StrainerCapsule, Straine
 import org.openmole.core.event._
 import org.openmole.tool.network.LocalHostName
 
-object LocalExecutor extends JavaLogger {
-
-  def containsMoleTask(moleJob: MoleJob) =
-    moleJob.task match {
-      case _: MoleTask              ⇒ true
-      case t: StrainerTaskDecorator ⇒ classOf[MoleTask].isAssignableFrom(t.task.getClass)
-      case _                        ⇒ false
-    }
-
-}
+object LocalExecutor extends JavaLogger
 
 class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnable {
 
@@ -72,7 +63,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
 
                 for (moleJob ← executionJob.moleJobs) {
                   if (moleJob.state != State.CANCELED) {
-                    if (LocalExecutor.containsMoleTask(moleJob)) jobGoneIdle()
+                    if (MoleTask.containsMoleTask(moleJob)) jobGoneIdle()
 
                     moleJob.perform(executionJob.executionContext)
                     moleJob.exception match {
@@ -95,7 +86,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                 display(stream, s"Error of local execution", error)
             }
 
-            environment.eventDispatcherService.trigger(environment: Environment, Environment.JobCompleted(executionJob, log, service.localRuntimeInfo))
+            environment.eventDispatcherService.trigger(environment: Environment, Environment.JobCompleted(executionJob, log, service.RuntimeInfo.localRuntimeInfo))
           }
           catch {
             case e: InterruptedException ⇒ throw e

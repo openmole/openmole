@@ -61,7 +61,8 @@
 @sect{(a selection of) Scientific papers/conference proceedings using OpenMOLE features}
     @ul
 
-        @li Juste Raimbault, «Indirect evidence of network effects in a system of cities», published in
+        @li
+            Juste Raimbault, «Indirect evidence of network effects in a system of cities», published in
          @i{Environment and Planning B: Urban Analytics and City Science}, 2399808318774335, 2018.
          @br
               @aa("[open-access version]", href:= shared.link.paper.epb2018arxiv)   @aa("[editor version]", href:= shared.link.paper.epb2018)
@@ -94,7 +95,7 @@
         @li
             Denise Pumain, Romain Reuillon, Sébastien Rey-Coyrehourcq, Arnaud Banos, Paul Chapron, et al.. "Urban Dynamics and Simulation Models". Springer, ISBN 978-3-319-46495-4, 2017.
             @br
-                @aa("[pre-print version]" , href:=shared.link.paper.urbanDynamics)   @a("[bibteX]", href:= shared.link.paper.urbanDynamicsBib)
+                @aa("[pre-print version]" , href:=Resource.paper.urbanDynamics.file)   @a("[bibteX]", href:= Resource.paper.urbanDynamicsBib.file)
 
         @li
              Jonathan Passerat-Palmbach, Romain Reuillon, Mathieu Leclaire, Antonios Makropoulos, Emma C. Robinson, Sarah

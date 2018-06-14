@@ -1,7 +1,6 @@
 package org.openmole.plugin.task.r
 
 import monocle.macros.Lenses
-import org.json4s.JsonAST.JValue
 import org.openmole.core.context.{ Namespace, Variable }
 import org.openmole.plugin.task.udocker._
 import org.openmole.core.fileservice._
@@ -41,16 +40,21 @@ object RTask {
 
   sealed trait InstallCommand
   object InstallCommand {
-    case class RLibrary(name: String) extends InstallCommand
+    case class RLibrary(name: String, version: Option[String]) extends InstallCommand
 
     def toCommand(installCommands: InstallCommand) =
       installCommands match {
-        case RLibrary(name) ⇒
+        case RLibrary(name, None) ⇒
           //Vector(s"""R -e 'install.packages(c(${names.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'""")
           s"""R --slave -e 'install.packages(c("$name"), dependencies = T); library("$name")'"""
+        case RLibrary(name, Some(version)) ⇒
+          // need to install devtools to get older packages versions
+          //apt update; apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev;
+          s"""R --slave -e 'library(devtools); install_version("$name",version = "$version", dependencies = T); library("$name")'"""
       }
 
-    implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name)
+    implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name, None)
+    implicit def stringCoupleToRLibrary(couple: (String, Option[String])): InstallCommand = RLibrary(couple._1, couple._2)
     def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommand.toCommand)
 
   }
@@ -61,13 +65,21 @@ object RTask {
     script:      FromContext[String],
     install:     Seq[String]         = Seq.empty,
     libraries:   Seq[InstallCommand] = Seq.empty,
-    forceUpdate: Boolean             = false
+    forceUpdate: Boolean             = false,
+    rVersion:    String              = "3.3.3"
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): RTask = {
 
-    def version = "3.3.3"
+    //def version = "3.3.3"
+    def version = rVersion
 
+    // add additional installation of devtools only if needed
     val installCommands =
-      install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite")))
+      if (libraries.exists { case l: InstallCommand.RLibrary ⇒ l.version.isDefined }) {
+        install ++ Seq("apt update", "apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev",
+          """R --slave -e 'install.packages("devtools", dependencies = T); library(devtools);""") ++
+          InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
+      }
+      else install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
 
     val uDockerArguments =
       UDockerTask.createUDocker(
@@ -107,6 +119,8 @@ object RTask {
   external:           External,
   info:               InfoConfig,
   rInputs:            Vector[(Val[_], String)], rOutputs: Vector[(String, Val[_])]) extends Task with ValidateTask {
+
+  lazy val containerPoolKey = UDockerTask.newCacheKey
 
   override def config = UDockerTask.config(_config, returnValue, stdOut, stdErr)
   override def validate = container.validateContainer(Vector(), uDocker.environmentVariables, external, inputs)
@@ -155,7 +169,15 @@ object RTask {
 
         def uDockerTask =
           UDockerTask(
-            uDocker, s"R --slave -f $rScriptName", errorOnReturnValue, returnValue, stdOut, stdErr, _config, external, info) set (
+            uDocker, s"R --slave -f $rScriptName",
+            errorOnReturnValue,
+            returnValue,
+            stdOut,
+            stdErr,
+            _config,
+            external,
+            info,
+            containerPoolKey = containerPoolKey) set (
             resources += (scriptFile, rScriptName, true),
             resources += (jsonInputs, inputJSONName, true),
             outputFiles += (outputJSONName, outputFile)
