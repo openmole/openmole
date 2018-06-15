@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.sampling.sensitivity
+package org.openmole.plugin.sampling
 
 import org.openmole.core.context._
 import org.openmole.core.outputmanager.OutputManager
@@ -86,8 +86,8 @@ package object sensitivity {
     // the subspace corresponding to this one
     val space: Seq[SubspaceToAnalyze] = inputs.flatMap(
       input ⇒ outputs.map(
-        output ⇒ subspaceForInputOutput(
-          toValDouble(input.prototype),
+        output ⇒ sensitivity.subspaceForInputOutput(
+          sensitivity.toValDouble(input.prototype),
           output))).toSeq
 
     // the aggregation obviously is a Morris aggregation!
@@ -103,3 +103,4 @@ package object sensitivity {
   }
 
 }
+

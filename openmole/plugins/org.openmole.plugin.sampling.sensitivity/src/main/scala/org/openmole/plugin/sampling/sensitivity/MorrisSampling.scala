@@ -55,6 +55,10 @@ import cats.implicits._
 import FromContext.asMonad._
 
 /**
+ * A trajectory in the Morris OAT understanding,
+ * that is a set of points in an N-dimensional spaces,
+ * with a seed being the starting point, then each next
+ * point changing only one variable of a given delta.
  * A raw trajectory is expressed with indices of factors
  * and a space of parameters in [0:1]
  */
@@ -181,8 +185,6 @@ sealed class MorrisSampling(
       Variable(MorrisSampling.varDelta, 0.0)
     ) ++ ScalarOrSequenceOfDouble.scaled(factors, t.seed).from(context)
 
-    //System.out.println("variables for ref run: " + variablesForRefRun)
-
     // forge lists of lists of variables for the runs of the trajectory
     val variablesForElementaryEffects = (t.points, t.deltas, t.variableOrder.zipWithIndex).zipped.map(
       (point: Array[Double], delta: Double, order2idx: (Int, Int)) ⇒ {
@@ -193,8 +195,6 @@ sealed class MorrisSampling(
           Variable(MorrisSampling.varDelta, point(factoridx) - t.seed(factoridx))
         ) ++ ScalarOrSequenceOfDouble.scaled(factors, point).from(context)
       })
-
-    //System.out.println("variables for runs: " + variablesForElementaryEffects)
 
     variablesForRefRun :: variablesForElementaryEffects
 

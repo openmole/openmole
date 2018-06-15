@@ -106,7 +106,7 @@ object MorrisAggregation {
     val sigma: Double = Math.sqrt(elementaryEffects.map(ee ⇒ squaredDiff(ee, mu)).sum / rD)
 
     if (verbose) {
-      System.out.println("=> aggregate impact of "+inputName+" on "+outputName+": mu=" + mu + ", mu*=" + muStar + ", sigma=" + sigma)
+      System.out.println("=> aggregate impact of " + inputName + " on " + outputName + ": mu=" + mu + ", mu*=" + muStar + ", sigma=" + sigma)
     }
 
     (mu, muStar, sigma)
@@ -129,10 +129,6 @@ object MorrisAggregation {
 
     ClosureTask("MorrisAggregation") { (context, _, _) ⇒
 
-      /*if (verbose) {
-        System.out.println("received context " + context)
-      }*/
-
       // retrieve the metadata passed by the sampling method
       val factorChanged: Array[String] = context(MorrisSampling.varFactorName.toArray)
       val deltas: Array[Double] = context(MorrisSampling.varDelta.toArray)
@@ -152,11 +148,6 @@ object MorrisAggregation {
 
         val (mu: Double, muStar: Double, sigma: Double) = elementaryEffect(inputName, outputName, outputValues, factorChanged, deltas, verbose)
 
-        /*if (verbose) {
-          System.out.println("Processed the elementary change for input " + inputName +
-            " on " + outputName +
-            " => mu=" + mu + ", mu*=" + muStar + ", sigma=" + sigma)
-        }*/
         List(inputName, outputName, mu, muStar, sigma)
       }.transpose
 
