@@ -77,6 +77,7 @@ object MorrisAggregation {
    */
   def elementaryEffect(
     inputName:     String,
+    outputName:    String,
     outputValues:  Array[Double],
     factorChanged: Array[String],
     deltas:        Array[Double],
@@ -88,9 +89,11 @@ object MorrisAggregation {
     val r: Int = indicesWithEffect.length
 
     if (verbose) {
-      System.out.println("searching for " + inputName + " in factorChanges " + factorChanged.toList)
-      System.out.println("found " + r + " repetitions: " + indicesWithEffect.toList)
-      System.out.println("will use them in " + outputValues.toList)
+      System.out.println("measuring the elementary effects of " + inputName + " on " + outputName + " based on " + r + " repetitions")
+
+      indicesWithEffect.foreach(idxChanged ⇒ {
+        System.out.println("For a delta: " + deltas(idxChanged) + ", value changed from " + outputValues(idxChanged - 1) + " to " + outputValues(idxChanged) + " => " + (outputValues(idxChanged) - outputValues(idxChanged - 1)) / (deltas(idxChanged)) + ")")
+      })
     }
 
     // ... so we know each index - 1 leads to the case before changing the factor
@@ -101,6 +104,10 @@ object MorrisAggregation {
     val mu: Double = elementaryEffects.sum / rD
     val muStar: Double = elementaryEffects.reduceLeft(sumAbs) / rD
     val sigma: Double = Math.sqrt(elementaryEffects.map(ee ⇒ squaredDiff(ee, mu)).sum / rD)
+
+    if (verbose) {
+      System.out.println("=> aggregate impact of "+inputName+" on "+outputName+": mu=" + mu + ", mu*=" + muStar + ", sigma=" + sigma)
+    }
 
     (mu, muStar, sigma)
 
@@ -122,9 +129,9 @@ object MorrisAggregation {
 
     ClosureTask("MorrisAggregation") { (context, _, _) ⇒
 
-      if (verbose) {
+      /*if (verbose) {
         System.out.println("received context " + context)
-      }
+      }*/
 
       // retrieve the metadata passed by the sampling method
       val factorChanged: Array[String] = context(MorrisSampling.varFactorName.toArray)
@@ -143,13 +150,13 @@ object MorrisAggregation {
           System.out.println("Processing the elementary change for input " + inputName + " on " + outputName)
         }
 
-        val (mu: Double, muStar: Double, sigma: Double) = elementaryEffect(inputName, outputValues, factorChanged, deltas, verbose)
+        val (mu: Double, muStar: Double, sigma: Double) = elementaryEffect(inputName, outputName, outputValues, factorChanged, deltas, verbose)
 
-        if (verbose) {
+        /*if (verbose) {
           System.out.println("Processed the elementary change for input " + inputName +
             " on " + outputName +
             " => mu=" + mu + ", mu*=" + muStar + ", sigma=" + sigma)
-        }
+        }*/
         List(inputName, outputName, mu, muStar, sigma)
       }.transpose
 
