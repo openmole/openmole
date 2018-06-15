@@ -31,6 +31,7 @@ import org.openmole.plugin.environment.batch.refresh.{ JobManager, StopEnvironme
 import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageService }
 import org.openmole.plugin.environment.egi.EGIEnvironment.WebDavLocation
 import org.openmole.tool.crypto.Cypher
+import org.openmole.core.workflow.execution._
 import squants._
 import squants.information._
 
@@ -195,19 +196,21 @@ object EGIEnvironment extends JavaLogger {
     name:           OptionalArgument[String]      = None
   )(implicit authentication: EGIAuthentication, services: BatchEnvironment.Services, cypher: Cypher, workspace: Workspace, varName: sourcecode.Name) = {
 
-    new EGIEnvironment(
-      voName = voName,
-      service = service,
-      group = group,
-      bdiiURL = bdii,
-      vomsURLs = vomsURLs,
-      fqan = fqan,
-      cpuTime = cpuTime,
-      openMOLEMemory = openMOLEMemory,
-      debug = debug,
-      name = name,
-      authentication = authentication
-    )
+    EnvironmentProvider { () ⇒
+      new EGIEnvironment(
+        voName = voName,
+        service = service,
+        group = group,
+        bdiiURL = bdii,
+        vomsURLs = vomsURLs,
+        fqan = fqan,
+        cpuTime = cpuTime,
+        openMOLEMemory = openMOLEMemory,
+        debug = debug,
+        name = name,
+        authentication = authentication
+      )
+    }
   }
 
 }

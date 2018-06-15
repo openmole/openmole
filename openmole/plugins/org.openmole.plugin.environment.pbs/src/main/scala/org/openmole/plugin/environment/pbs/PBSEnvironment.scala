@@ -71,28 +71,29 @@ object PBSEnvironment extends JavaLogger {
     flavour = flavour
     )
 
-      if(!localSubmission) {
-      val userValue = user.mustBeDefined("user")
-      val hostValue = host.mustBeDefined("host")
-      val portValue = port.mustBeDefined("port")
 
-      new PBSEnvironment(
-        user = userValue,
-        host = hostValue,
-        port = portValue,
-        timeout = timeout.getOrElse(services.preference(SSHEnvironment.TimeOut)),
-        parameters = parameters,
-        name = Some(name.getOrElse(varName.value)),
-        authentication = SSHAuthentication.find(userValue, hostValue, portValue).apply
-      )
-    } else
-      new PBSLocalEnvironment(
-        parameters = parameters,
-        name = Some(name.getOrElse(varName.value))
-      )
+    EnvironmentProvider { () =>
+      if (!localSubmission) {
+        val userValue = user.mustBeDefined("user")
+        val hostValue = host.mustBeDefined("host")
+        val portValue = port.mustBeDefined("port")
 
-
+        new PBSEnvironment(
+          user = userValue,
+          host = hostValue,
+          port = portValue,
+          timeout = timeout.getOrElse(services.preference(SSHEnvironment.TimeOut)),
+          parameters = parameters,
+          name = Some(name.getOrElse(varName.value)),
+          authentication = SSHAuthentication.find(userValue, hostValue, portValue)
+        )
+      } else
+        new PBSLocalEnvironment(
+          parameters = parameters,
+          name = Some(name.getOrElse(varName.value))
+        )
     }
+  }
 
   implicit def asSSHServer[A: gridscale.ssh.SSHAuthentication]: AsSSHServer[PBSEnvironment[A]] = new AsSSHServer[PBSEnvironment[A]] {
     override def apply(t: PBSEnvironment[A]) = gridscale.ssh.SSHServer(t.host, t.port, t.timeout)(t.authentication)

@@ -65,25 +65,27 @@ object OAREnvironment {
       bestEffort = bestEffort
     )
 
-    if(!localSubmission) {
-      val userValue = user.mustBeDefined("user")
-      val hostValue = host.mustBeDefined("host")
-      val portValue = port.mustBeDefined("port")
+    EnvironmentProvider { () =>
+      if (!localSubmission) {
+        val userValue = user.mustBeDefined("user")
+        val hostValue = host.mustBeDefined("host")
+        val portValue = port.mustBeDefined("port")
 
-      new OAREnvironment(
-        user = userValue,
-        host = hostValue,
-        port = portValue,
-        timeout = timeout.getOrElse(services.preference(SSHEnvironment.TimeOut)),
-        parameters = parameters,
-        name = Some(name.getOrElse(varName.value)),
-        authentication = SSHAuthentication.find(userValue, hostValue, portValue).apply
-      )
-    } else
-      new OARLocalEnvironment(
-        parameters = parameters,
-        name = Some(name.getOrElse(varName.value))
-      )
+        new OAREnvironment(
+          user = userValue,
+          host = hostValue,
+          port = portValue,
+          timeout = timeout.getOrElse(services.preference(SSHEnvironment.TimeOut)),
+          parameters = parameters,
+          name = Some(name.getOrElse(varName.value)),
+          authentication = SSHAuthentication.find(userValue, hostValue, portValue)
+        )
+      } else
+        new OARLocalEnvironment(
+          parameters = parameters,
+          name = Some(name.getOrElse(varName.value))
+        )
+    }
   }
 
   implicit def asSSHServer[A: gridscale.ssh.SSHAuthentication]: AsSSHServer[OAREnvironment[A]] = new AsSSHServer[OAREnvironment[A]] {

@@ -351,12 +351,12 @@ object MoleExecution extends JavaLogger {
     moleExecution.grouping.get(capsule) match {
       case Some(strategy) ⇒
         val groups = moleExecution.waitingJobs.getOrElseUpdate(capsule, collection.mutable.Map())
-        val category = strategy(moleJob.context, groups.map { case (gr, jobs) ⇒ gr → jobs })
+        val category = strategy.apply(moleJob.context, groups.toVector)(moleExecution.newGroup, moleExecution.executionContext.services.defaultRandom)
         val jobs = groups.getOrElseUpdate(category, ListBuffer())
         jobs.append(moleJob)
         moleExecution.nbWaiting += 1
 
-        if (strategy.complete(jobs())) {
+        if (strategy.complete(jobs)) {
           groups -= category
           moleExecution.nbWaiting -= jobs.size
           Some(Job(moleExecution, jobs.toVector) → capsule)
@@ -597,6 +597,8 @@ class MoleExecution(
 
   private[mole] var ticketNumber = 1L
   private[mole] val rootTicket = Ticket(id, 0)
+
+  private[mole] val newGroup = NewGroup()
 
   private[mole] val waitingJobs = collection.mutable.Map[Capsule, collection.mutable.Map[MoleJobGroup, ListBuffer[MoleJob]]]()
   private[mole] var nbWaiting = 0

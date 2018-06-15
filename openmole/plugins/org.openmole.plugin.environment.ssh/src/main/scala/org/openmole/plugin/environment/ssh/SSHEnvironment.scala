@@ -60,19 +60,22 @@ object SSHEnvironment {
     name:                 OptionalArgument[String]      = None
   )(implicit services: BatchEnvironment.Services, cypher: Cypher, authenticationStore: AuthenticationStore, varName: sourcecode.Name) = {
     import services._
-    new SSHEnvironment(
-      user = user,
-      host = host,
-      slots = slots,
-      port = port,
-      sharedDirectory = sharedDirectory,
-      workDirectory = workDirectory,
-      openMOLEMemory = openMOLEMemory,
-      threads = threads,
-      storageSharedLocally = storageSharedLocally,
-      name = Some(name.getOrElse(varName.value)),
-      authentication = SSHAuthentication.find(user, host, port).apply
-    )
+
+    EnvironmentProvider { () ⇒
+      new SSHEnvironment(
+        user = user,
+        host = host,
+        slots = slots,
+        port = port,
+        sharedDirectory = sharedDirectory,
+        workDirectory = workDirectory,
+        openMOLEMemory = openMOLEMemory,
+        threads = threads,
+        storageSharedLocally = storageSharedLocally,
+        name = Some(name.getOrElse(varName.value)),
+        authentication = SSHAuthentication.find(user, host, port)
+      )
+    }
   }
 
   class Updater(environemnt: WeakReference[SSHEnvironment[_]]) extends IUpdatable {

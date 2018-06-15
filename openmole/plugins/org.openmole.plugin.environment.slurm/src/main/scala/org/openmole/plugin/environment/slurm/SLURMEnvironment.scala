@@ -73,25 +73,27 @@ object SLURMEnvironment {
         storageSharedLocally = storageSharedLocally,
         forceCopyOnNode = forceCopyOnNode)
 
-      if (!localSubmission) {
-        val userValue = user.mustBeDefined("user")
-        val hostValue = host.mustBeDefined("host")
-        val portValue = port.mustBeDefined("port")
+      EnvironmentProvider { () =>
+        if (!localSubmission) {
+          val userValue = user.mustBeDefined("user")
+          val hostValue = host.mustBeDefined("host")
+          val portValue = port.mustBeDefined("port")
 
-        new SLURMEnvironment(
-          user = userValue,
-          host = hostValue,
-          port = portValue,
-          timeout = timeout.getOrElse(services.preference(SSHEnvironment.TimeOut)),
-          parameters = parameters,
-          name = Some(name.getOrElse(varName.value)),
-          authentication = SSHAuthentication.find(userValue, hostValue, portValue).apply
-        )
-      } else
-        new SLURMLocalEnvironment(
-          parameters = parameters,
-          name = Some(name.getOrElse(varName.value))
-        )
+          new SLURMEnvironment(
+            user = userValue,
+            host = hostValue,
+            port = portValue,
+            timeout = timeout.getOrElse(services.preference(SSHEnvironment.TimeOut)),
+            parameters = parameters,
+            name = Some(name.getOrElse(varName.value)),
+            authentication = SSHAuthentication.find(userValue, hostValue, portValue)
+          )
+        } else
+          new SLURMLocalEnvironment(
+            parameters = parameters,
+            name = Some(name.getOrElse(varName.value))
+          )
+      }
 
     }
 

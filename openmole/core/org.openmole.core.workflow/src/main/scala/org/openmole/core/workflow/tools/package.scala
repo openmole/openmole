@@ -17,33 +17,11 @@
 
 package org.openmole.core.workflow
 
-import scala.concurrent.stm._
-import org.openmole.tool.file._
-
-import scala.ref.WeakReference
-import cats._
-import cats._
-import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.expansion.{ FromContext, ToFromContext }
-
 package tools {
 
-  import org.openmole.core.exception.UserBadDataError
   import org.openmole.core.expansion.{ Expandable, ExpandedString, FromContext, ToFromContext }
-  import org.openmole.core.fileservice.FileService
-  import org.openmole.core.workspace.NewFile
 
   trait ToolsPackage {
-
-    implicit def objectToWeakReferenceConverter[T <: AnyRef](v: T) = new WeakReference[T](v)
-
-    implicit class RefDecorator[T](r: Ref[T]) {
-      def getUpdate(t: T ⇒ T): T = atomic { implicit txn ⇒ val v = r(); r() = t(v); v }
-    }
-
-    implicit class RefLongDecorator(r: Ref[Long]) {
-      def next = r getUpdate (_ + 1)
-    }
 
     implicit class VectorLensDecorator[T, U](l: monocle.Lens[T, Vector[U]]) {
       def add(u: U) = l.modify(_ ++ Seq(u))
