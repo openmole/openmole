@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.sampling
+package org.openmole.plugin.method
 
 import org.openmole.core.context._
 import org.openmole.core.outputmanager.OutputManager
@@ -31,7 +31,7 @@ import org.openmole.core.workflow.validation.DataflowProblem._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workflow.transition.Slot
 
-package object sensitivity {
+package object morris {
 
   implicit def scope = DefinitionScope.Internal
 
@@ -86,8 +86,8 @@ package object sensitivity {
     // the subspace corresponding to this one
     val space: Seq[SubspaceToAnalyze] = inputs.flatMap(
       input ⇒ outputs.map(
-        output ⇒ sensitivity.subspaceForInputOutput(
-          sensitivity.toValDouble(input.prototype),
+        output ⇒ morris.subspaceForInputOutput(
+          morris.toValDouble(input.prototype),
           output))).toSeq
 
     // the aggregation obviously is a Morris aggregation!

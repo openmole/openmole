@@ -444,7 +444,7 @@ lazy val modifierHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.modifie
 
 /* Method */
 
-def allMethod = Seq(evolution, directSampling)
+def allMethod = Seq(evolution, directSampling, morrisMethod)
 
 lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolution", imports = Seq("*")) dependsOn(
   openmoleDSL, csvTool, toolsTask, pattern, collectionDomain % "test", boundsDomain % "test"
@@ -455,11 +455,13 @@ lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolutio
 
 lazy val directSampling = OsgiProject(pluginDir, "org.openmole.plugin.method.directsampling", imports = Seq("*")) dependsOn(openmoleDSL, distributionDomain, pattern, modifierDomain) settings (pluginSettings: _*)
 
+lazy val morrisMethod = OsgiProject(pluginDir, "org.openmole.plugin.method.morris", imports = Seq("*")) dependsOn(exception, workflow, workspace, openmoleDSL) settings (pluginSettings: _*)
+
 
 
 /* Sampling */
 
-def allSampling = Seq(combineSampling, csvSampling, lhsSampling, quasirandomSampling, sensitivitySampling)
+def allSampling = Seq(combineSampling, csvSampling, lhsSampling, quasirandomSampling)
 
 lazy val combineSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.combine", imports = Seq("*")) dependsOn(exception, modifierDomain, collectionDomain, workflow) settings (pluginSettings: _*)
 
@@ -472,8 +474,6 @@ lazy val lhsSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.lhs"
 lazy val quasirandomSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.quasirandom", imports = Seq("*")) dependsOn(exception, workflow, workspace) settings (
   libraryDependencies += Libraries.math
   ) settings (pluginSettings: _*)
-
-lazy val sensitivitySampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.sensitivity", imports = Seq("*")) dependsOn(exception, workflow, workspace, openmoleDSL) settings (pluginSettings: _*)
 
 
 /* Source */
