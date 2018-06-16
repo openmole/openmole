@@ -24,10 +24,10 @@ import org.openmole.core.context._
 import org.openmole.core.event._
 import org.openmole.core.exception._
 import org.openmole.core.expansion._
-import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow._
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job.MoleJob
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
@@ -93,13 +93,15 @@ object MoleTask {
       import executionContext.workspace
       import executionContext.outputRedirection
 
+      val localEnvironment =
+        LocalEnvironment(1, executionContext.localEnvironment.deinterleave)
+
       val execution = MoleExecution(
         mole,
         implicits = implicitsValues,
-        defaultEnvironment = () ⇒ executionContext.localEnvironment,
+        defaultEnvironment = localEnvironment,
         executionContext = MoleExecutionContext(),
         cleanOnFinish = false,
-        startStopDefaultEnvironment = false,
         taskCache = executionContext.cache,
         lockRepository = executionContext.lockRepository
       )

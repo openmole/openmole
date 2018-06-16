@@ -42,17 +42,15 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
   import LocalExecutor.Log._
 
   var stop: Boolean = false
+  @volatile var running: Boolean = false
 
   override def run = try {
     while (!stop) {
       environment.get match {
         case Some(environment) ⇒
-          def jobGoneIdle() = {
-            environment.pool().idle(this)
-            stop = true
-          }
-
+          running = false
           val executionJob = environment.pool().takeNextJob
+          running = true
           val beginTime = System.currentTimeMillis
 
           try {
@@ -62,8 +60,6 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
 
                 for (moleJob ← executionJob.moleJobs) {
                   if (moleJob.state != State.CANCELED) {
-                    if (MoleTask.containsMoleTask(moleJob)) jobGoneIdle()
-
                     moleJob.perform(executionJob.executionContext)
                     moleJob.exception match {
                       case Some(e) ⇒ environment.eventDispatcherService.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
@@ -104,6 +100,9 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
   catch {
     case e: InterruptedException ⇒
     case e: ThreadDeath          ⇒
+  }
+  finally {
+    running = false
   }
 
   case class Output(stream: PrintStream, output: String, error: String)
