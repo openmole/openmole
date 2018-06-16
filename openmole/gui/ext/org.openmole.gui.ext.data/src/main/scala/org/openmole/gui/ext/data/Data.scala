@@ -378,7 +378,8 @@ object ExecutionInfo {
                      capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
                      error: Error,
                      environmentStates: Seq[EnvironmentState],
-                     duration: Long = 0L) extends ExecutionInfo {
+                     duration: Long = 0L,
+                     clean: Boolean = true) extends ExecutionInfo {
     def state: String = "failed"
   }
 
@@ -392,14 +393,18 @@ object ExecutionInfo {
   case class Finished(
                        capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
                        duration: Long = 0L,
-                       environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
+                       environmentStates: Seq[EnvironmentState],
+                       clean: Boolean) extends ExecutionInfo {
     def state: String = "finished"
   }
+
+
 
   case class Canceled(
                        capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
                        environmentStates: Seq[EnvironmentState],
-                       duration: Long = 0L) extends ExecutionInfo {
+                       duration: Long = 0L,
+                       clean: Boolean) extends ExecutionInfo {
     def state: String = "canceled"
   }
 

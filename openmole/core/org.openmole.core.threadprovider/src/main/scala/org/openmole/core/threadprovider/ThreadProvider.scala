@@ -37,6 +37,10 @@ object ThreadProvider {
 
   def apply(poolSize: Int) = new ThreadProvider(poolSize)
 
+  def background[T](threadProvider: ThreadProvider)(closure: ⇒ T): Future[T] = {
+    Executors.newSingleThreadExecutor(threadProvider.threadFactory).submit(() ⇒ closure)
+  }
+
 }
 
 class ThreadProvider(poolSize: Int) {

@@ -66,8 +66,8 @@ sealed trait Environment <: Name {
   def done: Long = _done.get()
   def failed: Long = _failed.get()
 
-  def start(): Unit = {}
-  def stop(): Unit = {}
+  def start(): Unit
+  def stop(): Unit
 }
 
 trait SubmissionEnvironment <: Environment {

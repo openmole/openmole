@@ -159,6 +159,29 @@ object BatchEnvironment extends JavaLogger {
   def trySelectSingleJobService(jobService: BatchJobService[_]) =
     UsageControl.tryGetToken(jobService.usageControl).map(t ⇒ (jobService, t))
 
+  def clean(environment: BatchEnvironment, usageControls: Seq[UsageControl])(implicit services: BatchEnvironment.Services) = {
+    environment.batchJobWatcher.stop = true
+    environment.jobs.foreach(_.state = ExecutionState.KILLED)
+
+    usageControls.foreach(UsageControl.freeze)
+    usageControls.foreach(UsageControl.waitUnused)
+    usageControls.foreach(UsageControl.unfreeze)
+
+    def kill(job: BatchExecutionJob) = {
+      job.state = ExecutionState.KILLED
+      job.batchJob.foreach { bj ⇒ UsageControl.withToken(bj.usageControl)(token ⇒ util.Try(JobManager.killBatchJob(bj, token))) }
+      job.serializedJob.foreach { sj ⇒ UsageControl.withToken(sj.storage.usageControl)(token ⇒ util.Try(JobManager.cleanSerializedJob(sj, token))) }
+    }
+
+    val futures = environment.jobs.map { j ⇒ services.threadProvider.submit(() ⇒ kill(j), JobManager.killPriority) }
+    futures.foreach(_.get())
+  }
+
+  def start(environment: BatchEnvironment)(implicit services: BatchEnvironment.Services) = {
+    import services.threadProvider
+    Updater.registerForUpdate(environment.batchJobWatcher)
+  }
+
 }
 
 abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
@@ -200,18 +223,6 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
   def running: Long = jobs.count { _.state == ExecutionState.RUNNING }
 
   def runtimeSettings = RuntimeSettings(archiveResult = false)
-
-  override def start() = {
-    super.start()
-    import services.threadProvider
-    Updater.registerForUpdate(batchJobWatcher)
-  }
-
-  override def stop() = {
-    super.stop()
-    batchJobWatcher.stop = true
-  }
-
 }
 
 class BatchExecutionJob(val job: Job, val environment: BatchEnvironment) extends ExecutionJob { bej ⇒

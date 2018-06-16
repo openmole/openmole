@@ -135,11 +135,6 @@ object MoleExecution extends JavaLogger {
     subMoleExecution.parent.foreach(_.children.remove(subMoleExecution.id))
   }
 
-  def clean(subMoleExecutionState: SubMoleExecutionState) = {
-    subMoleExecutionState.parent.foreach(s ⇒ s.children.remove(subMoleExecutionState.id))
-    subMoleExecutionState.moleExecution.subMoleExecutions.remove(subMoleExecutionState.id)
-  }
-
   def updateNbJobs(subMoleExecutionState: SubMoleExecutionState, v: Int): Unit = {
     subMoleExecutionState.nbJobs = subMoleExecutionState.nbJobs + v
     subMoleExecutionState.parent.foreach(s ⇒ updateNbJobs(s, v))
@@ -313,23 +308,28 @@ object MoleExecution extends JavaLogger {
 
   private def finish(moleExecution: MoleExecution, canceled: Boolean = false) =
     if (!moleExecution._finished) {
-      def stopEnvironments() = {
-        if (moleExecution.startStopDefaultEnvironment) moleExecution.defaultEnvironment.stop()
-        moleExecution.environments.values.foreach(_.stop())
-      }
+      moleExecution._finished = true
+      moleExecution._endTime = Some(System.currentTimeMillis)
+      moleExecution.executionContext.services.eventDispatcher.trigger(moleExecution, MoleExecution.Finished(canceled = canceled))
 
-      try stopEnvironments()
-      finally {
-        moleExecution._finished = true
-        moleExecution._endTime = Some(System.currentTimeMillis)
-        if (moleExecution.cleanOnFinish) {
-          moleExecution.executionContext.services.newFile.baseDir.recursiveDelete
-          moleExecution.taskCache.close()
+      ThreadProvider.background(moleExecution.executionContext.services.threadProvider) {
+        def stopEnvironments() = {
+          if (moleExecution.startStopDefaultEnvironment) moleExecution.defaultEnvironment.stop()
+          moleExecution.environments.values.foreach(_.stop())
         }
-        moleExecution.executionContext.services.eventDispatcher.trigger(moleExecution, MoleExecution.Finished(canceled = canceled))
-      }
 
+        try stopEnvironments()
+        finally MoleExecutionMessage.send(moleExecution)(MoleExecutionMessage.CleanMoleExcution())
+      }
     }
+
+  def clean(moleExecution: MoleExecution) = {
+    if (moleExecution.cleanOnFinish) {
+      moleExecution.executionContext.services.newFile.baseDir.recursiveDelete
+      moleExecution.taskCache.close()
+    }
+    moleExecution._cleaned = true
+  }
 
   def cancel(moleExecution: MoleExecution, t: Option[MoleExecutionFailed]): Unit =
     if (!moleExecution._canceled) {
@@ -405,6 +405,11 @@ object MoleExecution extends JavaLogger {
       } submit(moleExecution, Job(moleExecution, job), capsule)
     moleExecution.nbWaiting = 0
     moleExecution.waitingJobs.clear
+  }
+
+  def clean(subMoleExecutionState: SubMoleExecutionState) = {
+    subMoleExecutionState.parent.foreach(s ⇒ s.children.remove(subMoleExecutionState.id))
+    subMoleExecutionState.moleExecution.subMoleExecutions.remove(subMoleExecutionState.id)
   }
 
   def checkIfSubMoleIsFinished(subMoleExecutionState: SubMoleExecutionState) = {
@@ -508,6 +513,7 @@ object MoleExecutionMessage {
   case class StartMoleExecution(context: Option[Context]) extends MoleExecutionMessage
   case class CancelMoleExecution() extends MoleExecutionMessage
   case class RegisterJob(subMoleExecution: SubMoleExecutionState, job: MoleJob, capsule: Capsule) extends MoleExecutionMessage
+  case class CleanMoleExcution() extends MoleExecutionMessage
 
   def msgForSubMole(msg: MoleExecutionMessage, subMoleExecutionState: SubMoleExecutionState) = msg match {
     case msg: PerformTransition ⇒ msg.subMoleExecution == subMoleExecutionState.id
@@ -534,18 +540,18 @@ object MoleExecutionMessage {
 
   def dispatch(moleExecution: MoleExecution, msg: MoleExecutionMessage) = moleExecution.synchronized {
     try {
-      if (!moleExecution._canceled)
-        msg match {
-          case msg: PerformTransition ⇒
-            val state = moleExecution.subMoleExecutions(msg.subMoleExecution)
-            if (!state.canceled) msg.operation(state)
-            MoleExecution.checkIfSubMoleIsFinished(state)
-          case msg: JobFinished           ⇒ processJobFinished(moleExecution, msg)
-          case msg: WithMoleExecutionSate ⇒ msg.operation(moleExecution)
-          case msg: StartMoleExecution    ⇒ MoleExecution.start(moleExecution, msg.context)
-          case msg: CancelMoleExecution   ⇒ MoleExecution.cancel(moleExecution, None)
-          case msg: RegisterJob           ⇒ msg.subMoleExecution.jobs.put(msg.job, msg.capsule)
-        }
+      msg match {
+        case msg: PerformTransition if !moleExecution._canceled ⇒
+          val state = moleExecution.subMoleExecutions(msg.subMoleExecution)
+          if (!state.canceled) msg.operation(state)
+          MoleExecution.checkIfSubMoleIsFinished(state)
+        case msg: JobFinished if !moleExecution._canceled           ⇒ processJobFinished(moleExecution, msg)
+        case msg: WithMoleExecutionSate if !moleExecution._canceled ⇒ msg.operation(moleExecution)
+        case msg: StartMoleExecution if !moleExecution._canceled    ⇒ MoleExecution.start(moleExecution, msg.context)
+        case msg: CancelMoleExecution if !moleExecution._canceled   ⇒ MoleExecution.cancel(moleExecution, None)
+        case msg: RegisterJob if !moleExecution._canceled           ⇒ msg.subMoleExecution.jobs.put(msg.job, msg.capsule)
+        case msg: CleanMoleExcution                                 ⇒ MoleExecution.clean(moleExecution)
+      }
     }
     catch {
       case t: Throwable ⇒ MoleExecution.cancel(moleExecution, Some(MoleExecution.MoleExecutionError(t)))
@@ -556,7 +562,7 @@ object MoleExecutionMessage {
   }
 
   def dispatcher(moleExecution: MoleExecution) =
-    while (!(moleExecution._finished || moleExecution._canceled)) {
+    while (!(moleExecution._cleaned)) {
       val msg = moleExecution.messageQueue.dequeue()
       dispatch(moleExecution, msg)
     }
@@ -584,10 +590,12 @@ class MoleExecution(
   private[mole] var _started = false
   private[mole] var _canceled = false
   private[mole] var _finished = false
+  private[mole] var _cleaned = false
 
   def started = synchronized(_started)
   def canceled = synchronized(_canceled)
   def finished = synchronized(_finished)
+  def cleaned = synchronized(_cleaned)
 
   private[mole] var _startTime: Option[Long] = None
   private[mole] var _endTime: Option[Long] = None
