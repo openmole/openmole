@@ -124,6 +124,57 @@ object NetLogoTask {
       pooled = cached
     )
   }
+
+  def netLogoCompatibleType(x: Any) = {
+    def convertArray(x: Any): AnyRef = x match {
+      case a: Array[_] ⇒ a.asInstanceOf[Array[_]].map { x ⇒ convertArray(x.asInstanceOf[AnyRef]) }
+      case x           ⇒ safeType(x)
+    }
+
+    def safeType(x: Any): AnyRef = {
+      val v = x match {
+        case i: Int    ⇒ i.toDouble
+        case l: Long   ⇒ l.toDouble
+        case fl: Float ⇒ fl.toDouble
+        case f: File   ⇒ f.getAbsolutePath
+        case x: AnyRef ⇒ x // Double and String are unchanged
+      }
+      v.asInstanceOf[AnyRef]
+    }
+
+    x match {
+      case x: Array[_] ⇒ convertArray(x)
+      case x           ⇒ safeType(x)
+    }
+  }
+
+  def netLogoArrayToVariable(netlogoCollection: AbstractCollection[Any], prototype: Val[_]) = {
+    val arrayType = prototype.`type`.runtimeClass.getComponentType
+    val array = java.lang.reflect.Array.newInstance(arrayType, netlogoCollection.size)
+    val it = netlogoCollection.iterator
+    for (i ← 0 until netlogoCollection.size) {
+      val v = it.next
+      try java.lang.reflect.Array.set(array, i, v)
+      catch {
+        case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when adding a variable of type ${v.getClass} in an array of ${arrayType}")
+      }
+    }
+    Variable(prototype.asInstanceOf[Val[Any]], array)
+  }
+
+  def validateNetLogoInputTypes(inputs: Seq[Val[_]]) = {
+    def acceptedType(c: Class[_]): Boolean =
+      if (c.isArray()) acceptedType(c.getComponentType)
+      else Seq(classOf[String], classOf[Int], classOf[Double], classOf[Long], classOf[Float], classOf[File]).contains(c)
+
+    inputs.flatMap {
+      case v ⇒
+        v.`type`.runtimeClass.asInstanceOf[Class[_]] match {
+          case c if acceptedType(c) ⇒ None
+          case _                    ⇒ Some(new UserBadDataError(s"""Error for netLogoInput "${v.name} : type "${v.`type`.runtimeClass.toString()} is not managed by NetLogo."""))
+        }
+    }
+  }
 }
 
 trait NetLogoTask extends Task with ValidateTask {
@@ -144,20 +195,9 @@ trait NetLogoTask extends Task with ValidateTask {
   override def validate = Validate { p ⇒
     import p._
     val allInputs = External.PWD :: inputs.toList
-
-    def acceptedType(c: Class[_]): Boolean =
-      if (c.isArray()) acceptedType(c.getComponentType)
-      else Seq(classOf[String], classOf[Int], classOf[Double], classOf[Long], classOf[Float], classOf[File]).contains(c)
-
-    val testTypes = allInputs.flatMap {
-      case v ⇒
-        v.`type`.runtimeClass.asInstanceOf[Class[_]] match {
-          case c if acceptedType(c) ⇒ None
-          case _                    ⇒ Some(new UserBadDataError(s"""Error for netLogoInput "${v.name} : type "${v.`type`.runtimeClass.toString()} is not managed by NetLogo."""))
-        }
-    }
-
-    launchingCommands.flatMap(_.validate(allInputs)) ++ External.validate(external)(allInputs).apply ++ testTypes
+    launchingCommands.flatMap(_.validate(allInputs)) ++
+      External.validate(external)(allInputs).apply ++
+      NetLogoTask.validateNetLogoInputTypes(netLogoInputs.map(_._1))
   }
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
@@ -173,29 +213,8 @@ trait NetLogoTask extends Task with ValidateTask {
 
       seed.foreach { s ⇒ NetLogoTask.executeNetLogo(instance.netLogo, s"random-seed ${context(s)}") }
 
-      // FIXME this could be very costly since it wraps primitives values in objects
-      def convertArray(x: AnyRef): AnyRef = x match {
-        case a: Array[_] ⇒ a.asInstanceOf[Array[_]].map { x ⇒ convertArray(x.asInstanceOf[AnyRef]) }
-        case x           ⇒ safeType(x)
-      }
-
-      def safeType(x: AnyRef): AnyRef = {
-        val v = x.asInstanceOf[Any] match {
-          case i: Int    ⇒ i.toDouble
-          case l: Long   ⇒ l.toDouble
-          case fl: Float ⇒ fl.toDouble
-          case f: File   ⇒ f.getAbsolutePath
-          case x: AnyRef ⇒ x // Double and String are unchanged
-        }
-        v.asInstanceOf[AnyRef]
-      }
-
       for (inBinding ← netLogoInputs) {
-        val v =
-          preparedContext(inBinding._1) match {
-            case x: Array[_] ⇒ convertArray(x)
-            case x: AnyRef   ⇒ safeType(x)
-          }
+        val v = NetLogoTask.netLogoCompatibleType(preparedContext(inBinding._1))
         NetLogoTask.setGlobal(instance.netLogo, inBinding._2, v)
       }
 
@@ -209,7 +228,7 @@ trait NetLogoTask extends Task with ValidateTask {
               if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Val[Any]], outputValue)
               else {
                 val netLogoCollection = outputValue.asInstanceOf[AbstractCollection[Any]]
-                netLogoArrayToVariable(netLogoCollection, prototype)
+                NetLogoTask.netLogoArrayToVariable(netLogoCollection, prototype)
               }
             }
             catch {
@@ -224,7 +243,7 @@ trait NetLogoTask extends Task with ValidateTask {
               val netLogoCollection = NetLogoTask.report(instance.netLogo, name)
               val outputValue = netLogoCollection.asInstanceOf[AbstractCollection[Any]].toArray()(column)
               if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Val[Any]], outputValue)
-              else netLogoArrayToVariable(outputValue.asInstanceOf[AbstractCollection[Any]], prototype)
+              else NetLogoTask.netLogoArrayToVariable(outputValue.asInstanceOf[AbstractCollection[Any]], prototype)
             }
             catch {
               case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when fetching column $column of netlogo output $name in variable $prototype")
@@ -233,20 +252,6 @@ trait NetLogoTask extends Task with ValidateTask {
 
       contextResult
     }
-  }
-
-  def netLogoArrayToVariable(netlogoCollection: AbstractCollection[Any], prototype: Val[_]) = {
-    val arrayType = prototype.`type`.runtimeClass.getComponentType
-    val array = java.lang.reflect.Array.newInstance(arrayType, netlogoCollection.size)
-    val it = netlogoCollection.iterator
-    for (i ← 0 until netlogoCollection.size) {
-      val v = it.next
-      try java.lang.reflect.Array.set(array, i, v)
-      catch {
-        case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when adding a variable of type ${v.getClass} in an array of ${arrayType}")
-      }
-    }
-    Variable(prototype.asInstanceOf[Val[Any]], array)
   }
 
 }
