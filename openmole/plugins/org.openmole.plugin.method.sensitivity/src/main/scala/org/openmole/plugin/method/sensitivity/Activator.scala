@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.morris
+package org.openmole.plugin.method.sensitivity
 
 import org.openmole.core.pluginmanager._
 import org.openmole.core.preference.ConfigurationInfo
@@ -35,6 +35,7 @@ class Activator extends PluginInfoActivator {
       Vector(
         Sampling(objectName(MorrisSampling)),
         Task(objectName(MorrisAggregation)),
+        Sampling(objectName(SaltelliSampling)),
         Pattern("SensitivityMorris")
       )
 

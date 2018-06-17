@@ -43,7 +43,7 @@
  *     Technometrics 33: 161–174. doi:10.2307/1269043.
  */
 
-package org.openmole.plugin.method.morris
+package org.openmole.plugin.method.sensitivity
 
 import org.openmole.core.context._
 import org.openmole.core.expansion._

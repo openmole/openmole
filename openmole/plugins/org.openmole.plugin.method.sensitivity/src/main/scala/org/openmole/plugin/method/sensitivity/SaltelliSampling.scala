@@ -1,9 +1,10 @@
-package org.openmole.plugin.sampling.lhs
+package org.openmole.plugin.method.sensitivity
 
 import org.openmole.core.context._
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.sampling.Sampling
 import org.openmole.core.workflow.tools._
+import org.openmole.plugin.sampling.lhs._
 
 object SaltelliSampling {
 

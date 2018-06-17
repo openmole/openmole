@@ -31,7 +31,7 @@ import org.openmole.core.workflow.validation.DataflowProblem._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workflow.transition.Slot
 
-package object morris {
+package object sensitivity {
 
   implicit def scope = DefinitionScope.Internal
 
@@ -54,8 +54,8 @@ package object morris {
    * exception in case it's not possible
    */
   def toValDouble(v: Val[_]): Val[Double] = v match {
-    case vd: Val[Double] ⇒ vd
-    case _               ⇒ throw new IllegalArgumentException("expect inputs to be of type Double, but received " + v)
+    case Val.caseDouble(vd) ⇒ vd
+    case _                  ⇒ throw new IllegalArgumentException("expect inputs to be of type Double, but received " + v)
   }
 
   /**
@@ -86,8 +86,8 @@ package object morris {
     // the subspace corresponding to this one
     val space: Seq[SubspaceToAnalyze] = inputs.flatMap(
       input ⇒ outputs.map(
-        output ⇒ morris.subspaceForInputOutput(
-          morris.toValDouble(input.prototype),
+        output ⇒ sensitivity.subspaceForInputOutput(
+          sensitivity.toValDouble(input.prototype),
           output))).toSeq
 
     // the aggregation obviously is a Morris aggregation!
