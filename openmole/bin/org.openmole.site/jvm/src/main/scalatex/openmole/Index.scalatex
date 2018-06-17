@@ -2,23 +2,17 @@
 @import org.openmole.site._
 @import DocumentationPages._
 
-@h2(textAlign := "center"){
-  OpenMOLE: the Model Exploration Software
-}
-
 @h3{What is OpenMOLE?}
 
 @div(stylesheet.centerJustify(100)){
   OpenMOLE has been developed since 2008 as a @b{free and open-source} platform.
-@br
-  OpenMOLE offers tools to run, explore, diagnose and optimize your numerical model, taking advantage of distributed computing environments.
-  @br
-  With OpenMOLE you can @b{embed your already developed model}, in any language (Java, Binary exe, NetLogo, R, SciLab, Python, C++...).
+  It offers tools to run, explore, diagnose and optimize your numerical model, taking advantage of distributed computing environments.
+  With OpenMOLE you can @b{explore your already developed model}, in any language (Java, Binary exe, NetLogo, R, SciLab, Python, C++...).
 }
 
 @div(stylesheet.centerJustify(100)){
   OpenMOLE comes with a graphical user interface (GUI) to write @b{scripts around your model}.
-  These scripts will use OpenMOLE methods to @b{explore} your model and @b{distribute} its execution on High Performing Computing (HPC) environments, with only a few lines of code!
+  These scripts will use OpenMOLE methods to @b{explore} your model and @b{distribute} its executions on High Performing Computing (HPC) environments, with only a few lines of code!
 }
 
 
