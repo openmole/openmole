@@ -51,7 +51,7 @@ object Market {
     lazy val calibration = Tag("Calibration")
     lazy val tutorial = Tag("Tutorial")
     lazy val workflow = Tag("Workflow")
-    lazy val sensitivity = Tag("Sensitivy")
+    lazy val sensitivity = Tag("Sensitivity")
   }
 
   case class Tag(label: String)
