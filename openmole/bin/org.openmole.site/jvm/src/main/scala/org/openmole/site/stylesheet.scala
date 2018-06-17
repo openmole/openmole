@@ -155,7 +155,7 @@ package object stylesheet {
 
   def centerJustify(ratio: Int) = Seq(
     width := s"$ratio%",
-    paddingTop := 15,
+    paddingTop := 10,
     textAlign := "justify",
     marginLeft := "auto",
     marginRight := "auto"

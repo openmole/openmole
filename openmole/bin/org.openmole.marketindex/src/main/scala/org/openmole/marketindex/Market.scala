@@ -82,7 +82,7 @@ object Market {
       MarketEntry("Workflow Tutorial", "tutorials/workflow", Seq(tutorial, scala, workflow)),
       MarketEntry("Native Application Tutorial", "tutorials/native", Seq(tutorial, native, data, python)),
       MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration, tutorial, sensitivity)),
-      MarketEntry("Statistical Sensitivity Analysisi", "sensitivity", Seq(netlogo, sensitivity, simulation))
+      MarketEntry("Sensitivity Analysis", "sensitivity", Seq(netlogo, sensitivity, simulation))
     )
   )
 
