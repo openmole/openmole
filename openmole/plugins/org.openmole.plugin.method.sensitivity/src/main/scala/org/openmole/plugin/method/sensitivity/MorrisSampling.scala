@@ -53,6 +53,7 @@ import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.tools._
 import cats.implicits._
 import FromContext.asMonad._
+import org.openmole.tool.logger._
 
 /**
  * A trajectory in the Morris OAT understanding,
@@ -69,14 +70,13 @@ case class Trajectory(
   points:        List[Array[Double]]
 )
 
-object MorrisSampling {
+object MorrisSampling extends JavaLogger {
 
   def apply(
     repetitions: FromContext[Int],
     levels:      FromContext[Int],
-    verbose:     Boolean                          = false,
     factors:     Seq[ScalarOrSequenceOfDouble[_]]) =
-    new MorrisSampling(repetitions, levels, verbose, factors)
+    new MorrisSampling(repetitions, levels, factors)
 
   /**
    * Namespace for the variables peculiar to this Morris sampling
@@ -160,10 +160,11 @@ object MorrisSampling {
 
 }
 
+import MorrisSampling.Log._
+
 sealed class MorrisSampling(
   val repetitions: FromContext[Int],
   val levels:      FromContext[Int],
-  val verbose:     Boolean                          = false,
   val factors:     Seq[ScalarOrSequenceOfDouble[_]]) extends Sampling {
 
   override def inputs = factors.flatMap(_.inputs)
@@ -208,12 +209,10 @@ sealed class MorrisSampling(
 
     val trajectoriesRaw: List[Trajectory] = MorrisSampling.trajectories(k, p, r, random())
 
-    if (verbose) {
-      System.out.println("should explore a " + k + "-dimensions " +
-        p + "-levels grid with " +
-        r + " repetitions => " +
-        trajectoriesRaw.length + " trajectories")
-    }
+    logger.fine("should explore a " + k + "-dimensions " +
+      p + "-levels grid with " +
+      r + " repetitions => " +
+      trajectoriesRaw.length + " trajectories")
 
     trajectoriesRaw.zipWithIndex.flatMap {
       case (t, idTraj) ⇒

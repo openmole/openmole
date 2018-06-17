@@ -80,21 +80,15 @@ object MorrisAggregation {
     outputName:    String,
     outputValues:  Array[Double],
     factorChanged: Array[String],
-    deltas:        Array[Double],
-    verbose:       Boolean       = false): (Double, Double, Double) = {
+    deltas:        Array[Double]): (Double, Double, Double) = {
 
     // indices of results in which the input had been changed
     val indicesWithEffect: Array[Int] = factorChanged.zipWithIndex
       .collect { case (name, idx) if (inputName == name) ⇒ idx }
     val r: Int = indicesWithEffect.length
 
-    if (verbose) {
-      System.out.println("measuring the elementary effects of " + inputName + " on " + outputName + " based on " + r + " repetitions")
-
-      indicesWithEffect.foreach(idxChanged ⇒ {
-        System.out.println("For a delta: " + deltas(idxChanged) + ", value changed from " + outputValues(idxChanged - 1) + " to " + outputValues(idxChanged) + " => " + (outputValues(idxChanged) - outputValues(idxChanged - 1)) / (deltas(idxChanged)) + ")")
-      })
-    }
+    MorrisSampling.Log.logger.fine("measuring the elementary effects of " + inputName + " on " + outputName + " based on " + r + " repetitions")
+    indicesWithEffect.foreach(idxChanged ⇒ MorrisSampling.Log.logger.fine("For a delta: " + deltas(idxChanged) + ", value changed from " + outputValues(idxChanged - 1) + " to " + outputValues(idxChanged) + " => " + (outputValues(idxChanged) - outputValues(idxChanged - 1)) / (deltas(idxChanged)) + ")"))
 
     // ... so we know each index - 1 leads to the case before changing the factor
     // elementary effects
@@ -105,9 +99,7 @@ object MorrisAggregation {
     val muStar: Double = elementaryEffects.reduceLeft(sumAbs) / rD
     val sigma: Double = Math.sqrt(elementaryEffects.map(ee ⇒ squaredDiff(ee, mu)).sum / rD)
 
-    if (verbose) {
-      System.out.println("=> aggregate impact of " + inputName + " on " + outputName + ": mu=" + mu + ", mu*=" + muStar + ", sigma=" + sigma)
-    }
+    MorrisSampling.Log.logger.fine("=> aggregate impact of " + inputName + " on " + outputName + ": mu=" + mu + ", mu*=" + muStar + ", sigma=" + sigma)
 
     (mu, muStar, sigma)
 
@@ -121,7 +113,6 @@ object MorrisAggregation {
    */
 
   def apply[T](
-    verbose:   Boolean                = false,
     subspaces: Seq[SubspaceToAnalyze])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
 
     // the list of all the user inputs corresponding to model outputs
@@ -142,11 +133,9 @@ object MorrisAggregation {
         val outputValues: Array[Double] = context(subspace.output.toArray)
         val outputName: String = subspace.output.name
 
-        if (verbose) {
-          System.out.println("Processing the elementary change for input " + inputName + " on " + outputName)
-        }
+        MorrisSampling.Log.logger.fine("Processing the elementary change for input " + inputName + " on " + outputName)
 
-        val (mu: Double, muStar: Double, sigma: Double) = elementaryEffect(inputName, outputName, outputValues, factorChanged, deltas, verbose)
+        val (mu: Double, muStar: Double, sigma: Double) = elementaryEffect(inputName, outputName, outputValues, factorChanged, deltas)
 
         List(inputName, outputName, mu, muStar, sigma)
       }.transpose

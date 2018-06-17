@@ -72,12 +72,11 @@ package object sensitivity {
     inputs:      Seq[ScalarOrSequenceOfDouble[_]],
     outputs:     Seq[Val[Double]],
     repetitions: Int,
-    levels:      Int,
-    verbose:     Boolean                          = false): Puzzle = {
+    levels:      Int): Puzzle = {
 
     // the sampling for Morris is a One At a Time one,
     // with respect to the user settings for repetitions, levels and inputs
-    val sampling = MorrisSampling(repetitions, levels, verbose, inputs)
+    val sampling = MorrisSampling(repetitions, levels, inputs)
     val exploration = ExplorationTask(sampling)
     val cExploration = Capsule(exploration, strain = true)
 
@@ -93,7 +92,7 @@ package object sensitivity {
     // the aggregation obviously is a Morris aggregation!
     // it collects all the specific inputs added from the sampling
     // to interpret the results
-    val aggregation = MorrisAggregation(verbose, space)
+    val aggregation = MorrisAggregation(space)
     val cAggregation = Capsule(aggregation)
     val sAggregation = Slot(cAggregation)
 
