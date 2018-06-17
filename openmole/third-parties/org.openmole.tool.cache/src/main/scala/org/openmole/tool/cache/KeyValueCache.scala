@@ -14,7 +14,7 @@ case class KeyValueCache() { self ⇒
 
   def getOrElseUpdate[T](key: CacheKey[T], fill: ⇒ T, close: T ⇒ Unit = (_: T) ⇒ {}): T = synchronized {
     def cached = {
-      val t = fill
+      val t: T = fill
       Cached(t, () ⇒ close(t))
     }
 

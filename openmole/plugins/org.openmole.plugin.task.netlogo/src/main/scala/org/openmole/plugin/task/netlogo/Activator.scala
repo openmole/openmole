@@ -36,6 +36,7 @@ class Activator extends PluginInfoActivator {
       Vector(
         Word("launchingCommands"),
         Word("netLogoInputs"),
+        Word("netLogoArrayInputs"),
         Word("netLogoOutputs"),
         Word("netLogoArrayOutputs"),
         Word("embedWorkspace")

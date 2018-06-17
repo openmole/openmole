@@ -69,7 +69,9 @@ class ExecutionPanel {
   val staticInfo: Var[Map[ExecutionId, StaticExecutionInfo]] = Var(Map())
   var envError: Var[Map[EnvironmentId, EnvironmentErrorData]] = Var(Map())
   val expanders: Var[Map[ExpandID, Expander]] = Var(Map())
-  val executionsDisplayedInBanner: Var[Seq[ExecutionId]] = Var(Seq())
+
+  val executionsDisplayedInBanner: Var[Set[ExecutionId]] = Var(Set())
+
   val timerOn = Var(false)
   val jobViews: Var[Map[ExecutionId, JobView]] = Var(Map())
 
@@ -103,7 +105,7 @@ class ExecutionPanel {
       updating.set(false)
       setTimeout(5000) {
         Tooltip.cleanAll
-        if (atLeastOneNotDisplayed) updateExecutionInfo
+        updateExecutionInfo
       }
     }
 
@@ -118,7 +120,7 @@ class ExecutionPanel {
     }
   }
 
-  def atLeastOneNotDisplayed = execInfo.now.executionInfos.exists { ex ⇒ !executionsDisplayedInBanner.now.contains(ex._1) }
+  //def atLeastOneNotDisplayed = execInfo.now.executionInfos.exists { ex ⇒ !executionsDisplayedInBanner.now.contains(ex._1) }
 
   def updateStaticInfos = post()[Api].staticInfos.call().foreach { s ⇒
     staticInfo() = s.toMap
@@ -178,7 +180,7 @@ class ExecutionPanel {
     s" $text"
   )
 
-  def hasBeenDisplayed(id: ExecutionId) = executionsDisplayedInBanner() = (executionsDisplayedInBanner.now :+ id).distinct
+  def hasBeenDisplayed(id: ExecutionId) = executionsDisplayedInBanner() = (executionsDisplayedInBanner.now + id)
 
   def addToBanner(id: ExecutionId, bannerMessage: BannerMessage) = {
     if (!executionsDisplayedInBanner.now.contains(id)) {
@@ -249,7 +251,13 @@ class ExecutionPanel {
                 case f: ExecutionInfo.Failed ⇒
                   addToBanner(id, BannerAlert.div(failedDiv(ex)).critical)
                   ex.getLink(executionInfo.state, errorID).render
-                case _ ⇒ tags.span(executionInfo.state).render
+                case _ ⇒
+                  executionInfo match {
+                    case executionInfo: ExecutionInfo.Finished if !executionInfo.clean ⇒ tags.span("cleaning").render
+                    case executionInfo: ExecutionInfo.Canceled if !executionInfo.clean ⇒ tags.span("cleaning").render
+                    case executionInfo: ExecutionInfo.Failed if !executionInfo.clean ⇒ tags.span("cleaning").render
+                    case _ ⇒ tags.span(executionInfo.state).render
+                  }
               })
             val outputLink = expander(id.id, ex ⇒ ex.getGlyph(glyph_list, "", outputStreamID, () ⇒ doScrolls))
 
@@ -373,6 +381,7 @@ class ExecutionPanel {
     }
     envError() = envError.now.filterNot { e ⇒ e._1.executionId == id }
     envErrorPanels() = envErrorPanels.now.filterNot { e ⇒ e._1.executionId == id }
+    executionsDisplayedInBanner() = executionsDisplayedInBanner.now - id
   }
 
   def clearEnvErrors(environmentId: EnvironmentId) =

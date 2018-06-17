@@ -33,6 +33,7 @@ import org.scalatest.junit._
 
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.dsl._
+import org.openmole.tool.random.RandomProvider
 
 class MoleExecutionSpec extends FlatSpec with Matchers {
 
@@ -40,7 +41,7 @@ class MoleExecutionSpec extends FlatSpec with Matchers {
 
   class JobGroupingBy2Test extends Grouping {
 
-    def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])]): MoleJobGroup = {
+    def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])])(implicit newGroup: NewGroup, randomProvider: RandomProvider): MoleJobGroup = {
       groups.find { case (_, g) ⇒ g.size < 2 } match {
         case Some((mg, _)) ⇒ mg
         case None          ⇒ MoleJobGroup()

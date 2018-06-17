@@ -83,7 +83,7 @@ class PriorityQueue[T](fifo: Boolean) {
     inQueue.release
   }
 
-  def dequeue = {
+  def dequeue() = {
     inQueue.acquire
     synchronized {
       val (p, q) = queues.last

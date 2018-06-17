@@ -44,20 +44,20 @@ object Menu {
               img(alt := "", src := Resource.img.mole.openmoleText.file, Seq(width := 240, paddingTop := 5, pointer))
             )
           ),
-          div(classIs(collapse ++ navbar_collapse), aria.expanded := false, paddingTop := 10, id := navId)(
+          div(classIs(collapse ++ navbar_collapse), aria.expanded := false, paddingTop := 20, id := navId)(
             ul(classIs(nav ++ navbar_nav ++ navbar_right))(
               (sitePage match {
                 case stepPage: StepPage ⇒
                   Seq(
-                    li(pageLinkButton("MODELS", DocumentationPages.model, false, Seq(classIs(btn ++ btn_default)))),
-                    li(pageLinkButton("METHODS", DocumentationPages.method, false, Seq(classIs(btn ++ btn_default)))),
-                    li(pageLinkButton("ENVIRONMENTS", DocumentationPages.environment, false, Seq(classIs(btn ++ btn_default))))(paddingRight := 100)
+                    li(pageLinkButton("RUN", DocumentationPages.run, false, Seq(classIs(btn ++ btn_default))))(paddingTop := 10),
+                    li(pageLinkButton("EXPLORE", DocumentationPages.explore, false, Seq(classIs(btn ++ btn_default))))(paddingTop := 10),
+                    li(pageLinkButton("SCALE", DocumentationPages.scale, false, Seq(classIs(btn ++ btn_default))))(paddingRight := 80)(paddingTop := 10)
                   )
                 case _ ⇒ Seq(li)
               }),
-              li(innerLink(DocumentationPages.docSiteMap, "DOC"), liStyle),
-              li(outerLink("DEMO", shared.link.demo), liStyle),
-              li(outerLink("FORUM", shared.link.mailingList), liStyle),
+              li(innerLink(DocumentationPages.documentationHead, "DOCUMENTATION"), liStyle),
+              li(innerLink(DocumentationPages.tutorials, "TUTORIALS"), liStyle),
+              li(innerLink(DocumentationPages.OMcommunity, "COMMUNITY"), liStyle),
               li(divLinkButton(div(maxWidth := 140)(span("DOWNLOAD"), span(version.value, fontSize := "10px", paddingLeft := 7)), Resource.script.openmole.file, classIs(btn ++ btn_primary))),
               li(inputStyle)(img(id := shared.searchImg, src := Resource.img.menu.search.file, Seq(width := 35, paddingTop := 5, paddingLeft := 10, pointer)))(
                 div(id := shared.searchDiv)

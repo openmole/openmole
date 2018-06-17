@@ -25,12 +25,13 @@ import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.tools.service.OS
-import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.dsl.{ File, _ }
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.InputOutputCheck
 import org.openmole.core.workspace.NewFile
 import org.openmole.tool.random._
 import org.openmole.core.workflow.validation._
+import shapeless.TypeCase
 
 object External {
   val PWD = Val[String]("PWD")
@@ -73,19 +74,6 @@ object External {
 
   case class DeployedFile(file: File, expandedUserPath: String, link: Boolean, deployedFileType: DeployedFileType)
   type PathResolver = String ⇒ File
-
-  def withWorkDir[T](executionContext: TaskExecutionContext)(f: File ⇒ T): T = {
-    val tmpDir = executionContext.tmpDirectory.newDir("externalTask")
-    val res =
-      try f(tmpDir)
-      catch {
-        case e: Throwable ⇒
-          tmpDir.recursiveDelete
-          throw e
-      }
-    tmpDir.delete
-    res
-  }
 
   def validate(external: External)(inputs: Seq[Val[_]]) = Validate { p ⇒
     def resourceExists(resource: External.Resource) =
@@ -203,7 +191,12 @@ object External {
     InputOutputCheck.filterOutput(outputs, context).values.filter { v ⇒ v.prototype.`type` == ValType[File] }.map(_.asInstanceOf[Variable[File]]).toSeq
 
   def fetchOutputFiles(external: External, outputs: PrototypeSet, context: Context, resolver: PathResolver, workDirectory: File)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): Context = {
-    context ++ listOutputFiles(external.outputFiles, outputs, context, resolver, workDirectory)
+    val resultContext = listOutputFiles(external.outputFiles, outputs, context, resolver, workDirectory)
+    val resultDirectory = newFile.newDir("externalresult")
+    val outputContext = context ++ resultContext
+    val result = outputContext ++ moveFilesOutOfWorkDirectory(outputs, outputContext, workDirectory, resultDirectory)
+    fileService.deleteWhenEmpty(resultDirectory)
+    result
   }
 
   def listOutputFiles(outputFiles: Vector[External.OutputFile], outputs: PrototypeSet, context: Context, resolver: PathResolver, workDirectory: File)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): Vector[Variable[File]] = {
@@ -215,25 +208,30 @@ object External {
       if !f.value.exists
     } throw new UserBadDataError("Output file " + f.value.getAbsolutePath + s" (stored in variable ${f.prototype}) doesn't exist, parent directory ${f.value.getParentFileSafe} contains [" + f.value.getParentFileSafe.listFilesSafe.map(_.getName).mkString(", ") + "]")
 
-    // If the file path contains a symbolic link, the link might be deleted by the cleaning operation
+    // If the file path contains a symbolic link, the link will be deleted by the cleaning operation
     val fetchedOutputFiles =
-      allFiles.map { v ⇒
-        if (workDirectory.isAParentOf(v.value)) Variable.copy(v)(value = v.value.realFile) else v
-      }
+      allFiles.map { v ⇒ if (workDirectory.isAParentOf(v.value)) Variable.copy(v)(value = v.value.realFile) else v }
 
     fetchedOutputFiles
   }
 
-  def cleanWorkDirectory(outputs: PrototypeSet, context: Context, workDirectory: File)(implicit fileService: FileService) = {
-    val ctxFiles = contextFiles(outputs, context).map(_.value)
+  def moveFilesOutOfWorkDirectory(outputs: PrototypeSet, context: Context, workDirectory: File, resultDirectory: File)(implicit fileService: FileService) = {
+    val newFile = NewFile(resultDirectory)
 
-    for {
-      f ← ctxFiles
-      if workDirectory.isAParentOf(f)
-    } fileService.deleteWhenGarbageCollected(f)
-
-    workDirectory.applyRecursive(f ⇒ f.delete, ctxFiles)
-    workDirectory.applyRecursive(f ⇒ if (f.isDirectory) fileService.deleteWhenEmpty(f), ctxFiles)
+    contextFiles(outputs, context).map { v ⇒
+      val movedFile =
+        if (workDirectory.isAParentOf(v.value)) {
+          val newDir = newFile.newDir("outputFile")
+          newDir.mkdirs()
+          val moved = newDir / v.value.getName
+          v.value.move(moved)
+          fileService.deleteWhenEmpty(newDir)
+          fileService.deleteWhenGarbageCollected(moved)
+          moved
+        }
+        else v.value
+      Variable.copy(v)(value = movedFile)
+    }
   }
 
 }
@@ -245,18 +243,4 @@ import org.openmole.plugin.task.external.External._
   inputFiles:      Vector[External.InputFile]      = Vector.empty,
   outputFiles:     Vector[External.OutputFile]     = Vector.empty,
   resources:       Vector[External.Resource]       = Vector.empty
-) {
-
-  @deprecated("Use function in External object", "8")
-  def prepareInputFiles(context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService) =
-    External.deployInputFilesAndResources(this, context, resolver)
-
-  @deprecated("Use function in External object", "8")
-  def fetchOutputFiles(outputs: PrototypeSet, context: Context, resolver: PathResolver, workDirectory: File)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): Context =
-    External.fetchOutputFiles(this, outputs, context, resolver, workDirectory)
-
-  @deprecated("Use function in External object", "8")
-  def cleanWorkDirectory(outputs: PrototypeSet, context: Context, workDirectory: File)(implicit fileService: FileService) =
-    External.cleanWorkDirectory(outputs, context, workDirectory)
-
-}
+)
