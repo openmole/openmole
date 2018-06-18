@@ -25,7 +25,7 @@ package object json {
     import org.json4s._
     import shapeless._
 
-    def cannotConvert = throw new UserBadDataError(s"Can not convert value of type $jValue to Int for OpenMOLE variable $v.")
+    def cannotConvert = throw new UserBadDataError(s"Can not fetch value of type $jValue to OpenMOLE variable $v")
 
     def jValueToInt(jv: JValue) =
       jv match {

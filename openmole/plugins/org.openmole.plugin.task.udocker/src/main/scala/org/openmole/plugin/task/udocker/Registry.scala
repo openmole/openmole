@@ -2,7 +2,7 @@ package org.openmole.plugin.task.udocker
 
 import java.io._
 
-import org.apache.http.{ HttpResponse, HttpHost }
+import org.apache.http.{ HttpHost, HttpResponse }
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.{ HttpClients, LaxRedirectStrategy }
@@ -13,15 +13,17 @@ import io.circe.jawn.decode
 import io.circe.parser._
 import squants.time._
 import cats.implicits._
+import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workspace.NewFile
 import org.openmole.tool.stream._
-import org.openmole.tool.file.{ File ⇒ OMFile, FileDecorator }
+import org.openmole.tool.file.{ FileDecorator, File ⇒ OMFile }
 import org.openmole.core.networkservice._
 import org.openmole.core.services._
 
 object Registry {
 
-  def content(response: HttpResponse) = scala.io.Source.fromInputStream(response.getEntity.getContent).mkString
+  def content(response: HttpResponse) =
+    scala.io.Source.fromInputStream(response.getEntity.getContent).mkString
 
   object HTTP {
     def builder = HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).setRedirectStrategy(new LaxRedirectStrategy)
@@ -110,6 +112,10 @@ object Registry {
   def downloadManifest(image: DockerImage, timeout: Time)(implicit networkService: NetworkService): String = {
     val url = s"${baseURL(image)}/manifests/${image.tag}"
     val httpResponse = client(networkService).execute(Token.withToken(url, timeout))
+
+    if (httpResponse.getStatusLine.getStatusCode >= 300)
+      throw new UserBadDataError(s"Docker registry responded with $httpResponse to query of image $image")
+
     content(httpResponse)
   }
 
