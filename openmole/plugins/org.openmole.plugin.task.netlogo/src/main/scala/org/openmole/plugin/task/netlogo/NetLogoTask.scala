@@ -21,9 +21,8 @@ import java.util.AbstractCollection
 import java.lang.Class
 
 import scala.reflect.ClassTag
-
 import org.openmole.core.context.{ Context, Val, Variable }
-import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion._
 import org.openmole.core.tools.io.Prettifier._
 import org.openmole.core.workflow.dsl._
@@ -45,6 +44,7 @@ object NetLogoTask {
   def wrapError[T](msg: String)(f: ⇒ T): T =
     try f
     catch {
+      case e: InternalProcessingError ⇒ throw e
       case e: Throwable ⇒
         throw new UserBadDataError(s"$msg:\n" + e.stackStringWithMargin)
     }
@@ -225,6 +225,7 @@ trait NetLogoTask extends Task with ValidateTask {
           case (name, prototype) ⇒
             try {
               val outputValue = NetLogoTask.report(instance.netLogo, name)
+              if (outputValue == null) throw new InternalProcessingError(s"Value of netlogo output $name has been reported as null by netlogo")
               if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Val[Any]], outputValue)
               else {
                 val netLogoCollection = outputValue.asInstanceOf[AbstractCollection[Any]]
