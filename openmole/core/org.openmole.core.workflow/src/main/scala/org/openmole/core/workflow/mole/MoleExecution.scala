@@ -541,16 +541,18 @@ object MoleExecutionMessage {
   def dispatch(moleExecution: MoleExecution, msg: MoleExecutionMessage) = moleExecution.synchronized {
     try {
       msg match {
-        case msg: PerformTransition if !moleExecution._canceled ⇒
-          val state = moleExecution.subMoleExecutions(msg.subMoleExecution)
-          if (!state.canceled) msg.operation(state)
-          MoleExecution.checkIfSubMoleIsFinished(state)
-        case msg: JobFinished if !moleExecution._canceled           ⇒ processJobFinished(moleExecution, msg)
-        case msg: WithMoleExecutionSate if !moleExecution._canceled ⇒ msg.operation(moleExecution)
-        case msg: StartMoleExecution if !moleExecution._canceled    ⇒ MoleExecution.start(moleExecution, msg.context)
-        case msg: CancelMoleExecution if !moleExecution._canceled   ⇒ MoleExecution.cancel(moleExecution, None)
-        case msg: RegisterJob if !moleExecution._canceled           ⇒ msg.subMoleExecution.jobs.put(msg.job, msg.capsule)
-        case msg: CleanMoleExcution                                 ⇒ MoleExecution.clean(moleExecution)
+        case msg: PerformTransition ⇒
+          if (!moleExecution._canceled) {
+            val state = moleExecution.subMoleExecutions(msg.subMoleExecution)
+            if (!state.canceled) msg.operation(state)
+            MoleExecution.checkIfSubMoleIsFinished(state)
+          }
+        case msg: JobFinished           ⇒ if (!moleExecution._canceled) processJobFinished(moleExecution, msg)
+        case msg: WithMoleExecutionSate ⇒ if (!moleExecution._canceled) msg.operation(moleExecution)
+        case msg: StartMoleExecution    ⇒ if (!moleExecution._canceled) MoleExecution.start(moleExecution, msg.context)
+        case msg: CancelMoleExecution   ⇒ if (!moleExecution._canceled) MoleExecution.cancel(moleExecution, None)
+        case msg: RegisterJob           ⇒ if (!moleExecution._canceled) msg.subMoleExecution.jobs.put(msg.job, msg.capsule)
+        case msg: CleanMoleExcution     ⇒ MoleExecution.clean(moleExecution)
       }
     }
     catch {
