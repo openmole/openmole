@@ -13,7 +13,7 @@ Scilab is a scripted language initially designed for numerical computation.
 
 @linuxOnly("ScilabTask")
 
-@h2{Simlpe ScilabTask}
+@h2{Simple ScilabTask}
 
 Here is a dummy workflow multiplying a vector @i{dArray} by @i{i} using a @i{ScilabTask}:
 
