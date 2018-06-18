@@ -38,31 +38,31 @@ object ScilabTask {
     override def workDirectory = ScilabTask.uDocker composeLens UDockerArguments.workDirectory
   }
 
-//  sealed trait InstallCommand
-//  object InstallCommand {
-//    case class ScilabLibrary(name: String) extends InstallCommand
-//
-//        def toCommand(installCommands: InstallCommand) =
-//          installCommands match {
-//            case ScilabLibrary(name) ⇒
-//              //Vector(s"""R -e 'install.packages(c(${names.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'""")
-//              s"""R --slave -e 'install.packages(c("$name"), dependencies = T); library("$name")'"""
-//                 }
-//
-//        implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name, None)
-//        implicit def stringCoupleToRLibrary(couple: (String, Option[String])): InstallCommand = RLibrary(couple._1, couple._2)
-//        def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommand.toCommand)
-//
-//  }
+  //  sealed trait InstallCommand
+  //  object InstallCommand {
+  //    case class ScilabLibrary(name: String) extends InstallCommand
+  //
+  //        def toCommand(installCommands: InstallCommand) =
+  //          installCommands match {
+  //            case ScilabLibrary(name) ⇒
+  //              //Vector(s"""R -e 'install.packages(c(${names.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'""")
+  //              s"""R --slave -e 'install.packages(c("$name"), dependencies = T); library("$name")'"""
+  //                 }
+  //
+  //        implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name, None)
+  //        implicit def stringCoupleToRLibrary(couple: (String, Option[String])): InstallCommand = RLibrary(couple._1, couple._2)
+  //        def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommand.toCommand)
+  //
+  //  }
 
   def scilabImage(version: String) = DockerImage("openmole/scilab", version)
 
   def apply(
-    script:      FromContext[String],
+    script: FromContext[String],
     //install:     Seq[String]         = Seq.empty,
     //libraries:   Seq[InstallCommand] = Seq.empty,
-    forceUpdate: Boolean             = false,
-    version:     String              = "6.0.1")(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): ScilabTask = {
+    forceUpdate: Boolean = false,
+    version:     String  = "6.0.1")(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): ScilabTask = {
 
     //    // add additional installation of devtools only if needed
     //    val installCommands =
