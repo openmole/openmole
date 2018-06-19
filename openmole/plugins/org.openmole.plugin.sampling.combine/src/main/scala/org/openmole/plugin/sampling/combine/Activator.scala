@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.pluginmanager._
+import org.openmole.core.pluginmanager.{ KeyWord, _ }
 import org.openmole.core.preference.ConfigurationInfo
 import org.osgi.framework.BundleContext
 
@@ -40,7 +40,19 @@ class Activator extends PluginInfoActivator {
         Sampling(classOf[ShuffleSampling]),
         Sampling(classOf[TakeSampling]),
         Sampling(classOf[ZipWithIndexSampling]),
-        Sampling(classOf[ZipWithNameSampling[_, _]])
+        Sampling(classOf[ZipWithNameSampling[_, _]]),
+        KeyWord("zip"),
+        KeyWord("x"),
+        KeyWord("::"),
+        KeyWord("withIndex"),
+        KeyWord("sample"),
+        KeyWord("repeat"),
+        KeyWord("bootstrap"),
+        KeyWord("shuffle"),
+        KeyWord("repeat"),
+        KeyWord("take"),
+        KeyWord("filter"),
+        KeyWord("withName")
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
