@@ -42,8 +42,6 @@ class Activator extends PluginInfoActivator {
         Sampling(classOf[ZipWithIndexSampling]),
         Sampling(classOf[ZipWithNameSampling[_, _]]),
         "zip",
-        "x",
-        "::",
         "withIndex",
         "sample",
         "repeat",
