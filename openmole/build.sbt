@@ -872,7 +872,7 @@ lazy val marketIndex = Project("marketindex", binDir / "org.openmole.marketindex
     val runner = git.runner.value
     val dir = baseDirectory.value / "src/main/resources/openmole-market"
     val marketBranch = defineMarketBranch.value
-    runner.updated("https://github.com/openmole/openmole-market.git", marketBranch, dir, ConsoleLogger())
+    runner.updated("https://gitlab.iscpif.fr/openmole/market.git", marketBranch, dir, ConsoleLogger())
   }
 ) dependsOn(buildinfo, openmoleFile, openmoleTar, market)
 
