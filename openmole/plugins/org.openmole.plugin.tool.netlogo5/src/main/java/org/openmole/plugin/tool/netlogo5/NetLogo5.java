@@ -59,6 +59,9 @@ public class NetLogo5 implements NetLogo {
 
     @Override
     public Object report(String variable) throws Exception {
+        /*Object result = getWorkspace().report(variable);
+        if(result instanceof LogoList){return(listToArray((LogoList) result));}
+        else{return result;}*/
         return getWorkspace().report(variable);
     }
 
@@ -114,5 +117,22 @@ public class NetLogo5 implements NetLogo {
         }
         return(list.toLogoList());
     }
+
+    /**
+     * Converts a LogoList to an array
+     * @param list
+     * @return
+     */
+    public static Object[] listToArray(LogoList list){
+        Object[] array = new Object[list.size()];
+        int i=0;
+        for(Object o :list){
+            if(o instanceof LogoList){array[i]=listToArray((LogoList) o);}
+            else{array[i]=o;}
+            i++;
+        }
+        return(array);
+    }
+
 
 }

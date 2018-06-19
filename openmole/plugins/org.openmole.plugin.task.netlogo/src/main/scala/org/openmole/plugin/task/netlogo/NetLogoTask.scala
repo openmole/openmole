@@ -21,7 +21,7 @@ import java.util.AbstractCollection
 import java.lang.Class
 
 import scala.reflect.ClassTag
-import org.openmole.core.context.{ Context, Val, Variable }
+import org.openmole.core.context.{ Context, Val, ValType, Variable }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion._
 import org.openmole.core.tools.io.Prettifier._
@@ -32,6 +32,9 @@ import org.openmole.core.workspace.NewFile
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.tool.netlogo.NetLogo
 import org.openmole.tool.cache._
+
+import scala.annotation.tailrec
+import scala.collection.mutable.ArrayBuffer
 
 object NetLogoTask {
   sealed trait Workspace
@@ -149,16 +152,60 @@ object NetLogoTask {
   }
 
   def netLogoArrayToVariable(netlogoCollection: AbstractCollection[Any], prototype: Val[_]) = {
-    val arrayType = prototype.`type`.runtimeClass.getComponentType
-    val array = java.lang.reflect.Array.newInstance(arrayType, netlogoCollection.size)
-    val it = netlogoCollection.iterator
-    for (i ← 0 until netlogoCollection.size) {
-      val v = it.next
-      try java.lang.reflect.Array.set(array, i, v)
-      catch {
-        case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when adding a variable of type ${v.getClass} in an array of ${arrayType}")
+    //val arrayType = prototype.`type`.runtimeClass.asInstanceOf[Class[_]].getComponentType
+    val (multiArrayType, depth): (ValType[_], Int) = ValType.unArrayify(prototype.`type`)
+
+    // recurse to get sizes, Nested LogoLists assumed rectangular : size of first element is taken for each dimension
+    // will fail if the depth of the prototype is not the depth of the LogoList
+    @tailrec def getdims(collection: AbstractCollection[Any], dims: Seq[Int], maxdepth: Int): Seq[Int] = {
+      maxdepth match {
+        case d if d == 1 ⇒ (dims ++ Seq(collection.size()))
+        case _           ⇒ getdims(collection.iterator().next().asInstanceOf[AbstractCollection[Any]], dims ++ Seq(collection.size()), maxdepth - 1)
       }
     }
+    /*
+    var dims: Seq[Int] = Seq.empty
+    try {
+      dims = getdims(netlogoCollection, Seq.empty, depth)
+    }
+    catch {
+      case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when mapping a prototype array of depth ${depth} and type ${multiArrayType} with nested LogoLists")
+    }
+    */
+    val dims = getdims(netlogoCollection, Seq.empty, depth)
+
+    // create multi array
+    val array = java.lang.reflect.Array.newInstance(multiArrayType.runtimeClass.getComponentType, 2, 2) //dims: _*)
+
+    // recurse in the multi array
+    def setMultiArray(collection: AbstractCollection[Any], currentArray: java.lang.reflect.Array, maxdepth: Int): Unit = {
+      val it = collection.iterator()
+      for (i ← 0 until collection.size) {
+        val v = it.next
+        maxdepth match {
+          case d if d == 1 ⇒ {
+            try {
+              java.lang.reflect.Array.set(currentArray, i, v)
+            }
+            catch {
+              case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when adding a variable of type ${v.getClass} in an array of type ${multiArrayType}")
+            }
+          }
+          case _ ⇒ {
+            try {
+              setMultiArray(v.asInstanceOf[AbstractCollection[Any]], java.lang.reflect.Array.get(currentArray, i).asInstanceOf[java.lang.reflect.Array], maxdepth - 1)
+            }
+            catch {
+              case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when recursing at depth ${maxdepth} in a multi array of type ${multiArrayType}")
+            }
+          }
+        }
+      }
+    }
+
+    setMultiArray(netlogoCollection, array.asInstanceOf[java.lang.reflect.Array], depth)
+
+    // return Variable
     Variable(prototype.asInstanceOf[Val[Any]], array)
   }
 
