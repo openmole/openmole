@@ -39,10 +39,16 @@ object UserGuide {
       line
     )
 
-  def headerModel(model: String) = header(span(
-    tools.to(DocumentationPages.run)(img(src := Resource.img.model.codeAnimated.file, headerImg)),
-    span(s"Run your own $model model", h1Like)
-  ))
+  def headerModel(model: String) = model match {
+    case "Run" ⇒ header(span(
+      tools.to(DocumentationPages.run)(img(src := Resource.img.model.codeAnimated.file, headerImg)),
+      span(s"Run your model", h1Like)
+    ))
+    case _ ⇒ header(span(
+      tools.to(DocumentationPages.explore)(img(src := Resource.img.model.codeAnimated.file, headerImg)),
+      span(s"Run your own $model model", h1Like)
+    ))
+  }
 
   def headerMethod(method: String) = method match {
     case "Explore" ⇒ header(span(
@@ -54,6 +60,7 @@ object UserGuide {
       span(s"Explore with $method", h1Like)
     ))
   }
+
   def headerEnvironment(env: String) = env match {
     case "Scale" ⇒ header(span(
       tools.to(DocumentationPages.scale)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
@@ -74,9 +81,9 @@ object UserGuide {
     val currentStep = {
       if (DocumentationPages.docPages.contains(current)) {
         if ((DocumentationPages.runPages :+ DocumentationPages.run).contains(current)) {
-          val name = if (current == firstModel) "" else current.name
+          // val name = if (current == firstModel) "" else current.name
           StepPage(
-            headerModel(name),
+            headerModel(current.name),
             div(current.content),
             SideMenu.left(SideMenu.run),
             SideMenu.right(SideMenu.more.insert(current.details)),
@@ -91,13 +98,15 @@ object UserGuide {
             SideMenu.right(SideMenu.more.insert(current.details)),
             firstMethod, firstModel, firstEnvironment
           )
-        else StepPage(
-          headerEnvironment(current.name),
-          div(current.content),
-          SideMenu.left(SideMenu.scale),
-          SideMenu.right(SideMenu.more.insert(current.details)),
-          firstEnvironment, firstMethod, firstModel
-        )
+        else if ((DocumentationPages.runPages :+ DocumentationPages.run).contains(current))
+          StepPage(
+            headerEnvironment(current.name),
+            div(current.content),
+            SideMenu.left(SideMenu.scale),
+            SideMenu.right(SideMenu.more.insert(current.details)),
+            firstEnvironment, firstMethod, firstModel
+          )
+        else ContentPage(div(paddingTop := 100), div(current.content))
       }
       else ContentPage(div(paddingTop := 100), div(current.content))
     }
