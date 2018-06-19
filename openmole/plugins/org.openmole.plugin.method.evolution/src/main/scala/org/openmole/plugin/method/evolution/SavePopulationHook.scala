@@ -22,34 +22,47 @@ import org.openmole.core.expansion._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.context._
 import monocle.macros._
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation._
+import org.openmole.core.workspace.NewFile
 import org.openmole.tool.file._
+import org.openmole.tool.random.RandomProvider
 
 object SavePopulationHook {
 
-  def resultVariables[T](algorithm: T, context: Context)(implicit wfi: WorkflowIntegration[T]) = {
+  def resultVariables[T](algorithm: T, context: Context)(implicit wfi: WorkflowIntegration[T], randomProvider: RandomProvider, newFile: NewFile, fileService: FileService) = {
     val t = wfi(algorithm)
     context.variable(t.generationPrototype).toSeq ++ t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype)).from(context)
   }
 
-  def apply[T](algorithm: T, dir: FromContext[File])(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def apply[T](algorithm: T, dir: FromContext[File], frequency: OptionalArgument[Int] = None)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
     val t = wfi(algorithm)
 
     FromContextHook("SavePopulationHook") { p ⇒
       import p._
 
-      val resultFileLocation = dir / ExpandedString("population${" + t.generationPrototype.name + "}.csv")
+      def save =
+        frequency.option match {
+          case None ⇒ true
+          case Some(f) ⇒
+            val generation = context(t.generationPrototype)
+            (generation % f) == 0
+        }
 
-      import org.openmole.plugin.tool.csv._
+      if (save) {
+        val resultFileLocation = dir / ExpandedString("population${" + t.generationPrototype.name + "}.csv")
 
-      writeVariablesToCSV(
-        resultFileLocation.from(context),
-        resultVariables(algorithm, context).map(_.prototype.array),
-        resultVariables(algorithm, context),
-        overwrite = true
-      )
+        import org.openmole.plugin.tool.csv._
+
+        writeVariablesToCSV(
+          resultFileLocation.from(context),
+          resultVariables(algorithm, context).map(_.prototype.array),
+          resultVariables(algorithm, context),
+          overwrite = true
+        )
+      }
 
       context
     } set (inputs += (t.populationPrototype, t.statePrototype))
