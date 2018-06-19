@@ -41,18 +41,18 @@ class Activator extends PluginInfoActivator {
         Sampling(classOf[TakeSampling]),
         Sampling(classOf[ZipWithIndexSampling]),
         Sampling(classOf[ZipWithNameSampling[_, _]]),
-        KeyWord("zip"),
-        KeyWord("x"),
-        KeyWord("::"),
-        KeyWord("withIndex"),
-        KeyWord("sample"),
-        KeyWord("repeat"),
-        KeyWord("bootstrap"),
-        KeyWord("shuffle"),
-        KeyWord("repeat"),
-        KeyWord("take"),
-        KeyWord("filter"),
-        KeyWord("withName")
+        "zip",
+        "x",
+        "::",
+        "withIndex",
+        "sample",
+        "repeat",
+        "bootstrap",
+        "shuffle",
+        "repeat",
+        "take",
+        "filter",
+        "withName"
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
