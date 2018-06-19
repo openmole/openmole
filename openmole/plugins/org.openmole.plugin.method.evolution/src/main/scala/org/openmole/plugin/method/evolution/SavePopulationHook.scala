@@ -37,7 +37,7 @@ object SavePopulationHook {
     context.variable(t.generationPrototype).toSeq ++ t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype)).from(context)
   }
 
-  def apply[T](algorithm: T, dir: FromContext[File], frequency: OptionalArgument[Int] = None)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def apply[T](algorithm: T, dir: FromContext[File], frequency: OptionalArgument[Long] = None)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
     val t = wfi(algorithm)
 
     FromContextHook("SavePopulationHook") { p ⇒
