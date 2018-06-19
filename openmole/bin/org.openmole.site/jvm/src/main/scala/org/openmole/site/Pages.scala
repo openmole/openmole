@@ -135,20 +135,18 @@ object DocumentationPages {
 
   //var marketEntries: Seq[GeneratedMarketEntry] = Seq()
 
-  def allPages = Vector[DocumentationPage](siteMap) ++ headPages ++ docPages ++ tutoPages ++ communityPages ++ downloadPages
+  def allPages = headPages ++ docPages ++ tutoPages ++ communityPages ++ downloadPages
 
   // Definir un groupe de pages
   // def groupPages = Seq(...)
   // Definir chaque page du groupe
   // lazy val pageName = DocumentationPage.fromScalatex(name = "html title", content = scalatex.path.to.scalatexFile, title = Some("Titre onglet"))
 
-  lazy val siteMap = DocumentationPage.fromScalatex(name = "Site Map", content = scalatex.SiteMap)
-
   def headPages =
-    Seq(documentationHead, run, explore, scale, language, advanced, advancedConcepts, developers, tutorials, OMcommunity)
+    Seq(documentation, run, explore, scale, language, advanced, advancedConcepts, developers, tutorials, OMcommunity)
 
   // Documentation
-  lazy val documentationHead = DocumentationPage.fromScalatex(name = "Documentation", content = scalatex.DocumentationHead)
+  lazy val documentation = DocumentationPage.fromScalatex(name = "Documentation", content = scalatex.Documentation)
 
   def docPages =
     runPages ++

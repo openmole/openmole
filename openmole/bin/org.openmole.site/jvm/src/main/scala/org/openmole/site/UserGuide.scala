@@ -22,6 +22,7 @@ import stylesheet._
 import scalatags.Text.all._
 import SideMenu._
 import org.openmole.site.tools.classIs
+import tools._
 
 import scalatags.Text.TypedTag
 
@@ -75,43 +76,36 @@ object UserGuide {
     paddingRight := 15
   )
 
-  DocumentationPages.dataProcessing
-  def currentStep(current: Page): SitePage = {
-
-    val currentStep = {
-      if (DocumentationPages.docPages.contains(current)) {
-        if ((DocumentationPages.runPages :+ DocumentationPages.run).contains(current)) {
-          // val name = if (current == firstModel) "" else current.name
-          StepPage(
-            headerModel(current.name),
-            div(current.content),
-            SideMenu.left(SideMenu.run),
-            SideMenu.right(SideMenu.more.insert(current.details)),
-            firstModel, firstEnvironment, firstMethod
-          )
-        }
-        else if ((DocumentationPages.explorePages :+ DocumentationPages.explore).contains(current))
-          StepPage(
-            headerMethod(current.name),
-            div(current.content),
-            SideMenu.left(SideMenu.explore),
-            SideMenu.right(SideMenu.more.insert(current.details)),
-            firstMethod, firstModel, firstEnvironment
-          )
-        else if ((DocumentationPages.runPages :+ DocumentationPages.run).contains(current))
-          StepPage(
-            headerEnvironment(current.name),
-            div(current.content),
-            SideMenu.left(SideMenu.scale),
-            SideMenu.right(SideMenu.more.insert(current.details)),
-            firstEnvironment, firstMethod, firstModel
-          )
-        else ContentPage(div(paddingTop := 100), div(current.content))
-      }
-      else ContentPage(div(paddingTop := 100), div(current.content))
+  def integrate(current: Page): SitePage =
+    current match {
+      case p if (DocumentationPages.runPages :+ DocumentationPages.run).contains(p) ⇒
+        IntegratedPage(
+          headerModel(current.name),
+          div(current.content),
+          SideMenu.left(SideMenu.run),
+          Some(SideMenu.right(SideMenu.more.insert(current.details)))
+        )
+      case p if ((DocumentationPages.explorePages :+ DocumentationPages.explore).contains(p)) ⇒
+        IntegratedPage(
+          headerMethod(current.name),
+          div(current.content),
+          SideMenu.left(SideMenu.explore),
+          Some(SideMenu.right(SideMenu.more.insert(current.details)))
+        )
+      case p if ((DocumentationPages.runPages :+ DocumentationPages.run).contains(p)) ⇒
+        IntegratedPage(
+          headerEnvironment(current.name),
+          div(current.content),
+          SideMenu.left(SideMenu.scale),
+          Some(SideMenu.right(SideMenu.more.insert(current.details)))
+        )
+      case _ ⇒
+        IntegratedPage(
+          div(paddingTop := 100),
+          div(current.content),
+          SideMenu.left(SideMenu(Seq.empty, classIs(btn ++ btn_primary))),
+          None
+        )
     }
-
-    currentStep
-  }
 
 }

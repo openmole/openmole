@@ -71,9 +71,7 @@ object SideMenu {
     SideMenu(preText = title, links = stringMenus.map { a ⇒ Link(a, Link.intern(a)) })
 
   val run = SideMenu(DocumentationPages.runPages, classIs(btn ++ btn_primary), "Available tasks")
-
   val explore = SideMenu(DocumentationPages.explorePages, classIs(btn ++ btn_primary), "Available methods")
-
   val scale = SideMenu(DocumentationPages.scalePages, classIs(btn ++ btn_primary), "Available environments")
 
   val more = SideMenu(
@@ -83,7 +81,7 @@ object SideMenu {
       DocumentationPages.scale,
       DocumentationPages.language,
       DocumentationPages.gui,
-      DocumentationPages.siteMap
+      DocumentationPages.documentation
     ),
     classIs(btn ++ btn_default),
     "See also"

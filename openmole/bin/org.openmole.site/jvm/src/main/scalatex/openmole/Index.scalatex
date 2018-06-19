@@ -46,9 +46,7 @@
 @br
   When you are ready you can then download OpenMOLE and install it on your computer, everything is explained in the @a("Download", href := install.file) section.
 @br
-  Have a look at the @a("Getting Started", href := stepByStepIntro.file) section, check out the @a("GUI guide", href := gui.file), dive into the @a("documentation", href := documentationHead.file), and lastly explore some @a("advanced concepts", href := advancedConcepts.file).
-@br
-  There is also a full @a("site map", href := siteMap.file) to see all the resources on the website.
+  Have a look at the @a("Getting Started", href := stepByStepIntro.file) section, check out the @a("GUI guide", href := gui.file), dive into the @a("documentation", href := documentation.file), and lastly explore some @a("advanced concepts", href := advancedConcepts.file).
 }
 
 @div(stylesheet.centerJustify(100), id := shared.newsPosts)

@@ -46,7 +46,7 @@ object Menu {
           ),
           div(classIs(collapse ++ navbar_collapse), aria.expanded := false, paddingTop := 20, id := navId)(
             ul(classIs(nav ++ navbar_nav ++ navbar_right))(
-              li(innerLink(DocumentationPages.documentationHead, "DOCUMENTATION"), liStyle),
+              li(innerLink(DocumentationPages.documentation, "DOCUMENTATION"), liStyle),
               li(innerLink(DocumentationPages.tutorials, "TUTORIALS"), liStyle),
               li(innerLink(DocumentationPages.OMcommunity, "COMMUNITY"), liStyle),
               li(marginTop := -8, marginBottom := 8, divLinkButton(div(maxWidth := 140)(span("DOWNLOAD"), span(version.value, fontSize := "10px", paddingLeft := 7)), Resource.script.openmole.file, classIs(btn ++ btn_primary))),

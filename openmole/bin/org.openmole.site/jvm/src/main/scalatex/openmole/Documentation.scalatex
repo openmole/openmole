@@ -2,9 +2,8 @@
 @import org.openmole.site._
 @import DocumentationPages._
 
-@h1{Doc Site Map}
 
-@h2{@a("Documentation", href := documentationHead.file, style := "color:#a6bf26")}
+@h1(style := "color:#a6bf26", "Documentation")
 
 @ol(style := "list-style-type: upper-roman")
   @li
