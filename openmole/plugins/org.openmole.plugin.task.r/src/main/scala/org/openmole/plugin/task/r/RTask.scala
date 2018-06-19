@@ -66,11 +66,8 @@ object RTask {
     install:     Seq[String]         = Seq.empty,
     libraries:   Seq[InstallCommand] = Seq.empty,
     forceUpdate: Boolean             = false,
-    rVersion:    String              = "3.3.3"
+    version:     String              = "3.3.3"
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): RTask = {
-
-    //def version = "3.3.3"
-    def version = rVersion
 
     // add additional installation of devtools only if needed
     val installCommands =

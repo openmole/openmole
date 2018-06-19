@@ -135,20 +135,18 @@ object DocumentationPages {
 
   //var marketEntries: Seq[GeneratedMarketEntry] = Seq()
 
-  def allPages = Vector[DocumentationPage](siteMap) ++ headPages ++ docPages ++ tutoPages ++ communityPages ++ downloadPages
+  def allPages = headPages ++ docPages ++ tutoPages ++ communityPages ++ downloadPages
 
   // Definir un groupe de pages
   // def groupPages = Seq(...)
   // Definir chaque page du groupe
   // lazy val pageName = DocumentationPage.fromScalatex(name = "html title", content = scalatex.path.to.scalatexFile, title = Some("Titre onglet"))
 
-  lazy val siteMap = DocumentationPage.fromScalatex(name = "Site Map", content = scalatex.SiteMap)
-
   def headPages =
-    Seq(documentationHead, run, explore, scale, language, advanced, advancedConcepts, developers, tutorials, OMcommunity)
+    Seq(documentation, run, explore, scale, language, advanced, advancedConcepts, developers, tutorials, OMcommunity)
 
   // Documentation
-  lazy val documentationHead = DocumentationPage.fromScalatex(name = "Documentation", content = scalatex.DocumentationHead)
+  lazy val documentation = DocumentationPage.fromScalatex(name = "Documentation", content = scalatex.Documentation)
 
   def docPages =
     runPages ++
@@ -186,7 +184,7 @@ object DocumentationPages {
   // Run
   lazy val run = DocumentationPage.fromScalatex(name = "Run", content = scalatex.documentation.run.Run)
 
-  def runPages = Seq(care, container, java, netLogo, packagedCCplusplus, packagedPython, r, scala)
+  def runPages = Seq(java, netLogo, r, scilab, care, packagedCCplusplus, packagedPython, container, scala)
 
   lazy val care = DocumentationPage.fromScalatex(name = "CARE", content = scalatex.documentation.run.CARE)
   lazy val container = DocumentationPage.fromScalatex(name = "Container", content = scalatex.documentation.run.Container)
@@ -196,6 +194,7 @@ object DocumentationPages {
   lazy val packagedPython = DocumentationPage.fromScalatex(name = "Packaged Python", content = scalatex.documentation.run.PackagedPython)
   lazy val r = DocumentationPage.fromScalatex(name = "R", content = scalatex.documentation.run.R)
   lazy val scala = DocumentationPage.fromScalatex(name = "Scala", content = scalatex.documentation.run.Scala)
+  lazy val scilab = DocumentationPage.fromScalatex(name = "Scilab", content = scalatex.documentation.run.Scilab)
 
   // Explore
   lazy val explore = DocumentationPage.fromScalatex(name = "Explore", content = scalatex.documentation.explore.Explore)

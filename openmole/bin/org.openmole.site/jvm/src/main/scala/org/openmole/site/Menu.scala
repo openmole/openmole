@@ -46,16 +46,7 @@ object Menu {
           ),
           div(classIs(collapse ++ navbar_collapse), aria.expanded := false, paddingTop := 20, id := navId)(
             ul(classIs(nav ++ navbar_nav ++ navbar_right))(
-              (sitePage match {
-                case stepPage: StepPage ⇒
-                  Seq(
-                    li(pageLinkButton("RUN", DocumentationPages.run, false, Seq(classIs(btn ++ btn_default))))(paddingTop := 10),
-                    li(pageLinkButton("EXPLORE", DocumentationPages.explore, false, Seq(classIs(btn ++ btn_default))))(paddingTop := 10),
-                    li(pageLinkButton("SCALE", DocumentationPages.scale, false, Seq(classIs(btn ++ btn_default))))(paddingRight := 80)(paddingTop := 10)
-                  )
-                case _ ⇒ Seq(li)
-              }),
-              li(innerLink(DocumentationPages.documentationHead, "DOCUMENTATION"), liStyle),
+              li(innerLink(DocumentationPages.documentation, "DOCUMENTATION"), liStyle),
               li(innerLink(DocumentationPages.tutorials, "TUTORIALS"), liStyle),
               li(innerLink(DocumentationPages.OMcommunity, "COMMUNITY"), liStyle),
               li(marginTop := -8, marginBottom := 8, divLinkButton(div(maxWidth := 140)(span("DOWNLOAD"), span(version.value, fontSize := "10px", paddingLeft := 7)), Resource.script.openmole.file, classIs(btn ++ btn_primary))),

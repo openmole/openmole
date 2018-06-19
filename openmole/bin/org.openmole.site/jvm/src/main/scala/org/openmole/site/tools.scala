@@ -105,6 +105,7 @@ package object tools {
         case e: String ⇒ e
         case e: TypedTag[String] ⇒ e
         case e: scalatags.generic.StylePair[Any, String] ⇒ e.s := e.v
+        case e: AttrPair ⇒ e
         case _ ⇒ throw new RuntimeException("Unknown element type " + element.getClass)
       }
 

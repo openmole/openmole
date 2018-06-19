@@ -1,0 +1,32 @@
+
+@import org.openmole.site.tools._
+@import org.openmole.site._
+@import org.openmole.site.content.Native._
+
+
+@h2{ScilabTask}
+
+Scilab is a scripted language initially designed for numerical computation.
+
+
+@h2{Preliminary remark}
+
+@linuxOnly("ScilabTask")
+
+@h2{Simple ScilabTask}
+
+Here is a dummy workflow multiplying a vector @i{dArray} by @i{i} using a @i{ScilabTask}:
+
+@openmole("""
+val i = Val[Int]
+val dArray = Val[Array[Double]]
+
+val m =
+  ScilabTask("dArray = dArray * i") set (
+    scilabInputs += (i, dArray),
+    scilabOutputs += (i, dArray),
+    i := 9,
+    dArray := Array(9.0, 8.0)
+  )
+
+m hook ToStringHook()""")
