@@ -29,6 +29,11 @@ import org.openmole.tool.file._
 
 object SavePopulationHook {
 
+  def resultVariables[T](algorithm: T, context: Context)(implicit wfi: WorkflowIntegration[T]) = {
+    val t = wfi(algorithm)
+    context.variable(t.generationPrototype).toSeq ++ t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype)).from(context)
+  }
+
   def apply[T](algorithm: T, dir: FromContext[File])(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
     val t = wfi(algorithm)
 
@@ -36,14 +41,36 @@ object SavePopulationHook {
       import p._
 
       val resultFileLocation = dir / ExpandedString("population${" + t.generationPrototype.name + "}.csv")
-      val resultVariables = context.variable(t.generationPrototype).toSeq ++ t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype)).from(context)
 
       import org.openmole.plugin.tool.csv._
 
       writeVariablesToCSV(
         resultFileLocation.from(context),
-        resultVariables.map(_.prototype.array),
-        resultVariables,
+        resultVariables(algorithm, context).map(_.prototype.array),
+        resultVariables(algorithm, context),
+        overwrite = true
+      )
+
+      context
+    } set (inputs += (t.populationPrototype, t.statePrototype))
+
+  }
+
+}
+
+object SaveLastPopulationHook {
+
+  def apply[T](algorithm: T, file: FromContext[File])(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
+    val t = wfi(algorithm)
+
+    FromContextHook("SaveLastPopulationHook") { p ⇒
+      import p._
+      import org.openmole.plugin.tool.csv._
+
+      writeVariablesToCSV(
+        file.from(context),
+        SavePopulationHook.resultVariables(algorithm, context).map(_.prototype.array),
+        SavePopulationHook.resultVariables(algorithm, context),
         overwrite = true
       )
 
