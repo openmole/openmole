@@ -3,7 +3,7 @@ package org.openmole.plugin.task.scilab
 import monocle.macros._
 import org.openmole.core.context.ValType
 import org.openmole.core.dsl._
-import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.networkservice.NetworkService
@@ -94,7 +94,8 @@ object ScilabTask {
       external = External(),
       info = InfoConfig(),
       scilabInputs = Vector.empty,
-      scilabOutputs = Vector.empty
+      scilabOutputs = Vector.empty,
+      version = version
     )
   }
 
@@ -116,8 +117,11 @@ object ScilabTask {
     }
   }
 
-  def fromScilab(s: String, v: Val[_]) = {
-    val lines = s.split("\n").drop(1)
+  def fromScilab(s: String, v: Val[_], majorVersion: Int) = try {
+    val lines =
+      if (majorVersion >= 6) s.split("\n").drop(1)
+      else s.split("\n").drop(2)
+
     if (lines.isEmpty) throw new UserBadDataError(s"Value ${s} cannot be fetched in OpenMOLE variable $v")
 
     import org.openmole.core.context.Variable
@@ -161,6 +165,10 @@ object ScilabTask {
       case _                            ⇒ throw new UserBadDataError(s"Value ${s} cannot be fetched in OpenMOLE variable $v")
     }
   }
+  catch {
+    case t: Throwable ⇒
+      throw new InternalProcessingError(s"Error parsing scilab value $s to OpenMOLE variable $v", t)
+  }
 
 }
 
@@ -175,7 +183,8 @@ object ScilabTask {
   external:           External,
   info:               InfoConfig,
   scilabInputs:       Vector[(Val[_], String)],
-  scilabOutputs:      Vector[(String, Val[_])]) extends Task with ValidateTask {
+  scilabOutputs:      Vector[(String, Val[_])],
+  version:            String) extends Task with ValidateTask {
 
   lazy val containerPoolKey = UDockerTask.newCacheKey
 
@@ -185,6 +194,7 @@ object ScilabTask {
   override def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
     import p._
 
+    def majorVersion = version.takeWhile(_ != '.').toInt
     def scriptName = "openmolescript.sci"
 
     newFile.withTmpFile("script", ".sci") { scriptFile ⇒
@@ -192,7 +202,7 @@ object ScilabTask {
       def scilabInputMapping =
         scilabInputs.map { case (v, name) ⇒ s"$name = ${ScilabTask.toScilab(context(v))}" }.mkString("\n")
 
-      def outputFileName(v: Val[_]) = s"${v.name}.openmole"
+      def outputFileName(v: Val[_]) = s"/${v.name}.openmole"
       def outputValName(v: Val[_]) = v.withName(v.name + "File").withType[File]
       def scilabOutputMapping =
         scilabOutputs.map { case (name, v) ⇒ s"""print("${outputFileName(v)}", $name)""" }.mkString("\n")
@@ -202,12 +212,17 @@ object ScilabTask {
           |$scilabInputMapping
           |${script.from(context)}
           |${scilabOutputMapping}
+          |quit
         """.stripMargin
+
+      def launchCommand =
+        if (majorVersion >= 6) s"""scilab-cli -nb -quit -f $scriptName"""
+        else s"""scilab-cli -nb -f $scriptName"""
 
       def uDockerTask =
         UDockerTask(
           uDocker,
-          s"""scilab-cli -nb -quit -f $scriptName""",
+          launchCommand,
           errorOnReturnValue,
           returnValue,
           stdOut,
@@ -216,12 +231,12 @@ object ScilabTask {
           external,
           info,
           containerPoolKey = containerPoolKey) set (
-            resources += (scriptFile, scriptName, true),
-            scilabOutputs.map { case (_, v) ⇒ outputFiles.+=[UDockerTask](outputFileName(v), outputValName(v)) }
-          )
+          resources += (scriptFile, scriptName, true),
+          scilabOutputs.map { case (_, v) ⇒ outputFiles.+=[UDockerTask](outputFileName(v), outputValName(v)) }
+        )
 
       val resultContext = uDockerTask.process(executionContext).from(context)
-      resultContext ++ scilabOutputs.map { case (_, v) ⇒ ScilabTask.fromScilab(resultContext(outputValName(v)).content, v) }
+      resultContext ++ scilabOutputs.map { case (_, v) ⇒ ScilabTask.fromScilab(resultContext(outputValName(v)).content, v, majorVersion) }
     }
 
   }
