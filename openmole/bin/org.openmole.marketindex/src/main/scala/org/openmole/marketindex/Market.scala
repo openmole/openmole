@@ -72,7 +72,7 @@ object Market {
       MarketEntry("Pi Computation", "pi", Seq(stochastic, simulation, scala)),
       MarketEntry("Random Forest", "randomforest", Seq(stochastic, machineLearning, native, data, python)),
       MarketEntry("Hello World in R", "R-hello", Seq(R)),
-      MarketEntry("Hello World in Scilab", "Scilab-hello", Seq(scilab)),
+      MarketEntry("Hello World in Scilab", "scilab-hello", Seq(scilab)),
       MarketEntry("Fire in NetLogo", "fire", Seq(netlogo, stochastic, simulation)),
       MarketEntry("Hello World in Java", "java-hello", Seq(java)),
       MarketEntry("Calibration of Ants", "ants", Seq(netlogo, ga, simulation, calibration)),
