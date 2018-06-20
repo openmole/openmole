@@ -118,16 +118,13 @@ object ScilabTask {
   }
 
   def fromScilab(s: String, v: Val[_], majorVersion: Int) = try {
-    val lines =
-      if (majorVersion >= 6) s.split("\n").drop(1)
-      else s.split("\n").drop(2)
-
+    val lines = s.split("\n").dropWhile(_.trim.isEmpty)
     if (lines.isEmpty) throw new UserBadDataError(s"Value ${s} cannot be fetched in OpenMOLE variable $v")
 
     import org.openmole.core.context.Variable
 
     def toInt(s: String) = s.trim.toDouble.toInt
-    def toDouble(s: String) = s.trim.toDouble
+    def toDouble(s: String) = s.trim.replace("D", "e").toDouble
     def toLong(s: String) = s.trim.toDouble.toLong
     def toString(s: String) = s.trim
     def toBoolean(s: String) = s.trim == "T"
@@ -209,6 +206,7 @@ object ScilabTask {
 
       scriptFile.content =
         s"""
+          |${if (majorVersion < 6) """errcatch(-1,"stop")""" else ""}
           |$scilabInputMapping
           |${script.from(context)}
           |${scilabOutputMapping}
