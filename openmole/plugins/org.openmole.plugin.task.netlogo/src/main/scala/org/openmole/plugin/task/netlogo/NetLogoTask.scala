@@ -260,6 +260,7 @@ trait NetLogoTask extends Task with ValidateTask {
   def workspace: NetLogoTask.Workspace
   def launchingCommands: Seq[FromContext[String]]
   def netLogoInputs: Seq[(Val[_], String)]
+  def netLogoArrayInputs: Seq[(Val[_], String)]
   def netLogoOutputs: Iterable[(String, Val[_])]
   def netLogoArrayOutputs: Iterable[(String, Int, Val[_])]
   def netLogoFactory: NetLogoFactory
