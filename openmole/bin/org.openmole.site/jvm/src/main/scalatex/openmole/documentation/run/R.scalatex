@@ -6,7 +6,7 @@
 
 @h2{RTask}
 
-R is a scripted language initially designed for statistics, but which application range is much broader today (for example GIS, operational research, linear algebra, web applications, etc.).
+R is a scripted language initially designed for statistics, but whos application range is much broader today (for example GIS, operational research, linear algebra, web applications, etc.).
 , thanks to its large community and the variety of packages. It may be convenient to use some specific R libraries within a workflow, and OpenMOLE provides therefore a specific @i{RTask}.
 
 @h2{Preliminary remark}
@@ -73,7 +73,7 @@ import it from a @code{file.R}, deal with libraries, and plug inputs and outputs
 
 @p You can now upload @code{Rscript1.R} to your OpenMOLE workspace.
 
-@br Here is the OpenMOLE script to use it in the Rtask. In the @code{resource} of the Rtask is set, you have to precise the location
+@br Here is the OpenMOLE script to use it in the Rtask. In the @code{resource} of the Rtask is set, you have to find the precise location
 of the @code{file.R}, which is then imported in the R script using the R primitive @code{source()}).
 
 
@@ -208,7 +208,7 @@ Note that the last section present an alternative.
 It is also possible to pass files as argument of the @code{rTask}. However, we can't pass them with @i{rInputs} as seen before, as it will result in a type mismatch with an error message like  @i{type class java.io.File is not convertible to JSON}.
 
 
-@br We thus use @i{inputFiles}, and  we give an illustration in the following workflow (@code{rTask}). We precise that @code{inputFiles} must be used here (and not @code{resources}), since it is used as a @code{Val} and can be acted upon in a workflow, whereas @code{resources} acts differently since it is fixed.
+@br We thus use @i{inputFiles}, and  we give an illustration in the following workflow (@code{rTask}). We emphasize that @code{inputFiles} must be used here (and not @code{resources}), since it is used as a @code{Val} and can be acted upon in a workflow, whereas @code{resources} acts differently since it is fixed.
 
 @br We have first a @code{ScalaTask} which writes numbers in a file. The file is the OpenMole variable  @code{g} of type @i{java.io.File } .
  In order to have access to this file in the RTask, we put @code{g} as output of the ScalaTask.
@@ -307,7 +307,7 @@ that will be used in the RTask.
 @br  @i{task1} creates a file @code{g} and @code{task2} creates @code{y}, an @code{Array[Double]}. We both put them in the @code{Rtask} using
 respectively @code{inputFiles} and @code{rInputs}.
 
-@br Remark that the conversion from the OpenMOLE type (scala) @code{Array[Double]} to the R type vector is made directly by the @code{rInputs}
+@br Notice that the conversion from the OpenMOLE type (scala) @code{Array[Double]} to the R type vector is made directly by the @code{rInputs}
 
 @br The hook stored the file @code{g} in your @b{Workspace}, and display the @code{area}
 
@@ -433,7 +433,7 @@ val task1Capsule = Capsule(task1)
 ((task1Capsule --  objSlot) & (task1Capsule -- task2 -- objSlot)) hook ToStringHook()
  """)
 
-Remark that @code{a} is not an @code{output} of the @code{task2}, and if you try a classical chain @code{task1 -- task2 -- task3}, OpenMOLE will inform you that:
+Notice that @code{a} is not an @code{output} of the @code{task2}, and if you try a classical chain @code{task1 -- task2 -- task3}, OpenMOLE will inform you that:
   @plain("""
   Input (a: Int) is missing when reaching the slot270273838:task3-1057250483.
   """)
