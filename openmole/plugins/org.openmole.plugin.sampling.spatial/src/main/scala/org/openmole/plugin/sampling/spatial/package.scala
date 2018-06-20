@@ -3,26 +3,19 @@ package org.openmole.plugin.sampling
 package object spatial {
 
   /**
-    * Raster types
-    */
+   * Raster types
+   */
 
   type RasterLayer = Array[Array[Double]]
 
   type Raster = Seq[RasterLayer]
 
-
   /**
-    * Spatial points
-    */
+   * Spatial points
+   */
 
-  type SpatialPoint = (Double,Double)
+  type SpatialPoint = (Double, Double)
 
   type SpatialPoints = Iterable[SpatialPoint]
-
-
-
-
-
-
 
 }
