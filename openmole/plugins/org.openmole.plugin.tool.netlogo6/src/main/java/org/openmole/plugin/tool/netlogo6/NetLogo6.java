@@ -122,7 +122,6 @@ public class NetLogo6 implements NetLogo {
         return HeadlessWorkspace.class.getClassLoader();
     }
 
-
     /**
      * Converts an iterable to a LogoList
      * @param array
@@ -136,6 +135,5 @@ public class NetLogo6 implements NetLogo {
         }
         return(list.toLogoList());
     }
-
 
 }
