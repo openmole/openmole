@@ -117,7 +117,7 @@ object ScilabTask {
     }
   }
 
-  def fromScilab(s: String, v: Val[_], majorVersion: Int) = try {
+  def fromScilab(s: String, v: Val[_]) = try {
     val lines = s.split("\n").dropWhile(_.trim.isEmpty)
     if (lines.isEmpty) throw new UserBadDataError(s"Value ${s} cannot be fetched in OpenMOLE variable $v")
 
@@ -234,7 +234,7 @@ object ScilabTask {
         )
 
       val resultContext = uDockerTask.process(executionContext).from(context)
-      resultContext ++ scilabOutputs.map { case (_, v) ⇒ ScilabTask.fromScilab(resultContext(outputValName(v)).content, v, majorVersion) }
+      resultContext ++ scilabOutputs.map { case (_, v) ⇒ ScilabTask.fromScilab(resultContext(outputValName(v)).content, v) }
     }
 
   }
