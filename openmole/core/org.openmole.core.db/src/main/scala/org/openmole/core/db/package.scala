@@ -3,6 +3,7 @@ package org.openmole.core
 import java.io.File
 
 import com.thoughtworks.xstream.XStream
+import com.thoughtworks.xstream.security.{ NoTypePermission, TypePermission }
 import org.openmole.tool.network._
 import slick.jdbc.H2Profile.api._
 import squants.time.Time
@@ -30,6 +31,8 @@ package object db extends JavaLogger {
 
   lazy val xstream = {
     val xstream = new XStream()
+    xstream.addPermission(NoTypePermission.NONE)
+    xstream.allowTypesByWildcard(Array("java.*", "org.openmole.core.*"))
     xstream.setClassLoader(classOf[DBServerInfo].getClassLoader)
     xstream.alias("DBServerInfo", classOf[DBServerInfo])
     xstream

@@ -40,6 +40,8 @@ import scala.util.{ Failure, Success }
 
 object GetResultActor extends JavaLogger {
 
+  case class JobRemoteExecutionException(message: String, cause: Throwable) extends InternalProcessingError(message, cause)
+
   def receive(msg: GetResult)(implicit services: BatchEnvironment.Services) = {
     import services._
 
@@ -71,7 +73,7 @@ object GetResultActor extends JavaLogger {
     display(runtimeResult.stdOut, s"Output on ${runtimeResult.info.hostName}", storage, stream)
 
     runtimeResult.result match {
-      case Failure(exception) ⇒ throw new JobRemoteExecutionException(exception, "Fatal exception thrown during the execution of the job execution on the execution node")
+      case Failure(exception) ⇒ throw new JobRemoteExecutionException("Fatal exception thrown during the execution of the job execution on the execution node", exception)
       case Success((result, log)) ⇒
         val contextResults = getContextResults(result, storage)
 

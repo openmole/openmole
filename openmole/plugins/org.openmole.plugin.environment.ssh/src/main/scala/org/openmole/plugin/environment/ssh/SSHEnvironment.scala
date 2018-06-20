@@ -35,7 +35,6 @@ import org.openmole.tool.lock._
 import squants.information._
 import squants.time.TimeConversions._
 import org.openmole.plugin.environment.batch.environment._
-import org.openmole.plugin.environment.batch.refresh.{ JobManager, StopEnvironment }
 
 import scala.ref.WeakReference
 
@@ -60,19 +59,22 @@ object SSHEnvironment {
     name:                 OptionalArgument[String]      = None
   )(implicit services: BatchEnvironment.Services, cypher: Cypher, authenticationStore: AuthenticationStore, varName: sourcecode.Name) = {
     import services._
-    new SSHEnvironment(
-      user = user,
-      host = host,
-      slots = slots,
-      port = port,
-      sharedDirectory = sharedDirectory,
-      workDirectory = workDirectory,
-      openMOLEMemory = openMOLEMemory,
-      threads = threads,
-      storageSharedLocally = storageSharedLocally,
-      name = Some(name.getOrElse(varName.value)),
-      authentication = SSHAuthentication.find(user, host, port).apply
-    )
+
+    EnvironmentProvider { () ⇒
+      new SSHEnvironment(
+        user = user,
+        host = host,
+        slots = slots,
+        port = port,
+        sharedDirectory = sharedDirectory,
+        workDirectory = workDirectory,
+        openMOLEMemory = openMOLEMemory,
+        threads = threads,
+        storageSharedLocally = storageSharedLocally,
+        name = Some(name.getOrElse(varName.value)),
+        authentication = SSHAuthentication.find(user, host, port)
+      )
+    }
   }
 
   class Updater(environemnt: WeakReference[SSHEnvironment[_]]) extends IUpdatable {
@@ -135,8 +137,9 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   override def updateInterval = UpdateInterval.fixed(env.services.preference(SSHEnvironment.UpdateInterval))
 
   lazy val jobUpdater = new SSHEnvironment.Updater(WeakReference(this))
+
   override def start() = {
-    super.start()
+    BatchEnvironment.start(this)
     import services.threadProvider
     Updater.delay(jobUpdater, services.preference(SSHEnvironment.UpdateInterval))
   }
@@ -146,13 +149,12 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   def timeout = services.preference(SSHEnvironment.TimeOut)
 
-  override def stop() =
-    try super.stop()
-    finally {
-      jobUpdater.stop = true
-      def usageControls = List(storageService.usageControl, jobService.usageControl)
-      JobManager ! StopEnvironment(this, usageControls, Some(sshInterpreter().close))
-    }
+  override def stop() = {
+    jobUpdater.stop = true
+    def usageControls = List(storageService.usageControl, jobService.usageControl)
+    try BatchEnvironment.clean(this, usageControls)
+    finally sshInterpreter().close
+  }
 
   import env.services.{ threadProvider, preference }
 

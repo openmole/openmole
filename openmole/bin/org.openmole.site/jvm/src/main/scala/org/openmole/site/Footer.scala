@@ -69,15 +69,15 @@ object Footer {
                 ),
                 div(classIs(colMD(3)), footerColStyle)(
                   span("DEVELOPMENT", textAlign := "center"),
-                  imgSubItem(Resource.img.footer.previousVersion, "Changes", Pages.previousVersions.file, false),
+                  imgSubItem(Resource.img.footer.previousVersion, "Changes", DocumentationPages.previousVersions.file, false),
                   imgSubItem(Resource.img.footer.github, "Source code", shared.link.repo.openmole),
                   imgSubItem(Resource.img.footer.contribute, "Contribute!", DocumentationPages.howToContribute.file, false)
                 ),
                 div(classIs(colMD(3)), footerColStyle)(
                   span("ABOUT US", textAlign := "center"),
-                  imgSubItem(Resource.img.footer.paper, "Publications", Pages.communications.file, false),
-                  imgSubItem(Resource.img.footer.whoarwe, "Who are we?", Pages.whoAreWe.file, false),
-                  imgSubItem(Resource.img.footer.partner, "Partners", Pages.partner.file, false)
+                  imgSubItem(Resource.img.footer.paper, "Publications", DocumentationPages.communications.file, false),
+                  imgSubItem(Resource.img.footer.whoarwe, "Who are we?", DocumentationPages.whoWeAre.file, false),
+                  imgSubItem(Resource.img.footer.partner, "Partners", DocumentationPages.partner.file, false)
                 ),
                 div(classIs(colMD(3)), footerColStyle)(
                   span("COMMUNICATION", textAlign := "center"),

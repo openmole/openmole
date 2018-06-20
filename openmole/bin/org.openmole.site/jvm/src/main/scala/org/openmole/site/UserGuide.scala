@@ -22,14 +22,15 @@ import stylesheet._
 import scalatags.Text.all._
 import SideMenu._
 import org.openmole.site.tools.classIs
+import tools._
 
 import scalatags.Text.TypedTag
 
 object UserGuide {
 
-  val firstModel = DocumentationPages.model
-  val firstMethod = DocumentationPages.method
-  val firstEnvironment = DocumentationPages.environment
+  val firstModel = DocumentationPages.run
+  val firstMethod = DocumentationPages.explore
+  val firstEnvironment = DocumentationPages.scale
 
   val line = hr(classIs("line"), width := "90%", marginTop := 10)
 
@@ -38,61 +39,73 @@ object UserGuide {
       div(stepHeader)(sp),
       line
     )
-  def headerModel(model: String) = header(span(
-    tools.to(DocumentationPages.model)(img(src := Resource.img.model.codeAnimated.file, headerImg)),
-    span(s"Run your own $model model", h1Like)
-  ))
 
-  def headerMethod(method: String) = header(span(
-    tools.to(DocumentationPages.method)(img(src := Resource.img.method.exploreMapAnimated.file, headerImg)),
-    span(s"Explore with $method", h1Like)
-  ))
+  def headerModel(model: String) = model match {
+    case "Run" ⇒ header(span(
+      tools.to(DocumentationPages.run)(img(src := Resource.img.model.codeAnimated.file, headerImg)),
+      span(s"Run your model", h1Like)
+    ))
+    case _ ⇒ header(span(
+      tools.to(DocumentationPages.explore)(img(src := Resource.img.model.codeAnimated.file, headerImg)),
+      span(s"Run your own $model model", h1Like)
+    ))
+  }
 
-  def headerEnvironment(env: String) = header(span(
-    tools.to(DocumentationPages.environment)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
-    span(s"Scale on $env "), h1Like
-  ))
+  def headerMethod(method: String) = method match {
+    case "Explore" ⇒ header(span(
+      tools.to(DocumentationPages.explore)(img(src := Resource.img.method.exploreMapAnimated.file, headerImg)),
+      span(s"Explore your model", h1Like)
+    ))
+    case _ ⇒ header(span(
+      tools.to(DocumentationPages.explore)(img(src := Resource.img.method.exploreMapAnimated.file, headerImg)),
+      span(s"Explore with $method", h1Like)
+    ))
+  }
 
+  def headerEnvironment(env: String) = env match {
+    case "Scale" ⇒ header(span(
+      tools.to(DocumentationPages.scale)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
+      span(s"Scale on different environments "), h1Like))
+    case _ ⇒ header(span(
+      tools.to(DocumentationPages.scale)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
+      span(s"Scale on $env "), h1Like
+    ))
+  }
   lazy val imgStyle = Seq(
     width := 100,
     paddingRight := 15
   )
 
-  DocumentationPages.dataProcessing
-  def currentStep(current: Page): SitePage = {
-
-    val currentStep = {
-      if (DocumentationPages.topPages.contains(current)) {
-        if ((DocumentationPages.modelPages :+ DocumentationPages.model).contains(current)) {
-          val name = if (current == firstModel) "" else current.name
-          StepPage(
-            headerModel(name),
-            div(current.content),
-            SideMenu.left(SideMenu.model),
-            SideMenu.right(SideMenu.more.insert(current.details)),
-            firstModel, firstEnvironment, firstMethod
-          )
-        }
-        else if ((DocumentationPages.methodPages :+ DocumentationPages.method).contains(current))
-          StepPage(
-            headerMethod(current.name),
-            div(current.content),
-            SideMenu.left(SideMenu.method),
-            SideMenu.right(SideMenu.more.insert(current.details)),
-            firstMethod, firstModel, firstEnvironment
-          )
-        else StepPage(
+  def integrate(current: Page): SitePage =
+    current match {
+      case p if (DocumentationPages.runPages :+ DocumentationPages.run).contains(p) ⇒
+        IntegratedPage(
+          headerModel(current.name),
+          div(current.content),
+          SideMenu.left(SideMenu.run),
+          Some(SideMenu.right(SideMenu.more.insert(current.details)))
+        )
+      case p if ((DocumentationPages.explorePages :+ DocumentationPages.explore).contains(p)) ⇒
+        IntegratedPage(
+          headerMethod(current.name),
+          div(current.content),
+          SideMenu.left(SideMenu.explore),
+          Some(SideMenu.right(SideMenu.more.insert(current.details)))
+        )
+      case p if ((DocumentationPages.runPages :+ DocumentationPages.run).contains(p)) ⇒
+        IntegratedPage(
           headerEnvironment(current.name),
           div(current.content),
-          SideMenu.left(SideMenu.environment),
-          SideMenu.right(SideMenu.more.insert(current.details)),
-          firstEnvironment, firstMethod, firstModel
+          SideMenu.left(SideMenu.scale),
+          Some(SideMenu.right(SideMenu.more.insert(current.details)))
         )
-      }
-      else ContentPage(div(paddingTop := 100), div(current.content))
+      case _ ⇒
+        IntegratedPage(
+          div(paddingTop := 100),
+          div(current.content),
+          SideMenu.left(SideMenu(Seq.empty, classIs(btn ++ btn_primary))),
+          None
+        )
     }
-
-    currentStep
-  }
 
 }

@@ -31,15 +31,7 @@ object Variable {
   implicit def tupleWithValToVariable[T](t: (Val[T], T)) = apply(t._1, t._2)
   implicit def tubleToVariable[T: Manifest](t: (String, T)) = apply(Val[T](t._1), t._2)
 
-  def apply[T](p: Val[T], v: T) = new Variable[T] {
-    val prototype = p
-    val value = v
-  }
-
-  def unsecure[T](p: Val[T], v: Any) = new Variable[T] {
-    val prototype = p
-    val value = v.asInstanceOf[T]
-  }
+  def unsecure[T](p: Val[T], v: Any) = Variable[T](p, v.asInstanceOf[T])
 
   def openMOLE(name: String) = Val[Long](name, namespace = openMOLENameSpace)
   val openMOLESeed = openMOLE("seed")
@@ -47,12 +39,8 @@ object Variable {
   def copy[T](v: Variable[T])(prototype: Val[T] = v.prototype, value: T = v.value) = apply(prototype, value)
 }
 
-trait Variable[T] {
-  def prototype: Val[T]
-  def value: T
-
+case class Variable[T](prototype: Val[T], value: T) {
   override def toString: String = prettified(Int.MaxValue)
-
   def prettified(snipArray: Int) = prototype.name + "=" + (if (value != null) value.prettify(snipArray) else "null")
 }
 

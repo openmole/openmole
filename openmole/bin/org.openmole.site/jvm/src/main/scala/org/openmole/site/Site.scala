@@ -125,7 +125,7 @@ object Site extends App {
           val sitePage =
             page match {
               case Pages.index ⇒ ContentPage(div(paddingTop := 100), div(page.content))
-              case _           ⇒ UserGuide.currentStep(page)
+              case _           ⇒ UserGuide.integrate(page)
             }
 
           body(position := "relative", minHeight := "100%")(
@@ -134,15 +134,12 @@ object Site extends App {
               div(`id` := "sidebar-right", paddingTop := 200)(
                 page.source.map(source ⇒ tools.linkButton("Suggest edits", tools.modificationLink(source), classIs(btn ++ btn_danger))
                 )),
-              sitePage.name,
+              sitePage.header,
               sitePage.element
             ),
             sitePage match {
-              case s: StepPage ⇒ Seq(s.leftMenu, s.rightMenu)
-              case _ ⇒
-                //                val menus: Seq[TypedTag[_ <: String]] = //SideMenu.menus.get(page.name).getOrElse(Seq(div))
-                //                menus
-                div(id := shared.documentationSideMenu.place)
+              case s: IntegratedPage ⇒ Seq(s.leftMenu) ++ s.rightMenu.toSeq
+              case _                 ⇒ div(id := shared.documentationSideMenu.place)
             },
             Footer.build,
             onload := onLoadString(page)
@@ -155,11 +152,11 @@ object Site extends App {
           def commonJS = s"$siteJS.main();$siteJS.loadIndex(index);"
 
           sitepage match {
-            case Pages.index | Pages.training    ⇒ s"$siteJS.loadBlogPosts();" + commonJS
-            case DocumentationPages.profile      ⇒ s"$siteJS.profileAnimation();" + documentationJS + commonJS
-            case DocumentationPages.pse          ⇒ s"$siteJS.pseAnimation();" + documentationJS + commonJS
-            case DocumentationPages.simpleSAFire ⇒ s"$siteJS.sensitivityAnimation();" + documentationJS + commonJS
-            case _                               ⇒ documentationJS + commonJS
+            case Pages.index | DocumentationPages.training ⇒ s"$siteJS.loadBlogPosts();" + commonJS
+            case DocumentationPages.profile                ⇒ s"$siteJS.profileAnimation();" + documentationJS + commonJS
+            case DocumentationPages.pse                    ⇒ s"$siteJS.pseAnimation();" + documentationJS + commonJS
+            case DocumentationPages.simpleSAFire           ⇒ s"$siteJS.sensitivityAnimation();" + documentationJS + commonJS
+            case _                                         ⇒ documentationJS + commonJS
           }
         }
 

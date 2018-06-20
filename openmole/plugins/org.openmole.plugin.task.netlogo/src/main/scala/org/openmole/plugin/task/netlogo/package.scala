@@ -31,12 +31,6 @@ package netlogo {
       def +=[T: NetLogoTaskBuilder: InputOutputBuilder](p: Val[_]): T ⇒ T = this.+=[T](p, p.name)
     }
 
-    lazy val netLogoArrayInputs = new {
-      def +=[T: NetLogoTaskBuilder: InputOutputBuilder](p: Val[_], n: String): T ⇒ T =
-        implicitly[NetLogoTaskBuilder[T]].netLogoArrayInputs.modify(_ ++ Seq(p → n)) andThen (inputs += p)
-      def +=[T: NetLogoTaskBuilder: InputOutputBuilder](p: Val[_]): T ⇒ T = this.+=[T](p, p.name)
-    }
-
     lazy val netLogoOutputs = new {
       def +=[T: NetLogoTaskBuilder: InputOutputBuilder](name: String, column: Int, p: Val[_]): T ⇒ T =
         implicitly[NetLogoTaskBuilder[T]].netLogoArrayOutputs.modify(_ ++ Seq((name, column, p))) andThen (outputs += p)

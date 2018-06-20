@@ -22,28 +22,68 @@ import org.openmole.core.expansion._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.context._
 import monocle.macros._
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation._
+import org.openmole.core.workspace.NewFile
 import org.openmole.tool.file._
+import org.openmole.tool.random.RandomProvider
 
 object SavePopulationHook {
 
-  def apply[T](algorithm: T, dir: FromContext[File])(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def resultVariables[T](algorithm: T, context: Context)(implicit wfi: WorkflowIntegration[T], randomProvider: RandomProvider, newFile: NewFile, fileService: FileService) = {
+    val t = wfi(algorithm)
+    context.variable(t.generationPrototype).toSeq ++ t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype)).from(context)
+  }
+
+  def apply[T](algorithm: T, dir: FromContext[File], frequency: OptionalArgument[Long] = None)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
     val t = wfi(algorithm)
 
     FromContextHook("SavePopulationHook") { p ⇒
       import p._
 
-      val resultFileLocation = dir / ExpandedString("population${" + t.generationPrototype.name + "}.csv")
-      val resultVariables = context.variable(t.generationPrototype).toSeq ++ t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype)).from(context)
+      def save =
+        frequency.option match {
+          case None ⇒ true
+          case Some(f) ⇒
+            val generation = context(t.generationPrototype)
+            (generation % f) == 0
+        }
 
+      if (save) {
+        val resultFileLocation = dir / ExpandedString("population${" + t.generationPrototype.name + "}.csv")
+
+        import org.openmole.plugin.tool.csv._
+
+        writeVariablesToCSV(
+          resultFileLocation.from(context),
+          resultVariables(algorithm, context).map(_.prototype.array),
+          resultVariables(algorithm, context),
+          overwrite = true
+        )
+      }
+
+      context
+    } set (inputs += (t.populationPrototype, t.statePrototype))
+
+  }
+
+}
+
+object SaveLastPopulationHook {
+
+  def apply[T](algorithm: T, file: FromContext[File])(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
+    val t = wfi(algorithm)
+
+    FromContextHook("SaveLastPopulationHook") { p ⇒
+      import p._
       import org.openmole.plugin.tool.csv._
 
       writeVariablesToCSV(
-        resultFileLocation.from(context),
-        resultVariables.map(_.prototype.array),
-        resultVariables,
+        file.from(context),
+        SavePopulationHook.resultVariables(algorithm, context).map(_.prototype.array),
+        SavePopulationHook.resultVariables(algorithm, context),
         overwrite = true
       )
 

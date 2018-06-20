@@ -126,7 +126,7 @@ object SystemExecTask {
   override protected def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
     import p._
 
-    External.withWorkDir(executionContext) { tmpDir ⇒
+    newFile.withTmpDir { tmpDir ⇒
       val workDir =
         workDirectory match {
           case None    ⇒ tmpDir
@@ -137,7 +137,7 @@ object SystemExecTask {
 
       val context = p.context + (External.PWD → workDir.getAbsolutePath)
 
-      val preparedContext = external.prepareInputFiles(context, external.relativeResolver(workDir))
+      val preparedContext = External.deployInputFilesAndResources(external, context, External.relativeResolver(workDir))
 
       val osCommandLines =
         commands.find { _.os.compatible }.map {
@@ -164,8 +164,7 @@ object SystemExecTask {
           stdErr = executionContext.outputRedirection.output
         )
 
-      val retContext: Context = external.fetchOutputFiles(outputs, preparedContext, external.relativeResolver(workDir), tmpDir)
-      external.cleanWorkDirectory(outputs, retContext, tmpDir)
+      val retContext: Context = External.fetchOutputFiles(external, outputs, preparedContext, External.relativeResolver(workDir), tmpDir)
 
       retContext ++
         List(

@@ -25,25 +25,7 @@ package object json {
     import org.json4s._
     import shapeless._
 
-    val caseBoolean = TypeCase[Val[Boolean]]
-    val caseInt = TypeCase[Val[Int]]
-    val caseLong = TypeCase[Val[Long]]
-    val caseDouble = TypeCase[Val[Double]]
-    val caseString = TypeCase[Val[String]]
-
-    val caseArrayBoolean = TypeCase[Val[Array[Boolean]]]
-    val caseArrayInt = TypeCase[Val[Array[Int]]]
-    val caseArrayLong = TypeCase[Val[Array[Long]]]
-    val caseArrayDouble = TypeCase[Val[Array[Double]]]
-    val caseArrayString = TypeCase[Val[Array[String]]]
-
-    val caseArrayArrayBoolean = TypeCase[Val[Array[Array[Boolean]]]]
-    val caseArrayArrayInt = TypeCase[Val[Array[Array[Int]]]]
-    val caseArrayArrayLong = TypeCase[Val[Array[Array[Long]]]]
-    val caseArrayArrayDouble = TypeCase[Val[Array[Array[Double]]]]
-    val caseArrayArrayString = TypeCase[Val[Array[Array[String]]]]
-
-    def cannotConvert = throw new UserBadDataError(s"Can not convert value of type $jValue to Int for OpenMOLE variable $v.")
+    def cannotConvert = throw new UserBadDataError(s"Can not fetch value of type $jValue to OpenMOLE variable $v")
 
     def jValueToInt(jv: JValue) =
       jv match {
@@ -95,31 +77,31 @@ package object json {
       }
 
     (jValue, v) match {
-      case (value: JArray, caseInt(v))               ⇒ Variable(v, jValueToInt(value.arr.head))
-      case (value: JArray, caseLong(v))              ⇒ Variable(v, jValueToLong(value.arr.head))
-      case (value: JArray, caseDouble(v))            ⇒ Variable(v, jValueToDouble(value.arr.head))
-      case (value: JArray, caseString(v))            ⇒ Variable(v, jValueToString(value.arr.head))
-      case (value: JArray, caseBoolean(v))           ⇒ Variable(v, jValueToBoolean(value.arr.head))
+      case (value: JArray, Val.caseInt(v)) ⇒ Variable(v, jValueToInt(value.arr.head))
+      case (value: JArray, Val.caseLong(v)) ⇒ Variable(v, jValueToLong(value.arr.head))
+      case (value: JArray, Val.caseDouble(v)) ⇒ Variable(v, jValueToDouble(value.arr.head))
+      case (value: JArray, Val.caseString(v)) ⇒ Variable(v, jValueToString(value.arr.head))
+      case (value: JArray, Val.caseBoolean(v)) ⇒ Variable(v, jValueToBoolean(value.arr.head))
 
-      case (value: JArray, caseArrayInt(v))          ⇒ Variable(v, jValueToArray(value, jValueToInt))
-      case (value: JArray, caseArrayLong(v))         ⇒ Variable(v, jValueToArray(value, jValueToLong))
-      case (value: JArray, caseArrayDouble(v))       ⇒ Variable(v, jValueToArray(value, jValueToDouble))
-      case (value: JArray, caseArrayString(v))       ⇒ Variable(v, jValueToArray(value, jValueToString))
-      case (value: JArray, caseArrayBoolean(v))      ⇒ Variable(v, jValueToArray(value, jValueToBoolean))
+      case (value: JArray, Val.caseArrayInt(v)) ⇒ Variable(v, jValueToArray(value, jValueToInt))
+      case (value: JArray, Val.caseArrayLong(v)) ⇒ Variable(v, jValueToArray(value, jValueToLong))
+      case (value: JArray, Val.caseArrayDouble(v)) ⇒ Variable(v, jValueToArray(value, jValueToDouble))
+      case (value: JArray, Val.caseArrayString(v)) ⇒ Variable(v, jValueToArray(value, jValueToString))
+      case (value: JArray, Val.caseArrayBoolean(v)) ⇒ Variable(v, jValueToArray(value, jValueToBoolean))
 
-      case (value: JArray, caseArrayArrayInt(v))     ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToInt)))
-      case (value: JArray, caseArrayArrayLong(v))    ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToLong)))
-      case (value: JArray, caseArrayArrayDouble(v))  ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToDouble)))
-      case (value: JArray, caseArrayArrayString(v))  ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToString)))
-      case (value: JArray, caseArrayArrayBoolean(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToBoolean)))
+      case (value: JArray, Val.caseArrayArrayInt(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToInt)))
+      case (value: JArray, Val.caseArrayArrayLong(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToLong)))
+      case (value: JArray, Val.caseArrayArrayDouble(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToDouble)))
+      case (value: JArray, Val.caseArrayArrayString(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToString)))
+      case (value: JArray, Val.caseArrayArrayBoolean(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToBoolean)))
 
-      case (value: JValue, caseInt(v))               ⇒ Variable(v, jValueToInt(value))
-      case (value: JValue, caseLong(v))              ⇒ Variable(v, jValueToLong(value))
-      case (value: JValue, caseDouble(v))            ⇒ Variable(v, jValueToDouble(value))
-      case (value: JValue, caseString(v))            ⇒ Variable(v, jValueToString(value))
-      case (value: JValue, caseBoolean(v))           ⇒ Variable(v, jValueToBoolean(value))
+      case (value: JValue, Val.caseInt(v)) ⇒ Variable(v, jValueToInt(value))
+      case (value: JValue, Val.caseLong(v)) ⇒ Variable(v, jValueToLong(value))
+      case (value: JValue, Val.caseDouble(v)) ⇒ Variable(v, jValueToDouble(value))
+      case (value: JValue, Val.caseString(v)) ⇒ Variable(v, jValueToString(value))
+      case (value: JValue, Val.caseBoolean(v)) ⇒ Variable(v, jValueToBoolean(value))
 
-      case _                                         ⇒ cannotConvert
+      case _ ⇒ cannotConvert
     }
 
   }

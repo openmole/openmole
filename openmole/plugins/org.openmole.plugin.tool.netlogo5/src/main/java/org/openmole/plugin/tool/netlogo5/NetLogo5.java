@@ -33,27 +33,23 @@ import java.util.Map;
  */
 public class NetLogo5 implements NetLogo {
 
-    protected HeadlessWorkspace workspace = createWorkspace();
+    protected HeadlessWorkspace workspace = null;
 
-
-    private HeadlessWorkspace createWorkspace() {
-        ClassLoader threadClassLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getNetLogoClassLoader());
-        try {
-            return HeadlessWorkspace.newInstance();
-        } finally {
-            Thread.currentThread().setContextClassLoader(threadClassLoader);
+    private HeadlessWorkspace getWorkspace() {
+        if(workspace == null) {
+            workspace = HeadlessWorkspace.newInstance();
         }
+        return workspace;
     }
 
     @Override
     public void open(String script) throws Exception {
-        workspace.open(script);
+        getWorkspace().open(script);
     }
 
     @Override
     public void command(String cmd) throws Exception {
-        workspace.command(cmd);
+        getWorkspace().command(cmd);
     }
 
     @Override
@@ -63,7 +59,17 @@ public class NetLogo5 implements NetLogo {
 
     @Override
     public Object report(String variable) throws Exception {
-        return workspace.report(variable);
+        return getWorkspace().report(variable);
+    }
+
+    @Override
+    public void setGlobal(String variable, Object value) throws Exception {
+        if(value instanceof Object[]){
+            workspace.world().setObserverVariableByName(variable,arrayToList((Object[]) value));
+        }
+        else{
+            workspace.world().setObserverVariableByName(variable,value);
+        }
     }
 
 
@@ -77,25 +83,14 @@ public class NetLogo5 implements NetLogo {
         workspace.world().setObserverVariableByName(variable, arrayToList(value));
     }
 
-
-    /*
-    // this does not work : the mainRNG has private access
-    @Override
-    public void setRandomSeed(int seed) {
-        // we set the seed of the main rng ; not sure what is the role of the auxiliary rng (and what does random-seed exactly)
-        workspace.world().mainRNG.setSeed(seed);
-    }
-     */
-
-
     @Override
     public void dispose() throws Exception {
-        workspace.dispose();
+        getWorkspace().dispose();
     }
 
     @Override
     public String[] globals() {
-        World world = workspace.world();
+        World world = getWorkspace().world();
         Observer observer = world.observer();
         String nlGlobalList[] = new String[world.getVariablesArraySize(observer)];
         for (int i = 0; i < nlGlobalList.length; i++) {
@@ -107,7 +102,7 @@ public class NetLogo5 implements NetLogo {
 
     public String[] reporters() {
         LinkedList<String> reporters = new LinkedList<String>();
-        for (Map.Entry<String, Procedure> e : workspace.getProcedures().entrySet()) {
+        for (Map.Entry<String, Procedure> e : getWorkspace().getProcedures().entrySet()) {
             if (e.getValue().tyype == Procedure.Type.REPORTER) reporters.add(e.getKey());
         }
         return reporters.toArray(new String[0]);
@@ -128,10 +123,7 @@ public class NetLogo5 implements NetLogo {
         for(Object o:array){
             if(o instanceof Object[]){list.add(arrayToList((Object[]) o));}
             else{list.add(o);}
-            // finally do not recurse
-            //list.add(o);
         }
-        //list.addAll(array);
         return(list.toLogoList());
     }
 

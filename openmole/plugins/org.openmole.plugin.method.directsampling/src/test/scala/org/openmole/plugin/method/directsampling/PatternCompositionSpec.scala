@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.core.dsl._
 import org.openmole.core.workflow.task.ClosureTask
 import org.openmole.core.workflow.sampling.ExplicitSampling
+import org.openmole.core.context.Variable
 import org.openmole.plugin.tool.pattern._
 import org.scalatest._
 
@@ -42,7 +43,7 @@ class PatternCompositionSpec extends FlatSpec with Matchers {
         ExplicitSampling(l, Seq(0.1, 0.2))
       )
 
-    mole.start.waitUntilEnded
+    mole.run
 
     counter.intValue() should equal(12)
   }
@@ -72,7 +73,7 @@ class PatternCompositionSpec extends FlatSpec with Matchers {
           ExplicitSampling(i, Seq(1))
         )
 
-    mole.start.waitUntilEnded
+    mole.run
   }
 
   "Direct samplings" should "transmit explored value" in {
@@ -102,7 +103,38 @@ class PatternCompositionSpec extends FlatSpec with Matchers {
           ExplicitSampling(i, Seq(1, 2))
         )
 
-    mole.start.waitUntilEnded
+    mole.run
+  }
+
+  "Direct samplings" should "transmit explored value to aggregation task" in {
+    val l = Val[Double]
+    val i = Val[Int]
+    val j = Val[Int]
+    val seed = Val[Int]
+
+    val init = EmptyTask() set (
+      (inputs, outputs) += l,
+      l := 2.0
+    )
+
+    val model =
+      ClosureTask("model") { (_, _, _) ⇒ Seq(Variable(j, 2)) } set (inputs += (l, seed), outputs += j)
+
+    val agg =
+      ClosureTask("agg") { (_, _, _) ⇒ Seq(Variable(j, 2)) } set (inputs += (i, j.array), outputs += j)
+
+    val globalAgg =
+      EmptyTask() set (inputs += (i.array, j.array))
+
+    val mole =
+      init --
+        DirectSampling(
+          Replication(model, seed, 10, aggregation = agg),
+          ExplicitSampling(i, Seq(1, 2)),
+          aggregation = globalAgg
+        )
+
+    mole.run
   }
 
 }

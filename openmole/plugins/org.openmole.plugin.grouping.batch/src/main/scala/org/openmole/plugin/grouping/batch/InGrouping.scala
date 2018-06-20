@@ -20,6 +20,7 @@ package org.openmole.plugin.grouping.batch
 import org.openmole.core.context.Context
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole._
+import org.openmole.tool.random.RandomProvider
 
 object InGrouping {
   def apply(numberOfBatch: Int) = new InGrouping(numberOfBatch)
@@ -32,8 +33,8 @@ object InGrouping {
  */
 class InGrouping(numberOfBatch: Int) extends Grouping {
 
-  override def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])]): MoleJobGroup = {
-    if (groups.size < numberOfBatch) MoleJobGroup()
+  override def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])])(implicit newGroup: NewGroup, randomProvider: RandomProvider): MoleJobGroup = {
+    if (groups.size < numberOfBatch) newGroup()
     else groups.minBy { case (_, g) ⇒ g.size }._1
   }
 

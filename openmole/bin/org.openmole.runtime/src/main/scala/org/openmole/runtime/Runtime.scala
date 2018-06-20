@@ -206,7 +206,7 @@ class Runtime {
 
     val outputMessage = if (out.length != 0) Some(out) else None
 
-    val runtimeResult = RuntimeResult(outputMessage, result, localRuntimeInfo)
+    val runtimeResult = RuntimeResult(outputMessage, result, RuntimeInfo.localRuntimeInfo)
 
     newFile.withTmpFile("output", ".tgz") { outputLocal ⇒
       logger.fine(s"Serializing result to $outputLocal")

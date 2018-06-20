@@ -1,26 +1,52 @@
 
 @import org.openmole.site._
+@import DocumentationPages._
 
-@h2(textAlign := "center")
-  The Model Exploration Software
+@h3{What is OpenMOLE?}
 
 @div(stylesheet.centerJustify(100)){
-OpenMOLE has been developed since 2008 as a @b{free and open-source} platform.
-It explores, diagnoses your numerical model and optimizes its dynamics, taking advantage of distributed computing environments.
-The typical usages are model calibration, model exploration, machine learning, optimization, data processing.
+  OpenMOLE has been developed since 2008 as a @b{free and open-source} platform.
+  It offers tools to run, explore, diagnose and optimize your numerical model, taking advantage of distributed computing environments.
+  With OpenMOLE you can @b{explore your already developed model}, in any language (Java, Binary exe, NetLogo, R, SciLab, Python, C++...).
 }
 
 @div(stylesheet.centerJustify(100)){
-OpenMOLE comes with a web interface to write @b{scripts around your models}.
-You can describe how to @b{explore} your own model and how to @b{distribute} its executions on HPC environments in a few lines of code !
+  OpenMOLE comes with a graphical user interface (GUI) to write @b{scripts around your model}.
+  These scripts will use OpenMOLE methods to @b{explore} your model and @b{distribute} its executions on High Performing Computing (HPC) environments, with only a few lines of code!
 }
 
+
+@h3{What can I use it for?}
+@div(stylesheet.centerJustify(100)){
+
+    @i{Real} sensitivity analysis, Calibration on mono or multi criterion, Pattern diversity research in model dynamics, Custom design of experiments, Data processing.
+}
 @Main.build
 
-@div(stylesheet.centerJustify(100))
-  @h2{GETTING STARTED}
-  Take a tour in the @a("Getting started section", href := Pages.gettingStarted.file), with the @a("GUI guide", href := DocumentationPages.gui.file),
-  in the @a("Documentation", href := DocumentationPages.model.file) and latter learn @a("Advanced concepts", href := DocumentationPages.advancedConcepts.file).
-  Have also a look to the @a("full site map", href := DocumentationPages.docSiteMap.file)
+@p
+    Simulation models can be abstracted as a program (or function) that transforms a set of @b{inputs} into a set of @b{outputs}.
+@br
+
+    @img(src := Resource.img.method.modelIO.file, stylesheet.center(40))
+@br
+    Inputs are various : parameters , pictures, CSV files, DB connections, etc., most of the time, modelers are interested in  @b{parameters space exploration} for sensitivity analysis or calibration.
+@br
+    Likewise, outputs can be values are most of times @b{measures}, computed on the dynamics produced by a simulation run  (e.g. fitness or error functions).
+@br
+    In the following, we will refer to @b{input space} and @b{output space}. OpenMOLE provides methods to conveniently explore these spaces and help you answer original questions about your model (cf. TODO link explore)
+@br
+    The resulting output of a simulation, for a given input, will sometimes be referred as the @b{image} of the input.
+    Likewise, the parameters corresponding to an image are called @b{origins} or @b{ancestors}.
+
+
+@h3{Wanna try?}
+
+@div(stylesheet.centerJustify(100)){
+  You can try OpenMOLE online using the OpenMOLE @a("demonstration website", href := shared.link.demo).
+@br
+  When you are ready you can then download OpenMOLE and install it on your computer, everything is explained in the @a("Download", href := install.file) section.
+@br
+  Have a look at the @a("Getting Started", href := stepByStepIntro.file) section, check out the @a("GUI guide", href := gui.file), dive into the @a("documentation", href := documentation.file), and lastly explore some @a("advanced concepts", href := advancedConcepts.file).
+}
 
 @div(stylesheet.centerJustify(100), id := shared.newsPosts)

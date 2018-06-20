@@ -5,7 +5,7 @@ import sbt._
 
 object Libraries {
 
-  lazy val gridscaleVersion = "2.6"
+  lazy val gridscaleVersion = "2.7"
   lazy val mgoVersion = "3.16"
   lazy val bouncyCastleVersion = "1.57"
   lazy val aceVersion = "01.08.2014"
@@ -124,7 +124,7 @@ object Libraries {
   lazy val guava = "com.google.guava" % "guava" % "19.0"
   lazy val spray = "io.spray" %% "spray-json" % "1.3.2"
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
-  lazy val equinoxOSGi = "org.eclipse.tycho" % "org.eclipse.osgi" % "3.12.1.v20170821-1548"
+  lazy val equinoxOSGi = "org.eclipse.tycho" % "org.eclipse.osgi" % "3.13.0.v20180226-1711"
   lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.3.1"
 
   lazy val shapeless = "org.openmole.library" %% "com-chuusai-shapeless" % "2.3.2"

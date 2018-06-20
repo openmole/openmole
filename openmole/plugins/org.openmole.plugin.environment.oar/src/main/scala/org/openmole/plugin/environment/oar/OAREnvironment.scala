@@ -27,7 +27,6 @@ import org.openmole.tool.crypto.Cypher
 import squants._
 import squants.information._
 import effectaside._
-import org.openmole.plugin.environment.batch.refresh.{JobManager, StopEnvironment}
 import org.openmole.plugin.environment.gridscale._
 
 object OAREnvironment {
@@ -65,25 +64,27 @@ object OAREnvironment {
       bestEffort = bestEffort
     )
 
-    if(!localSubmission) {
-      val userValue = user.mustBeDefined("user")
-      val hostValue = host.mustBeDefined("host")
-      val portValue = port.mustBeDefined("port")
+    EnvironmentProvider { () =>
+      if (!localSubmission) {
+        val userValue = user.mustBeDefined("user")
+        val hostValue = host.mustBeDefined("host")
+        val portValue = port.mustBeDefined("port")
 
-      new OAREnvironment(
-        user = userValue,
-        host = hostValue,
-        port = portValue,
-        timeout = timeout.getOrElse(services.preference(SSHEnvironment.TimeOut)),
-        parameters = parameters,
-        name = Some(name.getOrElse(varName.value)),
-        authentication = SSHAuthentication.find(userValue, hostValue, portValue).apply
-      )
-    } else
-      new OARLocalEnvironment(
-        parameters = parameters,
-        name = Some(name.getOrElse(varName.value))
-      )
+        new OAREnvironment(
+          user = userValue,
+          host = hostValue,
+          port = portValue,
+          timeout = timeout.getOrElse(services.preference(SSHEnvironment.TimeOut)),
+          parameters = parameters,
+          name = Some(name.getOrElse(varName.value)),
+          authentication = SSHAuthentication.find(userValue, hostValue, portValue)
+        )
+      } else
+        new OARLocalEnvironment(
+          parameters = parameters,
+          name = Some(name.getOrElse(varName.value))
+        )
+    }
   }
 
   implicit def asSSHServer[A: gridscale.ssh.SSHAuthentication]: AsSSHServer[OAREnvironment[A]] = new AsSSHServer[OAREnvironment[A]] {
@@ -130,12 +131,13 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
   implicit val sshInterpreter = gridscale.ssh.SSH()
   implicit val systemInterpreter = effectaside.System()
 
-  override def stop() =
-    try super.stop()
-    finally  {
-      def usageControls = List(storageService.usageControl, jobService.usageControl)
-      JobManager ! StopEnvironment(this, usageControls, Some(sshInterpreter().close))
-    }
+  override def start() = BatchEnvironment.start(this)
+
+  override def stop() = {
+    def usageControls = List(storageService.usageControl, jobService.usageControl)
+    try BatchEnvironment.clean(this, usageControls)
+    finally sshInterpreter().close
+  }
 
   import env.services.{ threadProvider, preference }
   import org.openmole.plugin.environment.ssh._
@@ -286,10 +288,10 @@ class OARLocalEnvironment(
   override def trySelectJobService() = BatchEnvironment.trySelectSingleJobService(jobService)
 
 
-  override def stop() =
-    try super.stop()
-    finally  {
-      def usageControls = List(storageService.usageControl, jobService.usageControl)
-      JobManager ! StopEnvironment(this, usageControls)
-    }
+  override def start() = BatchEnvironment.start(this)
+
+  override def stop() = {
+    def usageControls = List(storageService.usageControl, jobService.usageControl)
+    BatchEnvironment.clean(this, usageControls)
+  }
 }

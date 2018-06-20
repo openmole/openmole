@@ -51,6 +51,7 @@ object Market {
     lazy val calibration = Tag("Calibration")
     lazy val tutorial = Tag("Tutorial")
     lazy val workflow = Tag("Workflow")
+    lazy val sensitivity = Tag("Sensitivity")
   }
 
   case class Tag(label: String)
@@ -80,7 +81,8 @@ object Market {
       MarketEntry("Explore a GAMA Model", "gama", Seq(gama, stochastic, simulation)),
       MarketEntry("Workflow Tutorial", "tutorials/workflow", Seq(tutorial, scala, workflow)),
       MarketEntry("Native Application Tutorial", "tutorials/native", Seq(tutorial, native, data, python)),
-      MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration, tutorial))
+      MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration, tutorial, sensitivity)),
+      MarketEntry("Sensitivity Analysis", "sensitivity", Seq(netlogo, sensitivity, simulation))
     )
   )
 

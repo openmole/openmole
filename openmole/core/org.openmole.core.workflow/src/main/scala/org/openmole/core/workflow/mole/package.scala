@@ -22,7 +22,6 @@ import scala.language.implicitConversions
 package mole {
 
   trait MolePackage
-
 }
 
 package object mole {

@@ -105,12 +105,22 @@ package object tools {
         case e: String ⇒ e
         case e: TypedTag[String] ⇒ e
         case e: scalatags.generic.StylePair[Any, String] ⇒ e.s := e.v
+        case e: AttrPair ⇒ e
         case _ ⇒ throw new RuntimeException("Unknown element type " + element.getClass)
       }
 
   }
 
+  object sitemap {
+
+    def siteMapSection(docSection: Seq[Page]) = for {
+      page ← docSection
+    } yield li(a(page.title, href := page.file))
+
+  }
+
   def h1(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h1(elements.map(links.toModifier): _*))
+
   def h2(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h2(`class` := shared.documentationSideMenu.cssClass)(elements.map(links.toModifier) ++ links.linkIcon(elements): _*))
   def h3(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h3(`class` := shared.documentationSideMenu.cssClass)(elements.map(links.toModifier) ++ links.linkIcon(elements): _*))
 

@@ -29,6 +29,7 @@ import org.openmole.tool.file._
 import org.openmole.core.serializer.converter._
 import java.util.concurrent.locks.{ ReadWriteLock, ReentrantReadWriteLock }
 
+import com.thoughtworks.xstream.security._
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.stream
@@ -44,8 +45,14 @@ object SerializerService {
 
 class SerializerService { service ⇒
 
-  private[serializer] def buildXStream =
-    new XStream(null, new BinaryStreamDriver(), new ClassLoaderReference(this.getClass.getClassLoader))
+  private[serializer] def buildXStream = {
+    val xs = new XStream(null, new BinaryStreamDriver(), new ClassLoaderReference(this.getClass.getClassLoader))
+    xs.addPermission(NoTypePermission.NONE)
+    xs.addPermission(new TypePermission {
+      override def allows(`type`: Class[_]): Boolean = true
+    })
+    xs
+  }
 
   private val lock = new ReentrantReadWriteLock
   private val xStreamOperations = ListBuffer.empty[(XStream ⇒ _)]

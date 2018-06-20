@@ -32,7 +32,6 @@ class Activator extends PluginInfoActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector(
-        Sampling(objectName(SaltelliSampling)),
         Sampling(objectName(LHS))
       )
 

@@ -34,7 +34,7 @@ package object execution {
     }
 
   object EnvironmentProvider {
-    def apply(build: () ⇒ Environment) = build
+    def apply[T <: Environment](build: () ⇒ T): EnvironmentProvider = build
   }
 
   type EnvironmentProvider = () ⇒ Environment

@@ -61,7 +61,7 @@ package object udocker extends UDockerPackage {
     }
   }
 
-  type FileInfo = (External.ToPut, File)
+  type FileInfo = (External.DeployedFile, File)
   type VolumeInfo = (File, String)
   type MountPoint = (String, String)
   type ContainerId = String

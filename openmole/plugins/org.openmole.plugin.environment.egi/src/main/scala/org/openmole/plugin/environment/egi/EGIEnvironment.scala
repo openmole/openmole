@@ -27,10 +27,11 @@ import org.openmole.core.threadprovider.Updater
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, SerializedJob, UpdateInterval, UsageControl }
 import org.openmole.plugin.environment.batch.jobservice.{ BatchJob, BatchJobService, JobServiceInterface }
-import org.openmole.plugin.environment.batch.refresh.{ JobManager, StopEnvironment }
+import org.openmole.plugin.environment.batch.refresh.{ JobManager }
 import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageService }
 import org.openmole.plugin.environment.egi.EGIEnvironment.WebDavLocation
 import org.openmole.tool.crypto.Cypher
+import org.openmole.core.workflow.execution._
 import squants._
 import squants.information._
 
@@ -195,19 +196,21 @@ object EGIEnvironment extends JavaLogger {
     name:           OptionalArgument[String]      = None
   )(implicit authentication: EGIAuthentication, services: BatchEnvironment.Services, cypher: Cypher, workspace: Workspace, varName: sourcecode.Name) = {
 
-    new EGIEnvironment(
-      voName = voName,
-      service = service,
-      group = group,
-      bdiiURL = bdii,
-      vomsURLs = vomsURLs,
-      fqan = fqan,
-      cpuTime = cpuTime,
-      openMOLEMemory = openMOLEMemory,
-      debug = debug,
-      name = name,
-      authentication = authentication
-    )
+    EnvironmentProvider { () ⇒
+      new EGIEnvironment(
+        voName = voName,
+        service = service,
+        group = group,
+        bdiiURL = bdii,
+        vomsURLs = vomsURLs,
+        fqan = fqan,
+        cpuTime = cpuTime,
+        openMOLEMemory = openMOLEMemory,
+        debug = debug,
+        name = name,
+        authentication = authentication
+      )
+    }
   }
 
 }
@@ -246,16 +249,14 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   override def start() = {
     proxyCache()
     Updater.delay(eagerSubmissionAgent)
-    super.start()
+    BatchEnvironment.start(this)
   }
 
-  override def stop() =
-    try super.stop()
-    finally {
-      eagerSubmissionAgent.stop = true
-      def usageControls = storages().map(_._2.usageControl) ++ List(batchJobService.usageControl)
-      JobManager ! StopEnvironment(this, usageControls)
-    }
+  override def stop() = {
+    eagerSubmissionAgent.stop = true
+    def usageControls = storages().map(_._2.usageControl) ++ List(batchJobService.usageControl)
+    BatchEnvironment.clean(this, usageControls)
+  }
 
   implicit def webdavlocationIsStorage = new StorageInterface[WebDavLocation] {
     def webdavServer(location: WebDavLocation) = gridscale.webdav.WebDAVSServer(location.url, proxyCache().factory)

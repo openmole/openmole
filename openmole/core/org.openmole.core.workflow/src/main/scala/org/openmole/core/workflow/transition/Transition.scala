@@ -46,7 +46,7 @@ class Transition(
   override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, moleExecutionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
     PerformTransition(subMole) { subMoleState ⇒
       import moleExecutionContext.services._
-      if (condition().from(context)) ITransition.submitNextJobsIfReady(this)(filtered(context).values, ticket, subMoleState)
+      if (condition.from(context)) ITransition.submitNextJobsIfReady(this)(filtered(context).values, ticket, subMoleState)
     }
   }
 

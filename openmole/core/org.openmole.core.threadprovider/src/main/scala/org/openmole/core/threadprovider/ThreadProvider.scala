@@ -37,6 +37,10 @@ object ThreadProvider {
 
   def apply(poolSize: Int) = new ThreadProvider(poolSize)
 
+  def background[T](threadProvider: ThreadProvider)(closure: ⇒ T): Future[T] = {
+    Executors.newSingleThreadExecutor(threadProvider.threadFactory).submit(() ⇒ closure)
+  }
+
 }
 
 class ThreadProvider(poolSize: Int) {
@@ -47,7 +51,7 @@ class ThreadProvider(poolSize: Int) {
     new ThreadPoolExecutor(poolSize, poolSize, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue[Runnable](), threadFactory)
 
   lazy val scheduler = Executors.newScheduledThreadPool(1, threadFactory)
-  lazy val taskQueue = PriorityQueue[ThreadProvider.Closure]
+  lazy val taskQueue = PriorityQueue[ThreadProvider.Closure](true)
 
   var stopped = false
 

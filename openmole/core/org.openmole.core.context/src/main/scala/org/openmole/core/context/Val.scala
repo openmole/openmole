@@ -19,7 +19,7 @@ package org.openmole.core.context
 
 import org.openmole.core.tools.obj.ClassUtils._
 import org.openmole.core.tools.obj.{ ClassUtils, Id }
-import shapeless.Typeable
+import shapeless.{ TypeCase, Typeable }
 
 import scala.annotation.tailrec
 import scala.reflect._
@@ -118,6 +118,23 @@ object Val {
       def describe = s"Val[${manifest[T].toString}]"
     }
 
+  val caseBoolean = TypeCase[Val[Boolean]]
+  val caseInt = TypeCase[Val[Int]]
+  val caseLong = TypeCase[Val[Long]]
+  val caseDouble = TypeCase[Val[Double]]
+  val caseString = TypeCase[Val[String]]
+
+  val caseArrayBoolean = TypeCase[Val[Array[Boolean]]]
+  val caseArrayInt = TypeCase[Val[Array[Int]]]
+  val caseArrayLong = TypeCase[Val[Array[Long]]]
+  val caseArrayDouble = TypeCase[Val[Array[Double]]]
+  val caseArrayString = TypeCase[Val[Array[String]]]
+
+  val caseArrayArrayBoolean = TypeCase[Val[Array[Array[Boolean]]]]
+  val caseArrayArrayInt = TypeCase[Val[Array[Array[Int]]]]
+  val caseArrayArrayLong = TypeCase[Val[Array[Array[Long]]]]
+  val caseArrayArrayDouble = TypeCase[Val[Array[Array[Double]]]]
+  val caseArrayArrayString = TypeCase[Val[Array[Array[String]]]]
 }
 
 object Namespace {

@@ -66,8 +66,8 @@ sealed trait Environment <: Name {
   def done: Long = _done.get()
   def failed: Long = _failed.get()
 
-  def start(): Unit = {}
-  def stop(): Unit = {}
+  def start(): Unit
+  def stop(): Unit
 }
 
 trait SubmissionEnvironment <: Environment {
@@ -84,18 +84,20 @@ object LocalEnvironment {
   )(implicit varName: sourcecode.Name, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher) =
     LocalEnvironmentProvider(() ⇒ new LocalEnvironment(nbThreads.getOrElse(1), deinterleave, Some(name.getOrElse(varName.value))))
 
+  def apply(threads: Int, deinterleave: Boolean)(implicit threadProvider: ThreadProvider, eventDispatcherService: EventDispatcher) =
+    LocalEnvironmentProvider(() ⇒ new LocalEnvironment(threads, deinterleave, None))
 }
 
 class LocalEnvironment(
   val nbThreads:     Int,
   val deinterleave:  Boolean,
   override val name: Option[String]
-)(implicit val preference: Preference, threadProvider: ThreadProvider, val eventDispatcherService: EventDispatcher) extends Environment {
+)(implicit val threadProvider: ThreadProvider, val eventDispatcherService: EventDispatcher) extends Environment {
 
   val pool = Cache(new ExecutorPool(nbThreads, WeakReference(this), threadProvider))
 
   def nbJobInQueue = pool().waiting
-  def exceptions = preference(Environment.maxExceptionsLog)
+  def exceptions = 0
 
   def submit(job: Job, executionContext: TaskExecutionContext): Unit =
     submit(new LocalExecutionJob(executionContext, job.moleJobs, Some(job.moleExecution)))

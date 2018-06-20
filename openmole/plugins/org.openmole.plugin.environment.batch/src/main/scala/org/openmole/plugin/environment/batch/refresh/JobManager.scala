@@ -36,14 +36,13 @@ object JobManager extends JavaLogger { self ⇒
 
   def messagePriority(message: DispatchedMessage) =
     message match {
-      case msg: Upload          ⇒ 10
-      case msg: Submit          ⇒ 50
-      case msg: Refresh         ⇒ 5
-      case msg: GetResult       ⇒ 50
-      case msg: KillBatchJob    ⇒ killPriority
-      case msg: Error           ⇒ 100 // This is very quick to process
-      case msg: StopEnvironment ⇒ 200
-      case _                    ⇒ 1
+      case msg: Upload       ⇒ 10
+      case msg: Submit       ⇒ 50
+      case msg: Refresh      ⇒ 5
+      case msg: GetResult    ⇒ 50
+      case msg: KillBatchJob ⇒ killPriority
+      case msg: Error        ⇒ 100 // This is very quick to process
+      case _                 ⇒ 1
     }
 
   object DispatcherActor {
@@ -57,7 +56,6 @@ object JobManager extends JavaLogger { self ⇒
         case msg: DeleteFile         ⇒ DeleteActor.receive(msg)
         case msg: CleanSerializedJob ⇒ CleanerActor.receive(msg)
         case msg: Error              ⇒ ErrorActor.receive(msg)
-        case msg: StopEnvironment    ⇒ StopEnvironmentActor.receive(msg)
       }
   }
 
@@ -72,7 +70,6 @@ object JobManager extends JavaLogger { self ⇒
     case msg: DeleteFile         ⇒ dispatch(msg)
     case msg: CleanSerializedJob ⇒ dispatch(msg)
     case msg: Error              ⇒ dispatch(msg)
-    case msg: StopEnvironment    ⇒ dispatch(msg)
 
     case Manage(job) ⇒
       self ! Upload(job)

@@ -191,20 +191,23 @@ class Execution {
               capsules = statuses,
               error = ErrorBuilder(t.exception),
               environmentStates = environmentState(key),
-              duration = moleExecution.duration.getOrElse(0)
+              duration = moleExecution.duration.getOrElse(0),
+              clean = moleExecution.cleaned
             )
           case _ ⇒
             if (moleExecution.canceled)
               Canceled(
                 capsules = statuses,
                 environmentStates = environmentState(key),
-                duration = moleExecution.duration.get
+                duration = moleExecution.duration.get,
+                clean = moleExecution.cleaned
               )
             else if (moleExecution.finished)
               Finished(
                 capsules = statuses,
                 duration = moleExecution.duration.get,
-                environmentStates = environmentState(key)
+                environmentStates = environmentState(key),
+                clean = moleExecution.cleaned
               )
             else if (moleExecution.started)
               Running(

@@ -53,9 +53,9 @@ object Main {
             div(colTag)(div(mainText, width := 220, scaleText))
           ),
           div(rowTag)(
-            div(colTag)(readMore(DocumentationPages.model)),
-            div(colTag)(readMore(DocumentationPages.method)),
-            div(colTag)(readMore(DocumentationPages.environment))
+            div(colTag)(readMore(DocumentationPages.run)),
+            div(colTag)(readMore(DocumentationPages.explore)),
+            div(colTag)(readMore(DocumentationPages.scale))
           )
         )
       )
@@ -73,19 +73,19 @@ object Main {
               div(rowTag)(img(src := Resource.img.model.code.file, width := 120)),
               div(rowTag, mainTitle)("RUN"),
               div(rowTag)(div(mainText, width := 200, runText)),
-              div(rowTag)(readMore(DocumentationPages.model))
+              div(rowTag)(readMore(DocumentationPages.run))
             ),
             div(colTag, paddingBottom := 30)(
               div(rowTag)(img(src := Resource.img.method.exploreMap.file, width := 120)),
               div(rowTag, mainTitle)("EXPLORE"),
               div(rowTag)(div(mainText, width := 200, exploreText)),
-              div(rowTag)(readMore(DocumentationPages.method))
+              div(rowTag)(readMore(DocumentationPages.explore))
             ),
             div(colTag)(
               div(rowTag)(img(src := Resource.img.environment.scale.file, width := 120)),
               div(rowTag, mainTitle)("SCALE"),
               div(rowTag)(div(mainText, width := 200, scaleText)),
-              div(rowTag)(readMore(DocumentationPages.environment))
+              div(rowTag)(readMore(DocumentationPages.scale))
             )
           )
         )
