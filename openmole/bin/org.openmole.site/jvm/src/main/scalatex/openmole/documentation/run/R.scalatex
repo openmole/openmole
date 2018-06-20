@@ -73,7 +73,7 @@ import it from a @code{file.R}, deal with libraries, and plug inputs and outputs
 
 @p You can now upload @code{Rscript1.R} to your OpenMOLE workspace.
 
-@br Here is the OpenMOLE script to use it in the Rtask. In the @code{resource} of the Rtask is set, you have to find the precise location
+@br Here is the OpenMOLE script to use it in the Rtask. In the @code{resource} of the Rtask is set, you have to provide the precise location
 of the @code{file.R}, which is then imported in the R script using the R primitive @code{source()}).
 
 
@@ -81,7 +81,7 @@ of the @code{file.R}, which is then imported in the R script using the R primiti
     val rTask2 =
       RTask($tq
         source("Rscript1.R")
-      $tq) set(
+      $tq) set (
         resources += workDirectory / "Rscript1.R"
       )
 
