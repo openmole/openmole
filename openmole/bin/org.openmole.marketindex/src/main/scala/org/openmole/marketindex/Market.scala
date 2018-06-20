@@ -37,6 +37,7 @@ object Market {
     lazy val simulation = Tag("Simulation")
     lazy val machineLearning = Tag("Machine Learning")
     lazy val R = Tag("R")
+    lazy val scilab = Tag("Scilab")
     lazy val fsl = Tag("FSL")
     lazy val neuroscience = Tag("Neuro Science")
     lazy val gama = Tag("GAMA")
@@ -70,7 +71,8 @@ object Market {
       githubMarket,
       MarketEntry("Pi Computation", "pi", Seq(stochastic, simulation, scala)),
       MarketEntry("Random Forest", "randomforest", Seq(stochastic, machineLearning, native, data, python)),
-      MarketEntry("Hello World in R", "R-hello", Seq(R, data, native)),
+      MarketEntry("Hello World in R", "R-hello", Seq(R)),
+      MarketEntry("Hello World in Scilab", "Scilab-hello", Seq(scilab)),
       MarketEntry("Fire in NetLogo", "fire", Seq(netlogo, stochastic, simulation)),
       MarketEntry("Hello World in Java", "java-hello", Seq(java)),
       MarketEntry("Calibration of Ants", "ants", Seq(netlogo, ga, simulation, calibration)),
