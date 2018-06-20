@@ -18,4 +18,10 @@ package object spatial {
 
   type SpatialPoints = Iterable[SpatialPoint]
 
+  /*
+  implicit def intToEitherIntCouple(i: Int): Either[Int, (Int, Int)] = Left(i)
+
+  implicit def doubletoEitherDoubleSeq(d: Double): Either[Double, Seq[Double]] = Left(d)
+  */
+
 }
