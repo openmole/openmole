@@ -78,11 +78,12 @@ object Market {
       MarketEntry("SimpopLocal", "simpoplocal", Seq(stochastic, simulation, ga, scala, calibration)),
       MarketEntry("Metamimetic Networks", "metamimetic-networks", Seq(stochastic, simulation, netlogo)),
       MarketEntry("Segmentation with FSL", "fsl-fast", Seq(fsl, data, native, neuroscience)),
-      MarketEntry("Explore a GAMA Model", "gama", Seq(gama, stochastic, simulation)),
+      MarketEntry("Sensitivity Analysis", "sensitivity", Seq(netlogo, sensitivity, simulation)),
+      //MarketEntry("Explore a GAMA Model", "gama", Seq(gama, stochastic, simulation)),
       MarketEntry("Workflow Tutorial", "tutorials/workflow", Seq(tutorial, scala, workflow)),
       MarketEntry("Native Application Tutorial", "tutorials/native", Seq(tutorial, native, data, python)),
       MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration, tutorial, sensitivity)),
-      MarketEntry("Sensitivity Analysis", "sensitivity", Seq(netlogo, sensitivity, simulation))
+      MarketEntry("Packaging an R Code", "R-care", Seq(R, data, native)),
     )
   )
 
