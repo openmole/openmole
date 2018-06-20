@@ -21,7 +21,7 @@ import java.util.AbstractCollection
 import java.lang.Class
 
 import scala.reflect.ClassTag
-import org.openmole.core.context.{ Context, Val, Variable }
+import org.openmole.core.context.{ Context, Val, ValType, Variable }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion._
 import org.openmole.core.tools.io.Prettifier._
@@ -32,6 +32,9 @@ import org.openmole.core.workspace.NewFile
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.tool.netlogo.NetLogo
 import org.openmole.tool.cache._
+
+import scala.annotation.tailrec
+import scala.collection.mutable.ArrayBuffer
 
 object NetLogoTask {
   sealed trait Workspace
@@ -149,17 +152,90 @@ object NetLogoTask {
   }
 
   def netLogoArrayToVariable(netlogoCollection: AbstractCollection[Any], prototype: Val[_]) = {
-    val arrayType = prototype.`type`.runtimeClass.getComponentType
-    val array = java.lang.reflect.Array.newInstance(arrayType, netlogoCollection.size)
-    val it = netlogoCollection.iterator
-    for (i ← 0 until netlogoCollection.size) {
-      val v = it.next
-      try java.lang.reflect.Array.set(array, i, v)
-      catch {
-        case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when adding a variable of type ${v.getClass} in an array of ${arrayType}")
+    // get arrayType and depth of multiple array prototype
+    val (multiArrayType, depth): (ValType[_], Int) = ValType.unArrayify(prototype.`type`)
+
+    // recurse to get sizes, Nested LogoLists assumed rectangular : size of first element is taken for each dimension
+    // will fail if the depth of the prototype is not the depth of the LogoList
+    @tailrec def getdims(collection: AbstractCollection[Any], dims: Seq[Int], maxdepth: Int): Seq[Int] = {
+      maxdepth match {
+        case d if d == 1 ⇒ (dims ++ Seq(collection.size()))
+        case _           ⇒ getdims(collection.iterator().next().asInstanceOf[AbstractCollection[Any]], dims ++ Seq(collection.size()), maxdepth - 1)
       }
     }
-    Variable(prototype.asInstanceOf[Val[Any]], array)
+
+    var dims: Seq[Int] = Seq.empty
+    try {
+      dims = getdims(netlogoCollection, Seq.empty, depth)
+    }
+    catch {
+      case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when mapping a prototype array of depth ${depth} and type ${multiArrayType} with nested LogoLists")
+    }
+
+    // create multi array
+    try {
+      val array = java.lang.reflect.Array.newInstance(multiArrayType.runtimeClass.asInstanceOf[Class[_]], dims: _*)
+
+      /**
+       * Manually do conversions to java native types ; necessary to add an output cast feature,
+       *   e.g. NetLogo numeric ~ java.lang.Double -> Int or String and not necessarily Double,
+       *   the target type being the one of the prototype
+       * @param value
+       * @param arrayType
+       */
+      def safeOutput(value: AnyRef, arrayType: Class[_]) = {
+        try {
+          arrayType match {
+            // all netlogo numeric are java.lang.Double
+            case c if c == classOf[Double] ⇒ value.asInstanceOf[java.lang.Double].doubleValue()
+            case c if c == classOf[Float]  ⇒ value.asInstanceOf[java.lang.Double].floatValue()
+            case c if c == classOf[Int]    ⇒ value.asInstanceOf[java.lang.Double].intValue()
+            case c if c == classOf[Long]   ⇒ value.asInstanceOf[java.lang.Double].longValue()
+            // target string assume the origin type has a toString
+            case c if c == classOf[String] ⇒ value.toString
+            // try casting anyway
+            case c                         ⇒ c.cast(value)
+          }
+        }
+        catch {
+          case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when casting a variable of type ${value.getClass} to target type ${arrayType}")
+        }
+      }
+
+      // recurse in the multi array
+      def setMultiArray(collection: AbstractCollection[Any], currentArray: AnyRef, arrayType: Class[_], maxdepth: Int): Unit = {
+        val it = collection.iterator()
+        for (i ← 0 until collection.size) {
+          val v = it.next
+          maxdepth match {
+            case d if d == 1 ⇒ {
+              try {
+                java.lang.reflect.Array.set(currentArray, i, safeOutput(v.asInstanceOf[AnyRef], arrayType))
+              }
+              catch {
+                case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when adding a variable of type ${v.getClass} in an array of type ${multiArrayType}")
+              }
+            }
+            case _ ⇒ {
+              try {
+                setMultiArray(v.asInstanceOf[AbstractCollection[Any]], java.lang.reflect.Array.get(currentArray, i), arrayType, maxdepth - 1)
+              }
+              catch {
+                case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when recursing at depth ${maxdepth} in a multi array of type ${multiArrayType}")
+              }
+            }
+          }
+        }
+      }
+
+      setMultiArray(netlogoCollection, array, multiArrayType.runtimeClass.asInstanceOf[Class[_]], depth)
+
+      // return Variable
+      Variable(prototype.asInstanceOf[Val[Any]], array)
+    }
+    catch {
+      case e: Throwable ⇒ throw new UserBadDataError(e, s"Error constructing array with dims ${dims.toString()} and type ${multiArrayType.runtimeClass}")
+    }
   }
 
   def validateNetLogoInputTypes(inputs: Seq[Val[_]]) = {
