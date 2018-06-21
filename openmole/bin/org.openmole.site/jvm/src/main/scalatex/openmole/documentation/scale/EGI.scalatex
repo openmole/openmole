@@ -5,7 +5,7 @@
 
 
 @aa("EGI", href := shared.link.egi) is a grid infrastructure gathering computing resources from all over the world.
-It is a very powerful computing environment, but is transpires as technically challenging to use.
+It is a very powerful computing environment, but transpires as technically challenging to use.
 OpenMOLE makes it very simple to benefit from the grid.
 
  @h3
