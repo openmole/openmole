@@ -17,7 +17,7 @@ We focus here on the way to manage them in the application.
 Basically, in OpenMOLE GUI, you can store, editing files, run and monitor experiments, store authentication credentials for distributed computation.
 The application runs in a browser (Firefox, Chrome, Opera, etc). The First time you run it, you are asked for a
 password to encrypt your settings (server port, authentication credentials, etc). Your settings data (so not your projects, which are never
-wiped out) are preserved so long your password do not change.
+wiped out) are preserved so long as your password do not change.
 For now OpenMOLE GUI looks like a web application but still run as a heavy client one. This should change in version 8 or 9.
 
 @break
@@ -28,7 +28,7 @@ For now OpenMOLE GUI looks like a web application but still run as a heavy clien
 
 Clicking on the main red button @i{New project} in the menu bar offers 3 choices:
 @h3{Empty project}
-Selecting thi option creates a new script file called @i{newProject.oms} in the current folder and open the (empty) file for edition.
+Selecting this option creates a new script file called @i{newProject.oms} in the current folder and open the (empty) file for edition.
 
 @h3{From market place}
 Selecting this option pops up a dialog containing all the running projects contained in our Market Place.
