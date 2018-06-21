@@ -74,7 +74,7 @@ object Native {
     paragraph(
       "The ",
       org.openmole.site.tools.code(taskName),
-      s""" works only on Linux systems. If you are running OpenMOLE on a different system you won't be able to use it. This limitation may be overcome in the future when docker is installed on MacOS and Windows."""
+      s""" only works on Linux systems. If you are running OpenMOLE on a different system you won't be able to use it. This limitation may be overcome in the future when docker is installed on MacOS and Windows."""
     )
 
 }
