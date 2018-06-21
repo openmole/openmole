@@ -32,7 +32,7 @@ By defining your own exploration task on @a("several types of input", href := an
 
 @h2{@gridSampling}
 
-For a reasonable number of dimension and discretisation quanta (steps) values, complete sampling (or grid sampling)  consists in producing every combination of
+For a reasonable number of dimension and discretisation quanta (steps) values, complete sampling (or grid sampling)  consists of producing every combination of
 the inputs possibles values, given their bounds and quanta of discretisation.
 @br
 @br
@@ -43,7 +43,7 @@ the inputs possibles values, given their bounds and quanta of discretisation.
 Regular sampling or Uniform Sampling are quite good for a first Input Space exploration when you don't know anything  about its structure yet.
 Since it samples from the input space, the collected values from the model executions will reveal the output values
 obtained for "evenly spaced" inputs.
-Sure it's not perfect, but still , it gives a little bit of insights about model sensitivity (as input values vary
+Sure it's not perfect, but still , it gives a little bit of insight about model sensitivity (as input values vary
 within their domain) and if the output are fitness, it may present a little bit of optimization information (as the zone in which the fitness could be
 minimized).
 @br The sampling does not reveal anything about the output space structure, as there is no reason than evenly spaced inputs lead
@@ -67,7 +67,7 @@ Grid Sampling is declared via a @b{DirectSampling Task}, where the bounds and di
    )""", name = "syntax of DirectSampling Task", header = "val my_own_evaluation = EmptyTask(); val my_aggregation = EmptyTask()")
 
 @br
-with
+with 
     @ul
     @li{@b{@hl.code(" evaluation")} is the task (or a composition of tasks) that uses your inputs, typically your model task and a hook.}
     @li{@b{@hl.code("sampling")} is the sampling task}
@@ -149,7 +149,7 @@ exploration""", name = "uniform sampling example")
 @br
 @h2{@csvSampling}
 
-You can inject your own sampling in OpenMOLE through a CSV file. Considering a CSV file like:
+You can inject your own sampling in OpenMOLE through a CSV file. Considering a CSV file like this:
 
 @hl.highlight("""
 colD,  colFileName,    i
@@ -327,9 +327,10 @@ Files are explored as items of a list.
 @h2{@advancedSampling}
 
 Sampling are tools for exploring a space of parameter. The term @i{parameter} is understood in a very broad
-acceptation in OpenMOLE. It may concern numbers, files, random streams, images...
+acceptation in OpenMOLE. It may concern numbers, files, random streams, images, etc...
 
 @p{Complete sampling}
+@br
   The most common way of exploring a model is by using a "complete" sampling, or @b{DirectSampling}, which generates every combination of parameters values and then use the DirectSampling method:
   @br @hl.openmole("""
   val i = Val[Int]
@@ -429,7 +430,7 @@ generating a new pair. OpenMOLE implements the @hl.code("ZipWithIndexSampling") 
       evaluation = (t hook ToStringHook())
     )""", name = "zip with name sampling")
 
-  @p If you need to go through several level of files you may use a sampling like this one:
+  @p If you need to go through several levels of files you may use a sampling like this one:
 
   @br @hl.openmole("""
   val dir = Val[File]
@@ -508,7 +509,7 @@ val s7 = s1 x (seed in (UniformDistribution[Int]() take 100))""", name = "random
 
 @h3{Higher level samplings}
 
-Some sampling combinations generate higher level samplings such as @hl.code("repeat") and
+Some sampling combinations generates higher level samplings such as @hl.code("repeat") and
 @hl.code("bootstrap"):
   @br @hl.openmole("""
     val i = Val[Int]
@@ -546,7 +547,7 @@ Some sampling combinations generate higher level samplings such as @hl.code("rep
 
 @h3{The is keyword}
 
-The is keyword can be use to assigned a value to variable in a sampling. For instance:
+The is keyword can be use to assigned a value to a variable in a sampling. For instance:
 @hl.openmole("""
 val i = Val[Int]
 val j = Val[Int]
