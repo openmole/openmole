@@ -68,7 +68,7 @@ Generally it is easier to directly use the variable containing the file:
 
 @h2("Plugins")
 
-If you use you own @a("OpenMole plugins", href := DocumentationPages.pluginDevelopment.file) and you call some code provided by the plugin in a @code{ScalaTask} you have associate the plugin with this task. Indeed OpenMOLE as no way of knowing that the task uses this plugins and the execution on a remote environment will certainly fail. To do so use the @code{plugins} keyword and the @code{pluginsOf} function. @code{pluginsOf} take an object of you plugins in parameter. It can take a class as well if you use []:
+If you use your own @a("OpenMole plugins", href := DocumentationPages.pluginDevelopment.file) and you call some code provided by the plugin in a @code{ScalaTask} you have associate the plugin with this task. Indeed OpenMOLE as no way of knowing that the task uses this plugin and the execution on a remote environment will certainly fail. To do so use the @code{plugins} keyword and the @code{pluginsOf} function. @code{pluginsOf} take an object of your plugins in the parameter. It can take a class as well if you use []:
   @ul
     @li{for a class: @code{plugins += pluginsOf[namespace.MyClass]}},
     @li{for an object: @code{plugins += pluginsOf(namespace.MyObject)}}.
