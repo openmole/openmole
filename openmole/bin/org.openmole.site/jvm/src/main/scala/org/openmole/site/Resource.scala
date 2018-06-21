@@ -63,7 +63,7 @@ object Resource {
       val profileAnim = methodResource("profileAnim.svg")
       val profileID = methodResource("profileID.svg")
 
-      val directSampling = methodResource("directSampling.svg")
+      val directSampling = methodResource("directSampling.png")
 
       val calibrationMono = methodResource("calibrationMono.png")
       val calibrationMulti = methodResource("calibrationMulti.svg")

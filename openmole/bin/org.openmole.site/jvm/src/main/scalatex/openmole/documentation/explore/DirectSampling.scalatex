@@ -3,6 +3,7 @@
 @import org.openmole.site.tools._
 
 
+
 @def variables = """
 val density = Val[Double]
 val seed = Val[Int]
@@ -118,7 +119,9 @@ Some details:
 
 @b{DirectSampling} generates a workflow that is illustrated below. You may recognize the @i{map reduce} design pattern, provided that an aggregation operator is defined (otherwise it would just be a @i{map} :-) )
 
-@Resource.rawFrag(Resource.img.method.directSampling)
+@br
+
+@img(src := Resource.img.method.directSampling.file, center(50))
 
 
 
