@@ -234,7 +234,7 @@ object DocumentationPages {
   // Developers
   lazy val developers = DocumentationPage.fromScalatex(name = "Developers", content = scalatex.documentation.developers.Developers)
 
-  def developersPages = Seq(capsule, console, moleTask, pluginDevelopment, serverRESTAPI, webServer)
+  def developersPages = Seq(console, pluginDevelopment, serverRESTAPI, webServer)
 
   lazy val console = DocumentationPage.fromScalatex(name = "Console", content = scalatex.documentation.developers.Console)
   lazy val pluginDevelopment = DocumentationPage.fromScalatex(name = "Plugin Development", content = scalatex.documentation.developers.PluginDevelopment)
