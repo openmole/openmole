@@ -106,14 +106,14 @@ sufficiently well.
 @p
 The Profile method takes the following parameters:
   @ul
-  @li{@hl.code("inputs"): a list of the model parameters with their minimum and maximum bounds,}
-  @li{@hl.code("objective"): a variable defined in the OpenMOLE script that contains the distance between the data and the model output,}
-  @li{@hl.code("x"): the parameter which is being profiled,}
-  @li{@hl.code("nX"): the size of the subintervals.}
+  @li{@hl.code("inputs"): a list of the model parameters with their minimum and maximum bounds}
+  @li{@hl.code("objective"): a variable defined in the OpenMOLE script that contains the distance between the data and the model output}
+  @li{@hl.code("x"): the parameter which is being profiled}
+  @li{@hl.code("nX"): the size of the subintervals}
   @li{@hl.code("stochastic"): the seed provider, mandatory if your model contains randomness}
 @p
 You will also need an evolutionary scheme and can use SteadyStateEvolution as described in @a("Calibration", href :=
-  DocumentationPages.calibration.file))
+  DocumentationPages.calibration.file)
 
 @p To profile a parameter, use the GenomeProfile constructor like so:
   @br @hl.openmole("""
