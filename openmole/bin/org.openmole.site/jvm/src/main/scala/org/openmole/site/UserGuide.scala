@@ -27,11 +27,11 @@ import tools._
 import scalatags.Text.TypedTag
 
 object UserGuide {
-
+  /*
   val firstModel = DocumentationPages.run
   val firstMethod = DocumentationPages.explore
   val firstEnvironment = DocumentationPages.scale
-
+*/
   val line = hr(classIs("line"), width := "90%", marginTop := 10)
 
   def header(sp: TypedTag[_ <: String]) =
@@ -68,9 +68,10 @@ object UserGuide {
       span(s"Scale on different environments "), h1Like))
     case _ ⇒ header(span(
       tools.to(DocumentationPages.scale)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
-      span(s"Scale on $env "), h1Like
+      span(s"Scale on $env"), h1Like
     ))
   }
+
   lazy val imgStyle = Seq(
     width := 100,
     paddingRight := 15

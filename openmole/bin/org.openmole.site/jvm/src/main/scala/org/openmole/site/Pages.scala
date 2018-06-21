@@ -154,6 +154,7 @@ object DocumentationPages {
       scalePages ++
       languagePages ++
       advancedConceptsPages ++
+      developersPages ++
       docLonelyPages
 
   def docLonelyPages = Seq(gui, market, commandOptions)
@@ -161,25 +162,6 @@ object DocumentationPages {
   lazy val gui = DocumentationPage.fromScalatex(name = "GUI", content = scalatex.documentation.GUI)
   lazy val market = DocumentationPage.fromScalatex(name = "Market", content = scalatex.documentation.Market)
   lazy val commandOptions = DocumentationPage.fromScalatex(name = "Command Options", content = scalatex.documentation.CommandOptions)
-
-  // Language
-  lazy val language = DocumentationPage.fromScalatex(name = "Language", content = scalatex.documentation.language.Language)
-
-  def languagePages = advancedPages ++ Seq(fileManagement, hook, scalaFunction)
-
-  lazy val fileManagement = DocumentationPage.fromScalatex(name = "File Management", content = scalatex.documentation.language.FileManagement)
-  lazy val hook = DocumentationPage.fromScalatex(name = "Hook", content = scalatex.documentation.language.Hook)
-  lazy val scalaFunction = DocumentationPage.fromScalatex(name = "Scala Function", content = scalatex.documentation.language.ScalaFunction)
-
-  // Advanced
-  lazy val advanced = DocumentationPage.fromScalatex(name = "Advanced", content = scalatex.documentation.language.advanced.Advanced)
-
-  def advancedPages = Seq(capsule, moleTask, source, transition)
-
-  lazy val capsule = DocumentationPage.fromScalatex(name = "Capsule", content = scalatex.documentation.language.advanced.Capsule)
-  lazy val moleTask = DocumentationPage.fromScalatex(name = "Mole Task", content = scalatex.documentation.language.advanced.MoleTask)
-  lazy val source = DocumentationPage.fromScalatex(name = "Source", content = scalatex.documentation.language.advanced.Source)
-  lazy val transition = DocumentationPage.fromScalatex(name = "Transition", content = scalatex.documentation.language.advanced.Transition)
 
   // Run
   lazy val run = DocumentationPage.fromScalatex(name = "Run", content = scalatex.documentation.run.Run)
@@ -217,6 +199,25 @@ object DocumentationPages {
   lazy val island = DocumentationPage.fromScalatex(name = "Island", content = scalatex.documentation.scale.Island)
   lazy val multithread = DocumentationPage.fromScalatex(name = "Multithread", content = scalatex.documentation.scale.Multithread)
   lazy val ssh = DocumentationPage.fromScalatex(name = "SSH", content = scalatex.documentation.scale.SSH)
+
+  // Language
+  lazy val language = DocumentationPage.fromScalatex(name = "Language", content = scalatex.documentation.language.Language)
+
+  def languagePages = advancedPages ++ Seq(fileManagement, hook, scalaFunction)
+
+  lazy val fileManagement = DocumentationPage.fromScalatex(name = "File Management", content = scalatex.documentation.language.FileManagement)
+  lazy val hook = DocumentationPage.fromScalatex(name = "Hook", content = scalatex.documentation.language.Hook)
+  lazy val scalaFunction = DocumentationPage.fromScalatex(name = "Scala Function", content = scalatex.documentation.language.ScalaFunction)
+
+  // Advanced
+  lazy val advanced = DocumentationPage.fromScalatex(name = "Advanced", content = scalatex.documentation.language.advanced.Advanced)
+
+  def advancedPages = Seq(capsule, moleTask, source, transition)
+
+  lazy val capsule = DocumentationPage.fromScalatex(name = "Capsule", content = scalatex.documentation.language.advanced.Capsule)
+  lazy val moleTask = DocumentationPage.fromScalatex(name = "Mole Task", content = scalatex.documentation.language.advanced.MoleTask)
+  lazy val source = DocumentationPage.fromScalatex(name = "Source", content = scalatex.documentation.language.advanced.Source)
+  lazy val transition = DocumentationPage.fromScalatex(name = "Transition", content = scalatex.documentation.language.advanced.Transition)
 
   // Advanced Concepts
   lazy val advancedConcepts = DocumentationPage.fromScalatex(name = "Advanced Concepts", content = scalatex.documentation.advancedConcepts.AdvancedConcepts)
