@@ -156,10 +156,10 @@ object RTask {
         writeInputsJSON(jsonInputs)
         scriptFile.content = s"""
           |library("jsonlite")
-          |$inputArrayName = fromJSON("$inputJSONName", simplifyMatrix = FALSE)
+          |$inputArrayName = fromJSON("/$inputJSONName", simplifyMatrix = FALSE)
           |${rInputMapping(inputArrayName)}
           |${script.from(p.context)(p.random, p.newFile, p.fileService)}
-          |write_json($rOutputMapping, "$outputJSONName", always_decimal = TRUE)
+          |write_json($rOutputMapping, "/$outputJSONName", always_decimal = TRUE)
           """.stripMargin
 
         val outputFile = Val[File]("outputFile", Namespace("RTask"))

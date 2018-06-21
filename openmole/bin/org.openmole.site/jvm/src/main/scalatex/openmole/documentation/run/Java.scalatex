@@ -4,7 +4,7 @@
 @h2("Making ScalaTask embedding Java code")
 
 
-OpenMOLE makes simple the inclusion of your own Java code in a workflow. Since the Scala compiler can compile Java code, Java code can be directly fed to the ScalaTask as shown in @aa("the ScalaTask example", href := DocumentationPages.scala.file). Additionally, a compiled Java program can be encapsulated in a ScalaTask as a jar file through the @hl.openmoleNoTest("libraries") parameter as below.
+OpenMOLE makes the inclusion of your own Java code in a workflow simple. Since the Scala compiler can compile Java code, Java code can be directly fed to the ScalaTask as shown in @aa("the ScalaTask example", href := DocumentationPages.scala.file). Additionally, a compiled Java program can be encapsulated in a ScalaTask as a jar file through the @hl.openmoleNoTest("libraries") parameter as below.
 
 @p
   /!\: In this page, there are two example to use a code developed in Java from OpenMOLE. The first one works for simple Java programs and the second one for a more complex program that requires dependencies managed by Maven.  For more ambitious developments, it is recommended to consider embedding your code in an @a("OpenMOLE plugin", href := DocumentationPages.pluginDevelopment.file). It is pretty straight forward since they are simple @a("OSGi", href:=shared.link.osgi) bundles.
@@ -35,7 +35,7 @@ OpenMOLE makes simple the inclusion of your own Java code in a workflow. Since t
   jar cvf Hello.jar hello""", "plain")
 
 @p 
-  To call this scala code we will use a ScalaTask which is able to call Java code. In order to do that you should first create a folder in the OpenMOLE we interface and then upload the Hello.jar file in this folder in OpenMOLE. In the same folder you may then write script (script.oms) which looks like that:
+  To call this scala code we will use a ScalaTask which is able to call Java code. In order to do that you should first create a folder in the OpenMOLE interface and then upload the Hello.jar file in this folder in OpenMOLE. In the same folder you may then write script (script.oms) which looks like this:
 @hl.openmole("""
   val proto1 = Val[Int]
 
@@ -281,7 +281,7 @@ Once this code is added, you can produce the  bundle by simply executing a build
 """, "java")
 
 @p
-    This function has simply to be called at the beginning of the task code. For example for the TiffReaderTask :
+    This function simply has to be called at the beginning of the task code. For example for the TiffReaderTask :
     @hl.openmole("""
        public static double readGeoTiff(File file) throws IOException {
 
