@@ -77,8 +77,6 @@
     @ul
       @li{@code{netLogoInputs} vector of couples (Val,String) to establish the link between workflow variables that are input and the corresponding netlogo variables}
       @li{@code{netLogoOutputs} vector of couples (String,Val) to collect outputs of the model (the string can be any NetLogo command)}
-      @li{@code{netLogoArrayOutputs} vector of triples (String,Int,Val) to collect outputs from lists in the model (gets the item at the given index)}
-
 
 @h2{Embedding NetLogo extensions and sources}
 

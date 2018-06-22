@@ -38,13 +38,7 @@ object NetLogo5Task {
   implicit def isTask: InputOutputBuilder[NetLogo5Task] = InputOutputBuilder(NetLogo5Task.config)
   implicit def isExternal: ExternalBuilder[NetLogo5Task] = ExternalBuilder(NetLogo5Task.external)
   implicit def isInfo = InfoBuilder(info)
-
-  implicit def isBuilder = new NetLogoTaskBuilder[NetLogo5Task] {
-    override def netLogoInputs = NetLogo5Task.netLogoInputs
-    override def netLogoArrayInputs = NetLogo5Task.netLogoArrayInputs
-    override def netLogoArrayOutputs = NetLogo5Task.netLogoArrayOutputs
-    override def netLogoOutputs = NetLogo5Task.netLogoOutputs
-  }
+  implicit def isMapped = MappedInputOutputBuilder(NetLogo5Task.mapped)
 
   def workspace(
     workspace:         File,
@@ -103,10 +97,7 @@ object NetLogo5Task {
       config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
-      netLogoInputs = Vector.empty,
-      netLogoArrayInputs = Vector.empty,
-      netLogoOutputs = Vector.empty,
-      netLogoArrayOutputs = Vector.empty,
+      mapped = MappedInputOutputConfig(),
       workspace = workspace,
       launchingCommands = launchingCommands,
       seed = seed,
@@ -117,18 +108,15 @@ object NetLogo5Task {
 }
 
 @Lenses case class NetLogo5Task(
-  config:              InputOutputConfig,
-  external:            External,
-  info:                InfoConfig,
-  netLogoInputs:       Vector[(Val[_], String)],
-  netLogoArrayInputs:  Vector[(Val[_], String)],
-  netLogoOutputs:      Vector[(String, Val[_])],
-  netLogoArrayOutputs: Vector[(String, Int, Val[_])],
-  workspace:           NetLogoTask.Workspace,
-  launchingCommands:   Seq[FromContext[String]],
-  seed:                Option[Val[Int]],
-  ignoreError:         Boolean,
-  reuseWorkspace:      Boolean
+  config:            InputOutputConfig,
+  external:          External,
+  info:              InfoConfig,
+  mapped:            MappedInputOutputConfig,
+  workspace:         NetLogoTask.Workspace,
+  launchingCommands: Seq[FromContext[String]],
+  seed:              Option[Val[Int]],
+  ignoreError:       Boolean,
+  reuseWorkspace:    Boolean
 ) extends NetLogoTask {
   override def netLogoFactory: NetLogoFactory = NetLogo5Task.factory
 }
