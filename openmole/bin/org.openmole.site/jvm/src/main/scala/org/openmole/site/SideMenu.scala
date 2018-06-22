@@ -73,6 +73,12 @@ object SideMenu {
   val run = SideMenu(DocumentationPages.runPages, classIs(btn ++ btn_primary), "Available tasks")
   val explore = SideMenu(DocumentationPages.explorePages, classIs(btn ++ btn_primary), "Available methods")
   val scale = SideMenu(DocumentationPages.scalePages, classIs(btn ++ btn_primary), "Available environments")
+  val language = SideMenu(DocumentationPages.languagePages, classIs(btn ++ btn_primary))
+  val advancedConcepts = SideMenu(DocumentationPages.advancedConceptsPages, classIs(btn ++ btn_primary))
+  val developers = SideMenu(DocumentationPages.developersPages, classIs(btn ++ btn_primary))
+  val tutorials = SideMenu(DocumentationPages.tutoPages, classIs(btn ++ btn_primary))
+  val community = SideMenu(DocumentationPages.communityPages, classIs(btn ++ btn_primary))
+  val download = SideMenu(DocumentationPages.downloadPages, classIs(btn ++ btn_primary))
 
   val more = SideMenu(
     Seq(
@@ -80,11 +86,12 @@ object SideMenu {
       DocumentationPages.explore,
       DocumentationPages.scale,
       DocumentationPages.language,
-      DocumentationPages.gui,
-      DocumentationPages.documentation
+      DocumentationPages.advancedConcepts,
+      DocumentationPages.developers,
+      DocumentationPages.gui
     ),
     classIs(btn ++ btn_default),
-    "See also"
+    "See also in the doc"
   )
 
 }

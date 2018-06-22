@@ -93,11 +93,53 @@ object UserGuide {
           SideMenu.left(SideMenu.explore),
           Some(SideMenu.right(SideMenu.more.insert(current.details)))
         )
-      case p if ((DocumentationPages.runPages :+ DocumentationPages.run).contains(p)) ⇒
+      case p if ((DocumentationPages.scalePages :+ DocumentationPages.scale).contains(p)) ⇒
         IntegratedPage(
           headerEnvironment(current.name),
           div(current.content),
           SideMenu.left(SideMenu.scale),
+          Some(SideMenu.right(SideMenu.more.insert(current.details)))
+        )
+      case p if ((DocumentationPages.languagePages :+ DocumentationPages.language).contains(p)) ⇒
+        IntegratedPage(
+          div(paddingTop := 100),
+          div(current.content),
+          SideMenu.left(SideMenu.language),
+          Some(SideMenu.right(SideMenu.more.insert(current.details)))
+        )
+      case p if ((DocumentationPages.advancedConceptsPages :+ DocumentationPages.advancedConcepts).contains(p)) ⇒
+        IntegratedPage(
+          div(paddingTop := 100),
+          div(current.content),
+          SideMenu.left(SideMenu.advancedConcepts),
+          Some(SideMenu.right(SideMenu.more.insert(current.details)))
+        )
+      case p if ((DocumentationPages.developersPages :+ DocumentationPages.developers).contains(p)) ⇒
+        IntegratedPage(
+          div(paddingTop := 100),
+          div(current.content),
+          SideMenu.left(SideMenu.developers),
+          Some(SideMenu.right(SideMenu.more.insert(current.details)))
+        )
+      case p if ((DocumentationPages.tutoPages :+ DocumentationPages.tutorials).contains(p)) ⇒
+        IntegratedPage(
+          div(paddingTop := 100),
+          div(current.content),
+          SideMenu.left(SideMenu.tutorials),
+          Some(SideMenu.right(SideMenu.more.insert(current.details)))
+        )
+      case p if ((DocumentationPages.communityPages :+ DocumentationPages.OMcommunity).contains(p)) ⇒
+        IntegratedPage(
+          div(paddingTop := 100),
+          div(current.content),
+          SideMenu.left(SideMenu.community),
+          Some(SideMenu.right(SideMenu.more.insert(current.details)))
+        )
+      case p if ((DocumentationPages.downloadPages :+ DocumentationPages.install).contains(p)) ⇒
+        IntegratedPage(
+          div(paddingTop := 100),
+          div(current.content),
+          SideMenu.left(SideMenu.download),
           Some(SideMenu.right(SideMenu.more.insert(current.details)))
         )
       case _ ⇒
@@ -105,7 +147,7 @@ object UserGuide {
           div(paddingTop := 100),
           div(current.content),
           SideMenu.left(SideMenu(Seq.empty, classIs(btn ++ btn_primary))),
-          None
+          Some(SideMenu.right(SideMenu.more.insert(current.details)))
         )
     }
 
