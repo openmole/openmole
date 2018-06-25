@@ -14,7 +14,7 @@ To summarize, you can **design large scale distributed programs** reusing **lega
 
 ## Try it! ##
 
-To checkout OpenMOLE you can play with to the [demo site](http://demo.openmole.org) (this site is wiped out every two hours). You should click on the litle cart and try out some of the market place examples.
+To checkout OpenMOLE you can play with to the [demo site](http://demo.openmole.org) (this site is wiped out every two hours). You should click on the little cart and try out some of the market place examples.
 
 :warning: Don't provide any credential to this site! :warning:
 

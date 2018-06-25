@@ -33,7 +33,10 @@ class Activator extends PluginInfoActivator {
     import org.openmole.core.pluginmanager.KeyWord._
 
     val keyWords: Vector[KeyWord] =
-      Vector(Task(objectName(ScilabTask)))
+      Vector(
+        Task(objectName(ScilabTask)),
+        "scilabInputs",
+        "scilabOutputs")
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
     ConfigurationInfo.register(

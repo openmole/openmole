@@ -25,6 +25,7 @@ import org.openmole.core.context.{ Context, Val, ValType, Variable }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion._
 import org.openmole.core.tools.io.Prettifier._
+import org.openmole.core.workflow.builder.MappedInputOutputConfig
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
@@ -259,10 +260,8 @@ trait NetLogoTask extends Task with ValidateTask {
 
   def workspace: NetLogoTask.Workspace
   def launchingCommands: Seq[FromContext[String]]
-  def netLogoInputs: Seq[(Val[_], String)]
-  def netLogoArrayInputs: Seq[(Val[_], String)]
-  def netLogoOutputs: Iterable[(String, Val[_])]
-  def netLogoArrayOutputs: Iterable[(String, Int, Val[_])]
+  def mapped: MappedInputOutputConfig
+
   def netLogoFactory: NetLogoFactory
   def ignoreError: Boolean
   def seed: Option[Val[Int]]
@@ -274,7 +273,7 @@ trait NetLogoTask extends Task with ValidateTask {
     val allInputs = External.PWD :: inputs.toList
     launchingCommands.flatMap(_.validate(allInputs)) ++
       External.validate(external)(allInputs).apply ++
-      NetLogoTask.validateNetLogoInputTypes(netLogoInputs.map(_._1))
+      NetLogoTask.validateNetLogoInputTypes(mapped.inputs.map(_.v))
   }
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
@@ -290,41 +289,30 @@ trait NetLogoTask extends Task with ValidateTask {
 
       seed.foreach { s ⇒ NetLogoTask.executeNetLogo(instance.netLogo, s"random-seed ${context(s)}") }
 
-      for (inBinding ← netLogoInputs) {
-        val v = NetLogoTask.netLogoCompatibleType(preparedContext(inBinding._1))
-        NetLogoTask.setGlobal(instance.netLogo, inBinding._2, v)
+      for (inBinding ← mapped.inputs) {
+        val v = NetLogoTask.netLogoCompatibleType(preparedContext(inBinding.v))
+        NetLogoTask.setGlobal(instance.netLogo, inBinding.name, v)
       }
 
       for (cmd ← launchingCommands.map(_.from(context))) NetLogoTask.executeNetLogo(instance.netLogo, cmd, ignoreError)
 
       val contextResult =
-        External.fetchOutputFiles(external, outputs, preparedContext, resolver, instance.workspaceDirectory) ++ netLogoOutputs.map {
-          case (name, prototype) ⇒
+        External.fetchOutputFiles(external, outputs, preparedContext, resolver, instance.workspaceDirectory) ++ mapped.outputs.map {
+          case mapped ⇒
             try {
-              val outputValue = NetLogoTask.report(instance.netLogo, name)
-              if (outputValue == null) throw new InternalProcessingError(s"Value of netlogo output $name has been reported as null by netlogo")
-              if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Val[Any]], outputValue)
+              val outputValue = NetLogoTask.report(instance.netLogo, mapped.name)
+              if (outputValue == null) throw new InternalProcessingError(s"Value of netlogo output ${mapped.name} has been reported as null by netlogo")
+              if (!mapped.v.`type`.runtimeClass.isArray) Variable.unsecure(mapped.v, outputValue)
               else {
                 val netLogoCollection = outputValue.asInstanceOf[AbstractCollection[Any]]
-                NetLogoTask.netLogoArrayToVariable(netLogoCollection, prototype)
+                NetLogoTask.netLogoArrayToVariable(netLogoCollection, mapped.v)
               }
             }
             catch {
               case e: Throwable ⇒
                 throw new UserBadDataError(
-                  s"Error when fetching netlogo output $name in variable $prototype:\n" + e.stackStringWithMargin
+                  s"Error when fetching netlogo output ${mapped.name} in variable ${mapped.v}:\n" + e.stackStringWithMargin
                 )
-            }
-        } ++ netLogoArrayOutputs.map {
-          case (name, column, prototype) ⇒
-            try {
-              val netLogoCollection = NetLogoTask.report(instance.netLogo, name)
-              val outputValue = netLogoCollection.asInstanceOf[AbstractCollection[Any]].toArray()(column)
-              if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Val[Any]], outputValue)
-              else NetLogoTask.netLogoArrayToVariable(outputValue.asInstanceOf[AbstractCollection[Any]], prototype)
-            }
-            catch {
-              case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when fetching column $column of netlogo output $name in variable $prototype")
             }
         }
 

@@ -26,7 +26,7 @@ variety of the dynamics it is able to produce, even those about which you were n
 
 The PSE method is designed to cover the output space, hence the highest score possible in output exploration.
 PSe is all about @i{covering} output space, hence the low scores in optimization and Input Space exploration.
-As the methods discovers patterns in the output space, inputs values that lead to these patterns are available, that give litlle insights
+As the methods discovers patterns in the output space, inputs values that lead to these patterns are available, that give little insights
 about the model sensitivity.
 Contrarily to calibration-based methods, PSE is sensitive to the dimensionality of the @b{output} space, as it maintains an archive
 of the output space locations covered ever since, which is rapidly costly for more than 3-4 dimensions.

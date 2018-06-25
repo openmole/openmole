@@ -3,18 +3,21 @@ package org.openmole.plugin.task
 import org.openmole.core.dsl._
 
 package scilab {
+
+  import org.openmole.core.workflow.builder._
+
   trait ScilabPackage {
 
+    @deprecated
     lazy val scilabInputs = new {
-      def +=(p: Val[_], name: String): ScilabTask ⇒ ScilabTask =
-        (ScilabTask.scilabInputs add (p, name)) andThen (inputs += p)
-      def +=(p: Val[_]*): ScilabTask ⇒ ScilabTask = p.map(p ⇒ +=(p, p.name))
+      def +=[T: MappedInputBuilder: InputBuilder](p: Val[_], name: String): T ⇒ T = inputs += p mapped name
+      def +=[T: MappedInputBuilder: InputBuilder](p: Val[_]*): T ⇒ T = inputs ++= p.map(_.mapped)
     }
 
+    @deprecated
     lazy val scilabOutputs = new {
-      def +=(name: String, p: Val[_]): ScilabTask ⇒ ScilabTask =
-        (ScilabTask.scilabOutputs add (name, p)) andThen (outputs += p)
-      def +=(p: Val[_]*): ScilabTask ⇒ ScilabTask = p.map(p ⇒ +=(p.name, p))
+      def +=[T: MappedOutputBuilder: OutputBuilder](name: String, p: Val[_]): T ⇒ T = outputs += p mapped name
+      def +=[T: MappedOutputBuilder: OutputBuilder](p: Val[_]*): T ⇒ T = outputs ++= p.map(_.mapped)
     }
 
   }

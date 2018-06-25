@@ -49,7 +49,8 @@ object Menu {
               li(innerLink(DocumentationPages.documentation, "DOCUMENTATION"), liStyle),
               li(innerLink(DocumentationPages.tutorials, "TUTORIALS"), liStyle),
               li(innerLink(DocumentationPages.OMcommunity, "COMMUNITY"), liStyle),
-              li(marginTop := -8, marginBottom := 8, divLinkButton(div(maxWidth := 140)(span("DOWNLOAD"), span(version.value, fontSize := "10px", paddingLeft := 7)), Resource.script.openmole.file, classIs(btn ++ btn_primary))),
+              // li(marginTop := -8, marginBottom := 8, divLinkButton(div(maxWidth := 140)(span("DOWNLOAD"), span(version.value, fontSize := "10px", paddingLeft := 7)), Resource.script.openmole.file, classIs(btn ++ btn_primary))),
+              li(innerLink(DocumentationPages.install, "DOWNLOAD"), liStyle),
               li(marginTop := -8, inputStyle)(img(id := shared.searchImg, src := Resource.img.menu.search.file, Seq(width := 35, paddingTop := 5, paddingLeft := 10, pointer)))(
                 div(id := shared.searchDiv)
               )

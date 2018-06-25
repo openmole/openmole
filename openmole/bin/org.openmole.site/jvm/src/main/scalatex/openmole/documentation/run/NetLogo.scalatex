@@ -77,8 +77,6 @@
     @ul
       @li{@code{netLogoInputs} vector of couples (Val,String) to establish the link between workflow variables that are input and the corresponding netlogo variables}
       @li{@code{netLogoOutputs} vector of couples (String,Val) to collect outputs of the model (the string can be any NetLogo command)}
-      @li{@code{netLogoArrayOutputs} vector of triples (String,Int,Val) to collect outputs from lists in the model (gets the item at the given index)}
-
 
 @h2{Embedding NetLogo extensions and sources}
 
@@ -93,7 +91,7 @@ To be able to run a model with extensions, put the extension folder in the same 
 @h2{An example of NetLogo model exploration}
 
 
-We present now step by step how to explore a NetLogo model. @a("The Fire model", href := Resource.script.fireNLogo.file) is a
+We now present step by step how to explore a NetLogo model. @a("The Fire model", href := Resource.script.fireNLogo.file) is a
 common NetLogo example available in the NetLogo common model library.
 It studies the percolation of a fire in a forest depending on the density of the forest. This model has one input : @code{density} and one output : @code{percent-burned}
 
@@ -183,6 +181,6 @@ DirectSampling(
 
 The Netlogo combines a GUI created by the user, in which he can define parameters and run functions, which the source code in itself.
 
-Sometimes, you have to modify slightly your code to render it purely headless so that it can be run everywhere.
+Sometimes, you have to modify your code slightly to render it purely headless so that it can be run everywhere.
 
 The way to proceed is explained in details in the @aa("Headless Netlogo", href := DocumentationPages.headlessNetLogo.file) section.

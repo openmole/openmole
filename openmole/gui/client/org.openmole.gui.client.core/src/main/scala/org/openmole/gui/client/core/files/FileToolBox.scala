@@ -147,7 +147,7 @@ class FileToolBox(initSafePath: SafePath) {
                 if (prefix.contains(".")) prefix.replaceFirst("[.]", "_1.")
                 else prefix + "_1"
               }
-              CoreUtils.replicate(sp, newName)
+              CoreUtils.duplicate(sp, newName)
               Popover.hide
             }
             true

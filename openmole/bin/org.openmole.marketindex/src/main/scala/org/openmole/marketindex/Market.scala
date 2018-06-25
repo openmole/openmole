@@ -37,6 +37,7 @@ object Market {
     lazy val simulation = Tag("Simulation")
     lazy val machineLearning = Tag("Machine Learning")
     lazy val R = Tag("R")
+    lazy val scilab = Tag("Scilab")
     lazy val fsl = Tag("FSL")
     lazy val neuroscience = Tag("Neuro Science")
     lazy val gama = Tag("GAMA")
@@ -70,7 +71,8 @@ object Market {
       githubMarket,
       MarketEntry("Pi Computation", "pi", Seq(stochastic, simulation, scala)),
       MarketEntry("Random Forest", "randomforest", Seq(stochastic, machineLearning, native, data, python)),
-      MarketEntry("Hello World in R", "R-hello", Seq(R, data, native)),
+      MarketEntry("Hello World in R", "R-hello", Seq(R)),
+      MarketEntry("Hello World in Scilab", "scilab-hello", Seq(scilab)),
       MarketEntry("Fire in NetLogo", "fire", Seq(netlogo, stochastic, simulation)),
       MarketEntry("Hello World in Java", "java-hello", Seq(java)),
       MarketEntry("Calibration of Ants", "ants", Seq(netlogo, ga, simulation, calibration)),
@@ -78,11 +80,12 @@ object Market {
       MarketEntry("SimpopLocal", "simpoplocal", Seq(stochastic, simulation, ga, scala, calibration)),
       MarketEntry("Metamimetic Networks", "metamimetic-networks", Seq(stochastic, simulation, netlogo)),
       MarketEntry("Segmentation with FSL", "fsl-fast", Seq(fsl, data, native, neuroscience)),
-      MarketEntry("Explore a GAMA Model", "gama", Seq(gama, stochastic, simulation)),
+      MarketEntry("Sensitivity Analysis", "sensitivity", Seq(netlogo, sensitivity, simulation)),
+      //MarketEntry("Explore a GAMA Model", "gama", Seq(gama, stochastic, simulation)),
       MarketEntry("Workflow Tutorial", "tutorials/workflow", Seq(tutorial, scala, workflow)),
       MarketEntry("Native Application Tutorial", "tutorials/native", Seq(tutorial, native, data, python)),
       MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration, tutorial, sensitivity)),
-      MarketEntry("Sensitivity Analysis", "sensitivity", Seq(netlogo, sensitivity, simulation))
+      MarketEntry("Packaging an R Code", "R-care", Seq(R, data, native)),
     )
   )
 

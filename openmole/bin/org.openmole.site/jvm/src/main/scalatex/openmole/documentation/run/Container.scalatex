@@ -19,7 +19,7 @@ val container =
   )
 """)
 
-You can run this task. At launch time it download the python image from the docker hub in order to be able to run afterwards.
+You can run this task. At launch time it downloads the python image from the docker hub in order to be able to run afterwards.
 
 @br Let's imagine a slightly more complete example. In this example we use this python script, that uses the @i{numpy} library to multiply a matrix (stored in a csv file) by a scalar number:
 
