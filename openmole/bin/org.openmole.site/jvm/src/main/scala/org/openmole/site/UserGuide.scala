@@ -58,14 +58,14 @@ object UserGuide {
     ))
     case _ ⇒ header(span(
       tools.to(DocumentationPages.explore)(img(src := Resource.img.method.exploreMapAnimated.file, headerImg)),
-      span(s"Explore with $method", h1Like)
+      span(s"Explore with the $method method", h1Like)
     ))
   }
 
   def headerEnvironment(env: String) = env match {
     case "Scale" ⇒ header(span(
       tools.to(DocumentationPages.scale)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
-      span(s"Scale on different environments "), h1Like))
+      span(s"Scale on different environments"), h1Like))
     case _ ⇒ header(span(
       tools.to(DocumentationPages.scale)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
       span(s"Scale on $env"), h1Like
@@ -135,7 +135,7 @@ object UserGuide {
           SideMenu.left(SideMenu.community),
           Some(SideMenu.right(SideMenu.more.insert(current.details)))
         )
-      case p if ((DocumentationPages.downloadPages :+ DocumentationPages.install).contains(p)) ⇒
+      case p if ((DocumentationPages.downloadPages :+ DocumentationPages.download).contains(p)) ⇒
         IntegratedPage(
           div(paddingTop := 100),
           div(current.content),
