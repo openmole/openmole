@@ -6,7 +6,11 @@
  
 @h2{ScilabTask}
 
-Scilab is a scripted language initially designed for numerical computation.
+@p Scilab is an open source software initially designed for numerical computation (see @aa("the official website", href:= "http://www.scilab.org/")).
+It provides its own high-level scripting language and can be used as a computing kernel only. Note that it includes most of proprietary Matlab's functionalities
+and that a set of conversion tools exists (@aa("doc", href:= "https://help.scilab.org/docs/6.0.1/fr_FR/mfile2sci.html")).
+
+
 
 
 @h2{Preliminary remark}
@@ -23,8 +27,10 @@ val dArray = Val[Array[Double]]
 
 val m =
   ScilabTask("dArray = dArray * i") set (
-    scilabInputs += (i, dArray),
-    scilabOutputs += (i, dArray),
+    inputs += i mapped "i",
+    inputs += dArray mapped "dArray",
+    outputs += i,
+    outputs += dArray mapped "dArray"
     i := 9,
     dArray := Array(9.0, 8.0)
   )
