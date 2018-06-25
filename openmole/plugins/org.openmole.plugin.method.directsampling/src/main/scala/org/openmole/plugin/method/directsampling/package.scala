@@ -39,8 +39,8 @@ package object directsampling {
     evaluation:       Puzzle,
     seed:             Val[T],
     replications:     Int,
-    distributionSeed: OptionalArgument[Long] = None,
-    aggregation:      Puzzle                 = defaultAggregation
+    distributionSeed: OptionalArgument[Long]   = None,
+    aggregation:      OptionalArgument[Puzzle] = None
   ) =
     DirectSampling(
       evaluation = evaluation,
@@ -48,18 +48,21 @@ package object directsampling {
       aggregation = aggregation
     )
 
-  def DirectSampling(
+  def DirectSampling[P](
     evaluation:  Puzzle,
     sampling:    Sampling,
-    aggregation: Puzzle   = defaultAggregation
+    aggregation: OptionalArgument[Puzzle] = None
   ): Puzzle = {
     val exploration = ExplorationTask(sampling)
     val explorationCapsule = Capsule(exploration, strain = true)
-    (explorationCapsule -< evaluation >- aggregation) &
-      (explorationCapsule -- (aggregation block (evaluation.outputs: _*)))
-  }
 
-  private def defaultAggregation =
-    Strain(EmptyTask() set (name := "aggregation"))
+    aggregation.option match {
+      case Some(aggregation) ⇒
+        (explorationCapsule -< evaluation >- aggregation) &
+          (explorationCapsule -- (aggregation block (evaluation.outputs: _*)))
+      case None ⇒
+        explorationCapsule -< evaluation
+    }
+  }
 
 }
