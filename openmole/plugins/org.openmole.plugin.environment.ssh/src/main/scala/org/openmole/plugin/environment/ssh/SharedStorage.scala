@@ -112,7 +112,11 @@ object SharedStorage extends JavaLogger {
         script.content = content
 
         val remoteScript = sharedFS.child(serializedJob.path, uniqName("run", ".sh"))
-        UsageControl.withToken(sharedFS.usageControl) { sharedFS.upload(script, remoteScript, options = TransferOptions(raw = true, forceCopy = true, canMove = true))(_) }
+        UsageControl.withToken(sharedFS.usageControl) { token ⇒
+
+          sharedFS.makeDir(baseWorkDirectory)(token)
+          sharedFS.upload(script, remoteScript, options = TransferOptions(raw = true, forceCopy = true, canMove = true))(token)
+        }
         remoteScript
       }
     (remoteScript, result, baseWorkDirectory)
