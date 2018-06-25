@@ -59,7 +59,7 @@ object SideMenu {
   def left(menus: SideMenu*) =
     build(menus, div(leftDetailButtons(220), `class` := "sidebar-left"), Some(div(id := shared.documentationSideMenu.place)))
 
-  implicit def pageToLink(p: Page): Link = Link(p.name, p.file)
+  implicit def pageToLink(p: Page): Link = Link(getPageTitle(p), p.file)
 
   implicit def seqPagToSeqLink(ps: Seq[Page]): Seq[Link] = ps.map {
     pageToLink
@@ -76,7 +76,8 @@ object SideMenu {
   val language = SideMenu(DocumentationPages.languagePages, classIs(btn ++ btn_primary))
   val advancedConcepts = SideMenu(DocumentationPages.advancedConceptsPages, classIs(btn ++ btn_primary))
   val developers = SideMenu(DocumentationPages.developersPages, classIs(btn ++ btn_primary))
-  val tutorials = SideMenu(DocumentationPages.tutoPages, classIs(btn ++ btn_primary))
+  val gettingStarted = SideMenu(DocumentationPages.gettingStartedPages, classIs(btn ++ btn_primary), "Getting started tutorials")
+  val netLogoGA = SideMenu(DocumentationPages.netLogoPages, classIs(btn ++ btn_primary), "NetLogo tutorials")
   val community = SideMenu(DocumentationPages.communityPages, classIs(btn ++ btn_primary))
   val download = SideMenu(DocumentationPages.downloadPages, classIs(btn ++ btn_primary))
 
