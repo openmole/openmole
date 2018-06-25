@@ -204,7 +204,9 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
       val executed = new AtomicInteger()
 
-      def exploration = ExplorationTask(ExplicitSampling(v, 0.0 until 100.0 by 1.0))
+      val sampling = 0.0 to 100.0 by 1.0
+
+      def exploration = ExplorationTask(ExplicitSampling(v, sampling))
 
       def main =
         EmptyTask() set (
@@ -213,7 +215,12 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
         )
 
       def test =
-        TestTask { ctx ⇒ executed.incrementAndGet(); ctx(v.toArray).toSeq.sorted should equal(ctx(v.toArray).toSeq); ctx } set (
+        TestTask {
+          ctx ⇒
+            executed.incrementAndGet()
+            ctx(v.toArray).toSeq should equal(sampling)
+            ctx
+        } set (
           name := "mean",
           inputs += v.array
         )

@@ -22,24 +22,43 @@ import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion.Condition
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.workflow.dsl
-import org.openmole.core.workflow.mole.MoleExecution.SubMoleExecutionState
+import org.openmole.core.workflow.mole.MoleExecution.{ AggregationTransitionRegistryRecord, SubMoleExecutionState }
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workflow.validation._
 import org.openmole.tool.lock._
 import org.openmole.tool.random.RandomProvider
 
+import scala.collection.mutable
 import scala.collection.mutable.{ HashSet, ListBuffer }
 
 object AggregationTransition {
-  def aggregateOutputs(moleExecution: MoleExecution, transition: IAggregationTransition, results: Iterable[(Long, Variable[_])]) = {
-    val toArrayTypes = transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).toList.map { d ⇒ d.name → d.`type` }.toMap[String, ValType[_]]
-    ContextAggregator.aggregate(transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks), toArrayTypes, results)
+
+  def aggregatedOutputs(moleExecution: MoleExecution, transition: IAggregationTransition) = transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).toVector
+
+  def aggregateOutputs(moleExecution: MoleExecution, transition: IAggregationTransition, results: AggregationTransitionRegistryRecord): Context = {
+    val vals = aggregatedOutputs(moleExecution, transition)
+    val resultValues = results.values.value
+    val size = resultValues.size
+
+    def resultsArrays = (resultValues zip results.ids.value).sortBy(_._2).unzip._1.transpose
+
+    def variables = (resultsArrays zip vals).map {
+      case (values, v) ⇒
+        val result = v.`type`.manifest.newArray(values.size)
+        var i = 0
+        for { x ← values } {
+          java.lang.reflect.Array.set(result, i, x)
+          i += 1
+        }
+        Variable.unsecure(v, result)
+    }
+
+    new mutable.WrappedArray.ofRef(variables)
   }
 
   def aggregate(aggregationTransition: IAggregationTransition, subMole: SubMoleExecutionState, ticket: Ticket, executionContext: MoleExecutionContext) = {
     import executionContext.services._
-    //val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration"))
 
     if ( /*!subMole.canceled && */ !hasBeenPerformed(aggregationTransition, subMole, ticket)) {
       val results = subMole.aggregationTransitionRegistry.remove(aggregationTransition, ticket).getOrElse(throw new InternalProcessingError("No context registered for the aggregation transition"))
@@ -105,7 +124,8 @@ class AggregationTransition(val start: Capsule, val end: Slot, val condition: Co
       if ( /*!subMole.canceled && */ !AggregationTransition.hasBeenPerformed(this, subMoleState, parentTicket)) {
         subMoleState.aggregationTransitionRegistry.consult(this, parentTicket) match {
           case Some(results) ⇒
-            results ++= filtered(context).values.map(ticket.content → _)
+            results.ids.append(ticket.content)
+            results.values.append(AggregationTransition.aggregatedOutputs(moleExecution, this).map(v ⇒ context(v)).toArray)
 
             if (trigger != Condition.False) {
               val context = AggregationTransition.aggregateOutputs(moleExecution, this, results)

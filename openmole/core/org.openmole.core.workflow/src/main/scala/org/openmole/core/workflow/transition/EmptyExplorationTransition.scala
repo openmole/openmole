@@ -36,11 +36,11 @@ class EmptyExplorationTransition(start: Capsule, end: Slot, size: FromContext[In
 
   override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
     MoleExecutionMessage.PerformTransition(subMole) { subMoleState ⇒
-      val subSubMole = MoleExecution.newChildSubMoleExecution(subMoleState)
-      ExplorationTransition.registerAggregationTransitions(this, ticket, subSubMole, executionContext)
-      //      ExplorationTransition.submitIn(this, filtered(context), ticket, subSubMole, executionContext)
       import executionContext.services._
-      for (i ← 0 until size.from(context)) ITransition.submitNextJobsIfReady(this)(ListBuffer() ++ filtered(context).values, MoleExecution.nextTicket(moleExecution, ticket), subMoleState)
+      val subSubMole = MoleExecution.newChildSubMoleExecution(subMoleState)
+      val s = size.from(context)
+      ExplorationTransition.registerAggregationTransitions(this, ticket, subSubMole, executionContext, s)
+      for (i ← 0 until s) ITransition.submitNextJobsIfReady(this)(ListBuffer() ++ filtered(context).values, MoleExecution.nextTicket(moleExecution, ticket), subMoleState)
     }
   }
 

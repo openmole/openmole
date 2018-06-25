@@ -36,13 +36,17 @@ class SlaveTransition(start: Capsule, end: Slot, condition: Condition = Conditio
   override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
     MoleExecutionMessage.PerformTransition(subMole) { subMoleState ⇒
       import executionContext.services._
-      if (condition.from(context))
+      if (condition.from(context)) {
+        val samples = ExplorationTransition.exploredSamples(this, context, moleExecution)
+
         ExplorationTransition.submitIn(
           this,
           filtered(context),
           ticket.parent.getOrElse(throw new UserBadDataError("Slave transition should take place within an exploration.")),
+          samples,
           subMoleState,
           executionContext)
+      }
     }
   }
   override def toString = s"$start -<- $end"

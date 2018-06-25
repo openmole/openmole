@@ -27,6 +27,7 @@ object ScilabTask {
   implicit def isTask: InputOutputBuilder[ScilabTask] = InputOutputBuilder(ScilabTask._config)
   implicit def isExternal: ExternalBuilder[ScilabTask] = ExternalBuilder(ScilabTask.external)
   implicit def isInfo = InfoBuilder(info)
+  implicit def isMapped = MappedInputOutputBuilder(ScilabTask.mapped)
 
   implicit def isBuilder = new ReturnValue[ScilabTask] with ErrorOnReturnValue[ScilabTask] with StdOutErr[ScilabTask] with EnvironmentVariables[ScilabTask] with HostFiles[ScilabTask] with WorkDirectory[ScilabTask] { builder ⇒
     override def returnValue = ScilabTask.returnValue
@@ -93,8 +94,7 @@ object ScilabTask {
       _config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
-      scilabInputs = Vector.empty,
-      scilabOutputs = Vector.empty,
+      mapped = MappedInputOutputConfig(),
       version = version
     )
   }
@@ -179,8 +179,7 @@ object ScilabTask {
   _config:            InputOutputConfig,
   external:           External,
   info:               InfoConfig,
-  scilabInputs:       Vector[(Val[_], String)],
-  scilabOutputs:      Vector[(String, Val[_])],
+  mapped:             MappedInputOutputConfig,
   version:            String) extends Task with ValidateTask {
 
   lazy val containerPoolKey = UDockerTask.newCacheKey
@@ -197,12 +196,12 @@ object ScilabTask {
     newFile.withTmpFile("script", ".sci") { scriptFile ⇒
 
       def scilabInputMapping =
-        scilabInputs.map { case (v, name) ⇒ s"$name = ${ScilabTask.toScilab(context(v))}" }.mkString("\n")
+        mapped.inputs.map { m ⇒ s"${m.name} = ${ScilabTask.toScilab(context(m.v))}" }.mkString("\n")
 
       def outputFileName(v: Val[_]) = s"/${v.name}.openmole"
       def outputValName(v: Val[_]) = v.withName(v.name + "File").withType[File]
       def scilabOutputMapping =
-        scilabOutputs.map { case (name, v) ⇒ s"""print("${outputFileName(v)}", $name)""" }.mkString("\n")
+        mapped.outputs.map { m ⇒ s"""print("${outputFileName(m.v)}", ${m.name})""" }.mkString("\n")
 
       scriptFile.content =
         s"""
@@ -230,11 +229,11 @@ object ScilabTask {
           info,
           containerPoolKey = containerPoolKey) set (
           resources += (scriptFile, scriptName, true),
-          scilabOutputs.map { case (_, v) ⇒ outputFiles.+=[UDockerTask](outputFileName(v), outputValName(v)) }
+          mapped.outputs.map { m ⇒ outputFiles.+=[UDockerTask](outputFileName(m.v), outputValName(m.v)) }
         )
 
       val resultContext = uDockerTask.process(executionContext).from(context)
-      resultContext ++ scilabOutputs.map { case (_, v) ⇒ ScilabTask.fromScilab(resultContext(outputValName(v)).content, v) }
+      resultContext ++ mapped.outputs.map { m ⇒ ScilabTask.fromScilab(resultContext(outputValName(m.v)).content, m.v) }
     }
 
   }

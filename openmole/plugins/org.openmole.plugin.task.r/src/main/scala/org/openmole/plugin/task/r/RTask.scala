@@ -98,8 +98,7 @@ object RTask {
       _config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
-      rInputs = Vector.empty,
-      rOutputs = Vector.empty
+      mapped = MappedInputOutputConfig()
     )
   }
 
@@ -115,7 +114,7 @@ object RTask {
   _config:            InputOutputConfig,
   external:           External,
   info:               InfoConfig,
-  rInputs:            Vector[(Val[_], String)], rOutputs: Vector[(String, Val[_])]) extends Task with ValidateTask {
+  mapped:             MappedInputOutputConfig) extends Task with ValidateTask {
 
   lazy val containerPoolKey = UDockerTask.newCacheKey
 
@@ -128,21 +127,21 @@ object RTask {
     import org.json4s.jackson.JsonMethods._
 
     def writeInputsJSON(file: File) = {
-      def values = rInputs.map { case (v, _) ⇒ Array(context(v)) }
+      def values = mapped.inputs.map { m ⇒ Array(context(m.v)) }
       file.content = compact(render(toJSONValue(values.toArray)))
     }
 
     def rInputMapping(arrayName: String) =
-      rInputs.zipWithIndex.map { case ((_, name), i) ⇒ s"$name = $arrayName[[${i + 1}]][[1]]" }.mkString("\n")
+      mapped.inputs.zipWithIndex.map { case (m, i) ⇒ s"${m.name} = $arrayName[[${i + 1}]][[1]]" }.mkString("\n")
 
     def rOutputMapping =
-      s"""list(${rOutputs.map { case (name, _) ⇒ name }.mkString(",")})"""
+      s"""list(${mapped.outputs.map { _.name }.mkString(",")})"""
 
     def readOutputJSON(file: File) = {
       import org.json4s._
       import org.json4s.jackson.JsonMethods._
       val outputValues = parse(file.content)
-      (outputValues.asInstanceOf[JArray].arr zip rOutputs.map(_._2)).map { case (jvalue, v) ⇒ jValueToVariable(jvalue, v) }
+      (outputValues.asInstanceOf[JArray].arr zip mapped.outputs.map(_.v)).map { case (jvalue, v) ⇒ jValueToVariable(jvalue, v) }
     }
 
     newFile.withTmpFile("script", ".R") { scriptFile ⇒
