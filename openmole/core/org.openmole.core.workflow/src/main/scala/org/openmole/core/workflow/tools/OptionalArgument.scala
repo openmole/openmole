@@ -2,8 +2,11 @@ package org.openmole.core.workflow.tools
 
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.{ FromContext, ToFromContext }
+import org.openmole.core.workflow.puzzle.ToPuzzle
 
 object OptionalArgument {
+  implicit def valueToOptionalOfForPuzzle[T](v: T)(implicit toPuzzle: ToPuzzle[T]) = OptionalArgument(Some(toPuzzle.toPuzzle(v)))
+
   implicit def valueToOptionalOfForContext[T](v: T)(implicit toFromContext: ToFromContext[T, T]) = OptionalArgument(Some(FromContext.contextConverter(v)))
   implicit def valueToOptionalArgument[T](v: T) = OptionalArgument(Some(v))
   implicit def noneToOptionalArgument[T](n: None.type) = OptionalArgument[T](n)
