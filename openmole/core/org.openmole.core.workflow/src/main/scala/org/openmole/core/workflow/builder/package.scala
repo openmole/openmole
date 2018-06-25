@@ -23,26 +23,41 @@ package builder {
   import org.openmole.core.expansion._
   import org.openmole.core.workflow.tools._
 
-  case class Mapped[T](v: Val[T], name: String)
+  object IO {
+    implicit def valToIO[T](v: Val[T]) = RawVal(v)
+
+    def collectVals(xs: Iterable[IO]) =
+      xs.collect {
+        case x: RawVal[_] ⇒ x.v
+        case x: Mapped[_] ⇒ x.v
+      }
+
+    def collectMapped(xs: Iterable[IO]) =
+      xs.collect { case x: Mapped[_] ⇒ x }
+  }
+
+  sealed trait IO
+  case class RawVal[T](v: Val[T]) extends IO
+  case class Mapped[T](v: Val[T], name: String) extends IO
 
   class Inputs {
     def +=[T: InputBuilder](d: Val[_]*): T ⇒ T =
       implicitly[InputBuilder[T]].inputs.modify(_ ++ d)
-    def +=[T: MappedInputBuilder: InputBuilder](mapped: Mapped[_]*): T ⇒ T =
-      (this ++= mapped.map(_.v)) andThen implicitly[MappedInputBuilder[T]].mappedInputs.modify(_ ++ mapped)
+    def +=[T: MappedInputBuilder: InputBuilder](mapped: IO*): T ⇒ T =
+      (this ++= IO.collectVals(mapped)) andThen implicitly[MappedInputBuilder[T]].mappedInputs.modify(_ ++ IO.collectMapped(mapped))
 
     def ++=[T: InputBuilder](d: Iterable[Val[_]]*): T ⇒ T = +=[T](d.flatten: _*)
-    def ++=[T: MappedInputBuilder: InputBuilder](mapped: Iterable[Mapped[_]]*): T ⇒ T = +=[T](mapped.flatten: _*)
+    def ++=[T: MappedInputBuilder: InputBuilder](mapped: Iterable[IO]*): T ⇒ T = +=[T](mapped.flatten: _*)
   }
 
   class Outputs {
     def +=[T: OutputBuilder](d: Val[_]*): T ⇒ T =
       implicitly[OutputBuilder[T]].outputs.modify(_ ++ d)
-    def +=[T: MappedOutputBuilder: OutputBuilder](mapped: Mapped[_]*): T ⇒ T =
-      (this ++= mapped.map(_.v)) andThen implicitly[MappedOutputBuilder[T]].mappedOutputs.modify(_ ++ mapped)
+    def +=[T: MappedOutputBuilder: OutputBuilder](mapped: IO*): T ⇒ T =
+      (this ++= IO.collectVals(mapped)) andThen implicitly[MappedOutputBuilder[T]].mappedOutputs.modify(_ ++ IO.collectMapped(mapped))
 
     def ++=[T: OutputBuilder](d: Iterable[Val[_]]*): T ⇒ T = +=[T](d.flatten: _*)
-    def ++=[T: MappedOutputBuilder: OutputBuilder](mapped: Iterable[Mapped[_]]*): T ⇒ T = +=[T](mapped.flatten: _*)
+    def ++=[T: MappedOutputBuilder: OutputBuilder](mapped: Iterable[IO]*): T ⇒ T = +=[T](mapped.flatten: _*)
   }
 
   class ExploredOutputs {
@@ -52,12 +67,7 @@ package builder {
       (outputs.modify(_ ++ add) andThen outputs.modify(_.explore(ds.map(_.name): _*)))(t)
     }
 
-    def +=[T: MappedOutputBuilder: OutputBuilder](mapped: Mapped[_ <: Array[_]]*): T ⇒ T =
-      (this ++= mapped.map(_.v)) andThen implicitly[MappedOutputBuilder[T]].mappedOutputs.modify(_ ++ mapped)
-
     def ++=[T: OutputBuilder](d: Iterable[Val[_ <: Array[_]]]*): T ⇒ T = +=[T](d.flatten: _*)
-    def ++=[T: MappedOutputBuilder: OutputBuilder](mapped: Iterable[Mapped[_ <: Array[_]]]*): T ⇒ T = +=[T](mapped.flatten: _*)
-
   }
 
   class Defaults {
