@@ -27,6 +27,7 @@ import org.nlogo.nvm.RuntimePrimitiveException;
 import org.openmole.plugin.tool.netlogo.NetLogo;
 import scala.collection.JavaConverters;
 
+import java.util.AbstractCollection;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -61,7 +62,12 @@ public class NetLogo6 implements NetLogo {
 
     @Override
     public Object report(String variable) throws Exception {
-        return getWorkspace().report(variable);
+        Object result = getWorkspace().report(variable);
+        if(result instanceof LogoList){
+            return listToCollection((LogoList) result);
+        }else {
+            return result;
+        }
     }
 
     @Override
@@ -108,7 +114,7 @@ public class NetLogo6 implements NetLogo {
      * @param array
      * @return
      */
-    public static LogoList arrayToList(Object[] array){
+    private static LogoList arrayToList(Object[] array){
         LogoListBuilder list = new LogoListBuilder();
         for(Object o:array){
             if(o instanceof Object[]){list.add(arrayToList((Object[]) o));}
@@ -117,4 +123,12 @@ public class NetLogo6 implements NetLogo {
         return(list.toLogoList());
     }
 
+    private static AbstractCollection listToCollection(LogoList list){
+        AbstractCollection collection = new LinkedList();
+        for(Object o:list.toJava()){
+            if(o instanceof LogoList){collection.add(listToCollection((LogoList) o));}
+            else{collection.add(o);}
+        }
+        return(collection);
+    }
 }
