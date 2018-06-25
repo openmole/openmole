@@ -11,7 +11,7 @@ val seed = Val[Int]
 val burned = Val[Double]
 """
 
-
+@h1{Simple Sensitivity Analysis with the NetLogo Fire Model}
 
 @sect{@shared.simpleSAFireMenu.sensitivityAnalysis }
     @p Typical Sensitivity analysis (in a simulation experiment  context) is the study of how the variation of an input
