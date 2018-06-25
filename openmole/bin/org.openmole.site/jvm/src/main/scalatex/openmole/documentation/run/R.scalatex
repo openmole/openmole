@@ -30,7 +30,8 @@ It takes the following arguments :
 
 @ul
    @li{@code{input/output} similar as for any task}
-   @li{mapped input: the syntax @code{input += prototype mapped "r-variable"} establishes a link between the workflow variable @code{prototype} (Val) and the corresponding R variable name @code{"r-variable"} (String)}
+   @li{mapped input: the syntax @code{inputs += prototype mapped "r-variable"} establishes a link between the workflow variable @code{prototype} (Val) and the corresponding R variable name @code{"r-variable"} (String)
+   If variables have the same name, you can use the short syntax @code{inputs += prototype.mapped}}
    @li{mapped output: similar syntax to collect outputs of the model}
 
 @p We develop below a detailed example of how to use a RTask, from a very simple use to a more elaborate with system libraries and R libraries.
@@ -109,7 +110,7 @@ in the @code{set} of the task.
           }
       j = f(i)
     $tq) set (
-      inputs += i mapped "i",
+      inputs += i.mapped,
       i := 3
     )
 
@@ -135,7 +136,7 @@ which is mapped to the OpenMOLE variable @code{i}.
       j = f(varRi)
     $tq) set(
       inputs += i mapped "varRi",
-      outputs += j mapped "j",
+      outputs += j.mapped,
       i := 3
     )
 
@@ -159,10 +160,10 @@ that come not in the R task (for example, the variable @i{c} in @i{rTask5} below
                    }
                j = f(i)
                $tq) set (
-                 inputs += i mapped "i",
+                 inputs += i.mapped,
                  (inputs, outputs) += c,
-                 outputs +=  j mapped "j",
-                 outputs += i mapped "j",
+                 outputs +=  j.mapped,
+                 outputs += i.mapped,
                  i := 3 ,
                  c:=2
                )
@@ -264,7 +265,7 @@ those libraries will be stored, and the execution is quicker.
         install = Seq("apt update", "apt install -y libgdal-dev libproj-dev"),
         libraries = Seq("GeoRange")
       ) set(
-        outputs += area mapped "area"
+        outputs += area.mapped
       )
 
     rTask3 hook ToStringHook()
@@ -350,7 +351,7 @@ respectively @code{inputFiles} and @code{inputs}.
         ) set(
           inputs += n ,
           inputs += g mapped "fileForR",
-          inputs += y mapped "y",
+          inputs += y.mapped,
           outputs += res mapped "area",
           outputs += (g,n)
         )
