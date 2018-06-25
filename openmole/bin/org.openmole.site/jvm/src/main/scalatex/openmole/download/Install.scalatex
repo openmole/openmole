@@ -7,15 +7,25 @@
 
 @h2{Try our demo website}
 Before downloading OpenMOLE, you might want to get a preview of what you can do with it.
-To do so, you can explore our @a("demo website", href := shared.link.demo).
+You can try OpenMOLE online using our @a("demo website", href := shared.link.demo).
+Please note that the service is reset every 6 hours, so don't be surprised if your current script suddenly vanishes :-)
 
 @h2{Download OpenMOLE}
-Archive link
+To run correctly on your own computer, OpenMOLE requires Java version 8 or above.
+Check our @a("FAQ", href := Pages.faq.file) to access your java version information.
+@br
+When Java is installed, you just need to download and extract @a("this archive", href:=Resource.script.openmole.file), and
+you're done! OpenMOLE is installed and works out of the box!
 
 @h2{Run OpenMOLE on Linux}
-Extract the archive
-Run openmole
-
-@h2{Run OpenMOLE on Windows}
-DON'T
-Tuto? App Ubuntu on Windows10? Disclaimer?
+You can then launch OpenMOLE by executing the @i{openmole} file in the installation directory with the @hl.code("./openmole") command.
+It will bring up you web browser.
+@br
+OpenMOLE supports Chrome and Firefox.
+If you are using another default web browser, please copy paste the OpenMOLE url (http://localhost:port) in one of these browsers.
+@br
+@br
+You should see something like this:
+@br
+@br
+@img(src := Resource.img.mole.uiScreenshot.file, `class` := "uiScreenshot", center(100)).
