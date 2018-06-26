@@ -78,24 +78,24 @@ object UserGuide {
   )
 
   def integrate(current: Page): SitePage = {
-    def integratedPage(left: SideMenu, right: SideMenu = SideMenu.more) =
+    def integratedPage(left: SideMenu, right: SideMenu = SideMenu.more, head: TypedTag[String] = div(paddingTop := 100)) =
       IntegratedPage(
-        headerModel(current.name),
+        head,
         div(current.content),
         SideMenu.left(left),
         Some(SideMenu.right(right.insert(current.details)))
       )
 
     current match {
-      case p if (DocumentationPages.runPages :+ DocumentationPages.run).contains(p)                           ⇒ integratedPage(SideMenu.run)
-      case p if ((DocumentationPages.explorePages :+ DocumentationPages.explore).contains(p))                 ⇒ integratedPage(SideMenu.explore)
-      case p if ((DocumentationPages.runPages :+ DocumentationPages.run).contains(p))                         ⇒ integratedPage(SideMenu.scale)
+      case p if (DocumentationPages.runPages :+ DocumentationPages.run).contains(p)                           ⇒ integratedPage(SideMenu.run, head = headerModel(current.name))
+      case p if (DocumentationPages.explorePages :+ DocumentationPages.explore).contains(p)                   ⇒ integratedPage(SideMenu.explore, head = headerMethod(current.name))
+      case p if (DocumentationPages.runPages :+ DocumentationPages.run).contains(p)                           ⇒ integratedPage(SideMenu.scale, head = headerEnvironment(current.name))
       case p if (DocumentationPages.advancedConceptsPages :+ DocumentationPages.advancedConcepts).contains(p) ⇒ integratedPage(SideMenu.advanced)
       case p if (DocumentationPages.developersPages :+ DocumentationPages.developers).contains(p)             ⇒ integratedPage(SideMenu.developers)
       case p if (DocumentationPages.languagePages :+ DocumentationPages.language).contains(p)                 ⇒ integratedPage(SideMenu.language)
-      case p if ((DocumentationPages.tutoPages :+ DocumentationPages.tutorials).contains(p))                  ⇒ integratedPage(SideMenu.tutorials)
-      case p if ((DocumentationPages.communityPages :+ DocumentationPages.OMcommunity).contains(p))           ⇒ integratedPage(SideMenu.community)
-      case p if ((DocumentationPages.downloadPages :+ DocumentationPages.download).contains(p))               ⇒ integratedPage(SideMenu.download)
+      case p if (DocumentationPages.tutoPages :+ DocumentationPages.tutorials).contains(p)                    ⇒ integratedPage(SideMenu.tutorials)
+      case p if (DocumentationPages.communityPages :+ DocumentationPages.OMcommunity).contains(p)             ⇒ integratedPage(SideMenu.community)
+      case p if (DocumentationPages.downloadPages :+ DocumentationPages.download).contains(p)                 ⇒ integratedPage(SideMenu.download)
       case _ ⇒
         IntegratedPage(
           div(paddingTop := 100),
