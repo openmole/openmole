@@ -77,36 +77,30 @@ object UserGuide {
     paddingRight := 15
   )
 
-  def integrate(current: Page): SitePage =
+  def integrate(current: Page): SitePage = {
+    def integratedPage(left: SideMenu, right: SideMenu = SideMenu.more) =
+      IntegratedPage(
+        headerModel(current.name),
+        div(current.content),
+        SideMenu.left(left),
+        Some(SideMenu.right(right.insert(current.details)))
+      )
+
     current match {
-      case p if (DocumentationPages.runPages :+ DocumentationPages.run).contains(p) ⇒
-        IntegratedPage(
-          headerModel(current.name),
-          div(current.content),
-          SideMenu.left(SideMenu.run),
-          Some(SideMenu.right(SideMenu.more.insert(current.details)))
-        )
-      case p if ((DocumentationPages.explorePages :+ DocumentationPages.explore).contains(p)) ⇒
-        IntegratedPage(
-          headerMethod(current.name),
-          div(current.content),
-          SideMenu.left(SideMenu.explore),
-          Some(SideMenu.right(SideMenu.more.insert(current.details)))
-        )
-      case p if ((DocumentationPages.runPages :+ DocumentationPages.run).contains(p)) ⇒
-        IntegratedPage(
-          headerEnvironment(current.name),
-          div(current.content),
-          SideMenu.left(SideMenu.scale),
-          Some(SideMenu.right(SideMenu.more.insert(current.details)))
-        )
+      case p if (DocumentationPages.runPages :+ DocumentationPages.run).contains(p)                           ⇒ integratedPage(SideMenu.run)
+      case p if ((DocumentationPages.explorePages :+ DocumentationPages.explore).contains(p))                 ⇒ integratedPage(SideMenu.explore)
+      case p if ((DocumentationPages.runPages :+ DocumentationPages.run).contains(p))                         ⇒ integratedPage(SideMenu.scale)
+      case p if (DocumentationPages.advancedConceptsPages :+ DocumentationPages.advancedConcepts).contains(p) ⇒ integratedPage(SideMenu.advanced)
+      case p if (DocumentationPages.developersPages :+ DocumentationPages.developers).contains(p)             ⇒ integratedPage(SideMenu.developers)
+      case p if (DocumentationPages.languagePages :+ DocumentationPages.language).contains(p)                 ⇒ integratedPage(SideMenu.language)
       case _ ⇒
         IntegratedPage(
           div(paddingTop := 100),
           div(current.content),
           SideMenu.left(SideMenu(Seq.empty, classIs(btn ++ btn_primary))),
-          None
+          Some(SideMenu.right(SideMenu.more.insert(current.details)))
         )
     }
+  }
 
 }

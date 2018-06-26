@@ -73,15 +73,18 @@ object SideMenu {
   val run = SideMenu(DocumentationPages.runPages, classIs(btn ++ btn_primary), "Available tasks")
   val explore = SideMenu(DocumentationPages.explorePages, classIs(btn ++ btn_primary), "Available methods")
   val scale = SideMenu(DocumentationPages.scalePages, classIs(btn ++ btn_primary), "Available environments")
+  val language = SideMenu(DocumentationPages.languagePages, classIs(btn ++ btn_primary), "Language")
+  val advanced = SideMenu(DocumentationPages.advancedConceptsPages, classIs(btn ++ btn_primary), "Advanced concepts")
+  val developers = SideMenu(DocumentationPages.developersPages, classIs(btn ++ btn_primary), "Developer's documentation")
 
   val more = SideMenu(
     Seq(
+      DocumentationPages.documentation,
       DocumentationPages.run,
       DocumentationPages.explore,
       DocumentationPages.scale,
       DocumentationPages.language,
-      DocumentationPages.gui,
-      DocumentationPages.documentation
+      DocumentationPages.gui
     ),
     classIs(btn ++ btn_default),
     "See also"
