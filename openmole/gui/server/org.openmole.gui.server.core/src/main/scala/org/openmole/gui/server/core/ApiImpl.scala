@@ -325,6 +325,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
             case ErrorInCode(e)            ⇒ error(e)
             case ErrorInCompiler(e)        ⇒ error(e)
             case compiled: Compiled ⇒
+              execution.compiled(execId)
 
               def catchAll[T](f: ⇒ T): Try[T] = {
                 val res =
