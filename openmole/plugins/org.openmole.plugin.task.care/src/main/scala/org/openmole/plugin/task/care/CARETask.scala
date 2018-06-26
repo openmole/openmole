@@ -55,22 +55,25 @@ object CARETask extends JavaLogger {
   }
 
   def apply(
-    archive:            File,
-    command:            String,
-    returnValue:        OptionalArgument[Val[Int]]    = None,
-    stdOut:             OptionalArgument[Val[String]] = None,
-    stdErr:             OptionalArgument[Val[String]] = None,
-    errorOnReturnValue: Boolean                       = true)(implicit sourceCodeName: sourcecode.Name, definitionScope: DefinitionScope): CARETask =
+    archive:              File,
+    command:              String,
+    returnValue:          OptionalArgument[Val[Int]]            = None,
+    stdOut:               OptionalArgument[Val[String]]         = None,
+    stdErr:               OptionalArgument[Val[String]]         = None,
+    errorOnReturnValue:   Boolean                               = true,
+    environmentVariables: Vector[(String, FromContext[String])] = Vector.empty,
+    hostFiles:            Vector[HostFile]                      = Vector.empty,
+    workDirectory:        OptionalArgument[String]              = None)(implicit sourceCodeName: sourcecode.Name, definitionScope: DefinitionScope): CARETask =
     new CARETask(
       archive = archive,
       command = command,
-      hostFiles = Vector.empty,
-      workDirectory = None,
+      hostFiles = hostFiles,
+      workDirectory = workDirectory,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
       stdErr = stdErr,
-      environmentVariables = Vector.empty,
+      environmentVariables = environmentVariables,
       _config = InputOutputConfig(),
       external = External(),
       info = InfoConfig()

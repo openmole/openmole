@@ -72,9 +72,9 @@ object RTask {
     returnValue:          OptionalArgument[Val[Int]]            = None,
     stdOut:               OptionalArgument[Val[String]]         = None,
     stdErr:               OptionalArgument[Val[String]]         = None,
-    environmentVariables: Vector[(String, FromContext[String])] = Vector.empty,
     hostFiles:            Vector[HostFile]                      = Vector.empty,
-    workDirectory:        OptionalArgument[String]              = None
+    workDirectory:        OptionalArgument[String]              = None,
+    environmentVariables: Vector[(String, FromContext[String])] = Vector.empty
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): RTask = {
 
     // add additional installation of devtools only if needed

@@ -63,8 +63,8 @@ object ScilabTask {
     script: FromContext[String],
     //install:     Seq[String]         = Seq.empty,
     //libraries:   Seq[InstallCommand] = Seq.empty,
-    forceUpdate: Boolean = false,
-    version:     String  = "6.0.1",
+    forceUpdate:          Boolean                               = false,
+    version:              String                                = "6.0.1",
     errorOnReturnValue:   Boolean                               = true,
     returnValue:          OptionalArgument[Val[Int]]            = None,
     stdOut:               OptionalArgument[Val[String]]         = None,
@@ -91,11 +91,10 @@ object ScilabTask {
         mode = "P1",
         reuseContainer = true
       ).copy(
-        environmentVariables = environmentVariables,
-        hostFiles = hostFiles,
-        workDirectory = workDirectory
-      )
-
+          environmentVariables = environmentVariables,
+          hostFiles = hostFiles,
+          workDirectory = workDirectory
+        )
 
     ScilabTask(
       script = script,
