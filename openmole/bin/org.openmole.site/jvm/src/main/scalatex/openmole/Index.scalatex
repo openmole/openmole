@@ -44,7 +44,7 @@
 @div(stylesheet.centerJustify(100)){
   You can try OpenMOLE online using the OpenMOLE @a("demonstration website", href := shared.link.demo).
 @br
-  When you are ready you can then download OpenMOLE and install it on your computer, everything is explained in the @a("Download", href := install.file) section.
+  When you are ready you can then download OpenMOLE and install it on your computer, everything is explained in the @a("Download", href := download.file) section.
 @br
   Have a look at the @a("Getting Started", href := stepByStepIntro.file) section, check out the @a("GUI guide", href := gui.file), dive into the @a("documentation", href := documentation.file), and lastly explore some @a("advanced concepts", href := advancedConcepts.file).
 }

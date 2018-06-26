@@ -58,14 +58,14 @@ object UserGuide {
     ))
     case _ ⇒ header(span(
       tools.to(DocumentationPages.explore)(img(src := Resource.img.method.exploreMapAnimated.file, headerImg)),
-      span(s"Explore with $method", h1Like)
+      span(s"Explore with the $method method", h1Like)
     ))
   }
 
   def headerEnvironment(env: String) = env match {
     case "Scale" ⇒ header(span(
       tools.to(DocumentationPages.scale)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
-      span(s"Scale on different environments "), h1Like))
+      span(s"Scale on different environments"), h1Like))
     case _ ⇒ header(span(
       tools.to(DocumentationPages.scale)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
       span(s"Scale on $env"), h1Like
@@ -93,6 +93,9 @@ object UserGuide {
       case p if (DocumentationPages.advancedConceptsPages :+ DocumentationPages.advancedConcepts).contains(p) ⇒ integratedPage(SideMenu.advanced)
       case p if (DocumentationPages.developersPages :+ DocumentationPages.developers).contains(p)             ⇒ integratedPage(SideMenu.developers)
       case p if (DocumentationPages.languagePages :+ DocumentationPages.language).contains(p)                 ⇒ integratedPage(SideMenu.language)
+      case p if ((DocumentationPages.tutoPages :+ DocumentationPages.tutorials).contains(p))                  ⇒ integratedPage(SideMenu.tutorials)
+      case p if ((DocumentationPages.communityPages :+ DocumentationPages.OMcommunity).contains(p))           ⇒ integratedPage(SideMenu.community)
+      case p if ((DocumentationPages.downloadPages :+ DocumentationPages.download).contains(p))               ⇒ integratedPage(SideMenu.download)
       case _ ⇒
         IntegratedPage(
           div(paddingTop := 100),

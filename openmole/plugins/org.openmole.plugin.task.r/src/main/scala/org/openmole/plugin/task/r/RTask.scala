@@ -63,11 +63,18 @@ object RTask {
   def rImage(version: String) = DockerImage("openmole/r-base", version)
 
   def apply(
-    script:      FromContext[String],
-    install:     Seq[String]         = Seq.empty,
-    libraries:   Seq[InstallCommand] = Seq.empty,
-    forceUpdate: Boolean             = false,
-    version:     String              = "3.3.3"
+    script:               FromContext[String],
+    install:              Seq[String]                           = Seq.empty,
+    libraries:            Seq[InstallCommand]                   = Seq.empty,
+    forceUpdate:          Boolean                               = false,
+    version:              String                                = "3.3.3",
+    errorOnReturnValue:   Boolean                               = true,
+    returnValue:          OptionalArgument[Val[Int]]            = None,
+    stdOut:               OptionalArgument[Val[String]]         = None,
+    stdErr:               OptionalArgument[Val[String]]         = None,
+    environmentVariables: Vector[(String, FromContext[String])] = Vector.empty,
+    hostFiles:            Vector[HostFile]                      = Vector.empty,
+    workDirectory:        OptionalArgument[String]              = None
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): RTask = {
 
     // add additional installation of devtools only if needed
@@ -87,15 +94,19 @@ object RTask {
         forceUpdate = forceUpdate,
         mode = "P1",
         reuseContainer = true
-      )
+      ).copy(
+          environmentVariables = environmentVariables,
+          hostFiles = hostFiles,
+          workDirectory = workDirectory
+        )
 
     RTask(
       script = script,
       uDockerArguments,
-      errorOnReturnValue = true,
-      returnValue = None,
-      stdOut = None,
-      stdErr = None,
+      errorOnReturnValue = errorOnReturnValue,
+      returnValue = returnValue,
+      stdOut = stdOut,
+      stdErr = stdErr,
       _config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),

@@ -76,8 +76,9 @@
 
     @p The properties to be adjusted with @code{set} :
     @ul
-      @li{@code{input/output} similar as for any task}
-      @li{mapped input: the syntax @code{input += prototype mapped "netlogo-variable"} establishes a link between the workflow variable @code{prototype} (Val) and the corresponding netlogo variable name @code{"netlogo-variable"} (String)}
+      @li{@code{inputs/outputs} similar as for any task}
+      @li{mapped input: the syntax @code{inputs += prototype mapped "netlogo-variable"} establishes a link between the workflow variable @code{prototype} (Val) and the corresponding netlogo variable name @code{"netlogo-variable"} (String)
+      If the variables have the same name, you can use the shorter syntax @code{inputs += prototype.mapped}}
       @li{mapped output: similar syntax to collect outputs of the model (the string can be any NetLogo command)}
 
     @p The former mapping syntax using @code{netLogoInputs} and @code{netLogoOutputs} is deprecated, but still works until further notice for compatibility reasons.
