@@ -47,7 +47,7 @@ object UserGuide {
     ))
     case _ ⇒ header(span(
       tools.to(DocumentationPages.explore)(img(src := Resource.img.model.codeAnimated.file, headerImg)),
-      span(s"Run your own $model model", h1Like)
+      span(s"Run your $model model", h1Like)
     ))
   }
 
@@ -58,7 +58,7 @@ object UserGuide {
     ))
     case _ ⇒ header(span(
       tools.to(DocumentationPages.explore)(img(src := Resource.img.method.exploreMapAnimated.file, headerImg)),
-      span(s"Explore with the $method method", h1Like)
+      span(s"Explore: $method", h1Like)
     ))
   }
 
@@ -68,7 +68,7 @@ object UserGuide {
       span(s"Scale on different environments"), h1Like))
     case _ ⇒ header(span(
       tools.to(DocumentationPages.scale)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
-      span(s"Scale on $env"), h1Like
+      span(s"Scale: $env"), h1Like
     ))
   }
 
@@ -89,7 +89,7 @@ object UserGuide {
     current match {
       case p if (DocumentationPages.runPages :+ DocumentationPages.run).contains(p)                           ⇒ integratedPage(SideMenu.run, head = headerModel(current.name))
       case p if (DocumentationPages.explorePages :+ DocumentationPages.explore).contains(p)                   ⇒ integratedPage(SideMenu.explore, head = headerMethod(current.name))
-      case p if (DocumentationPages.runPages :+ DocumentationPages.run).contains(p)                           ⇒ integratedPage(SideMenu.scale, head = headerEnvironment(current.name))
+      case p if (DocumentationPages.scalePages :+ DocumentationPages.scale).contains(p)                       ⇒ integratedPage(SideMenu.scale, head = headerEnvironment(current.name))
       case p if (DocumentationPages.advancedConceptsPages :+ DocumentationPages.advancedConcepts).contains(p) ⇒ integratedPage(SideMenu.advanced)
       case p if (DocumentationPages.developersPages :+ DocumentationPages.developers).contains(p)             ⇒ integratedPage(SideMenu.developers)
       case p if (DocumentationPages.languagePages :+ DocumentationPages.language).contains(p)                 ⇒ integratedPage(SideMenu.language)
