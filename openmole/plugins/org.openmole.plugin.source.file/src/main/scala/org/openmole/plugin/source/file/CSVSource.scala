@@ -17,13 +17,14 @@
 
 package org.openmole.plugin.source.file
 
+import javax.swing.JPopupMenu.Separator
 import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.dsl._
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.mole.{ MoleExecutionContext, Source }
-import org.openmole.plugin.tool.csv.{ CSVToVariables, CSVToVariablesBuilder }
+import org.openmole.plugin.tool.csv._
 
 import scala.reflect.ClassTag
 
@@ -33,12 +34,12 @@ object CSVSource {
   implicit def isInfo = InfoBuilder(CSVSource.info)
 
   implicit def isCSV = new CSVToVariablesBuilder[CSVSource] {
-    override def columns = CSVSource.columns
+    override def mappedInputs = CSVSource.columns
     override def fileColumns = CSVSource.fileColumns
     override def separator = CSVSource.separator
   }
 
-  def apply(path: FromContext[String])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(path: FromContext[String], separator: OptionalArgument[Char])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new CSVSource(
       path,
       config = InputOutputConfig(),
@@ -54,15 +55,16 @@ object CSVSource {
   path:        FromContext[String],
   config:      InputOutputConfig,
   info:        InfoConfig,
-  columns:     Vector[(String, Val[_])],
+  columns:     Vector[Mapped[_]],
   fileColumns: Vector[(String, File, Val[File])],
   separator:   Option[Char]
-) extends Source with CSVToVariables {
+) extends Source {
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
     import parameters._
     val file = new File(path.from(context))
-    val transposed = toVariables(file, context).toSeq.transpose
+    val transposed =
+      csvToVariables(columns, fileColumns, separator)(file, context).toSeq.transpose
 
     def variables =
       for {
