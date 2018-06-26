@@ -21,11 +21,11 @@ import java.io.File
 
 import org.openmole.core.dsl._
 import monocle.Lens
-import org.openmole.core.workflow.builder.{ Mapped, MappedInputBuilder }
+import org.openmole.core.workflow.builder._
 
-trait CSVToVariablesBuilder[T] extends MappedInputBuilder[T] {
-  def mappedInputs: Lens[T, Vector[Mapped[_]]]
-  def columns: Lens[T, Vector[Mapped[_]]] = mappedInputs
+trait CSVToVariablesBuilder[T] extends MappedOutputBuilder[T] {
+  def mappedOutputs: Lens[T, Vector[Mapped[_]]]
+  def columns: Lens[T, Vector[Mapped[_]]] = mappedOutputs
   def fileColumns: Lens[T, Vector[(String, File, Val[File])]]
   def separator: Lens[T, Option[Char]]
 }

@@ -33,7 +33,7 @@ object CSVSampling {
   implicit def isIO = InputOutputBuilder(CSVSampling.config)
 
   implicit def isBuilder: CSVToVariablesBuilder[CSVSampling] = new CSVToVariablesBuilder[CSVSampling] {
-    override def mappedInputs: Lens[CSVSampling, Vector[Mapped[_]]] = CSVSampling.columns
+    override def mappedOutputs: Lens[CSVSampling, Vector[Mapped[_]]] = CSVSampling.columns
     override def fileColumns = CSVSampling.fileColumns
     override def separator = CSVSampling.separator
   }

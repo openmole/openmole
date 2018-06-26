@@ -34,7 +34,7 @@ object CSVSource {
   implicit def isInfo = InfoBuilder(CSVSource.info)
 
   implicit def isCSV = new CSVToVariablesBuilder[CSVSource] {
-    override def mappedInputs = CSVSource.columns
+    override def mappedOutputs = CSVSource.columns
     override def fileColumns = CSVSource.fileColumns
     override def separator = CSVSource.separator
   }
