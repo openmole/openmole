@@ -59,7 +59,7 @@ object SideMenu {
   def left(menus: SideMenu*) =
     build(menus, div(leftDetailButtons(220), `class` := "sidebar-left"), Some(div(id := shared.documentationSideMenu.place)))
 
-  implicit def pageToLink(p: Page): Link = Link(getPageTitle(p), p.file)
+  implicit def pageToLink(p: Page): Link = Link(p.name, p.file)
 
   implicit def seqPagToSeqLink(ps: Seq[Page]): Seq[Link] = ps.map {
     pageToLink

@@ -192,10 +192,10 @@ package object tools {
   def basicButton(title: String, buttonStyle: AttrPair = classIs(btn ++ btn_default)) =
     span(buttonStyle, `type` := "button", title)
 
-  def getPageTitle(page: Page) = page.title match {
+  /*def getPageTitle(page: Page) = page.title match {
     case None    ⇒ page.name
     case Some(x) ⇒ x
-  }
+  }*/
 
   lazy val nav: String = "nav"
   lazy val navbar: String = "navbar"

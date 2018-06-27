@@ -87,22 +87,17 @@ object UserGuide {
       )
 
     current match {
-      case p if (DocumentationPages.runPages :+ DocumentationPages.run).contains(p)                           ⇒ integratedPage(SideMenu.run, head = headerModel(current.name))
-      case p if (DocumentationPages.explorePages :+ DocumentationPages.explore).contains(p)                   ⇒ integratedPage(SideMenu.explore, head = headerMethod(current.name))
-      case p if (DocumentationPages.scalePages :+ DocumentationPages.scale).contains(p)                       ⇒ integratedPage(SideMenu.scale, head = headerEnvironment(current.name))
+      case p if (DocumentationPages.runPages :+ DocumentationPages.run).contains(p) ⇒ integratedPage(SideMenu.run, head = headerModel(current.name))
+      case p if (DocumentationPages.explorePages :+ DocumentationPages.explore).contains(p) ⇒ integratedPage(SideMenu.explore, head = headerMethod(current.name))
+      case p if (DocumentationPages.scalePages :+ DocumentationPages.scale).contains(p) ⇒ integratedPage(SideMenu.scale, head = headerEnvironment(current.name))
       case p if (DocumentationPages.advancedConceptsPages :+ DocumentationPages.advancedConcepts).contains(p) ⇒ integratedPage(SideMenu.advanced)
-      case p if (DocumentationPages.developersPages :+ DocumentationPages.developers).contains(p)             ⇒ integratedPage(SideMenu.developers)
-      case p if (DocumentationPages.languagePages :+ DocumentationPages.language).contains(p)                 ⇒ integratedPage(SideMenu.language)
-      case p if (DocumentationPages.tutoPages :+ DocumentationPages.tutorials).contains(p)                    ⇒ integratedPage(SideMenu.tutorials)
-      case p if (DocumentationPages.communityPages :+ DocumentationPages.OMcommunity).contains(p)             ⇒ integratedPage(SideMenu.community)
-      case p if (DocumentationPages.downloadPages :+ DocumentationPages.download).contains(p)                 ⇒ integratedPage(SideMenu.download)
-      case _ ⇒
-        IntegratedPage(
-          div(paddingTop := 100),
-          div(current.content),
-          SideMenu.left(SideMenu(Seq.empty, classIs(btn ++ btn_primary))),
-          None
-        )
+      case p if (DocumentationPages.developersPages :+ DocumentationPages.developers).contains(p) ⇒ integratedPage(SideMenu.developers)
+      case p if (DocumentationPages.languagePages :+ DocumentationPages.language).contains(p) ⇒ integratedPage(SideMenu.language)
+      case p if (DocumentationPages.gettingStartedPages).contains(p) ⇒ integratedPage(SideMenu.gettingStarted)
+      case p if (DocumentationPages.netLogoPages).contains(p) ⇒ integratedPage(SideMenu.netLogoGA)
+      case p if (DocumentationPages.communityPages :+ DocumentationPages.OMcommunity).contains(p) ⇒ integratedPage(SideMenu.community)
+      case p if (DocumentationPages.downloadPages :+ DocumentationPages.download).contains(p) ⇒ integratedPage(SideMenu.download)
+      case _ ⇒ integratedPage(SideMenu(Seq.empty, classIs(btn ++ btn_primary)))
     }
   }
 
