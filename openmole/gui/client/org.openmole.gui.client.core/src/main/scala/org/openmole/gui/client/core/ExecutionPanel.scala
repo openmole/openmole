@@ -228,7 +228,8 @@ class ExecutionPanel {
               case c: ExecutionInfo.Canceled ⇒
                 hasBeenDisplayed(id)
                 ExecutionDetails("0", 0, envStates = c.environmentStates)
-              case r: ExecutionInfo.Launching ⇒ ExecutionDetails("0", 0, envStates = r.environmentStates)
+              case r: ExecutionInfo.Compiling ⇒ ExecutionDetails("0", 0, envStates = r.environmentStates)
+              case r: ExecutionInfo.Preparing ⇒ ExecutionDetails("0", 0, envStates = r.environmentStates)
             }
 
             val scriptLink = expander(id.id, ex ⇒ ex.getLink(staticInfo.now(id).path.name, scriptID))

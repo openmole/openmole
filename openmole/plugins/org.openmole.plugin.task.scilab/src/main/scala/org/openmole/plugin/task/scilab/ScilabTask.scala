@@ -29,6 +29,7 @@ object ScilabTask {
   implicit def isInfo = InfoBuilder(info)
   implicit def isMapped = MappedInputOutputBuilder(ScilabTask.mapped)
 
+  @deprecated
   implicit def isBuilder = new ReturnValue[ScilabTask] with ErrorOnReturnValue[ScilabTask] with StdOutErr[ScilabTask] with EnvironmentVariables[ScilabTask] with HostFiles[ScilabTask] with WorkDirectory[ScilabTask] { builder ⇒
     override def returnValue = ScilabTask.returnValue
     override def errorOnReturnValue = ScilabTask.errorOnReturnValue
@@ -62,8 +63,15 @@ object ScilabTask {
     script: FromContext[String],
     //install:     Seq[String]         = Seq.empty,
     //libraries:   Seq[InstallCommand] = Seq.empty,
-    forceUpdate: Boolean = false,
-    version:     String  = "6.0.1")(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): ScilabTask = {
+    forceUpdate:          Boolean                               = false,
+    version:              String                                = "6.0.1",
+    errorOnReturnValue:   Boolean                               = true,
+    returnValue:          OptionalArgument[Val[Int]]            = None,
+    stdOut:               OptionalArgument[Val[String]]         = None,
+    stdErr:               OptionalArgument[Val[String]]         = None,
+    environmentVariables: Vector[(String, FromContext[String])] = Vector.empty,
+    hostFiles:            Vector[HostFile]                      = Vector.empty,
+    workDirectory:        OptionalArgument[String]              = None)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): ScilabTask = {
 
     //    // add additional installation of devtools only if needed
     //    val installCommands =
@@ -82,15 +90,19 @@ object ScilabTask {
         forceUpdate = forceUpdate,
         mode = "P1",
         reuseContainer = true
-      )
+      ).copy(
+          environmentVariables = environmentVariables,
+          hostFiles = hostFiles,
+          workDirectory = workDirectory
+        )
 
     ScilabTask(
       script = script,
       uDockerArguments,
-      errorOnReturnValue = true,
-      returnValue = None,
-      stdOut = None,
-      stdErr = None,
+      errorOnReturnValue = errorOnReturnValue,
+      returnValue = returnValue,
+      stdOut = stdOut,
+      stdErr = stdErr,
       _config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),

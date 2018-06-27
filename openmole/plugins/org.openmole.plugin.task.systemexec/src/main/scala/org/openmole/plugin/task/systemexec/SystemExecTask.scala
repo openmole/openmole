@@ -38,6 +38,7 @@ object SystemExecTask {
   implicit def isExternal: ExternalBuilder[SystemExecTask] = ExternalBuilder(SystemExecTask.external)
   implicit def isInfo = InfoBuilder(info)
 
+  @deprecated
   implicit def isSystemExec = new SystemExecTaskBuilder[SystemExecTask] {
     override def commands = SystemExecTask.commands
     override def environmentVariables = SystemExecTask.environmentVariables
@@ -70,7 +71,8 @@ object SystemExecTask {
     returnValue:        OptionalArgument[Val[Int]]    = None,
     stdOut:             OptionalArgument[Val[String]] = None,
     stdErr:             OptionalArgument[Val[String]] = None,
-    shell:              Shell                         = Bash)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): SystemExecTask =
+    shell:              Shell                         = Bash,
+    environmentVariables: Vector[(String, FromContext[String])] = Vector.empty)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): SystemExecTask =
     new SystemExecTask(
       commands = commands.map(c ⇒ OSCommands(OS(), c)).toVector,
       workDirectory = workDirectory,
@@ -79,7 +81,7 @@ object SystemExecTask {
       stdOut = stdOut,
       stdErr = stdErr,
       shell = shell,
-      environmentVariables = Vector.empty,
+      environmentVariables = environmentVariables,
       _config = InputOutputConfig(),
       external = External(),
       info = InfoConfig()
