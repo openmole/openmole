@@ -408,13 +408,17 @@ object ExecutionInfo {
     def state: String = "canceled"
   }
 
-  case class Launching() extends ExecutionInfo {
-    def state: String = "launching"
-
+  case class Compiling() extends ExecutionInfo {
+    def state: String = "compiling"
     def duration: Long = 0L
-
     def capsules = Vector.empty
+    def environmentStates: Seq[EnvironmentState] = Seq()
+  }
 
+  case class Preparing() extends ExecutionInfo {
+    def state: String = "preparing"
+    def duration: Long = 0L
+    def capsules = Vector.empty
     def environmentStates: Seq[EnvironmentState] = Seq()
   }
 

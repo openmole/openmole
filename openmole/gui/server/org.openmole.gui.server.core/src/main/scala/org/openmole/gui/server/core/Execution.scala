@@ -39,11 +39,13 @@ class Execution {
 
   import ExecutionInfo._
 
+  case class Instantiation(future: Future[_], compiled: Boolean)
+
   private lazy val staticExecutionInfo = TMap[ExecutionId, StaticExecutionInfo]()
   private lazy val moleExecutions = TMap[ExecutionId, MoleExecution]()
   private lazy val outputStreams = TMap[ExecutionId, StringPrintStream]()
   private lazy val errors = TMap[ExecutionId, Failed]()
-  private lazy val compilation = TMap[ExecutionId, Future[_]]()
+  private lazy val instantiation = TMap[ExecutionId, Instantiation]()
 
   private lazy val environmentIds = TMap[ExecutionId, Seq[EnvironmentId]]()
   private lazy val runningEnvironments = TMap[EnvironmentId, RunningEnvironment]()
@@ -53,7 +55,11 @@ class Execution {
   }
 
   def addCompilation(ex: ExecutionId, future: Future[_]) = atomic { implicit ctx ⇒
-    compilation.put(ex, future)
+    instantiation.put(ex, Instantiation(future, false))
+  }
+
+  def compiled(ex: ExecutionId) = atomic { implicit ctx ⇒
+    instantiation.put(ex, instantiation.get(ex).get.copy(compiled = true))
   }
 
   def environmentListener(envId: EnvironmentId): Listner[Environment] = {
@@ -142,7 +148,7 @@ class Execution {
 
   def cancel(key: ExecutionId) = {
     moleExecutions.single.get(key).foreach(_.cancel)
-    compilation.single.get(key).foreach(_.cancel(true))
+    instantiation.single.get(key).foreach(_.future.cancel(true))
   }
 
   def remove(key: ExecutionId) = {
@@ -153,10 +159,10 @@ class Execution {
         val exec = moleExecutions.remove(key)
         outputStreams.remove(key)
         errors.remove(key)
-        val compil = compilation.remove(key)
+        val compil = instantiation.remove(key)
         (compil, exec)
       }
-    compil.foreach(_.cancel(true))
+    compil.foreach(_.future.cancel(true))
     exec.foreach(_.cancel)
   }
 
@@ -177,6 +183,10 @@ class Execution {
     }
 
   def executionInfo(key: ExecutionId): ExecutionInfo = atomic { implicit ctx ⇒
+
+    def launchStatus =
+      instantiation.get(key).map { i ⇒ if (!i.compiled) Compiling() else Preparing() }.getOrElse(Compiling())
+
     (errors.get(key), moleExecutions.get(key)) match {
       case (Some(error), _) ⇒ error
       case (_, Some(moleExecution)) ⇒
@@ -215,9 +225,9 @@ class Execution {
                 duration = d,
                 environmentStates = environmentState(key)
               )
-            else Launching()
+            else launchStatus
         }
-      case _ ⇒ Launching()
+      case _ ⇒ launchStatus
     }
   }
 

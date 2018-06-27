@@ -24,7 +24,7 @@ import org.openmole.core.expansion.{ Condition, FromContext }
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.workflow.dsl
 import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.mole.MoleExecution.SubMoleExecutionState
+import org.openmole.core.workflow.mole.MoleExecution.{ AggregationTransitionRegistryRecord, SubMoleExecutionState }
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
@@ -35,7 +35,7 @@ import scala.collection.mutable.{ HashSet, ListBuffer }
 
 object ExplorationTransition {
 
-  def registerAggregationTransitions(transition: ExplorationTransition, ticket: Ticket, subMoleExecution: SubMoleExecutionState, executionContext: MoleExecutionContext) = {
+  def registerAggregationTransitions(transition: ExplorationTransition, ticket: Ticket, subMoleExecution: SubMoleExecutionState, executionContext: MoleExecutionContext, size: Int) = {
     val alreadySeen = new HashSet[Capsule]
     val toProcess = new ListBuffer[(Capsule, Int)]
     toProcess += ((transition.end.capsule, 0))
@@ -51,7 +51,7 @@ object ExplorationTransition {
           case t: IAggregationTransition ⇒
             if (level > 0) toProcess += t.end.capsule → (level - 1)
             else if (level == 0) {
-              subMoleExecution.aggregationTransitionRegistry.register(t, ticket, new ListBuffer)
+              subMoleExecution.aggregationTransitionRegistry.register(t, ticket, AggregationTransitionRegistryRecord(size))
               subMoleExecution.onFinish += { se ⇒ AggregationTransition.aggregate(t, se, ticket, executionContext) }
             }
           case t: IExplorationTransition ⇒ toProcess += t.end.capsule → (level + 1)
@@ -61,16 +61,25 @@ object ExplorationTransition {
     }
   }
 
-  def submitIn(transition: ExplorationTransition, context: Context, ticket: Ticket, subMole: SubMoleExecutionState, executionContext: MoleExecutionContext) = {
+  def factors(transition: ExplorationTransition, moleExecution: MoleExecution) = {
+    def explored = ExplorationTask.explored(transition.start)
+    transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).partition(explored)
+    val (factors, outputs) = transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).partition(explored)
+    val typedFactors = factors.map(_.asInstanceOf[Val[Array[Any]]])
+    (typedFactors, outputs)
+  }
+
+  def exploredSamples(transition: ExplorationTransition, context: Context, moleExecution: MoleExecution) = {
+    def values = factors(transition, moleExecution)._1.toArray.map(context(_).toArray).transpose
+    values
+  }
+
+  def submitIn(transition: ExplorationTransition, context: Context, ticket: Ticket, samples: Array[Array[Any]], subMole: SubMoleExecutionState, executionContext: MoleExecutionContext) = {
     val moleExecution = subMole.moleExecution
     val mole = moleExecution.mole
-    def explored = ExplorationTask.explored(transition.start)
-    val (factors, outputs) = transition.start.outputs(mole, moleExecution.sources, moleExecution.hooks).partition(explored)
+    val (typedFactors, outputs) = factors(transition, moleExecution)
 
-    val typedFactors = factors.map(_.asInstanceOf[Val[Array[Any]]])
-    val values = typedFactors.toList.map(context(_).toIterable).transpose
-
-    for (value ← values) {
+    for (value ← samples) {
       val newTicket = MoleExecution.nextTicket(moleExecution, ticket)
       val variables = new ListBuffer[Variable[_]]
 
@@ -105,8 +114,9 @@ class ExplorationTransition(val start: Capsule, val end: Slot, val condition: Co
   override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
     MoleExecutionMessage.PerformTransition(subMole) { subMoleState ⇒
       val subSubMole = MoleExecution.newChildSubMoleExecution(subMoleState)
-      ExplorationTransition.registerAggregationTransitions(this, ticket, subSubMole, executionContext)
-      ExplorationTransition.submitIn(this, filtered(context), ticket, subSubMole, executionContext)
+      val samples = ExplorationTransition.exploredSamples(this, context, moleExecution)
+      ExplorationTransition.registerAggregationTransitions(this, ticket, subSubMole, executionContext, samples.size)
+      ExplorationTransition.submitIn(this, filtered(context), ticket, samples, subSubMole, executionContext)
     }
   }
 

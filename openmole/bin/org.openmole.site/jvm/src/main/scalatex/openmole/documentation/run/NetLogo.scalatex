@@ -21,9 +21,9 @@
   val fireTask =
     NetLogo6Task(workDirectory / "Fire.nlogo", cmds) set (
       inputs += seed,
+      inputs += density mapped "density",
       outputs += (density, seed),
-      netLogoInputs += (density, "density"),
-      netLogoOutputs += ("burned-trees", burned)
+      outputs += burned mapped "burned-trees"
     )"""
 
 @def csvHook = """
@@ -71,12 +71,17 @@
       @li{@code{script} netlogo model (File), mandatory}
       @li{@code{launchingCommands} netlogo commands to be executed, mandatory}
       @li{@code{embedWorkspace} should the workspace be embedded for execution of the model (use if you have source files or extensions in the model directory), optional, defaults to false}
+      @li{@code{reuseWorkspace} should the same workspace be reused when executing on a given jvm (use to avoid MetaSpace errors with large netlogo models loading several extensions when executed a large number of times on the same jvm), optional, defaults to false}
       @li{@code{seed} random seed, optional, defaults to None}
 
     @p The properties to be adjusted with @code{set} :
     @ul
-      @li{@code{netLogoInputs} vector of couples (Val,String) to establish the link between workflow variables that are input and the corresponding netlogo variables}
-      @li{@code{netLogoOutputs} vector of couples (String,Val) to collect outputs of the model (the string can be any NetLogo command)}
+      @li{@code{inputs/outputs} similar as for any task}
+      @li{mapped input: the syntax @code{inputs += prototype mapped "netlogo-variable"} establishes a link between the workflow variable @code{prototype} (Val) and the corresponding netlogo variable name @code{"netlogo-variable"} (String)
+      If the variables have the same name, you can use the shorter syntax @code{inputs += prototype.mapped}}
+      @li{mapped output: similar syntax to collect outputs of the model (the string can be any NetLogo command)}
+
+    @p The former mapping syntax using @code{netLogoInputs} and @code{netLogoOutputs} is deprecated, but still works until further notice for compatibility reasons.
 
 @h2{Embedding NetLogo extensions and sources}
 

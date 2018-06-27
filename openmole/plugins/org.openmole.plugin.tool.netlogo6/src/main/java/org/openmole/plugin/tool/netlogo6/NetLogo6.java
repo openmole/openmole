@@ -123,6 +123,7 @@ public class NetLogo6 implements NetLogo {
         return(list.toLogoList());
     }
 
+
     private static AbstractCollection listToCollection(LogoList list){
         AbstractCollection collection = new LinkedList();
         for(Object o:list.toJava()){
@@ -131,4 +132,7 @@ public class NetLogo6 implements NetLogo {
         }
         return(collection);
     }
+
+
+
 }

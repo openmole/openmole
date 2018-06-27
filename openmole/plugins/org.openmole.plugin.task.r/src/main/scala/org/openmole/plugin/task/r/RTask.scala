@@ -27,6 +27,7 @@ object RTask {
   implicit def isTask: InputOutputBuilder[RTask] = InputOutputBuilder(RTask._config)
   implicit def isExternal: ExternalBuilder[RTask] = ExternalBuilder(RTask.external)
   implicit def isInfo = InfoBuilder(info)
+  implicit def isMapped = MappedInputOutputBuilder(RTask.mapped)
 
   implicit def isBuilder = new ReturnValue[RTask] with ErrorOnReturnValue[RTask] with StdOutErr[RTask] with EnvironmentVariables[RTask] with HostFiles[RTask] with WorkDirectory[RTask] { builder ⇒
     override def returnValue = RTask.returnValue
@@ -62,11 +63,18 @@ object RTask {
   def rImage(version: String) = DockerImage("openmole/r-base", version)
 
   def apply(
-    script:      FromContext[String],
-    install:     Seq[String]         = Seq.empty,
-    libraries:   Seq[InstallCommand] = Seq.empty,
-    forceUpdate: Boolean             = false,
-    version:     String              = "3.3.3"
+    script:               FromContext[String],
+    install:              Seq[String]                           = Seq.empty,
+    libraries:            Seq[InstallCommand]                   = Seq.empty,
+    forceUpdate:          Boolean                               = false,
+    version:              String                                = "3.3.3",
+    errorOnReturnValue:   Boolean                               = true,
+    returnValue:          OptionalArgument[Val[Int]]            = None,
+    stdOut:               OptionalArgument[Val[String]]         = None,
+    stdErr:               OptionalArgument[Val[String]]         = None,
+    hostFiles:            Vector[HostFile]                      = Vector.empty,
+    workDirectory:        OptionalArgument[String]              = None,
+    environmentVariables: Vector[(String, FromContext[String])] = Vector.empty
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): RTask = {
 
     // add additional installation of devtools only if needed
@@ -86,15 +94,19 @@ object RTask {
         forceUpdate = forceUpdate,
         mode = "P1",
         reuseContainer = true
-      )
+      ).copy(
+          environmentVariables = environmentVariables,
+          hostFiles = hostFiles,
+          workDirectory = workDirectory
+        )
 
     RTask(
       script = script,
       uDockerArguments,
-      errorOnReturnValue = true,
-      returnValue = None,
-      stdOut = None,
-      stdErr = None,
+      errorOnReturnValue = errorOnReturnValue,
+      returnValue = returnValue,
+      stdOut = stdOut,
+      stdErr = stdErr,
       _config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
