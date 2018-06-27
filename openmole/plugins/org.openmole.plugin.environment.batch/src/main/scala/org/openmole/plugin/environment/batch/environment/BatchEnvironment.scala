@@ -161,7 +161,8 @@ object BatchEnvironment extends JavaLogger {
 
   def clean(environment: BatchEnvironment, usageControls: Seq[UsageControl])(implicit services: BatchEnvironment.Services) = {
     environment.batchJobWatcher.stop = true
-    environment.jobs.foreach(_.state = ExecutionState.KILLED)
+    val environmentJobs = environment.jobs
+    environmentJobs.foreach(_.state = ExecutionState.KILLED)
 
     usageControls.foreach(UsageControl.freeze)
     usageControls.foreach(UsageControl.waitUnused)
@@ -173,7 +174,7 @@ object BatchEnvironment extends JavaLogger {
       job.serializedJob.foreach { sj ⇒ UsageControl.withToken(sj.storage.usageControl)(token ⇒ util.Try(JobManager.cleanSerializedJob(sj, token))) }
     }
 
-    val futures = environment.jobs.map { j ⇒ services.threadProvider.submit(() ⇒ kill(j), JobManager.killPriority) }
+    val futures = environmentJobs.map { j ⇒ services.threadProvider.submit(() ⇒ kill(j), JobManager.killPriority) }
     futures.foreach(_.get())
   }
 
@@ -227,8 +228,8 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
 class BatchExecutionJob(val job: Job, val environment: BatchEnvironment) extends ExecutionJob { bej ⇒
 
-  var serializedJob: Option[SerializedJob] = None
-  var batchJob: Option[BatchJobControl] = None
+  @volatile var serializedJob: Option[SerializedJob] = None
+  @volatile var batchJob: Option[BatchJobControl] = None
 
   def moleJobs = job.moleJobs
   def runnableTasks = job.moleJobs.map(RunnableTask(_))
