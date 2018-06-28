@@ -195,7 +195,6 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
   def trySelectStorage(files: ⇒ Vector[File]): Option[(StorageService[_], AccessToken)]
   def trySelectJobService(): Option[(BatchJobService[_], AccessToken)]
 
-  def executionJob(job: Job) = new BatchExecutionJob(job, this)
   lazy val batchJobWatcher = new BatchJobWatcher(WeakReference(this), services.preference)
   def jobs = batchJobWatcher.executionJobs
 
@@ -204,7 +203,7 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
   lazy val plugins = PluginManager.pluginsForClass(this.getClass)
 
   override def submit(job: Job) = {
-    val bej = executionJob(job)
+    val bej = new BatchExecutionJob(job, this)
     batchJobWatcher.register(bej)
     eventDispatcherService.trigger(this, new Environment.JobSubmitted(bej))
     JobManager ! Manage(bej)
