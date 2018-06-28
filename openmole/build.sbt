@@ -484,7 +484,7 @@ lazy val fileSource = OsgiProject(pluginDir, "org.openmole.plugin.source.file", 
 
 /* Task */
 
-def allTask = Seq(toolsTask, external, netLogo, netLogo5, netLogo6, jvm, scala, template, systemexec, container, care, udocker, r, scilab)
+def allTask = Seq(toolsTask, external, netLogo, netLogo5, netLogo6, jvm, scala, template, systemexec, container, care, udocker, r, scilab, timing)
 
 lazy val toolsTask = OsgiProject(pluginDir, "org.openmole.plugin.task.tools", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings: _*)
 
@@ -519,6 +519,8 @@ lazy val udocker = OsgiProject(pluginDir, "org.openmole.plugin.task.udocker", im
 lazy val r = OsgiProject(pluginDir, "org.openmole.plugin.task.r", imports = Seq("*")) dependsOn (udocker, json) settings (pluginSettings: _*)
 
 lazy val scilab = OsgiProject(pluginDir, "org.openmole.plugin.task.scilab", imports = Seq("*")) dependsOn (udocker) settings (pluginSettings: _*)
+
+lazy val timing = OsgiProject(pluginDir, "org.openmole.plugin.task.timing", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings: _*)
 
 
 /* ---------------- REST ------------------- */
