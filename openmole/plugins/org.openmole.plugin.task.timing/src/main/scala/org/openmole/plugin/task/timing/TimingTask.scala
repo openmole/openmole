@@ -5,6 +5,7 @@ import org.openmole.core.context.Val
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.dsl._
 
 object TimingTask {
 
@@ -14,7 +15,8 @@ object TimingTask {
   def apply(
     task:    Task,
     tracker: Val[Long]
-  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = new TimingTask(task, tracker, InputOutputConfig(), InfoConfig())
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+    new TimingTask(task, tracker, InputOutputConfig(task.inputs, task.outputs), task.info) set (outputs += tracker)
 
 }
 
@@ -25,12 +27,12 @@ object TimingTask {
   info:    InfoConfig
 ) extends Task {
 
-  override def inputs = task.inputs
-  override def outputs = task.outputs ++ Seq(tracker)
+  //override def inputs = task.inputs
+  //override def outputs = task.outputs ++ Seq(tracker)
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
     val starttime = System.currentTimeMillis()
-    val taskcontext = task.perform(parameters.context, executionContext)
+    val taskcontext = parameters.context + task.perform(parameters.context, executionContext)
     val executiontime = (System.currentTimeMillis() - starttime)
     taskcontext + (tracker, executiontime)
   }
