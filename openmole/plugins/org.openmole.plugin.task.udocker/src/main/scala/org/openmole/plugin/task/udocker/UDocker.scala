@@ -65,12 +65,14 @@ object UDocker {
     }
 
     val manifestData = manifest(dockerImage, manifestContent)
-
-    def localLayersFutures =
+    val layersInManifest =
       for {
         m ← manifestData.toSeq.toVector
-        l ← layers(m.value).distinct
-      } yield Future {
+        l ← layers(m.value)
+      } yield l
+
+    def localLayersFutures =
+      for { l ← layersInManifest.distinct } yield Future {
         val lf = layerFile(l)
         if (!lf.exists) {
           outputRedirection.output.println(s"Downloading docker layer: ${l.digest}")
@@ -79,7 +81,8 @@ object UDocker {
         l → lf
       }
 
-    val localLayers = localLayersFutures.map(f ⇒ Await.result(f, Duration.Inf)).reverse
+    val localLayersMap = localLayersFutures.map(f ⇒ Await.result(f, Duration.Inf)).toMap
+    val localLayers = layersInManifest.reverse.map(l ⇒ l -> localLayersMap(l))
 
     for {
       m ← manifestData
