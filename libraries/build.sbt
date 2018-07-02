@@ -234,7 +234,7 @@ lazy val freedsl =
     version := freedslVersion
   ) dependsOn(cats, squants) settings(settings: _*)
 
-lazy val mgoVersion = "3.16"
+lazy val mgoVersion = "3.17"
 
 lazy val mgo = OsgiProject(dir, "mgo", imports = Seq("!better.*", "*")) settings(
   libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
