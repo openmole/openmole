@@ -318,7 +318,7 @@ object MoleExecution extends JavaLogger {
       moleExecution._endTime = Some(System.currentTimeMillis)
       moleExecution.executionContext.services.eventDispatcher.trigger(moleExecution, MoleExecution.Finished(canceled = canceled))
 
-      ThreadProvider.background(moleExecution.executionContext.services.threadProvider) {
+      moleExecution.executionContext.services.threadProvider.submit(ThreadProvider.maxPriority) { () ⇒
         def stopEnvironments() = {
           if (moleExecution.startStopDefaultEnvironment) moleExecution.defaultEnvironment.stop()
           moleExecution.environments.values.foreach(_.stop())

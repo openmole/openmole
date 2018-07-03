@@ -313,7 +313,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     import org.openmole.tool.thread._
 
     val compilationFuture =
-      ThreadProvider.background(threadProvider) { () ⇒
+      threadProvider.submit(ThreadProvider.maxPriority) { () ⇒
 
         def error(t: Throwable): Unit = execution.addError(execId, Failed(Vector.empty, ErrorBuilder(t), Seq()))
 
