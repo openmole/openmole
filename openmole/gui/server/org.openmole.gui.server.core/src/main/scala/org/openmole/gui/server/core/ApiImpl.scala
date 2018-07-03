@@ -29,6 +29,7 @@ import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.core.project._
 import org.openmole.core.services.Services
+import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.plugin.server._
@@ -312,7 +313,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     import org.openmole.tool.thread._
 
     val compilationFuture =
-      services.threadProvider.pool.submit { () ⇒
+      ThreadProvider.background(threadProvider) { () ⇒
 
         def error(t: Throwable): Unit = execution.addError(execId, Failed(Vector.empty, ErrorBuilder(t), Seq()))
 
