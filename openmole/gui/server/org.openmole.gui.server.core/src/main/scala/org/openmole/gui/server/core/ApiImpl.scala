@@ -256,7 +256,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     Utils.move(fromFile, toFile)
   }
 
-  def replicate(safePath: SafePath, newName: String): SafePath = Utils.replicate(safePath, newName)
+  def duplicate(safePath: SafePath, newName: String): SafePath = Utils.copy(safePath, newName)
 
   def mdToHtml(safePath: SafePath): String = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
@@ -325,6 +325,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
             case ErrorInCode(e)            ⇒ error(e)
             case ErrorInCompiler(e)        ⇒ error(e)
             case compiled: Compiled ⇒
+              execution.compiled(execId)
 
               def catchAll[T](f: ⇒ T): Try[T] = {
                 val res =

@@ -18,32 +18,23 @@
 package org.openmole.plugin.task
 
 import org.openmole.core.context.Val
-import org.openmole.core.workflow.dsl._
+import org.openmole.core.dsl._
 
 package netlogo {
 
   import org.openmole.core.workflow.builder._
 
   trait NetLogoPackage extends external.ExternalPackage {
+    @deprecated
     lazy val netLogoInputs = new {
-      def +=[T: NetLogoTaskBuilder: InputOutputBuilder](p: Val[_], n: String): T ⇒ T =
-        implicitly[NetLogoTaskBuilder[T]].netLogoInputs.modify(_ ++ Seq(p → n)) andThen (inputs += p)
-      def +=[T: NetLogoTaskBuilder: InputOutputBuilder](p: Val[_]): T ⇒ T = this.+=[T](p, p.name)
+      def +=[T: MappedInputBuilder: InputOutputBuilder](p: Val[_], n: String): T ⇒ T = inputs += p mapped n
+      def +=[T: MappedInputBuilder: InputOutputBuilder](p: Val[_]): T ⇒ T = this.+=[T](p, p.name)
     }
 
+    @deprecated
     lazy val netLogoOutputs = new {
-      def +=[T: NetLogoTaskBuilder: InputOutputBuilder](name: String, column: Int, p: Val[_]): T ⇒ T =
-        implicitly[NetLogoTaskBuilder[T]].netLogoArrayOutputs.modify(_ ++ Seq((name, column, p))) andThen (outputs += p)
-
-      def +=[T: NetLogoTaskBuilder: InputOutputBuilder](n: String, p: Val[_]): T ⇒ T =
-        implicitly[NetLogoTaskBuilder[T]].netLogoOutputs.modify(_ ++ Seq(n → p)) andThen (outputs += p)
-
-      def +=[T: NetLogoTaskBuilder: InputOutputBuilder](p: Val[_]): T ⇒ T = this.+=[T](p.name, p)
-    }
-
-    lazy val netLogoArrayOutputs = new {
-      def +=[T: NetLogoTaskBuilder: InputOutputBuilder](name: String, column: Int, p: Val[_]): T ⇒ T =
-        implicitly[NetLogoTaskBuilder[T]].netLogoArrayOutputs.modify(_ ++ Seq((name, column, p))) andThen (outputs += p)
+      def +=[T: MappedOutputBuilder: InputOutputBuilder](n: String, p: Val[_]): T ⇒ T = outputs += p mapped n
+      def +=[T: MappedOutputBuilder: InputOutputBuilder](p: Val[_]): T ⇒ T = this.+=[T](p.name, p)
     }
 
   }

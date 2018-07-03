@@ -2,23 +2,17 @@
 @import org.openmole.site._
 @import DocumentationPages._
 
-@h2(textAlign := "center"){
-  OpenMOLE: the Model Exploration Software
-}
-
 @h3{What is OpenMOLE?}
 
 @div(stylesheet.centerJustify(100)){
   OpenMOLE has been developed since 2008 as a @b{free and open-source} platform.
-@br
-  OpenMOLE offers tools to run, explore, diagnose and optimize your numerical model, taking advantage of distributed computing environments.
-  @br
-  With OpenMOLE you can @b{embed your already developed model}, in any language (Java, Binary exe, NetLogo, R, SciLab, Python, C++...).
+  It offers tools to run, explore, diagnose and optimize your numerical model, taking advantage of distributed computing environments.
+  With OpenMOLE you can @b{explore your already developed model}, in any language (Java, Binary exe, NetLogo, R, SciLab, Python, C++...).
 }
 
 @div(stylesheet.centerJustify(100)){
   OpenMOLE comes with a graphical user interface (GUI) to write @b{scripts around your model}.
-  These scripts will use OpenMOLE methods to @b{explore} your model and @b{distribute} its execution on High Performing Computing (HPC) environments, with only a few lines of code!
+  These scripts will use OpenMOLE methods to @b{explore} your model and @b{distribute} its executions on High Performing Computing (HPC) environments, with only a few lines of code!
 }
 
 
@@ -50,11 +44,9 @@
 @div(stylesheet.centerJustify(100)){
   You can try OpenMOLE online using the OpenMOLE @a("demonstration website", href := shared.link.demo).
 @br
-  When you are ready you can then download OpenMOLE and install it on your computer, everything is explained in the @a("Download", href := install.file) section.
+  When you are ready you can then download OpenMOLE and install it on your computer, everything is explained in the @a("Download", href := download.file) section.
 @br
-  Have a look at the @a("Getting Started", href := stepByStepIntro.file) section, check out the @a("GUI guide", href := gui.file), dive into the @a("documentation", href := documentationHead.file), and lastly explore some @a("advanced concepts", href := advancedConcepts.file).
-@br
-  There is also a full @a("site map", href := siteMap.file) to see all the resources on the website.
+  Have a look at the @a("Getting Started", href := stepByStepIntro.file) section, check out the @a("GUI guide", href := gui.file), dive into the @a("documentation", href := documentation.file), and lastly explore some @a("advanced concepts", href := advancedConcepts.file).
 }
 
 @div(stylesheet.centerJustify(100), id := shared.newsPosts)

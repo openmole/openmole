@@ -71,16 +71,29 @@ object SideMenu {
     SideMenu(preText = title, links = stringMenus.map { a ⇒ Link(a, Link.intern(a)) })
 
   val run = SideMenu(DocumentationPages.runPages, classIs(btn ++ btn_primary), "Available tasks")
-
   val explore = SideMenu(DocumentationPages.explorePages, classIs(btn ++ btn_primary), "Available methods")
-
   val scale = SideMenu(DocumentationPages.scalePages, classIs(btn ++ btn_primary), "Available environments")
+  val language = SideMenu(DocumentationPages.languagePages, classIs(btn ++ btn_primary), "Language")
+  val advanced = SideMenu(DocumentationPages.advancedConceptsPages, classIs(btn ++ btn_primary), "Advanced concepts")
+  val developers = SideMenu(DocumentationPages.developersPages, classIs(btn ++ btn_primary), "Developer's documentation")
+  val gettingStarted = SideMenu(DocumentationPages.gettingStartedPages, classIs(btn ++ btn_primary), "Getting started tutorials")
+  val netLogoGA = SideMenu(DocumentationPages.netLogoPages, classIs(btn ++ btn_primary), "NetLogo tutorials")
+  val community = SideMenu(DocumentationPages.communityPages, classIs(btn ++ btn_primary), "Community")
+  val download = SideMenu(DocumentationPages.downloadPages, classIs(btn ++ btn_primary), "Download")
 
   val more = SideMenu(
     Seq(
+      DocumentationPages.documentation,
+      DocumentationPages.run,
+      DocumentationPages.explore,
+      DocumentationPages.scale,
       DocumentationPages.language,
+      DocumentationPages.advancedConcepts,
+      DocumentationPages.developers,
       DocumentationPages.gui
-    ), classIs(btn ++ btn_default), "See also", true
+    ),
+    classIs(btn ++ btn_default),
+    "See also in the doc"
   )
 
 }

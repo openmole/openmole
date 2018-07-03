@@ -39,14 +39,14 @@ import org.openmole.core.workflow.transition.{ DataChannel, IAggregationTransiti
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.tool.cache.KeyValueCache
-import org.openmole.tool.collection.PriorityQueue
+import org.openmole.tool.collection.{ PriorityQueue, StaticArrayBuffer }
 import org.openmole.tool.lock._
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.random
 import org.openmole.tool.random.Seeder
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable.{ Buffer, ListBuffer }
+import scala.collection.mutable.{ ArrayBuffer, Buffer, ListBuffer }
 
 object MoleExecution extends JavaLogger {
 
@@ -123,7 +123,13 @@ object MoleExecution extends JavaLogger {
 
   case class JobStatuses(ready: Long, running: Long, completed: Long)
 
-  type AggregationTransitionRegistry = RegistryWithTicket[IAggregationTransition, Buffer[(Long, Variable[_])]]
+  object AggregationTransitionRegistryRecord {
+    def apply(size: Int): AggregationTransitionRegistryRecord =
+      new AggregationTransitionRegistryRecord(new StaticArrayBuffer(size), new StaticArrayBuffer(size))
+  }
+
+  case class AggregationTransitionRegistryRecord(ids: StaticArrayBuffer[Long], values: StaticArrayBuffer[Array[Any]])
+  type AggregationTransitionRegistry = RegistryWithTicket[IAggregationTransition, AggregationTransitionRegistryRecord]
   type MasterCapsuleRegistry = RegistryWithTicket[MasterCapsule, Context]
   type TransitionRegistry = RegistryWithTicket[ITransition, Iterable[Variable[_]]]
 
@@ -541,16 +547,18 @@ object MoleExecutionMessage {
   def dispatch(moleExecution: MoleExecution, msg: MoleExecutionMessage) = moleExecution.synchronized {
     try {
       msg match {
-        case msg: PerformTransition if !moleExecution._canceled ⇒
-          val state = moleExecution.subMoleExecutions(msg.subMoleExecution)
-          if (!state.canceled) msg.operation(state)
-          MoleExecution.checkIfSubMoleIsFinished(state)
-        case msg: JobFinished if !moleExecution._canceled           ⇒ processJobFinished(moleExecution, msg)
-        case msg: WithMoleExecutionSate if !moleExecution._canceled ⇒ msg.operation(moleExecution)
-        case msg: StartMoleExecution if !moleExecution._canceled    ⇒ MoleExecution.start(moleExecution, msg.context)
-        case msg: CancelMoleExecution if !moleExecution._canceled   ⇒ MoleExecution.cancel(moleExecution, None)
-        case msg: RegisterJob if !moleExecution._canceled           ⇒ msg.subMoleExecution.jobs.put(msg.job, msg.capsule)
-        case msg: CleanMoleExcution                                 ⇒ MoleExecution.clean(moleExecution)
+        case msg: PerformTransition ⇒
+          if (!moleExecution._canceled) {
+            val state = moleExecution.subMoleExecutions(msg.subMoleExecution)
+            if (!state.canceled) msg.operation(state)
+            MoleExecution.checkIfSubMoleIsFinished(state)
+          }
+        case msg: JobFinished           ⇒ if (!moleExecution._canceled) processJobFinished(moleExecution, msg)
+        case msg: WithMoleExecutionSate ⇒ if (!moleExecution._canceled) msg.operation(moleExecution)
+        case msg: StartMoleExecution    ⇒ if (!moleExecution._canceled) MoleExecution.start(moleExecution, msg.context)
+        case msg: CancelMoleExecution   ⇒ if (!moleExecution._canceled) MoleExecution.cancel(moleExecution, None)
+        case msg: RegisterJob           ⇒ if (!moleExecution._canceled) msg.subMoleExecution.jobs.put(msg.job, msg.capsule)
+        case msg: CleanMoleExcution     ⇒ MoleExecution.clean(moleExecution)
       }
     }
     catch {

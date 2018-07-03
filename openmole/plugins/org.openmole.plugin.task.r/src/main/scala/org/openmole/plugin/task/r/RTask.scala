@@ -27,6 +27,7 @@ object RTask {
   implicit def isTask: InputOutputBuilder[RTask] = InputOutputBuilder(RTask._config)
   implicit def isExternal: ExternalBuilder[RTask] = ExternalBuilder(RTask.external)
   implicit def isInfo = InfoBuilder(info)
+  implicit def isMapped = MappedInputOutputBuilder(RTask.mapped)
 
   implicit def isBuilder = new ReturnValue[RTask] with ErrorOnReturnValue[RTask] with StdOutErr[RTask] with EnvironmentVariables[RTask] with HostFiles[RTask] with WorkDirectory[RTask] { builder ⇒
     override def returnValue = RTask.returnValue
@@ -62,15 +63,19 @@ object RTask {
   def rImage(version: String) = DockerImage("openmole/r-base", version)
 
   def apply(
-    script:      FromContext[String],
-    install:     Seq[String]         = Seq.empty,
-    libraries:   Seq[InstallCommand] = Seq.empty,
-    forceUpdate: Boolean             = false,
-    rVersion:    String              = "3.3.3"
+    script:               FromContext[String],
+    install:              Seq[String]                           = Seq.empty,
+    libraries:            Seq[InstallCommand]                   = Seq.empty,
+    forceUpdate:          Boolean                               = false,
+    version:              String                                = "3.3.3",
+    errorOnReturnValue:   Boolean                               = true,
+    returnValue:          OptionalArgument[Val[Int]]            = None,
+    stdOut:               OptionalArgument[Val[String]]         = None,
+    stdErr:               OptionalArgument[Val[String]]         = None,
+    hostFiles:            Vector[HostFile]                      = Vector.empty,
+    workDirectory:        OptionalArgument[String]              = None,
+    environmentVariables: Vector[(String, FromContext[String])] = Vector.empty
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): RTask = {
-
-    //def version = "3.3.3"
-    def version = rVersion
 
     // add additional installation of devtools only if needed
     val installCommands =
@@ -89,20 +94,23 @@ object RTask {
         forceUpdate = forceUpdate,
         mode = "P1",
         reuseContainer = true
-      )
+      ).copy(
+          environmentVariables = environmentVariables,
+          hostFiles = hostFiles,
+          workDirectory = workDirectory
+        )
 
     RTask(
       script = script,
       uDockerArguments,
-      errorOnReturnValue = true,
-      returnValue = None,
-      stdOut = None,
-      stdErr = None,
+      errorOnReturnValue = errorOnReturnValue,
+      returnValue = returnValue,
+      stdOut = stdOut,
+      stdErr = stdErr,
       _config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
-      rInputs = Vector.empty,
-      rOutputs = Vector.empty
+      mapped = MappedInputOutputConfig()
     )
   }
 
@@ -118,7 +126,7 @@ object RTask {
   _config:            InputOutputConfig,
   external:           External,
   info:               InfoConfig,
-  rInputs:            Vector[(Val[_], String)], rOutputs: Vector[(String, Val[_])]) extends Task with ValidateTask {
+  mapped:             MappedInputOutputConfig) extends Task with ValidateTask {
 
   lazy val containerPoolKey = UDockerTask.newCacheKey
 
@@ -131,21 +139,21 @@ object RTask {
     import org.json4s.jackson.JsonMethods._
 
     def writeInputsJSON(file: File) = {
-      def values = rInputs.map { case (v, _) ⇒ Array(context(v)) }
+      def values = mapped.inputs.map { m ⇒ Array(context(m.v)) }
       file.content = compact(render(toJSONValue(values.toArray)))
     }
 
     def rInputMapping(arrayName: String) =
-      rInputs.zipWithIndex.map { case ((_, name), i) ⇒ s"$name = $arrayName[[${i + 1}]][[1]]" }.mkString("\n")
+      mapped.inputs.zipWithIndex.map { case (m, i) ⇒ s"${m.name} = $arrayName[[${i + 1}]][[1]]" }.mkString("\n")
 
     def rOutputMapping =
-      s"""list(${rOutputs.map { case (name, _) ⇒ name }.mkString(",")})"""
+      s"""list(${mapped.outputs.map { _.name }.mkString(",")})"""
 
     def readOutputJSON(file: File) = {
       import org.json4s._
       import org.json4s.jackson.JsonMethods._
       val outputValues = parse(file.content)
-      (outputValues.asInstanceOf[JArray].arr zip rOutputs.map(_._2)).map { case (jvalue, v) ⇒ jValueToVariable(jvalue, v) }
+      (outputValues.asInstanceOf[JArray].arr zip mapped.outputs.map(_.v)).map { case (jvalue, v) ⇒ jValueToVariable(jvalue, v) }
     }
 
     newFile.withTmpFile("script", ".R") { scriptFile ⇒
@@ -159,10 +167,10 @@ object RTask {
         writeInputsJSON(jsonInputs)
         scriptFile.content = s"""
           |library("jsonlite")
-          |$inputArrayName = fromJSON("$inputJSONName", simplifyMatrix = FALSE)
+          |$inputArrayName = fromJSON("/$inputJSONName", simplifyMatrix = FALSE)
           |${rInputMapping(inputArrayName)}
           |${script.from(p.context)(p.random, p.newFile, p.fileService)}
-          |write_json($rOutputMapping, "$outputJSONName", always_decimal = TRUE)
+          |write_json($rOutputMapping, "/$outputJSONName", always_decimal = TRUE)
           """.stripMargin
 
         val outputFile = Val[File]("outputFile", Namespace("RTask"))

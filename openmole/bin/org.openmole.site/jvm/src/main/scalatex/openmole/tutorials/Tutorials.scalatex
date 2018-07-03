@@ -2,29 +2,42 @@
 @import org.openmole.site.tools._
 @import org.openmole.site.stylesheet._
 @import org.openmole.site._
+@import DocumentationPages._
 @import scalatex.{ openmole ⇒ scalatex }
 
-@h1{Examples}
+@h1{Tutorials}
 
-This page exposes examples handling certain use cases of OpenMOLE. Don't focus too much on the
-applications or programming languages serving as a use case. These examples are more about how to do things
-the OpenMOLE way. You can discover them through the Market place or tutorials.
-@sect{The Market}
-    The market place is accessible through this @aa("repository", href := shared.link.repo.market) or directly from the GUI application ( @i{New Project > From Market place} ).
-    Clicking on a project enables to download it in the application and to run it directly !
+Here are some tutorials to help you build your first experiments:
 
-    @img(src := Resource.img.guiGuide.market.file, center(95))
+@br
+
+@ol(style := "list-style-type: upper-roman")
+  @li
+    @a("Getting Started with OpenMOLE", href := stepByStepIntro.file)
+    @ol
+      @sitemap.siteMapSection(gettingStartedPages)
+  @li
+    @a("Using NetLogo with OpenMOLE", href := netLogoGA.file)
+    @ol
+      @sitemap.siteMapSection(netLogoPages)
+
+@br
+
+Feel free to suggest topics for new tutorials you would find helpful on the @aa("forum", href := shared.link.mailingList).
+You can even write your own tutorial and share it with the OpenMOLE community on the forum!
+We'll make sure to integrate it with the next release.
+
+@h1{Market Place}
+
+This page exposes examples handling some use cases of OpenMOLE.
+Don't focus too much on the applications or programming languages serving as a use case.
+These examples are more about how to do things the OpenMOLE way.
+
+@br
+
+The market place is accessible through this @aa("repository", href := shared.link.repo.market) or directly from the GUI application (@i{New Project > From Market Place}).
+Clicking on a project allows to download it in the application and run it instantly!
+
+@img(src := Resource.img.guiGuide.market.file, center(95))
 
 
-@sect{Tutorials}
-    Some tutorials, wrote by users can also inspire you for building your first experiments:
-    @ul
-        @li{@a("Get started with OpenMOLE and a simple workflow", href := DocumentationPages.stepByStepIntro.file)}
-        @li{@aa("Calibrate a NetLogo model using genetic algorithms", href := DocumentationPages.netLogoGA.file)}
-        @li{@aa("One factor Sensitivity Analysis on Netlogo Model ", href := DocumentationPages.simpleSAFire.file)}
-
-@break
-
-Feel free to suggest new tutorial on topics you'd like us to describe more thoroughly. You can even write your own
-and share it with the OpenMOLE community on the @a("wiki", href := shared.link.openMOLEWiki)! We'll
-make sure to integrate it in the next release.

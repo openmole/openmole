@@ -84,7 +84,7 @@ package object tools {
   def code(code: String) = hl.code(code)
   def plain(code: String) = hl.plain(code)
 
-  /** heavily inspired from Section.scala */
+  /** heavily inspired from Section.scala **/
   object links {
 
     def anchor(elements: Seq[Any]): Seq[Modifier] =
@@ -105,6 +105,7 @@ package object tools {
         case e: String ⇒ e
         case e: TypedTag[String] ⇒ e
         case e: scalatags.generic.StylePair[Any, String] ⇒ e.s := e.v
+        case e: AttrPair ⇒ e
         case _ ⇒ throw new RuntimeException("Unknown element type " + element.getClass)
       }
 
@@ -190,6 +191,11 @@ package object tools {
 
   def basicButton(title: String, buttonStyle: AttrPair = classIs(btn ++ btn_default)) =
     span(buttonStyle, `type` := "button", title)
+
+  /*def getPageTitle(page: Page) = page.title match {
+    case None    ⇒ page.name
+    case Some(x) ⇒ x
+  }*/
 
   lazy val nav: String = "nav"
   lazy val navbar: String = "navbar"

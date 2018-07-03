@@ -18,7 +18,7 @@ Input files and resources are used to provide files to a task prior to its execu
 
 @h3{External Tasks}
 
-In order to provide files to that kind of tasks (phython, R, Netlogo...) OpenMOLE need to copy (link) the file to a known path on the local hard drive in order for the task to open it when it runs.
+In order to provide files to that kind of tasks (phython, R, Netlogo...) OpenMOLE needs to copy (link) the file to a known path on the local hard drive in order for the task to open it when it runs.
 
 Let's first consider a simple case in which an external task require a file to be executed, always the same. In this case we use the @code{resource} keyword.
 
@@ -116,7 +116,7 @@ When files are produced by a task they should be set as output of task in order 
 
 @h3{External Tasks}
 
-When a task produces a file it has to be set as an output of the task in order to be saved in you OpenMOLE workDirectory and/or to be used by a subsequent task. The general mechanism is to link the path of produced file to a variable of type @code{Val[File]} using the @code{outputFiles} keyword.
+When a task produces a file it has to be set as an output of the task in order to be saved in your OpenMOLE workDirectory and/or to be used by a subsequent task. The general mechanism is to link the path of produced file to a variable of type @code{Val[File]} using the @code{outputFiles} keyword.
 
 @openmole("""
 val f = Val[File]

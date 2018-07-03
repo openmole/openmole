@@ -170,7 +170,7 @@ object Validation {
       seen.flatMap {
         case (caps, paths) ⇒
           paths.filter { case (_, level) ⇒ level < 0 }.map { case (path, level) ⇒ NegativeLevelProblem(caps, path, level) }
-      }
+      } ++ (mole.transitions.map(_.start).toSet -- seen.keys).toVector.map { capsule ⇒ UnreachableCapsuleProblem(capsule) }
   }
 
   def duplicatedTransitions(mole: Mole) =

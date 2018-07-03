@@ -444,7 +444,7 @@ lazy val modifierHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.modifie
 
 /* Method */
 
-def allMethod = Seq(evolution, directSampling)
+def allMethod = Seq(evolution, directSampling, sensitivity)
 
 lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolution", imports = Seq("*")) dependsOn(
   openmoleDSL, csvTool, toolsTask, pattern, collectionDomain % "test", boundsDomain % "test"
@@ -455,6 +455,7 @@ lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolutio
 
 lazy val directSampling = OsgiProject(pluginDir, "org.openmole.plugin.method.directsampling", imports = Seq("*")) dependsOn(openmoleDSL, distributionDomain, pattern, modifierDomain) settings (pluginSettings: _*)
 
+lazy val sensitivity = OsgiProject(pluginDir, "org.openmole.plugin.method.sensitivity", imports = Seq("*")) dependsOn(exception, workflow, workspace, openmoleDSL, lhsSampling) settings (pluginSettings: _*)
 
 
 /* Sampling */
@@ -483,7 +484,7 @@ lazy val fileSource = OsgiProject(pluginDir, "org.openmole.plugin.source.file", 
 
 /* Task */
 
-def allTask = Seq(toolsTask, external, netLogo, netLogo5, netLogo6, jvm, scala, template, systemexec, container, care, udocker, r)
+def allTask = Seq(toolsTask, external, netLogo, netLogo5, netLogo6, jvm, scala, template, systemexec, container, care, udocker, r, scilab)
 
 lazy val toolsTask = OsgiProject(pluginDir, "org.openmole.plugin.task.tools", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings: _*)
 
@@ -516,6 +517,9 @@ lazy val udocker = OsgiProject(pluginDir, "org.openmole.plugin.task.udocker", im
   libraryDependencies ++= Libraries.httpClient) settings (pluginSettings: _*)
 
 lazy val r = OsgiProject(pluginDir, "org.openmole.plugin.task.r", imports = Seq("*")) dependsOn (udocker, json) settings (pluginSettings: _*)
+
+lazy val scilab = OsgiProject(pluginDir, "org.openmole.plugin.task.scilab", imports = Seq("*")) dependsOn (udocker) settings (pluginSettings: _*)
+
 
 /* ---------------- REST ------------------- */
 
@@ -868,7 +872,7 @@ lazy val marketIndex = Project("marketindex", binDir / "org.openmole.marketindex
     val runner = git.runner.value
     val dir = baseDirectory.value / "src/main/resources/openmole-market"
     val marketBranch = defineMarketBranch.value
-    runner.updated("https://github.com/openmole/openmole-market.git", marketBranch, dir, ConsoleLogger())
+    runner.updated("https://gitlab.iscpif.fr/openmole/market.git", marketBranch, dir, ConsoleLogger())
   }
 ) dependsOn(buildinfo, openmoleFile, openmoleTar, market)
 

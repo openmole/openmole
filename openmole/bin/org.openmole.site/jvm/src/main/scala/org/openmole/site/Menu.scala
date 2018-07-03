@@ -25,7 +25,7 @@ import org.openmole.core.buildinfo._
 object Menu {
 
   val navClass = classIs(navbar ++ navbar_default ++ navbar_staticTop ++ navbar_fixedTop ++ navbar_inverse)
-  val liStyle = paddingTop := 8
+  val liStyle = paddingTop := 0
   val inputStyle = paddingTop := 15
   val navId = "omwesite"
 
@@ -41,25 +41,17 @@ object Menu {
             ),
             a(classIs(navbar_brand), href := "#", padding := 0),
             to(Pages.index)(
-              img(alt := "", src := Resource.img.mole.openmoleText.file, Seq(width := 240, paddingTop := 5, pointer))
+              img(alt := "", src := Resource.img.mole.openmoleText.file, Seq(width := 240, paddingTop := 20, pointer))
             )
           ),
           div(classIs(collapse ++ navbar_collapse), aria.expanded := false, paddingTop := 20, id := navId)(
             ul(classIs(nav ++ navbar_nav ++ navbar_right))(
-              (sitePage match {
-                case stepPage: StepPage ⇒
-                  Seq(
-                    li(pageLinkButton("RUN", DocumentationPages.run, false, Seq(classIs(btn ++ btn_default))))(paddingTop := 10),
-                    li(pageLinkButton("EXPLORE", DocumentationPages.explore, false, Seq(classIs(btn ++ btn_default))))(paddingTop := 10),
-                    li(pageLinkButton("SCALE", DocumentationPages.scale, false, Seq(classIs(btn ++ btn_default))))(paddingRight := 80)(paddingTop := 10)
-                  )
-                case _ ⇒ Seq(li)
-              }),
-              li(innerLink(DocumentationPages.documentationHead, "DOCUMENTATION"), liStyle),
+              li(innerLink(DocumentationPages.documentation, "DOCUMENTATION"), liStyle),
               li(innerLink(DocumentationPages.tutorials, "TUTORIALS"), liStyle),
               li(innerLink(DocumentationPages.OMcommunity, "COMMUNITY"), liStyle),
-              li(divLinkButton(div(maxWidth := 140)(span("DOWNLOAD"), span(version.value, fontSize := "10px", paddingLeft := 7)), Resource.script.openmole.file, classIs(btn ++ btn_primary))),
-              li(inputStyle)(img(id := shared.searchImg, src := Resource.img.menu.search.file, Seq(width := 35, paddingTop := 5, paddingLeft := 10, pointer)))(
+              li(outerLink("DEMO", shared.link.demo), liStyle),
+              li(innerLink(DocumentationPages.download, "DOWNLOAD"), liStyle),
+              li(marginTop := -8, inputStyle)(img(id := shared.searchImg, src := Resource.img.menu.search.file, Seq(width := 35, paddingTop := 5, paddingLeft := 10, pointer)))(
                 div(id := shared.searchDiv)
               )
             )

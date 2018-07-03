@@ -2,7 +2,7 @@ package org.openmole.plugin.task.udocker
 
 import java.io._
 
-import org.apache.http.{ HttpResponse, HttpHost }
+import org.apache.http.{ HttpHost, HttpResponse }
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.{ HttpClients, LaxRedirectStrategy }
@@ -13,15 +13,18 @@ import io.circe.jawn.decode
 import io.circe.parser._
 import squants.time._
 import cats.implicits._
+import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workspace.NewFile
 import org.openmole.tool.stream._
-import org.openmole.tool.file.{ File ⇒ OMFile, FileDecorator }
+import org.openmole.tool.file.{ FileDecorator, File ⇒ OMFile }
 import org.openmole.core.networkservice._
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.services._
 
 object Registry {
 
-  def content(response: HttpResponse) = scala.io.Source.fromInputStream(response.getEntity.getContent).mkString
+  def content(response: HttpResponse) =
+    scala.io.Source.fromInputStream(response.getEntity.getContent).mkString
 
   object HTTP {
     def builder = HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).setRedirectStrategy(new LaxRedirectStrategy)
@@ -34,8 +37,12 @@ object Registry {
       case _                        ⇒ builder.build()
     }
 
-    def execute[T](get: HttpGet)(f: HttpResponse ⇒ T)(implicit networkService: NetworkService) = {
+    def execute[T](get: HttpGet, checkError: Boolean = true)(f: HttpResponse ⇒ T)(implicit networkService: NetworkService) = {
       val response = client(networkService).execute(get)
+
+      if (checkError && response.getStatusLine.getStatusCode >= 300)
+        throw new UserBadDataError(s"Docker registry responded with $response to the query $get")
+
       try f(response)
       finally response.close()
     }
@@ -59,6 +66,7 @@ object Registry {
       val get = new HttpGet(url)
       get.setConfig(RequestConfig.custom().setConnectTimeout(timeout.millis.toInt).setConnectionRequestTimeout(timeout.millis.toInt).build())
       val authenticationRequest = authentication(get)
+
       val t = token(authenticationRequest.get) match {
         case Left(l)  ⇒ throw new RuntimeException(s"Failed to obtain authentication token: $l")
         case Right(r) ⇒ r
@@ -70,7 +78,7 @@ object Registry {
       request
     }
 
-    def authentication(get: HttpGet)(implicit networkservice: NetworkService) = execute(get) { response ⇒
+    def authentication(get: HttpGet)(implicit networkservice: NetworkService) = execute(get, checkError = false) { response ⇒
       Option(response.getFirstHeader("Www-Authenticate")).map(_.getValue).map {
         a ⇒
           val Array(scheme, rest) = a.split(" ")
@@ -110,6 +118,10 @@ object Registry {
   def downloadManifest(image: DockerImage, timeout: Time)(implicit networkService: NetworkService): String = {
     val url = s"${baseURL(image)}/manifests/${image.tag}"
     val httpResponse = client(networkService).execute(Token.withToken(url, timeout))
+
+    if (httpResponse.getStatusLine.getStatusCode >= 300)
+      throw new UserBadDataError(s"Docker registry responded with $httpResponse to query of image $image")
+
     content(httpResponse)
   }
 

@@ -29,14 +29,14 @@ $tasks
   val env = LocalEnvironment(4)
   """
 
-@h1{Step by Step Introduction to  OpenMOLE}
-
-
+@h1{A Step by Step Introduction to OpenMOLE}
 
 @h2{What is OpenMOLE ?}
 
 
+
 @h2{What can I use it for ?}
+
 
 
 @h2{Background and Context}
@@ -54,28 +54,30 @@ Inputs can be of several types : @b{parameters} (Double, Integer, Boolean, Strin
 Outputs are basically the same : Valued measures (Double, Integer, Boolean, String) , @b{date} (typically .csv files).
 
 
+@h2{Installing OpenMOLE on your computer}
 
+@h3{Try our demo website}
+Before downloading OpenMOLE, you might want to get a preview of what you can do with it.
+You can try OpenMOLE online using our @a("demo website", href := shared.link.demo).
+Please note that the service is reset every 6 hours, so don't be surprised if your current script suddenly vanishes :-)
 
-
-@h2{Installation and Launch}
-
-
-You can try OpenMOLE online using the @aa "OpenMOLE demonstration website", href := shared.link.demo). Notice that the service is reset every 6 hours or so, so don't be surprised if your current script vanish :-).
-
-To be installed on your own computer, OpenMOLE requires Java version 8 or above.
+@h3{Download OpenMOLE}
+To run correctly on your own computer, OpenMOLE requires Java version 8 or above.
 Check our @a("FAQ", href := Pages.faq.file) to access your java version information.
-
 @br
-@h3{Linux installation}
-Then just extract the archive, available  @a("here", href:=Resource.script.openmole.file), somewhere and
+When Java is installed, you just need to download and extract @a("this archive", href:=Resource.script.openmole.file), and
 you're done! OpenMOLE is installed and works out of the box!
-@break
-Once installed, you can launch OpenMOLE by executing the @i{openmole} file in the installation directory
-(it is called @i{openmole.bat} for windozers). It will bring up you web browser. OpenMOLE supports
-Chrome and Firefox. If you are using another default web browser, please copy paste the OpenMOLE url
-(http://localhost:port) in one of these browsers.
 
-@p You should see something like this :
+@h3{Run OpenMOLE on Linux}
+You can then launch OpenMOLE by executing the @i{openmole} file in the installation directory with the @hl.code("./openmole") command.
+It will bring up you web browser.
+@br
+OpenMOLE supports Chrome and Firefox.
+If you are using another default web browser, please copy paste the OpenMOLE url (http://localhost:port) in one of these browsers.
+@br
+@br
+You should see something like this:
+@br
 @br
 @img(src := Resource.img.mole.uiScreenshot.file, `class` := "uiScreenshot", center(100)).
 
@@ -93,4 +95,8 @@ Chrome and Firefox. If you are using another default web browser, please copy pa
 
 To get help you are more than welcome to contact the OpenMOLE user mailing list. To do so, you should
 @aa("subscribe here", href := shared.link.mailingList), and then you can post your question to the list users.
-We're also present on the @b{#openmole} channel of the @a("ISC-PIF's RocketChat", href := shared.link.chat).
+We're also present on the @b{#openmole} channel of the @aa("ISC-PIF's RocketChat", href := shared.link.chat).
+
+@break
+
+@h3{@a("Next tutorial: How to Launch and Run a Model with OpenMOLE", href := launchTuto.file)}

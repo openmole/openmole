@@ -17,16 +17,12 @@
  */
 package org.openmole.core.workflow.builder
 
+import monocle.Lens
 import monocle.macros.Lenses
 import org.openmole.core.context.{ PrototypeSet, Val }
 import org.openmole.core.workflow.tools.DefaultSet
 
 object InputOutputConfig {
-  def apply(
-    inputs:   PrototypeSet = PrototypeSet.empty,
-    outputs:  PrototypeSet = PrototypeSet.empty,
-    defaults: DefaultSet   = DefaultSet.empty
-  ): InputOutputConfig = new InputOutputConfig(inputs, outputs, defaults)
 
   implicit class ConfigDecoration(config: InputOutputConfig) {
     def add(inputs: Seq[Val[_]] = Seq.empty, outputs: Seq[Val[_]] = Seq.empty) = InputOutputConfig.add(inputs, outputs)(config)
@@ -40,25 +36,8 @@ object InputOutputConfig {
 }
 
 @Lenses case class InputOutputConfig(
-  inputs:   PrototypeSet,
-  outputs:  PrototypeSet,
-  defaults: DefaultSet
+  inputs:   PrototypeSet = PrototypeSet.empty,
+  outputs:  PrototypeSet = PrototypeSet.empty,
+  defaults: DefaultSet   = DefaultSet.empty
 )
-
-import monocle.Lens
-import org.openmole.core.context.PrototypeSet
-import org.openmole.core.workflow.task.ClosureTask
-import org.openmole.core.workflow.tools.DefaultSet
-
-object InputOutputBuilder {
-
-  def apply[T](taskInfo: Lens[T, InputOutputConfig]) = new InputOutputBuilder[T] {
-    override def inputs: Lens[T, PrototypeSet] = taskInfo composeLens InputOutputConfig.inputs
-    override def defaults: Lens[T, DefaultSet] = taskInfo composeLens InputOutputConfig.defaults
-    override def outputs: Lens[T, PrototypeSet] = taskInfo composeLens InputOutputConfig.outputs
-  }
-
-}
-
-trait InputOutputBuilder[T] extends InputBuilder[T] with OutputBuilder[T] with DefaultBuilder[T]
 

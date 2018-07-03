@@ -80,8 +80,8 @@ object CoreUtils {
     }
   }
 
-  def replicate(safePath: SafePath, newName: String): Unit =
-    post()[Api].replicate(safePath, newName).call().foreach { y ⇒
+  def duplicate(safePath: SafePath, newName: String): Unit =
+    post()[Api].duplicate(safePath, newName).call().foreach { y ⇒
       TreeNodePanel.refreshAndDraw
     }
 

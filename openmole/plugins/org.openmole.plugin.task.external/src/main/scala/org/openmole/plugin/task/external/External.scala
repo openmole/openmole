@@ -77,7 +77,7 @@ object External {
 
   def validate(external: External)(inputs: Seq[Val[_]]) = Validate { p ⇒
     def resourceExists(resource: External.Resource) =
-      if (!resource.file.exists()) Seq(new UserBadDataError(s"""File resource "${resource.file} doesn't exsist.""")) else Seq.empty
+      if (!resource.file.exists()) Seq(new UserBadDataError(s"""File resource "${resource.file} doesn't exist.""")) else Seq.empty
 
     import p._
     external.inputFileArrays.flatMap(_.prefix.validate(inputs)) ++

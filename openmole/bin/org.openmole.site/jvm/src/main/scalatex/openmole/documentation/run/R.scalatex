@@ -6,7 +6,7 @@
 
 @h2{RTask}
 
-R is a scripted language initially designed for statistics, but which application range is much broader today (for example GIS, operational research, linear algebra, web applications, etc.).
+R is a scripted language initially designed for statistics, but whos application range is much broader today (for example GIS, operational research, linear algebra, web applications, etc.).
 , thanks to its large community and the variety of packages. It may be convenient to use some specific R libraries within a workflow, and OpenMOLE provides therefore a specific @i{RTask}.
 
 @h2{Preliminary remark}
@@ -26,11 +26,13 @@ It takes the following arguments :
    @li{@code{libraries} : Sequence of strings, optional (default = empty). The name of R libraries that will be used by the script and need to be installed before (note : as detailed below, installations are done only at the first use, and OpenMOLE keeps the docker image in cache. To force an update, use the @i{forceUpdate} argument)}
    @li{@code{forceUpdate} : Boolean, optional (default = false). Should the library installation be forced (to ensure an update for example). If true, the task will perform the installation (and thus the update) even if the library was already installed.}
 
-@p It has the following specific properties to be extended using @code{set} :
+@p The following properties must be defined using @code{set} :
 
 @ul
-   @li{@code{rInputs} : correspondences between workflow variables in input and R variables (add couples @i{(Val,String)})}
-   @li{@code{rOutputs} : correspondences between R variables and workflow variables in output (add couples @i{(String,Val)}}
+   @li{@code{input/output} similar as for any task}
+   @li{mapped input: the syntax @code{inputs += prototype mapped "r-variable"} establishes a link between the workflow variable @code{prototype} (Val) and the corresponding R variable name @code{"r-variable"} (String)
+   If variables have the same name, you can use the short syntax @code{inputs += prototype.mapped}}
+   @li{mapped output: similar syntax to collect outputs of the model}
 
 @p We develop below a detailed example of how to use a RTask, from a very simple use to a more elaborate with system libraries and R libraries.
 
@@ -73,7 +75,7 @@ import it from a @code{file.R}, deal with libraries, and plug inputs and outputs
 
 @p You can now upload @code{Rscript1.R} to your OpenMOLE workspace.
 
-@br Here is the OpenMOLE script to use it in the Rtask. In the @code{resource} of the Rtask is set, you have to precise the location
+@br Here is the OpenMOLE script to use it in the Rtask. In the @code{resource} of the Rtask is set, you have to provide the precise location
 of the @code{file.R}, which is then imported in the R script using the R primitive @code{source()}).
 
 
@@ -81,7 +83,7 @@ of the @code{file.R}, which is then imported in the R script using the R primiti
     val rTask2 =
       RTask($tq
         source("Rscript1.R")
-      $tq) set(
+      $tq) set (
         resources += workDirectory / "Rscript1.R"
       )
 
@@ -108,7 +110,7 @@ in the @code{set} of the task.
           }
       j = f(i)
     $tq) set (
-      rInputs += i,
+      inputs += i.mapped,
       i := 3
     )
 
@@ -133,8 +135,8 @@ which is mapped to the OpenMOLE variable @code{i}.
          }
       j = f(varRi)
     $tq) set(
-      rInputs += (i, "varRi"),
-      rOutputs += j,
+      inputs += i mapped "varRi",
+      outputs += j.mapped,
       i := 3
     )
 
@@ -143,34 +145,8 @@ which is mapped to the OpenMOLE variable @code{i}.
    """)
 
 
-@p Remark : if you have several outputs, they can be managed following two cases:
-
-@ul
-  @li{if they have the same name as OpenMole variables and R variables, pass them as a list in @code{rInputs}:}
-
-     @br @openmole(s"""
-        val c = Val[Double]
-        val d = Val[String]
-        val e = Val[Array[Double]]
-
-        rInputs += (c,d,e)
-      """)
-
-
-  @li{if they have different name as OpenMole variables and R variables, use several @code{rInputs("Rvariable", OMvariable)}:}
-
-     @br @openmole(s"""
-     val aOM = Val[Double]
-     val bOM = Val[Double]
-
-     rInputs += (aOM, "a_R")
-     rInputs += (bOM, "b_R")
-     """)
-
-@p Note that you can combine @code{rOutputs} with classic @code{outputs}
+@p Remark : if you have several outputs, you can combine @code{mapped outputs} with classic @code{outputs}
 that come not in the R task (for example, the variable @i{c} in @i{rTask5} below).
-
-
 
       @br @openmole( s"""
            val i = Val[Int]
@@ -184,10 +160,10 @@ that come not in the R task (for example, the variable @i{c} in @i{rTask5} below
                    }
                j = f(i)
                $tq) set (
-                 rInputs += i,
+                 inputs += i.mapped,
                  (inputs, outputs) += c,
-                 rOutputs += ("j", j),
-                 outputs += i ,
+                 outputs +=  j.mapped,
+                 outputs += i.mapped,
                  i := 3 ,
                  c:=2
                )
@@ -208,7 +184,7 @@ Note that the last section present an alternative.
 It is also possible to pass files as argument of the @code{rTask}. However, we can't pass them with @i{rInputs} as seen before, as it will result in a type mismatch with an error message like  @i{type class java.io.File is not convertible to JSON}.
 
 
-@br We thus use @i{inputFiles}, and  we give an illustration in the following workflow (@code{rTask}). We precise that @code{inputFiles} must be used here (and not @code{resources}), since it is used as a @code{Val} and can be acted upon in a workflow, whereas @code{resources} acts differently since it is fixed.
+@br We thus use @i{inputFiles}, and  we give an illustration in the following workflow (@code{rTask}). We emphasize that @code{inputFiles} must be used here (and not @code{resources}), since it is used as a @code{Val} and can be acted upon in a workflow, whereas @code{resources} acts differently since it is fixed.
 
 @br We have first a @code{ScalaTask} which writes numbers in a file. The file is the OpenMole variable  @code{g} of type @i{java.io.File } .
  In order to have access to this file in the RTask, we put @code{g} as output of the ScalaTask.
@@ -249,7 +225,7 @@ last task (here the OpenMOLE  variable @code{resR}).
        k=f(temp2)
      $tq) set(
        inputFiles += (g, "fileForR"),
-       rOutputs += ("k", resR)
+       outputs += resR mapped "k"
      )
 
    (task1 -- rTask ) hook ToStringHook(resR)
@@ -289,7 +265,7 @@ those libraries will be stored, and the execution is quicker.
         install = Seq("apt update", "apt install -y libgdal-dev libproj-dev"),
         libraries = Seq("GeoRange")
       ) set(
-        rOutputs += area
+        outputs += area.mapped
       )
 
     rTask3 hook ToStringHook()
@@ -305,9 +281,9 @@ Here is an example of an (almost complete) workflow using a Rtask, it uses @code
 that will be used in the RTask.
 
 @br  @i{task1} creates a file @code{g} and @code{task2} creates @code{y}, an @code{Array[Double]}. We both put them in the @code{Rtask} using
-respectively @code{inputFiles} and @code{rInputs}.
+respectively @code{inputFiles} and @code{inputs}.
 
-@br Remark that the conversion from the OpenMOLE type (scala) @code{Array[Double]} to the R type vector is made directly by the @code{rInputs}
+@br Notice that the conversion from the OpenMOLE type (scala) @code{Array[Double]} to the R type vector is made directly by the @code{inputs}
 
 @br The hook stored the file @code{g} in your @b{Workspace}, and display the @code{area}
 
@@ -374,9 +350,9 @@ respectively @code{inputFiles} and @code{rInputs}.
         libraries = Seq("GeoRange")
         ) set(
           inputs += n ,
-          inputFiles += (g, "fileForR"),
-          rInputs += (y, "y"),  // same as  rInputs += (y)
-          rOutputs += ("area", res),
+          inputs += g mapped "fileForR",
+          inputs += y.mapped,
+          outputs += res mapped "area",
           outputs += (g,n)
         )
 
@@ -433,7 +409,7 @@ val task1Capsule = Capsule(task1)
 ((task1Capsule --  objSlot) & (task1Capsule -- task2 -- objSlot)) hook ToStringHook()
  """)
 
-Remark that @code{a} is not an @code{output} of the @code{task2}, and if you try a classical chain @code{task1 -- task2 -- task3}, OpenMOLE will inform you that:
+Notice that @code{a} is not an @code{output} of the @code{task2}, and if you try a classical chain @code{task1 -- task2 -- task3}, OpenMOLE will inform you that:
   @plain("""
   Input (a: Int) is missing when reaching the slot270273838:task3-1057250483.
   """)

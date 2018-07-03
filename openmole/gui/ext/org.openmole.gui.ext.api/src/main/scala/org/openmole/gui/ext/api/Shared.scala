@@ -53,7 +53,7 @@ trait Api {
   def isEmpty(safePath: SafePath): Boolean
   def mdToHtml(safePath: SafePath): String
   def move(from: SafePath, to: SafePath): Unit
-  def replicate(safePath: SafePath, newName: String): SafePath
+  def duplicate(safePath: SafePath, newName: String): SafePath
   def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit
   def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath]
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Unit

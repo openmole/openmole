@@ -22,6 +22,8 @@ import io.circe.syntax._
 import monocle.macros.Lenses
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.outputredirection.OutputRedirection
+import org.openmole.core.preference.Preference
+import org.openmole.core.tools.service.Retry
 import org.openmole.plugin.task.systemexec.{ ExecutionCommand, commandLine, execute, executeAll }
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
@@ -47,7 +49,7 @@ object UDocker {
     lazy val id = UUID.randomUUID().toString
   }
 
-  def downloadImage(dockerImage: DockerImage, manifestDirectory: File, layersDirectory: File, timeout: Time)(implicit newFile: NewFile, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkservice: NetworkService) = {
+  def downloadImage(dockerImage: DockerImage, manifestDirectory: File, layersDirectory: File, timeout: Time, retry: Int)(implicit newFile: NewFile, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkservice: NetworkService) = {
     import Registry._
 
     def layerFile(layer: Layer) = layersDirectory / layer.digest
@@ -55,31 +57,34 @@ object UDocker {
 
     manifestFile.getParentFile.mkdirs()
 
-    val manifestContent = util.Try(downloadManifest(dockerImage, timeout)) match {
-      case util.Failure(e) ⇒
-        if (manifestFile.exists) manifestFile.withLock { _ ⇒ manifestFile.content }
-        else throw e
-      case util.Success(c) ⇒
-        manifestFile.withLock { _ ⇒ manifestFile.content = c }
-        c
-    }
+    val manifestContent =
+      util.Try(Retry.retry(retry)(downloadManifest(dockerImage, timeout))) match {
+        case util.Failure(e) if manifestFile.exists ⇒ manifestFile.withLock { _ ⇒ manifestFile.content }
+        case util.Failure(e)                        ⇒ throw e
+        case util.Success(c) ⇒
+          manifestFile.withLock { _ ⇒ manifestFile.content = c }
+          c
+      }
 
     val manifestData = manifest(dockerImage, manifestContent)
-
-    def localLayersFutures =
+    val layersInManifest =
       for {
         m ← manifestData.toSeq.toVector
-        l ← layers(m.value).distinct
-      } yield Future {
+        l ← layers(m.value)
+      } yield l
+
+    def localLayersFutures =
+      for { l ← layersInManifest.distinct } yield Future {
         val lf = layerFile(l)
         if (!lf.exists) {
           outputRedirection.output.println(s"Downloading docker layer: ${l.digest}")
-          downloadLayer(dockerImage, l, layersDirectory, lf, timeout)
+          Retry.retry(retry)(downloadLayer(dockerImage, l, layersDirectory, lf, timeout))
         }
         l → lf
       }
 
-    val localLayers = localLayersFutures.map(f ⇒ Await.result(f, Duration.Inf)).reverse
+    val localLayersMap = localLayersFutures.map(f ⇒ Await.result(f, Duration.Inf)).toMap
+    val localLayers = layersInManifest.reverse.map(l ⇒ l -> localLayersMap(l))
 
     for {
       m ← manifestData
