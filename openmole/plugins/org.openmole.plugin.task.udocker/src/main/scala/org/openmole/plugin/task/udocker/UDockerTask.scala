@@ -58,6 +58,7 @@ object UDockerTask {
   import UDocker._
 
   val RegistryTimeout = ConfigurationLocation("UDockerTask", "RegistryTimeout", Some(1 minutes))
+  val RegistryRetryOnError = ConfigurationLocation("UDockerTask", "RegistryRetryOnError", Some(5))
 
   implicit def isTask: InputOutputBuilder[UDockerTask] = InputOutputBuilder(UDockerTask._config)
   implicit def isExternal: ExternalBuilder[UDockerTask] = ExternalBuilder(UDockerTask.external)
@@ -205,7 +206,7 @@ object UDockerTask {
 
   def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkservice: NetworkService): Either[Err, LocalDockerImage] =
     containerImage match {
-      case i: DockerImage      ⇒ downloadImage(i, manifestDirectory(workspace), layersDirectory(workspace), preference(RegistryTimeout))
+      case i: DockerImage      ⇒ downloadImage(i, manifestDirectory(workspace), layersDirectory(workspace), preference(RegistryTimeout), preference(RegistryRetryOnError))
       case i: SavedDockerImage ⇒ loadImage(i)
     }
 
