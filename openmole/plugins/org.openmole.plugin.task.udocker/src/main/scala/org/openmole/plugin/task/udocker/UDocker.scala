@@ -55,14 +55,14 @@ object UDocker {
 
     manifestFile.getParentFile.mkdirs()
 
-    val manifestContent = util.Try(downloadManifest(dockerImage, timeout)) match {
-      case util.Failure(e) ⇒
-        if (manifestFile.exists) manifestFile.withLock { _ ⇒ manifestFile.content }
-        else throw e
-      case util.Success(c) ⇒
-        manifestFile.withLock { _ ⇒ manifestFile.content = c }
-        c
-    }
+    val manifestContent =
+      util.Try(downloadManifest(dockerImage, timeout)) match {
+        case util.Failure(e) if manifestFile.exists ⇒ manifestFile.withLock { _ ⇒ manifestFile.content }
+        case util.Failure(e)                        ⇒ throw e
+        case util.Success(c) ⇒
+          manifestFile.withLock { _ ⇒ manifestFile.content = c }
+          c
+      }
 
     val manifestData = manifest(dockerImage, manifestContent)
     val layersInManifest =

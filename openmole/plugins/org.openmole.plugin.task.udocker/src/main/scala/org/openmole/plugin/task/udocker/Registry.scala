@@ -18,6 +18,7 @@ import org.openmole.core.workspace.NewFile
 import org.openmole.tool.stream._
 import org.openmole.tool.file.{ FileDecorator, File ⇒ OMFile }
 import org.openmole.core.networkservice._
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.services._
 
 object Registry {
@@ -36,8 +37,12 @@ object Registry {
       case _                        ⇒ builder.build()
     }
 
-    def execute[T](get: HttpGet)(f: HttpResponse ⇒ T)(implicit networkService: NetworkService) = {
+    def execute[T](get: HttpGet, checkError: Boolean = true)(f: HttpResponse ⇒ T)(implicit networkService: NetworkService) = {
       val response = client(networkService).execute(get)
+
+      if (checkError && response.getStatusLine.getStatusCode >= 300)
+        throw new UserBadDataError(s"Docker registry responded with $response to the query $get")
+
       try f(response)
       finally response.close()
     }
@@ -61,6 +66,7 @@ object Registry {
       val get = new HttpGet(url)
       get.setConfig(RequestConfig.custom().setConnectTimeout(timeout.millis.toInt).setConnectionRequestTimeout(timeout.millis.toInt).build())
       val authenticationRequest = authentication(get)
+
       val t = token(authenticationRequest.get) match {
         case Left(l)  ⇒ throw new RuntimeException(s"Failed to obtain authentication token: $l")
         case Right(r) ⇒ r
@@ -72,7 +78,7 @@ object Registry {
       request
     }
 
-    def authentication(get: HttpGet)(implicit networkservice: NetworkService) = execute(get) { response ⇒
+    def authentication(get: HttpGet)(implicit networkservice: NetworkService) = execute(get, checkError = false) { response ⇒
       Option(response.getFirstHeader("Www-Authenticate")).map(_.getValue).map {
         a ⇒
           val Array(scheme, rest) = a.split(" ")
