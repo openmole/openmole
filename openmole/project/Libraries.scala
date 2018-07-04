@@ -15,7 +15,7 @@ object Libraries {
   lazy val netLogo6Version = "6.0.3"
   lazy val scalaTagsVersion = "0.6.5"
   lazy val scalaJSDomVersion = "0.9.3"
-  lazy val rxVersion = "0.3.2"
+  lazy val rxVersion = "0.4.0"
   lazy val boopickleVersion = "1.2.6"
   lazy val scalaAutowireVersion = "0.2.6"
   lazy val sourcecodeVersion = "0.1.3"
