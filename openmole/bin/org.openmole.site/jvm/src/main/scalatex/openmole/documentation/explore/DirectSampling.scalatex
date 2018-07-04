@@ -124,6 +124,44 @@ Some details:
 @img(src := Resource.img.method.directSampling.file, center(50))
 
 
+@break
+
+@h2{Model replication}
+
+In the case of a stochastic model, you may want to define a replication task to run several replications of the model for the same parameter values.
+This is similar to using a uniform distribution sampling on the seed of the model, and OpenMOLE provides a specific constructor for that, namely @code{Replication}.
+
+The use of a @code{Replication} sampling is the following:
+
+@hl.openmole("""
+val mySeed = Val[Int]
+val i = Val[Int]
+val o = Val[Double]
+
+val myModel =
+  ScalaTask("import scala.util.Random; val rng = new Random(seed); val o = i * 2 + 0.1 * rng.nextDouble()") set (
+    inputs += (i,seed),
+    outputs += (i, o)
+  )
+
+val replication = Replication(
+    evaluation = myModel,
+    seed = mySeed,
+    replications = 100
+)
+
+replication
+""", name="example of replication")
+
+The arguments for @code{Replication} are the following:
+
+@ul
+    @li{@b{@hl.code("evaluation")} is the task (or a composition of tasks) that uses your inputs, typically your model task and a hook.}
+    @li{@b{@hl.code("seed")} is the prototype for the seed, which will be sampled with an uniform distribution in its domain (Val[Int] or Val[Long]).}
+    @li{@b{@hl.code("replications")} (Int) is the number of replications.}
+    @li{@b{@hl.code("distributionSeed")} (@i{optional}, Long) is an optional seed to be given to he uniform distribution of the seed ("meta-seed").}
+    @li{@b{@hl.code("aggregation")} (@i{optional}) is an aggregation task to be performed on the outputs of your evaluation task.}
+
 
 @break
 

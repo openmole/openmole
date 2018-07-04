@@ -59,7 +59,7 @@ object JobManager extends JavaLogger { self ⇒
       }
   }
 
-  def dispatch(msg: DispatchedMessage)(implicit services: BatchEnvironment.Services) = services.threadProvider.submit(() ⇒ DispatcherActor.receive(msg), messagePriority(msg))
+  def dispatch(msg: DispatchedMessage)(implicit services: BatchEnvironment.Services) = services.threadProvider.submit(messagePriority(msg))(() ⇒ DispatcherActor.receive(msg))
 
   def !(msg: JobMessage)(implicit services: BatchEnvironment.Services): Unit = msg match {
     case msg: Upload             ⇒ dispatch(msg)
