@@ -100,7 +100,7 @@ class ModelWizardPanel {
   val currentPluginPanel: Var[Option[WizardGUIPlugin]] = Var(None)
 
   fileToUploadPath.trigger {
-    fileToUploadPath.now.map {
+    fileToUploadPath.now.foreach {
       buildForm
     }
   }

@@ -347,7 +347,8 @@ case class EnvironmentState(
                              submitted: Long,
                              failed: Long,
                              networkActivity: NetworkActivity,
-                             executionActivity: ExecutionActivity
+                             executionActivity: ExecutionActivity,
+                             numberOfErrors: Int
                            )
 
 //case class Output(output: String)

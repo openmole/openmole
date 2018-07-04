@@ -64,7 +64,9 @@ class Execution {
 
   def environmentListener(envId: EnvironmentId): Listner[Environment] = {
     case (env, bdl: BeginDownload) ⇒
-      updateRunningEnvironment(envId) { RunningEnvironment.networkActivity composeLens NetworkActivity.downloadingFiles modify (_ + 1) }
+      updateRunningEnvironment(envId) {
+        RunningEnvironment.networkActivity composeLens NetworkActivity.downloadingFiles modify (_ + 1)
+      }
 
     case (env, edl: EndDownload) ⇒ updateRunningEnvironment(envId) {
       RunningEnvironment.networkActivity.modify { na ⇒
@@ -79,7 +81,9 @@ class Execution {
     }
 
     case (env, bul: BeginUpload) ⇒
-      updateRunningEnvironment(envId) { RunningEnvironment.networkActivity composeLens NetworkActivity.uploadingFiles modify (_ + 1) }
+      updateRunningEnvironment(envId) {
+        RunningEnvironment.networkActivity composeLens NetworkActivity.uploadingFiles modify (_ + 1)
+      }
 
     case (env, eul: EndUpload) ⇒ updateRunningEnvironment(envId) {
       RunningEnvironment.networkActivity.modify { na ⇒
@@ -122,7 +126,9 @@ class Execution {
 
   def removeRunningEnvironments(id: ExecutionId) = atomic { implicit ctx ⇒
     environmentIds.remove(id).foreach {
-      _.foreach { runningEnvironments.remove }
+      _.foreach {
+        runningEnvironments.remove
+      }
     }
   }
 
@@ -177,10 +183,21 @@ class Execution {
           e.environment.submitted,
           e.environment.failed,
           e.networkActivity,
-          e.executionActivity
+          e.executionActivity,
+          environementErrors(envId).length
         )
       }
     }
+
+  def environementErrors(environmentId: EnvironmentId): Seq[EnvironmentError] = {
+    val errorMap = getRunningEnvironments(environmentId).toMap
+    val info = errorMap(environmentId)
+
+    info.environment.errors.map { ex ⇒
+      println("ERROR " + ex.exception.getMessage)
+      EnvironmentError(environmentId, ex.exception.getMessage, ErrorBuilder(ex.exception), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
+    }
+  }
 
   def executionInfo(key: ExecutionId): ExecutionInfo = atomic { implicit ctx ⇒
 
@@ -192,7 +209,9 @@ class Execution {
       case (_, Some(moleExecution)) ⇒
 
         val d = moleExecution.duration.getOrElse(0L)
+
         def convertStatuses(s: MoleExecution.JobStatuses) = ExecutionInfo.JobStatuses(s.ready, s.running, s.completed)
+
         lazy val statuses = moleExecution.capsuleStatuses.toVector.map { case (k, v) ⇒ k.toString -> convertStatuses(v) }
 
         moleExecution.exception match {

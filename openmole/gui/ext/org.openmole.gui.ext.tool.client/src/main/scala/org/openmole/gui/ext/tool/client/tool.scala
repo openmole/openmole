@@ -509,7 +509,7 @@ package object client {
       case _: ExecutionInfo.Running  ⇒ color("yellow")
       case _: ExecutionInfo.Finished ⇒ color("#a6bf26")
       case _: ExecutionInfo.Canceled ⇒ color("orange")
-      case _                         ⇒ color(WHITE)
+      case _                         ⇒ color("#333333")
     },
     fontWeight := "bold"
   )

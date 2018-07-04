@@ -130,7 +130,7 @@ class FileToolBox(initSafePath: SafePath) {
             true
           case fileaction.download ⇒
             withSafePath { sp ⇒
-              org.scalajs.dom.document.location.href = s"downloadFile?path=${Utils.toURI(sp.path)}"
+              org.scalajs.dom.document.location.href = s"downloadFile?path=${org.openmole.gui.ext.tool.client.Utils.toURI(sp.path)}"
               Popover.hide
             }
             true

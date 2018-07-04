@@ -98,7 +98,7 @@ class JarWizardGUI(safePath: SafePath, onMethodSelected: (LaunchingCommand) ⇒ 
           )
 
           methodTable.now.get.selected.trigger {
-            methodTable.now.get.selected.now.map(r ⇒ methodMap(r.values.head)).map { selectedMethod ⇒
+            methodTable.now.get.selected.now.map(r ⇒ methodMap(r.values.head)).foreach { selectedMethod ⇒
               onMethodSelected(JavaLaunchingCommand(
                 selectedMethod,
                 selectedMethod.args, selectedMethod.ret.map {

@@ -38,8 +38,6 @@ import TreeNodeTabs._
 
 sealed trait TreeNodeTab {
 
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-
   val safePathTab: Var[SafePath]
   val activity: Var[Activity] = Var(UnActive)
 
@@ -71,6 +69,8 @@ sealed trait TreeNodeTab {
 }
 
 object TreeNodeTab {
+
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
   def save(safePath: SafePath, editorPanelUI: EditorPanelUI, afterSave: () ⇒ Unit) =
     editorPanelUI.synchronized {
@@ -153,8 +153,9 @@ object TreeNodeTab {
     lazy val safePathTab = Var(safePath)
     lazy val isEditing = Var(initialEditing)
 
-    isEditing.trigger {
-      editor.setReadOnly(!isEditing.now)
+    Rx {
+      //isEditing.trigger {
+      editor.setReadOnly(!isEditing())
     }
 
     def content: String = editor.code
