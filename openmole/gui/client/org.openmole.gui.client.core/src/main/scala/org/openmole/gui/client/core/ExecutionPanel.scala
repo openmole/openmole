@@ -33,11 +33,13 @@ import org.openmole.gui.ext.data.{ Error ⇒ ExecError }
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.alert.BannerAlert
 import org.openmole.gui.client.core.alert.BannerAlert.BannerMessage
-import org.openmole.gui.client.tool.Expander
+import org.openmole.gui.client.tool.{ DynamicScrolledTextArea, Expander }
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.tool.client.Utils
+import org.scalajs.dom.html.TextArea
+import org.scalajs.dom.raw.HTMLElement
 import rx._
-import scaladget.bootstrapnative.Table.{ FixedCell, ReactiveRow, VarCell }
+import scaladget.bootstrapnative.Table.{ BSTableStyle, FixedCell, ReactiveRow, SubRow, VarCell }
 
 import concurrent.duration._
 import scaladget.bootstrapnative.bsn._
@@ -47,11 +49,23 @@ import scaladget.bootstrapnative.bsn.ScrollableTextArea.BottomScroll
 
 object ExecutionPanel {
 
-  trait JobView
+  sealed trait JobView
 
   object CapsuleView extends JobView
 
   object EnvironmentView extends JobView
+
+  sealed trait Sub
+
+  object SubScript extends Sub
+
+  object SubOutput extends Sub
+
+  object SubCompile extends Sub
+
+  object SubEnvirorment extends Sub
+
+  implicit def idToExecutionID(id: scaladget.tools.ID): ExecutionId = ExecutionId(id)
 
 }
 
@@ -82,14 +96,76 @@ class ExecutionPanel {
 
   val updating = new AtomicBoolean(false)
 
+  case class SubRowPanels(script: Rx[TypedTag[HTMLElement]], output: Rx[TypedTag[HTMLElement]])
+
+  val emptySubRowPanel = SubRowPanels(Rx(tags.div("")), Rx(tags.div("")))
+
+  val subRows: Var[Map[ExecutionId, SubRowPanels]] = Var(Map())
+  val expanded: Var[Seq[(ExecutionId, Sub)]] = Var(Seq())
+
+  def sub(executionId: ExecutionId) = expanded.map { e ⇒
+    e.find(_._1 == executionId).map {
+      _._2
+    }
+  }
+
+  def subRowPanel(executionId: ExecutionId) = {
+
+    sub(executionId).map {
+      _.map { x ⇒
+        val subRowForExecID = subRows.map {
+          _.get(executionId).getOrElse(emptySubRowPanel)
+        }
+        x match {
+          case SubScript ⇒ subRowForExecID.flatMap(_.script)
+          case SubOutput ⇒ subRowForExecID.flatMap(_.output)
+        }
+      }
+    }.flatMap {
+      _.getOrElse {
+        Rx(tags.div(""))
+      }
+    }
+  }
+
+  def subLink(s: Sub, id: ExecutionId, name: String = "", glyphicon: Glyphicon = emptyMod) = tags.span(glyphicon, cursor := "pointer", onclick := { () ⇒
+
+    expanded() = {
+      expanded.now.find {
+        _._1 == id
+      } match {
+        case Some(i) ⇒ expanded.now.filterNot {
+          _ == i
+        }
+        case _ ⇒ expanded.now :+ (id, s)
+      }
+    }
+
+    println("SUBROW " + subRows.now)
+    println("EXPANDED " + expanded.now)
+
+  }
+  )(name)
+
   //  val scriptID: ColumnID = "script"
   //  val envID: ColumnID = "env"
   //  val errorID: ColumnID = "error"
   //  val outputStreamID: ColumnID = "outputStream"
 
+  def execTextArea(content: String): TypedTag[TextArea] = textarea(content, height := "300px", width := "100%")
+
+  def execTextArea(content: Rx[String]): TypedTag[TextArea] = DynamicScrolledTextArea(content)
+
+  //    tags.textarea(
+  //      Rx {
+  //        println("RX content")
+  //        tags.span(
+  //          content()
+  //        )
+  //      }, height := "300px", width := "100%")
+
   lazy val executionTable = scaladget.bootstrapnative.Table(
     for {
-      staticMap ← staticInfo
       execMap ← executionInfo
     } yield {
       execMap.map {
@@ -99,7 +175,14 @@ class ExecutionPanel {
           val m = ((duration) - (h hours)).toMinutes
           val s = (duration - (h hours) - (m minutes)).toSeconds
 
-          val durationString = s"""${h.formatted("%d")}:${m.formatted("%02d")}:${s.formatted("%02d")}"""
+          val durationString =
+            s"""${
+              h.formatted("%d")
+            }:${
+              m.formatted("%02d")
+            }:${
+              s.formatted("%02d")
+            }"""
 
           val completed = info.completed
 
@@ -121,27 +204,56 @@ class ExecutionPanel {
             case r: ExecutionInfo.Preparing ⇒ (ExecutionDetails("0", 0, envStates = r.environmentStates), tags.span(info.state))
           }
 
+          subRows() = subRows.now.updated(execID, SubRowPanels(
+            Rx {
+              execTextArea(staticInfo.now(execID).script)
+            },
+            //            staticInfo.map { si =>
+            //              val eta = execTextArea(si(execID).script)
+            //
+            //              span(eta)
+            //            },
+            Rx {
+              execTextArea(outputInfo().find(_.id == execID).map {
+                _.output
+              }.getOrElse("")
+              )
+            }
+          )
+          )
+
           ReactiveRow(
             execID.id,
             Seq(
-              FixedCell(tags.span(tags.span(staticInfo.now(execID).path.name).tooltip("Original script")), 0),
+              FixedCell(tags.span(subLink(SubScript, execID, staticInfo.now(execID).path.name).tooltip("Original script")), 0),
               VarCell(tags.span(tags.span(Utils.longToDate(staticInfo.now(execID).startDate)).tooltip("Starting time")), 1),
               VarCell(tags.span(glyphAndText(glyph_flash, details.running.toString).tooltip("Running jobs")), 2),
               VarCell(tags.span(glyphAndText(glyph_flag, details.ratio.toString).tooltip("Finished/Total jobs")), 3),
               VarCell(tags.span(tags.span(durationString).tooltip("Elapsed time")), 4),
               VarCell(tags.span(statusTag(executionState(info)).tooltip("Execution state")), 5),
               FixedCell(tags.span(tags.span(glyph_stats, "Env").tooltip("Computation environment details")), 6),
-              FixedCell(tags.span(tags.span(glyph_list).tooltip("Standard output")), 7),
-              FixedCell(tags.span(tags.span(glyph_remove +++ ms("removeExecution"), onclick := { () ⇒
-                cancelExecution(execID)
+              VarCell(tags.span(subLink(SubOutput, execID, glyphicon = glyph_list).tooltip("Standard output")), 7),
+              FixedCell(tags.span(tags.span(glyph_remove +++ ms("removeExecution"), onclick := {
+                () ⇒
+                  cancelExecution(execID)
               }).tooltip("Cancel execution")), 8),
-              FixedCell(tags.span(tags.span(glyph_trash +++ ms("removeExecution"), onclick := { () ⇒
-                removeExecution(execID)
+              FixedCell(tags.span(tags.span(glyph_trash +++ ms("removeExecution"), onclick := {
+                () ⇒
+                  removeExecution(execID)
               }).tooltip("Trash execution")), 9)
-            )
-          )
+            ))
       }.toSeq
-    }
+    },
+    subRow = Some((i: scaladget.tools.ID) ⇒
+      SubRow(
+        subRowPanel(ExecutionId(i)),
+        expanded.map {
+          _.map {
+            _._1
+          }.contains(ExecutionId(i))
+        }
+      )),
+    bsTableStyle = BSTableStyle(tableStyle = inverse_table)
   )
 
   //  def expander[T](id: ExpandID, todo: Expander ⇒ T) = expanders.map { ex ⇒ todo(ex(id)) }
