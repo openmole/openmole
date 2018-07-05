@@ -83,6 +83,7 @@ package object csv extends CSVPackage {
               case Some(v) ⇒
                 v match {
                   case v: Array[_] ⇒ v.toList
+                  case l: List[_]  ⇒ l
                   case v           ⇒ List(v)
                 }
               case None ⇒ List("not found")
