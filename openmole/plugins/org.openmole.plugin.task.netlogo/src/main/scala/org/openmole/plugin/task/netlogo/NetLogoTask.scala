@@ -188,14 +188,16 @@ object NetLogoTask {
         try {
           arrayType match {
             // all netlogo numeric are java.lang.Double
-            case c if c == classOf[Double] ⇒ value.asInstanceOf[java.lang.Double].doubleValue()
-            case c if c == classOf[Float]  ⇒ value.asInstanceOf[java.lang.Double].floatValue()
-            case c if c == classOf[Int]    ⇒ value.asInstanceOf[java.lang.Double].intValue()
-            case c if c == classOf[Long]   ⇒ value.asInstanceOf[java.lang.Double].longValue()
+            case c if c == classOf[Double]  ⇒ value.asInstanceOf[java.lang.Double].doubleValue()
+            case c if c == classOf[Float]   ⇒ value.asInstanceOf[java.lang.Double].floatValue()
+            case c if c == classOf[Int]     ⇒ value.asInstanceOf[java.lang.Double].intValue()
+            case c if c == classOf[Long]    ⇒ value.asInstanceOf[java.lang.Double].longValue()
+            // target boolean
+            case c if c == classOf[Boolean] ⇒ value.asInstanceOf[java.lang.Boolean].booleanValue()
             // target string assume the origin type has a toString
-            case c if c == classOf[String] ⇒ value.toString
-            // try casting anyway
-            case c                         ⇒ c.cast(value)
+            case c if c == classOf[String]  ⇒ value.toString
+            // try casting anyway - NOTE : untested
+            case c                          ⇒ c.cast(value)
           }
         }
         catch {
