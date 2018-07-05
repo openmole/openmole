@@ -178,6 +178,54 @@ val nsga2 =
       param4 in List("apple", "banana", "strawberry")),
     objectives = Seq(distance1, distance2)
   )
-""", header= modelAndVariables, name = "Calibration")
-where @hl.code("param1") and @hl.code("param2") are input of the @hl.code("modelTask"), and @hl.code("distance1") and @hl.code("distance2") are its outputs.
+""", name = "Calibration")
+where @hl.code("param1"), @hl.code("param2"), @hl.code("param3") and @hl.code("param4") are input of the @hl.code("modelTask"), and @hl.code("distance1") and @hl.code("distance2") are its outputs.
 @p
+The output of the genetic algorithm must be captured with a specific hook that saves the current optimal population: @code{SavePopulationHook}.
+The arguments for a @code{SavePopulationHook} are the following:
+
+@ul
+  @li{@hl.code("evolution"): the genetic algorithm,}
+  @li{@hl.code("dir"): the directory in which population files will be stored,}
+  @li{@hl.code("frequency"): (@i{Optional}, Long) a frequency at which the generations will be saved.}
+
+If you want only to get the final result and do not care about dynamics of the algorithm, you can use a @code{SaveLastPopulationHook} which saves the last population only and takes as arguments the algorithm and the file in which it will be saved.
+
+A minimal working workflow is given below:
+
+@br @hl.openmole("""
+val param1 = Val[Double]
+val param2 = Val[Double]
+val param3 = Val[Int]
+val param4 = Val[String]
+
+val distance1 = Val[Double]
+val distance2 = Val[Double]
+
+val modelTask = ScalaTask("val distance1 = math.abs(param1 - 10.0) + math.abs(param2 - 50.0); val distance2 = (param3 == 2).toInt + (param4 == \"apple\").toInt") set (
+    inputs += (param1,param2, param3, param4),
+    outputs += (distance1, distance2)
+    )
+
+val nsga2 =
+  NSGA2Evolution(
+    evaluation = modelTask,
+    parallelism = 10,
+    termination = 100,
+    genome = Seq(
+      param1 in (0.0, 99.0),
+      param2 in (0.0, 99.0),
+      param3 in (0, 5),
+      param4 in List("apple", "banana", "strawberry")),
+    objectives = Seq(distance1, distance2)
+  )
+
+  val savePopulation = SavePopulationHook(nsga2, workDirectory / "evolution/")
+
+  (nsga2 hook savePopulation on LocalEnvironment(4))
+
+""", name = "Workflow nsga2")
+
+@br
+
+More details and advanced notions can be found on the @a("GA detailed page", href:=DocumentationPages.geneticAlgorithm.file).
