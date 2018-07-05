@@ -141,7 +141,7 @@ object NetLogoTask {
         case l: Long   ⇒ l.toDouble
         case fl: Float ⇒ fl.toDouble
         case f: File   ⇒ f.getAbsolutePath
-        case x: AnyRef ⇒ x // Double and String are unchanged
+        case x: AnyRef ⇒ x // Double, String and Boolean are unchanged
       }
       v.asInstanceOf[AnyRef]
     }
@@ -242,13 +242,13 @@ object NetLogoTask {
   def validateNetLogoInputTypes(inputs: Seq[Val[_]]) = {
     def acceptedType(c: Class[_]): Boolean =
       if (c.isArray()) acceptedType(c.getComponentType)
-      else Seq(classOf[String], classOf[Int], classOf[Double], classOf[Long], classOf[Float], classOf[File]).contains(c)
+      else Seq(classOf[String], classOf[Int], classOf[Double], classOf[Long], classOf[Float], classOf[File], classOf[Boolean]).contains(c)
 
     inputs.flatMap {
       case v ⇒
         v.`type`.runtimeClass.asInstanceOf[Class[_]] match {
           case c if acceptedType(c) ⇒ None
-          case _                    ⇒ Some(new UserBadDataError(s"""Error for netLogoInput "${v.name} : type "${v.`type`.runtimeClass.toString()} is not managed by NetLogo."""))
+          case _                    ⇒ Some(new UserBadDataError(s"""Error for netLogoInput ${v.name} : type ${v.`type`.runtimeClass.toString()} is not managed by NetLogo."""))
         }
     }
   }
