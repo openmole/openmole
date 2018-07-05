@@ -46,20 +46,20 @@ hereafter.
 
 @h2{Append to file}
 
-Similarly to the @i{AppendToFileHook}, any string can be appended to a file, using the more general
-@i{AppendToFileHook}. The appended strings can be a combination of variables from the dataflow and plain text.
+Similarly to the @code{AppendToFileHook}, any string can be appended to a file, using the more general
+@code{AppendToFileHook}. The appended strings can be a combination of variables from the dataflow and plain text.
 @br @hl.openmole("""
 val h = AppendToFileHook("/path/of/the/file.txt", "string ${i} to append")""", name = "append to file hook")
 
 @p{Append a file to another file}
-Use the @i{AppendFileFileHook} as well.
+Use the @code{AppendFileFileHook} as well.
 @br @hl.openmole("""
 val file = Val[File]
 val h = AppendToFileHook("${file.content}", "/path/of/the/file")""", name = "append file to file hook")
 
 @h2{Copy file}
 
-The @i{CSVHook} takes data from the dataflow and appends it to a file formatted as CSV:
+The @code{CSVHook} takes data from the dataflow and appends it to a file formatted as CSV:
 @br @hl.openmole("""
 val i = Val[Int]
 
@@ -87,7 +87,7 @@ are written to a single row/line of the CSV file.
 
 @h2{Copy file}
 
-The @i{CopyFileHook} makes it possible to copy a file / directory from the dataflow to a given location on the machine
+The @code{CopyFileHook} makes it possible to copy a file / directory from the dataflow to a given location on the machine
 running OpenMOLE.
 @br @hl.openmole("""
   val file = Val[File]
@@ -97,19 +97,40 @@ running OpenMOLE.
 
 @h2{Display variables}
 
-To display a variable in the console, use the @i{ToStringHook}:
+To display a variable in the console, use the @code{ToStringHook}:
 @br @hl.openmole("""
   val i = Val[Int]
   val j = Val[Int]
 
   val h = ToStringHook(i, j)""", name = "to string hook")
-  If no variable is specified, @i{ToStringHook} displays the whole dataflow.
+  If no variable is specified, @code{ToStringHook} displays the whole dataflow.
 
 @h2{Display results in the stdout}
 
-To display a string formed of variables and plain text in the console, use the @i{DisplayHook}. You can think of the
-@i{DisplayHook} as an OpenMOLE equivalent to Scala's @i{println}.
+To display a string formed of variables and plain text in the console, use the @code{DisplayHook}. You can think of the
+@code{DisplayHook} as an OpenMOLE equivalent to Scala's @code{println}.
 @br @hl.openmole("""
   val i = Val[Int]
 
   val h = DisplayHook("The value of i is ${i}.")""", name = "display hook")
+
+
+
+@h2{Conditional hooking}
+
+You may want to filter outputs that are redirected to a hook, i.e. do conditional hooking.
+You can use for that the @code{ConditionHook}, built from a hook and a condition:
+
+@br @hl.openmole("""
+  val i = Val[Int]
+
+  val display = DisplayHook("The value of i is ${i}.")
+  val h = ConditionHook(display,i > 0)
+
+  """, name = "condition hook")
+
+Decorators exist for a simpler syntax : @code{ConditionHook(myhook,mycondition)} is equivalent to @code{myhook when mycondition} and @code{myhook condition mycondition} (where the condition can be given as a condition or a string).
+
+
+
+
