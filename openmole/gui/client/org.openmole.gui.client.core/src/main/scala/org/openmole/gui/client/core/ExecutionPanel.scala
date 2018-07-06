@@ -101,69 +101,85 @@ class ExecutionPanel {
   val emptySubRowPanel = SubRowPanels(Rx(tags.div("")), Rx(tags.div("")))
 
   val subRows: Var[Map[ExecutionId, SubRowPanels]] = Var(Map())
-  val expanded: Var[Seq[(ExecutionId, Sub)]] = Var(Seq())
+  val expanded: Var[Map[ExecutionId, Option[Sub]]] = Var(Map())
 
-  def sub(executionId: ExecutionId) = expanded.map { e ⇒
-    e.find(_._1 == executionId).map {
-      _._2
-    }
+  def sub(executionId: ExecutionId) = {
+    expanded.now.get(executionId).flatten
   }
 
   def subRowPanel(executionId: ExecutionId) = {
+    println("subrow panel  " + executionId)
 
-    sub(executionId).map {
-      _.map { x ⇒
-        val subRowForExecID = subRows.map {
-          _.get(executionId).getOrElse(emptySubRowPanel)
-        }
-        x match {
-          case SubScript ⇒ subRowForExecID.flatMap(_.script)
-          case SubOutput ⇒ subRowForExecID.flatMap(_.output)
-        }
-      }
-    }.flatMap {
-      _.getOrElse {
-        Rx(tags.div(""))
-      }
+    subRows.flatMap {
+      _.get(executionId).map { srp ⇒
+        sub(executionId).map { s ⇒
+          s match {
+            case SubScript ⇒ srp.script
+            case SubOutput ⇒ srp.output
+          }
+        }.getOrElse(Rx(tags.div("toto", height := 200)))
+      }.getOrElse(Rx(tags.div("titi", height := 400)))
     }
+
+    //    subRows.flatMap {
+    //      _.get(executionId).map {
+    //        case (srp, sub) ⇒
+    //          sub.map { s ⇒
+    //            s match {
+    //              case SubScript ⇒ srp.script
+    //              case SubOutput ⇒ srp.output
+    //            }
+    //          }.getOrElse(Rx(tags.div("toto", height := 200)))
+    //      }.getOrElse(Rx(tags.div("titi", height := 400)))
+    //    }
+
+    //    sub(executionId).map {
+    //      _.map { x ⇒
+    //        val subRowForExecID = subRows.map {
+    //          _.get(executionId).getOrElse(emptySubRowPanel)
+    //        }
+    //        x match {
+    //          case SubScript ⇒ subRowForExecID.flatMap(_.script)
+    //          case SubOutput ⇒ subRowForExecID.flatMap(_.output)
+    //        }
+    //      }
+    //    }.flatMap {
+    //      _.getOrElse {
+    //        Rx(tags.div(""))
+    //      }
+    //    }
   }
 
   def subLink(s: Sub, id: ExecutionId, name: String = "", glyphicon: Glyphicon = emptyMod) = tags.span(glyphicon, cursor := "pointer", onclick := { () ⇒
 
-    expanded() = {
-      expanded.now.find {
-        _._1 == id
-      } match {
-        case Some(i) ⇒ expanded.now.filterNot {
-          _ == i
-        }
-        case _ ⇒ expanded.now :+ (id, s)
-      }
-    }
+    val curSub = expanded.now.get(id).flatten
+    expanded() = expanded.now.updated(id, curSub match {
+      case Some(ss: Sub) ⇒
+        println("S == SS " + ss == s)
+        if (ss == s) None
+        else Some(s)
+      case _ ⇒ Some(s)
+    })
 
-    println("SUBROW " + subRows.now)
-    println("EXPANDED " + expanded.now)
-
-  }
-  )(name)
+    println("Cur sub " + expanded.now)
+  })(name)
 
   //  val scriptID: ColumnID = "script"
   //  val envID: ColumnID = "env"
   //  val errorID: ColumnID = "error"
   //  val outputStreamID: ColumnID = "outputStream"
 
-  def execTextArea(content: String): TypedTag[TextArea] = textarea(content, height := "300px", width := "100%")
+  def execTextArea(content: String): TypedTag[HTMLElement] = textarea(content, height := "300px", width := "100%")
 
-  def execTextArea(content: Rx[String]): TypedTag[TextArea] = DynamicScrolledTextArea(content)
-
-  //    tags.textarea(
-  //      Rx {
-  //        println("RX content")
-  //        tags.span(
-  //          content()
-  //        )
-  //      }, height := "300px", width := "100%")
-
+  def execTextArea(content: Rx[String]): TypedTag[HTMLElement] = {
+    val st = scrollableText(content.now, BottomScroll)
+    content.trigger {
+      st.setContent(content.now)
+      println("DO scroll")
+      st.doScroll
+    }
+    div(st.sRender)
+  }
   lazy val executionTable = scaladget.bootstrapnative.Table(
     for {
       execMap ← executionInfo
@@ -186,7 +202,6 @@ class ExecutionPanel {
 
           val completed = info.completed
 
-          println("EXEC! " + execMap)
           val (details, statusTag) = info match {
             case f: ExecutionInfo.Failed ⇒
               addToBanner(execID, BannerAlert.div(failedDiv(execID)).critical)
@@ -205,16 +220,16 @@ class ExecutionPanel {
           }
 
           subRows() = subRows.now.updated(execID, SubRowPanels(
-            Rx {
-              execTextArea(staticInfo.now(execID).script)
+            staticInfo.map { si ⇒
+              execTextArea(si(execID).script)
             },
             //            staticInfo.map { si =>
             //              val eta = execTextArea(si(execID).script)
             //
             //              span(eta)
             //            },
-            Rx {
-              execTextArea(outputInfo().find(_.id == execID).map {
+            outputInfo.map { oi ⇒
+              execTextArea(oi.find(_.id == execID).map {
                 _.output
               }.getOrElse("")
               )
@@ -247,27 +262,11 @@ class ExecutionPanel {
     subRow = Some((i: scaladget.tools.ID) ⇒
       SubRow(
         subRowPanel(ExecutionId(i)),
-        expanded.map {
-          _.map {
-            _._1
-          }.contains(ExecutionId(i))
-        }
-      )),
+        expanded.map { _.get(ExecutionId(i)).flatten.isDefined }
+      )
+    ),
     bsTableStyle = BSTableStyle(tableStyle = inverse_table)
   )
-
-  //  def expander[T](id: ExpandID, todo: Expander ⇒ T) = expanders.map { ex ⇒ todo(ex(id)) }
-
-  //  def expanderIfVisible[T](id: ExpandID, columnID: ColumnID, todo: Expander ⇒ T, otherwise: T) = {
-  //    expanders.map { ex ⇒
-  //      if (ex(id).isVisible(columnID)) todo(ex(id))
-  //      else otherwise
-  //    }
-  //  }
-  //
-  //  def closeAllExpanders = expanders.now.values.map {
-  //    _.close
-  //  }
 
   def setTimerOn = {
     updating.set(false)

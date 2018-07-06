@@ -15,6 +15,6 @@ object DynamicScrolledTextArea {
         span(
           content()
         )
-      }, height := "300px", width := "100%")
+      }, height := "300px", width := "100%").render
   }
 }
