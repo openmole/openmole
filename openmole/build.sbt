@@ -866,7 +866,9 @@ lazy val marketIndex = Project("marketindex", binDir / "org.openmole.marketindex
   libraryDependencies += Libraries.json4s,
   defineMarketBranch := {
     val OMversion = version.value
-    OMversion.split('.').headOption.map(v => s"$v-dev")
+    val v = OMversion.split('.').headOption.map(v => s"$v-dev")
+    assert(v.isDefined)
+    v
   },
   cloneMarket := {
     val runner = git.runner.value
