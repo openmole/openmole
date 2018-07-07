@@ -44,4 +44,6 @@ object Job {
     def moleJobs = _moleJobs.toIterable
   }
 
+  implicit def ordering = Ordering.by[Job, Iterable[MoleJob]](_.moleJobs)
+
 }

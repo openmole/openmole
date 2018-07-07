@@ -24,30 +24,40 @@ import org.openmole.core.workflow.job.Job
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.refresh.{ JobManager, Kill }
 import org.openmole.tool.logger.JavaLogger
-
 import scala.ref._
 
 object BatchJobWatcher extends JavaLogger {
 
   private class ExecutionJobRegistry {
-    val jobs = collection.mutable.Map[Job, Array[BatchExecutionJob]]()
+    val jobs = collection.mutable.TreeMap[Job, Array[BatchExecutionJob]]()
+    var executionJobs = List[BatchExecutionJob]()
+
+    def jobsPair = synchronized { jobs.toVector }
     def allJobs = synchronized { jobs.keys }
     def executionJobs(job: Job): Vector[BatchExecutionJob] = synchronized { jobs.getOrElse(job, Array.empty).toVector }
-
-    def update(job: Job, ejobs: Vector[BatchExecutionJob]) = synchronized {
-      jobs(job) = ejobs.toArray
-    }
 
     def isEmpty: Boolean = synchronized { jobs.isEmpty }
 
     def register(ejob: BatchExecutionJob) = synchronized {
       val newJobs = (ejob :: jobs.getOrElse(ejob.job, Array.empty).toList).toArray
       jobs(ejob.job) = newJobs
+      executionJobs = ejob :: executionJobs
     }
 
-    def removeJob(job: Job) = synchronized { jobs -= job }
+    def pruneFinishedExecutionJobs() = synchronized {
+      executionJobs = executionJobs.filter(!_.state.isFinal)
+      jobs.clear()
+      for {
+        (j, ej) ← executionJobs.groupBy(_.job)
+      } jobs(j) = ej.toArray
+    }
 
-    def allExecutionJobs = synchronized { jobs.values.flatten }
+    def removeJob(job: Job) = synchronized {
+      jobs -= job
+      executionJobs = executionJobs.filter(_.job != job)
+    }
+
+    def allExecutionJobs = synchronized { executionJobs }
   }
 
 }
@@ -74,13 +84,15 @@ class BatchJobWatcher(environment: WeakReference[BatchEnvironment], preference: 
             val toKill = remove.flatMap(j ⇒ registry.executionJobs(j).filter(_.state != KILLED))
             for (j ← remove) registry.removeJob(j)
 
+            registry.pruneFinishedExecutionJobs()
+
             val toSubmit =
-              for (job ← registry.allJobs) yield {
-                val runningJobs = registry.executionJobs(job).filter(!_.state.isFinal)
-                registry(job) = runningJobs
-                if (registry.executionJobs(job).isEmpty) Some(job) else None
-              }
-            (toKill, toSubmit.flatten)
+              for {
+                (j, ej) ← registry.jobsPair
+                if ej.isEmpty
+              } yield j
+
+            (toKill, toSubmit)
           }
 
         toSubmit.foreach(env.submit)
