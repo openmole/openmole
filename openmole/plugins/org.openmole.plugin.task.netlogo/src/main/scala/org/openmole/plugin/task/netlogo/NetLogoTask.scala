@@ -141,7 +141,7 @@ object NetLogoTask {
         case l: Long   ⇒ l.toDouble
         case fl: Float ⇒ fl.toDouble
         case f: File   ⇒ f.getAbsolutePath
-        case x: AnyRef ⇒ x // Double and String are unchanged
+        case x: AnyRef ⇒ x // Double, String and Boolean are unchanged
       }
       v.asInstanceOf[AnyRef]
     }
@@ -188,14 +188,16 @@ object NetLogoTask {
         try {
           arrayType match {
             // all netlogo numeric are java.lang.Double
-            case c if c == classOf[Double] ⇒ value.asInstanceOf[java.lang.Double].doubleValue()
-            case c if c == classOf[Float]  ⇒ value.asInstanceOf[java.lang.Double].floatValue()
-            case c if c == classOf[Int]    ⇒ value.asInstanceOf[java.lang.Double].intValue()
-            case c if c == classOf[Long]   ⇒ value.asInstanceOf[java.lang.Double].longValue()
+            case c if c == classOf[Double]  ⇒ value.asInstanceOf[java.lang.Double].doubleValue()
+            case c if c == classOf[Float]   ⇒ value.asInstanceOf[java.lang.Double].floatValue()
+            case c if c == classOf[Int]     ⇒ value.asInstanceOf[java.lang.Double].intValue()
+            case c if c == classOf[Long]    ⇒ value.asInstanceOf[java.lang.Double].longValue()
+            // target boolean
+            case c if c == classOf[Boolean] ⇒ value.asInstanceOf[java.lang.Boolean].booleanValue()
             // target string assume the origin type has a toString
-            case c if c == classOf[String] ⇒ value.toString
-            // try casting anyway
-            case c                         ⇒ c.cast(value)
+            case c if c == classOf[String]  ⇒ value.toString
+            // try casting anyway - NOTE : untested
+            case c                          ⇒ c.cast(value)
           }
         }
         catch {
@@ -242,13 +244,13 @@ object NetLogoTask {
   def validateNetLogoInputTypes(inputs: Seq[Val[_]]) = {
     def acceptedType(c: Class[_]): Boolean =
       if (c.isArray()) acceptedType(c.getComponentType)
-      else Seq(classOf[String], classOf[Int], classOf[Double], classOf[Long], classOf[Float], classOf[File]).contains(c)
+      else Seq(classOf[String], classOf[Int], classOf[Double], classOf[Long], classOf[Float], classOf[File], classOf[Boolean]).contains(c)
 
     inputs.flatMap {
       case v ⇒
         v.`type`.runtimeClass.asInstanceOf[Class[_]] match {
           case c if acceptedType(c) ⇒ None
-          case _                    ⇒ Some(new UserBadDataError(s"""Error for netLogoInput "${v.name} : type "${v.`type`.runtimeClass.toString()} is not managed by NetLogo."""))
+          case _                    ⇒ Some(new UserBadDataError(s"""Error for netLogoInput ${v.name} : type ${v.`type`.runtimeClass.toString()} is not managed by NetLogo."""))
         }
     }
   }

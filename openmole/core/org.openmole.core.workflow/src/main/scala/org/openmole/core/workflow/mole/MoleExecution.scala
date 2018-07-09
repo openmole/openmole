@@ -439,12 +439,12 @@ object MoleExecution extends JavaLogger {
 
     val runningSet: java.util.HashSet[UUID] = {
       def submissionEnvironments = moleExecution.environments.values.toSeq.collect { case e: SubmissionEnvironment ⇒ e }
-      def executionJobs = submissionEnvironments.toIterator.flatMap(_.jobs.toIterator)
 
       val set = new java.util.HashSet[UUID](jobs.size + 1, 1.0f)
 
       for {
-        ej ← executionJobs
+        env ← submissionEnvironments
+        ej ← env.jobs
         if (ej.state == ExecutionState.RUNNING)
         mj ← ej.moleJobs
       } set.add(mj.id)
