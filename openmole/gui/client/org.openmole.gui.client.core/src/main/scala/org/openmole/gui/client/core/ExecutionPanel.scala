@@ -105,13 +105,8 @@ class ExecutionPanel {
   val emptySubRowPanel = SubRowPanels(Rx(tags.div("")), Rx(tags.div("")))
 
   val subRows: Var[Map[ExecutionId, SubRowPanels]] = Var(Map())
-  val preExpanded: Var[Map[ExecutionId, Option[Sub]]] = Var(Map())
   val expanded: Var[Map[ExecutionId, Option[Sub]]] = Var(Map())
   val subDiv: Var[Map[ExecutionId, Rx[TypedTag[HTMLElement]]]] = Var(Map())
-
-  preExpanded.trigger {
-    expanded.update(preExpanded.now)
-  }
 
   def subRowPanel(executionId: ExecutionId, srp: SubRowPanels, sub: Sub) = {
 
@@ -127,13 +122,13 @@ class ExecutionPanel {
   }
   def subLink(s: Sub, id: ExecutionId, name: String = "", glyphicon: Glyphicon = emptyMod) = tags.span(glyphicon, cursor := "pointer", onclick := { () ⇒
 
-    val curSub = preExpanded.now.get(id).flatten
+    val curSub = expanded.now.get(id).flatten
     subRows.map { sr ⇒
       sr.get(id).foreach { srp ⇒
         subRowPanel(id, srp, s)
       }
     }
-    preExpanded() = preExpanded.now.updated(id, curSub match {
+    expanded() = expanded.now.updated(id, curSub match {
       case Some(ss: Sub) ⇒
         if (ss == s) None
         else Some(s)
