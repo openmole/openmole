@@ -37,8 +37,12 @@ import org.openmole.gui.client.tool.{ DynamicScrolledTextArea, Expander }
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.tool.client.Utils
 import org.scalajs.dom.html.TextArea
-import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement }
 import rx._
+import rx.async._
+import rx.async.Platform._
+
+import scala.concurrent.duration._
 import scaladget.bootstrapnative.Table.{ BSTableStyle, FixedCell, ReactiveRow, SubRow, VarCell }
 
 import concurrent.duration._
@@ -101,73 +105,42 @@ class ExecutionPanel {
   val emptySubRowPanel = SubRowPanels(Rx(tags.div("")), Rx(tags.div("")))
 
   val subRows: Var[Map[ExecutionId, SubRowPanels]] = Var(Map())
+  val preExpanded: Var[Map[ExecutionId, Option[Sub]]] = Var(Map())
   val expanded: Var[Map[ExecutionId, Option[Sub]]] = Var(Map())
+  val subDiv: Var[Map[ExecutionId, Rx[TypedTag[HTMLElement]]]] = Var(Map())
 
-  def sub(executionId: ExecutionId) = {
-    expanded.now.get(executionId).flatten
+  preExpanded.trigger {
+    expanded.update(preExpanded.now)
   }
 
-  def subRowPanel(executionId: ExecutionId) = {
-    println("subrow panel  " + executionId)
+  def subRowPanel(executionId: ExecutionId, srp: SubRowPanels, sub: Sub) = {
 
-    subRows.flatMap {
-      _.get(executionId).map { srp ⇒
-        sub(executionId).map { s ⇒
-          s match {
-            case SubScript ⇒ srp.script
-            case SubOutput ⇒ srp.output
-          }
-        }.getOrElse(Rx(tags.div("toto", height := 200)))
-      }.getOrElse(Rx(tags.div("titi", height := 400)))
-    }
+    subDiv.update(subDiv.now.updated(
+      executionId,
+      sub match {
+        case SubScript ⇒ srp.script
+        case SubOutput ⇒ srp.output
+        case x: Any    ⇒ Rx(div(""))
+      }
 
-    //    subRows.flatMap {
-    //      _.get(executionId).map {
-    //        case (srp, sub) ⇒
-    //          sub.map { s ⇒
-    //            s match {
-    //              case SubScript ⇒ srp.script
-    //              case SubOutput ⇒ srp.output
-    //            }
-    //          }.getOrElse(Rx(tags.div("toto", height := 200)))
-    //      }.getOrElse(Rx(tags.div("titi", height := 400)))
-    //    }
-
-    //    sub(executionId).map {
-    //      _.map { x ⇒
-    //        val subRowForExecID = subRows.map {
-    //          _.get(executionId).getOrElse(emptySubRowPanel)
-    //        }
-    //        x match {
-    //          case SubScript ⇒ subRowForExecID.flatMap(_.script)
-    //          case SubOutput ⇒ subRowForExecID.flatMap(_.output)
-    //        }
-    //      }
-    //    }.flatMap {
-    //      _.getOrElse {
-    //        Rx(tags.div(""))
-    //      }
-    //    }
+    ))
   }
-
   def subLink(s: Sub, id: ExecutionId, name: String = "", glyphicon: Glyphicon = emptyMod) = tags.span(glyphicon, cursor := "pointer", onclick := { () ⇒
 
-    val curSub = expanded.now.get(id).flatten
-    expanded() = expanded.now.updated(id, curSub match {
+    val curSub = preExpanded.now.get(id).flatten
+    subRows.map { sr ⇒
+      sr.get(id).foreach { srp ⇒
+        subRowPanel(id, srp, s)
+      }
+    }
+    preExpanded() = preExpanded.now.updated(id, curSub match {
       case Some(ss: Sub) ⇒
-        println("S == SS " + ss == s)
         if (ss == s) None
         else Some(s)
       case _ ⇒ Some(s)
     })
 
-    println("Cur sub " + expanded.now)
   })(name)
-
-  //  val scriptID: ColumnID = "script"
-  //  val envID: ColumnID = "env"
-  //  val errorID: ColumnID = "error"
-  //  val outputStreamID: ColumnID = "outputStream"
 
   def execTextArea(content: String): TypedTag[HTMLElement] = textarea(content, height := "300px", width := "100%")
 
@@ -180,6 +153,7 @@ class ExecutionPanel {
     }
     div(st.sRender)
   }
+
   lazy val executionTable = scaladget.bootstrapnative.Table(
     for {
       execMap ← executionInfo
@@ -218,8 +192,7 @@ class ExecutionPanel {
               (ExecutionDetails("0", 0, envStates = r.environmentStates), tags.span(info.state))
             case r: ExecutionInfo.Preparing ⇒ (ExecutionDetails("0", 0, envStates = r.environmentStates), tags.span(info.state))
           }
-
-          subRows() = subRows.now.updated(execID, SubRowPanels(
+          val srp = SubRowPanels(
             staticInfo.map { si ⇒
               execTextArea(si(execID).script)
             },
@@ -235,7 +208,11 @@ class ExecutionPanel {
               )
             }
           )
-          )
+          subRows() = subRows.now.updated(execID, srp)
+
+          expanded.now.get(execID).flatten.foreach { sub ⇒
+            subRowPanel(execID, srp, sub)
+          }
 
           ReactiveRow(
             execID.id,
@@ -261,8 +238,10 @@ class ExecutionPanel {
     },
     subRow = Some((i: scaladget.tools.ID) ⇒
       SubRow(
-        subRowPanel(ExecutionId(i)),
-        expanded.map { _.get(ExecutionId(i)).flatten.isDefined }
+        subDiv.flatMap { _.getOrElse(ExecutionId(i), Rx { div("TOTO") }) },
+        expanded.map {
+          _.get(ExecutionId(i)).flatten.isDefined
+        }
       )
     ),
     bsTableStyle = BSTableStyle(tableStyle = inverse_table)
