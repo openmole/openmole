@@ -19,7 +19,7 @@ package org.openmole.gui.client.core
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 import scalatags.JsDom.all._
 import org.openmole.gui.client.tool.Expander._
 import scalatags.JsDom._
@@ -29,21 +29,21 @@ import scala.scalajs.js.timers._
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import autowire._
-import org.openmole.gui.ext.data.{Error ⇒ ExecError}
+import org.openmole.gui.ext.data.{ Error ⇒ ExecError }
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.alert.BannerAlert
 import org.openmole.gui.client.core.alert.BannerAlert.BannerMessage
-import org.openmole.gui.client.tool.{DynamicScrolledTextArea, Expander}
+import org.openmole.gui.client.tool.{ DynamicScrolledTextArea, Expander }
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.tool.client.Utils
 import org.scalajs.dom.html.TextArea
-import org.scalajs.dom.raw.{HTMLDivElement, HTMLElement}
+import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement }
 import rx._
 import rx.async._
 import rx.async.Platform._
 
 import scala.concurrent.duration._
-import scaladget.bootstrapnative.Table.{BSTableStyle, FixedCell, ReactiveRow, SubRow, VarCell}
+import scaladget.bootstrapnative.Table.{ BSTableStyle, FixedCell, ReactiveRow, SubRow, VarCell }
 
 import concurrent.duration._
 import scaladget.bootstrapnative.bsn._
@@ -78,25 +78,17 @@ import ExecutionPanel._
 class ExecutionPanel {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
-  //  case class PanelInfo(
-  //    executionInfos: Seq[(ExecutionId, ExecutionInfo)],
-  //    outputsInfos:   Seq[OutputStreamData]
-  //  )
-
   case class ExInfo(id: ExecutionId, info: Var[ExecutionInfo])
 
-  //val execInfo = Var(PanelInfo(Seq(), Seq()))
   val staticInfo: Var[Map[ExecutionId, StaticExecutionInfo]] = Var(Map())
   val executionInfo: Var[Map[ExecutionId, ExecutionInfo]] = Var(Map())
   val outputInfo: Var[Seq[OutputStreamData]] = Var(Seq())
   val envError: Var[Map[EnvironmentId, EnvironmentErrorData]] = Var(Map())
   val tableIndexes: Var[Map[ExecutionId, Int]] = Var(Map())
-  //val expanders: Var[Map[ExpandID, Expander]] = Var(Map())
 
   val executionsDisplayedInBanner: Var[Set[ExecutionId]] = Var(Set())
 
   val timerOn = Var(false)
-  //val jobTables: Var[Map[ExecutionId, JobTable]] = Var(Map())
 
   val updating = new AtomicBoolean(false)
 
@@ -114,7 +106,7 @@ class ExecutionPanel {
       sub match {
         case SubScript ⇒ srp.script
         case SubOutput ⇒ srp.output
-        case x: Any ⇒ Rx(div(""))
+        case x: Any    ⇒ Rx(div(""))
       }
 
     ))
@@ -143,7 +135,6 @@ class ExecutionPanel {
     val st = scrollableText(content.now, BottomScroll)
     content.trigger {
       st.setContent(content.now)
-      println("DO scroll")
       st.doScroll
     }
     div(st.sRender)
@@ -190,18 +181,14 @@ class ExecutionPanel {
             staticInfo.map { si ⇒
               execTextArea(si(execID).script)
             },
-            //            staticInfo.map { si =>
-            //              val eta = execTextArea(si(execID).script)
-            //
-            //              span(eta)
-            //            },
-            outputInfo.map { oi ⇒
-              execTextArea(oi.find(_.id == execID).map {
+            //NO SMOOTH
+            Rx(execTextArea(outputInfo.map { oi ⇒
+              oi.find(_.id == execID).map {
                 _.output
               }.getOrElse("")
-              )
-            }
+            }))
           )
+
           subRows() = subRows.now.updated(execID, srp)
 
           currentSub(execID) match {
@@ -312,12 +299,12 @@ class ExecutionPanel {
   //  }
 
   case class ExecutionDetails(
-                               ratio: String,
-                               running: Long,
-                               error: Option[ExecError] = None,
-                               envStates: Seq[EnvironmentState] = Seq(),
-                               outputs: String = ""
-                             )
+    ratio:     String,
+    running:   Long,
+    error:     Option[ExecError]     = None,
+    envStates: Seq[EnvironmentState] = Seq(),
+    outputs:   String                = ""
+  )
 
   //  val scriptTextAreas: Var[Map[ExecutionId, ScrollableText]] = Var(Map())
   //  val errorTextAreas: Var[Map[ExecutionId, ScrollableText]] = Var(Map())
