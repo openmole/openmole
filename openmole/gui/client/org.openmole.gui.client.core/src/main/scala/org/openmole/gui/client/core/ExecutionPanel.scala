@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 import scala.util.{ Failure, Success }
 import scalatags.JsDom.all._
-import org.openmole.gui.client.tool.Expander._
 import scalatags.JsDom._
 import org.openmole.gui.ext.tool.client._
 
@@ -33,22 +32,16 @@ import org.openmole.gui.ext.data.{ Error ⇒ ExecError }
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.alert.BannerAlert
 import org.openmole.gui.client.core.alert.BannerAlert.BannerMessage
-import org.openmole.gui.client.tool.{ DynamicScrolledTextArea, Expander }
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.tool.client.Utils
-import org.scalajs.dom.html.TextArea
-import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement }
+import org.scalajs.dom.raw.HTMLElement
 import rx._
-import rx.async._
-import rx.async.Platform._
 
-import scala.concurrent.duration._
 import scaladget.bootstrapnative.Table.{ BSTableStyle, FixedCell, ReactiveRow, SubRow, VarCell }
 
 import concurrent.duration._
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
-import scaladget.bootstrapnative.bsn.ScrollableText
 import scaladget.bootstrapnative.bsn.ScrollableTextArea.BottomScroll
 
 object ExecutionPanel {
@@ -114,20 +107,22 @@ class ExecutionPanel {
 
   def currentSub(id: ExecutionId) = expanded.now.get(id).flatten
 
-  def subLink(s: Sub, id: ExecutionId, name: String = "", glyphicon: Glyphicon = emptyMod) = tags.span(glyphicon, pointer, onclick := { () ⇒
+  def subLink(s: Sub, id: ExecutionId, name: String = "", glyphicon: Glyphicon = emptyMod) = tags.span(glyphicon, pointer,
+    scalatags.JsDom.all.color := rxIf(expanded.map { _.get(id).flatten == Some(s) }, BLUE, "black"),
+    onclick := { () ⇒
 
-    subRows.now.get(id).foreach { srp ⇒
-      subRowPanel(id, srp, s)
-    }
+      subRows.now.get(id).foreach { srp ⇒
+        subRowPanel(id, srp, s)
+      }
 
-    expanded() = expanded.now.updated(id, currentSub(id) match {
-      case Some(ss: Sub) ⇒
-        if (ss == s) None
-        else Some(s)
-      case _ ⇒ Some(s)
-    })
+      expanded() = expanded.now.updated(id, currentSub(id) match {
+        case Some(ss: Sub) ⇒
+          if (ss == s) None
+          else Some(s)
+        case _ ⇒ Some(s)
+      })
 
-  })(name)
+    })(name)
 
   def execTextArea(content: String): TypedTag[HTMLElement] = textarea(content, height := "300px", width := "100%")
 
@@ -179,9 +174,8 @@ class ExecutionPanel {
           }
           val srp = SubRowPanels(
             staticInfo.map { si ⇒
-              execTextArea(si(execID).script)
+              execTextArea(si(execID).script)(padding := 15)
             },
-            //NO SMOOTH
             Rx(execTextArea(outputInfo.map { oi ⇒
               oi.find(_.id == execID).map {
                 _.output
@@ -198,18 +192,17 @@ class ExecutionPanel {
               }
             case _ ⇒
           }
-
           ReactiveRow(
             execID.id,
             Seq(
-              FixedCell(tags.span(subLink(SubScript, execID, staticInfo.now(execID).path.name).tooltip("Original script")), 0),
+              VarCell(tags.span(subLink(SubScript, execID, staticInfo.now(execID).path.name).tooltip("Original script")), 0),
               VarCell(tags.span(tags.span(Utils.longToDate(staticInfo.now(execID).startDate)).tooltip("Starting time")), 1),
               VarCell(tags.span(glyphAndText(glyph_flash, details.running.toString).tooltip("Running jobs")), 2),
               VarCell(tags.span(glyphAndText(glyph_flag, details.ratio.toString).tooltip("Finished/Total jobs")), 3),
               VarCell(tags.span(tags.span(durationString).tooltip("Elapsed time")), 4),
               VarCell(tags.span(statusTag(executionState(info)).tooltip("Execution state")), 5),
-              FixedCell(tags.span(tags.span(glyph_stats, "Env").tooltip("Computation environment details")), 6),
-              FixedCell(tags.span(subLink(SubOutput, execID, glyphicon = glyph_list).tooltip("Standard output")), 7),
+              VarCell(tags.span(tags.span(glyph_stats, "Env").tooltip("Computation environment details")), 6),
+              VarCell(tags.span(subLink(SubOutput, execID, glyphicon = glyph_list).tooltip("Standard output")), 7),
               FixedCell(tags.span(tags.span(glyph_remove +++ ms("removeExecution"), onclick := {
                 () ⇒
                   cancelExecution(execID)
