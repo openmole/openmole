@@ -19,7 +19,7 @@ package org.openmole.gui.client.core
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 import scalatags.JsDom.all._
 import org.openmole.gui.client.tool.Expander._
 import scalatags.JsDom._
@@ -29,21 +29,21 @@ import scala.scalajs.js.timers._
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import autowire._
-import org.openmole.gui.ext.data.{ Error ⇒ ExecError }
+import org.openmole.gui.ext.data.{Error ⇒ ExecError}
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.alert.BannerAlert
 import org.openmole.gui.client.core.alert.BannerAlert.BannerMessage
-import org.openmole.gui.client.tool.{ DynamicScrolledTextArea, Expander }
+import org.openmole.gui.client.tool.{DynamicScrolledTextArea, Expander}
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.tool.client.Utils
 import org.scalajs.dom.html.TextArea
-import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement }
+import org.scalajs.dom.raw.{HTMLDivElement, HTMLElement}
 import rx._
 import rx.async._
 import rx.async.Platform._
 
 import scala.concurrent.duration._
-import scaladget.bootstrapnative.Table.{ BSTableStyle, FixedCell, ReactiveRow, SubRow, VarCell }
+import scaladget.bootstrapnative.Table.{BSTableStyle, FixedCell, ReactiveRow, SubRow, VarCell}
 
 import concurrent.duration._
 import scaladget.bootstrapnative.bsn._
@@ -109,26 +109,26 @@ class ExecutionPanel {
   val subDiv: Var[Map[ExecutionId, Rx[TypedTag[HTMLElement]]]] = Var(Map())
 
   def subRowPanel(executionId: ExecutionId, srp: SubRowPanels, sub: Sub) = {
-
     subDiv.update(subDiv.now.updated(
       executionId,
       sub match {
         case SubScript ⇒ srp.script
         case SubOutput ⇒ srp.output
-        case x: Any    ⇒ Rx(div(""))
+        case x: Any ⇒ Rx(div(""))
       }
 
     ))
   }
-  def subLink(s: Sub, id: ExecutionId, name: String = "", glyphicon: Glyphicon = emptyMod) = tags.span(glyphicon, cursor := "pointer", onclick := { () ⇒
 
-    val curSub = expanded.now.get(id).flatten
-    subRows.map { sr ⇒
-      sr.get(id).foreach { srp ⇒
-        subRowPanel(id, srp, s)
-      }
+  def currentSub(id: ExecutionId) = expanded.now.get(id).flatten
+
+  def subLink(s: Sub, id: ExecutionId, name: String = "", glyphicon: Glyphicon = emptyMod) = tags.span(glyphicon, pointer, onclick := { () ⇒
+
+    subRows.now.get(id).foreach { srp ⇒
+      subRowPanel(id, srp, s)
     }
-    expanded() = expanded.now.updated(id, curSub match {
+
+    expanded() = expanded.now.updated(id, currentSub(id) match {
       case Some(ss: Sub) ⇒
         if (ss == s) None
         else Some(s)
@@ -183,7 +183,6 @@ class ExecutionPanel {
               hasBeenDisplayed(execID)
               (ExecutionDetails("0", 0, envStates = c.environmentStates), (if (!c.clean) tags.span("cleaning") else tags.span(info.state)))
             case r: ExecutionInfo.Compiling ⇒
-              println("COmipiling")
               (ExecutionDetails("0", 0, envStates = r.environmentStates), tags.span(info.state))
             case r: ExecutionInfo.Preparing ⇒ (ExecutionDetails("0", 0, envStates = r.environmentStates), tags.span(info.state))
           }
@@ -205,8 +204,12 @@ class ExecutionPanel {
           )
           subRows() = subRows.now.updated(execID, srp)
 
-          expanded.now.get(execID).flatten.foreach { sub ⇒
-            subRowPanel(execID, srp, sub)
+          currentSub(execID) match {
+            case Some(SubOutput) ⇒
+              expanded.now.get(execID).flatten.foreach { sub ⇒
+                subRowPanel(execID, srp, sub)
+              }
+            case _ ⇒
           }
 
           ReactiveRow(
@@ -219,7 +222,7 @@ class ExecutionPanel {
               VarCell(tags.span(tags.span(durationString).tooltip("Elapsed time")), 4),
               VarCell(tags.span(statusTag(executionState(info)).tooltip("Execution state")), 5),
               FixedCell(tags.span(tags.span(glyph_stats, "Env").tooltip("Computation environment details")), 6),
-              VarCell(tags.span(subLink(SubOutput, execID, glyphicon = glyph_list).tooltip("Standard output")), 7),
+              FixedCell(tags.span(subLink(SubOutput, execID, glyphicon = glyph_list).tooltip("Standard output")), 7),
               FixedCell(tags.span(tags.span(glyph_remove +++ ms("removeExecution"), onclick := {
                 () ⇒
                   cancelExecution(execID)
@@ -233,7 +236,11 @@ class ExecutionPanel {
     },
     subRow = Some((i: scaladget.tools.ID) ⇒
       SubRow(
-        subDiv.flatMap { _.getOrElse(ExecutionId(i), Rx { div("TOTO") }) },
+        subDiv.flatMap {
+          _.getOrElse(ExecutionId(i), Rx {
+            div("TOTO")
+          })
+        },
         expanded.map {
           _.get(ExecutionId(i)).flatten.isDefined
         }
@@ -305,12 +312,12 @@ class ExecutionPanel {
   //  }
 
   case class ExecutionDetails(
-    ratio:     String,
-    running:   Long,
-    error:     Option[ExecError]     = None,
-    envStates: Seq[EnvironmentState] = Seq(),
-    outputs:   String                = ""
-  )
+                               ratio: String,
+                               running: Long,
+                               error: Option[ExecError] = None,
+                               envStates: Seq[EnvironmentState] = Seq(),
+                               outputs: String = ""
+                             )
 
   //  val scriptTextAreas: Var[Map[ExecutionId, ScrollableText]] = Var(Map())
   //  val errorTextAreas: Var[Map[ExecutionId, ScrollableText]] = Var(Map())
