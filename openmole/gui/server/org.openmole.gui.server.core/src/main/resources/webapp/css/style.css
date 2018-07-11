@@ -24,6 +24,10 @@ body{
 padding-top:7px;
 }
 
+textarea {
+  resize: none;
+}
+
 a {
     color: #3086b5;
 }

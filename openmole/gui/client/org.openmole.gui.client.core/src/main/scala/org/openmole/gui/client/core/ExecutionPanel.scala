@@ -34,9 +34,8 @@ import org.openmole.gui.client.core.alert.BannerAlert
 import org.openmole.gui.client.core.alert.BannerAlert.BannerMessage
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.tool.client.Utils
-import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.raw.{ HTMLElement, HTMLSpanElement }
 import rx._
-
 import scaladget.bootstrapnative.Table.{ BSTableStyle, FixedCell, ReactiveRow, SubRow, VarCell }
 
 import concurrent.duration._
@@ -60,7 +59,7 @@ object ExecutionPanel {
 
   object SubCompile extends Sub
 
-  object SubEnvirorment extends Sub
+  object SubEnvironment extends Sub
 
   implicit def idToExecutionID(id: scaladget.tools.ID): ExecutionId = ExecutionId(id)
 
@@ -85,9 +84,9 @@ class ExecutionPanel {
 
   val updating = new AtomicBoolean(false)
 
-  case class SubRowPanels(script: Rx[TypedTag[HTMLElement]], output: Rx[TypedTag[HTMLElement]])
+  case class SubRowPanels(script: Rx[TypedTag[HTMLElement]], output: Rx[TypedTag[HTMLElement]], failedStack: Rx[TypedTag[HTMLElement]])
 
-  val emptySubRowPanel = SubRowPanels(Rx(tags.div("")), Rx(tags.div("")))
+  val emptySubRowPanel = SubRowPanels(Rx(tags.div("")), Rx(tags.div("")), Rx(tags.div("")))
 
   val subRows: Var[Map[ExecutionId, SubRowPanels]] = Var(Map())
   val expanded: Var[Map[ExecutionId, Option[Sub]]] = Var(Map())
@@ -97,9 +96,10 @@ class ExecutionPanel {
     subDiv.update(subDiv.now.updated(
       executionId,
       sub match {
-        case SubScript ⇒ srp.script
-        case SubOutput ⇒ srp.output
-        case x: Any    ⇒ Rx(div(""))
+        case SubScript  ⇒ srp.script
+        case SubOutput  ⇒ srp.output
+        case SubCompile ⇒ srp.failedStack
+        case x: Any     ⇒ Rx(div(""))
       }
 
     ))
@@ -107,22 +107,28 @@ class ExecutionPanel {
 
   def currentSub(id: ExecutionId) = expanded.now.get(id).flatten
 
-  def subLink(s: Sub, id: ExecutionId, name: String = "", glyphicon: Glyphicon = emptyMod) = tags.span(glyphicon, pointer,
-    scalatags.JsDom.all.color := rxIf(expanded.map { _.get(id).flatten == Some(s) }, BLUE, "black"),
-    onclick := { () ⇒
+  def subLink(s: Sub, id: ExecutionId, name: String = "", glyphicon: Glyphicon = emptyMod, defaultModifier: ModifierSeq = Seq(scalatags.JsDom.all.color := "black"), selectedModifier: ModifierSeq = Seq(scalatags.JsDom.all.color := BLUE, fontWeight := "bold")) =
+    tags.span(Rx {
+      tags.span(glyphicon, pointer,
+        {
+          if (expanded().get(id).flatten == Some(s)) selectedModifier
+          else defaultModifier
+        },
+        onclick := { () ⇒
+          subRows.now.get(id).foreach { srp ⇒
+            subRowPanel(id, srp, s)
+          }
 
-      subRows.now.get(id).foreach { srp ⇒
-        subRowPanel(id, srp, s)
-      }
+          expanded() = expanded.now.updated(id, currentSub(id) match {
+            case Some(ss: Sub) ⇒
+              if (ss == s) None
+              else Some(s)
+            case _ ⇒ Some(s)
+          })
 
-      expanded() = expanded.now.updated(id, currentSub(id) match {
-        case Some(ss: Sub) ⇒
-          if (ss == s) None
-          else Some(s)
-        case _ ⇒ Some(s)
-      })
-
-    })(name)
+        })(name)
+    }
+    )
 
   def execTextArea(content: String): TypedTag[HTMLElement] = textarea(content, height := "300px", width := "100%")
 
@@ -157,21 +163,22 @@ class ExecutionPanel {
 
           val completed = info.completed
 
-          val (details, statusTag) = info match {
+          val (details, execStatus) = info match {
             case f: ExecutionInfo.Failed ⇒
               addToBanner(execID, BannerAlert.div(failedDiv(execID)).critical)
-              (ExecutionDetails("0", 0, Some(f.error), f.environmentStates), tags.span(info.state))
+              (ExecutionDetails("0", 0, Some(f.error), f.environmentStates), info.state)
             case f: ExecutionInfo.Finished ⇒
               addToBanner(execID, BannerAlert.div(succesDiv(execID)))
-              (ExecutionDetails(ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates), (if (!f.clean) tags.span("cleaning") else tags.span(info.state)))
-            case r: ExecutionInfo.Running ⇒ (ExecutionDetails(ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates), tags.span(info.state))
+              (ExecutionDetails(ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates), (if (!f.clean) "cleaning" else info.state))
+            case r: ExecutionInfo.Running ⇒ (ExecutionDetails(ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates), info.state)
             case c: ExecutionInfo.Canceled ⇒
               hasBeenDisplayed(execID)
-              (ExecutionDetails("0", 0, envStates = c.environmentStates), (if (!c.clean) tags.span("cleaning") else tags.span(info.state)))
+              (ExecutionDetails("0", 0, envStates = c.environmentStates), (if (!c.clean) "cleaning" else info.state))
             case r: ExecutionInfo.Compiling ⇒
-              (ExecutionDetails("0", 0, envStates = r.environmentStates), tags.span(info.state))
-            case r: ExecutionInfo.Preparing ⇒ (ExecutionDetails("0", 0, envStates = r.environmentStates), tags.span(info.state))
+              (ExecutionDetails("0", 0, envStates = r.environmentStates), info.state)
+            case r: ExecutionInfo.Preparing ⇒ (ExecutionDetails("0", 0, envStates = r.environmentStates), info.state)
           }
+
           val srp = SubRowPanels(
             staticInfo.map { si ⇒
               execTextArea(si(execID).script)(padding := 15)
@@ -180,7 +187,11 @@ class ExecutionPanel {
               oi.find(_.id == execID).map {
                 _.output
               }.getOrElse("")
-            }))
+            })),
+            Rx(execTextArea(details.error.map {
+              _.stackTrace
+            }.getOrElse("")
+            )(padding := 15))
           )
 
           subRows() = subRows.now.updated(execID, srp)
@@ -200,7 +211,7 @@ class ExecutionPanel {
               VarCell(tags.span(glyphAndText(glyph_flash, details.running.toString).tooltip("Running jobs")), 2),
               VarCell(tags.span(glyphAndText(glyph_flag, details.ratio.toString).tooltip("Finished/Total jobs")), 3),
               VarCell(tags.span(tags.span(durationString).tooltip("Elapsed time")), 4),
-              VarCell(tags.span(statusTag(executionState(info)).tooltip("Execution state")), 5),
+              VarCell(tags.span(subLink(SubCompile, execID, execStatus, defaultModifier = executionState(info)).tooltip("Execution state")), 5),
               VarCell(tags.span(tags.span(glyph_stats, "Env").tooltip("Computation environment details")), 6),
               VarCell(tags.span(subLink(SubOutput, execID, glyphicon = glyph_list).tooltip("Standard output")), 7),
               FixedCell(tags.span(tags.span(glyph_remove +++ ms("removeExecution"), onclick := {
