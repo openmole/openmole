@@ -18,6 +18,22 @@ body{
 .table.envError>tbody>tr>td{
     border-top:none;
     vertical-align: middle;
+    text-align: center;
+}
+
+.executionTable > tbody >tr{
+    text-align:center
+}
+
+.table-inverse {
+  color: #fff;
+  background-color: #292b2c;
+  border-radius: 3px;
+}
+
+.table-inverse > tbody > tr > td{
+  padding:20px;
+  text-align: center;
 }
 
 .label{

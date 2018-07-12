@@ -75,8 +75,8 @@ class ExecutionPanel {
   val staticInfo: Var[Map[ExecutionId, StaticExecutionInfo]] = Var(Map())
   val executionInfo: Var[Map[ExecutionId, ExecutionInfo]] = Var(Map())
   val outputInfo: Var[Seq[OutputStreamData]] = Var(Seq())
-  val envError: Var[Map[EnvironmentId, EnvironmentErrorData]] = Var(Map())
-  val tableIndexes: Var[Map[ExecutionId, Int]] = Var(Map())
+  val envError: Var[Map[EnvironmentId, (EnvironmentErrorData, ExecutionId)]] = Var(Map())
+  val jobTables: Var[Map[ExecutionId, JobTable]] = Var(Map())
 
   val executionsDisplayedInBanner: Var[Set[ExecutionId]] = Var(Set())
 
@@ -84,9 +84,13 @@ class ExecutionPanel {
 
   val updating = new AtomicBoolean(false)
 
-  case class SubRowPanels(script: Rx[TypedTag[HTMLElement]], output: Rx[TypedTag[HTMLElement]], failedStack: Rx[TypedTag[HTMLElement]])
+  case class SubRowPanels(
+    script:      Rx[TypedTag[HTMLElement]],
+    output:      Rx[TypedTag[HTMLElement]],
+    failedStack: Rx[TypedTag[HTMLElement]],
+    environment: Rx[TypedTag[HTMLElement]])
 
-  val emptySubRowPanel = SubRowPanels(Rx(tags.div("")), Rx(tags.div("")), Rx(tags.div("")))
+  val emptySubRowPanel = SubRowPanels(Rx(tags.div("")), Rx(tags.div("")), Rx(tags.div("")), Rx(tags.div("no env yet")))
 
   val subRows: Var[Map[ExecutionId, SubRowPanels]] = Var(Map())
   val expanded: Var[Map[ExecutionId, Option[Sub]]] = Var(Map())
@@ -96,10 +100,11 @@ class ExecutionPanel {
     subDiv.update(subDiv.now.updated(
       executionId,
       sub match {
-        case SubScript  ⇒ srp.script
-        case SubOutput  ⇒ srp.output
-        case SubCompile ⇒ srp.failedStack
-        case x: Any     ⇒ Rx(div(""))
+        case SubScript      ⇒ srp.script
+        case SubOutput      ⇒ srp.output
+        case SubCompile     ⇒ srp.failedStack
+        case SubEnvironment ⇒ srp.environment
+        case x: Any         ⇒ Rx(div(""))
       }
 
     ))
@@ -107,7 +112,7 @@ class ExecutionPanel {
 
   def currentSub(id: ExecutionId) = expanded.now.get(id).flatten
 
-  def subLink(s: Sub, id: ExecutionId, name: String = "", glyphicon: Glyphicon = emptyMod, defaultModifier: ModifierSeq = Seq(scalatags.JsDom.all.color := "black"), selectedModifier: ModifierSeq = Seq(scalatags.JsDom.all.color := BLUE, fontWeight := "bold")) =
+  def subLink(s: Sub, id: ExecutionId, name: String = "", glyphicon: Glyphicon = emptyMod, defaultModifier: ModifierSeq = Seq(scalatags.JsDom.all.color := "white"), selectedModifier: ModifierSeq = Seq(scalatags.JsDom.all.color := BLUE, fontWeight := "bold")) =
     tags.span(Rx {
       tags.span(glyphicon, pointer,
         {
@@ -191,7 +196,8 @@ class ExecutionPanel {
             Rx(execTextArea(details.error.map {
               _.stackTrace
             }.getOrElse("")
-            )(padding := 15))
+            )(padding := 15)),
+            jobTable(execID).render
           )
 
           subRows() = subRows.now.updated(execID, srp)
@@ -212,7 +218,7 @@ class ExecutionPanel {
               VarCell(tags.span(glyphAndText(glyph_flag, details.ratio.toString).tooltip("Finished/Total jobs")), 3),
               VarCell(tags.span(tags.span(durationString).tooltip("Elapsed time")), 4),
               VarCell(tags.span(subLink(SubCompile, execID, execStatus, defaultModifier = executionState(info)).tooltip("Execution state")), 5),
-              VarCell(tags.span(tags.span(glyph_stats, "Env").tooltip("Computation environment details")), 6),
+              VarCell(tags.span(subLink(SubEnvironment, execID, glyphicon = glyph_stats).tooltip("Computation environment details")), 6),
               VarCell(tags.span(subLink(SubOutput, execID, glyphicon = glyph_list).tooltip("Standard output")), 7),
               FixedCell(tags.span(tags.span(glyph_remove +++ ms("removeExecution"), onclick := {
                 () ⇒
@@ -339,21 +345,21 @@ class ExecutionPanel {
   //    }
   //  }
 
-  //  def jobTable(id: ExecutionId) = {
-  //    println("JTABLES " + jobTables.now)
-  //    if (jobTables.now.isDefinedAt(id)) {
-  //      println("IFFFFFF")
-  //      jobTables.now(id)
-  //    }
-  //    else {
-  //      println("ELLLLSE")
-  //      val jTable = JobTable(id)
-  //      println("instancied")
-  //      jobTables() = jobTables.now.updated(id, jTable)
-  //      println("JTABDES  " + jobTables.now)
-  //      jTable
-  //    }
-  //  }
+  def jobTable(id: ExecutionId) = {
+    println("JTABLES " + jobTables.now)
+    if (jobTables.now.isDefinedAt(id)) {
+      println("IFFFFFF")
+      jobTables.now(id)
+    }
+    else {
+      println("ELLLLSE")
+      val jTable = JobTable(id)
+      println("instancied")
+      jobTables() = jobTables.now.updated(id, jTable)
+      println("JTABDES  " + jobTables.now)
+      jTable
+    }
+  }
 
   val envLevel: Var[ErrorStateLevel] = Var(ErrorLevel())
 
@@ -719,7 +725,7 @@ class ExecutionPanel {
         updateExecutionInfo
     }
     envError() = envError.now.filterNot {
-      e ⇒ e._1.executionId == id
+      e ⇒ e._2._2 == id
     }
     //    envErrorPanels() = envErrorPanels.now.filterNot {
     //      e ⇒ e._1.executionId == id
@@ -733,11 +739,11 @@ class ExecutionPanel {
         envError() = envError.now - environmentId
     }
 
-  def updateEnvErrors(environmentId: EnvironmentId) =
+  def updateEnvErrors(environmentId: EnvironmentId, executionId: ExecutionId) =
     post()[Api].runningErrorEnvironmentData(environmentId, envErrorHistory.value.toInt).call().foreach {
       err ⇒
         println("ERR")
-        envError() = envError.now + (environmentId → err)
+        envError() = envError.now + (environmentId → (err, executionId))
     }
 
   //  def visibleClass(expandID: ExpandID, columnID: ColumnID, modifier: Modifier, extraStyle: ModifierSeq = emptyMod) =

@@ -343,7 +343,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
                   val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(outputStream))
                   Try(puzzle.toExecution(executionContext = MoleExecutionContext()(services))) match {
                     case Success(ex) ⇒
-                      val envIds = (ex.allEnvironments).map { env ⇒ EnvironmentId(getUUID, execId) → env }
+                      val envIds = (ex.allEnvironments).map { env ⇒ EnvironmentId(getUUID) → env }
                       execution.addRunning(execId, envIds)
                       envIds.foreach { case (envId, env) ⇒ env.listen(execution.environmentListener(envId)) }
 
