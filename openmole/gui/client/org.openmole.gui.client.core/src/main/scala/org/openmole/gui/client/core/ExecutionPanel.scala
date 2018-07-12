@@ -186,7 +186,7 @@ class ExecutionPanel {
 
           val srp = SubRowPanels(
             staticInfo.map { si ⇒
-              execTextArea(si(execID).script)(padding := 15)
+              execTextArea(si(execID).script)(padding := 15, fontSize := "14px", scalatags.JsDom.all.color := "#000")
             },
             Rx(execTextArea(outputInfo.map { oi ⇒
               oi.find(_.id == execID).map {
@@ -268,10 +268,8 @@ class ExecutionPanel {
     if (updating.compareAndSet(false, true)) {
       post()[Api].allStates(outputHistory.value.toInt).call().andThen {
         case Success((executionInfos, runningOutputData)) ⇒
-          executionInfos.foreach {
-            ei ⇒
-              executionInfo() = executionInfo.now.updated(ei._1, ei._2)
-          }
+          println("EXECCCC " + executionInfos)
+          executionInfo() = executionInfos.toMap
           outputInfo() = runningOutputData
           if (timerOn.now) delay
         case Failure(_) ⇒ delay
