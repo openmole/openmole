@@ -75,7 +75,6 @@ class ExecutionPanel {
   val staticInfo: Var[Map[ExecutionId, StaticExecutionInfo]] = Var(Map())
   val executionInfo: Var[Map[ExecutionId, ExecutionInfo]] = Var(Map())
   val outputInfo: Var[Seq[OutputStreamData]] = Var(Seq())
-  val envError: Var[Map[EnvironmentId, (EnvironmentErrorData, ExecutionId)]] = Var(Map())
   val jobTables: Var[Map[ExecutionId, JobTable]] = Var(Map())
 
   val executionsDisplayedInBanner: Var[Set[ExecutionId]] = Var(Set())
@@ -268,7 +267,6 @@ class ExecutionPanel {
     if (updating.compareAndSet(false, true)) {
       post()[Api].allStates(outputHistory.value.toInt).call().andThen {
         case Success((executionInfos, runningOutputData)) ⇒
-          println("EXECCCC " + executionInfos)
           executionInfo() = executionInfos.toMap
           outputInfo() = runningOutputData
           if (timerOn.now) delay
@@ -344,17 +342,12 @@ class ExecutionPanel {
   //  }
 
   def jobTable(id: ExecutionId) = {
-    println("JTABLES " + jobTables.now)
     if (jobTables.now.isDefinedAt(id)) {
-      println("IFFFFFF")
       jobTables.now(id)
     }
     else {
-      println("ELLLLSE")
       val jTable = JobTable(id)
-      println("instancied")
       jobTables() = jobTables.now.updated(id, jTable)
-      println("JTABDES  " + jobTables.now)
       jTable
     }
   }
@@ -722,27 +715,11 @@ class ExecutionPanel {
       r ⇒
         updateExecutionInfo
     }
-    envError() = envError.now.filterNot {
-      e ⇒ e._2._2 == id
-    }
     //    envErrorPanels() = envErrorPanels.now.filterNot {
     //      e ⇒ e._1.executionId == id
     //    }
     executionsDisplayedInBanner() = executionsDisplayedInBanner.now - id
   }
-
-  def clearEnvErrors(environmentId: EnvironmentId) =
-    post()[Api].clearEnvironmentErrors(environmentId).call().foreach {
-      _ ⇒
-        envError() = envError.now - environmentId
-    }
-
-  def updateEnvErrors(environmentId: EnvironmentId, executionId: ExecutionId) =
-    post()[Api].runningErrorEnvironmentData(environmentId, envErrorHistory.value.toInt).call().foreach {
-      err ⇒
-        println("ERR")
-        envError() = envError.now + (environmentId → (err, executionId))
-    }
 
   //  def visibleClass(expandID: ExpandID, columnID: ColumnID, modifier: Modifier, extraStyle: ModifierSeq = emptyMod) =
   //    expanderIfVisible(expandID, columnID, ex ⇒

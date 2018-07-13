@@ -5,11 +5,15 @@ import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.tool.client.omsheet
 import scaladget.bootstrapnative.bsn
 import bsn._
+import org.openmole.gui.ext.api.Api
 import scaladget.tools
 import scaladget.tools._
 import scalatags.JsDom.all._
 import rx._
 import scaladget.bootstrapnative.Table.{ BSTableStyle, FixedCell, ReactiveRow, SubRow, VarCell }
+import scala.concurrent.ExecutionContext.Implicits.global
+import boopickle.Default._
+import autowire._
 
 import scala.scalajs.js.timers
 import scala.scalajs.js.timers.SetTimeoutHandle
@@ -39,18 +43,35 @@ class JobTable(executionId: ExecutionId) {
     bsn.selectableButton("Environments", !capsuleActivated, onclick = () ⇒ switchView)
   )
 
-  val envErrors: Var[Map[EnvironmentId, EnvironmentErrorData]] = Var(Map())
+  //val envErrors: Var[Map[EnvironmentId, EnvironmentErrorData]] = Var(Map())
+
+  val envError: Var[Map[EnvironmentId, EnvironmentErrorData]] = Var(Map())
   //val environmentStates: Var[Seq[Var[EnvironmentState]]] = Var(Seq())
 
   val errOpen = Var(false)
 
-  panels.executionPanel.envError.trigger {
-    println("TRRRRIGER " + errOpen.now)
-    if (!errOpen.now) {
-      println("--------------------- Update errors")
-      envErrors() = panels.executionPanel.envError.now.map { case (k, v) ⇒ (k, v._1) }
+  def updateEnvErrors(environmentId: EnvironmentId) =
+    // if (!errOpen.now) {
+    post()[Api].runningErrorEnvironmentData(environmentId, panels.executionPanel.envErrorHistory.value.toInt).call().foreach {
+      err ⇒
+        println("ERR")
+        envError() = envError.now + (environmentId → err)
     }
-  }
+  //}
+
+  def clearEnvErrors(environmentId: EnvironmentId) =
+    post()[Api].clearEnvironmentErrors(environmentId).call().foreach {
+      _ ⇒
+        envError() = envError.now - environmentId
+    }
+
+  //  panels.executionPanel.envError.trigger {
+  //    println("TRRRRIGER " + errOpen.now)
+  //    if (!errOpen.now) {
+  //      println("--------------------- Update errors")
+  //      envErrors() = panels.executionPanel.envError.now.map { case (k, v) ⇒ (k, v._1) }
+  //    }
+  //  }
 
   def switchView = {
     jobViews() = jobViews.now match {
@@ -130,23 +151,31 @@ class JobTable(executionId: ExecutionId) {
                   errOpen() = !errOpen.now
                   //  val previousState = expandedErrors.now.get(e.envId).getOrElse(false)
                   //   expandedErrors() = expandedErrors.now.updated(e.envId, !previousState)
-                  // panels.executionPanel.updateEnvErrors(e.envId)
+                  updateEnvErrors(e.envId)
                   //   panels.executionPanel.toggleEnvironmentErrorPanel(e.envId)
                 }, bsn.btn_danger)(badge(e.numberOfErrors.toString)), 8),
               // span(bsn.buttonGroup(omsheet.columnLayout +++ (width := 80))(
               // bsn.buttonIcon(glyphicon = bsn.glyph_refresh, todo = { () ⇒ panels.executionPanel.updateEnvErrors(e.envId) }).tooltip("Refresh environment errors"),
-              FixedCell(bsn.buttonIcon(buttonStyle = bsn.btn_default, glyphicon = bsn.glyph_repeat, todo = () ⇒ panels.executionPanel.clearEnvErrors(e.envId)), 9) /*).tooltip("Reset environment errors")*/
+              FixedCell(bsn.buttonIcon(buttonStyle = bsn.btn_default, glyphicon = bsn.glyph_repeat, todo = () ⇒ clearEnvErrors(e.envId)), 9) /*).tooltip("Reset environment errors")*/
             )
           )
         }
       },
-      subRow = Some((i: scaladget.tools.ID) ⇒ SubRow({
-        val panel = new EnvironmentErrorPanel
-        envErrors.map { envErrors ⇒
-          panel.setErrors(error(envErrors, EnvironmentId(i)))
-          div(panel.view)
-        }
-      }, errOpen)),
+      subRow = Some((i: scaladget.tools.ID) ⇒ SubRow(
+        envError.map {
+          _.get(EnvironmentId(i))
+        }.map { env ⇒
+          env match {
+            case Some(e: EnvironmentErrorData) ⇒
+              val panel = new EnvironmentErrorPanel(e)
+              //              envError.map { ee ⇒
+              //                panel.setErrors(error(ee, EnvironmentId(i)))
+              //                panel.view.render
+              //              }
+              div(panel.view.render)
+            case None ⇒ div("No env")
+          }
+        }, errOpen)),
       bsTableStyle = BSTableStyle(tableStyle = `class` := "table executionTable")
     ).addHeaders("Name", "Elapsed time", "Uploads", "Downloads", "Submitted", "Running", "Finished", "Failed", "Errors", "Actions")
       .render(minWidth := 1000)
