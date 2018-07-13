@@ -127,7 +127,7 @@ Optionally you can use @hl.highlight("--test", "plain") in order to verify the s
 Bear in mind this is (really) @b{time-consuming}.
 
 @br
-Sources for the @bdocumentation pages} are located in @hl.highlight("openmole/openmole/bin/org.openmole.site/jvm/src/main/scalatex/openmole","plain")
+Sources for the @b{documentation pages} are located in @hl.highlight("openmole/openmole/bin/org.openmole.site/jvm/src/main/scalatex/openmole","plain")
 
 They are written using @a("scalatex", href:=shared.link.scalatex), a DSL to generate html content.
 
