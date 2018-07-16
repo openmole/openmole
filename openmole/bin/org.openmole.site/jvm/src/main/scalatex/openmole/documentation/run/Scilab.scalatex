@@ -6,7 +6,7 @@
  
 @h2{ScilabTask}
 
-@p Scilab is an open source software initially designed for numerical computation (see @aa("the official website", href:= "http://www.scilab.org/")).
+Scilab is an open source software initially designed for numerical computation (see @aa("the official website", href:= "http://www.scilab.org/")).
 It provides its own high-level scripting language and can be used as a computing kernel only. Note that it includes most of proprietary Matlab's functionalities
 and that a set of conversion tools exists (@aa("doc", href:= "https://help.scilab.org/docs/6.0.1/fr_FR/mfile2sci.html")).
 

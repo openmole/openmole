@@ -74,7 +74,7 @@ object SideMenu {
   val explore = SideMenu(DocumentationPages.explorePages, classIs(btn ++ btn_primary), "Available methods")
   val scale = SideMenu(DocumentationPages.scalePages, classIs(btn ++ btn_primary), "Available environments")
   val language = SideMenu(DocumentationPages.languagePages, classIs(btn ++ btn_primary), "Language")
-  val advanced = SideMenu(DocumentationPages.advancedConceptsPages, classIs(btn ++ btn_primary), "Advanced concepts")
+  val advanced = SideMenu(Seq(DocumentationPages.advancedConcepts), classIs(btn ++ btn_primary), "Advanced concepts")
   val developers = SideMenu(DocumentationPages.developersPages, classIs(btn ++ btn_primary), "Developer's documentation")
   val gettingStarted = SideMenu(DocumentationPages.gettingStartedPages, classIs(btn ++ btn_primary), "Getting started tutorials")
   val netLogoGA = SideMenu(DocumentationPages.netLogoPages, classIs(btn ++ btn_primary), "NetLogo tutorials")
