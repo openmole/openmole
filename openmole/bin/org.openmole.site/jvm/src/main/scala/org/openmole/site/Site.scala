@@ -122,10 +122,10 @@ object Site extends App {
 
         def bodyFrag(page: org.openmole.site.Page) = {
 
-          val sitePage =
+          val (sitePage, elementClass) =
             page match {
-              case Pages.index ⇒ ContentPage(div(paddingTop := 100), div(page.content))
-              case _           ⇒ UserGuide.integrate(page)
+              case Pages.index ⇒ (ContentPage(div(paddingTop := 100), div(page.content)), `class` := "")
+              case _           ⇒ (UserGuide.integrate(page), `class` := "page-element")
             }
 
           body(position := "relative", minHeight := "100%")(
@@ -135,7 +135,7 @@ object Site extends App {
                 page.source.map(source ⇒ tools.linkButton("Suggest edits", tools.modificationLink(source), classIs(btn ++ btn_danger))
                 )),
               sitePage.header,
-              sitePage.element
+              sitePage.element(elementClass)
             ),
             sitePage match {
               case s: IntegratedPage ⇒ Seq(s.leftMenu) ++ s.rightMenu.toSeq
