@@ -15,7 +15,8 @@ To run correctly on your own computer, OpenMOLE requires Java version 8 or above
 Check our @a("FAQ", href := Pages.faq.file) to access your java version information.
 @br
 When Java is installed, you just need to download and extract @a("this archive", href:=Resource.script.openmole.file), and
-you're done! OpenMOLE is installed and works out of the box!
+you're done! OpenMOLE is installed and works out of the box! @br @br
+@linkButton(s"Download ${org.openmole.core.buildinfo.version.value}", Resource.script.openmole.file, classIs(btn ++ btn_danger))
 
 @h2{Run OpenMOLE on Linux}
 You can then launch OpenMOLE by executing the @i{openmole} file in the installation directory with the @hl.code("./openmole") command.
