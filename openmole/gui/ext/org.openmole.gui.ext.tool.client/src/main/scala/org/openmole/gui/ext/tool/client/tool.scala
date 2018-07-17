@@ -534,7 +534,11 @@ package object client {
 
   lazy val environmentErrorBadge: ModifierSeq = Seq(
     color(DARK_GREY),
-    backgroundColor := FUN_GREY
+    backgroundColor := WHITE,
+    width := "auto",
+    height := 15,
+    marginLeft := 8,
+    padding := "1px 5px 5px 5px"
   )
 
   //OPTON DIVS

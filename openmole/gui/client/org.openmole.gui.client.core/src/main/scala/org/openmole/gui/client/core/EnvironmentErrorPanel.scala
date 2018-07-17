@@ -36,100 +36,30 @@ class EnvironmentErrorPanel(environmentErrorData: EnvironmentErrorData) {
       id -> e
   }.toMap
 
-  println(" -- errorData  " + errorData)
-
-  // implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-
-  //  val scrollableTable = scrollableDiv()
-  // val scrollableStack = scrollableText()
-  //  val sortingAndOrdering: Var[ListSortingAndOrdering] = Var(ListSortingAndOrdering(TimeSorting(), Descending()))
-  // val currentData: Var[Option[EnvironmentErrorData]] = Var(None)
-
-  //  val topTriangle = glyph_triangle_top +++ (fontSize := 10)
-  //  val bottomTriangle = glyph_triangle_bottom +++ (fontSize := 10)
-
-  //  def exclusiveButton(title: String, action1: () ⇒ Unit, action2: () ⇒ Unit) = exclusiveButtonGroup(emptyMod)(
-  //    ExclusiveButton.twoGlyphSpan(
-  //      topTriangle,
-  //      bottomTriangle,
-  //      action1,
-  //      action2,
-  //      preString = title
-  //    )
-  //  ).div
-
-  //  def setSorting(sorting: ListSorting, ordering: ListOrdering) = {
-  //    sortingAndOrdering() = ListSortingAndOrdering(sorting, ordering)
-  //    currentData.now.foreach {
-  //      setErrors
-  //    }
-  //  }
-
-  //  def sort(datedErrors: EnvironmentErrorData, sortingAndOrdering: ListSortingAndOrdering): Seq[(String, Long, Int, ErrorStateLevel, Error)] = {
-  //    val lines =
-  //      for {
-  //        (error, mostRecentDate, occurrences) ← datedErrors.datedErrors
-  //      } yield (error.errorMessage, mostRecentDate, occurrences, error.level, error.stack)
-  //
-  //    val sorted = sortingAndOrdering.fileSorting match {
-  //      case AlphaSorting() ⇒ lines.sortBy(_._1)
-  //      case TimeSorting()  ⇒ lines.sortBy(_._2)
-  //      case _              ⇒ lines.sortBy(_._4.name)
-  //    }
-  //
-  //    sortingAndOrdering.fileOrdering match {
-  //      case Ascending() ⇒ sorted
-  //      case _           ⇒ sorted.reverse
-  //    }
-  //  }
-
-  //  case class Line(message: String, stack: String, date: String, occurrences: String, levelLabel: TypedTag[HTMLLabelElement]) {
-  //    implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-  //    val detailOn = Var(false)
-  //
-  //    def toggleDetails = {
-  //      detailOn() = !detailOn.now
-  //    }
-  //
-  //    val render = tags.tr(row)(
-  //      tags.td(colMD(9), wordWrap := "break-word")(tags.a(message, pointer +++ (fontSize := 13), onclick := { () ⇒ toggleDetails })), //(width := 400)
-  //      tags.td(colMD(1) +++ textCenter)(badge(occurrences, environmentErrorBadge)),
-  //      tags.td(colMD(1) +++ (fontSize := 13) +++ textCenter)(date),
-  //      tags.td(colMD(1) +++ textCenter)(levelLabel)
-  //    )
-  //  }
-
-  //  def setErrors(ers: EnvironmentErrorData) = {
-  //    val someErs = Some(ers)
-  //    if (someErs != currentData.now) {
-  //      currentData() = someErs
-  //    }
-  //  }
   val detailOn: Var[Map[scaladget.tools.ID, Boolean]] = Var(Map())
 
-  def toggleDetail(id: String) =
-    detailOn.update(detailOn.now.updated(id, detailOn.now.get(id).getOrElse(false)))
+  def toggleDetail(id: String) = {
+    detailOn.update(detailOn.now.updated(id, !detailOn.now.get(id).getOrElse(false)))
+  }
 
   def levelLabel(level: ErrorStateLevel) = label(level.name)(level match {
     case ErrorLevel() ⇒ label_danger
-    case _            ⇒ environmentErrorBadge +++ "label"
+    case _            ⇒ label_warning
   })
 
   val view = {
     scaladget.bootstrapnative.Table(
       Rx(
         for {
-          (id, (error, date, nb)) ← errorData.toSeq
-          i ← (0 to environmentErrorData.datedErrors.length - 1)
+          (id, (error, date, nb)) ← errorData.toSeq.sortBy(x ⇒ x._2._2).reverse
         } yield {
           ReactiveRow(
             id,
             Seq(
-              FixedCell(tags.span(wordWrap := "break-word")(tags.a(error.errorMessage, pointer +++ (fontSize := 13), onclick := { () ⇒ toggleDetail(id) })), 0),
-              FixedCell(badge(nb.toString, environmentErrorBadge), 1),
-              FixedCell(span(fontSize := 13, textCenter)(date.toString), 2),
-              FixedCell(levelLabel(error.level), 3)
-            )
+              FixedCell(tags.span(wordWrap := "break-word")(tags.a(error.errorMessage, pointer +++ Seq(fontSize := 13, scalatags.JsDom.all.color := "#222", textDecoration.underline), onclick := { () ⇒ toggleDetail(id) })), 0),
+              FixedCell(levelLabel(error.level)(badge(nb.toString, environmentErrorBadge)), 1),
+              FixedCell(span(fontSize := 13, textCenter)(Utils.longToDate(date)), 2)
+            ), Seq(borderTop := "2px solid white", backgroundColor := "#ff000033")
           )
         }),
       subRow = Some((i: scaladget.tools.ID) ⇒ SubRow(
@@ -138,55 +68,11 @@ class EnvironmentErrorPanel(environmentErrorData: EnvironmentErrorData) {
           stackText.setContent(errorData.get(i).map { _._1.stack.stackTrace }.getOrElse(""))
           div(stackText.sRender)
         }, detailOn.map {
-          _.get(i).isDefined
+          _.get(i).getOrElse(false)
         }
       )
-      )).render(width := "100%")
+      )).render(width := "100%", marginTop := 30)
   }
-
-  //  val view = {
-  //    val errorTable = tags.table(tableClass +++ ms("EnvError") +++ (width := "100%"))(
-  ////      thead(
-  ////        tr(row)(
-  ////          th(exclusiveButton("Error", () ⇒ setSorting(AlphaSorting(), Ascending()), () ⇒ setSorting(AlphaSorting(), Descending()))),
-  ////          th(""),
-  ////          th(exclusiveButton("Date", () ⇒ setSorting(TimeSorting(), Ascending()), () ⇒ setSorting(TimeSorting(), Descending()))),
-  ////          th(exclusiveButton("Level", () ⇒ setSorting(LevelSorting(), Ascending()), () ⇒ setSorting(LevelSorting(), Descending())))
-  ////        )
-  ////      )
-  //      , Rx {
-  //        tbody(
-  //          for {
-  //            (message, date, occurrences, level, stack) ← sort(currentData().getOrElse(EnvironmentErrorData.empty), sortingAndOrdering.now)
-  //          } yield {
-  //
-  //            val line = Line(message, stack.stackTrace, Utils.longToDate(date), occurrences.toString, levelLabel(level))
-  //          val stackText = scrollableText()
-  //            stackText.setContent(line.stack)
-  //            Seq(
-  //              line.render,
-  //              tr(
-  //                td(colMD(12) +++ (fontSize := 11))(
-  //                  colspan := 12,
-  //                  Rx {
-  //                    if (line.detailOn()) {
-  //                      tags.div(
-  //                        stackText.view
-  //                      )
-  //                    }
-  //                    else tags.div()
-  //                  }
-  //                )
-  //              )
-  //            )
-  //          }
-  //        )
-  //      }
-  //    )
-  //
-  //    scrollableTable.setChild(div(omsheet.environmentPanelError)(errorTable).render)
-  //    scrollableTable.sRender
-  //  }
 
 }
 
