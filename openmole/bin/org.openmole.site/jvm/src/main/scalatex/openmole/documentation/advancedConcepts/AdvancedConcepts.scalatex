@@ -1,0 +1,26 @@
+@import org.openmole.site.stylesheet._
+@import org.openmole.site.Resource._
+@import org.openmole.site._
+@import org.openmole.site.tools._
+@import org.openmole.site.content.Environment._
+
+@h1{Advanced concepts}
+OpenMOLE has a lot of handy features that allows the familiar user to tune the workflow of execution into much more details
+that previously described in the @a("Model", href:=DocumentationPages.run.file) and @a("Method",
+href:=DocumentationPages.run.file) sections.
+
+We present here the relevant elements of the OpenMOLE framework:
+
+@h2{OpenMOLE technical concepts}
+
+Fine-tune  your workflow using the elements of the OpenMOLE language :
+@br
+@ul
+    @li
+      In OpenMOLE, transitions link tasks with each other. Here are presented several kinds of @aa("Transitions", href := DocumentationPages.transition.file) available in OpenMOLE
+    @li
+      Model tasks are represented as functions, taking arguments, and producing outputs. The @aa("Hook", href := DocumentationPages.hook.file) mechanism helps to make side effects on them (like displaying outputs, storing them in files, etc)
+    @li
+      The @aa("Sources", href := DocumentationPages.source.file) permit to inject data in the data-flow,
+    @li
+      Embed you own java/scala code and libraries into OpenMOLE though an OpenMOLE @a("plugin", href := DocumentationPages.pluginDevelopment.file).

@@ -24,7 +24,7 @@ package object stylesheet {
 
   lazy val GREEN = "#a6bf26"
 
-  lazy val DARK_GREY = "#222"
+  lazy val DARK_GREY = "#555"
 
   lazy val LIGHT_GREY = "#e7e7e7"
   //
@@ -105,6 +105,10 @@ package object stylesheet {
     textAlign := "center"
   ) ++ center(70)
 
+  lazy val centerBox100 = Seq(
+    textAlign := "center"
+  ) ++ center(100)
+
   lazy val footer = Seq(
     paddingTop := 30,
     paddingBottom := 20,
@@ -141,8 +145,8 @@ package object stylesheet {
 
   val h1Like = Seq(
     color := "#444",
-    fontSize := "30px",
-    fontWeight := 100,
+    fontSize := "35px",
+    fontWeight := "bold",
     margin := "0 0 24px",
     textTransform := "uppercase",
     paddingTop := 100

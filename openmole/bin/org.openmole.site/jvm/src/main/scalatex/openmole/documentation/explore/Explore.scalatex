@@ -23,8 +23,7 @@ sensitivity, robustness and diversity} of your model capabilities
 
 
 @h2{Context}
-@p
-    Simulation models can be abstracted as a program that transforms a set of @b{inputs} into a set of @b{outputs}.
+Simulation models can be abstracted as a program that transforms a set of @b{inputs} into a set of @b{outputs}.
 @br
 
     @img(src := Resource.img.method.modelIO.file, center(40))
@@ -34,9 +33,7 @@ sensitivity, robustness and diversity} of your model capabilities
     Likewise, considered outputs in simulation experiments are most of times @b{measures} computed on the dynamics produced by a simulation run  (e.g. fitness or error functions)
 
 @h2{Questioning your model}
-
-@p
-    There are four types of general questions that can be addressed by OpenMOLE methods.
+There are four types of general questions that can be addressed by OpenMOLE methods.
 
 @br
 
@@ -68,7 +65,6 @@ as well as @a("distribution schemes", href := DocumentationPages.island.file) sp
 
 
 @h2{Methods characteristics}
-
 Each of OpenMOLE methods comes with an image summarizing the performance and  characteristics regarding criterion they have in common e.g. coverage rate of input/out of sensitivity to dimensionality.
 @break
 
