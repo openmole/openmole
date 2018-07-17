@@ -103,7 +103,6 @@ class ExecutionPanel {
         case SubOutput      ⇒ srp.output
         case SubCompile     ⇒ srp.failedStack
         case SubEnvironment ⇒ srp.environment
-        case x: Any         ⇒ Rx(div(""))
       }
 
     ))
@@ -111,7 +110,7 @@ class ExecutionPanel {
 
   def currentSub(id: ExecutionId) = expanded.now.get(id).flatten
 
-  def subLink(s: Sub, id: ExecutionId, name: String = "", glyphicon: Glyphicon = emptyMod, defaultModifier: ModifierSeq = Seq(scalatags.JsDom.all.color := "white"), selectedModifier: ModifierSeq = Seq(scalatags.JsDom.all.color := BLUE, fontWeight := "bold")) =
+  def subLink(s: Sub, id: ExecutionId, name: String = "", glyphicon: Glyphicon = emptyMod, defaultModifier: ModifierSeq = Seq(scalatags.JsDom.all.color := WHITE), selectedModifier: ModifierSeq = Seq(scalatags.JsDom.all.color := BLUE, fontWeight := "bold")) =
     tags.span(Rx {
       tags.span(glyphicon, pointer,
         {
@@ -185,7 +184,7 @@ class ExecutionPanel {
 
           val srp = SubRowPanels(
             staticInfo.map { si ⇒
-              execTextArea(si(execID).script)(padding := 15, fontSize := "14px", scalatags.JsDom.all.color := "#000")
+              execTextArea(si(execID).script)(padding := 15, fontSize := "14px", scalatags.JsDom.all.color := WHITE)
             },
             Rx(execTextArea(outputInfo.map { oi ⇒
               oi.find(_.id == execID).map {
@@ -217,7 +216,7 @@ class ExecutionPanel {
               VarCell(tags.span(glyphAndText(glyph_flag, details.ratio.toString).tooltip("Finished/Total jobs")), 3),
               VarCell(tags.span(tags.span(durationString).tooltip("Elapsed time")), 4),
               VarCell(tags.span(subLink(SubCompile, execID, execStatus, defaultModifier = executionState(info)).tooltip("Execution state")), 5),
-              VarCell(tags.span(subLink(SubEnvironment, execID, glyphicon = glyph_stats).tooltip("Computation environment details")), 6),
+              VarCell(tags.span(subLink(SubEnvironment, execID, "Executions").tooltip("Computation environment details")), 6),
               VarCell(tags.span(subLink(SubOutput, execID, glyphicon = glyph_list).tooltip("Standard output")), 7),
               FixedCell(tags.span(tags.span(glyph_remove +++ ms("removeExecution"), onclick := {
                 () ⇒
@@ -311,9 +310,9 @@ class ExecutionPanel {
     completed + running + ready
   }"
 
-  def glyphAndText(mod: ModifierSeq, text: String) = tags.span(
+  def glyphAndText(mod: ModifierSeq, text: String) = tags.div(
     tags.span(mod),
-    s" $text"
+    badge(s" $text", Seq(backgroundColor := WHITE, scalatags.JsDom.all.color := DARK_GREY))
   )
 
   def hasBeenDisplayed(id: ExecutionId) = executionsDisplayedInBanner() = (executionsDisplayedInBanner.now + id)
@@ -360,6 +359,7 @@ class ExecutionPanel {
     }
     executionsDisplayedInBanner() = executionsDisplayedInBanner.now - id
   }
+
   val settingsForm = vForm(width := 200)(
     outputHistory.withLabel("# outputs"),
     envErrorHistory.withLabel("# environment errors")
