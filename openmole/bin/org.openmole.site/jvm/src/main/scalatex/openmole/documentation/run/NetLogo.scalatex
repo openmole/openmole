@@ -1,5 +1,6 @@
 @import org.openmole.site.tools._
 @import org.openmole.{site=> site}
+@import org.openmole.site.stylesheet._
 @import site._
 
 @def variables = """
@@ -65,6 +66,10 @@
 
     @p Similarly, 1 output of the model is considered and collected by OpenMOLE at the end of each model execution.
     It is written as @code{netLogoOutputs} in the definition of the task.
+
+    @br@br
+    @img(src := Resource.img.model.netlogoMapping.file, center(100))
+    @br
 
     @p The arguments for a NetLogoTask are the following :
     @ul

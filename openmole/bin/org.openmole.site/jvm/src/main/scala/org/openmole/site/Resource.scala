@@ -52,6 +52,8 @@ object Resource {
     object model {
       val code = modelResource("code.svg")
       val codeAnimated = modelResource("codeAnimated.svg")
+      val fileMapping = modelResource("fileMapping.png")
+      val netlogoMapping = modelResource("netlogoMapping.png")
     }
 
     object method {
