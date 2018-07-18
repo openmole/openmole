@@ -291,14 +291,9 @@ class ExecutionPanel {
   )
 
   def jobTable(id: ExecutionId) = {
-    if (jobTables.now.isDefinedAt(id)) {
-      jobTables.now(id)
-    }
-    else {
-      val jTable = JobTable(id)
-      jobTables() = jobTables.now.updated(id, jTable)
-      jTable
-    }
+    val jTable = JobTable(id)
+    jobTables() = jobTables.now.updated(id, jTable)
+    jTable
   }
 
   val outputHistory = inputTag("500")(placeholder := "# outputs").render
