@@ -90,33 +90,6 @@ class JobTable(executionId: ExecutionId) {
 
   val oldNumberErrors = Var(allErrors(environmentStates.now))
 
-  //  val refreshButtons = environmentStates.map { es ⇒
-  //    val currentErrors = allErrors(es)
-  //    println("old: " + oldNumberErrors.now)
-  //    println("current: " + currentErrors)
-  //
-  //    val buts = es.map { e ⇒
-  //      val ints = Seq(currentErrors.get(e.envId), oldNumberErrors.now.get(e.envId)).flatten
-  //      println("INIS " + ints)
-  //      e.envId -> {
-  //        if (ints.length == 2) {
-  //          val content = {
-  //            if (ints(0) > ints(1)) ("Refresh errors", true)
-  //            else ("Errors", !errOpen.now)
-  //          }
-  //          button(content._1, onclick := { () ⇒
-  //            errOpen() = content._2
-  //            updateEnvErrors(e.envId)
-  //          }, bsn.btn_danger)(badge(ints(0).toString))
-  //        }
-  //        else span
-  //      }
-  //    }.toMap
-  //
-  //    oldNumberErrors() = currentErrors
-  //    buts
-  //  }
-
   def capsuleTable(info: ExecutionInfo) = {
     scaladget.bootstrapnative.DataTable(
       Some(scaladget.bootstrapnative.Table.Header(Seq("Name", "Running", "Completed"))),
