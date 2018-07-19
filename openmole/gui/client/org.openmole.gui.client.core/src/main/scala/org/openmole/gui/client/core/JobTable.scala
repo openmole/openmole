@@ -42,8 +42,12 @@ class JobTable(executionId: ExecutionId) {
   )
 
   val envError: Var[Map[EnvironmentId, EnvironmentErrorData]] = Var(Map())
+  val errOpen: Var[Map[EnvironmentId, Boolean]] = Var(Map())
+  val autoUpdateErrors = Var(false)
 
-  val errOpen = Var(false)
+  def updateEnvErrors: Unit = envError.now.keys.foreach {
+    updateEnvErrors(_)
+  }
 
   def updateEnvErrors(environmentId: EnvironmentId) =
     post()[Api].runningErrorEnvironmentData(environmentId, panels.executionPanel.envErrorHistory.value.toInt).call().foreach {
@@ -58,6 +62,7 @@ class JobTable(executionId: ExecutionId) {
     }
 
   def toCapsuleView = jobViews() = CapsuleView
+
   def toEnvironmentView = jobViews() = EnvironmentView
 
   val executionInfo: Var[Option[ExecutionInfo]] = Var(None)
@@ -81,10 +86,43 @@ class JobTable(executionId: ExecutionId) {
     }.getOrElse(Seq())
   }
 
+  def allErrors(states: Seq[EnvironmentState]) = states.map { es ⇒ es.envId -> es.numberOfErrors }.toMap
+
+  val oldNumberErrors = Var(allErrors(environmentStates.now))
+
+  //  val refreshButtons = environmentStates.map { es ⇒
+  //    val currentErrors = allErrors(es)
+  //    println("old: " + oldNumberErrors.now)
+  //    println("current: " + currentErrors)
+  //
+  //    val buts = es.map { e ⇒
+  //      val ints = Seq(currentErrors.get(e.envId), oldNumberErrors.now.get(e.envId)).flatten
+  //      println("INIS " + ints)
+  //      e.envId -> {
+  //        if (ints.length == 2) {
+  //          val content = {
+  //            if (ints(0) > ints(1)) ("Refresh errors", true)
+  //            else ("Errors", !errOpen.now)
+  //          }
+  //          button(content._1, onclick := { () ⇒
+  //            errOpen() = content._2
+  //            updateEnvErrors(e.envId)
+  //          }, bsn.btn_danger)(badge(ints(0).toString))
+  //        }
+  //        else span
+  //      }
+  //    }.toMap
+  //
+  //    oldNumberErrors() = currentErrors
+  //    buts
+  //  }
+
   def capsuleTable(info: ExecutionInfo) = {
     scaladget.bootstrapnative.DataTable(
       Some(scaladget.bootstrapnative.Table.Header(Seq("Name", "Running", "Completed"))),
-      info.capsules.map { c ⇒ scaladget.bootstrapnative.DataTable.DataRow(Seq(c._1.toString, c._2.running.toString, c._2.completed.toString)) },
+      info.capsules.map {
+        c ⇒ scaladget.bootstrapnative.DataTable.DataRow(Seq(c._1.toString, c._2.running.toString, c._2.completed.toString))
+      },
       scaladget.bootstrapnative.Table.BSTableStyle(bsn.bordered_table, tools.emptyMod), true).render(width := "100%").render
   }
 
@@ -96,6 +134,7 @@ class JobTable(executionId: ExecutionId) {
         ee ← environmentStates
       } yield {
         ee.map { e ⇒
+          if (autoUpdateErrors.now) updateEnvErrors(e.envId)
           ReactiveRow(
             e.envId.id,
             Seq(
@@ -109,7 +148,7 @@ class JobTable(executionId: ExecutionId) {
               VarCell(span(e.failed.toString), 7),
               VarCell(if (e.numberOfErrors == 0) span() else
                 button("Errors", onclick := { () ⇒
-                  errOpen() = !errOpen.now
+                  errOpen.update(errOpen.now.updated(e.envId, !errOpen.now.getOrElse(e.envId, false)))
                   updateEnvErrors(e.envId)
                 }, bsn.btn_danger)(badge(e.numberOfErrors.toString)), 8)
             )
@@ -119,14 +158,15 @@ class JobTable(executionId: ExecutionId) {
       subRow = Some((i: scaladget.tools.ID) ⇒ SubRow(
         envError.map {
           _.get(EnvironmentId(i))
-        }.map { env ⇒
-          env match {
-            case Some(e: EnvironmentErrorData) ⇒
-              val panel = new EnvironmentErrorPanel(e)
-              div(panel.view.render)
-            case None ⇒ div("")
-          }
-        }, errOpen)),
+        }.map {
+          env ⇒
+            env match {
+              case Some(e: EnvironmentErrorData) ⇒
+                val panel = new EnvironmentErrorPanel(e, EnvironmentId(i), this)
+                div(panel.view.render)
+              case None ⇒ div("")
+            }
+        }, errOpen.map { _.getOrElse(EnvironmentId(i), false) })),
       bsTableStyle = BSTableStyle(tableStyle = `class` := "table executionTable")
     ).addHeaders("Name", "Elapsed time", "Uploads", "Downloads", "Submitted", "Running", "Finished", "Failed", "Errors")
       .render(minWidth := 1000)

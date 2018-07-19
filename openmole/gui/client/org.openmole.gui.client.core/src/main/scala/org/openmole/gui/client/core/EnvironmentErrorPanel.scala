@@ -7,9 +7,10 @@ import org.openmole.gui.ext.tool.client._
 import scalatags.JsDom.{ TypedTag, tags }
 import scalatags.JsDom.all._
 import org.openmole.gui.ext.tool.client.Utils
-import org.scalajs.dom.raw.HTMLLabelElement
+import org.scalajs.dom.raw.{ HTMLElement, HTMLLabelElement }
 import rx._
 import scaladget.bootstrapnative.Table.{ FixedCell, ReactiveRow, SubRow, VarCell }
+import scaladget.bootstrapnative.ToggleButton
 
 /*
  * Copyright (C) 27/07/15 // mathieu.leclaire@openmole.org
@@ -28,7 +29,7 @@ import scaladget.bootstrapnative.Table.{ FixedCell, ReactiveRow, SubRow, VarCell
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class EnvironmentErrorPanel(environmentErrorData: EnvironmentErrorData) {
+class EnvironmentErrorPanel(environmentErrorData: EnvironmentErrorData, environmentId: EnvironmentId, jobTable: JobTable) {
 
   val errorData = environmentErrorData.datedErrors.zipWithIndex.map {
     case (e, index) ⇒
@@ -47,7 +48,18 @@ class EnvironmentErrorPanel(environmentErrorData: EnvironmentErrorData) {
     case _            ⇒ label_warning
   })
 
-  val view = {
+  lazy val autoErrorToggle: ToggleButton = toggle(jobTable.autoUpdateErrors.now)
+
+  autoErrorToggle.position.trigger {
+    jobTable.autoUpdateErrors.update(autoErrorToggle.position.now)
+  }
+
+  val view = div(
+    div(marginTop := 30, fontWeight := "bold")(
+      span("Auto update "),
+      autoErrorToggle.render,
+      button(btn_default, "Reset", marginLeft := 20, fontWeight := "bold", onclick := { () ⇒ jobTable.clearEnvErrors(environmentId) })
+    ),
     scaladget.bootstrapnative.Table(
       Rx(
         for {
@@ -59,20 +71,22 @@ class EnvironmentErrorPanel(environmentErrorData: EnvironmentErrorData) {
               FixedCell(tags.span(wordWrap := "break-word")(tags.a(error.errorMessage, pointer +++ Seq(fontSize := 13, scalatags.JsDom.all.color := "#222", textDecoration.underline), onclick := { () ⇒ toggleDetail(id) })), 0),
               FixedCell(levelLabel(error.level)(badge(nb.toString, environmentErrorBadge)), 1),
               FixedCell(span(fontSize := 13, textCenter)(Utils.longToDate(date)), 2)
-            ), Seq(borderTop := "2px solid white", backgroundColor := "#ff000033")
+            ), Seq(borderTop := "2px solid white" /*, backgroundColor := "#ff000033"*/ )
           )
         }),
       subRow = Some((i: scaladget.tools.ID) ⇒ SubRow(
         Rx {
           val stackText = scrollableText()
-          stackText.setContent(errorData.get(i).map { _._1.stack.stackTrace }.getOrElse(""))
+          stackText.setContent(errorData.get(i).map {
+            _._1.stack.stackTrace
+          }.getOrElse(""))
           div(stackText.sRender)
         }, detailOn.map {
           _.get(i).getOrElse(false)
         }
       )
       )).render(width := "100%", marginTop := 30)
-  }
+  )
 
 }
 

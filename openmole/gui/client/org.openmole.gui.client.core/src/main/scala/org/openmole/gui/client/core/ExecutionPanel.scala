@@ -133,7 +133,7 @@ class ExecutionPanel {
     }
     )
 
-  def execTextArea(content: String): TypedTag[HTMLElement] = textarea(content, height := "300px", width := "100%")
+  def execTextArea(content: String): TypedTag[HTMLElement] = textarea(content, height := "300px", width := "100%", scalatags.JsDom.all.color := "#222")
 
   def execTextArea(content: Rx[String]): TypedTag[HTMLElement] = {
     val st = scrollableText(content.now, BottomScroll)
@@ -184,7 +184,7 @@ class ExecutionPanel {
 
           val srp = SubRowPanels(
             staticInfo.map { si ⇒
-              execTextArea(si(execID).script)(padding := 15, fontSize := "14px", scalatags.JsDom.all.color := WHITE)
+              execTextArea(si(execID).script)(padding := 15, fontSize := "14px")
             },
             Rx(execTextArea(outputInfo.map { oi ⇒
               oi.find(_.id == execID).map {
@@ -194,7 +194,7 @@ class ExecutionPanel {
             Rx(execTextArea(details.error.map {
               _.stackTrace
             }.getOrElse("")
-            )(padding := 15, fontSize := "14px", scalatags.JsDom.all.color := "#000")),
+            )(padding := 15, fontSize := "14px")),
             jobTable(execID).render
           )
 
