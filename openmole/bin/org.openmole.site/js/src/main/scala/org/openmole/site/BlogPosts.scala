@@ -133,13 +133,13 @@ object BlogPosts {
     right := 10
   )
 
-  def testAndAppend(id: String, element: HTMLElement) = {
+  def testAndAppend(id: String, element: HTMLElement): Unit = {
     val node = org.scalajs.dom.window.document.getElementById(id)
     if (node != null)
       node.appendChild(element)
   }
 
-  def addNewsdiv(blogPosts: Seq[BlogPost]) = {
+  def addNewsdiv(blogPosts: Seq[BlogPost]): Unit = {
     def limitLength(s: String) = if (s.size < 50) s else s"${s.take(50)} ..."
 
     val newsDiv = div(paddingTop := 20)(
