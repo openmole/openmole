@@ -423,6 +423,7 @@ package object client {
       paddingLeft := 10,
       width := 370,
       overflowY := "auto",
+      overflowX := "hidden",
       zIndex := -1
     )
   }
