@@ -1,9 +1,11 @@
 package org.openmole.plugin.task.scilab
 
+import java.util.AbstractCollection
+
 import monocle.macros._
 import org.openmole.core.context.ValType
 import org.openmole.core.dsl._
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
+import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.expansion._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.networkservice.NetworkService
@@ -13,13 +15,14 @@ import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
-import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.workspace.{NewFile, Workspace}
 import org.openmole.plugin.task.udocker._
 import org.openmole.plugin.task.container
 import org.openmole.plugin.task.container._
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.task.systemexec._
 
+import scala.annotation.tailrec
 import scala.reflect.ClassTag
 
 object ScilabTask {
@@ -118,14 +121,48 @@ object ScilabTask {
       case v: Double  ⇒ v.toString
       case v: Boolean ⇒ if (v) "%T" else "%F"
       case v: String  ⇒ '"' + v + '"'
-      case v: Array[Array[Array[_]]] ⇒
-        throw new UserBadDataError(s"The array of more than 2D $v of type ${v.getClass} is not convertible to Scilab")
+      case v: Array[_] ⇒ toScilabArray(v)
+      case _ ⇒
+        throw new UserBadDataError(s"Value $v of type ${v.getClass} is not convertible to Scilab")
+    }
+  }
+
+  /**
+    * Specific function to convert arrays, including multi-arrays
+    * @param v
+    * @return
+    */
+  def toScilabArray(v: Array[_]): String = {
+
+    def flattenDims(t: Array[_]): (Array[_],Seq[Int]) = {
+      @tailrec def getdims(v: Any, dims: Seq[Int]): Seq[Int] = {
+        v match {
+          case v: Array[_] => getdims(v(0),Seq(v.length)++dims)
+          case _ => dims
+        }
+      }
+      def flattenRight(t: Array[_]): Array[_] = {
+        t match {
+          case t: Array[Array[_]]=> t.map(flattenRight).transpose.flatten
+          case t: Array[_] => t
+        }
+      }
+      (flattenRight(t),getdims(t,Seq.empty))
+    }
+
+    v match {
+      case v: Array[Array[Array[_]]] ⇒ {
+        //throw new UserBadDataError(s"The array of more than 2D $v of type ${v.getClass} is not convertible to Scilab")
+        val flattened = flattenDims(v)
+        val dims = flattened._2
+        val values = flattened._1
+        // for the hypermatrix function, values must be a column vector -> hence the map as Array of singletons
+        "hypermat("+toScilabArray(dims.toArray)+","+toScilabArray(values.map{case x => Array(x)})+")"
+      }
       case v: Array[Array[_]] ⇒
         def line(v: Array[_]) = v.map(toScilab).mkString(", ")
         "[" + v.map(line).mkString("; ") + "]"
       case v: Array[_] ⇒ "[" + v.map(toScilab).mkString(", ") + "]"
-      case _ ⇒
-        throw new UserBadDataError(s"Value $v of type ${v.getClass} is not convertible to Scilab")
     }
   }
 
