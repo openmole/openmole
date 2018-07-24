@@ -2,7 +2,7 @@
 @import org.openmole.site._
 @import DocumentationPages._
 
-@div(`class` := "index-element")
+@div(`class` := "index-element" , id := "main-padding")
     @h4{What is OpenMOLE?}
 
     @div(stylesheet.centerJustify(100)){
@@ -24,7 +24,7 @@
 @Main.build
 
 
-@div(`class` := "index-element")
+@div(`class` := "index-element", id := "main-padding")
     @p
         Simulation models can be abstracted as a program (or function) that transforms a set of @b{inputs} into a set of @b{outputs}.
     @br

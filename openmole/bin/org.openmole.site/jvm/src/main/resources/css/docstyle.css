@@ -152,7 +152,6 @@ p{
 .page-element {
     background-color: white;
     border-radius:5px;
-    padding: 20px 50px 20px 50px;
     box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
     }
 
@@ -160,7 +159,6 @@ p{
     background-color: white;
     width: 100%;
     border-radius:10px;
-    padding:20px 80px 50px 80px;
     box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
     }
 
@@ -188,6 +186,15 @@ background-color : #222;
     float: left;
 }
 
+#main-padding{
+    padding: 0px 30px 50px 30px;
+}
+
+#padding-element{
+    padding: 10px 20px 20px 10px;
+}
+
+
 /*3 Column Layout*/
 @media only screen and (min-width: 1024px) {
     .wrap {
@@ -199,6 +206,14 @@ background-color : #222;
     #main-content {
         width: 50%;
         float: left;
+    }
+
+    #main-padding{
+        padding:20px 80px 50px 80px;
+    }
+
+    #padding-element{
+         padding: 20px 50px 20px 50px;
     }
 
     .sidebar-left {
@@ -237,6 +252,14 @@ background-color : #222;
     #main-content, .sidebar-left, #sidebar-right {
         top: 0;
     }
+
+    #main-padding{
+        padding:20px 80px 50px 80px;
+    }
+
+    #padding-element{
+        padding: 20px 50px 20px 50px;
+        }
 
     #sidebar-right {
         right: 0;

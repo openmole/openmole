@@ -3,7 +3,7 @@
 @import DocumentationPages._
 
 
-@h1(style := "color:#a6bf26", "Documentation")
+@h4(style := "color:#a6bf26", "Documentation")
 
 @ol(style := "list-style-type: upper-roman")
   @li

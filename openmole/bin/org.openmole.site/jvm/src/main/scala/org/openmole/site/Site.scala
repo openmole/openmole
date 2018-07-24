@@ -135,7 +135,7 @@ object Site extends App {
                 page.source.map(source ⇒ tools.linkButton("Suggest edits", tools.modificationLink(source), classIs(btn ++ btn_danger))
                 )),
               sitePage.header,
-              sitePage.element(elementClass)
+              sitePage.element(elementClass, id := "padding-element")
             ),
             sitePage match {
               case s: IntegratedPage ⇒ Seq(s.leftMenu) ++ s.rightMenu.toSeq
