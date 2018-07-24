@@ -412,19 +412,17 @@ package object client {
 
   def fileList: ModifierSeq = {
     Seq(
-      height := dom.window.innerHeight - 195, //nbElements * 21, //  <-- Select the height of the body
+      height := dom.window.innerHeight - 230, //nbElements * 21, //  <-- Select the height of the body
       absolutePosition,
       fontSize := 14,
       listStyleType := "none",
       marginTop := 50,
       paddingTop := 5,
-      paddingBottom := 30,
       marginLeft := -7,
       paddingLeft := 10,
       width := 370,
       overflowY := "auto",
-      overflowX := "hidden",
-      zIndex := -1
+      overflowX := "hidden"
     )
   }
 
