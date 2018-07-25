@@ -89,7 +89,8 @@ $> sbt publish""", "plain")
 
 An easy way to get an OpenMOLE compilation environment up and running is to use docker. Once docker is installed on your machine you can do:
 @br @hl.highlight("""
-$> git clone shared.link.openMOLEDockerBuild
+$> git clone """ + shared.link.repo.openMOLEDockerBuild +
+"""
 $> cd docker-build
 $> ./run -v /a/local/path/on/your/system
 # You should be in the docker container now, execute
