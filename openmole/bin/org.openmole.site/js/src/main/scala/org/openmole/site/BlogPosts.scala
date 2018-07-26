@@ -117,7 +117,7 @@ object BlogPosts {
   }
 
   val newsStyle = Seq(
-    backgroundColor := "#333",
+    border := "2px solid #333",
     padding := 10,
     marginTop := 5,
     borderRadius := "5px"
@@ -125,12 +125,7 @@ object BlogPosts {
 
   val titleStyle = Seq(
     textTransform := "uppercase",
-    color := "white"
-  )
-
-  val moreStyle = Seq(
-    float := "right",
-    right := 10
+    maxWidth := 400
   )
 
   def testAndAppend(id: String, element: HTMLElement): Unit = {
@@ -150,8 +145,8 @@ object BlogPosts {
         val d = bp.date.get
         val dateString = s"${d.toLocaleDateString()}"
         div(
-          span(s"$dateString: ${limitLength(bp.title)}")(titleStyle),
-          span(a(href := bp.link, target := "_blank")("Read more"))(moreStyle)
+          a(href := bp.link, target := "_blank")(s"$dateString: ${limitLength(bp.title)}")(titleStyle)
+        // span(a(href := bp.link, target := "_blank")("Read more"))(moreStyle)
         )(newsStyle)
       }
     ).render
