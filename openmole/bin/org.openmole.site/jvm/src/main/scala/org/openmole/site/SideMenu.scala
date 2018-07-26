@@ -55,7 +55,7 @@ object SideMenu {
       )
     )
 
-  def right(menus: SideMenu*) = build(menus, div(rightDetailButtons(220), id := "sidebar-right"))
+  def right(menus: SideMenu*) = build(menus, div(rightDetailButtons(200), id := "sidebar-right"))
   def left(menus: SideMenu*) = {
     build(menus, div(leftDetailButtons(200), `class` := "sidebar-left"), Some(div(id := shared.documentationSideMenu.place)))
   }
