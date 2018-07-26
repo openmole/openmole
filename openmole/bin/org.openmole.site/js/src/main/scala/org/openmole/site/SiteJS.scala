@@ -108,6 +108,6 @@ object SiteJS extends JSApp {
         }
       }
 
-    org.scalajs.dom.window.document.getElementById(shared.documentationSideMenu.place).innerHTML = div(menuContent.flatten: _*)
+    org.scalajs.dom.window.document.getElementById(shared.documentationSideMenu.place).innerHTML = div(menuContent.flatten: _*)(paddingBottom := 20)
   }
 }

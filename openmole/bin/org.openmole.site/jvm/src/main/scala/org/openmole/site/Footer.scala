@@ -36,7 +36,7 @@ object Footer {
     width := s"$ratio%"
   )
 
-  def subItem(i: TypedTag[String]) = div(paddingTop := 15)(i)
+  def subItem(i: TypedTag[String]) = div(paddingTop := 8)(i)
 
   def imgSubItem(image: FileResource, title: String, link: String, otherTab: Boolean = true) =
     subItem(
@@ -48,7 +48,7 @@ object Footer {
     )
 
   val footerColStyle = Seq(
-    paddingTop := 25,
+    paddingTop := 0,
     paddingLeft := 25,
     width := 150
   )

@@ -44,7 +44,7 @@ object SideMenu {
           m ← menus
         } yield {
           div(
-            if (m.links.isEmpty) div else div(m.preText, fontWeight := "bold", paddingTop := 20),
+            if (m.links.isEmpty) div else div(m.preText, fontWeight := "bold"),
             for {
               p ← m.links
             } yield {
@@ -56,9 +56,9 @@ object SideMenu {
     )
 
   def right(menus: SideMenu*) = build(menus, div(rightDetailButtons(220), id := "sidebar-right"))
-  def left(menus: SideMenu*) =
-    build(menus, div(leftDetailButtons(220), `class` := "sidebar-left"), Some(div(id := shared.documentationSideMenu.place)))
-
+  def left(menus: SideMenu*) = {
+    build(menus, div(leftDetailButtons(200), `class` := "sidebar-left"), Some(div(id := shared.documentationSideMenu.place)))
+  }
   implicit def pageToLink(p: Page): Link = Link(p.name, p.file)
 
   implicit def seqPagToSeqLink(ps: Seq[Page]): Seq[Link] = ps.map {

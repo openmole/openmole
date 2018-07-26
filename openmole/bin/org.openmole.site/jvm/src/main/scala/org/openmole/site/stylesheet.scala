@@ -48,13 +48,15 @@ package object stylesheet {
 
   def rightDetailButtons(topValue: Int) = Seq(
     top := topValue,
-    minWidth := 230
+    minWidth := 230,
+    lineHeight := "1em"
   )
 
   def leftDetailButtons(topValue: Int) = Seq(
     top := topValue,
     paddingRight := 50,
-    minWidth := 230
+    minWidth := 230,
+    lineHeight := "1em"
   )
 
   lazy val navigateDoc = Seq(
@@ -110,11 +112,7 @@ package object stylesheet {
   ) ++ center(100)
 
   lazy val footer = Seq(
-    paddingTop := 30,
-    paddingBottom := 20,
     position := "relative",
-    marginTop := -210,
-    minHeight := 210,
     clear := "both",
     backgroundColor := "#222",
     color := "white"
