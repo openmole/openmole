@@ -25,11 +25,7 @@
     @h5
         @a(language.title, href := language.file)
     @ol
-      @sitemap.siteMapSection(languagePages.diff(advancedPages))
-      @li
-        @a(advanced.title, href := advanced.file)
-        @ol(listStyleType := "lower-alpha")
-          @sitemap.siteMapSection(advancedPages)
+      @sitemap.siteMapSection(languagePages)
   @li
     @h5
         @a(advancedConcepts.title, href := advancedConcepts.file)
