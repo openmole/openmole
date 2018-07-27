@@ -81,7 +81,7 @@ package object client {
   lazy val fixedPosition: ModifierSeq = position := "fixed"
 
   lazy val centerElement: ModifierSeq = Seq(
-    display := "table",
+    display := "flex",
     margin := "0 auto",
     color(LIGHT_GREY)
   )
