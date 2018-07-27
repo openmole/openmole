@@ -3,26 +3,26 @@
 @import DocumentationPages._
 
 
-@h4(textAlign := "center", "Documentation")
+@h1(textAlign := "center", "Documentation")
 
 @ul( listStyleType := "none")
   @li
-    @h3
+    @h5
         @a(run.title, href := run.file)
     @ol
       @sitemap.siteMapSection(runPages)
   @li
-    @h3
+    @h5
         @a(explore.title, href := explore.file)
     @ol
       @sitemap.siteMapSection(explorePages)
   @li
-    @h3
+    @h5
         @a(scale.title, href := scale.file)
     @ol
       @sitemap.siteMapSection(scalePages)
   @li
-    @h3
+    @h5
         @a(language.title, href := language.file)
     @ol
       @sitemap.siteMapSection(languagePages.diff(advancedPages))
@@ -31,7 +31,7 @@
         @ol(listStyleType := "lower-alpha")
           @sitemap.siteMapSection(advancedPages)
   @li
-    @h3
+    @h5
         @a(advancedConcepts.title, href := advancedConcepts.file)
     @ol
       @sitemap.siteMapSection(advancedConceptsPages.diff(gaPages))
@@ -40,10 +40,10 @@
         @ol(listStyleType:= "lower-alpha")
           @sitemap.siteMapSection(gaPages)
   @li
-    @h3
+    @h5
         @a(developers.title, href := developers.file)
     @ol
       @sitemap.siteMapSection(developersPages)
-  @h3
+  @h5
     See also
   @sitemap.siteMapSection(docLonelyPages)

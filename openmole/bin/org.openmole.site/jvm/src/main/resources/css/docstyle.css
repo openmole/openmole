@@ -54,7 +54,11 @@ h2{
   text-transform: uppercase;
 }
 
-h3{color: #000;
+h3{
+  font-size:22px;
+}
+
+h5{color: #000;
   font-size: 25px;
   font-weight: 100;
   margin: 0 0 24px;
