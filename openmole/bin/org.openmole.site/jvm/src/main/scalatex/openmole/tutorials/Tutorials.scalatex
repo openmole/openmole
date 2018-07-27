@@ -11,13 +11,16 @@ Here are some tutorials to help you build your first experiments:
 
 @br
 
-@ol(style := "list-style-type: upper-roman")
+
+@ul(listStyleType := "none")
   @li
-    @a("Getting Started with OpenMOLE", href := stepByStepIntro.file)
+    @h5
+        @a("Getting Started with OpenMOLE", href := stepByStepIntro.file)
     @ol
       @sitemap.siteMapSection(gettingStartedPages)
   @li
-    @a("Using NetLogo with OpenMOLE", href := netLogoGA.file)
+    @h5
+        @a("Using NetLogo with OpenMOLE", href := netLogoGA.file)
     @ol
       @sitemap.siteMapSection(netLogoPages)
 
