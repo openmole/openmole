@@ -58,7 +58,7 @@ class JarWizardGUI(safePath: SafePath, onMethodSelected: (LaunchingCommand) ⇒ 
   val jarClasses: Var[Seq[FullClass]] = Var(Seq())
   val isOSGI: Var[Boolean] = Var(false)
 
-  OMPost()[Api].isOSGI(safePath).call().foreach {o=>
+  OMPost()[Api].isOSGI(safePath).call().foreach { o =>
     isOSGI() = o
   }
 
@@ -121,15 +121,16 @@ class JarWizardGUI(safePath: SafePath, onMethodSelected: (LaunchingCommand) ⇒ 
   )
 
   lazy val panel: TypedTag[HTMLElement] = div(
-  div(client.columnCSS)(
-      Rx{
-      if(isOSGI()) hForm(
-        div(embedAsPluginCheckBox.render)
-          .render.withLabel("Embed jar as plugin ?"),
-        span(client.modelHelp +++ client.columnCSS, "Your jar is an OSGI bundle. The best way to use it is to embed it as a plugin.").render
-      ) else div(client.modelHelp,
-        div("Your jar in not an OSGI bundle. An OSGI bundle is safer and more robust, so that we recomend you to render it as an OSGI bundle."),
-        a(href := "http://www.openmole.org/Plugins.html", target := "_blank")("How to create an OSGI bundle ?"))},
+    div(client.columnCSS)(
+      Rx {
+        if (isOSGI()) hForm(
+          div(embedAsPluginCheckBox.render)
+            .render.withLabel("Embed jar as plugin ?"),
+          span(client.modelHelp +++ client.columnCSS, "Your jar is an OSGI bundle. The best way to use it is to embed it as a plugin.").render
+        ) else div(client.modelHelp,
+          div("Your jar in not an OSGI bundle. An OSGI bundle is safer and more robust, so that we recomend you to render it as an OSGI bundle."),
+          a(href := "http://www.openmole.org/Plugin+Development.html", target := "_blank")("How to create an OSGI bundle ?"))
+      },
       h3("Classes"),
       searchClassInput.tag,
       div(tableCSS, paddingTop := 10)(
@@ -158,10 +159,18 @@ class JarWizardGUI(safePath: SafePath, onMethodSelected: (LaunchingCommand) ⇒ 
             outputs: Seq[ProtoTypePair],
             libraries: Option[String],
             resources: Resources) = {
-    val embedAsPlugin = if (embedAsPluginCheckBox.activeIndex == 0) true else false
+    val embedAsPlugin = {
+      if (isOSGI.now)
+        if (embedAsPluginCheckBox.activeIndex == 0) true else false
+      else false
+    }
 
     val plugin: Option[String] = {
-      if(embedAsPlugin) classTable.now.map{_.selected.now.map{_.values.headOption}.flatten}.flatten
+      if (embedAsPlugin) classTable.now.map {
+        _.selected.now.map {
+          _.values.headOption
+        }.flatten
+      }.flatten
       else None
     }
 
