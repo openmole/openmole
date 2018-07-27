@@ -54,8 +54,12 @@ h2{
   text-transform: uppercase;
 }
 
-h3{
-  font-size:22px;
+h3{color: #000;
+  font-size: 25px;
+  font-weight: 100;
+  margin: 0 0 24px;
+  padding-top: 50px;
+  text-transform: uppercase;
 }
 
 h1{
