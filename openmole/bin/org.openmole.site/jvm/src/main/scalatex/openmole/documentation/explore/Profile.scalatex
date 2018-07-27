@@ -83,7 +83,7 @@ The profile method can be typed  likewise:
 @div(style:="text-align:center")
                 ∀ j ∈ [1;n], y@sub{j} =min@sub{𝒙∈X@sub{@RawFrag{-i}}}@RawFrag{(M(𝒙))}
 @div(style:="text-align:center")
-                X@sub{@RawFrag{-i}}={𝒙∈𝓧@sub{1}🞩...🞩𝓧@sub{i-1}🞩{𝒙@sub{i}}🞩𝓧@sub{i+1}🞩...🞩𝓧@sub{k}}
+                X@sub{@RawFrag{-i}}={𝒙∈𝓧@sub{1} x ... x 𝓧@sub{i-1} x {𝒙@sub{i}} x 𝓧@sub{i+1} x ... x 𝓧@sub{k}}
 @br
 With M, the model, X , the Input space, Y, the output space, 𝓟(X) the power set of X ( i.e. every subset of X , including X and ∅ )
 @br
