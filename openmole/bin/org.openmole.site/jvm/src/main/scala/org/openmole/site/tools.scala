@@ -38,22 +38,6 @@ package object tools {
 
   val break = br(br)
 
-  object sect extends Section() {
-    override val headerH1 = Seq(
-      fontSize := "1.75em",
-      textAlign := "left",
-      // padding := "2.5em 1em 0"
-      margin := "30px 0 0"
-    )
-
-    override val header = Seq(
-      margin := 0,
-      color := "#333",
-      textAlign.center,
-      padding := "2.5em 2em 0"
-    )
-  }
-
   object api {
 
     def apiEntryTitle(entryName: String): Frag = Seq[Frag](b(entryName), ": ")

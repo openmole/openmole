@@ -28,7 +28,7 @@ For higher dimension input space, specific statistics techniques ensuring low di
 If you want to use design of experiments of your own you may also want to provide @a("a csv file with your samples" , href := "#CSVSampling") to OpenMOLE.
 
 @br
-By defining your own exploration task on @a("several types of input", href := anchor(severalInputs)), you will be able to highlight some of your model inner properties like those revealed by @a("sensitivity analysis", href:=Link.intern(shared.simpleSAFireMenu.sensitivityAnalysis)), as shown in a toy example on a @a("real world example", href:=Link.intern(shared.simpleSAFireMenu.sensitivityFireModel))
+By defining your own exploration task on @a("several types of input", href := anchor(severalInputs)), you will be able to highlight some of your model inner properties like those revealed by @a("sensitivity analysis", href:=Link.intern("Sensitivity analysis")), as shown in a toy example on a @a("real world example", href:=Link.intern("Real world Example"))
 
 
 @h2{@gridSampling}

@@ -42,34 +42,8 @@ package object shared {
     val animation = "startSensitivityAnim"
   }
 
-  object faq {
-    lazy val javaVersion = "Which Java version should I use?"
-    lazy val oldVersions = "Where can I find the old versions of OpenMOLE?"
-    lazy val sshConnectionBug = "OpenMOLE cannot connect to my environment using SSH"
-    lazy val passwordAuthentication = "Password authentication"
-    lazy val isOpenMOLEup = "Is OpenMOLE doing something?"
-    lazy val homeQuota = "I've reached my home folder size / file quota"
-    lazy val sampleError = "My sampling generates a type error"
-    lazy val cannotGetCare = "I can't get CARE / PRoot to work"
-    lazy val tooManyOpenFiles = "I get an error relate to file on linux and there is 'too many open files' written somewhere in the error"
-    lazy val qxcbConnection = "My workflow fails with QXcbConnection: Could not connect to display"
-    lazy val pathOverFile = "When shall I use Path over File?"
-    lazy val notListed = "My problem is not listed here"
-  }
-
-  object nativeModel {
-    lazy val rExample = "An example with R"
-    lazy val pythonExample = "Another example with Python"
-    lazy val advancedOptions = "Advanced options"
-  }
-
   object rTask {
     lazy val rVersion = "3.3.3"
-  }
-
-  object simpleSAFireMenu {
-    lazy val sensitivityAnalysis = "Sensitivity Analysis"
-    lazy val sensitivityFireModel = "Real world Example"
   }
 
   object documentationSideMenu {
