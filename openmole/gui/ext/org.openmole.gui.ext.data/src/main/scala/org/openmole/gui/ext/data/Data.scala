@@ -803,7 +803,7 @@ object Test {
 
 case class JVMInfos(javaVersion: String, jvmImplementation: String, processorAvailable: Int, allocatedMemory: Long, totalMemory: Long)
 
-case class SequenceData(header: Seq[String], content: Seq[Array[String]])
+case class SequenceData(header: Seq[String] = Seq(), content: Seq[Array[String]]= Seq())
 
 case class WizardModelData(
                             vals: String,

@@ -291,7 +291,9 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     val reader = new CSVReader(new FileReader(safePath), ',')
     val content = reader.readAll.asScala.toSeq
-    SequenceData(content.head, content.tail)
+    content.headOption.map { c ⇒
+      SequenceData(c, content.tail)
+    }.getOrElse(SequenceData())
   }
 
   // EXECUTIONS
