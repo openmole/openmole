@@ -40,7 +40,8 @@ These examples are more about how to do things the OpenMOLE way.
 
 The market place is accessible through this @aa("repository", href := shared.link.repo.market) or directly from the GUI application (@i{New Project > From Market Place}).
 Clicking on a project allows to download it in the application and run it instantly!
-
+@br
+@a("More informations", href := market.file)
 @img(src := Resource.img.guiGuide.market.file, center(95))
 
 
