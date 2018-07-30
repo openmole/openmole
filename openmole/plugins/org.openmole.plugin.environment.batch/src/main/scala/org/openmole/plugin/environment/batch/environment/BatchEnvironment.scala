@@ -186,6 +186,7 @@ object BatchEnvironment extends JavaLogger {
 
   def finishedExecutionJob(environment: BatchEnvironment, job: BatchExecutionJob) = {
     ExecutionJobRegistry.finished(environment.registry, job, environment)
+    environment.finishedJob(job)
   }
 
   def numberOfExecutionJobs(environment: BatchEnvironment, job: Job) = {
@@ -265,6 +266,8 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
   def running: Long = jobs.count { _.state == ExecutionState.RUNNING }
 
   def runtimeSettings = RuntimeSettings(archiveResult = false)
+
+  def finishedJob(job: ExecutionJob) = {}
 }
 
 class BatchExecutionJob(val job: Job, val environment: BatchEnvironment) extends ExecutionJob { bej ⇒

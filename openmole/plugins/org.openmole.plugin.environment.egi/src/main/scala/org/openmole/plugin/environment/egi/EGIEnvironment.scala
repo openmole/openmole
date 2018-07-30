@@ -27,14 +27,17 @@ import org.openmole.core.threadprovider.Updater
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, SerializedJob, UpdateInterval, UsageControl }
 import org.openmole.plugin.environment.batch.jobservice.{ BatchJob, BatchJobService, JobServiceInterface }
-import org.openmole.plugin.environment.batch.refresh.{ JobManager }
+import org.openmole.plugin.environment.batch.refresh.JobManager
 import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageService }
 import org.openmole.plugin.environment.egi.EGIEnvironment.WebDavLocation
 import org.openmole.tool.crypto.Cypher
 import org.openmole.core.workflow.execution._
+import org.openmole.core.workflow.job.Job
 import squants._
 import squants.information._
 
+import scala.collection.immutable.TreeSet
+import scala.collection.mutable.{ HashMap, MultiMap, Set }
 import scala.ref.WeakReference
 
 //import java.net.URI
@@ -67,16 +70,10 @@ object EGIEnvironment extends JavaLogger {
   val VOInformationSite = ConfigurationLocation("EGIEnvironment", "VOInformationSite", Some("http://operations-portal.egi.eu/xml/voIDCard/public/all/true"))
   val VOCardDownloadTimeOut = ConfigurationLocation("EGIEnvironment", "VOCardDownloadTimeOut", Some(2 minutes))
   val VOCardCacheTime = ConfigurationLocation("EGIEnvironment", "VOCardCacheTime", Some(6 hours))
-  //
-  val EagerSubmissionInterval = ConfigurationLocation("EGIEnvironment", "EagerSubmissionInterval", Some(2 minutes))
+
   val EagerSubmissionMinNumberOfJobs = ConfigurationLocation("EGIEnvironment", "EagerSubmissionMinNumberOfJobs", Some(100))
-  val RunningHistoryDuration = ConfigurationLocation("EGIEnvironment", "RunningHistoryDuration", Some(6 hours))
-  val EagerSubmissionThreshold = ConfigurationLocation("EGIEnvironment", "EagerSubmissionThreshold", Some(0.1))
   val EagerSubmissionNumberOfJobs = ConfigurationLocation("EGIEnvironment", "EagerSubmissionNumberOfJobs", Some(3))
 
-  //  val EagerSubmissionNbSampling = ConfigurationLocation("EGIEnvironment", "EagerSubmissionNbSampling", Some(10))
-  //  val EagerSubmissionSamplingWindowFactor = ConfigurationLocation("EGIEnvironment", "EagerSubmissionSamplingWindowFactor", Some(5))
-  //
   //  val ConnectionsBySRMSE = ConfigurationLocation("EGIEnvironment", "ConnectionsSRMSE", Some(10))
   val ConnexionsByWebDAVSE = ConfigurationLocation("EGIEnvironment", "ConnectionsByWebDAVSE", Some(100))
   val ConnectionsToDIRAC = ConfigurationLocation("EGIEnvironment", "ConnectionsToDIRAC", Some(10))
@@ -101,12 +98,6 @@ object EGIEnvironment extends JavaLogger {
   val StorageTimeFactor = ConfigurationLocation("EGIEnvironment", "StorageTimeFactor", Some(1.0))
   //    val StorageAvailabilityFactor = ConfigurationLocation("EGIEnvironment", "StorageAvailabilityFactor", Some(10.0))
   val StorageSuccessRateFactor = ConfigurationLocation("EGIEnvironment", "StorageSuccessRateFactor", Some(10.0))
-
-  //  val JobServiceJobFactor = ConfigurationLocation("EGIEnvironment", "JobServiceSizeFactor", Some(1.0))
-  //  val JobServiceTimeFactor = ConfigurationLocation("EGIEnvironment", "JobServiceTimeFactor", Some(10.0))
-  //  val JobServiceAvailabilityFactor = ConfigurationLocation("EGIEnvironment", "JobServiceAvailabilityFactor", Some(10.0))
-  //  val JobServiceSuccessRateFactor = ConfigurationLocation("EGIEnvironment", "JobServiceSuccessRateFactor", Some(1.0))
-  //
 
   val DiracConnectionTimeout = ConfigurationLocation("EGIEnvironment", "DiracConnectionTimeout", Some(1 minutes))
   val VOMSTimeout = ConfigurationLocation("EGIEnvironment", "VOMSTimeout", Some(1 minutes))
@@ -141,48 +132,56 @@ object EGIEnvironment extends JavaLogger {
     override def stdOutErr(env: EGIEnvironment[A], j: J) = env.stdOutErr(j)
   }
 
-  //  val EnvironmentCleaningThreads = ConfigurationLocation("EGIEnvironment", "EnvironmentCleaningThreads", Some(20))
-  //
-  //  val WMSRank = ConfigurationLocation("EGIEnvironment", "WMSRank", Some("""( other.GlueCEStateFreeJobSlots > 0 ? other.GlueCEStateFreeJobSlots : (-other.GlueCEStateWaitingJobs * 4 / ( other.GlueCEStateRunningJobs + 1 )) - 1 )"""))
-  //
+  def eagerSubmit(environment: EGIEnvironment[_])(implicit preference: Preference) = {
+    val jobs = environment.jobs
+    val jobSize = jobs.size
 
-  //
-  //  def normalizedFitness[T](fitness: ⇒ Iterable[(T, Double)], min: Double): Iterable[(T, Double)] = {
-  //    def orMinForExploration(v: Double) = math.max(v, min)
-  //    val fit = fitness
-  //    val maxFit = fit.map(_._2).max
-  //    if (maxFit < min) fit.map { case (c, _) ⇒ c → min }
-  //    else fit.map { case (c, f) ⇒ c → orMinForExploration(f / maxFit) }
-  //  }
+    val minOversub = preference(EGIEnvironment.EagerSubmissionMinNumberOfJobs)
+    val numberOfSimultaneousExecutionForAJob = preference(EGIEnvironment.EagerSubmissionNumberOfJobs)
 
-  //      def select[BS <: { def usageControl: AvailabilityQuality }](bss: List[BS], rate: BS ⇒ Double)(implicit preference: Preference, randomProvider: RandomProvider): Option[(BS, AccessToken)] =
-  //        bss match {
-  //          case Nil       ⇒ throw new InternalProcessingError("Cannot accept empty list.")
-  //          case bs :: Nil ⇒ bs.tryGetToken.map(bs → _)
-  //          case bss ⇒
-  //            val (empty, nonEmpty) = bss.partition(_.usageControl.isEmpty)
-  //
-  //            def emptyFitness = empty.map { _ → 0.0 }
-  //            def nonEmptyFitness = for { cur ← nonEmpty } yield cur → rate(cur)
-  //            def fitness = nonEmptyFitness ++ emptyFitness
-  //
-  //            @tailrec def selected(value: Double, jobServices: List[(BS, Double)]): BS =
-  //              jobServices match {
-  //                case Nil                  ⇒ throw new InternalProcessingError("List should never be empty.")
-  //                case (bs, fitness) :: Nil ⇒ bs
-  //                case (bs, fitness) :: tail ⇒
-  //                  if (value <= fitness) bs
-  //                  else selected(value - fitness, tail)
-  //              }
-  //
-  //            val notLoaded = normalizedFitness(fitness, preference(EGIEnvironment.MinValueForSelectionExploration)).shuffled(randomProvider())
-  //            val totalFitness = notLoaded.map { case (_, fitness) ⇒ fitness }.sum
-  //
-  //            val selectedBS = selected(randomProvider().nextDouble * totalFitness, notLoaded.toList)
-  //
-  //            selectedBS.tryGetToken.map(selectedBS → _)
-  //        }
-  //
+    var nbRessub = if (jobSize < minOversub) minOversub - jobSize else 0
+    lazy val executionJobs = jobs.groupBy(_.job)
+
+    if (nbRessub > 0) {
+      // Resubmit nbRessub jobs in a fair manner
+      val order = new HashMap[Int, Set[Job]] with MultiMap[Int, Job]
+      var keys = new TreeSet[Int]
+
+      for (job ← executionJobs.keys) {
+        val nb = executionJobs(job).size
+        if (nb < numberOfSimultaneousExecutionForAJob) {
+          order.addBinding(nb, job)
+          keys += nb
+        }
+      }
+
+      if (!keys.isEmpty) {
+        while (nbRessub > 0 && keys.head < numberOfSimultaneousExecutionForAJob) {
+          val key = keys.head
+          val jobs = order(keys.head)
+          val job =
+            jobs.find(j ⇒ executionJobs(j).isEmpty) match {
+              case Some(j) ⇒ j
+              case None ⇒
+                jobs.find(j ⇒ !executionJobs(j).exists(_.state != ExecutionState.SUBMITTED)) match {
+                  case Some(j) ⇒ j
+                  case None    ⇒ jobs.head
+                }
+            }
+
+          environment.submit(job)
+
+          order.removeBinding(key, job)
+          if (jobs.isEmpty) keys -= key
+
+          order.addBinding(key + 1, job)
+          keys += (key + 1)
+          nbRessub -= 1
+        }
+      }
+    }
+  }
+
   def apply(
     voName:         String,
     service:        OptionalArgument[String]      = None,
@@ -231,8 +230,6 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
   import services._
 
-  lazy val eagerSubmissionAgent = new EagerSubmissionAgent(WeakReference(this))
-
   implicit val interpreters = EGI()
   import interpreters._
 
@@ -248,12 +245,10 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
   override def start() = {
     proxyCache()
-    Updater.delay(eagerSubmissionAgent)
     BatchEnvironment.start(this)
   }
 
   override def stop() = {
-    eagerSubmissionAgent.stop = true
     def usageControls = storages().map(_._2.usageControl) ++ List(batchJobService.usageControl)
     BatchEnvironment.clean(this, usageControls)
   }
@@ -421,6 +416,8 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     }
   }
 
+  override def finishedJob(job: ExecutionJob): Unit = EGIEnvironment.eagerSubmit(this)
+
   lazy val jobStateCache = TimeCache { () ⇒
     val states = gridscale.dirac.queryState(diracService, tokenCache(), groupId = Some(diracJobGroup))
     states.toMap -> preference(EGIEnvironment.JobGroupRefreshInterval)
@@ -431,8 +428,9 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     org.openmole.plugin.environment.gridscale.GridScaleJobService.translateStatus(state)
   }
 
-  def delete(id: gridscale.dirac.JobID) =
+  def delete(id: gridscale.dirac.JobID) = {
     gridscale.dirac.delete(diracService, tokenCache(), id) //clean(LocalHost(), id)
+  }
 
   def stdOutErr(id: gridscale.dirac.JobID) = newFile.withTmpDir { tmpDir ⇒
     import org.openmole.tool.file._
