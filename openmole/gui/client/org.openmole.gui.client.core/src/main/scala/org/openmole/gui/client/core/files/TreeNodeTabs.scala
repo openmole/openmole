@@ -346,6 +346,7 @@ class TreeNodeTabs() {
       _ == tab
     }
     tabs() = newTabs
+    if (tabs.now.isEmpty) temporaryControl() = div()
     newTabs.lastOption.map { t ⇒
       setActive(t)
     }

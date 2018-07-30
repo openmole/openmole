@@ -140,9 +140,7 @@ object ScriptClient {
 
       val actionItem = navItem(div(
         Rx {
-          div(
-            treeNodeTabs.temporaryControl(): _*
-          )
+          treeNodeTabs.temporaryControl()
         }).render)
 
       dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
