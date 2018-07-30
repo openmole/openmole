@@ -265,6 +265,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     treeNodePanel.treeWarning() = true
     treeNodePanel.turnSelectionTo(false)
     selectedTool() = None
+    treeNodePanel.drawTree
   }
 
   val deleteButton = button("Delete", btn_danger, onclick := { () ⇒
