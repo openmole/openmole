@@ -82,7 +82,8 @@ package object client {
 
   lazy val centerElement: ModifierSeq = Seq(
     display := "flex",
-    margin := "0 auto",
+    justifyContent := "center",
+    //margin := "0 auto",
     color(LIGHT_GREY)
   )
 

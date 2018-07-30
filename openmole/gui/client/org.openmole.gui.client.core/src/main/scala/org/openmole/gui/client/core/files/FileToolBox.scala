@@ -54,7 +54,7 @@ class FileToolBox(initSafePath: SafePath) {
 
   import scaladget.tools._
 
-  val baseGlyph = ms("glyphitem") +++ omsheet.color(DARK_GREY) +++ Seq(marginTop := 3, padding := 5)
+  val baseGlyph = ms("glyphitem") +++ omsheet.color(DARK_GREY) +++ Seq(padding := 5)
   val trash = baseGlyph +++ glyph_trash
   val edit = baseGlyph +++ glyph_edit
   val download_alt = baseGlyph +++ glyph_download_alt
