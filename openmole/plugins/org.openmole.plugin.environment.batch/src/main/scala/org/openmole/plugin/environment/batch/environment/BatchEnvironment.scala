@@ -163,7 +163,6 @@ object BatchEnvironment extends JavaLogger {
   def start(environment: BatchEnvironment) = {}
 
   def clean(environment: BatchEnvironment, usageControls: Seq[UsageControl])(implicit services: BatchEnvironment.Services) = {
-    //environment.batchJobWatcher.stop = true
     val environmentJobs = environment.jobs
     environmentJobs.foreach(_.state = ExecutionState.KILLED)
 
@@ -200,7 +199,7 @@ object BatchEnvironment extends JavaLogger {
 
     def finished(registry: ExecutionJobRegistry, job: Job, environment: BatchEnvironment) = registry.synchronized {
       def removeJob(registry: ExecutionJobRegistry, job: Job) = {
-        val (newExecutionJobs, removed) = registry.executionJobs.span(_.job != job)
+        val (newExecutionJobs, removed) = registry.executionJobs.partition(_.job != job)
         registry.executionJobs = newExecutionJobs
         removed
       }
