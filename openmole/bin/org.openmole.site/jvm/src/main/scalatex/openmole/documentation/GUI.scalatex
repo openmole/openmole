@@ -127,6 +127,14 @@ The tool area at the top concerns the current folder and provides with
 @break
 
 Then, each file on each line has a settings button permitting for @b{cloning} the current file, @b{downloading} it, @b{editing} its name or @b{removing} it.
+Other actions are available depending on the context (ie the file extension):
+@ul
+    @li
+        @b{run} for .oms file in order to run file without editing it.
+    @li
+        @b{extract} for archives in order to produce a directory from an archive file.
+    @li
+        @b{to OMS} for code source potentially carried by a Task (.jar, nlogo, .py, etc). It starts the model wizard.
 
 @h2{Play and monitor executions}
 
