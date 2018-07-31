@@ -84,7 +84,11 @@ object JobManager extends JavaLogger { self ⇒
 
     case Kill(job) ⇒
       job.state = ExecutionState.KILLED
+      BatchEnvironment.finishedExecutionJob(job.environment, job)
       killAndClean(job)
+
+      if (!job.job.finished && BatchEnvironment.numberOfExecutionJobs(job.environment, job.job) == 0)
+        job.environment.submit(job.job)
 
     case Resubmit(job, storage) ⇒
       killAndClean(job)

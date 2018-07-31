@@ -50,6 +50,7 @@ object GetResultActor extends JavaLogger {
       case Some(token) ⇒
         try {
           getResult(sj.storage, resultPath, job)(token, services)
+          if (job.job.finished) BatchEnvironment.finishedJob(job.environment, job.job)
           JobManager ! Kill(job)
         }
         catch {
