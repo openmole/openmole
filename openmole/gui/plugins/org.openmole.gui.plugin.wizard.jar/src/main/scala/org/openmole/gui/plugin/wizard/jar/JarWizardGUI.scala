@@ -63,8 +63,8 @@ class JarWizardGUI(safePath: SafePath, onMethodSelected: (LaunchingCommand) ⇒ 
   }
 
   lazy val embedAsPluginCheckBox: SelectableButtons = radios()(
-    selectableButton("Yes", onclick = () ⇒ println("YES")),
-    selectableButton("No", onclick = () ⇒ println("NO"))
+    selectableButton("Yes", onclick = () ⇒ {}),
+    selectableButton("No", onclick = () ⇒ {})
   )
 
   val classTable: Var[Option[scaladget.bootstrapnative.DataTable]] = Var(None)

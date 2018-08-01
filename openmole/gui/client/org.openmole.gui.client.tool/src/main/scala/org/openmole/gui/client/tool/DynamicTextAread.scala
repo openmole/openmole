@@ -11,7 +11,6 @@ object DynamicScrolledTextArea {
   def apply(content: Rx[String]) = {
     textarea(
       Rx {
-        println("RX content")
         span(
           content()
         )
