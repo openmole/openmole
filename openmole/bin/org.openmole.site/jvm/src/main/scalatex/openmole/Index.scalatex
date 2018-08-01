@@ -32,7 +32,7 @@
     @br
         Likewise, outputs can be values are most of times @b{measures}, computed on the dynamics produced by a simulation run  (e.g. fitness or error functions).
     @br
-        In the following, we will refer to @b{input space} and @b{output space}. OpenMOLE provides methods to conveniently explore these spaces and help you answer original questions about your model (cf. TODO link explore)
+        In the following, we will refer to @b{input space} and @b{output space}. OpenMOLE provides methods to conveniently @a("explore", href := explore.file) these spaces and help you answer original questions about your model.
     @br
         The resulting output of a simulation, for a given input, will sometimes be referred as the @b{image} of the input.
         Likewise, the parameters corresponding to an image are called @b{origins} or @b{ancestors}.
