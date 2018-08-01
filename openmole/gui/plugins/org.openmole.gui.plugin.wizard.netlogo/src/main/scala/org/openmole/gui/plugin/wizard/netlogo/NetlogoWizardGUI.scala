@@ -55,8 +55,8 @@ class NetlogoWizardGUI extends WizardGUIPlugin {
   def factory = new NetlogoWizardFactory
 
   lazy val embedWorkspaceCheckBox: SelectableButtons = radios()(
-    selectableButton("Yes", onclick = () ⇒ println("YES")),
-    selectableButton("No", onclick = () ⇒ println("NO"))
+    selectableButton("Yes", onclick = () ⇒ {}),
+    selectableButton("No", onclick = () ⇒ {})
   )
 
   lazy val panel: TypedTag[HTMLElement] = div(

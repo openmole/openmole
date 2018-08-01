@@ -47,10 +47,6 @@ import scala.concurrent.Future
 class ModelWizardPanel {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
-  println("Wizards " + Plugins.wizardFactories.now.map {
-    _.name
-  })
-
   sealed trait VariableRole[T] {
     def content: T
 

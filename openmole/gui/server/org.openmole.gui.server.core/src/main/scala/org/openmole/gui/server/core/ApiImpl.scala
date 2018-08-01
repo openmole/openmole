@@ -377,7 +377,6 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   def runningErrorEnvironmentData(environmentId: EnvironmentId, lines: Int): EnvironmentErrorData = atomic { implicit ctx ⇒
     val environmentErrors = execution.environementErrors(environmentId)
 
-    println("ENV error size " + environmentErrors.length)
     def groupedErrors = environmentErrors.groupBy {
       _.errorMessage
     }.toSeq.map {

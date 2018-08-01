@@ -168,9 +168,7 @@ class FileToolBox(initSafePath: SafePath) {
               Popover.hide
             }
             true
-          case _ ⇒
-            println("unknown")
-            false
+          case _ ⇒ false
         }
       }
       else false

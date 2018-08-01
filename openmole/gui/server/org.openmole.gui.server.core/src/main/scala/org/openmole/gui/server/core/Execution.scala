@@ -194,7 +194,6 @@ class Execution {
     val info = errorMap(environmentId)
 
     info.environment.errors.map { ex ⇒
-      println("ERROR " + ex.exception.getMessage)
       EnvironmentError(environmentId, ex.exception.getMessage, ErrorBuilder(ex.exception), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
     }
   }
