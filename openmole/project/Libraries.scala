@@ -43,6 +43,7 @@ object Libraries {
   lazy val sourcecodeJS = libraryDependencies += "com.lihaoyi" %%% "sourcecode" % sourcecodeVersion
   lazy val scalajsMarked = libraryDependencies += "com.github.karasiq" %%% "scalajs-marked" % "1.0.2"
   lazy val htmlparser2 = libraryDependencies += "com.definitelyscala" %%% "scala-js-htmlparser2" % "1.0.2"
+  lazy val plotlyJS =  libraryDependencies += "com.definitelyscala" %%% "scala-js-plotlyjs" % "1.1.4"
 
   lazy val scalatest = "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 

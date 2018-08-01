@@ -21,6 +21,9 @@ import org.openmole.gui.ext.tool.client.FileManager
 import DataUtils._
 import net.scalapro.sortable._
 import org.openmole.gui.client.core.files.TreeNodeTab.{ EditableView, RowFilter }
+import org.openmole.gui.client.tool.plot._
+import org.openmole.gui.client.tool.plot.Tools._
+import scaladget.bootstrapnative.DataTable
 
 import scala.scalajs.js.timers._
 
@@ -141,6 +144,10 @@ object TreeNodeTab {
     override def toString = "Table"
   }
 
+  object Plot extends EditableView {
+    override def toString = "Plot"
+  }
+
   sealed trait RowFilter
 
   object First100 extends RowFilter
@@ -149,7 +156,14 @@ object TreeNodeTab {
 
   object All extends RowFilter
 
-  def editable(safePath: SafePath, initialContent: String, initialSequence: SequenceData, view: EditableView = Raw, initialEditing: Boolean = false, filter: RowFilter = First100): TreeNodeTab = new TreeNodeTab {
+  def editable(
+    safePath:        SafePath,
+    initialContent:  String,
+    initialSequence: SequenceData,
+    view:            EditableView = Raw,
+    initialEditing:  Boolean      = false,
+    filter:          RowFilter    = First100,
+    axis:            (Int, Int)   = (0, 1)): TreeNodeTab = new TreeNodeTab {
     lazy val safePathTab = Var(safePath)
     lazy val isEditing = Var(initialEditing)
 
@@ -229,40 +243,56 @@ object TreeNodeTab {
       case _     ⇒ Table.toString
     }
 
-    def switchView = {
+    def switchView(newView: EditableView) = {
 
-      def switch(newView: EditableView) = panels.treeNodeTabs.switchEditableTo(this, sequence.now, newView, filter, editing)
+      def switch = panels.treeNodeTabs.switchEditableTo(this, sequence.now, newView, filter, editing, axis)
 
-      view match {
-        case Table ⇒
-          switch(Raw)
+      newView match {
+        case Table | Plot ⇒
+          switch
         case _ ⇒
           if (editing)
             refresh(() ⇒ {
-              download(() ⇒ switch(Table))
+              download(() ⇒ switch)
             })
-          else switch(Table)
+          else switch
       }
     }
 
-    def toView(filter: RowFilter) = panels.treeNodeTabs.switchEditableTo(this, sequence.now, view, filter, editing)
+    def toView(filter: RowFilter) = panels.treeNodeTabs.switchEditableTo(this, sequence.now, view, filter, editing, axis)
 
-    lazy val switchButton = button(switchString, btn_default, margin := 20, onclick := { () ⇒
-      switchView
-    })
+    def toView(newAxis: (Int, Int)) = panels.treeNodeTabs.switchEditableTo(this, sequence.now, view, filter, editing, newAxis)
 
-    lazy val filterRadios = radios()(
+    lazy val switchButton = radios(margin := 20)(
+      selectableButton("Raw", view == Raw, onclick = () ⇒ switchView(Raw)),
+      selectableButton("Table", view == Table, onclick = () ⇒ switchView(Table)),
+      selectableButton("Plot", view == Plot, onclick = () ⇒ switchView(Plot))
+    )
+
+    lazy val filterRadios = radios(marginLeft := 40)(
       selectableButton("First 100", filter == First100, onclick = () ⇒ toView(First100)),
       selectableButton("Last 100", filter == Last100, onclick = () ⇒ toView(Last100)),
       selectableButton("All", filter == All, modifierSeq = btn_danger, onclick = () ⇒ toView(All))
     )
 
+    lazy val axisCheckBoxes = checkboxes(margin := 20)(
+      (for (
+        a ← sequence.now.header.zipWithIndex
+      ) yield {
+        selectableButton(a._1, axis._1 == a._2 || axis._2 == a._2, onclick = () ⇒ toView((axis._2, a._2)))
+      }): _*
+    )
+
     lazy val block: TypedTag[_ <: HTMLElement] = {
       div(
         if (isCSV) {
-          scalatags.JsDom.all.span(switchButton, view match {
+          scalatags.JsDom.all.span(switchButton.render, view match {
             case Table ⇒ filterRadios.render
-            case _     ⇒ div.render
+            case Plot ⇒ div(
+              filterRadios.render,
+              axisCheckBoxes.render
+            )
+            case _ ⇒ div.render
           })
         }
         else div,
@@ -278,12 +308,33 @@ object TreeNodeTab {
                         scaladget.bootstrapnative.DataTable.DataRow(_)
                       }.toSeq,
                       scaladget.bootstrapnative.Table.BSTableStyle(bordered_table, emptyMod), true)
-                  table.render(minWidth := sequence.now.header.length * 90)
+                  table.render(width := sequence.now.header.length * 90)
                 }
                 else div()
               }
             )
-          case _ ⇒ editorView
+          case Raw ⇒ editorView
+          case _ ⇒
+            if (filteredSequence.size > 0) {
+              if (filteredSequence.head.length > Math.max(axis._1, axis._2)) {
+                val dataRow = filteredSequence.map {
+                  scaladget.bootstrapnative.DataTable.DataRow(_)
+                }.toSeq
+                val col1 = DataTable.column(axis._1, dataRow)
+                val col2 = DataTable.column(axis._2, dataRow)
+                val xyplot = XYPlot(
+                  xaxisTitle = axis._1.toString,
+                  yaxisTitle = axis._2.toString,
+                  series = Seq(Serie(
+                    x = col1.values.toArray,
+                    y = col2.values.toArray
+                  ))
+                )
+                xyplot
+              }
+              else div("No plot to display")
+            }
+            else div("No plot to display")
         }
       )
     }
@@ -360,7 +411,7 @@ class TreeNodeTabs() {
     }
   }
 
-  def switchEditableTo(tab: TreeNodeTab, sequence: SequenceData, editableView: EditableView, filter: RowFilter, editing: Boolean) = {
+  def switchEditableTo(tab: TreeNodeTab, sequence: SequenceData, editableView: EditableView, filter: RowFilter, editing: Boolean, axis: (Int, Int)) = {
     val index = {
       val i = tabs.now.indexOf(tab)
       if (i == -1) tabs.now.size
@@ -369,7 +420,7 @@ class TreeNodeTabs() {
 
     removeTab(tab)
 
-    val newTab = TreeNodeTab.editable(tab.safePathTab.now, tab.content, sequence, editableView, editing, filter)
+    val newTab = TreeNodeTab.editable(tab.safePathTab.now, tab.content, sequence, editableView, editing, filter, axis)
     tabs() = tabs.now.take(index) ++ Seq(newTab) ++ tabs.now.takeRight(tabs.now.size - index)
 
     setActive(newTab)

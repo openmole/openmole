@@ -601,11 +601,12 @@ lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") e
   (sharedGUI, clientToolGUI, market, dataGUI, extClientTool) settings(
   libraryDependencies += Libraries.async,
   npmDeps in Compile += Dep("ace-builds", "1.2.9", List("mode-scala.js", "theme-github.js"), true),
-  npmDeps in Compile += Dep("sortablejs", "1.7.0", List("Sortable.min.js"))
+  npmDeps in Compile += Dep("sortablejs", "1.7.0", List("Sortable.min.js")),
+  npmDeps in Compile += Dep("plotly.js", "1.31.0", List("plotly-basic.min.js"))
 ) settings (defaultSettings: _*)
 
 
-lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool", privatePackages = Seq("autowire.*", "boopickle.*", "sourcecode.*", "rx.*", "org.scalajs.dom.*", "scalatags.*", "scaladget.*", "net.scalapro.sortable.*")) enablePlugins (ScalaJSPlugin) dependsOn (workspace) settings(
+lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool", privatePackages = Seq("autowire.*", "boopickle.*", "sourcecode.*", "rx.*", "org.scalajs.dom.*", "scalatags.*", "scaladget.*", "net.scalapro.sortable.*", "com.definitelyscala.plotlyjs.*", "org.querki.jsext.*")) enablePlugins (ScalaJSPlugin) dependsOn (workspace) settings(
   Libraries.autowireJS,
   Libraries.boopickleJS,
   Libraries.scalajsDomJS,
@@ -614,7 +615,8 @@ lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool
   Libraries.bootstrapnative,
   Libraries.scaladgetTools,
   Libraries.rxJS,
-  Libraries.sortable) dependsOn (extClientTool) settings (defaultSettings: _*)
+  Libraries.sortable,
+  Libraries.plotlyJS) dependsOn (extClientTool) settings (defaultSettings: _*)
 
 
 /* -------------------------- Server ----------------------- */
