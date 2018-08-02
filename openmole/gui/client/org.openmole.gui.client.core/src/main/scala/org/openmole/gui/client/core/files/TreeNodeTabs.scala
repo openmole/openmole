@@ -233,10 +233,12 @@ object TreeNodeTab {
       div(
         Rx {
           if (isEditing()) div()
-          else
+          else if (view == Raw) {
             button("Edit", btn_primary, onclick := { () ⇒
               isEditing() = !isEditing.now
             })
+          }
+          else div()
         }
       )
 
@@ -253,6 +255,7 @@ object TreeNodeTab {
 
       newView match {
         case Table | Plot ⇒
+          isEditing() = false
           switch
         case _ ⇒
           if (editing)
