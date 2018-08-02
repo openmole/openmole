@@ -189,7 +189,7 @@ background-color : #222;
 }
 
 #main-content, .sidebar-left, #sidebar-right, #footer {
-    padding:20px;
+    padding:30px;
     width: 100%;
     float: left;
 }
@@ -232,7 +232,7 @@ background-color : #222;
 
     #sidebar-right {
         text-align: left;
-        padding-eft : 50px;
+        padding-left : 30px;
         width: 25%;
         float: left;
     }
