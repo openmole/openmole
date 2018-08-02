@@ -297,15 +297,15 @@ object TreeNodeTab {
     lazy val block: TypedTag[_ <: HTMLElement] = {
       div(
         if (isCSV) {
-          scalatags.JsDom.all.span(switchButton.render, view match {
-            case Table ⇒ filterRadios.render
-            case Plot ⇒ div(
-              filterRadios.render,
-              plotModeRadios.render,
-              axisCheckBoxes.render
-            )
-            case _ ⇒ div.render
-          })
+          view match {
+            case Table ⇒ div(switchButton.render, filterRadios.render)
+            case Plot ⇒
+              div(
+                div(switchButton.render, filterRadios.render, plotModeRadios.render),
+                axisCheckBoxes.render
+              )
+            case _ ⇒ div(switchButton.render, div.render)
+          }
         }
         else div,
         view match {
