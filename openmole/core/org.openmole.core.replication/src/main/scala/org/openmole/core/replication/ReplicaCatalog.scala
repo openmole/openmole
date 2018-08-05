@@ -66,8 +66,6 @@ class ReplicaCatalog(database: Database, preference: Preference) {
   import ReplicaCatalog.Log._
   import ReplicaCatalog._
 
-  lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
-
   def query[T](f: DBIOAction[T, slick.dbio.NoStream, scala.Nothing]): T = Await.result(database.run(f), concurrent.duration.Duration.Inf)
 
   lazy val localLock = new LockRepository[ReplicaCacheKey]
@@ -210,12 +208,6 @@ class ReplicaCatalog(database: Database, preference: Preference) {
     query { q.delete }
 
     replica.foreach { r ⇒ replicaCache.invalidate(cacheKey(r)) }
-  }
-
-  def timeOfPersistent(name: String) = {
-    val matcher = replicationPattern.matcher(name)
-    if (!matcher.matches) None
-    else Try(matcher.group(1).toLong).toOption
   }
 
 }

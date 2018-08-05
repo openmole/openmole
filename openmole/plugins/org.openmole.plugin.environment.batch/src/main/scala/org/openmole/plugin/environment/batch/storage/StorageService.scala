@@ -19,6 +19,7 @@ package org.openmole.plugin.environment.batch.storage
 
 import java.io._
 import java.util.concurrent.{ Callable, TimeUnit, TimeoutException }
+import java.util.regex.Pattern
 
 import com.google.common.cache.CacheBuilder
 import gridscale._
@@ -34,6 +35,7 @@ import org.openmole.tool.logger.JavaLogger
 import squants.time.TimeConversions._
 
 import scala.ref.WeakReference
+import scala.util.Try
 
 object StorageService extends JavaLogger {
   val DirRegenerate = ConfigurationLocation("StorageService", "DirRegenerate", Some(1 hours))
@@ -63,6 +65,13 @@ object StorageService extends JavaLogger {
     val storage = new StorageService[S](s, root, id, environment, remoteStorage, usageControl, isConnectionError)
     startGC(storage)
     storage
+  }
+
+  lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
+  def extractTimeFromName(name: String) = {
+    val matcher = replicationPattern.matcher(name)
+    if (!matcher.matches) None
+    else Try(matcher.group(1).toLong).toOption
   }
 }
 
@@ -144,7 +153,7 @@ class StorageService[S](
     if (!exists(persistentPath)) makeDir(persistentPath)
 
     def graceIsOver(name: String) =
-      replicaCatalog.timeOfPersistent(name).map {
+      StorageService.extractTimeFromName(name).map {
         _ + preference(ReplicaCatalog.ReplicaGraceTime).toMillis < System.currentTimeMillis
       }.getOrElse(true)
 
