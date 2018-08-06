@@ -27,23 +27,6 @@ import org.openmole.tool.stream._
 
 import scala.ref.WeakReference
 
-//object Storage {
-//  val BufferSize = ConfigurationLocation("Storage", "BufferSize", Some(64 kilobytes))
-//  val CopyTimeout = ConfigurationLocation("Storage", "CopyTimeout", Some(1 minutes))
-//  val CloseTimeout = ConfigurationLocation("Storage", "CloseTimeout", Some(1 minutes))
-//}
-//
-//trait CompressedTransfer <: Storage {
-//
-//  override abstract def _uploadStream(src: InputStream, dest: String, options: TransferOptions) =
-//    if (!options.raw) super._uploadStream(src.toGZiped, dest, options) else super._uploadStream(src, dest, options)
-//
-//  override abstract protected def _downloadStream(src: String, options: TransferOptions) =
-//    if (!options.raw) super._downloadStream(src, options).toGZ else super._downloadStream(src, options)
-//
-//}
-//
-
 object StorageInterface {
 
   def remote[S](s: S)(implicit storage: StorageInterface[S]) =
@@ -71,6 +54,8 @@ object StorageInterface {
     }
     else downloadStream(src, downloadFile)
   }
+
+  def isDirectory(name: String) = name.endsWith("/")
 
 }
 

@@ -37,7 +37,7 @@ object SharedStorage extends JavaLogger {
       val runtimeInstall = runtimePrefix + runtime.runtime.hash
 
       val (workdir, scriptName) = {
-        val installDir = sharedFS.child(sharedFS.baseDir, "install")
+        val installDir = sharedFS.child(sharedFS.tmpDirectory(token), "install")
         util.Try(sharedFS.makeDir(installDir))
 
         val workdir = sharedFS.child(installDir, preference(Preference.uniqueID) + "_install")

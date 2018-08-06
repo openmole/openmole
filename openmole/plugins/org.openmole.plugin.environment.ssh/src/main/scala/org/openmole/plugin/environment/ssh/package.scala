@@ -29,6 +29,7 @@ import org.openmole.plugin.environment.batch.storage.{ StorageInterface, Storage
 import org.openmole.plugin.environment.gridscale.{ LocalStorage, LogicalLinkStorage }
 import squants.time.Time
 import effectaside._
+import org.openmole.core.replication.ReplicaCatalog
 
 package object ssh {
   //  class RemoteLogicalLinkStorage(val root: String) extends LogicalLinkStorage with SimpleStorage
@@ -66,7 +67,7 @@ package object ssh {
     concurrency:              Int,
     root:                     String,
     sharedDirectory:          Option[String],
-    forceCopyOnRemoteStorage: Boolean          = false)(implicit threadProvider: ThreadProvider, preference: Preference, localInterpreter: Effect[_root_.gridscale.local.Local]) = {
+    forceCopyOnRemoteStorage: Boolean          = false)(implicit threadProvider: ThreadProvider, preference: Preference, replicaCatalog: ReplicaCatalog, localInterpreter: Effect[_root_.gridscale.local.Local]) = {
     val remoteStorage = StorageInterface.remote(LogicalLinkStorage(forceCopy = forceCopyOnRemoteStorage))
     def id = new URI("file", null, "localhost", -1, sharedDirectory.orNull, null, null).toString
     StorageService(LocalStorage(), root, id, environment, remoteStorage, concurrency, t ⇒ false)
@@ -82,7 +83,7 @@ package object ssh {
     sharedDirectory:          Option[String],
     storageSharedLocally:     Boolean,
     forceCopyOnRemoteStorage: Boolean          = false
-  )(implicit storageInterface: StorageInterface[S], threadProvider: ThreadProvider, preference: Preference) = {
+  )(implicit storageInterface: StorageInterface[S], threadProvider: ThreadProvider, preference: Preference, replicaCatalog: ReplicaCatalog) = {
 
     val root = sharedDirectory match {
       case Some(p) ⇒ p

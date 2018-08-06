@@ -24,6 +24,7 @@ import org.openmole.core.communication.message._
 import org.openmole.core.communication.storage._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.job._
+import org.openmole.plugin.environment.batch
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment.signalUpload
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.storage._
@@ -73,7 +74,7 @@ object UploadActor extends JavaLogger {
     val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins
     val files = (new TreeSet[File]()(fileOrdering) ++ job.files) diff plugins
 
-    val communicationPath = storage.child(storage.tmpDir, UUID.randomUUID.toString)
+    val communicationPath = storage.child(storage.tmpDirectory(token), StorageService.timedUniqName)
     storage.makeDir(communicationPath)
 
     val inputPath = storage.child(communicationPath, uniqName("job", ".in"))
@@ -114,8 +115,8 @@ object UploadActor extends JavaLogger {
     val hash = services.fileService.hash(toReplicate).toString
 
     def upload = {
-      val name = uniqName(System.currentTimeMillis.toString, ".rep")
-      val newFile = storage.child(storage.persistentDir, name)
+      val name = batch.storage.StorageService.timedUniqName
+      val newFile = storage.child(storage.persistentDirectory(token), name)
       Log.logger.fine(s"Upload $toReplicate to $newFile on ${storage.id} mode $fileMode")
       signalUpload(eventDispatcher.eventId, storage.upload(toReplicate, newFile, options), toReplicate, newFile, storage)
       newFile
