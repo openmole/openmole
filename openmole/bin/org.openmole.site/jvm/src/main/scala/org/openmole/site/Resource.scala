@@ -271,7 +271,7 @@ object Resource {
   def rawFrag(fileResource: FileResource) = shared.rawFrag(content(fileResource))
 
   def content(fileResource: FileResource) =
-    this.getClass.getClassLoader.getResourceAsStream(fileResource.file).content
+    this.getClass.getClassLoader.getResourceAsStream(fileResource.file).mkString
 
   //  val marketResources(entries: Seq[GeneratedMarketEntry]) =
   //    entries.filter(_.tags.exists(_ == Market.Tags.tutorial)).map { tuto ⇒ MarketResource(tuto) }
