@@ -195,7 +195,6 @@ class StorageService[S](
 
   def rmDir(path: String)(implicit token: AccessToken): Unit = token.access { quality { storage.rmDir(s, path) } }
   def rmFile(path: String)(implicit token: AccessToken): Unit = token.access { quality { storage.rmFile(s, path) } }
-  def mv(from: String, to: String)(implicit token: AccessToken) = token.access { quality { storage.mv(s, from, to) } }
 
   def child(path: String, name: String) = storage.child(s, path, name)
 
