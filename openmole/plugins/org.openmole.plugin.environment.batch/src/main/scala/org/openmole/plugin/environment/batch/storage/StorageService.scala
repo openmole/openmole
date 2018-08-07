@@ -65,8 +65,10 @@ object StorageService extends JavaLogger {
 
     import cats.implicits._
 
-    val baseDir = Lazy(createBasePath(s, root, isConnectionError))
-    val persistentDirCache = baseDir.map { baseDir ⇒
+    val baseDirCache = Lazy(createBasePath(s, root, isConnectionError))
+    def baseDir(accessToken: AccessToken) = baseDirCache()
+
+    val persistentDirCache = baseDirCache.map { baseDir ⇒
       val dir = storageInterface.child(s, baseDir, persistent)
       if (!storageInterface.exists(s, dir)) storageInterface.makeDir(s, dir)
       cleanPersistent(s, dir, id)
@@ -75,7 +77,7 @@ object StorageService extends JavaLogger {
 
     def persistentDir(accessToken: AccessToken) = persistentDirCache()
 
-    val tmpDirCache = baseDir.map { baseDir ⇒
+    val tmpDirCache = baseDirCache.map { baseDir ⇒
       val dir = storageInterface.child(s, baseDir, tmp)
       if (!storageInterface.exists(s, dir)) storageInterface.makeDir(s, dir)
       cleanTmp(s, dir)
@@ -83,7 +85,7 @@ object StorageService extends JavaLogger {
     }
     def tmpDir(token: AccessToken) = tmpDirCache()
 
-    val storage = new StorageService[S](s, persistentDir, tmpDir, id, environment, remoteStorage, usageControl)
+    val storage = new StorageService[S](s, baseDir, persistentDir, tmpDir, id, environment, remoteStorage, usageControl)
     startGC(storage)
     storage
   }
@@ -165,6 +167,7 @@ object StorageService extends JavaLogger {
 
 class StorageService[S](
   s:                       S,
+  val baseDirectory:       AccessToken ⇒ String,
   val persistentDirectory: AccessToken ⇒ String,
   val tmpDirectory:        AccessToken ⇒ String,
   val id:                  String,
