@@ -46,8 +46,8 @@ object StorageService extends JavaLogger {
   def startGC(storage: StorageService[_])(implicit threadProvider: ThreadProvider, preference: Preference) =
     Updater.delay(new StoragesGC(WeakReference(storage)), preference(BatchEnvironment.StoragesGCUpdateInterval))
 
-  implicit def replicationStorage[S](implicit token: AccessToken): ReplicationStorage[StorageService[S]] = new ReplicationStorage[StorageService[S]] {
-    override def backgroundRmFile(storage: StorageService[S], path: String): Unit = storage.backgroundRmFile(path)
+  implicit def replicationStorage[S](implicit token: AccessToken, services: BatchEnvironment.Services): ReplicationStorage[StorageService[S]] = new ReplicationStorage[StorageService[S]] {
+    override def backgroundRmFile(storage: StorageService[S], path: String): Unit = StorageService.backgroundRmFile(storage, path)
     override def exists(storage: StorageService[S], path: String): Boolean = storage.exists(path)
     override def id(storage: StorageService[S]): String = storage.id
   }
@@ -158,6 +158,9 @@ object StorageService extends JavaLogger {
     }
   }
 
+  def backgroundRmFile(storageService: StorageService[_], path: String)(implicit services: BatchEnvironment.Services) = JobManager ! DeleteFile(storageService, path, false)
+  def backgroundRmDir(storageService: StorageService[_], path: String)(implicit services: BatchEnvironment.Services) = JobManager ! DeleteFile(storageService, path, true)
+
 }
 
 class StorageService[S](
@@ -189,6 +192,7 @@ class StorageService[S](
 
   def exists(path: String)(implicit token: AccessToken): Boolean = token.access { quality { storage.exists(s, path) } }
   def makeDir(path: String)(implicit token: AccessToken): Unit = token.access { quality { storage.makeDir(s, path) } }
+
   def rmDir(path: String)(implicit token: AccessToken): Unit = token.access { quality { storage.rmDir(s, path) } }
   def rmFile(path: String)(implicit token: AccessToken): Unit = token.access { quality { storage.rmFile(s, path) } }
   def mv(from: String, to: String)(implicit token: AccessToken) = token.access { quality { storage.mv(s, from, to) } }
@@ -197,8 +201,5 @@ class StorageService[S](
 
   def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.access { quality { storage.upload(s, src, dest, options) } }
   def download(src: String, dest: File, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.access { quality { storage.download(s, src, dest, options) } }
-
-  def backgroundRmFile(path: String) = JobManager ! DeleteFile(this, path, false)
-  def backgroundRmDir(path: String) = JobManager ! DeleteFile(this, path, true)
 
 }

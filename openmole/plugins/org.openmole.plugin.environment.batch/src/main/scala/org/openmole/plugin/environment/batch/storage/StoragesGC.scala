@@ -45,7 +45,7 @@ class StoragesGC(storageRef: WeakReference[StorageService[_]]) extends IUpdatabl
             if (!new File(replica.source).exists || System.currentTimeMillis - replica.lastCheckExists > services.preference(ReplicaCatalog.NoAccessCleanTime).millis) {
               logger.fine(s"Remove gc $replica")
               services.replicaCatalog.remove(replica.id)
-              storage.backgroundRmFile(replica.path)
+              StorageService.backgroundRmFile(storage, replica.path)
             }
           catch {
             case t: Throwable ⇒ logger.log(FINE, "Error while garbage collecting the replicas", t)
