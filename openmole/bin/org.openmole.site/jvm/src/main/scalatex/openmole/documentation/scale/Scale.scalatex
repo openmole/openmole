@@ -14,6 +14,7 @@
       outputs += (i, res)
     )"""
 
+@br
 A key feature in OpenMOLE is the possibility to delegate the workload to a remote execution environment. Tasks in OpenMOLE have been designed so that the delegation a part of the workload to a remote environment is declarative.
 
 @h2{Setting up an Authentication}

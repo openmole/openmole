@@ -108,7 +108,6 @@ object SiteJS extends JSApp {
           case _    ⇒ None
         }
       }
-
-    org.scalajs.dom.window.document.getElementById(shared.documentationSideMenu.place).innerHTML = div(if (nodes.length == 0) span else h2(marginTop := -20, "Contents"))(div(marginTop := -20)(menuContent.flatten: _*))
+    org.scalajs.dom.window.document.getElementById(shared.documentationSideMenu.place).innerHTML = div(if (nodes.length < 1) span(marginTop := 40) else h2(marginTop := -20, "Contents"))(menuContent.flatten: _*)
   }
 }

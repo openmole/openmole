@@ -15,6 +15,7 @@ val burned = Val[Double]
 @def severalInputs = "Exploration of several inputs"
 @def advancedSampling = "Advanced sampling"
 
+@br
 @b{Design of Experiments} (DoE) is the art of setting up an experimentation. In a model simulation context,
 it boils down to declare the inputs under study (most of the time, they're parameters) and the values they will take, for a batch of several simulations, with the idea of revealing a property of the model (e.g. sensitivity).
 Even if there are several state-of-the-art DoE methods implemented in OpenMOLE, we recommend to focus on OpenMOLE
