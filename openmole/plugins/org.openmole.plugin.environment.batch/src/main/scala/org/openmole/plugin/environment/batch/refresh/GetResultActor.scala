@@ -24,6 +24,7 @@ import org.openmole.core.communication.storage._
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.tools.service.Retry._
@@ -56,7 +57,8 @@ object GetResultActor extends JavaLogger {
         catch {
           case e: Throwable ⇒
             job.state = ExecutionState.FAILED
-            JobManager ! Error(job, e, job.batchJob.flatMap(_.tryStdOutErr(token)))
+            val stdOutErr = job.batchJob.flatMap(_.tryStdOutErr(token))
+            JobManager ! Error(job, e, stdOutErr)
             JobManager ! Kill(job)
         }
       case None ⇒

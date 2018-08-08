@@ -21,7 +21,7 @@ import java.io.File
 import java.util.UUID
 
 import org.openmole.core.communication.message._
-import org.openmole.core.communication.storage.TransferOptions
+import org.openmole.core.communication.storage.{ RemoteStorage, TransferOptions }
 import org.openmole.core.console.ScalaREPL.ReferencedClasses
 import org.openmole.core.console.{ REPLClassloader, ScalaREPL }
 import org.openmole.core.event.{ Event, EventDispatcher }
@@ -155,9 +155,9 @@ object BatchEnvironment extends JavaLogger {
     implicit val fileServiceCache:  FileServiceCache
   )
 
-  def serializeJob(storageService: StorageService[_], job: BatchExecutionJob)(implicit services: BatchEnvironment.Services) =
+  def serializeJob(storageService: StorageService[_], remoteStorage: RemoteStorage, job: BatchExecutionJob)(implicit services: BatchEnvironment.Services) =
     UsageControl.mapToken(storageService.usageControl) { implicit token ⇒
-      initCommunication(job, storageService)
+      initCommunication(job, storageService, remoteStorage)
     }
 
   def jobFiles(job: BatchExecutionJob) =
@@ -166,7 +166,7 @@ object BatchEnvironment extends JavaLogger {
       job.environment.plugins ++
       Seq(job.environment.jvmLinuxX64, job.environment.runtime)
 
-  def initCommunication(job: BatchExecutionJob, storage: StorageService[_])(implicit token: AccessToken, services: BatchEnvironment.Services): SerializedJob = services.newFile.withTmpFile("job", ".tar") { jobFile ⇒
+  def initCommunication(job: BatchExecutionJob, storage: StorageService[_], remoteStorage: RemoteStorage)(implicit token: AccessToken, services: BatchEnvironment.Services): SerializedJob = services.newFile.withTmpFile("job", ".tar") { jobFile ⇒
     import services._
 
     serializerService.serialise(job.runnableTasks, jobFile)
@@ -179,18 +179,7 @@ object BatchEnvironment extends JavaLogger {
 
     val inputPath = storage.child(communicationPath, uniqName("job", ".in"))
 
-    val serializedStorage =
-      services.newFile.withTmpFile("remoteStorage", ".tar") { storageFile ⇒
-        import services._
-        import org.openmole.tool.hash._
-        services.serializerService.serialiseAndArchiveFiles(storage.remoteStorage, storageFile)
-        val hash = storageFile.hash().toString()
-        val path = storage.child(communicationPath, StorageService.timedUniqName)
-        signalUpload(eventDispatcher.eventId, storage.upload(storageFile, path, TransferOptions(forceCopy = true, canMove = true)), storageFile, inputPath, storage)
-        FileMessage(path, hash)
-      }
-
-    val runtime = replicateTheRuntime(job.job, job.environment, storage, serializedStorage)
+    val runtime = replicateTheRuntime(job.job, job.environment, storage)
 
     val executionMessage = createExecutionMessage(
       job.job,
@@ -207,7 +196,18 @@ object BatchEnvironment extends JavaLogger {
       signalUpload(eventDispatcher.eventId, storage.upload(executionMessageFile, inputPath, TransferOptions(forceCopy = true, canMove = true)), executionMessageFile, inputPath, storage)
     }
 
-    SerializedJob(storage, communicationPath, inputPath, runtime)
+    val serializedStorage =
+      services.newFile.withTmpFile("remoteStorage", ".tar") { storageFile ⇒
+        import services._
+        import org.openmole.tool.hash._
+        services.serializerService.serialiseAndArchiveFiles(remoteStorage, storageFile)
+        val hash = storageFile.hash().toString()
+        val path = storage.child(communicationPath, StorageService.timedUniqName)
+        signalUpload(eventDispatcher.eventId, storage.upload(storageFile, path, TransferOptions(forceCopy = true, canMove = true)), storageFile, inputPath, storage)
+        FileMessage(path, hash)
+      }
+
+    SerializedJob(storage, communicationPath, inputPath, runtime, serializedStorage)
   }
 
   def toReplicatedFile(file: File, storage: StorageService[_], transferOptions: TransferOptions)(implicit token: AccessToken, services: BatchEnvironment.Services): ReplicatedFile = {
@@ -237,17 +237,15 @@ object BatchEnvironment extends JavaLogger {
   }
 
   def replicateTheRuntime(
-    job:               Job,
-    environment:       BatchEnvironment,
-    storage:           StorageService[_],
-    serializedStorage: FileMessage
+    job:         Job,
+    environment: BatchEnvironment,
+    storage:     StorageService[_]
   )(implicit token: AccessToken, services: BatchEnvironment.Services) = {
     val environmentPluginPath = shuffled(environment.plugins)(services.randomProvider()).map { p ⇒ toReplicatedFile(p, storage, TransferOptions(raw = true)) }.map { FileMessage(_) }
     val runtimeFileMessage = FileMessage(toReplicatedFile(environment.runtime, storage, TransferOptions(raw = true)))
     val jvmLinuxX64FileMessage = FileMessage(toReplicatedFile(environment.jvmLinuxX64, storage, TransferOptions(raw = true)))
 
     Runtime(
-      serializedStorage,
       runtimeFileMessage,
       environmentPluginPath.toSet,
       jvmLinuxX64FileMessage

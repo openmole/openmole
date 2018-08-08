@@ -25,10 +25,11 @@ import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.jobservice._
 import org.openmole.plugin.environment.ssh._
 import org.openmole.tool.crypto.Cypher
-import squants.{ Time, _ }
+import squants.{Time, _}
 import squants.information._
 import effectaside._
-import org.openmole.plugin.environment.batch.refresh.{ JobManager }
+import org.openmole.plugin.environment.batch.refresh.JobManager
+import org.openmole.plugin.environment.batch.storage.StorageInterface
 import org.openmole.plugin.environment.gridscale._
 
 object CondorEnvironment {
@@ -156,8 +157,10 @@ class CondorEnvironment[A: gridscale.ssh.SSHAuthentication](
       storageSharedLocally = parameters.storageSharedLocally
     )
 
-  override def serializeJob(batchExecutionJob: BatchExecutionJob) =
-    BatchEnvironment.serializeJob(storageService, batchExecutionJob)
+  override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
+    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())
+    BatchEnvironment.serializeJob(storageService, remoteStorage, batchExecutionJob)
+  }
 
   val installRuntime = new RuntimeInstallation(
     Frontend.ssh(host, port, timeout, authentication),
@@ -253,9 +256,10 @@ class CondorLocalEnvironment(
       sharedDirectory = parameters.sharedDirectory,
     )
 
-
-  override def serializeJob(batchExecutionJob: BatchExecutionJob) =
-    BatchEnvironment.serializeJob(storageService, batchExecutionJob)
+  override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
+    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())
+    BatchEnvironment.serializeJob(storageService, remoteStorage, batchExecutionJob)
+  }
 
   val installRuntime = new RuntimeInstallation(
     Frontend.local,

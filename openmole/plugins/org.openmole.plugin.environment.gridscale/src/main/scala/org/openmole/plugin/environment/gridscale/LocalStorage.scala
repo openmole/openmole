@@ -28,7 +28,9 @@ object LocalStorage {
   import effectaside._
   import gridscale.local
 
-  implicit def isStorage(implicit interpreter: Effect[local.Local]) = new StorageInterface[LocalStorage] {
+  implicit def isStorage = new StorageInterface[LocalStorage] {
+    implicit def interpreter = _root_.gridscale.local.Local()
+
     override def home(t: LocalStorage) = local.home
     override def child(t: LocalStorage, parent: String, child: String): String = (File(parent) / child).getAbsolutePath
     override def parent(t: LocalStorage, path: String): Option[String] = Option(File(path).getParent)

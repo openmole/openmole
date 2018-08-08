@@ -83,7 +83,7 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean, 
         script += cpCommand.download(resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar")
       }
 
-      script += cpCommand.download(resolve(runtime.storage.path), "$CUR/storage.xml")
+      script += cpCommand.download(resolve(serializedJob.remoteStorage.path), "$CUR/storage.bin")
 
       "mkdir -p envplugins && " + script.mkString(" && ")
     }
@@ -94,7 +94,7 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean, 
       script += "export PATH=$PWD/jre/bin:$PATH"
       script += "export HOME=$PWD"
       script += "/bin/sh run.sh " + memory + "m " + UUID.randomUUID + " -c " +
-        path + " -s $CUR/storage.xml -p $CUR/envplugins/ -i " + inputFile + " -o " + resultPath +
+        path + " -s $CUR/storage.bin -p $CUR/envplugins/ -i " + inputFile + " -o " + resultPath +
         " -t " + threads + (if (debug) " -d 2>&1" else "")
       script.mkString(" && ")
     }

@@ -27,6 +27,7 @@ import org.openmole.tool.crypto.Cypher
 import squants._
 import squants.information._
 import effectaside._
+import org.openmole.plugin.environment.batch.storage.StorageInterface
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.tool.logger.JavaLogger
 
@@ -158,8 +159,10 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
       storageSharedLocally = parameters.storageSharedLocally
     )
 
-  override def serializeJob(batchExecutionJob: BatchExecutionJob) =
-    BatchEnvironment.serializeJob(storageService, batchExecutionJob)
+  override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
+    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())
+    BatchEnvironment.serializeJob(storageService, remoteStorage, batchExecutionJob)
+  }
 
   val installRuntime = new RuntimeInstallation(
     Frontend.ssh(host, port, timeout, authentication),
@@ -264,8 +267,10 @@ class PBSLocalEnvironment(
       sharedDirectory = parameters.sharedDirectory,
     )
 
-  override def serializeJob(batchExecutionJob: BatchExecutionJob) =
-    BatchEnvironment.serializeJob(storageService, batchExecutionJob)
+  override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
+    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())
+    BatchEnvironment.serializeJob(storageService, remoteStorage, batchExecutionJob)
+  }
 
   val installRuntime = new RuntimeInstallation(
     Frontend.local,

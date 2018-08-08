@@ -35,6 +35,7 @@ import org.openmole.tool.lock._
 import squants.information._
 import squants.time.TimeConversions._
 import org.openmole.plugin.environment.batch.environment._
+import org.openmole.plugin.environment.batch.storage.StorageInterface
 
 import scala.ref.WeakReference
 
@@ -170,8 +171,10 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
       storageSharedLocally = storageSharedLocally
     )
 
-  override def serializeJob(batchExecutionJob: BatchExecutionJob) =
-    BatchEnvironment.serializeJob(storageService, batchExecutionJob)
+  override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
+    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())
+    BatchEnvironment.serializeJob(storageService, remoteStorage, batchExecutionJob)
+  }
 
   val installRuntime = new RuntimeInstallation(
     storageService = storageService,

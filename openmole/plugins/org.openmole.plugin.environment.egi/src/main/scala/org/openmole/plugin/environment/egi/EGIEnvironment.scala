@@ -294,7 +294,6 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         root = "",
         id = location,
         environment = env,
-        remoteStorage = CurlRemoteStorage(location, voName, debug, preference(EGIEnvironment.RemoteCopyTimeout)),
         concurrency = preference(EGIEnvironment.ConnexionsByWebDAVSE),
         isConnectionError = isConnectionError
       )
@@ -372,7 +371,9 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
       }
     }
 
-    BatchEnvironment.serializeJob(selectStorage, batchExecutionJob)
+    val storageService = selectStorage
+    val remoteStorage = CurlRemoteStorage(storageService.storage.url, voName, debug, preference(EGIEnvironment.RemoteCopyTimeout))
+    BatchEnvironment.serializeJob(selectStorage, remoteStorage, batchExecutionJob)
   }
 
   import gridscale.dirac._

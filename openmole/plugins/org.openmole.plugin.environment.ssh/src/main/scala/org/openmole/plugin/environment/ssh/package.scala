@@ -18,7 +18,6 @@ package org.openmole.plugin.environment
 
 import java.net.URI
 
-import effectaside._
 import org.openmole.core.communication.storage.TransferOptions
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.preference.Preference
@@ -63,26 +62,23 @@ package object ssh {
   }
 
   def localStorageService(
-    environment:              BatchEnvironment,
-    concurrency:              Int,
-    root:                     String,
-    sharedDirectory:          Option[String],
-    forceCopyOnRemoteStorage: Boolean          = false)(implicit threadProvider: ThreadProvider, preference: Preference, replicaCatalog: ReplicaCatalog, localInterpreter: Effect[_root_.gridscale.local.Local]) = {
-    val remoteStorage = StorageInterface.remote(LogicalLinkStorage(forceCopy = forceCopyOnRemoteStorage))
+    environment:     BatchEnvironment,
+    concurrency:     Int,
+    root:            String,
+    sharedDirectory: Option[String])(implicit threadProvider: ThreadProvider, preference: Preference, replicaCatalog: ReplicaCatalog, localInterpreter: Effect[_root_.gridscale.local.Local]) = {
     def id = new URI("file", null, "localhost", -1, sharedDirectory.orNull, null, null).toString
-    StorageService(LocalStorage(), root, id, environment, remoteStorage, concurrency, t ⇒ false)
+    StorageService(LocalStorage(), root, id, environment, concurrency, t ⇒ false)
   }
 
   def sshStorageService[S](
-    user:                     String,
-    host:                     String,
-    port:                     Int,
-    storage:                  S,
-    concurrency:              Int,
-    environment:              BatchEnvironment,
-    sharedDirectory:          Option[String],
-    storageSharedLocally:     Boolean,
-    forceCopyOnRemoteStorage: Boolean          = false
+    user:                 String,
+    host:                 String,
+    port:                 Int,
+    storage:              S,
+    concurrency:          Int,
+    environment:          BatchEnvironment,
+    sharedDirectory:      Option[String],
+    storageSharedLocally: Boolean
   )(implicit storageInterface: StorageInterface[S], threadProvider: ThreadProvider, preference: Preference, replicaCatalog: ReplicaCatalog) = {
 
     val root = sharedDirectory match {
@@ -92,13 +88,9 @@ package object ssh {
         storageInterface.child(storage, home, ".openmole/.tmp/ssh/")
     }
 
-    implicit def logicalLinkStorage = LogicalLinkStorage.isStorage(_root_.gridscale.local.Local())
-    implicit def localStorage = LocalStorage.isStorage(_root_.gridscale.local.Local())
-
-    val remoteStorage = StorageInterface.remote(LogicalLinkStorage(forceCopy = forceCopyOnRemoteStorage))
     if (storageSharedLocally) {
       def id = new URI("file", user, "localhost", -1, sharedDirectory.orNull, null, null).toString
-      StorageService(LocalStorage(), root, id, environment, remoteStorage, concurrency, t ⇒ false)
+      StorageService(LocalStorage(), root, id, environment, concurrency, t ⇒ false)
     }
     else {
       def id = new URI("ssh", user, host, port, root, null, null).toString
@@ -107,7 +99,7 @@ package object ssh {
         case _: _root_.gridscale.authentication.AuthenticationException ⇒ true
         case _ ⇒ false
       }
-      StorageService(storage, root, id, environment, remoteStorage, concurrency, isConnectionError)
+      StorageService(storage, root, id, environment, concurrency, isConnectionError)
     }
   }
 

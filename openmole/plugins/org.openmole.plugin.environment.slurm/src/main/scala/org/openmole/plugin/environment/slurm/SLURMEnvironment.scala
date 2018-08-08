@@ -25,9 +25,10 @@ import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.jobservice._
 import org.openmole.plugin.environment.ssh._
 import org.openmole.tool.crypto.Cypher
-import squants.{ Time, _ }
+import squants.{Time, _}
 import squants.information._
 import effectaside._
+import org.openmole.plugin.environment.batch.storage.StorageInterface
 import org.openmole.plugin.environment.gridscale._
 
 object SLURMEnvironment {
@@ -163,12 +164,13 @@ class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
       environment = env,
       concurrency = services.preference(SSHEnvironment.MaxConnections),
       sharedDirectory = parameters.sharedDirectory,
-      storageSharedLocally = parameters.storageSharedLocally,
-      forceCopyOnRemoteStorage = parameters.forceCopyOnNode
+      storageSharedLocally = parameters.storageSharedLocally
     )
 
-  override def serializeJob(batchExecutionJob: BatchExecutionJob) =
-    BatchEnvironment.serializeJob(storageService, batchExecutionJob)
+  override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
+    val remoteStorage = StorageInterface.remote(LogicalLinkStorage(forceCopy = parameters.forceCopyOnNode))
+    BatchEnvironment.serializeJob(storageService, remoteStorage, batchExecutionJob)
+  }
 
   val installRuntime = new RuntimeInstallation(
     Frontend.ssh(host, port, timeout, authentication),
@@ -225,8 +227,6 @@ class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
 
 
 
-
-
 object SLURMLocalEnvironment {
   implicit def isJobService: JobServiceInterface[SLURMLocalEnvironment] = new JobServiceInterface[SLURMLocalEnvironment] {
     override type J = gridscale.cluster.BatchScheduler.BatchJob
@@ -268,8 +268,10 @@ class SLURMLocalEnvironment(
       sharedDirectory = parameters.sharedDirectory,
     )
 
-  override def serializeJob(batchExecutionJob: BatchExecutionJob) =
-    BatchEnvironment.serializeJob(storageService, batchExecutionJob)
+  override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
+    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())
+    BatchEnvironment.serializeJob(storageService, remoteStorage, batchExecutionJob)
+  }
 
   val installRuntime = new RuntimeInstallation(
     Frontend.local,

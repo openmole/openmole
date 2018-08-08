@@ -54,7 +54,6 @@ object StorageService extends JavaLogger {
     root:              String,
     id:                String,
     environment:       BatchEnvironment,
-    remoteStorage:     RemoteStorage,
     concurrency:       Int,
     isConnectionError: Throwable ⇒ Boolean
   )(implicit storageInterface: StorageInterface[S], threadProvider: ThreadProvider, preference: Preference, replicaCatalog: ReplicaCatalog) = {
@@ -82,7 +81,7 @@ object StorageService extends JavaLogger {
     }
     def tmpDir(token: AccessToken) = tmpDirCache()
 
-    new StorageService[S](s, baseDir, persistentDir, tmpDir, id, environment, remoteStorage, usageControl)
+    new StorageService[S](s, baseDir, persistentDir, tmpDir, id, environment, usageControl)
   }
 
   def timedUniqName = org.openmole.tool.file.uniqName(System.currentTimeMillis.toString, ".rep", separator = "_")
@@ -161,30 +160,29 @@ object StorageService extends JavaLogger {
 }
 
 class StorageService[S](
-  s:                       S,
+  val storage:             S,
   val baseDirectory:       AccessToken ⇒ String,
   val persistentDirectory: AccessToken ⇒ String,
   val tmpDirectory:        AccessToken ⇒ String,
   val id:                  String,
   val environment:         BatchEnvironment,
-  val remoteStorage:       RemoteStorage,
   val usageControl:        UsageControl,
   qualityHysteresis:       Int                  = 100
-)(implicit storage: StorageInterface[S]) {
+)(implicit storageInterface: StorageInterface[S]) {
 
   override def toString: String = id
 
   lazy val quality = QualityControl(qualityHysteresis)
 
-  def exists(path: String)(implicit token: AccessToken): Boolean = token.access { quality { storage.exists(s, path) } }
+  def exists(path: String)(implicit token: AccessToken): Boolean = token.access { quality { storageInterface.exists(storage, path) } }
 
-  def rmDir(path: String)(implicit token: AccessToken): Unit = token.access { quality { storage.rmDir(s, path) } }
-  def rmFile(path: String)(implicit token: AccessToken): Unit = token.access { quality { storage.rmFile(s, path) } }
+  def rmDir(path: String)(implicit token: AccessToken): Unit = token.access { quality { storageInterface.rmDir(storage, path) } }
+  def rmFile(path: String)(implicit token: AccessToken): Unit = token.access { quality { storageInterface.rmFile(storage, path) } }
 
-  def makeDir(path: String)(implicit token: AccessToken): Unit = token.access { quality { storage.makeDir(s, path) } }
-  def child(path: String, name: String) = storage.child(s, path, name)
+  def makeDir(path: String)(implicit token: AccessToken): Unit = token.access { quality { storageInterface.makeDir(storage, path) } }
+  def child(path: String, name: String) = storageInterface.child(storage, path, name)
 
-  def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.access { quality { storage.upload(s, src, dest, options) } }
-  def download(src: String, dest: File, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.access { quality { storage.download(s, src, dest, options) } }
+  def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.access { quality { storageInterface.upload(storage, src, dest, options) } }
+  def download(src: String, dest: File, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.access { quality { storageInterface.download(storage, src, dest, options) } }
 
 }
