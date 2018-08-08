@@ -3,9 +3,6 @@
 @import org.openmole.site._
 @import org.openmole.site.tools._
 
-
-@h1{Plugin development}
-
 OpenMOLE is a plugable platform. It means that you can easily write your own extension and plug it into OpenMOLE. This tutorial explains how to write an OpenMOLE plugin using Scala and SBT. OpenMOLE is based on the JVM so you can create OpenMOLE plugins using Scala or any other JVM based languages such as Java, Groovy, Clojure, Jython...
 
 @p This tutorial exposes how to design a plugin. The prerequisites are to have git and SBT installed on your system.

@@ -20,7 +20,7 @@ variety of the dynamics it is able to produce, even those about which you were n
 
 @Resource.rawFrag(Resource.img.method.pseID)
 
-@h2{Method scores:}
+@h2{Method scores}
 
 @br
 
@@ -38,9 +38,6 @@ PSE handles stochasticity in the sense that the selected pattern are estimated b
 @Resource.rawFrag(Resource.img.method.pseAnim)
 @br
 @basicButton("Run", classIs(btn ++ btn_danger))(id := shared.pse.button, stylesheet.svgRunButton(-50))
-
-
-
 
 
 @p

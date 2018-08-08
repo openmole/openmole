@@ -29,8 +29,6 @@ $tasks
   val env = LocalEnvironment(4)
   """
 
-@h1{A Step by Step Introduction to OpenMOLE}
-
 @h2{What is OpenMOLE ?}
 
 

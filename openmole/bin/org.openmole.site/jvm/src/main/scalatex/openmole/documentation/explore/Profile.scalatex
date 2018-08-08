@@ -16,8 +16,6 @@ val myseed = Val[Int]
 val x = Val[Double]
 val fitness = Val[Double]"""
 
-
-
 The profile method is designed to test the sensitivity of the input parameters in a calibration context.
 Although it may look similar to traditional sensitivity analysis in principle, the calibration profile
 algorithm goes deeper, as it captures the full effect of a parameter variation on the model fitness, every other input
@@ -33,7 +31,7 @@ algorithm goes deeper, as it captures the full effect of a parameter variation o
 
 
 @br
-@h2{Method scores:}
+@h2{Method scores}
 The calibration profile method is perfect to reveal a model's sensitivity regarding its parameter, hence the highest score possible in sensitivity.
 However, it does not retrieve information about the input space nor the output space structures, as it focus on @b{one} parameter/input, every other input being let free.
 As the studied parameter varies, the other parameter are calibrated (see below), so this method scores very well
@@ -138,7 +136,7 @@ specifies that we are profiling @hl.code("param1").
 
 @break
 @br
-@h2{Interpretation of the profiles:}
+@h2{Interpretation of the profiles}
 A calibration profile is a 2D curve with the value of the parameter under study represented on the X-axis and the best possible calibration error on the Y-axis. To ease the interpretation of the profiles we propose to define an acceptance threshold on the calibration error: under this acceptance threshold the calibration error is considered sufficiently satisfying and the dynamics exposed by the model sufficiently acceptable, over this acceptance threshold the calibration error is considered too high and the dynamics exposed by the model are considered unacceptable.
 
 @br The computed calibration profiles may take very diverse shapes depending on the effect of the parameter of the model dynamics, however some of this shapes are recurrent. The most typical shapes are shown on the figure bellow. They have been discriminated by according to the variation of the values of the profile compared to the threshold value :

@@ -11,8 +11,6 @@ val seed = Val[Int]
 val burned = Val[Double]
 """
 
-@h1{Simple Sensitivity Analysis with the NetLogo Fire Model}
-
 @h2
     Sensitivity analysis
 

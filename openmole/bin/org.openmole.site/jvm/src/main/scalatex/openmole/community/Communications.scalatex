@@ -3,8 +3,6 @@
 @import org.openmole.site._
 
 
-@h1{Publications}
-
 @h2
     How to cite OpenMOLE?
 

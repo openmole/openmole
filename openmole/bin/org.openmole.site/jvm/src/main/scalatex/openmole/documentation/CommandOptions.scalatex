@@ -3,8 +3,6 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-@h1{Command Options}
-
 @p{Editor}
   To run OpenMOLE, just run the openmole file (or openmole.bat for the windoz users). It will bring up your web browser. OpenMOLE supports Chrome and Firefox. So if you are using another default web browser please copy paste the OpenMOLE url (http://localhost:port) in one of these browser.
   @p You should see something like this (all the documentation concerning the application is provided in the application itself (the last green icon in the top bar)):
