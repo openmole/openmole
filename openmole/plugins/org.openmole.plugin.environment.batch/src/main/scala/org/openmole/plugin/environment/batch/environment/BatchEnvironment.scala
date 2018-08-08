@@ -179,7 +179,18 @@ object BatchEnvironment extends JavaLogger {
 
     val inputPath = storage.child(communicationPath, uniqName("job", ".in"))
 
-    val runtime = replicateTheRuntime(job.job, job.environment, storage)
+    val serializedStorage =
+      services.newFile.withTmpFile("remoteStorage", ".tar") { storageFile ⇒
+        import services._
+        import org.openmole.tool.hash._
+        services.serializerService.serialiseAndArchiveFiles(storage.remoteStorage, storageFile)
+        val hash = storageFile.hash().toString()
+        val path = storage.child(communicationPath, StorageService.timedUniqName)
+        signalUpload(eventDispatcher.eventId, storage.upload(storageFile, path, TransferOptions(forceCopy = true, canMove = true)), storageFile, inputPath, storage)
+        FileMessage(path, hash)
+      }
+
+    val runtime = replicateTheRuntime(job.job, job.environment, storage, serializedStorage)
 
     val executionMessage = createExecutionMessage(
       job.job,
@@ -226,18 +237,17 @@ object BatchEnvironment extends JavaLogger {
   }
 
   def replicateTheRuntime(
-    job:         Job,
-    environment: BatchEnvironment,
-    storage:     StorageService[_]
+    job:               Job,
+    environment:       BatchEnvironment,
+    storage:           StorageService[_],
+    serializedStorage: FileMessage
   )(implicit token: AccessToken, services: BatchEnvironment.Services) = {
     val environmentPluginPath = shuffled(environment.plugins)(services.randomProvider()).map { p ⇒ toReplicatedFile(p, storage, TransferOptions(raw = true)) }.map { FileMessage(_) }
     val runtimeFileMessage = FileMessage(toReplicatedFile(environment.runtime, storage, TransferOptions(raw = true)))
     val jvmLinuxX64FileMessage = FileMessage(toReplicatedFile(environment.jvmLinuxX64, storage, TransferOptions(raw = true)))
 
-    val storageReplication = FileMessage(toReplicatedFile(storage.serializedRemoteStorage, storage, TransferOptions(raw = true, forceCopy = true)))
-
     Runtime(
-      storageReplication,
+      serializedStorage,
       runtimeFileMessage,
       environmentPluginPath.toSet,
       jvmLinuxX64FileMessage

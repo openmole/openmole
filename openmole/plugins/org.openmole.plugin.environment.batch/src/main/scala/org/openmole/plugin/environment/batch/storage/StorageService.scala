@@ -172,18 +172,6 @@ class StorageService[S](
   qualityHysteresis:       Int                  = 100
 )(implicit storage: StorageInterface[S]) {
 
-  import environment.services
-  import environment.services._
-
-  val _serializedRemoteStorage = Cache {
-    val file = newFile.newFile("remoteStorage", ".xml")
-    fileService.deleteWhenGarbageCollected(file)
-    serializerService.serialiseAndArchiveFiles(remoteStorage, file)
-    file
-  }
-
-  def serializedRemoteStorage = _serializedRemoteStorage()
-
   override def toString: String = id
 
   lazy val quality = QualityControl(qualityHysteresis)
