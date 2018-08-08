@@ -5,10 +5,8 @@
   val inputString = Val[String]
   val Digits = Val[Double]"""
 
-OpenMOLE handles your model execution by framing it in a task. Select the language of your model on your left to see how it is done.
-
 @h2{Tasks}
-
+OpenMOLE handles your model execution by framing it in a task. Select the language of your model on your left to see how it is done.
 Tasks are the atomic computing elements of OpenMOLE, they describe what OpenMOLE should execute. They are a bunch of tasks especially designed in order to embeds your own models and/or programs. Depending on what kind of program (binary executable, Java...) you want to embed in OpenMOLE you have to choose the adequate task.
 
 @p

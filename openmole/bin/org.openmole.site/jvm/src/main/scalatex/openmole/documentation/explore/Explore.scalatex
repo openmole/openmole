@@ -3,6 +3,7 @@
 @import org.openmole.site._
 @import org.openmole.site.stylesheet._
 
+@br
 OpenMOLE built-in methods are designed to explore your model and answer several questions regarding @b{optimization,
 sensitivity, robustness and diversity} of your model capabilities
 
