@@ -217,7 +217,10 @@ class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
     (gridscale.slurm.stdOut[_root_.gridscale.ssh.SSHServer](env, id), gridscale.slurm.stdErr[_root_.gridscale.ssh.SSHServer](env, id))
 
   lazy val jobService = BatchJobService(env, concurrency = services.preference(SSHEnvironment.MaxConnections))
-  override def trySelectJobService() = BatchEnvironment.trySelectSingleJobService(jobService)
+
+  override def submitSerializedJob(serializedJob: SerializedJob) =
+    BatchEnvironment.submitSerializedJob(jobService, serializedJob)
+
 }
 
 
@@ -318,7 +321,9 @@ class SLURMLocalEnvironment(
 
 
   lazy val jobService = BatchJobService(env, concurrency = services.preference(SSHEnvironment.MaxLocalOperations))
-  override def trySelectJobService() = BatchEnvironment.trySelectSingleJobService(jobService)
+
+  override def submitSerializedJob(serializedJob: SerializedJob) =
+    BatchEnvironment.submitSerializedJob(jobService, serializedJob)
 
 }
 

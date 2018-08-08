@@ -218,8 +218,9 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
     (gridscale.pbs.stdOut[_root_.gridscale.ssh.SSHServer](env, id), gridscale.pbs.stdErr[_root_.gridscale.ssh.SSHServer](env, id))
 
   lazy val jobService = BatchJobService(env, concurrency = services.preference(SSHEnvironment.MaxConnections))
-  override def trySelectJobService() = BatchEnvironment.trySelectSingleJobService(jobService)
 
+  override def submitSerializedJob(serializedJob: SerializedJob) =
+    BatchEnvironment.submitSerializedJob(jobService, serializedJob)
 }
 
 object PBSLocalEnvironment{
@@ -313,6 +314,7 @@ class PBSLocalEnvironment(
 
 
   lazy val jobService = BatchJobService(env, concurrency = services.preference(SSHEnvironment.MaxLocalOperations))
-  override def trySelectJobService() = BatchEnvironment.trySelectSingleJobService(jobService)
 
+  override def submitSerializedJob(serializedJob: SerializedJob) =
+    BatchEnvironment.submitSerializedJob(jobService, serializedJob)
 }

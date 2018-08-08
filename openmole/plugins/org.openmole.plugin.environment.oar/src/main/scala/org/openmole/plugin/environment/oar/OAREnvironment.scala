@@ -200,7 +200,10 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
     (gridscale.oar.stdOut[_root_.gridscale.ssh.SSHServer](env, id), gridscale.oar.stdErr[_root_.gridscale.ssh.SSHServer](env, id))
 
   lazy val jobService = BatchJobService(env, concurrency = services.preference(SSHEnvironment.MaxConnections))
-  override def trySelectJobService() = BatchEnvironment.trySelectSingleJobService(jobService)
+
+  override def submitSerializedJob(serializedJob: SerializedJob) =
+    BatchEnvironment.submitSerializedJob(jobService, serializedJob)
+
 }
 
 object OARLocalEnvironment{
@@ -286,8 +289,9 @@ class OARLocalEnvironment(
 
 
   lazy val jobService = BatchJobService(env, concurrency = services.preference(SSHEnvironment.MaxLocalOperations))
-  override def trySelectJobService() = BatchEnvironment.trySelectSingleJobService(jobService)
 
+  override def submitSerializedJob(serializedJob: SerializedJob) =
+    BatchEnvironment.submitSerializedJob(jobService, serializedJob)
 
   override def start() = BatchEnvironment.start(this)
 

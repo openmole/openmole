@@ -461,8 +461,8 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
   lazy val batchJobService = BatchJobService(env, preference(EGIEnvironment.ConnectionsToDIRAC))
 
-  override def trySelectJobService() =
-    UsageControl.tryGetToken(batchJobService.usageControl).map(token ⇒ (batchJobService, token))
+  override def submitSerializedJob(serializedJob: SerializedJob) =
+    BatchEnvironment.submitSerializedJob(batchJobService, serializedJob)
 
   override def updateInterval =
     UpdateInterval.fixed(preference(EGIEnvironment.JobGroupRefreshInterval))

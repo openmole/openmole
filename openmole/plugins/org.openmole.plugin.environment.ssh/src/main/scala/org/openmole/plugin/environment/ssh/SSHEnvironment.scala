@@ -255,5 +255,7 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   val submittedJobs = collection.mutable.Map[SSHEnvironment.SSHJob, PID]()
 
   lazy val jobService = BatchJobService(env, concurrency = preference(SSHEnvironment.MaxConnections))
-  override def trySelectJobService() = BatchEnvironment.trySelectSingleJobService(jobService)
+
+  override def submitSerializedJob(serializedJob: SerializedJob) =
+    BatchEnvironment.submitSerializedJob(jobService, serializedJob)
 }

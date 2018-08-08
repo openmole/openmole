@@ -28,15 +28,11 @@ object SubmitActor {
     val Submit(job, sj) = submit
 
     if (!job.state.isFinal) {
-      try job.environment.trySelectJobService match {
-        case Some((js, token)) ⇒
-          try {
-            val bj = js.submit(sj)(token)
-            job.state = SUBMITTED
-            job.batchJob = Some(bj)
-            JobManager ! Submitted(job, sj, bj)
-          }
-          finally UsageControl.releaseToken(js.usageControl, token)
+      try job.environment.submitSerializedJob(sj) match {
+        case Some(bj) ⇒
+          job.state = SUBMITTED
+          job.batchJob = Some(bj)
+          JobManager ! Submitted(job, sj, bj)
         case None ⇒ JobManager ! Delay(submit, BatchEnvironment.getTokenInterval)
       }
       catch {

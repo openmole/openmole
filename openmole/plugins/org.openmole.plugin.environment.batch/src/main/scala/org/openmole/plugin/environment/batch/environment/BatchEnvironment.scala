@@ -266,8 +266,10 @@ object BatchEnvironment extends JavaLogger {
     )
   }
 
-  def trySelectSingleJobService(jobService: BatchJobService[_]) =
-    UsageControl.tryGetToken(jobService.usageControl).map(t ⇒ (jobService, t))
+  def submitSerializedJob(jobService: BatchJobService[_], serializedJob: SerializedJob) =
+    UsageControl.mapToken(jobService.usageControl) { token ⇒
+      jobService.submit(serializedJob)(token)
+    }
 
   def start(environment: BatchEnvironment) = {}
 
@@ -345,7 +347,7 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
   def exceptions = services.preference(Environment.maxExceptionsLog)
 
   def serializeJob(batchExecutionJob: BatchExecutionJob): Option[SerializedJob]
-  def trySelectJobService(): Option[(BatchJobService[_], AccessToken)]
+  def submitSerializedJob(serializedJob: SerializedJob): Option[BatchJobControl]
 
   lazy val registry = new ExecutionJobRegistry()
   def jobs = ExecutionJobRegistry.executionJobs(registry)
