@@ -76,12 +76,26 @@ class ReplicaCatalog(database: Database, preference: Preference) {
     expireAfterAccess(preference(ReplicaCacheTime).millis, TimeUnit.MILLISECONDS).
     build[ReplicaCacheKey, Replica]
 
+  def clean[S](s: S)(implicit replicationStorage: ReplicationStorage[S]) = {
+    val time = System.currentTimeMillis
+
+    for {
+      replica ← query { replicas.filter { _.storage === replicationStorage.id(s) }.result }
+      if !new File(replica.source).exists || time - replica.lastCheckExists > preference(ReplicaCatalog.NoAccessCleanTime).millis
+    } {
+      logger.fine(s"Remove gc $replica")
+      remove(replica.id)
+      replicationStorage.backgroundRmFile(s, replica.path)
+    }
+  }
+
   def uploadAndGet[S](
     upload:  ⇒ String,
     srcPath: File,
     hash:    String,
     storage: S
   )(implicit replicationStorage: ReplicationStorage[S]): Replica = {
+    clean(storage)
     val cacheKey = (srcPath.getCanonicalPath, hash, replicationStorage.id(storage))
     // Avoid same transfer in multiple threads
     localLock.withLock(cacheKey) { uploadAndGetLocked(upload, srcPath, hash, storage, cacheKey) }

@@ -43,9 +43,6 @@ object StorageService extends JavaLogger {
   val persistent = "persistent/"
   val tmp = "tmp/"
 
-  def startGC(storage: StorageService[_])(implicit threadProvider: ThreadProvider, preference: Preference) =
-    Updater.delay(new StoragesGC(WeakReference(storage)), preference(BatchEnvironment.StoragesGCUpdateInterval))
-
   implicit def replicationStorage[S](implicit token: AccessToken, services: BatchEnvironment.Services): ReplicationStorage[StorageService[S]] = new ReplicationStorage[StorageService[S]] {
     override def backgroundRmFile(storage: StorageService[S], path: String): Unit = StorageService.backgroundRmFile(storage, path)
     override def exists(storage: StorageService[S], path: String): Boolean = storage.exists(path)
@@ -85,9 +82,7 @@ object StorageService extends JavaLogger {
     }
     def tmpDir(token: AccessToken) = tmpDirCache()
 
-    val storage = new StorageService[S](s, baseDir, persistentDir, tmpDir, id, environment, remoteStorage, usageControl)
-    startGC(storage)
-    storage
+    new StorageService[S](s, baseDir, persistentDir, tmpDir, id, environment, remoteStorage, usageControl)
   }
 
   def timedUniqName = org.openmole.tool.file.uniqName(System.currentTimeMillis.toString, ".rep", separator = "_")
