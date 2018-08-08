@@ -29,12 +29,12 @@ object UsageControl {
     finally releaseToken(usageControl, t)
   }
 
-  def releaseToken(usageControl: UsageControl, token: AccessToken) = atomic { implicit txn ⇒
+  private def releaseToken(usageControl: UsageControl, token: AccessToken) = atomic { implicit txn ⇒
     usageControl.usedToken -= token
     usageControl.tokens() = token :: usageControl.tokens()
   }
 
-  def tryGetToken(usageControl: UsageControl): Option[AccessToken] = atomic { implicit txn ⇒
+  private def tryGetToken(usageControl: UsageControl): Option[AccessToken] = atomic { implicit txn ⇒
     if (usageControl.stopped()) None
     else
       usageControl.tokens() match {
