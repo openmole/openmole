@@ -25,7 +25,7 @@ import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.threadprovider.Updater
 import org.openmole.core.workspace.Workspace
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, SerializedJob, UpdateInterval, UsageControl }
+import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.jobservice.{ BatchJob, BatchJobService, JobServiceInterface }
 import org.openmole.plugin.environment.batch.refresh.JobManager
 import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageService }
@@ -302,66 +302,77 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     else throw new InternalProcessingError("No WebDAV storage available for the VO")
   }
 
-  override def trySelectStorage(usedFiles: ⇒ Vector[File]) = {
+  override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
     import EGIEnvironment._
     import org.openmole.tool.file._
     import org.openmole.core.tools.math._
 
-    val sss = storages().map(_._2)
-    if (sss.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
+    def selectStorage = {
+      val sss = storages().map(_._2)
+      if (sss.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
 
-    // val nonEmpty = sss.filter(!_.usageControl.isEmpty)
+      if (sss.size == 1) sss.head
+      else {
+        // val nonEmpty = sss.filter(!_.usageControl.isEmpty)
 
-    case class FileInfo(size: Long, hash: String)
+        case class FileInfo(size: Long, hash: String)
 
-    def fileSize(file: File) = (if (file.isDirectory) fileService.archiveForDir(file).file else file).size
-    val usedFilesInfo = usedFiles.map { f ⇒ f → FileInfo(fileSize(f), fileService.hash(f).toString) }.toMap
-    val totalFileSize = usedFilesInfo.values.toSeq.map(_.size).sum
-    val onStorage = replicaCatalog.forHashes(usedFilesInfo.values.toVector.map(_.hash), sss.map(_.id)).groupBy(_.storage)
+        def fileSize(file: File) = (if (file.isDirectory) fileService.archiveForDir(file).file else file).size
 
-    def minOption(v: Seq[Double]) = if (v.isEmpty) None else Some(v.min)
-    def maxOption(v: Seq[Double]) = if (v.isEmpty) None else Some(v.max)
+        val usedFiles = BatchEnvironment.jobFiles(batchExecutionJob)
+        val usedFilesInfo = usedFiles.map { f ⇒ f → FileInfo(fileSize(f), fileService.hash(f).toString) }.toMap
+        val totalFileSize = usedFilesInfo.values.toSeq.map(_.size).sum
+        val onStorage = replicaCatalog.forHashes(usedFilesInfo.values.toVector.map(_.hash), sss.map(_.id)).groupBy(_.storage)
 
-    val times = sss.flatMap(_.quality.time)
-    val maxTime = maxOption(times)
-    val minTime = minOption(times)
+        def minOption(v: Seq[Double]) = if (v.isEmpty) None else Some(v.min)
 
-    //        val availablities = nonEmpty.flatMap(_.usageControl.availability)
-    //        val maxAvailability = maxOption(availablities)
-    //        val minAvailability = minOption(availablities)
+        def maxOption(v: Seq[Double]) = if (v.isEmpty) None else Some(v.max)
 
-    def rate(ss: StorageService[_]) = {
-      val sizesOnStorage = usedFilesInfo.filter { case (_, info) ⇒ onStorage.getOrElse(ss.id, Set.empty).exists(_.hash == info.hash) }.values.map { _.size }
-      val sizeOnStorage = sizesOnStorage.sum
+        val times = sss.flatMap(_.quality.time)
+        val maxTime = maxOption(times)
+        val minTime = minOption(times)
 
-      val sizeFactor = if (totalFileSize != 0) sizeOnStorage.toDouble / totalFileSize else 0.0
+        //        val availablities = nonEmpty.flatMap(_.usageControl.availability)
+        //        val maxAvailability = maxOption(availablities)
+        //        val minAvailability = minOption(availablities)
 
-      val timeFactor =
-        (minTime, maxTime, ss.quality.time) match {
-          case (Some(minTime), Some(maxTime), Some(time)) if (maxTime > minTime) ⇒ 0.0 - time.normalize(minTime, maxTime)
-          case _ ⇒ 0.0
+        def rate(ss: StorageService[_]) = {
+          val sizesOnStorage = usedFilesInfo.filter { case (_, info) ⇒ onStorage.getOrElse(ss.id, Set.empty).exists(_.hash == info.hash) }.values.map {
+            _.size
+          }
+          val sizeOnStorage = sizesOnStorage.sum
+
+          val sizeFactor = if (totalFileSize != 0) sizeOnStorage.toDouble / totalFileSize else 0.0
+
+          val timeFactor =
+            (minTime, maxTime, ss.quality.time) match {
+              case (Some(minTime), Some(maxTime), Some(time)) if (maxTime > minTime) ⇒ 0.0 - time.normalize(minTime, maxTime)
+              case _ ⇒ 0.0
+            }
+
+          //          val availabilityFactor =
+          //            (minAvailability, maxAvailability, ss.usageControl.availability) match {
+          //              case (Some(minAvailability), Some(maxAvailability), Some(availability)) if (maxAvailability > minAvailability) ⇒ 0.0 - availability.normalize(minAvailability, maxAvailability)
+          //              case _ ⇒ 0.0
+          //            }
+
+          math.pow(
+            preference(StorageSizeFactor) * sizeFactor +
+              preference(StorageTimeFactor) * timeFactor +
+              //              preference(StorageAvailabilityFactor) * availabilityFactor +
+              preference(StorageSuccessRateFactor) * ss.quality.successRate.getOrElse(0.0),
+            preference(StorageFitnessPower)
+          )
         }
 
-      //          val availabilityFactor =
-      //            (minAvailability, maxAvailability, ss.usageControl.availability) match {
-      //              case (Some(minAvailability), Some(maxAvailability), Some(availability)) if (maxAvailability > minAvailability) ⇒ 0.0 - availability.normalize(minAvailability, maxAvailability)
-      //              case _ ⇒ 0.0
-      //            }
+        val weighted = sss.map(s ⇒ math.max(rate(s), preference(EGIEnvironment.MinValueForSelectionExploration)) -> s)
 
-      math.pow(
-        preference(StorageSizeFactor) * sizeFactor +
-          preference(StorageTimeFactor) * timeFactor +
-          //              preference(StorageAvailabilityFactor) * availabilityFactor +
-          preference(StorageSuccessRateFactor) * ss.quality.successRate.getOrElse(0.0),
-        preference(StorageFitnessPower)
-      )
+        val storage = org.openmole.tool.random.multinomialDraw(weighted)(randomProvider())
+        storage
+      }
     }
 
-    val weighted = sss.map(s ⇒ math.max(rate(s), preference(EGIEnvironment.MinValueForSelectionExploration)) -> s)
-
-    val storage = org.openmole.tool.random.multinomialDraw(weighted)(randomProvider())
-    val token = UsageControl.tryGetToken(storage.usageControl)
-    token.map(t ⇒ storage -> t)
+    BatchEnvironment.serializeJob(selectStorage, batchExecutionJob)
   }
 
   import gridscale.dirac._

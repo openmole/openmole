@@ -11,6 +11,12 @@ object UsageControl {
 
   def faucetToken = AccessToken()
 
+  def mapToken[B](usageControl: UsageControl)(f: AccessToken ⇒ B) = {
+    val t = tryGetToken(usageControl)
+    try t.map(f)
+    finally t.foreach(releaseToken(usageControl, _))
+  }
+
   def tryWithToken[B](usageControl: UsageControl)(f: Option[AccessToken] ⇒ B) = {
     val t = tryGetToken(usageControl)
     try f(t)

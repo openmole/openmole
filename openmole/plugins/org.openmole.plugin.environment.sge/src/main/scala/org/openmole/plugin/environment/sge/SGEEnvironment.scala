@@ -142,7 +142,8 @@ class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
       storageSharedLocally = parameters.storageSharedLocally
     )
 
-  override def trySelectStorage(files: ⇒ Vector[File]) = BatchEnvironment.trySelectSingleStorage(storageService)
+  override def serializeJob(batchExecutionJob: BatchExecutionJob) =
+    BatchEnvironment.serializeJob(storageService, batchExecutionJob)
 
   val installRuntime = new RuntimeInstallation(
     Frontend.ssh(host, port, timeout, authentication),
@@ -231,8 +232,8 @@ class SGELocalEnvironment(
       sharedDirectory = parameters.sharedDirectory,
     )
 
-
-  override def trySelectStorage(files: ⇒ Vector[File]) = BatchEnvironment.trySelectSingleStorage(storageService)
+  override def serializeJob(batchExecutionJob: BatchExecutionJob) =
+    BatchEnvironment.serializeJob(storageService, batchExecutionJob)
 
   val installRuntime = new RuntimeInstallation(
     Frontend.local,

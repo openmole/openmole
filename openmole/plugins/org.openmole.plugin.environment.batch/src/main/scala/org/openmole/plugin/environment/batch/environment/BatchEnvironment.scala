@@ -19,13 +19,13 @@ package org.openmole.plugin.environment.batch.environment
 
 import java.io.File
 import java.util.UUID
-import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicLong
 
 import org.openmole.core.communication.message._
+import org.openmole.core.communication.storage.TransferOptions
 import org.openmole.core.console.ScalaREPL.ReferencedClasses
 import org.openmole.core.console.{ REPLClassloader, ScalaREPL }
 import org.openmole.core.event.{ Event, EventDispatcher }
+import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice.{ FileCache, FileService, FileServiceCache }
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
@@ -41,13 +41,15 @@ import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.cache._
 import org.openmole.tool.file._
 import org.openmole.tool.logger.JavaLogger
-import org.openmole.tool.random.{ RandomProvider, Seeder }
+import org.openmole.tool.random.{ RandomProvider, Seeder, shuffled }
 import squants.time.TimeConversions._
 import squants.information.Information
 import squants.information.InformationConversions._
 import org.openmole.core.location._
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment.ExecutionJobRegistry
+import org.openmole.plugin.environment.batch
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment.{ ExecutionJobRegistry, signalUpload }
 
+import scala.collection.immutable.TreeSet
 import scala.ref.WeakReference
 import scala.util.Random
 
@@ -154,8 +156,115 @@ object BatchEnvironment extends JavaLogger {
     implicit val fileServiceCache:  FileServiceCache
   )
 
-  def trySelectSingleStorage(s: StorageService[_]) =
-    UsageControl.tryGetToken(s.usageControl).map(t ⇒ (s, t))
+  def serializeJob(storageService: StorageService[_], job: BatchExecutionJob)(implicit services: BatchEnvironment.Services) =
+    UsageControl.mapToken(storageService.usageControl) { implicit token ⇒
+      initCommunication(job, storageService)
+    }
+
+  def jobFiles(job: BatchExecutionJob) =
+    job.pluginsAndFiles.files.toVector ++
+      job.pluginsAndFiles.plugins ++
+      job.environment.plugins ++
+      Seq(job.environment.jvmLinuxX64, job.environment.runtime)
+
+  def initCommunication(job: BatchExecutionJob, storage: StorageService[_])(implicit token: AccessToken, services: BatchEnvironment.Services): SerializedJob = services.newFile.withTmpFile("job", ".tar") { jobFile ⇒
+    import services._
+
+    serializerService.serialise(job.runnableTasks, jobFile)
+
+    val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins
+    val files = (new TreeSet[File]()(fileOrdering) ++ job.files) diff plugins
+
+    val communicationPath = storage.child(storage.tmpDirectory(token), StorageService.timedUniqName)
+    storage.makeDir(communicationPath)
+
+    val inputPath = storage.child(communicationPath, uniqName("job", ".in"))
+
+    val runtime = replicateTheRuntime(job.job, job.environment, storage)
+
+    val executionMessage = createExecutionMessage(
+      job.job,
+      jobFile,
+      files,
+      plugins,
+      storage,
+      communicationPath
+    )
+
+    /* ---- upload the execution message ----*/
+    newFile.withTmpFile("job", ".tar") { executionMessageFile ⇒
+      serializerService.serialiseAndArchiveFiles(executionMessage, executionMessageFile)
+      signalUpload(eventDispatcher.eventId, storage.upload(executionMessageFile, inputPath, TransferOptions(forceCopy = true, canMove = true)), executionMessageFile, inputPath, storage)
+    }
+
+    SerializedJob(storage, communicationPath, inputPath, runtime)
+  }
+
+  def toReplicatedFile(file: File, storage: StorageService[_], transferOptions: TransferOptions)(implicit token: AccessToken, services: BatchEnvironment.Services): ReplicatedFile = {
+    import services._
+
+    if (!file.exists) throw new UserBadDataError(s"File $file is required but doesn't exist.")
+
+    val isDir = file.isDirectory
+    val toReplicatePath = file.getCanonicalFile
+
+    val (toReplicate, options) =
+      if (isDir) (services.fileService.archiveForDir(file).file, transferOptions.copy(forceCopy = true))
+      else (file, transferOptions)
+
+    val fileMode = file.mode
+    val hash = services.fileService.hash(toReplicate).toString
+
+    def upload = {
+      val name = batch.storage.StorageService.timedUniqName
+      val newFile = storage.child(storage.persistentDirectory(token), name)
+      signalUpload(eventDispatcher.eventId, storage.upload(toReplicate, newFile, options), toReplicate, newFile, storage)
+      newFile
+    }
+
+    val replica = services.replicaCatalog.uploadAndGet(upload, toReplicatePath, hash, storage)
+    ReplicatedFile(file.getPath, file.getName, isDir, hash, replica.path, fileMode)
+  }
+
+  def replicateTheRuntime(
+    job:         Job,
+    environment: BatchEnvironment,
+    storage:     StorageService[_]
+  )(implicit token: AccessToken, services: BatchEnvironment.Services) = {
+    val environmentPluginPath = shuffled(environment.plugins)(services.randomProvider()).map { p ⇒ toReplicatedFile(p, storage, TransferOptions(raw = true)) }.map { FileMessage(_) }
+    val runtimeFileMessage = FileMessage(toReplicatedFile(environment.runtime, storage, TransferOptions(raw = true)))
+    val jvmLinuxX64FileMessage = FileMessage(toReplicatedFile(environment.jvmLinuxX64, storage, TransferOptions(raw = true)))
+
+    val storageReplication = FileMessage(toReplicatedFile(storage.serializedRemoteStorage, storage, TransferOptions(raw = true, forceCopy = true)))
+
+    Runtime(
+      storageReplication,
+      runtimeFileMessage,
+      environmentPluginPath.toSet,
+      jvmLinuxX64FileMessage
+    )
+  }
+
+  def createExecutionMessage(
+    job:                 Job,
+    jobFile:             File,
+    serializationFile:   Iterable[File],
+    serializationPlugin: Iterable[File],
+    storage:             StorageService[_],
+    path:                String
+  )(implicit token: AccessToken, services: BatchEnvironment.Services): ExecutionMessage = {
+
+    val pluginReplicas = shuffled(serializationPlugin)(services.randomProvider()).map { toReplicatedFile(_, storage, TransferOptions(raw = true)) }
+    val files = shuffled(serializationFile)(services.randomProvider()).map { toReplicatedFile(_, storage, TransferOptions()) }
+
+    ExecutionMessage(
+      pluginReplicas,
+      files,
+      jobFile,
+      path,
+      storage.environment.runtimeSettings
+    )
+  }
 
   def trySelectSingleJobService(jobService: BatchJobService[_]) =
     UsageControl.tryGetToken(jobService.usageControl).map(t ⇒ (jobService, t))
@@ -235,7 +344,7 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   def exceptions = services.preference(Environment.maxExceptionsLog)
 
-  def trySelectStorage(files: ⇒ Vector[File]): Option[(StorageService[_], AccessToken)]
+  def serializeJob(batchExecutionJob: BatchExecutionJob): Option[SerializedJob]
   def trySelectJobService(): Option[(BatchJobService[_], AccessToken)]
 
   lazy val registry = new ExecutionJobRegistry()
@@ -268,6 +377,7 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
   def runtimeSettings = RuntimeSettings(archiveResult = false)
 
   def finishedJob(job: ExecutionJob) = {}
+
 }
 
 class BatchExecutionJob(val job: Job, val environment: BatchEnvironment) extends ExecutionJob { bej ⇒

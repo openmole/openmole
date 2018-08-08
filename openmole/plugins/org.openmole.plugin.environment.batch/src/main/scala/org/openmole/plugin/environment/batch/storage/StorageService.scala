@@ -194,11 +194,11 @@ class StorageService[S](
   lazy val quality = QualityControl(qualityHysteresis)
 
   def exists(path: String)(implicit token: AccessToken): Boolean = token.access { quality { storage.exists(s, path) } }
-  def makeDir(path: String)(implicit token: AccessToken): Unit = token.access { quality { storage.makeDir(s, path) } }
 
   def rmDir(path: String)(implicit token: AccessToken): Unit = token.access { quality { storage.rmDir(s, path) } }
   def rmFile(path: String)(implicit token: AccessToken): Unit = token.access { quality { storage.rmFile(s, path) } }
 
+  def makeDir(path: String)(implicit token: AccessToken): Unit = token.access { quality { storage.makeDir(s, path) } }
   def child(path: String, name: String) = storage.child(s, path, name)
 
   def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default)(implicit token: AccessToken) = token.access { quality { storage.upload(s, src, dest, options) } }

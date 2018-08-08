@@ -167,7 +167,8 @@ class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
       forceCopyOnRemoteStorage = parameters.forceCopyOnNode
     )
 
-  override def trySelectStorage(files: ⇒ Vector[File]) = BatchEnvironment.trySelectSingleStorage(storageService)
+  override def serializeJob(batchExecutionJob: BatchExecutionJob) =
+    BatchEnvironment.serializeJob(storageService, batchExecutionJob)
 
   val installRuntime = new RuntimeInstallation(
     Frontend.ssh(host, port, timeout, authentication),
@@ -264,8 +265,8 @@ class SLURMLocalEnvironment(
       sharedDirectory = parameters.sharedDirectory,
     )
 
-
-  override def trySelectStorage(files: ⇒ Vector[File]) = BatchEnvironment.trySelectSingleStorage(storageService)
+  override def serializeJob(batchExecutionJob: BatchExecutionJob) =
+    BatchEnvironment.serializeJob(storageService, batchExecutionJob)
 
   val installRuntime = new RuntimeInstallation(
     Frontend.local,
