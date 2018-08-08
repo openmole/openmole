@@ -167,7 +167,7 @@ object TreeNodeTab {
     initialEditing:  Boolean      = false,
     filter:          RowFilter    = First100,
     axis:            (Int, Int)   = (0, 1),
-    plotMode:        PlotMode     = XYMode): TreeNodeTab = new TreeNodeTab {
+    plotMode:        PlotMode     = ScatterMode): TreeNodeTab = new TreeNodeTab {
 
     lazy val safePathTab = Var(safePath)
     lazy val isEditing = Var(initialEditing)

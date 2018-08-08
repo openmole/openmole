@@ -356,8 +356,9 @@ object Utils extends JavaLogger {
     jsFile
   }
 
-  def expandDepsFile(from: File, template: File, to: File) = {
+  def expandDepsFile(template: File, to: File) = {
 
+    val from = File.createTempFile("openmole", "grammar")
     val rules = PluginInfo.keyWords.partition { kw ⇒
       kw match {
         case _@ (KeyWord.Task(_) | KeyWord.Source(_) | KeyWord.Environment(_) | KeyWord.Hook(_) | KeyWord.Sampling(_) | KeyWord.Domain(_) | KeyWord.Pattern(_)) ⇒ false
@@ -366,7 +367,7 @@ object Utils extends JavaLogger {
     }
 
     to.content =
-      s"""${from.content}\n${template.content}""" // ${AceOpenMOLEMode.content}
+      s"""${template.content}""" // ${AceOpenMOLEMode.content}
         .replace(
           "##OMKeywords##",
           s""" "${

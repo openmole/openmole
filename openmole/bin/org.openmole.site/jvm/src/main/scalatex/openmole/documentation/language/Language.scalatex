@@ -7,6 +7,18 @@
 @p A good way to get a first glimpse at what OpenMOLE can do is to read this @aa("research paper", href := Resource.paper.fgcs2013.file).
 
 @h2
+    OpenMOLE scripts
+The OpenMOLE scripts are stored in the GUI in .oms files. They can eventually be split into several different files.
+To import the content of an .oms file (let say MyExp.oms) in a given .oms file located in the same directory:
+
+ @hl.openmoleNoTest("""
+ import _file_.MyExp._""")
+
+To refer to an .oms in a parent directory, use the @i{parent} keyword:
+ @hl.openmoleNoTest("""
+  import _parent_._file_.MyExp._""")
+
+@h2
     Basic scala constructs
 You need only a very basic understanding of the scala language in order to design OpenMOLE workflows.
  @hl.openmoleNoTest("""

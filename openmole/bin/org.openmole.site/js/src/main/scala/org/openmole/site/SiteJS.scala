@@ -44,6 +44,7 @@ object SiteJS extends JSApp {
     val title: String = js.native
     val url: String = js.native
   }
+
   type Entries = collection.mutable.Map[String, String]
 
   val lunrIndex: Var[Option[Index]] = Var(None)
@@ -108,6 +109,6 @@ object SiteJS extends JSApp {
         }
       }
 
-    org.scalajs.dom.window.document.getElementById(shared.documentationSideMenu.place).innerHTML = div(menuContent.flatten: _*)(paddingBottom := 20)
+    org.scalajs.dom.window.document.getElementById(shared.documentationSideMenu.place).innerHTML = div(if (nodes.length == 0) span else h2(marginTop := -20, "Contents"))(div(marginTop := -20)(menuContent.flatten: _*))
   }
 }
