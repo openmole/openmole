@@ -35,7 +35,7 @@ object Native {
   def importantAspectCARE = paragraph(p("One very important aspect of CARE is that ", b("you only need to package your application once"), ". As long as the execution you use to package your application makes uses of all the dependencies (libraries, packages, ...), you should not have any problem re-executing this archive with other parameters."))
 
   def introPackagingForRPythonCplusplus = paragraph(
-    "Most of the time, model code is not designed to be portable. OpenMOLE handles natively Java, Scala, NetLogo and R via specific Tasks. However, if no specific task has yet been designed for the language/platform you can still embed you code into OpenMOLE using:",
+    div("Most of the time, model code is not designed to be portable. OpenMOLE handles natively Java, Scala, NetLogo and R via specific Tasks. However, if no specific task has yet been designed for the language/platform you can still embed you code into OpenMOLE using:", marginTop := 30),
       ul(
         li("either the ", a("container task documentation", href := DocumentationPages.container.file, targetBlank)),
         li("or the ", a("native packaging documentation", href := DocumentationPages.care.file, targetBlank), "."),

@@ -135,11 +135,14 @@ object Site extends App {
                 page.source.map(source ⇒ tools.linkButton("Suggest edits", tools.modificationLink(source), classIs(btn ++ btn_danger))
                 )),
               sitePage.header,
-              sitePage.element(elementClass, id := "padding-element")
+              div(elementClass, id := "padding-element")(
+                div(id := shared.documentationSideMenu.place),
+                sitePage.element
+              )
             ),
             sitePage match {
               case s: IntegratedPage ⇒ Seq(s.leftMenu) ++ s.rightMenu.toSeq
-              case _                 ⇒ div(id := shared.documentationSideMenu.place)
+              case _                 ⇒ div()
             },
             Footer.build,
             onload := onLoadString(page)
