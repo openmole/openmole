@@ -39,7 +39,7 @@ the inputs possibles values, given their bounds and quanta of discretisation.
 @br
 @Resource.rawFrag(Resource.img.method.completeID)
 @br
-@b{Method scores:}
+@b{Method scores}
 @br
 Regular sampling or Uniform Sampling are quite good for a first Input Space exploration when you don't know anything  about its structure yet.
 Since it samples from the input space, the collected values from the model executions will reveal the output values
@@ -246,7 +246,7 @@ OpenMOLE includes two of these methods: @b{Sobol Sequence} and @b{Latin Hypercub
 @Resource.rawFrag(Resource.img.method.sobolLHSID)
 @br
 
-@b{Method scores:}
+@b{Method scores}
 @br
 
     These two methods perform allright in terms of Input Space Exploration (which is normal as they were built for that extent),

@@ -34,8 +34,6 @@
       )"""
 
 
-@h1{Using Genetic Algorithms to Calibrate a NetLogo Model}
-
 @p
   This example presents how to explore a NetLogo model step by step with an Evolutionary/Genetic Algorithm (EA/GA) in
   OpenMOLE.

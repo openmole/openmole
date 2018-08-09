@@ -2,8 +2,6 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-@h1{FAQ}
-
 @h2
     Which Java version should I use?
 @div OpenMOLE is fully working under OpenJDK 8 and above. OpenJDK is the recommended option. You can check which Java version

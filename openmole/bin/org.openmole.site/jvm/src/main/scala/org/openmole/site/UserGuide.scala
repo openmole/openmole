@@ -77,11 +77,24 @@ object UserGuide {
     paddingRight := 15
   )
 
+  def h2Contents(content: String) = {
+    val parsing = scala.xml.XML.loadString(s"<html>$content</html>")
+    val h2s = (parsing \\ "h2").map { h ⇒
+      val text = h.text.replaceAll("\uD83D\uDD17", "")
+      div(paddingTop := 5, paddingLeft := 10)(a(href := "#" + shared.anchor(text))(text))
+    }
+
+    if (h2s.isEmpty) span(marginTop := 40) else div(marginBottom := 30, scalatags.Text.all.h2(marginTop := -20, "Contents"), h2s)
+  }
+
   def integrate(current: Page): SitePage = {
     def integratedPage(left: SideMenu, right: SideMenu = SideMenu.more, head: TypedTag[String] = div(paddingTop := 100)) =
       IntegratedPage(
         head,
-        div(current.content),
+        div(
+          if (DocumentationPages.mainDocPages.contains(current)) span else scalatags.Text.all.h1(current.title),
+          h2Contents(current.content.render),
+          current.content),
         SideMenu.left(left),
         Some(SideMenu.right(right.insert(current.details)))
       )

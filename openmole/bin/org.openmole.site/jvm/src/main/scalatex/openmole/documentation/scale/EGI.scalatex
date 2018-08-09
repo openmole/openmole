@@ -3,16 +3,14 @@
 @import org.openmole.site.tools.api._
 @import org.openmole.site.content.Environment._
 
-
 @aa("EGI", href := shared.link.egi) is a grid infrastructure gathering computing resources from all over the world.
 It is a very powerful computing environment, but transpires as technically challenging to use.
 OpenMOLE makes it very simple to benefit from the grid.
 
- @h3
+ @h2
     Setup your grid credentials
 You first need to set your EGI certificate. The way to achieve this is describe in the @aa("GUI guide", href := DocumentationPages.gui.file)")
 
-@break
 
 Note: The following instructions explain how to setup the EGI authentication in console mode (not recommended).
 
@@ -23,7 +21,7 @@ EGIAuthentication() = P12Certificate(encrypted, "/path/to/your/certificate.p12")
 
 @p You need to execute this operation only once and for all. OpenMOLE persists this information in your preferences folder.
 
-  @h3
+  @h2
     Submitting jobs to EGI
   @p
     To use EGI through DIRAC you should setup an @hl.openmoleNoTest{EGIAuthentication} as explained above using a @b{P12 certificate bundle}. Other methods are not supported by DIRAC. In order to use EGI you must be registered in a @b{Virtual Organisation (VO)}.

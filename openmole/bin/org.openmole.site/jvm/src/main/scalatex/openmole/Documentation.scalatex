@@ -3,8 +3,6 @@
 @import DocumentationPages._
 
 
-@h1(textAlign := "center", "Documentation")
-
 @ul( listStyleType := "none")
   @li
     @h5

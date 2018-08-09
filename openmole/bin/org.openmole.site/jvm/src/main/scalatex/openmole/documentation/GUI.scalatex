@@ -4,8 +4,6 @@
 
 @def overview = "Overview"
 
-@h1{GUI guide}
-
 @h2{@overview}
 
 This GUI is an advanced editor for OpenMOLE experiment description through OpenMOLE scripts. It allows editing, managing and running them.

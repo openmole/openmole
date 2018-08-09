@@ -58,7 +58,7 @@ object SharedStorage extends JavaLogger {
               runtime.environmentPlugins.map { p ⇒ "cp " + p.path + " envplugins/plugin$PLUGIN.jar && PLUGIN=`expr $PLUGIN + 1`" }.mkString(" && ") + " && " +
               s"PATH=$$PWD/jre/bin:$$PATH /bin/bash -x run.sh 256m test_run --test && rm -rf test_run && " +
               s"cd .. && { if [ -d $runtimeInstall ]; then rm -rf $tmpDirName; exit 0; fi } && " +
-              s"mv $tmpDirName $runtimeInstall && rm -rf $tmpDirName && rm $scriptName && { ls $runtimePrefix* | grep -v '^$runtimeInstall' | xargs rm -rf ; }"
+              s"mv $tmpDirName $runtimeInstall && rm -rf $tmpDirName && rm $scriptName && { ls | grep '^$runtimePrefix' | grep -v '^$runtimeInstall' | xargs rm -rf ; }"
 
           Log.logger.fine(s"Install script: $content")
 

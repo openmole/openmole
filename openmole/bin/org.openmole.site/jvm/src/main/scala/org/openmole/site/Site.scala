@@ -136,7 +136,6 @@ object Site extends App {
                 )),
               sitePage.header,
               div(elementClass, id := "padding-element")(
-                div(id := shared.documentationSideMenu.place),
                 sitePage.element
               )
             ),
@@ -151,15 +150,14 @@ object Site extends App {
 
         private def onLoadString(sitepage: org.openmole.site.Page) = {
           def siteJS = "org.openmole.site.SiteJS()"
-          def documentationJS = s"$siteJS.documentationSideMenu();"
           def commonJS = s"$siteJS.main();$siteJS.loadIndex(index);"
 
           sitepage match {
             case Pages.index | DocumentationPages.training ⇒ s"$siteJS.loadBlogPosts();" + commonJS
-            case DocumentationPages.profile                ⇒ s"$siteJS.profileAnimation();" + documentationJS + commonJS
-            case DocumentationPages.pse                    ⇒ s"$siteJS.pseAnimation();" + documentationJS + commonJS
-            case DocumentationPages.simpleSAFire           ⇒ s"$siteJS.sensitivityAnimation();" + documentationJS + commonJS
-            case _                                         ⇒ documentationJS + commonJS
+            case DocumentationPages.profile                ⇒ s"$siteJS.profileAnimation();" + commonJS
+            case DocumentationPages.pse                    ⇒ s"$siteJS.pseAnimation();" + commonJS
+            case DocumentationPages.simpleSAFire           ⇒ s"$siteJS.sensitivityAnimation();" + commonJS
+            case _                                         ⇒ commonJS
           }
         }
 

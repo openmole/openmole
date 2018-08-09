@@ -3,8 +3,6 @@
 @import org.openmole.site._
 @import org.openmole.site.tools._
 
-@h1{File management}
-
 OpenMOLE implements mechanisms to conveniently make use of data stored as file in your experiments. OpenMOLE make very few distinction between file and directories. In this part when we use the "file" word it can generally be replaced by the "directory" word and the sentence hold.
 
 @br The files in OpenMOLE tasks have 2 main use cases:

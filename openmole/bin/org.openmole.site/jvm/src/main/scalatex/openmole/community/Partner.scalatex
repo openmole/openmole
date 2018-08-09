@@ -2,8 +2,6 @@
 @import org.openmole.site._
 @import org.openmole.site.stylesheet._
 
-
-@h1{Institutional partners}
 @div(stylesheet.centerBox100){
   @a(img(src := Resource.img.partner.iscpif.file,  partners), href := shared.link.partner.iscpif, target := "_blank")
   @a(img(src := Resource.img.partner.geocite.file, partners), href := shared.link.partner.parisgeo, target := "_blank")

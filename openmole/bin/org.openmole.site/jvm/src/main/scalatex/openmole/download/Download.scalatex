@@ -3,8 +3,6 @@
 @import org.openmole.site.stylesheet._
 @import DocumentationPages._
 
-@h1{Installing OpenMOLE on your computer}
-
 @h2{Try our demo website}
 Before downloading OpenMOLE, you might want to get a preview of what you can do with it.
 You can try OpenMOLE online using our @aa("demo website", href := shared.link.demo).

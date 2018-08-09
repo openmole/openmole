@@ -9,13 +9,10 @@
       span(name, memberStyle)
     )
 
-@h1{Hosting institutions}
 @div(stylesheet.centerBox100){
   @a(img(src := Resource.img.partner.iscpif.file,  partners), href := shared.link.partner.iscpif, target := "_blank")
   @a(img(src := Resource.img.partner.geocite.file, partners), href := shared.link.partner.parisgeo, target := "_blank")
 }
-
-@h1{Community leaders}
 
 @member(Resource.img.people.romain, "Romain REUILLON")
 @div(width := "75%", paddingLeft := 70)
@@ -30,8 +27,6 @@
 @member(Resource.img.people.jo, "Jonathan PASSERAT-PALMBACH")
 @div(width := "75%", paddingLeft := 70)
   Research associate at Imperial College London, in the @a("BioMedIA group", href := shared.link.partner.biomedia). Developer of the OpenMOLE Platform, he co-developed @aa("GridScale", href := shared.link.repo.gridscale). Regularly inserts bugs in the code to keep his team-mates on task.
-
-@h1{Active community}
 
 @member(Resource.img.people.paul, "Paul CHAPRON")
 @div(width := "75%", paddingLeft := 70)

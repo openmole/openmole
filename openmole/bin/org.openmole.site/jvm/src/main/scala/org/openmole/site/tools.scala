@@ -73,7 +73,7 @@ package object tools {
 
     def anchor(elements: Seq[Any]): Seq[Modifier] =
       link(elements) match {
-        case Some(t) ⇒ Seq(a(id := s"${shared.anchor(t)}", top := -90, position := "relative", display := "block"))
+        case Some(t) ⇒ Seq(a(id := s"${shared.anchor(t)}", top := -60, position := "relative", display := "block"))
         case None    ⇒ Seq()
       }
 

@@ -1,8 +1,6 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-@h1{Utility Scala functions}
-
 Some useful functions are usable anywhere in OpenMOLE where you would use scala code. For instance you can use them in:
     @ul
         @li

@@ -20,16 +20,11 @@
 
 
 
-@h1
-    Islands : a Custom Distribution Method for GA on distributed environments
+@i{Islands : a Custom Distribution Method for GA on distributed environments}
 
-
-
-
-
-  @p For distributed environments the island distribution scheme is well adapted. Islands of population evolve for a
-  while on a remote node. When an island is finished, its final population is merged back into a global archive.
-  A new island is then generated until the termination criterion: i.e. the total number of islands to generate is met.
+@p For distributed environments the island distribution scheme is well adapted. Islands of population evolve for a
+while on a remote node. When an island is finished, its final population is merged back into a global archive.
+A new island is then generated until the termination criterion: i.e. the total number of islands to generate is met.
 
 @br
 
