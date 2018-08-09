@@ -1,5 +1,6 @@
 
 @import org.openmole.site._
+@import org.openmole.site.tools._
 @import DocumentationPages._
 
 @div(`class` := "index-element" , id := "main-padding")
@@ -40,7 +41,7 @@
     @h4{Wanna try?}
 
     @div(stylesheet.centerJustify(100)){
-      You can try OpenMOLE online using the OpenMOLE @a("demonstration website", href := shared.link.demo).
+      You can try OpenMOLE online using the OpenMOLE @aa("demonstration website", href := shared.link.demo).
     @br
       When you are ready you can then download OpenMOLE and install it on your computer, everything is explained in the @a("Download", href := download.file) section.
     @br

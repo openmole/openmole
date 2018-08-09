@@ -273,7 +273,9 @@ object Error {
   def empty = Error("")
 }
 
-case class Error(stackTrace: String)
+case class Error(stackTrace: String) {
+  def +(error: Error) = Error(stackTrace + error.stackTrace)
+}
 
 case class Token(token: String, duration: Long)
 

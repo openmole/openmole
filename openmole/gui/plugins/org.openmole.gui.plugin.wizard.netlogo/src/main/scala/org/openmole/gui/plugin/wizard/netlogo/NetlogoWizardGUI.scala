@@ -43,9 +43,9 @@ class NetlogoWizardFactory extends WizardPluginFactory {
 
   def parse(safePath: SafePath): Future[Option[LaunchingCommand]] = OMPost()[NetlogoWizardAPI].parse(safePath).call()
 
-  def help: String = "If your Netlogo sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace. Then set the empeddWorkspace option to true in the oms script."
+  def help: String = "If your NetLogo script depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace. Then set the embedWorkspace option to true in the oms script."
 
-  def name: String = "Netlogo"
+  def name: String = "NetLogo"
 }
 
 @JSExportTopLevel("org.openmole.gui.plugin.wizard.netlogo.NetlogoWizardGUI")
@@ -64,7 +64,7 @@ class NetlogoWizardGUI extends WizardGUIPlugin {
       div(embedWorkspaceCheckBox.render)
         .render.withLabel("EmbedWorkspace")
     ),
-    div(client.modelHelp +++ client.columnCSS, "If your Jar sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace. Then set the empeddWorkspace option to true in the oms script.")
+    div(client.modelHelp +++ client.columnCSS, "If your Jar srcipt depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace. Then set the embedWorkspace option to true in the oms script.")
   )
 
   def save(
