@@ -211,7 +211,7 @@ background-color : #222;
 
 
     #main-content {
-        width: 50%;
+        width: 60%;
         float: left;
     }
 
@@ -225,14 +225,14 @@ background-color : #222;
 
     .sidebar-left {
         text-align:right;
-        width: 25%;
+        width: 20%;
         float: left;
     }
 
     #sidebar-right {
         text-align: left;
         padding-left : 30px;
-        width: 25%;
+        width: 20%;
         float: left;
     }
 
@@ -278,7 +278,7 @@ background-color : #222;
     }
 
     #main-content {
-        left: 25%; /*Width of #left-sidebar*/
+        left: 20%; /*Width of #left-sidebar*/
     }
 }
 
