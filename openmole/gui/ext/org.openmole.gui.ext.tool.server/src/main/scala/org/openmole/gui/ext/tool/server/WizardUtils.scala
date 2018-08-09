@@ -69,7 +69,7 @@ object WizardUtils {
       defaults,
       resourcesString,
       specificInputPattern.map { sip => imapString(imappings, sip) },
-      specificOutputPattern.map { sop => imapString(omappings, sop) }
+      specificOutputPattern.map { sop => omapString(omappings, sop) }
     )
   }
 
@@ -77,7 +77,7 @@ object WizardUtils {
       modelData.inputs +
       modelData.outputs +
       modelData.specificInputMapping.getOrElse("") +
-      modelData.specificInputMapping.getOrElse("") +
+      modelData.specificOutputMapping.getOrElse("") +
       modelData.inputFileMapping +
       modelData.outputFileMapping +
       modelData.resources +

@@ -51,7 +51,8 @@ object GUIServer {
     from / "fonts" copy to / "fonts"
     from / "img" copy to / "img"
 
-    Utils.expandDepsFile(from / "js" / Utils.depsFileName, from / "js" / Utils.openmoleGrammarName, to /> "js" / Utils.depsFileName)
+    Utils.expandDepsFile(from / "js" / Utils.openmoleGrammarName, to /> "js" / Utils.openmoleGrammarMode)
+    (from / "js" / Utils.depsFileName) copy (to /> "js" / Utils.depsFileName)
     Utils.openmoleFile(optimizedJS) copy (to /> "js" / Utils.openmoleFileName)
     to
   }

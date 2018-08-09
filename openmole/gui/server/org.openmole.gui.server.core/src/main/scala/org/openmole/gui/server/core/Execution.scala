@@ -24,7 +24,8 @@ import org.openmole.core.event.Listner
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.gui.ext.data._
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment.{ BeginDownload, BeginUpload, EndDownload, EndUpload }
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
+import org.openmole.plugin.environment.batch._
 import org.openmole.tool.file.readableByteCount
 import org.openmole.tool.stream.StringPrintStream
 
@@ -194,7 +195,10 @@ class Execution {
     val info = errorMap(environmentId)
 
     info.environment.errors.map { ex ⇒
-      EnvironmentError(environmentId, ex.exception.getMessage, ErrorBuilder(ex.exception), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
+      ex.exception match {
+        case fje: environment.FailedJobExecution ⇒ EnvironmentError(environmentId, fje.message, ErrorBuilder(fje.cause) + Error(s"\nDETAILS:\n${fje.detail}"), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
+        case _                                   ⇒ EnvironmentError(environmentId, ex.exception.getMessage, ErrorBuilder(ex.exception), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
+      }
     }
   }
 

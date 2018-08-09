@@ -55,9 +55,10 @@ class MarketPanel {
   lazy val marketTable = div(
     paddingTop := 20,
     Rx {
+      tagFilter.nameFilter()
       marketIndex().map { mindex ⇒
         for {
-          entry ← mindex.entries if tagFilter.exists(entry.tags)
+          entry ← mindex.entries if tagFilter.exists(entry.tags :+ entry.name)
         } yield {
           val isSelected = Some(entry) == selectedEntry()
           Seq(
@@ -115,6 +116,7 @@ class MarketPanel {
         state.withTransferWaiter { _ ⇒
           if (selectedEntry.now == Some(e)) buttonIcon(" Download", btn_warning, glyph_download_alt, todo) else tags.div()
         }
+      case _ ⇒ tags.div()
     }.getOrElse(tags.div())
   }
 

@@ -135,11 +135,13 @@ object Site extends App {
                 page.source.map(source ⇒ tools.linkButton("Suggest edits", tools.modificationLink(source), classIs(btn ++ btn_danger))
                 )),
               sitePage.header,
-              sitePage.element(elementClass, id := "padding-element")
+              div(elementClass, id := "padding-element")(
+                sitePage.element
+              )
             ),
             sitePage match {
               case s: IntegratedPage ⇒ Seq(s.leftMenu) ++ s.rightMenu.toSeq
-              case _                 ⇒ div(id := shared.documentationSideMenu.place)
+              case _                 ⇒ div()
             },
             Footer.build,
             onload := onLoadString(page)
@@ -148,15 +150,14 @@ object Site extends App {
 
         private def onLoadString(sitepage: org.openmole.site.Page) = {
           def siteJS = "org.openmole.site.SiteJS()"
-          def documentationJS = s"$siteJS.documentationSideMenu();"
           def commonJS = s"$siteJS.main();$siteJS.loadIndex(index);"
 
           sitepage match {
             case Pages.index | DocumentationPages.training ⇒ s"$siteJS.loadBlogPosts();" + commonJS
-            case DocumentationPages.profile                ⇒ s"$siteJS.profileAnimation();" + documentationJS + commonJS
-            case DocumentationPages.pse                    ⇒ s"$siteJS.pseAnimation();" + documentationJS + commonJS
-            case DocumentationPages.simpleSAFire           ⇒ s"$siteJS.sensitivityAnimation();" + documentationJS + commonJS
-            case _                                         ⇒ documentationJS + commonJS
+            case DocumentationPages.profile                ⇒ s"$siteJS.profileAnimation();" + commonJS
+            case DocumentationPages.pse                    ⇒ s"$siteJS.pseAnimation();" + commonJS
+            case DocumentationPages.simpleSAFire           ⇒ s"$siteJS.sensitivityAnimation();" + commonJS
+            case _                                         ⇒ commonJS
           }
         }
 

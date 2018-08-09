@@ -19,7 +19,6 @@ val modelTask = EmptyTask() set (
     )
 """
 
-
 Using Genetic Algorithms (GA), OpenMOLE find the inputs set matching one or several criteria: this is called @b{calibration}.
 In practice, calibration is used when you want to target @b{one} specific scenario or dynamic.
 Usually, one uses a fitness function that is commensurable to a distance from your target, so if your model is not
@@ -27,12 +26,9 @@ Usually, one uses a fitness function that is commensurable to a distance from yo
 For more details on the calibration using genetic algorithms, see the @a("GA detailed page", href:=DocumentationPages.geneticAlgorithm.file).
 
 @h2{Single criterion Calibration}
-
-@break
 @Resource.rawFrag(Resource.img.method.GAsingleID)
 @break
-@b{Method scores :}
-@br
+@h2{Method scores}
 The single criterion Calibration method is @i{designed} to solve an optimization problem, so unsurprisingly it performs well
 regarding the optimization grade.
 Since it's only focused towards discover the best performing individual (parameter set), this method doesn't provide
@@ -78,7 +74,7 @@ In other words : this function takes a model ( whose signature is (X→Y)  since
 @Resource.rawFrag(Resource.img.method.GAmultiID)
 @break
 
-@b{Method scores :}
+@h2{Method scores}
 @br
 Multi-criteria  Calibration method slightly differs from the single criterion version.
 It suffers the same limitation regarding Input and Output space limitations.
@@ -133,7 +129,7 @@ of your model outputs, which is not bad after all !
 @break
 
 
-@h3{Typed signature}
+@h2{Typed signature}
 The multi-criterion calibration of a Model signature can be typed  likewise:
 @br@br
 @div(style:="text-align:center")

@@ -2,9 +2,6 @@
 @import org.openmole.site.stylesheet._
 @import org.openmole.site._
 
-@h1
-    The Market Place
-
 This is the OpenMOLE Market Place. It gathers @b{working examples} of OpenMOLE workflows. To execute a market place entry you can either import it directly from within the OpenMOLE editor using the market place menu or download it from this page, upload it to you workspace and then extract it.
 @img(src := Resource.img.guiGuide.market.file, center(95))
 @p You can contribute to the market place either by providing a pull request on the OpenMOLE on the @a("central OpenMOLE market place on github", href := shared.link.repo.market) or by pushing your example workflows on your own git repository and post it to the @a("user mailing list", href:=shared.link.mailingList).

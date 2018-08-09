@@ -5,7 +5,6 @@
 @import DocumentationPages._
 @import scalatex.{ openmole ⇒ scalatex }
 
-@h1{Tutorials}
 
 Here are some tutorials to help you build your first experiments:
 

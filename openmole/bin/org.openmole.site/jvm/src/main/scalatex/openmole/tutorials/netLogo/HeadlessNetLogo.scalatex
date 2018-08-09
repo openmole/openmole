@@ -5,9 +5,6 @@
 @import org.openmole.site.stylesheet._
 @import DocumentationPages._
 
-@h1{How to Build a Headless Version of a NetLogo Code}
-
-This page will guide you towards using your program with graphical widgets and NetLogo in OpenMOLE.
 For this combination to work, some rules have to be applied to your program.
 
 @h2{Guidelines}

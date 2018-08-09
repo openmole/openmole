@@ -58,9 +58,13 @@ object Page {
 
     new Page {
       override def name: String = _name
+
       override def content = _content
+
       override def title = _title
+
       override def details = _details
+
       override def source = _source
     }
   }
@@ -68,12 +72,17 @@ object Page {
 
 trait Page {
   def content: Frag
+
   def name: String
 
   def title: Option[String] = Some(s"OpenMOLE - $name")
+
   def location: String = name
+
   def file = Pages.file(this)
+
   def details: Seq[Page]
+
   def source: Option[String]
 
   def anchor(name: String) = s"$file#${name.replaceAll(" ", "")}"
@@ -99,18 +108,28 @@ object DocumentationPage {
     source:   Option[String]           = None
   ) = {
     def _name = name
+
     def _content = content
+
     def _details = details
+
     def _location = location
+
     def _title = title
+
     def _source = source
 
     new DocumentationPage {
       def name = _name
+
       def content = _content
+
       override def details = _details
+
       override def location = _location.getOrElse(name)
+
       override def title = _title.orElse(Some(name))
+
       override def source = _source
     }
   }
@@ -144,6 +163,8 @@ object DocumentationPages {
 
   def headPages =
     Seq(documentation, run, explore, scale, language, advancedConcepts, developers, tutorials, OMcommunity)
+
+  val mainDocPages = runPages ++ explorePages ++ scalePages ++ Seq(scale, explore, run)
 
   // Documentation
   lazy val documentation = DocumentationPage.fromScalatex(name = "Documentation", content = scalatex.Documentation)

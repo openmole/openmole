@@ -48,7 +48,6 @@ package object shared {
 
   object documentationSideMenu {
     lazy val cssClass = "sidemenu"
-    lazy val place = "side-menu-place"
   }
 
   def anchor(title: String) = title.filter(c ⇒ c.isLetterOrDigit)

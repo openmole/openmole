@@ -16,8 +16,6 @@ val myseed = Val[Int]
 val x = Val[Double]
 val fitness = Val[Double]"""
 
-
-
 The profile method is designed to test the sensitivity of the input parameters in a calibration context.
 Although it may look similar to traditional sensitivity analysis in principle, the calibration profile
 algorithm goes deeper, as it captures the full effect of a parameter variation on the model fitness, every other input
@@ -33,8 +31,7 @@ algorithm goes deeper, as it captures the full effect of a parameter variation o
 
 
 @br
-@b{Method scores:}
-@br
+@h2{Method scores}
 The calibration profile method is perfect to reveal a model's sensitivity regarding its parameter, hence the highest score possible in sensitivity.
 However, it does not retrieve information about the input space nor the output space structures, as it focus on @b{one} parameter/input, every other input being let free.
 As the studied parameter varies, the other parameter are calibrated (see below), so this method scores very well
@@ -73,7 +70,7 @@ can visually determine what values i must take for the model to be
 
 @break
 
-@h3{Typed signature}
+@h2{Typed signature}
 The profile method can be typed  likewise:
 @br@br
 @div(style:="text-align:center")
@@ -139,16 +136,15 @@ specifies that we are profiling @hl.code("param1").
 
 @break
 @br
-@b{Interpretation of the profiles:}
-@br
+@h2{Interpretation of the profiles}
 A calibration profile is a 2D curve with the value of the parameter under study represented on the X-axis and the best possible calibration error on the Y-axis. To ease the interpretation of the profiles we propose to define an acceptance threshold on the calibration error: under this acceptance threshold the calibration error is considered sufficiently satisfying and the dynamics exposed by the model sufficiently acceptable, over this acceptance threshold the calibration error is considered too high and the dynamics exposed by the model are considered unacceptable.
 
 @br The computed calibration profiles may take very diverse shapes depending on the effect of the parameter of the model dynamics, however some of this shapes are recurrent. The most typical shapes are shown on the figure bellow. They have been discriminated by according to the variation of the values of the profile compared to the threshold value :
 @ul
-  @li {The shape 1 is exposed when a parameter is restricting with respect to the calibration criterion and when the model is able produce acceptable dynamics only for a specific range of the parameter. In this case a connected validity interval can be established for the parameter.}
-  @li {The shape 2  is exposed  when a parameter is restricting with respect to the calibration criterion, but the validity domain of the parameter is not connected. It might mean that several qualitatively different dynamics of the model meet the calibration requirement. In this case model dynamics should be observed directly to determine if the different kinds of dynamics are all suitable or if some of them are mistakenly accepted by the calibration objective.}
-  @li {The shape 3 is exposed when the model is not possible to calibrate. The profile doesn’t expose any acceptable dynamic according to the calibration criterion. In this case, the model should be improved or the calibration criterion should be adapted.}
-  @li {The shape 4 is exposed when a parameter doesn’t restrict the the model dynamics with regards to the calibration criterion. The model can always be calibrated whatever the value of the parameter is. In this case this parameter constitute a superfluous degree of liberty for the model since it’s effect can always be compensated by a variation on the other parameters. In general it means that this parameter should be fixed, that a mechanism of the model should be removed or that the model should be reduced by expressing the value of this parameter in function of the value of the other parameters.}
+  @li{The shape 1 is exposed when a parameter is restricting with respect to the calibration criterion and when the model is able produce acceptable dynamics only for a specific range of the parameter. In this case a connected validity interval can be established for the parameter.}
+  @li{The shape 2  is exposed  when a parameter is restricting with respect to the calibration criterion, but the validity domain of the parameter is not connected. It might mean that several qualitatively different dynamics of the model meet the calibration requirement. In this case model dynamics should be observed directly to determine if the different kinds of dynamics are all suitable or if some of them are mistakenly accepted by the calibration objective.}
+  @li{The shape 3 is exposed when the model is not possible to calibrate. The profile doesn’t expose any acceptable dynamic according to the calibration criterion. In this case, the model should be improved or the calibration criterion should be adapted.}
+  @li{The shape 4 is exposed when a parameter doesn’t restrict the the model dynamics with regards to the calibration criterion. The model can always be calibrated whatever the value of the parameter is. In this case this parameter constitute a superfluous degree of liberty for the model since it’s effect can always be compensated by a variation on the other parameters. In general it means that this parameter should be fixed, that a mechanism of the model should be removed or that the model should be reduced by expressing the value of this parameter in function of the value of the other parameters.}
 
 @br @img(src := Resource.img.method.profileInterpretation.file, center(70))
 

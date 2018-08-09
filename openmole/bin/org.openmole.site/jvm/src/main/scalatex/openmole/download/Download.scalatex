@@ -3,30 +3,32 @@
 @import org.openmole.site.stylesheet._
 @import DocumentationPages._
 
-@h1{Installing OpenMOLE on your computer}
-
 @h2{Try our demo website}
 Before downloading OpenMOLE, you might want to get a preview of what you can do with it.
-You can try OpenMOLE online using our @a("demo website", href := shared.link.demo).
+You can try OpenMOLE online using our @aa("demo website", href := shared.link.demo).
 Please note that the service is reset every 6 hours, so don't be surprised if your current script suddenly vanishes :-)
 
 @h2{Download OpenMOLE}
 To run correctly on your own computer, OpenMOLE requires Java version 8 or above.
-Check our @a("FAQ", href := Pages.faq.file) to access your java version information.
+Check our @aa("FAQ", href := Pages.faq.file) to access your Java version information.
 @br
 When Java is installed, you just need to download and extract @a("this archive", href:=Resource.script.openmole.file), and
-you're done! OpenMOLE is installed and works out of the box! @br @br
+you're done!
+OpenMOLE is installed and works out of the box!
+@br @br
 @linkButton(s"Download ${org.openmole.core.buildinfo.version.value}", Resource.script.openmole.file, classIs(btn ++ btn_danger))
 
 @h2{Run OpenMOLE on Linux}
 You can then launch OpenMOLE by executing the @i{openmole} file in the installation directory with the @hl.code("./openmole") command.
-It will bring up you web browser.
-@br
-OpenMOLE supports Chrome and Firefox.
-If you are using another default web browser, please copy paste the OpenMOLE url (http://localhost:port) in one of these browsers.
-@br
-@br
-You should see something like this:
-@br
-@br
+It will bring up you web browser and you should see something like this:
+@br @br
 @img(src := Resource.img.mole.uiScreenshot.file, `class` := "uiScreenshot", center(100)).
+@br @br
+OpenMOLE supports Chrome and Firefox.
+If you are using another web browser, you will need to copy paste the OpenMOLE url (something like http://localhost:[port]) in either Chrome or Firefox.
+
+@h2{Experiment with OpenMOLE}
+To get started with OpenMOLE and see a few simple use cases, you can follow our @a("Step by Step Introduction to OpenMOLE", href := stepByStepIntro.file).
+Other @a("Tutorials", href := tutorials.file) are also available, and you should find all the info you need in our @a("Documentation", href := documentation.file) section.
+@br
+If you have questions or problems, don't hesitate to contact our great @a("Community", href := OMcommunity.file) through the @aa("forum", href := shared.link.mailingList) or the @aa("chat", href := shared.link.chat)!

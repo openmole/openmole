@@ -1,10 +1,21 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-@h1{The OpenMOLE language}
 @p The OpenMOLE console language is an extension of the Scala language designed for distributed computing. It supports all the scala constructs and additional operators and classes especially designed to compose workflows. OpenMOLE workflows expose explicit parallel aspect of the workload that can be delegated to distributed computing environments in a transparent manner. The philosophy of OpenMOLE is test small (on your computer) and scale for free (on remote distributed computing environments).
 
 @p A good way to get a first glimpse at what OpenMOLE can do is to read this @aa("research paper", href := Resource.paper.fgcs2013.file).
+
+@h2
+    OpenMOLE scripts
+The OpenMOLE scripts are stored in the GUI in .oms files. They can eventually be split into several different files.
+To import the content of an .oms file (let say MyExp.oms) in a given .oms file located in the same directory:
+
+ @hl.openmoleNoTest("""
+ import _file_.MyExp._""")
+
+To refer to an .oms in a parent directory, use the @i{parent} keyword:
+ @hl.openmoleNoTest("""
+  import _parent_._file_.MyExp._""")
 
 @h2
     Basic scala constructs

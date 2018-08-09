@@ -1,5 +1,6 @@
 
 @import org.openmole.site._
+@import org.openmole.site.tools._
 @import DocumentationPages._
 
 @div(`class` := "index-element" , id := "main-padding")
@@ -27,7 +28,7 @@
 @div(`class` := "index-element", id := "main-padding")
     @p
         Simulation models can be abstracted as a program (or function) that transforms a set of @b{inputs} into a set of @b{outputs}.
-        @img(src := Resource.img.method.modelIO.file, stylesheet.center(80))
+        @img(src := Resource.img.method.modelIO.file, stylesheet.center(60))
         Inputs are various : parameters , pictures, CSV files, DB connections, etc., most of the time, modelers are interested in  @b{parameters space exploration} for sensitivity analysis or calibration.
     @br
         Likewise, outputs can be values are most of times @b{measures}, computed on the dynamics produced by a simulation run  (e.g. fitness or error functions).
@@ -40,7 +41,7 @@
     @h4{Wanna try?}
 
     @div(stylesheet.centerJustify(100)){
-      You can try OpenMOLE online using the OpenMOLE @a("demonstration website", href := shared.link.demo).
+      You can try OpenMOLE online using the OpenMOLE @aa("demonstration website", href := shared.link.demo).
     @br
       When you are ready you can then download OpenMOLE and install it on your computer, everything is explained in the @a("Download", href := download.file) section.
     @br

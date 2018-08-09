@@ -1,5 +1,5 @@
 
--J-Xmx4G
+-J-Xmx2G
 -J-Xss2M
 -J-Dfile.encoding=UTF-8
-
+-J-XX:MaxMetaspaceSize=512m

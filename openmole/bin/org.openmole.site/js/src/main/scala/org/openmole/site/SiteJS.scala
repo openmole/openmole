@@ -44,6 +44,7 @@ object SiteJS extends JSApp {
     val title: String = js.native
     val url: String = js.native
   }
+
   type Entries = collection.mutable.Map[String, String]
 
   val lunrIndex: Var[Option[Index]] = Var(None)
@@ -90,24 +91,4 @@ object SiteJS extends JSApp {
 
   @JSExport
   def sensitivityAnimation(): Unit = SVGStarter.decorateTrigger(shared.sensitivity.button, shared.sensitivity.animation, 8000)
-
-  @JSExport
-  def documentationSideMenu(): Unit = {
-    val nodes = org.scalajs.dom.document.getElementsByClassName(shared.documentationSideMenu.cssClass)
-
-    val text = p((0 until nodes.length).map(i ⇒ nodes(i).textContent).mkString(", "))
-
-    val menuContent =
-      for {
-        i ← 0 until nodes.length
-      } yield {
-        val text = nodes(i).textContent.dropRight(2)
-        nodes(i).nodeName match {
-          case "H2" ⇒ Some(div(paddingTop := 5)(a(href := "#" + shared.anchor(text))(text)))
-          case _    ⇒ None
-        }
-      }
-
-    org.scalajs.dom.window.document.getElementById(shared.documentationSideMenu.place).innerHTML = div(menuContent.flatten: _*)(paddingBottom := 20)
-  }
 }
