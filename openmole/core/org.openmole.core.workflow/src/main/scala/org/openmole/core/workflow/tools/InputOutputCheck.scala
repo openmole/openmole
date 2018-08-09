@@ -78,21 +78,21 @@ object InputOutputCheck {
           else Option.empty[Variable[_]]
       }
 
-  def perform(inputs: PrototypeSet, outputs: PrototypeSet, defaults: DefaultSet, process: FromContext[Context])(implicit preference: Preference) = FromContext.withValidation(process) { p ⇒
+  def perform(obj: Any, inputs: PrototypeSet, outputs: PrototypeSet, defaults: DefaultSet, process: FromContext[Context])(implicit preference: Preference) = FromContext.withValidation(process) { p ⇒
     import p._
     val initializedContext = initializeInput(defaults, context)
     val inputErrors = verifyInput(inputs, initializedContext)
-    if (!inputErrors.isEmpty) throw new InternalProcessingError(s"Input errors have been found in ${this}: ${inputErrors.mkString(", ")}.")
+    if (!inputErrors.isEmpty) throw new InternalProcessingError(s"Input errors have been found in ${obj}: ${inputErrors.mkString(", ")}.")
 
     val result =
       try initializedContext + process.from(initializedContext)
       catch {
         case e: Throwable ⇒
-          throw new InternalProcessingError(e, s"Error for context values in ${this} ${initializedContext.prettified}")
+          throw new InternalProcessingError(e, s"Error in ${obj} for context values ${initializedContext.prettified}")
       }
 
     val outputErrors = verifyOutput(outputs, result)
-    if (!outputErrors.isEmpty) throw new InternalProcessingError(s"Output errors in ${this}: ${outputErrors.mkString(", ")}.")
+    if (!outputErrors.isEmpty) throw new InternalProcessingError(s"Output errors in ${obj}: ${outputErrors.mkString(", ")}.")
     filterOutput(outputs, result)
   }
 
