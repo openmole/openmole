@@ -29,6 +29,7 @@ import org.openmole.plugin.environment.gridscale.{ LocalStorage, LogicalLinkStor
 import squants.time.Time
 import effectaside._
 import org.openmole.core.replication.ReplicaCatalog
+import org.openmole.tool.cache.Lazy
 
 package object ssh {
   //  class RemoteLogicalLinkStorage(val root: String) extends LogicalLinkStorage with SimpleStorage
@@ -68,9 +69,9 @@ package object ssh {
     sharedDirectory: Option[String])(implicit threadProvider: ThreadProvider, preference: Preference, replicaCatalog: ReplicaCatalog, localInterpreter: Effect[_root_.gridscale.local.Local]) = {
     def id = new URI("file", null, "localhost", -1, sharedDirectory.orNull, null, null).toString
     val storage = LocalStorage()
-    def storageSpace(accessToken: AccessToken) = StorageSpace.hierarchicalStorageSpace(storage, root, id, _ ⇒ false)
+    def storageSpace = StorageSpace.hierarchicalStorageSpace(storage, root, id, _ ⇒ false)
 
-    StorageService(storage, id, environment, concurrency, storageSpace)
+    StorageService(storage, id, environment, concurrency, Lazy(storageSpace))
   }
 
   def sshStorageService[S](
@@ -95,9 +96,9 @@ package object ssh {
       def id = new URI("file", user, "localhost", -1, sharedDirectory.orNull, null, null).toString
 
       val storage = LocalStorage()
-      def storageSpace(accessToken: AccessToken) = StorageSpace.hierarchicalStorageSpace(storage, root, id, _ ⇒ false)
+      def storageSpace = StorageSpace.hierarchicalStorageSpace(storage, root, id, _ ⇒ false)
 
-      StorageService(storage, id, environment, concurrency, storageSpace)
+      StorageService(storage, id, environment, concurrency, Lazy(storageSpace))
     }
     else {
       def id = new URI("ssh", user, host, port, root, null, null).toString
@@ -106,9 +107,9 @@ package object ssh {
         case _: _root_.gridscale.authentication.AuthenticationException ⇒ true
         case _ ⇒ false
       }
-      def storageSpace(accessToken: AccessToken) = StorageSpace.hierarchicalStorageSpace(storage, root, id, isConnectionError)
+      def storageSpace = StorageSpace.hierarchicalStorageSpace(storage, root, id, isConnectionError)
 
-      StorageService(storage, id, environment, concurrency, storageSpace)
+      StorageService(storage, id, environment, concurrency, Lazy(storageSpace))
     }
   }
 

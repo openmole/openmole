@@ -290,14 +290,14 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
       }
 
       val storage = EGIEnvironment.WebDavLocation(location)
-      def storageSpace(accessToken: AccessToken) = StorageSpace.hierarchicalStorageSpace(storage, "", location, isConnectionError)
+      def storageSpace = StorageSpace.hierarchicalStorageSpace(storage, "", location, isConnectionError)
 
       location -> StorageService(
         storage,
         id = location,
         environment = env,
         concurrency = preference(EGIEnvironment.ConnexionsByWebDAVSE),
-        storageSpace = storageSpace
+        storageSpace = Lazy(storageSpace)
       )
     }
     else throw new InternalProcessingError("No WebDAV storage available for the VO")

@@ -44,7 +44,7 @@ object StorageService extends JavaLogger {
     id:           String,
     environment:  BatchEnvironment,
     concurrency:  Int,
-    storageSpace: AccessToken ⇒ StorageSpace
+    storageSpace: Lazy[StorageSpace]
   )(implicit storageInterface: StorageInterface[S], threadProvider: ThreadProvider, preference: Preference, replicaCatalog: ReplicaCatalog) = {
     val usageControl = UsageControl(concurrency)
     new StorageService[S](s, storageSpace, id, environment, usageControl)
@@ -57,19 +57,19 @@ object StorageService extends JavaLogger {
 
 class StorageService[S](
   val storage:       S,
-  val storageSpace:  AccessToken ⇒ StorageSpace,
+  val storageSpace:  Lazy[StorageSpace],
   val id:            String,
   val environment:   BatchEnvironment,
   val usageControl:  UsageControl,
-  qualityHysteresis: Int                        = 100)(implicit storageInterface: StorageInterface[S]) {
+  qualityHysteresis: Int                = 100)(implicit storageInterface: StorageInterface[S]) {
 
   override def toString: String = id
 
   lazy val quality = QualityControl(qualityHysteresis)
 
-  def replicaDirectory(implicit accessToken: AccessToken) = storageSpace(accessToken).replicaDirectory
-  def baseDirectory(implicit accessToken: AccessToken) = storageSpace(accessToken).baseDirectory
-  def tmpDirectory(implicit accessToken: AccessToken) = storageSpace(accessToken).tmpDirectory
+  def replicaDirectory(implicit accessToken: AccessToken) = storageSpace().replicaDirectory
+  def baseDirectory(implicit accessToken: AccessToken) = storageSpace().baseDirectory
+  def tmpDirectory(implicit accessToken: AccessToken) = storageSpace().tmpDirectory
 
   def exists(path: String)(implicit token: AccessToken): Boolean = token.access { quality { storageInterface.exists(storage, path) } }
 
