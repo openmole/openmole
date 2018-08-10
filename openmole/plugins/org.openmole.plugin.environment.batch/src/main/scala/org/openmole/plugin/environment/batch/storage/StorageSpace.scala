@@ -25,7 +25,7 @@ object StorageSpace extends JavaLogger {
       dir
     }
 
-    def tmpDirectory = {
+    val tmpDirectory = {
       val dir = storageInterface.child(s, baseDirectory, tmp)
       if (!storageInterface.exists(s, dir)) storageInterface.makeDir(s, dir)
       cleanTmpDirectory(s, dir)

@@ -28,7 +28,7 @@ import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.jobservice.{ BatchJob, BatchJobService, JobServiceInterface }
 import org.openmole.plugin.environment.batch.refresh.JobManager
-import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageService }
+import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageService, StorageSpace }
 import org.openmole.plugin.environment.egi.EGIEnvironment.WebDavLocation
 import org.openmole.tool.crypto.Cypher
 import org.openmole.core.workflow.execution._
@@ -289,13 +289,15 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         case _ ⇒ false
       }
 
+      val storage = EGIEnvironment.WebDavLocation(location)
+      def storageSpace(accessToken: AccessToken) = StorageSpace.hierarchicalStorageSpace(storage, "", location, isConnectionError)
+
       location -> StorageService(
-        EGIEnvironment.WebDavLocation(location),
-        root = "",
+        storage,
         id = location,
         environment = env,
         concurrency = preference(EGIEnvironment.ConnexionsByWebDAVSE),
-        isConnectionError = isConnectionError
+        storageSpace = storageSpace
       )
     }
     else throw new InternalProcessingError("No WebDAV storage available for the VO")

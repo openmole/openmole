@@ -40,15 +40,13 @@ object StorageService extends JavaLogger {
   }
 
   def apply[S](
-    s:                 S,
-    root:              String,
-    id:                String,
-    environment:       BatchEnvironment,
-    concurrency:       Int,
-    isConnectionError: Throwable ⇒ Boolean
+    s:            S,
+    id:           String,
+    environment:  BatchEnvironment,
+    concurrency:  Int,
+    storageSpace: AccessToken ⇒ StorageSpace
   )(implicit storageInterface: StorageInterface[S], threadProvider: ThreadProvider, preference: Preference, replicaCatalog: ReplicaCatalog) = {
     val usageControl = UsageControl(concurrency)
-    def storageSpace(accessToken: AccessToken) = StorageSpace.hierarchicalStorageSpace(s, root, id, isConnectionError)
     new StorageService[S](s, storageSpace, id, environment, usageControl)
   }
 

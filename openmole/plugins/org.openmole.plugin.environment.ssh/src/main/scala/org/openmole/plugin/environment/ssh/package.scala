@@ -23,8 +23,8 @@ import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.dsl.File
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, Runtime, UsageControl }
-import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageService }
+import org.openmole.plugin.environment.batch.environment.{ AccessToken, BatchEnvironment, Runtime, UsageControl }
+import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageService, StorageSpace }
 import org.openmole.plugin.environment.gridscale.{ LocalStorage, LogicalLinkStorage }
 import squants.time.Time
 import effectaside._
@@ -67,7 +67,10 @@ package object ssh {
     root:            String,
     sharedDirectory: Option[String])(implicit threadProvider: ThreadProvider, preference: Preference, replicaCatalog: ReplicaCatalog, localInterpreter: Effect[_root_.gridscale.local.Local]) = {
     def id = new URI("file", null, "localhost", -1, sharedDirectory.orNull, null, null).toString
-    StorageService(LocalStorage(), root, id, environment, concurrency, t ⇒ false)
+    val storage = LocalStorage()
+    def storageSpace(accessToken: AccessToken) = StorageSpace.hierarchicalStorageSpace(storage, root, id, _ ⇒ false)
+
+    StorageService(storage, id, environment, concurrency, storageSpace)
   }
 
   def sshStorageService[S](
@@ -90,7 +93,11 @@ package object ssh {
 
     if (storageSharedLocally) {
       def id = new URI("file", user, "localhost", -1, sharedDirectory.orNull, null, null).toString
-      StorageService(LocalStorage(), root, id, environment, concurrency, t ⇒ false)
+
+      val storage = LocalStorage()
+      def storageSpace(accessToken: AccessToken) = StorageSpace.hierarchicalStorageSpace(storage, root, id, _ ⇒ false)
+
+      StorageService(storage, id, environment, concurrency, storageSpace)
     }
     else {
       def id = new URI("ssh", user, host, port, root, null, null).toString
@@ -99,7 +106,9 @@ package object ssh {
         case _: _root_.gridscale.authentication.AuthenticationException ⇒ true
         case _ ⇒ false
       }
-      StorageService(storage, root, id, environment, concurrency, isConnectionError)
+      def storageSpace(accessToken: AccessToken) = StorageSpace.hierarchicalStorageSpace(storage, root, id, isConnectionError)
+
+      StorageService(storage, id, environment, concurrency, storageSpace)
     }
   }
 
