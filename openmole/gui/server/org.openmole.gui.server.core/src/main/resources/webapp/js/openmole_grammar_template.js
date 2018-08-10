@@ -32,47 +32,24 @@ var OpenMOLEHighlightRules = function() {
             "case|default|do|else|for|if|match|while|throw|return|try|trye|catch|finally|yield|" +
             "abstract|class|def|extends|final|forSome|implicit|implicits|import|lazy|new|object|null|" +
             "override|package|private|protected|sealed|super|this|trait|type|val|var|with|" +
-            "assert|assume|require|print|println|printf|readLine|readBoolean|readByte|readShort|" + // package scala
-            "readChar|readInt|readLong|readFloat|readDouble|"+
+            "assert|assume|require|print|println|"+
             ##OMKeywords##
     );
 
     var buildinConstants = ("true|false");
 
     var langClasses = (
-        "AbstractMethodError|AssertionError|ClassCircularityError|"+
-        "ClassFormatError|Deprecated|EnumConstantNotPresentException|"+
-        "ExceptionInInitializerError|IllegalAccessError|"+
-        "IllegalThreadStateException|InstantiationError|InternalError|"+
-
-        "NegativeArraySizeException|NoSuchFieldError|Override|Process|"+
-        "ProcessBuilder|SecurityManager|StringIndexOutOfBoundsException|"+
-        "SuppressWarnings|TypeNotPresentException|UnknownError|"+
-        "UnsatisfiedLinkError|UnsupportedClassVersionError|VerifyError|"+
-        "InstantiationException|IndexOutOfBoundsException|"+
-        "ArrayIndexOutOfBoundsException|CloneNotSupportedException|"+
-        "NoSuchFieldException|IllegalArgumentException|NumberFormatException|"+
-        "SecurityException|Void|InheritableThreadLocal|IllegalStateException|"+
-        "InterruptedException|NoSuchMethodException|IllegalAccessException|"+
-        "UnsupportedOperationException|Enum|StrictMath|Package|Compiler|"+
-        "Readable|Runtime|StringBuilder|Math|IncompatibleClassChangeError|"+
-        "NoSuchMethodError|ThreadLocal|RuntimePermission|ArithmeticException|"+
-        "NullPointerException|Long|Integer|Short|Byte|Double|Number|Float|"+
-        "Character|Boolean|StackTraceElement|Appendable|StringBuffer|"+
-        "Iterable|ThreadGroup|Runnable|Thread|IllegalMonitorStateException|"+
-        "StackOverflowError|OutOfMemoryError|VirtualMachineError|"+
-        "ArrayStoreException|ClassCastException|LinkageError|"+
-        "NoClassDefFoundError|ClassNotFoundException|RuntimeException|"+
-        "Exception|ThreadDeath|Error|Throwable|System|ClassLoader|"+
-        "Cloneable|Class|CharSequence|Comparable|String|Object|" +
-        "Unit|Any|AnyVal|AnyRef|Null|ScalaObject|Singleton|Seq|Iterable|List|" +
+        "Long|Integer|Short|Byte|Double|Number|Float|"+
+        "Character|Boolean|"+
+        "Iterable|"+
+        "Class|String|Object|" +
+        "Unit|Any|AnyVal|AnyRef|Seq|Iterable|List|" +
         "Option|Array|Char|Byte|Int|Long|Nothing|" +
-
-        "App|Application|BufferedIterator|BigDecimal|BigInt|Console|Either|" +
-        "Enumeration|Equiv|Fractional|Function|IndexedSeq|Integral|Iterator|" +
-        "Map|Numeric|Nil|NotNull|Ordered|Ordering|PartialFunction|PartialOrdering|" +
-        "Product|Proxy|Range|Responder|Seq|Serializable|Set|Specializable|Stream|" +
-        "StringContext|Symbol|Traversable|TraversableOnce|Tuple|Vector|Pair|Triple|" +
+        "BigDecimal|BigInt|Either|" +
+        "Function|IndexedSeq|Iterator|" +
+        "Map|" +
+        "Range|Seq|Set|Stream|" +
+        "Vector|" +
 
         ##OMClasses##
     );
