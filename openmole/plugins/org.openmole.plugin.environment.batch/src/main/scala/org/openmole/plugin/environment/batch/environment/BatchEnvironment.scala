@@ -174,7 +174,7 @@ object BatchEnvironment extends JavaLogger {
     val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins
     val files = (new TreeSet[File]()(fileOrdering) ++ job.files) diff plugins
 
-    val communicationPath = storage.child(storage.tmpDirectory(token), StorageService.timedUniqName)
+    val communicationPath = storage.child(storage.tmpDirectory(token), StorageSpace.timedUniqName)
     storage.makeDir(communicationPath)
 
     val inputPath = storage.child(communicationPath, uniqName("job", ".in"))
@@ -202,7 +202,7 @@ object BatchEnvironment extends JavaLogger {
         import org.openmole.tool.hash._
         services.serializerService.serialiseAndArchiveFiles(remoteStorage, storageFile)
         val hash = storageFile.hash().toString()
-        val path = storage.child(communicationPath, StorageService.timedUniqName)
+        val path = storage.child(communicationPath, StorageSpace.timedUniqName)
         signalUpload(eventDispatcher.eventId, storage.upload(storageFile, path, TransferOptions(forceCopy = true, canMove = true)), storageFile, inputPath, storage)
         FileMessage(path, hash)
       }
@@ -226,8 +226,8 @@ object BatchEnvironment extends JavaLogger {
     val hash = services.fileService.hash(toReplicate).toString
 
     def upload = {
-      val name = batch.storage.StorageService.timedUniqName
-      val newFile = storage.child(storage.persistentDirectory(token), name)
+      val name = StorageSpace.timedUniqName
+      val newFile = storage.child(storage.replicaDirectory(token), name)
       signalUpload(eventDispatcher.eventId, storage.upload(toReplicate, newFile, options), toReplicate, newFile, storage)
       newFile
     }
