@@ -64,7 +64,7 @@ class NetlogoWizardGUI extends WizardGUIPlugin {
       div(embedWorkspaceCheckBox.render)
         .render.withLabel("EmbedWorkspace")
     ),
-    div(client.modelHelp +++ client.columnCSS, "If your Jar srcipt depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace. Then set the embedWorkspace option to true in the oms script.")
+    div(client.modelHelp +++ client.columnCSS, "If your Netlogo script depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace. Then set the embedWorkspace option to true in the oms script.")
   )
 
   def save(
