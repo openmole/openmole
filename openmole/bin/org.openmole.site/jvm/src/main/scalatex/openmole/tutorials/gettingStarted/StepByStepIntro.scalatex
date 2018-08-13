@@ -42,7 +42,7 @@ The model wizard will automatically detect the language in which the file is wri
 
 @br@br
 
-@img()
+@img(src := Resource.img.tutorial.modelImport.file, center(100))
 
 
 @h2{Executing the Ants model in OpenMOLE}
@@ -95,7 +95,7 @@ The execution panel will then open for you to monitor the execution, as shown be
 
 @br@br
 
-@img()
+@img(src := Resource.img.tutorial.modelExecution.file, center(100))
 
 
 @h2{To go further}
