@@ -23,12 +23,24 @@ object LunrIndex {
   def Index(url: String, name: String, text: String): JsObject = {
     Index(url, name, XML.loadString(text))
   }
+
+  def attributeValueEquals(value: String)(node: Node) = {
+    println("Val " + value + ", node " + node.text)
+    node.attributes.exists(_.value.text == value)
+  }
+
   def Index(url: String, name: String, xml: Elem): JsObject = {
     val body = (xml \\ "body").text
+    val code = (xml \\ "pre").text
+    val h2 = (xml \\ "h2").text
+    val h3 = (xml \\ "h2").text
     JsObject(
       "url" → JsString(url),
       "title" → JsString(name),
-      "body" → JsString(body)
+      "h2" → JsString(h2),
+      "h3" → JsString(h3),
+      "body" → JsString(body),
+      "pre" → JsString(code)
     )
   }
 }
