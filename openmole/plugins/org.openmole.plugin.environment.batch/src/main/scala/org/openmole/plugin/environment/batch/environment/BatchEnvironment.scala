@@ -364,7 +364,7 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
   lazy val plugins = PluginManager.pluginsForClass(this.getClass)
 
   override def submit(job: Job) = {
-    val bej = new BatchExecutionJob(job, this)
+    val bej = BatchExecutionJob(job, this)
     ExecutionJobRegistry.register(registry, bej)
     eventDispatcherService.trigger(this, new Environment.JobSubmitted(bej))
     JobManager ! Manage(bej)
@@ -387,6 +387,10 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   def finishedJob(job: ExecutionJob) = {}
 
+}
+
+object BatchExecutionJob {
+  def apply(job: Job, environment: BatchEnvironment) = new BatchExecutionJob(job, environment)
 }
 
 class BatchExecutionJob(val job: Job, val environment: BatchEnvironment) extends ExecutionJob { bej ⇒

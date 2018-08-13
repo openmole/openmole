@@ -168,6 +168,7 @@ class CondorEnvironment[A: gridscale.ssh.SSHAuthentication](
   )
 
   def submit(serializedJob: SerializedJob) = {
+
     def buildScript(serializedJob: SerializedJob) = {
       import services._
       SharedStorage.buildScript(
