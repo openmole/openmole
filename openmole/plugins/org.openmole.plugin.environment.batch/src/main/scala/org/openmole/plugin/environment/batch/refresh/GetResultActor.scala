@@ -33,6 +33,7 @@ import org.openmole.core.workflow.execution._
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
 import org.openmole.plugin.environment.batch.environment._
+import org.openmole.plugin.environment.batch.jobservice.{ BatchJobControl, BatchJobService }
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.file._
 import org.openmole.tool.logger.JavaLogger
@@ -57,7 +58,7 @@ object GetResultActor extends JavaLogger {
         catch {
           case e: Throwable ⇒
             job.state = ExecutionState.FAILED
-            val stdOutErr = job.batchJob.flatMap(_.tryStdOutErr(token))
+            val stdOutErr = job.batchJob.flatMap(bj ⇒ BatchJobService.tryStdOutErr(bj, token).toOption)
             JobManager ! Error(job, e, stdOutErr)
             JobManager ! Kill(job)
         }

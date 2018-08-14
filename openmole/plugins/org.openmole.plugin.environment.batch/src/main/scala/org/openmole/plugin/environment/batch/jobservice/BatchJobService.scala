@@ -38,47 +38,58 @@ case class BatchJob[J](id: J, resultPath: String)
 
 object BatchJobService extends JavaLogger {
 
-  def apply[JS](js: JS, concurrency: Int)(implicit _jobServiceInterface: JobServiceInterface[JS], eventDispatcher: EventDispatcher) =
-    new BatchJobService[JS](js, UsageControl(concurrency))
+  def apply[JS](js: JS, concurrency: Int)(implicit jobServiceInterface: JobServiceInterface[JS], eventDispatcher: EventDispatcher) =
+    new BatchJobService[JS](js, UsageControl(concurrency), jobServiceInterface)
 
-}
+  def tryStdOutErr(batchJob: BatchJobControl, token: AccessToken) = util.Try(batchJob.stdOutErr(token))
 
-trait BatchJobControl {
-  def updateState(implicit token: AccessToken): ExecutionState
-  def delete(implicit token: AccessToken): Unit
-  def stdOutErr(implicit token: AccessToken): (String, String)
-  def tryStdOutErr(implicit token: AccessToken) = util.Try(stdOutErr(token)).toOption
-  def usageControl: UsageControl
-  def resultPath: String
+  def submit[JS](batchJobService: BatchJobService[JS], serializedJob: SerializedJob)(implicit token: AccessToken): BatchJobControl = token.access {
+    import batchJobService._
+
+    type BJ = BatchJob[jsInterface.J]
+
+    def updateState(job: BJ)(token: AccessToken): ExecutionState = token.access { jsInterface.state(js, job.id) }
+    def delete(job: BJ)(token: AccessToken) = token.access { jsInterface.delete(js, job.id) }
+    def stdOutErr(job: BJ)(token: AccessToken) = token.access { jsInterface.stdOutErr(js, job.id) }
+
+    val job: BJ = jsInterface.submit(js, serializedJob)
+    BatchJobService.Log.logger.fine(s"Successful submission: ${job}")
+
+    BatchJobControl(
+      updateState(job),
+      delete(job),
+      stdOutErr(job),
+      usageControl,
+      job.resultPath
+    )
+  }
+
 }
 
 class BatchJobService[JS](
-  js:               JS,
-  val usageControl: UsageControl
-)(implicit val jsInterface: JobServiceInterface[JS], eventDispatcher: EventDispatcher) { bjs ⇒
+  val js:           JS,
+  val usageControl: UsageControl,
+  val jsInterface:  JobServiceInterface[JS])
 
-  type BJ = BatchJob[jsInterface.J]
+object BatchJobControl {
 
-  case class BatchJobControlImplementation(bj: BJ, usageControl: UsageControl) extends BatchJobControl {
-    def updateState(implicit token: AccessToken) = bjs.updateState(bj)
-    def delete(implicit token: AccessToken) = bjs.delete(bj)
-    def stdOutErr(implicit token: AccessToken) = jsInterface.stdOutErr(js, bj.id)
-    def resultPath = bj.resultPath
-  }
-
-  def submit(serializedJob: SerializedJob)(implicit token: AccessToken): BatchJobControl = token.access {
-    val job = jsInterface.submit(js, serializedJob)
-    BatchJobService.Log.logger.fine(s"Successful submission: ${job}")
-    BatchJobControlImplementation(job, usageControl)
-  }
-
-  def updateState(job: BJ)(implicit token: AccessToken): ExecutionState = {
-    val remoteState = token.access { jsInterface.state(js, job.id) }
-    remoteState
-  }
-
-  def delete(job: BJ)(implicit token: AccessToken) =
-    token.access { jsInterface.delete(js, job.id) }
+  def apply(
+    updateState:  AccessToken ⇒ ExecutionState,
+    delete:       AccessToken ⇒ Unit,
+    stdOutErr:    AccessToken ⇒ (String, String),
+    usageControl: UsageControl,
+    resultPath:   String): BatchJobControl = new BatchJobControl(
+    updateState,
+    delete,
+    stdOutErr,
+    usageControl,
+    resultPath)
 
 }
 
+class BatchJobControl(
+  val updateState:  AccessToken ⇒ ExecutionState,
+  val delete:       AccessToken ⇒ Unit,
+  val stdOutErr:    AccessToken ⇒ (String, String),
+  val usageControl: UsageControl,
+  val resultPath:   String)

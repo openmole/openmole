@@ -275,7 +275,7 @@ object BatchEnvironment extends JavaLogger {
 
   def submitSerializedJob(jobService: BatchJobService[_], serializedJob: SerializedJob) =
     UsageControl.mapToken(jobService.usageControl) { token ⇒
-      jobService.submit(serializedJob)(token)
+      BatchJobService.submit(jobService, serializedJob)(token)
     }
 
   def start(environment: BatchEnvironment) = {}

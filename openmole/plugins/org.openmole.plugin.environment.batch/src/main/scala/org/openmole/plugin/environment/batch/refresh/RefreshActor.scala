@@ -21,6 +21,7 @@ import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, ResubmitException, UsageControl }
+import org.openmole.plugin.environment.batch.jobservice.BatchJobService
 import org.openmole.tool.logger.JavaLogger
 
 object RefreshActor extends JavaLogger {
@@ -45,7 +46,7 @@ object RefreshActor extends JavaLogger {
             }
             else if (job.state == FAILED) {
               val exception = new InternalProcessingError(s"""Job status is FAILED""".stripMargin)
-              val stdOutErr = bj.tryStdOutErr(t)
+              val stdOutErr = BatchJobService.tryStdOutErr(bj, t).toOption
               JobManager ! Error(job, exception, stdOutErr)
               JobManager ! Kill(job)
             }
@@ -56,7 +57,7 @@ object RefreshActor extends JavaLogger {
               JobManager ! Resubmit(job, sj.storage)
             case e: Throwable ⇒
               if (updateErrorsInARow >= preference(BatchEnvironment.MaxUpdateErrorsInARow)) {
-                JobManager ! Error(job, e, bj.tryStdOutErr(t))
+                JobManager ! Error(job, e, BatchJobService.tryStdOutErr(bj, t).toOption)
                 JobManager ! Kill(job)
               }
               else {
