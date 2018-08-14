@@ -31,7 +31,6 @@ object LocalStorage {
   implicit def isStorage = new StorageInterface[LocalStorage] {
     implicit def interpreter = _root_.gridscale.local.Local()
 
-    override def home(t: LocalStorage) = local.home
     override def child(t: LocalStorage, parent: String, child: String): String = (File(parent) / child).getAbsolutePath
     override def parent(t: LocalStorage, path: String): Option[String] = Option(File(path).getParent)
     override def name(t: LocalStorage, path: String): String = File(path).getName
@@ -40,7 +39,6 @@ object LocalStorage {
     override def makeDir(t: LocalStorage, path: String): Unit = local.makeDir(path)
     override def rmDir(t: LocalStorage, path: String): Unit = local.rmDir(path)
     override def rmFile(t: LocalStorage, path: String): Unit = local.rmFile(path)
-    override def mv(t: LocalStorage, from: String, to: String): Unit = local.mv(from, to)
 
     override def upload(t: LocalStorage, src: File, dest: String, options: TransferOptions): Unit =
       StorageInterface.upload(false, local.writeFile(_, _))(src, dest, options)

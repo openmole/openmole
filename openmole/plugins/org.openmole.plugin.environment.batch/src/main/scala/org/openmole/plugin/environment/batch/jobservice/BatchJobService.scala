@@ -37,6 +37,7 @@ trait JobServiceInterface[JS] {
 case class BatchJob[J](id: J, resultPath: String)
 
 object BatchJobService extends JavaLogger {
+
   def apply[JS](js: JS, concurrency: Int)(implicit _jobServiceInterface: JobServiceInterface[JS], eventDispatcher: EventDispatcher) =
     new BatchJobService[JS](js, UsageControl(concurrency))
 

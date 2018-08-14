@@ -24,7 +24,7 @@ import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.dsl.File
 import org.openmole.plugin.environment.batch.environment.{ AccessToken, BatchEnvironment, Runtime, UsageControl }
-import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageService, StorageSpace }
+import org.openmole.plugin.environment.batch.storage.{ HierarchicalStorageInterface, StorageInterface, StorageService, StorageSpace }
 import org.openmole.plugin.environment.gridscale.{ LocalStorage, LogicalLinkStorage }
 import squants.time.Time
 import effectaside._
@@ -43,7 +43,7 @@ package object ssh {
 
   import _root_.gridscale.{ ssh ⇒ gssh }
 
-  implicit def isStorage[S: AsSSHServer](implicit interpreter: Effect[gssh.SSH]): StorageInterface[S] = new StorageInterface[S] {
+  implicit def isStorage[S: AsSSHServer](implicit interpreter: Effect[gssh.SSH]) = new StorageInterface[S] with HierarchicalStorageInterface[S] {
     override def child(t: S, parent: String, child: String): String = _root_.gridscale.RemotePath.child(parent, child)
     override def parent(t: S, path: String): Option[String] = _root_.gridscale.RemotePath.parent(path)
     override def name(t: S, path: String): String = _root_.gridscale.RemotePath.name(path)
@@ -54,7 +54,6 @@ package object ssh {
     override def makeDir(t: S, path: String): Unit = gssh.makeDir(t, path)
     override def rmDir(t: S, path: String): Unit = gssh.rmDir(t, path)
     override def rmFile(t: S, path: String): Unit = gssh.rmFile(t, path)
-    override def mv(t: S, from: String, to: String): Unit = gssh.mv(t, from, to)
 
     override def upload(t: S, src: File, dest: String, options: TransferOptions): Unit =
       StorageInterface.upload(false, gssh.writeFile(t, _, _))(src, dest, options)
@@ -83,12 +82,12 @@ package object ssh {
     environment:          BatchEnvironment,
     sharedDirectory:      Option[String],
     storageSharedLocally: Boolean
-  )(implicit storageInterface: StorageInterface[S], threadProvider: ThreadProvider, preference: Preference, replicaCatalog: ReplicaCatalog) = {
+  )(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], threadProvider: ThreadProvider, preference: Preference, replicaCatalog: ReplicaCatalog) = {
 
     val root = sharedDirectory match {
       case Some(p) ⇒ p
       case None ⇒
-        val home = storageInterface.home(storage)
+        val home = hierarchicalStorageInterface.home(storage)
         storageInterface.child(storage, home, ".openmole/.tmp/ssh/")
     }
 

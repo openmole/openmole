@@ -28,7 +28,6 @@ object LogicalLinkStorage {
   implicit def isStorage: StorageInterface[LogicalLinkStorage] = new StorageInterface[LogicalLinkStorage] {
     implicit def interpreter = _root_.gridscale.local.Local()
 
-    override def home(t: LogicalLinkStorage) = local.home
     override def child(t: LogicalLinkStorage, parent: String, child: String): String = (File(parent) / child).getAbsolutePath
     override def parent(t: LogicalLinkStorage, path: String): Option[String] = Option(File(path).getParent)
     override def name(t: LogicalLinkStorage, path: String): String = File(path).getName
@@ -37,18 +36,17 @@ object LogicalLinkStorage {
     override def makeDir(t: LogicalLinkStorage, path: String): Unit = local.makeDir(path)
     override def rmDir(t: LogicalLinkStorage, path: String): Unit = local.rmDir(path)
     override def rmFile(t: LogicalLinkStorage, path: String): Unit = local.rmFile(path)
-    override def mv(t: LogicalLinkStorage, from: String, to: String): Unit = local.mv(from, to)
 
     override def upload(t: LogicalLinkStorage, src: File, dest: String, options: TransferOptions): Unit = {
       def copy = StorageInterface.upload(false, local.writeFile(_, _))(src, dest, options)
 
-      if (options.canMove) mv(t, src.getPath, dest)
+      if (options.canMove) local.mv(src.getPath, dest)
       else if (options.forceCopy || t.forceCopy) copy
       else local.link(src.getPath, dest) //new File(dest).createLinkTo(src)
     }
     override def download(t: LogicalLinkStorage, src: String, dest: File, options: TransferOptions): Unit = {
       def copy = StorageInterface.download(false, local.readFile[Unit](_, _))(src, dest, options)
-      if (options.canMove) mv(t, src, dest.getPath)
+      if (options.canMove) local.mv(src, dest.getPath)
       else if (options.forceCopy || t.forceCopy) copy
       else local.link(src, dest.getPath) //dest.createLinkTo(src)
     }

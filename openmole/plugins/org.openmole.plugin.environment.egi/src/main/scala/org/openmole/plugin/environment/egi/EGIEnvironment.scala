@@ -256,7 +256,6 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   implicit def webdavlocationIsStorage = new StorageInterface[WebDavLocation] {
     def webdavServer(location: WebDavLocation) = gridscale.webdav.WebDAVSServer(location.url, proxyCache().factory)
 
-    override def home(t: WebDavLocation): String = ""
     override def child(t: WebDavLocation, parent: String, child: String): String = gridscale.RemotePath.child(parent, child)
     override def parent(t: WebDavLocation, path: String): Option[String] = gridscale.RemotePath.parent(path)
     override def name(t: WebDavLocation, path: String): String = gridscale.RemotePath.name(path)
@@ -266,7 +265,6 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     override def makeDir(t: WebDavLocation, path: String): Unit = gridscale.webdav.mkDirectory(webdavServer(t), path)
     override def rmDir(t: WebDavLocation, path: String): Unit = gridscale.webdav.rmDirectory(webdavServer(t), path)
     override def rmFile(t: WebDavLocation, path: String): Unit = gridscale.webdav.rmFile(webdavServer(t), path)
-    override def mv(t: WebDavLocation, from: String, to: String): Unit = gridscale.webdav.mv(webdavServer(t), from, to)
 
     override def upload(t: WebDavLocation, src: File, dest: String, options: storage.TransferOptions): Unit = {
       StorageInterface.upload(true, gridscale.webdav.writeStream(webdavServer(t), _, _))(src, dest, options)

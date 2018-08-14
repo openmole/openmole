@@ -60,19 +60,21 @@ object StorageInterface {
 }
 
 trait StorageInterface[T] {
-  def home(t: T): String
-  def child(t: T, parent: String, child: String): String
   def parent(t: T, path: String): Option[String]
   def name(t: T, path: String): String
 
   def exists(t: T, path: String): Boolean
-  // def listNames(t: T, path: String): Seq[String]
   def list(t: T, path: String): Seq[ListEntry]
   def makeDir(t: T, path: String): Unit
   def rmDir(t: T, path: String): Unit
   def rmFile(t: T, path: String): Unit
-  def mv(t: T, from: String, to: String)
+
+  def child(t: T, parent: String, child: String): String
 
   def upload(t: T, src: File, dest: String, options: TransferOptions = TransferOptions.default): Unit
   def download(t: T, src: String, dest: File, options: TransferOptions = TransferOptions.default): Unit
+}
+
+trait HierarchicalStorageInterface[T] {
+  def home(t: T): String
 }
