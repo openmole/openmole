@@ -263,10 +263,11 @@ object DocumentationPages {
   def tutoPages = gettingStartedPages ++ netLogoPages
 
   // Getting Started
-  def gettingStartedPages = Seq(stepByStepIntro, launchTuto, exploreTuto)
+  def gettingStartedPages = Seq(stepByStepIntro, exploreTuto)
+  //def gettingStartedPages = Seq(stepByStepIntro, launchTuto, exploreTuto)
 
   lazy val stepByStepIntro = DocumentationPage.fromScalatex(name = "Step By Step Intro", content = scalatex.tutorials.gettingStarted.StepByStepIntro, title = Some("A Step by Step Introduction to OpenMOLE"))
-  lazy val launchTuto = DocumentationPage.fromScalatex(name = "Launch Tuto", content = scalatex.tutorials.gettingStarted.LaunchTuto, title = Some("How to Launch and Run a Model with OpenMOLE"))
+  //lazy val launchTuto = DocumentationPage.fromScalatex(name = "Launch Tuto", content = scalatex.tutorials.gettingStarted.LaunchTuto, title = Some("How to Launch and Run a Model with OpenMOLE"))
   lazy val exploreTuto = DocumentationPage.fromScalatex(name = "Explore Tuto", content = scalatex.tutorials.gettingStarted.ExploreTuto, title = Some("How to Execute an Exploration Task"))
 
   // NetLogo
