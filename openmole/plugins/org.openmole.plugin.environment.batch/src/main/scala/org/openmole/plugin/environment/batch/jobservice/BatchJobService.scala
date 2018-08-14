@@ -34,6 +34,8 @@ trait JobServiceInterface[JS] {
   def stdOutErr(js: JS, j: J): (String, String)
 }
 
+case class BatchJob[J](id: J, resultPath: String)
+
 object BatchJobService extends JavaLogger {
   def apply[JS](js: JS, concurrency: Int)(implicit _jobServiceInterface: JobServiceInterface[JS], eventDispatcher: EventDispatcher) =
     new BatchJobService[JS](js, UsageControl(concurrency))
@@ -45,7 +47,6 @@ trait BatchJobControl {
   def delete(implicit token: AccessToken): Unit
   def stdOutErr(implicit token: AccessToken): (String, String)
   def tryStdOutErr(implicit token: AccessToken) = util.Try(stdOutErr(token)).toOption
-  def state: ExecutionState
   def usageControl: UsageControl
   def resultPath: String
 }
@@ -61,48 +62,22 @@ class BatchJobService[JS](
     def updateState(implicit token: AccessToken) = bjs.updateState(bj)
     def delete(implicit token: AccessToken) = bjs.delete(bj)
     def stdOutErr(implicit token: AccessToken) = jsInterface.stdOutErr(js, bj.id)
-    def state = bjs.state(bj)
     def resultPath = bj.resultPath
   }
 
-  lazy val states = TMap[BJ, ExecutionState]()
-
   def submit(serializedJob: SerializedJob)(implicit token: AccessToken): BatchJobControl = token.access {
     val job = jsInterface.submit(js, serializedJob)
-    setState(job, SUBMITTED)
     BatchJobService.Log.logger.fine(s"Successful submission: ${job}")
     BatchJobControlImplementation(job, usageControl)
   }
 
-  protected def getState(job: BJ) = states.single.get(job)
-
-  protected def setState(job: BJ, state: ExecutionState) = {
-    val event =
-      atomic { implicit ctx ⇒
-        val oldState = bjs.state(job)
-        if (oldState < state) {
-          states.put(job, state)
-          Some(new BatchJob.StateChanged(oldState, state))
-        }
-        else None
-      }
-
-    event.foreach(ev ⇒ eventDispatcher.trigger(job, ev))
-  }
-
-  def state(job: BJ) = getState(job).getOrElse(READY)
-  def hasBeenSubmitted(job: BJ): Boolean = state(job).compareTo(SUBMITTED) >= 0
-
   def updateState(job: BJ)(implicit token: AccessToken): ExecutionState = {
     val remoteState = token.access { jsInterface.state(js, job.id) }
-    setState(job, remoteState)
     remoteState
   }
 
-  def delete(job: BJ)(implicit token: AccessToken) = {
-    val exists = states.single.remove(job)
-    if (exists.isDefined) token.access { jsInterface.delete(js, job.id) }
-  }
+  def delete(job: BJ)(implicit token: AccessToken) =
+    token.access { jsInterface.delete(js, job.id) }
 
 }
 
