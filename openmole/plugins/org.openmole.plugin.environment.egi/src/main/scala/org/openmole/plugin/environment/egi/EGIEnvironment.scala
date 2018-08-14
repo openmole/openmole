@@ -26,7 +26,7 @@ import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.threadprovider.Updater
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.environment._
-import org.openmole.plugin.environment.batch.jobservice.{ BatchJob, BatchJobService, JobServiceInterface }
+import org.openmole.plugin.environment.batch.jobservice.{ BatchJobService, JobServiceInterface }
 import org.openmole.plugin.environment.batch.refresh.JobManager
 import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageService, StorageSpace }
 import org.openmole.plugin.environment.egi.EGIEnvironment.WebDavLocation
@@ -126,7 +126,7 @@ object EGIEnvironment extends JavaLogger {
 
   implicit def isJobService[A]: JobServiceInterface[EGIEnvironment[A]] = new JobServiceInterface[EGIEnvironment[A]] {
     override type J = gridscale.dirac.JobID
-    override def submit(env: EGIEnvironment[A], serializedJob: SerializedJob): BatchJob[J] = env.submit(serializedJob)
+    override def submit(env: EGIEnvironment[A], serializedJob: SerializedJob): J = env.submit(serializedJob)
     override def state(env: EGIEnvironment[A], j: J) = env.state(j)
     override def delete(env: EGIEnvironment[A], j: J): Unit = env.delete(j)
     override def stdOutErr(env: EGIEnvironment[A], j: J) = env.stdOutErr(j)
@@ -407,10 +407,8 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         storageLocations
       )
 
-    val outputFilePath = serializedJob.storage.child(serializedJob.path, uniqName("job", ".out"))
-
     newFile.withTmpFile("script", ".sh") { script ⇒
-      script.content = jobScript(serializedJob, outputFilePath)
+      script.content = jobScript(serializedJob)
 
       val jobDescription =
         JobDescription(
@@ -423,8 +421,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
           cpuTime = cpuTime
         )
 
-      val jid = gridscale.dirac.submit(diracService, jobDescription, tokenCache(), Some(diracJobGroup))
-      org.openmole.plugin.environment.batch.jobservice.BatchJob(jid, outputFilePath)
+      gridscale.dirac.submit(diracService, jobDescription, tokenCache(), Some(diracJobGroup))
     }
   }
 

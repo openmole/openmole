@@ -100,7 +100,7 @@ object CondorEnvironment {
 
   implicit def isJobService[A]: JobServiceInterface[CondorEnvironment[A]] = new JobServiceInterface[CondorEnvironment[A]] {
     override type J = gridscale.cluster.BatchScheduler.BatchJob
-    override def submit(env: CondorEnvironment[A], serializedJob: SerializedJob): BatchJob[J] = env.submit(serializedJob)
+    override def submit(env: CondorEnvironment[A], serializedJob: SerializedJob): J = env.submit(serializedJob)
     override def state(env: CondorEnvironment[A], j: J): ExecutionState.ExecutionState = env.state(j)
     override def delete(env: CondorEnvironment[A], j: J): Unit = env.delete(j)
     override def stdOutErr(js: CondorEnvironment[A], j: J) = js.stdOutErr(j)
@@ -181,7 +181,7 @@ class CondorEnvironment[A: gridscale.ssh.SSHAuthentication](
       )
     }
 
-    val (remoteScript, result, workDirectory) = buildScript(serializedJob)
+    val (remoteScript, workDirectory) = buildScript(serializedJob)
 
     val description = _root_.gridscale.condor.CondorJobDescription(
       executable = "/bin/bash",
@@ -193,8 +193,7 @@ class CondorEnvironment[A: gridscale.ssh.SSHAuthentication](
       requirements = parameters.requirements.map(_root_.gridscale.condor.CondorRequirement.apply)
     )
 
-    val id = gridscale.condor.submit[_root_.gridscale.ssh.SSHServer](env, description)
-    BatchJob(id, result)
+    gridscale.condor.submit[_root_.gridscale.ssh.SSHServer](env, description)
   }
 
   def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
@@ -219,7 +218,7 @@ class CondorEnvironment[A: gridscale.ssh.SSHAuthentication](
 object CondorLocalEnvironment {
   implicit def isJobService: JobServiceInterface[CondorLocalEnvironment] = new JobServiceInterface[CondorLocalEnvironment] {
     override type J = gridscale.cluster.BatchScheduler.BatchJob
-    override def submit(env: CondorLocalEnvironment, serializedJob: SerializedJob): BatchJob[J] = env.submit(serializedJob)
+    override def submit(env: CondorLocalEnvironment, serializedJob: SerializedJob): J = env.submit(serializedJob)
     override def state(env: CondorLocalEnvironment, j: J): ExecutionState.ExecutionState = env.state(j)
     override def delete(env: CondorLocalEnvironment, j: J): Unit = env.delete(j)
     override def stdOutErr(js: CondorLocalEnvironment, j: J) = js.stdOutErr(j)
@@ -282,7 +281,7 @@ class CondorLocalEnvironment(
       )
     }
 
-    val (remoteScript, result, workDirectory) = buildScript(serializedJob)
+    val (remoteScript, workDirectory) = buildScript(serializedJob)
 
     val description = _root_.gridscale.condor.CondorJobDescription(
       executable = "/bin/bash",
@@ -294,8 +293,7 @@ class CondorLocalEnvironment(
       requirements = parameters.requirements.map(_root_.gridscale.condor.CondorRequirement.apply)
     )
 
-    val id = gridscale.condor.submit(LocalHost(), description)
-    BatchJob(id, result)
+    gridscale.condor.submit(LocalHost(), description)
   }
 
   def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
@@ -314,45 +312,3 @@ class CondorLocalEnvironment(
     BatchEnvironment.submitSerializedJob(jobService, serializedJob)
 }
 
-
-
-//
-//class CondorEnvironment(
-//  val user:          String,
-//  val host:          String,
-//  override val port: Int,
-//  // TODO not available in the GridScale plugin yet
-//  //val queue: Option[String],
-//  override val openMOLEMemory: Option[Information],
-//  // TODO not available in the GridScale plugin yet
-//  //val wallTime: Option[Duration],
-//  val memory:               Option[Information],
-//  val nodes:                Option[Int]               = None,
-//  val coresByNode:          Option[Int]               = None,
-//  val sharedDirectory:      Option[String],
-//  val workDirectory:        Option[String],
-//  val requirements:         Option[CondorRequirement],
-//  override val threads:     Option[Int],
-//  val storageSharedLocally: Boolean,
-//  override val name:        Option[String]
-//)(val credential: fr.iscpif.gridscale.ssh.SSHAuthentication)(implicit val services: BatchEnvironment.Services) extends ClusterEnvironment { env ⇒
-//
-//  type JS = CondorJobService
-//
-//  val jobService =
-//    new CondorJobService {
-//      // TODO not available in the GridScale plugin yet
-//      //def queue = env.queue
-//      val environment = env
-//      def sharedFS = storage
-//      def workDirectory = env.workDirectory
-//      def timeout = env.timeout
-//      def credential = env.credential
-//      def user = env.user
-//      def host = env.host
-//      def port = env.port
-//    }
-//
-//  def allJobServices = List(jobService)
-//
-//}

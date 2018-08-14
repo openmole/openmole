@@ -36,7 +36,7 @@ object RefreshActor extends JavaLogger {
           try {
             val oldState = job.state
             job.state = bj.updateState(t)
-            if (job.state == DONE) JobManager ! GetResult(job, sj, bj.resultPath)
+            if (job.state == DONE) JobManager ! GetResult(job, sj, bj.resultPath(t))
             else if (!job.state.isFinal) {
               val newDelay =
                 if (oldState == job.state)

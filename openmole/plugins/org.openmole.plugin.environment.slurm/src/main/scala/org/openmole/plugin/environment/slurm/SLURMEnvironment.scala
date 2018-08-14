@@ -105,7 +105,7 @@ object SLURMEnvironment {
 
   implicit def isJobService[A]: JobServiceInterface[SLURMEnvironment[A]] = new JobServiceInterface[SLURMEnvironment[A]] {
     override type J = gridscale.cluster.BatchScheduler.BatchJob
-    override def submit(env: SLURMEnvironment[A], serializedJob: SerializedJob): BatchJob[J] = env.submit(serializedJob)
+    override def submit(env: SLURMEnvironment[A], serializedJob: SerializedJob): J = env.submit(serializedJob)
     override def state(env: SLURMEnvironment[A], j: J): ExecutionState.ExecutionState = env.state(j)
     override def delete(env: SLURMEnvironment[A], j: J): Unit = env.delete(j)
     override def stdOutErr(js: SLURMEnvironment[A], j: J) = js.stdOutErr(j)
@@ -190,7 +190,7 @@ class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
       )
     }
 
-    val (remoteScript, result, workDirectory) = buildScript(serializedJob)
+    val (remoteScript, workDirectory) = buildScript(serializedJob)
 
     val description = _root_.gridscale.slurm.SLURMJobDescription(
       command = s"/bin/bash $remoteScript",
@@ -205,8 +205,7 @@ class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
       constraints = parameters.constraints.toList
     )
 
-    val id = gridscale.slurm.submit[_root_.gridscale.ssh.SSHServer](env, description)
-    BatchJob(id, result)
+    gridscale.slurm.submit[_root_.gridscale.ssh.SSHServer](env, description)
   }
 
   def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
@@ -230,7 +229,7 @@ class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
 object SLURMLocalEnvironment {
   implicit def isJobService: JobServiceInterface[SLURMLocalEnvironment] = new JobServiceInterface[SLURMLocalEnvironment] {
     override type J = gridscale.cluster.BatchScheduler.BatchJob
-    override def submit(env: SLURMLocalEnvironment, serializedJob: SerializedJob): BatchJob[J] = env.submit(serializedJob)
+    override def submit(env: SLURMLocalEnvironment, serializedJob: SerializedJob): J = env.submit(serializedJob)
     override def state(env: SLURMLocalEnvironment, j: J): ExecutionState.ExecutionState = env.state(j)
     override def delete(env: SLURMLocalEnvironment, j: J): Unit = env.delete(j)
     override def stdOutErr(js: SLURMLocalEnvironment, j: J) = js.stdOutErr(j)
@@ -293,7 +292,7 @@ class SLURMLocalEnvironment(
       )
     }
 
-    val (remoteScript, result, workDirectory) = buildScript(serializedJob)
+    val (remoteScript, workDirectory) = buildScript(serializedJob)
 
     val description = _root_.gridscale.slurm.SLURMJobDescription(
       command = s"/bin/bash $remoteScript",
@@ -308,8 +307,7 @@ class SLURMLocalEnvironment(
       constraints = parameters.constraints.toList
     )
 
-    val id = gridscale.slurm.submit(LocalHost(), description)
-    BatchJob(id, result)
+    gridscale.slurm.submit(LocalHost(), description)
   }
 
   def state(id: gridscale.cluster.BatchScheduler.BatchJob) =

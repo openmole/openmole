@@ -178,6 +178,7 @@ object BatchEnvironment extends JavaLogger {
     storage.makeDir(communicationPath)
 
     val inputPath = storage.child(communicationPath, uniqName("job", ".in"))
+    val outputPath = storage.child(communicationPath, uniqName("job", ".out"))
 
     val runtime = replicateTheRuntime(job.job, job.environment, storage)
 
@@ -207,7 +208,7 @@ object BatchEnvironment extends JavaLogger {
         FileMessage(path, hash)
       }
 
-    SerializedJob(storage, communicationPath, inputPath, runtime, serializedStorage)
+    SerializedJob(storage, communicationPath, inputPath, runtime, serializedStorage, Some(outputPath))
   }
 
   def toReplicatedFile(file: File, storage: StorageService[_], transferOptions: TransferOptions)(implicit token: AccessToken, services: BatchEnvironment.Services): ReplicatedFile = {
@@ -273,9 +274,11 @@ object BatchEnvironment extends JavaLogger {
     )
   }
 
-  def submitSerializedJob(jobService: BatchJobService[_], serializedJob: SerializedJob) =
+  def resultPathInSerializedJob(serializedJob: SerializedJob, accessToken: AccessToken) = serializedJob.resultPath.get
+
+  def submitSerializedJob(jobService: BatchJobService[_], serializedJob: SerializedJob, resultPath: (SerializedJob, AccessToken) ⇒ String = resultPathInSerializedJob) =
     UsageControl.mapToken(jobService.usageControl) { token ⇒
-      BatchJobService.submit(jobService, serializedJob)(token)
+      BatchJobService.submit(jobService, serializedJob, resultPath(serializedJob, _))(token)
     }
 
   def start(environment: BatchEnvironment) = {}

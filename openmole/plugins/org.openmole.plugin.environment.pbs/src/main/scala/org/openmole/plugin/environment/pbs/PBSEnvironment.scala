@@ -101,7 +101,7 @@ object PBSEnvironment extends JavaLogger {
 
   implicit def isJobService[A]: JobServiceInterface[PBSEnvironment[A]] = new JobServiceInterface[PBSEnvironment[A]] {
     override type J = gridscale.cluster.BatchScheduler.BatchJob
-    override def submit(env: PBSEnvironment[A], serializedJob: SerializedJob): BatchJob[J] = env.submit(serializedJob)
+    override def submit(env: PBSEnvironment[A], serializedJob: SerializedJob): J = env.submit(serializedJob)
     override def state(env: PBSEnvironment[A], j: J): ExecutionState.ExecutionState = env.state(j)
     override def delete(env: PBSEnvironment[A], j: J): Unit = env.delete(j)
     override def stdOutErr(js: PBSEnvironment[A], j: J) = js.stdOutErr(j)
@@ -182,7 +182,7 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
       )
     }
 
-    val (remoteScript, result, workDirectory) = buildScript(serializedJob)
+    val (remoteScript, workDirectory) = buildScript(serializedJob)
 
     val description = gridscale.pbs.PBSJobDescription(
       command = s"/bin/bash $remoteScript",
@@ -208,7 +208,7 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
       |uniqId: ${id.uniqId}
       |job id: ${id.jobId}""".stripMargin)
 
-    BatchJob(id, result)
+    id
   }
 
   def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
@@ -229,7 +229,7 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
 object PBSLocalEnvironment{
   implicit def isJobService: JobServiceInterface[PBSLocalEnvironment] = new JobServiceInterface[PBSLocalEnvironment] {
     override type J = gridscale.cluster.BatchScheduler.BatchJob
-    override def submit(env: PBSLocalEnvironment, serializedJob: SerializedJob): BatchJob[J] = env.submit(serializedJob)
+    override def submit(env: PBSLocalEnvironment, serializedJob: SerializedJob): J = env.submit(serializedJob)
     override def state(env: PBSLocalEnvironment, j: J): ExecutionState.ExecutionState = env.state(j)
     override def delete(env: PBSLocalEnvironment, j: J): Unit = env.delete(j)
     override def stdOutErr(js: PBSLocalEnvironment, j: J) = js.stdOutErr(j)
@@ -292,7 +292,7 @@ class PBSLocalEnvironment(
       )
     }
 
-    val (remoteScript, result, workDirectory) = buildScript(serializedJob)
+    val (remoteScript, workDirectory) = buildScript(serializedJob)
     val description = gridscale.pbs.PBSJobDescription(
       command = s"/bin/bash $remoteScript",
       workDirectory = workDirectory,
@@ -304,8 +304,7 @@ class PBSLocalEnvironment(
       flavour = parameters.flavour
     )
 
-    val id = gridscale.pbs.submit(LocalHost(), description)
-    BatchJob(id, result)
+    gridscale.pbs.submit(LocalHost(), description)
   }
 
   def state(id: gridscale.cluster.BatchScheduler.BatchJob) =

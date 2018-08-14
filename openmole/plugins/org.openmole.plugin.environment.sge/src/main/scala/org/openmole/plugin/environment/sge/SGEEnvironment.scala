@@ -88,7 +88,7 @@ object SGEEnvironment {
 
   implicit def isJobService[A]: JobServiceInterface[SGEEnvironment[A]] = new JobServiceInterface[SGEEnvironment[A]] {
     override type J = gridscale.cluster.BatchScheduler.BatchJob
-    override def submit(env: SGEEnvironment[A], serializedJob: SerializedJob): BatchJob[J] = env.submit(serializedJob)
+    override def submit(env: SGEEnvironment[A], serializedJob: SerializedJob): J = env.submit(serializedJob)
     override def state(env: SGEEnvironment[A], j: J): ExecutionState.ExecutionState = env.state(j)
     override def delete(env: SGEEnvironment[A], j: J): Unit = env.delete(j)
     override def stdOutErr(js: SGEEnvironment[A], j: J) = js.stdOutErr(j)
@@ -166,7 +166,7 @@ class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
       )
     }
 
-    val (remoteScript, result, workDirectory) = buildScript(serializedJob)
+    val (remoteScript, workDirectory) = buildScript(serializedJob)
 
     val description = _root_.gridscale.sge.SGEJobDescription(
       command = s"/bin/bash $remoteScript",
@@ -176,8 +176,7 @@ class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
       memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
     )
 
-    val id = gridscale.sge.submit[_root_.gridscale.ssh.SSHServer](env, description)
-    BatchJob(id, result)
+    gridscale.sge.submit[_root_.gridscale.ssh.SSHServer](env, description)
   }
 
   def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
@@ -200,7 +199,7 @@ class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
 object SGELocalEnvironment {
   implicit def isJobService: JobServiceInterface[SGELocalEnvironment] = new JobServiceInterface[SGELocalEnvironment] {
     override type J = gridscale.cluster.BatchScheduler.BatchJob
-    override def submit(env: SGELocalEnvironment, serializedJob: SerializedJob): BatchJob[J] = env.submit(serializedJob)
+    override def submit(env: SGELocalEnvironment, serializedJob: SerializedJob): J = env.submit(serializedJob)
     override def state(env: SGELocalEnvironment, j: J): ExecutionState.ExecutionState = env.state(j)
     override def delete(env: SGELocalEnvironment, j: J): Unit = env.delete(j)
     override def stdOutErr(js: SGELocalEnvironment, j: J) = js.stdOutErr(j)
@@ -263,7 +262,7 @@ class SGELocalEnvironment(
       )
     }
 
-    val (remoteScript, result, workDirectory) = buildScript(serializedJob)
+    val (remoteScript, workDirectory) = buildScript(serializedJob)
     val description = _root_.gridscale.sge.SGEJobDescription(
       command = s"/bin/bash $remoteScript",
       queue = parameters.queue,
@@ -271,8 +270,7 @@ class SGELocalEnvironment(
       wallTime = parameters.wallTime,
       memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
     )
-    val id = gridscale.sge.submit(LocalHost(), description)
-    BatchJob(id, result)
+    gridscale.sge.submit(LocalHost(), description)
   }
 
   def state(id: gridscale.cluster.BatchScheduler.BatchJob) =

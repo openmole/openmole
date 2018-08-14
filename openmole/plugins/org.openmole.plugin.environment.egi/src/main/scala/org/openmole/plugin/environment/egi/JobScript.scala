@@ -28,7 +28,6 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean, 
 
   def apply(
     serializedJob: SerializedJob,
-    resultPath:    String,
     proxy:         Option[String] = None
   )(implicit preference: Preference) = {
     import serializedJob._
@@ -94,7 +93,7 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean, 
       script += "export PATH=$PWD/jre/bin:$PATH"
       script += "export HOME=$PWD"
       script += "/bin/sh run.sh " + memory + "m " + UUID.randomUUID + " -c " +
-        path + " -s $CUR/storage.bin -p $CUR/envplugins/ -i " + inputFile + " -o " + resultPath +
+        path + " -s $CUR/storage.bin -p $CUR/envplugins/ -i " + inputFile + " -o " + resultPath.get +
         " -t " + threads + (if (debug) " -d 2>&1" else "")
       script.mkString(" && ")
     }

@@ -112,7 +112,7 @@ object SSHEnvironment {
   implicit def isJobService[A]: JobServiceInterface[SSHEnvironment[A]] = new JobServiceInterface[SSHEnvironment[A]] {
     override type J = SSHJob
 
-    override def submit(env: SSHEnvironment[A], serializedJob: SerializedJob): BatchJob[J] = env.register(serializedJob)
+    override def submit(env: SSHEnvironment[A], serializedJob: SerializedJob): J = env.register(serializedJob)
     override def state(env: SSHEnvironment[A], j: J): ExecutionState.ExecutionState = env.state(j)
     override def delete(env: SSHEnvironment[A], j: J): Unit = env.delete(j)
     override def stdOutErr(js: SSHEnvironment[A], j: SSHJob) = js.stdOutErr(j)
@@ -194,19 +194,17 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
       )
     }
 
-    val (remoteScript, result, workDirectory) = buildScript(serializedJob)
+    val (remoteScript, workDirectory) = buildScript(serializedJob)
     val jobDescription = gridscale.ssh.SSHJobDescription(
       command = s"/bin/bash $remoteScript",
       workDirectory = workDirectory
     )
 
-    val registered = queuesLock {
+    queuesLock {
       val job = SSHEnvironment.SSHJob(jobId.getAndIncrement())
       jobsStates.put(job, SSHEnvironment.Queued(jobDescription))
       job
     }
-
-    BatchJob(registered, result)
   }
 
   def submit(job: SSHEnvironment.SSHJob, description: gridscale.ssh.SSHJobDescription) =

@@ -94,7 +94,7 @@ object OAREnvironment {
 
   implicit def isJobService[A]: JobServiceInterface[OAREnvironment[A]] = new JobServiceInterface[OAREnvironment[A]] {
     override type J = gridscale.cluster.BatchScheduler.BatchJob
-    override def submit(env: OAREnvironment[A], serializedJob: SerializedJob): BatchJob[J] = env.submit(serializedJob)
+    override def submit(env: OAREnvironment[A], serializedJob: SerializedJob): J = env.submit(serializedJob)
     override def state(env: OAREnvironment[A], j: J): ExecutionState.ExecutionState = env.state(j)
     override def delete(env: OAREnvironment[A], j: J): Unit = env.delete(j)
     override def stdOutErr(js: OAREnvironment[A], j: J) = js.stdOutErr(j)
@@ -178,7 +178,7 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
       )
     }
 
-    val (remoteScript, result, workDirectory) = buildScript(serializedJob)
+    val (remoteScript, workDirectory) = buildScript(serializedJob)
     val description = gridscale.oar.OARJobDescription(
       command = s"/bin/bash $remoteScript",
       workDirectory = workDirectory,
@@ -189,8 +189,7 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
       bestEffort = parameters.bestEffort
     )
 
-    val id = gridscale.oar.submit[_root_.gridscale.ssh.SSHServer](env, description)
-    BatchJob(id, result)
+    gridscale.oar.submit[_root_.gridscale.ssh.SSHServer](env, description)
   }
 
   def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
@@ -212,7 +211,7 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
 object OARLocalEnvironment{
   implicit def isJobService: JobServiceInterface[OARLocalEnvironment] = new JobServiceInterface[OARLocalEnvironment] {
     override type J = gridscale.cluster.BatchScheduler.BatchJob
-    override def submit(env: OARLocalEnvironment, serializedJob: SerializedJob): BatchJob[J] = env.submit(serializedJob)
+    override def submit(env: OARLocalEnvironment, serializedJob: SerializedJob): J = env.submit(serializedJob)
     override def state(env: OARLocalEnvironment, j: J): ExecutionState.ExecutionState = env.state(j)
     override def delete(env: OARLocalEnvironment, j: J): Unit = env.delete(j)
     override def stdOutErr(js: OARLocalEnvironment, j: J) = js.stdOutErr(j)
@@ -268,7 +267,7 @@ class OARLocalEnvironment(
       )
     }
 
-    val (remoteScript, result, workDirectory) = buildScript(serializedJob)
+    val (remoteScript, workDirectory) = buildScript(serializedJob)
     val description = gridscale.oar.OARJobDescription(
       command = s"/bin/bash $remoteScript",
       workDirectory = workDirectory,
@@ -279,8 +278,7 @@ class OARLocalEnvironment(
       bestEffort = parameters.bestEffort
     )
 
-    val id = gridscale.oar.submit(LocalHost(), description)
-    BatchJob(id, result)
+    gridscale.oar.submit(LocalHost(), description)
   }
 
   def state(id: gridscale.cluster.BatchScheduler.BatchJob) =

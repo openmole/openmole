@@ -28,13 +28,11 @@ import scala.concurrent.stm._
 trait JobServiceInterface[JS] {
   type J
 
-  def submit(js: JS, serializedJob: SerializedJob): BatchJob[J]
+  def submit(js: JS, serializedJob: SerializedJob): J
   def state(js: JS, j: J): ExecutionState
   def delete(js: JS, j: J): Unit
   def stdOutErr(js: JS, j: J): (String, String)
 }
-
-case class BatchJob[J](id: J, resultPath: String)
 
 object BatchJobService extends JavaLogger {
 
@@ -43,24 +41,22 @@ object BatchJobService extends JavaLogger {
 
   def tryStdOutErr(batchJob: BatchJobControl, token: AccessToken) = util.Try(batchJob.stdOutErr(token))
 
-  def submit[JS](batchJobService: BatchJobService[JS], serializedJob: SerializedJob)(implicit token: AccessToken): BatchJobControl = token.access {
+  def submit[JS](batchJobService: BatchJobService[JS], serializedJob: SerializedJob, resultPath: AccessToken ⇒ String)(implicit token: AccessToken): BatchJobControl = token.access {
     import batchJobService._
 
-    type BJ = BatchJob[jsInterface.J]
+    def updateState(job: jsInterface.J)(token: AccessToken): ExecutionState = token.access { jsInterface.state(js, job) }
+    def delete(job: jsInterface.J)(token: AccessToken) = token.access { jsInterface.delete(js, job) }
+    def stdOutErr(job: jsInterface.J)(token: AccessToken) = token.access { jsInterface.stdOutErr(js, job) }
 
-    def updateState(job: BJ)(token: AccessToken): ExecutionState = token.access { jsInterface.state(js, job.id) }
-    def delete(job: BJ)(token: AccessToken) = token.access { jsInterface.delete(js, job.id) }
-    def stdOutErr(job: BJ)(token: AccessToken) = token.access { jsInterface.stdOutErr(js, job.id) }
-
-    val job: BJ = jsInterface.submit(js, serializedJob)
+    val job = jsInterface.submit(js, serializedJob)
     BatchJobService.Log.logger.fine(s"Successful submission: ${job}")
 
     BatchJobControl(
       updateState(job),
       delete(job),
       stdOutErr(job),
-      usageControl,
-      job.resultPath
+      resultPath,
+      usageControl
     )
   }
 
@@ -77,13 +73,13 @@ object BatchJobControl {
     updateState:  AccessToken ⇒ ExecutionState,
     delete:       AccessToken ⇒ Unit,
     stdOutErr:    AccessToken ⇒ (String, String),
-    usageControl: UsageControl,
-    resultPath:   String): BatchJobControl = new BatchJobControl(
+    resultPath:   AccessToken ⇒ String,
+    usageControl: UsageControl): BatchJobControl = new BatchJobControl(
     updateState,
     delete,
     stdOutErr,
-    usageControl,
-    resultPath)
+    resultPath,
+    usageControl)
 
 }
 
@@ -91,5 +87,5 @@ class BatchJobControl(
   val updateState:  AccessToken ⇒ ExecutionState,
   val delete:       AccessToken ⇒ Unit,
   val stdOutErr:    AccessToken ⇒ (String, String),
-  val usageControl: UsageControl,
-  val resultPath:   String)
+  val resultPath:   AccessToken ⇒ String,
+  val usageControl: UsageControl)
