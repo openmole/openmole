@@ -95,7 +95,7 @@ object UserGuide {
           if (DocumentationPages.mainDocPages.contains(current)) span else scalatags.Text.all.h1(current.title),
           h2Contents(current.content.render),
           current.content),
-        SideMenu.left(left),
+        SideMenu.left(current, left),
         Some(SideMenu.right(right.insert(current.details)))
       )
 

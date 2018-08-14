@@ -31,7 +31,6 @@ import org.scalatra._
 import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
-import org.openmole.gui.server.jscompile.JSPack
 import org.openmole.tool.hash._
 import org.openmole.tool.file._
 import org.openmole.core.services._

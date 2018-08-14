@@ -55,7 +55,10 @@ object SiteJS extends JSApp {
     Search.build
 
     val index = Importedjs.lunr((i: Index) ⇒ {
-      i.field("title", lit("boost" → 10).value)
+      i.field("title", lit("boost" → 15).value)
+      i.field("h2", lit("boost" -> 10).value)
+      i.field("h3", lit("boost" -> 8).value)
+      i.field("pre", lit("boost" -> 5).value) // for code tags
       i.field("body", lit("boost" → 1).value)
       i.ref("url")
       indexArray.foreach(p ⇒ {
@@ -70,7 +73,10 @@ object SiteJS extends JSApp {
 
   def search(content: String): Seq[IIndexSearchResult] = {
     lunrIndex.now.map { i ⇒
-      i.search(content).toSeq
+      println("start search")
+      val oo = i.search(content).toSeq
+      println("end search")
+      oo
     }.getOrElse(Seq())
   }
 

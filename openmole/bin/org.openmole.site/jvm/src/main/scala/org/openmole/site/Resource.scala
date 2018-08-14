@@ -34,6 +34,7 @@ object Resource {
   def moleResource(name: String) = imgResource(s"mole/$name")
   def exampleResource(name: String) = imgResource(s"example/$name")
   def guiGuideResource(name: String) = imgResource(s"guiGuide/$name")
+  def tutorialResource(name: String) = imgResource(s"tutorial/$name")
 
   def jsResource(name: String) = fileResource(s"js/$name")
 
@@ -117,6 +118,11 @@ object Resource {
       val fireRemoveClearAll = exampleResource("fireRemoveClearAll.png")
 
       val ants = exampleResource("ants.png")
+    }
+
+    object tutorial {
+      val modelImport = tutorialResource("modelImport.png")
+      val modelExecution = tutorialResource("modelExecution.png")
     }
 
     object people {

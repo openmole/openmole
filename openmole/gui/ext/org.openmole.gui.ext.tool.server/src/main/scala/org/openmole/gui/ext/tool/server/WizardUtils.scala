@@ -69,7 +69,7 @@ object WizardUtils {
       defaults,
       resourcesString,
       specificInputPattern.map { sip => imapString(imappings, sip) },
-      specificOutputPattern.map { sop => imapString(omappings, sop) }
+      specificOutputPattern.map { sop => omapString(omappings, sop) }
     )
   }
 

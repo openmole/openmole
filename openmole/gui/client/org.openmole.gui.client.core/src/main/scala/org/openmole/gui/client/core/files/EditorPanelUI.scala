@@ -6,8 +6,6 @@ import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.FileExtension._
 
 import scala.scalajs.js
-import scala.scalajs.js.Dynamic.{ literal ⇒ lit }
-import scala.scalajs.js.{ Dynamic ⇒ Dyn }
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags
 import scala.async.Async.{ async, await }
@@ -15,7 +13,9 @@ import scaladget.ace._
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 
+import scala.scalajs.js.JSConverters._
 import org.openmole.gui.ext.tool.client._
+import js.Dynamic.{ literal ⇒ lit }
 
 /*
  * Copyright (C) 07/04/15 // mathieu.leclaire@openmole.org
@@ -69,11 +69,16 @@ class EditorPanelUI(initCode: String, fileType: FileExtension, containerModifier
 
     setCode(initCode)
     editor.setTheme("ace/theme/github")
+    ace.require("ace/ext/language_tools")
     editor.renderer.setShowGutter(true)
     editor.setShowPrintMargin(true)
     editor.setAutoScrollEditorIntoView(true)
 
-    // editor.getSession().setTabSize(2)
+    editor.setOptions(js.Dynamic.literal(
+      "enableBasicAutocompletion" -> true,
+      "enableSnippets" -> true,
+      "enableLiveAutocompletion" -> true
+    ))
   }
 
 }
