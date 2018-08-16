@@ -2,229 +2,242 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
-@h1{FAQ}
+@h2
+    Which Java version should I use?
+@div OpenMOLE is fully working under OpenJDK 8 and above. OpenJDK is the recommended option. You can check which Java version
+you're running by typing @hl.highlight("java -version", "plain") in a console.
 
-@sect{@shared.faq.javaVersion}
-    @div OpenMOLE is fully working under OpenJDK 8 and above. OpenJDK is the recommended option. You can check which Java version
-    you're running by typing @hl.highlight("java -version", "plain") in a console.
+@div If you use the closed-source Oracle Java virtual machine (which is probably the case if you are working on Mac or
+Windows), you have to install the  Java Cryptography Extension (JCE) available at the bottom of this
+@aa("page", href := shared.link.jce) in order for OpenMOLE to be
+fully functional.
 
-    @div If you use the closed-source Oracle Java virtual machine (which is probably the case if you are working on Mac or
-    Windows), you have to install the  Java Cryptography Extension (JCE) available at the bottom of this
-    @aa("page", href := shared.link.jce) in order for OpenMOLE to be
-    fully functional.
+@div JCE is an archive containing a bunch of files that you should replace in the @i{jre/lib/security}
+directory of your java installation. It enables strong cryptographic algorithms.
 
-    @div JCE is an archive containing a bunch of files that you should replace in the @i{jre/lib/security}
-    directory of your java installation. It enables strong cryptographic algorithms.
+@div Another concern for @b{Mac users} are the concurrent versions of Java that are often present on the same system. Mac
+OS ships with a default Java 6 that is not suitable to execute OpenMOLE. You must install Java 8 or greater and
+@b{set the environment variable JAVA_HOME} to the install location on your machine (typically the directory
+containing @i{.../bin/java}).
 
-    @div Another concern for @b{Mac users} are the concurrent versions of Java that are often present on the same system. Mac
-    OS ships with a default Java 6 that is not suitable to execute OpenMOLE. You must install Java 8 or greater and
-    @b{set the environment variable JAVA_HOME} to the install location on your machine (typically the directory
-    containing @i{.../bin/java}).
+@h2
+    oldVersions
+@div Old versions of OpenMOLE software and documentation are available @aa("here", href := shared.link.allOpenMOLE). Due to a data loss in 2016, the versions from OpenMOLE 6 are available only.
 
-@sect{@shared.faq.oldVersions}
-    @div Old versions of OpenMOLE software and documentation are available @aa("here", href := shared.link.allOpenMOLE). Due to a data loss in 2016, the versions from OpenMOLE 6 are available only.
 
+@h2
+    sshConnectionBug
+@div When one of the SSH authentications you've added to OpenMOLE is marked as failed, you can try these few steps to identify the problems.
 
-@sect{@shared.faq.sshConnectionBug}
-    @div When one of the SSH authentications you've added to OpenMOLE is marked as failed, you can try these few steps to identify the problems.
+@div If you are using OpenMOLE in console mode, enable the @i{FINE} level of logging in the console using:
+@hl.openmole("""logger.level("FINE")""")
 
-    @div If you are using OpenMOLE in console mode, enable the @i{FINE} level of logging in the console using:
-    @hl.openmole("""logger.level("FINE")""")
 
+@h2
+    Password authentication}
+@div If you are using the @hl.openmole("LoginPassword") authentication you might want to double check the user and
+  password you entered since one of them is more than likely incorrect.
 
-@sect{@shared.faq.passwordAuthentication}
-    @div If you are using the @hl.openmole("LoginPassword") authentication you might want to double check the user and
-      password you entered since one of them is more than likely incorrect.
+@div{SSH Keypair Authentication}
+@div In such a case, we'll have to investigate multiple options, as SSH public key authentications are sensitive to
+    several configuration parameters.
 
-    @div{SSH Keypair Authentication}
-    @div In such a case, we'll have to investigate multiple options, as SSH public key authentications are sensitive to
-        several configuration parameters.
+@div Public key authentication has usually a higher priority than password-based authentication when trying to
+    connect to a remote server. Thus, when you attempt an SSH connection to the the target environment, if your
+    client asks you to enter a password (please note that a passphrase is different from a password), then your
+    public key authentication is not taken into account.
 
-    @div Public key authentication has usually a higher priority than password-based authentication when trying to
-        connect to a remote server. Thus, when you attempt an SSH connection to the the target environment, if your
-        client asks you to enter a password (please note that a passphrase is different from a password), then your
-        public key authentication is not taken into account.
+@div SSH will skip your public key in case of bad configuration. The most common cases of badly configured keypairs
+    are the following:
+  @ul
+    @li{You haven't created an SSH keypair yet (using ssh-keygen). Private keys are usually stored in
+    @i{~/.ssh/id_rsa} or @i{~/.ssh/id_dsa}, and should have a matching ~/.ssh/id_[rd]sa.pub next to them.}
+    @li{Permissions of your ~/.ssh folder @b{must} be set to @i{drwx——} @("(700 in octal)"). Also, too permissive home
+    directories (with write access given to the whole group for instance) might show problematic.}
+    @li{A @i{~/.ssh/authorized_keys} file must be present on the remote system. It should at least contain a line
+    matching the content of the ~/.ssh/id_[rd]sa.pub from your base system.}
+    @li{You entered a passphrase when you generated your SSH keys and cannot remember it. In such a case, it might
+    be better to generate another keypair.}
 
-    @div SSH will skip your public key in case of bad configuration. The most common cases of badly configured keypairs
-        are the following:
-      @ul
-        @li{You haven't created an SSH keypair yet (using ssh-keygen). Private keys are usually stored in
-        @i{~/.ssh/id_rsa} or @i{~/.ssh/id_dsa}, and should have a matching ~/.ssh/id_[rd]sa.pub next to them.}
-        @li{Permissions of your ~/.ssh folder @b{must} be set to @i{drwx——} @("(700 in octal)"). Also, too permissive home
-        directories (with write access given to the whole group for instance) might show problematic.}
-        @li{A @i{~/.ssh/authorized_keys} file must be present on the remote system. It should at least contain a line
-        matching the content of the ~/.ssh/id_[rd]sa.pub from your base system.}
-        @li{You entered a passphrase when you generated your SSH keys and cannot remember it. In such a case, it might
-        be better to generate another keypair.}
+@div If you still could not solve your SSH authentication problems, another option is to recreate a public/private
+  keypair using the @hl.highlight("ssh-keygen", "bash") shell command. Store it to a different file to avoid
+  overwriting the one already in place. You might also want to try a simple @hl.openmole{LoginPassword}
+  authentication as explained in the @a("SSH h2ion", href := DocumentationPages.ssh.file).
 
-    @div If you still could not solve your SSH authentication problems, another option is to recreate a public/private
-      keypair using the @hl.highlight("ssh-keygen", "bash") shell command. Store it to a different file to avoid
-      overwriting the one already in place. You might also want to try a simple @hl.openmole{LoginPassword}
-      authentication as explained in the @a("SSH section", href := DocumentationPages.ssh.file).
+@div Adding the @hl.highlight("-vvv", "bash") flag to your @i{ssh} command will give a lot more details on the
+    communication between your client and the remote server. This will allow you to find out which authentication
+    is successful as well as the order in which the authentication modes are tried.
 
-    @div Adding the @hl.highlight("-vvv", "bash") flag to your @i{ssh} command will give a lot more details on the
-        communication between your client and the remote server. This will allow you to find out which authentication
-        is successful as well as the order in which the authentication modes are tried.
 
+@h2
+    Is OpenMOLE doing something?
+@div If you think OpenMOLE is crashed or stuck for some reason, here are a few things you can check from your system to decide whether it's just a temporary slow down or if the platform did actually crash.
 
-@sect{@shared.faq.isOpenMOLEup}
-    @div If you think OpenMOLE is crashed or stuck for some reason, here are a few things you can check from your system to decide whether it's just a temporary slow down or if the platform did actually crash.
+@div{Using tools from the Java Development Kit}
+@div A simple call to @hl.highlight("jps", "plain") from your command line will list all the instrumented JVMs on your system. If OpenMOLE is running, it is among these processes.
 
-    @div{Using tools from the Java Development Kit}
-    @div A simple call to @hl.highlight("jps", "plain") from your command line will list all the instrumented JVMs on your system. If OpenMOLE is running, it is among these processes.
+@div Now that you know OpenMOLE's process id, you can use @hl.highlight("jstack", "plain") to print the eventual stack traces collected from OpenMOLE's threads. It's a bit low level but can at least give you enough material to thoroughly document your problem in the issue list or the mailing list.
 
-    @div Now that you know OpenMOLE's process id, you can use @hl.highlight("jstack", "plain") to print the eventual stack traces collected from OpenMOLE's threads. It's a bit low level but can at least give you enough material to thoroughly document your problem in the issue list or the mailing list.
+@div The same procedure can be applied to the @hl.highlight("dbserver", "plain") running along OpenMOLE to manage the replica of the files copied to execution environments.
 
-    @div The same procedure can be applied to the @hl.highlight("dbserver", "plain") running along OpenMOLE to manage the replica of the files copied to execution environments.
+@div{Inspecting the temporary folders}
 
-    @div{Inspecting the temporary folders}
+@div OpenMOLE automatically creates temporary folders on the machine it's running in order to handle various inputs and outputs.
 
-    @div OpenMOLE automatically creates temporary folders on the machine it's running in order to handle various inputs and outputs.
+@div If you have access to the machine running OpenMOLE, change to your OpenMOLE's preferences folder down to the following path: @b{/home/user/.openmole/my_machine/.tmp}. List the content of this directory and change to the most recently created directory.
 
-    @div If you have access to the machine running OpenMOLE, change to your OpenMOLE's preferences folder down to the following path: @b{/home/user/.openmole/my_machine/.tmp}. List the content of this directory and change to the most recently created directory.
+@div If you're using a remote environment, it should contain the tar archives used to populate new jobs on your remote computing environment, along with the input data files required by the task. The only presence of these files is a good indicator that OpenMOLE is functioning correctly and preparing the delegation of your workflow. Hardcore debuggers might want to go even deeper and extract the content of the tar archives to verify them, but this is out of scope.
 
-    @div If you're using a remote environment, it should contain the tar archives used to populate new jobs on your remote computing environment, along with the input data files required by the task. The only presence of these files is a good indicator that OpenMOLE is functioning correctly and preparing the delegation of your workflow. Hardcore debuggers might want to go even deeper and extract the content of the tar archives to verify them, but this is out of scope.
+@div However, touching on temporary file creation in OpenMOLE seamlessly leads us to our next entry...
 
-    @div However, touching on temporary file creation in OpenMOLE seamlessly leads us to our next entry...
 
+@h2
+    I've reached my home folder size / file quota
+@div OpenMOLE generates a fair amount of @b{temporary files} in the @i{.openmole/mymachine/.tmp} folder associated to your machine. Although these are deleted at the end of an execution, they can lead to a significant increase of the space occupied by your .openmole folder and of the number of files present in the same folder.
 
-@sect{@shared.faq.homeQuota}
-    @div OpenMOLE generates a fair amount of @b{temporary files} in the @i{.openmole/mymachine/.tmp} folder associated to your machine. Although these are deleted at the end of an execution, they can lead to a significant increase of the space occupied by your .openmole folder and of the number of files present in the same folder.
+@div Because some systems place stringent limitations on these two quotas, you might want to move your @i{.openmole} folder to a file system not restricted by quotas in order to run your OpenMOLE experiment successfully. The simplest way to do so is to create a destination folder in the unrestricted file system and then create a symbolic link name @i{.openmole} in your home directory that points to this newly created folder. On a UNIX system, this procedure translates into the following commands.
 
-    @div Because some systems place stringent limitations on these two quotas, you might want to move your @i{.openmole} folder to a file system not restricted by quotas in order to run your OpenMOLE experiment successfully. The simplest way to do so is to create a destination folder in the unrestricted file system and then create a symbolic link name @i{.openmole} in your home directory that points to this newly created folder. On a UNIX system, this procedure translates into the following commands.
+@hl.highlight("""
+# assumes /data is not restricted by quotas
+cp -r ~/.openmole /data/openmole_data
+rm -rf ~/.openmole
+ln -s /data/openmole_data ~/.openmole
+""", "plain")
 
-    @hl.highlight("""
-    # assumes /data is not restricted by quotas
-    cp -r ~/.openmole /data/openmole_data
-    rm -rf ~/.openmole
-    ln -s /data/openmole_data ~/.openmole
-    """, "plain")
+@div In order for this procedure to work, you'll want to ensure the target folder (@i{/data/openmole} in the example) can be reached from all the machines running your OpenMOLE installation.
 
-    @div In order for this procedure to work, you'll want to ensure the target folder (@i{/data/openmole} in the example) can be reached from all the machines running your OpenMOLE installation.
+@div Moving your @i{.openmole} to a different location is also @b{strongly advised on remote execution hosts (typically clusters) on which you own a personal account} used with OpenMOLE. In the case of remote environments, the OpenMOLE runtime and the input files of your workflow will be copied to the @i{.openmole} folder, again leading to problematic over quotas on these systems. For this specific case, we @b{recommend using} the @hl.openmoleNoTest{sharedDirectory} option of the @a("cluster environment", href := DocumentationPages.cluster.file) to set the location where OpenMOLE should copy your files without any hitting quota restrictions.
 
-    @div Moving your @i{.openmole} to a different location is also @b{strongly advised on remote execution hosts (typically clusters) on which you own a personal account} used with OpenMOLE. In the case of remote environments, the OpenMOLE runtime and the input files of your workflow will be copied to the @i{.openmole} folder, again leading to problematic over quotas on these systems. For this specific case, we @b{recommend using} the @hl.openmoleNoTest{sharedDirectory} option of the @a("cluster environment", href := DocumentationPages.cluster.file) to set the location where OpenMOLE should copy your files without any hitting quota restrictions.
 
+@h2
+    My sampling generates a type error
 
-@sect{@shared.faq.sampleError}
-    @div Combining samplings is straightforward in OpenMOLE, but can sometimes results in syntax errors a bit cryptic to new users.
-    Let's take the example of a combined sampling made of a file exploration sampling and an integer range exploration:
+@div Combining samplings is straightforward in OpenMOLE, but can sometimes results in syntax errors a bit cryptic to new users.
+Let's take the example of a combined sampling made of a file exploration sampling and an integer range exploration:
 
-    @hl.code("""
-    (input in (workDirectory / "../data/").files withName inputName) x
-    i in (1 to 10)
-    """)
+@hl.code("""
+(input in (workDirectory / "../data/").files withName inputName) x
+i in (1 to 10)
+""")
 
-    @div This combined sampling will generate the following error when compiling the workflow:
+@div This combined sampling will generate the following error when compiling the workflow:
 
-    @hl.highlight("""
-    found   : org.openmole.core.workflow.data.Prototype[Int]
-    required: org.openmole.core.workflow.sampling.Sampling
-    """, "plain")
+@hl.highlight("""
+found   : org.openmole.core.workflow.data.Prototype[Int]
+required: org.openmole.core.workflow.sampling.Sampling
+""", "plain")
 
 
-    @div OpenMOLE cannot identify the integer range the valid sampling it is. Simply @b{wrapping the expression in parentheses}
-     fixes the problem as shown in this correct version:
+@div OpenMOLE cannot identify the integer range the valid sampling it is. Simply @b{wrapping the expression in parentheses}
+ fixes the problem as shown in this correct version:
 
-    @hl.code("""
-    (input in (workDirectory / "../data/").files withName inputName) x
-    (i in (1 to 10))
-    """)
+@hl.code("""
+(input in (workDirectory / "../data/").files withName inputName) x
+(i in (1 to 10))
+""")
 
 
-@sect{@shared.faq.cannotGetCare}
-    @div CARE has recently encountered some compatibility issues with recent versions of the Linux kernel (>= 4.8). If you had
-    downloaded CARE before the release of OpenMOLE 6.0, you might be faced with this issue when trying to package new code.
+@h2
+    I can't get CARE / PRoot to work
 
-    @div The typical behaviour of this problem is to terminate CARE or your re-execution by a @i{"signal 11" (Segmentation Fault)} message. The output will be similar to:
+@div CARE has recently encountered some compatibility issues with recent versions of the Linux kernel (>= 4.8). If you had
+downloaded CARE before the release of OpenMOLE 6.0, you might be faced with this issue when trying to package new code.
 
-    @div @hl.highlight("care info: pid 24238: terminated with signal 11", "plain").
+@div The typical behaviour of this problem is to terminate CARE or your re-execution by a @i{"signal 11" (Segmentation Fault)} message. The output will be similar to:
 
-    @div The easiest option to solve this problem is to download a fixed version from @aa("GitHub", href := shared.link.care).
+@div @hl.highlight("care info: pid 24238: terminated with signal 11", "plain").
 
-    @div This binary only works for 64 bits machines, which might not be the case of your workstation. Older versions of CARE are still available for different computer architecture from @aa("GitHub", href := shared.link.prootStatic). These versions require
-    the @hl.highlight("PROOT_NO_SECCOMP", "plain") environment variable to be set to 1 when running CARE. The packaging command line becomes:
+@div The easiest option to solve this problem is to download a fixed version from @aa("GitHub", href := shared.link.care).
 
-    @div @hl.highlight("PROOT_NO_SECCOMP=1 care -o foo.tgz.bin -r ~ my_app -input 42", "plain")
+@div This binary only works for 64 bits machines, which might not be the case of your workstation. Older versions of CARE are still available for different computer architecture from @aa("GitHub", href := shared.link.prootStatic). These versions require
+the @hl.highlight("PROOT_NO_SECCOMP", "plain") environment variable to be set to 1 when running CARE. The packaging command line becomes:
 
-    @div You can also export this variable to your environment once and for all:
+@div @hl.highlight("PROOT_NO_SECCOMP=1 care -o foo.tgz.bin -r ~ my_app -input 42", "plain")
 
-    @div @hl.highlight("export PROOT_NO_SECCOMP=1", "plain")
+@div You can also export this variable to your environment once and for all:
 
-    @div You'll have to do that in every terminal you're using unless you set this variable in your shell's startup file (@i{~/.bashrc} if you're using @i{bash}).
+@div @hl.highlight("export PROOT_NO_SECCOMP=1", "plain")
 
-    @div There is nothing to change in your OpenMOLE scripts, the good folks at OpenMOLE have everything under control ;)
+@div You'll have to do that in every terminal you're using unless you set this variable in your shell's startup file (@i{~/.bashrc} if you're using @i{bash}).
 
-    @div For more information about this specific problem, you can join this @aa("discussion", href := shared.link.prootIssue106).
+@div There is nothing to change in your OpenMOLE scripts, the good folks at OpenMOLE have everything under control ;)
 
-@sect{@shared.faq.tooManyOpenFiles}
-    @div On linux server the number of file a use can open is generally limited to 1024. OpenMOLE increase it to 4096 when on launch, but it doesn't seem to work on your system, you might want to understand why. To check the current of you system limit execute @i{ulimit -a} in a terminal:
+@div For more information about this specific problem, you can join this @aa("discussion", href := shared.link.prootIssue106).
 
-    @div @hl.highlight("""
-    reuillon@docker-host1:~$ ulimit -a
-    core file size          (blocks, -c) 0
-    data seg size           (kbytes, -d) unlimited
-    scheduling priority             (-e) 0
-    file size               (blocks, -f) unlimited
-    pending signals                 (-i) 64040
-    max locked memory       (kbytes, -l) 64
-    max memory size         (kbytes, -m) unlimited
-    open files                      (-n) 1024
-    pipe size            (512 bytes, -p) 8
-    POSIX message queues     (bytes, -q) 819200
-    real-time priority              (-r) 0
-    stack size              (kbytes, -s) 8192
-    cpu time               (seconds, -t) unlimited
-    max user processes              (-u) 64040
-    virtual memory          (kbytes, -v) unlimited
-    file locks                      (-x) unlimited""", "plain")
+@h2
+    I get an error relate to file on linux and there is 'too many open files' written somewhere in the error
 
-     @div In this example you can see the the nax number of open files is 1024. This is generally a soft limitation that can be overridden by the user. To do so execute @i{ulimit -n 4096} before launching in the same terminal. You can check that you command had the expected effect using @i{ulimit -a}. If is does't work it means that a hard limit has been set in the @i{limits.conf} of your system. If you are administrator you can fix it by modifying the file @i{/etc/security/limits.conf}, otherwise you should contact the system administrator and ask him/her kindly to unleash it.
+@div On linux server the number of file a use can open is generally limited to 1024. OpenMOLE increase it to 4096 when on launch, but it doesn't seem to work on your system, you might want to understand why. To check the current of you system limit execute @i{ulimit -a} in a terminal:
 
-@sect{@shared.faq.qxcbConnection}
-    @div For instance, if you try to use a standalone QGIS application, QGIS might try to access the display server (even when you run the application without a GUI).
-    This will definitely not work on a remote openmole instance (that probably does not have a display server).
+@div @hl.highlight("""
+reuillon@docker-host1:~$ ulimit -a
+core file size          (blocks, -c) 0
+data seg size           (kbytes, -d) unlimited
+scheduling priority             (-e) 0
+file size               (blocks, -f) unlimited
+pending signals                 (-i) 64040
+max locked memory       (kbytes, -l) 64
+max memory size         (kbytes, -m) unlimited
+open files                      (-n) 1024
+pipe size            (512 bytes, -p) 8
+POSIX message queues     (bytes, -q) 819200
+real-time priority              (-r) 0
+stack size              (kbytes, -s) 8192
+cpu time               (seconds, -t) unlimited
+max user processes              (-u) 64040
+virtual memory          (kbytes, -v) unlimited
+file locks                      (-x) unlimited""", "plain")
 
-    @div The full error might look something like:
-    @hl.highlight("""
-    QXcbConnection: Could not connect to display
-    proot terminated with signal 6
-    """, "plain")
+ @div In this example you can see the the nax number of open files is 1024. This is generally a soft limitation that can be overridden by the user. To do so execute @i{ulimit -n 4096} before launching in the same terminal. You can check that you command had the expected effect using @i{ulimit -a}. If is does't work it means that a hard limit has been set in the @i{limits.conf} of your system. If you are administrator you can fix it by modifying the file @i{/etc/security/limits.conf}, otherwise you should contact the system administrator and ask him/her kindly to unleash it.
 
-    @div Fortunately for you, we have a workaround.
+@h2
+    My workflow fails with QXcbConnection: Could not connect to display
+@div For instance, if you try to use a standalone QGIS application, QGIS might try to access the display server (even when you run the application without a GUI).
+This will definitely not work on a remote openmole instance (that probably does not have a display server).
 
-    @div Let's go back to our QGIS standalone application. It is a python application so we use CARE to embed it in a CARETask in openmole. The packaging would look like:
-    @hl.highlight("""
-    care -o myapp.tgz.bin python3 myapp.py param1 param2
-    """, "plain")
+@div The full error might look something like:
+@hl.highlight("""
+QXcbConnection: Could not connect to display
+proot terminated with signal 6
+""", "plain")
 
-    @div The workaround uses @aa("xvfb", href := shared.link.xvfb), a virtual framebuffer X server. The only thing you have to do is to run you command through xvfb. In our example, that would be:
+@div Fortunately for you, we have a workaround.
 
-    @hl.highlight("""
-    care -o myapp.tgz.bin xvfb-run python3 myapp.py param1 param2
-    """, "plain")
+@div Let's go back to our QGIS standalone application. It is a python application so we use CARE to embed it in a CARETask in openmole. The packaging would look like:
+@hl.highlight("""
+care -o myapp.tgz.bin python3 myapp.py param1 param2
+""", "plain")
 
-    @div And that's it. After that, no connection to the display server will be attempted.
+@div The workaround uses @aa("xvfb", href := shared.link.xvfb), a virtual framebuffer X server. The only thing you have to do is to run you command through xvfb. In our example, that would be:
 
+@hl.highlight("""
+care -o myapp.tgz.bin xvfb-run python3 myapp.py param1 param2
+""", "plain")
 
-@sect{@shared.faq.pathOverFile}
+@div And that's it. After that, no connection to the display server will be attempted.
 
-    @div OpenMOLE takes care of everything for you, from connecting to remote environments, to submitting jobs and copying your files. However, most @a("cluster", href := DocumentationPages.cluster.file) installations take advantage from a shared file system between the nodes.
 
-    @div If the file structure you're exploring is located on a shared filesystem, you do not need OpenMOLE to duplicate the target files, as they are available to the compute node directly from the shared filesystem.
+@h2
+    When shall I use Path over File?
 
-    @div In case you're manipulating very large files, it might not even be possible to duplicate them.
+@div OpenMOLE takes care of everything for you, from connecting to remote environments, to submitting jobs and copying your files. However, most @a("cluster", href := DocumentationPages.cluster.file) installations take advantage from a shared file system between the nodes.
 
-    @div When you find yourself in such a use case, you might want to try the @hl.openmoleNoTest{Path} optimisation for your scripts. By replacing the @hl.openmoleNoTest{Val[File]} variables by @hl.openmoleNoTest{Val[Path]} in your scripts, OpenMOLE will store the file's @b{location} and not its @b{content} as it would when using @hl.openmoleNoTest{Val[File]}.
+@div If the file structure you're exploring is located on a shared filesystem, you do not need OpenMOLE to duplicate the target files, as they are available to the compute node directly from the shared filesystem.
 
-    @div This optimisation is only available for @aa("cluster", href := DocumentationPages.cluster.file) and @b{not} for the @aa("EGI grid", href := DocumentationPages.egi.file).
+@div In case you're manipulating very large files, it might not even be possible to duplicate them.
 
-    @div You can find an example of using @hl.openmoleNoTest{Path} variables in the dataflow in the @a("data processing section", href := DocumentationPages.dataProcessing.file).
+@div When you find yourself in such a use case, you might want to try the @hl.openmoleNoTest{Path} optimisation for your scripts. By replacing the @hl.openmoleNoTest{Val[File]} variables by @hl.openmoleNoTest{Val[Path]} in your scripts, OpenMOLE will store the file's @b{location} and not its @b{content} as it would when using @hl.openmoleNoTest{Val[File]}.
 
+@div This optimisation is only available for @aa("cluster", href := DocumentationPages.cluster.file) and @b{not} for the @aa("EGI grid", href := DocumentationPages.egi.file).
 
+@div You can find an example of using @hl.openmoleNoTest{Path} variables in the dataflow in the @a("data processing h2ion", href := DocumentationPages.dataProcessing.file).
 
-@sect{@shared.faq.notListed}
-    @div If you could not resolve your problems, feel free to post your problem on the @a("mailing-list",
-    href := shared.link.mailingList).
 
-    @div If you think your problem is induced by a bug in OpenMOLE, please report the issue exhaustively on our @aa(
-    "GitHub page", href := shared.link.issue).
+
+@h2
+    My problem is not listed here}
+@div If you could not resolve your problems, feel free to post your problem on the @a("mailing-list",
+href := shared.link.mailingList).
+
+@div If you think your problem is induced by a bug in OpenMOLE, please report the issue exhaustively on our @aa(
+"GitHub page", href := shared.link.issue).

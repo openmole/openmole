@@ -58,17 +58,17 @@ class JarWizardGUI(safePath: SafePath, onMethodSelected: (LaunchingCommand) ⇒ 
   val jarClasses: Var[Seq[FullClass]] = Var(Seq())
   val isOSGI: Var[Boolean] = Var(false)
 
-  OMPost()[Api].isOSGI(safePath).call().foreach {o=>
+  OMPost()[Api].isOSGI(safePath).call().foreach { o =>
     isOSGI() = o
   }
 
   lazy val embedAsPluginCheckBox: SelectableButtons = radios()(
-    selectableButton("Yes", onclick = () ⇒ println("YES")),
-    selectableButton("No", onclick = () ⇒ println("NO"))
+    selectableButton("Yes", onclick = () ⇒ {}),
+    selectableButton("No", onclick = () ⇒ {})
   )
 
-  val classTable: Var[Option[scaladget.bootstrapnative.Table]] = Var(None)
-  val methodTable: Var[Option[scaladget.bootstrapnative.Table]] = Var(None)
+  val classTable: Var[Option[scaladget.bootstrapnative.DataTable]] = Var(None)
+  val methodTable: Var[Option[scaladget.bootstrapnative.DataTable]] = Var(None)
 
   searchClassInput.nameFilter.trigger {
     classTable.now.foreach { t ⇒
@@ -77,11 +77,11 @@ class JarWizardGUI(safePath: SafePath, onMethodSelected: (LaunchingCommand) ⇒ 
   }
 
   OMPost()[JarWizardAPI].jarClasses(safePath).call().foreach { jc ⇒
-    val table = scaladget.bootstrapnative.Table(
+    val table = scaladget.bootstrapnative.DataTable(
       rows = jc.map { c ⇒
-        scaladget.bootstrapnative.Row(Seq(c.name))
+        scaladget.bootstrapnative.DataTable.DataRow(Seq(c.name))
       }.toSeq,
-      bsTableStyle = scaladget.bootstrapnative.BSTableStyle(bordered_table +++ hover_table, emptyMod))
+      bsTableStyle = scaladget.bootstrapnative.Table.BSTableStyle(bordered_table +++ hover_table, emptyMod))
 
     classTable() = Some(table)
 
@@ -90,15 +90,15 @@ class JarWizardGUI(safePath: SafePath, onMethodSelected: (LaunchingCommand) ⇒ 
         OMPost()[JarWizardAPI].jarMethods(safePath, s.values.head).call().foreach { jm ⇒
           val methodMap = jm.map { m ⇒ m.expand -> m }.toMap
           methodTable() = Some(
-            scaladget.bootstrapnative.Table(
+            scaladget.bootstrapnative.DataTable(
               rows = jm.map { m ⇒
-                scaladget.bootstrapnative.Row(Seq(m.expand))
+                scaladget.bootstrapnative.DataTable.DataRow(Seq(m.expand))
               }.toSeq,
-              bsTableStyle = scaladget.bootstrapnative.BSTableStyle(bordered_table +++ hover_table, emptyMod))
+              bsTableStyle = scaladget.bootstrapnative.Table.BSTableStyle(bordered_table +++ hover_table, emptyMod))
           )
 
           methodTable.now.get.selected.trigger {
-            methodTable.now.get.selected.now.map(r ⇒ methodMap(r.values.head)).map { selectedMethod ⇒
+            methodTable.now.get.selected.now.map(r ⇒ methodMap(r.values.head)).foreach { selectedMethod ⇒
               onMethodSelected(JavaLaunchingCommand(
                 selectedMethod,
                 selectedMethod.args, selectedMethod.ret.map {
@@ -121,15 +121,16 @@ class JarWizardGUI(safePath: SafePath, onMethodSelected: (LaunchingCommand) ⇒ 
   )
 
   lazy val panel: TypedTag[HTMLElement] = div(
-  div(client.columnCSS)(
-      Rx{
-      if(isOSGI()) hForm(
-        div(embedAsPluginCheckBox.render)
-          .render.withLabel("Embed jar as plugin ?"),
-        span(client.modelHelp +++ client.columnCSS, "Your jar is an OSGI bundle. The best way to use it is to embed it as a plugin.").render
-      ) else div(client.modelHelp,
-        div("Your jar in not an OSGI bundle. An OSGI bundle is safer and more robust, so that we recomend you to render it as an OSGI bundle."),
-        a(href := "http://www.openmole.org/Plugins.html", target := "_blank")("How to create an OSGI bundle ?"))},
+    div(client.columnCSS)(
+      Rx {
+        if (isOSGI()) hForm(
+          div(embedAsPluginCheckBox.render)
+            .render.withLabel("Embed jar as plugin ?"),
+          span(client.modelHelp +++ client.columnCSS, "Your jar is an OSGI bundle. The best way to use it is to embed it as a plugin.").render
+        ) else div(client.modelHelp,
+          div("Your jar in not an OSGI bundle. An OSGI bundle is safer and more robust, so that we recomend you to render it as an OSGI bundle."),
+          a(href := "http://www.openmole.org/Plugin+Development.html", target := "_blank")("How to create an OSGI bundle ?"))
+      },
       h3("Classes"),
       searchClassInput.tag,
       div(tableCSS, paddingTop := 10)(
@@ -158,10 +159,18 @@ class JarWizardGUI(safePath: SafePath, onMethodSelected: (LaunchingCommand) ⇒ 
             outputs: Seq[ProtoTypePair],
             libraries: Option[String],
             resources: Resources) = {
-    val embedAsPlugin = if (embedAsPluginCheckBox.activeIndex == 0) true else false
+    val embedAsPlugin = {
+      if (isOSGI.now)
+        if (embedAsPluginCheckBox.activeIndex == 0) true else false
+      else false
+    }
 
     val plugin: Option[String] = {
-      if(embedAsPlugin) classTable.now.map{_.selected.now.map{_.values.headOption}.flatten}.flatten
+      if (embedAsPlugin) classTable.now.map {
+        _.selected.now.map {
+          _.values.headOption
+        }.flatten
+      }.flatten
       else None
     }
 

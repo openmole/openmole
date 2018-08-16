@@ -46,6 +46,7 @@ import squants.time.TimeConversions._
 import squants.information.Information
 import squants.information.InformationConversions._
 import org.openmole.core.location._
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment.ExecutionJobRegistry
 
 import scala.ref.WeakReference
 import scala.util.Random
@@ -159,8 +160,9 @@ object BatchEnvironment extends JavaLogger {
   def trySelectSingleJobService(jobService: BatchJobService[_]) =
     UsageControl.tryGetToken(jobService.usageControl).map(t ⇒ (jobService, t))
 
+  def start(environment: BatchEnvironment) = {}
+
   def clean(environment: BatchEnvironment, usageControls: Seq[UsageControl])(implicit services: BatchEnvironment.Services) = {
-    environment.batchJobWatcher.stop = true
     val environmentJobs = environment.jobs
     environmentJobs.foreach(_.state = ExecutionState.KILLED)
 
@@ -174,15 +176,56 @@ object BatchEnvironment extends JavaLogger {
       job.serializedJob.foreach { sj ⇒ UsageControl.withToken(sj.storage.usageControl)(token ⇒ util.Try(JobManager.cleanSerializedJob(sj, token))) }
     }
 
-    val futures = environmentJobs.map { j ⇒ services.threadProvider.submit(() ⇒ kill(j), JobManager.killPriority) }
+    val futures = environmentJobs.map { j ⇒ services.threadProvider.submit(JobManager.killPriority)(() ⇒ kill(j)) }
     futures.foreach(_.get())
   }
 
-  def start(environment: BatchEnvironment)(implicit services: BatchEnvironment.Services) = {
-    import services.threadProvider
-    Updater.registerForUpdate(environment.batchJobWatcher)
+  def finishedJob(environment: BatchEnvironment, job: Job) = {
+    ExecutionJobRegistry.finished(environment.registry, job, environment)
   }
 
+  def finishedExecutionJob(environment: BatchEnvironment, job: BatchExecutionJob) = {
+    ExecutionJobRegistry.finished(environment.registry, job, environment)
+    environment.finishedJob(job)
+  }
+
+  def numberOfExecutionJobs(environment: BatchEnvironment, job: Job) = {
+    ExecutionJobRegistry.numberOfExecutionJobs(environment.registry, job)
+  }
+
+  object ExecutionJobRegistry {
+    def register(registry: ExecutionJobRegistry, ejob: BatchExecutionJob) = registry.synchronized {
+      registry.executionJobs = ejob :: registry.executionJobs
+    }
+
+    def finished(registry: ExecutionJobRegistry, job: Job, environment: BatchEnvironment) = registry.synchronized {
+      def removeJob(registry: ExecutionJobRegistry, job: Job) = {
+        val (newExecutionJobs, removed) = registry.executionJobs.partition(_.job != job)
+        registry.executionJobs = newExecutionJobs
+        removed
+      }
+
+      val removed = removeJob(registry, job)
+      import environment.services
+      removed.filter(_.state != ExecutionState.KILLED).foreach(ej ⇒ JobManager ! Kill(ej))
+    }
+
+    def finished(registry: ExecutionJobRegistry, job: BatchExecutionJob, environment: BatchEnvironment) = registry.synchronized {
+      def pruneFinishedJobs(registry: ExecutionJobRegistry) =
+        registry.executionJobs = registry.executionJobs.filter(!_.state.isFinal)
+
+      pruneFinishedJobs(registry)
+    }
+
+    def executionJobs(registry: ExecutionJobRegistry) = registry.synchronized { registry.executionJobs }
+    def numberOfExecutionJobs(registry: ExecutionJobRegistry, job: Job) = registry.synchronized {
+      registry.executionJobs.count(_.job == job)
+    }
+  }
+
+  class ExecutionJobRegistry {
+    var executionJobs = List[BatchExecutionJob]()
+  }
 }
 
 abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
@@ -195,17 +238,16 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
   def trySelectStorage(files: ⇒ Vector[File]): Option[(StorageService[_], AccessToken)]
   def trySelectJobService(): Option[(BatchJobService[_], AccessToken)]
 
-  def executionJob(job: Job) = new BatchExecutionJob(job, this)
-  lazy val batchJobWatcher = new BatchJobWatcher(WeakReference(this), services.preference)
-  def jobs = batchJobWatcher.executionJobs
+  lazy val registry = new ExecutionJobRegistry()
+  def jobs = ExecutionJobRegistry.executionJobs(registry)
 
   lazy val replBundleCache = new AssociativeCache[ReferencedClasses, FileCache]()
 
   lazy val plugins = PluginManager.pluginsForClass(this.getClass)
 
   override def submit(job: Job) = {
-    val bej = executionJob(job)
-    batchJobWatcher.register(bej)
+    val bej = new BatchExecutionJob(job, this)
+    ExecutionJobRegistry.register(registry, bej)
     eventDispatcherService.trigger(this, new Environment.JobSubmitted(bej))
     JobManager ! Manage(bej)
   }
@@ -224,6 +266,8 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
   def running: Long = jobs.count { _.state == ExecutionState.RUNNING }
 
   def runtimeSettings = RuntimeSettings(archiveResult = false)
+
+  def finishedJob(job: ExecutionJob) = {}
 }
 
 class BatchExecutionJob(val job: Job, val environment: BatchEnvironment) extends ExecutionJob { bej ⇒

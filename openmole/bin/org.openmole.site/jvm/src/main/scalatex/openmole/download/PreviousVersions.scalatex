@@ -4,14 +4,39 @@
 @import org.openmole.core.buildinfo._
 @import org.openmole.site.Config._
 
-@h1{8.0 | TODO Set version }
+@h2{8.0 | TODO Set version }
+@h6{Core}
 @ul
   @li{Migrate to build to SBT 1.0}
   @li{Migrate to Scala 2.12: faster script compilation, more concise and more efficient byte code for OpenMOLE}
   @li{More reliable an efficient distributed execution through a complete refactor of the execution environments and migration to gridscale 2}
   @li{Use binary serialisation (boopickle) to communicate between the web app and the server: more efficient in term of CPU and bandwidth}
 
-@h1{7.0 | Nano Ninja}
+@h6{GUI}
+@ul
+    @li{Move http request serializations from upickle to boopickle}
+    @li{Editon tab order can now be rearranged}
+    @li{OM specific syntax highlighting with simple completion for OM keywords and previously defined variables}
+    @li{CSV files can now be viewed as tables (with column filtering) and as plots (scatter and lines)}
+    @li{Panels layouts rearranged}
+    @li{Revamp file settings}
+    @li{Add a toOMS option on potential model file to launch the model import wizard from the file tree.}
+    @li{Multiple selection for plugin removal}
+    @li{Revamp environment error from execution panel with a more reactive table}
+
+@h6{Web site}
+@ul
+    @li{Set the web site respoonsive}
+    @li{Revamp the page organizations, the navigation, assign a parent menu for almost all pages for an even better navigation}
+    @li{Fix documentation lacks about file management, scala functions, developer tools, community, etc}
+    @li{Add suggest edits button, which targets the scalatex github page in edition mode, ready for a Pull Request}
+    @li{Generate a contents for all pages}
+    @li{Upgrade the search efficiency}
+
+@div
+  @aa("Bug fixes", href := closedIssues("8"))
+
+@h2{7.0 | Nano Ninja}
 @ul
   @li{Simplification of the workflow construction: every method scheme has now its builder}
   @li{Revamp the MGO library}
@@ -29,14 +54,14 @@
   @li{Display JVM processor and memory info}
   @li{Revamp the website}
 
-@h2{7.1}
+@h3{7.1}
 @ul
   @li{Fix bug with NetLogo precompiled code}
 
 @div
   @aa("Bug fixes", href := closedIssues("7"))
 
-@h1{6.0 | Mostly Magic}
+@h2{6.0 | Mostly Magic}
 
 Long time, no release! More than a year!
 The OpenMOLE team is very proud to disclose "Mostly Magic", the 6th major version of OpenMOLE.
@@ -73,7 +98,7 @@ The possibility to delegate computation to cloud provider such as Amazon, Azure.
   @aa("Bug fixes", href := closedIssues("6.0"))
 
 
-@h2{6.1}
+@h3{6.1}
 @ul
   @li{CARE required a kernel version greater than 3.2 which is no suitable for grid executions. A new version as been released and linked in the doc which depends on the Linux kernel 2.6.32.}
   @li{The CARETask was failing on some systems due to argument parsing.}
@@ -84,7 +109,7 @@ The possibility to delegate computation to cloud provider such as Amazon, Azure.
 @aa("Bug fixes", href := closedIssues("6.1"))
 
 
-@h2{6.2}
+@h3{6.2}
 Fix the deserialization of the authentications.
 
 @div

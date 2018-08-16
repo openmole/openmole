@@ -122,24 +122,26 @@ object Site extends App {
 
         def bodyFrag(page: org.openmole.site.Page) = {
 
-          val sitePage =
+          val (sitePage, elementClass) =
             page match {
-              case Pages.index ⇒ ContentPage(div(paddingTop := 100), div(page.content))
-              case _           ⇒ UserGuide.integrate(page)
+              case Pages.index ⇒ (ContentPage(div(paddingTop := 100), div(page.content)), `class` := "")
+              case _           ⇒ (UserGuide.integrate(page), `class` := "page-element")
             }
 
           body(position := "relative", minHeight := "100%")(
             Menu.build(sitePage),
             div(id := "main-content")(
-              div(`id` := "sidebar-right", paddingTop := 200)(
+              div(`id` := "sidebar-right", paddingTop := 150)(
                 page.source.map(source ⇒ tools.linkButton("Suggest edits", tools.modificationLink(source), classIs(btn ++ btn_danger))
                 )),
               sitePage.header,
-              sitePage.element
+              div(elementClass, id := "padding-element")(
+                sitePage.element
+              )
             ),
             sitePage match {
               case s: IntegratedPage ⇒ Seq(s.leftMenu) ++ s.rightMenu.toSeq
-              case _                 ⇒ div(id := shared.documentationSideMenu.place)
+              case _                 ⇒ div()
             },
             Footer.build,
             onload := onLoadString(page)
@@ -148,15 +150,14 @@ object Site extends App {
 
         private def onLoadString(sitepage: org.openmole.site.Page) = {
           def siteJS = "org.openmole.site.SiteJS()"
-          def documentationJS = s"$siteJS.documentationSideMenu();"
           def commonJS = s"$siteJS.main();$siteJS.loadIndex(index);"
 
           sitepage match {
             case Pages.index | DocumentationPages.training ⇒ s"$siteJS.loadBlogPosts();" + commonJS
-            case DocumentationPages.profile                ⇒ s"$siteJS.profileAnimation();" + documentationJS + commonJS
-            case DocumentationPages.pse                    ⇒ s"$siteJS.pseAnimation();" + documentationJS + commonJS
-            case DocumentationPages.simpleSAFire           ⇒ s"$siteJS.sensitivityAnimation();" + documentationJS + commonJS
-            case _                                         ⇒ documentationJS + commonJS
+            case DocumentationPages.profile                ⇒ s"$siteJS.profileAnimation();" + commonJS
+            case DocumentationPages.pse                    ⇒ s"$siteJS.pseAnimation();" + commonJS
+            case DocumentationPages.simpleSAFire           ⇒ s"$siteJS.sensitivityAnimation();" + commonJS
+            case _                                         ⇒ commonJS
           }
         }
 

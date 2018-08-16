@@ -93,7 +93,7 @@ object SimExplorer extends JavaLogger {
             implicit val newFile = NewFile(workspace)
             implicit val serializerService = SerializerService()
             implicit val preference = Preference.memory()
-            implicit val threadProvider = ThreadProvider()
+            implicit val threadProvider = ThreadProvider(config.nbThread.get + 5)
             implicit val fileService = FileService()
             implicit val eventDispatcher = EventDispatcher()
 

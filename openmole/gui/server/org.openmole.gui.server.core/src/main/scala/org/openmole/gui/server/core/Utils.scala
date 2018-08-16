@@ -320,6 +320,7 @@ object Utils extends JavaLogger {
     import org.openmole.core.fileservice._
 
     def hash(f: File) = new File(f + "-hash")
+
     lockFile(file).withLock { _ ⇒
       val hashFile = hash(file)
       lazy val currentHash = fileService.hashNoCache(file).toString
@@ -350,13 +351,16 @@ object Utils extends JavaLogger {
       JSPack.link(jsPluginDirectory, jsFile, optimizedJS)
     }
 
+    (jsPluginDirectory / "optimized_mode").content = optimizedJS.toString
+
     if (!jsFile.exists) update
     else updateIfChanged(jsPluginDirectory) { _ ⇒ update }
     jsFile
   }
 
-  def expandDepsFile(from: File, template: File, to: File) = {
+  def expandDepsFile(template: File, to: File) = {
 
+    val from = File.createTempFile("openmole", "grammar")
     val rules = PluginInfo.keyWords.partition { kw ⇒
       kw match {
         case _@ (KeyWord.Task(_) | KeyWord.Source(_) | KeyWord.Environment(_) | KeyWord.Hook(_) | KeyWord.Sampling(_) | KeyWord.Domain(_) | KeyWord.Pattern(_)) ⇒ false
@@ -364,9 +368,22 @@ object Utils extends JavaLogger {
       }
     }
 
-    to.content = s"""${from.content}\n${template.content}""" // ${AceOpenMOLEMode.content}
-      .replace("##OMKeywords##", s""" "${rules._1.map { _.name }.mkString("|")}" """)
-      .replace("##OMClasses##", s""" "${rules._2.map { _.name }.mkString("|")}" """)
+    to.content =
+      s"""${template.content}""" // ${AceOpenMOLEMode.content}
+        .replace(
+          "##OMKeywords##",
+          s""" "${
+            rules._1.map {
+              _.name
+            }.mkString("|")
+          }" """)
+        .replace(
+          "##OMClasses##",
+          s""" "${
+            rules._2.map {
+              _.name
+            }.mkString("|")
+          }" """)
 
   }
 

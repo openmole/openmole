@@ -28,7 +28,7 @@ For higher dimension input space, specific statistics techniques ensuring low di
 If you want to use design of experiments of your own you may also want to provide @a("a csv file with your samples" , href := "#CSVSampling") to OpenMOLE.
 
 @br
-By defining your own exploration task on @a("several types of input", href := anchor(severalInputs)), you will be able to highlight some of your model inner properties like those revealed by @a("sensitivity analysis", href:=Link.intern(shared.simpleSAFireMenu.sensitivityAnalysis)), as shown in a toy example on a @a("real world example", href:=Link.intern(shared.simpleSAFireMenu.sensitivityFireModel))
+By defining your own exploration task on @a("several types of input", href := anchor(severalInputs)), you will be able to highlight some of your model inner properties like those revealed by @a("sensitivity analysis", href:=Link.intern("Sensitivity analysis")), as shown in a toy example on a @a("real world example", href:=Link.intern("Real world Example"))
 
 
 @h2{@gridSampling}
@@ -39,7 +39,7 @@ the inputs possibles values, given their bounds and quanta of discretisation.
 @br
 @Resource.rawFrag(Resource.img.method.completeID)
 @br
-@b{Method scores:}
+@b{Method scores}
 @br
 Regular sampling or Uniform Sampling are quite good for a first Input Space exploration when you don't know anything  about its structure yet.
 Since it samples from the input space, the collected values from the model executions will reveal the output values
@@ -123,6 +123,44 @@ Some details:
 
 @img(src := Resource.img.method.directSampling.file, center(50))
 
+
+@break
+
+@h2{Model replication}
+
+In the case of a stochastic model, you may want to define a replication task to run several replications of the model for the same parameter values.
+This is similar to using a uniform distribution sampling on the seed of the model, and OpenMOLE provides a specific constructor for that, namely @code{Replication}.
+
+The use of a @code{Replication} sampling is the following:
+
+@hl.openmole("""
+val mySeed = Val[Int]
+val i = Val[Int]
+val o = Val[Double]
+
+val myModel =
+  ScalaTask("import scala.util.Random; val rng = new Random(seed); val o = i * 2 + 0.1 * rng.nextDouble()") set (
+    inputs += (i,seed),
+    outputs += (i, o)
+  )
+
+val replication = Replication(
+    evaluation = myModel,
+    seed = mySeed,
+    replications = 100
+)
+
+replication
+""", name="example of replication")
+
+The arguments for @code{Replication} are the following:
+
+@ul
+    @li{@b{@hl.code("evaluation")} is the task (or a composition of tasks) that uses your inputs, typically your model task and a hook.}
+    @li{@b{@hl.code("seed")} is the prototype for the seed, which will be sampled with an uniform distribution in its domain (Val[Int] or Val[Long]).}
+    @li{@b{@hl.code("replications")} (Int) is the number of replications.}
+    @li{@b{@hl.code("distributionSeed")} (@i{optional}, Long) is an optional seed to be given to he uniform distribution of the seed ("meta-seed").}
+    @li{@b{@hl.code("aggregation")} (@i{optional}) is an aggregation task to be performed on the outputs of your evaluation task.}
 
 
 @break
@@ -208,7 +246,7 @@ OpenMOLE includes two of these methods: @b{Sobol Sequence} and @b{Latin Hypercub
 @Resource.rawFrag(Resource.img.method.sobolLHSID)
 @br
 
-@b{Method scores:}
+@b{Method scores}
 @br
 
     These two methods perform allright in terms of Input Space Exploration (which is normal as they were built for that extent),

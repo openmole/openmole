@@ -54,7 +54,7 @@ class FileToolBox(initSafePath: SafePath) {
 
   import scaladget.tools._
 
-  val baseGlyph = ms("glyphitem") +++ omsheet.color(DARK_GREY) +++ Seq(marginTop := 3, marginLeft := 8)
+  val baseGlyph = ms("glyphitem") +++ omsheet.color(DARK_GREY) +++ Seq(padding := 5)
   val trash = baseGlyph +++ glyph_trash
   val edit = baseGlyph +++ glyph_edit
   val download_alt = baseGlyph +++ glyph_download_alt
@@ -63,7 +63,7 @@ class FileToolBox(initSafePath: SafePath) {
   val execute = baseGlyph +++ glyph_flash
   val toScript = baseGlyph +++ OMTags.glyph_share
 
-  def iconAction(faction: FileAction, icon: ModifierSeq, text: String) = div(id := faction)(icon, div(text, giFontFamily, fontSize := "12px", paddingTop := 5))
+  def iconAction(faction: FileAction, icon: ModifierSeq, text: String) = div(id := faction)(icon, div(text, giFontFamily, fontSize := "12px", paddingTop := 5, flex := 1))
 
   val trashTrigger = iconAction(fileaction.trash, trash, "delete")
   val downloadTrigger = iconAction(fileaction.download, download_alt, "download")
@@ -130,7 +130,7 @@ class FileToolBox(initSafePath: SafePath) {
             true
           case fileaction.download ⇒
             withSafePath { sp ⇒
-              org.scalajs.dom.document.location.href = s"downloadFile?path=${Utils.toURI(sp.path)}"
+              org.scalajs.dom.document.location.href = s"downloadFile?path=${org.openmole.gui.ext.tool.client.Utils.toURI(sp.path)}"
               Popover.hide
             }
             true
@@ -168,9 +168,7 @@ class FileToolBox(initSafePath: SafePath) {
               Popover.hide
             }
             true
-          case _ ⇒
-            println("unknown")
-            false
+          case _ ⇒ false
         }
       }
       else false

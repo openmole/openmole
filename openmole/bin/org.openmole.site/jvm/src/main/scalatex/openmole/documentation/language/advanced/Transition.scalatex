@@ -4,7 +4,6 @@
 @import org.openmole.site.tools._
 
 
-@h1{Transitions}
 In OpenMOLE, transitions link tasks with each other. The following examples illustrate several kinds of transitions
 available in OpenMOLE.
 

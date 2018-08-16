@@ -31,7 +31,6 @@ import org.scalatra._
 import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
-import org.openmole.gui.server.jscompile.JSPack
 import org.openmole.tool.hash._
 import org.openmole.tool.file._
 import org.openmole.core.services._
@@ -51,7 +50,8 @@ object GUIServer {
     from / "fonts" copy to / "fonts"
     from / "img" copy to / "img"
 
-    Utils.expandDepsFile(from / "js" / Utils.depsFileName, from / "js" / Utils.openmoleGrammarName, to /> "js" / Utils.depsFileName)
+    Utils.expandDepsFile(from / "js" / Utils.openmoleGrammarName, to /> "js" / Utils.openmoleGrammarMode)
+    (from / "js" / Utils.depsFileName) copy (to /> "js" / Utils.depsFileName)
     Utils.openmoleFile(optimizedJS) copy (to /> "js" / Utils.openmoleFileName)
     to
   }

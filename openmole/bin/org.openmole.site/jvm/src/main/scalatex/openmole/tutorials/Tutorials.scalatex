@@ -5,19 +5,21 @@
 @import DocumentationPages._
 @import scalatex.{ openmole ⇒ scalatex }
 
-@h1{Tutorials}
 
 Here are some tutorials to help you build your first experiments:
 
 @br
 
-@ol(style := "list-style-type: upper-roman")
+
+@ul(listStyleType := "none")
   @li
-    @a("Getting Started with OpenMOLE", href := stepByStepIntro.file)
+    @h5
+        @a("Getting Started with OpenMOLE", href := stepByStepIntro.file)
     @ol
       @sitemap.siteMapSection(gettingStartedPages)
   @li
-    @a("Using NetLogo with OpenMOLE", href := netLogoGA.file)
+    @h5
+        @a("Using NetLogo with OpenMOLE", href := netLogoGA.file)
     @ol
       @sitemap.siteMapSection(netLogoPages)
 
@@ -37,7 +39,8 @@ These examples are more about how to do things the OpenMOLE way.
 
 The market place is accessible through this @aa("repository", href := shared.link.repo.market) or directly from the GUI application (@i{New Project > From Market Place}).
 Clicking on a project allows to download it in the application and run it instantly!
-
+@br
+@a("More informations", href := market.file)
 @img(src := Resource.img.guiGuide.market.file, center(95))
 
 

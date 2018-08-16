@@ -41,7 +41,7 @@ object Menu {
             ),
             a(classIs(navbar_brand), href := "#", padding := 0),
             to(Pages.index)(
-              img(alt := "", src := Resource.img.mole.openmoleText.file, Seq(width := 240, paddingTop := 20, pointer))
+              img(alt := "", src := Resource.img.mole.openmoleText.file, Seq(width := 240, padding := 15, pointer))
             )
           ),
           div(classIs(collapse ++ navbar_collapse), aria.expanded := false, paddingTop := 20, id := navId)(

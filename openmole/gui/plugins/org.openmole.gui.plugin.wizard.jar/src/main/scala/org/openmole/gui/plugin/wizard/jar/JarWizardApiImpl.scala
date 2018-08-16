@@ -50,7 +50,7 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
     val modelData = WizardUtils.wizardModelData(inputs, outputs, resources.all.map {
       _.safePath.name
     })
-    val task = s"${executableName.split('.').head.toLowerCase}Task"
+    val task = s"${executableName.split('.').head.toLowerCase.filterNot(_.isDigit).replace("-", "")}Task"
     val jarResourceLine: (String, Seq[org.openmole.gui.ext.data.Error]) = {
       if (data.embedAsPlugin) {
         data.plugin.map { p ⇒
@@ -59,13 +59,13 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
           (s"""  plugins += pluginsOf(${p}),\n""", errors)
         }.getOrElse(("", Seq()))
       }
-      else (s"${libraries.map { l ⇒ s"""  libraries += workingDirectory / "$l",""" }.getOrElse("")}\n\n", Seq())
+      else (s"${libraries.map { l ⇒ s"""  libraries += workDirectory / "$l",\n""" }.getOrElse("")}\n\n", Seq())
     }
 
     val mainOutputString = outputs.headOption.map { o ⇒ s"val ${o.name} = " }.getOrElse("")
 
-    val content = modelData.vals + s"""\n\nval $task = ScalaTask(\n\"\"\"$mainOutputString$command\"\"\") set(\n""" +
-      jarResourceLine +
+    val content = modelData.vals + s"""\n\nval $task = ScalaTask(\n\"\"\"$mainOutputString${command.replace("()", "")}(${inputs.map { _.name }.mkString(",")})\"\"\") set(\n""" +
+      jarResourceLine._1 +
       WizardUtils.expandWizardData(modelData) +
       s""")\n\n$task hook ToStringHook()"""
 

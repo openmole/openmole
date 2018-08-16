@@ -18,10 +18,26 @@ body{
 .table.envError>tbody>tr>td{
     border-top:none;
     vertical-align: middle;
+    text-align: center;
 }
 
-.label{
-padding-top:7px;
+.executionTable > tbody >tr{
+    text-align:center
+}
+
+.table-inverse {
+  color: #fff;
+  background-color: #292b2c;
+  border-radius: 3px;
+}
+
+.table-inverse > tbody > tr > td{
+  padding:20px;
+  text-align: center;
+}
+
+textarea {
+  resize: none;
 }
 
 a {
@@ -106,8 +122,9 @@ ul{
 .tree-path {
     position: relative;
     min-height: 27px;
-    height: 30px;
+    height: auto;
     left: -10px;
+    padding-bottom:10px;
     padding-left: 10px;
     padding-right: 18px;
     width: 373px;

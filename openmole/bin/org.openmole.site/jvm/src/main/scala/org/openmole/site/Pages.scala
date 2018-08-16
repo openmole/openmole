@@ -58,9 +58,13 @@ object Page {
 
     new Page {
       override def name: String = _name
+
       override def content = _content
+
       override def title = _title
+
       override def details = _details
+
       override def source = _source
     }
   }
@@ -68,12 +72,17 @@ object Page {
 
 trait Page {
   def content: Frag
+
   def name: String
 
   def title: Option[String] = Some(s"OpenMOLE - $name")
+
   def location: String = name
+
   def file = Pages.file(this)
+
   def details: Seq[Page]
+
   def source: Option[String]
 
   def anchor(name: String) = s"$file#${name.replaceAll(" ", "")}"
@@ -99,18 +108,28 @@ object DocumentationPage {
     source:   Option[String]           = None
   ) = {
     def _name = name
+
     def _content = content
+
     def _details = details
+
     def _location = location
+
     def _title = title
+
     def _source = source
 
     new DocumentationPage {
       def name = _name
+
       def content = _content
+
       override def details = _details
+
       override def location = _location.getOrElse(name)
+
       override def title = _title.orElse(Some(name))
+
       override def source = _source
     }
   }
@@ -143,7 +162,9 @@ object DocumentationPages {
   // lazy val pageName = DocumentationPage.fromScalatex(name = "html title", content = scalatex.path.to.scalatexFile, title = Some("Titre onglet"))
 
   def headPages =
-    Seq(documentation, run, explore, scale, language, advanced, advancedConcepts, developers, tutorials, OMcommunity)
+    Seq(documentation, run, explore, scale, language, advancedConcepts, developers, tutorials, OMcommunity)
+
+  val mainDocPages = runPages ++ explorePages ++ scalePages ++ Seq(scale, explore, run)
 
   // Documentation
   lazy val documentation = DocumentationPage.fromScalatex(name = "Documentation", content = scalatex.Documentation)
@@ -203,22 +224,17 @@ object DocumentationPages {
   // Language
   lazy val language = DocumentationPage.fromScalatex(name = "Language", content = scalatex.documentation.language.Language, title = Some("The OpenMOLE Language"))
 
-  def languagePages = advancedPages ++ Seq(fileManagement, hook, scalaFunction)
-
-  lazy val fileManagement = DocumentationPage.fromScalatex(name = "File Management", content = scalatex.documentation.language.FileManagement)
-  lazy val hook = DocumentationPage.fromScalatex(name = "Hooks", content = scalatex.documentation.language.Hook)
-  lazy val scalaFunction = DocumentationPage.fromScalatex(name = "Scala Function", content = scalatex.documentation.language.ScalaFunction)
-
   // Advanced
-  lazy val advanced = DocumentationPage.fromScalatex(name = "Advanced", content = scalatex.documentation.language.advanced.Advanced, title = Some("Advanced Features"))
-
-  def advancedPages = Seq(capsule, moleTask, source, transition)
-
   lazy val capsule = DocumentationPage.fromScalatex(name = "Capsule", content = scalatex.documentation.language.advanced.Capsule)
   lazy val moleTask = DocumentationPage.fromScalatex(name = "Mole Task", content = scalatex.documentation.language.advanced.MoleTask)
   lazy val source = DocumentationPage.fromScalatex(name = "Source", content = scalatex.documentation.language.advanced.Source)
   lazy val transition = DocumentationPage.fromScalatex(name = "Transition", content = scalatex.documentation.language.advanced.Transition)
 
+  def languagePages = Seq(fileManagement, hook, scalaFunction, capsule, moleTask, source, transition)
+
+  lazy val fileManagement = DocumentationPage.fromScalatex(name = "File Management", content = scalatex.documentation.language.FileManagement)
+  lazy val hook = DocumentationPage.fromScalatex(name = "Hooks", content = scalatex.documentation.language.Hook)
+  lazy val scalaFunction = DocumentationPage.fromScalatex(name = "Scala Function", content = scalatex.documentation.language.ScalaFunction)
   // Advanced Concepts
   lazy val advancedConcepts = DocumentationPage.fromScalatex(name = "Advanced Concepts", content = scalatex.documentation.advancedConcepts.AdvancedConcepts)
 
@@ -235,12 +251,11 @@ object DocumentationPages {
   // Developers
   lazy val developers = DocumentationPage.fromScalatex(name = "Developers", content = scalatex.documentation.developers.Developers, title = Some("Advanced Concepts for Developers"))
 
-  def developersPages = Seq(console, pluginDevelopment, serverRESTAPI, webServer)
+  def developersPages = Seq(console, pluginDevelopment, webServer)
 
   lazy val console = DocumentationPage.fromScalatex(name = "Console Mode", content = scalatex.documentation.developers.Console)
   lazy val pluginDevelopment = DocumentationPage.fromScalatex(name = "Plugin Development", content = scalatex.documentation.developers.PluginDevelopment)
-  lazy val serverRESTAPI = DocumentationPage.fromScalatex(name = "Server RESTAPI", content = scalatex.documentation.developers.ServerRESTAPI)
-  lazy val webServer = DocumentationPage.fromScalatex(name = "Web Server", content = scalatex.documentation.developers.WebServer)
+  lazy val webServer = DocumentationPage.fromScalatex(name = "RestAPI and Web Server", content = scalatex.documentation.developers.WebServer)
 
   // Tutorials
   lazy val tutorials = DocumentationPage.fromScalatex(name = "Tutorials", content = scalatex.tutorials.Tutorials)
@@ -248,10 +263,11 @@ object DocumentationPages {
   def tutoPages = gettingStartedPages ++ netLogoPages
 
   // Getting Started
-  def gettingStartedPages = Seq(stepByStepIntro, launchTuto, exploreTuto)
+  def gettingStartedPages = Seq(stepByStepIntro, exploreTuto)
+  //def gettingStartedPages = Seq(stepByStepIntro, launchTuto, exploreTuto)
 
   lazy val stepByStepIntro = DocumentationPage.fromScalatex(name = "Step By Step Intro", content = scalatex.tutorials.gettingStarted.StepByStepIntro, title = Some("A Step by Step Introduction to OpenMOLE"))
-  lazy val launchTuto = DocumentationPage.fromScalatex(name = "Launch Tuto", content = scalatex.tutorials.gettingStarted.LaunchTuto, title = Some("How to Launch and Run a Model with OpenMOLE"))
+  //lazy val launchTuto = DocumentationPage.fromScalatex(name = "Launch Tuto", content = scalatex.tutorials.gettingStarted.LaunchTuto, title = Some("How to Launch and Run a Model with OpenMOLE"))
   lazy val exploreTuto = DocumentationPage.fromScalatex(name = "Explore Tuto", content = scalatex.tutorials.gettingStarted.ExploreTuto, title = Some("How to Execute an Exploration Task"))
 
   // NetLogo

@@ -59,7 +59,7 @@ object JobManager extends JavaLogger { self ⇒
       }
   }
 
-  def dispatch(msg: DispatchedMessage)(implicit services: BatchEnvironment.Services) = services.threadProvider.submit(() ⇒ DispatcherActor.receive(msg), messagePriority(msg))
+  def dispatch(msg: DispatchedMessage)(implicit services: BatchEnvironment.Services) = services.threadProvider.submit(messagePriority(msg))(() ⇒ DispatcherActor.receive(msg))
 
   def !(msg: JobMessage)(implicit services: BatchEnvironment.Services): Unit = msg match {
     case msg: Upload             ⇒ dispatch(msg)
@@ -84,7 +84,11 @@ object JobManager extends JavaLogger { self ⇒
 
     case Kill(job) ⇒
       job.state = ExecutionState.KILLED
+      BatchEnvironment.finishedExecutionJob(job.environment, job)
       killAndClean(job)
+
+      if (!job.job.finished && BatchEnvironment.numberOfExecutionJobs(job.environment, job.job) == 0)
+        job.environment.submit(job.job)
 
     case Resubmit(job, storage) ⇒
       killAndClean(job)

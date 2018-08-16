@@ -34,6 +34,7 @@ object Resource {
   def moleResource(name: String) = imgResource(s"mole/$name")
   def exampleResource(name: String) = imgResource(s"example/$name")
   def guiGuideResource(name: String) = imgResource(s"guiGuide/$name")
+  def tutorialResource(name: String) = imgResource(s"tutorial/$name")
 
   def jsResource(name: String) = fileResource(s"js/$name")
 
@@ -52,6 +53,8 @@ object Resource {
     object model {
       val code = modelResource("code.svg")
       val codeAnimated = modelResource("codeAnimated.svg")
+      val fileMapping = modelResource("fileMapping.png")
+      val netlogoMapping = modelResource("netlogoMapping.png")
     }
 
     object method {
@@ -115,6 +118,11 @@ object Resource {
       val fireRemoveClearAll = exampleResource("fireRemoveClearAll.png")
 
       val ants = exampleResource("ants.png")
+    }
+
+    object tutorial {
+      val modelImport = tutorialResource("modelImport.png")
+      val modelExecution = tutorialResource("modelExecution.png")
     }
 
     object people {
@@ -269,7 +277,7 @@ object Resource {
   def rawFrag(fileResource: FileResource) = shared.rawFrag(content(fileResource))
 
   def content(fileResource: FileResource) =
-    this.getClass.getClassLoader.getResourceAsStream(fileResource.file).content
+    this.getClass.getClassLoader.getResourceAsStream(fileResource.file).mkString
 
   //  val marketResources(entries: Seq[GeneratedMarketEntry]) =
   //    entries.filter(_.tags.exists(_ == Market.Tags.tutorial)).map { tuto ⇒ MarketResource(tuto) }

@@ -2,13 +2,13 @@
 @import org.openmole.site._
 @import org.openmole.site.stylesheet._
 
-
-@h1{Institutional partners}
-@a(img(src := Resource.img.partner.iscpif.file,  partners), href := shared.link.partner.iscpif, target := "_blank")
-@a(img(src := Resource.img.partner.geocite.file, partners), href := shared.link.partner.parisgeo, target := "_blank")
-@a(img(src := Resource.img.partner.biomedia.file, partners), href := shared.link.partner.biomedia, target := "_blank")
-@a(img(src := Resource.img.partner.idf.file, partners), href := shared.link.partner.idf, target := "_blank")
-@a(img(src := Resource.img.partner.paris.file, partners), href := shared.link.partner.paris, target := "_blank")
+@div(stylesheet.centerBox100){
+  @a(img(src := Resource.img.partner.iscpif.file,  partners), href := shared.link.partner.iscpif, target := "_blank")
+  @a(img(src := Resource.img.partner.geocite.file, partners), href := shared.link.partner.parisgeo, target := "_blank")
+  @a(img(src := Resource.img.partner.biomedia.file, partners), href := shared.link.partner.biomedia, target := "_blank")
+  @a(img(src := Resource.img.partner.idf.file, partners), href := shared.link.partner.idf, target := "_blank")
+  @a(img(src := Resource.img.partner.paris.file, partners), href := shared.link.partner.paris, target := "_blank")
+}
 
 @h1{Some scientific collaborations outputs}
 

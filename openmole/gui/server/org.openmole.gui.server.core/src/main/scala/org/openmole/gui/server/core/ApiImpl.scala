@@ -29,6 +29,7 @@ import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.core.project._
 import org.openmole.core.services.Services
+import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.plugin.server._
@@ -290,7 +291,9 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     val reader = new CSVReader(new FileReader(safePath), ',')
     val content = reader.readAll.asScala.toSeq
-    SequenceData(content.head, content.tail)
+    content.headOption.map { c ⇒
+      SequenceData(c, content.tail)
+    }.getOrElse(SequenceData())
   }
 
   // EXECUTIONS
@@ -312,7 +315,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     import org.openmole.tool.thread._
 
     val compilationFuture =
-      services.threadProvider.pool.submit { () ⇒
+      threadProvider.submit(ThreadProvider.maxPriority) { () ⇒
 
         def error(t: Throwable): Unit = execution.addError(execId, Failed(Vector.empty, ErrorBuilder(t), Seq()))
 
@@ -342,7 +345,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
                   val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(outputStream))
                   Try(puzzle.toExecution(executionContext = MoleExecutionContext()(services))) match {
                     case Success(ex) ⇒
-                      val envIds = (ex.allEnvironments).map { env ⇒ EnvironmentId(getUUID, execId) → env }
+                      val envIds = (ex.allEnvironments).map { env ⇒ EnvironmentId(getUUID) → env }
                       execution.addRunning(execId, envIds)
                       envIds.foreach { case (envId, env) ⇒ env.listen(execution.environmentListener(envId)) }
 
@@ -372,13 +375,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   def clearEnvironmentErrors(environmentId: EnvironmentId): Unit = execution.deleteEnvironmentErrors(environmentId)
 
   def runningErrorEnvironmentData(environmentId: EnvironmentId, lines: Int): EnvironmentErrorData = atomic { implicit ctx ⇒
-    val errorMap = execution.getRunningEnvironments(environmentId).toMap
-    val info = errorMap(environmentId)
-
-    val environmentErrors =
-      info.environment.errors.map {
-        ex ⇒ EnvironmentError(environmentId, ex.exception.getMessage, ErrorBuilder(ex.exception), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
-      }
+    val environmentErrors = execution.environementErrors(environmentId)
 
     def groupedErrors = environmentErrors.groupBy {
       _.errorMessage
@@ -391,6 +388,10 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     }.takeRight(lines)
 
     EnvironmentErrorData(groupedErrors)
+    //    EnvironmentErrorData(Seq(
+    //      (EnvironmentError(environmentId, "YOur error man", Error("stansatienasitenasiruet a anuisetnasirte "), 2334454L, ErrorLevel()), 33345L, 2),
+    //      (EnvironmentError(environmentId, "YOur error man 4", Error("stansatienasitenasiruet a anuaeiaiueaiueaieisetnasirte "), 2334454L, ErrorLevel()), 31345L, 1)
+    //    ))
   }
 
   def marketIndex() = {

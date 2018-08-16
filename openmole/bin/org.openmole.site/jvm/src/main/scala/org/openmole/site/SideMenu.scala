@@ -30,13 +30,13 @@ object Link {
 
 case class Link(name: String, link: String)
 
-case class SideMenu(links: Seq[Link], menuStyle: AttrPair = classIs(""), preText: String = "", otherTab: Boolean = false) {
+case class SideMenu(links: Seq[Link], menuStyle: AttrPair = classIs(""), preText: String = "", otherTab: Boolean = false, currentPage: Option[Page] = None) {
   def insert(ls: Seq[Link]) = copy(ls ++ links)
 }
 
 object SideMenu {
 
-  private def build(menus: Seq[SideMenu], topDiv: TypedTag[_], extraDiv: Option[Frag] = None) =
+  private def build(menus: Seq[SideMenu], topDiv: TypedTag[_], extraDiv: Option[Frag] = None, currentPage: Option[Page] = None) =
     div(
       topDiv(
         extraDiv,
@@ -44,20 +44,28 @@ object SideMenu {
           m ← menus
         } yield {
           div(
-            if (m.links.isEmpty) div else div(m.preText, fontWeight := "bold", paddingTop := 20),
+            if (m.links.isEmpty) div else div(m.preText, fontWeight := "bold", paddingBottom := 5),
             for {
               p ← m.links
             } yield {
-              div(paddingTop := 5)(linkButton(p.name, p.link, m.menuStyle, m.otherTab))
+              val basicButton = div(paddingTop := 5)(linkButton(p.name, p.link, m.menuStyle, m.otherTab))
+              currentPage match {
+                case Some(page) ⇒
+                  if (page.name == p.name) div(paddingTop := 5)(linkButton(p.name, p.link, openInOtherTab = m.otherTab))
+                  else basicButton
+                case _ ⇒ basicButton
+              }
             }
           )
         }
       )
     )
 
-  def right(menus: SideMenu*) = build(menus, div(rightDetailButtons(220), id := "sidebar-right"))
-  def left(menus: SideMenu*) =
-    build(menus, div(leftDetailButtons(220), `class` := "sidebar-left"), Some(div(id := shared.documentationSideMenu.place)))
+  def right(menus: SideMenu*) = build(menus, div(rightDetailButtons(180), id := "sidebar-right"))
+
+  def left(current: Page, menus: SideMenu*) = {
+    build(menus, div(leftDetailButtons(180), `class` := "sidebar-left"), currentPage = Some(current))
+  }
 
   implicit def pageToLink(p: Page): Link = Link(p.name, p.file)
 
@@ -74,7 +82,7 @@ object SideMenu {
   val explore = SideMenu(DocumentationPages.explorePages, classIs(btn ++ btn_primary), "Available methods")
   val scale = SideMenu(DocumentationPages.scalePages, classIs(btn ++ btn_primary), "Available environments")
   val language = SideMenu(DocumentationPages.languagePages, classIs(btn ++ btn_primary), "Language")
-  val advanced = SideMenu(DocumentationPages.advancedConceptsPages, classIs(btn ++ btn_primary), "Advanced concepts")
+  val advanced = SideMenu(Seq(DocumentationPages.advancedConcepts), classIs(btn ++ btn_primary), "Advanced concepts")
   val developers = SideMenu(DocumentationPages.developersPages, classIs(btn ++ btn_primary), "Developer's documentation")
   val gettingStarted = SideMenu(DocumentationPages.gettingStartedPages, classIs(btn ++ btn_primary), "Getting started tutorials")
   val netLogoGA = SideMenu(DocumentationPages.netLogoPages, classIs(btn ++ btn_primary), "NetLogo tutorials")

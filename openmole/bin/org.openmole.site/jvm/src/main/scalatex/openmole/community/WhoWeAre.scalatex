@@ -9,16 +9,14 @@
       span(name, memberStyle)
     )
 
-@h1{Hosting institutions}
-@div(margin := "0 auto")
+@div(stylesheet.centerBox100){
   @a(img(src := Resource.img.partner.iscpif.file,  partners), href := shared.link.partner.iscpif, target := "_blank")
   @a(img(src := Resource.img.partner.geocite.file, partners), href := shared.link.partner.parisgeo, target := "_blank")
-
-@h1{Community leaders}
+}
 
 @member(Resource.img.people.romain, "Romain REUILLON")
 @div(width := "75%", paddingLeft := 70)
-    CNRS Researcher at Géographie-cité and ISC-PIF. Scientific Manager of the OpenMOLE platform leader of the development for Scientific simulation and computing, he developed both @aa("MGO", href := shared.link.repo.mgo)  and  @aa("GridScale", href := shared.link.repo.gridscale)
+    CNRS Researcher at Géographie-cités and ISC-PIF. Scientific Manager of the OpenMOLE Platform leader of the development for scientific simulation and computing, he developed both @aa("MGO", href := shared.link.repo.mgo) and @aa("GridScale", href := shared.link.repo.gridscale).
 
 
 @member(Resource.img.people.mathieu, "Mathieu LECLAIRE")
@@ -30,11 +28,9 @@
 @div(width := "75%", paddingLeft := 70)
   Research associate at Imperial College London, in the @a("BioMedIA group", href := shared.link.partner.biomedia). Developer of the OpenMOLE Platform, he co-developed @aa("GridScale", href := shared.link.repo.gridscale). Regularly inserts bugs in the code to keep his team-mates on task.
 
-@h1{Active community}
-
 @member(Resource.img.people.paul, "Paul CHAPRON")
 @div(width := "75%", paddingLeft := 70)
-  CNRS postdoc at ISC-PIF (UPS 3611). He applies OpenMOLE methods on some models. For instance, He carried out a @aa("study with OpenMOLE on the IGN SimPLU model", href := shared.link.simpluDemo), and tries to make the documentation user readable and noob-proof.
+  CNRS postdoc at ISC-PIF (UPS 3611). He applies OpenMOLE methods on some models. For instance, he carried out a @aa("study with OpenMOLE on the IGN SimPLU model", href := shared.link.simpluDemo), and tries to make the documentation user readable and noob-proof.
   As a hobby, he animates SVG files and gives his opinion on the graphical design :-)
 
 @member(Resource.img.people.guillaume, "Guillaume CHEREL")
@@ -45,7 +41,7 @@
 
 @member(Resource.img.people.etienne, "Étienne DELAY")
 @div(width := "75%", paddingLeft := 70)
-  PhD in geography, agent based model addicts, he is actually in postdoctoral fellowship in Dakar (Senegal).
+  PhD in geography, agent-based model addict, he is currently in a postdoctoral fellowship in Dakar (Senegal).
   Inside the OpenMole project, he is a beta user and contributor to the communication and documentation efforts.
 
 @member(Resource.img.people.julien, "Julien PERRET")
@@ -54,7 +50,7 @@
 
 @member(Resource.img.people.seb, "Sebastien REY-COYREHOURCQ")
 @div(width := "75%", paddingLeft := 70)
-  Research Engineer in Geomatics at UMR IDEES Rouen. I love Complex Systems, Agent Based Models, and Evolutionary Algorithm. I probably compile and beta test every dev version of OpenMOLE since 2010 :) I also participate in developing the @aa("MGO", href := shared.link.repo.mgo) framework and the @aa("Gama-plugin", href := shared.link.repo.gamaPlugin).
+  Research Engineer in Geomatics at UMR IDEES Rouen. I love Complex Systems, Agent-Based Models, and Evolutionary Algorithm. I probably compile and beta test every dev version of OpenMOLE since 2010 :) I also participate in developing the @aa("MGO", href := shared.link.repo.mgo) framework and the @aa("Gama-plugin", href := shared.link.repo.gamaPlugin).
 
 @member(Resource.img.people.juste, "Juste RAIMBAULT")
 @div(width := "75%", paddingLeft := 70)

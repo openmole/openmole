@@ -36,6 +36,7 @@ def defaultSettings = formatSettings ++
     resolvers += Resolver.sonatypeRepo("snapshots"),
     resolvers += Resolver.sonatypeRepo("staging"),
     resolvers += Resolver.bintrayRepo("projectseptemberinc", "maven"), // For freek
+    resolvers += Resolver.bintrayRepo("definitelyscala", "maven"), // For plotlyjs
     scalaVersion in Global := scalaVersionValue, // + "-bin-typelevel-4",
     scalacOptions ++= Seq("-target:jvm-1.8", "-language:higherKinds"),
     scalacOptions += "-Ypartial-unification",
@@ -606,12 +607,13 @@ def guiClientDir = guiDir / "client"
 lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins (ExecNpmPlugin) dependsOn
   (sharedGUI, clientToolGUI, market, dataGUI, extClientTool) settings(
   libraryDependencies += Libraries.async,
-  npmDeps in Compile += Dep("ace-builds", "1.2.9", List("mode-scala.js", "theme-github.js"), true),
-  npmDeps in Compile += Dep("sortablejs", "1.7.0", List("Sortable.min.js"))
+  npmDeps in Compile += Dep("ace-builds", "1.2.9", List("mode-scala.js", "theme-github.js", "ext-language_tools.js"), true),
+  npmDeps in Compile += Dep("sortablejs", "1.7.0", List("Sortable.min.js")),
+  npmDeps in Compile += Dep("plotly.js", "1.31.0", List("plotly-basic.min.js"))
 ) settings (defaultSettings: _*)
 
 
-lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool", privatePackages = Seq("autowire.*", "boopickle.*", "sourcecode.*", "rx.*", "org.scalajs.dom.*", "scalatags.*", "scaladget.*", "net.scalapro.sortable.*")) enablePlugins (ScalaJSPlugin) dependsOn (workspace) settings(
+lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool", privatePackages = Seq("autowire.*", "boopickle.*", "sourcecode.*", "rx.*", "org.scalajs.dom.*", "scalatags.*", "scaladget.*", "net.scalapro.sortable.*", "com.definitelyscala.plotlyjs.*", "org.querki.jsext.*")) enablePlugins (ScalaJSPlugin) dependsOn (workspace) settings(
   Libraries.autowireJS,
   Libraries.boopickleJS,
   Libraries.scalajsDomJS,
@@ -620,7 +622,8 @@ lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool
   Libraries.bootstrapnative,
   Libraries.scaladgetTools,
   Libraries.rxJS,
-  Libraries.sortable) dependsOn (extClientTool) settings (defaultSettings: _*)
+  Libraries.sortable,
+  Libraries.plotlyJS) dependsOn (extClientTool) settings (defaultSettings: _*)
 
 
 /* -------------------------- Server ----------------------- */
@@ -872,11 +875,13 @@ lazy val marketIndex = Project("marketindex", binDir / "org.openmole.marketindex
   libraryDependencies += Libraries.json4s,
   defineMarketBranch := {
     val OMversion = version.value
-    OMversion.split('.').headOption.map(v => s"$v-dev")
+    val v = OMversion.split('.').headOption.map(v => s"$v-dev")
+    assert(v.isDefined)
+    v
   },
   cloneMarket := {
     val runner = git.runner.value
-    val dir = baseDirectory.value / "src/main/resources/openmole-market"
+    val dir = baseDirectory.value / "target/openmole-market"
     val marketBranch = defineMarketBranch.value
     runner.updated("https://gitlab.iscpif.fr/openmole/market.git", marketBranch, dir, ConsoleLogger())
   }

@@ -23,17 +23,23 @@ import scala.collection.mutable.{ ListBuffer, WeakHashMap }
 
 object EventDispatcher {
   def apply() = new EventDispatcher
+  case class EventListnerKey(obj: Any, listner: Listner[_])
 }
 
 class EventDispatcher {
 
   private val _eventId = new AtomicLong
-  private lazy val listenerMap = new WeakHashMap[Any, ListBuffer[Listner[Any]]]
+  private lazy val listenerMap = new WeakHashMap[Any, collection.mutable.Set[Any]]
 
   def eventId = _eventId.getAndIncrement()
 
   def listen[T](obj: T)(listener: Listner[T]) = listenerMap.synchronized {
-    listenerMap.getOrElseUpdate(obj, ListBuffer()) += listener.asInstanceOf[Listner[Any]]
+    listenerMap.getOrElseUpdate(obj, collection.mutable.Set()) += listener.asInstanceOf[Listner[Any]]
+    EventDispatcher.EventListnerKey(obj, listener)
+  }
+
+  def unregister(key: EventDispatcher.EventListnerKey) = listenerMap.synchronized {
+    listenerMap.get(key.obj).foreach(_ -= key.listner)
   }
 
   def trigger[T](obj: T, event: Event[T]) = {

@@ -28,10 +28,6 @@
 """
 
 
-
-
-@h1{Genetic Algorithms in OpenMOLE}
-
 The various @a("methods", href:= DocumentationPages.explore.file) available in OpenMOLE make an extensive use of genetic algorithms (GA).
 For instance, it is the case for @a("the model calibration method", href := DocumentationPages.calibration.file) (which is an optimization problem), or the search for output diversity with the @a("PSE", href:= DocumentationPages.pse.file) method (which boils down to a GA with a novelty incentive).
 

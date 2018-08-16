@@ -5,29 +5,26 @@
 
 @def firstTime = "First time setup"
 
-@h1
-    How To contribute to the OpenMOLE project
-
 This page is dedicated to explain the organization of the project, the tools you need and the procedures to follow if
 you want to contribute painlessly to the OpenMOLE project (software and documentation).
 It also explains the various versions of OpenMOLE you may want to use/deploy, from local desktop to distant server.
 
 @h2{Prerequisites}
 
-You need three tools installed to get a local copy of OpenMOLE:
+You will need the following tools to get a local copy of OpenMOLE running:
 @ul
     @li
-        A java 8 @b{jdk} or higher (N.B. not only the JRE). Check your version by typing @hl.highlight("javac -version","plain") in a terminal
+        a java 8 or higher @b{jdk} (N.B. not only the JRE). Check your version by typing @hl.highlight("javac -version","plain") in a terminal
     @li
         the @a("git" ,href:=shared.link.git) software and the @a("LFS" ,href:=shared.link.gitlfs) extension
     @li
-        @a("sbt" ,href:=shared.link.sbt) , the scala  building tool
+        @a("sbt" ,href:=shared.link.sbt), the scala  building tool
     @li
-        @a("npm" , href:=shared.link.npm) is required to build the website.
+        @a("npm" , href:=shared.link.npm), required to build the website.
 
 
 
-As a suggestion, we recommand the @a("IntelliJ IDE", href:=shared.link.intelliJ) to  edit the scala source code of the project.
+As a suggestion, we recommand the @a("IntelliJ IDE", href:=shared.link.intelliJ) to  edit the Scala source code of the project.
 
 
 
@@ -55,7 +52,7 @@ These commands may take some time (a few minutes at least).
 
 @h2{Build from Sources}
 
-To build the OpenMOLE application, use the @hl.highlight("sbt assemble","plain") command inside openmole subdirectory.
+To build the OpenMOLE application, use the @hl.highlight("sbt assemble","plain") command inside the openmole subdirectory.
 
 @hl.highlight("""
 $> cd openmole
@@ -66,15 +63,15 @@ openmole> assemble
 """, "plain")
 
 Upon completion, the executable is placed  under @hl.highlight("/openmole/openmole/bin/openmole/target/assemble", "plain")
-and is launched as any executable : @hl.highlight("./openmole", "plain")
-Then, the app should pop up in your default web browser, the URL is something like @hl.highlight("http://localhost:44961/app","plain")
+and is launched as any executable via the @hl.highlight("./openmole", "plain") command.
+Then, the app should pop up in your default web browser, the URL should be something like @hl.highlight("http://localhost:44961/app","plain")
 
 
 @h2{Standalone archive}
 
-You can create a standalone archive of your fresh OpenMOLE build and ship it around by using the task @i{openmole:tar}:
-@br @hl.highlight("""sbt openmole:tar""", "plain")
-@p You will find the resulting archive in @i{bin/openmole/target/openmole.tar.gz}.
+You can create a standalone archive of your fresh OpenMOLE build and ship it around by using the task @i{openmole:tar} : @hl.highlight("""sbt openmole:tar""", "plain")
+@br You will find the resulting archive in @i{bin/openmole/target/openmole.tar.gz}.
+
 @p{Publish the bundles}
 @hl.highlight("""
 $> cd build-system
@@ -87,24 +84,23 @@ $> sbt publish""", "plain")
 
 @h2{Compile within Docker}
 
-An easy way to get an OpenMOLE compilation environment up and running is to use docker. Once docker is installed on you machine you can do:
+An easy way to get an OpenMOLE compilation environment up and running is to use docker. Once docker is installed on your machine you can do:
 @br @hl.highlight("""
-$> git clone shared.link.openMOLEDockerBuild
+$> git clone """ + shared.link.repo.openMOLEDockerBuild +
+"""
 $> cd docker-build
 $> ./run -v /a/local/path/on/your/system
 # You should be in the docker container now, execute
 clone
 compile
 """, "plain")
-@p You can now find the compile OpenMOLE in @i{/a/local/path/on/your/system/openmole/openmole/bin/openmole/target/assemble/}
+@br You can now find the compile OpenMOLE in @i{/a/local/path/on/your/system/openmole/openmole/bin/openmole/target/assemble/}
 
 
 @h2{Build the website}
 
-The source code of the website and the OpenMOLE documentation are hosted along in the code repository.
-You might spot a typo/incorrect spelling/grammar mistake/bad wording or simply want to improve a part of the
-documentation you think is unclear.
-If so, you're more than welcome to correct our mistakes and improve the documentation. To check your changes locally before sending us a Pull Request, here is how to build a local copy of the website/documentation.
+The source code of the website is hosted along the OpenMOLE documentation in the code repository.
+This is how to build a local copy of the website/documentation.
 
 @hl.highlight("""
 $> cd openmole/openmole
@@ -117,15 +113,19 @@ Location of the generated pages can be set via the @hl.highlight("--target","pla
 buildSite --target /tmp/
 ""","plain")
 
+@h3{Edit the website or the documentation}
+You might spot a typo/incorrect spelling/grammar mistake/bad wording, or simply want to improve a part of the documentation you think is unclear.
+If so, you're more than welcome to correct our mistakes and improve the documentation.
+To check your changes locally before sending us a Pull Request, you need to have built a local copy of the website/documentation as shown above.
+
 @br
-By default, pages are located in @hl.highlight("openmole/openmole/bin/org.openmole.site/jvm/target/site/","plain")
+By default, @b{website pages} are located in @hl.highlight("openmole/openmole/bin/org.openmole.site/jvm/target/site/","plain")
 
 Optionally you can use @hl.highlight("--test", "plain") in order to verify the syntax of the scripts extracts in the documentation is valid.
 Bear in mind this is (really) @b{time-consuming}.
 
-@h2{Edit Documentation pages}
-
-Sources are located in @hl.highlight("openmole/openmole/bin/org.openmole.site/jvm/src/main/scalatex/openmole","plain")
+@br
+Sources for the @b{documentation pages} are located in @hl.highlight("openmole/openmole/bin/org.openmole.site/jvm/src/main/scalatex/openmole","plain")
 
 They are written using @a("scalatex", href:=shared.link.scalatex), a DSL to generate html content.
 
@@ -137,7 +137,7 @@ They are written using @a("scalatex", href:=shared.link.scalatex), a DSL to gene
     @li
         @hl.highlight("dev", "plain") contains the unstable, current version  of the platform.
     @li
-        @hl.highlight("#version-dev", "plain")  e.g. 7-dev , is the stabilized version of the @hl.highlight("dev", "plain") branch
+        @hl.highlight("#version-dev", "plain") e.g. 7-dev , is the stabilized version of the @hl.highlight("dev", "plain") branch
     @li
         @hl.highlight("master", "plain") is the main branch, from which  the two former branches are derived
 
@@ -148,7 +148,7 @@ OpenMOLE is made of three different projects:
   @ul
     @li{ @i{openmole/openmole}: the main project containing the source code for the core and plugins }
     @li{ @i{openmole/libraries}: contains the libraries which OpenMOLE depends on but are not available as OSGi bundles from their developers. This project takes all these dependencies, wraps them in OSGi projects and generates the corresponding bundles to be later imported by OpenMOLE's main project.}
-    @li{ @i{openmole/build-system}: As its name stands, that's the build system :) It's very unlikely that you'll have to modify this project.}
+    @li{ @i{openmole/build-system}: As stated by its name, that's the build system :) It's very unlikely that you'll have to modify this project.}
 
 
 @h2{Dev versions}
@@ -171,15 +171,15 @@ After that, send a @aa("pull request", href := shared.link.pullRequests) so that
 
 OpenMOLE applies a branching model derived from @a("Vincent Driessen's", href := shared.link.branchingModel). Some slight differences should be noted:
 @ul
-@li{The next version of OpenMOLE is in the @b{dev} branch, it's our development branch;}
-@li{Disrupting features are developed in branches, branching off @b{dev};}
-  @li{New features are merged into the @b{dev} branch as soon as they are working satisfyingly enough to be operational in the next release;}
-@li{With each release, a maintenance branch is created to be able to patch the last released version, this branch is called version-dev. These are the so-called stable branches for each release;}
+@li{The next version of OpenMOLE is in the @b{dev} branch, it's our development branch ;}
+@li{Disrupting features are developed in branches, branching off @b{dev} ;}
+  @li{New features are merged into the @b{dev} branch as soon as they are working satisfyingly enough to be operational in the next release ;}
+@li{With each release, a maintenance branch is created to be able to patch the latest-released version, this branch is called version-dev. These are the so-called stable branches for each release ;}
 @li{Hotfixes should be developed by branching off the corresponding version-dev branch and merged back into their upstream branch and @b{master}.}
 
 @p The advantage of this model is that new features are tested early in interaction with each others. This scheme serves an hybrid, date-based/feature-based release schedule.
 
-@p At the beginning of a development cycle, an approximate date is given for the next release. This date depends on what are the new features planned for this milestone. This date is flexible and can be modulated given the progress of the new developments.
+@p At the beginning of a development cycle, an approximate date is given for the next release. This date depends on what the new features planned for this milestone are. This date is flexible and can be modulated given the progress of the new developments.
 
 @h2{Tips and tricks}
 
@@ -232,7 +232,7 @@ $> ./build.sh""", "plain")
 
 @br
 @h3{support for developers}
-For developers support, remember you can get in touch with the community:
+For developers support, remember you can get in touch with the community via:
 @ul
 @li{ the @a("chat", href := shared.link.chat) in channel "openmole-dev" }
 @li{ the @a("OpenMOLE user forum", href := shared.link.mailingList) }

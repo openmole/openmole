@@ -117,7 +117,8 @@ object BlogPosts {
   }
 
   val newsStyle = Seq(
-    backgroundColor := "#333",
+    boxShadow := "0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19)",
+    backgroundColor := "white",
     padding := 10,
     marginTop := 5,
     borderRadius := "5px"
@@ -125,21 +126,16 @@ object BlogPosts {
 
   val titleStyle = Seq(
     textTransform := "uppercase",
-    color := "white"
+    maxWidth := 400
   )
 
-  val moreStyle = Seq(
-    float := "right",
-    right := 10
-  )
-
-  def testAndAppend(id: String, element: HTMLElement) = {
+  def testAndAppend(id: String, element: HTMLElement): Unit = {
     val node = org.scalajs.dom.window.document.getElementById(id)
     if (node != null)
       node.appendChild(element)
   }
 
-  def addNewsdiv(blogPosts: Seq[BlogPost]) = {
+  def addNewsdiv(blogPosts: Seq[BlogPost]): Unit = {
     def limitLength(s: String) = if (s.size < 50) s else s"${s.take(50)} ..."
 
     val newsDiv = div(paddingTop := 20)(
@@ -150,8 +146,8 @@ object BlogPosts {
         val d = bp.date.get
         val dateString = s"${d.toLocaleDateString()}"
         div(
-          span(s"$dateString: ${limitLength(bp.title)}")(titleStyle),
-          span(a(href := bp.link, target := "_blank")("Read more"))(moreStyle)
+          a(href := bp.link, target := "_blank")(s"$dateString: ${limitLength(bp.title)}")(titleStyle)
+        // span(a(href := bp.link, target := "_blank")("Read more"))(moreStyle)
         )(newsStyle)
       }
     ).render

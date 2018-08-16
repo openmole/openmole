@@ -5,7 +5,12 @@
 
 
 
-@h1{Model Exploration Tutorial}
+@h2{Help wanted!}
 
+In this tutorial, we mean to present how to prepare and run an experiment, in order to explore a simple model with OpenMOLE.
+The toy model could remain Ants.nlogo, since we already know how to import it from the previous tutorial.
 
-@h2{Calibration ...}
+@br@br
+
+Don't hesitate to suggest a simple experiment you did as an example for this tutorial.
+To do so just click on the red "Suggest edits" button on the right side of the page!

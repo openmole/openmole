@@ -35,7 +35,7 @@ object UserGuide {
   val line = hr(classIs("line"), width := "90%", marginTop := 10)
 
   def header(sp: TypedTag[_ <: String]) =
-    div(minHeight := 250, paddingTop := 100)(
+    div(paddingTop := 100)(
       div(stepHeader)(sp),
       line
     )
@@ -77,12 +77,25 @@ object UserGuide {
     paddingRight := 15
   )
 
+  def h2Contents(content: String) = {
+    val parsing = scala.xml.XML.loadString(s"<html>$content</html>")
+    val h2s = (parsing \\ "h2").map { h ⇒
+      val text = h.text.replaceAll("\uD83D\uDD17", "")
+      div(paddingTop := 5, paddingLeft := 10)(a(href := "#" + shared.anchor(text))(text))
+    }
+
+    if (h2s.isEmpty) span(marginTop := 40) else div(marginBottom := 30, scalatags.Text.all.h2(marginTop := -20, "Contents"), h2s)
+  }
+
   def integrate(current: Page): SitePage = {
     def integratedPage(left: SideMenu, right: SideMenu = SideMenu.more, head: TypedTag[String] = div(paddingTop := 100)) =
       IntegratedPage(
         head,
-        div(current.content),
-        SideMenu.left(left),
+        div(
+          if (DocumentationPages.mainDocPages.contains(current)) span else scalatags.Text.all.h1(current.title),
+          h2Contents(current.content.render),
+          current.content),
+        SideMenu.left(current, left),
         Some(SideMenu.right(right.insert(current.details)))
       )
 
@@ -90,7 +103,7 @@ object UserGuide {
       case p if (DocumentationPages.runPages :+ DocumentationPages.run).contains(p) ⇒ integratedPage(SideMenu.run, head = headerModel(current.name))
       case p if (DocumentationPages.explorePages :+ DocumentationPages.explore).contains(p) ⇒ integratedPage(SideMenu.explore, head = headerMethod(current.name))
       case p if (DocumentationPages.scalePages :+ DocumentationPages.scale).contains(p) ⇒ integratedPage(SideMenu.scale, head = headerEnvironment(current.name))
-      case p if (DocumentationPages.advancedConceptsPages :+ DocumentationPages.advancedConcepts).contains(p) ⇒ integratedPage(SideMenu.advanced)
+      case p if DocumentationPages.advancedConceptsPages.contains(p) ⇒ integratedPage(SideMenu.advanced)
       case p if (DocumentationPages.developersPages :+ DocumentationPages.developers).contains(p) ⇒ integratedPage(SideMenu.developers)
       case p if (DocumentationPages.languagePages :+ DocumentationPages.language).contains(p) ⇒ integratedPage(SideMenu.language)
       case p if (DocumentationPages.gettingStartedPages).contains(p) ⇒ integratedPage(SideMenu.gettingStarted)

@@ -24,7 +24,8 @@ import org.openmole.core.event.Listner
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.gui.ext.data._
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment.{ BeginDownload, BeginUpload, EndDownload, EndUpload }
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
+import org.openmole.plugin.environment.batch._
 import org.openmole.tool.file.readableByteCount
 import org.openmole.tool.stream.StringPrintStream
 
@@ -64,7 +65,9 @@ class Execution {
 
   def environmentListener(envId: EnvironmentId): Listner[Environment] = {
     case (env, bdl: BeginDownload) ⇒
-      updateRunningEnvironment(envId) { RunningEnvironment.networkActivity composeLens NetworkActivity.downloadingFiles modify (_ + 1) }
+      updateRunningEnvironment(envId) {
+        RunningEnvironment.networkActivity composeLens NetworkActivity.downloadingFiles modify (_ + 1)
+      }
 
     case (env, edl: EndDownload) ⇒ updateRunningEnvironment(envId) {
       RunningEnvironment.networkActivity.modify { na ⇒
@@ -79,7 +82,9 @@ class Execution {
     }
 
     case (env, bul: BeginUpload) ⇒
-      updateRunningEnvironment(envId) { RunningEnvironment.networkActivity composeLens NetworkActivity.uploadingFiles modify (_ + 1) }
+      updateRunningEnvironment(envId) {
+        RunningEnvironment.networkActivity composeLens NetworkActivity.uploadingFiles modify (_ + 1)
+      }
 
     case (env, eul: EndUpload) ⇒ updateRunningEnvironment(envId) {
       RunningEnvironment.networkActivity.modify { na ⇒
@@ -122,7 +127,9 @@ class Execution {
 
   def removeRunningEnvironments(id: ExecutionId) = atomic { implicit ctx ⇒
     environmentIds.remove(id).foreach {
-      _.foreach { runningEnvironments.remove }
+      _.foreach {
+        runningEnvironments.remove
+      }
     }
   }
 
@@ -177,10 +184,23 @@ class Execution {
           e.environment.submitted,
           e.environment.failed,
           e.networkActivity,
-          e.executionActivity
+          e.executionActivity,
+          environementErrors(envId).length
         )
       }
     }
+
+  def environementErrors(environmentId: EnvironmentId): Seq[EnvironmentError] = {
+    val errorMap = getRunningEnvironments(environmentId).toMap
+    val info = errorMap(environmentId)
+
+    info.environment.errors.map { ex ⇒
+      ex.exception match {
+        case fje: environment.FailedJobExecution ⇒ EnvironmentError(environmentId, fje.message, ErrorBuilder(fje.cause) + Error(s"\nDETAILS:\n${fje.detail}"), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
+        case _                                   ⇒ EnvironmentError(environmentId, ex.exception.getMessage, ErrorBuilder(ex.exception), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
+      }
+    }
+  }
 
   def executionInfo(key: ExecutionId): ExecutionInfo = atomic { implicit ctx ⇒
 
@@ -192,7 +212,9 @@ class Execution {
       case (_, Some(moleExecution)) ⇒
 
         val d = moleExecution.duration.getOrElse(0L)
+
         def convertStatuses(s: MoleExecution.JobStatuses) = ExecutionInfo.JobStatuses(s.ready, s.running, s.completed)
+
         lazy val statuses = moleExecution.capsuleStatuses.toVector.map { case (k, v) ⇒ k.toString -> convertStatuses(v) }
 
         moleExecution.exception match {

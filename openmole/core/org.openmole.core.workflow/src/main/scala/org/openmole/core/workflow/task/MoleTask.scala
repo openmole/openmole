@@ -83,7 +83,7 @@ object MoleTask {
     @volatile var lastContext: Option[Context] = None
     val lastContextLock = new ReentrantLock()
 
-    val execution = {
+    val (execution, executionNewFile) = {
       implicit val eventDispatcher = EventDispatcher()
       val implicitsValues = implicits.flatMap(i ⇒ context.get(i))
       implicit val seeder = Seeder(random().nextLong())
@@ -111,19 +111,23 @@ object MoleTask {
           lastContextLock { if (ev.capsule == last) lastContext = Some(ev.moleJob.context) }
       }
 
-      execution
+      (execution, newFile)
     }
 
-    executionContext.moleExecution.foreach { parentExecution ⇒
-      implicit val ev = parentExecution.executionContext.services.eventDispatcher
-      parentExecution listen {
-        case (_, ev: MoleExecution.Finished) ⇒
-          MoleExecution.cancel(execution, Some(MoleExecution.MoleExecutionError(new InterruptedException("Parent execution has been canceled"))))
+    val listenerKey =
+      executionContext.moleExecution.map { parentExecution ⇒
+        implicit val ev = parentExecution.executionContext.services.eventDispatcher
+        parentExecution listen {
+          case (_, ev: MoleExecution.Finished) ⇒
+            MoleExecution.cancel(execution, Some(MoleExecution.MoleExecutionError(new InterruptedException("Parent execution has been canceled"))))
+        }
       }
-    }
 
     try execution.run(Some(context), validate = false)
-    finally fileService.deleteWhenEmpty(newFile.baseDir)
+    finally {
+      fileService.deleteWhenEmpty(executionNewFile.baseDir)
+      (executionContext.moleExecution zip listenerKey).foreach { case (moleExecution, key) ⇒ moleExecution.executionContext.services.eventDispatcher.unregister(key) }
+    }
 
     lastContext.getOrElse(throw new UserBadDataError("Last capsule " + last + " has never been executed."))
   }

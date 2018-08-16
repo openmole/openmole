@@ -47,10 +47,6 @@ import scala.concurrent.Future
 class ModelWizardPanel {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
-  println("Wizards " + Plugins.wizardFactories.now.map {
-    _.name
-  })
-
   sealed trait VariableRole[T] {
     def content: T
 
@@ -100,7 +96,7 @@ class ModelWizardPanel {
   val currentPluginPanel: Var[Option[WizardGUIPlugin]] = Var(None)
 
   fileToUploadPath.trigger {
-    fileToUploadPath.now.map {
+    fileToUploadPath.now.foreach {
       buildForm
     }
   }

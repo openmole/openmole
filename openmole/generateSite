@@ -14,7 +14,7 @@ mkdir -p "${TARGET}" && \
   rm -rf "${TARGET}/api" && \
   #sbt "project api" "set (crossTarget in api) := new File(\"${TARGET}\")" unidoc && \
   #mv "${TARGET}/unidoc" "${TARGET}/api" && \
-  sbt ";project marketindex; cloneMarket; run --target \"${TARGET}/market\" --market \"./bin/org.openmole.marketindex/src/main/resources/openmole-market/\"" && \
+  sbt ";project marketindex; cloneMarket; run --target \"${TARGET}/market\" --market \"./bin/org.openmole.marketindex/target/openmole-market/\"" && \
   sbt "project org-openmole-modules" assemble && \
   ./bin/org.openmole.modules/target/assemble/modules --target "${TARGET}/modules" && \
   echo "the website was generated in file://${TARGET}/index.html"

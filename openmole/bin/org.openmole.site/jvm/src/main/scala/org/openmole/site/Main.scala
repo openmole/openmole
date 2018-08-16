@@ -35,7 +35,7 @@ object Main {
       def colTag: Seq[Modifier] = Seq(classIs("col-md-4"), attr("align") := "center")
       def rowTag: Seq[Modifier] = Seq(classIs(row))
 
-      div(classIs(container_fluid), paddingTop := 40, paddingBottom := 40)(
+      div(classIs(container_fluid), paddingTop := 80, paddingBottom := 80)(
         div(classIs(row + " centered-form center-block"))(
           div(rowTag, paddingBottom := 5)(
             div(colTag)(img(src := Resource.img.model.code.file, width := 120)),
