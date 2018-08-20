@@ -351,6 +351,8 @@ object Utils extends JavaLogger {
       JSPack.link(jsPluginDirectory, jsFile, optimizedJS)
     }
 
+    (jsPluginDirectory / "optimized_mode").content = optimizedJS.toString
+
     if (!jsFile.exists) update
     else updateIfChanged(jsPluginDirectory) { _ ⇒ update }
     jsFile
