@@ -20,6 +20,7 @@ package org.openmole.plugin.environment.gridscale
 import java.io.InputStream
 
 import org.openmole.core.communication.storage._
+import org.openmole.plugin.environment.batch.environment.UsageControl
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.file._
 
@@ -28,8 +29,13 @@ object LocalStorage {
   import effectaside._
   import gridscale.local
 
-  implicit def isStorage = new StorageInterface[LocalStorage] {
+  implicit def isStorage = new StorageInterface[LocalStorage] with HierarchicalStorageInterface[LocalStorage] {
     implicit def interpreter = _root_.gridscale.local.Local()
+
+    override def quality(t: LocalStorage): QualityControl = t.qualityControl
+    override def usageControl(t: LocalStorage): UsageControl = t.usageControl
+
+    override def home(t: LocalStorage): String = interpreter().home()
 
     override def child(t: LocalStorage, parent: String, child: String): String = (File(parent) / child).getAbsolutePath
     override def parent(t: LocalStorage, path: String): Option[String] = Option(File(path).getParent)
@@ -48,5 +54,5 @@ object LocalStorage {
 
 }
 
-case class LocalStorage()
+case class LocalStorage(usageControl: UsageControl, qualityControl: QualityControl)
 

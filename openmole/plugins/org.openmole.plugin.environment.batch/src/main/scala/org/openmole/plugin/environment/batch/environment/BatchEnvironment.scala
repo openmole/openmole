@@ -113,6 +113,8 @@ object BatchEnvironment extends JavaLogger {
   val killJobRetry = ConfigurationLocation("BatchEnvironment", "KillJobRetry", Some(3))
   val cleanJobRetry = ConfigurationLocation("BatchEnvironment", "KillJobRetry", Some(3))
 
+  val QualityHysteresis = ConfigurationLocation("BatchEnvironment", "QualityHysteresis", Some(100))
+
   private def runtimeDirLocation = openMOLELocation / "runtime"
 
   lazy val runtimeLocation = runtimeDirLocation / "runtime.tar.gz"
@@ -276,9 +278,9 @@ object BatchEnvironment extends JavaLogger {
 
   def resultPathInSerializedJob(serializedJob: SerializedJob, accessToken: AccessToken) = serializedJob.resultPath.get
 
-  def submitSerializedJob(jobService: BatchJobService[_], serializedJob: SerializedJob, resultPath: (SerializedJob, AccessToken) ⇒ String = resultPathInSerializedJob) =
-    UsageControl.mapToken(jobService.usageControl) { token ⇒
-      BatchJobService.submit(jobService, serializedJob, resultPath(serializedJob, _))(token)
+  def submitSerializedJob[S](jobService: S, serializedJob: SerializedJob, resultPath: (SerializedJob, AccessToken) ⇒ String = resultPathInSerializedJob)(implicit jobServiceInterface: JobServiceInterface[S]) =
+    UsageControl.mapToken(jobServiceInterface.usageControl(jobService)) { implicit token ⇒
+      BatchJobService.submit(jobService, serializedJob, resultPath(serializedJob, _))
     }
 
   def start(environment: BatchEnvironment) = {}

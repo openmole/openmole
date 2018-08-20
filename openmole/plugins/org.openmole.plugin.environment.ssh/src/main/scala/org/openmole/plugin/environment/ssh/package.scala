@@ -24,53 +24,66 @@ import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.dsl.File
 import org.openmole.plugin.environment.batch.environment.{ AccessToken, BatchEnvironment, Runtime, UsageControl }
-import org.openmole.plugin.environment.batch.storage.{ HierarchicalStorageInterface, StorageInterface, StorageService, StorageSpace }
+import org.openmole.plugin.environment.batch.storage._
 import org.openmole.plugin.environment.gridscale.{ LocalStorage, LogicalLinkStorage }
 import squants.time.Time
 import effectaside._
 import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.tool.cache.Lazy
+import squants.Time
 
 package object ssh {
-  //  class RemoteLogicalLinkStorage(val root: String) extends LogicalLinkStorage with SimpleStorage
-  //  class RemoveLocalStorage(val root: String) extends LocalStorage with SimpleStorage
 
-  trait AsSSHServer[S] {
-    def apply(s: S): _root_.gridscale.ssh.SSHServer
-  }
-
-  implicit def toSSHServer[S: AsSSHServer](s: S) = implicitly[AsSSHServer[S]].apply(s)
+  case class SSHStorageServer(sshServer: _root_.gridscale.ssh.SSHServer, usageControl: UsageControl, qualityControl: QualityControl)
 
   import _root_.gridscale.{ ssh ⇒ gssh }
 
-  implicit def isStorage[S: AsSSHServer](implicit interpreter: Effect[gssh.SSH]) = new StorageInterface[S] with HierarchicalStorageInterface[S] {
-    override def child(t: S, parent: String, child: String): String = _root_.gridscale.RemotePath.child(parent, child)
-    override def parent(t: S, path: String): Option[String] = _root_.gridscale.RemotePath.parent(path)
-    override def name(t: S, path: String): String = _root_.gridscale.RemotePath.name(path)
-    override def home(t: S) = gssh.home(t)
+  object SSHStorageServer {
+    implicit def isStorage(implicit interpreter: Effect[gssh.SSH]) = new StorageInterface[SSHStorageServer] with HierarchicalStorageInterface[SSHStorageServer] {
+      implicit def toSSHServer(s: SSHStorageServer) = s.sshServer
+      override def quality(s: SSHStorageServer): QualityControl = s.qualityControl
+      override def usageControl(s: SSHStorageServer): UsageControl = s.usageControl
 
-    override def exists(t: S, path: String): Boolean = gssh.exists(t, path)
-    override def list(t: S, path: String) = gssh.list(t, path)
-    override def makeDir(t: S, path: String): Unit = gssh.makeDir(t, path)
-    override def rmDir(t: S, path: String): Unit = gssh.rmDir(t, path)
-    override def rmFile(t: S, path: String): Unit = gssh.rmFile(t, path)
+      override def child(t: SSHStorageServer, parent: String, child: String): String = _root_.gridscale.RemotePath.child(parent, child)
+      override def parent(t: SSHStorageServer, path: String): Option[String] = _root_.gridscale.RemotePath.parent(path)
+      override def name(t: SSHStorageServer, path: String): String = _root_.gridscale.RemotePath.name(path)
 
-    override def upload(t: S, src: File, dest: String, options: TransferOptions): Unit =
-      StorageInterface.upload(false, gssh.writeFile(t, _, _))(src, dest, options)
-    override def download(t: S, src: String, dest: File, options: TransferOptions): Unit =
-      StorageInterface.download(false, gssh.readFile[Unit](t, _, _))(src, dest, options)
+      override def home(t: SSHStorageServer) = gssh.home(t)
+      override def exists(t: SSHStorageServer, path: String): Boolean = gssh.exists(t, path)
+      override def list(t: SSHStorageServer, path: String) = gssh.list(t, path)
+
+      override def makeDir(t: SSHStorageServer, path: String): Unit = gssh.makeDir(t, path)
+      override def rmDir(t: SSHStorageServer, path: String): Unit = gssh.rmDir(t, path)
+
+      override def rmFile(t: SSHStorageServer, path: String): Unit = gssh.rmFile(t, path)
+
+      override def upload(t: SSHStorageServer, src: File, dest: String, options: TransferOptions): Unit =
+        StorageInterface.upload(false, gssh.writeFile(t, _, _))(src, dest, options)
+
+      override def download(t: SSHStorageServer, src: String, dest: File, options: TransferOptions): Unit =
+        StorageInterface.download(false, gssh.readFile[Unit](t, _, _))(src, dest, options)
+    }
   }
 
   def localStorageService(
+    storage:         LocalStorage,
     environment:     BatchEnvironment,
-    concurrency:     Int,
-    root:            String,
-    sharedDirectory: Option[String])(implicit threadProvider: ThreadProvider, preference: Preference, replicaCatalog: ReplicaCatalog, localInterpreter: Effect[_root_.gridscale.local.Local]) = {
-    def id = new URI("file", null, "localhost", -1, sharedDirectory.orNull, null, null).toString
-    val storage = LocalStorage()
+    sharedDirectory: Option[String])(implicit threadProvider: ThreadProvider, preference: Preference, replicaCatalog: ReplicaCatalog) = {
+
+    val root = sshRoot(storage, sharedDirectory)
+    def id = new URI("file", null, "localhost", -1, root, null, null).toString
     def storageSpace = StorageSpace.hierarchicalStorageSpace(storage, root, id, _ ⇒ false)
 
-    StorageService(storage, id, environment, concurrency, Lazy(storageSpace))
+    StorageService(storage, id, environment, Lazy(storageSpace))
+  }
+
+  def sshRoot[S](s: S, sharedDirectory: Option[String])(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
+    sharedDirectory match {
+      case Some(p) ⇒ p
+      case None ⇒
+        val home = hierarchicalStorageInterface.home(s)
+        storageInterface.child(s, home, ".openmole/.tmp/ssh/")
+    }
   }
 
   def sshStorageService[S](
@@ -78,38 +91,21 @@ package object ssh {
     host:                 String,
     port:                 Int,
     storage:              S,
-    concurrency:          Int,
     environment:          BatchEnvironment,
     sharedDirectory:      Option[String],
     storageSharedLocally: Boolean
   )(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], threadProvider: ThreadProvider, preference: Preference, replicaCatalog: ReplicaCatalog) = {
+    val root = sshRoot(storage, sharedDirectory)
 
-    val root = sharedDirectory match {
-      case Some(p) ⇒ p
-      case None ⇒
-        val home = hierarchicalStorageInterface.home(storage)
-        storageInterface.child(storage, home, ".openmole/.tmp/ssh/")
+    def id = new URI("ssh", user, host, port, root, null, null).toString
+    def isConnectionError(t: Throwable) = t match {
+      case _: _root_.gridscale.ssh.ConnectionError ⇒ true
+      case _: _root_.gridscale.authentication.AuthenticationException ⇒ true
+      case _ ⇒ false
     }
+    def storageSpace = StorageSpace.hierarchicalStorageSpace(storage, root, id, isConnectionError)
 
-    if (storageSharedLocally) {
-      def id = new URI("file", user, "localhost", -1, sharedDirectory.orNull, null, null).toString
-
-      val storage = LocalStorage()
-      def storageSpace = StorageSpace.hierarchicalStorageSpace(storage, root, id, _ ⇒ false)
-
-      StorageService(storage, id, environment, concurrency, Lazy(storageSpace))
-    }
-    else {
-      def id = new URI("ssh", user, host, port, root, null, null).toString
-      def isConnectionError(t: Throwable) = t match {
-        case _: _root_.gridscale.ssh.ConnectionError ⇒ true
-        case _: _root_.gridscale.authentication.AuthenticationException ⇒ true
-        case _ ⇒ false
-      }
-      def storageSpace = StorageSpace.hierarchicalStorageSpace(storage, root, id, isConnectionError)
-
-      StorageService(storage, id, environment, concurrency, Lazy(storageSpace))
-    }
+    StorageService(storage, id, environment, Lazy(storageSpace))
   }
 
   class RuntimeInstallation(

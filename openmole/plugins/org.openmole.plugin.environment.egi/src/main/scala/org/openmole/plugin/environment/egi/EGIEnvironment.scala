@@ -28,11 +28,12 @@ import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.jobservice.{ BatchJobService, JobServiceInterface }
 import org.openmole.plugin.environment.batch.refresh.JobManager
-import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageService, StorageSpace }
+import org.openmole.plugin.environment.batch.storage.{ QualityControl, StorageInterface, StorageService, StorageSpace }
 import org.openmole.plugin.environment.egi.EGIEnvironment.WebDavLocation
 import org.openmole.tool.crypto.Cypher
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job.Job
+import org.openmole.plugin.environment.batch.environment
 import squants._
 import squants.information._
 
@@ -92,6 +93,7 @@ object EGIEnvironment extends JavaLogger {
   //  val ShallowWMSRetryCount = ConfigurationLocation("EGIEnvironment", "ShallowWMSRetryCount", Some(5))
   //
   //  val JobServiceFitnessPower = ConfigurationLocation("EGIEnvironment", "JobServiceFitnessPower", Some(2.0))
+
   val StorageFitnessPower = ConfigurationLocation("EGIEnvironment", "StorageFitnessPower", Some(2.0))
   //
   val StorageSizeFactor = ConfigurationLocation("EGIEnvironment", "StorageSizeFactor", Some(5.0))
@@ -119,7 +121,7 @@ object EGIEnvironment extends JavaLogger {
   def defaultBDIIs(implicit preference: Preference) =
     preference(EGIEnvironment.DefaultBDIIs).map(b ⇒ new java.net.URI(b)).map(toBDII)
 
-  case class WebDavLocation(url: String)
+  case class WebDavLocation(url: String, usageControl: UsageControl, qualityControl: QualityControl)
 
   def stdOutFileName = "output"
   def stdErrFileName = "error"
@@ -130,6 +132,8 @@ object EGIEnvironment extends JavaLogger {
     override def state(env: EGIEnvironment[A], j: J) = env.state(j)
     override def delete(env: EGIEnvironment[A], j: J): Unit = env.delete(j)
     override def stdOutErr(env: EGIEnvironment[A], j: J) = env.stdOutErr(j)
+
+    override def usageControl(js: EGIEnvironment[A]): UsageControl = js.diracUsageControl
   }
 
   def eagerSubmit(environment: EGIEnvironment[_])(implicit preference: Preference) = {
@@ -249,12 +253,15 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   }
 
   override def stop() = {
-    def usageControls = storages().map(_._2.usageControl) ++ List(batchJobService.usageControl)
+    def usageControls = storages().map(_._2.usageControl) ++ List(diracUsageControl)
     BatchEnvironment.clean(this, usageControls)
   }
 
   implicit def webdavlocationIsStorage = new StorageInterface[WebDavLocation] {
     def webdavServer(location: WebDavLocation) = gridscale.webdav.WebDAVSServer(location.url, proxyCache().factory)
+
+    override def quality(t: WebDavLocation): QualityControl = t.qualityControl
+    override def usageControl(t: WebDavLocation): UsageControl = t.usageControl
 
     override def child(t: WebDavLocation, parent: String, child: String): String = gridscale.RemotePath.child(parent, child)
     override def parent(t: WebDavLocation, path: String): Option[String] = gridscale.RemotePath.parent(path)
@@ -287,14 +294,13 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         case _ ⇒ false
       }
 
-      val storage = EGIEnvironment.WebDavLocation(location)
+      val storage = EGIEnvironment.WebDavLocation(location, UsageControl(preference(EGIEnvironment.ConnexionsByWebDAVSE)), QualityControl(preference(BatchEnvironment.QualityHysteresis)))
       def storageSpace = StorageSpace.hierarchicalStorageSpace(storage, "", location, isConnectionError)
 
       location -> StorageService(
         storage,
         id = location,
         environment = env,
-        concurrency = preference(EGIEnvironment.ConnexionsByWebDAVSE),
         storageSpace = Lazy(storageSpace)
       )
     }
@@ -457,12 +463,13 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     (stdOut, stdErr)
   }
 
-  lazy val batchJobService = BatchJobService(env, preference(EGIEnvironment.ConnectionsToDIRAC))
+  lazy val diracUsageControl = environment.UsageControl(preference(EGIEnvironment.ConnectionsToDIRAC))
 
   override def submitSerializedJob(serializedJob: SerializedJob) =
-    BatchEnvironment.submitSerializedJob(batchJobService, serializedJob)
+    BatchEnvironment.submitSerializedJob(env, serializedJob)
 
   override def updateInterval =
     UpdateInterval.fixed(preference(EGIEnvironment.JobGroupRefreshInterval))
 
 }
+

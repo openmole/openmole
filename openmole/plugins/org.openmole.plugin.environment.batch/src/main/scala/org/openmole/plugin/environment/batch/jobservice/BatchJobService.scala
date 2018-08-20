@@ -32,23 +32,21 @@ trait JobServiceInterface[JS] {
   def state(js: JS, j: J): ExecutionState
   def delete(js: JS, j: J): Unit
   def stdOutErr(js: JS, j: J): (String, String)
+
+  def usageControl(js: JS): UsageControl
 }
 
 object BatchJobService extends JavaLogger {
 
-  def apply[JS](js: JS, concurrency: Int)(implicit jobServiceInterface: JobServiceInterface[JS], eventDispatcher: EventDispatcher) =
-    new BatchJobService[JS](js, UsageControl(concurrency), jobServiceInterface)
-
   def tryStdOutErr(batchJob: BatchJobControl, token: AccessToken) = util.Try(batchJob.stdOutErr(token))
 
-  def submit[JS](batchJobService: BatchJobService[JS], serializedJob: SerializedJob, resultPath: AccessToken ⇒ String)(implicit token: AccessToken): BatchJobControl = token.access {
-    import batchJobService._
+  def submit[JS](jobService: JS, serializedJob: SerializedJob, resultPath: AccessToken ⇒ String)(implicit token: AccessToken, jobServiceInterface: JobServiceInterface[JS]): BatchJobControl = token.access {
 
-    def updateState(job: jsInterface.J)(token: AccessToken): ExecutionState = token.access { jsInterface.state(js, job) }
-    def delete(job: jsInterface.J)(token: AccessToken) = token.access { jsInterface.delete(js, job) }
-    def stdOutErr(job: jsInterface.J)(token: AccessToken) = token.access { jsInterface.stdOutErr(js, job) }
+    def updateState(job: jobServiceInterface.J)(token: AccessToken): ExecutionState = token.access { jobServiceInterface.state(jobService, job) }
+    def delete(job: jobServiceInterface.J)(token: AccessToken) = token.access { jobServiceInterface.delete(jobService, job) }
+    def stdOutErr(job: jobServiceInterface.J)(token: AccessToken) = token.access { jobServiceInterface.stdOutErr(jobService, job) }
 
-    val job = jsInterface.submit(js, serializedJob)
+    val job = jobServiceInterface.submit(jobService, serializedJob)
     BatchJobService.Log.logger.fine(s"Successful submission: ${job}")
 
     BatchJobControl(
@@ -56,16 +54,11 @@ object BatchJobService extends JavaLogger {
       delete(job),
       stdOutErr(job),
       resultPath,
-      usageControl
+      jobServiceInterface.usageControl(jobService)
     )
   }
 
 }
-
-class BatchJobService[JS](
-  val js:           JS,
-  val usageControl: UsageControl,
-  val jsInterface:  JobServiceInterface[JS])
 
 object BatchJobControl {
 

@@ -43,11 +43,9 @@ object StorageService extends JavaLogger {
     s:            S,
     id:           String,
     environment:  BatchEnvironment,
-    concurrency:  Int,
     storageSpace: Lazy[StorageSpace]
   )(implicit storageInterface: StorageInterface[S], threadProvider: ThreadProvider, preference: Preference, replicaCatalog: ReplicaCatalog) = {
-    val usageControl = UsageControl(concurrency)
-    new StorageService[S](s, storageSpace, id, environment, usageControl)
+    new StorageService[S](s, storageSpace, id, environment)
   }
 
   def backgroundRmFile(storageService: StorageService[_], path: String)(implicit services: BatchEnvironment.Services) = JobManager ! DeleteFile(storageService, path, false)
@@ -56,16 +54,15 @@ object StorageService extends JavaLogger {
 }
 
 class StorageService[S](
-  val storage:       S,
-  val storageSpace:  Lazy[StorageSpace],
-  val id:            String,
-  val environment:   BatchEnvironment,
-  val usageControl:  UsageControl,
-  qualityHysteresis: Int                = 100)(implicit storageInterface: StorageInterface[S]) {
+  val storage:      S,
+  val storageSpace: Lazy[StorageSpace],
+  val id:           String,
+  val environment:  BatchEnvironment)(implicit storageInterface: StorageInterface[S]) {
 
   override def toString: String = id
 
-  lazy val quality = QualityControl(qualityHysteresis)
+  def quality = storageInterface.quality(storage)
+  def usageControl = storageInterface.usageControl(storage)
 
   def replicaDirectory(implicit accessToken: AccessToken) = storageSpace().replicaDirectory
   def baseDirectory(implicit accessToken: AccessToken) = storageSpace().baseDirectory

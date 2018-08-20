@@ -92,7 +92,13 @@ object SharedStorage extends JavaLogger {
       path
     }
 
-  def buildScript(runtimePath: Runtime ⇒ String, workDirectory: Option[String], openMOLEMemory: Option[Information], threads: Option[Int], serializedJob: SerializedJob, sharedFS: StorageService[_])(implicit newFile: NewFile, preference: Preference) = {
+  def buildScript[S](
+    runtimePath:    Runtime ⇒ String,
+    workDirectory:  Option[String],
+    openMOLEMemory: Option[Information],
+    threads:        Option[Int],
+    serializedJob:  SerializedJob,
+    storage:        S)(implicit newFile: NewFile, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
     val runtime = runtimePath(serializedJob.runtime) //preparedRuntime(serializedJob.runtime)
     val result = serializedJob.resultPath.get
     val baseWorkDirectory = workDirectory getOrElse serializedJob.path
@@ -111,8 +117,8 @@ object SharedStorage extends JavaLogger {
 
         script.content = content
 
-        val remoteScript = sharedFS.child(serializedJob.path, uniqName("run", ".sh"))
-        UsageControl.withToken(sharedFS.usageControl) { sharedFS.upload(script, remoteScript, options = TransferOptions(raw = true, forceCopy = true, canMove = true))(_) }
+        val remoteScript = storageInterface.child(storage, serializedJob.path, uniqName("run", ".sh"))
+        UsageControl.withToken(storageInterface.usageControl(storage)) { _ ⇒ storageInterface.upload(storage, script, remoteScript, options = TransferOptions(raw = true, forceCopy = true, canMove = true)) }
         remoteScript
       }
     (remoteScript, baseWorkDirectory)

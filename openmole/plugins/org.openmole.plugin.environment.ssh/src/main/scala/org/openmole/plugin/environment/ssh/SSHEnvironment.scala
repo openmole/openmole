@@ -35,7 +35,8 @@ import org.openmole.tool.lock._
 import squants.information._
 import squants.time.TimeConversions._
 import org.openmole.plugin.environment.batch.environment._
-import org.openmole.plugin.environment.batch.storage.StorageInterface
+import org.openmole.plugin.environment.batch.storage.{ HierarchicalStorageInterface, QualityControl, StorageInterface }
+import org.openmole.plugin.environment.ssh.SSHEnvironment.SSHJob
 
 import scala.ref.WeakReference
 
@@ -78,28 +79,24 @@ object SSHEnvironment {
     }
   }
 
-  class Updater(environemnt: WeakReference[SSHEnvironment[_]]) extends IUpdatable {
+  class Updater(environment: WeakReference[SSHEnvironment[_]]) extends IUpdatable {
 
     var stop = false
 
     def update() =
       if (stop) false
-      else environemnt.get match {
+      else environment.get match {
         case Some(env) ⇒
           val nbSubmit = env.slots - env.numberOfRunningJobs
           val toSubmit = env.queuesLock { env.jobsStates.collect { case (job, Queued(desc)) ⇒ job → desc }.take(nbSubmit) }
 
           for {
             (job, desc) ← toSubmit
-          } env.submit(job, desc)
+          } env.sshJobService.submit(job, desc)
 
           !stop
         case None ⇒ false
       }
-  }
-
-  implicit def asSSHServer[A: ssh.SSHAuthentication] = new AsSSHServer[SSHEnvironment[A]] {
-    override def apply(t: SSHEnvironment[A]) = ssh.SSHServer(t.host, t.port, t.timeout)(t.authentication)
   }
 
   case class SSHJob(id: Long) extends AnyVal
@@ -108,15 +105,6 @@ object SSHEnvironment {
   case class Queued(description: gridscale.ssh.SSHJobDescription) extends SSHRunState
   case class Submitted(pid: gridscale.ssh.JobId) extends SSHRunState
   case object Failed extends SSHRunState
-
-  implicit def isJobService[A]: JobServiceInterface[SSHEnvironment[A]] = new JobServiceInterface[SSHEnvironment[A]] {
-    override type J = SSHJob
-
-    override def submit(env: SSHEnvironment[A], serializedJob: SerializedJob): J = env.register(serializedJob)
-    override def state(env: SSHEnvironment[A], j: J): ExecutionState.ExecutionState = env.state(j)
-    override def delete(env: SSHEnvironment[A], j: J): Unit = env.delete(j)
-    override def stdOutErr(js: SSHEnvironment[A], j: SSHJob) = js.stdOutErr(j)
-  }
 
 }
 
@@ -139,6 +127,13 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   lazy val jobUpdater = new SSHEnvironment.Updater(WeakReference(this))
 
+  val queuesLock = new ReentrantLock()
+  val jobsStates = collection.mutable.TreeMap[SSHEnvironment.SSHJob, SSHEnvironment.SSHRunState]()(Ordering.by(_.id))
+  val jobId = new AtomicLong()
+
+  type PID = Int
+  val submittedJobs = collection.mutable.Map[SSHEnvironment.SSHJob, PID]()
+
   override def start() = {
     BatchEnvironment.start(this)
     import services.threadProvider
@@ -152,27 +147,37 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   override def stop() = {
     jobUpdater.stop = true
-    def usageControls = List(storageService.usageControl, jobService.usageControl)
+    def usageControls = List(storageService.usageControl, sshJobService.usageControl)
     try BatchEnvironment.clean(this, usageControls)
     finally sshInterpreter().close
   }
 
   import env.services.{ threadProvider, preference }
 
+  lazy val usageControl = UsageControl(preference(SSHEnvironment.MaxConnections))
+  lazy val qualityControl = QualityControl(preference(BatchEnvironment.QualityHysteresis))
+
+  def numberOfRunningJobs: Int = {
+    val sshJobIds = env.queuesLock { env.jobsStates.toSeq.collect { case (j, SSHEnvironment.Submitted(id)) ⇒ id } }
+    sshJobIds.toList.map(id ⇒ gridscale.ssh.SSHJobDescription.jobIsRunning(env.sshServer, id)).count(_ == true)
+  }
+
+  lazy val sshServer = gridscale.ssh.SSHServer(env.host, env.port, env.timeout)(env.authentication)
+
   lazy val storageService =
-    sshStorageService(
+    if (storageSharedLocally) localStorageService(LocalStorage(UsageControl(preference(SSHEnvironment.MaxConnections)), qualityControl), this, sharedDirectory)
+    else sshStorageService(
       user = user,
       host = host,
       port = port,
-      storage = env,
+      storage = SSHStorageServer(sshServer, usageControl, qualityControl),
       environment = env,
-      concurrency = preference(SSHEnvironment.MaxConnections),
       sharedDirectory = sharedDirectory,
       storageSharedLocally = storageSharedLocally
     )
 
   override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
-    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())
+    val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage())
     BatchEnvironment.serializeJob(storageService, remoteStorage, batchExecutionJob)
   }
 
@@ -180,6 +185,30 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
     storageService = storageService,
     frontend = Frontend.ssh(host, port, timeout, authentication)
   )
+
+  lazy val sshJobService =
+    if (storageSharedLocally) new SSHJobService(LocalStorage(usageControl, qualityControl), services, installRuntime, env, usageControl)
+    else new SSHJobService(SSHStorageServer(sshServer, usageControl, qualityControl), services, installRuntime, env, usageControl)
+
+  override def submitSerializedJob(serializedJob: SerializedJob) =
+    BatchEnvironment.submitSerializedJob(sshJobService, serializedJob)
+}
+
+object SSHJobService {
+
+  implicit def isJobService[A]: JobServiceInterface[SSHJobService[A]] = new JobServiceInterface[SSHJobService[A]] {
+    override type J = SSHJob
+
+    override def submit(env: SSHJobService[A], serializedJob: SerializedJob): J = env.register(serializedJob)
+    override def state(env: SSHJobService[A], j: J): ExecutionState.ExecutionState = env.state(j)
+    override def delete(env: SSHJobService[A], j: J): Unit = env.delete(j)
+    override def stdOutErr(js: SSHJobService[A], j: SSHJob) = js.stdOutErr(j)
+
+    override def usageControl(js: SSHJobService[A]): UsageControl = js.usageControl
+  }
+}
+
+class SSHJobService[S](s: S, services: BatchEnvironment.Services, installation: RuntimeInstallation, env: SSHEnvironment[_], val usageControl: UsageControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], sshEffect: Effect[_root_.gridscale.ssh.SSH], systemEffect: Effect[effectaside.System]) {
 
   def register(serializedJob: SerializedJob) = {
     def buildScript(serializedJob: SerializedJob) = {
@@ -190,7 +219,7 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
         env.openMOLEMemory,
         env.threads,
         serializedJob,
-        env.storageService
+        s
       )
     }
 
@@ -200,63 +229,47 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
       workDirectory = workDirectory
     )
 
-    queuesLock {
-      val job = SSHEnvironment.SSHJob(jobId.getAndIncrement())
-      jobsStates.put(job, SSHEnvironment.Queued(jobDescription))
+    env.queuesLock {
+      val job = SSHEnvironment.SSHJob(env.jobId.getAndIncrement())
+      env.jobsStates.put(job, SSHEnvironment.Queued(jobDescription))
       job
     }
   }
 
   def submit(job: SSHEnvironment.SSHJob, description: gridscale.ssh.SSHJobDescription) =
     try {
-      val id = gridscale.ssh.submit(env, description)
-      queuesLock { jobsStates.put(job, SSHEnvironment.Submitted(id)) }
+      val id = gridscale.ssh.submit(env.sshServer, description)
+      env.queuesLock { env.jobsStates.put(job, SSHEnvironment.Submitted(id)) }
     }
     catch {
       case t: Throwable ⇒
-        queuesLock { jobsStates.put(job, SSHEnvironment.Failed) }
+        env.queuesLock { env.jobsStates.put(job, SSHEnvironment.Failed) }
         throw t
     }
 
-  def state(job: SSHEnvironment.SSHJob) = queuesLock {
-    jobsStates.get(job) match {
+  def state(job: SSHEnvironment.SSHJob) = env.queuesLock {
+    env.jobsStates.get(job) match {
       case None                               ⇒ ExecutionState.DONE
       case Some(state: SSHEnvironment.Queued) ⇒ ExecutionState.SUBMITTED
       case Some(SSHEnvironment.Failed)        ⇒ ExecutionState.FAILED
-      case Some(SSHEnvironment.Submitted(id)) ⇒ GridScaleJobService.translateStatus(gridscale.ssh.state(env, id))
+      case Some(SSHEnvironment.Submitted(id)) ⇒ GridScaleJobService.translateStatus(gridscale.ssh.state(env.sshServer, id))
     }
   }
 
   def delete(job: SSHEnvironment.SSHJob): Unit = {
-    val jobState = queuesLock { jobsStates.remove(job) }
+    val jobState = env.queuesLock { env.jobsStates.remove(job) }
     jobState match {
-      case Some(SSHEnvironment.Submitted(id)) ⇒ gridscale.ssh.clean(env, id)
+      case Some(SSHEnvironment.Submitted(id)) ⇒ gridscale.ssh.clean(env.sshServer, id)
       case _                                  ⇒
     }
   }
 
   def stdOutErr(j: SSHEnvironment.SSHJob) = {
-    val jobState = queuesLock { jobsStates.get(j) }
+    val jobState = env.queuesLock { env.jobsStates.get(j) }
     jobState match {
-      case Some(SSHEnvironment.Submitted(id)) ⇒ (gridscale.ssh.stdOut(env, id), gridscale.ssh.stdErr(env, id))
+      case Some(SSHEnvironment.Submitted(id)) ⇒ (gridscale.ssh.stdOut(env.sshServer, id), gridscale.ssh.stdErr(env.sshServer, id))
       case _                                  ⇒ ("", "")
     }
   }
 
-  def numberOfRunningJobs: Int = {
-    val sshJobIds = env.queuesLock { env.jobsStates.toSeq.collect { case (j, SSHEnvironment.Submitted(id)) ⇒ id } }
-    sshJobIds.toList.map(id ⇒ gridscale.ssh.SSHJobDescription.jobIsRunning(env, id)).count(_ == true)
-  }
-
-  val queuesLock = new ReentrantLock()
-  val jobsStates = collection.mutable.TreeMap[SSHEnvironment.SSHJob, SSHEnvironment.SSHRunState]()(Ordering.by(_.id))
-  val jobId = new AtomicLong()
-
-  type PID = Int
-  val submittedJobs = collection.mutable.Map[SSHEnvironment.SSHJob, PID]()
-
-  lazy val jobService = BatchJobService(env, concurrency = preference(SSHEnvironment.MaxConnections))
-
-  override def submitSerializedJob(serializedJob: SerializedJob) =
-    BatchEnvironment.submitSerializedJob(jobService, serializedJob)
 }

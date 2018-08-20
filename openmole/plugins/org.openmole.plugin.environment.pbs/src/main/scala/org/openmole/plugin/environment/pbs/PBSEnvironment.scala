@@ -27,52 +27,53 @@ import org.openmole.tool.crypto.Cypher
 import squants._
 import squants.information._
 import effectaside._
-import org.openmole.plugin.environment.batch.storage.StorageInterface
-import org.openmole.plugin.environment.gridscale._
+import gridscale.cluster.HeadNode
+import org.openmole.core.preference.Preference
+import org.openmole.plugin.environment.batch.storage.{ HierarchicalStorageInterface, QualityControl, StorageInterface }
+import org.openmole.plugin.environment.gridscale.{ GridScaleJobService, LocalStorage, LogicalLinkStorage }
+import org.openmole.plugin.environment.pbs.PBSEnvironment.Parameters
 import org.openmole.tool.logger.JavaLogger
 
 object PBSEnvironment extends JavaLogger {
 
-    def apply(
-      user:                 OptionalArgument[String] = None,
-      host:                 OptionalArgument[String] = None,
-      port:                 OptionalArgument[Int]         = 22,
-      queue:                OptionalArgument[String]      = None,
-      openMOLEMemory:       OptionalArgument[Information] = None,
-      wallTime:             OptionalArgument[Time]        = None,
-      memory:               OptionalArgument[Information] = None,
-      nodes:                OptionalArgument[Int]         = None,
-      coreByNode:           OptionalArgument[Int]         = None,
-      sharedDirectory:      OptionalArgument[String]      = None,
-      workDirectory:        OptionalArgument[String]      = None,
-      threads:              OptionalArgument[Int]         = None,
-      storageSharedLocally: Boolean                       = false,
-      timeout:              OptionalArgument[Time]        = None,
-      flavour:              gridscale.pbs.PBSFlavour = Torque,
-      name:                 OptionalArgument[String]      = None,
-      localSubmission: Boolean                            = false
-    )(implicit services: BatchEnvironment.Services, authenticationStore: AuthenticationStore, cypher: Cypher, varName: sourcecode.Name) = {
-      import services._
-
+  def apply(
+    user:                 OptionalArgument[String]      = None,
+    host:                 OptionalArgument[String]      = None,
+    port:                 OptionalArgument[Int]         = 22,
+    queue:                OptionalArgument[String]      = None,
+    openMOLEMemory:       OptionalArgument[Information] = None,
+    wallTime:             OptionalArgument[Time]        = None,
+    memory:               OptionalArgument[Information] = None,
+    nodes:                OptionalArgument[Int]         = None,
+    coreByNode:           OptionalArgument[Int]         = None,
+    sharedDirectory:      OptionalArgument[String]      = None,
+    workDirectory:        OptionalArgument[String]      = None,
+    threads:              OptionalArgument[Int]         = None,
+    storageSharedLocally: Boolean                       = false,
+    timeout:              OptionalArgument[Time]        = None,
+    flavour:              gridscale.pbs.PBSFlavour      = Torque,
+    name:                 OptionalArgument[String]      = None,
+    localSubmission:      Boolean                       = false
+  )(implicit services: BatchEnvironment.Services, authenticationStore: AuthenticationStore, cypher: Cypher, varName: sourcecode.Name) = {
+    import services._
 
     import services._
 
     val parameters = Parameters(
-       queue = queue,
-    wallTime = wallTime,
-    openMOLEMemory = openMOLEMemory,
-    memory = memory,
-    nodes = nodes,
-    coreByNode = coreByNode,
-    sharedDirectory = sharedDirectory,
-    workDirectory = workDirectory,
-    threads = threads,
-    storageSharedLocally = storageSharedLocally,
-    flavour = flavour
+      queue = queue,
+      wallTime = wallTime,
+      openMOLEMemory = openMOLEMemory,
+      memory = memory,
+      nodes = nodes,
+      coreByNode = coreByNode,
+      sharedDirectory = sharedDirectory,
+      workDirectory = workDirectory,
+      threads = threads,
+      storageSharedLocally = storageSharedLocally,
+      flavour = flavour
     )
 
-
-    EnvironmentProvider { () =>
+    EnvironmentProvider { () ⇒
       if (!localSubmission) {
         val userValue = user.mustBeDefined("user")
         val hostValue = host.mustBeDefined("host")
@@ -87,24 +88,13 @@ object PBSEnvironment extends JavaLogger {
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue)
         )
-      } else
+      }
+      else
         new PBSLocalEnvironment(
           parameters = parameters,
           name = Some(name.getOrElse(varName.value))
         )
     }
-  }
-
-  implicit def asSSHServer[A: gridscale.ssh.SSHAuthentication]: AsSSHServer[PBSEnvironment[A]] = new AsSSHServer[PBSEnvironment[A]] {
-    override def apply(t: PBSEnvironment[A]) = gridscale.ssh.SSHServer(t.host, t.port, t.timeout)(t.authentication)
-  }
-
-  implicit def isJobService[A]: JobServiceInterface[PBSEnvironment[A]] = new JobServiceInterface[PBSEnvironment[A]] {
-    override type J = gridscale.cluster.BatchScheduler.BatchJob
-    override def submit(env: PBSEnvironment[A], serializedJob: SerializedJob): J = env.submit(serializedJob)
-    override def state(env: PBSEnvironment[A], j: J): ExecutionState.ExecutionState = env.state(j)
-    override def delete(env: PBSEnvironment[A], j: J): Unit = env.delete(j)
-    override def stdOutErr(js: PBSEnvironment[A], j: J) = js.stdOutErr(j)
   }
 
   case class Parameters(
@@ -118,7 +108,7 @@ object PBSEnvironment extends JavaLogger {
     workDirectory:        Option[String],
     threads:              Option[Int],
     storageSharedLocally: Boolean,
-    flavour:              gridscale.pbs.PBSFlavour)
+    flavour:              _root_.gridscale.pbs.PBSFlavour)
 }
 
 class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
@@ -139,7 +129,7 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
   override def start() = BatchEnvironment.start(this)
 
   override def stop() = {
-    def usageControls = List(storageService.usageControl, jobService.usageControl)
+    def usageControls = List(storageService.usageControl, pbsJobService.usageControl)
     try BatchEnvironment.clean(this, usageControls)
     finally sshInterpreter().close
   }
@@ -147,20 +137,25 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
   import env.services.{ threadProvider, preference }
   import org.openmole.plugin.environment.ssh._
 
+  lazy val usageControl = UsageControl(preference(SSHEnvironment.MaxConnections))
+  lazy val qualityControl = QualityControl(preference(BatchEnvironment.QualityHysteresis))
+
+  lazy val sshServer = gridscale.ssh.SSHServer(host, port, timeout)(authentication)
+
   lazy val storageService =
-    sshStorageService(
+    if (parameters.storageSharedLocally) localStorageService(LocalStorage(UsageControl(preference(SSHEnvironment.MaxConnections)), qualityControl), env, parameters.sharedDirectory)
+    else sshStorageService(
       user = user,
       host = host,
       port = port,
-      storage = env,
+      storage = SSHStorageServer(sshServer, usageControl, qualityControl),
       environment = env,
-      concurrency = services.preference(SSHEnvironment.MaxConnections),
       sharedDirectory = parameters.sharedDirectory,
       storageSharedLocally = parameters.storageSharedLocally
     )
 
   override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
-    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())
+    val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage())
     BatchEnvironment.serializeJob(storageService, remoteStorage, batchExecutionJob)
   }
 
@@ -169,16 +164,95 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
     storageService = storageService
   )
 
+  lazy val pbsJobService =
+    if (parameters.storageSharedLocally) new PBSJobService(LocalStorage(usageControl, qualityControl), installRuntime, parameters, sshServer, usageControl)
+    else new PBSJobService(SSHStorageServer(sshServer, usageControl, qualityControl), installRuntime, parameters, sshServer, usageControl)
+
+  override def submitSerializedJob(serializedJob: SerializedJob) =
+    BatchEnvironment.submitSerializedJob(pbsJobService, serializedJob)
+}
+
+class PBSLocalEnvironment(
+  val parameters: PBSEnvironment.Parameters,
+  val name:       Option[String]
+)(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
+
+  import services._
+
+  implicit val localInterpreter = gridscale.local.Local()
+
+  import env.services.{ threadProvider, preference }
+  import org.openmole.plugin.environment.ssh._
+
+  override def start() = BatchEnvironment.start(this)
+
+  override def stop() = {
+    def usageControls = List(storageService.usageControl, pbsJobService.usageControl)
+    BatchEnvironment.clean(this, usageControls)
+  }
+
+  lazy val storage = LocalStorage(UsageControl(preference(SSHEnvironment.MaxLocalOperations)), QualityControl(preference(BatchEnvironment.QualityHysteresis)))
+
+  lazy val usageControl = UsageControl(preference(SSHEnvironment.MaxConnections))
+  lazy val qualityControl = QualityControl(preference(BatchEnvironment.QualityHysteresis))
+
+  lazy val storageService =
+    localStorageService(
+      storage = LocalStorage(usageControl, qualityControl),
+      environment = env,
+      sharedDirectory = parameters.sharedDirectory)
+
+  override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
+    val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage())
+    BatchEnvironment.serializeJob(storageService, remoteStorage, batchExecutionJob)
+  }
+
+  val installRuntime = new RuntimeInstallation(
+    Frontend.local,
+    storageService = storageService
+  )
+
+  import _root_.gridscale.local.LocalHost
+
+  lazy val pbsJobService = new PBSJobService(LocalStorage(usageControl, qualityControl), installRuntime, parameters, LocalHost(), UsageControl(preference(SSHEnvironment.MaxConnections)))
+
+  override def submitSerializedJob(serializedJob: SerializedJob) =
+    BatchEnvironment.submitSerializedJob(pbsJobService, serializedJob)
+
+}
+
+object PBSJobService {
+
+  implicit def isJobService[A, B]: JobServiceInterface[PBSJobService[A, B]] = new JobServiceInterface[PBSJobService[A, B]] {
+    override type J = gridscale.cluster.BatchScheduler.BatchJob
+    override def submit(env: PBSJobService[A, B], serializedJob: SerializedJob): J = env.submit(serializedJob)
+    override def state(env: PBSJobService[A, B], j: J): ExecutionState.ExecutionState = env.state(j)
+    override def delete(env: PBSJobService[A, B], j: J): Unit = env.delete(j)
+    override def stdOutErr(js: PBSJobService[A, B], j: J) = js.stdOutErr(j)
+    override def usageControl(js: PBSJobService[A, B]): UsageControl = js.usageControl
+  }
+
+}
+
+class PBSJobService[S, H](
+  s:                S,
+  installation:     RuntimeInstallation,
+  parameters:       Parameters,
+  h:                H,
+  val usageControl: UsageControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], headNode: HeadNode[H], services: BatchEnvironment.Services) {
+
+  import services._
+  implicit val systemInterpreter = effectaside.System()
+
   def submit(serializedJob: SerializedJob) = {
     def buildScript(serializedJob: SerializedJob) = {
-      import services._
       SharedStorage.buildScript(
-        env.installRuntime.apply,
+        installation.apply,
         parameters.workDirectory,
         parameters.openMOLEMemory,
         parameters.threads,
         serializedJob,
-        env.storageService
+        s
       )
     }
 
@@ -198,127 +272,25 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
     import PBSEnvironment.Log._
 
     log(FINE, s"""Submitting PBS job, PBS script:
-      |${gridscale.pbs.impl.toScript(description)("uniqId")}
-      |bash script:
-      |$remoteScript""".stripMargin)
-    
-    val id = gridscale.pbs.submit[_root_.gridscale.ssh.SSHServer](env, description)
+                 |${gridscale.pbs.impl.toScript(description)("uniqId")}
+                 |bash script:
+                 |$remoteScript""".stripMargin)
+
+    val id = gridscale.pbs.submit(h, description)
 
     log(FINE, s"""Submitted PBS job with PBS script:
-      |uniqId: ${id.uniqId}
-      |job id: ${id.jobId}""".stripMargin)
+                 |uniqId: ${id.uniqId}
+                 |job id: ${id.jobId}""".stripMargin)
 
     id
   }
 
   def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    GridScaleJobService.translateStatus(gridscale.pbs.state[_root_.gridscale.ssh.SSHServer](env, id))
+    GridScaleJobService.translateStatus(gridscale.pbs.state(h, id))
 
   def delete(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    gridscale.pbs.clean[_root_.gridscale.ssh.SSHServer](env, id)
+    gridscale.pbs.clean(h, id)
 
   def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    (gridscale.pbs.stdOut[_root_.gridscale.ssh.SSHServer](env, id), gridscale.pbs.stdErr[_root_.gridscale.ssh.SSHServer](env, id))
-
-  lazy val jobService = BatchJobService(env, concurrency = services.preference(SSHEnvironment.MaxConnections))
-
-  override def submitSerializedJob(serializedJob: SerializedJob) =
-    BatchEnvironment.submitSerializedJob(jobService, serializedJob)
-}
-
-object PBSLocalEnvironment{
-  implicit def isJobService: JobServiceInterface[PBSLocalEnvironment] = new JobServiceInterface[PBSLocalEnvironment] {
-    override type J = gridscale.cluster.BatchScheduler.BatchJob
-    override def submit(env: PBSLocalEnvironment, serializedJob: SerializedJob): J = env.submit(serializedJob)
-    override def state(env: PBSLocalEnvironment, j: J): ExecutionState.ExecutionState = env.state(j)
-    override def delete(env: PBSLocalEnvironment, j: J): Unit = env.delete(j)
-    override def stdOutErr(js: PBSLocalEnvironment, j: J) = js.stdOutErr(j)
-  }
-}
-
-class PBSLocalEnvironment(
-   val parameters: PBSEnvironment.Parameters,
-   val name:       Option[String]
-  )(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
-
-  import services._
-
-  lazy val usageControl = UsageControl(services.preference(SSHEnvironment.MaxLocalOperations))
-  def usageControls = List(storageService.usageControl, jobService.usageControl)
-
-  implicit val localInterpreter = gridscale.local.Local()
-  implicit val systemInterpreter = effectaside.System()
-
-  import env.services.{ threadProvider, preference }
-  import org.openmole.plugin.environment.ssh._
-
-  override def start() = BatchEnvironment.start(this)
-
-  override def stop() = {
-    def usageControls = List(storageService.usageControl, jobService.usageControl)
-    BatchEnvironment.clean(this, usageControls)
-  }
-
-  lazy val storageService =
-    localStorageService(
-      environment = env,
-      concurrency = services.preference(SSHEnvironment.MaxLocalOperations),
-      root = "",
-      sharedDirectory = parameters.sharedDirectory,
-    )
-
-  override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
-    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())
-    BatchEnvironment.serializeJob(storageService, remoteStorage, batchExecutionJob)
-  }
-
-  val installRuntime = new RuntimeInstallation(
-    Frontend.local,
-    storageService = storageService
-  )
-
-  import _root_.gridscale.local.LocalHost
-
-  def submit(serializedJob: SerializedJob) = {
-    def buildScript(serializedJob: SerializedJob) = {
-      import services._
-      SharedStorage.buildScript(
-        env.installRuntime.apply,
-        parameters.workDirectory,
-        parameters.openMOLEMemory,
-        parameters.threads,
-        serializedJob,
-        env.storageService
-      )
-    }
-
-    val (remoteScript, workDirectory) = buildScript(serializedJob)
-    val description = gridscale.pbs.PBSJobDescription(
-      command = s"/bin/bash $remoteScript",
-      workDirectory = workDirectory,
-      queue = parameters.queue,
-      wallTime = parameters.wallTime,
-      memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
-      nodes = parameters.nodes,
-      coreByNode = parameters.coreByNode orElse parameters.threads,
-      flavour = parameters.flavour
-    )
-
-    gridscale.pbs.submit(LocalHost(), description)
-  }
-
-  def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    GridScaleJobService.translateStatus(gridscale.pbs.state(LocalHost(), id))
-
-  def delete(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    gridscale.pbs.clean(LocalHost(), id)
-
-  def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    (gridscale.pbs.stdOut(LocalHost(), id), gridscale.pbs.stdErr(LocalHost(), id))
-
-
-  lazy val jobService = BatchJobService(env, concurrency = services.preference(SSHEnvironment.MaxLocalOperations))
-
-  override def submitSerializedJob(serializedJob: SerializedJob) =
-    BatchEnvironment.submitSerializedJob(jobService, serializedJob)
+    (gridscale.pbs.stdOut(h, id), gridscale.pbs.stdErr(h, id))
 }

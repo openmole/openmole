@@ -18,6 +18,7 @@ package org.openmole.plugin.environment.gridscale
 
 import gridscale.local
 import org.openmole.core.communication.storage._
+import org.openmole.core.workspace.NewFile
 import org.openmole.plugin.environment.batch.storage.StorageInterface
 import org.openmole.tool.file._
 
@@ -25,32 +26,39 @@ object LogicalLinkStorage {
 
   import effectaside._
 
-  implicit def isStorage: StorageInterface[LogicalLinkStorage] = new StorageInterface[LogicalLinkStorage] {
-    implicit def interpreter = _root_.gridscale.local.Local()
+  implicit def interpreter = _root_.gridscale.local.Local()
 
-    override def child(t: LogicalLinkStorage, parent: String, child: String): String = (File(parent) / child).getAbsolutePath
-    override def parent(t: LogicalLinkStorage, path: String): Option[String] = Option(File(path).getParent)
-    override def name(t: LogicalLinkStorage, path: String): String = File(path).getName
-    override def exists(t: LogicalLinkStorage, path: String): Boolean = local.exists(path)
-    override def list(t: LogicalLinkStorage, path: String): Seq[gridscale.ListEntry] = local.list(path)
-    override def makeDir(t: LogicalLinkStorage, path: String): Unit = local.makeDir(path)
-    override def rmDir(t: LogicalLinkStorage, path: String): Unit = local.rmDir(path)
-    override def rmFile(t: LogicalLinkStorage, path: String): Unit = local.rmFile(path)
+  def child(t: LogicalLinkStorage, parent: String, child: String): String = (File(parent) / child).getAbsolutePath
+  def parent(t: LogicalLinkStorage, path: String): Option[String] = Option(File(path).getParent)
+  def name(t: LogicalLinkStorage, path: String): String = File(path).getName
+  def exists(t: LogicalLinkStorage, path: String): Boolean = local.exists(path)
+  def list(t: LogicalLinkStorage, path: String): Seq[gridscale.ListEntry] = local.list(path)
+  def makeDir(t: LogicalLinkStorage, path: String): Unit = local.makeDir(path)
+  def rmDir(t: LogicalLinkStorage, path: String): Unit = local.rmDir(path)
+  def rmFile(t: LogicalLinkStorage, path: String): Unit = local.rmFile(path)
 
-    override def upload(t: LogicalLinkStorage, src: File, dest: String, options: TransferOptions): Unit = {
-      def copy = StorageInterface.upload(false, local.writeFile(_, _))(src, dest, options)
+  def upload(t: LogicalLinkStorage, src: File, dest: String, options: TransferOptions): Unit = {
+    def copy = StorageInterface.upload(false, local.writeFile(_, _))(src, dest, options)
 
-      if (options.canMove) local.mv(src.getPath, dest)
-      else if (options.forceCopy || t.forceCopy) copy
-      else local.link(src.getPath, dest) //new File(dest).createLinkTo(src)
-    }
-    override def download(t: LogicalLinkStorage, src: String, dest: File, options: TransferOptions): Unit = {
-      def copy = StorageInterface.download(false, local.readFile[Unit](_, _))(src, dest, options)
-      if (options.canMove) local.mv(src, dest.getPath)
-      else if (options.forceCopy || t.forceCopy) copy
-      else local.link(src, dest.getPath) //dest.createLinkTo(src)
-    }
+    if (options.canMove) local.mv(src.getPath, dest)
+    else if (options.forceCopy || t.forceCopy) copy
+    else local.link(src.getPath, dest) //new File(dest).createLinkTo(src)
   }
+
+  def download(t: LogicalLinkStorage, src: String, dest: File, options: TransferOptions): Unit = {
+    def copy = StorageInterface.download(false, local.readFile[Unit](_, _))(src, dest, options)
+    if (options.canMove) local.mv(src, dest.getPath)
+    else if (options.forceCopy || t.forceCopy) copy
+    else local.link(src, dest.getPath) //dest.createLinkTo(src)
+  }
+
+  def remote(s: LogicalLinkStorage) =
+    new RemoteStorage {
+      override def upload(src: File, dest: String, options: TransferOptions)(implicit newFile: NewFile): Unit = LogicalLinkStorage.upload(s, src, dest, options)
+      override def download(src: String, dest: File, options: TransferOptions)(implicit newFile: NewFile): Unit = LogicalLinkStorage.download(s, src, dest, options)
+      override def child(parent: String, child: String): String = LogicalLinkStorage.child(s, parent, child)
+    }
+
 }
 
 case class LogicalLinkStorage(forceCopy: Boolean = false)
