@@ -67,8 +67,6 @@ package dsl {
       def yottabyte = n yottabytes
     }
 
-    implicit def stringToTime(s: String): Time = implicitly[FromString[Time]].apply(s)
-    implicit def stringToTimeOptional(s: String): OptionalArgument[Time] = OptionalArgument(stringToTime(s))
     implicit def intToMemory(i: Int): Information = (i megabytes)
     implicit def intToMemoryOptional(i: Int): OptionalArgument[Information] = OptionalArgument(intToMemory(i))
 
