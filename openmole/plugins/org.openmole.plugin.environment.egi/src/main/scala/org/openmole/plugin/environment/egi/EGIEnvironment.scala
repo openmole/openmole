@@ -381,7 +381,9 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
       storageService,
       remoteStorage,
       batchExecutionJob,
-      StorageSpace.createJobDirectory(storageService, storageSpace()), storageSpace().replicaDirectory)
+      StorageSpace.createJobDirectory(storageService, storageSpace()),
+      storageSpace().replicaDirectory,
+      StorageSpace.backgroundRm(storageService, _, true))
 
   }
 

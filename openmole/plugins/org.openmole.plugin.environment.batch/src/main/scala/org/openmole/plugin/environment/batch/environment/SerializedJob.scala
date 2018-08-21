@@ -27,5 +27,5 @@ case class SerializedJob(
   runtime:       Runtime,
   remoteStorage: FileMessage,
   resultPath:    Option[String],
-  var cleaned:   Boolean           = false
+  clean:         String ⇒ Unit
 )

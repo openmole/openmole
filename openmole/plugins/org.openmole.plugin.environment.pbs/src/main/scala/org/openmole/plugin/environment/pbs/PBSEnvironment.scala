@@ -158,8 +158,9 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
     val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage())
 
     storageService match {
-      case Left((space, local)) ⇒ BatchEnvironment.serializeJob(local, remoteStorage, batchExecutionJob, StorageSpace.createJobDirectory(local, space), space.replicaDirectory)
-      case Right((space, ssh))  ⇒ BatchEnvironment.serializeJob(ssh, remoteStorage, batchExecutionJob, StorageSpace.createJobDirectory(ssh, space), space.replicaDirectory)
+      case Left((space, local)) ⇒
+        BatchEnvironment.serializeJob(local, remoteStorage, batchExecutionJob, StorageSpace.createJobDirectory(local, space), space.replicaDirectory, StorageSpace.backgroundRm(local, _, true))
+      case Right((space, ssh)) ⇒ BatchEnvironment.serializeJob(ssh, remoteStorage, batchExecutionJob, StorageSpace.createJobDirectory(ssh, space), space.replicaDirectory, StorageSpace.backgroundRm(ssh, _, true))
     }
   }
 
@@ -203,7 +204,7 @@ class PBSLocalEnvironment(
 
   override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
     val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage())
-    BatchEnvironment.serializeJob(storage, remoteStorage, batchExecutionJob, StorageSpace.createJobDirectory(storage, space), space.replicaDirectory)
+    BatchEnvironment.serializeJob(storage, remoteStorage, batchExecutionJob, StorageSpace.createJobDirectory(storage, space), space.replicaDirectory, StorageSpace.backgroundRm(storage, _, true))
   }
 
   lazy val installRuntime = new RuntimeInstallation(Frontend.local, storage, space.baseDirectory)

@@ -26,6 +26,7 @@ import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.core.communication.storage._
 import org.openmole.core.exception.InternalProcessingError
+import org.openmole.plugin.environment.batch.refresh.{ JobManager, RetryAction }
 import org.openmole.tool.logger.JavaLogger
 import squants.information.Information
 

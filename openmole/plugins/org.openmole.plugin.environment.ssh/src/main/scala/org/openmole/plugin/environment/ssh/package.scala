@@ -95,7 +95,7 @@ package object ssh {
     LocalStorage(accessControl, id, environment, root)
   }
 
-  def localStorageSpace(local: LocalStorage)(implicit preference: Preference, replicaCatalog: ReplicaCatalog, interpreter: Effect[_root_.gridscale.local.Local]) = StorageSpace.hierarchicalStorageSpace(local, local.root, local.id, _ ⇒ false)
+  def localStorageSpace(local: LocalStorage)(implicit services: BatchEnvironment.Services, interpreter: Effect[_root_.gridscale.local.Local]) = StorageSpace.hierarchicalStorageSpace(local, local.root, local.id, _ ⇒ false)
 
   def sshStorage(
     user:                 String,
@@ -111,7 +111,7 @@ package object ssh {
     SSHStorage(sshServer, accessControl, id, environment, root)
   }
 
-  def sshStorageSpace(ssh: SSHStorage)(implicit preference: Preference, replicaCatalog: ReplicaCatalog, interpreter: Effect[_root_.gridscale.ssh.SSH]) = StorageSpace.hierarchicalStorageSpace(ssh, ssh.root, ssh.id, SSHStorage.isConnectionError)
+  def sshStorageSpace(ssh: SSHStorage)(implicit services: BatchEnvironment.Services, interpreter: Effect[_root_.gridscale.ssh.SSH]) = StorageSpace.hierarchicalStorageSpace(ssh, ssh.root, ssh.id, SSHStorage.isConnectionError)
 
   type LocalOrSSH = Either[(Any, LocalStorage), (Any, SSHStorage)]
 

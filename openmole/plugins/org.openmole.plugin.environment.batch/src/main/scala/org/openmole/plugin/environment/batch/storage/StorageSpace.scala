@@ -7,16 +7,19 @@ import java.util.regex.Pattern
 import scala.util._
 import squants.time.TimeConversions._
 import gridscale._
+import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment }
+import org.openmole.plugin.environment.batch.refresh.{ JobManager, RetryAction }
 import org.openmole.tool.cache.Lazy
 import org.openmole.tool.logger.JavaLogger
 
 object StorageSpace extends JavaLogger {
   val TmpDirRemoval = ConfigurationLocation("StorageService", "TmpDirRemoval", Some(30 days))
 
-  def hierarchicalStorageSpace[S](s: S, root: String, storageId: String, isConnectionError: Throwable ⇒ Boolean)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], preference: Preference, replicaCatalog: ReplicaCatalog) = {
+  def hierarchicalStorageSpace[S](s: S, root: String, storageId: String, isConnectionError: Throwable ⇒ Boolean)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], services: BatchEnvironment.Services) = {
     val persistent = "persistent/"
     val tmp = "tmp/"
 
+    import services._
     val baseDirectory = createBasePath(s, root, isConnectionError)
 
     val replicaDirectory = {
@@ -45,9 +48,9 @@ object StorageSpace extends JavaLogger {
     else Try(matcher.group(1).toLong).toOption
   }
 
-  def cleanTmpDirectory[S](s: S, tmpDirectory: String)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], preference: Preference) = {
+  def cleanTmpDirectory[S](s: S, tmpDirectory: String)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], services: BatchEnvironment.Services) = {
     val entries = hierarchicalStorageInterface.list(s, tmpDirectory)
-    val removalDate = System.currentTimeMillis - preference(TmpDirRemoval).toMillis
+    val removalDate = System.currentTimeMillis - services.preference(TmpDirRemoval).toMillis
 
     def remove(name: String) = extractTimeFromName(name).map(_ < removalDate).getOrElse(true)
 
@@ -56,26 +59,26 @@ object StorageSpace extends JavaLogger {
       if remove(entry.name)
     } {
       val path = storageInterface.child(s, tmpDirectory, entry.name)
-      if (entry.`type` == FileType.Directory) storageInterface.rmDir(s, path)
-      else storageInterface.rmFile(s, path)
+      if (entry.`type` == FileType.Directory) backgroundRm(s, path, directory = true)
+      else backgroundRm(s, path, directory = false)
     }
   }
 
-  def cleanReplicaDirectory[S](s: S, persistentPath: String, storageId: String)(implicit replicaCatalog: ReplicaCatalog, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
+  def cleanReplicaDirectory[S](s: S, persistentPath: String, storageId: String)(implicit services: BatchEnvironment.Services, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
     def graceIsOver(name: String) =
       extractTimeFromName(name).map {
-        _ + preference(ReplicaCatalog.ReplicaGraceTime).toMillis < System.currentTimeMillis
+        _ + services.preference(ReplicaCatalog.ReplicaGraceTime).toMillis < System.currentTimeMillis
       }.getOrElse(true)
 
     val names = hierarchicalStorageInterface.list(s, persistentPath).map(_.name)
-    val inReplica = replicaCatalog.forPaths(names.map { storageInterface.child(s, persistentPath, _) }, Seq(storageId)).map(_.path).toSet
+    val inReplica = services.replicaCatalog.forPaths(names.map { storageInterface.child(s, persistentPath, _) }, Seq(storageId)).map(_.path).toSet
 
     for {
       name ← names
       if graceIsOver(name)
     } {
       val path = storageInterface.child(s, persistentPath, name)
-      if (!inReplica.contains(path)) storageInterface.rmFile(s, path)
+      if (!inReplica.contains(path)) backgroundRm(s, path, directory = false)
     }
   }
 
@@ -104,6 +107,11 @@ object StorageSpace extends JavaLogger {
       case util.Failure(e) ⇒
         if (storageInterface.exists(s, basePath)) basePath else throw e
     }
+  }
+
+  def backgroundRm[S](storage: S, path: String, directory: Boolean)(implicit services: BatchEnvironment.Services, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
+    def action = !AccessControl.tryWithPermit(storageInterface.accessControl(storage)) { if (directory) hierarchicalStorageInterface.rmDir(storage, path) else storageInterface.rmFile(storage, path) }.isDefined
+    JobManager ! RetryAction(() ⇒ action)
   }
 
   def createJobDirectory[S](s: S, storageSpace: StorageSpace)(implicit hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = Lazy {

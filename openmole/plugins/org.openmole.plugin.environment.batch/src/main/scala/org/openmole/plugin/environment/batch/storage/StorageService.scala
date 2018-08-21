@@ -41,8 +41,10 @@ object StorageService extends JavaLogger {
 
   def apply[S](s: S)(implicit storageInterface: StorageInterface[S], environmentStorage: EnvironmentStorage[S]) = new StorageService[S](s)
 
-  def backgroundRmFile(storageService: StorageService[_], path: String)(implicit services: BatchEnvironment.Services) = JobManager ! DeleteFile(storageService, path, false)
-  def backgroundRmDir(storageService: StorageService[_], path: String)(implicit services: BatchEnvironment.Services) = JobManager ! DeleteFile(storageService, path, true)
+  def backgroundRmFile(storageService: StorageService[_], path: String)(implicit services: BatchEnvironment.Services) = {
+    def action = !AccessControl.tryWithPermit(storageService.accessControl) { storageService.rmFile(path) }.isDefined
+    JobManager ! RetryAction(() ⇒ action)
+  }
 
 }
 
@@ -56,8 +58,6 @@ class StorageService[S](val storage: S)(implicit storageInterface: StorageInterf
   def environment = environmentStorage.environment(storage)
 
   def exists(path: String): Boolean = storageInterface.exists(storage, path)
-
-  def rmDir(path: String): Unit = storageInterface.rmDir(storage, path)
   def rmFile(path: String): Unit = storageInterface.rmFile(storage, path)
 
   def child(path: String, name: String) = storageInterface.child(storage, path, name)

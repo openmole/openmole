@@ -39,4 +39,4 @@ case class GetResult(job: BatchExecutionJob, serializedJob: SerializedJob, outpu
 case class Manage(job: BatchExecutionJob) extends JobMessage
 case class MoleJobError(moleJob: MoleJob, job: BatchExecutionJob, exception: Throwable) extends JobMessage
 case class CleanSerializedJob(job: SerializedJob) extends JobMessage with DispatchedMessage
-case class DeleteFile(storage: StorageService[_], path: String, directory: Boolean) extends JobMessage with DispatchedMessage
+case class RetryAction(action: () ⇒ Boolean) extends JobMessage with DispatchedMessage

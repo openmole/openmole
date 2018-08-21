@@ -20,22 +20,20 @@ package org.openmole.plugin.environment.batch.refresh
 import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, AccessControl }
 import org.openmole.tool.logger.JavaLogger
 
-object DeleteActor extends JavaLogger {
-  def receive(msg: DeleteFile)(implicit services: BatchEnvironment.Services) = {
+object RetryActionActor extends JavaLogger {
+
+  def receive(msg: RetryAction)(implicit services: BatchEnvironment.Services) = {
     import services._
 
-    val DeleteFile(storage, path, directory) = msg
+    val RetryAction(action) = msg
     try {
-      val permitted =
-        AccessControl.tryWithPermit(storage.accessControl) {
-          if (directory) storage.rmDir(path) else storage.rmFile(path)
-        }
-
-      if (!permitted.isDefined) JobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
+      val retry = action()
+      if (retry) JobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
     }
     catch {
       case t: Throwable ⇒
         Log.logger.log(Log.FINE, "Error when deleting a file", t)
     }
   }
+
 }

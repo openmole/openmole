@@ -21,7 +21,10 @@ import java.io.FileNotFoundException
 import java.util.concurrent.TimeUnit
 
 import gridscale.authentication._
+import org.openmole.core.event.EventDispatcher
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.preference.Preference
+import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.tools.service.Retry.retry
 import org.openmole.core.workflow.execution._
 import org.openmole.plugin.environment.batch.environment._
@@ -48,12 +51,12 @@ object JobManager extends JavaLogger { self ⇒
   object DispatcherActor {
     def receive(dispatched: DispatchedMessage)(implicit services: BatchEnvironment.Services) =
       dispatched match {
-        case msg: Upload             ⇒ UploadActor.receive(msg)
-        case msg: Submit             ⇒ SubmitActor.receive(msg)
-        case msg: Refresh            ⇒ RefreshActor.receive(msg)
-        case msg: GetResult          ⇒ GetResultActor.receive(msg)
+        case msg: Upload             ⇒ if (!msg.job.job.finished) UploadActor.receive(msg) else self ! Kill(msg.job)
+        case msg: Submit             ⇒ if (!msg.job.job.finished) SubmitActor.receive(msg) else self ! Kill(msg.job)
+        case msg: Refresh            ⇒ if (!msg.job.job.finished) RefreshActor.receive(msg) else self ! Kill(msg.job)
+        case msg: GetResult          ⇒ if (!msg.job.job.finished) GetResultActor.receive(msg) else self ! Kill(msg.job)
         case msg: KillBatchJob       ⇒ KillerActor.receive(msg)
-        case msg: DeleteFile         ⇒ DeleteActor.receive(msg)
+        case msg: RetryAction        ⇒ RetryActionActor.receive(msg)
         case msg: CleanSerializedJob ⇒ CleanerActor.receive(msg)
         case msg: Error              ⇒ ErrorActor.receive(msg)
       }
@@ -67,7 +70,7 @@ object JobManager extends JavaLogger { self ⇒
     case msg: Refresh            ⇒ dispatch(msg)
     case msg: GetResult          ⇒ dispatch(msg)
     case msg: KillBatchJob       ⇒ dispatch(msg)
-    case msg: DeleteFile         ⇒ dispatch(msg)
+    case msg: RetryAction        ⇒ dispatch(msg)
     case msg: CleanSerializedJob ⇒ dispatch(msg)
     case msg: Error              ⇒ dispatch(msg)
 
@@ -87,8 +90,7 @@ object JobManager extends JavaLogger { self ⇒
       BatchEnvironment.finishedExecutionJob(job.environment, job)
       killAndClean(job)
 
-      if (!job.job.finished && BatchEnvironment.numberOfExecutionJobs(job.environment, job.job) == 0)
-        job.environment.submit(job.job)
+      if (!job.job.finished && BatchEnvironment.numberOfExecutionJobs(job.environment, job.job) == 0) job.environment.submit(job.job)
 
     case Resubmit(job, storage) ⇒
       killAndClean(job)
@@ -114,8 +116,7 @@ object JobManager extends JavaLogger { self ⇒
     retry(services.preference(BatchEnvironment.killJobRetry))(bj.delete)
 
   def cleanSerializedJob(sj: SerializedJob)(implicit services: BatchEnvironment.Services) = sj.synchronized {
-    retry(services.preference(BatchEnvironment.cleanJobRetry))(sj.storage.rmDir(sj.path))
-    sj.cleaned = true
+    retry(services.preference(BatchEnvironment.cleanJobRetry))(sj.clean(sj.path))
   }
 
 }
