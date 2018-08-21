@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.gridscale
 import java.io.InputStream
 
 import org.openmole.core.communication.storage._
-import org.openmole.plugin.environment.batch.environment.UsageControl
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, UsageControl }
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.file._
 
@@ -29,15 +29,14 @@ object LocalStorage {
   import effectaside._
   import gridscale.local
 
-  implicit def isStorage = new StorageInterface[LocalStorage] with HierarchicalStorageInterface[LocalStorage] {
-    implicit def interpreter = _root_.gridscale.local.Local()
+  def home(implicit interpreter: Effect[local.Local]) = interpreter().home()
+  def child(parent: String, child: String) = (File(parent) / child).getAbsolutePath
 
+  implicit def isStorage(implicit interpreter: Effect[local.Local]) = new StorageInterface[LocalStorage] with HierarchicalStorageInterface[LocalStorage] with EnvironmentStorage[LocalStorage] {
     override def quality(t: LocalStorage): QualityControl = t.qualityControl
     override def usageControl(t: LocalStorage): UsageControl = t.usageControl
 
-    override def home(t: LocalStorage): String = interpreter().home()
-
-    override def child(t: LocalStorage, parent: String, child: String): String = (File(parent) / child).getAbsolutePath
+    override def child(t: LocalStorage, parent: String, child: String): String = LocalStorage.child(parent, child)
     override def parent(t: LocalStorage, path: String): Option[String] = Option(File(path).getParent)
     override def name(t: LocalStorage, path: String): String = File(path).getName
     override def exists(t: LocalStorage, path: String): Boolean = local.exists(path)
@@ -50,9 +49,12 @@ object LocalStorage {
       StorageInterface.upload(false, local.writeFile(_, _))(src, dest, options)
     override def download(t: LocalStorage, src: String, dest: File, options: TransferOptions): Unit =
       StorageInterface.download(false, local.readFile[Unit](_, _))(src, dest, options)
+
+    override def id(s: LocalStorage): String = s.id
+    override def environment(s: LocalStorage): BatchEnvironment = s.environment
   }
 
 }
 
-case class LocalStorage(usageControl: UsageControl, qualityControl: QualityControl)
+case class LocalStorage(usageControl: UsageControl, qualityControl: QualityControl, id: String, environment: BatchEnvironment, root: String)
 

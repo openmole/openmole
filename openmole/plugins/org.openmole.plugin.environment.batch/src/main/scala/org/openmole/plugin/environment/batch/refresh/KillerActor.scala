@@ -27,11 +27,11 @@ object KillerActor extends JavaLogger {
     import services._
 
     val KillBatchJob(bj) = msg
-    try UsageControl.tryWithToken(bj.usageControl) {
-      case Some(t) ⇒ JobManager.killBatchJob(bj, t)
-      case None ⇒
-        JobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
-    } catch {
+    try {
+      val permitted = UsageControl.tryWithPermit(bj.usageControl) { JobManager.killBatchJob(bj) }
+      if (!permitted.isDefined) JobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
+    }
+    catch {
       case e: Throwable ⇒ Log.logger.log(Log.FINE, "Could not kill job.", e)
     }
   }

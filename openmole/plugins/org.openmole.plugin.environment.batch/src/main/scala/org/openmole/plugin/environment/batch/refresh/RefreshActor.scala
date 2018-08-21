@@ -31,12 +31,12 @@ object RefreshActor extends JavaLogger {
 
     val Refresh(job, sj, bj, delay, updateErrorsInARow) = refresh
     if (!job.state.isFinal) {
-      UsageControl.tryWithToken(bj.usageControl) {
-        case Some(t) ⇒
+      val permitted =
+        UsageControl.tryWithPermit(bj.usageControl) {
           try {
             val oldState = job.state
-            job.state = bj.updateState(t)
-            if (job.state == DONE) JobManager ! GetResult(job, sj, bj.resultPath(t))
+            job.state = bj.updateState()
+            if (job.state == DONE) JobManager ! GetResult(job, sj, bj.resultPath())
             else if (!job.state.isFinal) {
               val newDelay =
                 if (oldState == job.state)
@@ -46,7 +46,7 @@ object RefreshActor extends JavaLogger {
             }
             else if (job.state == FAILED) {
               val exception = new InternalProcessingError(s"""Job status is FAILED""".stripMargin)
-              val stdOutErr = BatchJobService.tryStdOutErr(bj, t).toOption
+              val stdOutErr = BatchJobService.tryStdOutErr(bj).toOption
               JobManager ! Error(job, exception, stdOutErr)
               JobManager ! Kill(job)
             }
@@ -57,7 +57,7 @@ object RefreshActor extends JavaLogger {
               JobManager ! Resubmit(job, sj.storage)
             case e: Throwable ⇒
               if (updateErrorsInARow >= preference(BatchEnvironment.MaxUpdateErrorsInARow)) {
-                JobManager ! Error(job, e, BatchJobService.tryStdOutErr(bj, t).toOption)
+                JobManager ! Error(job, e, BatchJobService.tryStdOutErr(bj).toOption)
                 JobManager ! Kill(job)
               }
               else {
@@ -65,8 +65,9 @@ object RefreshActor extends JavaLogger {
                 JobManager ! Delay(Refresh(job, sj, bj, delay, updateErrorsInARow + 1), delay)
               }
           }
-        case None ⇒ JobManager ! Delay(Refresh(job, sj, bj, delay, updateErrorsInARow), BatchEnvironment.getTokenInterval)
-      }
+        }
+
+      if (!permitted.isDefined) JobManager ! Delay(Refresh(job, sj, bj, delay, updateErrorsInARow), BatchEnvironment.getTokenInterval)
     }
   }
 }

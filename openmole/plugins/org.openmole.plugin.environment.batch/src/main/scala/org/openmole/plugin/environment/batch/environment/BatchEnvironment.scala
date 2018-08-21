@@ -157,10 +157,8 @@ object BatchEnvironment extends JavaLogger {
     implicit val fileServiceCache:  FileServiceCache
   )
 
-  def serializeJob(storageService: StorageService[_], remoteStorage: RemoteStorage, job: BatchExecutionJob)(implicit services: BatchEnvironment.Services) =
-    UsageControl.mapToken(storageService.usageControl) { implicit token ⇒
-      initCommunication(job, storageService, remoteStorage)
-    }
+  def serializeJob(storageService: StorageService[_], remoteStorage: RemoteStorage, job: BatchExecutionJob, tmpDirectory: String, replicaDirectory: String)(implicit services: BatchEnvironment.Services) =
+    UsageControl.tryWithPermit(storageService.usageControl) { initCommunication(job, storageService, remoteStorage, tmpDirectory, replicaDirectory) }
 
   def jobFiles(job: BatchExecutionJob) =
     job.pluginsAndFiles.files.toVector ++
@@ -168,7 +166,7 @@ object BatchEnvironment extends JavaLogger {
       job.environment.plugins ++
       Seq(job.environment.jvmLinuxX64, job.environment.runtime)
 
-  def initCommunication(job: BatchExecutionJob, storage: StorageService[_], remoteStorage: RemoteStorage)(implicit token: AccessToken, services: BatchEnvironment.Services): SerializedJob = services.newFile.withTmpFile("job", ".tar") { jobFile ⇒
+  def initCommunication(job: BatchExecutionJob, storage: StorageService[_], remoteStorage: RemoteStorage, tmpDirectory: String, replicaDirectory: String)(implicit services: BatchEnvironment.Services): SerializedJob = services.newFile.withTmpFile("job", ".tar") { jobFile ⇒
     import services._
 
     serializerService.serialise(job.runnableTasks, jobFile)
@@ -176,13 +174,13 @@ object BatchEnvironment extends JavaLogger {
     val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins
     val files = (new TreeSet[File]()(fileOrdering) ++ job.files) diff plugins
 
-    val communicationPath = storage.child(storage.tmpDirectory(token), StorageSpace.timedUniqName)
+    val communicationPath = storage.child(tmpDirectory, StorageSpace.timedUniqName)
     storage.makeDir(communicationPath)
 
     val inputPath = storage.child(communicationPath, uniqName("job", ".in"))
     val outputPath = storage.child(communicationPath, uniqName("job", ".out"))
 
-    val runtime = replicateTheRuntime(job.job, job.environment, storage)
+    val runtime = replicateTheRuntime(job.job, job.environment, storage, replicaDirectory)
 
     val executionMessage = createExecutionMessage(
       job.job,
@@ -190,7 +188,8 @@ object BatchEnvironment extends JavaLogger {
       files,
       plugins,
       storage,
-      communicationPath
+      communicationPath,
+      replicaDirectory
     )
 
     /* ---- upload the execution message ----*/
@@ -213,7 +212,7 @@ object BatchEnvironment extends JavaLogger {
     SerializedJob(storage, communicationPath, inputPath, runtime, serializedStorage, Some(outputPath))
   }
 
-  def toReplicatedFile(file: File, storage: StorageService[_], transferOptions: TransferOptions)(implicit token: AccessToken, services: BatchEnvironment.Services): ReplicatedFile = {
+  def toReplicatedFile(file: File, storage: StorageService[_], replicaDirectory: String, transferOptions: TransferOptions)(implicit services: BatchEnvironment.Services): ReplicatedFile = {
     import services._
 
     if (!file.exists) throw new UserBadDataError(s"File $file is required but doesn't exist.")
@@ -230,7 +229,7 @@ object BatchEnvironment extends JavaLogger {
 
     def upload = {
       val name = StorageSpace.timedUniqName
-      val newFile = storage.child(storage.replicaDirectory(token), name)
+      val newFile = storage.child(replicaDirectory, name)
       signalUpload(eventDispatcher.eventId, storage.upload(toReplicate, newFile, options), toReplicate, newFile, storage)
       newFile
     }
@@ -240,13 +239,14 @@ object BatchEnvironment extends JavaLogger {
   }
 
   def replicateTheRuntime(
-    job:         Job,
-    environment: BatchEnvironment,
-    storage:     StorageService[_]
-  )(implicit token: AccessToken, services: BatchEnvironment.Services) = {
-    val environmentPluginPath = shuffled(environment.plugins)(services.randomProvider()).map { p ⇒ toReplicatedFile(p, storage, TransferOptions(raw = true)) }.map { FileMessage(_) }
-    val runtimeFileMessage = FileMessage(toReplicatedFile(environment.runtime, storage, TransferOptions(raw = true)))
-    val jvmLinuxX64FileMessage = FileMessage(toReplicatedFile(environment.jvmLinuxX64, storage, TransferOptions(raw = true)))
+    job:              Job,
+    environment:      BatchEnvironment,
+    storage:          StorageService[_],
+    replicaDirectory: String
+  )(implicit services: BatchEnvironment.Services) = {
+    val environmentPluginPath = shuffled(environment.plugins)(services.randomProvider()).map { p ⇒ toReplicatedFile(p, storage, replicaDirectory, TransferOptions(raw = true)) }.map { FileMessage(_) }
+    val runtimeFileMessage = FileMessage(toReplicatedFile(environment.runtime, storage, replicaDirectory, TransferOptions(raw = true)))
+    val jvmLinuxX64FileMessage = FileMessage(toReplicatedFile(environment.jvmLinuxX64, storage, replicaDirectory, TransferOptions(raw = true)))
 
     Runtime(
       runtimeFileMessage,
@@ -261,11 +261,12 @@ object BatchEnvironment extends JavaLogger {
     serializationFile:   Iterable[File],
     serializationPlugin: Iterable[File],
     storage:             StorageService[_],
-    path:                String
-  )(implicit token: AccessToken, services: BatchEnvironment.Services): ExecutionMessage = {
+    path:                String,
+    replicaDirectory:    String
+  )(implicit services: BatchEnvironment.Services): ExecutionMessage = {
 
-    val pluginReplicas = shuffled(serializationPlugin)(services.randomProvider()).map { toReplicatedFile(_, storage, TransferOptions(raw = true)) }
-    val files = shuffled(serializationFile)(services.randomProvider()).map { toReplicatedFile(_, storage, TransferOptions()) }
+    val pluginReplicas = shuffled(serializationPlugin)(services.randomProvider()).map { toReplicatedFile(_, storage, replicaDirectory, TransferOptions(raw = true)) }
+    val files = shuffled(serializationFile)(services.randomProvider()).map { toReplicatedFile(_, storage, replicaDirectory, TransferOptions()) }
 
     ExecutionMessage(
       pluginReplicas,
@@ -276,11 +277,11 @@ object BatchEnvironment extends JavaLogger {
     )
   }
 
-  def resultPathInSerializedJob(serializedJob: SerializedJob, accessToken: AccessToken) = serializedJob.resultPath.get
+  def resultPathInSerializedJob(serializedJob: SerializedJob) = serializedJob.resultPath.get
 
-  def submitSerializedJob[S](jobService: S, serializedJob: SerializedJob, resultPath: (SerializedJob, AccessToken) ⇒ String = resultPathInSerializedJob)(implicit jobServiceInterface: JobServiceInterface[S]) =
-    UsageControl.mapToken(jobServiceInterface.usageControl(jobService)) { implicit token ⇒
-      BatchJobService.submit(jobService, serializedJob, resultPath(serializedJob, _))
+  def submitSerializedJob[S](jobService: S, serializedJob: SerializedJob, resultPath: SerializedJob ⇒ String = resultPathInSerializedJob)(implicit jobServiceInterface: JobServiceInterface[S]) =
+    UsageControl.tryWithPermit(jobServiceInterface.usageControl(jobService)) {
+      BatchJobService.submit(jobService, serializedJob, () ⇒ resultPath(serializedJob))
     }
 
   def start(environment: BatchEnvironment) = {}
@@ -295,8 +296,8 @@ object BatchEnvironment extends JavaLogger {
 
     def kill(job: BatchExecutionJob) = {
       job.state = ExecutionState.KILLED
-      job.batchJob.foreach { bj ⇒ UsageControl.withToken(bj.usageControl)(token ⇒ util.Try(JobManager.killBatchJob(bj, token))) }
-      job.serializedJob.foreach { sj ⇒ UsageControl.withToken(sj.storage.usageControl)(token ⇒ util.Try(JobManager.cleanSerializedJob(sj, token))) }
+      job.batchJob.foreach { bj ⇒ UsageControl.withPermit(bj.usageControl) { util.Try(JobManager.killBatchJob(bj)) } }
+      job.serializedJob.foreach { sj ⇒ UsageControl.withPermit(sj.storage.usageControl) { util.Try(JobManager.cleanSerializedJob(sj)) } }
     }
 
     val futures = environmentJobs.map { j ⇒ services.threadProvider.submit(JobManager.killPriority)(() ⇒ kill(j)) }

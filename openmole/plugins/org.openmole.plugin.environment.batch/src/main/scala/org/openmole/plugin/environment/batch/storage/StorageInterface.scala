@@ -22,7 +22,7 @@ import java.nio.file.Files
 import gridscale._
 import org.openmole.core.communication.storage._
 import org.openmole.core.workspace._
-import org.openmole.plugin.environment.batch.environment.UsageControl
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, UsageControl }
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 
@@ -81,5 +81,9 @@ trait StorageInterface[T] {
 }
 
 trait HierarchicalStorageInterface[T] {
-  def home(t: T): String
+}
+
+trait EnvironmentStorage[S] {
+  def id(s: S): String
+  def environment(s: S): BatchEnvironment
 }

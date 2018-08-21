@@ -25,11 +25,13 @@ object DeleteActor extends JavaLogger {
     import services._
 
     val DeleteFile(storage, path, directory) = msg
-    try UsageControl.tryWithToken(storage.usageControl) {
-      case Some(t) ⇒
-        if (directory) storage.rmDir(path)(t) else storage.rmFile(path)(t)
-      case None ⇒
-        JobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
+    try {
+      val permitted =
+        UsageControl.tryWithPermit(storage.usageControl) {
+          if (directory) storage.rmDir(path) else storage.rmFile(path)
+        }
+
+      if (!permitted.isDefined) JobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
     }
     catch {
       case t: Throwable ⇒

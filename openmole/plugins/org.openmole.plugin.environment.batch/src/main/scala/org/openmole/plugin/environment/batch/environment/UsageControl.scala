@@ -1,76 +1,82 @@
 package org.openmole.plugin.environment.batch.environment
 
-import org.openmole.core.exception._
-import scala.concurrent.stm._
-
-case class AccessToken() {
-  def access[T](op: ⇒ T): T = synchronized(op)
-}
+import java.util.concurrent.Semaphore
 
 object UsageControl {
 
-  def faucetToken = AccessToken()
-
-  def mapToken[B](usageControl: UsageControl)(f: AccessToken ⇒ B) = {
-    val t = tryGetToken(usageControl)
-    try t.map(f)
-    finally t.foreach(releaseToken(usageControl, _))
+  def tryWithPermit[B](usageControl: UsageControl)(f: ⇒ B) = {
+    val t = tryAquirePermit(usageControl)
+    if (t) try Some(f) finally releasePermit(usageControl)
+    else None
   }
 
-  def tryWithToken[B](usageControl: UsageControl)(f: Option[AccessToken] ⇒ B) = {
-    val t = tryGetToken(usageControl)
-    try f(t)
-    finally t.foreach(releaseToken(usageControl, _))
+  def withPermit[B](usageControl: UsageControl)(f: ⇒ B) = {
+    aquirePermit(usageControl)
+    try f
+    finally releasePermit(usageControl)
   }
 
-  def withToken[B](usageControl: UsageControl)(f: AccessToken ⇒ B) = {
-    val t = getToken(usageControl)
-    try f(t)
-    finally releaseToken(usageControl, t)
-  }
-
-  private def releaseToken(usageControl: UsageControl, token: AccessToken) = atomic { implicit txn ⇒
-    usageControl.usedToken -= token
-    usageControl.tokens() = token :: usageControl.tokens()
-  }
-
-  private def tryGetToken(usageControl: UsageControl): Option[AccessToken] = atomic { implicit txn ⇒
-    if (usageControl.stopped()) None
-    else
-      usageControl.tokens() match {
-        case h :: t ⇒
-          usageControl.tokens() = t
-          usageControl.usedToken += h
-          Some(h)
-        case Nil ⇒ None
-      }
-  }
-
-  private def getToken(usageControl: UsageControl) = atomic { implicit txn ⇒
-    if (usageControl.stopped()) throw new InternalProcessingError("Service has been stopped")
-    tryGetToken(usageControl) match {
-      case Some(t) ⇒ t
-      case None    ⇒ retry
+  private def tryAquirePermit(usageControl: UsageControl) = {
+    val aq = usageControl.semaphore.tryAcquire()
+    if (aq) {
+      usageControl.all.acquire()
+      permit(usageControl, Thread.currentThread())
     }
+    aq
   }
+
+  private def aquirePermit(usageControl: UsageControl) =
+    if (!isPermitted(usageControl, Thread.currentThread())) {
+      usageControl.semaphore.acquire()
+      usageControl.all.acquire()
+      permit(usageControl, Thread.currentThread())
+    }
+
+  private def releasePermit(usageControl: UsageControl) = {
+    revokePermit(usageControl, Thread.currentThread())
+    usageControl.semaphore.release()
+    usageControl.all.release()
+  }
+
+  private def isPermitted(usageControl: UsageControl, thread: Thread) = usageControl.permittedThreads.synchronized(usageControl.permittedThreads.contains(thread.getId))
+  private def permit(usageControl: UsageControl, thread: Thread) = usageControl.permittedThreads.synchronized(usageControl.permittedThreads.add(thread.getId))
+  private def revokePermit(usageControl: UsageControl, thread: Thread) = usageControl.permittedThreads.synchronized(usageControl.permittedThreads.remove(thread.getId))
 
   def freeze(usageControl: UsageControl) = {
-    usageControl.stopped.single() = true
+    usageControl.semaphore.setMaxPermits(0)
   }
 
   def unfreeze(usageControl: UsageControl) = {
-    usageControl.stopped.single() = false
+    usageControl.semaphore.setMaxPermits(usageControl.nbTokens)
   }
 
-  def waitUnused(usageControl: UsageControl) = atomic {
-    implicit txn ⇒ if (!usageControl.usedToken.isEmpty) retry
+  def waitUnused(usageControl: UsageControl) = {
+    usageControl.all.acquire(usageControl.nbTokens)
+    usageControl.all.release(usageControl.nbTokens)
   }
 
 }
 
 case class UsageControl(nbTokens: Int) { la ⇒
-  private lazy val tokens = Ref(List.fill(nbTokens)(AccessToken()))
-  private lazy val usedToken = TSet[AccessToken]()
-  private lazy val stopped = Ref(false)
+  lazy val permittedThreads = collection.mutable.Set[Long]()
+  lazy val semaphore = new AdjustableSemaphore(nbTokens)
+  lazy val all = new Semaphore(nbTokens)
 }
 
+import java.util.concurrent.Semaphore
+
+final class AdjustableSemaphore(var maxPermits: Int) extends Semaphore(maxPermits) {
+
+  def setMaxPermits(newMax: Int): Unit = synchronized {
+    if (newMax < 0) throw new IllegalArgumentException("Semaphore size must be at least 0," + " was " + newMax)
+
+    val delta = newMax - maxPermits
+
+    if (delta == 0) return
+    else if (delta > 0) release(delta)
+    else reducePermits(-delta)
+
+    maxPermits = newMax
+  }
+
+}

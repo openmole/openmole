@@ -59,7 +59,7 @@ object JobManager extends JavaLogger { self ⇒
       }
   }
 
-  def dispatch(msg: DispatchedMessage)(implicit services: BatchEnvironment.Services) = services.threadProvider.submit(messagePriority(msg))(() ⇒ DispatcherActor.receive(msg))
+  def dispatch(msg: DispatchedMessage)(implicit services: BatchEnvironment.Services) = services.threadProvider.submit(messagePriority(msg)) { () ⇒ DispatcherActor.receive(msg) }
 
   def !(msg: JobMessage)(implicit services: BatchEnvironment.Services): Unit = msg match {
     case msg: Upload             ⇒ dispatch(msg)
@@ -110,11 +110,11 @@ object JobManager extends JavaLogger { self ⇒
     job.serializedJob = None
   }
 
-  def killBatchJob(bj: BatchJobControl, t: AccessToken)(implicit services: BatchEnvironment.Services) =
-    retry(services.preference(BatchEnvironment.killJobRetry))(bj.delete(t))
+  def killBatchJob(bj: BatchJobControl)(implicit services: BatchEnvironment.Services) =
+    retry(services.preference(BatchEnvironment.killJobRetry))(bj.delete)
 
-  def cleanSerializedJob(sj: SerializedJob, t: AccessToken)(implicit services: BatchEnvironment.Services) = sj.synchronized {
-    retry(services.preference(BatchEnvironment.cleanJobRetry))(sj.storage.rmDir(sj.path)(t))
+  def cleanSerializedJob(sj: SerializedJob)(implicit services: BatchEnvironment.Services) = sj.synchronized {
+    retry(services.preference(BatchEnvironment.cleanJobRetry))(sj.storage.rmDir(sj.path))
     sj.cleaned = true
   }
 

@@ -48,26 +48,26 @@ object GetResultActor extends JavaLogger {
     import services._
 
     val GetResult(job, sj, resultPath) = msg
-    UsageControl.tryWithToken(sj.storage.usageControl) {
-      case Some(token) ⇒
+    val permitted =
+      UsageControl.tryWithPermit(sj.storage.usageControl) {
         try {
-          getResult(sj.storage, resultPath, job)(token, services)
+          getResult(sj.storage, resultPath, job)
           if (job.job.finished) BatchEnvironment.finishedJob(job.environment, job.job)
           JobManager ! Kill(job)
         }
         catch {
           case e: Throwable ⇒
             job.state = ExecutionState.FAILED
-            val stdOutErr = job.batchJob.flatMap(bj ⇒ BatchJobService.tryStdOutErr(bj, token).toOption)
+            val stdOutErr = job.batchJob.flatMap(bj ⇒ BatchJobService.tryStdOutErr(bj).toOption)
             JobManager ! Error(job, e, stdOutErr)
             JobManager ! Kill(job)
         }
-      case None ⇒
-        JobManager ! Delay(msg, getTokenInterval)
-    }
+      }
+
+    if (!permitted.isDefined) JobManager ! Delay(msg, getTokenInterval)
   }
 
-  def getResult(storage: StorageService[_], outputFilePath: String, batchJob: BatchExecutionJob)(implicit token: AccessToken, services: BatchEnvironment.Services): Unit = {
+  def getResult(storage: StorageService[_], outputFilePath: String, batchJob: BatchExecutionJob)(implicit services: BatchEnvironment.Services): Unit = {
     import batchJob.job
     import services._
 
@@ -96,7 +96,7 @@ object GetResultActor extends JavaLogger {
     }
   }
 
-  private def getRuntimeResult(outputFilePath: String, storage: StorageService[_])(implicit token: AccessToken, services: BatchEnvironment.Services): RuntimeResult = {
+  private def getRuntimeResult(outputFilePath: String, storage: StorageService[_])(implicit services: BatchEnvironment.Services): RuntimeResult = {
     import services._
     retry(preference(BatchEnvironment.downloadResultRetry)) {
       newFile.withTmpFile { resultFile ⇒
@@ -108,14 +108,14 @@ object GetResultActor extends JavaLogger {
     }
   }
 
-  private def display(output: Option[File], description: String, storage: StorageService[_], stream: PrintStream)(implicit token: AccessToken) = {
+  private def display(output: Option[File], description: String, storage: StorageService[_], stream: PrintStream) = {
     output.foreach { file ⇒
       execution.display(stream, description, file.content)
       file.delete()
     }
   }
 
-  private def getContextResults(serializedResults: SerializedContextResults, storage: StorageService[_])(implicit token: AccessToken, services: BatchEnvironment.Services): ContextResults = {
+  private def getContextResults(serializedResults: SerializedContextResults, storage: StorageService[_])(implicit services: BatchEnvironment.Services): ContextResults = {
     import services._
     serializedResults match {
       case serializedResults: IndividualFilesContextResults ⇒

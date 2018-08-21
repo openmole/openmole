@@ -38,13 +38,13 @@ trait JobServiceInterface[JS] {
 
 object BatchJobService extends JavaLogger {
 
-  def tryStdOutErr(batchJob: BatchJobControl, token: AccessToken) = util.Try(batchJob.stdOutErr(token))
+  def tryStdOutErr(batchJob: BatchJobControl) = util.Try(batchJob.stdOutErr())
 
-  def submit[JS](jobService: JS, serializedJob: SerializedJob, resultPath: AccessToken ⇒ String)(implicit token: AccessToken, jobServiceInterface: JobServiceInterface[JS]): BatchJobControl = token.access {
+  def submit[JS](jobService: JS, serializedJob: SerializedJob, resultPath: () ⇒ String)(implicit jobServiceInterface: JobServiceInterface[JS]): BatchJobControl = {
 
-    def updateState(job: jobServiceInterface.J)(token: AccessToken): ExecutionState = token.access { jobServiceInterface.state(jobService, job) }
-    def delete(job: jobServiceInterface.J)(token: AccessToken) = token.access { jobServiceInterface.delete(jobService, job) }
-    def stdOutErr(job: jobServiceInterface.J)(token: AccessToken) = token.access { jobServiceInterface.stdOutErr(jobService, job) }
+    def updateState(job: jobServiceInterface.J)(): ExecutionState = jobServiceInterface.state(jobService, job)
+    def delete(job: jobServiceInterface.J)() = jobServiceInterface.delete(jobService, job)
+    def stdOutErr(job: jobServiceInterface.J)() = jobServiceInterface.stdOutErr(jobService, job)
 
     val job = jobServiceInterface.submit(jobService, serializedJob)
     BatchJobService.Log.logger.fine(s"Successful submission: ${job}")
@@ -63,10 +63,10 @@ object BatchJobService extends JavaLogger {
 object BatchJobControl {
 
   def apply(
-    updateState:  AccessToken ⇒ ExecutionState,
-    delete:       AccessToken ⇒ Unit,
-    stdOutErr:    AccessToken ⇒ (String, String),
-    resultPath:   AccessToken ⇒ String,
+    updateState:  () ⇒ ExecutionState,
+    delete:       () ⇒ Unit,
+    stdOutErr:    () ⇒ (String, String),
+    resultPath:   () ⇒ String,
     usageControl: UsageControl): BatchJobControl = new BatchJobControl(
     updateState,
     delete,
@@ -77,8 +77,8 @@ object BatchJobControl {
 }
 
 class BatchJobControl(
-  val updateState:  AccessToken ⇒ ExecutionState,
-  val delete:       AccessToken ⇒ Unit,
-  val stdOutErr:    AccessToken ⇒ (String, String),
-  val resultPath:   AccessToken ⇒ String,
+  val updateState:  () ⇒ ExecutionState,
+  val delete:       () ⇒ Unit,
+  val stdOutErr:    () ⇒ (String, String),
+  val resultPath:   () ⇒ String,
   val usageControl: UsageControl)

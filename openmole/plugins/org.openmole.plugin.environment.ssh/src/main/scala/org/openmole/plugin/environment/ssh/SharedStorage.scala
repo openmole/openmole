@@ -31,17 +31,17 @@ import squants.information.Information
 
 object SharedStorage extends JavaLogger {
 
-  def installRuntime(runtime: Runtime, sharedFS: StorageService[_], frontend: Frontend)(implicit preference: Preference, newFile: NewFile) =
-    UsageControl.withToken(sharedFS.usageControl) { implicit token ⇒
+  def installRuntime[S](runtime: Runtime, storage: S, frontend: Frontend, baseDirectory: String)(implicit preference: Preference, newFile: NewFile, storageInterface: StorageInterface[S]) =
+    UsageControl.withPermit(storageInterface.usageControl(storage)) {
       val runtimePrefix = "runtime"
       val runtimeInstall = runtimePrefix + runtime.runtime.hash
 
       val (workdir, scriptName) = {
-        val installDir = sharedFS.child(sharedFS.baseDirectory(token), "install")
-        util.Try(sharedFS.makeDir(installDir))
+        val installDir = storageInterface.child(storage, baseDirectory, "install")
+        util.Try(storageInterface.makeDir(storage, installDir))
 
-        val workdir = sharedFS.child(installDir, preference(Preference.uniqueID) + "_install")
-        if (!sharedFS.exists(workdir)) sharedFS.makeDir(workdir)
+        val workdir = storageInterface.child(storage, installDir, preference(Preference.uniqueID) + "_install")
+        if (!storageInterface.exists(storage, workdir)) storageInterface.makeDir(storage, workdir)
 
         newFile.withTmpFile("install", ".sh") { script ⇒
 
@@ -64,8 +64,8 @@ object SharedStorage extends JavaLogger {
 
           script.content = content
 
-          val remoteScript = sharedFS.child(workdir, scriptName)
-          sharedFS.upload(script, remoteScript, options = TransferOptions(raw = true, forceCopy = true, canMove = true))
+          val remoteScript = storageInterface.child(storage, workdir, scriptName)
+          storageInterface.upload(storage, script, remoteScript, options = TransferOptions(raw = true, forceCopy = true, canMove = true))
           (workdir, scriptName)
         }
       }
@@ -84,7 +84,7 @@ object SharedStorage extends JavaLogger {
           }
       }
 
-      val path = sharedFS.child(workdir, runtimeInstall)
+      val path = storageInterface.child(storage, workdir, runtimeInstall)
 
       //installJobService.execute(jobDescription)
       Log.logger.fine("End install")
@@ -118,7 +118,7 @@ object SharedStorage extends JavaLogger {
         script.content = content
 
         val remoteScript = storageInterface.child(storage, serializedJob.path, uniqName("run", ".sh"))
-        UsageControl.withToken(storageInterface.usageControl(storage)) { _ ⇒ storageInterface.upload(storage, script, remoteScript, options = TransferOptions(raw = true, forceCopy = true, canMove = true)) }
+        UsageControl.withPermit(storageInterface.usageControl(storage)) { storageInterface.upload(storage, script, remoteScript, options = TransferOptions(raw = true, forceCopy = true, canMove = true)) }
         remoteScript
       }
     (remoteScript, baseWorkDirectory)

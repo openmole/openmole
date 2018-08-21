@@ -19,6 +19,7 @@ package org.openmole.plugin.environment.egi
 
 import java.io.File
 
+import org.bouncycastle.voms.VOMSAttribute
 import org.openmole.core.authentication.AuthenticationStore
 import org.openmole.core.communication.storage
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
@@ -28,8 +29,7 @@ import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.jobservice.{ BatchJobService, JobServiceInterface }
 import org.openmole.plugin.environment.batch.refresh.JobManager
-import org.openmole.plugin.environment.batch.storage.{ QualityControl, StorageInterface, StorageService, StorageSpace }
-import org.openmole.plugin.environment.egi.EGIEnvironment.WebDavLocation
+import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.crypto.Cypher
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job.Job
@@ -121,7 +121,35 @@ object EGIEnvironment extends JavaLogger {
   def defaultBDIIs(implicit preference: Preference) =
     preference(EGIEnvironment.DefaultBDIIs).map(b ⇒ new java.net.URI(b)).map(toBDII)
 
-  case class WebDavLocation(url: String, usageControl: UsageControl, qualityControl: QualityControl)
+  implicit def webdavlocationIsStorage(implicit httpEffect: Effect[_root_.gridscale.http.HTTP]) = new StorageInterface[WebDavStorage] with EnvironmentStorage[WebDavStorage] {
+    def webdavServer(location: WebDavStorage) = gridscale.webdav.WebDAVSServer(location.url, location.proxyCache().factory)
+
+    override def quality(t: WebDavStorage): QualityControl = t.qualityControl
+    override def usageControl(t: WebDavStorage): UsageControl = t.usageControl
+
+    override def child(t: WebDavStorage, parent: String, child: String): String = gridscale.RemotePath.child(parent, child)
+    override def parent(t: WebDavStorage, path: String): Option[String] = gridscale.RemotePath.parent(path)
+    override def name(t: WebDavStorage, path: String): String = gridscale.RemotePath.name(path)
+
+    override def exists(t: WebDavStorage, path: String): Boolean = gridscale.webdav.exists(webdavServer(t), path)
+    override def list(t: WebDavStorage, path: String): Seq[gridscale.ListEntry] = gridscale.webdav.list(webdavServer(t), path)
+    override def makeDir(t: WebDavStorage, path: String): Unit = gridscale.webdav.mkDirectory(webdavServer(t), path)
+    override def rmDir(t: WebDavStorage, path: String): Unit = gridscale.webdav.rmDirectory(webdavServer(t), path)
+    override def rmFile(t: WebDavStorage, path: String): Unit = gridscale.webdav.rmFile(webdavServer(t), path)
+
+    override def upload(t: WebDavStorage, src: File, dest: String, options: storage.TransferOptions): Unit = {
+      StorageInterface.upload(true, gridscale.webdav.writeStream(webdavServer(t), _, _))(src, dest, options)
+      //if (!exists(t, dest)) throw new InternalProcessingError(s"File $src has been successfully uploaded to $dest on $t but does not exist.")
+    }
+
+    override def download(t: WebDavStorage, src: String, dest: File, options: storage.TransferOptions): Unit =
+      StorageInterface.download(true, gridscale.webdav.readStream[Unit](webdavServer(t), _, _))(src, dest, options)
+
+    override def id(s: WebDavStorage): String = s.url
+    override def environment(s: WebDavStorage): BatchEnvironment = s.environment
+  }
+
+  case class WebDavStorage(url: String, usageControl: UsageControl, qualityControl: QualityControl, proxyCache: TimeCache[VOMS.VOMSCredential], environment: EGIEnvironment[_])
 
   def stdOutFileName = "output"
   def stdErrFileName = "error"
@@ -232,6 +260,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   val authentication: A
 )(implicit val services: BatchEnvironment.Services, workspace: Workspace) extends BatchEnvironment { env ⇒
 
+  import EGIEnvironment._
   import services._
 
   implicit val interpreters = EGI()
@@ -257,32 +286,6 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     BatchEnvironment.clean(this, usageControls)
   }
 
-  implicit def webdavlocationIsStorage = new StorageInterface[WebDavLocation] {
-    def webdavServer(location: WebDavLocation) = gridscale.webdav.WebDAVSServer(location.url, proxyCache().factory)
-
-    override def quality(t: WebDavLocation): QualityControl = t.qualityControl
-    override def usageControl(t: WebDavLocation): UsageControl = t.usageControl
-
-    override def child(t: WebDavLocation, parent: String, child: String): String = gridscale.RemotePath.child(parent, child)
-    override def parent(t: WebDavLocation, path: String): Option[String] = gridscale.RemotePath.parent(path)
-    override def name(t: WebDavLocation, path: String): String = gridscale.RemotePath.name(path)
-
-    override def exists(t: WebDavLocation, path: String): Boolean = gridscale.webdav.exists(webdavServer(t), path)
-    override def list(t: WebDavLocation, path: String): Seq[gridscale.ListEntry] = gridscale.webdav.list(webdavServer(t), path)
-    override def makeDir(t: WebDavLocation, path: String): Unit = gridscale.webdav.mkDirectory(webdavServer(t), path)
-    override def rmDir(t: WebDavLocation, path: String): Unit = gridscale.webdav.rmDirectory(webdavServer(t), path)
-    override def rmFile(t: WebDavLocation, path: String): Unit = gridscale.webdav.rmFile(webdavServer(t), path)
-
-    override def upload(t: WebDavLocation, src: File, dest: String, options: storage.TransferOptions): Unit = {
-      StorageInterface.upload(true, gridscale.webdav.writeStream(webdavServer(t), _, _))(src, dest, options)
-      //if (!exists(t, dest)) throw new InternalProcessingError(s"File $src has been successfully uploaded to $dest on $t but does not exist.")
-    }
-
-    override def download(t: WebDavLocation, src: String, dest: File, options: storage.TransferOptions): Unit =
-      StorageInterface.download(true, gridscale.webdav.readStream[Unit](webdavServer(t), _, _))(src, dest, options)
-
-  }
-
   def bdiis: Seq[gridscale.egi.BDIIServer] =
     bdiiURL.map(b ⇒ Seq(EGIEnvironment.toBDII(new java.net.URI(b)))).getOrElse(EGIEnvironment.defaultBDIIs)
 
@@ -294,15 +297,9 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         case _ ⇒ false
       }
 
-      val storage = EGIEnvironment.WebDavLocation(location, UsageControl(preference(EGIEnvironment.ConnexionsByWebDAVSE)), QualityControl(preference(BatchEnvironment.QualityHysteresis)))
+      val storage = WebDavStorage(location, UsageControl(preference(EGIEnvironment.ConnexionsByWebDAVSE)), QualityControl(preference(BatchEnvironment.QualityHysteresis)), proxyCache, env)
       def storageSpace = StorageSpace.hierarchicalStorageSpace(storage, "", location, isConnectionError)
-
-      location -> StorageService(
-        storage,
-        id = location,
-        environment = env,
-        storageSpace = Lazy(storageSpace)
-      )
+      (Lazy(storageSpace), storage)
     }
     else throw new InternalProcessingError("No WebDAV storage available for the VO")
   }
@@ -313,7 +310,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     import org.openmole.core.tools.math._
 
     def selectStorage = {
-      val sss = storages().map(_._2)
+      val sss = storages()
       if (sss.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
 
       if (sss.size == 1) sss.head
@@ -327,13 +324,14 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         val usedFiles = BatchEnvironment.jobFiles(batchExecutionJob)
         val usedFilesInfo = usedFiles.map { f ⇒ f → FileInfo(fileSize(f), fileService.hash(f).toString) }.toMap
         val totalFileSize = usedFilesInfo.values.toSeq.map(_.size).sum
-        val onStorage = replicaCatalog.forHashes(usedFilesInfo.values.toVector.map(_.hash), sss.map(_.id)).groupBy(_.storage)
+
+        val onStorage = replicaCatalog.forHashes(usedFilesInfo.values.toVector.map(_.hash), sss.map(_._2).map(implicitly[EnvironmentStorage[WebDavStorage]].id)).groupBy(_.storage)
 
         def minOption(v: Seq[Double]) = if (v.isEmpty) None else Some(v.min)
 
         def maxOption(v: Seq[Double]) = if (v.isEmpty) None else Some(v.max)
 
-        val times = sss.flatMap(_.quality.time)
+        val times = sss.flatMap(_._2.qualityControl.time)
         val maxTime = maxOption(times)
         val minTime = minOption(times)
 
@@ -341,8 +339,8 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         //        val maxAvailability = maxOption(availablities)
         //        val minAvailability = minOption(availablities)
 
-        def rate(ss: StorageService[_]) = {
-          val sizesOnStorage = usedFilesInfo.filter { case (_, info) ⇒ onStorage.getOrElse(ss.id, Set.empty).exists(_.hash == info.hash) }.values.map {
+        def rate(ss: WebDavStorage) = {
+          val sizesOnStorage = usedFilesInfo.filter { case (_, info) ⇒ onStorage.getOrElse(implicitly[EnvironmentStorage[WebDavStorage]].id(ss), Set.empty).exists(_.hash == info.hash) }.values.map {
             _.size
           }
           val sizeOnStorage = sizesOnStorage.sum
@@ -350,7 +348,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
           val sizeFactor = if (totalFileSize != 0) sizeOnStorage.toDouble / totalFileSize else 0.0
 
           val timeFactor =
-            (minTime, maxTime, ss.quality.time) match {
+            (minTime, maxTime, ss.qualityControl.time) match {
               case (Some(minTime), Some(maxTime), Some(time)) if (maxTime > minTime) ⇒ 0.0 - time.normalize(minTime, maxTime)
               case _ ⇒ 0.0
             }
@@ -365,21 +363,20 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
             preference(StorageSizeFactor) * sizeFactor +
               preference(StorageTimeFactor) * timeFactor +
               //              preference(StorageAvailabilityFactor) * availabilityFactor +
-              preference(StorageSuccessRateFactor) * ss.quality.successRate.getOrElse(0.0),
+              preference(StorageSuccessRateFactor) * ss.qualityControl.successRate.getOrElse(0.0),
             preference(StorageFitnessPower)
           )
         }
 
-        val weighted = sss.map(s ⇒ math.max(rate(s), preference(EGIEnvironment.MinValueForSelectionExploration)) -> s)
-
+        val weighted = sss.map(s ⇒ math.max(rate(s._2), preference(EGIEnvironment.MinValueForSelectionExploration)) -> s)
         val storage = org.openmole.tool.random.multinomialDraw(weighted)(randomProvider())
         storage
       }
     }
 
-    val storageService = selectStorage
-    val remoteStorage = CurlRemoteStorage(storageService.storage.url, voName, debug, preference(EGIEnvironment.RemoteCopyTimeout))
-    BatchEnvironment.serializeJob(selectStorage, remoteStorage, batchExecutionJob)
+    val (storageSpace, storageService) = selectStorage
+    val remoteStorage = CurlRemoteStorage(storageService.url, voName, debug, preference(EGIEnvironment.RemoteCopyTimeout))
+    BatchEnvironment.serializeJob(StorageService(storageService), remoteStorage, batchExecutionJob, storageSpace().tmpDirectory, storageSpace().replicaDirectory)
   }
 
   import gridscale.dirac._
@@ -402,7 +399,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   def submit(serializedJob: SerializedJob) = {
     import org.openmole.tool.file._
 
-    def storageLocations = storages().map(id ⇒ id._1 -> id._1).toMap
+    def storageLocations = storages().map(_._2).map(s ⇒ implicitly[EnvironmentStorage[WebDavStorage]].id(s) -> s.url).toMap
 
     def jobScript =
       JobScript(
@@ -472,4 +469,3 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     UpdateInterval.fixed(preference(EGIEnvironment.JobGroupRefreshInterval))
 
 }
-

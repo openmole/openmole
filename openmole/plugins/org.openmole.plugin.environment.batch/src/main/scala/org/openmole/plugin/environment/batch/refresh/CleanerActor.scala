@@ -27,9 +27,12 @@ object CleanerActor extends JavaLogger {
     val CleanSerializedJob(sj) = msg
     try
       sj.synchronized {
-        if (!sj.cleaned) UsageControl.tryWithToken(sj.storage.usageControl) {
-          case Some(t) ⇒ JobManager.cleanSerializedJob(sj, t)
-          case None    ⇒ JobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
+        if (!sj.cleaned) {
+          val permitted = UsageControl.tryWithPermit(sj.storage.usageControl) {
+            JobManager.cleanSerializedJob(sj)
+          }
+
+          if (!permitted.isDefined) JobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
         }
       }
     catch {
