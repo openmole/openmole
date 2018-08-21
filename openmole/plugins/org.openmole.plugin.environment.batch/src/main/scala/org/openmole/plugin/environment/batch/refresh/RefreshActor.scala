@@ -36,7 +36,7 @@ object RefreshActor extends JavaLogger {
           try {
             val oldState = job.state
             job.state = bj.updateState()
-            if (job.state == DONE) JobManager ! GetResult(job, sj, bj.resultPath())
+            if (job.state == DONE) JobManager ! GetResult(job, sj, bj.resultPath(), bj)
             else if (!job.state.isFinal) {
               val newDelay =
                 if (oldState == job.state)
@@ -48,17 +48,17 @@ object RefreshActor extends JavaLogger {
               val exception = new InternalProcessingError(s"""Job status is FAILED""".stripMargin)
               val stdOutErr = BatchJobService.tryStdOutErr(bj).toOption
               JobManager ! Error(job, exception, stdOutErr)
-              JobManager ! Kill(job)
+              JobManager ! Kill(job, Some(bj), Some(sj))
             }
-            else JobManager ! Kill(job)
+            else JobManager ! Kill(job, Some(bj), Some(sj))
           }
           catch {
             case _: ResubmitException ⇒
-              JobManager ! Resubmit(job, sj.storage)
+              JobManager ! Resubmit(job, sj.storage, bj, sj)
             case e: Throwable ⇒
               if (updateErrorsInARow >= preference(BatchEnvironment.MaxUpdateErrorsInARow)) {
                 JobManager ! Error(job, e, BatchJobService.tryStdOutErr(bj).toOption)
-                JobManager ! Kill(job)
+                JobManager ! Kill(job, Some(bj), Some(sj))
               }
               else {
                 Log.logger.log(Log.FINE, s"${updateErrorsInARow + 1} errors in a row during job refresh", e)

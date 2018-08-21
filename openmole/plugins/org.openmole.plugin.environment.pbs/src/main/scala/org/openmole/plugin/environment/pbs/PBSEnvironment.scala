@@ -119,13 +119,7 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
   implicit val systemInterpreter = effectaside.System()
   implicit val localInterpreter = gridscale.local.Local()
 
-  override def start() = BatchEnvironment.start(this)
-
-  override def stop() = {
-    def accessControls = List(getaccessControl(storageService), pbsJobService.accessControl)
-    try BatchEnvironment.clean(this, accessControls)
-    finally sshInterpreter().close
-  }
+  override def stop() = { sshInterpreter().close }
 
   import env.services.preference
   import org.openmole.plugin.environment.ssh._
@@ -191,13 +185,6 @@ class PBSLocalEnvironment(
 
   import env.services.preference
   import org.openmole.plugin.environment.ssh._
-
-  override def start() = BatchEnvironment.start(this)
-
-  override def stop() = {
-    def accessControls = List(storage.accessControl, pbsJobService.accessControl)
-    BatchEnvironment.clean(this, accessControls)
-  }
 
   lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.MaxConnections)))
   lazy val space = localStorageSpace(storage)

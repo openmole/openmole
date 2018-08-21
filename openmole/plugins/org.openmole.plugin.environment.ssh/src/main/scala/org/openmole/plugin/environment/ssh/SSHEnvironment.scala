@@ -131,7 +131,6 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   val submittedJobs = collection.mutable.Map[SSHEnvironment.SSHJob, PID]()
 
   override def start() = {
-    BatchEnvironment.start(this)
     import services.threadProvider
     Updater.delay(jobUpdater, services.preference(SSHEnvironment.UpdateInterval))
   }
@@ -144,10 +143,7 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   override def stop() = {
     jobUpdater.stop = true
-    def accessControls = List(getaccessControl(storageService), sshJobService.accessControl)
-
-    try BatchEnvironment.clean(this, accessControls)
-    finally sshInterpreter().close
+    sshInterpreter().close
   }
 
   import env.services.preference

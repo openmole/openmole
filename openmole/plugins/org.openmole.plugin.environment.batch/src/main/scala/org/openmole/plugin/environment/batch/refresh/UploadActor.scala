@@ -17,22 +17,8 @@
 
 package org.openmole.plugin.environment.batch.refresh
 
-import java.io.File
-import java.util.UUID
-
-import org.openmole.core.communication.message._
-import org.openmole.core.communication.storage._
-import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workflow.job._
-import org.openmole.plugin.environment.batch
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment.signalUpload
 import org.openmole.plugin.environment.batch.environment._
-import org.openmole.plugin.environment.batch.storage._
-import org.openmole.tool.file.{ uniqName, _ }
 import org.openmole.tool.logger.JavaLogger
-import org.openmole.tool.random._
-
-import scala.collection.immutable.TreeSet
 
 object UploadActor extends JavaLogger {
 
@@ -42,10 +28,8 @@ object UploadActor extends JavaLogger {
     val job = msg.job
     if (!job.state.isFinal) {
       try job.environment.serializeJob(job) match {
-        case Some(sj) ⇒
-          job.serializedJob = Some(sj)
-          JobManager ! Uploaded(job, sj)
-        case None ⇒ JobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
+        case Some(sj) ⇒ JobManager ! Uploaded(job, sj)
+        case None     ⇒ JobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
       }
       catch {
         case e: Throwable ⇒

@@ -35,7 +35,7 @@ import squants.Time
 package object ssh {
 
   case class SSHStorage(sshServer: _root_.gridscale.ssh.SSHServer, accessControl: AccessControl, id: String, environment: BatchEnvironment, root: String)
-  case class LocalStorageServe(localStorage: LocalStorage, accessControl: AccessControl, qualityControl: QualityControl)
+  case class LocalStorageServer(localStorage: LocalStorage, accessControl: AccessControl, qualityControl: QualityControl)
 
   import _root_.gridscale.{ ssh ⇒ gssh }
 
@@ -52,19 +52,21 @@ package object ssh {
       override def parent(t: SSHStorage, path: String): Option[String] = _root_.gridscale.RemotePath.parent(path)
       override def name(t: SSHStorage, path: String): String = _root_.gridscale.RemotePath.name(path)
 
-      override def exists(t: SSHStorage, path: String): Boolean = gssh.exists(t, path)
-      override def list(t: SSHStorage, path: String) = gssh.list(t, path)
+      override def exists(t: SSHStorage, path: String): Boolean = t.accessControl { gssh.exists(t, path) }
+      override def list(t: SSHStorage, path: String) = t.accessControl { gssh.list(t, path) }
 
-      override def makeDir(t: SSHStorage, path: String): Unit = gssh.makeDir(t, path)
-      override def rmDir(t: SSHStorage, path: String): Unit = gssh.rmDir(t, path)
+      override def makeDir(t: SSHStorage, path: String): Unit = t.accessControl { gssh.makeDir(t, path) }
+      override def rmDir(t: SSHStorage, path: String): Unit = t.accessControl { gssh.rmDir(t, path) }
 
-      override def rmFile(t: SSHStorage, path: String): Unit = gssh.rmFile(t, path)
+      override def rmFile(t: SSHStorage, path: String): Unit = t.accessControl { gssh.rmFile(t, path) }
 
-      override def upload(t: SSHStorage, src: File, dest: String, options: TransferOptions): Unit =
+      override def upload(t: SSHStorage, src: File, dest: String, options: TransferOptions): Unit =t.accessControl {
         StorageInterface.upload(false, gssh.writeFile(t, _, _))(src, dest, options)
+      }
 
-      override def download(t: SSHStorage, src: String, dest: File, options: TransferOptions): Unit =
+      override def download(t: SSHStorage, src: String, dest: File, options: TransferOptions): Unit =t.accessControl {
         StorageInterface.download(false, gssh.readFile[Unit](t, _, _))(src, dest, options)
+      }
 
       override def id(s: SSHStorage): String = s.id
       override def environment(s: SSHStorage): BatchEnvironment = s.environment

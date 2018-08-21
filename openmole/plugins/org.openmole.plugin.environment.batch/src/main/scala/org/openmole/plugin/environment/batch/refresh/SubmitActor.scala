@@ -31,7 +31,6 @@ object SubmitActor {
       try job.environment.submitSerializedJob(sj) match {
         case Some(bj) ⇒
           job.state = SUBMITTED
-          job.batchJob = Some(bj)
           JobManager ! Submitted(job, sj, bj)
         case None ⇒ JobManager ! Delay(submit, BatchEnvironment.getTokenInterval)
       }

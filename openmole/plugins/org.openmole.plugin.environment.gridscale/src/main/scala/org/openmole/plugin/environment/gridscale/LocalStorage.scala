@@ -38,16 +38,19 @@ object LocalStorage {
     override def child(t: LocalStorage, parent: String, child: String): String = LocalStorage.child(parent, child)
     override def parent(t: LocalStorage, path: String): Option[String] = Option(File(path).getParent)
     override def name(t: LocalStorage, path: String): String = File(path).getName
-    override def exists(t: LocalStorage, path: String): Boolean = local.exists(path)
-    override def list(t: LocalStorage, path: String): Seq[gridscale.ListEntry] = local.list(path)
-    override def makeDir(t: LocalStorage, path: String): Unit = local.makeDir(path)
-    override def rmDir(t: LocalStorage, path: String): Unit = local.rmDir(path)
-    override def rmFile(t: LocalStorage, path: String): Unit = local.rmFile(path)
+    override def exists(t: LocalStorage, path: String): Boolean = t.accessControl { local.exists(path) }
+    override def list(t: LocalStorage, path: String): Seq[gridscale.ListEntry] = t.accessControl { local.list(path) }
+    override def makeDir(t: LocalStorage, path: String): Unit = t.accessControl { local.makeDir(path) }
+    override def rmDir(t: LocalStorage, path: String): Unit = t.accessControl { local.rmDir(path) }
+    override def rmFile(t: LocalStorage, path: String): Unit = t.accessControl { local.rmFile(path) }
 
-    override def upload(t: LocalStorage, src: File, dest: String, options: TransferOptions): Unit =
+    override def upload(t: LocalStorage, src: File, dest: String, options: TransferOptions): Unit = t.accessControl {
       StorageInterface.upload(false, local.writeFile(_, _))(src, dest, options)
-    override def download(t: LocalStorage, src: String, dest: File, options: TransferOptions): Unit =
+    }
+
+    override def download(t: LocalStorage, src: String, dest: File, options: TransferOptions): Unit = t.accessControl {
       StorageInterface.download(false, local.readFile[Unit](_, _))(src, dest, options)
+    }
 
     override def id(s: LocalStorage): String = s.id
     override def environment(s: LocalStorage): BatchEnvironment = s.environment

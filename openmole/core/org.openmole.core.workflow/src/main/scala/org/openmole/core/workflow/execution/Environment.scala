@@ -66,13 +66,14 @@ sealed trait Environment <: Name {
   def done: Long = _done.get()
   def failed: Long = _failed.get()
 
-  def start(): Unit
-  def stop(): Unit
+  def start(): Unit = {}
+  def stop(): Unit = {}
 }
 
 trait SubmissionEnvironment <: Environment {
   def submit(job: Job)
   def jobs: Iterable[ExecutionJob]
+  def clean: Boolean
 }
 
 object LocalEnvironment {

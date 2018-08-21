@@ -130,19 +130,23 @@ object EGIEnvironment extends JavaLogger {
     override def parent(t: WebDavStorage, path: String): Option[String] = gridscale.RemotePath.parent(path)
     override def name(t: WebDavStorage, path: String): String = gridscale.RemotePath.name(path)
 
-    override def exists(t: WebDavStorage, path: String): Boolean = t.qualityControl { gridscale.webdav.exists(webdavServer(t), path) }
-    override def list(t: WebDavStorage, path: String): Seq[gridscale.ListEntry] = t.qualityControl { gridscale.webdav.list(webdavServer(t), path) }
-    override def makeDir(t: WebDavStorage, path: String): Unit = t.qualityControl { gridscale.webdav.mkDirectory(webdavServer(t), path) }
-    override def rmDir(t: WebDavStorage, path: String): Unit = t.qualityControl { gridscale.webdav.rmDirectory(webdavServer(t), path) }
-    override def rmFile(t: WebDavStorage, path: String): Unit = t.qualityControl { gridscale.webdav.rmFile(webdavServer(t), path) }
+    override def exists(t: WebDavStorage, path: String): Boolean = t.accessControl { t.qualityControl { gridscale.webdav.exists(webdavServer(t), path) } }
+    override def list(t: WebDavStorage, path: String): Seq[gridscale.ListEntry] = t.accessControl { t.qualityControl { gridscale.webdav.list(webdavServer(t), path) } }
+    override def makeDir(t: WebDavStorage, path: String): Unit = t.accessControl { t.qualityControl { gridscale.webdav.mkDirectory(webdavServer(t), path) } }
+    override def rmDir(t: WebDavStorage, path: String): Unit = t.accessControl { t.qualityControl { gridscale.webdav.rmDirectory(webdavServer(t), path) } }
+    override def rmFile(t: WebDavStorage, path: String): Unit = t.accessControl { t.qualityControl { gridscale.webdav.rmFile(webdavServer(t), path) } }
 
-    override def upload(t: WebDavStorage, src: File, dest: String, options: storage.TransferOptions): Unit = t.qualityControl {
-      StorageInterface.upload(true, gridscale.webdav.writeStream(webdavServer(t), _, _))(src, dest, options)
-      //if (!exists(t, dest)) throw new InternalProcessingError(s"File $src has been successfully uploaded to $dest on $t but does not exist.")
+    override def upload(t: WebDavStorage, src: File, dest: String, options: storage.TransferOptions): Unit = t.accessControl {
+      t.qualityControl {
+        StorageInterface.upload(true, gridscale.webdav.writeStream(webdavServer(t), _, _))(src, dest, options)
+        //if (!exists(t, dest)) throw new InternalProcessingError(s"File $src has been successfully uploaded to $dest on $t but does not exist.")
+      }
     }
 
-    override def download(t: WebDavStorage, src: String, dest: File, options: storage.TransferOptions): Unit = t.qualityControl {
-      StorageInterface.download(true, gridscale.webdav.readStream[Unit](webdavServer(t), _, _))(src, dest, options)
+    override def download(t: WebDavStorage, src: String, dest: File, options: storage.TransferOptions): Unit = t.accessControl {
+      t.qualityControl {
+        StorageInterface.download(true, gridscale.webdav.readStream[Unit](webdavServer(t), _, _))(src, dest, options)
+      }
     }
 
     override def id(s: WebDavStorage): String = s.url
@@ -278,12 +282,6 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
   override def start() = {
     proxyCache()
-    BatchEnvironment.start(this)
-  }
-
-  override def stop() = {
-    def accessControls = storages().map(_._2.accessControl) ++ List(diracaccessControl)
-    BatchEnvironment.clean(this, accessControls)
   }
 
   def bdiis: Seq[gridscale.egi.BDIIServer] =

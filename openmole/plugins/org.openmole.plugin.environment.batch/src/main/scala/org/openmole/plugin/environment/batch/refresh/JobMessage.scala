@@ -30,13 +30,11 @@ case class Uploaded(job: BatchExecutionJob, serializedJob: SerializedJob) extend
 case class Submit(job: BatchExecutionJob, serializedJob: SerializedJob) extends JobMessage with DispatchedMessage
 case class Submitted(job: BatchExecutionJob, serializedJob: SerializedJob, batchJob: BatchJobControl) extends JobMessage
 case class Refresh(job: BatchExecutionJob, serializedJob: SerializedJob, batchJob: BatchJobControl, delay: Time, consecutiveUpdateErrors: Int = 0) extends JobMessage with DispatchedMessage
-case class Resubmit(job: BatchExecutionJob, storage: StorageService[_]) extends JobMessage
+case class Resubmit(job: BatchExecutionJob, storage: StorageService[_], batchJob: BatchJobControl, serializedJob: SerializedJob) extends JobMessage
 case class Delay(msg: JobMessage, delay: Time) extends JobMessage
 case class Error(job: BatchExecutionJob, exception: Throwable, stdOutErr: Option[(String, String)]) extends JobMessage with DispatchedMessage
-case class Kill(job: BatchExecutionJob) extends JobMessage
-case class KillBatchJob(batchJob: BatchJobControl) extends JobMessage with DispatchedMessage
-case class GetResult(job: BatchExecutionJob, serializedJob: SerializedJob, outputFilePath: String) extends JobMessage with DispatchedMessage
+case class Kill(job: BatchExecutionJob, batchJob: Option[BatchJobControl], serializedJob: Option[SerializedJob]) extends JobMessage
+case class GetResult(job: BatchExecutionJob, serializedJob: SerializedJob, outputFilePath: String, batchJob: BatchJobControl) extends JobMessage with DispatchedMessage
 case class Manage(job: BatchExecutionJob) extends JobMessage
 case class MoleJobError(moleJob: MoleJob, job: BatchExecutionJob, exception: Throwable) extends JobMessage
-case class CleanSerializedJob(job: SerializedJob) extends JobMessage with DispatchedMessage
 case class RetryAction(action: () ⇒ Boolean) extends JobMessage with DispatchedMessage

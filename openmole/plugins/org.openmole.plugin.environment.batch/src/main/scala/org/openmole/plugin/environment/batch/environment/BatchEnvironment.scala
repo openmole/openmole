@@ -285,25 +285,9 @@ object BatchEnvironment extends JavaLogger {
       BatchJobService.submit(jobService, serializedJob, () ⇒ resultPath(serializedJob))
     }
 
-  def start(environment: BatchEnvironment) = {}
-
-  def clean(environment: BatchEnvironment, accessControls: Seq[AccessControl])(implicit services: BatchEnvironment.Services) = {
+  def isClean(environment: BatchEnvironment)(implicit services: BatchEnvironment.Services) = {
     val environmentJobs = environment.jobs
-    environmentJobs.foreach(_.state = ExecutionState.KILLED)
-
-    accessControls.foreach(AccessControl.freeze)
-    accessControls.foreach(AccessControl.waitUnused)
-    accessControls.foreach(AccessControl.unfreeze)
-
-    def kill(job: BatchExecutionJob) = {
-      import services._
-      job.state = ExecutionState.KILLED
-      job.batchJob.foreach { bj ⇒ AccessControl.withPermit(bj.accessControl) { util.Try(JobManager.killBatchJob(bj)) } }
-      job.serializedJob.foreach { sj ⇒ AccessControl.withPermit(sj.storage.accessControl) { util.Try(JobManager.cleanSerializedJob(sj)) } }
-    }
-
-    val futures = environmentJobs.map { j ⇒ services.threadProvider.submit(JobManager.killPriority)(() ⇒ kill(j)) }
-    futures.foreach(_.get())
+    environmentJobs.forall(_.state == ExecutionState.KILLED)
   }
 
   def finishedJob(environment: BatchEnvironment, job: Job) = {
@@ -356,6 +340,8 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
   def serializeJob(batchExecutionJob: BatchExecutionJob): Option[SerializedJob]
   def submitSerializedJob(serializedJob: SerializedJob): Option[BatchJobControl]
 
+  def clean = BatchEnvironment.isClean(this)
+
   lazy val registry = new ExecutionJobRegistry()
   def jobs = ExecutionJobRegistry.executionJobs(registry)
 
@@ -395,9 +381,6 @@ object BatchExecutionJob {
 }
 
 class BatchExecutionJob(val job: Job, val environment: BatchEnvironment) extends ExecutionJob { bej ⇒
-
-  @volatile var serializedJob: Option[SerializedJob] = None
-  @volatile var batchJob: Option[BatchJobControl] = None
 
   def moleJobs = job.moleJobs
   def runnableTasks = job.moleJobs.map(RunnableTask(_))
