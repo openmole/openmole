@@ -34,7 +34,7 @@ import squants.Time
 
 package object ssh {
 
-  case class SSHStorage(sshServer: _root_.gridscale.ssh.SSHServer, accessControl: AccessControl, qualityControl: QualityControl, id: String, environment: BatchEnvironment, root: String)
+  case class SSHStorage(sshServer: _root_.gridscale.ssh.SSHServer, accessControl: AccessControl, id: String, environment: BatchEnvironment, root: String)
   case class LocalStorageServe(localStorage: LocalStorage, accessControl: AccessControl, qualityControl: QualityControl)
 
   import _root_.gridscale.{ ssh ⇒ gssh }
@@ -46,7 +46,6 @@ package object ssh {
 
     implicit def isStorage(implicit interpreter: Effect[gssh.SSH]) = new StorageInterface[SSHStorage] with HierarchicalStorageInterface[SSHStorage] with EnvironmentStorage[SSHStorage] {
       implicit def toSSHServer(s: SSHStorage) = s.sshServer
-      override def quality(s: SSHStorage): QualityControl = s.qualityControl
       override def accessControl(s: SSHStorage): AccessControl = s.accessControl
 
       override def child(t: SSHStorage, parent: String, child: String): String = SSHStorage.child(parent, child)
@@ -86,32 +85,30 @@ package object ssh {
   }
 
   def localStorage(
-                    environment:     BatchEnvironment,
-                    sharedDirectory: Option[String],
-                    accessControl:    AccessControl,
-                    qualityControl:  QualityControl)(implicit local: Effect[_root_.gridscale.local.Local]) = {
+    environment:     BatchEnvironment,
+    sharedDirectory: Option[String],
+    accessControl:    AccessControl)(implicit local: Effect[_root_.gridscale.local.Local]) = {
 
     val root = sshRoot(LocalStorage.home, LocalStorage.child, sharedDirectory)
     def id = new URI("file", null, "localhost", -1, root, null, null).toString
 
-    LocalStorage(accessControl, qualityControl, id, environment, root)
+    LocalStorage(accessControl, id, environment, root)
   }
 
   def localStorageSpace(local: LocalStorage)(implicit preference: Preference, replicaCatalog: ReplicaCatalog, interpreter: Effect[_root_.gridscale.local.Local]) = StorageSpace.hierarchicalStorageSpace(local, local.root, local.id, _ ⇒ false)
 
   def sshStorage(
-                  user:                 String,
-                  host:                 String,
-                  port:                 Int,
-                  sshServer:            _root_.gridscale.ssh.SSHServer,
-                  accessControl:         AccessControl,
-                  qualityControl:       QualityControl,
-                  environment:          BatchEnvironment,
-                  sharedDirectory:      Option[String]
+    user:                 String,
+    host:                 String,
+    port:                 Int,
+    sshServer:            _root_.gridscale.ssh.SSHServer,
+    accessControl:         AccessControl,
+    environment:          BatchEnvironment,
+    sharedDirectory:      Option[String]
   )(implicit ssh: Effect[_root_.gridscale.ssh.SSH]) = {
     val root = sshRoot(SSHStorage.home(sshServer), SSHStorage.child, sharedDirectory)
     def id = new URI("ssh", user, host, port, root, null, null).toString
-    SSHStorage(sshServer, accessControl, qualityControl, id, environment, root)
+    SSHStorage(sshServer, accessControl, id, environment, root)
   }
 
   def sshStorageSpace(ssh: SSHStorage)(implicit preference: Preference, replicaCatalog: ReplicaCatalog, interpreter: Effect[_root_.gridscale.ssh.SSH]) = StorageSpace.hierarchicalStorageSpace(ssh, ssh.root, ssh.id, SSHStorage.isConnectionError)

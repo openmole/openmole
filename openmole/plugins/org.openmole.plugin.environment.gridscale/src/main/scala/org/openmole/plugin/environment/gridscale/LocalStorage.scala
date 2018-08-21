@@ -33,7 +33,6 @@ object LocalStorage {
   def child(parent: String, child: String) = (File(parent) / child).getAbsolutePath
 
   implicit def isStorage(implicit interpreter: Effect[local.Local]) = new StorageInterface[LocalStorage] with HierarchicalStorageInterface[LocalStorage] with EnvironmentStorage[LocalStorage] {
-    override def quality(t: LocalStorage): QualityControl = t.qualityControl
     override def accessControl(t: LocalStorage): AccessControl = t.accessControl
 
     override def child(t: LocalStorage, parent: String, child: String): String = LocalStorage.child(parent, child)
@@ -56,5 +55,5 @@ object LocalStorage {
 
 }
 
-case class LocalStorage(accessControl: AccessControl, qualityControl: QualityControl, id: String, environment: BatchEnvironment, root: String)
+case class LocalStorage(accessControl: AccessControl, id: String, environment: BatchEnvironment, root: String)
 

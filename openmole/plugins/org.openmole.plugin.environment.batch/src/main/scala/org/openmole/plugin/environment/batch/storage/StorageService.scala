@@ -50,21 +50,20 @@ class StorageService[S](val storage: S)(implicit storageInterface: StorageInterf
 
   override def toString: String = id
 
-  def quality = storageInterface.quality(storage)
   def accessControl = storageInterface.accessControl(storage)
 
   def id = environmentStorage.id(storage)
   def environment = environmentStorage.environment(storage)
 
-  def exists(path: String): Boolean = quality { storageInterface.exists(storage, path) }
+  def exists(path: String): Boolean = storageInterface.exists(storage, path)
 
-  def rmDir(path: String): Unit = quality { storageInterface.rmDir(storage, path) }
-  def rmFile(path: String): Unit = quality { storageInterface.rmFile(storage, path) }
+  def rmDir(path: String): Unit = storageInterface.rmDir(storage, path)
+  def rmFile(path: String): Unit = storageInterface.rmFile(storage, path)
 
-  def makeDir(path: String): Unit = quality { storageInterface.makeDir(storage, path) }
+  def makeDir(path: String): Unit = storageInterface.makeDir(storage, path)
   def child(path: String, name: String) = storageInterface.child(storage, path, name)
 
-  def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default) = quality { storageInterface.upload(storage, src, dest, options) }
-  def download(src: String, dest: File, options: TransferOptions = TransferOptions.default) = quality { storageInterface.download(storage, src, dest, options) }
+  def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default) = storageInterface.upload(storage, src, dest, options)
+  def download(src: String, dest: File, options: TransferOptions = TransferOptions.default) = storageInterface.download(storage, src, dest, options)
 
 }

@@ -153,7 +153,6 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   import env.services.preference
 
   lazy val accessControl = AccessControl(preference(SSHEnvironment.MaxConnections))
-  lazy val qualityControl = QualityControl(preference(BatchEnvironment.QualityHysteresis))
 
   def numberOfRunningJobs: Int = {
     val sshJobIds = env.queuesLock { env.jobsStates.toSeq.collect { case (j, SSHEnvironment.Submitted(id)) ⇒ id } }
@@ -164,7 +163,7 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   lazy val storageService =
     if (storageSharedLocally) Left {
-      val local = localStorage(env, sharedDirectory, AccessControl(preference(SSHEnvironment.MaxConnections)), qualityControl)
+      val local = localStorage(env, sharedDirectory, AccessControl(preference(SSHEnvironment.MaxConnections)))
       (localStorageSpace(local), local)
     }
     else
@@ -176,7 +175,6 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
             port = port,
             sshServer = sshServer,
             accessControl = accessControl,
-            qualityControl = qualityControl,
             environment = env,
             sharedDirectory = sharedDirectory
           )

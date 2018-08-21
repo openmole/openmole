@@ -61,8 +61,6 @@ object StorageInterface {
 }
 
 trait StorageInterface[T] {
-
-  def quality(t: T): QualityControl
   def accessControl(t: T): AccessControl
 
   def parent(t: T, path: String): Option[String]

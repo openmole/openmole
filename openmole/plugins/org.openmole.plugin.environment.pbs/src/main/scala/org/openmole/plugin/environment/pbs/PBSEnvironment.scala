@@ -135,7 +135,7 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   lazy val storageService =
     if (parameters.storageSharedLocally) Left {
-      val local = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.MaxConnections)), QualityControl(preference(BatchEnvironment.QualityHysteresis)))
+      val local = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.MaxConnections)))
       (localStorageSpace(local), local)
     }
     else
@@ -147,7 +147,6 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
             port = port,
             sshServer = sshServer,
             accessControl = accessControl,
-            qualityControl = QualityControl(preference(BatchEnvironment.QualityHysteresis)),
             environment = env,
             sharedDirectory = parameters.sharedDirectory
           )
@@ -199,7 +198,7 @@ class PBSLocalEnvironment(
     BatchEnvironment.clean(this, accessControls)
   }
 
-  lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.MaxConnections)), QualityControl(preference(BatchEnvironment.QualityHysteresis)))
+  lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.MaxConnections)))
   lazy val space = localStorageSpace(storage)
 
   override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
