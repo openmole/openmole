@@ -22,7 +22,7 @@ import java.nio.file.Files
 import gridscale._
 import org.openmole.core.communication.storage._
 import org.openmole.core.workspace._
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, UsageControl }
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, AccessControl }
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 
@@ -63,7 +63,7 @@ object StorageInterface {
 trait StorageInterface[T] {
 
   def quality(t: T): QualityControl
-  def usageControl(t: T): UsageControl
+  def accessControl(t: T): AccessControl
 
   def parent(t: T, path: String): Option[String]
   def name(t: T, path: String): String

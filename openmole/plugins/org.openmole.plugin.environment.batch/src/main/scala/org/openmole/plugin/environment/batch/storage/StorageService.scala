@@ -51,7 +51,7 @@ class StorageService[S](val storage: S)(implicit storageInterface: StorageInterf
   override def toString: String = id
 
   def quality = storageInterface.quality(storage)
-  def usageControl = storageInterface.usageControl(storage)
+  def accessControl = storageInterface.accessControl(storage)
 
   def id = environmentStorage.id(storage)
   def environment = environmentStorage.environment(storage)

@@ -5,7 +5,7 @@ import java.io.FileNotFoundException
 import gridscale.authentication.AuthenticationException
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.workflow.execution.Environment
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchExecutionJob, FailedJobExecution, UsageControl }
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchExecutionJob, FailedJobExecution, AccessControl }
 import org.openmole.tool.logger.JavaLogger
 
 object ErrorActor extends JavaLogger {

@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.batch.refresh
 
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, UsageControl }
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, AccessControl }
 import org.openmole.tool.logger.JavaLogger
 
 object CleanerActor extends JavaLogger {
@@ -28,7 +28,7 @@ object CleanerActor extends JavaLogger {
     try
       sj.synchronized {
         if (!sj.cleaned) {
-          val permitted = UsageControl.tryWithPermit(sj.storage.usageControl) {
+          val permitted = AccessControl.tryWithPermit(sj.storage.accessControl) {
             JobManager.cleanSerializedJob(sj)
           }
 

@@ -18,7 +18,7 @@
 package org.openmole.plugin.environment.batch.refresh
 
 import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, UsageControl }
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, AccessControl }
 
 object SubmitActor {
 

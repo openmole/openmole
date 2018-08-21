@@ -125,7 +125,7 @@ object EGIEnvironment extends JavaLogger {
     def webdavServer(location: WebDavStorage) = gridscale.webdav.WebDAVSServer(location.url, location.proxyCache().factory)
 
     override def quality(t: WebDavStorage): QualityControl = t.qualityControl
-    override def usageControl(t: WebDavStorage): UsageControl = t.usageControl
+    override def accessControl(t: WebDavStorage): AccessControl = t.accessControl
 
     override def child(t: WebDavStorage, parent: String, child: String): String = gridscale.RemotePath.child(parent, child)
     override def parent(t: WebDavStorage, path: String): Option[String] = gridscale.RemotePath.parent(path)
@@ -149,7 +149,7 @@ object EGIEnvironment extends JavaLogger {
     override def environment(s: WebDavStorage): BatchEnvironment = s.environment
   }
 
-  case class WebDavStorage(url: String, usageControl: UsageControl, qualityControl: QualityControl, proxyCache: TimeCache[VOMS.VOMSCredential], environment: EGIEnvironment[_])
+  case class WebDavStorage(url: String, accessControl: AccessControl, qualityControl: QualityControl, proxyCache: TimeCache[VOMS.VOMSCredential], environment: EGIEnvironment[_])
 
   def stdOutFileName = "output"
   def stdErrFileName = "error"
@@ -161,7 +161,7 @@ object EGIEnvironment extends JavaLogger {
     override def delete(env: EGIEnvironment[A], j: J): Unit = env.delete(j)
     override def stdOutErr(env: EGIEnvironment[A], j: J) = env.stdOutErr(j)
 
-    override def usageControl(js: EGIEnvironment[A]): UsageControl = js.diracUsageControl
+    override def accessControl(js: EGIEnvironment[A]): AccessControl = js.diracaccessControl
   }
 
   def eagerSubmit(environment: EGIEnvironment[_])(implicit preference: Preference) = {
@@ -282,8 +282,8 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   }
 
   override def stop() = {
-    def usageControls = storages().map(_._2.usageControl) ++ List(diracUsageControl)
-    BatchEnvironment.clean(this, usageControls)
+    def accessControls = storages().map(_._2.accessControl) ++ List(diracaccessControl)
+    BatchEnvironment.clean(this, accessControls)
   }
 
   def bdiis: Seq[gridscale.egi.BDIIServer] =
@@ -297,7 +297,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         case _ ⇒ false
       }
 
-      val storage = WebDavStorage(location, UsageControl(preference(EGIEnvironment.ConnexionsByWebDAVSE)), QualityControl(preference(BatchEnvironment.QualityHysteresis)), proxyCache, env)
+      val storage = WebDavStorage(location, AccessControl(preference(EGIEnvironment.ConnexionsByWebDAVSE)), QualityControl(preference(BatchEnvironment.QualityHysteresis)), proxyCache, env)
       def storageSpace = StorageSpace.hierarchicalStorageSpace(storage, "", location, isConnectionError)
       (Lazy(storageSpace), storage)
     }
@@ -315,7 +315,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
       if (sss.size == 1) sss.head
       else {
-        // val nonEmpty = sss.filter(!_.usageControl.isEmpty)
+        // val nonEmpty = sss.filter(!_.accessControl.isEmpty)
 
         case class FileInfo(size: Long, hash: String)
 
@@ -335,7 +335,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         val maxTime = maxOption(times)
         val minTime = minOption(times)
 
-        //        val availablities = nonEmpty.flatMap(_.usageControl.availability)
+        //        val availablities = nonEmpty.flatMap(_.accessControl.availability)
         //        val maxAvailability = maxOption(availablities)
         //        val minAvailability = minOption(availablities)
 
@@ -354,7 +354,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
             }
 
           //          val availabilityFactor =
-          //            (minAvailability, maxAvailability, ss.usageControl.availability) match {
+          //            (minAvailability, maxAvailability, ss.accessControl.availability) match {
           //              case (Some(minAvailability), Some(maxAvailability), Some(availability)) if (maxAvailability > minAvailability) ⇒ 0.0 - availability.normalize(minAvailability, maxAvailability)
           //              case _ ⇒ 0.0
           //            }
@@ -460,7 +460,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     (stdOut, stdErr)
   }
 
-  lazy val diracUsageControl = environment.UsageControl(preference(EGIEnvironment.ConnectionsToDIRAC))
+  lazy val diracaccessControl = environment.AccessControl(preference(EGIEnvironment.ConnectionsToDIRAC))
 
   override def submitSerializedJob(serializedJob: SerializedJob) =
     BatchEnvironment.submitSerializedJob(env, serializedJob)

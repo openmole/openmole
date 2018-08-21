@@ -62,7 +62,7 @@ import org.openmole.plugin.environment.egi.BDIIStorageServers.Log._
 //    val sss = storages
 //    if (sss.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
 //
-//    val nonEmpty = sss.filter(!_.usageControl.isEmpty)
+//    val nonEmpty = sss.filter(!_.accessControl.isEmpty)
 //
 //    case class FileInfo(size: Long, hash: String)
 //
@@ -73,11 +73,11 @@ import org.openmole.plugin.environment.egi.BDIIStorageServers.Log._
 //    def minOption(v: Seq[Double]) = if (v.isEmpty) None else Some(v.min)
 //    def maxOption(v: Seq[Double]) = if (v.isEmpty) None else Some(v.max)
 //
-//    val times = sss.flatMap(_.usageControl.time)
+//    val times = sss.flatMap(_.accessControl.time)
 //    val maxTime = maxOption(times)
 //    val minTime = minOption(times)
 //
-//    val availablities = nonEmpty.flatMap(_.usageControl.availability)
+//    val availablities = nonEmpty.flatMap(_.accessControl.availability)
 //    val maxAvailability = maxOption(availablities)
 //    val minAvailability = minOption(availablities)
 //
@@ -88,13 +88,13 @@ import org.openmole.plugin.environment.egi.BDIIStorageServers.Log._
 //      val sizeFactor = if (totalFileSize != 0) sizeOnStorage.toDouble / totalFileSize else 0.0
 //
 //      val timeFactor =
-//        (minTime, maxTime, ss.usageControl.time) match {
+//        (minTime, maxTime, ss.accessControl.time) match {
 //          case (Some(minTime), Some(maxTime), Some(time)) if (maxTime > minTime) ⇒ 0.0 - time.normalize(minTime, maxTime)
 //          case _ ⇒ 0.0
 //        }
 //
 //      val availabilityFactor =
-//        (minAvailability, maxAvailability, ss.usageControl.availability) match {
+//        (minAvailability, maxAvailability, ss.accessControl.availability) match {
 //          case (Some(minAvailability), Some(maxAvailability), Some(availability)) if (maxAvailability > minAvailability) ⇒ 0.0 - availability.normalize(minAvailability, maxAvailability)
 //          case _ ⇒ 0.0
 //        }
@@ -103,7 +103,7 @@ import org.openmole.plugin.environment.egi.BDIIStorageServers.Log._
 //        preference(StorageSizeFactor) * sizeFactor +
 //          preference(StorageTimeFactor) * timeFactor +
 //          preference(StorageAvailabilityFactor) * availabilityFactor +
-//          preference(StorageSuccessRateFactor) * ss.usageControl.successRate.getOrElse(0.0),
+//          preference(StorageSuccessRateFactor) * ss.accessControl.successRate.getOrElse(0.0),
 //        preference(StorageFitnessPower)
 //      )
 //    }

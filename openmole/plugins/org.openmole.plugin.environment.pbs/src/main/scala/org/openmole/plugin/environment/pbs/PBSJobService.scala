@@ -2,7 +2,7 @@ package org.openmole.plugin.environment.pbs
 
 import gridscale.cluster.HeadNode
 import org.openmole.core.workflow.execution.ExecutionState
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, SerializedJob, UsageControl }
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, SerializedJob, AccessControl }
 import org.openmole.plugin.environment.batch.jobservice.JobServiceInterface
 import org.openmole.plugin.environment.batch.storage.{ HierarchicalStorageInterface, StorageInterface }
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
@@ -17,17 +17,17 @@ object PBSJobService {
     override def state(env: PBSJobService[A, B], j: J): ExecutionState.ExecutionState = env.state(j)
     override def delete(env: PBSJobService[A, B], j: J): Unit = env.delete(j)
     override def stdOutErr(js: PBSJobService[A, B], j: J) = js.stdOutErr(j)
-    override def usageControl(js: PBSJobService[A, B]): UsageControl = js.usageControl
+    override def accessControl(js: PBSJobService[A, B]): AccessControl = js.accessControl
   }
 
 }
 
 class PBSJobService[S, H](
-  s:                S,
-  installation:     RuntimeInstallation[_],
-  parameters:       Parameters,
-  h:                H,
-  val usageControl: UsageControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], headNode: HeadNode[H], services: BatchEnvironment.Services) {
+  s:                 S,
+  installation:      RuntimeInstallation[_],
+  parameters:        Parameters,
+  h:                 H,
+  val accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], headNode: HeadNode[H], services: BatchEnvironment.Services) {
 
   import services._
   implicit val systemInterpreter = effectaside.System()

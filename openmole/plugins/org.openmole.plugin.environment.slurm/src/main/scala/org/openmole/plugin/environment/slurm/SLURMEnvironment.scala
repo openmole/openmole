@@ -147,8 +147,8 @@ class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
   override def start() = BatchEnvironment.start(this)
 
   override def stop() = {
-    def usageControls = List(storageService.usageControl, jobService.usageControl)
-    try BatchEnvironment.clean(this, usageControls)
+    def accessControls = List(storageService.accessControl, jobService.accessControl)
+    try BatchEnvironment.clean(this, accessControls)
     finally sshInterpreter().close
   }
 
@@ -243,8 +243,8 @@ class SLURMLocalEnvironment(
 
   import services._
 
-  lazy val usageControl = UsageControl(services.preference(SSHEnvironment.MaxLocalOperations))
-  def usageControls = List(storageService.usageControl, jobService.usageControl)
+  lazy val accessControl = AccessControl(services.preference(SSHEnvironment.MaxLocalOperations))
+  def accessControls = List(storageService.accessControl, jobService.accessControl)
 
   implicit val localInterpreter = gridscale.local.Local()
   implicit val systemInterpreter = effectaside.System()
@@ -255,8 +255,8 @@ class SLURMLocalEnvironment(
   override def start() = BatchEnvironment.start(this)
 
   override def stop() = {
-    def usageControls = List(storageService.usageControl, jobService.usageControl)
-    BatchEnvironment.clean(this, usageControls)
+    def accessControls = List(storageService.accessControl, jobService.accessControl)
+    BatchEnvironment.clean(this, accessControls)
   }
 
   lazy val storageService =

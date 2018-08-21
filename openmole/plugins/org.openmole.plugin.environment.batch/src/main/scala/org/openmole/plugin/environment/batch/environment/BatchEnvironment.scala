@@ -158,7 +158,7 @@ object BatchEnvironment extends JavaLogger {
   )
 
   def serializeJob(storageService: StorageService[_], remoteStorage: RemoteStorage, job: BatchExecutionJob, tmpDirectory: String, replicaDirectory: String)(implicit services: BatchEnvironment.Services) =
-    UsageControl.tryWithPermit(storageService.usageControl) { initCommunication(job, storageService, remoteStorage, tmpDirectory, replicaDirectory) }
+    AccessControl.tryWithPermit(storageService.accessControl) { initCommunication(job, storageService, remoteStorage, tmpDirectory, replicaDirectory) }
 
   def jobFiles(job: BatchExecutionJob) =
     job.pluginsAndFiles.files.toVector ++
@@ -280,24 +280,24 @@ object BatchEnvironment extends JavaLogger {
   def resultPathInSerializedJob(serializedJob: SerializedJob) = serializedJob.resultPath.get
 
   def submitSerializedJob[S](jobService: S, serializedJob: SerializedJob, resultPath: SerializedJob ⇒ String = resultPathInSerializedJob)(implicit jobServiceInterface: JobServiceInterface[S]) =
-    UsageControl.tryWithPermit(jobServiceInterface.usageControl(jobService)) {
+    AccessControl.tryWithPermit(jobServiceInterface.accessControl(jobService)) {
       BatchJobService.submit(jobService, serializedJob, () ⇒ resultPath(serializedJob))
     }
 
   def start(environment: BatchEnvironment) = {}
 
-  def clean(environment: BatchEnvironment, usageControls: Seq[UsageControl])(implicit services: BatchEnvironment.Services) = {
+  def clean(environment: BatchEnvironment, accessControls: Seq[AccessControl])(implicit services: BatchEnvironment.Services) = {
     val environmentJobs = environment.jobs
     environmentJobs.foreach(_.state = ExecutionState.KILLED)
 
-    usageControls.foreach(UsageControl.freeze)
-    usageControls.foreach(UsageControl.waitUnused)
-    usageControls.foreach(UsageControl.unfreeze)
+    accessControls.foreach(AccessControl.freeze)
+    accessControls.foreach(AccessControl.waitUnused)
+    accessControls.foreach(AccessControl.unfreeze)
 
     def kill(job: BatchExecutionJob) = {
       job.state = ExecutionState.KILLED
-      job.batchJob.foreach { bj ⇒ UsageControl.withPermit(bj.usageControl) { util.Try(JobManager.killBatchJob(bj)) } }
-      job.serializedJob.foreach { sj ⇒ UsageControl.withPermit(sj.storage.usageControl) { util.Try(JobManager.cleanSerializedJob(sj)) } }
+      job.batchJob.foreach { bj ⇒ AccessControl.withPermit(bj.accessControl) { util.Try(JobManager.killBatchJob(bj)) } }
+      job.serializedJob.foreach { sj ⇒ AccessControl.withPermit(sj.storage.accessControl) { util.Try(JobManager.cleanSerializedJob(sj)) } }
     }
 
     val futures = environmentJobs.map { j ⇒ services.threadProvider.submit(JobManager.killPriority)(() ⇒ kill(j)) }

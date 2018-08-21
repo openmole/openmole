@@ -38,7 +38,7 @@
 //
 //  import environment.services._
 //
-//  def usageControl = UnlimitedAccess
+//  def accessControl = UnlimitedAccess
 //
 //  def diracService = {
 //    lazy val gridscale.DIRACJobService.Service(service, group) = gridscale.DIRACJobService.getService(environment.voName)

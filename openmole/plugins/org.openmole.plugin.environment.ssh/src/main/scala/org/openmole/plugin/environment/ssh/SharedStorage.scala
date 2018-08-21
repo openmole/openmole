@@ -32,7 +32,7 @@ import squants.information.Information
 object SharedStorage extends JavaLogger {
 
   def installRuntime[S](runtime: Runtime, storage: S, frontend: Frontend, baseDirectory: String)(implicit preference: Preference, newFile: NewFile, storageInterface: StorageInterface[S]) =
-    UsageControl.withPermit(storageInterface.usageControl(storage)) {
+    AccessControl.withPermit(storageInterface.accessControl(storage)) {
       val runtimePrefix = "runtime"
       val runtimeInstall = runtimePrefix + runtime.runtime.hash
 
@@ -118,7 +118,7 @@ object SharedStorage extends JavaLogger {
         script.content = content
 
         val remoteScript = storageInterface.child(storage, serializedJob.path, uniqName("run", ".sh"))
-        UsageControl.withPermit(storageInterface.usageControl(storage)) { storageInterface.upload(storage, script, remoteScript, options = TransferOptions(raw = true, forceCopy = true, canMove = true)) }
+        AccessControl.withPermit(storageInterface.accessControl(storage)) { storageInterface.upload(storage, script, remoteScript, options = TransferOptions(raw = true, forceCopy = true, canMove = true)) }
         remoteScript
       }
     (remoteScript, baseWorkDirectory)

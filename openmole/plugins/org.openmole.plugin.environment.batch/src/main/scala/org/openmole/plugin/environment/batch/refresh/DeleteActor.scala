@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.batch.refresh
 
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, UsageControl }
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, AccessControl }
 import org.openmole.tool.logger.JavaLogger
 
 object DeleteActor extends JavaLogger {
@@ -27,7 +27,7 @@ object DeleteActor extends JavaLogger {
     val DeleteFile(storage, path, directory) = msg
     try {
       val permitted =
-        UsageControl.tryWithPermit(storage.usageControl) {
+        AccessControl.tryWithPermit(storage.accessControl) {
           if (directory) storage.rmDir(path) else storage.rmFile(path)
         }
 

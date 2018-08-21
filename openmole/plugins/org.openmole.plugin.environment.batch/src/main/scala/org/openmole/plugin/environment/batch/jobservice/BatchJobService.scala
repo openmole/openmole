@@ -33,7 +33,7 @@ trait JobServiceInterface[JS] {
   def delete(js: JS, j: J): Unit
   def stdOutErr(js: JS, j: J): (String, String)
 
-  def usageControl(js: JS): UsageControl
+  def accessControl(js: JS): AccessControl
 }
 
 object BatchJobService extends JavaLogger {
@@ -54,7 +54,7 @@ object BatchJobService extends JavaLogger {
       delete(job),
       stdOutErr(job),
       resultPath,
-      jobServiceInterface.usageControl(jobService)
+      jobServiceInterface.accessControl(jobService)
     )
   }
 
@@ -63,22 +63,22 @@ object BatchJobService extends JavaLogger {
 object BatchJobControl {
 
   def apply(
-    updateState:  () ⇒ ExecutionState,
-    delete:       () ⇒ Unit,
-    stdOutErr:    () ⇒ (String, String),
-    resultPath:   () ⇒ String,
-    usageControl: UsageControl): BatchJobControl = new BatchJobControl(
+    updateState:   () ⇒ ExecutionState,
+    delete:        () ⇒ Unit,
+    stdOutErr:     () ⇒ (String, String),
+    resultPath:    () ⇒ String,
+    accessControl: AccessControl): BatchJobControl = new BatchJobControl(
     updateState,
     delete,
     stdOutErr,
     resultPath,
-    usageControl)
+    accessControl)
 
 }
 
 class BatchJobControl(
-  val updateState:  () ⇒ ExecutionState,
-  val delete:       () ⇒ Unit,
-  val stdOutErr:    () ⇒ (String, String),
-  val resultPath:   () ⇒ String,
-  val usageControl: UsageControl)
+  val updateState:   () ⇒ ExecutionState,
+  val delete:        () ⇒ Unit,
+  val stdOutErr:     () ⇒ (String, String),
+  val resultPath:    () ⇒ String,
+  val accessControl: AccessControl)

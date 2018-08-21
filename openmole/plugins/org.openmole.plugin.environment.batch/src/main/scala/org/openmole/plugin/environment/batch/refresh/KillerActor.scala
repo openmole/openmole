@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.batch.refresh
 
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, UsageControl }
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, AccessControl }
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.core.tools.service.Retry._
 
@@ -28,7 +28,7 @@ object KillerActor extends JavaLogger {
 
     val KillBatchJob(bj) = msg
     try {
-      val permitted = UsageControl.tryWithPermit(bj.usageControl) { JobManager.killBatchJob(bj) }
+      val permitted = AccessControl.tryWithPermit(bj.accessControl) { JobManager.killBatchJob(bj) }
       if (!permitted.isDefined) JobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
     }
     catch {

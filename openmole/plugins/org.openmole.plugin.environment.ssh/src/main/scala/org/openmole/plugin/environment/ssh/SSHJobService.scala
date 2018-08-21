@@ -2,7 +2,7 @@ package org.openmole.plugin.environment.ssh
 
 import effectaside.Effect
 import org.openmole.core.workflow.execution.ExecutionState
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, SerializedJob, UsageControl }
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, SerializedJob, AccessControl }
 import org.openmole.plugin.environment.batch.jobservice.JobServiceInterface
 import org.openmole.plugin.environment.batch.storage.{ HierarchicalStorageInterface, StorageInterface }
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
@@ -19,11 +19,11 @@ object SSHJobService {
     override def delete(env: SSHJobService[A], j: J): Unit = env.delete(j)
     override def stdOutErr(js: SSHJobService[A], j: SSHJob) = js.stdOutErr(j)
 
-    override def usageControl(js: SSHJobService[A]): UsageControl = js.usageControl
+    override def accessControl(js: SSHJobService[A]): AccessControl = js.accessControl
   }
 }
 
-class SSHJobService[S](s: S, services: BatchEnvironment.Services, installation: RuntimeInstallation[_], env: SSHEnvironment[_], val usageControl: UsageControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], sshEffect: Effect[_root_.gridscale.ssh.SSH], systemEffect: Effect[effectaside.System]) {
+class SSHJobService[S](s: S, services: BatchEnvironment.Services, installation: RuntimeInstallation[_], env: SSHEnvironment[_], val accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], sshEffect: Effect[_root_.gridscale.ssh.SSH], systemEffect: Effect[effectaside.System]) {
 
   def register(serializedJob: SerializedJob) = {
     def buildScript(serializedJob: SerializedJob) = {

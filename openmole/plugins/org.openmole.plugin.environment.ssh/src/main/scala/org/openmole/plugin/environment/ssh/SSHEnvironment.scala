@@ -144,15 +144,15 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   override def stop() = {
     jobUpdater.stop = true
-    def usageControls = List(getUsageControl(storageService), sshJobService.usageControl)
+    def accessControls = List(getaccessControl(storageService), sshJobService.accessControl)
 
-    try BatchEnvironment.clean(this, usageControls)
+    try BatchEnvironment.clean(this, accessControls)
     finally sshInterpreter().close
   }
 
   import env.services.preference
 
-  lazy val usageControl = UsageControl(preference(SSHEnvironment.MaxConnections))
+  lazy val accessControl = AccessControl(preference(SSHEnvironment.MaxConnections))
   lazy val qualityControl = QualityControl(preference(BatchEnvironment.QualityHysteresis))
 
   def numberOfRunningJobs: Int = {
@@ -164,7 +164,7 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   lazy val storageService =
     if (storageSharedLocally) Left {
-      val local = localStorage(env, sharedDirectory, UsageControl(preference(SSHEnvironment.MaxConnections)), qualityControl)
+      val local = localStorage(env, sharedDirectory, AccessControl(preference(SSHEnvironment.MaxConnections)), qualityControl)
       (localStorageSpace(local), local)
     }
     else
@@ -175,7 +175,7 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
             host = host,
             port = port,
             sshServer = sshServer,
-            usageControl = usageControl,
+            accessControl = accessControl,
             qualityControl = qualityControl,
             environment = env,
             sharedDirectory = sharedDirectory
@@ -201,8 +201,8 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   lazy val sshJobService =
     storageService match {
-      case Left((space, local)) ⇒ new SSHJobService(local, services, installRuntime, env, usageControl)
-      case Right((space, ssh))  ⇒ new SSHJobService(ssh, services, installRuntime, env, usageControl)
+      case Left((space, local)) ⇒ new SSHJobService(local, services, installRuntime, env, accessControl)
+      case Right((space, ssh))  ⇒ new SSHJobService(ssh, services, installRuntime, env, accessControl)
     }
 
   override def submitSerializedJob(serializedJob: SerializedJob) =

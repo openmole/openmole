@@ -49,7 +49,7 @@ object GetResultActor extends JavaLogger {
 
     val GetResult(job, sj, resultPath) = msg
     val permitted =
-      UsageControl.tryWithPermit(sj.storage.usageControl) {
+      AccessControl.tryWithPermit(sj.storage.accessControl) {
         try {
           getResult(sj.storage, resultPath, job)
           if (job.job.finished) BatchEnvironment.finishedJob(job.environment, job.job)

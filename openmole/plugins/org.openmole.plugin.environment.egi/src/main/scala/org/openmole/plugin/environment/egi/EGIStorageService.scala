@@ -36,8 +36,8 @@
 //import scala.util.Try
 //
 //trait EGIStorageService extends StorageService with GridScaleStorage with CompressedTransfer {
-//  val usageControl: AvailabilityQuality
-//  import usageControl.quality
+//  val accessControl: AvailabilityQuality
+//  import accessControl.quality
 //
 //  override def exists(path: String)(implicit token: AccessToken): Boolean = quality { super.exists(path)(token) }
 //  override def listNames(path: String)(implicit token: AccessToken): Seq[String] = quality { super.listNames(path)(token) }
@@ -99,7 +99,7 @@ import org.openmole.tool.file._
 //      new EGIWebDAVStorageService {
 //        def threads = preference(EGIEnvironment.ConnectionsByWebDAVSE)
 //
-//        val usageControl = AvailabilityQuality(new LimitedAccess(threads, Int.MaxValue), preference(EGIEnvironment.QualityHysteresis))
+//        val accessControl = AvailabilityQuality(new LimitedAccess(threads, Int.MaxValue), preference(EGIEnvironment.QualityHysteresis))
 //        val storage = DPMWebDAVStorage(s.copy(basePath = ""))(authentication)
 //        val url = new URI("https", null, s.host, s.port, null, null, null)
 //        val remoteStorage = new CurlRemoteStorage(s.host, s.port, voName, preference(EGIEnvironment.RemoteCopyTimeout), debug)
