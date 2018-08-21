@@ -61,9 +61,6 @@ object StorageInterface {
 trait StorageInterface[T] {
   def accessControl(t: T): AccessControl
 
-  def parent(t: T, path: String): Option[String]
-  def name(t: T, path: String): String
-
   def exists(t: T, path: String): Boolean
 
   def rmDir(t: T, path: String): Unit
@@ -79,6 +76,8 @@ trait HierarchicalStorageInterface[T] {
   def makeDir(t: T, path: String): Unit
   def child(t: T, parent: String, child: String): String
   def list(t: T, path: String): Seq[ListEntry]
+  def parent(t: T, path: String): Option[String]
+  def name(t: T, path: String): String
 }
 
 trait EnvironmentStorage[S] {

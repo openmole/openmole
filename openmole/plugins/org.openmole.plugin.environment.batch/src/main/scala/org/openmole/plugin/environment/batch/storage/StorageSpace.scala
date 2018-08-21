@@ -83,11 +83,11 @@ object StorageSpace extends JavaLogger {
     def baseDirName = "openmole-" + preference(Preference.uniqueID) + '/'
 
     def mkRootDir: String = synchronized {
-      val paths = Iterator.iterate[Option[String]](Some(root))(p ⇒ p.flatMap(storageInterface.parent(s, _))).takeWhile(_.isDefined).toSeq.reverse.flatten
+      val paths = Iterator.iterate[Option[String]](Some(root))(p ⇒ p.flatMap(hierarchicalStorageInterface.parent(s, _))).takeWhile(_.isDefined).toSeq.reverse.flatten
 
       paths.tail.foldLeft(paths.head.toString) {
         (path, file) ⇒
-          val childPath = storageInterface.child(s, path, storageInterface.name(s, file))
+          val childPath = storageInterface.child(s, path, hierarchicalStorageInterface.name(s, file))
           try hierarchicalStorageInterface.makeDir(s, childPath)
           catch {
             case e: Throwable if isConnectionError(e) ⇒ throw e
