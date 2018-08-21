@@ -45,8 +45,8 @@ object StorageSpace extends JavaLogger {
     else Try(matcher.group(1).toLong).toOption
   }
 
-  def cleanTmpDirectory[S](s: S, tmpDirectory: String)(implicit storageInterface: StorageInterface[S], preference: Preference) = {
-    val entries = storageInterface.list(s, tmpDirectory)
+  def cleanTmpDirectory[S](s: S, tmpDirectory: String)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], preference: Preference) = {
+    val entries = hierarchicalStorageInterface.list(s, tmpDirectory)
     val removalDate = System.currentTimeMillis - preference(TmpDirRemoval).toMillis
 
     def remove(name: String) = extractTimeFromName(name).map(_ < removalDate).getOrElse(true)
@@ -61,13 +61,13 @@ object StorageSpace extends JavaLogger {
     }
   }
 
-  def cleanReplicaDirectory[S](s: S, persistentPath: String, storageId: String)(implicit replicaCatalog: ReplicaCatalog, preference: Preference, storageInterface: StorageInterface[S]) = {
+  def cleanReplicaDirectory[S](s: S, persistentPath: String, storageId: String)(implicit replicaCatalog: ReplicaCatalog, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
     def graceIsOver(name: String) =
       extractTimeFromName(name).map {
         _ + preference(ReplicaCatalog.ReplicaGraceTime).toMillis < System.currentTimeMillis
       }.getOrElse(true)
 
-    val names = storageInterface.list(s, persistentPath).map(_.name)
+    val names = hierarchicalStorageInterface.list(s, persistentPath).map(_.name)
     val inReplica = replicaCatalog.forPaths(names.map { storageInterface.child(s, persistentPath, _) }, Seq(storageId)).map(_.path).toSet
 
     for {
