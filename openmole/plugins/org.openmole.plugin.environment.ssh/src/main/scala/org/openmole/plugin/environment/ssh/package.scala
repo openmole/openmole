@@ -125,7 +125,7 @@ package object ssh {
     frontend:       Frontend,
     storage: S,
     baseDirectory: String,
-  )(implicit preference: Preference, newFile: NewFile, storageInterface: StorageInterface[S]) {
+  )(implicit preference: Preference, newFile: NewFile, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) {
 
     val installMap = collection.mutable.Map[Runtime, String]()
 

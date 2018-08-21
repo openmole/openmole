@@ -26,8 +26,6 @@ import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, Acc
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 
-import scala.ref.WeakReference
-
 object StorageInterface {
 
   def remote[S](s: S)(implicit storage: StorageInterface[S]) =
@@ -68,7 +66,6 @@ trait StorageInterface[T] {
 
   def exists(t: T, path: String): Boolean
   def list(t: T, path: String): Seq[ListEntry]
-  def makeDir(t: T, path: String): Unit
   def rmDir(t: T, path: String): Unit
   def rmFile(t: T, path: String): Unit
 
@@ -79,6 +76,8 @@ trait StorageInterface[T] {
 }
 
 trait HierarchicalStorageInterface[T] {
+  def makeDir(t: T, path: String): Unit
+  def child(t: T, parent: String, child: String): String
 }
 
 trait EnvironmentStorage[S] {

@@ -60,7 +60,6 @@ class StorageService[S](val storage: S)(implicit storageInterface: StorageInterf
   def rmDir(path: String): Unit = storageInterface.rmDir(storage, path)
   def rmFile(path: String): Unit = storageInterface.rmFile(storage, path)
 
-  def makeDir(path: String): Unit = storageInterface.makeDir(storage, path)
   def child(path: String, name: String) = storageInterface.child(storage, path, name)
 
   def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default) = storageInterface.upload(storage, src, dest, options)

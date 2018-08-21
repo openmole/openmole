@@ -186,8 +186,8 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
     val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage())
 
     storageService match {
-      case Left((space, local)) ⇒ BatchEnvironment.serializeJob(StorageService(local), remoteStorage, batchExecutionJob, space.tmpDirectory, space.replicaDirectory)
-      case Right((space, ssh))  ⇒ BatchEnvironment.serializeJob(StorageService(ssh), remoteStorage, batchExecutionJob, space.tmpDirectory, space.replicaDirectory)
+      case Left((space, local)) ⇒ BatchEnvironment.serializeJob(local, remoteStorage, batchExecutionJob, StorageSpace.createJobDirectory(local, space), space.replicaDirectory)
+      case Right((space, ssh))  ⇒ BatchEnvironment.serializeJob(ssh, remoteStorage, batchExecutionJob, StorageSpace.createJobDirectory(ssh, space), space.replicaDirectory)
     }
   }
 

@@ -7,27 +7,28 @@ import java.util.regex.Pattern
 import scala.util._
 import squants.time.TimeConversions._
 import gridscale._
+import org.openmole.tool.cache.Lazy
 import org.openmole.tool.logger.JavaLogger
 
 object StorageSpace extends JavaLogger {
   val TmpDirRemoval = ConfigurationLocation("StorageService", "TmpDirRemoval", Some(30 days))
 
-  def hierarchicalStorageSpace[S](s: S, root: String, storageId: String, isConnectionError: Throwable ⇒ Boolean)(implicit storageInterface: StorageInterface[S], preference: Preference, replicaCatalog: ReplicaCatalog) = {
+  def hierarchicalStorageSpace[S](s: S, root: String, storageId: String, isConnectionError: Throwable ⇒ Boolean)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], preference: Preference, replicaCatalog: ReplicaCatalog) = {
     val persistent = "persistent/"
     val tmp = "tmp/"
 
     val baseDirectory = createBasePath(s, root, isConnectionError)
 
     val replicaDirectory = {
-      val dir = storageInterface.child(s, baseDirectory, persistent)
-      if (!storageInterface.exists(s, dir)) storageInterface.makeDir(s, dir)
+      val dir = hierarchicalStorageInterface.child(s, baseDirectory, persistent)
+      if (!storageInterface.exists(s, dir)) hierarchicalStorageInterface.makeDir(s, dir)
       cleanReplicaDirectory(s, dir, storageId)
       dir
     }
 
     val tmpDirectory = {
-      val dir = storageInterface.child(s, baseDirectory, tmp)
-      if (!storageInterface.exists(s, dir)) storageInterface.makeDir(s, dir)
+      val dir = hierarchicalStorageInterface.child(s, baseDirectory, tmp)
+      if (!storageInterface.exists(s, dir)) hierarchicalStorageInterface.makeDir(s, dir)
       cleanTmpDirectory(s, dir)
       dir
     }
@@ -78,7 +79,7 @@ object StorageSpace extends JavaLogger {
     }
   }
 
-  def createBasePath[S](s: S, root: String, isConnectionError: Throwable ⇒ Boolean)(implicit storageInterface: StorageInterface[S], preference: Preference) = {
+  def createBasePath[S](s: S, root: String, isConnectionError: Throwable ⇒ Boolean)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], preference: Preference) = {
     def baseDirName = "openmole-" + preference(Preference.uniqueID) + '/'
 
     def mkRootDir: String = synchronized {
@@ -87,7 +88,7 @@ object StorageSpace extends JavaLogger {
       paths.tail.foldLeft(paths.head.toString) {
         (path, file) ⇒
           val childPath = storageInterface.child(s, path, storageInterface.name(s, file))
-          try storageInterface.makeDir(s, childPath)
+          try hierarchicalStorageInterface.makeDir(s, childPath)
           catch {
             case e: Throwable if isConnectionError(e) ⇒ throw e
             case e: Throwable                         ⇒ Log.logger.log(Log.FINE, "Error creating base directory " + root, e)
@@ -98,11 +99,17 @@ object StorageSpace extends JavaLogger {
 
     val rootPath = mkRootDir
     val basePath = storageInterface.child(s, rootPath, baseDirName)
-    util.Try(storageInterface.makeDir(s, basePath)) match {
+    util.Try(hierarchicalStorageInterface.makeDir(s, basePath)) match {
       case util.Success(_) ⇒ basePath
       case util.Failure(e) ⇒
         if (storageInterface.exists(s, basePath)) basePath else throw e
     }
+  }
+
+  def createJobDirectory[S](s: S, storageSpace: StorageSpace)(implicit hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = Lazy {
+    val communicationPath = hierarchicalStorageInterface.child(s, storageSpace.tmpDirectory, StorageSpace.timedUniqName)
+    hierarchicalStorageInterface.makeDir(s, communicationPath)
+    communicationPath
   }
 
 }

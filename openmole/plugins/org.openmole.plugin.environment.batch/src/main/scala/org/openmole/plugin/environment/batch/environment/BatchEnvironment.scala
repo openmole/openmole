@@ -157,8 +157,12 @@ object BatchEnvironment extends JavaLogger {
     implicit val fileServiceCache:  FileServiceCache
   )
 
-  def serializeJob(storageService: StorageService[_], remoteStorage: RemoteStorage, job: BatchExecutionJob, tmpDirectory: String, replicaDirectory: String)(implicit services: BatchEnvironment.Services) =
-    AccessControl.tryWithPermit(storageService.accessControl) { initCommunication(job, storageService, remoteStorage, tmpDirectory, replicaDirectory) }
+  def serializeJob[S](storage: S, remoteStorage: RemoteStorage, job: BatchExecutionJob, communicationPath: Lazy[String], replicaDirectory: String)(implicit services: BatchEnvironment.Services, storageInterface: StorageInterface[S], environmentStorage: EnvironmentStorage[S]) = {
+    val storageService = StorageService(storage)
+    AccessControl.tryWithPermit(storageService.accessControl) {
+      initCommunication(job, storageService, remoteStorage, communicationPath, replicaDirectory)
+    }
+  }
 
   def jobFiles(job: BatchExecutionJob) =
     job.pluginsAndFiles.files.toVector ++
@@ -166,7 +170,7 @@ object BatchEnvironment extends JavaLogger {
       job.environment.plugins ++
       Seq(job.environment.jvmLinuxX64, job.environment.runtime)
 
-  def initCommunication(job: BatchExecutionJob, storage: StorageService[_], remoteStorage: RemoteStorage, tmpDirectory: String, replicaDirectory: String)(implicit services: BatchEnvironment.Services): SerializedJob = services.newFile.withTmpFile("job", ".tar") { jobFile ⇒
+  def initCommunication(job: BatchExecutionJob, storage: StorageService[_], remoteStorage: RemoteStorage, communicationPath: Lazy[String], replicaDirectory: String)(implicit services: BatchEnvironment.Services): SerializedJob = services.newFile.withTmpFile("job", ".tar") { jobFile ⇒
     import services._
 
     serializerService.serialise(job.runnableTasks, jobFile)
@@ -174,11 +178,8 @@ object BatchEnvironment extends JavaLogger {
     val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins
     val files = (new TreeSet[File]()(fileOrdering) ++ job.files) diff plugins
 
-    val communicationPath = storage.child(tmpDirectory, StorageSpace.timedUniqName)
-    storage.makeDir(communicationPath)
-
-    val inputPath = storage.child(communicationPath, uniqName("job", ".in"))
-    val outputPath = storage.child(communicationPath, uniqName("job", ".out"))
+    val inputPath = storage.child(communicationPath(), uniqName("job", ".in"))
+    val outputPath = storage.child(communicationPath(), uniqName("job", ".out"))
 
     val runtime = replicateTheRuntime(job.job, job.environment, storage, replicaDirectory)
 
@@ -188,7 +189,7 @@ object BatchEnvironment extends JavaLogger {
       files,
       plugins,
       storage,
-      communicationPath,
+      communicationPath(),
       replicaDirectory
     )
 
@@ -204,12 +205,12 @@ object BatchEnvironment extends JavaLogger {
         import org.openmole.tool.hash._
         services.serializerService.serialiseAndArchiveFiles(remoteStorage, storageFile)
         val hash = storageFile.hash().toString()
-        val path = storage.child(communicationPath, StorageSpace.timedUniqName)
+        val path = storage.child(communicationPath(), StorageSpace.timedUniqName)
         signalUpload(eventDispatcher.eventId, storage.upload(storageFile, path, TransferOptions(forceCopy = true, canMove = true)), storageFile, inputPath, storage)
         FileMessage(path, hash)
       }
 
-    SerializedJob(storage, communicationPath, inputPath, runtime, serializedStorage, Some(outputPath))
+    SerializedJob(storage, communicationPath(), inputPath, runtime, serializedStorage, Some(outputPath))
   }
 
   def toReplicatedFile(file: File, storage: StorageService[_], replicaDirectory: String, transferOptions: TransferOptions)(implicit services: BatchEnvironment.Services): ReplicatedFile = {

@@ -31,17 +31,17 @@ import squants.information.Information
 
 object SharedStorage extends JavaLogger {
 
-  def installRuntime[S](runtime: Runtime, storage: S, frontend: Frontend, baseDirectory: String)(implicit preference: Preference, newFile: NewFile, storageInterface: StorageInterface[S]) =
+  def installRuntime[S](runtime: Runtime, storage: S, frontend: Frontend, baseDirectory: String)(implicit preference: Preference, newFile: NewFile, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) =
     AccessControl.withPermit(storageInterface.accessControl(storage)) {
       val runtimePrefix = "runtime"
       val runtimeInstall = runtimePrefix + runtime.runtime.hash
 
       val (workdir, scriptName) = {
         val installDir = storageInterface.child(storage, baseDirectory, "install")
-        util.Try(storageInterface.makeDir(storage, installDir))
+        util.Try(hierarchicalStorageInterface.makeDir(storage, installDir))
 
         val workdir = storageInterface.child(storage, installDir, preference(Preference.uniqueID) + "_install")
-        if (!storageInterface.exists(storage, workdir)) storageInterface.makeDir(storage, workdir)
+        if (!storageInterface.exists(storage, workdir)) hierarchicalStorageInterface.makeDir(storage, workdir)
 
         newFile.withTmpFile("install", ".sh") { script ⇒
 

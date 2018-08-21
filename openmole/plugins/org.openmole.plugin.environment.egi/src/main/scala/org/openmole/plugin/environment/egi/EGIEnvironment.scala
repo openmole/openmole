@@ -121,7 +121,7 @@ object EGIEnvironment extends JavaLogger {
   def defaultBDIIs(implicit preference: Preference) =
     preference(EGIEnvironment.DefaultBDIIs).map(b ⇒ new java.net.URI(b)).map(toBDII)
 
-  implicit def webdavlocationIsStorage(implicit httpEffect: Effect[_root_.gridscale.http.HTTP]) = new StorageInterface[WebDavStorage] with EnvironmentStorage[WebDavStorage] {
+  implicit def webdavlocationIsStorage(implicit httpEffect: Effect[_root_.gridscale.http.HTTP]) = new StorageInterface[WebDavStorage] with EnvironmentStorage[WebDavStorage] with HierarchicalStorageInterface[WebDavStorage] {
     def webdavServer(location: WebDavStorage) = gridscale.webdav.WebDAVSServer(location.url, location.proxyCache().factory)
 
     override def accessControl(t: WebDavStorage): AccessControl = t.accessControl
@@ -376,7 +376,13 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
     val (storageSpace, storageService) = selectStorage
     val remoteStorage = CurlRemoteStorage(storageService.url, voName, debug, preference(EGIEnvironment.RemoteCopyTimeout))
-    BatchEnvironment.serializeJob(StorageService(storageService), remoteStorage, batchExecutionJob, storageSpace().tmpDirectory, storageSpace().replicaDirectory)
+
+    BatchEnvironment.serializeJob(
+      storageService,
+      remoteStorage,
+      batchExecutionJob,
+      StorageSpace.createJobDirectory(storageService, storageSpace()), storageSpace().replicaDirectory)
+
   }
 
   import gridscale.dirac._
