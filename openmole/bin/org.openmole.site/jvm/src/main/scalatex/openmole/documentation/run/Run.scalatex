@@ -54,6 +54,7 @@ Once your model is properly embedded in an OpenMOLE task you can use it in an ex
 
 
 
+
 @h2{Exploration method}
 
 The composition a a full exploration experiment is achieved by writing a script in the OpenMOLE language. Writing an OpenMOLE exploration script consists in defining:
