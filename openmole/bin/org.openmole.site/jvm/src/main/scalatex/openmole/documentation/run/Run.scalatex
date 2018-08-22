@@ -52,6 +52,7 @@ val t = EmptyTask() set (
 Once your model is properly embedded in an OpenMOLE task you can use it in an exploration method and delegate the multiple execution of the task to remote computing environments.
 
 
+
 @h2{Exploration method}
 
 The composition a a full exploration experiment is achieved by writing a script in the OpenMOLE language. Writing an OpenMOLE exploration script consists in defining:
