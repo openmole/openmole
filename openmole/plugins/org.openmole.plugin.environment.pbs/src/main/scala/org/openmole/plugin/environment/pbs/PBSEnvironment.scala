@@ -119,7 +119,17 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
   implicit val systemInterpreter = effectaside.System()
   implicit val localInterpreter = gridscale.local.Local()
 
-  override def stop() = { sshInterpreter().close }
+  override def start() = {
+    storageService
+  }
+
+  override def stop() = {
+    storageService match {
+      case Left((space, local)) ⇒ HierarchicalStorageSpace.clean(local, space)
+      case Right((space, ssh))  ⇒ HierarchicalStorageSpace.clean(ssh, space)
+    }
+    sshInterpreter().close
+  }
 
   import env.services.preference
   import org.openmole.plugin.environment.ssh._
@@ -153,8 +163,8 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
 
     storageService match {
       case Left((space, local)) ⇒
-        BatchEnvironment.serializeJob(local, remoteStorage, batchExecutionJob, StorageSpace.createJobDirectory(local, space), space.replicaDirectory, StorageSpace.backgroundRm(local, _, true))
-      case Right((space, ssh)) ⇒ BatchEnvironment.serializeJob(ssh, remoteStorage, batchExecutionJob, StorageSpace.createJobDirectory(ssh, space), space.replicaDirectory, StorageSpace.backgroundRm(ssh, _, true))
+        BatchEnvironment.serializeJob(local, remoteStorage, batchExecutionJob, HierarchicalStorageSpace.createJobDirectory(local, space), space.replicaDirectory, HierarchicalStorageSpace.backgroundRm(local, _, true))
+      case Right((space, ssh)) ⇒ BatchEnvironment.serializeJob(ssh, remoteStorage, batchExecutionJob, HierarchicalStorageSpace.createJobDirectory(ssh, space), space.replicaDirectory, HierarchicalStorageSpace.backgroundRm(ssh, _, true))
     }
   }
 
@@ -170,8 +180,8 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
       case Right((_, ssh))  ⇒ new PBSJobService(ssh, installRuntime, parameters, sshServer, accessControl)
     }
 
-  override def submitSerializedJob(serializedJob: SerializedJob) =
-    BatchEnvironment.submitSerializedJob(pbsJobService, serializedJob)
+  override def submitSerializedJob(batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob) =
+    BatchEnvironment.submitSerializedJob(pbsJobService, batchExecutionJob, serializedJob)
 }
 
 class PBSLocalEnvironment(
@@ -183,6 +193,9 @@ class PBSLocalEnvironment(
 
   implicit val localInterpreter = gridscale.local.Local()
 
+  override def start() = { storage; space }
+  override def stop() = { HierarchicalStorageSpace.clean(storage, space) }
+
   import env.services.preference
   import org.openmole.plugin.environment.ssh._
 
@@ -191,7 +204,7 @@ class PBSLocalEnvironment(
 
   override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
     val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage())
-    BatchEnvironment.serializeJob(storage, remoteStorage, batchExecutionJob, StorageSpace.createJobDirectory(storage, space), space.replicaDirectory, StorageSpace.backgroundRm(storage, _, true))
+    BatchEnvironment.serializeJob(storage, remoteStorage, batchExecutionJob, HierarchicalStorageSpace.createJobDirectory(storage, space), space.replicaDirectory, HierarchicalStorageSpace.backgroundRm(storage, _, true))
   }
 
   lazy val installRuntime = new RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
@@ -200,8 +213,8 @@ class PBSLocalEnvironment(
 
   lazy val pbsJobService = new PBSJobService(storage, installRuntime, parameters, LocalHost(), AccessControl(preference(SSHEnvironment.MaxConnections)))
 
-  override def submitSerializedJob(serializedJob: SerializedJob) =
-    BatchEnvironment.submitSerializedJob(pbsJobService, serializedJob)
+  override def submitSerializedJob(batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob) =
+    BatchEnvironment.submitSerializedJob(pbsJobService, batchExecutionJob, serializedJob)
 
 }
 

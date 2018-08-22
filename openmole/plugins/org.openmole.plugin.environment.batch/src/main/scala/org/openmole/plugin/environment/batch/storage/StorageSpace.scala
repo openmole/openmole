@@ -12,34 +12,38 @@ import org.openmole.plugin.environment.batch.refresh.{ JobManager, RetryAction }
 import org.openmole.tool.cache.Lazy
 import org.openmole.tool.logger.JavaLogger
 
-object StorageSpace extends JavaLogger {
+object StorageSpace {
+  def timedUniqName = org.openmole.tool.file.uniqName(System.currentTimeMillis.toString, ".rep", separator = "_")
+}
+
+object HierarchicalStorageSpace extends JavaLogger {
   val TmpDirRemoval = ConfigurationLocation("StorageService", "TmpDirRemoval", Some(30 days))
 
-  def hierarchicalStorageSpace[S](s: S, root: String, storageId: String, isConnectionError: Throwable ⇒ Boolean)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], services: BatchEnvironment.Services) = {
+  def create[S](s: S, root: String, storageId: String, isConnectionError: Throwable ⇒ Boolean)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], preference: Preference) = {
     val persistent = "persistent/"
     val tmp = "tmp/"
 
-    import services._
     val baseDirectory = createBasePath(s, root, isConnectionError)
 
     val replicaDirectory = {
       val dir = hierarchicalStorageInterface.child(s, baseDirectory, persistent)
       if (!storageInterface.exists(s, dir)) hierarchicalStorageInterface.makeDir(s, dir)
-      cleanReplicaDirectory(s, dir, storageId)
       dir
     }
 
     val tmpDirectory = {
       val dir = hierarchicalStorageInterface.child(s, baseDirectory, tmp)
       if (!storageInterface.exists(s, dir)) hierarchicalStorageInterface.makeDir(s, dir)
-      cleanTmpDirectory(s, dir)
       dir
     }
 
     StorageSpace(baseDirectory, replicaDirectory, tmpDirectory)
   }
 
-  def timedUniqName = org.openmole.tool.file.uniqName(System.currentTimeMillis.toString, ".rep", separator = "_")
+  def clean[S](s: S, storageSpace: StorageSpace)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], environmentStorage: EnvironmentStorage[S], services: BatchEnvironment.Services) = {
+    cleanReplicaDirectory(s, storageSpace.replicaDirectory, environmentStorage.id(s))
+    cleanTmpDirectory(s, storageSpace.tmpDirectory)
+  }
 
   lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
   def extractTimeFromName(name: String) = {
@@ -119,6 +123,6 @@ object StorageSpace extends JavaLogger {
     hierarchicalStorageInterface.makeDir(s, communicationPath)
     communicationPath
   }
-
 }
+
 case class StorageSpace(baseDirectory: String, replicaDirectory: String, tmpDirectory: String)

@@ -280,9 +280,9 @@ object BatchEnvironment extends JavaLogger {
 
   def resultPathInSerializedJob(serializedJob: SerializedJob) = serializedJob.resultPath.get
 
-  def submitSerializedJob[S](jobService: S, serializedJob: SerializedJob, resultPath: SerializedJob ⇒ String = resultPathInSerializedJob)(implicit jobServiceInterface: JobServiceInterface[S]) =
+  def submitSerializedJob[S](jobService: S, batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob, resultPath: SerializedJob ⇒ String = resultPathInSerializedJob)(implicit jobServiceInterface: JobServiceInterface[S]) =
     AccessControl.tryWithPermit(jobServiceInterface.accessControl(jobService)) {
-      BatchJobService.submit(jobService, serializedJob, () ⇒ resultPath(serializedJob))
+      BatchJobService.submit(jobService, batchExecutionJob, serializedJob, () ⇒ resultPath(serializedJob))
     }
 
   def isClean(environment: BatchEnvironment)(implicit services: BatchEnvironment.Services) = {
@@ -338,7 +338,7 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
   def exceptions = services.preference(Environment.maxExceptionsLog)
 
   def serializeJob(batchExecutionJob: BatchExecutionJob): Option[SerializedJob]
-  def submitSerializedJob(serializedJob: SerializedJob): Option[BatchJobControl]
+  def submitSerializedJob(batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob): Option[BatchJobControl]
 
   def clean = BatchEnvironment.isClean(this)
 

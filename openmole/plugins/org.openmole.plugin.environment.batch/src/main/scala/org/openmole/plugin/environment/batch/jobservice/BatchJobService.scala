@@ -28,7 +28,7 @@ import scala.concurrent.stm._
 trait JobServiceInterface[JS] {
   type J
 
-  def submit(js: JS, serializedJob: SerializedJob): J
+  def submit(js: JS, serializedJob: SerializedJob, batchExecutionJob: BatchExecutionJob): J
   def state(js: JS, j: J): ExecutionState
   def delete(js: JS, j: J): Unit
   def stdOutErr(js: JS, j: J): (String, String)
@@ -40,13 +40,13 @@ object BatchJobService extends JavaLogger {
 
   def tryStdOutErr(batchJob: BatchJobControl) = util.Try(batchJob.stdOutErr())
 
-  def submit[JS](jobService: JS, serializedJob: SerializedJob, resultPath: () ⇒ String)(implicit jobServiceInterface: JobServiceInterface[JS]): BatchJobControl = {
+  def submit[JS](jobService: JS, batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob, resultPath: () ⇒ String)(implicit jobServiceInterface: JobServiceInterface[JS]): BatchJobControl = {
 
     def updateState(job: jobServiceInterface.J)(): ExecutionState = jobServiceInterface.state(jobService, job)
     def delete(job: jobServiceInterface.J)() = jobServiceInterface.delete(jobService, job)
     def stdOutErr(job: jobServiceInterface.J)() = jobServiceInterface.stdOutErr(jobService, job)
 
-    val job = jobServiceInterface.submit(jobService, serializedJob)
+    val job = jobServiceInterface.submit(jobService, serializedJob, batchExecutionJob)
     BatchJobService.Log.logger.fine(s"Successful submission: ${job}")
 
     BatchJobControl(

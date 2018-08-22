@@ -31,12 +31,13 @@ import org.openmole.plugin.environment.batch.storage._
 import org.openmole.plugin.environment.gridscale.LogicalLinkStorage
 import org.openmole.tool.crypto._
 import org.openmole.tool.lock._
+import org.openmole.tool.logger.JavaLogger
 import squants.information._
 import squants.time.TimeConversions._
 
 import scala.ref.WeakReference
 
-object SSHEnvironment {
+object SSHEnvironment extends JavaLogger {
 
   val MaxLocalOperations = ConfigurationLocation("ClusterEnvironment", "MaxLocalOperations", Some(100))
   val MaxConnections = ConfigurationLocation("SSHEnvironment", "MaxConnections", Some(5))
@@ -75,30 +76,10 @@ object SSHEnvironment {
     }
   }
 
-  class Updater(environment: WeakReference[SSHEnvironment[_]]) extends IUpdatable {
-
-    var stop = false
-
-    def update() =
-      if (stop) false
-      else environment.get match {
-        case Some(env) ⇒
-          val nbSubmit = env.slots - env.numberOfRunningJobs
-          val toSubmit = env.queuesLock { env.jobsStates.collect { case (job, Queued(desc)) ⇒ job → desc }.take(nbSubmit) }
-
-          for {
-            (job, desc) ← toSubmit
-          } env.sshJobService.submit(job, desc)
-
-          !stop
-        case None ⇒ false
-      }
-  }
-
   case class SSHJob(id: Long) extends AnyVal
 
   sealed trait SSHRunState
-  case class Queued(description: gridscale.ssh.SSHJobDescription) extends SSHRunState
+  case class Queued(description: gridscale.ssh.SSHJobDescription, batchExecutionJob: BatchExecutionJob) extends SSHRunState
   case class Submitted(pid: gridscale.ssh.JobId) extends SSHRunState
   case object Failed extends SSHRunState
 
@@ -121,7 +102,7 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   import services._
   override def updateInterval = UpdateInterval.fixed(env.services.preference(SSHEnvironment.UpdateInterval))
 
-  lazy val jobUpdater = new SSHEnvironment.Updater(WeakReference(this))
+  lazy val jobUpdater = new SSHJobService.Updater(WeakReference(this))
 
   val queuesLock = new ReentrantLock()
   val jobsStates = collection.mutable.TreeMap[SSHEnvironment.SSHJob, SSHEnvironment.SSHRunState]()(Ordering.by(_.id))
@@ -130,18 +111,23 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   type PID = Int
   val submittedJobs = collection.mutable.Map[SSHEnvironment.SSHJob, PID]()
 
-  override def start() = {
-    import services.threadProvider
-    Updater.delay(jobUpdater, services.preference(SSHEnvironment.UpdateInterval))
-  }
-
   implicit val sshInterpreter = gridscale.ssh.SSH()
   implicit val systemInterpreter = System()
   implicit val localInterpreter = gridscale.local.Local()
 
   def timeout = services.preference(SSHEnvironment.TimeOut)
 
+  override def start() = {
+    storageService
+    import services.threadProvider
+    Updater.delay(jobUpdater, services.preference(SSHEnvironment.UpdateInterval))
+  }
+
   override def stop() = {
+    storageService match {
+      case Left((space, local)) ⇒ HierarchicalStorageSpace.clean(local, space)
+      case Right((space, ssh))  ⇒ HierarchicalStorageSpace.clean(ssh, space)
+    }
     jobUpdater.stop = true
     sshInterpreter().close
   }
@@ -149,11 +135,6 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   import env.services.preference
 
   lazy val accessControl = AccessControl(preference(SSHEnvironment.MaxConnections))
-
-  def numberOfRunningJobs: Int = {
-    val sshJobIds = env.queuesLock { env.jobsStates.toSeq.collect { case (j, SSHEnvironment.Submitted(id)) ⇒ id } }
-    sshJobIds.toList.map(id ⇒ gridscale.ssh.SSHJobDescription.jobIsRunning(env.sshServer, id)).count(_ == true)
-  }
 
   lazy val sshServer = gridscale.ssh.SSHServer(env.host, env.port, env.timeout)(env.authentication)
 
@@ -182,8 +163,8 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
     val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage())
 
     storageService match {
-      case Left((space, local)) ⇒ BatchEnvironment.serializeJob(local, remoteStorage, batchExecutionJob, StorageSpace.createJobDirectory(local, space), space.replicaDirectory, StorageSpace.backgroundRm(local, _, true))
-      case Right((space, ssh))  ⇒ BatchEnvironment.serializeJob(ssh, remoteStorage, batchExecutionJob, StorageSpace.createJobDirectory(ssh, space), space.replicaDirectory, StorageSpace.backgroundRm(ssh, _, true))
+      case Left((space, local)) ⇒ BatchEnvironment.serializeJob(local, remoteStorage, batchExecutionJob, HierarchicalStorageSpace.createJobDirectory(local, space), space.replicaDirectory, HierarchicalStorageSpace.backgroundRm(local, _, true))
+      case Right((space, ssh))  ⇒ BatchEnvironment.serializeJob(ssh, remoteStorage, batchExecutionJob, HierarchicalStorageSpace.createJobDirectory(ssh, space), space.replicaDirectory, HierarchicalStorageSpace.backgroundRm(ssh, _, true))
     }
   }
 
@@ -199,7 +180,7 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
       case Right((space, ssh))  ⇒ new SSHJobService(ssh, services, installRuntime, env, accessControl)
     }
 
-  override def submitSerializedJob(serializedJob: SerializedJob) =
-    BatchEnvironment.submitSerializedJob(sshJobService, serializedJob)
+  override def submitSerializedJob(batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob) =
+    BatchEnvironment.submitSerializedJob(sshJobService, batchExecutionJob, serializedJob)
 }
 

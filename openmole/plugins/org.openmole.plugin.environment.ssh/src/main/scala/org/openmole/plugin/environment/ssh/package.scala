@@ -18,18 +18,14 @@ package org.openmole.plugin.environment
 
 import java.net.URI
 
+import effectaside._
 import org.openmole.core.communication.storage.TransferOptions
-import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.preference.Preference
-import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.dsl.File
-import org.openmole.plugin.environment.batch.environment.{BatchEnvironment, Runtime, AccessControl}
+import org.openmole.core.workspace.NewFile
+import org.openmole.plugin.environment.batch.environment.{AccessControl, BatchEnvironment, Runtime}
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.plugin.environment.gridscale.LocalStorage
-import effectaside._
-import org.openmole.core.replication.ReplicaCatalog
-import org.openmole.core.workspace.NewFile
-import org.openmole.tool.cache.Lazy
 import squants.Time
 
 package object ssh {
@@ -37,7 +33,7 @@ package object ssh {
   case class SSHStorage(sshServer: _root_.gridscale.ssh.SSHServer, accessControl: AccessControl, id: String, environment: BatchEnvironment, root: String)
   case class LocalStorageServer(localStorage: LocalStorage, accessControl: AccessControl, qualityControl: QualityControl)
 
-  import _root_.gridscale.{ ssh ⇒ gssh }
+  import _root_.gridscale.{ssh => gssh}
 
   object SSHStorage {
 
@@ -97,7 +93,8 @@ package object ssh {
     LocalStorage(accessControl, id, environment, root)
   }
 
-  def localStorageSpace(local: LocalStorage)(implicit services: BatchEnvironment.Services, interpreter: Effect[_root_.gridscale.local.Local]) = StorageSpace.hierarchicalStorageSpace(local, local.root, local.id, _ ⇒ false)
+  def localStorageSpace(local: LocalStorage)(implicit preference: Preference, localEffect: Effect[_root_.gridscale.local.Local]) =
+    HierarchicalStorageSpace.create(local, local.root, local.id, _ ⇒ false)
 
   def sshStorage(
     user:                 String,
@@ -113,7 +110,8 @@ package object ssh {
     SSHStorage(sshServer, accessControl, id, environment, root)
   }
 
-  def sshStorageSpace(ssh: SSHStorage)(implicit services: BatchEnvironment.Services, interpreter: Effect[_root_.gridscale.ssh.SSH]) = StorageSpace.hierarchicalStorageSpace(ssh, ssh.root, ssh.id, SSHStorage.isConnectionError)
+  def sshStorageSpace(ssh: SSHStorage)(implicit preference: Preference, sshEffect: Effect[_root_.gridscale.ssh.SSH]) =
+    HierarchicalStorageSpace.create(ssh, ssh.root, ssh.id, SSHStorage.isConnectionError)
 
   type LocalOrSSH = Either[(Any, LocalStorage), (Any, SSHStorage)]
 

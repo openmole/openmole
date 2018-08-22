@@ -43,7 +43,7 @@ object ErrorActor extends JavaLogger {
           )
       }
 
-    val er = Environment.ExceptionRaised(job, detailedException, level)
+    val er = Environment.ExecutionJobExceptionRaised(job, detailedException, level)
     job.environment.error(er)
     services.eventDispatcher.trigger(job.environment: Environment, er)
     logger.log(FINE, "Error in job refresh", detailedException)

@@ -19,10 +19,11 @@ package org.openmole.plugin.environment.egi
 
 import java.io.File
 
+import org.apache.commons.configuration2.HierarchicalConfigurationXMLReader
 import org.bouncycastle.voms.VOMSAttribute
 import org.openmole.core.authentication.AuthenticationStore
 import org.openmole.core.communication.storage
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
+import org.openmole.core.exception.{ InternalProcessingError, MultipleException, UserBadDataError }
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.threadprovider.Updater
 import org.openmole.core.workspace.Workspace
@@ -160,7 +161,7 @@ object EGIEnvironment extends JavaLogger {
 
   implicit def isJobService[A]: JobServiceInterface[EGIEnvironment[A]] = new JobServiceInterface[EGIEnvironment[A]] {
     override type J = gridscale.dirac.JobID
-    override def submit(env: EGIEnvironment[A], serializedJob: SerializedJob): J = env.submit(serializedJob)
+    override def submit(env: EGIEnvironment[A], serializedJob: SerializedJob, batchExecutionJob: BatchExecutionJob): J = env.submit(serializedJob)
     override def state(env: EGIEnvironment[A], j: J) = env.state(j)
     override def delete(env: EGIEnvironment[A], j: J): Unit = env.delete(j)
     override def stdOutErr(env: EGIEnvironment[A], j: J) = env.stdOutErr(j)
@@ -282,12 +283,17 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
   override def start() = {
     proxyCache()
+    if (storages.map(_.toOption).flatten.isEmpty) throw new InternalProcessingError(s"No webdav storage is working for the VO $voName", MultipleException(storages.collect { case util.Failure(e) ⇒ e }))
+  }
+
+  override def stop() = {
+    storages.map(_.toOption).flatten.foreach { case (space, storage) ⇒ HierarchicalStorageSpace.clean(storage, space) }
   }
 
   def bdiis: Seq[gridscale.egi.BDIIServer] =
     bdiiURL.map(b ⇒ Seq(EGIEnvironment.toBDII(new java.net.URI(b)))).getOrElse(EGIEnvironment.defaultBDIIs)
 
-  lazy val storages = Cache {
+  lazy val storages = {
     val webdavStorages = findFirstWorking(bdiis) { b: BDIIServer ⇒ webDAVs(b, voName) }
     if (!webdavStorages.isEmpty) webdavStorages.map { location ⇒
       def isConnectionError(t: Throwable) = t match {
@@ -296,10 +302,10 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
       }
 
       val storage = WebDavStorage(location, AccessControl(preference(EGIEnvironment.ConnexionsByWebDAVSE)), QualityControl(preference(BatchEnvironment.QualityHysteresis)), proxyCache, env)
-      def storageSpace = StorageSpace.hierarchicalStorageSpace(storage, "", location, isConnectionError)
-      (Lazy(storageSpace), storage)
+      def storageSpace = util.Try { HierarchicalStorageSpace.create(storage, "", location, isConnectionError) }
+      storageSpace.map(s ⇒ (s, storage))
     }
-    else throw new InternalProcessingError("No WebDAV storage available for the VO")
+    else throw new InternalProcessingError(s"No WebDAV storage available for the VO $voName")
   }
 
   override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
@@ -308,7 +314,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     import org.openmole.core.tools.math._
 
     def selectStorage = {
-      val sss = storages()
+      val sss = storages.map(_.toOption).flatten
       if (sss.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
 
       if (sss.size == 1) sss.head
@@ -379,9 +385,9 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
       storageService,
       remoteStorage,
       batchExecutionJob,
-      StorageSpace.createJobDirectory(storageService, storageSpace()),
-      storageSpace().replicaDirectory,
-      StorageSpace.backgroundRm(storageService, _, true))
+      HierarchicalStorageSpace.createJobDirectory(storageService, storageSpace),
+      storageSpace.replicaDirectory,
+      HierarchicalStorageSpace.backgroundRm(storageService, _, true))
 
   }
 
@@ -405,7 +411,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   def submit(serializedJob: SerializedJob) = {
     import org.openmole.tool.file._
 
-    def storageLocations = storages().map(_._2).map(s ⇒ implicitly[EnvironmentStorage[WebDavStorage]].id(s) -> s.url).toMap
+    def storageLocations = storages.map(_.toOption).flatten.map(_._2).map(s ⇒ implicitly[EnvironmentStorage[WebDavStorage]].id(s) -> s.url).toMap
 
     def jobScript =
       JobScript(
@@ -468,8 +474,8 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
   lazy val diracaccessControl = environment.AccessControl(preference(EGIEnvironment.ConnectionsToDIRAC))
 
-  override def submitSerializedJob(serializedJob: SerializedJob) =
-    BatchEnvironment.submitSerializedJob(env, serializedJob)
+  override def submitSerializedJob(batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob) =
+    BatchEnvironment.submitSerializedJob(env, batchExecutionJob, serializedJob)
 
   override def updateInterval =
     UpdateInterval.fixed(preference(EGIEnvironment.JobGroupRefreshInterval))
