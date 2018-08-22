@@ -64,7 +64,7 @@ class PBSJobService[S, H](
                  |bash script:
                  |$remoteScript""".stripMargin)
 
-    val id = gridscale.pbs.submit(h, description)
+    val id = accessControl { gridscale.pbs.submit(h, description) }
 
     log(FINE, s"""Submitted PBS job with PBS script:
                  |uniqId: ${id.uniqId}
@@ -74,12 +74,12 @@ class PBSJobService[S, H](
   }
 
   def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    GridScaleJobService.translateStatus(gridscale.pbs.state(h, id))
+    accessControl { GridScaleJobService.translateStatus(gridscale.pbs.state(h, id)) }
 
   def delete(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    gridscale.pbs.clean(h, id)
+    accessControl { gridscale.pbs.clean(h, id) }
 
   def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    (gridscale.pbs.stdOut(h, id), gridscale.pbs.stdErr(h, id))
+    accessControl { (gridscale.pbs.stdOut(h, id), gridscale.pbs.stdErr(h, id)) }
 
 }

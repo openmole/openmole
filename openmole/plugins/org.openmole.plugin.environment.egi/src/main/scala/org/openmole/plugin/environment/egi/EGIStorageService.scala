@@ -52,8 +52,13 @@
 
 package org.openmole.plugin.environment.egi
 
+import effectaside.Effect
+import gridscale.egi.VOMS
 import org.openmole.core.communication.storage._
 import org.openmole.core.workspace.NewFile
+import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment }
+import org.openmole.plugin.environment.batch.storage.{ EnvironmentStorage, HierarchicalStorageInterface, QualityControl, StorageInterface }
+import org.openmole.tool.cache.TimeCache
 import org.openmole.tool.file._
 //
 //object NativeCommandCopy {
@@ -210,3 +215,40 @@ case class CurlRemoteStorage(location: String, voName: String, debug: Boolean, t
   override def child(parent: String, child: String): String = gridscale.RemotePath.child(parent, child)
 }
 
+object WebDavStorage {
+  implicit def webdavlocationIsStorage(implicit httpEffect: Effect[_root_.gridscale.http.HTTP]) = new StorageInterface[WebDavStorage] with EnvironmentStorage[WebDavStorage] with HierarchicalStorageInterface[WebDavStorage] {
+
+    def webdavServer(location: WebDavStorage) = gridscale.webdav.WebDAVSServer(location.url, location.proxyCache().factory)
+
+    override def accessControl(t: WebDavStorage): AccessControl = t.accessControl
+
+    override def child(t: WebDavStorage, parent: String, child: String): String = gridscale.RemotePath.child(parent, child)
+    override def parent(t: WebDavStorage, path: String): Option[String] = gridscale.RemotePath.parent(path)
+    override def name(t: WebDavStorage, path: String): String = gridscale.RemotePath.name(path)
+
+    override def exists(t: WebDavStorage, path: String): Boolean = t.accessControl { t.qualityControl { gridscale.webdav.exists(webdavServer(t), path) } }
+    override def list(t: WebDavStorage, path: String): Seq[gridscale.ListEntry] = t.accessControl { t.qualityControl { gridscale.webdav.list(webdavServer(t), path) } }
+    override def makeDir(t: WebDavStorage, path: String): Unit = t.accessControl { t.qualityControl { gridscale.webdav.mkDirectory(webdavServer(t), path) } }
+    override def rmDir(t: WebDavStorage, path: String): Unit = t.accessControl { t.qualityControl { gridscale.webdav.rmDirectory(webdavServer(t), path) } }
+    override def rmFile(t: WebDavStorage, path: String): Unit = t.accessControl { t.qualityControl { gridscale.webdav.rmFile(webdavServer(t), path) } }
+
+    override def upload(t: WebDavStorage, src: File, dest: String, options: storage.TransferOptions): Unit = t.accessControl {
+      t.qualityControl {
+        StorageInterface.upload(true, gridscale.webdav.writeStream(webdavServer(t), _, _))(src, dest, options)
+        //if (!exists(t, dest)) throw new InternalProcessingError(s"File $src has been successfully uploaded to $dest on $t but does not exist.")
+      }
+    }
+
+    override def download(t: WebDavStorage, src: String, dest: File, options: storage.TransferOptions): Unit = t.accessControl {
+      t.qualityControl {
+        StorageInterface.download(true, gridscale.webdav.readStream[Unit](webdavServer(t), _, _))(src, dest, options)
+      }
+    }
+
+    override def id(s: WebDavStorage): String = s.url
+    override def environment(s: WebDavStorage): BatchEnvironment = s.environment
+  }
+
+}
+
+case class WebDavStorage(url: String, accessControl: AccessControl, qualityControl: QualityControl, proxyCache: TimeCache[VOMS.VOMSCredential], environment: EGIEnvironment[_])

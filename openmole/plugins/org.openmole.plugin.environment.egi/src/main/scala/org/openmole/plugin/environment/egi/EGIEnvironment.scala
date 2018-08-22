@@ -122,52 +122,8 @@ object EGIEnvironment extends JavaLogger {
   def defaultBDIIs(implicit preference: Preference) =
     preference(EGIEnvironment.DefaultBDIIs).map(b ⇒ new java.net.URI(b)).map(toBDII)
 
-  implicit def webdavlocationIsStorage(implicit httpEffect: Effect[_root_.gridscale.http.HTTP]) = new StorageInterface[WebDavStorage] with EnvironmentStorage[WebDavStorage] with HierarchicalStorageInterface[WebDavStorage] {
-    def webdavServer(location: WebDavStorage) = gridscale.webdav.WebDAVSServer(location.url, location.proxyCache().factory)
-
-    override def accessControl(t: WebDavStorage): AccessControl = t.accessControl
-
-    override def child(t: WebDavStorage, parent: String, child: String): String = gridscale.RemotePath.child(parent, child)
-    override def parent(t: WebDavStorage, path: String): Option[String] = gridscale.RemotePath.parent(path)
-    override def name(t: WebDavStorage, path: String): String = gridscale.RemotePath.name(path)
-
-    override def exists(t: WebDavStorage, path: String): Boolean = t.accessControl { t.qualityControl { gridscale.webdav.exists(webdavServer(t), path) } }
-    override def list(t: WebDavStorage, path: String): Seq[gridscale.ListEntry] = t.accessControl { t.qualityControl { gridscale.webdav.list(webdavServer(t), path) } }
-    override def makeDir(t: WebDavStorage, path: String): Unit = t.accessControl { t.qualityControl { gridscale.webdav.mkDirectory(webdavServer(t), path) } }
-    override def rmDir(t: WebDavStorage, path: String): Unit = t.accessControl { t.qualityControl { gridscale.webdav.rmDirectory(webdavServer(t), path) } }
-    override def rmFile(t: WebDavStorage, path: String): Unit = t.accessControl { t.qualityControl { gridscale.webdav.rmFile(webdavServer(t), path) } }
-
-    override def upload(t: WebDavStorage, src: File, dest: String, options: storage.TransferOptions): Unit = t.accessControl {
-      t.qualityControl {
-        StorageInterface.upload(true, gridscale.webdav.writeStream(webdavServer(t), _, _))(src, dest, options)
-        //if (!exists(t, dest)) throw new InternalProcessingError(s"File $src has been successfully uploaded to $dest on $t but does not exist.")
-      }
-    }
-
-    override def download(t: WebDavStorage, src: String, dest: File, options: storage.TransferOptions): Unit = t.accessControl {
-      t.qualityControl {
-        StorageInterface.download(true, gridscale.webdav.readStream[Unit](webdavServer(t), _, _))(src, dest, options)
-      }
-    }
-
-    override def id(s: WebDavStorage): String = s.url
-    override def environment(s: WebDavStorage): BatchEnvironment = s.environment
-  }
-
-  case class WebDavStorage(url: String, accessControl: AccessControl, qualityControl: QualityControl, proxyCache: TimeCache[VOMS.VOMSCredential], environment: EGIEnvironment[_])
-
   def stdOutFileName = "output"
   def stdErrFileName = "error"
-
-  implicit def isJobService[A]: JobServiceInterface[EGIEnvironment[A]] = new JobServiceInterface[EGIEnvironment[A]] {
-    override type J = gridscale.dirac.JobID
-    override def submit(env: EGIEnvironment[A], serializedJob: SerializedJob, batchExecutionJob: BatchExecutionJob): J = env.submit(serializedJob)
-    override def state(env: EGIEnvironment[A], j: J) = env.state(j)
-    override def delete(env: EGIEnvironment[A], j: J): Unit = env.delete(j)
-    override def stdOutErr(env: EGIEnvironment[A], j: J) = env.stdOutErr(j)
-
-    override def accessControl(js: EGIEnvironment[A]): AccessControl = js.diracaccessControl
-  }
 
   def eagerSubmit(environment: EGIEnvironment[_])(implicit preference: Preference) = {
     val jobs = environment.jobs
@@ -284,6 +240,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   override def start() = {
     proxyCache()
     if (storages.map(_.toOption).flatten.isEmpty) throw new InternalProcessingError(s"No webdav storage is working for the VO $voName", MultipleException(storages.collect { case util.Failure(e) ⇒ e }))
+    jobService
   }
 
   override def stop() = {
@@ -393,7 +350,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
   import gridscale.dirac._
 
-  lazy val diracService = {
+  lazy val jobService = {
     def userDiracService =
       for {
         s ← service
@@ -403,81 +360,15 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     val diracService = userDiracService getOrElse getService(voName)
     val s = server(diracService, implicitly[EGIAuthenticationInterface[A]].apply(authentication), EGIAuthentication.CACertificatesDir)
     delegate(s, implicitly[EGIAuthenticationInterface[A]].apply(authentication), tokenCache())
-    s
+    EGIJobService(s, env)
   }
-
-  lazy val diracJobGroup = java.util.UUID.randomUUID().toString.filter(_ != '-')
-
-  def submit(serializedJob: SerializedJob) = {
-    import org.openmole.tool.file._
-
-    def storageLocations = storages.map(_.toOption).flatten.map(_._2).map(s ⇒ implicitly[EnvironmentStorage[WebDavStorage]].id(s) -> s.url).toMap
-
-    def jobScript =
-      JobScript(
-        voName = voName,
-        memory = BatchEnvironment.openMOLEMemoryValue(openMOLEMemory).toMegabytes.toInt,
-        threads = 1,
-        debug = debug,
-        storageLocations
-      )
-
-    newFile.withTmpFile("script", ".sh") { script ⇒
-      script.content = jobScript(serializedJob)
-
-      val jobDescription =
-        JobDescription(
-          executable = "/bin/bash",
-          arguments = s"-x ${script.getName}",
-          inputSandbox = Seq(script),
-          stdOut = Some(EGIEnvironment.stdOutFileName),
-          stdErr = Some(EGIEnvironment.stdErrFileName),
-          outputSandbox = Seq(EGIEnvironment.stdOutFileName, EGIEnvironment.stdErrFileName),
-          cpuTime = cpuTime
-        )
-
-      gridscale.dirac.submit(diracService, jobDescription, tokenCache(), Some(diracJobGroup))
-    }
-  }
-
-  override def finishedJob(job: ExecutionJob): Unit = EGIEnvironment.eagerSubmit(this)
-
-  lazy val jobStateCache = TimeCache { () ⇒
-    val states = gridscale.dirac.queryState(diracService, tokenCache(), groupId = Some(diracJobGroup))
-    states.toMap -> preference(EGIEnvironment.JobGroupRefreshInterval)
-  }
-
-  def state(id: gridscale.dirac.JobID) = {
-    val state = jobStateCache().getOrElse(id.id, throw new InternalProcessingError(s"Job ${id.id} not found in group ${diracJobGroup} of DIRAC server."))
-    org.openmole.plugin.environment.gridscale.GridScaleJobService.translateStatus(state)
-  }
-
-  def delete(id: gridscale.dirac.JobID) = {
-    gridscale.dirac.delete(diracService, tokenCache(), id) //clean(LocalHost(), id)
-  }
-
-  def stdOutErr(id: gridscale.dirac.JobID) = newFile.withTmpDir { tmpDir ⇒
-    import org.openmole.tool.file._
-    tmpDir.mkdirs()
-    gridscale.dirac.downloadOutputSandbox(diracService, tokenCache(), id, tmpDir)
-
-    def stdOut =
-      if ((tmpDir / EGIEnvironment.stdOutFileName) exists) (tmpDir / EGIEnvironment.stdOutFileName).content
-      else ""
-
-    def stdErr =
-      if ((tmpDir / EGIEnvironment.stdErrFileName) exists) (tmpDir / EGIEnvironment.stdErrFileName).content
-      else ""
-
-    (stdOut, stdErr)
-  }
-
-  lazy val diracaccessControl = environment.AccessControl(preference(EGIEnvironment.ConnectionsToDIRAC))
 
   override def submitSerializedJob(batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob) =
-    BatchEnvironment.submitSerializedJob(env, batchExecutionJob, serializedJob)
+    BatchEnvironment.submitSerializedJob(jobService, batchExecutionJob, serializedJob)
 
   override def updateInterval =
     UpdateInterval.fixed(preference(EGIEnvironment.JobGroupRefreshInterval))
+
+  override def finishedJob(job: ExecutionJob): Unit = EGIEnvironment.eagerSubmit(env)
 
 }

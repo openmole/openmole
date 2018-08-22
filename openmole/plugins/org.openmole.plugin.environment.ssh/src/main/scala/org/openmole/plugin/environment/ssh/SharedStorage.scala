@@ -33,7 +33,7 @@ import squants.information.Information
 object SharedStorage extends JavaLogger {
 
   def installRuntime[S](runtime: Runtime, storage: S, frontend: Frontend, baseDirectory: String)(implicit preference: Preference, newFile: NewFile, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) =
-    AccessControl.withPermit(storageInterface.accessControl(storage)) {
+    storageInterface.accessControl(storage) {
       val runtimePrefix = "runtime"
       val runtimeInstall = runtimePrefix + runtime.runtime.hash
 
@@ -99,7 +99,7 @@ object SharedStorage extends JavaLogger {
     openMOLEMemory: Option[Information],
     threads:        Option[Int],
     serializedJob:  SerializedJob,
-    storage:        S)(implicit newFile: NewFile, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
+    storage:        S)(implicit newFile: NewFile, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = storageInterface.accessControl(storage) {
     val runtime = runtimePath(serializedJob.runtime) //preparedRuntime(serializedJob.runtime)
     val result = serializedJob.resultPath.get
     val baseWorkDirectory = workDirectory getOrElse serializedJob.path
