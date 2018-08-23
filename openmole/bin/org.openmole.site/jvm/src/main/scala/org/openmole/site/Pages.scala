@@ -162,7 +162,7 @@ object DocumentationPages {
   // lazy val pageName = DocumentationPage.fromScalatex(name = "html title", content = scalatex.path.to.scalatexFile, title = Some("Titre onglet"))
 
   def headPages =
-    Seq(documentation, run, explore, scale, language, advancedConcepts, developers, tutorials, OMcommunity)
+    Seq(documentation, run, packaged, explore, scale, language, advancedConcepts, developers, tutorials, OMcommunity)
 
   val mainDocPages = runPages ++ explorePages ++ scalePages ++ Seq(scale, explore, run)
 
@@ -170,7 +170,8 @@ object DocumentationPages {
   lazy val documentation = DocumentationPage.fromScalatex(name = "Documentation", content = scalatex.Documentation)
 
   def docPages =
-    runPages ++
+    taskPages ++
+      packagedPages ++
       explorePages ++
       scalePages ++
       languagePages ++
@@ -187,17 +188,22 @@ object DocumentationPages {
   // Run
   lazy val run = DocumentationPage.fromScalatex(name = "Run", content = scalatex.documentation.run.Run, title = Some("Run Your Model"))
 
-  def runPages = Seq(java, netLogo, r, scilab, care, packagedCCplusplus, packagedPython, container, scala)
+  def runPages = taskPages :+ packaged
 
-  lazy val care = DocumentationPage.fromScalatex(name = "CARE", content = scalatex.documentation.run.CARE)
-  lazy val container = DocumentationPage.fromScalatex(name = "Container", content = scalatex.documentation.run.Container)
-  lazy val java = DocumentationPage.fromScalatex(name = "Java", content = scalatex.documentation.run.Java)
-  lazy val netLogo = DocumentationPage.fromScalatex(name = "NetLogo", content = scalatex.documentation.run.NetLogo)
-  lazy val packagedCCplusplus = DocumentationPage.fromScalatex(name = "C Cplusplus", content = scalatex.documentation.run.PackagedCCplusplus, title = Some("C/C++"))
-  lazy val packagedPython = DocumentationPage.fromScalatex(name = "Python", content = scalatex.documentation.run.PackagedPython)
-  lazy val r = DocumentationPage.fromScalatex(name = "R", content = scalatex.documentation.run.R)
-  lazy val scala = DocumentationPage.fromScalatex(name = "Scala", content = scalatex.documentation.run.Scala)
-  lazy val scilab = DocumentationPage.fromScalatex(name = "Scilab", content = scalatex.documentation.run.Scilab)
+  def taskPages = Seq(scala, java, netLogo, r, scilab)
+  lazy val scala = DocumentationPage.fromScalatex(name = "Scala", content = scalatex.documentation.run.task.Scala)
+  lazy val java = DocumentationPage.fromScalatex(name = "Java", content = scalatex.documentation.run.task.Java)
+  lazy val netLogo = DocumentationPage.fromScalatex(name = "NetLogo", content = scalatex.documentation.run.task.NetLogo)
+  lazy val r = DocumentationPage.fromScalatex(name = "R", content = scalatex.documentation.run.task.R)
+  lazy val scilab = DocumentationPage.fromScalatex(name = "Scilab", content = scalatex.documentation.run.task.Scilab)
+
+  lazy val packaged = DocumentationPage.fromScalatex(name = "Packaged", content = scalatex.documentation.run.packaged.Packaged, title = Some("Package Native Code"))
+
+  def packagedPages = Seq(packagedPython, packagedCCplusplus)
+
+  //lazy val container = DocumentationPage.fromScalatex(name = "Container", content = scalatex.documentation.run.Container)
+  lazy val packagedPython = DocumentationPage.fromScalatex(name = "Python", content = scalatex.documentation.run.packaged.PackagedPython)
+  lazy val packagedCCplusplus = DocumentationPage.fromScalatex(name = "C Cplusplus", content = scalatex.documentation.run.packaged.PackagedCCplusplus, title = Some("C/C++"))
 
   // Explore
   lazy val explore = DocumentationPage.fromScalatex(name = "Explore", content = scalatex.documentation.explore.Explore, title = Some("Explore Your Model"))

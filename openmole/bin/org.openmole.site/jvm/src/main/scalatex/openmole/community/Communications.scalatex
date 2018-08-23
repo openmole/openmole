@@ -32,7 +32,7 @@
 
 
 
-@h3{When you're using the @a("reproducibility features", href := DocumentationPages.care.file) (@hl.openmoleNoTest{CARETask}, ...)}
+@h3{When you're using the @a("reproducibility features", href := DocumentationPages.packaged.file) (@hl.openmoleNoTest{CARETask}, ...)}
 @ul
     @li
         @Papers.frontiers2017

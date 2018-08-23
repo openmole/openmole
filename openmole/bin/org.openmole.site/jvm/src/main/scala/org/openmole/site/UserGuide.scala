@@ -101,6 +101,7 @@ object UserGuide {
 
     current match {
       case p if (DocumentationPages.runPages :+ DocumentationPages.run).contains(p) ⇒ integratedPage(SideMenu.run, head = headerModel(current.name))
+      case p if (DocumentationPages.packagedPages :+ DocumentationPages.packaged).contains(p) ⇒ integratedPage(SideMenu.packaged, head = headerModel(current.name))
       case p if (DocumentationPages.explorePages :+ DocumentationPages.explore).contains(p) ⇒ integratedPage(SideMenu.explore, head = headerMethod(current.name))
       case p if (DocumentationPages.scalePages :+ DocumentationPages.scale).contains(p) ⇒ integratedPage(SideMenu.scale, head = headerEnvironment(current.name))
       case p if DocumentationPages.advancedConceptsPages.contains(p) ⇒ integratedPage(SideMenu.advanced)
