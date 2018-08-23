@@ -28,11 +28,10 @@ object SubmitActor {
     val Submit(job, sj) = submit
 
     if (!job.state.isFinal) {
-      try job.environment.submitSerializedJob(job, sj) match {
-        case Some(bj) ⇒
-          job.state = SUBMITTED
-          JobManager ! Submitted(job, sj, bj)
-        case None ⇒ JobManager ! Delay(submit, BatchEnvironment.getTokenInterval)
+      try {
+        val bj = job.environment.submitSerializedJob(job, sj)
+        job.state = SUBMITTED
+        JobManager ! Submitted(job, sj, bj)
       }
       catch {
         case e: Throwable ⇒

@@ -33,8 +33,6 @@ object LocalStorage {
   def child(parent: String, child: String) = (File(parent) / child).getAbsolutePath
 
   implicit def isStorage(implicit interpreter: Effect[local.Local]) = new StorageInterface[LocalStorage] with HierarchicalStorageInterface[LocalStorage] with EnvironmentStorage[LocalStorage] {
-    override def accessControl(t: LocalStorage): AccessControl = t.accessControl
-
     override def child(t: LocalStorage, parent: String, child: String): String = LocalStorage.child(parent, child)
     override def parent(t: LocalStorage, path: String): Option[String] = Option(File(path).getParent)
     override def name(t: LocalStorage, path: String): String = File(path).getName

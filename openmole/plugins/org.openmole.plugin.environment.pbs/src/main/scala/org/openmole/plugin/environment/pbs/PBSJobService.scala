@@ -17,7 +17,6 @@ object PBSJobService {
     override def state(env: PBSJobService[A, B], j: J): ExecutionState.ExecutionState = env.state(j)
     override def delete(env: PBSJobService[A, B], j: J): Unit = env.delete(j)
     override def stdOutErr(js: PBSJobService[A, B], j: J) = js.stdOutErr(j)
-    override def accessControl(js: PBSJobService[A, B]): AccessControl = js.accessControl
   }
 
 }

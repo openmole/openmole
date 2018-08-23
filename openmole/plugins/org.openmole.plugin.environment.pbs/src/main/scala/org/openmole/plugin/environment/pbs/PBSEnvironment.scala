@@ -159,12 +159,15 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
       }
 
   override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
-    val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage())
+    def remoteStorage(jobDirectory: String) = LogicalLinkStorage.remote(LogicalLinkStorage(), jobDirectory)
 
     storageService match {
       case Left((space, local)) ⇒
-        BatchEnvironment.serializeJob(local, remoteStorage, batchExecutionJob, HierarchicalStorageSpace.createJobDirectory(local, space), space.replicaDirectory, HierarchicalStorageSpace.backgroundRm(local, _, true))
-      case Right((space, ssh)) ⇒ BatchEnvironment.serializeJob(ssh, remoteStorage, batchExecutionJob, HierarchicalStorageSpace.createJobDirectory(ssh, space), space.replicaDirectory, HierarchicalStorageSpace.backgroundRm(ssh, _, true))
+        val jobDirectory = HierarchicalStorageSpace.createJobDirectory(local, space)
+        BatchEnvironment.serializeJob(local, remoteStorage(jobDirectory), batchExecutionJob, jobDirectory, space.replicaDirectory, () ⇒ HierarchicalStorageSpace.backgroundRm(local, jobDirectory, true))
+      case Right((space, ssh)) ⇒
+        val jobDirectory = HierarchicalStorageSpace.createJobDirectory(ssh, space)
+        BatchEnvironment.serializeJob(ssh, remoteStorage(jobDirectory), batchExecutionJob, HierarchicalStorageSpace.createJobDirectory(ssh, space), space.replicaDirectory, () ⇒ HierarchicalStorageSpace.backgroundRm(ssh, jobDirectory, true))
     }
   }
 
@@ -203,8 +206,10 @@ class PBSLocalEnvironment(
   lazy val space = localStorageSpace(storage)
 
   override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
-    val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage())
-    BatchEnvironment.serializeJob(storage, remoteStorage, batchExecutionJob, HierarchicalStorageSpace.createJobDirectory(storage, space), space.replicaDirectory, HierarchicalStorageSpace.backgroundRm(storage, _, true))
+    val jobDirectory = HierarchicalStorageSpace.createJobDirectory(storage, space)
+    val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage(), jobDirectory)
+
+    BatchEnvironment.serializeJob(storage, remoteStorage, batchExecutionJob, jobDirectory, space.replicaDirectory, () ⇒ HierarchicalStorageSpace.backgroundRm(storage, jobDirectory, true))
   }
 
   lazy val installRuntime = new RuntimeInstallation(Frontend.local, storage, space.baseDirectory)

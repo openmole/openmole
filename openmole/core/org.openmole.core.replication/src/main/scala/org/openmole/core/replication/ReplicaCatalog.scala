@@ -97,6 +97,7 @@ class ReplicaCatalog(database: Database, preference: Preference) {
   )(implicit replicationStorage: ReplicationStorage[S]): Replica = {
     clean(storage)
     val cacheKey = (srcPath.getCanonicalPath, hash, replicationStorage.id(storage))
+
     // Avoid same transfer in multiple threads
     localLock.withLock(cacheKey) { uploadAndGetLocked(upload, srcPath, hash, storage, cacheKey) }
   }

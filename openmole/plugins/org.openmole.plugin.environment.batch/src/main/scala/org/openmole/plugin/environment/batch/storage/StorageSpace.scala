@@ -114,11 +114,11 @@ object HierarchicalStorageSpace extends JavaLogger {
   }
 
   def backgroundRm[S](storage: S, path: String, directory: Boolean)(implicit services: BatchEnvironment.Services, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
-    def action = !AccessControl.tryWithPermit(storageInterface.accessControl(storage)) { if (directory) hierarchicalStorageInterface.rmDir(storage, path) else storageInterface.rmFile(storage, path) }.isDefined
+    def action = { if (directory) hierarchicalStorageInterface.rmDir(storage, path) else storageInterface.rmFile(storage, path); false }
     JobManager ! RetryAction(() ⇒ action)
   }
 
-  def createJobDirectory[S](s: S, storageSpace: StorageSpace)(implicit hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = Lazy {
+  def createJobDirectory[S](s: S, storageSpace: StorageSpace)(implicit hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
     val communicationPath = hierarchicalStorageInterface.child(s, storageSpace.tmpDirectory, StorageSpace.timedUniqName)
     hierarchicalStorageInterface.makeDir(s, communicationPath)
     communicationPath

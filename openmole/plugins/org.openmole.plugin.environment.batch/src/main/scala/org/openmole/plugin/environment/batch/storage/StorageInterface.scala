@@ -28,11 +28,15 @@ import org.openmole.tool.stream._
 
 object StorageInterface {
 
-  def remote[S](s: S)(implicit storage: StorageInterface[S]) =
+  def remote[S](s: S, communicationDirectory: String)(implicit storage: StorageInterface[S]) =
     new RemoteStorage {
-      override def upload(src: File, dest: String, options: TransferOptions)(implicit newFile: NewFile): Unit = storage.upload(s, src, dest, options)
+      override def upload(src: File, dest: Option[String], options: TransferOptions)(implicit newFile: NewFile): String = {
+        val uploadDestination = dest.getOrElse(storage.child(s, communicationDirectory, StorageSpace.timedUniqName))
+        storage.upload(s, src, uploadDestination, options)
+        uploadDestination
+      }
+
       override def download(src: String, dest: File, options: TransferOptions)(implicit newFile: NewFile): Unit = storage.download(s, src, dest, options)
-      override def child(parent: String, child: String): String = storage.child(s, parent, child)
     }
 
   def upload(compressed: Boolean, uploadStream: (() ⇒ InputStream, String) ⇒ Unit)(src: File, dest: String, options: TransferOptions = TransferOptions.default): Unit = {
@@ -59,8 +63,6 @@ object StorageInterface {
 }
 
 trait StorageInterface[T] {
-  def accessControl(t: T): AccessControl
-
   def exists(t: T, path: String): Boolean
   def rmFile(t: T, path: String): Unit
   def child(t: T, parent: String, child: String): String

@@ -98,13 +98,8 @@ object JobManager extends JavaLogger { self ⇒
   }
 
   def tryKillAndClean(job: BatchExecutionJob, bj: Option[BatchJobControl], sj: Option[SerializedJob])(implicit services: BatchEnvironment.Services) = {
-    def killBatchJob(bj: BatchJobControl)(implicit services: BatchEnvironment.Services) = AccessControl.withPermit(bj.accessControl) {
-      retry(services.preference(BatchEnvironment.killJobRetry))(bj.delete)
-    }
-
-    def cleanSerializedJob(sj: SerializedJob)(implicit services: BatchEnvironment.Services) = AccessControl.withPermit(sj.storage.accessControl) {
-      retry(services.preference(BatchEnvironment.cleanJobRetry))(sj.clean(sj.path))
-    }
+    def killBatchJob(bj: BatchJobControl)(implicit services: BatchEnvironment.Services) = retry(services.preference(BatchEnvironment.killJobRetry))(bj.delete)
+    def cleanSerializedJob(sj: SerializedJob)(implicit services: BatchEnvironment.Services) = retry(services.preference(BatchEnvironment.cleanJobRetry))(sj.clean())
 
     try bj.foreach(killBatchJob) catch {
       case e: Throwable ⇒ self ! Error(job, e, None)

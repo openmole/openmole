@@ -25,6 +25,7 @@ import squants.time.Time
 
 sealed trait JobMessage
 sealed trait DispatchedMessage
+
 case class Upload(job: BatchExecutionJob) extends JobMessage with DispatchedMessage
 case class Uploaded(job: BatchExecutionJob, serializedJob: SerializedJob) extends JobMessage
 case class Submit(job: BatchExecutionJob, serializedJob: SerializedJob) extends JobMessage with DispatchedMessage

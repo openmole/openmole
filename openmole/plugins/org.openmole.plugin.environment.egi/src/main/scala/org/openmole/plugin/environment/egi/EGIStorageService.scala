@@ -57,7 +57,7 @@ import gridscale.egi.VOMS
 import org.openmole.core.communication.storage._
 import org.openmole.core.workspace.NewFile
 import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment }
-import org.openmole.plugin.environment.batch.storage.{ EnvironmentStorage, HierarchicalStorageInterface, QualityControl, StorageInterface }
+import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.cache.TimeCache
 import org.openmole.tool.file._
 //
@@ -173,32 +173,36 @@ object CurlRemoteStorage {
   }
 }
 
-case class CurlRemoteStorage(location: String, voName: String, debug: Boolean, timeout: Time) extends RemoteStorage {
+case class CurlRemoteStorage(location: String, jobDirectory: String, voName: String, debug: Boolean, timeout: Time) extends RemoteStorage {
 
   //@transient lazy val url = new URI(location)
   @transient lazy val curl = CurlRemoteStorage.Curl(voName, debug, timeout)
   def resolve(dest: String) = gridscale.RemotePath.child(location, dest)
 
-  override def upload(src: File, dest: String, options: storage.TransferOptions)(implicit newFile: NewFile): Unit =
+  override def upload(src: File, dest: Option[String], options: storage.TransferOptions)(implicit newFile: NewFile): String = {
+    val uploadDestination = dest.getOrElse(child(jobDirectory, StorageSpace.timedUniqName))
+
     try {
       try {
-        if (options.raw) CurlRemoteStorage.run(curl.upload(src.getAbsolutePath, resolve(dest)))
+        if (options.raw) CurlRemoteStorage.run(curl.upload(src.getAbsolutePath, resolve(uploadDestination)))
         else newFile.withTmpFile { tmpFile ⇒
           src.copyCompressFile(tmpFile)
-          CurlRemoteStorage.run(curl.upload(tmpFile.getAbsolutePath, resolve(dest)))
+          CurlRemoteStorage.run(curl.upload(tmpFile.getAbsolutePath, resolve(uploadDestination)))
         }
+        uploadDestination
       }
       catch {
         case e: Throwable ⇒
-          util.Try(CurlRemoteStorage.run(curl.delete(resolve(dest))))
+          util.Try(CurlRemoteStorage.run(curl.delete(resolve(uploadDestination))))
           throw new java.io.IOException(s"Error uploading $src to $dest to $location with option $options", e)
       }
     }
     catch {
       case t: Throwable ⇒
-        util.Try(CurlRemoteStorage.run(s"${curl} -X DELETE ${resolve(dest)}"))
+        util.Try(CurlRemoteStorage.run(s"${curl} -X DELETE ${resolve(uploadDestination)}"))
         throw t
     }
+  }
 
   override def download(src: String, dest: File, options: storage.TransferOptions)(implicit newFile: NewFile): Unit = {
     try {
@@ -212,15 +216,14 @@ case class CurlRemoteStorage(location: String, voName: String, debug: Boolean, t
       case e: Throwable ⇒ throw new java.io.IOException(s"Error downloading $src to $dest from $location with option $options", e)
     }
   }
-  override def child(parent: String, child: String): String = gridscale.RemotePath.child(parent, child)
+
+  def child(parent: String, child: String): String = gridscale.RemotePath.child(parent, child)
 }
 
 object WebDavStorage {
   implicit def webdavlocationIsStorage(implicit httpEffect: Effect[_root_.gridscale.http.HTTP]) = new StorageInterface[WebDavStorage] with EnvironmentStorage[WebDavStorage] with HierarchicalStorageInterface[WebDavStorage] {
 
     def webdavServer(location: WebDavStorage) = gridscale.webdav.WebDAVSServer(location.url, location.proxyCache().factory)
-
-    override def accessControl(t: WebDavStorage): AccessControl = t.accessControl
 
     override def child(t: WebDavStorage, parent: String, child: String): String = gridscale.RemotePath.child(parent, child)
     override def parent(t: WebDavStorage, path: String): Option[String] = gridscale.RemotePath.parent(path)

@@ -45,25 +45,19 @@ object GetResultActor extends JavaLogger {
   case class JobRemoteExecutionException(message: String, cause: Throwable) extends InternalProcessingError(message, cause)
 
   def receive(msg: GetResult)(implicit services: BatchEnvironment.Services) = {
-    import services._
-
     val GetResult(job, sj, resultPath, batchJob) = msg
-    val permitted =
-      AccessControl.tryWithPermit(sj.storage.accessControl) {
-        try {
-          getResult(sj.storage, resultPath, job)
-          JobManager ! Kill(job, Some(batchJob), Some(sj))
-        }
-        catch {
-          case e: Throwable ⇒
-            job.state = ExecutionState.FAILED
-            val stdOutErr = BatchJobService.tryStdOutErr(batchJob).toOption
-            JobManager ! Error(job, e, stdOutErr)
-            JobManager ! Kill(job, Some(batchJob), Some(sj))
-        }
-      }
 
-    if (!permitted.isDefined) JobManager ! Delay(msg, getTokenInterval)
+    try {
+      getResult(sj.storage, resultPath, job)
+      JobManager ! Kill(job, Some(batchJob), Some(sj))
+    }
+    catch {
+      case e: Throwable ⇒
+        job.state = ExecutionState.FAILED
+        val stdOutErr = BatchJobService.tryStdOutErr(batchJob).toOption
+        JobManager ! Error(job, e, stdOutErr)
+        JobManager ! Kill(job, Some(batchJob), Some(sj))
+    }
   }
 
   def getResult(storage: StorageService[_], outputFilePath: String, batchJob: BatchExecutionJob)(implicit services: BatchEnvironment.Services): Unit = {
@@ -125,7 +119,7 @@ object GetResultActor extends JavaLogger {
                 replicated.originalPath →
                   ReplicatedFile.download(replicated) { (p, f) ⇒
                     retry(preference(BatchEnvironment.downloadResultRetry)) {
-                      signalDownload(eventDispatcher.eventId, storage.download(p, f, TransferOptions(forceCopy = true, canMove = true)), p, storage, f)
+                      signalDownload(eventDispatcher.eventId, storage.download(p, f, TransferOptions(noLink = true, canMove = true)), p, storage, f)
                     }
                   }
             }.toMap

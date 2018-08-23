@@ -19,7 +19,7 @@ package org.openmole.plugin.environment.gridscale
 import gridscale.local
 import org.openmole.core.communication.storage._
 import org.openmole.core.workspace.NewFile
-import org.openmole.plugin.environment.batch.storage.StorageInterface
+import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageSpace }
 import org.openmole.tool.file._
 
 object LogicalLinkStorage {
@@ -41,22 +41,25 @@ object LogicalLinkStorage {
     def copy = StorageInterface.upload(false, local.writeFile(_, _))(src, dest, options)
 
     if (options.canMove) local.mv(src.getPath, dest)
-    else if (options.forceCopy || t.forceCopy) copy
+    else if (options.noLink || t.forceCopy) copy
     else local.link(src.getPath, dest) //new File(dest).createLinkTo(src)
   }
 
   def download(t: LogicalLinkStorage, src: String, dest: File, options: TransferOptions): Unit = {
     def copy = StorageInterface.download(false, local.readFile[Unit](_, _))(src, dest, options)
     if (options.canMove) local.mv(src, dest.getPath)
-    else if (options.forceCopy || t.forceCopy) copy
+    else if (options.noLink || t.forceCopy) copy
     else local.link(src, dest.getPath) //dest.createLinkTo(src)
   }
 
-  def remote(s: LogicalLinkStorage) =
+  def remote(s: LogicalLinkStorage, jobDirectory: String) =
     new RemoteStorage {
-      override def upload(src: File, dest: String, options: TransferOptions)(implicit newFile: NewFile): Unit = LogicalLinkStorage.upload(s, src, dest, options)
+      override def upload(src: File, dest: Option[String], options: TransferOptions)(implicit newFile: NewFile): String = {
+        val uploadDestination = dest.getOrElse(LogicalLinkStorage.child(s, jobDirectory, StorageSpace.timedUniqName))
+        LogicalLinkStorage.upload(s, src, uploadDestination, options)
+        uploadDestination
+      }
       override def download(src: String, dest: File, options: TransferOptions)(implicit newFile: NewFile): Unit = LogicalLinkStorage.download(s, src, dest, options)
-      override def child(parent: String, child: String): String = LogicalLinkStorage.child(s, parent, child)
     }
 
 }

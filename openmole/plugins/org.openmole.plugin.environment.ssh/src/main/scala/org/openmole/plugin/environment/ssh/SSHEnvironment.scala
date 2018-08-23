@@ -83,6 +83,24 @@ object SSHEnvironment extends JavaLogger {
   case class Submitted(pid: gridscale.ssh.JobId) extends SSHRunState
   case object Failed extends SSHRunState
 
+  class SSHJobStateRegistry {
+    val jobsStates = collection.mutable.TreeMap[SSHEnvironment.SSHJob, SSHEnvironment.SSHRunState]()(Ordering.by(_.id))
+    val queuesLock = new ReentrantLock()
+    val jobId = new AtomicLong()
+
+    def registerJob(description: gridscale.ssh.SSHJobDescription, batchExecutionJob: BatchExecutionJob) = queuesLock {
+      val job = SSHEnvironment.SSHJob(jobId.getAndIncrement())
+      jobsStates.put(job, SSHEnvironment.Queued(description, batchExecutionJob))
+      job
+    }
+
+    def update(job: SSHJob, state: SSHRunState) = queuesLock { jobsStates.put(job, state) }
+    def get(job: SSHJob) = queuesLock { jobsStates.get(job) }
+    def remove(job: SSHJob) = queuesLock { jobsStates.remove(job) }
+    def submitted = queuesLock { jobsStates.toSeq.collect { case (j, SSHEnvironment.Submitted(id)) ⇒ (j, id) } }
+    def queued = queuesLock { jobsStates.collect { case (job, Queued(desc, bj)) ⇒ (job, desc, bj) } }
+  }
+
 }
 
 class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
@@ -104,12 +122,10 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   lazy val jobUpdater = new SSHJobService.Updater(WeakReference(this))
 
-  val queuesLock = new ReentrantLock()
-  val jobsStates = collection.mutable.TreeMap[SSHEnvironment.SSHJob, SSHEnvironment.SSHRunState]()(Ordering.by(_.id))
-  val jobId = new AtomicLong()
-
   type PID = Int
-  val submittedJobs = collection.mutable.Map[SSHEnvironment.SSHJob, PID]()
+  lazy val submittedJobs = collection.mutable.Map[SSHEnvironment.SSHJob, PID]()
+
+  lazy val stateRegistry = new SSHEnvironment.SSHJobStateRegistry
 
   implicit val sshInterpreter = gridscale.ssh.SSH()
   implicit val systemInterpreter = System()
@@ -160,11 +176,15 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
       }
 
   override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
-    val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage())
+    def remoteStorage(jobDirectory: String) = LogicalLinkStorage.remote(LogicalLinkStorage(), jobDirectory)
 
     storageService match {
-      case Left((space, local)) ⇒ BatchEnvironment.serializeJob(local, remoteStorage, batchExecutionJob, HierarchicalStorageSpace.createJobDirectory(local, space), space.replicaDirectory, HierarchicalStorageSpace.backgroundRm(local, _, true))
-      case Right((space, ssh))  ⇒ BatchEnvironment.serializeJob(ssh, remoteStorage, batchExecutionJob, HierarchicalStorageSpace.createJobDirectory(ssh, space), space.replicaDirectory, HierarchicalStorageSpace.backgroundRm(ssh, _, true))
+      case Left((space, local)) ⇒
+        val jobDirectory = HierarchicalStorageSpace.createJobDirectory(local, space)
+        BatchEnvironment.serializeJob(local, remoteStorage(jobDirectory), batchExecutionJob, jobDirectory, space.replicaDirectory, () ⇒ HierarchicalStorageSpace.backgroundRm(local, jobDirectory, true))
+      case Right((space, ssh)) ⇒
+        val jobDirectory = HierarchicalStorageSpace.createJobDirectory(ssh, space)
+        BatchEnvironment.serializeJob(ssh, remoteStorage(jobDirectory), batchExecutionJob, jobDirectory, space.replicaDirectory, () ⇒ HierarchicalStorageSpace.backgroundRm(ssh, jobDirectory, true))
     }
   }
 

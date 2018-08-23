@@ -16,8 +16,6 @@ object EGIJobService {
     override def state(js: EGIJobService, j: J) = js.state(j)
     override def delete(js: EGIJobService, j: J): Unit = js.delete(j)
     override def stdOutErr(js: EGIJobService, j: J) = js.stdOutErr(j)
-
-    override def accessControl(js: EGIJobService) = js.accessControl
   }
 
   def apply(diracService: _root_.gridscale.dirac.DIRACServer, environment: EGIEnvironment[_]) =

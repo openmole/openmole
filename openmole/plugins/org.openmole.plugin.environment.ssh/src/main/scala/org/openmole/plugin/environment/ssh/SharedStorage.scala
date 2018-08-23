@@ -32,66 +32,65 @@ import squants.information.Information
 
 object SharedStorage extends JavaLogger {
 
-  def installRuntime[S](runtime: Runtime, storage: S, frontend: Frontend, baseDirectory: String)(implicit preference: Preference, newFile: NewFile, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) =
-    storageInterface.accessControl(storage) {
-      val runtimePrefix = "runtime"
-      val runtimeInstall = runtimePrefix + runtime.runtime.hash
+  def installRuntime[S](runtime: Runtime, storage: S, frontend: Frontend, baseDirectory: String)(implicit preference: Preference, newFile: NewFile, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
+    val runtimePrefix = "runtime"
+    val runtimeInstall = runtimePrefix + runtime.runtime.hash
 
-      val (workdir, scriptName) = {
-        val installDir = storageInterface.child(storage, baseDirectory, "install")
-        util.Try(hierarchicalStorageInterface.makeDir(storage, installDir))
+    val (workdir, scriptName) = {
+      val installDir = storageInterface.child(storage, baseDirectory, "install")
+      util.Try(hierarchicalStorageInterface.makeDir(storage, installDir))
 
-        val workdir = storageInterface.child(storage, installDir, preference(Preference.uniqueID) + "_install")
-        if (!storageInterface.exists(storage, workdir)) hierarchicalStorageInterface.makeDir(storage, workdir)
+      val workdir = storageInterface.child(storage, installDir, preference(Preference.uniqueID) + "_install")
+      if (!storageInterface.exists(storage, workdir)) hierarchicalStorageInterface.makeDir(storage, workdir)
 
-        newFile.withTmpFile("install", ".sh") { script ⇒
+      newFile.withTmpFile("install", ".sh") { script ⇒
 
-          val tmpDirName = runtimePrefix + UUID.randomUUID.toString
-          val scriptName = uniqName("install", ".sh")
+        val tmpDirName = runtimePrefix + UUID.randomUUID.toString
+        val scriptName = uniqName("install", ".sh")
 
-          val content =
-            s"{ if [ -d $runtimeInstall ]; then exit 0; fi; } && " +
-              s"mkdir -p $tmpDirName && cd $tmpDirName && { if [ `uname -m` = x86_64 ]; then cp ${runtime.jvmLinuxX64.path} jvm.tar.gz; " +
-              """else echo "Unsupported architecture: " `uname -m`; exit 1; fi; } && """ +
-              "gunzip jvm.tar.gz && tar -xf jvm.tar && rm jvm.tar && " +
-              s"cp ${runtime.runtime.path} runtime.tar.gz && gunzip runtime.tar.gz && tar -xf runtime.tar; rm runtime.tar && " +
-              s"mkdir -p envplugins && PLUGIN=0 && " +
-              runtime.environmentPlugins.map { p ⇒ "cp " + p.path + " envplugins/plugin$PLUGIN.jar && PLUGIN=`expr $PLUGIN + 1`" }.mkString(" && ") + " && " +
-              s"PATH=$$PWD/jre/bin:$$PATH /bin/bash -x run.sh 256m test_run --test && rm -rf test_run && " +
-              s"cd .. && { if [ -d $runtimeInstall ]; then rm -rf $tmpDirName; exit 0; fi } && " +
-              s"mv $tmpDirName $runtimeInstall && rm -rf $tmpDirName && rm $scriptName && { ls | grep '^$runtimePrefix' | grep -v '^$runtimeInstall' | xargs rm -rf ; }"
+        val content =
+          s"{ if [ -d $runtimeInstall ]; then exit 0; fi; } && " +
+            s"mkdir -p $tmpDirName && cd $tmpDirName && { if [ `uname -m` = x86_64 ]; then cp ${runtime.jvmLinuxX64.path} jvm.tar.gz; " +
+            """else echo "Unsupported architecture: " `uname -m`; exit 1; fi; } && """ +
+            "gunzip jvm.tar.gz && tar -xf jvm.tar && rm jvm.tar && " +
+            s"cp ${runtime.runtime.path} runtime.tar.gz && gunzip runtime.tar.gz && tar -xf runtime.tar; rm runtime.tar && " +
+            s"mkdir -p envplugins && PLUGIN=0 && " +
+            runtime.environmentPlugins.map { p ⇒ "cp " + p.path + " envplugins/plugin$PLUGIN.jar && PLUGIN=`expr $PLUGIN + 1`" }.mkString(" && ") + " && " +
+            s"PATH=$$PWD/jre/bin:$$PATH /bin/bash -x run.sh 256m test_run --test && rm -rf test_run && " +
+            s"cd .. && { if [ -d $runtimeInstall ]; then rm -rf $tmpDirName; exit 0; fi } && " +
+            s"mv $tmpDirName $runtimeInstall && rm -rf $tmpDirName && rm $scriptName && { ls | grep '^$runtimePrefix' | grep -v '^$runtimeInstall' | xargs rm -rf ; }"
 
-          Log.logger.fine(s"Install script: $content")
+        Log.logger.fine(s"Install script: $content")
 
-          script.content = content
+        script.content = content
 
-          val remoteScript = storageInterface.child(storage, workdir, scriptName)
-          storageInterface.upload(storage, script, remoteScript, options = TransferOptions(raw = true, forceCopy = true, canMove = true))
-          (workdir, scriptName)
-        }
+        val remoteScript = storageInterface.child(storage, workdir, scriptName)
+        storageInterface.upload(storage, script, remoteScript, options = TransferOptions(raw = true, noLink = true, canMove = true))
+        (workdir, scriptName)
       }
-
-      val command = s"""cd "$workdir" ; /bin/bash -x $scriptName"""
-
-      Log.logger.fine("Begin install")
-
-      frontend.run(command) match {
-        case util.Failure(e) ⇒ throw new InternalProcessingError(e, "There was an error during the runtime installation process.")
-        case util.Success(r) ⇒
-          r.returnCode match {
-            case 0 ⇒
-            case _ ⇒
-              throw new InternalProcessingError(s"Unexpected return status for the install process ${r.returnCode}.\nstdout:\n${r.stdOut}\nstderr:\n${r.stdErr}")
-          }
-      }
-
-      val path = storageInterface.child(storage, workdir, runtimeInstall)
-
-      //installJobService.execute(jobDescription)
-      Log.logger.fine("End install")
-
-      path
     }
+
+    val command = s"""cd "$workdir" ; /bin/bash -x $scriptName"""
+
+    Log.logger.fine("Begin install")
+
+    frontend.run(command) match {
+      case util.Failure(e) ⇒ throw new InternalProcessingError(e, "There was an error during the runtime installation process.")
+      case util.Success(r) ⇒
+        r.returnCode match {
+          case 0 ⇒
+          case _ ⇒
+            throw new InternalProcessingError(s"Unexpected return status for the install process ${r.returnCode}.\nstdout:\n${r.stdOut}\nstderr:\n${r.stdErr}")
+        }
+    }
+
+    val path = storageInterface.child(storage, workdir, runtimeInstall)
+
+    //installJobService.execute(jobDescription)
+    Log.logger.fine("End install")
+
+    path
+  }
 
   def buildScript[S](
     runtimePath:    Runtime ⇒ String,
@@ -99,7 +98,7 @@ object SharedStorage extends JavaLogger {
     openMOLEMemory: Option[Information],
     threads:        Option[Int],
     serializedJob:  SerializedJob,
-    storage:        S)(implicit newFile: NewFile, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = storageInterface.accessControl(storage) {
+    storage:        S)(implicit newFile: NewFile, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
     val runtime = runtimePath(serializedJob.runtime) //preparedRuntime(serializedJob.runtime)
     val result = serializedJob.resultPath.get
     val baseWorkDirectory = workDirectory getOrElse serializedJob.path
@@ -119,7 +118,7 @@ object SharedStorage extends JavaLogger {
         script.content = content
 
         val remoteScript = storageInterface.child(storage, serializedJob.path, uniqName("run", ".sh"))
-        AccessControl.withPermit(storageInterface.accessControl(storage)) { storageInterface.upload(storage, script, remoteScript, options = TransferOptions(raw = true, forceCopy = true, canMove = true)) }
+        storageInterface.upload(storage, script, remoteScript, options = TransferOptions(raw = true, noLink = true, canMove = true))
         remoteScript
       }
     (remoteScript, baseWorkDirectory)

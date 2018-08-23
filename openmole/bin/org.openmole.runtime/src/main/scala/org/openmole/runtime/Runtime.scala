@@ -174,12 +174,7 @@ class Runtime {
 
         val replicated =
           pac.files.map { file ⇒
-            def uploadOnStorage(f: File) = {
-              val name = storage.child(communicationDirPath, uniqName("resultFile", ".bin"))
-              retry(storage.upload(f, name, TransferOptions(forceCopy = true, canMove = true)))
-              name
-            }
-
+            def uploadOnStorage(f: File) = retry(storage.upload(f, None, TransferOptions(noLink = true, canMove = true)))
             ReplicatedFile.upload(file, uploadOnStorage)
           }
 
@@ -212,7 +207,7 @@ class Runtime {
       logger.fine(s"Serializing result to $outputLocal")
       serializerService.serialiseAndArchiveFiles(runtimeResult, outputLocal)
       logger.fine(s"Upload the serialized result to $outputMessagePath on $storage")
-      retry(storage.upload(outputLocal, outputMessagePath, TransferOptions(forceCopy = true, canMove = true)))
+      retry(storage.upload(outputLocal, Some(outputMessagePath), TransferOptions(noLink = true, canMove = true)))
     }
 
     result

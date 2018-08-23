@@ -23,8 +23,6 @@ object SSHJobService extends JavaLogger {
     override def state(js: SSHJobService[A], j: J): ExecutionState.ExecutionState = js.state(j)
     override def delete(js: SSHJobService[A], j: J): Unit = js.delete(j)
     override def stdOutErr(js: SSHJobService[A], j: SSHJob) = js.stdOutErr(j)
-
-    override def accessControl(js: SSHJobService[A]): AccessControl = js.accessControl
   }
 
   class Updater(environment: WeakReference[SSHEnvironment[_]]) extends IUpdatable {
@@ -35,11 +33,11 @@ object SSHJobService extends JavaLogger {
       if (stop) false
       else environment.get match {
         case Some(env) ⇒
-          val sshJobIds = env.queuesLock { env.jobsStates.toSeq.collect { case (j, SSHEnvironment.Submitted(id)) ⇒ id } }
+          val sshJobIds = env.stateRegistry.submitted
 
           val runningJobResults = env.accessControl {
             import env.sshInterpreter
-            sshJobIds.toList.map(id ⇒ util.Try(gridscale.ssh.SSHJobDescription.jobIsRunning(env.sshServer, id)))
+            sshJobIds.toList.map { case (_, id) ⇒ util.Try(gridscale.ssh.SSHJobDescription.jobIsRunning(env.sshServer, id)) }
           }
 
           val errors = runningJobResults.collect { case util.Failure(x) ⇒ x }
@@ -48,11 +46,8 @@ object SSHJobService extends JavaLogger {
           } env.error(ExceptionRaised(e, Log.WARNING))
 
           val boundNumberOfRunningJobs: Int = runningJobResults.map(_.getOrElse(true)).count(_ == true)
-
           val nbSubmit = env.slots - boundNumberOfRunningJobs
-          val toSubmit = env.queuesLock {
-            env.jobsStates.collect { case (job, Queued(desc, bj)) ⇒ (job, desc, bj) }.take(nbSubmit)
-          }
+          val toSubmit = env.stateRegistry.queued.take(nbSubmit)
 
           for {
             (job, desc, bj) ← toSubmit
@@ -66,6 +61,7 @@ object SSHJobService extends JavaLogger {
         case None ⇒ false
       }
   }
+
 }
 
 class SSHJobService[S](s: S, services: BatchEnvironment.Services, installation: RuntimeInstallation[_], env: SSHEnvironment[_], val accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], sshEffect: Effect[_root_.gridscale.ssh.SSH], systemEffect: Effect[effectaside.System]) {
@@ -89,37 +85,30 @@ class SSHJobService[S](s: S, services: BatchEnvironment.Services, installation: 
       workDirectory = workDirectory
     )
 
-    accessControl {
-      env.queuesLock {
-        val job = SSHEnvironment.SSHJob(env.jobId.getAndIncrement())
-        env.jobsStates.put(job, SSHEnvironment.Queued(jobDescription, batchExecutionJob))
-        job
-      }
-    }
+    env.stateRegistry.registerJob(jobDescription, batchExecutionJob)
   }
 
   def submit(job: SSHEnvironment.SSHJob, description: gridscale.ssh.SSHJobDescription, batchExecutionJob: BatchExecutionJob) =
     try {
       val id = gridscale.ssh.submit(env.sshServer, description)
-      env.queuesLock { env.jobsStates.put(job, SSHEnvironment.Submitted(id)) }
+      env.stateRegistry.update(job, SSHEnvironment.Submitted(id))
     }
     catch {
       case t: Throwable ⇒
-        env.queuesLock { env.jobsStates.put(job, SSHEnvironment.Failed) }
+        env.stateRegistry.update(job, SSHEnvironment.Failed)
         throw t
     }
 
-  def state(job: SSHEnvironment.SSHJob) = env.queuesLock {
-    env.jobsStates.get(job) match {
+  def state(job: SSHEnvironment.SSHJob) =
+    env.stateRegistry.get(job) match {
       case None                               ⇒ ExecutionState.DONE
       case Some(state: SSHEnvironment.Queued) ⇒ ExecutionState.SUBMITTED
       case Some(SSHEnvironment.Failed)        ⇒ ExecutionState.FAILED
       case Some(SSHEnvironment.Submitted(id)) ⇒ accessControl { GridScaleJobService.translateStatus(gridscale.ssh.state(env.sshServer, id)) }
     }
-  }
 
   def delete(job: SSHEnvironment.SSHJob): Unit = {
-    val jobState = env.queuesLock { env.jobsStates.remove(job) }
+    val jobState = env.stateRegistry.remove(job)
     jobState match {
       case Some(SSHEnvironment.Submitted(id)) ⇒ accessControl { gridscale.ssh.clean(env.sshServer, id) }
       case _                                  ⇒
@@ -127,7 +116,7 @@ class SSHJobService[S](s: S, services: BatchEnvironment.Services, installation: 
   }
 
   def stdOutErr(j: SSHEnvironment.SSHJob) = {
-    val jobState = env.queuesLock { env.jobsStates.get(j) }
+    val jobState = env.stateRegistry.get(j)
     jobState match {
       case Some(SSHEnvironment.Submitted(id)) ⇒ accessControl { (gridscale.ssh.stdOut(env.sshServer, id), gridscale.ssh.stdErr(env.sshServer, id)) }
       case _                                  ⇒ ("", "")

@@ -336,15 +336,17 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     }
 
     val (storageSpace, storageService) = selectStorage
-    val remoteStorage = CurlRemoteStorage(storageService.url, voName, debug, preference(EGIEnvironment.RemoteCopyTimeout))
+
+    val jobDirectory = HierarchicalStorageSpace.createJobDirectory(storageService, storageSpace)
+    val remoteStorage = CurlRemoteStorage(storageService.url, jobDirectory, voName, debug, preference(EGIEnvironment.RemoteCopyTimeout))
 
     BatchEnvironment.serializeJob(
       storageService,
       remoteStorage,
       batchExecutionJob,
-      HierarchicalStorageSpace.createJobDirectory(storageService, storageSpace),
+      jobDirectory,
       storageSpace.replicaDirectory,
-      HierarchicalStorageSpace.backgroundRm(storageService, _, true))
+      () ⇒ HierarchicalStorageSpace.backgroundRm(storageService, jobDirectory, true))
 
   }
 

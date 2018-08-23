@@ -42,7 +42,7 @@ object StorageService extends JavaLogger {
   def apply[S](s: S)(implicit storageInterface: StorageInterface[S], environmentStorage: EnvironmentStorage[S]) = new StorageService[S](s)
 
   def backgroundRmFile(storageService: StorageService[_], path: String)(implicit services: BatchEnvironment.Services) = {
-    def action = !AccessControl.tryWithPermit(storageService.accessControl) { storageService.rmFile(path) }.isDefined
+    def action = { storageService.rmFile(path); false }
     JobManager ! RetryAction(() ⇒ action)
   }
 
@@ -51,8 +51,6 @@ object StorageService extends JavaLogger {
 class StorageService[S](val storage: S)(implicit storageInterface: StorageInterface[S], environmentStorage: EnvironmentStorage[S]) {
 
   override def toString: String = id
-
-  def accessControl = storageInterface.accessControl(storage)
 
   def id = environmentStorage.id(storage)
   def environment = environmentStorage.environment(storage)

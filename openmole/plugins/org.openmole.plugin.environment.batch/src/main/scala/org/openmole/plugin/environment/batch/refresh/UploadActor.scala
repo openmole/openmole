@@ -27,9 +27,9 @@ object UploadActor extends JavaLogger {
 
     val job = msg.job
     if (!job.state.isFinal) {
-      try job.environment.serializeJob(job) match {
-        case Some(sj) ⇒ JobManager ! Uploaded(job, sj)
-        case None     ⇒ JobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
+      try {
+        val sj = job.environment.serializeJob(job)
+        JobManager ! Uploaded(job, sj)
       }
       catch {
         case e: Throwable ⇒
