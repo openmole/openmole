@@ -170,7 +170,7 @@ object DocumentationPages {
   lazy val documentation = DocumentationPage.fromScalatex(name = "Documentation", content = scalatex.Documentation)
 
   def docPages =
-    taskPages ++
+    runPages ++
       packagedPages ++
       explorePages ++
       scalePages ++
@@ -188,9 +188,8 @@ object DocumentationPages {
   // Run
   lazy val run = DocumentationPage.fromScalatex(name = "Run", content = scalatex.documentation.run.Run, title = Some("Run Your Model"))
 
-  def runPages = taskPages :+ packaged
+  def runPages = Seq(scala, java, netLogo, r, scilab, packaged)
 
-  def taskPages = Seq(scala, java, netLogo, r, scilab)
   lazy val scala = DocumentationPage.fromScalatex(name = "Scala", content = scalatex.documentation.run.task.Scala)
   lazy val java = DocumentationPage.fromScalatex(name = "Java", content = scalatex.documentation.run.task.Java)
   lazy val netLogo = DocumentationPage.fromScalatex(name = "NetLogo", content = scalatex.documentation.run.task.NetLogo)
@@ -208,13 +207,16 @@ object DocumentationPages {
   // Explore
   lazy val explore = DocumentationPage.fromScalatex(name = "Explore", content = scalatex.documentation.explore.Explore, title = Some("Explore Your Model"))
 
-  def explorePages = Seq(calibration, dataProcessing, directSampling, profile, pse)
+  def explorePages = Seq(calibration, dataProcessing, pse) ++ sensitivityPages
 
   lazy val calibration = DocumentationPage.fromScalatex(name = "Calibration", content = scalatex.documentation.explore.Calibration)
   lazy val dataProcessing = DocumentationPage.fromScalatex(name = "Data Processing", content = scalatex.documentation.explore.DataProcessing)
+  lazy val pse = DocumentationPage.fromScalatex(name = "PSE", content = scalatex.documentation.explore.PSE, title = Some("Pattern Space Exploration"))
+
+  def sensitivityPages = Seq(directSampling, profile)
+
   lazy val directSampling = DocumentationPage.fromScalatex(name = "Direct Sampling", content = scalatex.documentation.explore.DirectSampling)
   lazy val profile = DocumentationPage.fromScalatex(name = "Profile", content = scalatex.documentation.explore.Profile)
-  lazy val pse = DocumentationPage.fromScalatex(name = "PSE", content = scalatex.documentation.explore.PSE, title = Some("Pattern Space Exploration"))
 
   // Scale
   lazy val scale = DocumentationPage.fromScalatex(name = "Scale", content = scalatex.documentation.scale.Scale, title = Some("Scale on Different Environments"))
