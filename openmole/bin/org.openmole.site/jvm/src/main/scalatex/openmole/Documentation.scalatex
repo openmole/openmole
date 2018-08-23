@@ -8,7 +8,11 @@
     @h5
         @a(run.title, href := run.file)
     @ol
-      @sitemap.siteMapSection(runPages)
+      @sitemap.siteMapSection(taskPages)
+      @li
+        @a(packaged.title, href := packaged.file)
+        @ol(listStyleType:= "lower-alpha")
+          @sitemap.siteMapSection(packagedPages)
   @li
     @h5
         @a(explore.title, href := explore.file)
