@@ -64,14 +64,18 @@ object SSHJobService extends JavaLogger {
 
 }
 
-class SSHJobService[S](s: S, services: BatchEnvironment.Services, installation: RuntimeInstallation[_], env: SSHEnvironment[_], val accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], sshEffect: Effect[_root_.gridscale.ssh.SSH], systemEffect: Effect[effectaside.System]) {
+class SSHJobService[S](s: S, tmpDirectory: String, services: BatchEnvironment.Services, installation: RuntimeInstallation[_], env: SSHEnvironment[_], val accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], sshEffect: Effect[_root_.gridscale.ssh.SSH], systemEffect: Effect[effectaside.System]) {
 
   def register(serializedJob: SerializedJob, batchExecutionJob: BatchExecutionJob) = {
+
+    val workDirectory = env.workDirectory getOrElse tmpDirectory
+
     def buildScript(serializedJob: SerializedJob) = {
       import services._
+
       SharedStorage.buildScript(
         installation.apply,
-        env.workDirectory,
+        workDirectory,
         env.openMOLEMemory,
         env.threads,
         serializedJob,
@@ -79,7 +83,7 @@ class SSHJobService[S](s: S, services: BatchEnvironment.Services, installation: 
       )
     }
 
-    val (remoteScript, workDirectory) = buildScript(serializedJob)
+    val remoteScript = buildScript(serializedJob)
     val jobDescription = gridscale.ssh.SSHJobDescription(
       command = s"/bin/bash $remoteScript",
       workDirectory = workDirectory

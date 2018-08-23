@@ -179,8 +179,8 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   lazy val pbsJobService =
     storageService match {
-      case Left((_, local)) ⇒ new PBSJobService(local, installRuntime, parameters, sshServer, accessControl)
-      case Right((_, ssh))  ⇒ new PBSJobService(ssh, installRuntime, parameters, sshServer, accessControl)
+      case Left((space, local)) ⇒ new PBSJobService(local, space.tmpDirectory, installRuntime, parameters, sshServer, accessControl)
+      case Right((space, ssh))  ⇒ new PBSJobService(ssh, space.tmpDirectory, installRuntime, parameters, sshServer, accessControl)
     }
 
   override def submitSerializedJob(batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob) =
@@ -216,7 +216,7 @@ class PBSLocalEnvironment(
 
   import _root_.gridscale.local.LocalHost
 
-  lazy val pbsJobService = new PBSJobService(storage, installRuntime, parameters, LocalHost(), AccessControl(preference(SSHEnvironment.MaxConnections)))
+  lazy val pbsJobService = new PBSJobService(storage, space.tmpDirectory, installRuntime, parameters, LocalHost(), AccessControl(preference(SSHEnvironment.MaxConnections)))
 
   override def submitSerializedJob(batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob) =
     BatchEnvironment.submitSerializedJob(pbsJobService, batchExecutionJob, serializedJob)

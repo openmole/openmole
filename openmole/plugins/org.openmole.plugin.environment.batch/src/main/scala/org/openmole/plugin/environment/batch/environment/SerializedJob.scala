@@ -22,10 +22,8 @@ import org.openmole.core.communication.message._
 
 case class SerializedJob(
   storage:       StorageService[_],
-  path:          String,
-  inputFile:     String,
+  inputPath:     String,
   runtime:       Runtime,
   remoteStorage: FileMessage,
   resultPath:    Option[String],
-  clean:         () ⇒ Unit
-)
+  clean:         () ⇒ Unit)

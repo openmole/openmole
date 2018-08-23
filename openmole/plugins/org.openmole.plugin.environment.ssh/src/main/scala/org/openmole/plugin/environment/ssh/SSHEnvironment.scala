@@ -196,8 +196,8 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   lazy val sshJobService =
     storageService match {
-      case Left((space, local)) ⇒ new SSHJobService(local, services, installRuntime, env, accessControl)
-      case Right((space, ssh))  ⇒ new SSHJobService(ssh, services, installRuntime, env, accessControl)
+      case Left((space, local)) ⇒ new SSHJobService(local, space.tmpDirectory, services, installRuntime, env, accessControl)
+      case Right((space, ssh))  ⇒ new SSHJobService(ssh, space.tmpDirectory, services, installRuntime, env, accessControl)
     }
 
   override def submitSerializedJob(batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob) =

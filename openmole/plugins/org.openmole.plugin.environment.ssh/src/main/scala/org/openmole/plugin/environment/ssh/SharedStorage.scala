@@ -94,34 +94,34 @@ object SharedStorage extends JavaLogger {
 
   def buildScript[S](
     runtimePath:    Runtime ⇒ String,
-    workDirectory:  Option[String],
+    workDirectory:  String,
     openMOLEMemory: Option[Information],
     threads:        Option[Int],
     serializedJob:  SerializedJob,
     storage:        S)(implicit newFile: NewFile, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
     val runtime = runtimePath(serializedJob.runtime) //preparedRuntime(serializedJob.runtime)
     val result = serializedJob.resultPath.get
-    val baseWorkDirectory = workDirectory getOrElse serializedJob.path
-    val workspace = serializedJob.storage.child(baseWorkDirectory, UUID.randomUUID.toString)
-    val osgiWorkDir = serializedJob.storage.child(baseWorkDirectory, UUID.randomUUID.toString)
+    val workspace = serializedJob.storage.child(workDirectory, UUID.randomUUID.toString)
+    val osgiWorkDir = serializedJob.storage.child(workDirectory, UUID.randomUUID.toString)
 
     val remoteScript =
       newFile.withTmpFile("run", ".sh") { script ⇒
         val content =
           s"""export PATH=$runtime/jre/bin/:$$PATH; cd $runtime; mkdir -p $osgiWorkDir; export OPENMOLE_HOME=$workspace ; mkdir -p $$OPENMOLE_HOME ; """ +
             "sh run.sh " + BatchEnvironment.openMOLEMemoryValue(openMOLEMemory).toMegabytes.toInt + "m " + osgiWorkDir + " -s " + serializedJob.remoteStorage.path +
-            " -c " + serializedJob.path + " -p envplugins/ -i " + serializedJob.inputFile + " -o " + result + " -t " + BatchEnvironment.threadsValue(threads) +
+            " -p envplugins/ -i " + serializedJob.inputPath + " -o " + result + " -t " + BatchEnvironment.threadsValue(threads) +
             "; RETURNCODE=$?; rm -rf $OPENMOLE_HOME ; rm -rf " + osgiWorkDir + " ; exit $RETURNCODE;"
 
         Log.logger.fine("Script: " + content)
 
         script.content = content
 
-        val remoteScript = storageInterface.child(storage, serializedJob.path, uniqName("run", ".sh"))
+        val remoteScript = storageInterface.child(storage, workDirectory, uniqName("run", ".sh"))
         storageInterface.upload(storage, script, remoteScript, options = TransferOptions(raw = true, noLink = true, canMove = true))
         remoteScript
       }
-    (remoteScript, baseWorkDirectory)
+
+    remoteScript
   }
 
 }

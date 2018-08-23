@@ -60,12 +60,11 @@ class Runtime {
   import Log._
 
   def apply(
-    storage:              RemoteStorage,
-    communicationDirPath: String,
-    inputMessagePath:     String,
-    outputMessagePath:    String,
-    threads:              Int,
-    debug:                Boolean
+    storage:           RemoteStorage,
+    inputMessagePath:  String,
+    outputMessagePath: String,
+    threads:           Int,
+    debug:             Boolean
   )(implicit serializerService: SerializerService, newFile: NewFile, fileService: FileService, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace) = {
 
     /*--- get execution message and job for runtime---*/

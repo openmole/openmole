@@ -157,16 +157,16 @@ object BatchEnvironment extends JavaLogger {
     implicit val fileServiceCache:  FileServiceCache
   )
 
-  def serializeJob[S](storage: S, remoteStorage: RemoteStorage, job: BatchExecutionJob, communicationPath: String, replicaDirectory: String, clean: () ⇒ Unit)(implicit services: BatchEnvironment.Services, storageInterface: StorageInterface[S], environmentStorage: EnvironmentStorage[S]) = {
-    val storageService = StorageService(storage)
-    initCommunication(job, storageService, remoteStorage, communicationPath, replicaDirectory, clean)
-  }
-
   def jobFiles(job: BatchExecutionJob) =
     job.pluginsAndFiles.files.toVector ++
       job.pluginsAndFiles.plugins ++
       job.environment.plugins ++
       Seq(job.environment.jvmLinuxX64, job.environment.runtime)
+
+  def serializeJob[S](storage: S, remoteStorage: RemoteStorage, job: BatchExecutionJob, communicationPath: String, replicaDirectory: String, clean: () ⇒ Unit)(implicit services: BatchEnvironment.Services, storageInterface: StorageInterface[S], environmentStorage: EnvironmentStorage[S]) = {
+    val storageService = StorageService(storage)
+    initCommunication(job, storageService, remoteStorage, communicationPath, replicaDirectory, clean)
+  }
 
   def initCommunication(job: BatchExecutionJob, storage: StorageService[_], remoteStorage: RemoteStorage, communicationPath: String, replicaDirectory: String, clean: () ⇒ Unit)(implicit services: BatchEnvironment.Services): SerializedJob = services.newFile.withTmpFile("job", ".tar") { jobFile ⇒
     import services._
@@ -208,7 +208,7 @@ object BatchEnvironment extends JavaLogger {
         FileMessage(path, hash)
       }
 
-    SerializedJob(storage, communicationPath, inputPath, runtime, serializedStorage, Some(outputPath), clean)
+    SerializedJob(storage, inputPath, runtime, serializedStorage, Some(outputPath), clean)
   }
 
   def toReplicatedFile(file: File, storage: StorageService[_], replicaDirectory: String, transferOptions: TransferOptions)(implicit services: BatchEnvironment.Services): ReplicatedFile = {
