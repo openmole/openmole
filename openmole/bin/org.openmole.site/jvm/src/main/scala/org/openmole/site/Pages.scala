@@ -97,7 +97,8 @@ object DocumentationPage {
     content:  T,
     details:  ⇒ Seq[DocumentationPage] = Seq.empty,
     location: Option[String]           = None,
-    title:    Option[String]           = None) = apply(name, content(), details, location, title, source = Some(content.sourcePath))
+    title:    Option[String]           = None) =
+    apply(name, content(), details, location, title, source = Some(content.sourcePath))
 
   def apply(
     name:     String,
@@ -162,7 +163,7 @@ object DocumentationPages {
   // lazy val pageName = DocumentationPage.fromScalatex(name = "html title", content = scalatex.path.to.scalatexFile, title = Some("Titre onglet"))
 
   def headPages =
-    Seq(documentation, run, packaged, explore, scale, language, advancedConcepts, developers, tutorials, OMcommunity)
+    Seq(documentation, run, explore, scale, language, advancedConcepts, developers, tutorials, OMcommunity)
 
   val mainDocPages = runPages ++ explorePages ++ scalePages ++ Seq(scale, explore, run)
 
@@ -173,6 +174,7 @@ object DocumentationPages {
     runPages ++
       packagedPages ++
       explorePages ++
+      //sensitivityPages ++
       scalePages ++
       languagePages ++
       advancedConceptsPages ++
@@ -243,10 +245,11 @@ object DocumentationPages {
   lazy val fileManagement = DocumentationPage.fromScalatex(name = "File Management", content = scalatex.documentation.language.FileManagement)
   lazy val hook = DocumentationPage.fromScalatex(name = "Hooks", content = scalatex.documentation.language.Hook)
   lazy val scalaFunction = DocumentationPage.fromScalatex(name = "Scala Function", content = scalatex.documentation.language.ScalaFunction)
+
   // Advanced Concepts
   lazy val advancedConcepts = DocumentationPage.fromScalatex(name = "Advanced Concepts", content = scalatex.documentation.advancedConcepts.AdvancedConcepts)
 
-  def advancedConceptsPages = gaPages :+ resumableWorkflow
+  def advancedConceptsPages = resumableWorkflow +: gaPages
 
   lazy val resumableWorkflow = DocumentationPage.fromScalatex(name = "Resumable Workflow", content = scalatex.documentation.advancedConcepts.ResumableWorkflow)
 

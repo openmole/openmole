@@ -17,7 +17,7 @@
     @h5
         @a(explore.title, href := explore.file)
     @ol
-      @sitemap.siteMapSection(explorePages.diff(sensitivityPages))
+      @sitemap.siteMapSection(explorePages)
       @li
         @a("Sensitivity Analysis", href := directSampling.file)
         @ol(listStyleType:= "lower-alpha")
