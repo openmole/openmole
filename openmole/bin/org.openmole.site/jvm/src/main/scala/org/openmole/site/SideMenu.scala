@@ -40,19 +40,16 @@ object SideMenu {
     div(
       topDiv(
         extraDiv,
-        for {
-          m ← menus
-        } yield {
+        for { m ← menus } yield {
           div(
             if (m.links.isEmpty) div else div(m.preText, fontWeight := "bold", paddingBottom := 5),
-            for {
-              p ← m.links
-            } yield {
+            for { p ← m.links } yield {
               val basicButton = div(paddingTop := 5)(linkButton(p.name, p.link, m.menuStyle, m.otherTab))
               currentPage match {
-                case Some(page) ⇒
+                case Some(page) ⇒ {
                   if (page.name == p.name) div(paddingTop := 5)(linkButton(p.name, p.link, openInOtherTab = m.otherTab))
                   else basicButton
+                }
                 case _ ⇒ basicButton
               }
             }
@@ -81,9 +78,10 @@ object SideMenu {
   val run = SideMenu(DocumentationPages.runPages, classIs(btn ++ btn_primary), "Available tasks")
   val packaged = SideMenu(DocumentationPages.packagedPages, classIs(btn ++ btn_primary), "Package you code")
   val explore = SideMenu(DocumentationPages.explorePages, classIs(btn ++ btn_primary), "Available methods")
+  val sensitivity = SideMenu(DocumentationPages.sensitivityPages, classIs(btn ++ btn_primary), "Sensitivity methods")
   val scale = SideMenu(DocumentationPages.scalePages, classIs(btn ++ btn_primary), "Available environments")
   val language = SideMenu(DocumentationPages.languagePages, classIs(btn ++ btn_primary), "Language")
-  val advanced = SideMenu(Seq(DocumentationPages.advancedConcepts), classIs(btn ++ btn_primary), "Advanced concepts")
+  val advanced = SideMenu(DocumentationPages.advancedConceptsPages, classIs(btn ++ btn_primary), "Advanced concepts")
   val developers = SideMenu(DocumentationPages.developersPages, classIs(btn ++ btn_primary), "Developer's documentation")
   val gettingStarted = SideMenu(DocumentationPages.gettingStartedPages, classIs(btn ++ btn_primary), "Getting started tutorials")
   val netLogoGA = SideMenu(DocumentationPages.netLogoPages, classIs(btn ++ btn_primary), "NetLogo tutorials")

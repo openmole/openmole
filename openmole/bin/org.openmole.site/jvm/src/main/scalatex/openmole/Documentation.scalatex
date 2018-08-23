@@ -8,7 +8,7 @@
     @h5
         @a(run.title, href := run.file)
     @ol
-      @sitemap.siteMapSection(taskPages)
+      @sitemap.siteMapSection(runPages.diff(Seq(packaged)))
       @li
         @a(packaged.title, href := packaged.file)
         @ol(listStyleType:= "lower-alpha")
@@ -18,6 +18,10 @@
         @a(explore.title, href := explore.file)
     @ol
       @sitemap.siteMapSection(explorePages)
+      @li
+        @a("Sensitivity Analysis", href := directSampling.file)
+        @ol(listStyleType:= "lower-alpha")
+          @sitemap.siteMapSection(sensitivityPages)
   @li
     @h5
         @a(scale.title, href := scale.file)

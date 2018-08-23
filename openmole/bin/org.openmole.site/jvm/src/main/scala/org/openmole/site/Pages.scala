@@ -97,7 +97,8 @@ object DocumentationPage {
     content:  T,
     details:  ⇒ Seq[DocumentationPage] = Seq.empty,
     location: Option[String]           = None,
-    title:    Option[String]           = None) = apply(name, content(), details, location, title, source = Some(content.sourcePath))
+    title:    Option[String]           = None) =
+    apply(name, content(), details, location, title, source = Some(content.sourcePath))
 
   def apply(
     name:     String,
@@ -162,7 +163,7 @@ object DocumentationPages {
   // lazy val pageName = DocumentationPage.fromScalatex(name = "html title", content = scalatex.path.to.scalatexFile, title = Some("Titre onglet"))
 
   def headPages =
-    Seq(documentation, run, packaged, explore, scale, language, advancedConcepts, developers, tutorials, OMcommunity)
+    Seq(documentation, run, explore, scale, language, advancedConcepts, developers, tutorials, OMcommunity)
 
   val mainDocPages = runPages ++ explorePages ++ scalePages ++ Seq(scale, explore, run)
 
@@ -170,9 +171,10 @@ object DocumentationPages {
   lazy val documentation = DocumentationPage.fromScalatex(name = "Documentation", content = scalatex.Documentation)
 
   def docPages =
-    taskPages ++
+    runPages ++
       packagedPages ++
       explorePages ++
+      //sensitivityPages ++
       scalePages ++
       languagePages ++
       advancedConceptsPages ++
@@ -188,9 +190,8 @@ object DocumentationPages {
   // Run
   lazy val run = DocumentationPage.fromScalatex(name = "Run", content = scalatex.documentation.run.Run, title = Some("Run Your Model"))
 
-  def runPages = taskPages :+ packaged
+  def runPages = Seq(scala, java, netLogo, r, scilab, packaged)
 
-  def taskPages = Seq(scala, java, netLogo, r, scilab)
   lazy val scala = DocumentationPage.fromScalatex(name = "Scala", content = scalatex.documentation.run.task.Scala)
   lazy val java = DocumentationPage.fromScalatex(name = "Java", content = scalatex.documentation.run.task.Java)
   lazy val netLogo = DocumentationPage.fromScalatex(name = "NetLogo", content = scalatex.documentation.run.task.NetLogo)
@@ -208,13 +209,16 @@ object DocumentationPages {
   // Explore
   lazy val explore = DocumentationPage.fromScalatex(name = "Explore", content = scalatex.documentation.explore.Explore, title = Some("Explore Your Model"))
 
-  def explorePages = Seq(calibration, dataProcessing, directSampling, profile, pse)
+  def explorePages = Seq(calibration, dataProcessing, pse) ++ sensitivityPages
 
   lazy val calibration = DocumentationPage.fromScalatex(name = "Calibration", content = scalatex.documentation.explore.Calibration)
   lazy val dataProcessing = DocumentationPage.fromScalatex(name = "Data Processing", content = scalatex.documentation.explore.DataProcessing)
+  lazy val pse = DocumentationPage.fromScalatex(name = "PSE", content = scalatex.documentation.explore.PSE, title = Some("Pattern Space Exploration"))
+
+  def sensitivityPages = Seq(directSampling, profile)
+
   lazy val directSampling = DocumentationPage.fromScalatex(name = "Direct Sampling", content = scalatex.documentation.explore.DirectSampling)
   lazy val profile = DocumentationPage.fromScalatex(name = "Profile", content = scalatex.documentation.explore.Profile)
-  lazy val pse = DocumentationPage.fromScalatex(name = "PSE", content = scalatex.documentation.explore.PSE, title = Some("Pattern Space Exploration"))
 
   // Scale
   lazy val scale = DocumentationPage.fromScalatex(name = "Scale", content = scalatex.documentation.scale.Scale, title = Some("Scale on Different Environments"))
@@ -241,10 +245,11 @@ object DocumentationPages {
   lazy val fileManagement = DocumentationPage.fromScalatex(name = "File Management", content = scalatex.documentation.language.FileManagement)
   lazy val hook = DocumentationPage.fromScalatex(name = "Hooks", content = scalatex.documentation.language.Hook)
   lazy val scalaFunction = DocumentationPage.fromScalatex(name = "Scala Function", content = scalatex.documentation.language.ScalaFunction)
+
   // Advanced Concepts
   lazy val advancedConcepts = DocumentationPage.fromScalatex(name = "Advanced Concepts", content = scalatex.documentation.advancedConcepts.AdvancedConcepts)
 
-  def advancedConceptsPages = gaPages :+ resumableWorkflow
+  def advancedConceptsPages = resumableWorkflow +: gaPages
 
   lazy val resumableWorkflow = DocumentationPage.fromScalatex(name = "Resumable Workflow", content = scalatex.documentation.advancedConcepts.ResumableWorkflow)
 
