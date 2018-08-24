@@ -172,11 +172,13 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
           val job = pbsJobService.submit(sj)
 
           BatchJobControl(
-            StorageService(local),
+            env,
+            StorageService.id(local),
             () ⇒ pbsJobService.state(job),
             () ⇒ pbsJobService.delete(job),
             () ⇒ pbsJobService.stdOutErr(job),
             () ⇒ sj.resultPath.get,
+            StorageService.download(local, _, _, _),
             () ⇒ clean
           )
         }
@@ -190,11 +192,13 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
           val job = pbsJobService.submit(sj)
 
           BatchJobControl(
-            StorageService(ssh),
+            env,
+            StorageService.id(ssh),
             () ⇒ pbsJobService.state(job),
             () ⇒ pbsJobService.delete(job),
             () ⇒ pbsJobService.stdOutErr(job),
             () ⇒ sj.resultPath.get,
+            StorageService.download(ssh, _, _, _),
             () ⇒ clean
           )
         }
@@ -243,11 +247,13 @@ class PBSLocalEnvironment(
       val job = pbsJobService.submit(sj)
 
       BatchJobControl(
-        StorageService(storage),
+        env,
+        StorageService.id(storage),
         () ⇒ pbsJobService.state(job),
         () ⇒ pbsJobService.delete(job),
         () ⇒ pbsJobService.stdOutErr(job),
         () ⇒ sj.resultPath.get,
+        StorageService.download(storage, _, _, _),
         () ⇒ clean
       )
     }

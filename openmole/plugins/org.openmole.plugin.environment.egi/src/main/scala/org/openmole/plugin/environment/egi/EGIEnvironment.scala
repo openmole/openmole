@@ -322,14 +322,16 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         jobDirectory,
         storageSpace.replicaDirectory)
 
-      val job = jobService.submit(sj)
+      val job = jobService.submit(sj, storageService.url)
 
       BatchJobControl(
-        StorageService(storageService),
+        env,
+        StorageService.id(storageService),
         () ⇒ jobService.state(job),
         () ⇒ jobService.delete(job),
         () ⇒ jobService.stdOutErr(job),
         () ⇒ sj.resultPath.get,
+        StorageService.download(storageService, _, _, _),
         () ⇒ StorageService.rmDirectory(storageService, jobDirectory)
       )
     }

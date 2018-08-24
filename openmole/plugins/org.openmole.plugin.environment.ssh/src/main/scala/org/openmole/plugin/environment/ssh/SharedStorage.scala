@@ -101,8 +101,8 @@ object SharedStorage extends JavaLogger {
     storage:        S)(implicit newFile: NewFile, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
     val runtime = runtimePath(serializedJob.runtime) //preparedRuntime(serializedJob.runtime)
     val result = serializedJob.resultPath.get
-    val workspace = serializedJob.storage.child(workDirectory, UUID.randomUUID.toString)
-    val osgiWorkDir = serializedJob.storage.child(workDirectory, UUID.randomUUID.toString)
+    val workspace = storageInterface.child(storage, workDirectory, UUID.randomUUID.toString)
+    val osgiWorkDir = storageInterface.child(storage, workDirectory, UUID.randomUUID.toString)
 
     val remoteScript =
       newFile.withTmpFile("run", ".sh") { script ⇒

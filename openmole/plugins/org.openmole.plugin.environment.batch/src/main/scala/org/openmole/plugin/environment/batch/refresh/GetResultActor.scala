@@ -27,7 +27,6 @@ import org.openmole.core.workflow.execution
 import org.openmole.core.workflow.execution._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
 import org.openmole.plugin.environment.batch.environment._
-import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.file._
 import org.openmole.tool.logger.JavaLogger
 
@@ -41,7 +40,7 @@ object GetResultActor extends JavaLogger {
     val GetResult(job, resultPath, batchJob) = msg
 
     try {
-      getResult(batchJob.storage, resultPath, job)
+      getResult(batchJob.storageId, batchJob.environment, batchJob.download, resultPath, job)
       JobManager ! Kill(job, Some(batchJob))
     }
     catch {
@@ -53,20 +52,20 @@ object GetResultActor extends JavaLogger {
     }
   }
 
-  def getResult(storage: StorageService[_], outputFilePath: String, batchJob: BatchExecutionJob)(implicit services: BatchEnvironment.Services): Unit = {
+  def getResult(storageId: String, environment: BatchEnvironment, download: (String, File, TransferOptions) ⇒ Unit, outputFilePath: String, batchJob: BatchExecutionJob)(implicit services: BatchEnvironment.Services): Unit = {
     import batchJob.job
 
-    val runtimeResult = getRuntimeResult(outputFilePath, storage)
+    val runtimeResult = getRuntimeResult(outputFilePath, storageId, environment, download)
 
     val stream = job.moleExecution.executionContext.services.outputRedirection.output
-    display(runtimeResult.stdOut, s"Output on ${runtimeResult.info.hostName}", storage, stream)
+    display(runtimeResult.stdOut, s"Output on ${runtimeResult.info.hostName}", stream)
 
     runtimeResult.result match {
       case Failure(exception) ⇒ throw new JobRemoteExecutionException("Fatal exception thrown during the execution of the job execution on the execution node", exception)
       case Success((result, log)) ⇒
-        val contextResults = getContextResults(result, storage)
+        val contextResults = getContextResults(result, storageId, environment, download)
 
-        services.eventDispatcher.trigger(storage.environment: Environment, Environment.JobCompleted(batchJob, log, runtimeResult.info))
+        services.eventDispatcher.trigger(environment: Environment, Environment.JobCompleted(batchJob, log, runtimeResult.info))
 
         //Try to download the results for all the jobs of the group
         for (moleJob ← job.moleJobs) {
@@ -81,11 +80,11 @@ object GetResultActor extends JavaLogger {
     }
   }
 
-  private def getRuntimeResult(outputFilePath: String, storage: StorageService[_])(implicit services: BatchEnvironment.Services): RuntimeResult = {
+  private def getRuntimeResult(outputFilePath: String, storageId: String, environment: BatchEnvironment, download: (String, File, TransferOptions) ⇒ Unit)(implicit services: BatchEnvironment.Services): RuntimeResult = {
     import services._
     retry(preference(BatchEnvironment.downloadResultRetry)) {
       newFile.withTmpFile { resultFile ⇒
-        signalDownload(eventDispatcher.eventId, storage.download(outputFilePath, resultFile), outputFilePath, storage, resultFile)
+        signalDownload(eventDispatcher.eventId, download(outputFilePath, resultFile, TransferOptions.default), outputFilePath, environment, storageId, resultFile)
         val (res, files) = RuntimeResult.load(resultFile)
         files.foreach(fileService.deleteWhenGarbageCollected)
         res
@@ -93,14 +92,14 @@ object GetResultActor extends JavaLogger {
     }
   }
 
-  private def display(output: Option[File], description: String, storage: StorageService[_], stream: PrintStream) = {
+  private def display(output: Option[File], description: String, stream: PrintStream) = {
     output.foreach { file ⇒
       execution.display(stream, description, file.content)
       file.delete()
     }
   }
 
-  private def getContextResults(serializedResults: SerializedContextResults, storage: StorageService[_])(implicit services: BatchEnvironment.Services): ContextResults = {
+  private def getContextResults(serializedResults: SerializedContextResults, storageId: String, environment: BatchEnvironment, download: (String, File, TransferOptions) ⇒ Unit)(implicit services: BatchEnvironment.Services): ContextResults = {
     import services._
     serializedResults match {
       case serializedResults: IndividualFilesContextResults ⇒
@@ -111,7 +110,7 @@ object GetResultActor extends JavaLogger {
                 replicated.originalPath →
                   ReplicatedFile.download(replicated) { (p, f) ⇒
                     retry(preference(BatchEnvironment.downloadResultRetry)) {
-                      signalDownload(eventDispatcher.eventId, storage.download(p, f, TransferOptions(noLink = true, canMove = true)), p, storage, f)
+                      signalDownload(eventDispatcher.eventId, download(p, f, TransferOptions(noLink = true, canMove = true)), p, environment, storageId, f)
                     }
                   }
             }.toMap

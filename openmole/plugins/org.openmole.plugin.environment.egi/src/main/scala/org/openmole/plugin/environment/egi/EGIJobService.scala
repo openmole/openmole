@@ -21,22 +21,18 @@ class EGIJobService(diracService: _root_.gridscale.dirac.DIRACServer, environmen
 
   lazy val diracJobGroup = java.util.UUID.randomUUID().toString.filter(_ != '-')
 
-  def submit(serializedJob: SerializedJob) = accessControl {
+  def submit(serializedJob: SerializedJob, storageLocation: String) = accessControl {
     import org.openmole.tool.file._
 
-    def storageLocations = storages.map(_.toOption).flatten.map(_._2).map(s ⇒ implicitly[EnvironmentStorage[WebDavStorage]].id(s) -> s.url).toMap
-
-    def jobScript =
-      JobScript(
+    newFile.withTmpFile("script", ".sh") { script ⇒
+      script.content = JobScript.create(
+        serializedJob,
+        storageLocation,
         voName = voName,
         memory = BatchEnvironment.openMOLEMemoryValue(openMOLEMemory).toMegabytes.toInt,
         threads = 1,
-        debug = debug,
-        storageLocations
+        debug = debug
       )
-
-    newFile.withTmpFile("script", ".sh") { script ⇒
-      script.content = jobScript(serializedJob)
 
       val jobDescription =
         JobDescription(

@@ -24,11 +24,16 @@ import org.openmole.plugin.environment.batch.environment.SerializedJob
 
 import scala.collection.mutable.ListBuffer
 
-case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean, storageLocations: String ⇒ String) {
+object JobScript {
 
-  def apply(
-    serializedJob: SerializedJob,
-    proxy:         Option[String] = None
+  def create(
+    serializedJob:   SerializedJob,
+    storageLocation: String,
+    voName:          String,
+    memory:          Int,
+    threads:         Int,
+    debug:           Boolean,
+    proxy:           Option[String] = None
   )(implicit preference: Preference) = {
     import serializedJob._
 
@@ -36,7 +41,6 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean, 
 
     assert(runtime.runtime.path != null)
 
-    val storageLocation = storageLocations(serializedJob.storage.id)
     def resolve(dest: String) = gridscale.RemotePath.child(storageLocation, dest)
 
     val debugInfo = s"echo $storageLocation ; hostname ; date -R ; cat /proc/meminfo ; ulimit -n 10240 ; ulimit -a ; " + "env ; echo $X509_USER_PROXY ; "

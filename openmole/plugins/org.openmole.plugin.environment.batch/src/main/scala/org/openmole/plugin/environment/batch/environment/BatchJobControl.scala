@@ -18,33 +18,41 @@
 
 package org.openmole.plugin.environment.batch.environment
 
+import java.io.File
+
 import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.plugin.environment.batch.storage.StorageService
+import org.openmole.core.communication.storage._
 
 object BatchJobControl {
 
   def tryStdOutErr(batchJob: BatchJobControl) = util.Try(batchJob.stdOutErr())
 
   def apply(
-    storageService: StorageService[_],
-    updateState:    () ⇒ ExecutionState,
-    delete:         () ⇒ Unit,
-    stdOutErr:      () ⇒ (String, String),
-    resultPath:     () ⇒ String,
-    clean:          () ⇒ Unit): BatchJobControl = new BatchJobControl(
-    storageService,
+    environment: BatchEnvironment,
+    storageId:   String,
+    updateState: () ⇒ ExecutionState,
+    delete:      () ⇒ Unit,
+    stdOutErr:   () ⇒ (String, String),
+    resultPath:  () ⇒ String,
+    download:    (String, File, TransferOptions) ⇒ Unit,
+    clean:       () ⇒ Unit): BatchJobControl = new BatchJobControl(
+    environment,
+    storageId,
     updateState,
     delete,
     stdOutErr,
+    download,
     resultPath,
     clean)
 
 }
 
 class BatchJobControl(
-  val storage:     StorageService[_],
+  val environment: BatchEnvironment,
+  val storageId:   String,
   val updateState: () ⇒ ExecutionState,
   val delete:      () ⇒ Unit,
   val stdOutErr:   () ⇒ (String, String),
+  val download:    (String, File, TransferOptions) ⇒ Unit,
   val resultPath:  () ⇒ String,
   val clean:       () ⇒ Unit)

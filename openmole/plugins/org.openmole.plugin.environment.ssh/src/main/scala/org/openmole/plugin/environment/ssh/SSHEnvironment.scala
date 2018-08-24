@@ -177,7 +177,6 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
       }
 
   def execute(batchExecutionJob: BatchExecutionJob) = {
-    def remoteStorage(jobDirectory: String) = LogicalLinkStorage.remote(LogicalLinkStorage(), jobDirectory)
 
     storageService match {
       case Left((space, local)) ⇒
@@ -190,11 +189,13 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
           val job = sshJobService.register(batchExecutionJob, sj)
 
           BatchJobControl(
-            StorageService(local),
+            env,
+            StorageService.id(local),
             () ⇒ sshJobService.state(job),
             () ⇒ sshJobService.delete(job),
             () ⇒ sshJobService.stdOutErr(job),
             () ⇒ sj.resultPath.get,
+            StorageService.download(local, _, _, _),
             () ⇒ clean
           )
         }
@@ -209,11 +210,13 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
           val job = sshJobService.register(batchExecutionJob, sj)
 
           BatchJobControl(
-            StorageService(ssh),
+            env,
+            StorageService.id(ssh),
             () ⇒ sshJobService.state(job),
             () ⇒ sshJobService.delete(job),
             () ⇒ sshJobService.stdOutErr(job),
             () ⇒ sj.resultPath.get,
+            StorageService.download(ssh, _, _, _),
             () ⇒ clean
           )
         }

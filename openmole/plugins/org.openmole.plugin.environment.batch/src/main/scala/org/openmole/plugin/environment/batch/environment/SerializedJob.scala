@@ -21,7 +21,6 @@ import org.openmole.plugin.environment.batch.storage._
 import org.openmole.core.communication.message._
 
 case class SerializedJob(
-  storage:       StorageService[_],
   inputPath:     String,
   runtime:       Runtime,
   remoteStorage: FileMessage,

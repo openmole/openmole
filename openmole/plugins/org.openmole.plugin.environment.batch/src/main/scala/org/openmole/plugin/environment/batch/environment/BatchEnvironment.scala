@@ -55,41 +55,41 @@ object BatchEnvironment extends JavaLogger {
     def id: Long
   }
 
-  case class BeginUpload(id: Long, file: File, path: String, storage: StorageService[_]) extends Event[BatchEnvironment] with Transfer
-  case class EndUpload(id: Long, file: File, path: String, storage: StorageService[_], exception: Option[Throwable], size: Long) extends Event[BatchEnvironment] with Transfer {
+  case class BeginUpload(id: Long, file: File, path: String, storageId: String) extends Event[BatchEnvironment] with Transfer
+  case class EndUpload(id: Long, file: File, path: String, storageId: String, exception: Option[Throwable], size: Long) extends Event[BatchEnvironment] with Transfer {
     def success = exception.isEmpty
   }
 
-  case class BeginDownload(id: Long, file: File, path: String, storage: StorageService[_]) extends Event[BatchEnvironment] with Transfer
-  case class EndDownload(id: Long, file: File, path: String, storage: StorageService[_], exception: Option[Throwable]) extends Event[BatchEnvironment] with Transfer {
+  case class BeginDownload(id: Long, file: File, path: String, storageId: String) extends Event[BatchEnvironment] with Transfer
+  case class EndDownload(id: Long, file: File, path: String, storageId: String, exception: Option[Throwable]) extends Event[BatchEnvironment] with Transfer {
     def success = exception.isEmpty
     def size = file.size
   }
 
-  def signalUpload[T](id: Long, upload: ⇒ T, file: File, path: String, storage: StorageService[_])(implicit eventDispatcher: EventDispatcher): T = {
+  def signalUpload[T](id: Long, upload: ⇒ T, file: File, path: String, environment: BatchEnvironment, storageId: String)(implicit eventDispatcher: EventDispatcher): T = {
     val size = file.size
-    eventDispatcher.trigger(storage.environment, BeginUpload(id, file, path, storage))
+    eventDispatcher.trigger(environment, BeginUpload(id, file, path, storageId))
     val res =
       try upload
       catch {
         case e: Throwable ⇒
-          eventDispatcher.trigger(storage.environment, EndUpload(id, file, path, storage, Some(e), size))
+          eventDispatcher.trigger(environment, EndUpload(id, file, path, storageId, Some(e), size))
           throw e
       }
-    eventDispatcher.trigger(storage.environment, EndUpload(id, file, path, storage, None, size))
+    eventDispatcher.trigger(environment, EndUpload(id, file, path, storageId, None, size))
     res
   }
 
-  def signalDownload[T](id: Long, download: ⇒ T, path: String, storage: StorageService[_], file: File)(implicit eventDispatcher: EventDispatcher): T = {
-    eventDispatcher.trigger(storage.environment, BeginDownload(id, file, path, storage))
+  def signalDownload[T](id: Long, download: ⇒ T, path: String, environment: BatchEnvironment, storageId: String, file: File)(implicit eventDispatcher: EventDispatcher): T = {
+    eventDispatcher.trigger(environment, BeginDownload(id, file, path, storageId))
     val res =
       try download
       catch {
         case e: Throwable ⇒
-          eventDispatcher.trigger(storage.environment, EndDownload(id, file, path, storage, Some(e)))
+          eventDispatcher.trigger(environment, EndDownload(id, file, path, storageId, Some(e)))
           throw e
       }
-    eventDispatcher.trigger(storage.environment, EndDownload(id, file, path, storage, None))
+    eventDispatcher.trigger(environment, EndDownload(id, file, path, storageId, None))
     res
   }
 
@@ -190,7 +190,7 @@ object BatchEnvironment extends JavaLogger {
     /* ---- upload the execution message ----*/
     newFile.withTmpFile("job", ".tar") { executionMessageFile ⇒
       serializerService.serialiseAndArchiveFiles(executionMessage, executionMessageFile)
-      signalUpload(eventDispatcher.eventId, storage.upload(executionMessageFile, inputPath, TransferOptions(noLink = true, canMove = true)), executionMessageFile, inputPath, storage)
+      signalUpload(eventDispatcher.eventId, storage.upload(executionMessageFile, inputPath, TransferOptions(noLink = true, canMove = true)), executionMessageFile, inputPath, job.environment, storage.id)
     }
 
     val serializedStorage =
@@ -200,11 +200,11 @@ object BatchEnvironment extends JavaLogger {
         services.serializerService.serialiseAndArchiveFiles(remoteStorage, storageFile)
         val hash = storageFile.hash().toString()
         val path = storage.child(communicationPath, StorageSpace.timedUniqName)
-        signalUpload(eventDispatcher.eventId, storage.upload(storageFile, path, TransferOptions(noLink = true, canMove = true, raw = true)), storageFile, inputPath, storage)
+        signalUpload(eventDispatcher.eventId, storage.upload(storageFile, path, TransferOptions(noLink = true, canMove = true, raw = true)), storageFile, inputPath, job.environment, storage.id)
         FileMessage(path, hash)
       }
 
-    SerializedJob(storage, inputPath, runtime, serializedStorage, Some(outputPath))
+    SerializedJob(inputPath, runtime, serializedStorage, Some(outputPath))
   }
 
   def toReplicatedFile(file: File, storage: StorageService[_], replicaDirectory: String, transferOptions: TransferOptions)(implicit services: BatchEnvironment.Services): ReplicatedFile = {
@@ -225,7 +225,7 @@ object BatchEnvironment extends JavaLogger {
     def upload = {
       val name = StorageSpace.timedUniqName
       val newFile = storage.child(replicaDirectory, name)
-      signalUpload(eventDispatcher.eventId, storage.upload(toReplicate, newFile, options), toReplicate, newFile, storage)
+      signalUpload(eventDispatcher.eventId, storage.upload(toReplicate, newFile, options), toReplicate, newFile, storage.environment, storage.id)
       newFile
     }
 
