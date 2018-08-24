@@ -289,6 +289,8 @@ trait NetLogoTask extends Task with ValidateTask {
       val context = parameters.context + (External.PWD → instance.workspaceDirectory.getAbsolutePath)
       val preparedContext = External.deployInputFilesAndResources(external, context, resolver)
 
+      NetLogoTask.executeNetLogo(instance.netLogo,"clear-all")
+
       seed.foreach { s ⇒ NetLogoTask.executeNetLogo(instance.netLogo, s"random-seed ${context(s)}") }
 
       for (inBinding ← mapped.inputs) {
