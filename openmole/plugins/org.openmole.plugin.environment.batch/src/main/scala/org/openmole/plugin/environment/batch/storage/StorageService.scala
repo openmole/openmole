@@ -46,6 +46,9 @@ object StorageService extends JavaLogger {
     JobManager ! RetryAction(() ⇒ action)
   }
 
+  def rmDirectory[S](s: S, directory: String)(implicit hierarchicalStorageInterface: HierarchicalStorageInterface[S]) =
+    hierarchicalStorageInterface.rmDir(s, directory)
+
 }
 
 class StorageService[S](val storage: S)(implicit storageInterface: StorageInterface[S], environmentStorage: EnvironmentStorage[S]) {

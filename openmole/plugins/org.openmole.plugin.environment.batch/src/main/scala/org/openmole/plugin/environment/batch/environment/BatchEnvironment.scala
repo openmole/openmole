@@ -35,7 +35,6 @@ import org.openmole.core.threadprovider.{ ThreadProvider, Updater }
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workspace._
-import org.openmole.plugin.environment.batch.jobservice._
 import org.openmole.plugin.environment.batch.refresh._
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.cache._
@@ -46,12 +45,9 @@ import squants.time.TimeConversions._
 import squants.information.Information
 import squants.information.InformationConversions._
 import org.openmole.core.location._
-import org.openmole.plugin.environment.batch
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment.{ ExecutionJobRegistry, signalUpload }
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment.{ ExecutionJobRegistry }
 
 import scala.collection.immutable.TreeSet
-import scala.ref.WeakReference
-import scala.util.Random
 
 object BatchEnvironment extends JavaLogger {
 
@@ -163,12 +159,12 @@ object BatchEnvironment extends JavaLogger {
       job.environment.plugins ++
       Seq(job.environment.jvmLinuxX64, job.environment.runtime)
 
-  def serializeJob[S](storage: S, remoteStorage: RemoteStorage, job: BatchExecutionJob, communicationPath: String, replicaDirectory: String, clean: () ⇒ Unit)(implicit services: BatchEnvironment.Services, storageInterface: StorageInterface[S], environmentStorage: EnvironmentStorage[S]) = {
+  def serializeJob[S](storage: S, remoteStorage: RemoteStorage, job: BatchExecutionJob, communicationPath: String, replicaDirectory: String)(implicit services: BatchEnvironment.Services, storageInterface: StorageInterface[S], environmentStorage: EnvironmentStorage[S]) = {
     val storageService = StorageService(storage)
-    initCommunication(job, storageService, remoteStorage, communicationPath, replicaDirectory, clean)
+    initCommunication(job, storageService, remoteStorage, communicationPath, replicaDirectory)
   }
 
-  def initCommunication(job: BatchExecutionJob, storage: StorageService[_], remoteStorage: RemoteStorage, communicationPath: String, replicaDirectory: String, clean: () ⇒ Unit)(implicit services: BatchEnvironment.Services): SerializedJob = services.newFile.withTmpFile("job", ".tar") { jobFile ⇒
+  def initCommunication(job: BatchExecutionJob, storage: StorageService[_], remoteStorage: RemoteStorage, communicationPath: String, replicaDirectory: String)(implicit services: BatchEnvironment.Services): SerializedJob = services.newFile.withTmpFile("job", ".tar") { jobFile ⇒
     import services._
 
     serializerService.serialise(job.runnableTasks, jobFile)
@@ -208,7 +204,7 @@ object BatchEnvironment extends JavaLogger {
         FileMessage(path, hash)
       }
 
-    SerializedJob(storage, inputPath, runtime, serializedStorage, Some(outputPath), clean)
+    SerializedJob(storage, inputPath, runtime, serializedStorage, Some(outputPath))
   }
 
   def toReplicatedFile(file: File, storage: StorageService[_], replicaDirectory: String, transferOptions: TransferOptions)(implicit services: BatchEnvironment.Services): ReplicatedFile = {
@@ -276,11 +272,6 @@ object BatchEnvironment extends JavaLogger {
     )
   }
 
-  def resultPathInSerializedJob(serializedJob: SerializedJob) = serializedJob.resultPath.get
-
-  def submitSerializedJob[S](jobService: S, batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob, resultPath: SerializedJob ⇒ String = resultPathInSerializedJob)(implicit jobServiceInterface: JobServiceInterface[S]) =
-    BatchJobService.submit(jobService, batchExecutionJob, serializedJob, () ⇒ resultPath(serializedJob))
-
   def isClean(environment: BatchEnvironment)(implicit services: BatchEnvironment.Services) = {
     val environmentJobs = environment.jobs
     environmentJobs.forall(_.state == ExecutionState.KILLED)
@@ -333,10 +324,6 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   def exceptions = services.preference(Environment.maxExceptionsLog)
 
-  def serializeJob(batchExecutionJob: BatchExecutionJob): SerializedJob
-  def submitSerializedJob(batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob): BatchJobControl
-  //def delete(serializedJob: SerializedJob, batchExecutionJob: Option[BatchExecutionJob]): Unit
-
   def clean = BatchEnvironment.isClean(this)
 
   lazy val registry = new ExecutionJobRegistry()
@@ -353,6 +340,8 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
     eventDispatcherService.trigger(this, new Environment.JobSubmitted(bej))
     JobManager ! Manage(bej)
   }
+
+  def execute(batchExecutionJob: BatchExecutionJob): BatchJobControl
 
   def runtime = BatchEnvironment.runtimeLocation
   def jvmLinuxX64 = BatchEnvironment.JVMLinuxX64Location

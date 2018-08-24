@@ -25,18 +25,18 @@ object SubmitActor {
   def receive(submit: Submit)(implicit services: BatchEnvironment.Services) = {
     import services._
 
-    val Submit(job, sj) = submit
+    val Submit(job) = submit
 
     if (!job.state.isFinal) {
       try {
-        val bj = job.environment.submitSerializedJob(job, sj)
+        val bj = job.environment.execute(job)
         job.state = SUBMITTED
-        JobManager ! Submitted(job, sj, bj)
+        JobManager ! Submitted(job, bj)
       }
       catch {
         case e: Throwable ⇒
           JobManager ! Error(job, e, None)
-          JobManager ! Submit(job, sj)
+          JobManager ! Submit(job)
       }
     }
   }

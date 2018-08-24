@@ -25,5 +25,4 @@ case class SerializedJob(
   inputPath:     String,
   runtime:       Runtime,
   remoteStorage: FileMessage,
-  resultPath:    Option[String],
-  clean:         () ⇒ Unit)
+  resultPath:    Option[String])

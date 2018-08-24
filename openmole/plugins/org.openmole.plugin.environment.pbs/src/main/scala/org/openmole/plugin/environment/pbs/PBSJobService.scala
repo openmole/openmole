@@ -3,23 +3,10 @@ package org.openmole.plugin.environment.pbs
 import gridscale.cluster.HeadNode
 import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment, BatchExecutionJob, SerializedJob }
-import org.openmole.plugin.environment.batch.jobservice.JobServiceInterface
 import org.openmole.plugin.environment.batch.storage.{ HierarchicalStorageInterface, StorageInterface }
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import org.openmole.plugin.environment.pbs.PBSEnvironment.Parameters
 import org.openmole.plugin.environment.ssh.{ RuntimeInstallation, SharedStorage }
-
-object PBSJobService {
-
-  implicit def isJobService[A, B]: JobServiceInterface[PBSJobService[A, B]] = new JobServiceInterface[PBSJobService[A, B]] {
-    override type J = gridscale.cluster.BatchScheduler.BatchJob
-    override def submit(env: PBSJobService[A, B], serializedJob: SerializedJob, batchExecutionJob: BatchExecutionJob): J = env.submit(serializedJob)
-    override def state(env: PBSJobService[A, B], j: J): ExecutionState.ExecutionState = env.state(j)
-    override def delete(env: PBSJobService[A, B], j: J): Unit = env.delete(j)
-    override def stdOutErr(js: PBSJobService[A, B], j: J) = js.stdOutErr(j)
-  }
-
-}
 
 class PBSJobService[S, H](
   s:                 S,

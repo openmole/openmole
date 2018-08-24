@@ -17,53 +17,27 @@
 
 package org.openmole.plugin.environment.egi
 
-import java.io.File
-
-import org.apache.commons.configuration2.HierarchicalConfigurationXMLReader
-import org.bouncycastle.voms.VOMSAttribute
-import org.openmole.core.authentication.AuthenticationStore
-import org.openmole.core.communication.storage
-import org.openmole.core.exception.{ InternalProcessingError, MultipleException, UserBadDataError }
-import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.threadprovider.Updater
-import org.openmole.core.workspace.Workspace
-import org.openmole.plugin.environment.batch.environment._
-import org.openmole.plugin.environment.batch.jobservice.{ BatchJobService, JobServiceInterface }
-import org.openmole.plugin.environment.batch.refresh.JobManager
-import org.openmole.plugin.environment.batch.storage._
-import org.openmole.tool.crypto.Cypher
+import org.openmole.core.exception.{ InternalProcessingError, MultipleException }
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job.Job
-import org.openmole.plugin.environment.batch.environment
-import squants._
+import org.openmole.core.workspace.Workspace
+import org.openmole.plugin.environment.batch.environment.{ BatchJobControl, _ }
+import org.openmole.plugin.environment.batch.storage._
+import org.openmole.tool.crypto.Cypher
 import squants.information._
 
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable.{ HashMap, MultiMap, Set }
-import scala.ref.WeakReference
-
-//import java.net.URI
-//
-//import fr.iscpif.gridscale.egi.BDII
-//import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.core.workflow.dsl._
-//import org.openmole.core.workspace.Workspace
-//import org.openmole.plugin.environment.batch.control._
-//import org.openmole.plugin.environment.batch.environment._
-//import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.logger.JavaLogger
-//import org.openmole.tool.random._
-//import squants.information.Information
+import org.openmole.tool.exception._
+import gridscale.egi._
+import org.openmole.tool.cache._
 import squants.time.Time
 import squants.time.TimeConversions._
-import org.openmole.tool.cache._
-import gridscale.egi._
-import effectaside._
 
 object EGIEnvironment extends JavaLogger {
-
-  import util._
 
   val FetchResourcesTimeOut = ConfigurationLocation("EGIEnvironment", "FetchResourcesTimeOut", Some(1 minutes))
   val CACertificatesSite = ConfigurationLocation("EGIEnvironment", "CACertificatesSite", Some("http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/"))
@@ -221,7 +195,6 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   val authentication: A
 )(implicit val services: BatchEnvironment.Services, workspace: Workspace) extends BatchEnvironment { env ⇒
 
-  import EGIEnvironment._
   import services._
 
   implicit val interpreters = EGI()
@@ -265,10 +238,10 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     else throw new InternalProcessingError(s"No WebDAV storage available for the VO $voName")
   }
 
-  override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
+  def execute(batchExecutionJob: BatchExecutionJob) = {
     import EGIEnvironment._
-    import org.openmole.tool.file._
     import org.openmole.core.tools.math._
+    import org.openmole.tool.file._
 
     def selectStorage = {
       val sss = storages.map(_.toOption).flatten
@@ -338,16 +311,28 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     val (storageSpace, storageService) = selectStorage
 
     val jobDirectory = HierarchicalStorageSpace.createJobDirectory(storageService, storageSpace)
-    val remoteStorage = CurlRemoteStorage(storageService.url, jobDirectory, voName, debug, preference(EGIEnvironment.RemoteCopyTimeout))
 
-    BatchEnvironment.serializeJob(
-      storageService,
-      remoteStorage,
-      batchExecutionJob,
-      jobDirectory,
-      storageSpace.replicaDirectory,
-      () ⇒ HierarchicalStorageSpace.backgroundRm(storageService, jobDirectory, true))
+    tryOnError { StorageService.rmDirectory(storageService, jobDirectory) } {
+      val remoteStorage = CurlRemoteStorage(storageService.url, jobDirectory, voName, debug, preference(EGIEnvironment.RemoteCopyTimeout))
 
+      val sj = BatchEnvironment.serializeJob(
+        storageService,
+        remoteStorage,
+        batchExecutionJob,
+        jobDirectory,
+        storageSpace.replicaDirectory)
+
+      val job = jobService.submit(sj)
+
+      BatchJobControl(
+        StorageService(storageService),
+        () ⇒ jobService.state(job),
+        () ⇒ jobService.delete(job),
+        () ⇒ jobService.stdOutErr(job),
+        () ⇒ sj.resultPath.get,
+        () ⇒ StorageService.rmDirectory(storageService, jobDirectory)
+      )
+    }
   }
 
   import gridscale.dirac._
@@ -364,9 +349,6 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     delegate(s, implicitly[EGIAuthenticationInterface[A]].apply(authentication), tokenCache())
     EGIJobService(s, env)
   }
-
-  override def submitSerializedJob(batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob) =
-    BatchEnvironment.submitSerializedJob(jobService, batchExecutionJob, serializedJob)
 
   override def updateInterval =
     UpdateInterval.fixed(preference(EGIEnvironment.JobGroupRefreshInterval))

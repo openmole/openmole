@@ -2,21 +2,11 @@ package org.openmole.plugin.environment.egi
 
 import gridscale.dirac.JobDescription
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment, BatchExecutionJob, SerializedJob }
-import org.openmole.plugin.environment.batch.jobservice.JobServiceInterface
+import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment, SerializedJob }
 import org.openmole.plugin.environment.batch.storage.EnvironmentStorage
 import org.openmole.tool.cache.TimeCache
 
 object EGIJobService {
-
-  implicit def isJobService: JobServiceInterface[EGIJobService] = new JobServiceInterface[EGIJobService] {
-    override type J = _root_.gridscale.dirac.JobID
-
-    override def submit(js: EGIJobService, serializedJob: SerializedJob, batchExecutionJob: BatchExecutionJob): J = js.submit(serializedJob)
-    override def state(js: EGIJobService, j: J) = js.state(j)
-    override def delete(js: EGIJobService, j: J): Unit = js.delete(j)
-    override def stdOutErr(js: EGIJobService, j: J) = js.stdOutErr(j)
-  }
 
   def apply(diracService: _root_.gridscale.dirac.DIRACServer, environment: EGIEnvironment[_]) =
     new EGIJobService(diracService, environment)
@@ -26,8 +16,8 @@ object EGIJobService {
 class EGIJobService(diracService: _root_.gridscale.dirac.DIRACServer, environment: EGIEnvironment[_]) {
 
   import environment._
-  import services._
   import interpreters._
+  import services._
 
   lazy val diracJobGroup = java.util.UUID.randomUUID().toString.filter(_ != '-')
 

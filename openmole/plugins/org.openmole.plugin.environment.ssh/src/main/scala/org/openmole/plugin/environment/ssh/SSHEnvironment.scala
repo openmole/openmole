@@ -26,7 +26,8 @@ import org.openmole.core.preference.ConfigurationLocation
 import org.openmole.core.threadprovider.{ IUpdatable, Updater }
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
-import org.openmole.plugin.environment.batch.environment._
+import org.openmole.plugin.environment.batch.environment.{ BatchJobControl, _ }
+import org.openmole.tool.exception._
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.plugin.environment.gridscale.LogicalLinkStorage
 import org.openmole.tool.crypto._
@@ -175,16 +176,48 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
         (sshStorageSpace(ssh), ssh)
       }
 
-  override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
+  def execute(batchExecutionJob: BatchExecutionJob) = {
     def remoteStorage(jobDirectory: String) = LogicalLinkStorage.remote(LogicalLinkStorage(), jobDirectory)
 
     storageService match {
       case Left((space, local)) ⇒
         val jobDirectory = HierarchicalStorageSpace.createJobDirectory(local, space)
-        BatchEnvironment.serializeJob(local, remoteStorage(jobDirectory), batchExecutionJob, jobDirectory, space.replicaDirectory, () ⇒ HierarchicalStorageSpace.backgroundRm(local, jobDirectory, true))
+        val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage(), jobDirectory)
+        def clean = StorageService.rmDirectory(local, jobDirectory)
+
+        tryOnError { clean } {
+          val sj = BatchEnvironment.serializeJob(local, remoteStorage, batchExecutionJob, jobDirectory, space.replicaDirectory)
+          val job = sshJobService.register(batchExecutionJob, sj)
+
+          BatchJobControl(
+            StorageService(local),
+            () ⇒ sshJobService.state(job),
+            () ⇒ sshJobService.delete(job),
+            () ⇒ sshJobService.stdOutErr(job),
+            () ⇒ sj.resultPath.get,
+            () ⇒ clean
+          )
+        }
+
       case Right((space, ssh)) ⇒
         val jobDirectory = HierarchicalStorageSpace.createJobDirectory(ssh, space)
-        BatchEnvironment.serializeJob(ssh, remoteStorage(jobDirectory), batchExecutionJob, jobDirectory, space.replicaDirectory, () ⇒ HierarchicalStorageSpace.backgroundRm(ssh, jobDirectory, true))
+        val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage(), jobDirectory)
+        def clean = StorageService.rmDirectory(ssh, jobDirectory)
+
+        tryOnError { clean } {
+          val sj = BatchEnvironment.serializeJob(ssh, remoteStorage, batchExecutionJob, jobDirectory, space.replicaDirectory)
+          val job = sshJobService.register(batchExecutionJob, sj)
+
+          BatchJobControl(
+            StorageService(ssh),
+            () ⇒ sshJobService.state(job),
+            () ⇒ sshJobService.delete(job),
+            () ⇒ sshJobService.stdOutErr(job),
+            () ⇒ sj.resultPath.get,
+            () ⇒ clean
+          )
+        }
+
     }
   }
 
@@ -200,7 +233,5 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
       case Right((space, ssh))  ⇒ new SSHJobService(ssh, space.tmpDirectory, services, installRuntime, env, accessControl)
     }
 
-  override def submitSerializedJob(batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob) =
-    BatchEnvironment.submitSerializedJob(sshJobService, batchExecutionJob, serializedJob)
 }
 

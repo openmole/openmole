@@ -20,12 +20,13 @@ package org.openmole.plugin.environment.pbs
 import org.openmole.core.authentication._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
-import org.openmole.plugin.environment.batch.environment._
+import org.openmole.plugin.environment.batch.environment.{ BatchJobControl, _ }
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.plugin.environment.gridscale.LogicalLinkStorage
 import org.openmole.plugin.environment.ssh._
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.logger.JavaLogger
+import org.openmole.tool.exception._
 import squants._
 import squants.information._
 
@@ -158,16 +159,45 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
         (sshStorageSpace(ssh), ssh)
       }
 
-  override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
+  def execute(batchExecutionJob: BatchExecutionJob) = {
     def remoteStorage(jobDirectory: String) = LogicalLinkStorage.remote(LogicalLinkStorage(), jobDirectory)
 
     storageService match {
       case Left((space, local)) ⇒
         val jobDirectory = HierarchicalStorageSpace.createJobDirectory(local, space)
-        BatchEnvironment.serializeJob(local, remoteStorage(jobDirectory), batchExecutionJob, jobDirectory, space.replicaDirectory, () ⇒ HierarchicalStorageSpace.backgroundRm(local, jobDirectory, true))
+        def clean = StorageService.rmDirectory(local, jobDirectory)
+
+        tryOnError { clean } {
+          val sj = BatchEnvironment.serializeJob(local, remoteStorage(jobDirectory), batchExecutionJob, jobDirectory, space.replicaDirectory)
+          val job = pbsJobService.submit(sj)
+
+          BatchJobControl(
+            StorageService(local),
+            () ⇒ pbsJobService.state(job),
+            () ⇒ pbsJobService.delete(job),
+            () ⇒ pbsJobService.stdOutErr(job),
+            () ⇒ sj.resultPath.get,
+            () ⇒ clean
+          )
+        }
+
       case Right((space, ssh)) ⇒
         val jobDirectory = HierarchicalStorageSpace.createJobDirectory(ssh, space)
-        BatchEnvironment.serializeJob(ssh, remoteStorage(jobDirectory), batchExecutionJob, HierarchicalStorageSpace.createJobDirectory(ssh, space), space.replicaDirectory, () ⇒ HierarchicalStorageSpace.backgroundRm(ssh, jobDirectory, true))
+        def clean = StorageService.rmDirectory(ssh, jobDirectory)
+
+        tryOnError { clean } {
+          val sj = BatchEnvironment.serializeJob(ssh, remoteStorage(jobDirectory), batchExecutionJob, jobDirectory, space.replicaDirectory)
+          val job = pbsJobService.submit(sj)
+
+          BatchJobControl(
+            StorageService(ssh),
+            () ⇒ pbsJobService.state(job),
+            () ⇒ pbsJobService.delete(job),
+            () ⇒ pbsJobService.stdOutErr(job),
+            () ⇒ sj.resultPath.get,
+            () ⇒ clean
+          )
+        }
     }
   }
 
@@ -183,8 +213,6 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
       case Right((space, ssh))  ⇒ new PBSJobService(ssh, space.tmpDirectory, installRuntime, parameters, sshServer, accessControl)
     }
 
-  override def submitSerializedJob(batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob) =
-    BatchEnvironment.submitSerializedJob(pbsJobService, batchExecutionJob, serializedJob)
 }
 
 class PBSLocalEnvironment(
@@ -205,11 +233,25 @@ class PBSLocalEnvironment(
   lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.MaxConnections)))
   lazy val space = localStorageSpace(storage)
 
-  override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
+  def execute(batchExecutionJob: BatchExecutionJob) = {
     val jobDirectory = HierarchicalStorageSpace.createJobDirectory(storage, space)
     val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage(), jobDirectory)
+    def clean = StorageService.rmDirectory(storage, jobDirectory)
 
-    BatchEnvironment.serializeJob(storage, remoteStorage, batchExecutionJob, jobDirectory, space.replicaDirectory, () ⇒ HierarchicalStorageSpace.backgroundRm(storage, jobDirectory, true))
+    tryOnError { clean } {
+      val sj = BatchEnvironment.serializeJob(storage, remoteStorage, batchExecutionJob, jobDirectory, space.replicaDirectory)
+      val job = pbsJobService.submit(sj)
+
+      BatchJobControl(
+        StorageService(storage),
+        () ⇒ pbsJobService.state(job),
+        () ⇒ pbsJobService.delete(job),
+        () ⇒ pbsJobService.stdOutErr(job),
+        () ⇒ sj.resultPath.get,
+        () ⇒ clean
+      )
+    }
+
   }
 
   lazy val installRuntime = new RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
@@ -217,9 +259,6 @@ class PBSLocalEnvironment(
   import _root_.gridscale.local.LocalHost
 
   lazy val pbsJobService = new PBSJobService(storage, space.tmpDirectory, installRuntime, parameters, LocalHost(), AccessControl(preference(SSHEnvironment.MaxConnections)))
-
-  override def submitSerializedJob(batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob) =
-    BatchEnvironment.submitSerializedJob(pbsJobService, batchExecutionJob, serializedJob)
 
 }
 

@@ -21,19 +21,12 @@ import java.io.PrintStream
 
 import org.openmole.core.communication.message._
 import org.openmole.core.communication.storage._
-import org.openmole.core.event.EventDispatcher
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.fileservice.FileService
-import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.preference.Preference
-import org.openmole.core.serializer.SerializerService
 import org.openmole.core.tools.service.Retry._
 import org.openmole.core.workflow.execution
 import org.openmole.core.workflow.execution._
-import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
 import org.openmole.plugin.environment.batch.environment._
-import org.openmole.plugin.environment.batch.jobservice.{ BatchJobControl, BatchJobService }
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.file._
 import org.openmole.tool.logger.JavaLogger
@@ -45,24 +38,23 @@ object GetResultActor extends JavaLogger {
   case class JobRemoteExecutionException(message: String, cause: Throwable) extends InternalProcessingError(message, cause)
 
   def receive(msg: GetResult)(implicit services: BatchEnvironment.Services) = {
-    val GetResult(job, sj, resultPath, batchJob) = msg
+    val GetResult(job, resultPath, batchJob) = msg
 
     try {
-      getResult(sj.storage, resultPath, job)
-      JobManager ! Kill(job, Some(batchJob), Some(sj))
+      getResult(batchJob.storage, resultPath, job)
+      JobManager ! Kill(job, Some(batchJob))
     }
     catch {
       case e: Throwable ⇒
         job.state = ExecutionState.FAILED
-        val stdOutErr = BatchJobService.tryStdOutErr(batchJob).toOption
+        val stdOutErr = BatchJobControl.tryStdOutErr(batchJob).toOption
         JobManager ! Error(job, e, stdOutErr)
-        JobManager ! Kill(job, Some(batchJob), Some(sj))
+        JobManager ! Kill(job, Some(batchJob))
     }
   }
 
   def getResult(storage: StorageService[_], outputFilePath: String, batchJob: BatchExecutionJob)(implicit services: BatchEnvironment.Services): Unit = {
     import batchJob.job
-    import services._
 
     val runtimeResult = getRuntimeResult(outputFilePath, storage)
 

@@ -5,25 +5,13 @@ import org.openmole.core.threadprovider.IUpdatable
 import org.openmole.core.workflow.execution.Environment.ExceptionRaised
 import org.openmole.core.workflow.execution.{ Environment, ExecutionState }
 import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment, BatchExecutionJob, SerializedJob }
-import org.openmole.plugin.environment.batch.jobservice.JobServiceInterface
 import org.openmole.plugin.environment.batch.storage.{ HierarchicalStorageInterface, StorageInterface }
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
-import org.openmole.plugin.environment.ssh.SSHEnvironment.{ Queued, SSHJob }
-import org.openmole.tool.lock._
 import org.openmole.tool.logger.JavaLogger
 
 import scala.ref.WeakReference
 
 object SSHJobService extends JavaLogger {
-
-  implicit def isJobService[A]: JobServiceInterface[SSHJobService[A]] = new JobServiceInterface[SSHJobService[A]] {
-    override type J = SSHJob
-
-    override def submit(js: SSHJobService[A], serializedJob: SerializedJob, batchExecutionJob: BatchExecutionJob): J = js.register(serializedJob, batchExecutionJob)
-    override def state(js: SSHJobService[A], j: J): ExecutionState.ExecutionState = js.state(j)
-    override def delete(js: SSHJobService[A], j: J): Unit = js.delete(j)
-    override def stdOutErr(js: SSHJobService[A], j: SSHJob) = js.stdOutErr(j)
-  }
 
   class Updater(environment: WeakReference[SSHEnvironment[_]]) extends IUpdatable {
 
@@ -66,7 +54,7 @@ object SSHJobService extends JavaLogger {
 
 class SSHJobService[S](s: S, tmpDirectory: String, services: BatchEnvironment.Services, installation: RuntimeInstallation[_], env: SSHEnvironment[_], val accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], sshEffect: Effect[_root_.gridscale.ssh.SSH], systemEffect: Effect[effectaside.System]) {
 
-  def register(serializedJob: SerializedJob, batchExecutionJob: BatchExecutionJob) = {
+  def register(batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob) = {
 
     val workDirectory = env.workDirectory getOrElse tmpDirectory
 
