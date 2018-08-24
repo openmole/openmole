@@ -28,6 +28,7 @@ object JobScript {
 
   def create(
     serializedJob:   SerializedJob,
+    resultPath:      String,
     storageLocation: String,
     voName:          String,
     memory:          Int,
@@ -96,7 +97,7 @@ object JobScript {
 
       script += "export PATH=$PWD/jre/bin:$PATH"
       script += "export HOME=$PWD"
-      script += "/bin/sh run.sh " + memory + "m " + UUID.randomUUID + " -s $CUR/storage.bin -p $CUR/envplugins/ -i " + inputPath + " -o " + resultPath.get + " -t " + threads + (if (debug) " -d 2>&1" else "")
+      script += "/bin/sh run.sh " + memory + "m " + UUID.randomUUID + " -s $CUR/storage.bin -p $CUR/envplugins/ -i " + inputPath + " -o " + resultPath + " -t " + threads + (if (debug) " -d 2>&1" else "")
       script.mkString(" && ")
     }
 

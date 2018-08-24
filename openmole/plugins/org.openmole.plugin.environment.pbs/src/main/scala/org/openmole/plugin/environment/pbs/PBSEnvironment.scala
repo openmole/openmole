@@ -102,6 +102,32 @@ object PBSEnvironment extends JavaLogger {
     threads:              Option[Int],
     storageSharedLocally: Boolean,
     flavour:              _root_.gridscale.pbs.PBSFlavour)
+
+  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: PBSJobService[_, _])(implicit services: BatchEnvironment.Services) = {
+    val jobDirectory = HierarchicalStorageSpace.createJobDirectory(storage, space)
+    def remoteStorage(jobDirectory: String) = LogicalLinkStorage.remote(LogicalLinkStorage(), jobDirectory)
+
+    def clean = StorageService.rmDirectory(storage, jobDirectory)
+
+    tryOnError { clean } {
+      val sj = BatchEnvironment.serializeJob(storage, remoteStorage(jobDirectory), batchExecutionJob, jobDirectory, space.replicaDirectory)
+      val outputPath = StorageService.child(storage, jobDirectory, uniqName("job", ".out"))
+
+      val job = jobService.submit(sj, outputPath)
+
+      BatchJobControl(
+        batchExecutionJob.environment,
+        StorageService.id(storage),
+        () ⇒ jobService.state(job),
+        () ⇒ jobService.delete(job),
+        () ⇒ jobService.stdOutErr(job),
+        () ⇒ outputPath,
+        StorageService.download(storage, _, _, _),
+        () ⇒ clean
+      )
+    }
+  }
+
 }
 
 class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
@@ -159,51 +185,11 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
         (sshStorageSpace(ssh), ssh)
       }
 
-  def execute(batchExecutionJob: BatchExecutionJob) = {
-    def remoteStorage(jobDirectory: String) = LogicalLinkStorage.remote(LogicalLinkStorage(), jobDirectory)
-
+  def execute(batchExecutionJob: BatchExecutionJob) =
     storageService match {
-      case Left((space, local)) ⇒
-        val jobDirectory = HierarchicalStorageSpace.createJobDirectory(local, space)
-        def clean = StorageService.rmDirectory(local, jobDirectory)
-
-        tryOnError { clean } {
-          val sj = BatchEnvironment.serializeJob(local, remoteStorage(jobDirectory), batchExecutionJob, jobDirectory, space.replicaDirectory)
-          val job = pbsJobService.submit(sj)
-
-          BatchJobControl(
-            env,
-            StorageService.id(local),
-            () ⇒ pbsJobService.state(job),
-            () ⇒ pbsJobService.delete(job),
-            () ⇒ pbsJobService.stdOutErr(job),
-            () ⇒ sj.resultPath.get,
-            StorageService.download(local, _, _, _),
-            () ⇒ clean
-          )
-        }
-
-      case Right((space, ssh)) ⇒
-        val jobDirectory = HierarchicalStorageSpace.createJobDirectory(ssh, space)
-        def clean = StorageService.rmDirectory(ssh, jobDirectory)
-
-        tryOnError { clean } {
-          val sj = BatchEnvironment.serializeJob(ssh, remoteStorage(jobDirectory), batchExecutionJob, jobDirectory, space.replicaDirectory)
-          val job = pbsJobService.submit(sj)
-
-          BatchJobControl(
-            env,
-            StorageService.id(ssh),
-            () ⇒ pbsJobService.state(job),
-            () ⇒ pbsJobService.delete(job),
-            () ⇒ pbsJobService.stdOutErr(job),
-            () ⇒ sj.resultPath.get,
-            StorageService.download(ssh, _, _, _),
-            () ⇒ clean
-          )
-        }
+      case Left((space, local)) ⇒ PBSEnvironment.submit(batchExecutionJob, local, space, pbsJobService)
+      case Right((space, ssh))  ⇒ PBSEnvironment.submit(batchExecutionJob, ssh, space, pbsJobService)
     }
-  }
 
   lazy val installRuntime =
     storageService match {
@@ -237,28 +223,7 @@ class PBSLocalEnvironment(
   lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.MaxConnections)))
   lazy val space = localStorageSpace(storage)
 
-  def execute(batchExecutionJob: BatchExecutionJob) = {
-    val jobDirectory = HierarchicalStorageSpace.createJobDirectory(storage, space)
-    val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage(), jobDirectory)
-    def clean = StorageService.rmDirectory(storage, jobDirectory)
-
-    tryOnError { clean } {
-      val sj = BatchEnvironment.serializeJob(storage, remoteStorage, batchExecutionJob, jobDirectory, space.replicaDirectory)
-      val job = pbsJobService.submit(sj)
-
-      BatchJobControl(
-        env,
-        StorageService.id(storage),
-        () ⇒ pbsJobService.state(job),
-        () ⇒ pbsJobService.delete(job),
-        () ⇒ pbsJobService.stdOutErr(job),
-        () ⇒ sj.resultPath.get,
-        StorageService.download(storage, _, _, _),
-        () ⇒ clean
-      )
-    }
-
-  }
+  def execute(batchExecutionJob: BatchExecutionJob) = PBSEnvironment.submit(batchExecutionJob, storage, space, pbsJobService)
 
   lazy val installRuntime = new RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
 

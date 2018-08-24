@@ -19,21 +19,22 @@ class PBSJobService[S, H](
   import services._
   implicit val systemInterpreter = effectaside.System()
 
-  def submit(serializedJob: SerializedJob) = {
+  def submit(serializedJob: SerializedJob, outputPath: String) = {
     val workDirectory = parameters.workDirectory getOrElse tmpDirectory
 
-    def buildScript(serializedJob: SerializedJob) = {
+    def buildScript(serializedJob: SerializedJob, outputPath: String) = {
       SharedStorage.buildScript(
         installation.apply,
         workDirectory,
         parameters.openMOLEMemory,
         parameters.threads,
         serializedJob,
+        outputPath,
         s
       )
     }
 
-    val remoteScript = buildScript(serializedJob)
+    val remoteScript = buildScript(serializedJob, outputPath)
 
     val description = gridscale.pbs.PBSJobDescription(
       command = s"/bin/bash $remoteScript",

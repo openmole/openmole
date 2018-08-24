@@ -54,7 +54,7 @@ object SSHJobService extends JavaLogger {
 
 class SSHJobService[S](s: S, tmpDirectory: String, services: BatchEnvironment.Services, installation: RuntimeInstallation[_], env: SSHEnvironment[_], val accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], sshEffect: Effect[_root_.gridscale.ssh.SSH], systemEffect: Effect[effectaside.System]) {
 
-  def register(batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob) = {
+  def register(batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob, outputPath: String) = {
 
     val workDirectory = env.workDirectory getOrElse tmpDirectory
 
@@ -67,6 +67,7 @@ class SSHJobService[S](s: S, tmpDirectory: String, services: BatchEnvironment.Se
         env.openMOLEMemory,
         env.threads,
         serializedJob,
+        outputPath,
         s
       )
     }

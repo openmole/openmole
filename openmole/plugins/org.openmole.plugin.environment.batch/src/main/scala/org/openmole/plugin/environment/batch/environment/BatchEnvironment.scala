@@ -173,7 +173,6 @@ object BatchEnvironment extends JavaLogger {
     val files = (new TreeSet[File]()(fileOrdering) ++ job.files) diff plugins
 
     val inputPath = storage.child(communicationPath, uniqName("job", ".in"))
-    val outputPath = storage.child(communicationPath, uniqName("job", ".out"))
 
     val runtime = replicateTheRuntime(job.job, job.environment, storage, replicaDirectory)
 
@@ -204,7 +203,7 @@ object BatchEnvironment extends JavaLogger {
         FileMessage(path, hash)
       }
 
-    SerializedJob(inputPath, runtime, serializedStorage, Some(outputPath))
+    SerializedJob(inputPath, runtime, serializedStorage)
   }
 
   def toReplicatedFile(file: File, storage: StorageService[_], replicaDirectory: String, transferOptions: TransferOptions)(implicit services: BatchEnvironment.Services): ReplicatedFile = {

@@ -53,6 +53,8 @@ object StorageService extends JavaLogger {
   def download[S](s: S, src: String, dest: File, options: TransferOptions = TransferOptions.default)(implicit storageService: StorageInterface[S]) =
     storageService.download(s, src, dest, options)
 
+  def child[S](s: S, path: String, name: String)(implicit storageService: StorageInterface[S]) = storageService.child(s, path, name)
+
 }
 
 class StorageService[S](val storage: S)(implicit storageInterface: StorageInterface[S], environmentStorage: EnvironmentStorage[S]) {

@@ -98,9 +98,10 @@ object SharedStorage extends JavaLogger {
     openMOLEMemory: Option[Information],
     threads:        Option[Int],
     serializedJob:  SerializedJob,
+    outputPath:     String,
     storage:        S)(implicit newFile: NewFile, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
     val runtime = runtimePath(serializedJob.runtime) //preparedRuntime(serializedJob.runtime)
-    val result = serializedJob.resultPath.get
+    val result = outputPath
     val workspace = storageInterface.child(storage, workDirectory, UUID.randomUUID.toString)
     val osgiWorkDir = storageInterface.child(storage, workDirectory, UUID.randomUUID.toString)
 
