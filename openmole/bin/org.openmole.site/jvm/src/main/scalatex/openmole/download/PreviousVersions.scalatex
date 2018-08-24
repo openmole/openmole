@@ -24,9 +24,21 @@
     @li{Multiple selection for plugin removal}
     @li{Revamp environment error from execution panel with a more reactive table}
 
+
+@h6{Plugins}
+@ul
+    @li{Simplification of syntax for external tasks (mapping of variables)}
+    @li{Tasks providing containers similar to docker (udocker)}
+    @li{New language handled: RTask}
+    @li{New language handled: ScilabTask}
+    @li{New external plugin: CormasTask}
+    @li{NetLogoTask : NetLogo 6 is now supported; handling of arrays as input variables; conversion between scala and netlogo types clarified; pooling on execution nodes}
+    @li{New sampling methods : Saltelli, Morris}
+    @li{New mgo methods : NicheNSGA2, OSE}
+
 @h6{Web site}
 @ul
-    @li{Set the web site respoonsive}
+    @li{Set the web site responsive}
     @li{Revamp the page organizations, the navigation, assign a parent menu for almost all pages for an even better navigation}
     @li{Fix documentation lacks about file management, scala functions, developer tools, community, etc}
     @li{Add suggest edits button, which targets the scalatex github page in edition mode, ready for a Pull Request}
@@ -85,7 +97,7 @@ What's to come in next release?
 @p
 First we plan to avoid as much as possible the long release cycles such as this one, we will make our best to shorten the release cycle of OpenMOLE to a few months.
 A new website is under development (thanks Paul & Etienne aka jQuery team)
-The documentation will be emporered with a search function in the documentation (thanks Julien!!!)
+The documentation will be empowered with a search function in the documentation (thanks Julien!!!)
 A new ContainerTask will offer support for Docker / OCI containers
 A modular OpenMOLE, with additional plugins enabled on demand
 Improvement of the interface to be even more user friendly, with more tooltips and integrated help.
@@ -114,4 +126,3 @@ Fix the deserialization of the authentications.
 
 @div
   @aa("Bug fixes", href := closedIssues("6.2"))
-

@@ -53,6 +53,8 @@ def defaultSettings = formatSettings ++
     shellPrompt := { s => Project.extract(s).currentProject.id + " > " }
   )
 
+Global / concurrentRestrictions := Seq(Tags.limitAll(4))
+
 
 publishTo in ThisBuild :=
   (if (isSnapshot.value) Some("OpenMOLE Nexus" at "https://maven.openmole.org/snapshots") else Some("OpenMOLE Nexus" at "https://maven.openmole.org/releases"))
