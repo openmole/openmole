@@ -197,6 +197,7 @@ class PBSLocalEnvironment(
   import services._
 
   implicit val localInterpreter = gridscale.local.Local()
+  implicit val systemInterpreter = effectaside.System()
 
   override def start() = { storage; space }
   override def stop() = { HierarchicalStorageSpace.clean(storage, space) }

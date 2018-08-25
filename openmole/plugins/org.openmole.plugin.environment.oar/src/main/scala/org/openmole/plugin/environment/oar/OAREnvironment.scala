@@ -21,14 +21,11 @@ import org.openmole.core.authentication._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
 import org.openmole.plugin.environment.batch.environment._
-import org.openmole.plugin.environment.batch.jobservice._
+import org.openmole.plugin.environment.batch.storage._
 import org.openmole.plugin.environment.ssh._
 import org.openmole.tool.crypto.Cypher
 import squants._
 import squants.information._
-import effectaside._
-import org.openmole.plugin.environment.batch.storage.StorageInterface
-import org.openmole.plugin.environment.gridscale._
 
 object OAREnvironment {
 
@@ -48,7 +45,7 @@ object OAREnvironment {
     name:                 OptionalArgument[String]      = None,
     bestEffort:           Boolean                       = true,
     timeout:              OptionalArgument[Time]        = None,
-    localSubmission: Boolean                            = false
+    localSubmission:      Boolean                       = false
   )(implicit services: BatchEnvironment.Services, authenticationStore: AuthenticationStore, cypher: Cypher, varName: sourcecode.Name) = {
     import services._
 
@@ -65,7 +62,7 @@ object OAREnvironment {
       bestEffort = bestEffort
     )
 
-    EnvironmentProvider { () =>
+    EnvironmentProvider { () ⇒
       if (!localSubmission) {
         val userValue = user.mustBeDefined("user")
         val hostValue = host.mustBeDefined("host")
@@ -80,24 +77,13 @@ object OAREnvironment {
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue)
         )
-      } else
+      }
+      else
         new OARLocalEnvironment(
           parameters = parameters,
           name = Some(name.getOrElse(varName.value))
         )
     }
-  }
-
-  implicit def asSSHServer[A: gridscale.ssh.SSHAuthentication]: AsSSHServer[OAREnvironment[A]] = new AsSSHServer[OAREnvironment[A]] {
-    override def apply(t: OAREnvironment[A]) = gridscale.ssh.SSHServer(t.host, t.port, t.timeout)(t.authentication)
-  }
-
-  implicit def isJobService[A]: JobServiceInterface[OAREnvironment[A]] = new JobServiceInterface[OAREnvironment[A]] {
-    override type J = gridscale.cluster.BatchScheduler.BatchJob
-    override def submit(env: OAREnvironment[A], serializedJob: SerializedJob): J = env.submit(serializedJob)
-    override def state(env: OAREnvironment[A], j: J): ExecutionState.ExecutionState = env.state(j)
-    override def delete(env: OAREnvironment[A], j: J): Unit = env.delete(j)
-    override def stdOutErr(js: OAREnvironment[A], j: J) = js.stdOutErr(j)
   }
 
   case class Parameters(
@@ -115,191 +101,115 @@ object OAREnvironment {
 
   def nbCores(parameters: Parameters) = parameters.core orElse parameters.threads
 
+  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: OARJobService[_, _])(implicit services: BatchEnvironment.Services) =
+    submitToCluster(
+      batchExecutionJob,
+      storage,
+      space,
+      jobService.submit(_, _),
+      jobService.state(_),
+      jobService.delete(_),
+      jobService.stdOutErr(_)
+    )
+
 }
 
 class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
-    val parameters:     OAREnvironment.Parameters,
-    val user:           String,
-    val host:           String,
-    val port:           Int,
-    val timeout:        Time,
-    val name:           Option[String],
-    val authentication: A
+  val parameters:     OAREnvironment.Parameters,
+  val user:           String,
+  val host:           String,
+  val port:           Int,
+  val timeout:        Time,
+  val name:           Option[String],
+  val authentication: A
 )(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
 
   import services._
 
   implicit val sshInterpreter = gridscale.ssh.SSH()
   implicit val systemInterpreter = effectaside.System()
+  implicit val localInterpreter = gridscale.local.Local()
 
-  override def start() = BatchEnvironment.start(this)
+  override def start() = {
+    storageService
+  }
 
   override def stop() = {
-    def accessControls = List(storageService.accessControl, jobService.accessControl)
-    try BatchEnvironment.clean(this, accessControls)
-    finally sshInterpreter().close
+    storageService match {
+      case Left((space, local)) ⇒ HierarchicalStorageSpace.clean(local, space)
+      case Right((space, ssh))  ⇒ HierarchicalStorageSpace.clean(ssh, space)
+    }
+    sshInterpreter().close
   }
 
-  import env.services.{ threadProvider, preference }
-  import org.openmole.plugin.environment.ssh._
+  lazy val accessControl = AccessControl(preference(SSHEnvironment.MaxConnections))
+  lazy val sshServer = gridscale.ssh.SSHServer(host, port, timeout)(authentication)
 
   lazy val storageService =
-    sshStorageService(
-      user = user,
-      host = host,
-      port = port,
-      storage = env,
-      environment = env,
-      concurrency = services.preference(SSHEnvironment.MaxConnections),
-      sharedDirectory = parameters.sharedDirectory,
-      storageSharedLocally = parameters.storageSharedLocally
-    )
+    if (parameters.storageSharedLocally) Left {
+      val local = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.MaxConnections)))
+      (localStorageSpace(local), local)
+    }
+    else
+      Right {
+        val ssh =
+          sshStorage(
+            user = user,
+            host = host,
+            port = port,
+            sshServer = sshServer,
+            accessControl = accessControl,
+            environment = env,
+            sharedDirectory = parameters.sharedDirectory
+          )
 
-  override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
-    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())
-    BatchEnvironment.serializeJob(storageService, remoteStorage, batchExecutionJob)
-  }
+        (sshStorageSpace(ssh), ssh)
+      }
 
-  val installRuntime = new RuntimeInstallation(
-    Frontend.ssh(host, port, timeout, authentication),
-    storageService = storageService
-  )
-
-  def submit(serializedJob: SerializedJob) = {
-    def buildScript(serializedJob: SerializedJob) = {
-      import services._
-      SharedStorage.buildScript(
-        env.installRuntime.apply,
-        parameters.workDirectory,
-        parameters.openMOLEMemory,
-        parameters.threads,
-        serializedJob,
-        env.storageService
-      )
+  def execute(batchExecutionJob: BatchExecutionJob) =
+    storageService match {
+      case Left((space, local)) ⇒ OAREnvironment.submit(batchExecutionJob, local, space, pbsJobService)
+      case Right((space, ssh))  ⇒ OAREnvironment.submit(batchExecutionJob, ssh, space, pbsJobService)
     }
 
-    val (remoteScript, workDirectory) = buildScript(serializedJob)
-    val description = gridscale.oar.OARJobDescription(
-      command = s"/bin/bash $remoteScript",
-      workDirectory = workDirectory,
-      queue = parameters.queue,
-      cpu = parameters.cpu,
-      core = OAREnvironment.nbCores(parameters),
-      wallTime = parameters.wallTime,
-      bestEffort = parameters.bestEffort
-    )
+  lazy val installRuntime =
+    storageService match {
+      case Left((space, local)) ⇒ new RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), local, space.baseDirectory)
+      case Right((space, ssh))  ⇒ new RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), ssh, space.baseDirectory)
+    }
 
-    gridscale.oar.submit[_root_.gridscale.ssh.SSHServer](env, description)
-  }
+  lazy val pbsJobService =
+    storageService match {
+      case Left((space, local)) ⇒ new OARJobService(local, space.tmpDirectory, installRuntime, parameters, sshServer, accessControl)
+      case Right((space, ssh))  ⇒ new OARJobService(ssh, space.tmpDirectory, installRuntime, parameters, sshServer, accessControl)
+    }
 
-  def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    GridScaleJobService.translateStatus(gridscale.oar.state[_root_.gridscale.ssh.SSHServer](env, id))
-
-  def delete(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    gridscale.oar.clean[_root_.gridscale.ssh.SSHServer](env, id)
-
-  def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    (gridscale.oar.stdOut[_root_.gridscale.ssh.SSHServer](env, id), gridscale.oar.stdErr[_root_.gridscale.ssh.SSHServer](env, id))
-
-  lazy val jobService = BatchJobService(env, concurrency = services.preference(SSHEnvironment.MaxConnections))
-
-  override def submitSerializedJob(serializedJob: SerializedJob) =
-    BatchEnvironment.submitSerializedJob(jobService, serializedJob)
-
-}
-
-object OARLocalEnvironment{
-  implicit def isJobService: JobServiceInterface[OARLocalEnvironment] = new JobServiceInterface[OARLocalEnvironment] {
-    override type J = gridscale.cluster.BatchScheduler.BatchJob
-    override def submit(env: OARLocalEnvironment, serializedJob: SerializedJob): J = env.submit(serializedJob)
-    override def state(env: OARLocalEnvironment, j: J): ExecutionState.ExecutionState = env.state(j)
-    override def delete(env: OARLocalEnvironment, j: J): Unit = env.delete(j)
-    override def stdOutErr(js: OARLocalEnvironment, j: J) = js.stdOutErr(j)
-  }
 }
 
 class OARLocalEnvironment(
-    val parameters: OAREnvironment.Parameters,
-    val name:       Option[String]
+  val parameters: OAREnvironment.Parameters,
+  val name:       Option[String]
 )(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
 
   import services._
-
-  lazy val accessControl = AccessControl(services.preference(SSHEnvironment.MaxLocalOperations))
-  def accessControls = List(storageService.accessControl, jobService.accessControl)
-
   implicit val localInterpreter = gridscale.local.Local()
   implicit val systemInterpreter = effectaside.System()
 
-  import env.services.{ threadProvider, preference }
+  override def start() = { storage; space }
+  override def stop() = { HierarchicalStorageSpace.clean(storage, space) }
+
+  import env.services.preference
   import org.openmole.plugin.environment.ssh._
 
-  lazy val storageService =
-   localStorageService(
-      environment = env,
-      concurrency = services.preference(SSHEnvironment.MaxLocalOperations),
-      root = "",
-      sharedDirectory = parameters.sharedDirectory,
-    )
+  lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.MaxConnections)))
+  lazy val space = localStorageSpace(storage)
 
-  override def serializeJob(batchExecutionJob: BatchExecutionJob) = {
-    val remoteStorage = StorageInterface.remote(LogicalLinkStorage())
-    BatchEnvironment.serializeJob(storageService, remoteStorage, batchExecutionJob)
-  }
+  def execute(batchExecutionJob: BatchExecutionJob) = OAREnvironment.submit(batchExecutionJob, storage, space, jobService)
 
-  val installRuntime = new RuntimeInstallation(
-    Frontend.local,
-    storageService = storageService
-  )
+  lazy val installRuntime = new RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
 
   import _root_.gridscale.local.LocalHost
 
-  def submit(serializedJob: SerializedJob) = {
-    def buildScript(serializedJob: SerializedJob) = {
-      import services._
-      SharedStorage.buildScript(
-        env.installRuntime.apply,
-        parameters.workDirectory,
-        parameters.openMOLEMemory,
-        parameters.threads,
-        serializedJob,
-        env.storageService
-      )
-    }
+  lazy val jobService = new OARJobService(storage, space.tmpDirectory, installRuntime, parameters, LocalHost(), AccessControl(preference(SSHEnvironment.MaxConnections)))
 
-    val (remoteScript, workDirectory) = buildScript(serializedJob)
-    val description = gridscale.oar.OARJobDescription(
-      command = s"/bin/bash $remoteScript",
-      workDirectory = workDirectory,
-      queue = parameters.queue,
-      cpu = parameters.cpu,
-      core = OAREnvironment.nbCores(parameters),
-      wallTime = parameters.wallTime,
-      bestEffort = parameters.bestEffort
-    )
-
-    gridscale.oar.submit(LocalHost(), description)
-  }
-
-  def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    GridScaleJobService.translateStatus(gridscale.oar.state(LocalHost(), id))
-
-  def delete(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    gridscale.oar.clean(LocalHost(), id)
-
-  def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    (gridscale.oar.stdOut(LocalHost(), id), gridscale.oar.stdErr(LocalHost(), id))
-
-
-  lazy val jobService = BatchJobService(env, concurrency = services.preference(SSHEnvironment.MaxLocalOperations))
-
-  override def submitSerializedJob(serializedJob: SerializedJob) =
-    BatchEnvironment.submitSerializedJob(jobService, serializedJob)
-
-  override def start() = BatchEnvironment.start(this)
-
-  override def stop() = {
-    def accessControls = List(storageService.accessControl, jobService.accessControl)
-    BatchEnvironment.clean(this, accessControls)
-  }
 }
