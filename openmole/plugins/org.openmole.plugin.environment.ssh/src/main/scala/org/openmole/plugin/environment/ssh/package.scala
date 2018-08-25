@@ -21,11 +21,13 @@ import java.net.URI
 import effectaside._
 import org.openmole.core.communication.storage.TransferOptions
 import org.openmole.core.preference.Preference
-import org.openmole.core.workflow.dsl.File
+import org.openmole.core.workflow.dsl.{File, uniqName}
+import org.openmole.core.workflow.execution.ExecutionState.ExecutionState
 import org.openmole.core.workspace.NewFile
-import org.openmole.plugin.environment.batch.environment.{AccessControl, BatchEnvironment, Runtime}
+import org.openmole.plugin.environment.batch.environment.{AccessControl, BatchEnvironment, BatchExecutionJob, BatchJobControl, Runtime, SerializedJob}
 import org.openmole.plugin.environment.batch.storage._
-import org.openmole.plugin.environment.gridscale.LocalStorage
+import org.openmole.plugin.environment.gridscale.{LocalStorage, LogicalLinkStorage}
+import org.openmole.tool.exception.tryOnError
 import squants.Time
 
 package object ssh {
@@ -155,5 +157,50 @@ package object ssh {
   trait Frontend {
     def run(command: String): util.Try[_root_.gridscale.ExecutionResult]
   }
+
+  def submitToCluster[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage, J](
+    batchExecutionJob: BatchExecutionJob,
+    storage: S,
+    space: StorageSpace,
+    submit: (SerializedJob, String) => J,
+    state: J => ExecutionState,
+    delete: J => Unit,
+    stdOutErr: J => (String, String))(implicit services: BatchEnvironment.Services) = {
+    val jobDirectory = HierarchicalStorageSpace.createJobDirectory(storage, space)
+    val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage(), jobDirectory)
+
+    def clean = StorageService.rmDirectory(storage, jobDirectory)
+
+    tryOnError { clean } {
+      def replicate(f: File, options: TransferOptions) =
+        BatchEnvironment.toReplicatedFile(
+          StorageService.uploadInDirectory(storage, _, space.replicaDirectory, _),
+          StorageService.exists(storage, _),
+          StorageService.backgroundRmFile(storage, _),
+          batchExecutionJob.environment,
+          StorageService.id(storage)
+        )(f, options)
+
+      def upload(f: File, options: TransferOptions) = StorageService.uploadInDirectory(storage, f, jobDirectory, options)
+
+      val sj = BatchEnvironment.serializeJob(batchExecutionJob, remoteStorage, replicate, upload, StorageService.id(storage))
+      val outputPath = StorageService.child(storage, jobDirectory, uniqName("job", ".out"))
+
+      val job = submit(sj, outputPath)
+
+      BatchJobControl(
+        batchExecutionJob.environment,
+        StorageService.id(storage),
+        () => state(job),
+        () ⇒ delete(job),
+        () ⇒ stdOutErr(job),
+        () ⇒ outputPath,
+        StorageService.download(storage, _, _, _),
+        () ⇒ clean
+      )
+    }
+  }
+
+
 
 }

@@ -18,16 +18,12 @@
 package org.openmole.plugin.environment.pbs
 
 import org.openmole.core.authentication._
-import org.openmole.core.communication.storage.TransferOptions
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
-import org.openmole.plugin.environment.batch.environment.{ BatchJobControl, _ }
+import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.storage._
-import org.openmole.plugin.environment.gridscale.LogicalLinkStorage
 import org.openmole.plugin.environment.ssh._
 import org.openmole.tool.crypto.Cypher
-import org.openmole.tool.exception._
-import org.openmole.tool.file.File
 import org.openmole.tool.logger.JavaLogger
 import squants._
 import squants.information._
@@ -105,41 +101,16 @@ object PBSEnvironment extends JavaLogger {
     storageSharedLocally: Boolean,
     flavour:              _root_.gridscale.pbs.PBSFlavour)
 
-  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: PBSJobService[_, _])(implicit services: BatchEnvironment.Services) = {
-    val jobDirectory = HierarchicalStorageSpace.createJobDirectory(storage, space)
-    val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage(), jobDirectory)
-
-    def clean = StorageService.rmDirectory(storage, jobDirectory)
-
-    tryOnError { clean } {
-      def replicate(f: File, options: TransferOptions) =
-        BatchEnvironment.toReplicatedFile(
-          StorageService.uploadInDirectory(storage, _, space.replicaDirectory, _),
-          StorageService.exists(storage, _),
-          StorageService.backgroundRmFile(storage, _),
-          batchExecutionJob.environment,
-          StorageService.id(storage)
-        )(f, options)
-
-      def upload(f: File, options: TransferOptions) = StorageService.uploadInDirectory(storage, f, jobDirectory, options)
-
-      val sj = BatchEnvironment.serializeJob(batchExecutionJob, remoteStorage, replicate, upload, StorageService.id(storage))
-      val outputPath = StorageService.child(storage, jobDirectory, uniqName("job", ".out"))
-
-      val job = jobService.submit(sj, outputPath)
-
-      BatchJobControl(
-        batchExecutionJob.environment,
-        StorageService.id(storage),
-        () ⇒ jobService.state(job),
-        () ⇒ jobService.delete(job),
-        () ⇒ jobService.stdOutErr(job),
-        () ⇒ outputPath,
-        StorageService.download(storage, _, _, _),
-        () ⇒ clean
-      )
-    }
-  }
+  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: PBSJobService[_, _])(implicit services: BatchEnvironment.Services) =
+    submitToCluster(
+      batchExecutionJob,
+      storage,
+      space,
+      jobService.submit(_, _),
+      jobService.state(_),
+      jobService.delete(_),
+      jobService.stdOutErr(_)
+    )
 
 }
 

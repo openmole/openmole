@@ -21,31 +21,30 @@ import java.io.File
 import java.util.UUID
 
 import org.openmole.core.communication.message._
-import org.openmole.core.communication.storage.{ RemoteStorage, TransferOptions }
+import org.openmole.core.communication.storage.{RemoteStorage, TransferOptions}
 import org.openmole.core.console.ScalaREPL.ReferencedClasses
-import org.openmole.core.console.{ REPLClassloader, ScalaREPL }
-import org.openmole.core.event.{ Event, EventDispatcher }
+import org.openmole.core.console.{REPLClassloader, ScalaREPL}
+import org.openmole.core.event.{Event, EventDispatcher}
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.fileservice.{ FileCache, FileService, FileServiceCache }
+import org.openmole.core.fileservice.{FileCache, FileService, FileServiceCache}
+import org.openmole.core.location._
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.preference.{ ConfigurationLocation, Preference }
+import org.openmole.core.preference.{ConfigurationLocation, Preference}
 import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.serializer.SerializerService
-import org.openmole.core.threadprovider.{ ThreadProvider, Updater }
+import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workspace._
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment.ExecutionJobRegistry
 import org.openmole.plugin.environment.batch.refresh._
-import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.cache._
 import org.openmole.tool.file._
 import org.openmole.tool.logger.JavaLogger
-import org.openmole.tool.random.{ RandomProvider, Seeder, shuffled }
-import squants.time.TimeConversions._
+import org.openmole.tool.random.{RandomProvider, Seeder, shuffled}
 import squants.information.Information
 import squants.information.InformationConversions._
-import org.openmole.core.location._
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment.{ ExecutionJobRegistry }
+import squants.time.TimeConversions._
 
 import scala.collection.immutable.TreeSet
 
@@ -200,8 +199,6 @@ object BatchEnvironment extends JavaLogger {
     val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins
     val files = (new TreeSet[File]()(fileOrdering) ++ job.files) diff plugins
 
-    //val inputPath = storage.child(communicationPath, uniqName("job", ".in"))
-
     val runtime = replicateTheRuntime(job.job, job.environment, replicate)
 
     val executionMessage = createExecutionMessage(
@@ -222,8 +219,8 @@ object BatchEnvironment extends JavaLogger {
 
     val serializedStorage =
       services.newFile.withTmpFile("remoteStorage", ".tar") { storageFile ⇒
-        import services._
         import org.openmole.tool.hash._
+        import services._
         services.serializerService.serialiseAndArchiveFiles(remoteStorage, storageFile)
         val hash = storageFile.hash().toString()
         val path = signalUpload(eventDispatcher.eventId, upload(storageFile, TransferOptions(noLink = true, canMove = true, raw = true)), storageFile, job.environment, storageId)
@@ -333,7 +330,6 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
   lazy val plugins = PluginManager.pluginsForClass(this.getClass)
 
   override def submit(job: Job) = {
-    import services._
     val bej = BatchExecutionJob(job, this)
     ExecutionJobRegistry.register(registry, bej)
     eventDispatcherService.trigger(this, new Environment.JobSubmitted(bej))

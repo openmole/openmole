@@ -103,39 +103,16 @@ object SSHEnvironment extends JavaLogger {
     def queued = queuesLock { jobsStates.collect { case (job, Queued(desc, bj)) ⇒ (job, desc, bj) } }
   }
 
-  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SSHJobService[_])(implicit services: BatchEnvironment.Services) = {
-    val jobDirectory = HierarchicalStorageSpace.createJobDirectory(storage, space)
-    val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage(), jobDirectory)
-    def clean = StorageService.rmDirectory(storage, jobDirectory)
-
-    tryOnError { clean } {
-      def replicate(f: File, options: TransferOptions) =
-        BatchEnvironment.toReplicatedFile(
-          StorageService.uploadInDirectory(storage, _, space.replicaDirectory, _),
-          StorageService.exists(storage, _),
-          StorageService.backgroundRmFile(storage, _),
-          batchExecutionJob.environment,
-          StorageService.id(storage)
-        )(f, options)
-
-      def upload(f: File, options: TransferOptions) = StorageService.uploadInDirectory(storage, f, jobDirectory, options)
-
-      val sj = BatchEnvironment.serializeJob(batchExecutionJob, remoteStorage, replicate, upload, StorageService.id(storage))
-      val outputPath = StorageService.child(storage, jobDirectory, uniqName("job", ".out"))
-      val job = jobService.register(batchExecutionJob, sj, outputPath)
-
-      BatchJobControl(
-        batchExecutionJob.environment,
-        StorageService.id(storage),
-        () ⇒ jobService.state(job),
-        () ⇒ jobService.delete(job),
-        () ⇒ jobService.stdOutErr(job),
-        () ⇒ outputPath,
-        StorageService.download(storage, _, _, _),
-        () ⇒ clean
-      )
-    }
-  }
+  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SSHJobService[_])(implicit services: BatchEnvironment.Services) =
+    submitToCluster(
+      batchExecutionJob,
+      storage,
+      space,
+      jobService.register(batchExecutionJob, _, _),
+      jobService.state(_),
+      jobService.delete(_),
+      jobService.stdOutErr(_)
+    )
 
 }
 
