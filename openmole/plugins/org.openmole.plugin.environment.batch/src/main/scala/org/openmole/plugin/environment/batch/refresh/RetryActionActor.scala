@@ -15,12 +15,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-//package org.openmole.plugin.environment.egi
-//
-//import java.io.File
-//
-//object ProxyFile {
-//  def apply(proxy: File) = new ProxyFile(proxy)
-//}
-//
-//class ProxyFile(val proxy: File) extends EGIAuthentication
+package org.openmole.plugin.environment.batch.refresh
+
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, AccessControl }
+import org.openmole.tool.logger.JavaLogger
+
+object RetryActionActor extends JavaLogger {
+
+  def receive(msg: RetryAction)(implicit services: BatchEnvironment.Services) = {
+    import services._
+
+    val RetryAction(action) = msg
+    try {
+      val retry = action()
+      if (retry) JobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
+    }
+    catch {
+      case t: Throwable ⇒
+        Log.logger.log(Log.FINE, "Error when deleting a file", t)
+    }
+  }
+
+}

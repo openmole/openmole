@@ -1,16 +1,18 @@
-package org.openmole.plugin.environment.slurm
+package org.openmole.plugin.environment.pbs
 
 import gridscale.cluster.HeadNode
-import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment, SerializedJob }
+import org.openmole.core.workflow.execution.ExecutionState
+import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment, BatchExecutionJob, SerializedJob }
 import org.openmole.plugin.environment.batch.storage.{ HierarchicalStorageInterface, StorageInterface }
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
+import org.openmole.plugin.environment.pbs.PBSEnvironment.Parameters
 import org.openmole.plugin.environment.ssh.{ RuntimeInstallation, SharedStorage }
 
-class SLURMJobService[S, H](
+class PBSJobService[S, H](
   s:                 S,
   tmpDirectory:      String,
   installation:      RuntimeInstallation[_],
-  parameters:        SLURMEnvironment.Parameters,
+  parameters:        Parameters,
   h:                 H,
   val accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], headNode: HeadNode[H], services: BatchEnvironment.Services, systemInterpreter: effectaside.Effect[effectaside.System]) {
 
@@ -33,29 +35,40 @@ class SLURMJobService[S, H](
 
     val remoteScript = buildScript(serializedJob, outputPath)
 
-    val description = _root_.gridscale.slurm.SLURMJobDescription(
+    val description = gridscale.pbs.PBSJobDescription(
       command = s"/bin/bash $remoteScript",
-      queue = parameters.queue,
       workDirectory = workDirectory,
+      queue = parameters.queue,
       wallTime = parameters.wallTime,
       memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
       nodes = parameters.nodes,
-      coresByNode = parameters.coresByNode orElse parameters.threads,
-      qos = parameters.qos,
-      gres = parameters.gres.toList,
-      constraints = parameters.constraints.toList
+      coreByNode = parameters.coreByNode orElse parameters.threads,
+      flavour = parameters.flavour
     )
 
-    accessControl { gridscale.slurm.submit(h, description) }
+    import PBSEnvironment.Log._
+
+    log(FINE, s"""Submitting PBS job, PBS script:
+                 |${gridscale.pbs.impl.toScript(description)("uniqId")}
+                 |bash script:
+                 |$remoteScript""".stripMargin)
+
+    val id = accessControl { gridscale.pbs.submit(h, description) }
+
+    log(FINE, s"""Submitted PBS job with PBS script:
+                 |uniqId: ${id.uniqId}
+                 |job id: ${id.jobId}""".stripMargin)
+
+    id
   }
 
   def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    accessControl { GridScaleJobService.translateStatus(gridscale.slurm.state(h, id)) }
+    accessControl { GridScaleJobService.translateStatus(gridscale.pbs.state(h, id)) }
 
   def delete(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    accessControl { gridscale.slurm.clean(h, id) }
+    accessControl { gridscale.pbs.clean(h, id) }
 
   def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    accessControl { (gridscale.slurm.stdOut(h, id), gridscale.slurm.stdErr(h, id)) }
+    accessControl { (gridscale.pbs.stdOut(h, id), gridscale.pbs.stdErr(h, id)) }
 
 }

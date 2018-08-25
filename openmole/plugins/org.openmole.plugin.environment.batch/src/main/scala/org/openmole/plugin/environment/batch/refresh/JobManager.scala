@@ -20,14 +20,13 @@ package org.openmole.plugin.environment.batch.refresh
 import java.io.FileNotFoundException
 import java.util.concurrent.TimeUnit
 
-import gridscale.authentication._
-import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.tools.service.Retry.retry
 import org.openmole.core.workflow.execution._
-import org.openmole.plugin.environment.batch.environment._
-import org.openmole.plugin.environment.batch.jobservice.BatchJobControl
+import org.openmole.plugin.environment.batch.environment.{ BatchJobControl, _ }
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.thread._
+
+import scala.tools.reflect.WrappedProperties
 
 object JobManager extends JavaLogger { self ⇒
   import Log._
@@ -36,64 +35,53 @@ object JobManager extends JavaLogger { self ⇒
 
   def messagePriority(message: DispatchedMessage) =
     message match {
-      case msg: Upload       ⇒ 10
-      case msg: Submit       ⇒ 50
-      case msg: Refresh      ⇒ 5
-      case msg: GetResult    ⇒ 50
-      case msg: KillBatchJob ⇒ killPriority
-      case msg: Error        ⇒ 100 // This is very quick to process
-      case _                 ⇒ 1
+      case msg: Submit    ⇒ 50
+      case msg: Refresh   ⇒ 5
+      case msg: GetResult ⇒ 50
+      case msg: Error     ⇒ 100 // This is very quick to process
+      case _              ⇒ 1
     }
 
   object DispatcherActor {
     def receive(dispatched: DispatchedMessage)(implicit services: BatchEnvironment.Services) =
       dispatched match {
-        case msg: Upload             ⇒ UploadActor.receive(msg)
-        case msg: Submit             ⇒ SubmitActor.receive(msg)
-        case msg: Refresh            ⇒ RefreshActor.receive(msg)
-        case msg: GetResult          ⇒ GetResultActor.receive(msg)
-        case msg: KillBatchJob       ⇒ KillerActor.receive(msg)
-        case msg: DeleteFile         ⇒ DeleteActor.receive(msg)
-        case msg: CleanSerializedJob ⇒ CleanerActor.receive(msg)
-        case msg: Error              ⇒ ErrorActor.receive(msg)
+        case msg: Submit      ⇒ if (!msg.job.job.finished) SubmitActor.receive(msg) else self ! Kill(msg.job, None)
+        case msg: Refresh     ⇒ if (!msg.job.job.finished) RefreshActor.receive(msg) else self ! Kill(msg.job, Some(msg.batchJob))
+        case msg: GetResult   ⇒ if (!msg.job.job.finished) GetResultActor.receive(msg) else self ! Kill(msg.job, Some(msg.batchJob))
+        case msg: RetryAction ⇒ RetryActionActor.receive(msg)
+        case msg: Error       ⇒ ErrorActor.receive(msg)
       }
   }
 
-  def dispatch(msg: DispatchedMessage)(implicit services: BatchEnvironment.Services) = services.threadProvider.submit(messagePriority(msg))(() ⇒ DispatcherActor.receive(msg))
+  def dispatch(msg: DispatchedMessage)(implicit services: BatchEnvironment.Services) = services.threadProvider.submit(messagePriority(msg)) { () ⇒ DispatcherActor.receive(msg) }
 
   def !(msg: JobMessage)(implicit services: BatchEnvironment.Services): Unit = msg match {
-    case msg: Upload             ⇒ dispatch(msg)
-    case msg: Submit             ⇒ dispatch(msg)
-    case msg: Refresh            ⇒ dispatch(msg)
-    case msg: GetResult          ⇒ dispatch(msg)
-    case msg: KillBatchJob       ⇒ dispatch(msg)
-    case msg: DeleteFile         ⇒ dispatch(msg)
-    case msg: CleanSerializedJob ⇒ dispatch(msg)
-    case msg: Error              ⇒ dispatch(msg)
+    case msg: Submit      ⇒ dispatch(msg)
+    case msg: Refresh     ⇒ dispatch(msg)
+    case msg: GetResult   ⇒ dispatch(msg)
+    case msg: RetryAction ⇒ dispatch(msg)
+    case msg: Error       ⇒ dispatch(msg)
 
     case Manage(job) ⇒
-      self ! Upload(job)
+      self ! Submit(job)
 
     case Delay(msg, delay) ⇒
       services.threadProvider.scheduler.schedule((self ! msg): Runnable, delay.millis, TimeUnit.MILLISECONDS)
 
-    case Uploaded(job, sj) ⇒ self ! Submit(job, sj)
+    case Submitted(job, bj) ⇒
+      self ! Delay(Refresh(job, bj, job.environment.updateInterval.minUpdateInterval), job.environment.updateInterval.minUpdateInterval)
 
-    case Submitted(job, sj, bj) ⇒
-      self ! Delay(Refresh(job, sj, bj, job.environment.updateInterval.minUpdateInterval), job.environment.updateInterval.minUpdateInterval)
-
-    case Kill(job) ⇒
-      job.state = ExecutionState.KILLED
+    case Kill(job, batchJob) ⇒
       BatchEnvironment.finishedExecutionJob(job.environment, job)
-      killAndClean(job)
+      tryKillAndClean(job, batchJob)
+      job.state = ExecutionState.KILLED
+      if (job.job.finished) BatchEnvironment.finishedJob(job.environment, job.job)
+      if (!job.job.finished && BatchEnvironment.numberOfExecutionJobs(job.environment, job.job) == 0) job.environment.submit(job.job)
 
-      if (!job.job.finished && BatchEnvironment.numberOfExecutionJobs(job.environment, job.job) == 0)
-        job.environment.submit(job.job)
-
-    case Resubmit(job, storage) ⇒
-      killAndClean(job)
+    case Resubmit(job, batchJob) ⇒
+      tryKillAndClean(job, Some(batchJob))
       job.state = ExecutionState.READY
-      dispatch(Upload(job))
+      dispatch(Submit(job))
 
     case MoleJobError(mj, j, e) ⇒
       val er = Environment.MoleJobExceptionRaised(j, e, WARNING, mj)
@@ -103,19 +91,17 @@ object JobManager extends JavaLogger { self ⇒
 
   }
 
-  def killAndClean(job: BatchExecutionJob)(implicit services: BatchEnvironment.Services) = {
-    job.batchJob.foreach(bj ⇒ self ! KillBatchJob(bj))
-    job.batchJob = None
-    job.serializedJob.foreach(j ⇒ self ! CleanSerializedJob(j))
-    job.serializedJob = None
-  }
+  def tryKillAndClean(job: BatchExecutionJob, bj: Option[BatchJobControl])(implicit services: BatchEnvironment.Services) = {
+    def kill(bj: BatchJobControl)(implicit services: BatchEnvironment.Services) = retry(services.preference(BatchEnvironment.killJobRetry))(bj.delete())
+    def clean(bj: BatchJobControl)(implicit services: BatchEnvironment.Services) = retry(services.preference(BatchEnvironment.cleanJobRetry))(bj.clean())
 
-  def killBatchJob(bj: BatchJobControl, t: AccessToken)(implicit services: BatchEnvironment.Services) =
-    retry(services.preference(BatchEnvironment.killJobRetry))(bj.delete(t))
+    try bj.foreach(kill) catch {
+      case e: Throwable ⇒ self ! Error(job, e, None)
+    }
 
-  def cleanSerializedJob(sj: SerializedJob, t: AccessToken)(implicit services: BatchEnvironment.Services) = sj.synchronized {
-    retry(services.preference(BatchEnvironment.cleanJobRetry))(sj.storage.rmDir(sj.path)(t))
-    sj.cleaned = true
+    try bj.foreach(clean) catch {
+      case e: Throwable ⇒ self ! Error(job, e, None)
+    }
   }
 
 }
