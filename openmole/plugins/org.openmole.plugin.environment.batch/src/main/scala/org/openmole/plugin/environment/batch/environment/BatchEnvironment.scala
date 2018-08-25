@@ -55,9 +55,9 @@ object BatchEnvironment extends JavaLogger {
     def id: Long
   }
 
-  case class BeginUpload(id: Long, file: File, path: String, storageId: String) extends Event[BatchEnvironment] with Transfer
-  case class EndUpload(id: Long, file: File, path: String, storageId: String, exception: Option[Throwable], size: Long) extends Event[BatchEnvironment] with Transfer {
-    def success = exception.isEmpty
+  case class BeginUpload(id: Long, file: File, storageId: String) extends Event[BatchEnvironment] with Transfer
+  case class EndUpload(id: Long, file: File, storageId: String, path: util.Try[String], size: Long) extends Event[BatchEnvironment] with Transfer {
+    def success = path.isSuccess
   }
 
   case class BeginDownload(id: Long, file: File, path: String, storageId: String) extends Event[BatchEnvironment] with Transfer
@@ -66,18 +66,19 @@ object BatchEnvironment extends JavaLogger {
     def size = file.size
   }
 
-  def signalUpload[T](id: Long, upload: ⇒ T, file: File, path: String, environment: BatchEnvironment, storageId: String)(implicit eventDispatcher: EventDispatcher): T = {
+  def signalUpload(id: Long, upload: ⇒ String, file: File, environment: BatchEnvironment, storageId: String)(implicit eventDispatcher: EventDispatcher): String = {
     val size = file.size
-    eventDispatcher.trigger(environment, BeginUpload(id, file, path, storageId))
-    val res =
+    eventDispatcher.trigger(environment, BeginUpload(id, file, storageId))
+    val path =
       try upload
       catch {
         case e: Throwable ⇒
-          eventDispatcher.trigger(environment, EndUpload(id, file, path, storageId, Some(e), size))
+          eventDispatcher.trigger(environment, EndUpload(id, file, storageId, util.Failure(e), size))
           throw e
       }
-    eventDispatcher.trigger(environment, EndUpload(id, file, path, storageId, None, size))
-    res
+
+    eventDispatcher.trigger(environment, EndUpload(id, file, storageId, util.Success(path), size))
+    path
   }
 
   def signalDownload[T](id: Long, download: ⇒ T, path: String, environment: BatchEnvironment, storageId: String, file: File)(implicit eventDispatcher: EventDispatcher): T = {
@@ -159,54 +160,12 @@ object BatchEnvironment extends JavaLogger {
       job.environment.plugins ++
       Seq(job.environment.jvmLinuxX64, job.environment.runtime)
 
-  def serializeJob[S](storage: S, remoteStorage: RemoteStorage, job: BatchExecutionJob, communicationPath: String, replicaDirectory: String)(implicit services: BatchEnvironment.Services, storageInterface: StorageInterface[S], environmentStorage: EnvironmentStorage[S]) = {
-    val storageService = StorageService(storage)
-    initCommunication(job, storageService, remoteStorage, communicationPath, replicaDirectory)
-  }
-
-  def initCommunication(job: BatchExecutionJob, storage: StorageService[_], remoteStorage: RemoteStorage, communicationPath: String, replicaDirectory: String)(implicit services: BatchEnvironment.Services): SerializedJob = services.newFile.withTmpFile("job", ".tar") { jobFile ⇒
-    import services._
-
-    serializerService.serialise(job.runnableTasks, jobFile)
-
-    val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins
-    val files = (new TreeSet[File]()(fileOrdering) ++ job.files) diff plugins
-
-    val inputPath = storage.child(communicationPath, uniqName("job", ".in"))
-
-    val runtime = replicateTheRuntime(job.job, job.environment, storage, replicaDirectory)
-
-    val executionMessage = createExecutionMessage(
-      job.job,
-      jobFile,
-      files,
-      plugins,
-      storage,
-      communicationPath,
-      replicaDirectory
-    )
-
-    /* ---- upload the execution message ----*/
-    newFile.withTmpFile("job", ".tar") { executionMessageFile ⇒
-      serializerService.serialiseAndArchiveFiles(executionMessage, executionMessageFile)
-      signalUpload(eventDispatcher.eventId, storage.upload(executionMessageFile, inputPath, TransferOptions(noLink = true, canMove = true)), executionMessageFile, inputPath, job.environment, storage.id)
-    }
-
-    val serializedStorage =
-      services.newFile.withTmpFile("remoteStorage", ".tar") { storageFile ⇒
-        import services._
-        import org.openmole.tool.hash._
-        services.serializerService.serialiseAndArchiveFiles(remoteStorage, storageFile)
-        val hash = storageFile.hash().toString()
-        val path = storage.child(communicationPath, StorageSpace.timedUniqName)
-        signalUpload(eventDispatcher.eventId, storage.upload(storageFile, path, TransferOptions(noLink = true, canMove = true, raw = true)), storageFile, inputPath, job.environment, storage.id)
-        FileMessage(path, hash)
-      }
-
-    SerializedJob(inputPath, runtime, serializedStorage)
-  }
-
-  def toReplicatedFile(file: File, storage: StorageService[_], replicaDirectory: String, transferOptions: TransferOptions)(implicit services: BatchEnvironment.Services): ReplicatedFile = {
+  def toReplicatedFile(
+    upload: (File, TransferOptions) => String,
+    exist: String => Boolean,
+    remove: String => Unit,
+    environment: BatchEnvironment,
+    storageId: String)(file: File, transferOptions: TransferOptions)(implicit services: BatchEnvironment.Services): ReplicatedFile = {
     import services._
 
     if (!file.exists) throw new UserBadDataError(s"File $file is required but doesn't exist.")
@@ -221,26 +180,69 @@ object BatchEnvironment extends JavaLogger {
     val fileMode = file.mode
     val hash = services.fileService.hash(toReplicate).toString
 
-    def upload = {
-      val name = StorageSpace.timedUniqName
-      val newFile = storage.child(replicaDirectory, name)
-      signalUpload(eventDispatcher.eventId, storage.upload(toReplicate, newFile, options), toReplicate, newFile, storage.environment, storage.id)
-      newFile
-    }
+    def uploadReplica = signalUpload(eventDispatcher.eventId, upload(toReplicate, options), toReplicate, environment, storageId)
 
-    val replica = services.replicaCatalog.uploadAndGet(upload, toReplicatePath, hash, storage)
+    val replica = services.replicaCatalog.uploadAndGet(uploadReplica, exist, remove, toReplicatePath, hash, storageId)
     ReplicatedFile(file.getPath, file.getName, isDir, hash, replica.path, fileMode)
   }
+  
+  def serializeJob(
+    job: BatchExecutionJob,
+    remoteStorage: RemoteStorage,
+    replicate: (File, TransferOptions) => ReplicatedFile,
+    upload: (File, TransferOptions) => String,
+    storageId: String)(implicit services: BatchEnvironment.Services): SerializedJob = services.newFile.withTmpFile("job", ".tar") { jobFile ⇒
+
+    import services._
+
+    serializerService.serialise(job.runnableTasks, jobFile)
+
+    val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins
+    val files = (new TreeSet[File]()(fileOrdering) ++ job.files) diff plugins
+
+    //val inputPath = storage.child(communicationPath, uniqName("job", ".in"))
+
+    val runtime = replicateTheRuntime(job.job, job.environment, replicate)
+
+    val executionMessage = createExecutionMessage(
+      job.job,
+      jobFile,
+      files,
+      plugins,
+      replicate,
+      job.environment
+    )
+
+    /* ---- upload the execution message ----*/
+    val inputPath =
+      newFile.withTmpFile("job", ".tar") { executionMessageFile ⇒
+        serializerService.serialiseAndArchiveFiles(executionMessage, executionMessageFile)
+        signalUpload(eventDispatcher.eventId, upload(executionMessageFile, TransferOptions(noLink = true, canMove = true)), executionMessageFile, job.environment, storageId)
+      }
+
+    val serializedStorage =
+      services.newFile.withTmpFile("remoteStorage", ".tar") { storageFile ⇒
+        import services._
+        import org.openmole.tool.hash._
+        services.serializerService.serialiseAndArchiveFiles(remoteStorage, storageFile)
+        val hash = storageFile.hash().toString()
+        val path = signalUpload(eventDispatcher.eventId, upload(storageFile, TransferOptions(noLink = true, canMove = true, raw = true)), storageFile, job.environment, storageId)
+        FileMessage(path, hash)
+      }
+
+    SerializedJob(inputPath, runtime, serializedStorage)
+  }
+
+
 
   def replicateTheRuntime(
     job:              Job,
     environment:      BatchEnvironment,
-    storage:          StorageService[_],
-    replicaDirectory: String
+    replicate: (File, TransferOptions) => ReplicatedFile,
   )(implicit services: BatchEnvironment.Services) = {
-    val environmentPluginPath = shuffled(environment.plugins)(services.randomProvider()).map { p ⇒ toReplicatedFile(p, storage, replicaDirectory, TransferOptions(raw = true)) }.map { FileMessage(_) }
-    val runtimeFileMessage = FileMessage(toReplicatedFile(environment.runtime, storage, replicaDirectory, TransferOptions(raw = true)))
-    val jvmLinuxX64FileMessage = FileMessage(toReplicatedFile(environment.jvmLinuxX64, storage, replicaDirectory, TransferOptions(raw = true)))
+    val environmentPluginPath = shuffled(environment.plugins)(services.randomProvider()).map { p ⇒ replicate(p, TransferOptions(raw = true)) }.map { FileMessage(_) }
+    val runtimeFileMessage = FileMessage(replicate(environment.runtime, TransferOptions(raw = true)))
+    val jvmLinuxX64FileMessage = FileMessage(replicate(environment.jvmLinuxX64, TransferOptions(raw = true)))
 
     Runtime(
       runtimeFileMessage,
@@ -254,20 +256,18 @@ object BatchEnvironment extends JavaLogger {
     jobFile:             File,
     serializationFile:   Iterable[File],
     serializationPlugin: Iterable[File],
-    storage:             StorageService[_],
-    path:                String,
-    replicaDirectory:    String
+    replicate: (File, TransferOptions) => ReplicatedFile,
+    environment: BatchEnvironment
   )(implicit services: BatchEnvironment.Services): ExecutionMessage = {
 
-    val pluginReplicas = shuffled(serializationPlugin)(services.randomProvider()).map { toReplicatedFile(_, storage, replicaDirectory, TransferOptions(raw = true)) }
-    val files = shuffled(serializationFile)(services.randomProvider()).map { toReplicatedFile(_, storage, replicaDirectory, TransferOptions()) }
+    val pluginReplicas = shuffled(serializationPlugin)(services.randomProvider()).map { replicate(_, TransferOptions(raw = true)) }
+    val files = shuffled(serializationFile)(services.randomProvider()).map { replicate(_, TransferOptions()) }
 
     ExecutionMessage(
       pluginReplicas,
       files,
       jobFile,
-      path,
-      storage.environment.runtimeSettings
+      environment.runtimeSettings
     )
   }
 

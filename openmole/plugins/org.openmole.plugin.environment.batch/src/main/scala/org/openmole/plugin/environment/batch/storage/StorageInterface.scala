@@ -28,15 +28,10 @@ import org.openmole.tool.stream._
 
 object StorageInterface {
 
-  def remote[S](s: S, communicationDirectory: String)(implicit storage: StorageInterface[S]) =
+  def remote[S: StorageInterface: HierarchicalStorageInterface](s: S, communicationDirectory: String) =
     new RemoteStorage {
-      override def upload(src: File, dest: Option[String], options: TransferOptions)(implicit newFile: NewFile): String = {
-        val uploadDestination = dest.getOrElse(storage.child(s, communicationDirectory, StorageSpace.timedUniqName))
-        storage.upload(s, src, uploadDestination, options)
-        uploadDestination
-      }
-
-      override def download(src: String, dest: File, options: TransferOptions)(implicit newFile: NewFile): Unit = storage.download(s, src, dest, options)
+      override def upload(src: File, dest: Option[String], options: TransferOptions)(implicit newFile: NewFile): String = StorageService.uploadInDirectory(s, src, communicationDirectory, options)
+      override def download(src: String, dest: File, options: TransferOptions)(implicit newFile: NewFile): Unit = StorageService.download(s, src, dest, options)
     }
 
   def upload(compressed: Boolean, uploadStream: (() ⇒ InputStream, String) ⇒ Unit)(src: File, dest: String, options: TransferOptions = TransferOptions.default): Unit = {
@@ -65,8 +60,6 @@ object StorageInterface {
 trait StorageInterface[T] {
   def exists(t: T, path: String): Boolean
   def rmFile(t: T, path: String): Unit
-  def child(t: T, parent: String, child: String): String
-
   def upload(t: T, src: File, dest: String, options: TransferOptions = TransferOptions.default): Unit
   def download(t: T, src: String, dest: File, options: TransferOptions = TransferOptions.default): Unit
 }

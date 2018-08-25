@@ -62,7 +62,7 @@ object HierarchicalStorageSpace extends JavaLogger {
       entry ← entries
       if remove(entry.name)
     } {
-      val path = storageInterface.child(s, tmpDirectory, entry.name)
+      val path = StorageService.child(s, tmpDirectory, entry.name)
       if (entry.`type` == FileType.Directory) backgroundRm(s, path, directory = true)
       else backgroundRm(s, path, directory = false)
     }
@@ -75,13 +75,13 @@ object HierarchicalStorageSpace extends JavaLogger {
       }.getOrElse(true)
 
     val names = hierarchicalStorageInterface.list(s, persistentPath).map(_.name)
-    val inReplica = services.replicaCatalog.forPaths(names.map { storageInterface.child(s, persistentPath, _) }, Seq(storageId)).map(_.path).toSet
+    val inReplica = services.replicaCatalog.forPaths(names.map { StorageService.child(s, persistentPath, _) }, Seq(storageId)).map(_.path).toSet
 
     for {
       name ← names
       if graceIsOver(name)
     } {
-      val path = storageInterface.child(s, persistentPath, name)
+      val path = StorageService.child(s, persistentPath, name)
       if (!inReplica.contains(path)) backgroundRm(s, path, directory = false)
     }
   }
@@ -94,7 +94,7 @@ object HierarchicalStorageSpace extends JavaLogger {
 
       paths.tail.foldLeft(paths.head.toString) {
         (path, file) ⇒
-          val childPath = storageInterface.child(s, path, hierarchicalStorageInterface.name(s, file))
+          val childPath = StorageService.child(s, path, hierarchicalStorageInterface.name(s, file))
           try hierarchicalStorageInterface.makeDir(s, childPath)
           catch {
             case e: Throwable if isConnectionError(e) ⇒ throw e
@@ -105,7 +105,7 @@ object HierarchicalStorageSpace extends JavaLogger {
     }
 
     val rootPath = mkRootDir
-    val basePath = storageInterface.child(s, rootPath, baseDirName)
+    val basePath = StorageService.child(s, rootPath, baseDirName)
     util.Try(hierarchicalStorageInterface.makeDir(s, basePath)) match {
       case util.Success(_) ⇒ basePath
       case util.Failure(e) ⇒

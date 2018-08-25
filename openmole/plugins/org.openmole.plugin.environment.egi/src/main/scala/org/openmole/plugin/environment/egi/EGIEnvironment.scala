@@ -29,10 +29,11 @@ import squants.information._
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable.{ HashMap, MultiMap, Set }
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
-import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.dsl.{ File, _ }
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.exception._
 import gridscale.egi._
+import org.openmole.core.communication.storage.TransferOptions
 import org.openmole.tool.cache._
 import squants.time.Time
 import squants.time.TimeConversions._
@@ -308,32 +309,37 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
       }
     }
 
-    val (storageSpace, storageService) = selectStorage
+    val (space, storage) = selectStorage
 
-    val jobDirectory = HierarchicalStorageSpace.createJobDirectory(storageService, storageSpace)
+    val jobDirectory = HierarchicalStorageSpace.createJobDirectory(storage, space)
 
-    tryOnError { StorageService.rmDirectory(storageService, jobDirectory) } {
-      val remoteStorage = CurlRemoteStorage(storageService.url, jobDirectory, voName, debug, preference(EGIEnvironment.RemoteCopyTimeout))
+    tryOnError { StorageService.rmDirectory(storage, jobDirectory) } {
+      val remoteStorage = CurlRemoteStorage(storage.url, jobDirectory, voName, debug, preference(EGIEnvironment.RemoteCopyTimeout))
 
-      val sj = BatchEnvironment.serializeJob(
-        storageService,
-        remoteStorage,
-        batchExecutionJob,
-        jobDirectory,
-        storageSpace.replicaDirectory)
+      def replicate(f: File, options: TransferOptions) =
+        BatchEnvironment.toReplicatedFile(
+          StorageService.uploadInDirectory(storage, _, space.replicaDirectory, _),
+          StorageService.exists(storage, _),
+          StorageService.backgroundRmFile(storage, _),
+          batchExecutionJob.environment,
+          StorageService.id(storage)
+        )(f, options)
 
-      val outputPath = StorageService.child(storageService, jobDirectory, uniqName("job", ".out"))
-      val job = jobService.submit(sj, outputPath, storageService.url)
+      def upload(f: File, options: TransferOptions) = StorageService.uploadInDirectory(storage, f, jobDirectory, options)
+
+      val sj = BatchEnvironment.serializeJob(batchExecutionJob, remoteStorage, replicate, upload, StorageService.id(storage))
+      val outputPath = StorageService.child(storage, jobDirectory, uniqName("job", ".out"))
+      val job = jobService.submit(sj, outputPath, storage.url)
 
       BatchJobControl(
         env,
-        StorageService.id(storageService),
+        StorageService.id(storage),
         () ⇒ jobService.state(job),
         () ⇒ jobService.delete(job),
         () ⇒ jobService.stdOutErr(job),
         () ⇒ outputPath,
-        StorageService.download(storageService, _, _, _),
-        () ⇒ StorageService.rmDirectory(storageService, jobDirectory)
+        StorageService.download(storage, _, _, _),
+        () ⇒ StorageService.rmDirectory(storage, jobDirectory)
       )
     }
   }

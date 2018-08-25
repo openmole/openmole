@@ -37,10 +37,10 @@ object SharedStorage extends JavaLogger {
     val runtimeInstall = runtimePrefix + runtime.runtime.hash
 
     val (workdir, scriptName) = {
-      val installDir = storageInterface.child(storage, baseDirectory, "install")
+      val installDir = StorageService.child(storage, baseDirectory, "install")
       util.Try(hierarchicalStorageInterface.makeDir(storage, installDir))
 
-      val workdir = storageInterface.child(storage, installDir, preference(Preference.uniqueID) + "_install")
+      val workdir = StorageService.child(storage, installDir, preference(Preference.uniqueID) + "_install")
       if (!storageInterface.exists(storage, workdir)) hierarchicalStorageInterface.makeDir(storage, workdir)
 
       newFile.withTmpFile("install", ".sh") { script ⇒
@@ -64,7 +64,7 @@ object SharedStorage extends JavaLogger {
 
         script.content = content
 
-        val remoteScript = storageInterface.child(storage, workdir, scriptName)
+        val remoteScript = StorageService.child(storage, workdir, scriptName)
         storageInterface.upload(storage, script, remoteScript, options = TransferOptions(raw = true, noLink = true, canMove = true))
         (workdir, scriptName)
       }
@@ -84,7 +84,7 @@ object SharedStorage extends JavaLogger {
         }
     }
 
-    val path = storageInterface.child(storage, workdir, runtimeInstall)
+    val path = StorageService.child(storage, workdir, runtimeInstall)
 
     //installJobService.execute(jobDescription)
     Log.logger.fine("End install")
@@ -102,8 +102,8 @@ object SharedStorage extends JavaLogger {
     storage:        S)(implicit newFile: NewFile, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
     val runtime = runtimePath(serializedJob.runtime) //preparedRuntime(serializedJob.runtime)
     val result = outputPath
-    val workspace = storageInterface.child(storage, workDirectory, UUID.randomUUID.toString)
-    val osgiWorkDir = storageInterface.child(storage, workDirectory, UUID.randomUUID.toString)
+    val workspace = StorageService.child(storage, workDirectory, UUID.randomUUID.toString)
+    val osgiWorkDir = StorageService.child(storage, workDirectory, UUID.randomUUID.toString)
 
     val remoteScript =
       newFile.withTmpFile("run", ".sh") { script ⇒
@@ -117,8 +117,8 @@ object SharedStorage extends JavaLogger {
 
         script.content = content
 
-        val remoteScript = storageInterface.child(storage, workDirectory, uniqName("run", ".sh"))
-        storageInterface.upload(storage, script, remoteScript, options = TransferOptions(raw = true, noLink = true, canMove = true))
+        val remoteScript = StorageService.child(storage, workDirectory, uniqName("run", ".sh"))
+        StorageService.upload(storage, script, remoteScript, options = TransferOptions(raw = true, noLink = true, canMove = true))
         remoteScript
       }
 

@@ -22,15 +22,16 @@ import java.util.concurrent.locks.ReentrantLock
 
 import effectaside._
 import org.openmole.core.authentication.AuthenticationStore
+import org.openmole.core.communication.storage.TransferOptions
 import org.openmole.core.preference.ConfigurationLocation
-import org.openmole.core.threadprovider.{ IUpdatable, Updater }
+import org.openmole.core.threadprovider.Updater
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
 import org.openmole.plugin.environment.batch.environment.{ BatchJobControl, _ }
-import org.openmole.tool.exception._
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.plugin.environment.gridscale.LogicalLinkStorage
 import org.openmole.tool.crypto._
+import org.openmole.tool.exception._
 import org.openmole.tool.lock._
 import org.openmole.tool.logger.JavaLogger
 import squants.information._
@@ -108,7 +109,18 @@ object SSHEnvironment extends JavaLogger {
     def clean = StorageService.rmDirectory(storage, jobDirectory)
 
     tryOnError { clean } {
-      val sj = BatchEnvironment.serializeJob(storage, remoteStorage, batchExecutionJob, jobDirectory, space.replicaDirectory)
+      def replicate(f: File, options: TransferOptions) =
+        BatchEnvironment.toReplicatedFile(
+          StorageService.uploadInDirectory(storage, _, space.replicaDirectory, _),
+          StorageService.exists(storage, _),
+          StorageService.backgroundRmFile(storage, _),
+          batchExecutionJob.environment,
+          StorageService.id(storage)
+        )(f, options)
+
+      def upload(f: File, options: TransferOptions) = StorageService.uploadInDirectory(storage, f, jobDirectory, options)
+
+      val sj = BatchEnvironment.serializeJob(batchExecutionJob, remoteStorage, replicate, upload, StorageService.id(storage))
       val outputPath = StorageService.child(storage, jobDirectory, uniqName("job", ".out"))
       val job = jobService.register(batchExecutionJob, sj, outputPath)
 

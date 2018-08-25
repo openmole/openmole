@@ -20,31 +20,22 @@ package org.openmole.plugin.environment.batch.storage
 import java.io._
 
 import org.openmole.core.communication.storage._
-import org.openmole.core.preference.{ ConfigurationLocation, Preference }
-import org.openmole.core.replication.{ ReplicaCatalog, ReplicationStorage }
-import org.openmole.core.serializer._
-import org.openmole.core.threadprovider.{ ThreadProvider, Updater }
+import org.openmole.core.preference.ConfigurationLocation
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.refresh._
-import org.openmole.tool.cache._
 import org.openmole.tool.logger.JavaLogger
 import squants.time.TimeConversions._
 
 object StorageService extends JavaLogger {
   val DirRegenerate = ConfigurationLocation("StorageService", "DirRegenerate", Some(1 hours))
 
-  implicit def replicationStorage[S](implicit services: BatchEnvironment.Services): ReplicationStorage[StorageService[S]] = new ReplicationStorage[StorageService[S]] {
-    override def backgroundRmFile(storage: StorageService[S], path: String): Unit = StorageService.backgroundRmFile(storage, path)
-    override def exists(storage: StorageService[S], path: String): Boolean = storage.exists(path)
-    override def id(storage: StorageService[S]): String = storage.id
-  }
-
-  def apply[S](s: S)(implicit storageInterface: StorageInterface[S], environmentStorage: EnvironmentStorage[S]) = new StorageService[S](s)
-
-  def backgroundRmFile(storageService: StorageService[_], path: String)(implicit services: BatchEnvironment.Services) = {
-    def action = { storageService.rmFile(path); false }
+  def backgroundRmFile[S](s: S, path: String)(implicit services: BatchEnvironment.Services, storageInterface: StorageInterface[S]) = {
+    def action = { rmFile(s, path); false }
     JobManager ! RetryAction(() ⇒ action)
   }
+
+  def rmFile[S](s: S, directory: String)(implicit storageInterface: StorageInterface[S]) =
+    storageInterface.rmFile(s, directory)
 
   def rmDirectory[S](s: S, directory: String)(implicit hierarchicalStorageInterface: HierarchicalStorageInterface[S]) =
     hierarchicalStorageInterface.rmDir(s, directory)
@@ -53,23 +44,19 @@ object StorageService extends JavaLogger {
   def download[S](s: S, src: String, dest: File, options: TransferOptions = TransferOptions.default)(implicit storageService: StorageInterface[S]) =
     storageService.download(s, src, dest, options)
 
-  def child[S](s: S, path: String, name: String)(implicit storageService: StorageInterface[S]) = storageService.child(s, path, name)
+  def upload[S](s: S, src: File, dest: String, options: TransferOptions = TransferOptions.default)(implicit storageInterface: StorageInterface[S]) =
+    storageInterface.upload(s, src, dest, options)
+
+  def child[S](s: S, path: String, name: String)(implicit storageService: HierarchicalStorageInterface[S]) = storageService.child(s, path, name)
+
+  def exists[S](s: S, path: String)(implicit storageInterface: StorageInterface[S]) =
+    storageInterface.exists(s, path)
+
+  def uploadInDirectory[S: StorageInterface: HierarchicalStorageInterface](s: S, file: File, directory: String, transferOptions: TransferOptions) = {
+    val path = child(s, directory, StorageSpace.timedUniqName)
+    upload(s, file, path, transferOptions)
+    path
+  }
 
 }
 
-class StorageService[S](val storage: S)(implicit storageInterface: StorageInterface[S], environmentStorage: EnvironmentStorage[S]) {
-
-  override def toString: String = id
-
-  def id = environmentStorage.id(storage)
-  def environment = environmentStorage.environment(storage)
-
-  def exists(path: String): Boolean = storageInterface.exists(storage, path)
-  def rmFile(path: String): Unit = storageInterface.rmFile(storage, path)
-
-  def child(path: String, name: String) = storageInterface.child(storage, path, name)
-
-  def upload(src: File, dest: String, options: TransferOptions = TransferOptions.default) = storageInterface.upload(storage, src, dest, options)
-  def download(src: String, dest: File, options: TransferOptions = TransferOptions.default) = storageInterface.download(storage, src, dest, options)
-
-}
