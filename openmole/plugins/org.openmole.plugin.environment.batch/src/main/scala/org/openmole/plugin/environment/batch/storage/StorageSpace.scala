@@ -1,5 +1,7 @@
 package org.openmole.plugin.environment.batch.storage
 
+import java.nio.file.spi.FileTypeDetector
+
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.core.replication.ReplicaCatalog
 import java.util.regex.Pattern
@@ -63,8 +65,8 @@ object HierarchicalStorageSpace extends JavaLogger {
       if remove(entry.name)
     } {
       val path = StorageService.child(s, tmpDirectory, entry.name)
-      if (entry.`type` == FileType.Directory) backgroundRm(s, path, directory = true)
-      else backgroundRm(s, path, directory = false)
+      if (entry.`type` == FileType.Directory) StorageService.rmDirectory(s, path)
+      else StorageService.rmFile(s, path)
     }
   }
 
@@ -74,15 +76,15 @@ object HierarchicalStorageSpace extends JavaLogger {
         _ + services.preference(ReplicaCatalog.ReplicaGraceTime).toMillis < System.currentTimeMillis
       }.getOrElse(true)
 
-    val names = hierarchicalStorageInterface.list(s, persistentPath).map(_.name)
-    val inReplica = services.replicaCatalog.forPaths(names.map { StorageService.child(s, persistentPath, _) }, Seq(storageId)).map(_.path).toSet
+    val entries = hierarchicalStorageInterface.list(s, persistentPath)
+    val inReplica = services.replicaCatalog.forPaths(entries.map { e ⇒ StorageService.child(s, persistentPath, e.name) }, Seq(storageId)).map(_.path).toSet
 
     for {
-      name ← names
-      if graceIsOver(name)
+      e ← entries
+      if graceIsOver(e.name)
     } {
-      val path = StorageService.child(s, persistentPath, name)
-      if (!inReplica.contains(path)) backgroundRm(s, path, directory = false)
+      val path = StorageService.child(s, persistentPath, e.name)
+      if (!inReplica.contains(path)) if (e.`type` == FileType.Directory) StorageService.rmDirectory(s, path) else StorageService.rmFile(s, path)
     }
   }
 
@@ -111,11 +113,6 @@ object HierarchicalStorageSpace extends JavaLogger {
       case util.Failure(e) ⇒
         if (storageInterface.exists(s, basePath)) basePath else throw e
     }
-  }
-
-  def backgroundRm[S](storage: S, path: String, directory: Boolean)(implicit services: BatchEnvironment.Services, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
-    def action = { if (directory) hierarchicalStorageInterface.rmDir(storage, path) else storageInterface.rmFile(storage, path); false }
-    JobManager ! RetryAction(() ⇒ action)
   }
 
   def createJobDirectory[S](s: S, storageSpace: StorageSpace)(implicit hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
