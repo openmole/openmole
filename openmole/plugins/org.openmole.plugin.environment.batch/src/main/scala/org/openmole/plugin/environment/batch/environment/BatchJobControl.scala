@@ -28,15 +28,17 @@ object BatchJobControl {
   def tryStdOutErr(batchJob: BatchJobControl) = util.Try(batchJob.stdOutErr())
 
   def apply(
-    environment: BatchEnvironment,
-    storageId:   String,
-    updateState: () ⇒ ExecutionState,
-    delete:      () ⇒ Unit,
-    stdOutErr:   () ⇒ (String, String),
-    resultPath:  () ⇒ String,
-    download:    (String, File, TransferOptions) ⇒ Unit,
-    clean:       () ⇒ Unit): BatchJobControl = new BatchJobControl(
+    environment:    BatchEnvironment,
+    updateInterval: UpdateInterval,
+    storageId:      String,
+    updateState:    () ⇒ ExecutionState,
+    delete:         () ⇒ Unit,
+    stdOutErr:      () ⇒ (String, String),
+    resultPath:     () ⇒ String,
+    download:       (String, File, TransferOptions) ⇒ Unit,
+    clean:          () ⇒ Unit): BatchJobControl = new BatchJobControl(
     environment,
+    updateInterval,
     storageId,
     updateState,
     delete,
@@ -48,11 +50,12 @@ object BatchJobControl {
 }
 
 class BatchJobControl(
-  val environment: BatchEnvironment,
-  val storageId:   String,
-  val updateState: () ⇒ ExecutionState,
-  val delete:      () ⇒ Unit,
-  val stdOutErr:   () ⇒ (String, String),
-  val download:    (String, File, TransferOptions) ⇒ Unit,
-  val resultPath:  () ⇒ String,
-  val clean:       () ⇒ Unit)
+  val environment:    BatchEnvironment,
+  val updateInterval: UpdateInterval,
+  val storageId:      String,
+  val updateState:    () ⇒ ExecutionState,
+  val delete:         () ⇒ Unit,
+  val stdOutErr:      () ⇒ (String, String),
+  val download:       (String, File, TransferOptions) ⇒ Unit,
+  val resultPath:     () ⇒ String,
+  val clean:          () ⇒ Unit)

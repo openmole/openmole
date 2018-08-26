@@ -69,7 +69,7 @@ object JobManager extends JavaLogger { self ⇒
       services.threadProvider.scheduler.schedule((self ! msg): Runnable, delay.millis, TimeUnit.MILLISECONDS)
 
     case Submitted(job, bj) ⇒
-      self ! Delay(Refresh(job, bj, job.environment.updateInterval.minUpdateInterval), job.environment.updateInterval.minUpdateInterval)
+      self ! Delay(Refresh(job, bj, bj.updateInterval.minUpdateInterval), bj.updateInterval.minUpdateInterval)
 
     case Kill(job, batchJob) ⇒
       BatchEnvironment.finishedExecutionJob(job.environment, job)

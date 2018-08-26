@@ -67,7 +67,7 @@ object SSHAuthentication {
     implicit val intp = gridscale.ssh.SSH()
     try
       Try {
-        val server = gridscale.ssh.SSHServer(a.host, a.port, preference(SSHEnvironment.TimeOut))(a)
+        val server = gridscale.ssh.SSHServer(a.host, a.port, preference(SSHEnvironment.timeOut))(a)
         gridscale.ssh.home(server)
       }.map(_ ⇒ true)
     finally intp().close()

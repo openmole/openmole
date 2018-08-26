@@ -333,6 +333,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
       BatchJobControl(
         env,
+        UpdateInterval.fixed(preference(EGIEnvironment.JobGroupRefreshInterval)),
         StorageService.id(storage),
         () ⇒ jobService.state(job),
         () ⇒ jobService.delete(job),
@@ -358,9 +359,6 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     delegate(s, implicitly[EGIAuthenticationInterface[A]].apply(authentication), tokenCache())
     EGIJobService(s, env)
   }
-
-  override def updateInterval =
-    UpdateInterval.fixed(preference(EGIEnvironment.JobGroupRefreshInterval))
 
   override def finishedJob(job: ExecutionJob): Unit = EGIEnvironment.eagerSubmit(env)
 

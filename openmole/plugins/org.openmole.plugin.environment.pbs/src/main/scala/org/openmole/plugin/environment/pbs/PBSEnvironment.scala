@@ -75,7 +75,7 @@ object PBSEnvironment extends JavaLogger {
           user = userValue,
           host = hostValue,
           port = portValue,
-          timeout = timeout.getOrElse(services.preference(SSHEnvironment.TimeOut)),
+          timeout = timeout.getOrElse(services.preference(SSHEnvironment.timeOut)),
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue)
@@ -145,12 +145,12 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
   import env.services.preference
   import org.openmole.plugin.environment.ssh._
 
-  lazy val accessControl = AccessControl(preference(SSHEnvironment.MaxConnections))
+  lazy val accessControl = AccessControl(preference(SSHEnvironment.maxConnections))
   lazy val sshServer = gridscale.ssh.SSHServer(host, port, timeout)(authentication)
 
   lazy val storageService =
     if (parameters.storageSharedLocally) Left {
-      val local = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.MaxConnections)))
+      val local = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
       (localStorageSpace(local), local)
     }
     else
@@ -205,7 +205,7 @@ class PBSLocalEnvironment(
   import env.services.preference
   import org.openmole.plugin.environment.ssh._
 
-  lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.MaxConnections)))
+  lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
   lazy val space = localStorageSpace(storage)
 
   def execute(batchExecutionJob: BatchExecutionJob) = PBSEnvironment.submit(batchExecutionJob, storage, space, pbsJobService)
@@ -214,7 +214,7 @@ class PBSLocalEnvironment(
 
   import _root_.gridscale.local.LocalHost
 
-  lazy val pbsJobService = new PBSJobService(storage, space.tmpDirectory, installRuntime, parameters, LocalHost(), AccessControl(preference(SSHEnvironment.MaxConnections)))
+  lazy val pbsJobService = new PBSJobService(storage, space.tmpDirectory, installRuntime, parameters, LocalHost(), AccessControl(preference(SSHEnvironment.maxConnections)))
 
 }
 

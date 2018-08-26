@@ -102,6 +102,7 @@ object BatchEnvironment extends JavaLogger {
   val MinUpdateInterval = ConfigurationLocation("BatchEnvironment", "MinUpdateInterval", Some(1 minutes))
   val MaxUpdateInterval = ConfigurationLocation("BatchEnvironment", "MaxUpdateInterval", Some(10 minutes))
   val IncrementUpdateInterval = ConfigurationLocation("BatchEnvironment", "IncrementUpdateInterval", Some(1 minutes))
+
   val MaxUpdateErrorsInARow = ConfigurationLocation("BatchEnvironment", "MaxUpdateErrorsInARow", Some(3))
   val RuntimeMemoryMargin = ConfigurationLocation("BatchEnvironment", "RuntimeMemoryMargin", Some(400 megabytes))
 
@@ -311,6 +312,13 @@ object BatchEnvironment extends JavaLogger {
   class ExecutionJobRegistry {
     var executionJobs = List[BatchExecutionJob]()
   }
+
+  def defaultUpdateInterval(implicit preference: Preference) =
+    UpdateInterval(
+      minUpdateInterval = preference(BatchEnvironment.MinUpdateInterval),
+      maxUpdateInterval = preference(BatchEnvironment.MaxUpdateInterval),
+      incrementUpdateInterval = preference(BatchEnvironment.IncrementUpdateInterval)
+    )
 }
 
 abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
@@ -340,13 +348,6 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   def runtime = BatchEnvironment.runtimeLocation
   def jvmLinuxX64 = BatchEnvironment.JVMLinuxX64Location
-
-  def updateInterval =
-    UpdateInterval(
-      minUpdateInterval = services.preference(BatchEnvironment.MinUpdateInterval),
-      maxUpdateInterval = services.preference(BatchEnvironment.MaxUpdateInterval),
-      incrementUpdateInterval = services.preference(BatchEnvironment.IncrementUpdateInterval)
-    )
 
   def submitted: Long = jobs.count { _.state == ExecutionState.SUBMITTED }
   def running: Long = jobs.count { _.state == ExecutionState.RUNNING }

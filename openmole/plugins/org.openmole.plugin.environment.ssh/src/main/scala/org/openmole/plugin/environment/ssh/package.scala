@@ -24,7 +24,7 @@ import org.openmole.core.preference.Preference
 import org.openmole.core.workflow.dsl.{File, uniqName}
 import org.openmole.core.workflow.execution.ExecutionState.ExecutionState
 import org.openmole.core.workspace.NewFile
-import org.openmole.plugin.environment.batch.environment.{AccessControl, BatchEnvironment, BatchExecutionJob, BatchJobControl, Runtime, SerializedJob}
+import org.openmole.plugin.environment.batch.environment.{AccessControl, BatchEnvironment, BatchExecutionJob, BatchJobControl, Runtime, SerializedJob, UpdateInterval}
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.plugin.environment.gridscale.{LocalStorage, LogicalLinkStorage}
 import org.openmole.tool.exception.tryOnError
@@ -190,6 +190,7 @@ package object ssh {
 
       BatchJobControl(
         batchExecutionJob.environment,
+        BatchEnvironment.defaultUpdateInterval(services.preference),
         StorageService.id(storage),
         () => state(job),
         () ⇒ delete(job),

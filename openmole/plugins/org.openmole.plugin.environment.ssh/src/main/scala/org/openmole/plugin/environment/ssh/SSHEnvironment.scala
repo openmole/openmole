@@ -22,16 +22,13 @@ import java.util.concurrent.locks.ReentrantLock
 
 import effectaside._
 import org.openmole.core.authentication.AuthenticationStore
-import org.openmole.core.communication.storage.TransferOptions
 import org.openmole.core.preference.ConfigurationLocation
 import org.openmole.core.threadprovider.Updater
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
-import org.openmole.plugin.environment.batch.environment.{ BatchJobControl, _ }
+import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.storage._
-import org.openmole.plugin.environment.gridscale.LogicalLinkStorage
 import org.openmole.tool.crypto._
-import org.openmole.tool.exception._
 import org.openmole.tool.lock._
 import org.openmole.tool.logger.JavaLogger
 import squants.information._
@@ -41,11 +38,11 @@ import scala.ref.WeakReference
 
 object SSHEnvironment extends JavaLogger {
 
-  val MaxLocalOperations = ConfigurationLocation("ClusterEnvironment", "MaxLocalOperations", Some(100))
-  val MaxConnections = ConfigurationLocation("SSHEnvironment", "MaxConnections", Some(5))
+  val maxLocalOperations = ConfigurationLocation("ClusterEnvironment", "MaxLocalOperations", Some(100))
+  val maxConnections = ConfigurationLocation("SSHEnvironment", "MaxConnections", Some(5))
 
-  val UpdateInterval = ConfigurationLocation("SSHEnvironment", "UpdateInterval", Some(10 seconds))
-  val TimeOut = ConfigurationLocation("SSHEnvironment", "Timeout", Some(1 minutes))
+  val updateInterval = ConfigurationLocation("SSHEnvironment", "UpdateInterval", Some(10 seconds))
+  val timeOut = ConfigurationLocation("SSHEnvironment", "Timeout", Some(1 minutes))
 
   def apply(
     user:                 String,
@@ -131,7 +128,6 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
 )(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
 
   import services._
-  override def updateInterval = UpdateInterval.fixed(env.services.preference(SSHEnvironment.UpdateInterval))
 
   lazy val jobUpdater = new SSHJobService.Updater(WeakReference(this))
 
@@ -144,12 +140,12 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   implicit val systemInterpreter = System()
   implicit val localInterpreter = gridscale.local.Local()
 
-  def timeout = services.preference(SSHEnvironment.TimeOut)
+  def timeout = services.preference(SSHEnvironment.timeOut)
 
   override def start() = {
     storageService
     import services.threadProvider
-    Updater.delay(jobUpdater, services.preference(SSHEnvironment.UpdateInterval))
+    Updater.delay(jobUpdater, services.preference(SSHEnvironment.updateInterval))
   }
 
   override def stop() = {
@@ -163,13 +159,13 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   import env.services.preference
 
-  lazy val accessControl = AccessControl(preference(SSHEnvironment.MaxConnections))
+  lazy val accessControl = AccessControl(preference(SSHEnvironment.maxConnections))
 
   lazy val sshServer = gridscale.ssh.SSHServer(env.host, env.port, env.timeout)(env.authentication)
 
   lazy val storageService =
     if (storageSharedLocally) Left {
-      val local = localStorage(env, sharedDirectory, AccessControl(preference(SSHEnvironment.MaxConnections)))
+      val local = localStorage(env, sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
       (localStorageSpace(local), local)
     }
     else

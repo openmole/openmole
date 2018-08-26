@@ -75,7 +75,7 @@ object CondorEnvironment {
           user = userValue,
           host = hostValue,
           port = portValue,
-          timeout = timeout.getOrElse(services.preference(SSHEnvironment.TimeOut)),
+          timeout = timeout.getOrElse(services.preference(SSHEnvironment.timeOut)),
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue)
@@ -143,12 +143,12 @@ class CondorEnvironment[A: gridscale.ssh.SSHAuthentication](
     sshInterpreter().close
   }
 
-  lazy val accessControl = AccessControl(preference(SSHEnvironment.MaxConnections))
+  lazy val accessControl = AccessControl(preference(SSHEnvironment.maxConnections))
   lazy val sshServer = gridscale.ssh.SSHServer(host, port, timeout)(authentication)
 
   lazy val storageService =
     if (parameters.storageSharedLocally) Left {
-      val local = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.MaxConnections)))
+      val local = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
       (localStorageSpace(local), local)
     }
     else
@@ -201,7 +201,7 @@ class CondorLocalEnvironment(
   import env.services.preference
   import org.openmole.plugin.environment.ssh._
 
-  lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.MaxConnections)))
+  lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
   lazy val space = localStorageSpace(storage)
 
   def execute(batchExecutionJob: BatchExecutionJob) = CondorEnvironment.submit(batchExecutionJob, storage, space, jobService)
@@ -210,7 +210,7 @@ class CondorLocalEnvironment(
 
   import _root_.gridscale.local.LocalHost
 
-  lazy val jobService = new CondorJobService(storage, space.tmpDirectory, installRuntime, parameters, LocalHost(), AccessControl(preference(SSHEnvironment.MaxConnections)))
+  lazy val jobService = new CondorJobService(storage, space.tmpDirectory, installRuntime, parameters, LocalHost(), AccessControl(preference(SSHEnvironment.maxConnections)))
 
 }
 

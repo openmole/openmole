@@ -36,8 +36,8 @@ object RefreshActor extends JavaLogger {
         else if (!job.state.isFinal) {
           val newDelay =
             if (oldState == job.state)
-              (delay + job.environment.updateInterval.incrementUpdateInterval) min job.environment.updateInterval.maxUpdateInterval
-            else job.environment.updateInterval.minUpdateInterval
+              (delay + bj.updateInterval.incrementUpdateInterval) min bj.updateInterval.maxUpdateInterval
+            else bj.updateInterval.minUpdateInterval
           JobManager ! Delay(Refresh(job, bj, newDelay, 0), newDelay)
         }
         else if (job.state == FAILED) {
