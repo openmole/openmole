@@ -1,4 +1,4 @@
-package org.openmole.plugin.environment.slurm
+package org.openmole.plugin.environment.condor
 
 import gridscale.cluster.HeadNode
 import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment, SerializedJob }
@@ -6,11 +6,11 @@ import org.openmole.plugin.environment.batch.storage.{ HierarchicalStorageInterf
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import org.openmole.plugin.environment.ssh.{ RuntimeInstallation, SharedStorage }
 
-class SLURMJobService[S, H](
+class CondorJobService[S, H](
   s:                 S,
   tmpDirectory:      String,
   installation:      RuntimeInstallation[_],
-  parameters:        SLURMEnvironment.Parameters,
+  parameters:        CondorEnvironment.Parameters,
   h:                 H,
   val accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], headNode: HeadNode[H], services: BatchEnvironment.Services, systemInterpreter: effectaside.Effect[effectaside.System]) {
 
@@ -33,29 +33,26 @@ class SLURMJobService[S, H](
 
     val remoteScript = buildScript(serializedJob, outputPath)
 
-    val description = _root_.gridscale.slurm.SLURMJobDescription(
-      command = s"/bin/bash $remoteScript",
-      queue = parameters.queue,
+    val description = _root_.gridscale.condor.CondorJobDescription(
+      executable = "/bin/bash",
+      arguments = remoteScript,
       workDirectory = workDirectory,
-      wallTime = parameters.wallTime,
       memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
       nodes = parameters.nodes,
-      coresByNode = parameters.coresByNode orElse parameters.threads,
-      qos = parameters.qos,
-      gres = parameters.gres.toList,
-      constraints = parameters.constraints.toList
+      coreByNode = parameters.coresByNode orElse parameters.threads,
+      requirements = parameters.requirements.map(_root_.gridscale.condor.CondorRequirement.apply)
     )
 
-    accessControl { gridscale.slurm.submit(h, description) }
+    accessControl { gridscale.condor.submit(h, description) }
   }
 
   def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    accessControl { GridScaleJobService.translateStatus(gridscale.slurm.state(h, id)) }
+    accessControl { GridScaleJobService.translateStatus(gridscale.condor.state(h, id)) }
 
   def delete(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    accessControl { gridscale.slurm.clean(h, id) }
+    accessControl { gridscale.condor.clean(h, id) }
 
   def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    accessControl { (gridscale.slurm.stdOut(h, id), gridscale.slurm.stdErr(h, id)) }
+    accessControl { (gridscale.condor.stdOut(h, id), gridscale.condor.stdErr(h, id)) }
 
 }
