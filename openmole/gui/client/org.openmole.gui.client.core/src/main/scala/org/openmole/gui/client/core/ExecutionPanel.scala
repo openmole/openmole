@@ -182,21 +182,13 @@ class ExecutionPanel {
             case r: ExecutionInfo.Preparing ⇒ (ExecutionDetails("0", 0, envStates = r.environmentStates), info.state)
           }
 
-          val srp = SubRowPanels(
-            staticInfo.map { si ⇒
-              execTextArea(si(execID).script)(padding := 15, fontSize := "14px")
-            },
-            Rx(execTextArea(outputInfo.map { oi ⇒
-              oi.find(_.id == execID).map {
-                _.output
-              }.getOrElse("")
-            })),
-            Rx(execTextArea(details.error.map {
-              _.stackTrace
-            }.getOrElse("")
-            )(padding := 15, fontSize := "14px")),
-            jobTable(execID).render
-          )
+          val srp =
+            SubRowPanels(
+              staticInfo.map { si ⇒ execTextArea(si(execID).script)(padding := 15, fontSize := "14px") },
+              Rx(execTextArea(outputInfo.map { oi ⇒ oi.find(_.id == execID).map { _.output }.getOrElse("") })),
+              Rx(execTextArea(details.error.map { _.stackTrace }.getOrElse(""))(padding := 15, fontSize := "14px", monospace)),
+              jobTable(execID).render
+            )
 
           subRows() = subRows.now.updated(execID, srp)
 
