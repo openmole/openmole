@@ -30,6 +30,7 @@ import org.openmole.core.workflow.validation._
 import org.openmole.plugin.domain.distribution._
 import org.openmole.plugin.domain.modifier._
 import org.openmole.plugin.tool.pattern._
+import org.openmole.core.expansion._
 
 package object directsampling {
 
@@ -51,17 +52,18 @@ package object directsampling {
   def DirectSampling[P](
     evaluation:  Puzzle,
     sampling:    Sampling,
-    aggregation: OptionalArgument[Puzzle] = None
+    aggregation: OptionalArgument[Puzzle] = None,
+    condition:   Condition                = Condition.True
   ): Puzzle = {
     val exploration = ExplorationTask(sampling)
     val explorationCapsule = Capsule(exploration, strain = true)
 
     aggregation.option match {
       case Some(aggregation) ⇒
-        (explorationCapsule -< evaluation >- aggregation) &
+        (explorationCapsule -< (evaluation when condition) >- aggregation) &
           (explorationCapsule -- (aggregation block (evaluation.outputs: _*)))
       case None ⇒
-        explorationCapsule -< evaluation
+        explorationCapsule -< (evaluation when condition)
     }
   }
 
