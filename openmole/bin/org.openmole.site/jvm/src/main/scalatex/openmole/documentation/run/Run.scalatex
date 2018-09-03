@@ -71,6 +71,12 @@ People from the lab gave you a huge CSV file with each line containing various e
 What you want to do is to run a simulation for each line of this file, execute it on the lab's cluster, and gather the results.
 Your OpenMOLE script would look like that:
 
+Let's say you have a model that takes a string as input and do some stuff with it, like launching a simulation with the parameters contained in the input string.
+People from the lab gave you a huge CSV file with each line containing various experimental setup parameters.
+@br
+What you want to do is to run a simulation for each line of this file, execute it on the lab's cluster, and gather the results.
+Your OpenMOLE script would look like that:
+
 @br@br
 
 @hl.openmoleNoTest("""
