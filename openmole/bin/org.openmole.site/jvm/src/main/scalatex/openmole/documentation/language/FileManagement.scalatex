@@ -150,7 +150,7 @@ When using the @code{ScalaTask}, files are simple variables and are manipulated 
 @h2{Complementary information}
 
 @ul
-  @li{@a("Documentation on data processing", href := DocumentationPages.dataProcessing.file)}
+  @li{@a("Documentation on data processing", href := DocumentationPages.fileSampling.file)}
   @li{@a("Utility functions of the ScalaTask", href := DocumentationPages.scalaFunction.file)}
   @li{@a("Documentation of the RTask", href := DocumentationPages.r.file)}
   @li{@a("Documentation of the CARETask and the SystemExecTask", href := DocumentationPages.packaged.file)}
