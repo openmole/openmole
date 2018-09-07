@@ -68,13 +68,13 @@ object Utils {
     addFilePlugins(files)
   }
 
-  def addFilePlugins(files: Seq[File]): Seq[Error] = {
-    val errors = org.openmole.core.module.addPluginsFiles(files, false, Some(org.openmole.core.module.pluginDirectory(Workspace.instance)))(Workspace.instance)
+  def addFilePlugins(files: Seq[File])(implicit workspace: Workspace): Seq[Error] = {
+    val errors = org.openmole.core.module.addPluginsFiles(files, false, Some(org.openmole.core.module.pluginDirectory))
     errors.map(e ⇒ ErrorBuilder(e._2))
   }
 
-  def removePlugin(plugin: Plugin): Unit = synchronized {
-    val file = module.pluginDirectory(Workspace.instance) / plugin.name
+  def removePlugin(plugin: Plugin)(implicit workspace: Workspace): Unit = synchronized {
+    val file = module.pluginDirectory / plugin.name
     val allDependingFiles = PluginManager.allDepending(file, b ⇒ !b.isProvided)
     val bundle = PluginManager.bundle(file)
     bundle.foreach(PluginManager.remove)
