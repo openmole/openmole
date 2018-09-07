@@ -16,10 +16,10 @@ computing environment.}
 @li{ @b{Do not use the same functions @i{setup} and @i{go} to setup your program on a remote environment}. On the remote environment,
 the NetLogo program is initialised and launched only once, so there is no need to call a @i{clear-all} primitive with each
 setup. When running on distributed environments, @i{clear-all} is @b{not} your best friend. @i{clear-all} erases all the
-globals passed by OpenMoLE to your program before it starts and will make it crash.}
+globals passed by OpenMoLE to your program before it starts and will make it crash.} -> depends on how it is done : nuance that
 @li{ @b{Do not directly use the implicit globals created by means of a widget.} Although you can you can access and
 overwrite implicit globals in OpenMole, it prevents OpenMoLE from mapping explicitly its Prototypes to the NetLogo
-globals.}
+globals.} -> ?
 
 @p NetLogo is a graphical framework. As such, many variables of a model developed in NetLogo are set through widgets
 (a graphical component). In the NetLogo World, setting or getting a value on the model inputs is generally achieved by
@@ -27,10 +27,12 @@ calling set or get on the widget object. In OpenMoLE however, the NetLogo progra
 Models must be used in headless mode with OpenMole. This is not a problem because globals with unspecified values
 in the OpenMole NetLogo Task will take the default values defined in widgets.
 
-@p Still, having a lot of parameters defined in your model might make you forget to override values in OpenMOLE.
+@p Still, having a lot of parameters defined in your model might make you forget to override values in OpenMOLE. // YES
 As a result, NetLogo would take widget values and your model would run a thousand times with a wrong set of parameter values!
 Let's study a simple method to avoid such a situation. This approach invites you to define all the parameters of your
 models prior to any run of your NetLogo models in OpenMOLE.
+
+// TODO : rewrite fire model with "best practice" experiment structure ?
 
 @h2{Application to the Fire model}
 

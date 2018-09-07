@@ -187,10 +187,29 @@ DirectSampling(
 
 @p At the end of the execution, you will find the output values in a file called @i{result.csv}.
 
-@h3{Going further}
+@h2{Headless NetLogo model}
 
 The Netlogo combines a GUI created by the user, in which he can define parameters and run functions, which the source code in itself.
 
 Sometimes, you have to modify your code slightly to render it purely headless so that it can be run everywhere.
 
 The way to proceed is explained in details in the @aa("Headless Netlogo", href := DocumentationPages.headlessNetLogo.file) section.
+
+There is no strict requirement for a normal model to run, except that the user cannot access plots nor reporters, or export images of the world.
+Global variables defined in the GUI (as sliders or switches for example) are still available and can be set from the OpenMOLE script.
+
+//-> to be tested : direct variable setting on variables defined in gui : does it still work ?
+
+We recommand however the following ``best practices'':
+@ul
+  @li{Do not keep any global variable in the GUI, so that reading the code of the headless model explicitly gives all globals}
+  @li{To set variables for the experiment, one can either use input mapping or string substitution within a NetLogo command (a typical example being @code{setup-experiment var1 var2} and a sppecific setup procedure for experiments.
+  This allows to know explicitly variables concerned by the experiments, and not forget to setup any global.
+  This procedure can be used upstream the actual setup, acting as a setup of parameters in the GUI (the actual setup will need then to test if current mode is headless before clearing-all for example)}
+  @li{The use of direct variable setting is particularly useful when dealing with large arrays that will fail (? - test that ?) with string substitution.
+  When using this way of setting the variables, the user must be careful of not calling the @code{clear-all} procedure at the beginning of his code (in practice, globals are set @i{before} the call to user commands - a clear-all is done before that, to ensure workspace is clean in the case of pooling)}
+  @li{Keep two files of the model, one for the standard model and one for the headless. This imply having all the code within @code{.nls} include files (except globals, breed and variables declarations).
+  A good way to proceed is to separate procedures by types of agents and/or purpose.}
+  // rq : standard structure could be some kind of framework - template to generate it ? (skeleton common to most models)
+
+
