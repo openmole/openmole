@@ -3,7 +3,7 @@
 @import org.openmole.site.tools.api._
 @import org.openmole.site.content.Native._
 
-When your model is written in a language for which a specific OpenMOLE task doesn't exist, or if it uses an assembly of tools, libraries, binaries, etc..  you have to package it in a single piece of executable code, so that you can send it to any machine (with potentially varying OS installations). To make your code portable from machine to machine (Linux to Linux) you may either use @a("containers", href := DocumentationPages.container.file) or the CARE packaging tool. In this page, you will learn how to use the CARE packaging tool.
+When your model is written in a language for which a specific OpenMOLE task doesn't exist, or if it uses an assembly of tools, libraries, binaries, etc..  you have to package it in a single piece of executable code, so that you can send it to any machine (with potentially varying OS installations). To make your code portable from machine to machine (Linux to Linux) you may either use @a("containers", href := DocumentationPages.packaged.file) or the CARE packaging tool. In this page, you will learn how to use the CARE packaging tool.
 @p
   This section intends to be general and seeks to explain how to embed any native code into OpenMOLE. More specific documentation pages on how to package some languages/platforms with CARE are available for:
 @ul

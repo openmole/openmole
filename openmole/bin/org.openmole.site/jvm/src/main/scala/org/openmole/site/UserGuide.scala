@@ -94,18 +94,22 @@ object UserGuide {
         div(
           if (DocumentationPages.mainDocPages.contains(current)) span else scalatags.Text.all.h1(current.title),
           h2Contents(current.content.render),
-          current.content),
+          current.content
+        ),
         SideMenu.left(current, left),
         Some(SideMenu.right(right.insert(current.details)))
       )
 
     current match {
-      case p if (DocumentationPages.runPages :+ DocumentationPages.run).contains(p) ⇒ integratedPage(SideMenu.run, head = headerModel(current.name))
+      case p if (DocumentationPages.runPages.diff(Seq(DocumentationPages.packaged)) :+ DocumentationPages.run).contains(p) ⇒ integratedPage(SideMenu.run, head = headerModel(current.name))
+      case p if (DocumentationPages.packagedPages :+ DocumentationPages.packaged).contains(p) ⇒ integratedPage(SideMenu.packaged, head = headerModel(current.name))
       case p if (DocumentationPages.explorePages :+ DocumentationPages.explore).contains(p) ⇒ integratedPage(SideMenu.explore, head = headerMethod(current.name))
+      case p if (DocumentationPages.sensitivityPages).contains(p) ⇒ integratedPage(SideMenu.sensitivity, head = headerMethod(current.name))
       case p if (DocumentationPages.scalePages :+ DocumentationPages.scale).contains(p) ⇒ integratedPage(SideMenu.scale, head = headerEnvironment(current.name))
       case p if DocumentationPages.advancedConceptsPages.contains(p) ⇒ integratedPage(SideMenu.advanced)
       case p if (DocumentationPages.developersPages :+ DocumentationPages.developers).contains(p) ⇒ integratedPage(SideMenu.developers)
       case p if (DocumentationPages.languagePages :+ DocumentationPages.language).contains(p) ⇒ integratedPage(SideMenu.language)
+      case p if (DocumentationPages.advancedConceptsPages :+ DocumentationPages.advancedConcepts).contains(p) ⇒ integratedPage(SideMenu.advanced)
       case p if (DocumentationPages.gettingStartedPages).contains(p) ⇒ integratedPage(SideMenu.gettingStarted)
       case p if (DocumentationPages.netLogoPages).contains(p) ⇒ integratedPage(SideMenu.netLogoGA)
       case p if (DocumentationPages.communityPages :+ DocumentationPages.OMcommunity).contains(p) ⇒ integratedPage(SideMenu.community)

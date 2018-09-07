@@ -94,7 +94,7 @@ In the directory where the @b("hello_world.cpp") file is, we do:
 care-x86_64 -o ./cpp.tgz.bin -r ~ ./a.out 12.24 24
 """, "shell")
 
-@i{Please see the @a("Native packaging page", href:=DocumentationPages.care.file) for more details.}
+@i{Please see the @a("Native packaging page", href:=DocumentationPages.packaged.file) for more details.}
 
 @p The packaging step produces the following output:
 

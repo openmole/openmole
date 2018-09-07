@@ -22,35 +22,16 @@ import java.nio.file.Files
 import gridscale._
 import org.openmole.core.communication.storage._
 import org.openmole.core.workspace._
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, AccessControl }
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 
-import scala.ref.WeakReference
-
-//object Storage {
-//  val BufferSize = ConfigurationLocation("Storage", "BufferSize", Some(64 kilobytes))
-//  val CopyTimeout = ConfigurationLocation("Storage", "CopyTimeout", Some(1 minutes))
-//  val CloseTimeout = ConfigurationLocation("Storage", "CloseTimeout", Some(1 minutes))
-//}
-//
-//trait CompressedTransfer <: Storage {
-//
-//  override abstract def _uploadStream(src: InputStream, dest: String, options: TransferOptions) =
-//    if (!options.raw) super._uploadStream(src.toGZiped, dest, options) else super._uploadStream(src, dest, options)
-//
-//  override abstract protected def _downloadStream(src: String, options: TransferOptions) =
-//    if (!options.raw) super._downloadStream(src, options).toGZ else super._downloadStream(src, options)
-//
-//}
-//
-
 object StorageInterface {
 
-  def remote[S](s: S)(implicit storage: StorageInterface[S]) =
+  def remote[S: StorageInterface: HierarchicalStorageInterface](s: S, communicationDirectory: String) =
     new RemoteStorage {
-      override def upload(src: File, dest: String, options: TransferOptions)(implicit newFile: NewFile): Unit = storage.upload(s, src, dest, options)
-      override def download(src: String, dest: File, options: TransferOptions)(implicit newFile: NewFile): Unit = storage.download(s, src, dest, options)
-      override def child(parent: String, child: String): String = storage.child(s, parent, child)
+      override def upload(src: File, dest: Option[String], options: TransferOptions)(implicit newFile: NewFile): String = StorageService.uploadInDirectory(s, src, communicationDirectory, options)
+      override def download(src: String, dest: File, options: TransferOptions)(implicit newFile: NewFile): Unit = StorageService.download(s, src, dest, options)
     }
 
   def upload(compressed: Boolean, uploadStream: (() ⇒ InputStream, String) ⇒ Unit)(src: File, dest: String, options: TransferOptions = TransferOptions.default): Unit = {
@@ -72,22 +53,27 @@ object StorageInterface {
     else downloadStream(src, downloadFile)
   }
 
+  def isDirectory(name: String) = name.endsWith("/")
+
 }
 
 trait StorageInterface[T] {
-  def home(t: T): String
-  def child(t: T, parent: String, child: String): String
-  def parent(t: T, path: String): Option[String]
-  def name(t: T, path: String): String
-
   def exists(t: T, path: String): Boolean
-  // def listNames(t: T, path: String): Seq[String]
-  def list(t: T, path: String): Seq[ListEntry]
-  def makeDir(t: T, path: String): Unit
-  def rmDir(t: T, path: String): Unit
   def rmFile(t: T, path: String): Unit
-  def mv(t: T, from: String, to: String)
-
   def upload(t: T, src: File, dest: String, options: TransferOptions = TransferOptions.default): Unit
   def download(t: T, src: String, dest: File, options: TransferOptions = TransferOptions.default): Unit
+}
+
+trait HierarchicalStorageInterface[T] {
+  def rmDir(t: T, path: String): Unit
+  def makeDir(t: T, path: String): Unit
+  def child(t: T, parent: String, child: String): String
+  def list(t: T, path: String): Seq[ListEntry]
+  def parent(t: T, path: String): Option[String]
+  def name(t: T, path: String): String
+}
+
+trait EnvironmentStorage[S] {
+  def id(s: S): String
+  def environment(s: S): BatchEnvironment
 }

@@ -31,7 +31,7 @@
     @li{Tasks providing containers similar to docker (udocker)}
     @li{New language handled: RTask}
     @li{New language handled: ScilabTask}
-    @li{New external plugin: ComrasTask}
+    @li{New external plugin: CormasTask}
     @li{NetLogoTask : NetLogo 6 is now supported; handling of arrays as input variables; conversion between scala and netlogo types clarified; pooling on execution nodes}
     @li{New sampling methods : Saltelli, Morris}
     @li{New mgo methods : NicheNSGA2, OSE}

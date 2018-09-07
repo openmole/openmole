@@ -56,7 +56,7 @@ Use the @code{AppendFileFileHook} as well.
 val file = Val[File]
 val h = AppendToFileHook("${file.content}", "/path/of/the/file")""", name = "append file to file hook")
 
-@h2{Copy file}
+@h2{CSVHook}
 
 The @code{CSVHook} takes data from the dataflow and appends it to a file formatted as CSV:
 @br @hl.openmole("""

@@ -12,7 +12,7 @@ import org.json4s._
 import org.openmole.core.project._
 import org.openmole.core.event._
 import org.openmole.core.workflow.execution.Environment
-import org.openmole.core.workflow.execution.Environment.ExceptionRaised
+import org.openmole.core.workflow.execution.Environment.ExecutionJobExceptionRaised
 import org.openmole.core.workflow.mole.{ MoleExecution, MoleExecutionContext, MoleServices }
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
