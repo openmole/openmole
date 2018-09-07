@@ -120,6 +120,7 @@ package object shared {
       //lazy val urbanDynamicsBib = "https://hal.archives-ouvertes.fr/hal-01583528v1/bibtex"
       lazy val epb2018 = "http://journals.sagepub.com/doi/abs/10.1177/2399808318774335"
       lazy val epb2018arxiv = "https://arxiv.org/pdf/1804.09416.pdf"
+      lazy val pone2018 = "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0203516"
     }
 
     object partner {
