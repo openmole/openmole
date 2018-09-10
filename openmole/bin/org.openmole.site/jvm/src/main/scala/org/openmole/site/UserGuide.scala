@@ -103,8 +103,8 @@ object UserGuide {
     current match {
       case p if (DocumentationPages.runPages.diff(Seq(DocumentationPages.packaged)) :+ DocumentationPages.run).contains(p) ⇒ integratedPage(SideMenu.run, head = headerModel(current.name))
       case p if (DocumentationPages.packagedPages :+ DocumentationPages.packaged).contains(p) ⇒ integratedPage(SideMenu.packaged, head = headerModel(current.name))
-      case p if (DocumentationPages.explorePages :+ DocumentationPages.explore).contains(p) ⇒ integratedPage(SideMenu.explore, head = headerMethod(current.name))
-      case p if (DocumentationPages.sensitivityPages).contains(p) ⇒ integratedPage(SideMenu.sensitivity, head = headerMethod(current.name))
+      case p if (DocumentationPages.explorePages.diff(Seq(DocumentationPages.directSampling)) :+ DocumentationPages.explore).contains(p) ⇒ integratedPage(SideMenu.explore, head = headerMethod(current.name))
+      case p if (DocumentationPages.samplingPages :+ DocumentationPages.directSampling).contains(p) ⇒ integratedPage(SideMenu.sampling, head = headerModel(current.name))
       case p if (DocumentationPages.scalePages :+ DocumentationPages.scale).contains(p) ⇒ integratedPage(SideMenu.scale, head = headerEnvironment(current.name))
       case p if DocumentationPages.advancedConceptsPages.contains(p) ⇒ integratedPage(SideMenu.advanced)
       case p if (DocumentationPages.developersPages :+ DocumentationPages.developers).contains(p) ⇒ integratedPage(SideMenu.developers)

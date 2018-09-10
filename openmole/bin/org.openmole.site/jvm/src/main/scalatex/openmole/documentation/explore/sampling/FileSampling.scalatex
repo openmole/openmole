@@ -1,6 +1,7 @@
 
 @import org.openmole.site._
 @import org.openmole.site.tools._
+@import DocumentationPages._
 
 Data processing often revolves about massive computation using big bunch of files.
 
@@ -62,7 +63,7 @@ If you wish to select one single file for each value of i you may use the @hl.hi
 
 As its name suggests, the @hl.openmoleNoTest{files} selector manipulates @hl.highlight("File", "plain") instances and directly injects them in the dataflow.
 
-@p If you plan to delegate your workflow to a @aa("local cluster environment", href :=  DocumentationPages.cluster.file) equipped with a shared file system across all nodes, you don't need data to be automatically copied by OpenMOLE.
+@p If you plan to delegate your workflow to a @aa("local cluster environment", href :=  cluster.file) equipped with a shared file system across all nodes, you don't need data to be automatically copied by OpenMOLE.
 
 
 @p In this case, you might prefer the paths selector instead.
@@ -100,4 +101,4 @@ You can find full examples using OpenMOLE's capabilities to process a dataset in
 
 @h2{Going further}
 
-Files can also be injected in the dataflow through @a("Sources", href := DocumentationPages.source.file). They provide more powerful file filtering possibilities using regular expressions and can also target directories only.
+Files can also be injected in the dataflow through @a("Sources", href := source.file). They provide more powerful file filtering possibilities using regular expressions and can also target directories only.
