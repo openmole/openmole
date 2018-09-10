@@ -33,9 +33,7 @@ object Pages {
   // Toutes les pages à la racine du site
   val index = Page("index", scalatex.Index(), title = Some("OpenMOLE: the Model Exploration Software"))
 
-  val faq = Page.fromScalatex("FAQ", scalatex.FAQ, title = Some("Frequently Asked Questions"))
-
-  val all: Seq[Page] = DocumentationPages.allPages ++ Seq(index, faq)
+  val all: Seq[Page] = DocumentationPages.allPages ++ Seq(index)
 
   //def rawFile(page: Page) = page.location.mkString("_") + ".html"
   def file(page: Page) = java.net.URLEncoder.encode(page.location, "UTF-8") + ".html"
@@ -168,7 +166,7 @@ object DocumentationPages {
   val mainDocPages = runPages ++ explorePages ++ scalePages ++ Seq(scale, explore, run)
 
   // Documentation
-  lazy val documentation = DocumentationPage.fromScalatex(name = "Documentation", content = scalatex.Documentation)
+  lazy val documentation = DocumentationPage.fromScalatex(name = "Documentation", content = scalatex.documentation.Documentation)
 
   def docPages =
     runPages ++
@@ -181,11 +179,12 @@ object DocumentationPages {
       developersPages ++
       docLonelyPages
 
-  def docLonelyPages = Seq(gui, market, commandOptions)
+  def docLonelyPages = Seq(gui, market, commandOptions, faq)
 
   lazy val gui = DocumentationPage.fromScalatex(name = "GUI", content = scalatex.documentation.GUI, title = Some("Graphical User Interface"))
   lazy val market = DocumentationPage.fromScalatex(name = "Market", content = scalatex.documentation.Market)
   lazy val commandOptions = DocumentationPage.fromScalatex(name = "Command Options", content = scalatex.documentation.CommandOptions)
+  val faq = DocumentationPage.fromScalatex(name = "FAQ", content = scalatex.FAQ, title = Some("Frequently Asked Questions"))
 
   // Run
   lazy val run = DocumentationPage.fromScalatex(name = "Run", content = scalatex.documentation.run.Run, title = Some("Run Your Model"))

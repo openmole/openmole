@@ -2,6 +2,7 @@
 @import org.openmole.site._
 @import org.openmole.site.tools.api._
 @import org.openmole.site.content.Native._
+@import DocumentationPages._
 
 
 
@@ -65,7 +66,7 @@ Before going any further, here are a few notes about the options accepted by CAR
 @h6{Importing a packaged application in OpenMOLE}
 Second, just provide the resulting package along with some other information to OpenMOLE.
 Et voilà!
-If you encounter any problem to package your application, please refer to the corresponding entry in the @aa("FAQ", href := Pages.faq.file + "#Ican'tgetCARE/PRoottowork").
+If you encounter any problem to package your application, please refer to the corresponding entry in the @aa("FAQ", href := faq.file + "#Ican'tgetCARE/PRoottowork").
 
 @br@br
 
