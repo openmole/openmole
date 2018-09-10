@@ -10,7 +10,7 @@ Please note that the service is reset every 6 hours, so don't be surprised if yo
 
 @h2{Download OpenMOLE}
 To run correctly on your own computer, OpenMOLE requires Java version 8 or above.
-Check our @aa("FAQ", href := Pages.faq.file) to access your Java version information.
+Check our @aa("FAQ", href := faq.file) to access your Java version information.
 @br
 When Java is installed, you just need to download and extract @a("this archive", href:=Resource.script.openmole.file), and
 you're done!
