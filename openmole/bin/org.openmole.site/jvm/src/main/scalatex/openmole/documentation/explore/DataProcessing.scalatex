@@ -14,7 +14,11 @@ over a set of files in a subdirectory you may use:
 
 @hl.openmole("""
   val f = Val[File]
-  val explo = ExplorationTask (f in (workDirectory / "dir"))""")
+
+  DirectSampling(
+    evaluation = myModel,
+    sampling = f in (workDirectory / "dir"
+  )""", header = "val myModel = EmptyTask()")
 
 @br
 To explore files located in several directories:
@@ -22,12 +26,13 @@ To explore files located in several directories:
   val i = Val[Int]
   val f = Val[File]
 
-  val explo =
-    ExplorationTask (
+  DirectSampling(
+    evaluation =  myModel,
+    sampling =
       (i in (0 to 10)) x
       (f in (workDirectory / "dir").files("subdir${i}", recursive = true).filter(f => f.isDirectory && f.getName.startsWith("exp")))
-    )
-  """)
+  )""", header = "val myModel = EmptyTask()")
+
 @br
 The @hl.openmoleNoTest{filter} modifier filters the initial file sampling according to a predicate.
 You can filter using any function taking a @hl.openmoleNoTest{File} and producing a @hl.openmoleNoTest{Boolean} (see the corresponding @a("javadoc", href := shared.link.javaFile) or create your own). Some predicate functions available out of the box are @hl.highlight("startsWith(), contains(), endsWith() ", "plain").
@@ -35,9 +40,10 @@ You can filter using any function taking a @hl.openmoleNoTest{File} and producin
 @hl.openmole("""
   val f = Val[File]
 
-  val explo =
-    ExplorationTask ( (f in (workDirectory / "dir") filter(_.getName.endsWith(".nii.gz")) ) )
-  """)
+  DirectSampling(
+    evaluation = myModel,
+    sampling = (f in (workDirectory / "dir") filter(_.getName.endsWith(".nii.gz")) )
+  )""", header = "val myModel = EmptyTask()")
 
 @br
 Searching in deep file trees can be very time consuming and irrelevant in some cases where you know how your data is organised.
@@ -51,12 +57,12 @@ If you wish to select one single file for each value of i you may use the @hl.hi
   val i = Val[Int]
   val f = Val[File]
 
-  val explo =
-    ExplorationTask (
+  DirectSampling(
+    evaluation = myModel,
+    sampling =
       (i in (0 to 10)) x
-      (f in File("/path/to/a/dir").select("file${i}.txt"))
-    )
-  """)
+      (f in (workDirectory / "dir").files("subdir${i}", recursive = true).filter(f => f.isDirectory && f.getName.startsWith("exp")))
+  )""", header = "val myModel = EmptyTask()")
 
 @h2{Files vs Paths}
 
@@ -76,16 +82,17 @@ The @b{explored files won't be automatically copied by OpenMOLE when using @hl.o
 @br
 
 @p @hl.openmole("""
-import java.nio.file.Path
+  import java.nio.file.Path
 
-val dataDir     = "/vol/vipdata/data/HCP100"
+  val dataDir     = "/vol/vipdata/data/HCP100"
 
-val subjectPath = Val[Path]
-val subjectID   = Val[String]
-val exploIDsTask = ExplorationTask ( subjectPath in File(dataDir).paths(filter=".*\\.nii.gz") withName subjectID)
+  val subjectPath = Val[Path]
+  val subjectID   = Val[String]
 
-( exploIDsTask hook ToStringHook() ) -- EmptyTask()
-""")
+  DirectSampling(
+    evaluation = myModel,
+    sampling = subjectPath in File(dataDir).paths(filter=".*\\.nii.gz") withName subjectID
+  )""", header = "val myModel = EmptyTask()")
 
 @p More details on the difference between manipulating @hl.openmoleNoTest{Files} and @hl.openmoleNoTest{Paths} can be found in the dedicated entry of the @aa("FAQ", href:= Pages.faq.file + "#WhenshallIusePathoverFile?").
 
@@ -94,9 +101,9 @@ val exploIDsTask = ExplorationTask ( subjectPath in File(dataDir).paths(filter="
 You can find full examples using OpenMOLE's capabilities to process a dataset in the following entries of the marketplace:
 @ul
     @li
-        @a("FSL-Fast", href := shared.link.repo.market + "/tree/7-dev/fsl-fast")
+        @a("FSL-Fast", href := shared.link.repo.market + "/tree/8-dev/fsl-fast")
     @li
-        @a("Random Forest", href := shared.link.repo.market + "/tree/7-dev/randomforest")
+        @a("Random Forest", href := shared.link.repo.market + "/tree/8-dev/randomforest")
 
 @h2{Going further}
 
