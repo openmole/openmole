@@ -76,13 +76,10 @@ object SideMenu {
     SideMenu(preText = title, links = stringMenus.map { a ⇒ Link(a, Link.intern(a)) })
 
   val run = SideMenu(DocumentationPages.runPages, classIs(btn ++ btn_primary), "Available tasks")
-  val packaged = SideMenu(DocumentationPages.packagedPages, classIs(btn ++ btn_primary), "Package you code")
+  val packaged = SideMenu(DocumentationPages.packagedPages, classIs(btn ++ btn_primary), "Package your code")
   val explore = SideMenu(DocumentationPages.explorePages, classIs(btn ++ btn_primary), "Available methods")
-<<<<<<< HEAD
-  val sensitivity = SideMenu(DocumentationPages.sensitivityPages, classIs(btn ++ btn_primary), "Sensitivity Analysis")
-=======
   val sensitivity = SideMenu(DocumentationPages.sensitivityPages, classIs(btn ++ btn_primary), "Sensitivity methods")
->>>>>>> master
+  val sampling = SideMenu(DocumentationPages.samplingPages, classIs(btn ++ btn_primary), "Sampling methods")
   val scale = SideMenu(DocumentationPages.scalePages, classIs(btn ++ btn_primary), "Available environments")
   val language = SideMenu(DocumentationPages.languagePages, classIs(btn ++ btn_primary), "Language")
   val advanced = SideMenu(DocumentationPages.advancedConceptsPages, classIs(btn ++ btn_primary), "Advanced concepts")
@@ -94,7 +91,6 @@ object SideMenu {
 
   val more = SideMenu(
     Seq(
-      DocumentationPages.documentation,
       DocumentationPages.run,
       DocumentationPages.explore,
       DocumentationPages.scale,
