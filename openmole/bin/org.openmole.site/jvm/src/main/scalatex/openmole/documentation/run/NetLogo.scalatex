@@ -304,8 +304,4 @@ used directly in OpenMOLE.
 @p More examples of working with NetLogo models can be found in specific tutorials.
 
 See this first tutorial on a simple sensitivity analysis @aa("Next tutorial: Simple Sensitivity Analysis with the NetLogo Fire Model", href := DocumentationPages.simpleSAFire.file)
-Check also this tutorial to learn how OpenMOLE can help you @aa("calibrate your NetLogo model using Genetic Algorithms",
-href := DocumentationPages.netLogoGA.file).
-
-
-
+Check also this tutorial to learn how OpenMOLE can help you @aa("calibrate your NetLogo model using Genetic Algorithms", href := DocumentationPages.netLogoGA.file)
