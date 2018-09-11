@@ -5,11 +5,48 @@
 @import org.openmole.site.Config._
 
 @h2{8.0 | TODO Set version }
+@h6{Core}
 @ul
   @li{Migrate to build to SBT 1.0}
   @li{Migrate to Scala 2.12: faster script compilation, more concise and more efficient byte code for OpenMOLE}
   @li{More reliable an efficient distributed execution through a complete refactor of the execution environments and migration to gridscale 2}
   @li{Use binary serialisation (boopickle) to communicate between the web app and the server: more efficient in term of CPU and bandwidth}
+
+@h6{GUI}
+@ul
+    @li{Move http request serializations from upickle to boopickle}
+    @li{Editon tab order can now be rearranged}
+    @li{OM specific syntax highlighting with simple completion for OM keywords and previously defined variables}
+    @li{CSV files can now be viewed as tables (with column filtering) and as plots (scatter and lines)}
+    @li{Panels layouts rearranged}
+    @li{Revamp file settings}
+    @li{Add a toOMS option on potential model file to launch the model import wizard from the file tree.}
+    @li{Multiple selection for plugin removal}
+    @li{Revamp environment error from execution panel with a more reactive table}
+
+
+@h6{Plugins}
+@ul
+    @li{Simplification of syntax for external tasks (mapping of variables)}
+    @li{Tasks providing containers similar to docker (udocker)}
+    @li{New language handled: RTask}
+    @li{New language handled: ScilabTask}
+    @li{New external plugin: CormasTask}
+    @li{NetLogoTask : NetLogo 6 is now supported; handling of arrays as input variables; conversion between scala and netlogo types clarified; pooling on execution nodes}
+    @li{New sampling methods : Saltelli, Morris}
+    @li{New mgo methods : NicheNSGA2, OSE}
+
+@h6{Web site}
+@ul
+    @li{Set the web site responsive}
+    @li{Revamp the page organizations, the navigation, assign a parent menu for almost all pages for an even better navigation}
+    @li{Fix documentation lacks about file management, scala functions, developer tools, community, etc}
+    @li{Add suggest edits button, which targets the scalatex github page in edition mode, ready for a Pull Request}
+    @li{Generate a contents for all pages}
+    @li{Upgrade the search efficiency}
+
+@div
+  @aa("Bug fixes", href := closedIssues("8"))
 
 @h2{7.0 | Nano Ninja}
 @ul
@@ -60,7 +97,7 @@ What's to come in next release?
 @p
 First we plan to avoid as much as possible the long release cycles such as this one, we will make our best to shorten the release cycle of OpenMOLE to a few months.
 A new website is under development (thanks Paul & Etienne aka jQuery team)
-The documentation will be emporered with a search function in the documentation (thanks Julien!!!)
+The documentation will be empowered with a search function in the documentation (thanks Julien!!!)
 A new ContainerTask will offer support for Docker / OCI containers
 A modular OpenMOLE, with additional plugins enabled on demand
 Improvement of the interface to be even more user friendly, with more tooltips and integrated help.
@@ -89,4 +126,3 @@ Fix the deserialization of the authentications.
 
 @div
   @aa("Bug fixes", href := closedIssues("6.2"))
-

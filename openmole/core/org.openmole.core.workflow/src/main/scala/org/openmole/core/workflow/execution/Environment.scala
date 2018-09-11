@@ -40,8 +40,11 @@ object Environment {
 
   case class JobSubmitted(job: ExecutionJob) extends Event[Environment]
   case class JobStateChanged(job: ExecutionJob, newState: ExecutionState, oldState: ExecutionState) extends Event[Environment]
-  case class ExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level) extends Event[Environment] with ExceptionEvent
+
+  case class ExceptionRaised(exception: Throwable, level: Level) extends Event[Environment] with ExceptionEvent
+  case class ExecutionJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level) extends Event[Environment] with ExceptionEvent
   case class MoleJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level, moleJob: MoleJob) extends Event[Environment] with ExceptionEvent
+
   case class JobCompleted(job: ExecutionJob, log: RuntimeLog, info: RuntimeInfo) extends Event[Environment]
 
   case class RuntimeLog(beginTime: Long, executionBeginTime: Long, executionEndTime: Long, endTime: Long)
@@ -66,13 +69,14 @@ sealed trait Environment <: Name {
   def done: Long = _done.get()
   def failed: Long = _failed.get()
 
-  def start(): Unit
-  def stop(): Unit
+  def start(): Unit = {}
+  def stop(): Unit = {}
 }
 
 trait SubmissionEnvironment <: Environment {
   def submit(job: Job)
   def jobs: Iterable[ExecutionJob]
+  def clean: Boolean
 }
 
 object LocalEnvironment {

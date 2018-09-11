@@ -1,0 +1,38 @@
+@import org.openmole.site.stylesheet._
+@import org.openmole.site._
+@import org.openmole.site.tools._
+@import DocumentationPages._
+
+
+
+@def variables = """
+val density = Val[Double]
+val seed = Val[Int]
+val burned = Val[Double]
+"""
+
+@def gridSampling = "Grid Sampling"
+@def csvSampling = "CSV Sampling"
+@def severalInputs = "Exploration of several inputs"
+@def advancedSampling = "Advanced sampling"
+
+
+@h2{Uniform Distribution Sampling}
+
+Sampling can also be performed at random within a domain via a @hl.code("UniformDistribution(maximum)").
+This task generates values uniformly distributed between zero and the maximum argument. Custom domains can be defined using transformations, as in the example below that generates values between -10 and + 10.
+
+ @hl.openmole("""
+val my_input = Val[Double]
+val my_model = EmptyTask() set( (inputs, outputs) += my_input)
+
+val exploration =
+  DirectSampling(
+    evaluation = my_model hook ToStringHook(),
+    sampling= (my_input in (UniformDistribution[Double](max=20) take 100)).map(x => x -10)
+  )
+
+exploration""", name = "uniform sampling example")
+
+
+@br N.B. @hl.code("DirectSampling") usage is not limited to uniform or grid sampling, and accepts any type of more @a("advanced sampling", href := anchor(advancedSampling)).
