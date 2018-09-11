@@ -80,8 +80,8 @@
 @h3
     Existing solutions
 @p
-    To reduce the influence of the fitness fluctuation, the most commonly used approach is  "resampling". It consists in
-    replicating the fitness evaluation of an the individual. The computed "quality" of an individual is then
+    To reduce the influence of the fitness fluctuation, the simplest approach is  "resampling". It consists in
+    replicating the fitness evaluation of individuals. The computed "quality" of an individual is then
     an estimation (e.g. mean, median) based on a @i{finite} number of replications of the fitness computation.
 @br
     This number is set to a compromise between the computation time taken to evaluate one set of parameters (an individual)
@@ -92,6 +92,8 @@
     Other ad hoc methods of the literature are based on some assumptions that are hard or impossible to verify
     (such as the invariance of the noise distribution over the fitness space) and add parameters to the algorithm
     that are difficult to tune finely.
+@br
+    See @aa("this paper" , href:=Resource.literature.rakshit2016.file) for an extensive review of noisy fitness management in Evolutionary Computation.
 
 @h3
     OpenMOLE's solution
@@ -153,4 +155,4 @@ See the line @hl.code("""stochastic = Stochastic(seed = seed, reevaluate = 0.2, 
 
 
 
- This method has been implement in the library for evolutionary computing: MGO5, but it has not been published yet :-(
+This method has been implemented in the library for evolutionary computing: MGO5, and is currently being benchmarked against other stochasticity management methods (see  @aa("the repository" , href:=shared.link.repo.mgobench))

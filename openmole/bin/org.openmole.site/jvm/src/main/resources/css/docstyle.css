@@ -4,10 +4,81 @@ span.hljs-tag, span.hljs-symbol{
 }
 
 @font-face {
-    font-family: 'gi';
-    src: url('../fonts/gi.otf');
-    font-weight: normal;
-    font-style: normal;
+  font-family: 'gi';
+  src: url('../fonts/gi.otf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body{
+  color: #555;
+  font-family: gi;
+  font-size: 15px;
+  text-align: justify;
+  background-color: #f1f1f1;
+}
+
+h1{
+  color: #444;
+  font-size: 30px;
+  font-weight: bold;
+  text-transform: uppercase;
+  text-align: center;
+  padding-bottom: 20px;
+}
+
+h2{
+  color: #333;
+  font-size: 25px;
+  font-weight: 100;
+  text-transform: uppercase;
+  padding-top: 30px;
+  padding-bottom: 10px;
+}
+
+h3{
+  color: #444;
+  font-size: 22px;
+  padding-top: 10px;
+}
+
+h6 {
+  color: #444;
+  font-size: 18px;
+  font-weight: 150;
+  padding-top: 10px;
+}
+
+h4{
+  color: #444;
+  font-size: 30px;
+  font-weight: bold;
+  text-transform: uppercase;
+  padding-top: 40px;
+}
+
+h5{
+  color: #000;
+  font-size: 25px;
+  font-weight: 100;
+  text-transform: uppercase;
+  padding-top: 50px;
+  margin: 0 0 24px;
+}
+
+code{
+  color: #c83771;
+  font-size: small;
+  font-weight: bold;
+  background-color: white;
+}
+
+a {
+  color: #4096c5;
+}
+
+asitemap{
+  color : orange;
 }
 
 p{
@@ -26,14 +97,6 @@ html {
     font-size: 17px;
 }
 
-a {
- color: #4096c5;
-}
-
-asitemap{
-    color : orange;
-    }
-
 
 .btn-mole{
  color: #333;
@@ -43,56 +106,6 @@ asitemap{
 
 .line {
 border-bottom: 1px solid #eee;
-}
-
-h2{
-  color: #000;
-  font-size: 25px;
-  font-weight: 100;
-  padding-top: 50px;
-  text-transform: uppercase;
-}
-
-h3{
-  font-size:22px;
-}
-
-h5{color: #000;
-  font-size: 25px;
-  font-weight: 100;
-  margin: 0 0 24px;
-  padding-top: 50px;
-  text-transform: uppercase;
-}
-
-h6 {
-    font-weight:150;
-    font-size: 18px;
-    margin-top:10px;
-}
-
-h1{
-font-size: 30px;
-font-weight: bold;
-color: #444;
-text-transform:uppercase;
-padding-bottom:20px;
-text-align:center;
-}
-
-h4{
-font-size: 30px;
-font-weight: bold;
-color: #444;
-text-transform:uppercase;
-padding-top: 40px;
-}
-
-code{
-    color: #c83771;
-    font-size: small;
-    background-color:white;
-    font-weight:bold;
 }
 
 .scalatex-site-Styles-content{
@@ -107,29 +120,6 @@ code{
   }
 
 /*Workaround for bug in highlight.js IDEA theme*/
-span.hljs-tag, span.hljs-symbol{
-  background: none;
-}
-
-@font-face {
-    font-family: 'gi';
-    src: url('../fonts/gi.otf');
-    font-weight: normal;
-    font-style: normal;
-}
-
-body{
-    color: #555;
-    font-family:gi;
-    font-size: 15px;
-    text-align: justify;
-    background-color: #f1f1f1;
-    }
-
-p{
-  padding-top:30px;
-}
-
 .fade-in {
 	opacity: 1;
 	animation-name: fadeInOpacity;
@@ -145,13 +135,6 @@ p{
 	100% {
 		opacity: 1;
 	}
-}
-
-
-.question{
-    font-weight: bold;
-    padding-top: 20px;
-    font-size: 17px;
 }
 
 
