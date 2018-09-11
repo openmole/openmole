@@ -207,8 +207,6 @@ The Netlogo combines a GUI created by the user, in which he can define parameter
 
 Sometimes, you have to modify your code slightly to render it purely headless so that it can be run everywhere.
 
-The way to proceed is explained in details in the @aa("Headless Netlogo", href := DocumentationPages.headlessNetLogo.file) section.
-
 There is no strict requirement for a normal model to run, except that the user cannot access plots nor reporters, or export images of the world.
 Global variables defined in the GUI (as sliders or switches for example) are still available and can be set from the OpenMOLE script.
 
@@ -303,10 +301,8 @@ used directly in OpenMOLE.
 
 @h2{Tutorials}
 
-@p Think you're ready for the next level?
-See this first tutorial on a simple sensitivity analysis @aa("Next tutorial: Simple Sensitivity Analysis with the NetLogo Fire Model", href := simpleSAFire.file)
+@p More examples of working with NetLogo models can be found in specific tutorials.
+
+See this first tutorial on a simple sensitivity analysis @aa("Next tutorial: Simple Sensitivity Analysis with the NetLogo Fire Model", href := DocumentationPages.simpleSAFire.file)
 Check also this tutorial to learn how OpenMOLE can help you @aa("calibrate your NetLogo model using Genetic Algorithms",
 href := DocumentationPages.netLogoGA.file).
-
-
-
