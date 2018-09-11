@@ -277,7 +277,6 @@ object DocumentationPages {
   // NetLogo
   def netLogoPages = Seq(netLogoGA, headlessNetLogo, simpleSAFire)
   lazy val netLogoGA = DocumentationPage.fromScalatex(name = "NetLogo GA", content = scalatex.tutorials.netLogo.NetLogoGA, title = Some("Using Genetic Algorithms to Calibrate a NetLogo Model"))
-  lazy val headlessNetLogo = DocumentationPage.fromScalatex(name = "Headless NetLogo", content = scalatex.tutorials.netLogo.HeadlessNetLogo, title = Some("How to Build a Headless Version of a NetLogo Code"))
   lazy val simpleSAFire = DocumentationPage.fromScalatex(name = "Simple SA Fire", content = scalatex.tutorials.netLogo.SimpleSAFire, title = Some("Simple Sensitivity Analysis"))
 
   // Community

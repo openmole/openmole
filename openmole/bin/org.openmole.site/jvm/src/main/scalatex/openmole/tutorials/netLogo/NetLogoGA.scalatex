@@ -54,7 +54,7 @@ more ants carry food to the nest, they reinforce the chemical trail.}
 @p A visual representation of this model looks like that:
 @br @img(src := Resource.img.example.ants.file)
 
-@p In this tutorial we use @a("a headless version", href := DocumentationPages.headlessNetLogo.file) of the
+@p In this tutorial we use a headless version (@a("see NetLogo task documentation", href := DocumentationPages.netLogo.file)) of the
 model. This modified version is available @aa("here", href := Resource.script.antsNLogo.file).
 
 @h2{An optimisation problem}
@@ -206,4 +206,3 @@ val env = EGIEnvironment("biomed", openMOLEMemory = 1200 megabytes, cpuTime = 4 
 
 @break
 
-@h3{@a("Next tutorial: How to Build a Headless Version of a NetLogo Code", href := headlessNetLogo.file)}

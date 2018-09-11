@@ -139,6 +139,7 @@ package object shared {
       lazy val scaladget = "https://github.com/openmole/scaladget"
       lazy val scalawui = "https://github.com/openmole/scalaWUI"
       lazy val mgo = "https://github.com/openmole/mgo"
+      lazy val mgobench = "https://github.com/openmole/mgo-benchmark"
       lazy val simplu = "https://github.com/IGNF/simplu3D"
       lazy val myOpenmolePlugin = "https://github.com/openmole/myopenmoleplugin"
       lazy val gamaPlugin = "https://github.com/openmole/gama-plugin"
