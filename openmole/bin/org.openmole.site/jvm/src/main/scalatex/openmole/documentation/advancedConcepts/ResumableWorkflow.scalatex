@@ -33,5 +33,5 @@ DirectSampling(
   sampling = parameter in (0 to 100),
   evaluation = writeTask hook copy,
   condition = !outputPath.exists || outputPath.isEmpty
-)
+)""")
 
