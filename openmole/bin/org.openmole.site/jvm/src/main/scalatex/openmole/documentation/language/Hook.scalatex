@@ -124,7 +124,7 @@ You can use for that the @code{ConditionHook}, built from a hook and a condition
   val i = Val[Int]
 
   val display = DisplayHook("The value of i is ${i}.")
-  val h = ConditionHook(display,i > 0)
+  val h = ConditionHook(display, "i > 0")
 
   """, name = "condition hook")
 

@@ -59,10 +59,10 @@ The @code{resources} keyword is useful for files, existing before the workflow e
 @openmole(s"""
   val f = Val[File]
 
-  val producer = ScalaTask(
+  val producer = ScalaTask($tq
     val f = newFile()
     f.content = "I love tofu"
-  @tq) set (
+  $tq) set (
     outputs += f
   )
 
@@ -103,9 +103,9 @@ In this case the file is provided using a default argument. You can of course pr
     outputs += f
   )
 
-  val task = ScalaTask(@tq
+  val task = ScalaTask($tq
     println(f.content)
-  @tq) set (
+  $tq) set (
     inputs += f
   )
 

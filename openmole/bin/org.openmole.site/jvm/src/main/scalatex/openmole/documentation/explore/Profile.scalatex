@@ -114,6 +114,9 @@ You will also need an evolutionary scheme and can use SteadyStateEvolution as de
 
 @p To profile a parameter, use the GenomeProfile constructor like so:
   @br @hl.openmole("""
+  val param1 = Val[Double]
+  val param2 = Val[Double]
+
   val exploration =
     GenomeProfileEvolution(
       evaluation = modelTask,
