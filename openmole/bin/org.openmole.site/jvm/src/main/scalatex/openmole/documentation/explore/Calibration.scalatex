@@ -34,15 +34,9 @@ regarding the optimization grade.
 Since it's only focused towards discover the best performing individual (parameter set), this method doesn't provide
 insights about the sensitivity  of the model regarding its inputs, as it does not keep full record of the past input samplings leading to the optimal solution.
 @br
-For the same reason, this method does not intend to cover the input space and the output space and thus does not perform
-well regarding the input space and output space exploration grades.
-It @i{does} indeed explore input space, but does not keep track of it.
-Calibration can handle stochasticity, using a @a("specific method", href:=DocumentationPages.stochasticityManagement.file).
+For the same reason, this method does not intend to cover the input space and the output space and thus does not maximize the coverage of the input space or the output space exploration grades. It concentrate the sampling of the input space toward the part with minimizes the fitness and therefore intentionally neglect the part of the input space leading to high fitness values. Calibration can handle stochasticity, using a @a("specific method", href:=DocumentationPages.stochasticityManagement.file).
 @br
-This method is not sensitive to the dimensionality of the model output space, as it only need a fitness value, which
-  is a single criterion (value).
- It is, on the contrary, sensitive the input space dimensionality, as the population of potential solutions to
- evolve can be tremendous, as well as its fitness gradient hardly tractable.
+The dimensionality of the model input space is generally no dimensioning for this method. It can handle up to a hundred dimensions is some cases. However the number of objectives (output dimensionality) should be limited to 2 or 3 compromise objectives top.
 
 
 @break
