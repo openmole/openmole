@@ -162,6 +162,11 @@ It takes the following parameters:
 @p
   In your OpenMOLE script, the NSGA2 algorithm scheme is defined like so:
 @br @hl.openmole("""
+val param1 = Val[Double]
+val param2 = Val[Double]
+val param3 = Val[Int]
+val param4 = Val[String]
+
 val nsga2 =
   NSGA2Evolution(
     evaluation = modelTask,

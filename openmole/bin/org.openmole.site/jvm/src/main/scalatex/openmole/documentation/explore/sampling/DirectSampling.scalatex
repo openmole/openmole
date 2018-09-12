@@ -140,8 +140,8 @@ val i = Val[Int]
 val o = Val[Double]
 
 val myModel =
-  ScalaTask("import scala.util.Random; val rng = new Random(seed); val o = i * 2 + 0.1 * rng.nextDouble()") set (
-    inputs += (i,seed),
+  ScalaTask("import scala.util.Random; val rng = new Random(mySeed); val o = i * 2 + 0.1 * rng.nextDouble()") set (
+    inputs += (i, mySeed),
     outputs += (i, o)
   )
 

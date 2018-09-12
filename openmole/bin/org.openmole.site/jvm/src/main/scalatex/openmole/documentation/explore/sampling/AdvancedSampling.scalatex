@@ -62,6 +62,7 @@ factor depends on the value of the first one.
        (i in (0 to 10 by 2)) x
        (j in Range[Double]("0.0", "2 * i", "0.5")),
      evaluation = myModel
+   )
   """, name = "combine sampling", header = "val myModel = EmptyTask()")
 
   Samplings can also be combined using variants of the zip operator.
