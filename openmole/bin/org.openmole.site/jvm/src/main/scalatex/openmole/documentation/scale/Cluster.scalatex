@@ -36,7 +36,7 @@ val env =
 
 @h2{SGE}
 
-To delegate some computation load to a @aa("SGE", href := shared.link.grieEngine) based cluster you can use the @hl.openmoleNoTest{SGEEnvironment} as follows:
+To delegate some computation load to a @aa("SGE", href := shared.link.gridEngine) based cluster you can use the @hl.openmoleNoTest{SGEEnvironment} as follows:
 @br @hl.openmole("""
 val env =
   SGEEnvironment(
