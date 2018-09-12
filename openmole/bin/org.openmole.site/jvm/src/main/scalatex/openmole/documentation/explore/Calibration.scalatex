@@ -2,6 +2,7 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 @import org.openmole.site.stylesheet._
+@import DocumentationPages._
 
 
 @def modelAndVariables = """
@@ -19,129 +20,127 @@ val modelTask = EmptyTask() set (
     )
 """
 
-Using Genetic Algorithms (GA), OpenMOLE find the inputs set matching one or several criteria: this is called @b{calibration}.
-In practice, calibration is used when you want to target @b{one} specific scenario or dynamic.
-Usually, one uses a fitness function that is commensurable to a distance from your target, so if your model is not
- able to match the objective dynamic, the calibration will find the parameterization leading to the closest possible dynamic.
-For more details on the calibration using genetic algorithms, see the @a("GA detailed page", href:=DocumentationPages.geneticAlgorithm.file).
+Using Genetic Algorithms (GA), OpenMOLE finds the input set matching one or several criteria: this is called @b{calibration}.
+In practice, calibration is used to target @b{one} specific scenario or dynamic.
+Usually, one uses a fitness function that is commensurable to a distance from your target, so if your model is not able to match the objective dynamic, the calibration will find the parameterization leading to the closest possible dynamic.
+For more details on the calibration using genetic algorithms, see the @aa("GA detailed page", href := geneticAlgorithm.file).
+
+
 
 @h2{Single criterion Calibration}
+
 @Resource.rawFrag(Resource.img.method.GAsingleID)
-@break
-@h2{Method scores}
-The single criterion Calibration method is @i{designed} to solve an optimization problem, so unsurprisingly it performs well
-regarding the optimization grade.
-Since it's only focused towards discover the best performing individual (parameter set), this method doesn't provide
-insights about the sensitivity  of the model regarding its inputs, as it does not keep full record of the past input samplings leading to the optimal solution.
-@br
-For the same reason, this method does not intend to cover the input space and the output space and thus does not perform
-well regarding the input space and output space exploration grades.
-It @i{does} indeed explore input space, but does not keep track of it.
-Calibration can handle stochasticity, using a @a("specific method", href:=DocumentationPages.stochasticityManagement.file).
-@br
-This method is not sensitive to the dimensionality of the model output space, as it only need a fitness value, which
-  is a single criterion (value).
- It is, on the contrary, sensitive the input space dimensionality, as the population of potential solutions to
- evolve can be tremendous, as well as its fitness gradient hardly tractable.
 
 
-@break
+@h3{Method scores}
+
+The single criterion calibration method is designed to solve an optimization problem, so unsurprisingly it performs well regarding the optimization grade.
+Since it is only focused towards discovering the best performing individual (parameter set), this method doesn't provide insights about the model sensitivity regarding its input parameters, as it does not keep full records of the past input samplings leading to the optimal solution.
+
+@br
+
+For the same reason, this method does not intend to cover the entirety of the input and output spaces, and thus does not perform well regarding the input and output exploration grades.
+It concentrates the sampling of the input space towards the part wich minimizes the fitness, and therefore intentionally neglects the part of the input space leading to high fitness values.
+Calibration can handle stochasticity, using a @aa("specific method", href := stochasticityManagement.file).
+
+@br
+
+The dimensionality of the model input space is generally not an issue for this method, as it can handle up to a hundred dimensions in some cases.
+However, the number of objectives (output dimensionality) should be limited to a maximum of 2 or 3 compromise objectives.
+
+@br@br
+
 @figure
  @img(src := Resource.img.method.calibrationMono.file, center(70))
- @br
- Single criterion calibration answers the question :  For a given target value of output o1, what is(are) the
- parameter set(s) (i, j , k) that produce the closest values of o1 to the target ?
-@break
+
+@br
+
+Single criterion calibration answers the following question: for a given target value of output o1, what is(are) the parameter set(s) (i, j , k) that produce the closest values of o1 to the target?
+
 
 @h3{Typed signature}
-The single criterion calibration of a Model can be seen as a general function, whose signature can be typed, and be noted likewise:
+
+The single criterion calibration of a model can be seen as a general function, whose signature can be typed, and be noted as:
+
 @br@br
+
 @div(style:="text-align:center")
-    Calibration@sub{single} (X → Y) → Y → X
+    Calibration@sub{single} :  (X → Y) → Y → X
 
 @br
-With X , the Input space, Y, the output space.
-@br
-In other words : this function takes a model ( whose signature is (X→Y)  since it transforms inputs into outputs) , an element @i{y} of Y (y is the criterion value to reach) and  find an element of X (this element noted @i{x} happens to be such that , M(@b{x}) is the "closest" to @i{y})
 
+With X the input space, and Y the output space.
 
+@br@br
+
+In other words, this function takes a model M whose signature is (X→Y) (since it transforms inputs into outputs), an element @i{y} of Y representing the criterion value to reach, and finds an element @i{x} of X such that M(@i{x}) is the "closest" possible value to @i{y}.
 
 
 
 @h2{Multi-criteria Calibration}
 
-@br
 @Resource.rawFrag(Resource.img.method.GAmultiID)
-@break
 
-@h2{Method scores}
-@br
-Multi-criteria  Calibration method slightly differs from the single criterion version.
-It suffers the same limitation regarding Input and Output space limitations.
-However, since it may reveal a Pareto frontier and the underlying trade-off, it reveals a little bit
-of the model sensitivity, showing that the model performance regarding a criterion is  impacted by its performances
-regarding the others. This is not @i{genuine sensitivity} as in sensitivity analysis, but still, it reveals a variation
-of your model outputs, which is not bad after all !
-@br
 
-@break
+@h3{Method scores}
+
+The multi criteria calibration method slightly differs from the single criterion version.
+It suffers the same limitations regarding input and output spaces.
+However, since it may reveal a Pareto frontier and the underlying trade-off, it reveals a little bit of the model sensitivity, showing that the model performance regarding a criterion is impacted by its performances regarding the others.
+This is not genuine sensitivity as in sensitivity analysis, but still, it reveals a variation of your model outputs, which is not bad after all!
+
+@br@br
 
 @figure
   @img(src := Resource.img.method.calibrationMulti.file, center(70))
-  @figcaption
-    Figure: Multi-criteria answers the question : For a given target pattern (o1,o2) what are the parameters sets (i,j) that produce
-    closest output values to the target pattern ? Sometimes a Pareto Frontier may appear !
+
+@br
+
+Multi criteria calibration answers the following question: for a given target pattern (o1,o2), what are the parameter sets (i,j) that produce the closest output values to the target pattern ?
+
+@br
+
+Sometimes a Pareto Frontier may appear!
 
 
-@break
+@h3{Differences between single and multi criteria calibration}
 
+Calibration boils down to minimizing a distance measure between the model output and some data.
+When there is only a single distance measure considered, it is single criterion calibration.
+When there are more than one distances that matter, it is multi-criteria calibration.
+For example, one may study a prey-predator model and want to find parameter values for which the model reproduces some expected size of both the prey and predator populations.
 
-
-@p
-  Calibration boils down to minimizing a distance measure between the
-  model output and some data. When there is only a single distance measure
-  considered, it is single criterion calibration. When it there are more
-  than one distance that matter, it is multi-criteria calibration. For
-  example, one may study a prey-predator model and want to find parameter
-  values for which the model reproduce some expected size of both the prey
-  and predator populations.
-
-@p
-  The single criterion case is simpler, because we can always tell which
-  distance is smaller between any two distances. Thus, we can always
-  select the set of parameter values that is the best.
-
-@p
-  In the multi-criteria case, it may not always be possible to tell which
-  simulation output has the smallest distance to the data. For example,
-  consider a pair (d1, d2) that represents the differences between the
-  model output and the data for the prey population size (d1) and the
-  predator population size (d2). Two pairs such as (10, 50) and (50,
-  10) each have one element smaller than the other and one bigger. There
-  is no natural way to tell which pair represents the smaller distance
-  between the model and the data. Thus, in the multi-criteria case, we
-  keep all the parameter sets (e.g. {(i1, j1, k1), (i2, j2, k2), ...})
-  which yield distances (e.g. {(d11, d21), (d12, d22), ...}) for which
-  we cannot find another parameter set that yields smaller distances for
-  all the distances considered. The set of all these parameter sets is
-  called the Pareto-front.
-
-@break
-
-
-@h2{Typed signature}
-The multi-criterion calibration of a Model signature can be typed  likewise:
 @br@br
+
+The single criterion case is simpler, because we can always tell which distance is smaller between any two distances.
+Thus, we can always select the best set of parameter values.
+
+@br
+
+In the multi criteria case, it may not always be possible to tell which simulation output has the smallest distance to the data.
+For example, consider a pair (d1, d2) representing the differences between the model output and the data for the prey population size (d1) and the predator population size (d2).
+Two pairs such as (10, 50) and (50, 10) each have one element smaller than the other and one bigger.
+There is no natural way to tell which pair represents the smallest distance between the model and the data.
+Thus, in the multi-criteria case, we keep all the parameter sets (e.g. {(i1, j1, k1), (i2, j2, k2), ...}) yielding such equivalent distances (e.g. {(d11, d21), (d12, d22), ...}).
+The set of all these parameter sets is called the Pareto front.
+
+
+@h3{Typed signature}
+
+The signature function of multi-criteria calibration can be typed as:
+
+@br@br
+
 @div(style:="text-align:center")
-    Calibration@sub{multi}   :   (X → Y) → Y → [X]
+    Calibration@sub{multi} : (X → Y) → Y → [X]
 
 @br
-With X , the Input space, Y, the output space.
-@br
-In other words : this function takes a model M ( whose signature is (X→Y) ) , an element @i{y} of Y (y is the list of criterion value to reach) and  find a list of elements of X (noted @i{x}) such that M(x) are Pareto dominant compared to every image of other elements of X by M , regarding criterion @i{y})
 
+With X the input space, and Y the output space.
 
+@br@br
 
+In other words, this function takes a model M whose signature is (X→Y), an element @i{y} of Y representing the list of criteria values to reach, and finds a list @i{x} of elements of X such that M(@i{x}) is Pareto dominant compared to every image of other elements of X by M, regarding criterion @i{y}.
 
 
 
@@ -152,16 +151,20 @@ It takes the following parameters:
 
 @ul
   @li{@hl.code("mu"): the population size,}
-  @li{@hl.code("genome"): a list of the model parameters and their respective intervals,}
-  @li{@hl.code("objectives"): a list of the distance measures (which in the single criterion case will contain only one measure)}
+  @li{@hl.code("genome"): a list of the model parameters and their respective variation intervals,}
+  @li{@hl.code("objectives"): a list of the distance measures (which in the single criterion case will contain only one measure),}
   @li{@hl.code("algorithm"): the nsga2 algorithm defining the evolution,}
   @li{@hl.code("evaluation"): the OpenMOLE task that runs the simulation,}
   @li{@hl.code("parallelism"): the number of simulations that will be run in parallel,}
-  @li{@hl.code("termination"): the total number of evaluations (execution of the task passed to the parameter "evaluation") to be executed}
+  @li{@hl.code("termination"): the total number of evaluations (execution of the task passed to the parameter "evaluation") to be executed.}
 
-@p
-  In your OpenMOLE script, the NSGA2 algorithm scheme is defined like so:
-@br @hl.openmole("""
+@br
+
+In your OpenMOLE script, the NSGA2 algorithm scheme is defined like so:
+
+@br@br
+
+@hl.openmole("""
 val nsga2 =
   NSGA2Evolution(
     evaluation = modelTask,
@@ -175,21 +178,30 @@ val nsga2 =
     objectives = Seq(distance1, distance2)
   )
 """, name = "Calibration")
-where @hl.code("param1"), @hl.code("param2"), @hl.code("param3") and @hl.code("param4") are input of the @hl.code("modelTask"), and @hl.code("distance1") and @hl.code("distance2") are its outputs.
-@p
-The output of the genetic algorithm must be captured with a specific hook that saves the current optimal population: @code{SavePopulationHook}.
-The arguments for a @code{SavePopulationHook} are the following:
+
+@br
+
+Where @code{param1}, @code{param2}, @code{param3} and @code{param4} are inputs of the @code{modelTask}, and @code{distance1} and @code{distance2} are its outputs.
+
+@br@br
+
+The output of the genetic algorithm must be captured with a specific hook which saves the current optimal population: @code{SavePopulationHook}.
+The arguments for @code{SavePopulationHook} are:
 
 @ul
   @li{@hl.code("evolution"): the genetic algorithm,}
-  @li{@hl.code("dir"): the directory in which population files will be stored,}
-  @li{@hl.code("frequency"): (@i{Optional}, Long) a frequency at which the generations will be saved.}
+  @li{@hl.code("dir"): the directory in which to store the population files,}
+  @li{@hl.code("frequency"): (@i{Optional}, Long) the frequency at which the generations should be saved.}
 
-If you want only to get the final result and do not care about dynamics of the algorithm, you can use a @code{SaveLastPopulationHook} which saves the last population only and takes as arguments the algorithm and the file in which it will be saved.
+If you only want to get the final population and do not care about dynamics of the algorithm, you can use a @code{SaveLastPopulationHook} which saves the last population only, and takes as arguments the algorithm and the file in which it will be saved.
+
+@br@br
 
 A minimal working workflow is given below:
 
-@br @hl.openmole("""
+@br@br
+
+@hl.openmole("""
 val param1 = Val[Double]
 val param2 = Val[Double]
 val param3 = Val[Int]
@@ -224,4 +236,4 @@ val nsga2 =
 
 @br
 
-More details and advanced notions can be found on the @a("GA detailed page", href:=DocumentationPages.geneticAlgorithm.file).
+More details and advanced notions can be found on the @a("GA detailed page", href := geneticAlgorithm.file).
