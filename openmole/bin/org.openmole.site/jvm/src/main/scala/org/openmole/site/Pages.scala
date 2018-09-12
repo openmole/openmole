@@ -283,17 +283,17 @@ object DocumentationPages {
   // Community
   lazy val OMcommunity = DocumentationPage.fromScalatex(name = "Community", content = scalatex.community.OMCommunity)
 
-  def communityPages = Seq(communications, howToContribute, partner, training, whoWeAre)
-  lazy val communications = DocumentationPage.fromScalatex(name = "Communications", content = scalatex.community.Communications)
+  def communityPages = Seq(howToContribute, training, communications, whoWeAre, partner)
   lazy val howToContribute = DocumentationPage.fromScalatex(name = "How to Contribute", content = scalatex.community.HowToContribute)
-  lazy val partner = DocumentationPage.fromScalatex(name = "Partners", content = scalatex.community.Partner)
-  lazy val training = DocumentationPage.fromScalatex(name = "Training", content = scalatex.community.Training)
+  lazy val training = DocumentationPage.fromScalatex(name = "Trainings", content = scalatex.community.Training)
+  lazy val communications = DocumentationPage.fromScalatex(name = "Publications", content = scalatex.community.Communications)
   lazy val whoWeAre = DocumentationPage.fromScalatex(name = "Who We Are", content = scalatex.community.WhoWeAre)
+  lazy val partner = DocumentationPage.fromScalatex(name = "Our Partners", content = scalatex.community.Partner)
 
   // Download
-  def downloadPages = Seq(download, previousVersions)
+  def downloadPages = Seq(download, releaseNotes)
   lazy val download = DocumentationPage.fromScalatex(name = "Download", content = scalatex.download.Download)
-  lazy val previousVersions = DocumentationPage.fromScalatex(name = "Previous Versions", content = scalatex.download.PreviousVersions)
+  lazy val releaseNotes = DocumentationPage.fromScalatex(name = "Release Notes", content = scalatex.download.ReleaseNotes)
 
   //    val market = new DocumentationPage {
   //      override def content: Text.all.Frag = div(tagContent(marketEntries))
