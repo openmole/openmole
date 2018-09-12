@@ -91,9 +91,9 @@ package object shared {
     // Models
     lazy val simpluDemo = "https://simplu.openmole.org"
     lazy val netlogoAnts = "http://ccl.northwestern.edu/netlogo/models/Ants"
-    lazy val branchingModel = "http://nvie.com/posts/a-successful-git-branching-model/"
 
     // Additional info
+    lazy val branchingModel = "http://nvie.com/posts/a-successful-git-branching-model/"
     lazy val batchProcessing = "https://en.wikipedia.org/wiki/Batch_processing"
     lazy val batchSystem = "http://en.wikipedia.org/wiki/Portable_Batch_System"
     lazy val gridEngine = "https://en.wikipedia.org/wiki/Oracle_Grid_Engine"
@@ -101,6 +101,7 @@ package object shared {
     lazy val condor = "https://en.wikipedia.org/wiki/HTCondor"
     lazy val oar = "http://oar.imag.fr/dokuwiki/doku.php"
     lazy val ssh = "https://en.wikipedia.org/wiki/Secure_Shell"
+    lazy val sshPublicKey = "https://git-scm.com/book/en/v2/Git-on-the-Server-Generating-Your-SSH-Public-Key"
     lazy val geodivercity = "http://geodivercity.parisgeo.cnrs.fr/blog/"
     lazy val ercSpringer = "http://www.springer.com/fr/book/9783319464954"
     lazy val ggplot2 = "http://ggplot2.tidyverse.org/reference/"
