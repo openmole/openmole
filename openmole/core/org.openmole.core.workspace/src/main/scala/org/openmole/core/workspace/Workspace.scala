@@ -57,8 +57,6 @@ object Workspace {
     new Workspace(location, tmpDir, persistentDir)
   }
 
-  lazy val instance = Workspace(defaultLocation)
-
   def clean(ws: Workspace) = ws.tmpDir.recursiveDelete
 }
 

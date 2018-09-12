@@ -30,7 +30,7 @@ val m =
     inputs += i mapped "i",
     inputs += dArray mapped "dArray",
     outputs += i,
-    outputs += dArray mapped "dArray"
+    outputs += dArray mapped "dArray",
     i := 9,
     dArray := Array(9.0, 8.0)
   )

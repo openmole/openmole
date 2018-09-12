@@ -1,0 +1,58 @@
+package org.openmole.plugin.environment.condor
+
+import gridscale.cluster.HeadNode
+import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment, SerializedJob }
+import org.openmole.plugin.environment.batch.storage.{ HierarchicalStorageInterface, StorageInterface }
+import org.openmole.plugin.environment.gridscale.GridScaleJobService
+import org.openmole.plugin.environment.ssh.{ RuntimeInstallation, SharedStorage }
+
+class CondorJobService[S, H](
+  s:                 S,
+  tmpDirectory:      String,
+  installation:      RuntimeInstallation[_],
+  parameters:        CondorEnvironment.Parameters,
+  h:                 H,
+  val accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], headNode: HeadNode[H], services: BatchEnvironment.Services, systemInterpreter: effectaside.Effect[effectaside.System]) {
+
+  import services._
+
+  def submit(serializedJob: SerializedJob, outputPath: String) = {
+    val workDirectory = parameters.workDirectory getOrElse tmpDirectory
+
+    def buildScript(serializedJob: SerializedJob, outputPath: String) = {
+      SharedStorage.buildScript(
+        installation.apply,
+        workDirectory,
+        parameters.openMOLEMemory,
+        parameters.threads,
+        serializedJob,
+        outputPath,
+        s
+      )
+    }
+
+    val remoteScript = buildScript(serializedJob, outputPath)
+
+    val description = _root_.gridscale.condor.CondorJobDescription(
+      executable = "/bin/bash",
+      arguments = remoteScript,
+      workDirectory = workDirectory,
+      memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
+      nodes = parameters.nodes,
+      coreByNode = parameters.coresByNode orElse parameters.threads,
+      requirements = parameters.requirements.map(_root_.gridscale.condor.CondorRequirement.apply)
+    )
+
+    accessControl { gridscale.condor.submit(h, description) }
+  }
+
+  def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
+    accessControl { GridScaleJobService.translateStatus(gridscale.condor.state(h, id)) }
+
+  def delete(id: gridscale.cluster.BatchScheduler.BatchJob) =
+    accessControl { gridscale.condor.clean(h, id) }
+
+  def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob) =
+    accessControl { (gridscale.condor.stdOut(h, id), gridscale.condor.stdErr(h, id)) }
+
+}

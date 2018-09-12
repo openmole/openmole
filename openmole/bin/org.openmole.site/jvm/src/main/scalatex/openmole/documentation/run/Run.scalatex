@@ -5,19 +5,22 @@
   val inputString = Val[String]
   val Digits = Val[Double]"""
 
+
+
 @h2{Tasks}
+
 Tasks are the atomic computing elements of OpenMOLE: they describe what OpenMOLE should execute.
 There is a number of tasks in OpenMOLE especially designed to embed your own models and/or programs, depending on the language your model uses (binary executable, Java, R, etc.).
 You need to choose the adequate task for your model.
 @br
 All the available tasks are documented in this section, just click on an item in the list on the left menu.
 
-@br
+@br@br
 
 The execution of a given task @b{depends on input variables}, and each task @b{produces output variables} which can be transmitted as inputs of subsequent tasks.
 Below is a dummy task to illustrate this concept:
 
-@br
+@br@br
 
 @hl.openmole("""
 // Define a variable i of type Int
@@ -32,8 +35,9 @@ val t = EmptyTask() set (
   outputs += j
 )""")
 
-@break
 It is also possible to specify default values which are used by the task in case no input data was provided in the dataflow:
+
+@br@br
 
 @hl.openmole("""
 val i = Val[Int]
@@ -49,6 +53,7 @@ val t = EmptyTask() set (
 Once your model is properly embedded in an OpenMOLE task, you can use an exploration method on it, and delegate the multiple executions of the task on remote computing environments.
 
 
+
 @h2{Exploration method}
 
 The composition of a full exploration experiment is achieved by writing a script in the OpenMOLE language.
@@ -60,11 +65,19 @@ A working OpenMOLE exploration script needs to define:
    @li{one or several @a("hooks", href := DocumentationPages.hook.file),}
    @li{possibly an @a("execution environment", href := DocumentationPages.scale.file).}
 
-@break
 Let's say you have a model that takes a string as input and do some stuff with it, like launching a simulation with the parameters contained in the input string.
 People from the lab gave you a huge CSV file with each line containing various experimental setup parameters.
+@br
 What you want to do is to run a simulation for each line of this file, execute it on the lab's cluster, and gather the results.
 Your OpenMOLE script would look like that:
+
+Let's say you have a model that takes a string as input and do some stuff with it, like launching a simulation with the parameters contained in the input string.
+People from the lab gave you a huge CSV file with each line containing various experimental setup parameters.
+@br
+What you want to do is to run a simulation for each line of this file, execute it on the lab's cluster, and gather the results.
+Your OpenMOLE script would look like that:
+
+@br@br
 
 @hl.openmoleNoTest("""
     val inputParameter: Val[Int]
@@ -73,7 +86,7 @@ Your OpenMOLE script would look like that:
     // Crawl the big file and take the lines
     val all_the_lines = CSVSampling("EmpiricalData.CSV") set (columns += inputParameter)
 
-    // Encapsulates your model in an "execution" task that calls the main routine
+    // Encapsulate your model in an "execution" task that calls the main routine
     val  my_model_execution =
       ScalaTask("mainRun(inputParameter)",
         inputs += inputString,
@@ -84,7 +97,7 @@ Your OpenMOLE script would look like that:
     val catch_output = CSVHook(workDirectory / "path/to/save/it")
 
     // Declare your computing environment
-    val lab_Cluster = ClusterEnvironment(login, machineIP)
+    val env = ClusterEnvironment(login, machineIP)
 
     // The exploration method
     // It says: explore the lines and run a model execution for each one, save the outputs, all that on the cluster

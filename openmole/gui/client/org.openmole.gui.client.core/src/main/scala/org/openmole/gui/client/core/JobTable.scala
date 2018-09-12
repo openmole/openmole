@@ -21,9 +21,8 @@ import scala.scalajs.js.timers.SetTimeoutHandle
 object JobTable {
   def apply(executionId: ExecutionId) = new JobTable(executionId)
 
-  private def displaySize(size: Long, readable: String) =
-    if (size == 0L) ""
-    else s"($readable)"
+  private def displaySize(size: Long, readable: String, operations: Int) =
+    if (size > 0) s"$operations ($readable)" else s"$operations"
 }
 
 import JobTable._
@@ -113,8 +112,8 @@ class JobTable(executionId: ExecutionId) {
             Seq(
               FixedCell(span(e.taskName), 0),
               VarCell(span(CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime)), 1),
-              VarCell(span(displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize)), 2),
-              VarCell(span(displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize)), 3),
+              VarCell(span(displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles)), 2),
+              VarCell(span(displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize, e.networkActivity.downloadingFiles)), 3),
               VarCell(span(e.submitted.toString), 4),
               VarCell(span(e.running.toString), 5),
               VarCell(span(e.done.toString), 6),

@@ -63,7 +63,7 @@ class DesktopGridService(port: Int, passwordHash: Hash, path: File)(implicit ser
     val storage =
       new StorageService with GridScaleStorage with CompressedTransfer {
 
-        def usageControl = UnlimitedAccess
+        def accessControl = UnlimitedAccess
 
         val remoteStorage: RemoteStorage = new DumyStorage
         val environment = _environment
@@ -88,7 +88,7 @@ class DesktopGridService(port: Int, passwordHash: Hash, path: File)(implicit ser
       service.submit(serializedJob, BatchEnvironment.openMOLEMemoryValue(environment.openMOLEMemory), this)
     override protected def _state(j: J): ExecutionState = service.state(j)
     override val environment: BatchEnvironment = _environment
-    override def usageControl = UnlimitedAccess
+    override def accessControl = UnlimitedAccess
   }
 
   val server = new SFTPServer(path, port, passwordHash = passwordHash)

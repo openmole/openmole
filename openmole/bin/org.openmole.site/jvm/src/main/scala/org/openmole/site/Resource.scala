@@ -269,7 +269,12 @@ object Resource {
   object paper {
     val fgcs2013 = paperResource("FGCS2013.pdf")
     val hpcs2010 = paperResource("hpcs2010.pdf")
-    val urbanDynamics = paperResource("urbanDynamics.pdf") // TODO add pdf
+    val urbanDynamics = paperResource("urbanDynamics.pdf")
+  }
+
+  // cited papers
+  object literature {
+    val rakshit2016 = paperResource("rakshit2016.pdf")
   }
 
   val api = fileResource("api")

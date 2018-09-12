@@ -120,7 +120,7 @@ package object message {
     }
   }
 
-  case class ExecutionMessage(plugins: Iterable[ReplicatedFile], files: Iterable[ReplicatedFile], jobs: File, communicationDirPath: String, runtimeSettings: RuntimeSettings)
+  case class ExecutionMessage(plugins: Iterable[ReplicatedFile], files: Iterable[ReplicatedFile], jobs: File, runtimeSettings: RuntimeSettings)
 
   object RuntimeResult {
     def load(file: File)(implicit serialiserService: SerializerService, fileService: FileService, newFile: NewFile) =

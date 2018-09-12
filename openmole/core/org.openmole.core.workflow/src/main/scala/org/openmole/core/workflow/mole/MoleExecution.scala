@@ -603,7 +603,8 @@ class MoleExecution(
   def started = synchronized(_started)
   def canceled = synchronized(_canceled)
   def finished = synchronized(_finished)
-  def cleaned = synchronized(_cleaned)
+
+  def cleaned = synchronized(_cleaned && allEnvironments.collect { case x: SubmissionEnvironment ⇒ x }.forall(_.clean))
 
   private[mole] var _startTime: Option[Long] = None
   private[mole] var _endTime: Option[Long] = None

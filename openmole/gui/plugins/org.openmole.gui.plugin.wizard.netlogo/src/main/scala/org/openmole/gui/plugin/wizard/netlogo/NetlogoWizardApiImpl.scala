@@ -27,6 +27,9 @@ import org.openmole.gui.ext.tool.server.Utils._
 
 class NetlogoWizardApiImpl(s: Services) extends NetlogoWizardAPI {
 
+  import s._
+  import org.openmole.gui.ext.data.ServerFileSystemContext.project
+
   def toTask(
     target:         SafePath,
     executableName: String,
@@ -48,13 +51,13 @@ class NetlogoWizardApiImpl(s: Services) extends NetlogoWizardAPI {
       expandWizardData(modelData) +
       s""")\n\n$task hook ToStringHook()"""
 
-    target.write(content)(context = org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace = Workspace.instance)
+    target.write(content)
     WizardToTask(target)
   }
 
   def parse(safePath: SafePath): Option[LaunchingCommand] = {
 
-    val lines = Utils.lines(safePath)(context = org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace = Workspace.instance)
+    val lines = Utils.lines(safePath)
 
     def parse0(lines: Seq[(String, Int)], args: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair]): (Seq[ProtoTypePair], Seq[ProtoTypePair]) = {
       if (lines.isEmpty) (ProtoTypePair("seed", ProtoTYPE.INT, "0", None) +: args, outputs)

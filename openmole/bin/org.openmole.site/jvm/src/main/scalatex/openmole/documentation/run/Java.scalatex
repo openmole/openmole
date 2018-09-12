@@ -113,7 +113,7 @@ OpenMOLE makes the inclusion of your own Java code in a workflow simple. Since t
   @p
     When a task needs to access (read from or write to) external files, OpenMOLE needs to know it so it can pass them around to distant computing nodes. Let's consider another "Hello World" code Hello.java. This program reads the content of a file and writes it to another file.
 
-    @hl.openmole("""
+    @hl("""
     package hello;
 
     import java.io.*;
@@ -142,7 +142,7 @@ OpenMOLE makes the inclusion of your own Java code in a workflow simple. Since t
         }
         return new String(buffer);
       }
-    }""")
+    }""", "java")
 
   @p
     You can compile it and package as "Hello.jar" in the same manner as the previous example. For the program to access external files, give them to the task as @i{inputFile}.
@@ -229,7 +229,7 @@ Once this code is added, you can produce the  bundle by simply executing a build
     In order to declare the JAI functions, a code has to be prepared such as following em{initJai()} method that is defined for a TiffReaderTask class.
 
 
-@hl.openmole("""
+@hl("""
     public static void initJAI() {
          // Disable mediaLib searching that produces unwanted errors
          // See https://www.java.net/node/666373
@@ -297,11 +297,10 @@ Once this code is added, you can produce the  bundle by simply executing a build
     When defining the task on the OpenMOLE script, you have to ensure that all JAI classes are managed by the same class loader by using the dedicated function @em{withThreadClassLoader}. When using the Java code as a library, it requires some update on the script as follow (for example, for the TiffReaderTask) :
 
     @hl.openmole("""
-        val GeoTifWriter = ScalaTask(
-          "
+        val GeoTifWriter = ScalaTask($tq
           |import fr.openmole.geotools.tiff._
           |withThreadClassLoader(TiffReaderTask.getClassLoader())(TiffWriterTask.write(fileIn, fileOut))".stripMargin
-          ) set (
+          $tq.stripMargin) set (
           libraries += workDirectory / "test-mupcity-openmole-0.0.1-SNAPSHOT-shaded.jar",
           fileIn :=  workDirectory / "data" / "test.tif",
           fileOut :=  workDirectory / "data" / "out.tif",

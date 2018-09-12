@@ -9,8 +9,8 @@ object Generate {
 
   def run(args: Array[String]): Int = {
     case class Parameters(
-      target:  Option[File] = None,
-      ignored: List[String] = Nil
+      target:  Option[File]   = None,
+      ignored: List[String]   = Nil
     )
 
     @tailrec def parse(args: List[String], c: Parameters = Parameters()): Parameters = args match {
@@ -21,18 +21,25 @@ object Generate {
 
     val parameters = parse(args.toList.map(_.trim))
 
-    def generateModules(baseDirectory: File, moduleLocation: File ⇒ String, index: File) = {
+    def generateModules(copy: File ⇒ String, index: File) = {
       import org.json4s._
       import org.json4s.jackson.Serialization
       implicit val formats = Serialization.formats(NoTypeHints)
-      val modules = module.generate(module.allModules, baseDirectory, moduleLocation)
+      val modules = module.generate(module.allModules, copy)
       index.content = Serialization.writePretty(modules)
       modules
     }
 
     parameters.target.get.mkdirs()
 
-    generateModules(parameters.target.get, f ⇒ s"modules/${f.getName}", parameters.target.get / buildinfo.moduleListName)
+    def copy(f: File): String = {
+      val name = s"modules/${f.getName}"
+      f copy (parameters.target.get / name)
+      name
+    }
+
+    generateModules(copy, parameters.target.get / buildinfo.moduleListName)
+
     0
   }
 
