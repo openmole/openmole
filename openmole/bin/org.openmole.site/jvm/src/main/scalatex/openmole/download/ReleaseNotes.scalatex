@@ -4,23 +4,25 @@
 @import org.openmole.core.buildinfo._
 @import org.openmole.site.Config._
 
+
+
 @h2{8.0 | TODO Set version }
 @h6{Core}
 @ul
   @li{Migrate to build to SBT 1.0}
   @li{Migrate to Scala 2.12: faster script compilation, more concise and more efficient byte code for OpenMOLE}
-  @li{More reliable an efficient distributed execution through a complete refactor of the execution environments and migration to gridscale 2}
-  @li{Use binary serialisation (boopickle) to communicate between the web app and the server: more efficient in term of CPU and bandwidth}
+  @li{More reliable and efficient distributed execution through a complete refactor of the execution environments and migration to gridscale 2}
+  @li{Use binary serialization (boopickle) to communicate between the web app and the server: more efficient in term of CPU and bandwidth}
 
 @h6{GUI}
 @ul
     @li{Move http request serializations from upickle to boopickle}
-    @li{Editon tab order can now be rearranged}
+    @li{Edition tab order can now be rearranged}
     @li{OM specific syntax highlighting with simple completion for OM keywords and previously defined variables}
     @li{CSV files can now be viewed as tables (with column filtering) and as plots (scatter and lines)}
     @li{Panels layouts rearranged}
     @li{Revamp file settings}
-    @li{Add a toOMS option on potential model file to launch the model import wizard from the file tree.}
+    @li{Add a toOMS option on potential model files to launch the model import wizard from the file tree}
     @li{Multiple selection for plugin removal}
     @li{Revamp environment error from execution panel with a more reactive table}
 
@@ -32,17 +34,17 @@
     @li{New language handled: RTask}
     @li{New language handled: ScilabTask}
     @li{New external plugin: CormasTask}
-    @li{NetLogoTask : NetLogo 6 is now supported; handling of arrays as input variables; conversion between scala and netlogo types clarified; pooling on execution nodes}
-    @li{New sampling methods : Saltelli, Morris}
-    @li{New mgo methods : NicheNSGA2, OSE}
+    @li{NetLogoTask: NetLogo 6 is now supported, handling of arrays as input variables, conversion between scala and netlogo types clarified, pooling on execution nodes}
+    @li{New sampling methods: Saltelli, Morris}
+    @li{New MGO methods: NichedNSGA2, OSE}
 
-@h6{Web site}
+@h6{Website}
 @ul
-    @li{Set the web site responsive}
-    @li{Revamp the page organizations, the navigation, assign a parent menu for almost all pages for an even better navigation}
-    @li{Fix documentation lacks about file management, scala functions, developer tools, community, etc}
+    @li{Set the website responsive}
+    @li{Revamp the page organization, the navigation, assign a parent menu for almost all pages for an even better navigation}
+    @li{Fix documentation lacks about file management, scala functions, developer tools, community, etc.}
     @li{Add suggest edits button, which targets the scalatex github page in edition mode, ready for a Pull Request}
-    @li{Generate a contents for all pages}
+    @li{Generate a "Contents" section for all pages}
     @li{Upgrade the search efficiency}
 
 @div
@@ -53,16 +55,16 @@
   @li{Simplification of the workflow construction: every method scheme has now its builder}
   @li{Revamp the MGO library}
   @li{Heavy code refactoring}
-  @li{First refactoring toward OpenMOLE as a library}
+  @li{First refactoring towards OpenMOLE as a library}
   @li{Better resource cleaning after an execution}
   @li{Refactoring of the build-system}
   @li{Full integration of bootstrap.native lib through the scaladget DSL, meaning that both bootstrap and jquery dependencies have been wiped out}
   @li{New accessibility for starting a new project thanks to the New project option button. It gathers creating a new oms file, importing a code file or downloading a market entry.}
-  @li{GUI Plugins are back! All authentications in the web interface are now plugins. An example of what is looks like can be found here. Model wizards will follow. Anyway, it is now possible to build graphical extensions !}
+  @li{GUI Plugins are back! All authentications in the web interface are now plugins. An example of what is looks like can be found here. Model wizards will follow. Anyway, it is now possible to build graphical extensions!}
   @li{A top banner gives information about failed, succeeded runs or about any trouble in reaching the server.}
   @li{Support zip archives}
   @li{Support Desktop grid environments}
-  @li{Support both care tar.gz.bin and tgz.bin archives in the model wizard section.}
+  @li{Support both care tar.gz.bin and tgz.bin archives in the model wizard section}
   @li{Display JVM processor and memory info}
   @li{Revamp the website}
 
@@ -75,20 +77,21 @@
 
 @h2{6.0 | Mostly Magic}
 
-Long time, no release! More than a year!
+Long time no release! More than a year!
 The OpenMOLE team is very proud to disclose "Mostly Magic", the 6th major version of OpenMOLE.
-As a reminder OpenMOLE is a software for parameter exploration, optimisation, data processing which allow a simple access to large scale distributed execution environments. It has been designed to be useful for a wide range of users and is usable even for people with no knowledge in distributed computing.
+As a reminder OpenMOLE is a software for parameter exploration, optimization, data processing which allows a simple access to large scale distributed execution environments.
+It has been designed to be useful for a wide range of users and is usable even for people with no knowledge in distributed computing.
 
 @p
 What's new?
 
 @ul
-  @li{A new task has been introduced, the CARETask. It makes it easier than ever to run your applications and their dependencies (C, Python, R, ...) in OpenMOLE The access to EGI is now base on DIRAC and webdav. It is more reliable, more scalable an more efficient}
-  @li{A Path type is now available in samplings to avoid copying files over local networks (use with Clusters and shared file systems only, not on EGI)}
-  @li{Authentications are now tested when they are created. Valid authentications methods are marked with a green OK tag and can be used in the workflow}
-  @li{The optimisation methods have been redesigned to be easier to use}
-  @li{A new import wizard is here to ease the integration of your programs in OpenMOLE}
-  @li{The file browser of the GUI has been revamped and its now fast and handy}
+  @li{A new task has been introduced, the CARETask. It makes it easier than ever to run your applications and their dependencies (C, Python, R, ...) in OpenMOLE. The access to EGI is now based on DIRAC and webdav. It is more reliable, more scalable and more efficient.}
+  @li{A Path type is now available in samplings to avoid copying files over local networks (use with Clusters and shared file systems only, not on EGI).}
+  @li{Authentications are now tested when they are created. Valid authentications methods are marked with a green OK tag and can be used in the workflow.}
+  @li{The optimisation methods have been redesigned to be easier to use.}
+  @li{A new import wizard is here to ease the integration of your programs in OpenMOLE.}
+  @li{The file browser of the GUI has been revamped and is now fast and handy.}
   @li{The execution panel has been widely improved.}
   @li{A new democratic (or is it?) process to decide on the release name :)}
 
@@ -96,14 +99,14 @@ What's new?
 What's to come in next release?
 @p
 First we plan to avoid as much as possible the long release cycles such as this one, we will make our best to shorten the release cycle of OpenMOLE to a few months.
-A new website is under development (thanks Paul & Etienne aka jQuery team)
-The documentation will be empowered with a search function in the documentation (thanks Julien!!!)
-A new ContainerTask will offer support for Docker / OCI containers
-A modular OpenMOLE, with additional plugins enabled on demand
+A new website is under development (thanks Paul & Etienne aka jQuery team).
+The documentation will be empowered with a search function in the documentation (thanks Julien!!!).
+A new ContainerTask will offer support for Docker / OCI containers.
+A modular OpenMOLE, with additional plugins enabled on demand.
 Improvement of the interface to be even more user friendly, with more tooltips and integrated help.
 
 @p
-A multi-user version that you can install on a server and be used by several user at the same time
+A multi-user version that you can install on a server and be used by several user at the same time.
 The possibility to delegate computation to cloud provider such as Amazon, Azure... and cloud middleware such as open stack.
 
 @div
@@ -112,7 +115,7 @@ The possibility to delegate computation to cloud provider such as Amazon, Azure.
 
 @h3{6.1}
 @ul
-  @li{CARE required a kernel version greater than 3.2 which is no suitable for grid executions. A new version as been released and linked in the doc which depends on the Linux kernel 2.6.32.}
+  @li{CARE required a kernel version greater than 3.2 which is not suitable for grid executions. A new version as been released and linked in the doc which depends on the Linux kernel 2.6.32.}
   @li{The CARETask was failing on some systems due to argument parsing.}
   @li{The market entries using CARE archives were failing due to a missing execution permission.}
   @li{The authentication add panel had no cancel button.}
