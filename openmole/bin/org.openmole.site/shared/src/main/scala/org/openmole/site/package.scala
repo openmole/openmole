@@ -46,10 +46,6 @@ package object shared {
     lazy val rVersion = "3.3.3"
   }
 
-  object documentationSideMenu {
-    lazy val cssClass = "sidemenu"
-  }
-
   def anchor(title: String) = title.filter(c ⇒ c.isLetterOrDigit)
 
   object link {

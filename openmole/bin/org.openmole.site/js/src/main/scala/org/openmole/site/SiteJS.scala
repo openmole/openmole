@@ -73,10 +73,7 @@ object SiteJS extends JSApp {
 
   def search(content: String): Seq[IIndexSearchResult] = {
     lunrIndex.now.map { i ⇒
-      println("start search")
-      val oo = i.search(content).toSeq
-      println("end search")
-      oo
+      i.search(content).toSeq
     }.getOrElse(Seq())
   }
 
