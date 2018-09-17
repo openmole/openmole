@@ -20,7 +20,6 @@ package org.openmole.plugin.environment.gridscale
 
 import gridscale._
 import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.plugin.environment.batch.jobservice.BatchJobService
 
 object GridScaleJobService {
   def translateStatus(state: JobState) =

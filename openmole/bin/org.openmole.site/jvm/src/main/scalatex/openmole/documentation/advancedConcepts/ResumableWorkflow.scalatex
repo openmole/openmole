@@ -11,17 +11,14 @@ This little tutorial explains how to prepare your workflow to be able to stop it
 val parameter = Val[Int]
 val resultFile = Val[File]
 
-// define the sampling
-val exploration = ExplorationTask(parameter in (0 to 100))
-
 // write the parameter in a file
 val writeTask = ScalaTask($tq
-val resultFile = newFile();
-resultFile.content = s"$$parameter"
-$tq) set (
-(inputs, outputs) += parameter,
-outputs += resultFile
-)
+  val resultFile = newFile();
+  resultFile.content = s"$$parameter"
+  $tq) set (
+    (inputs, outputs) += parameter,
+    outputs += resultFile
+  )
 
 // outputpath is the path where resultFile is stored
 val outputPath = Expression[File](workDirectory / "results/results_$${parameter}")
@@ -31,5 +28,10 @@ val copy = CopyFileHook(resultFile, outputPath)
 
 // a job is executed only if there is no matching resultFile or an empty resultFile
 // once you've run this workflow once you can manually suppress some result files and run it again
-exploration -< (writeTask hook copy when (!outputPath.exists || outputPath.isEmpty))""")
+
+DirectSampling(
+  sampling = parameter in (0 to 100),
+  evaluation = writeTask hook copy,
+  condition = !outputPath.exists || outputPath.isEmpty
+)""")
 

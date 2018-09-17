@@ -65,11 +65,11 @@ object Footer {
                   span("COMMUNITY", textAlign := "center"),
                   imgSubItem(Resource.img.footer.email, "Forum", shared.link.mailingList),
                   imgSubItem(Resource.img.footer.chat, "Chat", shared.link.chat),
-                  imgSubItem(Resource.img.footer.faq, "FAQ", Pages.faq.file, false)
+                  imgSubItem(Resource.img.footer.faq, "FAQ", DocumentationPages.faq.file, false)
                 ),
                 div(classIs(colMD(3)), footerColStyle)(
                   span("DEVELOPMENT", textAlign := "center"),
-                  imgSubItem(Resource.img.footer.previousVersion, "Changes", DocumentationPages.previousVersions.file, false),
+                  imgSubItem(Resource.img.footer.previousVersion, "Changes", DocumentationPages.releaseNotes.file, false),
                   imgSubItem(Resource.img.footer.github, "Source code", shared.link.repo.openmole),
                   imgSubItem(Resource.img.footer.contribute, "Contribute!", DocumentationPages.howToContribute.file, false)
                 ),

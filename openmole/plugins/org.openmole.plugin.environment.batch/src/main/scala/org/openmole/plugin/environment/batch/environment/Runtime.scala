@@ -20,7 +20,6 @@ package org.openmole.plugin.environment.batch.environment
 import org.openmole.core.communication.message._
 
 case class Runtime(
-  storage:            FileMessage,
   runtime:            FileMessage,
   environmentPlugins: Set[FileMessage],
   jvmLinuxX64:        FileMessage

@@ -513,7 +513,7 @@ package file {
       else (doubleBytes / tB).formatted("%.2f").toString + "TB"
     }
 
-    def uniqName(prefix: String, sufix: String) = prefix + "_" + UUID.randomUUID.toString + sufix
+    def uniqName(prefix: String, sufix: String, separator: String = "_") = prefix + separator + UUID.randomUUID.toString + sufix
 
     def acceptDirectory = new Filter[Path] {
       def accept(entry: Path): Boolean = Files.isDirectory(entry)

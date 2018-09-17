@@ -53,7 +53,7 @@ A new island is then generated until the termination criterion: i.e. the total n
   val evolution =
     NSGA2Evolution(
       genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
-      objectives = Seq(o1, o2)
+      objectives = Seq(o1, o2),
       evaluation = model,
       termination = 10000,
       parallelism = 100,

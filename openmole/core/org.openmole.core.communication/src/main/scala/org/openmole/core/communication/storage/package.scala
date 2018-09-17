@@ -22,6 +22,6 @@ package object storage {
     implicit def default = TransferOptions()
   }
 
-  case class TransferOptions(raw: Boolean = false, forceCopy: Boolean = false, canMove: Boolean = false)
+  case class TransferOptions(raw: Boolean = false, noLink: Boolean = false, canMove: Boolean = false)
 
 }

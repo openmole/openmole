@@ -68,21 +68,17 @@ object module {
       ModuleEntry("Sensitivity", "Statistical sensitivity analisys", components(MorrisSampling))
     )
 
-  def generate(modules: Seq[ModuleEntry], baseDirectory: File, location: File ⇒ String) = {
+  def generate(modules: Seq[ModuleEntry], copy: File ⇒ String) = {
     def allFiles = modules.flatMap(_.components)
 
-    for {
-      f ← allFiles.distinct
-    } yield {
-      val dest = baseDirectory / location(f)
-      f copy dest
-    }
+    val copied =
+      (for { f ← allFiles.distinct } yield f -> copy(f)).toMap
 
     modules.map { m ⇒
       Module(
         m.name,
         m.description,
-        m.components.map(f ⇒ Component(location(f), f.hash().toString))
+        m.components.map(f ⇒ Component(copied(f), f.hash().toString))
       )
     }
   }

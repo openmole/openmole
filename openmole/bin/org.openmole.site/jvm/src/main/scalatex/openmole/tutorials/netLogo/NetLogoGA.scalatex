@@ -1,4 +1,3 @@
-
 @import org.openmole.site.tools._
 @import org.openmole.site._
 @import DocumentationPages._
@@ -54,7 +53,7 @@ more ants carry food to the nest, they reinforce the chemical trail.}
 @p A visual representation of this model looks like that:
 @br @img(src := Resource.img.example.ants.file)
 
-@p In this tutorial we use @a("a headless version", href := DocumentationPages.headlessNetLogo.file) of the
+@p In this tutorial we use a headless version (@a("see NetLogo task documentation", href := DocumentationPages.netLogo.file)) of the
 model. This modified version is available @aa("here", href := Resource.script.antsNLogo.file).
 
 @h2{An optimisation problem}
@@ -136,7 +135,7 @@ method, is the netlogo task i.e. running the model, which indeed provides an @b{
 // Define the population size: 100.
 // Define the inputs and their respective variation bounds.
 // Define the objectives to minimize.
-// Tell OpenMOLE that this model is stochastic and that it should generate a seed for each execution
+// Tell OpenMOLE that this model is stochastic and that it should generate a seed for each execution
 // Define the fitness evaluation
 // Define the parallelism level
 // Terminate after 10000 evaluations
@@ -203,7 +202,3 @@ val env = EGIEnvironment("biomed", openMOLEMemory = 1200 megabytes, cpuTime = 4 
 
 // Define the workflow
 (island on env hook savePopulationHook)""", header = model, name = "ga netlogo islands")
-
-@break
-
-@h3{@a("Next tutorial: How to Build a Headless Version of a NetLogo Code", href := headlessNetLogo.file)}
