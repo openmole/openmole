@@ -39,23 +39,26 @@ package object directsampling {
     seed:             Val[T],
     replications:     Int,
     distributionSeed: OptionalArgument[Long]   = None,
-    aggregation:      OptionalArgument[Puzzle] = None
+    aggregation:      OptionalArgument[Puzzle] = None,
+    wrap:             Boolean                  = true
   ) =
     DirectSampling(
       evaluation = evaluation,
       sampling = seed in (TakeDomain(UniformDistribution[T](distributionSeed), replications)),
-      aggregation = aggregation
+      aggregation = aggregation,
+      wrap = wrap
     )
 
   def DirectSampling[P](
     evaluation:  Puzzle,
     sampling:    Sampling,
     aggregation: OptionalArgument[Puzzle] = None,
-    condition:   Condition                = Condition.True
+    condition:   Condition                = Condition.True,
+    wrap:        Boolean                  = true
   ): Puzzle = {
     val exploration = ExplorationTask(sampling)
     val explorationCapsule = Capsule(exploration, strain = true)
-    val wrapped = wrapPuzzle(evaluation, sampling.prototypes.toSeq, evaluation.outputs)
+    val wrapped = wrapPuzzle(evaluation, sampling.prototypes.toSeq, evaluation.outputs, wrap = wrap)
 
     aggregation.option match {
       case Some(aggregation) ⇒
