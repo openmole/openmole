@@ -110,7 +110,15 @@ You can restrict this behaviour by @b{listing only the variables you want to sav
 
 @br@br
 
-Some additional optional parameters can be set by calling the function @hl.openmoleNoTest("set") on the newly created @i{Hook}.
+@p Some additional optional parameters can be passed to the CSVHook.
+@br Setting @hl.code("""csvHeader = "Col1, Col2, ColZ"""") customises the header of the CSV file to be created with the string it receives as a parameter. Please note that this only happens if the file doesn't exist when the hook is executed.
+@br @hl.code("arrayOnRaw = true") forces the flattening of the input lists such that all variables values are written to a single row/line of the CSV file.
+
+@br For instance:
+@br @hl.openmole("""
+val i = Val[Int]
+
+val h = CSVHook("/path/to/a/file/or/dir${i}.csv", csvHeader = "Col1, Col2, ColZ", arrayOnRaw = true)""", name = "csv hook with options")
 
 @br
 
