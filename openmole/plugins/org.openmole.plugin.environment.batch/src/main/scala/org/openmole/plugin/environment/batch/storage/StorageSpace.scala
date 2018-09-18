@@ -43,6 +43,7 @@ object HierarchicalStorageSpace extends JavaLogger {
   }
 
   def clean[S](s: S, storageSpace: StorageSpace)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], environmentStorage: EnvironmentStorage[S], services: BatchEnvironment.Services) = {
+    services.replicaCatalog.clean(environmentStorage.id(s), StorageService.rmFile(s, _))
     cleanReplicaDirectory(s, storageSpace.replicaDirectory, environmentStorage.id(s))
     cleanTmpDirectory(s, storageSpace.tmpDirectory)
   }
