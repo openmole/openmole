@@ -37,6 +37,9 @@ import org.openmole.gui.ext.data.DataUtils._
 
 class NativeWizardApiImpl(s: Services) extends NativeWizardAPI {
 
+  import s._
+  import org.openmole.gui.ext.data.ServerFileSystemContext.project
+
   def toTask(
     target:         SafePath,
     executableName: String,
@@ -55,7 +58,7 @@ class NativeWizardApiImpl(s: Services) extends NativeWizardAPI {
       expandWizardData(data) +
       s""")\n\n$task hook ToStringHook()"""
 
-    target.write(content)(context = org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace = Workspace.instance)
+    target.write(content)
     WizardToTask(target)
   }
 
@@ -197,9 +200,7 @@ class NativeWizardApiImpl(s: Services) extends NativeWizardAPI {
       }.opt.get
 
     //  val (language, codeName, commandElements) =
-    val command = fromCareArchive(safePathToFile(safePath)(
-      context = org.openmole.gui.ext.data.ServerFileSystemContext.project,
-      workspace = org.openmole.core.workspace.Workspace.instance)).commandLine.getOrElse(Seq())
+    val command = fromCareArchive(safePathToFile(safePath)).commandLine.getOrElse(Seq())
     val (language, codeName, commandElements) = command.headOption match {
       case Some("python") ⇒ (Some(PythonLanguage()), command.lift(1).getOrElse(""), mapToVariableElements(indexArgs(command.drop(2), Seq()), CareTaskType()).toSeq)
       //  case Some("R")      ⇒ (Some(RLanguage()), "", "", RTaskType())

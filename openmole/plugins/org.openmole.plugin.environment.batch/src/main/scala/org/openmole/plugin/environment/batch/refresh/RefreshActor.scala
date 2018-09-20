@@ -19,7 +19,7 @@ package org.openmole.plugin.environment.batch.refresh
 
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, ResubmitException, UsageControl }
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchJobControl, ResubmitException }
 import org.openmole.tool.logger.JavaLogger
 
 object RefreshActor extends JavaLogger {
@@ -27,43 +27,41 @@ object RefreshActor extends JavaLogger {
   def receive(refresh: Refresh)(implicit services: BatchEnvironment.Services) = {
     import services._
 
-    val Refresh(job, sj, bj, delay, updateErrorsInARow) = refresh
+    val Refresh(job, bj, delay, updateErrorsInARow) = refresh
     if (!job.state.isFinal) {
-      UsageControl.tryWithToken(bj.usageControl) {
-        case Some(t) ⇒
-          try {
-            val oldState = job.state
-            job.state = bj.updateState(t)
-            if (job.state == DONE) JobManager ! GetResult(job, sj, bj.resultPath)
-            else if (!job.state.isFinal) {
-              val newDelay =
-                if (oldState == job.state)
-                  (delay + job.environment.updateInterval.incrementUpdateInterval) min job.environment.updateInterval.maxUpdateInterval
-                else job.environment.updateInterval.minUpdateInterval
-              JobManager ! Delay(Refresh(job, sj, bj, newDelay, 0), newDelay)
-            }
-            else if (job.state == FAILED) {
-              val exception = new InternalProcessingError(s"""Job status is FAILED""".stripMargin)
-              JobManager ! Error(job, exception, bj.tryStdOutErr(t))
-              JobManager ! Kill(job)
-            }
-            else JobManager ! Kill(job)
-          }
-          catch {
-            case _: ResubmitException ⇒
-              JobManager ! Resubmit(job, sj.storage)
-            case e: Throwable ⇒
-              if (updateErrorsInARow >= preference(BatchEnvironment.MaxUpdateErrorsInARow)) {
-                JobManager ! Error(job, e, bj.tryStdOutErr(t))
-                JobManager ! Kill(job)
-              }
-              else {
-                Log.logger.log(Log.FINE, s"${updateErrorsInARow + 1} errors in a row during job refresh", e)
-                JobManager ! Delay(Refresh(job, sj, bj, delay, updateErrorsInARow + 1), delay)
-              }
-          }
-        case None ⇒ JobManager ! Delay(Refresh(job, sj, bj, delay, updateErrorsInARow), BatchEnvironment.getTokenInterval)
+      try {
+        val oldState = job.state
+        job.state = bj.updateState()
+        if (job.state == DONE) JobManager ! GetResult(job, bj.resultPath(), bj)
+        else if (!job.state.isFinal) {
+          val newDelay =
+            if (oldState == job.state)
+              (delay + bj.updateInterval.incrementUpdateInterval) min bj.updateInterval.maxUpdateInterval
+            else bj.updateInterval.minUpdateInterval
+          JobManager ! Delay(Refresh(job, bj, newDelay, 0), newDelay)
+        }
+        else if (job.state == FAILED) {
+          val exception = new InternalProcessingError(s"""Job status is FAILED""".stripMargin)
+          val stdOutErr = BatchJobControl.tryStdOutErr(bj).toOption
+          JobManager ! Error(job, exception, stdOutErr)
+          JobManager ! Kill(job, Some(bj))
+        }
+        else JobManager ! Kill(job, Some(bj))
       }
+      catch {
+        case _: ResubmitException ⇒
+          JobManager ! Resubmit(job, bj)
+        case e: Throwable ⇒
+          if (updateErrorsInARow >= preference(BatchEnvironment.MaxUpdateErrorsInARow)) {
+            JobManager ! Error(job, e, BatchJobControl.tryStdOutErr(bj).toOption)
+            JobManager ! Kill(job, Some(bj))
+          }
+          else {
+            Log.logger.log(Log.FINE, s"${updateErrorsInARow + 1} errors in a row during job refresh", e)
+            JobManager ! Delay(Refresh(job, bj, delay, updateErrorsInARow + 1), delay)
+          }
+      }
+
     }
   }
 }

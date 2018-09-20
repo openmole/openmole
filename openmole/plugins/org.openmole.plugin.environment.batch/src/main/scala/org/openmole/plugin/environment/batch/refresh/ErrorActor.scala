@@ -5,7 +5,7 @@ import java.io.FileNotFoundException
 import gridscale.authentication.AuthenticationException
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.workflow.execution.Environment
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchExecutionJob, FailedJobExecution, UsageControl }
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchExecutionJob, FailedJobExecution, AccessControl }
 import org.openmole.tool.logger.JavaLogger
 
 object ErrorActor extends JavaLogger {
@@ -43,8 +43,9 @@ object ErrorActor extends JavaLogger {
           )
       }
 
-    val er = Environment.ExceptionRaised(job, detailedException, level)
+    val er = Environment.ExecutionJobExceptionRaised(job, detailedException, level)
     job.environment.error(er)
+
     services.eventDispatcher.trigger(job.environment: Environment, er)
     logger.log(FINE, "Error in job refresh", detailedException)
   }

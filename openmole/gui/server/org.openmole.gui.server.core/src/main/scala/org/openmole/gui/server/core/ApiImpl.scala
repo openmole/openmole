@@ -425,7 +425,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   //PLUGINS
   def addUploadedPlugins(nodes: Seq[String]): Seq[Error] = {
     val files = nodes.map(Utils.pluginUpdoadDirectory / _)
-    val errors = org.openmole.core.module.addPluginsFiles(files, true, Some(org.openmole.core.module.pluginDirectory(Workspace.instance)))(Workspace.instance)
+    val errors = org.openmole.core.module.addPluginsFiles(files, true, Some(org.openmole.core.module.pluginDirectory))
     files.foreach(_.recursiveDelete)
     errors.map(e ⇒ ErrorBuilder(e._2))
   }

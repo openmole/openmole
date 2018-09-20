@@ -87,7 +87,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
             case e: InterruptedException ⇒ throw e
             case e: ThreadDeath          ⇒ throw e
             case e: Throwable ⇒
-              val er = ExceptionRaised(executionJob, e, SEVERE)
+              val er = ExecutionJobExceptionRaised(executionJob, e, SEVERE)
               environment.error(er)
               logger.log(SEVERE, "Error in execution", e)
               environment.eventDispatcherService.trigger(environment: Environment, er)

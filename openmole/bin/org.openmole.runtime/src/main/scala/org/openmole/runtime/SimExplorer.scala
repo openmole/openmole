@@ -44,7 +44,6 @@ object SimExplorer extends JavaLogger {
         storage:       Option[String] = None,
         inputMessage:  Option[String] = None,
         outputMessage: Option[String] = None,
-        path:          Option[String] = None,
         pluginPath:    Option[String] = None,
         nbThread:      Option[Int]    = None,
         workspace:     Option[String] = None,
@@ -62,9 +61,6 @@ object SimExplorer extends JavaLogger {
         }
         opt[String]('o', "output") text ("Path of the output message") action {
           (v, c) ⇒ c.copy(outputMessage = Some(v))
-        }
-        opt[String]('c', "path") text ("Path for the communication") action {
-          (v, c) ⇒ c.copy(path = Some(v))
         }
         opt[String]('p', "plugin") text ("Path for plugin category to preload") action {
           (v, c) ⇒ c.copy(pluginPath = Some(v))
@@ -107,7 +103,6 @@ object SimExplorer extends JavaLogger {
 
               new Runtime().apply(
                 storage,
-                config.path.get,
                 config.inputMessage.get,
                 config.outputMessage.get,
                 config.nbThread.getOrElse(1),

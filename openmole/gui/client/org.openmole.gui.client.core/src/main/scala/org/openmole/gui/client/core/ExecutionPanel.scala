@@ -76,6 +76,7 @@ class ExecutionPanel {
 
   val staticInfo: Var[Map[ExecutionId, StaticExecutionInfo]] = Var(Map())
   val executionInfo: Var[Map[ExecutionId, ExecutionInfo]] = Var(Map())
+
   val outputInfo: Var[Seq[OutputStreamData]] = Var(Seq())
   val jobTables: Var[Map[ExecutionId, JobTable]] = Var(Map())
 
@@ -149,8 +150,9 @@ class ExecutionPanel {
   lazy val executionTable = scaladget.bootstrapnative.Table(
     for {
       execMap ← executionInfo
+      staticInf ← staticInfo
     } yield {
-      execMap.map {
+      execMap.toSeq.sortBy(e ⇒ staticInf(e._1).startDate).map {
         case (execID, info) ⇒
           val duration: Duration = (info.duration milliseconds)
           val h = (duration).toHours
@@ -190,21 +192,13 @@ class ExecutionPanel {
             case r: ExecutionInfo.Preparing ⇒ (ExecutionDetails("0", 0, envStates = r.environmentStates), info.state)
           }
 
-          val srp = SubRowPanels(
-            staticInfo.map { si ⇒
-              execTextArea(si(execID).script)(padding := 15, fontSize := "14px")
-            },
-            Rx(execTextArea(outputInfo.map { oi ⇒
-              oi.find(_.id == execID).map {
-                _.output
-              }.getOrElse("")
-            })),
-            Rx(execTextArea(details.error.map {
-              _.stackTrace
-            }.getOrElse("")
-            )(padding := 15, fontSize := "14px")),
-            jobTable(execID).render
-          )
+          val srp =
+            SubRowPanels(
+              staticInfo.map { si ⇒ execTextArea(si(execID).script)(padding := 15, fontSize := "14px") },
+              Rx(execTextArea(outputInfo.map { oi ⇒ oi.find(_.id == execID).map { _.output }.getOrElse("") })),
+              Rx(execTextArea(details.error.map { _.stackTrace }.getOrElse(""))(padding := 15, fontSize := "14px", monospace)),
+              jobTable(execID).render
+            )
 
           subRows() = subRows.now.updated(execID, srp)
 
@@ -218,8 +212,8 @@ class ExecutionPanel {
           ReactiveRow(
             execID.id,
             Seq(
-              VarCell(tags.span(subLink(SubScript, execID, staticInfo.now(execID).path.name).tooltip("Original script")), 0),
-              VarCell(tags.span(tags.span(Utils.longToDate(staticInfo.now(execID).startDate)).tooltip("Starting time")), 1),
+              VarCell(tags.span(subLink(SubScript, execID, staticInf(execID).path.name).tooltip("Original script")), 0),
+              VarCell(tags.span(tags.span(Utils.longToDate(staticInf(execID).startDate)).tooltip("Starting time")), 1),
               VarCell(tags.span(glyphAndText(glyph_flash, details.running.toString).tooltip("Running jobs")), 2),
               VarCell(tags.span(glyphAndText(glyph_flag, details.ratio.toString).tooltip("Finished/Total jobs")), 3),
               VarCell(tags.span(tags.span(durationString).tooltip("Elapsed time")), 4),

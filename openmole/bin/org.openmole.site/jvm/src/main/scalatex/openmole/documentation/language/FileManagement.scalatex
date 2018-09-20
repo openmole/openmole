@@ -59,10 +59,10 @@ The @code{resources} keyword is useful for files, existing before the workflow e
 @openmole(s"""
   val f = Val[File]
 
-  val producer = ScalaTask(
+  val producer = ScalaTask($tq
     val f = newFile()
     f.content = "I love tofu"
-  @tq) set (
+  $tq) set (
     outputs += f
   )
 
@@ -103,9 +103,9 @@ In this case the file is provided using a default argument. You can of course pr
     outputs += f
   )
 
-  val task = ScalaTask(@tq
+  val task = ScalaTask($tq
     println(f.content)
-  @tq) set (
+  $tq) set (
     inputs += f
   )
 
@@ -150,10 +150,10 @@ When using the @code{ScalaTask}, files are simple variables and are manipulated 
 @h2{Complementary information}
 
 @ul
-  @li{@a("Documentation on data processing", href := DocumentationPages.dataProcessing.file)}
+  @li{@a("Documentation on data processing", href := DocumentationPages.fileSampling.file)}
   @li{@a("Utility functions of the ScalaTask", href := DocumentationPages.scalaFunction.file)}
   @li{@a("Documentation of the RTask", href := DocumentationPages.r.file)}
-  @li{@a("Documentation of the CARETask and the SystemExecTask", href := DocumentationPages.care.file)}
+  @li{@a("Documentation of the CARETask and the SystemExecTask", href := DocumentationPages.packaged.file)}
   @li{@a("Example in python", href := DocumentationPages.packagedPython.file)}
   @li{@a("Example in R", href := DocumentationPages.r.file)}
   @li{@a("Example in C++", href := DocumentationPages.packagedCCplusplus.file)}

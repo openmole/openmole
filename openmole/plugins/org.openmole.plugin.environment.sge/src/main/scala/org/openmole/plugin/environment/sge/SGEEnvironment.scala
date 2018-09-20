@@ -21,13 +21,11 @@ import org.openmole.core.authentication._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
 import org.openmole.plugin.environment.batch.environment._
-import org.openmole.plugin.environment.batch.jobservice._
+import org.openmole.plugin.environment.batch.storage._
 import org.openmole.plugin.environment.ssh._
 import org.openmole.tool.crypto.Cypher
-import squants.{Time, _}
+import squants.Time
 import squants.information._
-import effectaside._
-import org.openmole.plugin.environment.gridscale._
 
 object SGEEnvironment {
   def apply(
@@ -44,9 +42,8 @@ object SGEEnvironment {
     storageSharedLocally: Boolean                       = false,
     timeout:              OptionalArgument[Time]        = None,
     name:                 OptionalArgument[String]      = None,
-    localSubmission: Boolean                            = false)(implicit services: BatchEnvironment.Services, authenticationStore: AuthenticationStore, cypher: Cypher, varName: sourcecode.Name) = {
+    localSubmission:      Boolean                       = false)(implicit services: BatchEnvironment.Services, authenticationStore: AuthenticationStore, cypher: Cypher, varName: sourcecode.Name) = {
     import services._
-
 
     val parameters = Parameters(
       queue = queue,
@@ -58,7 +55,7 @@ object SGEEnvironment {
       threads = threads,
       storageSharedLocally = storageSharedLocally)
 
-    EnvironmentProvider { () =>
+    EnvironmentProvider { () ⇒
       if (!localSubmission) {
         val userValue = user.mustBeDefined("user")
         val hostValue = host.mustBeDefined("host")
@@ -68,12 +65,13 @@ object SGEEnvironment {
           user = userValue,
           host = hostValue,
           port = portValue,
-          timeout = timeout.getOrElse(services.preference(SSHEnvironment.TimeOut)),
+          timeout = timeout.getOrElse(services.preference(SSHEnvironment.timeOut)),
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue)
         )
-      } else
+      }
+      else
         new SGELocalEnvironment(
           parameters = parameters,
           name = Some(name.getOrElse(varName.value))
@@ -81,27 +79,26 @@ object SGEEnvironment {
     }
   }
 
-  implicit def asSSHServer[A: gridscale.ssh.SSHAuthentication]: AsSSHServer[SGEEnvironment[A]] = new AsSSHServer[SGEEnvironment[A]] {
-    override def apply(t: SGEEnvironment[A]) = gridscale.ssh.SSHServer(t.host, t.port, t.timeout)(t.authentication)
-  }
-
-  implicit def isJobService[A]: JobServiceInterface[SGEEnvironment[A]] = new JobServiceInterface[SGEEnvironment[A]] {
-    override type J = gridscale.cluster.BatchScheduler.BatchJob
-    override def submit(env: SGEEnvironment[A], serializedJob: SerializedJob): BatchJob[J] = env.submit(serializedJob)
-    override def state(env: SGEEnvironment[A], j: J): ExecutionState.ExecutionState = env.state(j)
-    override def delete(env: SGEEnvironment[A], j: J): Unit = env.delete(j)
-    override def stdOutErr(js: SGEEnvironment[A], j: J) = js.stdOutErr(j)
-  }
-
   case class Parameters(
-    queue:                   Option[String],
-    openMOLEMemory: Option[Information],
-    wallTime:                Option[Time],
-    memory:                  Option[Information],
-    sharedDirectory:         Option[String],
-    workDirectory:           Option[String],
-    threads:        Option[Int],
-    storageSharedLocally:    Boolean)
+    queue:                Option[String],
+    openMOLEMemory:       Option[Information],
+    wallTime:             Option[Time],
+    memory:               Option[Information],
+    sharedDirectory:      Option[String],
+    workDirectory:        Option[String],
+    threads:              Option[Int],
+    storageSharedLocally: Boolean)
+
+  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SGEJobService[_, _])(implicit services: BatchEnvironment.Services) =
+    submitToCluster(
+      batchExecutionJob,
+      storage,
+      space,
+      jobService.submit(_, _),
+      jobService.state(_),
+      jobService.delete(_),
+      jobService.stdOutErr(_)
+    )
 
 }
 
@@ -112,171 +109,94 @@ class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
   val timeout:        Time,
   val parameters:     SGEEnvironment.Parameters,
   val name:           Option[String],
-  val authentication: A)(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env =>
+  val authentication: A)(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
 
   import services._
 
   implicit val sshInterpreter = gridscale.ssh.SSH()
   implicit val systemInterpreter = effectaside.System()
+  implicit val localInterpreter = gridscale.local.Local()
 
-  override def start() = BatchEnvironment.start(this)
+  override def start() = {
+    storageService
+  }
 
   override def stop() = {
-    def usageControls = List(storageService.usageControl, jobService.usageControl)
-    try BatchEnvironment.clean(this, usageControls)
-    finally sshInterpreter().close
+    storageService match {
+      case Left((space, local)) ⇒ HierarchicalStorageSpace.clean(local, space)
+      case Right((space, ssh))  ⇒ HierarchicalStorageSpace.clean(ssh, space)
+    }
+    sshInterpreter().close
   }
 
-  import env.services.{ threadProvider, preference }
-  import org.openmole.plugin.environment.ssh._
+  lazy val accessControl = AccessControl(preference(SSHEnvironment.maxConnections))
+  lazy val sshServer = gridscale.ssh.SSHServer(host, port, timeout)(authentication)
 
   lazy val storageService =
-    sshStorageService(
-      user = user,
-      host = host,
-      port = port,
-      storage = env,
-      environment = env,
-      concurrency = services.preference(SSHEnvironment.MaxConnections),
-      sharedDirectory = parameters.sharedDirectory,
-      storageSharedLocally = parameters.storageSharedLocally
-    )
+    if (parameters.storageSharedLocally) Left {
+      val local = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
+      (localStorageSpace(local), local)
+    }
+    else
+      Right {
+        val ssh =
+          sshStorage(
+            user = user,
+            host = host,
+            port = port,
+            sshServer = sshServer,
+            accessControl = accessControl,
+            environment = env,
+            sharedDirectory = parameters.sharedDirectory
+          )
 
-  override def trySelectStorage(files: ⇒ Vector[File]) = BatchEnvironment.trySelectSingleStorage(storageService)
+        (sshStorageSpace(ssh), ssh)
+      }
 
-  val installRuntime = new RuntimeInstallation(
-    Frontend.ssh(host, port, timeout, authentication),
-    storageService = storageService
-  )
-
-  def submit(serializedJob: SerializedJob) = {
-    def buildScript(serializedJob: SerializedJob) = {
-      import services._
-      SharedStorage.buildScript(
-        env.installRuntime.apply,
-        parameters.workDirectory,
-        parameters.openMOLEMemory,
-        parameters.threads,
-        serializedJob,
-        env.storageService
-      )
+  def execute(batchExecutionJob: BatchExecutionJob) =
+    storageService match {
+      case Left((space, local)) ⇒ SGEEnvironment.submit(batchExecutionJob, local, space, pbsJobService)
+      case Right((space, ssh))  ⇒ SGEEnvironment.submit(batchExecutionJob, ssh, space, pbsJobService)
     }
 
-    val (remoteScript, result, workDirectory) = buildScript(serializedJob)
+  lazy val installRuntime =
+    storageService match {
+      case Left((space, local)) ⇒ new RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), local, space.baseDirectory)
+      case Right((space, ssh))  ⇒ new RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), ssh, space.baseDirectory)
+    }
 
-    val description = _root_.gridscale.sge.SGEJobDescription(
-      command = s"/bin/bash $remoteScript",
-      queue = parameters.queue,
-      workDirectory = workDirectory,
-      wallTime = parameters.wallTime,
-      memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
-    )
+  lazy val pbsJobService =
+    storageService match {
+      case Left((space, local)) ⇒ new SGEJobService(local, space.tmpDirectory, installRuntime, parameters, sshServer, accessControl)
+      case Right((space, ssh))  ⇒ new SGEJobService(ssh, space.tmpDirectory, installRuntime, parameters, sshServer, accessControl)
+    }
 
-    val id = gridscale.sge.submit[_root_.gridscale.ssh.SSHServer](env, description)
-    BatchJob(id, result)
-  }
-
-  def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    GridScaleJobService.translateStatus(gridscale.sge.state[_root_.gridscale.ssh.SSHServer](env, id))
-
-  def delete(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    gridscale.sge.clean[_root_.gridscale.ssh.SSHServer](env, id)
-
-  def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    (gridscale.sge.stdOut[_root_.gridscale.ssh.SSHServer](env, id), gridscale.sge.stdErr[_root_.gridscale.ssh.SSHServer](env, id))
-
-  lazy val jobService = BatchJobService(env, concurrency = services.preference(SSHEnvironment.MaxConnections))
-  override def trySelectJobService() = BatchEnvironment.trySelectSingleJobService(jobService)
 }
-
-
-object SGELocalEnvironment {
-  implicit def isJobService: JobServiceInterface[SGELocalEnvironment] = new JobServiceInterface[SGELocalEnvironment] {
-    override type J = gridscale.cluster.BatchScheduler.BatchJob
-    override def submit(env: SGELocalEnvironment, serializedJob: SerializedJob): BatchJob[J] = env.submit(serializedJob)
-    override def state(env: SGELocalEnvironment, j: J): ExecutionState.ExecutionState = env.state(j)
-    override def delete(env: SGELocalEnvironment, j: J): Unit = env.delete(j)
-    override def stdOutErr(js: SGELocalEnvironment, j: J) = js.stdOutErr(j)
-  }
-}
-
 
 class SGELocalEnvironment(
-  val parameters:     SGEEnvironment.Parameters,
-  val name:           Option[String])(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env =>
+  val parameters: SGEEnvironment.Parameters,
+  val name:       Option[String])(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
 
   import services._
-
-  lazy val usageControl = UsageControl(services.preference(SSHEnvironment.MaxLocalOperations))
-  def usageControls = List(storageService.usageControl, jobService.usageControl)
 
   implicit val localInterpreter = gridscale.local.Local()
   implicit val systemInterpreter = effectaside.System()
 
-  import env.services.{ threadProvider, preference }
+  override def start() = { storage; space }
+  override def stop() = { HierarchicalStorageSpace.clean(storage, space) }
+
+  import env.services.preference
   import org.openmole.plugin.environment.ssh._
 
-  override def start() = BatchEnvironment.start(this)
+  lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
+  lazy val space = localStorageSpace(storage)
 
-  override def stop() = {
-    def usageControls = List(storageService.usageControl, jobService.usageControl)
-    BatchEnvironment.clean(this, usageControls)
-  }
+  def execute(batchExecutionJob: BatchExecutionJob) = SGEEnvironment.submit(batchExecutionJob, storage, space, jobService)
 
-  lazy val storageService =
-    localStorageService(
-      environment = env,
-      concurrency = services.preference(SSHEnvironment.MaxLocalOperations),
-      root = "",
-      sharedDirectory = parameters.sharedDirectory,
-    )
-
-
-  override def trySelectStorage(files: ⇒ Vector[File]) = BatchEnvironment.trySelectSingleStorage(storageService)
-
-  val installRuntime = new RuntimeInstallation(
-    Frontend.local,
-    storageService = storageService
-  )
+  lazy val installRuntime = new RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
 
   import _root_.gridscale.local.LocalHost
 
-  def submit(serializedJob: SerializedJob) = {
-    def buildScript(serializedJob: SerializedJob) = {
-      import services._
-      SharedStorage.buildScript(
-        env.installRuntime.apply,
-        parameters.workDirectory,
-        parameters.openMOLEMemory,
-        parameters.threads,
-        serializedJob,
-        env.storageService
-      )
-    }
-
-    val (remoteScript, result, workDirectory) = buildScript(serializedJob)
-    val description = _root_.gridscale.sge.SGEJobDescription(
-      command = s"/bin/bash $remoteScript",
-      queue = parameters.queue,
-      workDirectory = workDirectory,
-      wallTime = parameters.wallTime,
-      memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
-    )
-    val id = gridscale.sge.submit(LocalHost(), description)
-    BatchJob(id, result)
-  }
-
-  def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    GridScaleJobService.translateStatus(gridscale.sge.state(LocalHost(), id))
-
-  def delete(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    gridscale.sge.clean(LocalHost(), id)
-
-  def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    (gridscale.sge.stdOut(LocalHost(), id), gridscale.sge.stdErr(LocalHost(), id))
-
-
-  lazy val jobService = BatchJobService(env, concurrency = services.preference(SSHEnvironment.MaxLocalOperations))
-  override def trySelectJobService() = BatchEnvironment.trySelectSingleJobService(jobService)
+  lazy val jobService = new SGEJobService(storage, space.tmpDirectory, installRuntime, parameters, LocalHost(), AccessControl(preference(SSHEnvironment.maxConnections)))
 
 }

@@ -319,23 +319,21 @@ case class ErrorLevel() extends ErrorStateLevel {
 }
 
 case class EnvironmentError(
-                             environmentId: EnvironmentId,
-                             errorMessage: String,
-                             stack: Error,
-                             date: Long,
-                             level: ErrorStateLevel
-                           ) extends Ordered[EnvironmentError] {
+  environmentId: EnvironmentId,
+  errorMessage: String,
+  stack: Error,
+  date: Long,
+  level: ErrorStateLevel) extends Ordered[EnvironmentError] {
   def compare(that: EnvironmentError) = date compare that.date
 }
 
 @Lenses case class NetworkActivity(
-                                    downloadingFiles: Int = 0,
-                                    downloadedSize: Long = 0L,
-                                    readableDownloadedSize: String = "",
-                                    uploadingFiles: Int = 0,
-                                    uploadedSize: Long = 0L,
-                                    readableUploadedSize: String = ""
-                                  )
+  downloadingFiles: Int = 0,
+  downloadedSize: Long = 0L,
+  readableDownloadedSize: String = "",
+  uploadingFiles: Int = 0,
+  uploadedSize: Long = 0L,
+  readableUploadedSize: String = "")
 
 @Lenses case class ExecutionActivity(executionTime: Long = 0)
 
@@ -348,35 +346,26 @@ case class EnvironmentErrorData(datedErrors: Seq[(EnvironmentError, Long, Int)])
 
 case class OutputStreamData(id: ExecutionId, output: String)
 
-case class StaticExecutionInfo(path: SafePath, script: String, startDate: Long = 0L)
+case class StaticExecutionInfo(path: SafePath, script: String, startDate: Long)
 
 case class EnvironmentState(
-                             envId: EnvironmentId,
-                             taskName: String,
-                             running: Long,
-                             done: Long,
-                             submitted: Long,
-                             failed: Long,
-                             networkActivity: NetworkActivity,
-                             executionActivity: ExecutionActivity,
-                             numberOfErrors: Int
-                           )
-
-//case class Output(output: String)
+  envId: EnvironmentId,
+  taskName: String,
+  running: Long,
+  done: Long,
+  submitted: Long,
+  failed: Long,
+  networkActivity: NetworkActivity,
+  executionActivity: ExecutionActivity,
+  numberOfErrors: Int)
 
 sealed trait ExecutionInfo {
   def state: String
-
   def duration: Long
-
   def capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)]
-
   def ready: Long = capsules.map(_._2.ready).sum
-
   def running: Long = capsules.map(_._2.running).sum
-
   def completed: Long = capsules.map(_._2.completed).sum
-
   def environmentStates: Seq[EnvironmentState]
 }
 
@@ -387,18 +376,18 @@ object ExecutionInfo {
   case class JobStatuses(ready: Long, running: Long, completed: Long)
 
   case class Failed(
-                     capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
-                     error: Error,
-                     environmentStates: Seq[EnvironmentState],
-                     duration: Long = 0L,
-                     clean: Boolean = true) extends ExecutionInfo {
+    capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
+    error: Error,
+    environmentStates: Seq[EnvironmentState],
+    duration: Long = 0L,
+    clean: Boolean = true) extends ExecutionInfo {
     def state: String = "failed"
   }
 
   case class Running(
-                      capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
-                      duration: Long,
-                      environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
+    capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
+    duration: Long,
+    environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
     def state: String = "running"
   }
 
