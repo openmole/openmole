@@ -59,6 +59,8 @@ sealed trait TreeNodeTab {
   // Get the file content to be saved
   def content: String
 
+  def editor: Option[EditorPanelUI]
+
   def editable: Boolean
 
   def editing: Boolean
@@ -87,18 +89,19 @@ object TreeNodeTab {
 
     lazy val safePathTab = Var(safePath)
 
-    val editor = EditorPanelUI(FileExtension.OMS, initialContent)
-    editor.initEditor
+    lazy val omsEditor = EditorPanelUI(FileExtension.OMS, initialContent)
+    def editor = Some(omsEditor)
+    omsEditor.initEditor
 
     def editable = true
 
     def editing = true
 
-    def content = editor.code
+    def content = omsEditor.code
 
-    def refresh(onsaved: () ⇒ Unit) = save(safePathTab.now, editor, onsaved)
+    def refresh(onsaved: () ⇒ Unit) = save(safePathTab.now, omsEditor, onsaved)
 
-    def resizeEditor = editor.editor.resize()
+    def resizeEditor = omsEditor.editor.resize()
 
     lazy val controlElement = button("Run", btn_primary, onclick := { () ⇒
       refresh(() ⇒
@@ -107,13 +110,15 @@ object TreeNodeTab {
         })
     })
 
-    lazy val block = editor.view
+    lazy val block = omsEditor.view
   }
 
   def html(safePath: SafePath, htmlContent: String) = new TreeNodeTab {
     lazy val safePathTab = Var(safePath)
 
     def content: String = htmlContent
+
+    def editor = None
 
     def editable: Boolean = false
 
@@ -173,10 +178,10 @@ object TreeNodeTab {
     lazy val isEditing = Var(initialEditing)
 
     Rx {
-      editor.setReadOnly(!isEditing())
+      editableEditor.setReadOnly(!isEditing())
     }
 
-    def content: String = editor.code
+    def content: String = editableEditor.code
 
     val sequence = Var(initialSequence)
     val nbColumns = sequence.now.header.length
@@ -189,8 +194,9 @@ object TreeNodeTab {
       case _        ⇒ sequence.now.content
     }
 
-    lazy val editor = EditorPanelUI(extension, initialContent, if (isCSV) paddingBottom := 80 else emptyMod)
-    editor.initEditor
+    lazy val editableEditor = EditorPanelUI(extension, initialContent, if (isCSV) paddingBottom := 80 else emptyMod)
+    def editor = Some(editableEditor)
+    editableEditor.initEditor
 
     def editable = true
 
@@ -201,7 +207,7 @@ object TreeNodeTab {
         safePathTab.now,
         (p: ProcessState) ⇒ {},
         (cont: String) ⇒ {
-          editor.setCode(cont)
+          editableEditor.setCode(cont)
           if (isCSV) {
             post()[Api].sequence(safePathTab.now).call().foreach { seq ⇒
               sequence() = seq
@@ -214,7 +220,7 @@ object TreeNodeTab {
     }
 
     def refresh(afterRefresh: () ⇒ Unit): Unit = {
-      def saveTab = TreeNodeTab.save(safePathTab.now, editor, afterRefresh)
+      def saveTab = TreeNodeTab.save(safePathTab.now, editableEditor, afterRefresh)
 
       if (editing) {
         if (isCSV) {
@@ -227,7 +233,7 @@ object TreeNodeTab {
         download(afterRefresh)
     }
 
-    def resizeEditor = editor.editor.resize()
+    def resizeEditor = editableEditor.editor.resize()
 
     lazy val controlElement: TypedTag[HTMLElement] =
       div(
@@ -242,7 +248,7 @@ object TreeNodeTab {
         }
       )
 
-    lazy val editorView = editor.view
+    lazy val editorView = editableEditor.view
 
     val switchString = view match {
       case Table ⇒ Raw.toString
@@ -430,6 +436,11 @@ class TreeNodeTabs() {
   }
 
   def switchEditableTo(tab: TreeNodeTab, sequence: SequenceData, editableView: EditableView, filter: RowFilter, editing: Boolean, axis: (Int, Int), plotMode: PlotMode) = {
+    val newTab = TreeNodeTab.editable(tab.safePathTab.now, tab.content, sequence, editableView, editing, filter, axis, plotMode)
+    switchTab(tab, newTab)
+  }
+
+  def switchTab(tab: TreeNodeTab, to: TreeNodeTab) = {
     val index = {
       val i = tabs.now.indexOf(tab)
       if (i == -1) tabs.now.size
@@ -437,11 +448,9 @@ class TreeNodeTabs() {
     }
 
     removeTab(tab)
+    tabs() = tabs.now.take(index) ++ Seq(to) ++ tabs.now.takeRight(tabs.now.size - index)
 
-    val newTab = TreeNodeTab.editable(tab.safePathTab.now, tab.content, sequence, editableView, editing, filter, axis, plotMode)
-    tabs() = tabs.now.take(index) ++ Seq(newTab) ++ tabs.now.takeRight(tabs.now.size - index)
-
-    setActive(newTab)
+    setActive(to)
   }
 
   def alterables: Seq[AlterableFileContent] = tabs.now.filter {

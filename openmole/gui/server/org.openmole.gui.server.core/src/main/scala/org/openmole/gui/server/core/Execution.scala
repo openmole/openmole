@@ -196,7 +196,7 @@ class Execution {
 
     info.environment.errors.map { ex ⇒
       ex.exception match {
-        case fje: environment.FailedJobExecution ⇒ EnvironmentError(environmentId, fje.message, ErrorBuilder(fje.cause) + Error(s"\nDETAILS:\n${fje.detail}"), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
+        case fje: environment.FailedJobExecution ⇒ EnvironmentError(environmentId, fje.message, ErrorBuilder(fje.cause) + MessageError(s"\nDETAILS:\n${fje.detail}"), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
         case _                                   ⇒ EnvironmentError(environmentId, ex.exception.getMessage, ErrorBuilder(ex.exception), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
       }
     }

@@ -13,6 +13,7 @@ import java.io._
 import java.nio.file._
 
 import au.com.bytecode.opencsv.CSVReader
+import org.openmole.core.console.ScalaREPL
 import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
 
 import scala.util.{ Failure, Success, Try }
@@ -317,9 +318,18 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     val compilationFuture =
       threadProvider.submit(ThreadProvider.maxPriority) { () ⇒
 
-        def error(t: Throwable): Unit = execution.addError(execId, Failed(Vector.empty, ErrorBuilder(t), Seq()))
+        def error(t: Throwable): Unit = {
+          t match {
+            case ce: ScalaREPL.CompilationError ⇒ execution.addError(execId, Failed(Vector.empty, CompilationError(ce.errorMessages.map { em ⇒
+              val ewl = ErrorWithLocation(em.rawMessage, em.position.map { _.line }, em.position.map { _.start }, em.position.map { _.end })
+              println("EWL " + ewl)
+              ewl
+            }), Seq()))
+            case _ ⇒ execution.addError(execId, Failed(Vector.empty, ErrorBuilder(t), Seq()))
+          }
+        }
 
-        def message(message: String): Unit = execution.addError(execId, Failed(Vector.empty, Error(message), Seq()))
+        def message(message: String): Unit = execution.addError(execId, Failed(Vector.empty, MessageError(message), Seq()))
 
         try {
           val project = Project(script.getParentFileSafe)
@@ -440,6 +450,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     module.pluginDirectory.listFilesSafe.map(p ⇒ Plugin(p.getName, new SimpleDateFormat("dd/MM/yyyy HH:mm").format(p.lastModified)))
 
   def removePlugin(plugin: Plugin): Unit = org.openmole.gui.ext.tool.server.Utils.removePlugin(plugin)
+
   //GUI OM PLUGINS
 
   def getGUIPlugins(): AllPluginExtensionData = {

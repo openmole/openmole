@@ -7,7 +7,8 @@ import org.openmole.gui.ext.data.FileExtension._
 
 import scala.scalajs.js
 import scalatags.JsDom.all._
-import scalatags.JsDom.tags
+import scalatags.JsDom.{ TypedTag, tags }
+
 import scala.async.Async.{ async, await }
 import scaladget.ace._
 import scaladget.bootstrapnative.bsn._
@@ -15,7 +16,10 @@ import scaladget.tools._
 
 import scala.scalajs.js.JSConverters._
 import org.openmole.gui.ext.tool.client._
-import js.Dynamic.{ literal ⇒ lit }
+import org.scalajs.dom.raw.{ Element, Event, HTMLDivElement, HTMLElement }
+import scaladget.bootstrapnative.Popup
+import scaladget.bootstrapnative.Popup.{ ClickPopup, Manual, PopupPosition }
+import rx._
 
 /*
  * Copyright (C) 07/04/15 // mathieu.leclaire@openmole.org
@@ -38,28 +42,88 @@ class EditorPanelUI(initCode: String, fileType: FileExtension, containerModifier
 
   def save(onsave: () ⇒ Unit) = {}
 
-  val editorDiv = tags.div(id := "editor")
-  val editor = ace.edit(editorDiv.render)
+  val editorDiv = tags.div(id := "editor").render
+  val editor = ace.edit(editorDiv)
 
-  val view = {
+  lazy val view = {
     div(editorContainer +++ container +++ containerModifierSeq)(
       div(panelClass +++ panelDefault)(
         div(panelBody)(
-          editor.container
+          editor.container,
+          errorDiv
         )
       )
     )
   }
 
-  def sess = editor.getSession()
+  val errors: Var[Seq[ErrorWithLocation]] = Var(Seq())
 
-  def aceDoc = sess.getDocument()
+  def session = editor.getSession()
 
-  def code: String = sess.getValue()
+  def aceDoc = session.getDocument()
+
+  def code: String = session.getValue()
 
   def setCode(content: String) = editor.getSession().setValue(content)
 
   def setReadOnly(b: Boolean) = editor.setReadOnly(b)
+
+  val nbLines: Var[(Int, Int)] = Var((editor.getFirstVisibleRow.toInt, editor.getLastVisibleRow.toInt))
+
+  session.on("change", (x) ⇒ {
+    nbLines() = (editor.getFirstVisibleRow.toInt, editor.getLastVisibleRow.toInt)
+  })
+
+  session.on("changeScrollTop", x ⇒ {
+    Popover.current.now.foreach { p ⇒
+      Popover.toggle(p)
+    }
+    nbLines() = (editor.renderer.getScrollTopRow.toInt, editor.renderer.getScrollBottomRow.toInt)
+  })
+
+  def buildManualPopover(i: Int, title: String, position: PopupPosition) = {
+    lazy val pop1 = div(i)(`class` := "gutterError").popover(
+      title,
+      position,
+      Manual
+    )
+    lazy val pop1Render = pop1.render
+
+    pop1Render.onclick = { (e: Event) ⇒
+      if (Popover.current.now == pop1) Popover.hide
+      else {
+        Popover.current.now.foreach { p ⇒
+          Popover.toggle(p)
+        }
+        Popover.toggle(pop1)
+      }
+      e.stopPropagation
+    }
+    pop1Render
+  }
+
+  lazy val errorDiv: TypedTag[HTMLDivElement] = div(`class` := "gutterDecoration")(
+    Rx {
+      val range = (nbLines()._1 until nbLines()._2)
+      val topMargin = if (session.getScrollTop() > 0) marginTop := -8 else marginTop := 0
+      div(topMargin)(
+        for (
+          r ← range
+        ) yield {
+          errors().find(e ⇒ e.line == Some(r)).map { e ⇒
+            e.line.map { l ⇒
+              buildManualPopover(l, e.stackTrace, Popup.Left)
+            }.getOrElse(div(height := 15, opacity := 0).render)
+          }.getOrElse(div(height := 15, opacity := 0).render)
+        }
+      )
+    }
+  )
+
+  def setErrors(errorsWithLocation: Seq[ErrorWithLocation]) = {
+    nbLines() = (editor.getFirstVisibleRow.toInt, editor.getLastVisibleRow.toInt)
+    errors() = errorsWithLocation
+  }
 
   def initEditor = {
     fileType match {

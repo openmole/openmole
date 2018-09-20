@@ -32,7 +32,9 @@ import org.openmole.gui.ext.data.{ Error ⇒ ExecError }
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.alert.BannerAlert
 import org.openmole.gui.client.core.alert.BannerAlert.BannerMessage
+import org.openmole.gui.client.core.files.TreeNodeTabs
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.data.ExecutionInfo.Failed
 import org.openmole.gui.ext.tool.client.Utils
 import org.scalajs.dom.raw.{ HTMLElement, HTMLSpanElement }
 import rx._
@@ -168,6 +170,12 @@ class ExecutionPanel {
 
           val (details, execStatus) = info match {
             case f: ExecutionInfo.Failed ⇒
+              panels.treeNodeTabs.find(staticInfo.now(execID).path).foreach { tab ⇒
+                f.error match {
+                  case ce: CompilationError ⇒ tab.editor.foreach { _.setErrors(ce.errors) }
+                  case _                    ⇒
+                }
+              }
               addToBanner(execID, BannerAlert.div(failedDiv(execID)).critical)
               (ExecutionDetails("0", 0, Some(f.error), f.environmentStates), info.state)
             case f: ExecutionInfo.Finished ⇒

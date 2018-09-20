@@ -1,7 +1,7 @@
 package org.openmole.gui.plugin.authentication.egi
 
 import org.openmole.gui.ext.data
-import org.openmole.gui.ext.data.{ AuthenticationData, Error, Test }
+import org.openmole.gui.ext.data.{ AuthenticationData, Error, MessageError, Test }
 
 /*
  * Copyright (C) 12/01/17 // mathieu.leclaire@openmole.org
@@ -40,7 +40,7 @@ object EGIAuthenticationTest {
   ): Test = {
     val all = Seq(password, proxy, dirac)
     if (all.exists { t ⇒ t == Test.pending }) Test.pending
-    else if (all.exists { t ⇒ t.errorStack != Error.empty }) Test.error("failed", Error(s"${password.errorStack.stackTrace} \n\n ${proxy.errorStack.stackTrace} \n\n ${dirac.errorStack.stackTrace}"))
+    else if (all.exists { t ⇒ t.errorStack != Error.empty }) Test.error("failed", MessageError(s"${password.errorStack.stackTrace} \n\n ${proxy.errorStack.stackTrace} \n\n ${dirac.errorStack.stackTrace}"))
     else Test.passed(message)
   }
 }
