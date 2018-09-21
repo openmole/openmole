@@ -56,7 +56,9 @@ class EditorPanelUI(initCode: String, fileType: FileExtension, containerModifier
     )
   }
 
-  val errors: Var[Seq[ErrorWithLocation]] = Var(Seq())
+  val errors: Var[Seq[(ErrorWithLocation, String)]] = Var(Seq())
+  val errorsInEditor: Var[Seq[Int]] = Var(Seq())
+  val correctedInEditor: Var[Seq[Int]] = Var(Seq())
 
   def session = editor.getSession()
 
@@ -81,6 +83,31 @@ class EditorPanelUI(initCode: String, fileType: FileExtension, containerModifier
     nbLines() = (editor.renderer.getScrollTopRow.toInt, editor.renderer.getScrollBottomRow.toInt)
   })
 
+  editor.session.doc.on("change", x ⇒ {
+    val currentPosition = editor.getCursorPosition.row.toInt + 1
+    if (errorsInEditor.now.contains(currentPosition)) {
+      errorsInEditor.update(errorsInEditor.now.filterNot(_ == currentPosition))
+      correctedInEditor.update((correctedInEditor.now :+ currentPosition).distinct)
+    }
+    else {
+      val cor = correctedInEditor.now.filter {
+        _ == currentPosition
+      }
+      // Error cache
+      val errText = errors.now.filter {
+        _._1.line == Some(currentPosition)
+      }.map {
+        _._2
+      }.headOption.getOrElse("")
+      cor.foreach { c ⇒
+        if (errText == session.doc.getLine(currentPosition)) {
+          correctedInEditor.update(correctedInEditor.now.filterNot(_ == currentPosition))
+          errorsInEditor.update((errorsInEditor.now :+ currentPosition).distinct)
+        }
+      }
+    }
+  })
+
   def buildManualPopover(i: Int, title: String, position: PopupPosition) = {
     lazy val pop1 = div(i)(`class` := "gutterError").popover(
       title,
@@ -102,6 +129,11 @@ class EditorPanelUI(initCode: String, fileType: FileExtension, containerModifier
     pop1Render
   }
 
+  def buildCleanGutter(row: Int, corrects: Seq[Int]) = {
+    if (corrects.contains(row)) div(`class` := "gutterCorrected").render
+    else div(height := 15, opacity := 0).render
+  }
+
   lazy val errorDiv: TypedTag[HTMLDivElement] = div(`class` := "gutterDecoration")(
     Rx {
       val range = (nbLines()._1 until nbLines()._2)
@@ -110,19 +142,25 @@ class EditorPanelUI(initCode: String, fileType: FileExtension, containerModifier
         for (
           r ← range
         ) yield {
-          errors().find(e ⇒ e.line == Some(r)).map { e ⇒
-            e.line.map { l ⇒
-              buildManualPopover(l, e.stackTrace, Popup.Left)
-            }.getOrElse(div(height := 15, opacity := 0).render)
-          }.getOrElse(div(height := 15, opacity := 0).render)
+          if (errorsInEditor().exists(_ == r)) {
+            errors().find(e ⇒ e._1.line == Some(r)).map { e ⇒
+              e._1.line.map { l ⇒
+                buildManualPopover(l, e._1.stackTrace, Popup.Left)
+              }.getOrElse(buildCleanGutter(r, correctedInEditor()))
+            }.getOrElse(buildCleanGutter(r, correctedInEditor()))
+          }
+          else buildCleanGutter(r, correctedInEditor())
         }
       )
-    }
-  )
+    })
 
   def setErrors(errorsWithLocation: Seq[ErrorWithLocation]) = {
     nbLines() = (editor.getFirstVisibleRow.toInt, editor.getLastVisibleRow.toInt)
-    errors() = errorsWithLocation
+    errors() = errorsWithLocation.map { ewl ⇒ (ewl, ewl.line.map { l ⇒ session.doc.getLine(l) }.getOrElse("")) }
+    errorsInEditor() = errors.now.flatMap {
+      _._1.line
+    }
+    correctedInEditor() = Seq()
   }
 
   def initEditor = {

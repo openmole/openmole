@@ -552,5 +552,14 @@ padding-bottom: 90px;
     font-weight: bold;
     margin-left: -3px;
     width: 25px;
-    cursor: pointer;
+}
+
+.gutterCorrected {
+    background: rgba(220,220,220);
+    height: 15px;
+    border-radius: 3px;
+    color: white;
+    font-weight: bold;
+    margin-left: -3px;
+    width: 25px;
 }

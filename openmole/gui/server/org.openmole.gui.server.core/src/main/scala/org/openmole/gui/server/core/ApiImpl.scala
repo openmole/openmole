@@ -321,9 +321,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
         def error(t: Throwable): Unit = {
           t match {
             case ce: ScalaREPL.CompilationError ⇒ execution.addError(execId, Failed(Vector.empty, CompilationError(ce.errorMessages.map { em ⇒
-              val ewl = ErrorWithLocation(em.rawMessage, em.position.map { _.line }, em.position.map { _.start }, em.position.map { _.end })
-              println("EWL " + ewl)
-              ewl
+              ErrorWithLocation(em.rawMessage, em.position.map { _.line }, em.position.map { _.start }, em.position.map { _.end })
             }), Seq()))
             case _ ⇒ execution.addError(execId, Failed(Vector.empty, ErrorBuilder(t), Seq()))
           }
