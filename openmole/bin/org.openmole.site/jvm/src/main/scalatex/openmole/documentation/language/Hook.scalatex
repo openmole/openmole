@@ -1,17 +1,27 @@
 @import org.openmole.site._
 @import org.openmole.site.tools._
 
-Tasks are mute pieces of software. They are not conceived to write files, display values, or generally present
-any side effects at all. Tasks' role is to compute some output data from their input data. That's what guaranties that
-their execution can be deported to other machines.
 
-@p OpenMOLE introduces a mechanism called @b{Hooks} to save or display results generated on remote environments. Hooks
-  are conceived to perform an action upon completion of the task they are attached to.
 
-@h2{Plug a Hook}
+Tasks in OpenMOLE are mute pieces of software.
+They are not conceived to write files, display values, or generally present any side effects at all.
+The role of a task is to compute some output data from their input data.
+That's what guarantees that their execution can be deported to other machines.
+
+@br@br
+
+OpenMOLE introduces a mechanism called @b{Hooks} to save or display results generated on remote environments.
+Hooks are conceived to perform an action upon completion of the task they are attached to.
+
+
+
+@h2{How to plug a hook to a task}
 
 Let's consider this simple workflow:
-@br @hl.openmole("""
+
+@br@br
+
+@hl.openmole("""
   val i = Val[Int]
   val hello = ScalaTask("i = i * 2") set (
     inputs += i,
@@ -25,9 +35,15 @@ Let's consider this simple workflow:
     sampling = i in (0 to 9)
   )""", name = "plug a hook")
 
-@p The hook @i{h} is plugged to the end of the @i{hello} task. Everytime @i{hello} finishes, the hook @i{h} is
-executed. Multiple hooks can also be plugged to the same task as in the present example:
-@br @hl.openmole("""
+@br
+
+The hook @i{h} is plugged to the end of the @i{hello} task.
+Everytime @i{hello} finishes, the hook @i{h} is executed.
+Multiple hooks can also be plugged to the same task as shown in this next example:
+
+@br@br
+
+@hl.openmole("""
   val i = Val[Int]
 
   val hello = ScalaTask("val i = 2") set (
@@ -40,32 +56,59 @@ executed. Multiple hooks can also be plugged to the same task as in the present 
 
   (hello hook (h1, h2, h3))""", name = "plug multiple hooks")
 
-@p Hooks come in various declinations, with different actions on the results. The available hooks are described
-hereafter.
+@br
 
-@h2{Append to file}
+Hooks come in various declinations, with different actions on the results.
+The available hooks are described hereafter.
 
-Similarly to the @code{AppendToFileHook}, any string can be appended to a file, using the more general
-@code{AppendToFileHook}. The appended strings can be a combination of variables from the dataflow and plain text.
-@br @hl.openmole("""
+
+
+@h2{Hooks to write into files}
+
+@h3{Write a string}
+
+Similarly to the @code{AppendToFileHook}, any string can be appended to a file, using the more general @code{AppendToFileHook}.
+The appended strings can be a combination of variables from the dataflow and plain text.
+
+@br@br
+
+@hl.openmole("""
 val h = AppendToFileHook("/path/of/the/file.txt", "string ${i} to append")""", name = "append to file hook")
 
-@p{Append a file to another file}
+
+@h3{Write an entire file}
+
 Use the @code{AppendFileFileHook} as well.
-@br @hl.openmole("""
+
+@br@br
+
+@hl.openmole("""
 val file = Val[File]
 val h = AppendToFileHook("${file.content}", "/path/of/the/file")""", name = "append file to file hook")
 
-@h2{CSVHook}
+
+@h3{Write into a CSV file}
 
 The @code{CSVHook} takes data from the dataflow and appends it to a file formatted as CSV:
-@br @hl.openmole("""
+
+@br@br
+
+@hl.openmole("""
 val i = Val[Int]
 
 val h = CSVHook("/path/to/a/file/or/dir${i}.csv")""", name = "csv hook")
-@p The path is expanded using the variables from the dataflow (expressions between ${} are evaluated and replaced).
 
-@p The optional last parameter of @i{AppendToCSVFileHook} is the list of variables to write to the CSV file. The default behaviour when this list is not specified is to dump all the variables from the dataflow to the file. You can restrict this behaviour by @b{listing only the variables you want to save}
+@br
+
+The path is expanded using the variables from the dataflow (expressions between ${} are evaluated and replaced).
+
+@br@br
+
+The optional last parameter of @i{AppendToCSVFileHook} is the list of variables to write to the CSV file.
+The default behaviour when this list is not specified is to dump all the variables from the dataflow to the file.
+You can restrict this behaviour by @b{listing only the variables you want to save}.
+
+@br@br
 
 @p Some additional optional parameters can be passed to the CSVHook.
 @br Setting @hl.code("""csvHeader = "Col1, Col2, ColZ"""") customises the header of the CSV file to be created with the string it receives as a parameter. Please note that this only happens if the file doesn't exist when the hook is executed.
@@ -77,8 +120,22 @@ val i = Val[Int]
 
 val h = CSVHook("/path/to/a/file/or/dir${i}.csv", csvHeader = "Col1, Col2, ColZ", arrayOnRaw = true)""", name = "csv hook with options")
 
-@p This workflow demonstrates the optional behaviour of @i{AppendToCSVFileHook}:
-@br @hl.openmole("""
+@br
+
+Setting @hl.code("csvHeader := Col1, Col2, ColZ") customises the header of the CSV file to be created with the string it receives as a parameter.
+Please note that this only happens if the file doesn't exist when the hook is executed.
+
+@br
+
+@hl.code("singleRow := true") forces the flattening of the input lists such that all variables values are written to a single row/line of the CSV file.
+
+@br@br
+
+This workflow demonstrates the optional behaviour of @i{AppendToCSVFileHook}:
+
+@br@br
+
+@hl.openmole("""
   val i = Val[Int]
   val j = Val[Int]
   // this variable will not be written to the CSV file
@@ -89,31 +146,49 @@ val h = CSVHook("/path/to/a/file/or/dir${i}.csv", csvHeader = "Col1, Col2, ColZ"
     arraysOnSingleRow := true
   )""", name = "csv hook with headers")
 
-@h2{Copy file}
 
-The @code{CopyFileHook} makes it possible to copy a file / directory from the dataflow to a given location on the machine
-running OpenMOLE.
-@br @hl.openmole("""
+
+@h2{Hook to copy a file}
+
+The @code{CopyFileHook} makes it possible to copy a file/directory from the dataflow to a given location on the machine running OpenMOLE.
+
+@br@br
+
+@hl.openmole("""
   val file = Val[File]
   val i = Val[Int]
 
   val h = CopyFileHook(file, "/path/to/copy/the/file${i}.txt")""", name = "copy file hook")
 
-@h2{Display variables}
+
+
+@h2{Hooks to display results}
+
+@h3{Display variables}
 
 To display a variable in the console, use the @code{ToStringHook}:
-@br @hl.openmole("""
+
+@br@br
+
+@hl.openmole("""
   val i = Val[Int]
   val j = Val[Int]
 
   val h = ToStringHook(i, j)""", name = "to string hook")
-  If no variable is specified, @code{ToStringHook} displays the whole dataflow.
 
-@h2{Display results in the stdout}
+@br
 
-To display a string formed of variables and plain text in the console, use the @code{DisplayHook}. You can think of the
-@code{DisplayHook} as an OpenMOLE equivalent to Scala's @code{println}.
-@br @hl.openmole("""
+If no variable is specified, @code{ToStringHook} displays the whole dataflow.
+
+
+@h3{Display results in the stdout}
+
+To display a string formed of variables and plain text in the console, use the @code{DisplayHook}.
+You can think of the @code{DisplayHook} as an OpenMOLE equivalent to Scala's @code{println}.
+
+@br@br
+
+@hl.openmole("""
   val i = Val[Int]
 
   val h = DisplayHook("The value of i is ${i}.")""", name = "display hook")
@@ -125,7 +200,9 @@ To display a string formed of variables and plain text in the console, use the @
 You may want to filter outputs that are redirected to a hook, i.e. do conditional hooking.
 You can use for that the @code{ConditionHook}, built from a hook and a condition:
 
-@br @hl.openmole("""
+@br@br
+
+@hl.openmole("""
   val i = Val[Int]
 
   val display = DisplayHook("The value of i is ${i}.")
@@ -133,8 +210,6 @@ You can use for that the @code{ConditionHook}, built from a hook and a condition
 
   """, name = "condition hook")
 
+  @br
+
 Decorators exist for a simpler syntax : @code{ConditionHook(myhook,mycondition)} is equivalent to @code{myhook when mycondition} and @code{myhook condition mycondition} (where the condition can be given as a condition or a string).
-
-
-
-

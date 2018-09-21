@@ -19,6 +19,7 @@ package org.openmole.core.replication
 
 import java.io.File
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.locks.ReentrantLock
 
 import com.google.common.cache._
 import org.openmole.core.db.{ Replica, replicas }
@@ -59,6 +60,7 @@ class ReplicaCatalog(database: Database, preference: Preference) {
   def query[T](f: DBIOAction[T, slick.dbio.NoStream, scala.Nothing]): T = Await.result(database.run(f), concurrent.duration.Duration.Inf)
 
   lazy val localLock = new LockRepository[ReplicaCacheKey]
+
   type ReplicaCacheKey = (String, String, String)
 
   val replicaCache = CacheBuilder.newBuilder.asInstanceOf[CacheBuilder[ReplicaCacheKey, Replica]].
@@ -66,7 +68,7 @@ class ReplicaCatalog(database: Database, preference: Preference) {
     expireAfterAccess(preference(ReplicaCacheTime).millis, TimeUnit.MILLISECONDS).
     build[ReplicaCacheKey, Replica]
 
-  private def clean(storageId: String, removeOnStorage: String ⇒ Unit) = {
+  def clean(storageId: String, removeOnStorage: String ⇒ Unit) = {
     val time = System.currentTimeMillis
 
     for {
@@ -87,7 +89,6 @@ class ReplicaCatalog(database: Database, preference: Preference) {
     hash:      String,
     storageId: String
   ): Replica = {
-    clean(storageId, remove)
     val cacheKey = (srcPath.getCanonicalPath, hash, storageId)
     // Avoid same transfer in multiple threads
     localLock.withLock(cacheKey) {
