@@ -229,14 +229,14 @@ See how several Slots define a loop in this workflow:
   (t0 -- s1 -- (s2 when "i < 100") & (c1 hook ToStringHook()))""")
 
 
-@h3{Combining several workflow parts with @code{+}}
+@h3{Combining several workflow parts with @code{&}}
 
 In OpenMOLE the representation of the workflow has been designed to be as linear as possible, but actually workflows
 are just as graph of task and transitions.
 Sometime you cannot express complex workflows in such a linear manner.
-Therefore you may want to use the @code{+} operator to merge different part of a workflow.
-While the linear representation is more compact, the @code{+} notation provides you with more freedom in the design of the transition graph (note that you can combine the two representations in order to get both compactness and flexibility).
-The following example exposes two exactly equivalent workflows, the first design using only the linear representation and the second design using mostly the @code{+} operator:
+Therefore you may want to use the @code{&} operator to merge different part of a workflow.
+While the linear representation is more compact, the @code{&} notation provides you with more freedom in the design of the transition graph (note that you can combine the two representations in order to get both compactness and flexibility).
+The following example exposes two exactly equivalent workflows, the first design using only the linear representation and the second design using mostly the @code{&} operator:
 
 @br@br
 

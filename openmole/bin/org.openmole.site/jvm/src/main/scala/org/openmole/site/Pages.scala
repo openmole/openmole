@@ -179,10 +179,9 @@ object DocumentationPages {
       developersPages ++
       docLonelyPages
 
-  def docLonelyPages = Seq(gui, market, commandOptions, faq)
+  def docLonelyPages = Seq(gui, commandOptions, faq)
 
   lazy val gui = DocumentationPage.fromScalatex(name = "GUI", content = scalatex.documentation.GUI, title = Some("Graphical User Interface"))
-  lazy val market = DocumentationPage.fromScalatex(name = "Market", content = scalatex.documentation.Market)
   lazy val commandOptions = DocumentationPage.fromScalatex(name = "Command Options", content = scalatex.documentation.CommandOptions)
   val faq = DocumentationPage.fromScalatex(name = "FAQ", content = scalatex.FAQ, title = Some("Frequently Asked Questions"))
 
@@ -266,19 +265,23 @@ object DocumentationPages {
   // Tutorials
   lazy val tutorials = DocumentationPage.fromScalatex(name = "Tutorials", content = scalatex.tutorials.Tutorials)
 
-  def tutoPages = gettingStartedPages ++ netLogoPages
+  def tutoPages = gettingStartedPages ++ netLogoPages :+ market
+  def menuTutoPages = Seq(stepByStepIntro, netLogoGA, market)
 
   // Getting Started
   def gettingStartedPages = Seq(stepByStepIntro, exploreTuto)
-  lazy val stepByStepIntro = DocumentationPage.fromScalatex(name = "Step By Step Intro", content = scalatex.tutorials.gettingStarted.StepByStepIntro, title = Some("A Step by Step Introduction to OpenMOLE"))
+  lazy val stepByStepIntro = DocumentationPage.fromScalatex(name = "Step By Step Introduction", content = scalatex.tutorials.gettingStarted.StepByStepIntro, title = Some("A Step by Step Introduction to OpenMOLE"))
   //lazy val launchTuto = DocumentationPage.fromScalatex(name = "Launch Tuto", content = scalatex.tutorials.gettingStarted.LaunchTuto, title = Some("How to Launch and Run a Model with OpenMOLE"))
-  lazy val exploreTuto = DocumentationPage.fromScalatex(name = "Explore Tuto", content = scalatex.tutorials.gettingStarted.ExploreTuto, title = Some("How to Execute an Exploration Task"))
+  lazy val exploreTuto = DocumentationPage.fromScalatex(name = "Explore Tutorial", content = scalatex.tutorials.gettingStarted.ExploreTuto, title = Some("How to Execute an Exploration Task"))
 
   // NetLogo
   def netLogoPages = Seq(netLogoGA, simpleSAFire)
 
   lazy val netLogoGA = DocumentationPage.fromScalatex(name = "NetLogo GA", content = scalatex.tutorials.netLogo.NetLogoGA, title = Some("Using Genetic Algorithms to Calibrate a NetLogo Model"))
   lazy val simpleSAFire = DocumentationPage.fromScalatex(name = "Simple SA Fire", content = scalatex.tutorials.netLogo.SimpleSAFire, title = Some("Simple Sensitivity Analysis"))
+
+  // Market
+  lazy val market = DocumentationPage.fromScalatex(name = "Market", content = scalatex.tutorials.Market, title = Some("Market Place"))
 
   // Community
   lazy val OMcommunity = DocumentationPage.fromScalatex(name = "Community", content = scalatex.community.OMCommunity)
