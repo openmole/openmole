@@ -161,7 +161,7 @@ object DocumentationPages {
   // lazy val pageName = DocumentationPage.fromScalatex(name = "html title", content = scalatex.path.to.scalatexFile, title = Some("Titre onglet"))
 
   def headPages =
-    Seq(documentation, run, explore, scale, language, advancedConcepts, developers, tutorials, OMcommunity)
+    Seq(documentation, run, explore, scale, language, developers, tutorials, OMcommunity)
 
   val mainDocPages = runPages ++ explorePages ++ scalePages ++ Seq(scale, explore, run)
 
