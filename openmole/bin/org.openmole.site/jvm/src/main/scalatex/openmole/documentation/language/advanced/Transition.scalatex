@@ -133,6 +133,10 @@ exploration -< t1 -- (t2 hook ToStringHook(), (t3 hook ToStringHook()))""")
 When needed, it is possible to set a condition on a transition, so that the task after the transition is executed
 under this condition only.
 Conditional transitions are specified using the @hl.openmoleNoTest("when") keyword.
+
+
+@h3{Using a condition on the execution of a task}
+
 For instance we can add a condition on the execution of @code{t2} in the previous workflow:
 
 @br@br
@@ -149,6 +153,48 @@ exploration -< t1 -- (t2 hook ToStringHook() when "d < 1000")""")
 @br
 
 In this case the task @code{t2} is executed only if the variable @code{d} is greater than 1,000.
+
+
+@h3{Using a condition to define a resumable workflow}
+
+Sometimes you might want to be able to easily stop your workflow and relaunch it only on unfinished jobs.
+The following example explains how to relaunch your workflow only on unprocessed inputs or with new inputs.
+For instance if your task may fail or sometimes return empty or invalid files, you can benefit from this OpenMOLE construct.
+
+@br
+
+You will need to use a combination of the @i{when} condition and the @i{Expression} keyword: the condition is expressed using an OpenMOLE @i{Expression}. Here is an example:
+
+@br@br
+
+@hl.openmole(s"""
+// define files and name used
+val parameter = Val[Int]
+val resultFile = Val[File]
+
+// write the parameter in a file
+val writeTask = ScalaTask($tq
+  val resultFile = newFile();
+  resultFile.content = s"$$parameter"
+  $tq) set (
+    (inputs, outputs) += parameter,
+    outputs += resultFile
+  )
+
+// outputpath is the path where resultFile is stored
+val outputPath = Expression[File](workDirectory / "results/results_$${parameter}")
+
+// the file coming from each job is copied in the results folder
+val copy = CopyFileHook(resultFile, outputPath)
+
+// a job is executed only if there is no matching resultFile or an empty resultFile
+// once you've run this workflow once you can manually suppress some result files and run it again
+
+DirectSampling(
+  sampling = parameter in (0 to 100),
+  evaluation = writeTask hook copy,
+  condition = !outputPath.exists || outputPath.isEmpty
+)""")
 
 
 
