@@ -94,7 +94,7 @@ object SideMenu {
       DocumentationPages.explore,
       DocumentationPages.scale,
       DocumentationPages.language,
-      DocumentationPages.advancedConcepts,
+      DocumentationPages.geneticAlgorithm,
       DocumentationPages.developers,
       DocumentationPages.gui
     ),
