@@ -161,7 +161,7 @@ object DocumentationPages {
   // lazy val pageName = DocumentationPage.fromScalatex(name = "html title", content = scalatex.path.to.scalatexFile, title = Some("Titre onglet"))
 
   def headPages =
-    Seq(documentation, run, explore, scale, language, advancedConcepts, developers, tutorials, OMcommunity)
+    Seq(documentation, run, explore, scale, language, developers, tutorials, OMcommunity)
 
   val mainDocPages = runPages ++ explorePages ++ scalePages ++ Seq(scale, explore, run)
 
@@ -223,7 +223,7 @@ object DocumentationPages {
   // Scale
   lazy val scale = DocumentationPage.fromScalatex(name = "Scale", content = scalatex.documentation.scale.Scale, title = Some("Scale on Different Environments"))
 
-  def scalePages = Seq(cluster, egi, island, multithread, ssh)
+  def scalePages = Seq(multithread, ssh, cluster, egi, island)
   lazy val cluster = DocumentationPage.fromScalatex(name = "Cluster", content = scalatex.documentation.scale.Cluster)
   lazy val egi = DocumentationPage.fromScalatex(name = "EGI", content = scalatex.documentation.scale.EGI, title = Some("European Grid Infrastructure"))
   lazy val island = DocumentationPage.fromScalatex(name = "Island", content = scalatex.documentation.scale.Island)
@@ -233,25 +233,25 @@ object DocumentationPages {
   // Language
   lazy val language = DocumentationPage.fromScalatex(name = "Language", content = scalatex.documentation.language.Language, title = Some("The OpenMOLE Language"))
 
-  def languagePages = Seq(fileManagement, hook, scalaFunction, capsule, moleTask, source, transition)
+  def languagePages = Seq(fileManagement, scalaFunction, hook, transition, source, capsule, moleTask)
   lazy val fileManagement = DocumentationPage.fromScalatex(name = "File Management", content = scalatex.documentation.language.FileManagement)
   lazy val hook = DocumentationPage.fromScalatex(name = "Hooks", content = scalatex.documentation.language.Hook)
-  lazy val scalaFunction = DocumentationPage.fromScalatex(name = "Scala Function", content = scalatex.documentation.language.ScalaFunction)
+  lazy val scalaFunction = DocumentationPage.fromScalatex(name = "Scala Functions", content = scalatex.documentation.language.ScalaFunction)
 
   // Advanced
   lazy val capsule = DocumentationPage.fromScalatex(name = "Capsule", content = scalatex.documentation.language.advanced.Capsule)
   lazy val moleTask = DocumentationPage.fromScalatex(name = "Mole Task", content = scalatex.documentation.language.advanced.MoleTask)
   lazy val source = DocumentationPage.fromScalatex(name = "Source", content = scalatex.documentation.language.advanced.Source)
-  lazy val transition = DocumentationPage.fromScalatex(name = "Transition", content = scalatex.documentation.language.advanced.Transition)
+  lazy val transition = DocumentationPage.fromScalatex(name = "Transitions", content = scalatex.documentation.language.advanced.Transition)
 
   // Advanced Concepts
-  lazy val advancedConcepts = DocumentationPage.fromScalatex(name = "Advanced Concepts", content = scalatex.documentation.advancedConcepts.AdvancedConcepts)
+  //lazy val advancedConcepts = DocumentationPage.fromScalatex(name = "Advanced Concepts", content = scalatex.documentation.advancedConcepts.AdvancedConcepts)
 
-  def advancedConceptsPages = resumableWorkflow +: gaPages
-  lazy val resumableWorkflow = DocumentationPage.fromScalatex(name = "Resumable Workflow", content = scalatex.documentation.advancedConcepts.ResumableWorkflow)
+  def advancedConceptsPages = Seq(geneticAlgorithm, stochasticityManagement)
+  //lazy val resumableWorkflow = DocumentationPage.fromScalatex(name = "Resumable Workflow", content = scalatex.documentation.advancedConcepts.ResumableWorkflow)
 
   // Genetic Algorithms
-  def gaPages = Seq(geneticAlgorithm, stochasticityManagement)
+  //def gaPages = Seq(geneticAlgorithm, stochasticityManagement)
   lazy val geneticAlgorithm = DocumentationPage.fromScalatex(name = "Genetic Algorithms", content = scalatex.documentation.advancedConcepts.GA.GeneticAlgorithm)
   lazy val stochasticityManagement = DocumentationPage.fromScalatex(name = "Stochasticity Management", content = scalatex.documentation.advancedConcepts.GA.StochasticityManagement)
 

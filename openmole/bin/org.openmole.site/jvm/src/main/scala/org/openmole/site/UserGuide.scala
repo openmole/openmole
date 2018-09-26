@@ -109,7 +109,7 @@ object UserGuide {
       case p if DocumentationPages.advancedConceptsPages.contains(p) ⇒ integratedPage(SideMenu.advanced)
       case p if (DocumentationPages.developersPages :+ DocumentationPages.developers).contains(p) ⇒ integratedPage(SideMenu.developers)
       case p if (DocumentationPages.languagePages :+ DocumentationPages.language).contains(p) ⇒ integratedPage(SideMenu.language)
-      case p if (DocumentationPages.advancedConceptsPages :+ DocumentationPages.advancedConcepts).contains(p) ⇒ integratedPage(SideMenu.advanced)
+      case p if (DocumentationPages.advancedConceptsPages).contains(p) ⇒ integratedPage(SideMenu.advanced)
       case p if (DocumentationPages.gettingStartedPages).contains(p) ⇒ integratedPage(SideMenu.gettingStarted)
       case p if (DocumentationPages.netLogoPages).contains(p) ⇒ integratedPage(SideMenu.netLogoGA)
       case p if (DocumentationPages.communityPages :+ DocumentationPages.OMcommunity).contains(p) ⇒ integratedPage(SideMenu.community)
