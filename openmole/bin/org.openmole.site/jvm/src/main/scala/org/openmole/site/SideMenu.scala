@@ -83,6 +83,7 @@ object SideMenu {
   val language = SideMenu(DocumentationPages.languagePages, classIs(btn ++ btn_primary), "Language")
   val advanced = SideMenu(DocumentationPages.advancedConceptsPages, classIs(btn ++ btn_primary), "Advanced concepts")
   val developers = SideMenu(DocumentationPages.developersPages, classIs(btn ++ btn_primary), "Developer's documentation")
+  val tutorials = SideMenu(DocumentationPages.menuTutoPages, classIs(btn ++ btn_primary), "Tutorials")
   val gettingStarted = SideMenu(DocumentationPages.gettingStartedPages, classIs(btn ++ btn_primary), "Getting started tutorials")
   val netLogoGA = SideMenu(DocumentationPages.netLogoPages, classIs(btn ++ btn_primary), "NetLogo tutorials")
   val community = SideMenu(DocumentationPages.communityPages, classIs(btn ++ btn_primary), "Community")
