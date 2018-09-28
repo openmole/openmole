@@ -65,7 +65,7 @@ package object directsampling {
         val p = (explorationCapsule -< (wrapped.evaluationPuzzle when condition) >- aggregation) &
           (explorationCapsule -- (aggregation block (evaluation.outputs: _*)))
 
-        OutputEnvironmentPuzzleContainer(p, wrapped.evaluationPuzzle.last, wrapped.delegate)
+        OutputEnvironmentPuzzleContainer(p, aggregation.last, wrapped.delegate)
       case None ⇒
         val preTask = EmptyTask() set ((inputs, outputs) ++= sampling.prototypes)
         val afterTask = EmptyTask() set ((inputs, outputs) ++= evaluation.outputs ++ sampling.prototypes)
@@ -76,7 +76,7 @@ package object directsampling {
         val p = (explorationCapsule -< preCapsule -- (wrapped.evaluationPuzzle when condition) -- afterSlot) &
           (preCapsule -- (afterSlot block (evaluation.outputs: _*)))
 
-        OutputEnvironmentPuzzleContainer(p, wrapped.evaluationPuzzle.last, wrapped.delegate)
+        OutputEnvironmentPuzzleContainer(p, afterSlot, wrapped.delegate)
     }
   }
 
