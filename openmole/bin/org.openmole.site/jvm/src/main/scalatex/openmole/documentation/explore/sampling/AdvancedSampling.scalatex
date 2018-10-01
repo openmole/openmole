@@ -121,8 +121,8 @@ generating a new pair. OpenMOLE implements the @hl.code("ZipWithIndexSampling") 
 
     DirectSampling(
       sampling = file in (workDirectory / "dir") withName name,
-      evaluation = (t hook ToStringHook())
-    )""", name = "zip with name sampling")
+      evaluation = t
+    ) hook ToStringHook()""", name = "zip with name sampling")
 
   @p If you need to go through several levels of files you may use a sampling like this one:
 
@@ -144,9 +144,8 @@ generating a new pair. OpenMOLE implements the @hl.code("ZipWithIndexSampling") 
     sampling =
       (dir in (workDirectory / "test") withName dirName) x
       (file in dir withName fileName),
-    evaluation = t hook ToStringHook()
-  )
-  """, name = "multilevel file sampling")
+    evaluation = t
+  ) hook ToStringHook()""", name = "multilevel file sampling")
 
 @h3{Take, filter, sample samplings}
 
@@ -233,8 +232,8 @@ Some sampling combinations generates higher level samplings such as @hl.code("re
 
     DirectSampling(
       sampling = (f1 x f2) bootstrap (5, 10),
-      evaluation = stat hook ToStringHook()
-    )
+      evaluation = stat
+    ) hook ToStringHook()
 
     """, name = "bootstrap example sampling")
 

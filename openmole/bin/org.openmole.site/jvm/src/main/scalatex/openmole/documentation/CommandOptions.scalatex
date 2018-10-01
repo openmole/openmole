@@ -21,11 +21,11 @@
   @br @hl.code("""
   val exploration =
     DirectSampling(
-      evaluation = myModel on env,
+      evaluation = myModel,
       sampling = mySampling
     )
 
-  val ex = exploration start""")
+  val ex = (exploration on env) start""")
 
   @p Using the ex and the env variables you can follow the progress of the execution by using the commands: print(ex) and print(env). To cancel the execution you should use: ex.cancel.
 

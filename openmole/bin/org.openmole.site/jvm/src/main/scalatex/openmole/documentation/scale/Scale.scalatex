@@ -34,9 +34,9 @@ val env = LocalEnvironment(10)
 
 // Make the model run on the the local environment
 DirectSampling(
-  evaluation = model on env hook ToStringHook(),
+  evaluation = model,
   sampling = i in (0.0 to 100.0 by 1.0)
-)""")
+) on env hook ToStringHook()""")
 
 @p You do not need to install anything or perform any kind of configuration on the target execution environment for
 OpenMOLE to work. It reuses the infrastructure in place. You will however be required to provide the authentication
@@ -58,9 +58,9 @@ $tasks
 
 // Make the model run on the the local environment
 DirectSampling(
-  evaluation = model on env by 100 hook ToStringHook(),
+  evaluation = model,
   sampling = i in (0.0 to 1000.0 by 1.0)
-)
+)  on env by 100 hook ToStringHook()
 """, header = """
 val env = LocalEnvironment(10)
 """)

@@ -193,12 +193,11 @@ $netlogo
 $csvHook
 
 DirectSampling(
-  evaluation = fireTask hook csvHook,
+  evaluation = fireTask,
   sampling = sampling
-)""", name = "netlogo full workflow")
+) hook csvHook""", name = "netlogo full workflow")
 
 At the end of the execution, you will find the output values in a file called @i{result.csv}.
-
 
 
 @h2{Headless NetLogo model}
@@ -293,9 +292,6 @@ used directly in OpenMOLE.
 }
 
 @p The program is now ready to be parameterised and manipulated by OpenMOLE \o/
-
-
-
 
 
 

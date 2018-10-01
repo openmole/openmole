@@ -101,10 +101,10 @@ val average =
 
 val exploration =
   DirectSampling(
-    evaluation = myModel hook ToStringHook(),
+    evaluation = myModel,
     sampling = i in (0 to 10 by 1),
-    aggregation = average hook ToStringHook()
-  )
+    aggregation = average
+  ) hook ToStringHook()
 
 exploration""", name="concrete example of direct sampling")
 
