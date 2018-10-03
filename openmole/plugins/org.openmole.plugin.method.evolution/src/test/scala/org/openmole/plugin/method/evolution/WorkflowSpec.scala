@@ -24,6 +24,7 @@ import org.scalatest._
 import org.openmole.tool.types._
 import org.openmole.plugin.domain.bounds._
 import org.openmole.core.workflow.tools.Stubs._
+import org.openmole.plugin.method.evolution.Genome.GenomeBound
 
 class WorkflowSpec extends FlatSpec with Matchers {
 
@@ -97,7 +98,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
   "Bound array" should "compile" in {
     SteadyStateEvolution(
-      algorithm = boundArray(),
+      algorithm = boundArray,
       evaluation = EmptyTask(),
       parallelism = 10,
       termination = 10
@@ -106,7 +107,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
   "Island evolution" should "compile" in {
     val steady = SteadyStateEvolution(
-      algorithm = boundArray(),
+      algorithm = boundArray,
       evaluation = EmptyTask(),
       parallelism = 10,
       termination = 10
@@ -145,6 +146,13 @@ class WorkflowSpec extends FlatSpec with Matchers {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
+  }
+
+  "Genome bounds" should "compile" in {
+    import org.openmole.plugin.domain.collection._
+    val ba = Val[Array[Boolean]]
+    val b1: GenomeBound = ba in Seq(Vector(true, false), Vector(true, false))
+    val b2: GenomeBound = ba in 2
   }
 
 }
