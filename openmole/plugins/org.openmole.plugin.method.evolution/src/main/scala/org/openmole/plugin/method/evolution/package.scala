@@ -178,7 +178,7 @@ package object evolution {
       ((firstCapsule -- masterSlave) >| (Capsule(last, strain = true) when t.terminatedPrototype)) &
         (firstCapsule oo (wrapped.evaluationPuzzle, filter = Block(t.populationPrototype, t.statePrototype)))
 
-    val gaPuzzle = OutputEnvironmentPuzzleContainer(puzzle, masterSlave.last, wrapped.delegate)
+    val gaPuzzle = PuzzleContainer(puzzle, masterSlave.last, wrapped.delegate)
 
     gaPuzzle :: algorithm :: HNil
   }
@@ -284,7 +284,7 @@ package object evolution {
       ((firstCapsule -- masterSlave) >| (Capsule(last, strain = true) when t.terminatedPrototype)) &
         (firstCapsule oo (islandCapsule, Block(t.populationPrototype, t.statePrototype)))
 
-    val gaPuzzle = OutputEnvironmentPuzzleContainer(puzzle, masterSlave.last, Vector(islandCapsule))
+    val gaPuzzle = PuzzleContainer(puzzle, masterSlave.last, Vector(islandCapsule))
 
     gaPuzzle :: algorithm :: HNil
   }

@@ -41,7 +41,7 @@ package object directsampling {
     distributionSeed: OptionalArgument[Long]   = None,
     aggregation:      OptionalArgument[Puzzle] = None,
     wrap:             Boolean                  = true
-  ): OutputEnvironmentPuzzleContainer =
+  ): PuzzleContainer =
     DirectSampling(
       evaluation = evaluation,
       sampling = seed in (TakeDomain(UniformDistribution[T](distributionSeed), replications)),
@@ -55,7 +55,7 @@ package object directsampling {
     aggregation: OptionalArgument[Puzzle] = None,
     condition:   Condition                = Condition.True,
     wrap:        Boolean                  = true
-  ): OutputEnvironmentPuzzleContainer = {
+  ): PuzzleContainer = {
     val exploration = ExplorationTask(sampling)
     val explorationCapsule = Capsule(exploration, strain = true)
     val wrapped = wrapPuzzle(evaluation, sampling.prototypes.toSeq, evaluation.outputs, wrap = wrap)
@@ -65,7 +65,7 @@ package object directsampling {
         val p = (explorationCapsule -< (wrapped.evaluationPuzzle when condition) >- aggregation) &
           (explorationCapsule -- (aggregation block (evaluation.outputs: _*)))
 
-        OutputEnvironmentPuzzleContainer(p, aggregation.last, wrapped.delegate)
+        PuzzleContainer(p, aggregation.last, wrapped.delegate)
       case None ⇒
         val preTask = EmptyTask() set ((inputs, outputs) ++= sampling.prototypes)
         val afterTask = EmptyTask() set ((inputs, outputs) ++= evaluation.outputs ++ sampling.prototypes)
@@ -76,7 +76,7 @@ package object directsampling {
         val p = (explorationCapsule -< preCapsule -- (wrapped.evaluationPuzzle when condition) -- afterSlot) &
           (preCapsule -- (afterSlot block (evaluation.outputs: _*)))
 
-        OutputEnvironmentPuzzleContainer(p, afterSlot, wrapped.delegate)
+        PuzzleContainer(p, afterSlot, wrapped.delegate)
     }
   }
 
