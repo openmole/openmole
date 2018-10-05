@@ -87,7 +87,7 @@ The change of regime clearly appears between 50% and 75% percent density, so we 
 
 @break
 
-This gives us the following scatter plot, where we added an "estimator" (or predictor)  curve (geom_smooth() from @a("ggplot2 R library", href:=shared.link.ggplot2) to be precise) that acts like a floating estimator in the collection of points, giving the statistical tendency of the Y-Axis values of points along the X-axis.
+This gives us the following scatter plot, where we added a summary curve (using the geom_smooth() function from @a("ggplot2 R library", href:=shared.link.ggplot2)) which acts like a smoother, giving the statistical trend of the Y-Axis values of points along the X-axis.
 
 @br@br
 @img(src := org.openmole.site.Resource.img.method.densityBurnedZoom.file, stylesheet.center(80))
@@ -95,7 +95,7 @@ This gives us the following scatter plot, where we added an "estimator" (or pred
 @br
 
 
-That's pretty cool already ! The estimator gives us a nice sigmoïd shape on which we could find the mid point, the steepness of the curve and so on, to better characterize the phenomenon.
+The trend appears to be a sigmoïd shape on which we could find the mid point, the steepness of the curve and so on, to better characterize the phenomenon.
 @break
 Eventually, let's have a look at the stochasticity of the model. Looking at the plot, we see that there is a lot of variation possible, especially in the transition zone,  around 60% density.
 Let's make a final exploration Task to investigate the variation of model outputs for several replications of the same parameterization.
@@ -129,12 +129,11 @@ Another interesting thing to investigate what would be the density from which th
 
 
 @p
-For completeness sake, here is the R code snippet to produce plots from your results file (RSutdio version 1.0.153, ggplot2 version 2.2.1)
+For completeness sake, here is the R code snippet to produce plots from your results file (RStudio version 1.0.153, ggplot2 version 2.2.1). The result files correspond to the experiments above in the same order.
 
 
 @hl.highlight("""
     library(ggplot2)
-    setwd("~/dev/DocOpenMoleSensitivity/")
 
     df <- read.csv("result.csv")
     dfzoom <- read.csv("resultZoom.csv")
@@ -168,6 +167,13 @@ For completeness sake, here is the R code snippet to produce plots from your res
     ppp
 ""","R")
 
+
+
+
+
+@h2{To go further}
+
+In the @a("next tutorial", href := DocumentationPages.netLogoGA.file), more advanced methods such as calibration using genetic algorithms are shown still on a NetLogo model.
 
 
 
