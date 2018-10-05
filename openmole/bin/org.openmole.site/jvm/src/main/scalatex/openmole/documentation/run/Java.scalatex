@@ -99,11 +99,11 @@ OpenMOLE makes the inclusion of your own Java code in a workflow simple. Since t
   val csvHook = AppendToCSVFileHook(workDirectory / "result.csv")
 
   DirectSampling(
-    evaluation = javaTask hook csvHook,
+    evaluation = javaTask,
     sampling =
       (arg1 in (0.0 to 10.0 by 1.0)) x
       (arg2 in (0.0 until 10.0 by 1.0))
-  )""")
+  ) hook csvHook""")
 
 @p
   This workflow will call the function @i{hello} with both arguments varying from 0 to 10 and save the results in a CSV file. Variables @i{arg1} and @i{arg2} are specified in the task output so that they are also written to the CSV file by the hook (see @aa("Hooks", href := DocumentationPages.hook.file))
@@ -169,9 +169,9 @@ OpenMOLE makes the inclusion of your own Java code in a workflow simple. Since t
       )
 
     DirectSampling(
-      evaluation = javaTask hook copyHook,
+      evaluation = javaTask,
       sampling = proto1 in (0 to 10)
-    )""")
+    ) hook copyHook""")
 
   @p
     For this example to work you should create a file named "input.txt" in the work directory of your project.

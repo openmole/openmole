@@ -7,7 +7,7 @@ def settings = Seq(
   resolvers += DefaultMavenRepository,
   resolvers += Resolver.sonatypeRepo("snapshots"),
   resolvers += Resolver.sonatypeRepo("releases"),
-  scalaVersion in Global := "2.12.6",
+  scalaVersion in Global := "2.12.7",
   scalacOptions ++= Seq("-deprecation"),
   publishArtifact in (packageDoc in publishLocal) := false,
   publishArtifact in (packageSrc in publishLocal) := false,
@@ -146,13 +146,13 @@ lazy val netlogo6 = OsgiProject(
   //resolvers += Resolver.bintrayRepo("netlogo", "NetLogo-JVM"),
   libraryDependencies ++= Seq(
     "org.nlogo" % "netlogo" % netLogo6Version % "provided" from s"https://dl.bintray.com/netlogo/NetLogo-JVM/org/nlogo/netlogo/$netLogo6Version/netlogo-$netLogo6Version.jar",
-    "org.scala-lang" % "scala-library" % "2.12.1" % "provided",
-    "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4" % "provided",
-    "commons-codec" % "commons-codec" % "1.11" % "provided",
+    "org.scala-lang" % "scala-library" % "2.12.4" % "provided",
+    "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.5" % "provided",
+    "commons-codec" % "commons-codec" % "1.10" % "provided",
     "org.ow2.asm" % "asm-all" % "5.0.4" % "provided",
     "org.picocontainer" % "picocontainer" % "2.13.6" % "provided",
     "org.parboiled" %% "parboiled" % "2.1.3" % "provided"
-  ), version := netLogo6Version, scalaVersion := "2.12.1", crossPaths := false) settings(settings: _*)
+  ), version := netLogo6Version, scalaVersion := "2.12.4", crossPaths := false) settings(settings: _*)
 
 lazy val scalaTagsVersion = "0.6.5"
 lazy val scalaRxVersion = "0.4.0"

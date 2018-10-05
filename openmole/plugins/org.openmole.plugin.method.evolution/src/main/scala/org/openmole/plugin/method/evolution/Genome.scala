@@ -40,6 +40,9 @@ object Genome {
     implicit def factorIsSequenceOfEnumeration[D, T](f: Factor[D, Array[T]])(implicit fix: Fix[D, Array[T]]) =
       SequenceOfEnumeration(f.prototype, fix.apply(f.domain).toVector)
 
+    implicit def factorOfBooleanIsSequenceOfEnumeration(f: Factor[Int, Array[Boolean]]) =
+      SequenceOfEnumeration(f.prototype, Vector.fill(f.domain)(Array(true, false)))
+
     def toVal(b: GenomeBound) = b match {
       case b: GenomeBound.ScalarDouble             ⇒ b.v
       case b: GenomeBound.ScalarInt                ⇒ b.v

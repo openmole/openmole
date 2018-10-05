@@ -36,15 +36,24 @@ object AppendToCSVFileHook {
     override def arraysOnSingleRow = AppendToCSVFileHook.arraysOnSingleRow
   }
 
-  def apply(file: FromContext[File], prototypes: Val[_]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(file: FromContext[File], values: Val[_]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): AppendToCSVFileHook =
+    AppendToCSVFileHook(
+      file,
+      values.toVector)
+
+  def apply(
+    file:       FromContext[File],
+    values:     Seq[Val[_]]                 = Vector.empty,
+    header:     Option[FromContext[String]] = None,
+    arrayOnRow: Boolean                     = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new AppendToCSVFileHook(
       file,
-      prototypes.toVector,
-      header = None,
-      arraysOnSingleRow = false,
+      values.toVector,
+      header = header,
+      arraysOnSingleRow = arrayOnRow,
       config = InputOutputConfig(),
       info = InfoConfig()
-    ) set (inputs += (prototypes: _*))
+    ) set (inputs += (values: _*))
 
 }
 
