@@ -21,13 +21,16 @@ import org.openmole.gui.ext.tool.client.FileManager
 import DataUtils._
 import com.definitelyscala.plotlyjs.PlotType
 import net.scalapro.sortable._
+import org.omg.PortableServer.POAManagerPackage.State
 import org.openmole.gui.client.core.files.TreeNodeTab.{ EditableView, RowFilter }
 import org.openmole.gui.client.tool.plot
 import org.openmole.gui.client.tool.plot.Plot.{ PlotMode, ScatterMode, XYMode }
 import org.openmole.gui.client.tool.plot._
 import org.openmole.gui.client.tool.plot.Tools._
 import scaladget.bootstrapnative.DataTable
+import rx._
 
+import scala.collection.immutable.HashMap
 import scala.scalajs.js.timers._
 
 object TreeNodeTabs {
@@ -38,6 +41,32 @@ object TreeNodeTabs {
 
   object UnActive extends Activity
 
+  val omsErrorCache =
+    //collection.mutable.HashMap[SafePath, Seq[(ErrorWithLocation, String)]]()
+    Var(HashMap[SafePath, EditorErrors]())
+
+  //  def cache(sp: SafePath, editorErrors: EditorErrors) = {
+  //    omsErrorCache.update(omsErrorCache.now.updated(sp, editorErrors))
+  //  }
+
+  def errors(safePath: SafePath): Rx[Seq[ErrorFromCompiler]] = omsErrorCache.map {
+    _.get(safePath).map { ee ⇒ ee.errorsFromCompiler }.getOrElse(Seq())
+  }
+
+  def errorsInEditor(safePath: SafePath): Rx[Seq[Int]] = omsErrorCache.map {
+    _.get(safePath).map { ee ⇒ ee.errorsInEditor }.getOrElse(Seq())
+  }
+
+  def updateErrorsInEditor(safePath: SafePath, n: Seq[Int]) = {
+    omsErrorCache.update(omsErrorCache.now.updated(safePath, omsErrorCache.now.getOrElse(safePath, EditorErrors()).copy(errorsInEditor = n)))
+  }
+
+  def updateErrors(safePath: SafePath, errorsFromCompiler: Seq[ErrorFromCompiler]) = {
+    omsErrorCache.update(omsErrorCache.now.updated(safePath, omsErrorCache.now.getOrElse(safePath, EditorErrors()).copy(errorsFromCompiler = errorsFromCompiler)))
+    //    omsErrorCache.get(safePath).map(_.copy(errorsFromCompiler = errorsFromCompiler)).foreach { eie ⇒
+    //      omsErrorCache.update(safePath, eie)
+    //    }
+  }
 }
 
 import TreeNodeTabs._
@@ -50,9 +79,19 @@ sealed trait TreeNodeTab {
   val tabName = Var(safePathTab.now.name)
   val id: String = getUUID
 
-  def activate = activity() = Active
+  def activate = {
+    activity() = Active
+    onActivate()
+  }
 
-  def desactivate = activity() = UnActive
+  def desactivate = {
+    activity() = UnActive
+    onDesactivate()
+  }
+
+  def onActivate: () ⇒ Unit = () ⇒ {}
+
+  def onDesactivate: () ⇒ Unit = () ⇒ {}
 
   def extension: FileExtension = safePathTab.now.name
 
@@ -89,13 +128,19 @@ object TreeNodeTab {
 
     lazy val safePathTab = Var(safePath)
 
-    lazy val omsEditor = EditorPanelUI(FileExtension.OMS, initialContent)
+    lazy val omsEditor = EditorPanelUI(safePath, FileExtension.OMS, initialContent)
+
     def editor = Some(omsEditor)
+
     omsEditor.initEditor
 
     def editable = true
 
     def editing = true
+
+    override def onActivate: () ⇒ Unit = {
+      () ⇒ omsEditor.setNbLines
+    }
 
     def content = omsEditor.code
 
@@ -124,9 +169,11 @@ object TreeNodeTab {
 
     def editing: Boolean = false
 
-    def refresh(afterRefresh: () ⇒ Unit): Unit = () ⇒ {}
+    def refresh(afterRefresh: () ⇒ Unit): Unit = () ⇒ {
+    }
 
-    def resizeEditor = {}
+    def resizeEditor = {
+    }
 
     lazy val controlElement: TypedTag[HTMLElement] = div()
 
@@ -194,8 +241,10 @@ object TreeNodeTab {
       case _        ⇒ sequence.now.content
     }
 
-    lazy val editableEditor = EditorPanelUI(extension, initialContent, if (isCSV) paddingBottom := 80 else emptyMod)
+    lazy val editableEditor = EditorPanelUI(safePath, extension, initialContent, if (isCSV) paddingBottom := 80 else emptyMod)
+
     def editor = Some(editableEditor)
+
     editableEditor.initEditor
 
     def editable = true
@@ -205,13 +254,15 @@ object TreeNodeTab {
     def download(afterRefresh: () ⇒ Unit) = editor.synchronized {
       FileManager.download(
         safePathTab.now,
-        (p: ProcessState) ⇒ {},
+        (p: ProcessState) ⇒ {
+        },
         (cont: String) ⇒ {
           editableEditor.setCode(cont)
           if (isCSV) {
-            post()[Api].sequence(safePathTab.now).call().foreach { seq ⇒
-              sequence() = seq
-              afterRefresh()
+            post()[Api].sequence(safePathTab.now).call().foreach {
+              seq ⇒
+                sequence() = seq
+                afterRefresh()
             }
           }
           else afterRefresh()
@@ -240,8 +291,9 @@ object TreeNodeTab {
         Rx {
           if (isEditing()) div()
           else if (view == Raw) {
-            button("Edit", btn_primary, onclick := { () ⇒
-              isEditing() = !isEditing.now
+            button("Edit", btn_primary, onclick := {
+              () ⇒
+                isEditing() = !isEditing.now
             })
           }
           else div()
@@ -319,20 +371,19 @@ object TreeNodeTab {
         else div,
         view match {
           case Table ⇒
-            div(overflow := "auto", height := "90%")(
-              {
-                if (!sequence.now.header.isEmpty && !filteredSequence.isEmpty) {
-                  val table =
-                    scaladget.bootstrapnative.DataTable(
-                      Some(scaladget.bootstrapnative.Table.Header(sequence.now.header)),
-                      filteredSequence.map {
-                        scaladget.bootstrapnative.DataTable.DataRow(_)
-                      }.toSeq,
-                      scaladget.bootstrapnative.Table.BSTableStyle(bordered_table, emptyMod), true)
-                  table.render(width := sequence.now.header.length * 90)
-                }
-                else div()
+            div(overflow := "auto", height := "90%")({
+              if (!sequence.now.header.isEmpty && !filteredSequence.isEmpty) {
+                val table =
+                  scaladget.bootstrapnative.DataTable(
+                    Some(scaladget.bootstrapnative.Table.Header(sequence.now.header)),
+                    filteredSequence.map {
+                      scaladget.bootstrapnative.DataTable.DataRow(_)
+                    }.toSeq,
+                    scaladget.bootstrapnative.Table.BSTableStyle(bordered_table, emptyMod), true)
+                table.render(width := sequence.now.header.length * 90)
               }
+              else div()
+            }
             )
           case Raw ⇒ editorView
           case _ ⇒
@@ -402,6 +453,8 @@ class TreeNodeTabs() {
     }
     tab.activate
   }
+
+  def isActive(safePath: SafePath) = tabs.now.filter { _.safePathTab.now == safePath }.map { _.activity }.headOption.getOrElse(Var(TreeNodeTabs.UnActive))
 
   def unActiveAll = tabs.map {
     _.foreach { t ⇒

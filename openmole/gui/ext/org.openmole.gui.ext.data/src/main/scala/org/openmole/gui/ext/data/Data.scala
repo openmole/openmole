@@ -273,7 +273,6 @@ object Error {
   def empty = MessageError("")
 }
 
-case class ErrorWithLocation(stackTrace: String, line: Option[Int] = None, start: Option[Int], end: Option[Int] )
 sealed trait Error {
   def stackTrace: String
 }
@@ -818,3 +817,8 @@ case class WizardModelData(
                           )
 
 case class WizardToTask(safePath: SafePath, errors: Seq[Error] = Seq())
+
+
+case class ErrorWithLocation(stackTrace: String = "", line: Option[Int] = None, start: Option[Int] = None, end: Option[Int]=None)
+case class ErrorFromCompiler(errorWithLocation: ErrorWithLocation = ErrorWithLocation(), lineContent: String = "")
+case class EditorErrors(errorsFromCompiler: Seq[ErrorFromCompiler] = Seq(), errorsInEditor: Seq[Int] = Seq())

@@ -175,7 +175,7 @@ class ExecutionPanel {
               panels.treeNodeTabs.find(staticInfo.now(execID).path).foreach { tab ⇒
                 f.error match {
                   case ce: CompilationError ⇒ tab.editor.foreach { _.setErrors(ce.errors) }
-                  case _                    ⇒
+                  case _ ⇒
                 }
               }
               addToBanner(execID, BannerAlert.div(failedDiv(execID)).critical)
