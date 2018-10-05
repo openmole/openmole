@@ -163,7 +163,7 @@ package object tools {
     )
 
   def modificationLink(source: String) =
-    s"https://github.com/openmole/openmole/edit/dev/openmole/bin/org.openmole.site/jvm/src/main/scalatex/$source"
+    s"https://github.com/openmole/openmole/edit/${org.openmole.core.buildinfo.version.major}-dev/openmole/bin/org.openmole.site/jvm/src/main/scalatex/$source"
 
   def rightGlyphButton(title: String, page: Page, glyph: String, openInOtherTab: Boolean = false, buttonStyle: Seq[Modifier] = Seq(classIs(btn ++ btn_default))) =
     to(page)(if (openInOtherTab) targetBlank else "")(
