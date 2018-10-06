@@ -214,6 +214,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   override def start() = {
     proxyCache()
     if (storages.map(_.toOption).flatten.isEmpty) throw new InternalProcessingError(s"No webdav storage is working for the VO $voName", MultipleException(storages.collect { case util.Failure(e) ⇒ e }))
+    storages.map(_.toOption).flatten.foreach { case (space, storage) ⇒ HierarchicalStorageSpace.clean(storage, space) }
     jobService
   }
 

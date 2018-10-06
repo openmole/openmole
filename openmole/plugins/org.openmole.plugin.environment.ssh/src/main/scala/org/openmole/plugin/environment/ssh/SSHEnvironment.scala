@@ -144,15 +144,13 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   override def start() = {
     storageService
+    cleanSSHStorage(storageService)
     import services.threadProvider
     Updater.delay(jobUpdater, services.preference(SSHEnvironment.updateInterval))
   }
 
   override def stop() = {
-    storageService match {
-      case Left((space, local)) ⇒ HierarchicalStorageSpace.clean(local, space)
-      case Right((space, ssh))  ⇒ HierarchicalStorageSpace.clean(ssh, space)
-    }
+    cleanSSHStorage(storageService)
     jobUpdater.stop = true
     sshInterpreter().close
   }

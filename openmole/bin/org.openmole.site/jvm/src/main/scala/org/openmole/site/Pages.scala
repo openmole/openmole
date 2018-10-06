@@ -177,6 +177,7 @@ object DocumentationPages {
       languagePages ++
       advancedConceptsPages ++
       developersPages ++
+      tutoPages ++
       docLonelyPages
 
   def docLonelyPages = Seq(gui, commandOptions, faq)
@@ -265,20 +266,13 @@ object DocumentationPages {
   // Tutorials
   lazy val tutorials = DocumentationPage.fromScalatex(name = "Tutorials", content = scalatex.tutorials.Tutorials)
 
-  def tutoPages = gettingStartedPages ++ netLogoPages :+ market
-  def menuTutoPages = Seq(stepByStepIntro, netLogoGA, market)
+  def tutoPages = Seq(stepByStepIntro, exploreTuto, simpleSAFire, netLogoGA, market)
 
-  // Getting Started
-  def gettingStartedPages = Seq(stepByStepIntro, exploreTuto)
   lazy val stepByStepIntro = DocumentationPage.fromScalatex(name = "Step By Step Introduction", content = scalatex.tutorials.gettingStarted.StepByStepIntro, title = Some("A Step by Step Introduction to OpenMOLE"))
   //lazy val launchTuto = DocumentationPage.fromScalatex(name = "Launch Tuto", content = scalatex.tutorials.gettingStarted.LaunchTuto, title = Some("How to Launch and Run a Model with OpenMOLE"))
   lazy val exploreTuto = DocumentationPage.fromScalatex(name = "Explore Tutorial", content = scalatex.tutorials.gettingStarted.ExploreTuto, title = Some("How to Execute an Exploration Task"))
-
-  // NetLogo
-  def netLogoPages = Seq(netLogoGA, simpleSAFire)
-
-  lazy val netLogoGA = DocumentationPage.fromScalatex(name = "NetLogo GA", content = scalatex.tutorials.netLogo.NetLogoGA, title = Some("Using Genetic Algorithms to Calibrate a NetLogo Model"))
-  lazy val simpleSAFire = DocumentationPage.fromScalatex(name = "Simple SA Fire", content = scalatex.tutorials.netLogo.SimpleSAFire, title = Some("Simple Sensitivity Analysis"))
+  lazy val simpleSAFire = DocumentationPage.fromScalatex(name = "Fire Sensitivity Analysis", content = scalatex.tutorials.netLogo.SimpleSAFire, title = Some("Simple Sensitivity Analysis with the Fire Model"))
+  lazy val netLogoGA = DocumentationPage.fromScalatex(name = "NetLogo and Genetic Algorithms", content = scalatex.tutorials.netLogo.NetLogoGA, title = Some("Using Genetic Algorithms to Calibrate a NetLogo Model"))
 
   // Market
   lazy val market = DocumentationPage.fromScalatex(name = "Market", content = scalatex.tutorials.Market, title = Some("Market Place"))
