@@ -50,7 +50,7 @@ class NativeWizardApiImpl(s: Services) extends NativeWizardAPI {
     resources:      Resources,
     data:           NativeWizardData): WizardToTask = {
 
-    val data = wizardModelData(inputs, outputs, resources.all.map { _.safePath.name }, Some("netLogoInputs"), Some("netLogoOutputs"))
+    val data = wizardModelData(inputs, outputs, resources.all.map { _.safePath.name }, Some("inputs"), Some("outputs"))
     val task = s"${executableName.split('.').head.toLowerCase}Task"
 
     val content = data.vals +

@@ -73,18 +73,17 @@ val finalTicksFood1 = Val[Double]
 val finalTicksFood2 = Val[Double]
 val finalTicksFood3 = Val[Double]
 // NetLogo command list
-val launch = List("setup","random-seed ${seed}","go;;You should set your stopping criteria here instead")
+val launch = List("setup","go;;You should set your stopping criteria here instead")
 
 // NetLogo task
-val antsTask = NetLogo6Task(workDirectory / "ants.nlogo", launch, embedWorkspace = true) set(
-  inputs += (seed),
-  netLogoInputs += (diffusionRate, "diffusion-rate"),
-  netLogoInputs += (evaporationRate, "evaporation-rate"),
-  netLogoInputs += (population, "population"),
-  netLogoOutputs += ("count-food", countFood),
-  netLogoOutputs += ("final-ticks-food1", finalTicksFood1),
-  netLogoOutputs += ("final-ticks-food2", finalTicksFood2),
-  netLogoOutputs += ("final-ticks-food3", finalTicksFood3),
+val antsTask = NetLogo6Task(workDirectory / "ants.nlogo", launch, embedWorkspace = true,seed=seed) set(
+  inputs += diffusionRate mapped "diffusion-rate",
+  inputs += evaporationRate mapped "evaporation-rate",
+  inputs += population mapped "population",
+  outputs += countFood mapped "count-food",
+  outputs += finalTicksFood1 mapped "final-ticks-food1",
+  outputs += finalTicksFood2 mapped "final-ticks-food2",
+  outputs += finalTicksFood3 mapped "final-ticks-food3",
   // Default values. Can be removed if OpenMOLE Vals are set by values coming from the workflow
   seed := 0,
   diffusionRate := 21,

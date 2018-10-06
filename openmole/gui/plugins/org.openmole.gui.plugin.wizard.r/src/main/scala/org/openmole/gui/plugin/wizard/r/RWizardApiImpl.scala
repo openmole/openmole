@@ -42,7 +42,7 @@ class RWizardApiImpl(s: Services) extends RWizardAPI {
 
     val modelData = wizardModelData(inputs, outputs, resources.all.map {
       _.safePath.name
-    } :+ executableName, Some("rInputs"), Some("rOuputs"))
+    } :+ executableName, Some("inputs"), Some("ouputs"))
 
     val task = s"${executableName.split('.').head.toLowerCase}Task"
 
