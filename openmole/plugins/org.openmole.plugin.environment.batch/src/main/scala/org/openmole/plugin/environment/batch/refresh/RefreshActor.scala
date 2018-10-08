@@ -32,21 +32,21 @@ object RefreshActor extends JavaLogger {
       try {
         val oldState = job.state
         job.state = bj.updateState()
-        if (job.state == DONE) JobManager ! GetResult(job, bj.resultPath(), bj)
-        else if (!job.state.isFinal) {
-          val newDelay =
-            if (oldState == job.state)
-              (delay + bj.updateInterval.incrementUpdateInterval) min bj.updateInterval.maxUpdateInterval
-            else bj.updateInterval.minUpdateInterval
-          JobManager ! Delay(Refresh(job, bj, newDelay, 0), newDelay)
+        job.state match {
+          case DONE ⇒ JobManager ! GetResult(job, bj.resultPath(), bj)
+          case FAILED ⇒
+            val exception = new InternalProcessingError(s"""Job status is FAILED""".stripMargin)
+            val stdOutErr = BatchJobControl.tryStdOutErr(bj).toOption
+            JobManager ! Error(job, exception, stdOutErr)
+            JobManager ! Kill(job, Some(bj))
+          case SUBMITTED | RUNNING ⇒
+            val newDelay =
+              if (oldState == job.state) (delay + bj.updateInterval.incrementUpdateInterval) min bj.updateInterval.maxUpdateInterval
+              else bj.updateInterval.minUpdateInterval
+            JobManager ! Delay(Refresh(job, bj, newDelay, 0), newDelay)
+          case KILLED ⇒
+          case _      ⇒ throw new InternalProcessingError(s"Job ${job} is in state ${job.state} while being refreshed")
         }
-        else if (job.state == FAILED) {
-          val exception = new InternalProcessingError(s"""Job status is FAILED""".stripMargin)
-          val stdOutErr = BatchJobControl.tryStdOutErr(bj).toOption
-          JobManager ! Error(job, exception, stdOutErr)
-          JobManager ! Kill(job, Some(bj))
-        }
-        else JobManager ! Kill(job, Some(bj))
       }
       catch {
         case _: ResubmitException ⇒
