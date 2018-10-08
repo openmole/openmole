@@ -9,6 +9,7 @@ import java.util.regex.Pattern
 import scala.util._
 import squants.time.TimeConversions._
 import gridscale._
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment }
 import org.openmole.plugin.environment.batch.refresh.{ JobManager, RetryAction }
 import org.openmole.tool.cache.Lazy
@@ -25,18 +26,28 @@ object HierarchicalStorageSpace extends JavaLogger {
     val persistent = "persistent/"
     val tmp = "tmp/"
 
-    val baseDirectory = createBasePath(s, root, isConnectionError)
+    val baseDirectory =
+      try createBasePath(s, root, isConnectionError)
+      catch {
+        case e: Throwable ⇒ throw new InternalProcessingError(s"Error creating base directory $root on storage $s", e)
+      }
 
-    val replicaDirectory = {
-      val dir = hierarchicalStorageInterface.child(s, baseDirectory, persistent)
-      if (!storageInterface.exists(s, dir)) hierarchicalStorageInterface.makeDir(s, dir)
-      dir
+    val replicaDirectory = hierarchicalStorageInterface.child(s, baseDirectory, persistent)
+
+    try {
+      if (!storageInterface.exists(s, replicaDirectory)) hierarchicalStorageInterface.makeDir(s, replicaDirectory)
+    }
+    catch {
+      case e: Throwable ⇒ throw new InternalProcessingError(s"Error creating replica directory $replicaDirectory on storage $s", e)
     }
 
-    val tmpDirectory = {
-      val dir = hierarchicalStorageInterface.child(s, baseDirectory, tmp)
-      if (!storageInterface.exists(s, dir)) hierarchicalStorageInterface.makeDir(s, dir)
-      dir
+    val tmpDirectory = hierarchicalStorageInterface.child(s, baseDirectory, tmp)
+
+    try {
+      if (!storageInterface.exists(s, tmpDirectory)) hierarchicalStorageInterface.makeDir(s, tmpDirectory)
+    }
+    catch {
+      case e: Throwable ⇒ throw new InternalProcessingError(s"Error creating tmp directory $tmpDirectory on storage $s", e)
     }
 
     StorageSpace(baseDirectory, replicaDirectory, tmpDirectory)
