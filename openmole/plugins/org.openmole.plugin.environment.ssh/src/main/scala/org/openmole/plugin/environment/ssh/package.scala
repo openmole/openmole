@@ -203,5 +203,11 @@ package object ssh {
   }
 
 
+  def cleanSSHStorage(storage: Either[(StorageSpace, LocalStorage), (StorageSpace, SSHStorage)])(implicit services: BatchEnvironment.Services, s: Effect[_root_.gridscale.ssh.SSH], l: Effect[_root_.gridscale.local.Local]) =
+    storage match {
+      case Left((space, local)) ⇒ HierarchicalStorageSpace.clean(local, space)
+      case Right((space, ssh))  ⇒ HierarchicalStorageSpace.clean(ssh, space)
+    }
+
 
 }

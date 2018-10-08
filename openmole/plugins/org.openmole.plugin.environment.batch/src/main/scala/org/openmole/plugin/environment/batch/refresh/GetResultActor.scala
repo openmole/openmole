@@ -39,16 +39,15 @@ object GetResultActor extends JavaLogger {
   def receive(msg: GetResult)(implicit services: BatchEnvironment.Services) = {
     val GetResult(job, resultPath, batchJob) = msg
 
-    try {
-      getResult(batchJob.storageId, batchJob.environment, batchJob.download, resultPath, job)
-      JobManager ! Kill(job, Some(batchJob))
-    }
+    try getResult(batchJob.storageId, batchJob.environment, batchJob.download, resultPath, job)
     catch {
       case e: Throwable ⇒
         job.state = ExecutionState.FAILED
         val stdOutErr = BatchJobControl.tryStdOutErr(batchJob).toOption
         JobManager ! Error(job, e, stdOutErr)
-        JobManager ! Kill(job, Some(batchJob))
+    }
+    finally {
+      JobManager ! Kill(job, Some(batchJob))
     }
   }
 

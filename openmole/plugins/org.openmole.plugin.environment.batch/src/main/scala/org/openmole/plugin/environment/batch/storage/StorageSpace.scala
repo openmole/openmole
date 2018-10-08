@@ -15,7 +15,7 @@ import org.openmole.tool.cache.Lazy
 import org.openmole.tool.logger.JavaLogger
 
 object StorageSpace {
-  def timedUniqName = org.openmole.tool.file.uniqName(System.currentTimeMillis.toString, ".rep", separator = "_")
+  def timedUniqName = org.openmole.tool.file.uniqName(System.currentTimeMillis.toString, "", separator = "_")
 }
 
 object HierarchicalStorageSpace extends JavaLogger {

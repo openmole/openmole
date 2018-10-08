@@ -133,13 +133,11 @@ class CondorEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   override def start() = {
     storageService
+    cleanSSHStorage(storageService)
   }
 
   override def stop() = {
-    storageService match {
-      case Left((space, local)) ⇒ HierarchicalStorageSpace.clean(local, space)
-      case Right((space, ssh))  ⇒ HierarchicalStorageSpace.clean(ssh, space)
-    }
+    cleanSSHStorage(storageService)
     sshInterpreter().close
   }
 
@@ -195,7 +193,7 @@ class CondorLocalEnvironment(
   implicit val localInterpreter = gridscale.local.Local()
   implicit val systemInterpreter = effectaside.System()
 
-  override def start() = { storage; space }
+  override def start() = { storage; HierarchicalStorageSpace.clean(storage, space); space }
   override def stop() = { HierarchicalStorageSpace.clean(storage, space) }
 
   import env.services.preference
