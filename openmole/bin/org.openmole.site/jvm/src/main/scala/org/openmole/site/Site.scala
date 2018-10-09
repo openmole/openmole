@@ -124,7 +124,7 @@ object Site extends App {
 
           val (sitePage, elementClass) =
             page match {
-              case Pages.index ⇒ (ContentPage(div(paddingTop := 100), div(page.content)), `class` := "")
+              case Pages.index ⇒ (ContentPage(div, div(page.content)), `class` := "")
               case _           ⇒ (UserGuide.integrate(page), `class` := "page-element")
             }
 
@@ -150,10 +150,11 @@ object Site extends App {
 
         private def onLoadString(sitepage: org.openmole.site.Page) = {
           def siteJS = "org.openmole.site.SiteJS()"
+
           def commonJS = s"$siteJS.main();$siteJS.loadIndex(index);"
 
           sitepage match {
-            case Pages.index | DocumentationPages.training ⇒ s"$siteJS.loadBlogPosts();" + commonJS
+            case Pages.index | DocumentationPages.training ⇒ s"$siteJS.loadBlogPosts();$siteJS.banner();" + commonJS
             case DocumentationPages.profile                ⇒ s"$siteJS.profileAnimation();" + commonJS
             case DocumentationPages.pse                    ⇒ s"$siteJS.pseAnimation();" + commonJS
             case DocumentationPages.simpleSAFire           ⇒ s"$siteJS.sensitivityAnimation();" + commonJS
