@@ -29,21 +29,18 @@ trait ExecutionJob {
 
   def state = _state
 
-  def state_=(state: ExecutionState) = synchronized {
-    if (!this.state.isFinal) {
-      state match {
+  def state_=(newState: ExecutionState) = synchronized {
+    if (state != KILLED && newState != state) {
+      newState match {
         case DONE ⇒ environment._done.incrementAndGet()
         case FAILED ⇒
-          if (this.state == DONE) environment._done.decrementAndGet()
+          if (state == DONE) environment._done.decrementAndGet()
           environment._failed.incrementAndGet()
         case _ ⇒
       }
 
-      if (state != this.state) {
-        environment.eventDispatcherService.trigger(environment, new Environment.JobStateChanged(this, state, this.state))
-      }
-
-      _state = state
+      environment.eventDispatcherService.trigger(environment, new Environment.JobStateChanged(this, newState, this.state))
+      _state = newState
     }
   }
 }

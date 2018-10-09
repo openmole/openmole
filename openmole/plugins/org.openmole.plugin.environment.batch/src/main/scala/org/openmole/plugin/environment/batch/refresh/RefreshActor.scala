@@ -28,7 +28,7 @@ object RefreshActor extends JavaLogger {
     import services._
 
     val Refresh(job, bj, delay, updateErrorsInARow) = refresh
-    if (!job.state.isFinal) {
+    if (job.state != KILLED) {
       try {
         val oldState = job.state
         job.state = bj.updateState()
