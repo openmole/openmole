@@ -170,10 +170,14 @@ background-color : #222;
     margin: 0 auto;
 }
 
+img{
+  max-width : 100%;
+  height : auto;
+}
 
-    .banner{
-    top:80px;
-    }
+.banner{
+   top:80px;
+}
 
 #main-content, .sidebar-left, #sidebar-right, #footer {
     padding:0px;
@@ -188,6 +192,13 @@ background-color : #222;
 #padding-element{
     padding: 10px 20px 20px 10px;
 }
+
+ .inner-footer {
+     margin: 0 auto;
+     width: 100%;
+     margin-top: 30px;
+     margin-bottom: 30px;
+    }
 
 
 /*3 Column Layout*/
@@ -281,6 +292,13 @@ background-color : #222;
 
     #main-content {
         left: 20%; /*Width of #left-sidebar*/
+    }
+    
+    .inner-footer {
+     margin: 0 auto;
+     width: 640px;
+     margin-top: 30px;
+     margin-bottom: 30px;
     }
 }
 

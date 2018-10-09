@@ -40,6 +40,12 @@ package object stylesheet {
     display := "block"
   )
 
+  def centerW(w: Int) = Seq(
+    width := s"${w}px",
+    margin := "0 auto",
+    display := "block"
+  )
+
   /* lazy val mainDiv = Seq(
     paddingTop := 100,
     paddingBottom := 50,

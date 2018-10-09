@@ -106,7 +106,7 @@ object SiteJS extends JSApp {
       if (visibleBanner()) {
         div(
           marginTop := 10,
-          width := "350px",
+          textAlign := "center",
           display := "block",
           marginLeft := "auto",
           marginRight := "auto",
@@ -114,7 +114,7 @@ object SiteJS extends JSApp {
           position := "relative",
           `class` := "banner")(
             a(
-              img(src := "img/banner/banner.png", width := "350px"),
+              img(src := "img/banner/banner.png", width := "450px"),
               href := "http://exmodelo.org", target := "_blank"
             )
           )

@@ -32,7 +32,7 @@
 @div(`class` := "index-element", id := "main-padding")
     @p
         Simulation models can be abstracted as a program (or function) that transforms a set of @b{inputs} into a set of @b{outputs}.
-        @img(src := Resource.img.method.modelIO.file, stylesheet.center(60))
+        @img(src := Resource.img.method.modelIO.file, stylesheet.centerW(400))
         Inputs are various : parameters , pictures, CSV files, DB connections, etc., most of the time, modelers are interested in  @b{parameters space exploration} for sensitivity analysis or calibration.
     @br
         Likewise, outputs can be values are most of times @b{measures}, computed on the dynamics produced by a simulation run  (e.g. fitness or error functions).
