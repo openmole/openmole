@@ -152,13 +152,6 @@ border-bottom: 1px solid #eee;
     box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
     }
 
-.index-element {
-    background-color: white;
-    width: 100%;
-    border-radius:10px;
-    box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
-    }
-
 #footer {
 background-color : #222;
 }
@@ -178,13 +171,13 @@ background-color : #222;
 }
 
 #main-content, .sidebar-left, #sidebar-right, #footer {
-    padding:30px;
+    padding:0px;
     width: 100%;
     float: left;
 }
 
 #main-padding{
-    padding: 0px 30px 50px 30px;
+    padding: 5px 0px 50px 5px;
 }
 
 #padding-element{
@@ -199,6 +192,12 @@ background-color : #222;
         margin: 0 auto;
     }
 
+    .index-element {
+        background-color: white;
+        width: 100%;
+        border-radius:10px;
+        box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
+        }
 
     #main-content {
         width: 60%;
