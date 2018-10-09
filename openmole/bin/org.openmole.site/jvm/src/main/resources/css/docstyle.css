@@ -170,6 +170,11 @@ background-color : #222;
     margin: 0 auto;
 }
 
+
+    .banner{
+    top:80px;
+    }
+
 #main-content, .sidebar-left, #sidebar-right, #footer {
     padding:0px;
     width: 100%;
@@ -190,6 +195,11 @@ background-color : #222;
     .wrap {
         width: 1024px;
         margin: 0 auto;
+    }
+
+
+    .banner{
+    top:0px;
     }
 
     .index-element {
@@ -237,6 +247,7 @@ background-color : #222;
         width: 1140px;
         margin: 0 auto;
     }
+
 }
 
 /*Move Sidebar Position*/
