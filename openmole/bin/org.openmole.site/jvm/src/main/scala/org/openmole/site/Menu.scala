@@ -46,7 +46,7 @@ object Menu {
           ),
           div(classIs(collapse ++ navbar_collapse), aria.expanded := false, paddingTop := 20, id := navId)(
             ul(classIs(nav ++ navbar_nav ++ navbar_right))(
-              li(innerLink(DocumentationPages.documentation, "DOCUMENTATION"), liStyle),
+              li(innerLink(DocumentationPages.documentation, "DOC"), liStyle),
               li(innerLink(DocumentationPages.tutorials, "TUTORIALS"), liStyle),
               li(innerLink(DocumentationPages.OMcommunity, "COMMUNITY"), liStyle),
               li(outerLink("DEMO", shared.link.demo), liStyle),

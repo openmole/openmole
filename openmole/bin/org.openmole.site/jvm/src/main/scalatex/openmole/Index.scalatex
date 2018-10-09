@@ -12,10 +12,14 @@
       With OpenMOLE you can @b{explore your already developed model}, in any language (Java, Binary exe, NetLogo, R, SciLab, Python, C++...).
     }
 
+    @br
+
     @div(stylesheet.centerJustify(100)){
       OpenMOLE comes with a graphical user interface (GUI) to write @b{scripts around your model}.
       These scripts will use OpenMOLE methods to @b{explore} your model and @b{distribute} its executions on High Performing Computing (HPC) environments, with only a few lines of code!
     }
+
+    @br
 
     @div(stylesheet.centerJustify(100)){
     OpenMOLE is the tool you need if you want to carry out

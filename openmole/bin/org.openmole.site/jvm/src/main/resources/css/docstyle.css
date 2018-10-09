@@ -13,8 +13,9 @@ span.hljs-tag, span.hljs-symbol{
 body{
   color: #555;
   font-family: gi;
-  font-size: 15px;
-  text-align: justify;
+  font-size: 18px;
+  line-height: 28px;
+  text-align: left;
   background-color: #f1f1f1;
 }
 
