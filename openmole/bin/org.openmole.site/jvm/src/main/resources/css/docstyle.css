@@ -237,7 +237,9 @@ background-color : #222;
 
     .inner-footer {
      margin: 0 auto;
-     width: 600px;
+     width: 640px;
+     margin-top: 30px;
+     margin-bottom: 30px;
     }
 }
 
