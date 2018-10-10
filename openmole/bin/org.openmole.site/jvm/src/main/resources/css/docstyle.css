@@ -160,6 +160,10 @@ background-color : #222;
     margin-bottom:20px;
 }
 
+#omwesite{
+    margin-left:-200px;
+}
+
 
 
 /*Base Mobile Layout*/
@@ -207,10 +211,14 @@ img{
         margin: 0 auto;
     }
 
+    #omwesite{
+    margin-left: 200px;
+    }
 
     .banner{
         position:relative;
         top:-80px;
+        float:right;
     }
 
     .index-element {

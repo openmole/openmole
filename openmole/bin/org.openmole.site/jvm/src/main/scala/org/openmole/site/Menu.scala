@@ -29,8 +29,26 @@ object Menu {
   val inputStyle = paddingTop := 15
   val navId = "omwesite"
 
+  def banner(sitePage: SitePage) = sitePage match {
+    case cp: ContentPage ⇒ div(
+      marginTop := 10,
+      textAlign := "center",
+      display := "block",
+      marginLeft := "auto",
+      marginRight := "auto",
+      zIndex := 2000,
+      `class` := "banner")(
+        a(
+          img(src := "img/banner/banner.png", width := "450px"),
+          href := "http://exmodelo.org", target := "_blank"
+        )
+      )
+    case _ ⇒ div
+  }
+
   def build(sitePage: SitePage) = {
     div(classIs("container"))(
+      banner(sitePage),
       tags2.nav(navClass, paddingRight := 20)(
         div(classIs(container_fluid))(
           div(classIs(navbar_header))(
@@ -45,7 +63,7 @@ object Menu {
             )
           ),
           div(classIs(collapse ++ navbar_collapse), aria.expanded := false, paddingTop := 20, id := navId)(
-            ul(classIs(nav ++ navbar_nav ++ navbar_right))(
+            ul(classIs(nav ++ navbar_nav ++ navbar_left), marginLeft := 200)(
               li(innerLink(DocumentationPages.documentation, "DOC"), liStyle),
               li(innerLink(DocumentationPages.tutorials, "TUTORIALS"), liStyle),
               li(innerLink(DocumentationPages.OMcommunity, "COMMUNITY"), liStyle),

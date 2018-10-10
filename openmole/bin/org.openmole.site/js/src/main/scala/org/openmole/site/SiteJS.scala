@@ -100,26 +100,28 @@ object SiteJS extends JSApp {
 
   // BANNER
   @JSExport
-  def banner(): Unit = org.scalajs.dom.document.body.insertBefore(div(
-    width := "100%",
-    Rx {
-      if (visibleBanner()) {
-        div(
-          marginTop := 10,
-          textAlign := "center",
-          display := "block",
-          marginLeft := "auto",
-          marginRight := "auto",
-          zIndex := 2000,
-          `class` := "banner")(
-            a(
-              img(src := "img/banner/banner.png", width := "450px"),
-              href := "http://exmodelo.org", target := "_blank"
-            )
-          )
-      }
-      else div
-    }
-  ), org.scalajs.dom.document.body.firstChild
-  )
+  def banner(): Unit = {}
+
+  //    org.scalajs.dom.document.body.insertBefore(div(
+  //    width := "100%",
+  //    Rx {
+  //      if (visibleBanner()) {
+  //        div(
+  //          marginTop := 10,
+  //          textAlign := "center",
+  //          display := "block",
+  //          marginLeft := "auto",
+  //          marginRight := "auto",
+  //          zIndex := 2000,
+  //          `class` := "banner")(
+  //            a(
+  //              img(src := "img/banner/banner.png", width := "450px"),
+  //              href := "http://exmodelo.org", target := "_blank"
+  //            )
+  //          )
+  //      }
+  //      else div
+  //    }
+  //  ), org.scalajs.dom.document.body.firstChild
+  //  )
 }

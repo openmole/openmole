@@ -131,7 +131,7 @@ object Site extends App {
           body(position := "relative", minHeight := "100%")(
             Menu.build(sitePage),
             div(id := "main-content")(
-              div(`id` := "sidebar-right", paddingTop := 130, paddingBottom := 20)(
+              div(`id` := "sidebar-right", paddingTop := 100, paddingBottom := 20)(
                 page.source.map(source ⇒ tools.linkButton("Suggest edits", tools.modificationLink(source), classIs(btn ++ btn_danger))
                 )),
               sitePage.header,
