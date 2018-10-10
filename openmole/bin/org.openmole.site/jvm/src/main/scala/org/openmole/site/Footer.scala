@@ -47,7 +47,7 @@ object Footer {
     )
 
   val footerColStyle = Seq(
-    paddingTop := 0,
+    paddingTop := 20,
     paddingLeft := 25,
     width := 160
   )
