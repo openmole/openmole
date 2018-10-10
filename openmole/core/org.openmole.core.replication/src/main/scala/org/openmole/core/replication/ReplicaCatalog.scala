@@ -71,14 +71,12 @@ class ReplicaCatalog(database: Database, preference: Preference) {
   def clean(storageId: String, removeOnStorage: String ⇒ Unit) = {
     val time = System.currentTimeMillis
 
+    // Note: Destination file will be cleaned while cleaning the replicaDirectory
     for {
       replica ← query { replicas.filter { _.storage === storageId }.result }
       if !new File(replica.source).exists || time - replica.lastCheckExists > preference(ReplicaCatalog.NoAccessCleanTime).millis
-    } {
-      logger.fine(s"Remove gc $replica")
-      remove(replica.id)
-      removeOnStorage(replica.path)
-    }
+    } remove(replica.id)
+
   }
 
   def uploadAndGet[S](
