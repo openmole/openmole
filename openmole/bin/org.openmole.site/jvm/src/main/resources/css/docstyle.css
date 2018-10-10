@@ -174,7 +174,8 @@ img{
 }
 
 .banner{
-   top:80px;
+    padding-top:80px;
+    margin-bottom:-80px;
 }
 
 #main-content, .sidebar-left, #sidebar-right, #footer {
@@ -208,7 +209,8 @@ img{
 
 
     .banner{
-    top:0px;
+        position:relative;
+        top:-80px;
     }
 
     .index-element {

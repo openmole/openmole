@@ -111,7 +111,6 @@ object SiteJS extends JSApp {
           marginLeft := "auto",
           marginRight := "auto",
           zIndex := 2000,
-          position := "relative",
           `class` := "banner")(
             a(
               img(src := "img/banner/banner.png", width := "450px"),
