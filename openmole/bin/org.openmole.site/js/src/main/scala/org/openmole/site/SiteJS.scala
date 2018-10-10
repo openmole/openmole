@@ -1,11 +1,8 @@
 package org.openmole.site
 
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools.JsRxTags._
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation._
 import scalatags.JsDom.all._
-import scalatags.JsDom.svgAttrs
 import rx._
 
 import scaladget.lunr.{ IIndexSearchResult, Importedjs, Index }
@@ -95,33 +92,4 @@ object SiteJS extends JSApp {
 
   @JSExport
   def sensitivityAnimation(): Unit = SVGStarter.decorateTrigger(shared.sensitivity.button, shared.sensitivity.animation, 8000)
-
-  val visibleBanner = Var(true)
-
-  // BANNER
-  @JSExport
-  def banner(): Unit = {}
-
-  //    org.scalajs.dom.document.body.insertBefore(div(
-  //    width := "100%",
-  //    Rx {
-  //      if (visibleBanner()) {
-  //        div(
-  //          marginTop := 10,
-  //          textAlign := "center",
-  //          display := "block",
-  //          marginLeft := "auto",
-  //          marginRight := "auto",
-  //          zIndex := 2000,
-  //          `class` := "banner")(
-  //            a(
-  //              img(src := "img/banner/banner.png", width := "450px"),
-  //              href := "http://exmodelo.org", target := "_blank"
-  //            )
-  //          )
-  //      }
-  //      else div
-  //    }
-  //  ), org.scalajs.dom.document.body.firstChild
-  //  )
 }

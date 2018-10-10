@@ -154,7 +154,7 @@ object Site extends App {
           def commonJS = s"$siteJS.main();$siteJS.loadIndex(index);"
 
           sitepage match {
-            case Pages.index | DocumentationPages.training ⇒ s"$siteJS.loadBlogPosts();$siteJS.banner();" + commonJS
+            case Pages.index | DocumentationPages.training ⇒ s"$siteJS.loadBlogPosts();" + commonJS
             case DocumentationPages.profile                ⇒ s"$siteJS.profileAnimation();" + commonJS
             case DocumentationPages.pse                    ⇒ s"$siteJS.pseAnimation();" + commonJS
             case DocumentationPages.simpleSAFire           ⇒ s"$siteJS.sensitivityAnimation();" + commonJS
