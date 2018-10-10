@@ -153,7 +153,8 @@ package object stylesheet {
     fontWeight := "bold",
     margin := "0 0 24px",
     textTransform := "uppercase",
-    paddingTop := 100
+    paddingTop := 130,
+    lineHeight := "50px"
   )
 
   def svgRunButton(top: Int) = Seq(

@@ -103,8 +103,6 @@ package object tools {
 
   }
 
-  def h1(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h1(elements.map(links.toModifier): _*))
-
   def h2(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h2(elements.map(links.toModifier) ++ links.linkIcon(elements): _*))
   def h3(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h3(elements.map(links.toModifier) ++ links.linkIcon(elements): _*))
 

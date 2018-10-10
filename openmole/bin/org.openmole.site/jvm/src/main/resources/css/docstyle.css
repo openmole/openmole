@@ -24,8 +24,7 @@ h1{
   font-size: 30px;
   font-weight: bold;
   text-transform: uppercase;
-  text-align: center;
-  padding-bottom: 20px;
+  padding-top: 40px;
 }
 
 h2{
@@ -48,14 +47,6 @@ h6 {
   font-size: 18px;
   font-weight: 150;
   padding-top: 10px;
-}
-
-h4{
-  color: #444;
-  font-size: 30px;
-  font-weight: bold;
-  text-transform: uppercase;
-  padding-top: 40px;
 }
 
 h5{

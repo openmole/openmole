@@ -4,7 +4,7 @@
 @import DocumentationPages._
 
 @div(`class` := "index-element" , id := "main-padding")
-    @h4{What is OpenMOLE?}
+    @h1{What is OpenMOLE?}
 
     @div(stylesheet.centerJustify(100)){
       OpenMOLE has been developed since 2008 as a @b{free and open-source} platform.
@@ -42,7 +42,7 @@
         The resulting output of a simulation, for a given input, will sometimes be referred as the @b{image} of the input.
         Likewise, the parameters corresponding to an image are called @b{origins} or @b{ancestors}.
 
-    @h4{Wanna try?}
+    @h1{Wanna try?}
 
     @div(stylesheet.centerJustify(100)){
       You can try OpenMOLE online using the OpenMOLE @aa("demonstration website", href := shared.link.demo).
