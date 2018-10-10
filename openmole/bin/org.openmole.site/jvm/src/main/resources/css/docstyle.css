@@ -146,12 +146,6 @@ border-bottom: 1px solid #eee;
     min-height: 800px;
 }
 
-.page-element {
-    background-color: white;
-    border-radius:5px;
-    box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
-    }
-
 #footer {
 background-color : #222;
 }
@@ -217,6 +211,12 @@ img{
         background-color: white;
         width: 100%;
         border-radius:10px;
+        box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
+        }
+
+    .page-element {
+        background-color: white;
+        border-radius:5px;
         box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
         }
 
