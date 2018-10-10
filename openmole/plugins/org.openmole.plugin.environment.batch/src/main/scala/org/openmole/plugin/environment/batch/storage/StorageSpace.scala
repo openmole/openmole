@@ -66,6 +66,8 @@ object HierarchicalStorageSpace extends JavaLogger {
     else Try(matcher.group(1).toLong).toOption
   }
 
+  def ignoreErrors[T](f: ⇒ T): Unit = Try(f)
+
   def cleanTmpDirectory[S](s: S, tmpDirectory: String)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], services: BatchEnvironment.Services) = {
     val entries = hierarchicalStorageInterface.list(s, tmpDirectory)
     val removalDate = System.currentTimeMillis - services.preference(TmpDirRemoval).toMillis
@@ -77,8 +79,8 @@ object HierarchicalStorageSpace extends JavaLogger {
       if remove(entry.name)
     } {
       val path = StorageService.child(s, tmpDirectory, entry.name)
-      if (entry.`type` == FileType.Directory) StorageService.rmDirectory(s, path)
-      else StorageService.rmFile(s, path)
+      if (entry.`type` == FileType.Directory) ignoreErrors(StorageService.rmDirectory(s, path))
+      else ignoreErrors(StorageService.rmFile(s, path))
     }
   }
 
@@ -96,7 +98,9 @@ object HierarchicalStorageSpace extends JavaLogger {
       if graceIsOver(e.name)
     } {
       val path = StorageService.child(s, persistentPath, e.name)
-      if (!inReplica.contains(path)) if (e.`type` == FileType.Directory) StorageService.rmDirectory(s, path) else StorageService.rmFile(s, path)
+      if (!inReplica.contains(path))
+        if (e.`type` == FileType.Directory) ignoreErrors(StorageService.rmDirectory(s, path))
+        else ignoreErrors(StorageService.rmFile(s, path))
     }
   }
 
