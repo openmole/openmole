@@ -34,6 +34,11 @@ object StorageService extends JavaLogger {
     JobManager ! RetryAction(() ⇒ action)
   }
 
+  def backgroundRmDirectory[S](s: S, path: String)(implicit services: BatchEnvironment.Services, storageInterface: HierarchicalStorageInterface[S]) = {
+    def action = { rmDirectory(s, path); false }
+    JobManager ! RetryAction(() ⇒ action)
+  }
+
   def rmFile[S](s: S, directory: String)(implicit storageInterface: StorageInterface[S]) =
     storageInterface.rmFile(s, directory)
 
