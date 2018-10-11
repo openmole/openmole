@@ -315,12 +315,16 @@ object UDocker {
         case None ⇒
 
           val cl = commandLine(s"/usr/bin/env python2 ${uDockerExecutable.getAbsolutePath} create $imageId")
-          execute(cl, tmpDirectory, uDockerVariables, captureOutput = true, captureError = true, displayOutput = false, displayError = false).output.get.split("\n").head
+          val execres = execute(cl, tmpDirectory, uDockerVariables, captureOutput = true, captureError = true, displayOutput = false, displayError = false).output.get
+          println("Container create output : "+execres)
+          execres.split("\n").head
         case Some(directory) ⇒
           val name = containerName(UUID.randomUUID().toString) //.take(10)
           directory.copy(containerDirectory / name)
           name
       }
+
+    println("Container id "+id)
 
     uDocker.mode.foreach { mode ⇒
       val cl = commandLine(s"""/usr/bin/env python2 ${uDockerExecutable.getAbsolutePath} setup --execmode=$mode $id""")
