@@ -72,14 +72,12 @@ object JobManager extends JavaLogger { self ⇒
       self ! Delay(Refresh(job, bj, bj.updateInterval.minUpdateInterval), bj.updateInterval.minUpdateInterval)
 
     case Kill(job, batchJob) ⇒
-      try {
-        BatchEnvironment.finishedExecutionJob(job.environment, job)
-        tryKillAndClean(job, batchJob)
-        job.state = ExecutionState.KILLED
-      }
+      job.state = ExecutionState.KILLED
+      try BatchEnvironment.finishedExecutionJob(job.environment, job)
       finally {
         if (job.job.finished) BatchEnvironment.finishedJob(job.environment, job.job)
         else job.environment.submit(job.job)
+        tryKillAndClean(job, batchJob)
       }
 
     case Resubmit(job, batchJob) ⇒
