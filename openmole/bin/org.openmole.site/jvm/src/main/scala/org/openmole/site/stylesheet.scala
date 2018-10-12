@@ -84,8 +84,9 @@ package object stylesheet {
   ) ++ center(90)
 
   val headerImg = Seq(
-    padding := 10,
-    width := 130
+    paddingRight := 20,
+    marginBottom := 30,
+    height := 80
   )
 
   lazy val previousDoc = Seq(
@@ -151,9 +152,7 @@ package object stylesheet {
     color := "#444",
     fontSize := "35px",
     fontWeight := "bold",
-    margin := "0 0 24px",
     textTransform := "uppercase",
-    paddingTop := 130,
     lineHeight := "50px"
   )
 
@@ -168,5 +167,10 @@ package object stylesheet {
     textAlign := "justify",
     marginLeft := "auto",
     marginRight := "auto"
+  )
+
+  val suggest = Seq(
+    padding := 25,
+    float := "right"
   )
 }

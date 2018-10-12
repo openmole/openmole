@@ -133,7 +133,6 @@ border-bottom: 1px solid #eee;
 
 /*Responsive columns*/
 #main-content{
-    padding-top: 150px;
     min-height: 800px;
 }
 
@@ -223,6 +222,7 @@ img{
         background-color: white;
         border-radius:5px;
         box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
+        margin-bottom:30px;
         }
 
     #main-content {
@@ -249,6 +249,7 @@ img{
         padding-left : 30px;
         width: 20%;
         float: left;
+        padding-top:130px;
     }
 
     .inner-footer {
@@ -328,4 +329,20 @@ img{
  margin-right:auto;
  margin-left:auto;
  /*! background-color: yellow; */
+}
+
+
+.btn.btn-default {
+    background-color:transparent;
+    color:#333;
+    border: 1px solid #ccc;
+    text-transform: uppercase;
+}
+
+.btn.btn-selected {
+    border: 2px solid #a6bf26ff;
+    background-color:transparent;
+    font-weight: bold;
+    color:#333;
+    text-transform: uppercase;
 }
