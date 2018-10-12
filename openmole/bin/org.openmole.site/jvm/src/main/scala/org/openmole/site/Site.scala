@@ -131,13 +131,12 @@ object Site extends App {
           body(position := "relative", minHeight := "100%")(
             Menu.build(sitePage),
             div(id := "main-content")(
-              //              div(`id` := "sidebar-right")(
-              //                pageTree.source.map(source ⇒ tools.linkButton("Suggest edits", tools.modificationLink(source), classIs(btn ++ btn_danger))
-              //                )),
               sitePage.header(
                 pageTree.source.map(source ⇒ tools.linkButton("Suggest edits", tools.modificationLink(source), classIs(btn ++ btn_danger))(stylesheet.suggest)
                 )),
               div(elementClass, id := "padding-element")(
+                if (pageTree.name == DocumentationPages.documentation.name) div
+                else sitePage.parents.map { p ⇒ innerLink(p.page, p.name) }.reduceLeftOption((x1, x2) ⇒ span(x1, span(" > "), x2)).getOrElse(span),
                 sitePage.element
               )
             ),

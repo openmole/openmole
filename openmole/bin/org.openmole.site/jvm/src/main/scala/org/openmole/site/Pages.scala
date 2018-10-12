@@ -210,19 +210,9 @@ abstract class DocumentationPage extends Page {
 import PageTree._
 
 object DocumentationPages {
-
-  // Toutes les pages qu'on veut dans la SiteMap
-
   index ⇒
 
-  //var marketEntries: Seq[GeneratedMarketEntry] = Seq()
-
   def allPages = docPages.flatMap { _.sons } ++ tutoPages.sons ++ communityPages.sons ++ headPages ++ Seq(downloadPage)
-
-  // Definir un groupe de pages
-  // def groupPages = Seq(...)
-  // Definir chaque page du groupe
-  // lazy val pageName = DocumentationPage.fromScalatex(name = "html title", content = scalatex.path.to.scalatexFile, title = Some("Titre onglet"))
 
   def headPages: Seq[PageTree] = docPages ++ Seq(runPages, explorePages, scalePages, languagePages, developersPages, tutoPages, communityPages)
 

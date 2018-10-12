@@ -86,21 +86,21 @@ object UserGuide {
   }
 
   def integrate(current: PageTree): SitePage = {
+    val parentPageTrees = PageTree.parents(current)
     def integratedPage(left: SideMenu, right: SideMenu = SideMenu.more(current.page), head: TypedTag[String] = header(span(current.title, h1Like))(textAlign := "center", marginBottom := 30)) = {
       IntegratedPage(
         head,
         div(
-          // if (DocumentationPages.mainDocPages.contains(current)) span else scalatags.Text.all.h1(current.title),
           h2Contents(current.content.render),
           current.content
         ),
         SideMenu.left(current, left),
-        Some(SideMenu.right(current, right /*.insert(current.details)*/ ))
+        Some(SideMenu.right(current, right /*.insert(current.details)*/ )),
+        PageTree.fromPage(DocumentationPages.documentation) +: parentPageTrees.reverse
       )
     }
 
-    val parents = PageTree.parents(current).map { _.name }
-    //    println("Parents for " + current.page.name + " :: " + parents.contains(DocumentationPages.developers.name))
+    val parents = parentPageTrees.map { _.name }
 
     current match {
       case p if (parents.contains(DocumentationPages.run.name) || current.name == DocumentationPages.run.name) ⇒ integratedPage(SideMenu.run, head = headerModel(current.name))
