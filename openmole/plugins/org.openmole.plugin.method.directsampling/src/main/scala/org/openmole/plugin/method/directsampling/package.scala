@@ -40,7 +40,7 @@ package object directsampling {
     replications:     Int,
     distributionSeed: OptionalArgument[Long]   = None,
     aggregation:      OptionalArgument[Puzzle] = None,
-    wrap:             Boolean                  = true
+    wrap:             Boolean                  = false
   ): PuzzleContainer =
     DirectSampling(
       evaluation = evaluation,
@@ -54,7 +54,7 @@ package object directsampling {
     sampling:    Sampling,
     aggregation: OptionalArgument[Puzzle] = None,
     condition:   Condition                = Condition.True,
-    wrap:        Boolean                  = true
+    wrap:        Boolean                  = false
   ): PuzzleContainer = {
     val exploration = ExplorationTask(sampling)
     val explorationCapsule = Capsule(exploration, strain = true)
