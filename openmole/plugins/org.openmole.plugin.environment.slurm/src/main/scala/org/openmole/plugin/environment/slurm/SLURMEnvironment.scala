@@ -139,10 +139,10 @@ class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
   implicit val systemInterpreter = effectaside.System()
   implicit val localInterpreter = gridscale.local.Local()
 
-  override def start() = { storageService; cleanSSHStorage(storageService) }
+  override def start() = { storageService; cleanSSHStorage(storageService, background = true) }
 
   override def stop() = {
-    cleanSSHStorage(storageService)
+    cleanSSHStorage(storageService, background = false)
     sshInterpreter().close
   }
 
@@ -202,8 +202,8 @@ class SLURMLocalEnvironment(
   implicit val localInterpreter = gridscale.local.Local()
   implicit val systemInterpreter = effectaside.System()
 
-  override def start() = { storage; space; HierarchicalStorageSpace.clean(storage, space) }
-  override def stop() = { HierarchicalStorageSpace.clean(storage, space) }
+  override def start() = { storage; space; HierarchicalStorageSpace.clean(storage, space, background = true) }
+  override def stop() = { HierarchicalStorageSpace.clean(storage, space, background = false) }
 
   import env.services.preference
   import org.openmole.plugin.environment.ssh._
