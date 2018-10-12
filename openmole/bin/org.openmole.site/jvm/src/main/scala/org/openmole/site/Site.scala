@@ -136,7 +136,7 @@ object Site extends App {
                 )),
               div(elementClass, id := "padding-element")(
                 if (pageTree.name == DocumentationPages.documentation.name) div
-                else sitePage.parents.map { p ⇒ innerLink(p.page, p.name) }.reduceLeftOption((x1, x2) ⇒ span(x1, span(" > "), x2)).getOrElse(span),
+                else sitePage.parents.map { p ⇒ innerLink(p.page, p.name) }.distinct.reduceLeftOption((x1, x2) ⇒ span(x1, span(" > "), x2)).getOrElse(span),
                 sitePage.element
               )
             ),
