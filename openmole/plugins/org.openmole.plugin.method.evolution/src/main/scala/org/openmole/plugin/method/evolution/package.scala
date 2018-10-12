@@ -94,7 +94,7 @@ package object evolution {
 
   }
 
-  case class SteadyState(wrap: Boolean = true) extends EvolutionPattern
+  case class SteadyState(wrap: Boolean = false) extends EvolutionPattern
   case class Island(termination: OMTermination, sample: OptionalArgument[Int] = None, wrap: Boolean = true) extends EvolutionPattern
 
   import shapeless._
