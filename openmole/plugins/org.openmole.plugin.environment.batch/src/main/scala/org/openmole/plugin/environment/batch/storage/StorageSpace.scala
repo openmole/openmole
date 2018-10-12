@@ -53,10 +53,10 @@ object HierarchicalStorageSpace extends JavaLogger {
     StorageSpace(baseDirectory, replicaDirectory, tmpDirectory)
   }
 
-  def clean[S](s: S, storageSpace: StorageSpace)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], environmentStorage: EnvironmentStorage[S], services: BatchEnvironment.Services) = {
+  def clean[S](s: S, storageSpace: StorageSpace, background: Boolean)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], environmentStorage: EnvironmentStorage[S], services: BatchEnvironment.Services) = {
     services.replicaCatalog.clean(environmentStorage.id(s), StorageService.rmFile(s, _))
-    cleanReplicaDirectory(s, storageSpace.replicaDirectory, environmentStorage.id(s))
-    cleanTmpDirectory(s, storageSpace.tmpDirectory)
+    cleanReplicaDirectory(s, storageSpace.replicaDirectory, environmentStorage.id(s), background)
+    cleanTmpDirectory(s, storageSpace.tmpDirectory, background)
   }
 
   lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
@@ -68,7 +68,7 @@ object HierarchicalStorageSpace extends JavaLogger {
 
   def ignoreErrors[T](f: ⇒ T): Unit = Try(f)
 
-  def cleanTmpDirectory[S](s: S, tmpDirectory: String)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], services: BatchEnvironment.Services) = {
+  def cleanTmpDirectory[S](s: S, tmpDirectory: String, background: Boolean)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], services: BatchEnvironment.Services) = {
     val entries = hierarchicalStorageInterface.list(s, tmpDirectory)
     val removalDate = System.currentTimeMillis - services.preference(TmpDirRemoval).toMillis
 
@@ -79,12 +79,12 @@ object HierarchicalStorageSpace extends JavaLogger {
       if remove(entry.name)
     } {
       val path = StorageService.child(s, tmpDirectory, entry.name)
-      if (entry.`type` == FileType.Directory) ignoreErrors(StorageService.rmDirectory(s, path))
-      else ignoreErrors(StorageService.rmFile(s, path))
+      if (entry.`type` == FileType.Directory) ignoreErrors(StorageService.rmDirectory(s, path, background))
+      else ignoreErrors(StorageService.rmFile(s, path, background))
     }
   }
 
-  def cleanReplicaDirectory[S](s: S, persistentPath: String, storageId: String)(implicit services: BatchEnvironment.Services, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
+  def cleanReplicaDirectory[S](s: S, persistentPath: String, storageId: String, background: Boolean)(implicit services: BatchEnvironment.Services, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
     def graceIsOver(name: String) =
       extractTimeFromName(name).map {
         _ + services.preference(ReplicaCatalog.ReplicaGraceTime).toMillis < System.currentTimeMillis
@@ -99,8 +99,8 @@ object HierarchicalStorageSpace extends JavaLogger {
     } {
       val path = StorageService.child(s, persistentPath, e.name)
       if (!inReplica.contains(path))
-        if (e.`type` == FileType.Directory) ignoreErrors(StorageService.rmDirectory(s, path))
-        else ignoreErrors(StorageService.rmFile(s, path))
+        if (e.`type` == FileType.Directory) ignoreErrors(StorageService.rmDirectory(s, path, background))
+        else ignoreErrors(StorageService.rmFile(s, path, background))
     }
   }
 
