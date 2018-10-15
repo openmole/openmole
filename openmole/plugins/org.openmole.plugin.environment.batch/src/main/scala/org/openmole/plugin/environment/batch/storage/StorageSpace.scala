@@ -16,7 +16,16 @@ import org.openmole.tool.cache.Lazy
 import org.openmole.tool.logger.JavaLogger
 
 object StorageSpace {
+
+  def timeOfTheDay = {
+    val day = 1000L * 60 * 60 * 24
+    val time = System.currentTimeMillis()
+    val sinceBeginingOfTheDay = time % day
+    (time - sinceBeginingOfTheDay).toString
+  }
+
   def timedUniqName = org.openmole.tool.file.uniqName(System.currentTimeMillis.toString, "", separator = "_")
+
 }
 
 object HierarchicalStorageSpace extends JavaLogger {
@@ -59,11 +68,10 @@ object HierarchicalStorageSpace extends JavaLogger {
     cleanTmpDirectory(s, storageSpace.tmpDirectory, background)
   }
 
-  lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
   def extractTimeFromName(name: String) = {
-    val matcher = replicationPattern.matcher(name)
-    if (!matcher.matches) None
-    else Try(matcher.group(1).toLong).toOption
+    val time = name.takeWhile(_.isDigit)
+    if (time.isEmpty) None
+    else Try(time.toLong).toOption
   }
 
   def ignoreErrors[T](f: ⇒ T): Unit = Try(f)
