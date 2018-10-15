@@ -13,8 +13,9 @@ span.hljs-tag, span.hljs-symbol{
 body{
   color: #555;
   font-family: gi;
-  font-size: 15px;
-  text-align: justify;
+  font-size: 18px;
+  line-height: 28px;
+  text-align: left;
   background-color: #f1f1f1;
 }
 
@@ -23,8 +24,7 @@ h1{
   font-size: 30px;
   font-weight: bold;
   text-transform: uppercase;
-  text-align: center;
-  padding-bottom: 20px;
+  padding-top: 40px;
 }
 
 h2{
@@ -47,14 +47,6 @@ h6 {
   font-size: 18px;
   font-weight: 150;
   padding-top: 10px;
-}
-
-h4{
-  color: #444;
-  font-size: 30px;
-  font-weight: bold;
-  text-transform: uppercase;
-  padding-top: 40px;
 }
 
 h5{
@@ -141,31 +133,25 @@ border-bottom: 1px solid #eee;
 
 /*Responsive columns*/
 #main-content{
-    padding-top: 150px;
     min-height: 800px;
 }
-
-.page-element {
-    background-color: white;
-    border-radius:5px;
-    box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
-    }
-
-.index-element {
-    background-color: white;
-    width: 100%;
-    border-radius:10px;
-    box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
-    }
 
 #footer {
 background-color : #222;
 }
 
 .sidebar-left {
+    margin-left:15px;
+    margin-bottom:20px;
 }
 
 #sidebar-right {
+    margin-left:15px;
+    margin-bottom:20px;
+}
+
+#omwesite{
+    margin-left:-200px;
 }
 
 
@@ -176,19 +162,36 @@ background-color : #222;
     margin: 0 auto;
 }
 
+img{
+  max-width : 100%;
+  height : auto;
+}
+
+.banner{
+    padding-top:80px;
+    margin-bottom:-80px;
+}
+
 #main-content, .sidebar-left, #sidebar-right, #footer {
-    padding:30px;
+    padding:0px;
     width: 100%;
     float: left;
 }
 
 #main-padding{
-    padding: 0px 30px 50px 30px;
+    padding: 5px 0px 50px 5px;
 }
 
 #padding-element{
     padding: 10px 20px 20px 10px;
 }
+
+ .inner-footer {
+     margin: 0 auto;
+     width: 100%;
+     margin-top: 10px;
+     margin-bottom: 30px;
+    }
 
 
 /*3 Column Layout*/
@@ -198,6 +201,29 @@ background-color : #222;
         margin: 0 auto;
     }
 
+    #omwesite{
+    margin-left: 200px;
+    }
+
+    .banner{
+        position:relative;
+        top:-80px;
+        float:right;
+    }
+
+    .index-element {
+        background-color: white;
+        width: 100%;
+        border-radius:10px;
+        box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
+        }
+
+    .page-element {
+        background-color: white;
+        border-radius:5px;
+        box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
+        margin-bottom:30px;
+        }
 
     #main-content {
         width: 60%;
@@ -223,11 +249,14 @@ background-color : #222;
         padding-left : 30px;
         width: 20%;
         float: left;
+        padding-top:130px;
     }
 
     .inner-footer {
      margin: 0 auto;
-     width: 600px;
+     width: 640px;
+     margin-top: 30px;
+     margin-bottom: 30px;
     }
 }
 
@@ -237,6 +266,7 @@ background-color : #222;
         width: 1140px;
         margin: 0 auto;
     }
+
 }
 
 /*Move Sidebar Position*/
@@ -269,6 +299,13 @@ background-color : #222;
     #main-content {
         left: 20%; /*Width of #left-sidebar*/
     }
+    
+    .inner-footer {
+     margin: 0 auto;
+     width: 640px;
+     margin-top: 30px;
+     margin-bottom: 30px;
+    }
 }
 
 /*Optional 2 Column Layout*/
@@ -292,4 +329,20 @@ background-color : #222;
  margin-right:auto;
  margin-left:auto;
  /*! background-color: yellow; */
+}
+
+
+.btn.btn-default {
+    background-color:transparent;
+    color:#333;
+    border: 1px solid #ccc;
+    text-transform: uppercase;
+}
+
+.btn.btn-selected {
+    border: 2px solid #a6bf26ff;
+    background-color:transparent;
+    font-weight: bold;
+    color:#333;
+    text-transform: uppercase;
 }

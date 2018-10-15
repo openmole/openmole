@@ -310,17 +310,19 @@ object UDocker {
 
   def createContainer(uDocker: UDockerArguments, uDockerExecutable: File, containerDirectory: File, uDockerVariables: Vector[(String, String)], uDockerVolumes: Vector[(String, String)], imageId: String)(implicit newFile: NewFile) = newFile.withTmpDir { tmpDirectory ⇒
 
-    val id =
+    val (id, createstdout) =
       uDocker.localDockerImage.container match {
         case None ⇒
-
           val cl = commandLine(s"/usr/bin/env python2 ${uDockerExecutable.getAbsolutePath} create $imageId")
-          execute(cl, tmpDirectory, uDockerVariables, captureOutput = true, captureError = true, displayOutput = false, displayError = false).output.get.split("\n").head
+          val execres = execute(cl, tmpDirectory, uDockerVariables, captureOutput = true, captureError = true, displayOutput = false, displayError = false).output.get
+          (execres.split("\n").map(_.trim).reverse.find(_.size > 0).head, execres)
         case Some(directory) ⇒
-          val name = containerName(UUID.randomUUID().toString) //.take(10)
+          val name = containerName(UUID.randomUUID().toString)
           directory.copy(containerDirectory / name)
-          name
+          (name, "")
       }
+
+    assert((containerDirectory / id).listFiles().map(_.getName).contains("imagerepo.name"), s"No valid container for id $id ; create output was $createstdout")
 
     uDocker.mode.foreach { mode ⇒
       val cl = commandLine(s"""/usr/bin/env python2 ${uDockerExecutable.getAbsolutePath} setup --execmode=$mode $id""")
