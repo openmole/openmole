@@ -1,7 +1,5 @@
 package org.openmole.site
 
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools.JsRxTags._
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation._
 import scalatags.JsDom.all._
