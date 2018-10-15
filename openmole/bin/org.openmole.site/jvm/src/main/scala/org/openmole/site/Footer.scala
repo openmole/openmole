@@ -26,7 +26,6 @@ object Footer {
   val WHITE = color := "#e6e6e6"
 
   val titleStyle = Seq(
-    fontSize := "15px",
     marginLeft := 4
   )
 
@@ -48,9 +47,9 @@ object Footer {
     )
 
   val footerColStyle = Seq(
-    paddingTop := 0,
+    paddingTop := 20,
     paddingLeft := 25,
-    width := 150
+    width := 160
   )
 
   val build = {
@@ -70,13 +69,13 @@ object Footer {
                 div(classIs(colMD(3)), footerColStyle)(
                   span("DEVELOPMENT", textAlign := "center"),
                   imgSubItem(Resource.img.footer.previousVersion, "Changes", DocumentationPages.releaseNotes.file, false),
-                  imgSubItem(Resource.img.footer.github, "Source code", shared.link.repo.openmole),
-                  imgSubItem(Resource.img.footer.contribute, "Contribute!", DocumentationPages.howToContribute.file, false)
+                  imgSubItem(Resource.img.footer.github, "Sources", shared.link.repo.openmole),
+                  imgSubItem(Resource.img.footer.contribute, "Join us!", DocumentationPages.howToContribute.file, false)
                 ),
                 div(classIs(colMD(3)), footerColStyle)(
                   span("ABOUT US", textAlign := "center"),
                   imgSubItem(Resource.img.footer.paper, "Publications", DocumentationPages.communications.file, false),
-                  imgSubItem(Resource.img.footer.whoarwe, "Who are we?", DocumentationPages.whoWeAre.file, false),
+                  imgSubItem(Resource.img.footer.whoarwe, "Team", DocumentationPages.whoWeAre.file, false),
                   imgSubItem(Resource.img.footer.partner, "Partners", DocumentationPages.partner.file, false)
                 ),
                 div(classIs(colMD(3)), footerColStyle)(
