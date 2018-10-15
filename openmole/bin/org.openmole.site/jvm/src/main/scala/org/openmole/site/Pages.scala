@@ -333,12 +333,14 @@ object DocumentationPages {
   // Tutorials
   lazy val tutorials = DocumentationPage.fromScalatex(name = "Tutorials", content = scalatex.tutorials.Tutorials)
 
-  def tutoPages = pageNode(tutorials, Vector(stepByStepIntro, exploreTuto, netLogoGA, simpleSAFire, fromPage(market)))
 
+  def tutoPages = pageNode(tutorials, Vector(stepByStepIntro, exploreTuto, netLogoGA, simpleSAFire, fromPage(market)))
   def menuTutoPages = Seq(stepByStepIntro, exploreTuto, netLogoGA, simpleSAFire, market)
+
 
   lazy val stepByStepIntro = DocumentationPage.fromScalatex(name = "Step By Step Introduction", content = scalatex.tutorials.gettingStarted.StepByStepIntro, title = Some("A Step by Step Introduction to OpenMOLE"))
   lazy val exploreTuto = DocumentationPage.fromScalatex(name = "Explore Tutorial", content = scalatex.tutorials.gettingStarted.ExploreTuto, title = Some("How to Execute an Exploration Task"))
+
   lazy val netLogoGA = DocumentationPage.fromScalatex(name = "NetLogo GA", content = scalatex.tutorials.netLogo.NetLogoGA, title = Some("Using Genetic Algorithms to Calibrate a NetLogo Model"))
   lazy val simpleSAFire = DocumentationPage.fromScalatex(name = "Simple SA Fire", content = scalatex.tutorials.netLogo.SimpleSAFire, title = Some("Simple Sensitivity Analysis"))
 

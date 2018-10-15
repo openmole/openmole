@@ -176,7 +176,7 @@ package object ssh {
         BatchEnvironment.toReplicatedFile(
           StorageService.uploadInDirectory(storage, _, space.replicaDirectory, _),
           StorageService.exists(storage, _),
-          StorageService.backgroundRmFile(storage, _),
+          StorageService.rmFile(storage, _, background = true),
           batchExecutionJob.environment,
           StorageService.id(storage)
         )(f, options)
@@ -202,6 +202,12 @@ package object ssh {
     }
   }
 
+
+  def cleanSSHStorage(storage: Either[(StorageSpace, LocalStorage), (StorageSpace, SSHStorage)], background: Boolean)(implicit services: BatchEnvironment.Services, s: Effect[_root_.gridscale.ssh.SSH], l: Effect[_root_.gridscale.local.Local]) =
+    storage match {
+      case Left((space, local)) ⇒ HierarchicalStorageSpace.clean(local, space,background)
+      case Right((space, ssh))  ⇒ HierarchicalStorageSpace.clean(ssh, space, background)
+    }
 
 
 }

@@ -299,13 +299,17 @@ object BatchEnvironment extends JavaLogger {
     }
 
     def finished(registry: ExecutionJobRegistry, job: BatchExecutionJob, environment: BatchEnvironment) = registry.synchronized {
-      def pruneFinishedJobs(registry: ExecutionJobRegistry) = registry.executionJobs = registry.executionJobs.filter(!_.state.isFinal)
+      def pruneFinishedJobs(registry: ExecutionJobRegistry) = registry.executionJobs = registry.executionJobs.filter(_.state != ExecutionState.KILLED)
       pruneFinishedJobs(registry)
     }
 
     def executionJobs(registry: ExecutionJobRegistry) = registry.synchronized { registry.executionJobs }
     def numberOfExecutionJobs(registry: ExecutionJobRegistry, job: Job) = registry.synchronized {
       registry.executionJobs.count(_.job == job)
+    }
+
+    def lonelyJobs(registry: ExecutionJobRegistry) = registry.synchronized {
+      registry.executionJobs.view.groupBy(_.job).filter(j => !j._1.finished && j._2.isEmpty).unzip._1.toSeq
     }
   }
 

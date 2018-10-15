@@ -214,11 +214,12 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   override def start() = {
     proxyCache()
     if (storages.map(_.toOption).flatten.isEmpty) throw new InternalProcessingError(s"No webdav storage is working for the VO $voName", MultipleException(storages.collect { case util.Failure(e) ⇒ e }))
+    storages.map(_.toOption).flatten.foreach { case (space, storage) ⇒ HierarchicalStorageSpace.clean(storage, space, background = true) }
     jobService
   }
 
   override def stop() = {
-    storages.map(_.toOption).flatten.foreach { case (space, storage) ⇒ HierarchicalStorageSpace.clean(storage, space) }
+    storages.map(_.toOption).flatten.foreach { case (space, storage) ⇒ HierarchicalStorageSpace.clean(storage, space, background = false) }
   }
 
   def bdiis: Seq[gridscale.egi.BDIIServer] =
@@ -320,7 +321,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         BatchEnvironment.toReplicatedFile(
           StorageService.uploadInDirectory(storage, _, space.replicaDirectory, _),
           StorageService.exists(storage, _),
-          StorageService.backgroundRmFile(storage, _),
+          StorageService.rmFile(storage, _, background = true),
           batchExecutionJob.environment,
           StorageService.id(storage)
         )(f, options)

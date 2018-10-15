@@ -42,12 +42,12 @@ class NetlogoWizardApiImpl(s: Services) extends NetlogoWizardAPI {
 
     val modelData = wizardModelData(inputs, outputs, resources.all.map {
       _.safePath.name
-    }, Some("netLogoInputs"), Some("netLogoOutputs"))
+    }, Some("inputs"), Some("outputs"))
     val task = s"${executableName.split('.').head.toLowerCase}Task"
 
     val content = modelData.vals +
-      s"""\nval launch = List("${(Seq("setup", "random-seed ${seed}") ++ (command.split('\n').toSeq)).mkString("\",\"")}")
-            \nval $task = NetLogo6Task(workDirectory / ${executableName.split('/').map { s ⇒ s"""\"$s\"""" }.mkString(" / ")}, launch, embedWorkspace = ${data.embedWorkspace}) set(\n""".stripMargin +
+      s"""\nval launch = List("${(Seq("setup") ++ (command.split('\n').toSeq)).mkString("\",\"")}")
+            \nval $task = NetLogo6Task(workDirectory / ${executableName.split('/').map { s ⇒ s"""\"$s\"""" }.mkString(" / ")}, launch, embedWorkspace = ${data.embedWorkspace}, seed=seed) set(\n""".stripMargin +
       expandWizardData(modelData) +
       s""")\n\n$task hook ToStringHook()"""
 
