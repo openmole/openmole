@@ -45,13 +45,17 @@ object SiteJS extends JSApp {
 
   type Entries = collection.mutable.Map[String, String]
 
+  val indexArray: Var[js.Array[js.Any]] = Var(js.Array())
   val lunrIndex: Var[Option[Index]] = Var(None)
   var entries: Entries = collection.mutable.Map.empty
 
   @JSExport
-  def loadIndex(indexArray: js.Array[js.Any]): Unit = {
-    Search.build
+  def loadIndex(array: js.Array[js.Any]): Unit = {
+    Search.build(() ⇒ getIndex)
+    indexArray.update(array)
+  }
 
+  def doIndex(indexArray: js.Array[js.Any]) = {
     val index = Importedjs.lunr((i: Index) ⇒ {
       i.field("title", lit("boost" → 15).value)
       i.field("h2", lit("boost" -> 10).value)
@@ -69,9 +73,21 @@ object SiteJS extends JSApp {
     lunrIndex() = Some(index)
   }
 
+  def getIndex: Option[Index] =
+    //Load index cache
+    lunrIndex.now match {
+      case None ⇒ indexArray.now.size match {
+        case 0 ⇒ None
+        case _ ⇒
+          doIndex(indexArray.now)
+          getIndex
+      }
+      case i: Option[Index] ⇒ i
+    }
+
   def search(content: String): Seq[IIndexSearchResult] = {
-    lunrIndex.now.map { i ⇒
-      i.search(content).toSeq
+    getIndex.map {
+      ind ⇒ ind.search(content).toSeq
     }.getOrElse(Seq())
   }
 
