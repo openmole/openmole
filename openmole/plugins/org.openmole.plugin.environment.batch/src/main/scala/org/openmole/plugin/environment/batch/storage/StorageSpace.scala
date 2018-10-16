@@ -14,13 +14,24 @@ import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchE
 import org.openmole.plugin.environment.batch.refresh.{ JobManager, RetryAction }
 import org.openmole.tool.cache.Lazy
 import org.openmole.tool.logger.JavaLogger
+import squants._
 
 object StorageSpace {
+
+  def lastBegining(interval: Time) = {
+    val modulo = interval.toMillis
+    val time = System.currentTimeMillis()
+    val sinceBeginingOfTheDay = time % modulo
+    (time - sinceBeginingOfTheDay).toString
+  }
+
   def timedUniqName = org.openmole.tool.file.uniqName(System.currentTimeMillis.toString, "", separator = "_")
+
 }
 
 object HierarchicalStorageSpace extends JavaLogger {
   val TmpDirRemoval = ConfigurationLocation("StorageService", "TmpDirRemoval", Some(30 days))
+  val TmpDirCreation = ConfigurationLocation("StorageService", "TmpDirCreation", Some(1 hours))
 
   def create[S](s: S, root: String, storageId: String, isConnectionError: Throwable ⇒ Boolean)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], preference: Preference) = {
     val persistent = "persistent/"
@@ -59,11 +70,10 @@ object HierarchicalStorageSpace extends JavaLogger {
     cleanTmpDirectory(s, storageSpace.tmpDirectory, background)
   }
 
-  lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
   def extractTimeFromName(name: String) = {
-    val matcher = replicationPattern.matcher(name)
-    if (!matcher.matches) None
-    else Try(matcher.group(1).toLong).toOption
+    val time = name.takeWhile(_.isDigit)
+    if (time.isEmpty) None
+    else Try(time.toLong).toOption
   }
 
   def ignoreErrors[T](f: ⇒ T): Unit = Try(f)
@@ -131,8 +141,10 @@ object HierarchicalStorageSpace extends JavaLogger {
     }
   }
 
-  def createJobDirectory[S](s: S, storageSpace: StorageSpace)(implicit hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
-    val communicationPath = hierarchicalStorageInterface.child(s, storageSpace.tmpDirectory, StorageSpace.timedUniqName)
+  def createJobDirectory[S](s: S, storageSpace: StorageSpace)(implicit hierarchicalStorageInterface: HierarchicalStorageInterface[S], preference: Preference) = {
+    val intervalDirectory = hierarchicalStorageInterface.child(s, storageSpace.tmpDirectory, StorageSpace.lastBegining(preference(TmpDirCreation)))
+    ignoreErrors(hierarchicalStorageInterface.makeDir(s, intervalDirectory))
+    val communicationPath = hierarchicalStorageInterface.child(s, intervalDirectory, StorageSpace.timedUniqName)
     hierarchicalStorageInterface.makeDir(s, communicationPath)
     communicationPath
   }

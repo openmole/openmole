@@ -210,9 +210,6 @@ class Execution {
     (errors.get(key), moleExecutions.get(key)) match {
       case (Some(error), _) ⇒ error
       case (_, Some(moleExecution)) ⇒
-
-        val d = moleExecution.duration.getOrElse(0L)
-
         def convertStatuses(s: MoleExecution.JobStatuses) = ExecutionInfo.JobStatuses(s.ready, s.running, s.completed)
 
         lazy val statuses = moleExecution.capsuleStatuses.toVector.map { case (k, v) ⇒ k.toString -> convertStatuses(v) }
@@ -223,7 +220,7 @@ class Execution {
               capsules = statuses,
               error = ErrorBuilder(t.exception),
               environmentStates = environmentState(key),
-              duration = moleExecution.duration.getOrElse(0),
+              duration = moleExecution.duration.getOrElse(0L),
               clean = moleExecution.cleaned
             )
           case _ ⇒
@@ -231,20 +228,20 @@ class Execution {
               Canceled(
                 capsules = statuses,
                 environmentStates = environmentState(key),
-                duration = moleExecution.duration.get,
+                duration = moleExecution.duration.getOrElse(0L),
                 clean = moleExecution.cleaned
               )
             else if (moleExecution.finished)
               Finished(
                 capsules = statuses,
-                duration = moleExecution.duration.get,
+                duration = moleExecution.duration.getOrElse(0L),
                 environmentStates = environmentState(key),
                 clean = moleExecution.cleaned
               )
             else if (moleExecution.started)
               Running(
                 capsules = statuses,
-                duration = d,
+                duration = moleExecution.duration.getOrElse(0L),
                 environmentStates = environmentState(key)
               )
             else launchStatus
