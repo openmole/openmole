@@ -30,7 +30,7 @@ object Search {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
-  def build = {
+  def build(getIndex: () ⇒ Unit) {
 
     val centerSearch = Seq(
       width := 150,
@@ -109,7 +109,13 @@ object Search {
 
     val dd = new Dropdown(resultDiv, div, emptyMod, resultStyle, () ⇒ {})
 
-    org.scalajs.dom.window.document.getElementById(shared.searchImg).addEventListener("click", {
+    val ddd = org.scalajs.dom.window.document.getElementById(shared.searchImg)
+    ddd.addEventListener("mouseover", {
+      (e: MouseEvent) ⇒
+        getIndex()
+    })
+
+    ddd.addEventListener("click", {
       (e: MouseEvent) ⇒
         dd.toggle
         searchInput.focus()

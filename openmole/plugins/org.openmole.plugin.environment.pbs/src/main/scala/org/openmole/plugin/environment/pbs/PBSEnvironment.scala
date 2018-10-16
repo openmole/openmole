@@ -132,7 +132,6 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   override def start() = {
     storageService
-    cleanSSHStorage(storageService, background = true)
   }
 
   override def stop() = {
@@ -197,7 +196,7 @@ class PBSLocalEnvironment(
   implicit val localInterpreter = gridscale.local.Local()
   implicit val systemInterpreter = effectaside.System()
 
-  override def start() = { storage; space; HierarchicalStorageSpace.clean(storage, space, background = true) }
+  override def start() = { storage; space }
   override def stop() = { HierarchicalStorageSpace.clean(storage, space, background = false) }
 
   import env.services.preference

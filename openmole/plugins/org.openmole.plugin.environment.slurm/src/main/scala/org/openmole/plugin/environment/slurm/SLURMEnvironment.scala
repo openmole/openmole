@@ -139,7 +139,7 @@ class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
   implicit val systemInterpreter = effectaside.System()
   implicit val localInterpreter = gridscale.local.Local()
 
-  override def start() = { storageService; cleanSSHStorage(storageService, background = true) }
+  override def start() = { storageService }
 
   override def stop() = {
     cleanSSHStorage(storageService, background = false)
