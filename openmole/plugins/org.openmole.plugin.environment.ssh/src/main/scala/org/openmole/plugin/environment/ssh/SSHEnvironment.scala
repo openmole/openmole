@@ -144,7 +144,6 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   override def start() = {
     storageService
-    cleanSSHStorage(storageService, background = true)
     import services.threadProvider
     Updater.delay(jobUpdater, services.preference(SSHEnvironment.updateInterval))
   }
