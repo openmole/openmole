@@ -166,6 +166,7 @@ package object ssh {
     state: J => ExecutionState,
     delete: J => Unit,
     stdOutErr: J => (String, String))(implicit services: BatchEnvironment.Services) = {
+    import services._
     val jobDirectory = HierarchicalStorageSpace.createJobDirectory(storage, space)
     val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage(), jobDirectory)
 
