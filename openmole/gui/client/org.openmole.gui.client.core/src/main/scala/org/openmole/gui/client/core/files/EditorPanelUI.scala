@@ -45,6 +45,7 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
 
   val editorDiv = tags.div(id := "editor").render
   val editor = ace.edit(editorDiv)
+  val offset = Var(0)
 
   val extension: FileExtension = safePath.name
   lazy val view = {
@@ -56,8 +57,7 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
             Rx {
               if (extension == OMS && org.openmole.gui.client.core.panels.treeNodeTabs.isActive(safePath)() == TreeNodeTabs.Active) {
                 val range = (nbLines()._1 until nbLines()._2)
-                val topMargin = if (session.getScrollTop() > 0) marginTop := -8 else marginTop := 0
-                div(topMargin)(
+                div(marginTop := offset())(
                   for (
                     r ← range
                   ) yield {
@@ -128,6 +128,13 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
       Popover.toggle(p)
     }
     nbLines() = (editor.renderer.getScrollTopRow.toInt, editor.renderer.getScrollBottomRow.toInt)
+
+    val nbL = code.count((c: Char) ⇒ c == '\n')
+    offset() = {
+      if (editor.renderer.getScrollBottomRow().toInt == nbL) -10
+      else if (editor.renderer.getScrollTopRow().toInt == 0) 0
+      else offset.now
+    }
   })
 
   editor.session.doc.on("change", x ⇒ {
@@ -156,7 +163,7 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
   })
 
   def buildManualPopover(i: Int, title: String, position: PopupPosition) = {
-    lazy val pop1 = div(i)(`class` := "gutterError").popover(
+    lazy val pop1 = div(i)(`class` := "gutterError", height := 15).popover(
       title,
       position,
       Manual
@@ -177,7 +184,7 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
   }
 
   def buildCleanGutter(row: Int, corrects: Seq[Int]) = {
-    if (corrects.contains(row)) div(`class` := "gutterCorrected").render
+    if (corrects.contains(row)) div(`class` := "gutterCorrected", height := 15)(row).render
     else div(height := 15, opacity := 0).render
   }
   def initEditor = {
