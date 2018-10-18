@@ -107,6 +107,11 @@ package transition {
       Puzzle.merge(from.firstSlot, puzzles.flatMap(_.lasts), puzzles)
     }
 
+    def oo[T: ToTransitionParameter](t: T): Puzzle = {
+      val parameters = implicitly[ToTransitionParameter[T]].apply(t)
+      oo(parameters.puzzleParameter, parameters.filterParameter)
+    }
+
     def oo(to: Puzzle, prototypes: Val[_]*): Puzzle = {
       def blockList: BlockList = if (prototypes.isEmpty) BlockList.empty else Keep(prototypes: _*)
       oo(to, filter = blockList)
