@@ -183,7 +183,13 @@ class ExecutionPanel {
             case f: ExecutionInfo.Finished ⇒
               addToBanner(execID, BannerAlert.div(succesDiv(execID)))
               (ExecutionDetails(ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates), (if (!f.clean) "cleaning" else info.state))
-            case r: ExecutionInfo.Running ⇒ (ExecutionDetails(ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates), info.state)
+            case r: ExecutionInfo.Running ⇒
+              panels.treeNodeTabs.find(staticInfo.now(execID).path).foreach { tab ⇒
+                tab.editor.foreach {
+                  _.setErrors(Seq())
+                }
+              }
+              (ExecutionDetails(ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates), info.state)
             case c: ExecutionInfo.Canceled ⇒
               hasBeenDisplayed(execID)
               (ExecutionDetails("0", 0, envStates = c.environmentStates), (if (!c.clean) "cleaning" else info.state))
