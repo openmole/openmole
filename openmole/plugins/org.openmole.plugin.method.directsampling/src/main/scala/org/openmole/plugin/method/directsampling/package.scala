@@ -71,10 +71,12 @@ package object directsampling {
         val afterTask = EmptyTask() set ((inputs, outputs) ++= evaluation.outputs ++ sampling.prototypes)
 
         val preCapsule = Capsule(preTask)
-        val afterSlot = Slot(afterTask)
+        val afterSlot = Slot(Capsule(afterTask, strain = true))
 
-        val p = (explorationCapsule -< preCapsule -- (wrapped.evaluationPuzzle when condition) -- afterSlot) &
-          (preCapsule oo (afterSlot block (evaluation.outputs: _*)))
+        val p =
+          (explorationCapsule -< preCapsule -- (wrapped.evaluationPuzzle when condition) -- afterSlot) &
+            (preCapsule oo (afterSlot block (evaluation.outputs: _*))) &
+            (explorationCapsule oo (afterSlot block (evaluation.outputs ++ sampling.prototypes: _*)))
 
         PuzzleContainer(p, afterSlot, wrapped.delegate)
     }
