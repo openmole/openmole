@@ -63,7 +63,7 @@ package object directsampling {
     aggregation.option match {
       case Some(aggregation) ⇒
         val p = (explorationCapsule -< (wrapped.evaluationPuzzle when condition) >- aggregation) &
-          (explorationCapsule -- (aggregation block (evaluation.outputs: _*)))
+          (explorationCapsule -- (aggregation block (wrapped.evaluationPuzzle.outputs: _*)))
 
         PuzzleContainer(p, aggregation.last, wrapped.delegate)
       case None ⇒
