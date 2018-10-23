@@ -255,7 +255,7 @@ object DocumentationPages {
   lazy val netLogo = DocumentationPage.fromScalatex(name = "NetLogo", content = scalatex.documentation.run.NetLogo)
   lazy val r = DocumentationPage.fromScalatex(name = "R", content = scalatex.documentation.run.R)
   lazy val scilab = DocumentationPage.fromScalatex(name = "Scilab", content = scalatex.documentation.run.Scilab)
-  lazy val packaged = DocumentationPage.fromScalatex(name = "Packaged", content = scalatex.documentation.run.packaged.Packaged, title = Some("Package Native Code"))
+  lazy val packaged = DocumentationPage.fromScalatex(name = "Package Native Code", content = scalatex.documentation.run.packaged.Packaged)
 
   def packagedPages = pageNode(packaged, Vector(packagedPython, packagedCCplusplus))
 
