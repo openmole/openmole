@@ -255,7 +255,7 @@ object DocumentationPages {
   lazy val netLogo = DocumentationPage.fromScalatex(name = "NetLogo", content = scalatex.documentation.run.NetLogo)
   lazy val r = DocumentationPage.fromScalatex(name = "R", content = scalatex.documentation.run.R)
   lazy val scilab = DocumentationPage.fromScalatex(name = "Scilab", content = scalatex.documentation.run.Scilab)
-  lazy val packaged = DocumentationPage.fromScalatex(name = "Packaged", content = scalatex.documentation.run.packaged.Packaged, title = Some("Package Native Code"))
+  lazy val packaged = DocumentationPage.fromScalatex(name = "Package Native Code", content = scalatex.documentation.run.packaged.Packaged)
 
   def packagedPages = pageNode(packaged, Vector(packagedPython, packagedCCplusplus))
 
@@ -333,10 +333,8 @@ object DocumentationPages {
   // Tutorials
   lazy val tutorials = DocumentationPage.fromScalatex(name = "Tutorials", content = scalatex.tutorials.Tutorials)
 
-
   def tutoPages = pageNode(tutorials, Vector(stepByStepIntro, exploreTuto, netLogoGA, simpleSAFire, fromPage(market)))
   def menuTutoPages = Seq(stepByStepIntro, exploreTuto, netLogoGA, simpleSAFire, market)
-
 
   lazy val stepByStepIntro = DocumentationPage.fromScalatex(name = "Step By Step Introduction", content = scalatex.tutorials.gettingStarted.StepByStepIntro, title = Some("A Step by Step Introduction to OpenMOLE"))
   lazy val exploreTuto = DocumentationPage.fromScalatex(name = "Explore Tutorial", content = scalatex.tutorials.gettingStarted.ExploreTuto, title = Some("How to Execute an Exploration Task"))
