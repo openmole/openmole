@@ -103,38 +103,21 @@ package object evolution {
     val t = wfi(algorithm)
 
     val wrapped = wrapPuzzle(evaluation, t.inputPrototypes, t.outputPrototypes, wrap)
-
-    val randomGenomes =
-      BreedTask(algorithm, parallelism) set (
-        name := "randomGenome",
-        outputs += t.populationPrototype
-      )
-
-    val scalingGenomeTask = ScalingGenomeTask(algorithm) set (
-      name := "scalingGenome"
-    )
-
-    val toOffspring =
-      ToOffspringTask(algorithm) set (
-        name := "toOffspring"
-      )
-
-    val elitismTask = ElitismTask(algorithm) set (name := "elitism")
-
-    val terminationTask = TerminationTask(algorithm, termination) set (name := "termination")
-
-    val breed = BreedTask(algorithm, 1) set (name := "breed")
+    val randomGenomes = BreedTask(algorithm, parallelism) set ((inputs, outputs) += t.populationPrototype)
+    val scalingGenomeTask = ScalingGenomeTask(algorithm)
+    val toOffspring = ToOffspringTask(algorithm)
+    val elitismTask = ElitismTask(algorithm)
+    val terminationTask = TerminationTask(algorithm, termination)
+    val breed = BreedTask(algorithm, 1)
 
     val masterFirst =
       EmptyTask() set (
-        name := "masterFirst",
         (inputs, outputs) += (t.populationPrototype, t.genomePrototype, t.statePrototype),
         (inputs, outputs) += (t.objectives.map(_.prototype): _*)
       )
 
     val masterLast =
       EmptyTask() set (
-        name := "masterLast",
         (inputs, outputs) += (t.populationPrototype, t.statePrototype, t.genomePrototype.toArray, t.terminatedPrototype, t.generationPrototype)
       )
 
@@ -162,17 +145,14 @@ package object evolution {
       randomGenomes,
       masterTask,
       scalingGenomeTask -- Strain(wrapped.evaluationPuzzle),
-      t.populationPrototype, t.statePrototype
+      state = Seq(t.populationPrototype, t.statePrototype),
+      slaves = parallelism
     )
 
-    val firstTask = InitialStateTask(algorithm) set (name := "first")
-
+    val firstTask = InitialStateTask(algorithm)
     val firstCapsule = Capsule(firstTask, strain = true)
 
-    val last = EmptyTask() set (
-      name := "last",
-      (inputs, outputs) += (t.statePrototype, t.populationPrototype)
-    )
+    val last = EmptyTask() set ((inputs, outputs) += (t.statePrototype, t.populationPrototype))
 
     val puzzle =
       ((firstCapsule -- masterSlave) >| (Capsule(last, strain = true) when t.terminatedPrototype)) &
@@ -199,36 +179,23 @@ package object evolution {
 
     val masterFirst =
       EmptyTask() set (
-        name := "masterFirst",
         (inputs, outputs) += (t.populationPrototype, t.offspringPrototype, t.statePrototype)
       )
 
     val masterLast =
       EmptyTask() set (
-        name := "masterLast",
         (inputs, outputs) += (t.populationPrototype, t.statePrototype, islandPopulationPrototype.toArray, t.terminatedPrototype, t.generationPrototype)
       )
 
-    val elitismTask = ElitismTask(algorithm) set (name := "elitism")
-
+    val elitismTask = ElitismTask(algorithm)
     val generateIsland = GenerateIslandTask(algorithm, sample, 1, islandPopulationPrototype)
-
-    val terminationTask = TerminationTask(algorithm, termination) set (name := "termination")
-
-    val islandPopulationToPopulation =
-      AssignTask(islandPopulationPrototype → t.populationPrototype) set (
-        name := "islandPopulationToPopulation"
-      )
-
+    val terminationTask = TerminationTask(algorithm, termination)
+    val islandPopulationToPopulation = AssignTask(islandPopulationPrototype → t.populationPrototype)
     val reassingRNGTask = ReassignStateRNGTask(algorithm)
 
     val fromIsland = FromIslandTask(algorithm)
 
-    val populationToOffspring =
-      AssignTask(t.populationPrototype → t.offspringPrototype) set (
-        name := "populationToOffspring"
-      )
-
+    val populationToOffspring = AssignTask(t.populationPrototype → t.offspringPrototype)
     val elitismSlot = Slot(elitismTask)
     val terminationCapsule = Capsule(terminationTask)
     val masterLastSlot = Slot(masterLast)
@@ -243,24 +210,17 @@ package object evolution {
         (elitismSlot -- generateIsland -- masterLastSlot) &
         (elitismSlot -- (masterLastSlot keep t.populationPrototype))
 
-    val masterTask = MoleTask(master) set (
-      name := "islandMaster",
-      exploredOutputs += islandPopulationPrototype.toArray
-    )
+    val masterTask = MoleTask(master) set (exploredOutputs += islandPopulationPrototype.toArray)
 
     val generateInitialIslands =
       GenerateIslandTask(algorithm, sample, parallelism, islandPopulationPrototype) set (
-        name := "generateInitialIslands",
         (inputs, outputs) += t.statePrototype,
         outputs += t.populationPrototype
       )
 
-    val islandCapsule = Slot(MoleTask(selectPuzzle(island)) set (name := "island"))
+    val islandCapsule = Slot(MoleTask(selectPuzzle(island)))
 
-    val slaveFist = EmptyTask() set (
-      name := "slaveFirst",
-      (inputs, outputs) += (t.statePrototype, islandPopulationPrototype)
-    )
+    val slaveFist = EmptyTask() set ((inputs, outputs) += (t.statePrototype, islandPopulationPrototype))
 
     val slave = slaveFist -- (islandPopulationToPopulation, reassingRNGTask) -- islandCapsule -- fromIsland -- populationToOffspring
 
@@ -268,17 +228,15 @@ package object evolution {
       generateInitialIslands,
       masterTask,
       slave,
-      t.populationPrototype, t.statePrototype
+      state = Seq(t.populationPrototype, t.statePrototype),
+      slaves = parallelism
     )
 
-    val firstTask = InitialStateTask(algorithm) set (name := "first")
+    val firstTask = InitialStateTask(algorithm)
 
     val firstCapsule = Capsule(firstTask, strain = true)
 
-    val last = EmptyTask() set (
-      name := "last",
-      (inputs, outputs) += (t.populationPrototype, t.statePrototype)
-    )
+    val last = EmptyTask() set ((inputs, outputs) += (t.populationPrototype, t.statePrototype))
 
     val puzzle =
       ((firstCapsule -- masterSlave) >| (Capsule(last, strain = true) when t.terminatedPrototype)) &

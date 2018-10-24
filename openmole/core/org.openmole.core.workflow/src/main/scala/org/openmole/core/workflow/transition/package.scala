@@ -25,6 +25,7 @@ package transition {
 
   import org.openmole.core.context.Val
   import org.openmole.core.expansion.{ Condition, FromContext }
+  import org.openmole.core.workflow.tools.OptionalArgument
 
   trait TransitionDecorator {
     val from: Puzzle
@@ -60,11 +61,9 @@ package transition {
       Puzzle.merge(from.firstSlot, parameters.flatMap(_.puzzleParameter.lasts), from :: parameters.map(_.puzzleParameter).toList, transitions)
     }
 
-    def -<-(toPuzzles: Puzzle*) = {
-      val transitions = for (f ← from.lasts; l ← toPuzzles) yield new SlaveTransition(f, l.firstSlot)
-      Puzzle.merge(from.firstSlot, toPuzzles.flatMap {
-        _.lasts
-      }, from :: toPuzzles.toList ::: Nil, transitions)
+    def -<-(p: Puzzle, slaves: OptionalArgument[Int] = None) = {
+      val transitions = for (f ← from.lasts) yield new SlaveTransition(f, p.firstSlot, slaves = slaves.option)
+      Puzzle.merge(from.firstSlot, p.lasts, puzzles = from :: p :: Nil, transitions = transitions)
     }
 
     def >-[T: ToTransitionParameter](ts: T*): Puzzle = {
