@@ -174,6 +174,7 @@ object UDocker {
     else dockerImage.file.extractUncompress(extractedImage)
 
     val manifestContent = (extractedImage / "manifest.json").content
+    assert(manifestContent.size > 2,s"Corrupted image with no manifest : $extractedImage for file ${dockerImage.file}")
     val topLevelManifests = decode[List[TopLevelImageManifest]](manifestContent)
     val topLevelImageManifest = topLevelManifests.map(_.head)
 
@@ -314,6 +315,7 @@ object UDocker {
       uDocker.localDockerImage.container match {
         case None ⇒
           val cl = commandLine(s"/usr/bin/env python2 ${uDockerExecutable.getAbsolutePath} create $imageId")
+          // check that json conf actually exists ? at creation check that effectively created
           val execres = execute(cl, tmpDirectory, uDockerVariables, captureOutput = true, captureError = true, displayOutput = false, displayError = false).output.get
           (execres.split("\n").map(_.trim).reverse.find(_.size > 0).head, execres)
         case Some(directory) ⇒
