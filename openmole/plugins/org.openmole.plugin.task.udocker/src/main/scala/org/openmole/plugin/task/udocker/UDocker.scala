@@ -121,9 +121,12 @@ object UDocker {
 
     val imageId = s"${localDockerImage.image}:${localDockerImage.tag}"
 
-    imageRepositoryDirectory / "manifest" content = localDockerImage.manifest.asJson.toString
-    imageRepositoryDirectory / "TAG" content = s"$repositoryDirectory/$imageId"
-    imageRepositoryDirectory / "v2" content = ""
+    // also lock as this directory can be simultaneously used by other tasks working with the same image
+    imageRepositoryDirectory.withLockInDirectory {
+      imageRepositoryDirectory / "manifest" content = localDockerImage.manifest.asJson.toString
+      imageRepositoryDirectory / "TAG" content = s"$repositoryDirectory/$imageId"
+      imageRepositoryDirectory / "v2" content = ""
+    }
   }
 
   /**
@@ -174,6 +177,7 @@ object UDocker {
     else dockerImage.file.extractUncompress(extractedImage)
 
     val manifestContent = (extractedImage / "manifest.json").content
+    assert(manifestContent.size > 0, s"Corrupted saved image with no manifest for file ${dockerImage.file}")
     val topLevelManifests = decode[List[TopLevelImageManifest]](manifestContent)
     val topLevelImageManifest = topLevelManifests.map(_.head)
 
