@@ -62,23 +62,15 @@ package object directsampling {
 
     aggregation.option match {
       case Some(aggregation) ⇒
-        val p = (explorationCapsule -< (wrapped.evaluationPuzzle when condition) >- aggregation) &
-          (explorationCapsule -- (aggregation block (wrapped.evaluationPuzzle.outputs: _*)))
+        val p =
+          (explorationCapsule -< (wrapped.evaluationPuzzle when condition) >- aggregation) &
+            (explorationCapsule -- (aggregation block (wrapped.evaluationPuzzle.outputs: _*)))
 
         PuzzleContainer(p, aggregation.last, wrapped.delegate)
       case None ⇒
-        val preTask = EmptyTask() set ((inputs, outputs) ++= sampling.prototypes)
-        val afterTask = EmptyTask() set ((inputs, outputs) ++= evaluation.outputs ++ sampling.prototypes)
-
-        val preCapsule = Capsule(preTask)
-        val afterSlot = Slot(Capsule(afterTask, strain = true))
-
-        val p =
-          (explorationCapsule -< preCapsule -- (wrapped.evaluationPuzzle when condition) -- afterSlot) &
-            (preCapsule oo (afterSlot block (evaluation.outputs: _*))) &
-            (explorationCapsule oo (afterSlot block (evaluation.outputs ++ sampling.prototypes: _*)))
-
-        PuzzleContainer(p, afterSlot, wrapped.delegate)
+        val strained = Strain(wrapped.evaluationPuzzle)
+        val p = explorationCapsule -< (strained when condition)
+        PuzzleContainer(p, strained.last, wrapped.delegate)
     }
   }
 

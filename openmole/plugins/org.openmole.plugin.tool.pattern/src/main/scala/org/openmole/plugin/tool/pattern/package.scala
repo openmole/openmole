@@ -35,7 +35,7 @@ package object pattern {
     else {
       val firstEvaluation = EmptyTask() set ((inputs, outputs) += (inputVals: _*))
       val lastEvaluation = EmptyTask() set ((inputs, outputs) += (outputVals: _*))
-      val puzzle = firstEvaluation -- evaluation -- lastEvaluation
+      val puzzle = Strain(firstEvaluation) -- evaluation -- lastEvaluation
       Wrapped(puzzle, Puzzle.capsules(evaluation))
     }
 
