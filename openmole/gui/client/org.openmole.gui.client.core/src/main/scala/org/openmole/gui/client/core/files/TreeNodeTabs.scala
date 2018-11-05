@@ -21,7 +21,6 @@ import org.openmole.gui.ext.tool.client.FileManager
 import DataUtils._
 import com.definitelyscala.plotlyjs.PlotType
 import net.scalapro.sortable._
-import org.omg.PortableServer.POAManagerPackage.State
 import org.openmole.gui.client.core.files.TreeNodeTab.{ EditableView, RowFilter }
 import org.openmole.gui.client.tool.plot
 import org.openmole.gui.client.tool.plot.Plot.{ PlotMode, ScatterMode, XYMode }
