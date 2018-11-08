@@ -104,7 +104,6 @@ object BatchEnvironment extends JavaLogger {
   val IncrementUpdateInterval = ConfigurationLocation("BatchEnvironment", "IncrementUpdateInterval", Some(1 minutes))
 
   val MaxUpdateErrorsInARow = ConfigurationLocation("BatchEnvironment", "MaxUpdateErrorsInARow", Some(3))
-  val RuntimeMemoryMargin = ConfigurationLocation("BatchEnvironment", "RuntimeMemoryMargin", Some(400 megabytes))
 
   val downloadResultRetry = ConfigurationLocation("BatchEnvironment", "DownloadResultRetry", Some(3))
   val killJobRetry = ConfigurationLocation("BatchEnvironment", "KillJobRetry", Some(3))
@@ -123,11 +122,6 @@ object BatchEnvironment extends JavaLogger {
   def openMOLEMemoryValue(openMOLEMemory: Option[Information])(implicit preference: Preference) = openMOLEMemory match {
     case None    ⇒ preference(MemorySizeForRuntime)
     case Some(m) ⇒ m
-  }
-
-  def requiredMemory(openMOLEMemory: Option[Information], memory: Option[Information])(implicit preference: Preference) = memory match {
-    case Some(m) ⇒ m
-    case None    ⇒ openMOLEMemoryValue(openMOLEMemory) + preference(BatchEnvironment.RuntimeMemoryMargin)
   }
 
   def threadsValue(threads: Option[Int]) = threads.getOrElse(1)

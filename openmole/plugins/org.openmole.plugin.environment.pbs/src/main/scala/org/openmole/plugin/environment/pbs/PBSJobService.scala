@@ -40,7 +40,7 @@ class PBSJobService[S, H](
       workDirectory = workDirectory,
       queue = parameters.queue,
       wallTime = parameters.wallTime,
-      memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
+      memory = parameters.memory,
       nodes = parameters.nodes,
       coreByNode = parameters.coreByNode orElse parameters.threads,
       flavour = parameters.flavour

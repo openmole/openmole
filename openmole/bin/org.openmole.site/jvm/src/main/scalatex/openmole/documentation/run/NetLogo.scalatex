@@ -27,6 +27,7 @@
       outputs += burned mapped "burned-trees"
     )"""
 
+
 @def csvHook = """
   val csvHook = AppendToCSVFileHook(workDirectory / "result.csv", density, burned, seed)"""
 
@@ -61,7 +62,11 @@ In this example, the command list contains:
   @ul
     @li{@code{random-seed} initializing the random number generator of NetLogo using the seed provided by OpenMOLE,}
     @li{@code{setup} calling the setup function of the nlogo file,}
-    @li{@code{go} running the model. For this particular model, this function is called until no more turtles are active.}
+    @li{@code{go} running the model. For this particular model, this function is called until no more turtles are active. }
+
+If you use the forever button @code{go} in the NetLogo GUI don't forget that you @i{will} need something like @code{"while [condition] [go]"} in the command list, as openmole won't loop your @code{go} function by default.
+
+@br
 
 The @code{replication} and @code{density} OpenMOLE variables are used as parameters of the NetLogo program.
 Therefore they appear as inputs of the NetLogoTask.
