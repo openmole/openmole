@@ -38,7 +38,7 @@ class SLURMJobService[S, H](
       queue = parameters.queue,
       workDirectory = workDirectory,
       wallTime = parameters.wallTime,
-      memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
+      memory = parameters.memory,
       nodes = parameters.nodes,
       coresByNode = parameters.coresByNode orElse parameters.threads,
       qos = parameters.qos,
