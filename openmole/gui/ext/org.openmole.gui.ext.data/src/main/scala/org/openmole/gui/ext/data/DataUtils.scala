@@ -72,7 +72,7 @@ object DataUtils {
   }
 
   implicit class CleanName(s: String) {
-    def clean = s.split('-').reduce(_ + _.capitalize).filterNot(Seq('?', ' ').contains)
+    def clean = s.split('-').reduce(_ + _.capitalize).filterNot(Seq('?', ' ').contains).replaceAll("%","percent")
   }
 
   def isCSV(safePath: SafePath) = {
