@@ -607,7 +607,7 @@ lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") e
   libraryDependencies += Libraries.async,
   npmDeps in Compile += Dep("ace-builds", "1.2.9", List("mode-scala.js", "theme-github.js", "ext-language_tools.js"), true),
   npmDeps in Compile += Dep("sortablejs", "1.7.0", List("Sortable.min.js")),
-  npmDeps in Compile += Dep("plotly.js", "1.31.0", List("plotly-basic.min.js"))
+  npmDeps in Compile += Dep("plotly.js", "1.42.0", List("plotly.min.js"))
 ) settings (defaultSettings: _*)
 
 

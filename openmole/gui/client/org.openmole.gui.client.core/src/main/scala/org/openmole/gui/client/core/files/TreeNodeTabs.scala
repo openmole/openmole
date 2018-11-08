@@ -12,23 +12,19 @@ import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.openmole.gui.ext.api.Api
 import org.scalajs.dom.raw.HTMLElement
-import rx._
 import scalatags.JsDom.all.{ raw, _ }
 import scalatags.JsDom.TypedTag
 import org.openmole.gui.ext.tool.client._
 import org.openmole.gui.client.core._
 import org.openmole.gui.ext.tool.client.FileManager
 import DataUtils._
-import com.definitelyscala.plotlyjs.PlotType
 import net.scalapro.sortable._
 import org.openmole.gui.client.core.files.TreeNodeTab.{ EditableView, RowFilter }
 import org.openmole.gui.client.tool.plot
-import org.openmole.gui.client.tool.plot.Plot.{ PlotMode, ScatterMode, XYMode }
+import org.openmole.gui.client.tool.plot.Plot.{ PlotMode, ScatterMode, SplomMode, XYMode }
 import org.openmole.gui.client.tool.plot._
-import org.openmole.gui.client.tool.plot.Tools._
 import scaladget.bootstrapnative.DataTable
 import rx._
-
 import scala.collection.immutable.HashMap
 import scala.scalajs.js.timers._
 
@@ -217,7 +213,7 @@ object TreeNodeTab {
     view:            EditableView = Raw,
     initialEditing:  Boolean      = false,
     filter:          RowFilter    = First100,
-    axis:            (Int, Int)   = (0, 1),
+    axis:            Seq[Int]     = Seq(0, 1),
     plotMode:        PlotMode     = ScatterMode): TreeNodeTab = new TreeNodeTab {
 
     lazy val safePathTab = Var(safePath)
@@ -325,9 +321,15 @@ object TreeNodeTab {
 
     def toView(filter: RowFilter) = panels.treeNodeTabs.switchEditableTo(this, sequence.now, view, filter, editing, axis, plotMode)
 
-    def toView(newAxis: (Int, Int)) = panels.treeNodeTabs.switchEditableTo(this, sequence.now, view, filter, editing, newAxis, plotMode)
+    def toView(newAxis: Seq[Int]) = panels.treeNodeTabs.switchEditableTo(this, sequence.now, view, filter, editing, newAxis, plotMode)
 
-    def toView(newMode: PlotMode) = panels.treeNodeTabs.switchEditableTo(this, sequence.now, view, filter, editing, axis, newMode)
+    def toView(newMode: PlotMode) = {
+      val (seqs, ax) = newMode match {
+        case SplomMode ⇒ (initialSequence, axis)
+        case _         ⇒ (sequence.now, axis.take(2))
+      }
+      panels.treeNodeTabs.switchEditableTo(this, seqs, view, filter, editing, ax, newMode)
+    }
 
     lazy val switchButton = radios(margin := 20)(
       selectableButton("Raw", view == Raw, onclick = () ⇒ switchView(Raw)),
@@ -345,13 +347,20 @@ object TreeNodeTab {
       (for (
         a ← sequence.now.header.zipWithIndex
       ) yield {
-        selectableButton(a._1, axis._1 == a._2 || axis._2 == a._2, onclick = () ⇒ toView((axis._2, a._2)))
+        selectableButton(a._1, axis.contains(a._2), onclick = () ⇒ {
+          val newAxis = plotMode match {
+            case SplomMode ⇒ if (axis.contains(a._2)) axis.filterNot(_ == a._2) else axis :+ a._2
+            case _         ⇒ Seq(axis.last, a._2)
+          }
+          toView(newAxis)
+        })
       }): _*
     )
 
     lazy val plotModeRadios = radios(marginLeft := 40)(
       selectableButton("Line", plotMode == XYMode, onclick = () ⇒ toView(XYMode)),
-      selectableButton("Scatter", plotMode == ScatterMode, onclick = () ⇒ toView(ScatterMode))
+      selectableButton("Scatter", plotMode == ScatterMode, onclick = () ⇒ toView(ScatterMode)),
+      selectableButton("SPLOM", plotMode == SplomMode, onclick = () ⇒ toView(SplomMode))
     )
 
     lazy val block: TypedTag[_ <: HTMLElement] = {
@@ -387,24 +396,19 @@ object TreeNodeTab {
           case Raw ⇒ editorView
           case _ ⇒
             if (filteredSequence.size > 0) {
-              if (filteredSequence.head.length > Math.max(axis._1, axis._2)) {
+              if (filteredSequence.head.length >= axis.length) {
                 val dataRow = filteredSequence.map {
                   scaladget.bootstrapnative.DataTable.DataRow(_)
                 }.toSeq
-                val col1 = DataTable.column(axis._1, dataRow)
-                val col2 = DataTable.column(axis._2, dataRow)
-                val xyplot = plot.Plot(
+                plot.Plot(
                   "",
-                  sequence.now.header(axis._1),
-                  sequence.now.header(axis._2),
-                  Seq(Serie(
-                    x = col1.values.toArray,
-                    y = col2.values.toArray
-                  )),
+                  Serie(axis.length, axis.foldLeft(Array[Dim]()) { (acc, col) ⇒
+                    acc :+ Dim(DataTable.column(col, dataRow).values, sequence.now.header.lift(col).getOrElse(""))
+                  }),
                   false,
                   plotMode
                 )
-                xyplot
+
               }
               else div("No plot to display")
             }
@@ -453,7 +457,11 @@ class TreeNodeTabs() {
     tab.activate
   }
 
-  def isActive(safePath: SafePath) = tabs.now.filter { _.safePathTab.now == safePath }.map { _.activity }.headOption.getOrElse(Var(TreeNodeTabs.UnActive))
+  def isActive(safePath: SafePath) = tabs.now.filter {
+    _.safePathTab.now == safePath
+  }.map {
+    _.activity
+  }.headOption.getOrElse(Var(TreeNodeTabs.UnActive))
 
   def unActiveAll = tabs.map {
     _.foreach { t ⇒
@@ -487,7 +495,7 @@ class TreeNodeTabs() {
     }
   }
 
-  def switchEditableTo(tab: TreeNodeTab, sequence: SequenceData, editableView: EditableView, filter: RowFilter, editing: Boolean, axis: (Int, Int), plotMode: PlotMode) = {
+  def switchEditableTo(tab: TreeNodeTab, sequence: SequenceData, editableView: EditableView, filter: RowFilter, editing: Boolean, axis: Seq[Int], plotMode: PlotMode) = {
     val newTab = TreeNodeTab.editable(tab.safePathTab.now, tab.content, sequence, editableView, editing, filter, axis, plotMode)
     switchTab(tab, newTab)
   }

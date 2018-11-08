@@ -3,35 +3,39 @@ package org.openmole.gui.client.tool.plot
 import com.definitelyscala.plotlyjs._
 import com.definitelyscala.plotlyjs.all._
 import com.definitelyscala.plotlyjs.PlotlyImplicits._
+import scala.scalajs.js.JSConverters._
+import scala.scalajs.js
 import scalatags.JsDom.all._
-import Serie._
 
 object XYPlot {
 
   def apply(
-    title:      String     = "",
-    xaxisTitle: String     = "",
-    yaxisTitle: String     = "",
-    series:     Seq[Serie],
-    legend:     Boolean    = false) = {
+    title:  String  = "",
+    serie:  Serie,
+    legend: Boolean = false) = {
 
-    lazy val plotDiv = div.render
+    lazy val plotDiv = Plot.baseDiv
 
-    lazy val layout = Layout
-      .title(title)
-      .showlegend(legend)
-      .xaxis(plotlyaxis.title(xaxisTitle))
-      .yaxis(plotlyaxis.title(yaxisTitle))
+    val dims = serie.values.take(2)
 
-    lazy val config = Config.displayModeBar(false)
+    if (dims.length == 2) {
+      val plotDataArray: scalajs.js.Array[PlotData] = js.Array(
+        serie.plotDataBuilder
+          .x(dims.head.toDimension._result.values.get)
+          .y(dims(1).toDimension._result.values.get)
+      )
 
-    val plotDataArray: scalajs.js.Array[PlotData] = series
+      lazy val layout = Plot.baseLayout(title)
+        .xaxis(plotlyaxis.title(dims.head.label))
+        .yaxis(plotlyaxis.title(dims(1).label))
+        .width(800)
 
-    Plotly.newPlot(
-      plotDiv,
-      plotDataArray,
-      layout,
-      config)
+      Plotly.newPlot(
+        plotDiv,
+        plotDataArray,
+        layout, Plot.baseConfig
+      )
+    }
 
     div(plotDiv.render).render
   }
