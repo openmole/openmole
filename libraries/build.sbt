@@ -183,9 +183,9 @@ lazy val scalatexSite =
     libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.3.12",
     version := "0.3.12") settings(settings: _*)
 
-lazy val upickle = OsgiProject(dir, "upickle", exports = Seq("upickle.*", "jawn.*", "derive.*", "sourcecode.*"), imports = Seq("*")) settings(
+lazy val upickle = OsgiProject(dir, "upickle", exports = Seq("upickle.*", "jawn.*", "derive.*"), imports = Seq("*")) settings(
   libraryDependencies ++= Seq("com.lihaoyi" %% "upickle" % scalaUpickleVersion),
-  version := scalaUpickleVersion) settings(settings: _*)
+  version := scalaUpickleVersion) settings(settings: _*) dependsOn(sourceCode)
 
 lazy val boopickle = OsgiProject(dir, "boopickle", exports = Seq("boopickle.*"), imports = Seq("*")) settings(
   libraryDependencies ++= Seq("io.suzaku" %% "boopickle" % scalaBoopickleVersion),
@@ -337,9 +337,10 @@ lazy val config = OsgiProject(dir, "org.apache.commons.configuration2",
   libraryDependencies += "commons-beanutils" % "commons-beanutils" % "1.9.2",
   version := "2.2") settings(settings: _*) dependsOn (logging)
 
+def sourceCodeVersion = "0.1.4"
 lazy val sourceCode = OsgiProject(dir, "sourcecode") settings (
-  libraryDependencies += "com.lihaoyi" %% "sourcecode" % "0.1.3",
-  version := "0.1.3"
+  libraryDependencies += "com.lihaoyi" %% "sourcecode" % sourceCodeVersion,
+  version := sourceCodeVersion
 ) settings(settings: _*)
 
 
