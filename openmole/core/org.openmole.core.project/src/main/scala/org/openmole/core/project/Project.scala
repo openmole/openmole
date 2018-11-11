@@ -113,8 +113,9 @@ case class ErrorInCode(error: ScalaREPL.CompilationError) extends CompilationErr
 case class ErrorInCompiler(error: Throwable) extends CompilationError
 
 case class Compiled(result: ScalaREPL.Compiled) extends CompileResult {
+
   def eval =
-    result.apply() match {
+    result.apply().asInstanceOf[Function0[_]]() match {
       case p: Puzzle ⇒ p
       case e         ⇒ throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
     }
@@ -139,7 +140,7 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL) {
 
       def footer =
         s"""}
-           |runOMSScript()""".stripMargin
+           |() => runOMSScript()""".stripMargin
 
       def compileContent =
         s"""$header

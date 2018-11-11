@@ -28,6 +28,7 @@ import org.openmole.core.event.{Event, EventDispatcher}
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice.{FileCache, FileService, FileServiceCache}
 import org.openmole.core.location._
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.preference.{ConfigurationLocation, Preference}
 import org.openmole.core.replication.ReplicaCatalog
@@ -37,6 +38,7 @@ import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workspace._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment.ExecutionJobRegistry
+import org.openmole.plugin.environment.batch.environment.BatchExecutionJob.ClosuresBundle
 import org.openmole.plugin.environment.batch.refresh._
 import org.openmole.tool.cache._
 import org.openmole.tool.file._
@@ -47,6 +49,9 @@ import squants.information.InformationConversions._
 import squants.time.TimeConversions._
 
 import scala.collection.immutable.TreeSet
+import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
+import org.openmole.tool.osgi._
+import org.osgi.framework.Bundle
 
 object BatchEnvironment extends JavaLogger {
 
@@ -191,7 +196,7 @@ object BatchEnvironment extends JavaLogger {
 
     serializerService.serialise(job.runnableTasks, jobFile)
 
-    val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins
+    val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins -- job.environment.plugins
     val files = (new TreeSet[File]()(fileOrdering) ++ job.files) diff plugins
 
     val runtime = replicateTheRuntime(job.job, job.environment, replicate)
@@ -331,7 +336,7 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
   lazy val registry = new ExecutionJobRegistry()
   def jobs = ExecutionJobRegistry.executionJobs(registry)
 
-  lazy val replBundleCache = new AssociativeCache[ReferencedClasses, FileCache]()
+  lazy val replBundleCache = new AssociativeCache[ClosuresBundle, FileCache]()
 
   lazy val plugins = PluginManager.pluginsForClass(this.getClass)
 
@@ -358,35 +363,114 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
 object BatchExecutionJob {
   def apply(job: Job, environment: BatchEnvironment) = new BatchExecutionJob(job, environment)
+
+  def toClassPath(c: String) = s"${c.replace('.', '/')}.class"
+  def toClassName(p: String) = p.dropRight(".class".size).replace("/", ".")
+
+  def replClassDirectory(c: Class[_]) = {
+    val replClassloader = c.getClassLoader.asInstanceOf[URLClassLoader]
+    val location = toClassPath(c.getName)
+    val classURL = replClassloader.findResource(location)
+    new File(classURL.getPath.dropRight(location.size))
+  }
+
+  def allClasses(directory: File): Seq[ClassFile] = {
+    import java.nio.file._
+    import collection.JavaConverters._
+    Files.walk(directory.toPath).
+      filter(p => Files.isRegularFile(p) && p.toFile.getName.endsWith(".class")).iterator().asScala.
+      map { p =>
+        val path = directory.toPath.relativize(p)
+        ClassFile(path.toString, p.toFile)
+      }.toList
+  }
+
+  def isREPLPackage(p: String) = p.startsWith("$line")
+
+  case class ClosuresBundle(classes: Seq[ClassFile], exported: Seq[String], dependencies: Seq[VersionedPackage], plugins: Seq[File])
+
 }
 
 class BatchExecutionJob(val job: Job, val environment: BatchEnvironment) extends ExecutionJob { bej ⇒
 
+
   def moleJobs = job.moleJobs
   def runnableTasks = job.moleJobs.map(RunnableTask(_))
 
-  def plugins = pluginsAndFiles.plugins ++ closureBundle.map(_.file) ++ referencedClosures.toSeq.flatMap(_.plugins)
+  def plugins = pluginsAndFiles.plugins ++ closureBundle.map(_.file) ++ replClosuresBundles.flatMap(_.plugins)
   def files = pluginsAndFiles.files
 
   @transient lazy val pluginsAndFiles = environment.services.serializerService.pluginsAndFiles(runnableTasks)
 
-  @transient lazy val referencedClosures = {
-    if (pluginsAndFiles.replClasses.isEmpty) None
-    else {
-      def referenced =
-        pluginsAndFiles.replClasses.map { c ⇒
-          val replClassloader = c.getClassLoader.asInstanceOf[REPLClassloader]
-          replClassloader.referencedClasses(Seq(c))
-        }.fold(ReferencedClasses.empty)(ReferencedClasses.merge)
-      Some(referenced)
-    }
-  }
+  @transient lazy val replClosuresBundles = {
+    import java.nio.file._
+    import org.openmole.tool.bytecode._
 
-  def closureBundle =
-    referencedClosures.map { closures ⇒
+    val replDirectories =
+      pluginsAndFiles.replClasses.map(c => c.getClassLoader -> BatchExecutionJob.replClassDirectory(c)).distinct
+
+    def bundles(directory: File, classLoader: ClassLoader) = {
+      val allClassFiles = BatchExecutionJob.allClasses(directory)
+
+      val mentionedClasses =
+        for {
+          f <- allClassFiles.toList
+          t <- listAllClasses(Files.readAllBytes(f.file))
+          c <- util.Try[Class[_]](classLoader.loadClass(t.getClassName)).toOption.toSeq
+        } yield BatchExecutionJob.toClassName(f.path) -> c
+
+      def toVersionedPackage(c: Class[_]) = {
+        val p = c.getPackage.getName
+        PluginManager.bundleForClass(c).map { b => VersionedPackage(p, Some(b.getVersion.toString)) }
+      }
+
+      val packages = mentionedClasses.map(_._2).flatMap(toVersionedPackage).distinct
+      val plugins = mentionedClasses.map(_._2).flatMap(PluginManager.pluginsForClass)
+
+      val exported =
+        allClassFiles.flatMap(c => Option(new File(c.path).getParent)).distinct.
+          filter(BatchExecutionJob.isREPLPackage).
+          map(_.replace("/", "."))
+
+
+//      def replClassFiles() = {
+//        val replClasses = pluginsAndFiles.replClasses.map(c => c.getName).toSet
+//
+//        val mentions = Map[String, Class[_]]() ++ mentionedClasses
+//        val primaryREPLClasses = replClasses.filter(mentions.isDefinedAt)
+//
+//        val seen = collection.mutable.HashSet[String]()
+//        val toProcess = collection.mutable.Stack[String]()
+//
+//        primaryREPLClasses.foreach(c ⇒ seen.add(c))
+//        primaryREPLClasses.foreach(c ⇒ toProcess.push(c))
+//
+//        while (!toProcess.isEmpty) {
+//          val processing = toProcess.pop
+//          for {
+//            clazz ← mentions.get(processing).toSeq
+//            if !seen.contains(clazz.getName)
+//          } {
+//            seen += clazz.getName
+//            toProcess push clazz.getName
+//          }
+//        }
+//
+//        allClassFiles.filter(c => seen.contains(BatchExecutionJob.toClassName(c.path)))
+//      }
+
+      BatchExecutionJob.ClosuresBundle(allClassFiles, exported, packages, plugins)
+    }
+
+
+    replDirectories.map { case(c, d) => bundles(d, c) }
+  }
+  
+  def closureBundle: Seq[FileCache] =
+    replClosuresBundles.map { closures ⇒
       environment.replBundleCache.cache(job.moleExecution, closures, preCompute = false) { rc ⇒
         val bundle = environment.services.newFile.newFile("closureBundle", ".jar")
-        try ScalaREPL.bundleFromReferencedClass(closures, "closure-" + UUID.randomUUID.toString, "1.0", bundle)
+        try createBundle("closure-" + UUID.randomUUID.toString, "1.0", closures.classes, closures.exported, closures.dependencies, bundle)
         catch {
           case e: Throwable ⇒
             bundle.delete()
