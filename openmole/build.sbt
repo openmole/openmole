@@ -253,14 +253,13 @@ lazy val outputManager = OsgiProject(coreDir, "org.openmole.core.outputmanager",
 
 lazy val outputRedirection = OsgiProject(coreDir, "org.openmole.core.outputredirection", imports = Seq("*")) settings (coreSettings: _*)
 
-lazy val console = OsgiProject(coreDir, "org.openmole.core.console", global = true, imports = Seq("*")) dependsOn
-  (pluginManager) settings(
+lazy val console = OsgiProject(coreDir, "org.openmole.core.console", global = true, imports = Seq("*")) dependsOn (pluginManager) settings(
   OsgiKeys.importPackage := Seq("*"),
   Libraries.addScalaLang(scalaVersionValue),
   libraryDependencies += Libraries.monocle,
   macroParadise,
   defaultActivator
-) dependsOn(openmoleByteCode, openmoleOSGi, workspace, fileService) settings (coreSettings: _*)
+) dependsOn(openmoleOSGi, workspace, fileService) settings (coreSettings: _*)
 
 lazy val project = OsgiProject(coreDir, "org.openmole.core.project", imports = Seq("*")) dependsOn(console, openmoleDSL, services) settings (OsgiKeys.importPackage := Seq("*")) settings (coreSettings: _*)
 
@@ -383,7 +382,8 @@ def allEnvironment = Seq(batch, gridscale, ssh, egi, pbs, oar, sge, condor, slur
 
 lazy val batch = OsgiProject(pluginDir, "org.openmole.plugin.environment.batch", imports = Seq("*")) dependsOn(
   workflow, workspace, tools, event, replication, exception,
-  serializer, fileService, pluginManager, openmoleTar, communication, authentication, location, services
+  serializer, fileService, pluginManager, openmoleTar, communication, authentication, location, services,
+  openmoleByteCode
 ) settings (
   libraryDependencies ++= Seq(
     Libraries.gridscale,
@@ -714,7 +714,7 @@ def binDir = file("bin")
 
 
 def bundleFilter(m: ModuleID, artifact: Artifact) = {
-  def excludedLibraryDependencies = Set("slick", "squants", "shapeless")
+  def excludedLibraryDependencies = Set("slick", "squants", "shapeless", "sourcecode")
 
   def exclude =
     (m.organization != "org.openmole.library" && excludedLibraryDependencies.exists(m.name.contains)) ||
