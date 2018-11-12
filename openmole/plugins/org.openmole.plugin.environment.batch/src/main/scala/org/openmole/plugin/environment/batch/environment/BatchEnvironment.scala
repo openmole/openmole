@@ -416,48 +416,21 @@ class BatchExecutionJob(val job: Job, val environment: BatchEnvironment) extends
         for {
           f <- allClassFiles.toList
           t <- listAllClasses(Files.readAllBytes(f.file))
-          c <- util.Try[Class[_]](classLoader.loadClass(t.getClassName)).toOption.toSeq
-        } yield BatchExecutionJob.toClassName(f.path) -> c
+          c <- util.Try[Class[_]](Class.forName(t.getClassName, true, classLoader)).toOption.toSeq
+        } yield c
 
       def toVersionedPackage(c: Class[_]) = {
         val p = c.getPackage.getName
         PluginManager.bundleForClass(c).map { b => VersionedPackage(p, Some(b.getVersion.toString)) }
       }
 
-      val packages = mentionedClasses.map(_._2).flatMap(toVersionedPackage).distinct
-      val plugins = mentionedClasses.map(_._2).flatMap(PluginManager.pluginsForClass)
+      val packages = mentionedClasses.flatMap(toVersionedPackage).distinct
+      val plugins = mentionedClasses.flatMap(PluginManager.pluginsForClass)
 
       val exported =
         allClassFiles.flatMap(c => Option(new File(c.path).getParent)).distinct.
           filter(BatchExecutionJob.isREPLPackage).
           map(_.replace("/", "."))
-
-
-//      def replClassFiles() = {
-//        val replClasses = pluginsAndFiles.replClasses.map(c => c.getName).toSet
-//
-//        val mentions = Map[String, Class[_]]() ++ mentionedClasses
-//        val primaryREPLClasses = replClasses.filter(mentions.isDefinedAt)
-//
-//        val seen = collection.mutable.HashSet[String]()
-//        val toProcess = collection.mutable.Stack[String]()
-//
-//        primaryREPLClasses.foreach(c ⇒ seen.add(c))
-//        primaryREPLClasses.foreach(c ⇒ toProcess.push(c))
-//
-//        while (!toProcess.isEmpty) {
-//          val processing = toProcess.pop
-//          for {
-//            clazz ← mentions.get(processing).toSeq
-//            if !seen.contains(clazz.getName)
-//          } {
-//            seen += clazz.getName
-//            toProcess push clazz.getName
-//          }
-//        }
-//
-//        allClassFiles.filter(c => seen.contains(BatchExecutionJob.toClassName(c.path)))
-//      }
 
       BatchExecutionJob.ClosuresBundle(allClassFiles, exported, packages, plugins)
     }
