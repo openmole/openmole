@@ -5,7 +5,7 @@ import sbt._
 
 object Libraries {
 
-  lazy val gridscaleVersion = "2.12"
+  lazy val gridscaleVersion = "2.13"
   lazy val mgoVersion = "3.17"
   lazy val bouncyCastleVersion = "1.57"
   lazy val aceVersion = "01.08.2014"
