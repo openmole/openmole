@@ -107,7 +107,7 @@ object CondorEnvironment {
       batchExecutionJob,
       storage,
       space,
-      jobService.submit(_, _),
+      jobService.submit(_, _, _),
       jobService.state(_),
       jobService.delete(_),
       jobService.stdOutErr(_)
