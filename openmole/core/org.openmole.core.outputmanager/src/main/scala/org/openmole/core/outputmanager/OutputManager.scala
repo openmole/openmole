@@ -80,12 +80,14 @@ object OutputManager {
 
   def redirectSystemOutput(ps: PrintStream) = {
     System.setOut(ps)
-    Console.getClass.getMethod("setOutDirect", classOf[PrintStream]).invoke(Console, ps)
+    Console.setOut(ps)
+    //Console.getClass.getMethod("setOutDirect", classOf[PrintStream]).invoke(Console, ps)
   }
 
   def redirectSystemError(ps: PrintStream) = {
     System.setErr(ps)
-    Console.getClass.getMethod("setErrDirect", classOf[PrintStream]).invoke(Console, ps)
+    Console.setErr(ps)
+    //Console.getClass.getMethod("setErrDirect", classOf[PrintStream]).invoke(Console, ps)
   }
 
   private def unregister(thread: ThreadGroup) = {
@@ -117,8 +119,9 @@ object OutputManager {
 
   def withStreamOutputs[T](out: PrintStream, err: PrintStream)(f: ⇒ T): T = {
     redirectOutput(out, err)
-    val res = try f
-    finally OutputManager.unregister(Thread.currentThread.getThreadGroup)
+    val res =
+      try f
+      finally OutputManager.unregister(Thread.currentThread.getThreadGroup)
     res
   }
 

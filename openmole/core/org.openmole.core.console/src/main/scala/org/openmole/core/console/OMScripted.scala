@@ -146,36 +146,6 @@ class OMScripted(val factory: ScriptEngineFactory, settings: Settings, out: JPri
   private class WrappedRequest(val req: intp.Request) extends CompiledScript {
     var first = true
 
-    private def evalEither(r: intp.Request, ctx: ScriptContext) = {
-      if (ctx.getWriter == null && ctx.getErrorWriter == null && ctx.getReader == null) r.lineRep.evalEither
-      else {
-        val closeables = Array.ofDim[Closeable](2)
-        val w = if (ctx.getWriter == null) Console.out else {
-          val v = new WriterOutputStream(ctx.getWriter)
-          closeables(0) = v
-          v
-        }
-        val e = if (ctx.getErrorWriter == null) Console.err else {
-          val v = new WriterOutputStream(ctx.getErrorWriter)
-          closeables(1) = v
-          v
-        }
-        val in = if (ctx.getReader == null) Console.in else ctx.getReader
-        try {
-          Console.withOut(w) {
-            Console.withErr(e) {
-              Console.withIn(in) {
-                r.lineRep.evalEither
-              }
-            }
-          }
-        }
-        finally {
-          closeables foreach (c ⇒ if (c != null) c.close())
-        }
-      }
-    }
-
     /* First time, cause lazy evaluation of a memoized result.
      * Subsequently, instantiate a new object for evaluation.
      * Per the API: Checked exception types thrown by underlying scripting implementations
@@ -184,7 +154,7 @@ class OMScripted(val factory: ScriptEngineFactory, settings: Settings, out: JPri
     @throws[ScriptException]
     override def eval(context: ScriptContext) = withScriptContext(context) {
       if (first) {
-        val result = evalEither(req, context) match {
+        val result = req.lineRep.evalEither match {
           case Left(e: RuntimeException) ⇒ throw e
           case Left(e: Exception)        ⇒ throw new ScriptException(e)
           case Left(e)                   ⇒ throw e
@@ -208,7 +178,7 @@ class OMScripted(val factory: ScriptEngineFactory, settings: Settings, out: JPri
           val newreq = OMScripted.call[IMain, Either[IR.Result, intp.Request]](intp, "requestFromLine", Vector(newline)).right.get
           val ok = newreq.compile
 
-          val result = evalEither(newreq, context) match {
+          val result = newreq.lineRep.evalEither match {
             case Left(e: RuntimeException) ⇒ throw e
             case Left(e: Exception)        ⇒ throw new ScriptException(e)
             case Left(e)                   ⇒ throw e
