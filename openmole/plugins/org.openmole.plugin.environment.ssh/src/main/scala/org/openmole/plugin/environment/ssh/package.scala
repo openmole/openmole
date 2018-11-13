@@ -162,11 +162,12 @@ package object ssh {
     batchExecutionJob: BatchExecutionJob,
     storage: S,
     space: StorageSpace,
-    submit: (SerializedJob, String) => J,
+    submit: (SerializedJob, String, String) => J,
     state: J => ExecutionState,
     delete: J => Unit,
     stdOutErr: J => (String, String))(implicit services: BatchEnvironment.Services) = {
     import services._
+
     val jobDirectory = HierarchicalStorageSpace.createJobDirectory(storage, space)
     val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage(), jobDirectory)
 
@@ -187,7 +188,7 @@ package object ssh {
       val sj = BatchEnvironment.serializeJob(batchExecutionJob, remoteStorage, replicate, upload, StorageService.id(storage))
       val outputPath = StorageService.child(storage, jobDirectory, uniqName("job", ".out"))
 
-      val job = submit(sj, outputPath)
+      val job = submit(sj, outputPath, jobDirectory)
 
       BatchJobControl(
         batchExecutionJob.environment,
