@@ -105,7 +105,7 @@ object SSHEnvironment extends JavaLogger {
       batchExecutionJob,
       storage,
       space,
-      jobService.register(batchExecutionJob, _, _),
+      jobService.register(batchExecutionJob, _, _, _),
       jobService.state(_),
       jobService.delete(_),
       jobService.stdOutErr(_)
