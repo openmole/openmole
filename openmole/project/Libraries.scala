@@ -51,7 +51,7 @@ object Libraries {
 
   def addScalaLang(scalaVersion: String) = libraryDependencies += "org.openmole.library" %% "org-scala-lang-scala-library" % scalaVersion
 
-  lazy val scalatra = "org.openmole.library" %% "org-scalatra" % "2.5.0"
+  lazy val scalatra = "org.openmole.library" %% "org-scalatra" % "2.6.3"
   lazy val logback = "org.openmole.library" %% "ch-qos-logback" % "1.0.9"
   lazy val h2 = "org.openmole.library" %% "org-h2" % "1.4.196"
   lazy val bonecp = "org.openmole.library" %% "com-jolbox-bonecp" % "0.8.0-rc1"
