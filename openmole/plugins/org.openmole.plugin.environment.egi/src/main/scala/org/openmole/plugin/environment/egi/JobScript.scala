@@ -24,12 +24,17 @@ import org.openmole.plugin.environment.batch.environment.SerializedJob
 
 import scala.collection.mutable.ListBuffer
 
-case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean, storageLocations: String ⇒ String) {
+object JobScript {
 
-  def apply(
-    serializedJob: SerializedJob,
-    resultPath:    String,
-    proxy:         Option[String] = None
+  def create(
+    serializedJob:   SerializedJob,
+    resultPath:      String,
+    storageLocation: String,
+    voName:          String,
+    memory:          Int,
+    threads:         Int,
+    debug:           Boolean,
+    proxy:           Option[String] = None
   )(implicit preference: Preference) = {
     import serializedJob._
 
@@ -37,7 +42,6 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean, 
 
     assert(runtime.runtime.path != null)
 
-    val storageLocation = storageLocations(serializedJob.storage.id)
     def resolve(dest: String) = gridscale.RemotePath.child(storageLocation, dest)
 
     val debugInfo = s"echo $storageLocation ; hostname ; date -R ; cat /proc/meminfo ; ulimit -n 10240 ; ulimit -a ; " + "env ; echo $X509_USER_PROXY ; "
@@ -83,7 +87,7 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean, 
         script += cpCommand.download(resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar")
       }
 
-      script += cpCommand.download(resolve(runtime.storage.path), "$CUR/storage.xml")
+      script += cpCommand.download(resolve(serializedJob.remoteStorage.path), "$CUR/storage.bin")
 
       "mkdir -p envplugins && " + script.mkString(" && ")
     }
@@ -93,9 +97,7 @@ case class JobScript(voName: String, memory: Int, threads: Int, debug: Boolean, 
 
       script += "export PATH=$PWD/jre/bin:$PATH"
       script += "export HOME=$PWD"
-      script += "/bin/sh run.sh " + memory + "m " + UUID.randomUUID + " -c " +
-        path + " -s $CUR/storage.xml -p $CUR/envplugins/ -i " + inputFile + " -o " + resultPath +
-        " -t " + threads + (if (debug) " -d 2>&1" else "")
+      script += "/bin/sh run.sh " + memory + "m " + UUID.randomUUID + " -s $CUR/storage.bin -p $CUR/envplugins/ -i " + inputPath + " -o " + resultPath + " -t " + threads + (if (debug) " -d 2>&1" else "")
       script.mkString(" && ")
     }
 

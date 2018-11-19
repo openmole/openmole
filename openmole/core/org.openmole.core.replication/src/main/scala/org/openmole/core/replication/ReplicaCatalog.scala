@@ -18,14 +18,12 @@
 package org.openmole.core.replication
 
 import java.io.File
-import java.sql.DriverAction
 import java.util.concurrent.TimeUnit
-import java.util.regex.Pattern
+import java.util.concurrent.locks.ReentrantLock
 
 import com.google.common.cache._
-import org.openmole.core.db
+import org.openmole.core.db.{ Replica, replicas }
 import org.openmole.core.preference._
-import org.openmole.core.db.{ DBServerInfo, Replica, replicas }
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.lock.LockRepository
 import org.openmole.tool.logger.JavaLogger
@@ -34,7 +32,6 @@ import squants.time.TimeConversions._
 
 import scala.annotation.tailrec
 import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 import scala.util.{ Success, Try }
 
 object ReplicaCatalog extends JavaLogger {
@@ -55,22 +52,15 @@ object ReplicaCatalog extends JavaLogger {
 
 }
 
-trait ReplicationStorage[T] {
-  def backgroundRmFile(storage: T, path: String): Unit
-  def exists(storage: T, path: String): Boolean
-  def id(storage: T): String
-}
-
 class ReplicaCatalog(database: Database, preference: Preference) {
 
   import ReplicaCatalog.Log._
   import ReplicaCatalog._
 
-  lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
-
   def query[T](f: DBIOAction[T, slick.dbio.NoStream, scala.Nothing]): T = Await.result(database.run(f), concurrent.duration.Duration.Inf)
 
   lazy val localLock = new LockRepository[ReplicaCacheKey]
+
   type ReplicaCacheKey = (String, String, String)
 
   val replicaCache = CacheBuilder.newBuilder.asInstanceOf[CacheBuilder[ReplicaCacheKey, Replica]].
@@ -78,24 +68,48 @@ class ReplicaCatalog(database: Database, preference: Preference) {
     expireAfterAccess(preference(ReplicaCacheTime).millis, TimeUnit.MILLISECONDS).
     build[ReplicaCacheKey, Replica]
 
-  def uploadAndGet[S](
-    upload:  ⇒ String,
-    srcPath: File,
-    hash:    String,
-    storage: S
-  )(implicit replicationStorage: ReplicationStorage[S]): Replica = {
-    val cacheKey = (srcPath.getCanonicalPath, hash, replicationStorage.id(storage))
-    // Avoid same transfer in multiple threads
-    localLock.withLock(cacheKey) { uploadAndGetLocked(upload, srcPath, hash, storage, cacheKey) }
+  def clean(storageId: String, removeOnStorage: String ⇒ Unit) = {
+    val time = System.currentTimeMillis
+
+    // Note: Destination file will be cleaned while cleaning the replicaDirectory
+    for {
+      replica ← query { replicas.filter { _.storage === storageId }.result }
+      if !new File(replica.source).exists || time - replica.lastCheckExists > preference(ReplicaCatalog.NoAccessCleanTime).millis
+    } remove(replica.id)
+
   }
 
-  @tailrec private def uploadAndGetLocked[S](
-    upload:   ⇒ String,
-    srcPath:  File,
-    hash:     String,
-    storage:  S,
-    cacheKey: ReplicaCacheKey
-  )(implicit replicationStorage: ReplicationStorage[S]): Replica = {
+  def uploadAndGet[S](
+    upload:    ⇒ String,
+    exists:    String ⇒ Boolean,
+    remove:    String ⇒ Unit,
+    srcPath:   File,
+    hash:      String,
+    storageId: String
+  ): Replica = {
+    val cacheKey = (srcPath.getCanonicalPath, hash, storageId)
+    // Avoid same transfer in multiple threads
+    localLock.withLock(cacheKey) {
+      uploadAndGetLocked(
+        upload = upload,
+        exists = exists,
+        remove = remove,
+        srcPath = srcPath,
+        hash = hash,
+        storageId = storageId,
+        cacheKey = cacheKey)
+    }
+  }
+
+  @tailrec private def uploadAndGetLocked(
+    upload:    ⇒ String,
+    exists:    String ⇒ Boolean,
+    remove:    String ⇒ Unit,
+    srcPath:   File,
+    hash:      String,
+    storageId: String,
+    cacheKey:  ReplicaCacheKey
+  ): Replica = {
     val replica =
       Option(replicaCache.getIfPresent(cacheKey)) match {
         case Some(r) ⇒ r
@@ -104,14 +118,14 @@ class ReplicaCatalog(database: Database, preference: Preference) {
           def cleanOldReplicas = {
             val getReplicasForSrcWithOtherHash =
               replicas.filter { r ⇒
-                r.source === srcPath.getCanonicalPath && r.hash =!= hash && r.storage === replicationStorage.id(storage)
+                r.source === srcPath.getCanonicalPath && r.hash =!= hash && r.storage === storageId
               }
 
             val samePath = query(getReplicasForSrcWithOtherHash.result)
             samePath.foreach {
               replica ⇒
                 logger.fine(s"Remove obsolete $replica")
-                replicationStorage.backgroundRmFile(storage, replica.path)
+                remove(replica.path)
             }
 
             query(getReplicasForSrcWithOtherHash.delete)
@@ -119,7 +133,7 @@ class ReplicaCatalog(database: Database, preference: Preference) {
 
           def uploadAndInsertIfNotInCatalog: Replica = {
             def getReplica =
-              replicas.filter { r ⇒ r.source === srcPath.getCanonicalPath && r.storage === replicationStorage.id(storage) && r.hash === hash }
+              replicas.filter { r ⇒ r.source === srcPath.getCanonicalPath && r.storage === storageId && r.hash === hash }
 
             import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -139,7 +153,7 @@ class ReplicaCatalog(database: Database, preference: Preference) {
                       case None ⇒
                         val newReplica = Replica(
                           source = srcPath.getCanonicalPath,
-                          storage = replicationStorage.id(storage),
+                          storage = storageId,
                           path = newFile,
                           hash = hash,
                           lastCheckExists = System.currentTimeMillis
@@ -153,7 +167,7 @@ class ReplicaCatalog(database: Database, preference: Preference) {
 
                 inserted match {
                   case AlreadyInDb(remoteFile, replica) ⇒
-                    replicationStorage.backgroundRmFile(storage, remoteFile)
+                    remove(remoteFile)
                     replica
                   case Inserted(replica) ⇒ replica
                 }
@@ -168,7 +182,7 @@ class ReplicaCatalog(database: Database, preference: Preference) {
 
     def itsTimeToCheck(r: Replica) = r.lastCheckExists + preference(CheckFileExistsInterval).toMillis < System.currentTimeMillis
     def stillExists(r: Replica) =
-      Try(replicationStorage.exists(storage, r.path)) match {
+      Try(exists(r.path)) match {
         case Success(e) ⇒ e
         case _          ⇒ false
       }
@@ -183,7 +197,14 @@ class ReplicaCatalog(database: Database, preference: Preference) {
       else {
         replicaCache.invalidate(cacheKey)
         query(replicas.filter(_.id === replica.id).delete)
-        uploadAndGetLocked(upload, srcPath, hash, storage, cacheKey)
+        uploadAndGetLocked(
+          upload = upload,
+          exists = exists,
+          remove = remove,
+          srcPath = srcPath,
+          hash = hash,
+          storageId = storageId,
+          cacheKey = cacheKey)
       }
     }
     else replica
@@ -192,7 +213,6 @@ class ReplicaCatalog(database: Database, preference: Preference) {
   def forPaths(paths: Seq[String], storageId: Seq[String]) = query { replicas.filter(r ⇒ (r.path inSetBind paths) && (r.storage inSetBind storageId)).result }
   def forHashes(hashes: Seq[String], storageId: Seq[String]) = query { replicas.filter(r ⇒ (r.hash inSetBind hashes) && (r.storage inSetBind storageId)).result }
 
-  def deleteReplicas[S](storageId: S)(implicit replicationStorage: ReplicationStorage[S]): Unit = deleteReplicas(replicationStorage.id(storageId))
   def deleteReplicas(storageId: String): Unit = {
     def q = replicas.filter { _.storage === storageId }
     val replica = query { q.result }.headOption
@@ -210,12 +230,6 @@ class ReplicaCatalog(database: Database, preference: Preference) {
     query { q.delete }
 
     replica.foreach { r ⇒ replicaCache.invalidate(cacheKey(r)) }
-  }
-
-  def timeOfPersistent(name: String) = {
-    val matcher = replicationPattern.matcher(name)
-    if (!matcher.matches) None
-    else Try(matcher.group(1).toLong).toOption
   }
 
 }

@@ -20,6 +20,7 @@ package org.openmole.plugin.grouping.batch
 import org.openmole.core.context.Context
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole._
+import org.openmole.tool.random.RandomProvider
 
 object ByGrouping {
 
@@ -34,10 +35,10 @@ object ByGrouping {
  */
 class ByGrouping(numberOfMoleJobs: Int) extends Grouping {
 
-  override def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])]): MoleJobGroup = {
+  override def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])])(implicit newGroup: NewGroup, randomProvider: RandomProvider): MoleJobGroup = {
     groups.find { case (_, g) ⇒ g.size < numberOfMoleJobs } match {
       case Some((mg, _)) ⇒ mg
-      case None          ⇒ MoleJobGroup()
+      case None          ⇒ newGroup()
     }
   }
 

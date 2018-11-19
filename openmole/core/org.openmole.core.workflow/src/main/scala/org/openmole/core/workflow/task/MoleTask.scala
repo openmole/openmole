@@ -27,6 +27,8 @@ import org.openmole.core.expansion._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow._
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.execution._
+import org.openmole.core.workflow.job.MoleJob
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workspace.NewFile
@@ -56,6 +58,13 @@ object MoleTask {
     )
   }
 
+  def containsMoleTask(moleJob: MoleJob) =
+    moleJob.task match {
+      case _: MoleTask              ⇒ true
+      case t: StrainerTaskDecorator ⇒ classOf[MoleTask].isAssignableFrom(t.task.getClass)
+      case _                        ⇒ false
+    }
+
 }
 
 @Lenses case class MoleTask(
@@ -70,35 +79,55 @@ object MoleTask {
 
   protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { p ⇒
     import p._
-    val implicitsValues = implicits.flatMap(i ⇒ context.get(i))
-    implicit val seeder = Seeder(random().nextLong())
-    implicit val eventDispatcher = EventDispatcher()
-    implicit val newFile = NewFile(executionContext.tmpDirectory.newDir("moletask"))
-    import executionContext.preference
-    import executionContext.threadProvider
-    import executionContext.workspace
-    import executionContext.outputRedirection
-
-    val execution =
-      MoleExecution(
-        mole,
-        implicits = implicitsValues,
-        defaultEnvironment = () ⇒ executionContext.localEnvironment,
-        executionContext = MoleExecutionContext(),
-        cleanOnFinish = false,
-        startStopDefaultEnvironment = false
-      )
 
     @volatile var lastContext: Option[Context] = None
     val lastContextLock = new ReentrantLock()
 
-    execution listen {
-      case (_, ev: MoleExecution.JobFinished) ⇒
-        lastContextLock { if (ev.capsule == last) lastContext = Some(ev.moleJob.context) }
+    val (execution, executionNewFile) = {
+      implicit val eventDispatcher = EventDispatcher()
+      val implicitsValues = implicits.flatMap(i ⇒ context.get(i))
+      implicit val seeder = Seeder(random().nextLong())
+      implicit val newFile = NewFile(executionContext.tmpDirectory.newDir("moletask"))
+      import executionContext.preference
+      import executionContext.threadProvider
+      import executionContext.workspace
+      import executionContext.outputRedirection
+
+      val localEnvironment =
+        LocalEnvironment(1, executionContext.localEnvironment.deinterleave)
+
+      val execution = MoleExecution(
+        mole,
+        implicits = implicitsValues,
+        defaultEnvironment = localEnvironment,
+        executionContext = MoleExecutionContext(),
+        cleanOnFinish = false,
+        taskCache = executionContext.cache,
+        lockRepository = executionContext.lockRepository
+      )
+
+      execution listen {
+        case (_, ev: MoleExecution.JobFinished) ⇒
+          lastContextLock { if (ev.capsule == last) lastContext = Some(ev.moleJob.context) }
+      }
+
+      (execution, newFile)
     }
 
+    val listenerKey =
+      executionContext.moleExecution.map { parentExecution ⇒
+        implicit val ev = parentExecution.executionContext.services.eventDispatcher
+        parentExecution listen {
+          case (_, ev: MoleExecution.Finished) ⇒
+            MoleExecution.cancel(execution, Some(MoleExecution.MoleExecutionError(new InterruptedException("Parent execution has been canceled"))))
+        }
+      }
+
     try execution.run(Some(context), validate = false)
-    finally fileService.deleteWhenEmpty(newFile.baseDir)
+    finally {
+      fileService.deleteWhenEmpty(executionNewFile.baseDir)
+      (executionContext.moleExecution zip listenerKey).foreach { case (moleExecution, key) ⇒ moleExecution.executionContext.services.eventDispatcher.unregister(key) }
+    }
 
     lastContext.getOrElse(throw new UserBadDataError("Last capsule " + last + " has never been executed."))
   }

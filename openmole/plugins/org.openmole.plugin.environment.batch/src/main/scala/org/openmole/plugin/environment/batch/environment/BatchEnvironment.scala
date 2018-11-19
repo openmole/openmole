@@ -19,36 +19,39 @@ package org.openmole.plugin.environment.batch.environment
 
 import java.io.File
 import java.util.UUID
-import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicLong
 
 import org.openmole.core.communication.message._
+import org.openmole.core.communication.storage.{RemoteStorage, TransferOptions}
 import org.openmole.core.console.ScalaREPL.ReferencedClasses
-import org.openmole.core.console.{ REPLClassloader, ScalaREPL }
-import org.openmole.core.event.{ Event, EventDispatcher }
-import org.openmole.core.fileservice.{ FileCache, FileService, FileServiceCache }
+import org.openmole.core.console.{REPLClassloader, ScalaREPL}
+import org.openmole.core.event.{Event, EventDispatcher}
+import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.fileservice.{FileCache, FileService, FileServiceCache}
+import org.openmole.core.location._
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.preference.{ ConfigurationLocation, Preference }
+import org.openmole.core.preference.{ConfigurationLocation, Preference}
 import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.serializer.SerializerService
-import org.openmole.core.threadprovider.{ ThreadProvider, Updater }
+import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workspace._
-import org.openmole.plugin.environment.batch.jobservice._
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment.ExecutionJobRegistry
+import org.openmole.plugin.environment.batch.environment.BatchExecutionJob.ClosuresBundle
 import org.openmole.plugin.environment.batch.refresh._
-import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.cache._
 import org.openmole.tool.file._
 import org.openmole.tool.logger.JavaLogger
-import org.openmole.tool.random.{ RandomProvider, Seeder }
-import squants.time.TimeConversions._
+import org.openmole.tool.random.{RandomProvider, Seeder, shuffled}
 import squants.information.Information
 import squants.information.InformationConversions._
-import org.openmole.core.location._
+import squants.time.TimeConversions._
 
-import scala.ref.WeakReference
-import scala.util.Random
+import scala.collection.immutable.TreeSet
+import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
+import org.openmole.tool.osgi._
+import org.osgi.framework.Bundle
 
 object BatchEnvironment extends JavaLogger {
 
@@ -56,41 +59,42 @@ object BatchEnvironment extends JavaLogger {
     def id: Long
   }
 
-  case class BeginUpload(id: Long, file: File, path: String, storage: StorageService[_]) extends Event[BatchEnvironment] with Transfer
-  case class EndUpload(id: Long, file: File, path: String, storage: StorageService[_], exception: Option[Throwable], size: Long) extends Event[BatchEnvironment] with Transfer {
-    def success = exception.isEmpty
+  case class BeginUpload(id: Long, file: File, storageId: String) extends Event[BatchEnvironment] with Transfer
+  case class EndUpload(id: Long, file: File, storageId: String, path: util.Try[String], size: Long) extends Event[BatchEnvironment] with Transfer {
+    def success = path.isSuccess
   }
 
-  case class BeginDownload(id: Long, file: File, path: String, storage: StorageService[_]) extends Event[BatchEnvironment] with Transfer
-  case class EndDownload(id: Long, file: File, path: String, storage: StorageService[_], exception: Option[Throwable]) extends Event[BatchEnvironment] with Transfer {
+  case class BeginDownload(id: Long, file: File, path: String, storageId: String) extends Event[BatchEnvironment] with Transfer
+  case class EndDownload(id: Long, file: File, path: String, storageId: String, exception: Option[Throwable]) extends Event[BatchEnvironment] with Transfer {
     def success = exception.isEmpty
     def size = file.size
   }
 
-  def signalUpload[T](id: Long, upload: ⇒ T, file: File, path: String, storage: StorageService[_])(implicit eventDispatcher: EventDispatcher): T = {
+  def signalUpload(id: Long, upload: ⇒ String, file: File, environment: BatchEnvironment, storageId: String)(implicit eventDispatcher: EventDispatcher): String = {
     val size = file.size
-    eventDispatcher.trigger(storage.environment, BeginUpload(id, file, path, storage))
-    val res =
+    eventDispatcher.trigger(environment, BeginUpload(id, file, storageId))
+    val path =
       try upload
       catch {
         case e: Throwable ⇒
-          eventDispatcher.trigger(storage.environment, EndUpload(id, file, path, storage, Some(e), size))
+          eventDispatcher.trigger(environment, EndUpload(id, file, storageId, util.Failure(e), size))
           throw e
       }
-    eventDispatcher.trigger(storage.environment, EndUpload(id, file, path, storage, None, size))
-    res
+
+    eventDispatcher.trigger(environment, EndUpload(id, file, storageId, util.Success(path), size))
+    path
   }
 
-  def signalDownload[T](id: Long, download: ⇒ T, path: String, storage: StorageService[_], file: File)(implicit eventDispatcher: EventDispatcher): T = {
-    eventDispatcher.trigger(storage.environment, BeginDownload(id, file, path, storage))
+  def signalDownload[T](id: Long, download: ⇒ T, path: String, environment: BatchEnvironment, storageId: String, file: File)(implicit eventDispatcher: EventDispatcher): T = {
+    eventDispatcher.trigger(environment, BeginDownload(id, file, path, storageId))
     val res =
       try download
       catch {
         case e: Throwable ⇒
-          eventDispatcher.trigger(storage.environment, EndDownload(id, file, path, storage, Some(e)))
+          eventDispatcher.trigger(environment, EndDownload(id, file, path, storageId, Some(e)))
           throw e
       }
-    eventDispatcher.trigger(storage.environment, EndDownload(id, file, path, storage, None))
+    eventDispatcher.trigger(environment, EndDownload(id, file, path, storageId, None))
     res
   }
 
@@ -103,13 +107,14 @@ object BatchEnvironment extends JavaLogger {
   val MinUpdateInterval = ConfigurationLocation("BatchEnvironment", "MinUpdateInterval", Some(1 minutes))
   val MaxUpdateInterval = ConfigurationLocation("BatchEnvironment", "MaxUpdateInterval", Some(10 minutes))
   val IncrementUpdateInterval = ConfigurationLocation("BatchEnvironment", "IncrementUpdateInterval", Some(1 minutes))
+
   val MaxUpdateErrorsInARow = ConfigurationLocation("BatchEnvironment", "MaxUpdateErrorsInARow", Some(3))
-  val StoragesGCUpdateInterval = ConfigurationLocation("BatchEnvironment", "StoragesGCUpdateInterval", Some(1 hours))
-  val RuntimeMemoryMargin = ConfigurationLocation("BatchEnvironment", "RuntimeMemoryMargin", Some(400 megabytes))
 
   val downloadResultRetry = ConfigurationLocation("BatchEnvironment", "DownloadResultRetry", Some(3))
   val killJobRetry = ConfigurationLocation("BatchEnvironment", "KillJobRetry", Some(3))
   val cleanJobRetry = ConfigurationLocation("BatchEnvironment", "KillJobRetry", Some(3))
+
+  val QualityHysteresis = ConfigurationLocation("BatchEnvironment", "QualityHysteresis", Some(100))
 
   private def runtimeDirLocation = openMOLELocation / "runtime"
 
@@ -122,11 +127,6 @@ object BatchEnvironment extends JavaLogger {
   def openMOLEMemoryValue(openMOLEMemory: Option[Information])(implicit preference: Preference) = openMOLEMemory match {
     case None    ⇒ preference(MemorySizeForRuntime)
     case Some(m) ⇒ m
-  }
-
-  def requiredMemory(openMOLEMemory: Option[Information], memory: Option[Information])(implicit preference: Preference) = memory match {
-    case Some(m) ⇒ m
-    case None    ⇒ openMOLEMemoryValue(openMOLEMemory) + preference(BatchEnvironment.RuntimeMemoryMargin)
   }
 
   def threadsValue(threads: Option[Int]) = threads.getOrElse(1)
@@ -153,12 +153,175 @@ object BatchEnvironment extends JavaLogger {
     implicit val fileServiceCache:  FileServiceCache
   )
 
-  def trySelectSingleStorage(s: StorageService[_]) =
-    UsageControl.tryGetToken(s.usageControl).map(t ⇒ (s, t))
+  def jobFiles(job: BatchExecutionJob) =
+    job.pluginsAndFiles.files.toVector ++
+      job.pluginsAndFiles.plugins ++
+      job.environment.plugins ++
+      Seq(job.environment.jvmLinuxX64, job.environment.runtime)
 
-  def trySelectSingleJobService(jobService: BatchJobService[_]) =
-    UsageControl.tryGetToken(jobService.usageControl).map(t ⇒ (jobService, t))
+  def toReplicatedFile(
+    upload: (File, TransferOptions) => String,
+    exist: String => Boolean,
+    remove: String => Unit,
+    environment: BatchEnvironment,
+    storageId: String)(file: File, transferOptions: TransferOptions)(implicit services: BatchEnvironment.Services): ReplicatedFile = {
+    import services._
 
+    if (!file.exists) throw new UserBadDataError(s"File $file is required but doesn't exist.")
+
+    val isDir = file.isDirectory
+    val toReplicatePath = file.getCanonicalFile
+
+    val (toReplicate, options) =
+      if (isDir) (services.fileService.archiveForDir(file).file, transferOptions.copy(noLink = true))
+      else (file, transferOptions)
+
+    val fileMode = file.mode
+    val hash = services.fileService.hash(toReplicate).toString
+
+    def uploadReplica = signalUpload(eventDispatcher.eventId, upload(toReplicate, options), toReplicate, environment, storageId)
+
+    val replica = services.replicaCatalog.uploadAndGet(uploadReplica, exist, remove, toReplicatePath, hash, storageId)
+    ReplicatedFile(file.getPath, file.getName, isDir, hash, replica.path, fileMode)
+  }
+  
+  def serializeJob(
+    job: BatchExecutionJob,
+    remoteStorage: RemoteStorage,
+    replicate: (File, TransferOptions) => ReplicatedFile,
+    upload: (File, TransferOptions) => String,
+    storageId: String)(implicit services: BatchEnvironment.Services): SerializedJob = services.newFile.withTmpFile("job", ".tar") { jobFile ⇒
+
+    import services._
+
+    serializerService.serialise(job.runnableTasks, jobFile)
+
+    val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins -- job.environment.plugins
+    val files = (new TreeSet[File]()(fileOrdering) ++ job.files) diff plugins
+
+    val runtime = replicateTheRuntime(job.job, job.environment, replicate)
+
+    val executionMessage = createExecutionMessage(
+      job.job,
+      jobFile,
+      files,
+      plugins,
+      replicate,
+      job.environment
+    )
+
+    /* ---- upload the execution message ----*/
+    val inputPath =
+      newFile.withTmpFile("job", ".tar") { executionMessageFile ⇒
+        serializerService.serialiseAndArchiveFiles(executionMessage, executionMessageFile)
+        signalUpload(eventDispatcher.eventId, upload(executionMessageFile, TransferOptions(noLink = true, canMove = true)), executionMessageFile, job.environment, storageId)
+      }
+
+    val serializedStorage =
+      services.newFile.withTmpFile("remoteStorage", ".tar") { storageFile ⇒
+        import org.openmole.tool.hash._
+        import services._
+        services.serializerService.serialiseAndArchiveFiles(remoteStorage, storageFile)
+        val hash = storageFile.hash().toString()
+        val path = signalUpload(eventDispatcher.eventId, upload(storageFile, TransferOptions(noLink = true, canMove = true, raw = true)), storageFile, job.environment, storageId)
+        FileMessage(path, hash)
+      }
+
+    SerializedJob(inputPath, runtime, serializedStorage)
+  }
+
+
+
+  def replicateTheRuntime(
+    job:              Job,
+    environment:      BatchEnvironment,
+    replicate: (File, TransferOptions) => ReplicatedFile,
+  )(implicit services: BatchEnvironment.Services) = {
+    val environmentPluginPath = shuffled(environment.plugins)(services.randomProvider()).map { p ⇒ replicate(p, TransferOptions(raw = true)) }.map { FileMessage(_) }
+    val runtimeFileMessage = FileMessage(replicate(environment.runtime, TransferOptions(raw = true)))
+    val jvmLinuxX64FileMessage = FileMessage(replicate(environment.jvmLinuxX64, TransferOptions(raw = true)))
+
+    Runtime(
+      runtimeFileMessage,
+      environmentPluginPath.toSet,
+      jvmLinuxX64FileMessage
+    )
+  }
+
+  def createExecutionMessage(
+    job:                 Job,
+    jobFile:             File,
+    serializationFile:   Iterable[File],
+    serializationPlugin: Iterable[File],
+    replicate: (File, TransferOptions) => ReplicatedFile,
+    environment: BatchEnvironment
+  )(implicit services: BatchEnvironment.Services): ExecutionMessage = {
+
+    val pluginReplicas = shuffled(serializationPlugin)(services.randomProvider()).map { replicate(_, TransferOptions(raw = true)) }
+    val files = shuffled(serializationFile)(services.randomProvider()).map { replicate(_, TransferOptions()) }
+
+    ExecutionMessage(
+      pluginReplicas,
+      files,
+      jobFile,
+      environment.runtimeSettings
+    )
+  }
+
+  def isClean(environment: BatchEnvironment)(implicit services: BatchEnvironment.Services) = {
+    val environmentJobs = environment.jobs
+    environmentJobs.forall(_.state == ExecutionState.KILLED)
+  }
+
+  def finishedJob(environment: BatchEnvironment, job: Job) = {
+    ExecutionJobRegistry.finished(environment.registry, job, environment)
+  }
+
+  def finishedExecutionJob(environment: BatchEnvironment, job: BatchExecutionJob) = {
+    ExecutionJobRegistry.finished(environment.registry, job, environment)
+    environment.finishedJob(job)
+  }
+
+  def numberOfExecutionJobs(environment: BatchEnvironment, job: Job) = {
+    ExecutionJobRegistry.numberOfExecutionJobs(environment.registry, job)
+  }
+
+  object ExecutionJobRegistry {
+    def register(registry: ExecutionJobRegistry, ejob: BatchExecutionJob) = registry.synchronized {
+      registry.executionJobs = ejob :: registry.executionJobs
+    }
+
+    def finished(registry: ExecutionJobRegistry, job: Job, environment: BatchEnvironment) = registry.synchronized {
+      val (newExecutionJobs, removed) = registry.executionJobs.partition(_.job != job)
+      registry.executionJobs = newExecutionJobs
+      removed
+    }
+
+    def finished(registry: ExecutionJobRegistry, job: BatchExecutionJob, environment: BatchEnvironment) = registry.synchronized {
+      def pruneFinishedJobs(registry: ExecutionJobRegistry) = registry.executionJobs = registry.executionJobs.filter(_.state != ExecutionState.KILLED)
+      pruneFinishedJobs(registry)
+    }
+
+    def executionJobs(registry: ExecutionJobRegistry) = registry.synchronized { registry.executionJobs }
+    def numberOfExecutionJobs(registry: ExecutionJobRegistry, job: Job) = registry.synchronized {
+      registry.executionJobs.count(_.job == job)
+    }
+
+    def lonelyJobs(registry: ExecutionJobRegistry) = registry.synchronized {
+      registry.executionJobs.view.groupBy(_.job).filter(j => !j._1.finished && j._2.isEmpty).unzip._1.toSeq
+    }
+  }
+
+  class ExecutionJobRegistry {
+    var executionJobs = List[BatchExecutionJob]()
+  }
+
+  def defaultUpdateInterval(implicit preference: Preference) =
+    UpdateInterval(
+      minUpdateInterval = preference(BatchEnvironment.MinUpdateInterval),
+      maxUpdateInterval = preference(BatchEnvironment.MaxUpdateInterval),
+      incrementUpdateInterval = preference(BatchEnvironment.IncrementUpdateInterval)
+    )
 }
 
 abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
@@ -168,82 +331,119 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   def exceptions = services.preference(Environment.maxExceptionsLog)
 
-  def trySelectStorage(files: ⇒ Vector[File]): Option[(StorageService[_], AccessToken)]
-  def trySelectJobService(): Option[(BatchJobService[_], AccessToken)]
+  def clean = BatchEnvironment.isClean(this)
 
-  def executionJob(job: Job) = new BatchExecutionJob(job, this)
-  lazy val batchJobWatcher = new BatchJobWatcher(WeakReference(this), services.preference)
-  def jobs = batchJobWatcher.executionJobs
+  lazy val registry = new ExecutionJobRegistry()
+  def jobs = ExecutionJobRegistry.executionJobs(registry)
 
-  lazy val replBundleCache = new AssociativeCache[ReferencedClasses, FileCache]()
+  lazy val replBundleCache = new AssociativeCache[ClosuresBundle, FileCache]()
 
   lazy val plugins = PluginManager.pluginsForClass(this.getClass)
 
   override def submit(job: Job) = {
-    val bej = executionJob(job)
-    batchJobWatcher.register(bej)
+    val bej = BatchExecutionJob(job, this)
+    ExecutionJobRegistry.register(registry, bej)
     eventDispatcherService.trigger(this, new Environment.JobSubmitted(bej))
     JobManager ! Manage(bej)
   }
 
+  def execute(batchExecutionJob: BatchExecutionJob): BatchJobControl
+
   def runtime = BatchEnvironment.runtimeLocation
   def jvmLinuxX64 = BatchEnvironment.JVMLinuxX64Location
-
-  def updateInterval =
-    UpdateInterval(
-      minUpdateInterval = services.preference(BatchEnvironment.MinUpdateInterval),
-      maxUpdateInterval = services.preference(BatchEnvironment.MaxUpdateInterval),
-      incrementUpdateInterval = services.preference(BatchEnvironment.IncrementUpdateInterval)
-    )
 
   def submitted: Long = jobs.count { _.state == ExecutionState.SUBMITTED }
   def running: Long = jobs.count { _.state == ExecutionState.RUNNING }
 
   def runtimeSettings = RuntimeSettings(archiveResult = false)
 
-  override def start() = {
-    super.start()
-    import services.threadProvider
-    Updater.registerForUpdate(batchJobWatcher)
+  def finishedJob(job: ExecutionJob) = {}
+
+}
+
+object BatchExecutionJob {
+  def apply(job: Job, environment: BatchEnvironment) = new BatchExecutionJob(job, environment)
+
+  def toClassPath(c: String) = s"${c.replace('.', '/')}.class"
+  def toClassName(p: String) = p.dropRight(".class".size).replace("/", ".")
+
+  def replClassDirectory(c: Class[_]) = {
+    val replClassloader = c.getClassLoader.asInstanceOf[URLClassLoader]
+    val location = toClassPath(c.getName)
+    val classURL = replClassloader.findResource(location)
+    new File(classURL.getPath.dropRight(location.size))
   }
 
-  override def stop() = {
-    super.stop()
-    batchJobWatcher.stop = true
+  def allClasses(directory: File): Seq[ClassFile] = {
+    import java.nio.file._
+    import collection.JavaConverters._
+    Files.walk(directory.toPath).
+      filter(p => Files.isRegularFile(p) && p.toFile.getName.endsWith(".class")).iterator().asScala.
+      map { p =>
+        val path = directory.toPath.relativize(p)
+        ClassFile(path.toString, p.toFile)
+      }.toList
   }
+
+  def isREPLPackage(p: String) = p.startsWith("$line")
+
+  case class ClosuresBundle(classes: Seq[ClassFile], exported: Seq[String], dependencies: Seq[VersionedPackage], plugins: Seq[File])
 
 }
 
 class BatchExecutionJob(val job: Job, val environment: BatchEnvironment) extends ExecutionJob { bej ⇒
 
-  var serializedJob: Option[SerializedJob] = None
-  var batchJob: Option[BatchJobControl] = None
 
   def moleJobs = job.moleJobs
   def runnableTasks = job.moleJobs.map(RunnableTask(_))
 
-  def plugins = pluginsAndFiles.plugins ++ closureBundle.map(_.file) ++ referencedClosures.toSeq.flatMap(_.plugins)
+  def plugins = pluginsAndFiles.plugins ++ closureBundle.map(_.file) ++ replClosuresBundles.flatMap(_.plugins)
   def files = pluginsAndFiles.files
 
   @transient lazy val pluginsAndFiles = environment.services.serializerService.pluginsAndFiles(runnableTasks)
 
-  @transient lazy val referencedClosures = {
-    if (pluginsAndFiles.replClasses.isEmpty) None
-    else {
-      def referenced =
-        pluginsAndFiles.replClasses.map { c ⇒
-          val replClassloader = c.getClassLoader.asInstanceOf[REPLClassloader]
-          replClassloader.referencedClasses(Seq(c))
-        }.fold(ReferencedClasses.empty)(ReferencedClasses.merge)
-      Some(referenced)
-    }
-  }
+  @transient lazy val replClosuresBundles = {
+    import java.nio.file._
+    import org.openmole.tool.bytecode._
 
-  def closureBundle =
-    referencedClosures.map { closures ⇒
+    val replDirectories =
+      pluginsAndFiles.replClasses.map(c => c.getClassLoader -> BatchExecutionJob.replClassDirectory(c)).distinct
+
+    def bundles(directory: File, classLoader: ClassLoader) = {
+      val allClassFiles = BatchExecutionJob.allClasses(directory)
+
+      val mentionedClasses =
+        for {
+          f <- allClassFiles.toList
+          t <- listAllClasses(Files.readAllBytes(f.file))
+          c <- util.Try[Class[_]](Class.forName(t.getClassName, true, classLoader)).toOption.toSeq
+        } yield c
+
+      def toVersionedPackage(c: Class[_]) = {
+        val p = c.getPackage.getName
+        PluginManager.bundleForClass(c).map { b => VersionedPackage(p, Some(b.getVersion.toString)) }
+      }
+
+      val packages = mentionedClasses.flatMap(toVersionedPackage).distinct
+      val plugins = mentionedClasses.flatMap(PluginManager.pluginsForClass)
+
+      val exported =
+        allClassFiles.flatMap(c => Option(new File(c.path).getParent)).distinct.
+          filter(BatchExecutionJob.isREPLPackage).
+          map(_.replace("/", "."))
+
+      BatchExecutionJob.ClosuresBundle(allClassFiles, exported, packages, plugins)
+    }
+
+
+    replDirectories.map { case(c, d) => bundles(d, c) }
+  }
+  
+  def closureBundle: Seq[FileCache] =
+    replClosuresBundles.map { closures ⇒
       environment.replBundleCache.cache(job.moleExecution, closures, preCompute = false) { rc ⇒
         val bundle = environment.services.newFile.newFile("closureBundle", ".jar")
-        try ScalaREPL.bundleFromReferencedClass(closures, "closure-" + UUID.randomUUID.toString, "1.0", bundle)
+        try createBundle("closure-" + UUID.randomUUID.toString, "1.0", closures.classes, closures.exported, closures.dependencies, bundle)
         catch {
           case e: Throwable ⇒
             bundle.delete()

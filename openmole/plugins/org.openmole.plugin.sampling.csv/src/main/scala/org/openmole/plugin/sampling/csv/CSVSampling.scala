@@ -19,31 +19,32 @@ package org.openmole.plugin.sampling.csv
 
 import java.io.File
 
+import monocle.Lens
 import monocle.macros.Lenses
 import org.openmole.core.context.Val
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig, Mapped, MappedInputBuilder }
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.tools._
-import org.openmole.plugin.tool.csv.{ CSVToVariables, CSVToVariablesBuilder }
+import org.openmole.plugin.tool.csv._
 
 object CSVSampling {
 
   implicit def isIO = InputOutputBuilder(CSVSampling.config)
 
-  implicit def isBuilder = new CSVToVariablesBuilder[CSVSampling] {
-    override def columns = CSVSampling.columns
+  implicit def isBuilder: CSVToVariablesBuilder[CSVSampling] = new CSVToVariablesBuilder[CSVSampling] {
+    override def mappedOutputs: Lens[CSVSampling, Vector[Mapped[_]]] = CSVSampling.columns
     override def fileColumns = CSVSampling.fileColumns
     override def separator = CSVSampling.separator
   }
 
-  def apply(file: FromContext[File]): CSVSampling =
+  def apply(file: FromContext[File], separator: OptionalArgument[Char] = None): CSVSampling =
     new CSVSampling(
       file,
       config = InputOutputConfig(),
       columns = Vector.empty,
       fileColumns = Vector.empty,
-      separator = None
+      separator = separator.option
     )
 
   def apply(file: File): CSVSampling = apply(file: FromContext[File])
@@ -54,16 +55,19 @@ object CSVSampling {
 @Lenses case class CSVSampling(
   file:        FromContext[File],
   config:      InputOutputConfig,
-  columns:     Vector[(String, Val[_])],
+  columns:     Vector[Mapped[_]],
   fileColumns: Vector[(String, File, Val[File])],
   separator:   Option[Char]
-) extends Sampling with CSVToVariables {
+) extends Sampling {
 
   override def inputs = InputOutputConfig.inputs.get(config)
   override def prototypes = InputOutputConfig.outputs.get(config)
   override def apply() = FromContext { p ⇒
     import p._
-    toVariables(file.from(context), context)
+    csvToVariables(
+      columns,
+      fileColumns,
+      separator)(file.from(context), context)
   }
 
 }

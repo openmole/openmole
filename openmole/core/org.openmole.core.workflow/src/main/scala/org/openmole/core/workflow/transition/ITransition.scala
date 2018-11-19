@@ -22,7 +22,7 @@ import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.mole.MoleExecution.SubMoleExecutionState
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.tools.ContextAggregator._
+import org.openmole.core.workflow.tools.ContextAggregator
 import org.openmole.core.workflow.validation.TypeUtil._
 
 object ITransition {
@@ -51,7 +51,7 @@ object ITransition {
       val toArrayManifests =
         validTypes(mole, subMoleState.moleExecution.sources, subMoleState.moleExecution.hooks)(transition.end).filter(_.toArray).map(ct ⇒ ct.name → ct.`type`).toMap[String, ValType[_]]
 
-      val newContext = aggregate(transition.end.capsule.inputs(mole, subMoleState.moleExecution.sources, subMoleState.moleExecution.hooks), toArrayManifests, combinasion.map(ticket.content → _))
+      val newContext = ContextAggregator.aggregate(transition.end.capsule.inputs(mole, subMoleState.moleExecution.sources, subMoleState.moleExecution.hooks), toArrayManifests, combinasion.map(ticket.content → _))
       MoleExecution.submit(subMoleState, transition.end.capsule, newContext, newTicket)
     }
   }

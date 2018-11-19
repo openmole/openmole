@@ -19,12 +19,15 @@ package org.openmole.plugin.tool.netlogo6;
 import org.nlogo.agent.Observer;
 import org.nlogo.agent.World;
 import org.nlogo.api.LogoException;
+import org.nlogo.api.LogoListBuilder;
+import org.nlogo.core.LogoList;
 import org.nlogo.headless.HeadlessWorkspace;
 import org.nlogo.nvm.Procedure;
 import org.nlogo.nvm.RuntimePrimitiveException;
 import org.openmole.plugin.tool.netlogo.NetLogo;
 import scala.collection.JavaConverters;
 
+import java.util.AbstractCollection;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -33,27 +36,23 @@ import java.util.Map;
  */
 public class NetLogo6 implements NetLogo {
 
-    protected HeadlessWorkspace workspace = createWorkspace();
+    protected HeadlessWorkspace workspace = null;
 
-    private HeadlessWorkspace createWorkspace() {
-        ClassLoader threadClassLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getNetLogoClassLoader());
-        try {
-            return HeadlessWorkspace.newInstance();
-        } finally {
-            Thread.currentThread().setContextClassLoader(threadClassLoader);
+    private HeadlessWorkspace getWorkspace() {
+        if(workspace == null) {
+            workspace = HeadlessWorkspace.newInstance();
         }
+        return workspace;
     }
-
 
     @Override
     public void open(String script) throws Exception {
-        workspace.open(script);
+        getWorkspace().open(script);
     }
 
     @Override
     public void command(String cmd) throws Exception {
-        workspace.command(cmd);
+        getWorkspace().command(cmd);
     }
 
     @Override
@@ -63,17 +62,32 @@ public class NetLogo6 implements NetLogo {
 
     @Override
     public Object report(String variable) throws Exception {
-        return workspace.report(variable);
+        Object result = getWorkspace().report(variable);
+        if(result instanceof LogoList){
+            return listToCollection((LogoList) result);
+        }else {
+            return result;
+        }
+    }
+
+    @Override
+    public void setGlobal(String variable, Object value) throws Exception {
+        if(value instanceof Object[]){
+            workspace.world().setObserverVariableByName(variable,arrayToList((Object[]) value));
+        }
+        else{
+            workspace.world().setObserverVariableByName(variable,value);
+        }
     }
 
     @Override
     public void dispose() throws Exception {
-        workspace.dispose();
+        getWorkspace().dispose();
     }
 
     @Override
     public String[] globals() {
-        World world = workspace.world();
+        World world = getWorkspace().world();
         Observer observer = world.observer();
         String nlGlobalList[] = new String[world.getVariablesArraySize(observer)];
         for (int i = 0; i < nlGlobalList.length; i++) {
@@ -84,7 +98,7 @@ public class NetLogo6 implements NetLogo {
 
     public String[] reporters() {
         LinkedList<String> reporters = new LinkedList<String>();
-        for (scala.Tuple2<java.lang.String,org.nlogo.nvm.Procedure> e : JavaConverters.asJavaCollectionConverter(workspace.procedures()).asJavaCollection()) {
+        for (scala.Tuple2<java.lang.String,org.nlogo.nvm.Procedure> e : JavaConverters.asJavaCollectionConverter(getWorkspace().procedures()).asJavaCollection()) {
             if (e._2().isReporter()) reporters.add(e._1());
         }
         return reporters.toArray(new String[0]);
@@ -94,4 +108,31 @@ public class NetLogo6 implements NetLogo {
     public ClassLoader getNetLogoClassLoader() {
         return HeadlessWorkspace.class.getClassLoader();
     }
+
+    /**
+     * Converts an iterable to a LogoList
+     * @param array
+     * @return
+     */
+    public static LogoList arrayToList(Object[] array){
+        LogoListBuilder list = new LogoListBuilder();
+        for(Object o:array){
+            if(o instanceof Object[]){list.add(arrayToList((Object[]) o));}
+            else{list.add(o);}
+        }
+        return(list.toLogoList());
+    }
+
+
+    private static AbstractCollection listToCollection(LogoList list){
+        AbstractCollection collection = new LinkedList();
+        for(Object o:list.toJava()){
+            if(o instanceof LogoList){collection.add(listToCollection((LogoList) o));}
+            else{collection.add(o);}
+        }
+        return(collection);
+    }
+
+
+
 }

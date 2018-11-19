@@ -17,30 +17,11 @@
 
 package org.openmole.core.workflow
 
-import scala.concurrent.stm._
-import org.openmole.tool.file._
-import scala.ref.WeakReference
-import cats._
-import cats._
-
 package tools {
 
-  import org.openmole.core.exception.UserBadDataError
   import org.openmole.core.expansion.{ Expandable, ExpandedString, FromContext, ToFromContext }
-  import org.openmole.core.fileservice.FileService
-  import org.openmole.core.workspace.NewFile
 
   trait ToolsPackage {
-
-    implicit def objectToWeakReferenceConverter[T <: AnyRef](v: T) = new WeakReference[T](v)
-
-    implicit class RefDecorator[T](r: Ref[T]) {
-      def getUpdate(t: T ⇒ T): T = atomic { implicit txn ⇒ val v = r(); r() = t(v); v }
-    }
-
-    implicit class RefLongDecorator(r: Ref[Long]) {
-      def next = r getUpdate (_ + 1)
-    }
 
     implicit class VectorLensDecorator[T, U](l: monocle.Lens[T, Vector[U]]) {
       def add(u: U) = l.modify(_ ++ Seq(u))
@@ -53,17 +34,8 @@ package tools {
     implicit def seqOfFunction[T](s: Seq[T ⇒ T]) = s.sequence
     implicit def arrayOfFunction[T](s: Array[T ⇒ T]) = s.toSeq.sequence
 
-    object OptionalArgument {
-      implicit def valueToOptionalOfForContext[T](v: T)(implicit toFromContext: ToFromContext[T, T]) = OptionalArgument(Some(FromContext.contextConverter(v)))
-      implicit def valueToOptionalArgument[T](v: T) = OptionalArgument(Some(v))
-      implicit def noneToOptionalArgument[T](n: None.type) = OptionalArgument[T](n)
-
-      def apply[T](t: T): OptionalArgument[T] = OptionalArgument(Some(t))
-    }
-
-    case class OptionalArgument[T](option: Option[T] = None) {
-      def mustBeDefined(name: String) = option.getOrElse(throw new UserBadDataError(s"Parameter $name has not been set."))
-    }
+    def OptionalArgument = tools.OptionalArgument
+    type OptionalArgument[T] = tools.OptionalArgument[T]
 
     implicit def optionalArgumentToOption[T](optionalArgument: OptionalArgument[T]) = optionalArgument.option
     implicit def fromStringToExpandedStringOptionalArgument(s: String) = OptionalArgument[FromContext[String]](Some(ExpandedString(s)))
@@ -75,4 +47,3 @@ package tools {
   }
 }
 
-package object tools

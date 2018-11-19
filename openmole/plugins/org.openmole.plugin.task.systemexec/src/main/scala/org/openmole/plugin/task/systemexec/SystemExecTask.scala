@@ -38,6 +38,7 @@ object SystemExecTask {
   implicit def isExternal: ExternalBuilder[SystemExecTask] = ExternalBuilder(SystemExecTask.external)
   implicit def isInfo = InfoBuilder(info)
 
+  @deprecated
   implicit def isSystemExec = new SystemExecTaskBuilder[SystemExecTask] {
     override def commands = SystemExecTask.commands
     override def environmentVariables = SystemExecTask.environmentVariables
@@ -70,7 +71,8 @@ object SystemExecTask {
     returnValue:        OptionalArgument[Val[Int]]    = None,
     stdOut:             OptionalArgument[Val[String]] = None,
     stdErr:             OptionalArgument[Val[String]] = None,
-    shell:              Shell                         = Bash)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): SystemExecTask =
+    shell:              Shell                         = Bash,
+    environmentVariables: Vector[(String, FromContext[String])] = Vector.empty)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): SystemExecTask =
     new SystemExecTask(
       commands = commands.map(c ⇒ OSCommands(OS(), c)).toVector,
       workDirectory = workDirectory,
@@ -79,7 +81,7 @@ object SystemExecTask {
       stdOut = stdOut,
       stdErr = stdErr,
       shell = shell,
-      environmentVariables = Vector.empty,
+      environmentVariables = environmentVariables,
       _config = InputOutputConfig(),
       external = External(),
       info = InfoConfig()
@@ -126,7 +128,7 @@ object SystemExecTask {
   override protected def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
     import p._
 
-    External.withWorkDir(executionContext) { tmpDir ⇒
+    newFile.withTmpDir { tmpDir ⇒
       val workDir =
         workDirectory match {
           case None    ⇒ tmpDir
@@ -137,7 +139,7 @@ object SystemExecTask {
 
       val context = p.context + (External.PWD → workDir.getAbsolutePath)
 
-      val preparedContext = external.prepareInputFiles(context, external.relativeResolver(workDir))
+      val preparedContext = External.deployInputFilesAndResources(external, context, External.relativeResolver(workDir))
 
       val osCommandLines =
         commands.find { _.os.compatible }.map {
@@ -164,8 +166,7 @@ object SystemExecTask {
           stdErr = executionContext.outputRedirection.output
         )
 
-      val retContext: Context = external.fetchOutputFiles(outputs, preparedContext, external.relativeResolver(workDir), tmpDir)
-      external.cleanWorkDirectory(outputs, retContext, tmpDir)
+      val retContext: Context = External.fetchOutputFiles(external, outputs, preparedContext, External.relativeResolver(workDir), tmpDir)
 
       retContext ++
         List(

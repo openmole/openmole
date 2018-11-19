@@ -13,6 +13,7 @@ import java.io._
 import java.nio.file._
 
 import au.com.bytecode.opencsv.CSVReader
+import org.openmole.core.console.ScalaREPL
 import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
 
 import scala.util.{ Failure, Success, Try }
@@ -29,6 +30,7 @@ import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.core.project._
 import org.openmole.core.services.Services
+import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.plugin.server._
@@ -256,7 +258,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     Utils.move(fromFile, toFile)
   }
 
-  def replicate(safePath: SafePath, newName: String): SafePath = Utils.replicate(safePath, newName)
+  def duplicate(safePath: SafePath, newName: String): SafePath = Utils.copy(safePath, newName)
 
   def mdToHtml(safePath: SafePath): String = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
@@ -290,7 +292,9 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     val reader = new CSVReader(new FileReader(safePath), ',')
     val content = reader.readAll.asScala.toSeq
-    SequenceData(content.head, content.tail)
+    content.headOption.map { c ⇒
+      SequenceData(c, content.tail)
+    }.getOrElse(SequenceData())
   }
 
   // EXECUTIONS
@@ -312,11 +316,18 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     import org.openmole.tool.thread._
 
     val compilationFuture =
-      services.threadProvider.pool.submit { () ⇒
+      threadProvider.submit(ThreadProvider.maxPriority) { () ⇒
 
-        def error(t: Throwable): Unit = execution.addError(execId, Failed(Vector.empty, ErrorBuilder(t), Seq()))
+        def error(t: Throwable): Unit = {
+          t match {
+            case ce: ScalaREPL.CompilationError ⇒ execution.addError(execId, Failed(Vector.empty, CompilationError(ce.errorMessages.map { em ⇒
+              ErrorWithLocation(em.rawMessage, em.position.map { _.line }, em.position.map { _.start }, em.position.map { _.end })
+            }), Seq()))
+            case _ ⇒ execution.addError(execId, Failed(Vector.empty, ErrorBuilder(t), Seq()))
+          }
+        }
 
-        def message(message: String): Unit = execution.addError(execId, Failed(Vector.empty, Error(message), Seq()))
+        def message(message: String): Unit = execution.addError(execId, Failed(Vector.empty, MessageError(message), Seq()))
 
         try {
           val project = Project(script.getParentFileSafe)
@@ -325,6 +336,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
             case ErrorInCode(e)            ⇒ error(e)
             case ErrorInCompiler(e)        ⇒ error(e)
             case compiled: Compiled ⇒
+              execution.compiled(execId)
 
               def catchAll[T](f: ⇒ T): Try[T] = {
                 val res =
@@ -341,7 +353,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
                   val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(outputStream))
                   Try(puzzle.toExecution(executionContext = MoleExecutionContext()(services))) match {
                     case Success(ex) ⇒
-                      val envIds = (ex.allEnvironments).map { env ⇒ EnvironmentId(getUUID, execId) → env }
+                      val envIds = (ex.allEnvironments).map { env ⇒ EnvironmentId(getUUID) → env }
                       execution.addRunning(execId, envIds)
                       envIds.foreach { case (envId, env) ⇒ env.listen(execution.environmentListener(envId)) }
 
@@ -371,13 +383,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   def clearEnvironmentErrors(environmentId: EnvironmentId): Unit = execution.deleteEnvironmentErrors(environmentId)
 
   def runningErrorEnvironmentData(environmentId: EnvironmentId, lines: Int): EnvironmentErrorData = atomic { implicit ctx ⇒
-    val errorMap = execution.getRunningEnvironments(environmentId).toMap
-    val info = errorMap(environmentId)
-
-    val environmentErrors =
-      info.environment.errors.map {
-        ex ⇒ EnvironmentError(environmentId, ex.exception.getMessage, ErrorBuilder(ex.exception), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
-      }
+    val environmentErrors = execution.environementErrors(environmentId)
 
     def groupedErrors = environmentErrors.groupBy {
       _.errorMessage
@@ -390,6 +396,10 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     }.takeRight(lines)
 
     EnvironmentErrorData(groupedErrors)
+    //    EnvironmentErrorData(Seq(
+    //      (EnvironmentError(environmentId, "YOur error man", Error("stansatienasitenasiruet a anuisetnasirte "), 2334454L, ErrorLevel()), 33345L, 2),
+    //      (EnvironmentError(environmentId, "YOur error man 4", Error("stansatienasitenasiruet a anuaeiaiueaiueaieisetnasirte "), 2334454L, ErrorLevel()), 31345L, 1)
+    //    ))
   }
 
   def marketIndex() = {
@@ -413,7 +423,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   //PLUGINS
   def addUploadedPlugins(nodes: Seq[String]): Seq[Error] = {
     val files = nodes.map(Utils.pluginUpdoadDirectory / _)
-    val errors = org.openmole.core.module.addPluginsFiles(files, true, Some(org.openmole.core.module.pluginDirectory(Workspace.instance)))(Workspace.instance)
+    val errors = org.openmole.core.module.addPluginsFiles(files, true, Some(org.openmole.core.module.pluginDirectory))
     files.foreach(_.recursiveDelete)
     errors.map(e ⇒ ErrorBuilder(e._2))
   }
@@ -438,6 +448,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     module.pluginDirectory.listFilesSafe.map(p ⇒ Plugin(p.getName, new SimpleDateFormat("dd/MM/yyyy HH:mm").format(p.lastModified)))
 
   def removePlugin(plugin: Plugin): Unit = org.openmole.gui.ext.tool.server.Utils.removePlugin(plugin)
+
   //GUI OM PLUGINS
 
   def getGUIPlugins(): AllPluginExtensionData = {

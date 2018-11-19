@@ -27,6 +27,9 @@ import org.openmole.gui.ext.tool.server.Utils._
 
 class RWizardApiImpl(s: Services) extends RWizardAPI {
 
+  import s._
+  import org.openmole.gui.ext.data.ServerFileSystemContext.project
+
   def toTask(
     target:         SafePath,
     executableName: String,
@@ -39,7 +42,7 @@ class RWizardApiImpl(s: Services) extends RWizardAPI {
 
     val modelData = wizardModelData(inputs, outputs, resources.all.map {
       _.safePath.name
-    } :+ executableName, Some("rInputs"), Some("rOuputs"))
+    } :+ executableName, Some("inputs"), Some("ouputs"))
 
     val task = s"${executableName.split('.').head.toLowerCase}Task"
 
@@ -48,7 +51,7 @@ class RWizardApiImpl(s: Services) extends RWizardAPI {
       expandWizardData(modelData) +
       s""")\n\n$task hook ToStringHook()"""
 
-    target.write(content)(context = org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace = Workspace.instance)
+    target.write(content)
     WizardToTask(target)
   }
 

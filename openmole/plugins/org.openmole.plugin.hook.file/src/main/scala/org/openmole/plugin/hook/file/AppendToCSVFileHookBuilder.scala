@@ -21,6 +21,9 @@ import monocle.Lens
 import org.openmole.core.expansion.FromContext
 
 trait AppendToCSVFileHookBuilder[T] {
+  @deprecated("9", "use apply arguments")
   def csvHeader: Lens[T, Option[FromContext[String]]]
+
+  @deprecated("9", "use apply arguments")
   def arraysOnSingleRow: Lens[T, Boolean]
 }

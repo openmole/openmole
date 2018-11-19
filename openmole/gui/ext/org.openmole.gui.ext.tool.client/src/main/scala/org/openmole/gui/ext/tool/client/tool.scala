@@ -81,8 +81,9 @@ package object client {
   lazy val fixedPosition: ModifierSeq = position := "fixed"
 
   lazy val centerElement: ModifierSeq = Seq(
-    display := "table",
-    margin := "0 auto",
+    display := "flex",
+    justifyContent := "center",
+    //margin := "0 auto",
     color(LIGHT_GREY)
   )
 
@@ -412,18 +413,17 @@ package object client {
 
   def fileList: ModifierSeq = {
     Seq(
-      height := dom.window.innerHeight - 195, //nbElements * 21, //  <-- Select the height of the body
+      height := dom.window.innerHeight - 230, //nbElements * 21, //  <-- Select the height of the body
       absolutePosition,
       fontSize := 14,
       listStyleType := "none",
       marginTop := 50,
       paddingTop := 5,
-      paddingBottom := 30,
       marginLeft := -7,
       paddingLeft := 10,
       width := 370,
       overflowY := "auto",
-      zIndex := -1
+      overflowX := "hidden"
     )
   }
 
@@ -509,7 +509,7 @@ package object client {
       case _: ExecutionInfo.Running  ⇒ color("yellow")
       case _: ExecutionInfo.Finished ⇒ color("#a6bf26")
       case _: ExecutionInfo.Canceled ⇒ color("orange")
-      case _                         ⇒ color(WHITE)
+      case _                         ⇒ color("#fff")
     },
     fontWeight := "bold"
   )
@@ -534,7 +534,11 @@ package object client {
 
   lazy val environmentErrorBadge: ModifierSeq = Seq(
     color(DARK_GREY),
-    backgroundColor := FUN_GREY
+    backgroundColor := WHITE,
+    width := "auto",
+    height := 15,
+    marginLeft := 8,
+    padding := "1px 5px 5px 5px"
   )
 
   //OPTON DIVS

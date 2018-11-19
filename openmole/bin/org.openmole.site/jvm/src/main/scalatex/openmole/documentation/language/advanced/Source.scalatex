@@ -3,12 +3,11 @@
 @import org.openmole.site._
 @import org.openmole.site.tools._
 
-@h1{Source}
 Sources have been designed as a possible way to inject data in the dataflow from diverse sources: CSV files,
 databases, sensors...
 
 @p At the moment, only file-based Sources are available in OpenMOLE. If you need to interface OpenMOLE with an
-external datasource, check the @a("contact information page", href := Pages.whoAreWe.file) to see how to reach the
+external datasource, check the @a("contact information page", href := DocumentationPages.whoWeAre.file) to see how to reach the
 OpenMOLE development team.
 
 @h2{Plug a source}
@@ -71,12 +70,12 @@ val s2 =
 
 @p Sources store each entry found in an Array. In most cases, you will want each of the entries to feed a different
 task. Let's now see how this can be done by reusing what we've discovered with the
-@aa("data processing sampling", href := DocumentationPages.dataProcessing.file).
+@aa("data processing sampling", href := DocumentationPages.fileSampling.file).
 
 @h2{A complete example}
 
 Here, we are collecting all the directories which named "care_archive". See how they are gathered in an
-@i{Array[File]} container and can be explored by an @aa("ExplorationTask", href := DocumentationPages.dataProcessing.file) using
+@i{Array[File]} container and can be explored by an @aa("ExplorationTask", href := DocumentationPages.fileSampling.file) using
 the keyword @hl.openmoleNoTest("in"). This exploration generates one @i{analysisTask} per directory collected by the
 source.
 

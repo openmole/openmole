@@ -18,138 +18,310 @@
 package org.openmole.plugin.task.netlogo
 
 import java.util.AbstractCollection
+import java.lang.Class
 
-import org.openmole.core.context.{ Context, Val, Variable }
-import org.openmole.core.exception.UserBadDataError
+import scala.reflect.ClassTag
+import org.openmole.core.context.{ Context, Val, ValType, Variable }
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion._
 import org.openmole.core.tools.io.Prettifier._
+import org.openmole.core.workflow.builder.MappedInputOutputConfig
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
+import org.openmole.core.workspace.NewFile
 import org.openmole.plugin.task.external._
+import org.openmole.plugin.tool.netlogo.NetLogo
+import org.openmole.tool.cache._
+
+import scala.annotation.tailrec
+import scala.collection.mutable.ArrayBuffer
 
 object NetLogoTask {
-  case class Workspace(script: String, workspace: OptionalArgument[String] = None)
-}
+  sealed trait Workspace
 
-trait NetLogoTask extends Task with ValidateTask {
-
-  def workspace: NetLogoTask.Workspace
-  def launchingCommands: Seq[FromContext[String]]
-  def netLogoInputs: Seq[(Val[_], String)]
-  def netLogoOutputs: Iterable[(String, Val[_])]
-  def netLogoArrayOutputs: Iterable[(String, Int, Val[_])]
-  def netLogoFactory: NetLogoFactory
-  def ignoreError: Boolean
-  def seed: Option[Val[Int]]
-  def external: External
-
-  override def validate = Validate { p ⇒
-    import p._
-    val allInputs = External.PWD :: inputs.toList
-    launchingCommands.flatMap(_.validate(allInputs)) ++ External.validate(external)(allInputs).apply
+  object Workspace {
+    case class Script(script: File, name: String) extends Workspace
+    case class Directory(directory: File, name: String, script: String) extends Workspace
   }
 
-  private def wrapError[T](msg: String)(f: ⇒ T): T =
+  def wrapError[T](msg: String)(f: ⇒ T): T =
     try f
     catch {
+      case e: InternalProcessingError ⇒ throw e
       case e: Throwable ⇒
         throw new UserBadDataError(s"$msg:\n" + e.stackStringWithMargin)
     }
 
-  override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
-    External.withWorkDir(executionContext) { tmpDir ⇒
-      import parameters._
+  def deployWorkspace(workspace: Workspace, directory: File) = {
+    import org.openmole.tool.file._
 
-      val workDir =
-        workspace.workspace.option match {
-          case None    ⇒ tmpDir
-          case Some(d) ⇒ tmpDir / d
-        }
+    val resolver = External.relativeResolver(directory)(_)
+    workspace match {
+      case s: NetLogoTask.Workspace.Script ⇒
+        s.script.realFile.copy(resolver(s.name))
+        (directory, directory / s.name)
+      case w: NetLogoTask.Workspace.Directory ⇒
+        w.directory.realFile.copy(resolver(w.name))
+        (directory / w.name, directory / w.name / w.script)
+    }
+  }
 
-      val context = parameters.context + (External.PWD → workDir.getAbsolutePath)
+  case class NetoLogoInstance(directory: File, workspaceDirectory: File, netLogo: NetLogo)
 
-      val preparedContext = external.prepareInputFiles(context, external.relativeResolver(tmpDir))
+  def openNetLogoWorkspace(netLogoFactory: NetLogoFactory, workspace: Workspace, directory: File) = {
+    val (workDir, script) = deployWorkspace(workspace, directory)
+    val resolver = External.relativeResolver(workDir)(_)
+    val netLogo = netLogoFactory()
 
-      val script = workDir / workspace.script
-      val netLogo = netLogoFactory()
-      withThreadClassLoader(netLogo.getNetLogoClassLoader) {
-        try {
-          wrapError(s"Error while opening the file $script") {
-            netLogo.open(script.getAbsolutePath)
-          }
-
-          def executeNetLogo(cmd: String, ignoreError: Boolean = false) = wrapError(s"Error while executing command $cmd") {
-            try netLogo.command(cmd)
-            catch {
-              case t: Throwable ⇒
-                if (ignoreError && netLogo.isNetLogoException(t)) {} else throw t
-            }
-          }
-
-          seed.foreach { s ⇒ executeNetLogo(s"random-seed ${context(s)}") }
-
-          for (inBinding ← netLogoInputs) {
-            val v = preparedContext(inBinding._1) match {
-              case x: String ⇒ '"' + x + '"'
-              case x: File   ⇒ '"' + x.getAbsolutePath + '"'
-              case x         ⇒ x.toString
-            }
-            executeNetLogo("set " + inBinding._2 + " " + v)
-          }
-
-          for (cmd ← launchingCommands.map(_.from(context))) executeNetLogo(cmd, ignoreError)
-
-          val contextResult =
-            external.fetchOutputFiles(outputs, preparedContext, external.relativeResolver(workDir), tmpDir) ++ netLogoOutputs.map {
-              case (name, prototype) ⇒
-                try {
-                  val outputValue = netLogo.report(name)
-                  if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Val[Any]], outputValue)
-                  else {
-                    val netLogoCollection = outputValue.asInstanceOf[AbstractCollection[Any]]
-                    netLogoArrayToVariable(netLogoCollection, prototype)
-                  }
-                }
-                catch {
-                  case e: Throwable ⇒
-                    throw new UserBadDataError(
-                      s"Error when fetching netlogo output $name in variable $prototype:\n" + e.stackStringWithMargin
-                    )
-                }
-            } ++ netLogoArrayOutputs.map {
-              case (name, column, prototype) ⇒
-                try {
-                  val netLogoCollection = netLogo.report(name)
-                  val outputValue = netLogoCollection.asInstanceOf[AbstractCollection[Any]].toArray()(column)
-                  if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Val[Any]], outputValue)
-                  else netLogoArrayToVariable(outputValue.asInstanceOf[AbstractCollection[Any]], prototype)
-                }
-                catch {
-                  case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when fetching column $column of netlogo output $name in variable $prototype")
-                }
-            }
-
-          external.cleanWorkDirectory(outputs, contextResult, tmpDir)
-          contextResult
-        }
-        finally netLogo.dispose
+    withThreadClassLoader(netLogo.getNetLogoClassLoader) {
+      wrapError(s"Error while opening the file $script") {
+        netLogo.open(script.getAbsolutePath)
       }
+    }
+
+    NetoLogoInstance(directory, workDir, netLogo)
+  }
+
+  def executeNetLogo(netLogo: NetLogo, cmd: String, ignoreError: Boolean = false) =
+    withThreadClassLoader(netLogo.getNetLogoClassLoader) {
+      wrapError(s"Error while executing command $cmd") {
+        try netLogo.command(cmd)
+        catch {
+          case t: Throwable ⇒
+            if (ignoreError && netLogo.isNetLogoException(t)) {} else throw t
+        }
+      }
+    }
+
+  def setGlobal(netLogo: NetLogo, variable: String, value: AnyRef, ignoreError: Boolean = false) =
+    withThreadClassLoader(netLogo.getNetLogoClassLoader) {
+      wrapError(s"Error while setting $variable") {
+        try netLogo.setGlobal(variable, value)
+        catch {
+          case t: Throwable ⇒
+            if (ignoreError && netLogo.isNetLogoException(t)) {} else throw t
+        }
+      }
+    }
+
+  def report(netLogo: NetLogo, name: String) =
+    withThreadClassLoader(netLogo.getNetLogoClassLoader) { netLogo.report(name) }
+
+  def dispose(netLogo: NetLogo) =
+    withThreadClassLoader(netLogo.getNetLogoClassLoader) { netLogo.dispose() }
+
+  def createPool(netLogoFactory: NetLogoFactory, workspace: NetLogoTask.Workspace, cached: Boolean)(implicit newFile: NewFile) = {
+    def createInstance = {
+      val workspaceDirectory = newFile.newDir("netlogoworkpsace")
+      NetLogoTask.openNetLogoWorkspace(netLogoFactory, workspace, workspaceDirectory)
+    }
+
+    def destroyInstance(instance: NetLogoTask.NetoLogoInstance) = {
+      instance.directory.recursiveDelete
+      instance.netLogo.dispose()
+    }
+
+    WithInstance[NetLogoTask.NetoLogoInstance](
+      () ⇒ createInstance,
+      close = destroyInstance,
+      pooled = cached
+    )
+  }
+
+  def netLogoCompatibleType(x: Any) = {
+    def convertArray(x: Any): AnyRef = x match {
+      case a: Array[_] ⇒ a.asInstanceOf[Array[_]].map { x ⇒ convertArray(x.asInstanceOf[AnyRef]) }
+      case x           ⇒ safeType(x)
+    }
+
+    def safeType(x: Any): AnyRef = {
+      val v = x match {
+        case i: Int    ⇒ i.toDouble
+        case l: Long   ⇒ l.toDouble
+        case fl: Float ⇒ fl.toDouble
+        case f: File   ⇒ f.getAbsolutePath
+        case x: AnyRef ⇒ x // Double, String and Boolean are unchanged
+      }
+      v.asInstanceOf[AnyRef]
+    }
+
+    x match {
+      case x: Array[_] ⇒ convertArray(x)
+      case x           ⇒ safeType(x)
     }
   }
 
   def netLogoArrayToVariable(netlogoCollection: AbstractCollection[Any], prototype: Val[_]) = {
-    val arrayType = prototype.`type`.runtimeClass.getComponentType
-    val array = java.lang.reflect.Array.newInstance(arrayType, netlogoCollection.size)
-    val it = netlogoCollection.iterator
-    for (i ← 0 until netlogoCollection.size) {
-      val v = it.next
-      try java.lang.reflect.Array.set(array, i, v)
-      catch {
-        case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when adding a variable of type ${v.getClass} in an array of ${arrayType}")
+    // get arrayType and depth of multiple array prototype
+    val (multiArrayType, depth): (ValType[_], Int) = ValType.unArrayify(prototype.`type`)
+
+    // recurse to get sizes, Nested LogoLists assumed rectangular : size of first element is taken for each dimension
+    // will fail if the depth of the prototype is not the depth of the LogoList
+    @tailrec def getdims(collection: AbstractCollection[Any], dims: Seq[Int], maxdepth: Int): Seq[Int] = {
+      maxdepth match {
+        case d if d == 1 ⇒ (dims ++ Seq(collection.size()))
+        case _           ⇒ getdims(collection.iterator().next().asInstanceOf[AbstractCollection[Any]], dims ++ Seq(collection.size()), maxdepth - 1)
       }
     }
-    Variable(prototype.asInstanceOf[Val[Any]], array)
+
+    var dims: Seq[Int] = Seq.empty
+    try {
+      dims = getdims(netlogoCollection, Seq.empty, depth)
+    }
+    catch {
+      case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when mapping a prototype array of depth ${depth} and type ${multiArrayType} with nested LogoLists")
+    }
+
+    // create multi array
+    try {
+      val array = java.lang.reflect.Array.newInstance(multiArrayType.runtimeClass.asInstanceOf[Class[_]], dims: _*)
+
+      /**
+       * Manually do conversions to java native types ; necessary to add an output cast feature,
+       *   e.g. NetLogo numeric ~ java.lang.Double -> Int or String and not necessarily Double,
+       *   the target type being the one of the prototype
+       * @param value
+       * @param arrayType
+       */
+      def safeOutput(value: AnyRef, arrayType: Class[_]) = {
+        try {
+          arrayType match {
+            // all netlogo numeric are java.lang.Double
+            case c if c == classOf[Double]  ⇒ value.asInstanceOf[java.lang.Double].doubleValue()
+            case c if c == classOf[Float]   ⇒ value.asInstanceOf[java.lang.Double].floatValue()
+            case c if c == classOf[Int]     ⇒ value.asInstanceOf[java.lang.Double].intValue()
+            case c if c == classOf[Long]    ⇒ value.asInstanceOf[java.lang.Double].longValue()
+            // target boolean
+            case c if c == classOf[Boolean] ⇒ value.asInstanceOf[java.lang.Boolean].booleanValue()
+            // target string assume the origin type has a toString
+            case c if c == classOf[String]  ⇒ value.toString
+            // try casting anyway - NOTE : untested
+            case c                          ⇒ c.cast(value)
+          }
+        }
+        catch {
+          case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when casting a variable of type ${value.getClass} to target type ${arrayType}")
+        }
+      }
+
+      // recurse in the multi array
+      def setMultiArray(collection: AbstractCollection[Any], currentArray: AnyRef, arrayType: Class[_], maxdepth: Int): Unit = {
+        val it = collection.iterator()
+        for (i ← 0 until collection.size) {
+          val v = it.next
+          maxdepth match {
+            case d if d == 1 ⇒ {
+              try {
+                java.lang.reflect.Array.set(currentArray, i, safeOutput(v.asInstanceOf[AnyRef], arrayType))
+              }
+              catch {
+                case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when adding a variable of type ${v.getClass} in an array of type ${multiArrayType}")
+              }
+            }
+            case _ ⇒ {
+              try {
+                setMultiArray(v.asInstanceOf[AbstractCollection[Any]], java.lang.reflect.Array.get(currentArray, i), arrayType, maxdepth - 1)
+              }
+              catch {
+                case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when recursing at depth ${maxdepth} in a multi array of type ${multiArrayType}")
+              }
+            }
+          }
+        }
+      }
+
+      setMultiArray(netlogoCollection, array, multiArrayType.runtimeClass.asInstanceOf[Class[_]], depth)
+
+      // return Variable
+      Variable(prototype.asInstanceOf[Val[Any]], array)
+    }
+    catch {
+      case e: Throwable ⇒ throw new UserBadDataError(e, s"Error constructing array with dims ${dims.toString()} and type ${multiArrayType.runtimeClass}")
+    }
+  }
+
+  def validateNetLogoInputTypes(inputs: Seq[Val[_]]) = {
+    def acceptedType(c: Class[_]): Boolean =
+      if (c.isArray()) acceptedType(c.getComponentType)
+      else Seq(classOf[String], classOf[Int], classOf[Double], classOf[Long], classOf[Float], classOf[File], classOf[Boolean]).contains(c)
+
+    inputs.flatMap {
+      case v ⇒
+        v.`type`.runtimeClass.asInstanceOf[Class[_]] match {
+          case c if acceptedType(c) ⇒ None
+          case _                    ⇒ Some(new UserBadDataError(s"""Error for netLogoInput ${v.name} : type ${v.`type`.runtimeClass.toString()} is not managed by NetLogo."""))
+        }
+    }
+  }
+}
+
+trait NetLogoTask extends Task with ValidateTask {
+
+  lazy val netLogoInstanceKey = CacheKey[WithInstance[NetLogoTask.NetoLogoInstance]]()
+
+  def workspace: NetLogoTask.Workspace
+  def launchingCommands: Seq[FromContext[String]]
+  def mapped: MappedInputOutputConfig
+
+  def netLogoFactory: NetLogoFactory
+  def ignoreError: Boolean
+  def seed: Option[Val[Int]]
+  def external: External
+  def reuseWorkspace: Boolean
+
+  override def validate = Validate { p ⇒
+    import p._
+    val allInputs = External.PWD :: inputs.toList
+    launchingCommands.flatMap(_.validate(allInputs)) ++
+      External.validate(external)(allInputs).apply ++
+      NetLogoTask.validateNetLogoInputTypes(mapped.inputs.map(_.v))
+  }
+
+  override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
+    import parameters._
+
+    val pool = executionContext.cache.getOrElseUpdate(netLogoInstanceKey, NetLogoTask.createPool(netLogoFactory, workspace, reuseWorkspace))
+
+    pool { instance ⇒
+
+      val resolver = External.relativeResolver(instance.workspaceDirectory)(_)
+      val context = parameters.context + (External.PWD → instance.workspaceDirectory.getAbsolutePath)
+      val preparedContext = External.deployInputFilesAndResources(external, context, resolver)
+
+      NetLogoTask.executeNetLogo(instance.netLogo, "clear-all")
+
+      seed.foreach { s ⇒ NetLogoTask.executeNetLogo(instance.netLogo, s"random-seed ${context(s)}") }
+
+      for (inBinding ← mapped.inputs) {
+        val v = NetLogoTask.netLogoCompatibleType(preparedContext(inBinding.v))
+        NetLogoTask.setGlobal(instance.netLogo, inBinding.name, v)
+      }
+
+      for (cmd ← launchingCommands.map(_.from(context))) NetLogoTask.executeNetLogo(instance.netLogo, cmd, ignoreError)
+
+      val contextResult =
+        External.fetchOutputFiles(external, outputs, preparedContext, resolver, instance.workspaceDirectory) ++ mapped.outputs.map {
+          case mapped ⇒
+            try {
+              val outputValue = NetLogoTask.report(instance.netLogo, mapped.name)
+              if (outputValue == null) throw new InternalProcessingError(s"Value of netlogo output ${mapped.name} has been reported as null by netlogo")
+              if (!mapped.v.`type`.runtimeClass.isArray) Variable.unsecure(mapped.v, outputValue)
+              else {
+                val netLogoCollection = outputValue.asInstanceOf[AbstractCollection[Any]]
+                NetLogoTask.netLogoArrayToVariable(netLogoCollection, mapped.v)
+              }
+            }
+            catch {
+              case e: Throwable ⇒
+                throw new UserBadDataError(
+                  s"Error when fetching netlogo output ${mapped.name} in variable ${mapped.v}:\n" + e.stackStringWithMargin
+                )
+            }
+        }
+
+      contextResult
+    }
   }
 
 }

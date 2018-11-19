@@ -40,6 +40,7 @@ import scala.io.{ BufferedSource, Codec }
 import org.openmole.core.services._
 import org.openmole.core.pluginmanager.KeyWord
 
+import scala.annotation.tailrec
 import scala.util.{ Failure, Success, Try }
 
 object Utils extends JavaLogger {
@@ -124,12 +125,13 @@ object Utils extends JavaLogger {
       val from: File = sp
       val to: File = toPath
       if (from.exists && to.exists) {
-        from.copy(new File(to, withName.getOrElse(from.getName)))
+        FileDecorator(from).copy(toF = new File(to, withName.getOrElse(from.getName)), followSymlinks = true)
       }
     }
   }
 
   def getPathArray(f: File, until: File): Seq[String] = {
+    @tailrec
     def getParentsArray0(f: File, computedParents: Seq[String]): Seq[String] = {
       val parent = f.getParentFile
       if (parent != null) {
@@ -148,6 +150,7 @@ object Utils extends JavaLogger {
   }
 
   def getFile(root: File, paths: Seq[String]): File = {
+    @tailrec
     def getFile0(paths: Seq[String], accFile: File): File = {
       if (paths.isEmpty) accFile
       else getFile0(paths.tail, new File(accFile, paths.head))
@@ -175,7 +178,7 @@ object Utils extends JavaLogger {
     }
   }
 
-  def replicate(safePath: SafePath, newName: String)(implicit workspace: Workspace): SafePath = {
+  def copy(safePath: SafePath, newName: String)(implicit workspace: Workspace): SafePath = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
     val toPath = safePath.copy(path = safePath.path.dropRight(1) :+ newName)
@@ -183,7 +186,7 @@ object Utils extends JavaLogger {
 
     val from: File = safePath
     val replica: File = safePath.parent ++ newName
-    replica.content = from.content
+    FileDecorator(from).copy(replica)
 
     replica
   }
@@ -311,11 +314,13 @@ object Utils extends JavaLogger {
   val openmoleFileName = "openmole.js"
   val depsFileName = "deps.js"
   val openmoleGrammarName = "openmole_grammar_template.js"
+  val openmoleGrammarMode = "mode-openmole.js"
 
   def updateIfChanged(file: File)(update: File ⇒ Unit)(implicit fileService: FileService, newFile: NewFile) = {
     import org.openmole.core.fileservice._
 
     def hash(f: File) = new File(f + "-hash")
+
     lockFile(file).withLock { _ ⇒
       val hashFile = hash(file)
       lazy val currentHash = fileService.hashNoCache(file).toString
@@ -346,13 +351,16 @@ object Utils extends JavaLogger {
       JSPack.link(jsPluginDirectory, jsFile, optimizedJS)
     }
 
+    (jsPluginDirectory / "optimized_mode").content = optimizedJS.toString
+
     if (!jsFile.exists) update
     else updateIfChanged(jsPluginDirectory) { _ ⇒ update }
     jsFile
   }
 
-  def expandDepsFile(from: File, template: File, to: File) = {
+  def expandDepsFile(template: File, to: File) = {
 
+    val from = File.createTempFile("openmole", "grammar")
     val rules = PluginInfo.keyWords.partition { kw ⇒
       kw match {
         case _@ (KeyWord.Task(_) | KeyWord.Source(_) | KeyWord.Environment(_) | KeyWord.Hook(_) | KeyWord.Sampling(_) | KeyWord.Domain(_) | KeyWord.Pattern(_)) ⇒ false
@@ -360,9 +368,22 @@ object Utils extends JavaLogger {
       }
     }
 
-    to.content = s"""${from.content}\n${template.content}""" // ${AceOpenMOLEMode.content}
-      .replace("##OMKeywords##", s""" "${rules._1.map { _.name }.mkString("|")}" """)
-      .replace("##OMClasses##", s""" "${rules._2.map { _.name }.mkString("|")}" """)
+    to.content =
+      s"""${template.content}""" // ${AceOpenMOLEMode.content}
+        .replace(
+          "##OMKeywords##",
+          s""" "${
+            rules._1.map {
+              _.name
+            }.mkString("|")
+          }" """)
+        .replace(
+          "##OMClasses##",
+          s""" "${
+            rules._2.map {
+              _.name
+            }.mkString("|")
+          }" """)
 
   }
 

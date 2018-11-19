@@ -23,17 +23,34 @@ import java.util.zip.ZipEntry
 
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
-import org.osgi.framework.Constants
+import org.osgi.framework.{ Bundle, Constants }
 
 package object osgi {
 
-  case class ClassByteCode(name: String, byteCode: Array[Byte])
+  object ClassSource {
+    def path(c: ClassSource) =
+      c match {
+        case ClassFile(path, _)     ⇒ path
+        case ClassByteCode(path, _) ⇒ path
+      }
+
+    def openInputStream(c: ClassSource) =
+      c match {
+        case ClassFile(_, file)         ⇒ file.bufferedInputStream
+        case ClassByteCode(_, byteCode) ⇒ new ByteArrayInputStream(byteCode)
+      }
+  }
+
+  sealed class ClassSource
+  case class ClassFile(path: String, file: File) extends ClassSource
+  case class ClassByteCode(path: String, byteCode: Array[Byte]) extends ClassSource
+
   case class VersionedPackage(name: String, version: Option[String])
 
   def createBundle(
     name:             String,
     version:          String,
-    classes:          Seq[ClassByteCode],
+    classes:          Seq[ClassSource],
     exportedPackages: Seq[String],
     importedPackages: Seq[VersionedPackage],
     bundle:           File
@@ -56,8 +73,9 @@ package object osgi {
       for {
         cbc ← classes
       } {
-        os.putNextEntry(new ZipEntry(cbc.name))
-        copy(new ByteArrayInputStream(cbc.byteCode), os)
+        os.putNextEntry(new ZipEntry(ClassSource.path(cbc)))
+        val is = ClassSource.openInputStream(cbc)
+        try copy(is, os) finally is.close()
         os.closeEntry()
       }
     }

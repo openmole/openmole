@@ -21,15 +21,15 @@ import java.io.File
 
 import com.thoughtworks.xstream.converters.Converter
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
-import com.thoughtworks.xstream.core.{ JVM, ClassLoaderReference }
+import com.thoughtworks.xstream.core.{ ClassLoaderReference, JVM }
 import com.thoughtworks.xstream.core.util.CompositeClassLoader
 import com.thoughtworks.xstream.io.xml.XppDriver
 import com.thoughtworks.xstream.{ XStream, mapper }
-import com.thoughtworks.xstream.mapper.{ DefaultMapper, MapperWrapper, Mapper }
+import com.thoughtworks.xstream.mapper.{ DefaultMapper, Mapper, MapperWrapper }
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.serializer.converter.Serialiser
 import org.openmole.core.serializer.file.FileConverterNotifier
-import org.openmole.core.serializer.plugin.{ Plugins, PluginClassConverter, PluginConverter }
+import org.openmole.core.serializer.plugin.{ PluginClassConverter, PluginConverter, Plugins }
 import org.openmole.core.serializer.structure.PluginClassAndFiles
 import org.openmole.tool.file._
 import org.openmole.tool.stream.NullOutputStream
@@ -37,6 +37,7 @@ import org.openmole.core.console._
 
 import scala.collection.immutable.{ HashSet, TreeSet }
 import scala.collection.mutable
+import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 trait PluginAndFilesListing { this: Serialiser ⇒
 
@@ -58,7 +59,7 @@ trait PluginAndFilesListing { this: Serialiser ⇒
         PluginManager.pluginsForClass(c).foreach(pluginUsed)
       }
 
-      if (c.getClassLoader != null && classOf[REPLClassloader].isAssignableFrom(c.getClassLoader.getClass)) {
+      if (c.getClassLoader != null && classOf[URLClassLoader].isAssignableFrom(c.getClassLoader.getClass) && !PluginManager.bundleForClass(c).isDefined) {
         replClasses += c
       }
 

@@ -27,6 +27,9 @@ import org.openmole.gui.ext.tool.server.Utils._
 
 class NetlogoWizardApiImpl(s: Services) extends NetlogoWizardAPI {
 
+  import s._
+  import org.openmole.gui.ext.data.ServerFileSystemContext.project
+
   def toTask(
     target:         SafePath,
     executableName: String,
@@ -39,22 +42,22 @@ class NetlogoWizardApiImpl(s: Services) extends NetlogoWizardAPI {
 
     val modelData = wizardModelData(inputs, outputs, resources.all.map {
       _.safePath.name
-    }, Some("netLogoInputs"), Some("netLogoOutputs"))
+    }, Some("inputs"), Some("outputs"))
     val task = s"${executableName.split('.').head.toLowerCase}Task"
 
     val content = modelData.vals +
-      s"""\nval launch = List("${(Seq("setup", "random-seed ${seed}") ++ (command.split('\n').toSeq)).mkString("\",\"")}")
-            \nval $task = NetLogo6Task(workDirectory / ${executableName.split('/').map { s ⇒ s"""\"$s\"""" }.mkString(" / ")}, launch, embedWorkspace = ${data.embedWorkspace}) set(\n""".stripMargin +
+      s"""\nval launch = List("${(Seq("setup") ++ (command.split('\n').toSeq)).mkString("\",\"")}")
+            \nval $task = NetLogo6Task(workDirectory / ${executableName.split('/').map { s ⇒ s"""\"$s\"""" }.mkString(" / ")}, launch, embedWorkspace = ${data.embedWorkspace}, seed=seed) set(\n""".stripMargin +
       expandWizardData(modelData) +
       s""")\n\n$task hook ToStringHook()"""
 
-    target.write(content)(context = org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace = Workspace.instance)
+    target.write(content)
     WizardToTask(target)
   }
 
   def parse(safePath: SafePath): Option[LaunchingCommand] = {
 
-    val lines = Utils.lines(safePath)(context = org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace = Workspace.instance)
+    val lines = Utils.lines(safePath)
 
     def parse0(lines: Seq[(String, Int)], args: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair]): (Seq[ProtoTypePair], Seq[ProtoTypePair]) = {
       if (lines.isEmpty) (ProtoTypePair("seed", ProtoTYPE.INT, "0", None) +: args, outputs)

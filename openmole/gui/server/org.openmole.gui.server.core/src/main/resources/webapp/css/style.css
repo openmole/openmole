@@ -18,10 +18,26 @@ body{
 .table.envError>tbody>tr>td{
     border-top:none;
     vertical-align: middle;
+    text-align: center;
 }
 
-.label{
-padding-top:7px;
+.executionTable > tbody >tr{
+    text-align:center
+}
+
+.table-inverse {
+  color: #fff;
+  background-color: #292b2c;
+  border-radius: 3px;
+}
+
+.table-inverse > tbody > tr > td{
+  padding:20px;
+  text-align: center;
+}
+
+textarea {
+  resize: none;
 }
 
 a {
@@ -78,7 +94,7 @@ ul{
     position: relative;
     top: 4px;
     font-size: 15px;
-    color: #828082;
+    color: #828082;
     cursor: pointer;
     padding-top: 5px;
     font-weight: bold;
@@ -106,8 +122,9 @@ ul{
 .tree-path {
     position: relative;
     min-height: 27px;
-    height: 30px;
+    height: auto;
     left: -10px;
+    padding-bottom:10px;
     padding-left: 10px;
     padding-right: 18px;
     width: 373px;
@@ -486,5 +503,56 @@ padding-bottom: 90px;
 }
 
 .expanded {
-    max-height: 100vh;
-  }
+  max-height: 100vh;
+}
+
+.loader {
+  border: 6px solid #f3f3f3; /* Light grey */
+  border-top: 6px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.gutterDecoration{
+  position:absolute;
+  z-index: 20;
+  font: 14px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;;
+  top:0;
+  width: 20px;
+  margin-left:17px;
+  text-align:right;
+  padding-right:3px;
+  padding-top:2px;
+  margin-top:-1px;
+}
+
+.gutterError {
+      background: rgba(255,128,128);
+      cursor: pointer;
+      border-radius: 3px;
+      color: white;
+      font-weight: bold;
+      width: 45px;
+      margin-left: -20px;
+      text-align: left;
+      padding-left:5px;
+}
+
+.gutterCorrected {
+    background: rgba(220,220,220);
+      cursor: pointer;
+      border-radius: 3px;
+      color: #333;
+      font-weight: bold;
+      width: 45px;
+      margin-left: -20px;
+      text-align: left;
+      padding-left:5px;
+}

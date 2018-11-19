@@ -47,14 +47,15 @@ object ScalaTask {
     override def plugins = ScalaTask.plugins
   }
 
-  def apply(source: String)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(source: String, validate: Boolean = true)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new ScalaTask(
       source,
       plugins = Vector.empty,
       libraries = Vector.empty,
       config = InputOutputConfig(),
       external = External(),
-      info = InfoConfig()
+      info = InfoConfig(),
+      _validate = validate
     )
 
   def apply(f: (Context, ⇒ Random) ⇒ Seq[Variable[_]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
@@ -71,7 +72,8 @@ object ScalaTask {
   libraries:  Vector[File],
   config:     InputOutputConfig,
   external:   External,
-  info:       InfoConfig
+  info:       InfoConfig,
+  _validate:  Boolean
 ) extends Task with ValidateTask with Plugins {
 
   lazy val compilation = CacheKey[ScalaCompilation.ContextClosure[java.util.Map[String, Any]]]()
@@ -87,14 +89,17 @@ object ScalaTask {
     )
   }
 
-  override def validate = Validate { p ⇒
-    import p._
+  override def validate =
+    if (_validate)
+      Validate { p ⇒
+        import p._
 
-    Try(compile) match {
-      case Success(_) ⇒ Seq.empty
-      case Failure(e) ⇒ Seq(e)
-    }
-  }
+        Try(compile) match {
+          case Success(_) ⇒ Seq.empty
+          case Failure(e) ⇒ Seq(e)
+        }
+      }
+    else Validate.success
 
   override def process(taskExecutionContext: TaskExecutionContext) = {
     def processCode =

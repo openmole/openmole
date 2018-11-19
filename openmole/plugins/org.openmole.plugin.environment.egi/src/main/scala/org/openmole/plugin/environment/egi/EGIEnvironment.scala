@@ -17,47 +17,28 @@
 
 package org.openmole.plugin.environment.egi
 
-import java.io.File
-
-import org.openmole.core.authentication.AuthenticationStore
-import org.openmole.core.communication.storage
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.threadprovider.Updater
+import org.openmole.core.exception.{ InternalProcessingError, MultipleException }
+import org.openmole.core.workflow.execution._
+import org.openmole.core.workflow.job.Job
 import org.openmole.core.workspace.Workspace
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, SerializedJob, UpdateInterval, UsageControl }
-import org.openmole.plugin.environment.batch.jobservice.{ BatchJob, BatchJobService, JobServiceInterface }
-import org.openmole.plugin.environment.batch.refresh.{ JobManager, StopEnvironment }
-import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageService }
-import org.openmole.plugin.environment.egi.EGIEnvironment.WebDavLocation
+import org.openmole.plugin.environment.batch.environment.{ BatchJobControl, _ }
+import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.crypto.Cypher
-import squants._
 import squants.information._
 
-import scala.ref.WeakReference
-
-//import java.net.URI
-//
-//import fr.iscpif.gridscale.egi.BDII
-//import org.openmole.core.exception.InternalProcessingError
+import scala.collection.immutable.TreeSet
+import scala.collection.mutable.{ HashMap, MultiMap, Set }
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
-import org.openmole.core.workflow.dsl._
-//import org.openmole.core.workspace.Workspace
-//import org.openmole.plugin.environment.batch.control._
-//import org.openmole.plugin.environment.batch.environment._
-//import org.openmole.tool.crypto.Cypher
+import org.openmole.core.workflow.dsl.{ File, _ }
 import org.openmole.tool.logger.JavaLogger
-//import org.openmole.tool.random._
-//import squants.information.Information
+import org.openmole.tool.exception._
+import gridscale.egi._
+import org.openmole.core.communication.storage.TransferOptions
+import org.openmole.tool.cache._
 import squants.time.Time
 import squants.time.TimeConversions._
-import org.openmole.tool.cache._
-import gridscale.egi._
-import effectaside._
 
 object EGIEnvironment extends JavaLogger {
-
-  import util._
 
   val FetchResourcesTimeOut = ConfigurationLocation("EGIEnvironment", "FetchResourcesTimeOut", Some(1 minutes))
   val CACertificatesSite = ConfigurationLocation("EGIEnvironment", "CACertificatesSite", Some("http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/"))
@@ -66,16 +47,10 @@ object EGIEnvironment extends JavaLogger {
   val VOInformationSite = ConfigurationLocation("EGIEnvironment", "VOInformationSite", Some("http://operations-portal.egi.eu/xml/voIDCard/public/all/true"))
   val VOCardDownloadTimeOut = ConfigurationLocation("EGIEnvironment", "VOCardDownloadTimeOut", Some(2 minutes))
   val VOCardCacheTime = ConfigurationLocation("EGIEnvironment", "VOCardCacheTime", Some(6 hours))
-  //
-  val EagerSubmissionInterval = ConfigurationLocation("EGIEnvironment", "EagerSubmissionInterval", Some(2 minutes))
+
   val EagerSubmissionMinNumberOfJobs = ConfigurationLocation("EGIEnvironment", "EagerSubmissionMinNumberOfJobs", Some(100))
-  val RunningHistoryDuration = ConfigurationLocation("EGIEnvironment", "RunningHistoryDuration", Some(6 hours))
-  val EagerSubmissionThreshold = ConfigurationLocation("EGIEnvironment", "EagerSubmissionThreshold", Some(0.1))
   val EagerSubmissionNumberOfJobs = ConfigurationLocation("EGIEnvironment", "EagerSubmissionNumberOfJobs", Some(3))
 
-  //  val EagerSubmissionNbSampling = ConfigurationLocation("EGIEnvironment", "EagerSubmissionNbSampling", Some(10))
-  //  val EagerSubmissionSamplingWindowFactor = ConfigurationLocation("EGIEnvironment", "EagerSubmissionSamplingWindowFactor", Some(5))
-  //
   //  val ConnectionsBySRMSE = ConfigurationLocation("EGIEnvironment", "ConnectionsSRMSE", Some(10))
   val ConnexionsByWebDAVSE = ConfigurationLocation("EGIEnvironment", "ConnectionsByWebDAVSE", Some(100))
   val ConnectionsToDIRAC = ConfigurationLocation("EGIEnvironment", "ConnectionsToDIRAC", Some(10))
@@ -94,18 +69,13 @@ object EGIEnvironment extends JavaLogger {
   //  val ShallowWMSRetryCount = ConfigurationLocation("EGIEnvironment", "ShallowWMSRetryCount", Some(5))
   //
   //  val JobServiceFitnessPower = ConfigurationLocation("EGIEnvironment", "JobServiceFitnessPower", Some(2.0))
+
   val StorageFitnessPower = ConfigurationLocation("EGIEnvironment", "StorageFitnessPower", Some(2.0))
   //
   val StorageSizeFactor = ConfigurationLocation("EGIEnvironment", "StorageSizeFactor", Some(5.0))
   val StorageTimeFactor = ConfigurationLocation("EGIEnvironment", "StorageTimeFactor", Some(1.0))
   //    val StorageAvailabilityFactor = ConfigurationLocation("EGIEnvironment", "StorageAvailabilityFactor", Some(10.0))
   val StorageSuccessRateFactor = ConfigurationLocation("EGIEnvironment", "StorageSuccessRateFactor", Some(10.0))
-
-  //  val JobServiceJobFactor = ConfigurationLocation("EGIEnvironment", "JobServiceSizeFactor", Some(1.0))
-  //  val JobServiceTimeFactor = ConfigurationLocation("EGIEnvironment", "JobServiceTimeFactor", Some(10.0))
-  //  val JobServiceAvailabilityFactor = ConfigurationLocation("EGIEnvironment", "JobServiceAvailabilityFactor", Some(10.0))
-  //  val JobServiceSuccessRateFactor = ConfigurationLocation("EGIEnvironment", "JobServiceSuccessRateFactor", Some(1.0))
-  //
 
   val DiracConnectionTimeout = ConfigurationLocation("EGIEnvironment", "DiracConnectionTimeout", Some(1 minutes))
   val VOMSTimeout = ConfigurationLocation("EGIEnvironment", "VOMSTimeout", Some(1 minutes))
@@ -127,61 +97,59 @@ object EGIEnvironment extends JavaLogger {
   def defaultBDIIs(implicit preference: Preference) =
     preference(EGIEnvironment.DefaultBDIIs).map(b ⇒ new java.net.URI(b)).map(toBDII)
 
-  case class WebDavLocation(url: String)
-
   def stdOutFileName = "output"
   def stdErrFileName = "error"
 
-  implicit def isJobService[A]: JobServiceInterface[EGIEnvironment[A]] = new JobServiceInterface[EGIEnvironment[A]] {
-    override type J = gridscale.dirac.JobID
-    override def submit(env: EGIEnvironment[A], serializedJob: SerializedJob): BatchJob[J] = env.submit(serializedJob)
-    override def state(env: EGIEnvironment[A], j: J) = env.state(j)
-    override def delete(env: EGIEnvironment[A], j: J): Unit = env.delete(j)
-    override def stdOutErr(env: EGIEnvironment[A], j: J) = env.stdOutErr(j)
+  def eagerSubmit(environment: EGIEnvironment[_])(implicit preference: Preference) = {
+    val jobs = environment.jobs
+    val jobSize = jobs.size
+
+    val minOversub = preference(EGIEnvironment.EagerSubmissionMinNumberOfJobs)
+    val numberOfSimultaneousExecutionForAJob = preference(EGIEnvironment.EagerSubmissionNumberOfJobs)
+
+    var nbRessub = if (jobSize < minOversub) minOversub - jobSize else 0
+    lazy val executionJobs = jobs.groupBy(_.job)
+
+    if (nbRessub > 0) {
+      // Resubmit nbRessub jobs in a fair manner
+      val order = new HashMap[Int, Set[Job]] with MultiMap[Int, Job]
+      var keys = new TreeSet[Int]
+
+      for (job ← executionJobs.keys) {
+        val nb = executionJobs(job).size
+        if (nb < numberOfSimultaneousExecutionForAJob) {
+          order.addBinding(nb, job)
+          keys += nb
+        }
+      }
+
+      if (!keys.isEmpty) {
+        while (nbRessub > 0 && keys.head < numberOfSimultaneousExecutionForAJob) {
+          val key = keys.head
+          val jobs = order(keys.head)
+          val job =
+            jobs.find(j ⇒ executionJobs(j).isEmpty) match {
+              case Some(j) ⇒ j
+              case None ⇒
+                jobs.find(j ⇒ !executionJobs(j).exists(_.state != ExecutionState.SUBMITTED)) match {
+                  case Some(j) ⇒ j
+                  case None    ⇒ jobs.head
+                }
+            }
+
+          environment.submit(job)
+
+          order.removeBinding(key, job)
+          if (jobs.isEmpty) keys -= key
+
+          order.addBinding(key + 1, job)
+          keys += (key + 1)
+          nbRessub -= 1
+        }
+      }
+    }
   }
 
-  //  val EnvironmentCleaningThreads = ConfigurationLocation("EGIEnvironment", "EnvironmentCleaningThreads", Some(20))
-  //
-  //  val WMSRank = ConfigurationLocation("EGIEnvironment", "WMSRank", Some("""( other.GlueCEStateFreeJobSlots > 0 ? other.GlueCEStateFreeJobSlots : (-other.GlueCEStateWaitingJobs * 4 / ( other.GlueCEStateRunningJobs + 1 )) - 1 )"""))
-  //
-
-  //
-  //  def normalizedFitness[T](fitness: ⇒ Iterable[(T, Double)], min: Double): Iterable[(T, Double)] = {
-  //    def orMinForExploration(v: Double) = math.max(v, min)
-  //    val fit = fitness
-  //    val maxFit = fit.map(_._2).max
-  //    if (maxFit < min) fit.map { case (c, _) ⇒ c → min }
-  //    else fit.map { case (c, f) ⇒ c → orMinForExploration(f / maxFit) }
-  //  }
-
-  //      def select[BS <: { def usageControl: AvailabilityQuality }](bss: List[BS], rate: BS ⇒ Double)(implicit preference: Preference, randomProvider: RandomProvider): Option[(BS, AccessToken)] =
-  //        bss match {
-  //          case Nil       ⇒ throw new InternalProcessingError("Cannot accept empty list.")
-  //          case bs :: Nil ⇒ bs.tryGetToken.map(bs → _)
-  //          case bss ⇒
-  //            val (empty, nonEmpty) = bss.partition(_.usageControl.isEmpty)
-  //
-  //            def emptyFitness = empty.map { _ → 0.0 }
-  //            def nonEmptyFitness = for { cur ← nonEmpty } yield cur → rate(cur)
-  //            def fitness = nonEmptyFitness ++ emptyFitness
-  //
-  //            @tailrec def selected(value: Double, jobServices: List[(BS, Double)]): BS =
-  //              jobServices match {
-  //                case Nil                  ⇒ throw new InternalProcessingError("List should never be empty.")
-  //                case (bs, fitness) :: Nil ⇒ bs
-  //                case (bs, fitness) :: tail ⇒
-  //                  if (value <= fitness) bs
-  //                  else selected(value - fitness, tail)
-  //              }
-  //
-  //            val notLoaded = normalizedFitness(fitness, preference(EGIEnvironment.MinValueForSelectionExploration)).shuffled(randomProvider())
-  //            val totalFitness = notLoaded.map { case (_, fitness) ⇒ fitness }.sum
-  //
-  //            val selectedBS = selected(randomProvider().nextDouble * totalFitness, notLoaded.toList)
-  //
-  //            selectedBS.tryGetToken.map(selectedBS → _)
-  //        }
-  //
   def apply(
     voName:         String,
     service:        OptionalArgument[String]      = None,
@@ -195,19 +163,21 @@ object EGIEnvironment extends JavaLogger {
     name:           OptionalArgument[String]      = None
   )(implicit authentication: EGIAuthentication, services: BatchEnvironment.Services, cypher: Cypher, workspace: Workspace, varName: sourcecode.Name) = {
 
-    new EGIEnvironment(
-      voName = voName,
-      service = service,
-      group = group,
-      bdiiURL = bdii,
-      vomsURLs = vomsURLs,
-      fqan = fqan,
-      cpuTime = cpuTime,
-      openMOLEMemory = openMOLEMemory,
-      debug = debug,
-      name = name,
-      authentication = authentication
-    )
+    EnvironmentProvider { () ⇒
+      new EGIEnvironment(
+        voName = voName,
+        service = service,
+        group = group,
+        bdiiURL = bdii,
+        vomsURLs = vomsURLs,
+        fqan = fqan,
+        cpuTime = cpuTime,
+        openMOLEMemory = openMOLEMemory,
+        debug = debug,
+        name = name,
+        authentication = authentication
+      )
+    }
   }
 
 }
@@ -228,8 +198,6 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
   import services._
 
-  lazy val eagerSubmissionAgent = new EagerSubmissionAgent(WeakReference(this))
-
   implicit val interpreters = EGI()
   import interpreters._
 
@@ -245,47 +213,18 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
   override def start() = {
     proxyCache()
-    Updater.delay(eagerSubmissionAgent)
-    super.start()
+    if (storages.map(_.toOption).flatten.isEmpty) throw new InternalProcessingError(s"No webdav storage is working for the VO $voName", MultipleException(storages.collect { case util.Failure(e) ⇒ e }))
+    jobService
   }
 
-  override def stop() =
-    try super.stop()
-    finally {
-      eagerSubmissionAgent.stop = true
-      def usageControls = storages().map(_._2.usageControl) ++ List(batchJobService.usageControl)
-      JobManager ! StopEnvironment(this, usageControls)
-    }
-
-  implicit def webdavlocationIsStorage = new StorageInterface[WebDavLocation] {
-    def webdavServer(location: WebDavLocation) = gridscale.webdav.WebDAVSServer(location.url, proxyCache().factory)
-
-    override def home(t: WebDavLocation): String = ""
-    override def child(t: WebDavLocation, parent: String, child: String): String = gridscale.RemotePath.child(parent, child)
-    override def parent(t: WebDavLocation, path: String): Option[String] = gridscale.RemotePath.parent(path)
-    override def name(t: WebDavLocation, path: String): String = gridscale.RemotePath.name(path)
-
-    override def exists(t: WebDavLocation, path: String): Boolean = gridscale.webdav.exists(webdavServer(t), path)
-    override def list(t: WebDavLocation, path: String): Seq[gridscale.ListEntry] = gridscale.webdav.list(webdavServer(t), path)
-    override def makeDir(t: WebDavLocation, path: String): Unit = gridscale.webdav.mkDirectory(webdavServer(t), path)
-    override def rmDir(t: WebDavLocation, path: String): Unit = gridscale.webdav.rmDirectory(webdavServer(t), path)
-    override def rmFile(t: WebDavLocation, path: String): Unit = gridscale.webdav.rmFile(webdavServer(t), path)
-    override def mv(t: WebDavLocation, from: String, to: String): Unit = gridscale.webdav.mv(webdavServer(t), from, to)
-
-    override def upload(t: WebDavLocation, src: File, dest: String, options: storage.TransferOptions): Unit = {
-      StorageInterface.upload(true, gridscale.webdav.writeStream(webdavServer(t), _, _))(src, dest, options)
-      //if (!exists(t, dest)) throw new InternalProcessingError(s"File $src has been successfully uploaded to $dest on $t but does not exist.")
-    }
-
-    override def download(t: WebDavLocation, src: String, dest: File, options: storage.TransferOptions): Unit =
-      StorageInterface.download(true, gridscale.webdav.readStream[Unit](webdavServer(t), _, _))(src, dest, options)
-
+  override def stop() = {
+    storages.map(_.toOption).flatten.foreach { case (space, storage) ⇒ HierarchicalStorageSpace.clean(storage, space, background = false) }
   }
 
   def bdiis: Seq[gridscale.egi.BDIIServer] =
     bdiiURL.map(b ⇒ Seq(EGIEnvironment.toBDII(new java.net.URI(b)))).getOrElse(EGIEnvironment.defaultBDIIs)
 
-  lazy val storages = Cache {
+  lazy val storages = {
     val webdavStorages = findFirstWorking(bdiis) { b: BDIIServer ⇒ webDAVs(b, voName) }
     if (!webdavStorages.isEmpty) webdavStorages.map { location ⇒
       def isConnectionError(t: Throwable) = t match {
@@ -293,84 +232,122 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         case _ ⇒ false
       }
 
-      location -> StorageService(
-        EGIEnvironment.WebDavLocation(location),
-        root = "",
-        id = location,
-        environment = env,
-        remoteStorage = CurlRemoteStorage(location, voName, debug, preference(EGIEnvironment.RemoteCopyTimeout)),
-        concurrency = preference(EGIEnvironment.ConnexionsByWebDAVSE),
-        isConnectionError = isConnectionError
-      )
+      val storage = WebDavStorage(location, AccessControl(preference(EGIEnvironment.ConnexionsByWebDAVSE)), QualityControl(preference(BatchEnvironment.QualityHysteresis)), proxyCache, env)
+      def storageSpace = util.Try { HierarchicalStorageSpace.create(storage, "", location, isConnectionError) }
+      storageSpace.map(s ⇒ (s, storage))
     }
-    else throw new InternalProcessingError("No WebDAV storage available for the VO")
+    else throw new InternalProcessingError(s"No WebDAV storage available for the VO $voName")
   }
 
-  override def trySelectStorage(usedFiles: ⇒ Vector[File]) = {
+  def execute(batchExecutionJob: BatchExecutionJob) = {
     import EGIEnvironment._
-    import org.openmole.tool.file._
     import org.openmole.core.tools.math._
+    import org.openmole.tool.file._
 
-    val sss = storages().map(_._2)
-    if (sss.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
+    def selectStorage = {
+      val sss = storages.map(_.toOption).flatten
+      if (sss.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
 
-    // val nonEmpty = sss.filter(!_.usageControl.isEmpty)
+      if (sss.size == 1) sss.head
+      else {
+        // val nonEmpty = sss.filter(!_.accessControl.isEmpty)
 
-    case class FileInfo(size: Long, hash: String)
+        case class FileInfo(size: Long, hash: String)
 
-    def fileSize(file: File) = (if (file.isDirectory) fileService.archiveForDir(file).file else file).size
-    val usedFilesInfo = usedFiles.map { f ⇒ f → FileInfo(fileSize(f), fileService.hash(f).toString) }.toMap
-    val totalFileSize = usedFilesInfo.values.toSeq.map(_.size).sum
-    val onStorage = replicaCatalog.forHashes(usedFilesInfo.values.toVector.map(_.hash), sss.map(_.id)).groupBy(_.storage)
+        def fileSize(file: File) = (if (file.isDirectory) fileService.archiveForDir(file).file else file).size
 
-    def minOption(v: Seq[Double]) = if (v.isEmpty) None else Some(v.min)
-    def maxOption(v: Seq[Double]) = if (v.isEmpty) None else Some(v.max)
+        val usedFiles = BatchEnvironment.jobFiles(batchExecutionJob)
+        val usedFilesInfo = usedFiles.map { f ⇒ f → FileInfo(fileSize(f), fileService.hash(f).toString) }.toMap
+        val totalFileSize = usedFilesInfo.values.toSeq.map(_.size).sum
 
-    val times = sss.flatMap(_.quality.time)
-    val maxTime = maxOption(times)
-    val minTime = minOption(times)
+        val onStorage = replicaCatalog.forHashes(usedFilesInfo.values.toVector.map(_.hash), sss.map(_._2).map(implicitly[EnvironmentStorage[WebDavStorage]].id)).groupBy(_.storage)
 
-    //        val availablities = nonEmpty.flatMap(_.usageControl.availability)
-    //        val maxAvailability = maxOption(availablities)
-    //        val minAvailability = minOption(availablities)
+        def minOption(v: Seq[Double]) = if (v.isEmpty) None else Some(v.min)
 
-    def rate(ss: StorageService[_]) = {
-      val sizesOnStorage = usedFilesInfo.filter { case (_, info) ⇒ onStorage.getOrElse(ss.id, Set.empty).exists(_.hash == info.hash) }.values.map { _.size }
-      val sizeOnStorage = sizesOnStorage.sum
+        def maxOption(v: Seq[Double]) = if (v.isEmpty) None else Some(v.max)
 
-      val sizeFactor = if (totalFileSize != 0) sizeOnStorage.toDouble / totalFileSize else 0.0
+        val times = sss.flatMap(_._2.qualityControl.time)
+        val maxTime = maxOption(times)
+        val minTime = minOption(times)
 
-      val timeFactor =
-        (minTime, maxTime, ss.quality.time) match {
-          case (Some(minTime), Some(maxTime), Some(time)) if (maxTime > minTime) ⇒ 0.0 - time.normalize(minTime, maxTime)
-          case _ ⇒ 0.0
+        //        val availablities = nonEmpty.flatMap(_.accessControl.availability)
+        //        val maxAvailability = maxOption(availablities)
+        //        val minAvailability = minOption(availablities)
+
+        def rate(ss: WebDavStorage) = {
+          val sizesOnStorage = usedFilesInfo.filter { case (_, info) ⇒ onStorage.getOrElse(implicitly[EnvironmentStorage[WebDavStorage]].id(ss), Set.empty).exists(_.hash == info.hash) }.values.map {
+            _.size
+          }
+          val sizeOnStorage = sizesOnStorage.sum
+
+          val sizeFactor = if (totalFileSize != 0) sizeOnStorage.toDouble / totalFileSize else 0.0
+
+          val timeFactor =
+            (minTime, maxTime, ss.qualityControl.time) match {
+              case (Some(minTime), Some(maxTime), Some(time)) if (maxTime > minTime) ⇒ 0.0 - time.normalize(minTime, maxTime)
+              case _ ⇒ 0.0
+            }
+
+          //          val availabilityFactor =
+          //            (minAvailability, maxAvailability, ss.accessControl.availability) match {
+          //              case (Some(minAvailability), Some(maxAvailability), Some(availability)) if (maxAvailability > minAvailability) ⇒ 0.0 - availability.normalize(minAvailability, maxAvailability)
+          //              case _ ⇒ 0.0
+          //            }
+
+          math.pow(
+            preference(StorageSizeFactor) * sizeFactor +
+              preference(StorageTimeFactor) * timeFactor +
+              //              preference(StorageAvailabilityFactor) * availabilityFactor +
+              preference(StorageSuccessRateFactor) * ss.qualityControl.successRate.getOrElse(0.0),
+            preference(StorageFitnessPower)
+          )
         }
 
-      //          val availabilityFactor =
-      //            (minAvailability, maxAvailability, ss.usageControl.availability) match {
-      //              case (Some(minAvailability), Some(maxAvailability), Some(availability)) if (maxAvailability > minAvailability) ⇒ 0.0 - availability.normalize(minAvailability, maxAvailability)
-      //              case _ ⇒ 0.0
-      //            }
-
-      math.pow(
-        preference(StorageSizeFactor) * sizeFactor +
-          preference(StorageTimeFactor) * timeFactor +
-          //              preference(StorageAvailabilityFactor) * availabilityFactor +
-          preference(StorageSuccessRateFactor) * ss.quality.successRate.getOrElse(0.0),
-        preference(StorageFitnessPower)
-      )
+        val weighted = sss.map(s ⇒ math.max(rate(s._2), preference(EGIEnvironment.MinValueForSelectionExploration)) -> s)
+        val storage = org.openmole.tool.random.multinomialDraw(weighted)(randomProvider())
+        storage
+      }
     }
 
-    val weighted = sss.map(s ⇒ math.max(rate(s), preference(EGIEnvironment.MinValueForSelectionExploration)) -> s)
+    val (space, storage) = selectStorage
 
-    val storage = org.openmole.tool.random.multinomialDraw(weighted)(randomProvider())
-    val token = UsageControl.tryGetToken(storage.usageControl)
-    token.map(t ⇒ storage -> t)
+    val jobDirectory = HierarchicalStorageSpace.createJobDirectory(storage, space)
+
+    tryOnError { StorageService.rmDirectory(storage, jobDirectory) } {
+      val remoteStorage = CurlRemoteStorage(storage.url, jobDirectory, voName, debug, preference(EGIEnvironment.RemoteCopyTimeout))
+
+      def replicate(f: File, options: TransferOptions) =
+        BatchEnvironment.toReplicatedFile(
+          StorageService.uploadInDirectory(storage, _, space.replicaDirectory, _),
+          StorageService.exists(storage, _),
+          StorageService.rmFile(storage, _, background = true),
+          batchExecutionJob.environment,
+          StorageService.id(storage)
+        )(f, options)
+
+      def upload(f: File, options: TransferOptions) = StorageService.uploadInDirectory(storage, f, jobDirectory, options)
+
+      val sj = BatchEnvironment.serializeJob(batchExecutionJob, remoteStorage, replicate, upload, StorageService.id(storage))
+      val outputPath = StorageService.child(storage, jobDirectory, uniqName("job", ".out"))
+      val job = jobService.submit(sj, outputPath, storage.url)
+
+      BatchJobControl(
+        env,
+        UpdateInterval.fixed(preference(EGIEnvironment.JobGroupRefreshInterval)),
+        StorageService.id(storage),
+        () ⇒ jobService.state(job),
+        () ⇒ jobService.delete(job),
+        () ⇒ jobService.stdOutErr(job),
+        () ⇒ outputPath,
+        StorageService.download(storage, _, _, _),
+        () ⇒ StorageService.rmDirectory(storage, jobDirectory)
+      )
+    }
   }
 
   import gridscale.dirac._
 
-  lazy val diracService = {
+  lazy val jobService = {
     def userDiracService =
       for {
         s ← service
@@ -380,81 +357,9 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     val diracService = userDiracService getOrElse getService(voName)
     val s = server(diracService, implicitly[EGIAuthenticationInterface[A]].apply(authentication), EGIAuthentication.CACertificatesDir)
     delegate(s, implicitly[EGIAuthenticationInterface[A]].apply(authentication), tokenCache())
-    s
+    EGIJobService(s, env)
   }
 
-  lazy val diracJobGroup = java.util.UUID.randomUUID().toString.filter(_ != '-')
-
-  def submit(serializedJob: SerializedJob) = {
-    import org.openmole.tool.file._
-
-    def storageLocations = storages().map(id ⇒ id._1 -> id._1).toMap
-
-    def jobScript =
-      JobScript(
-        voName = voName,
-        memory = BatchEnvironment.openMOLEMemoryValue(openMOLEMemory).toMegabytes.toInt,
-        threads = 1,
-        debug = debug,
-        storageLocations
-      )
-
-    val outputFilePath = serializedJob.storage.child(serializedJob.path, uniqName("job", ".out"))
-
-    newFile.withTmpFile("script", ".sh") { script ⇒
-      script.content = jobScript(serializedJob, outputFilePath)
-
-      val jobDescription =
-        JobDescription(
-          executable = "/bin/bash",
-          arguments = s"-x ${script.getName}",
-          inputSandbox = Seq(script),
-          stdOut = Some(EGIEnvironment.stdOutFileName),
-          stdErr = Some(EGIEnvironment.stdErrFileName),
-          outputSandbox = Seq(EGIEnvironment.stdOutFileName, EGIEnvironment.stdErrFileName),
-          cpuTime = cpuTime
-        )
-
-      val jid = gridscale.dirac.submit(diracService, jobDescription, tokenCache(), Some(diracJobGroup))
-      org.openmole.plugin.environment.batch.jobservice.BatchJob(jid, outputFilePath)
-    }
-  }
-
-  lazy val jobStateCache = TimeCache { () ⇒
-    val states = gridscale.dirac.queryGroupState(diracService, tokenCache(), diracJobGroup)
-    states.toMap -> preference(EGIEnvironment.JobGroupRefreshInterval)
-  }
-
-  def state(id: gridscale.dirac.JobID) = {
-    val state = jobStateCache().getOrElse(id.id, throw new InternalProcessingError(s"Job ${id.id} not found in group ${diracJobGroup} of DIRAC server."))
-    org.openmole.plugin.environment.gridscale.GridScaleJobService.translateStatus(state)
-  }
-
-  def delete(id: gridscale.dirac.JobID) =
-    gridscale.dirac.delete(diracService, tokenCache(), id) //clean(LocalHost(), id)
-
-  def stdOutErr(id: gridscale.dirac.JobID) = newFile.withTmpDir { tmpDir ⇒
-    import org.openmole.tool.file._
-    tmpDir.mkdirs()
-    gridscale.dirac.downloadOutputSandbox(diracService, tokenCache(), id, tmpDir)
-
-    def stdOut =
-      if ((tmpDir / EGIEnvironment.stdOutFileName) exists) (tmpDir / EGIEnvironment.stdOutFileName).content
-      else ""
-
-    def stdErr =
-      if ((tmpDir / EGIEnvironment.stdErrFileName) exists) (tmpDir / EGIEnvironment.stdErrFileName).content
-      else ""
-
-    (stdOut, stdErr)
-  }
-
-  lazy val batchJobService = BatchJobService(env, preference(EGIEnvironment.ConnectionsToDIRAC))
-
-  override def trySelectJobService() =
-    UsageControl.tryGetToken(batchJobService.usageControl).map(token ⇒ (batchJobService, token))
-
-  override def updateInterval =
-    UpdateInterval.fixed(preference(EGIEnvironment.JobGroupRefreshInterval))
+  override def finishedJob(job: ExecutionJob): Unit = EGIEnvironment.eagerSubmit(env)
 
 }

@@ -35,34 +35,22 @@ import org.openmole.core.workflow.mole.{ MoleExecution, StrainerCapsule, Straine
 import org.openmole.core.event._
 import org.openmole.tool.network.LocalHostName
 
-object LocalExecutor extends JavaLogger {
-
-  def containsMoleTask(moleJob: MoleJob) =
-    moleJob.task match {
-      case _: MoleTask              ⇒ true
-      case t: StrainerTaskDecorator ⇒ classOf[MoleTask].isAssignableFrom(t.task.getClass)
-      case _                        ⇒ false
-    }
-
-}
+object LocalExecutor extends JavaLogger
 
 class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnable {
 
   import LocalExecutor.Log._
 
   var stop: Boolean = false
+  @volatile var running: Boolean = false
 
   override def run = try {
     while (!stop) {
       environment.get match {
         case Some(environment) ⇒
-          def jobGoneIdle() = {
-            environment.pool().removeExecuter(this)
-            environment.pool().addExecuter()
-            stop = true
-          }
-
-          val executionJob = environment.pool().takeNextjob
+          running = false
+          val executionJob = environment.pool().takeNextJob
+          running = true
           val beginTime = System.currentTimeMillis
 
           try {
@@ -72,8 +60,6 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
 
                 for (moleJob ← executionJob.moleJobs) {
                   if (moleJob.state != State.CANCELED) {
-                    if (LocalExecutor.containsMoleTask(moleJob)) jobGoneIdle()
-
                     moleJob.perform(executionJob.executionContext)
                     moleJob.exception match {
                       case Some(e) ⇒ environment.eventDispatcherService.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
@@ -95,13 +81,13 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                 display(stream, s"Error of local execution", error)
             }
 
-            environment.eventDispatcherService.trigger(environment: Environment, Environment.JobCompleted(executionJob, log, service.localRuntimeInfo))
+            environment.eventDispatcherService.trigger(environment: Environment, Environment.JobCompleted(executionJob, log, service.RuntimeInfo.localRuntimeInfo))
           }
           catch {
             case e: InterruptedException ⇒ throw e
             case e: ThreadDeath          ⇒ throw e
             case e: Throwable ⇒
-              val er = ExceptionRaised(executionJob, e, SEVERE)
+              val er = ExecutionJobExceptionRaised(executionJob, e, SEVERE)
               environment.error(er)
               logger.log(SEVERE, "Error in execution", e)
               environment.eventDispatcherService.trigger(environment: Environment, er)
@@ -114,6 +100,9 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
   catch {
     case e: InterruptedException ⇒
     case e: ThreadDeath          ⇒
+  }
+  finally {
+    running = false
   }
 
   case class Output(stream: PrintStream, output: String, error: String)

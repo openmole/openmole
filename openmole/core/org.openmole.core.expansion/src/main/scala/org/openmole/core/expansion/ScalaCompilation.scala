@@ -40,7 +40,10 @@ object ScalaCompilation {
     |
     |$code""".stripMargin
 
-  def priorityBundles(plugins: Seq[File]) = plugins.flatMap(PluginManager.bundle) ++ PluginManager.bundleForClass(this.getClass)
+  def priorityBundles(plugins: Seq[File]) = {
+    val pluginBundles = plugins.flatMap(PluginManager.bundle)
+    pluginBundles ++ pluginBundles.flatMap(PluginManager.allPluginDependencies) ++ PluginManager.bundleForClass(this.getClass)
+  }
 
   def compile(code: String, plugins: Seq[File], libraries: Seq[File])(implicit newFile: NewFile, fileService: FileService) = {
     val osgiMode = org.openmole.core.console.Activator.osgi

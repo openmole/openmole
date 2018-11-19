@@ -73,7 +73,7 @@ object ScalaREPL {
 
   case class BundledClass(name: String, bundle: Option[Bundle])
   case class REPLClass(name: String, path: String, classLoader: REPLClassloader) {
-    def byteCode = classLoader.findClassFile(name).getOrElse(throw new InternalProcessingError("Class not found in this classloader")).toByteArray
+    //    def byteCode = classLoader.findClassFile(name).getOrElse(throw new InternalProcessingError("Class not found in this classloader")).toByteArray
   }
   case class ReferencedClasses(repl: Vector[REPLClass], other: Vector[BundledClass]) {
     def plugins = other.flatMap(_.bundle).flatMap(PluginManager.allPluginDependencies).distinct.map(_.file)
@@ -85,28 +85,28 @@ object ScalaREPL {
     def empty = ReferencedClasses(Vector.empty, Vector.empty)
   }
 
-  def bundleFromReferencedClass(ref: ReferencedClasses, bundleName: String, bundleVersion: String, bundle: java.io.File) = {
-    val classByteCode = ref.repl.distinct.map(c ⇒ ClassByteCode(c.path, c.byteCode))
-
-    def packageName(c: String) = c.reverse.dropWhile(_ != '.').drop(1).reverse
-    def importPackages = ref.other.filter(_.bundle.isDefined).groupBy(_.bundle).toSeq.flatMap {
-      case (b, cs) ⇒
-        for {
-          c ← cs
-          p = packageName(c.name)
-          if !p.isEmpty
-        } yield VersionedPackage(p, b.map(_.getVersion.toString))
-    }.distinct
-
-    createBundle(
-      name = bundleName,
-      version = bundleVersion,
-      classes = classByteCode,
-      exportedPackages = ref.repl.map(c ⇒ packageName(c.name)).distinct.filter(p ⇒ !p.isEmpty),
-      importedPackages = importPackages,
-      bundle = bundle
-    )
-  }
+  //    def bundleFromReferencedClass(ref: ReferencedClasses, bundleName: String, bundleVersion: String, bundle: java.io.File) = {
+  //      val classByteCode = ref.repl.distinct.map(c ⇒ ClassByteCode(c.path, c.byteCode))
+  //
+  //      def packageName(c: String) = c.reverse.dropWhile(_ != '.').drop(1).reverse
+  //      def importPackages = ref.other.filter(_.bundle.isDefined).groupBy(_.bundle).toSeq.flatMap {
+  //        case (b, cs) ⇒
+  //          for {
+  //            c ← cs
+  //            p = packageName(c.name)
+  //            if !p.isEmpty
+  //          } yield VersionedPackage(p, b.map(_.getVersion.toString))
+  //      }.distinct
+  //
+  //      createBundle(
+  //        name = bundleName,
+  //        version = bundleVersion,
+  //        classes = classByteCode,
+  //        exportedPackages = ref.repl.map(c ⇒ packageName(c.name)).distinct.filter(p ⇒ !p.isEmpty),
+  //        importedPackages = importPackages,
+  //        bundle = bundle
+  //      )
+  //    }
 
   class OMIMain(settings: Settings, priorityBundles: ⇒ Seq[Bundle], jars: Seq[JFile], quiet: Boolean) extends IMain(settings) {
     var storeErrors: Boolean = true
@@ -185,58 +185,58 @@ import ScalaREPL._
 
 class REPLClassloader(val file: AbstractFile, parent: ClassLoader) extends scala.reflect.internal.util.AbstractFileClassLoader(file, parent) { cl ⇒
 
-  def classFiles = {
-    def all(fs: AbstractFile): List[AbstractFile] = {
-      if (fs.isDirectory) fs :: fs.iterator.flatMap(all).toList
-      else List(fs)
-    }
-    all(file).filterNot(_.isDirectory)
-  }
+  //  def classFiles = {
+  //    def all(fs: AbstractFile): List[AbstractFile] = {
+  //      if (fs.isDirectory) fs :: fs.iterator.flatMap(all).toList
+  //      else List(fs)
+  //    }
+  //    all(file).filterNot(_.isDirectory)
+  //  }
 
-  def toClassPath(c: String) = s"${c.replace('.', '/')}.class"
-  def toAbsoluteClassPath(c: String) = s"${file.name}/${toClassPath(c)}"
-  def findClassFile(name: String): Option[AbstractFile] = classFiles.find(_.path == toAbsoluteClassPath(name))
-  def findClassFile(c: Class[_]): Option[AbstractFile] = findClassFile(c.getClass.getName)
-
-  def referencedClasses(
-    classes:           Seq[Class[_]],
-    additionalClasses: Seq[Class[_]] = Seq(classOf[scala.runtime.AbstractFunction1[_, _]])
-  ) = {
-
-    import org.openmole.tool.bytecode._
-
-    val seen = collection.mutable.HashSet[String]()
-    val toProcess = collection.mutable.Stack[String]()
-
-    classes.foreach(c ⇒ seen.add(c.getName))
-    classes.foreach(c ⇒ toProcess.push(c.getName))
-    additionalClasses.foreach(c ⇒ seen.add(c.getName))
-
-    while (!toProcess.isEmpty) {
-      val processing = toProcess.pop
-      for {
-        classFile ← findClassFile(processing).toSeq
-        refClass ← listAllClasses(classFile.toByteArray)
-        if !seen.contains(refClass.getClassName)
-      } {
-        seen += refClass.getClassName
-        toProcess push refClass.getClassName
-      }
-    }
-
-    val (repl, other) = seen.toVector.sorted.partition(c ⇒ findClassFile(c).isDefined)
-
-    val replClasses = repl.map { c ⇒
-      REPLClass(c, cl.toClassPath(c), cl)
-    }
-
-    val bundledOther = other.map { c ⇒
-      val bundle = tryToLoadClass(c).flatMap(PluginManager.bundleForClass)
-      BundledClass(name = c, bundle = bundle)
-    }
-
-    ReferencedClasses(replClasses, bundledOther)
-  }
+  //  def toClassPath(c: String) = s"${c.replace('.', '/')}.class"
+  //  def toAbsoluteClassPath(c: String) = s"${file.name}/${toClassPath(c)}"
+  //  def findClassFile(name: String): Option[AbstractFile] = classFiles.find(_.path == toAbsoluteClassPath(name))
+  //    def findClassFile(c: Class[_]): Option[AbstractFile] = findClassFile(c.getClass.getName)
+  //
+  //  def referencedClasses(
+  //    classes:           Seq[Class[_]],
+  //    additionalClasses: Seq[Class[_]] = Seq(classOf[scala.runtime.AbstractFunction1[_, _]])
+  //  ) = {
+  //
+  //    import org.openmole.tool.bytecode._
+  //
+  //    val seen = collection.mutable.HashSet[String]()
+  //    val toProcess = collection.mutable.Stack[String]()
+  //
+  //    classes.foreach(c ⇒ seen.add(c.getName))
+  //    classes.foreach(c ⇒ toProcess.push(c.getName))
+  //    additionalClasses.foreach(c ⇒ seen.add(c.getName))
+  //
+  //    while (!toProcess.isEmpty) {
+  //      val processing = toProcess.pop
+  //      for {
+  //        classFile ← findClassFile(processing).toSeq
+  //        refClass ← listAllClasses(classFile.toByteArray)
+  //        if !seen.contains(refClass.getClassName)
+  //      } {
+  //        seen += refClass.getClassName
+  //        toProcess push refClass.getClassName
+  //      }
+  //    }
+  //
+  //    val (repl, other) = seen.toVector.sorted.partition(c ⇒ findClassFile(c).isDefined)
+  //
+  //    val replClasses = repl.map { c ⇒
+  //      REPLClass(c, cl.toClassPath(c), cl)
+  //    }
+  //
+  //    val bundledOther = other.map { c ⇒
+  //      val bundle = tryToLoadClass(c).flatMap(PluginManager.bundleForClass)
+  //      BundledClass(name = c, bundle = bundle)
+  //    }
+  //
+  //    ReferencedClasses(replClasses, bundledOther)
+  //  }
 
 }
 

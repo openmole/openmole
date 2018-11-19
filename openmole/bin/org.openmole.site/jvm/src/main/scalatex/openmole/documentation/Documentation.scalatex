@@ -1,0 +1,47 @@
+@import org.openmole.site.tools._
+@import org.openmole.site._
+@import DocumentationPages._
+
+
+@ul( listStyleType := "none")
+  @li
+    @h5
+        @a(run.title, href := run.file)
+    @ol
+      @sitemap.siteMapSection(runPages.diff(Seq(packaged)))
+      @li
+        @a(packaged.title, href := packaged.file)
+        @ol(listStyleType:= "lower-alpha")
+          @sitemap.siteMapSection(packagedPages)
+  @li
+    @h5
+        @a(explore.title, href := explore.file)
+    @ol
+      @li
+        @a(directSampling.title, href := directSampling.file)
+        @ol(listStyleType:= "lower-alpha")
+          @sitemap.siteMapSection(samplingPages)
+      @sitemap.siteMapSection(explorePages.diff(Seq(directSampling)))
+  @li
+    @h5
+        @a(scale.title, href := scale.file)
+    @ol
+      @sitemap.siteMapSection(scalePages)
+  @li
+    @h5
+        @a(language.title, href := language.file)
+    @ol
+      @sitemap.siteMapSection(languagePages)
+  @li
+    @h5
+        @a("Advanced Concepts", href := geneticAlgorithm.file)
+    @ol
+      @sitemap.siteMapSection(advancedConceptsPages)
+  @li
+    @h5
+        @a(developers.title, href := developers.file)
+    @ol
+      @sitemap.siteMapSection(developersPages)
+  @h5
+    See also
+  @sitemap.siteMapSection(docLonelyPages)

@@ -23,40 +23,22 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workspace.NewFile
 import org.openmole.tool.random.Seeder
 
-//trait PuzzleContainer {
-//  def buildPuzzle: Puzzle
-//  def toExecution(implicit moleServices: MoleServices) = buildPuzzle.toExecution
-//}
-
-object OutputPuzzleContainer {
-  implicit def isToPuzzle = ToPuzzle[OutputPuzzleContainer](_.buildPuzzle)
+object PuzzleContainer {
+  implicit def isToPuzzle: ToPuzzle[PuzzleContainer] =
+    ToPuzzle[PuzzleContainer](_.buildPuzzle)
 }
 
-case class OutputPuzzleContainer(
-  puzzle: Puzzle,
-  output: Capsule,
-  hooks:  Seq[Hook] = Seq.empty
-) extends HookDecorator[OutputPuzzleContainer] {
-  def hook(hs: Hook*) = copy(hooks = hooks ++ hs)
-  def buildPuzzle = puzzle.copy(hooks = puzzle.hooks ++ hooks.map(output → _))
-}
-
-object OutputEnvironmentPuzzleContainer {
-  implicit def isToPuzzle: ToPuzzle[OutputEnvironmentPuzzleContainer] =
-    ToPuzzle[OutputEnvironmentPuzzleContainer](_.buildPuzzle)
-}
-
-case class OutputEnvironmentPuzzleContainer(
+case class PuzzleContainer(
   puzzle:      Puzzle,
   output:      Capsule,
   delegate:    Vector[Capsule],
   hooks:       Seq[Hook]                   = Seq.empty,
   environment: Option[EnvironmentProvider] = None,
   grouping:    Option[Grouping]            = None
-) extends HookDecorator[OutputEnvironmentPuzzleContainer] with EnvironmentDecorator[OutputEnvironmentPuzzleContainer] {
+) {
 
   def on(environment: EnvironmentProvider) = copy(environment = Some(environment))
-  def by(strategy: Grouping): OutputEnvironmentPuzzleContainer = copy(grouping = Some(strategy))
+  def by(strategy: Grouping): PuzzleContainer = copy(grouping = Some(strategy))
   def hook(hs: Hook*) = copy(hooks = hooks ++ hs)
 
   def buildPuzzle: Puzzle =

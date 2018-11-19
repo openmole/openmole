@@ -35,6 +35,9 @@ import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 class JarWizardApiImpl(s: Services) extends JarWizardAPI {
 
+  import s._
+  import org.openmole.gui.ext.data.ServerFileSystemContext.project
+
   def toTask(
     target:         SafePath,
     executableName: String,
@@ -43,14 +46,12 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
     outputs:        Seq[ProtoTypePair],
     libraries:      Option[String],
     resources:      Resources,
-    data:           JarWizardData): WizardToTask = {
-
-    implicit val workspace = Workspace.instance
+    data:           JarWizardData) = {
 
     val modelData = WizardUtils.wizardModelData(inputs, outputs, resources.all.map {
       _.safePath.name
     })
-    val task = s"${executableName.split('.').head.toLowerCase}Task"
+    val task = s"${executableName.split('.').head.toLowerCase.filterNot(_.isDigit).replace("-", "")}Task"
     val jarResourceLine: (String, Seq[org.openmole.gui.ext.data.Error]) = {
       if (data.embedAsPlugin) {
         data.plugin.map { p ⇒
@@ -59,28 +60,24 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
           (s"""  plugins += pluginsOf(${p}),\n""", errors)
         }.getOrElse(("", Seq()))
       }
-      else (s"${libraries.map { l ⇒ s"""  libraries += workingDirectory / "$l",""" }.getOrElse("")}\n\n", Seq())
+      else (s"${libraries.map { l ⇒ s"""  libraries += workDirectory / "$l",\n""" }.getOrElse("")}\n\n", Seq())
     }
 
     val mainOutputString = outputs.headOption.map { o ⇒ s"val ${o.name} = " }.getOrElse("")
 
-    val content = modelData.vals + s"""\n\nval $task = ScalaTask(\n\"\"\"$mainOutputString$command\"\"\") set(\n""" +
-      jarResourceLine +
+    val content = modelData.vals + s"""\n\nval $task = ScalaTask(\n\"\"\"$mainOutputString${command.replace("()", "")}(${inputs.map { _.name }.mkString(",")})\"\"\") set(\n""" +
+      jarResourceLine._1 +
       WizardUtils.expandWizardData(modelData) +
       s""")\n\n$task hook ToStringHook()"""
 
-    target.write(content)(context = org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace = Workspace.instance)
+    target.write(content)
     WizardToTask(target, jarResourceLine._2)
   }
 
   def parse(safePath: SafePath): Option[LaunchingCommand] =
     Some(BasicLaunchingCommand(Some(JavaLikeLanguage()), ""))
 
-  def jarClasses(jarPath: SafePath): Seq[FullClass] = {
-
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
-    implicit val workspace = Workspace.instance
-
+  def jarClasses(jarPath: SafePath) = {
     val zip = new ZipInputStream(new FileInputStream(jarPath))
 
     var classes: Seq[FullClass] = Seq()
@@ -102,8 +99,6 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
   }
 
   def jarMethods(jarPath: SafePath, classString: String): Seq[JarMethod] = {
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
-    implicit val workspace = Workspace.instance
 
     val classLoader = new URLClassLoader(Seq(jarPath.toURI.toURL), this.getClass.getClassLoader)
     val clazz = Class.forName(classString, true, classLoader)

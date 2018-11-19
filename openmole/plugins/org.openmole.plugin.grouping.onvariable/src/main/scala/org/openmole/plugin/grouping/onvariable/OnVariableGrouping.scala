@@ -21,6 +21,7 @@ package org.openmole.plugin.grouping.onvariable
 import org.openmole.core.context._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole._
+import org.openmole.tool.random.RandomProvider
 
 object OnVariableGrouping {
 
@@ -30,7 +31,7 @@ object OnVariableGrouping {
 
 class OnVariableGrouping(numberOfMoleJobs: Option[Int], prototypes: Val[_]*) extends Grouping {
 
-  def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])]): MoleJobGroup =
+  def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])])(implicit newGroup: NewGroup, randomProvider: RandomProvider): MoleJobGroup =
     new MoleJobGroup(prototypes.flatMap { context.option(_) }.toSeq: _*)
 
   override def complete(jobs: Iterable[MoleJob]) =

@@ -60,12 +60,11 @@ class Runtime {
   import Log._
 
   def apply(
-    storage:              RemoteStorage,
-    communicationDirPath: String,
-    inputMessagePath:     String,
-    outputMessagePath:    String,
-    threads:              Int,
-    debug:                Boolean
+    storage:           RemoteStorage,
+    inputMessagePath:  String,
+    outputMessagePath: String,
+    threads:           Int,
+    debug:             Boolean
   )(implicit serializerService: SerializerService, newFile: NewFile, fileService: FileService, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace) = {
 
     /*--- get execution message and job for runtime---*/
@@ -174,12 +173,7 @@ class Runtime {
 
         val replicated =
           pac.files.map { file ⇒
-            def uploadOnStorage(f: File) = {
-              val name = storage.child(communicationDirPath, uniqName("resultFile", ".bin"))
-              retry(storage.upload(f, name, TransferOptions(forceCopy = true, canMove = true)))
-              name
-            }
-
+            def uploadOnStorage(f: File) = retry(storage.upload(f, None, TransferOptions(noLink = true, canMove = true)))
             ReplicatedFile.upload(file, uploadOnStorage)
           }
 
@@ -206,13 +200,13 @@ class Runtime {
 
     val outputMessage = if (out.length != 0) Some(out) else None
 
-    val runtimeResult = RuntimeResult(outputMessage, result, localRuntimeInfo)
+    val runtimeResult = RuntimeResult(outputMessage, result, RuntimeInfo.localRuntimeInfo)
 
     newFile.withTmpFile("output", ".tgz") { outputLocal ⇒
       logger.fine(s"Serializing result to $outputLocal")
       serializerService.serialiseAndArchiveFiles(runtimeResult, outputLocal)
       logger.fine(s"Upload the serialized result to $outputMessagePath on $storage")
-      retry(storage.upload(outputLocal, outputMessagePath, TransferOptions(forceCopy = true, canMove = true)))
+      retry(storage.upload(outputLocal, Some(outputMessagePath), TransferOptions(noLink = true, canMove = true)))
     }
 
     result

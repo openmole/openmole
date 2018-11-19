@@ -509,3 +509,31 @@ object PSE {
 
 }
 
+object PSEEvolution {
+
+  import org.openmole.core.dsl._
+  import org.openmole.core.workflow.puzzle._
+
+  def apply(
+    genome:       Genome,
+    objectives:   Seq[PSE.PatternAxe],
+    evaluation:   Puzzle,
+    termination:  OMTermination,
+    stochastic:   OptionalArgument[Stochastic] = None,
+    parallelism:  Int                          = 1,
+    distribution: EvolutionPattern             = SteadyState()) =
+    EvolutionPattern.build(
+      algorithm =
+        PSE(
+          genome = genome,
+          objectives = objectives,
+          stochastic = stochastic
+        ),
+      evaluation = evaluation,
+      termination = termination,
+      stochastic = stochastic,
+      parallelism = parallelism,
+      distribution = distribution
+    )
+
+}

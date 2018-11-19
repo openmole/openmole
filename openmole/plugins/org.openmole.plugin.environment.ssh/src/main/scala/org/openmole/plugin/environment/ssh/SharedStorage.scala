@@ -26,206 +26,103 @@ import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.core.communication.storage._
 import org.openmole.core.exception.InternalProcessingError
+import org.openmole.plugin.environment.batch.refresh.{ JobManager, RetryAction }
 import org.openmole.tool.logger.JavaLogger
 import squants.information.Information
 
 object SharedStorage extends JavaLogger {
 
-  def installRuntime(runtime: Runtime, sharedFS: StorageService[_], frontend: Frontend)(implicit preference: Preference, newFile: NewFile) =
-    UsageControl.withToken(sharedFS.usageControl) { implicit token ⇒
-      val runtimePrefix = "runtime"
-      val runtimeInstall = runtimePrefix + runtime.runtime.hash
+  def installRuntime[S](runtime: Runtime, storage: S, frontend: Frontend, baseDirectory: String)(implicit preference: Preference, newFile: NewFile, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
+    val runtimePrefix = "runtime"
+    val runtimeInstall = runtimePrefix + runtime.runtime.hash
 
-      val (workdir, scriptName) = {
-        val installDir = sharedFS.child(sharedFS.baseDir, "install")
-        util.Try(sharedFS.makeDir(installDir))
+    val (workdir, scriptName) = {
+      val installDir = StorageService.child(storage, baseDirectory, "install")
+      util.Try(hierarchicalStorageInterface.makeDir(storage, installDir))
 
-        val workdir = sharedFS.child(installDir, preference(Preference.uniqueID) + "_install")
-        if (!sharedFS.exists(workdir)) sharedFS.makeDir(workdir)
+      val workdir = StorageService.child(storage, installDir, preference(Preference.uniqueID) + "_install")
+      if (!storageInterface.exists(storage, workdir)) hierarchicalStorageInterface.makeDir(storage, workdir)
 
-        newFile.withTmpFile("install", ".sh") { script ⇒
+      newFile.withTmpFile("install", ".sh") { script ⇒
 
-          val tmpDirName = runtimePrefix + UUID.randomUUID.toString
-          val scriptName = uniqName("install", ".sh")
+        val tmpDirName = runtimePrefix + UUID.randomUUID.toString
+        val scriptName = uniqName("install", ".sh")
 
-          val content =
-            s"{ if [ -d $runtimeInstall ]; then exit 0; fi; } && " +
-              s"mkdir -p $tmpDirName && cd $tmpDirName && { if [ `uname -m` = x86_64 ]; then cp ${runtime.jvmLinuxX64.path} jvm.tar.gz; " +
-              """else echo "Unsupported architecture: " `uname -m`; exit 1; fi; } && """ +
-              "gunzip jvm.tar.gz && tar -xf jvm.tar && rm jvm.tar && " +
-              s"cp ${runtime.runtime.path} runtime.tar.gz && gunzip runtime.tar.gz && tar -xf runtime.tar; rm runtime.tar && " +
-              s"mkdir -p envplugins && PLUGIN=0 && " +
-              runtime.environmentPlugins.map { p ⇒ "cp " + p.path + " envplugins/plugin$PLUGIN.jar && PLUGIN=`expr $PLUGIN + 1`" }.mkString(" && ") + " && " +
-              s"PATH=$$PWD/jre/bin:$$PATH /bin/bash -x run.sh 256m test_run --test && rm -rf test_run && " +
-              s"cd .. && { if [ -d $runtimeInstall ]; then rm -rf $tmpDirName; exit 0; fi } && " +
-              s"mv $tmpDirName $runtimeInstall && rm -rf $tmpDirName && rm $scriptName && { ls $runtimePrefix* | grep -v '^$runtimeInstall' | xargs rm -rf ; }"
+        val content =
+          s"{ if [ -d $runtimeInstall ]; then exit 0; fi; } && " +
+            s"mkdir -p $tmpDirName && cd $tmpDirName && { if [ `uname -m` = x86_64 ]; then cp ${runtime.jvmLinuxX64.path} jvm.tar.gz; " +
+            """else echo "Unsupported architecture: " `uname -m`; exit 1; fi; } && """ +
+            "gunzip jvm.tar.gz && tar -xf jvm.tar && rm jvm.tar && " +
+            s"cp ${runtime.runtime.path} runtime.tar.gz && gunzip runtime.tar.gz && tar -xf runtime.tar; rm runtime.tar && " +
+            s"mkdir -p envplugins && PLUGIN=0 && " +
+            runtime.environmentPlugins.map { p ⇒ "cp " + p.path + " envplugins/plugin$PLUGIN.jar && PLUGIN=`expr $PLUGIN + 1`" }.mkString(" && ") + " && " +
+            s"PATH=$$PWD/jre/bin:$$PATH /bin/bash -x run.sh 256m test_run --test && rm -rf test_run && " +
+            s"cd .. && { if [ -d $runtimeInstall ]; then rm -rf $tmpDirName; exit 0; fi } && " +
+            s"mv $tmpDirName $runtimeInstall && rm -rf $tmpDirName && rm $scriptName && { ls | grep '^$runtimePrefix' | grep -v '^$runtimeInstall' | xargs rm -rf ; }"
 
-          Log.logger.fine(s"Install script: $content")
+        Log.logger.fine(s"Install script: $content")
 
-          script.content = content
+        script.content = content
 
-          val remoteScript = sharedFS.child(workdir, scriptName)
-          sharedFS.upload(script, remoteScript, options = TransferOptions(raw = true, forceCopy = true, canMove = true))
-          (workdir, scriptName)
-        }
+        val remoteScript = StorageService.child(storage, workdir, scriptName)
+        storageInterface.upload(storage, script, remoteScript, options = TransferOptions(raw = true, noLink = true, canMove = true))
+        (workdir, scriptName)
       }
-
-      val command = s"""cd "$workdir" ; /bin/bash -x $scriptName"""
-
-      Log.logger.fine("Begin install")
-
-      frontend.run(command) match {
-        case util.Failure(e) ⇒ throw new InternalProcessingError(e, "There was an error during the runtime installation process.")
-        case util.Success(r) ⇒
-          r.returnCode match {
-            case 0 ⇒
-            case _ ⇒
-              throw new InternalProcessingError(s"Unexpected return status for the install process ${r.returnCode}.\nstdout:\n${r.stdOut}\nstderr:\n${r.stdErr}")
-          }
-      }
-
-      val path = sharedFS.child(workdir, runtimeInstall)
-
-      //installJobService.execute(jobDescription)
-      Log.logger.fine("End install")
-
-      path
     }
 
-  def buildScript(runtimePath: Runtime ⇒ String, workDirectory: Option[String], openMOLEMemory: Option[Information], threads: Option[Int], serializedJob: SerializedJob, sharedFS: StorageService[_])(implicit newFile: NewFile, preference: Preference) = {
+    val command = s"""cd "$workdir" ; /bin/bash -x $scriptName"""
+
+    Log.logger.fine("Begin install")
+
+    frontend.run(command) match {
+      case util.Failure(e) ⇒ throw new InternalProcessingError(e, "There was an error during the runtime installation process.")
+      case util.Success(r) ⇒
+        r.returnCode match {
+          case 0 ⇒
+          case _ ⇒
+            throw new InternalProcessingError(s"Unexpected return status for the install process ${r.returnCode}.\nstdout:\n${r.stdOut}\nstderr:\n${r.stdErr}")
+        }
+    }
+
+    val path = StorageService.child(storage, workdir, runtimeInstall)
+
+    //installJobService.execute(jobDescription)
+    Log.logger.fine("End install")
+
+    path
+  }
+
+  def buildScript[S](
+    runtimePath:    Runtime ⇒ String,
+    workDirectory:  String,
+    openMOLEMemory: Option[Information],
+    threads:        Option[Int],
+    serializedJob:  SerializedJob,
+    outputPath:     String,
+    storage:        S)(implicit newFile: NewFile, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
     val runtime = runtimePath(serializedJob.runtime) //preparedRuntime(serializedJob.runtime)
-    val result = sharedFS.child(serializedJob.path, uniqName("result", ".bin"))
-    val baseWorkDirectory = workDirectory getOrElse serializedJob.path
-    val workspace = serializedJob.storage.child(baseWorkDirectory, UUID.randomUUID.toString)
-    val osgiWorkDir = serializedJob.storage.child(baseWorkDirectory, UUID.randomUUID.toString)
+    val result = outputPath
+    val workspace = StorageService.child(storage, workDirectory, UUID.randomUUID.toString)
+    val osgiWorkDir = StorageService.child(storage, workDirectory, UUID.randomUUID.toString)
 
     val remoteScript =
       newFile.withTmpFile("run", ".sh") { script ⇒
         val content =
           s"""export PATH=$runtime/jre/bin/:$$PATH; cd $runtime; mkdir -p $osgiWorkDir; export OPENMOLE_HOME=$workspace ; mkdir -p $$OPENMOLE_HOME ; """ +
-            "sh run.sh " + BatchEnvironment.openMOLEMemoryValue(openMOLEMemory).toMegabytes.toInt + "m " + osgiWorkDir + " -s " + serializedJob.runtime.storage.path +
-            " -c " + serializedJob.path + " -p envplugins/ -i " + serializedJob.inputFile + " -o " + result + " -t " + BatchEnvironment.threadsValue(threads) +
+            "sh run.sh " + BatchEnvironment.openMOLEMemoryValue(openMOLEMemory).toMegabytes.toInt + "m " + osgiWorkDir + " -s " + serializedJob.remoteStorage.path +
+            " -p envplugins/ -i " + serializedJob.inputPath + " -o " + result + " -t " + BatchEnvironment.threadsValue(threads) +
             "; RETURNCODE=$?; rm -rf $OPENMOLE_HOME ; rm -rf " + osgiWorkDir + " ; exit $RETURNCODE;"
 
         Log.logger.fine("Script: " + content)
 
         script.content = content
 
-        val remoteScript = sharedFS.child(serializedJob.path, uniqName("run", ".sh"))
-        UsageControl.withToken(sharedFS.usageControl) { sharedFS.upload(script, remoteScript, options = TransferOptions(raw = true, forceCopy = true, canMove = true))(_) }
+        val remoteScript = StorageService.child(storage, workDirectory, uniqName("run", ".sh"))
+        StorageService.upload(storage, script, remoteScript, options = TransferOptions(raw = true, noLink = true, canMove = true))
         remoteScript
       }
-    (remoteScript, result, baseWorkDirectory)
+
+    remoteScript
   }
 
 }
-//
-//import org.openmole.plugin.environment.ssh.SharedStorage._
-//import Log._
-//import org.openmole.core.communication.storage._
-//import squants.time.TimeConversions._
-//
-//trait SharedStorage extends SSHService { js ⇒
-//
-//  def sharedFS: StorageService
-//  def workDirectory: Option[String]
-//
-//  def installJobService = new fr.iscpif.gridscale.ssh.SSHJobService {
-//    def credential = js.credential
-//    def host = js.host
-//    def user = js.user
-//    override def port = js.port
-//    override def timeout = environment.preference(SSHService.timeout)
-//  }
-//
-//  @transient private var installed: Option[String] = None
-//
-//  def preparedRuntime(runtime: Runtime) = synchronized {
-//    try installed match {
-//      case None ⇒ sharedFS.withToken { implicit token ⇒
-//        val runtimePrefix = "runtime"
-//        val runtimeInstall = runtimePrefix + runtime.runtime.hash
-//
-//        val (workdir, scriptName) = {
-//          val installDir = sharedFS.child(sharedFS.root, "install")
-//          Try(sharedFS.makeDir(installDir))
-//          val workdir = sharedFS.child(installDir, environment.preference(Preference.uniqueID) + "_install")
-//          if (!sharedFS.exists(workdir)) sharedFS.makeDir(workdir)
-//
-//          environment.services.newFile.withTmpFile("install", ".sh") { script ⇒
-//
-//            val tmpDirName = runtimePrefix + UUID.randomUUID.toString
-//            val scriptName = uniqName("install", ".sh")
-//
-//            val content =
-//              s"(if [ -d $runtimeInstall ]; then exit 0; fi) && " +
-//                s"mkdir -p $tmpDirName && cd $tmpDirName && (if [ `uname -m` = x86_64 ]; then cp ${runtime.jvmLinuxX64.path} jvm.tar.gz; " +
-//                """else echo "Unsupported architecture: " `uname -m`; exit 1; fi) && """ +
-//                "gunzip jvm.tar.gz && tar -xf jvm.tar && rm jvm.tar && " +
-//                s"cp ${runtime.runtime.path} runtime.tar.gz && gunzip runtime.tar.gz && tar -xf runtime.tar; rm runtime.tar && " +
-//                s"mkdir -p envplugins && PLUGIN=0 && " +
-//                runtime.environmentPlugins.map { p ⇒ "cp " + p.path + " envplugins/plugin$PLUGIN.jar && PLUGIN=`expr $PLUGIN + 1`" }.mkString(" && ") + " && " +
-//                s"cd .. && (if [ -d $runtimeInstall ]; then rm -rf $tmpDirName; exit 0; fi) && " +
-//                s"mv $tmpDirName $runtimeInstall && rm -rf $tmpDirName && rm $scriptName && ( ls $runtimePrefix* | grep -v '^$runtimeInstall' | xargs rm -rf )"
-//
-//            logger.fine(s"Install script: $content")
-//
-//            script.content = content
-//
-//            val remoteScript = sharedFS.child(workdir, scriptName)
-//            sharedFS.upload(script, remoteScript, options = TransferOptions(raw = true, forceCopy = true, canMove = true))
-//            (workdir, scriptName)
-//          }
-//        }
-//
-//        val jobDescription = fr.iscpif.gridscale.ssh.SSHJobDescription(
-//          executable = "/bin/bash",
-//          arguments = scriptName,
-//          workDirectory = workdir
-//        )
-//
-//        logger.fine("Begin install")
-//        installJobService.execute(jobDescription)
-//        logger.fine("End install")
-//
-//        val path = sharedFS.child(workdir, runtimeInstall)
-//        installed = Some(path)
-//        path
-//      }
-//      case Some(path) ⇒ path
-//    } catch {
-//      case e: Exception ⇒ throw new InternalProcessingError(e, "There was an error during the runtime installation process.")
-//    }
-//  }
-//
-//  protected def buildScript(serializedJob: SerializedJob) = {
-//    val runtime = preparedRuntime(serializedJob.runtime)
-//    val result = sharedFS.child(serializedJob.path, uniqName("result", ".bin"))
-//
-//    val remoteScript =
-//      environment.services.newFile.withTmpFile("run", ".sh") { script ⇒
-//        val baseWorkspace = workDirectory getOrElse serializedJob.path
-//        val workspace = serializedJob.storage.child(baseWorkspace, UUID.randomUUID.toString)
-//        val osgiWorkDir = serializedJob.storage.child(baseWorkspace, UUID.randomUUID.toString)
-//
-//        import environment.preference
-//
-//        val content =
-//          s"""export PATH=$runtime/jre/bin/:$$PATH; cd $runtime; mkdir -p $osgiWorkDir; export OPENMOLE_HOME=$workspace ; mkdir -p $$OPENMOLE_HOME ; """ +
-//            "sh run.sh " + BatchEnvironment.openMOLEMemoryValue(environment.openMOLEMemory)(preference).toMegabytes.toInt + "m " + osgiWorkDir + " -s " + serializedJob.runtime.storage.path +
-//            " -c " + serializedJob.path + " -p envplugins/ -i " + serializedJob.inputFile + " -o " + result + " -t " + BatchEnvironment.threadsValue(environment.threads) +
-//            "; RETURNCODE=$?; rm -rf $OPENMOLE_HOME ; rm -rf " + osgiWorkDir + " ; exit $RETURNCODE;"
-//
-//        logger.fine("Script: " + content)
-//
-//        script.content = content
-//
-//        val remoteScript = sharedFS.child(serializedJob.path, uniqName("run", ".sh"))
-//        sharedFS.withToken { sharedFS.upload(script, remoteScript, options = TransferOptions(raw = true, forceCopy = true, canMove = true))(_) }
-//        remoteScript
-//      }
-//    (remoteScript, result)
-//  }
-//
-//}
-//

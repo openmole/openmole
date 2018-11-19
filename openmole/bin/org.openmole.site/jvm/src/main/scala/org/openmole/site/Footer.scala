@@ -26,7 +26,6 @@ object Footer {
   val WHITE = color := "#e6e6e6"
 
   val titleStyle = Seq(
-    fontSize := "15px",
     marginLeft := 4
   )
 
@@ -36,7 +35,7 @@ object Footer {
     width := s"$ratio%"
   )
 
-  def subItem(i: TypedTag[String]) = div(paddingTop := 15)(i)
+  def subItem(i: TypedTag[String]) = div(paddingTop := 8)(i)
 
   def imgSubItem(image: FileResource, title: String, link: String, otherTab: Boolean = true) =
     subItem(
@@ -48,9 +47,9 @@ object Footer {
     )
 
   val footerColStyle = Seq(
-    paddingTop := 25,
+    paddingTop := 20,
     paddingLeft := 25,
-    width := 150
+    width := 160
   )
 
   val build = {
@@ -65,19 +64,19 @@ object Footer {
                   span("COMMUNITY", textAlign := "center"),
                   imgSubItem(Resource.img.footer.email, "Forum", shared.link.mailingList),
                   imgSubItem(Resource.img.footer.chat, "Chat", shared.link.chat),
-                  imgSubItem(Resource.img.footer.faq, "FAQ", Pages.faq.file, false)
+                  imgSubItem(Resource.img.footer.faq, "FAQ", DocumentationPages.faq.file, false)
                 ),
                 div(classIs(colMD(3)), footerColStyle)(
                   span("DEVELOPMENT", textAlign := "center"),
-                  imgSubItem(Resource.img.footer.previousVersion, "Changes", Pages.previousVersions.file, false),
-                  imgSubItem(Resource.img.footer.github, "Source code", shared.link.repo.openmole),
-                  imgSubItem(Resource.img.footer.contribute, "Contribute!", DocumentationPages.howToContribute.file, false)
+                  imgSubItem(Resource.img.footer.previousVersion, "Changes", DocumentationPages.releaseNotes.file, false),
+                  imgSubItem(Resource.img.footer.github, "Sources", shared.link.repo.openmole),
+                  imgSubItem(Resource.img.footer.contribute, "Join us!", DocumentationPages.howToContribute.file, false)
                 ),
                 div(classIs(colMD(3)), footerColStyle)(
                   span("ABOUT US", textAlign := "center"),
-                  imgSubItem(Resource.img.footer.paper, "Publications", Pages.communications.file, false),
-                  imgSubItem(Resource.img.footer.whoarwe, "Who are we?", Pages.whoAreWe.file, false),
-                  imgSubItem(Resource.img.footer.partner, "Partners", Pages.partner.file, false)
+                  imgSubItem(Resource.img.footer.paper, "Publications", DocumentationPages.communications.file, false),
+                  imgSubItem(Resource.img.footer.whoarwe, "Team", DocumentationPages.whoWeAre.file, false),
+                  imgSubItem(Resource.img.footer.partner, "Partners", DocumentationPages.partner.file, false)
                 ),
                 div(classIs(colMD(3)), footerColStyle)(
                   span("COMMUNICATION", textAlign := "center"),

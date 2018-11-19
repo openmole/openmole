@@ -10,6 +10,7 @@ import scala.concurrent.ExecutionContext
 
 object ThreadProvider {
 
+  val maxPriority = Int.MaxValue
   val maxPoolSize = ConfigurationLocation("ThreadProvider", "MaxPoolSize", Some(50))
 
   def apply(maxPoolSize: Option[Int] = None)(implicit preference: Preference) =
@@ -47,7 +48,7 @@ class ThreadProvider(poolSize: Int) {
     new ThreadPoolExecutor(poolSize, poolSize, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue[Runnable](), threadFactory)
 
   lazy val scheduler = Executors.newScheduledThreadPool(1, threadFactory)
-  lazy val taskQueue = PriorityQueue[ThreadProvider.Closure]
+  lazy val taskQueue = PriorityQueue[ThreadProvider.Closure](true)
 
   var stopped = false
 
@@ -58,7 +59,7 @@ class ThreadProvider(poolSize: Int) {
     parentGroup.interrupt()
   }
 
-  def submit(task: ThreadProvider.Closure, priority: Int) = {
+  def submit(priority: Int)(task: ThreadProvider.Closure) = {
     taskQueue.enqueue(task, priority)
     pool.submit(new ThreadProvider.RunClosure(taskQueue))
   }

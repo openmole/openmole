@@ -4,16 +4,24 @@
 @import org.openmole.site.tools._
 
 
-@h1{Transitions}
-In OpenMOLE, transitions link tasks with each other. The following examples illustrate several kinds of transitions
-available in OpenMOLE.
 
-@h2{Simple transition}
+In OpenMOLE, transitions represent the links between tasks.
+The following examples illustrate several kinds of transitions available in OpenMOLE.
 
-A transition specifies a precedence relationship between 2 tasks. In the following example, the task @i{t1} produces
-a variable @i{i} which travels along a transition to the task @i{t2}. @i{t2} uses it in turn in order to compute its
-output. Simple transitions are marked by the operator @hl.openmoleNoTest("--") between the tasks:
-@br @hl.openmole("""
+
+
+@h2{Basic transitions}
+
+@h3{Simple transition}
+
+A transition specifies a precedence relationship between two tasks.
+In the following example, the task @code{t1} produces a variable @code{i} which travels along a transition to the task @code{t2}.
+@code{t2} uses it in turn in order to compute its output.
+Simple transitions are marked by the operator @hl.openmoleNoTest("--") between the tasks:
+
+@br@br
+
+@hl.openmole("""
 val d = Val[Double]
 val e = Val[Double]
 
@@ -22,13 +30,17 @@ val t2 = ScalaTask("val e = d / 42") set ( inputs += d, outputs += e)
 
 t1 -- (t2 hook ToStringHook())""")
 
-@h2{Exploration transition}
 
-The @b{Exploration} transition links an @hl.openmole("ExplorationTask") to another task. It creates one new
-execution stream by sample point in the design of experiment of the @hl.openmole("ExplorationTask"). For instance,
-the following workflow runs the task @i{t1} 10 times. Exploration transitions use the @hl.openmoleNoTest("-<") between the
-tasks.
-@br @hl.openmole("""
+@h3{Exploration transition}
+
+The @b{Exploration} transition links an @hl.openmole("ExplorationTask") to another task.
+It creates one new execution stream by sample point in the design of experiment of the @hl.openmole("ExplorationTask").
+For instance, the following workflow runs the task @code{t1} 10 times.
+Exploration transitions use @hl.openmoleNoTest("-<") to link the tasks.
+
+@br@br
+
+@hl.openmole("""
 // Declare the variable
 val d = Val[Double]
 
@@ -40,57 +52,21 @@ val exploration = ExplorationTask( d in (0.0 to 99.0 by 10.0) )
 
 exploration -< (t1 hook ToStringHook())""")
 
-@p You can read more about @a("Explorations and Samplings", href := DocumentationPages.directSampling.file)
+@br
+
+You can read more about @a("Explorations and Samplings", href := DocumentationPages.directSampling.file)
 in the relevant section of the documentation.
 
-@h2{Combining transitions}
 
-In order to automate some processes we might want to run several task in sequence after an exploration transition.
-To achieve that you can easily compose the 2 previous transitions:
-@br @hl.openmole("""
-val d = Val[Double]
+@h3{Aggregating results from an exploration}
 
-val t1 = ScalaTask("d = d * 42") set ( inputs += d, outputs += d )
-val t2 = ScalaTask("d = d + 100") set ( inputs += d, outputs += d)
-val exploration = ExplorationTask( d in (0.0 to 99.0 by 10.0) )
+We have seen how we can execute tasks for a set of values with the exploration transition @hl.openmoleNoTest("-<").
+It is also possible to collect all the results produced by an exploration in order to compute global indicators with the aggregation transition noted @hl.openmoleNoTest(">-").
+The following workflow sums over all the results computed by the @code{t1} task in the exploration:
 
-exploration -< t1 -- (t2 hook ToStringHook())""")
+@br@br
 
-@h2{Conditions}
-
-When needed, it is possible to set a condition on the transition so that the task after the transition is executed
-under this condition only. Conditional transitions are specified after the @hl.openmoleNoTest("when"). For instance we can
-add a condition on the execution of @i{t2} in the previous workflow:
-@br @hl.openmole("""
-val d = Val[Double]
-
-val t1 = ScalaTask("d = d * 42") set ( inputs += d, outputs += d )
-val t2 = ScalaTask("d = d + 100") set ( inputs += d, outputs += d)
-val exploration = ExplorationTask( d in (0.0 to 99.0 by 10.0) )
-
-exploration -< t1 -- (t2 hook ToStringHook() when "d < 1000")""")
-@p In this case the task @i{t2} is executed only if the variable "d" is greater than 1,000.
-
-@h2{Tasks in parallel}
-
-In OpenMOLE you can also define task as being independent from each other so they can be executed concurrently.
-Parallel tasks are to be put in brackets. For instance, in this example @i{t2} and @i{t3} are executed concurrently:
-@br @hl.openmole("""
-val d = Val[Double]
-
-val t1 = ScalaTask("d = d * 42") set ( inputs += d, outputs += d )
-val t2 = ScalaTask("d = d + 100") set ( inputs += d, outputs += d)
-val t3 = ScalaTask("d = d - 100") set ( inputs += d, outputs += d)
-val exploration = ExplorationTask( d in (0.0 to 99.0 by 10.0) )
-
-exploration -< t1 -- (t2 hook ToStringHook(), (t3 hook ToStringHook()))""")
-
-@h2{Aggregating results from an exploration}
-
-We have seen how we can execute tasks for a set of values with the Exploration transition @hl.openmoleNoTest("-<"). It is
-also possible to collect all the results produced by an exploration in order to compute global indicators. The
-following workflow sums over all the results computed by the @i{t1} task in the exploration:
-@br @hl.openmole("""
+@hl.openmole("""
 // Declare the variable
 val d = Val[Double]
 
@@ -102,33 +78,169 @@ val aggregate = ScalaTask("val d = input.d.sum") set (
 )
 
 exploration -< t1 >- (aggregate hook ToStringHook())""")
-@p The aggregation is performed using the @b{Aggregation transition} noted @hl.openmoleNoTest(">-").
 
-@p It is very important to understand that this transition @b{gathers} input data from the dataflow. This task has
-a @b{single instance} that is fed with a @b{collection of inputs} stored in the variable @i{d}. In order for
-OpenMOLE to match the input data to this aggregation, we explicitly note the inputs as being arrays using the
-@hl.openmoleNoTest("toArray") conversion. Subsequent parallelism is preserved by marking the same @i{d} collection
-again as an array. This restores any subsequent parallelism by splitting the data among multiple instances of the
-next task in the workflow.
+@br
+
+It is very important to understand that this transition @b{gathers} input data from the dataflow.
+This task has a @b{single instance} which is provided with a @b{collection of inputs} stored in the variable @code{d}.
+In order for OpenMOLE to match the input data to this aggregation, we explicitly note the inputs as being arrays using the @hl.openmoleNoTest("toArray") conversion.
+Subsequent parallelism is preserved by marking the same @code{d} collection again as an array.
+This restores any subsequent parallelism by splitting the data among multiple instances of the next task in the workflow.
 
 
-@h2{Advanced concepts: Capsules and Slots}
 
-Tasks are not directly linked to each-other by transitions. This has been made as transparent as possible, but two
-other notions are involved behind the scenes. Tasks are encapsulated in a so called
-@i{Capsule}. The @aa("Capsule section", href := DocumentationPages.capsule.file) explains this in details.
+@h2{Combining transitions}
 
-Other specific capsules are defined in OpenMOLE. They are described in the @aa("Advanced capsule", href := DocumentationPages.capsule.file) section
+@h3{Simple combination}
 
-@h2{Combining several workflow parts with +}
+In order to automate some processes we might want to run several task in sequence after an exploration transition.
+To achieve that, you can easily compose different transitions:
 
-In OpenMOLE the representation of the workflow have been designed to be as linear as possible, but actually workflows
-are just as graph of task and transitions. Sometime you cannot express complex workflows in such a linear manner. Therefore you may
-want to use the + operator to merge different part of a workflow. While the linear representation is more compact, the + notation
-provides you with more freedom in the design of the transition graph (note that you can combine the 2 representations in order to get
-both compactness and flexibility). The following example exposes two exactly equivalent workflows, the first
-design uses only the linear representation and the second design uses mostly the + operator:
-@br @hl.openmole("""
+@br@br
+
+@hl.openmole("""
+val d = Val[Double]
+
+val t1 = ScalaTask("d = d * 42") set ( inputs += d, outputs += d )
+val t2 = ScalaTask("d = d + 100") set ( inputs += d, outputs += d)
+val exploration = ExplorationTask( d in (0.0 to 99.0 by 10.0) )
+
+exploration -< t1 -- (t2 hook ToStringHook())""")
+
+
+@h3{Tasks in parallel}
+
+In OpenMOLE you can also declare tasks to be independent from each other so they can be executed concurrently.
+Parallel tasks are to be put in brackets.
+For instance, in this example @code{t2} and @code{t3} are executed concurrently:
+
+@br@br
+
+@hl.openmole("""
+val d = Val[Double]
+
+val t1 = ScalaTask("d = d * 42") set ( inputs += d, outputs += d )
+val t2 = ScalaTask("d = d + 100") set ( inputs += d, outputs += d)
+val t3 = ScalaTask("d = d - 100") set ( inputs += d, outputs += d)
+val exploration = ExplorationTask( d in (0.0 to 99.0 by 10.0) )
+
+exploration -< t1 -- (t2 hook ToStringHook(), (t3 hook ToStringHook()))""")
+
+
+
+@h2{Conditions}
+
+When needed, it is possible to set a condition on a transition, so that the task after the transition is executed
+under this condition only.
+Conditional transitions are specified using the @hl.openmoleNoTest("when") keyword.
+
+
+@h3{Using a condition on the execution of a task}
+
+For instance we can add a condition on the execution of @code{t2} in the previous workflow:
+
+@br@br
+
+@hl.openmole("""
+val d = Val[Double]
+
+val t1 = ScalaTask("d = d * 42") set ( inputs += d, outputs += d )
+val t2 = ScalaTask("d = d + 100") set ( inputs += d, outputs += d)
+val exploration = ExplorationTask( d in (0.0 to 99.0 by 10.0) )
+
+exploration -< t1 -- (t2 hook ToStringHook() when "d < 1000")""")
+
+@br
+
+In this case the task @code{t2} is executed only if the variable @code{d} is greater than 1,000.
+
+
+@h3{Using a condition to define a resumable workflow}
+
+Sometimes you might want to be able to easily stop your workflow and relaunch it only on unfinished jobs.
+The following example explains how to relaunch your workflow only on unprocessed inputs or with new inputs.
+For instance if your task may fail or sometimes return empty or invalid files, you can benefit from this OpenMOLE construct.
+
+@br
+
+You will need to use a combination of the @i{when} condition and the @i{Expression} keyword: the condition is expressed using an OpenMOLE @i{Expression}. Here is an example:
+
+@br@br
+
+@hl.openmole(s"""
+// define files and name used
+val parameter = Val[Int]
+val resultFile = Val[File]
+
+// write the parameter in a file
+val writeTask = ScalaTask($tq
+  val resultFile = newFile();
+  resultFile.content = s"$$parameter"
+  $tq) set (
+    (inputs, outputs) += parameter,
+    outputs += resultFile
+  )
+
+// outputpath is the path where resultFile is stored
+val outputPath = Expression[File](workDirectory / "results/results_$${parameter}")
+
+// the file coming from each job is copied in the results folder
+val copy = CopyFileHook(resultFile, outputPath)
+
+// a job is executed only if there is no matching resultFile or an empty resultFile
+// once you've run this workflow once you can manually suppress some result files and run it again
+
+DirectSampling(
+  sampling = parameter in (0 to 100),
+  evaluation = writeTask hook copy,
+  condition = !outputPath.exists || outputPath.isEmpty
+)""")
+
+
+
+@h2{Advanced concepts}
+
+@h3{Capsules and Slots}
+
+Tasks are not directly linked to each other by transitions.
+This has been made as transparent as possible, but two other notions are involved behind the scenes.
+Tasks are encapsulated in so called @b{Capsules}, which can have several input @b{Slots}.
+The @aa("Capsule section", href := DocumentationPages.capsule.file) explains this in details.
+
+
+@h3{Loops}
+
+Loops are a direct application of the explicit definition of Capsules and Slots to wrap tasks.
+A task may possess multiple input Slots.
+@b{Slots} are useful to distinguish loops from synchronization points.
+The execution of a task is started @b{when all the incoming transitions belonging to the same input @code{Slot} have been triggered}.
+See how several Slots define a loop in this workflow:
+
+@br@br
+
+@hl.openmole("""
+  val i = Val[Int]
+  val t0 = ScalaTask("val i = 0") set ( outputs += i )
+  val t1 = ScalaTask("i = i + 1") set ( inputs += i, outputs += i )
+  val c1 = Capsule(t1)
+  val s1 = Slot(c1)
+  val s2 = Slot(c1)
+
+  (t0 -- s1 -- (s2 when "i < 100") & (c1 hook ToStringHook()))""")
+
+
+@h3{Combining several workflow parts with @code{&}}
+
+In OpenMOLE the representation of the workflow has been designed to be as linear as possible, but actually workflows
+are just as graph of task and transitions.
+Sometime you cannot express complex workflows in such a linear manner.
+Therefore you may want to use the @code{&} operator to merge different part of a workflow.
+While the linear representation is more compact, the @code{&} notation provides you with more freedom in the design of the transition graph (note that you can combine the two representations in order to get both compactness and flexibility).
+The following example exposes two exactly equivalent workflows, the first design using only the linear representation and the second design using mostly the @code{&} operator:
+
+@br@br
+
+@hl.openmole("""
 val d = Val[Double]
 
 val t1 = ScalaTask("d = d * 42") set ( inputs += d, outputs += d )
@@ -148,19 +260,3 @@ val t3Capsule = Capsule(t3)
   (t1Capsule -- t3Capsule) &
   (t2Capsule hook ToStringHook()) &
   (t3Capsule hook ToStringHook()))""")
-
-@h2{Loops}
-
-Loops are a direct application of the explicit definition of Capsules and Slots to wrap tasks. A task may possess
-multiple input Slots. @i{Slots} are useful to distinguish loops from synchronization points. The execution of
-a task is started @b{when all the incoming transitions belonging to the same input @i{Slot} have been triggered}. See
-how several @i{Slots} define a loop in this workflow:
-@br @hl.openmole("""
-  val i = Val[Int]
-  val t0 = ScalaTask("val i = 0") set ( outputs += i )
-  val t1 = ScalaTask("i = i + 1") set ( inputs += i, outputs += i )
-  val c1 = Capsule(t1)
-  val s1 = Slot(c1)
-  val s2 = Slot(c1)
-
-  (t0 -- s1 -- (s2 when "i < 100") & (c1 hook ToStringHook()))""")

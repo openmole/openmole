@@ -17,10 +17,13 @@
 
 package org.openmole.plugin.tool
 
-import java.io.File
+import java.io.{ File, FileReader }
+import java.math.{ BigDecimal, BigInteger }
 
-import org.openmole.core.context.{ Context, Val }
+import au.com.bytecode.opencsv.CSVReader
+import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.dsl._
+import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.builder._
 
 import scala.annotation.tailrec
@@ -31,16 +34,15 @@ package csv {
     lazy val columns = new {
       def +=[T: CSVToVariablesBuilder: InputOutputBuilder](proto: Val[_]): T ⇒ T = this.+=(proto.name, proto)
       def +=[T: CSVToVariablesBuilder: InputOutputBuilder](name: String, proto: Val[_]): T ⇒ T =
-        (implicitly[CSVToVariablesBuilder[T]].columns add (name → proto)) andThen
-          (outputs += proto)
+        (implicitly[CSVToVariablesBuilder[T]].columns add Mapped(proto, name)) andThen (outputs += proto)
     }
+
     lazy val fileColumns = new {
       def +=[T: CSVToVariablesBuilder: InputOutputBuilder](dir: File, proto: Val[File]): T ⇒ T =
         this.+=(proto.name, dir, proto)
 
       def +=[T: CSVToVariablesBuilder: InputOutputBuilder](name: String, dir: File, proto: Val[File]): T ⇒ T =
-        (implicitly[CSVToVariablesBuilder[T]].fileColumns add (name, dir, proto)) andThen
-          (outputs += proto)
+        (implicitly[CSVToVariablesBuilder[T]].fileColumns add (name, dir, proto)) andThen (outputs += proto)
     }
     lazy val separator = new {
       def :=[T: CSVToVariablesBuilder](s: OptionalArgument[Char]): T ⇒ T =
@@ -81,6 +83,7 @@ package object csv extends CSVPackage {
               case Some(v) ⇒
                 v match {
                   case v: Array[_] ⇒ v.toList
+                  case l: List[_]  ⇒ l
                   case v           ⇒ List(v)
                 }
               case None ⇒ List("not found")
@@ -127,5 +130,58 @@ package object csv extends CSVPackage {
         write(lists)
     }
   }
+
+  /**
+   * Builds the plan.
+   *
+   */
+  def csvToVariables(
+    columns:     Vector[Mapped[_]],
+    fileColumns: Vector[(String, File, Val[File])],
+    separator:   Option[Char])(file: File, context: Context): Iterator[Iterable[Variable[_]]] = {
+    val reader = new CSVReader(new FileReader(file), separator.getOrElse(','))
+    val headers = reader.readNext.toArray
+
+    //test wether prototype names belong to header names
+    val columnsIndexes = columns.map {
+      case m ⇒
+        val i = headers.indexOf(m.name)
+        if (i == -1) throw new UserBadDataError("Unknown column name : " + name)
+        else i
+    }
+
+    val fileColumnsIndexes =
+      fileColumns.map {
+        case (name, _, _) ⇒
+          val i = headers.indexOf(name)
+          if (i == -1) throw new UserBadDataError("Unknown column name : " + name)
+          else i
+      }
+
+    Iterator.continually(reader.readNext).takeWhile(_ != null).map {
+      line ⇒
+        (columns zip columnsIndexes).map {
+          case (m, i) ⇒ Variable.unsecure(m.v, converter(m.v)(line(i)))
+        } ++
+          (fileColumns zip fileColumnsIndexes).map {
+            case ((_, f, p), i) ⇒ Variable(p, new File(f, line(i)))
+          }
+    }
+
+  }
+
+  val conveters = Map[Class[_], (String ⇒ _)](
+    classOf[BigInteger] → (new BigInteger(_: String)),
+    classOf[BigDecimal] → (new BigDecimal(_: String)),
+    classOf[Double] → ((_: String).toDouble),
+    classOf[String] → ((_: String).toString),
+    classOf[Boolean] → ((_: String).toBoolean),
+    classOf[Int] → ((_: String).toInt),
+    classOf[Float] → ((_: String).toFloat),
+    classOf[Long] → ((_: String).toLong)
+  )
+
+  def converter[T](p: Val[_]): String ⇒ _ =
+    conveters.getOrElse(p.`type`.runtimeClass, throw new UserBadDataError("Unmanaged type for csv sampling for column binded to prototype " + p))
 
 }

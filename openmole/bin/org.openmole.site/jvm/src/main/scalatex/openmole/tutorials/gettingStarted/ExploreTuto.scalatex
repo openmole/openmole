@@ -1,0 +1,169 @@
+@import org.openmole.site._
+@import org.openmole.site.tools._
+@import org.openmole.site.stylesheet._
+@import DocumentationPages._
+
+
+
+@h2{Overview}
+
+In this tutorial, we mean to present how to prepare and run an experiment, in order to explore a simple model with OpenMOLE.
+The toy model is Ants.nlogo, since we already know how to import and run it from the previous tutorial.
+
+@br
+
+The simplest numerical experiments that can be done with such a stochastic model are:
+    @ul
+        @li
+            run the model several times with the same parameter values to understand the statistics of its behavior
+        @li
+            run the model with different parameter values to have a glimpse on the influence of parameters on its behavior
+
+
+We will cover both in this tutorial.
+
+@h2{Running repetitions of the model}
+
+OpenMOLE workflows should end by giving the task to be run: in the previous tutorial, the model task could be run as a single standalone task, since it did not require any further input.
+
+@br
+
+Other types of task are provided by methods.
+The method @code{Replication} takes a model task and repeats it a given number of times: this is necessary for stochastic models which outcome will be different each time.
+
+@br
+
+As the model has a random @code{seed} parameter (the random seed gives the trajectory of the random number generator: two runs with the same seed will give exactly the same outcome, and stochasticity is emulated by changing the seed)
+, it can be passed to the @code{Replication} method as an argument, and the task will attribute seeds itself to each run (necessary for exact reproducibility).
+The fixed value for the seed must be removed in the model to take that into account.
+@br
+
+The corresponding workflow is the following (where we assume that a function @code{go-experiment} has been defined in the NetLogo model, which runs the model for a given number of time steps):
+
+@br
+
+@hl.openmole("""
+// Input values
+val seed = Val[Int]
+val diffusionRate = Val[Double]
+val evaporationRate = Val[Double]
+val population = Val[Double]
+// Output values
+val countFood = Val[Double]
+val finalTicksFood1 = Val[Double]
+val finalTicksFood2 = Val[Double]
+val finalTicksFood3 = Val[Double]
+// NetLogo command list
+val launch = List("setup","go-experiment")
+
+// NetLogo task
+val antsTask = NetLogo6Task(workDirectory / "ants.nlogo", launch, embedWorkspace = true,seed=seed) set(
+  inputs += diffusionRate mapped "diffusion-rate",
+  inputs += evaporationRate mapped "evaporation-rate",
+  inputs += population mapped "population",
+  outputs += countFood mapped "count-food",
+  outputs += finalTicksFood1 mapped "final-ticks-food1",
+  outputs += finalTicksFood2 mapped "final-ticks-food2",
+  outputs += finalTicksFood3 mapped "final-ticks-food3",
+  diffusionRate := 21,
+  evaporationRate := 9,
+  population := 125)
+
+// Define the replication task
+val replications = Replication(
+  evaluation = antsTask, // the model to run
+  seed = seed, // the seed variable
+  replications = 100 // the number of runs
+)
+
+// Run the task
+// Note: we have here changed the hook to a CSVHook, which here gathers the results into a csv file
+replications hook CSVHook(workDirectory / "replications_results.csv")
+""")
+
+
+@h2{Exploring a grid of the parameter space}
+
+As you may have analyzed the results from the previous experiments (for example studied the statistical distributions of outputs, their covariance structure, etc.), you know more about the role of stochasticity in this setting of the model.
+You however do not know anything about the influence of input parameters @code{diffusionRate}, @code{evaporationRate}, @code{population} on these outputs.
+This will be precisely the aim of design of experiments, sensitivity analysis and exploration methods which are integrated into OpenMOLE.
+
+@br
+
+Let illustrate a simple experiment of a grid search of the parameter space.
+Each parameter will take a finite number of values within a defined interval.
+Rate parameters are between 0 and 100, and let say we consider ant populations of size between 50 and 150. With a step of 50 for each parameter, the complete grid has a size of 27 (3x3x3) parameter points.
+The syntax to attribute these values to Vals in OpenMOLE is the following:
+
+@br
+
+@hl.openmole("""
+  (diffusionRate in (0.0 to 100.0 by 50.0)) x
+  (evaporationRate in (0.0 to 100.0 by 50.0)) x
+  (population in (50.0 to 150.0 by 50.0))
+""")
+
+@br
+
+We then use the method of @code{DirectSampling} which takes as arguments the sampling itself (values of parameters) and the model to evaluate.
+Instead of running one instance of the model for each parameter point, what would not make much sense because of the stochasticity, we do not provide the model itself to evaluate, but the replication task defined above.
+This way, each parameter point will be run 100 times, so that statistics can then be computed for each parameter point.
+
+@br
+
+At this point, you must not forget to remove fixed parameter values in the model task, as these will be provided by the sampling task. The script is the following:
+
+
+@hl.openmole("""
+// Input values
+val seed = Val[Int]
+val diffusionRate = Val[Double]
+val evaporationRate = Val[Double]
+val population = Val[Double]
+// Output values
+val countFood = Val[Double]
+val finalTicksFood1 = Val[Double]
+val finalTicksFood2 = Val[Double]
+val finalTicksFood3 = Val[Double]
+// NetLogo command list
+val launch = List("setup","go-experiment")
+
+// NetLogo task
+val antsTask = NetLogo6Task(workDirectory / "ants.nlogo", launch, embedWorkspace = true,seed=seed) set(
+  inputs += diffusionRate mapped "diffusion-rate",
+  inputs += evaporationRate mapped "evaporation-rate",
+  inputs += population mapped "population",
+  outputs += countFood mapped "count-food",
+  outputs += finalTicksFood1 mapped "final-ticks-food1",
+  outputs += finalTicksFood2 mapped "final-ticks-food2",
+  outputs += finalTicksFood3 mapped "final-ticks-food3"
+)
+
+// Define the replication task
+val replications = Replication(
+  evaluation = antsTask, // the model to run
+  seed = seed, // the seed variable
+  replications = 100 // the number of runs
+)
+
+// Define the parameter sampling task
+val exploration = DirectSampling (
+   evaluation = replications,
+   sampling =
+     (diffusionRate in (0.0 to 100.0 by 50.0)) x
+     (evaporationRate in (0.0 to 100.0 by 50.0)) x
+     (population in (50.0 to 150.0 by 50.0))
+   )
+
+// Run the task
+exploration hook CSVHook(workDirectory / "grid_results.csv")
+""")
+
+@br
+
+You can then use the results to better understand how your model behaves.
+
+
+@h2{To go further}
+
+In the @a("next tutorial", href := simpleSAFire.file), an other example of direct sampling with a NetLogo model will give a deeper insight on how to understand and analyze the results of such an experiment.

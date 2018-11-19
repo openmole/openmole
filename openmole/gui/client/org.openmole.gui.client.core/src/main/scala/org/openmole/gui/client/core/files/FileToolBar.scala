@@ -265,6 +265,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     treeNodePanel.treeWarning() = true
     treeNodePanel.turnSelectionTo(false)
     selectedTool() = None
+    treeNodePanel.drawTree
   }
 
   val deleteButton = button("Delete", btn_danger, onclick := { () ⇒
@@ -362,15 +363,16 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
     tags.div(paddingBottom := 10, paddingTop := 50)(
       tags.div(centerElement)(
-        buildSpan(RefreshTool, "Refresh the current folder", () ⇒ {
-          treeNodePanel.invalidCacheAndDraw
-        }),
-        upButton.tooltip("Upload a file"),
-        buildAndSelectSpan(PluginTool, "Detect plugins that can be enabled in this folder"),
-        buildAndSelectSpan(TrashTool, "Delete selected files"),
-        buildAndSelectSpan(CopyTool, "Copy selected files"),
+        buildAndSelectSpan(FilterTool, "Filter files by number of entries or by names"),
         buildAndSelectSpan(FileCreationTool, "File or folder creation"),
-        buildAndSelectSpan(FilterTool, "Filter files by number of entries or by names")
+        buildAndSelectSpan(CopyTool, "Copy selected files"),
+        buildAndSelectSpan(TrashTool, "Delete selected files"),
+        buildAndSelectSpan(PluginTool, "Detect plugins that can be enabled in this folder"),
+        tags.div(centerElement)(
+          buildSpan(RefreshTool, "Refresh the current folder", () ⇒ {
+            treeNodePanel.invalidCacheAndDraw
+          })),
+        upButton.tooltip("Upload a file")
       ),
       Rx {
         val msg = message()

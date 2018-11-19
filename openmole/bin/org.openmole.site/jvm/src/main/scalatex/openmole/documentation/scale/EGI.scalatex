@@ -1,0 +1,57 @@
+@import org.openmole.site._
+@import org.openmole.site.tools._
+@import org.openmole.site.tools.api._
+@import org.openmole.site.content.Environment._
+
+@aa("EGI", href := shared.link.egi) is a grid infrastructure gathering computing resources from all over the world.
+It is a very powerful computing environment, but transpires as technically challenging to use.
+OpenMOLE makes it very simple to benefit from the grid.
+
+ @h2
+    Setup your grid credentials
+You first need to set your EGI certificate. The way to achieve this is describe in the @aa("GUI guide", href := DocumentationPages.gui.file)")
+
+
+Note: The following instructions explain how to setup the EGI authentication in console mode (not recommended).
+
+To delegate a task to EGI you need to register your certificate in OpenMOLE. In the console execute:
+
+@br @hl.openmole("""
+EGIAuthentication() = P12Certificate(encrypted, "/path/to/your/certificate.p12")""", header = """def encrypted = "" """)
+
+@p You need to execute this operation only once and for all. OpenMOLE persists this information in your preferences folder.
+
+  @h2
+    Submitting jobs to EGI
+  @p
+    To use EGI through DIRAC you should setup an @hl.openmoleNoTest{EGIAuthentication} as explained above using a @b{P12 certificate bundle}. Other methods are not supported by DIRAC. In order to use EGI you must be registered in a @b{Virtual Organisation (VO)}.
+     @br The VO is the only compulsory parameter when creating an EGI environment. Here the VO @i{biomed} is specified, but you can specify the EGI VO of your choice:
+    @br @hl.openmole("""
+    val env = EGIEnvironment("biomed")""")
+
+    @p Basic options available for EGI are:
+    @ul
+      @li{@apiEntryTitle{cpuTime} the maximum duration for the job in terms of CPU consumption, for instance 1 hour,}
+      @li{@openMOLEMemory,}
+      @li{@apiEntryTitle{debug} generate debugging information about the execution node (hostname, date, memory, max number of file descriptors, user proxy, ...). Defaults to @hl.openmoleNoTest{debug = false}}
+      @li{@name.}
+
+
+    @p The @hl.openmoleNoTest{EGIEnvironment} can be tuned using the previous options as in this example:
+    @br @hl.openmole("""
+      val env =
+        EGIEnvironment(
+          "biomed",
+          cpuTime = 4 hours,
+          openMOLEMemory = 200 megabytes
+        )""")
+
+    @p The @hl.openmoleNoTest{EGIEnvironment} also accepts a set of more advanced options:
+    @ul
+      @li{@apiEntryTitle{service} a DIRAC REST API,}
+      @li{@apiEntryTitle{group} the name of the DIRAC group,}
+      @li{@apiEntryTitle{bdii} the BDII to use for listing resources accessible from this VO. The BDII in your preference file is used, when this field is left unspecified.}
+      @li{@apiEntryTitle{vomsURL} the URL of the VOMS server used for the authentication,}
+      @li{@apiEntryTitle{fqan} additional flags for authentication,}
+      @li{@apiEntryTitle{setup} setup to use on the DIRAC server. It is set to "Dirac-Production" by default.}
+

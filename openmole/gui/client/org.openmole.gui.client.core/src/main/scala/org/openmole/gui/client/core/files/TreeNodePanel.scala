@@ -466,7 +466,6 @@ class TreeNodePanel {
     ondragenter := {
       (e: DragEvent) ⇒
         val el = e.target.asInstanceOf[HTMLElement]
-        println("EL " + el)
         val style = new CSSStyleDeclaration()
         style.backgroundColor = "red"
         el.style = style

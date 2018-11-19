@@ -16,6 +16,27 @@
  */
 package org.openmole.plugin.tool
 
+import org.openmole.core.context._
+import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.builder.DefinitionScope
+import org.openmole.core.workflow.mole.Capsule
+import org.openmole.core.workflow.puzzle.Puzzle
+import org.openmole.core.workflow.task.{ EmptyTask, MoleTask }
+
 package object pattern {
+
+  case class Wrapped(evaluationPuzzle: Puzzle, delegate: Vector[Capsule])
+
+  def wrapPuzzle(evaluation: Puzzle, inputVals: Seq[Val[_]], outputVals: Seq[Val[_]], wrap: Boolean = true)(implicit definitionScope: DefinitionScope) =
+    if (wrap) {
+      val moleCapsule = Capsule(MoleTask(evaluation) set (inputs += (inputVals: _*), outputs += (outputVals: _*)))
+      Wrapped(moleCapsule, Vector(moleCapsule))
+    }
+    else {
+      val firstEvaluation = EmptyTask() set ((inputs, outputs) += (inputVals: _*))
+      val lastEvaluation = EmptyTask() set ((inputs, outputs) += (outputVals: _*))
+      val puzzle = Strain(firstEvaluation) -- evaluation -- lastEvaluation
+      Wrapped(puzzle, Puzzle.capsules(evaluation))
+    }
 
 }

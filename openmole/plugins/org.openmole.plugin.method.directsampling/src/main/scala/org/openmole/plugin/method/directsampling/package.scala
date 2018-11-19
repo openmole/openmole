@@ -18,15 +18,14 @@
 package org.openmole.plugin.method
 
 import org.openmole.core.context._
-import org.openmole.core.outputmanager.OutputManager
+import org.openmole.core.expansion._
 import org.openmole.core.workflow.builder.DefinitionScope
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.validation.DataflowProblem._
-import org.openmole.core.workflow.validation._
+import org.openmole.core.workflow.transition._
 import org.openmole.plugin.domain.distribution._
 import org.openmole.plugin.domain.modifier._
 import org.openmole.plugin.tool.pattern._
@@ -39,27 +38,40 @@ package object directsampling {
     evaluation:       Puzzle,
     seed:             Val[T],
     replications:     Int,
-    distributionSeed: OptionalArgument[Long] = None,
-    aggregation:      Puzzle                 = defaultAggregation
-  ) =
+    distributionSeed: OptionalArgument[Long]   = None,
+    aggregation:      OptionalArgument[Puzzle] = None,
+    wrap:             Boolean                  = false
+  ): PuzzleContainer =
     DirectSampling(
       evaluation = evaluation,
       sampling = seed in (TakeDomain(UniformDistribution[T](distributionSeed), replications)),
-      aggregation = aggregation
+      aggregation = aggregation,
+      wrap = wrap
     )
 
-  def DirectSampling(
+  def DirectSampling[P](
     evaluation:  Puzzle,
     sampling:    Sampling,
-    aggregation: Puzzle   = defaultAggregation
-  ): Puzzle = {
+    aggregation: OptionalArgument[Puzzle] = None,
+    condition:   Condition                = Condition.True,
+    wrap:        Boolean                  = false
+  ): PuzzleContainer = {
     val exploration = ExplorationTask(sampling)
     val explorationCapsule = Capsule(exploration, strain = true)
-    (explorationCapsule -< evaluation >- aggregation) &
-      (explorationCapsule -- (aggregation block (evaluation.outputs: _*)))
-  }
+    val wrapped = wrapPuzzle(evaluation, sampling.prototypes.toSeq, evaluation.outputs, wrap = wrap)
 
-  private def defaultAggregation =
-    Strain(EmptyTask() set (name := "aggregation"))
+    aggregation.option match {
+      case Some(aggregation) ⇒
+        val p =
+          (explorationCapsule -< (wrapped.evaluationPuzzle when condition) >- aggregation) &
+            (explorationCapsule -- (aggregation block (wrapped.evaluationPuzzle.outputs: _*)))
+
+        PuzzleContainer(p, aggregation.last, wrapped.delegate)
+      case None ⇒
+        val strained = Strain(wrapped.evaluationPuzzle)
+        val p = explorationCapsule -< (strained when condition)
+        PuzzleContainer(p, strained.last, wrapped.delegate)
+    }
+  }
 
 }

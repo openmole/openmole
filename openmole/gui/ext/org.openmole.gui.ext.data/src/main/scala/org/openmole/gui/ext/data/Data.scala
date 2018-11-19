@@ -270,21 +270,31 @@ case class TreeNodeData(
 case class ScriptData(scriptPath: SafePath)
 
 object Error {
-  def empty = Error("")
+  def empty = MessageError("")
 }
 
-case class Error(stackTrace: String)
+sealed trait Error {
+  def stackTrace: String
+}
+
+case class MessageError(stackTrace: String) extends Error {
+  def +(error: MessageError) = MessageError(stackTrace + error.stackTrace)
+}
+
+case class CompilationError(errors: Seq[ErrorWithLocation]) extends Error{
+  def stackTrace = ""
+}
 
 case class Token(token: String, duration: Long)
 
 object ErrorBuilder {
-  def apply(t: Throwable): Error = {
+  def apply(t: Throwable): MessageError = {
     val sw = new StringWriter()
     t.printStackTrace(new PrintWriter(sw))
-    Error(sw.toString)
+    MessageError(sw.toString)
   }
 
-  def apply(stackTrace: String) = Error(stackTrace)
+  def apply(stackTrace: String) = MessageError(stackTrace)
 }
 
 sealed trait ID {
@@ -293,7 +303,7 @@ sealed trait ID {
 
 case class ExecutionId(id: String = java.util.UUID.randomUUID.toString) extends ID
 
-case class EnvironmentId(id: String = java.util.UUID.randomUUID.toString, executionId: ExecutionId) extends ID
+case class EnvironmentId(id: String = java.util.UUID.randomUUID.toString) extends ID
 
 sealed trait ErrorStateLevel {
   def name: String
@@ -308,23 +318,21 @@ case class ErrorLevel() extends ErrorStateLevel {
 }
 
 case class EnvironmentError(
-                             environmentId: EnvironmentId,
-                             errorMessage: String,
-                             stack: Error,
-                             date: Long,
-                             level: ErrorStateLevel
-                           ) extends Ordered[EnvironmentError] {
+  environmentId: EnvironmentId,
+  errorMessage: String,
+  stack: Error,
+  date: Long,
+  level: ErrorStateLevel) extends Ordered[EnvironmentError] {
   def compare(that: EnvironmentError) = date compare that.date
 }
 
 @Lenses case class NetworkActivity(
-                                    downloadingFiles: Int = 0,
-                                    downloadedSize: Long = 0L,
-                                    readableDownloadedSize: String = "",
-                                    uploadingFiles: Int = 0,
-                                    uploadedSize: Long = 0L,
-                                    readableUploadedSize: String = ""
-                                  )
+  downloadingFiles: Int = 0,
+  downloadedSize: Long = 0L,
+  readableDownloadedSize: String = "",
+  uploadingFiles: Int = 0,
+  uploadedSize: Long = 0L,
+  readableUploadedSize: String = "")
 
 @Lenses case class ExecutionActivity(executionTime: Long = 0)
 
@@ -337,34 +345,26 @@ case class EnvironmentErrorData(datedErrors: Seq[(EnvironmentError, Long, Int)])
 
 case class OutputStreamData(id: ExecutionId, output: String)
 
-case class StaticExecutionInfo(path: SafePath, script: String, startDate: Long = 0L)
+case class StaticExecutionInfo(path: SafePath, script: String, startDate: Long)
 
 case class EnvironmentState(
-                             envId: EnvironmentId,
-                             taskName: String,
-                             running: Long,
-                             done: Long,
-                             submitted: Long,
-                             failed: Long,
-                             networkActivity: NetworkActivity,
-                             executionActivity: ExecutionActivity
-                           )
-
-//case class Output(output: String)
+  envId: EnvironmentId,
+  taskName: String,
+  running: Long,
+  done: Long,
+  submitted: Long,
+  failed: Long,
+  networkActivity: NetworkActivity,
+  executionActivity: ExecutionActivity,
+  numberOfErrors: Int)
 
 sealed trait ExecutionInfo {
   def state: String
-
   def duration: Long
-
   def capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)]
-
   def ready: Long = capsules.map(_._2.ready).sum
-
   def running: Long = capsules.map(_._2.running).sum
-
   def completed: Long = capsules.map(_._2.completed).sum
-
   def environmentStates: Seq[EnvironmentState]
 }
 
@@ -375,41 +375,50 @@ object ExecutionInfo {
   case class JobStatuses(ready: Long, running: Long, completed: Long)
 
   case class Failed(
-                     capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
-                     error: Error,
-                     environmentStates: Seq[EnvironmentState],
-                     duration: Long = 0L) extends ExecutionInfo {
+    capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
+    error: Error,
+    environmentStates: Seq[EnvironmentState],
+    duration: Long = 0L,
+    clean: Boolean = true) extends ExecutionInfo {
     def state: String = "failed"
   }
 
   case class Running(
-                      capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
-                      duration: Long,
-                      environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
+    capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
+    duration: Long,
+    environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
     def state: String = "running"
   }
 
   case class Finished(
                        capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
                        duration: Long = 0L,
-                       environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
+                       environmentStates: Seq[EnvironmentState],
+                       clean: Boolean) extends ExecutionInfo {
     def state: String = "finished"
   }
+
+
 
   case class Canceled(
                        capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
                        environmentStates: Seq[EnvironmentState],
-                       duration: Long = 0L) extends ExecutionInfo {
+                       duration: Long = 0L,
+                       clean: Boolean) extends ExecutionInfo {
     def state: String = "canceled"
   }
 
-  case class Launching() extends ExecutionInfo {
-    def state: String = "launching"
-
+  case class Compiling() extends ExecutionInfo {
+    def state: String = "compiling"
     def duration: Long = 0L
-
     def capsules = Vector.empty
+    def environmentStates: Seq[EnvironmentState] = Seq()
+  }
 
+  case class Preparing() extends ExecutionInfo {
+    def state: String = "preparing"
+    def duration: Long = 0L
+    def capsules = Vector.empty
     def environmentStates: Seq[EnvironmentState] = Seq()
   }
 
@@ -793,7 +802,7 @@ object Test {
 
 case class JVMInfos(javaVersion: String, jvmImplementation: String, processorAvailable: Int, allocatedMemory: Long, totalMemory: Long)
 
-case class SequenceData(header: Seq[String], content: Seq[Array[String]])
+case class SequenceData(header: Seq[String] = Seq(), content: Seq[Array[String]]= Seq())
 
 case class WizardModelData(
                             vals: String,
@@ -808,3 +817,8 @@ case class WizardModelData(
                           )
 
 case class WizardToTask(safePath: SafePath, errors: Seq[Error] = Seq())
+
+
+case class ErrorWithLocation(stackTrace: String = "", line: Option[Int] = None, start: Option[Int] = None, end: Option[Int]=None)
+case class ErrorFromCompiler(errorWithLocation: ErrorWithLocation = ErrorWithLocation(), lineContent: String = "")
+case class EditorErrors(errorsFromCompiler: Seq[ErrorFromCompiler] = Seq(), errorsInEditor: Seq[Int] = Seq())

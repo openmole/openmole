@@ -26,7 +26,7 @@ import scaladget.tools._
 import autowire._
 import org.openmole.gui.ext.tool.client
 import org.scalajs.dom.raw.HTMLElement
-import scaladget.bootstrapnative.SelectableButtons
+import scaladget.bootstrapnative.{ SelectableButtons, ToggleButton }
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
@@ -43,9 +43,9 @@ class NetlogoWizardFactory extends WizardPluginFactory {
 
   def parse(safePath: SafePath): Future[Option[LaunchingCommand]] = OMPost()[NetlogoWizardAPI].parse(safePath).call()
 
-  def help: String = "If your Netlogo sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace. Then set the empeddWorkspace option to true in the oms script."
+  def help: String = "If your NetLogo script depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace. Then set the embedWorkspace option to true in the oms script."
 
-  def name: String = "Netlogo"
+  def name: String = "NetLogo"
 }
 
 @JSExportTopLevel("org.openmole.gui.plugin.wizard.netlogo.NetlogoWizardGUI")
@@ -54,17 +54,14 @@ class NetlogoWizardGUI extends WizardGUIPlugin {
 
   def factory = new NetlogoWizardFactory
 
-  lazy val embedWorkspaceCheckBox: SelectableButtons = radios()(
-    selectableButton("Yes", onclick = () ⇒ println("YES")),
-    selectableButton("No", onclick = () ⇒ println("NO"))
-  )
+  lazy val embedWorkspaceToggle: ToggleButton = toggle(false, "Yes", "No")
 
   lazy val panel: TypedTag[HTMLElement] = div(
     hForm(
-      div(embedWorkspaceCheckBox.render)
+      div(embedWorkspaceToggle.render)
         .render.withLabel("EmbedWorkspace")
     ),
-    div(client.modelHelp +++ client.columnCSS, "If your Jar sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace. Then set the empeddWorkspace option to true in the oms script.")
+    div(client.modelHelp +++ client.columnCSS, "If your Netlogo script depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace. Then set the embedWorkspace option to true in the oms script.")
   )
 
   def save(
@@ -83,6 +80,5 @@ class NetlogoWizardGUI extends WizardGUIPlugin {
       outputs,
       libraries,
       resources,
-      NetlogoWizardData(if (embedWorkspaceCheckBox.activeIndex == 0) true else false)).call()
-
+      NetlogoWizardData(embedWorkspaceToggle.position.now)).call()
 }

@@ -38,22 +38,6 @@ package object tools {
 
   val break = br(br)
 
-  object sect extends Section() {
-    override val headerH1 = Seq(
-      fontSize := "1.75em",
-      textAlign := "left",
-      // padding := "2.5em 1em 0"
-      margin := "30px 0 0"
-    )
-
-    override val header = Seq(
-      margin := 0,
-      color := "#333",
-      textAlign.center,
-      padding := "2.5em 2em 0"
-    )
-  }
-
   object api {
 
     def apiEntryTitle(entryName: String): Frag = Seq[Frag](b(entryName), ": ")
@@ -84,12 +68,12 @@ package object tools {
   def code(code: String) = hl.code(code)
   def plain(code: String) = hl.plain(code)
 
-  /** heavily inspired from Section.scala */
+  /** heavily inspired from Section.scala **/
   object links {
 
     def anchor(elements: Seq[Any]): Seq[Modifier] =
       link(elements) match {
-        case Some(t) ⇒ Seq(a(id := s"${shared.anchor(t)}", top := -90, position := "relative", display := "block"))
+        case Some(t) ⇒ Seq(a(id := s"${shared.anchor(t)}", top := -60, position := "relative", display := "block"))
         case None    ⇒ Seq()
       }
 
@@ -105,14 +89,22 @@ package object tools {
         case e: String ⇒ e
         case e: TypedTag[String] ⇒ e
         case e: scalatags.generic.StylePair[Any, String] ⇒ e.s := e.v
+        case e: AttrPair ⇒ e
         case _ ⇒ throw new RuntimeException("Unknown element type " + element.getClass)
       }
 
   }
 
-  def h1(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h1(elements.map(links.toModifier): _*))
-  def h2(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h2(`class` := shared.documentationSideMenu.cssClass)(elements.map(links.toModifier) ++ links.linkIcon(elements): _*))
-  def h3(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h3(`class` := shared.documentationSideMenu.cssClass)(elements.map(links.toModifier) ++ links.linkIcon(elements): _*))
+  object sitemap {
+
+    def siteMapSection(docSection: Seq[Page]) = for {
+      page ← docSection
+    } yield li(a(page.title, href := page.file))
+
+  }
+
+  def h2(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h2(elements.map(links.toModifier) ++ links.linkIcon(elements): _*))
+  def h3(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h3(elements.map(links.toModifier) ++ links.linkIcon(elements): _*))
 
   def anchor(title: String) = s"#${shared.anchor(title)}"
 
@@ -148,7 +140,7 @@ package object tools {
     def ++(s: String) = s"$ss $s"
   }
 
-  def linkButton(title: String, link: String, buttonStyle: AttrPair = classIs(btn ++ btn_default), openInOtherTab: Boolean = true) =
+  def linkButton(title: String, link: String, buttonStyle: AttrPair = classIs(btn ++ btn_selected), openInOtherTab: Boolean = true) =
     a(href := link)(if (openInOtherTab) targetBlank else "")(span(buttonStyle, `type` := "button", title))
 
   def divLinkButton(content: TypedTag[_], link: String, buttonStyle: AttrPair = classIs(btn ++ btn_default), openInOtherTab: Boolean = true) =
@@ -169,7 +161,7 @@ package object tools {
     )
 
   def modificationLink(source: String) =
-    s"https://github.com/openmole/openmole/edit/dev/openmole/bin/org.openmole.site/jvm/src/main/scalatex/$source"
+    s"https://github.com/openmole/openmole/edit/${org.openmole.core.buildinfo.version.major}-dev/openmole/bin/org.openmole.site/jvm/src/main/scalatex/$source"
 
   def rightGlyphButton(title: String, page: Page, glyph: String, openInOtherTab: Boolean = false, buttonStyle: Seq[Modifier] = Seq(classIs(btn ++ btn_default))) =
     to(page)(if (openInOtherTab) targetBlank else "")(
@@ -181,6 +173,11 @@ package object tools {
 
   def basicButton(title: String, buttonStyle: AttrPair = classIs(btn ++ btn_default)) =
     span(buttonStyle, `type` := "button", title)
+
+  /*def getPageTitle(page: Page) = page.title match {
+    case None    ⇒ page.name
+    case Some(x) ⇒ x
+  }*/
 
   lazy val nav: String = "nav"
   lazy val navbar: String = "navbar"
@@ -201,6 +198,7 @@ package object tools {
 
   lazy val btn: String = "btn"
   lazy val btn_default: String = "btn-default"
+  lazy val btn_selected: String = "btn-selected"
   lazy val btn_primary: String = "btn-primary"
   lazy val btn_danger: String = "btn-danger"
   lazy val btn_mole: String = "btn-mole"

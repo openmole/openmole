@@ -37,7 +37,8 @@ class Activator extends PluginInfoActivator {
         Hook(classOf[AppendToCSVFileHook]),
         Hook(classOf[AppendToFileHook]),
         Hook(classOf[CopyFileHook]),
-        Hook(classOf[SaveHook])
+        Hook(classOf[SaveHook]),
+        Hook("CSVHook")
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)

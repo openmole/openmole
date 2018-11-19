@@ -17,47 +17,83 @@
 
 package org.openmole.tool.collection
 
+import java.util
 import java.util.concurrent.Semaphore
 import java.util.TreeMap
+
 import collection.JavaConverters._
-import java.util.Stack
+import java.util.{ Queue, Stack, LinkedList }
 
 object PriorityQueue {
-  def apply[T]() = new PriorityQueue[T]
+  def apply[T](fifo: Boolean = false) = new PriorityQueue[T](fifo)
+
+  sealed trait InnerQueue[T]
+  case class FIFO[T](linkedList: util.LinkedList[T] = new util.LinkedList[T]) extends InnerQueue[T]
+  case class FILO[T](stack: util.Stack[T] = new util.Stack[T]) extends InnerQueue[T]
+
+  def add[T](innerQueue: InnerQueue[T], t: T) = innerQueue match {
+    case FILO(s) ⇒ s.push(t)
+    case FIFO(l) ⇒ l.add(t)
+  }
+
+  def pool[T](innerQueue: InnerQueue[T]) = innerQueue match {
+    case FILO(s) ⇒ s.pop()
+    case FIFO(l) ⇒ l.poll()
+  }
+
+  def clear[T](innerQueue: InnerQueue[T]) = innerQueue match {
+    case FILO(s) ⇒ s.clear()
+    case FIFO(l) ⇒ l.clear()
+  }
+
+  def size[T](innerQueue: InnerQueue[T]) = innerQueue match {
+    case FILO(s) ⇒ s.size()
+    case FIFO(l) ⇒ l.size()
+  }
+
+  def isEmpty[T](innerQueue: InnerQueue[T]) = innerQueue match {
+    case FILO(s) ⇒ s.isEmpty()
+    case FIFO(l) ⇒ l.isEmpty()
+  }
+
+  def toVector[T](innerQueue: InnerQueue[T]) = innerQueue match {
+    case FILO(s) ⇒ s.iterator().asScala.toVector
+    case FIFO(l) ⇒ l.iterator().asScala.toVector
+  }
 }
 
-class PriorityQueue[T] {
+class PriorityQueue[T](fifo: Boolean) {
 
   private val inQueue = new Semaphore(0)
 
-  val queues = (new TreeMap[Int, Stack[T]]).asScala
+  val queues = (new TreeMap[Int, PriorityQueue.InnerQueue[T]]).asScala
 
-  def size: Int = synchronized { queues.map { case (_, q) ⇒ q.size }.sum }
+  def size: Int = synchronized { queues.map { case (_, q) ⇒ PriorityQueue.size(q) }.sum }
 
   def enqueue(e: T, priority: Int) = {
     synchronized {
       queues.get(priority) match {
-        case Some(queue) ⇒ queue.push(e)
+        case Some(queue) ⇒ PriorityQueue.add(queue, e)
         case None ⇒
-          val q = new Stack[T]
-          q.push(e)
+          val q: PriorityQueue.InnerQueue[T] = if (!fifo) PriorityQueue.FILO[T]() else PriorityQueue.FIFO[T]()
+          PriorityQueue.add(q, e)
           queues.put(priority, q)
       }
     }
     inQueue.release
   }
 
-  def dequeue = {
+  def dequeue() = {
     inQueue.acquire
     synchronized {
       val (p, q) = queues.last
-      val job = q.pop
-      if (q.isEmpty) queues.remove(p)
+      val job = PriorityQueue.pool(q)
+      if (PriorityQueue.isEmpty(q)) queues.remove(p)
       job
     }
   }
 
-  def all = synchronized { queues.values.toVector.flatMap(_.iterator().asScala.toVector) }
+  def all = synchronized { queues.values.toVector.flatMap(PriorityQueue.toVector) }
   def clear() = synchronized { queues.clear() }
   def isEmpty = synchronized(size == 0)
 

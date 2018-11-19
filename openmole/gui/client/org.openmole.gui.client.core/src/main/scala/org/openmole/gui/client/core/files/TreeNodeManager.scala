@@ -107,7 +107,10 @@ class TreeNodeManager {
     val cur = current.now
 
     def getAndUpdateSons(safePath: SafePath): Future[ListFiles] = CoreUtils.getSons(safePath, fileFilter).map { newsons ⇒
-      sons() = sons.now.updated(cur, newsons)
+      sons() = {
+        val ns: ListFiles = newsons
+        sons.now.updated(cur, ns)
+      }
       newsons
     }
 

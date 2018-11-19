@@ -1,0 +1,158 @@
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+
+
+
+@def model = """
+  //model inputs
+  val x = Val[Double]
+  val y = Val[Double]
+  //model outputs
+  val o1 = Val[Double]
+  val o2 = Val[Double]
+
+  val model =
+    ScalaTask("val o1 = x; val o2 = y") set (
+      inputs += (x, y),
+      outputs += (o1, o2)
+    )
+"""
+
+@h2
+    OpenMOLE Strategy to handle Stochastic Models Calibration
+
+  @p Calibration of stochastic models leads to noisy fitness functions that may jeopardize Genetic Algorithm convergence.
+   An efficient strategy to deal with such fitness functions is implemented in OpenMOLE. This strategy automatically balances the need for replications and
+  the discovery of new solutions. In case you want to explore a stochastic model with a genetic algorithm you can do:
+@br
+@br
+
+  @br @hl.openmole("""
+  val seed = Val[Long]
+
+  val evolution =
+    SteadyStateEvolution(
+      // Definition of the optimisation algorithm
+      // mu is the size of the population
+      // genome (of individuals) is the inputs prototype and their variation ranges
+      // objectives are the objectives to minimise
+      algorithm =
+        NSGA2(
+          mu = 100,
+          genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
+          objectives = Seq(o1, o2),
+          // OpenMOLE provide a seed for your stochastic model to use (it is optional)
+          // 20% of the evaluations are used for replicating existing solutions
+          // 100 replication are stored at max for each individual
+          stochastic = Stochastic(seed = seed, reevaluate = 0.2, replications = 100)
+        ),
+      evaluation = model,
+      termination = 100
+    )""", header = model)
+
+
+@h2
+    The problem of stochasticity in Model Calibration
+@p
+    Genetic algorithms don’t cope well with stochasticity.
+
+     This is especially the case for algorithms with evolution strategies of type "µ + λ" (such as NSGA2, the GA used in OpenMOLE)
+     which preserves best solutions (individuals) from a generation to another.
+
+    In that kind of optimization, the quality of a solution is only @b{estimated}.
+    Since it is subject to variation from a replication to another, the quality can either be overvalued or
+    undervalued i.e. estimated at a significantly greater or lower value than the one obtained for an infinite
+    number of replications.
+
+@br
+    Undervalued solutions are not that problematic, as they might be discarded instead of being kept, but the algorithm
+    has a chance to retry a very similar solution later on.
+
+    Conversely, the overvalued solutions are very problematic : the genetic algorithm will keep them
+    in the population of good solutions because they have been (falsely) evaluated as such, and will generate
+     new offspring solutions from them.
+@br
+
+    This behaviour can greatly slow down the convergence of the calibration algorithm and even make it converge toward
+    set of parameters producing very unstable dynamics, very likely to produce false positive good solutions.
+
+@h3
+    Existing solutions
+@p
+    To reduce the influence of the fitness fluctuation, the simplest approach is  "resampling". It consists in
+    replicating the fitness evaluation of individuals. The computed "quality" of an individual is then
+    an estimation (e.g. mean, median) based on a @i{finite} number of replications of the fitness computation.
+@br
+    This number is set to a compromise between the computation time taken to evaluate one set of parameters (an individual)
+     and an acceptable level of noise for the computed quality.
+     Still, any number of replications, even very high, implies that some solutions are overvalued with a non negligible probability given that the fitness function is evaluated
+    millions of times.
+@br
+    Other ad hoc methods of the literature are based on some assumptions that are hard or impossible to verify
+    (such as the invariance of the noise distribution over the fitness space) and add parameters to the algorithm
+    that are difficult to tune finely.
+@br
+    See @aa("this paper" , href:=Resource.literature.rakshit2016.file) for an extensive review of noisy fitness management in Evolutionary Computation.
+
+@h3
+    OpenMOLE's solution
+
+@p
+    To overcome these limitations, OpenMOLE uses an auto-adaptive strategy called "stochastic resampling".
+
+@br
+    The idea is to  evaluate individuals with only one replication and, at the next generation, to keep and re-inject a sample of the individuals of the current population in the newly created population..
+@br
+
+    For instance, at each generation, 90% of the individuals offspring genomes are @b{new genomes} obtained by
+    classical mutation/crossover steps of genetic algorithms, and 10% of the offspring genomes are drawn randomly from
+    the current population i.e. @b{already evaluated genomes}, for which the algorithm computes one additional replication.
+
+
+    Replicated evaluations are stored for each individual in a vector of replications. The global fitness of an
+    individual is computed using (for instance) the median of each fitness value stored in the replication vector.
+
+@br
+    This evolution strategy intends to have the best individuals survive several generations and therefore be
+    the most likely to be resampled, since each individual has a fixed chance of being resampled at each generation.
+@br
+
+    However, this fixed probability of resampling is not sufficient alone, since well evaluated solutions are likely
+     to be replaced by overvalued solutions (new solutions with a few "lucky" replications).
+
+
+    So as to compensate this bias, we add a technical objective to NSGA2 : maximize the number of evaluations
+    of a solution.
+
+
+@br
+
+    The optimization problem of model calibration becomes a @b{multi-objective optimisation problem}
+    (if it was not already !) : the algorithm has to optimize the objectives of the model @b{and} the technical
+    objective as well.
+
+    Therefore, the number of replications is taken into account in the Pareto compromise elitism of NSGA2: solutions with
+    many replications are kept, even if some solutions are better on the other objectives but have been evaluated fewer times.
+
+
+
+    By doing so, we let the multi-objective optimization algorithm handle the compromise between the quality of the
+    solutions and their robustness.
+
+
+@p
+
+    This method adds only two new parameters:
+    @ol
+        @li
+            @hl.code("""reevaluate"""), the probability of resampling an individual at each generation
+        @li
+            @hl.code("""replications"""), the maximum number of evaluation values for an individual, to limit the
+            memory used to store an individual.
+
+See the line @hl.code("""stochastic = Stochastic(seed = seed, reevaluate = 0.2, replications = 100)""") in the example.
+
+
+
+This method has been implemented in the library for evolutionary computing: MGO5, and is currently being benchmarked against other stochasticity management methods (see  @aa("the repository" , href:=shared.link.repo.mgobench))

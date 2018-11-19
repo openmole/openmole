@@ -38,44 +38,41 @@ object NetLogo6Task {
   implicit def isTask: InputOutputBuilder[NetLogo6Task] = InputOutputBuilder(NetLogo6Task.config)
   implicit def isExternal: ExternalBuilder[NetLogo6Task] = ExternalBuilder(NetLogo6Task.external)
   implicit def isInfo = InfoBuilder(info)
-
-  implicit def isBuilder = new NetLogoTaskBuilder[NetLogo6Task] {
-    override def netLogoInputs = NetLogo6Task.netLogoInputs
-    override def netLogoArrayOutputs = NetLogo6Task.netLogoArrayOutputs
-    override def netLogoOutputs = NetLogo6Task.netLogoOutputs
-  }
+  implicit def isMapped = MappedInputOutputBuilder(NetLogo6Task.mapped)
 
   def workspace(
     workspace:         File,
     script:            String,
     launchingCommands: Seq[FromContext[String]],
-    seed:              OptionalArgument[Val[Int]] = None,
-    ignoreError:       Boolean                    = false
+    seed:              OptionalArgument[Val[Int]],
+    ignoreError:       Boolean,
+    reuseWorkspace:    Boolean
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): NetLogo6Task =
     withDefaultArgs(
-      workspace = Workspace(script = script, workspace = workspace.getName),
+      workspace = Workspace.Directory(directory = workspace, script = script, name = workspace.getName),
       launchingCommands = launchingCommands,
       seed = seed,
-      ignoreError = ignoreError
+      ignoreError = ignoreError,
+      reuseWorkspace = reuseWorkspace
     ) set (
-        inputs += (seed.option.toSeq: _*),
-        resources += workspace
+        inputs += (seed.option.toSeq: _*)
       )
 
   def file(
     script:            File,
     launchingCommands: Seq[FromContext[String]],
-    seed:              OptionalArgument[Val[Int]] = None,
-    ignoreError:       Boolean                    = false
+    seed:              OptionalArgument[Val[Int]],
+    ignoreError:       Boolean,
+    reuseWorkspace:    Boolean
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): NetLogo6Task =
     withDefaultArgs(
-      workspace = Workspace(script = script.getName),
+      workspace = Workspace.Script(script = script, name = script.getName),
       launchingCommands = launchingCommands,
       seed = seed,
-      ignoreError = ignoreError
+      ignoreError = ignoreError,
+      reuseWorkspace = reuseWorkspace
     ) set (
-        inputs += (seed.option.toSeq: _*),
-        resources += script
+        inputs += (seed.option.toSeq: _*)
       )
 
   def apply(
@@ -83,43 +80,43 @@ object NetLogo6Task {
     launchingCommands: Seq[FromContext[String]],
     embedWorkspace:    Boolean                    = false,
     seed:              OptionalArgument[Val[Int]] = None,
-    ignoreError:       Boolean                    = false
+    ignoreError:       Boolean                    = false,
+    reuseWorkspace:    Boolean                    = false
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): NetLogo6Task =
-    if (embedWorkspace) workspace(script.getCanonicalFile.getParentFile, script.getName, launchingCommands, seed = seed, ignoreError = ignoreError)
-    else file(script, launchingCommands, seed = seed, ignoreError = ignoreError)
+    if (embedWorkspace) workspace(script.getCanonicalFile.getParentFile, script.getName, launchingCommands, seed = seed, ignoreError = ignoreError, reuseWorkspace = reuseWorkspace)
+    else file(script, launchingCommands, seed = seed, ignoreError = ignoreError, reuseWorkspace = reuseWorkspace)
 
   private def withDefaultArgs(
     workspace:         NetLogoTask.Workspace,
     launchingCommands: Seq[FromContext[String]],
     seed:              Option[Val[Int]],
-    ignoreError:       Boolean
+    ignoreError:       Boolean,
+    reuseWorkspace:    Boolean
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     NetLogo6Task(
       config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
-      netLogoInputs = Vector.empty,
-      netLogoOutputs = Vector.empty,
-      netLogoArrayOutputs = Vector.empty,
+      mapped = MappedInputOutputConfig(),
       workspace = workspace,
       launchingCommands = launchingCommands,
       seed = seed,
-      ignoreError = ignoreError
+      ignoreError = ignoreError,
+      reuseWorkspace = reuseWorkspace
     )
 
 }
 
 @Lenses case class NetLogo6Task(
-  config:              InputOutputConfig,
-  external:            External,
-  info:                InfoConfig,
-  netLogoInputs:       Vector[(Val[_], String)],
-  netLogoOutputs:      Vector[(String, Val[_])],
-  netLogoArrayOutputs: Vector[(String, Int, Val[_])],
-  workspace:           NetLogoTask.Workspace,
-  launchingCommands:   Seq[FromContext[String]],
-  seed:                Option[Val[Int]],
-  ignoreError:         Boolean
+  config:            InputOutputConfig,
+  external:          External,
+  info:              InfoConfig,
+  mapped:            MappedInputOutputConfig,
+  workspace:         NetLogoTask.Workspace,
+  launchingCommands: Seq[FromContext[String]],
+  seed:              Option[Val[Int]],
+  ignoreError:       Boolean,
+  reuseWorkspace:    Boolean
 ) extends NetLogoTask {
   override def netLogoFactory: NetLogoFactory = NetLogo6Task.factory
 }

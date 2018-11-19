@@ -24,7 +24,7 @@ package object stylesheet {
 
   lazy val GREEN = "#a6bf26"
 
-  lazy val DARK_GREY = "#222"
+  lazy val DARK_GREY = "#555"
 
   lazy val LIGHT_GREY = "#e7e7e7"
   //
@@ -40,6 +40,12 @@ package object stylesheet {
     display := "block"
   )
 
+  def centerW(w: Int) = Seq(
+    width := s"${w}px",
+    margin := "0 auto",
+    display := "block"
+  )
+
   /* lazy val mainDiv = Seq(
     paddingTop := 100,
     paddingBottom := 50,
@@ -48,13 +54,15 @@ package object stylesheet {
 
   def rightDetailButtons(topValue: Int) = Seq(
     top := topValue,
-    minWidth := 230
+    minWidth := 230,
+    lineHeight := "1em"
   )
 
   def leftDetailButtons(topValue: Int) = Seq(
     top := topValue,
     paddingRight := 50,
-    minWidth := 230
+    minWidth := 230,
+    lineHeight := "1em"
   )
 
   lazy val navigateDoc = Seq(
@@ -76,8 +84,9 @@ package object stylesheet {
   ) ++ center(90)
 
   val headerImg = Seq(
-    padding := 10,
-    width := 130
+    paddingRight := 20,
+    marginBottom := 30,
+    height := 80
   )
 
   lazy val previousDoc = Seq(
@@ -105,12 +114,12 @@ package object stylesheet {
     textAlign := "center"
   ) ++ center(70)
 
+  lazy val centerBox100 = Seq(
+    textAlign := "center"
+  ) ++ center(100)
+
   lazy val footer = Seq(
-    paddingTop := 30,
-    paddingBottom := 20,
     position := "relative",
-    marginTop := -210,
-    minHeight := 210,
     clear := "both",
     backgroundColor := "#222",
     color := "white"
@@ -141,11 +150,10 @@ package object stylesheet {
 
   val h1Like = Seq(
     color := "#444",
-    fontSize := "30px",
-    fontWeight := 100,
-    margin := "0 0 24px",
+    fontSize := "35px",
+    fontWeight := "bold",
     textTransform := "uppercase",
-    paddingTop := 100
+    lineHeight := "50px"
   )
 
   def svgRunButton(top: Int) = Seq(
@@ -155,9 +163,14 @@ package object stylesheet {
 
   def centerJustify(ratio: Int) = Seq(
     width := s"$ratio%",
-    paddingTop := 15,
+    paddingTop := 10,
     textAlign := "justify",
     marginLeft := "auto",
     marginRight := "auto"
+  )
+
+  val suggest = Seq(
+    padding := 25,
+    float := "right"
   )
 }

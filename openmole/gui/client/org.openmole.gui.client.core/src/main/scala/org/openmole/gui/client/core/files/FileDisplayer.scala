@@ -28,11 +28,6 @@ import scala.concurrent.Future
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object FileDisplayer {
-  def editor(fileType: FileExtension, initCode: String): EditorPanelUI = EditorPanelUI(fileType, initCode)
-
-}
-
 class FileDisplayer(val tabs: TreeNodeTabs) {
 
   def alreadyDisplayed(safePath: SafePath) =

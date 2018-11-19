@@ -120,46 +120,46 @@ object Site extends App {
          * The body of this site's HTML page
          */
 
-        def bodyFrag(page: org.openmole.site.Page) = {
+        def bodyFrag(pageTree: PageTree) = {
 
-          val sitePage =
-            page match {
-              case Pages.index ⇒ ContentPage(div(paddingTop := 100), div(page.content))
-              case _           ⇒ UserGuide.currentStep(page)
+          val (sitePage, elementClass) =
+            pageTree.page match {
+              case Pages.indexPage ⇒ (ContentPage(div, div(pageTree.content)), `class` := "")
+              case _               ⇒ (UserGuide.integrate(pageTree), `class` := "page-element")
             }
 
           body(position := "relative", minHeight := "100%")(
             Menu.build(sitePage),
             div(id := "main-content")(
-              div(`id` := "sidebar-right", paddingTop := 200)(
-                page.source.map(source ⇒ tools.linkButton("Suggest edits", tools.modificationLink(source), classIs(btn ++ btn_danger))
+              sitePage.header(
+                pageTree.source.map(source ⇒ tools.linkButton("Suggest edits", tools.modificationLink(source), classIs(btn ++ btn_danger))(stylesheet.suggest)
                 )),
-              sitePage.name,
-              sitePage.element
+              div(elementClass, id := "padding-element")(
+                if (pageTree.name == DocumentationPages.documentation.name) div
+                else sitePage.parents.map { p ⇒ innerLink(p.page, p.name) }.distinct.reduceLeftOption((x1, x2) ⇒ span(x1, span(" > "), x2)).getOrElse(span),
+                sitePage.element
+              )
             ),
             sitePage match {
-              case s: StepPage ⇒ Seq(s.leftMenu, s.rightMenu)
-              case _ ⇒
-                //                val menus: Seq[TypedTag[_ <: String]] = //SideMenu.menus.get(page.name).getOrElse(Seq(div))
-                //                menus
-                div(id := shared.documentationSideMenu.place)
+              case s: IntegratedPage ⇒ Seq(s.leftMenu) ++ s.rightMenu.toSeq
+              case _                 ⇒ div()
             },
             Footer.build,
-            onload := onLoadString(page)
+            onload := onLoadString(pageTree)
           )
         }
 
-        private def onLoadString(sitepage: org.openmole.site.Page) = {
+        private def onLoadString(sitepage: org.openmole.site.PageTree) = {
           def siteJS = "org.openmole.site.SiteJS()"
-          def documentationJS = s"$siteJS.documentationSideMenu();"
+
           def commonJS = s"$siteJS.main();$siteJS.loadIndex(index);"
 
-          sitepage match {
-            case Pages.index | Pages.training    ⇒ s"$siteJS.loadBlogPosts();" + commonJS
-            case DocumentationPages.profile      ⇒ s"$siteJS.profileAnimation();" + documentationJS + commonJS
-            case DocumentationPages.pse          ⇒ s"$siteJS.pseAnimation();" + documentationJS + commonJS
-            case DocumentationPages.simpleSAFire ⇒ s"$siteJS.sensitivityAnimation();" + documentationJS + commonJS
-            case _                               ⇒ documentationJS + commonJS
+          sitepage.page match {
+            case Pages.index | DocumentationPages.training ⇒ s"$siteJS.loadBlogPosts();" + commonJS
+            case DocumentationPages.profile                ⇒ s"$siteJS.profileAnimation();" + commonJS
+            case DocumentationPages.pse                    ⇒ s"$siteJS.pseAnimation();" + commonJS
+            case DocumentationPages.simpleSAFire           ⇒ s"$siteJS.sensitivityAnimation();" + commonJS
+            case _                                         ⇒ commonJS
           }
         }
 

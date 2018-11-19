@@ -87,6 +87,7 @@ object Application extends JavaLogger {
       http:                 Boolean         = false,
       browse:               Boolean         = true,
       proxyURI:             Option[String]  = None,
+      httpSubDirectory:     Option[String]  = None,
       args:                 List[String]    = Nil,
       extraHeader:          Option[File]    = None
     )
@@ -128,6 +129,7 @@ object Application extends JavaLogger {
       |[--mem memory] allocate more memory to the JVM (not supported on windows yes), for instance --mem 2G
       |[--logger-level level] set the level of logging (OFF, SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST, ALL)
       |[--proxy hostname] set the proxy to use to install containers or R packages, in the form http://myproxy.org:3128
+      |[--http-sub-directory] set the subdirectory for openmole app (for non-root path). No '/' is required (Example: "user1")
       |[--] end of options the remaining arguments are provided to the console in the args array
       |[-h | --help] print help""".stripMargin
 
@@ -160,6 +162,7 @@ object Application extends JavaLogger {
         case "--host-name" :: tail              ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
         case "--reset-password" :: tail         ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = true)))
         case "--proxy" :: tail                  ⇒ parse(tail.tail, c.copy(proxyURI = Some(tail.head)))
+        case "--http-sub-directory" :: tail     ⇒ parse(tail.tail, c.copy(httpSubDirectory = Some(tail.head)))
         case "--" :: tail                       ⇒ parse(Nil, c.copy(args = tail))
         case "-h" :: tail                       ⇒ help(tail)
         case "--help" :: tail                   ⇒ help(tail)
@@ -224,7 +227,7 @@ object Application extends JavaLogger {
         }
         else {
           Services.withServices(workspaceDirectory, passwordString, config.proxyURI) { services ⇒
-            val server = new RESTServer(config.port, config.hostName, services)
+            val server = new RESTServer(config.port, config.hostName, services, config.httpSubDirectory)
             server.run()
           }
           Console.ExitCodes.ok
@@ -276,9 +279,10 @@ object Application extends JavaLogger {
             GUIServer.urlFile.content = url
 
             GUIServices.withServices(workspace, config.proxyURI) { services ⇒
-              val server = new GUIServer(port, config.remote, useHTTP, services, config.password, extraHeader, !config.unoptimizedJS)
+              val server = new GUIServer(port, config.remote, useHTTP, services, config.password, extraHeader, !config.unoptimizedJS, config.httpSubDirectory)
               server.start()
               if (config.browse && !config.remote) browse(url)
+              server.launchApplication()
               logger.info(s"Server listening on port $port.")
               server.join() match {
                 case GUIServer.Ok      ⇒ Console.ExitCodes.ok

@@ -48,7 +48,6 @@ class ResetPassword {
 
   def setPasswordForm: HTMLFormElement =
     tags.form(
-      action := "/resetPassword",
       method := "post",
       passwordInput,
       passwordAgainInput,

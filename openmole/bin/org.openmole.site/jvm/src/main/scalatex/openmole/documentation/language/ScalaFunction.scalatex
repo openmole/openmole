@@ -1,0 +1,71 @@
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+Some useful functions are usable anywhere in OpenMOLE where you would use scala code. For instance you can use them in:
+    @ul
+        @li
+            @a("ScalaTask", href := DocumentationPages.scala.file) code,
+        @li
+            string expanded by OpenMOLE (${scala code}),
+        @li
+            OpenMOLE scripts.
+
+@h2{Data processing}
+
+OpenMOLE provides a useful function to aggregate data. This function can be called on array and vectors. For instance:
+
+@hl.openmole("""
+val pi = Val[Double]
+val piAvg = Val[Double]
+
+// Define the average task that average several estimation of pi
+val average =
+  ScalaTask("val piAvg = pi.average") set (
+    inputs += pi.toArray,
+    outputs += piAvg
+)""")
+
+This task takes place after an exploration and compute the average of many values of pi. The presently available functions are:
+@ul
+  @li
+    @hl.code("""def median: Double"""), compute the median of the vector,
+  @li
+    @hl.code("""def medianAbsoluteDeviation: Double"""), compute the median absolute deviation of the vector,
+  @li
+    @hl.code("""def average: Double"""), compute the average of the vector,
+  @li
+    @hl.code("""def meanSquaredError: Double"""), compute the mean square error of the vector,
+  @li
+    @hl.code("""def rootMeanSquaredError: Double"""), compute the root of the mean square error of the vector.
+
+@h2{File creation}
+
+It might be useful to create files and folders in ScalaTask code. To do that use one of the folowing functions:
+@ul
+    @li
+        @hl.code("def newFile(prefix: String, suffix: String): File"), this function creates a new file in the OpenMOLE workspace. You may optionally provide a prefix and suffix for the file name. It would generally be called @hl.code("newFile()").
+    @li
+        @hl.code("def newDir(prefix: String): File"), this function creates a new directory in the OpenMOLE workspace. You may optionally provide a prefix for the directory name. It would generally be called @hl.code("newDir()"). This function doesn't create the directory.
+    @li
+        @hl.code("def mkDir(prefix: String): File"), this function creates a new directory in the OpenMOLE workspace. You may optionally provide a prefix for the directory name. It would generally be called @hl.code("mkDir()"). This function creates the directory.
+
+@h2{Random number generator}
+
+@p
+  In scala code you may use a properly initialised random generator by calling @hl.code("""random()"""). For instance you may call @hl.code("""random().nextInt""").
+@p
+  It might sometimes be useful to create a new random number generator. To do that use @hl.code("def newRandom(seed: Long): Random"). The seed is optional. If it is not provided OpenMOLE will take care of the generator initialisation in a sound manner. It would generally be called @hl.code("newRNG()").
+
+
+@todo("""julien
+  @h2{Technical functions}
+
+  def classLoader[C: Manifest] = manifest[C].erasure.getClassLoader
+  def classLoader(a: Any) = a.getClass.getClassLoader
+
+  def withThreadClassLoader[R](classLoader: ClassLoader)(f: ⇒ R) =
+    org.openmole.tool.thread.withThreadClassLoader(classLoader)(f)
+    """)
+
+
+

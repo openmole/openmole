@@ -26,7 +26,8 @@ import org.openmole.plugin.environment.sge.SGEEnvironment
 import org.openmole.plugin.environment.slurm.SLURMEnvironment
 import org.openmole.plugin.environment.ssh.SSHEnvironment
 import org.openmole.plugin.hook.file.AppendToCSVFileHook
-import org.openmole.plugin.method.evolution._
+import org.openmole.plugin.method.evolution.NSGA2
+import org.openmole.plugin.method.sensitivity.MorrisSampling
 import org.openmole.plugin.sampling.csv.CSVSampling
 import org.openmole.plugin.sampling.lhs.LHS
 import org.openmole.plugin.sampling.quasirandom.SobolSampling
@@ -39,7 +40,12 @@ import org.openmole.tool.hash._
 
 object module {
 
-  case class ModuleEntry(name: String, description: String, components: Seq[File])
+  val method = "method"
+  val environment = "environment"
+  val sampling = "sampling"
+  val task = "task"
+
+  case class ModuleEntry(name: String, description: String, components: Seq[File], tags: String*)
 
   def allModules =
     Seq[ModuleEntry](
@@ -58,24 +64,21 @@ object module {
       ModuleEntry("CSVSampling", "Generate sampling using CSV files", components(CSVSampling)),
       ModuleEntry("LHS", "Generate Latin Hypercube Sampling", components(LHS)),
       ModuleEntry("QuasiRandom", "Generate sampling using low-discrepency sequences", components(SobolSampling)),
-      ModuleEntry("Evolution", "Explore/optimise models using evolutionary algorithms", components(NSGA2))
+      ModuleEntry("Evolution", "Explore/optimise models using evolutionary algorithms", components(NSGA2)),
+      ModuleEntry("Sensitivity", "Statistical sensitivity analisys", components(MorrisSampling))
     )
 
-  def generate(modules: Seq[ModuleEntry], baseDirectory: File, location: File ⇒ String) = {
+  def generate(modules: Seq[ModuleEntry], copy: File ⇒ String) = {
     def allFiles = modules.flatMap(_.components)
 
-    for {
-      f ← allFiles.distinct
-    } yield {
-      val dest = baseDirectory / location(f)
-      f copy dest
-    }
+    val copied =
+      (for { f ← allFiles.distinct } yield f -> copy(f)).toMap
 
     modules.map { m ⇒
       Module(
         m.name,
         m.description,
-        m.components.map(f ⇒ Component(location(f), f.hash().toString))
+        m.components.map(f ⇒ Component(copied(f), f.hash().toString))
       )
     }
   }

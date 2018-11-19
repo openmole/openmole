@@ -49,6 +49,10 @@ object TopologyProblem {
   case class NoTransitionToCapsuleProblem(capsule: Capsule, dataChannel: DataChannel) extends TopologyProblem {
     override def toString = s"NoTransitionToCapsuleProblem: $capsule is linked with $dataChannel but not with any transition"
   }
+
+  case class UnreachableCapsuleProblem(capsule: Capsule) extends TopologyProblem {
+    override def toString = s"UnreachableCapsuleProblem: $capsule is not linked to the workflow by any transition"
+  }
 }
 
 trait TopologyProblem extends Problem

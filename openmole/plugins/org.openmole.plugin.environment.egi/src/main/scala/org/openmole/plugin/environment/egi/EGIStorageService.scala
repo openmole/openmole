@@ -36,8 +36,8 @@
 //import scala.util.Try
 //
 //trait EGIStorageService extends StorageService with GridScaleStorage with CompressedTransfer {
-//  val usageControl: AvailabilityQuality
-//  import usageControl.quality
+//  val accessControl: AvailabilityQuality
+//  import accessControl.quality
 //
 //  override def exists(path: String)(implicit token: AccessToken): Boolean = quality { super.exists(path)(token) }
 //  override def listNames(path: String)(implicit token: AccessToken): Seq[String] = quality { super.listNames(path)(token) }
@@ -52,8 +52,13 @@
 
 package org.openmole.plugin.environment.egi
 
+import effectaside.Effect
+import gridscale.egi.VOMS
 import org.openmole.core.communication.storage._
 import org.openmole.core.workspace.NewFile
+import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment }
+import org.openmole.plugin.environment.batch.storage._
+import org.openmole.tool.cache.TimeCache
 import org.openmole.tool.file._
 //
 //object NativeCommandCopy {
@@ -99,7 +104,7 @@ import org.openmole.tool.file._
 //      new EGIWebDAVStorageService {
 //        def threads = preference(EGIEnvironment.ConnectionsByWebDAVSE)
 //
-//        val usageControl = AvailabilityQuality(new LimitedAccess(threads, Int.MaxValue), preference(EGIEnvironment.QualityHysteresis))
+//        val accessControl = AvailabilityQuality(new LimitedAccess(threads, Int.MaxValue), preference(EGIEnvironment.QualityHysteresis))
 //        val storage = DPMWebDAVStorage(s.copy(basePath = ""))(authentication)
 //        val url = new URI("https", null, s.host, s.port, null, null, null)
 //        val remoteStorage = new CurlRemoteStorage(s.host, s.port, voName, preference(EGIEnvironment.RemoteCopyTimeout), debug)
@@ -168,32 +173,36 @@ object CurlRemoteStorage {
   }
 }
 
-case class CurlRemoteStorage(location: String, voName: String, debug: Boolean, timeout: Time) extends RemoteStorage {
+case class CurlRemoteStorage(location: String, jobDirectory: String, voName: String, debug: Boolean, timeout: Time) extends RemoteStorage {
 
   //@transient lazy val url = new URI(location)
   @transient lazy val curl = CurlRemoteStorage.Curl(voName, debug, timeout)
   def resolve(dest: String) = gridscale.RemotePath.child(location, dest)
 
-  override def upload(src: File, dest: String, options: storage.TransferOptions)(implicit newFile: NewFile): Unit =
+  override def upload(src: File, dest: Option[String], options: storage.TransferOptions)(implicit newFile: NewFile): String = {
+    val uploadDestination = dest.getOrElse(child(jobDirectory, StorageSpace.timedUniqName))
+
     try {
       try {
-        if (options.raw) CurlRemoteStorage.run(curl.upload(src.getAbsolutePath, resolve(dest)))
+        if (options.raw) CurlRemoteStorage.run(curl.upload(src.getAbsolutePath, resolve(uploadDestination)))
         else newFile.withTmpFile { tmpFile ⇒
           src.copyCompressFile(tmpFile)
-          CurlRemoteStorage.run(curl.upload(tmpFile.getAbsolutePath, resolve(dest)))
+          CurlRemoteStorage.run(curl.upload(tmpFile.getAbsolutePath, resolve(uploadDestination)))
         }
+        uploadDestination
       }
       catch {
         case e: Throwable ⇒
-          util.Try(CurlRemoteStorage.run(curl.delete(resolve(dest))))
+          util.Try(CurlRemoteStorage.run(curl.delete(resolve(uploadDestination))))
           throw new java.io.IOException(s"Error uploading $src to $dest to $location with option $options", e)
       }
     }
     catch {
       case t: Throwable ⇒
-        util.Try(CurlRemoteStorage.run(s"${curl} -X DELETE ${resolve(dest)}"))
+        util.Try(CurlRemoteStorage.run(s"${curl} -X DELETE ${resolve(uploadDestination)}"))
         throw t
     }
+  }
 
   override def download(src: String, dest: File, options: storage.TransferOptions)(implicit newFile: NewFile): Unit = {
     try {
@@ -207,6 +216,42 @@ case class CurlRemoteStorage(location: String, voName: String, debug: Boolean, t
       case e: Throwable ⇒ throw new java.io.IOException(s"Error downloading $src to $dest from $location with option $options", e)
     }
   }
-  override def child(parent: String, child: String): String = gridscale.RemotePath.child(parent, child)
+
+  def child(parent: String, child: String): String = gridscale.RemotePath.child(parent, child)
 }
 
+object WebDavStorage {
+  implicit def webdavlocationIsStorage(implicit httpEffect: Effect[_root_.gridscale.http.HTTP]) = new StorageInterface[WebDavStorage] with EnvironmentStorage[WebDavStorage] with HierarchicalStorageInterface[WebDavStorage] {
+
+    def webdavServer(location: WebDavStorage) = gridscale.webdav.WebDAVSServer(location.url, location.proxyCache().factory)
+
+    override def child(t: WebDavStorage, parent: String, child: String): String = gridscale.RemotePath.child(parent, child)
+    override def parent(t: WebDavStorage, path: String): Option[String] = gridscale.RemotePath.parent(path)
+    override def name(t: WebDavStorage, path: String): String = gridscale.RemotePath.name(path)
+
+    override def exists(t: WebDavStorage, path: String): Boolean = t.accessControl { t.qualityControl { gridscale.webdav.exists(webdavServer(t), path) } }
+    override def list(t: WebDavStorage, path: String): Seq[gridscale.ListEntry] = t.accessControl { t.qualityControl { gridscale.webdav.list(webdavServer(t), path) } }
+    override def makeDir(t: WebDavStorage, path: String): Unit = t.accessControl { t.qualityControl { gridscale.webdav.mkDirectory(webdavServer(t), path) } }
+    override def rmDir(t: WebDavStorage, path: String): Unit = t.accessControl { t.qualityControl { gridscale.webdav.rmDirectory(webdavServer(t), path) } }
+    override def rmFile(t: WebDavStorage, path: String): Unit = t.accessControl { t.qualityControl { gridscale.webdav.rmFile(webdavServer(t), path) } }
+
+    override def upload(t: WebDavStorage, src: File, dest: String, options: storage.TransferOptions): Unit = t.accessControl {
+      t.qualityControl {
+        StorageInterface.upload(true, gridscale.webdav.writeStream(webdavServer(t), _, _))(src, dest, options)
+        //if (!exists(t, dest)) throw new InternalProcessingError(s"File $src has been successfully uploaded to $dest on $t but does not exist.")
+      }
+    }
+
+    override def download(t: WebDavStorage, src: String, dest: File, options: storage.TransferOptions): Unit = t.accessControl {
+      t.qualityControl {
+        StorageInterface.download(true, gridscale.webdav.readStream[Unit](webdavServer(t), _, _))(src, dest, options)
+      }
+    }
+
+    override def id(s: WebDavStorage): String = s.url
+    override def environment(s: WebDavStorage): BatchEnvironment = s.environment
+  }
+
+}
+
+case class WebDavStorage(url: String, accessControl: AccessControl, qualityControl: QualityControl, proxyCache: TimeCache[VOMS.VOMSCredential], environment: EGIEnvironment[_])
