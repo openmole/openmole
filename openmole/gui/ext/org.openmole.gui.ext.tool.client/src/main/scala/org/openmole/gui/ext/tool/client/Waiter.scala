@@ -1,14 +1,15 @@
-package org.openmole.gui.client.core
+package org.openmole.gui.ext.tool.client
 
-import scaladget.tools._
 import org.openmole.gui.ext.data._
 import org.scalajs.dom.raw.HTMLElement
 import rx._
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import scala.concurrent.Future
-import scala.util.{ Success, Failure }
+import scaladget.tools._
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags }
+
+import scala.concurrent.Future
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.util.{ Failure, Success }
 
 /*
  * Copyright (C) 22/12/15 // mathieu.leclaire@openmole.org
@@ -38,7 +39,7 @@ object Waiter {
     )
 }
 
-import Waiter._
+import org.openmole.gui.ext.tool.client.Waiter._
 
 class ProcessStateWaiter(processingState: Var[ProcessState]) {
 

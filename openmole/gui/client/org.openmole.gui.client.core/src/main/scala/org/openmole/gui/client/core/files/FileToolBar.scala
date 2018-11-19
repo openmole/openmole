@@ -18,7 +18,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import org.scalajs.dom.raw.{ HTMLButtonElement, HTMLElement, HTMLInputElement, HTMLSpanElement }
 import rx._
-import org.openmole.gui.client.core.Waiter._
+import Waiter._
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.panels._

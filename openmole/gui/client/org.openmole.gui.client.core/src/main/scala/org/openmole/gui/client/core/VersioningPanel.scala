@@ -8,7 +8,7 @@ import scaladget.tools._
 import scaladget.tools._
 import rx._
 import scaladget.bootstrapnative.Selector.Options
-import org.openmole.gui.client.core.files.treenodemanager
+import org.openmole.gui.client.core.files.{ TreeNodePanel, treenodemanager }
 
 class VersioningPanel {
 
@@ -18,7 +18,12 @@ class VersioningPanel {
     }
   )
 
-  val currentPanel: Var[Option[VersioningGUIPlugin]] = Var(versioningSelector.content.now.map { _.build(treenodemanager.instance.current.now) })
+  def onCloned = () ⇒ {
+    TreeNodePanel.refreshAndDraw
+    dialog.hide
+  }
+
+  val currentPanel: Var[Option[VersioningGUIPlugin]] = Var(versioningSelector.content.now.map { _.build(treenodemanager.instance.current.now, onCloned) })
   val dialog = ModalDialog(omsheet.panelWidth(52))
 
   dialog header (b("Clone a repository"))

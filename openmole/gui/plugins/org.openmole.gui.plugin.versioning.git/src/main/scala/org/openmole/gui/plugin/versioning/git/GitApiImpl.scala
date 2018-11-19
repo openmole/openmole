@@ -19,45 +19,42 @@ package org.openmole.gui.plugin.versioning.git
 
 import org.openmole.core.services._
 import org.openmole.gui.ext.data._
-import org.openmole.core.workspace.Workspace
-import org.openmole.core.workspace._
-import org.openmole.core.context.Context
 import org.openmole.gui.ext.tool.server.Utils._
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.errors._
 
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder
-import org.eclipse.jgit.treewalk.CanonicalTreeParser
-import org.eclipse.jgit.diff.DiffFormatter
-import org.eclipse.jgit.treewalk.CanonicalTreeParser
-import org.eclipse.jgit.util.io.DisabledOutputStream
-import org.eclipse.jgit.diff.DiffEntry
-
 class GitApiImpl(s: Services) extends GitAPI {
 
   implicit val services = s
+
   import s._
 
   implicit val context = org.openmole.gui.ext.data.ServerFileSystemContext.project
 
-  def cloneGIT(url: String, folder: SafePath): SafePath = {
+  def cloneGIT(url: String, folder: SafePath): Option[SafePath] = {
 
-    println("cloneGIT " + url)
-    val folderF: java.io.File = folder
-    println("Clone ", url, " to ", folderF.getAbsolutePath)
-
-    try {
-      val git = Git.cloneRepository().setURI(url).setDirectory(folderF).call()
-    }
-    catch {
-      case ire: InvalidRemoteException ⇒ println("GIT remote Exception")
-      case te: TransportException      ⇒ println("GIT transport Exception")
-      case gae: GitAPIException        ⇒ println("GIT api Exception")
-      case x: Any                      ⇒ println("Any: " + x)
-      // case x: Throwable                ⇒ println("unknown exception " + x.getMessage + ":::\n" + x.getStackTrace.mkString("\n"))
+    val repositoryName = url.split('/').map {
+      _.split('.')
+    }.lastOption.flatMap {
+      _.headOption
     }
 
-    folder
+    val targetFolder = repositoryName map { r ⇒ folder ++ r }
+
+    targetFolder map { tf ⇒
+      val ff: java.io.File = tf
+      try {
+        val git = Git.cloneRepository().setURI(url).setDirectory(ff).call()
+      }
+      catch {
+        case ire: InvalidRemoteException ⇒ println("GIT remote Exception")
+        case te: TransportException      ⇒ println("GIT transport Exception")
+        case gae: GitAPIException        ⇒ println("GIT api Exception")
+        case x: Any                      ⇒ println("Any: " + x)
+      }
+      tf
+    }
+
   }
 
   def status(folder: SafePath, files: Seq[SafePath]) = {

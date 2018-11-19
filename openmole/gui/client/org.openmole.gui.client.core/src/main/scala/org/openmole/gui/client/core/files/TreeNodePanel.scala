@@ -4,7 +4,7 @@ import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, Relati
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.files.FileToolBar.{ FilterTool, PluginTool, TrashTool }
 import org.openmole.gui.client.core.CoreUtils
-import org.openmole.gui.client.core.Waiter._
+import org.openmole.gui.ext.tool.client.Waiter._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.panels._
 import org.openmole.gui.ext.tool.client._

@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.Waiter._
+import org.openmole.gui.ext.tool.client.Waiter._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.tool.OMTags
 import org.scalajs.dom.raw.{ HTMLInputElement, MouseEvent }

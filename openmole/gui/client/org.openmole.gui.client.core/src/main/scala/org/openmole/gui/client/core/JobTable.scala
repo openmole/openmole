@@ -2,7 +2,7 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.ExecutionPanel.{ CapsuleView, EnvironmentView, JobView, SubScript }
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.tool.client.omsheet
+import org.openmole.gui.ext.tool.client.{ Waiter, omsheet }
 import scaladget.bootstrapnative.bsn
 import bsn._
 import org.openmole.gui.ext.api.Api
@@ -11,6 +11,7 @@ import scaladget.tools._
 import scalatags.JsDom.all._
 import rx._
 import scaladget.bootstrapnative.Table.{ BSTableStyle, FixedCell, ReactiveRow, SubRow, VarCell }
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import autowire._

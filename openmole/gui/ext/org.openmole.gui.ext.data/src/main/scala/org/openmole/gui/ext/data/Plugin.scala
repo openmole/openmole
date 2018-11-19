@@ -85,10 +85,10 @@ trait VersioningGUIPlugin extends GUIPlugin {
 
   val panel: TypedTag[HTMLElement]
 
-  def cloneGIT: Future[SafePath]
+  def cloneGIT: Future[Option[SafePath]]
 }
 
 trait VersioningPluginFactory extends GUIPluginFactory {
 
-  def build(cloneIn: SafePath): VersioningGUIPlugin
+  def build(cloneIn: SafePath, onCloned: () ⇒ Unit = () ⇒ {}): VersioningGUIPlugin
 }
