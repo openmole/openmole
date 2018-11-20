@@ -18,37 +18,49 @@
 package org.openmole.plugin.method.evolution
 
 import org.openmole.core.context.{ Context, Variable }
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.workflow.builder.DefinitionScope
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.tools.DefaultSet
 
 object BreedTask {
 
-  def apply[T: WorkflowIntegration](algorithm: T, size: Int)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
-    val t = wfi(algorithm)
+  def apply[T: WorkflowIntegration](algorithm: T, size: Int, suggestion: Seq[DefaultSet] = Seq.empty)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
+    lazy val t = wfi(algorithm)
 
     FromContextTask("BreedTask") { p ⇒
       import p._
+
+      def defaultSetToVariables(ds: DefaultSet) = ds.map(_.toVariable(context)).toVector
+      val suggestedGenomes = suggestion.map(ds ⇒ t.operations.buildGenome(defaultSetToVariables(ds)).from(context))
+
       val population = context(t.populationPrototype)
+      val s = context(t.statePrototype)
 
-      if (population.isEmpty) {
-        val s = context(t.statePrototype)
-        val (news, gs) = t.operations.initialGenomes(size)(context).run(s).value
+      (population.isEmpty, t.operations.generation(s), suggestedGenomes.isEmpty) match {
+        case (true, 0, false) ⇒
 
-        Context(
-          Variable(t.genomePrototype.array, gs.toArray(t.genomePrototype.`type`.manifest)),
-          Variable(t.statePrototype, news)
-        )
+          Context(
+            Variable(t.genomePrototype.array, random().shuffle(suggestedGenomes).toArray(t.genomePrototype.`type`.manifest)),
+            Variable(t.statePrototype, s)
+          )
+        case (true, _, _) ⇒
+          val (news, gs) = t.operations.initialGenomes(size)(context).run(s).value
+
+          Context(
+            Variable(t.genomePrototype.array, gs.toArray(t.genomePrototype.`type`.manifest)),
+            Variable(t.statePrototype, news)
+          )
+        case (false, _, _) ⇒
+          val (newState, breeded) = t.operations.breeding(population.toVector, size).from(context).run(s).value
+
+          Context(
+            Variable(t.genomePrototype.array, breeded.toArray(t.genomePrototype.`type`.manifest)),
+            Variable(t.statePrototype, newState)
+          )
       }
-      else {
-        val s = context(t.statePrototype)
-        val (newState, breeded) = t.operations.breeding(population.toVector, size).from(context).run(s).value
 
-        Context(
-          Variable(t.genomePrototype.array, breeded.toArray(t.genomePrototype.`type`.manifest)),
-          Variable(t.statePrototype, newState)
-        )
-      }
     } set (
       inputs += (t.populationPrototype, t.statePrototype),
       outputs += (t.statePrototype),

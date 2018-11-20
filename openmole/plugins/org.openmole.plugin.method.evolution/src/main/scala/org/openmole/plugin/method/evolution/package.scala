@@ -29,7 +29,10 @@ import org.openmole.core.expansion._
 import org.openmole.tool.types._
 import squants.time.Time
 import mgo.double2Scalable
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.task
+import org.openmole.core.workflow.tools.DefaultSet
 
 package object evolution {
 
@@ -65,7 +68,8 @@ package object evolution {
       termination:  OMTermination,
       stochastic:   OptionalArgument[Stochastic] = None,
       parallelism:  Int                          = 1,
-      distribution: EvolutionPattern             = SteadyState())(implicit wfi: WorkflowIntegration[T]) =
+      distribution: EvolutionPattern             = SteadyState(),
+      suggestion:   Seq[DefaultSet])(implicit wfi: WorkflowIntegration[T]) =
       distribution match {
         case s: SteadyState ⇒
           SteadyStateEvolution(
@@ -73,7 +77,8 @@ package object evolution {
             evaluation = evaluation,
             parallelism = parallelism,
             termination = termination,
-            wrap = s.wrap
+            wrap = s.wrap,
+            suggestion = suggestion
           )
         case i: Island ⇒
           val steadyState =
@@ -81,7 +86,8 @@ package object evolution {
               algorithm = algorithm,
               evaluation = evaluation,
               termination = i.termination,
-              wrap = i.wrap
+              wrap = i.wrap,
+              suggestion = suggestion
             )
 
           IslandEvolution(
@@ -99,11 +105,11 @@ package object evolution {
 
   import shapeless._
 
-  def SteadyStateEvolution[T](algorithm: T, evaluation: Puzzle, termination: OMTermination, parallelism: Int = 1, wrap: Boolean = false)(implicit wfi: WorkflowIntegration[T]) = {
+  def SteadyStateEvolution[T](algorithm: T, evaluation: Puzzle, termination: OMTermination, parallelism: Int = 1, suggestion: Seq[DefaultSet] = Seq.empty, wrap: Boolean = false)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
     val wrapped = wrapPuzzle(evaluation, t.inputPrototypes, t.outputPrototypes, wrap)
-    val randomGenomes = BreedTask(algorithm, parallelism) set ((inputs, outputs) += t.populationPrototype)
+    val randomGenomes = BreedTask[T](algorithm, parallelism, suggestion) set ((inputs, outputs) += t.populationPrototype)
     val scalingGenomeTask = ScalingGenomeTask(algorithm)
     val toOffspring = ToOffspringTask(algorithm)
     val elitismTask = ElitismTask(algorithm)
@@ -210,7 +216,7 @@ package object evolution {
         (elitismSlot -- generateIsland -- masterLastSlot) &
         (elitismSlot -- (masterLastSlot keep t.populationPrototype))
 
-    val masterTask = MoleTask(master) set (exploredOutputs += islandPopulationPrototype.toArray)
+    val masterTask = MoleTask(master) set (exploredOutputs += (islandPopulationPrototype.toArray))
 
     val generateInitialIslands =
       GenerateIslandTask(algorithm, sample, parallelism, islandPopulationPrototype) set (
