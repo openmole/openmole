@@ -21,7 +21,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.tool.client.OMPost
-import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import autowire._
 import org.openmole.gui.ext.tool.client
@@ -31,6 +30,8 @@ import scala.scalajs.js.annotation._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import org.openmole.gui.ext.tool.client.Waiter
+import org.openmole.gui.plugin.versioning.git.GitGUI.{ Cloning, CloningStatus, NotClonedYet }
+import scaladget.bootstrapnative.bsn._
 
 @JSExportTopLevel("org.openmole.gui.plugin.versioning.git.GitFactory")
 class GitFactory extends VersioningPluginFactory {
@@ -40,6 +41,20 @@ class GitFactory extends VersioningPluginFactory {
   def build(cloneIn: SafePath, onCloned: () ⇒ Unit = () ⇒ {}) = new GitGUI(cloneIn, onCloned)
 }
 
+object GitGUI {
+
+  trait CloningStatus
+
+  object NotClonedYet extends CloningStatus
+
+  object Cloning extends CloningStatus
+
+  object Cloned extends CloningStatus
+
+  case class CloneError(messageError: MessageError) extends CloningStatus
+
+}
+
 @JSExportTopLevel("org.openmole.gui.plugin.versioning.git.GitGUI")
 class GitGUI(cloneIn: SafePath, onCloned: () ⇒ Unit = () ⇒ {}) extends VersioningGUIPlugin {
 
@@ -47,32 +62,53 @@ class GitGUI(cloneIn: SafePath, onCloned: () ⇒ Unit = () ⇒ {}) extends Versi
 
   import rx._
 
-  val cloning = Var(false)
+  val cloningStatus: Var[CloningStatus] = Var(NotClonedYet)
+  val watchStack = Var(false)
   val inputStyle: ModifierSeq = Seq(width := 300)
-  val repositoryUrlInput = inputTag("")(placeholder := "Repository URL", inputStyle).render
+  val repositoryUrlInput = inputTag("")(placeholder := "Repository HTTPS URL", inputStyle).render
 
-  val repositoryUrlButton = button("clone", btn_default, `type` := "submit")
+  val repositoryUrlButton = button("clone", marginLeft := 5, btn_default, `type` := "submit")
 
-  lazy val panel: TypedTag[HTMLElement] = div(
-    hForm(Seq(paddingTop := 20, width := 500).toMS)(
-      repositoryUrlInput,
-      div(
+  lazy val panel: TypedTag[HTMLElement] =
+    div(
+      form(paddingTop := 20, width := 500, display := "flex", marginLeft := 5)(
+        repositoryUrlInput,
         Rx {
-          if (cloning()) div(backgroundColor := client.DARK_GREY, width := 60, height := 33, borderRadius := "4px")(Waiter.waiter)
-          else repositoryUrlButton
-        }).render
-    )(
-        onsubmit := {
-          () ⇒
-            cloning.update(true)
-            cloneGIT.foreach { c ⇒
-              cloning.update(false)
-              onCloned()
-            }
-            false
+          cloningStatus() match {
+            case Cloning ⇒ div(backgroundColor := client.DARK_GREY, width := 60, height := 33, marginLeft := 5, borderRadius := "4px")(Waiter.waiter)
+            case _       ⇒ repositoryUrlButton
+          }
+        },
+        Rx {
+          cloningStatus() match {
+            case GitGUI.CloneError(messageError: MessageError) ⇒ label(btn_danger, "Cloning error", marginLeft := 5, onclick := { () ⇒ watchStack.update(!watchStack.now) })
+            case _ ⇒ div
+          }
         }
-      ).render
-  )
+      )(
+          onsubmit := {
+            () ⇒
+              cloningStatus.update(Cloning)
+              cloneGIT.foreach { c ⇒
+                println("Cloned : " + c)
+                val status = c match {
+                  case None ⇒
+                    onCloned()
+                    GitGUI.Cloned
+                  case Some(me: MessageError) ⇒ GitGUI.CloneError(me)
+                }
+                cloningStatus.update(status)
+              }
+              false
+          }
+        ),
+      div(Rx {
+        cloningStatus() match {
+          case GitGUI.CloneError(messageError: MessageError) ⇒ watchStack.expand(div(messageError.stackTrace))
+          case _ ⇒ div.render
+        }
+      })
+    )
 
   def cloneGIT = OMPost()[GitAPI].cloneGIT(repositoryUrlInput.value, cloneIn).call()
 }

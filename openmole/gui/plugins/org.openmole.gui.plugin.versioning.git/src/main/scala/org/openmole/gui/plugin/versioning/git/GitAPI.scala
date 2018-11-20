@@ -23,6 +23,6 @@ trait GitAPI {
 
   case class GitFile(oldPath: SafePath, newPath: SafePath, status: String)
 
-  def cloneGIT(url: String, folder: SafePath): Option[SafePath]
+  def cloneGIT(url: String, folder: SafePath): Option[MessageError]
   //def status(folder: SafePath, files: Seq[SafePath]): Seq[GitFile]
 }

@@ -17,11 +17,14 @@
  */
 package org.openmole.gui.plugin.versioning.git
 
+import java.io.{ PrintWriter, StringWriter }
+
 import org.openmole.core.services._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.tool.server.Utils._
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.errors._
+import org.openmole.core.console.ScalaREPL.ErrorMessage
 
 class GitApiImpl(s: Services) extends GitAPI {
 
@@ -31,7 +34,7 @@ class GitApiImpl(s: Services) extends GitAPI {
 
   implicit val context = org.openmole.gui.ext.data.ServerFileSystemContext.project
 
-  def cloneGIT(url: String, folder: SafePath): Option[SafePath] = {
+  def cloneGIT(url: String, folder: SafePath): Option[MessageError] = {
 
     val repositoryName = url.split('/').map {
       _.split('.')
@@ -41,20 +44,14 @@ class GitApiImpl(s: Services) extends GitAPI {
 
     val targetFolder = repositoryName map { r ⇒ folder ++ r }
 
-    targetFolder map { tf ⇒
-      val ff: java.io.File = tf
-      try {
-        val git = Git.cloneRepository().setURI(url).setDirectory(ff).call()
+    scala.util.Try(
+      targetFolder map { tf ⇒
+        val ff: java.io.File = tf
+        Git.cloneRepository().setURI(url).setDirectory(ff).call()
+      }) match {
+        case scala.util.Failure(e: Exception) ⇒ Some(ErrorBuilder(e))
+        case _                                ⇒ None
       }
-      catch {
-        case ire: InvalidRemoteException ⇒ println("GIT remote Exception")
-        case te: TransportException      ⇒ println("GIT transport Exception")
-        case gae: GitAPIException        ⇒ println("GIT api Exception")
-        case x: Any                      ⇒ println("Any: " + x)
-      }
-      tf
-    }
-
   }
 
   def status(folder: SafePath, files: Seq[SafePath]) = {
