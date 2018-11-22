@@ -336,7 +336,9 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
   lazy val registry = new ExecutionJobRegistry()
   def jobs = ExecutionJobRegistry.executionJobs(registry)
 
+  lazy val relpClassesCache = new AssociativeCache[Seq[Class[_]], Seq[ClosuresBundle]]
   lazy val replBundleCache = new AssociativeCache[ClosuresBundle, FileCache]()
+
 
   lazy val plugins = PluginManager.pluginsForClass(this.getClass)
 
@@ -397,50 +399,52 @@ class BatchExecutionJob(val job: Job, val environment: BatchEnvironment) extends
   def moleJobs = job.moleJobs
   def runnableTasks = job.moleJobs.map(RunnableTask(_))
 
-  def plugins = pluginsAndFiles.plugins ++ closureBundle.map(_.file) ++ replClosuresBundles.flatMap(_.plugins)
+  @transient lazy val plugins = pluginsAndFiles.plugins ++ closureBundleAndPlugins
   def files = pluginsAndFiles.files
 
   @transient lazy val pluginsAndFiles = environment.services.serializerService.pluginsAndFiles(runnableTasks)
 
-  @transient lazy val replClosuresBundles = {
+  def replClosuresBundles = {
     import java.nio.file._
     import org.openmole.tool.bytecode._
 
-    val replDirectories =
-      pluginsAndFiles.replClasses.map(c => c.getClassLoader -> BatchExecutionJob.replClassDirectory(c)).distinct
+    environment.relpClassesCache.cache(job.moleExecution, pluginsAndFiles.replClasses, preCompute = false) { replClasses =>
+      val replDirectories = replClasses.map(c => c.getClassLoader -> BatchExecutionJob.replClassDirectory(c)).distinct
 
-    def bundles(directory: File, classLoader: ClassLoader) = {
-      val allClassFiles = BatchExecutionJob.allClasses(directory)
+      def bundles(directory: File, classLoader: ClassLoader) = {
+        val allClassFiles = BatchExecutionJob.allClasses(directory)
 
-      val mentionedClasses =
-        for {
-          f <- allClassFiles.toList
-          t <- listAllClasses(Files.readAllBytes(f.file))
-          c <- util.Try[Class[_]](Class.forName(t.getClassName, true, classLoader)).toOption.toSeq
-        } yield c
+        val mentionedClasses =
+          for {
+            f <- allClassFiles.toList
+            t <- listAllClasses(Files.readAllBytes(f.file))
+            c <- util.Try[Class[_]](Class.forName(t.getClassName, true, classLoader)).toOption.toSeq
+          } yield c
 
-      def toVersionedPackage(c: Class[_]) = {
-        val p = c.getPackage.getName
-        PluginManager.bundleForClass(c).map { b => VersionedPackage(p, Some(b.getVersion.toString)) }
+        def toVersionedPackage(c: Class[_]) = {
+          val p = c.getPackage.getName
+          PluginManager.bundleForClass(c).map { b => VersionedPackage(p, Some(b.getVersion.toString)) }
+        }
+
+        val packages = mentionedClasses.flatMap(toVersionedPackage).distinct
+        val plugins = mentionedClasses.flatMap(PluginManager.pluginsForClass)
+
+        val exported =
+          allClassFiles.flatMap(c => Option(new File(c.path).getParent)).distinct.
+            filter(BatchExecutionJob.isREPLPackage).
+            map(_.replace("/", "."))
+
+        BatchExecutionJob.ClosuresBundle(allClassFiles, exported, packages, plugins)
       }
 
-      val packages = mentionedClasses.flatMap(toVersionedPackage).distinct
-      val plugins = mentionedClasses.flatMap(PluginManager.pluginsForClass)
-
-      val exported =
-        allClassFiles.flatMap(c => Option(new File(c.path).getParent)).distinct.
-          filter(BatchExecutionJob.isREPLPackage).
-          map(_.replace("/", "."))
-
-      BatchExecutionJob.ClosuresBundle(allClassFiles, exported, packages, plugins)
+      replDirectories.map { case (c, d) => bundles(d, c) }
     }
-
-
-    replDirectories.map { case(c, d) => bundles(d, c) }
   }
-  
-  def closureBundle: Seq[FileCache] =
-    replClosuresBundles.map { closures ⇒
+
+  def closureBundleAndPlugins: Seq[File] = {
+    val replBundle = replClosuresBundles
+
+    val plugins = replBundle.map { closures ⇒
       environment.replBundleCache.cache(job.moleExecution, closures, preCompute = false) { rc ⇒
         val bundle = environment.services.newFile.newFile("closureBundle", ".jar")
         try createBundle("closure-" + UUID.randomUUID.toString, "1.0", closures.classes, closures.exported, closures.dependencies, bundle)
@@ -452,6 +456,9 @@ class BatchExecutionJob(val job: Job, val environment: BatchEnvironment) extends
         FileCache(bundle)(environment.services.fileService)
       }
     }
+
+    plugins.map(_.file) ++ replBundle.flatMap(_.plugins)
+  }
 
   def usedFiles: Iterable[File] =
     (files ++
