@@ -24,7 +24,7 @@ import cats.implicits._
 /**
  * The parameter is a variable wich is injected in the data flow during the
  * workflow execution just before the begining of a task execution. It can be
- * usefull for testing purposes and for defining default value of inputs of a
+ * useful for testing purposes and for defining default value of inputs of a
  * task.
  *
  */

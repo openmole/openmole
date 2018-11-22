@@ -18,6 +18,7 @@ package org.openmole.plugin.method.evolution
 
 import org.openmole.core.dsl._
 import org.openmole.core.workflow.puzzle.{ PuzzleContainer, ToPuzzle }
+import org.openmole.core.workflow.tools.DefaultSet
 import org.openmole.core.workflow.validation.Validation
 import org.openmole.plugin.domain.collection._
 import org.scalatest._
@@ -153,6 +154,23 @@ class WorkflowSpec extends FlatSpec with Matchers {
     val ba = Val[Array[Boolean]]
     val b1: GenomeBound = ba in Seq(Vector(true, false), Vector(true, false))
     val b2: GenomeBound = ba in 2
+  }
+
+  "Suggestion" should "be possible" in {
+
+    val a = Val[Double]
+
+    NSGA2Evolution(
+      evaluation = EmptyTask(),
+      objectives = Seq(a),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100,
+      suggested =
+        Seq(
+          Seq(a := 0.5)
+        )
+
+    )
   }
 
 }

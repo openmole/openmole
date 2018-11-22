@@ -11,6 +11,7 @@ import mgo.niche._
 import monocle.macros._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.domain._
+import org.openmole.core.workflow.tools.DefaultSet
 import org.openmole.plugin.method.evolution.NichedNSGA2.NichedElement
 
 object NichedNSGA2Algorithm {
@@ -274,7 +275,11 @@ object NichedNSGA2 {
         def randomLens = GenLens[S](_.random)
         def startTimeLens = GenLens[S](_.startTime)
         def generation(s: S) = s.generation
+
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
+        def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+        def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
+
         def buildIndividual(genome: G, phenotype: Vector[Double], context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[Unit](random = rng, s = ())
 
@@ -401,10 +406,15 @@ object NichedNSGA2 {
       }
 
       def operations(om: StochasticParams) = new Ops {
+
         def randomLens = GenLens[S](_.random)
         def startTimeLens = GenLens[S](_.startTime)
         def generation(s: S) = s.generation
+
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
+        def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+        def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
+
         def buildIndividual(genome: G, phenotype: Vector[Double], context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[Unit](random = rng, s = ())
 
@@ -549,9 +559,10 @@ object NichedNSGA2Evolution {
     genome:       Genome,
     objectives:   Objectives,
     nicheSize:    Int,
-    stochastic:   OptionalArgument[Stochastic] = None,
-    parallelism:  Int                          = 1,
-    distribution: EvolutionPattern             = SteadyState()) =
+    stochastic:   OptionalArgument[Stochastic]           = None,
+    parallelism:  Int                                    = 1,
+    distribution: EvolutionPattern                       = SteadyState(),
+    suggestion:   Seq[Seq[DefaultSet.DefaultAssignment]] = Seq()) =
     EvolutionPattern.build(
       algorithm =
         NichedNSGA2(
@@ -565,7 +576,8 @@ object NichedNSGA2Evolution {
       termination = termination,
       stochastic = stochastic,
       parallelism = parallelism,
-      distribution = distribution
+      distribution = distribution,
+      suggestion = suggestion.map(DefaultSet.fromAssignments)
     )
 
 }

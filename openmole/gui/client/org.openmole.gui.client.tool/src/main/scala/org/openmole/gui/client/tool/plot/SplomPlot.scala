@@ -43,17 +43,18 @@ object SplomPlot {
         _.toDimension._result
       }.toJSArray
 
-      val colorDim = serie.dimensionSize
+      val arraySize = dims.headOption.map { _.values.length }.getOrElse(0)
+      val colors = (0 to arraySize).toJSArray map { x ⇒ x.toDouble / arraySize }
 
       Plotly.newPlot(
         plotDiv,
         scalajs.js.Array(serie.plotDataBuilder
           .set(dimensions)
           .set(plotlytype.splom)
-        //          .set(plotlymarker
-        //            .set(plotlycolor.array((0 to serie.dimensionSize).toJSArray))
-        //            .set(ColorScale.hot)
-        //          )._result
+          .set(plotlymarker
+            .set(Color.array(colors))
+            .set(ColorScale.viridis)
+          )._result
         ),
         layout,
         Plot.baseConfig)

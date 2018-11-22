@@ -16,13 +16,14 @@
  */
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.context.{ Context, Val }
+import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
 import org.openmole.tool.random._
 import monocle.macros._
 import cats.implicits._
 import org.openmole.core.expansion.FromContext
+import org.openmole.core.workflow.tools.DefaultSet
 
 object PSEAlgorithm {
 
@@ -262,6 +263,9 @@ object PSE {
         def generation(s: S) = s.generation
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
+        def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+        def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
+
         def buildIndividual(genome: G, phenotype: Vector[Double], context: Context) = PSEAlgorithm.buildIndividual(genome, phenotype)
 
         def initialState(rng: util.Random) = EvolutionState[HitMapState](random = rng, s = Map())
@@ -383,7 +387,10 @@ object PSE {
         def startTimeLens = GenLens[S](_.startTime)
 
         def generation(s: S) = s.generation
+
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
+        def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+        def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
 
         def buildIndividual(genome: G, phenotype: Vector[Double], context: Context) = NoisyPSEAlgorithm.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[HitMapState](random = rng, s = Map())
@@ -519,9 +526,10 @@ object PSEEvolution {
     objectives:   Seq[PSE.PatternAxe],
     evaluation:   Puzzle,
     termination:  OMTermination,
-    stochastic:   OptionalArgument[Stochastic] = None,
-    parallelism:  Int                          = 1,
-    distribution: EvolutionPattern             = SteadyState()) =
+    stochastic:   OptionalArgument[Stochastic]           = None,
+    parallelism:  Int                                    = 1,
+    distribution: EvolutionPattern                       = SteadyState(),
+    suggestion:   Seq[Seq[DefaultSet.DefaultAssignment]] = Seq()) =
     EvolutionPattern.build(
       algorithm =
         PSE(
@@ -533,7 +541,8 @@ object PSEEvolution {
       termination = termination,
       stochastic = stochastic,
       parallelism = parallelism,
-      distribution = distribution
+      distribution = distribution,
+      suggestion = suggestion.map(DefaultSet.fromAssignments)
     )
 
 }

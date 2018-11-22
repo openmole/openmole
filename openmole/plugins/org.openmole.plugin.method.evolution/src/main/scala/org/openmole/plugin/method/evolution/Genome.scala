@@ -1,6 +1,7 @@
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.context.{ Val, Variable }
+import org.openmole.core.context.{ Context, Val, Variable }
+import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.tools.math._
 
@@ -127,6 +128,47 @@ object Genome {
       }
     }
     indexOf0(genome.toList, 0)
+  }
+
+  def fromVariables(variables: Seq[Variable[_]], genome: Genome) = FromContext { p ⇒
+    import p._
+
+    val vContext = Context() ++ variables
+
+    def valueOf(v: Val[_]) =
+      vContext.get(v.name) match {
+        case None ⇒ throw new UserBadDataError(s"Values $v has not been provided among $vContext")
+        case Some(f) ⇒
+          if (!v.accepts(f.value)) throw new UserBadDataError(s"Values ${f.value} is incompatible with genome part of type ${v}")
+          else f.value
+      }
+
+    @tailrec def fromVariables0(genome: List[Genome.GenomeBound], accInt: List[Int], accDouble: List[Double]): (Vector[Double], Vector[Int]) =
+      genome match {
+        case Nil                                ⇒ (accDouble.reverse.toVector, accInt.reverse.toVector)
+        case (h: GenomeBound.ScalarDouble) :: t ⇒ fromVariables0(t, accInt, valueOf(h.v).asInstanceOf[Double].normalize(h.low(context), h.high(context)) :: accDouble)
+        case (h: GenomeBound.SequenceOfDouble) :: t ⇒
+          val values = (h.low(context) zip h.high(context) zip valueOf(h.v).asInstanceOf[Array[Double]]).map { case ((low, high), v) ⇒ v.normalize(low, high) }.toList
+          fromVariables0(t, accInt, values ::: accDouble)
+        case (h: GenomeBound.ScalarInt) :: t     ⇒ fromVariables0(t, valueOf(h.v).asInstanceOf[Int] :: accInt, accDouble)
+        case (h: GenomeBound.SequenceOfInt) :: t ⇒ fromVariables0(t, valueOf(h.v).asInstanceOf[Array[Int]].toList ::: accInt, accDouble)
+        case (h: GenomeBound.Enumeration[_]) :: t ⇒
+          val i = h.values.indexOf(valueOf(h.v))
+          if (i == -1) throw new UserBadDataError(s"Value ${valueOf(h.v)} does'nt match a element of enumeration ${h.values} for input ${h.v}")
+          fromVariables0(t, i :: accInt, accDouble)
+        case (h: GenomeBound.SequenceOfEnumeration[_]) :: t ⇒
+          val vs = valueOf(h.v).asInstanceOf[Array[_]]
+          val is =
+            (vs zip h.values).zipWithIndex.map {
+              case ((v, hv), index) ⇒
+                val i = hv.indexOf(v)
+                if (i == -1) throw new UserBadDataError(s"Value ${v} does'nt match a element of enumeration ${hv} for at index $index of input ${h.v}")
+                i
+            }
+          fromVariables0(t, is.toList ::: accInt, accDouble)
+      }
+
+    fromVariables0(genome.toList, List(), List())
   }
 
   def toVariables(genome: Genome, continuousValues: Vector[Double], discreteValue: Vector[Int], scale: Boolean) = {

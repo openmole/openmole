@@ -14,5 +14,5 @@ case class Serie(
   values:          Seq[Dim]          = Seq(),
   plotDataBuilder: PlotDataBuilder   = PlotData.set(plotlymode.markers.lines),
   markerBuilder:   PlotMarkerBuilder = plotlymarker.set(plotlysymbol.cross),
-  colorScale:      ColorScale        = ColorScale.hot
+  colorScale:      ColorScale        = ColorScale.blues
 )
