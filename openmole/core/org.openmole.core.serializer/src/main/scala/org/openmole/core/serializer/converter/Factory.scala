@@ -21,33 +21,25 @@ import collection.mutable
 import com.thoughtworks.xstream.XStream
 import collection.mutable.ListBuffer
 
-trait Factory {
+class Factory[T](build: () ⇒ T, initialize: T ⇒ Unit, clean: T ⇒ Unit = (_: T) ⇒ {}) {
 
   private val pool = new mutable.Stack[T]
   private val _instantiated = ListBuffer.empty[T]
-
-  type T <: {
-    def xStream: XStream
-    def clean
-  }
-
-  def make: T
-
-  def initialize(t: T): T = t
 
   def instantiated = synchronized(_instantiated.toList)
 
   def borrow: T = synchronized {
     if (!pool.isEmpty) pool.pop
     else {
-      val t = initialize(make)
+      val t = build()
+      initialize(t)
       _instantiated += t
       t
     }
   }
 
   def release(serial: T) = synchronized {
-    try serial.clean
+    try clean(serial)
     finally pool.push(serial)
   }
 

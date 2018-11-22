@@ -23,12 +23,14 @@ import java.io.FileInputStream
 import java.io.InputStream
 import java.io.OutputStream
 
-import com.thoughtworks.xstream.core.ClassLoaderReference
+import com.thoughtworks.xstream.core.{ Caching, ClassLoaderReference, DefaultConverterLookup }
 import com.thoughtworks.xstream.io.binary.BinaryStreamDriver
 import org.openmole.tool.file._
 import org.openmole.core.serializer.converter._
 import java.util.concurrent.locks.{ ReadWriteLock, ReentrantReadWriteLock }
 
+import com.thoughtworks.xstream.converters.Converter
+import com.thoughtworks.xstream.mapper.Mapper
 import com.thoughtworks.xstream.security._
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.tool.logger.JavaLogger
@@ -46,7 +48,17 @@ object SerializerService {
 class SerializerService { service ⇒
 
   private[serializer] def buildXStream = {
-    val xs = new XStream(null, new BinaryStreamDriver(), new ClassLoaderReference(this.getClass.getClassLoader))
+    val lookup = new DefaultConverterLookup()
+
+    val xs =
+      new XStream(
+        null,
+        new BinaryStreamDriver(),
+        new ClassLoaderReference(this.getClass.getClassLoader),
+        null: Mapper,
+        lookup,
+        (c: Converter, p: Int) ⇒ lookup.registerConverter(c, p))
+
     xs.addPermission(NoTypePermission.NONE)
     xs.addPermission(new TypePermission {
       override def allows(`type`: Class[_]): Boolean = true
@@ -60,39 +72,36 @@ class SerializerService { service ⇒
   private val xstream = buildXStream
   private val content = "content.xml"
 
-  private trait Initialized extends Factory {
-    override def initialize(t: T) = lock.read {
-      for {
-        op ← xStreamOperations
-      } op(t.xStream)
-      t
-    }
+  private def initialize(t: XStream) = lock.read {
+    for { op ← xStreamOperations } op(t)
+    t
   }
 
-  private val fileSerialisation = new Factory with Initialized {
-    type T = Serialiser with FileSerialisation
-    def make = new Serialiser(service) with FileSerialisation
+  private val fileSerialisation = {
+    def make() = buildXStream
+    new Factory(make, initialize)
   }
 
-  private val pluginAndFileListingFactory = new Factory with Initialized {
+  private val pluginAndFileListingFactory = {
     type T = Serialiser with PluginAndFilesListing
-    def make = new Serialiser(service) with PluginAndFilesListing
+    def make() = new Serialiser(service) with PluginAndFilesListing
+    new Factory[T](
+      make,
+      s ⇒ initialize(s.xStream),
+      s ⇒ (s.xStream.getConverterLookup).asInstanceOf[Caching].flushCache()
+    )
   }
 
-  private val deserialiserWithFileInjectionFactory = new Factory with Initialized {
+  private val deserialiserWithFileInjectionFactory = {
     type T = Serialiser with FileInjection
-    def make = new Serialiser(service) with FileInjection
+    def make() = new Serialiser(service) with FileInjection
+    new Factory[T](make, s ⇒ initialize(s.xStream), _.xStream.getConverterLookup.asInstanceOf[Caching].flushCache())
   }
 
   private def xStreams =
     xstream ::
       pluginAndFileListingFactory.instantiated.map(_.xStream) :::
       deserialiserWithFileInjectionFactory.instantiated.map(_.xStream)
-
-  def register(op: XStream ⇒ Unit) = lock.write {
-    xStreamOperations += op
-    xStreams.foreach(op)
-  }
 
   def deserialise[T](file: File): T = lock.read {
     val is = new FileInputStream(file)
@@ -111,7 +120,7 @@ class SerializerService { service ⇒
   def deserialiseAndExtractFiles[T](tis: TarInputStream)(implicit newFile: NewFile): (T, Iterable[File]) = lock.read {
     newFile.withTmpDir { archiveExtractDir ⇒
       tis.extract(archiveExtractDir)
-      val fileReplacement = fileSerialisation.exec(_.deserialiseFileReplacements(archiveExtractDir))
+      val fileReplacement = fileSerialisation.exec(s ⇒ FileSerialisation.deserialiseFileReplacements(archiveExtractDir, s))
       val contentFile = new File(archiveExtractDir, content)
       (deserialiseReplaceFiles[T](contentFile, fileReplacement), fileReplacement.values)
     }
@@ -129,7 +138,7 @@ class SerializerService { service ⇒
       tos.addFile(objSerial, content)
     }
     val serializationResult = pluginsAndFiles(obj)
-    fileSerialisation.exec(_.serialiseFiles(serializationResult.files, tos))
+    fileSerialisation.exec(s ⇒ FileSerialisation.serialiseFiles(serializationResult.files, tos, s))
   }
 
   def pluginsAndFiles(obj: Any) = pluginAndFileListingFactory.exec(_.list(obj))

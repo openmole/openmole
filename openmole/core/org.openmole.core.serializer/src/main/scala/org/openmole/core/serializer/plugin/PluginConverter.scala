@@ -30,9 +30,15 @@ import org.openmole.core.console._
 import org.openmole.core.serializer.PluginAndFilesListing
 import org.openmole.tool.logger.JavaLogger
 
-object PluginConverter extends JavaLogger
+object PluginConverter extends JavaLogger {
 
-import PluginConverter._
+  def canConvert(c: Class[_]): Boolean = {
+    classOf[Plugins].isAssignableFrom(c) ||
+      PluginManager.isClassProvidedByAPlugin(c) ||
+      (c.getClassLoader != null && classOf[REPLClassloader].isAssignableFrom(c.getClassLoader.getClass))
+  }
+
+}
 
 class PluginConverter(serializer: PluginAndFilesListing, reflectionConverter: ReflectionConverter) extends Converter {
 
@@ -46,11 +52,6 @@ class PluginConverter(serializer: PluginAndFilesListing, reflectionConverter: Re
     throw new UnsupportedOperationException("Bug: Should never be called.")
   }
 
-  override def canConvert(c: Class[_]): Boolean = {
-
-    classOf[Plugins].isAssignableFrom(c) ||
-      PluginManager.isClassProvidedByAPlugin(c) ||
-      (c.getClassLoader != null && classOf[REPLClassloader].isAssignableFrom(c.getClassLoader.getClass))
-  }
+  override def canConvert(c: Class[_]): Boolean = PluginConverter.canConvert(c)
 
 }

@@ -19,9 +19,9 @@ package org.openmole.core.serializer
 
 import java.io.File
 
-import com.thoughtworks.xstream.converters.Converter
+import com.thoughtworks.xstream.converters.{ Converter, ConverterLookup }
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
-import com.thoughtworks.xstream.core.{ ClassLoaderReference, JVM }
+import com.thoughtworks.xstream.core.{ ClassLoaderReference, DefaultConverterLookup, JVM }
 import com.thoughtworks.xstream.core.util.CompositeClassLoader
 import com.thoughtworks.xstream.io.xml.XppDriver
 import com.thoughtworks.xstream.{ XStream, mapper }
@@ -36,7 +36,6 @@ import org.openmole.tool.stream.NullOutputStream
 import org.openmole.core.console._
 
 import scala.collection.immutable.{ HashSet, TreeSet }
-import scala.collection.mutable
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 trait PluginAndFilesListing { this: Serialiser ⇒
