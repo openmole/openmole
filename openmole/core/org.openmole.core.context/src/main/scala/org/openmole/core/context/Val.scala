@@ -144,7 +144,7 @@ object Namespace {
 case class Namespace(names: String*) {
   override def toString =
     if (names.isEmpty) ""
-    else names.mkString("$") + "$"
+    else names.mkString("$")
 }
 
 /**
@@ -161,7 +161,7 @@ class Val[T](val simpleName: String, val `type`: ValType[T], val namespace: Name
    *
    * @return the name of the prototype
    */
-  def name: String = namespace.toString + simpleName
+  def name: String = namespace.toString + "$" + simpleName
 
   /**
    * Test if this prototype can be assigned from another prototype. This work
