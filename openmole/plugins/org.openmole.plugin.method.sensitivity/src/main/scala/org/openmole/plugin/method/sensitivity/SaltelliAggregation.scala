@@ -1,9 +1,12 @@
 package org.openmole.plugin.method.sensitivity
 
-import org.openmole.core.context._
+import org.openmole.core.context.Namespace
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.task._
-//import org.openmole.core.dsl._
+import org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
+import org.openmole.core.dsl
+import org.openmole.core.dsl._
 
 object SaltelliAggregation {
 
@@ -70,22 +73,28 @@ object SaltelliAggregation {
   //   1 - (bxcAvg - math.pow(f0, 2)) / (axaAvg - math.pow(f0, 2))
   // }
 
-  def apply(inputs: Seq[Val[_]], outputs: Seq[Val[_]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(inputs: Seq[ScalarOrSequenceOfDouble[_]], outputs: Seq[Val[Double]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     ClosureTask("SaltelliAggregation") { (context, _, _) ⇒
+
+      //OutputManager.systemOutput.println()
+
       println(context)
       val matrixNames: Array[String] =
         context(SaltelliSampling.matrixName.array)
       // an array of a,b,c for each pair of inputs
+      val fA: Seq[Array[Double]] = outputs.map(o ⇒ context(o.toArray))
 
       def indices(names: Array[String], value: String) = (names zipWithIndex).filter(_._1 == value).map(_._2)
 
       //indices(matrixNames, "a").map()
 
-      context /*+
-        (SaltelliAggregation.firstOrderSI, ???) +
-        (SaltelliAggregation.totalOrderSI, ???)
-        */
-    }
+      context +
+        (SaltelliAggregation.firstOrderSI, Array(0.0, 1.7, 9.8)) +
+        (SaltelliAggregation.totalOrderSI, Array(8.7, 8.7, 6.5))
+
+    } set (
+      dsl.inputs ++= outputs.map(_.array)
+    )
 
 }
 

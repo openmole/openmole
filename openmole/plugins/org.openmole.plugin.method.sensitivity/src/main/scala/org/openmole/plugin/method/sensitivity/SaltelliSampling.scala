@@ -58,7 +58,7 @@ class SaltelliSampling(val samples: FromContext[Int], val factors: ScalarOrSeque
       matrix.zipWithIndex.map {
         case (l, index) ⇒
           def line = ScalarOrSequenceOfDouble.unflatten(factors, l).from(context)
-          Variable(SaltelliSampling.matrixName, m.toString) :: Variable(SaltelliSampling.matrixIndex, index.toString) :: line
+          Variable(SaltelliSampling.matrixName, m.toString) :: Variable(SaltelliSampling.matrixIndex, index) :: line
       }.toList
 
     def aVariables = toVariables(a, Namespace("a"))

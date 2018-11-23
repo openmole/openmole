@@ -18,21 +18,17 @@
 
 package org.openmole.plugin.method
 
-import org.openmole.core.context._
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.workflow.builder.DefinitionScope
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
 import org.openmole.core.workflow.validation.DataflowProblem._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workflow.transition.Slot
-import org.openmole.plugin.method.directsampling._
 import org.openmole.core.dsl
+import org.openmole.core.dsl._
+import org.openmole.core.workflow.puzzle.Puzzle
+import org.openmole.plugin.method.directsampling._
 
 package object sensitivity {
 
@@ -111,12 +107,15 @@ package object sensitivity {
     samples:    FromContext[Int]) = {
 
     val sampling = SaltelliSampling(samples, inputs: _*)
-    val aggregation = SaltelliAggregation(
-      inputs = (inputs.map(_.prototype.array) ++ SaltelliSampling.matrix.map(_.array)),
-      outputs = Seq(
-        SaltelliAggregation.totalOrderSI.array,
-        SaltelliAggregation.firstOrderSI.array)
-    )
+
+    val aggregation =
+      SaltelliAggregation(
+        inputs = inputs,
+        outputs = outputs
+      ) set (
+        dsl.inputs += (SaltelliSampling.matrixName.array, SaltelliSampling.matrixIndex.array),
+        dsl.outputs += (SaltelliAggregation.firstOrderSI, SaltelliAggregation.totalOrderSI)
+      )
 
     DirectSampling(
       evaluation = evaluation,
