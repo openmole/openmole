@@ -19,6 +19,7 @@
 package org.openmole.plugin.method
 
 import org.openmole.core.context._
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.workflow.builder.DefinitionScope
 import org.openmole.core.workflow.dsl._
@@ -30,6 +31,8 @@ import org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
 import org.openmole.core.workflow.validation.DataflowProblem._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workflow.transition.Slot
+import org.openmole.plugin.method.directsampling._
+import org.openmole.core.dsl
 
 package object sensitivity {
 
@@ -99,6 +102,27 @@ package object sensitivity {
     ((cExploration -< evaluation >- sAggregation) &
       (cExploration -- sAggregation))
 
+  }
+
+  def SensitivitySaltelli(
+    evaluation: Puzzle,
+    inputs:     Seq[ScalarOrSequenceOfDouble[_]],
+    outputs:    Seq[Val[Double]],
+    samples:    FromContext[Int]) = {
+
+    val sampling = SaltelliSampling(samples, inputs: _*)
+    val aggregation = SaltelliAggregation(
+      inputs = (inputs.map(_.prototype.array) ++ SaltelliSampling.matrix.map(_.array)),
+      outputs = Seq(
+        SaltelliAggregation.totalOrderSI.array,
+        SaltelliAggregation.firstOrderSI.array)
+    )
+
+    DirectSampling(
+      evaluation = evaluation,
+      sampling = sampling,
+      aggregation = aggregation
+    )
   }
 
 }

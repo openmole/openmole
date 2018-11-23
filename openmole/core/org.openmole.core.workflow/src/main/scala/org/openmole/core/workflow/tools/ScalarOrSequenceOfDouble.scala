@@ -25,6 +25,8 @@ import org.openmole.core.workflow.sampling._
 import org.openmole.core.workspace._
 import org.openmole.tool.random._
 import cats.implicits._
+import org.openmole.core.exception.UserBadDataError
+
 import scala.annotation.tailrec
 import org.openmole.core.tools.math._
 
@@ -48,15 +50,15 @@ object Scalable {
     override def prototype(t: ScalableNumber): Val[_] = t.prototype
     override def size(t: ScalableNumber): FromContext[Int] = 1
 
-    override def scaled(s: ScalableNumber)(genomePart: Seq[Double]): FromContext[Scaled] = {
-      val g = genomePart.head
-      assert(!g.isNaN)
+    override def unflatten(s: ScalableNumber)(sequence: Seq[Double], scale: Boolean): FromContext[Scaled] = {
+      val g = sequence.head
 
       (s.min map2 s.max) { (min, max) ⇒
-        val sc = g.scale(min, max)
+        val sc = if (scale) g.scale(min, max) else g
         ScaledScalar(s.prototype, sc)
       }
     }
+
     override def toVariable(t: ScalableNumber)(value: Seq[Any]): Variable[_] =
       Variable.unsecure(prototype(t).toArray, value.map(_.asInstanceOf[Double]).toArray[Double])
   }
@@ -69,8 +71,8 @@ object Scalable {
     override def inputs(t: Factor[D, Double]): PrototypeSet = Seq()
     override def prototype(t: Factor[D, Double]): Val[_] = scalarIsScalable.prototype(factorToScalar(t))
     override def size(t: Factor[D, Double]) = scalarIsScalable.size(factorToScalar(t))
-    override def scaled(t: Factor[D, Double])(genomePart: Seq[Double]): FromContext[Scaled] =
-      scalarIsScalable.scaled(factorToScalar(t))(genomePart)
+    override def unflatten(t: Factor[D, Double])(genomePart: Seq[Double], scale: Boolean): FromContext[Scaled] =
+      scalarIsScalable.unflatten(factorToScalar(t))(genomePart, scale)
     override def toVariable(t: Factor[D, Double])(value: Seq[Any]): Variable[_] =
       scalarIsScalable.toVariable(factorToScalar(t))(value)
   }
@@ -84,12 +86,12 @@ object Scalable {
     override def size(t: Factor[D, Array[Double]]): FromContext[Int] =
       (bounded.min(t.domain) map2 bounded.max(t.domain)) { case (min, max) ⇒ math.min(min.size, max.size) }
 
-    override def scaled(t: Factor[D, Array[Double]])(values: Seq[Double]): FromContext[Scaled] = {
+    override def unflatten(t: Factor[D, Array[Double]])(sequence: Seq[Double], scale: Boolean): FromContext[Scaled] = {
 
       def scaled =
         (bounded.min(t.domain) map2 bounded.max(t.domain)) {
           case (min, max) ⇒
-            (values zip (min zip max)).map { case (g, (min, max)) ⇒ g.scale(min, max) }
+            (sequence zip (min zip max)).map { case (g, (min, max)) ⇒ if (scale) g.scale(min, max) else g }
         }
 
       scaled.map { sc ⇒ ScaledSequence(t.prototype, sc.toArray) }
@@ -107,28 +109,35 @@ trait Scalable[T] {
   def inputs(t: T): PrototypeSet
   def prototype(t: T): Val[_]
   def size(t: T): FromContext[Int]
-  def scaled(t: T)(values: Seq[Double]): FromContext[Scalable.Scaled]
+  def unflatten(t: T)(sequence: Seq[Double], scale: Boolean): FromContext[Scalable.Scaled]
   def toVariable(t: T)(value: Seq[Any]): Variable[_]
 }
 
 object ScalarOrSequenceOfDouble {
 
-  def scaled(scales: Seq[ScalarOrSequenceOfDouble[_]], values: Seq[Double]): FromContext[List[Variable[_]]] = {
-    @tailrec def scaled0(scales: List[ScalarOrSequenceOfDouble[_]], values: List[Double], acc: List[Variable[_]] = Nil)(context: ⇒ Context, rng: RandomProvider, newFile: NewFile, fileService: FileService): List[Variable[_]] =
+  def unflatten(scales: Seq[ScalarOrSequenceOfDouble[_]], values: Seq[Double], scale: Boolean = true): FromContext[List[Variable[_]]] = {
+    @tailrec def unflatten0(scales: List[ScalarOrSequenceOfDouble[_]], values: List[Double], acc: List[Variable[_]] = Nil)(context: ⇒ Context, rng: RandomProvider, newFile: NewFile, fileService: FileService): List[Variable[_]] =
       if (scales.isEmpty || values.isEmpty) acc.reverse
       else {
         val input = scales.head
         val (variable, tail) =
-          input.scaled(values).map {
+          input.unflatten(values, scale).map {
             case Scalable.ScaledScalar(p, v)   ⇒ Variable(p, v) → values.tail
             case Scalable.ScaledSequence(p, v) ⇒ Variable(p, v) → values.drop(input.size(context)(rng, newFile, fileService))
           }.from(context)(rng, newFile, fileService)
 
-        scaled0(scales.tail, tail, variable :: acc)({ context + variable }, rng, newFile, fileService)
+        unflatten0(scales.tail, tail, variable :: acc)({ context + variable }, rng, newFile, fileService)
       }
 
-    FromContext { p ⇒ scaled0(scales.toList, values.toList)(p.context, p.random, p.newFile, p.fileService) }
+    FromContext { p ⇒ unflatten0(scales.toList, values.toList)(p.context, p.random, p.newFile, p.fileService) }
   }
+
+  def flatten(values: Seq[Any]) =
+    values map {
+      case x: Double        ⇒ Array(x)
+      case x: Array[Double] ⇒ x
+      case x                ⇒ throw new InternalError(s"Value $x of type ${x.getClass} should be of type Double or Array[Double]")
+    }
 
   implicit def fromScalable[T: Scalable](t: T): ScalarOrSequenceOfDouble[T] = new ScalarOrSequenceOfDouble(t, implicitly[Scalable[T]])
 }
@@ -138,6 +147,6 @@ class ScalarOrSequenceOfDouble[T](t: T, scalable: Scalable[T]) {
   def inputs = scalable.inputs(t)
   def prototype = scalable.prototype(t)
   def size = scalable.size(t)
-  def scaled(values: Seq[Double]) = scalable.scaled(t)(values)
+  def unflatten(values: Seq[Double], scale: Boolean) = scalable.unflatten(t)(values, scale)
   def toVariable(value: Seq[Any]): Variable[_] = scalable.toVariable(t)(value)
 }

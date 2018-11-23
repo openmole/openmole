@@ -46,7 +46,7 @@ sealed class LHS(val samples: FromContext[Int], val factors: ScalarOrSequenceOfD
     val s = samples.from(context)
     val vectorSize = factors.map(_.size(context)).sum
     def values = LHS.lhsValues(vectorSize, s, random())
-    values.map(v ⇒ ScalarOrSequenceOfDouble.scaled(factors, v).from(context)).toIterator
+    values.map(v ⇒ ScalarOrSequenceOfDouble.unflatten(factors, v).from(context)).toIterator
   }
 
 }
