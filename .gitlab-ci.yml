@@ -1,16 +1,22 @@
 stages:
-  - test-ci
+  - build-site
 
-image: debian
+image: openmole/openmole
+
+variables:
+  HOME: "$CI_PROJECT_DIR"
+  IVY_HOME: "$HOME/.ivy2"
+  SBT_OPTS: "-Dsbt.ivy.home=$IVY_HOME"
 
 test ci:
-  stage: test-ci
+  stage: build-site
   before_script:
     - apt update
   cache:
     untracked: true
-  only:
-    - master
   script:
-    - echo youpi
+    - (cd build-system && sbt clean publishLocal)
+    - (cd libraries && sbt clean publishLocal)
+    - (cd openmole && sbt clean)
+    - (cd openmole && ./generateSite $WORKSPACE/openmole/bin/target/site/)
 
