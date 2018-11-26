@@ -263,8 +263,7 @@ class Execution {
     val executionIds = staticExecutionInfo.map(_._1)
 
     def outputStreamData(id: ExecutionId, lines: Int) = atomic { implicit ctx ⇒
-      import scala.collection.JavaConverters._
-      OutputStreamData(id, outputStreams(id).toString.lines.iterator().asScala.toSeq.takeRight(lines).mkString("\n"))
+      OutputStreamData(id, outputStreams(id).toString.lines.toSeq.takeRight(lines).mkString("\n"))
     }
 
     val outputs = executionIds.toSeq.map {
