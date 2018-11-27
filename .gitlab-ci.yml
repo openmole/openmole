@@ -1,7 +1,7 @@
 stages:
   - build-site
 
-image: openmole/openmole
+image: openmole/openmole-buildenv
 
 variables:
   HOME: "$CI_PROJECT_DIR"
