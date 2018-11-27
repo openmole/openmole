@@ -161,7 +161,8 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
       case Some(v) ⇒ p.isAssignableFrom(v.prototype)
     }
 
-  def -(name: String) = Context.fromMap(variables - name)
+  def -(name: String): Context = Context.fromMap(variables - name)
+  def -(v: Val[_]): Context = this - v.name
 
   override def empty = Context.empty
 

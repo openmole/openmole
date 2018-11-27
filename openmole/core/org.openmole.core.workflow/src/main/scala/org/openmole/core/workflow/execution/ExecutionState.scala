@@ -17,15 +17,15 @@
 
 package org.openmole.core.workflow.execution
 
-object ExecutionState extends Enumeration {
+object ExecutionState {
 
-  class ExecutionState(val name: String, val isFinal: Boolean = false) extends Val(name)
+  case class ExecutionState(name: String) extends AnyVal
 
-  val READY = new ExecutionState("Ready")
-  val SUBMITTED = new ExecutionState("Submitted")
-  val RUNNING = new ExecutionState("Running")
-  val DONE = new ExecutionState("Done")
-  val FAILED = new ExecutionState("Failed")
-  val KILLED = new ExecutionState("Killed", true)
+  val READY = ExecutionState("Ready")
+  val SUBMITTED = ExecutionState("Submitted")
+  val RUNNING = ExecutionState("Running")
+  val DONE = ExecutionState("Done")
+  val FAILED = ExecutionState("Failed")
+  val KILLED = ExecutionState("Killed")
 }
 

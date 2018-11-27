@@ -13,7 +13,53 @@ import org.scalatest._
 class PatternCompositionSpec extends FlatSpec with Matchers {
   import org.openmole.core.workflow.tools.Stubs._
 
-  "Direct samplings" should "compose with loop" in {
+  "Direct sampling" should "transmit explored inputs" in {
+    val i = Val[Int]
+
+    val model =
+      ClosureTask("model") {
+        (context, _, _) ⇒
+          context(i) should equal(1)
+          context
+      } set (inputs += i)
+
+    val mole =
+      DirectSampling(
+        model,
+        ExplicitSampling(i, Seq(1))
+      )
+
+    mole.run
+  }
+
+  "Direct sampling" should "transmit explored inputs to repicated model" in {
+    val i = Val[Int]
+    val seed = Val[Int]
+
+    val model =
+      ClosureTask("model") {
+        (context, _, _) ⇒
+          context(i) should equal(1)
+          context
+      } set (inputs += (i, seed))
+
+    val replication =
+      Replication(
+        model,
+        seed,
+        1
+      )
+
+    val mole =
+      DirectSampling(
+        replication,
+        ExplicitSampling(i, Seq(1))
+      )
+
+    mole.run
+  }
+
+  "Direct sampling" should "compose with loop" in {
     val counter = new AtomicInteger(0)
 
     val step = Val[Long]

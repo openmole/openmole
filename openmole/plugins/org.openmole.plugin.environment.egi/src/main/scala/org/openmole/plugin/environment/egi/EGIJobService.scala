@@ -21,7 +21,7 @@ class EGIJobService(diracService: _root_.gridscale.dirac.DIRACServer, environmen
 
   lazy val diracJobGroup = java.util.UUID.randomUUID().toString.filter(_ != '-')
 
-  def submit(serializedJob: SerializedJob, outputPath: String, storageLocation: String) = accessControl {
+  def submit(serializedJob: SerializedJob, outputPath: String, storageLocation: String) = {
     import org.openmole.tool.file._
 
     newFile.withTmpFile("script", ".sh") { script ⇒
@@ -46,29 +46,29 @@ class EGIJobService(diracService: _root_.gridscale.dirac.DIRACServer, environmen
           cpuTime = cpuTime
         )
 
-      gridscale.dirac.submit(diracService, jobDescription, tokenCache(), Some(diracJobGroup))
+      accessControl { gridscale.dirac.submit(diracService, jobDescription, tokenCache(), Some(diracJobGroup)) }
     }
   }
 
   lazy val jobStateCache = TimeCache { () ⇒
-    val states = gridscale.dirac.queryState(diracService, tokenCache(), groupId = Some(diracJobGroup))
+    val states = accessControl { gridscale.dirac.queryState(diracService, tokenCache(), groupId = Some(diracJobGroup)) }
     states.toMap -> preference(EGIEnvironment.JobGroupRefreshInterval)
   }
 
-  def state(id: gridscale.dirac.JobID) = accessControl {
+  def state(id: gridscale.dirac.JobID) = {
     val state = jobStateCache().getOrElse(id.id, throw new InternalProcessingError(s"Job ${id.id} not found in group ${diracJobGroup} of DIRAC server."))
     org.openmole.plugin.environment.gridscale.GridScaleJobService.translateStatus(state)
   }
 
-  def delete(id: gridscale.dirac.JobID) = accessControl {
-    gridscale.dirac.delete(diracService, tokenCache(), id) //clean(LocalHost(), id)
+  def delete(id: gridscale.dirac.JobID) = {
+    accessControl { gridscale.dirac.delete(diracService, tokenCache(), id) }
   }
 
-  def stdOutErr(id: gridscale.dirac.JobID) = accessControl {
+  def stdOutErr(id: gridscale.dirac.JobID) = {
     newFile.withTmpDir { tmpDir ⇒
       import org.openmole.tool.file._
       tmpDir.mkdirs()
-      gridscale.dirac.downloadOutputSandbox(diracService, tokenCache(), id, tmpDir)
+      accessControl { gridscale.dirac.downloadOutputSandbox(diracService, tokenCache(), id, tmpDir) }
 
       def stdOut =
         if ((tmpDir / EGIEnvironment.stdOutFileName) exists) (tmpDir / EGIEnvironment.stdOutFileName).content

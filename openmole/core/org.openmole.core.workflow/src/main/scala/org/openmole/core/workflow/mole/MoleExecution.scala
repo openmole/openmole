@@ -215,7 +215,7 @@ object MoleExecution extends JavaLogger {
   def jobFinished(subMoleExecutionState: SubMoleExecutionState, job: MoleJob, capsule: Capsule, ticket: Ticket) = {
     val mole = subMoleExecutionState.moleExecution.mole
 
-    def ctxForHooks = subMoleExecutionState.moleExecution.implicits + job.context
+    def ctxForHooks = (subMoleExecutionState.moleExecution.implicits + job.context) - Variable.openMOLESeed
 
     def executeHook(h: Hook) =
       try h.perform(ctxForHooks, subMoleExecutionState.moleExecution.executionContext)

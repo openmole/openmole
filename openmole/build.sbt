@@ -253,14 +253,13 @@ lazy val outputManager = OsgiProject(coreDir, "org.openmole.core.outputmanager",
 
 lazy val outputRedirection = OsgiProject(coreDir, "org.openmole.core.outputredirection", imports = Seq("*")) settings (coreSettings: _*)
 
-lazy val console = OsgiProject(coreDir, "org.openmole.core.console", global = true, imports = Seq("*")) dependsOn
-  (pluginManager) settings(
+lazy val console = OsgiProject(coreDir, "org.openmole.core.console", global = true, imports = Seq("*")) dependsOn (pluginManager) settings(
   OsgiKeys.importPackage := Seq("*"),
   Libraries.addScalaLang(scalaVersionValue),
   libraryDependencies += Libraries.monocle,
   macroParadise,
   defaultActivator
-) dependsOn(openmoleByteCode, openmoleOSGi, workspace, fileService) settings (coreSettings: _*)
+) dependsOn(openmoleOSGi, workspace, fileService) settings (coreSettings: _*)
 
 lazy val project = OsgiProject(coreDir, "org.openmole.core.project", imports = Seq("*")) dependsOn(console, openmoleDSL, services) settings (OsgiKeys.importPackage := Seq("*")) settings (coreSettings: _*)
 
@@ -383,7 +382,8 @@ def allEnvironment = Seq(batch, gridscale, ssh, egi, pbs, oar, sge, condor, slur
 
 lazy val batch = OsgiProject(pluginDir, "org.openmole.plugin.environment.batch", imports = Seq("*")) dependsOn(
   workflow, workspace, tools, event, replication, exception,
-  serializer, fileService, pluginManager, openmoleTar, communication, authentication, location, services
+  serializer, fileService, pluginManager, openmoleTar, communication, authentication, location, services,
+  openmoleByteCode
 ) settings (
   libraryDependencies ++= Seq(
     Libraries.gridscale,
@@ -607,7 +607,7 @@ lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") e
   libraryDependencies += Libraries.async,
   npmDeps in Compile += Dep("ace-builds", "1.2.9", List("mode-scala.js", "theme-github.js", "ext-language_tools.js"), true),
   npmDeps in Compile += Dep("sortablejs", "1.7.0", List("Sortable.min.js")),
-  npmDeps in Compile += Dep("plotly.js", "1.31.0", List("plotly-basic.min.js"))
+  npmDeps in Compile += Dep("plotly.js", "1.42.0", List("plotly.min.js"))
 ) settings (defaultSettings: _*)
 
 
@@ -714,7 +714,7 @@ def binDir = file("bin")
 
 
 def bundleFilter(m: ModuleID, artifact: Artifact) = {
-  def excludedLibraryDependencies = Set("slick", "squants", "shapeless")
+  def excludedLibraryDependencies = Set("slick", "squants", "shapeless", "sourcecode")
 
   def exclude =
     (m.organization != "org.openmole.library" && excludedLibraryDependencies.exists(m.name.contains)) ||
@@ -1019,7 +1019,7 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     )
   ),
   dockerfile in docker := new Dockerfile {
-    from("openjdk:10-jre-slim")
+    from("openjdk:11-jre-slim")
     maintainer("Romain Reuillon <romain.reuillon@iscpif.fr>, Jonathan Passerat-Palmbach <j.passerat-palmbach@imperial.ac.uk>")
     copy((assemble in openmole).value, s"/openmole")
     runRaw(

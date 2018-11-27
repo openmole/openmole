@@ -40,7 +40,7 @@ package object directsampling {
     replications:     Int,
     distributionSeed: OptionalArgument[Long]   = None,
     aggregation:      OptionalArgument[Puzzle] = None,
-    wrap:             Boolean                  = true
+    wrap:             Boolean                  = false
   ): PuzzleContainer =
     DirectSampling(
       evaluation = evaluation,
@@ -54,7 +54,7 @@ package object directsampling {
     sampling:    Sampling,
     aggregation: OptionalArgument[Puzzle] = None,
     condition:   Condition                = Condition.True,
-    wrap:        Boolean                  = true
+    wrap:        Boolean                  = false
   ): PuzzleContainer = {
     val exploration = ExplorationTask(sampling)
     val explorationCapsule = Capsule(exploration, strain = true)
@@ -62,21 +62,15 @@ package object directsampling {
 
     aggregation.option match {
       case Some(aggregation) ⇒
-        val p = (explorationCapsule -< (wrapped.evaluationPuzzle when condition) >- aggregation) &
-          (explorationCapsule -- (aggregation block (evaluation.outputs: _*)))
+        val p =
+          (explorationCapsule -< (wrapped.evaluationPuzzle when condition) >- aggregation) &
+            (explorationCapsule -- (aggregation block (wrapped.evaluationPuzzle.outputs: _*)))
 
         PuzzleContainer(p, aggregation.last, wrapped.delegate)
       case None ⇒
-        val preTask = EmptyTask() set ((inputs, outputs) ++= sampling.prototypes)
-        val afterTask = EmptyTask() set ((inputs, outputs) ++= evaluation.outputs ++ sampling.prototypes)
-
-        val preCapsule = Capsule(preTask)
-        val afterSlot = Slot(afterTask)
-
-        val p = (explorationCapsule -< preCapsule -- (wrapped.evaluationPuzzle when condition) -- afterSlot) &
-          (preCapsule -- (afterSlot block (evaluation.outputs: _*)))
-
-        PuzzleContainer(p, afterSlot, wrapped.delegate)
+        val strained = Strain(wrapped.evaluationPuzzle)
+        val p = explorationCapsule -< (strained when condition)
+        PuzzleContainer(p, strained.last, wrapped.delegate)
     }
   }
 

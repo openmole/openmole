@@ -16,8 +16,8 @@ def settings = Seq(
 ) 
 
 
-lazy val scalatraVersion = "2.5.0"
-lazy val jettyVersion = "9.2.19.v20160908"
+lazy val scalatraVersion = "2.6.3"
+lazy val jettyVersion = "9.3.25.v20180904"
 
 lazy val scalatra = OsgiProject(dir, "org.scalatra",
   exports = Seq("org.scalatra.*, org.fusesource.*", "grizzled.*", "org.eclipse.jetty.*", "javax.*"),
@@ -183,9 +183,9 @@ lazy val scalatexSite =
     libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.3.12",
     version := "0.3.12") settings(settings: _*)
 
-lazy val upickle = OsgiProject(dir, "upickle", exports = Seq("upickle.*", "jawn.*", "derive.*", "sourcecode.*"), imports = Seq("*")) settings(
+lazy val upickle = OsgiProject(dir, "upickle", exports = Seq("upickle.*", "jawn.*", "derive.*"), imports = Seq("*")) settings(
   libraryDependencies ++= Seq("com.lihaoyi" %% "upickle" % scalaUpickleVersion),
-  version := scalaUpickleVersion) settings(settings: _*)
+  version := scalaUpickleVersion) settings(settings: _*) dependsOn(sourceCode)
 
 lazy val boopickle = OsgiProject(dir, "boopickle", exports = Seq("boopickle.*"), imports = Seq("*")) settings(
   libraryDependencies ++= Seq("io.suzaku" %% "boopickle" % scalaBoopickleVersion),
@@ -337,9 +337,10 @@ lazy val config = OsgiProject(dir, "org.apache.commons.configuration2",
   libraryDependencies += "commons-beanutils" % "commons-beanutils" % "1.9.2",
   version := "2.2") settings(settings: _*) dependsOn (logging)
 
+def sourceCodeVersion = "0.1.4"
 lazy val sourceCode = OsgiProject(dir, "sourcecode") settings (
-  libraryDependencies += "com.lihaoyi" %% "sourcecode" % "0.1.3",
-  version := "0.1.3"
+  libraryDependencies += "com.lihaoyi" %% "sourcecode" % sourceCodeVersion,
+  version := sourceCodeVersion
 ) settings(settings: _*)
 
 
@@ -349,7 +350,7 @@ lazy val effectaside = OsgiProject(dir, "effectaside", imports = Seq("*")) setti
   version := effectasideVersion
 )
 
-def gridscaleVersion = "2.9"
+def gridscaleVersion = "2.14"
 lazy val gridscale = OsgiProject(dir, "gridscale", imports = Seq("*"), exports = Seq("gridscale.*", "enumeratum.*")) settings (
   libraryDependencies += "fr.iscpif.gridscale" %% "gridscale" % gridscaleVersion,
   version := gridscaleVersion

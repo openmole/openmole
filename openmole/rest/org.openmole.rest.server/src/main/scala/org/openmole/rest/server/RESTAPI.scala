@@ -56,7 +56,7 @@ case class WorkDirectory(workDirectory: File) {
 }
 
 @MultipartConfig(fileSizeThreshold = 1024 * 1024) //research scala multipart config
-trait RESTAPI extends ScalatraServlet with GZipSupport
+trait RESTAPI extends ScalatraServlet with ContentEncodingSupport
   with FileUploadSupport
   with FlashMapSupport
   with Authentication {

@@ -36,18 +36,18 @@ case class SideMenu(links: Seq[Link], menuStyle: AttrPair = classIs(""), preText
 
 object SideMenu {
 
-  private def build(menus: Seq[SideMenu], topDiv: TypedTag[_], extraDiv: Option[Frag] = None, currentPage: Option[Page] = None) =
+  private def build(menus: Seq[SideMenu], topDiv: TypedTag[_], extraDiv: Option[Frag] = None, currentPage: Option[Page] = None, selectMode: Boolean = false) =
     div(
       topDiv(
         extraDiv,
         for { m ← menus } yield {
           div(
-            if (m.links.isEmpty) div else div(m.preText, fontWeight := "bold", paddingBottom := 5),
+            if (m.links.isEmpty) div else div(m.preText, fontWeight := "bold", paddingBottom := 10),
             for { p ← m.links } yield {
-              val basicButton = div(paddingTop := 5)(linkButton(p.name, p.link, m.menuStyle, m.otherTab))
+              val basicButton = div(paddingTop := 10)(linkButton(p.name, p.link, m.menuStyle, m.otherTab))
               currentPage match {
                 case Some(page) ⇒ {
-                  if (page.name == p.name) div(paddingTop := 5)(linkButton(p.name, p.link, openInOtherTab = m.otherTab))
+                  if ((page.name == p.name) && selectMode) div(paddingTop := 10)(linkButton(p.name, p.link, openInOtherTab = m.otherTab))
                   else basicButton
                 }
                 case _ ⇒ basicButton
@@ -58,11 +58,9 @@ object SideMenu {
       )
     )
 
-  def right(menus: SideMenu*) = build(menus, div(rightDetailButtons(180), id := "sidebar-right"))
+  def right(current: Page, menus: SideMenu*) = build(menus, div(rightDetailButtons(100), id := "sidebar-right"), currentPage = Some(current))
 
-  def left(current: Page, menus: SideMenu*) = {
-    build(menus, div(leftDetailButtons(180), `class` := "sidebar-left"), currentPage = Some(current))
-  }
+  def left(current: Page, menus: SideMenu*) = build(menus, div(leftDetailButtons(230), `class` := "sidebar-left"), currentPage = Some(current), selectMode = true)
 
   implicit def pageToLink(p: Page): Link = Link(p.name, p.file)
 
@@ -70,26 +68,26 @@ object SideMenu {
     pageToLink
   }
 
+  implicit def pageNodeToLink(pageTree: PageTree): Seq[Link] = pageTree.sons.map { pageToLink(_) }
+
   def details(pages: Seq[Page]) = SideMenu(pages, classIs(btn ++ btn_default), otherTab = true)
 
   def fromStrings(title: String, stringMenus: String*) =
     SideMenu(preText = title, links = stringMenus.map { a ⇒ Link(a, Link.intern(a)) })
 
-  val run = SideMenu(DocumentationPages.runPages, classIs(btn ++ btn_primary), "Available tasks")
-  val packaged = SideMenu(DocumentationPages.packagedPages, classIs(btn ++ btn_primary), "Package your code")
-  val explore = SideMenu(DocumentationPages.explorePages, classIs(btn ++ btn_primary), "Available methods")
-  val sampling = SideMenu(DocumentationPages.samplingPages, classIs(btn ++ btn_primary), "Sampling methods")
-  val scale = SideMenu(DocumentationPages.scalePages, classIs(btn ++ btn_primary), "Available environments")
-  val language = SideMenu(DocumentationPages.languagePages, classIs(btn ++ btn_primary), "Language")
-  val advanced = SideMenu(DocumentationPages.advancedConceptsPages, classIs(btn ++ btn_primary), "Advanced concepts")
-  val developers = SideMenu(DocumentationPages.developersPages, classIs(btn ++ btn_primary), "Developer's documentation")
-  val tutorials = SideMenu(DocumentationPages.menuTutoPages, classIs(btn ++ btn_primary), "Tutorials")
-  val gettingStarted = SideMenu(DocumentationPages.gettingStartedPages, classIs(btn ++ btn_primary), "Getting started tutorials")
-  val netLogoGA = SideMenu(DocumentationPages.netLogoPages, classIs(btn ++ btn_primary), "NetLogo tutorials")
-  val community = SideMenu(DocumentationPages.communityPages, classIs(btn ++ btn_primary), "Community")
-  val download = SideMenu(DocumentationPages.downloadPages, classIs(btn ++ btn_primary), "Download")
+  val run = SideMenu(DocumentationPages.runPages, classIs(btn ++ btn_default), "Available tasks")
+  val packaged = SideMenu(DocumentationPages.packagedPages, classIs(btn ++ btn_default), "Package your code")
+  val explore = SideMenu(DocumentationPages.explorePages, classIs(btn ++ btn_default), "Available methods")
+  val sampling = SideMenu(DocumentationPages.samplingPages, classIs(btn ++ btn_default), "Sampling methods")
+  val scale = SideMenu(DocumentationPages.scalePages, classIs(btn ++ btn_default), "Available environments")
+  val language = SideMenu(DocumentationPages.languagePages, classIs(btn ++ btn_default), "Language")
+  val advanced = SideMenu(DocumentationPages.advancedConceptsPages, classIs(btn ++ btn_default), "Advanced concepts")
+  val developers = SideMenu(DocumentationPages.developersPages, classIs(btn ++ btn_default), "Developer's documentation")
+  val tutorials = SideMenu(DocumentationPages.menuTutoPages, classIs(btn ++ btn_default), "Tutorials")
+  val community = SideMenu(DocumentationPages.communityPages, classIs(btn ++ btn_default), "Community")
+  val download = SideMenu(DocumentationPages.downloadPage, classIs(btn ++ btn_default), "Download")
 
-  val more = SideMenu(
+  def more(current: Page) = SideMenu(
     Seq(
       DocumentationPages.run,
       DocumentationPages.explore,
@@ -98,8 +96,8 @@ object SideMenu {
       DocumentationPages.geneticAlgorithm,
       DocumentationPages.developers,
       DocumentationPages.gui
-    ),
-    classIs(btn ++ btn_default),
+    ).filterNot(_ == current),
+    classIs(""),
     "See also in the doc"
   )
 

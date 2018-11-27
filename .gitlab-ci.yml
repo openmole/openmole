@@ -1,0 +1,16 @@
+stages:
+  - test-ci
+
+image: debian
+
+test ci:
+  stage: test-ci
+  before_script:
+    - apt update
+  cache:
+    untracked: true
+  only:
+    - master
+  script:
+    - echo youpi
+

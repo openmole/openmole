@@ -28,7 +28,6 @@ import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
 import org.openmole.plugin.environment.batch._
 import org.openmole.tool.file.readableByteCount
 import org.openmole.tool.stream.StringPrintStream
-
 import scala.concurrent.stm._
 
 @Lenses case class RunningEnvironment(
@@ -196,7 +195,7 @@ class Execution {
 
     info.environment.errors.map { ex ⇒
       ex.exception match {
-        case fje: environment.FailedJobExecution ⇒ EnvironmentError(environmentId, fje.message, ErrorBuilder(fje.cause) + Error(s"\nDETAILS:\n${fje.detail}"), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
+        case fje: environment.FailedJobExecution ⇒ EnvironmentError(environmentId, fje.message, ErrorBuilder(fje.cause) + MessageError(s"\nDETAILS:\n${fje.detail}"), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
         case _                                   ⇒ EnvironmentError(environmentId, ex.exception.getMessage, ErrorBuilder(ex.exception), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
       }
     }
@@ -210,9 +209,6 @@ class Execution {
     (errors.get(key), moleExecutions.get(key)) match {
       case (Some(error), _) ⇒ error
       case (_, Some(moleExecution)) ⇒
-
-        val d = moleExecution.duration.getOrElse(0L)
-
         def convertStatuses(s: MoleExecution.JobStatuses) = ExecutionInfo.JobStatuses(s.ready, s.running, s.completed)
 
         lazy val statuses = moleExecution.capsuleStatuses.toVector.map { case (k, v) ⇒ k.toString -> convertStatuses(v) }
@@ -223,7 +219,7 @@ class Execution {
               capsules = statuses,
               error = ErrorBuilder(t.exception),
               environmentStates = environmentState(key),
-              duration = moleExecution.duration.getOrElse(0),
+              duration = moleExecution.duration.getOrElse(0L),
               clean = moleExecution.cleaned
             )
           case _ ⇒
@@ -231,20 +227,20 @@ class Execution {
               Canceled(
                 capsules = statuses,
                 environmentStates = environmentState(key),
-                duration = moleExecution.duration.get,
+                duration = moleExecution.duration.getOrElse(0L),
                 clean = moleExecution.cleaned
               )
             else if (moleExecution.finished)
               Finished(
                 capsules = statuses,
-                duration = moleExecution.duration.get,
+                duration = moleExecution.duration.getOrElse(0L),
                 environmentStates = environmentState(key),
                 clean = moleExecution.cleaned
               )
             else if (moleExecution.started)
               Running(
                 capsules = statuses,
-                duration = d,
+                duration = moleExecution.duration.getOrElse(0L),
                 environmentStates = environmentState(key)
               )
             else launchStatus
@@ -263,7 +259,7 @@ class Execution {
     val executionIds = staticExecutionInfo.map(_._1)
 
     def outputStreamData(id: ExecutionId, lines: Int) = atomic { implicit ctx ⇒
-      OutputStreamData(id, outputStreams(id).toString.lines.toSeq.takeRight(lines).mkString("\n"))
+      OutputStreamData(id, outputStreams(id).toString.lines.toArray.takeRight(lines).mkString("\n"))
     }
 
     val outputs = executionIds.toSeq.map {

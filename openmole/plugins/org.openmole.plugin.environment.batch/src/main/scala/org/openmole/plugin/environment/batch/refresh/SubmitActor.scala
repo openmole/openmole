@@ -27,7 +27,7 @@ object SubmitActor {
 
     val Submit(job) = submit
 
-    if (!job.state.isFinal) {
+    if (job.state != KILLED) {
       try {
         val bj = job.environment.execute(job)
         job.state = SUBMITTED

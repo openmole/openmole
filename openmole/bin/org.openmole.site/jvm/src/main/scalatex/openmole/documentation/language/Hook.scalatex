@@ -23,9 +23,9 @@ Let's consider this simple workflow:
   val h = ToStringHook()
 
   DirectSampling(
-    evaluation = hello,
+    evaluation = (hello hook h),
     sampling = i in (0 to 9)
-  )  hook h""", name = "plug a hook")
+  )""", name = "plug a hook")
 
 @br
 

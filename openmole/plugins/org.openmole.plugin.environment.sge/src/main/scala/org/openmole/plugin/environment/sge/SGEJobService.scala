@@ -1,23 +1,23 @@
 package org.openmole.plugin.environment.sge
 
 import gridscale.cluster.HeadNode
-import org.openmole.plugin.environment.batch.environment.{AccessControl, BatchEnvironment, SerializedJob}
-import org.openmole.plugin.environment.batch.storage.{HierarchicalStorageInterface, StorageInterface}
+import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment, SerializedJob }
+import org.openmole.plugin.environment.batch.storage.{ HierarchicalStorageInterface, StorageInterface }
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
-import org.openmole.plugin.environment.ssh.{RuntimeInstallation, SharedStorage}
+import org.openmole.plugin.environment.ssh.{ RuntimeInstallation, SharedStorage }
 
 class SGEJobService[S, H](
-  s:                 S,
-  tmpDirectory:      String,
-  installation:      RuntimeInstallation[_],
-  parameters:        SGEEnvironment.Parameters,
-  h:                 H,
+  s:             S,
+  tmpDirectory:  String,
+  installation:  RuntimeInstallation[_],
+  parameters:    SGEEnvironment.Parameters,
+  h:             H,
   accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], headNode: HeadNode[H], services: BatchEnvironment.Services, systemInterpreter: effectaside.Effect[effectaside.System]) {
 
   import services._
 
-  def submit(serializedJob: SerializedJob, outputPath: String) = {
-    val workDirectory = parameters.workDirectory getOrElse tmpDirectory
+  def submit(serializedJob: SerializedJob, outputPath: String, jobDirectory: String) = {
+    val workDirectory = parameters.workDirectory getOrElse jobDirectory
 
     def buildScript(serializedJob: SerializedJob, outputPath: String) = {
       SharedStorage.buildScript(
@@ -38,7 +38,7 @@ class SGEJobService[S, H](
       queue = parameters.queue,
       workDirectory = workDirectory,
       wallTime = parameters.wallTime,
-      memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
+      memory = parameters.memory
     )
 
     accessControl { gridscale.sge.submit(h, description) }
@@ -52,6 +52,5 @@ class SGEJobService[S, H](
 
   def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob) =
     accessControl { (gridscale.sge.stdOut(h, id), gridscale.sge.stdErr(h, id)) }
-
 
 }

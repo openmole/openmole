@@ -16,8 +16,8 @@ class CondorJobService[S, H](
 
   import services._
 
-  def submit(serializedJob: SerializedJob, outputPath: String) = {
-    val workDirectory = parameters.workDirectory getOrElse tmpDirectory
+  def submit(serializedJob: SerializedJob, outputPath: String, jobDirectory: String) = {
+    val workDirectory = parameters.workDirectory getOrElse jobDirectory
 
     def buildScript(serializedJob: SerializedJob, outputPath: String) = {
       SharedStorage.buildScript(
@@ -37,7 +37,7 @@ class CondorJobService[S, H](
       executable = "/bin/bash",
       arguments = remoteScript,
       workDirectory = workDirectory,
-      memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
+      memory = parameters.memory,
       nodes = parameters.nodes,
       coreByNode = parameters.coresByNode orElse parameters.threads,
       requirements = parameters.requirements.map(_root_.gridscale.condor.CondorRequirement.apply)

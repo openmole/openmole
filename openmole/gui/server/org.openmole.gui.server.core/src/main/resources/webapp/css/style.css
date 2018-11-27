@@ -94,7 +94,7 @@ ul{
     position: relative;
     top: 4px;
     font-size: 15px;
-    color: #828082;
+    color: #828082;
     cursor: pointer;
     padding-top: 5px;
     font-weight: bold;
@@ -518,4 +518,41 @@ padding-bottom: 90px;
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+.gutterDecoration{
+  position:absolute;
+  z-index: 20;
+  font: 14px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;;
+  top:0;
+  width: 20px;
+  margin-left:17px;
+  text-align:right;
+  padding-right:3px;
+  padding-top:2px;
+  margin-top:-1px;
+}
+
+.gutterError {
+      background: rgba(255,128,128);
+      cursor: pointer;
+      border-radius: 3px;
+      color: white;
+      font-weight: bold;
+      width: 45px;
+      margin-left: -20px;
+      text-align: left;
+      padding-left:5px;
+}
+
+.gutterCorrected {
+    background: rgba(220,220,220);
+      cursor: pointer;
+      border-radius: 3px;
+      color: #333;
+      font-weight: bold;
+      width: 45px;
+      margin-left: -20px;
+      text-align: left;
+      padding-left:5px;
 }

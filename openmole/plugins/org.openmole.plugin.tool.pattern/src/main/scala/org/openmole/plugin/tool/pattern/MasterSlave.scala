@@ -27,23 +27,17 @@ import shapeless._
 
 object MasterSlave {
 
-  @deprecated("use the uncurried apply function", "7")
-  def apply(
-    bootstrap: Puzzle,
-    master:    Task,
-    state:     Val[_]*
-  )(slave: Puzzle): Puzzle = apply(bootstrap, master, slave, state: _*)
-
   def apply(
     bootstrap: Puzzle,
     master:    Task,
     slave:     Puzzle,
-    state:     Val[_]*
+    state:     Seq[Val[_]],
+    slaves:    OptionalArgument[Int] = None
   ): Puzzle = {
     val masterCapsule = MasterCapsule(master, state: _*)
     val masterSlot = Slot(masterCapsule)
     val slaveSlot2 = Slot(slave.first)
-    val puzzle = (bootstrap -< slave -- masterSlot) & (masterCapsule -<- slaveSlot2) & (bootstrap oo (masterSlot, state: _*))
+    val puzzle = (bootstrap -< slave -- masterSlot) & (masterSlot -<- slaveSlot2) & (bootstrap oo (masterSlot, state: _*))
     puzzle :: Elements(masterSlot, slave) :: HNil
   }
 

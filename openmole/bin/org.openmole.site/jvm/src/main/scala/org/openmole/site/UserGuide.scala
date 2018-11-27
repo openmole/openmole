@@ -27,15 +27,13 @@ import tools._
 import scalatags.Text.TypedTag
 
 object UserGuide {
-  /*
-  val firstModel = DocumentationPages.run
-  val firstMethod = DocumentationPages.explore
-  val firstEnvironment = DocumentationPages.scale
-*/
+
   val line = hr(classIs("line"), width := "90%", marginTop := 10)
 
+  implicit def fromPageTreeToLinks(pageTree: PageTree): Seq[Link] = pageTree.sons.map { s ⇒ Link(s.page.name, s.page.file) }
+
   def header(sp: TypedTag[_ <: String]) =
-    div(paddingTop := 100)(
+    div(paddingTop := 120)(
       div(stepHeader)(sp),
       line
     )
@@ -84,37 +82,37 @@ object UserGuide {
       div(paddingTop := 5, paddingLeft := 10)(a(href := "#" + shared.anchor(text))(text))
     }
 
-    if (h2s.isEmpty) span(marginTop := 40) else div(marginBottom := 30, scalatags.Text.all.h2(marginTop := -20, "Contents"), h2s)
+    if (h2s.isEmpty) span(marginTop := 40) else div(marginBottom := 30, scalatags.Text.all.h2("Contents"), h2s)
   }
 
-  def integrate(current: Page): SitePage = {
-    def integratedPage(left: SideMenu, right: SideMenu = SideMenu.more, head: TypedTag[String] = div(paddingTop := 100)) =
+  def integrate(current: PageTree): SitePage = {
+    val parentPageTrees = PageTree.parents(current)
+    def integratedPage(left: SideMenu, right: SideMenu = SideMenu.more(current.page), head: TypedTag[String] = header(span(current.title, h1Like))(textAlign := "center", marginBottom := 30)) = {
       IntegratedPage(
         head,
         div(
-          if (DocumentationPages.mainDocPages.contains(current)) span else scalatags.Text.all.h1(current.title),
           h2Contents(current.content.render),
           current.content
         ),
         SideMenu.left(current, left),
-        Some(SideMenu.right(right.insert(current.details)))
+        Some(SideMenu.right(current, right /*.insert(current.details)*/ )),
+        PageTree.fromPage(DocumentationPages.documentation) +: parentPageTrees.reverse
       )
+    }
+
+    val parents = parentPageTrees.map { _.name }
 
     current match {
-      case p if (DocumentationPages.runPages.diff(Seq(DocumentationPages.packaged)) :+ DocumentationPages.run).contains(p) ⇒ integratedPage(SideMenu.run, head = headerModel(current.name))
-      case p if (DocumentationPages.packagedPages :+ DocumentationPages.packaged).contains(p) ⇒ integratedPage(SideMenu.packaged, head = headerModel(current.name))
-      case p if (DocumentationPages.explorePages.diff(Seq(DocumentationPages.directSampling)) :+ DocumentationPages.explore).contains(p) ⇒ integratedPage(SideMenu.explore, head = headerMethod(current.name))
-      case p if (DocumentationPages.samplingPages :+ DocumentationPages.directSampling).contains(p) ⇒ integratedPage(SideMenu.sampling, head = headerModel(current.name))
-      case p if (DocumentationPages.scalePages :+ DocumentationPages.scale).contains(p) ⇒ integratedPage(SideMenu.scale, head = headerEnvironment(current.name))
-      case p if DocumentationPages.advancedConceptsPages.contains(p) ⇒ integratedPage(SideMenu.advanced)
-      case p if (DocumentationPages.developersPages :+ DocumentationPages.developers).contains(p) ⇒ integratedPage(SideMenu.developers)
-      case p if (DocumentationPages.languagePages :+ DocumentationPages.language).contains(p) ⇒ integratedPage(SideMenu.language)
-      case p if (DocumentationPages.advancedConceptsPages).contains(p) ⇒ integratedPage(SideMenu.advanced)
-      case p if Seq(DocumentationPages.tutorials).contains(p) ⇒ integratedPage(SideMenu.tutorials)
-      case p if (DocumentationPages.gettingStartedPages).contains(p) ⇒ integratedPage(SideMenu.gettingStarted)
-      case p if (DocumentationPages.netLogoPages).contains(p) ⇒ integratedPage(SideMenu.netLogoGA)
-      case p if (DocumentationPages.communityPages :+ DocumentationPages.OMcommunity).contains(p) ⇒ integratedPage(SideMenu.community)
-      case p if (DocumentationPages.downloadPages :+ DocumentationPages.download).contains(p) ⇒ integratedPage(SideMenu.download)
+      case p if ((DocumentationPages.packagedPages.sons.map { _.name } :+ DocumentationPages.packaged.name).contains(current.name)) ⇒ integratedPage(SideMenu.packaged, head = headerModel(current.name))
+      case p if (parents.contains(DocumentationPages.run.name) || current.name == DocumentationPages.run.name) ⇒ integratedPage(SideMenu.run, head = headerModel(current.name))
+      case p if ((DocumentationPages.samplingPages.sons.map { _.name } :+ DocumentationPages.directSampling.name).contains(current.name)) ⇒ integratedPage(SideMenu.sampling, head = headerMethod(current.name))
+      case p if (parents.contains(DocumentationPages.explore.name) || current.name == DocumentationPages.explore.name) ⇒ integratedPage(SideMenu.explore, head = headerMethod(current.name))
+      case p if (parents.contains(DocumentationPages.scale.name) || current.name == DocumentationPages.scale.name) ⇒ integratedPage(SideMenu.scale, head = headerEnvironment(current.name))
+      case p if (parents.contains(DocumentationPages.advancedConcepts.name) || current.name == DocumentationPages.advancedConcepts.name) ⇒ integratedPage(SideMenu.advanced)
+      case p if (parents.contains(DocumentationPages.developers.name) || current.name == DocumentationPages.developers.name) ⇒ integratedPage(SideMenu.developers)
+      case p if (parents.contains(DocumentationPages.language.name) || current.name == DocumentationPages.language.name) ⇒ integratedPage(SideMenu.language)
+      case p if (parents.contains(DocumentationPages.tutorials.name) || current.name == DocumentationPages.tutorials.name) ⇒ integratedPage(SideMenu.tutorials)
+      case p if (parents.contains(DocumentationPages.OMcommunity.name) || current.name == DocumentationPages.OMcommunity.name) ⇒ integratedPage(SideMenu.community)
       case _ ⇒ integratedPage(SideMenu(Seq.empty, classIs(btn ++ btn_primary)))
     }
   }

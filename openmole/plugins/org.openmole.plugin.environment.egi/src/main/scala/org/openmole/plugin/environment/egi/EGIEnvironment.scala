@@ -218,7 +218,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   }
 
   override def stop() = {
-    storages.map(_.toOption).flatten.foreach { case (space, storage) ⇒ HierarchicalStorageSpace.clean(storage, space) }
+    storages.map(_.toOption).flatten.foreach { case (space, storage) ⇒ HierarchicalStorageSpace.clean(storage, space, background = false) }
   }
 
   def bdiis: Seq[gridscale.egi.BDIIServer] =
@@ -320,7 +320,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         BatchEnvironment.toReplicatedFile(
           StorageService.uploadInDirectory(storage, _, space.replicaDirectory, _),
           StorageService.exists(storage, _),
-          StorageService.backgroundRmFile(storage, _),
+          StorageService.rmFile(storage, _, background = true),
           batchExecutionJob.environment,
           StorageService.id(storage)
         )(f, options)

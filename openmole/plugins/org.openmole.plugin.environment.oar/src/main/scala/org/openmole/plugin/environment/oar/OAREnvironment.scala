@@ -106,7 +106,7 @@ object OAREnvironment {
       batchExecutionJob,
       storage,
       space,
-      jobService.submit(_, _),
+      jobService.submit(_, _, _),
       jobService.state(_),
       jobService.delete(_),
       jobService.stdOutErr(_)
@@ -135,10 +135,7 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
   }
 
   override def stop() = {
-    storageService match {
-      case Left((space, local)) ⇒ HierarchicalStorageSpace.clean(local, space)
-      case Right((space, ssh))  ⇒ HierarchicalStorageSpace.clean(ssh, space)
-    }
+    cleanSSHStorage(storageService, background = false)
     sshInterpreter().close
   }
 
@@ -196,7 +193,7 @@ class OARLocalEnvironment(
   implicit val systemInterpreter = effectaside.System()
 
   override def start() = { storage; space }
-  override def stop() = { HierarchicalStorageSpace.clean(storage, space) }
+  override def stop() = { HierarchicalStorageSpace.clean(storage, space, background = false) }
 
   import env.services.preference
   import org.openmole.plugin.environment.ssh._

@@ -32,7 +32,9 @@ import org.openmole.gui.ext.data.{ Error ⇒ ExecError }
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.alert.BannerAlert
 import org.openmole.gui.client.core.alert.BannerAlert.BannerMessage
+import org.openmole.gui.client.core.files.TreeNodeTabs
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.data.ExecutionInfo.Failed
 import org.openmole.gui.ext.tool.client.Utils
 import org.scalajs.dom.raw.{ HTMLElement, HTMLSpanElement }
 import rx._
@@ -170,12 +172,24 @@ class ExecutionPanel {
 
           val (details, execStatus) = info match {
             case f: ExecutionInfo.Failed ⇒
+              panels.treeNodeTabs.find(staticInfo.now(execID).path).foreach { tab ⇒
+                f.error match {
+                  case ce: CompilationError ⇒ tab.editor.foreach { _.setErrors(ce.errors) }
+                  case _                    ⇒
+                }
+              }
               addToBanner(execID, BannerAlert.div(failedDiv(execID)).critical)
               (ExecutionDetails("0", 0, Some(f.error), f.environmentStates), info.state)
             case f: ExecutionInfo.Finished ⇒
               addToBanner(execID, BannerAlert.div(succesDiv(execID)))
               (ExecutionDetails(ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates), (if (!f.clean) "cleaning" else info.state))
-            case r: ExecutionInfo.Running ⇒ (ExecutionDetails(ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates), info.state)
+            case r: ExecutionInfo.Running ⇒
+              panels.treeNodeTabs.find(staticInfo.now(execID).path).foreach { tab ⇒
+                tab.editor.foreach {
+                  _.setErrors(Seq())
+                }
+              }
+              (ExecutionDetails(ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates), info.state)
             case c: ExecutionInfo.Canceled ⇒
               hasBeenDisplayed(execID)
               (ExecutionDetails("0", 0, envStates = c.environmentStates), (if (!c.clean) "cleaning" else info.state))

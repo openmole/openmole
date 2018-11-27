@@ -103,6 +103,6 @@ Your OpenMOLE script would look like that:
     // It says: explore the lines and run a model execution for each one, save the outputs, all that on the cluster
     // (results are not brought back to the local computer yet).
     DirectSampling(
-      evaluation = my_model_execution,
+      evaluation = my_model_execution on env hook catch_output,
       sampling = all_the_lines
-    ) on env hook catch_output""")
+    )""")

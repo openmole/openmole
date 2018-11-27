@@ -270,23 +270,31 @@ case class TreeNodeData(
 case class ScriptData(scriptPath: SafePath)
 
 object Error {
-  def empty = Error("")
+  def empty = MessageError("")
 }
 
-case class Error(stackTrace: String) {
-  def +(error: Error) = Error(stackTrace + error.stackTrace)
+sealed trait Error {
+  def stackTrace: String
+}
+
+case class MessageError(stackTrace: String) extends Error {
+  def +(error: MessageError) = MessageError(stackTrace + error.stackTrace)
+}
+
+case class CompilationError(errors: Seq[ErrorWithLocation]) extends Error{
+  def stackTrace = ""
 }
 
 case class Token(token: String, duration: Long)
 
 object ErrorBuilder {
-  def apply(t: Throwable): Error = {
+  def apply(t: Throwable): MessageError = {
     val sw = new StringWriter()
     t.printStackTrace(new PrintWriter(sw))
-    Error(sw.toString)
+    MessageError(sw.toString)
   }
 
-  def apply(stackTrace: String) = Error(stackTrace)
+  def apply(stackTrace: String) = MessageError(stackTrace)
 }
 
 sealed trait ID {
@@ -809,3 +817,8 @@ case class WizardModelData(
                           )
 
 case class WizardToTask(safePath: SafePath, errors: Seq[Error] = Seq())
+
+
+case class ErrorWithLocation(stackTrace: String = "", line: Option[Int] = None, start: Option[Int] = None, end: Option[Int]=None)
+case class ErrorFromCompiler(errorWithLocation: ErrorWithLocation = ErrorWithLocation(), lineContent: String = "")
+case class EditorErrors(errorsFromCompiler: Seq[ErrorFromCompiler] = Seq(), errorsInEditor: Seq[Int] = Seq())

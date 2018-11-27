@@ -103,8 +103,6 @@ package object tools {
 
   }
 
-  def h1(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h1(elements.map(links.toModifier): _*))
-
   def h2(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h2(elements.map(links.toModifier) ++ links.linkIcon(elements): _*))
   def h3(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h3(elements.map(links.toModifier) ++ links.linkIcon(elements): _*))
 
@@ -142,7 +140,7 @@ package object tools {
     def ++(s: String) = s"$ss $s"
   }
 
-  def linkButton(title: String, link: String, buttonStyle: AttrPair = classIs(btn ++ btn_default), openInOtherTab: Boolean = true) =
+  def linkButton(title: String, link: String, buttonStyle: AttrPair = classIs(btn ++ btn_selected), openInOtherTab: Boolean = true) =
     a(href := link)(if (openInOtherTab) targetBlank else "")(span(buttonStyle, `type` := "button", title))
 
   def divLinkButton(content: TypedTag[_], link: String, buttonStyle: AttrPair = classIs(btn ++ btn_default), openInOtherTab: Boolean = true) =
@@ -163,7 +161,7 @@ package object tools {
     )
 
   def modificationLink(source: String) =
-    s"https://github.com/openmole/openmole/edit/dev/openmole/bin/org.openmole.site/jvm/src/main/scalatex/$source"
+    s"https://github.com/openmole/openmole/edit/${org.openmole.core.buildinfo.version.major}-dev/openmole/bin/org.openmole.site/jvm/src/main/scalatex/$source"
 
   def rightGlyphButton(title: String, page: Page, glyph: String, openInOtherTab: Boolean = false, buttonStyle: Seq[Modifier] = Seq(classIs(btn ++ btn_default))) =
     to(page)(if (openInOtherTab) targetBlank else "")(
@@ -200,6 +198,7 @@ package object tools {
 
   lazy val btn: String = "btn"
   lazy val btn_default: String = "btn-default"
+  lazy val btn_selected: String = "btn-selected"
   lazy val btn_primary: String = "btn-primary"
   lazy val btn_danger: String = "btn-danger"
   lazy val btn_mole: String = "btn-mole"
