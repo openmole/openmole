@@ -1,6 +1,3 @@
-stages:
-  - build-site
-
 image: openmole/openmole-buildenv
 
 variables:
@@ -8,12 +5,12 @@ variables:
   IVY_HOME: "$HOME/.ivy2"
   SBT_OPTS: "-Dsbt.ivy.home=$IVY_HOME"
 
-test ci:
-  stage: build-site
-  before_script:
-    - apt update
-  cache:
-    untracked: true
+before_script:
+  - apt update
+cache:
+  untracked: true
+
+build_site:
   script:
     - (cd build-system && sbt clean publishLocal)
     - (cd libraries && sbt clean publishLocal)
