@@ -1,8 +1,8 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
+import org.openmole.gui.client.core.alert.AbsolutePositioning.{FileZone, RelativeCenterPosition}
 import org.openmole.gui.client.core.alert.AlertPanel
-import org.openmole.gui.client.core.files.FileToolBar.{ FilterTool, PluginTool, TrashTool }
+import org.openmole.gui.client.core.files.FileToolBar.{FilterTool, PluginTool, TrashTool}
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.ext.tool.client.Waiter._
 import org.openmole.gui.ext.data._
@@ -14,8 +14,8 @@ import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw._
 import org.openmole.gui.client.core._
 import scalatags.JsDom.all._
-import scalatags.JsDom.{ TypedTag, tags }
-import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
+import scalatags.JsDom.{TypedTag, tags}
+import org.openmole.gui.client.core.files.treenodemanager.{instance ⇒ manager}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
@@ -203,7 +203,7 @@ class TreeNodePanel {
 
   def computePluggables = fileToolBar.selectedTool.now match {
     case Some(PluginTool) ⇒ manager.computePluggables(() ⇒ if (!manager.pluggables.now.isEmpty) turnSelectionTo(true))
-    case _                ⇒
+    case _ ⇒
   }
 
   def drawTree: Unit = {
@@ -217,7 +217,7 @@ class TreeNodePanel {
         else {
           tbody(
             backgroundColor := Rx {
-              if (selectionMode()) omsheet.BLUE else omsheet.DARK_GREY
+              if (selectionMode()) omsheet.LIGHT_BLUE else omsheet.DARK_GREY
             },
             omsheet.fileList,
             Rx {
@@ -255,18 +255,21 @@ class TreeNodePanel {
 
   }
 
-  def drawNode(node: TreeNode) = node match {
-    case fn: FileNode ⇒
-      ReactiveLine(fn, TreeNodeType.file, () ⇒ {
-        displayNode(fn)
-      })
-    case dn: DirNode ⇒ ReactiveLine(dn, TreeNodeType.folder, () ⇒ {
-      manager switch (dn.name.now)
-      fileToolBar.clearMessage
-      fileToolBar.unselectTool
-      treeWarning() = true
-      drawTree
-    })
+  def drawNode(node: TreeNode) = {
+    node match {
+      case fn: FileNode ⇒
+        ReactiveLine(fn, TreeNodeType.file, () ⇒ {
+          displayNode(fn)
+        })
+      case dn: DirNode ⇒
+        ReactiveLine(dn, TreeNodeType.folder, () ⇒ {
+          manager switch (dn.name.now)
+          fileToolBar.clearMessage
+          fileToolBar.unselectTool
+          treeWarning() = true
+          //drawTree
+        })
+    }
   }
 
   def displayNode(tn: TreeNode) = tn match {
@@ -318,7 +321,9 @@ class TreeNodePanel {
 
     private val treeStates: Var[TreeStates] = Var(TreeStates(false, false, false))
 
-    val clickablePair = {
+    val settingsGlyph = ms("glyphitem") +++ glyph_settings +++ omsheet.color(WHITE) +++ (paddingLeft := 4)
+
+    def clickablePair(tn: TreeNode, selectableElement: TypedTag[HTMLElement]) = {
       val style = floatLeft +++ pointer +++ Seq(
         draggable := true,
         onclick := { (e: MouseEvent) ⇒
@@ -328,19 +333,34 @@ class TreeNodePanel {
         }
       )
 
+      val settings = span(
+        tags.i(timeOrSize(tn)),
+        buildManualPopover(
+          div(settingsGlyph, onclick := { () ⇒ Popover.hide })
+        )
+      )
+
       tn match {
-        case fn: FileNode ⇒ span(span(paddingTop := 4), omsheet.file +++ style)(div(omsheet.fileNameOverflow)(tn.name.now))
+        case fn: FileNode ⇒ div(ms("fileWrap"))(
+          selectableElement,
+          span(paddingTop := 4, omsheet.file +++ style)(div(omsheet.fileNameOverflow)(tn.name.now)),
+          settings(fileInfo)
+        )
         case dn: DirNode ⇒
-          span(
-            span(ms(dn.isEmpty, emptyMod, omsheet.fileIcon +++ glyph_plus)),
-            (omsheet.dir +++ style)
-          )(div(omsheet.fileNameOverflow +++ (paddingLeft := 22))(tn.name.now))
+          val (icon, rectangle, image, aCSS, namePadding) = if (dn.versioningSystem) (emptyMod, style, img(src := org.openmole.gui.ext.data.Images.git, width := 18, height := 18, padding := 1), "versioningWrap", 8) else (omsheet.fileIcon +++ glyph_plus, (omsheet.dir +++ style), span, "fileWrap", 24)
+          div(ms(aCSS))(
+            selectableElement,
+            span(ms(dn.isEmpty, emptyMod, icon))(image),
+            rectangle,
+            span(tn.name.now, omsheet.fileNameOverflow, paddingLeft := namePadding),
+            settings(dirInfo)
+          )
       }
     }
 
     def timeOrSize(tn: TreeNode): String = fileToolBar.fileFilter.now.fileSorting match {
       case TimeSorting() ⇒ CoreUtils.longTimeToString(tn.time)
-      case _             ⇒ CoreUtils.readableByteCountAsString(tn.size)
+      case _ ⇒ CoreUtils.readableByteCountAsString(tn.size)
     }
 
     def clearSelectionExecpt(safePath: SafePath) = {
@@ -391,7 +411,7 @@ class TreeNodePanel {
         else {
           Popover.current.now match {
             case Some(p) ⇒ Popover.toggle(p)
-            case _       ⇒
+            case _ ⇒
           }
           Popover.toggle(pop)
         }
@@ -403,18 +423,16 @@ class TreeNodePanel {
     }
 
     val render: TypedTag[dom.html.TableRow] = {
-      val settingsGlyph = ms("glyphitem") +++ glyph_settings +++ omsheet.color(WHITE) +++ (paddingLeft := 4)
 
       tr(
         Rx {
           td(
-            onclick := { (e: MouseEvent) ⇒
-              {
-                if (selectionMode.now) {
-                  addToSelection
-                  if (e.ctrlKey) clearSelectionExecpt(tnSafePath)
-                }
+            onclick := { (e: MouseEvent) ⇒ {
+              if (selectionMode.now) {
+                addToSelection
+                if (e.ctrlKey) clearSelectionExecpt(tnSafePath)
               }
+            }
             },
             dropPairs,
             ondragstart := { (e: DragEvent) ⇒
@@ -426,35 +444,27 @@ class TreeNodePanel {
               e.preventDefault()
               dropAction(manager.current.now ++ tn.name.now, tn match {
                 case _: DirNode ⇒ true
-                case _          ⇒ false
+                case _ ⇒ false
               })
             },
             ondragenter := {
               (e: DragEvent) ⇒
                 false
             },
-            clickablePair, {
-              div(fileInfo)(
-                span(omsheet.fileSize)(
-                  tags.i(timeOrSize(tn)),
-                  buildManualPopover(
-                    div(settingsGlyph, onclick := { () ⇒ Popover.hide })
-                  )
-                )
-              )
-            },
-            div(
-              width := "100%",
-              if (treeStates().selected) {
-                fileToolBar.selectedTool() match {
-                  case Some(TrashTool) ⇒ omsheet.fileSelectedForDeletion
-                  case Some(PluginTool) if manager.pluggables().contains(tn) ⇒ omsheet.fileSelected
-                  case _ ⇒ omsheet.fileSelected
+            clickablePair(tn,
+              div(
+                width := "100%",
+                if (treeStates().selected) {
+                  fileToolBar.selectedTool() match {
+                    case Some(TrashTool) ⇒ omsheet.fileSelectedForDeletion
+                    case Some(PluginTool) if manager.pluggables().contains(tn) ⇒ omsheet.fileSelected
+                    case _ ⇒ omsheet.fileSelected
+                  }
                 }
-              }
-              else omsheet.fileSelectionOverlay,
-              span(omsheet.fileSelectionMessage)
-            )
+                else omsheet.fileSelectionOverlay,
+                span(omsheet.fileSelectionMessage)
+              )
+            ),
           )
         }
       )

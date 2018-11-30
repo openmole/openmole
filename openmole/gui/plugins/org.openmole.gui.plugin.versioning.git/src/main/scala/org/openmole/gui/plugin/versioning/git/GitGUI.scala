@@ -39,6 +39,8 @@ class GitFactory extends VersioningPluginFactory {
   def name: String = "GIT"
 
   def build(cloneIn: SafePath, onCloned: () ⇒ Unit = () ⇒ {}) = new GitGUI(cloneIn, onCloned)
+
+  def versioningConfigFolderName = ".git"
 }
 
 object GitGUI {

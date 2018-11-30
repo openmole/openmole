@@ -37,6 +37,8 @@ package object client {
 
   lazy val BLUE = "#3086b5"
 
+  lazy val LIGHT_BLUE = "lightblue"
+
   lazy val RED = "#c83737"
 
   lazy val DARK_GREY = "#222"
@@ -256,30 +258,28 @@ package object client {
   )
 
   //TREENODE PANEL
-  lazy val fileInfo: ModifierSeq = Seq(
+  lazy val fileDirInfo: ModifierSeq = Seq(
     absolutePosition,
     width := 120,
-    right := 2,
-    marginTop := 6,
-    textAlign := "right"
+    textAlign := "right",
+    color(WHITE),
+    fontSize := 10,
+    left := 230
   )
 
-  lazy val fileSize: ModifierSeq = Seq(
-    color("lightgray"),
-    fontSize := 10
-  )
+  lazy val fileInfo: ModifierSeq = fileDirInfo +++ (marginTop := 6)
+  lazy val dirInfo: ModifierSeq = fileDirInfo +++ (marginTop := 3)
 
   lazy val file: ModifierSeq = Seq(
     color(WHITE),
-    display := "inline-block",
-    height := 20,
+    height := 24,
     textDecoration := "none"
   )
 
   lazy val dir: ModifierSeq = Seq(
     backgroundColor := BLUE,
     color(WHITE),
-    display := "inline-block",
+    relativePosition,
     height := 20,
     marginBottom := 3,
     marginTop := 2,
@@ -290,11 +290,12 @@ package object client {
   )
 
   lazy val fileNameOverflow: ModifierSeq = Seq(
+    absolutePosition,
     color(WHITE),
     whiteSpace := "nowrap",
     overflow := "hidden",
     pointer,
-    width := 245,
+    width := 250,
     textOverflow := "ellipsis"
   )
 
@@ -325,13 +326,13 @@ package object client {
   )
 
   lazy val fileSelectionOverlay: ModifierSeq = Seq(
-    right := 0,
+    left := -3,
     pointer,
-    width := 360,
-    height := 24,
-    marginLeft := -5,
-    marginBottom := 1,
-    borderRadius := "2px"
+    width := 350,
+    height := 22,
+    borderRadius := "2px",
+    absolutePosition,
+    bottom := -1
   )
 
   lazy val fileSelected: ModifierSeq = Seq(

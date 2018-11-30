@@ -91,4 +91,6 @@ trait VersioningGUIPlugin extends GUIPlugin {
 trait VersioningPluginFactory extends GUIPluginFactory {
 
   def build(cloneIn: SafePath, onCloned: () ⇒ Unit = () ⇒ {}): VersioningGUIPlugin
+
+  def versioningConfigFolderName: String
 }

@@ -556,3 +556,15 @@ padding-bottom: 90px;
       text-align: left;
       padding-left:5px;
 }
+
+.fileWrap {
+    display : flex;
+    position: relative;
+    flex-direction: row;
+}
+
+.versioningWrap {
+    position: relative;
+    flex-direction: row;
+    padding:1px;
+}

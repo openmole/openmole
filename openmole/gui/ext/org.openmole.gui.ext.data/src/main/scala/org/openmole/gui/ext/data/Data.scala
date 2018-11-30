@@ -258,7 +258,7 @@ case class UploadAbsolute() extends UploadType {
   def typeName = "absolute"
 }
 
-case class DirData(isEmpty: Boolean)
+case class DirData(isEmpty: Boolean, versioning: Boolean)
 
 case class TreeNodeData(
                          name: String,

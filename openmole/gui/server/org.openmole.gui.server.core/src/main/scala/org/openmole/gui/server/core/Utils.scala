@@ -101,7 +101,11 @@ object Utils extends JavaLogger {
     )
     else None
 
-    val dirData = if (f.isDirectory) Some(DirData(f.isDirectoryEmpty)) else None
+    // Simplify versionning search process considering that only git is implemented ever as versioning system
+    val dirData = if (f.isDirectory) Some(DirData(f.isDirectoryEmpty, f.listFiles.exists {
+      _.getName == ".git"
+    }))
+    else None
 
     time.map(t ⇒ TreeNodeData(f.getName, dirData, f.length, t))
   }
