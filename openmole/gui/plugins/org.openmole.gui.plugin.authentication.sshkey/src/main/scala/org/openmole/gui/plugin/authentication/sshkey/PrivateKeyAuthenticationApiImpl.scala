@@ -18,7 +18,7 @@
 package org.openmole.gui.plugin.authentication.sshkey
 
 import org.openmole.core.services._
-import org.openmole.gui.ext.data.{ ErrorBuilder, Test }
+import org.openmole.gui.ext.data.{ ErrorData, Test }
 import org.openmole.gui.ext.tool.server.Utils
 import org.openmole.plugin.environment.ssh._
 
@@ -67,7 +67,7 @@ class PrivateKeyAuthenticationApiImpl(s: Services) extends PrivateKeyAuthenticat
     coreObject(data).map { co ⇒
       SSHAuthentication.test(co) match {
         case Success(_) ⇒ Test.passed()
-        case Failure(f) ⇒ Test.error("failed", ErrorBuilder(f))
+        case Failure(f) ⇒ Test.error("failed", ErrorData(f))
       }
     }
   ).flatten

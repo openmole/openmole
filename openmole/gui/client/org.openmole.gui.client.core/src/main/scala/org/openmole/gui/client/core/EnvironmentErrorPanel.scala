@@ -77,9 +77,7 @@ class EnvironmentErrorPanel(environmentErrorData: EnvironmentErrorData, environm
       subRow = Some((i: scaladget.tools.ID) ⇒ SubRow(
         Rx {
           val stackText = scrollableText()
-          stackText.setContent(errorData.get(i).map {
-            _._1.stack.stackTrace
-          }.getOrElse(""))
+          stackText.setContent(errorData.get(i).map { e ⇒ ErrorData.stackTrace(e._1.stack) }.getOrElse(""))
           div(stackText.sRender)
         }, detailOn.map {
           _.get(i).getOrElse(false)

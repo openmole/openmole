@@ -135,7 +135,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     to.listFiles.toSeq
   }
 
-  def unknownFormat(name: String) = ExtractResult(Some(ErrorBuilder("Unknown compression format for " + name)))
+  def unknownFormat(name: String) = ExtractResult(Some(ErrorData("Unknown compression format for " + name)))
 
   private def extractArchiveFromFiles(from: File, to: File)(implicit context: ServerFileSystemContext): ExtractResult = {
     Try {
@@ -152,7 +152,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
       }
     } match {
       case Success(_) ⇒ ExtractResult.ok
-      case Failure(t) ⇒ ExtractResult(Some(ErrorBuilder(t)))
+      case Failure(t) ⇒ ExtractResult(Some(ErrorData(t)))
     }
   }
 
@@ -320,14 +320,20 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
         def error(t: Throwable): Unit = {
           t match {
-            case ce: ScalaREPL.CompilationError ⇒ execution.addError(execId, Failed(Vector.empty, CompilationError(ce.errorMessages.map { em ⇒
-              ErrorWithLocation(em.rawMessage, em.position.map { _.line }, em.position.map { _.start }, em.position.map { _.end })
-            }), Seq()))
-            case _ ⇒ execution.addError(execId, Failed(Vector.empty, ErrorBuilder(t), Seq()))
+            case ce: ScalaREPL.CompilationError ⇒
+              def toErrorWithLocation(em: ScalaREPL.ErrorMessage) = ErrorWithLocation(em.rawMessage, em.position.map { _.line }, em.position.map { _.start }, em.position.map { _.end })
+
+              execution.addError(
+                execId,
+                Failed(
+                  Vector.empty,
+                  ErrorData(ce.errorMessages.map(toErrorWithLocation), t),
+                  Seq()))
+            case _ ⇒ execution.addError(execId, Failed(Vector.empty, ErrorData(t), Seq()))
           }
         }
 
-        def message(message: String): Unit = execution.addError(execId, Failed(Vector.empty, MessageError(message), Seq()))
+        def message(message: String): Unit = execution.addError(execId, Failed(Vector.empty, MessageErrorData(message), Seq()))
 
         try {
           val project = Project(script.getParentFileSafe)
@@ -383,7 +389,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   def clearEnvironmentErrors(environmentId: EnvironmentId): Unit = execution.deleteEnvironmentErrors(environmentId)
 
   def runningErrorEnvironmentData(environmentId: EnvironmentId, lines: Int): EnvironmentErrorData = atomic { implicit ctx ⇒
-    val environmentErrors = execution.environementErrors(environmentId)
+    val environmentErrors = execution.environmentErrors(environmentId)
 
     def groupedErrors = environmentErrors.groupBy {
       _.errorMessage
@@ -421,11 +427,11 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   }
 
   //PLUGINS
-  def addUploadedPlugins(nodes: Seq[String]): Seq[Error] = {
+  def addUploadedPlugins(nodes: Seq[String]): Seq[ErrorData] = {
     val files = nodes.map(Utils.pluginUpdoadDirectory / _)
     val errors = org.openmole.core.module.addPluginsFiles(files, true, Some(org.openmole.core.module.pluginDirectory))
     files.foreach(_.recursiveDelete)
-    errors.map(e ⇒ ErrorBuilder(e._2))
+    errors.map(e ⇒ ErrorData(e._2))
   }
 
   def autoAddPlugins(path: SafePath) = {
