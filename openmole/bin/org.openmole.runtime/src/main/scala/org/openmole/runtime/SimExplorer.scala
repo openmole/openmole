@@ -99,7 +99,7 @@ object SimExplorer extends JavaLogger {
               logger.fine("plugins: " + config.pluginPath.get + " " + new File(config.pluginPath.get).listFilesSafe.mkString(","))
               PluginManager.tryLoad(new File(config.pluginPath.get).listFilesSafe).foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
 
-              val (storage, _) = serializerService.deserialiseAndExtractFiles[RemoteStorage](new File(config.storage.get))
+              val (storage, _) = serializerService.deserializeAndExtractFiles[RemoteStorage](new File(config.storage.get))
 
               new Runtime().apply(
                 storage,

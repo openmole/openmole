@@ -63,7 +63,7 @@ object SaveHook {
     val saveContext: Context = prototypes.map(p ⇒ context.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p has not been found")))
     val to = file.from(context)
     to.createParentDir
-    serializerService.serialiseAndArchiveFiles(saveContext, to)
+    serializerService.serializeAndArchiveFiles(saveContext, to)
     context
   }
 }

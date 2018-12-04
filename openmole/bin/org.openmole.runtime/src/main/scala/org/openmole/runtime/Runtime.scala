@@ -132,7 +132,7 @@ class Runtime {
         }
       }
 
-      val runnableTasks = serializerService.deserialiseReplaceFiles[Seq[RunnableTask]](executionMessage.jobs, usedFiles)
+      val runnableTasks = serializerService.deserializeReplaceFiles[Seq[RunnableTask]](executionMessage.jobs, usedFiles)
 
       val saver = new ContextSaver(runnableTasks.size)
       val allMoleJobs = runnableTasks.map { _.toMoleJob(saver.save) }
@@ -160,14 +160,14 @@ class Runtime {
 
       def uploadArchive = {
         val contextResultFile = newFile.newFile("contextResult", "res")
-        serializerService.serialiseAndArchiveFiles(contextResults, contextResultFile)
+        serializerService.serializeAndArchiveFiles(contextResults, contextResultFile)
         fileService.deleteWhenGarbageCollected(contextResultFile)
         ArchiveContextResults(contextResultFile)
       }
 
       def uploadIndividualFiles = {
         val contextResultFile = newFile.newFile("contextResult", "res")
-        serializerService.serialise(contextResults, contextResultFile)
+        serializerService.serialize(contextResults, contextResultFile)
         fileService.deleteWhenGarbageCollected(contextResultFile)
         val pac = serializerService.pluginsAndFiles(contextResults)
 
@@ -204,7 +204,7 @@ class Runtime {
 
     newFile.withTmpFile("output", ".tgz") { outputLocal ⇒
       logger.fine(s"Serializing result to $outputLocal")
-      serializerService.serialiseAndArchiveFiles(runtimeResult, outputLocal)
+      serializerService.serializeAndArchiveFiles(runtimeResult, outputLocal)
       logger.fine(s"Upload the serialized result to $outputMessagePath on $storage")
       retry(storage.upload(outputLocal, Some(outputMessagePath), TransferOptions(noLink = true, canMove = true)))
     }
