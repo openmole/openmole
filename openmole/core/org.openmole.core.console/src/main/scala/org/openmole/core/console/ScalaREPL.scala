@@ -183,30 +183,17 @@ object ScalaREPL {
 
 import ScalaREPL._
 
-class REPLClassloader(val file: AbstractFile, classLoader: ClassLoader) extends scala.reflect.internal.util.AbstractFileClassLoader(file, classLoader) { cl ⇒
+class REPLClassloader(val file: AbstractFile, classLoader: ClassLoader) extends scala.reflect.internal.util.AbstractFileClassLoader(file, null) { cl ⇒
 
-  //  lazy val abstractFileLoader = new scala.reflect.internal.util.AbstractFileClassLoader(file, null)
-  //  lazy val compositeClassLoader = new CompositeClassLoader(abstractFileLoader, classLoader)
-  //
-  //  override def loadClass(s: String, b: Boolean): Class[_] = {
-  //    import org.openmole.tool.file._
-  //    println(s"start load $s")
-  //    val c =
-  //      try compositeClassLoader.loadClass(s, b)
-  //      catch {
-  //        case e ⇒
-  //          println(e)
-  //          throw e
-  //      }
-  //
-  //    c
-  //  }
-  //
-  //  override def getResource(s: String) = compositeClassLoader.getResource(s)
-  //  override def getResources(s: String) = compositeClassLoader.getResources(s)
-  //  override def getResourceAsStream(s: String) = compositeClassLoader.getResourceAsStream(s)
-  //  override def getPackage(name: String): Package = abstractFileLoader.getPackage(name)
-  //  override def getPackages(): Array[Package] = abstractFileLoader.getPackages()
+  lazy val abstractFileLoader = new scala.reflect.internal.util.AbstractFileClassLoader(file, null)
+  lazy val compositeClassLoader = new CompositeClassLoader(abstractFileLoader, classLoader)
+
+  override def loadClass(s: String, b: Boolean): Class[_] = compositeClassLoader.loadClass(s, b)
+  override def getResource(s: String) = compositeClassLoader.getResource(s)
+  override def getResources(s: String) = compositeClassLoader.getResources(s)
+  override def getResourceAsStream(s: String) = compositeClassLoader.getResourceAsStream(s)
+  override def getPackage(name: String): Package = abstractFileLoader.getPackage(name)
+  override def getPackages(): Array[Package] = abstractFileLoader.getPackages()
 
 }
 
@@ -312,9 +299,9 @@ class Interpreter(priorityBundles: ⇒ Seq[Bundle], jars: Seq[JFile], quiet: Boo
   def compile(code: String): ScalaREPL.Compiled = synchronized {
     val settings = OSGiScalaCompiler.createSettings(new Settings, priorityBundles, jars, classDirectory)
     val iMain = new OMIMain(settings, priorityBundles, jars, quiet)
-    val s = new OMScripted(new nsc.interpreter.Scripted.Factory, settings, new NewLinePrintWriter(new ConsoleWriter, true), iMain)
+    val s = new ScalaREPL(priorityBundles, jars, quiet, classDirectory, 1)
     val compiled = s.compile(code)
-    () ⇒ compiled.eval()
+    () ⇒ compiled.apply()
   }
 }
 

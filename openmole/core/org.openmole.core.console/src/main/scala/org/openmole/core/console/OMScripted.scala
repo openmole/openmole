@@ -27,7 +27,7 @@ object OMScripted {
 }
 
 /* A REPL adaptor for the javax.script API. */
-class OMScripted(val factory: ScriptEngineFactory, settings: Settings, out: JPrintWriter, val omIMain: OMIMain)
+class OMScripted(val factory: ScriptEngineFactory, settings: Settings, out: JPrintWriter, val omIMain: IMain)
   extends AbstractScriptEngine with Compilable {
 
   def createBindings: Bindings = new SimpleBindings
@@ -115,7 +115,7 @@ class OMScripted(val factory: ScriptEngineFactory, settings: Settings, out: JPri
         case Right(req) ⇒
           code = ""
           new WrappedRequest(req)
-        case Left(IR.Incomplete) ⇒
+        case Left(IR.Incomplete) | Left(IR.Success) ⇒
           code = cat + "\n"
           new CompiledScript {
             def eval(context: ScriptContext): Object = null
