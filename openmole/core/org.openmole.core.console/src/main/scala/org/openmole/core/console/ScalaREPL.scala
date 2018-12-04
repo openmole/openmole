@@ -183,7 +183,6 @@ object ScalaREPL {
 
 import ScalaREPL._
 
-
 class REPLClassloader(val file: AbstractFile, classLoader: ClassLoader) extends scala.reflect.internal.util.AbstractFileClassLoader(file, null) { cl ⇒
 
   lazy val abstractFileLoader = new scala.reflect.internal.util.AbstractFileClassLoader(file, null)
@@ -300,11 +299,7 @@ class Interpreter(priorityBundles: ⇒ Seq[Bundle], jars: Seq[JFile], quiet: Boo
   def compile(code: String): ScalaREPL.Compiled = synchronized {
     val settings = OSGiScalaCompiler.createSettings(new Settings, priorityBundles, jars, classDirectory)
     val iMain = new OMIMain(settings, priorityBundles, jars, quiet)
-<<<<<<< HEAD
-    val s = new OMScripted(new nsc.interpreter.Scripted.Factory, settings, new NewLinePrintWriter(new ConsoleWriter, true), iMain)
-=======
     val s = new ScalaREPL(priorityBundles, jars, quiet, classDirectory, 1)
->>>>>>> 9-dev
     val compiled = s.compile(code)
     () ⇒ compiled.apply()
   }
