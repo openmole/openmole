@@ -33,8 +33,8 @@ class SerializationSpec extends FlatSpec with Matchers {
 
   def serializeDeserialize[T](o: T) = {
     val builder = new ByteArrayOutputStream()
-    serializer.serialise(o, builder)
-    serializer.deserialise[T](new ByteArrayInputStream(builder.toByteArray))
+    serializer.serialize(o, builder)
+    serializer.deserialize[T](new ByteArrayInputStream(builder.toByteArray))
   }
 
   "Task " should "be the same after serialization and deserialization" in {
