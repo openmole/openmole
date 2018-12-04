@@ -80,7 +80,7 @@ trait Api {
   def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Unit
 
   //CORE PLUGINS
-  def addUploadedPlugins(nodes: Seq[String]): Seq[Error]
+  def addUploadedPlugins(nodes: Seq[String]): Seq[ErrorData]
   def autoAddPlugins(path: SafePath): Unit
   def isPlugin(path: SafePath): Boolean
   def allPluggableIn(path: SafePath): Seq[SafePath]

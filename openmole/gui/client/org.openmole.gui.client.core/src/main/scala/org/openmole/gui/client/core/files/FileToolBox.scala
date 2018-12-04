@@ -255,8 +255,8 @@ class FileToolBox(initSafePath: SafePath) {
     post()[Api].extractTGZ(safePath).call().foreach {
       r ⇒
         r.error match {
-          case Some(e: org.openmole.gui.ext.data.Error) ⇒
-            AlertPanel.detail("An error occurred during extraction", e.stackTrace, transform = RelativeCenterPosition, zone = FileZone)
+          case Some(e: org.openmole.gui.ext.data.ErrorData) ⇒
+            AlertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
           case _ ⇒ treeNodePanel.invalidCacheAndDraw
         }
     }
