@@ -1,5 +1,7 @@
 package org.openmole.gui.client.core.files
 
+import java.awt.Color
+
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{FileZone, RelativeCenterPosition}
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.files.FileToolBar.{FilterTool, PluginTool, TrashTool}
@@ -15,7 +17,7 @@ import org.scalajs.dom.raw._
 import org.openmole.gui.client.core._
 import scalatags.JsDom.all._
 import scalatags.JsDom.{TypedTag, tags}
-import org.openmole.gui.client.core.files.treenodemanager.{instance ⇒ manager}
+import org.openmole.gui.client.core.files.treenodemanager.{instance => manager}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
@@ -208,7 +210,7 @@ class TreeNodePanel {
 
   def drawTree: Unit = {
     computePluggables
-    tree() = manager.computeCurrentSons(filter).withFutureWaiter("Get files", (sons: ListFiles) ⇒ {
+    tree() = manager.computeCurrentSons(filter).withFutureWaiter("Get files", (sons: ListFilesData) ⇒ {
 
       tags.table(
         if (manager.isRootCurrent && manager.isProjectsEmpty) {
@@ -251,16 +253,18 @@ class TreeNodePanel {
           )
         }
       )
-    })
+    })(omsheet.color(WHITE))
 
   }
 
-  def drawNode(node: TreeNode) = {
+  def drawNode(nodeData: VersionedTreeNodeData) = {
+    val node: TreeNode = nodeData.treeNodeData
+
     node match {
       case fn: FileNode ⇒
         ReactiveLine(fn, TreeNodeType.file, () ⇒ {
           displayNode(fn)
-        })
+        }, nodeData.versionStatus)
       case dn: DirNode ⇒
         ReactiveLine(dn, TreeNodeType.folder, () ⇒ {
           manager switch (dn.name.now)
@@ -268,7 +272,7 @@ class TreeNodePanel {
           fileToolBar.unselectTool
           treeWarning() = true
           //drawTree
-        })
+        }, nodeData.versionStatus)
     }
   }
 
@@ -294,11 +298,12 @@ class TreeNodePanel {
   var currentSafePath: Var[Option[SafePath]] = Var(None)
 
   object ReactiveLine {
-    def apply(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) = new ReactiveLine(tn, treeNodeType, todo)
+    def apply(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit, versionStatus: VersionStatus) = new ReactiveLine(tn, treeNodeType, todo, versionStatus)
   }
 
-  class ReactiveLine(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) {
+  class ReactiveLine(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit, versionStatus: VersionStatus) {
 
+    println("TN " + tn.name + " // " + versionStatus)
     val tnSafePath = manager.current.now ++ tn.name.now
 
     case class TreeStates(settingsSet: Boolean, edition: Boolean, replication: Boolean, selected: Boolean = manager.isSelected(tn)) {
@@ -318,6 +323,15 @@ class TreeNodePanel {
 
       def setSelected(b: Boolean) = treeStates() = copy(selected = b)
     }
+
+    case class DirAspect(
+                          icon: ModifierSeq,
+                          rectangle: ModifierSeq,
+                          image: TypedTag[HTMLElement],
+                          aCSS: String,
+                          namePadding: Int,
+                          textColor: String = WHITE
+                        )
 
     private val treeStates: Var[TreeStates] = Var(TreeStates(false, false, false))
 
@@ -340,19 +354,32 @@ class TreeNodePanel {
         )
       )
 
+      def textColor = versionStatus match {
+        case m: Modified => BLUE_GREY
+        case _ => WHITE
+      }
+
+
       tn match {
-        case fn: FileNode ⇒ div(ms("fileWrap"))(
-          selectableElement,
-          span(paddingTop := 4, omsheet.file +++ style)(div(omsheet.fileNameOverflow)(tn.name.now)),
-          settings(fileInfo)
-        )
-        case dn: DirNode ⇒
-          val (icon, rectangle, image, aCSS, namePadding) = if (dn.versioningSystem) (emptyMod, style, img(src := org.openmole.gui.ext.data.Images.git, width := 18, height := 18, padding := 1), "versioningWrap", 8) else (omsheet.fileIcon +++ glyph_plus, (omsheet.dir +++ style), span, "fileWrap", 24)
-          div(ms(aCSS))(
+        case fn: FileNode ⇒
+          div(ms("fileWrap"))(
             selectableElement,
-            span(ms(dn.isEmpty, emptyMod, icon))(image),
-            rectangle,
-            span(tn.name.now, omsheet.fileNameOverflow, paddingLeft := namePadding),
+            span(paddingTop := 4, omsheet.file +++ style)(div(omsheet.fileNameOverflow, omsheet.color(textColor))(tn.name.now)),
+            settings(fileInfo)
+
+          )
+        case dn: DirNode ⇒
+          val dirAspect =
+            dn.versioningSystem match {
+              case Some(v: Versioning) => DirAspect(emptyMod, style, img(src := org.openmole.gui.ext.data.Images.git, width := 18, height := 18, padding := 1), "versioningWrap", 8)
+              case _ => DirAspect(omsheet.fileIcon +++ glyph_plus, (omsheet.dir +++ style), span, "fileWrap", 24)
+            }
+
+          div(ms(dirAspect.aCSS))(
+            selectableElement,
+            span(ms(dn.isEmpty, emptyMod, dirAspect.icon))(dirAspect.image),
+            dirAspect.rectangle,
+            span(tn.name.now, omsheet.fileNameOverflow, paddingLeft := dirAspect.namePadding, omsheet.color(textColor)),
             settings(dirInfo)
           )
       }

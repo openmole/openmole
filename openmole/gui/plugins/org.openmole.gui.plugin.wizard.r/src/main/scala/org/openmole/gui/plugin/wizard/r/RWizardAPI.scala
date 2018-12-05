@@ -19,7 +19,7 @@ package org.openmole.gui.plugin.wizard.r
 
 import org.openmole.gui.ext.data._
 
-trait RWizardAPI {
+trait RWizardAPI extends PluginAPI {
   def toTask(
     target:         SafePath,
     executableName: String,

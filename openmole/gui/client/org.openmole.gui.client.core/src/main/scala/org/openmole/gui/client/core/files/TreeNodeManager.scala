@@ -21,7 +21,6 @@ import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.ext.data.{ FileFilter, ListFilesData, SafePath }
 import rx._
-import org.openmole.gui.client.core.files.TreeNode.ListFiles
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -39,7 +38,7 @@ class TreeNodeManager {
 
   val dirNodeLine: Var[SafePath] = Var(root)
 
-  val sons: Var[Map[SafePath, ListFiles]] = Var(Map())
+  val sons: Var[Map[SafePath, ListFilesData]] = Var(Map())
 
   val error: Var[Option[TreeNodeError]] = Var(None)
 
@@ -103,12 +102,12 @@ class TreeNodeManager {
 
   def invalidCache(sp: SafePath) = sons() = sons.now.filterNot(_._1.path == sp.path)
 
-  def computeCurrentSons(fileFilter: FileFilter): Future[ListFiles] = {
+  def computeCurrentSons(fileFilter: FileFilter): Future[ListFilesData] = {
     val cur = current.now
 
-    def getAndUpdateSons(safePath: SafePath): Future[ListFiles] = CoreUtils.getSons(safePath, fileFilter).map { newsons ⇒
+    def getAndUpdateSons(safePath: SafePath): Future[ListFilesData] = CoreUtils.getSons(safePath, fileFilter).map { newsons ⇒
       sons() = {
-        val ns: ListFiles = newsons
+        val ns: ListFilesData = newsons
         sons.now.updated(cur, ns)
       }
       newsons
@@ -135,6 +134,6 @@ class TreeNodeManager {
 
   def isRootCurrent = current.now == root
 
-  def isProjectsEmpty = sons.now.getOrElse(root, ListFiles(Seq(), 0)).list.isEmpty
+  def isProjectsEmpty = sons.now.getOrElse(root, ListFilesData(Seq(), 0)).list.isEmpty
 
 }

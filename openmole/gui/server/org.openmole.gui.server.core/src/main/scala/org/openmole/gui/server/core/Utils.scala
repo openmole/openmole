@@ -79,6 +79,7 @@ object Utils extends JavaLogger {
   }
 
   implicit def safePathToFile(s: SafePath)(implicit context: ServerFileSystemContext, workspace: Workspace): File = {
+    println("SP " + s.path)
     context match {
       case _: ProjectFileSystem ⇒ getFile(webUIDirectory, s.path)
       case _                    ⇒ getFile(new File(""), s.path)
@@ -94,24 +95,34 @@ object Utils extends JavaLogger {
     fileToSafePath
   }
 
-  def fileToTreeNodeData(f: File)(implicit context: ServerFileSystemContext = ProjectFileSystem()): Option[TreeNodeData] = {
-
+  def fileToTreeNodeData(f: File)(implicit context: ServerFileSystemContext = ProjectFileSystem(), workspace: Workspace, services: Services): Option[TreeNodeData] = {
     val time = if (f.exists) Some(
       java.nio.file.Files.readAttributes(f, classOf[BasicFileAttributes]).lastModifiedTime.toMillis
     )
     else None
 
-    // Simplify versionning search process considering that only git is implemented ever as versioning system
-    val dirData = if (f.isDirectory) Some(DirData(f.isDirectoryEmpty, f.listFiles.exists {
-      _.getName == ".git"
-    }))
+    val dirData = if (f.isDirectory) {
+      val versioning = {
+        f.listFiles.exists {
+          _.getName == ".git"
+        } match {
+          case true ⇒
+            PluginActivator.versioningApi.headOption.map { factory ⇒ Versioning(factory(services).modifiedFiles(f /*root repository*/).map { sp ⇒ VersionedFile(sp, Modified()) }) }
+          case _ ⇒ None
+        }
+      }
+
+      Some(DirData(f.isDirectoryEmpty, versioning))
+    }
     else None
 
     time.map(t ⇒ TreeNodeData(f.getName, dirData, f.length, t))
   }
 
-  implicit def seqfileToSeqTreeNodeData(fs: Seq[File])(implicit context: ServerFileSystemContext): Seq[TreeNodeData] = fs.flatMap {
-    fileToTreeNodeData(_)
+  implicit def safePathToTreeNodeData(safePath: SafePath)(implicit context: ServerFileSystemContext = ProjectFileSystem(), workspace: Workspace, services: Services): Option[TreeNodeData] = fileToTreeNodeData(safePathToFile(safePath))
+
+  implicit def seqfileToSeqTreeNodeData(fs: Seq[File])(implicit context: ServerFileSystemContext, workspace: Workspace, services: Services): Seq[TreeNodeData] = fs.flatMap {
+    fileToTreeNodeData(_)(context, workspace, services)
   }
 
   implicit def fileToOptionSafePath(f: File)(implicit context: ServerFileSystemContext, workspace: Workspace): Option[SafePath] = Some(fileToSafePath(f))
@@ -163,7 +174,25 @@ object Utils extends JavaLogger {
     getFile0(paths, root)
   }
 
-  def listFiles(path: SafePath, fileFilter: data.FileFilter)(implicit context: ServerFileSystemContext, workspace: Workspace): ListFilesData = {
+  def toVersionedTuple(/*ROOT*/parent: Option[TreeNodeData], treeNodeDatas: Seq[TreeNodeData]): Seq[VersionedTreeNodeData] = {
+
+    val modifiedFiles = parent.map { p ⇒
+      p.dirData.flatMap {
+        _.versioningSystem.map {
+          _.modifiedFiles
+        }
+      }.getOrElse(Seq())
+    }.getOrElse(Seq())
+
+    treeNodeDatas.map { tnd ⇒
+      VersionedTreeNodeData(tnd, modifiedFiles.filter { f ⇒ f.safePath.name == tnd.name }.headOption.map {
+        _.status
+      }.getOrElse(Clear()))
+    }
+
+  }
+
+  def listFiles(path: SafePath, fileFilter: data.FileFilter/*, root: SafePath*/)(implicit context: ServerFileSystemContext, workspace: Workspace, services: Services): ListFilesData = {
 
     val allFiles = safePathToFile(path).listFilesSafe.toSeq
 
@@ -176,10 +205,13 @@ object Utils extends JavaLogger {
     val threshold = fileFilter.threshold.getOrElse(1000)
     val nbFiles = allFiles.size
 
-    fileFilter.firstLast match {
-      case First() ⇒ ListFilesData(sorted.take(threshold), nbFiles)
-      case Last()  ⇒ ListFilesData(sorted.takeRight(threshold).reverse, nbFiles)
+    val oo = fileFilter.firstLast match {
+      case First() ⇒ ListFilesData(toVersionedTuple(path, sorted.take(threshold)), nbFiles)
+      case Last()  ⇒ ListFilesData(toVersionedTuple(path, sorted.takeRight(threshold).reverse), nbFiles)
     }
+
+    println("Versioned files " + oo)
+    oo
   }
 
   def copy(safePath: SafePath, newName: String)(implicit workspace: Workspace): SafePath = {
@@ -231,10 +263,10 @@ object Utils extends JavaLogger {
     safePathToFile(safePath).exists
   }
 
-  def existsExcept(in: SafePath, exceptItSelf: Boolean)(implicit workspace: Workspace): Boolean = {
+  def existsExcept(in: SafePath, exceptItSelf: Boolean)(implicit workspace: Workspace, services: Services): Boolean = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     val li = listFiles(in.parent, data.FileFilter.defaultFilter)
-    val count = li.list.count(l ⇒ treeNodeToSafePath(l, in.parent).path == in.path)
+    val count = li.list.count(l ⇒ treeNodeToSafePath(l.treeNodeData, in.parent).path == in.path)
 
     val bound = if (exceptItSelf) 1 else 0
     if (count > bound) true else false

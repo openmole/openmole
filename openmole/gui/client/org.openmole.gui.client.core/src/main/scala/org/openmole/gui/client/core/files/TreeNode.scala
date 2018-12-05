@@ -60,8 +60,15 @@ sealed trait TreeNode {
 
 object TreeNode {
 
+  implicit def treeNodeDataToDirNode(otnd: Option[TreeNodeData]): Option[DirNode] = otnd.flatMap { tnd ⇒
+    tnd.dirData match {
+      case Some(dd: DirData) ⇒ Some(DirNode(Var(tnd.name), tnd.size, tnd.time, dd.isEmpty, dd.versioningSystem))
+      case _                 ⇒ None
+    }
+  }
+
   implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode = tnd.dirData match {
-    case Some(dd: DirData) ⇒ DirNode(Var(tnd.name), tnd.size, tnd.time, dd.isEmpty, dd.versioning)
+    case Some(dd: DirData) ⇒ DirNode(Var(tnd.name), tnd.size, tnd.time, dd.isEmpty, dd.versioningSystem)
     case _                 ⇒ FileNode(Var(tnd.name), tnd.size, tnd.time)
   }
 
@@ -78,9 +85,22 @@ object TreeNode {
 
   implicit def seqTreeNodeDataToSeqTreeNode(tnds: Seq[TreeNodeData]): Seq[TreeNode] = tnds.map(treeNodeDataToTreeNode(_))
 
-  implicit def listFilesDataToListFiles(lfd: ListFilesData): ListFiles = ListFiles(lfd.list, lfd.nbFilesOnServer)
+  //  def listFilesDataToListFiles(lfd: ListFilesData): ListFiles = {
+  //
+  ////          val modifiedFiles = lfd.list.flatMap { tn =>
+  ////            tn.dirData.flatMap {
+  ////              _.versioningSystem.map {
+  ////                _.modifiedFiles
+  ////              }
+  ////            }.getOrElse(Seq()).map {f=>
+  ////              f=> f.status
+  ////            }
+  ////          }
+  //
+  //    ListFiles(lfd.list, lfd.nbFilesOnServer)
+  //  }
 
-  case class ListFiles(list: Seq[TreeNode], nbFilesOnServer: Int)
+  // case class ListFiles(list: Seq[(TreeNode, VersionStatus)], nbFilesOnServer: Int)
 
 }
 
@@ -89,7 +109,7 @@ case class DirNode(
   size:             Long,
   time:             Long,
   isEmpty:          Boolean,
-  versioningSystem: Boolean
+  versioningSystem: Option[Versioning]
 ) extends TreeNode
 
 case class FileNode(

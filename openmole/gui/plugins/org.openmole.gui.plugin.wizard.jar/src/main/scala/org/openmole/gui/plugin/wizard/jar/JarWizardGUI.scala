@@ -35,10 +35,16 @@ import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.DataUtils._
 import org.openmole.gui.ext.tool.client
 import rx._
+import org.openmole.core.services._
 
 @JSExportTopLevel("org.openmole.gui.plugin.wizard.jar.JarWizardFactory")
 class JarWizardFactory extends WizardPluginFactory {
+
+  type APIType = JarWizardAPI
+
   type WizardType = JarWizardData
+
+  def api = (s: Services) ⇒ new JarWizardApiImpl(s)
 
   val fileType = JarArchive
 

@@ -22,6 +22,7 @@ import boopickle.Default._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.tool.client.OMPost
 import autowire._
+import org.openmole.core.services.Services
 import org.scalajs.dom.raw.HTMLElement
 
 import scala.concurrent.Future
@@ -32,7 +33,12 @@ import rx._
 
 @JSExportTopLevel("org.openmole.gui.plugin.wizard.native.NativeWizardFactory")
 class NativeWizardFactory extends WizardPluginFactory {
+
+  type APIType = NativeWizardAPI
+
   val fileType = CareArchive
+
+  def api = (s: Services) ⇒ new NativeWizardApiImpl(s)
 
   def build(safePath: SafePath, onPanelFilled: (LaunchingCommand) ⇒ Unit = (LaunchingCommand) ⇒ {}): WizardGUIPlugin = new NativeWizardGUI
 

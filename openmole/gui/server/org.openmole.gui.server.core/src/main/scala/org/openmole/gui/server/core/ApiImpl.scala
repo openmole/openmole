@@ -242,7 +242,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   }
 
   def listFiles(sp: SafePath, fileFilter: data.FileFilter): ListFilesData = atomic { implicit ctx ⇒
-    Utils.listFiles(sp, fileFilter)(org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace)
+    Utils.listFiles(sp, fileFilter)(org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace, services)
   }
 
   def isEmpty(sp: SafePath): Boolean = {
@@ -472,8 +472,8 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     val toDir = archivePath.toNoExtention
     // extractTGZToAndDeleteArchive(archivePath, toDir)
     (for {
-      tnd ← listFiles(toDir).list if FileType.isSupportedLanguage(tnd.name)
-    } yield tnd).map { nd ⇒ toDir ++ nd.name }
+      tnd ← listFiles(toDir).list if FileType.isSupportedLanguage(tnd.treeNodeData.name)
+    } yield tnd).map { nd ⇒ toDir ++ nd.treeNodeData.name }
   }
 
   def expandResources(resources: Resources): Resources = {

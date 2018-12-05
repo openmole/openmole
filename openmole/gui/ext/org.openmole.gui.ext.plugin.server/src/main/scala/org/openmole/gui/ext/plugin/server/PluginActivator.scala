@@ -18,7 +18,7 @@ package org.openmole.gui.ext.plugin.server
  *
  */
 
-import org.openmole.gui.ext.data.{ AuthenticationPluginFactory, GUIPluginAsJS, VersioningPluginFactory, WizardPluginFactory }
+import org.openmole.gui.ext.data._
 import org.osgi.framework._
 
 import collection.JavaConverters._
@@ -48,6 +48,8 @@ object PluginActivator {
     instances.filter {
       classOf[VersioningPluginFactory].isAssignableFrom
     }
+
+  def versioningApi = plugins.filter { case (k, _) ⇒ classOf[VersioningPluginFactory].isAssignableFrom(k) }.map { _._1.newInstance.asInstanceOf[VersioningPluginFactory].api }.toSeq
 }
 
 trait PluginActivator extends BundleActivator {

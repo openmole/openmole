@@ -39,6 +39,8 @@ package object client {
 
   lazy val LIGHT_BLUE = "lightblue"
 
+  lazy val BLUE_GREY = "#4492b5ff"
+
   lazy val RED = "#c83737"
 
   lazy val DARK_GREY = "#222"
@@ -291,7 +293,6 @@ package object client {
 
   lazy val fileNameOverflow: ModifierSeq = Seq(
     absolutePosition,
-    color(WHITE),
     whiteSpace := "nowrap",
     overflow := "hidden",
     pointer,

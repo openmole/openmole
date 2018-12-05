@@ -33,10 +33,15 @@ import scala.concurrent.Future
 import scala.scalajs.js.annotation._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
+import org.openmole.core.services._
 
 @JSExportTopLevel("org.openmole.gui.plugin.authentication.sshlogin.LoginAuthenticationFactory")
 class LoginAuthenticationFactory extends AuthenticationPluginFactory {
   type AuthType = LoginAuthenticationData
+
+  type APIType = LoginAuthenticationAPI
+
+  def api = (s: Services) ⇒ new LoginAuthenticationApiImpl(s)
 
   def buildEmpty: AuthenticationPlugin = new LoginAuthenticationGUI
 

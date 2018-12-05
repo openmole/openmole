@@ -32,10 +32,16 @@ import scala.concurrent.Future
 import scala.scalajs.js.annotation._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
+import org.openmole.core.services._
 
 @JSExportTopLevel("org.openmole.gui.plugin.wizard.netlogo.NetlogoWizardFactory")
 class NetlogoWizardFactory extends WizardPluginFactory {
+
+  type APIType = NetlogoWizardAPI
+
   type WizardType = NetlogoWizardData
+
+  def api = (s: Services) ⇒ new NetlogoWizardApiImpl(s)
 
   val fileType = CodeFile(NetLogoLanguage())
 

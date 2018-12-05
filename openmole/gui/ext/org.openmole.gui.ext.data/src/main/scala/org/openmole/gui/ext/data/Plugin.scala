@@ -21,6 +21,7 @@ import org.scalajs.dom.raw.HTMLElement
 
 import scala.concurrent.Future
 import scalatags.JsDom.TypedTag
+import org.openmole.core.services._
 
 sealed trait GUIPlugin
 
@@ -40,12 +41,25 @@ trait AuthenticationPlugin extends GUIPlugin {
   def test: Future[Seq[Test]]
 }
 
+trait VersioningAPI extends PluginAPI {
+  def clone(url: String, folder: SafePath): Option[MessageError]
+
+  def modifiedFiles(safePath: SafePath): Seq[SafePath]
+}
+
 sealed trait GUIPluginFactory {
+
+  type FactoryPluginAPI <: PluginAPI
+
+  def api: Services ⇒ FactoryPluginAPI
+
   def name: String
 }
 
 trait AuthenticationPluginFactory extends GUIPluginFactory {
   type AuthType <: AuthenticationData
+
+  type FactoryPluginAPI = PluginAPI
 
   def build(data: AuthType): AuthenticationPlugin
 
@@ -72,6 +86,8 @@ trait WizardGUIPlugin extends GUIPlugin {
 
 trait WizardPluginFactory extends GUIPluginFactory {
 
+  type FactoryPluginAPI = PluginAPI
+
   def build(safePath: SafePath, onPanelFilled: (LaunchingCommand) ⇒ Unit): WizardGUIPlugin
 
   def fileType: FileType
@@ -84,11 +100,11 @@ trait VersioningGUIPlugin extends GUIPlugin {
   def factory: VersioningPluginFactory
 
   val panel: TypedTag[HTMLElement]
-
-  def cloneGIT: Future[Option[MessageError]]
 }
 
 trait VersioningPluginFactory extends GUIPluginFactory {
+
+  override type FactoryPluginAPI = VersioningAPI
 
   def build(cloneIn: SafePath, onCloned: () ⇒ Unit = () ⇒ {}): VersioningGUIPlugin
 

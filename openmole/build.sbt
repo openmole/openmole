@@ -559,7 +559,7 @@ def guiExtTarget = guiExt / "target"
 
 /* -------------------- Ext ----------------------*/
 
-lazy val dataGUI = OsgiProject(guiExt, "org.openmole.gui.ext.data") enablePlugins (ScalaJSPlugin) settings(
+lazy val dataGUI = OsgiProject(guiExt, "org.openmole.gui.ext.data") enablePlugins (ScalaJSPlugin) dependsOn(services) settings(
   Libraries.scalaTagsJS,
   Libraries.scalajsDomJS,
   libraryDependencies += Libraries.monocle

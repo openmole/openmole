@@ -32,9 +32,14 @@ import scalatags.JsDom.all._
 import org.openmole.gui.ext.tool.client.Waiter
 import org.openmole.gui.plugin.versioning.git.GitGUI.{ Cloning, CloningStatus, NotClonedYet }
 import scaladget.bootstrapnative.bsn._
+import org.openmole.core.services._
 
 @JSExportTopLevel("org.openmole.gui.plugin.versioning.git.GitFactory")
 class GitFactory extends VersioningPluginFactory {
+
+  type APIType = GitAPI
+
+  def api = (s: Services) ⇒ new GitApiImpl(s)
 
   def name: String = "GIT"
 
@@ -112,5 +117,5 @@ class GitGUI(cloneIn: SafePath, onCloned: () ⇒ Unit = () ⇒ {}) extends Versi
       })
     )
 
-  def cloneGIT = OMPost()[GitAPI].cloneGIT(repositoryUrlInput.value, cloneIn).call()
+  def cloneGIT = OMPost()[GitAPI].clone(repositoryUrlInput.value, cloneIn).call()
 }

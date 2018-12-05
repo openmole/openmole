@@ -30,10 +30,15 @@ import autowire._
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
 import scalatags.JsDom.all._
+import org.openmole.core.services._
 
 @JSExportTopLevel("org.openmole.gui.plugin.authentication.sshkey.PrivateKeyAuthenticationFactory")
 class PrivateKeyAuthenticationFactory extends AuthenticationPluginFactory {
   type AuthType = PrivateKeyAuthenticationData
+
+  type APIType = PrivateKeyAuthenticationAPI
+
+  def api = (s: Services) ⇒ new PrivateKeyAuthenticationApiImpl(s)
 
   def buildEmpty: AuthenticationPlugin = new PrivateKeyAuthenticationGUI
 

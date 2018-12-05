@@ -326,10 +326,10 @@ class ModelWizardPanel {
         post()[Api].listFiles(resourceDir).call().foreach {
           b ⇒
             val l = b.list.filterNot {
-              _.name == modelName
+              _.treeNodeData.name == modelName
             }.map {
               tn ⇒
-                val sp = resourceDir ++ tn.name
+                val sp = resourceDir ++ tn.treeNodeData.name
                 Resource(sp, 0L)
             }
             resources() = resources.now.copy(implicits = l, number = l.size)

@@ -17,10 +17,9 @@
  */
 package org.openmole.gui.plugin.wizard.jar
 
-import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data._
 
-trait JarWizardAPI {
+trait JarWizardAPI extends PluginAPI {
   def toTask(
     target:         SafePath,
     executableName: String,

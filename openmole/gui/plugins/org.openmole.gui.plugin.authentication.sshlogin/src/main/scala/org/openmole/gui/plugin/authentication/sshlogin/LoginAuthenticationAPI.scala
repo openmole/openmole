@@ -2,7 +2,7 @@ package org.openmole.gui.plugin.authentication.sshlogin
 
 import org.openmole.gui.ext.data._
 
-trait LoginAuthenticationAPI {
+trait LoginAuthenticationAPI extends PluginAPI {
   //  def authentications(): Seq[AuthenticationData]
   def loginAuthentications(): Seq[LoginAuthenticationData]
 

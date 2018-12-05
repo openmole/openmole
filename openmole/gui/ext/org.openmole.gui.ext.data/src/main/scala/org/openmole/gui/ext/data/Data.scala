@@ -258,7 +258,13 @@ case class UploadAbsolute() extends UploadType {
   def typeName = "absolute"
 }
 
-case class DirData(isEmpty: Boolean, versioning: Boolean)
+sealed trait VersionStatus
+case class Clear() extends VersionStatus
+case class Modified() extends VersionStatus
+
+case class VersionedFile(safePath: SafePath, status: VersionStatus)
+case class Versioning(modifiedFiles: Seq[VersionedFile])
+case class DirData(isEmpty: Boolean, versioningSystem: Option[Versioning])
 
 case class TreeNodeData(
                          name: String,
@@ -743,7 +749,8 @@ case class FileFilter(firstLast: FirstLast = First(), threshold: Option[Int] = S
   }
 }
 
-case class ListFilesData(list: Seq[TreeNodeData], nbFilesOnServer: Int)
+case class VersionedTreeNodeData(treeNodeData: TreeNodeData, versionStatus: VersionStatus)
+case class ListFilesData(list: Seq[VersionedTreeNodeData], nbFilesOnServer: Int)
 
 object FileFilter {
   def defaultFilter = FileFilter.this (First(), Some(100), "", AlphaSorting())
@@ -759,6 +766,8 @@ object AuthenticationExtension extends PluginExtensionType
 case class AllPluginExtensionData(authentications: Seq[GUIPluginAsJS], wizards: Seq[GUIPluginAsJS], versioning: Seq[GUIPluginAsJS])
 
 case class GUIPluginAsJS(jsObject: String)
+
+trait PluginAPI
 
 trait AuthenticationData {
   def name: String

@@ -19,7 +19,7 @@ package org.openmole.gui.plugin.wizard.native
 
 import org.openmole.gui.ext.data._
 
-trait NativeWizardAPI {
+trait NativeWizardAPI extends PluginAPI {
   def toTask(
     target:         SafePath,
     executableName: String,

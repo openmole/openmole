@@ -1,8 +1,8 @@
 package org.openmole.gui.plugin.authentication.sshkey
 
-import org.openmole.gui.ext.data.Test
+import org.openmole.gui.ext.data.{ Test, PluginAPI }
 
-trait PrivateKeyAuthenticationAPI {
+trait PrivateKeyAuthenticationAPI extends PluginAPI {
 
   def privateKeyAuthentications(): Seq[PrivateKeyAuthenticationData]
 

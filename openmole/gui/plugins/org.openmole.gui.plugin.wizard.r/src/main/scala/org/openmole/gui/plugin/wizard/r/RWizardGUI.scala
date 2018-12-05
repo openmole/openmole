@@ -31,10 +31,16 @@ import scala.concurrent.Future
 import scala.scalajs.js.annotation._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
+import org.openmole.core.services._
 
 @JSExportTopLevel("org.openmole.gui.plugin.wizard.r.RWizardFactory")
 class RWizardFactory extends WizardPluginFactory {
+
+  type APIType = RWizardAPI
+
   val fileType = CodeFile(RLanguage())
+
+  def api = (s: Services) ⇒ new RWizardApiImpl(s)
 
   def build(safePath: SafePath, onPanelFilled: (LaunchingCommand) ⇒ Unit = (LaunchingCommand) ⇒ {}): WizardGUIPlugin = new RWizardGUI
 

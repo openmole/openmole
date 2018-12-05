@@ -29,10 +29,15 @@ import autowire._
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
 import scalatags.JsDom.all._
+import org.openmole.core.services._
 
 @JSExportTopLevel("org.openmole.gui.plugin.authentication.egi.EGIAuthenticationGUIFactory")
 class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory {
   type AuthType = EGIAuthenticationData
+
+  type APIType = EGIAuthenticationAPI
+
+  def api = (s: Services) ⇒ new EGIAuthenticationAPIImpl(s)
 
   def buildEmpty: AuthenticationPlugin = new EGIAuthenticationGUI
 

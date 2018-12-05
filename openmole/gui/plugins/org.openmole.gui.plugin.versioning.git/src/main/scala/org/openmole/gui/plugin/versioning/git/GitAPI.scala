@@ -19,10 +19,9 @@ package org.openmole.gui.plugin.versioning.git
 
 import org.openmole.gui.ext.data._
 
-trait GitAPI {
+trait GitAPI extends VersioningAPI {
 
-  case class GitFile(oldPath: SafePath, newPath: SafePath, status: String)
+  def clone(url: String, folder: SafePath): Option[MessageError]
 
-  def cloneGIT(url: String, folder: SafePath): Option[MessageError]
-  //def status(folder: SafePath, files: Seq[SafePath]): Seq[GitFile]
+  def modifiedFiles(safePath: SafePath): Seq[SafePath]
 }

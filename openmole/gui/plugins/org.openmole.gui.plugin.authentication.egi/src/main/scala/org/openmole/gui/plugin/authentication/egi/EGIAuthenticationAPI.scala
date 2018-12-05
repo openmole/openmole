@@ -1,8 +1,8 @@
 package org.openmole.gui.plugin.authentication.egi
 
-import org.openmole.gui.ext.data.Test
+import org.openmole.gui.ext.data.{ PluginAPI, Test }
 
-trait EGIAuthenticationAPI {
+trait EGIAuthenticationAPI extends PluginAPI {
   //  def authentications(): Seq[AuthenticationData]
   def egiAuthentications(): Seq[EGIAuthenticationData]
 
