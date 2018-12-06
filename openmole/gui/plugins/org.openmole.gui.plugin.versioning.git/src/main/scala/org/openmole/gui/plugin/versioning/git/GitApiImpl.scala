@@ -31,7 +31,7 @@ class GitApiImpl(s: Services) extends GitAPI {
 
   implicit val context = org.openmole.gui.ext.data.ServerFileSystemContext.project
 
-  def clone(url: String, folder: SafePath): Option[MessageError] = {
+  def clone(url: String, folder: SafePath): Option[MessageErrorData] = {
 
     val repositoryName = url.split('/').map {
       _.split('.')
@@ -46,44 +46,13 @@ class GitApiImpl(s: Services) extends GitAPI {
         val ff: java.io.File = tf
         Git.cloneRepository().setURI(url).setDirectory(ff).call()
       }) match {
-        case scala.util.Failure(e: Exception) ⇒ Some(ErrorBuilder(e))
+        case scala.util.Failure(e: Exception) ⇒ Some(ErrorData(e))
         case _                                ⇒ None
       }
   }
 
   def modifiedFiles(safePath: SafePath): Seq[SafePath] = {
-
     val git = new Git(Git.open(safePath).getRepository())
-    println("Status : " + git.status.call())
-    println("Clean : " + git.status.call().isClean)
-
-    git.status.call().getModified.asScala.toSeq.map { f ⇒ safePath ++ f }
+    git.status.call().getModified.asScala.toSeq.map { f ⇒ safePath.copy(path = safePath.path ++ f.split("/")) }
   }
-
-  /*  def buildGitRepository(folder: SafePath): Seq[SafePath] = {
-    val builder = new FileRepositoryBuilder()
-    val repository = builder.setGitDir(folder).readEnvironment().findGitDir().build()
-    val git = new Git(repository)
-
-    val reader = git.getRepository().newObjectReader()
-
-    val oldTreeIter = new CanonicalTreeParser
-    val oldTree = git.getRepository.resolve("HEAD^{tree}")
-    oldTreeIter.reset(reader, oldTree)
-
-    val newTreeIter = new CanonicalTreeParser
-    val newTree = git.getRepository.resolve("HEAD~1^{tree}")
-    newTreeIter.reset(reader, newTree)
-
-    val diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE)
-    diffFormatter.setRepository(git.getRepository)
-
-    val entries = diffFormatter.scan(oldTreeIter, newTreeIter)
-
-    import java.io._
-    import scala.collection.JavaConversions._
-
-    entries.map { e ⇒ GitFile(new File(e.getOldPath), SafePath(e.getNewPath, context), e.getChangeType.values()) }
-  }*/
-
 }

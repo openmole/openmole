@@ -42,7 +42,7 @@ trait AuthenticationPlugin extends GUIPlugin {
 }
 
 trait VersioningAPI extends PluginAPI {
-  def clone(url: String, folder: SafePath): Option[MessageError]
+  def clone(url: String, folder: SafePath): Option[MessageErrorData]
 
   def modifiedFiles(safePath: SafePath): Seq[SafePath]
 }

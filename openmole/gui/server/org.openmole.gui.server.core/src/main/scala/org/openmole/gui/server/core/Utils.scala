@@ -79,7 +79,6 @@ object Utils extends JavaLogger {
   }
 
   implicit def safePathToFile(s: SafePath)(implicit context: ServerFileSystemContext, workspace: Workspace): File = {
-    println("SP " + s.path)
     context match {
       case _: ProjectFileSystem ⇒ getFile(webUIDirectory, s.path)
       case _                    ⇒ getFile(new File(""), s.path)
@@ -101,20 +100,9 @@ object Utils extends JavaLogger {
     )
     else None
 
-    val dirData = if (f.isDirectory) {
-      val versioning = {
-        f.listFiles.exists {
-          _.getName == ".git"
-        } match {
-          case true ⇒
-            PluginActivator.versioningApi.headOption.map { factory ⇒ Versioning(factory(services).modifiedFiles(f /*root repository*/).map { sp ⇒ VersionedFile(sp, Modified()) }) }
-          case _ ⇒ None
-        }
-      }
-
-      Some(DirData(f.isDirectoryEmpty, versioning))
-    }
-    else None
+    val dirData =
+      if (f.isDirectory) Some(DirData(f.isDirectoryEmpty, rootVersionedDirectory(f).map { _ ⇒ Versioning() }))
+      else None
 
     time.map(t ⇒ TreeNodeData(f.getName, dirData, f.length, t))
   }
@@ -174,25 +162,29 @@ object Utils extends JavaLogger {
     getFile0(paths, root)
   }
 
-  def toVersionedTuple(/*ROOT*/parent: Option[TreeNodeData], treeNodeDatas: Seq[TreeNodeData]): Seq[VersionedTreeNodeData] = {
-
-    val modifiedFiles = parent.map { p ⇒
-      p.dirData.flatMap {
-        _.versioningSystem.map {
-          _.modifiedFiles
-        }
-      }.getOrElse(Seq())
-    }.getOrElse(Seq())
-
-    treeNodeDatas.map { tnd ⇒
-      VersionedTreeNodeData(tnd, modifiedFiles.filter { f ⇒ f.safePath.name == tnd.name }.headOption.map {
-        _.status
-      }.getOrElse(Clear()))
+  def rootVersionedDirectory(file: File)(implicit workspace: Workspace): Option[File] = {
+    file match {
+      case (f: File) ⇒
+        if (f == projectsDirectory()) None
+        else if (f.listFiles.exists {
+          _.getName == ".git"
+        }) Some(f)
+        else rootVersionedDirectory(file.getParentFile)
+      case _ ⇒ None
     }
-
   }
 
-  def listFiles(path: SafePath, fileFilter: data.FileFilter/*, root: SafePath*/)(implicit context: ServerFileSystemContext, workspace: Workspace, services: Services): ListFilesData = {
+  def toVersionedTuple(treeNodeDatas: Seq[TreeNodeData], modifiedFileNames: Seq[String]) = {
+
+    treeNodeDatas.map { tnd ⇒
+      VersionedTreeNodeData(tnd, modifiedFileNames.contains(tnd.name) match {
+        case true ⇒ Modified()
+        case _    ⇒ Clear()
+      })
+    }
+  }
+
+  def listFiles(path: SafePath, fileFilter: data.FileFilter)(implicit context: ServerFileSystemContext, workspace: Workspace, services: Services): ListFilesData = {
 
     val allFiles = safePathToFile(path).listFilesSafe.toSeq
 
@@ -205,13 +197,20 @@ object Utils extends JavaLogger {
     val threshold = fileFilter.threshold.getOrElse(1000)
     val nbFiles = allFiles.size
 
-    val oo = fileFilter.firstLast match {
-      case First() ⇒ ListFilesData(toVersionedTuple(path, sorted.take(threshold)), nbFiles)
-      case Last()  ⇒ ListFilesData(toVersionedTuple(path, sorted.takeRight(threshold).reverse), nbFiles)
+    val parentFile: File = path
+    val modifiedFiles = rootVersionedDirectory(parentFile).flatMap { r ⇒
+      r.flatMap { root ⇒
+        val rootSafePath: SafePath = root
+        PluginActivator.versioningApi.headOption.map { factory ⇒ factory(services).modifiedFiles(rootSafePath) }
+      }
+    }.getOrElse(Seq()).map {
+      _.name
     }
 
-    println("Versioned files " + oo)
-    oo
+    fileFilter.firstLast match {
+      case First() ⇒ ListFilesData(toVersionedTuple(sorted.take(threshold), modifiedFiles), nbFiles)
+      case Last()  ⇒ ListFilesData(toVersionedTuple(sorted.takeRight(threshold).reverse, modifiedFiles), nbFiles)
+    }
   }
 
   def copy(safePath: SafePath, newName: String)(implicit workspace: Workspace): SafePath = {

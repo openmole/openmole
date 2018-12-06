@@ -21,7 +21,7 @@ import org.openmole.gui.ext.data._
 
 trait GitAPI extends VersioningAPI {
 
-  def clone(url: String, folder: SafePath): Option[MessageError]
+  def clone(url: String, folder: SafePath): Option[MessageErrorData]
 
   def modifiedFiles(safePath: SafePath): Seq[SafePath]
 }

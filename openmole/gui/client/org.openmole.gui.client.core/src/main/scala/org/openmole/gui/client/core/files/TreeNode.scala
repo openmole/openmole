@@ -62,13 +62,13 @@ object TreeNode {
 
   implicit def treeNodeDataToDirNode(otnd: Option[TreeNodeData]): Option[DirNode] = otnd.flatMap { tnd ⇒
     tnd.dirData match {
-      case Some(dd: DirData) ⇒ Some(DirNode(Var(tnd.name), tnd.size, tnd.time, dd.isEmpty, dd.versioningSystem))
+      case Some(dd: DirData) ⇒ Some(DirNode(Var(tnd.name), tnd.size, tnd.time, dd.isEmpty, dd.versioning))
       case _                 ⇒ None
     }
   }
 
   implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode = tnd.dirData match {
-    case Some(dd: DirData) ⇒ DirNode(Var(tnd.name), tnd.size, tnd.time, dd.isEmpty, dd.versioningSystem)
+    case Some(dd: DirData) ⇒ DirNode(Var(tnd.name), tnd.size, tnd.time, dd.isEmpty, dd.versioning)
     case _                 ⇒ FileNode(Var(tnd.name), tnd.size, tnd.time)
   }
 
@@ -84,32 +84,14 @@ object TreeNode {
   implicit def futureSeqTreeNodeDataToFutureSeqTreeNode(ftnds: Future[Seq[TreeNodeData]]): Future[Seq[TreeNode]] = ftnds.map(seqTreeNodeDataToSeqTreeNode)
 
   implicit def seqTreeNodeDataToSeqTreeNode(tnds: Seq[TreeNodeData]): Seq[TreeNode] = tnds.map(treeNodeDataToTreeNode(_))
-
-  //  def listFilesDataToListFiles(lfd: ListFilesData): ListFiles = {
-  //
-  ////          val modifiedFiles = lfd.list.flatMap { tn =>
-  ////            tn.dirData.flatMap {
-  ////              _.versioningSystem.map {
-  ////                _.modifiedFiles
-  ////              }
-  ////            }.getOrElse(Seq()).map {f=>
-  ////              f=> f.status
-  ////            }
-  ////          }
-  //
-  //    ListFiles(lfd.list, lfd.nbFilesOnServer)
-  //  }
-
-  // case class ListFiles(list: Seq[(TreeNode, VersionStatus)], nbFilesOnServer: Int)
-
 }
 
 case class DirNode(
-  name:             Var[String],
-  size:             Long,
-  time:             Long,
-  isEmpty:          Boolean,
-  versioningSystem: Option[Versioning]
+  name:       Var[String],
+  size:       Long,
+  time:       Long,
+  isEmpty:    Boolean,
+  versioning: Option[Versioning]
 ) extends TreeNode
 
 case class FileNode(

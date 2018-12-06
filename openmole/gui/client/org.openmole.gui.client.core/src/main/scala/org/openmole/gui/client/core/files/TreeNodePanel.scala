@@ -303,7 +303,6 @@ class TreeNodePanel {
 
   class ReactiveLine(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit, versionStatus: VersionStatus) {
 
-    println("TN " + tn.name + " // " + versionStatus)
     val tnSafePath = manager.current.now ++ tn.name.now
 
     case class TreeStates(settingsSet: Boolean, edition: Boolean, replication: Boolean, selected: Boolean = manager.isSelected(tn)) {
@@ -359,7 +358,6 @@ class TreeNodePanel {
         case _ => WHITE
       }
 
-
       tn match {
         case fn: FileNode ⇒
           div(ms("fileWrap"))(
@@ -370,7 +368,7 @@ class TreeNodePanel {
           )
         case dn: DirNode ⇒
           val dirAspect =
-            dn.versioningSystem match {
+            dn.versioning match {
               case Some(v: Versioning) => DirAspect(emptyMod, style, img(src := org.openmole.gui.ext.data.Images.git, width := 18, height := 18, padding := 1), "versioningWrap", 8)
               case _ => DirAspect(omsheet.fileIcon +++ glyph_plus, (omsheet.dir +++ style), span, "fileWrap", 24)
             }

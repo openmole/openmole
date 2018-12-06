@@ -58,7 +58,7 @@ object GitGUI {
 
   object Cloned extends CloningStatus
 
-  case class CloneError(messageError: MessageError) extends CloningStatus
+  case class CloneError(messageError: MessageErrorData) extends CloningStatus
 
 }
 
@@ -88,7 +88,7 @@ class GitGUI(cloneIn: SafePath, onCloned: () ⇒ Unit = () ⇒ {}) extends Versi
         },
         Rx {
           cloningStatus() match {
-            case GitGUI.CloneError(messageError: MessageError) ⇒ label(btn_danger, "Cloning error", marginLeft := 5, onclick := { () ⇒ watchStack.update(!watchStack.now) })
+            case GitGUI.CloneError(messageError: MessageErrorData) ⇒ label(btn_danger, "Cloning error", marginLeft := 5, onclick := { () ⇒ watchStack.update(!watchStack.now) })
             case _ ⇒ div
           }
         }
@@ -102,7 +102,7 @@ class GitGUI(cloneIn: SafePath, onCloned: () ⇒ Unit = () ⇒ {}) extends Versi
                   case None ⇒
                     onCloned()
                     GitGUI.Cloned
-                  case Some(me: MessageError) ⇒ GitGUI.CloneError(me)
+                  case Some(me: MessageErrorData) ⇒ GitGUI.CloneError(me)
                 }
                 cloningStatus.update(status)
               }
@@ -111,7 +111,7 @@ class GitGUI(cloneIn: SafePath, onCloned: () ⇒ Unit = () ⇒ {}) extends Versi
         ),
       div(Rx {
         cloningStatus() match {
-          case GitGUI.CloneError(messageError: MessageError) ⇒ watchStack.expand(div(messageError.stackTrace))
+          case GitGUI.CloneError(messageError: MessageErrorData) ⇒ watchStack.expand(div(messageError.stackTrace))
           case _ ⇒ div.render
         }
       })

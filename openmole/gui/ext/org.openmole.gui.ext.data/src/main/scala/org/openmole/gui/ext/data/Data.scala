@@ -263,8 +263,8 @@ case class Clear() extends VersionStatus
 case class Modified() extends VersionStatus
 
 case class VersionedFile(safePath: SafePath, status: VersionStatus)
-case class Versioning(modifiedFiles: Seq[VersionedFile])
-case class DirData(isEmpty: Boolean, versioningSystem: Option[Versioning])
+case class Versioning()
+case class DirData(isEmpty: Boolean, versioning: Option[Versioning])
 
 case class TreeNodeData(
                          name: String,
