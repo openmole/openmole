@@ -30,6 +30,10 @@ import org.openmole.tool.random._
 
 import scala.util._
 
+trait CompilationClosure[+T] extends ScalaCompilation.ContextClosure[T] {
+  def apply(context: Context, rng: RandomProvider, newFile: NewFile): T
+}
+
 object ScalaCompilation {
 
   def openMOLEImports = Seq(s"${org.openmole.core.code.CodePackage.namespace}._")
@@ -84,31 +88,26 @@ object ScalaCompilation {
   def prefix = "_input_value_"
 
   def function[RETURN](inputs: Seq[Val[_]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: NewFile, fileService: FileService) = {
-    compile(script(inputs, source, wrapping, returnType), plugins, libraries).map { evaluated ⇒
-      val m = evaluated.getClass.getMethods.find(_.getName.contains("apply")).get
-      m.setAccessible(true)
-      (evaluated, m) //evaluated.getClass.getMethod("apply", classOf[Context], classOf[RandomProvider], classOf[NewFile]))
-    }
+    val s = script(inputs, source, wrapping, returnType)
+    compile(s, plugins, libraries).map { evaluated ⇒ evaluated.asInstanceOf[CompilationClosure[RETURN]] }
   }
 
   def closure[RETURN](inputs: Seq[Val[_]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: NewFile, fileService: FileService) =
-    function[RETURN](inputs, source, plugins, libraries, wrapping, returnType).map {
-      case (evaluated, method) ⇒
-        val closure: ContextClosure[RETURN] = (context: Context, rng: RandomProvider, newFile: NewFile) ⇒ method.invoke(evaluated, context, rng, newFile).asInstanceOf[RETURN]
-        closure
-    }
+    function[RETURN](inputs, source, plugins, libraries, wrapping, returnType)
 
   def script[RETURN](inputs: Seq[Val[_]], source: String, wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN]) =
-    s"""(${prefix}context: ${manifest[Context].toString}, ${prefix}RNG: ${manifest[RandomProvider].toString}, ${prefix}NewFile: ${manifest[NewFile].toString}) => {
-       |  object $inputObject {
-       |    ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
-       |  }
-       |  import ${inputObject}._
-       |  implicit lazy val ${Variable.openMOLE("RNG").name}: util.Random = ${prefix}RNG()
-       |  implicit lazy val ${Variable.openMOLE("NewFile").name} = ${prefix}NewFile
-       |  $source
-       |  ${wrapping.wrapOutput}
-       |}: ${toScalaNativeType(returnType)}""".stripMargin
+    s"""new ${classOf[CompilationClosure[_]].getName}[${toScalaNativeType(returnType)}] {
+       |  def apply(${prefix}context: ${manifest[Context].toString}, ${prefix}RNG: ${manifest[RandomProvider].toString}, ${prefix}NewFile: ${manifest[NewFile].toString}) = {
+       |    object $inputObject {
+       |      ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
+       |    }
+       |    import ${inputObject}._
+       |    implicit lazy val ${Variable.openMOLE("RNG").name}: util.Random = ${prefix}RNG()
+       |    implicit lazy val ${Variable.openMOLE("NewFile").name} = ${prefix}NewFile
+       |    $source
+       |    ${wrapping.wrapOutput}
+       |  }: ${toScalaNativeType(returnType)}
+       |}""".stripMargin
 
   def inputObject = "input"
 

@@ -52,10 +52,10 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
       _.safePath.name
     })
     val task = s"${executableName.split('.').head.toLowerCase.filterNot(_.isDigit).replace("-", "")}Task"
-    val jarResourceLine: (String, Seq[org.openmole.gui.ext.data.Error]) = {
+    val jarResourceLine: (String, Seq[org.openmole.gui.ext.data.ErrorData]) = {
       if (data.embedAsPlugin) {
         data.plugin.map { p ⇒
-          val errors = org.openmole.gui.ext.tool.server.Utils.addPlugins(Seq(data.jarPath)).map { e ⇒ ErrorBuilder(e.stackTrace) }
+          val errors = org.openmole.gui.ext.tool.server.Utils.addPlugins(Seq(data.jarPath))
           if (!errors.isEmpty) org.openmole.gui.ext.tool.server.Utils.removePlugin(Plugin(data.jarPath.name))
           (s"""  plugins += pluginsOf(${p}),\n""", errors)
         }.getOrElse(("", Seq()))

@@ -20,6 +20,7 @@ package org.openmole.plugin.hook.file
 import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.expansion._
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.tools.io.Prettifier._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.mole._

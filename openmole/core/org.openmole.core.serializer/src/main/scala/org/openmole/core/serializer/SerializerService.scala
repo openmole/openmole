@@ -23,12 +23,14 @@ import java.io.FileInputStream
 import java.io.InputStream
 import java.io.OutputStream
 
-import com.thoughtworks.xstream.core.ClassLoaderReference
+import com.thoughtworks.xstream.core.{ Caching, ClassLoaderReference, DefaultConverterLookup }
 import com.thoughtworks.xstream.io.binary.BinaryStreamDriver
 import org.openmole.tool.file._
 import org.openmole.core.serializer.converter._
 import java.util.concurrent.locks.{ ReadWriteLock, ReentrantReadWriteLock }
 
+import com.thoughtworks.xstream.converters.Converter
+import com.thoughtworks.xstream.mapper.Mapper
 import com.thoughtworks.xstream.security._
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.tool.logger.JavaLogger
@@ -45,8 +47,18 @@ object SerializerService {
 
 class SerializerService { service ⇒
 
-  private[serializer] def buildXStream = {
-    val xs = new XStream(null, new BinaryStreamDriver(), new ClassLoaderReference(this.getClass.getClassLoader))
+  private[serializer] def buildXStream() = {
+    val lookup = new DefaultConverterLookup()
+
+    val xs =
+      new XStream(
+        null,
+        new BinaryStreamDriver(),
+        new ClassLoaderReference(this.getClass.getClassLoader),
+        null: Mapper,
+        lookup,
+        (c: Converter, p: Int) ⇒ lookup.registerConverter(c, p))
+
     xs.addPermission(NoTypePermission.NONE)
     xs.addPermission(new TypePermission {
       override def allows(`type`: Class[_]): Boolean = true
@@ -54,106 +66,71 @@ class SerializerService { service ⇒
     xs
   }
 
-  private val lock = new ReentrantReadWriteLock
-  private val xStreamOperations = ListBuffer.empty[(XStream ⇒ _)]
-
-  private val xstream = buildXStream
   private val content = "content.xml"
 
-  private trait Initialized extends Factory {
-    override def initialize(t: T) = lock.read {
-      for {
-        op ← xStreamOperations
-      } op(t.xStream)
-      t
-    }
-  }
+  private def fileSerialisation() = buildXStream
+  private def pluginAndFileListing() = new Serialiser(service) with PluginAndFilesListing
+  private def deserializerWithFileInjection() = new Serialiser(service) with FileInjection
 
-  private val fileSerialisation = new Factory with Initialized {
-    type T = Serialiser with FileSerialisation
-    def make = new Serialiser(service) with FileSerialisation
-  }
-
-  private val pluginAndFileListingFactory = new Factory with Initialized {
-    type T = Serialiser with PluginAndFilesListing
-    def make = new Serialiser(service) with PluginAndFilesListing
-  }
-
-  private val deserialiserWithFileInjectionFactory = new Factory with Initialized {
-    type T = Serialiser with FileInjection
-    def make = new Serialiser(service) with FileInjection
-  }
-
-  private def xStreams =
-    xstream ::
-      pluginAndFileListingFactory.instantiated.map(_.xStream) :::
-      deserialiserWithFileInjectionFactory.instantiated.map(_.xStream)
-
-  def register(op: XStream ⇒ Unit) = lock.write {
-    xStreamOperations += op
-    xStreams.foreach(op)
-  }
-
-  def deserialise[T](file: File): T = lock.read {
+  def deserialize[T](file: File): T = {
     val is = new FileInputStream(file)
-    try deserialise(is)
+    try deserialize(is)
     finally is.close
   }
 
-  def deserialise[T](is: InputStream): T = lock.read(xstream.fromXML(is).asInstanceOf[T])
+  def deserialize[T](is: InputStream): T = buildXStream().fromXML(is).asInstanceOf[T]
 
-  def deserialiseAndExtractFiles[T](file: File)(implicit newFile: NewFile): (T, Iterable[File]) = {
+  def deserializeAndExtractFiles[T](file: File)(implicit newFile: NewFile): (T, Iterable[File]) = {
     val tis = new TarInputStream(file.bufferedInputStream)
-    try deserialiseAndExtractFiles(tis)
+    try deserializeAndExtractFiles(tis)
     finally tis.close
   }
 
-  def deserialiseAndExtractFiles[T](tis: TarInputStream)(implicit newFile: NewFile): (T, Iterable[File]) = lock.read {
+  def deserializeAndExtractFiles[T](tis: TarInputStream)(implicit newFile: NewFile): (T, Iterable[File]) = {
     newFile.withTmpDir { archiveExtractDir ⇒
       tis.extract(archiveExtractDir)
-      val fileReplacement = fileSerialisation.exec(_.deserialiseFileReplacements(archiveExtractDir))
+      val fileReplacement = FileSerialisation.deserialiseFileReplacements(archiveExtractDir, fileSerialisation())
       val contentFile = new File(archiveExtractDir, content)
-      (deserialiseReplaceFiles[T](contentFile, fileReplacement), fileReplacement.values)
+      (deserializeReplaceFiles[T](contentFile, fileReplacement), fileReplacement.values)
     }
   }
 
-  def serialiseAndArchiveFiles(obj: Any, f: File)(implicit newFile: NewFile): Unit = {
+  def serializeAndArchiveFiles(obj: Any, f: File)(implicit newFile: NewFile): Unit = {
     val os = new TarOutputStream(f.bufferedOutputStream())
-    try serialiseAndArchiveFiles(obj, os)
+    try serializeAndArchiveFiles(obj, os)
     finally os.close
   }
 
-  def serialiseAndArchiveFiles(obj: Any, tos: TarOutputStream)(implicit newFile: NewFile): Unit = lock.read {
+  def serializeAndArchiveFiles(obj: Any, tos: TarOutputStream)(implicit newFile: NewFile): Unit = {
     newFile.withTmpFile { objSerial ⇒
-      serialise(obj, objSerial)
+      serialize(obj, objSerial)
       tos.addFile(objSerial, content)
     }
     val serializationResult = pluginsAndFiles(obj)
-    fileSerialisation.exec(_.serialiseFiles(serializationResult.files, tos))
+    FileSerialisation.serialiseFiles(serializationResult.files, tos, fileSerialisation())
   }
 
-  def pluginsAndFiles(obj: Any) = pluginAndFileListingFactory.exec(_.list(obj))
+  def pluginsAndFiles(obj: Any) = pluginAndFileListing().list(obj)
 
-  def deserialiseReplaceFiles[T](file: File, files: PartialFunction[String, File]): T = lock.read {
+  def deserializeReplaceFiles[T](file: File, files: PartialFunction[String, File]): T = {
     val is = file.bufferedInputStream
-    try deserialiseReplaceFiles[T](is, files)
+    try deserializeReplaceFiles[T](is, files)
     finally is.close
   }
 
-  def deserialiseReplaceFiles[T](is: InputStream, files: PartialFunction[String, File]): T =
-    lock.read(deserialiserWithFileInjectionFactory.exec {
-      serializer ⇒
-        serializer.injectedFiles = files
-        serializer.fromXML[T](is)
-    })
+  def deserializeReplaceFiles[T](is: InputStream, files: PartialFunction[String, File]): T = {
+    val serializer = deserializerWithFileInjection()
+    serializer.injectedFiles = files
+    serializer.fromXML[T](is)
+  }
 
-  def serialise(obj: Any) = lock.read(xstream.toXML(obj))
+  def serialize(obj: Any) = buildXStream().toXML(obj)
 
-  def serialise(obj: Any, os: OutputStream) = lock.read(xstream.toXML(obj, os))
+  def serialize(obj: Any, os: OutputStream) = buildXStream().toXML(obj, os)
 
-  def serialise(obj: Any, file: File): Unit = lock.read {
+  def serialize(obj: Any, file: File): Unit = {
     val os = file.bufferedOutputStream()
-    try serialise(obj, os)
+    try serialize(obj, os)
     finally os.close
   }
 

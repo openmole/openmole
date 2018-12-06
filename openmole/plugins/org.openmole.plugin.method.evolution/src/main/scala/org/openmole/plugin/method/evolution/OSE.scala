@@ -7,6 +7,7 @@ import org.openmole.core.workflow.domain.Fix
 import org.openmole.core.workflow.sampling.Factor
 import cats.implicits._
 import org.openmole.core.outputmanager.OutputManager
+import org.openmole.core.workflow.tools.DefaultSet
 import org.openmole.plugin.method.evolution.Genome.GenomeBound
 import org.openmole.tool.types.ToDouble
 
@@ -66,6 +67,9 @@ object OSE {
         def generation(s: S) = s.generation
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
+        def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+        def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
+
         def buildIndividual(genome: G, phenotype: Vector[Double], context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
 
         def initialState(rng: util.Random) = EvolutionState[OSEState](random = rng, s = (Array.empty, Array.empty))
@@ -184,7 +188,10 @@ object OSE {
         def startTimeLens = GenLens[S](_.startTime)
 
         def generation(s: S) = s.generation
+
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
+        def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+        def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
 
         def buildIndividual(genome: G, phenotype: Vector[Double], context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[OSEState](random = rng, s = (Array.empty, Array.empty))
@@ -385,11 +392,12 @@ object OSEEvolution {
     objectives:   Seq[OSE.FitnessPattern],
     evaluation:   Puzzle,
     termination:  OMTermination,
-    mu:           Int                          = 200,
-    genome:       Genome                       = Seq(),
-    stochastic:   OptionalArgument[Stochastic] = None,
-    parallelism:  Int                          = 1,
-    distribution: EvolutionPattern             = SteadyState()) =
+    mu:           Int                                    = 200,
+    genome:       Genome                                 = Seq(),
+    stochastic:   OptionalArgument[Stochastic]           = None,
+    parallelism:  Int                                    = 1,
+    distribution: EvolutionPattern                       = SteadyState(),
+    suggestion:   Seq[Seq[DefaultSet.DefaultAssignment]] = Seq()) =
     EvolutionPattern.build(
       algorithm =
         OSE(
@@ -403,7 +411,8 @@ object OSEEvolution {
       termination = termination,
       stochastic = stochastic,
       parallelism = parallelism,
-      distribution = distribution
+      distribution = distribution,
+      suggestion = suggestion.map(DefaultSet.fromAssignments)
     )
 
 }

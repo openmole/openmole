@@ -19,7 +19,11 @@ package org.openmole.core.workflow
 
 package tools {
 
+  import org.openmole.core.context.{ Context, Variable }
   import org.openmole.core.expansion.{ Expandable, ExpandedString, FromContext, ToFromContext }
+  import org.openmole.core.fileservice.FileService
+  import org.openmole.core.workspace.NewFile
+  import org.openmole.tool.random.RandomProvider
 
   trait ToolsPackage {
 

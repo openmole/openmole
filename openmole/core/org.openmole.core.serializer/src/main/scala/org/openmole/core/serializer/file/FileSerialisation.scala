@@ -25,21 +25,18 @@ import org.openmole.tool.tar.TarOutputStream
 import scala.collection.immutable.HashMap
 import java.util.UUID
 import java.io.{ File, FileOutputStream }
+
+import com.thoughtworks.xstream.XStream
 import org.openmole.core.serializer.converter.Serialiser
 
 object FileSerialisation {
   case class FileInfo(originalPath: String, directory: Boolean, exists: Boolean)
   type FilesInfo = HashMap[String, FileInfo]
-}
-
-import FileSerialisation._
-
-trait FileSerialisation extends Serialiser {
 
   def filesInfo = "filesInfo.xml"
   def fileDir = "files"
 
-  def serialiseFiles(files: Iterable[File], tos: TarOutputStream)(implicit newFile: NewFile) = newFile.withTmpDir { tmpDir ⇒
+  def serialiseFiles(files: Iterable[File], tos: TarOutputStream, xStream: XStream)(implicit newFile: NewFile) = newFile.withTmpDir { tmpDir ⇒
     val fileInfo = HashMap() ++ files.map {
       file ⇒
         val name = UUID.randomUUID
@@ -64,7 +61,7 @@ trait FileSerialisation extends Serialiser {
     }
   }
 
-  def deserialiseFileReplacements(archiveExtractDir: File)(implicit newFile: NewFile) = {
+  def deserialiseFileReplacements(archiveExtractDir: File, xStream: XStream)(implicit newFile: NewFile) = {
     val fileInfoFile = archiveExtractDir / s"$fileDir/$filesInfo"
     val fi = fileInfoFile.withInputStream(xStream.fromXML).asInstanceOf[FilesInfo]
 

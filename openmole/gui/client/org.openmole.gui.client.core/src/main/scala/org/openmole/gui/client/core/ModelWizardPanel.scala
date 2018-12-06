@@ -415,7 +415,7 @@ class ModelWizardPanel {
               }
               else {
                 dialog.hide
-                BannerAlert.registerWithDetails("Plugin import failed", wtt.errors.map { _.stackTrace }.mkString("\n"))
+                BannerAlert.registerWithDetails("Plugin import failed", wtt.errors.map { ErrorData.stackTrace }.mkString("\n"))
               }
           }
       }

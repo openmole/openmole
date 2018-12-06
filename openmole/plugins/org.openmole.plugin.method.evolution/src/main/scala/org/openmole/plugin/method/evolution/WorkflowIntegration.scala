@@ -164,6 +164,8 @@ object EvolutionWorkflow {
   implicit def isWorkflowIntegration: WorkflowIntegration[EvolutionWorkflow] = new WorkflowIntegration[EvolutionWorkflow] {
     def apply(t: EvolutionWorkflow) = t
   }
+
+  //case class EvolutionState[S](s: S, island)
 }
 
 trait EvolutionWorkflow {
@@ -277,12 +279,17 @@ object MGOAPI {
       def initialState(rng: util.Random): S
       def initialGenomes(n: Int): FromContext[M[Vector[G]]]
       def buildIndividual(genome: G, phenotype: P, context: Context): I
+
       def genomeValues(genome: G): V
+      def buildGenome(values: V): G
+      def buildGenome(context: Vector[Variable[_]]): FromContext[G]
+
       def randomLens: monocle.Lens[S, util.Random]
       def startTimeLens: monocle.Lens[S, Long]
       def generation(s: S): Long
       def breeding(individuals: Vector[I], n: Int): FromContext[M[Vector[G]]]
       def elitism(individuals: Vector[I]): FromContext[M[Vector[I]]]
+
       def migrateToIsland(i: Vector[I]): Vector[I]
       def migrateFromIsland(population: Vector[I], state: S): Vector[I]
 

@@ -77,7 +77,7 @@ class PluginPanel {
               plugins.foreach { p ⇒
                 post()[Api].removePlugin(Plugin(p)).call()
               }
-              BannerAlert.registerWithDetails("Plugin import failed", ex.head.stackTrace)
+              BannerAlert.registerWithDetails("Plugin import failed", ErrorData.stackTrace(ex.head))
             }
           }
         }

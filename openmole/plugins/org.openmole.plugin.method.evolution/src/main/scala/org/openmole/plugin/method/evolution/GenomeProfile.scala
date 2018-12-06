@@ -19,6 +19,8 @@ package org.openmole.plugin.method.evolution
 
 import org.openmole.core.dsl._
 import cats._
+import org.openmole.core.context.Context
+import org.openmole.core.workflow.tools.DefaultSet
 
 object GenomeProfile {
 
@@ -63,10 +65,11 @@ object GenomeProfileEvolution {
     objective:    Objective,
     evaluation:   Puzzle,
     termination:  OMTermination,
-    nicheSize:    Int                          = 20,
-    stochastic:   OptionalArgument[Stochastic] = None,
-    parallelism:  Int                          = 1,
-    distribution: EvolutionPattern             = SteadyState()) =
+    nicheSize:    Int                                    = 20,
+    stochastic:   OptionalArgument[Stochastic]           = None,
+    parallelism:  Int                                    = 1,
+    distribution: EvolutionPattern                       = SteadyState(),
+    suggestion:   Seq[Seq[DefaultSet.DefaultAssignment]] = Seq()) =
     EvolutionPattern.build(
       algorithm =
         GenomeProfile(
@@ -80,7 +83,8 @@ object GenomeProfileEvolution {
       termination = termination,
       stochastic = stochastic,
       parallelism = parallelism,
-      distribution = distribution
+      distribution = distribution,
+      suggestion = suggestion.map(DefaultSet.fromAssignments)
     )
 
 }
