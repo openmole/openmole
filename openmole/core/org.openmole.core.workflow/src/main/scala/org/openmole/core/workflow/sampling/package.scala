@@ -28,7 +28,6 @@ package sampling {
   trait SamplingPackage {
 
     implicit class PrototypeFactorDecorator[T](p: Val[T]) {
-      def in[D](d: D): Factor[D, T] = Factor(p, d)
       def is(d: FromContext[T]) = Factor(p, d)
     }
 
@@ -38,7 +37,14 @@ package sampling {
     }
 
     implicit def discreteFactorIsSampling[D, T](f: Factor[D, T])(implicit discrete: Discrete[D, T]) = FactorSampling(f)
+
   }
 }
 
-package object sampling
+package object sampling {
+  import org.openmole.core.context._
+  import org.openmole.core.keyword._
+
+  type Factor[D, T] = In[Val[T], D]
+  def Factor[D, T](p: Val[T], d: D) = In(p, d)
+}

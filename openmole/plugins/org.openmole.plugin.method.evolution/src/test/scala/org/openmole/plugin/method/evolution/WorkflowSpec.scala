@@ -26,6 +26,7 @@ import org.openmole.tool.types._
 import org.openmole.plugin.domain.bounds._
 import org.openmole.core.workflow.tools.Stubs._
 import org.openmole.plugin.method.evolution.Genome.GenomeBound
+import org.openmole.plugin.method.evolution.PSE.PatternAxe
 
 class WorkflowSpec extends FlatSpec with Matchers {
 
@@ -165,11 +166,50 @@ class WorkflowSpec extends FlatSpec with Matchers {
       objectives = Seq(a),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
-      suggested =
-        Seq(
-          Seq(a := 0.5)
-        )
+      suggestion = Seq(Seq(a := 0.5))
+    )
+  }
 
+  "Aggregation" should "be possible in NSGA" in {
+
+    val a = Val[Double]
+    def f(v: Vector[Double]) = v.head
+
+    NSGA2Evolution(
+      evaluation = EmptyTask(),
+      objectives = Seq(a aggregate f),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100
+
+    )
+  }
+
+  "Aggregation" should "be possible in PSE" in {
+    val a = Val[Double]
+    val b = Val[Double]
+    def f(v: Vector[Double]) = v.head
+
+    PSEEvolution(
+      evaluation = EmptyTask(),
+      objectives = Seq(a aggregate f in (0.0 to 1.0 by 0.1), b in (0.2 to 0.5 by 0.1)),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100
+
+    )
+  }
+
+  "Aggregation" should "be possible in OSE" in {
+    val o = Val[Double]
+    val a = Val[Double]
+    val b = Val[Double]
+    def f(v: Vector[Double]) = v.head
+
+    OSEEvolution(
+      origin = Seq(o in (0.0 to 1.0 by 0.1)),
+      evaluation = EmptyTask(),
+      objectives = Seq(a aggregate f under 9, b under 3.0),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100
     )
   }
 

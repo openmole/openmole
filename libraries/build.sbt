@@ -90,11 +90,13 @@ lazy val xstream = OsgiProject(
     "!org.xml.sax.*",
     "!sun.misc.*",
     "!org.joda.time.*",
+    "!com.sun.xml.*",
+    "!com.ibm.xml.*",
     "!javax.*",
     "*"),
   privatePackages = Seq("!scala.*", "META-INF.services.*", "*")) settings(
-  libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.10", "net.sf.kxml" % "kxml2" % "2.3.0"),
-  version := "1.4.10") settings(settings: _*)
+  libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.11", "net.sf.kxml" % "kxml2" % "2.3.0"),
+  version := "1.4.11") settings(settings: _*)
 
 lazy val scalaLang = OsgiProject(
   dir,
@@ -234,7 +236,7 @@ lazy val freedsl =
     version := freedslVersion
   ) dependsOn(cats, squants) settings(settings: _*)
 
-lazy val mgoVersion = "3.17"
+lazy val mgoVersion = "3.18"
 
 lazy val mgo = OsgiProject(dir, "mgo", imports = Seq("!better.*", "*")) settings(
   libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
