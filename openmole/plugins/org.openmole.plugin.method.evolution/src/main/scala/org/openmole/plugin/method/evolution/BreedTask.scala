@@ -18,21 +18,20 @@
 package org.openmole.plugin.method.evolution
 
 import org.openmole.core.context.{ Context, Variable }
-import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.workflow.builder.DefinitionScope
+import org.openmole.core.workflow.builder.{ ValueAssignment, DefinitionScope }
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.DefaultSet
 
 object BreedTask {
 
-  def apply[T: WorkflowIntegration](algorithm: T, size: Int, suggestion: Seq[DefaultSet] = Seq.empty)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def apply[T: WorkflowIntegration](algorithm: T, size: Int, suggestion: Seq[Seq[ValueAssignment[_]]] = Seq.empty)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
     lazy val t = wfi(algorithm)
 
     FromContextTask("BreedTask") { p ⇒
       import p._
 
-      def defaultSetToVariables(ds: DefaultSet) = ds.map(_.toVariable(context)).toVector
+      def defaultSetToVariables(ds: Seq[ValueAssignment[_]]) = ds.map(v ⇒ Variable.unsecure(v.value, v.equal.from(context))).toVector
       val suggestedGenomes = suggestion.map(ds ⇒ t.operations.buildGenome(defaultSetToVariables(ds)).from(context))
 
       val population = context(t.populationPrototype)

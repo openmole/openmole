@@ -74,7 +74,7 @@ package object evolution {
       stochastic:   OptionalArgument[Stochastic] = None,
       parallelism:  Int                          = 1,
       distribution: EvolutionPattern             = SteadyState(),
-      suggestion:   Seq[DefaultSet])(implicit wfi: WorkflowIntegration[T]) =
+      suggestion:   Seq[Seq[ValueAssignment[_]]])(implicit wfi: WorkflowIntegration[T]) =
       distribution match {
         case s: SteadyState ⇒
           SteadyStateEvolution(
@@ -110,7 +110,7 @@ package object evolution {
 
   import shapeless._
 
-  def SteadyStateEvolution[T](algorithm: T, evaluation: Puzzle, termination: OMTermination, parallelism: Int = 1, suggestion: Seq[DefaultSet] = Seq.empty, wrap: Boolean = false)(implicit wfi: WorkflowIntegration[T]) = {
+  def SteadyStateEvolution[T](algorithm: T, evaluation: Puzzle, termination: OMTermination, parallelism: Int = 1, suggestion: Seq[Seq[ValueAssignment[_]]] = Seq.empty, wrap: Boolean = false)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
     val wrapped = wrapPuzzle(evaluation, t.inputPrototypes, t.objectivePrototypes, wrap)

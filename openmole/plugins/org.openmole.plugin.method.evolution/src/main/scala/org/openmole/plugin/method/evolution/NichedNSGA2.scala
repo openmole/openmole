@@ -9,6 +9,7 @@ import cats._
 import cats.implicits._
 import mgo.niche._
 import monocle.macros._
+import org.openmole.core.workflow.builder.ValueAssignment
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.tools.DefaultSet
@@ -550,10 +551,10 @@ object NichedNSGA2Evolution {
     genome:       Genome,
     objectives:   Objectives,
     nicheSize:    Int,
-    stochastic:   OptionalArgument[Stochastic]           = None,
-    parallelism:  Int                                    = 1,
-    distribution: EvolutionPattern                       = SteadyState(),
-    suggestion:   Seq[Seq[DefaultSet.DefaultAssignment]] = Seq()) =
+    stochastic:   OptionalArgument[Stochastic] = None,
+    parallelism:  Int                          = 1,
+    distribution: EvolutionPattern             = SteadyState(),
+    suggestion:   Seq[Seq[ValueAssignment[_]]] = Seq()) =
     EvolutionPattern.build(
       algorithm =
         NichedNSGA2(
@@ -568,7 +569,7 @@ object NichedNSGA2Evolution {
       stochastic = stochastic,
       parallelism = parallelism,
       distribution = distribution,
-      suggestion = suggestion.map(DefaultSet.fromAssignments)
+      suggestion = suggestion
     )
 
 }

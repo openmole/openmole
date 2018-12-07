@@ -7,6 +7,7 @@ import org.openmole.core.workflow.domain.Fix
 import org.openmole.core.workflow.sampling.Factor
 import cats.implicits._
 import org.openmole.core.keyword.Under
+import org.openmole.core.workflow.builder.ValueAssignment
 import org.openmole.core.workflow.tools.DefaultSet
 import org.openmole.plugin.method.evolution.Genome.GenomeBound
 import org.openmole.tool.types.ToDouble
@@ -389,12 +390,12 @@ object OSEEvolution {
     objectives:   Seq[OSE.FitnessPattern],
     evaluation:   Puzzle,
     termination:  OMTermination,
-    mu:           Int                                    = 200,
-    genome:       Genome                                 = Seq(),
-    stochastic:   OptionalArgument[Stochastic]           = None,
-    parallelism:  Int                                    = 1,
-    distribution: EvolutionPattern                       = SteadyState(),
-    suggestion:   Seq[Seq[DefaultSet.DefaultAssignment]] = Seq()) =
+    mu:           Int                          = 200,
+    genome:       Genome                       = Seq(),
+    stochastic:   OptionalArgument[Stochastic] = None,
+    parallelism:  Int                          = 1,
+    distribution: EvolutionPattern             = SteadyState(),
+    suggestion:   Seq[Seq[ValueAssignment[_]]] = Seq()) =
     EvolutionPattern.build(
       algorithm =
         OSE(
@@ -409,7 +410,7 @@ object OSEEvolution {
       stochastic = stochastic,
       parallelism = parallelism,
       distribution = distribution,
-      suggestion = suggestion.map(DefaultSet.fromAssignments)
+      suggestion = suggestion
     )
 
 }

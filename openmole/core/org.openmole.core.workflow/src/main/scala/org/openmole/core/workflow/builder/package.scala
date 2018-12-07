@@ -17,11 +17,12 @@
 
 package org.openmole.core.workflow
 
-package builder {
+import org.openmole.core.context._
+import org.openmole.core.expansion._
+import org.openmole.core.keyword.:=
+import org.openmole.core.workflow.tools._
 
-  import org.openmole.core.context._
-  import org.openmole.core.expansion._
-  import org.openmole.core.workflow.tools._
+package builder {
 
   object IO {
     implicit def valToIO[T](v: Val[T]) = RawVal(v)
@@ -95,14 +96,26 @@ package builder {
         (inputs ++= (ps: _*)) andThen (outputs ++= (ps: _*))
     }
 
-    class AssignDefault[T](p: Val[T]) {
-      def :=[U: DefaultBuilder: InputBuilder](v: T, `override`: Boolean): U ⇒ U =
-        (this := (v: FromContext[T], `override`)) andThen (inputs += p)
-      def :=[U: DefaultBuilder: InputBuilder](v: T): U ⇒ U = this.:=(v, false)
-      def :=[U: DefaultBuilder: InputBuilder](v: FromContext[T], `override`: Boolean): U ⇒ U =
-        implicitly[DefaultBuilder[U]].defaults.modify(_ + Default[T](p, v, `override`)) andThen (inputs += p)
-      def :=[U: DefaultBuilder: InputBuilder](v: FromContext[T]): U ⇒ U =
-        this.:=(v, false)
+    implicit def equalToAssignDefaultFromContext[T, U: DefaultBuilder: InputBuilder](v: :=[Val[T], (FromContext[T], Boolean)]): U ⇒ U =
+      implicitly[DefaultBuilder[U]].defaults.modify(_ + Default[T](v.value, v.equal._1, v.equal._2)) andThen (inputs += v.value)
+
+    implicit def equalToAssignDefaultFromContext2[T, U: DefaultBuilder: InputBuilder](v: :=[Val[T], FromContext[T]]): U ⇒ U =
+      implicitly[DefaultBuilder[U]].defaults.modify(_ + Default[T](v.value, v.equal, false)) andThen (inputs += v.value)
+
+    implicit def equalToAssignDefaultValue[T, U: DefaultBuilder: InputBuilder](v: :=[Val[T], (T, Boolean)]): U ⇒ U =
+      implicitly[DefaultBuilder[U]].defaults.modify(_ + Default[T](v.value, v.equal._1: FromContext[T], v.equal._2)) andThen (inputs += v.value)
+
+    implicit def equalToAssignDefaultValue2[T, U: DefaultBuilder: InputBuilder](v: :=[Val[T], T]): U ⇒ U =
+      implicitly[DefaultBuilder[U]].defaults.modify(_ + Default[T](v.value, v.equal: FromContext[T], false)) andThen (inputs += v.value)
+
+    implicit def equalToAssignDefaultSeqValue[T, U: DefaultBuilder: InputBuilder](v: :=[Iterable[Val[T]], (Iterable[T], Boolean)]): U ⇒ U = {
+      def defaults(u: U) = (v.value zip v.equal._1).foldLeft(u) { case (u, (p, lv)) ⇒ new :=(p, (lv, v.equal._2))(u) }
+      defaults _ andThen (inputs ++= v.value)
+    }
+
+    implicit def equalToAssignDefaultSeqValue2[T, U: DefaultBuilder: InputBuilder](v: :=[Iterable[Val[T]], Iterable[T]]): U ⇒ U = {
+      def defaults(u: U) = (v.value zip v.equal).foldLeft(u) { case (u, (p, v)) ⇒ new :=(p, v)(u) }
+      defaults _ andThen (inputs ++= v.value)
     }
 
     implicit class BuildMapped[T](p: Val[T]) {
@@ -110,22 +123,15 @@ package builder {
       def mapped(name: String) = Mapped(p, name)
     }
 
-    class AssignDefaultSeq[T](p: Iterable[Val[T]]) {
-      def :=[U: DefaultBuilder: InputBuilder](v: Iterable[T], `override`: Boolean): U ⇒ U = {
-        def defaults(u: U) = (p zip v).foldLeft(u) { case (u, (p, v)) ⇒ (new AssignDefault(p).:=[U](v, `override`)).apply(u) }
-        defaults _ andThen (inputs ++= p)
-      }
-
-      def :=[U: DefaultBuilder: InputBuilder](v: Iterable[T]): U ⇒ U = this.:=(v, false)
-    }
-
-    implicit def prototypeToAssignDefault[T](p: Val[T]) = new AssignDefault[T](p)
-
     final lazy val name = new Name
 
     implicit class SetBuilder[T](t: T) {
       def set(ops: (T ⇒ T)*): T =
         ops.foldLeft(t) { (curT, op) ⇒ op(curT) }
+    }
+
+    implicit class ValueAssignmentDecorator[T](v: Val[T]) {
+      def :=(t: FromContext[T]): ValueAssignment[T] = new :=(v, t)
     }
   }
 
@@ -146,5 +152,7 @@ package builder {
 
 }
 
-package object builder
+package object builder {
+  type ValueAssignment[T] = :=[Val[T], FromContext[T]]
+}
 

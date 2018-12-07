@@ -22,6 +22,7 @@ import org.openmole.core.expansion.FromContext
 import squants.Time
 import cats.implicits._
 import org.openmole.core.context._
+import org.openmole.core.workflow.builder.ValueAssignment
 import org.openmole.core.workflow.tools.DefaultSet
 
 object NSGA2 {
@@ -288,11 +289,11 @@ object NSGA2Evolution {
     objectives:   Objectives,
     evaluation:   Puzzle,
     termination:  OMTermination,
-    mu:           Int                                    = 200,
-    stochastic:   OptionalArgument[Stochastic]           = None,
-    parallelism:  Int                                    = 1,
-    distribution: EvolutionPattern                       = SteadyState(),
-    suggestion:   Seq[Seq[DefaultSet.DefaultAssignment]] = Seq()) =
+    mu:           Int                          = 200,
+    stochastic:   OptionalArgument[Stochastic] = None,
+    parallelism:  Int                          = 1,
+    distribution: EvolutionPattern             = SteadyState(),
+    suggestion:   Seq[Seq[ValueAssignment[_]]] = Seq()) =
     EvolutionPattern.build(
       algorithm =
         NSGA2(
@@ -306,7 +307,7 @@ object NSGA2Evolution {
       stochastic = stochastic,
       parallelism = parallelism,
       distribution = distribution,
-      suggestion = suggestion.map(DefaultSet.fromAssignments)
+      suggestion = suggestion
     )
 
 }

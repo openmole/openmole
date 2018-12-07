@@ -25,7 +25,8 @@ import cats.implicits._
 import mgo.tools.CanBeNaN
 import org.openmole.core.context.{ Context, Variable }
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.keyword.{ In }
+import org.openmole.core.keyword.In
+import org.openmole.core.workflow.builder.ValueAssignment
 import org.openmole.core.workflow.tools.DefaultSet
 
 object PSEAlgorithm {
@@ -538,10 +539,10 @@ object PSEEvolution {
     objectives:   Seq[PSE.PatternAxe],
     evaluation:   Puzzle,
     termination:  OMTermination,
-    stochastic:   OptionalArgument[Stochastic]           = None,
-    parallelism:  Int                                    = 1,
-    distribution: EvolutionPattern                       = SteadyState(),
-    suggestion:   Seq[Seq[DefaultSet.DefaultAssignment]] = Seq()) =
+    stochastic:   OptionalArgument[Stochastic] = None,
+    parallelism:  Int                          = 1,
+    distribution: EvolutionPattern             = SteadyState(),
+    suggestion:   Seq[Seq[ValueAssignment[_]]] = Seq()) =
     EvolutionPattern.build(
       algorithm =
         PSE(
@@ -554,7 +555,7 @@ object PSEEvolution {
       stochastic = stochastic,
       parallelism = parallelism,
       distribution = distribution,
-      suggestion = suggestion.map(DefaultSet.fromAssignments)
+      suggestion = suggestion
     )
 
 }

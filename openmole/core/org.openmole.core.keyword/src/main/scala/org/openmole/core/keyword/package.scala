@@ -3,6 +3,7 @@ package org.openmole.core
 package keyword {
   case class In[A, B](value: A, domain: B)
   case class Under[A, B](value: A, under: B)
+  case class :=[A, B](value: A, equal: B)
 
   trait KeyWordPackage {
     implicit class InDecorator[A](a: A) {
@@ -11,6 +12,10 @@ package keyword {
 
     implicit class UnderDecorator[A](a: A) {
       def under[B](b: B) = Under(a, b)
+    }
+
+    implicit class EqualDecorator[A](a: A) {
+      def :=[B](b: B) = new :=(a, b)
     }
   }
 
