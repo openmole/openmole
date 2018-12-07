@@ -31,7 +31,7 @@ object PuzzleContainer {
 case class PuzzleContainer(
   puzzle:      Puzzle,
   output:      Capsule,
-  delegate:    Vector[Capsule],
+  delegate:    Vector[Capsule]             = Vector.empty,
   hooks:       Seq[Hook]                   = Seq.empty,
   environment: Option[EnvironmentProvider] = None,
   grouping:    Option[Grouping]            = None

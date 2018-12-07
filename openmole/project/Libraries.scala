@@ -6,7 +6,7 @@ import sbt._
 object Libraries {
 
   lazy val gridscaleVersion = "2.14"
-  lazy val mgoVersion = "3.17"
+  lazy val mgoVersion = "3.18"
   lazy val bouncyCastleVersion = "1.60"
   lazy val aceVersion = "01.08.2014"
   lazy val d3Version = "3.5.12"
@@ -26,7 +26,7 @@ object Libraries {
   lazy val catsVersion = "1.0.1"
   lazy val scalajsVersion = "0.6.23"
   lazy val squantsVersion = "1.3.0"
-  lazy val xstreamVersion = "1.4.10"
+  lazy val xstreamVersion = "1.4.11"
   lazy val scalaURIVersion = "1.1.1"
 
   lazy val bootstrapnative = libraryDependencies += "fr.iscpif.scaladget" %%% "bootstrapnative" % scaladgetVersion
@@ -126,7 +126,7 @@ object Libraries {
   lazy val guava = "com.google.guava" % "guava" % "19.0"
   lazy val spray = "io.spray" %% "spray-json" % "1.3.2"
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
-  lazy val equinoxOSGi = "org.eclipse.tycho" % "org.eclipse.osgi" % "3.13.0.v20180226-1711"
+  lazy val equinoxOSGi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.13.100"
   lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.3.1"
 
   lazy val shapeless = "org.openmole.library" %% "com-chuusai-shapeless" % "2.3.2"

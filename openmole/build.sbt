@@ -119,6 +119,7 @@ def coreSettings =
     )
 
 def allCore = Seq(
+  keyword,
   workflow,
   authentication,
   serializer,
@@ -150,6 +151,8 @@ def allCore = Seq(
   )
 
 
+lazy val keyword = OsgiProject(coreDir, "org.openmole.core.keyword", imports = Seq("*")) settings (coreSettings: _*)
+
 lazy val context = OsgiProject(coreDir, "org.openmole.core.context", imports = Seq("*")) settings(
   libraryDependencies ++= Seq(Libraries.cats, Libraries.sourceCode), defaultActivator
 ) dependsOn(tools, workspace, preference) settings (coreSettings: _*)
@@ -177,7 +180,8 @@ lazy val workflow = OsgiProject(coreDir, "org.openmole.core.workflow", imports =
   threadProvider,
   outputRedirection,
   code,
-  networkService) settings (coreSettings: _*)
+  networkService,
+  keyword) settings (coreSettings: _*)
 
 lazy val serializer = OsgiProject(coreDir, "org.openmole.core.serializer", global = true, imports = Seq("*")) settings(
   libraryDependencies += Libraries.xstream,
@@ -253,7 +257,7 @@ lazy val outputManager = OsgiProject(coreDir, "org.openmole.core.outputmanager",
 
 lazy val outputRedirection = OsgiProject(coreDir, "org.openmole.core.outputredirection", imports = Seq("*")) settings (coreSettings: _*)
 
-lazy val console = OsgiProject(coreDir, "org.openmole.core.console", global = true, imports = Seq("*")) dependsOn (pluginManager) settings(
+lazy val console = OsgiProject(coreDir, "org.openmole.core.console", global = true, imports = Seq("*"), exports = Seq("org.openmole.core.console.*", "$line5.*")) dependsOn (pluginManager) settings(
   OsgiKeys.importPackage := Seq("*"),
   Libraries.addScalaLang(scalaVersionValue),
   libraryDependencies += Libraries.monocle,
@@ -678,7 +682,7 @@ lazy val guiEnvironmentSSHLoginPlugin = OsgiProject(guiPluginDir, "org.openmole.
   Libraries.bootstrapnative
 ) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, ssh) enablePlugins (ExecNpmPlugin)
 
-lazy val netlogoWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.netlogo") settings(
+lazy val netlogoWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.netlogo", imports = Seq("!org.scalajs.*", "!rx.*", "!scaladget.*", "*")) settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi
 ) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ExecNpmPlugin)

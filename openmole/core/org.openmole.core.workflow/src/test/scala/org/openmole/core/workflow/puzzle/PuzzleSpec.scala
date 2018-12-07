@@ -18,7 +18,7 @@ class PuzzleSpec extends FlatSpec with Matchers {
     import shapeless._
 
     val caps = Capsule(EmptyTask())
-    val test = OutputPuzzleContainer(caps, caps) :: 9 :: HNil
+    val test = PuzzleContainer(caps, caps) :: 9 :: HNil
 
     (test: MoleExecution)
   }

@@ -130,7 +130,7 @@ object NSGA2 {
   case class DeterministicParams(
     mu:                  Int,
     genome:              Genome,
-    objectives:          Objectives,
+    objectives:          Seq[ExactObjective[_]],
     operatorExploration: Double)
 
   object StochasticParams {
@@ -140,18 +140,16 @@ object NSGA2 {
     import freedsl.dsl._
     import mgo.contexts._
 
-    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Vector[Double]] {
+    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Vector[Any]] {
       type G = CDGenome.Genome
-      type I = CDGenome.NoisyIndividual.Individual
+      type I = CDGenome.NoisyIndividual.Individual[Vector[Any]]
       type S = EvolutionState[Unit]
 
-      def iManifest = implicitly
+      def iManifest = implicitly[Manifest[I]]
       def gManifest = implicitly
       def sManifest = implicitly
 
-      private def interpret[U](f: mgo.contexts.run.Implicits ⇒ (S, U)) = State[S, U] { (s: S) ⇒
-        MGONoisyNSGA2.run(s)(f)
-      }
+      private def interpret[U](f: mgo.contexts.run.Implicits ⇒ (S, U)) = State[S, U] { (s: S) ⇒ MGONoisyNSGA2.run(s)(f) }
 
       private def zipWithState[M[_]: cats.Monad: StartTime: Random: Generation, T](op: M[T]): M[(S, T)] = {
         import cats.implicits._
@@ -170,15 +168,21 @@ object NSGA2 {
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
 
-        def buildIndividual(genome: G, phenotype: Vector[Double], context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Vector[Any], context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[Unit](random = rng, s = ())
+
+        def aggregate(v: Vector[Vector[Any]]): Vector[Double] =
+          for {
+            (vs, obj) ← v.transpose zip om.objectives
+          } yield NoisyObjective.aggregateAny(obj, vs)
 
         def result(population: Vector[I], state: S) = FromContext { p ⇒
           import p._
 
-          val res = MGONoisyNSGA2.result(population, om.aggregation, Genome.continuous(om.genome).from(context))
+          val res = MGONoisyNSGA2.result(population, aggregate(_), Genome.continuous(om.genome).from(context))
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness)).from(context)
+
           val samples = Variable(GAIntegration.samples.array, res.map(_.replications).toArray)
 
           genomes ++ fitness ++ Seq(samples)
@@ -196,7 +200,7 @@ object NSGA2 {
           Genome.discrete(om.genome).map { discrete ⇒
             interpret { impl ⇒
               import impl._
-              zipWithState(MGONoisyNSGA2.adaptiveBreeding[DSL](n, om.operatorExploration, om.cloneProbability, om.aggregation, discrete).run(individuals)).eval
+              zipWithState(MGONoisyNSGA2.adaptiveBreeding[DSL, Vector[Any]](n, om.operatorExploration, om.cloneProbability, aggregate, discrete).run(individuals)).eval
             }
           }
 
@@ -206,7 +210,7 @@ object NSGA2 {
               import impl._
               def step =
                 for {
-                  elited ← MGONoisyNSGA2.elitism[DSL](om.mu, om.historySize, om.aggregation, continuous) apply individuals
+                  elited ← MGONoisyNSGA2.elitism[DSL, Vector[Any]](om.mu, om.historySize, aggregate, continuous) apply individuals
                   _ ← mgo.elitism.incrementGeneration[DSL]
                 } yield elited
 
@@ -235,38 +239,38 @@ object NSGA2 {
     mu:                  Int,
     operatorExploration: Double,
     genome:              Genome,
-    objectives:          Objectives,
+    objectives:          Seq[NoisyObjective[_]],
     historySize:         Int,
-    cloneProbability:    Double,
-    aggregation:         Vector[Vector[Double]] ⇒ Vector[Double]
+    cloneProbability:    Double
   )
 
   import org.openmole.core.dsl._
 
-  def apply(
+  def apply[P](
     genome:     Genome,
     objectives: Objectives,
     mu:         Int                          = 200,
     stochastic: OptionalArgument[Stochastic] = None
   ): EvolutionWorkflow =
-    stochastic.option match {
-      case None ⇒
+    Objective.onlyExact(objectives) && !stochastic.isDefined match {
+      case true ⇒
+        val exactObjectives = objectives.map(o ⇒ Objective.toExact(o))
         val integration: WorkflowIntegration.DeterministicGA[_] = WorkflowIntegration.DeterministicGA(
-          DeterministicParams(mu, genome, objectives, operatorExploration),
+          DeterministicParams(mu, genome, exactObjectives, operatorExploration),
           genome,
-          objectives
+          exactObjectives
         )(DeterministicParams.integration)
 
         WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
-      case Some(stochastic) ⇒
-        def aggregation(h: Vector[Vector[Double]]) =
-          StochasticGAIntegration.aggregateVector(stochastic.aggregation.option, h)
+      case false ⇒
+        val noisyObjectives = objectives.map(o ⇒ Objective.toNoisy(o))
+        val stochasticValue = stochastic.option.getOrElse(Stochastic())
 
         val integration: WorkflowIntegration.StochasticGA[_] = WorkflowIntegration.StochasticGA(
-          StochasticParams(mu, operatorExploration, genome, objectives, stochastic.replications, stochastic.reevaluate, aggregation),
+          StochasticParams(mu, operatorExploration, genome, noisyObjectives, stochasticValue.replications, stochasticValue.reevaluate),
           genome,
-          objectives,
-          stochastic
+          noisyObjectives,
+          stochasticValue
         )(StochasticParams.integration)
 
         WorkflowIntegration.StochasticGA.toEvolutionWorkflow(integration)

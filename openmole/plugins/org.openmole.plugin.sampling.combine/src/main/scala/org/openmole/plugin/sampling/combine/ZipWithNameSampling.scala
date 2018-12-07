@@ -33,11 +33,11 @@ object ZipWithNameSampling {
 class ZipWithNameSampling[D, T: CanGetName](val factor: Factor[D, T], val name: Val[String])(implicit discrete: Discrete[D, T]) extends Sampling {
 
   override def inputs = FactorSampling(factor).inputs
-  override def prototypes = List(factor.prototype, name)
+  override def prototypes = List(factor.value, name)
 
   override def apply() =
     for {
       d ← discrete.iterator(factor.domain)
-    } yield d.map { v ⇒ List(Variable(factor.prototype, v), Variable(name, implicitly[CanGetName[T]].getName(v))) }
+    } yield d.map { v ⇒ List(Variable(factor.value, v), Variable(name, implicitly[CanGetName[T]].getName(v))) }
 
 }

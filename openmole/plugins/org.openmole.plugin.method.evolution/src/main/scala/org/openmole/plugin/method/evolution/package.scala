@@ -40,9 +40,14 @@ package object evolution {
 
   val operatorExploration = 0.1
 
-  type Objectives = Seq[Objective]
-  type FitnessAggregation = Seq[Double] ⇒ Double
+  type Objectives = Seq[Objective[_]]
   type Genome = Seq[Genome.GenomeBound]
+
+  case class Aggregate[A, B](value: A, aggregate: B)
+
+  implicit class AggregateDecorator[A, B](a: A) {
+    def aggregate[B, C](b: Vector[B] ⇒ C) = Aggregate(a, b)
+  }
 
   implicit def intToCounterTerminationConverter(n: Long): AfterGeneration = AfterGeneration(n)
   implicit def durationToDurationTerminationConverter(d: Time): AfterDuration = AfterDuration(d)
@@ -108,8 +113,9 @@ package object evolution {
   def SteadyStateEvolution[T](algorithm: T, evaluation: Puzzle, termination: OMTermination, parallelism: Int = 1, suggestion: Seq[DefaultSet] = Seq.empty, wrap: Boolean = false)(implicit wfi: WorkflowIntegration[T]) = {
     val t = wfi(algorithm)
 
-    val wrapped = wrapPuzzle(evaluation, t.inputPrototypes, t.outputPrototypes, wrap)
+    val wrapped = wrapPuzzle(evaluation, t.inputPrototypes, t.objectivePrototypes, wrap)
     val randomGenomes = BreedTask[T](algorithm, parallelism, suggestion) set ((inputs, outputs) += t.populationPrototype)
+
     val scalingGenomeTask = ScalingGenomeTask(algorithm)
     val toOffspring = ToOffspringTask(algorithm)
     val elitismTask = ElitismTask(algorithm)
@@ -119,7 +125,7 @@ package object evolution {
     val masterFirst =
       EmptyTask() set (
         (inputs, outputs) += (t.populationPrototype, t.genomePrototype, t.statePrototype),
-        (inputs, outputs) += (t.objectives.map(_.prototype): _*)
+        (inputs, outputs) += (t.objectivePrototypes: _*)
       )
 
     val masterLast =
@@ -135,7 +141,7 @@ package object evolution {
 
     val master =
       (masterFirstCapsule --
-        (toOffspring keep (Seq(t.statePrototype, t.genomePrototype) ++ t.objectives.map(_.prototype): _*)) --
+        (toOffspring keep (Seq(t.statePrototype, t.genomePrototype) ++ t.objectivePrototypes: _*)) --
         elitismSlot --
         terminationCapsule --
         breedSlot --

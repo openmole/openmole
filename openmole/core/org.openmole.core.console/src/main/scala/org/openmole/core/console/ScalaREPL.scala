@@ -297,11 +297,8 @@ object Interpreter {
 class Interpreter(priorityBundles: ⇒ Seq[Bundle], jars: Seq[JFile], quiet: Boolean, classDirectory: java.io.File) {
   def eval(code: String) = compile(code).apply()
   def compile(code: String): ScalaREPL.Compiled = synchronized {
-    val settings = OSGiScalaCompiler.createSettings(new Settings, priorityBundles, jars, classDirectory)
-    val iMain = new OMIMain(settings, priorityBundles, jars, quiet)
     val s = new ScalaREPL(priorityBundles, jars, quiet, classDirectory, 1)
-    val compiled = s.compile(code)
-    () ⇒ compiled.apply()
+    s.compile(code)
   }
 }
 

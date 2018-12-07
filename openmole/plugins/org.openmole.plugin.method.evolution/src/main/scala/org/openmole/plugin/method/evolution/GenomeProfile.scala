@@ -28,7 +28,7 @@ object GenomeProfile {
     x:          Val[Double],
     nX:         Int,
     genome:     Genome,
-    objective:  Objective,
+    objective:  Objective[_],
     stochastic: OptionalArgument[Stochastic] = None,
     nicheSize:  Int                          = 20
   ) = {
@@ -62,7 +62,7 @@ object GenomeProfileEvolution {
     x:            Val[Double],
     nX:           Int,
     genome:       Genome,
-    objective:    Objective,
+    objective:    Objective[_],
     evaluation:   Puzzle,
     termination:  OMTermination,
     nicheSize:    Int                                    = 20,
@@ -88,4 +88,3 @@ object GenomeProfileEvolution {
     )
 
 }
-
