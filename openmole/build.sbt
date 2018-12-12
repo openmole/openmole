@@ -609,9 +609,8 @@ def guiClientDir = guiDir / "client"
 lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins (ExecNpmPlugin) dependsOn
   (sharedGUI, clientToolGUI, market, dataGUI, extClientTool) settings(
   libraryDependencies += Libraries.async,
-  npmDeps in Compile += Dep("ace-builds", "1.2.9", List("mode-scala.js", "theme-github.js", "ext-language_tools.js"), true),
-  npmDeps in Compile += Dep("sortablejs", "1.7.0", List("Sortable.min.js")),
-  npmDeps in Compile += Dep("plotly.js", "1.42.0", List("plotly.min.js"))
+  npmDeps in Compile += Dep("ace-builds", "1.4.1", List("mode-scala.js", "theme-github.js", "ext-language_tools.js"), true),
+  npmDeps in Compile += Dep("sortablejs", "1.7.0", List("Sortable.min.js"))
 ) settings (defaultSettings: _*)
 
 
@@ -668,40 +667,40 @@ lazy val guiEnvironmentEGIPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.p
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi,
   Libraries.bootstrapnative
-) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, egi) enablePlugins (ExecNpmPlugin)
+) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, egi) enablePlugins (ScalaJSPlugin)
 
 lazy val guiEnvironmentSSHKeyPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.sshkey") settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi,
   Libraries.bootstrapnative
-) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, ssh) enablePlugins (ExecNpmPlugin)
+) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, ssh) enablePlugins (ScalaJSPlugin)
 
 lazy val guiEnvironmentSSHLoginPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.sshlogin") settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi,
   Libraries.bootstrapnative
-) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, ssh) enablePlugins (ExecNpmPlugin)
+) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, ssh) enablePlugins (ScalaJSPlugin)
 
 lazy val netlogoWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.netlogo", imports = Seq("!org.scalajs.*", "!rx.*", "!scaladget.*", "*")) settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi
-) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ExecNpmPlugin)
+) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ScalaJSPlugin)
 
 lazy val nativeWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.native") settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi,
   libraryDependencies += Libraries.arm
-) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ExecNpmPlugin)
+) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ScalaJSPlugin)
 
 lazy val rWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.r") settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi,
-) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ExecNpmPlugin)
+) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ScalaJSPlugin)
 
 lazy val jarWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.jar") settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi,
-) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ExecNpmPlugin)
+) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ScalaJSPlugin)
 
 val guiPlugins = Seq(
   guiEnvironmentSSHLoginPlugin,
@@ -789,13 +788,14 @@ def openmoleDependencies = openmoleNakedDependencies ++ corePlugins ++ guiPlugin
 
 def requieredRuntimeLibraries = Seq(Libraries.osgiCompendium, Libraries.logging)
 
-lazy val openmoleNaked =
+lazy val openmoleNaked = 
   Project("openmole-naked", binDir / "openmole-naked") settings (assemblySettings: _*) enablePlugins (ExecNpmPlugin) settings(
     setExecutable ++= Seq("openmole", "openmole.bat"),
     Osgi.bundleDependencies in Compile := OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject, includeRoot = false))).value,
     resourcesAssemble += (resourceDirectory in Compile).value -> assemblyPath.value,
     resourcesAssemble += ((resourceDirectory in serverGUI in Compile).value / "webapp") → (assemblyPath.value / "webapp"),
     resourcesAssemble += (dependencyFile in clientGUI in Compile).value -> (assemblyPath.value / "webapp/js/deps.js"),
+    resourcesAssemble += (cssFile in clientGUI in Compile).value -> (assemblyPath.value / "webapp/css/"),
     resourcesAssemble += {
       val tarFile = (tar in openmoleRuntime).value
       tarFile -> (assemblyPath.value / "runtime" / tarFile.getName)
@@ -909,11 +909,12 @@ buildSite := {
     (run in siteJVM in Compile).toTask(" " + args.mkString(" ")).map(_ => siteTarget)
   }.evaluated
 
-  def copySiteResources(siteBuildJS: File, dependencyFile: File, resourceDirectory: File, siteTarget: File) = {
+  def copySiteResources(siteBuildJS: File, dependencyFile: File, resourceDirectory: File, siteTarget: File, cssFile: File) = {
     IO.copyFile(siteBuildJS, siteTarget / "js/sitejs.js")
     IO.copyFile(dependencyFile, siteTarget / "js/deps.js")
     IO.copyDirectory(resourceDirectory / "js", siteTarget / "js")
     IO.copyDirectory(resourceDirectory / "css", siteTarget / "css")
+    IO.copyDirectory(cssFile, siteTarget / "css")
     IO.copyDirectory(resourceDirectory / "fonts", siteTarget / "fonts")
     IO.copyDirectory(resourceDirectory / "img", siteTarget / "img")
     IO.copyDirectory(resourceDirectory / "bibtex", siteTarget / "bibtex")
@@ -924,7 +925,8 @@ buildSite := {
   copySiteResources((fullOptJS in siteJS in Compile).value.data,
     (dependencyFile in siteJS in Compile).value,
     (resourceDirectory in siteJVM in Compile).value,
-    siteTarget)
+    siteTarget,
+    (cssFile in siteJS in Compile).value)
 
   siteTarget
 }
