@@ -62,7 +62,7 @@ object Scalable {
   }
 
   private def factorToScalar[D](f: Factor[D, Double])(implicit bounded: Bounds[D, Double]) =
-    ScalableNumber(f.prototype, bounded.min(f.domain), bounded.max(f.domain))
+    ScalableNumber(f.value, bounded.min(f.domain), bounded.max(f.domain))
 
   implicit def factorIsScalable[D](implicit bounded: Bounds[D, Double]) = new Scalable[Factor[D, Double]] {
     def isScalar(t: Factor[D, Double]) = scalarIsScalable.isScalar(factorToScalar(t))
@@ -79,7 +79,7 @@ object Scalable {
 
     def isScalar(t: Factor[D, Array[Double]]) = false
     override def inputs(t: Factor[D, Array[Double]]) = Seq()
-    override def prototype(t: Factor[D, Array[Double]]): Val[_] = t.prototype
+    override def prototype(t: Factor[D, Array[Double]]): Val[_] = t.value
 
     override def size(t: Factor[D, Array[Double]]): FromContext[Int] =
       (bounded.min(t.domain) map2 bounded.max(t.domain)) { case (min, max) ⇒ math.min(min.size, max.size) }
@@ -92,7 +92,7 @@ object Scalable {
             (values zip (min zip max)).map { case (g, (min, max)) ⇒ g.scale(min, max) }
         }
 
-      scaled.map { sc ⇒ ScaledSequence(t.prototype, sc.toArray) }
+      scaled.map { sc ⇒ ScaledSequence(t.value, sc.toArray) }
     }
 
     override def toVariable(t: Factor[D, Array[Double]])(value: Seq[Any]): Variable[_] =

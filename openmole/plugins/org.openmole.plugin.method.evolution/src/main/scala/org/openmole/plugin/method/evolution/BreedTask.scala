@@ -18,21 +18,20 @@
 package org.openmole.plugin.method.evolution
 
 import org.openmole.core.context.{ Context, Variable }
-import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.workflow.builder.DefinitionScope
+import org.openmole.core.workflow.builder.{ ValueAssignment, DefinitionScope }
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.DefaultSet
 
 object BreedTask {
 
-  def apply[T: WorkflowIntegration](algorithm: T, size: Int, suggestion: Seq[DefaultSet] = Seq.empty)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def apply[T: WorkflowIntegration](algorithm: T, size: Int, suggestion: Seq[Seq[ValueAssignment[_]]] = Seq.empty)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
     lazy val t = wfi(algorithm)
 
     FromContextTask("BreedTask") { p ⇒
       import p._
 
-      def defaultSetToVariables(ds: DefaultSet) = ds.map(_.toVariable(context)).toVector
+      def defaultSetToVariables(ds: Seq[ValueAssignment[_]]) = ds.map(v ⇒ Variable.unsecure(v.value, v.equal.from(context))).toVector
       val suggestedGenomes = suggestion.map(ds ⇒ t.operations.buildGenome(defaultSetToVariables(ds)).from(context))
 
       val population = context(t.populationPrototype)
@@ -40,10 +39,15 @@ object BreedTask {
 
       (population.isEmpty, t.operations.generation(s), suggestedGenomes.isEmpty) match {
         case (true, 0, false) ⇒
+          val (news, gs) =
+            size - suggestedGenomes.size match {
+              case x if x > 0 ⇒ t.operations.initialGenomes(x)(context).run(s).value
+              case x          ⇒ (s, Vector.empty)
+            }
 
           Context(
-            Variable(t.genomePrototype.array, random().shuffle(suggestedGenomes).toArray(t.genomePrototype.`type`.manifest)),
-            Variable(t.statePrototype, s)
+            Variable(t.genomePrototype.array, random().shuffle(suggestedGenomes ++ gs).toArray(t.genomePrototype.`type`.manifest)),
+            Variable(t.statePrototype, news)
           )
         case (true, _, _) ⇒
           val (news, gs) = t.operations.initialGenomes(size)(context).run(s).value

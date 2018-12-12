@@ -24,25 +24,25 @@ object Genome {
     import org.openmole.core.workflow.sampling._
 
     implicit def factorIsScalaDouble[D](f: Factor[D, Double])(implicit bounded: Bounds[D, Double]) =
-      ScalarDouble(f.prototype, bounded.min(f.domain), bounded.max(f.domain))
+      ScalarDouble(f.value, bounded.min(f.domain), bounded.max(f.domain))
 
     implicit def factorIsScalarInt[D](f: Factor[D, Int])(implicit bounded: Bounds[D, Int]) =
-      ScalarInt(f.prototype, bounded.min(f.domain), bounded.max(f.domain))
+      ScalarInt(f.value, bounded.min(f.domain), bounded.max(f.domain))
 
     implicit def factorIsSequenceOfDouble[D](f: Factor[D, Array[Double]])(implicit bounded: Bounds[D, Array[Double]], sized: Sized[D]) =
-      SequenceOfDouble(f.prototype, bounded.min(f.domain), bounded.max(f.domain), sized(f.domain))
+      SequenceOfDouble(f.value, bounded.min(f.domain), bounded.max(f.domain), sized(f.domain))
 
     implicit def factorIsSequenceOfInt[D](f: Factor[D, Array[Int]])(implicit bounded: Bounds[D, Array[Int]], sized: Sized[D]) =
-      SequenceOfInt(f.prototype, bounded.min(f.domain), bounded.max(f.domain), sized(f.domain))
+      SequenceOfInt(f.value, bounded.min(f.domain), bounded.max(f.domain), sized(f.domain))
 
     implicit def factorIsIsEnumeration[D, T](f: Factor[D, T])(implicit fix: Fix[D, T]) =
-      Enumeration(f.prototype, fix.apply(f.domain).toVector)
+      Enumeration(f.value, fix.apply(f.domain).toVector)
 
     implicit def factorIsSequenceOfEnumeration[D, T](f: Factor[D, Array[T]])(implicit fix: Fix[D, Array[T]]) =
-      SequenceOfEnumeration(f.prototype, fix.apply(f.domain).toVector)
+      SequenceOfEnumeration(f.value, fix.apply(f.domain).toVector)
 
     implicit def factorOfBooleanIsSequenceOfEnumeration(f: Factor[Int, Array[Boolean]]) =
-      SequenceOfEnumeration(f.prototype, Vector.fill(f.domain)(Array(true, false)))
+      SequenceOfEnumeration(f.value, Vector.fill(f.domain)(Array(true, false)))
 
     def toVal(b: GenomeBound) = b match {
       case b: GenomeBound.ScalarDouble             ⇒ b.v
