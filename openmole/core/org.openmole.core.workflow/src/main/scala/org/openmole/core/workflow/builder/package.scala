@@ -145,6 +145,7 @@ package builder {
     }
 
     implicit class ValueAssignmentDecorator[T](v: Val[T]) {
+      def :=(t: T): ValueAssignment[T] = new :=(v, t)
       def :=(t: FromContext[T]): ValueAssignment[T] = new :=(v, t)
     }
   }
