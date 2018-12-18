@@ -17,19 +17,15 @@
 
 package org.openmole.core.workflow.validation
 
-import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.validation._
-import DataflowProblem._
-import org.openmole.core.workflow.data._
+import org.openmole.core.context.Val
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
-import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.validation.DataflowProblem._
+import org.openmole.core.workflow.validation.TopologyProblem._
 import org.scalatest._
-import TopologyProblem.{ DataChannelNegativeLevelProblem, MoleTaskLastCapsuleProblem }
-import org.openmole.core.context.Val
 
 class ValidationSpec extends FlatSpec with Matchers {
 
@@ -108,7 +104,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val mole = ((c1 -- c2) & (c1 -- c2)) toMole
 
     val errors = Validation.duplicatedTransitions(mole)
-    errors.isEmpty should equal(false)
+    assert(!errors.isEmpty)
   }
 
   "Validation" should "detect a missing input error due to datachannel filtering" in {
