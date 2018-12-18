@@ -173,6 +173,13 @@ object Validation {
       } ++ (mole.transitions.map(_.start).toSet -- seen.keys).toVector.map { capsule ⇒ UnreachableCapsuleProblem(capsule) }
   }
 
+  def moleTaskTopologyError(moleTask: MoleTask, capsule: Capsule) = {
+    moleTask.mole.level(moleTask.last) match {
+      case 0 ⇒ List()
+      case l ⇒ List(MoleTaskLastCapsuleProblem(capsule, moleTask, l))
+    }
+  }
+
   def duplicatedTransitions(mole: Mole) =
     for {
       end ← mole.capsules
@@ -319,15 +326,19 @@ object Validation {
           moleTask.implicits.flatMap(i ⇒ inputs.get(i))
         }
 
-        (mt match {
-          case Some((t, c)) ⇒
-            moleTaskImplicitsErrors(t, c) ++
-              typeErrorsMoleTask(m, moleTaskImplicits(t)).map { e ⇒ MoleTaskDataFlowProblem(c, e) }
-          case None ⇒
-            sourceTypeErrors(m, implicits.prototypes, sources, hooks) ++
-              hookErrors(m, implicits.prototypes, sources, hooks) ++
-              typeErrorsTopMole(m, implicits.prototypes, sources, hooks)
-        }) ++
+        def sourceHookOrMtError =
+          mt match {
+            case Some((t, c)) ⇒
+              moleTaskImplicitsErrors(t, c) ++
+                typeErrorsMoleTask(m, moleTaskImplicits(t)).map { e ⇒ MoleTaskDataFlowProblem(c, e) } ++
+                moleTaskTopologyError(t, c)
+            case None ⇒
+              sourceTypeErrors(m, implicits.prototypes, sources, hooks) ++
+                hookErrors(m, implicits.prototypes, sources, hooks) ++
+                typeErrorsTopMole(m, implicits.prototypes, sources, hooks)
+          }
+
+        sourceHookOrMtError ++
           topologyErrors(m) ++
           duplicatedTransitions(m) ++
           duplicatedName(m, sources, hooks) ++

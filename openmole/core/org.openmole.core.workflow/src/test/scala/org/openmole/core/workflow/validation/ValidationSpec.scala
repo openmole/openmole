@@ -28,7 +28,7 @@ import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl._
 import org.scalatest._
-import TopologyProblem.DataChannelNegativeLevelProblem
+import TopologyProblem.{ DataChannelNegativeLevelProblem, MoleTaskLastCapsuleProblem }
 import org.openmole.core.context.Val
 
 class ValidationSpec extends FlatSpec with Matchers {
@@ -47,10 +47,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val mole = (c1 -- c2).toMole
 
     val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
-    errors.headOption match {
-      case Some(MissingInput(_, d)) ⇒ assert(d == p)
-      case _                        ⇒ sys.error("Error should have been detected")
-    }
+    errors.headOption should matchPattern { case Some(MissingInput(_, `p`)) ⇒ }
   }
 
   "Validation" should "not detect a missing input error" in {
@@ -67,7 +64,7 @@ class ValidationSpec extends FlatSpec with Matchers {
 
     val mole = (c1 -- c2) toMole
 
-    Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty).isEmpty should equal(true)
+    assert(Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty).isEmpty)
   }
 
   "Validation" should "detect a type error" in {
@@ -83,12 +80,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val mole = (c1 -- c2) toMole
 
     val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
-    errors.headOption match {
-      case Some(WrongType(_, d, t)) ⇒
-        assert(d == pString)
-        assert(t == pInt)
-      case _ ⇒ sys.error("Error should have been detected")
-    }
+    errors.headOption should matchPattern { case Some(WrongType(_, `pString`, `pInt`)) ⇒ }
   }
 
   "Validation" should "detect a topology error" in {
@@ -103,7 +95,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val mole = (c1 -< c2 -- c1) toMole
 
     val errors = Validation.topologyErrors(mole)
-    errors.isEmpty should equal(false)
+    assert(!errors.isEmpty)
   }
 
   "Validation" should "detect a duplicated transition" in {
@@ -138,10 +130,7 @@ class ValidationSpec extends FlatSpec with Matchers {
 
     val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
 
-    errors.headOption match {
-      case Some(MissingInput(_, d)) ⇒ assert(d == p)
-      case _                        ⇒ sys.error("Error should have been detected")
-    }
+    errors.headOption should matchPattern { case Some(MissingInput(_, `p`)) ⇒ }
   }
 
   "Validation" should "detect a missing input in the submole" in {
@@ -158,11 +147,21 @@ class ValidationSpec extends FlatSpec with Matchers {
 
     val errors = Validation(Mole(mt))
 
-    errors.headOption match {
-      case Some(MoleTaskDataFlowProblem(_, MissingInput(_, d))) ⇒ assert(d == p)
-      case _ ⇒ sys.error("Error should have been detected")
-    }
+    errors.headOption should matchPattern { case Some(MoleTaskDataFlowProblem(_, MissingInput(_, `p`))) ⇒ }
 
+  }
+
+  "Validation" should "detect an incorect level of the last capsule of a mole task" in {
+    val t1 = EmptyTask()
+    val t2 = EmptyTask()
+    val c1 = Capsule(t1)
+    val c2 = Capsule(t2)
+
+    val mt = MoleTask(c1 -< c2)
+
+    val errors = Validation(Mole(mt))
+
+    errors.headOption should matchPattern { case Some(MoleTaskLastCapsuleProblem(_, _, _)) ⇒ }
   }
 
   "Validation" should "not detect a missing input" in {
@@ -185,7 +184,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val mole = (c1 -- mtC) toMole
 
     val errors = Validation(mole)
-    errors.isEmpty should equal(true)
+    assert(errors.isEmpty)
   }
 
   "Validation" should "not detect a missing input when provided by the implicits" in {
@@ -211,7 +210,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val mole = (c1 -- mtC) toMole
 
     val errors = Validation(mole)
-    errors.isEmpty should equal(true)
+    assert(errors.isEmpty)
   }
 
   "Validation" should "detect a duplicated name error" in {
@@ -223,10 +222,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val c1 = Capsule(t1)
 
     val errors = Validation.duplicatedName(Mole(c1), Sources.empty, Hooks.empty)
-    errors.headOption match {
-      case Some(DuplicatedName(_, _, _, Output)) ⇒
-      case _                                     ⇒ sys.error("Error should have been detected")
-    }
+    errors.headOption should matchPattern { case Some(DuplicatedName(_, _, _, Output)) ⇒ }
   }
 
   "Validation" should "detect a missing input error for the misc" in {
@@ -239,10 +235,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val h = TestHook() set (inputs += i)
 
     val errors = Validation.hookErrors(Mole(c1), Iterable.empty, Sources.empty, Hooks(Map(c1 → List(h))))
-    errors.headOption match {
-      case Some(MissingHookInput(_, _, _)) ⇒
-      case _                               ⇒ sys.error("Error should have been detected")
-    }
+    errors.headOption should matchPattern { case Some(MissingHookInput(_, _, _)) ⇒ }
   }
 
   "Validation" should "detect a wrong input type error for the misc" in {
@@ -256,10 +249,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val h = TestHook() set (inputs += iInt)
 
     val errors = Validation.hookErrors(Mole(c1), Iterable.empty, Sources.empty, Hooks(Map(c1 → List(h))))
-    errors.headOption match {
-      case Some(WrongHookType(_, _, _, _)) ⇒
-      case _                               ⇒ sys.error("Error should have been detected")
-    }
+    errors.headOption should matchPattern { case Some(WrongHookType(_, _, _, _)) ⇒ }
   }
 
   "Validation" should "take into account outputs produced by a source" in {
@@ -274,7 +264,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val mole = Mole(c1)
 
     val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources(Map(c1 → List(s))), Hooks.empty)
-    errors.isEmpty should equal(true)
+    assert(errors.isEmpty)
   }
 
   "Validation" should "detect a missing input for a source" in {
@@ -289,10 +279,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val mole = Mole(c1)
 
     val errors = Validation.sourceTypeErrors(mole, List.empty, Sources(Map(c1 → List(s))), Hooks.empty)
-    errors.headOption match {
-      case Some(MissingSourceInput(_, _, _)) ⇒
-      case _                                 ⇒ sys.error("Error should have been detected")
-    }
+    errors.headOption should matchPattern { case Some(MissingSourceInput(_, _, _)) ⇒ }
   }
 
   "Validation" should "detect a data channel error when a data channel is going from a level to a lower level" in {
@@ -313,10 +300,7 @@ class ValidationSpec extends FlatSpec with Matchers {
 
     val errors = Validation.dataChannelErrors(mole)
 
-    errors.headOption match {
-      case Some(DataChannelNegativeLevelProblem(_)) ⇒
-      case _                                        ⇒ sys.error("Error should have been detected")
-    }
+    errors.headOption should matchPattern { case Some(DataChannelNegativeLevelProblem(_)) ⇒ }
   }
 
   "Merge between aggregation and simple transition" should "be supported" in {
@@ -339,7 +323,7 @@ class ValidationSpec extends FlatSpec with Matchers {
 
     val mole = ((explorationCaps -< t1Caps >- aggSlot) & (explorationCaps -- aggSlot)) toMole
 
-    Validation(mole).isEmpty should equal(true)
+    assert(Validation(mole).isEmpty)
   }
 
   "Validation" should "detect a incoherent input in slot" in {
@@ -355,10 +339,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val mole = (t0 -- (t1, t2) -- t3).toMole
 
     val errors = Validation.incoherentTypeAggregation(mole, Sources.empty, Hooks.empty)
-    errors.headOption match {
-      case Some(IncoherentTypeAggregation(_, _)) ⇒
-      case _                                     ⇒ sys.error("Error should have been detected")
-    }
+    errors.headOption should matchPattern { case Some(IncoherentTypeAggregation(_, _)) ⇒ }
   }
 
   "Validation" should "detect a incoherent input between slots" in {
@@ -374,10 +355,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val mole = (t0 -- (t1, t2) --= t3).toMole
 
     val errors = Validation.incoherentTypeBetweenSlots(mole, Sources.empty, Hooks.empty)
-    errors.headOption match {
-      case Some(IncoherentTypesBetweenSlots(_, _, _)) ⇒
-      case _ ⇒ sys.error("Error should have been detected")
-    }
+    errors.headOption should matchPattern { case Some(IncoherentTypesBetweenSlots(_, _, _)) ⇒ }
   }
 
   "Workflow with exploration and strainer" should "be ok" in {

@@ -251,7 +251,6 @@ class WorkflowSpec extends FlatSpec with Matchers {
       objectives = Seq(a aggregate f in (0.0 to 1.0 by 0.1), b in (0.2 to 0.5 by 0.1)),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100
-
     )
   }
 
