@@ -27,6 +27,7 @@ import org.openmole.core.event.{Event, EventDispatcher}
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice.{FileCache, FileService, FileServiceCache}
 import org.openmole.core.location._
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.preference.{ConfigurationLocation, Preference}
 import org.openmole.core.replication.ReplicaCatalog
@@ -448,7 +449,7 @@ class BatchExecutionJob(val job: Job, val environment: BatchEnvironment) extends
   def runnableTasks = job.moleJobs.map(RunnableTask(_))
 
   @transient lazy val plugins = pluginsAndFiles.plugins ++ closureBundleAndPlugins._1
-  def files = pluginsAndFiles.files
+  def files =  pluginsAndFiles.files
 
   @transient lazy val pluginsAndFiles = environment.services.serializerService.pluginsAndFiles(runnableTasks)
 

@@ -18,6 +18,7 @@
 package org.openmole.core.workflow.validation
 
 import org.openmole.core.workflow.mole.Capsule
+import org.openmole.core.workflow.task.MoleTask
 import org.openmole.core.workflow.transition.{ DataChannel, ITransition }
 
 object TopologyProblem {
@@ -30,7 +31,7 @@ object TopologyProblem {
     capsule: Capsule,
     paths:   List[(List[Capsule], Int)]
   ) extends TopologyProblem {
-    override def toString = "LevelProblem: " + capsule + ", " + paths.map { case (p, l) ⇒ "Folowing the path (" + p.mkString(", ") + " has level " + l + ")" }.mkString(", ")
+    override def toString = "LevelProblem: " + capsule + ", " + paths.map { case (p, l) ⇒ "Following the path (" + p.mkString(", ") + " has level " + l + ")" }.mkString(", ")
   }
 
   case class NegativeLevelProblem(
@@ -52,6 +53,10 @@ object TopologyProblem {
 
   case class UnreachableCapsuleProblem(capsule: Capsule) extends TopologyProblem {
     override def toString = s"UnreachableCapsuleProblem: $capsule is not linked to the workflow by any transition"
+  }
+
+  case class MoleTaskLastCapsuleProblem(capsule: Capsule, moleTask: MoleTask, level: Int) extends TopologyProblem {
+    override def toString = s"MoleTaskLastCapsuleProblem: in mole task $capsule the last capsule ${moleTask.last} has been found at level $level, it should be at level 0"
   }
 }
 
