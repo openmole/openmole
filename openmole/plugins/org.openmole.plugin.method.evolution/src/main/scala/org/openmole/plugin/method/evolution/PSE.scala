@@ -494,8 +494,8 @@ object PSE {
     objectives: Seq[PatternAxe],
     stochastic: OptionalArgument[Stochastic] = None
   ) =
-    Objective.onlyExact(objectives.map(_.p)) && !stochastic.isDefined match {
-      case true ⇒
+    WorkflowIntegration.stochasticity(objectives.map(_.p), stochastic) match {
+      case None ⇒
         val exactObjectives = objectives.map(o ⇒ Objective.toExact(o.p))
 
         val integration: WorkflowIntegration.DeterministicGA[_] = WorkflowIntegration.DeterministicGA(
@@ -508,9 +508,8 @@ object PSE {
           exactObjectives)(DeterministicParams.integration)
 
         WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
-      case false ⇒
+      case Some(stochasticValue) ⇒
         val noisyObjectives = objectives.map(o ⇒ Objective.toNoisy(o.p))
-        val stochasticValue = stochastic.option.getOrElse(Stochastic())
 
         val integration: WorkflowIntegration.StochasticGA[_] = WorkflowIntegration.StochasticGA(
           StochasticParams(

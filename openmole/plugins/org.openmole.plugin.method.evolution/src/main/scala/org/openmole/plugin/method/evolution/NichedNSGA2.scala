@@ -499,8 +499,8 @@ object NichedNSGA2 {
     nicheSize:  Int,
     stochastic: OptionalArgument[Stochastic] = None
   ): EvolutionWorkflow =
-    Objective.onlyExact(objectives) && !stochastic.isDefined match {
-      case true ⇒
+    WorkflowIntegration.stochasticity(objectives, stochastic) match {
+      case None ⇒
         val exactObjectives = objectives.map(o ⇒ Objective.toExact(o))
         val integration: WorkflowIntegration.DeterministicGA[_] = new WorkflowIntegration.DeterministicGA(
           DeterministicParams(
@@ -516,9 +516,8 @@ object NichedNSGA2 {
 
         WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
 
-      case false ⇒
+      case Some(stochasticValue) ⇒
         val noisyObjectives = objectives.map(o ⇒ Objective.toNoisy(o))
-        val stochasticValue = stochastic.option.getOrElse(Stochastic())
 
         val integration: WorkflowIntegration.StochasticGA[_] = WorkflowIntegration.StochasticGA(
           StochasticParams(

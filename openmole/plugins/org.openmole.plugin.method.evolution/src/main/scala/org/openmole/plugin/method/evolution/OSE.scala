@@ -335,8 +335,8 @@ object OSE {
     genome:     Genome                       = Seq(),
     mu:         Int                          = 200,
     stochastic: OptionalArgument[Stochastic] = None): EvolutionWorkflow =
-    Objective.onlyExact(objectives.map(_.objective)) && !stochastic.isDefined match {
-      case true ⇒
+    WorkflowIntegration.stochasticity(objectives.map(_.objective), stochastic) match {
+      case None ⇒
         val exactObjectives = FitnessPattern.toObjectives(objectives).map(o ⇒ Objective.toExact(o))
         val fg = OriginAxe.fullGenome(origin, genome)
 
@@ -354,10 +354,9 @@ object OSE {
           )
 
         WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
-      case false ⇒
+      case Some(stochasticValue) ⇒
         val fg = OriginAxe.fullGenome(origin, genome)
         val noisyObjectives = FitnessPattern.toObjectives(objectives).map(o ⇒ Objective.toNoisy(o))
-        val stochasticValue = stochastic.option.getOrElse(Stochastic())
 
         val integration: WorkflowIntegration.StochasticGA[_] =
           WorkflowIntegration.StochasticGA(
