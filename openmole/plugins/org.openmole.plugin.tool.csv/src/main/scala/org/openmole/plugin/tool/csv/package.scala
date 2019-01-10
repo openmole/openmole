@@ -61,39 +61,29 @@ package object csv extends CSVPackage {
   def writeVariablesToCSV(
     file:              File,
     prototypes:        Seq[Val[_]],
-    context:           Context,
+    values:            Seq[Any],
     arraysOnSingleRow: Boolean        = false,
     header:            Option[String] = None,
     overwrite:         Boolean        = false): Unit = {
 
     file.createParentDir
 
-    val ps =
-      if (prototypes.isEmpty) context.values.map { _.prototype }
-      else prototypes
-
     file.withLock {
       fos ⇒
 
         if (overwrite) file.content = ""
 
-        val lists = ps.map {
-          p ⇒
-            context.option(p) match {
-              case Some(v) ⇒
-                v match {
-                  case v: Array[_] ⇒ v.toList
-                  case l: List[_]  ⇒ l
-                  case v           ⇒ List(v)
-                }
-              case None ⇒ List("not found")
-            }
-        }.toList
+        val lists =
+          values.map {
+            case v: Array[_] ⇒ v.toList
+            case l: List[_]  ⇒ l
+            case v           ⇒ List(v)
+          }.toList
 
         if (file.size == 0)
           fos.appendLine {
             def defaultHeader =
-              (ps zip lists).flatMap {
+              (prototypes zip lists).flatMap {
                 case (p, l) ⇒
                   if (arraysOnSingleRow && moreThanOneElement(l))
                     (0 until l.size).map(i ⇒ s"${p.name}$i")
