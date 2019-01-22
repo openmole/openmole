@@ -45,55 +45,57 @@ object Scalable {
   case class ScaledSequence[T: ClassTag](prototype: Val[Array[T]], s: Array[T]) extends Scaled
   case class ScaledScalar[T](prototype: Val[T], v: T) extends Scaled
 
-  implicit def factorOfDoubleIsScalable[D](implicit bounded: Bounds[D, Double]) = new Scalable[Factor[D, Double]] {
-    def isScalar(t: Factor[D, Double]) = true
-    override def inputs(t: Factor[D, Double]) = Seq()
-    override def prototype(t: Factor[D, Double]): Val[_] = t.value
-    override def size(t: Factor[D, Double]): FromContext[Int] = 1
+  object ScalableType {
+    implicit def doubleIsScalable = new ScalableType[Double] {
+      def scale(v: Double, min: Double, max: Double) = v.scale(min, max)
+    }
 
-    override def scaled(s: Factor[D, Double])(values: Seq[Double]): FromContext[Scaled] = {
+    implicit def intIsScalable = new ScalableType[Int] {
+      def scale(v: Double, min: Int, max: Int) = v.scale(min.toDouble, max.toDouble + 1).toInt
+    }
+
+    implicit def longIsScalable = new ScalableType[Long] {
+      def scale(v: Double, min: Long, max: Long) = v.scale(min.toDouble, max.toDouble + 1).toLong
+    }
+
+  }
+
+  trait ScalableType[T] {
+    def scale(v: Double, min: T, max: T): T
+  }
+
+  implicit def factorOfDoubleIsScalable[D, T: ScalableType](implicit bounded: Bounds[D, T]) = new Scalable[Factor[D, T]] {
+    def isScalar(t: Factor[D, T]) = true
+    override def inputs(t: Factor[D, T]) = Seq()
+    override def prototype(t: Factor[D, T]): Val[_] = t.value
+    override def size(t: Factor[D, T]): FromContext[Int] = 1
+
+    override def scaled(s: Factor[D, T])(values: Seq[Double]): FromContext[Scaled] = {
       val g = values.head
       assert(!g.isNaN)
 
       (bounded.min(s.domain) map2 bounded.max(s.domain)) { (min, max) ⇒
-        val sc = g.scale(min, max)
+        val sc = implicitly[ScalableType[T]].scale(g, min, max)
         ScaledScalar(s.value, sc)
       }
     }
   }
 
-  implicit def factorOfIntIsScalable[D](implicit bounded: Bounds[D, Int]) = new Scalable[Factor[D, Int]] {
-    def isScalar(t: Factor[D, Int]) = true
-    override def inputs(t: Factor[D, Int]) = Seq()
-    override def prototype(t: Factor[D, Int]): Val[_] = t.value
-    override def size(t: Factor[D, Int]): FromContext[Int] = 1
+  implicit def factorOfSequenceIsScalable[D, T: ScalableType: ClassTag](implicit bounded: Bounds[D, Array[T]]) = new Scalable[Factor[D, Array[T]]] {
 
-    override def scaled(s: Factor[D, Int])(values: Seq[Double]): FromContext[Scaled] = {
-      val g = values.head
-      assert(!g.isNaN)
+    def isScalar(t: Factor[D, Array[T]]) = false
+    override def inputs(t: Factor[D, Array[T]]) = Seq()
+    override def prototype(t: Factor[D, Array[T]]): Val[_] = t.value
 
-      (bounded.min(s.domain) map2 bounded.max(s.domain)) { (min, max) ⇒
-        val sc = g.scale(min, max + 1).toInt
-        ScaledScalar(s.value, sc)
-      }
-    }
-  }
-
-  implicit def factorOfSequenceIsScalable[D](implicit bounded: Bounds[D, Array[Double]]) = new Scalable[Factor[D, Array[Double]]] {
-
-    def isScalar(t: Factor[D, Array[Double]]) = false
-    override def inputs(t: Factor[D, Array[Double]]) = Seq()
-    override def prototype(t: Factor[D, Array[Double]]): Val[_] = t.value
-
-    override def size(t: Factor[D, Array[Double]]): FromContext[Int] =
+    override def size(t: Factor[D, Array[T]]): FromContext[Int] =
       (bounded.min(t.domain) map2 bounded.max(t.domain)) { case (min, max) ⇒ math.min(min.size, max.size) }
 
-    override def scaled(t: Factor[D, Array[Double]])(values: Seq[Double]): FromContext[Scaled] = {
+    override def scaled(t: Factor[D, Array[T]])(values: Seq[Double]): FromContext[Scaled] = {
 
       def scaled =
         (bounded.min(t.domain) map2 bounded.max(t.domain)) {
           case (min, max) ⇒
-            (values zip (min zip max)).map { case (g, (min, max)) ⇒ g.scale(min, max) }
+            (values zip (min zip max)).map { case (g, (min, max)) ⇒ implicitly[ScalableType[T]].scale(g, min, max) }
         }
 
       scaled.map { sc ⇒ ScaledSequence(t.value, sc.toArray) }
