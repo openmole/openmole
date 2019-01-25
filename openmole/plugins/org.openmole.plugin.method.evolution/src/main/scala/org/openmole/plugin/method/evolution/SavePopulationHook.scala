@@ -59,7 +59,7 @@ object SavePopulationHook {
         writeVariablesToCSV(
           resultFileLocation.from(context),
           resultVariables(algorithm, context).map(_.prototype.array),
-          resultVariables(algorithm, context),
+          resultVariables(algorithm, context).map(_.value),
           overwrite = true
         )
       }
@@ -83,7 +83,7 @@ object SaveLastPopulationHook {
       writeVariablesToCSV(
         file.from(context),
         SavePopulationHook.resultVariables(algorithm, context).map(_.prototype.array),
-        SavePopulationHook.resultVariables(algorithm, context),
+        SavePopulationHook.resultVariables(algorithm, context).map(_.value),
         overwrite = true
       )
 

@@ -25,78 +25,81 @@ import org.openmole.core.workflow.sampling._
 import org.openmole.core.workspace._
 import org.openmole.tool.random._
 import cats.implicits._
+
 import scala.annotation.tailrec
 import org.openmole.core.tools.math._
 
+import scala.reflect.ClassTag
+
 object Scalable {
 
-  sealed trait Scaled
-  case class ScaledSequence(prototype: Val[Array[Double]], s: Array[Double]) extends Scaled
-  case class ScaledScalar(prototype: Val[Double], v: Double) extends Scaled
-
-  case class ScalableNumber(prototype: Val[Double], min: FromContext[Double], max: FromContext[Double])
-  object ScalableSequence {
-    def apply(prototype: Val[Array[Double]], min: FromContext[Double], max: FromContext[Double], size: Int): ScalableSequence =
-      ScalableSequence(prototype, Seq.fill(size)(min), Seq.fill(size)(max))
+  object Scaled {
+    def toVariable(s: Scaled, values: List[Double], inputSize: Int) =
+      s match {
+        case Scalable.ScaledScalar(p, v)   ⇒ Variable(p, v) → values.tail
+        case Scalable.ScaledSequence(p, v) ⇒ Variable(p, v) → values.drop(inputSize)
+      }
   }
 
-  case class ScalableSequence(prototype: Val[Array[Double]], min: Seq[FromContext[Double]], max: Seq[FromContext[Double]])
+  sealed trait Scaled
+  case class ScaledSequence[T: ClassTag](prototype: Val[Array[T]], s: Array[T]) extends Scaled
+  case class ScaledScalar[T](prototype: Val[T], v: T) extends Scaled
 
-  implicit def scalarIsScalable = new Scalable[ScalableNumber] {
-    def isScalar(t: ScalableNumber) = true
-    override def inputs(t: ScalableNumber) = Seq()
-    override def prototype(t: ScalableNumber): Val[_] = t.prototype
-    override def size(t: ScalableNumber): FromContext[Int] = 1
+  object ScalableType {
+    implicit def doubleIsScalable = new ScalableType[Double] {
+      def scale(v: Double, min: Double, max: Double) = v.scale(min, max)
+    }
 
-    override def scaled(s: ScalableNumber)(genomePart: Seq[Double]): FromContext[Scaled] = {
-      val g = genomePart.head
+    implicit def intIsScalable = new ScalableType[Int] {
+      def scale(v: Double, min: Int, max: Int) = v.scale(min.toDouble, max.toDouble + 1).toInt
+    }
+
+    implicit def longIsScalable = new ScalableType[Long] {
+      def scale(v: Double, min: Long, max: Long) = v.scale(min.toDouble, max.toDouble + 1).toLong
+    }
+
+  }
+
+  trait ScalableType[T] {
+    def scale(v: Double, min: T, max: T): T
+  }
+
+  implicit def factorOfDoubleIsScalable[D, T: ScalableType](implicit bounded: Bounds[D, T]) = new Scalable[Factor[D, T]] {
+    def isScalar(t: Factor[D, T]) = true
+    override def inputs(t: Factor[D, T]) = Seq()
+    override def prototype(t: Factor[D, T]): Val[_] = t.value
+    override def size(t: Factor[D, T]): FromContext[Int] = 1
+
+    override def scaled(s: Factor[D, T])(values: Seq[Double]): FromContext[Scaled] = {
+      val g = values.head
       assert(!g.isNaN)
 
-      (s.min map2 s.max) { (min, max) ⇒
-        val sc = g.scale(min, max)
-        ScaledScalar(s.prototype, sc)
+      (bounded.min(s.domain) map2 bounded.max(s.domain)) { (min, max) ⇒
+        val sc = implicitly[ScalableType[T]].scale(g, min, max)
+        ScaledScalar(s.value, sc)
       }
     }
-    override def toVariable(t: ScalableNumber)(value: Seq[Any]): Variable[_] =
-      Variable.unsecure(prototype(t).toArray, value.map(_.asInstanceOf[Double]).toArray[Double])
   }
 
-  private def factorToScalar[D](f: Factor[D, Double])(implicit bounded: Bounds[D, Double]) =
-    ScalableNumber(f.value, bounded.min(f.domain), bounded.max(f.domain))
+  implicit def factorOfSequenceIsScalable[D, T: ScalableType: ClassTag](implicit bounded: Bounds[D, Array[T]]) = new Scalable[Factor[D, Array[T]]] {
 
-  implicit def factorIsScalable[D](implicit bounded: Bounds[D, Double]) = new Scalable[Factor[D, Double]] {
-    def isScalar(t: Factor[D, Double]) = scalarIsScalable.isScalar(factorToScalar(t))
-    override def inputs(t: Factor[D, Double]): PrototypeSet = Seq()
-    override def prototype(t: Factor[D, Double]): Val[_] = scalarIsScalable.prototype(factorToScalar(t))
-    override def size(t: Factor[D, Double]) = scalarIsScalable.size(factorToScalar(t))
-    override def scaled(t: Factor[D, Double])(genomePart: Seq[Double]): FromContext[Scaled] =
-      scalarIsScalable.scaled(factorToScalar(t))(genomePart)
-    override def toVariable(t: Factor[D, Double])(value: Seq[Any]): Variable[_] =
-      scalarIsScalable.toVariable(factorToScalar(t))(value)
-  }
+    def isScalar(t: Factor[D, Array[T]]) = false
+    override def inputs(t: Factor[D, Array[T]]) = Seq()
+    override def prototype(t: Factor[D, Array[T]]): Val[_] = t.value
 
-  implicit def factorOfSequenceIsScalable[D](implicit bounded: Bounds[D, Array[Double]]) = new Scalable[Factor[D, Array[Double]]] {
-
-    def isScalar(t: Factor[D, Array[Double]]) = false
-    override def inputs(t: Factor[D, Array[Double]]) = Seq()
-    override def prototype(t: Factor[D, Array[Double]]): Val[_] = t.value
-
-    override def size(t: Factor[D, Array[Double]]): FromContext[Int] =
+    override def size(t: Factor[D, Array[T]]): FromContext[Int] =
       (bounded.min(t.domain) map2 bounded.max(t.domain)) { case (min, max) ⇒ math.min(min.size, max.size) }
 
-    override def scaled(t: Factor[D, Array[Double]])(values: Seq[Double]): FromContext[Scaled] = {
+    override def scaled(t: Factor[D, Array[T]])(values: Seq[Double]): FromContext[Scaled] = {
 
       def scaled =
         (bounded.min(t.domain) map2 bounded.max(t.domain)) {
           case (min, max) ⇒
-            (values zip (min zip max)).map { case (g, (min, max)) ⇒ g.scale(min, max) }
+            (values zip (min zip max)).map { case (g, (min, max)) ⇒ implicitly[ScalableType[T]].scale(g, min, max) }
         }
 
       scaled.map { sc ⇒ ScaledSequence(t.value, sc.toArray) }
     }
-
-    override def toVariable(t: Factor[D, Array[Double]])(value: Seq[Any]): Variable[_] =
-      Variable.unsecure(prototype(t).toArray, value.map(_.asInstanceOf[Array[Double]]).toArray[Array[Double]])
 
   }
 
@@ -108,7 +111,6 @@ trait Scalable[T] {
   def prototype(t: T): Val[_]
   def size(t: T): FromContext[Int]
   def scaled(t: T)(values: Seq[Double]): FromContext[Scalable.Scaled]
-  def toVariable(t: T)(value: Seq[Any]): Variable[_]
 }
 
 object ScalarOrSequenceOfDouble {
@@ -119,10 +121,7 @@ object ScalarOrSequenceOfDouble {
       else {
         val input = scales.head
         val (variable, tail) =
-          input.scaled(values).map {
-            case Scalable.ScaledScalar(p, v)   ⇒ Variable(p, v) → values.tail
-            case Scalable.ScaledSequence(p, v) ⇒ Variable(p, v) → values.drop(input.size(context)(rng, newFile, fileService))
-          }.from(context)(rng, newFile, fileService)
+          input.scaled(values).map { Scalable.Scaled.toVariable(_, values, input.size(context)(rng, newFile, fileService)) }.from(context)(rng, newFile, fileService)
 
         scaled0(scales.tail, tail, variable :: acc)({ context + variable }, rng, newFile, fileService)
       }
@@ -139,5 +138,4 @@ class ScalarOrSequenceOfDouble[T](t: T, scalable: Scalable[T]) {
   def prototype = scalable.prototype(t)
   def size = scalable.size(t)
   def scaled(values: Seq[Double]) = scalable.scaled(t)(values)
-  def toVariable(value: Seq[Any]): Variable[_] = scalable.toVariable(t)(value)
 }

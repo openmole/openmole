@@ -25,6 +25,7 @@ import scala.language.higherKinds
 import scala.util.Random
 import cats._
 import cats.implicits._
+import org.openmole.core.exception.UserBadDataError
 import shapeless.TypeCase
 
 object GASeeder {
@@ -67,6 +68,14 @@ case class Stochastic(
 )
 
 object WorkflowIntegration {
+
+  def stochasticity(objectives: Objectives, stochastic: Option[Stochastic]) =
+    (Objective.onlyExact(objectives), stochastic) match {
+      case (true, None)     ⇒ None
+      case (true, Some(s))  ⇒ Some(s)
+      case (false, Some(s)) ⇒ Some(s)
+      case (false, None)    ⇒ throw new UserBadDataError("Aggregation have been specified for some objective, but no stochastic parameter is provided.")
+    }
 
   implicit def hlistContainingIntegration[H <: shapeless.HList, U](implicit hwi: WorkflowIntegrationSelector[H, U]) = new WorkflowIntegration[H] {
     def apply(h: H) = hwi.selected(hwi(h))
