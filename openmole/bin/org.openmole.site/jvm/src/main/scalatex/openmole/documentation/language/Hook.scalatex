@@ -95,7 +95,7 @@ The optional last parameter of @i{AppendToCSVFileHook} is the list of variables 
 @br@br
 
 @p Some additional optional parameters can be passed to the CSVHook.
-@br Setting @hl.code("""csvHeader = "Col1, Col2, ColZ"""") customises the header of the CSV file to be created with the string it receives as a parameter. Please note that this only happens if the file doesn't exist when the hook is executed.
+@br Setting @hl.code("""header = "Col1, Col2, ColZ"""") customises the header of the CSV file to be created with the string it receives as a parameter. Please note that this only happens if the file doesn't exist when the hook is executed.
 @br @hl.code("arrayOnRaw = true") forces the flattening of the input lists such that all variables values are written to a single row/line of the CSV file.
 
 @br For instance:
@@ -103,7 +103,7 @@ The optional last parameter of @i{AppendToCSVFileHook} is the list of variables 
 val i = Val[Int]
 val j = Val[Array[Int]]
 
-val h = CSVHook("/path/to/a/file/or/dir${i}.csv", values = Seq(i, j), csvHeader = "i, j", arrayOnRaw = true)""", name = "csv hook with options")
+val h = CSVHook("/path/to/a/file/or/dir${i}.csv", values = Seq(i, j), header = "i, j", arrayOnRaw = true)""", name = "csv hook with options")
 
 @br@br
 
