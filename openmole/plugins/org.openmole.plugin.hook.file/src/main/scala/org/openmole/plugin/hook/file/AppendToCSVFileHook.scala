@@ -44,9 +44,9 @@ object AppendToCSVFileHook {
 
   def apply(
     file:       FromContext[File],
-    values:     Seq[Val[_]]                 = Vector.empty,
-    header:     Option[FromContext[String]] = None,
-    arrayOnRow: Boolean                     = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+    values:     Seq[Val[_]]                           = Vector.empty,
+    header:     OptionalArgument[FromContext[String]] = None,
+    arrayOnRow: Boolean                               = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new AppendToCSVFileHook(
       file,
       values.toVector,
