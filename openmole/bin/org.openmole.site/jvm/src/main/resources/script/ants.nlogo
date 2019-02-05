@@ -7,10 +7,10 @@ patches-own [
 ]
 
 globals [
- final-ticks-food1  
+ final-ticks-food1
  final-ticks-food2
  final-ticks-food3
- gpopulation 
+ gpopulation
  gdiffusion-rate
  gevaporation-rate
 ]
@@ -46,7 +46,7 @@ to setup-patches
     recolor-patch ]
 end
 
-to-report go-stop? 
+to-report go-stop?
   ifelse (count-food > 0)[
     report true
   ][
@@ -54,7 +54,7 @@ to-report go-stop?
   ]
 end
 
-to compute-fitness 
+to compute-fitness
   if ((sum [food] of patches with [food-source-number = 1] = 0) and (final-ticks-food1 = 0)) [
    set final-ticks-food1 ticks ]
  if ((sum [food] of patches with [food-source-number = 2] = 0) and (final-ticks-food2 = 0)) [
@@ -63,7 +63,7 @@ to compute-fitness
    set final-ticks-food3 ticks ]
 end
 
-to run-to-grid 
+to run-to-grid
     setup-ants
     while [go-stop? = true ]
      [go
@@ -196,10 +196,10 @@ end
 GRAPHICS-WINDOW
 257
 10
-764
-538
-35
-35
+762
+516
+-1
+-1
 7.0
 1
 10
@@ -246,7 +246,7 @@ diffusion-rate
 diffusion-rate
 0.0
 99.0
-21
+21.0
 1.0
 1
 NIL
@@ -261,7 +261,7 @@ evaporation-rate
 evaporation-rate
 0.0
 99.0
-9
+9.0
 1.0
 1
 NIL
@@ -293,7 +293,7 @@ population
 population
 0.0
 200.0
-125
+125.0
 1.0
 1
 NIL
@@ -709,9 +709,8 @@ false
 0
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
-
 @#$#@#$#@
-NetLogo 5.0.4
+NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
@@ -719,15 +718,14 @@ NetLogo 5.0.4
 @#$#@#$#@
 default
 0.0
--0.2 0 1.0 0.0
+-0.2 0 0.0 1.0
 0.0 1 1.0 0.0
-0.2 0 1.0 0.0
+0.2 0 0.0 1.0
 link direction
 true
 0
 Line -7500403 true 150 150 90 180
 Line -7500403 true 150 150 210 180
-
 @#$#@#$#@
 0
 @#$#@#$#@

@@ -34,7 +34,8 @@ object ExplorationTask {
   def apply(sampling: Sampling)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     FromContextTask("ExplorationTask") { p ⇒
       import p._
-      val variablesValues = TreeMap.empty[Val[_], ArrayBuffer[Any]] ++ sampling.prototypes.map { p ⇒ p → ArrayBuffer[Any]() }
+
+      val variablesValues = TreeMap.empty[Val[_], ArrayBuffer[Any]] ++ sampling.prototypes.map { p ⇒ p → p.`type`.manifest.newArrayBuilder().asInstanceOf[collection.mutable.ArrayBuilder[Any]] }
 
       for {
         sample ← sampling().from(context)
@@ -49,7 +50,7 @@ object ExplorationTask {
           try {
             Variable.unsecure(
               k.toArray,
-              v.toArray(k.`type`.manifest.asInstanceOf[Manifest[Any]])
+              v.result
             )
           }
           catch {
