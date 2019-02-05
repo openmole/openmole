@@ -305,7 +305,7 @@ lazy val collections = OsgiProject(dir, "org.apache.commons.collections", export
   (libraryDependencies += "org.apache.commons" % "commons-collections4" % "4.1", version := "4.1") settings(settings: _*)
 
 lazy val jgit = OsgiProject(dir, "org.eclipse.jgit", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
-  libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit" % "4.11.0.201803080745-r", version := "4.11" ) settings(settings: _*)
+  libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit" % "5.2.0.201812061821-r", version := "5.2" ) settings(settings: _*)
 
 lazy val txtmark = OsgiProject(dir, "com.github.rjeschke.txtmark", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
   libraryDependencies += "com.github.rjeschke" % "txtmark" % "0.13", version := "0.13" ) settings(settings: _*)
@@ -426,3 +426,4 @@ lazy val jzlib = OsgiProject(dir, "com.jcraft.jzlib", imports = Seq("*")) settin
   libraryDependencies += "com.jcraft" % "jzlib" % "1.1.3",
   version := "1.1.3"
 ) settings(settings: _*)
+

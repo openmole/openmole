@@ -25,7 +25,7 @@ import boopickle.Default._
 class Activator extends PluginActivator {
 
   def info: PluginInfo = PluginInfo(
-    classOf[GitFactory],
+    classOf[GitPluginFactory],
     s ⇒ OMRouter[GitAPI](AutowireServer.route[GitAPI](new GitApiImpl(s)))
   )
 }

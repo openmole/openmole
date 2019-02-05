@@ -82,6 +82,7 @@ def allThirdParties = Seq(
   openmoleRandom,
   openmoleNetwork,
   openmoleException,
+  openmoleVersion,
   txtmark)
 
 lazy val openmoleCache = OsgiProject(thirdPartiesDir, "org.openmole.tool.cache", imports = Seq("*")) dependsOn (openmoleLogger) settings (thirdPartiesSettings: _*) settings (libraryDependencies += Libraries.squants, libraryDependencies += Libraries.cats)
@@ -101,6 +102,7 @@ lazy val openmoleOSGi = OsgiProject(thirdPartiesDir, "org.openmole.tool.osgi", i
 lazy val openmoleRandom = OsgiProject(thirdPartiesDir, "org.openmole.tool.random", imports = Seq("*")) settings (thirdPartiesSettings: _*) settings(libraryDependencies += Libraries.math, Libraries.addScalaLang(scalaVersionValue)) dependsOn (openmoleCache)
 lazy val openmoleNetwork = OsgiProject(thirdPartiesDir, "org.openmole.tool.network", imports = Seq("*")) settings (thirdPartiesSettings: _*)
 lazy val openmoleException = OsgiProject(thirdPartiesDir, "org.openmole.tool.exception", imports = Seq("*")) settings (thirdPartiesSettings: _*)
+lazy val openmoleVersion = OsgiProject(thirdPartiesDir, "org.openmole.tool.version", imports = Seq("*")) settings(libraryDependencies ++= Seq(Libraries.jgit)) settings (thirdPartiesSettings: _*)
 
 lazy val txtmark = OsgiProject(thirdPartiesDir, "com.quandora.txtmark", exports = Seq("com.github.rjeschke.txtmark.*"), imports = Seq("*")) settings (thirdPartiesSettings: _*)
 
@@ -608,13 +610,13 @@ lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompil
 def guiClientDir = guiDir / "client"
 lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins (ExecNpmPlugin) dependsOn
   (sharedGUI, clientToolGUI, market, dataGUI, extClientTool) settings(
-  libraryDependencies += Libraries.async,
-  npmDeps in Compile += Dep("ace-builds", "1.4.1", List("mode-scala.js", "theme-github.js", "ext-language_tools.js"), true),
-  npmDeps in Compile += Dep("sortablejs", "1.7.0", List("Sortable.min.js"))
+  libraryDependencies += Libraries.async
 ) settings (defaultSettings: _*)
 
 
-lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool", privatePackages = Seq("autowire.*", "boopickle.*", "sourcecode.*", "rx.*", "org.scalajs.dom.*", "scalatags.*", "scaladget.*", "net.scalapro.sortable.*", "com.definitelyscala.plotlyjs.*", "org.querki.jsext.*")) enablePlugins (ScalaJSPlugin) dependsOn (workspace) settings(
+lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool", privatePackages = Seq("autowire.*", "boopickle.*", "sourcecode.*", "rx.*", "org.scalajs.dom.*", "scalatags.*", "scaladget.*", "net.scalapro.sortable.*", "com.definitelyscala.plotlyjs.*", "org.querki.jsext.*")) enablePlugins (ExecNpmPlugin) dependsOn (workspace) settings(
+  npmDeps in Compile += Dep("ace-builds", "1.4.1", List("mode-scala.js", "theme-github.js", "ext-language_tools.js"), true),
+  npmDeps in Compile += Dep("sortablejs", "1.7.0", List("Sortable.min.js")),
   Libraries.autowireJS,
   Libraries.boopickleJS,
   Libraries.scalajsDomJS,
@@ -622,6 +624,7 @@ lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool
   Libraries.ace,
   Libraries.bootstrapnative,
   Libraries.scaladgetTools,
+  Libraries.aceDiff,
   Libraries.rxJS,
   Libraries.sortable,
   Libraries.plotlyJS) dependsOn (extClientTool) settings (defaultSettings: _*)
@@ -654,7 +657,8 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core") s
   extPluginGUIServer,
   jsCompile,
   services,
-  location
+  location,
+  openmoleVersion
 ) settings (defaultSettings: _*)
 
 /* -------------------- GUI Plugin ----------------------- */
@@ -689,8 +693,8 @@ lazy val netlogoWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugi
 lazy val gitVersioningPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.versioning.git") settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi,
-  libraryDependencies += Libraries.jgit
-) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ExecNpmPlugin)
+  libraryDependencies += Libraries.jgit,
+) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ScalaJSPlugin)
 
 
 lazy val nativeWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.native") settings(
@@ -797,7 +801,7 @@ def openmoleDependencies = openmoleNakedDependencies ++ corePlugins ++ guiPlugin
 def requieredRuntimeLibraries = Seq(Libraries.osgiCompendium, Libraries.logging)
 
 lazy val openmoleNaked = 
-  Project("openmole-naked", binDir / "openmole-naked") settings (assemblySettings: _*) enablePlugins (ExecNpmPlugin) settings(
+  Project("openmole-naked", binDir / "openmole-naked") settings (assemblySettings: _*) enablePlugins (ScalaJSPlugin) settings(
     setExecutable ++= Seq("openmole", "openmole.bat"),
     Osgi.bundleDependencies in Compile := OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject, includeRoot = false))).value,
     resourcesAssemble += (resourceDirectory in Compile).value -> assemblyPath.value,

@@ -28,5 +28,6 @@ package object panels {
   val marketPanel = new MarketPanel
   val pluginPanel = new PluginPanel
   val stackPanel = new TextPanel("Error stack")
-  def versioningPanel = new VersioningPanel
+  val diffPanel = new DiffPanel
+  def versioningPanel = new CloningPanel
 }

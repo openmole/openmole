@@ -865,4 +865,12 @@ package object client {
     color(BS_GREY)
   ): ModifierSeq) ++ centerCell
 
+  //LAYOUT
+
+  lazy val twoColumns: ModifierSeq = Seq(
+    display.flex,
+    overflow.hidden,
+    alignItems.center,
+    flex := "1"
+  )
 }

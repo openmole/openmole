@@ -166,20 +166,28 @@ object Utils extends JavaLogger {
     file match {
       case (f: File) ⇒
         if (f == projectsDirectory()) None
-        else if (f.listFiles.exists {
-          _.getName == ".git"
-        }) Some(f)
+        else if (f.isDirectory) {
+          if (f.listFiles.exists {
+            _.getName == ".git"
+          }) Some(f)
+          else rootVersionedDirectory(file.getParentFile)
+        }
         else rootVersionedDirectory(file.getParentFile)
       case _ ⇒ None
     }
   }
 
-  def toVersionedTuple(treeNodeDatas: Seq[TreeNodeData], modifiedFileNames: Seq[String]) = {
+  def toVersionedTuple(treeNodeDatas: Seq[TreeNodeData], modifiedFileNames: Seq[String], parent: SafePath)(implicit context: ServerFileSystemContext, workspace: Workspace) = {
 
     treeNodeDatas.map { tnd ⇒
       VersionedTreeNodeData(tnd, modifiedFileNames.contains(tnd.name) match {
-        case true ⇒ Modified()
-        case _    ⇒ Clear()
+        case true ⇒
+          val safePath = treeNodeToSafePath(tnd, parent)
+          rootVersionedDirectory(safePathToFile(safePath)).map { repo ⇒
+            val content = org.openmole.tool.version.content(repo, safePath)
+            Modified(content)
+          }.getOrElse(Modified(""))
+        case _ ⇒ Clear()
       })
     }
   }
@@ -208,8 +216,8 @@ object Utils extends JavaLogger {
     }
 
     fileFilter.firstLast match {
-      case First() ⇒ ListFilesData(toVersionedTuple(sorted.take(threshold), modifiedFiles), nbFiles)
-      case Last()  ⇒ ListFilesData(toVersionedTuple(sorted.takeRight(threshold).reverse, modifiedFiles), nbFiles)
+      case First() ⇒ ListFilesData(toVersionedTuple(sorted.take(threshold), modifiedFiles, path), nbFiles)
+      case Last()  ⇒ ListFilesData(toVersionedTuple(sorted.takeRight(threshold).reverse, modifiedFiles, path), nbFiles)
     }
   }
 

@@ -106,7 +106,9 @@ trait VersioningPluginFactory extends GUIPluginFactory {
 
   override type FactoryPluginAPI = VersioningAPI
 
-  def build(cloneIn: SafePath, onCloned: () ⇒ Unit = () ⇒ {}): VersioningGUIPlugin
+  def clonePanel(cloneIn: SafePath, onCloned: () ⇒ Unit = () ⇒ {}): VersioningGUIPlugin
+
+  def diffPanel(localSafePath: SafePath, repositorySafePath: SafePath): VersioningGUIPlugin
 
   def versioningConfigFolderName: String
 }

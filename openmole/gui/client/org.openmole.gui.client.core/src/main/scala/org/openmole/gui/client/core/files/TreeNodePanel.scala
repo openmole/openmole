@@ -260,6 +260,7 @@ class TreeNodePanel {
   def drawNode(nodeData: VersionedTreeNodeData) = {
     val node: TreeNode = nodeData.treeNodeData
 
+    println("DRAW " + nodeData)
     node match {
       case fn: FileNode ⇒
         ReactiveLine(fn, TreeNodeType.file, () ⇒ {
@@ -295,7 +296,7 @@ class TreeNodePanel {
   def stringAlertWithDetails(message: String, detail: String) =
     AlertPanel.detail(message, detail, transform = RelativeCenterPosition, zone = FileZone)
 
-  var currentSafePath: Var[Option[SafePath]] = Var(None)
+  var currentSafePath: Var[Option[VersionedSafePath]] = Var(None)
 
   object ReactiveLine {
     def apply(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit, versionStatus: VersionStatus) = new ReactiveLine(tn, treeNodeType, todo, versionStatus)
@@ -303,6 +304,7 @@ class TreeNodePanel {
 
   class ReactiveLine(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit, versionStatus: VersionStatus) {
 
+    println("TN " + tn.name + " // " + versionStatus)
     val tnSafePath = manager.current.now ++ tn.name.now
 
     case class TreeStates(settingsSet: Boolean, edition: Boolean, replication: Boolean, selected: Boolean = manager.isSelected(tn)) {
@@ -400,7 +402,7 @@ class TreeNodePanel {
 
     def addToSelection: Unit = addToSelection(!treeStates.now.selected)
 
-    val toolBox = FileToolBox(tnSafePath)
+    val toolBox = FileToolBox(tnSafePath, versionStatus)
 
     def inPopover(element: HTMLElement) = {
       val popClass = "popover"
@@ -440,7 +442,7 @@ class TreeNodePanel {
           }
           Popover.toggle(pop)
         }
-        currentSafePath() = Some(tnSafePath)
+        currentSafePath() = Some(VersionedSafePath(tnSafePath, versionStatus))
         e.stopPropagation
       }
 

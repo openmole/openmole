@@ -215,7 +215,7 @@ object ServerFileSystemContext {
 }
 
 //The path it relative to the project root directory
-case class SafePath(path: Seq[String], context: ServerFileSystemContext = ProjectFileSystem()) {
+case class SafePath(path: Seq[String], context: ServerFileSystemContext = ProjectFileSystem(), versionStatus: VersionStatus = Clear()) {
 
   def ++(s: String) = sp(this.path :+ s)
 
@@ -231,6 +231,8 @@ case class SafePath(path: Seq[String], context: ServerFileSystemContext = Projec
 
   def normalizedPathString = path.tail.mkString("/")
 }
+
+case class VersionedSafePath(safePath: SafePath, versionStatus: VersionStatus)
 
 object ExtractResult {
   def ok = ExtractResult(None)
@@ -260,9 +262,8 @@ case class UploadAbsolute() extends UploadType {
 
 sealed trait VersionStatus
 case class Clear() extends VersionStatus
-case class Modified() extends VersionStatus
+case class Modified(originalContent: String) extends VersionStatus
 
-case class VersionedFile(safePath: SafePath, status: VersionStatus)
 case class Versioning()
 case class DirData(isEmpty: Boolean, versioning: Option[Versioning])
 

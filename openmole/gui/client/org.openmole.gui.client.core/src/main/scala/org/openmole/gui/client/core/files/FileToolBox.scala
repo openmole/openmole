@@ -40,17 +40,20 @@ object FileToolBox {
     val duplicate: FileAction = "duplicate"
     val execute: FileAction = "execute"
     val toScript: FileAction = "to-script"
+
+    //VERSIONING
+    val diff: FileAction = "version-diff"
   }
 
-  def apply(initSafePath: SafePath) = {
-    new FileToolBox(initSafePath)
+  def apply(initSafePath: SafePath, initVersionStatus: VersionStatus) = {
+    new FileToolBox(initSafePath, initVersionStatus)
   }
 
 }
 
 import FileToolBox._
 
-class FileToolBox(initSafePath: SafePath) {
+class FileToolBox(initSafePath: SafePath, initVersionStatus: VersionStatus) {
 
   import scaladget.tools._
 
@@ -62,6 +65,7 @@ class FileToolBox(initSafePath: SafePath) {
   val arrow_right_and_left = baseGlyph +++ glyph_arrow_right_and_left
   val execute = baseGlyph +++ glyph_flash
   val toScript = baseGlyph +++ OMTags.glyph_share
+  val diff = baseGlyph +++ OMTags.glyph_transfer
 
   def iconAction(faction: FileAction, icon: ModifierSeq, text: String) = div(id := faction)(icon, div(text, giFontFamily, fontSize := "12px", paddingTop := 5, flex := 1))
 
@@ -72,6 +76,8 @@ class FileToolBox(initSafePath: SafePath) {
   val confirmationGroup = buttonGroup()(confirmTrashTrigger, cancelTrashTrigger)
 
   val renameTrigger = span(edit, id := fileaction.rename)
+
+  val versioningFactory = Plugins.versioningFactories.now.headOption
 
   def confirmRename(tag: String, confirmString: String) = button(btn_danger, confirmString, id := tag)
 
@@ -168,6 +174,16 @@ class FileToolBox(initSafePath: SafePath) {
               Popover.hide
             }
             true
+          case fileaction.diff ⇒
+            withVersionedSafePath { vsp: VersionedSafePath ⇒
+              vsp.versionStatus match {
+                case Modified(originalContent) ⇒
+                  panels.diffPanel.displayDiff(originalContent, vsp.safePath)
+                case _ ⇒
+              }
+            }
+            Popover.hide
+            true
           case _ ⇒ false
         }
       }
@@ -178,7 +194,12 @@ class FileToolBox(initSafePath: SafePath) {
 
   def withSafePath(action: SafePath ⇒ Unit) =
     treeNodePanel.currentSafePath.now.foreach { sp ⇒
-      action(sp)
+      action(sp.safePath)
+    }
+
+  def withVersionedSafePath(action: VersionedSafePath ⇒ Unit) =
+    treeNodePanel.currentSafePath.now.foreach { vsp ⇒
+      action(vsp)
     }
 
   val editTitle = inputTag()(
@@ -226,6 +247,15 @@ class FileToolBox(initSafePath: SafePath) {
     renameTrigger
   )
 
+  //VERSIONING FILEACTIONS
+  val versioningFileActions = versioningFactory.map { f ⇒
+    Seq(
+      iconAction(fileaction.diff, diff, "diff")
+    )
+  }.getOrElse(Seq())
+
+  //VERSIONING ACTIONS
+
   val titleRoot = buildTitleRoot(initSafePath.name)
 
   val contentRoot = {
@@ -247,7 +277,11 @@ class FileToolBox(initSafePath: SafePath) {
         case _ ⇒ span
       },
       duplicateTrigger,
-      trashTrigger
+      trashTrigger,
+      initVersionStatus match {
+        case Clear() ⇒ div()
+        case _       ⇒ div(marginLeft := 5)(versioningFileActions)
+      }
     )
   }
 
@@ -288,7 +322,9 @@ class FileToolBox(initSafePath: SafePath) {
         treeNodeTabs.rename(safePath, newNode)
         treeNodePanel.invalidCacheAndDraw
         treeNodeTabs.checkTabs
-        treeNodePanel.currentSafePath() = Some(safePath.parent ++ newTitle)
+        treeNodePanel.currentSafePath() = treeNodePanel.currentSafePath.now.map {
+          _.copy(safePath = safePath.parent ++ newTitle)
+        }
         replacing()
     }
   }

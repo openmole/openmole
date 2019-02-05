@@ -21,6 +21,7 @@ import org.openmole.core.services._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.tool.server.Utils._
 import org.eclipse.jgit.api.Git
+
 import collection.JavaConverters._
 
 class GitApiImpl(s: Services) extends GitAPI {
@@ -30,6 +31,14 @@ class GitApiImpl(s: Services) extends GitAPI {
   import s._
 
   implicit val context = org.openmole.gui.ext.data.ServerFileSystemContext.project
+
+  private def git(repositoryPath: SafePath) = new Git(Git.open(repositoryPath).getRepository())
+
+  private def remote(repositoryPath: SafePath) = {
+    val remotes = git(repositoryPath).remoteList().call()
+    if (remotes.isEmpty) None
+    else Some(remotes.get(0).getURIs.get(0))
+  }
 
   def clone(url: String, folder: SafePath): Option[MessageErrorData] = {
 
@@ -52,7 +61,8 @@ class GitApiImpl(s: Services) extends GitAPI {
   }
 
   def modifiedFiles(safePath: SafePath): Seq[SafePath] = {
-    val git = new Git(Git.open(safePath).getRepository())
-    git.status.call().getModified.asScala.toSeq.map { f ⇒ safePath.copy(path = safePath.path ++ f.split("/")) }
+    git(safePath).status.call().getModified.asScala.toSeq.map { f ⇒
+      safePath.copy(path = safePath.path ++ f.split("/"))
+    }
   }
 }

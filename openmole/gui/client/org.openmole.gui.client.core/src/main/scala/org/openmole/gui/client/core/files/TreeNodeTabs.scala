@@ -99,7 +99,9 @@ sealed trait TreeNodeTab {
 
   def editing: Boolean
 
-  def refresh(afterRefresh: () ⇒ Unit = () ⇒ {}): Unit
+  def saveTab(afterSave: () ⇒ Unit = () ⇒ {}): Unit
+
+  def refresh(withContent: String): Unit
 
   def resizeEditor: Unit
 
@@ -139,12 +141,14 @@ object TreeNodeTab {
 
     def content = omsEditor.code
 
-    def refresh(onsaved: () ⇒ Unit) = save(safePathTab.now, omsEditor, onsaved)
+    def saveTab(onsaved: () ⇒ Unit) = save(safePathTab.now, omsEditor, onsaved)
+
+    def refresh(withContent: String): Unit = omsEditor.editor.getSession().setValue(withContent)
 
     def resizeEditor = omsEditor.editor.resize()
 
     lazy val controlElement = button("Run", btn_primary, onclick := { () ⇒
-      refresh(() ⇒
+      saveTab(() ⇒
         post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePathTab.now)).call().foreach { execInfo ⇒
           org.openmole.gui.client.core.panels.executionPanel.dialog.show
         })
@@ -164,11 +168,12 @@ object TreeNodeTab {
 
     def editing: Boolean = false
 
-    def refresh(afterRefresh: () ⇒ Unit): Unit = () ⇒ {
+    def saveTab(afterSave: () ⇒ Unit): Unit = () ⇒ {
     }
 
-    def resizeEditor = {
-    }
+    def refresh(withContent: String): Unit = {}
+
+    def resizeEditor = {}
 
     lazy val controlElement: TypedTag[HTMLElement] = div()
 
@@ -265,8 +270,8 @@ object TreeNodeTab {
       )
     }
 
-    def refresh(afterRefresh: () ⇒ Unit): Unit = {
-      def saveTab = TreeNodeTab.save(safePathTab.now, editableEditor, afterRefresh)
+    def saveTab(afterSave: () ⇒ Unit): Unit = {
+      def saveTab = TreeNodeTab.save(safePathTab.now, editableEditor, afterSave)
 
       if (editing) {
         if (isCSV) {
@@ -276,8 +281,10 @@ object TreeNodeTab {
           saveTab
       }
       else
-        download(afterRefresh)
+        download(afterSave)
     }
+
+    def refresh(withContent: String): Unit = editor.foreach { _.editor.getSession().setValue(withContent) }
 
     def resizeEditor = editableEditor.editor.resize()
 
@@ -312,7 +319,7 @@ object TreeNodeTab {
           switch
         case _ ⇒
           if (editing)
-            refresh(() ⇒ {
+            saveTab(() ⇒ {
               download(() ⇒ switch)
             })
           else switch
@@ -444,7 +451,7 @@ class TreeNodeTabs() {
       case None ⇒
         timer() = Some(setInterval(15000) {
           tabs.now.foreach {
-            _.refresh()
+            _.saveTab()
           }
         })
       case _ ⇒
@@ -487,7 +494,7 @@ class TreeNodeTabs() {
     }
   }
 
-  def --(tab: TreeNodeTab): Unit = tab.refresh(() ⇒ removeTab(tab))
+  def --(tab: TreeNodeTab): Unit = tab.saveTab(() ⇒ removeTab(tab))
 
   def --(safePath: SafePath): Unit = {
     find(safePath).map {
@@ -539,6 +546,8 @@ class TreeNodeTabs() {
   def find(safePath: SafePath) = tabs.now.find { t ⇒
     t.safePathTab.now == safePath
   }
+
+  def content(safePath: SafePath) = find(safePath).map { _.content }
 
   implicit def modToModSeq(m: Modifier): ModifierSeq = Seq(m)
 

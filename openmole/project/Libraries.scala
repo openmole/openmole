@@ -8,7 +8,6 @@ object Libraries {
   lazy val gridscaleVersion = "2.14"
   lazy val mgoVersion = "3.18"
   lazy val bouncyCastleVersion = "1.60"
-  lazy val aceVersion = "01.08.2014"
   lazy val d3Version = "3.5.12"
   lazy val tooltipserVersion = "3.3.0"
   lazy val netLogo5Version = "5.3.1"
@@ -19,7 +18,7 @@ object Libraries {
   lazy val boopickleVersion = "1.2.6"
   lazy val scalaAutowireVersion = "0.2.6"
   lazy val sourcecodeVersion = "0.1.4"
-  lazy val scaladgetVersion = "1.2.0"
+  lazy val scaladgetVersion = "1.2.2-SNAPSHOT"
   lazy val sortableVersion = "0.2.1"
   lazy val json4sVersion = "3.5.0"
   lazy val circeVersion = "0.9.1"
@@ -34,6 +33,7 @@ object Libraries {
 
   lazy val sortable = libraryDependencies += "net.scalapro" %%% "sortable-js-facade" % sortableVersion
   lazy val ace = libraryDependencies += "fr.iscpif.scaladget" %%% "ace" % scaladgetVersion
+  lazy val aceDiff = libraryDependencies += "fr.iscpif.scaladget" %%% "acediff" % scaladgetVersion
   lazy val scaladgetTools = libraryDependencies += "fr.iscpif.scaladget" %%% "tools" % scaladgetVersion
   lazy val scalajsDomJS = libraryDependencies += "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion
   lazy val rxJS = libraryDependencies += "com.lihaoyi" %%% "scalarx" % rxVersion
@@ -74,7 +74,7 @@ object Libraries {
   lazy val ant = "org.openmole.library" %% "org-apache-ant" % "1.8.0"
   lazy val codec = "org.openmole.library" %% "org-apache-commons-codec" % "1.10"
   lazy val async = "org.openmole.library" %% "scala-async" % "0.9.6"
-  lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % "4.11"
+  lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % "5.2"
   lazy val cats = "org.openmole.library" %% "cats" % catsVersion
   lazy val squants = "org.openmole.library" %% "squants" % squantsVersion
   lazy val clapper = "org.openmole.library" %% "org-clapper" % "1.1.2"

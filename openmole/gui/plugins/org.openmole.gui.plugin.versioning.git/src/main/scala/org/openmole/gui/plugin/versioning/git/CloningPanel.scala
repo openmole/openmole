@@ -30,25 +30,11 @@ import scala.scalajs.js.annotation._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import org.openmole.gui.ext.tool.client.Waiter
-import org.openmole.gui.plugin.versioning.git.GitGUI.{ Cloning, CloningStatus, NotClonedYet }
+import org.openmole.gui.plugin.versioning.git.GitCloning.{ Cloning, CloningStatus, NotClonedYet }
 import scaladget.bootstrapnative.bsn._
 import org.openmole.core.services._
 
-@JSExportTopLevel("org.openmole.gui.plugin.versioning.git.GitFactory")
-class GitFactory extends VersioningPluginFactory {
-
-  type APIType = GitAPI
-
-  def api = (s: Services) ⇒ new GitApiImpl(s)
-
-  def name: String = "GIT"
-
-  def build(cloneIn: SafePath, onCloned: () ⇒ Unit = () ⇒ {}) = new GitGUI(cloneIn, onCloned)
-
-  def versioningConfigFolderName = ".git"
-}
-
-object GitGUI {
+object GitCloning {
 
   trait CloningStatus
 
@@ -63,9 +49,9 @@ object GitGUI {
 }
 
 @JSExportTopLevel("org.openmole.gui.plugin.versioning.git.GitGUI")
-class GitGUI(cloneIn: SafePath, onCloned: () ⇒ Unit = () ⇒ {}) extends VersioningGUIPlugin {
+class CloningPanel(cloneIn: SafePath, onCloned: () ⇒ Unit = () ⇒ {}) extends VersioningGUIPlugin {
 
-  def factory = new GitFactory
+  def factory = new GitPluginFactory
 
   import rx._
 
@@ -88,7 +74,7 @@ class GitGUI(cloneIn: SafePath, onCloned: () ⇒ Unit = () ⇒ {}) extends Versi
         },
         Rx {
           cloningStatus() match {
-            case GitGUI.CloneError(messageError: MessageErrorData) ⇒ label(btn_danger, "Cloning error", marginLeft := 5, onclick := { () ⇒ watchStack.update(!watchStack.now) })
+            case GitCloning.CloneError(messageError: MessageErrorData) ⇒ label(btn_danger, "Cloning error", marginLeft := 5, onclick := { () ⇒ watchStack.update(!watchStack.now) })
             case _ ⇒ div
           }
         }
@@ -101,8 +87,8 @@ class GitGUI(cloneIn: SafePath, onCloned: () ⇒ Unit = () ⇒ {}) extends Versi
                 val status = c match {
                   case None ⇒
                     onCloned()
-                    GitGUI.Cloned
-                  case Some(me: MessageErrorData) ⇒ GitGUI.CloneError(me)
+                    GitCloning.Cloned
+                  case Some(me: MessageErrorData) ⇒ GitCloning.CloneError(me)
                 }
                 cloningStatus.update(status)
               }
@@ -111,7 +97,7 @@ class GitGUI(cloneIn: SafePath, onCloned: () ⇒ Unit = () ⇒ {}) extends Versi
         ),
       div(Rx {
         cloningStatus() match {
-          case GitGUI.CloneError(messageError: MessageErrorData) ⇒ watchStack.expand(div(messageError.stackTrace))
+          case GitCloning.CloneError(messageError: MessageErrorData) ⇒ watchStack.expand(div(messageError.stackTrace))
           case _ ⇒ div.render
         }
       })
