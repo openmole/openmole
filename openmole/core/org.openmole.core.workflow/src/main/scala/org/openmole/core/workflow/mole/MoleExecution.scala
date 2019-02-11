@@ -502,6 +502,20 @@ object MoleExecution extends JavaLogger {
     lazy val masterCapsuleExecutor = Executors.newSingleThreadExecutor(threadProvider.threadFactory)
   }
 
+  object SynchronisationContext {
+    implicit def default = Synchronized
+    def apply[T](th: Any, op: ⇒ T)(implicit s: SynchronisationContext) =
+      s match {
+        case MoleExecution.Synchronized ⇒ synchronized(op)
+        case MoleExecution.UnsafeAccess ⇒ op
+      }
+
+  }
+
+  sealed trait SynchronisationContext
+  case object Synchronized extends SynchronisationContext
+  case object UnsafeAccess extends SynchronisationContext
+
 }
 
 object SubMoleExecution {
@@ -600,17 +614,19 @@ class MoleExecution(
   private[mole] var _finished = false
   private[mole] var _cleaned = false
 
-  def started = synchronized(_started)
-  def canceled = synchronized(_canceled)
-  def finished = synchronized(_finished)
+  def sync[T](op: ⇒ T)(implicit s: MoleExecution.SynchronisationContext) = MoleExecution.SynchronisationContext(this, op)
 
-  def cleaned = synchronized(_cleaned && allEnvironments.collect { case x: SubmissionEnvironment ⇒ x }.forall(_.clean))
+  def started(implicit s: MoleExecution.SynchronisationContext) = sync(_started)
+  def canceled(implicit s: MoleExecution.SynchronisationContext) = sync(_canceled)
+  def finished(implicit s: MoleExecution.SynchronisationContext) = sync(_finished)
+
+  def cleaned(implicit s: MoleExecution.SynchronisationContext) = sync(_cleaned && allEnvironments.collect { case x: SubmissionEnvironment ⇒ x }.forall(_.clean))
 
   private[mole] var _startTime: Option[Long] = None
   private[mole] var _endTime: Option[Long] = None
 
-  def startTime = synchronized(_startTime)
-  def endTime = synchronized(_endTime)
+  def startTime(implicit s: MoleExecution.SynchronisationContext) = sync(_startTime)
+  def endTime(implicit s: MoleExecution.SynchronisationContext) = sync(_endTime)
 
   private[mole] var ticketNumber = 1L
   private[mole] val rootTicket = Ticket(id, 0)
@@ -639,7 +655,7 @@ class MoleExecution(
   private[workflow] val dataChannelRegistry = new RegistryWithTicket[DataChannel, Buffer[Variable[_]]]
   private[mole] var _exception = Option.empty[MoleExecutionFailed]
 
-  def exception = synchronized(_exception)
+  def exception(implicit s: MoleExecution.SynchronisationContext) = sync(_exception)
 
   def duration: Option[Long] = synchronized {
     (_startTime, _endTime) match {
