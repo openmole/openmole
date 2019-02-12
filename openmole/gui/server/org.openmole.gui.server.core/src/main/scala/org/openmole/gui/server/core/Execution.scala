@@ -203,6 +203,8 @@ class Execution {
 
   def executionInfo(key: ExecutionId): ExecutionInfo = atomic { implicit ctx ⇒
 
+    implicit def moleExecutionAccess = MoleExecution.UnsafeAccess
+
     def launchStatus =
       instantiation.get(key).map { i ⇒ if (!i.compiled) Compiling() else Preparing() }.getOrElse(Compiling())
 

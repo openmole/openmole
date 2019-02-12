@@ -75,7 +75,6 @@ case class PuzzlePiece(
   def hook(hooks: Hook*) = copy(hooks = this.hooks.toList ::: hooks.toList)
   def source(sources: Source*) = copy(sources = this.sources.toList ::: sources.toList)
   def by(strategy: Grouping) = copy(grouping = Some(strategy))
-
 }
 
 object ToPuzzle {
@@ -147,7 +146,6 @@ object Puzzle {
   }
 
   object PuzzleSelector {
-
     def apply[L <: HList](implicit selector: PuzzleSelector[L]): PuzzleSelector[L] = selector
 
     implicit def select[H, T <: HList](implicit pz: ToPuzzle[H]): PuzzleSelector[H :: T] =
@@ -178,20 +176,7 @@ object Puzzle {
   sources:      Iterable[(Capsule, Source)]       = Iterable.empty,
   hooks:        Iterable[(Capsule, Hook)]         = Iterable.empty,
   environments: Map[Capsule, EnvironmentProvider] = Map.empty,
-  grouping:     Map[Capsule, Grouping]            = Map.empty
-) {
-
-  def this(p: Puzzle) =
-    this(
-      p.firstSlot,
-      p.lasts,
-      p.transitions,
-      p.dataChannels,
-      p.sources,
-      p.hooks,
-      p.environments,
-      p.grouping
-    )
+  grouping:     Map[Capsule, Grouping]            = Map.empty) {
 
   def toMole = new Mole(firstSlot.capsule, transitions, dataChannels)
 
