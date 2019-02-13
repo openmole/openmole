@@ -91,9 +91,9 @@ class JobTable(executionId: ExecutionId) {
 
   def capsuleTable(info: ExecutionInfo) = {
     scaladget.bootstrapnative.DataTable(
-      Some(scaladget.bootstrapnative.Table.Header(Seq("Name", "Running", "Completed"))),
+      Some(scaladget.bootstrapnative.Table.Header(Seq("Name", "Ready", "Running", "Completed"))),
       info.capsules.map {
-        c ⇒ scaladget.bootstrapnative.DataTable.DataRow(Seq(c._1.toString, c._2.running.toString, c._2.completed.toString))
+        c ⇒ scaladget.bootstrapnative.DataTable.DataRow(Seq(c._1.toString, c._2.ready.toString, c._2.running.toString, c._2.completed.toString))
       },
       scaladget.bootstrapnative.Table.BSTableStyle(bsn.bordered_table, tools.emptyMod), true).render(width := "100%").render
   }

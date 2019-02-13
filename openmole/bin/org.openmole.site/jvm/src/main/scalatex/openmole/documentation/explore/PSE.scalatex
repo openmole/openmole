@@ -2,6 +2,7 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 @import org.openmole.site.stylesheet._
+@import DocumentationPages._
 
 @def model = """
 val param1 = Val[Double]
@@ -134,3 +135,6 @@ Guillaume Chérel, Clémentine Cottineau and Romain Reuillon, « Beyond Corrobor
         @br
             @a("[online version]" , href:=shared.link.paper.beyondCorroboration)  @a("[bibteX]", href:= Resource.bibtex.PSEmethodBib.file)
 
+@h2{Stochastic models}
+
+@a("You can check additional options to run PSE on stochastic models on this page.", href := stochasticityManagement.file)

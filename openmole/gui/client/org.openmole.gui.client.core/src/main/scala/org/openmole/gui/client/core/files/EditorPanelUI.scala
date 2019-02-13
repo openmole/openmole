@@ -121,7 +121,6 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
     nbLines() = (editor.getFirstVisibleRow.toInt, editor.getLastVisibleRow.toInt)
   }
 
-
   //MEMORY LEAK SNIPPET
   //  session.on("change", (x) ⇒ {
   //    nbLines() = (editor.getFirstVisibleRow.toInt, editor.getLastVisibleRow.toInt)
