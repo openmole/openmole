@@ -80,8 +80,11 @@ object SettingsView {
       }
     )
 
-  val docButton =
-    div(a(href := "https://next.openmole.org/GUI+guide.html")(target := "_blank", tags.span("Documentation"))).render
+  val docButton = a(href := "#", onclick := { () ⇒
+    Settings.settings.map { sets ⇒
+      org.scalajs.dom.window.open(s"https://${if (sets.isDevelopment) "next." else ""}openmole.org/GUI.html", "_blank")
+    }
+  })(tags.span("Documentation")).render
 
   val jvmInfoButton = button("JVM stats", btn_default +++ (marginLeft := 12), glyph_stats, onclick := { () ⇒
     timer.now match {
