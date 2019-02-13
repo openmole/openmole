@@ -1,5 +1,7 @@
 package org.openmole.gui.client.core.files
 
+import org.openmole.gui.client.core.CoreUtils
+
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import org.openmole.gui.ext.data._
@@ -13,8 +15,8 @@ import scala.async.Async.{ async, await }
 import scaladget.ace._
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
-
 import org.openmole.gui.ext.data.DataUtils._
+
 import scala.scalajs.js.JSConverters._
 import org.openmole.gui.ext.tool.client._
 import org.scalajs.dom.raw.{ Element, Event, HTMLDivElement, HTMLElement }
@@ -119,48 +121,50 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
     nbLines() = (editor.getFirstVisibleRow.toInt, editor.getLastVisibleRow.toInt)
   }
 
-  session.on("change", (x) ⇒ {
-    nbLines() = (editor.getFirstVisibleRow.toInt, editor.getLastVisibleRow.toInt)
-  })
 
-  session.on("changeScrollTop", x ⇒ {
-    Popover.current.now.foreach { p ⇒
-      Popover.toggle(p)
-    }
-    nbLines() = (editor.renderer.getScrollTopRow.toInt, editor.renderer.getScrollBottomRow.toInt)
+  //MEMORY LEAK SNIPPET
+  //  session.on("change", (x) ⇒ {
+  //    nbLines() = (editor.getFirstVisibleRow.toInt, editor.getLastVisibleRow.toInt)
+  //  })
+  //
+  //  session.on("changeScrollTop", x ⇒ {
+  //    Popover.current.now.foreach { p ⇒
+  //      Popover.toggle(p)
+  //    }
+  //    nbLines() = (editor.renderer.getScrollTopRow.toInt, editor.renderer.getScrollBottomRow.toInt)
+  //
+  //    val nbL = code.count((c: Char) ⇒ c == '\n')
+  //    offset() = {
+  //      if (editor.renderer.getScrollBottomRow().toInt == nbL) -10
+  //      else if (editor.renderer.getScrollTopRow().toInt == 0) 0
+  //      else offset.now
+  //    }
+  //  })
 
-    val nbL = code.count((c: Char) ⇒ c == '\n')
-    offset() = {
-      if (editor.renderer.getScrollBottomRow().toInt == nbL) -10
-      else if (editor.renderer.getScrollTopRow().toInt == 0) 0
-      else offset.now
-    }
-  })
-
-  editor.session.doc.on("change", x ⇒ {
-    if (extension == OMS && org.openmole.gui.client.core.panels.treeNodeTabs.isActive(safePath).now == TreeNodeTabs.Active) {
-      val currentPosition = editor.getCursorPosition.row.toInt + 1
-      if (errorsInEditor.now.contains(currentPosition)) {
-        TreeNodeTabs.updateErrorsInEditor(safePath, errorsInEditor.now.filterNot(_ == currentPosition))
-      }
-      else {
-        val cor = correctedInEditor.filter {
-          _ == currentPosition
-        }
-        // Error cache
-        val errText = errors.now.filter {
-          _.errorWithLocation.line == Some(currentPosition)
-        }.map {
-          _.lineContent
-        }.headOption.getOrElse("")
-        cor.foreach { c ⇒
-          if (errText == session.doc.getLine(currentPosition)) {
-            TreeNodeTabs.updateErrorsInEditor(safePath, errorsInEditor.now :+ currentPosition)
-          }
-        }
-      }
-    }
-  })
+  //  editor.session.doc.on("change", x ⇒ {
+  //    if (extension == OMS && org.openmole.gui.client.core.panels.treeNodeTabs.isActive(safePath).now == TreeNodeTabs.Active) {
+  //      val currentPosition = editor.getCursorPosition.row.toInt + 1
+  //      if (errorsInEditor.now.contains(currentPosition)) {
+  //        TreeNodeTabs.updateErrorsInEditor(safePath, errorsInEditor.now.filterNot(_ == currentPosition))
+  //      }
+  //      else {
+  //        val cor = correctedInEditor.filter {
+  //          _ == currentPosition
+  //        }
+  //        // Error cache
+  //        val errText = errors.now.filter {
+  //          _.errorWithLocation.line == Some(currentPosition)
+  //        }.map {
+  //          _.lineContent
+  //        }.headOption.getOrElse("")
+  //        cor.foreach { c ⇒
+  //          if (errText == session.doc.getLine(currentPosition)) {
+  //            TreeNodeTabs.updateErrorsInEditor(safePath, errorsInEditor.now :+ currentPosition)
+  //          }
+  //        }
+  //      }
+  //    }
+  //  })
 
   def buildManualPopover(i: Int, title: String, position: PopupPosition) = {
     lazy val pop1 = div(i)(`class` := "gutterError", height := 15).popover(
