@@ -78,7 +78,8 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
       Utils.projectsDirectory(),
       buildinfo.version.value,
       buildinfo.name,
-      new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(buildinfo.BuildInfo.buildTime)
+      new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(buildinfo.BuildInfo.buildTime),
+      buildinfo.development
     )
   }
 
