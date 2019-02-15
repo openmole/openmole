@@ -49,13 +49,13 @@ object ScalaCompilation {
     pluginBundles ++ pluginBundles.flatMap(PluginManager.allPluginDependencies) ++ PluginManager.bundleForClass(this.getClass)
   }
 
-  def compile(code: String, plugins: Seq[File], libraries: Seq[File])(implicit newFile: NewFile, fileService: FileService) = {
+  def compile[RETURN](code: String, plugins: Seq[File] = Seq.empty, libraries: Seq[File] = Seq.empty)(implicit newFile: NewFile, fileService: FileService) = {
     val osgiMode = org.openmole.core.console.Activator.osgi
     val interpreter =
       if (osgiMode) Interpreter(priorityBundles(plugins), libraries)
       else Interpreter(jars = libraries)
 
-    Try[Any] {
+    Try[RETURN] {
       val evaluated = interpreter.eval(addImports(code))
 
       if (evaluated == null) throw new InternalProcessingError(
@@ -63,7 +63,7 @@ object ScalaCompilation {
            |$code""".stripMargin
       )
 
-      evaluated
+      evaluated.asInstanceOf[RETURN]
     } match {
       case util.Success(s) ⇒ Success(s)
       case util.Failure(e) ⇒
@@ -89,7 +89,7 @@ object ScalaCompilation {
 
   def function[RETURN](inputs: Seq[Val[_]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: NewFile, fileService: FileService) = {
     val s = script(inputs, source, wrapping, returnType)
-    compile(s, plugins, libraries).map { evaluated ⇒ evaluated.asInstanceOf[CompilationClosure[RETURN]] }
+    compile[CompilationClosure[RETURN]](s, plugins, libraries)
   }
 
   def closure[RETURN](inputs: Seq[Val[_]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: NewFile, fileService: FileService) =

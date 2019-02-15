@@ -14,6 +14,7 @@ import java.nio.file._
 
 import au.com.bytecode.opencsv.CSVReader
 import org.openmole.core.console.ScalaREPL
+import org.openmole.core.expansion.ScalaCompilation
 import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
 
 import scala.util.{ Failure, Success, Try }
