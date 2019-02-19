@@ -27,9 +27,9 @@ object FactorSampling {
   def apply[D, T](f: Factor[D, T])(implicit discrete: Discrete[D, T], domainInputs: DomainInputs[D] = DomainInputs.empty) =
     new Sampling {
       override def inputs = domainInputs.inputs(f.domain)
-      override def prototypes = List(f.prototype)
+      override def prototypes = List(f.value)
       override def apply(): FromContext[Iterator[collection.Iterable[Variable[T]]]] =
-        discrete.iterator(f.domain).map(_.map { v ⇒ List(Variable(f.prototype, v)) })
+        discrete.iterator(f.domain).map(_.map { v ⇒ List(Variable(f.value, v)) })
     }
 
 }

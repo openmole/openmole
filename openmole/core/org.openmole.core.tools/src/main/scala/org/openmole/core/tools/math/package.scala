@@ -23,6 +23,7 @@ package object math {
     val factor = (boundaryMax - boundaryMin) / (max - min)
     (factor * (v - min) + boundaryMin)
   }
+
   implicit class Double2Scalable(d: Double) {
     def scale(min: Double, max: Double, originalMin: Double = 0, originalMax: Double = 1) =
       math.scale(d, originalMin, originalMax, min, max)

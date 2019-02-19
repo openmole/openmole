@@ -184,24 +184,26 @@ class Execution {
           e.environment.failed,
           e.networkActivity,
           e.executionActivity,
-          environementErrors(envId).length
+          environmentErrors(envId).length
         )
       }
     }
 
-  def environementErrors(environmentId: EnvironmentId): Seq[EnvironmentError] = {
+  def environmentErrors(environmentId: EnvironmentId): Seq[EnvironmentError] = {
     val errorMap = getRunningEnvironments(environmentId).toMap
     val info = errorMap(environmentId)
 
     info.environment.errors.map { ex ⇒
       ex.exception match {
-        case fje: environment.FailedJobExecution ⇒ EnvironmentError(environmentId, fje.message, ErrorBuilder(fje.cause) + MessageError(s"\nDETAILS:\n${fje.detail}"), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
-        case _                                   ⇒ EnvironmentError(environmentId, ex.exception.getMessage, ErrorBuilder(ex.exception), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
+        case fje: environment.FailedJobExecution ⇒ EnvironmentError(environmentId, fje.message, ErrorData(fje.cause) + MessageErrorData(s"\nDETAILS:\n${fje.detail}"), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
+        case _                                   ⇒ EnvironmentError(environmentId, ex.exception.getMessage, ErrorData(ex.exception), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
       }
     }
   }
 
   def executionInfo(key: ExecutionId): ExecutionInfo = atomic { implicit ctx ⇒
+
+    implicit def moleExecutionAccess = MoleExecution.UnsafeAccess
 
     def launchStatus =
       instantiation.get(key).map { i ⇒ if (!i.compiled) Compiling() else Preparing() }.getOrElse(Compiling())
@@ -217,7 +219,7 @@ class Execution {
           case Some(t) ⇒
             Failed(
               capsules = statuses,
-              error = ErrorBuilder(t.exception),
+              error = ErrorData(t.exception),
               environmentStates = environmentState(key),
               duration = moleExecution.duration.getOrElse(0L),
               clean = moleExecution.cleaned

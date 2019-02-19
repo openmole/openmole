@@ -17,14 +17,10 @@
 package org.openmole.plugin.method.evolution
 
 import org.openmole.core.dsl._
-import org.openmole.core.workflow.puzzle.{ PuzzleContainer, ToPuzzle }
-import org.openmole.core.workflow.tools.DefaultSet
-import org.openmole.core.workflow.validation.Validation
+import org.openmole.core.workflow.validation._
 import org.openmole.plugin.domain.collection._
 import org.scalatest._
-import org.openmole.tool.types._
 import org.openmole.plugin.domain.bounds._
-import org.openmole.core.workflow.tools.Stubs._
 import org.openmole.plugin.method.evolution.Genome.GenomeBound
 
 class WorkflowSpec extends FlatSpec with Matchers {
@@ -156,8 +152,67 @@ class WorkflowSpec extends FlatSpec with Matchers {
     val b2: GenomeBound = ba in 2
   }
 
-  "Suggestion" should "be possible" in {
+  "NSGAEvolution" should "be valid" in {
+    val a = Val[Double]
+    val b = Val[Double]
 
+    val nsga = NSGA2Evolution(
+      evaluation = EmptyTask() set (inputs += a, outputs += b),
+      objectives = Seq(b),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100
+    )
+
+    Validation(nsga.toMole).isEmpty should equal(true)
+  }
+
+  "NSGAEvolution with island" should "be valid" in {
+    val a = Val[Double]
+    val b = Val[Double]
+
+    val nsga = NSGA2Evolution(
+      evaluation = EmptyTask() set (inputs += a, outputs += b),
+      objectives = Seq(b),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100,
+      distribution = Island(1)
+    )
+
+    Validation(nsga.toMole).isEmpty should equal(true)
+  }
+
+  "Stochastic NSGAEvolution" should "be valid" in {
+    val a = Val[Double]
+    val b = Val[Double]
+
+    val nsga = NSGA2Evolution(
+      evaluation = EmptyTask() set (inputs += a, outputs += b),
+      objectives = Seq(b),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100,
+      stochastic = Stochastic()
+    )
+
+    Validation(nsga.toMole).isEmpty should equal(true)
+  }
+
+  "Stochastic NSGAEvolution with island" should "be valid" in {
+    val a = Val[Double]
+    val b = Val[Double]
+
+    val nsga = NSGA2Evolution(
+      evaluation = EmptyTask() set (inputs += a, outputs += b),
+      objectives = Seq(b),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100,
+      stochastic = Stochastic(),
+      distribution = Island(1)
+    )
+
+    Validation(nsga.toMole).isEmpty should equal(true)
+  }
+
+  "Suggestion" should "be possible" in {
     val a = Val[Double]
 
     NSGA2Evolution(
@@ -165,11 +220,52 @@ class WorkflowSpec extends FlatSpec with Matchers {
       objectives = Seq(a),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
-      suggested =
-        Seq(
-          Seq(a := 0.5)
-        )
+      suggestion = Seq(Seq(a := 0.5))
+    )
+  }
 
+  "Aggregation" should "be possible in NSGA" in {
+
+    val a = Val[Double]
+    val b = Val[Double]
+
+    def f(v: Vector[Double]) = v.head
+
+    val nsga = NSGA2Evolution(
+      evaluation = EmptyTask() set (inputs += a, outputs += b),
+      objectives = Seq(b aggregate f),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100
+    )
+
+    Validation(nsga.toMole).isEmpty should equal(true)
+  }
+
+  "Aggregation" should "be possible in PSE" in {
+    val a = Val[Double]
+    val b = Val[Double]
+    def f(v: Vector[Double]) = v.head
+
+    PSEEvolution(
+      evaluation = EmptyTask(),
+      objectives = Seq(a aggregate f in (0.0 to 1.0 by 0.1), b in (0.2 to 0.5 by 0.1)),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100
+    )
+  }
+
+  "Aggregation" should "be possible in OSE" in {
+    val o = Val[Double]
+    val a = Val[Double]
+    val b = Val[Double]
+    def f(v: Vector[Double]) = v.head
+
+    OSEEvolution(
+      origin = Seq(o in (0.0 to 1.0 by 0.1)),
+      evaluation = EmptyTask(),
+      objectives = Seq(a aggregate f under 9, b under 3.0),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100
     )
   }
 

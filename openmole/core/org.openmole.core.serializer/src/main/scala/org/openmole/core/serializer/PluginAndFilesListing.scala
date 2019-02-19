@@ -38,6 +38,10 @@ import org.openmole.core.console._
 import scala.collection.immutable.{ HashSet, TreeSet }
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
+object PluginAndFilesListing {
+  def looksLikeREPLClassName(p: String) = p.startsWith("$line")
+}
+
 trait PluginAndFilesListing { this: Serialiser ⇒
 
   lazy val reflectionConverter: ReflectionConverter =
@@ -54,13 +58,10 @@ trait PluginAndFilesListing { this: Serialiser ⇒
 
   def classUsed(c: Class[_]) = {
     if (!seenClasses.contains(c)) {
-      if (PluginManager.isClassProvidedByAPlugin(c)) {
-        PluginManager.pluginsForClass(c).foreach(pluginUsed)
-      }
+      if (PluginManager.isClassProvidedByAPlugin(c)) PluginManager.pluginsForClass(c).foreach(pluginUsed)
 
-      if (c.getClassLoader != null && classOf[URLClassLoader].isAssignableFrom(c.getClassLoader.getClass) && !PluginManager.bundleForClass(c).isDefined) {
-        replClasses += c
-      }
+      if (Option(c.getName).map(PluginAndFilesListing.looksLikeREPLClassName).getOrElse(false) &&
+        !PluginManager.bundleForClass(c).isDefined) replClasses += c
 
       seenClasses += c
     }

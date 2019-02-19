@@ -1,7 +1,7 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 @import org.openmole.site.stylesheet._
-
+@import DocumentationPages._
 
 @def modelAndVariables = """
 val param1 = Val[Double]
@@ -160,3 +160,8 @@ Romain Reuillon, Clara Schmitt, Ricardo De Aldama, and Jean-Baptiste Mouret, «A
         (JASSS) , Vol 18, Issue 1, 2015.
         @br
             @a("[online version]" , href:= shared.link.paper.jassCP)  @a("[bibteX]", href:= Resource.bibtex.profilemethodBib.file)
+
+
+@h2{Stochastic models}
+
+@a("You can check additional options to profile stochastic models on this page.", href := stochasticityManagement.file)

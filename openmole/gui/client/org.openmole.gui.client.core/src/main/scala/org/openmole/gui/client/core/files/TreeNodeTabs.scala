@@ -44,11 +44,11 @@ object TreeNodeTabs {
   //    omsErrorCache.update(omsErrorCache.now.updated(sp, editorErrors))
   //  }
 
-  def errors(safePath: SafePath): Rx[Seq[ErrorFromCompiler]] = omsErrorCache.map {
+  def errors(safePath: SafePath)(implicit ctx: Ctx.Owner): Rx[Seq[ErrorFromCompiler]] = omsErrorCache.map {
     _.get(safePath).map { ee ⇒ ee.errorsFromCompiler }.getOrElse(Seq())
   }
 
-  def errorsInEditor(safePath: SafePath): Rx[Seq[Int]] = omsErrorCache.map {
+  def errorsInEditor(safePath: SafePath)(implicit ctx: Ctx.Owner): Rx[Seq[Int]] = omsErrorCache.map {
     _.get(safePath).map { ee ⇒ ee.errorsInEditor }.getOrElse(Seq())
   }
 

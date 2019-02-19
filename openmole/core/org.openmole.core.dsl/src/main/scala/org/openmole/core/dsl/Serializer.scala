@@ -21,14 +21,14 @@ import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workspace.NewFile
 
 trait Serializer {
-  def load(file: File)(implicit serialiserService: SerializerService) = serialiserService.deserialise[Object](file)
-  def loadArchive(file: File)(implicit newFile: NewFile, serialiserService: SerializerService) = serialiserService.deserialiseAndExtractFiles[Object](file)
+  def load(file: File)(implicit serialiserService: SerializerService) = serialiserService.deserialize[Object](file)
+  def loadArchive(file: File)(implicit newFile: NewFile, serialiserService: SerializerService) = serialiserService.deserializeAndExtractFiles[Object](file)
 
   def load(file: String)(implicit serialiserService: SerializerService): Object = load(new File(file))
   def loadArchive(file: String)(implicit newFile: NewFile, serialiserService: SerializerService): Object = loadArchive(new File(file))
 
-  def save(obj: Object, file: File)(implicit serialiserService: SerializerService) = serialiserService.serialise(obj, file)
-  def saveArchive(obj: Object, file: File)(implicit newFile: NewFile, serialiserService: SerializerService) = serialiserService.serialiseAndArchiveFiles(obj, file)
+  def save(obj: Object, file: File)(implicit serialiserService: SerializerService) = serialiserService.serialize(obj, file)
+  def saveArchive(obj: Object, file: File)(implicit newFile: NewFile, serialiserService: SerializerService) = serialiserService.serializeAndArchiveFiles(obj, file)
 
   def save(obj: Object, file: String)(implicit serialiserService: SerializerService): Unit = save(obj, new File(file))
   def saveArchive(obj: Object, file: String)(implicit newFile: NewFile, serialiserService: SerializerService): Unit = saveArchive(obj, new File(file))

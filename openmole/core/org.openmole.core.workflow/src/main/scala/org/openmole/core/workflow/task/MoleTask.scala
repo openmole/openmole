@@ -87,7 +87,7 @@ object MoleTask {
       implicit val eventDispatcher = EventDispatcher()
       val implicitsValues = implicits.flatMap(i ⇒ context.get(i))
       implicit val seeder = Seeder(random().nextLong())
-      implicit val newFile = NewFile(executionContext.tmpDirectory.newDir("moletask"))
+      implicit val newFile = NewFile(executionContext.tmpDirectory)
       import executionContext.preference
       import executionContext.threadProvider
       import executionContext.workspace
@@ -95,6 +95,8 @@ object MoleTask {
 
       val localEnvironment =
         LocalEnvironment(1, executionContext.localEnvironment.deinterleave)
+
+      val moleServices = MoleServices.create
 
       val execution = MoleExecution(
         mole,
@@ -104,14 +106,14 @@ object MoleTask {
         cleanOnFinish = false,
         taskCache = executionContext.cache,
         lockRepository = executionContext.lockRepository
-      )
+      )(moleServices)
 
       execution listen {
         case (_, ev: MoleExecution.JobFinished) ⇒
           lastContextLock { if (ev.capsule == last) lastContext = Some(ev.moleJob.context) }
       }
 
-      (execution, newFile)
+      (execution, moleServices.newFile)
     }
 
     val listenerKey =

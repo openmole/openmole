@@ -61,7 +61,7 @@ object OSGiScalaCompiler {
 
         classDirectory.mkdirs()
         newSettings.outputDirs.setSingleOutput(AbstractFile.getDirectory(classDirectory))
-        newSettings.classpath.append(classDirectory.getCanonicalPath)
+        newSettings.classpath.prepend(classDirectory.getCanonicalPath)
         bundles.foreach(newSettings.classpath.append)
 
         newSettings
@@ -71,7 +71,7 @@ object OSGiScalaCompiler {
     newSettings
   }
 
-  def apply(settings: Settings, reporter: Reporter, priorityBundles: Seq[Bundle], jars: Seq[File]) =
+  def apply(settings: Settings, reporter: Reporter) =
     new OSGiScalaCompiler(settings, reporter)
 
 }

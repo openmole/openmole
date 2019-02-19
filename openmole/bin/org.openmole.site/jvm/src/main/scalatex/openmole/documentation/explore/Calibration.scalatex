@@ -215,10 +215,11 @@ val param4 = Val[String]
 val distance1 = Val[Double]
 val distance2 = Val[Double]
 
-val modelTask = ScalaTask("val distance1 = math.abs(param1 - 10.0) + math.abs(param2 - 50.0); val distance2 = (param3 == 2).toInt + (param4 == \"apple\").toInt") set (
+val modelTask =
+  ScalaTask("val distance1 = math.abs(param1 - 10.0) + math.abs(param2 - 50.0); val distance2 = (param3 == 2).toInt + (param4 == \"apple\").toInt") set (
     inputs += (param1,param2, param3, param4),
     outputs += (distance1, distance2)
-    )
+  )
 
 val nsga2 =
   NSGA2Evolution(
@@ -242,3 +243,7 @@ val nsga2 =
 @br
 
 More details and advanced notions can be found on the @a("GA detailed page", href := geneticAlgorithm.file).
+
+@h2{Stochastic models}
+
+@a("You can check additional options to calibrate stochastic models on this page.", href := stochasticityManagement.file)

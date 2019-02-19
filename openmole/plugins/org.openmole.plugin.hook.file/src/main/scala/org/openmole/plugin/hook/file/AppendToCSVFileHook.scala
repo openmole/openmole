@@ -20,6 +20,7 @@ package org.openmole.plugin.hook.file
 import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.expansion._
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.tools.io.Prettifier._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.mole._
@@ -43,9 +44,9 @@ object AppendToCSVFileHook {
 
   def apply(
     file:       FromContext[File],
-    values:     Seq[Val[_]]                 = Vector.empty,
-    header:     Option[FromContext[String]] = None,
-    arrayOnRow: Boolean                     = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+    values:     Seq[Val[_]]                           = Vector.empty,
+    header:     OptionalArgument[FromContext[String]] = None,
+    arrayOnRow: Boolean                               = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new AppendToCSVFileHook(
       file,
       values.toVector,
@@ -74,7 +75,12 @@ object AppendToCSVFileHook {
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
     import parameters._
     import org.openmole.plugin.tool.csv._
-    writeVariablesToCSV(file.from(context), prototypes, context, arraysOnSingleRow, header.map(_.from(context)))
+
+    val ps =
+      if (prototypes.isEmpty) context.values.map { _.prototype }.toVector
+      else prototypes
+
+    writeVariablesToCSV(file.from(context), ps, ps.map(context(_)), arraysOnSingleRow, header.map(_.from(context)))
     context
   }
 

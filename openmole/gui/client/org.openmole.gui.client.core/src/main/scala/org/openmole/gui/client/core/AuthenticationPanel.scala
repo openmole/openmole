@@ -88,7 +88,7 @@ class AuthenticationPanel {
           case PassedTest(_) ⇒ lab(label_success).render
           case PendingTest() ⇒ lab(label_warning).render
           case _ ⇒ lab(label_danger +++ pointer)(onclick := { () ⇒
-            currentStack() = test.errorStack.stackTrace
+            currentStack() = ErrorData.stackTrace(test.errorStack)
             errorOn() = !errorOn.now
           }).render
         }
