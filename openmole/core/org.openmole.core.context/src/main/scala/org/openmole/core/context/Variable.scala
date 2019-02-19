@@ -42,5 +42,6 @@ object Variable {
 case class Variable[T](prototype: Val[T], value: T) {
   override def toString: String = prettified(Int.MaxValue)
   def prettified(snipArray: Int) = prototype.name + "=" + (if (value != null) value.prettify(snipArray) else "null")
+  def name = prototype.name
 }
 

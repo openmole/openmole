@@ -102,23 +102,18 @@ package object sensitivity {
 
   def SensitivitySaltelli(
     evaluation:   Puzzle,
-    modelInputs:  Seq[ScalarOrSequenceOfDouble[_]],
-    modelOutputs: Seq[Val[Double]],
-    firstOrderSI: Val[Array[Array[Double]]],
-    totalOrderSI: Val[Array[Array[Double]]],
+    inputs:  Seq[ScalarOrSequenceOfDouble[_]],
+    outputs: Seq[Val[Double]],
     samples:      FromContext[Int]) = {
 
-    val sampling = SaltelliSampling(samples, modelInputs: _*)
+    val sampling = SaltelliSampling(samples, inputs: _*)
 
     val aggregation =
       SaltelliAggregation(
-        modelInputs = modelInputs,
-        modelOutputs = modelOutputs,
-        firstOrderSI = firstOrderSI,
-        totalOrderSI = totalOrderSI
+        modelInputs = inputs,
+        modelOutputs = outputs,
       ) set (
-        dsl.inputs += (SaltelliSampling.matrixName.array, SaltelliSampling.matrixIndex.array),
-        dsl.outputs += (firstOrderSI, totalOrderSI)
+        dsl.inputs += (SaltelliSampling.matrixName.array, SaltelliSampling.matrixIndex.array)
       )
 
     DirectSampling(

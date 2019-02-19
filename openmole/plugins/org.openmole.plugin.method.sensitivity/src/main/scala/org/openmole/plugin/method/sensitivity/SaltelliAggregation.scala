@@ -1,6 +1,6 @@
 package org.openmole.plugin.method.sensitivity
 
-import org.openmole.core.context.Namespace
+import org.openmole.core.context.{ Namespace, Variable }
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.task._
@@ -57,14 +57,26 @@ object SaltelliAggregation {
     (firstOrderEffects, totalOrderEffects)
   }
 
+  def outputVals(
+    prefix:       String,
+    modelInputs:  Seq[ScalarOrSequenceOfDouble[_]],
+    modelOutputs: Seq[Val[Double]]) =
+    for {
+      i ← ScalarOrSequenceOfDouble.prototypes(modelInputs)
+      o ← modelOutputs
+    } yield i.withNamespace(Namespace(prefix, o.name))
+
   def apply(
     modelInputs:  Seq[ScalarOrSequenceOfDouble[_]],
     modelOutputs: Seq[Val[Double]],
-    firstOrderSI: Val[Array[Array[Double]]],
-    totalOrderSI: Val[Array[Array[Double]]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    ClosureTask("SaltelliAggregation") { (context, _, _) ⇒
+    firstOrderSI: Val[Array[Array[Double]]]        = Val[Array[Array[Double]]]("firstOrderSI"),
+    totalOrderSI: Val[Array[Array[Double]]]        = Val[Array[Array[Double]]]("totalOrderSI"))(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
 
-      //OutputManager.systemOutput.println()
+    val fOOutputs = outputVals("firstOrder", modelInputs, modelOutputs)
+    val tOOutputs = outputVals("totalOrder", modelInputs, modelOutputs)
+
+    FromContextTask("SaltelliAggregation") { p ⇒
+      import p._
 
       val matrixNames: Array[String] =
         context(SaltelliSampling.matrixName.array)
@@ -97,16 +109,27 @@ object SaltelliAggregation {
       val fosi = ftoi.map { _._1.toArray }.toArray
       val tosi = ftoi.map { _._2.toArray }.toArray
 
-      // println(context)
-      // println(modelInputs.map { _.prototype.name }.mkString(" "))
-      // println(modelOutputs)
-      // println(matrixNames.mkString(" "))
+      val fosiv =
+        for {
+          (on, oi) ← modelOutputs.zipWithIndex
+          v ← ScalarOrSequenceOfDouble.unflatten(modelInputs, fosi(oi), scale = false).from(context)
+        } yield v.value
 
-      context + (firstOrderSI, fosi) + (totalOrderSI, tosi)
+      val tosiv =
+        for {
+          (on, oi) ← modelOutputs.zipWithIndex
+          v ← ScalarOrSequenceOfDouble.unflatten(modelInputs, tosi(oi), scale = false).from(context)
+        } yield v.value
+
+      context ++
+        (fOOutputs zip fosiv).map { case (fo, v) ⇒ Variable.unsecure(fo, v) } ++
+        (tOOutputs zip tosiv).map { case (to, v) ⇒ Variable.unsecure(to, v) }
 
     } set (
-      dsl.inputs ++= modelOutputs.map(_.array)
+      dsl.inputs ++= modelOutputs.map(_.array),
+      dsl.outputs ++= (fOOutputs, tOOutputs)
     )
+  }
 
 }
 
