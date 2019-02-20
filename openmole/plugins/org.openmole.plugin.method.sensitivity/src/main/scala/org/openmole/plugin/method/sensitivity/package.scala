@@ -76,8 +76,6 @@ package object sensitivity {
     // the sampling for Morris is a One At a Time one,
     // with respect to the user settings for repetitions, levels and inputs
     val sampling = MorrisSampling(repetitions, levels, inputs)
-    val exploration = ExplorationTask(sampling)
-    val cExploration = Capsule(exploration, strain = true)
 
     // generate the space of to analyze for outputs:
     // for each input, for each output, add to the space
@@ -92,12 +90,12 @@ package object sensitivity {
     // it collects all the specific inputs added from the sampling
     // to interpret the results
     val aggregation = MorrisAggregation(space)
-    val cAggregation = Capsule(aggregation)
-    val sAggregation = Slot(cAggregation)
 
-    ((cExploration -< evaluation >- sAggregation) &
-      (cExploration -- sAggregation))
-
+    DirectSampling(
+      evaluation = evaluation,
+      sampling = sampling,
+      aggregation = aggregation
+    )
   }
 
   def SensitivitySaltelli(
