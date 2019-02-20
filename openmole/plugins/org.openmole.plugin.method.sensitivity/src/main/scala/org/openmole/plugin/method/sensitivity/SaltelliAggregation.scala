@@ -57,23 +57,14 @@ object SaltelliAggregation {
     (firstOrderEffects, totalOrderEffects)
   }
 
-  def outputVals(
-    prefix:       String,
-    modelInputs:  Seq[ScalarOrSequenceOfDouble[_]],
-    modelOutputs: Seq[Val[Double]]) =
-    for {
-      i ← ScalarOrSequenceOfDouble.prototypes(modelInputs)
-      o ← modelOutputs
-    } yield i.withNamespace(Namespace(prefix, o.name))
-
   def apply(
     modelInputs:  Seq[ScalarOrSequenceOfDouble[_]],
     modelOutputs: Seq[Val[Double]],
     firstOrderSI: Val[Array[Array[Double]]]        = Val[Array[Array[Double]]]("firstOrderSI"),
     totalOrderSI: Val[Array[Array[Double]]]        = Val[Array[Array[Double]]]("totalOrderSI"))(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
 
-    val fOOutputs = outputVals("firstOrder", modelInputs, modelOutputs)
-    val tOOutputs = outputVals("totalOrder", modelInputs, modelOutputs)
+    val fOOutputs = Sensitivity.outputs(modelInputs, modelOutputs).map { case (i, o) ⇒ Saltelli.firstOrder(i, o) }
+    val tOOutputs = Sensitivity.outputs(modelInputs, modelOutputs).map { case (i, o) ⇒ Saltelli.totalOrder(i, o) }
 
     FromContextTask("SaltelliAggregation") { p ⇒
       import p._
