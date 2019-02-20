@@ -1,0 +1,54 @@
+@import org.openmole.site.tools._
+@import org.openmole.site._
+@import org.openmole.site.stylesheet._
+@import DocumentationPages._
+
+
+@def model = """
+val i1 = Val[Double]
+val i2 = Val[Double]
+val i3 = Val[Double]
+
+val o1 = Val[Double]
+val o2 = Val[Double]
+
+// Define the model task that computes an estimation of pi
+val model =
+  EmptyTask() set (
+    inputs += (i1, i2, i3),
+    outputs += (o1, o2)
+  )"""
+
+
+Statistical sensitivity analyses are used to characterize using statistical indicators. In general they involve an a priori sampling of the input space and a statistical method of analysis of the co-variance of the inputs and outputs of the model. There are either global, they depict the effects of model inputs in the complete input space, or local, they depict the effect of inputs around a given value. OpenMOLE implements 2 methods for global sensitivity analysis.
+
+@h2{Morris}
+
+@a("Morris", href := "https://en.wikipedia.org/wiki/Morris_method") is a statistical method for global sensitivity analysis. Here is how you can make use of it in OpenMOLE:
+@br @hl.openmole("""
+SensitivityMorris(
+  evaluation = model,
+  inputs = Seq(
+    i1 in (0.0, 1.0),
+    i2 in (0.0, 1.0),
+    i3 in (0.0, 1.0)),
+  outputs = Seq(o1, o2),
+  repetitions = 10,
+  levels = 10
+) hook ToStringHook()
+""",header=model, name = "Morris")
+
+@h2{Saltelli}
+
+Saltelli is a statistical method for global sensitivity analysis. Here is how you can make use of it in OpenMOLE:
+@br @hl.openmole("""
+SensitivitySaltelli(
+  evaluation = model,
+  inputs = Seq(
+    i1 in (0.0, 1.0),
+    i2 in (0.0, 1.0),
+    i3 in (0.0, 1.0)),
+  outputs = Seq(o1, o2),
+  samples = 100
+) hook ToStringHook()
+""",header=model, name = "Saltelli")
