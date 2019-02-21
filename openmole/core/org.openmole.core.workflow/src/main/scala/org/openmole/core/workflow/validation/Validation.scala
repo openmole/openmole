@@ -19,6 +19,7 @@ package org.openmole.core.workflow.validation
 
 import org.openmole.core.context._
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.{ Default, DefaultSet }
@@ -34,13 +35,13 @@ import scala.util.{ Failure, Success, Try }
 
 object Validation {
 
-  def allMoles(mole: Mole) =
-    (mole, None) ::
+  def allMoles(mole: Mole, in: Option[(MoleTask, Capsule)] = None): List[(Mole, Option[(MoleTask, Capsule)])] =
+    (mole, in) ::
       mole.capsules.flatMap(
         c ⇒
           c.task match {
-            case mt: MoleTask ⇒ Some(mt.mole → Some(mt → c))
-            case _            ⇒ None
+            case mt: MoleTask ⇒ allMoles(mt.mole, Some(mt → c))
+            case _            ⇒ List.empty
           }
       ).toList
 
