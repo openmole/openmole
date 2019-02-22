@@ -10,19 +10,23 @@ import scalatags.JsDom.all._
 object XYPlot {
 
   def apply(
-    title:  String  = "",
+    title:  String        = "",
     serie:  Serie,
-    legend: Boolean = false) = {
+    legend: Boolean       = false,
+    errors: Option[Serie] = None) = {
 
     lazy val plotDiv = Plot.baseDiv
 
     val dims = serie.values.take(2)
 
     if (dims.length == 2) {
+
+      val data = serie.plotDataBuilder
+        .x(dims.head.toDimension._result.values.get)
+        .y(dims(1).toDimension._result.values.get)
+
       val plotDataArray: scalajs.js.Array[PlotData] = js.Array(
-        serie.plotDataBuilder
-          .x(dims.head.toDimension._result.values.get)
-          .y(dims(1).toDimension._result.values.get)
+        ToolPlot.error(data, errors)
       )
 
       lazy val layout = Plot.baseLayout(title)
