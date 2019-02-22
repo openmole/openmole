@@ -36,7 +36,8 @@ class Activator extends PluginInfoActivator {
         Sampling(objectName(MorrisSampling)),
         Task(objectName(MorrisAggregation)),
         Sampling(objectName(SaltelliSampling)),
-        Pattern("SensitivityMorris")
+        Pattern("SensitivityMorris"),
+        Pattern("SensitivitySaltelli"),
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)

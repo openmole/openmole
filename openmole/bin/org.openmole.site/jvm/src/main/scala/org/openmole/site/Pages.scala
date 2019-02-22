@@ -86,23 +86,11 @@ object PageTree {
 
 sealed trait PageTree {
   def page: Page
-
   def name: String = page.name
-
   def title: Option[String] = page.title
-
-  // def details = page.map { _.details}
-
   def source = page.source
-
   def content: Text.all.Frag = page.content
-
-  def hasSon(pageTree: PageTree) = {
-    val oo = sons.contains(pageTree)
-    print("Sons  " + sons + " " + oo + " contains ? " + pageTree)
-    oo
-  }
-
+  def hasSon(pageTree: PageTree) = sons.contains(pageTree)
   def sons: Vector[PageTree]
 }
 
@@ -124,11 +112,8 @@ object Page {
 
     new Page {
       override def name: String = _name
-
       override def content = _content
-
       override def title = _title
-
       override def source = _source
     }
   }
@@ -136,19 +121,11 @@ object Page {
 
 trait Page {
   def content: Frag
-
   def name: String
-
   def title: Option[String] = Some(s"OpenMOLE - $name")
-
   def location: String = name
-
   def file = Pages.file(this)
-
-  //def details: Seq[Page]
-
   def source: Option[String]
-
   def anchor(name: String) = s"$file#${name.replaceAll(" ", "")}"
 }
 
@@ -171,26 +148,17 @@ object DocumentationPage {
     source:   Option[String]           = None
   ) = {
     def _name = name
-
     def _content = content
-
     def _details = details
-
     def _location = location
-
     def _title = title
-
     def _source = source
 
     new DocumentationPage {
       def name = _name
-
       def content = _content
-
       override def location = _location.getOrElse(name)
-
       override def title = _title.orElse(Some(name))
-
       override def source = _source
     }
   }
@@ -265,7 +233,7 @@ object DocumentationPages {
   // Explore
   lazy val explore = DocumentationPage.fromScalatex(name = "Explore", content = scalatex.documentation.explore.Explore, title = Some("Explore Your Model"))
 
-  def explorePages = pageNode(explore, Vector(directSampling, calibration, profile, pse))
+  def explorePages = pageNode(explore, Vector(directSampling, calibration, profile, pse, sensitivity))
 
   lazy val directSampling = DocumentationPage.fromScalatex(name = "Direct Sampling", content = scalatex.documentation.explore.sampling.DirectSampling)
 
@@ -281,6 +249,7 @@ object DocumentationPages {
   lazy val calibration = DocumentationPage.fromScalatex(name = "Calibration", content = scalatex.documentation.explore.Calibration)
   lazy val profile = DocumentationPage.fromScalatex(name = "Profile", content = scalatex.documentation.explore.Profile)
   lazy val pse = DocumentationPage.fromScalatex(name = "PSE", content = scalatex.documentation.explore.PSE, title = Some("Pattern Space Exploration"))
+  lazy val sensitivity = DocumentationPage.fromScalatex(name = "Sensitivity", content = scalatex.documentation.explore.Sensitivity, title = Some("Stastistical Sensitivity Analysis"))
 
   // Scale
   lazy val scale = DocumentationPage.fromScalatex(name = "Scale", content = scalatex.documentation.scale.Scale, title = Some("Scale on Different Environments"))

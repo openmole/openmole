@@ -466,7 +466,7 @@ lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolutio
 
 lazy val directSampling = OsgiProject(pluginDir, "org.openmole.plugin.method.directsampling", imports = Seq("*")) dependsOn(openmoleDSL, distributionDomain, pattern, modifierDomain) settings (pluginSettings: _*)
 
-lazy val sensitivity = OsgiProject(pluginDir, "org.openmole.plugin.method.sensitivity", imports = Seq("*")) dependsOn(exception, workflow, workspace, openmoleDSL, lhsSampling) settings (pluginSettings: _*)
+lazy val sensitivity = OsgiProject(pluginDir, "org.openmole.plugin.method.sensitivity", imports = Seq("*")) dependsOn(exception, workflow, workspace, openmoleDSL, lhsSampling, directSampling) settings (pluginSettings: _*)
 
 
 /* Sampling */

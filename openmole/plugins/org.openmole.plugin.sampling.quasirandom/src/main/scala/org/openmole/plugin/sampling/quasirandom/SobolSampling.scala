@@ -44,6 +44,6 @@ sealed class SobolSampling[D](val samples: FromContext[Int], val factors: Scalar
 
     for {
       v ← Iterator.continually(sequence.nextVector()).take(s)
-    } yield ScalarOrSequenceOfDouble.scaled(factors, v.toSeq)(context)
+    } yield ScalarOrSequenceOfDouble.unflatten(factors, v.toSeq)(context)
   }
 }

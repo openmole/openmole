@@ -48,20 +48,24 @@ object Scalable {
   object ScalableType {
     implicit def doubleIsScalable = new ScalableType[Double] {
       def scale(v: Double, min: Double, max: Double) = v.scale(min, max)
+      def convert(v: Double) = v
     }
 
     implicit def intIsScalable = new ScalableType[Int] {
       def scale(v: Double, min: Int, max: Int) = v.scale(min.toDouble, max.toDouble + 1).toInt
+      def convert(v: Double) = v.toInt
     }
 
     implicit def longIsScalable = new ScalableType[Long] {
       def scale(v: Double, min: Long, max: Long) = v.scale(min.toDouble, max.toDouble + 1).toLong
+      def convert(v: Double) = v.toLong
     }
 
   }
 
   trait ScalableType[T] {
     def scale(v: Double, min: T, max: T): T
+    def convert(v: Double): T
   }
 
   implicit def factorOfDoubleIsScalable[D, T: ScalableType](implicit bounded: Bounds[D, T]) = new Scalable[Factor[D, T]] {
@@ -70,12 +74,12 @@ object Scalable {
     override def prototype(t: Factor[D, T]): Val[_] = t.value
     override def size(t: Factor[D, T]): FromContext[Int] = 1
 
-    override def scaled(s: Factor[D, T])(values: Seq[Double]): FromContext[Scaled] = {
+    override def unflatten(s: Factor[D, T])(values: Seq[Double], scale: Boolean): FromContext[Scaled] = {
       val g = values.head
       assert(!g.isNaN)
 
       (bounded.min(s.domain) map2 bounded.max(s.domain)) { (min, max) ⇒
-        val sc = implicitly[ScalableType[T]].scale(g, min, max)
+        val sc = if (scale) implicitly[ScalableType[T]].scale(g, min, max) else implicitly[ScalableType[T]].convert(g)
         ScaledScalar(s.value, sc)
       }
     }
@@ -90,12 +94,13 @@ object Scalable {
     override def size(t: Factor[D, Array[T]]): FromContext[Int] =
       (bounded.min(t.domain) map2 bounded.max(t.domain)) { case (min, max) ⇒ math.min(min.size, max.size) }
 
-    override def scaled(t: Factor[D, Array[T]])(values: Seq[Double]): FromContext[Scaled] = {
+    override def unflatten(t: Factor[D, Array[T]])(values: Seq[Double], scale: Boolean): FromContext[Scaled] = {
 
       def scaled =
         (bounded.min(t.domain) map2 bounded.max(t.domain)) {
           case (min, max) ⇒
-            (values zip (min zip max)).map { case (g, (min, max)) ⇒ implicitly[ScalableType[T]].scale(g, min, max) }
+            if (scale) (values zip (min zip max)).map { case (g, (min, max)) ⇒ implicitly[ScalableType[T]].scale(g, min, max) }
+            else values.map(implicitly[ScalableType[T]].convert)
         }
 
       scaled.map { sc ⇒ ScaledSequence(t.value, sc.toArray) }
@@ -110,18 +115,20 @@ trait Scalable[T] {
   def inputs(t: T): PrototypeSet
   def prototype(t: T): Val[_]
   def size(t: T): FromContext[Int]
-  def scaled(t: T)(values: Seq[Double]): FromContext[Scalable.Scaled]
+  def unflatten(t: T)(values: Seq[Double], scale: Boolean): FromContext[Scalable.Scaled]
 }
 
 object ScalarOrSequenceOfDouble {
 
-  def scaled(scales: Seq[ScalarOrSequenceOfDouble[_]], values: Seq[Double]): FromContext[List[Variable[_]]] = {
+  def prototypes(scales: Seq[ScalarOrSequenceOfDouble[_]]) = scales.map(_.prototype)
+
+  def unflatten(scales: Seq[ScalarOrSequenceOfDouble[_]], values: Seq[Double], scale: Boolean = true): FromContext[List[Variable[_]]] = {
     @tailrec def scaled0(scales: List[ScalarOrSequenceOfDouble[_]], values: List[Double], acc: List[Variable[_]] = Nil)(context: ⇒ Context, rng: RandomProvider, newFile: NewFile, fileService: FileService): List[Variable[_]] =
       if (scales.isEmpty || values.isEmpty) acc.reverse
       else {
         val input = scales.head
         val (variable, tail) =
-          input.scaled(values).map { Scalable.Scaled.toVariable(_, values, input.size(context)(rng, newFile, fileService)) }.from(context)(rng, newFile, fileService)
+          input.unflatten(values, scale).map { Scalable.Scaled.toVariable(_, values, input.size(context)(rng, newFile, fileService)) }.from(context)(rng, newFile, fileService)
 
         scaled0(scales.tail, tail, variable :: acc)({ context + variable }, rng, newFile, fileService)
       }
@@ -137,5 +144,5 @@ class ScalarOrSequenceOfDouble[T](t: T, scalable: Scalable[T]) {
   def inputs = scalable.inputs(t)
   def prototype = scalable.prototype(t)
   def size = scalable.size(t)
-  def scaled(values: Seq[Double]) = scalable.scaled(t)(values)
+  def unflatten(values: Seq[Double], scale: Boolean = true) = scalable.unflatten(t)(values, scale)
 }

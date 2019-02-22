@@ -18,46 +18,56 @@
 
 package org.openmole.plugin.method
 
-import org.openmole.core.context._
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.workflow.builder.DefinitionScope
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
 import org.openmole.core.workflow.validation.DataflowProblem._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workflow.transition.Slot
+import org.openmole.core.dsl
+import org.openmole.core.dsl._
+import org.openmole.core.workflow.puzzle.Puzzle
+import org.openmole.plugin.method.directsampling._
 
 package object sensitivity {
 
   implicit def scope = DefinitionScope.Internal
 
-  /**
-   * For a given input of the model, and a given output of a the model,
-   * returns the subspace of analysis, namely: the subspace made of these input and
-   * output, with the additional outputs for this sensitivity quantified over
-   * mu, mu* and sigma.
-   */
-  def subspaceForInputOutput(input: Val[Double], output: Val[Double]): SubspaceToAnalyze = {
-    SubspaceToAnalyze(
-      input,
-      output
-    )
-  }
 
-  /**
-   * Casts a Val[_] (value of something) to a Val[Double]
-   * (value containing a Double), and throws a nice
-   * exception in case it's not possible
-   */
-  def toValDouble(v: Val[_]): Val[Double] = v match {
-    case Val.caseDouble(vd) ⇒ vd
-    case _                  ⇒ throw new IllegalArgumentException("expect inputs to be of type Double, but received " + v)
-  }
+  object Sensitivity {
+    /**
+      * For a given input of the model, and a given output of a the model,
+      * returns the subspace of analysis, namely: the subspace made of these input and
+      * output, with the additional outputs for this sensitivity quantified over
+      * mu, mu* and sigma.
+      */
+    def subspaceForInputOutput(input: Val[Double], output: Val[Double]): SubspaceToAnalyze = {
+      SubspaceToAnalyze(
+        input,
+        output
+      )
+    }
 
+    /**
+      * Casts a Val[_] (value of something) to a Val[Double]
+      * (value containing a Double), and throws a nice
+      * exception in case it's not possible
+      */
+    def toValDouble(v: Val[_]): Val[Double] = v match {
+      case Val.caseDouble(vd) ⇒ vd
+      case _ ⇒ throw new IllegalArgumentException("expect inputs to be of type Double, but received " + v)
+    }
+
+
+    def outputs(
+      modelInputs: Seq[ScalarOrSequenceOfDouble[_]],
+      modelOutputs: Seq[Val[Double]]) =
+      for {
+        i ← ScalarOrSequenceOfDouble.prototypes(modelInputs)
+        o ← modelOutputs
+      } yield (i, o)
+  }
   /**
    * A Morris Sensitivity Analysis takes a puzzle (a model) that we want to analyse,
    * the list of the inputs (and their ranges), the list of outputs we want
@@ -77,28 +87,40 @@ package object sensitivity {
     // the sampling for Morris is a One At a Time one,
     // with respect to the user settings for repetitions, levels and inputs
     val sampling = MorrisSampling(repetitions, levels, inputs)
-    val exploration = ExplorationTask(sampling)
-    val cExploration = Capsule(exploration, strain = true)
-
-    // generate the space of to analyze for outputs:
-    // for each input, for each output, add to the space
-    // the subspace corresponding to this one
-    val space: Seq[SubspaceToAnalyze] = inputs.flatMap(
-      input ⇒ outputs.map(
-        output ⇒ sensitivity.subspaceForInputOutput(
-          sensitivity.toValDouble(input.prototype),
-          output))).toSeq
 
     // the aggregation obviously is a Morris aggregation!
     // it collects all the specific inputs added from the sampling
     // to interpret the results
-    val aggregation = MorrisAggregation(space)
-    val cAggregation = Capsule(aggregation)
-    val sAggregation = Slot(cAggregation)
+    val aggregation = MorrisAggregation(inputs, outputs)
 
-    ((cExploration -< evaluation >- sAggregation) &
-      (cExploration -- sAggregation))
+    DirectSampling(
+      evaluation = evaluation,
+      sampling = sampling,
+      aggregation = aggregation
+    )
+  }
 
+  def SensitivitySaltelli(
+    evaluation:   Puzzle,
+    inputs:  Seq[ScalarOrSequenceOfDouble[_]],
+    outputs: Seq[Val[Double]],
+    samples:      FromContext[Int]) = {
+
+    val sampling = SaltelliSampling(samples, inputs: _*)
+
+    val aggregation =
+      SaltelliAggregation(
+        modelInputs = inputs,
+        modelOutputs = outputs,
+      ) set (
+        dsl.inputs += (SaltelliSampling.matrixName.array, SaltelliSampling.matrixIndex.array)
+      )
+
+    DirectSampling(
+      evaluation = evaluation,
+      sampling = sampling,
+      aggregation = aggregation
+    )
   }
 
 }

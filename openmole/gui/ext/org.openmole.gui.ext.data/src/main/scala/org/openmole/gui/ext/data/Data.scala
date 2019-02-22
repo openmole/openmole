@@ -762,7 +762,7 @@ object FileFilter {
   def defaultFilter = FileFilter.this (First(), Some(100), "", AlphaSorting())
 }
 
-case class OMSettings(workspace: SafePath, version: String, versionName: String, buildTime: String)
+case class OMSettings(workspace: SafePath, version: String, versionName: String, buildTime: String, isDevelopment: Boolean)
 
 sealed trait PluginExtensionType
 

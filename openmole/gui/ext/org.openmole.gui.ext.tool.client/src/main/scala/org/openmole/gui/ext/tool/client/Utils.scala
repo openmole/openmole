@@ -19,7 +19,7 @@ package org.openmole.gui.ext.tool.client
 
 import org.scalajs.dom.raw.{ Event, HTMLElement }
 import scalatags.JsDom.all._
-import rx.Rx
+import rx._
 import scalatags.JsDom.TypedTag
 import scaladget.tools._
 
@@ -32,7 +32,7 @@ object Utils {
 
   def longToDate(date: Long) = s"${new Date(date).toLocaleDateString}, ${new Date(date).toLocaleTimeString}"
 
-  implicit class TagCollapserOnClickRX(triggerCondition: Rx[Boolean]) {
+  implicit class TagCollapserOnClickRX(triggerCondition: Rx[Boolean])(implicit ctx: Ctx.Owner) {
     def expandDiv(inner: TypedTag[_ <: HTMLElement], onended: () ⇒ Unit = () ⇒ {}) = {
       val expanded = div(`class` := Rx {
         if (triggerCondition()) "hidden-div expanded"

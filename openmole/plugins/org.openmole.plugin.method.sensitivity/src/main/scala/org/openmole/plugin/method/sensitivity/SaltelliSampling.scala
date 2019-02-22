@@ -53,23 +53,23 @@ class SaltelliSampling(val samples: FromContext[Int], val factors: ScalarOrSeque
 
     def toVariables(
       matrix: Array[Array[Double]],
-      m:      String
+      m:      Namespace
     ): List[Iterable[Variable[_]]] =
       matrix.zipWithIndex.map {
         case (l, index) ⇒
-          def line = ScalarOrSequenceOfDouble.scaled(factors, l).from(context)
-          Variable(SaltelliSampling.matrixName, m) :: Variable(SaltelliSampling.matrixIndex, index) :: line
+          def line = ScalarOrSequenceOfDouble.unflatten(factors, l).from(context)
+          Variable(SaltelliSampling.matrixName, m.toString) :: Variable(SaltelliSampling.matrixIndex, index) :: line
       }.toList
 
-    def aVariables = toVariables(a, "a")
-    def bVariables = toVariables(b, "b")
+    def aVariables = toVariables(a, Namespace("a"))
+    def bVariables = toVariables(b, Namespace("b"))
 
     def cVariables =
       cIndices.zipWithIndex.flatMap {
         case ((f, j, scalar), i) ⇒
           val matrixName =
-            if (scalar) f.prototype.withNamespace(Namespace("c")).name
-            else f.prototype.withNamespace(Namespace("c", j.toString)).name
+            if (scalar) Namespace("c", f.prototype.name)
+            else Namespace("c", j.toString, f.prototype.name)
 
           toVariables(
             SaltelliSampling.buildC(i, a, b),

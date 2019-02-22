@@ -14,6 +14,7 @@ import java.nio.file._
 
 import au.com.bytecode.opencsv.CSVReader
 import org.openmole.core.console.ScalaREPL
+import org.openmole.core.expansion.ScalaCompilation
 import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
 
 import scala.util.{ Failure, Success, Try }
@@ -78,7 +79,8 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
       Utils.projectsDirectory(),
       buildinfo.version.value,
       buildinfo.name,
-      new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(buildinfo.BuildInfo.buildTime)
+      new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(buildinfo.BuildInfo.buildTime),
+      buildinfo.development
     )
   }
 
