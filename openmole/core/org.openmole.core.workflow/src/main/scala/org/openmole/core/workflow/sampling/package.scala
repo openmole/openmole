@@ -38,6 +38,8 @@ package sampling {
 
     implicit def discreteFactorIsSampling[D, T](f: Factor[D, T])(implicit discrete: Discrete[D, T]) = FactorSampling(f)
 
+    type Sampling = sampling.Sampling
+
   }
 }
 

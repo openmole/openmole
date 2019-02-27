@@ -20,7 +20,7 @@ package org.openmole.core.workflow.task
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.mole.Capsule
+import org.openmole.core.workflow.mole.MoleCapsule
 import org.openmole.core.workflow.sampling._
 
 import scala.collection.immutable.TreeMap
@@ -62,6 +62,6 @@ object ExplorationTask {
       exploredOutputs += (sampling.prototypes.toSeq.map(_.toArray): _*)
     )
 
-  def explored(c: Capsule) = (p: Val[_]) ⇒ c.task.outputs.explored(p)
+  def explored(c: MoleCapsule) = (p: Val[_]) ⇒ c.task.outputs.explored(p)
 
 }

@@ -15,33 +15,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.transition
+package org.openmole.core.workflow.puzzle
 
 import org.openmole.core.context.Val
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.sampling._
+import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.sampling.ExplicitSampling
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.builder._
 import org.scalatest._
 
 import scala.collection.mutable.ListBuffer
-import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.dsl._
 
 class ExplorationTransitionSpec extends FlatSpec with Matchers {
 
   import org.openmole.core.workflow.tools.Stubs._
 
   "Exploration transition" should "submit one MoleJob for each value in the sampling" in {
-
     val data = List("A", "B", "C")
     val i = Val[String]("i")
 
-    val sampling = new ExplicitSampling(i, data)
-
-    val exc = Capsule(ExplorationTask(sampling))
-
-    val res = new ListBuffer[String]
+    val sampling = ExplicitSampling(i, data)
+    val res = ListBuffer[String]()
 
     val t = TestTask { context ⇒
       res.synchronized {
@@ -49,12 +42,9 @@ class ExplorationTransitionSpec extends FlatSpec with Matchers {
         res += context(i)
         context
       }
-    } set (
-      name := "Test",
-      inputs += i
-    )
+    } set (inputs += i)
 
-    val ex = exc -< t
+    val ex = sampling -< t
     ex.run()
     res.toArray.sorted.deep should equal(data.toArray.deep)
   }
@@ -63,8 +53,6 @@ class ExplorationTransitionSpec extends FlatSpec with Matchers {
     val data = List("A", "B", "C")
     val i = Val[String]("i")
 
-    val explo = ExplorationTask(new ExplicitSampling(i, data))
-
     val res = new ListBuffer[String]
 
     val t = TestTask { context ⇒
@@ -73,12 +61,9 @@ class ExplorationTransitionSpec extends FlatSpec with Matchers {
         res += context(i)
         context
       }
-    } set (
-      name := "Test",
-      inputs += i
-    )
+    } set (inputs += i)
 
-    (explo -< t).run()
+    (ExplicitSampling(i, data) -< t).run()
     res.toArray.sorted.deep should equal(data.toArray.deep)
   }
 
@@ -86,9 +71,7 @@ class ExplorationTransitionSpec extends FlatSpec with Matchers {
     val i = Val[Int]("i")
     val data = (1 to 100)
 
-    val sampling = new ExplicitSampling(i, data)
-
-    val exc = Capsule(ExplorationTask(sampling))
+    val sampling = ExplicitSampling(i, data)
 
     val res = new ListBuffer[Int]
 
@@ -98,12 +81,9 @@ class ExplorationTransitionSpec extends FlatSpec with Matchers {
         res += context(i)
         context
       }
-    } set (
-      name := "Test",
-      inputs += i
-    )
+    } set (inputs += i)
 
-    val ex = exc -< (t when "i % 2 != 0")
+    val ex = (sampling -< t when "i % 2 != 0")
     ex.run()
     res.toArray.sorted.deep should equal(data.toArray.filter(_ % 2 != 0).deep)
   }

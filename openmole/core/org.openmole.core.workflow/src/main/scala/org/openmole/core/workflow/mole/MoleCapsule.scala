@@ -26,16 +26,16 @@ import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.validation._
 import org.openmole.tool.random._
 
-object Capsule {
+object MoleCapsule {
 
-  implicit def taskToCapsuleConverter(task: Task) = Capsule(task)
-  implicit def slotToCapsuleConverter(slot: Slot) = slot.capsule
+  implicit def taskToCapsuleConverter(task: Task) = MoleCapsule(task)
+  implicit def slotToCapsuleConverter(slot: TransitionSlot) = slot.capsule
 
-  def apply(task: Task, strain: Boolean = false) = new Capsule(task, strain)
+  def apply(task: Task, strain: Boolean = false) = new MoleCapsule(task, strain)
 
-  def isStrainer(c: Capsule) = c.strainer
+  def isStrainer(c: MoleCapsule) = c.strainer
 
-  def reachNoStrainer(mole: Mole)(slot: Slot, seen: Set[Slot] = Set.empty): Boolean = {
+  def reachNoStrainer(mole: Mole)(slot: TransitionSlot, seen: Set[TransitionSlot] = Set.empty): Boolean = {
     if (slot.capsule == mole.root) true
     else if (seen.contains(slot)) false
     else {
@@ -58,7 +58,7 @@ object Capsule {
  * @param _task task inside this capsule
  * @param strainer true if this capsule let pass all data through
  */
-class Capsule(_task: Task, val strainer: Boolean) {
+class MoleCapsule(_task: Task, val strainer: Boolean) {
 
   lazy val task =
     strainer match {
@@ -110,7 +110,7 @@ class Capsule(_task: Task, val strainer: Boolean) {
     if (this == mole.root) mole.inputs
     else {
       val slots = mole.slots(this)
-      val noStrainer = slots.toSeq.filter(s ⇒ Capsule.reachNoStrainer(mole)(s))
+      val noStrainer = slots.toSeq.filter(s ⇒ MoleCapsule.reachNoStrainer(mole)(s))
 
       val bySlot =
         for {
@@ -147,5 +147,16 @@ class StrainerTaskDecorator(val task: Task) extends Task {
 }
 
 object StrainerCapsule {
-  def apply(task: Task) = Capsule(task, strain = true)
+  def apply(task: Task) = MoleCapsule(task, strain = true)
+}
+
+object MasterCapsule {
+  def apply(task: Task, persist: Seq[Val[_]], strain: Boolean) = new MasterCapsule(task, persist.map(_.name), strain)
+  def apply(t: Task, persist: Val[_]*): MasterCapsule = apply(t, persist, false)
+}
+
+class MasterCapsule(task: Task, val persist: Seq[String] = Seq.empty, strainer: Boolean) extends MoleCapsule(task, strainer) {
+  def toPersist(context: Context): Context =
+    persist.map { n ⇒ context.variable(n).get }
+
 }

@@ -45,7 +45,7 @@ package collection {
 
 package object collection extends LowPriorityImplicits {
 
-  implicit def iterableOfToArrayIsFinie[T: ClassTag, A1[_]: ToArray] = new Finite[Iterable[A1[T]], Array[T]] {
+  implicit def iterableOfToArrayIsFinite[T: ClassTag, A1[_]: ToArray] = new Finite[Iterable[A1[T]], Array[T]] {
     override def computeValues(domain: Iterable[A1[T]]) = domain.map(implicitly[ToArray[A1]].apply[T])
   }
 

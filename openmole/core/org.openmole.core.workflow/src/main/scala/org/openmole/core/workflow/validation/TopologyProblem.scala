@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.validation
 
-import org.openmole.core.workflow.mole.Capsule
+import org.openmole.core.workflow.mole.MoleCapsule
 import org.openmole.core.workflow.task.MoleTask
 import org.openmole.core.workflow.transition.{ DataChannel, ITransition }
 
@@ -28,15 +28,15 @@ object TopologyProblem {
   }
 
   case class LevelProblem(
-    capsule: Capsule,
-    paths:   List[(List[Capsule], Int)]
+    capsule: MoleCapsule,
+    paths:   List[(List[MoleCapsule], Int)]
   ) extends TopologyProblem {
     override def toString = "LevelProblem: " + capsule + ", " + paths.map { case (p, l) ⇒ "Following the path (" + p.mkString(", ") + " has level " + l + ")" }.mkString(", ")
   }
 
   case class NegativeLevelProblem(
-    capsule: Capsule,
-    path:    List[Capsule],
+    capsule: MoleCapsule,
+    path:    List[MoleCapsule],
     level:   Int
   ) extends TopologyProblem {
 
@@ -47,15 +47,15 @@ object TopologyProblem {
     override def toString = "DataChannelNegativeLevelProblem: " + dataChannel + ", links a capsule of upper level to lower level, this is not supported, use aggregation transitions."
   }
 
-  case class NoTransitionToCapsuleProblem(capsule: Capsule, dataChannel: DataChannel) extends TopologyProblem {
+  case class NoTransitionToCapsuleProblem(capsule: MoleCapsule, dataChannel: DataChannel) extends TopologyProblem {
     override def toString = s"NoTransitionToCapsuleProblem: $capsule is linked with $dataChannel but not with any transition"
   }
 
-  case class UnreachableCapsuleProblem(capsule: Capsule) extends TopologyProblem {
+  case class UnreachableCapsuleProblem(capsule: MoleCapsule) extends TopologyProblem {
     override def toString = s"UnreachableCapsuleProblem: $capsule is not linked to the workflow by any transition"
   }
 
-  case class MoleTaskLastCapsuleProblem(capsule: Capsule, moleTask: MoleTask, level: Int) extends TopologyProblem {
+  case class MoleTaskLastCapsuleProblem(capsule: MoleCapsule, moleTask: MoleTask, level: Int) extends TopologyProblem {
     override def toString = s"MoleTaskLastCapsuleProblem: in mole task $capsule the last capsule ${moleTask.last} has been found at level $level, it should be at level 0"
   }
 }

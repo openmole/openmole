@@ -19,7 +19,6 @@ package org.openmole.core.workflow.validation
 
 import org.openmole.core.context.Val
 import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.mole._
@@ -37,12 +36,9 @@ class TypeUtilSpec extends FlatSpec with Matchers {
     val t1 = EmptyTask() set (outputs += p)
     val t2 = EmptyTask() set (inputs += p)
 
-    val t1c = Capsule(t1)
-    val t2c = Slot(t2)
+    val mole: Mole = (t1 -- t2)
 
-    val mole = (t1c -- t2c) toMole
-
-    val types = TypeUtil.computeTypes(mole, Sources.empty, Hooks.empty)(t2c)
+    val types = TypeUtil.computeTypes(mole, Sources.empty, Hooks.empty)(mole.slots(mole.capsules.find(_.task == t2).get).head)
 
     types.collect { case x: InvalidType ⇒ x }.isEmpty should equal(true)
 
@@ -59,13 +55,9 @@ class TypeUtilSpec extends FlatSpec with Matchers {
     val t2 = EmptyTask() set (outputs += p)
     val t3 = EmptyTask() set (inputs += p)
 
-    val t1c = Capsule(t1)
-    val t2c = Capsule(t2)
-    val t3c = Slot(t3)
+    val mole: Mole = (t1 -- t3) & (t2 -- t3)
 
-    val mole = ((t1c -- t3c) & (t2c -- t3c)) toMole
-
-    val types = TypeUtil.computeTypes(mole, Sources.empty, Hooks.empty)(t3c)
+    val types = TypeUtil.computeTypes(mole, Sources.empty, Hooks.empty)(mole.slots(mole.capsules.find(_.task == t3).get).head)
 
     types.collect { case x: InvalidType ⇒ x }.isEmpty should equal(true)
     val validTypes = types.collect { case x: ValidType ⇒ x }

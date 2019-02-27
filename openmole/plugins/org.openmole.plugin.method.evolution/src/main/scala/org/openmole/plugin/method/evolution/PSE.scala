@@ -531,12 +531,11 @@ object PSE {
 object PSEEvolution {
 
   import org.openmole.core.dsl._
-  import org.openmole.core.workflow.puzzle._
 
   def apply(
     genome:       Genome,
     objectives:   Seq[PSE.PatternAxe],
-    evaluation:   Puzzle,
+    evaluation:   DSL,
     termination:  OMTermination,
     stochastic:   OptionalArgument[Stochastic] = None,
     parallelism:  Int                          = 1,

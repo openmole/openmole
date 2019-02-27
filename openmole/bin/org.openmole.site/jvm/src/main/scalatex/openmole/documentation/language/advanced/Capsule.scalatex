@@ -16,8 +16,7 @@ transitions are plugged to. This code snippet explicitly encapsulates the task @
 point on which @a("Hooks", href := DocumentationPages.hook.file), @a("Sources", href := DocumentationPages.source.file) and
 @a("Execution Environments", href := DocumentationPages.scale.file) are specified.
 
-@p When a task is directly linked to another without explicitly specifying a Capsule, @b{a new capsule is created}.
-It means that for several transitions to reach the same task, the Capsule should be created explicitly.
+@p When a task is directly linked to another without explicitly specifying a Capsule, @b{a single capsule is created for this task and used each time the task in mentioned in the workflow}.
 
 @p Capsules might own several input Slots in which transitions are plugged. Slots make it possible to specify
 iterative workflows (with cycles) as well as synchronisation points between several parts of a workflow. The rule is
@@ -41,20 +40,18 @@ val i = Val[Int]
 val j = Val[Int]
 
 val t1 = ScalaTask("val i = 42") set (outputs += i)
+val t2 = ScalaTask("val j = 84") set (outputs += j)
 
-val t2 = ScalaTask("val j = i * 2") set (outputs += j)
-val c2 = Capsule(t2, strain = true)
-
-t1 -- (c2 hook ToStringHook(i, j))
+t1 -- (Strain(t2) hook ToStringHook(i, j))
 """)
 
 @p This workflow displays @hl.highlight("{i=42, j=84}", "plain")
 
 @h2{Master capsule}
 
-OpenMOLE provides a very flexible workflow formalism. It even makes it possible to design workflows with a part that mimics a @b{master / slave} @("(also known as Map/Reduce)") distribution scheme. This schemes involves many slave jobs computing partial results and a master gathering the whole result.
+OpenMOLE provides a very flexible workflow formalism. It even makes it possible to design workflows with a part that mimics a @b{master / slave} distribution scheme. This schemes involves many slave jobs computing partial results and a master gathering the whole result.
 
-@p You can think of a steady state genetic algorithm of instance as an typical use case. This use case would see a global solution population maintained and a bunch of slave workers computing fitnesses in a distributed manner. Each time a worker ends, its result is used to update the global population and a new worker is launched. To achieve such a distribution scheme, one should use the @i{Master Capsule} along with an end-exploration transition.
+@p You can think of a steady state genetic algorithm of instance as a typical use case. This use case would see a global solution population maintained and a bunch of slave workers computing fitnesses in a distributed manner. Each time a worker ends, its result is used to update the global population and a new worker is launched. To achieve such a distribution scheme, one should use the @i{Master Capsule} along with an end-exploration transition.
 
 @p The @i{MasterCapsule} is a special capsule that preserves a state from one execution to another. An execution of the @i{MasterCapsule} modifies this state and the next execution gets the state that has been modified last. To ensure soundness of the state only, the @i{MasterCapsule}s are always executed locally and multiple executions of a given @i{MasterCapsule} are carried sequentially.
 
@@ -73,24 +70,18 @@ val exploration = ExplorationTask(i in (0 until 10))
 
 val model = ScalaTask("i = i + 7") set (inputs += i, outputs += i)
 
-val modelCapsule = Capsule(model)
-val modelSlot1 = Slot(modelCapsule)
-val modelSlot2 = Slot(modelCapsule)
-
 val select =
   ScalaTask("archive = archive ++ (if(i % 3 == 0) Seq(i) else Seq())") set (
     (inputs, outputs) += (i, archive),
     archive := Array[Int]()
   )
 
-val selectCaps = MasterCapsule(select, archive)
-
 val finalTask = EmptyTask()
 
 val displayHook = ToStringHook()
 
-val skel = exploration -< modelSlot1 -- (selectCaps hook displayHook)
-val loop = selectCaps -- modelSlot2
-val terminate = selectCaps >| (Capsule(finalTask, strain = true) hook DisplayHook("archive.size >= 10"))
+val skel = exploration -< model -- (Master(select, archive) hook displayHook)
+val loop = select -- Slot(model)
+val terminate = select >| (Strain(finalTask) hook DisplayHook("${archive.size}")) when "archive.size > 10"
 
 skel & loop & terminate""")

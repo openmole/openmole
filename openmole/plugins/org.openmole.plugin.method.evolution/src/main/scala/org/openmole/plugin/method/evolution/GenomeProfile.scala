@@ -57,14 +57,13 @@ object GenomeProfile {
 object GenomeProfileEvolution {
 
   import org.openmole.core.dsl._
-  import org.openmole.core.workflow.puzzle._
 
   def apply(
     x:            Val[Double],
     nX:           Int,
     genome:       Genome,
     objective:    Objective[_],
-    evaluation:   Puzzle,
+    evaluation:   DSL,
     termination:  OMTermination,
     nicheSize:    Int                          = 20,
     stochastic:   OptionalArgument[Stochastic] = None,

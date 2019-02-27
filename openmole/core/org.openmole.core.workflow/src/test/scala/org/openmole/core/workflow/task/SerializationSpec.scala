@@ -20,7 +20,6 @@ package org.openmole.core.workflow.task
 import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
 
 import org.openmole.core.context.Val
-import org.openmole.core.workflow.data._
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workflow.builder._
 import org.scalatest._

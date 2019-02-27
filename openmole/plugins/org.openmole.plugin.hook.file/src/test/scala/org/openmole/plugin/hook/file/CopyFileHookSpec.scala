@@ -17,9 +17,9 @@
 
 package org.openmole.plugin.hook.file
 
-import java.io.{File, FileWriter}
+import java.io.{ File, FileWriter }
 
-import org.openmole.core.context.{Context, Val, PrototypeSet}
+import org.openmole.core.context.{ Context, Val, PrototypeSet }
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.DefaultSet
@@ -45,7 +45,7 @@ class CopyFileHookSpec extends FlatSpec with Matchers {
       override def process(context: Context) = context + (p → f)
     }
 
-    val t1c = new Capsule(t1)
+    val t1c = new MoleCapsule(t1)
 
     val fDest = File.createTempFile("test", ".tmp")
 

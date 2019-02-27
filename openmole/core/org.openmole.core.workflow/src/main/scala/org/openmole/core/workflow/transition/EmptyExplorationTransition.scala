@@ -27,7 +27,7 @@ import org.openmole.core.workspace.NewFile
 
 import scala.collection.mutable.ListBuffer
 
-class EmptyExplorationTransition(start: Capsule, end: Slot, size: FromContext[Int], condition: Condition = Condition.True, filter: BlockList = BlockList.empty) extends ExplorationTransition(start, end, condition, filter) with ValidateTransition {
+class EmptyExplorationTransition(start: MoleCapsule, end: TransitionSlot, size: FromContext[Int], condition: Condition = Condition.True, filter: BlockList = BlockList.empty) extends ExplorationTransition(start, end, condition, filter) with ValidateTransition {
 
   override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
     import p._

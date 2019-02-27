@@ -52,10 +52,10 @@ object MoleExecution extends JavaLogger {
 
   class Starting extends Event[MoleExecution]
   case class Finished(canceled: Boolean) extends Event[MoleExecution]
-  case class JobStatusChanged(moleJob: MoleJob, capsule: Capsule, newState: State, oldState: State) extends Event[MoleExecution]
-  case class JobCreated(moleJob: MoleJob, capsule: Capsule) extends Event[MoleExecution]
-  case class JobSubmitted(moleJob: Job, capsule: Capsule, environment: Environment) extends Event[MoleExecution]
-  case class JobFinished(moleJob: MoleJob, capsule: Capsule) extends Event[MoleExecution]
+  case class JobStatusChanged(moleJob: MoleJob, capsule: MoleCapsule, newState: State, oldState: State) extends Event[MoleExecution]
+  case class JobCreated(moleJob: MoleJob, capsule: MoleCapsule) extends Event[MoleExecution]
+  case class JobSubmitted(moleJob: Job, capsule: MoleCapsule, environment: Environment) extends Event[MoleExecution]
+  case class JobFinished(moleJob: MoleJob, capsule: MoleCapsule) extends Event[MoleExecution]
 
   object MoleExecutionFailed {
     def exception(moleExecutionError: MoleExecutionFailed) = moleExecutionError.exception
@@ -72,23 +72,23 @@ object MoleExecution extends JavaLogger {
     def exception: Throwable
   }
 
-  case class JobFailed(moleJob: MoleJob, capsule: Capsule, exception: Throwable) extends Event[MoleExecution] with MoleExecutionFailed {
+  case class JobFailed(moleJob: MoleJob, capsule: MoleCapsule, exception: Throwable) extends Event[MoleExecution] with MoleExecutionFailed {
     def level = Level.SEVERE
   }
 
-  case class ExceptionRaised(moleJob: MoleJob, capsule: Capsule, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
-  case class SourceExceptionRaised(source: Source, capsule: Capsule, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
-  case class HookExceptionRaised(hook: Hook, capsule: Capsule, moleJob: MoleJob, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
+  case class ExceptionRaised(moleJob: MoleJob, capsule: MoleCapsule, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
+  case class SourceExceptionRaised(source: Source, capsule: MoleCapsule, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
+  case class HookExceptionRaised(hook: Hook, capsule: MoleCapsule, moleJob: MoleJob, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
   case class MoleExecutionError(exception: Throwable) extends MoleExecutionFailed
 
   private def listOfTupleToMap[K, V](l: Traversable[(K, V)]): Map[K, Traversable[V]] = l.groupBy(_._1).mapValues(_.map(_._2))
 
   def apply(
     mole:                        Mole,
-    sources:                     Iterable[(Capsule, Source)]                = Iterable.empty,
-    hooks:                       Iterable[(Capsule, Hook)]                  = Iterable.empty,
-    environments:                Map[Capsule, EnvironmentProvider]          = Map.empty,
-    grouping:                    Map[Capsule, Grouping]                     = Map.empty,
+    sources:                     Iterable[(MoleCapsule, Source)]            = Iterable.empty,
+    hooks:                       Iterable[(MoleCapsule, Hook)]              = Iterable.empty,
+    environments:                Map[MoleCapsule, EnvironmentProvider]      = Map.empty,
+    grouping:                    Map[MoleCapsule, Grouping]                 = Map.empty,
     implicits:                   Context                                    = Context.empty,
     defaultEnvironment:          OptionalArgument[LocalEnvironmentProvider] = None,
     cleanOnFinish:               Boolean                                    = true,
@@ -119,7 +119,7 @@ object MoleExecution extends JavaLogger {
     )
   }
 
-  type CapsuleStatuses = Map[Capsule, JobStatuses]
+  type CapsuleStatuses = Map[MoleCapsule, JobStatuses]
 
   case class JobStatuses(ready: Long, running: Long, completed: Long)
 
@@ -146,7 +146,7 @@ object MoleExecution extends JavaLogger {
     subMoleExecutionState.parent.foreach(s ⇒ updateNbJobs(s, v))
   }
 
-  def submit(subMoleExecutionState: SubMoleExecutionState, capsule: Capsule, context: Context, ticket: Ticket): Unit = {
+  def submit(subMoleExecutionState: SubMoleExecutionState, capsule: MoleCapsule, context: Context, ticket: Ticket): Unit = {
     import subMoleExecutionState.moleExecution.executionContext.services._
     if (!subMoleExecutionState.canceled) {
       updateNbJobs(subMoleExecutionState, 1)
@@ -212,7 +212,7 @@ object MoleExecution extends JavaLogger {
     }
   }
 
-  def jobFinished(subMoleExecutionState: SubMoleExecutionState, job: MoleJob, capsule: Capsule, ticket: Ticket) = {
+  def jobFinished(subMoleExecutionState: SubMoleExecutionState, job: MoleJob, capsule: MoleCapsule, ticket: Ticket) = {
     val mole = subMoleExecutionState.moleExecution.mole
 
     def ctxForHooks = (subMoleExecutionState.moleExecution.implicits + job.context) - Variable.openMOLESeed
@@ -270,7 +270,7 @@ object MoleExecution extends JavaLogger {
   def newChildSubMoleExecution(subMoleExecution: SubMoleExecutionState): SubMoleExecutionState =
     newSubMoleExecution(Some(subMoleExecution), subMoleExecution.moleExecution)
 
-  def finalState(subMoleExecutionState: SubMoleExecutionState, job: MoleJob, state: State, capsule: Capsule, ticket: Ticket) = {
+  def finalState(subMoleExecutionState: SubMoleExecutionState, job: MoleJob, state: State, capsule: MoleCapsule, ticket: Ticket) = {
     job.exception match {
       case Some(e) ⇒
         val error = MoleExecution.JobFailed(job, capsule, e)
@@ -353,7 +353,7 @@ object MoleExecution extends JavaLogger {
 
   def nextJobId(moleExecution: MoleExecution) = UUID.randomUUID
 
-  def group(moleExecution: MoleExecution, moleJob: MoleJob, capsule: Capsule) = {
+  def group(moleExecution: MoleExecution, moleJob: MoleJob, capsule: MoleCapsule) = {
     moleExecution.grouping.get(capsule) match {
       case Some(strategy) ⇒
         val groups = moleExecution.waitingJobs.getOrElseUpdate(capsule, collection.mutable.Map())
@@ -374,7 +374,7 @@ object MoleExecution extends JavaLogger {
     }
   }.map { case (j, c) ⇒ submit(moleExecution, j, c) }
 
-  def submit(moleExecution: MoleExecution, job: Job, capsule: Capsule) =
+  def submit(moleExecution: MoleExecution, job: Job, capsule: MoleCapsule) =
     if (!job.finished) {
       val env = moleExecution.environments.getOrElse(capsule, moleExecution.defaultEnvironment)
       import moleExecution.executionContext.services._
@@ -435,7 +435,7 @@ object MoleExecution extends JavaLogger {
 
   def allJobs(moleExecution: MoleExecution) = moleExecution.subMoleExecutions.values.flatMap(_.jobs.toVector.map { case (mj, c) ⇒ c -> mj })
 
-  def capsuleStatuses(moleExecution: MoleExecution, jobs: Seq[(Capsule, MoleJob)], completed: Map[Capsule, Long]): CapsuleStatuses = {
+  def capsuleStatuses(moleExecution: MoleExecution, jobs: Seq[(MoleCapsule, MoleJob)], completed: Map[MoleCapsule, Long]): CapsuleStatuses = {
 
     val runningSet: java.util.HashSet[UUID] = {
       def submissionEnvironments = moleExecution.environments.values.toSeq.collect { case e: SubmissionEnvironment ⇒ e }
@@ -454,10 +454,10 @@ object MoleExecution extends JavaLogger {
 
     def isRunningOnEnvironment(moleJob: MoleJob): Boolean = runningSet.contains(moleJob.id)
 
-    val ready = collection.mutable.Map[Capsule, Long]()
-    val running = collection.mutable.Map[Capsule, Long]()
+    val ready = collection.mutable.Map[MoleCapsule, Long]()
+    val running = collection.mutable.Map[MoleCapsule, Long]()
 
-    def increment(map: collection.mutable.Map[Capsule, Long], key: Capsule) = {
+    def increment(map: collection.mutable.Map[MoleCapsule, Long], key: MoleCapsule) = {
       val value = map.getOrElse(key, 0L)
       map.update(key, value + 1)
     }
@@ -493,7 +493,7 @@ object MoleExecution extends JavaLogger {
 
     var nbJobs = 0
     var children = collection.mutable.TreeMap[SubMoleExecution, SubMoleExecutionState]()
-    var jobs = collection.mutable.TreeMap[MoleJob, Capsule]()
+    var jobs = collection.mutable.TreeMap[MoleJob, MoleCapsule]()
     var canceled = false
     val onFinish = collection.mutable.ListBuffer[(SubMoleExecutionState ⇒ Any)]()
     val masterCapsuleRegistry = new MasterCapsuleRegistry
@@ -528,11 +528,11 @@ sealed trait MoleExecutionMessage
 
 object MoleExecutionMessage {
   case class PerformTransition(subMoleExecution: SubMoleExecution)(val operation: SubMoleExecutionState ⇒ Unit) extends MoleExecutionMessage
-  case class JobFinished(subMoleExecution: SubMoleExecution)(val job: MoleJob, val state: State, val capsule: Capsule, val ticket: Ticket) extends MoleExecutionMessage
+  case class JobFinished(subMoleExecution: SubMoleExecution)(val job: MoleJob, val state: State, val capsule: MoleCapsule, val ticket: Ticket) extends MoleExecutionMessage
   case class WithMoleExecutionSate(operation: MoleExecution ⇒ Unit) extends MoleExecutionMessage
   case class StartMoleExecution(context: Option[Context]) extends MoleExecutionMessage
   case class CancelMoleExecution() extends MoleExecutionMessage
-  case class RegisterJob(subMoleExecution: SubMoleExecutionState, job: MoleJob, capsule: Capsule) extends MoleExecutionMessage
+  case class RegisterJob(subMoleExecution: SubMoleExecutionState, job: MoleJob, capsule: MoleCapsule) extends MoleExecutionMessage
   case class CleanMoleExcution() extends MoleExecutionMessage
 
   def msgForSubMole(msg: MoleExecutionMessage, subMoleExecutionState: SubMoleExecutionState) = msg match {
@@ -595,8 +595,8 @@ class MoleExecution(
   val mole:                        Mole,
   val sources:                     Sources,
   val hooks:                       Hooks,
-  val environmentProviders:        Map[Capsule, EnvironmentProvider],
-  val grouping:                    Map[Capsule, Grouping],
+  val environmentProviders:        Map[MoleCapsule, EnvironmentProvider],
+  val grouping:                    Map[MoleCapsule, Grouping],
   val defaultEnvironmentProvider:  LocalEnvironmentProvider,
   val cleanOnFinish:               Boolean,
   val implicits:                   Context,
@@ -633,11 +633,11 @@ class MoleExecution(
 
   private[mole] val newGroup = NewGroup()
 
-  private[mole] val waitingJobs = collection.mutable.Map[Capsule, collection.mutable.Map[MoleJobGroup, ListBuffer[MoleJob]]]()
+  private[mole] val waitingJobs = collection.mutable.Map[MoleCapsule, collection.mutable.Map[MoleJobGroup, ListBuffer[MoleJob]]]()
   private[mole] var nbWaiting = 0
 
   private[mole] val completed = {
-    val map = collection.mutable.Map[Capsule, Long]()
+    val map = collection.mutable.Map[MoleCapsule, Long]()
     map ++= mole.capsules.map(_ -> 0L)
     map
   }
