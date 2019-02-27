@@ -35,7 +35,7 @@ import scala.util.{ Failure, Success, Try }
 
 object Validation {
 
-  def allMoles(mole: Mole, in: Option[(MoleTask, Capsule)] = None): List[(Mole, Option[(MoleTask, Capsule)])] =
+  def allMoles(mole: Mole, in: Option[(MoleTask, MoleCapsule)] = None): List[(Mole, Option[(MoleTask, MoleCapsule)])] =
     (mole, in) ::
       mole.capsules.flatMap(
         c ⇒
@@ -62,7 +62,7 @@ object Validation {
     val implicitMap = prototypesToMap(implicits)
   }
 
-  def taskTypeErrors(mole: Mole)(capsules: Iterable[Capsule], implicits: Iterable[Val[_]], sources: Sources, hooks: Hooks) = {
+  def taskTypeErrors(mole: Mole)(capsules: Iterable[MoleCapsule], implicits: Iterable[Val[_]], sources: Sources, hooks: Hooks) = {
 
     val implicitMap = prototypesToMap(implicits)
 
@@ -149,8 +149,8 @@ object Validation {
     taskTypeErrors(mole)(mole.capsules.filterNot(_ == mole.root), implicits, Sources.empty, Hooks.empty)
 
   def topologyErrors(mole: Mole) = {
-    val seen = new HashMap[Capsule, (List[(List[Capsule], Int)])]
-    val toProcess = new Queue[(Capsule, Int, List[Capsule])]
+    val seen = new HashMap[MoleCapsule, (List[(List[MoleCapsule], Int)])]
+    val toProcess = new Queue[(MoleCapsule, Int, List[MoleCapsule])]
 
     toProcess.enqueue((mole.root, 0, List.empty))
     seen(mole.root) = List((List.empty → 0))
@@ -174,7 +174,7 @@ object Validation {
       } ++ (mole.transitions.map(_.start).toSet -- seen.keys).toVector.map { capsule ⇒ UnreachableCapsuleProblem(capsule) }
   }
 
-  def moleTaskTopologyError(moleTask: MoleTask, capsule: Capsule) = {
+  def moleTaskTopologyError(moleTask: MoleTask, capsule: MoleCapsule) = {
     moleTask.mole.level(moleTask.last) match {
       case 0 ⇒ List()
       case l ⇒ List(MoleTaskLastCapsuleProblem(capsule, moleTask, l))
@@ -239,7 +239,7 @@ object Validation {
     (moleTask.mole.root.inputs(moleTask.mole, Sources.empty, Hooks.empty).toList ++
       moleTask.inputs).map(i ⇒ i.name → i).toMap[String, Val[_]]
 
-  def moleTaskImplicitsErrors(moleTask: MoleTask, capsule: Capsule) = {
+  def moleTaskImplicitsErrors(moleTask: MoleTask, capsule: MoleCapsule) = {
     val inputs = moleTaskInputMaps(moleTask)
     moleTask.implicits.filterNot(inputs.contains).map(i ⇒ MissingMoleTaskImplicit(capsule, i))
   }

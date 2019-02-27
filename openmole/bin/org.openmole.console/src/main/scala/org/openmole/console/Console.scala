@@ -24,11 +24,11 @@ import org.openmole.core.preference.Preference
 import org.openmole.core.project._
 import org.openmole.core.tools.io.Prettifier._
 import org.openmole.tool.crypto.Cypher
-import org.openmole.tool.file._
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.core.services._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workspace.NewFile
+import org.openmole.core.dsl._
 
 import scala.annotation.tailrec
 import scala.util._
@@ -127,7 +127,7 @@ class Console(script: Option[String] = None) {
             Try(compiled.eval) match {
               case Success(res) ⇒
                 MoleServices.create
-                val ex = res.toExecution()
+                val ex = dslToPuzzle(res).toExecution()
                 Try(ex.run) match {
                   case Failure(e) ⇒
                     println(e.stackString)

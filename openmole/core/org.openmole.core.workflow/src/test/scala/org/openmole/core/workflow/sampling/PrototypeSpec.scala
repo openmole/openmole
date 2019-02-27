@@ -15,14 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.data
+package org.openmole.core.workflow.sampling
 
 import org.openmole.core.context.Val
 import org.scalatest._
-import org.scalatest.junit._
-
-import scala.collection.mutable.ListBuffer
-import org.openmole.core.workflow.dsl._
 
 class PrototypeSpec extends FlatSpec with Matchers {
   "ToArray of dim 0" should "return the prototype itself" in {

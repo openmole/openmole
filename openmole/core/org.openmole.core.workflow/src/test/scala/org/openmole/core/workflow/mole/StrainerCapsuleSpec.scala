@@ -18,10 +18,8 @@
 package org.openmole.core.workflow.mole
 
 import org.openmole.core.context.Val
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
-import org.openmole.core.workflow.data._
 import org.openmole.core.workflow.task.EmptyTask
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.puzzle._
@@ -34,59 +32,42 @@ class StrainerCapsuleSpec extends FlatSpec with Matchers {
   import org.openmole.core.workflow.tools.Stubs._
 
   "The strainer capsule" should "let the data pass through" in {
-    val p = Val[String]("p")
+    val p = Val[String]
 
-    val t1 = TestTask { _ + (p → "Test") } set (
-      name := "Test write",
-      outputs += p
-    )
-
+    val t1 = TestTask { _ + (p → "Test") } set (outputs += p)
     val strainer = EmptyTask()
 
     val t2 = TestTask { context ⇒
       context(p) should equal("Test")
       context
-    } set (
-      name := "Test read",
-      inputs += p
-    )
+    } set (inputs += p)
 
-    val t1c = Capsule(t1)
-    val strainerC = Capsule(strainer, strain = true)
-    val t2c = Capsule(t2)
-
-    val ex = t1c -- strainerC -- t2c
+    val ex = t1 -- Strain(strainer) -- t2
     ex.run
   }
 
   "The strainer capsule" should "let the data pass through even if linked with a data channel to the root" in {
-    val p = Val[String]("p")
+    @volatile var executed = false
+    val p = Val[String]
 
-    val root = StrainerCapsule(EmptyTask())
+    val root = EmptyTask()
 
-    val t1 =
-      TestTask { _ + (p → "Test") } set (
-        name := "Test write",
-        outputs += p
-      )
+    val t1 = TestTask { _ + (p → "Test") } set (outputs += p)
 
-    val tNone = Capsule(EmptyTask(), strain = true)
-    val tNone2 = Capsule(EmptyTask(), strain = true)
+    val tNone = EmptyTask()
+    val tNone2 = EmptyTask()
 
     val strainer = EmptyTask()
 
     val t2 = TestTask { context ⇒
       context(p) should equal("Test")
+      executed = true
       context
-    } set (
-      name := "Test read",
-      inputs += p
-    )
+    } set (inputs += p)
 
-    val strainerC = Slot(Capsule(strainer, strain = true))
-
-    val ex = (root -- tNone -- (Capsule(t1), tNone2) -- strainerC -- t2) & (root oo strainerC)
+    val ex = (Strain(root) -- Strain(tNone) -- (t1, Strain(tNone2)) -- Strain(strainer) -- t2) & (root oo strainer)
     ex.run
+    executed should equal(true)
   }
 
 }

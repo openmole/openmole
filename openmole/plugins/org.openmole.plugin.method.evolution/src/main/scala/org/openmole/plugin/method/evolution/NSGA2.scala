@@ -281,12 +281,11 @@ object NSGA2 {
 object NSGA2Evolution {
 
   import org.openmole.core.dsl._
-  import org.openmole.core.workflow.puzzle._
 
   def apply(
     genome:       Genome,
     objectives:   Objectives,
-    evaluation:   Puzzle,
+    evaluation:   DSL,
     termination:  OMTermination,
     mu:           Int                          = 200,
     stochastic:   OptionalArgument[Stochastic] = None,

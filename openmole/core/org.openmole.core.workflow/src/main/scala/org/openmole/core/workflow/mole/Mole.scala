@@ -25,10 +25,10 @@ import scala.collection._
 
 object Mole {
 
-  def nextCapsules(mole: Mole)(from: Capsule, lvl: Int) =
+  def nextCapsules(mole: Mole)(from: MoleCapsule, lvl: Int) =
     nextTransitions(mole)(from, lvl).map { case (t, lvl) ⇒ t.end.capsule → lvl }
 
-  def nextTransitions(mole: Mole)(from: Capsule, lvl: Int) =
+  def nextTransitions(mole: Mole)(from: MoleCapsule, lvl: Int) =
     mole.outputTransitions(from).map {
       case t: IAggregationTransition    ⇒ t → (lvl - 1)
       case t: IEndExplorationTransition ⇒ t → (lvl - 1)
@@ -57,13 +57,13 @@ object Mole {
 }
 
 case class Mole(
-  root:         Capsule,
+  root:         MoleCapsule,
   transitions:  Iterable[ITransition] = Iterable.empty,
   dataChannels: Iterable[DataChannel] = Iterable.empty,
   inputs:       PrototypeSet          = PrototypeSet.empty
 ) {
 
-  lazy val slots = (Slot(root) :: transitions.map(_.end).toList).groupBy(_.capsule).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
+  lazy val slots = (TransitionSlot(root) :: transitions.map(_.end).toList).groupBy(_.capsule).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
   lazy val capsules = slots.keys
   lazy val inputTransitions = transitions.groupBy(_.end).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
   lazy val outputTransitions = transitions.groupBy(_.start).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
@@ -71,5 +71,5 @@ case class Mole(
   lazy val outputDataChannels = dataChannels.groupBy(_.start).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
 
   lazy val levels = Mole.levels(this)
-  def level(c: Capsule) = levels(c)
+  def level(c: MoleCapsule) = levels(c)
 }

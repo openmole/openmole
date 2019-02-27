@@ -27,7 +27,7 @@ import org.openmole.core.workflow.validation.TypeUtil._
 
 object ITransition {
 
-  def nextTaskReady(end: Slot)(ticket: Ticket, registry: MoleExecution.TransitionRegistry, mole: Mole): Boolean = mole.inputTransitions(end).forall(registry.isRegistred(_, ticket))
+  def nextTaskReady(end: TransitionSlot)(ticket: Ticket, registry: MoleExecution.TransitionRegistry, mole: Mole): Boolean = mole.inputTransitions(end).forall(registry.isRegistred(_, ticket))
 
   def submitNextJobsIfReady(transition: ITransition)(context: Iterable[Variable[_]], ticket: Ticket, subMoleState: SubMoleExecutionState) = {
     val mole = subMoleState.moleExecution.mole
@@ -65,7 +65,7 @@ trait ITransition {
    *
    * @return the starting capsule of this transition
    */
-  def start: Capsule
+  def start: MoleCapsule
 
   /**
    *
@@ -73,7 +73,7 @@ trait ITransition {
    *
    * @return the ending capsule of this transition
    */
-  def end: Slot
+  def end: TransitionSlot
 
   /**
    *

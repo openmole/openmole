@@ -36,7 +36,6 @@ class Activator extends PluginInfoActivator {
         Pattern(objectName(MasterSlave)),
         Pattern(objectName(Skip)),
         Pattern(objectName(Sequence)),
-        Pattern(objectName(Strain)),
         Pattern(objectName(Switch)),
         Pattern(objectName(While))
       )

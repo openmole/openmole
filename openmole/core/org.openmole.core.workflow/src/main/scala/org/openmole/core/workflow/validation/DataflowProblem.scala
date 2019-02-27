@@ -18,14 +18,14 @@
 package org.openmole.core.workflow.validation
 
 import org.openmole.core.context.{ Val, ValType }
-import org.openmole.core.workflow.mole.{ Capsule, Hook, Source }
-import org.openmole.core.workflow.transition.Slot
+import org.openmole.core.workflow.mole.{ MoleCapsule, Hook, Source }
+import org.openmole.core.workflow.transition.TransitionSlot
 import org.openmole.core.workflow.validation.TypeUtil.InvalidType
 
 object DataflowProblem {
 
   trait SlotDataflowProblem extends DataflowProblem {
-    def slot: Slot
+    def slot: TransitionSlot
     def capsule = slot.capsule
   }
 
@@ -38,7 +38,7 @@ object DataflowProblem {
   }
 
   case class WrongType(
-    slot:     Slot,
+    slot:     TransitionSlot,
     expected: Val[_],
     provided: Val[_]
   ) extends SlotDataflowProblem {
@@ -47,7 +47,7 @@ object DataflowProblem {
   }
 
   case class MissingInput(
-    slot: Slot,
+    slot: TransitionSlot,
     data: Val[_]
   ) extends SlotDataflowProblem {
 
@@ -55,7 +55,7 @@ object DataflowProblem {
   }
 
   case class DuplicatedName(
-    capsule:   Capsule,
+    capsule:   MoleCapsule,
     name:      String,
     prototype: Iterable[Val[_]],
     slotType:  SlotType
@@ -65,7 +65,7 @@ object DataflowProblem {
   }
 
   case class IncoherentTypesBetweenSlots(
-    capsule: Capsule,
+    capsule: MoleCapsule,
     name:    String,
     types:   Iterable[ValType[_]]
   ) extends DataflowProblem {
@@ -74,7 +74,7 @@ object DataflowProblem {
   }
 
   case class IncoherentTypeAggregation(
-    slot:   Slot,
+    slot:   TransitionSlot,
     `type`: InvalidType
   ) extends SlotDataflowProblem {
     override def toString = s"Cannot aggregate type for slot ${slot}, the incoming data type are inconsistent (it may be because variables with the same name but not the same type reach the slot): ${`type`}."
@@ -83,7 +83,7 @@ object DataflowProblem {
   sealed trait SourceProblem extends SlotDataflowProblem
 
   case class MissingSourceInput(
-    slot:   Slot,
+    slot:   TransitionSlot,
     source: Source,
     input:  Val[_]
   ) extends SourceProblem {
@@ -92,7 +92,7 @@ object DataflowProblem {
   }
 
   case class WrongSourceType(
-    slot:     Slot,
+    slot:     TransitionSlot,
     source:   Source,
     expected: Val[_],
     provided: Val[_]
@@ -104,7 +104,7 @@ object DataflowProblem {
   sealed trait HookProblem extends DataflowProblem
 
   case class MissingHookInput(
-    capsule: Capsule,
+    capsule: MoleCapsule,
     hook:    Hook,
     input:   Val[_]
   ) extends HookProblem {
@@ -112,7 +112,7 @@ object DataflowProblem {
     override def toString = s"Input $input is missing for misc $hook"
   }
   case class WrongHookType(
-    capsule: Capsule,
+    capsule: MoleCapsule,
     hook:    Hook,
     input:   Val[_],
     found:   Val[_]
@@ -122,20 +122,20 @@ object DataflowProblem {
   }
 
   case class MissingMoleTaskImplicit(
-    capsule:    Capsule,
+    capsule:    MoleCapsule,
     `implicit`: String
   ) extends DataflowProblem {
 
     override def toString = s"Implicit ${`implicit`} not found in input of $capsule"
   }
 
-  case class MoleTaskDataFlowProblem(capsule: Capsule, problem: DataflowProblem) extends DataflowProblem {
+  case class MoleTaskDataFlowProblem(capsule: MoleCapsule, problem: DataflowProblem) extends DataflowProblem {
     override def toString = s"Error in mole task $capsule: $problem"
   }
 
 }
 
 trait DataflowProblem extends Problem {
-  def capsule: Capsule
+  def capsule: MoleCapsule
 }
 
