@@ -19,12 +19,8 @@ package org.openmole.core.workflow
 
 package composition {
 
-  import java.util.UUID
-
-  import cats.data.WriterT
   import org.openmole.core.context.{ Context, Val }
   import org.openmole.core.expansion.Condition
-  import org.openmole.core.tools.obj.Id
   import org.openmole.core.workflow.builder.DefinitionScope
   import org.openmole.core.workflow.execution.{ EnvironmentProvider, LocalEnvironmentProvider }
   import org.openmole.core.workflow.mole.{ Grouping, Hook, MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source }
@@ -457,6 +453,7 @@ package composition {
         def apply(t: T) = f(t)
       }
 
+      implicit def dslToDSL = ToDSL[DSL](identity)
       implicit def taskToTransitionDSL = ToDSL[Task](t ⇒ TaskNodeDSL(TaskNode(t)))
       implicit def taskInNodeToTransitionDSL = ToDSL[TaskNode](t ⇒ TaskNodeDSL(t))
       implicit def transitionDSLSelectorToTransitionDSL[HL <: HList](implicit transitionDSLSelector: DSLSelector[HL]) = ToDSL[HL](t ⇒ transitionDSLSelector(t))
@@ -472,7 +469,6 @@ package composition {
       }
 
       implicit def transitionDSLToMole = ToMole[DSL](t ⇒ dslToPuzzle(t).toMole)
-
       implicit def toTransitionDSLToMoleExecution[T: ToDSL] = ToMole[T] { t ⇒ transitionDSLToMole.apply(implicitly[ToDSL[T]].apply(t)) }
     }
 
@@ -485,8 +481,7 @@ package composition {
         def apply(t: T) = f(t)
       }
 
-      implicit def transitionDSLToMoleExecution(implicit moleServices: MoleServices) = ToMoleExecution[DSL](t ⇒ dslToPuzzle(t).toExecution)
-      implicit def toDSLToMoleExecution[T: ToDSL](implicit moleServices: MoleServices) = ToMoleExecution[T] { t ⇒ transitionDSLToMoleExecution.apply(implicitly[ToDSL[T]].apply(t)) }
+      implicit def toDSLToMoleExecution[T: ToDSL](implicit moleServices: MoleServices) = ToMoleExecution[T] { t ⇒ dslToPuzzle(implicitly[ToDSL[T]].apply(t)).toExecution }
     }
 
     trait ToMoleExecution[-T] {
@@ -501,7 +496,6 @@ package composition {
     implicit def toOptionalDSL[T: ToDSL](t: T) = OptionalArgument(Some(toDSL(t)))
     implicit def toMole[T: ToMole](t: T) = implicitly[ToMole[T]].apply(t)
     implicit def toMoleExecution[T: ToMoleExecution](t: T) = implicitly[ToMoleExecution[T]].apply(t)
-    implicit def toMole(t: DSL) = dslToPuzzle(t).toMole
 
     implicit class DSLDecorator(t1: DSL) {
       def &(t2: DSL) = new &(t1, t2)
@@ -517,6 +511,9 @@ package composition {
         TypeUtil.receivedTypes(mole, p.sources, p.hooks)(slot) toSeq
       }
     }
+
+
+    /* ----------------- Patterns ------------------- */
 
     object Master {
       def apply(task: Task, persist: Val[_]*) = TaskNode(task, master = true, persist = persist)
