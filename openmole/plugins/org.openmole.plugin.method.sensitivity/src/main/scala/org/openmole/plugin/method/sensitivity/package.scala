@@ -24,10 +24,9 @@ import org.openmole.core.workflow.builder.DefinitionScope
 import org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
 import org.openmole.core.workflow.validation.DataflowProblem._
 import org.openmole.core.workflow.validation._
-import org.openmole.core.workflow.transition.Slot
+import org.openmole.core.workflow.transition.TransitionSlot
 import org.openmole.core.dsl
 import org.openmole.core.dsl._
-import org.openmole.core.workflow.puzzle.Puzzle
 import org.openmole.plugin.method.directsampling._
 
 package object sensitivity {
@@ -78,11 +77,11 @@ package object sensitivity {
    * running the model, and aggregating the result to produce the sensitivty outputs.
    */
   def SensitivityMorris(
-    evaluation:  Puzzle,
+    evaluation:  DSL,
     inputs:      Seq[ScalarOrSequenceOfDouble[_]],
     outputs:     Seq[Val[Double]],
     repetitions: Int,
-    levels:      Int): Puzzle = {
+    levels:      Int) = {
 
     // the sampling for Morris is a One At a Time one,
     // with respect to the user settings for repetitions, levels and inputs
@@ -101,7 +100,7 @@ package object sensitivity {
   }
 
   def SensitivitySaltelli(
-    evaluation:   Puzzle,
+    evaluation:   DSL,
     inputs:  Seq[ScalarOrSequenceOfDouble[_]],
     outputs: Seq[Val[Double]],
     samples:      FromContext[Int]) = {

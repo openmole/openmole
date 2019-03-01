@@ -18,6 +18,7 @@
 package org.openmole.core.workflow.task
 
 import java.io.File
+import java.util.UUID
 
 import org.openmole.core.context._
 import org.openmole.core.event.EventDispatcher
@@ -26,6 +27,7 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.outputredirection._
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
+import org.openmole.core.tools.obj.Id
 import org.openmole.core.workflow.builder.{ InfoConfig, InputOutputConfig }
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.mole.MoleExecution
@@ -55,7 +57,7 @@ object Task {
   def definitionScope(t: Task) = t.info.definitionScope
 }
 
-trait Task <: Name {
+trait Task <: Name with Id {
 
   /**
    *
@@ -77,6 +79,9 @@ trait Task <: Name {
   def outputs = config.outputs
   def defaults = config.defaults
   def name = info.name
+
+  // Make sure 2 tasks with the same content are not equal in the java sens
+  lazy val id = new Object {}
 
 }
 

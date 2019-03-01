@@ -541,10 +541,9 @@ object NichedNSGA2 {
 object NichedNSGA2Evolution {
 
   import org.openmole.core.dsl._
-  import org.openmole.core.workflow.puzzle._
 
   def apply(
-    evaluation:   Puzzle,
+    evaluation:   DSL,
     termination:  OMTermination,
     niche:        Seq[NichedElement],
     genome:       Genome,

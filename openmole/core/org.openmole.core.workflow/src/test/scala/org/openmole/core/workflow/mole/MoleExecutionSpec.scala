@@ -55,36 +55,23 @@ class MoleExecutionSpec extends FlatSpec with Matchers {
     val i = Val[String]("i")
 
     val sampling = ExplicitSampling(i, data)
-
-    val exc = Capsule(ExplorationTask(sampling))
-
     val emptyT = EmptyTask() set ((inputs, outputs) += i)
-
-    val emptyC = Capsule(emptyT)
 
     val testT = TestTask { context ⇒
       context.contains(i.toArray) should equal(true)
       context(i.toArray).sorted.deep should equal(data.toArray.deep)
       context
-    } set (
-      name := "Test",
-      inputs += i.array
-    )
+    } set (inputs += i.array)
 
-    val testC = Capsule(testT)
+    val ex = ExplorationTask(sampling) -< (emptyT by new JobGroupingBy2Test) >- testT
 
-    val ex = exc -< emptyC >- testC
-
-    MoleExecution(
-      mole = ex.toMole,
-      grouping = Map(emptyC → new JobGroupingBy2Test)
-    ).run
+    ex.run
   }
 
   "Implicits" should "be used when input is missing" in {
     val i = Val[String]("i")
     val emptyT = EmptyTask() set (inputs += i)
-    val emptyC = Capsule(emptyT)
+    val emptyC = MoleCapsule(emptyT)
     MoleExecution(mole = Mole(emptyC), implicits = Context(Variable(i, "test"))).run
   }
 }

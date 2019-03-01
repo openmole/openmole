@@ -5,7 +5,7 @@ import sbt._
 
 object Libraries {
 
-  lazy val gridscaleVersion = "2.14"
+  lazy val gridscaleVersion = "2.15"
   lazy val mgoVersion = "3.18"
   lazy val bouncyCastleVersion = "1.60"
   lazy val aceVersion = "01.08.2014"
@@ -19,7 +19,7 @@ object Libraries {
   lazy val boopickleVersion = "1.2.6"
   lazy val scalaAutowireVersion = "0.2.6"
   lazy val sourcecodeVersion = "0.1.4"
-  lazy val scaladgetVersion = "1.2.0"
+  lazy val scaladgetVersion = "1.2.4"
   lazy val sortableVersion = "0.2.1"
   lazy val json4sVersion = "3.5.0"
   lazy val circeVersion = "0.9.1"
@@ -43,7 +43,7 @@ object Libraries {
   lazy val sourcecodeJS = libraryDependencies += "com.lihaoyi" %%% "sourcecode" % sourcecodeVersion
   lazy val scalajsMarked = libraryDependencies += "com.github.karasiq" %%% "scalajs-marked" % "1.0.2"
   lazy val htmlparser2 = libraryDependencies += "com.definitelyscala" %%% "scala-js-htmlparser2" % "1.0.2"
-  lazy val plotlyJS =  libraryDependencies += "com.definitelyscala" %%% "scala-js-plotlyjs" % "1.1.8"
+  lazy val plotlyJS =  libraryDependencies += "com.definitelyscala" %%% "scala-js-plotlyjs" % "1.1.9"
 
   lazy val scalatest = "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 

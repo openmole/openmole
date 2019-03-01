@@ -19,28 +19,19 @@ package org.openmole.plugin.tool.pattern
 import org.openmole.core.context.Val
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.transition._
-
-import shapeless._
 
 object MasterSlave {
 
   def apply(
-    bootstrap: Puzzle,
+    bootstrap: DSL,
     master:    Task,
-    slave:     Puzzle,
+    slave:     DSL,
     state:     Seq[Val[_]],
     slaves:    OptionalArgument[Int] = None
-  ): Puzzle = {
-    val masterCapsule = MasterCapsule(master, state: _*)
-    val masterSlot = Slot(masterCapsule)
-    val slaveSlot2 = Slot(slave.first)
-    val puzzle = (bootstrap -< slave -- masterSlot) & (masterSlot -<- slaveSlot2) & (bootstrap oo (masterSlot, state: _*))
-    puzzle :: Elements(masterSlot, slave) :: HNil
+  ): DSL = {
+    val masterCapsule = Master(master, persist = state: _*)
+    (bootstrap -< slave -- masterCapsule) & (masterCapsule -<- Slot(slave) slaves slaves) & (bootstrap oo masterCapsule keep (state: _*))
   }
-
-  case class Elements(master: Slot, slave: Puzzle)
 
 }

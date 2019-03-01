@@ -17,33 +17,26 @@
 package org.openmole.plugin.tool.pattern
 
 import org.openmole.core.expansion.Condition
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.transition._
+import org.openmole.core.dsl._
 
 object Case {
-  def apply(puzzle: Puzzle): Case = Case(Condition.True, puzzle)
+  def apply(dsl: DSL): Case = Case(Condition.True, dsl)
 }
 
-case class Case(condition: Condition, puzzle: Puzzle)
+case class Case(condition: Condition, dsl: DSL)
 
 object Switch {
   import org.openmole.core.workflow.builder.DefinitionScope.internal._
 
   def apply(cases: Case*) = {
-    val first = Capsule(EmptyTask(), strain = true)
-    val firstSlot = Slot(first)
-    val last = Capsule(EmptyTask(), strain = true)
+    val first = Strain(EmptyTask())
+    val last = Strain(EmptyTask())
 
-    val alternatives: Seq[Puzzle] =
-      cases.map {
-        case Case(condition, puzzle) ⇒
-          firstSlot -- (puzzle when condition) -- last
-      }
+    cases.map {
+      case Case(condition, dsl) ⇒
+        first -- Slot(dsl) when condition
+    }.reduce[DSL](_ & _) -- Slot(last)
 
-    Puzzle.merge(firstSlot, Seq(last), puzzles = alternatives)
   }
 
 }

@@ -382,12 +382,11 @@ object OSE {
 object OSEEvolution {
 
   import org.openmole.core.dsl._
-  import org.openmole.core.workflow.puzzle._
 
   def apply(
     origin:       Seq[OSE.OriginAxe],
     objectives:   Seq[OSE.FitnessPattern],
-    evaluation:   Puzzle,
+    evaluation:   DSL,
     termination:  OMTermination,
     mu:           Int                          = 200,
     genome:       Genome                       = Seq(),

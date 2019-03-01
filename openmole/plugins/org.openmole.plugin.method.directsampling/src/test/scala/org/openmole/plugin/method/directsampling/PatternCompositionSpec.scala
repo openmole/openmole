@@ -70,13 +70,13 @@ class PatternCompositionSpec extends FlatSpec with Matchers {
       ClosureTask("model") {
         (context, _, _) ⇒
           counter.incrementAndGet()
-          context
+          context + (step -> (context(step) + 1))
       } set (
         (inputs, outputs) += (step, seed, l),
         step := 1L
       )
 
-    val loop = While(model, "step < 4", step)
+    val loop = While(model, "step < 4")
 
     val mole =
       DirectSampling(
