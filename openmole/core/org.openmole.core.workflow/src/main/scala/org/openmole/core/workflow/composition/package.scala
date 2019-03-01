@@ -512,7 +512,6 @@ package composition {
       }
     }
 
-
     /* ----------------- Patterns ------------------- */
 
     object Master {
