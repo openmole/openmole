@@ -145,7 +145,7 @@ package object evolution {
     val last = EmptyTask() set ((inputs, outputs) += (t.statePrototype, t.populationPrototype))
 
     val puzzle =
-      (Strain(firstTask) -- masterSlave >| Strain(last) when t.terminatedPrototype) &
+      (Strain(firstTask) -- (masterSlave >| Strain(last) when t.terminatedPrototype)) &
         (firstTask oo wrapped block (t.populationPrototype, t.statePrototype))
 
     val gaDSL = DSLContainer(puzzle, output = Some(masterTask), delegate = wrapped.delegate)
