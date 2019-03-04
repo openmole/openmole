@@ -126,7 +126,7 @@ object Libraries {
   lazy val guava = "com.google.guava" % "guava" % "19.0"
   lazy val spray = "io.spray" %% "spray-json" % "1.3.2"
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
-  lazy val equinoxOSGi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.13.100"
+  lazy val equinoxOSGi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.13.200"
   lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.3.1"
 
   lazy val shapeless = "org.openmole.library" %% "com-chuusai-shapeless" % "2.3.2"
