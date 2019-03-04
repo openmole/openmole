@@ -17,6 +17,7 @@
 package org.openmole.plugin.method.evolution
 
 import org.openmole.core.dsl._
+import org.openmole.core.workflow.mole.Mole
 import org.openmole.core.workflow.validation._
 import org.openmole.plugin.domain.collection._
 import org.scalatest._
@@ -113,33 +114,34 @@ class WorkflowSpec extends FlatSpec with Matchers {
   }
 
   "Steady state workflow" should "have no validation error" in {
-    Validation(nsga2().head.toMole).toList match {
+    val mole: Mole = nsga2().head
+    Validation(mole).toList match {
       case Nil ⇒
-      case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
+      case l   ⇒ sys.error(s"Several validation errors have been found in ${mole}: " + l.mkString("\n"))
     }
 
-    Validation(conflict.head.toMole).toList match {
+    Validation(conflict.head).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
   }
 
   "Island workflow" should "have no validation error" in {
-    val islandEvolutionNSGA2 = IslandEvolution(nsga2(), 10, 50, 100).head.toMole
+    val islandEvolutionNSGA2 = IslandEvolution(nsga2(), 10, 50, 100).head
 
     Validation(islandEvolutionNSGA2).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
 
-    Validation(IslandEvolution(conflict, 10, 50, 100).head.toMole).toList match {
+    Validation(IslandEvolution(conflict, 10, 50, 100).head).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
   }
 
   "Steady state workflow with wrapping" should "have no validation error" in {
-    Validation(nsga2(wrap = false).head.toMole).toList match {
+    Validation(nsga2(wrap = false).head).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
@@ -163,7 +165,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
       termination = 100
     )
 
-    Validation(nsga.toMole).isEmpty should equal(true)
+    Validation(nsga).isEmpty should equal(true)
   }
 
   "NSGAEvolution with island" should "be valid" in {
@@ -178,7 +180,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
       distribution = Island(1)
     )
 
-    Validation(nsga.toMole).isEmpty should equal(true)
+    Validation(nsga).isEmpty should equal(true)
   }
 
   "Stochastic NSGAEvolution" should "be valid" in {
@@ -193,7 +195,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
       stochastic = Stochastic()
     )
 
-    Validation(nsga.toMole).isEmpty should equal(true)
+    Validation(nsga).isEmpty should equal(true)
   }
 
   "Stochastic NSGAEvolution with island" should "be valid" in {
@@ -209,7 +211,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
       distribution = Island(1)
     )
 
-    Validation(nsga.toMole).isEmpty should equal(true)
+    Validation(nsga).isEmpty should equal(true)
   }
 
   "Suggestion" should "be possible" in {
@@ -235,10 +237,11 @@ class WorkflowSpec extends FlatSpec with Matchers {
       evaluation = EmptyTask() set (inputs += a, outputs += b),
       objectives = Seq(b aggregate f),
       genome = Seq(a in (0.0, 1.0)),
-      termination = 100
+      termination = 100,
+      stochastic = Stochastic()
     )
 
-    Validation(nsga.toMole).isEmpty should equal(true)
+    Validation(nsga).isEmpty should equal(true)
   }
 
   "Aggregation" should "be possible in PSE" in {
@@ -250,7 +253,8 @@ class WorkflowSpec extends FlatSpec with Matchers {
       evaluation = EmptyTask(),
       objectives = Seq(a aggregate f in (0.0 to 1.0 by 0.1), b in (0.2 to 0.5 by 0.1)),
       genome = Seq(a in (0.0, 1.0)),
-      termination = 100
+      termination = 100,
+      stochastic = Stochastic()
     )
   }
 
@@ -265,7 +269,8 @@ class WorkflowSpec extends FlatSpec with Matchers {
       evaluation = EmptyTask(),
       objectives = Seq(a aggregate f under 9, b under 3.0),
       genome = Seq(a in (0.0, 1.0)),
-      termination = 100
+      termination = 100,
+      stochastic = Stochastic()
     )
   }
 

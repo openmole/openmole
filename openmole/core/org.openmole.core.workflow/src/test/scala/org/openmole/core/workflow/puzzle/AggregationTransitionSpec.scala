@@ -15,26 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.transition
+package org.openmole.core.workflow.puzzle
 
 import java.util.concurrent.atomic.AtomicInteger
 
 import org.openmole.core.context.Val
-import org.openmole.core.exception._
-import org.openmole.core.workflow.execution._
+import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.workflow.execution.LocalEnvironment
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.transition._
-import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.dsl._
 import org.scalatest._
+import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.sampling.ExplicitSampling
+import org.openmole.core.workflow.transition.TransitionSlot
+import org.openmole.core.workflow.validation.Validation
 
-import scala.collection.mutable.ListBuffer
-import scala.reflect.macros.whitebox
 import scala.util.Try
 
 class AggregationTransitionSpec extends FlatSpec with Matchers {
@@ -45,33 +40,22 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
     @volatile var endCapsExecuted = 0
 
     val data = List("A", "A", "B", "C")
-    val i = Val[String]("i")
-
-    val sampling = new ExplicitSampling(i, data)
-
-    val exc = Capsule(ExplorationTask(sampling))
+    val i = Val[String]
 
     val emptyT = EmptyTask() set ((inputs, outputs) += i)
-
-    val emptyC = Capsule(emptyT)
 
     val testT = TestTask { context ⇒
       context.contains(i.toArray) should equal(true)
       context(i.toArray).sorted.deep should equal(data.toArray.deep)
       endCapsExecuted += 1
       context
-    } set (
-      name := "Test",
-      inputs += i.array
-    )
+    } set (inputs += i.array)
 
-    val testC = Capsule(testT)
+    val mole = ExplicitSampling(i, data) -< emptyT >- testT
 
-    val mole = exc -< emptyC >- testC toMole
-
-    MoleExecution(mole).run
+    mole.run
     endCapsExecuted should equal(1)
-    MoleExecution(mole).run
+    mole.run
     endCapsExecuted should equal(2)
   }
 
@@ -79,29 +63,20 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
     @volatile var endCapsExecuted = 0
 
     val data = List(1, 2, 3, 2)
-    val i = Val[Int]("i")
-
-    val sampling = new ExplicitSampling(i, data)
-
-    val exc = Capsule(ExplorationTask(sampling))
+    val i = Val[Int]
 
     val emptyT = EmptyTask() set ((inputs, outputs) += i)
-    val emptyC = Capsule(emptyT)
 
-    val testT = TestTask { context ⇒
-      context.contains(i.toArray) should equal(true)
-      context(i.toArray).getClass should equal(classOf[Array[Int]])
-      context(i.toArray).sorted.deep should equal(data.sorted.toArray.deep)
-      endCapsExecuted += 1
-      context
-    } set (
-      name := "Test",
-      inputs += i.array
-    )
+    val testT =
+      TestTask { context ⇒
+        context.contains(i.toArray) should equal(true)
+        context(i.toArray).getClass should equal(classOf[Array[Int]])
+        context(i.toArray).sorted.deep should equal(data.sorted.toArray.deep)
+        endCapsExecuted += 1
+        context
+      } set (inputs += i.array)
 
-    val testC = Capsule(testT)
-
-    val ex = exc -< emptyC >- testC
+    val ex = ExplicitSampling(i, data) -< emptyT >- testT
 
     ex.run
     endCapsExecuted should equal(1)
@@ -111,60 +86,44 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
     val endCapsExecuted = new AtomicInteger()
 
     val data = 0 to 1000
-    val i = Val[Int]("i")
-
-    val sampling = new ExplicitSampling(i, data)
-
-    val exc = Capsule(ExplorationTask(sampling))
+    val i = Val[Int]
 
     val emptyT = EmptyTask() set ((inputs, outputs) += i)
 
-    val emptyC = Capsule(emptyT)
+    val testT =
+      TestTask { context ⇒
+        context.contains(i.toArray) should equal(true)
+        context(i.toArray).sorted.deep should equal(data.toArray.deep)
+        endCapsExecuted.incrementAndGet()
+        context
+      } set (inputs += i.array)
 
-    val testT = TestTask { context ⇒
-      context.contains(i.toArray) should equal(true)
-      context(i.toArray).sorted.deep should equal(data.toArray.deep)
-      endCapsExecuted.incrementAndGet()
-      context
-    } set (
-      name := "Test",
-      inputs += i.array
-    )
+    val mole = ExplicitSampling(i, data) -< emptyT >- testT
 
-    val testC = Capsule(testT)
-    val mole = exc -< emptyC >- testC toMole
-
-    MoleExecution(mole).start.cancel
+    mole.start.cancel
     endCapsExecuted.set(0)
-    MoleExecution(mole).run
+    mole.run
     endCapsExecuted.get() should equal(1)
   }
 
   "Aggregation transition" should "not be executed when a task failed in exploration" in {
     val data = 0 to 1000
-    val i = Val[Int]("i")
-    val sampling = new ExplicitSampling(i, data)
-    val exploration = ExplorationTask(sampling)
+    val i = Val[Int]
+
     val endCapsExecuted = new AtomicInteger()
 
     val run =
       TestTask { context ⇒
         if (context(i) == 42) throw new InternalProcessingError("Some error for test")
         context
-      } set (
-        name := "Run",
-        (inputs, outputs) += i
-      )
+      } set ((inputs, outputs) += i)
 
     val test = TestTask { context ⇒
       endCapsExecuted.incrementAndGet()
       context
-    } set (
-      name := "Test",
-      inputs += i.array
-    )
+    } set (inputs += i.array)
 
-    val ex = Try { (exploration -< run >- test).run }
+    Try { (ExplicitSampling(i, data) -< run >- test).run }
 
     endCapsExecuted.get() should equal(0)
   }
@@ -190,7 +149,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
         inputs += v.array
       )
 
-    val ex: MoleExecution = (exploration -< main >- (test, test))
+    val ex = (exploration -< main >- (test, test))
 
     ex.run
 
@@ -199,20 +158,15 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
   "Order" should "be preserved" in {
     def test = {
-      val v = Val[Double]("v")
-      val s = Val[Double]("s")
+      val v = Val[Double]
+      val s = Val[Double]
 
       val executed = new AtomicInteger()
 
       val sampling = 0.0 to 100.0 by 1.0
 
-      def exploration = ExplorationTask(ExplicitSampling(v, sampling))
-
       def main =
-        EmptyTask() set (
-          name := "main",
-          (inputs, outputs) += v
-        )
+        EmptyTask() set ((inputs, outputs) += v)
 
       def test =
         TestTask {
@@ -220,14 +174,11 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
             executed.incrementAndGet()
             ctx(v.toArray).toSeq should equal(sampling)
             ctx
-        } set (
-          name := "mean",
-          inputs += v.array
-        )
+        } set (inputs += v.array)
 
       val env = LocalEnvironment(10)
 
-      (exploration -< (main on env) >- test) run ()
+      ExplicitSampling(v, sampling) -< (main on env) >- test run
 
       executed.get should equal(1)
     }

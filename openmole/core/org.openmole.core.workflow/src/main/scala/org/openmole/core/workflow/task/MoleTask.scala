@@ -30,7 +30,6 @@ import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job.MoleJob
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workspace.NewFile
 import org.openmole.tool.lock._
 import org.openmole.tool.random.Seeder
@@ -40,15 +39,17 @@ object MoleTask {
   implicit def isTask = InputOutputBuilder(MoleTask.config)
   implicit def isInfo = InfoBuilder(MoleTask.info)
 
-  def apply(puzzle: Puzzle)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): MoleTask =
-    apply(puzzle toMole, puzzle.lasts.head)
+  def apply(dsl: DSL)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): MoleTask = {
+    val puzzle = dslToPuzzle(dsl)
+    apply(puzzle.toMole, puzzle.lasts.head)
+  }
 
   /**
    * *
    * @param mole the mole executed by this task.
    * @param last the capsule which returns the results
    */
-  def apply(mole: Mole, last: Capsule)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): MoleTask = {
+  def apply(mole: Mole, last: MoleCapsule)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): MoleTask = {
     val mt = new MoleTask(_mole = mole, last = last, Vector.empty, InputOutputConfig(), InfoConfig())
 
     mt set (
@@ -69,7 +70,7 @@ object MoleTask {
 
 @Lenses case class MoleTask(
   _mole:     Mole,
-  last:      Capsule,
+  last:      MoleCapsule,
   implicits: Vector[String],
   config:    InputOutputConfig,
   info:      InfoConfig

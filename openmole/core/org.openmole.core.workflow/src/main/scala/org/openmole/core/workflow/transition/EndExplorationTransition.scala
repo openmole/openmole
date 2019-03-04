@@ -29,7 +29,7 @@ import org.openmole.tool.lock._
 
 import scala.util.{ Failure, Success, Try }
 
-class EndExplorationTransition(val start: Capsule, val end: Slot, val trigger: Condition, val filter: BlockList = BlockList.empty) extends IEndExplorationTransition with ValidateTransition {
+class EndExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, val trigger: Condition, val filter: BlockList = BlockList.empty) extends IEndExplorationTransition with ValidateTransition {
 
   override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
     import p._

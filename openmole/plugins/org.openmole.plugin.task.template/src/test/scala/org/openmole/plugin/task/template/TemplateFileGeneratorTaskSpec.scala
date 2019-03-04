@@ -19,7 +19,7 @@ package org.openmole.plugin.task.template
 
 import java.io.File
 
-import org.openmole.core.context.{Context, Val}
+import org.openmole.core.context.{ Context, Val }
 import org.openmole.plugin.task.template.TemplateData._
 import org.openmole.tool.hash._
 import org.scalatest._

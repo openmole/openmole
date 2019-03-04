@@ -33,7 +33,7 @@ class HookSpec extends FlatSpec with Matchers {
 
   import org.openmole.core.workflow.tools.Stubs._
 
-  "A hook" should "intercept the execution of a capsule" in {
+  "A hook" should "intercept the execution of a task" in {
     val executed = new AtomicInteger(0)
 
     val p = Val[String]("p")
@@ -44,8 +44,6 @@ class HookSpec extends FlatSpec with Matchers {
         outputs += p
       )
 
-    val t1c = Capsule(t1)
-
     val hook = TestHook { context ⇒
       context.contains(p) should equal(true)
       context(p) should equal("test")
@@ -53,7 +51,7 @@ class HookSpec extends FlatSpec with Matchers {
       context
     }
 
-    val ex = t1c hook hook
+    val ex = t1 hook hook
 
     ex.run
 
@@ -71,8 +69,6 @@ class HookSpec extends FlatSpec with Matchers {
         outputs += p
       )
 
-    val t1c = MasterCapsule(t1)
-
     val hook = TestHook { context ⇒
       context.contains(p) should equal(true)
       context(p) should equal("test")
@@ -80,7 +76,7 @@ class HookSpec extends FlatSpec with Matchers {
       context
     }
 
-    val ex = MoleExecution(Mole(t1c), hooks = List(t1c → hook))
+    val ex = Master(t1) hook hook
 
     ex.run
 

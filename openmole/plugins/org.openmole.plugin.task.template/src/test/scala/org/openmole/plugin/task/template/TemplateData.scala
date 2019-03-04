@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.task.template
 
-import java.io.{File, PrintWriter}
+import java.io.{ File, PrintWriter }
 
 object TemplateData {
 

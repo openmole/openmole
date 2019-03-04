@@ -15,22 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.transition
+package org.openmole.core.workflow.puzzle
 
 import org.openmole.core.context.Val
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.data._
-import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.builder._
-import org.scalatest._
-
-import scala.collection.mutable.ListBuffer
-import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.sampling.ExplicitSampling
+import org.openmole.core.workflow.task._
+import org.scalatest._
 
 class EndExplorationTransitionSpec extends FlatSpec with Matchers {
 
@@ -42,26 +33,17 @@ class EndExplorationTransitionSpec extends FlatSpec with Matchers {
     val data = List("A", "A", "B", "C")
     val i = Val[String]("i")
 
-    val sampling = new ExplicitSampling(i, data)
-
-    val exc = Capsule(ExplorationTask(sampling))
+    val sampling = ExplicitSampling(i, data)
 
     val emptyT = EmptyTask() set ((inputs, outputs) += i)
-
-    val emptyC = Capsule(emptyT)
 
     val testT = TestTask { context ⇒
       context.contains(i) should equal(true)
       endCapsExecuted += 1
       context
-    } set (
-      name := "Test",
-      inputs += i
-    )
+    } set (inputs += i)
 
-    val testC = Capsule(testT)
-
-    val ex = exc -< emptyC >| (testC when "true")
+    val ex = ExplorationTask(sampling) -< (emptyT >| testT when "true")
 
     ex.run
     endCapsExecuted should equal(1)

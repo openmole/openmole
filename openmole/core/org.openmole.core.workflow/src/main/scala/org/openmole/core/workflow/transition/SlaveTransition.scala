@@ -27,7 +27,7 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace.NewFile
 
-class SlaveTransition(start: Capsule, end: Slot, condition: Condition = Condition.True, filter: BlockList = BlockList.empty, slaves: Option[Int] = None) extends ExplorationTransition(start, end, condition, filter) with ISlaveTransition with ValidateTransition {
+class SlaveTransition(start: MoleCapsule, end: TransitionSlot, condition: Condition = Condition.True, filter: BlockList = BlockList.empty, slaves: Option[Int] = None) extends ExplorationTransition(start, end, condition, filter) with ISlaveTransition with ValidateTransition {
 
   override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
     import p._

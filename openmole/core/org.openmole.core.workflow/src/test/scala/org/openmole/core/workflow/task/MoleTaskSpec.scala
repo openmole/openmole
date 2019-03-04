@@ -19,13 +19,13 @@ package org.openmole.core.workflow.task
 
 import org.openmole.core.context.Val
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.workflow.data._
 import org.scalatest._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.sampling.ExplicitSampling
 
 import scala.util.Try
 
@@ -34,17 +34,16 @@ class MoleTaskSpec extends FlatSpec with Matchers {
   import org.openmole.core.workflow.tools.Stubs._
 
   "Implicits" should "work with mole task" in {
-    val i = Val[String]("i")
+    val i = Val[String]
     val emptyT = EmptyTask() set (inputs += i)
-    val emptyC = Capsule(emptyT)
 
     val moleTask =
-      MoleTask(Mole(emptyC), emptyC) set (
+      MoleTask(emptyT) set (
         implicits += i,
         i := "test"
       )
 
-    MoleExecution(Mole(moleTask)).run
+    moleTask run
   }
 
   "MoleTask" should "propagate errors" in {
@@ -54,7 +53,6 @@ class MoleTaskSpec extends FlatSpec with Matchers {
       )
 
     val moleTask = MoleTask(error)
-
     val res = Try { moleTask.run }
 
     res shouldBe a[util.Failure[_]]
@@ -62,19 +60,39 @@ class MoleTaskSpec extends FlatSpec with Matchers {
   }
 
   "MoleTask" should "provide its inputs to the first capsule if it is a strainer" in {
-    val tm1 = Capsule(EmptyTask(), strain = true)
+    @volatile var executed = false
 
-    val i = Val[String]("i")
+    val i = Val[String]
 
-    val emptyT = EmptyTask() set (inputs += i, name := "EmptyT")
-    val emptyC = Capsule(emptyT)
+    val emptyT = TestTask { context ⇒
+      executed = true
+      context
+    } set (inputs += i)
 
-    val moleTask = MoleTask((tm1 -- emptyC) toMole, emptyC) set (
+    val moleTask = MoleTask(Strain(EmptyTask()) -- emptyT) set (
       inputs += i,
       i := "test"
     )
 
-    MoleExecution(Mole(moleTask)).run
+    moleTask run
+
+    executed should equal(true)
+  }
+
+  "MoleTask" should "work with the end exploration transition" in {
+    val data = List("A", "A", "B", "C")
+    val i = Val[String]("i")
+
+    val sampling = ExplicitSampling(i, data)
+
+    val emptyT = EmptyTask() set ((inputs, outputs) += i)
+    val testT = EmptyTask() set ((inputs, outputs) += i)
+
+    val mt = MoleTask(sampling -< (emptyT >| testT when "true"))
+
+    val ex = mt -- testT
+
+    ex.run
   }
 
 }

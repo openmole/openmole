@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Romain Reuillon
+ * Copyright (C) 2010 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,26 +15,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.domain.modifier
+package org.openmole.core.workflow.transition
 
-import org.openmole.core.context.Context
-import org.openmole.core.workflow.domain._
-import org.scalatest._
+import org.openmole.core.workflow.mole._
 
-import scala.util.Random
+object TransitionSlot {
 
-class GroupDomainSpec extends FlatSpec with Matchers {
-
-  "GroupDomain" should "change the values of a domain to an iterable of array" in {
-    implicit val rng = new Random(42)
-
-    val r1 = (1 to 10)
-
-    val md = GroupDomain(r1, 3)
-
-    def it[D](d: D)(implicit domain: Discrete[D, Array[Int]]) = domain.iterator(d).from(Context.empty)(RandomProvider(???))
-
-    it(md).toList.size should equal(4)
+  def apply(c: MoleCapsule): TransitionSlot = new TransitionSlot {
+    val capsule = c
   }
+
+}
+
+trait TransitionSlot {
+
+  /**
+   *
+   * Get the capsule this slot belongs to.
+   *
+   *
+   * @return the capsule this slot belongs to
+   */
+  def capsule: MoleCapsule
+
+  override def toString = s"slot@$hashCode:$capsule"
 
 }

@@ -19,7 +19,6 @@ package org.openmole.core.workflow.sampling
 
 import org.openmole.core.context.{ Val, Variable }
 
-// FIXME remove after moving collection domains to core
 case class ExplicitSampling[T](prototype: Val[T], data: Iterable[T]) extends Sampling {
   override def prototypes = List(prototype)
   override def apply() = data.map { v ⇒ List(Variable(prototype, v)) }.iterator

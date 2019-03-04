@@ -74,8 +74,8 @@ object AggregationTransition {
 
     def oneAggregationTransitionNotPerformed(subMole: SubMoleExecutionState, ticket: Ticket): Boolean = {
       val mole = subMole.moleExecution.mole
-      val alreadySeen = new HashSet[Capsule]
-      val toProcess = new ListBuffer[(Capsule, Int)]
+      val alreadySeen = new HashSet[MoleCapsule]
+      val toProcess = new ListBuffer[(MoleCapsule, Int)]
       toProcess += ((aggregationTransition.start, 0))
 
       while (!toProcess.isEmpty) {
@@ -107,7 +107,7 @@ object AggregationTransition {
 
 }
 
-class AggregationTransition(val start: Capsule, val end: Slot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty, val trigger: Condition = Condition.False) extends IAggregationTransition with ValidateTransition {
+class AggregationTransition(val start: MoleCapsule, val end: TransitionSlot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty, val trigger: Condition = Condition.False) extends IAggregationTransition with ValidateTransition {
 
   override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
     import p._

@@ -21,6 +21,8 @@ package expansion {
 
   trait ExpansionPackage {
     implicit def seqToSeqOfFromContext[T](s: Seq[T])(implicit toFromContext: ToFromContext[T, T]): Seq[FromContext[T]] = s.map(e ⇒ toFromContext(e))
+    type Condition = expansion.Condition
+    lazy val Condition = expansion.Condition
   }
 
 }
