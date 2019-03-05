@@ -88,7 +88,7 @@ class MoleTaskSpec extends FlatSpec with Matchers {
     val emptyT = EmptyTask() set ((inputs, outputs) += i)
     val testT = EmptyTask() set ((inputs, outputs) += i)
 
-    val mt = MoleTask(sampling -< (emptyT >| testT when "true"))
+    val mt = MoleTask(sampling -< (emptyT >| Strain(testT) when "true"))
 
     val ex = mt -- testT
 

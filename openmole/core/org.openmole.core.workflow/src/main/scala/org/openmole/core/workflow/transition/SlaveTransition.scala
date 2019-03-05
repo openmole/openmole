@@ -37,7 +37,8 @@ class SlaveTransition(start: MoleCapsule, end: TransitionSlot, condition: Condit
   override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
     MoleExecutionMessage.PerformTransition(subMole) { subMoleState ⇒
       import executionContext.services._
-      if (condition.from(context) && slaves.map(_ < subMoleState.jobs.size).getOrElse(true)) {
+
+      if (condition.from(context) && slaves.map(subMoleState.jobs.size < _).getOrElse(true)) {
         val samples = ExplorationTransition.exploredSamples(this, context, moleExecution)
 
         ExplorationTransition.submitIn(

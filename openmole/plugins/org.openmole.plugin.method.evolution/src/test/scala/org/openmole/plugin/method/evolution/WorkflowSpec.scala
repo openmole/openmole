@@ -17,7 +17,9 @@
 package org.openmole.plugin.method.evolution
 
 import org.openmole.core.dsl._
+import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.mole.Mole
+import org.openmole.core.workflow.task.FromContextTask
 import org.openmole.core.workflow.validation._
 import org.openmole.plugin.domain.collection._
 import org.scalatest._
@@ -111,6 +113,31 @@ class WorkflowSpec extends FlatSpec with Matchers {
       termination = 10
     )
     IslandEvolution(steady, 10, 10)
+  }
+
+  "Evolution" should "run" in {
+    @volatile var executed = 0
+
+    val a = Val[Double]
+
+    val testTask =
+      FromContextTask("test") { p ⇒
+        import p._
+        executed += 1
+        context
+      } set ((inputs, outputs) += a)
+
+    val nsga = NSGA2Evolution(
+      evaluation = testTask,
+      objectives = Seq(a),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100,
+      parallelism = 10
+    )
+
+    nsga run ()
+
+    executed should be >= 100
   }
 
   "Steady state workflow" should "have no validation error" in {

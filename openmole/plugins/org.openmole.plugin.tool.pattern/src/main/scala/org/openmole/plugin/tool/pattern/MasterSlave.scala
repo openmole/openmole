@@ -17,21 +17,37 @@
 package org.openmole.plugin.tool.pattern
 
 import org.openmole.core.context.Val
+import org.openmole.core.dsl.DSL
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 
 object MasterSlave {
 
+  import org.openmole.core.workflow.builder.DefinitionScope.internal._
+
   def apply(
     bootstrap: DSL,
     master:    Task,
     slave:     DSL,
     state:     Seq[Val[_]],
-    slaves:    OptionalArgument[Int] = None
+    slaves:    OptionalArgument[Int]       = None,
+    stop:      OptionalArgument[Condition] = None
   ): DSL = {
     val masterCapsule = Master(master, persist = state: _*)
-    (bootstrap -< slave -- masterCapsule) & (masterCapsule -<- Slot(slave) slaves slaves) & (bootstrap oo masterCapsule keep (state: _*))
+    val masterSlaveLast = Strain(EmptyTask())
+
+    val skel = stop.option match {
+      case Some(s) ⇒ bootstrap -< slave -- (masterCapsule >| masterSlaveLast when s)
+      case None    ⇒ bootstrap -< slave -- masterCapsule
+    }
+
+    val wf =
+      skel &
+        (masterCapsule -<- Slot(slave) slaves slaves) &
+        (bootstrap oo masterCapsule keep (state: _*))
+
+    DSLContainer(wf, output = Some(master), delegate = DSL.tasks(slave).map(_.task))
   }
 
 }

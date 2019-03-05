@@ -40,7 +40,7 @@ object TopologyProblem {
     level:   Int
   ) extends TopologyProblem {
 
-    override def toString = "LevelProblem: " + capsule + ", " + path.mkString(", ") + " has a negative level " + level
+    override def toString = "LevelProblem: " + capsule + " has a negative level " + level + " following the path " + path.mkString(", ")
   }
 
   case class DataChannelNegativeLevelProblem(dataChannel: DataChannel) extends TopologyProblem {

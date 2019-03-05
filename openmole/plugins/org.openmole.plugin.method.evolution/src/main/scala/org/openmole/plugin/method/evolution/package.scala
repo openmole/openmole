@@ -19,6 +19,7 @@ package org.openmole.plugin.method
 
 import org.openmole.core.dsl._
 import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.task.FromContextTask
 import org.openmole.plugin.task.tools._
 import org.openmole.plugin.tool.pattern
 import org.openmole.plugin.tool.pattern.MasterSlave
@@ -132,20 +133,20 @@ package object evolution {
 
     val masterTask = MoleTask(master) set (exploredOutputs += t.genomePrototype.toArray)
 
-    val masterSlave = MasterSlave(
-      randomGenomes,
-      masterTask,
-      scaleGenome -- Strain(wrapped),
-      state = Seq(t.populationPrototype, t.statePrototype),
-      slaves = parallelism
-    )
+    val masterSlave =
+      MasterSlave(
+        randomGenomes,
+        master = masterTask,
+        slave = scaleGenome -- Strain(wrapped),
+        state = Seq(t.populationPrototype, t.statePrototype),
+        slaves = parallelism,
+        stop = t.terminatedPrototype
+      )
 
     val firstTask = InitialStateTask(algorithm)
 
-    val last = EmptyTask() set ((inputs, outputs) += (t.statePrototype, t.populationPrototype))
-
     val puzzle =
-      (Strain(firstTask) -- (masterSlave >| Strain(last) when t.terminatedPrototype)) &
+      (Strain(firstTask) -- masterSlave) &
         (firstTask oo wrapped block (t.populationPrototype, t.statePrototype))
 
     val gaDSL = DSLContainer(puzzle, output = Some(masterTask), delegate = wrapped.delegate)
@@ -211,15 +212,14 @@ package object evolution {
       masterTask,
       slave,
       state = Seq(t.populationPrototype, t.statePrototype),
-      slaves = parallelism
+      slaves = parallelism,
+      stop = t.terminatedPrototype
     )
 
     val first = InitialStateTask(algorithm)
 
-    val last = EmptyTask() set ((inputs, outputs) += (t.populationPrototype, t.statePrototype))
-
     val puzzle =
-      (Strain(first) -- masterSlave >| Strain(last) when t.terminatedPrototype) &
+      (Strain(first) -- masterSlave) &
         (first oo islandTask block (t.populationPrototype, t.statePrototype))
 
     val gaPuzzle = DSLContainer(puzzle, output = Some(masterTask), delegate = Vector(islandTask))

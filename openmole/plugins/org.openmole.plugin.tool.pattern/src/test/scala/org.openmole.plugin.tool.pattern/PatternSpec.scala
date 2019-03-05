@@ -47,7 +47,14 @@ class PatternSpec extends FlatSpec with Matchers {
       context
     } set (inputs += i)
 
-    val ex = MasterSlave(sampling, master, slave, Seq(state)) >| EmptyTask() when "state > 10"
+    val ex =
+      MasterSlave(
+        sampling,
+        master,
+        slave,
+        Seq(state),
+        stop = "state > 10"
+      )
 
     ex.run
     slaveExecuted should be >= 10
@@ -100,22 +107,6 @@ class PatternSpec extends FlatSpec with Matchers {
 
     testExecuted should equal(2)
     lastExecuted should equal(2)
-  }
-
-  "While" should "execute the task multiple times" in {
-    @volatile var testExecuted = 0
-
-    val i = Val[Int]
-
-    val test = FromContextTask("test") { p ⇒
-      import p._
-      testExecuted += 1
-      context + (i -> (context(i) + 1))
-    } set ((inputs, outputs) += i, i := 0)
-
-    While(test, "i < 10") run ()
-
-    testExecuted should equal(10)
   }
 
   "While" should "execute the task multiple times" in {
