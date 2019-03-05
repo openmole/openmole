@@ -26,7 +26,7 @@ import org.openmole.core.workflow.tools.{ Default, DefaultSet }
 import org.openmole.core.workflow.validation.DataflowProblem._
 import org.openmole.core.workflow.validation.TopologyProblem._
 import org.openmole.core.workflow.validation.TypeUtil._
-import org.openmole.core.workflow.validation.ValidationProblem.{ HookValidationProblem, TaskValidationProblem }
+import org.openmole.core.workflow.validation.ValidationProblem.{ HookValidationProblem, TaskValidationProblem, TransitionValidationProblem }
 import org.openmole.core.workspace.NewFile
 
 import scala.collection.immutable.TreeMap
@@ -206,9 +206,10 @@ object Validation {
         transition ← mole.transitions.collect { case x: ValidateTransition ⇒ x }
       } yield {
         val inputs = TypeUtil.validTypes(mole, sources, hooks)(transition.end, _ == transition)
-        transition.validate(inputs.toSeq.map(_.toPrototype)).apply
+        TransitionValidationProblem(transition, transition.validate(inputs.toSeq.map(_.toPrototype)).apply)
       }
-    errors.flatten
+
+    errors
   }
 
   def incoherentTypeAggregation(mole: Mole, sources: Sources, hooks: Hooks) =
@@ -319,7 +320,7 @@ object Validation {
     noTransitionProblems ++ negativeLevelProblem
   }
 
-  def apply(mole: Mole, implicits: Context = Context.empty, sources: Sources = Sources.empty, hooks: Hooks = Hooks.empty)(implicit newFile: NewFile, fileService: FileService) = {
+  def apply(mole: Mole, implicits: Context = Context.empty, sources: Sources = Sources.empty, hooks: Hooks = Hooks.empty)(implicit newFile: NewFile, fileService: FileService): List[Problem] =
     allMoles(mole).flatMap {
       case (m, mt) ⇒
         def moleTaskImplicits(moleTask: MoleTask) = {
@@ -349,6 +350,5 @@ object Validation {
           taskValidationErrors(m) ++
           transitionValidationErrors(m, sources, hooks)
     }
-  }
 
 }

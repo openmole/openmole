@@ -22,6 +22,7 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.tools.io.Prettifier
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.transition._
 import org.openmole.core.workspace.NewFile
 
 trait ValidateTask {
@@ -46,6 +47,9 @@ object ValidationProblem {
     override def toString = s"Errors in validation of hook $hook:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).stackStringWithMargin).mkString("\n")
   }
 
+  case class TransitionValidationProblem(transition: ITransition, errors: Seq[Throwable]) extends ValidationProblem {
+    override def toString = s"Errors in validation of transition $transition:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).stackStringWithMargin).mkString("\n")
+  }
 }
 
 trait ValidationProblem extends Problem
