@@ -206,10 +206,13 @@ object Validation {
         transition ← mole.transitions.collect { case x: ValidateTransition ⇒ x }
       } yield {
         val inputs = TypeUtil.validTypes(mole, sources, hooks)(transition.end, _ == transition)
-        TransitionValidationProblem(transition, transition.validate(inputs.toSeq.map(_.toPrototype)).apply)
+        transition.validate(inputs.toSeq.map(_.toPrototype)).apply match {
+          case ts if !ts.isEmpty ⇒ Some(TransitionValidationProblem(transition, ts))
+          case _                 ⇒ None
+        }
       }
 
-    errors
+    errors.flatten
   }
 
   def incoherentTypeAggregation(mole: Mole, sources: Sources, hooks: Hooks) =
