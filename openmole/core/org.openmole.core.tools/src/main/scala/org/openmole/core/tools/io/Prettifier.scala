@@ -59,6 +59,10 @@ object Prettifier extends JavaLogger {
       sw.toString
     }
 
+    def messageAndStackStringWithMargin =
+      s"""|${t.getClass}: ${t.getMessage}
+       """ + stackStringWithMargin
+
     def stackStringWithMargin = t.stackString.split("\n").map(" | " + _).mkString("\n")
   }
 

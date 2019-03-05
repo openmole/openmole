@@ -40,15 +40,15 @@ trait ValidateTransition {
 object ValidationProblem {
 
   case class TaskValidationProblem(task: Task, errors: Seq[Throwable]) extends ValidationProblem {
-    override def toString = s"Errors in validation of task $task:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).stackStringWithMargin).mkString("\n")
+    override def toString = s"Errors in validation of task $task:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).messageAndStackStringWithMargin).mkString("\n")
   }
 
   case class HookValidationProblem(hook: Hook, errors: Seq[Throwable]) extends ValidationProblem {
-    override def toString = s"Errors in validation of hook $hook:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).stackStringWithMargin).mkString("\n")
+    override def toString = s"Errors in validation of hook $hook:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).messageAndStackStringWithMargin).mkString("\n")
   }
 
   case class TransitionValidationProblem(transition: ITransition, errors: Seq[Throwable]) extends ValidationProblem {
-    override def toString = s"Errors in validation of transition $transition:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).stackStringWithMargin).mkString("\n")
+    override def toString = s"Errors in validation of transition $transition:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).messageAndStackStringWithMargin).mkString("\n")
   }
 }
 
