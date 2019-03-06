@@ -38,6 +38,7 @@ class Activator extends PluginInfoActivator {
         Hook(classOf[AppendToFileHook]),
         Hook(classOf[CopyFileHook]),
         Hook(classOf[SaveHook]),
+        Hook(classOf[MatrixHook]),
         Hook("CSVHook")
       )
 
