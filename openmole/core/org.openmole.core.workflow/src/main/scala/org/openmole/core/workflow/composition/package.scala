@@ -21,6 +21,7 @@ package composition {
 
   import org.openmole.core.context.{ Context, Val }
   import org.openmole.core.expansion.Condition
+  import org.openmole.core.outputmanager.OutputManager
   import org.openmole.core.workflow.builder.DefinitionScope
   import org.openmole.core.workflow.execution.{ EnvironmentProvider, LocalEnvironmentProvider }
   import org.openmole.core.workflow.mole.{ Grouping, Hook, MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source }
@@ -346,10 +347,11 @@ package composition {
 
         def dslContainerToPuzzle(container: DSLContainer) = {
           val puzzle = transitionDSLToPuzzle0(container.dsl, slots, converted)
+          def outputs = container.output.map(t ⇒ Vector(slots(t).capsule)).getOrElse(puzzle.lasts)
 
           val hooks =
             for {
-              o ← container.output.map(t ⇒ slots(t).capsule).toVector
+              o ← outputs
               h ← container.hooks
             } yield o -> h
 
