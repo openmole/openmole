@@ -21,7 +21,7 @@ import DataUtils._
 import net.scalapro.sortable._
 import org.openmole.gui.client.core.files.TreeNodeTab.{EditableView, ErrorBar, RowFilter}
 import org.openmole.gui.client.tool.plot
-import org.openmole.gui.client.tool.plot.Plot.{PlotMode, ScatterMode, SplomMode, XYMode}
+import org.openmole.gui.client.tool.plot.Plot._
 import org.openmole.gui.client.tool.plot._
 import scaladget.bootstrapnative.{DataTable, ToggleButton}
 import rx._
@@ -343,6 +343,7 @@ object TreeNodeTab {
     def toView(newMode: PlotMode) = {
       val (seqs, ax) = newMode match {
         case SplomMode ⇒ (initialSequence, axis)
+        case HeatMapMode=> (sequence.now, 0 to sequence.now.header.size -1)
         case _ ⇒ (sequence.now, axis.take(2))
       }
       panels.treeNodeTabs.switchEditableTo(this, seqs, view, filter, editing, ax, newMode, error)
@@ -378,6 +379,7 @@ object TreeNodeTab {
         selectableButton(a._1, axis.contains(a._2), onclick = () ⇒ {
           val newAxis = plotMode match {
             case SplomMode ⇒ if (axis.contains(a._2)) axis.filterNot(_ == a._2) else axis :+ a._2
+            case HeatMapMode=> Seq()
             case _ ⇒ Seq(axis.last, a._2)
           }
           toView(newAxis)
@@ -403,7 +405,7 @@ object TreeNodeTab {
     )
 
     lazy val errorBar = plotMode match {
-      case SplomMode ⇒ div()
+      case SplomMode | HeatMapMode ⇒ div()
       case _ ⇒
         scalatags.JsDom.tags.span(hForm(
           scalatags.JsDom.tags.span(
@@ -420,7 +422,8 @@ object TreeNodeTab {
     lazy val plotModeRadios = radios(marginLeft := 40)(
       selectableButton("Line", plotMode == XYMode, onclick = () ⇒ toView(XYMode)),
       selectableButton("Scatter", plotMode == ScatterMode, onclick = () ⇒ toView(ScatterMode)),
-      selectableButton("SPLOM", plotMode == SplomMode, onclick = () ⇒ toView(SplomMode))
+      selectableButton("SPLOM", plotMode == SplomMode, onclick = () ⇒ toView(SplomMode)),
+      selectableButton("Heat map", plotMode == HeatMapMode, onclick = () ⇒ toView(HeatMapMode))
     )
 
     lazy val block: TypedTag[_ <: HTMLElement] = {
@@ -432,7 +435,10 @@ object TreeNodeTab {
               div(
                 vForm(
                   div(switchButton.render, filterRadios.render, plotModeRadios.render).render,
-                  scalatags.JsDom.tags.span(axisCheckBoxes.render).render.withLabel("x|y axis"),
+                  plotMode match {
+                    case HeatMapMode=> div().render
+                    case _=>scalatags.JsDom.tags.span(axisCheckBoxes.render).render.withLabel("x|y axis")
+                  },
                   errorBar.render
                 ),
               )

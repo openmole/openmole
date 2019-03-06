@@ -15,6 +15,8 @@ case class BasePlot(
   def line = XYPlot(title, serie, legend, error)
 
   def splom = SplomPlot(title, serie, legend)
+
+  def heatmap = HeatMapPlot(title, serie, legend)
 }
 
 object Plot {
@@ -26,6 +28,8 @@ object Plot {
   object ScatterMode extends PlotMode
 
   object SplomMode extends PlotMode
+
+  object HeatMapMode extends PlotMode
 
   def baseDiv = div.render
 
@@ -54,6 +58,7 @@ object Plot {
       case XYMode      ⇒ bpl.line
       case ScatterMode ⇒ bpl.scatter
       case SplomMode   ⇒ bpl.splom
+      case HeatMapMode ⇒ bpl.heatmap
     }
   }
 }
