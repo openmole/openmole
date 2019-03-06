@@ -194,8 +194,8 @@ object BatchEnvironment extends JavaLogger {
 
     serializerService.serialize(job.runnableTasks, jobFile)
 
-    val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins -- job.environment.plugins
-    val files = (new TreeSet[File]()(fileOrdering) ++ job.files) diff plugins
+    val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins -- job.environment.plugins ++ (job.files.toSet & job.environment.plugins.toSet)
+    val files = (new TreeSet[File]()(fileOrdering) ++ job.files) -- plugins
 
     val runtime = replicateTheRuntime(job.job, job.environment, replicate)
 
