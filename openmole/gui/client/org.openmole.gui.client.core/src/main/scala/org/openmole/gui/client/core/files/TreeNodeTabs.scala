@@ -342,7 +342,7 @@ object TreeNodeTab {
 
     def toView(newMode: PlotMode) = {
       val (seqs, ax) = newMode match {
-        case SplomMode ⇒ (initialSequence, axis)
+        case SplomMode ⇒ (initialSequence, axis.take(5))
         case HeatMapMode=> (sequence.now, 0 to sequence.now.header.size -1)
         case _ ⇒ (sequence.now, axis.take(2))
       }
