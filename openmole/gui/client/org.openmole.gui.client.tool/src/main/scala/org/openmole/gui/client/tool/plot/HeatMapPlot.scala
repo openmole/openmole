@@ -15,11 +15,10 @@ object HeatMapPlot {
 
     lazy val plotDiv = Plot.baseDiv
 
-    val dims = serie.values
-    val nbDims = dims.length
+    val dims = serie.values.map { _.values.reverse }.transpose
 
     val data = PlotData
-      .z(dims.map { _.values.toJSArray }.toJSArray)
+      .z(dims.map { _.toJSArray }.toJSArray)
       .set(plotlytype.heatmap)
 
     val layout = Layout
