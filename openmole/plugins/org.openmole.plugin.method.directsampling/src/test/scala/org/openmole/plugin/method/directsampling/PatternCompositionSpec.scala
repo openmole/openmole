@@ -195,7 +195,7 @@ class PatternCompositionSpec extends FlatSpec with Matchers {
 
     val mole =
       DirectSampling(
-        Replication(model, seed, 10, aggregation = Strain(agg) hook h),
+        Replication(model, seed, 10, aggregation = agg) hook h,
         ExplicitSampling(l, Seq(1.0, 2.0))
       )
 

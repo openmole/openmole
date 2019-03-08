@@ -54,11 +54,14 @@ package object directsampling {
 
     aggregation.option match {
       case Some(aggregation) ⇒
+        val output = EmptyTask()
+
         val p =
           (Strain(exploration) -< wrapped when condition) >- aggregation &
-            (exploration -- aggregation block (wrapped.outputs: _*))
+            ((exploration -- aggregation block (wrapped.outputs: _*)) -- output) &
+            (exploration -- Strain(output) block (aggregation.outputs: _*))
 
-        DSLContainer(p, delegate = wrapped.delegate)
+        DSLContainer(p, output = Some(output), delegate = wrapped.delegate)
       case None ⇒
         val p = Strain(exploration) -< Strain(wrapped) when condition
         DSLContainer(p, delegate = wrapped.delegate)
