@@ -1,4 +1,4 @@
-package org.openmole.core.workflow.tools
+package org.openmole.core.workflow.test
 
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.{ FileService, FileServiceCache }
@@ -7,9 +7,9 @@ import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workspace._
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.tool.crypto.Cypher
-import org.openmole.tool.random._
+import org.openmole.tool.random.{ RandomProvider, Seeder }
 
 object Stubs {
 

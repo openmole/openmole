@@ -17,15 +17,16 @@
 
 package org.openmole.core.workflow.mole
 
-import org.openmole.core.context.{ Val, Variable }
+import org.openmole.core.context.{Val, Variable}
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.test.TestTask
 import org.scalatest._
 
 class MasterCapsuleSpec extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.tools.Stubs._
+  import org.openmole.core.workflow.test.Stubs._
 
   "A master capsule" should "execute tasks" in {
     @volatile var testExecuted = false

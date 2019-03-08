@@ -27,6 +27,7 @@ import org.openmole.core.workflow.task._
 import org.scalatest._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.sampling.ExplicitSampling
+import org.openmole.core.workflow.test.TestTask
 import org.openmole.core.workflow.transition.TransitionSlot
 import org.openmole.core.workflow.validation.Validation
 
@@ -34,7 +35,7 @@ import scala.util.Try
 
 class AggregationTransitionSpec extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.tools.Stubs._
+  import org.openmole.core.workflow.test.Stubs._
 
   "Aggregation transition" should "turn results of exploration into a array of values" in {
     @volatile var endCapsExecuted = 0

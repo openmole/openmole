@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.mole
 
-import org.openmole.core.context.{ Context, Val, Variable }
+import org.openmole.core.context.{Context, Val, Variable}
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.sampling._
@@ -33,11 +33,12 @@ import org.scalatest.junit._
 
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.test.TestTask
 import org.openmole.tool.random.RandomProvider
 
 class MoleExecutionSpec extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.tools.Stubs._
+  import org.openmole.core.workflow.test.Stubs._
 
   class JobGroupingBy2Test extends Grouping {
 

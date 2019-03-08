@@ -44,6 +44,8 @@ object MatrixHook {
       matrix = MatrixObject[T](matrix, toMatrix),
       config = InputOutputConfig(),
       info = InfoConfig()
+    ) set (
+      inputs += matrix
     )
 
 }

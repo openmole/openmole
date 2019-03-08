@@ -5,10 +5,11 @@ import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution.LocalEnvironment
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.test.TestHook
 import org.scalatest._
 
 class PuzzleSpec extends FlatSpec with Matchers {
-  import org.openmole.core.workflow.tools.Stubs._
+  import org.openmole.core.workflow.test.Stubs._
 
   "A single task" should "be a valid mole" in {
     val t = EmptyTask()

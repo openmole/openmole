@@ -26,12 +26,13 @@ import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.test.{TestHook, TestTask}
 import org.scalatest._
 import org.scalatest.junit._
 
 class HookSpec extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.tools.Stubs._
+  import org.openmole.core.workflow.test.Stubs._
 
   "A hook" should "intercept the execution of a task" in {
     val executed = new AtomicInteger(0)

@@ -26,10 +26,11 @@ import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.builder._
 import org.scalatest._
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.test.TestTask
 
 class StrainerCapsuleSpec extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.tools.Stubs._
+  import org.openmole.core.workflow.test.Stubs._
 
   "The strainer capsule" should "let the data pass through" in {
     val p = Val[String]

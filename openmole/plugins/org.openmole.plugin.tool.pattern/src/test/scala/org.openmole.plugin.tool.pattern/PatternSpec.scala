@@ -27,7 +27,7 @@ import org.scalatest._
 
 class PatternSpec extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.tools.Stubs._
+  import org.openmole.core.workflow.test.Stubs._
 
   "Master slave" should "execute the slave and end on condition" in {
     @volatile var slaveExecuted = 0

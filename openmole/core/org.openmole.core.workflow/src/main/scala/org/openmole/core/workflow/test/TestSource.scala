@@ -14,25 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core.workflow.mole
+package org.openmole.core.workflow.test
 
 import monocle.macros.Lenses
 import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.builder.{ InfoConfig, InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.workflow.mole.{ MoleExecutionContext, Source }
+import org.openmole.core.workflow.test.Stubs._
 
-import org.openmole.core.workflow.tools.Stubs._
-
-object TestHook {
-
-  implicit def isBuilder: InputOutputBuilder[TestHook] = InputOutputBuilder(config)
-
+object TestSource {
+  implicit def isBuilder: InputOutputBuilder[TestSource] = InputOutputBuilder(config)
 }
 
-@Lenses case class TestHook(
+@Lenses case class TestSource(
   f:      Context ⇒ Context = identity[Context],
   config: InputOutputConfig = InputOutputConfig(),
   info:   InfoConfig        = InfoConfig()
-) extends Hook {
+) extends Source {
   override protected def process(executionContext: MoleExecutionContext) = FromContext { p ⇒ f(p.context) }
 }

@@ -26,7 +26,7 @@ import org.openmole.core.workflow.validation.TypeUtil.{ InvalidType, ValidType }
 import org.scalatest._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.tools.Stubs._
+import org.openmole.core.workflow.test.Stubs._
 
 class TypeUtilSpec extends FlatSpec with Matchers {
 

@@ -22,7 +22,7 @@ import org.scalatest._
 
 class RangeTest extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.tools.Stubs._
+  import org.openmole.core.workflow.test.Stubs._
 
   "sizes of computed values" should "be correct" in {
     Range[Double](0.0, 10.0, 0.1).computeValues(Context()).size shouldBe 101
