@@ -16,37 +16,41 @@
  */
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.dsl._
+import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.expansion.FromContext
+import cats._
+import cats.data._
+import cats.implicits._
+import mgo.evolution._
+import mgo.evolution.algorithm._
+import mgo.evolution.breeding._
+import mgo.evolution.contexts._
+import mgo.evolution.elitism._
+import mgo.evolution.niche._
+import mgo.tagtools._
+import mgo.tools.CanBeNaN
+import monocle.macros.GenLens
+import org.openmole.core.context.{ Context, Val, Variable }
+import org.openmole.core.keyword.{ In, Under }
+import org.openmole.core.workflow.builder.ValueAssignment
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
-import org.openmole.tool.random._
-import monocle.macros._
-import cats.implicits._
-import mgo.tools.CanBeNaN
-import org.openmole.core.context.{ Context, Variable }
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.keyword.In
-import org.openmole.core.workflow.builder.ValueAssignment
-import org.openmole.core.workflow.tools.DefaultSet
+import org.openmole.core.workflow.tools.OptionalArgument
+import org.openmole.plugin.method.evolution.Genome.GenomeBound
+import org.openmole.plugin.method.evolution.NichedNSGA2.NichedElement
+import org.openmole.tool.types.ToDouble
+import squants.time.Time
+
+import scala.language.higherKinds
 
 object PSEAlgorithm {
 
-  import mgo._
-  import mgo.breeding._
-  import mgo.contexts._
-  import mgo.ranking._
-  import mgo.elitism._
   import mgo.tools._
-  import mgo.niche._
-
   import monocle.macros.{ GenLens, Lenses }
 
   import scala.language.higherKinds
   import cats.implicits._
-  import freedsl.io.IOInterpreter
-  import freedsl.random.RandomInterpreter
-  import freedsl.system.SystemInterpreter
-  import mgo.algorithm._
+  import mgo.evolution.algorithm._
 
   import GenomeVectorDouble._
   import CDGenome._
@@ -70,7 +74,7 @@ object PSEAlgorithm {
 
   def state[M[_]: cats.Monad: StartTime: Random: Generation](implicit hitmap: HitMap[M]) = for {
     map ← hitmap.get
-    s ← mgo.algorithm.state[M, Map[Vector[Int], Int]](map)
+    s ← mgo.evolution.algorithm.state[M, Map[Vector[Int], Int]](map)
   } yield s
 
   def buildIndividual(g: Genome, f: Vector[Double]) = Individual(g, f.toArray)
@@ -127,12 +131,12 @@ object PSEAlgorithm {
 
 object NoisyPSEAlgorithm {
 
-  import mgo._
-  import mgo.breeding._
-  import mgo.contexts._
+  import mgo.evolution._
+  import breeding._
+  import contexts._
   import monocle.macros._
-  import mgo.algorithm._
-  import mgo.algorithm.CDGenome._
+  import algorithm._
+  import algorithm.CDGenome._
 
   @Lenses case class Individual[P](
     genome:           Genome,
@@ -224,10 +228,9 @@ object PSE {
 
   object DeterministicParams {
 
-    import mgo.algorithm.{ PSE ⇒ _, _ }
+    import mgo.evolution.algorithm.{ PSE ⇒ _, _ }
     import cats.data._
-    import freedsl.dsl._
-    import mgo.contexts._
+    import mgo.evolution.contexts._
 
     implicit def integration = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Vector[Double]] { api ⇒
       type G = CDGenome.Genome
@@ -252,12 +255,12 @@ object PSE {
 
       def afterGeneration(g: Long, population: Vector[I]): M[Boolean] = interpret { impl ⇒
         import impl._
-        zipWithState(mgo.afterGeneration[DSL, I](g).run(population)).eval
+        zipWithState(mgo.evolution.afterGeneration[DSL, I](g).run(population)).eval
       }
 
       def afterDuration(d: squants.Time, population: Vector[I]): M[Boolean] = interpret { impl ⇒
         import impl._
-        zipWithState(mgo.afterDuration[DSL, I](d).run(population)).eval
+        zipWithState(mgo.evolution.afterDuration[DSL, I](d).run(population)).eval
       }
 
       def operations(om: DeterministicParams) = new Ops {
@@ -319,7 +322,7 @@ object PSE {
               def step =
                 for {
                   elited ← PSEAlgorithm.elitism[DSL](om.pattern, continuous) apply individuals
-                  _ ← mgo.elitism.incrementGeneration[DSL]
+                  _ ← mgo.evolution.elitism.incrementGeneration[DSL]
                 } yield elited
 
               zipWithState(step).eval
@@ -356,10 +359,9 @@ object PSE {
       }
     }
 
-    import mgo.algorithm.{ PSE ⇒ _, NoisyPSE ⇒ _, _ }
+    import mgo.evolution.algorithm.{ PSE ⇒ _, NoisyPSE ⇒ _, _ }
     import cats.data._
-    import freedsl.dsl._
-    import mgo.contexts._
+    import mgo.evolution.contexts._
 
     implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Vector[Any]] { api ⇒
       type G = CDGenome.Genome
@@ -384,12 +386,12 @@ object PSE {
 
       def afterGeneration(g: Long, population: Vector[I]): M[Boolean] = interpret { impl ⇒
         import impl._
-        zipWithState(mgo.afterGeneration[DSL, I](g).run(population)).eval
+        zipWithState(mgo.evolution.afterGeneration[DSL, I](g).run(population)).eval
       }
 
       def afterDuration(d: squants.Time, population: Vector[I]): M[Boolean] = interpret { impl ⇒
         import impl._
-        zipWithState(mgo.afterDuration[DSL, I](d).run(population)).eval
+        zipWithState(mgo.evolution.afterDuration[DSL, I](d).run(population)).eval
       }
 
       def operations(om: StochasticParams) = new Ops {
@@ -450,7 +452,7 @@ object PSE {
                     NoisyObjective.aggregate(om.objectives),
                     om.historySize,
                     continuous) apply individuals
-                  _ ← mgo.elitism.incrementGeneration[DSL]
+                  _ ← mgo.evolution.elitism.incrementGeneration[DSL]
                 } yield elited
 
               zipWithState(step).eval
@@ -494,13 +496,13 @@ object PSE {
     objectives: Seq[PatternAxe],
     stochastic: OptionalArgument[Stochastic] = None
   ) =
-    WorkflowIntegration.stochasticity(objectives.map(_.p), stochastic) match {
+    WorkflowIntegration.stochasticity(objectives.map(_.p), stochastic.option) match {
       case None ⇒
         val exactObjectives = objectives.map(o ⇒ Objective.toExact(o.p))
 
         val integration: WorkflowIntegration.DeterministicGA[_] = WorkflowIntegration.DeterministicGA(
           DeterministicParams(
-            mgo.niche.irregularGrid(objectives.map(_.scale).toVector),
+            mgo.evolution.niche.irregularGrid(objectives.map(_.scale).toVector),
             genome,
             exactObjectives,
             operatorExploration),
@@ -513,7 +515,7 @@ object PSE {
 
         val integration: WorkflowIntegration.StochasticGA[_] = WorkflowIntegration.StochasticGA(
           StochasticParams(
-            pattern = mgo.niche.irregularGrid(objectives.map(_.scale).toVector),
+            pattern = mgo.evolution.niche.irregularGrid(objectives.map(_.scale).toVector),
             genome = genome,
             objectives = noisyObjectives,
             historySize = stochasticValue.replications,
@@ -530,7 +532,7 @@ object PSE {
 
 object PSEEvolution {
 
-  import org.openmole.core.dsl._
+  import org.openmole.core.dsl.DSL
 
   def apply(
     genome:       Genome,

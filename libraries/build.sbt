@@ -214,7 +214,6 @@ lazy val cats =
     version := catsVersion
   ) settings(settings: _*)
 
-lazy val freedslVersion = "0.26"
 lazy val squantsVersion = "1.3.0"
 
 lazy val squants = 
@@ -224,24 +223,11 @@ lazy val squants =
   ) settings(settings: _*)
 
 
-lazy val freedsl =
-  OsgiProject(dir, "freedsl", exports = Seq("freedsl.*", "freestyle.*", "mainecoon.*")) settings (
-    libraryDependencies += "fr.iscpif.freedsl" %% "freedsl" % freedslVersion,
-    libraryDependencies += "fr.iscpif.freedsl" %% "random" % freedslVersion,
-    libraryDependencies += "fr.iscpif.freedsl" %% "system" % freedslVersion,
-    libraryDependencies += "fr.iscpif.freedsl" %% "io" % freedslVersion,
-    libraryDependencies += "fr.iscpif.freedsl" %% "filesystem" % freedslVersion,
-    libraryDependencies += "fr.iscpif.freedsl" %% "errorhandler" % freedslVersion,
-    libraryDependencies += "fr.iscpif.freedsl" %% "tool" % freedslVersion,
-    libraryDependencies += "fr.iscpif.freedsl" %% "dsl" % freedslVersion,
-    version := freedslVersion
-  ) dependsOn(cats, squants) settings(settings: _*)
+lazy val mgoVersion = "3.21"
 
-lazy val mgoVersion = "3.18"
-
-lazy val mgo = OsgiProject(dir, "mgo", imports = Seq("!better.*", "*")) settings(
+lazy val mgo = OsgiProject(dir, "mgo", privatePackages = Seq("!scala.*", "!cats.*", "*")) settings(
   libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
-  version := mgoVersion) dependsOn(monocle, freedsl, math) settings(settings: _*)
+  version := mgoVersion) dependsOn(monocle, math) settings(settings: _*)
 
 /*lazy val familyVersion = "1.3"
 lazy val family = OsgiProject(dir, "fr.iscpif.family") settings(

@@ -1,16 +1,29 @@
 package org.openmole.plugin.method.evolution
 
-import monocle.macros.GenLens
-import org.openmole.core.context._
+import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.domain.Fix
-import org.openmole.core.workflow.sampling.Factor
+import cats._
+import cats.data._
 import cats.implicits._
+import mgo.evolution._
+import mgo.evolution.algorithm._
+import mgo.evolution.breeding._
+import mgo.evolution.contexts._
+import mgo.evolution.elitism._
+import mgo.evolution.niche._
+import mgo.tagtools._
+import monocle.macros.GenLens
+import org.openmole.core.context.{ Context, Variable }
 import org.openmole.core.keyword.Under
 import org.openmole.core.workflow.builder.ValueAssignment
-import org.openmole.core.workflow.tools.DefaultSet
+import org.openmole.core.workflow.domain._
+import org.openmole.core.workflow.sampling._
 import org.openmole.plugin.method.evolution.Genome.GenomeBound
+import org.openmole.plugin.method.evolution.NichedNSGA2.NichedElement
 import org.openmole.tool.types.ToDouble
+import squants.time.Time
+
+import scala.language.higherKinds
 
 object OSE {
 
@@ -24,11 +37,10 @@ object OSE {
 
   object DeterministicParams {
 
-    import mgo.algorithm.{ OSE ⇒ MGOOSE, _ }
-    import mgo.algorithm.OSE._
+    import mgo.evolution.algorithm.{ OSE ⇒ MGOOSE, _ }
+    import mgo.evolution.algorithm.OSE._
     import cats.data._
-    import freedsl.dsl._
-    import mgo.contexts._
+    import mgo.evolution.contexts._
 
     implicit def integration = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Vector[Double]] { api ⇒
       type G = CDGenome.Genome
@@ -53,12 +65,12 @@ object OSE {
 
       def afterGeneration(g: Long, population: Vector[I]): M[Boolean] = interpret { impl ⇒
         import impl._
-        zipWithState(mgo.afterGeneration[DSL, I](g).run(population)).eval
+        zipWithState(mgo.evolution.afterGeneration[DSL, I](g).run(population)).eval
       }
 
       def afterDuration(d: squants.Time, population: Vector[I]): M[Boolean] = interpret { impl ⇒
         import impl._
-        zipWithState(mgo.afterDuration[DSL, I](d).run(population)).eval
+        zipWithState(mgo.evolution.afterDuration[DSL, I](d).run(population)).eval
       }
 
       def operations(om: DeterministicParams) = new Ops {
@@ -118,7 +130,7 @@ object OSE {
               def step =
                 for {
                   elited ← MGOOSE.elitism[DSL](om.mu, om.limit, om.origin, continuous) apply individuals
-                  _ ← mgo.elitism.incrementGeneration[DSL]
+                  _ ← mgo.evolution.elitism.incrementGeneration[DSL]
                 } yield elited
 
               zipWithState(step).eval
@@ -144,12 +156,11 @@ object OSE {
 
   object StochasticParams {
 
-    import mgo.algorithm._
-    import mgo.algorithm.{ NoisyOSE ⇒ MGONoisyOSE, _ }
-    import mgo.algorithm.NoisyOSE._
+    import mgo.evolution.algorithm._
+    import mgo.evolution.algorithm.{ NoisyOSE ⇒ MGONoisyOSE, _ }
+    import mgo.evolution.algorithm.NoisyOSE._
     import cats.data._
-    import freedsl.dsl._
-    import mgo.contexts._
+    import mgo.evolution.contexts._
 
     implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Vector[Any]] { api ⇒
       type G = CDGenome.Genome
@@ -161,7 +172,7 @@ object OSE {
       def sManifest = implicitly
 
       private def interpret[U](f: OSEImplicits[Vector[Any]] ⇒ (S, U)) = State[S, U] { (s: S) ⇒
-        mgo.algorithm.NoisyOSE.run(s)(f)
+        mgo.evolution.algorithm.NoisyOSE.run(s)(f)
       }
 
       private def zipWithState[M[_]: cats.Monad: StartTime: Random: Generation: ReachMap, T](op: M[T])(implicit archive: Archive[M, I]): M[(S, T)] = {
@@ -174,12 +185,12 @@ object OSE {
 
       def afterGeneration(g: Long, population: Vector[I]): M[Boolean] = interpret { impl ⇒
         import impl._
-        zipWithState(mgo.afterGeneration[DSL, I](g).run(population)).eval
+        zipWithState(mgo.evolution.afterGeneration[DSL, I](g).run(population)).eval
       }
 
       def afterDuration(d: squants.Time, population: Vector[I]): M[Boolean] = interpret { impl ⇒
         import impl._
-        zipWithState(mgo.afterDuration[DSL, I](d).run(population)).eval
+        zipWithState(mgo.evolution.afterDuration[DSL, I](d).run(population)).eval
       }
 
       def operations(om: StochasticParams) = new Ops {
@@ -243,7 +254,7 @@ object OSE {
                     continuous,
                     om.origin,
                     om.limit) apply individuals
-                  _ ← mgo.elitism.incrementGeneration[DSL]
+                  _ ← mgo.evolution.elitism.incrementGeneration[DSL]
                 } yield elited
 
               zipWithState(step).eval
@@ -304,8 +315,8 @@ object OSE {
         origin.toVector.flatMap {
           case ContinuousOriginAxe(p, scale)         ⇒ Vector(mgo.tools.findInterval(scale, Genome.continuousValue(fg, p.v, continuous)))
           case DiscreteOriginAxe(p, scale)           ⇒ Vector(mgo.tools.findInterval(scale, Genome.discreteValue(fg, p.v, discrete)))
-          case ContinuousSequenceOriginAxe(p, scale) ⇒ mgo.niche.irregularGrid[Double](scale)(Genome.continuousSequenceValue(fg, p.v, p.size, continuous))
-          case DiscreteSequenceOriginAxe(p, scale)   ⇒ mgo.niche.irregularGrid[Int](scale)(Genome.discreteSequenceValue(fg, p.v, p.size, discrete))
+          case ContinuousSequenceOriginAxe(p, scale) ⇒ mgo.evolution.niche.irregularGrid[Double](scale)(Genome.continuousSequenceValue(fg, p.v, p.size, continuous))
+          case DiscreteSequenceOriginAxe(p, scale)   ⇒ mgo.evolution.niche.irregularGrid[Int](scale)(Genome.discreteSequenceValue(fg, p.v, p.size, discrete))
         }
 
       grid(_, _)
@@ -335,7 +346,7 @@ object OSE {
     genome:     Genome                       = Seq(),
     mu:         Int                          = 200,
     stochastic: OptionalArgument[Stochastic] = None): EvolutionWorkflow =
-    WorkflowIntegration.stochasticity(objectives.map(_.objective), stochastic) match {
+    WorkflowIntegration.stochasticity(objectives.map(_.objective), stochastic.option) match {
       case None ⇒
         val exactObjectives = FitnessPattern.toObjectives(objectives).map(o ⇒ Objective.toExact(o))
         val fg = OriginAxe.fullGenome(origin, genome)
