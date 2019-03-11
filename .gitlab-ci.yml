@@ -7,6 +7,7 @@ image: openmole/build
 assemble:
   stage: assemble
   script:
+    - echo youpi
     #- bash -x build.sh
     #- '(cd openmole && ./generateSite ./site)'
   cache:
