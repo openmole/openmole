@@ -18,7 +18,7 @@ copy:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
   script:
-    - echo "put openmole/build.sh" >tonext
+    - echo "put build.sh" >tonext
     - sftp  -B tonext -P 21022 user@docker.openmole.org 
    
 
