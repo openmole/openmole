@@ -1,10 +1,9 @@
 stages:
-  - test-ci
+  - assemble
 
 image: openmole/build
 
-test ci:
-  stage: test-ci
+assemble:
   script:
     - bash -x build.sh
 
