@@ -7,9 +7,8 @@ image: openmole/build
 assemble:
   stage: assemble
   script:
-    - echo youpi
-    #- bash -x build.sh
-    #- '(cd openmole && ./generateSite ./site)'
+    - bash -x build.sh
+    - '(cd openmole && ./generateSite ./site)'
   cache:
     paths:
       - ./openmole/site # répertoire mis en cache
@@ -30,14 +29,14 @@ copy:
     - ssh-keyscan -p 21022 docker.openmole.org > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - echo "put -r ./openmole/build.sbt next" >./tonext
+    - echo "put -r ./site/* next" >./tonext
     - sftp -i ~/.ssh/identity -b ./tonext -P 21022 user@docker.openmole.org
   cache:
     paths:
       - ./openmole/site # répertoire mis en cache
     policy: pull # le cache sera juste sauvegardé, pas de récupération d'un cache existant
-  #variables:
-  #  GIT_STRATEGY: none
+  variables:
+    GIT_STRATEGY: none
    
 
 
