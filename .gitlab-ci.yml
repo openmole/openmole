@@ -1,10 +1,10 @@
 stages:
-  - test-ci
+  - assemble
 
-image: debian
+image: openmole/build
 
-test ci:
-  stage: test-ci
+assemble:
+  stage: assemble
   script:
-    - echo youpi
+    - bash -x build.sh
 
