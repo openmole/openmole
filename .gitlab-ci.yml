@@ -1,10 +1,10 @@
 stages:
   - test-ci
 
-image: debian
+image: openmole/build
 
 test ci:
   stage: test-ci
   script:
-    - echo youpi
+    - bash -x build.sh
 
