@@ -24,6 +24,8 @@ copy:
     - echo "$SSH_KEY" | tr -d '\r' | ssh-add - > /dev/null
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
+    - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
   script:
     - echo "put -r ./openmole/build.sbt next" >./tonext
     - cat tonext
@@ -32,6 +34,8 @@ copy:
     paths:
       - ./openmole/site # répertoire mis en cache
     policy: pull # le cache sera juste sauvegardé, pas de récupération d'un cache existant
+  #variables:
+  #  GIT_STRATEGY: none
    
 
 
