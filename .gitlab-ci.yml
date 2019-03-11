@@ -25,14 +25,13 @@ copy:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     #- echo "$SSH_KEY" | tr -d '\r' | ssh-add - > /dev/null
-    - echo "$SSH_KEY" >~/.ssh/id
-    - chmod 400 ~/.ssh/id
-    - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+    - echo "$SSH_PRIVATE_KEY" >~/.ssh/id
+    - chmod 400 ~/.ssh/identity
+    - ssh-keyscan -p 21022 docker.openmole.org > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
     - echo "put -r ./openmole/build.sbt next" >./tonext
-    - cat tonext
-    - sftp -i id -b ./tonext -P 21022 user@docker.openmole.org
+    - sftp -i identity -b ./tonext -P 21022 user@docker.openmole.org
   cache:
     paths:
       - ./openmole/site # répertoire mis en cache
