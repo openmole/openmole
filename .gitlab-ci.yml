@@ -1,5 +1,5 @@
 stages:
-  #- assemble
+  - assemble
   - copy
 
 image: openmole/build
@@ -7,8 +7,8 @@ image: openmole/build
 assemble:
   stage: assemble
   script:
-    - bash -x build.sh
-    - '(cd openmole && ./generateSite ./site)'
+    #- bash -x build.sh
+    #- '(cd openmole && ./generateSite ./site)'
   cache:
     paths:
       - ./openmole/site # répertoire mis en cache
