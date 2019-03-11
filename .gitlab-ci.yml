@@ -1,5 +1,5 @@
 stages:
-  - assemble
+  #- assemble
   - copy
 
 image: openmole/build
@@ -8,6 +8,12 @@ assemble:
   stage: assemble
   script:
     - bash -x build.sh
+    - '(cd openmole && ./generateSite ./site)'
+  cache:
+    paths:
+      - ./openmole/site # répertoire mis en cache
+    policy: push # le cache sera juste sauvegardé, pas de récupération d'un cache existant
+
 
 copy:
   stage: copy
@@ -18,8 +24,12 @@ copy:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
   script:
-    - echo "put build.sh" >tonext
-    - sftp  -B tonext -P 21022 user@docker.openmole.org 
+    - echo "put -r ./openmole/build.sbt next" >tonext
+    - sftp -P 21022 user@docker.openmole.org -b tonext 
+  cache:
+    paths:
+      - ./openmole/site # répertoire mis en cache
+    policy: pull # le cache sera juste sauvegardé, pas de récupération d'un cache existant
    
 
 
