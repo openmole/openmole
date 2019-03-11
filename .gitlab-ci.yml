@@ -4,6 +4,7 @@ stages:
 image: openmole/build
 
 assemble:
+  stage: assemble
   script:
     - bash -x build.sh
 
