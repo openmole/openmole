@@ -225,9 +225,9 @@ lazy val squants =
 
 lazy val mgoVersion = "3.21"
 
-lazy val mgo = OsgiProject(dir, "mgo", privatePackages = Seq("!scala.*", "!cats.*", "!monocle.*", "!scalaz.*", "!shapeless.*", "*")) settings(
+lazy val mgo = OsgiProject(dir, "mgo", exports = Seq("mgo.*", "freestyle.*"), imports = Seq("!better.*", "*")) settings(
   libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
-  version := mgoVersion) dependsOn(monocle, math) settings(settings: _*)
+  version := mgoVersion) dependsOn(monocle, math, cats, squants) settings(settings: _*)
 
 /*lazy val familyVersion = "1.3"
 lazy val family = OsgiProject(dir, "fr.iscpif.family") settings(
