@@ -25,7 +25,7 @@ copy:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     #- echo "$SSH_KEY" | tr -d '\r' | ssh-add - > /dev/null
-    - echo "$SSH_PRIVATE_KEY" >~/.ssh/id
+    - echo "$SSH_PRIVATE_KEY" >~/.ssh/identity
     - chmod 400 ~/.ssh/identity
     - ssh-keyscan -p 21022 docker.openmole.org > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
