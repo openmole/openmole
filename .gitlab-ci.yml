@@ -11,15 +11,15 @@ assemble:
 
 copy:
   stage: copy
-   before_script:
-     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-     - eval $(ssh-agent -s)
-     - echo "$SSH_KEY" | tr -d '\r' | ssh-add - > /dev/null
-     - mkdir -p ~/.ssh
-     - chmod 700 ~/.ssh
-   script:
-     - echo "put openmole/build.sh" >tonext
-     - sftp  -B tonext -P 21022 user@docker.openmole.org 
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - echo "$SSH_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+  script:
+    - echo "put openmole/build.sh" >tonext
+    - sftp  -B tonext -P 21022 user@docker.openmole.org 
    
 
 
