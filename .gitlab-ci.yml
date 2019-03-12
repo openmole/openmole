@@ -8,7 +8,7 @@ assemble:
   stage: assemble
   script:
     - bash -x build.sh
-    - '(cd openmole && ./generateSite ./site)'
+    - '(cd openmole && ./generateSite $PWD/site)'
   cache:
     paths:
       - ./openmole/site # répertoire mis en cache
