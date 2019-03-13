@@ -9,7 +9,7 @@ image: openmole/build
 assemble:
   stage: assemble
   script:
-    - export SBT_OPTS="-Dsbt.global.base=/builds/sbt-cache/sbtboot -Dsbt.boot.directory=/builds/sbt-cache/boot -Dsbt.ivy.home=/builds/sbt-cache/ivy -Xmx3G -Xss2M -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=1G"
+    - export SBT_OPTS="-Dsbt.global.base=/builds/openmole/sbt-cache/sbtboot -Dsbt.boot.directory=/builds/openmole/sbt-cache/boot -Dsbt.ivy.home=/builds/openmole/sbt-cache/ivy -Xmx3G -Xss2M -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=1G"
     - rm -f openmole/.sbtopts
     - bash -x build.sh
     - '(cd openmole && ./generateSite $PWD/site)'
@@ -22,12 +22,13 @@ assemble:
 test:
   stage: test
   script:
-    - export SBT_OPTS="-Dsbt.global.base=/builds/sbt-cache/sbtboot -Dsbt.boot.directory=/builds/sbt-cache/boot -Dsbt.ivy.home=/builds/sbt-cache/ivy -Xmx3G -Xss2M -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=1G"
+    - export SBT_OPTS="-Dsbt.global.base=/builds/openmole/sbt-cache/sbtboot -Dsbt.boot.directory=/builds/openmole/sbt-cache/boot -Dsbt.ivy.home=/builds/openmole/sbt-cache/ivy -Xmx3G -Xss2M -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=1G"
     - rm -f openmole/.sbtopts
     - '(cd openmole && sbt test)'
   cache:
     paths:
       - ./sbt-cache
+      - ./openmole
     policy: pull 
 
 
