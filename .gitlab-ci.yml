@@ -14,17 +14,18 @@ assemble:
     - bash -x build.sh
     - '(cd openmole && ./generateSite $PWD/site)'
   cache:
-    key: assemble-cache
+    key: ${CI_COMMIT_REF_SLUG}
     paths:
       - openmole/
       - sbt-cache/
+
 test:
   stage: deploy
   script:
     - rm -f openmole/.sbtopts
     - '(cd openmole && sbt test)'
   cache:
-    key: assemble-cache
+    key: ${CI_COMMIT_REF_SLUG}
 
 copy:
   stage: deploy
@@ -42,7 +43,7 @@ copy:
   variables:
     GIT_STRATEGY: none
   cache:
-    key: assemble-cache
+    key: ${CI_COMMIT_REF_SLUG}
    
 
 
