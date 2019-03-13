@@ -7,17 +7,6 @@ image: openmole/build
 variables:
   SBT_OPTS: "-Dsbt.global.base=/builds/sbt-cache/sbtboot -Dsbt.boot.directory=/builds/sbt-cache/boot -Dsbt.ivy.home=/builds/sbt-cache/ivy -Xmx3G -Xss2M -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=1G"
 
-cache:
-  # if you want to have a separate cache per branch, uncomment the next line
-  key: "$CI_BUILD_REF_NAME"
-  untracked: true
-  paths:
-    - "sbt-cache/ivy"
-    - "sbt-cache/boot"
-    - "sbt-cache/sbtboot"
-    - "sbt-cache/target"
-    - "sbt-cache/coursier"
-
 assemble:
   stage: assemble
   script:
@@ -27,6 +16,7 @@ assemble:
   cache:
     paths:
       - ./openmole
+      - ./sbt-cache
     policy: push
 
 test:
@@ -37,7 +27,10 @@ test:
   cache:
     paths:
       - ./openmole
+      - ./sbt-cache
     policy: pull 
+  variables:
+    GIT_STRATEGY: none
 
 copy:
   stage: deploy
