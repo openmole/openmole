@@ -90,10 +90,7 @@ class PuzzleSpec extends FlatSpec with Matchers {
 
     val container = DSLContainer(first, output = Some(first))
 
-    val h = TestHook { context ⇒
-      hookExecuted = true
-      context
-    }
+    val h = TestHook { context ⇒ hookExecuted = true }
 
     (container hook h) run ()
 

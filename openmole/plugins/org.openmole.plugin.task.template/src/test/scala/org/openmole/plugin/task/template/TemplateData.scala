@@ -21,23 +21,4 @@ import java.io.{ File, PrintWriter }
 
 object TemplateData {
 
-  lazy val templateFile: File = {
-    val template = File.createTempFile("file", ".test")
-    val writer = new PrintWriter(template)
-    writer.println("My first line")
-    writer.println("${2*3}")
-    writer.print("${\"I am ${6*5} year old\"}")
-    writer.close
-    template
-  }
-
-  lazy val targetFile: File = {
-    val target = File.createTempFile("target", ".test")
-    val writert = new PrintWriter(target)
-    writert.println("My first line")
-    writert.println("6")
-    writert.print("I am 30 year old")
-    writert.close
-    target
-  }
 }

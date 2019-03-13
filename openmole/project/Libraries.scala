@@ -45,7 +45,7 @@ object Libraries {
   lazy val htmlparser2 = libraryDependencies += "com.definitelyscala" %%% "scala-js-htmlparser2" % "1.0.2"
   lazy val plotlyJS =  libraryDependencies += "com.definitelyscala" %%% "scala-js-plotlyjs" % "1.1.9"
 
-  lazy val scalatest = "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+  lazy val scalatest = "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 
   /** ------- Bundles -------------- */
 

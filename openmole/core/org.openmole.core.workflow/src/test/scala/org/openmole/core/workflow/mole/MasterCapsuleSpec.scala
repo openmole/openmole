@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.mole
 
-import org.openmole.core.context.{Val, Variable}
+import org.openmole.core.context.{ Val, Variable }
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._

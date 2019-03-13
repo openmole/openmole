@@ -28,9 +28,9 @@ object TestHook {
 }
 
 @Lenses case class TestHook(
-  f:      Context ⇒ Context = identity[Context],
+  f:      Context ⇒ Unit    = identity[Context],
   config: InputOutputConfig = InputOutputConfig(),
   info:   InfoConfig        = InfoConfig()
 ) extends Hook {
-  override protected def process(executionContext: MoleExecutionContext) = FromContext { p ⇒ f(p.context) }
+  override protected def process(executionContext: MoleExecutionContext) = FromContext { p ⇒ f(p.context); p.context }
 }

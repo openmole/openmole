@@ -26,7 +26,7 @@ import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.test.{TestHook, TestTask}
+import org.openmole.core.workflow.test.{ TestHook, TestTask }
 import org.scalatest._
 import org.scalatest.junit._
 
@@ -49,7 +49,6 @@ class HookSpec extends FlatSpec with Matchers {
       context.contains(p) should equal(true)
       context(p) should equal("test")
       executed.incrementAndGet()
-      context
     }
 
     val ex = t1 hook hook
@@ -74,7 +73,6 @@ class HookSpec extends FlatSpec with Matchers {
       context.contains(p) should equal(true)
       context(p) should equal("test")
       executed = true
-      context
     }
 
     val ex = Master(t1) hook hook

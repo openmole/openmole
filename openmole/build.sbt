@@ -865,7 +865,7 @@ lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultS
   Libraries.scalajsMarked
 )
 
-lazy val siteJS = site.js enablePlugins (ExecNpmPlugin)
+lazy val siteJS = site.js enablePlugins (ExecNpmPlugin) settings (test := {})
 lazy val siteJVM = site.jvm dependsOn(tools, project, serializer, buildinfo, marketIndex) settings (
   libraryDependencies += Libraries.sourceCode)
 
