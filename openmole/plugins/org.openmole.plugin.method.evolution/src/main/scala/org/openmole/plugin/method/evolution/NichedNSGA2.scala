@@ -119,7 +119,7 @@ object NoisyNichedNSGA2Algorithm {
     def nicheResult(population: Vector[Individual[P]]) =
       if (population.isEmpty) population
       else if (onlyOldest) {
-        val sorted = population.sortBy(_.fitnessHistory.size)
+        val sorted = population.sortBy(-_.fitnessHistory.size)
         val maxHistory = sorted.head.fitnessHistory.size
         population.filter(_.fitnessHistory.size == maxHistory)
       }
