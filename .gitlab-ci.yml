@@ -11,7 +11,7 @@ assemble:
     #- '(cd openmole && sbt test)' # Metaspace error to be solved
     - '(cd openmole && ./generateSite $PWD/site)'
   cache:
-    key: ${CI_COMMIT_REF_SLUG}
+    key: ${CI_COMMIT_SHA}
     paths:
       - openmole/
 
@@ -31,7 +31,7 @@ copy:
   variables:
     GIT_STRATEGY: none
   cache:
-    key: ${CI_COMMIT_REF_SLUG}
+    key: ${CI_COMMIT_SHA}
    
 
 
