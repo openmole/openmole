@@ -556,7 +556,8 @@ object NichedNSGA2Evolution {
       stochastic = stochastic,
       parallelism = parallelism,
       distribution = distribution,
-      suggestion = suggestion
+      suggestion = suggestion,
+      scope = "niched nsga2"
     )
 
 }

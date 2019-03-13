@@ -18,6 +18,7 @@ package org.openmole.plugin.tool.pattern
 
 import org.openmole.core.expansion.Condition
 import org.openmole.core.dsl._
+import org.openmole.core.workflow.builder.DefinitionScope
 
 object Case {
   def apply(dsl: DSL): Case = Case(Condition.True, dsl)
@@ -26,9 +27,9 @@ object Case {
 case class Case(condition: Condition, dsl: DSL)
 
 object Switch {
-  import org.openmole.core.workflow.builder.DefinitionScope.internal._
 
-  def apply(cases: Case*) = {
+  def apply(cases: Case*)(implicit definitionScope: DefinitionScope = DefinitionScope.Internal("switch")) = {
+
     val first = Strain(EmptyTask())
     val last = Strain(EmptyTask())
 

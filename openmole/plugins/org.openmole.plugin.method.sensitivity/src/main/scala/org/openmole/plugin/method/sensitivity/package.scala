@@ -31,9 +31,6 @@ import org.openmole.plugin.method.directsampling._
 
 package object sensitivity {
 
-  implicit def scope = DefinitionScope.Internal
-
-
   object Sensitivity {
     /**
       * For a given input of the model, and a given output of a the model,
@@ -83,6 +80,9 @@ package object sensitivity {
     repetitions: Int,
     levels:      Int) = {
 
+
+    implicit def scope = DefinitionScope.Internal("Morris sensitivity")
+
     // the sampling for Morris is a One At a Time one,
     // with respect to the user settings for repetitions, levels and inputs
     val sampling = MorrisSampling(repetitions, levels, inputs)
@@ -95,7 +95,8 @@ package object sensitivity {
     DirectSampling(
       evaluation = evaluation,
       sampling = sampling,
-      aggregation = aggregation
+      aggregation = aggregation,
+      scope = scope
     )
   }
 
@@ -104,6 +105,8 @@ package object sensitivity {
     inputs:  Seq[ScalarOrSequenceOfDouble[_]],
     outputs: Seq[Val[Double]],
     samples:      FromContext[Int]) = {
+
+    implicit def scope = DefinitionScope.Internal("Saltelli sensitivity")
 
     val sampling = SaltelliSampling(samples, inputs: _*)
 
@@ -118,7 +121,8 @@ package object sensitivity {
     DirectSampling(
       evaluation = evaluation,
       sampling = sampling,
-      aggregation = aggregation
+      aggregation = aggregation,
+      scope = scope
     )
   }
 

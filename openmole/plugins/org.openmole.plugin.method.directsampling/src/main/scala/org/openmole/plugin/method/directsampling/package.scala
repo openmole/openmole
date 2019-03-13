@@ -25,8 +25,6 @@ import org.openmole.plugin.tool.pattern
 
 package object directsampling {
 
-  implicit def scope = DefinitionScope.Internal
-
   def Replication[T: Distribution](
     evaluation:       DSL,
     seed:             Val[T],
@@ -39,7 +37,8 @@ package object directsampling {
       evaluation = evaluation,
       sampling = seed in (TakeDomain(UniformDistribution[T](distributionSeed), replications)),
       aggregation = aggregation,
-      wrap = wrap
+      wrap = wrap,
+      scope = "replication"
     )
 
   def DirectSampling[P](
@@ -47,8 +46,11 @@ package object directsampling {
     sampling:    Sampling,
     aggregation: OptionalArgument[DSL] = None,
     condition:   Condition             = Condition.True,
-    wrap:        Boolean               = false
+    wrap:        Boolean               = false,
+    scope:       DefinitionScope       = "direct sampling"
   ): DSLContainer = {
+    implicit def defScope = scope
+
     val exploration = ExplorationTask(sampling)
     val wrapped = pattern.wrap(evaluation, sampling.prototypes.toSeq, evaluation.outputs, wrap = wrap)
 

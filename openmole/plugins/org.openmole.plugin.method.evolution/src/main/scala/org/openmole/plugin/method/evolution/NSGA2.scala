@@ -316,7 +316,8 @@ object NSGA2Evolution {
       stochastic = stochastic,
       parallelism = parallelism,
       distribution = distribution,
-      suggestion = suggestion
+      suggestion = suggestion,
+      scope = "nsga2"
     )
 
 }

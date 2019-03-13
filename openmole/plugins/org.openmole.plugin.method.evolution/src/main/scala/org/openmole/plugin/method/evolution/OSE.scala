@@ -419,7 +419,8 @@ object OSEEvolution {
       stochastic = stochastic,
       parallelism = parallelism,
       distribution = distribution,
-      suggestion = suggestion
+      suggestion = suggestion,
+      scope = "ose"
     )
 
 }

@@ -18,12 +18,11 @@ package org.openmole.plugin.tool.pattern
 
 import org.openmole.core.dsl._
 import org.openmole.core.expansion._
+import org.openmole.core.workflow.builder.DefinitionScope
 
 object Skip {
 
-  import org.openmole.core.workflow.builder.DefinitionScope.internal._
-
-  def apply(dsl: DSL, condition: Condition) = {
+  def apply(dsl: DSL, condition: Condition)(implicit definitionScope: DefinitionScope = DefinitionScope.Internal("skip")) = {
     val first = Strain(EmptyTask())
     val last = Strain(EmptyTask())
 
@@ -35,7 +34,7 @@ object Skip {
 
 object If {
 
-  def apply(dsl: DSL, condition: Condition) =
+  def apply(dsl: DSL, condition: Condition)(implicit definitionScope: DefinitionScope = DefinitionScope.Internal("if")) =
     Skip(dsl = dsl, condition = !condition)
 
 }

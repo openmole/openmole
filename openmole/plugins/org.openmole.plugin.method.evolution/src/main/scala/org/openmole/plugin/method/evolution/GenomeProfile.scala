@@ -85,7 +85,8 @@ object GenomeProfileEvolution {
       stochastic = stochastic,
       parallelism = parallelism,
       distribution = distribution,
-      suggestion = suggestion
+      suggestion = suggestion,
+      scope = "profile"
     )
 
 }
