@@ -28,6 +28,8 @@ import org.openmole.plugin.method.evolution.Genome.GenomeBound
 
 class WorkflowSpec extends FlatSpec with Matchers {
 
+  import org.openmole.core.workflow.test.Stubs._
+
   def nsga2(wrap: Boolean = true) = {
     val x = Val[Double]
     val y = Val[Double]

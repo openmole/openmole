@@ -3,3 +3,5 @@
 -J-Xss2M
 -J-Dfile.encoding=UTF-8
 -J-XX:MaxMetaspaceSize=1G
+-Dlog4j2.disable.jmx=true 
+-Dlog4j.shutdownHookEnabled=false
