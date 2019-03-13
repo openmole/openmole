@@ -7,7 +7,6 @@ image: openmole/build
 assemble:
   stage: assemble
   script:
-    - rm -f openmole/.sbtopts
     - bash -x build.sh
     - '(cd openmole && sbt test)'
     - '(cd openmole && ./generateSite $PWD/site)'
