@@ -38,7 +38,7 @@ class JobTable(executionId: ExecutionId) {
   val capsuleActivated = jobViews.now == CapsuleView
 
   val jobViewButton = bsn.radios(omsheet.centerElement +++ Seq(marginTop := 40, marginBottom := 40))(
-    bsn.selectableButton("Capsules", capsuleActivated, onclick = () ⇒ toCapsuleView),
+    bsn.selectableButton("Tasks", capsuleActivated, onclick = () ⇒ toCapsuleView),
     bsn.selectableButton("Environments", !capsuleActivated, onclick = () ⇒ toEnvironmentView)
   )
 
