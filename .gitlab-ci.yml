@@ -7,7 +7,7 @@ assemble:
   stage: assemble
   script:
     - bash -x build.sh
-    #- '(cd openmole && sbt test)' # Metaspace error to be solved
+    - '(cd openmole && sbt test)' # Metaspace error to be solved
     - '(cd openmole && ./generateSite $PWD/site)'
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - mkdir -p ~/.ssh
@@ -16,7 +16,8 @@ assemble:
     - chmod 400 ~/.ssh/identity
     - ssh-keyscan -p 21022 docker.openmole.org > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
-
+    - echo "put -r ./openmole/site/* next" >./tonext     
+    - sftp -i ~/.ssh/identity -b ./tonext -P 21022 user@docker.openmole.org
 
 
    
