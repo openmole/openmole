@@ -26,7 +26,7 @@ copy:
     - ssh-keyscan -p 21022 docker.openmole.org > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - echo "put -r ./openmole/site/* next" >./tonext
+    - echo "put -r ./openmole/openmole/site/* next" >./tonext
     - sftp -i ~/.ssh/identity -b ./tonext -P 21022 user@docker.openmole.org
   variables:
     GIT_STRATEGY: none
