@@ -7,22 +7,24 @@ image: openmole/build
 assemble:
   stage: assemble
   script:
+    - export HOME=$PWD
     - bash -x build.sh
     - '(cd openmole && ./generateSite $PWD/site)'
   cache:
     paths:
       - ./openmole
-      - /root/.ivy2/
+      - ./.ivy2/
     policy: push
 
 test:
   stage: deploy
   script:
+    - export HOME=$PWD
     - '(cd openmole && sbt test)'
   cache:
     paths:
       - ./openmole
-      - /root/.ivy2/
+      - ./.ivy2/
     policy: pull 
 
 copy:
