@@ -11,7 +11,7 @@ cache:
     - ./sbt-cache
 
 variables:
-  - SBT_OPTS: "-Dsbt.global.base=/builds/openmole/sbt-cache/sbtboot -Dsbt.boot.directory=/builds/openmole/sbt-cache/boot -Dsbt.ivy.home=/builds/openmole/sbt-cache/ivy -Xmx3G -Xss2M -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=1G"
+  SBT_OPTS: "-Dsbt.global.base=/builds/openmole/sbt-cache/sbtboot -Dsbt.boot.directory=/builds/openmole/sbt-cache/boot -Dsbt.ivy.home=/builds/openmole/sbt-cache/ivy -Xmx3G -Xss2M -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=1G"
 
 assemble:
   stage: assemble
