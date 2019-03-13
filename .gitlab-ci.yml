@@ -5,7 +5,7 @@ stages:
 image: openmole/build
 
 variables:
-  SBT_OPTS: "-Dsbt.global.base=sbt-cache/sbtboot -Dsbt.boot.directory=sbt-cache/boot -Dsbt.ivy.home=sbt-cache/ivy -J-Xmx3G -J-Xss2M -J-Dfile.encoding=UTF-8 -J-XX:MaxMetaspaceSize=1G"
+  SBT_OPTS: "-Dsbt.global.base=sbt-cache/sbtboot -Dsbt.boot.directory=sbt-cache/boot -Dsbt.ivy.home=sbt-cache/ivy -Xmx3G -Xss2M -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=1G"
 
 cache:
   # if you want to have a separate cache per branch, uncomment the next line
