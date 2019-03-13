@@ -11,7 +11,7 @@ assemble:
     - '(cd openmole && ./generateSite $PWD/site)'
   cache:
     paths:
-      - ./
+      - ./openmole
       - /root/.ivy2/
     policy: push
 
@@ -21,7 +21,7 @@ test:
     - '(cd openmole && sbt test)'
   cache:
     paths:
-      - ./
+      - ./openmole
       - /root/.ivy2/
     policy: pull 
   variables:
@@ -45,7 +45,7 @@ copy:
     - sftp -i ~/.ssh/identity -b ./tonext -P 21022 user@docker.openmole.org
   cache:
     paths:
-      - ./
+      - ./openmole
     policy: pull
   variables:
     GIT_STRATEGY: none
