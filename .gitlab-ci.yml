@@ -16,8 +16,8 @@ assemble:
   cache:
     key: assemble-cache
     paths:
-      - ./openmole
-      - ./sbt-cache
+      - openmole/
+      - sbt-cache/
 test:
   stage: deploy
   script:
