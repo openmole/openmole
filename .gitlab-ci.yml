@@ -5,32 +5,25 @@ stages:
 
 image: openmole/build
 
+cache:
+  paths:
+    - ./openmole
+    - ./sbt-cache
+
+variables:
+  - SBT_OPTS: "-Dsbt.global.base=/builds/openmole/sbt-cache/sbtboot -Dsbt.boot.directory=/builds/openmole/sbt-cache/boot -Dsbt.ivy.home=/builds/openmole/sbt-cache/ivy -Xmx3G -Xss2M -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=1G"
 
 assemble:
   stage: assemble
   script:
-    - export SBT_OPTS="-Dsbt.global.base=/builds/openmole/sbt-cache/sbtboot -Dsbt.boot.directory=/builds/openmole/sbt-cache/boot -Dsbt.ivy.home=/builds/openmole/sbt-cache/ivy -Xmx3G -Xss2M -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=1G"
     - rm -f openmole/.sbtopts
     - bash -x build.sh
     - '(cd openmole && ./generateSite $PWD/site)'
-  cache:
-    paths:
-      - ./openmole
-      - ./sbt-cache
-    policy: push
-
 test:
   stage: test
   script:
-    - export SBT_OPTS="-Dsbt.global.base=/builds/openmole/sbt-cache/sbtboot -Dsbt.boot.directory=/builds/openmole/sbt-cache/boot -Dsbt.ivy.home=/builds/openmole/sbt-cache/ivy -Xmx3G -Xss2M -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=1G"
     - rm -f openmole/.sbtopts
     - '(cd openmole && sbt test)'
-  cache:
-    paths:
-      - ./sbt-cache
-      - ./openmole
-    policy: pull 
-
 
 copy:
   stage: deploy
@@ -45,10 +38,6 @@ copy:
   script:
     - echo "put -r ./openmole/site/* next" >./tonext
     - sftp -i ~/.ssh/identity -b ./tonext -P 21022 user@docker.openmole.org
-  cache:
-    paths:
-      - ./openmole
-    policy: pull
   variables:
     GIT_STRATEGY: none
    
