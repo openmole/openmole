@@ -4,16 +4,28 @@ stages:
 
 image: openmole/build
 
+variables:
+  SBT_OPTS: "-Dsbt.global.base=sbt-cache/sbtboot -Dsbt.boot.directory=sbt-cache/boot -Dsbt.ivy.home=sbt-cache/ivy"
+
+cache:
+  # if you want to have a separate cache per branch, uncomment the next line
+  key: "$CI_BUILD_REF_NAME"
+  untracked: true
+  paths:
+    - "sbt-cache/ivy"
+    - "sbt-cache/boot"
+    - "sbt-cache/sbtboot"
+    - "sbt-cache/target"
+    - "sbt-cache/coursier"
+
 assemble:
   stage: assemble
   script:
-    - export HOME=$PWD
     - bash -x build.sh
     - '(cd openmole && ./generateSite $PWD/site)'
   cache:
     paths:
       - ./openmole
-      - ./.ivy2/
     policy: push
 
 test:
@@ -24,7 +36,6 @@ test:
   cache:
     paths:
       - ./openmole
-      - ./.ivy2/
     policy: pull 
 
 copy:
