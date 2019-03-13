@@ -15,7 +15,7 @@ import mgo.evolution.elitism._
 import mgo.evolution.niche._
 import mgo.tagtools._
 import monocle.macros.GenLens
-import org.openmole.core.workflow.builder.ValueAssignment
+import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
 import org.openmole.plugin.method.evolution.NichedNSGA2.NichedElement
@@ -541,7 +541,8 @@ object NichedNSGA2Evolution {
     stochastic:   OptionalArgument[Stochastic] = None,
     parallelism:  Int                          = 1,
     distribution: EvolutionPattern             = SteadyState(),
-    suggestion:   Seq[Seq[ValueAssignment[_]]] = Seq()) =
+    suggestion:   Seq[Seq[ValueAssignment[_]]] = Seq(),
+    scope:        DefinitionScope              = "niched nsga2") =
     EvolutionPattern.build(
       algorithm =
         NichedNSGA2(
@@ -557,7 +558,7 @@ object NichedNSGA2Evolution {
       parallelism = parallelism,
       distribution = distribution,
       suggestion = suggestion,
-      scope = "niched nsga2"
+      scope = scope
     )
 
 }

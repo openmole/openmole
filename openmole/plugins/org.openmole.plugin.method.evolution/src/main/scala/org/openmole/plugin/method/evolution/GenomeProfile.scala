@@ -20,7 +20,7 @@ package org.openmole.plugin.method.evolution
 import org.openmole.core.dsl._
 import cats._
 import org.openmole.core.context.Context
-import org.openmole.core.workflow.builder.ValueAssignment
+import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
 import org.openmole.core.workflow.tools.DefaultSet
 
 object GenomeProfile {
@@ -69,7 +69,8 @@ object GenomeProfileEvolution {
     stochastic:   OptionalArgument[Stochastic] = None,
     parallelism:  Int                          = 1,
     distribution: EvolutionPattern             = SteadyState(),
-    suggestion:   Seq[Seq[ValueAssignment[_]]] = Seq()) =
+    suggestion:   Seq[Seq[ValueAssignment[_]]] = Seq(),
+    scope:        DefinitionScope              = "profile") =
     EvolutionPattern.build(
       algorithm =
         GenomeProfile(
@@ -86,7 +87,7 @@ object GenomeProfileEvolution {
       parallelism = parallelism,
       distribution = distribution,
       suggestion = suggestion,
-      scope = "profile"
+      scope = scope
     )
 
 }

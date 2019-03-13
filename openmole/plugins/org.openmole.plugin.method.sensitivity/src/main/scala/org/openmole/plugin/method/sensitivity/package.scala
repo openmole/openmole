@@ -78,10 +78,10 @@ package object sensitivity {
     inputs:      Seq[ScalarOrSequenceOfDouble[_]],
     outputs:     Seq[Val[Double]],
     repetitions: Int,
-    levels:      Int) = {
+    levels:      Int,
+    scope: DefinitionScope = "sensitivity morris") = {
 
-
-    implicit def scope = DefinitionScope.Internal("Morris sensitivity")
+    implicit def defScope = scope
 
     // the sampling for Morris is a One At a Time one,
     // with respect to the user settings for repetitions, levels and inputs
@@ -104,9 +104,10 @@ package object sensitivity {
     evaluation:   DSL,
     inputs:  Seq[ScalarOrSequenceOfDouble[_]],
     outputs: Seq[Val[Double]],
-    samples:      FromContext[Int]) = {
+    samples:      FromContext[Int],
+    scope: DefinitionScope = "sensitivity saltelli") = {
 
-    implicit def scope = DefinitionScope.Internal("Saltelli sensitivity")
+    implicit def defScope = scope
 
     val sampling = SaltelliSampling(samples, inputs: _*)
 

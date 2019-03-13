@@ -31,14 +31,15 @@ package object directsampling {
     replications:     Int,
     distributionSeed: OptionalArgument[Long] = None,
     aggregation:      OptionalArgument[DSL]  = None,
-    wrap:             Boolean                = false
+    wrap:             Boolean                = false,
+    scope:            DefinitionScope        = "replication"
   ): DSLContainer =
     DirectSampling(
       evaluation = evaluation,
       sampling = seed in (TakeDomain(UniformDistribution[T](distributionSeed), replications)),
       aggregation = aggregation,
       wrap = wrap,
-      scope = "replication"
+      scope = scope
     )
 
   def DirectSampling[P](
