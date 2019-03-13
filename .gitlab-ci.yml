@@ -18,6 +18,7 @@ assemble:
 test:
   stage: deploy
   script:
+    - '(cd openmole && sbt test)'
   cache:
     paths:
       - ./
