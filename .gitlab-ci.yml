@@ -1,11 +1,17 @@
 stages:
   - assemble
+  - test
   - deploy
 
 image: openmole/build
 
+cache:
+  paths:
+    - ./openmole
+    - ./sbt-cache
+
 variables:
-  SBT_OPTS: "-Dsbt.global.base=/builds/sbt-cache/sbtboot -Dsbt.boot.directory=/builds/sbt-cache/boot -Dsbt.ivy.home=/builds/sbt-cache/ivy -Xmx3G -Xss2M -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=1G"
+  SBT_OPTS: "-Dsbt.global.base=/builds/openmole/sbt-cache/sbtboot -Dsbt.boot.directory=/builds/openmole/sbt-cache/boot -Dsbt.ivy.home=/builds/openmole/sbt-cache/ivy -Xmx3G -Xss2M -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=1G"
 
 assemble:
   stage: assemble
@@ -13,34 +19,18 @@ assemble:
     - rm -f openmole/.sbtopts
     - bash -x build.sh
     - '(cd openmole && ./generateSite $PWD/site)'
-  cache:
-    paths:
-      - ./openmole
-      - ./sbt-cache
-    policy: push
-
 test:
-  stage: deploy
+  stage: test
   script:
     - rm -f openmole/.sbtopts
     - '(cd openmole && sbt test)'
-  cache:
-    paths:
-      - ./openmole
-      - ./sbt-cache
-    policy: pull 
-  variables:
-    GIT_STRATEGY: none
 
 copy:
   stage: deploy
   before_script:
-    #- 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-    #- eval $(ssh-agent -s)
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    #- echo "$SSH_KEY" | tr -d '\r' | ssh-add - > /dev/null
     - echo "$SSH_PRIVATE_KEY" >~/.ssh/identity
     - chmod 400 ~/.ssh/identity
     - ssh-keyscan -p 21022 docker.openmole.org > ~/.ssh/known_hosts
@@ -48,10 +38,6 @@ copy:
   script:
     - echo "put -r ./openmole/site/* next" >./tonext
     - sftp -i ~/.ssh/identity -b ./tonext -P 21022 user@docker.openmole.org
-  cache:
-    paths:
-      - ./openmole
-    policy: pull
   variables:
     GIT_STRATEGY: none
    
