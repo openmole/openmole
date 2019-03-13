@@ -24,8 +24,6 @@ test:
       - ./openmole
       - /root/.ivy2/
     policy: pull 
-  variables:
-    GIT_STRATEGY: none
 
 copy:
   stage: deploy
