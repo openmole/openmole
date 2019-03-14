@@ -319,7 +319,7 @@ object MoleExecution extends JavaLogger {
         }
 
         try stopEnvironments()
-        finally MoleExecutionMessage.send(moleExecution)(MoleExecutionMessage.CleanMoleExcution())
+        finally MoleExecutionMessage.send(moleExecution)(MoleExecutionMessage.CleanMoleExecution())
       }
     }
 
@@ -529,7 +529,7 @@ object MoleExecutionMessage {
   case class StartMoleExecution(context: Option[Context]) extends MoleExecutionMessage
   case class CancelMoleExecution() extends MoleExecutionMessage
   case class RegisterJob(subMoleExecution: SubMoleExecutionState, job: MoleJob, capsule: MoleCapsule) extends MoleExecutionMessage
-  case class CleanMoleExcution() extends MoleExecutionMessage
+  case class CleanMoleExecution() extends MoleExecutionMessage
 
   def msgForSubMole(msg: MoleExecutionMessage, subMoleExecutionState: SubMoleExecutionState) = msg match {
     case msg: PerformTransition ⇒ msg.subMoleExecution == subMoleExecutionState.id
@@ -568,7 +568,7 @@ object MoleExecutionMessage {
         case msg: StartMoleExecution    ⇒ if (!moleExecution._canceled) MoleExecution.start(moleExecution, msg.context)
         case msg: CancelMoleExecution   ⇒ if (!moleExecution._canceled) MoleExecution.cancel(moleExecution, None)
         case msg: RegisterJob           ⇒ if (!moleExecution._canceled) msg.subMoleExecution.jobs.put(msg.job, msg.capsule)
-        case msg: CleanMoleExcution     ⇒ MoleExecution.clean(moleExecution)
+        case msg: CleanMoleExecution     ⇒ MoleExecution.clean(moleExecution)
       }
     }
     catch {
