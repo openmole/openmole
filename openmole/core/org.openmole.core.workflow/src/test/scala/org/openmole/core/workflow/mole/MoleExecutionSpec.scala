@@ -75,4 +75,10 @@ class MoleExecutionSpec extends FlatSpec with Matchers {
     val emptyC = MoleCapsule(emptyT)
     MoleExecution(mole = Mole(emptyC), implicits = Context(Variable(i, "test"))).run
   }
+
+  "Wait" should "wait for the mole executon to be completed" in {
+    val emptyT = EmptyTask()
+    val me = emptyT.start()
+    me.hangOn()
+  }
 }
