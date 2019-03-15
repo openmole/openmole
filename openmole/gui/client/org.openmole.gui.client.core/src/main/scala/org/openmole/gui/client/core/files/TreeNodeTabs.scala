@@ -19,7 +19,7 @@ import org.openmole.gui.client.core._
 import org.openmole.gui.ext.tool.client.FileManager
 import DataUtils._
 import net.scalapro.sortable._
-import org.openmole.gui.client.core.files.TreeNodeTab.{EditableView, ErrorBar, RowFilter}
+import org.openmole.gui.client.core.files.TreeNodeTab.{ClosureFilter, EditableView, IndexedAxis, First100, Raw, RowFilter}
 import org.openmole.gui.client.tool.plot
 import org.openmole.gui.client.tool.plot.Plot._
 import org.openmole.gui.client.tool.plot._
@@ -59,9 +59,6 @@ object TreeNodeTabs {
 
   def updateErrors(safePath: SafePath, errorsFromCompiler: Seq[ErrorFromCompiler]) = {
     omsErrorCache.update(omsErrorCache.now.updated(safePath, omsErrorCache.now.getOrElse(safePath, EditorErrors()).copy(errorsFromCompiler = errorsFromCompiler)))
-    //    omsErrorCache.get(safePath).map(_.copy(errorsFromCompiler = errorsFromCompiler)).foreach { eie ⇒
-    //      omsErrorCache.update(safePath, eie)
-    //    }
   }
 }
 
@@ -207,31 +204,33 @@ object TreeNodeTab {
 
   object All extends RowFilter
 
-  case class ErrorBar(title: String, fullSequenceIndex: Int)
+  case class IndexedAxis(title: String, fullSequenceIndex: Int)
 
-  def availableForError(sequence: SequenceData, axis: Seq[Int]) = {
-    sequence.header.zipWithIndex.filterNot {
+  case class ClosureFilter(closure: String = "", axis: Seq[IndexedAxis] = Seq())
+
+  def availableForError(sequence: SequenceData, axis: Seq[Int]) = sequence.header.zipWithIndex.filterNot {
+    case (x, i) ⇒
+      axis.contains(i)
+  }.map { afe =>
+    IndexedAxis(afe._1, afe._2)
+  }
+
+  def availableForClosureFilter(sequence: SequenceData, axis: Seq[Int], closure: String) =
+    ClosureFilter(closure, sequence.header.zipWithIndex.filter {
       case (x, i) ⇒
         axis.contains(i)
-    }.map {afe=>
-      ErrorBar(afe._1, afe._2)
-    }
-  }
+    }.map { afe =>
+      IndexedAxis(afe._1, afe._2)
+    })
 
 
   def editable(
                 safePath: SafePath,
                 initialContent: String,
-                initialSequence: SequenceData,
-                view: EditableView = Raw,
-                initialEditing: Boolean = false,
-                filter: RowFilter = First100,
-                axis: Seq[Int] = Seq(0, 1),
-                plotMode: PlotMode = ScatterMode,
-                error: Option[ErrorBar] = None): TreeNodeTab = new TreeNodeTab {
+                editableSettings: EditableSettings): TreeNodeTab = new TreeNodeTab {
 
     lazy val safePathTab = Var(safePath)
-    lazy val isEditing = Var(initialEditing)
+    lazy val isEditing = Var(editableSettings.editing)
 
     Rx {
       editableEditor.setReadOnly(!isEditing())
@@ -239,12 +238,12 @@ object TreeNodeTab {
 
     def content: String = editableEditor.code
 
-    val sequence = Var(initialSequence)
+    val sequence = Var(editableSettings.sequence)
     val nbColumns = sequence.now.header.length
 
     def isCSV = DataUtils.isCSV(safePath)
 
-    val filteredSequence = filter match {
+    val filteredSequence = editableSettings.filter match {
       case First100 ⇒ sequence.now.content.take(100)
       case Last100 ⇒ sequence.now.content.takeRight(100)
       case _ ⇒ sequence.now.content
@@ -284,7 +283,7 @@ object TreeNodeTab {
 
       if (editing) {
         if (isCSV) {
-          if (view == Raw) saveTab
+          if (editableSettings.view == Raw) saveTab
         }
         else
           saveTab
@@ -299,7 +298,7 @@ object TreeNodeTab {
       div(
         Rx {
           if (isEditing()) div()
-          else if (view == Raw) {
+          else if (editableSettings.view == Raw) {
             button("Edit", btn_primary, onclick := {
               () ⇒
                 isEditing() = !isEditing.now
@@ -311,14 +310,14 @@ object TreeNodeTab {
 
     lazy val editorView = editableEditor.view
 
-    val switchString = view match {
+    val switchString = editableSettings.view match {
       case Table ⇒ Raw.toString
       case _ ⇒ Table.toString
     }
 
     def switchView(newView: EditableView) = {
 
-      def switch = panels.treeNodeTabs.switchEditableTo(this, sequence.now, newView, filter, editing, axis, plotMode, error)
+      def switch = panels.treeNodeTabs.switchEditableTo(this, editableSettings.copy(sequence = sequence.now, view = newView))
 
       newView match {
         case Table | Plot ⇒
@@ -333,34 +332,42 @@ object TreeNodeTab {
       }
     }
 
-    def toView(filter: RowFilter) = panels.treeNodeTabs.switchEditableTo(this, sequence.now, view, filter, editing, axis, plotMode, error)
+    def toView(newFilter: RowFilter) = panels.treeNodeTabs.switchEditableTo(this, editableSettings.copy(sequence = sequence.now, filter = newFilter))
 
     def toView(newAxis: Seq[Int]) = {
-      val afe = error.map{_=> availableForError(sequence.now, newAxis)}.map{_.head}
-      panels.treeNodeTabs.switchEditableTo(this, sequence.now, view, filter, editing, newAxis, plotMode, afe)
+      val afe = editableSettings.error.map { _ => availableForError(sequence.now, newAxis) }.map {
+        _.head
+      }
+      panels.treeNodeTabs.switchEditableTo(this, editableSettings.copy(sequence = sequence.now, axis = newAxis, error = afe))
     }
 
     def toView(newMode: PlotMode) = {
       val (seqs, ax) = newMode match {
-        case SplomMode ⇒ (initialSequence, axis.take(5))
-        case HeatMapMode=> (sequence.now, 0 to sequence.now.header.size -1)
-        case _ ⇒ (sequence.now, axis.take(2))
+        case SplomMode ⇒ (editableSettings.sequence, editableSettings.axis.take(5))
+        case HeatMapMode => (sequence.now, 0 to sequence.now.header.size - 1)
+        case _ ⇒ (sequence.now, editableSettings.axis.take(2))
       }
-      panels.treeNodeTabs.switchEditableTo(this, seqs, view, filter, editing, ax, newMode, error)
+
+      panels.treeNodeTabs.switchEditableTo(this, editableSettings.copy(axis = ax, plotMode = newMode))
     }
 
-    def toView(error: Option[ErrorBar]) = panels.treeNodeTabs.switchEditableTo(this, sequence.now, view, filter, editing, axis, plotMode, error)
+    def toView(newError: Option[IndexedAxis]) = panels.treeNodeTabs.switchEditableTo(this, editableSettings.copy(sequence = sequence.now, error = newError))
+
+    def toClosureView(newPlotClosure: Option[ClosureFilter]): Unit = {
+      panels.treeNodeTabs.switchEditableTo(this, editableSettings.copy(plotClosure = newPlotClosure))
+    }
+
 
     lazy val switchButton = radios(margin := 20)(
-      selectableButton("Raw", view == Raw, onclick = () ⇒ switchView(Raw)),
-      selectableButton("Table", view == Table, onclick = () ⇒ switchView(Table)),
-      selectableButton("Plot", view == Plot, onclick = () ⇒ switchView(Plot))
+      selectableButton("Raw", editableSettings.view == Raw, onclick = () ⇒ switchView(Raw)),
+      selectableButton("Table", editableSettings.view == Table, onclick = () ⇒ switchView(Table)),
+      selectableButton("Plot", editableSettings.view == Plot, onclick = () ⇒ switchView(Plot))
     )
 
     lazy val filterRadios = radios(marginLeft := 40)(
-      selectableButton("First 100", filter == First100, onclick = () ⇒ toView(First100)),
-      selectableButton("Last 100", filter == Last100, onclick = () ⇒ toView(Last100)),
-      selectableButton("All", filter == All, modifierSeq = btn_danger, onclick = () ⇒ toView(All))
+      selectableButton("First 100", editableSettings.filter == First100, onclick = () ⇒ toView(First100)),
+      selectableButton("Last 100", editableSettings.filter == Last100, onclick = () ⇒ toView(Last100)),
+      selectableButton("All", editableSettings.filter == All, modifierSeq = btn_danger, onclick = () ⇒ toView(All))
     )
 
     val rowStyle: ModifierSeq = Seq(
@@ -376,11 +383,11 @@ object TreeNodeTab {
       (for (
         a ← sequence.now.header.zipWithIndex
       ) yield {
-        selectableButton(a._1, axis.contains(a._2), onclick = () ⇒ {
-          val newAxis = plotMode match {
-            case SplomMode ⇒ if (axis.contains(a._2)) axis.filterNot(_ == a._2) else axis :+ a._2
-            case HeatMapMode=> Seq()
-            case _ ⇒ Seq(axis.last, a._2)
+        selectableButton(a._1, editableSettings.axis.contains(a._2), onclick = () ⇒ {
+          val newAxis = editableSettings.plotMode match {
+            case SplomMode ⇒ if (editableSettings.axis.contains(a._2)) editableSettings.axis.filterNot(_ == a._2) else editableSettings.axis :+ a._2
+            case HeatMapMode => Seq()
+            case _ ⇒ Seq(editableSettings.axis.last, a._2)
           }
           toView(newAxis)
         })
@@ -390,54 +397,121 @@ object TreeNodeTab {
 
     def errorCheckBox = checkboxes(marginLeft := 20)(
       (for (
-        a ← availableForError(sequence.now, axis)
+        a ← availableForError(sequence.now, editableSettings.axis)
       ) yield {
-        selectableButton(a.title, error == Some(a), onclick = () ⇒ {
+        selectableButton(a.title, editableSettings.error == Some(a), onclick = () ⇒ {
           toView(Some(a))
         })
       }): _*
     )
 
-    lazy val toggleError: ToggleButton = toggle(error.isDefined, "On", "Off", onToggled = () ⇒ {
-      if (toggleError.position.now) toView(availableForError(sequence.now, axis).headOption)
-      else toView(None)
+    lazy val filterClosureRadios = checkboxes(marginLeft := 20)(
+      (for (
+        a ← availableForClosureFilter(sequence.now, editableSettings.axis, editableSettings.plotClosure.map {
+          _.closure
+        }.getOrElse("")).axis
+      ) yield {
+        selectableButton(a.title, editableSettings.plotClosure.map {
+          _.axis
+        }.getOrElse(Seq()).contains(a), onclick = () ⇒ {
+          val axisSet = editableSettings.plotClosure.map {
+            _.axis
+          }.getOrElse(Seq())
+          toClosureView(editableSettings.plotClosure.map {
+            _.copy(closure = closureInput.value, axis = {
+              if (axisSet.contains(a)) axisSet.filterNot(_ == a)
+              else axisSet :+ a
+            })
+          })
+        })
+      }): _*
+    )
+
+    lazy val toggleFilter: ToggleButton = toggle(editableSettings.plotClosure.isDefined, "On", "Off", onToggled = () ⇒ {
+      if (toggleFilter.position.now) toClosureView(Some(ClosureFilter(closureInput.value, editableSettings.plotClosure.map {
+        _.axis
+      }.getOrElse(Seq()))))
+      else toClosureView(None)
     }
     )
 
-    lazy val errorBar = plotMode match {
+
+    lazy val closureInput = input(placeholder := "Filter closure. Ex: x < 10", marginLeft := 10 )(value := editableSettings.plotClosure.map {
+      _.closure
+    }.getOrElse("")).render
+
+    lazy val inputFilterValidation = button(btn_primary, marginLeft:= 10, "Apply", onclick := { () =>
+      toClosureView(editableSettings.plotClosure.map {
+        _.copy(closure = closureInput.value)
+      })
+    })
+
+    lazy val toggleError: ToggleButton = toggle(editableSettings.error.isDefined, "On", "Off", onToggled = () ⇒ {
+      if (toggleError.position.now) toView(availableForError(sequence.now, editableSettings.axis).headOption)
+      else toView(None)
+    })
+
+    lazy val errorBar = editableSettings.plotMode match {
       case SplomMode | HeatMapMode ⇒ div()
       case _ ⇒
         scalatags.JsDom.tags.span(hForm(
           scalatags.JsDom.tags.span(
             toggleError.render,
             Rx {
-            if (toggleError.position()) scalatags.JsDom.tags.span(errorCheckBox.render).render
-            else {
-              scalatags.JsDom.tags.span.render
-            }
-          }).render.withLabel("Error bar")
-        ))
+              if (toggleError.position()) scalatags.JsDom.tags.span(errorCheckBox.render).render
+              else {
+                scalatags.JsDom.tags.span.render
+              }
+            }).render.withLabel("Error bar")
+        ),
+          scalatags.JsDom.tags.span(hForm(
+            scalatags.JsDom.tags.span(
+              toggleFilter.render,
+              Rx {
+                if (toggleFilter.position()) scalatags.JsDom.tags.span(filterClosureRadios.render, closureInput, inputFilterValidation).render
+                else {
+                  scalatags.JsDom.tags.span.render
+                }
+              }).render.withLabel("Filter")
+          ))
+
+        )
     }
 
     lazy val plotModeRadios = radios(marginLeft := 40)(
-      selectableButton("Line", plotMode == XYMode, onclick = () ⇒ toView(XYMode)),
-      selectableButton("Scatter", plotMode == ScatterMode, onclick = () ⇒ toView(ScatterMode)),
-      selectableButton("SPLOM", plotMode == SplomMode, onclick = () ⇒ toView(SplomMode)),
-      selectableButton("Heat map", plotMode == HeatMapMode, onclick = () ⇒ toView(HeatMapMode))
+      selectableButton("Line", editableSettings.plotMode == XYMode, onclick = () ⇒ toView(XYMode)),
+      selectableButton("Scatter", editableSettings.plotMode == ScatterMode, onclick = () ⇒ toView(ScatterMode)),
+      selectableButton("SPLOM", editableSettings.plotMode == SplomMode, onclick = () ⇒ toView(SplomMode)),
+      selectableButton("Heat map", editableSettings.plotMode == HeatMapMode, onclick = () ⇒ toView(HeatMapMode))
     )
+
+    def jsClosure(value: String, col: Int) = {
+      val closure = closureInput.value
+      if(closure.isEmpty) true
+      else {
+        editableSettings.plotClosure.map {
+          _.axis.find(_.fullSequenceIndex == col).map { pc =>
+            closure.replace("x", value)
+          }.map { cf =>
+            scala.util.Try(scala.scalajs.js.eval(s"function func() { return ${cf};} func()").asInstanceOf[Boolean]).toOption.getOrElse(true)
+          }.getOrElse(true)
+        }.getOrElse(true)
+      }
+    }
+
 
     lazy val block: TypedTag[_ <: HTMLElement] = {
       div(
         if (isCSV) {
-          view match {
+          editableSettings.view match {
             case Table ⇒ div(switchButton.render, filterRadios.render)
             case Plot ⇒
               div(
                 vForm(
                   div(switchButton.render, filterRadios.render, plotModeRadios.render).render,
-                  plotMode match {
-                    case HeatMapMode=> div().render
-                    case _=>scalatags.JsDom.tags.span(axisCheckBoxes.render).render.withLabel("x|y axis")
+                  editableSettings.plotMode match {
+                    case HeatMapMode => div().render
+                    case _ => scalatags.JsDom.tags.span(axisCheckBoxes.render).render.withLabel("x|y axis")
                   },
                   errorBar.render
                 ),
@@ -446,7 +520,7 @@ object TreeNodeTab {
           }
         }
         else div,
-        view match {
+        editableSettings.view match {
           case Table ⇒
             div(overflow := "auto", height := "90%")({
               if (!sequence.now.header.isEmpty && !filteredSequence.isEmpty) {
@@ -465,18 +539,18 @@ object TreeNodeTab {
           case Raw ⇒ editorView
           case _ ⇒
             if (filteredSequence.size > 0) {
-              if (filteredSequence.head.length >= axis.length) {
+              if (filteredSequence.head.length >= editableSettings.axis.length) {
                 val dataRow = filteredSequence.map {
                   scaladget.bootstrapnative.DataTable.DataRow(_)
                 }.toSeq
                 plot.Plot(
                   "",
-                  Serie(axis.length, axis.foldLeft(Array[Dim]()) { (acc, col) ⇒
-                    acc :+ Dim(DataTable.column(col, dataRow).values, sequence.now.header.lift(col).getOrElse(""))
+                  Serie(editableSettings.axis.length, editableSettings.axis.foldLeft(Array[Dim]()) { (acc, col) ⇒
+                    acc :+ Dim(DataTable.column(col, dataRow).values.filter(v => jsClosure(v, col)), sequence.now.header.lift(col).getOrElse(""))
                   }),
                   false,
-                  plotMode,
-                  error.map { i ⇒ Serie(1, Seq(Dim(DataTable.column(i.fullSequenceIndex, dataRow).values, sequence.now.header.lift(i.fullSequenceIndex).getOrElse("")))) }
+                  editableSettings.plotMode,
+                  editableSettings.error.map { i ⇒ Serie(1, Seq(Dim(DataTable.column(i.fullSequenceIndex, dataRow).values, sequence.now.header.lift(i.fullSequenceIndex).getOrElse("")))) }
                 )
 
               }
@@ -488,6 +562,28 @@ object TreeNodeTab {
     }
 
   }
+}
+
+case class EditableSettings(
+                             sequence: SequenceData,
+                             view: EditableView,
+                             filter: RowFilter,
+                             editing: Boolean,
+                             axis: Seq[Int],
+                             plotMode: PlotMode,
+                             error: Option[IndexedAxis],
+                             plotClosure: Option[ClosureFilter]
+                           )
+
+object EditableSettings {
+  def build(sequence: SequenceData,
+            view: EditableView = Raw,
+            filter: RowFilter = First100,
+            editing: Boolean = false,
+            axis: Seq[Int] = Seq(0, 1),
+            plotMode: PlotMode = ScatterMode,
+            error: Option[IndexedAxis] = None,
+            plotClosure: Option[ClosureFilter] = None) = EditableSettings(sequence, view, filter, editing, axis, plotMode, error, plotClosure)
 }
 
 class TreeNodeTabs() {
@@ -565,8 +661,8 @@ class TreeNodeTabs() {
     }
   }
 
-  def switchEditableTo(tab: TreeNodeTab, sequence: SequenceData, editableView: EditableView, filter: RowFilter, editing: Boolean, axis: Seq[Int], plotMode: PlotMode, error: Option[ErrorBar]) = {
-    val newTab = TreeNodeTab.editable(tab.safePathTab.now, tab.content, sequence, editableView, editing, filter, axis, plotMode, error)
+  def switchEditableTo(tab: TreeNodeTab, editableSettings: EditableSettings) = {
+    val newTab = TreeNodeTab.editable(tab.safePathTab.now, tab.content, editableSettings)
     switchTab(tab, newTab)
   }
 
