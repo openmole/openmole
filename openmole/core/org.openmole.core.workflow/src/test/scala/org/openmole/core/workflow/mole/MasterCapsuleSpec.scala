@@ -18,47 +18,34 @@
 package org.openmole.core.workflow.mole
 
 import org.openmole.core.context.{ Val, Variable }
-import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.execution._
-import org.openmole.core.workflow.transition._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.transition._
-import org.scalatest._
-import org.scalatest.junit._
-
-import scala.collection.mutable.ListBuffer
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.transition._
-import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.test.TestTask
+import org.scalatest._
 
 class MasterCapsuleSpec extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.tools.Stubs._
+  import org.openmole.core.workflow.test.Stubs._
 
   "A master capsule" should "execute tasks" in {
+    @volatile var testExecuted = false
+
     val p = Val[String]("p")
 
-    val t1 = TestTask { _ + (p → "Test") } set (
-      name := "Test write",
-      outputs += p
-    )
+    val t1 = TestTask { _ + (p → "Test") } set (outputs += p)
 
     val t2 = TestTask { context ⇒
       context(p) should equal("Test")
+      testExecuted = true
       context
-    } set (
-      name := "Test read",
-      inputs += p
-    )
+    } set (inputs += p)
 
-    val t1c = MasterCapsule(t1)
-    val t2c = MasterCapsule(t2)
-
-    val ex = t1c -- t2c toExecution
+    val ex = Master(t1) -- Master(t2)
 
     ex.run
+
+    testExecuted should equal(true)
   }
 
   "A master capsule" should "keep value of a variable from on execution to another" in {
@@ -66,32 +53,17 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
     val i = Val[String]("i")
     val n = Val[Int]("n")
 
-    val sampling = new ExplicitSampling(i, data)
-
-    val exc = Capsule(ExplorationTask(sampling))
-
-    val emptyT = EmptyTask() set (
-      inputs += i,
-      outputs += i
-    )
+    val emptyT = EmptyTask() set ((inputs, outputs) += i)
 
     val select = TestTask { context ⇒
       val nVal = context(n)
       context + Variable(n, nVal + 1) + Variable(i, (nVal + 1).toString)
     } set (
-      name := "Select",
-      inputs += (n, i),
-      outputs += (n, i),
+      (inputs, outputs) += (n, i),
       n := 0
     )
 
-    val emptyC = Capsule(emptyT)
-    val slot1 = Slot(emptyC)
-    val slot2 = Slot(emptyC)
-
-    val selectCaps = MasterCapsule(select, n)
-
-    val ex = exc -< slot1 -- selectCaps -- (slot2 when "n <= 100")
+    val ex = ExplicitSampling(i, data) -< emptyT -- (Master(select, n) -- Slot(emptyT) when "n <= 100")
 
     ex.run
   }
@@ -113,22 +85,14 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
         outputs += i
       )
 
-    val modelCapsule = Capsule(model)
-    val modelSlot1 = Slot(modelCapsule)
-    val modelSlot2 = Slot(modelCapsule)
-
     val select = TestTask { context ⇒
       assert(context.contains(archive))
       selectTaskExecuted += 1
       context + Variable(archive, (context(i) :: context(archive).toList) toArray)
     } set (
-      name := "select",
-      inputs += (archive, i),
-      outputs += (archive, i),
+      (inputs, outputs) += (archive, i),
       archive := Array.empty[Int]
     )
-
-    val selectCaps = MasterCapsule(select, archive)
 
     val finalTask = TestTask { context ⇒
       assert(context.contains(archive))
@@ -136,36 +100,23 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
       endCapsExecuted += 1
       context
     } set (
-      name := "final",
       inputs += archive
     )
 
-    val skel = exploration -< modelSlot1 -- selectCaps
-    val loop = selectCaps -- modelSlot2
-    val terminate = selectCaps >| (finalTask when "archive.size >= 10")
-
-    val ex = skel & loop & terminate
+    val ex =
+      exploration -< model -- Master(select, archive) &
+        select -- Slot(model) &
+        (select >| finalTask when "archive.size >= 10")
 
     (noException shouldBe thrownBy(ex.run))
     endCapsExecuted should equal(1)
   }
 
   "A master capsule" should "work with mole tasks" in {
-
-    val t1 = EmptyTask() set (name := "Test write")
-
-    val mole = Mole(t1)
-
-    val mt = MoleTask(mole, mole.root)
-
-    val t1c = MasterCapsule(mt)
-
-    val i = Val[Int]("i")
-
-    val explo = ExplorationTask(ExplicitSampling(i, 0 to 100))
-
-    val ex = explo -< t1c
-
+    val i = Val[Int]
+    val t1 = EmptyTask() set ((inputs, outputs) += i)
+    val mt = MoleTask(t1)
+    val ex = ExplicitSampling(i, 0 to 100) -< Master(mt, i)
     ex.run
   }
 

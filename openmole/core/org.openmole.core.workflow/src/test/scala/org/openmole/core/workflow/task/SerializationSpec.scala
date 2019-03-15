@@ -20,7 +20,6 @@ package org.openmole.core.workflow.task
 import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
 
 import org.openmole.core.context.Val
-import org.openmole.core.workflow.data._
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workflow.builder._
 import org.scalatest._
@@ -29,7 +28,7 @@ import org.openmole.core.workflow.tools.DefaultSet
 
 class SerializationSpec extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.tools.Stubs._
+  import org.openmole.core.workflow.test.Stubs._
 
   def serializeDeserialize[T](o: T) = {
     val builder = new ByteArrayOutputStream()

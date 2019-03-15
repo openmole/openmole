@@ -22,7 +22,6 @@ import org.openmole.core.workflow.mole.{ MoleExecutionContext, MoleServices }
 import org.openmole.tool.stream.StringPrintStream
 
 import scala.concurrent.stm._
-import org.openmole.tool.file._
 import org.openmole.tool.tar._
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.module
@@ -32,7 +31,7 @@ import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.core.project._
 import org.openmole.core.services.Services
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.dsl._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.plugin.server._
 import org.openmole.gui.ext.tool.server.OMRouter
@@ -357,9 +356,9 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
               catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
                 case Failure(e) ⇒ error(e)
-                case Success(puzzle) ⇒
+                case Success(dsl) ⇒
                   val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(outputStream))
-                  Try(puzzle.toExecution(executionContext = MoleExecutionContext()(services))) match {
+                  Try(dslToPuzzle(dsl).toExecution(executionContext = MoleExecutionContext()(services))) match {
                     case Success(ex) ⇒
                       val envIds = (ex.allEnvironments).map { env ⇒ EnvironmentId(getUUID) → env }
                       execution.addRunning(execId, envIds)

@@ -55,7 +55,7 @@ object Genome {
 
   }
 
-  import _root_.mgo.{ C, D }
+  import _root_.mgo.evolution.{ C, D }
   import cats.implicits._
 
   def continuous(genome: Genome) = {

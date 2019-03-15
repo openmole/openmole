@@ -36,8 +36,8 @@ import scala.collection.mutable.{ HashSet, ListBuffer }
 object ExplorationTransition {
 
   def registerAggregationTransitions(transition: ExplorationTransition, ticket: Ticket, subMoleExecution: SubMoleExecutionState, executionContext: MoleExecutionContext, size: Int) = {
-    val alreadySeen = new HashSet[Capsule]
-    val toProcess = new ListBuffer[(Capsule, Int)]
+    val alreadySeen = new HashSet[MoleCapsule]
+    val toProcess = new ListBuffer[(MoleCapsule, Int)]
     toProcess += ((transition.end.capsule, 0))
     while (!toProcess.isEmpty) {
       val cur = toProcess.remove(0)
@@ -104,7 +104,7 @@ object ExplorationTransition {
 
 }
 
-class ExplorationTransition(val start: Capsule, val end: Slot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty) extends IExplorationTransition with ValidateTransition {
+class ExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty) extends IExplorationTransition with ValidateTransition {
 
   override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
     import p._

@@ -20,7 +20,7 @@ package org.openmole.plugin.method.evolution
 import org.openmole.core.dsl._
 import cats._
 import org.openmole.core.context.Context
-import org.openmole.core.workflow.builder.ValueAssignment
+import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
 import org.openmole.core.workflow.tools.DefaultSet
 
 object GenomeProfile {
@@ -31,7 +31,7 @@ object GenomeProfile {
     genome:     Genome,
     objective:  Objective[_],
     stochastic: OptionalArgument[Stochastic] = None,
-    nicheSize:  Int                          = 20
+    nicheSize:  OptionalArgument[Int]        = None
   ) = {
     stochastic.option match {
       case None ⇒
@@ -39,14 +39,14 @@ object GenomeProfile {
           Vector(NichedNSGA2.NichedElement.Continuous(x, nX)),
           genome,
           objectives = Seq(objective),
-          nicheSize = 1
+          nicheSize = nicheSize.option.getOrElse(1)
         )
       case Some(stochastic) ⇒
         NichedNSGA2(
           Vector(NichedNSGA2.NichedElement.Continuous(x, nX)),
           genome,
           Seq(objective),
-          nicheSize,
+          nicheSize.option.getOrElse(10),
           stochastic = stochastic
         )
     }
@@ -57,20 +57,20 @@ object GenomeProfile {
 object GenomeProfileEvolution {
 
   import org.openmole.core.dsl._
-  import org.openmole.core.workflow.puzzle._
 
   def apply(
     x:            Val[Double],
     nX:           Int,
     genome:       Genome,
     objective:    Objective[_],
-    evaluation:   Puzzle,
+    evaluation:   DSL,
     termination:  OMTermination,
-    nicheSize:    Int                          = 20,
+    nicheSize:    OptionalArgument[Int]        = None,
     stochastic:   OptionalArgument[Stochastic] = None,
     parallelism:  Int                          = 1,
     distribution: EvolutionPattern             = SteadyState(),
-    suggestion:   Seq[Seq[ValueAssignment[_]]] = Seq()) =
+    suggestion:   Seq[Seq[ValueAssignment[_]]] = Seq(),
+    scope:        DefinitionScope              = "profile") =
     EvolutionPattern.build(
       algorithm =
         GenomeProfile(
@@ -78,14 +78,16 @@ object GenomeProfileEvolution {
           nX = nX,
           genome = genome,
           objective = objective,
-          stochastic = stochastic
+          stochastic = stochastic,
+          nicheSize = nicheSize
         ),
       evaluation = evaluation,
       termination = termination,
       stochastic = stochastic,
       parallelism = parallelism,
       distribution = distribution,
-      suggestion = suggestion
+      suggestion = suggestion,
+      scope = scope
     )
 
 }

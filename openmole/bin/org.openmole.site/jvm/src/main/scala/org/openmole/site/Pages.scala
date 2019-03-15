@@ -233,7 +233,7 @@ object DocumentationPages {
   // Explore
   lazy val explore = DocumentationPage.fromScalatex(name = "Explore", content = scalatex.documentation.explore.Explore, title = Some("Explore Your Model"))
 
-  def explorePages = pageNode(explore, Vector(directSampling, calibration, profile, pse, sensitivity))
+  def explorePages = pageNode(explore, Vector(directSampling, calibration, sensitivity, profile, pse))
 
   lazy val directSampling = DocumentationPage.fromScalatex(name = "Direct Sampling", content = scalatex.documentation.explore.sampling.DirectSampling)
 
@@ -247,9 +247,9 @@ object DocumentationPages {
   lazy val advancedSampling = DocumentationPage.fromScalatex(name = "Advanced Samplings", content = scalatex.documentation.explore.sampling.AdvancedSampling)
 
   lazy val calibration = DocumentationPage.fromScalatex(name = "Calibration", content = scalatex.documentation.explore.Calibration)
+  lazy val sensitivity = DocumentationPage.fromScalatex(name = "Sensitivity", content = scalatex.documentation.explore.Sensitivity, title = Some("Stastistical Sensitivity Analysis"))
   lazy val profile = DocumentationPage.fromScalatex(name = "Profile", content = scalatex.documentation.explore.Profile)
   lazy val pse = DocumentationPage.fromScalatex(name = "PSE", content = scalatex.documentation.explore.PSE, title = Some("Pattern Space Exploration"))
-  lazy val sensitivity = DocumentationPage.fromScalatex(name = "Sensitivity", content = scalatex.documentation.explore.Sensitivity, title = Some("Stastistical Sensitivity Analysis"))
 
   // Scale
   lazy val scale = DocumentationPage.fromScalatex(name = "Scale", content = scalatex.documentation.scale.Scale, title = Some("Scale on Different Environments"))

@@ -23,6 +23,8 @@ object BlockList {
   def empty = new BlockList {
     override def apply(t: Val[_]) = false
   }
+
+  implicit def seqOfValToKeep(s: Seq[Val[_]]) = Keep(s: _*)
 }
 
 trait BlockList <: (Val[_] ⇒ Boolean)

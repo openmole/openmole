@@ -26,4 +26,5 @@ package object event {
   implicit class EventDispatcherDecorator[T](o: T) {
     def listen(listener: Listner[T])(implicit eventDispatcher: EventDispatcher) = eventDispatcher.listen(o)(listener)
   }
+
 }

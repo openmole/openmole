@@ -95,7 +95,7 @@ lazy val openmoleHash = OsgiProject(thirdPartiesDir, "org.openmole.tool.hash", i
 lazy val openmoleStream = OsgiProject(thirdPartiesDir, "org.openmole.tool.stream", imports = Seq("*")) dependsOn (openmoleThread) settings(libraryDependencies += Libraries.collections, libraryDependencies += Libraries.squants) settings (thirdPartiesSettings: _*)
 lazy val openmoleCollection = OsgiProject(thirdPartiesDir, "org.openmole.tool.collection", imports = Seq("*")) settings (Libraries.addScalaLang(scalaVersionValue)) settings (thirdPartiesSettings: _*)
 lazy val openmoleCrypto = OsgiProject(thirdPartiesDir, "org.openmole.tool.crypto", imports = Seq("*")) settings(libraryDependencies += Libraries.bouncyCastle, libraryDependencies += Libraries.jasypt) settings (thirdPartiesSettings: _*)
-lazy val openmoleStatistics = OsgiProject(thirdPartiesDir, "org.openmole.tool.statistics", imports = Seq("*")) dependsOn (openmoleLogger) settings (thirdPartiesSettings: _*)
+lazy val openmoleStatistics = OsgiProject(thirdPartiesDir, "org.openmole.tool.statistics", imports = Seq("*")) dependsOn (openmoleLogger, openmoleTypes) settings (thirdPartiesSettings: _*)
 lazy val openmoleTypes = OsgiProject(thirdPartiesDir, "org.openmole.tool.types", imports = Seq("*")) settings(libraryDependencies += Libraries.shapeless, libraryDependencies += Libraries.squants) settings (thirdPartiesSettings: _*)
 lazy val openmoleByteCode = OsgiProject(thirdPartiesDir, "org.openmole.tool.bytecode", imports = Seq("*")) settings (libraryDependencies += Libraries.asm) settings (thirdPartiesSettings: _*)
 lazy val openmoleOSGi = OsgiProject(thirdPartiesDir, "org.openmole.tool.osgi", imports = Seq("*")) dependsOn (openmoleFile) settings (libraryDependencies += Libraries.equinoxOSGi) settings (thirdPartiesSettings: _*)
@@ -374,8 +374,7 @@ lazy val distributionDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain
 lazy val fileDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.file", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings: _*)
 
 lazy val modifierDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.modifier", imports = Seq("*")) dependsOn (openmoleDSL) settings (
-  libraryDependencies += Libraries.scalatest
-  ) settings (pluginSettings: _*)
+  libraryDependencies += Libraries.scalatest) settings (pluginSettings: _*)
 
 lazy val rangeDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.range", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings: _*)
 
@@ -878,7 +877,7 @@ lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultS
   Libraries.scalajsMarked
 )
 
-lazy val siteJS = site.js enablePlugins (ExecNpmPlugin)
+lazy val siteJS = site.js enablePlugins (ExecNpmPlugin) settings (test := {})
 lazy val siteJVM = site.jvm dependsOn(tools, project, serializer, buildinfo, marketIndex) settings (
   libraryDependencies += Libraries.sourceCode)
 
@@ -897,7 +896,7 @@ lazy val marketIndex = Project("marketindex", binDir / "org.openmole.marketindex
     val runner = git.runner.value
     val dir = baseDirectory.value / "target/openmole-market"
     val marketBranch = defineMarketBranch.value
-    runner.updated("https://gitlab.iscpif.fr/openmole/market.git", marketBranch, dir, ConsoleLogger())
+    runner.updated("https://gitlab.openmole.org/openmole/market.git", marketBranch, dir, ConsoleLogger())
   }
 ) dependsOn(buildinfo, openmoleFile, openmoleTar, market)
 

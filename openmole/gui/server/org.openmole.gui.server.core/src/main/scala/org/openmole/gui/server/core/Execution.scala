@@ -21,6 +21,7 @@ import java.util.concurrent.Future
 
 import monocle.macros.Lenses
 import org.openmole.core.event.Listner
+import org.openmole.core.workflow.builder.DefinitionScope
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.gui.ext.data._
@@ -28,6 +29,7 @@ import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
 import org.openmole.plugin.environment.batch._
 import org.openmole.tool.file.readableByteCount
 import org.openmole.tool.stream.StringPrintStream
+
 import scala.concurrent.stm._
 
 @Lenses case class RunningEnvironment(
@@ -213,7 +215,16 @@ class Execution {
       case (_, Some(moleExecution)) ⇒
         def convertStatuses(s: MoleExecution.JobStatuses) = ExecutionInfo.JobStatuses(s.ready, s.running, s.completed)
 
-        lazy val statuses = moleExecution.capsuleStatuses.toVector.map { case (k, v) ⇒ k.toString -> convertStatuses(v) }
+        def scopeToString(scope: DefinitionScope) =
+          scope match {
+            case DefinitionScope.User           ⇒ "user"
+            case DefinitionScope.Internal(name) ⇒ name
+          }
+
+        lazy val statuses = moleExecution.capsuleStatuses.toVector.map {
+          case (k, v) ⇒
+            CapsuleExecution(name = k.task.simpleName, scope = scopeToString(k.task.info.definitionScope), statuses = convertStatuses(v))
+        }
 
         moleExecution.exception match {
           case Some(t) ⇒

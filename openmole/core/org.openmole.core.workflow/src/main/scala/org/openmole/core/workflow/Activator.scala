@@ -16,17 +16,16 @@ class Activator extends BundleActivator {
       import org.openmole.core.pluginmanager.KeyWord._
       import org.openmole.core.context._
       import org.openmole.core.workflow.mole._
-      import org.openmole.core.workflow.transition.{ Slot }
+      import org.openmole.core.workflow.transition.{ TransitionSlot }
       import org.openmole.core.workflow.execution.{ LocalEnvironment }
-      import org.openmole.core.workflow.puzzle.Puzzle
       import org.openmole.core.workflow.task.{ EmptyTask, ExplorationTask, ClosureTask, ToArrayTask, MoleTask, FromContextTask }
 
       Vector(
         Word(classOf[Val[_]]),
-        Word(classOf[Capsule]),
-        Word(classOf[MasterCapsule]),
-        Word(classOf[Slot]),
-        Word(classOf[Puzzle]),
+        Word("Capsule"),
+        Word("Slot"),
+        Word("Capsule"),
+        Word("Strain"),
         Word("in"),
         Word("is"),
         Word("on"),
@@ -46,7 +45,6 @@ class Activator extends BundleActivator {
         Transition(">-"),
         Transition("-<-"),
         Transition(">|"),
-        Transition("--="),
         Transition("oo"),
         Environment(classOf[LocalEnvironment]),
         Task(objectName(EmptyTask)),

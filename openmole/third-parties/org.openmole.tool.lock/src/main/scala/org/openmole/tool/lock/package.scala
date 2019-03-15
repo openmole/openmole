@@ -40,6 +40,11 @@ package object lock {
       }
       finally s.release()
     }
+
+    def acquireAndRelease() = {
+      s.acquire()
+      s.release()
+    }
   }
 
   implicit class ReadWriteLockDecorator(l: ReadWriteLock) {

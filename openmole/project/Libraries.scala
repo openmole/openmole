@@ -5,8 +5,8 @@ import sbt._
 
 object Libraries {
 
-  lazy val gridscaleVersion = "2.14"
-  lazy val mgoVersion = "3.18"
+  lazy val gridscaleVersion = "2.15"
+  lazy val mgoVersion = "3.21"
   lazy val bouncyCastleVersion = "1.60"
   lazy val d3Version = "3.5.12"
   lazy val tooltipserVersion = "3.3.0"
@@ -45,7 +45,7 @@ object Libraries {
   lazy val htmlparser2 = libraryDependencies += "com.definitelyscala" %%% "scala-js-htmlparser2" % "1.0.2"
   lazy val plotlyJS =  libraryDependencies += "com.definitelyscala" %%% "scala-js-plotlyjs" % "1.1.9"
 
-  lazy val scalatest = "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+  lazy val scalatest = "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 
   /** ------- Bundles -------------- */
 
@@ -126,7 +126,7 @@ object Libraries {
   lazy val guava = "com.google.guava" % "guava" % "19.0"
   lazy val spray = "io.spray" %% "spray-json" % "1.3.2"
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
-  lazy val equinoxOSGi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.13.100"
+  lazy val equinoxOSGi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.13.200"
   lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.3.1"
 
   lazy val shapeless = "org.openmole.library" %% "com-chuusai-shapeless" % "2.3.2"
