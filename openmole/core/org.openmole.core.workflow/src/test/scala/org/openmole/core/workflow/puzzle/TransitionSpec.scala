@@ -24,13 +24,14 @@ import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution.LocalEnvironment
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.test.TestTask
 import org.openmole.core.workflow.transition.TransitionSlot
 import org.openmole.core.workflow.validation.Validation
 import org.scalatest._
 
 class TransitionSpec extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.tools.Stubs._
+  import org.openmole.core.workflow.test.Stubs._
   //
   //  "Transitions" should "compile" in {
   //    EmptyTask() -- EmptyTask()

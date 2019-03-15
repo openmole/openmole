@@ -17,22 +17,36 @@
 
 package org.openmole.plugin.method.evolution
 
-import monocle.macros._
+import org.openmole.core.context.{ Context, Val, Variable }
+import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
-import squants.Time
+import org.openmole.core.workflow.tools.OptionalArgument
+import cats._
+import cats.data._
 import cats.implicits._
-import org.openmole.core.context._
-import org.openmole.core.workflow.builder.ValueAssignment
-import org.openmole.core.workflow.tools.DefaultSet
+import mgo.evolution._
+import mgo.evolution.algorithm._
+import mgo.evolution.breeding._
+import mgo.evolution.contexts._
+import mgo.evolution.elitism._
+import mgo.evolution.niche._
+import mgo.tagtools._
+import monocle.macros.GenLens
+import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
+import org.openmole.core.workflow.domain._
+import org.openmole.core.workflow.sampling._
+import org.openmole.plugin.method.evolution.NichedNSGA2.NichedElement
+import squants.time.Time
+
+import scala.language.higherKinds
 
 object NSGA2 {
 
   object DeterministicParams {
-    import mgo.algorithm.{ NSGA2 ⇒ MGONSGA2, _ }
-    import mgo.algorithm.CDGenome
+    import mgo.evolution.algorithm.{ NSGA2 ⇒ MGONSGA2, _ }
+    import mgo.evolution.algorithm.CDGenome
     import cats.data._
-    import freedsl.dsl._
-    import mgo.contexts._
+    import mgo.evolution.contexts._
 
     implicit def integration: MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Vector[Double]] = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Vector[Double]] {
       type G = CDGenome.Genome
@@ -43,7 +57,7 @@ object NSGA2 {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      private def interpret[U](f: mgo.contexts.run.Implicits ⇒ (S, U)) = State[S, U] { (s: S) ⇒
+      private def interpret[U](f: mgo.evolution.contexts.run.Implicits ⇒ (S, U)) = State[S, U] { (s: S) ⇒
         MGONSGA2.run(s)(f)
       }
 
@@ -51,7 +65,7 @@ object NSGA2 {
         import cats.implicits._
         for {
           t ← op
-          newState ← mgo.algorithm.NSGA2.state[M]
+          newState ← mgo.evolution.algorithm.NSGA2.state[M]
         } yield (newState, t)
       }
 
@@ -103,7 +117,7 @@ object NSGA2 {
               def step =
                 for {
                   elited ← MGONSGA2.elitism[DSL](om.mu, continuous) apply individuals
-                  _ ← mgo.elitism.incrementGeneration[DSL]
+                  _ ← mgo.evolution.elitism.incrementGeneration[DSL]
                 } yield elited
 
               zipWithState(step).eval
@@ -115,12 +129,12 @@ object NSGA2 {
 
         def afterGeneration(g: Long, population: Vector[I]): M[Boolean] = interpret { impl ⇒
           import impl._
-          zipWithState(mgo.afterGeneration[DSL, I](g).run(population)).eval
+          zipWithState(mgo.evolution.afterGeneration[DSL, I](g).run(population)).eval
         }
 
         def afterDuration(d: Time, population: Vector[I]): M[Boolean] = interpret { impl ⇒
           import impl._
-          zipWithState(mgo.afterDuration[DSL, I](d).run(population)).eval
+          zipWithState(mgo.evolution.afterDuration[DSL, I](d).run(population)).eval
         }
       }
 
@@ -135,11 +149,10 @@ object NSGA2 {
     operatorExploration: Double)
 
   object StochasticParams {
-    import mgo.algorithm.{ NoisyNSGA2 ⇒ MGONoisyNSGA2, _ }
-    import mgo.algorithm.CDGenome
+    import mgo.evolution.algorithm.{ NoisyNSGA2 ⇒ MGONoisyNSGA2, _ }
+    import mgo.evolution.algorithm.CDGenome
     import cats.data._
-    import freedsl.dsl._
-    import mgo.contexts._
+    import mgo.evolution.contexts._
 
     implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Vector[Any]] {
       type G = CDGenome.Genome
@@ -150,7 +163,7 @@ object NSGA2 {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      private def interpret[U](f: mgo.contexts.run.Implicits ⇒ (S, U)) = State[S, U] { (s: S) ⇒ MGONoisyNSGA2.run(s)(f) }
+      private def interpret[U](f: mgo.evolution.contexts.run.Implicits ⇒ (S, U)) = State[S, U] { (s: S) ⇒ MGONoisyNSGA2.run(s)(f) }
 
       private def zipWithState[M[_]: cats.Monad: StartTime: Random: Generation, T](op: M[T]): M[(S, T)] = {
         import cats.implicits._
@@ -212,7 +225,7 @@ object NSGA2 {
               def step =
                 for {
                   elited ← MGONoisyNSGA2.elitism[DSL, Vector[Any]](om.mu, om.historySize, aggregate, continuous) apply individuals
-                  _ ← mgo.elitism.incrementGeneration[DSL]
+                  _ ← mgo.evolution.elitism.incrementGeneration[DSL]
                 } yield elited
 
               zipWithState(step).eval
@@ -221,12 +234,12 @@ object NSGA2 {
 
         def afterGeneration(g: Long, population: Vector[I]): M[Boolean] = interpret { impl ⇒
           import impl._
-          zipWithState(mgo.afterGeneration[DSL, I](g).run(population)).eval
+          zipWithState(mgo.evolution.afterGeneration[DSL, I](g).run(population)).eval
         }
 
         def afterDuration(d: Time, population: Vector[I]): M[Boolean] = interpret { impl ⇒
           import impl._
-          zipWithState(mgo.afterDuration[DSL, I](d).run(population)).eval
+          zipWithState(mgo.evolution.afterDuration[DSL, I](d).run(population)).eval
         }
 
         def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland(population)
@@ -245,15 +258,13 @@ object NSGA2 {
     cloneProbability:    Double
   )
 
-  import org.openmole.core.dsl._
-
   def apply[P](
     genome:     Genome,
     objectives: Objectives,
     mu:         Int                          = 200,
     stochastic: OptionalArgument[Stochastic] = None
   ): EvolutionWorkflow =
-    WorkflowIntegration.stochasticity(objectives, stochastic) match {
+    WorkflowIntegration.stochasticity(objectives, stochastic.option) match {
       case None ⇒
         val exactObjectives = objectives.map(o ⇒ Objective.toExact(o))
         val integration: WorkflowIntegration.DeterministicGA[_] = WorkflowIntegration.DeterministicGA(
@@ -280,7 +291,7 @@ object NSGA2 {
 
 object NSGA2Evolution {
 
-  import org.openmole.core.dsl._
+  import org.openmole.core.dsl.DSL
 
   def apply(
     genome:       Genome,
@@ -291,7 +302,8 @@ object NSGA2Evolution {
     stochastic:   OptionalArgument[Stochastic] = None,
     parallelism:  Int                          = 1,
     distribution: EvolutionPattern             = SteadyState(),
-    suggestion:   Seq[Seq[ValueAssignment[_]]] = Seq()) =
+    suggestion:   Seq[Seq[ValueAssignment[_]]] = Seq(),
+    scope:        DefinitionScope              = "nsga2") =
     EvolutionPattern.build(
       algorithm =
         NSGA2(
@@ -305,7 +317,8 @@ object NSGA2Evolution {
       stochastic = stochastic,
       parallelism = parallelism,
       distribution = distribution,
-      suggestion = suggestion
+      suggestion = suggestion,
+      scope = scope
     )
 
 }

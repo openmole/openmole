@@ -27,8 +27,6 @@ import squants.time.Time
 
 package object evolution {
 
-  implicit def scope = DefinitionScope.Internal
-
   val operatorExploration = 0.1
 
   type Objectives = Seq[Objective[_]]
@@ -65,7 +63,8 @@ package object evolution {
       stochastic:   OptionalArgument[Stochastic] = None,
       parallelism:  Int                          = 1,
       distribution: EvolutionPattern             = SteadyState(),
-      suggestion:   Seq[Seq[ValueAssignment[_]]])(implicit wfi: WorkflowIntegration[T]) =
+      suggestion:   Seq[Seq[ValueAssignment[_]]],
+      scope:        DefinitionScope)(implicit wfi: WorkflowIntegration[T]) =
       distribution match {
         case s: SteadyState ⇒
           SteadyStateEvolution(
@@ -74,7 +73,8 @@ package object evolution {
             parallelism = parallelism,
             termination = termination,
             wrap = s.wrap,
-            suggestion = suggestion
+            suggestion = suggestion,
+            scope = scope
           )
         case i: Island ⇒
           val steadyState =
@@ -83,14 +83,16 @@ package object evolution {
               evaluation = evaluation,
               termination = i.termination,
               wrap = false,
-              suggestion = suggestion
+              suggestion = suggestion,
+              scope = scope
             )
 
           IslandEvolution(
             island = steadyState,
             parallelism = parallelism,
             termination = termination,
-            sample = i.sample
+            sample = i.sample,
+            scope = scope
           )
       }
 
@@ -101,7 +103,9 @@ package object evolution {
 
   import shapeless._
 
-  def SteadyStateEvolution[T](algorithm: T, evaluation: DSL, termination: OMTermination, parallelism: Int = 1, suggestion: Seq[Seq[ValueAssignment[_]]] = Seq.empty, wrap: Boolean = false)(implicit wfi: WorkflowIntegration[T]) = {
+  def SteadyStateEvolution[T](algorithm: T, evaluation: DSL, termination: OMTermination, parallelism: Int = 1, suggestion: Seq[Seq[ValueAssignment[_]]] = Seq.empty, wrap: Boolean = false, scope: DefinitionScope = "steady state evolution")(implicit wfi: WorkflowIntegration[T]) = {
+    implicit def defScope = scope
+
     val t = wfi(algorithm)
 
     val wrapped = pattern.wrap(evaluation, t.inputPrototypes, t.objectivePrototypes, wrap)
@@ -158,11 +162,16 @@ package object evolution {
     island:      HL,
     parallelism: Int,
     termination: OMTermination,
-    sample:      OptionalArgument[Int] = None
+    sample:      OptionalArgument[Int] = None,
+    scope:       DefinitionScope       = "island evolution"
   )(implicit
     wfi: WorkflowIntegrationSelector[HL, T],
     selectDSL: DSLSelector[HL]) = {
+
+    implicit def defScope = scope
+
     val algorithm: T = wfi(island)
+
     implicit val wi = wfi.selected
     val t = wi(algorithm)
 

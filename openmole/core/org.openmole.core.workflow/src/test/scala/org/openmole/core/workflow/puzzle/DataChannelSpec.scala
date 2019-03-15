@@ -21,13 +21,14 @@ import org.openmole.core.context.Val
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.sampling.ExplicitSampling
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.test.TestTask
 import org.scalatest._
 
 import scala.collection.mutable.ListBuffer
 
 class DataChannelSpec extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.tools.Stubs._
+  import org.openmole.core.workflow.test.Stubs._
 
   "A datachannel" should "enable variable values to be transmitted from a task to another" in {
     val p = Val[String]

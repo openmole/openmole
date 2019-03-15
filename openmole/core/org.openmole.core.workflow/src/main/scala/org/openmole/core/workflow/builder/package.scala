@@ -151,12 +151,10 @@ package builder {
   }
 
   object DefinitionScope {
-    case object Internal extends DefinitionScope
+    case class Internal(name: String) extends DefinitionScope
     case object User extends DefinitionScope
 
-    lazy val internal = new {
-      implicit def default: DefinitionScope = Internal
-    }
+    implicit def internal(scope: String) = Internal(scope)
 
     lazy val user = new {
       implicit def default: DefinitionScope = User

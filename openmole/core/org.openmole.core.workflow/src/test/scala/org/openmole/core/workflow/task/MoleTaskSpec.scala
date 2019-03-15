@@ -26,12 +26,13 @@ import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.sampling.ExplicitSampling
+import org.openmole.core.workflow.test.TestTask
 
 import scala.util.Try
 
 class MoleTaskSpec extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.tools.Stubs._
+  import org.openmole.core.workflow.test.Stubs._
 
   "Implicits" should "work with mole task" in {
     val i = Val[String]

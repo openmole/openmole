@@ -6,7 +6,7 @@ import sbt._
 object Libraries {
 
   lazy val gridscaleVersion = "2.15"
-  lazy val mgoVersion = "3.18"
+  lazy val mgoVersion = "3.21"
   lazy val bouncyCastleVersion = "1.60"
   lazy val aceVersion = "01.08.2014"
   lazy val d3Version = "3.5.12"
@@ -45,7 +45,7 @@ object Libraries {
   lazy val htmlparser2 = libraryDependencies += "com.definitelyscala" %%% "scala-js-htmlparser2" % "1.0.2"
   lazy val plotlyJS =  libraryDependencies += "com.definitelyscala" %%% "scala-js-plotlyjs" % "1.1.9"
 
-  lazy val scalatest = "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+  lazy val scalatest = "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 
   /** ------- Bundles -------------- */
 

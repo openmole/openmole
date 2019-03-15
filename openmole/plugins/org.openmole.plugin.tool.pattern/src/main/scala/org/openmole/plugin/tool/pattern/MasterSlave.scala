@@ -18,13 +18,12 @@ package org.openmole.plugin.tool.pattern
 
 import org.openmole.core.context.Val
 import org.openmole.core.dsl.DSL
+import org.openmole.core.workflow.builder.DefinitionScope
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 
 object MasterSlave {
-
-  import org.openmole.core.workflow.builder.DefinitionScope.internal._
 
   def apply(
     bootstrap: DSL,
@@ -33,7 +32,7 @@ object MasterSlave {
     state:     Seq[Val[_]],
     slaves:    OptionalArgument[Int]       = None,
     stop:      OptionalArgument[Condition] = None
-  ): DSL = {
+  )(implicit scope: DefinitionScope = "master slave"): DSL = {
     val masterCapsule = Master(master, persist = state: _*)
     val masterSlaveLast = Strain(EmptyTask())
 

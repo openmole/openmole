@@ -25,21 +25,21 @@ import org.openmole.plugin.tool.pattern
 
 package object directsampling {
 
-  implicit def scope = DefinitionScope.Internal
-
   def Replication[T: Distribution](
     evaluation:       DSL,
     seed:             Val[T],
     replications:     Int,
     distributionSeed: OptionalArgument[Long] = None,
     aggregation:      OptionalArgument[DSL]  = None,
-    wrap:             Boolean                = false
+    wrap:             Boolean                = false,
+    scope:            DefinitionScope        = "replication"
   ): DSLContainer =
     DirectSampling(
       evaluation = evaluation,
       sampling = seed in (TakeDomain(UniformDistribution[T](distributionSeed), replications)),
       aggregation = aggregation,
-      wrap = wrap
+      wrap = wrap,
+      scope = scope
     )
 
   def DirectSampling[P](
@@ -47,18 +47,24 @@ package object directsampling {
     sampling:    Sampling,
     aggregation: OptionalArgument[DSL] = None,
     condition:   Condition             = Condition.True,
-    wrap:        Boolean               = false
+    wrap:        Boolean               = false,
+    scope:       DefinitionScope       = "direct sampling"
   ): DSLContainer = {
+    implicit def defScope = scope
+
     val exploration = ExplorationTask(sampling)
     val wrapped = pattern.wrap(evaluation, sampling.prototypes.toSeq, evaluation.outputs, wrap = wrap)
 
     aggregation.option match {
       case Some(aggregation) ⇒
+        val output = EmptyTask()
+
         val p =
           (Strain(exploration) -< wrapped when condition) >- aggregation &
-            (exploration -- aggregation block (wrapped.outputs: _*))
+            ((exploration -- aggregation block (wrapped.outputs: _*)) -- output) &
+            (exploration -- Strain(output) block (aggregation.outputs: _*))
 
-        DSLContainer(p, delegate = wrapped.delegate)
+        DSLContainer(p, output = Some(output), delegate = wrapped.delegate)
       case None ⇒
         val p = Strain(exploration) -< Strain(wrapped) when condition
         DSLContainer(p, delegate = wrapped.delegate)

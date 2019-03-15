@@ -21,6 +21,7 @@ package composition {
 
   import org.openmole.core.context.{ Context, Val }
   import org.openmole.core.expansion.Condition
+  import org.openmole.core.outputmanager.OutputManager
   import org.openmole.core.workflow.builder.DefinitionScope
   import org.openmole.core.workflow.execution.{ EnvironmentProvider, LocalEnvironmentProvider }
   import org.openmole.core.workflow.mole.{ Grouping, Hook, MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source }
@@ -346,10 +347,11 @@ package composition {
 
         def dslContainerToPuzzle(container: DSLContainer) = {
           val puzzle = transitionDSLToPuzzle0(container.dsl, slots, converted)
+          def outputs = container.output.map(t ⇒ Vector(slots(t).capsule)).getOrElse(puzzle.lasts)
 
           val hooks =
             for {
-              o ← container.output.map(t ⇒ slots(t).capsule).toVector
+              o ← outputs
               h ← container.hooks
             } yield o -> h
 
@@ -503,7 +505,7 @@ package composition {
       def and(t2: DSL) = new &(t1, t2)
 
       def outputs = {
-        import org.openmole.core.workflow.builder.DefinitionScope.internal._
+        implicit def scope = DefinitionScope.Internal("outptus")
         val last = EmptyTask()
         val p: Puzzle = dslToPuzzle(t1 -- last)
         val mole = p.toMole
@@ -520,13 +522,12 @@ package composition {
     }
 
     object Strain {
-      import DefinitionScope.internal._
 
       def apply(task: Task) = TaskNode(task, strain = true)
 
       def apply(task: TaskNode) = task.copy(strain = true)
 
-      def apply(dsl: DSL): DSL = {
+      def apply(dsl: DSL)(implicit scope: DefinitionScope = "strain"): DSL = {
         val first = Strain(EmptyTask())
         val last = Strain(EmptyTask())
 

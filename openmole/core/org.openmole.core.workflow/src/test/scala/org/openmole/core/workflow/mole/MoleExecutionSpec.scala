@@ -33,11 +33,12 @@ import org.scalatest.junit._
 
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.test.TestTask
 import org.openmole.tool.random.RandomProvider
 
 class MoleExecutionSpec extends FlatSpec with Matchers {
 
-  import org.openmole.core.workflow.tools.Stubs._
+  import org.openmole.core.workflow.test.Stubs._
 
   class JobGroupingBy2Test extends Grouping {
 
@@ -73,5 +74,11 @@ class MoleExecutionSpec extends FlatSpec with Matchers {
     val emptyT = EmptyTask() set (inputs += i)
     val emptyC = MoleCapsule(emptyT)
     MoleExecution(mole = Mole(emptyC), implicits = Context(Variable(i, "test"))).run
+  }
+
+  "Wait" should "wait for the mole executon to be completed" in {
+    val emptyT = EmptyTask()
+    val me = emptyT.start()
+    me.hangOn()
   }
 }

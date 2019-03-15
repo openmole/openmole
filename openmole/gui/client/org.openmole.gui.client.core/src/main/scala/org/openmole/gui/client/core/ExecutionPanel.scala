@@ -168,8 +168,6 @@ class ExecutionPanel {
               s.formatted("%02d")
             }"""
 
-          val completed = info.completed
-
           val (details, execStatus) = info match {
             case f: ExecutionInfo.Failed ⇒
               panels.treeNodeTabs.find(staticInfo.now(execID).path).foreach { tab ⇒

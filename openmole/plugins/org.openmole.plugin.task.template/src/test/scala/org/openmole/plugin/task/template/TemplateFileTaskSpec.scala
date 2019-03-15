@@ -17,20 +17,43 @@
 
 package org.openmole.plugin.task.template
 
-import java.io.File
-
-import org.openmole.core.context.{ Context, Val }
-import org.openmole.plugin.task.template.TemplateData._
+import org.openmole.core.dsl._
+import org.openmole.core.workflow.test.TestHook
 import org.openmole.tool.hash._
 import org.scalatest._
 
-class TemplateFileGeneratorTaskSpec extends FlatSpec with Matchers {
-  implicit val plugins = PluginSet.empty
+class TemplateFileTaskSpec extends FlatSpec with Matchers {
+
+  import org.openmole.core.workflow.test.Stubs._
 
   "A template file generator task" should "parse a template file and evalutate the ${} expressions" in {
-    val outputP = Val[File]("file1")
-    val t1 = TemplateFileTask(templateFile, outputP)
-    t1.toTask.process(Context.empty)(outputP).hash should equal(targetFile.hash)
+
+    lazy val templateFile: File = {
+      val template = java.io.File.createTempFile("file", ".test")
+      template.content =
+        """My first line
+          |${2*3}
+          |I am ${a*5} year old
+          |${s"I am ${a*5} year old"}""".stripMargin
+      template
+    }
+
+    lazy val targetFile: File = {
+      val target = java.io.File.createTempFile("target", ".test")
+      target.content =
+        """My first line
+          |6
+          |I am 30 year old
+          |I am 30 year old""".stripMargin
+      target
+    }
+
+    val outputP = Val[File]
+    val a = Val[Int]
+
+    val t1 = TemplateFileTask(templateFile, outputP) set (a := 6)
+    val testHook = TestHook { c ⇒ targetFile.hash() should equal(c(outputP).hash()) }
+    (t1 hook testHook).run()
   }
 
 }

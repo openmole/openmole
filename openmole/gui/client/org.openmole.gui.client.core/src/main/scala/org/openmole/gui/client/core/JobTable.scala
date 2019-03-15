@@ -11,9 +11,11 @@ import scaladget.tools._
 import scalatags.JsDom.all._
 import rx._
 import scaladget.bootstrapnative.Table.{ BSTableStyle, FixedCell, ReactiveRow, SubRow, VarCell }
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import autowire._
+import org.openmole.gui.ext.data.ExecutionInfo.CapsuleExecution
 
 import scala.scalajs.js.timers
 import scala.scalajs.js.timers.SetTimeoutHandle
@@ -36,7 +38,7 @@ class JobTable(executionId: ExecutionId) {
   val capsuleActivated = jobViews.now == CapsuleView
 
   val jobViewButton = bsn.radios(omsheet.centerElement +++ Seq(marginTop := 40, marginBottom := 40))(
-    bsn.selectableButton("Capsules", capsuleActivated, onclick = () ⇒ toCapsuleView),
+    bsn.selectableButton("Tasks", capsuleActivated, onclick = () ⇒ toCapsuleView),
     bsn.selectableButton("Environments", !capsuleActivated, onclick = () ⇒ toEnvironmentView)
   )
 
@@ -90,12 +92,20 @@ class JobTable(executionId: ExecutionId) {
   val oldNumberErrors = Var(allErrors(environmentStates.now))
 
   def capsuleTable(info: ExecutionInfo) = {
-    scaladget.bootstrapnative.DataTable(
-      Some(scaladget.bootstrapnative.Table.Header(Seq("Name", "Ready", "Running", "Completed"))),
-      info.capsules.map {
-        c ⇒ scaladget.bootstrapnative.DataTable.DataRow(Seq(c._1.toString, c._2.ready.toString, c._2.running.toString, c._2.completed.toString))
-      },
-      scaladget.bootstrapnative.Table.BSTableStyle(bsn.bordered_table, tools.emptyMod), true).render(width := "100%").render
+
+    def dataRow(c: CapsuleExecution) = {
+      def total = c.statuses.ready + c.statuses.running + c.statuses.completed
+      def data = Seq(c.scope, c.name, c.statuses.ready.toString, c.statuses.running.toString, c.statuses.completed.toString, total.toString)
+      scaladget.bootstrapnative.DataTable.DataRow(data)
+    }
+
+    def table =
+      scaladget.bootstrapnative.DataTable(
+        Some(scaladget.bootstrapnative.Table.Header(Seq("Scope", "Name", "Ready", "Running", "Completed", "Total"))),
+        info.capsules.map(dataRow),
+        scaladget.bootstrapnative.Table.BSTableStyle(bsn.bordered_table, tools.emptyMod), true).render(width := "100%").render
+
+    table
   }
 
   def error(errors: Map[EnvironmentId, EnvironmentErrorData], environmentId: EnvironmentId) = errors.getOrElse(environmentId, EnvironmentErrorData.empty)

@@ -254,7 +254,7 @@ object GAIntegration {
 }
 
 object DeterministicGAIntegration {
-  def migrateToIsland(population: Vector[mgo.algorithm.CDGenome.DeterministicIndividual.Individual]) = population
+  def migrateToIsland(population: Vector[mgo.evolution.algorithm.CDGenome.DeterministicIndividual.Individual]) = population
 
 }
 
@@ -267,7 +267,7 @@ object StochasticGAIntegration {
   //      case _                             ⇒ ???
   //    }
 
-  def migrateToIsland[P](population: Vector[mgo.algorithm.CDGenome.NoisyIndividual.Individual[P]]) = population.map(_.copy(historyAge = 0))
+  def migrateToIsland[P](population: Vector[mgo.evolution.algorithm.CDGenome.NoisyIndividual.Individual[P]]) = population.map(_.copy(historyAge = 0))
 
 }
 
