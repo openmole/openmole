@@ -568,7 +568,7 @@ object MoleExecutionMessage {
         case msg: StartMoleExecution    ⇒ if (!moleExecution._canceled) MoleExecution.start(moleExecution, msg.context)
         case msg: CancelMoleExecution   ⇒ if (!moleExecution._canceled) MoleExecution.cancel(moleExecution, None)
         case msg: RegisterJob           ⇒ if (!moleExecution._canceled) msg.subMoleExecution.jobs.put(msg.job, msg.capsule)
-        case msg: CleanMoleExecution     ⇒ MoleExecution.clean(moleExecution)
+        case msg: CleanMoleExecution    ⇒ MoleExecution.clean(moleExecution)
       }
     }
     catch {
