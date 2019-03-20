@@ -36,14 +36,19 @@ object Scalable {
   object Scaled {
     def toVariable(s: Scaled, values: List[Double], inputSize: Int) =
       s match {
-        case Scalable.ScaledScalar(p, v)   ⇒ Variable(p, v) → values.tail
-        case Scalable.ScaledSequence(p, v) ⇒ Variable(p, v) → values.drop(inputSize)
+        case s: Scalable.ScaledScalar[_]   ⇒ s.toVariable → values.tail
+        case s: Scalable.ScaledSequence[_] ⇒ s.toVariable → values.drop(inputSize)
       }
   }
 
   sealed trait Scaled
-  case class ScaledSequence[T: ClassTag](prototype: Val[Array[T]], s: Array[T]) extends Scaled
-  case class ScaledScalar[T](prototype: Val[T], v: T) extends Scaled
+
+  case class ScaledSequence[T: ClassTag](prototype: Val[Array[T]], s: Array[T]) extends Scaled {
+    def toVariable = Variable(prototype, s)
+  }
+  case class ScaledScalar[T](prototype: Val[T], v: T) extends Scaled {
+    def toVariable = Variable(prototype, v)
+  }
 
   object ScalableType {
     implicit def doubleIsScalable = new ScalableType[Double] {
