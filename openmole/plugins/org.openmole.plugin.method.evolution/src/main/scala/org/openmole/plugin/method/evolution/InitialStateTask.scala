@@ -19,6 +19,7 @@ package org.openmole.plugin.method.evolution
 
 import org.openmole.core.context.{ Context, Variable }
 import org.openmole.core.expansion.FromContext
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.workflow.builder.DefinitionScope
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
@@ -29,8 +30,12 @@ object InitialStateTask {
     val t = wfi(algorithm)
 
     ClosureTask("InitialStateTask") { (context, _, _) ⇒
+      def initialisedState =
+        t.operations.startTimeLens.set(System.currentTimeMillis) andThen
+          t.operations.generationLens.set(0L) apply context(t.statePrototype)
+
       Context(
-        Variable(t.statePrototype, t.operations.startTimeLens.set(System.currentTimeMillis)(context(t.statePrototype)))
+        Variable(t.statePrototype, initialisedState)
       )
     } set (
       inputs += (t.statePrototype, t.populationPrototype),

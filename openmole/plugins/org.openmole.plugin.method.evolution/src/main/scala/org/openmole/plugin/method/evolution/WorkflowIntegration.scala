@@ -296,7 +296,7 @@ object MGOAPI {
 
       def randomLens: monocle.Lens[S, util.Random]
       def startTimeLens: monocle.Lens[S, Long]
-      def generation(s: S): Long
+      def generationLens: monocle.Lens[S, Long]
       def breeding(individuals: Vector[I], n: Int): FromContext[M[Vector[G]]]
       def elitism(individuals: Vector[I]): FromContext[M[Vector[I]]]
 

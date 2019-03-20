@@ -35,7 +35,7 @@ object TerminationTask {
       Context(
         Variable(t.terminatedPrototype, te),
         Variable(t.statePrototype, newState),
-        Variable(t.generationPrototype, t.operations.generation(newState))
+        Variable(t.generationPrototype, t.operations.generationLens.get(newState))
       )
     } set (
       inputs += (t.statePrototype, t.populationPrototype),
