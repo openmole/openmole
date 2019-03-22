@@ -223,10 +223,13 @@ class ReplicaCatalog(database: Database, preference: Preference) {
   private def cacheKey(r: Replica) = (r.source, r.hash, r.storage)
 
   def remove(id: Long) = {
-    logger.fine(s"Remove replica with id $id")
 
     def q = replicas.filter(_.id === id)
     val replica = query { q.result }.headOption
+
+    val (source, storage, path) = if (replica.nonEmpty) (replica.get.source, replica.get.storage, replica.get.path) else ("None", "None", "None")
+    logger.fine(s"Remove replica with id $id, from source $source, storage $storage, path $path")
+
     query { q.delete }
 
     replica.foreach { r ⇒ replicaCache.invalidate(cacheKey(r)) }
