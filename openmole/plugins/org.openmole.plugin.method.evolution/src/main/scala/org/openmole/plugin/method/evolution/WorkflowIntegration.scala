@@ -255,7 +255,7 @@ object GAIntegration {
 
 object DeterministicGAIntegration {
   def migrateToIsland(population: Vector[mgo.evolution.algorithm.CDGenome.DeterministicIndividual.Individual]) = population
-
+  def migrateFromIsland(population: Vector[mgo.evolution.algorithm.CDGenome.DeterministicIndividual.Individual]) = population
 }
 
 object StochasticGAIntegration {
