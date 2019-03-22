@@ -315,13 +315,13 @@ object PSE {
             }
           }
 
-        def elitism(individuals: Vector[I]) =
+        def elitism(population: Vector[I], candidates: Vector[I]) =
           Genome.continuous(om.genome).map { continuous ⇒
             interpret { impl ⇒
               import impl._
               def step =
                 for {
-                  elited ← PSEAlgorithm.elitism[DSL](om.pattern, continuous) apply individuals
+                  elited ← PSEAlgorithm.elitism[DSL](om.pattern, continuous) apply (population, candidates)
                   _ ← mgo.evolution.elitism.incrementGeneration[DSL]
                 } yield elited
 
@@ -440,7 +440,7 @@ object PSE {
             }
           }
 
-        def elitism(individuals: Vector[I]) =
+        def elitism(population: Vector[I], candidates: Vector[I]) =
           Genome.continuous(om.genome).map { continuous ⇒
             interpret { impl ⇒
               import impl._
@@ -450,7 +450,7 @@ object PSE {
                     om.pattern,
                     NoisyObjective.aggregate(om.objectives),
                     om.historySize,
-                    continuous) apply individuals
+                    continuous) apply (population, candidates)
                   _ ← mgo.evolution.elitism.incrementGeneration[DSL]
                 } yield elited
 
@@ -464,9 +464,10 @@ object PSE {
         def migrateToIsland(population: Vector[I]) =
           population.map(NoisyPSEAlgorithm.Individual.historyAge.set(0))
 
-        def migrateFromIsland(population: Vector[I], state: S) =
-          population.filter(i ⇒ NoisyPSEAlgorithm.Individual.historyAge.get(i) > 0).
-            map(NoisyPSEAlgorithm.Individual.mapped.set(false))
+        def migrateFromIsland(population: Vector[I], state: S) = {
+          def keepIslandHistoryPart(i: I) = i.copy(phenotypeHistory = i.phenotypeHistory.take(i.historyAge.toInt))
+          population.filter(_.historyAge > 0).map(keepIslandHistoryPart)
+        }
       }
 
     }

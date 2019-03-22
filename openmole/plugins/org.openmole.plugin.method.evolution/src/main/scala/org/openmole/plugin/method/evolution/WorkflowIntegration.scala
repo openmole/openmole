@@ -260,14 +260,13 @@ object DeterministicGAIntegration {
 
 object StochasticGAIntegration {
 
-  //  def aggregateVector[P](stochastic: Stochastic[P], values: Vector[Vector[P]]): Vector[Double] =
-  //    (stochastic.aggregation.option, stochastic) match {
-  //      case (Some(aggs), _)               ⇒ (values.transpose zip aggs).map { case (p, a) ⇒ a(p) }
-  //      case (_, Stochastic.caseDouble(s)) ⇒ values.transpose.map(_.median)
-  //      case _                             ⇒ ???
-  //    }
-
   def migrateToIsland[P](population: Vector[mgo.evolution.algorithm.CDGenome.NoisyIndividual.Individual[P]]) = population.map(_.copy(historyAge = 0))
+  def migrateFromIsland[P](population: Vector[mgo.evolution.algorithm.CDGenome.NoisyIndividual.Individual[P]]) = {
+    def keepIslandHistoryPart(i: mgo.evolution.algorithm.CDGenome.NoisyIndividual.Individual[P]) =
+      i.copy(fitnessHistory = i.fitnessHistory.take(i.historyAge.toInt))
+
+    population.filter(_.historyAge > 0).map(keepIslandHistoryPart)
+  }
 
 }
 
@@ -298,7 +297,7 @@ object MGOAPI {
       def startTimeLens: monocle.Lens[S, Long]
       def generationLens: monocle.Lens[S, Long]
       def breeding(individuals: Vector[I], n: Int): FromContext[M[Vector[G]]]
-      def elitism(individuals: Vector[I]): FromContext[M[Vector[I]]]
+      def elitism(population: Vector[I], candidates: Vector[I]): FromContext[M[Vector[I]]]
 
       def migrateToIsland(i: Vector[I]): Vector[I]
       def migrateFromIsland(population: Vector[I], state: S): Vector[I]

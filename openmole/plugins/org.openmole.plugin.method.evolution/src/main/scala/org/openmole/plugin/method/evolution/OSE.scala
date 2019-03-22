@@ -123,13 +123,13 @@ object OSE {
             }
           }
 
-        def elitism(individuals: Vector[I]) =
+        def elitism(population: Vector[I], candidates: Vector[I]) =
           Genome.continuous(om.genome).map { continuous ⇒
             interpret { impl ⇒
               import impl._
               def step =
                 for {
-                  elited ← MGOOSE.elitism[DSL](om.mu, om.limit, om.origin, continuous) apply individuals
+                  elited ← MGOOSE.elitism[DSL](om.mu, om.limit, om.origin, continuous) apply (population, candidates)
                   _ ← mgo.evolution.elitism.incrementGeneration[DSL]
                 } yield elited
 
@@ -240,7 +240,7 @@ object OSE {
             }
           }
 
-        def elitism(individuals: Vector[I]) =
+        def elitism(population: Vector[I], candidates: Vector[I]) =
           Genome.continuous(om.genome).map { continuous ⇒
             interpret { impl ⇒
               import impl._
@@ -252,7 +252,7 @@ object OSE {
                     NoisyObjective.aggregate(om.objectives),
                     continuous,
                     om.origin,
-                    om.limit) apply individuals
+                    om.limit) apply (population, candidates)
                   _ ← mgo.evolution.elitism.incrementGeneration[DSL]
                 } yield elited
 
@@ -263,7 +263,7 @@ object OSE {
         def afterGeneration(g: Long, population: Vector[I]) = api.afterGeneration(g, population)
         def afterDuration(d: squants.Time, population: Vector[I]) = api.afterDuration(d, population)
         def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland(population)
-        def migrateFromIsland(population: Vector[I], state: S) = population ++ state.s._1
+        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland(population ++ state.s._1)
 
       }
 

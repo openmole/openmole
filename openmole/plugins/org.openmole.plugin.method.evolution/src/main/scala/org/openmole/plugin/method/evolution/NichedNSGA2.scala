@@ -302,13 +302,13 @@ object NichedNSGA2 {
             }
           }
 
-        def elitism(population: Vector[I]) = FromContext { p ⇒
+        def elitism(population: Vector[I], candidates: Vector[I]) = FromContext { p ⇒
           import p._
           interpret { impl ⇒
             import impl._
             def step =
               for {
-                elited ← NichedNSGA2Algorithm.elitism[DSL, Vector[Int]](om.niche.from(context), om.nicheSize, Genome.continuous(om.genome).from(context)) apply population
+                elited ← NichedNSGA2Algorithm.elitism[DSL, Vector[Int]](om.niche.from(context), om.nicheSize, Genome.continuous(om.genome).from(context)) apply (population, candidates)
                 _ ← mgo.evolution.elitism.incrementGeneration[DSL]
               } yield elited
 
@@ -435,7 +435,7 @@ object NichedNSGA2 {
             }
           }
 
-        def elitism(individuals: Vector[I]) =
+        def elitism(population: Vector[I], candidates: Vector[I]) =
           FromContext { p ⇒
             import p._
             interpret { impl ⇒
@@ -447,7 +447,7 @@ object NichedNSGA2 {
                     om.nicheSize,
                     om.historySize,
                     NoisyObjective.aggregate(om.objectives),
-                    Genome.continuous(om.genome).from(context)) apply individuals
+                    Genome.continuous(om.genome).from(context)) apply (population, candidates)
                   _ ← incrementGeneration[DSL]
                 } yield elited
 
@@ -466,7 +466,7 @@ object NichedNSGA2 {
         }
 
         def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland(population)
-        def migrateFromIsland(population: Vector[I], state: S) = population
+        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland(population)
       }
 
     }

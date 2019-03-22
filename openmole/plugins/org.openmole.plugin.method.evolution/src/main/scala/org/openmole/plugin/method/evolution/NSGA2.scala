@@ -110,13 +110,13 @@ object NSGA2 {
             }
           }
 
-        def elitism(individuals: Vector[I]) =
+        def elitism(population: Vector[I], candidates: Vector[I]) =
           Genome.continuous(om.genome).map { continuous ⇒
             interpret { impl ⇒
               import impl._
               def step =
                 for {
-                  elited ← MGONSGA2.elitism[DSL](om.mu, continuous) apply individuals
+                  elited ← MGONSGA2.elitism[DSL](om.mu, continuous) apply (population, candidates)
                   _ ← mgo.evolution.elitism.incrementGeneration[DSL]
                 } yield elited
 
@@ -218,13 +218,13 @@ object NSGA2 {
             }
           }
 
-        def elitism(individuals: Vector[I]) =
+        def elitism(population: Vector[I], candidates: Vector[I]) =
           Genome.continuous(om.genome).map { continuous ⇒
             interpret { impl ⇒
               import impl._
               def step =
                 for {
-                  elited ← MGONoisyNSGA2.elitism[DSL, Vector[Any]](om.mu, om.historySize, aggregate, continuous) apply individuals
+                  elited ← MGONoisyNSGA2.elitism[DSL, Vector[Any]](om.mu, om.historySize, aggregate, continuous) apply (population, candidates)
                   _ ← mgo.evolution.elitism.incrementGeneration[DSL]
                 } yield elited
 
@@ -243,7 +243,7 @@ object NSGA2 {
         }
 
         def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland(population)
-        def migrateFromIsland(population: Vector[I], state: S) = population
+        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland(population)
       }
 
     }

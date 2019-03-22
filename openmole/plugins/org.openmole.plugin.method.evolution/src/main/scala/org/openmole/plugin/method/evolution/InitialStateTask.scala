@@ -34,9 +34,7 @@ object InitialStateTask {
         t.operations.startTimeLens.set(System.currentTimeMillis) andThen
           t.operations.generationLens.set(0L) apply context(t.statePrototype)
 
-      Context(
-        Variable(t.statePrototype, initialisedState)
-      )
+      Context(Variable(t.statePrototype, initialisedState))
     } set (
       inputs += (t.statePrototype, t.populationPrototype),
       outputs += (t.statePrototype, t.populationPrototype),
