@@ -465,8 +465,8 @@ object NichedNSGA2 {
           zipWithState(mgo.evolution.afterDuration[DSL, I](d).run(population)).eval
         }
 
-        def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland(population)
-        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland(population)
+        def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland[I](population, CDGenome.NoisyIndividual.Individual.historyAge)
+        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Vector[Any]](population, CDGenome.NoisyIndividual.Individual.historyAge, CDGenome.NoisyIndividual.Individual.fitnessHistory)
       }
 
     }

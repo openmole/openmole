@@ -260,12 +260,10 @@ object DeterministicGAIntegration {
 
 object StochasticGAIntegration {
 
-  def migrateToIsland[P](population: Vector[mgo.evolution.algorithm.CDGenome.NoisyIndividual.Individual[P]]) = population.map(_.copy(historyAge = 0))
-  def migrateFromIsland[P](population: Vector[mgo.evolution.algorithm.CDGenome.NoisyIndividual.Individual[P]]) = {
-    def keepIslandHistoryPart(i: mgo.evolution.algorithm.CDGenome.NoisyIndividual.Individual[P]) =
-      i.copy(fitnessHistory = i.fitnessHistory.take(i.historyAge.toInt))
-
-    population.filter(_.historyAge > 0).map(keepIslandHistoryPart)
+  def migrateToIsland[I](population: Vector[I], historyAge: monocle.Lens[I, Long]) = population.map(historyAge.set(0))
+  def migrateFromIsland[I, P](population: Vector[I], historyAge: monocle.Lens[I, Long], history: monocle.Lens[I, Array[P]]) = {
+    def keepIslandHistoryPart(i: I) = history.modify(h ⇒ h.takeRight(historyAge.get(i).toInt))(i)
+    population.filter(i ⇒ historyAge.get(i) > 0).map(keepIslandHistoryPart)
   }
 
 }

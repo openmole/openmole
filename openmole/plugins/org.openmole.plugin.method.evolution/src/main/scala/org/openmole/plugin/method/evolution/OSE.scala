@@ -262,8 +262,9 @@ object OSE {
 
         def afterGeneration(g: Long, population: Vector[I]) = api.afterGeneration(g, population)
         def afterDuration(d: squants.Time, population: Vector[I]) = api.afterDuration(d, population)
-        def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland(population)
-        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland(population ++ state.s._1)
+
+        def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland[I](population, CDGenome.NoisyIndividual.Individual.historyAge)
+        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Vector[Any]](population ++ state.s._1, CDGenome.NoisyIndividual.Individual.historyAge, CDGenome.NoisyIndividual.Individual.fitnessHistory)
 
       }
 

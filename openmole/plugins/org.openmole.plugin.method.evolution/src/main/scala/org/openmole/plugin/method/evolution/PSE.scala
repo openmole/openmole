@@ -462,12 +462,11 @@ object PSE {
         def afterDuration(d: squants.Time, population: Vector[I]) = api.afterDuration(d, population)
 
         def migrateToIsland(population: Vector[I]) =
-          population.map(NoisyPSEAlgorithm.Individual.historyAge.set(0))
+          StochasticGAIntegration.migrateToIsland[I](population, NoisyPSEAlgorithm.Individual.historyAge)
 
-        def migrateFromIsland(population: Vector[I], state: S) = {
-          def keepIslandHistoryPart(i: I) = i.copy(phenotypeHistory = i.phenotypeHistory.take(i.historyAge.toInt))
-          population.filter(_.historyAge > 0).map(keepIslandHistoryPart)
-        }
+        def migrateFromIsland(population: Vector[I], state: S) =
+          StochasticGAIntegration.migrateFromIsland[I, Vector[Any]](population, NoisyPSEAlgorithm.Individual.historyAge, NoisyPSEAlgorithm.Individual.phenotypeHistory)
+
       }
 
     }
