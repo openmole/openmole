@@ -48,7 +48,7 @@ acceptation in OpenMOLE. It may concern numbers, files, random streams, images, 
 To define samplings, you can combine them with each other. As we've previously seen, the complete sampling is a
 way to achieve that. Many composition functions are implemented in OpenMOLE.
 
-@p The "x" combinator also enables domain bounds to depend on each others. Notice how the upper bound of the second
+@p The @code{x} combinator also enables domain bounds to depend on each others. Notice how the upper bound of the second
 factor depends on the value of the first one.
 
 @p
@@ -66,6 +66,19 @@ factor depends on the value of the first one.
   """, name = "combine sampling", header = "val myModel = EmptyTask()")
 
   Samplings can also be combined using variants of the zip operator.
+
+@h3{Concatenate samplings}
+
+While the sampling combination with the cartesian product operator @code{x} produces a complete sampling, one may want to concatenate two samplings.
+
+The operator @code{::} does so, as for example:
+
+@hl.openmole("""
+((i in Seq(0,1))x(j is 2.0))::((i is 10)x(j is 666.0))
+""", name ="concatenate samplings")
+
+
+
 
 @h3{Zip samplings}
 
