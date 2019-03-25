@@ -219,32 +219,4 @@ Files are explored as items of a list.
     and @a("FileSampling task", href := fileSampling.file + anchor("Exploring a set of files")).
 
 
-@h2{One Factor At a Time sampling}
-
-In the case of models requiring a long time to run, or for preliminary experiments, one may want to proceed to a sampling similar to the grid sampling, with a reduced number of total runs.
-For this, one can vary each factor successively in its domain, the others being fixed to a nominal value.
-
-The sampling primitive @code{OneFactorSampling} does so and takes as arguments any number of factors decorated by the keyword @code{nominal} and the nominal value.
-
-It is used as follows in an example with a @code{DirectSampling}:
-
-@hl.openmole("""
-val x1 = Val[Double]
-val x2 = Val[Double]
-val o = Val[Double]
-
-val myModel = ScalaTask("val o = x1 + x2") set (
-    inputs += (x1,x2),
-    outputs += (x1,x2, o)
-  )
-
-val exploration = DirectSampling(
-    evaluation = myModel hook ToStringHook(),
-    sampling = OneFactorSampling(
-      (x1 in (0.0 to 1.0 by 0.2)) nominal 0.5,
-      (x2 in (0.0 to 1.0 by 0.2)) nominal 0.5
-    )
-  )
-
-exploration""", name="example of one factor at a time")
 

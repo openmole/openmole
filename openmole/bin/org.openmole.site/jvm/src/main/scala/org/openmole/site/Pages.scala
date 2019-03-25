@@ -237,12 +237,14 @@ object DocumentationPages {
 
   lazy val directSampling = DocumentationPage.fromScalatex(name = "Direct Sampling", content = scalatex.documentation.explore.sampling.DirectSampling)
 
-  def samplingPages = pageNode(directSampling, Vector(uniformSampling, csvSampling, lhsSampling, sobolSampling, fileSampling, advancedSampling))
+  def samplingPages = pageNode(directSampling, Vector(uniformSampling, csvSampling, lhsSampling, sobolSampling, oneFactorSampling, fileSampling, advancedSampling))
 
   lazy val uniformSampling = DocumentationPage.fromScalatex(name = "Uniform Sampling", content = scalatex.documentation.explore.sampling.UniformSampling)
   lazy val csvSampling = DocumentationPage.fromScalatex(name = "CSV Sampling", content = scalatex.documentation.explore.sampling.CSVSampling)
   lazy val lhsSampling = DocumentationPage.fromScalatex(name = "LHS Sampling", content = scalatex.documentation.explore.sampling.LHSSampling)
   lazy val sobolSampling = DocumentationPage.fromScalatex(name = "Sobol Sampling", content = scalatex.documentation.explore.sampling.SobolSampling)
+  lazy val oneFactorSampling = DocumentationPage.fromScalatex(name = "One Factor At A Time", content = scalatex.documentation.explore.sampling.OneFactorSampling)
+
   lazy val fileSampling = DocumentationPage.fromScalatex(name = "Sampling Over Files", content = scalatex.documentation.explore.sampling.FileSampling)
   lazy val advancedSampling = DocumentationPage.fromScalatex(name = "Advanced Samplings", content = scalatex.documentation.explore.sampling.AdvancedSampling)
 
