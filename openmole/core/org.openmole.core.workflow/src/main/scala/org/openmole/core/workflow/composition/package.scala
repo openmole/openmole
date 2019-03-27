@@ -504,10 +504,11 @@ package composition {
 
       def and(t2: DSL) = new &(t1, t2)
 
-      def outputs = {
-        implicit def scope = DefinitionScope.Internal("outptus")
+      def outputs: Seq[Val[_]] = outputs(false)
+      def outputs(explore: Boolean): Seq[Val[_]] = {
+        implicit def scope = DefinitionScope.Internal("outputs")
         val last = EmptyTask()
-        val p: Puzzle = dslToPuzzle(t1 -- last)
+        val p: Puzzle = if (!explore) dslToPuzzle(t1 -- last) else dslToPuzzle(t1 -< last)
         val mole = p.toMole
         val slot = p.slots.toSeq.find(_.capsule.task == last).head
         TypeUtil.receivedTypes(mole, p.sources, p.hooks)(slot) toSeq
