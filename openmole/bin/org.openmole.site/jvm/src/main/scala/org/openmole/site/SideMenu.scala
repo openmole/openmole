@@ -83,9 +83,9 @@ object SideMenu {
   val language = SideMenu(DocumentationPages.languagePages, classIs(btn ++ btn_default), "Language")
   val advanced = SideMenu(DocumentationPages.advancedConceptsPages, classIs(btn ++ btn_default), "Advanced concepts")
   val developers = SideMenu(DocumentationPages.developersPages, classIs(btn ++ btn_default), "Developer's documentation")
-  val tutorials = SideMenu(DocumentationPages.menuTutoPages, classIs(btn ++ btn_default), "Tutorials")
+  val tutorials = SideMenu(DocumentationPages.tutoPages, classIs(btn ++ btn_default), "Tutorials")
   val community = SideMenu(DocumentationPages.communityPages, classIs(btn ++ btn_default), "Community")
-  val download = SideMenu(DocumentationPages.downloadPage, classIs(btn ++ btn_default), "Download")
+  val download = SideMenu(DocumentationPages.downloadPages, classIs(btn ++ btn_default), "Download")
 
   def more(current: Page) = SideMenu(
     Seq(
