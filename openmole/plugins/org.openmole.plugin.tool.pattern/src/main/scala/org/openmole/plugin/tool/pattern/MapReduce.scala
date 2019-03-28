@@ -11,9 +11,7 @@ object MapReduce {
     evaluation:  DSL,
     aggregation: OptionalArgument[DSL] = None,
     condition:   Condition             = Condition.True,
-    wrap:        Boolean               = false,
-    scope:       DefinitionScope       = "map reduce"): DSLContainer = {
-    implicit def defScope = scope
+    wrap:        Boolean               = false)(implicit scope: DefinitionScope = "map reduce"): DSLContainer = {
 
     val wrapped = org.openmole.plugin.tool.pattern.wrap(evaluation, (sampler: DSL).outputs(explore = true).toSeq, evaluation.outputs, wrap = wrap)
 

@@ -41,8 +41,7 @@ package object abc {
       MapReduce(
         sampler = preStepTask,
         evaluation = evaluation,
-        aggregation = postStepTask,
-        scope = scope
+        aggregation = postStepTask
       )
 
     val loop =

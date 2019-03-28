@@ -58,8 +58,8 @@ package object directsampling {
       evaluation = evaluation,
       sampler = exploration,
       condition = condition,
-      wrap = wrap,
-      scope = scope
+      aggregation = aggregation,
+      wrap = wrap
     )
   }
 
