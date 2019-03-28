@@ -73,7 +73,7 @@ object NSGA2 {
 
         def randomLens = GenLens[S](_.random)
         def startTimeLens = GenLens[S](_.startTime)
-        def generation(s: EvolutionState[Unit]) = s.generation
+        def generationLens = GenLens[S](_.generation)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
@@ -110,13 +110,13 @@ object NSGA2 {
             }
           }
 
-        def elitism(individuals: Vector[I]) =
+        def elitism(population: Vector[I], candidates: Vector[I]) =
           Genome.continuous(om.genome).map { continuous ⇒
             interpret { impl ⇒
               import impl._
               def step =
                 for {
-                  elited ← MGONSGA2.elitism[DSL](om.mu, continuous) apply individuals
+                  elited ← MGONSGA2.elitism[DSL](om.mu, continuous) apply (population, candidates)
                   _ ← mgo.evolution.elitism.incrementGeneration[DSL]
                 } yield elited
 
@@ -176,7 +176,7 @@ object NSGA2 {
       def operations(om: StochasticParams) = new Ops {
         def randomLens = GenLens[S](_.random)
         def startTimeLens = GenLens[S](_.startTime)
-        def generation(s: S) = s.generation
+        def generationLens = GenLens[S](_.generation)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
@@ -218,13 +218,13 @@ object NSGA2 {
             }
           }
 
-        def elitism(individuals: Vector[I]) =
+        def elitism(population: Vector[I], candidates: Vector[I]) =
           Genome.continuous(om.genome).map { continuous ⇒
             interpret { impl ⇒
               import impl._
               def step =
                 for {
-                  elited ← MGONoisyNSGA2.elitism[DSL, Vector[Any]](om.mu, om.historySize, aggregate, continuous) apply individuals
+                  elited ← MGONoisyNSGA2.elitism[DSL, Vector[Any]](om.mu, om.historySize, aggregate, continuous) apply (population, candidates)
                   _ ← mgo.evolution.elitism.incrementGeneration[DSL]
                 } yield elited
 
@@ -242,8 +242,8 @@ object NSGA2 {
           zipWithState(mgo.evolution.afterDuration[DSL, I](d).run(population)).eval
         }
 
-        def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland(population)
-        def migrateFromIsland(population: Vector[I], state: S) = population
+        def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland[I](population, CDGenome.NoisyIndividual.Individual.historyAge)
+        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Vector[Any]](population, CDGenome.NoisyIndividual.Individual.historyAge, CDGenome.NoisyIndividual.Individual.fitnessHistory)
       }
 
     }

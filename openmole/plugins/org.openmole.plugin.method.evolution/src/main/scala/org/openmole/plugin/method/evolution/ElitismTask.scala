@@ -30,7 +30,7 @@ object ElitismTask {
       import p._
 
       val (newState, newPopulation) =
-        t.operations.elitism(context(t.populationPrototype).toVector ++ context(t.offspringPrototype)).from(context).
+        t.operations.elitism(context(t.populationPrototype).toVector, context(t.offspringPrototype).toVector).from(context).
           run(context(t.statePrototype)).value
 
       Context(

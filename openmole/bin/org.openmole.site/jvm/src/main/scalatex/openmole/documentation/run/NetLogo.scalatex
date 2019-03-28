@@ -205,6 +205,15 @@ DirectSampling(
 At the end of the execution, you will find the output values in a file called @i{result.csv}.
 
 
+@h2{Import wizard}
+
+When working with models with a large number of parameters and/or outputs, writing the script can be already painful just when defining the prototypes.
+Fortunately, OpenMOLE includes an import wizard in its interface, for several languages including NetLogo. To use it, use the button @code{New project} and the option @code{Import your model}.
+The wizard will detect your parameters and outputs (defined in the GUI), the resources used such as files, and propose in an interactive window to change these. Once you validate, a minimal script is created.
+
+@object C{val c = "Not that this feature is not useful when working with headless models."}
+
+
 
 @h2{Headless NetLogo model}
 

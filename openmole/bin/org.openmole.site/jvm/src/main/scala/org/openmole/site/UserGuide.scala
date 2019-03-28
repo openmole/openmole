@@ -113,6 +113,7 @@ object UserGuide {
       case p if (parents.contains(DocumentationPages.language.name) || current.name == DocumentationPages.language.name) ⇒ integratedPage(SideMenu.language)
       case p if (parents.contains(DocumentationPages.tutorials.name) || current.name == DocumentationPages.tutorials.name) ⇒ integratedPage(SideMenu.tutorials)
       case p if (parents.contains(DocumentationPages.OMcommunity.name) || current.name == DocumentationPages.OMcommunity.name) ⇒ integratedPage(SideMenu.community)
+      case p if (parents.contains(DocumentationPages.download.name) || current.name == DocumentationPages.download.name) ⇒ integratedPage(SideMenu.download)
       case _ ⇒ integratedPage(SideMenu(Seq.empty, classIs(btn ++ btn_primary)))
     }
   }

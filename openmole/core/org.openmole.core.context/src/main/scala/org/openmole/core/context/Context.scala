@@ -167,6 +167,7 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
   override def empty = Context.empty
 
   def get(key: String) = variables.get(key)
+  def get[T](proto: Val[T]): Option[T] = option[T](proto)
 
   def update[T](p: Val[T], v: T) = this + Variable(p, v)
 

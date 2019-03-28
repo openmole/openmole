@@ -267,7 +267,7 @@ object PSE {
 
         def randomLens = GenLens[S](_.random)
         def startTimeLens = GenLens[S](_.startTime)
-        def generation(s: S) = s.generation
+        def generationLens = GenLens[S](_.generation)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
@@ -315,13 +315,13 @@ object PSE {
             }
           }
 
-        def elitism(individuals: Vector[I]) =
+        def elitism(population: Vector[I], candidates: Vector[I]) =
           Genome.continuous(om.genome).map { continuous ⇒
             interpret { impl ⇒
               import impl._
               def step =
                 for {
-                  elited ← PSEAlgorithm.elitism[DSL](om.pattern, continuous) apply individuals
+                  elited ← PSEAlgorithm.elitism[DSL](om.pattern, continuous) apply (population, candidates)
                   _ ← mgo.evolution.elitism.incrementGeneration[DSL]
                 } yield elited
 
@@ -397,8 +397,7 @@ object PSE {
       def operations(om: StochasticParams) = new Ops {
         def randomLens = GenLens[S](_.random)
         def startTimeLens = GenLens[S](_.startTime)
-
-        def generation(s: S) = s.generation
+        def generationLens = GenLens[S](_.generation)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
@@ -441,7 +440,7 @@ object PSE {
             }
           }
 
-        def elitism(individuals: Vector[I]) =
+        def elitism(population: Vector[I], candidates: Vector[I]) =
           Genome.continuous(om.genome).map { continuous ⇒
             interpret { impl ⇒
               import impl._
@@ -451,7 +450,7 @@ object PSE {
                     om.pattern,
                     NoisyObjective.aggregate(om.objectives),
                     om.historySize,
-                    continuous) apply individuals
+                    continuous) apply (population, candidates)
                   _ ← mgo.evolution.elitism.incrementGeneration[DSL]
                 } yield elited
 
@@ -463,11 +462,11 @@ object PSE {
         def afterDuration(d: squants.Time, population: Vector[I]) = api.afterDuration(d, population)
 
         def migrateToIsland(population: Vector[I]) =
-          population.map(NoisyPSEAlgorithm.Individual.historyAge.set(0))
+          StochasticGAIntegration.migrateToIsland[I](population, NoisyPSEAlgorithm.Individual.historyAge)
 
         def migrateFromIsland(population: Vector[I], state: S) =
-          population.filter(i ⇒ NoisyPSEAlgorithm.Individual.historyAge.get(i) > 0).
-            map(NoisyPSEAlgorithm.Individual.mapped.set(false))
+          StochasticGAIntegration.migrateFromIsland[I, Vector[Any]](population, NoisyPSEAlgorithm.Individual.historyAge, NoisyPSEAlgorithm.Individual.phenotypeHistory)
+
       }
 
     }

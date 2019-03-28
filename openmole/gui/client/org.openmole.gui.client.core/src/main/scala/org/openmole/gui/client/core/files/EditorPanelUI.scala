@@ -11,7 +11,6 @@ import scala.scalajs.js
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags }
 
-import scala.async.Async.{ async, await }
 import scaladget.ace._
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
@@ -19,7 +18,7 @@ import org.openmole.gui.ext.data.DataUtils._
 
 import scala.scalajs.js.JSConverters._
 import org.openmole.gui.ext.tool.client._
-import org.scalajs.dom.raw.{ Element, Event, HTMLDivElement, HTMLElement }
+import org.scalajs.dom.raw.Event
 import scaladget.bootstrapnative.Popup
 import scaladget.bootstrapnative.Popup.{ ClickPopup, Manual, PopupPosition }
 import rx._
@@ -47,7 +46,13 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
 
   val editorDiv = tags.div(id := "editor").render
   val editor = ace.edit(editorDiv)
-  val offset = Var(0)
+
+  val lineHeight = 15
+  val scrollTop = Var(0.0)
+  val changed = Var(false)
+
+  editor.container.style.lineHeight = s"${lineHeight}px"
+  editor.renderer.updateFontSize
 
   val extension: FileExtension = safePath.name
   lazy val view = {
@@ -57,22 +62,20 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
           editor.container,
           div(`class` := "gutterDecoration")(
             Rx {
+              val scrollAsLines = scrollTop() / lineHeight
+              val max = editor.renderer.getLastVisibleRow
               if (extension == OMS && org.openmole.gui.client.core.panels.treeNodeTabs.isActive(safePath)() == TreeNodeTabs.Active) {
-                val range = (nbLines()._1 until nbLines()._2)
-                div(marginTop := offset())(
-                  for (
-                    r ← range
-                  ) yield {
-                    if (errorsInEditor().exists(_ == r)) {
-                      errors().find(e ⇒ e.errorWithLocation.line == Some(r)).map { e ⇒
-                        e.errorWithLocation.line.map { l ⇒
-                          buildManualPopover(l, e.errorWithLocation.stackTrace, Popup.Left)
-                        }.getOrElse(buildCleanGutter(r, correctedInEditor()))
-                      }.getOrElse(buildCleanGutter(r, correctedInEditor()))
+                div(
+                  for {
+                    i ← errorsInEditor().filter { e ⇒
+                      e > scrollAsLines && e < max
                     }
-                    else {
-                      buildCleanGutter(r, correctedInEditor())
-                    }
+                  } yield {
+                    errors().find(_.errorWithLocation.line == Some(i)).map { e ⇒
+                      e.errorWithLocation.line.map { l ⇒
+                        buildManualPopover(l, (i - scrollAsLines) * lineHeight, e.errorWithLocation.stackTrace, Popup.Left)
+                      }.getOrElse(div.render)
+                    }.getOrElse(div.render)
                   }
                 )
               }
@@ -84,27 +87,17 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
     )
   }
 
-  val nbLines: Var[(Int, Int)] = Var((editor.getFirstVisibleRow.toInt, editor.getLastVisibleRow.toInt))
-
   def errors = TreeNodeTabs.errors(safePath)
 
   def errorsInEditor = TreeNodeTabs.errorsInEditor(safePath)
 
-  def correctedInEditor = errors.map { e ⇒
-    e.flatMap {
-      _.errorWithLocation.line
-    }.filterNot {
-      errorsInEditor.now.contains
-    }
-  }
-
   def setErrors(errorsWithLocation: Seq[ErrorWithLocation]): Unit = {
+    changed.update(false)
     TreeNodeTabs.updateErrors(safePath, errorsWithLocation.map { ewl ⇒ ErrorFromCompiler(ewl, ewl.line.map { l ⇒ session.doc.getLine(l) }.getOrElse("")) })
     TreeNodeTabs.updateErrorsInEditor(safePath, errorsWithLocation.flatMap {
       _.line
     })
 
-    setNbLines
   }
 
   def session = editor.getSession()
@@ -117,79 +110,39 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
 
   def setReadOnly(b: Boolean) = editor.setReadOnly(b)
 
-  def setNbLines = {
-    nbLines() = (editor.getFirstVisibleRow.toInt, editor.getLastVisibleRow.toInt)
-  }
+  def updateScrollTop = scrollTop.update(editor.renderer.getScrollTop)
 
-  //MEMORY LEAK SNIPPET
-  //  session.on("change", (x) ⇒ {
-  //    nbLines() = (editor.getFirstVisibleRow.toInt, editor.getLastVisibleRow.toInt)
-  //  })
-  //
-  //  session.on("changeScrollTop", x ⇒ {
-  //    Popover.current.now.foreach { p ⇒
-  //      Popover.toggle(p)
-  //    }
-  //    nbLines() = (editor.renderer.getScrollTopRow.toInt, editor.renderer.getScrollBottomRow.toInt)
-  //
-  //    val nbL = code.count((c: Char) ⇒ c == '\n')
-  //    offset() = {
-  //      if (editor.renderer.getScrollBottomRow().toInt == nbL) -10
-  //      else if (editor.renderer.getScrollTopRow().toInt == 0) 0
-  //      else offset.now
-  //    }
-  //  })
+  session.on("change", (x) ⇒ {
+    changed.update(true)
+    updateScrollTop
+  })
 
-  //  editor.session.doc.on("change", x ⇒ {
-  //    if (extension == OMS && org.openmole.gui.client.core.panels.treeNodeTabs.isActive(safePath).now == TreeNodeTabs.Active) {
-  //      val currentPosition = editor.getCursorPosition.row.toInt + 1
-  //      if (errorsInEditor.now.contains(currentPosition)) {
-  //        TreeNodeTabs.updateErrorsInEditor(safePath, errorsInEditor.now.filterNot(_ == currentPosition))
-  //      }
-  //      else {
-  //        val cor = correctedInEditor.filter {
-  //          _ == currentPosition
-  //        }
-  //        // Error cache
-  //        val errText = errors.now.filter {
-  //          _.errorWithLocation.line == Some(currentPosition)
-  //        }.map {
-  //          _.lineContent
-  //        }.headOption.getOrElse("")
-  //        cor.foreach { c ⇒
-  //          if (errText == session.doc.getLine(currentPosition)) {
-  //            TreeNodeTabs.updateErrorsInEditor(safePath, errorsInEditor.now :+ currentPosition)
-  //          }
-  //        }
-  //      }
-  //    }
-  //  })
+  session.on("changeScrollTop", x ⇒ {
+    updateScrollTop
+  })
 
-  def buildManualPopover(i: Int, title: String, position: PopupPosition) = {
-    lazy val pop1 = div(i)(`class` := "gutterError", height := 15).popover(
-      title,
-      position,
-      Manual
-    )
+  def buildManualPopover(line: Int, topPosition: Double, title: String, position: PopupPosition) = {
+    lazy val pop1 = div(line)(`class` := "gutterError", top := topPosition,
+      backgroundColor := Rx {
+        if (changed()) "rgba(255,204,0)"
+        else "rgba(255,128,128)"
+      }
+    ).popover(
+        title,
+        position,
+        Manual
+      )
+
     lazy val pop1Render = pop1.render
 
     pop1Render.onclick = { (e: Event) ⇒
-      if (Popover.current.now == pop1) Popover.hide
-      else {
-        Popover.current.now.foreach { p ⇒
-          Popover.toggle(p)
-        }
-        Popover.toggle(pop1)
-      }
+      Popover.hide
+      Popover.toggle(pop1)
       e.stopPropagation
     }
     pop1Render
   }
 
-  def buildCleanGutter(row: Int, corrects: Seq[Int]) = {
-    if (corrects.contains(row)) div(`class` := "gutterCorrected", height := 15)(row).render
-    else div(height := 15, opacity := 0).render
-  }
   def initEditor = {
     fileType match {
       case ef: HighlightedFile ⇒ editor.getSession().setMode("ace/mode/" + ef.highlighter)

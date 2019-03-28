@@ -267,7 +267,7 @@ object NichedNSGA2 {
       def operations(om: DeterministicParams) = new Ops {
         def randomLens = GenLens[S](_.random)
         def startTimeLens = GenLens[S](_.startTime)
-        def generation(s: S) = s.generation
+        def generationLens = GenLens[S](_.generation)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
@@ -302,13 +302,13 @@ object NichedNSGA2 {
             }
           }
 
-        def elitism(population: Vector[I]) = FromContext { p ⇒
+        def elitism(population: Vector[I], candidates: Vector[I]) = FromContext { p ⇒
           import p._
           interpret { impl ⇒
             import impl._
             def step =
               for {
-                elited ← NichedNSGA2Algorithm.elitism[DSL, Vector[Int]](om.niche.from(context), om.nicheSize, Genome.continuous(om.genome).from(context)) apply population
+                elited ← NichedNSGA2Algorithm.elitism[DSL, Vector[Int]](om.niche.from(context), om.nicheSize, Genome.continuous(om.genome).from(context)) apply (population, candidates)
                 _ ← mgo.evolution.elitism.incrementGeneration[DSL]
               } yield elited
 
@@ -327,7 +327,7 @@ object NichedNSGA2 {
         }
 
         def migrateToIsland(population: Vector[I]) = DeterministicGAIntegration.migrateToIsland(population)
-        def migrateFromIsland(population: Vector[I], state: S) = population
+        def migrateFromIsland(population: Vector[I], state: S) = DeterministicGAIntegration.migrateFromIsland(population)
       }
 
     }
@@ -399,7 +399,7 @@ object NichedNSGA2 {
 
         def randomLens = GenLens[S](_.random)
         def startTimeLens = GenLens[S](_.startTime)
-        def generation(s: S) = s.generation
+        def generationLens = GenLens[S](_.generation)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
@@ -435,7 +435,7 @@ object NichedNSGA2 {
             }
           }
 
-        def elitism(individuals: Vector[I]) =
+        def elitism(population: Vector[I], candidates: Vector[I]) =
           FromContext { p ⇒
             import p._
             interpret { impl ⇒
@@ -447,7 +447,7 @@ object NichedNSGA2 {
                     om.nicheSize,
                     om.historySize,
                     NoisyObjective.aggregate(om.objectives),
-                    Genome.continuous(om.genome).from(context)) apply individuals
+                    Genome.continuous(om.genome).from(context)) apply (population, candidates)
                   _ ← incrementGeneration[DSL]
                 } yield elited
 
@@ -465,8 +465,8 @@ object NichedNSGA2 {
           zipWithState(mgo.evolution.afterDuration[DSL, I](d).run(population)).eval
         }
 
-        def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland(population)
-        def migrateFromIsland(population: Vector[I], state: S) = population
+        def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland[I](population, CDGenome.NoisyIndividual.Individual.historyAge)
+        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Vector[Any]](population, CDGenome.NoisyIndividual.Individual.historyAge, CDGenome.NoisyIndividual.Individual.fitnessHistory)
       }
 
     }

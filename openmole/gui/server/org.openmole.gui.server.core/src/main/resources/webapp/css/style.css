@@ -523,26 +523,24 @@ padding-bottom: 90px;
 .gutterDecoration{
   position:absolute;
   z-index: 20;
-  font: 14px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;;
+  font: 15px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;;
   top:0;
   width: 20px;
   margin-left:17px;
   text-align:right;
   padding-right:3px;
-  padding-top:2px;
-  margin-top:-1px;
 }
 
 .gutterError {
-      background: rgba(255,128,128);
       cursor: pointer;
-      border-radius: 3px;
       color: white;
       font-weight: bold;
-      width: 45px;
-      margin-left: -20px;
-      text-align: left;
-      padding-left:5px;
+      width: auto;
+      min-width: 25px;
+      padding-right:3px;
+      text-align: right;
+      right:0px;
+      position: absolute;
 }
 
 .gutterCorrected {

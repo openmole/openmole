@@ -18,7 +18,8 @@
 package org.openmole.plugin.method.evolution
 
 import org.openmole.core.context.{ Context, Variable }
-import org.openmole.core.workflow.builder.{ ValueAssignment, DefinitionScope }
+import org.openmole.core.outputmanager.OutputManager
+import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.DefaultSet
@@ -37,7 +38,7 @@ object BreedTask {
       val population = context(t.populationPrototype)
       val s = context(t.statePrototype)
 
-      (population.isEmpty, t.operations.generation(s), suggestedGenomes.isEmpty) match {
+      (population.isEmpty, t.operations.generationLens.get(s), suggestedGenomes.isEmpty) match {
         case (true, 0, false) ⇒
           val (news, gs) =
             size - suggestedGenomes.size match {

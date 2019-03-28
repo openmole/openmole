@@ -133,8 +133,8 @@ object TreeNodeTab {
 
     def editing = true
 
-    override def onActivate: () ⇒ Unit = {
-      () ⇒ omsEditor.setNbLines
+    override def onActivate: () ⇒ Unit = ()=> {
+     // () ⇒ omsEditor.setNbLines
     }
 
     def content = omsEditor.code

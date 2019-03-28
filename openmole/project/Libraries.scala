@@ -6,7 +6,7 @@ import sbt._
 object Libraries {
 
   lazy val gridscaleVersion = "2.15"
-  lazy val mgoVersion = "3.21"
+  lazy val mgoVersion = "3.25"
   lazy val bouncyCastleVersion = "1.60"
   lazy val d3Version = "3.5.12"
   lazy val tooltipserVersion = "3.3.0"
@@ -21,7 +21,7 @@ object Libraries {
   lazy val scaladgetVersion = "1.2.4"
   lazy val sortableVersion = "0.2.1"
   lazy val json4sVersion = "3.5.0"
-  lazy val circeVersion = "0.9.1"
+  lazy val circeVersion = "0.10.0"
   lazy val catsVersion = "1.0.1"
   lazy val scalajsVersion = "0.6.23"
   lazy val squantsVersion = "1.3.0"
@@ -53,7 +53,7 @@ object Libraries {
 
   lazy val scalatra = "org.openmole.library" %% "org-scalatra" % "2.6.3"
   lazy val logback = "org.openmole.library" %% "ch-qos-logback" % "1.0.9"
-  lazy val h2 = "org.openmole.library" %% "org-h2" % "1.4.196"
+  lazy val h2 = "org.openmole.library" %% "org-h2" % "1.4.199"
   lazy val bonecp = "org.openmole.library" %% "com-jolbox-bonecp" % "0.8.0-rc1"
   lazy val slick = "org.openmole.library" %% "com-typesafe-slick" % "3.2.0"
   lazy val slf4j = "org.openmole.library" %% "org-slf4j" % "1.7.10"

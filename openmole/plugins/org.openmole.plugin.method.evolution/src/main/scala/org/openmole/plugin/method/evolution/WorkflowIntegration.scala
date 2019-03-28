@@ -255,19 +255,16 @@ object GAIntegration {
 
 object DeterministicGAIntegration {
   def migrateToIsland(population: Vector[mgo.evolution.algorithm.CDGenome.DeterministicIndividual.Individual]) = population
-
+  def migrateFromIsland(population: Vector[mgo.evolution.algorithm.CDGenome.DeterministicIndividual.Individual]) = population
 }
 
 object StochasticGAIntegration {
 
-  //  def aggregateVector[P](stochastic: Stochastic[P], values: Vector[Vector[P]]): Vector[Double] =
-  //    (stochastic.aggregation.option, stochastic) match {
-  //      case (Some(aggs), _)               ⇒ (values.transpose zip aggs).map { case (p, a) ⇒ a(p) }
-  //      case (_, Stochastic.caseDouble(s)) ⇒ values.transpose.map(_.median)
-  //      case _                             ⇒ ???
-  //    }
-
-  def migrateToIsland[P](population: Vector[mgo.evolution.algorithm.CDGenome.NoisyIndividual.Individual[P]]) = population.map(_.copy(historyAge = 0))
+  def migrateToIsland[I](population: Vector[I], historyAge: monocle.Lens[I, Long]) = population.map(historyAge.set(0))
+  def migrateFromIsland[I, P](population: Vector[I], historyAge: monocle.Lens[I, Long], history: monocle.Lens[I, Array[P]]) = {
+    def keepIslandHistoryPart(i: I) = history.modify(h ⇒ h.takeRight(historyAge.get(i).toInt))(i)
+    population.filter(i ⇒ historyAge.get(i) > 0).map(keepIslandHistoryPart)
+  }
 
 }
 
@@ -296,9 +293,9 @@ object MGOAPI {
 
       def randomLens: monocle.Lens[S, util.Random]
       def startTimeLens: monocle.Lens[S, Long]
-      def generation(s: S): Long
+      def generationLens: monocle.Lens[S, Long]
       def breeding(individuals: Vector[I], n: Int): FromContext[M[Vector[G]]]
-      def elitism(individuals: Vector[I]): FromContext[M[Vector[I]]]
+      def elitism(population: Vector[I], candidates: Vector[I]): FromContext[M[Vector[I]]]
 
       def migrateToIsland(i: Vector[I]): Vector[I]
       def migrateFromIsland(population: Vector[I], state: S): Vector[I]
