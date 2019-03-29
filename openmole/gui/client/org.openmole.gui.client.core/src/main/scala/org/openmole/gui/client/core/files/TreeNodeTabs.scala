@@ -143,7 +143,7 @@ object TreeNodeTab {
 
     lazy val controlElement = button("Run", btn_primary, onclick := { () ⇒
       refresh(() ⇒
-        post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePathTab.now)).call().foreach { execInfo ⇒
+        post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePathTab.now), true).call().foreach { execInfo ⇒
           org.openmole.gui.client.core.panels.executionPanel.dialog.show
         })
     })

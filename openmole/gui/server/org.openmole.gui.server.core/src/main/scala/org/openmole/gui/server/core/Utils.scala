@@ -428,4 +428,13 @@ object Utils extends JavaLogger {
     }
   }
 
+  def catchAll[T](f: ⇒ T): Try[T] = {
+    val res =
+      try Success(f)
+      catch {
+        case t: Throwable ⇒ Failure(t)
+      }
+    res
+  }
+
 }

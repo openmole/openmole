@@ -78,7 +78,7 @@ class MoleExecutionSpec extends FlatSpec with Matchers {
 
   "Wait" should "wait for the mole executon to be completed" in {
     val emptyT = EmptyTask()
-    val me = emptyT.start()
+    val me = emptyT.start(false)
     me.hangOn()
   }
 }

@@ -103,7 +103,7 @@ trait RESTAPI extends ScalatraServlet with ContentEncodingSupport
         }
 
         def start(ex: MoleExecution) = {
-          Try(ex.start) match {
+          Try(ex.start(false)) match {
             case Failure(e) ⇒ error(e)
             case Success(ex) ⇒
               moles.add(id, Execution(directory, ex))
