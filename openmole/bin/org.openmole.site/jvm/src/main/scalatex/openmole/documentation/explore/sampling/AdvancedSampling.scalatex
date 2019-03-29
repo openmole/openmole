@@ -121,12 +121,12 @@ generating a new pair. OpenMOLE implements the @hl.code("ZipWithIndexSampling") 
   output results depending on the input filename the filename should be transmitted in a variable of type String. When running
   this snippet, the file is renamed by the ScalaTask however, its name is saved in the @i{name} variable.
 
-  @br @hl.openmole("""
+  @br @hl.openmole(s"""
     val file = Val[File]
     val name = Val[String]
     val size = Val[Long]
 
-    val t = ScalaTask("val size = new java.io.File(workDir, \"file\").length") set (
+    val t = ScalaTask(${tq}val size = (workDirectory / "file").length${tq}) set (
       inputFiles += (file, "file"),
       inputs += name,
       outputs += (name, size)
