@@ -154,7 +154,7 @@ class FileToolBox(initSafePath: SafePath) {
           case fileaction.execute ⇒
             import scala.concurrent.duration._
             withSafePath { sp ⇒
-              post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(sp)).call().foreach { execInfo ⇒
+              post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(sp), true).call().foreach { execInfo ⇒
                 Popover.hide
                 org.openmole.gui.client.core.panels.executionPanel.dialog.show
               }

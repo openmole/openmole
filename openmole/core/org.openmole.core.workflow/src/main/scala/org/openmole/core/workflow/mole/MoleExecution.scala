@@ -683,10 +683,10 @@ class MoleExecution(
     else this
   }
 
-  def start() = {
+  def start(doValidation: Boolean) = {
     import executionContext.services._
-    validate
-    val t = threadProvider.newThread { () ⇒ run(None, validate = false) }
+    if (doValidation) validate
+    val t = threadProvider.newThread { () ⇒ run(None, validate = doValidation) }
     t.start()
     this
   }
