@@ -21,7 +21,7 @@ import java.io.File
 
 import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Variable }
-import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion.{ FromContext, ScalaCompilation }
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.serializer.plugin.Plugins
@@ -89,17 +89,29 @@ object ScalaTask {
     )
   }
 
-  override def validate =
-    if (_validate)
+  override def validate = {
+    def libraryErrors = libraries.flatMap { l ⇒
+      l.exists() match {
+        case false ⇒ Some(new UserBadDataError(s"Library file $l does not exist"))
+        case true  ⇒ None
+      }
+    }
+
+    if (_validate) {
       Validate { p ⇒
         import p._
 
-        Try(compile) match {
-          case Success(_) ⇒ Seq.empty
-          case Failure(e) ⇒ Seq(e)
-        }
+        def compilationError =
+          Try(compile) match {
+            case Success(_) ⇒ Seq.empty
+            case Failure(e) ⇒ Seq(e)
+          }
+
+        libraryErrors ++ compilationError
       }
+    }
     else Validate.success
+  }
 
   override def process(taskExecutionContext: TaskExecutionContext) = {
     def processCode =
