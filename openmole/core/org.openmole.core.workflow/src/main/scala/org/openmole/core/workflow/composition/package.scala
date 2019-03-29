@@ -17,6 +17,11 @@
 
 package org.openmole.core.workflow
 
+/**
+ * This package articulates workflows, by providing <code>Puzzle</code> and the bricks to construct them such as transitions.
+ *
+ * It also contains a large part of the DSL.
+ */
 package composition {
 
   import org.openmole.core.context.{ Context, Val }
@@ -36,6 +41,16 @@ package composition {
 
     def apply(s: TransitionSlot): Puzzle = Puzzle(s, lasts = Vector(s.capsule))
 
+    /**
+      * Merge two puzzles. The entry slot is taken as the entry slot of p1.
+      * It concatenates transitions, data channels, environments and groupings; concatenates and reduce to distinct elements sources and hooks.
+      * Last capsules are either merged, or taken as p1 depending on the argument mergeLast.
+      *
+      * @param p1
+      * @param p2
+      * @param mergeLasts
+      * @return
+      */
     def merge(p1: Puzzle, p2: Puzzle, mergeLasts: Boolean = false) = {
       new Puzzle(
         p1.firstSlot,
@@ -68,6 +83,19 @@ package composition {
 
   }
 
+  /**
+   * A Puzzle is the overall wrapper of the different components of an experiment: it articulates the different <code>MoleCapsule</code> in the script
+   * through transitions between slots, and incorporates data, sources, hooks, environments.
+   *
+   * @param firstSlot the first slot to enter the puzzle
+   * @param lasts the set of MoleCapsule on which the puzzle ends
+   * @param transitions the transitions from which the workflow is reconstructed
+   * @param dataChannels
+   * @param sources sources (mapped as MoleCapsule -> Hook)
+   * @param hooks hooks (mapped as MoleCapsule -> Hook)
+   * @param environments
+   * @param grouping
+   */
   case class Puzzle(
     firstSlot:    TransitionSlot,
     lasts:        Iterable[MoleCapsule],

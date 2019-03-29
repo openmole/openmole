@@ -57,6 +57,10 @@ object ITransition {
   }
 }
 
+/**
+ * The trait representing a transition between a start point which is a [[org.openmole.core.workflow.mole.MoleCapsule]]
+ * and an endpoint which is a [[org.openmole.core.workflow.transition.TransitionSlot]]
+ */
 trait ITransition {
 
   /**

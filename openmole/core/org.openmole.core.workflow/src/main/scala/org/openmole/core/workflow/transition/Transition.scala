@@ -31,6 +31,14 @@ import org.openmole.core.workspace.NewFile
 
 object Transition extends JavaLogger
 
+/**
+ * Transition between a mole and a slot
+ *
+ * @param start
+ * @param end
+ * @param condition
+ * @param filter
+ */
 class Transition(
   val start:     MoleCapsule,
   val end:       TransitionSlot,

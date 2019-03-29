@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2017 Jonathan Passerat-Palmbach
  * Copyright (C) 2017 Romain Reuillon
  *
