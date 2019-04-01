@@ -1,5 +1,8 @@
 package org.openmole.core
 
+/**
+ * Generic keywords and their DSL
+ */
 package keyword {
   case class In[A, B](value: A, domain: B)
   case class Under[A, B](value: A, under: B)

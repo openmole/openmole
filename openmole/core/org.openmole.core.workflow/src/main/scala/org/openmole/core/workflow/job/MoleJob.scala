@@ -27,6 +27,15 @@ object MoleJob {
   implicit val moleJobOrdering = Ordering.by((_: MoleJob).id)
 
   type StateChangedCallBack = (MoleJob, State, State) ⇒ Unit
+
+  /**
+   * Construct from context and UUID
+   * @param task
+   * @param context context for prototypes and values
+   * @param id UUID
+   * @param stateChangedCallBack
+   * @return
+   */
   def apply(
     task:                 Task,
     context:              Context,
@@ -48,6 +57,16 @@ object MoleJob {
 
 import MoleJob._
 
+/**
+ * Atomic executable job, wrapping a [[Task]]
+ *
+ * @param task task to be executed
+ * @param prototypes prototypes for the task
+ * @param values values of prototypes
+ * @param mostSignificantBits to construct the UUID
+ * @param leastSignificantBits to construct the UUID
+ * @param stateChangedCallBack what to do when the state is changed
+ */
 class MoleJob(
   val task:               Task,
   private var prototypes: Array[Val[Any]],

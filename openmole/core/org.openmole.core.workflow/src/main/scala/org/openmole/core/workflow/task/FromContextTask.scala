@@ -18,14 +18,34 @@ object FromContextTask {
     info = InfoConfig()
   )
 
+  /**
+   * Construct from a FromContext
+   * @param className
+   * @param fromContext
+   * @return
+   */
   def apply(className: String, fromContext: FromContext[Context])(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextTask =
     withTaskExecutionContext(className, (_: TaskExecutionContext) ⇒ fromContext)
 
+  /**
+   * Construct from a [[FromContext.Parameters]] => [[Context]] function
+   * @param className
+   * @param fromContext
+   * @return
+   */
   def apply(className: String)(fromContext: FromContext.Parameters ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextTask =
     withTaskExecutionContext(className, (_: TaskExecutionContext) ⇒ FromContext(fromContext))
 
 }
 
+/**
+ * A task wrapping a function from a [[TaskExecutionContext]] to a [[FromContext]]
+ *
+ * @param fromContext function
+ * @param className name of the task
+ * @param config
+ * @param info
+ */
 @Lenses case class FromContextTask(
   fromContext:            TaskExecutionContext ⇒ FromContext[Context],
   override val className: String,

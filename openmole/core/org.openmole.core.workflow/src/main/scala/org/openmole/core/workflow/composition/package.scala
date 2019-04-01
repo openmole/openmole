@@ -42,15 +42,15 @@ package composition {
     def apply(s: TransitionSlot): Puzzle = Puzzle(s, lasts = Vector(s.capsule))
 
     /**
-      * Merge two puzzles. The entry slot is taken as the entry slot of p1.
-      * It concatenates transitions, data channels, environments and groupings; concatenates and reduce to distinct elements sources and hooks.
-      * Last capsules are either merged, or taken as p1 depending on the argument mergeLast.
-      *
-      * @param p1
-      * @param p2
-      * @param mergeLasts
-      * @return
-      */
+     * Merge two puzzles. The entry slot is taken as the entry slot of p1.
+     * It concatenates transitions, data channels, environments and groupings; concatenates and reduce to distinct elements sources and hooks.
+     * Last capsules are either merged, or taken as p1 depending on the argument mergeLast.
+     *
+     * @param p1
+     * @param p2
+     * @param mergeLasts
+     * @return
+     */
     def merge(p1: Puzzle, p2: Puzzle, mergeLasts: Boolean = false) = {
       new Puzzle(
         p1.firstSlot,

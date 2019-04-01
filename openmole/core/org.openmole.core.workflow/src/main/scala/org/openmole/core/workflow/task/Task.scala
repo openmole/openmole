@@ -57,19 +57,28 @@ object Task {
   def definitionScope(t: Task) = t.info.definitionScope
 }
 
+/**
+ * A Task is a fundamental unit for the execution of a workflow.
+ */
 trait Task <: Name with Id {
 
   /**
-   *
    * Perform this task.
    *
    * @param context the context in which the task will be executed
+   * @param executionContext context of the environment in which the Task is executed
+   * @return
    */
   def perform(context: Context, executionContext: TaskExecutionContext): Context = {
     lazy val rng = Lazy(Task.buildRNG(context))
     InputOutputCheck.perform(this, inputs, outputs, defaults, process(executionContext))(executionContext.preference).from(context)(rng, NewFile(executionContext.tmpDirectory), executionContext.fileService)
   }
 
+  /**
+   * The actuel processing of the Task, wrapped by the [[perform]] method
+   * @param executionContext
+   * @return
+   */
   protected def process(executionContext: TaskExecutionContext): FromContext[Context]
 
   def config: InputOutputConfig
@@ -80,7 +89,11 @@ trait Task <: Name with Id {
   def defaults = config.defaults
   def name = info.name
 
-  // Make sure 2 tasks with the same content are not equal in the java sens
+  /**
+   * Make sure 2 tasks with the same content are not equal in the java sense:
+   * as Task inherits of the trait Id, hashconsing is done through this id, and creating a unique object here will ensure unicity of tasks
+   * (this trick allows to still benefit of the power of case classes while staying in a standard object oriented scheme)
+   */
   lazy val id = new Object {}
 
 }

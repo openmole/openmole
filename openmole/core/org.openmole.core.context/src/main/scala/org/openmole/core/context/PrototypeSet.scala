@@ -27,16 +27,21 @@ object PrototypeSet {
   def copy(prototypeSet: PrototypeSet)(prototypes: Seq[Val[_]] = prototypeSet.prototypes, explore: Set[String] = prototypeSet.explore) = apply(prototypes, explore)
 }
 
+/**
+ * An ordered set of prototypes
+ * @param prototypes the sequence of prototypes
+ * @param explore names of prototypes which have already been explored
+ */
 class PrototypeSet(val prototypes: Seq[Val[_]], val explore: Set[String] = Set.empty) extends Iterable[Val[_]] { self ⇒
 
   @transient lazy val prototypeMap: Map[String, Val[_]] =
     TreeMap.empty[String, Val[_]] ++ prototypes.map { d ⇒ (d.name, d) }
 
   /**
-   * Get the @link{Data} by its name as an Option.
+   * Get the prototype by its name as an Option.
    *
-   * @param name the name of the @link{Data}
-   * @return Some(data) if it is present in the data set None otherwise
+   * @param name the name of the prototype
+   * @return Some(data) if it is present in the prototype set, None otherwise
    */
   def apply(name: String): Option[Val[_]] = prototypeMap.get(name)
 
@@ -49,27 +54,71 @@ class PrototypeSet(val prototypes: Seq[Val[_]], val explore: Set[String] = Set.e
    */
   def contains(name: String): Boolean = prototypeMap.contains(name)
 
+  /**
+   * get the explored prototypes
+   * @return
+   */
   def explored: Seq[Val[_]] = prototypes.filter(explored)
 
+  /**
+   * check if a prototype has been explored
+   * @param p
+   * @return
+   */
   def explored(p: Val[_]): Boolean = p.`type`.isArray && explore.contains(p.name)
 
   override def iterator: Iterator[Val[_]] = prototypes.iterator
 
+  /**
+   * Explore the given prototypes (by name)
+   * @param d names of prototypes to explore
+   * @return
+   */
   def explore(d: String*) = PrototypeSet.copy(this)(explore = explore ++ d)
 
+  /**
+   * Concatenate with a set of prototypes
+   * @param d
+   * @return
+   */
   def ++(d: Traversable[Val[_]]) = PrototypeSet.copy(this)(prototypes = d.toList ::: prototypes.toList)
 
+  /**
+   * Prepend a PrototypeSet
+   * @param set
+   * @return
+   */
   def +(set: PrototypeSet): PrototypeSet = PrototypeSet.copy(this)(prototypes = set.prototypes.toList ::: prototypes.toList)
 
+  /**
+   * Prepend a prototype
+   * @param d
+   * @return
+   */
   def +(d: Val[_]) = PrototypeSet.copy(this)(prototypes = d :: prototypes.toList)
 
+  /**
+   * Remove a prototype
+   * @param d
+   * @return
+   */
   def -(d: Val[_]) = PrototypeSet.copy(this)(prototypes = prototypes.filter(_.name != d.name).toList)
 
+  /**
+   * Remove a set of prototypes
+   * @param d
+   * @return
+   */
   def --(d: Traversable[Val[_]]) = {
     val dset = d.map(_.name).toSet
     PrototypeSet.copy(this)(prototypes = prototypes.filter(p ⇒ !dset.contains(p.name)).toList)
   }
 
+  /**
+   * Check if a prototype is in the set by name
+   * @param data
+   * @return
+   */
   def contains(data: Val[_]) = prototypeMap.contains(data.name)
 
   def toMap = prototypeMap

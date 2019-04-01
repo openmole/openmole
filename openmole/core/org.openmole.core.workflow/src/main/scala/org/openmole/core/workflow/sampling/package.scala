@@ -56,5 +56,12 @@ package object sampling {
    * @tparam T
    */
   type Factor[D, T] = In[Val[T], D]
+
+  /**
+   * Construct a [[Factor]] from a prototype and its domain
+   * @param p
+   * @param d
+   * @return
+   */
   def Factor[D, T](p: Val[T], d: D) = In(p, d)
 }
