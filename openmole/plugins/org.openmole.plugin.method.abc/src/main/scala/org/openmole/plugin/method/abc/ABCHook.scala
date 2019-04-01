@@ -5,12 +5,12 @@ import org.openmole.core.expansion._
 import org.openmole.core.dsl._
 import org.openmole.core.workflow.builder.DefinitionScope
 import org.openmole.core.workflow.mole.FromContextHook
-import shapeless.HNil
+import shapeless.{ HList, HNil }
 import shapeless.ops.hlist.Selector
 
 object ABCHook {
 
-  def apply[T <: HNil](algorithm: T, dir: FromContext[File], frequency: OptionalArgument[Long] = None)(implicit parametersExtractor: Selector[T, ABCParameters], name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def apply[T <: HList](algorithm: T, dir: FromContext[File], frequency: OptionalArgument[Long] = None)(implicit parametersExtractor: Selector[T, ABCParameters], name: sourcecode.Name, definitionScope: DefinitionScope) = {
 
     val parameters = parametersExtractor(algorithm)
 
@@ -23,9 +23,7 @@ object ABCHook {
 
         case MonAPMC.State(t0, s) ⇒
 
-          // TODO: il faut que step prenne la valeur de la variable "step" définie dans abc.
-          //val step = context(parameters.step)
-          val step = s.t
+          val step = context(parameters.step)
 
           val filePath = dir / ExpandedString("step${" + step + "}.csv")
           val file = filePath.from(context)

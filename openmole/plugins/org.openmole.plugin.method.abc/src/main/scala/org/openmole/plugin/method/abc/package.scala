@@ -16,7 +16,9 @@ package object abc {
   case class ABCPrior(v: Val[Double], low: FromContext[Double], high: FromContext[Double])
   case class ABCObserved(v: Val[Double], observed: Double)
 
-  case class ABCParameters(state: Val[MonAPMC.MonState])
+  case class ABCParameters(
+    state: Val[MonAPMC.MonState],
+    step:  Val[Int])
 
   def ABC(
     evaluation:       DSL,
@@ -53,7 +55,7 @@ package object abc {
         condition = !(stop: Condition)
       )
 
-    DSLContainer(loop, output = Some(postStepTask), delegate = mapReduce.delegate) :: ABCParameters(state) :: HNil
+    DSLContainer(loop, output = Some(postStepTask), delegate = mapReduce.delegate) :: ABCParameters(state, step) :: HNil
   }
 
 }
