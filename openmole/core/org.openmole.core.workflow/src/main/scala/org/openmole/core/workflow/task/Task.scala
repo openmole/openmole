@@ -53,6 +53,13 @@ case class TaskExecutionContext(
 )
 
 object Task {
+
+  /**
+    * Construct a Random Number Generator for the task. The rng is constructed by [[org.openmole.tool.random.Random]] with the seed provided from the context (seed being defined as an OpenMOLE variable)
+    *
+    * @param context
+    * @return
+    */
   def buildRNG(context: Context): scala.util.Random = random.Random(context(Variable.openMOLESeed)).toScala
   def definitionScope(t: Task) = t.info.definitionScope
 }
@@ -81,7 +88,16 @@ trait Task <: Name with Id {
    */
   protected def process(executionContext: TaskExecutionContext): FromContext[Context]
 
+  /**
+    * Configuration for inputs/outputs
+    * @return
+    */
   def config: InputOutputConfig
+
+  /**
+    * Information on the task (name, scope)
+    * @return
+    */
   def info: InfoConfig
 
   def inputs = config.inputs

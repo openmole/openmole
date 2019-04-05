@@ -41,6 +41,10 @@ object DefaultSet {
 
 }
 
+/**
+  * A set of default values for prototypes
+  * @param defaults
+  */
 case class DefaultSet(defaults: Iterable[Default[_]]) {
 
   @transient lazy val defaultMap =

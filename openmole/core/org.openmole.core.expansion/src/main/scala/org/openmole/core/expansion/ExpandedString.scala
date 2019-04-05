@@ -29,6 +29,9 @@ import org.openmole.tool.random._
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
+/**
+  * Methods to parse code strings
+  */
 object ExpandedString {
 
   implicit def fromStringToVariableExpansion(s: String) = ExpandedString(s)
@@ -99,6 +102,9 @@ object ExpandedString {
     def validate(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService): Seq[Throwable] = Seq.empty
   }
 
+  /**
+    * An ExpandedElement distinguishes between value strings and code strings
+    */
   object ExpandedElement {
     def apply(code: String): ExpansionElement = {
       if (code.isEmpty) ValueElement(code)
