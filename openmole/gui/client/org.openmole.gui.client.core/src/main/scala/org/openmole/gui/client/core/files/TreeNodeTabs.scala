@@ -11,7 +11,7 @@ import scala.concurrent.duration._
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.openmole.gui.ext.api.Api
-import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.raw.{Event, HTMLElement}
 import scalatags.JsDom.all.{raw, _}
 import scalatags.JsDom.TypedTag
 import org.openmole.gui.ext.tool.client._
@@ -19,11 +19,12 @@ import org.openmole.gui.client.core._
 import org.openmole.gui.ext.tool.client.FileManager
 import DataUtils._
 import net.scalapro.sortable._
-import org.openmole.gui.client.core.files.TreeNodeTab.{ClosureFilter, EditableView, IndexedAxis, First100, Raw, RowFilter}
+import org.openmole.gui.client.core.files.TreeNodeTab.{ClosureFilter, EditableView, First100, IndexedAxis, Raw, RowFilter}
 import org.openmole.gui.client.tool.plot
 import org.openmole.gui.client.tool.plot.Plot._
 import org.openmole.gui.client.tool.plot._
 import scaladget.bootstrapnative.{DataTable, ToggleButton}
+import org.openmole.gui.ext.tool._
 import rx._
 
 import scala.collection.immutable.HashMap
@@ -114,7 +115,9 @@ object TreeNodeTab {
 
   def save(safePath: SafePath, editorPanelUI: EditorPanelUI, afterSave: () ⇒ Unit) =
     editorPanelUI.synchronized {
-      post()[Api].saveFile(safePath, editorPanelUI.code).call().foreach(_ ⇒ afterSave())
+      post()[Api].saveFile(safePath, editorPanelUI.code).call().foreach { _ ⇒
+        afterSave()
+      }
     }
 
   def oms(safePath: SafePath, initialContent: String) = new TreeNodeTab {
@@ -131,8 +134,7 @@ object TreeNodeTab {
 
     def editing = true
 
-    override def onActivate: () ⇒ Unit = ()=> {
-     // () ⇒ omsEditor.setNbLines
+    override def onActivate: () ⇒ Unit = () => {
     }
 
     def content = omsEditor.code
@@ -141,12 +143,51 @@ object TreeNodeTab {
 
     def resizeEditor = omsEditor.editor.resize()
 
-    lazy val controlElement = button("Run", btn_primary, onclick := { () ⇒
-      refresh(() ⇒
-        post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePathTab.now), true).call().foreach { execInfo ⇒
-          org.openmole.gui.client.core.panels.executionPanel.dialog.show
+
+    lazy val controlElement = {
+      val compileDisabled = Var(false)
+
+      def unsetErrors = setErrors(Seq())
+
+      def setErrors(errors: Seq[ErrorWithLocation]) = {
+        for {
+          tab <- panels.treeNodeTabs.find(safePath)
+          editor <- tab.editor
+        } yield {
+          editor.setErrors(errors)
+        }
+      }
+
+      def setError(errorDataOption: Option[ErrorData]) = {
+        compileDisabled.update(false)
+        errorDataOption match {
+          case Some(ce: CompilationErrorData) ⇒ setErrors(ce.errors)
+          case _ =>
+        }
+      }
+
+      div(display.flex, flexDirection.row)(
+        Rx {
+          if (compileDisabled()) Waiter.waiter
+          else
+            button("Test", btn_default, marginLeft := 30, onclick := { () ⇒
+              unsetErrors
+              compileDisabled.update(true)
+              refresh(() =>
+                post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].compileScript(ScriptData(safePathTab.now)).call().foreach { errorDataOption ⇒
+                  setError(errorDataOption)
+                })
+            })
+        },
+        button("Run", btn_primary, marginLeft := 10, onclick := { () ⇒
+          unsetErrors
+          refresh(() ⇒
+            post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePathTab.now), true).call().foreach { execInfo ⇒
+              org.openmole.gui.client.core.panels.executionPanel.dialog.show
+            })
         })
-    })
+      )
+    }
 
     lazy val block = omsEditor.view
   }
@@ -436,11 +477,11 @@ object TreeNodeTab {
     )
 
 
-    lazy val closureInput = input(placeholder := "Filter closure. Ex: x < 10", marginLeft := 10 )(value := editableSettings.plotClosure.map {
+    lazy val closureInput = input(placeholder := "Filter closure. Ex: x < 10", marginLeft := 10)(value := editableSettings.plotClosure.map {
       _.closure
     }.getOrElse("")).render
 
-    lazy val inputFilterValidation = button(btn_primary, marginLeft:= 10, "Apply", onclick := { () =>
+    lazy val inputFilterValidation = button(btn_primary, marginLeft := 10, "Apply", onclick := { () =>
       toClosureView(editableSettings.plotClosure.map {
         _.copy(closure = closureInput.value)
       })
@@ -487,7 +528,7 @@ object TreeNodeTab {
 
     def jsClosure(value: String, col: Int) = {
       val closure = closureInput.value
-      if(closure.isEmpty) true
+      if (closure.isEmpty) true
       else {
         editableSettings.plotClosure.map {
           _.axis.find(_.fullSequenceIndex == col).map { pc =>

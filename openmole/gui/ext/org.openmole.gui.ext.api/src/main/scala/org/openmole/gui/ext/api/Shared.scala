@@ -71,7 +71,7 @@ trait Api {
   def staticInfos(): Seq[(ExecutionId, StaticExecutionInfo)]
   def cancelExecution(id: ExecutionId): Unit
   def removeExecution(id: ExecutionId): Unit
-  def compileScript(scriptData: ScriptData): Unit
+  def compileScript(scriptData: ScriptData): Option[ErrorData]
   def runScript(scriptData: ScriptData, validateScript: Boolean): Unit
   def clearEnvironmentErrors(environmentId: EnvironmentId): Unit
   def runningErrorEnvironmentData(environmentId: EnvironmentId, lines: Int): EnvironmentErrorData

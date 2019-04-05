@@ -304,23 +304,84 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   def removeExecution(id: ExecutionId): Unit = execution.remove(id)
 
   def compileScript(scriptData: ScriptData) = {
-    processCompilation(scriptData)
+    val (execId, outputStream) = compilationData(scriptData)
+    synchronousCompilation(execId, scriptData, outputStream)
   }
 
   def runScript(scriptData: ScriptData, validateScript: Boolean) = {
-    processCompilation(
+    asynchronousCompilation(
       scriptData,
+      (execId: ExecutionId) ⇒ execution.compiled(execId),
       (ex: MoleExecution, execID: ExecutionId, error: Throwable ⇒ Unit) ⇒ processRun(ex, execID, validateScript, error)
     )
   }
 
-  def processCompilation(scriptData: ScriptData, onCompiled: (MoleExecution, ExecutionId, Throwable ⇒ Unit) ⇒ Unit = (_, _, _) ⇒ {}): Unit = {
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+  private def compilationData(scriptData: ScriptData) = {
+    (ExecutionId(getUUID) /*, safePathToFile(scriptData.scriptPath)*/ , StringPrintStream(Some(preference(outputSize))))
+  }
 
-    val execId = ExecutionId(getUUID)
-    val script = safePathToFile(scriptData.scriptPath)
-    val content = script.content
-    val outputStream = StringPrintStream(Some(preference(outputSize)))
+  def synchronousCompilation(
+    execId:       ExecutionId,
+    scriptData:   ScriptData,
+    outputStream: StringPrintStream,
+    onCompiled:   ExecutionId ⇒ Unit                                    = ExecutionId ⇒ {},
+    onEvaluated:  (MoleExecution, ExecutionId, Throwable ⇒ Unit) ⇒ Unit = (_, _, _) ⇒ {}): Option[ErrorData] = {
+
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    def error(t: Throwable): ErrorData = {
+      t match {
+        case ce: ScalaREPL.CompilationError ⇒
+          def toErrorWithLocation(em: ScalaREPL.ErrorMessage) = ErrorWithLocation(em.rawMessage, em.position.map {
+            _.line
+          }, em.position.map {
+            _.start
+          }, em.position.map {
+            _.end
+          })
+
+          ErrorData(ce.errorMessages.map(toErrorWithLocation), t)
+        case _ ⇒ ErrorData(t)
+      }
+    }
+
+    def message(message: String) = MessageErrorData(message)
+
+    val script: File = safePathToFile(scriptData.scriptPath)
+
+    try {
+      val project = Project(script.getParentFileSafe)
+      project.compile(script, Seq.empty)(Services.copy(services)(outputRedirection = OutputRedirection(outputStream))) match {
+        case ScriptFileDoesNotExists() ⇒ Some(message("Script file does not exist"))
+        case ErrorInCode(e)            ⇒ Some(error(e))
+        case ErrorInCompiler(e)        ⇒ Some(error(e))
+        case compiled: Compiled ⇒
+          onCompiled(execId)
+          catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
+            case Failure(e) ⇒ Some(error(e))
+            case Success(dsl) ⇒
+              val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(outputStream))
+              Try(dslToPuzzle(dsl).toExecution(executionContext = MoleExecutionContext()(services))) match {
+                case Success(ex) ⇒
+                  onEvaluated(ex, execId, (t: Throwable) ⇒ error(t))
+                  None
+                case Failure(e) ⇒ Some(error(e))
+              }
+          }
+      }
+
+    }
+    catch {
+      case t: Throwable ⇒ Some(error(t))
+    }
+
+  }
+
+  def asynchronousCompilation(scriptData: ScriptData, onEvaluated: ExecutionId ⇒ Unit = ExecutionId ⇒ {}, onCompiled: (MoleExecution, ExecutionId, Throwable ⇒ Unit) ⇒ Unit = (_, _, _) ⇒ {}): Unit = {
+
+    val (execId, outputStream) = compilationData(scriptData)
+
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    val content = safePathToFile(scriptData.scriptPath).content
 
     execution.addStaticInfo(execId, StaticExecutionInfo(scriptData.scriptPath, content, System.currentTimeMillis()))
     execution.addOutputStreams(execId, outputStream)
@@ -329,52 +390,9 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
     val compilationFuture =
       threadProvider.submit(ThreadProvider.maxPriority) { () ⇒
-
-        def error(t: Throwable): Unit = {
-          t match {
-            case ce: ScalaREPL.CompilationError ⇒
-              def toErrorWithLocation(em: ScalaREPL.ErrorMessage) = ErrorWithLocation(em.rawMessage, em.position.map {
-                _.line
-              }, em.position.map {
-                _.start
-              }, em.position.map {
-                _.end
-              })
-
-              execution.addError(
-                execId,
-                Failed(
-                  Vector.empty,
-                  ErrorData(ce.errorMessages.map(toErrorWithLocation), t),
-                  Seq()))
-            case _ ⇒ execution.addError(execId, Failed(Vector.empty, ErrorData(t), Seq()))
-          }
-        }
-
-        def message(message: String): Unit = execution.addError(execId, Failed(Vector.empty, MessageErrorData(message), Seq()))
-
-        try {
-          val project = Project(script.getParentFileSafe)
-          project.compile(script, Seq.empty)(Services.copy(services)(outputRedirection = OutputRedirection(outputStream))) match {
-            case ScriptFileDoesNotExists() ⇒ message("Script file does not exist")
-            case ErrorInCode(e)            ⇒ error(e)
-            case ErrorInCompiler(e)        ⇒ error(e)
-            case compiled: Compiled ⇒
-              execution.compiled(execId)
-
-              catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
-                case Failure(e) ⇒ error(e)
-                case Success(dsl) ⇒
-                  val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(outputStream))
-                  Try(dslToPuzzle(dsl).toExecution(executionContext = MoleExecutionContext()(services))) match {
-                    case Success(ex) ⇒ onCompiled(ex, execId, (t: Throwable) ⇒ error(t))
-                    case Failure(e)  ⇒ error(e)
-                  }
-              }
-          }
-        }
-        catch {
-          case t: Throwable ⇒ error(t)
+        val errorData = synchronousCompilation(execId, scriptData, outputStream, onEvaluated, onCompiled)
+        errorData.foreach { ed ⇒
+          execution.addError(execId, Failed(Vector.empty, ed, Seq.empty))
         }
       }
 
