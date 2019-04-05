@@ -35,10 +35,26 @@ object MoleExecutionContext {
   def apply()(implicit moleServices: MoleServices) = new MoleExecutionContext()
 }
 
+/**
+ * Wrapper for [[MoleServices]] which are implicit
+ * @param services implicit services
+ */
 class MoleExecutionContext(implicit val services: MoleServices)
 
 object MoleServices {
 
+  /**
+   * create a MoleService from implicit parameters
+   * @param preference
+   * @param seeder
+   * @param threadProvider
+   * @param eventDispatcher
+   * @param newFile
+   * @param fileService
+   * @param workspace
+   * @param outputRedirection
+   * @return
+   */
   implicit def create(implicit preference: Preference, seeder: Seeder, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, newFile: NewFile, fileService: FileService, workspace: Workspace, outputRedirection: OutputRedirection) = {
     new MoleServices()(
       preference = preference,
@@ -76,6 +92,19 @@ object MoleServices {
     )
 }
 
+/**
+ * implicit services for the execution of a Mole
+ *
+ * @param preference preferences
+ * @param seeder
+ * @param threadProvider
+ * @param eventDispatcher
+ * @param newFile
+ * @param workspace
+ * @param fileService
+ * @param fileServiceCache
+ * @param outputRedirection
+ */
 class MoleServices(
   implicit
   val preference:        Preference,

@@ -57,6 +57,10 @@ object ITransition {
   }
 }
 
+/**
+ * The trait representing a transition between a start point which is a [[org.openmole.core.workflow.mole.MoleCapsule]]
+ * and an endpoint which is a [[org.openmole.core.workflow.transition.TransitionSlot]]
+ */
 trait ITransition {
 
   /**
@@ -85,14 +89,14 @@ trait ITransition {
 
   /**
    *
-   * Get the filter of the variables which are filtred by this transition.
+   * Get the filter of the variables which are filtered by this transition.
    *
-   * @return filter on the names of the variables which are filtred by this transition
+   * @return filter on the names of the variables which are filtered by this transition
    */
   def filter: BlockList
 
   /**
-   * Get the unfiltred user output data of the starting capsule going through
+   * Get the unfiltered user output data of the starting capsule going through
    * this transition
    *
    * @return the unfiltred output data of the staring capsule
@@ -109,6 +113,11 @@ trait ITransition {
    */
   def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, moleExecutionContext: MoleExecutionContext): Unit
 
+  /**
+   * Filter a given context
+   * @param context
+   * @return
+   */
   protected def filtered(context: Context): Context = context.filterNot { case (_, v) ⇒ filter(v.prototype) }
 
   override def toString = this.getClass.getSimpleName + " from " + start + " to " + end

@@ -52,6 +52,11 @@ object ReplicaCatalog extends JavaLogger {
 
 }
 
+/**
+ * Manage [[Replica]]s in the database
+ * @param database
+ * @param preference
+ */
 class ReplicaCatalog(database: Database, preference: Preference) {
 
   import ReplicaCatalog.Log._

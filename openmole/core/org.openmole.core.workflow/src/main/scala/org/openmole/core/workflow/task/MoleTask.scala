@@ -39,13 +39,18 @@ object MoleTask {
   implicit def isTask = InputOutputBuilder(MoleTask.config)
   implicit def isInfo = InfoBuilder(MoleTask.info)
 
+  /**
+   * Constructor used to construct the MoleTask corresponding to the full puzzle
+   *
+   * @param dsl
+   * @return
+   */
   def apply(dsl: DSL)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): MoleTask = {
     val puzzle = dslToPuzzle(dsl)
     apply(puzzle.toMole, puzzle.lasts.head)
   }
 
   /**
-   * *
    * @param mole the mole executed by this task.
    * @param last the capsule which returns the results
    */
@@ -68,6 +73,15 @@ object MoleTask {
 
 }
 
+/**
+ * Task executing a Mole
+ *
+ * @param _mole the Mole to be executed
+ * @param last the MoleCapsule finishing the Mole
+ * @param implicits names of implicits, which values are imported explicitly from the context
+ * @param config inputs and outputs prototypes, and defaults
+ * @param info name and definition scope
+ */
 @Lenses case class MoleTask(
   _mole:     Mole,
   last:      MoleCapsule,
@@ -76,6 +90,10 @@ object MoleTask {
   info:      InfoConfig
 ) extends Task {
 
+  /**
+   * mole of the MoleTask, with inputs from the config: InputOutputConfig
+   * @return
+   */
   def mole = _mole.copy(inputs = inputs)
 
   protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { p ⇒

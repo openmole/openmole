@@ -23,6 +23,12 @@ import cats._
 import cats.implicits._
 import scala.language.higherKinds
 
+/**
+ * Property of being finite for a domain
+ *
+ * @tparam D domain type
+ * @tparam T variable type
+ */
 @implicitNotFound("${D} is not a finite variation domain of type ${T}")
 trait Finite[-D, +T] extends Discrete[D, T] {
   def computeValues(domain: D): FromContext[collection.Iterable[T]]

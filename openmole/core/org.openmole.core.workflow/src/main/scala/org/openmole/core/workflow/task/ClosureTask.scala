@@ -28,6 +28,12 @@ object ClosureTask {
   implicit def isBuilder: InputOutputBuilder[ClosureTask] = InputOutputBuilder(ClosureTask.config)
   implicit def isInfo: InfoBuilder[ClosureTask] = InfoBuilder(ClosureTask.info)
 
+  /**
+   * Construct from a name and a function (no input-output nor info configs)
+   * @param className
+   * @param closure
+   * @return
+   */
   def apply(className: String)(closure: (Context, RandomProvider, TaskExecutionContext) ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): ClosureTask = new ClosureTask(
     closure,
     className = className,
@@ -36,6 +42,13 @@ object ClosureTask {
   )
 }
 
+/**
+ * A Task executing a provided function from a [[org.openmole.core.context.Context]] to a context, given additional [[RandomProvider]] and [[TaskExecutionContext]] parameters
+ * @param closure function wrapped by the task
+ * @param className name for this task
+ * @param config
+ * @param info
+ */
 @Lenses case class ClosureTask(
   closure:                (Context, RandomProvider, TaskExecutionContext) ⇒ Context,
   override val className: String,

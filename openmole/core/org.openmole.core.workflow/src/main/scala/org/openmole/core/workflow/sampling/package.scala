@@ -17,6 +17,9 @@
 
 package org.openmole.core.workflow
 
+/**
+ * Sampling aims at associating prototypes with values.
+ */
 package sampling {
 
   import org.openmole.core.context._
@@ -47,6 +50,18 @@ package object sampling {
   import org.openmole.core.context._
   import org.openmole.core.keyword._
 
+  /**
+   * The factor type associates a Val to a domain through the keyword In
+   * @tparam D
+   * @tparam T
+   */
   type Factor[D, T] = In[Val[T], D]
+
+  /**
+   * Construct a [[Factor]] from a prototype and its domain
+   * @param p
+   * @param d
+   * @return
+   */
   def Factor[D, T](p: Val[T], d: D) = In(p, d)
 }

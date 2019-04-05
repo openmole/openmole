@@ -73,6 +73,11 @@ sealed trait Environment <: Name {
   def stop(): Unit = {}
 }
 
+/**
+ * An environment with the properties of submitting jobs, getting jobs, and cleaning.
+ *
+ * This trait is implemented by environment plugins, and not the more generic [[Environment]]
+ */
 trait SubmissionEnvironment <: Environment {
   def submit(job: Job)
   def jobs: Iterable[ExecutionJob]
@@ -92,6 +97,11 @@ object LocalEnvironment {
     LocalEnvironmentProvider(() ⇒ new LocalEnvironment(threads, deinterleave, None))
 }
 
+/**
+ * Local environment
+ * @param nbThreads number of parallel threads
+ * @param deinterleave get the outputs of executions as strings
+ */
 class LocalEnvironment(
   val nbThreads:     Int,
   val deinterleave:  Boolean,

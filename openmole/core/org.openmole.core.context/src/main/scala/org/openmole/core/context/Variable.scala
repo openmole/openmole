@@ -28,17 +28,52 @@ import scala.util.Random
 object Variable {
   def openMOLENameSpace = Namespace("openmole")
 
+  /**
+    * implicit conversion of a tuple (prototype,value) to a Variable
+    * @param t
+    * @tparam T
+    * @return
+    */
   implicit def tupleWithValToVariable[T](t: (Val[T], T)) = apply(t._1, t._2)
-  implicit def tubleToVariable[T: Manifest](t: (String, T)) = apply(Val[T](t._1), t._2)
 
+  /**
+    * implicit conversion of tuple (prototype name, value)
+    * @param t
+    * @tparam T
+    * @return
+    */
+  implicit def tupleToVariable[T: Manifest](t: (String, T)) = apply(Val[T](t._1), t._2)
+
+  /**
+    * Unsecure constructor, trying to cast the provided value to the type of the prototype
+    * @param p prototype
+    * @param v value
+    * @tparam T
+    * @return
+    */
   def unsecure[T](p: Val[T], v: Any) = Variable[T](p, v.asInstanceOf[T])
 
+  /**
+    * Variable defined by OpenMOLE
+    * @param name
+    * @return
+    */
   def openMOLE(name: String) = Val[Long](name, namespace = openMOLENameSpace)
+
+  /**
+    * Seed for rng
+    */
   val openMOLESeed = openMOLE("seed")
 
   def copy[T](v: Variable[T])(prototype: Val[T] = v.prototype, value: T = v.value) = apply(prototype, value)
 }
 
+/**
+  * A Variable is a prototype with a value
+  * @param prototype the prototype
+  * @param value the value
+  * @tparam T type of the Variable
+  */
 case class Variable[T](prototype: Val[T], value: T) {
   override def toString: String = prettified(Int.MaxValue)
   def prettified(snipArray: Int) = prototype.name + "=" + (if (value != null) value.prettify(snipArray) else "null")

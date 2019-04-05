@@ -17,6 +17,11 @@
 
 package org.openmole.core.exception
 
+/**
+ * An exception thrown at problems encountered because of the user
+ * @param exception
+ * @param message
+ */
 class UserBadDataError(exception: Throwable, val message: String) extends Exception(message, exception) {
 
   def this(message: String) = {

@@ -1,0 +1,34 @@
+
+
+This page gives a broad overview of stabilized concepts in OpenMOLE's core and its architecture.
+
+
+@h1{Workflow}
+
+package @code{org.openmole.core.workflow}
+
+
+@object C{val c = "builder : Lens, setter / getters, etc"}
+
+
+@h2{Composition}
+
+@code{org.openmole.core.workflow.composition} :
+ - contains functions to construct the Puzzle, which contains Slots, Transitions and Capsules.
+The puzzle is exported to an Execution for running the script.
+
+ - contains the transitions and the corresponding DSL
+
+ - contains the dsl linking transitions etc to puzzles
+
+
+@object C{val c = "domain : traits for types for value domains for prototypes"}
+
+
+
+
+
+
+
+
+

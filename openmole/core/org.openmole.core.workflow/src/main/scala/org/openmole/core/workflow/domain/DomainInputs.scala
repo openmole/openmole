@@ -20,11 +20,21 @@ package org.openmole.core.workflow.domain
 import org.openmole.core.context._
 
 object DomainInputs {
+
+  /**
+   * By default implicitly no domain inputs
+   * @tparam T
+   * @return
+   */
   implicit def empty[T] = new DomainInputs[T] {
     def inputs(domain: T): PrototypeSet = PrototypeSet.empty
   }
 }
 
+/**
+ * Property of having inputs for a domain
+ * @tparam D
+ */
 trait DomainInputs[-D] {
   def inputs(domain: D): PrototypeSet
 }

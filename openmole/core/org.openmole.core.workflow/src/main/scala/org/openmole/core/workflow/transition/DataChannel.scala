@@ -81,7 +81,7 @@ object DataChannel {
 
 /**
  * A data channel allow to transmit data between remotes task capsules within a mole.
- * Two capsules could be linked with a {@link DataChannel} if:
+ * Two capsules could be linked with a [[DataChannel]] if:
  *      - they belong to the same mole,
  *      - there is no capsule with more than one input slot in a path between
  *        the two capsules.

@@ -37,6 +37,13 @@ object Mole {
       case t: ITransition               ⇒ t → lvl
     }
 
+  /**
+   * Computes and checks the levels of capsules in a [[org.openmole.core.workflow.mole.Mole]].
+   * The root level is 0, explorations increase the level whereas aggregation decrease it.
+   *
+   * @param mole
+   * @return
+   */
   def levels(mole: Mole) = {
     val cache = mutable.HashMap(mole.root → 0)
     val toProceed = mutable.ListBuffer(mole.root → 0)
@@ -56,6 +63,14 @@ object Mole {
 
 }
 
+/**
+ * A Mole contains a [[org.openmole.core.workflow.mole.MoleCapsule]] and associates it to transitions, data channels and inputs.
+ *
+ * @param root
+ * @param transitions
+ * @param dataChannels
+ * @param inputs
+ */
 case class Mole(
   root:         MoleCapsule,
   transitions:  Iterable[ITransition] = Iterable.empty,
