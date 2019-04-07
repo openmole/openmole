@@ -21,7 +21,7 @@ import org.openmole.core.dsl._
 import org.openmole.core.workflow.builder.DefinitionScope
 import org.openmole.plugin.domain.distribution._
 import org.openmole.plugin.domain.modifier._
-import org.openmole.plugin.tool.pattern
+import org.openmole.plugin.tool.pattern._
 
 package object directsampling {
 
@@ -53,22 +53,14 @@ package object directsampling {
     implicit def defScope = scope
 
     val exploration = ExplorationTask(sampling)
-    val wrapped = pattern.wrap(evaluation, sampling.prototypes.toSeq, evaluation.outputs, wrap = wrap)
 
-    aggregation.option match {
-      case Some(aggregation) ⇒
-        val output = EmptyTask()
-
-        val p =
-          (Strain(exploration) -< wrapped when condition) >- aggregation &
-            ((exploration -- aggregation block (wrapped.outputs: _*)) -- output) &
-            (exploration -- Strain(output) block (aggregation.outputs: _*))
-
-        DSLContainer(p, output = Some(output), delegate = wrapped.delegate)
-      case None ⇒
-        val p = Strain(exploration) -< Strain(wrapped) when condition
-        DSLContainer(p, delegate = wrapped.delegate)
-    }
+    MapReduce[P](
+      evaluation = evaluation,
+      sampler = exploration,
+      condition = condition,
+      aggregation = aggregation,
+      wrap = wrap
+    )
   }
 
 }

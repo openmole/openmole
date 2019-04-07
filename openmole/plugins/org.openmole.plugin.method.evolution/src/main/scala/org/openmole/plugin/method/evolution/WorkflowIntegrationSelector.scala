@@ -2,6 +2,7 @@ package org.openmole.plugin.method.evolution
 
 import shapeless._
 import ops._
+import ops.hlist._
 
 trait WorkflowIntegrationSelector[L <: HList, U] extends DepFn1[L] with Serializable {
   type Out = U
