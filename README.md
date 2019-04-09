@@ -27,3 +27,8 @@ To checkout OpenMOLE you can play with to the [demo site](http://demo.openmole.o
   - **Advanced methods** – Advanced numerical experiments (design of experiments, optimization, calibration, sensitivity analysis, ...),
   - **Mature** – Developed since 2008, used in many real world applications and for daily production by many scientists.
 
+## OpenMOLE Avanced Features: ##
+  - **Workflow plateform** – Design scientific workflows,
+  - **Distributed genetic algorithms** - Distribute the computation of your fitness functions,
+  - **Distributed computing** - A high level aproach to distributed computing.
+
