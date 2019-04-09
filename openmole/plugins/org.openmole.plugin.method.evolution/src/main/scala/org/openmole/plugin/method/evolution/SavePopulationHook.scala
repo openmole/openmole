@@ -32,14 +32,10 @@ import org.openmole.tool.random.RandomProvider
 
 object SavePopulationHook {
 
-  def resultVariables[T](algorithm: T, context: Context)(implicit wfi: WorkflowIntegration[T], randomProvider: RandomProvider, newFile: NewFile, fileService: FileService) = {
-    val t = wfi(algorithm)
+  def resultVariables(t: EvolutionWorkflow, context: Context)(implicit randomProvider: RandomProvider, newFile: NewFile, fileService: FileService) =
     context.variable(t.generationPrototype).toSeq ++ t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype)).from(context)
-  }
 
-  def apply[T](algorithm: T, dir: FromContext[File], frequency: OptionalArgument[Long] = None)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
-    val t = wfi(algorithm)
-
+  def hook(t: EvolutionWorkflow, dir: FromContext[File], frequency: OptionalArgument[Long])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
     FromContextHook("SavePopulationHook") { p ⇒
       import p._
 
@@ -58,8 +54,8 @@ object SavePopulationHook {
 
         writeVariablesToCSV(
           resultFileLocation.from(context),
-          resultVariables(algorithm, context).map(_.prototype.array),
-          resultVariables(algorithm, context).map(_.value),
+          resultVariables(t, context).map(_.prototype.array),
+          resultVariables(t, context).map(_.value),
           overwrite = true
         )
       }
@@ -67,6 +63,11 @@ object SavePopulationHook {
       context
     } set (inputs += (t.populationPrototype, t.statePrototype))
 
+  }
+
+  def apply[T](algorithm: T, dir: FromContext[File], frequency: OptionalArgument[Long] = None)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
+    val t = wfi(algorithm)
+    hook(t, dir, frequency)
   }
 
 }
@@ -82,8 +83,8 @@ object SaveLastPopulationHook {
 
       writeVariablesToCSV(
         file.from(context),
-        SavePopulationHook.resultVariables(algorithm, context).map(_.prototype.array),
-        SavePopulationHook.resultVariables(algorithm, context).map(_.value),
+        SavePopulationHook.resultVariables(t, context).map(_.prototype.array),
+        SavePopulationHook.resultVariables(t, context).map(_.value),
         overwrite = true
       )
 

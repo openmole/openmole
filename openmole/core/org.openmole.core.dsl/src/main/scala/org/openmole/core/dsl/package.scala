@@ -21,11 +21,8 @@ package dsl {
 
   import org.openmole.core.context._
   import org.openmole.core.logconfig.LoggerConfig
-  import org.openmole.core.workspace._
   import cats._
   import org.openmole.tool.crypto.Cypher
-  import org.openmole.tool.types._
-  import squants._
   import squants.information._
 
   trait DSLPackage <: Commands
@@ -77,6 +74,20 @@ package dsl {
     }
 
     type Data = File
+  }
+
+  object extension {
+    type FromContext[T] = org.openmole.core.expansion.FromContext[T]
+    def FromContext = org.openmole.core.expansion.FromContext
+
+    type DefinitionScope = org.openmole.core.workflow.builder.DefinitionScope
+    def DefinitionScope = org.openmole.core.workflow.builder.DefinitionScope
+
+    type ScalarOrSequenceOfDouble[T] = org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble[T]
+    def ScalarOrSequenceOfDouble = org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
+
+    type Task = org.openmole.core.workflow.task.Task
+    def Task = org.openmole.core.workflow.task.Task
   }
 
 }

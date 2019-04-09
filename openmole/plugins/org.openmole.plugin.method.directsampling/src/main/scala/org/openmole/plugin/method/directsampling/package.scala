@@ -17,13 +17,28 @@
 
 package org.openmole.plugin.method
 
+import monocle.macros.Lenses
 import org.openmole.core.dsl._
-import org.openmole.core.workflow.builder.DefinitionScope
+import org.openmole.core.dsl.extension._
 import org.openmole.plugin.domain.distribution._
 import org.openmole.plugin.domain.modifier._
-import org.openmole.plugin.tool.pattern
+import org.openmole.plugin.tool.pattern._
+import org.openmole.plugin.hook.file._
 
 package object directsampling {
+
+  implicit def extension = DSLContainerExtension(DirectSamplingMethodContainer.container)
+
+  @Lenses case class DirectSamplingMethodContainer(container: DSLContainer, scope: DefinitionScope) {
+    def save(
+      file:       FromContext[File],
+      values:     Seq[Val[_]]                           = Vector.empty,
+      header:     OptionalArgument[FromContext[String]] = None,
+      arrayOnRow: Boolean                               = false) = {
+      implicit val defScope = scope
+      this hook CSVHook(file = file, values = values, header = header, arrayOnRow = arrayOnRow)
+    }
+  }
 
   def Replication[T: Distribution](
     evaluation:       DSL,
@@ -33,7 +48,7 @@ package object directsampling {
     aggregation:      OptionalArgument[DSL]  = None,
     wrap:             Boolean                = false,
     scope:            DefinitionScope        = "replication"
-  ): DSLContainer =
+  ) =
     DirectSampling(
       evaluation = evaluation,
       sampling = seed in (TakeDomain(UniformDistribution[T](distributionSeed), replications)),
@@ -42,33 +57,28 @@ package object directsampling {
       scope = scope
     )
 
-  def DirectSampling[P](
+  def DirectSampling(
     evaluation:  DSL,
     sampling:    Sampling,
     aggregation: OptionalArgument[DSL] = None,
     condition:   Condition             = Condition.True,
     wrap:        Boolean               = false,
     scope:       DefinitionScope       = "direct sampling"
-  ): DSLContainer = {
+  ) = {
     implicit def defScope = scope
 
     val exploration = ExplorationTask(sampling)
-    val wrapped = pattern.wrap(evaluation, sampling.prototypes.toSeq, evaluation.outputs, wrap = wrap)
 
-    aggregation.option match {
-      case Some(aggregation) ⇒
-        val output = EmptyTask()
+    val s =
+      MapReduce(
+        evaluation = evaluation,
+        sampler = exploration,
+        condition = condition,
+        aggregation = aggregation,
+        wrap = wrap
+      )
 
-        val p =
-          (Strain(exploration) -< wrapped when condition) >- aggregation &
-            ((exploration -- aggregation block (wrapped.outputs: _*)) -- output) &
-            (exploration -- Strain(output) block (aggregation.outputs: _*))
-
-        DSLContainer(p, output = Some(output), delegate = wrapped.delegate)
-      case None ⇒
-        val p = Strain(exploration) -< Strain(wrapped) when condition
-        DSLContainer(p, delegate = wrapped.delegate)
-    }
+    DirectSamplingMethodContainer(s, scope)
   }
 
 }

@@ -24,17 +24,16 @@ import org.openmole.core.workflow.task._
 
 object ToOffspringTask {
 
-  def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
-    val t = wfi(algorithm)
-    import t.integration.iManifest
+  def apply(evolution: EvolutionWorkflow)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
+    import evolution.integration.iManifest
 
     ClosureTask("ToOffspringTask") { (context, _, _) ⇒
-      val i = t.buildIndividual(context(t.genomePrototype), context)
-      Context(Variable(t.offspringPrototype, Array(i)))
+      val i = evolution.buildIndividual(context(evolution.genomePrototype), context)
+      Context(Variable(evolution.offspringPrototype, Array(i)))
     } set (
-      inputs += (t.objectivePrototypes: _*),
-      inputs += (t.genomePrototype, t.statePrototype),
-      outputs += (t.statePrototype, t.offspringPrototype)
+      inputs += (evolution.objectivePrototypes: _*),
+      inputs += (evolution.genomePrototype, evolution.statePrototype),
+      outputs += (evolution.statePrototype, evolution.offspringPrototype)
     )
   }
 

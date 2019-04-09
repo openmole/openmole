@@ -8,11 +8,11 @@ import org.openmole.core.workflow.task.{ ClosureTask, FromContextTask }
 object While {
 
   def apply(
-    dsl:       DSL,
-    condition: Condition
+    evaluation: DSL,
+    condition:  Condition
   )(implicit scope: DefinitionScope = "while"): DSL = {
     val last = Strain(EmptyTask())
-    (dsl -- last when !condition) & (dsl -- Slot(dsl) when condition)
+    (evaluation -- last when !condition) & (evaluation -- Slot(evaluation) when condition)
   }
 
 }

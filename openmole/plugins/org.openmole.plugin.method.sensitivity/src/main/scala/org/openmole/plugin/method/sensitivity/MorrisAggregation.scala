@@ -148,6 +148,7 @@ object MorrisAggregation {
         MorrisSampling.varFactorName.toArray,
         MorrisSampling.varDelta.toArray
       ),
+
         // we provide as outputs
         // ... our output indicators
         outputs ++= (muOutputs, muStarOutputs, sigmaOutputs)
