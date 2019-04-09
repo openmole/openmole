@@ -25,14 +25,13 @@ import org.openmole.core.workflow.builder.DefinitionScope
 
 object GenerateIslandTask {
 
-  def apply[T](algorithm: T, sample: Option[Int], size: Int, untypedOutputPopulation: Val[_])(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
-    val t = wfi(algorithm)
-    val outputPopulation = untypedOutputPopulation.asInstanceOf[Val[t.Pop]]
+  def apply(evolution: EvolutionWorkflow, sample: Option[Int], size: Int, untypedOutputPopulation: Val[_])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
+    val outputPopulation = untypedOutputPopulation.asInstanceOf[Val[evolution.Pop]]
 
     ClosureTask("GenerateIslandTask") { (context, rng, _) ⇒
-      val p = context(t.populationPrototype)
+      val p = context(evolution.populationPrototype)
 
-      import t.integration.iManifest
+      import evolution.integration.iManifest
 
       def samples =
         if (p.isEmpty) Vector.empty
@@ -41,10 +40,10 @@ object GenerateIslandTask {
           case None    ⇒ p.toVector
         }
 
-      def populations = Array.fill(size)(t.operations.migrateToIsland(samples).toArray)
+      def populations = Array.fill(size)(evolution.operations.migrateToIsland(samples).toArray)
       Variable(outputPopulation.toArray, populations)
     } set (
-      inputs += t.populationPrototype,
+      inputs += evolution.populationPrototype,
       exploredOutputs += outputPopulation.toArray
     )
   }

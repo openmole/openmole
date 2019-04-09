@@ -30,8 +30,8 @@ import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
 /**
-  * Methods to parse code strings
-  */
+ * Methods to parse code strings
+ */
 object ExpandedString {
 
   implicit def fromStringToVariableExpansion(s: String) = ExpandedString(s)
@@ -103,8 +103,8 @@ object ExpandedString {
   }
 
   /**
-    * An ExpandedElement distinguishes between value strings and code strings
-    */
+   * An ExpandedElement distinguishes between value strings and code strings
+   */
   object ExpandedElement {
     def apply(code: String): ExpansionElement = {
       if (code.isEmpty) ValueElement(code)

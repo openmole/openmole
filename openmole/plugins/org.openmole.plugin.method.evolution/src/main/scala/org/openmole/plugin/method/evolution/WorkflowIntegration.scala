@@ -163,6 +163,10 @@ object WorkflowIntegration {
     def toEvolutionWorkflow(a: StochasticGA[_]): EvolutionWorkflow = WorkflowIntegration.stochasticGAIntegration(a)
   }
 
+  def apply[T](f: T ⇒ EvolutionWorkflow) = new WorkflowIntegration[T] {
+    def apply(t: T) = f(t)
+  }
+
 }
 
 trait WorkflowIntegration[T] {

@@ -261,6 +261,18 @@ package composition {
       val delegate = container.delegate.map { t ⇒ TaskNode(t, environment = container.environment, grouping = container.grouping) }
       delegate ++ output
     }
+
+    trait Extension[T] {
+      def lens: monocle.Lens[T, DSLContainer]
+    }
+
+    case class Extended[T](t: T)(implicit extension: Extension[T]) {
+      def on(environment: EnvironmentProvider) = extension.lens.modify(_.on(environment))(t)
+      def by(strategy: Grouping) = extension.lens.modify(_.by(strategy))(t)
+      def hook(hooks: Hook*) = extension.lens.modify(_.hook(hooks: _*))(t)
+    }
+
+    implicit def toDSLContainer[T: Extension](t: T) = implicitly[Extension[T]].lens.get(t)
   }
 
   case class DSLContainer(
@@ -299,6 +311,11 @@ package composition {
         grouping,
         hooks
       )
+
+    def DSLContainerExtension[T](l: monocle.Lens[T, DSLContainer]): composition.DSLContainer.Extension[T] =
+      new composition.DSLContainer.Extension[T] {
+        def lens = l
+      }
 
     type DSLContainer = composition.DSLContainer
     def Slot(dsl: DSL) = composition.Slot(dsl)
@@ -417,9 +434,14 @@ package composition {
     object DSLSelector {
       def apply[L <: HList](implicit selector: DSLSelector[L]): DSLSelector[L] = selector
 
-      implicit def select[T <: HList]: DSLSelector[DSL :: T] =
+      implicit def select1[T <: HList]: DSLSelector[DSL :: T] =
         new DSLSelector[DSL :: T] {
           def apply(l: DSL :: T) = l.head
+        }
+
+      implicit def select2[T <: HList, D: composition.DSLContainer.Extension]: DSLSelector[D :: T] =
+        new DSLSelector[D :: T] {
+          def apply(l: D :: T) = implicitly[composition.DSLContainer.Extension[D]].lens.get(l.head)
         }
 
       implicit def recurse[H, T <: HList](implicit st: DSLSelector[T]): DSLSelector[H :: T] =
@@ -486,7 +508,8 @@ package composition {
       implicit def dslToDSL = ToDSL[DSL](identity)
       implicit def taskToTransitionDSL = ToDSL[Task](t ⇒ TaskNodeDSL(TaskNode(t)))
       implicit def taskInNodeToTransitionDSL = ToDSL[TaskNode](t ⇒ TaskNodeDSL(t))
-      implicit def transitionDSLSelectorToTransitionDSL[HL <: HList](implicit transitionDSLSelector: DSLSelector[HL]) = ToDSL[HL](t ⇒ transitionDSLSelector(t))
+      implicit def dslExtensionToDSL[T](implicit ext: composition.DSLContainer.Extension[T]) = ToDSL(ext.lens.get)
+      implicit def transitionDSLSelectorToTransitionDSL[HL <: HList](implicit dslSelector: DSLSelector[HL]) = ToDSL[HL](t ⇒ dslSelector(t))
     }
 
     trait ToDSL[-T] {
@@ -526,6 +549,8 @@ package composition {
     implicit def toOptionalDSL[T: ToDSL](t: T) = OptionalArgument(Some(toDSL(t)))
     implicit def toMole[T: ToMole](t: T) = implicitly[ToMole[T]].apply(t)
     implicit def toMoleExecution[T: ToMoleExecution](t: T) = implicitly[ToMoleExecution[T]].apply(t)
+
+    implicit def dslContainerExtension[T: composition.DSLContainer.Extension](t: T) = composition.DSLContainer.Extended(t)
 
     implicit class DSLDecorator(t1: DSL) {
       def &(t2: DSL) = new &(t1, t2)

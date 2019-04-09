@@ -18,18 +18,16 @@
 
 package org.openmole.plugin.method
 
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.workflow.builder.DefinitionScope
-import org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
-import org.openmole.core.workflow.validation.DataflowProblem._
-import org.openmole.core.workflow.validation._
-import org.openmole.core.workflow.transition.TransitionSlot
+import monocle.macros.Lenses
 import org.openmole.core.dsl
 import org.openmole.core.dsl._
-import org.openmole.plugin.method.directsampling._
+import org.openmole.core.dsl.extension._
+import org.openmole.plugin.hook.file.CSVHook
+import org.openmole.plugin.tool.pattern._
 
 package object sensitivity {
+
+  implicit def extension = DSLContainerExtension(Sensitivity.MethodContainer.container)
 
   object Sensitivity {
     /**
@@ -63,7 +61,22 @@ package object sensitivity {
         i ← ScalarOrSequenceOfDouble.prototypes(modelInputs)
         o ← modelOutputs
       } yield (i, o)
+
+
+
+    @Lenses case class MethodContainer(container: DSLContainer, scope: DefinitionScope, outputs: Seq[Val[_]]) {
+      def save(
+        file:       FromContext[File],
+        values:     Seq[Val[_]]                           = Vector.empty,
+        header:     OptionalArgument[FromContext[String]] = None,
+        arrayOnRow: Boolean                               = false) = {
+        implicit val defScope = scope
+        this hook CSVHook(file = file, values = outputs ++ values, header = header, arrayOnRow = arrayOnRow)
+      }
+    }
+
   }
+
   /**
    * A Morris Sensitivity Analysis takes a puzzle (a model) that we want to analyse,
    * the list of the inputs (and their ranges), the list of outputs we want
@@ -92,12 +105,20 @@ package object sensitivity {
     // to interpret the results
     val aggregation = MorrisAggregation(inputs, outputs)
 
-    DirectSampling(
-      evaluation = evaluation,
-      sampling = sampling,
-      aggregation = aggregation,
-      scope = scope
-    )
+
+    val w =
+      MapReduce(
+        evaluation = evaluation,
+        sampler = ExplorationTask(sampling),
+        aggregation = aggregation
+      )
+
+    val sensitivityOutput =
+      Sensitivity.outputs(inputs, outputs).map { case (i, o) ⇒ Morris.mu(i, o) } ++
+      Sensitivity.outputs(inputs, outputs).map { case (i, o) ⇒ Morris.muStar(i, o) } ++
+      Sensitivity.outputs(inputs, outputs).map { case (i, o) ⇒ Morris.sigma(i, o) }
+
+    Sensitivity.MethodContainer(w, scope, sensitivityOutput)
   }
 
   def SensitivitySaltelli(
@@ -119,12 +140,18 @@ package object sensitivity {
         dsl.inputs += (SaltelliSampling.matrixName.array, SaltelliSampling.matrixIndex.array)
       )
 
-    DirectSampling(
-      evaluation = evaluation,
-      sampling = sampling,
-      aggregation = aggregation,
-      scope = scope
-    )
+    val w =
+      MapReduce(
+        evaluation = evaluation,
+        sampler = ExplorationTask(sampling),
+        aggregation = aggregation
+      )
+
+    val sensitivityOutputs =
+      Sensitivity.outputs(inputs, outputs).map { case (i, o) ⇒ Saltelli.firstOrder(i, o) } ++
+      Sensitivity.outputs(inputs, outputs).map { case (i, o) ⇒ Saltelli.totalOrder(i, o) }
+
+    Sensitivity.MethodContainer(w, scope, sensitivityOutputs)
   }
 
 }
