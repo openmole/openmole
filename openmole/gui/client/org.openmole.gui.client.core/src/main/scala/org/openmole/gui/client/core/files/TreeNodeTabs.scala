@@ -20,7 +20,7 @@ import org.openmole.gui.ext.tool.client.FileManager
 import DataUtils._
 import net.scalapro.sortable._
 import org.openmole.gui.client.core.files.TreeNodeTab.{ClosureFilter, EditableView, First100, IndexedAxis, Raw, RowFilter}
-import org.openmole.gui.client.tool.plot
+import org.openmole.gui.client.tool.{OMTags, plot}
 import org.openmole.gui.client.tool.plot.Plot._
 import org.openmole.gui.client.tool.plot._
 import scaladget.bootstrapnative.{DataTable, ToggleButton}
@@ -146,6 +146,7 @@ object TreeNodeTab {
 
     lazy val controlElement = {
       val compileDisabled = Var(false)
+      val runOption = Var(false)
 
       def unsetErrors = setErrors(Seq())
 
@@ -165,12 +166,13 @@ object TreeNodeTab {
           case _ =>
         }
       }
+      lazy val validateButton = toggle(true, "Yes", "No")
 
       div(display.flex, flexDirection.row)(
         Rx {
           if (compileDisabled()) Waiter.waiter
           else
-            button("Test", btn_default, marginLeft := 30, onclick := { () ⇒
+            button("Test", btn_default, onclick := { () ⇒
               unsetErrors
               compileDisabled.update(true)
               refresh(() =>
@@ -179,13 +181,22 @@ object TreeNodeTab {
                 })
             })
         },
-        button("Run", btn_primary, marginLeft := 10, onclick := { () ⇒
-          unsetErrors
-          refresh(() ⇒
-            post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePathTab.now), true).call().foreach { execInfo ⇒
-              org.openmole.gui.client.core.panels.executionPanel.dialog.show
-            })
-        })
+        div(display.flex, flexDirection.row)(
+          button("Run", btn_primary, marginLeft := 10, onclick := { () ⇒
+            unsetErrors
+            refresh(() ⇒
+              post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePathTab.now), validateButton.position.now).call().foreach { execInfo ⇒
+                org.openmole.gui.client.core.panels.executionPanel.dialog.show
+              })
+          }),
+          Rx {
+            if (runOption()) div(display.flex, flexDirection.row)(
+              div("Script validation", giFontFamily, fontSize:="13px", marginLeft := 10, display.flex, alignItems.center),
+              validateButton.render(border := "1px solid black", marginLeft := 10),
+              button(ms("close closeRunOptions") +++ tabClose :+ (paddingBottom := 8) , `type` := "button", onclick := { () ⇒ runOption.update(false)})(raw("&#215")))
+            else div(OMTags.options, pointer, marginLeft := 10, display.flex, alignItems.center)(onclick := {()=> runOption.update(true)})
+          }
+        )
       )
     }
 

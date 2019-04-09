@@ -69,19 +69,19 @@ trait LowPriorityFromContext {
   def contextConverter[F, T](f: F)(implicit tfc: ToFromContext[F, T]): FromContext[T] = tfc(f)
 
   /**
-    * implicit converter of a value to a FromContext (using implicit [[LowPriorityToFromContext]])
-    * @param t
-    * @tparam T
-    * @return
-    */
+   * implicit converter of a value to a FromContext (using implicit [[LowPriorityToFromContext]])
+   * @param t
+   * @tparam T
+   * @return
+   */
   implicit def fromTToContext[T](t: T): FromContext[T] = contextConverter(t)
 }
 
 object FromContext extends LowPriorityFromContext {
 
   /**
-    * A [[FromContext]] can be seen as a monad
-    */
+   * A [[FromContext]] can be seen as a monad
+   */
   object asMonad {
     implicit val monad: Monad[FromContext] = new Monad[FromContext] {
       def tailRecM[A, B](a: A)(f: A ⇒ FromContext[Either[A, B]]): FromContext[B] = {
@@ -109,8 +109,8 @@ object FromContext extends LowPriorityFromContext {
   }
 
   /**
-    * Implicitly define an Applicative on FromContext
-    */
+   * Implicitly define an Applicative on FromContext
+   */
   implicit val applicative: Applicative[FromContext] = new Applicative[FromContext] {
     override def pure[A](x: A): FromContext[A] = FromContext.value(x)
     override def ap[A, B](ff: FromContext[(A) ⇒ B])(fa: FromContext[A]): FromContext[B] =
@@ -126,12 +126,12 @@ object FromContext extends LowPriorityFromContext {
   }
 
   /**
-    * Convert scala code to a FromContext (code is compiled by [[ScalaCompilation]])
-    *
-    * @param code
-    * @tparam T
-    * @return
-    */
+   * Convert scala code to a FromContext (code is compiled by [[ScalaCompilation]])
+   *
+   * @param code
+   * @tparam T
+   * @return
+   */
   def codeToFromContext[T: Manifest](code: String): FromContext[T] =
     new FromContext[T] {
       val proxy = Cache(ScalaCompilation.dynamic[T](code))
@@ -157,11 +157,11 @@ object FromContext extends LowPriorityFromContext {
   implicit def prototypeIsFromContext[T](p: Val[T]) = contextConverter[Val[T], T](p)
 
   /**
-    * FromContext for a given prototype
-    * @param p
-    * @tparam T
-    * @return
-    */
+   * FromContext for a given prototype
+   * @param p
+   * @tparam T
+   * @return
+   */
   def prototype[T](p: Val[T]) =
     new FromContext[T] {
       override def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService) = context(p)
@@ -171,11 +171,11 @@ object FromContext extends LowPriorityFromContext {
     }
 
   /**
-    * From context for a given value
-    * @param t
-    * @tparam T
-    * @return
-    */
+   * From context for a given value
+   * @param t
+   * @tparam T
+   * @return
+   */
   def value[T](t: T): FromContext[T] =
     new FromContext[T] {
       def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): T = t
@@ -183,20 +183,20 @@ object FromContext extends LowPriorityFromContext {
     }
 
   /**
-    * Parameters wrap a Context and implicit services
-    * @param context
-    * @param random
-    * @param newFile
-    * @param fileService
-    */
+   * Parameters wrap a Context and implicit services
+   * @param context
+   * @param random
+   * @param newFile
+   * @param fileService
+   */
   case class Parameters(context: Context, implicit val random: RandomProvider, implicit val newFile: NewFile, implicit val fileService: FileService)
 
   /**
-    * Construct a FromContext from a function of [[Parameters]]
-    * @param f
-    * @tparam T
-    * @return
-    */
+   * Construct a FromContext from a function of [[Parameters]]
+   * @param f
+   * @tparam T
+   * @return
+   */
   def apply[T](f: Parameters ⇒ T): FromContext[T] =
     new FromContext[T] {
       def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService) = f(Parameters(context, rng, newFile, fileService))
@@ -204,12 +204,12 @@ object FromContext extends LowPriorityFromContext {
     }
 
   /**
-    * Construct a FromContext from a function of [[Parameters]], with an additional list of FromContext which must be validated on inputs
-    * @param validated
-    * @param f
-    * @tparam T
-    * @return
-    */
+   * Construct a FromContext from a function of [[Parameters]], with an additional list of FromContext which must be validated on inputs
+   * @param validated
+   * @param f
+   * @tparam T
+   * @return
+   */
   def withValidation[T](validated: FromContext[_]*)(f: Parameters ⇒ T) =
     new FromContext[T] {
       def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService) = f(Parameters(context, rng, newFile, fileService))
@@ -217,9 +217,9 @@ object FromContext extends LowPriorityFromContext {
     }
 
   /**
-    * Operators for boolean FromContext ([[Condition]] ~ FromContext[Boolean])
-    * @param f
-    */
+   * Operators for boolean FromContext ([[Condition]] ~ FromContext[Boolean])
+   * @param f
+   */
   implicit class ConditionDecorator(f: Condition) {
     def unary_! = f.map(v ⇒ !v)
 

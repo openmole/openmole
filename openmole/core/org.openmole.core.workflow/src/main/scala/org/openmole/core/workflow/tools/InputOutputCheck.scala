@@ -26,25 +26,25 @@ import org.openmole.core.workspace.NewFile
 import org.openmole.tool.random._
 
 /**
-  * Methods for the validation of inputs/outputs
-  */
+ * Methods for the validation of inputs/outputs
+ */
 object InputOutputCheck {
 
   trait InputError
 
   /**
-    * Missing input
-    * @param input
-    */
+   * Missing input
+   * @param input
+   */
   case class InputNotFound(input: Val[_]) extends InputError {
     override def toString = s"Input data '$input' has not been found"
   }
 
   /**
-    * Wrong type for an input
-    * @param input
-    * @param found
-    */
+   * Wrong type for an input
+   * @param input
+   * @param found
+   */
   case class InputTypeMismatch(input: Val[_], found: Val[_]) extends InputError {
     override def toString = s"Input data named '$found' is of an incompatible with the required '$input'"
   }
@@ -52,18 +52,18 @@ object InputOutputCheck {
   trait OutputError
 
   /**
-    * Missing output
-    * @param output
-    */
+   * Missing output
+   * @param output
+   */
   case class OutputNotFound(output: Val[_]) extends OutputError {
     override def toString = s"Output data '$output' has not been found"
   }
 
   /**
-    * Wrong type for an output
-    * @param output
-    * @param variable
-    */
+   * Wrong type for an output
+   * @param output
+   * @param variable
+   */
   case class OutputTypeMismatch(output: Val[_], variable: Variable[_]) extends OutputError {
     override def toString = s"""Type mismatch the content of the output value '${output.name}' of type '${variable.value.getClass}' is incompatible with the output variable '${output}'."""
   }
@@ -89,22 +89,22 @@ object InputOutputCheck {
     }
 
   /**
-    * Given a prototype set and a context, construct a [[Context]] with these prototypes only
-    *
-    * @param outputs
-    * @param context
-    * @return
-    */
+   * Given a prototype set and a context, construct a [[Context]] with these prototypes only
+   *
+   * @param outputs
+   * @param context
+   * @return
+   */
   def filterOutput(outputs: PrototypeSet, context: Context): Context =
     Context(outputs.toList.flatMap(o ⇒ context.variable(o): Option[Variable[_]]): _*)
 
   /**
-    * Extend a context with default values (taken into account if overriding is activated or variable is missing in previous context)
-    *
-    * @param defaults default value
-    * @param context context to be extended
-    * @return the new context
-    */
+   * Extend a context with default values (taken into account if overriding is activated or variable is missing in previous context)
+   *
+   * @param defaults default value
+   * @param context context to be extended
+   * @return the new context
+   */
   def initializeInput(defaults: DefaultSet, context: Context)(implicit randomProvider: RandomProvider, newFile: NewFile, fileService: FileService): Context =
     context ++
       defaults.flatMap {
