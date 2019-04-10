@@ -19,19 +19,19 @@ import org.openmole.core.networkservice._
 package object services {
 
   /**
-    * Methods to get implicit services (workspace, files, random provider, network, etc.)
-    */
+   * Methods to get implicit services (workspace, files, random provider, network, etc.)
+   */
   object Services {
 
     /**
-      * Execute a function with services provided
-      * @param workspace
-      * @param password
-      * @param httpProxy
-      * @param f
-      * @tparam T
-      * @return
-      */
+     * Execute a function with services provided
+     * @param workspace
+     * @param password
+     * @param httpProxy
+     * @param f
+     * @tparam T
+     * @return
+     */
     def withServices[T](workspace: File, password: String, httpProxy: Option[String])(f: Services ⇒ T) = {
       val services = Services(workspace, password, httpProxy)
       try f(services)
@@ -42,15 +42,15 @@ package object services {
     def authenticationStore(workspace: Workspace) = AuthenticationStore(workspace.persistentDir)
 
     /**
-      * Construct Service from user modifiable options
-      *
-      *  -> this method can be extended to add user defined services (e.g. change output redirection at this level ?)
-      *
-      * @param workspace workspace path
-      * @param password password to be encrypted
-      * @param httpProxy optional http proxy
-      * @return
-      */
+     * Construct Service from user modifiable options
+     *
+     *  -> this method can be extended to add user defined services (e.g. change output redirection at this level ?)
+     *
+     * @param workspace workspace path
+     * @param password password to be encrypted
+     * @param httpProxy optional http proxy
+     * @return
+     */
     def apply(workspace: File, password: String, httpProxy: Option[String]) = {
       implicit val ws = Workspace(workspace)
       implicit val cypher = Cypher(password)
@@ -72,20 +72,20 @@ package object services {
     }
 
     /**
-      * Dispose of services (deleted tmp directories ; stop the thread provider)
-      * @param services
-      * @return
-      */
+     * Dispose of services (deleted tmp directories ; stop the thread provider)
+     * @param services
+     * @return
+     */
     def dispose(services: Services) = {
       util.Try(services.workspace.tmpDir.recursiveDelete)
       util.Try(services.threadProvider.stop())
     }
 
     /**
-      * reset user password
-      * @param authenticationStore
-      * @param preference
-      */
+     * reset user password
+     * @param authenticationStore
+     * @param preference
+     */
     def resetPassword(implicit authenticationStore: AuthenticationStore, preference: Preference) = {
       authenticationStore.delete()
       preference.clear()
@@ -129,8 +129,8 @@ package object services {
   }
 
   /**
-    * Trait for services
-    */
+   * Trait for services
+   */
   trait Services {
     implicit def workspace: Workspace
     implicit def preference: Preference
@@ -150,23 +150,23 @@ package object services {
   }
 
   /**
-    * A container for services, constructed with implicit arguments
-    * @param workspace workspace
-    * @param preference user preferences
-    * @param cypher encrypter for password
-    * @param threadProvider
-    * @param seeder provides seed for rng
-    * @param replicaCatalog replica database manager
-    * @param newFile new files/dirs and tmp files / dir in a given directory
-    * @param authenticationStore
-    * @param serializerService serializer
-    * @param fileService file management
-    * @param randomProvider rng
-    * @param eventDispatcher
-    * @param outputRedirection
-    * @param networkService network properties (proxies)
-    * @param fileServiceCache
-    */
+   * A container for services, constructed with implicit arguments
+   * @param workspace workspace
+   * @param preference user preferences
+   * @param cypher encrypter for password
+   * @param threadProvider
+   * @param seeder provides seed for rng
+   * @param replicaCatalog replica database manager
+   * @param newFile new files/dirs and tmp files / dir in a given directory
+   * @param authenticationStore
+   * @param serializerService serializer
+   * @param fileService file management
+   * @param randomProvider rng
+   * @param eventDispatcher
+   * @param outputRedirection
+   * @param networkService network properties (proxies)
+   * @param fileServiceCache
+   */
   class ServicesContainer(implicit
     val workspace: Workspace,
                           val preference:          Preference,
