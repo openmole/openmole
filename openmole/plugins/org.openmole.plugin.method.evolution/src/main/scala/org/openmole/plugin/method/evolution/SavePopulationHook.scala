@@ -27,6 +27,7 @@ import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace.NewFile
+import org.openmole.plugin.method.evolution.SavePopulationHook.resultVariables
 import org.openmole.tool.file._
 import org.openmole.tool.random.RandomProvider
 
@@ -52,10 +53,13 @@ object SavePopulationHook {
 
         import org.openmole.plugin.tool.csv._
 
+        val values = resultVariables(t, context).map(_.value)
+        def headerLine = header(resultVariables(t, context).map(_.prototype.array), values)
+
         writeVariablesToCSV(
           resultFileLocation.from(context),
-          resultVariables(t, context).map(_.prototype.array),
-          resultVariables(t, context).map(_.value),
+          headerLine,
+          values,
           overwrite = true
         )
       }
@@ -81,10 +85,13 @@ object SaveLastPopulationHook {
       import p._
       import org.openmole.plugin.tool.csv._
 
+      val values = resultVariables(t, context).map(_.value)
+      def headerLine = header(resultVariables(t, context).map(_.prototype.array), values)
+
       writeVariablesToCSV(
         file.from(context),
-        SavePopulationHook.resultVariables(t, context).map(_.prototype.array),
-        SavePopulationHook.resultVariables(t, context).map(_.value),
+        headerLine,
+        values,
         overwrite = true
       )
 

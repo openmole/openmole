@@ -88,6 +88,8 @@ package dsl {
 
     type Task = org.openmole.core.workflow.task.Task
     def Task = org.openmole.core.workflow.task.Task
+
+    def Hook = org.openmole.core.workflow.mole.Hook
   }
 
 }

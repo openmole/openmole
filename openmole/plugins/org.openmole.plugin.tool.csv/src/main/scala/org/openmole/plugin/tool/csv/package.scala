@@ -58,42 +58,44 @@ package object csv extends CSVPackage {
   import org.openmole.tool.stream._
   import org.openmole.core.tools.io.Prettifier._
 
+  def moreThanOneElement(l: List[_]) = !l.isEmpty && !l.tail.isEmpty
+
+  def dataToLists(values: Seq[Any]) =
+    values.map {
+      case v: Array[_] ⇒ v.toList
+      case l: List[_]  ⇒ l
+      case v           ⇒ List(v)
+    }.toList
+
+  def header(prototypes: Seq[Val[_]], values: Seq[Any], arraysOnSingleRow: Boolean = false) = {
+    val lists =
+      values.map {
+        case v: Array[_] ⇒ v.toList
+        case l: List[_]  ⇒ l
+        case v           ⇒ List(v)
+      }.toList
+
+    (prototypes zip lists).flatMap {
+      case (p, l) ⇒
+        if (arraysOnSingleRow && moreThanOneElement(l))
+          (0 until l.size).map(i ⇒ s"${p.name}$i")
+        else List(p.name)
+    }.mkString(",")
+  }
+
   def writeVariablesToCSV(
     file:              File,
-    prototypes:        Seq[Val[_]],
+    header:            ⇒ String,
     values:            Seq[Any],
-    arraysOnSingleRow: Boolean        = false,
-    header:            Option[String] = None,
-    overwrite:         Boolean        = false): Unit = {
+    arraysOnSingleRow: Boolean  = false,
+    overwrite:         Boolean  = false): Unit = {
 
     file.createParentDir
 
     file.withLock {
       fos ⇒
-
         if (overwrite) file.content = ""
-
-        val lists =
-          values.map {
-            case v: Array[_] ⇒ v.toList
-            case l: List[_]  ⇒ l
-            case v           ⇒ List(v)
-          }.toList
-
-        if (file.size == 0)
-          fos.appendLine {
-            def defaultHeader =
-              (prototypes zip lists).flatMap {
-                case (p, l) ⇒
-                  if (arraysOnSingleRow && moreThanOneElement(l))
-                    (0 until l.size).map(i ⇒ s"${p.name}$i")
-                  else List(p.name)
-              }.mkString(",")
-
-            header getOrElse defaultHeader
-          }
-
-        def moreThanOneElement(l: List[_]) = !l.isEmpty && !l.tail.isEmpty
+        if (file.size == 0) fos.appendLine { header }
 
         def flatAny(o: Any): List[Any] = o match {
           case o: List[_] ⇒ o
@@ -117,7 +119,7 @@ package object csv extends CSVPackage {
           }).mkString(","))
         }
 
-        write(lists)
+        write(dataToLists(values))
     }
   }
 
