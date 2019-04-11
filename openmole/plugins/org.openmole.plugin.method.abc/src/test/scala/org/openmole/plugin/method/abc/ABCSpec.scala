@@ -42,7 +42,7 @@ class ABCSpec extends FlatSpec with Matchers {
 
     abc run()
   }
-  
+
 
   "abc island" should "run" in {
     val x1 = Val[Double]
