@@ -1,11 +1,10 @@
 package org.openmole.plugin.method.abc
 
 import mgo.abc.MonAPMC
-import org.openmole.core.expansion._
 import org.openmole.core.dsl._
-import org.openmole.core.workflow.builder.DefinitionScope
-import org.openmole.core.workflow.mole.FromContextHook
-import shapeless.{ HList, HNil }
+import org.openmole.core.dsl.extension._
+
+import shapeless.{ HList }
 import shapeless.ops.hlist.Selector
 
 object ABCHook {
@@ -14,7 +13,7 @@ object ABCHook {
 
     val parameters = parametersExtractor(algorithm)
 
-    FromContextHook("ABCHook") { p ⇒
+    Hook("ABCHook") { p ⇒
       import p._
       import org.openmole.plugin.tool.csv._
 
@@ -25,7 +24,7 @@ object ABCHook {
 
           val step = context(parameters.step)
 
-          val filePath = dir / ExpandedString("step${" + step + "}.csv")
+          val filePath = dir / s"step${step}.csv"
           val file = filePath.from(context)
 
           val size = s.thetas.size
