@@ -8,10 +8,11 @@ import monocle.macros.Lenses
 
 package object abc {
 
-  implicit def saltelliExtension = DSLContainerExtension(ABC.ABCContainer.container)
+  implicit def abcContainerExtension = DSLContainerExtension(ABC.ABCContainer.container)
 
   object ABC {
     val abcNamespace = Namespace("abc")
+    val state = Val[MonAPMC.MonState]("state", abcNamespace)
 
     case class Prior(v: Val[Double], low: FromContext[Double], high: FromContext[Double])
     case class Observed(v: Val[Double], observed: Double)
@@ -25,11 +26,10 @@ package object abc {
       observed:         Seq[Observed],
       sample:           Int,
       generated:        Int,
-      minAcceptedRatio: Double                = 0.01,
-      termination:      OptionalArgument[Int] = None,
-      scope:            DefinitionScope       = "abc") = {
+      minAcceptedRatio: OptionalArgument[Double] = 0.01,
+      termination:      OptionalArgument[Int]    = None,
+      scope:            DefinitionScope          = "abc") = {
       implicit def defScope = scope
-      val state = Val[MonAPMC.MonState]("state", abcNamespace)
       val stepState = Val[MonAPMC.StepState]("stepState", abcNamespace)
       val step = Val[Int]("step", abcNamespace)
 
@@ -57,6 +57,57 @@ package object abc {
       ABCContainer(DSLContainer(loop, output = Some(postStepTask), delegate = mapReduce.delegate), ABCParameters(state, step))
     }
 
+  }
+
+  import ABC._
+
+  def IslandABC(
+    evaluation:       DSL,
+    prior:            Seq[Prior],
+    observed:         Seq[Observed],
+    sample:           Int,
+    generated:        Int,
+    parallelism:      Int,
+    islandGenerated:  Int                   = 1,
+    minAcceptedRatio: Double                = 0.01,
+    termination:      OptionalArgument[Int] = None,
+    scope:            DefinitionScope       = "abc island"
+  ) = {
+    implicit def defScope = scope
+
+    val masterState = Val[MonAPMC.MonState]("masterState", abcNamespace)
+    val step = Val[Int]("step", abcNamespace)
+    val stop = Val[Boolean]
+
+    val n = sample + generated
+    val nAlpha = sample
+
+    val appendSplit = AppendSplitTask(n, nAlpha, masterState, state, step)
+    val terminationTask = IslandTerminationTask(minAcceptedRatio, state, step, termination, stop)
+    val master = appendSplit -- terminationTask
+
+    val slave =
+      MoleTask(
+        apply(
+          evaluation = evaluation,
+          prior = prior,
+          observed = observed,
+          sample = sample,
+          generated = islandGenerated,
+          minAcceptedRatio = None
+        )
+      )
+
+    val masterSlave = MasterSlave(
+      SplitTask(state, masterState, parallelism),
+      master = MoleTask(master),
+      slave = slave,
+      state = Seq(masterState, step),
+      slaves = parallelism,
+      stop = stop
+    )
+
+    ABCContainer(DSLContainer(masterSlave, output = Some(appendSplit), delegate = Vector(slave)), ABCParameters(masterState, step))
   }
 
 }
