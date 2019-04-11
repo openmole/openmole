@@ -4,25 +4,17 @@ import mgo.abc.MonAPMC
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
-import shapeless.{ HList }
-import shapeless.ops.hlist.Selector
-
 object ABCHook {
 
-  def apply[T <: HList](algorithm: T, dir: FromContext[File], frequency: OptionalArgument[Long] = None)(implicit parametersExtractor: Selector[T, ABCParameters], name: sourcecode.Name, definitionScope: DefinitionScope) = {
-
-    val parameters = parametersExtractor(algorithm)
-
+  def apply(abc: ABC.ABCContainer, dir: FromContext[File], frequency: OptionalArgument[Long] = None)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     Hook("ABCHook") { p ⇒
       import p._
       import org.openmole.plugin.tool.csv._
 
-      context(parameters.state) match {
+      context(abc.parameters.state) match {
         case MonAPMC.Empty() ⇒ ()
-
-        case MonAPMC.State(t0, s) ⇒
-
-          val step = context(parameters.step)
+        case MonAPMC.State(_, s) ⇒
+          val step = context(abc.parameters.step)
 
           val filePath = dir / s"step${step}.csv"
           val file = filePath.from(context)
@@ -68,7 +60,5 @@ object ABCHook {
 
       context
     }
-
-  }
 
 }

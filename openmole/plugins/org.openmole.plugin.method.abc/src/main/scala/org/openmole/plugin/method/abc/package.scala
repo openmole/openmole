@@ -1,61 +1,62 @@
 package org.openmole.plugin.method
 
-import org.openmole.core.context.{ Context, Namespace }
 import org.openmole.core.dsl._
-import org.openmole.core.expansion._
+import org.openmole.core.dsl.extension._
 import org.openmole.plugin.tool.pattern._
 import mgo.abc._
-import org.openmole.core.workflow.builder.DefinitionScope
-import org.openmole.core.expansion.Condition
-import shapeless._
+import monocle.macros.Lenses
 
 package object abc {
 
-  val abcNamespace = Namespace("abc")
+  implicit def saltelliExtension = DSLContainerExtension(ABC.ABCContainer.container)
 
-  case class ABCPrior(v: Val[Double], low: FromContext[Double], high: FromContext[Double])
-  case class ABCObserved(v: Val[Double], observed: Double)
+  object ABC {
+    val abcNamespace = Namespace("abc")
 
-  case class ABCParameters(
-    state: Val[MonAPMC.MonState],
-    step:  Val[Int])
+    case class Prior(v: Val[Double], low: FromContext[Double], high: FromContext[Double])
+    case class Observed(v: Val[Double], observed: Double)
+    case class ABCParameters(state: Val[MonAPMC.MonState], step: Val[Int])
 
-  def ABC(
-    evaluation:       DSL,
-    prior:            Seq[ABCPrior],
-    observed:         Seq[ABCObserved],
-    sample:           Int,
-    generated:        Int,
-    minAcceptedRatio: Double                = 0.01,
-    termination:      OptionalArgument[Int] = None,
-    scope:            DefinitionScope       = "abc") = {
-    implicit def defScope = scope
-    val state = Val[MonAPMC.MonState]("state", abcNamespace)
-    val stepState = Val[MonAPMC.StepState]("stepState", abcNamespace)
-    val step = Val[Int]("step", abcNamespace)
+    @Lenses case class ABCContainer(container: DSLContainer, parameters: ABCParameters)
 
-    val stop = Val[Boolean]
+    def apply(
+      evaluation:       DSL,
+      prior:            Seq[Prior],
+      observed:         Seq[Observed],
+      sample:           Int,
+      generated:        Int,
+      minAcceptedRatio: Double                = 0.01,
+      termination:      OptionalArgument[Int] = None,
+      scope:            DefinitionScope       = "abc") = {
+      implicit def defScope = scope
+      val state = Val[MonAPMC.MonState]("state", abcNamespace)
+      val stepState = Val[MonAPMC.StepState]("stepState", abcNamespace)
+      val step = Val[Int]("step", abcNamespace)
 
-    val n = sample + generated
-    val nAlpha = sample
+      val stop = Val[Boolean]
 
-    val preStepTask = PreStepTask(n, nAlpha, prior, state, stepState, step)
-    val postStepTask = PostStepTask(n, nAlpha, prior, observed, state, stepState, minAcceptedRatio, termination, stop, step)
+      val n = sample + generated
+      val nAlpha = sample
 
-    val mapReduce =
-      MapReduce(
-        sampler = preStepTask,
-        evaluation = evaluation,
-        aggregation = postStepTask
-      )
+      val preStepTask = PreStepTask(n, nAlpha, prior, state, stepState, step)
+      val postStepTask = PostStepTask(n, nAlpha, prior, observed, state, stepState, minAcceptedRatio, termination, stop, step)
 
-    val loop =
-      While(
-        evaluation = mapReduce,
-        condition = !(stop: Condition)
-      )
+      val mapReduce =
+        MapReduce(
+          sampler = preStepTask,
+          evaluation = evaluation,
+          aggregation = postStepTask
+        )
 
-    DSLContainer(loop, output = Some(postStepTask), delegate = mapReduce.delegate) :: ABCParameters(state, step) :: HNil
+      val loop =
+        While(
+          evaluation = mapReduce,
+          condition = !(stop: Condition)
+        )
+
+      ABCContainer(DSLContainer(loop, output = Some(postStepTask), delegate = mapReduce.delegate), ABCParameters(state, step))
+    }
+
   }
 
 }

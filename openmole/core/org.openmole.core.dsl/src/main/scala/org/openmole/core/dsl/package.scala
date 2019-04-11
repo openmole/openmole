@@ -90,6 +90,9 @@ package dsl {
     def Task = org.openmole.core.workflow.task.Task
 
     def Hook = org.openmole.core.workflow.mole.Hook
+
+    type Namespace = org.openmole.core.context.Namespace
+    def Namespace = org.openmole.core.context.Namespace
   }
 
 }

@@ -11,8 +11,8 @@ object PostStepTask {
   def apply(
     n:                Int,
     nAlpha:           Int,
-    prior:            Seq[ABCPrior],
-    observed:         Seq[ABCObserved],
+    prior:            Seq[ABC.Prior],
+    observed:         Seq[ABC.Observed],
     state:            Val[MonAPMC.MonState],
     stepState:        Val[MonAPMC.StepState],
     minAcceptedRatio: Double,
