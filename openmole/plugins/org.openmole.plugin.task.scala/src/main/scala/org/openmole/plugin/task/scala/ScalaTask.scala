@@ -32,7 +32,9 @@ import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace.NewFile
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
 import org.openmole.plugin.task.jvm._
-import org.openmole.tool.cache.{ Cache, CacheKey }
+
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 
 import scala.util._
 
@@ -47,16 +49,16 @@ object ScalaTask {
     override def plugins = ScalaTask.plugins
   }
 
-  def apply(source: String, validate: Boolean = true)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(source: String)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
     new ScalaTask(
       source,
       plugins = Vector.empty,
       libraries = Vector.empty,
       config = InputOutputConfig(),
       external = External(),
-      info = InfoConfig(),
-      _validate = validate
+      info = InfoConfig()
     )
+  }
 
   def apply(f: (Context, ⇒ Random) ⇒ Seq[Variable[_]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     ClosureTask("ScalaTask")((ctx, rng, _) ⇒ Context(f(ctx, rng()): _*))
@@ -72,8 +74,7 @@ object ScalaTask {
   libraries:  Vector[File],
   config:     InputOutputConfig,
   external:   External,
-  info:       InfoConfig,
-  _validate:  Boolean
+  info:       InfoConfig
 ) extends Task with ValidateTask with Plugins {
 
   lazy val compilation = CacheKey[ScalaCompilation.ContextClosure[java.util.Map[String, Any]]]()
@@ -97,20 +98,17 @@ object ScalaTask {
       }
     }
 
-    if (_validate) {
-      Validate { p ⇒
-        import p._
+    Validate { p ⇒
+      import p._
 
-        def compilationError =
-          Try(compile) match {
-            case Success(_) ⇒ Seq.empty
-            case Failure(e) ⇒ Seq(e)
-          }
+      def compilationError =
+        Try(compile) match {
+          case Success(_) ⇒ Seq.empty
+          case Failure(e) ⇒ Seq(e)
+        }
 
-        libraryErrors ++ compilationError
-      }
+      libraryErrors ++ compilationError
     }
-    else Validate.success
   }
 
   override def process(taskExecutionContext: TaskExecutionContext) = {

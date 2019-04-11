@@ -17,17 +17,14 @@
 
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.context.{ Context, Variable }
-import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools.DefaultSet
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
+import org.openmole.core.workflow.builder.ValueAssignment
 
 object BreedTask {
 
   def apply(evolution: EvolutionWorkflow, size: Int, suggestion: Seq[Seq[ValueAssignment[_]]] = Seq.empty)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    FromContextTask("BreedTask") { p ⇒
+    Task("BreedTask") { p ⇒
       import p._
 
       def defaultSetToVariables(ds: Seq[ValueAssignment[_]]) = ds.map(v ⇒ Variable.unsecure(v.value, v.equal.from(context))).toVector

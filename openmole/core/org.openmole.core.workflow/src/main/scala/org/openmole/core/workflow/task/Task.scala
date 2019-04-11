@@ -28,7 +28,7 @@ import org.openmole.core.outputredirection._
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.tools.obj.Id
-import org.openmole.core.workflow.builder.{ InfoConfig, InputOutputConfig }
+import org.openmole.core.workflow.builder.{ DefinitionScope, InfoConfig, InputOutputConfig }
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.tools._
@@ -62,6 +62,10 @@ object Task {
    */
   def buildRNG(context: Context): scala.util.Random = random.Random(context(Variable.openMOLESeed)).toScala
   def definitionScope(t: Task) = t.info.definitionScope
+
+  def apply(className: String)(fromContext: FromContextTask.Parameters ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextTask =
+    FromContextTask.apply(className)(fromContext)
+
 }
 
 /**

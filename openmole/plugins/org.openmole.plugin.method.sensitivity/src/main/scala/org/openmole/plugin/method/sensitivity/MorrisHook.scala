@@ -1,8 +1,7 @@
 package org.openmole.plugin.method.sensitivity
 
-import org.openmole.core.dsl.File
+import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import org.openmole.core.exception.UserBadDataError
 
 object MorrisHook {
 

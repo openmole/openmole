@@ -83,16 +83,26 @@ package dsl {
     type DefinitionScope = org.openmole.core.workflow.builder.DefinitionScope
     def DefinitionScope = org.openmole.core.workflow.builder.DefinitionScope
 
+    type CacheKey[T] = org.openmole.tool.cache.CacheKey[T]
+    def CacheKey = org.openmole.tool.cache.CacheKey
+
     type ScalarOrSequenceOfDouble[T] = org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble[T]
     def ScalarOrSequenceOfDouble = org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
+
+    type Hook = org.openmole.core.workflow.mole.Hook
+    def Hook = org.openmole.core.workflow.mole.Hook
 
     type Task = org.openmole.core.workflow.task.Task
     def Task = org.openmole.core.workflow.task.Task
 
-    def Hook = org.openmole.core.workflow.mole.Hook
-
     type Namespace = org.openmole.core.context.Namespace
     def Namespace = org.openmole.core.context.Namespace
+
+    type Variable[T] = org.openmole.core.context.Variable[T]
+    def Variable = org.openmole.core.context.Variable
+
+    type Context = org.openmole.core.context.Context
+    def Context = org.openmole.core.context.Context
   }
 
 }
