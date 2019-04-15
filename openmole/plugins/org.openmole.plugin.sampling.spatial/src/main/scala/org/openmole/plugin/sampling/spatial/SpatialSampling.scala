@@ -37,13 +37,13 @@ sealed class ExpMixtureThresholdSpatialSampling(
     val n = samples.from(context)
     val size = gridSize.from(context)
 
-    val ncenters: Double = ScalarOrSequenceOfDouble.unflatten(Seq(centers), Seq(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double]).head
-    val radius: Double = ScalarOrSequenceOfDouble.unflatten(Seq(kernelRadius), Seq(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double]).head
-    val th: Double = ScalarOrSequenceOfDouble.unflatten(Seq(threshold), Seq(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double]).head
+    val ncenters: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(centers), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
+    val radius: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(kernelRadius), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
+    val th: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(threshold), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
 
-    val generator = SpatialData.ExpMixtureGenerator(size, ncenters.toInt, 1.0, radius)
+    val generators = ncenters.zip(radius).map{case (nc,r) => SpatialData.ExpMixtureGenerator(size, nc.toInt, 1.0, r) }.toArray
 
-    def values: Array[RasterLayerData[Double]] = Array.fill(n) { generator.generateGrid(random()).map { _.map { case d ⇒ if (d > th) 1.0 else 0.0 } } }
+    def values: Array[RasterLayerData[Double]] = generators.zip(th).map{case (gen,t) =>  gen.generateGrid(random()).map { _.map { case d ⇒ if (d > t) 1.0 else 0.0 } } }
 
     values.map { case v ⇒ List(Variable(prototype.asInstanceOf[Val[Any]], v)) }.toIterator
   }
@@ -72,13 +72,13 @@ sealed class PercolationGridSpatialSampling(
     val n = samples.from(context)
     val size = gridSize.from(context)
 
-    val proba: Double = ScalarOrSequenceOfDouble.unflatten(Seq(percolationProba), Seq(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double]).head
-    val bord: Double = ScalarOrSequenceOfDouble.unflatten(Seq(bordPoints), Seq(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double]).head
-    val width: Double = ScalarOrSequenceOfDouble.unflatten(Seq(linkwidth), Seq(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double]).head
+    val proba: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(percolationProba), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
+    val bord: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(bordPoints), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
+    val width: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(linkwidth), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
 
-    val generator = SpatialData.PercolationGridGenerator(size, proba, bord.toInt, width)
+    val generators = proba.zip(bord.zip(width)).map{case (p,(b,w)) => SpatialData.PercolationGridGenerator(size, p, b.toInt, w) }.toArray
 
-    def values: Array[RasterLayerData[Double]] = Array.fill(n) { generator.generateGrid(random()).map { _.map { case d ⇒ if (d > 0.0) 1.0 else 0.0 } } }
+    def values: Array[RasterLayerData[Double]] = generators map { _.generateGrid(random()).map { _.map { case d ⇒ if (d > 0.0) 1.0 else 0.0 } } }
 
     values.map { case v ⇒ List(Variable(prototype.asInstanceOf[Val[Any]], v)) }.toIterator
   }
@@ -106,12 +106,13 @@ sealed class BlocksGridSpatialSampling(
     val n = samples.from(context)
     val size = gridSize.from(context)
 
-    val blocksnum: Double = ScalarOrSequenceOfDouble.unflatten(Seq(blocks), Seq(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double]).head
-    val blocksmax: Double = ScalarOrSequenceOfDouble.unflatten(Seq(blockMinSize), Seq(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double]).head
-    val blocksmin: Double = ScalarOrSequenceOfDouble.unflatten(Seq(blockMaxSize), Seq(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double]).head
-    val generator = SpatialData.BlocksGridGenerator(size, blocksnum.toInt, blocksmax.toInt, blocksmin.toInt)
+    val blocksnum: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(blocks), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
+    val blocksmax: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(blockMinSize), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
+    val blocksmin: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(blockMaxSize), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
 
-    def values: Array[RasterLayerData[Double]] = Array.fill(n) { generator.generateGrid(random()).map { _.map { case d ⇒ if (d > 0.0) 1.0 else 0.0 } } }
+    val generators = blocksnum.zip(blocksmax.zip(blocksmin)).map { case (bn, (bma, bmi)) ⇒ SpatialData.BlocksGridGenerator(size, bn.toInt, bma.toInt, bmi.toInt) }.toArray
+
+    def values: Array[RasterLayerData[Double]] = generators.map { _.generateGrid(random()).map { _.map { case d ⇒ if (d > 0.0) 1.0 else 0.0 } } }
 
     values.map { case v ⇒ List(Variable(prototype.asInstanceOf[Val[Any]], v)) }.toIterator
   }
