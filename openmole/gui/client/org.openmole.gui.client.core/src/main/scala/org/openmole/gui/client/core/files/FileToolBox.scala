@@ -154,7 +154,7 @@ class FileToolBox(initSafePath: SafePath) {
           case fileaction.execute ⇒
             import scala.concurrent.duration._
             withSafePath { sp ⇒
-              post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(sp)).call().foreach { execInfo ⇒
+              post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(sp), true).call().foreach { execInfo ⇒
                 Popover.hide
                 org.openmole.gui.client.core.panels.executionPanel.dialog.show
               }
@@ -255,8 +255,8 @@ class FileToolBox(initSafePath: SafePath) {
     post()[Api].extractTGZ(safePath).call().foreach {
       r ⇒
         r.error match {
-          case Some(e: org.openmole.gui.ext.data.Error) ⇒
-            AlertPanel.detail("An error occurred during extraction", e.stackTrace, transform = RelativeCenterPosition, zone = FileZone)
+          case Some(e: org.openmole.gui.ext.data.ErrorData) ⇒
+            AlertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
           case _ ⇒ treeNodePanel.invalidCacheAndDraw
         }
     }

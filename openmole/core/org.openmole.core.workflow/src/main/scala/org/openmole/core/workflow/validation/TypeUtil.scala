@@ -26,7 +26,7 @@ import scala.collection.mutable.{ HashMap, HashSet, ListBuffer }
 
 object TypeUtil {
 
-  def receivedTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[Val[_]] =
+  def receivedTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: TransitionSlot): Iterable[Val[_]] =
     validTypes(mole, sources, hooks)(slot).map { _.toPrototype }
 
   sealed trait ComputedType
@@ -38,14 +38,14 @@ object TypeUtil {
   }
 
   def validTypes(mole: Mole, sources: Sources, hooks: Hooks)(
-    slot:        Slot,
+    slot:        TransitionSlot,
     transition:  ITransition ⇒ Boolean = _ ⇒ true,
     dataChannel: DataChannel ⇒ Boolean = _ ⇒ true
   ): Iterable[ValidType] =
     computeTypes(mole, sources, hooks)(slot, transition).collect { case x: ValidType ⇒ x }
 
   def computeTypes(mole: Mole, sources: Sources, hooks: Hooks)(
-    slot:        Slot,
+    slot:        TransitionSlot,
     transition:  ITransition ⇒ Boolean = _ ⇒ true,
     dataChannel: DataChannel ⇒ Boolean = _ ⇒ true
   ): Iterable[ComputedType] = {

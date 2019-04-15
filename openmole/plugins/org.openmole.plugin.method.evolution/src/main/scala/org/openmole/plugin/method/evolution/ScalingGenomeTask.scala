@@ -23,16 +23,13 @@ import org.openmole.core.workflow.task._
 
 object ScalingGenomeTask {
 
-  def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
-    val t = wfi(algorithm)
-
+  def apply(evolution: EvolutionWorkflow)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     FromContextTask("ScalingGenomeTask") { p ⇒
       import p._
-      context ++ t.genomeToVariables(context(t.genomePrototype)).from(context)
+      context ++ evolution.genomeToVariables(context(evolution.genomePrototype)).from(context)
     } set (
-      outputs += (t.inputPrototypes: _*),
-      (inputs, outputs) += t.genomePrototype
+      outputs += (evolution.inputPrototypes: _*),
+      (inputs, outputs) += evolution.genomePrototype
     )
-  }
 
 }

@@ -46,64 +46,72 @@ package object shared {
     lazy val rVersion = "3.3.3"
   }
 
-  object documentationSideMenu {
-    lazy val cssClass = "sidemenu"
-  }
-
   def anchor(title: String) = title.filter(c ⇒ c.isLetterOrDigit)
 
   object link {
-
+    // OpenMOLE
     lazy val demo = "http://demo.openmole.org"
-    lazy val twitter = "https://twitter.com/OpenMOLE"
-    lazy val blog = "https://blog.openmole.org"
-    lazy val chat = "https://chat.iscpif.fr/channel/openmole"
-    lazy val simpluDemo = "https://simplu.openmole.org"
+    lazy val next = "https://next.openmole.org/"
+    lazy val allOpenMOLE = "http://www.openmole.org/all/"
+
+    // Contributions
+    lazy val issue = "https://github.com/openmole/openmole/issues"
+    lazy val pullRequests = "https://github.com/openmole/openmole/pulls"
+    lazy val howToPR = "https://help.github.com/articles/about-pull-requests/"
+
+    // Community
     lazy val mailingList = "http://ask.openmole.org"
+    lazy val chat = "https://chat.iscpif.fr/channel/openmole"
+    lazy val blog = "https://blog.openmole.org"
+    lazy val openMOLEWiki = "https://github.com/openmole/openmole/wiki"
+    lazy val twitter = "https://twitter.com/OpenMOLE"
     lazy val shortTrainings = "https://iscpif.fr/events/formationsjedi/"
     lazy val longTrainings = "http://cnrsformation.cnrs.fr"
+
+    // Resources
+    lazy val scala = "http://www.scala-lang.org/"
+    lazy val scalaBook = "http://www.scala-lang.org/node/959"
+    lazy val scalaDoc = "http://www.scala-lang.org/api/current/index.html"
+    lazy val scalatex = "http://www.lihaoyi.com/Scalatex/"
+    lazy val sbt = "http://www.scala-sbt.org/"
+    lazy val intelliJ = "https://www.jetbrains.com/idea/"
+    lazy val git = "https://git-scm.com/"
+    lazy val gitlfs = "https://git-lfs.github.com/"
+    lazy val npm = "https://www.npmjs.com/get-npm"
+    lazy val osgi = "https://www.osgi.org/"
+    lazy val care = "https://github.com/proot-me/proot-static-build/releases/download/v5.1.1/care_2.2.2_x86_64_rc2--no-seccomp"
+    lazy val CAREsite = "https://proot-me.github.io/"
+    lazy val CAREmailing = "https://groups.google.com/forum/?fromgroups#!forum/reproducible"
     lazy val egi = "http://www.egi.eu/"
+
+    // Models
+    lazy val simpluDemo = "https://simplu.openmole.org"
+    lazy val netlogoAnts = "http://ccl.northwestern.edu/netlogo/models/Ants"
+
+    // Additional info
+    lazy val branchingModel = "http://nvie.com/posts/a-successful-git-branching-model/"
     lazy val batchProcessing = "https://en.wikipedia.org/wiki/Batch_processing"
     lazy val batchSystem = "http://en.wikipedia.org/wiki/Portable_Batch_System"
-    lazy val grieEngine = "https://en.wikipedia.org/wiki/Oracle_Grid_Engine"
+    lazy val gridEngine = "https://en.wikipedia.org/wiki/Oracle_Grid_Engine"
     lazy val slurm = "https://en.wikipedia.org/wiki/Simple_Linux_Utility_for_Resource_Management"
     lazy val condor = "https://en.wikipedia.org/wiki/HTCondor"
     lazy val oar = "http://oar.imag.fr/dokuwiki/doku.php"
     lazy val ssh = "https://en.wikipedia.org/wiki/Secure_Shell"
+    lazy val sshPublicKey = "https://git-scm.com/book/en/v2/Git-on-the-Server-Generating-Your-SSH-Public-Key"
     lazy val geodivercity = "http://geodivercity.parisgeo.cnrs.fr/blog/"
     lazy val ercSpringer = "http://www.springer.com/fr/book/9783319464954"
-    lazy val git = "https://git-scm.com/"
-    lazy val gitlfs = "https://git-lfs.github.com/"
-    lazy val sbt = "http://www.scala-sbt.org/"
-    lazy val scala = "http://www.scala-lang.org/"
-    lazy val scalaBook = "http://www.scala-lang.org/node/959"
-    lazy val scalaDoc = "http://www.scala-lang.org/api/current/index.html"
-    lazy val intelliJ = "https://www.jetbrains.com/idea/"
-    lazy val scalatex = "http://www.lihaoyi.com/Scalatex/"
-    lazy val netlogoAnts = "http://ccl.northwestern.edu/netlogo/models/Ants"
-    lazy val branchingModel = "http://nvie.com/posts/a-successful-git-branching-model/"
-    lazy val issue = "https://github.com/openmole/openmole/issues"
-    lazy val pullRequests = "https://github.com/openmole/openmole/pulls"
-    lazy val next = "https://next.openmole.org/"
-    lazy val CAREsite = "https://proot-me.github.io/"
-    lazy val CAREmailing = "https://groups.google.com/forum/?fromgroups#!forum/reproducible"
     lazy val ggplot2 = "http://ggplot2.tidyverse.org/reference/"
     lazy val sobol = "https://en.wikipedia.org/wiki/Sobol_sequence"
     lazy val lhs = "https://en.wikipedia.org/wiki/Latin_hypercube_sampling"
     lazy val jce = "http://www.oracle.com/technetwork/java/javase/downloads/index.html"
-    lazy val allOpenMOLE = "http://www.openmole.org/all/"
-    lazy val care = "https://github.com/proot-me/proot-static-build/releases/download/v5.1.1/care_2.2.2_x86_64_rc2--no-seccomp"
     lazy val prootIssue106 = "https://github.com/proot-me/PRoot/issues/106"
     lazy val xvfb = "https://www.x.org/releases/X11R7.7/doc/man/man1/Xvfb.1.xhtml"
     lazy val prootStatic = "https://github.com/proot-me/proot-static-build/tree/master/static"
     lazy val multiobjectiveOptimization = "http://en.wikipedia.org/wiki/Multiobjective_optimization"
     lazy val paretoEfficency = "http://en.wikipedia.org/wiki/Pareto_efficiency"
-    lazy val openMOLEWiki = "https://github.com/openmole/openmole/wiki"
     lazy val noveltySearch = "http://eplex.cs.ucf.edu/noveltysearch/userspage/"
     lazy val javaString = "https://docs.oracle.com/javase/7/docs/api/java/lang/String.html"
     lazy val javaFile = "https://docs.oracle.com/javase/8/docs/api/java/io/File.html"
-    lazy val npm = "https://www.npmjs.com/get-npm"
-    lazy val osgi = "https://www.osgi.org/"
 
     object paper {
       lazy val jassCP = "http://jasss.soc.surrey.ac.uk/18/1/12.html"
@@ -196,7 +204,7 @@ package object shared {
     egi,
     batchProcessing,
     batchSystem,
-    grieEngine,
+    gridEngine,
     slurm,
     condor,
     oar,

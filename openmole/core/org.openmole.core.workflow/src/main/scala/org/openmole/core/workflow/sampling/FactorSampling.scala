@@ -24,12 +24,19 @@ import cats.implicits._
 
 object FactorSampling {
 
+  /**
+   * Construct a sampling from a [[Factor]], given an implicit discrete domain and implicit optional inputs for the domain (as [[org.openmole.core.workflow.domain.DomainInputs]])
+   * @param f the factor
+   * @param discrete discrete domain
+   * @param domainInputs  optional inputs of the domain
+   * @return
+   */
   def apply[D, T](f: Factor[D, T])(implicit discrete: Discrete[D, T], domainInputs: DomainInputs[D] = DomainInputs.empty) =
     new Sampling {
       override def inputs = domainInputs.inputs(f.domain)
-      override def prototypes = List(f.prototype)
+      override def prototypes = List(f.value)
       override def apply(): FromContext[Iterator[collection.Iterable[Variable[T]]]] =
-        discrete.iterator(f.domain).map(_.map { v ⇒ List(Variable(f.prototype, v)) })
+        discrete.iterator(f.domain).map(_.map { v ⇒ List(Variable(f.value, v)) })
     }
 
 }

@@ -46,7 +46,7 @@ class AuthenticationStore(_baseDir: File) {
 
   def save(obj: Any, name: String)(implicit serializerService: SerializerService) = {
     val file = new File(baseDir, name)
-    serializerService.serialise(obj, file)
+    serializerService.serialize(obj, file)
   }
 
   def load[T](name: String)(implicit serializerService: SerializerService): T = {
@@ -55,7 +55,7 @@ class AuthenticationStore(_baseDir: File) {
   }
 
   def loadFile[T](file: File)(implicit serializerService: SerializerService): T =
-    serializerService.deserialise[T](file)
+    serializerService.deserialize[T](file)
 
   def delete() = {
     baseDir.recursiveDelete

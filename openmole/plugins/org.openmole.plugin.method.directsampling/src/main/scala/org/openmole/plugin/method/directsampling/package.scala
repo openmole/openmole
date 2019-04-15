@@ -17,54 +17,68 @@
 
 package org.openmole.plugin.method
 
-import org.openmole.core.context._
-import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.workflow.builder.DefinitionScope
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.validation.DataflowProblem._
-import org.openmole.core.workflow.validation._
+import monocle.macros.Lenses
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 import org.openmole.plugin.domain.distribution._
 import org.openmole.plugin.domain.modifier._
 import org.openmole.plugin.tool.pattern._
-import org.openmole.core.expansion._
+import org.openmole.plugin.hook.file._
 
 package object directsampling {
 
-  implicit def scope = DefinitionScope.Internal
+  implicit def extension = DSLContainerExtension(DirectSamplingMethodContainer.container)
+
+  @Lenses case class DirectSamplingMethodContainer(container: DSLContainer, scope: DefinitionScope) {
+    def save(
+      file:       FromContext[File],
+      values:     Seq[Val[_]]                           = Vector.empty,
+      header:     OptionalArgument[FromContext[String]] = None,
+      arrayOnRow: Boolean                               = false) = {
+      implicit val defScope = scope
+      this hook CSVHook(file = file, values = values, header = header, arrayOnRow = arrayOnRow)
+    }
+  }
 
   def Replication[T: Distribution](
-    evaluation:       Puzzle,
+    evaluation:       DSL,
     seed:             Val[T],
     replications:     Int,
-    distributionSeed: OptionalArgument[Long]   = None,
-    aggregation:      OptionalArgument[Puzzle] = None
+    distributionSeed: OptionalArgument[Long] = None,
+    aggregation:      OptionalArgument[DSL]  = None,
+    wrap:             Boolean                = false,
+    scope:            DefinitionScope        = "replication"
   ) =
     DirectSampling(
       evaluation = evaluation,
       sampling = seed in (TakeDomain(UniformDistribution[T](distributionSeed), replications)),
-      aggregation = aggregation
+      aggregation = aggregation,
+      wrap = wrap,
+      scope = scope
     )
 
-  def DirectSampling[P](
-    evaluation:  Puzzle,
+  def DirectSampling(
+    evaluation:  DSL,
     sampling:    Sampling,
-    aggregation: OptionalArgument[Puzzle] = None,
-    condition:   Condition                = Condition.True
-  ): Puzzle = {
-    val exploration = ExplorationTask(sampling)
-    val explorationCapsule = Capsule(exploration, strain = true)
+    aggregation: OptionalArgument[DSL] = None,
+    condition:   Condition             = Condition.True,
+    wrap:        Boolean               = false,
+    scope:       DefinitionScope       = "direct sampling"
+  ) = {
+    implicit def defScope = scope
 
-    aggregation.option match {
-      case Some(aggregation) ⇒
-        (explorationCapsule -< (evaluation when condition) >- aggregation) &
-          (explorationCapsule -- (aggregation block (evaluation.outputs: _*)))
-      case None ⇒
-        explorationCapsule -< (evaluation when condition)
-    }
+    val exploration = ExplorationTask(sampling)
+
+    val s =
+      MapReduce(
+        evaluation = evaluation,
+        sampler = exploration,
+        condition = condition,
+        aggregation = aggregation,
+        wrap = wrap
+      )
+
+    DirectSamplingMethodContainer(s, scope)
   }
 
 }

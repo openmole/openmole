@@ -44,6 +44,12 @@ trait Stat {
 
   def rootMeanSquaredError = (sequence: Seq[Double]) ⇒ sqrt(meanSquaredError(sequence))
 
+  def sumOfAbsoluteErrors(v1: Seq[Double], v2: Seq[Double]): Double =
+    (v1 zip v2).map { case (v1v, v2v) ⇒ math.abs(v1v - v2v) }.sum
+
+  def sumOfSquaredErrors(v1: Seq[Double], v2: Seq[Double]): Double =
+    (v1 zip v2).map { case (v1v, v2v) ⇒ math.pow(v1v - v2v, 2) }.sum
+
   /**
    * Compute the confidence interval half-width for the given confidence level.
    *

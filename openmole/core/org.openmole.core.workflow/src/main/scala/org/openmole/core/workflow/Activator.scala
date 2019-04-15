@@ -16,46 +16,44 @@ class Activator extends BundleActivator {
       import org.openmole.core.pluginmanager.KeyWord._
       import org.openmole.core.context._
       import org.openmole.core.workflow.mole._
-      import org.openmole.core.workflow.transition.{ Slot }
+      import org.openmole.core.workflow.transition.{ TransitionSlot }
       import org.openmole.core.workflow.execution.{ LocalEnvironment }
-      import org.openmole.core.workflow.puzzle.Puzzle
       import org.openmole.core.workflow.task.{ EmptyTask, ExplorationTask, ClosureTask, ToArrayTask, MoleTask, FromContextTask }
 
       Vector(
-        Word(classOf[Val[_]]),
-        Word(classOf[Capsule]),
-        Word(classOf[MasterCapsule]),
-        Word(classOf[Slot]),
-        Word(classOf[Puzzle]),
-        Word("in"),
-        Word("is"),
-        Word("on"),
-        Word("by"),
-        Word("set"),
-        Word("+="),
-        Word(":="),
-        Word("/"),
-        Word("inputs"),
-        Word("outputs"),
-        Word("hook"),
-        Word("workDirectory"),
-        Word("plugins"),
-        Word("pluginsOf"),
-        Transition("--"),
-        Transition("-<"),
-        Transition(">-"),
-        Transition("-<-"),
-        Transition(">|"),
-        Transition("--="),
-        Transition("oo"),
-        Environment(classOf[LocalEnvironment]),
-        Task(objectName(EmptyTask)),
-        Task(objectName(ExplorationTask)),
-        Task(objectName(ClosureTask)),
-        Task(objectName(ToArrayTask)),
-        Task(objectName(MoleTask)),
-        Task(objectName(FromContextTask)),
-        Hook(objectName(FromContextHook))
+        WordKeyWord(classOf[Val[_]]),
+        WordKeyWord("Capsule"),
+        WordKeyWord("Slot"),
+        WordKeyWord("Capsule"),
+        WordKeyWord("Strain"),
+        WordKeyWord("in"),
+        WordKeyWord("is"),
+        WordKeyWord("on"),
+        WordKeyWord("by"),
+        WordKeyWord("set"),
+        WordKeyWord("+="),
+        WordKeyWord(":="),
+        WordKeyWord("/"),
+        WordKeyWord("inputs"),
+        WordKeyWord("outputs"),
+        WordKeyWord("hook"),
+        WordKeyWord("workDirectory"),
+        WordKeyWord("plugins"),
+        WordKeyWord("pluginsOf"),
+        TransitionKeyWord("--"),
+        TransitionKeyWord("-<"),
+        TransitionKeyWord(">-"),
+        TransitionKeyWord("-<-"),
+        TransitionKeyWord(">|"),
+        TransitionKeyWord("oo"),
+        EnvironmentKeyWord(classOf[LocalEnvironment]),
+        TaskKeyWord(objectName(EmptyTask)),
+        TaskKeyWord(objectName(ExplorationTask)),
+        TaskKeyWord(objectName(ClosureTask)),
+        TaskKeyWord(objectName(ToArrayTask)),
+        TaskKeyWord(objectName(MoleTask)),
+        TaskKeyWord(objectName(FromContextTask)),
+        HookKeyWord(objectName(FromContextHook))
       )
     }
 

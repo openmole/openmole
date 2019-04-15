@@ -33,12 +33,11 @@ class Activator extends PluginInfoActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector(
-        Pattern(objectName(MasterSlave)),
-        Pattern(objectName(Skip)),
-        Pattern(objectName(Sequence)),
-        Pattern(objectName(Strain)),
-        Pattern(objectName(Switch)),
-        Pattern(objectName(While))
+        PatternKeyWord(objectName(MasterSlave)),
+        PatternKeyWord(objectName(Skip)),
+        PatternKeyWord(objectName(Sequence)),
+        PatternKeyWord(objectName(Switch)),
+        PatternKeyWord(objectName(While))
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)

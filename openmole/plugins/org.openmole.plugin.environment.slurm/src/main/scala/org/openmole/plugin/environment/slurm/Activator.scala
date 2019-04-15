@@ -30,7 +30,7 @@ class Activator extends BundleActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector(
-        Environment(classOf[SLURMEnvironment[_]])
+        EnvironmentKeyWord(classOf[SLURMEnvironment[_]])
       )
 
     PluginInfo.register(this, namespaces = Vector(this.getClass.getPackage), keyWords = keyWords)

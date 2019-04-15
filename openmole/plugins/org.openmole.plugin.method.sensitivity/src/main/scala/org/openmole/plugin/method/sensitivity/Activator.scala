@@ -33,10 +33,11 @@ class Activator extends PluginInfoActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector(
-        Sampling(objectName(MorrisSampling)),
-        Task(objectName(MorrisAggregation)),
-        Sampling(objectName(SaltelliSampling)),
-        Pattern("SensitivityMorris")
+        SamplingKeyWord(objectName(MorrisSampling)),
+        TaskKeyWord(objectName(MorrisAggregation)),
+        SamplingKeyWord(objectName(SaltelliSampling)),
+        PatternKeyWord("SensitivityMorris"),
+        PatternKeyWord("SensitivitySaltelli"),
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)

@@ -28,11 +28,6 @@ import scala.concurrent.Future
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object FileDisplayer {
-  def editor(fileType: FileExtension, initCode: String): EditorPanelUI = EditorPanelUI(fileType, initCode)
-
-}
-
 class FileDisplayer(val tabs: TreeNodeTabs) {
 
   def alreadyDisplayed(safePath: SafePath) =
@@ -53,11 +48,11 @@ class FileDisplayer(val tabs: TreeNodeTabs) {
         case ef: EditableFile ⇒
           if (DataUtils.isCSV(safePath)) {
             post()[Api].sequence(safePath).call().foreach { seq ⇒
-              tabs ++ TreeNodeTab.editable(safePath, content, seq, TreeNodeTab.Table, !ef.onDemand)
+              tabs ++ TreeNodeTab.editable(safePath, content, EditableSettings.build(seq, view = TreeNodeTab.Table, editing = !ef.onDemand))
             }
           }
           else {
-            tabs ++ TreeNodeTab.editable(safePath, content, SequenceData(Seq(), Seq()), TreeNodeTab.Raw)
+            tabs ++ TreeNodeTab.editable(safePath, content, EditableSettings.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw))
           }
         case _ ⇒ //FIXME for GUI workflows
       }

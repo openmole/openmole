@@ -6,41 +6,40 @@
 @import scalatex.{ openmole ⇒ scalatex }
 
 
-Here are some tutorials to help you build your first experiments:
-
-@br
-
-
-@ul(listStyleType := "none")
-  @li
-    @h5
-        @a("Getting Started with OpenMOLE", href := stepByStepIntro.file)
-    @ol
-      @sitemap.siteMapSection(gettingStartedPages)
-  @li
-    @h5
-        @a("Using NetLogo with OpenMOLE", href := netLogoGA.file)
-    @ol
-      @sitemap.siteMapSection(netLogoPages)
-
-@br
-
+In this section you will find some tutorials to help you build your first experiments.
 Feel free to suggest topics for new tutorials you would find helpful on the @aa("forum", href := shared.link.mailingList).
+
+@br@br
+
 You can even write your own tutorial and share it with the OpenMOLE community on the forum!
 We'll make sure to integrate it with the next release.
 
-@h1{Market Place}
+@br@br
 
-This page exposes examples handling some use cases of OpenMOLE.
-Don't focus too much on the applications or programming languages serving as a use case.
-These examples are more about how to do things the OpenMOLE way.
+The available tutorials are the following:
 
-@br
+@br@br
 
-The market place is accessible through this @aa("repository", href := shared.link.repo.market) or directly from the GUI application (@i{New Project > From Market Place}).
-Clicking on a project allows to download it in the application and run it instantly!
-@br
-@a("More informations", href := market.file)
-@img(src := Resource.img.guiGuide.market.file, center(95))
+@b{Getting Started}
+
+  @ul
+    @li
+      @a("Getting started with OpenMole",href := stepByStepIntro.file)
+    @li
+      @a("First exploration", href := exploreTuto.file)
+
+@b{NetLogo tutorials}
+
+  @ul
+    @li
+      @a("Explore a NetLogo model",href := simpleSAFire.file)
+    @li
+      @a("Calibrate a NetLogo model", href := netLogoGA.file)
+
+@b{Market place}
+
+ @ul
+     @li
+       @a("Market place",href := market.file)
 
 

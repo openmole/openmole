@@ -21,7 +21,6 @@ import javax.script.CompiledScript
 import org.openmole.core.console._
 import org.openmole.core.pluginmanager._
 import org.openmole.core.project.Imports.{ SourceFile, Tree }
-import org.openmole.core.workflow.puzzle._
 import org.openmole.tool.file._
 import monocle.function.all._
 import monocle.std.all._
@@ -29,6 +28,7 @@ import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.services._
+import org.openmole.core.workflow.composition.DSL
 import org.openmole.core.workspace.NewFile
 import org.openmole.tool.hash._
 
@@ -102,6 +102,10 @@ object Project {
   def apply(workDirectory: File)(implicit newFile: NewFile, fileService: FileService) =
     new Project(workDirectory, v ⇒ Project.newREPL(v))
 
+  trait OMSScript {
+    def run(): DSL
+  }
+
 }
 
 sealed trait CompileResult
@@ -113,10 +117,11 @@ case class ErrorInCode(error: ScalaREPL.CompilationError) extends CompilationErr
 case class ErrorInCompiler(error: Throwable) extends CompilationError
 
 case class Compiled(result: ScalaREPL.Compiled) extends CompileResult {
+
   def eval =
-    result.apply() match {
-      case p: Puzzle ⇒ p
-      case e         ⇒ throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
+    result.apply().asInstanceOf[Project.OMSScript].run() match {
+      case p: DSL ⇒ p
+      case e      ⇒ throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
     }
 }
 
@@ -134,12 +139,15 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL) {
       def header =
         s"""${scriptsObjects(script)}
            |
-           |def runOMSScript(): ${classOf[Puzzle].getCanonicalName} = {
+           |new ${classOf[Project.OMSScript].getCanonicalName} {
+           |
+           |def run(): ${classOf[DSL].getCanonicalName} = {
            |import ${Project.uniqueName(script)}._imports._""".stripMargin
 
       def footer =
         s"""}
-           |runOMSScript()""".stripMargin
+           |}
+         """.stripMargin
 
       def compileContent =
         s"""$header

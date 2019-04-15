@@ -71,7 +71,8 @@ trait Api {
   def staticInfos(): Seq[(ExecutionId, StaticExecutionInfo)]
   def cancelExecution(id: ExecutionId): Unit
   def removeExecution(id: ExecutionId): Unit
-  def runScript(scriptData: ScriptData): Unit
+  def compileScript(scriptData: ScriptData): Option[ErrorData]
+  def runScript(scriptData: ScriptData, validateScript: Boolean): Unit
   def clearEnvironmentErrors(environmentId: EnvironmentId): Unit
   def runningErrorEnvironmentData(environmentId: EnvironmentId, lines: Int): EnvironmentErrorData
 
@@ -80,7 +81,7 @@ trait Api {
   def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Unit
 
   //CORE PLUGINS
-  def addUploadedPlugins(nodes: Seq[String]): Seq[Error]
+  def addUploadedPlugins(nodes: Seq[String]): Seq[ErrorData]
   def autoAddPlugins(path: SafePath): Unit
   def isPlugin(path: SafePath): Boolean
   def allPluggableIn(path: SafePath): Seq[SafePath]

@@ -17,15 +17,18 @@
 package org.openmole.plugin.method.evolution
 
 import org.openmole.core.dsl._
-import org.openmole.core.workflow.puzzle.{ OutputEnvironmentPuzzleContainer, ToPuzzle }
-import org.openmole.core.workflow.validation.Validation
+import org.openmole.core.expansion.FromContext
+import org.openmole.core.workflow.mole.Mole
+import org.openmole.core.workflow.task.FromContextTask
+import org.openmole.core.workflow.validation._
 import org.openmole.plugin.domain.collection._
 import org.scalatest._
-import org.openmole.tool.types._
 import org.openmole.plugin.domain.bounds._
-import org.openmole.core.workflow.tools.Stubs._
+import org.openmole.plugin.method.evolution.Genome.GenomeBound
 
 class WorkflowSpec extends FlatSpec with Matchers {
+
+  import org.openmole.core.workflow.test.Stubs._
 
   def nsga2(wrap: Boolean = true) = {
     val x = Val[Double]
@@ -93,11 +96,11 @@ class WorkflowSpec extends FlatSpec with Matchers {
     )
   }
 
-  import org.openmole.core.workflow.tools.Stubs._
+  import org.openmole.core.workflow.test.Stubs._
 
   "Bound array" should "compile" in {
     SteadyStateEvolution(
-      algorithm = boundArray(),
+      algorithm = boundArray,
       evaluation = EmptyTask(),
       parallelism = 10,
       termination = 10
@@ -106,7 +109,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
   "Island evolution" should "compile" in {
     val steady = SteadyStateEvolution(
-      algorithm = boundArray(),
+      algorithm = boundArray,
       evaluation = EmptyTask(),
       parallelism = 10,
       termination = 10
@@ -114,37 +117,215 @@ class WorkflowSpec extends FlatSpec with Matchers {
     IslandEvolution(steady, 10, 10)
   }
 
+  "Evolution" should "run" in {
+    @volatile var executed = 0
+
+    val a = Val[Double]
+
+    val testTask =
+      FromContextTask("test") { p ⇒
+        import p._
+        executed += 1
+        context
+      } set ((inputs, outputs) += a)
+
+    val nsga = NSGA2Evolution(
+      evaluation = testTask,
+      objectives = Seq(a),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100,
+      parallelism = 10
+    )
+
+    nsga run ()
+
+    executed should be >= 100
+  }
+
+  "Island evolution" should "run" in {
+    @volatile var executed = 0
+
+    val a = Val[Double]
+
+    val testTask =
+      FromContextTask("test") { p ⇒
+        import p._
+        executed += 1
+        context
+      } set ((inputs, outputs) += a)
+
+    val nsga = NSGA2Evolution(
+      evaluation = testTask,
+      objectives = Seq(a),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100,
+      distribution = Island(5)
+    )
+
+    nsga run ()
+
+    executed should be >= 500
+  }
+
   "Steady state workflow" should "have no validation error" in {
-    Validation(nsga2().head.toMole).toList match {
+    val mole: Mole = nsga2()
+    Validation(mole).toList match {
       case Nil ⇒
-      case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
+      case l   ⇒ sys.error(s"Several validation errors have been found in ${mole}: " + l.mkString("\n"))
     }
 
-    Validation(conflict.head.toMole).toList match {
+    Validation(conflict.container).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
   }
 
   "Island workflow" should "have no validation error" in {
-    val islandEvolutionNSGA2 = IslandEvolution(nsga2(), 10, 50, 100).head.toMole
+    val islandEvolutionNSGA2 = IslandEvolution(nsga2(), 10, 50, 100).container
 
     Validation(islandEvolutionNSGA2).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
 
-    Validation(IslandEvolution(conflict, 10, 50, 100).head.toMole).toList match {
+    Validation(IslandEvolution(conflict, 10, 50, 100).container).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
   }
 
   "Steady state workflow with wrapping" should "have no validation error" in {
-    Validation(nsga2(wrap = false).head.toMole).toList match {
+    Validation(nsga2(wrap = false).container).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
+  }
+
+  "Genome bounds" should "compile" in {
+    import org.openmole.plugin.domain.collection._
+    val ba = Val[Array[Boolean]]
+    val b1: GenomeBound = ba in Seq(Vector(true, false), Vector(true, false))
+    val b2: GenomeBound = ba in 2
+  }
+
+  "NSGAEvolution" should "be valid" in {
+    val a = Val[Double]
+    val b = Val[Double]
+
+    val nsga = NSGA2Evolution(
+      evaluation = EmptyTask() set (inputs += a, outputs += b),
+      objectives = Seq(b),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100
+    )
+
+    Validation(nsga).isEmpty should equal(true)
+  }
+
+  "NSGAEvolution with island" should "be valid" in {
+    val a = Val[Double]
+    val b = Val[Double]
+
+    val nsga = NSGA2Evolution(
+      evaluation = EmptyTask() set (inputs += a, outputs += b),
+      objectives = Seq(b),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100,
+      distribution = Island(1)
+    )
+
+    Validation(nsga).isEmpty should equal(true)
+  }
+
+  "Stochastic NSGAEvolution" should "be valid" in {
+    val a = Val[Double]
+    val b = Val[Double]
+
+    val nsga = NSGA2Evolution(
+      evaluation = EmptyTask() set (inputs += a, outputs += b),
+      objectives = Seq(b),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100,
+      stochastic = Stochastic()
+    )
+
+    Validation(nsga).isEmpty should equal(true)
+  }
+
+  "Stochastic NSGAEvolution with island" should "be valid" in {
+    val a = Val[Double]
+    val b = Val[Double]
+
+    val nsga = NSGA2Evolution(
+      evaluation = EmptyTask() set (inputs += a, outputs += b),
+      objectives = Seq(b),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100,
+      stochastic = Stochastic(),
+      distribution = Island(1)
+    )
+
+    Validation(nsga).isEmpty should equal(true)
+  }
+
+  "Suggestion" should "be possible" in {
+    val a = Val[Double]
+
+    NSGA2Evolution(
+      evaluation = EmptyTask(),
+      objectives = Seq(a),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100,
+      suggestion = Seq(Seq(a := 0.5))
+    )
+  }
+
+  "Aggregation" should "be possible in NSGA" in {
+
+    val a = Val[Double]
+    val b = Val[Double]
+
+    def f(v: Vector[Double]) = v.head
+
+    val nsga = NSGA2Evolution(
+      evaluation = EmptyTask() set (inputs += a, outputs += b),
+      objectives = Seq(b aggregate f),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100,
+      stochastic = Stochastic()
+    )
+
+    Validation(nsga).isEmpty should equal(true)
+  }
+
+  "Aggregation" should "be possible in PSE" in {
+    val a = Val[Double]
+    val b = Val[Double]
+    def f(v: Vector[Double]) = v.head
+
+    PSEEvolution(
+      evaluation = EmptyTask(),
+      objectives = Seq(a aggregate f in (0.0 to 1.0 by 0.1), b in (0.2 to 0.5 by 0.1)),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100,
+      stochastic = Stochastic()
+    )
+  }
+
+  "Aggregation" should "be possible in OSE" in {
+    val o = Val[Double]
+    val a = Val[Double]
+    val b = Val[Double]
+    def f(v: Vector[Double]) = v.head
+
+    OSEEvolution(
+      origin = Seq(o in (0.0 to 1.0 by 0.1)),
+      evaluation = EmptyTask(),
+      objectives = Seq(a aggregate f under 9, b under 3.0),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100,
+      stochastic = Stochastic()
+    )
   }
 
 }

@@ -17,11 +17,25 @@
 
 package org.openmole.core.workflow
 
+import org.openmole.core.context._
+import org.openmole.core.expansion._
+import org.openmole.core.keyword.:=
+import org.openmole.core.workflow.tools._
+
+/**
+  * Part of the dsl for task properties (inputs, outputs, assignements)
+  */
 package builder {
 
-  import org.openmole.core.context._
-  import org.openmole.core.expansion._
-  import org.openmole.core.workflow.tools._
+  object Setter {
+    def apply[O, T](f: O ⇒ T ⇒ T) = new Setter[O, T] {
+      def set(o: O)(t: T) = f(o)(t)
+    }
+  }
+
+  trait Setter[O, T] {
+    def set(o: O)(t: T): T
+  }
 
   object IO {
     implicit def valToIO[T](v: Val[T]) = RawVal(v)
@@ -36,10 +50,28 @@ package builder {
       xs.collect { case x: Mapped[_] ⇒ x }
   }
 
+  /**
+    * Wrapper for prototypes as input/output
+    */
   sealed trait IO
+
+  /**
+    * Single prototype
+    * @param v
+    */
   case class RawVal[T](v: Val[T]) extends IO
+
+  /**
+    * Prototype mapped to a variable name
+    * @param v
+    * @param name
+    */
   case class Mapped[T](v: Val[T], name: String) extends IO
 
+
+  /**
+    * Operations on inputs
+    */
   class Inputs {
     def +=[T: InputBuilder](d: Val[_]*): T ⇒ T =
       implicitly[InputBuilder[T]].inputs.modify(_ ++ d)
@@ -50,6 +82,9 @@ package builder {
     def ++=[T: MappedInputBuilder: InputBuilder](mapped: Iterable[IO]*): T ⇒ T = +=[T](mapped.flatten: _*)
   }
 
+  /**
+    * Operations on outputs
+    */
   class Outputs {
     def +=[T: OutputBuilder](d: Val[_]*): T ⇒ T =
       implicitly[OutputBuilder[T]].outputs.modify(_ ++ d)
@@ -82,12 +117,19 @@ package builder {
       implicitly[NameBuilder[T]].name.set(Some(name))
   }
 
+  /**
+    * DSL for i/o in itself
+    */
   trait BuilderPackage {
     final lazy val inputs: Inputs = new Inputs
     final lazy val outputs: Outputs = new Outputs
     final lazy val exploredOutputs: ExploredOutputs = new ExploredOutputs
     final lazy val defaults: Defaults = new Defaults
 
+    /**
+      * operators on both inputs and outputs
+      * @param io
+      */
     implicit class InputsOutputsDecorator(io: (Inputs, Outputs)) {
       def +=[T: InputBuilder: OutputBuilder](ps: Val[_]*): T ⇒ T =
         (inputs += (ps: _*)) andThen (outputs += (ps: _*))
@@ -95,31 +137,51 @@ package builder {
         (inputs ++= (ps: _*)) andThen (outputs ++= (ps: _*))
     }
 
-    class AssignDefault[T](p: Val[T]) {
-      def :=[U: DefaultBuilder: InputBuilder](v: T, `override`: Boolean): U ⇒ U =
-        (this := (v: FromContext[T], `override`)) andThen (inputs += p)
-      def :=[U: DefaultBuilder: InputBuilder](v: T): U ⇒ U = this.:=(v, false)
-      def :=[U: DefaultBuilder: InputBuilder](v: FromContext[T], `override`: Boolean): U ⇒ U =
-        implicitly[DefaultBuilder[U]].defaults.modify(_ + Default[T](p, v, `override`)) andThen (inputs += p)
-      def :=[U: DefaultBuilder: InputBuilder](v: FromContext[T]): U ⇒ U =
-        this.:=(v, false)
-    }
+    implicit def setterToFunction[O, S](o: O)(implicit setter: Setter[O, S]) = implicitly[Setter[O, S]].set(o)(_)
 
-    implicit class BuildMapped[T](p: Val[T]) {
-      def mapped: Mapped[T] = mapped(p.simpleName)
-      def mapped(name: String) = Mapped(p, name)
-    }
+    implicit def equalToAssignDefaultFromContext[T, U: DefaultBuilder: InputBuilder] =
+      Setter[:=[Val[T], (FromContext[T], Boolean)], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + Default[T](v.value, v.equal._1, v.equal._2)) andThen (inputs += v.value) }
 
-    class AssignDefaultSeq[T](p: Iterable[Val[T]]) {
-      def :=[U: DefaultBuilder: InputBuilder](v: Iterable[T], `override`: Boolean): U ⇒ U = {
-        def defaults(u: U) = (p zip v).foldLeft(u) { case (u, (p, v)) ⇒ (new AssignDefault(p).:=[U](v, `override`)).apply(u) }
-        defaults _ andThen (inputs ++= p)
+    implicit def equalToAssignDefaultFromContext2[T, U: DefaultBuilder: InputBuilder] =
+      Setter[:=[Val[T], FromContext[T]], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + Default[T](v.value, v.equal, false)) andThen (inputs += v.value) }
+
+    implicit def equalToAssignDefaultValue[T, U: DefaultBuilder: InputBuilder] =
+      Setter[:=[Val[T], (T, Boolean)], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + Default[T](v.value, v.equal._1: FromContext[T], v.equal._2)) andThen (inputs += v.value) }
+
+    implicit def equalToAssignDefaultValue2[T, U: DefaultBuilder: InputBuilder] =
+      Setter[:=[Val[T], T], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + Default[T](v.value, v.equal: FromContext[T], false)) andThen (inputs += v.value) }
+
+    implicit def equalToAssignDefaultSeqValue[T, U: DefaultBuilder: InputBuilder] =
+      Setter[:=[Iterable[Val[T]], (Iterable[T], Boolean)], U] { v ⇒
+        def defaults(u: U) = (v.value zip v.equal._1).foldLeft(u) { case (u, (p, lv)) ⇒ new :=(p, (lv, v.equal._2))(u) }
+        defaults _ andThen (inputs ++= v.value)
       }
 
-      def :=[U: DefaultBuilder: InputBuilder](v: Iterable[T]): U ⇒ U = this.:=(v, false)
-    }
+    implicit def equalToAssignDefaultSeqValue2[T, U: DefaultBuilder: InputBuilder] =
+      Setter[:=[Iterable[Val[T]], Iterable[T]], U] { v ⇒
+        def defaults(u: U) = (v.value zip v.equal).foldLeft(u) { case (u, (p, v)) ⇒ new :=(p, v)(u) }
+        defaults _ andThen (inputs ++= v.value)
+      }
 
-    implicit def prototypeToAssignDefault[T](p: Val[T]) = new AssignDefault[T](p)
+    /**
+      * Construct mapped prototype
+      * @param p
+      * @tparam T
+      */
+    implicit class BuildMapped[T](p: Val[T]) {
+      /**
+        * mapped to its own simple name
+        * @return
+        */
+      def mapped: Mapped[T] = mapped(p.simpleName)
+
+      /**
+        * mapped to the given variable name
+        * @param name
+        * @return
+        */
+      def mapped(name: String) = Mapped(p, name)
+    }
 
     final lazy val name = new Name
 
@@ -127,15 +189,23 @@ package builder {
       def set(ops: (T ⇒ T)*): T =
         ops.foldLeft(t) { (curT, op) ⇒ op(curT) }
     }
+
+    /**
+      * Decorate a prototype with value assignements
+      * @param v
+      * @tparam T
+      */
+    implicit class ValueAssignmentDecorator[T](v: Val[T]) {
+      def :=(t: T): ValueAssignment[T] = new :=(v, t)
+      def :=(t: FromContext[T]): ValueAssignment[T] = new :=(v, t)
+    }
   }
 
   object DefinitionScope {
-    case object Internal extends DefinitionScope
+    case class Internal(name: String) extends DefinitionScope
     case object User extends DefinitionScope
 
-    lazy val internal = new {
-      implicit def default: DefinitionScope = Internal
-    }
+    implicit def internal(scope: String) = Internal(scope)
 
     lazy val user = new {
       implicit def default: DefinitionScope = User
@@ -146,5 +216,7 @@ package builder {
 
 }
 
-package object builder
+package object builder {
+  type ValueAssignment[T] = :=[Val[T], FromContext[T]]
+}
 

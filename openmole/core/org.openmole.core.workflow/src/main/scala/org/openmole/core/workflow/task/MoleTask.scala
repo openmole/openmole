@@ -30,7 +30,6 @@ import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job.MoleJob
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workspace.NewFile
 import org.openmole.tool.lock._
 import org.openmole.tool.random.Seeder
@@ -40,15 +39,22 @@ object MoleTask {
   implicit def isTask = InputOutputBuilder(MoleTask.config)
   implicit def isInfo = InfoBuilder(MoleTask.info)
 
-  def apply(puzzle: Puzzle)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): MoleTask =
-    apply(puzzle toMole, puzzle.lasts.head)
+  /**
+   * Constructor used to construct the MoleTask corresponding to the full puzzle
+   *
+   * @param dsl
+   * @return
+   */
+  def apply(dsl: DSL)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): MoleTask = {
+    val puzzle = dslToPuzzle(dsl)
+    apply(puzzle.toMole, puzzle.lasts.head)
+  }
 
   /**
-   * *
    * @param mole the mole executed by this task.
    * @param last the capsule which returns the results
    */
-  def apply(mole: Mole, last: Capsule)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): MoleTask = {
+  def apply(mole: Mole, last: MoleCapsule)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): MoleTask = {
     val mt = new MoleTask(_mole = mole, last = last, Vector.empty, InputOutputConfig(), InfoConfig())
 
     mt set (
@@ -67,14 +73,27 @@ object MoleTask {
 
 }
 
+/**
+ * Task executing a Mole
+ *
+ * @param _mole the Mole to be executed
+ * @param last the MoleCapsule finishing the Mole
+ * @param implicits names of implicits, which values are imported explicitly from the context
+ * @param config inputs and outputs prototypes, and defaults
+ * @param info name and definition scope
+ */
 @Lenses case class MoleTask(
   _mole:     Mole,
-  last:      Capsule,
+  last:      MoleCapsule,
   implicits: Vector[String],
   config:    InputOutputConfig,
   info:      InfoConfig
 ) extends Task {
 
+  /**
+   * mole of the MoleTask, with inputs from the config: InputOutputConfig
+   * @return
+   */
   def mole = _mole.copy(inputs = inputs)
 
   protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { p ⇒
@@ -87,7 +106,7 @@ object MoleTask {
       implicit val eventDispatcher = EventDispatcher()
       val implicitsValues = implicits.flatMap(i ⇒ context.get(i))
       implicit val seeder = Seeder(random().nextLong())
-      implicit val newFile = NewFile(executionContext.tmpDirectory.newDir("moletask"))
+      implicit val newFile = NewFile(executionContext.tmpDirectory)
       import executionContext.preference
       import executionContext.threadProvider
       import executionContext.workspace
@@ -95,6 +114,8 @@ object MoleTask {
 
       val localEnvironment =
         LocalEnvironment(1, executionContext.localEnvironment.deinterleave)
+
+      val moleServices = MoleServices.create
 
       val execution = MoleExecution(
         mole,
@@ -104,14 +125,14 @@ object MoleTask {
         cleanOnFinish = false,
         taskCache = executionContext.cache,
         lockRepository = executionContext.lockRepository
-      )
+      )(moleServices)
 
       execution listen {
         case (_, ev: MoleExecution.JobFinished) ⇒
           lastContextLock { if (ev.capsule == last) lastContext = Some(ev.moleJob.context) }
       }
 
-      (execution, newFile)
+      (execution, moleServices.newFile)
     }
 
     val listenerKey =

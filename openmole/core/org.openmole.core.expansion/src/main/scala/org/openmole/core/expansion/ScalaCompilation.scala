@@ -30,25 +30,60 @@ import org.openmole.tool.random._
 
 import scala.util._
 
+trait CompilationClosure[+T] extends ScalaCompilation.ContextClosure[T] {
+  def apply(context: Context, rng: RandomProvider, newFile: NewFile): T
+}
+
+/**
+ * Methods for compiling scala code
+ */
 object ScalaCompilation {
 
+  /**
+   * OpenMOLE namespace to import
+   * @return
+   */
   def openMOLEImports = Seq(s"${org.openmole.core.code.CodePackage.namespace}._")
 
+  /**
+   * Prepend OpenMOLE imports to a script
+   * @param code
+   * @return
+   */
   def addImports(code: String) =
     s"""
     |${openMOLEImports.map("import " + _).mkString("\n")}
     |
     |$code""".stripMargin
 
-  def priorityBundles(plugins: Seq[File]) = plugins.flatMap(PluginManager.bundle) ++ PluginManager.bundleForClass(this.getClass)
+  /**
+   * Get osgi bundles given a sequence of plugins
+   * @param plugins
+   * @return
+   */
+  def priorityBundles(plugins: Seq[File]) = {
+    val pluginBundles = plugins.flatMap(PluginManager.bundle)
+    pluginBundles ++ pluginBundles.flatMap(PluginManager.allPluginDependencies) ++ PluginManager.bundleForClass(this.getClass)
+  }
 
-  def compile(code: String, plugins: Seq[File], libraries: Seq[File])(implicit newFile: NewFile, fileService: FileService) = {
+  /**
+   * Compile scala code using a [[org.openmole.core.console.Interpreter]]
+   *
+   * @param code
+   * @param plugins
+   * @param libraries
+   * @param newFile
+   * @param fileService
+   * @tparam RETURN
+   * @return
+   */
+  def compile[RETURN](code: String, plugins: Seq[File] = Seq.empty, libraries: Seq[File] = Seq.empty)(implicit newFile: NewFile, fileService: FileService) = {
     val osgiMode = org.openmole.core.console.Activator.osgi
     val interpreter =
       if (osgiMode) Interpreter(priorityBundles(plugins), libraries)
       else Interpreter(jars = libraries)
 
-    Try[Any] {
+    Try[RETURN] {
       val evaluated = interpreter.eval(addImports(code))
 
       if (evaluated == null) throw new InternalProcessingError(
@@ -56,7 +91,7 @@ object ScalaCompilation {
            |$code""".stripMargin
       )
 
-      evaluated
+      evaluated.asInstanceOf[RETURN]
     } match {
       case util.Success(s) ⇒ Success(s)
       case util.Failure(e) ⇒
@@ -78,36 +113,49 @@ object ScalaCompilation {
     native getOrElse t
   }
 
-  def prefix = "_input_value_"
-
   def function[RETURN](inputs: Seq[Val[_]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: NewFile, fileService: FileService) = {
-    compile(script(inputs, source, wrapping, returnType), plugins, libraries).map { evaluated ⇒
-      val m = evaluated.getClass.getMethods.find(_.getName.contains("apply")).get
-      m.setAccessible(true)
-      (evaluated, m) //evaluated.getClass.getMethod("apply", classOf[Context], classOf[RandomProvider], classOf[NewFile]))
-    }
+    val s = script(inputs, source, wrapping, returnType)
+    compile[CompilationClosure[RETURN]](s, plugins, libraries)
   }
 
   def closure[RETURN](inputs: Seq[Val[_]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: NewFile, fileService: FileService) =
-    function[RETURN](inputs, source, plugins, libraries, wrapping, returnType).map {
-      case (evaluated, method) ⇒
-        val closure: ContextClosure[RETURN] = (context: Context, rng: RandomProvider, newFile: NewFile) ⇒ method.invoke(evaluated, context, rng, newFile).asInstanceOf[RETURN]
-        closure
-    }
+    function[RETURN](inputs, source, plugins, libraries, wrapping, returnType)
 
-  def script[RETURN](inputs: Seq[Val[_]], source: String, wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN]) =
-    s"""(${prefix}context: ${manifest[Context].toString}, ${prefix}RNG: ${manifest[RandomProvider].toString}, ${prefix}NewFile: ${manifest[NewFile].toString}) => {
-       |  object $inputObject {
-       |    ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
-       |  }
-       |  import ${inputObject}._
-       |  implicit lazy val ${Variable.openMOLE("RNG").name}: util.Random = ${prefix}RNG()
-       |  implicit lazy val ${Variable.openMOLE("NewFile").name} = ${prefix}NewFile
-       |  $source
-       |  ${wrapping.wrapOutput}
-       |}: ${toScalaNativeType(returnType)}""".stripMargin
+  /**
+   * prefix used for input values in [[script]] construction
+   * @return
+   */
+  def prefix = "_input_value_"
 
+  /**
+   * name of the input object in [[script]] construction
+   * @return
+   */
   def inputObject = "input"
+
+  /**
+   * Embed script elements in a compilable String.
+   *  - an object of the runtime class of the CompilationClosure, parametrized with return type forced to scala native, is created by this code.
+   * @param inputs input prototypes
+   * @param source the source code in itself
+   * @param wrapping how outputs are wrapped as code string
+   * @param returnType the return type of the script
+   * @tparam RETURN
+   * @return
+   */
+  def script[RETURN](inputs: Seq[Val[_]], source: String, wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN]) =
+    s"""new ${classOf[CompilationClosure[_]].getName}[${toScalaNativeType(returnType)}] {
+       |  def apply(${prefix}context: ${manifest[Context].toString}, ${prefix}RNG: ${manifest[RandomProvider].toString}, ${prefix}NewFile: ${manifest[NewFile].toString}) = {
+       |    object $inputObject {
+       |      ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
+       |    }
+       |    import ${inputObject}._
+       |    implicit lazy val ${Variable.openMOLE("RNG").name}: util.Random = ${prefix}RNG()
+       |    implicit lazy val ${Variable.openMOLE("NewFile").name} = ${prefix}NewFile
+       |    $source
+       |    ${wrapping.wrapOutput}
+       |  }: ${toScalaNativeType(returnType)}
+       |}""".stripMargin
 
   def static[R](
     code:      String,
@@ -168,6 +216,10 @@ object ScalaCompilation {
     def wrapOutput: String
   }
 
+  /**
+   * Wraps a prototype set as compilable code (used to build the [[script]])
+   * @param outputs
+   */
   case class WrappedOutput(outputs: PrototypeSet) extends OutputWrapping[java.util.Map[String, Any]] {
 
     def wrapOutput =

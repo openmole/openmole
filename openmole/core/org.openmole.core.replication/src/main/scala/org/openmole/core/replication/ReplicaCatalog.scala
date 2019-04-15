@@ -19,6 +19,7 @@ package org.openmole.core.replication
 
 import java.io.File
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.locks.ReentrantLock
 
 import com.google.common.cache._
 import org.openmole.core.db.{ Replica, replicas }
@@ -51,6 +52,11 @@ object ReplicaCatalog extends JavaLogger {
 
 }
 
+/**
+ * Manage [[Replica]]s in the database
+ * @param database
+ * @param preference
+ */
 class ReplicaCatalog(database: Database, preference: Preference) {
 
   import ReplicaCatalog.Log._
@@ -59,6 +65,7 @@ class ReplicaCatalog(database: Database, preference: Preference) {
   def query[T](f: DBIOAction[T, slick.dbio.NoStream, scala.Nothing]): T = Await.result(database.run(f), concurrent.duration.Duration.Inf)
 
   lazy val localLock = new LockRepository[ReplicaCacheKey]
+
   type ReplicaCacheKey = (String, String, String)
 
   val replicaCache = CacheBuilder.newBuilder.asInstanceOf[CacheBuilder[ReplicaCacheKey, Replica]].
@@ -66,17 +73,15 @@ class ReplicaCatalog(database: Database, preference: Preference) {
     expireAfterAccess(preference(ReplicaCacheTime).millis, TimeUnit.MILLISECONDS).
     build[ReplicaCacheKey, Replica]
 
-  private def clean(storageId: String, removeOnStorage: String ⇒ Unit) = {
+  def clean(storageId: String, removeOnStorage: String ⇒ Unit) = {
     val time = System.currentTimeMillis
 
+    // Note: Destination file will be cleaned while cleaning the replicaDirectory
     for {
       replica ← query { replicas.filter { _.storage === storageId }.result }
       if !new File(replica.source).exists || time - replica.lastCheckExists > preference(ReplicaCatalog.NoAccessCleanTime).millis
-    } {
-      logger.fine(s"Remove gc $replica")
-      remove(replica.id)
-      removeOnStorage(replica.path)
-    }
+    } remove(replica.id)
+
   }
 
   def uploadAndGet[S](
@@ -87,7 +92,6 @@ class ReplicaCatalog(database: Database, preference: Preference) {
     hash:      String,
     storageId: String
   ): Replica = {
-    clean(storageId, remove)
     val cacheKey = (srcPath.getCanonicalPath, hash, storageId)
     // Avoid same transfer in multiple threads
     localLock.withLock(cacheKey) {
@@ -224,10 +228,13 @@ class ReplicaCatalog(database: Database, preference: Preference) {
   private def cacheKey(r: Replica) = (r.source, r.hash, r.storage)
 
   def remove(id: Long) = {
-    logger.fine(s"Remove replica with id $id")
 
     def q = replicas.filter(_.id === id)
     val replica = query { q.result }.headOption
+
+    val (source, storage, path) = if (replica.nonEmpty) (replica.get.source, replica.get.storage, replica.get.path) else ("None", "None", "None")
+    logger.fine(s"Remove replica with id $id, from source $source, storage $storage, path $path")
+
     query { q.delete }
 
     replica.foreach { r ⇒ replicaCache.invalidate(cacheKey(r)) }

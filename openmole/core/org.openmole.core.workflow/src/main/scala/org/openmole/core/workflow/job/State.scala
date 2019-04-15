@@ -20,14 +20,16 @@ package org.openmole.core.workflow.job
 object State extends Enumeration {
 
   /**
-   * @param isFinal Get if the state is a final state. Meaning there is no way
-   * it the {@link IMoleJob} state can change again.
+   * Enumeration of possible job states
+   *
+   * @param name name of the state
+   * @param isFinal Get if the state is a final state. Meaning there is for the [[MoleJob]] to change state again.
    */
   case class State(name: String, isFinal: Boolean = false) extends Val(name)
 
   /**
    *
-   * The job as been created and is ready to be excuted.
+   * The job as been created and is ready to be executed.
    *
    */
   val READY = new State("Ready")
@@ -41,14 +43,14 @@ object State extends Enumeration {
 
   /**
    *
-   * The job has sucessfully ended.
+   * The job has successfully ended.
    *
    */
   val COMPLETED = new State("Completed", true)
 
   /**
    *
-   * The job has failed, an uncatched exception has been raised
+   * The job has failed, an uncaught exception has been raised
    * to the workflow engine.
    *
    */

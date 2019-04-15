@@ -22,7 +22,7 @@ import org.openmole.tool.random
 import org.openmole.tool.random.RandomProvider
 import org.openmole.tool.statistics.StatisticsPackage
 
-trait CodePackage extends FilePackage with StatisticsPackage {
+trait CodePackage extends FilePackage with StatisticsPackage with MathPackage {
   def Random(seed: Long): java.util.Random = random.Random.apply(seed)
   def Random()(implicit randomProvider: RandomProvider): java.util.Random = newRandom(randomProvider().nextLong())
 
@@ -52,4 +52,17 @@ trait CodePackage extends FilePackage with StatisticsPackage {
 
 object CodePackage extends CodePackage {
   def namespace = s"${this.getClass.getPackage.getName}.${classOf[CodePackage].getSimpleName}"
+}
+
+trait MathPackage { mp ⇒
+
+  def round(d: Double, n: Int = 0) = {
+    val s = math pow (10, n)
+    math.round(d * s) / s
+  }
+
+  implicit class DoubleMathDecorator(d: Double) {
+    def round(n: Int = 0) = mp.round(d, n)
+  }
+
 }

@@ -17,19 +17,34 @@
 
 package org.openmole.core.workflow.tools
 
-import scala.collection.SetLike
+import monocle.Lens
+
 import scala.collection.immutable.TreeMap
 import org.openmole.core.context._
+import org.openmole.core.workflow.builder.{ DefaultBuilder, InputBuilder }
 
 object DefaultSet {
   implicit def seqToDefaultSet(s: Seq[Default[_]]) = DefaultSet(s: _*)
   implicit def defaultSetToSeq(d: DefaultSet): Seq[Default[_]] = d.defaultMap.values.toSeq
 
-  val empty = DefaultSet(Iterable.empty)
+  implicit def defaultBuilder = new DefaultBuilder[DefaultSet] with InputBuilder[DefaultSet] {
+    override def defaults: Lens[DefaultSet, DefaultSet] = Lens.id
+    override def inputs: Lens[DefaultSet, PrototypeSet] = Lens { _: DefaultSet ⇒ PrototypeSet.empty } { p ⇒ d ⇒ d }
+  }
+
+  lazy val empty = DefaultSet(Iterable.empty)
+
+  type DefaultAssignment = DefaultSet ⇒ DefaultSet
+  def fromAssignments(assignments: Seq[DefaultAssignment]): DefaultSet = assignments.foldLeft(empty)((ds, a) ⇒ a(ds))
 
   def apply(p: Default[_]*): DefaultSet = DefaultSet(p)
+
 }
 
+/**
+ * A set of default values for prototypes
+ * @param defaults
+ */
 case class DefaultSet(defaults: Iterable[Default[_]]) {
 
   @transient lazy val defaultMap =

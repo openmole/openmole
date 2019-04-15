@@ -38,10 +38,16 @@ object ExecutorPool {
 
 }
 
+/**
+ * A pool of [[LocalExecutor]] threads
+ *
+ * @param nbThreads
+ * @param environment
+ * @param threadProvider
+ */
 class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment], threadProvider: ThreadProvider) {
 
-  def priority(localExecutionJob: LocalExecutionJob) = localExecutionJob.moleJobs.count(mj ⇒ MoleTask.containsMoleTask(mj))
-
+  def priority(localExecutionJob: LocalExecutionJob) = 1
   private val jobs = PriorityQueue[LocalExecutionJob]()
 
   private val executors = {
@@ -54,11 +60,11 @@ class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment],
     case (exe, thread) ⇒ exe.stop = true; thread.interrupt
   }
 
-  private[local] def addExecuter() = executors.synchronized {
+  private[local] def addExecutor() = executors.synchronized {
     executors += ExecutorPool.createExecutor(environment, threadProvider)
   }
 
-  private[local] def removeExecuter(ex: LocalExecutor) = executors.synchronized {
+  private[local] def removeExecutor(ex: LocalExecutor) = executors.synchronized {
     executors.remove(ex)
   }
 
@@ -66,7 +72,7 @@ class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment],
 
   private[local] def idle(localExecutor: LocalExecutor) = {
     val thread = executors.synchronized { executors.remove(localExecutor) }.get
-    addExecuter()
+    addExecutor()
   }
 
   def enqueue(job: LocalExecutionJob) = jobs.enqueue(job, priority(job))

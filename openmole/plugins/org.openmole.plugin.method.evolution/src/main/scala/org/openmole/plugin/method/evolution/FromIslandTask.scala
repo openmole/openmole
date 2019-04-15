@@ -24,16 +24,13 @@ import org.openmole.core.workflow.task._
 
 object FromIslandTask {
 
-  def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
-    val t = wfi(algorithm)
-
+  def apply[T](evolution: EvolutionWorkflow)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     ClosureTask("FromIslandTask") { (context, _, _) ⇒
-      val population = t.operations.migrateFromIsland(context(t.populationPrototype).toVector, context(t.statePrototype))
-      Variable(t.populationPrototype, population.toArray(t.individualPrototype.`type`.manifest))
+      val population = evolution.operations.migrateFromIsland(context(evolution.populationPrototype).toVector, context(evolution.statePrototype))
+      Variable(evolution.populationPrototype, population.toArray(evolution.individualPrototype.`type`.manifest))
     } set (
-      inputs += (t.populationPrototype, t.statePrototype),
-      outputs += t.populationPrototype
+      inputs += (evolution.populationPrototype, evolution.statePrototype),
+      outputs += evolution.populationPrototype
     )
-  }
 
 }

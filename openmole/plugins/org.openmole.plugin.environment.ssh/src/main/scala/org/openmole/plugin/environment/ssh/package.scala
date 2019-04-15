@@ -162,10 +162,12 @@ package object ssh {
     batchExecutionJob: BatchExecutionJob,
     storage: S,
     space: StorageSpace,
-    submit: (SerializedJob, String) => J,
+    submit: (SerializedJob, String, String) => J,
     state: J => ExecutionState,
     delete: J => Unit,
     stdOutErr: J => (String, String))(implicit services: BatchEnvironment.Services) = {
+    import services._
+
     val jobDirectory = HierarchicalStorageSpace.createJobDirectory(storage, space)
     val remoteStorage = LogicalLinkStorage.remote(LogicalLinkStorage(), jobDirectory)
 
@@ -176,7 +178,7 @@ package object ssh {
         BatchEnvironment.toReplicatedFile(
           StorageService.uploadInDirectory(storage, _, space.replicaDirectory, _),
           StorageService.exists(storage, _),
-          StorageService.backgroundRmFile(storage, _),
+          StorageService.rmFile(storage, _, background = true),
           batchExecutionJob.environment,
           StorageService.id(storage)
         )(f, options)
@@ -186,7 +188,7 @@ package object ssh {
       val sj = BatchEnvironment.serializeJob(batchExecutionJob, remoteStorage, replicate, upload, StorageService.id(storage))
       val outputPath = StorageService.child(storage, jobDirectory, uniqName("job", ".out"))
 
-      val job = submit(sj, outputPath)
+      val job = submit(sj, outputPath, jobDirectory)
 
       BatchJobControl(
         batchExecutionJob.environment,
@@ -202,6 +204,12 @@ package object ssh {
     }
   }
 
+
+  def cleanSSHStorage(storage: Either[(StorageSpace, LocalStorage), (StorageSpace, SSHStorage)], background: Boolean)(implicit services: BatchEnvironment.Services, s: Effect[_root_.gridscale.ssh.SSH], l: Effect[_root_.gridscale.local.Local]) =
+    storage match {
+      case Left((space, local)) ⇒ HierarchicalStorageSpace.clean(local, space,background)
+      case Right((space, ssh))  ⇒ HierarchicalStorageSpace.clean(ssh, space, background)
+    }
 
 
 }

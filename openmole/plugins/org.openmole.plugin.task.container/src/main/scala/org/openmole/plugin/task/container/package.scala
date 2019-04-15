@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2017 Jonathan Passerat-Palmbach
  * Copyright (C) 2017 Romain Reuillon
  *
@@ -49,12 +49,13 @@ package object container extends ContainerPackage {
   type FileBinding = (String, String)
 
   /**
+   * FIXME maybe make it an option to avoid passing "" when inputDirectory is empty
+   *
    * @param inputDirectory Directory used to store input files / folder from the dataflow
    * @param baseDirectory
    * @param path Target location
    * @return
    */
-  // FIXME maybe make it an option to avoid passing "" when inputDirectory is empty
   def inputPathResolver(inputDirectory: File, baseDirectory: String)(path: String): File = {
     if (File(path).isAbsolute) inputDirectory / path
     else inputDirectory / baseDirectory / path

@@ -29,15 +29,22 @@ import squants.time.TimeConversions._
 object StorageService extends JavaLogger {
   val DirRegenerate = ConfigurationLocation("StorageService", "DirRegenerate", Some(1 hours))
 
-  def backgroundRmFile[S](s: S, path: String)(implicit services: BatchEnvironment.Services, storageInterface: StorageInterface[S]) = {
+  def rmFile[S](s: S, path: String, background: Boolean)(implicit services: BatchEnvironment.Services, storageInterface: StorageInterface[S]): Unit = {
     def action = { rmFile(s, path); false }
-    JobManager ! RetryAction(() ⇒ action)
+    if (background) JobManager ! RetryAction(() ⇒ action)
+    else rmFile(s, path)
   }
 
-  def rmFile[S](s: S, directory: String)(implicit storageInterface: StorageInterface[S]) =
+  def rmDirectory[S](s: S, path: String, background: Boolean)(implicit services: BatchEnvironment.Services, storageInterface: HierarchicalStorageInterface[S]): Unit = {
+    def action = { rmDirectory(s, path); false }
+    if (background) JobManager ! RetryAction(() ⇒ action)
+    else rmDirectory(s, path)
+  }
+
+  def rmFile[S](s: S, directory: String)(implicit storageInterface: StorageInterface[S]): Unit =
     storageInterface.rmFile(s, directory)
 
-  def rmDirectory[S](s: S, directory: String)(implicit hierarchicalStorageInterface: HierarchicalStorageInterface[S]) =
+  def rmDirectory[S](s: S, directory: String)(implicit hierarchicalStorageInterface: HierarchicalStorageInterface[S]): Unit =
     hierarchicalStorageInterface.rmDir(s, directory)
 
   def id[S](s: S)(implicit environmentStorage: EnvironmentStorage[S]) = environmentStorage.id(s)

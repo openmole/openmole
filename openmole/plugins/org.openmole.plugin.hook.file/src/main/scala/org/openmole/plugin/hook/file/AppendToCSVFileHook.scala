@@ -20,6 +20,7 @@ package org.openmole.plugin.hook.file
 import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.expansion._
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.tools.io.Prettifier._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.mole._
@@ -36,15 +37,24 @@ object AppendToCSVFileHook {
     override def arraysOnSingleRow = AppendToCSVFileHook.arraysOnSingleRow
   }
 
-  def apply(file: FromContext[File], prototypes: Val[_]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(file: FromContext[File], values: Val[_]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): AppendToCSVFileHook =
+    AppendToCSVFileHook(
+      file,
+      values.toVector)
+
+  def apply(
+    file:       FromContext[File],
+    values:     Seq[Val[_]]                           = Vector.empty,
+    header:     OptionalArgument[FromContext[String]] = None,
+    arrayOnRow: Boolean                               = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new AppendToCSVFileHook(
       file,
-      prototypes.toVector,
-      header = None,
-      arraysOnSingleRow = false,
+      values.toVector,
+      header = header,
+      arraysOnSingleRow = arrayOnRow,
       config = InputOutputConfig(),
       info = InfoConfig()
-    ) set (inputs += (prototypes: _*))
+    ) set (inputs += (values: _*))
 
 }
 
@@ -64,8 +74,16 @@ object AppendToCSVFileHook {
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
     import parameters._
-    import org.openmole.plugin.tool.csv._
-    writeVariablesToCSV(file.from(context), prototypes, context, arraysOnSingleRow, header.map(_.from(context)))
+    import org.openmole.plugin.tool.csv
+
+    val ps =
+      if (prototypes.isEmpty) context.values.map { _.prototype }.toVector
+      else prototypes
+
+    val values = ps.map(context(_))
+
+    def headerLine = header.map(_.from(context)) getOrElse csv.header(ps, values, arraysOnSingleRow)
+    csv.writeVariablesToCSV(file.from(context), headerLine, values, arraysOnSingleRow)
     context
   }
 

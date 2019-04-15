@@ -9,8 +9,8 @@ object Generate {
 
   def run(args: Array[String]): Int = {
     case class Parameters(
-      target:  Option[File]   = None,
-      ignored: List[String]   = Nil
+      target:  Option[File] = None,
+      ignored: List[String] = Nil
     )
 
     @tailrec def parse(args: List[String], c: Parameters = Parameters()): Parameters = args match {

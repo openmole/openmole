@@ -16,31 +16,25 @@
  */
 package org.openmole.plugin.tool.pattern
 
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.transition._
+import org.openmole.core.dsl._
 import org.openmole.core.expansion._
+import org.openmole.core.workflow.builder.DefinitionScope
 
 object Skip {
 
-  import org.openmole.core.workflow.builder.DefinitionScope.internal._
+  def apply(dsl: DSL, condition: Condition)(implicit definitionScope: DefinitionScope = DefinitionScope.Internal("skip")) = {
+    val first = Strain(EmptyTask())
+    val last = Strain(EmptyTask())
 
-  def apply(puzzle: Puzzle, condition: Condition) = {
-    val first = Capsule(EmptyTask(), strain = true)
-    val firstSlot = Slot(first)
-    val last = Capsule(EmptyTask(), strain = true)
-
-    (firstSlot -- (puzzle when !condition) -- last) &
-      (firstSlot -- (last when condition))
+    ((first -- dsl when !condition) -- last) &
+      (first -- Slot(last) when condition)
   }
 
 }
 
 object If {
 
-  def apply(puzzle: Puzzle, condition: Condition) =
-    Skip(puzzle = puzzle, condition = !condition)
+  def apply(dsl: DSL, condition: Condition)(implicit definitionScope: DefinitionScope = DefinitionScope.Internal("if")) =
+    Skip(dsl = dsl, condition = !condition)
 
 }

@@ -27,6 +27,4 @@ trait Id {
     else if (!classOf[Id].isAssignableFrom(other.asInstanceOf[AnyRef].getClass)) false
     else id.equals(other.asInstanceOf[Id].id)
   }
-
-  override def toString = id.toString
 }

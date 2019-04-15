@@ -71,16 +71,16 @@ class EGIAuthenticationAPIImpl(s: Services) extends EGIAuthenticationAPI {
     def testPassword(data: EGIAuthenticationData, test: EGIAuthentication ⇒ Try[Boolean]): Test = coreObject(data).map { d ⇒
       test(d) match {
         case Success(_) ⇒ Test.passed()
-        case Failure(f) ⇒ Test.error("Invalid Password", ErrorBuilder(f))
+        case Failure(f) ⇒ Test.error("Invalid Password", ErrorData(f))
       }
-    }.getOrElse(Test.error("Unknown error", Error("Unknown " + data.name)))
+    }.getOrElse(Test.error("Unknown error", MessageErrorData("Unknown " + data.name)))
 
     def test(data: EGIAuthenticationData, voName: String, test: (EGIAuthentication, String) ⇒ Try[Boolean]): Test = coreObject(data).map { d ⇒
       test(d, voName) match {
         case Success(_) ⇒ Test.passed(voName)
-        case Failure(f) ⇒ Test.error("Invalid Password", ErrorBuilder(f))
+        case Failure(f) ⇒ Test.error("Invalid Password", ErrorData(f))
       }
-    }.getOrElse(Test.error("Unknown error", Error("Unknown " + data.name)))
+    }.getOrElse(Test.error("Unknown error", MessageErrorData("Unknown " + data.name)))
 
     val vos = services.preference(EGIAuthenticationAPIImpl.voTest)
 

@@ -60,7 +60,7 @@ object Utils {
     }
   }
 
-  def addPlugins(safePaths: Seq[SafePath])(implicit workspace: Workspace): Seq[Error] = {
+  def addPlugins(safePaths: Seq[SafePath])(implicit workspace: Workspace): Seq[ErrorData] = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     val files: Seq[File] = safePaths.map {
       safePathToFile
@@ -68,9 +68,9 @@ object Utils {
     addFilePlugins(files)
   }
 
-  def addFilePlugins(files: Seq[File])(implicit workspace: Workspace): Seq[Error] = {
+  def addFilePlugins(files: Seq[File])(implicit workspace: Workspace): Seq[ErrorData] = {
     val errors = org.openmole.core.module.addPluginsFiles(files, false, Some(org.openmole.core.module.pluginDirectory))
-    errors.map(e ⇒ ErrorBuilder(e._2))
+    errors.map(e ⇒ ErrorData(e._2))
   }
 
   def removePlugin(plugin: Plugin)(implicit workspace: Workspace): Unit = synchronized {

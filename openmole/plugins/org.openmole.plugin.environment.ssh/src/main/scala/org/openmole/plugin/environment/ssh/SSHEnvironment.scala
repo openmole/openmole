@@ -105,7 +105,7 @@ object SSHEnvironment extends JavaLogger {
       batchExecutionJob,
       storage,
       space,
-      jobService.register(batchExecutionJob, _, _),
+      jobService.register(batchExecutionJob, _, _, _),
       jobService.state(_),
       jobService.delete(_),
       jobService.stdOutErr(_)
@@ -149,10 +149,7 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   }
 
   override def stop() = {
-    storageService match {
-      case Left((space, local)) ⇒ HierarchicalStorageSpace.clean(local, space)
-      case Right((space, ssh))  ⇒ HierarchicalStorageSpace.clean(ssh, space)
-    }
+    cleanSSHStorage(storageService, background = false)
     jobUpdater.stop = true
     sshInterpreter().close
   }

@@ -120,22 +120,23 @@ object Site extends App {
          * The body of this site's HTML page
          */
 
-        def bodyFrag(page: org.openmole.site.Page) = {
+        def bodyFrag(pageTree: PageTree) = {
 
           val (sitePage, elementClass) =
-            page match {
-              case Pages.index ⇒ (ContentPage(div(paddingTop := 100), div(page.content)), `class` := "")
-              case _           ⇒ (UserGuide.integrate(page), `class` := "page-element")
+            pageTree.page match {
+              case Pages.indexPage ⇒ (ContentPage(div, div(pageTree.content)), `class` := "")
+              case _               ⇒ (UserGuide.integrate(pageTree), `class` := "page-element")
             }
 
           body(position := "relative", minHeight := "100%")(
             Menu.build(sitePage),
             div(id := "main-content")(
-              div(`id` := "sidebar-right", paddingTop := 150)(
-                page.source.map(source ⇒ tools.linkButton("Suggest edits", tools.modificationLink(source), classIs(btn ++ btn_danger))
+              sitePage.header(
+                pageTree.source.map(source ⇒ tools.linkButton("Suggest edits", tools.modificationLink(source), classIs(btn ++ btn_danger))(stylesheet.suggest)
                 )),
-              sitePage.header,
               div(elementClass, id := "padding-element")(
+                if (pageTree.name == DocumentationPages.documentation.name) div
+                else sitePage.parents.map { p ⇒ innerLink(p.page, p.name) }.distinct.reduceLeftOption((x1, x2) ⇒ span(x1, span(" > "), x2)).getOrElse(span),
                 sitePage.element
               )
             ),
@@ -144,15 +145,16 @@ object Site extends App {
               case _                 ⇒ div()
             },
             Footer.build,
-            onload := onLoadString(page)
+            onload := onLoadString(pageTree)
           )
         }
 
-        private def onLoadString(sitepage: org.openmole.site.Page) = {
+        private def onLoadString(sitepage: org.openmole.site.PageTree) = {
           def siteJS = "org.openmole.site.SiteJS()"
+
           def commonJS = s"$siteJS.main();$siteJS.loadIndex(index);"
 
-          sitepage match {
+          sitepage.page match {
             case Pages.index | DocumentationPages.training ⇒ s"$siteJS.loadBlogPosts();" + commonJS
             case DocumentationPages.profile                ⇒ s"$siteJS.profileAnimation();" + commonJS
             case DocumentationPages.pse                    ⇒ s"$siteJS.pseAnimation();" + commonJS

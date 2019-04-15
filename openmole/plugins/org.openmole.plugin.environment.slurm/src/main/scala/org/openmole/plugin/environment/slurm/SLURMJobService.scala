@@ -16,8 +16,8 @@ class SLURMJobService[S, H](
 
   import services._
 
-  def submit(serializedJob: SerializedJob, outputPath: String) = {
-    val workDirectory = parameters.workDirectory getOrElse tmpDirectory
+  def submit(serializedJob: SerializedJob, outputPath: String, jobDirectory: String) = {
+    val workDirectory = parameters.workDirectory getOrElse jobDirectory
 
     def buildScript(serializedJob: SerializedJob, outputPath: String) = {
       SharedStorage.buildScript(
@@ -38,7 +38,7 @@ class SLURMJobService[S, H](
       queue = parameters.queue,
       workDirectory = workDirectory,
       wallTime = parameters.wallTime,
-      memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
+      memory = parameters.memory,
       nodes = parameters.nodes,
       coresByNode = parameters.coresByNode orElse parameters.threads,
       qos = parameters.qos,

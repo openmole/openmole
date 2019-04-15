@@ -7,7 +7,8 @@ def settings = Seq(
   resolvers += DefaultMavenRepository,
   resolvers += Resolver.sonatypeRepo("snapshots"),
   resolvers += Resolver.sonatypeRepo("releases"),
-  scalaVersion in Global := "2.12.6",
+  resolvers += Resolver.sonatypeRepo("staging"),
+  scalaVersion in Global := "2.12.7",
   scalacOptions ++= Seq("-deprecation"),
   publishArtifact in (packageDoc in publishLocal) := false,
   publishArtifact in (packageSrc in publishLocal) := false,
@@ -16,8 +17,8 @@ def settings = Seq(
 ) 
 
 
-lazy val scalatraVersion = "2.5.0"
-lazy val jettyVersion = "9.2.19.v20160908"
+lazy val scalatraVersion = "2.6.3"
+lazy val jettyVersion = "9.3.25.v20180904"
 
 lazy val scalatra = OsgiProject(dir, "org.scalatra",
   exports = Seq("org.scalatra.*, org.fusesource.*", "grizzled.*", "org.eclipse.jetty.*", "javax.*"),
@@ -42,7 +43,7 @@ lazy val shapeless =  OsgiProject(dir, "com.chuusai.shapeless", exports = Seq("s
   version := shapelessVersion
 ) settings(settings: _*)
 
-lazy val circeVersion = "0.9.1"
+lazy val circeVersion = "0.10.0"
 lazy val circe = OsgiProject(dir, "io.circe",
   exports = Seq("io.circe.*", "!cats.*", "!scala.*", "!shapeless.*"),
   privatePackages = Seq("jawn.*"),
@@ -59,7 +60,7 @@ lazy val circe = OsgiProject(dir, "io.circe",
 lazy val logback = OsgiProject(dir, "ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl"), dynamicImports = Seq("*")) settings
   (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9") settings(settings: _*)
 
-lazy val h2Version = "1.4.196"
+lazy val h2Version = "1.4.199"
 lazy val h2 = OsgiProject(dir, "org.h2", dynamicImports = Seq("*"), privatePackages = Seq("META-INF.*")) settings
   (libraryDependencies += "com.h2database" % "h2" % h2Version, version := h2Version) settings(settings: _*)
 
@@ -90,11 +91,13 @@ lazy val xstream = OsgiProject(
     "!org.xml.sax.*",
     "!sun.misc.*",
     "!org.joda.time.*",
+    "!com.sun.xml.*",
+    "!com.ibm.xml.*",
     "!javax.*",
     "*"),
   privatePackages = Seq("!scala.*", "META-INF.services.*", "*")) settings(
-  libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.10", "net.sf.kxml" % "kxml2" % "2.3.0"),
-  version := "1.4.10") settings(settings: _*)
+  libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.11", "net.sf.kxml" % "kxml2" % "2.3.0"),
+  version := "1.4.11") settings(settings: _*)
 
 lazy val scalaLang = OsgiProject(
   dir,
@@ -146,13 +149,13 @@ lazy val netlogo6 = OsgiProject(
   //resolvers += Resolver.bintrayRepo("netlogo", "NetLogo-JVM"),
   libraryDependencies ++= Seq(
     "org.nlogo" % "netlogo" % netLogo6Version % "provided" from s"https://dl.bintray.com/netlogo/NetLogo-JVM/org/nlogo/netlogo/$netLogo6Version/netlogo-$netLogo6Version.jar",
-    "org.scala-lang" % "scala-library" % "2.12.1" % "provided",
-    "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4" % "provided",
-    "commons-codec" % "commons-codec" % "1.11" % "provided",
+    "org.scala-lang" % "scala-library" % "2.12.4" % "provided",
+    "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.5" % "provided",
+    "commons-codec" % "commons-codec" % "1.10" % "provided",
     "org.ow2.asm" % "asm-all" % "5.0.4" % "provided",
     "org.picocontainer" % "picocontainer" % "2.13.6" % "provided",
     "org.parboiled" %% "parboiled" % "2.1.3" % "provided"
-  ), version := netLogo6Version, scalaVersion := "2.12.1", crossPaths := false) settings(settings: _*)
+  ), version := netLogo6Version, scalaVersion := "2.12.4", crossPaths := false) settings(settings: _*)
 
 lazy val scalaTagsVersion = "0.6.5"
 lazy val scalaRxVersion = "0.4.0"
@@ -183,9 +186,9 @@ lazy val scalatexSite =
     libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.3.12",
     version := "0.3.12") settings(settings: _*)
 
-lazy val upickle = OsgiProject(dir, "upickle", exports = Seq("upickle.*", "jawn.*", "derive.*", "sourcecode.*"), imports = Seq("*")) settings(
+lazy val upickle = OsgiProject(dir, "upickle", exports = Seq("upickle.*", "jawn.*", "derive.*"), imports = Seq("*")) settings(
   libraryDependencies ++= Seq("com.lihaoyi" %% "upickle" % scalaUpickleVersion),
-  version := scalaUpickleVersion) settings(settings: _*)
+  version := scalaUpickleVersion) settings(settings: _*) dependsOn(sourceCode)
 
 lazy val boopickle = OsgiProject(dir, "boopickle", exports = Seq("boopickle.*"), imports = Seq("*")) settings(
   libraryDependencies ++= Seq("io.suzaku" %% "boopickle" % scalaBoopickleVersion),
@@ -211,7 +214,6 @@ lazy val cats =
     version := catsVersion
   ) settings(settings: _*)
 
-lazy val freedslVersion = "0.26"
 lazy val squantsVersion = "1.3.0"
 
 lazy val squants = 
@@ -221,24 +223,11 @@ lazy val squants =
   ) settings(settings: _*)
 
 
-lazy val freedsl =
-  OsgiProject(dir, "freedsl", exports = Seq("freedsl.*", "freestyle.*", "mainecoon.*")) settings (
-    libraryDependencies += "fr.iscpif.freedsl" %% "freedsl" % freedslVersion,
-    libraryDependencies += "fr.iscpif.freedsl" %% "random" % freedslVersion,
-    libraryDependencies += "fr.iscpif.freedsl" %% "system" % freedslVersion,
-    libraryDependencies += "fr.iscpif.freedsl" %% "io" % freedslVersion,
-    libraryDependencies += "fr.iscpif.freedsl" %% "filesystem" % freedslVersion,
-    libraryDependencies += "fr.iscpif.freedsl" %% "errorhandler" % freedslVersion,
-    libraryDependencies += "fr.iscpif.freedsl" %% "tool" % freedslVersion,
-    libraryDependencies += "fr.iscpif.freedsl" %% "dsl" % freedslVersion,
-    version := freedslVersion
-  ) dependsOn(cats, squants) settings(settings: _*)
+lazy val mgoVersion = "3.26"
 
-lazy val mgoVersion = "3.17"
-
-lazy val mgo = OsgiProject(dir, "mgo", imports = Seq("!better.*", "*")) settings(
+lazy val mgo = OsgiProject(dir, "mgo", exports = Seq("mgo.*", "freestyle.*"), imports = Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "*"), privatePackages = Seq("!scala.*", "!monocle.*", "!org.apache.commons.math3.*", "!cats.*", "!squants.*", "!scalaz.*", "*")) settings(
   libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
-  version := mgoVersion) dependsOn(monocle, freedsl, math) settings(settings: _*)
+  version := mgoVersion) dependsOn(monocle, math, cats, squants) settings(settings: _*)
 
 /*lazy val familyVersion = "1.3"
 lazy val family = OsgiProject(dir, "fr.iscpif.family") settings(
@@ -337,9 +326,10 @@ lazy val config = OsgiProject(dir, "org.apache.commons.configuration2",
   libraryDependencies += "commons-beanutils" % "commons-beanutils" % "1.9.2",
   version := "2.2") settings(settings: _*) dependsOn (logging)
 
+def sourceCodeVersion = "0.1.4"
 lazy val sourceCode = OsgiProject(dir, "sourcecode") settings (
-  libraryDependencies += "com.lihaoyi" %% "sourcecode" % "0.1.3",
-  version := "0.1.3"
+  libraryDependencies += "com.lihaoyi" %% "sourcecode" % sourceCodeVersion,
+  version := sourceCodeVersion
 ) settings(settings: _*)
 
 
@@ -349,7 +339,7 @@ lazy val effectaside = OsgiProject(dir, "effectaside", imports = Seq("*")) setti
   version := effectasideVersion
 )
 
-def gridscaleVersion = "2.9"
+def gridscaleVersion = "2.15"
 lazy val gridscale = OsgiProject(dir, "gridscale", imports = Seq("*"), exports = Seq("gridscale.*", "enumeratum.*")) settings (
   libraryDependencies += "fr.iscpif.gridscale" %% "gridscale" % gridscaleVersion,
   version := gridscaleVersion
