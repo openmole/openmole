@@ -33,15 +33,15 @@ class Activator extends PluginInfoActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector(
-        Task(objectName(BreedTask)),
-        Task(objectName(DeltaTask)),
-        Task(objectName(ElitismTask)),
-        Task(objectName(FromIslandTask)),
-        Task(objectName(GenerateIslandTask)),
-        Task(objectName(ReassignStateRNGTask)),
-        Task(objectName(ScalingGenomeTask)),
-        Task(objectName(TerminationTask)),
-        Task(objectName(InitialStateTask)),
+        TaskKeyWord(objectName(BreedTask)),
+        TaskKeyWord(objectName(DeltaTask)),
+        TaskKeyWord(objectName(ElitismTask)),
+        TaskKeyWord(objectName(FromIslandTask)),
+        TaskKeyWord(objectName(GenerateIslandTask)),
+        TaskKeyWord(objectName(ReassignStateRNGTask)),
+        TaskKeyWord(objectName(ScalingGenomeTask)),
+        TaskKeyWord(objectName(TerminationTask)),
+        TaskKeyWord(objectName(InitialStateTask)),
         //        Pattern(objectName(NichedNSGA2)),
         //        Pattern(objectName(NichedNSGA2Evolution)),
         //        Pattern(objectName(GenomeProfile)),
@@ -52,10 +52,10 @@ class Activator extends PluginInfoActivator {
         //        Pattern(objectName(OSEEvolution)),
         //        Pattern(objectName(PSE)),
         //        Pattern(objectName(PSEEvolution)),
-        Pattern("SteadyStateEvolution"),
-        Pattern("IslandEvolution"),
-        Word(Stochastic.getClass),
-        Hook(objectName(SavePopulationHook))
+        PatternKeyWord("SteadyStateEvolution"),
+        PatternKeyWord("IslandEvolution"),
+        WordKeyWord(Stochastic.getClass),
+        HookKeyWord(objectName(SavePopulationHook))
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)

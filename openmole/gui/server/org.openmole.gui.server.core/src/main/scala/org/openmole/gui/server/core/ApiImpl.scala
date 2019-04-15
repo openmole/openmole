@@ -311,8 +311,8 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   def runScript(scriptData: ScriptData, validateScript: Boolean) = {
     asynchronousCompilation(
       scriptData,
-      (execId: ExecutionId) ⇒ execution.compiled(execId),
-      (ex: MoleExecution, execID: ExecutionId, error: Throwable ⇒ Unit) ⇒ processRun(ex, execID, validateScript, error)
+      Some(execId ⇒ execution.compiled(execId)),
+      Some(processRun(_, _, validateScript))
     )
   }
 
@@ -324,20 +324,15 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     execId:       ExecutionId,
     scriptData:   ScriptData,
     outputStream: StringPrintStream,
-    onCompiled:   ExecutionId ⇒ Unit                                    = ExecutionId ⇒ {},
-    onEvaluated:  (MoleExecution, ExecutionId, Throwable ⇒ Unit) ⇒ Unit = (_, _, _) ⇒ {}): Option[ErrorData] = {
+    onCompiled:   Option[ExecutionId ⇒ Unit]                  = None,
+    onEvaluated:  Option[(MoleExecution, ExecutionId) ⇒ Unit] = None): Option[ErrorData] = {
 
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     def error(t: Throwable): ErrorData = {
       t match {
         case ce: ScalaREPL.CompilationError ⇒
-          def toErrorWithLocation(em: ScalaREPL.ErrorMessage) = ErrorWithLocation(em.rawMessage, em.position.map {
-            _.line
-          }, em.position.map {
-            _.start
-          }, em.position.map {
-            _.end
-          })
+          def toErrorWithLocation(em: ScalaREPL.ErrorMessage) =
+            ErrorWithLocation(em.rawMessage, em.position.map { _.line }, em.position.map { _.start }, em.position.map { _.end })
 
           ErrorData(ce.errorMessages.map(toErrorWithLocation), t)
         case _ ⇒ ErrorData(t)
@@ -355,14 +350,14 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
         case ErrorInCode(e)            ⇒ Some(error(e))
         case ErrorInCompiler(e)        ⇒ Some(error(e))
         case compiled: Compiled ⇒
-          onCompiled(execId)
+          onCompiled.foreach { _(execId) }
           catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
             case Failure(e) ⇒ Some(error(e))
             case Success(dsl) ⇒
               val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(outputStream))
               Try(dslToPuzzle(dsl).toExecution(executionContext = MoleExecutionContext()(services))) match {
                 case Success(ex) ⇒
-                  onEvaluated(ex, execId, (t: Throwable) ⇒ error(t))
+                  onEvaluated.foreach { _(ex, execId) }
                   None
                 case Failure(e) ⇒ Some(error(e))
               }
@@ -376,7 +371,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
   }
 
-  def asynchronousCompilation(scriptData: ScriptData, onEvaluated: ExecutionId ⇒ Unit = ExecutionId ⇒ {}, onCompiled: (MoleExecution, ExecutionId, Throwable ⇒ Unit) ⇒ Unit = (_, _, _) ⇒ {}): Unit = {
+  def asynchronousCompilation(scriptData: ScriptData, onEvaluated: Option[ExecutionId ⇒ Unit] = None, onCompiled: Option[(MoleExecution, ExecutionId) ⇒ Unit] = None): Unit = {
 
     val (execId, outputStream) = compilationData(scriptData)
 
@@ -391,21 +386,19 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     val compilationFuture =
       threadProvider.submit(ThreadProvider.maxPriority) { () ⇒
         val errorData = synchronousCompilation(execId, scriptData, outputStream, onEvaluated, onCompiled)
-        errorData.foreach { ed ⇒
-          execution.addError(execId, Failed(Vector.empty, ed, Seq.empty))
-        }
+        errorData.foreach { ed ⇒ execution.addError(execId, Failed(Vector.empty, ed, Seq.empty)) }
       }
 
     execution.addCompilation(execId, compilationFuture)
   }
 
-  def processRun(ex: MoleExecution, execId: ExecutionId, validateScript: Boolean, error: Throwable ⇒ Unit) = {
+  def processRun(ex: MoleExecution, execId: ExecutionId, validateScript: Boolean) = {
     val envIds = (ex.allEnvironments).map { env ⇒ EnvironmentId(getUUID) → env }
     execution.addRunning(execId, envIds)
     envIds.foreach { case (envId, env) ⇒ env.listen(execution.environmentListener(envId)) }
 
     catchAll(ex.start(validateScript)) match {
-      case Failure(e) ⇒ error(e)
+      case Failure(e) ⇒ execution.addError(execId, Failed(Vector.empty, ErrorData(e), Seq.empty))
       case Success(_) ⇒
         val inserted = execution.addMoleExecution(execId, ex)
         if (!inserted) ex.cancel

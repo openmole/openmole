@@ -22,12 +22,13 @@ import monocle.macros.Lenses
 import org.openmole.core.dsl
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import org.openmole.plugin.hook.file.CSVHook
+import org.openmole.plugin.tool.csv.{header, writeVariablesToCSV}
 import org.openmole.plugin.tool.pattern._
 
 package object sensitivity {
 
-  implicit def extension = DSLContainerExtension(Sensitivity.MethodContainer.container)
+  implicit def saltelliExtension = DSLContainerExtension(Sensitivity.SaltelliMethodContainer.container)
+  implicit def morrisExtension = DSLContainerExtension(Sensitivity.MorrisMethodContainer.container)
 
   object Sensitivity {
     /**
@@ -54,6 +55,19 @@ package object sensitivity {
     }
 
 
+    def writeFile(file: File, inputs: Seq[Val[_]], outputs: Seq[Val[_]], coefficient: (Val[_], Val[_]) ⇒ Val[_]) = FromContext { p ⇒
+      import p._
+
+      file.createParentDir
+      file.delete
+
+      outputs.foreach { o ⇒
+        val vs = inputs.map { i ⇒ coefficient(i, o) }
+        def headerLine = s"""output,${header(inputs, vs)}"""
+        writeVariablesToCSV(file, headerLine, Seq(o.name) ++ vs.map(v ⇒ context(v)))
+      }
+    }
+
     def outputs(
       modelInputs: Seq[ScalarOrSequenceOfDouble[_]],
       modelOutputs: Seq[Val[Double]]) =
@@ -64,14 +78,17 @@ package object sensitivity {
 
 
 
-    @Lenses case class MethodContainer(container: DSLContainer, scope: DefinitionScope, outputs: Seq[Val[_]]) {
-      def save(
-        file:       FromContext[File],
-        values:     Seq[Val[_]]                           = Vector.empty,
-        header:     OptionalArgument[FromContext[String]] = None,
-        arrayOnRow: Boolean                               = false) = {
+    @Lenses case class SaltelliMethodContainer(container: DSLContainer, scope: DefinitionScope, inputs: Seq[ScalarOrSequenceOfDouble[_]], outputs: Seq[Val[_]]) {
+      def save(directory:       FromContext[File]) = {
         implicit val defScope = scope
-        this hook CSVHook(file = file, values = outputs ++ values, header = header, arrayOnRow = arrayOnRow)
+        this hook SaltelliHook(this, directory)
+      }
+    }
+
+    @Lenses case class MorrisMethodContainer(container: DSLContainer, scope: DefinitionScope, inputs: Seq[ScalarOrSequenceOfDouble[_]], outputs: Seq[Val[_]]) {
+      def save(directory:       FromContext[File]) = {
+        implicit val defScope = scope
+        this hook MorrisHook(this, directory)
       }
     }
 
@@ -113,12 +130,7 @@ package object sensitivity {
         aggregation = aggregation
       )
 
-    val sensitivityOutput =
-      Sensitivity.outputs(inputs, outputs).map { case (i, o) ⇒ Morris.mu(i, o) } ++
-      Sensitivity.outputs(inputs, outputs).map { case (i, o) ⇒ Morris.muStar(i, o) } ++
-      Sensitivity.outputs(inputs, outputs).map { case (i, o) ⇒ Morris.sigma(i, o) }
-
-    Sensitivity.MethodContainer(w, scope, sensitivityOutput)
+    Sensitivity.MorrisMethodContainer(w, scope, inputs, outputs)
   }
 
   def SensitivitySaltelli(
@@ -127,7 +139,6 @@ package object sensitivity {
     outputs: Seq[Val[Double]],
     samples:      FromContext[Int],
     scope: DefinitionScope = "sensitivity saltelli") = {
-
     implicit def defScope = scope
 
     val sampling = SaltelliSampling(samples, inputs: _*)
@@ -147,11 +158,7 @@ package object sensitivity {
         aggregation = aggregation
       )
 
-    val sensitivityOutputs =
-      Sensitivity.outputs(inputs, outputs).map { case (i, o) ⇒ Saltelli.firstOrder(i, o) } ++
-      Sensitivity.outputs(inputs, outputs).map { case (i, o) ⇒ Saltelli.totalOrder(i, o) }
-
-    Sensitivity.MethodContainer(w, scope, sensitivityOutputs)
+    Sensitivity.SaltelliMethodContainer(w, scope, inputs, outputs)
   }
 
 }

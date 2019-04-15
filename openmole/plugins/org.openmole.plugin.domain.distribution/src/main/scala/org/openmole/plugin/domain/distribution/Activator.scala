@@ -28,7 +28,7 @@ class Activator extends BundleActivator {
   override def start(context: BundleContext): Unit = {
     import org.openmole.core.pluginmanager.KeyWord._
 
-    val keyWords = Vector(Domain(classOf[UniformDistribution[_]]))
+    val keyWords = Vector(DomainKeyWord(classOf[UniformDistribution[_]]))
 
     PluginInfo.register(this, namespaces = Vector(this.getClass.getPackage), keyWords = keyWords)
   }

@@ -46,8 +46,8 @@ object SerializerService {
 }
 
 /**
-  * Serializer
-  */
+ * Serializer
+ */
 class SerializerService { service ⇒
 
   private[serializer] def buildXStream() = {

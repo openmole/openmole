@@ -74,13 +74,16 @@ object AppendToCSVFileHook {
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
     import parameters._
-    import org.openmole.plugin.tool.csv._
+    import org.openmole.plugin.tool.csv
 
     val ps =
       if (prototypes.isEmpty) context.values.map { _.prototype }.toVector
       else prototypes
 
-    writeVariablesToCSV(file.from(context), ps, ps.map(context(_)), arraysOnSingleRow, header.map(_.from(context)))
+    val values = ps.map(context(_))
+
+    def headerLine = header.map(_.from(context)) getOrElse csv.header(ps, values, arraysOnSingleRow)
+    csv.writeVariablesToCSV(file.from(context), headerLine, values, arraysOnSingleRow)
     context
   }
 

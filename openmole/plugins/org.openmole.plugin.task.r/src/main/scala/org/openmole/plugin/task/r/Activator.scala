@@ -34,7 +34,7 @@ class Activator extends PluginInfoActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector(
-        Task(objectName(RTask))
+        TaskKeyWord(objectName(RTask))
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
