@@ -2,26 +2,13 @@ package org.openmole.plugin.sampling
 
 package object spatial {
 
-  /**
-   * Raster types
-   */
+  type RasterLayerData[N] = Array[Array[N]]
+  type RasterData[N] = Seq[RasterLayerData[N]]
+  type RasterDim = Either[Int, (Int, Int)]
+  type Point2D = (Double, Double)
+  type Coordinate = (Double, Double)
 
-  type RasterLayer = Array[Array[Double]]
-
-  type Raster = Seq[RasterLayer]
-
-  /**
-   * Spatial points
-   */
-
-  type SpatialPoint = (Double, Double)
-
-  type SpatialPoints = Iterable[SpatialPoint]
-
-  /*
-  implicit def intToEitherIntCouple(i: Int): Either[Int, (Int, Int)] = Left(i)
-
-  implicit def doubletoEitherDoubleSeq(d: Double): Either[Double, Seq[Double]] = Left(d)
-  */
+  implicit def rasterDimConversion(i: Int): RasterDim = Left(i)
+  implicit def rasterDimConversion(c: (Int, Int)): RasterDim = Right(c)
 
 }

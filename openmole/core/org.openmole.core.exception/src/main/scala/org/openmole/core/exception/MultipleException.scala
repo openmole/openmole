@@ -25,9 +25,9 @@ object MultipleException {
 }
 
 /**
-  * An Exception wrapping several exceptions
-  * @param exceptions
-  */
+ * An Exception wrapping several exceptions
+ * @param exceptions
+ */
 class MultipleException(exceptions: Iterable[Throwable]) extends Exception with Iterable[Throwable] {
 
   def iterator: Iterator[Throwable] = exceptions.iterator

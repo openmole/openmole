@@ -1,4 +1,3 @@
-
 package org.openmole.plugin.task.timing
 
 import org.openmole.core.pluginmanager._
@@ -17,7 +16,7 @@ class Activator extends PluginInfoActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector(
-        Task(objectName(TimingTask))
+        TaskKeyWord(objectName(TimingTask))
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)

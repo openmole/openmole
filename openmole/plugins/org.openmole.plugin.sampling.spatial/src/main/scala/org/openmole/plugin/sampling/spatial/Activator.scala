@@ -16,9 +16,12 @@ class Activator extends PluginInfoActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector(
-        Sampling(objectName(RandomSpatialSampling)),
-        Sampling(objectName(ExponentialMixtureSpatialSampling)),
-        Sampling(objectName(ReactionDiffusionSpatialSampling))
+        SamplingKeyWord(objectName(RandomSpatialSampling)),
+        SamplingKeyWord(objectName(ExponentialMixtureSpatialSampling)),
+        SamplingKeyWord(objectName(ReactionDiffusionSpatialSampling)),
+        SamplingKeyWord(objectName(BlocksGridSpatialSampling)),
+        SamplingKeyWord(objectName(PercolationGridSpatialSampling)),
+        SamplingKeyWord(objectName(ExpMixtureThresholdSpatialSampling))
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)

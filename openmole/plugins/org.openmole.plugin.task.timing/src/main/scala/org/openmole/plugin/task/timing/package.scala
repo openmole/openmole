@@ -1,3 +1,5 @@
+
+/*
 package org.openmole.plugin.task
 
 package timing {
@@ -19,3 +21,5 @@ package timing {
 }
 
 package object timing extends TimingTaskPackage
+
+*/

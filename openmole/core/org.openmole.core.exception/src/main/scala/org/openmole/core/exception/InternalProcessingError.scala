@@ -18,10 +18,10 @@
 package org.openmole.core.exception
 
 /**
-  * An exception occurred during the processing of a task
-  * @param message
-  * @param exception
-  */
+ * An exception occurred during the processing of a task
+ * @param message
+ * @param exception
+ */
 class InternalProcessingError(message: String, exception: Throwable = null) extends Exception(message, exception) {
   def this(exception: Throwable, message: String) = this(message, exception)
 }

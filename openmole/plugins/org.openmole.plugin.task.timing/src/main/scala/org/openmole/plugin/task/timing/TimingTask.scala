@@ -27,8 +27,8 @@ object TimingTask {
   info:    InfoConfig
 ) extends Task {
 
-  //override def inputs = task.inputs
-  //override def outputs = task.outputs ++ Seq(tracker)
+  override def inputs = task.inputs
+  override def outputs = task.outputs ++ Seq(tracker)
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
     val starttime = System.currentTimeMillis()
@@ -37,3 +37,4 @@ object TimingTask {
     taskcontext + (tracker, executiontime)
   }
 }
+
