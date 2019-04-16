@@ -78,10 +78,7 @@ object Project {
         val newCls =
           lastStat match {
             case _: Term ⇒ cls.copy(templ = cls.templ.copy(stats = cls.templ.stats.dropRight(1)))
-            case x ⇒
-              println(x.getClass)
-
-              cls
+            case x ⇒ cls
           }
 
         source.copy(stats = source.stats.dropRight(1) ++ Seq(newCls))
