@@ -72,13 +72,19 @@ object Project {
         import _root_.scala.meta._
 
         val source = classContent.parse[Source].get
-        val cls = source.stats.last.asInstanceOf[Defn.Class]
+        val cls = source.stats.last.asInstanceOf[Defn.Object]
         val lastStat = cls.templ.stats.last
+
+        def addLazy(stat: Stat) =
+          stat match {
+            case v: Defn.Val if v.mods.collect { case x: Mod.Lazy ⇒ x }.isEmpty ⇒ v.copy(mods = v.mods ++ Seq(Mod.Lazy()))
+            case s ⇒ s
+          }
 
         val newCls =
           lastStat match {
-            case _: Term ⇒ cls.copy(templ = cls.templ.copy(stats = cls.templ.stats.dropRight(1)))
-            case x ⇒ cls
+            case _: Term ⇒ cls.copy(templ = cls.templ.copy(stats = cls.templ.stats.dropRight(1).map(addLazy)))
+            case x       ⇒ cls.copy(templ = cls.templ.copy(stats = cls.templ.stats.map(addLazy)))
           }
 
         source.copy(stats = source.stats.dropRight(1) ++ Seq(newCls))
@@ -89,7 +95,7 @@ object Project {
       val name = uniqueName(sourceFile.file)
 
       val classContent =
-        s"""class ${name}Class {
+        s"""object ${name} {
            |lazy val _imports = new {
            |$imports
            |}
@@ -102,9 +108,7 @@ object Project {
            |}
         """.stripMargin
 
-      s"""${removeLastTerm(classContent)}
-           |lazy val ${name} = new ${name}Class
-         """.stripMargin
+      removeLastTerm(classContent)
     }
 
     val allImports = Imports.importedFiles(script)
