@@ -22,6 +22,9 @@ import org.openmole.core.expansion._
 import org.openmole.core.keyword.:=
 import org.openmole.core.workflow.tools._
 
+/**
+ * Part of the dsl for task properties (inputs, outputs, assignements)
+ */
 package builder {
 
   object Setter {
@@ -47,10 +50,27 @@ package builder {
       xs.collect { case x: Mapped[_] ⇒ x }
   }
 
+  /**
+   * Wrapper for prototypes as input/output
+   */
   sealed trait IO
+
+  /**
+   * Single prototype
+   * @param v
+   */
   case class RawVal[T](v: Val[T]) extends IO
+
+  /**
+   * Prototype mapped to a variable name
+   * @param v
+   * @param name
+   */
   case class Mapped[T](v: Val[T], name: String) extends IO
 
+  /**
+   * Operations on inputs
+   */
   class Inputs {
     def +=[T: InputBuilder](d: Val[_]*): T ⇒ T =
       implicitly[InputBuilder[T]].inputs.modify(_ ++ d)
@@ -61,6 +81,9 @@ package builder {
     def ++=[T: MappedInputBuilder: InputBuilder](mapped: Iterable[IO]*): T ⇒ T = +=[T](mapped.flatten: _*)
   }
 
+  /**
+   * Operations on outputs
+   */
   class Outputs {
     def +=[T: OutputBuilder](d: Val[_]*): T ⇒ T =
       implicitly[OutputBuilder[T]].outputs.modify(_ ++ d)
@@ -93,12 +116,19 @@ package builder {
       implicitly[NameBuilder[T]].name.set(Some(name))
   }
 
+  /**
+   * DSL for i/o in itself
+   */
   trait BuilderPackage {
     final lazy val inputs: Inputs = new Inputs
     final lazy val outputs: Outputs = new Outputs
     final lazy val exploredOutputs: ExploredOutputs = new ExploredOutputs
     final lazy val defaults: Defaults = new Defaults
 
+    /**
+     * operators on both inputs and outputs
+     * @param io
+     */
     implicit class InputsOutputsDecorator(io: (Inputs, Outputs)) {
       def +=[T: InputBuilder: OutputBuilder](ps: Val[_]*): T ⇒ T =
         (inputs += (ps: _*)) andThen (outputs += (ps: _*))
@@ -132,8 +162,23 @@ package builder {
         defaults _ andThen (inputs ++= v.value)
       }
 
+    /**
+     * Construct mapped prototype
+     * @param p
+     * @tparam T
+     */
     implicit class BuildMapped[T](p: Val[T]) {
+      /**
+       * mapped to its own simple name
+       * @return
+       */
       def mapped: Mapped[T] = mapped(p.simpleName)
+
+      /**
+       * mapped to the given variable name
+       * @param name
+       * @return
+       */
       def mapped(name: String) = Mapped(p, name)
     }
 
@@ -144,6 +189,11 @@ package builder {
         ops.foldLeft(t) { (curT, op) ⇒ op(curT) }
     }
 
+    /**
+     * Decorate a prototype with value assignements
+     * @param v
+     * @tparam T
+     */
     implicit class ValueAssignmentDecorator[T](v: Val[T]) {
       def :=(t: T): ValueAssignment[T] = new :=(v, t)
       def :=(t: FromContext[T]): ValueAssignment[T] = new :=(v, t)

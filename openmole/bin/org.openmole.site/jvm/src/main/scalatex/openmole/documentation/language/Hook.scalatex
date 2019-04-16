@@ -106,14 +106,14 @@ val h = AppendToFileHook("${file.content}", "/path/of/the/file")""", name = "app
 
 @h3{Write into a CSV file}
 
-The @code{CSVHook} takes data from the dataflow and appends it to a file formatted as CSV:
+The @code{AppendToCSVFileHook} takes data from the dataflow and appends it to a file formatted as CSV:
 
 @br@br
 
 @hl.openmole("""
 val i = Val[Int]
 
-val h = CSVHook("/path/to/a/file/or/dir${i}.csv")""", name = "csv hook")
+val h = AppendToCSVFileHook("/path/to/a/file/or/dir${i}.csv")""", name = "csv hook")
 
 @br
 
@@ -121,25 +121,40 @@ The path is expanded using the variables from the dataflow (expressions between 
 
 @br@br
 
-The optional last parameter of @i{AppendToCSVFileHook} is the list of variables to write to the CSV file.
+The optional last parameter of @code{AppendToCSVFileHook} is the list of variables to write to the CSV file.
 The default behaviour when this list is not specified is to dump all the variables from the dataflow to the file.
 You can restrict this behaviour by @b{listing only the variables you want to save}.
 
 @br@br
 
-@p Some additional optional parameters can be passed to the CSVHook.
+@p Some additional optional parameters can be passed to the @code{AppendToCSVFileHook}.
 @br Setting @hl.code("""header = "Col1, Col2, ColZ"""") customises the header of the CSV file to be created with the string it receives as a parameter.
 Please note that this only happens if the file doesn't exist when the hook is executed.
-@br @hl.code("arrayOnRaw = true") forces the flattening of the input lists such that all variables values are written to a single row/line of the CSV file.
+@br @hl.code("arrayOnRow = true") forces the flattening of the input lists such that all variables values are written to a single row/line of the CSV file.
 
 @br For instance:
 @br @hl.openmole("""
 val i = Val[Int]
 val j = Val[Array[Int]]
 
-val h = CSVHook("/path/to/a/file/or/dir${i}.csv", values = Seq(i, j), header = "i, j", arrayOnRaw = true)""", name = "csv hook with options")
+val h = AppendToCSVFileHook("/path/to/a/file/or/dir${i}.csv", values = Seq(i, j), header = "i, j", arrayOnRaw = true)""", name = "csv hook with options")
 
 @br@br
+
+
+@h3{Write a matrix into a file}
+
+Some workflow may output two dimensional data, which can be understood as a matrix.
+For this, the @code{MatrixHook} writes matrix-like data to a file. It is constructed from a file and a prototype the following way:
+
+@hl.openmole("""
+val matrix = Val[Array[Array[Double]]]
+val h = MatrixHook("file.csv",matrix)
+""")
+
+Output format will be a csv file, with comma as delimiter for rows. Data understood as matrix are one and two dimensional arrays of double, int and long.
+
+
 
 @h2{Hook to copy a file}
 
@@ -173,7 +188,6 @@ To display a variable @code{i} from the workflow in the standard output, use the
 @br
 
 If no variable is specified in @code{ToStringHook()}, the whole dataflow will be displayed.
-TODO whole dataflow = all outputs of the corresponding task?
 
 
 @h3{Display strings}

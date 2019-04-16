@@ -88,6 +88,7 @@ public class NetLogo5 implements NetLogo {
         return nlGlobalList;
     }
 
+
     public String[] reporters() {
         LinkedList<String> reporters = new LinkedList<String>();
         for (Map.Entry<String, Procedure> e : getWorkspace().getProcedures().entrySet()) {

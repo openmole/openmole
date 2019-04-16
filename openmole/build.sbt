@@ -470,7 +470,7 @@ lazy val sensitivity = OsgiProject(pluginDir, "org.openmole.plugin.method.sensit
 
 /* Sampling */
 
-def allSampling = Seq(combineSampling, csvSampling,oneFactorSampling, lhsSampling, quasirandomSampling)
+def allSampling = Seq(combineSampling, csvSampling,oneFactorSampling, lhsSampling, quasirandomSampling, spatialSampling)
 
 lazy val combineSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.combine", imports = Seq("*")) dependsOn(exception, modifierDomain, collectionDomain, workflow) settings (pluginSettings: _*)
 
@@ -486,6 +486,10 @@ lazy val quasirandomSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampl
   libraryDependencies += Libraries.math
   ) settings (pluginSettings: _*)
 
+lazy val spatialSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.spatial", imports = Seq("*")) dependsOn(exception, workflow, workspace) settings (
+  libraryDependencies += Libraries.math
+  ) settings (pluginSettings: _*)
+
 
 /* Source */
 
@@ -496,7 +500,7 @@ lazy val fileSource = OsgiProject(pluginDir, "org.openmole.plugin.source.file", 
 
 /* Task */
 
-def allTask = Seq(toolsTask, external, netLogo, netLogo5, netLogo6, jvm, scala, template, systemexec, container, care, udocker, r, scilab)
+def allTask = Seq(toolsTask, external, netLogo, netLogo5, netLogo6, jvm, scala, template, systemexec, container, care, udocker, r, scilab, timing)
 
 lazy val toolsTask = OsgiProject(pluginDir, "org.openmole.plugin.task.tools", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings: _*)
 
@@ -531,6 +535,8 @@ lazy val udocker = OsgiProject(pluginDir, "org.openmole.plugin.task.udocker", im
 lazy val r = OsgiProject(pluginDir, "org.openmole.plugin.task.r", imports = Seq("*")) dependsOn (udocker, json) settings (pluginSettings: _*)
 
 lazy val scilab = OsgiProject(pluginDir, "org.openmole.plugin.task.scilab", imports = Seq("*")) dependsOn (udocker) settings (pluginSettings: _*)
+
+lazy val timing = OsgiProject(pluginDir, "org.openmole.plugin.task.timing", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings: _*)
 
 
 /* ---------------- REST ------------------- */
