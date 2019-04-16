@@ -49,7 +49,11 @@ object Libraries {
 
   /** ------- Bundles -------------- */
 
-  def addScalaLang(scalaVersion: String) = libraryDependencies += "org.openmole.library" %% "org-scala-lang-scala-library" % scalaVersion
+  def addScalaLang(scalaVersion: String) =
+    libraryDependencies ++= Seq(
+      "org.openmole.library" %% "org-scala-lang-scala-library" % scalaVersion,
+      "org.scalameta" %% "scalameta" % "4.1.0"
+    )
 
   lazy val scalatra = "org.openmole.library" %% "org-scalatra" % "2.6.3"
   lazy val logback = "org.openmole.library" %% "ch-qos-logback" % "1.0.9"

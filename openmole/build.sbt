@@ -265,7 +265,9 @@ lazy val console = OsgiProject(coreDir, "org.openmole.core.console", global = tr
   defaultActivator
 ) dependsOn(openmoleOSGi, workspace, fileService) settings (coreSettings: _*)
 
-lazy val project = OsgiProject(coreDir, "org.openmole.core.project", imports = Seq("*")) dependsOn(console, openmoleDSL, services) settings (OsgiKeys.importPackage := Seq("*")) settings (coreSettings: _*)
+lazy val project = OsgiProject(coreDir, "org.openmole.core.project", imports = Seq("*")) dependsOn(console, openmoleDSL, services) settings (OsgiKeys.importPackage := Seq("*")) settings (coreSettings: _*) settings (
+  Libraries.addScalaLang(scalaVersionValue)
+)
 
 lazy val buildinfo = OsgiProject(coreDir, "org.openmole.core.buildinfo", imports = Seq("*")) enablePlugins (BuildInfoPlugin) settings(
   //sourceGenerators in Compile += buildInfo.taskValue,
