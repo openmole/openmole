@@ -68,25 +68,21 @@ object Project {
     }
 
     def makeImportedScript(sourceFile: SourceFile) = {
-      def removeLastTerm(classContent: String) = {
+      def removeTerms(classContent: String) = {
         import _root_.scala.meta._
 
         val source = classContent.parse[Source].get
         val cls = source.stats.last.asInstanceOf[Defn.Object]
         val lastStat = cls.templ.stats.last
 
-        def addLazy(stat: Stat) =
+        def filterTermAndAddLazy(stat: Stat) =
           stat match {
-            case v: Defn.Val if v.mods.collect { case x: Mod.Lazy ⇒ x }.isEmpty ⇒ v.copy(mods = v.mods ++ Seq(Mod.Lazy()))
-            case s ⇒ s
+            case _: Term ⇒ None
+            case v: Defn.Val if v.mods.collect { case x: Mod.Lazy ⇒ x }.isEmpty ⇒ Some(v.copy(mods = v.mods ++ Seq(Mod.Lazy())))
+            case s ⇒ Some(s)
           }
 
-        val newCls =
-          lastStat match {
-            case _: Term ⇒ cls.copy(templ = cls.templ.copy(stats = cls.templ.stats.dropRight(1).map(addLazy)))
-            case x       ⇒ cls.copy(templ = cls.templ.copy(stats = cls.templ.stats.map(addLazy)))
-          }
-
+        val newCls = cls.copy(templ = cls.templ.copy(stats = cls.templ.stats.flatMap(filterTermAndAddLazy)))
         source.copy(stats = source.stats.dropRight(1) ++ Seq(newCls))
       }
 
@@ -108,7 +104,7 @@ object Project {
            |}
         """.stripMargin
 
-      removeLastTerm(classContent)
+      removeTerms(classContent)
     }
 
     val allImports = Imports.importedFiles(script)
