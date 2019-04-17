@@ -15,35 +15,33 @@ trait SpatialSampling {
   // add optional morphology computation here ?
 }
 
-
 object SpatialSampling {
 
   /**
-    * Generic variable iterator for spatial samplings (includes morphology computation, and generator parameters)
-    *
-    * @param prototype
-    * @param values
-    * @param morphologyPrototype
-    * @param parameters
-    * @return
-    */
-  def buildVariables(prototype: Val[_],values: Array[Array[Array[Double]]],morphologyPrototype: Option[Val[_]],parameters: (Val[_],Iterable[Double])*): Iterator[List[Variable[_]]] = {
+   * Generic variable iterator for spatial samplings (includes morphology computation, and generator parameters)
+   *
+   * @param prototype
+   * @param values
+   * @param morphologyPrototype
+   * @param parameters
+   * @return
+   */
+  def buildVariables(prototype: Val[_], values: Array[Array[Array[Double]]], morphologyPrototype: Option[Val[_]], parameters: (Val[_], Iterable[Double])*): Iterator[List[Variable[_]]] = {
 
     // FIXME the way morphology is computed / selected indicators should be an option ?
-    val morphologies: Array[Array[Double]] = if(morphologyPrototype.isDefined) {values.map{SpatialData.Morphology(_).toArray(-1)}} else Array.fill(values.size)(Array.empty)
+    val morphologies: Array[Array[Double]] = if (morphologyPrototype.isDefined) { values.map { SpatialData.Morphology(_).toArray(-1) } } else Array.fill(values.size)(Array.empty)
 
-    val arrayParams: List[(Val[_],Array[Double])] = parameters.map{case (p,v) => (p,v.toArray)}.toList
+    val arrayParams: List[(Val[_], Array[Double])] = parameters.map { case (p, v) ⇒ (p, v.toArray) }.toList
 
-    values.zip(morphologies).zipWithIndex.map { case ((v,morph),i) ⇒ List(
-      Variable(prototype.asInstanceOf[Val[Any]], v)
-    )++ (if (morphologyPrototype.isDefined) List(Variable(morphologyPrototype.get,morph)) else List()
-      )++ arrayParams.map{case (p,v) => Variable(p.asInstanceOf[Val[Any]],v(i))}
+    values.zip(morphologies).zipWithIndex.map {
+      case ((v, morph), i) ⇒ List(
+        Variable(prototype.asInstanceOf[Val[Any]], v)
+      ) ++ (if (morphologyPrototype.isDefined) List(Variable(morphologyPrototype.get.asInstanceOf[Val[Any]], morph)) else List()
+        ) ++ arrayParams.map { case (p, v) ⇒ Variable(p.asInstanceOf[Val[Any]], v(i)) }
     }.toIterator
   }
 
 }
-
-
 
 object ExpMixtureThresholdSpatialSampling {
   def apply(samples: FromContext[Int], gridSize: FromContext[Int],
@@ -62,18 +60,18 @@ object ExpMixtureThresholdSpatialSampling {
  * @param prototype output prototype (must be an Array[Array[Double]])
  */
 sealed class ExpMixtureThresholdSpatialSampling(
-  val samples:      FromContext[Int],
-  val gridSize:     FromContext[Int],
-  val centers:      ScalarOrSequenceOfDouble[_],
-  val kernelRadius: ScalarOrSequenceOfDouble[_],
-  val threshold:    ScalarOrSequenceOfDouble[_],
-  val prototype:    Val[_],
-  val morphologyPrototype: Option[Val[_]] = None
+  val samples:             FromContext[Int],
+  val gridSize:            FromContext[Int],
+  val centers:             ScalarOrSequenceOfDouble[_],
+  val kernelRadius:        ScalarOrSequenceOfDouble[_],
+  val threshold:           ScalarOrSequenceOfDouble[_],
+  val prototype:           Val[_],
+  val morphologyPrototype: Option[Val[_]]              = None
 ) extends Sampling {
 
-  val (centersPrototype,radiusPrototype,thresholdPrototype) = (centers.prototype,kernelRadius.prototype,threshold.prototype)
+  val (centersPrototype, radiusPrototype, thresholdPrototype) = (centers.prototype, kernelRadius.prototype, threshold.prototype)
 
-  override def prototypes = Seq(prototype,centersPrototype,radiusPrototype,thresholdPrototype)
+  override def prototypes = Seq(prototype, centersPrototype, radiusPrototype, thresholdPrototype)
 
   override def apply() = FromContext { p ⇒
     import p._
@@ -88,7 +86,7 @@ sealed class ExpMixtureThresholdSpatialSampling(
 
     def values: Array[RasterLayerData[Double]] = generators.zip(th).map { case (gen, t) ⇒ gen.generateGrid(random()).map { _.map { case d ⇒ if (d > t) 1.0 else 0.0 } } }
 
-    SpatialSampling.buildVariables(prototype,values,morphologyPrototype,(centersPrototype,ncenters),(radiusPrototype,radius),(thresholdPrototype,th))
+    SpatialSampling.buildVariables(prototype, values, morphologyPrototype, (centersPrototype, ncenters), (radiusPrototype, radius), (thresholdPrototype, th))
   }
 
 }
@@ -137,7 +135,7 @@ sealed class PercolationGridSpatialSampling(
 
     def values: Array[RasterLayerData[Double]] = generators map { _.generateGrid(random()).map { _.map { case d ⇒ if (d > 0.0) 1.0 else 0.0 } } }
 
-    SpatialSampling.buildVariables(prototype,values,morphologyPrototype,(probaPrototype,proba),(bordPrototype,bord),(widthPrototype,width))
+    SpatialSampling.buildVariables(prototype, values, morphologyPrototype, (probaPrototype, proba), (bordPrototype, bord), (widthPrototype, width))
   }
 }
 
@@ -159,17 +157,17 @@ object BlocksGridSpatialSampling {
  * @param gridSize
  */
 sealed class BlocksGridSpatialSampling(
-  val samples:      FromContext[Int],
-  val blocks:       ScalarOrSequenceOfDouble[_],
-  val blockMinSize: ScalarOrSequenceOfDouble[_],
-  val blockMaxSize: ScalarOrSequenceOfDouble[_],
-  val prototype:    Val[_],
-  val gridSize:     FromContext[Int],
-  val morphologyPrototype: Option[Val[_]] = None
-                                      ) extends Sampling {
-  val (blocksPrototype,blockMinSizePrototype,blockMaxSizePrototype) = (blocks.prototype,blockMinSize.prototype,blockMaxSize.prototype)
+  val samples:             FromContext[Int],
+  val blocks:              ScalarOrSequenceOfDouble[_],
+  val blockMinSize:        ScalarOrSequenceOfDouble[_],
+  val blockMaxSize:        ScalarOrSequenceOfDouble[_],
+  val prototype:           Val[_],
+  val gridSize:            FromContext[Int],
+  val morphologyPrototype: Option[Val[_]]              = None
+) extends Sampling {
+  val (blocksPrototype, blockMinSizePrototype, blockMaxSizePrototype) = (blocks.prototype, blockMinSize.prototype, blockMaxSize.prototype)
 
-  override def prototypes = Seq(prototype,blocksPrototype,blockMinSizePrototype,blockMaxSizePrototype)
+  override def prototypes = Seq(prototype, blocksPrototype, blockMinSizePrototype, blockMaxSizePrototype)
 
   override def apply() = FromContext { p ⇒
     import p._
@@ -184,7 +182,7 @@ sealed class BlocksGridSpatialSampling(
 
     def values: Array[RasterLayerData[Double]] = generators.map { _.generateGrid(random()).map { _.map { case d ⇒ if (d > 0.0) 1.0 else 0.0 } } }
 
-    SpatialSampling.buildVariables(prototype,values,morphologyPrototype,(blocksPrototype,blocksnum),(blockMinSizePrototype,blocksmin),(blockMaxSizePrototype,blocksmax))
+    SpatialSampling.buildVariables(prototype, values, morphologyPrototype, (blocksPrototype, blocksnum), (blockMinSizePrototype, blocksmin), (blockMaxSizePrototype, blocksmax))
   }
 }
 
@@ -201,32 +199,30 @@ object RandomSpatialSampling {
  * @tparam D
  */
 sealed class RandomSpatialSampling(
-                                    val samples: FromContext[Int],
-                                    val prototype: Val[_],
-                                    val gridSize: FromContext[Int],
-                                    val density: Option[ScalarOrSequenceOfDouble[_]] = None,
-                                    val morphologyPrototype: Option[Val[_]] = None
-                                  ) extends Sampling {
+  val samples:             FromContext[Int],
+  val prototype:           Val[_],
+  val gridSize:            FromContext[Int],
+  val density:             Option[ScalarOrSequenceOfDouble[_]] = None,
+  val morphologyPrototype: Option[Val[_]]                      = None
+) extends Sampling {
 
-
-  override def prototypes = if(density.isDefined) Seq(prototype,density.get.prototype) else Seq(prototype)
+  override def prototypes = if (density.isDefined) Seq(prototype, density.get.prototype) else Seq(prototype)
 
   override def apply() = FromContext { p ⇒
     import p._
     val s = samples.from(context)
     val size = gridSize.from(context)
 
-    val densities: List[Double] = if(density.isDefined)
+    val densities: List[Double] = if (density.isDefined)
       ScalarOrSequenceOfDouble.unflatten(Seq.fill(s)(density.get), Seq.fill(s)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
     else List.fill(s)(0.5) // by default half cells are filled in average
 
-    def values: Array[Array[Array[Double]]] = SpatialData.RandomGrid.randomGridSample(size, s, random()).zip(densities).map{case (grid,dens) => grid.map { _.map { case d ⇒ if (d < dens) 1.0 else 0.0 } }}
+    def values: Array[Array[Array[Double]]] = SpatialData.RandomGrid.randomGridSample(size, s, random()).zip(densities).map { case (grid, dens) ⇒ grid.map { _.map { case d ⇒ if (d < dens) 1.0 else 0.0 } } }
 
-    if (density.isDefined) SpatialSampling.buildVariables(prototype,values,morphologyPrototype,(density.get.prototype,densities))
-    else SpatialSampling.buildVariables(prototype,values,morphologyPrototype)
+    if (density.isDefined) SpatialSampling.buildVariables(prototype, values, morphologyPrototype, (density.get.prototype, densities))
+    else SpatialSampling.buildVariables(prototype, values, morphologyPrototype)
   }
 }
-
 
 object OSMBuildingsGridSampling {
   // unnecessary
@@ -235,41 +231,38 @@ object OSMBuildingsGridSampling {
 }
 
 /**
-  * Construct a grid from openstreetmap buildings
-  *
-  * @param coordinates
-  * @param windowSize
-  * @param worldSize
-  * @param prototype
-  * @param morphologyPrototype
-  */
+ * Construct a grid from openstreetmap buildings
+ *
+ * @param coordinates
+ * @param windowSize
+ * @param worldSize
+ * @param prototype
+ * @param morphologyPrototype
+ */
 sealed class OSMBuildingsGridSampling(
-                                     val coordinates: FromContext[Array[(Double,Double)]],
-                                     //val coordbbox: Option[FromContext[]]
-                                     // val samples: Option[FromContext[Int]], // TODO : add option to random draw in a bbox ?
-                                     val windowSize: FromContext[Double],
-                                     val worldSize: FromContext[Int],
-                                     // + api parameters / simplif options ?
-                                     val prototype: Val[_],
-                                     val morphologyPrototype: Option[Val[_]] = None
-                                     ) extends Sampling {
+  val coordinates: FromContext[Array[(Double, Double)]],
+  //val coordbbox: Option[FromContext[]]
+  // val samples: Option[FromContext[Int]], // TODO : add option to random draw in a bbox ?
+  val windowSize: FromContext[Double],
+  val worldSize:  FromContext[Int],
+  // + api parameters / simplif options ?
+  val prototype:           Val[_],
+  val morphologyPrototype: Option[Val[_]] = None
+) extends Sampling {
 
   override def prototypes: Iterable[Val[_]] = Seq(prototype)
 
-  override def apply() = FromContext { p =>
+  override def apply() = FromContext { p ⇒
     import p._
-    val coords: Array[(Double,Double)] = coordinates.from(context)
+    val coords: Array[(Double, Double)] = coordinates.from(context)
     val wsize = windowSize.from(context)
     val size = worldSize.from(context)
-    def values = SpatialData.OSMBuildings.buildingGrid(coords,wsize,size)
+    def values = SpatialData.OSMBuildings.buildingGrid(coords, wsize, size)
 
-    SpatialSampling.buildVariables(prototype,values,morphologyPrototype)
+    SpatialSampling.buildVariables(prototype, values, morphologyPrototype)
   }
 
 }
-
-
-
 
 object ExponentialMixtureSpatialSampling {
 
