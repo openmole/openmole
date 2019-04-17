@@ -189,6 +189,9 @@ sealed class BlocksGridSpatialSampling(
 object RandomSpatialSampling {
   def apply(samples: FromContext[Int], gridSize: FromContext[Int], prototype: Val[_]) =
     new RandomSpatialSampling(samples, prototype, gridSize)
+
+  def apply(samples: FromContext[Int], gridSize: FromContext[Int], density: ScalarOrSequenceOfDouble[_], prototype: Val[_]) =
+    new RandomSpatialSampling(samples, prototype, gridSize, Some(density))
 }
 
 /**
@@ -269,6 +272,9 @@ object ExponentialMixtureSpatialSampling {
   /**
    * Constructor with default values, except for gridSize, samples, prototypes (passed as a Seq[Val[_] ])
    *  note : either is not really practical ?
+   *
+   * TODO implement constructors or implicits removing the use of Eithers for the dsl
+   * TODO uniformize constructors with binary grids
    */
   def apply(
     gridSize:      FromContext[Either[Int, (Int, Int)]],
