@@ -10,16 +10,17 @@ import org.openmole.core.workflow.task.FromContextTask
 object PostStepTask {
 
   def apply(
-    n:                Int,
-    nAlpha:           Int,
-    prior:            Seq[ABC.Prior],
-    observed:         Seq[ABC.Observed],
-    state:            Val[MonAPMC.MonState],
-    stepState:        Val[MonAPMC.StepState],
-    minAcceptedRatio: Option[Double],
-    termination:      OptionalArgument[Int],
-    stop:             Val[Boolean],
-    step:             Val[Int])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+    n:                    Int,
+    nAlpha:               Int,
+    stopSampleSizeFactor: Int,
+    prior:                Seq[ABC.Prior],
+    observed:             Seq[ABC.Observed],
+    state:                Val[MonAPMC.MonState],
+    stepState:            Val[MonAPMC.StepState],
+    minAcceptedRatio:     Option[Double],
+    termination:          OptionalArgument[Int],
+    stop:                 Val[Boolean],
+    step:                 Val[Int])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     FromContextTask("postStepTask") { p ⇒
       import p._
 
@@ -34,7 +35,7 @@ object PostStepTask {
       val xs = observed.toArray.map(o ⇒ context(o.v.array)).transpose
       val s = MonAPMC.postStep(n, nAlpha, density, observed.map(_.observed).toArray, context(stepState), xs)(random())
       val stopValue =
-        minAcceptedRatio.map(ar ⇒ MonAPMC.stop(ar, s)).getOrElse(false) ||
+        minAcceptedRatio.map(ar ⇒ MonAPMC.stop(n, nAlpha, ar, stopSampleSizeFactor, s)).getOrElse(false) ||
           termination.option.map(_ <= context(step)).getOrElse(false)
 
       context + Variable(state, s) + Variable(stop, stopValue) + Variable(step, context(step) + 1)

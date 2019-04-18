@@ -21,14 +21,15 @@ package object abc {
     @Lenses case class ABCContainer(container: DSLContainer, parameters: ABCParameters)
 
     def apply(
-      evaluation:       DSL,
-      prior:            Seq[Prior],
-      observed:         Seq[Observed],
-      sample:           Int,
-      generated:        Int,
-      minAcceptedRatio: OptionalArgument[Double] = 0.01,
-      termination:      OptionalArgument[Int]    = None,
-      scope:            DefinitionScope          = "abc") = {
+      evaluation:           DSL,
+      prior:                Seq[Prior],
+      observed:             Seq[Observed],
+      sample:               Int,
+      generated:            Int,
+      minAcceptedRatio:     OptionalArgument[Double] = 0.01,
+      stopSampleSizeFactor: Int                      = 1,
+      termination:          OptionalArgument[Int]    = None,
+      scope:                DefinitionScope          = "abc") = {
       implicit def defScope = scope
       val stepState = Val[MonAPMC.StepState]("stepState", abcNamespace)
       val step = Val[Int]("step", abcNamespace)
@@ -39,7 +40,7 @@ package object abc {
       val nAlpha = sample
 
       val preStepTask = PreStepTask(n, nAlpha, prior, state, stepState, step)
-      val postStepTask = PostStepTask(n, nAlpha, prior, observed, state, stepState, minAcceptedRatio, termination, stop, step)
+      val postStepTask = PostStepTask(n, nAlpha, stopSampleSizeFactor, prior, observed, state, stepState, minAcceptedRatio, termination, stop, step)
 
       val mapReduce =
         MapReduce(
@@ -62,16 +63,17 @@ package object abc {
   import ABC._
 
   def IslandABC(
-    evaluation:       DSL,
-    prior:            Seq[Prior],
-    observed:         Seq[Observed],
-    sample:           Int,
-    generated:        Int,
-    parallelism:      Int,
-    islandGenerated:  Int                   = 1,
-    minAcceptedRatio: Double                = 0.01,
-    termination:      OptionalArgument[Int] = None,
-    scope:            DefinitionScope       = "abc island"
+    evaluation:           DSL,
+    prior:                Seq[Prior],
+    observed:             Seq[Observed],
+    sample:               Int,
+    generated:            Int,
+    parallelism:          Int,
+    islandGenerated:      Int                   = 1,
+    minAcceptedRatio:     Double                = 0.01,
+    stopSampleSizeFactor: Int                   = 1,
+    termination:          OptionalArgument[Int] = None,
+    scope:                DefinitionScope       = "abc island"
   ) = {
     implicit def defScope = scope
 
@@ -83,7 +85,7 @@ package object abc {
     val nAlpha = sample
 
     val appendSplit = AppendSplitTask(n, nAlpha, masterState, state, step)
-    val terminationTask = IslandTerminationTask(minAcceptedRatio, state, step, termination, stop)
+    val terminationTask = IslandTerminationTask(n, nAlpha, minAcceptedRatio, stopSampleSizeFactor, state, step, termination, stop)
     val master = appendSplit -- terminationTask
 
     val slave =
