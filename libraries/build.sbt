@@ -67,7 +67,7 @@ lazy val h2 = OsgiProject(dir, "org.h2", dynamicImports = Seq("*"), privatePacka
 lazy val bonecp = OsgiProject(dir, "com.jolbox.bonecp", dynamicImports = Seq("*")) settings
   (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0-rc1", version := "0.8.0-rc1") settings(settings: _*)
 
-lazy val slickVersion = "3.2.0"
+lazy val slickVersion = "3.3.0"
 lazy val slick = OsgiProject(dir,"com.typesafe.slick", exports = Seq("slick.*"), privatePackages = Seq("org.reactivestreams.*")) settings
   (libraryDependencies += "com.typesafe.slick" %% "slick" % slickVersion, version := slickVersion) settings(settings: _*)
 
