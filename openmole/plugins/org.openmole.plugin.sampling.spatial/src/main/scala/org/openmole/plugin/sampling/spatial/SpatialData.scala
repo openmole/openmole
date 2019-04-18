@@ -13,6 +13,12 @@ import scala.util.Random
 // FIXME patch putting spatial primitives here before a first stable release of spatial data
 object SpatialData {
 
+  object OSMBuildings {
+
+    // FIXME implement using spatialdata (do not import xml reader etc here)
+    def buildingGrid(coordinates: Array[(Double, Double)], windowSize: Double, worldSize: Int) = Array.fill(coordinates.size) { Array.fill(worldSize) { Array.fill(worldSize)(0.0) } }
+  }
+
   object RandomGrid {
 
     /**
