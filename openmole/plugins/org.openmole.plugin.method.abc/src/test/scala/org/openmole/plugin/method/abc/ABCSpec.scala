@@ -2,7 +2,7 @@ package org.openmole.plugin.method.abc
 
 import org.scalatest.{FlatSpec, Matchers}
 import org.openmole.core.dsl._
-import org.openmole.core.workflow.test.TestTask
+import org.openmole.core.workflow.test._
 import scala.util.Random
 
 class ABCSpec extends FlatSpec with Matchers {
@@ -26,7 +26,7 @@ class ABCSpec extends FlatSpec with Matchers {
     ABC.Observed(o2, 1.3)
   )
 
-  val testTask = TestTask { context => context + (o1 -> context(x1) + rng.nextDouble() * 0.01) + (o2 -> context(x2) + rng.nextDouble() * 0.01) } set(
+  val testTask = TestTask { context => context + (o1 -> (context(x1) + rng.nextDouble() * 0.01)) + (o2 -> (context(x2) + rng.nextDouble() * 0.01)) } set(
     inputs += (x1, x2),
     outputs += (o1, o2)
   )
@@ -63,7 +63,7 @@ class ABCSpec extends FlatSpec with Matchers {
     abc run()
   }
 
-  "abc with a deterministic model" should "throw a SingularCovarianceException" in {
+  "abc with a deterministic model" should "terminate" in {
     val abc =
       ABC(
         evaluation = testTaskDeterministic,
@@ -73,15 +73,6 @@ class ABCSpec extends FlatSpec with Matchers {
         generated = 10
       )
 
-
-    var exceptionCaught: Option[APMC.SingularCovarianceException] = None
-      try {
-        abc run()
-      } catch {
-        case e: APMC.SingularCovarianceException =>
-          exceptionCaught = Some(e)
-      }
-
-    exceptionCaught
+    abc run()
   }
 }

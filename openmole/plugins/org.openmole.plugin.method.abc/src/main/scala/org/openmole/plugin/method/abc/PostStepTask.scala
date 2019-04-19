@@ -1,11 +1,12 @@
 package org.openmole.plugin.method.abc
 
-import mgo.abc.MonAPMC
+import mgo.abc.{ MonAPMC, APMC }
 
 import org.openmole.core.context.Variable
 import org.openmole.core.dsl.{ OptionalArgument, _ }
 import org.openmole.core.workflow.builder.DefinitionScope
 import org.openmole.core.workflow.task.FromContextTask
+import util._
 
 object PostStepTask {
 
@@ -33,12 +34,27 @@ object PostStepTask {
       }
 
       val xs = observed.toArray.map(o ⇒ context(o.v.array)).transpose
-      val s = MonAPMC.postStep(n, nAlpha, density, observed.map(_.observed).toArray, context(stepState), xs)(random())
-      val stopValue =
-        minAcceptedRatio.map(ar ⇒ MonAPMC.stop(n, nAlpha, ar, stopSampleSizeFactor, s)).getOrElse(false) ||
-          termination.option.map(_ <= context(step)).getOrElse(false)
+      val s = Try(MonAPMC.postStep(n, nAlpha, density, observed.map(_.observed).toArray, context(stepState), xs)(random()))
 
-      context + Variable(state, s) + Variable(stop, stopValue) + Variable(step, context(step) + 1)
+      s match {
+        case Success(s) ⇒
+          def stopValue(s: MonAPMC.MonState) =
+            minAcceptedRatio.map(ar ⇒ MonAPMC.stop(n, nAlpha, ar, stopSampleSizeFactor, s)).getOrElse(false) ||
+              termination.option.map(_ <= context(step)).getOrElse(false)
+
+          context + Variable(state, s) + Variable(stop, stopValue(s)) + Variable(step, context(step) + 1)
+
+        case Failure(f: APMC.SingularCovarianceException) ⇒
+          def copyState(s: MonAPMC.MonState, ns: APMC.State) =
+            s match {
+              case MonAPMC.Empty()  ⇒ s
+              case s: MonAPMC.State ⇒ s.copy(s = ns)
+            }
+
+          context + Variable(state, copyState(context(state), f.s)) + Variable(stop, true) + Variable(step, context(step) + 1)
+
+        case Failure(f) ⇒ throw f
+      }
     } set (
       inputs += stepState,
       inputs += (observed.map(_.v.array): _*),
