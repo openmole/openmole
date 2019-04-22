@@ -154,9 +154,9 @@ object NSGA2 {
     import cats.data._
     import mgo.evolution.contexts._
 
-    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Vector[Any]] {
+    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Array[Any]] {
       type G = CDGenome.Genome
-      type I = CDGenome.NoisyIndividual.Individual[Vector[Any]]
+      type I = CDGenome.NoisyIndividual.Individual[Array[Any]]
       type S = EvolutionState[Unit]
 
       def iManifest = implicitly[Manifest[I]]
@@ -182,10 +182,10 @@ object NSGA2 {
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
 
-        def buildIndividual(genome: G, phenotype: Vector[Any], context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Array[Any], context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[Unit](random = rng, s = ())
 
-        def aggregate(v: Vector[Vector[Any]]): Vector[Double] =
+        def aggregate(v: Vector[Array[Any]]): Vector[Double] =
           for {
             (vs, obj) ← v.transpose zip om.objectives
           } yield NoisyObjective.aggregateAny(obj, vs)
@@ -214,7 +214,7 @@ object NSGA2 {
           Genome.discrete(om.genome).map { discrete ⇒
             interpret { impl ⇒
               import impl._
-              zipWithState(MGONoisyNSGA2.adaptiveBreeding[DSL, Vector[Any]](n, om.operatorExploration, om.cloneProbability, aggregate, discrete).run(individuals)).eval
+              zipWithState(MGONoisyNSGA2.adaptiveBreeding[DSL, Array[Any]](n, om.operatorExploration, om.cloneProbability, aggregate, discrete).run(individuals)).eval
             }
           }
 
@@ -224,7 +224,7 @@ object NSGA2 {
               import impl._
               def step =
                 for {
-                  elited ← MGONoisyNSGA2.elitism[DSL, Vector[Any]](om.mu, om.historySize, aggregate, continuous) apply (population, candidates)
+                  elited ← MGONoisyNSGA2.elitism[DSL, Array[Any]](om.mu, om.historySize, aggregate, continuous) apply (population, candidates)
                   _ ← mgo.evolution.elitism.incrementGeneration[DSL]
                 } yield elited
 
@@ -243,7 +243,7 @@ object NSGA2 {
         }
 
         def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland[I](population, CDGenome.NoisyIndividual.Individual.historyAge)
-        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Vector[Any]](population, CDGenome.NoisyIndividual.Individual.historyAge, CDGenome.NoisyIndividual.Individual.fitnessHistory)
+        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Array[Any]](population, CDGenome.NoisyIndividual.Individual.historyAge, CDGenome.NoisyIndividual.Individual.fitnessHistory)
       }
 
     }

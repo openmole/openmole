@@ -359,13 +359,17 @@ object PSE {
       }
     }
 
+    implicit def arrayCanBeNaN[T](implicit cbn: CanBeNaN[T]) = new CanBeNaN[Array[T]] {
+      override def isNaN(t: Array[T]): Boolean = t.exists(cbn.isNaN)
+    }
+
     import mgo.evolution.algorithm.{ PSE ⇒ _, NoisyPSE ⇒ _, _ }
     import cats.data._
     import mgo.evolution.contexts._
 
-    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Vector[Any]] { api ⇒
+    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Array[Any]] { api ⇒
       type G = CDGenome.Genome
-      type I = NoisyPSEAlgorithm.Individual[Vector[Any]]
+      type I = NoisyPSEAlgorithm.Individual[Array[Any]]
       type S = EvolutionState[HitMapState]
 
       def iManifest = implicitly
@@ -403,7 +407,7 @@ object PSE {
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
 
-        def buildIndividual(genome: G, phenotype: Vector[Any], context: Context) = NoisyPSEAlgorithm.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Array[Any], context: Context) = NoisyPSEAlgorithm.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[HitMapState](random = rng, s = Map())
 
         def result(population: Vector[I], state: S) = FromContext { p ⇒
@@ -430,7 +434,7 @@ object PSE {
           Genome.discrete(om.genome).map { discrete ⇒
             interpret { impl ⇒
               import impl._
-              zipWithState(NoisyPSEAlgorithm.adaptiveBreeding[DSL, Vector[Any]](
+              zipWithState(NoisyPSEAlgorithm.adaptiveBreeding[DSL, Array[Any]](
                 n,
                 om.operatorExploration,
                 om.cloneProbability,
@@ -446,7 +450,7 @@ object PSE {
               import impl._
               def step =
                 for {
-                  elited ← NoisyPSEAlgorithm.elitism[DSL, Vector[Any]](
+                  elited ← NoisyPSEAlgorithm.elitism[DSL, Array[Any]](
                     om.pattern,
                     NoisyObjective.aggregate(om.objectives),
                     om.historySize,
@@ -465,7 +469,7 @@ object PSE {
           StochasticGAIntegration.migrateToIsland[I](population, NoisyPSEAlgorithm.Individual.historyAge)
 
         def migrateFromIsland(population: Vector[I], state: S) =
-          StochasticGAIntegration.migrateFromIsland[I, Vector[Any]](population, NoisyPSEAlgorithm.Individual.historyAge, NoisyPSEAlgorithm.Individual.phenotypeHistory)
+          StochasticGAIntegration.migrateFromIsland[I, Array[Any]](population, NoisyPSEAlgorithm.Individual.historyAge, NoisyPSEAlgorithm.Individual.phenotypeHistory)
 
       }
 

@@ -55,7 +55,7 @@ case class ExactObjective[P](prototype: Val[P], get: Context ⇒ P, toDouble: P 
 
 object NoisyObjective {
   def aggregateAny[P](n: NoisyObjective[P], values: Vector[Any]) = n.aggregate(values.map(_.asInstanceOf[P]))
-  def aggregate(objectives: Seq[NoisyObjective[_]])(v: Vector[Vector[Any]]): Vector[Double] =
+  def aggregate(objectives: Seq[NoisyObjective[_]])(v: Vector[Array[Any]]): Vector[Double] =
     for {
       (vs, obj) ← v.transpose zip objectives
     } yield NoisyObjective.aggregateAny(obj, vs)

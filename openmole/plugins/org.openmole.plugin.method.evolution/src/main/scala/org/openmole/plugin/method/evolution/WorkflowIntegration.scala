@@ -112,7 +112,7 @@ object WorkflowIntegration {
       def mgoAG = a.ag
 
       type V = (Vector[Double], Vector[Int])
-      type P = Vector[Any]
+      type P = Array[Any]
 
       lazy val integration = a.algorithm
 
@@ -128,7 +128,7 @@ object WorkflowIntegration {
         (Genome.toVariables(a.genome, continuous, discrete, scale = true) map2 FromContext { p ⇒ seeder(p.random()) })(_ ++ _)
       }
 
-      def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ Objective.prototype(o)).map(context.apply(_)).toVector
+      def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ Objective.prototype(o)).map(context.apply(_)).toArray
     }
 
   case class DeterministicGA[AG](
@@ -152,11 +152,11 @@ object WorkflowIntegration {
     replication: Stochastic
   )(
     implicit
-    val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Vector[Any]]
+    val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Array[Any]]
   )
 
   object StochasticGA {
-    implicit def stochasticGAIntegration[AG]: WorkflowIntegration[StochasticGA[AG]] = new WorkflowIntegration[StochasticGA[AG]] {
+    implicit def stochasticGAIntegration[AG, P]: WorkflowIntegration[StochasticGA[AG]] = new WorkflowIntegration[StochasticGA[AG]] {
       override def apply(a: StochasticGA[AG]) = WorkflowIntegration.stochasticGAIntegration(a)
     }
 
