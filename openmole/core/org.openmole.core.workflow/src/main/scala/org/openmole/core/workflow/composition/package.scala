@@ -157,7 +157,8 @@ package composition {
   }
 
   sealed trait TransitionOrigin {
-    def --(d: TransitionDestination*) = new --(this, d.toVector)
+    def --(d: Seq[TransitionDestination]) = new --(this, d.toVector)
+    def --(d1: TransitionDestination, d: TransitionDestination*) = new --(this, (Seq(d1) ++ d).toVector)
     def -<(d: TransitionDestination*) = new -<(this, d.toVector)
     def >-(d: TransitionDestination*) = new >-(this, d.toVector)
     def >|(d: TransitionDestination*) = new >|(this, d.toVector)
@@ -464,6 +465,7 @@ package composition {
       implicit def taskToOrigin = ToOrigin[Task] { t ⇒ TaskOrigin(TaskNode(t)) }
       implicit def transitionDSLToOrigin = ToOrigin[DSL] { TransitionDSLOrigin(_) }
       implicit def taskTransitionPieceToOrigin = ToOrigin[TaskNode] { n ⇒ TaskOrigin(n) }
+      implicit def dslExtensionToDestination[T](implicit ext: composition.DSLContainer.Extension[T]) = ToOrigin[T] { t ⇒ TransitionDSLOrigin(ext.lens.get(t)) }
       implicit def samplingToOrigin(implicit scope: DefinitionScope) = ToOrigin[Sampling] { s ⇒ taskToOrigin(ExplorationTask(s)) }
     }
 
@@ -479,9 +481,8 @@ package composition {
       implicit def taskToDestination = ToDestination[Task] { t ⇒ TaskDestination(TaskNode(t)) }
       implicit def taskTransitionPieceToDestination = ToDestination[TaskNode] { t ⇒ TaskDestination(t) }
       implicit def samplingToDestination(implicit scope: DefinitionScope) = ToDestination[Sampling] { s ⇒ taskToDestination(ExplorationTask(s)) }
-      implicit def transitionDSLToDestination = ToDestination[DSL] {
-        TransitionDSLDestination(_)
-      }
+      implicit def dslExtensionToDestination[T](implicit ext: composition.DSLContainer.Extension[T]) = ToDestination[T] { t ⇒ TransitionDSLDestination(ext.lens.get(t)) }
+      implicit def transitionDSLToDestination = ToDestination[DSL] { TransitionDSLDestination(_) }
     }
 
     trait ToDestination[-T] {
@@ -544,6 +545,7 @@ package composition {
     implicit def toOrigin[T: ToOrigin](t: T) = implicitly[ToOrigin[T]].apply(t)
     implicit def toDestination[T: ToDestination](t: T) = implicitly[ToDestination[T]].apply(t)
     implicit def toDestinationSeq[T: ToDestination](s: Seq[T]) = s.map(t ⇒ implicitly[ToDestination[T]].apply(t))
+
     implicit def toNode[T](t: T)(implicit toNode: ToNode[T]) = toNode.apply(t)
     implicit def toDSL[T: ToDSL](t: T) = implicitly[ToDSL[T]].apply(t)
     implicit def toOptionalDSL[T: ToDSL](t: T) = OptionalArgument(Some(toDSL(t)))
