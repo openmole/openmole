@@ -157,12 +157,14 @@ package composition {
   }
 
   sealed trait TransitionOrigin {
-    def --(d: Seq[TransitionDestination]) = new --(this, d.toVector)
     def --(d1: TransitionDestination, d: TransitionDestination*) = new --(this, (Seq(d1) ++ d).toVector)
+    def --(d: Seq[TransitionDestination]) = new --(this, d.toVector)
+
     def -<(d: TransitionDestination*) = new -<(this, d.toVector)
     def >-(d: TransitionDestination*) = new >-(this, d.toVector)
     def >|(d: TransitionDestination*) = new >|(this, d.toVector)
     def -<-(d: TransitionDestination*) = new -<-(this, d.toVector)
+
     def oo(d: TransitionDestination*) = new oo(this, d.toVector)
   }
 
