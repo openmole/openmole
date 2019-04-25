@@ -28,7 +28,7 @@ object IslandTerminationTask {
 
       context + (stop -> stopValue)
     } set (
-      inputs += (state, step),
+      (inputs, outputs) += (state, step),
       outputs += stop
     )
 

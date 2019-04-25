@@ -7,24 +7,23 @@ import org.openmole.core.workflow.task.FromContextTask
 
 object SplitTask {
 
-  def apply(state: Val[MonAPMC.MonState], masterState: Val[MonAPMC.MonState], n: Int)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(masterState: Val[MonAPMC.MonState], islandState: Val[MonAPMC.MonState], n: Int)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     FromContextTask("splitTask") { p ⇒
       import p._
 
       def generateStates(s: MonAPMC.MonState, acc: List[MonAPMC.MonState], cpt: Int): (MonAPMC.MonState, Array[MonAPMC.MonState]) = {
         val (s1, s2) = MonAPMC.split(s)
         if(cpt >= n) (s1, acc.toArray)
-        else  generateStates(s1, s2 :: acc, cpt + 1)
+        else generateStates(s1, s2 :: acc, cpt + 1)
       }
 
-      val (ms, states) = generateStates(context(state), List(), n)
+      val (ms, states) = generateStates(context(masterState), List(), 0)
 
-      context + (state.array -> states) + (masterState -> ms)
+      context + (islandState.array -> states) + (masterState -> ms)
     } set (
-      inputs += state,
-      exploredOutputs += state.array,
-      outputs += masterState,
-      state := MonAPMC.Empty(),
+      (inputs, outputs) += masterState,
+      exploredOutputs += islandState.array,
+      masterState := MonAPMC.Empty(),
     )
 
 }

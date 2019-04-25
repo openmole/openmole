@@ -18,7 +18,12 @@ package object abc {
     case class Observed(v: Val[Double], observed: Double)
     case class ABCParameters(state: Val[MonAPMC.MonState], step: Val[Int])
 
-    @Lenses case class ABCContainer(container: DSLContainer, parameters: ABCParameters)
+    @Lenses case class ABCContainer(container: DSLContainer, parameters: ABCParameters, scope: DefinitionScope) {
+      def save(directory: FromContext[File]) = {
+        implicit val defScope = scope
+        this.hook(ABCHook(this, directory))
+      }
+    }
 
     def apply(
       evaluation:           DSL,
@@ -55,7 +60,7 @@ package object abc {
           condition = !(stop: Condition)
         )
 
-      ABCContainer(DSLContainer(loop, output = Some(postStepTask), delegate = mapReduce.delegate), ABCParameters(state, step))
+      ABCContainer(DSLContainer(loop, output = Some(postStepTask), delegate = mapReduce.delegate), ABCParameters(state, step), scope)
     }
 
   }
@@ -69,6 +74,7 @@ package object abc {
     sample:               Int,
     generated:            Int,
     parallelism:          Int,
+    islandTermination:    Int,
     islandGenerated:      Int                   = 1,
     minAcceptedRatio:     Double                = 0.01,
     stopSampleSizeFactor: Int                   = 1,
@@ -78,38 +84,49 @@ package object abc {
     implicit def defScope = scope
 
     val masterState = Val[MonAPMC.MonState]("masterState", abcNamespace)
+    val islandState = state
+
     val step = Val[Int]("step", abcNamespace)
     val stop = Val[Boolean]
 
     val n = sample + generated
     val nAlpha = sample
 
-    val appendSplit = AppendSplitTask(n, nAlpha, masterState, state, step)
-    val terminationTask = IslandTerminationTask(n, nAlpha, minAcceptedRatio, stopSampleSizeFactor, state, step, termination, stop)
-    val master = appendSplit -- terminationTask
+    val appendSplit = AppendSplitTask(n, nAlpha, masterState, islandState, step)
+    val terminationTask =
+      IslandTerminationTask(n, nAlpha, minAcceptedRatio, stopSampleSizeFactor, masterState, step, termination, stop) set (
+        (inputs, outputs) += islandState.array
+      )
+
+    val master =
+      MoleTask(appendSplit -- terminationTask) set (
+        exploredOutputs += islandState.array
+      )
 
     val slave =
       MoleTask(
-        apply(
+        ABC.apply(
           evaluation = evaluation,
           prior = prior,
           observed = observed,
           sample = sample,
           generated = islandGenerated,
-          minAcceptedRatio = None
+          minAcceptedRatio = None,
+          termination = islandTermination
         )
       )
 
-    val masterSlave = MasterSlave(
-      SplitTask(state, masterState, parallelism),
-      master = MoleTask(master),
-      slave = slave,
-      state = Seq(masterState, step),
-      slaves = parallelism,
-      stop = stop
-    )
+    val masterSlave =
+      MasterSlave(
+        SplitTask(masterState, islandState, parallelism),
+        master = master,
+        slave = slave,
+        state = Seq(masterState, step),
+        slaves = parallelism,
+        stop = stop
+      )
 
-    ABCContainer(DSLContainer(masterSlave, output = Some(appendSplit), delegate = Vector(slave)), ABCParameters(masterState, step))
+    ABCContainer(DSLContainer(masterSlave, output = Some(appendSplit), delegate = Vector(slave)), ABCParameters(masterState, step), scope)
   }
 
 }

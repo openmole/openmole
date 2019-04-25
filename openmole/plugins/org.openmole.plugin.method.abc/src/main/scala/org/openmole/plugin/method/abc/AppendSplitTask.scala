@@ -7,16 +7,16 @@ import org.openmole.core.workflow.task.FromContextTask
 
 object AppendSplitTask {
 
-  def apply(n: Int, nAlpha: Int, state: Val[MonAPMC.MonState], islandState: Val[MonAPMC.MonState], step: Val[Int])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(n: Int, nAlpha: Int, masterState: Val[MonAPMC.MonState], islandState: Val[MonAPMC.MonState], step: Val[Int])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     FromContextTask("appendTask") { p ⇒
       import p._
-      val newState = MonAPMC.append(nAlpha, context(state), context(islandState))
+      val newState = MonAPMC.append(nAlpha, context(masterState), context(islandState))
       val (ns1, ns2) = MonAPMC.split(newState)
-      context + (state.array -> Array(ns1)) + (islandState -> ns2) + (step -> (context(step) + 1))
+      context + (islandState.array -> Array(ns1)) + (masterState -> ns2) + (step -> (context(step) + 1))
     } set (
-      (inputs, outputs) += (islandState, step),
-      inputs += state,
-      exploredOutputs += state.array
+      (inputs, outputs) += (masterState, step),
+      inputs += islandState,
+      exploredOutputs += islandState.array
     )
 
 }
