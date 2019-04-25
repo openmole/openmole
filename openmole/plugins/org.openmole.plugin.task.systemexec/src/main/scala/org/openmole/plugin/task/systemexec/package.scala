@@ -155,10 +155,21 @@ package object systemexec extends SystemExecPackage {
       }
   }
 
+  /**
+   * Result of a system execution
+   * @param returnCode
+   * @param output
+   * @param errorOutput
+   */
   case class ExecutionResult(returnCode: Int, output: Option[String], errorOutput: Option[String])
 
   def commandLine(cmd: String) = parse(cmd).toArray
 
+  /**
+   * parse a command line
+   * @param line
+   * @return
+   */
   def parse(line: String) = {
     var inDoubleQuote = false
     var inSingleQuote = false
@@ -215,6 +226,20 @@ package object systemexec extends SystemExecPackage {
     arguments.toVector
   }
 
+  /**
+   * Execute a parsed command
+   * @param command
+   * @param workDir
+   * @param environmentVariables
+   * @param captureOutput
+   * @param captureError
+   * @param errorOnReturnValue
+   * @param displayOutput
+   * @param displayError
+   * @param stdOut
+   * @param stdErr
+   * @return
+   */
   def execute(
     command:              Array[String],
     workDir:              File,
@@ -288,6 +313,12 @@ package object systemexec extends SystemExecPackage {
     }
   }
 
+  /**
+   * Throw an error for a command and its result
+   * @param commandLine
+   * @param executionResult
+   * @return
+   */
   def error(commandLine: Vector[String], executionResult: ExecutionResult) = {
     def output = executionResult.output.map(o ⇒ s"\nStandard output was:\n$o")
     def error = executionResult.errorOutput.map(e ⇒ s"\nError output was:\n$e")
@@ -315,6 +346,20 @@ package object systemexec extends SystemExecPackage {
     implicit def stringToRaw(c: String) = Raw(c)
   }
 
+  /**
+   * Execute a list of commands
+   * @param workDirectory
+   * @param environmentVariables
+   * @param commands
+   * @param errorOnReturnValue
+   * @param captureOutput
+   * @param captureError
+   * @param displayOutput
+   * @param displayError
+   * @param stdOut
+   * @param stdErr
+   * @return
+   */
   def executeAll(
     workDirectory:        File,
     environmentVariables: Vector[(String, String)],

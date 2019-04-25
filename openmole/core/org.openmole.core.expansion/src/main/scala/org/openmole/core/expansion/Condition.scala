@@ -17,6 +17,9 @@
 
 package org.openmole.core.expansion
 
+/**
+ * Lazy Boolean constants as [[FromContext]]
+ */
 object Condition {
   lazy val True = FromContext.value(true)
   lazy val False = FromContext.value(false)

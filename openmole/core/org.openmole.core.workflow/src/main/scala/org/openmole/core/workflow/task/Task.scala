@@ -39,6 +39,20 @@ import org.openmole.tool.random
 import org.openmole.tool.random._
 import org.openmole.tool.thread._
 
+/**
+ * Execution context for a task
+ *
+ * @param tmpDirectory tmp dir
+ * @param localEnvironment local environment
+ * @param preference
+ * @param threadProvider
+ * @param fileService
+ * @param workspace
+ * @param outputRedirection
+ * @param cache
+ * @param lockRepository
+ * @param moleExecution
+ */
 case class TaskExecutionContext(
   tmpDirectory:                   File,
   localEnvironment:               LocalEnvironment,
