@@ -222,6 +222,22 @@ class WorkflowSpec extends FlatSpec with Matchers {
     Validation(nsga).isEmpty should equal(true)
   }
 
+  "NSGAEvolution" should "be possible to generate" in {
+    val a = Val[Double]
+    val b = Val[Double]
+
+    def nsga(i: Int) =
+      NSGA2Evolution(
+        evaluation = EmptyTask() set (inputs += a, outputs += b),
+        objectives = Seq(b),
+        genome = Seq(a in (0.0, 1.0)),
+        termination = 100
+      )
+
+    val wf = EmptyTask() -- (0 until 2).map(nsga)
+    Validation(wf).isEmpty should equal(true)
+  }
+
   "NSGAEvolution with island" should "be valid" in {
     val a = Val[Double]
     val b = Val[Double]
