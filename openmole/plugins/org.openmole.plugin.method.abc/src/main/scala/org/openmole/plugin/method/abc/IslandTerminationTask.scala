@@ -22,6 +22,24 @@ object IslandTerminationTask {
     FromContextTask("appendTask") { p ⇒
       import p._
 
+      context(state) match {
+        case MonAPMC.State(t0, s) ⇒
+          val tSpan = ((stopSampleSizeFactor * nAlpha).toDouble /
+            (n - nAlpha).toDouble).ceil
+          val count = s.ts.count { _ > s.t - tSpan }
+          val pAcc = count.toDouble / (tSpan * (n - nAlpha)).toDouble
+          //(s.t >= tSpan) && (pAccMin >= pAcc)
+
+          println("n " ++ n.toString)
+          println("nAlpha " ++ nAlpha.toString)
+          println("minAcceptedRatio " ++ minAcceptedRatio.toString)
+          println("tSpan " ++ tSpan.toString)
+          println("s.t " ++ s.t.toString)
+          println("pAcc " ++ pAcc.toString)
+          println("s.ts " ++ s.ts.mkString(","))
+          println("s.epsilon " ++ s.epsilon.toString)
+      }
+
       val stopValue =
         maxStep.option.map(ms ⇒ context(step) >= ms).getOrElse(false) ||
           MonAPMC.stop(n, nAlpha, minAcceptedRatio, stopSampleSizeFactor, context(state))

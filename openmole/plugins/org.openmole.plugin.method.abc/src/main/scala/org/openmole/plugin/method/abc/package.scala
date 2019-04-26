@@ -33,7 +33,7 @@ package object abc {
       generated:            Int,
       minAcceptedRatio:     OptionalArgument[Double] = 0.01,
       stopSampleSizeFactor: Int                      = 1,
-      termination:          OptionalArgument[Int]    = None,
+      maxStep:              OptionalArgument[Int]    = None,
       scope:                DefinitionScope          = "abc") = {
       implicit def defScope = scope
       val stepState = Val[MonAPMC.StepState]("stepState", abcNamespace)
@@ -45,7 +45,7 @@ package object abc {
       val nAlpha = sample
 
       val preStepTask = PreStepTask(n, nAlpha, prior, state, stepState, step)
-      val postStepTask = PostStepTask(n, nAlpha, stopSampleSizeFactor, prior, observed, state, stepState, minAcceptedRatio, termination, stop, step)
+      val postStepTask = PostStepTask(n, nAlpha, stopSampleSizeFactor, prior, observed, state, stepState, minAcceptedRatio, maxStep, stop, step)
 
       val mapReduce =
         MapReduce(
@@ -68,17 +68,17 @@ package object abc {
   import ABC._
 
   def IslandABC(
-    evaluation:           DSL,
-    prior:                Seq[Prior],
-    observed:             Seq[Observed],
-    sample:               Int,
-    generated:            Int,
-    parallelism:          Int,
-    islandTermination:    Int,
-    islandGenerated:      Int                   = 1,
+    evaluation:  DSL,
+    prior:       Seq[Prior],
+    observed:    Seq[Observed],
+    sample:      Int,
+    generated:   Int,
+    parallelism: Int,
+    //islandGenerated:      Int                   = 1,
     minAcceptedRatio:     Double                = 0.01,
     stopSampleSizeFactor: Int                   = 1,
-    termination:          OptionalArgument[Int] = None,
+    maxStep:              OptionalArgument[Int] = None,
+    islandSteps:          Int                   = 1,
     scope:                DefinitionScope       = "abc island"
   ) = {
     implicit def defScope = scope
@@ -94,7 +94,7 @@ package object abc {
 
     val appendSplit = AppendSplitTask(n, nAlpha, masterState, islandState, step)
     val terminationTask =
-      IslandTerminationTask(n, nAlpha, minAcceptedRatio, stopSampleSizeFactor, masterState, step, termination, stop) set (
+      IslandTerminationTask(n, nAlpha, minAcceptedRatio, stopSampleSizeFactor, masterState, step, maxStep, stop) set (
         (inputs, outputs) += islandState.array
       )
 
@@ -110,9 +110,10 @@ package object abc {
           prior = prior,
           observed = observed,
           sample = sample,
-          generated = islandGenerated,
-          minAcceptedRatio = None,
-          termination = islandTermination
+          generated = generated,
+          minAcceptedRatio = minAcceptedRatio,
+          maxStep = islandSteps,
+          stopSampleSizeFactor = stopSampleSizeFactor
         )
       )
 
