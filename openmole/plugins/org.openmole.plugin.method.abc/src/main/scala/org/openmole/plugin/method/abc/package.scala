@@ -127,7 +127,7 @@ package object abc {
         stop = stop
       )
 
-    ABCContainer(DSLContainer(masterSlave, output = Some(appendSplit), delegate = Vector(slave)), ABCParameters(masterState, step), scope)
+    ABCContainer(DSLContainer(masterSlave, output = Some(master), delegate = Vector(slave)), ABCParameters(masterState, step), scope)
   }
 
 }
