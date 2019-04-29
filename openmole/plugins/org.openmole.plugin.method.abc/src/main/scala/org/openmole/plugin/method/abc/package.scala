@@ -16,10 +16,10 @@ package object abc {
     case class Observed(v: Val[Double], observed: Double)
     case class ABCParameters(state: Val[MonAPMC.MonState], step: Val[Int])
 
-    implicit class ABCContainer(dsl: DSLContainer[ABCParameters]) {
-      def hook[T](directory: T)(implicit tfc: ToFromContext[T, File]) = {
+    implicit class ABCContainer(dsl: DSLContainer[ABCParameters]) extends DSLContainerHook(dsl) {
+      def hook(directory: FromContext[File]): DSLContainer[ABC.ABCParameters] = {
         implicit val defScope = dsl.scope
-        dsl hook ABCHook(dsl, tfc(directory))
+        dsl hook ABCHook(dsl, directory)
       }
     }
 

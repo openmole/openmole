@@ -77,20 +77,20 @@ package object sensitivity {
     case class SaltelliParams(inputs: Seq[ScalarOrSequenceOfDouble[_]], outputs: Seq[Val[_]])
 
 
-    implicit class SaltelliMethodContainer(dsl: DSLContainer[SaltelliParams]) {
-      def hook[T](directory: T)(implicit toFromContext: ToFromContext[T, File]) = {
+    implicit class SaltelliMethodContainer(dsl: DSLContainer[SaltelliParams])  extends DSLContainerHook(dsl) {
+      def hook(directory: FromContext[File]): DSLContainer[Sensitivity.SaltelliParams] = {
         implicit val defScope = dsl.scope
-        dsl hook SaltelliHook(dsl, toFromContext(directory))
+        dsl hook SaltelliHook(dsl, directory)
       }
     }
 
 
     case class MorrisParams(inputs: Seq[ScalarOrSequenceOfDouble[_]], outputs: Seq[Val[_]])
 
-    implicit class MorrisMethodContainer(dsl: DSLContainer[MorrisParams]) {
-      def hook[T](directory: T)(implicit toFromContext: ToFromContext[T, File]) = {
+    implicit class MorrisMethodContainer(dsl: DSLContainer[MorrisParams]) extends DSLContainerHook(dsl) {
+      def hook(directory: FromContext[File]): DSLContainer[Sensitivity.MorrisParams] = {
         implicit val defScope = dsl.scope
-        dsl hook MorrisHook(dsl, toFromContext(directory))
+        dsl hook MorrisHook(dsl, directory)
       }
     }
 

@@ -23,7 +23,7 @@ class PuzzleSpec extends FlatSpec with Matchers {
     val task = EmptyTask()
     val test = DSLContainer(task) :: 9 :: HNil
 
-    (test: DSLContainer).run()
+    (test: DSLContainer[_]).run()
     (test: MoleExecution).run()
     test.run()
     test on LocalEnvironment(1)

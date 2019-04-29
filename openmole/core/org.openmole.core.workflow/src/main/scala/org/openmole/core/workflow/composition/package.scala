@@ -266,7 +266,7 @@ package composition {
     }
   }
 
-  case class DSLContainer[T](
+  case class DSLContainer[+T](
     dsl:         DSL,
     output:      Option[Task]                = None,
     delegate:    Vector[Task]                = Vector.empty,
@@ -277,7 +277,6 @@ package composition {
     scope:       DefinitionScope) extends DSL {
     def on(environment: EnvironmentProvider) = copy(environment = Some(environment))
     def by(strategy: Grouping) = copy(grouping = Some(strategy))
-    def hook(hooks: Hook*) = copy(hooks = this.hooks ++ hooks)
   }
 
   case class TaskNodeDSL(node: TaskNode) extends DSL
@@ -288,6 +287,12 @@ package composition {
 
     type DSL = composition.DSL
     val DSL = composition.DSL
+
+    class DSLContainerHook[T](dsl: DSLContainer[T]) {
+      def hook(hooks: Hook*) = dsl.copy(hooks = dsl.hooks ++ hooks)
+    }
+
+    implicit def hookDecorator[T](container: DSLContainer[T]) = new DSLContainerHook(container)
 
     def DSLContainer(
       transitionDSL: DSL,

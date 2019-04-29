@@ -17,7 +17,6 @@
 package org.openmole.plugin.method.evolution
 
 import org.openmole.core.dsl._
-import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.mole.Mole
 import org.openmole.core.workflow.task.FromContextTask
 import org.openmole.core.workflow.validation._
@@ -174,28 +173,28 @@ class WorkflowSpec extends FlatSpec with Matchers {
       case l   ⇒ sys.error(s"Several validation errors have been found in ${mole}: " + l.mkString("\n"))
     }
 
-    Validation(conflict.container).toList match {
+    Validation(conflict).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
   }
 
   "Island workflow" should "have no validation error" in {
-    val islandEvolutionNSGA2 = IslandEvolution(nsga2(), 10, 50, 100).container
+    val islandEvolutionNSGA2 = IslandEvolution(nsga2(), 10, 50, 100)
 
     Validation(islandEvolutionNSGA2).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
 
-    Validation(IslandEvolution(conflict, 10, 50, 100).container).toList match {
+    Validation(IslandEvolution(conflict, 10, 50, 100)).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
   }
 
   "Steady state workflow with wrapping" should "have no validation error" in {
-    Validation(nsga2(wrap = false).container).toList match {
+    Validation(nsga2(wrap = false)).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }

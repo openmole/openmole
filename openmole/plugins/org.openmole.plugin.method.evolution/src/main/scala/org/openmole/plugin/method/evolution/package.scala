@@ -104,10 +104,10 @@ package object evolution {
 
   implicit def workflowIntegration = WorkflowIntegration[DSLContainer[EvolutionWorkflow]](_.data)
 
-  implicit class EvolutionMethodContainer(dsl: DSLContainer[EvolutionWorkflow]) {
-    def hook[T](directory: T, frequency: OptionalArgument[Long] = None)(implicit tfc: ToFromContext[T, File]) = {
+  implicit class EvolutionMethodContainer(dsl: DSLContainer[EvolutionWorkflow]) extends DSLContainerHook(dsl) {
+    def hook(directory: FromContext[File], frequency: OptionalArgument[Long] = None): DSLContainer[EvolutionWorkflow] = {
       implicit val defScope = dsl.scope
-      dsl.hook(SavePopulationHook(dsl, tfc(directory), frequency))
+      dsl.hook(SavePopulationHook(dsl, directory, frequency))
     }
   }
 
