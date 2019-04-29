@@ -37,17 +37,19 @@ trait Stat {
 
   def average = (sequence: Seq[Double]) ⇒ sequence.sum / sequence.size
 
-  def meanSquaredError = (sequence: Seq[Double]) ⇒ {
+  def meanSquaredError(sequence: Seq[Double]) = variance(sequence)
+  def variance = (sequence: Seq[Double]) ⇒ {
     val avg = average(sequence)
     average(sequence.map { v ⇒ math.pow(v - avg, 2) })
   }
 
-  def rootMeanSquaredError = (sequence: Seq[Double]) ⇒ sqrt(meanSquaredError(sequence))
+  def rootMeanSquaredError(sequence: Seq[Double]) = standardDeviation(sequence)
+  def standardDeviation = (sequence: Seq[Double]) ⇒ sqrt(variance(sequence))
 
-  def sumOfAbsoluteErrors(v1: Seq[Double], v2: Seq[Double]): Double =
+  def absoluteDistance(v1: Seq[Double], v2: Seq[Double]): Double =
     (v1 zip v2).map { case (v1v, v2v) ⇒ math.abs(v1v - v2v) }.sum
 
-  def sumOfSquaredErrors(v1: Seq[Double], v2: Seq[Double]): Double =
+  def squareDistance(v1: Seq[Double], v2: Seq[Double]): Double =
     (v1 zip v2).map { case (v1v, v2v) ⇒ math.pow(v1v - v2v, 2) }.sum
 
   /**
