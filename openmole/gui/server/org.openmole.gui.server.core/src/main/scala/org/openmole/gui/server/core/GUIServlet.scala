@@ -83,7 +83,6 @@ object GUIServices {
     implicit val seeder = Seeder()
     implicit val serializerService = SerializerService()
     implicit val threadProvider = ThreadProvider()
-    implicit val replicaCatalog = ReplicaCatalog(ws)
     implicit val authenticationStore = AuthenticationStore(ws.persistentDir)
     implicit val fileService = FileService()
     implicit val randomProvider = RandomProvider(seeder.newRNG)
@@ -91,6 +90,7 @@ object GUIServices {
     implicit val outputRedirection = OutputRedirection()
     implicit val networkService = NetworkService(httpProxy)
     implicit val fileServiceCache = FileServiceCache()
+    implicit val replicaCatalog = ReplicaCatalog(ws)
 
     new GUIServices()
   }

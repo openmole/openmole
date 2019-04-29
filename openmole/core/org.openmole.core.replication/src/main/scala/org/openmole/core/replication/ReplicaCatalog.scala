@@ -19,7 +19,6 @@ package org.openmole.core.replication
 
 import java.io.File
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.locks.ReentrantLock
 
 import com.google.common.cache._
 import org.openmole.core.db.{ Replica, replicas }

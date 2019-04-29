@@ -29,7 +29,7 @@ import cats.implicits._
  *
  * @param prototype prototype taking the value by default
  * @param value value by default from the context
- * @param `override`
+ * @param `override` should the default value override conflicting variable values
  * @tparam T type of the Val
  */
 case class Default[T](prototype: Val[T], value: FromContext[T], `override`: Boolean) {

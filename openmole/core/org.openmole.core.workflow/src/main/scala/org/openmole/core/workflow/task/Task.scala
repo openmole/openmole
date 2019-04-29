@@ -28,7 +28,7 @@ import org.openmole.core.outputredirection._
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.tools.obj.Id
-import org.openmole.core.workflow.builder.{ InfoConfig, InputOutputConfig }
+import org.openmole.core.workflow.builder.{ DefinitionScope, InfoConfig, InputOutputConfig }
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.tools._
@@ -39,6 +39,20 @@ import org.openmole.tool.random
 import org.openmole.tool.random._
 import org.openmole.tool.thread._
 
+/**
+ * Execution context for a task
+ *
+ * @param tmpDirectory tmp dir
+ * @param localEnvironment local environment
+ * @param preference
+ * @param threadProvider
+ * @param fileService
+ * @param workspace
+ * @param outputRedirection
+ * @param cache
+ * @param lockRepository
+ * @param moleExecution
+ */
 case class TaskExecutionContext(
   tmpDirectory:                   File,
   localEnvironment:               LocalEnvironment,
@@ -62,6 +76,10 @@ object Task {
    */
   def buildRNG(context: Context): scala.util.Random = random.Random(context(Variable.openMOLESeed)).toScala
   def definitionScope(t: Task) = t.info.definitionScope
+
+  def apply(className: String)(fromContext: FromContextTask.Parameters ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextTask =
+    FromContextTask.apply(className)(fromContext)
+
 }
 
 /**
@@ -82,7 +100,7 @@ trait Task <: Name with Id {
   }
 
   /**
-   * The actuel processing of the Task, wrapped by the [[perform]] method
+   * The actual processing of the Task, wrapped by the [[perform]] method
    * @param executionContext
    * @return
    */

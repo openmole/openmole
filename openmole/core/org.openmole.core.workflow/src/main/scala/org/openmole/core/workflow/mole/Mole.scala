@@ -18,7 +18,7 @@
 package org.openmole.core.workflow.mole
 
 import org.openmole.core.context.PrototypeSet
-import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.workflow.transition._
 
 import scala.collection._
@@ -86,5 +86,9 @@ case class Mole(
   lazy val outputDataChannels = dataChannels.groupBy(_.start).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
 
   lazy val levels = Mole.levels(this)
-  def level(c: MoleCapsule) = levels(c)
+  def level(c: MoleCapsule) =
+    levels.get(c) match {
+      case Some(l) ⇒ l
+      case None    ⇒ throw new InternalProcessingError(s"Capsule $c not found in $this")
+    }
 }

@@ -114,7 +114,7 @@ public class NetLogo6 implements NetLogo {
      * @param array
      * @return
      */
-    public static LogoList arrayToList(Object[] array){
+    private static LogoList arrayToList(Object[] array){
         LogoListBuilder list = new LogoListBuilder();
         for(Object o:array){
             if(o instanceof Object[]){list.add(arrayToList((Object[]) o));}

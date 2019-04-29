@@ -41,12 +41,12 @@ object ExpandedString {
   def apply(s: String): FromContext[String] = apply(new StringInputStream(s))
 
   /**
-    * Expand an input stream as an [[Expansion]]
-    * @param is
-    * @return
-    */
+   * Expand an input stream as an [[FromContext]]
+   * @param is
+   * @return
+   */
   def apply(is: InputStream): FromContext[String] = {
-    val expandedElements = ListBuffer[ExpansionElement]()
+    val expandedElements = ListBuffer[ExpandedElement]()
 
     val it = Iterator.continually(is.read).takeWhile(_ != -1)
 
@@ -92,34 +92,23 @@ object ExpandedString {
     }
     if (dollar) os.write('$')
     expandedElements += UnexpandedElement(os.clear())
-    Expansion(expandedElements)
-  }
 
-  /**
-    * An Expansion wraps a sequence of [[ExpansionElement]] extending a @code{FromContext[String]}
-    * @param elements
-    */
-  case class Expansion(elements: Seq[ExpandedString.ExpansionElement]) extends FromContext[String] {
-    def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService) = elements.map(_.from(context)).mkString
-    def validate(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService): Seq[Throwable] = elements.flatMap(_.validate(inputs))
-  }
+    val expandedFC = expandedElements.map(ExpandedElement.fromContext)
 
-  type ExpansionElement = FromContext[String]
-
-  /**
-    * An [[ExpansionElement]] which has not been expanded yet (a String)
-    * @param string
-    */
-  case class UnexpandedElement(string: String) extends ExpansionElement {
-    def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): String = string
-    def validate(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService): Seq[Throwable] = Seq.empty
+    FromContext { p ⇒
+      import p._
+      expandedFC.map(_.from(context)).mkString
+    } validate { p ⇒
+      import p._
+      expandedFC.flatMap(_.validate(inputs))
+    }
   }
 
   /**
    * An ExpandedElement distinguishes between value strings and code strings
    */
   object ExpandedElement {
-    def apply(code: String): ExpansionElement = {
+    def apply(code: String): ExpandedElement = {
       if (code.isEmpty) ValueElement(code)
       else
         Try(code.toDouble).toOption orElse
@@ -129,32 +118,47 @@ object ExpandedString {
             case None    ⇒ CodeElement(code)
           }
     }
-  }
 
-  /**
-    * A value element
-    * @param v
-    */
-  case class ValueElement(v: String) extends ExpansionElement {
-    def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): String = v
-    def validate(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService): Seq[Throwable] = Seq.empty
-  }
+    def fromContext(expansionElement: ExpandedElement) =
+      expansionElement match {
+        case e: UnexpandedElement ⇒ FromContext(_ ⇒ e.string)
+        case e: ValueElement      ⇒ FromContext(_ ⇒ e.v)
+        case e: CodeElement ⇒
+          FromContext { p ⇒
+            import p._
+            context.variable(e.code) match {
+              case Some(value) ⇒ value.value.toString
+              case None        ⇒ e.proxy().from(context).toString
+            }
+          } validate { p ⇒
+            import p._
+            if (inputs.exists(_.name == e.code)) Seq.empty
+            else e.proxy.validate(inputs).toSeq
+          }
 
-  /**
-    * A code element - the code is compiled only at each deserialization (@transient lazy val pattern for the proxy dynamically compiling here)
-    * @param code
-    */
-  case class CodeElement(code: String) extends ExpansionElement {
-    @transient lazy val proxy = ScalaCompilation.dynamic[Any](code)
-    def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): String = {
-      context.variable(code) match {
-        case Some(value) ⇒ value.value.toString
-        case None        ⇒ proxy().from(context).toString
       }
-    }
-    def validate(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService): Seq[Throwable] =
-      if (inputs.exists(_.name == code)) Seq.empty
-      else proxy.validate(inputs).toSeq
+  }
+
+  sealed trait ExpandedElement
+
+  /**
+   * An [[ExpandedElement]] which has not been expanded yet (a String)
+   * @param string
+   */
+  case class UnexpandedElement(string: String) extends ExpandedElement
+
+  /**
+   * A value element
+   * @param v
+   */
+  case class ValueElement(v: String) extends ExpandedElement
+
+  /**
+   * A code element - the code is compiled only at each deserialization (@transient lazy val pattern for the proxy dynamically compiling here)
+   * @param code
+   */
+  case class CodeElement(code: String) extends ExpandedElement {
+    @transient lazy val proxy = ScalaCompilation.dynamic[Any](code)
   }
 
 }

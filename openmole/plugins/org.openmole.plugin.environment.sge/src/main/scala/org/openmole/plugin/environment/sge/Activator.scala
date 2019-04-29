@@ -30,7 +30,7 @@ class Activator extends BundleActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector(
-        Environment(classOf[SGEEnvironment[_]])
+        EnvironmentKeyWord(classOf[SGEEnvironment[_]])
       )
 
     PluginInfo.register(this, namespaces = Vector(this.getClass.getPackage), keyWords = keyWords)

@@ -169,26 +169,31 @@ object MoleExecution extends JavaLogger {
           val jobId = nextJobId(subMoleExecutionState.moleExecution)
 
           subMoleExecutionState.masterCapsuleExecutor.submit {
-            val savedContext = subMoleExecutionState.masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(Context.empty)
-            val moleJob: MoleJob = MoleJob(capsule.task, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, stateChanged)
-            eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
-            MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.RegisterJob(subMoleExecutionState, moleJob, capsule))
-            val taskContext =
-              TaskExecutionContext(
-                newFile.baseDir,
-                subMoleExecutionState.moleExecution.defaultEnvironment,
-                preference,
-                threadProvider,
-                fileService,
-                workspace,
-                outputRedirection,
-                subMoleExecutionState.moleExecution.taskCache,
-                subMoleExecutionState.moleExecution.lockRepository,
-                moleExecution = Some(subMoleExecutionState.moleExecution)
-              )
-            moleJob.perform(taskContext)
-            subMoleExecutionState.masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(moleJob.context))
-            MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(moleJob, moleJob.state, capsule, ticket))
+            try {
+              val savedContext = subMoleExecutionState.masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(Context.empty)
+              val moleJob: MoleJob = MoleJob(capsule.task, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, stateChanged)
+              eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
+              MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.RegisterJob(subMoleExecutionState, moleJob, capsule))
+              val taskContext =
+                TaskExecutionContext(
+                  newFile.baseDir,
+                  subMoleExecutionState.moleExecution.defaultEnvironment,
+                  preference,
+                  threadProvider,
+                  fileService,
+                  workspace,
+                  outputRedirection,
+                  subMoleExecutionState.moleExecution.taskCache,
+                  subMoleExecutionState.moleExecution.lockRepository,
+                  moleExecution = Some(subMoleExecutionState.moleExecution)
+                )
+              moleJob.perform(taskContext)
+              subMoleExecutionState.masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(moleJob.context))
+              MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(moleJob, moleJob.state, capsule, ticket))
+            }
+            catch {
+              case t: Throwable ⇒ MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.MoleExecutionError(t))
+            }
           }
         case _ ⇒
           def stateChanged(job: MoleJob, oldState: State, newState: State) = {
@@ -530,6 +535,7 @@ object MoleExecutionMessage {
   case class CancelMoleExecution() extends MoleExecutionMessage
   case class RegisterJob(subMoleExecution: SubMoleExecutionState, job: MoleJob, capsule: MoleCapsule) extends MoleExecutionMessage
   case class CleanMoleExecution() extends MoleExecutionMessage
+  case class MoleExecutionError(t: Throwable) extends MoleExecutionMessage
 
   def msgForSubMole(msg: MoleExecutionMessage, subMoleExecutionState: SubMoleExecutionState) = msg match {
     case msg: PerformTransition ⇒ msg.subMoleExecution == subMoleExecutionState.id
@@ -569,6 +575,7 @@ object MoleExecutionMessage {
         case msg: CancelMoleExecution   ⇒ if (!moleExecution._canceled) MoleExecution.cancel(moleExecution, None)
         case msg: RegisterJob           ⇒ if (!moleExecution._canceled) msg.subMoleExecution.jobs.put(msg.job, msg.capsule)
         case msg: CleanMoleExecution    ⇒ MoleExecution.clean(moleExecution)
+        case msg: MoleExecutionError    ⇒ MoleExecution.cancel(moleExecution, Some(MoleExecution.MoleExecutionError(msg.t)))
       }
     }
     catch {

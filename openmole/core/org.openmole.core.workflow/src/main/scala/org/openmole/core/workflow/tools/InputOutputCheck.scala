@@ -113,7 +113,7 @@ object InputOutputCheck {
           else Option.empty[Variable[_]]
       }
 
-  def perform(obj: Any, inputs: PrototypeSet, outputs: PrototypeSet, defaults: DefaultSet, process: FromContext[Context])(implicit preference: Preference) = FromContext.withValidation(process) { p ⇒
+  def perform(obj: Any, inputs: PrototypeSet, outputs: PrototypeSet, defaults: DefaultSet, process: FromContext[Context])(implicit preference: Preference) = FromContext { p ⇒
     import p._
     val initializedContext = initializeInput(defaults, context)
     val inputErrors = verifyInput(inputs, initializedContext)
@@ -129,6 +129,9 @@ object InputOutputCheck {
     val outputErrors = verifyOutput(outputs, result)
     if (!outputErrors.isEmpty) throw new InternalProcessingError(s"Output errors in ${obj}: ${outputErrors.mkString(", ")}.")
     filterOutput(outputs, result)
+  } validate { p ⇒
+    import p._
+    process.validate(p.inputs)
   }
 
 }

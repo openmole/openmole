@@ -114,14 +114,13 @@ object FromContext extends LowPriorityFromContext {
   implicit val applicative: Applicative[FromContext] = new Applicative[FromContext] {
     override def pure[A](x: A): FromContext[A] = FromContext.value(x)
     override def ap[A, B](ff: FromContext[(A) ⇒ B])(fa: FromContext[A]): FromContext[B] =
-      new FromContext[B] {
-        override def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): B = {
-          val res = fa.from(context)(rng, newFile, fileService)
-          ff.from(context)(rng, newFile, fileService)(res)
-        }
-
-        override def validate(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService): Seq[Throwable] =
-          fa.validate(inputs) ++ ff.validate(inputs)
+      FromContext[B] { p ⇒
+        import p._
+        val res = fa.from(context)
+        ff.from(context).apply(res)
+      } validate { p ⇒
+        import p._
+        fa.validate(inputs) ++ ff.validate(inputs)
       }
   }
 
@@ -132,12 +131,17 @@ object FromContext extends LowPriorityFromContext {
    * @tparam T
    * @return
    */
-  def codeToFromContext[T: Manifest](code: String): FromContext[T] =
-    new FromContext[T] {
-      val proxy = Cache(ScalaCompilation.dynamic[T](code))
-      override def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): T = proxy.apply.apply.from(context)
-      override def validate(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService): Seq[Throwable] = proxy().validate(inputs).toSeq
+  def codeToFromContext[T: Manifest](code: String) = {
+    val proxy = Cache(ScalaCompilation.dynamic[T](code))
+
+    FromContext[T] { p ⇒
+      import p._
+      proxy.apply.apply.from(context)
+    } validate { p ⇒
+      import p._
+      proxy().validate(inputs).toSeq
     }
+  }
 
   implicit def functionToFromContext[T](f: (Context ⇒ T)) = contextConverter(f)
   implicit def codeToFromContextFloat(s: String) = contextConverter[String, Float](s)
@@ -163,11 +167,12 @@ object FromContext extends LowPriorityFromContext {
    * @return
    */
   def prototype[T](p: Val[T]) =
-    new FromContext[T] {
-      override def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService) = context(p)
-      def validate(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService): Seq[Throwable] = {
-        if (inputs.exists(_ == p)) Seq.empty else Seq(new UserBadDataError(s"Prototype $p not found"))
-      }
+    FromContext[T] { param ⇒
+      import param._
+      context(p)
+    } validate { param ⇒
+      import param._
+      if (inputs.exists(_ == p)) Seq.empty else Seq(new UserBadDataError(s"Prototype $p not found"))
     }
 
   /**
@@ -176,11 +181,7 @@ object FromContext extends LowPriorityFromContext {
    * @tparam T
    * @return
    */
-  def value[T](t: T): FromContext[T] =
-    new FromContext[T] {
-      def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): T = t
-      def validate(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService): Seq[Throwable] = Seq.empty
-    }
+  def value[T](t: T): FromContext[T] = FromContext[T] { _ ⇒ t }
 
   /**
    * Parameters wrap a Context and implicit services
@@ -190,6 +191,7 @@ object FromContext extends LowPriorityFromContext {
    * @param fileService
    */
   case class Parameters(context: Context, implicit val random: RandomProvider, implicit val newFile: NewFile, implicit val fileService: FileService)
+  case class ValidationParameters(inputs: Seq[Val[_]], implicit val newFile: NewFile, implicit val fileService: FileService)
 
   /**
    * Construct a FromContext from a function of [[Parameters]]
@@ -197,24 +199,7 @@ object FromContext extends LowPriorityFromContext {
    * @tparam T
    * @return
    */
-  def apply[T](f: Parameters ⇒ T): FromContext[T] =
-    new FromContext[T] {
-      def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService) = f(Parameters(context, rng, newFile, fileService))
-      def validate(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService): Seq[Throwable] = Seq.empty
-    }
-
-  /**
-   * Construct a FromContext from a function of [[Parameters]], with an additional list of FromContext which must be validated on inputs
-   * @param validated
-   * @param f
-   * @tparam T
-   * @return
-   */
-  def withValidation[T](validated: FromContext[_]*)(f: Parameters ⇒ T) =
-    new FromContext[T] {
-      def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService) = f(Parameters(context, rng, newFile, fileService))
-      def validate(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService): Seq[Throwable] = validated.flatMap(_.validate(inputs))
-    }
+  def apply[T](f: Parameters ⇒ T): FromContext[T] = new FromContext[T](f, _ ⇒ Seq.empty)
 
   /**
    * Operators for boolean FromContext ([[Condition]] ~ FromContext[Boolean])
@@ -224,15 +209,21 @@ object FromContext extends LowPriorityFromContext {
     def unary_! = f.map(v ⇒ !v)
 
     def &&(d: Condition): Condition =
-      new FromContext[Boolean] {
-        override def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): Boolean = f.from(context) && d.from(context)
-        override def validate(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService): Seq[Throwable] = f.validate(inputs) ++ d.validate(inputs)
+      FromContext[Boolean] { p ⇒
+        import p._
+        f.from(context) && d.from(context)
+      } validate { p ⇒
+        import p._
+        f.validate(inputs) ++ d.validate(inputs)
       }
 
     def ||(d: Condition): Condition =
-      new FromContext[Boolean] {
-        override def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): Boolean = f.from(context) || d.from(context)
-        override def validate(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService) = f.validate(inputs) ++ d.validate(inputs)
+      FromContext[Boolean] { p ⇒
+        import p._
+        f.from(context) || d.from(context)
+      } validate { p ⇒
+        import p._
+        f.validate(inputs) ++ d.validate(inputs)
       }
   }
 
@@ -248,10 +239,15 @@ object FromContext extends LowPriorityFromContext {
 
 }
 
-trait FromContext[+T] {
-  def apply(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): T = from(context)
-  def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): T
-  def validate(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService): Seq[Throwable]
+class FromContext[+T](c: FromContext.Parameters ⇒ T, v: FromContext.ValidationParameters ⇒ Seq[Throwable]) {
+  def apply(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): T = c(FromContext.Parameters(context, rng, newFile, fileService))
+  def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): T = apply(context)
+  def validate(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService): Seq[Throwable] = v(FromContext.ValidationParameters(inputs, newFile, fileService))
+
+  def validate(v2: FromContext.ValidationParameters ⇒ Seq[Throwable]) = {
+    def nv(p: FromContext.ValidationParameters) = v(p) ++ v2(p)
+    new FromContext(c, v = nv)
+  }
 }
 
 object Expandable {

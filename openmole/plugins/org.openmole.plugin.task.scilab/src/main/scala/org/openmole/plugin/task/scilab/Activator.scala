@@ -34,7 +34,7 @@ class Activator extends PluginInfoActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector(
-        Task(objectName(ScilabTask)),
+        TaskKeyWord(objectName(ScilabTask)),
         "scilabInputs",
         "scilabOutputs")
 

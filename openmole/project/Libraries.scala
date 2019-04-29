@@ -6,7 +6,7 @@ import sbt._
 object Libraries {
 
   lazy val gridscaleVersion = "2.15"
-  lazy val mgoVersion = "3.26"
+  lazy val mgoVersion = "3.28"
   lazy val bouncyCastleVersion = "1.60"
   lazy val aceVersion = "01.08.2014"
   lazy val d3Version = "3.5.12"
@@ -49,13 +49,17 @@ object Libraries {
 
   /** ------- Bundles -------------- */
 
-  def addScalaLang(scalaVersion: String) = libraryDependencies += "org.openmole.library" %% "org-scala-lang-scala-library" % scalaVersion
+  def addScalaLang(scalaVersion: String) =
+    libraryDependencies ++= Seq(
+      "org.openmole.library" %% "org-scala-lang-scala-library" % scalaVersion,
+      "org.scalameta" %% "scalameta" % "4.1.0"
+    )
 
   lazy val scalatra = "org.openmole.library" %% "org-scalatra" % "2.6.3"
   lazy val logback = "org.openmole.library" %% "ch-qos-logback" % "1.0.9"
   lazy val h2 = "org.openmole.library" %% "org-h2" % "1.4.199"
   lazy val bonecp = "org.openmole.library" %% "com-jolbox-bonecp" % "0.8.0-rc1"
-  lazy val slick = "org.openmole.library" %% "com-typesafe-slick" % "3.2.0"
+  lazy val slick = "org.openmole.library" %% "com-typesafe-slick" % "3.3.0"
   lazy val slf4j = "org.openmole.library" %% "org-slf4j" % "1.7.10"
   lazy val xstream = "org.openmole.library" %% "com-thoughtworks-xstream" % xstreamVersion
   lazy val jasypt = "org.openmole.library" %% "org-jasypt-encryption" % "1.9.2"

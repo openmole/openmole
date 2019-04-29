@@ -17,15 +17,13 @@
 
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.context.{ Context, Variable }
-import org.openmole.core.workflow.builder.DefinitionScope
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.task._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 
 object ElitismTask {
 
   def apply[T](evolution: EvolutionWorkflow)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
-    FromContextTask("ElitismTask") { p ⇒
+    Task("ElitismTask") { p ⇒
       import p._
 
       val (newState, newPopulation) =

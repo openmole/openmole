@@ -17,7 +17,6 @@
  */
 package org.openmole.core.project
 
-import javax.script.CompiledScript
 import org.openmole.core.console._
 import org.openmole.core.pluginmanager._
 import org.openmole.core.project.Imports.{ SourceFile, Tree }
@@ -26,7 +25,6 @@ import monocle.function.all._
 import monocle.std.all._
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.services._
 import org.openmole.core.workflow.composition.DSL
 import org.openmole.core.workspace.NewFile
@@ -55,7 +53,7 @@ object Project {
     def makeVal(identifier: String, file: File) =
       s"""lazy val ${identifier} = ${uniqueName(file)}"""
 
-    def makeScriptImports(sourceFile: SourceFile) = {
+    def makeScriptWithImports(sourceFile: SourceFile) = {
       def imports = makeImportTree(Tree.insertAll(sourceFile.importedFiles))
 
       val name = uniqueName(sourceFile.file)
@@ -69,12 +67,31 @@ object Project {
            """
     }
 
-    def makeScript(sourceFile: SourceFile) = {
+    def makeImportedScript(sourceFile: SourceFile) = {
+      def removeTerms(classContent: String) = {
+        import _root_.scala.meta._
+
+        val source = classContent.parse[Source].get
+        val cls = source.stats.last.asInstanceOf[Defn.Object]
+        val lastStat = cls.templ.stats.last
+
+        def filterTermAndAddLazy(stat: Stat) =
+          stat match {
+            case _: Term ⇒ None
+            case v: Defn.Val if v.mods.collect { case x: Mod.Lazy ⇒ x }.isEmpty ⇒ Some(v.copy(mods = v.mods ++ Seq(Mod.Lazy())))
+            case s ⇒ Some(s)
+          }
+
+        val newCls = cls.copy(templ = cls.templ.copy(stats = cls.templ.stats.flatMap(filterTermAndAddLazy)))
+        source.copy(stats = source.stats.dropRight(1) ++ Seq(newCls))
+      }
+
       def imports = makeImportTree(Tree.insertAll(sourceFile.importedFiles))
 
       val name = uniqueName(sourceFile.file)
 
-      s"""class ${name}Class {
+      val classContent =
+        s"""object ${name} {
            |lazy val _imports = new {
            |$imports
            |}
@@ -82,17 +99,18 @@ object Project {
            |import _imports._
            |
            |private lazy val ${ConsoleVariables.workDirectory} = File(new java.net.URI("${sourceFile.file.getParentFileSafe.toURI}").getPath)
+           |
            |${sourceFile.file.content}
            |}
-           |
-           |lazy val ${name} = new ${name}Class
-         """.stripMargin
+        """.stripMargin
+
+      removeTerms(classContent)
     }
 
     val allImports = Imports.importedFiles(script)
 
     // The first script is the script being compiled itself, no need to include its vars and defs, it would be redundant
-    def importHeader = { allImports.take(1).map(makeScriptImports) ++ allImports.drop(1).map(makeScript) }.mkString("\n")
+    def importHeader = { allImports.take(1).map(makeScriptWithImports) ++ allImports.drop(1).map(makeImportedScript) }.mkString("\n")
 
     s"""
        |$importHeader

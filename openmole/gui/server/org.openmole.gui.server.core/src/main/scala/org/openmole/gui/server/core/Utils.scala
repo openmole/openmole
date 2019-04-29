@@ -363,7 +363,7 @@ object Utils extends JavaLogger {
     val from = File.createTempFile("openmole", "grammar")
     val rules = PluginInfo.keyWords.partition { kw ⇒
       kw match {
-        case _@ (KeyWord.Task(_) | KeyWord.Source(_) | KeyWord.Environment(_) | KeyWord.Hook(_) | KeyWord.Sampling(_) | KeyWord.Domain(_) | KeyWord.Pattern(_)) ⇒ false
+        case _@ (KeyWord.TaskKeyWord(_) | KeyWord.SourceKeyWord(_) | KeyWord.EnvironmentKeyWord(_) | KeyWord.HookKeyWord(_) | KeyWord.SamplingKeyWord(_) | KeyWord.DomainKeyWord(_) | KeyWord.PatternKeyWord(_)) ⇒ false
         case _ ⇒ true
       }
     }

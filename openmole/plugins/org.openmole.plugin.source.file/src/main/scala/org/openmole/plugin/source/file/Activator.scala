@@ -32,11 +32,11 @@ class Activator extends PluginInfoActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector(
-        Source(objectName(CSVSource)),
-        Source(objectName(FileSource)),
-        Source(objectName(ListDirectoriesSource)),
-        Source(objectName(ListFilesSource)),
-        Source(objectName(LoadSource))
+        SourceKeyWord(objectName(CSVSource)),
+        SourceKeyWord(objectName(FileSource)),
+        SourceKeyWord(objectName(ListDirectoriesSource)),
+        SourceKeyWord(objectName(ListFilesSource)),
+        SourceKeyWord(objectName(LoadSource))
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)

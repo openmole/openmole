@@ -1,31 +1,22 @@
 package org.openmole.plugin.method.abc
 
 import mgo.abc.MonAPMC
-import org.openmole.core.expansion._
 import org.openmole.core.dsl._
-import org.openmole.core.workflow.builder.DefinitionScope
-import org.openmole.core.workflow.mole.FromContextHook
-import shapeless.{ HList, HNil }
-import shapeless.ops.hlist.Selector
+import org.openmole.core.dsl.extension._
 
 object ABCHook {
 
-  def apply[T <: HList](algorithm: T, dir: FromContext[File], frequency: OptionalArgument[Long] = None)(implicit parametersExtractor: Selector[T, ABCParameters], name: sourcecode.Name, definitionScope: DefinitionScope) = {
-
-    val parameters = parametersExtractor(algorithm)
-
-    FromContextHook("ABCHook") { p ⇒
+  def apply(abc: ABC.ABCContainer, dir: FromContext[File], frequency: OptionalArgument[Long] = None)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+    Hook("ABCHook") { p ⇒
       import p._
       import org.openmole.plugin.tool.csv._
 
-      context(parameters.state) match {
+      context(abc.parameters.state) match {
         case MonAPMC.Empty() ⇒ ()
+        case MonAPMC.State(_, s) ⇒
+          val step = context(abc.parameters.step)
 
-        case MonAPMC.State(t0, s) ⇒
-
-          val step = context(parameters.step)
-
-          val filePath = dir / ExpandedString("step${" + step + "}.csv")
+          val filePath = dir / s"step${step}.csv"
           val file = filePath.from(context)
 
           val size = s.thetas.size
@@ -45,13 +36,7 @@ object ABCHook {
               s.weights zip
               s.thetas).map {
                 case ((((((epsilon, pAcc), t), ti), rhoi), wi), thetai) ⇒
-                  epsilon.toString ++ "," ++
-                    pAcc.toString ++ "," ++
-                    t.toString ++ "," ++
-                    ti.toString ++ "," ++
-                    rhoi.toString ++ "," ++
-                    wi.toString ++ "," ++
-                    thetai.mkString(",")
+                  epsilon.toString ++ "," ++ pAcc.toString ++ "," ++ t.toString ++ "," ++ ti.toString ++ "," ++ rhoi.toString ++ "," ++ wi.toString ++ "," ++ thetai.mkString(",")
               }.mkString("\n")
 
           file.createParentDir
@@ -69,7 +54,5 @@ object ABCHook {
 
       context
     }
-
-  }
 
 }

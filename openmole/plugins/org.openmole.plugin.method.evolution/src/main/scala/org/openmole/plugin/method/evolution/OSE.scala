@@ -162,16 +162,16 @@ object OSE {
     import cats.data._
     import mgo.evolution.contexts._
 
-    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Vector[Any]] { api ⇒
+    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Array[Any]] { api ⇒
       type G = CDGenome.Genome
-      type I = CDGenome.NoisyIndividual.Individual[Vector[Any]]
-      type S = EvolutionState[OSEState[Vector[Any]]]
+      type I = CDGenome.NoisyIndividual.Individual[Array[Any]]
+      type S = EvolutionState[OSEState[Array[Any]]]
 
       def iManifest = implicitly
       def gManifest = implicitly
       def sManifest = implicitly
 
-      private def interpret[U](f: OSEImplicits[Vector[Any]] ⇒ (S, U)) = State[S, U] { (s: S) ⇒
+      private def interpret[U](f: OSEImplicits[Array[Any]] ⇒ (S, U)) = State[S, U] { (s: S) ⇒
         mgo.evolution.algorithm.NoisyOSE.run(s)(f)
       }
 
@@ -179,7 +179,7 @@ object OSE {
         import cats.implicits._
         for {
           t ← op
-          newState ← MGONoisyOSE.state[M, Vector[Any]]
+          newState ← MGONoisyOSE.state[M, Array[Any]]
         } yield (newState, t)
       }
 
@@ -202,8 +202,8 @@ object OSE {
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
 
-        def buildIndividual(genome: G, phenotype: Vector[Any], context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
-        def initialState(rng: util.Random) = EvolutionState[OSEState[Vector[Any]]](random = rng, s = (Array.empty, Array.empty))
+        def buildIndividual(genome: G, phenotype: Array[Any], context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
+        def initialState(rng: util.Random) = EvolutionState[OSEState[Array[Any]]](random = rng, s = (Array.empty, Array.empty))
 
         def result(population: Vector[I], state: S) = FromContext { p ⇒
           import p._
@@ -229,7 +229,7 @@ object OSE {
           Genome.discrete(om.genome).map { discrete ⇒
             interpret { impl ⇒
               import impl._
-              zipWithState(MGONoisyOSE.adaptiveBreeding[DSL, Vector[Any]](
+              zipWithState(MGONoisyOSE.adaptiveBreeding[DSL, Array[Any]](
                 n,
                 om.operatorExploration,
                 om.cloneProbability,
@@ -246,7 +246,7 @@ object OSE {
               import impl._
               def step =
                 for {
-                  elited ← MGONoisyOSE.elitism[DSL, Vector[Any]](
+                  elited ← MGONoisyOSE.elitism[DSL, Array[Any]](
                     om.mu,
                     om.historySize,
                     NoisyObjective.aggregate(om.objectives),
@@ -264,7 +264,7 @@ object OSE {
         def afterDuration(d: squants.Time, population: Vector[I]) = api.afterDuration(d, population)
 
         def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland[I](population, CDGenome.NoisyIndividual.Individual.historyAge)
-        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Vector[Any]](population ++ state.s._1, CDGenome.NoisyIndividual.Individual.historyAge, CDGenome.NoisyIndividual.Individual.fitnessHistory)
+        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Array[Any]](population ++ state.s._1, CDGenome.NoisyIndividual.Individual.historyAge, CDGenome.NoisyIndividual.Individual.fitnessHistory)
 
       }
 
