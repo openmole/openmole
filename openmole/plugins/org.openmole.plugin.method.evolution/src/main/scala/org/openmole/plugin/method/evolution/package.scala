@@ -18,7 +18,7 @@
 package org.openmole.plugin.method
 
 import org.openmole.core.dsl._
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.dsl.extension._
 import org.openmole.core.workflow.builder._
 import monocle.macros._
 import org.openmole.plugin.task.tools._
@@ -65,7 +65,7 @@ package object evolution {
       parallelism:  Int                          = 1,
       distribution: EvolutionPattern             = SteadyState(),
       suggestion:   Seq[Seq[ValueAssignment[_]]],
-      scope:        DefinitionScope)(implicit wfi: WorkflowIntegration[T]) =
+      scope:        DefinitionScope)(implicit wfi: WorkflowIntegration[T]): DSLContainer[EvolutionWorkflow] =
       distribution match {
         case s: SteadyState ⇒
           SteadyStateEvolution(
@@ -102,14 +102,12 @@ package object evolution {
   case class SteadyState(wrap: Boolean = false) extends EvolutionPattern
   case class Island(termination: OMTermination, sample: OptionalArgument[Int] = None) extends EvolutionPattern
 
-  implicit def extension = DSLContainerExtension(EvolutionMethodContainer.container)
-  implicit def workflowIntegration = WorkflowIntegration[EvolutionMethodContainer](_.evolution)
+  implicit def workflowIntegration = WorkflowIntegration[DSLContainer[EvolutionWorkflow]](_.data)
 
-  @Lenses case class EvolutionMethodContainer(evolution: EvolutionWorkflow, container: DSLContainer, scope: DefinitionScope) {
-    def save(directory: FromContext[File], frequency: OptionalArgument[Long] = None) = {
-      implicit val defScope = scope
-      val savePopulation = SavePopulationHook(this, directory, frequency)
-      this.hook(savePopulation)
+  implicit class EvolutionMethodContainer(dsl: DSLContainer[EvolutionWorkflow]) {
+    def hook[T](directory: T, frequency: OptionalArgument[Long] = None)(implicit tfc: ToFromContext[T, File]) = {
+      implicit val defScope = dsl.scope
+      dsl.hook(SavePopulationHook(dsl, tfc(directory), frequency))
     }
   }
 
@@ -163,22 +161,20 @@ package object evolution {
       (Strain(firstTask) -- masterSlave) &
         (firstTask oo wrapped block (evolution.populationPrototype, evolution.statePrototype))
 
-    val gaDSL = DSLContainer(puzzle, output = Some(masterTask), delegate = wrapped.delegate)
-
-    EvolutionMethodContainer(evolution, gaDSL, scope)
+    DSLContainerExtension[EvolutionWorkflow](puzzle, output = Some(masterTask), delegate = wrapped.delegate, data = evolution)
   }
 
   def IslandEvolution[T](
-    island:      EvolutionMethodContainer,
+    island:      DSLContainer[EvolutionWorkflow],
     parallelism: Int,
     termination: OMTermination,
-    sample:      OptionalArgument[Int]    = None,
-    scope:       DefinitionScope          = "island evolution"
+    sample:      OptionalArgument[Int]           = None,
+    scope:       DefinitionScope                 = "island evolution"
   ) = {
 
     implicit def defScope = scope
 
-    val t = island.evolution
+    val t = island.data
 
     val islandPopulationPrototype = t.populationPrototype.withName("islandPopulation")
 
@@ -236,9 +232,7 @@ package object evolution {
       (Strain(first) -- masterSlave) &
         (first oo islandTask block (t.populationPrototype, t.statePrototype))
 
-    val gaPuzzle = DSLContainer(puzzle, output = Some(masterTask), delegate = Vector(islandTask))
-
-    EvolutionMethodContainer(t, gaPuzzle, scope)
+    DSLContainerExtension[EvolutionWorkflow](puzzle, output = Some(masterTask), delegate = Vector(islandTask), data = t)
   }
 
 }

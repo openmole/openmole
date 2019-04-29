@@ -80,6 +80,8 @@ package dsl {
     type FromContext[T] = org.openmole.core.expansion.FromContext[T]
     lazy val FromContext = org.openmole.core.expansion.FromContext
 
+    type ToFromContext[F, T] = org.openmole.core.expansion.ToFromContext[F, T]
+
     type DefinitionScope = org.openmole.core.workflow.builder.DefinitionScope
     def DefinitionScope = org.openmole.core.workflow.builder.DefinitionScope
 
