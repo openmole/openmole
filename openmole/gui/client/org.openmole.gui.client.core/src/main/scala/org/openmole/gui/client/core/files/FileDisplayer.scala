@@ -40,7 +40,9 @@ class FileDisplayer(val tabs: TreeNodeTabs) {
       case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
       case _ ⇒ fileExtension match {
         case OpenMOLEScript ⇒
-          tabs ++ TreeNodeTab.oms(safePath, content)
+          val tab = TreeNodeTab.oms(safePath, content)
+          tabs ++ tab
+          tab.omsEditor.editor.focus
         case MDScript ⇒ post()[Api].mdToHtml(safePath).call().foreach { htmlString ⇒
           tabs ++ TreeNodeTab.html(safePath, htmlString)
         }

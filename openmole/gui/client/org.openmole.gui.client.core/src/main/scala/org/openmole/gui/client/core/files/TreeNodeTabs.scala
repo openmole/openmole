@@ -784,6 +784,7 @@ class TreeNodeTabs() {
                 case _ ⇒ unActiveTab
               },
               data("toggle") := "tab", onclick := { () ⇒
+                t.editor.foreach{_.editor.focus}
                 setActive(t)
               }
             )(
