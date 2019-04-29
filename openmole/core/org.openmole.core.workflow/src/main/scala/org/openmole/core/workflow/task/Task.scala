@@ -100,7 +100,7 @@ trait Task <: Name with Id {
   }
 
   /**
-   * The actuel processing of the Task, wrapped by the [[perform]] method
+   * The actual processing of the Task, wrapped by the [[perform]] method
    * @param executionContext
    * @return
    */
