@@ -29,6 +29,10 @@ trait ValidateTask {
   def validate: Validate
 }
 
+trait ValidateSource {
+  def validate(inputs: Seq[Val[_]]): Validate
+}
+
 trait ValidateHook {
   def validate(inputs: Seq[Val[_]]): Validate
 }
@@ -41,6 +45,10 @@ object ValidationProblem {
 
   case class TaskValidationProblem(task: Task, errors: Seq[Throwable]) extends ValidationProblem {
     override def toString = s"Errors in validation of task $task:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).messageAndStackStringWithMargin).mkString("\n")
+  }
+
+  case class SourceValidationProblem(source: Source, errors: Seq[Throwable]) extends ValidationProblem {
+    override def toString = s"Errors in validation of source $source:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).messageAndStackStringWithMargin).mkString("\n")
   }
 
   case class HookValidationProblem(hook: Hook, errors: Seq[Throwable]) extends ValidationProblem {

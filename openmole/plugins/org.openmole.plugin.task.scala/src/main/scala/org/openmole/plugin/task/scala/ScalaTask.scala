@@ -32,9 +32,8 @@ import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace.NewFile
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
 import org.openmole.plugin.task.jvm._
-
 import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
+import org.openmole.tool.cache._
 
 import scala.util._
 
