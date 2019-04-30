@@ -19,9 +19,11 @@
 package org.openmole.plugin.method.sensitivity
 
 import org.openmole.core.context.{ Namespace, Val, Variable }
+import org.openmole.core.expansion._
 import org.openmole.core.workflow.builder.DefinitionScope
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.task.ClosureTask
+import org.openmole.core.dsl._
+import org.openmole.core.workflow.task.FromContextTask
+import org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
 
 /**
  * Describes a part of the space of inputs/ouputs of a model (or actually, puzzle)
@@ -40,12 +42,6 @@ object MorrisAggregation {
    * Variables produced by Morris analysis
    */
   val namespace = Namespace("morris")
-
-  val varInputName = Val[Array[String]]("input", namespace = namespace)
-  val varOutputName = Val[Array[String]]("output", namespace = namespace)
-  val varMu = Val[Array[Double]]("mu", namespace = namespace)
-  val varMuStar = Val[Array[Double]]("mustar", namespace = namespace)
-  val varSigma = Val[Array[Double]]("sigma", namespace = namespace)
 
   /**
    * Takes lists for trajectories:
@@ -76,18 +72,18 @@ object MorrisAggregation {
    * which factor was changed and of how much delta
    */
   def elementaryEffect(
-    inputName:     String,
-    outputName:    String,
+    input:         Val[_],
+    output:        Val[_],
     outputValues:  Array[Double],
     factorChanged: Array[String],
     deltas:        Array[Double]): (Double, Double, Double) = {
 
     // indices of results in which the input had been changed
     val indicesWithEffect: Array[Int] = factorChanged.zipWithIndex
-      .collect { case (name, idx) if (inputName == name) ⇒ idx }
+      .collect { case (name, idx) if (input.name == name) ⇒ idx }
     val r: Int = indicesWithEffect.length
 
-    MorrisSampling.Log.logger.fine("measuring the elementary effects of " + inputName + " on " + outputName + " based on " + r + " repetitions")
+    MorrisSampling.Log.logger.fine("measuring the elementary effects of " + input + " on " + output + " based on " + r + " repetitions")
     indicesWithEffect.foreach(idxChanged ⇒ MorrisSampling.Log.logger.fine("For a delta: " + deltas(idxChanged) + ", value changed from " + outputValues(idxChanged - 1) + " to " + outputValues(idxChanged) + " => " + (outputValues(idxChanged) - outputValues(idxChanged - 1)) / (deltas(idxChanged)) + ")"))
 
     // ... so we know each index - 1 leads to the case before changing the factor
@@ -99,7 +95,7 @@ object MorrisAggregation {
     val muStar: Double = elementaryEffects.reduceLeft(sumAbs) / rD
     val sigma: Double = Math.sqrt(elementaryEffects.map(ee ⇒ squaredDiff(ee, mu)).sum / rD)
 
-    MorrisSampling.Log.logger.fine("=> aggregate impact of " + inputName + " on " + outputName + ": mu=" + mu + ", mu*=" + muStar + ", sigma=" + sigma)
+    MorrisSampling.Log.logger.fine("=> aggregate impact of " + input + " on " + output + ": mu=" + mu + ", mu*=" + muStar + ", sigma=" + sigma)
 
     (mu, muStar, sigma)
 
@@ -113,12 +109,15 @@ object MorrisAggregation {
    */
 
   def apply[T](
-    subspaces: Seq[SubspaceToAnalyze])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
+    modelInputs:  Seq[ScalarOrSequenceOfDouble[_]],
+    modelOutputs: Seq[Val[Double]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
 
-    // the list of all the user inputs corresponding to model outputs
-    val allInputsForModelOutputs: List[Val[Array[Double]]] = subspaces.map(s ⇒ s.output.toArray).toList.distinct
+    val muOutputs = Sensitivity.outputs(modelInputs, modelOutputs).map { case (i, o) ⇒ Morris.mu(i, o) }
+    val muStarOutputs = Sensitivity.outputs(modelInputs, modelOutputs).map { case (i, o) ⇒ Morris.muStar(i, o) }
+    val sigmaOutputs = Sensitivity.outputs(modelInputs, modelOutputs).map { case (i, o) ⇒ Morris.sigma(i, o) }
 
-    ClosureTask("MorrisAggregation") { (context, _, _) ⇒
+    FromContextTask("MorrisAggregation") { p ⇒
+      import p._
 
       // retrieve the metadata passed by the sampling method
       val factorChanged: Array[String] = context(MorrisSampling.varFactorName.toArray)
@@ -126,46 +125,33 @@ object MorrisAggregation {
 
       // for each part of the space we were asked to explore, compute the elementary effects and returns them
       // into the variables passed by the user
-      val transposed = subspaces.map { subspace ⇒
-        // retrieve the values to analyze
-        val inputName: String = subspace.input.name
-        //val inputValue:Double = context(subspace.input)
-        val outputValues: Array[Double] = context(subspace.output.toArray)
-        val outputName: String = subspace.output.name
+      val List(mu, muStar, sigma) =
+        Sensitivity.outputs(modelInputs, modelOutputs).map {
+          case (input, output) ⇒
+            val outputValues: Array[Double] = context(output.toArray)
+            MorrisSampling.Log.logger.fine("Processing the elementary change for input " + input + " on " + output)
+            val (mu, muStar, sigma) = elementaryEffect(input, output, outputValues, factorChanged, deltas)
+            List(mu, muStar, sigma)
+        }.transpose.toList
 
-        MorrisSampling.Log.logger.fine("Processing the elementary change for input " + inputName + " on " + outputName)
-
-        val (mu: Double, muStar: Double, sigma: Double) = elementaryEffect(inputName, outputName, outputValues, factorChanged, deltas)
-
-        List(inputName, outputName, mu, muStar, sigma)
-      }.transpose
-
-      // cast the variables and return them as Arrays for each variable
-      List(
-        Variable(MorrisAggregation.varInputName, transposed(0).map(_.asInstanceOf[String]).toArray),
-        Variable(MorrisAggregation.varOutputName, transposed(1).map(_.asInstanceOf[String]).toArray),
-        Variable(MorrisAggregation.varMu, transposed(2).map(_.asInstanceOf[Double]).toArray),
-        Variable(MorrisAggregation.varMuStar, transposed(3).map(_.asInstanceOf[Double]).toArray),
-        Variable(MorrisAggregation.varSigma, transposed(4).map(_.asInstanceOf[Double]).toArray))
-
+      context ++
+        (muOutputs zip mu).map { case (v, i) ⇒ Variable.unsecure(v, i) } ++
+        (muStarOutputs zip muStar).map { case (v, i) ⇒ Variable.unsecure(v, i) } ++
+        (sigmaOutputs zip sigma).map { case (v, i) ⇒ Variable.unsecure(v, i) }
     } set (
       // we expect as inputs:
       // ... the outputs of the model we want to analyze
-      inputs ++= allInputsForModelOutputs,
+      inputs ++= modelOutputs.map(_.array),
+
       // ... the metadata generated by the sampling
       inputs += (
         MorrisSampling.varFactorName.toArray,
         MorrisSampling.varDelta.toArray
       ),
+
         // we provide as outputs
         // ... our output indicators
-        outputs += (
-          MorrisAggregation.varInputName,
-          MorrisAggregation.varOutputName,
-          MorrisAggregation.varMu,
-          MorrisAggregation.varMuStar,
-          MorrisAggregation.varSigma
-        )
+        outputs ++= (muOutputs, muStarOutputs, sigmaOutputs)
     )
 
   }

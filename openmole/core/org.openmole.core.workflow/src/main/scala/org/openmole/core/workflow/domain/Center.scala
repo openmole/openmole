@@ -20,6 +20,11 @@ package org.openmole.core.workflow.domain
 import org.openmole.core.expansion._
 import scala.annotation.implicitNotFound
 
+/**
+ * Property of being centered for a domain
+ * @tparam D
+ * @tparam T
+ */
 @implicitNotFound("${D} is not a variation domain with a center of type ${T}")
 trait Center[-D, +T] {
   def center(domain: D): FromContext[T]

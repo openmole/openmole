@@ -23,14 +23,11 @@ import org.openmole.core.workflow.task._
 
 object ReassignStateRNGTask {
 
-  def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
-    val t = wfi(algorithm)
-
+  def apply[T](evolution: EvolutionWorkflow)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     ClosureTask("ReassignStateRNGTask") { (context, _, _) ⇒
-      Context(Variable(t.statePrototype, t.operations.randomLens.set(Task.buildRNG(context))(context(t.statePrototype))))
+      Context(Variable(evolution.statePrototype, evolution.operations.randomLens.set(Task.buildRNG(context))(context(evolution.statePrototype))))
     } set (
-      (inputs, outputs) += t.statePrototype
+      (inputs, outputs) += evolution.statePrototype
     )
-  }
 
 }

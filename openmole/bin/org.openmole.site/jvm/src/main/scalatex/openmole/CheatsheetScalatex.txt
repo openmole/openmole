@@ -1,0 +1,39 @@
+TITLE AND HEADERS
+No need to put a page title, it's done during the page creation step
+Start directly with your page content
+The content can be organized with headers
+Allowed header levels are @h2, @h3, and @h6 (@h4 and @h5 levels are reserved for other uses)
+All @h2 headers will automatically appear in a "Contents" section at the top of the page
+
+
+SPACING
+Spaces around headers are automatically created, no need to put additional spaces when creating a new section
+To facilitate reading, manually add spaces around images (add @br@br before AND after the image) and code bits (add @br@br before and @br after the code bit).
+
+
+FORMATTING
+To create a new line use @br
+To create a new paragraph use @br@br
+Bold with @b{word}
+Italic with @i{word}
+Create an unordered list with @ul
+                                @li{first item,}
+                                @li{second item,}
+                                @li{last item}
+Create an ordered list with @ol
+                              @li{first item,}
+                              @li{second item,}
+                              @li{last item}
+Inline code with @code{some code}
+Bit of code which will be checked by the compiler with @hl.openmole("""
+                                                         A longer bit of code
+                                                         On several lines if needed
+                                                         Like an example for instance
+                                                       """)
+Bit of code which will NOT be checked by the compiler with @hl.openmoleNoTest("""
+                                                             A longer bit of code
+                                                             On several lines if needed
+                                                             Like an example for instance
+                                                           """)
+Include an image with @img(src := path.to.the.image, center(100))
+Include a link with @a("text to write", href := link.to.something)

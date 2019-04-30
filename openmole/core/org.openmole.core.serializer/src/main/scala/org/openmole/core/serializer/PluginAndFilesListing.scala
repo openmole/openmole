@@ -19,25 +19,20 @@ package org.openmole.core.serializer
 
 import java.io.File
 
-import com.thoughtworks.xstream.converters.Converter
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
-import com.thoughtworks.xstream.core.{ ClassLoaderReference, JVM }
-import com.thoughtworks.xstream.core.util.CompositeClassLoader
-import com.thoughtworks.xstream.io.xml.XppDriver
-import com.thoughtworks.xstream.{ XStream, mapper }
-import com.thoughtworks.xstream.mapper.{ DefaultMapper, Mapper, MapperWrapper }
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.serializer.converter.Serialiser
 import org.openmole.core.serializer.file.FileConverterNotifier
-import org.openmole.core.serializer.plugin.{ PluginClassConverter, PluginConverter, Plugins }
+import org.openmole.core.serializer.plugin.{ PluginClassConverter, PluginConverter }
 import org.openmole.core.serializer.structure.PluginClassAndFiles
 import org.openmole.tool.file._
 import org.openmole.tool.stream.NullOutputStream
-import org.openmole.core.console._
 
 import scala.collection.immutable.{ HashSet, TreeSet }
-import scala.collection.mutable
-import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
+
+object PluginAndFilesListing {
+  def looksLikeREPLClassName(p: String) = p.startsWith("$line")
+}
 
 trait PluginAndFilesListing { this: Serialiser ⇒
 
@@ -54,14 +49,12 @@ trait PluginAndFilesListing { this: Serialiser ⇒
   xStream.registerConverter(new PluginClassConverter(this))
 
   def classUsed(c: Class[_]) = {
-    if (!seenClasses.contains(c)) {
-      if (PluginManager.isClassProvidedByAPlugin(c)) {
-        PluginManager.pluginsForClass(c).foreach(pluginUsed)
-      }
 
-      if (c.getClassLoader != null && classOf[URLClassLoader].isAssignableFrom(c.getClassLoader.getClass) && !PluginManager.bundleForClass(c).isDefined) {
-        replClasses += c
-      }
+    if (!seenClasses.contains(c)) {
+      if (PluginManager.isClassProvidedByAPlugin(c)) PluginManager.pluginsForClass(c).foreach(pluginUsed)
+
+      if (Option(c.getName).map(PluginAndFilesListing.looksLikeREPLClassName).getOrElse(false) &&
+        !PluginManager.bundleForClass(c).isDefined) replClasses += c
 
       seenClasses += c
     }

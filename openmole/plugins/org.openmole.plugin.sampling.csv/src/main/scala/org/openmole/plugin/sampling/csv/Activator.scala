@@ -32,7 +32,7 @@ class Activator extends PluginInfoActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector(
-        Sampling(objectName(CSVSampling))
+        SamplingKeyWord(objectName(CSVSampling))
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)

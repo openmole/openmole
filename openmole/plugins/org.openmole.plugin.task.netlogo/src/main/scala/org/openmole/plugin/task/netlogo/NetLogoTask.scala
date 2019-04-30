@@ -219,14 +219,13 @@ object NetLogoTask {
                 case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when adding a variable of type ${v.getClass} in an array of type ${multiArrayType}")
               }
             }
-            case _ ⇒ {
+            case _ ⇒
               try {
                 setMultiArray(v.asInstanceOf[AbstractCollection[Any]], java.lang.reflect.Array.get(currentArray, i), arrayType, maxdepth - 1)
               }
               catch {
                 case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when recursing at depth ${maxdepth} in a multi array of type ${multiArrayType}")
               }
-            }
           }
         }
       }

@@ -20,6 +20,10 @@ package org.openmole.core.workflow.sampling
 import org.openmole.core.context._
 import org.openmole.core.expansion._
 
+object Sampling {
+  def apply(samples: FromContext.Parameters ⇒ Iterator[Iterable[Variable[_]]]) = FromContextSampling(samples)
+}
+
 trait Sampling {
 
   /**

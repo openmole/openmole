@@ -35,9 +35,9 @@ class Activator extends PluginInfoActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector(
-        Word("columns"),
-        Word("fileColumns"),
-        Word("separator"),
+        WordKeyWord("columns"),
+        WordKeyWord("fileColumns"),
+        WordKeyWord("separator"),
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)

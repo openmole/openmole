@@ -27,7 +27,7 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace.NewFile
 
-class SlaveTransition(start: Capsule, end: Slot, condition: Condition = Condition.True, filter: BlockList = BlockList.empty, slaves: Option[Int] = None) extends ExplorationTransition(start, end, condition, filter) with ISlaveTransition with ValidateTransition {
+class SlaveTransition(start: MoleCapsule, end: TransitionSlot, condition: Condition = Condition.True, filter: BlockList = BlockList.empty, slaves: Option[Int] = None) extends ExplorationTransition(start, end, condition, filter) with ISlaveTransition with ValidateTransition {
 
   override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
     import p._
@@ -37,7 +37,8 @@ class SlaveTransition(start: Capsule, end: Slot, condition: Condition = Conditio
   override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
     MoleExecutionMessage.PerformTransition(subMole) { subMoleState ⇒
       import executionContext.services._
-      if (condition.from(context) && slaves.map(_ < subMoleState.jobs.size).getOrElse(true)) {
+
+      if (condition.from(context) && slaves.map(subMoleState.jobs.size < _).getOrElse(true)) {
         val samples = ExplorationTransition.exploredSamples(this, context, moleExecution)
 
         ExplorationTransition.submitIn(

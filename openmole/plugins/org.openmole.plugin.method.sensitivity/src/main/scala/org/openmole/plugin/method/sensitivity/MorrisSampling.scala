@@ -184,7 +184,7 @@ sealed class MorrisSampling(
     val variablesForRefRun: List[Variable[_]] = List(
       Variable(MorrisSampling.varFactorName, ""),
       Variable(MorrisSampling.varDelta, 0.0)
-    ) ++ ScalarOrSequenceOfDouble.scaled(factors, t.seed).from(context)
+    ) ++ ScalarOrSequenceOfDouble.unflatten(factors, t.seed).from(context)
 
     // forge lists of lists of variables for the runs of the trajectory
     val variablesForElementaryEffects = (t.points, t.deltas, t.variableOrder.zipWithIndex).zipped.map(
@@ -194,7 +194,7 @@ sealed class MorrisSampling(
         List(
           Variable(MorrisSampling.varFactorName, factors(factoridx).prototype.name),
           Variable(MorrisSampling.varDelta, point(factoridx) - t.seed(factoridx))
-        ) ++ ScalarOrSequenceOfDouble.scaled(factors, point).from(context)
+        ) ++ ScalarOrSequenceOfDouble.unflatten(factors, point).from(context)
       })
 
     variablesForRefRun :: variablesForElementaryEffects

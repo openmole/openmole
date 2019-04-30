@@ -236,7 +236,7 @@ object ExtractResult {
   def ok = ExtractResult(None)
 }
 
-case class ExtractResult(error: Option[Error])
+case class ExtractResult(error: Option[ErrorData])
 
 sealed trait UploadType {
   def typeName: String
@@ -269,33 +269,38 @@ case class TreeNodeData(
 
 case class ScriptData(scriptPath: SafePath)
 
-object Error {
-  def empty = MessageError("")
-}
+object ErrorData {
+  def empty = MessageErrorData("")
 
-sealed trait Error {
-  def stackTrace: String
-}
-
-case class MessageError(stackTrace: String) extends Error {
-  def +(error: MessageError) = MessageError(stackTrace + error.stackTrace)
-}
-
-case class CompilationError(errors: Seq[ErrorWithLocation]) extends Error{
-  def stackTrace = ""
-}
-
-case class Token(token: String, duration: Long)
-
-object ErrorBuilder {
-  def apply(t: Throwable): MessageError = {
+  def toStackTrace(t: Throwable) = {
     val sw = new StringWriter()
     t.printStackTrace(new PrintWriter(sw))
-    MessageError(sw.toString)
+    sw.toString
   }
 
-  def apply(stackTrace: String) = MessageError(stackTrace)
+  def apply(errors: Seq[ErrorWithLocation], t: Throwable) = CompilationErrorData(errors, toStackTrace(t))
+  def apply(t: Throwable): MessageErrorData = MessageErrorData(toStackTrace(t))
+  def apply(stackTrace: String) = MessageErrorData(stackTrace)
+
+
+  def stackTrace(e: ErrorData) =
+    e match {
+      case MessageErrorData(stackTrace) => stackTrace
+      case CompilationErrorData(_, stackTrace) => stackTrace
+    }
 }
+
+sealed trait ErrorData
+
+case class MessageErrorData(stackTrace: String) extends ErrorData {
+  def +(error: MessageErrorData) = MessageErrorData(stackTrace + error.stackTrace)
+}
+
+case class CompilationErrorData(errors: Seq[ErrorWithLocation], stackTrace: String) extends ErrorData
+
+
+
+case class Token(token: String, duration: Long)
 
 sealed trait ID {
   def id: String
@@ -320,7 +325,7 @@ case class ErrorLevel() extends ErrorStateLevel {
 case class EnvironmentError(
   environmentId: EnvironmentId,
   errorMessage: String,
-  stack: Error,
+  stack: ErrorData,
   date: Long,
   level: ErrorStateLevel) extends Ordered[EnvironmentError] {
   def compare(that: EnvironmentError) = date compare that.date
@@ -361,37 +366,36 @@ case class EnvironmentState(
 sealed trait ExecutionInfo {
   def state: String
   def duration: Long
-  def capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)]
-  def ready: Long = capsules.map(_._2.ready).sum
-  def running: Long = capsules.map(_._2.running).sum
-  def completed: Long = capsules.map(_._2.completed).sum
+  def capsules: Vector[ExecutionInfo.CapsuleExecution]
+  def ready: Long = capsules.map(_.statuses.ready).sum
+  def running: Long = capsules.map(_.statuses.running).sum
+  def completed: Long = capsules.map(_.statuses.completed).sum
   def environmentStates: Seq[EnvironmentState]
 }
 
 object ExecutionInfo {
 
-  type CapsuleId = String
-
+  case class CapsuleExecution(name: String, scope: String, statuses: ExecutionInfo.JobStatuses)
   case class JobStatuses(ready: Long, running: Long, completed: Long)
 
   case class Failed(
-    capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
-    error: Error,
-    environmentStates: Seq[EnvironmentState],
-    duration: Long = 0L,
-    clean: Boolean = true) extends ExecutionInfo {
+                     capsules: Vector[ExecutionInfo.CapsuleExecution],
+                     error: ErrorData,
+                     environmentStates: Seq[EnvironmentState],
+                     duration: Long = 0L,
+                     clean: Boolean = true) extends ExecutionInfo {
     def state: String = "failed"
   }
 
   case class Running(
-    capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
-    duration: Long,
-    environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
+                      capsules: Vector[ExecutionInfo.CapsuleExecution],
+                      duration: Long,
+                      environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
     def state: String = "running"
   }
 
   case class Finished(
-                       capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
+                       capsules: Vector[ExecutionInfo.CapsuleExecution],
                        duration: Long = 0L,
                        environmentStates: Seq[EnvironmentState],
                        clean: Boolean) extends ExecutionInfo {
@@ -401,7 +405,7 @@ object ExecutionInfo {
 
 
   case class Canceled(
-                       capsules: Vector[(ExecutionInfo.CapsuleId, ExecutionInfo.JobStatuses)],
+                       capsules: Vector[ExecutionInfo.CapsuleExecution],
                        environmentStates: Seq[EnvironmentState],
                        duration: Long = 0L,
                        clean: Boolean) extends ExecutionInfo {
@@ -749,7 +753,7 @@ object FileFilter {
   def defaultFilter = FileFilter.this (First(), Some(100), "", AlphaSorting())
 }
 
-case class OMSettings(workspace: SafePath, version: String, versionName: String, buildTime: String)
+case class OMSettings(workspace: SafePath, version: String, versionName: String, buildTime: String, isDevelopment: Boolean)
 
 sealed trait PluginExtensionType
 
@@ -771,7 +775,7 @@ sealed trait Test {
 
   def message: String
 
-  def errorStack: Error
+  def errorStack: ErrorData
 }
 
 case class PendingTest() extends Test {
@@ -779,17 +783,17 @@ case class PendingTest() extends Test {
 
   def message = "pending"
 
-  def errorStack = Error.empty
+  def errorStack = ErrorData.empty
 }
 
-case class FailedTest(message: String, errorStack: Error) extends Test {
+case class FailedTest(message: String, errorStack: ErrorData) extends Test {
   def passed = false
 }
 
 case class PassedTest(message: String) extends Test {
   def passed = true
 
-  override def errorStack = Error.empty
+  override def errorStack = ErrorData.empty
 }
 
 object Test {
@@ -797,7 +801,7 @@ object Test {
 
   def pending = PendingTest()
 
-  def error(msg: String, err: Error) = FailedTest(msg, err)
+  def error(msg: String, err: ErrorData) = FailedTest(msg, err)
 }
 
 case class JVMInfos(javaVersion: String, jvmImplementation: String, processorAvailable: Int, allocatedMemory: Long, totalMemory: Long)
@@ -816,7 +820,7 @@ case class WizardModelData(
                             specificOutputMapping: Option[String] = None,
                           )
 
-case class WizardToTask(safePath: SafePath, errors: Seq[Error] = Seq())
+case class WizardToTask(safePath: SafePath, errors: Seq[ErrorData] = Seq())
 
 
 case class ErrorWithLocation(stackTrace: String = "", line: Option[Int] = None, start: Option[Int] = None, end: Option[Int]=None)

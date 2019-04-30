@@ -32,7 +32,7 @@ class Activator extends PluginInfoActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector(
-        Task(objectName(NetLogo6Task))
+        TaskKeyWord(objectName(NetLogo6Task))
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)

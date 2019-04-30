@@ -17,6 +17,9 @@
 
 package org.openmole.core.exception
 
+/**
+ * Primitives to manage exceptions
+ */
 object ExceptionUtils {
   def prettify(e: Throwable) = {
     s"${e.getClass.getName}: ${e.getMessage}\n ${stack(e.getStackTrace)}\n" +

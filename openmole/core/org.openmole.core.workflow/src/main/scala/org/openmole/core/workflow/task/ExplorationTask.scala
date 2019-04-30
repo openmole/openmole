@@ -20,7 +20,7 @@ package org.openmole.core.workflow.task
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.mole.Capsule
+import org.openmole.core.workflow.mole.MoleCapsule
 import org.openmole.core.workflow.sampling._
 
 import scala.collection.immutable.TreeMap
@@ -29,12 +29,24 @@ import cats.implicits._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.tools._
 
+/**
+ * ExplorationTask is a wrapper for a sampling
+ */
 object ExplorationTask {
 
+  /**
+   * Explore a given sampling: gets the prototype values in the sampling from the context to construct the context with all values,
+   * wrapped as a [[FromContextTask]].
+   * Values assignment is done with insecure casting, and an exception is caught and piped as a [[UserBadDataError]] if the conversion can not be done.
+   *
+   * @param sampling
+   * @return
+   */
   def apply(sampling: Sampling)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     FromContextTask("ExplorationTask") { p ⇒
       import p._
-      val variablesValues = TreeMap.empty[Val[_], ArrayBuffer[Any]] ++ sampling.prototypes.map { p ⇒ p → ArrayBuffer[Any]() }
+
+      val variablesValues = TreeMap.empty[Val[_], ArrayBuffer[Any]] ++ sampling.prototypes.map { p ⇒ p → p.`type`.manifest.newArrayBuilder().asInstanceOf[collection.mutable.ArrayBuilder[Any]] }
 
       for {
         sample ← sampling().from(context)
@@ -49,7 +61,7 @@ object ExplorationTask {
           try {
             Variable.unsecure(
               k.toArray,
-              v.toArray(k.`type`.manifest.asInstanceOf[Manifest[Any]])
+              v.result
             )
           }
           catch {
@@ -61,6 +73,11 @@ object ExplorationTask {
       exploredOutputs += (sampling.prototypes.toSeq.map(_.toArray): _*)
     )
 
-  def explored(c: Capsule) = (p: Val[_]) ⇒ c.task.outputs.explored(p)
+  /**
+   * Given a [[MoleCapsule]], function to test if a given prototype is explored by it
+   * @param c
+   * @return
+   */
+  def explored(c: MoleCapsule) = (p: Val[_]) ⇒ c.task.outputs.explored(p)
 
 }

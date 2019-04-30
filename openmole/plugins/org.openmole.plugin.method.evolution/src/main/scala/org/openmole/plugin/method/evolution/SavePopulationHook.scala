@@ -27,19 +27,16 @@ import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace.NewFile
+import org.openmole.plugin.method.evolution.SavePopulationHook.resultVariables
 import org.openmole.tool.file._
 import org.openmole.tool.random.RandomProvider
 
 object SavePopulationHook {
 
-  def resultVariables[T](algorithm: T, context: Context)(implicit wfi: WorkflowIntegration[T], randomProvider: RandomProvider, newFile: NewFile, fileService: FileService) = {
-    val t = wfi(algorithm)
+  def resultVariables(t: EvolutionWorkflow, context: Context)(implicit randomProvider: RandomProvider, newFile: NewFile, fileService: FileService) =
     context.variable(t.generationPrototype).toSeq ++ t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype)).from(context)
-  }
 
-  def apply[T](algorithm: T, dir: FromContext[File], frequency: OptionalArgument[Long] = None)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
-    val t = wfi(algorithm)
-
+  def hook(t: EvolutionWorkflow, dir: FromContext[File], frequency: OptionalArgument[Long])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
     FromContextHook("SavePopulationHook") { p ⇒
       import p._
 
@@ -56,10 +53,13 @@ object SavePopulationHook {
 
         import org.openmole.plugin.tool.csv._
 
+        val values = resultVariables(t, context).map(_.value)
+        def headerLine = header(resultVariables(t, context).map(_.prototype.array), values)
+
         writeVariablesToCSV(
           resultFileLocation.from(context),
-          resultVariables(algorithm, context).map(_.prototype.array),
-          resultVariables(algorithm, context),
+          headerLine,
+          values,
           overwrite = true
         )
       }
@@ -67,6 +67,11 @@ object SavePopulationHook {
       context
     } set (inputs += (t.populationPrototype, t.statePrototype))
 
+  }
+
+  def apply[T](algorithm: T, dir: FromContext[File], frequency: OptionalArgument[Long] = None)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
+    val t = wfi(algorithm)
+    hook(t, dir, frequency)
   }
 
 }
@@ -80,10 +85,13 @@ object SaveLastPopulationHook {
       import p._
       import org.openmole.plugin.tool.csv._
 
+      val values = resultVariables(t, context).map(_.value)
+      def headerLine = header(resultVariables(t, context).map(_.prototype.array), values)
+
       writeVariablesToCSV(
         file.from(context),
-        SavePopulationHook.resultVariables(algorithm, context).map(_.prototype.array),
-        SavePopulationHook.resultVariables(algorithm, context),
+        headerLine,
+        values,
         overwrite = true
       )
 

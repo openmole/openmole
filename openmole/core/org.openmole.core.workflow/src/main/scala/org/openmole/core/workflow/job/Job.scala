@@ -19,9 +19,26 @@ package org.openmole.core.workflow.job
 
 import org.openmole.core.workflow.mole.MoleExecution
 
+/**
+ * A computation job to be executed
+ */
 sealed trait Job {
+  /**
+   * the [[MoleJob]] in this job
+   * @return
+   */
   def moleJobs: Iterable[MoleJob]
+
+  /**
+   * the Job is finished if all mole jobs are finished
+   * @return
+   */
   def finished: Boolean = moleJobs.forall { _.finished }
+
+  /**
+   * Execution of the job
+   * @return
+   */
   def moleExecution: MoleExecution
 }
 

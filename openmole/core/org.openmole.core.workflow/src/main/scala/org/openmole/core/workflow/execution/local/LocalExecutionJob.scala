@@ -22,6 +22,12 @@ import org.openmole.core.workflow.job.MoleJob
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.task._
 
+/**
+ * An [[ExecutionJob]] on the local environment (retrieved from the [[TaskExecutionContext]])
+ * @param executionContext
+ * @param moleJobs
+ * @param moleExecution
+ */
 case class LocalExecutionJob(executionContext: TaskExecutionContext, moleJobs: Iterable[MoleJob], moleExecution: Option[MoleExecution]) extends ExecutionJob {
   def environment = executionContext.localEnvironment
 }

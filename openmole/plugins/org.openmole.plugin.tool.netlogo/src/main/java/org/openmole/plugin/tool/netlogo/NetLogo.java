@@ -18,6 +18,7 @@
 
 package org.openmole.plugin.tool.netlogo;
 
+
 public interface NetLogo {
   public String[] globals() throws Exception;
   public String[] reporters() throws Exception;
@@ -29,3 +30,10 @@ public interface NetLogo {
   void dispose() throws Exception;
   ClassLoader getNetLogoClassLoader();
 }
+
+
+
+
+
+
+

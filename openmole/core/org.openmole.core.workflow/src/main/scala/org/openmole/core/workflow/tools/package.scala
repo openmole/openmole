@@ -19,7 +19,11 @@ package org.openmole.core.workflow
 
 package tools {
 
+  import org.openmole.core.context.{ Context, Variable }
   import org.openmole.core.expansion.{ Expandable, ExpandedString, FromContext, ToFromContext }
+  import org.openmole.core.fileservice.FileService
+  import org.openmole.core.workspace.NewFile
+  import org.openmole.tool.random.RandomProvider
 
   trait ToolsPackage {
 
@@ -37,6 +41,7 @@ package tools {
     def OptionalArgument = tools.OptionalArgument
     type OptionalArgument[T] = tools.OptionalArgument[T]
 
+    implicit def optionalCondition[T](t: T)(implicit toCondition: ToFromContext[T, Boolean]) = OptionalArgument(Some(toCondition.apply(t)))
     implicit def optionalArgumentToOption[T](optionalArgument: OptionalArgument[T]) = optionalArgument.option
     implicit def fromStringToExpandedStringOptionalArgument(s: String) = OptionalArgument[FromContext[String]](Some(ExpandedString(s)))
 

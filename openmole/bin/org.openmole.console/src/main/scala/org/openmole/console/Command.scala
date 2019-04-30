@@ -29,7 +29,6 @@ import org.openmole.core.project._
 import org.openmole.core.tools.io.Prettifier._
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.mole.{ Mole, MoleExecution }
-import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.validation.Validation
 import org.openmole.core.module
 import org.openmole.core.pluginmanager.PluginManager
@@ -125,10 +124,10 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
     }
     finally ConsoleVariables.bindVariables(console, variables)
 
-  def load(file: File, args: Seq[String] = Seq.empty)(implicit services: Services): Puzzle =
+  def load(file: File, args: Seq[String] = Seq.empty)(implicit services: Services): DSL =
     loadAny(file) match {
-      case res: Puzzle ⇒ res
-      case x           ⇒ throw new UserBadDataError("The result is not a puzzle")
+      case res: DSL ⇒ res
+      case x        ⇒ throw new UserBadDataError("The result is not a puzzle")
     }
 
   def modules(urls: OptionalArgument[Seq[String]] = None)(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile, fileService: FileService): Unit = {

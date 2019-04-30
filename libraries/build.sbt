@@ -7,6 +7,7 @@ def settings = Seq(
   resolvers += DefaultMavenRepository,
   resolvers += Resolver.sonatypeRepo("snapshots"),
   resolvers += Resolver.sonatypeRepo("releases"),
+  resolvers += Resolver.sonatypeRepo("staging"),
   scalaVersion in Global := "2.12.7",
   scalacOptions ++= Seq("-deprecation"),
   publishArtifact in (packageDoc in publishLocal) := false,
@@ -42,7 +43,7 @@ lazy val shapeless =  OsgiProject(dir, "com.chuusai.shapeless", exports = Seq("s
   version := shapelessVersion
 ) settings(settings: _*)
 
-lazy val circeVersion = "0.9.1"
+lazy val circeVersion = "0.10.0"
 lazy val circe = OsgiProject(dir, "io.circe",
   exports = Seq("io.circe.*", "!cats.*", "!scala.*", "!shapeless.*"),
   privatePackages = Seq("jawn.*"),
@@ -59,14 +60,14 @@ lazy val circe = OsgiProject(dir, "io.circe",
 lazy val logback = OsgiProject(dir, "ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl"), dynamicImports = Seq("*")) settings
   (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9") settings(settings: _*)
 
-lazy val h2Version = "1.4.196"
+lazy val h2Version = "1.4.199"
 lazy val h2 = OsgiProject(dir, "org.h2", dynamicImports = Seq("*"), privatePackages = Seq("META-INF.*")) settings
   (libraryDependencies += "com.h2database" % "h2" % h2Version, version := h2Version) settings(settings: _*)
 
 lazy val bonecp = OsgiProject(dir, "com.jolbox.bonecp", dynamicImports = Seq("*")) settings
   (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0-rc1", version := "0.8.0-rc1") settings(settings: _*)
 
-lazy val slickVersion = "3.2.0"
+lazy val slickVersion = "3.3.0"
 lazy val slick = OsgiProject(dir,"com.typesafe.slick", exports = Seq("slick.*"), privatePackages = Seq("org.reactivestreams.*")) settings
   (libraryDependencies += "com.typesafe.slick" %% "slick" % slickVersion, version := slickVersion) settings(settings: _*)
 
@@ -90,11 +91,13 @@ lazy val xstream = OsgiProject(
     "!org.xml.sax.*",
     "!sun.misc.*",
     "!org.joda.time.*",
+    "!com.sun.xml.*",
+    "!com.ibm.xml.*",
     "!javax.*",
     "*"),
   privatePackages = Seq("!scala.*", "META-INF.services.*", "*")) settings(
-  libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.10", "net.sf.kxml" % "kxml2" % "2.3.0"),
-  version := "1.4.10") settings(settings: _*)
+  libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.11", "net.sf.kxml" % "kxml2" % "2.3.0"),
+  version := "1.4.11") settings(settings: _*)
 
 lazy val scalaLang = OsgiProject(
   dir,
@@ -111,6 +114,7 @@ lazy val scalaLang = OsgiProject(
       "jline" % "jline" % "2.12.1",
       "org.scala-stm" %% "scala-stm" % "0.8",
       "com.typesafe" % "config" % "1.2.1",
+      "org.scalameta" %% "scalameta" % "4.1.0",
       "org.scala-lang" % "scala-compiler" % scalaVersion.value
     )
   }, version := scalaVersion.value) settings(settings: _*)
@@ -211,7 +215,6 @@ lazy val cats =
     version := catsVersion
   ) settings(settings: _*)
 
-lazy val freedslVersion = "0.26"
 lazy val squantsVersion = "1.3.0"
 
 lazy val squants = 
@@ -221,24 +224,11 @@ lazy val squants =
   ) settings(settings: _*)
 
 
-lazy val freedsl =
-  OsgiProject(dir, "freedsl", exports = Seq("freedsl.*", "freestyle.*", "mainecoon.*")) settings (
-    libraryDependencies += "fr.iscpif.freedsl" %% "freedsl" % freedslVersion,
-    libraryDependencies += "fr.iscpif.freedsl" %% "random" % freedslVersion,
-    libraryDependencies += "fr.iscpif.freedsl" %% "system" % freedslVersion,
-    libraryDependencies += "fr.iscpif.freedsl" %% "io" % freedslVersion,
-    libraryDependencies += "fr.iscpif.freedsl" %% "filesystem" % freedslVersion,
-    libraryDependencies += "fr.iscpif.freedsl" %% "errorhandler" % freedslVersion,
-    libraryDependencies += "fr.iscpif.freedsl" %% "tool" % freedslVersion,
-    libraryDependencies += "fr.iscpif.freedsl" %% "dsl" % freedslVersion,
-    version := freedslVersion
-  ) dependsOn(cats, squants) settings(settings: _*)
+lazy val mgoVersion = "3.28"
 
-lazy val mgoVersion = "3.17"
-
-lazy val mgo = OsgiProject(dir, "mgo", imports = Seq("!better.*", "*")) settings(
+lazy val mgo = OsgiProject(dir, "mgo", exports = Seq("mgo.*", "freestyle.*"), imports = Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "*"), privatePackages = Seq("!scala.*", "!monocle.*", "!org.apache.commons.math3.*", "!cats.*", "!squants.*", "!scalaz.*", "*")) settings(
   libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
-  version := mgoVersion) dependsOn(monocle, freedsl, math) settings(settings: _*)
+  version := mgoVersion) dependsOn(monocle, math, cats, squants) settings(settings: _*)
 
 /*lazy val familyVersion = "1.3"
 lazy val family = OsgiProject(dir, "fr.iscpif.family") settings(
@@ -350,7 +340,7 @@ lazy val effectaside = OsgiProject(dir, "effectaside", imports = Seq("*")) setti
   version := effectasideVersion
 )
 
-def gridscaleVersion = "2.13"
+def gridscaleVersion = "2.15"
 lazy val gridscale = OsgiProject(dir, "gridscale", imports = Seq("*"), exports = Seq("gridscale.*", "enumeratum.*")) settings (
   libraryDependencies += "fr.iscpif.gridscale" %% "gridscale" % gridscaleVersion,
   version := gridscaleVersion

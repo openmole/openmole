@@ -3,17 +3,17 @@ package org.openmole.core
 import java.io.File
 
 import com.thoughtworks.xstream.XStream
-import com.thoughtworks.xstream.security.{ NoTypePermission, TypePermission }
-import org.openmole.tool.network._
+import com.thoughtworks.xstream.security.{ NoTypePermission }
 import slick.jdbc.H2Profile.api._
 import squants.time.Time
 import slick.jdbc.meta._
 
-import scala.concurrent.{ Await, Future }
+import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.concurrent.duration.Duration
 import scala.io.Source
 import org.openmole.tool.file._
 import org.openmole.tool.logger.JavaLogger
+import slick.jdbc.H2Profile.backend.DatabaseDef
 
 package object db extends JavaLogger {
 
@@ -58,20 +58,21 @@ package object db extends JavaLogger {
       )
 
     val db = connect
-
     Await.result(db.run { sqlu"""SET DEFAULT_LOCK_TIMEOUT ${lockTimeout.millis}""" }, concurrent.duration.Duration.Inf)
-
-    import scala.concurrent.ExecutionContext.Implicits.global
-
-    def createTableIfNotInTables(tables: Vector[MTable]): Future[Unit] =
-      if (!tables.exists(_.name.name == replicas.baseTableRow.tableName)) db.run(replicas.schema.create)
-      else Future()
-
-    val createTableIfNotExist: Future[Unit] = db.run(MTable.getTables).flatMap(createTableIfNotInTables)
-
-    Await.result(createTableIfNotExist, Duration.Inf)
-
+    tryCreateTable(db)
     db
+  }
+
+  def tryCreateTable(db: Database) = {
+    val create = replicas.schema.create
+    val createTableIfNotExist = db.run(create)
+
+    // Ignore table already exists error, fix it when if not exist statement is available through slick
+    util.Try(Await.result(createTableIfNotExist, Duration.Inf)) match {
+      case util.Failure(_: org.h2.jdbc.JdbcSQLSyntaxErrorException) ⇒
+      case util.Failure(e) ⇒ throw e
+      case _ ⇒
+    }
   }
 
   def memory() = {

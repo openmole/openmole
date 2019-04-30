@@ -37,6 +37,11 @@ import org.openmole.tool.network.LocalHostName
 
 object LocalExecutor extends JavaLogger
 
+/**
+ * Runnable class for local execution
+ *
+ * @param environment
+ */
 class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnable {
 
   import LocalExecutor.Log._

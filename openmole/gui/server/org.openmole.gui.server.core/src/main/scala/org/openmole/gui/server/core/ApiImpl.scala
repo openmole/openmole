@@ -14,14 +14,14 @@ import java.nio.file._
 
 import au.com.bytecode.opencsv.CSVReader
 import org.openmole.core.console.ScalaREPL
+import org.openmole.core.expansion.ScalaCompilation
 import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
 
 import scala.util.{ Failure, Success, Try }
-import org.openmole.core.workflow.mole.{ MoleExecutionContext, MoleServices }
+import org.openmole.core.workflow.mole.{ MoleExecution, MoleExecutionContext, MoleServices }
 import org.openmole.tool.stream.StringPrintStream
 
 import scala.concurrent.stm._
-import org.openmole.tool.file._
 import org.openmole.tool.tar._
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.module
@@ -31,7 +31,7 @@ import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.core.project._
 import org.openmole.core.services.Services
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.dsl._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.plugin.server._
 import org.openmole.gui.ext.tool.server.OMRouter
@@ -78,7 +78,8 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
       Utils.projectsDirectory(),
       buildinfo.version.value,
       buildinfo.name,
-      new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(buildinfo.BuildInfo.buildTime)
+      new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(buildinfo.BuildInfo.buildTime),
+      buildinfo.development
     )
   }
 
@@ -135,7 +136,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     to.listFiles.toSeq
   }
 
-  def unknownFormat(name: String) = ExtractResult(Some(ErrorBuilder("Unknown compression format for " + name)))
+  def unknownFormat(name: String) = ExtractResult(Some(ErrorData("Unknown compression format for " + name)))
 
   private def extractArchiveFromFiles(from: File, to: File)(implicit context: ServerFileSystemContext): ExtractResult = {
     Try {
@@ -152,7 +153,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
       }
     } match {
       case Success(_) ⇒ ExtractResult.ok
-      case Failure(t) ⇒ ExtractResult(Some(ErrorBuilder(t)))
+      case Failure(t) ⇒ ExtractResult(Some(ErrorData(t)))
     }
   }
 
@@ -302,13 +303,80 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
   def removeExecution(id: ExecutionId): Unit = execution.remove(id)
 
-  def runScript(scriptData: ScriptData): Unit = {
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+  def compileScript(scriptData: ScriptData) = {
+    val (execId, outputStream) = compilationData(scriptData)
+    synchronousCompilation(execId, scriptData, outputStream)
+  }
 
-    val execId = ExecutionId(getUUID)
-    val script = safePathToFile(scriptData.scriptPath)
-    val content = script.content
-    val outputStream = StringPrintStream(Some(preference(outputSize)))
+  def runScript(scriptData: ScriptData, validateScript: Boolean) = {
+    asynchronousCompilation(
+      scriptData,
+      Some(execId ⇒ execution.compiled(execId)),
+      Some(processRun(_, _, validateScript))
+    )
+  }
+
+  private def compilationData(scriptData: ScriptData) = {
+    (ExecutionId(getUUID) /*, safePathToFile(scriptData.scriptPath)*/ , StringPrintStream(Some(preference(outputSize))))
+  }
+
+  def synchronousCompilation(
+    execId:       ExecutionId,
+    scriptData:   ScriptData,
+    outputStream: StringPrintStream,
+    onCompiled:   Option[ExecutionId ⇒ Unit]                  = None,
+    onEvaluated:  Option[(MoleExecution, ExecutionId) ⇒ Unit] = None): Option[ErrorData] = {
+
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    def error(t: Throwable): ErrorData = {
+      t match {
+        case ce: ScalaREPL.CompilationError ⇒
+          def toErrorWithLocation(em: ScalaREPL.ErrorMessage) =
+            ErrorWithLocation(em.rawMessage, em.position.map { _.line }, em.position.map { _.start }, em.position.map { _.end })
+
+          ErrorData(ce.errorMessages.map(toErrorWithLocation), t)
+        case _ ⇒ ErrorData(t)
+      }
+    }
+
+    def message(message: String) = MessageErrorData(message)
+
+    val script: File = safePathToFile(scriptData.scriptPath)
+
+    try {
+      val project = Project(script.getParentFileSafe)
+      project.compile(script, Seq.empty)(Services.copy(services)(outputRedirection = OutputRedirection(outputStream))) match {
+        case ScriptFileDoesNotExists() ⇒ Some(message("Script file does not exist"))
+        case ErrorInCode(e)            ⇒ Some(error(e))
+        case ErrorInCompiler(e)        ⇒ Some(error(e))
+        case compiled: Compiled ⇒
+          onCompiled.foreach { _(execId) }
+          catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
+            case Failure(e) ⇒ Some(error(e))
+            case Success(dsl) ⇒
+              val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(outputStream))
+              Try(dslToPuzzle(dsl).toExecution(executionContext = MoleExecutionContext()(services))) match {
+                case Success(ex) ⇒
+                  onEvaluated.foreach { _(ex, execId) }
+                  None
+                case Failure(e) ⇒ Some(error(e))
+              }
+          }
+      }
+
+    }
+    catch {
+      case t: Throwable ⇒ Some(error(t))
+    }
+
+  }
+
+  def asynchronousCompilation(scriptData: ScriptData, onEvaluated: Option[ExecutionId ⇒ Unit] = None, onCompiled: Option[(MoleExecution, ExecutionId) ⇒ Unit] = None): Unit = {
+
+    val (execId, outputStream) = compilationData(scriptData)
+
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    val content = safePathToFile(scriptData.scriptPath).content
 
     execution.addStaticInfo(execId, StaticExecutionInfo(scriptData.scriptPath, content, System.currentTimeMillis()))
     execution.addOutputStreams(execId, outputStream)
@@ -317,63 +385,24 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
     val compilationFuture =
       threadProvider.submit(ThreadProvider.maxPriority) { () ⇒
-
-        def error(t: Throwable): Unit = {
-          t match {
-            case ce: ScalaREPL.CompilationError ⇒ execution.addError(execId, Failed(Vector.empty, CompilationError(ce.errorMessages.map { em ⇒
-              ErrorWithLocation(em.rawMessage, em.position.map { _.line }, em.position.map { _.start }, em.position.map { _.end })
-            }), Seq()))
-            case _ ⇒ execution.addError(execId, Failed(Vector.empty, ErrorBuilder(t), Seq()))
-          }
-        }
-
-        def message(message: String): Unit = execution.addError(execId, Failed(Vector.empty, MessageError(message), Seq()))
-
-        try {
-          val project = Project(script.getParentFileSafe)
-          project.compile(script, Seq.empty)(Services.copy(services)(outputRedirection = OutputRedirection(outputStream))) match {
-            case ScriptFileDoesNotExists() ⇒ message("Script file does not exist")
-            case ErrorInCode(e)            ⇒ error(e)
-            case ErrorInCompiler(e)        ⇒ error(e)
-            case compiled: Compiled ⇒
-              execution.compiled(execId)
-
-              def catchAll[T](f: ⇒ T): Try[T] = {
-                val res =
-                  try Success(f)
-                  catch {
-                    case t: Throwable ⇒ Failure(t)
-                  }
-                res
-              }
-
-              catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
-                case Failure(e) ⇒ error(e)
-                case Success(puzzle) ⇒
-                  val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(outputStream))
-                  Try(puzzle.toExecution(executionContext = MoleExecutionContext()(services))) match {
-                    case Success(ex) ⇒
-                      val envIds = (ex.allEnvironments).map { env ⇒ EnvironmentId(getUUID) → env }
-                      execution.addRunning(execId, envIds)
-                      envIds.foreach { case (envId, env) ⇒ env.listen(execution.environmentListener(envId)) }
-
-                      catchAll(ex.start) match {
-                        case Failure(e) ⇒ error(e)
-                        case Success(_) ⇒
-                          val inserted = execution.addMoleExecution(execId, ex)
-                          if (!inserted) ex.cancel
-                      }
-                    case Failure(e) ⇒ error(e)
-                  }
-              }
-          }
-        }
-        catch {
-          case t: Throwable ⇒ error(t)
-        }
+        val errorData = synchronousCompilation(execId, scriptData, outputStream, onEvaluated, onCompiled)
+        errorData.foreach { ed ⇒ execution.addError(execId, Failed(Vector.empty, ed, Seq.empty)) }
       }
 
     execution.addCompilation(execId, compilationFuture)
+  }
+
+  def processRun(ex: MoleExecution, execId: ExecutionId, validateScript: Boolean) = {
+    val envIds = (ex.allEnvironments).map { env ⇒ EnvironmentId(getUUID) → env }
+    execution.addRunning(execId, envIds)
+    envIds.foreach { case (envId, env) ⇒ env.listen(execution.environmentListener(envId)) }
+
+    catchAll(ex.start(validateScript)) match {
+      case Failure(e) ⇒ execution.addError(execId, Failed(Vector.empty, ErrorData(e), Seq.empty))
+      case Success(_) ⇒
+        val inserted = execution.addMoleExecution(execId, ex)
+        if (!inserted) ex.cancel
+    }
   }
 
   def allStates(lines: Int) = execution.allStates(lines)
@@ -383,7 +412,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   def clearEnvironmentErrors(environmentId: EnvironmentId): Unit = execution.deleteEnvironmentErrors(environmentId)
 
   def runningErrorEnvironmentData(environmentId: EnvironmentId, lines: Int): EnvironmentErrorData = atomic { implicit ctx ⇒
-    val environmentErrors = execution.environementErrors(environmentId)
+    val environmentErrors = execution.environmentErrors(environmentId)
 
     def groupedErrors = environmentErrors.groupBy {
       _.errorMessage
@@ -421,11 +450,11 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   }
 
   //PLUGINS
-  def addUploadedPlugins(nodes: Seq[String]): Seq[Error] = {
+  def addUploadedPlugins(nodes: Seq[String]): Seq[ErrorData] = {
     val files = nodes.map(Utils.pluginUpdoadDirectory / _)
     val errors = org.openmole.core.module.addPluginsFiles(files, true, Some(org.openmole.core.module.pluginDirectory))
     files.foreach(_.recursiveDelete)
-    errors.map(e ⇒ ErrorBuilder(e._2))
+    errors.map(e ⇒ ErrorData(e._2))
   }
 
   def autoAddPlugins(path: SafePath) = {

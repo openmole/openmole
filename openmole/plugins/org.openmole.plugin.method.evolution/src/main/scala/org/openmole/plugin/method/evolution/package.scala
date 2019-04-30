@@ -17,29 +17,27 @@
 
 package org.openmole.plugin.method
 
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.transition._
-import org.openmole.plugin.task.tools._
-import org.openmole.plugin.tool.pattern._
-import org.openmole.core.context._
-import org.openmole.core.expansion._
-import org.openmole.tool.types._
-import squants.time.Time
-import mgo.double2Scalable
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 import org.openmole.core.workflow.builder._
+import monocle.macros._
+import org.openmole.plugin.task.tools._
+import org.openmole.plugin.tool.pattern
+import org.openmole.plugin.tool.pattern.MasterSlave
+import squants.time.Time
 
 package object evolution {
 
-  implicit def scope = DefinitionScope.Internal
-
   val operatorExploration = 0.1
 
-  type Objectives = Seq[Objective]
-  type FitnessAggregation = Seq[Double] ⇒ Double
+  type Objectives = Seq[Objective[_]]
   type Genome = Seq[Genome.GenomeBound]
+
+  case class Aggregate[A, B](value: A, aggregate: B)
+
+  implicit class AggregateDecorator[A, B](a: A) {
+    def aggregate[B, C](b: Vector[B] ⇒ C) = Aggregate(a, b)
+  }
 
   implicit def intToCounterTerminationConverter(n: Long): AfterGeneration = AfterGeneration(n)
   implicit def durationToDurationTerminationConverter(d: Time): AfterDuration = AfterDuration(d)
@@ -61,11 +59,13 @@ package object evolution {
   object EvolutionPattern {
     def build[T](
       algorithm:    T,
-      evaluation:   Puzzle,
+      evaluation:   DSL,
       termination:  OMTermination,
       stochastic:   OptionalArgument[Stochastic] = None,
       parallelism:  Int                          = 1,
-      distribution: EvolutionPattern             = SteadyState())(implicit wfi: WorkflowIntegration[T]) =
+      distribution: EvolutionPattern             = SteadyState(),
+      suggestion:   Seq[Seq[ValueAssignment[_]]],
+      scope:        DefinitionScope)(implicit wfi: WorkflowIntegration[T]): DSLContainer[EvolutionWorkflow] =
       distribution match {
         case s: SteadyState ⇒
           SteadyStateEvolution(
@@ -73,7 +73,9 @@ package object evolution {
             evaluation = evaluation,
             parallelism = parallelism,
             termination = termination,
-            wrap = s.wrap
+            wrap = s.wrap,
+            suggestion = suggestion,
+            scope = scope
           )
         case i: Island ⇒
           val steadyState =
@@ -81,99 +83,98 @@ package object evolution {
               algorithm = algorithm,
               evaluation = evaluation,
               termination = i.termination,
-              wrap = i.wrap
+              wrap = false,
+              suggestion = suggestion,
+              scope = scope
             )
 
           IslandEvolution(
             island = steadyState,
             parallelism = parallelism,
             termination = termination,
-            sample = i.sample
+            sample = i.sample,
+            scope = scope
           )
       }
 
   }
 
   case class SteadyState(wrap: Boolean = false) extends EvolutionPattern
-  case class Island(termination: OMTermination, sample: OptionalArgument[Int] = None, wrap: Boolean = true) extends EvolutionPattern
+  case class Island(termination: OMTermination, sample: OptionalArgument[Int] = None) extends EvolutionPattern
 
-  import shapeless._
+  implicit def workflowIntegration = WorkflowIntegration[DSLContainer[EvolutionWorkflow]](_.data)
 
-  def SteadyStateEvolution[T](algorithm: T, evaluation: Puzzle, termination: OMTermination, parallelism: Int = 1, wrap: Boolean = false)(implicit wfi: WorkflowIntegration[T]) = {
-    val t = wfi(algorithm)
+  implicit class EvolutionMethodContainer(dsl: DSLContainer[EvolutionWorkflow]) extends DSLContainerHook(dsl) {
+    def hook(directory: FromContext[File], frequency: OptionalArgument[Long] = None): DSLContainer[EvolutionWorkflow] = {
+      implicit val defScope = dsl.scope
+      dsl.hook(SavePopulationHook(dsl, directory, frequency))
+    }
+  }
 
-    val wrapped = wrapPuzzle(evaluation, t.inputPrototypes, t.outputPrototypes, wrap)
-    val randomGenomes = BreedTask(algorithm, parallelism) set ((inputs, outputs) += t.populationPrototype)
-    val scalingGenomeTask = ScalingGenomeTask(algorithm)
-    val toOffspring = ToOffspringTask(algorithm)
-    val elitismTask = ElitismTask(algorithm)
-    val terminationTask = TerminationTask(algorithm, termination)
-    val breed = BreedTask(algorithm, 1)
+  def SteadyStateEvolution[T](algorithm: T, evaluation: DSL, termination: OMTermination, parallelism: Int = 1, suggestion: Seq[Seq[ValueAssignment[_]]] = Seq.empty, wrap: Boolean = false, scope: DefinitionScope = "steady state evolution")(implicit wfi: WorkflowIntegration[T]) = {
+    implicit def defScope = scope
+
+    val evolution = wfi(algorithm)
+
+    val wrapped = pattern.wrap(evaluation, evolution.inputPrototypes, evolution.objectivePrototypes, wrap)
+    val randomGenomes = BreedTask(evolution, parallelism, suggestion) set ((inputs, outputs) += evolution.populationPrototype)
+
+    val scaleGenome = ScalingGenomeTask(evolution)
+    val toOffspring = ToOffspringTask(evolution)
+    val elitism = ElitismTask(evolution)
+    val terminationTask = TerminationTask(evolution, termination)
+    val breed = BreedTask(evolution, 1)
 
     val masterFirst =
       EmptyTask() set (
-        (inputs, outputs) += (t.populationPrototype, t.genomePrototype, t.statePrototype),
-        (inputs, outputs) += (t.objectives.map(_.prototype): _*)
+        (inputs, outputs) += (evolution.populationPrototype, evolution.genomePrototype, evolution.statePrototype),
+        (inputs, outputs) += (evolution.objectivePrototypes: _*)
       )
 
     val masterLast =
       EmptyTask() set (
-        (inputs, outputs) += (t.populationPrototype, t.statePrototype, t.genomePrototype.toArray, t.terminatedPrototype, t.generationPrototype)
+        (inputs, outputs) += (evolution.populationPrototype, evolution.statePrototype, evolution.genomePrototype.toArray, evolution.terminatedPrototype, evolution.generationPrototype)
       )
 
-    val masterFirstCapsule = Capsule(masterFirst)
-    val elitismSlot = Slot(elitismTask)
-    val masterLastSlot = Slot(masterLast)
-    val terminationCapsule = Capsule(terminationTask)
-    val breedSlot = Slot(breed)
-
     val master =
-      (masterFirstCapsule --
-        (toOffspring keep (Seq(t.statePrototype, t.genomePrototype) ++ t.objectives.map(_.prototype): _*)) --
-        elitismSlot --
-        terminationCapsule --
-        breedSlot --
-        masterLastSlot) &
-        (masterFirstCapsule -- (elitismSlot keep t.populationPrototype)) &
-        (elitismSlot -- (breedSlot keep t.populationPrototype)) &
-        (elitismSlot -- (masterLastSlot keep t.populationPrototype)) &
-        (terminationCapsule -- (masterLastSlot keep (t.terminatedPrototype, t.generationPrototype)))
+      ((masterFirst -- toOffspring keep (Seq(evolution.statePrototype, evolution.genomePrototype) ++ evolution.objectivePrototypes: _*)) -- elitism -- terminationTask -- breed -- masterLast) &
+        (masterFirst -- elitism keep evolution.populationPrototype) &
+        (elitism -- breed keep evolution.populationPrototype) &
+        (elitism -- masterLast keep evolution.populationPrototype) &
+        (terminationTask -- masterLast keep (evolution.terminatedPrototype, evolution.generationPrototype))
 
-    val masterTask = MoleTask(master) set (exploredOutputs += t.genomePrototype.toArray)
+    val masterTask = MoleTask(master) set (exploredOutputs += evolution.genomePrototype.toArray)
 
-    val masterSlave = MasterSlave(
-      randomGenomes,
-      masterTask,
-      scalingGenomeTask -- Strain(wrapped.evaluationPuzzle),
-      state = Seq(t.populationPrototype, t.statePrototype),
-      slaves = parallelism
-    )
+    val masterSlave =
+      MasterSlave(
+        randomGenomes,
+        master = masterTask,
+        slave = scaleGenome -- Strain(wrapped),
+        state = Seq(evolution.populationPrototype, evolution.statePrototype),
+        slaves = parallelism,
+        stop = evolution.terminatedPrototype
+      )
 
-    val firstTask = InitialStateTask(algorithm)
-    val firstCapsule = Capsule(firstTask, strain = true)
-
-    val last = EmptyTask() set ((inputs, outputs) += (t.statePrototype, t.populationPrototype))
+    val firstTask = InitialStateTask(evolution)
 
     val puzzle =
-      ((firstCapsule -- masterSlave) >| (Capsule(last, strain = true) when t.terminatedPrototype)) &
-        (firstCapsule oo (wrapped.evaluationPuzzle, filter = Block(t.populationPrototype, t.statePrototype)))
+      (Strain(firstTask) -- masterSlave) &
+        (firstTask oo wrapped block (evolution.populationPrototype, evolution.statePrototype))
 
-    val gaPuzzle = PuzzleContainer(puzzle, masterSlave.last, wrapped.delegate)
-
-    gaPuzzle :: algorithm :: HNil
+    DSLContainerExtension[EvolutionWorkflow](puzzle, output = Some(masterTask), delegate = wrapped.delegate, data = evolution)
   }
 
-  def IslandEvolution[HL <: HList, T](
-    island:      HL,
+  def IslandEvolution[T](
+    island:      DSLContainer[EvolutionWorkflow],
     parallelism: Int,
     termination: OMTermination,
-    sample:      OptionalArgument[Int] = None
-  )(implicit
-    wfi: WorkflowIntegrationSelector[HL, T],
-    selectPuzzle: Puzzle.PuzzleSelector[HL]) = {
-    val algorithm: T = wfi(island)
-    implicit val wi = wfi.selected
-    val t = wi(algorithm)
+    sample:      OptionalArgument[Int]           = None,
+    scope:       DefinitionScope                 = "island evolution"
+  ) = {
+
+    implicit def defScope = scope
+
+    val t = island.data
 
     val islandPopulationPrototype = t.populationPrototype.withName("islandPopulation")
 
@@ -187,64 +188,51 @@ package object evolution {
         (inputs, outputs) += (t.populationPrototype, t.statePrototype, islandPopulationPrototype.toArray, t.terminatedPrototype, t.generationPrototype)
       )
 
-    val elitismTask = ElitismTask(algorithm)
-    val generateIsland = GenerateIslandTask(algorithm, sample, 1, islandPopulationPrototype)
-    val terminationTask = TerminationTask(algorithm, termination)
+    val elitism = ElitismTask(t)
+    val generateIsland = GenerateIslandTask(t, sample, 1, islandPopulationPrototype)
+    val terminationTask = TerminationTask(t, termination)
     val islandPopulationToPopulation = AssignTask(islandPopulationPrototype → t.populationPrototype)
-    val reassingRNGTask = ReassignStateRNGTask(algorithm)
+    val reassingRNG = ReassignStateRNGTask(t)
 
-    val fromIsland = FromIslandTask(algorithm)
+    val fromIsland = FromIslandTask(t)
 
     val populationToOffspring = AssignTask(t.populationPrototype → t.offspringPrototype)
-    val elitismSlot = Slot(elitismTask)
-    val terminationCapsule = Capsule(terminationTask)
-    val masterLastSlot = Slot(masterLast)
 
     val master =
-      (
-        masterFirst --
-        (elitismSlot keep (t.statePrototype, t.populationPrototype, t.offspringPrototype)) --
-        terminationCapsule --
-        (masterLastSlot keep (t.terminatedPrototype, t.generationPrototype, t.statePrototype))
-      ) &
-        (elitismSlot -- generateIsland -- masterLastSlot) &
-        (elitismSlot -- (masterLastSlot keep t.populationPrototype))
+      ((masterFirst -- elitism keep (t.statePrototype, t.populationPrototype, t.offspringPrototype)) -- terminationTask -- masterLast keep (t.terminatedPrototype, t.generationPrototype, t.statePrototype)) &
+        (elitism -- generateIsland -- masterLast) &
+        (elitism -- masterLast keep t.populationPrototype)
 
-    val masterTask = MoleTask(master) set (exploredOutputs += islandPopulationPrototype.toArray)
+    val masterTask = MoleTask(master) set (exploredOutputs += (islandPopulationPrototype.toArray))
 
     val generateInitialIslands =
-      GenerateIslandTask(algorithm, sample, parallelism, islandPopulationPrototype) set (
+      GenerateIslandTask(t, sample, parallelism, islandPopulationPrototype) set (
         (inputs, outputs) += t.statePrototype,
         outputs += t.populationPrototype
       )
 
-    val islandCapsule = Slot(MoleTask(selectPuzzle(island)))
+    val islandTask = MoleTask(island)
 
     val slaveFist = EmptyTask() set ((inputs, outputs) += (t.statePrototype, islandPopulationPrototype))
 
-    val slave = slaveFist -- (islandPopulationToPopulation, reassingRNGTask) -- islandCapsule -- fromIsland -- populationToOffspring
+    val slave = slaveFist -- (islandPopulationToPopulation, reassingRNG) -- islandTask -- fromIsland -- populationToOffspring
 
     val masterSlave = MasterSlave(
       generateInitialIslands,
       masterTask,
       slave,
       state = Seq(t.populationPrototype, t.statePrototype),
-      slaves = parallelism
+      slaves = parallelism,
+      stop = t.terminatedPrototype
     )
 
-    val firstTask = InitialStateTask(algorithm)
-
-    val firstCapsule = Capsule(firstTask, strain = true)
-
-    val last = EmptyTask() set ((inputs, outputs) += (t.populationPrototype, t.statePrototype))
+    val first = InitialStateTask(t)
 
     val puzzle =
-      ((firstCapsule -- masterSlave) >| (Capsule(last, strain = true) when t.terminatedPrototype)) &
-        (firstCapsule oo (islandCapsule, Block(t.populationPrototype, t.statePrototype)))
+      (Strain(first) -- masterSlave) &
+        (first oo islandTask block (t.populationPrototype, t.statePrototype))
 
-    val gaPuzzle = PuzzleContainer(puzzle, masterSlave.last, Vector(islandCapsule))
-
-    gaPuzzle :: algorithm :: HNil
+    DSLContainerExtension[EvolutionWorkflow](puzzle, output = Some(masterTask), delegate = Vector(islandTask), data = t)
   }
 
 }

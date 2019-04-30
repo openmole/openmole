@@ -48,7 +48,7 @@ acceptation in OpenMOLE. It may concern numbers, files, random streams, images, 
 To define samplings, you can combine them with each other. As we've previously seen, the complete sampling is a
 way to achieve that. Many composition functions are implemented in OpenMOLE.
 
-@p The "x" combinator also enables domain bounds to depend on each others. Notice how the upper bound of the second
+@p The @code{x} combinator also enables domain bounds to depend on each others. Notice how the upper bound of the second
 factor depends on the value of the first one.
 
 @p
@@ -66,6 +66,19 @@ factor depends on the value of the first one.
   """, name = "combine sampling", header = "val myModel = EmptyTask()")
 
   Samplings can also be combined using variants of the zip operator.
+
+@h3{Concatenate samplings}
+
+While the sampling combination with the cartesian product operator @code{x} produces a complete sampling, one may want to concatenate two samplings.
+
+The operator @code{::} does so, as for example:
+
+@hl.openmole("""
+((i in Seq(0,1))x(j is 2.0))::((i is 10)x(j is 666.0))
+""", name ="concatenate samplings")
+
+
+
 
 @h3{Zip samplings}
 
@@ -108,12 +121,12 @@ generating a new pair. OpenMOLE implements the @hl.code("ZipWithIndexSampling") 
   output results depending on the input filename the filename should be transmitted in a variable of type String. When running
   this snippet, the file is renamed by the ScalaTask however, its name is saved in the @i{name} variable.
 
-  @br @hl.openmole("""
+  @br @hl.openmole(s"""
     val file = Val[File]
     val name = Val[String]
     val size = Val[Long]
 
-    val t = ScalaTask("val size = new java.io.File(workDir, \"file\").length") set (
+    val t = ScalaTask(${tq}val size = (workDirectory / "file").length${tq}) set (
       inputFiles += (file, "file"),
       inputs += name,
       outputs += (name, size)

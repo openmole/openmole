@@ -53,6 +53,8 @@ object JobScript {
 
       if (debug) script += "voms-proxy-info -all"
 
+      script += "unset http_proxy"
+      script += "unset https_proxy"
       script += "BASEPATH=$PWD"
       script += "CUR=$PWD/ws$RANDOM"
       script += "while test -e $CUR; do export CUR=$PWD/ws$RANDOM; done"

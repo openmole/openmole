@@ -34,12 +34,12 @@ class Activator extends PluginInfoActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector(
-        Word("launchingCommands"),
-        Word("netLogoInputs"),
-        Word("netLogoArrayInputs"),
-        Word("netLogoOutputs"),
-        Word("netLogoArrayOutputs"),
-        Word("embedWorkspace")
+        WordKeyWord("launchingCommands"),
+        WordKeyWord("netLogoInputs"),
+        WordKeyWord("netLogoArrayInputs"),
+        WordKeyWord("netLogoOutputs"),
+        WordKeyWord("netLogoArrayOutputs"),
+        WordKeyWord("embedWorkspace")
       //Word("netLogoFactory"),// deprecated
       //Word("external"), // deprecated
       //Word("script"), // too general

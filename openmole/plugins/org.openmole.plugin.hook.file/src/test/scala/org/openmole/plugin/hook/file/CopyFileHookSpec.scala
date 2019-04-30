@@ -17,15 +17,16 @@
 
 package org.openmole.plugin.hook.file
 
-import java.io.{File, FileWriter}
+import java.io.{ File, FileWriter }
 
-import org.openmole.core.context.{Context, Val, PrototypeSet}
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools.DefaultSet
+import org.openmole.core.dsl._
+import org.openmole.core.workflow.test.TestTask
+import org.openmole.tool.hash._
 import org.scalatest._
 
 class CopyFileHookSpec extends FlatSpec with Matchers {
+
+  import org.openmole.core.workflow.test.Stubs._
 
   "A copy file misc" should "copy a file after the execution of a capsule" in {
     val f = File.createTempFile("test", ".tmp")
@@ -36,26 +37,17 @@ class CopyFileHookSpec extends FlatSpec with Matchers {
 
     val p = Val[File]("p")
 
-    val t1 = new Task {
-      val name = "Test"
-      val outputs = PrototypeSet(p)
-      val inputs = PrototypeSet.empty
-      val plugins = PluginSet.empty
-      val defaults = DefaultSet.empty
-      override def process(context: Context) = context + (p → f)
-    }
-
-    val t1c = new Capsule(t1)
+    val t1 = TestTask { context ⇒ context + (p → f) } set (outputs += p)
 
     val fDest = File.createTempFile("test", ".tmp")
 
     val hook = CopyFileHook(p, fDest.getAbsolutePath)
 
-    val ex = MoleExecution(Mole(t1c), hooks = List(t1c → hook))
+    val ex = t1 hook hook
 
-    ex.start.waitUntilEnded
+    ex.run()
 
-    f.hash should equal(fDest.hash)
+    f.hash() should equal(fDest.hash())
     f.delete
     fDest.delete
   }

@@ -27,7 +27,7 @@ object DataChannel {
   def levelDelta(mole: Mole)(dataChannel: DataChannel): Int =
     mole.level(dataChannel.end.capsule) - mole.level(dataChannel.start)
 
-  def apply(start: Capsule, end: Slot, filter: BlockList) = new DataChannel(start, end, filter)
+  def apply(start: MoleCapsule, end: TransitionSlot, filter: BlockList) = new DataChannel(start, end, filter)
 
   /**
    * Consums the provided variables and construct a context for them.
@@ -81,7 +81,7 @@ object DataChannel {
 
 /**
  * A data channel allow to transmit data between remotes task capsules within a mole.
- * Two capsules could be linked with a {@link DataChannel} if:
+ * Two capsules could be linked with a [[DataChannel]] if:
  *      - they belong to the same mole,
  *      - there is no capsule with more than one input slot in a path between
  *        the two capsules.
@@ -91,8 +91,8 @@ object DataChannel {
  * @param filter the filter of the variable transported by this data channel
  */
 class DataChannel(
-  val start:  Capsule,
-  val end:    Slot,
+  val start:  MoleCapsule,
+  val end:    TransitionSlot,
   val filter: BlockList
 ) {
 
