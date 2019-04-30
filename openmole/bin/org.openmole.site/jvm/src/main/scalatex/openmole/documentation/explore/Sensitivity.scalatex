@@ -35,7 +35,7 @@ SensitivityMorris(
   outputs = Seq(o1, o2),
   repetitions = 10,
   levels = 10
-) hook ToStringHook()
+) hook DisplayHook()
 """,header=model, name = "Morris")
 
 @h2{Saltelli}
@@ -50,5 +50,5 @@ SensitivitySaltelli(
     i3 in (0.0, 1.0)),
   outputs = Seq(o1, o2),
   samples = 100
-) hook ToStringHook()
+) hook DisplayHook()
 """,header=model, name = "Saltelli")

@@ -87,11 +87,7 @@ With M, the model, X , the Input space, Y, the output space, 𝓟(X) the power s
 In other words : this function takes a model M ( whose signature is (X→Y) ) , an element @i{y} of Y (y is the list of criterion value to reach) and  find a list of elements of X (noted @i{x}) such that, M(x) are Pareto dominant compared to every image of other elements of X by M , regarding criterion @i{y})
 
 
-
-
 @break
-
-
 
 
 @p
@@ -109,27 +105,25 @@ The Profile method takes the following parameters:
   @li{@hl.code("nX"): the size of the subintervals}
   @li{@hl.code("stochastic"): the seed provider, mandatory if your model contains randomness}
 @p
-You will also need an evolutionary scheme and can use SteadyStateEvolution as described in @a("Calibration", href :=
-  DocumentationPages.calibration.file)
 
 @p To profile a parameter, use the GenomeProfile constructor like so:
   @br @hl.openmole("""
   val param1 = Val[Double]
   val param2 = Val[Double]
 
-  val exploration =
-    GenomeProfileEvolution(
-      evaluation = modelTask,
-      parallelism = 10,
-      termination = 100,
-      x = param1,
-      nX = 20,
-      genome =
-        Seq(
-          param1 in (0.0, 99.0),
-          param2 in (0.0, 99.0)),
-      objective = fitness,
-      stochastic = Stochastic(seed = myseed))
+
+  GenomeProfileEvolution(
+    evaluation = modelTask,
+    parallelism = 10,
+    termination = 100,
+    x = param1,
+    nX = 20,
+    genome =
+      Seq(
+        param1 in (0.0, 99.0),
+        param2 in (0.0, 99.0)),
+    objective = fitness,
+    stochastic = Stochastic(seed = myseed)) hook(workDirectory / "results", frequency = 100)
 """, header= modelAndVariables , name = "Profile")
 where @hl.code("param1") and @hl.code("param2") are inputs
 of the task that runs the model (and refer to the model parameters),

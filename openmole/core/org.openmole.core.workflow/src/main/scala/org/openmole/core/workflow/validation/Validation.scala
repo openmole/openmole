@@ -26,7 +26,7 @@ import org.openmole.core.workflow.tools.{ Default, DefaultSet }
 import org.openmole.core.workflow.validation.DataflowProblem._
 import org.openmole.core.workflow.validation.TopologyProblem._
 import org.openmole.core.workflow.validation.TypeUtil._
-import org.openmole.core.workflow.validation.ValidationProblem.{ HookValidationProblem, TaskValidationProblem, TransitionValidationProblem }
+import org.openmole.core.workflow.validation.ValidationProblem.{ HookValidationProblem, SourceValidationProblem, TaskValidationProblem, TransitionValidationProblem }
 import org.openmole.core.workspace.NewFile
 
 import scala.collection.immutable.TreeMap
@@ -109,37 +109,55 @@ object Validation {
     }
   }
 
-  def sourceTypeErrors(mole: Mole, implicits: Iterable[Val[_]], sources: Sources, hooks: Hooks) = {
+  def sourceErrors(mole: Mole, implicits: Iterable[Val[_]], sources: Sources, hooks: Hooks)(implicit newFile: NewFile, fileService: FileService) = {
     val implicitMap = prototypesToMap(implicits)
 
-    val x = (for {
-      c ← mole.capsules
-      (so: Source) ← sources.getOrElse(c, List.empty)
-      (defaultsOverride, defaultsNonOverride) = separateDefaults(so.defaults)
-      sl ← mole.slots(c)
-      receivedInputs = TreeMap(TypeUtil.validTypes(mole, sources, hooks)(sl).map { p ⇒ p.name → p }.toSeq: _*)
-      i ← so.inputs
-    } yield {
-      def checkPrototypeMatch(p: Val[_]) =
-        if (!i.isAssignableFrom(p)) Some(WrongSourceType(sl, so, i, p))
-        else None
+    def inputErrors =
+      for {
+        c ← mole.capsules
+        (so: Source) ← sources.getOrElse(c, List.empty)
+        (defaultsOverride, defaultsNonOverride) = separateDefaults(so.defaults)
+        sl ← mole.slots(c)
+        receivedInputs = TreeMap(TypeUtil.validTypes(mole, sources, hooks)(sl).map { p ⇒ p.name → p }.toSeq: _*)
+        i ← so.inputs
+      } yield {
+        def checkPrototypeMatch(p: Val[_]) =
+          if (!i.isAssignableFrom(p)) Some(WrongSourceType(sl, so, i, p))
+          else None
 
-      val inputName = i.name
+        val inputName = i.name
 
-      val defaultOverride = defaultsOverride.get(inputName)
-      val receivedInput = receivedInputs.get(inputName)
-      val receivedImplicit = implicitMap.get(inputName)
-      val defaultNonOverride = defaultsNonOverride.get(inputName)
+        val defaultOverride = defaultsOverride.get(inputName)
+        val receivedInput = receivedInputs.get(inputName)
+        val receivedImplicit = implicitMap.get(inputName)
+        val defaultNonOverride = defaultsNonOverride.get(inputName)
 
-      (defaultOverride, receivedInput, receivedImplicit, defaultNonOverride) match {
-        case (Some(parameter), _, _, _)          ⇒ checkPrototypeMatch(parameter)
-        case (None, Some(received), impl, param) ⇒ checkPrototypeMatch(received.toPrototype)
-        case (None, None, Some(impl), _)         ⇒ checkPrototypeMatch(impl)
-        case (None, None, None, Some(param))     ⇒ checkPrototypeMatch(param)
-        case (None, None, None, None)            ⇒ Some(MissingSourceInput(sl, so, i))
+        (defaultOverride, receivedInput, receivedImplicit, defaultNonOverride) match {
+          case (Some(parameter), _, _, _)          ⇒ checkPrototypeMatch(parameter)
+          case (None, Some(received), impl, param) ⇒ checkPrototypeMatch(received.toPrototype)
+          case (None, None, Some(impl), _)         ⇒ checkPrototypeMatch(impl)
+          case (None, None, None, Some(param))     ⇒ checkPrototypeMatch(param)
+          case (None, None, None, None)            ⇒ Some(MissingSourceInput(sl, so, i))
+        }
       }
-    })
-    x.flatten
+
+    def validationErrors =
+      for {
+        c ← mole.capsules
+        source ← sources.getOrElse(c, List.empty).collect { case s: ValidateSource ⇒ s }
+        (defaultsOverride, defaultsNonOverride) = separateDefaults(source.defaults)
+        sl ← mole.slots(c)
+        receivedInputs = TreeMap(TypeUtil.validTypes(mole, sources, hooks)(sl).map { p ⇒ p.name → p }.toSeq: _*).mapValues(_.toPrototype)
+      } yield {
+        val inputs = (defaultsNonOverride ++ implicitMap ++ receivedInputs ++ defaultsOverride).toSeq.map(_._2)
+
+        source.validate(inputs).apply.toList match {
+          case Nil ⇒ None
+          case e   ⇒ Some(SourceValidationProblem(source, e))
+        }
+      }
+
+    inputErrors.flatten ++ validationErrors.flatten
   }
 
   def typeErrorsTopMole(mole: Mole, implicits: Iterable[Val[_]], sources: Sources, hooks: Hooks) =
@@ -266,8 +284,6 @@ object Validation {
         val receivedImplicit = implicitMap.get(inputName)
         val defaultNonOverride = defaultsNonOverride.get(inputName)
 
-        (defaultOverride, receivedInput, receivedImplicit, defaultNonOverride)
-
         val computed =
           (defaultOverride, receivedInput, receivedImplicit, defaultNonOverride) match {
             case (Some(parameter), _, _, _)      ⇒ Some(parameter)
@@ -338,7 +354,7 @@ object Validation {
                 typeErrorsMoleTask(m, moleTaskImplicits(t)).map { e ⇒ MoleTaskDataFlowProblem(c, e) } ++
                 moleTaskTopologyError(t, c)
             case None ⇒
-              sourceTypeErrors(m, implicits.prototypes, sources, hooks) ++
+              sourceErrors(m, implicits.prototypes, sources, hooks) ++
                 hookErrors(m, implicits.prototypes, sources, hooks) ++
                 typeErrorsTopMole(m, implicits.prototypes, sources, hooks)
           }

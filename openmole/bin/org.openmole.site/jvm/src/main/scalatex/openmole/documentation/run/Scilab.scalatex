@@ -35,4 +35,4 @@ val m =
     dArray := Array(9.0, 8.0)
   )
 
-m hook ToStringHook()""")
+m hook DisplayHook()""")
