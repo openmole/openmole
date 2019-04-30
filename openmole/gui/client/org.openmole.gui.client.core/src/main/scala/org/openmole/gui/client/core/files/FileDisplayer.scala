@@ -47,7 +47,7 @@ class FileDisplayer(val tabs: TreeNodeTabs) {
         case SVGExtension ⇒ tabs ++ TreeNodeTab.html(safePath, content)
         case ef: EditableFile ⇒
           if (DataUtils.isCSV(safePath)) {
-            post()[Api].sequence(safePath).call().foreach { seq ⇒
+            post()[Api].sequence(safePath, ',').call().foreach { seq ⇒
               tabs ++ TreeNodeTab.editable(safePath, content, seq, TreeNodeTab.Table, !ef.onDemand)
             }
           }
