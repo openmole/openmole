@@ -90,14 +90,16 @@ object UDockerTask {
     containerPoolKey:   CacheKey[WithInstance[(File, ContainerID)]] = CacheKey()
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService): UDockerTask = {
 
+    /*
     def blockChars(s: String): String = {
-      val blocked = Set(''', '"', '\\')
+      val blocked = Set.empty[Char] // Set(''', '"') //, '\\')
       s.flatMap { c ⇒ if (blocked.contains(c)) s"\\$c" else s"$c" }
     }
+    */
 
     UDockerTask(
       uDocker = createUDocker(image, install, user, mode, cacheInstall, forceUpdate, reuseContainer),
-      commands = Commands.value.modify(_.map(_.map(blockChars)))(run),
+      commands = run, //Commands.value.modify(_.map(_.map(blockChars)))(run),
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
@@ -320,14 +322,20 @@ object UDockerTask {
               uDocker.environmentVariables.map { case (name, variable) ⇒ name -> variable.from(preparedContext) }
 
             def expandCommand(command: FromContext[String]) =
-              ExecutionCommand.Raw(UDocker.uDockerRunCommand(
-                uDocker.user,
-                containerEnvironmentVariables,
-                volumes,
-                userWorkDirectory(uDocker),
-                uDockerExecutable,
-                runId,
-                command.from(preparedContext)))
+              ExecutionCommand.Raw(
+                List(
+                  UDocker.uDockerRunCommandPrefix(
+                    uDocker.user,
+                    containerEnvironmentVariables,
+                    volumes,
+                    userWorkDirectory(uDocker),
+                    uDockerExecutable,
+                    runId
+                  ),
+                  command.from(preparedContext)
+                ),
+                List(false, true)
+              )
 
             val executionResult = executeAll(
               taskWorkDirectory,
