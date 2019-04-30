@@ -35,7 +35,7 @@ Let's consider this simple workflow:
   )
 
   // Define a Hook
-  val h = ToStringHook()
+  val h = DisplayHook()
 
   // Define an exploration task
   DirectSampling(
@@ -64,9 +64,9 @@ See the following workflow:
     outputs += i
   )
 
-  val h1 = ToStringHook()
-  val h2 = ToStringHook()
-  val h3 = ToStringHook()
+  val h1 = DisplayHook()
+  val h2 = DisplayHook()
+  val h3 = DisplayHook()
 
   (hello hook (h1, h2, h3))
 """, name = "plug multiple hooks")
@@ -174,7 +174,7 @@ The @code{CopyFileHook} makes it possible to copy a file/directory from the data
 
 @h3{Display variables}
 
-To display a variable @code{i} from the workflow in the standard output, use the hook @code{ToStringHook(i)}:
+To display a variable @code{i} from the workflow in the standard output, use the hook @code{DisplayHook(i)}:
 
 @br@br
 
@@ -182,12 +182,12 @@ To display a variable @code{i} from the workflow in the standard output, use the
   val i = Val[Int]
   val j = Val[Int]
 
-  val h = ToStringHook(i, j)
+  val h = DisplayHook(i, j)
 """, name = "to string hook")
 
 @br
 
-If no variable is specified in @code{ToStringHook()}, the whole dataflow will be displayed.
+If no variable is specified in @code{DisplayHook()}, the whole dataflow will be displayed.
 
 
 @h3{Display strings}

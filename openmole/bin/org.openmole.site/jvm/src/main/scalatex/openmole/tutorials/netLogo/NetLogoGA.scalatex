@@ -109,7 +109,7 @@ parameters. More details about the NetLogo5 task used in this script can be foun
 @hl.openmole(s"""
 $model
 // Define the hooks to collect the results
-val displayHook = ToStringHook(food1, food2, food3)
+val displayHook = DisplayHook(food1, food2, food3)
 
 //Definie the environment
 val env = LocalEnvironment(5)

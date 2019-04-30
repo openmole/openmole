@@ -91,7 +91,7 @@ val antsTask = NetLogo6Task(workDirectory / "ants.nlogo", launch, embedWorkspace
   population := 125)
 
 // Workflow containing a hook to save execution outputs
-antsTask hook ToStringHook()
+antsTask hook DisplayHook()
 """)
 
 

@@ -17,7 +17,7 @@ val sum =
     array := Array(8.0, 9.0, 10.0)
   )
 
-(sum hook ToStringHook())""")
+(sum hook DisplayHook())""")
 
 You can embed you own Scala/Java code and libraries in OpenMOLE using an OpenMOLE @a("Plugin", href := DocumentationPages.pluginDevelopment.file).
 
@@ -88,7 +88,7 @@ val hello = ScalaTask("val j = myopenmoleplugin.Hello.world(i)") set (
 )
 
 DirectSampling(
-  evaluation = hello hook ToStringHook(),
+  evaluation = hello hook DisplayHook(),
   sampling = i in (0 to 2)
 )
 """, header = "object myopenmoleplugin { object Hello {} }")
@@ -115,7 +115,7 @@ val sum = ScalaTask("val result = multiplied.sum") set (
 DirectSampling (
   evaluation = expensive,
   sampling = element in List(8.0, 9.0, 10.0),
-  aggregation = sum hook ToStringHook()
+  aggregation = sum hook DisplayHook()
 )""")
 
 @p
