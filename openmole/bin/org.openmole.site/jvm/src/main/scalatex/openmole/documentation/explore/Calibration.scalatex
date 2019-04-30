@@ -170,19 +170,17 @@ val param2 = Val[Double]
 val param3 = Val[Int]
 val param4 = Val[String]
 
-val nsga2 =
-  NSGA2Evolution(
-    evaluation = modelTask,
-    parallelism = 10,
-    termination = 100,
-    genome = Seq(
-      param1 in (0.0, 99.0),
-      param2 in (0.0, 99.0),
-      param3 in (0, 5),
-      param4 in List("apple", "banana", "strawberry")),
-    objectives = Seq(distance1, distance2)
-  )
-""", name = "Calibration")
+NSGA2Evolution(
+  evaluation = modelTask,
+  parallelism = 10,
+  termination = 100,
+  genome = Seq(
+    param1 in (0.0, 99.0),
+    param2 in (0.0, 99.0),
+    param3 in (0, 5),
+    param4 in List("apple", "banana", "strawberry")),
+  objectives = Seq(distance1, distance2)
+) hook (workDirectory / "evolution")""", name = "Calibration")
 
 @br
 
