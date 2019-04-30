@@ -157,11 +157,7 @@ val evolution =
   )
 
 // Define a hook to save the Pareto frontier
-val savePopulationHook = SavePopulationHook(evolution, workDirectory / "results")
-
-// Plug everything together to create the workflow
-val model_execution = (evolution hook savePopulationHook)
-model_execution
+evolution hook (workDirectory / "results")
 """, header = model, name = "ga netlogo evolution")
 
 
@@ -189,16 +185,14 @@ SteadyStateEvolution(
 // Define the island model with 1,000 concurrent islands. Each island gets 50 individuals sampled from the global
 // population. The algorithm stops after 100,000 islands evaluations.
 val island =
-IslandEvolution(
-  evolution,
-  parallelism = 1000,
-  termination = 100000
-)
-
-val savePopulationHook = SavePopulationHook(island, workDirectory / "results")
+  IslandEvolution(
+    evolution,
+    parallelism = 1000,
+    termination = 100000
+  )
 
 // Define the execution environment
 val env = EGIEnvironment("biomed", openMOLEMemory = 1200 megabytes, cpuTime = 4 hours)
 
 // Define the workflow
-(island on env hook savePopulationHook)""", header = model, name = "ga netlogo islands")
+island on env hook (workDirectory / "results")""", header = model, name = "ga netlogo islands")

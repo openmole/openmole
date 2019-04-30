@@ -76,7 +76,27 @@ See the following workflow:
 Here the hooks @code{h1}, @code{h2}, and @code{h3} are all plugged to the @code{hello} task and will all be executed upon its completion.
 However, we should point out that plugging the same hook multiple times to the same task is usually of limited interest...!
 
+@h2{Default hooks}
 
+Most OpenMOLE methods define a default hook to save you're results in a properly formatted file. To use this hook you can pass required arguments directly to the hook keyword without specifying the type of hook. For instance, in a direct sampling you can do:
+
+@hl.openmole("""
+val i = Val[Int]
+
+//Defines the "model" task
+val myModel =
+  ScalaTask("val o = i * 2") set (
+    inputs += i,
+    outputs += (i, o)
+  )
+DirectSampling(
+  evaluation = myModel,
+  sampling = i in (0 to 10 by 1)
+) hook (workDirectory / "result.csv")""", name="default hook")
+
+@br
+
+This code saves your results in a file.
 
 @h2{Hooks to write into files}
 

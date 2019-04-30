@@ -99,14 +99,11 @@ val average =
     outputs += avg
   )
 
-val exploration =
-  DirectSampling(
-    evaluation = myModel hook DisplayHook(),
-    sampling = i in (0 to 10 by 1),
-    aggregation = average hook DisplayHook()
-  )
-
-exploration""", name="concrete example of direct sampling")
+DirectSampling(
+  evaluation = myModel hook DisplayHook(),
+  sampling = i in (0 to 10 by 1),
+  aggregation = average hook DisplayHook()
+)""", name="concrete example of direct sampling")
 
 Some details:
 @ul
@@ -145,14 +142,11 @@ val myModel =
     outputs += (i, o)
   )
 
-val replication = Replication(
-    evaluation = myModel,
-    seed = mySeed,
-    replications = 100
-)
-
-replication
-""", name="example of replication")
+Replication(
+  evaluation = myModel,
+  seed = mySeed,
+  replications = 100
+)""", name="example of replication", header = "val myModel = EmptyTask()")
 
 The arguments for @code{Replication} are the following:
 
@@ -175,7 +169,7 @@ Sampling can be performed on several inputs domains as well as on @b{several inp
 Here is an example, still supposing you have already defined a task used for evaluation called myModel:
 
 
-@hl.openmoleNoTest("""
+@hl.openmole("""
  val i = Val[Int]
  val j = Val[Double]
  val k = Val[String]
@@ -192,7 +186,7 @@ Here is an example, still supposing you have already defined a task used for eva
      (l in (UniformDistribution[Long]() take 10)) x
      (m in (workDirectory / "dir").files().filter(f => f.getName.startsWith("exp") && f.getName.endsWith(".csv")))
    )
-  """)
+  """, name = "several inputs", header = "val myModel = EmptyTask()")
 
 @br
 DirectSampling performs every combination between the 5 inputs of various types: Integer (i) , Double (j), Strings (k), Long (l), Files (m).
