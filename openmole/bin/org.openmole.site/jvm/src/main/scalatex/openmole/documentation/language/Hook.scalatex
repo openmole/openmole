@@ -120,7 +120,7 @@ The appended string can be a combination of variables from the data flow and pla
 @hl.openmole("""
     val i = Val[Int]
 
-    val h = AppendToFileHook("/path/of/the/file.txt", "string ${i} to append")
+    val h = AppendToFileHook("path/of/the/file.txt", "string ${i} to append")
 """, name = "append to file hook")
 
 
@@ -134,7 +134,7 @@ The appended string can be a combination of variables from the data flow and pla
     val file = Val[File]
     val i = Val[Int]
 
-    val h = AppendToFileHook("${file.content}", "/path/to/a/file/or/dir${i}.csv")
+    val h = AppendToFileHook("${file.content}", "path/to/a/file/or/dir${i}.csv")
 """, name = "append file to file hook")
 
 @br
@@ -152,7 +152,7 @@ The hook @code{AppendToCSVFileHook} takes data from the data flow and appends it
 @hl.openmole("""
     val i = Val[Int]
 
-    val h = AppendToCSVFileHook("/path/to/a/file/or/dir${i}.csv")
+    val h = AppendToCSVFileHook("path/to/a/file/or/dir${i}.csv")
 """, name = "csv hook")
 
 @br
@@ -167,7 +167,7 @@ Some additional optional parameters can be passed to the @code{AppendToCSVFileHo
     val i = Val[Int]
     val j = Val[Array[Int]]
 
-    val h = AppendToCSVFileHook("/path/to/a/file/or/dir${i}.csv", values = Seq(i, j), header = "i, j", arrayOnRaw = true)""", name = "csv hook with options")
+    val h = AppendToCSVFileHook("path/to/a/file/or/dir${i}.csv", values = Seq(i, j), header = "i, j", arrayOnRow = true)""", name = "csv hook with options")
 
 
 @h3{Write a matrix into a file}
@@ -200,7 +200,7 @@ The @code{CopyFileHook} makes it possible to copy a file or directory from the d
   val file = Val[File]
   val i = Val[Int]
 
-  val h = CopyFileHook(file, "/path/to/copy/the/file${i}.txt")
+  val h = CopyFileHook(file, "path/to/copy/the/file${i}.txt")
 """, name = "copy file hook")
 
 
