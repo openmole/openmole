@@ -18,43 +18,17 @@
 package org.openmole.plugin.source.file
 
 import java.io.File
-
-import monocle.macros.Lenses
-import org.openmole.core.context.{ Context, Val, Variable }
-import org.openmole.core.dsl
 import org.openmole.core.dsl._
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.mole._
+import org.openmole.core.dsl.extension._
 
 object FileSource {
 
-  implicit def isIO = InputOutputBuilder(FileSource.config)
-  implicit def isInfo = InfoBuilder(info)
-
   def apply(path: FromContext[String], prototype: Val[File])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    new FileSource(
-      path,
-      prototype,
-      config = InputOutputConfig(),
-      info = InfoConfig()
-    ) set (dsl.outputs += prototype)
+    Source("FileSource") { p ⇒
+      import p._
+      val expandedPath = new File(path.from(context))
+      Variable(prototype, expandedPath)
+    } set (outputs += prototype)
 
 }
 
-@Lenses case class FileSource(
-  path:      FromContext[String],
-  prototype: Val[File],
-  config:    InputOutputConfig,
-  info:      InfoConfig
-) extends Source {
-
-  override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
-    import parameters._
-    val expandedPath = new File(path.from(context))
-    Variable(
-      prototype,
-      expandedPath
-    )
-  }
-}

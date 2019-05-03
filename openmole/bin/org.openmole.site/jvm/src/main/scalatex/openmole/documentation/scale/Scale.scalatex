@@ -34,7 +34,7 @@ val env = LocalEnvironment(10)
 
 // Make the model run on the the local environment
 DirectSampling(
-  evaluation = model on env hook ToStringHook(),
+  evaluation = model on env hook DisplayHook(),
   sampling = i in (0.0 to 100.0 by 1.0)
 )""")
 
@@ -58,7 +58,7 @@ $tasks
 
 // Make the model run on the the local environment
 DirectSampling(
-  evaluation = model on env by 100 hook ToStringHook(),
+  evaluation = model on env by 100 hook DisplayHook(),
   sampling = i in (0.0 to 1000.0 by 1.0)
 )
 """, header = """

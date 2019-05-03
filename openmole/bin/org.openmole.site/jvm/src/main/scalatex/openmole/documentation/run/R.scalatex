@@ -150,7 +150,7 @@ In the script below (@code{rTask4}), we add an output variable @code{j}, and we 
     )
 
 
-  rTask4 hook ToStringHook()
+  rTask4 hook DisplayHook()
    """)
 
 @br
@@ -178,7 +178,7 @@ Remark: if you have several outputs, you can combine @code{mapped outputs} with 
                  i := 3 ,
                  c:=2
                )
-           rTask5 hook ToStringHook()
+           rTask5 hook DisplayHook()
            """)
 
 @br
@@ -242,7 +242,7 @@ Note that you have to put @code{g} as an output of the RTask (see the section "A
        outputs += resR mapped "k"
      )
 
-   (task1 -- rTask ) hook ToStringHook(resR)
+   (task1 -- rTask ) hook DisplayHook(resR)
    """)
 
 
@@ -292,7 +292,7 @@ Remark: the first time you use R with @code{libraries} or @code{packages}, it ta
         outputs += area.mapped
       )
 
-    rTask3 hook ToStringHook()
+    rTask3 hook DisplayHook()
     """)
 
 
@@ -388,7 +388,7 @@ The hook stores the file @code{g} in your @b{Workspace}, and displays the @code{
 
     val h1 = CopyFileHook(g, workDirectory / "random_points.txt")
 
-    (task1 -- task2 -- rTask ) hook (h1,ToStringHook(res,n) )
+    (task1 -- task2 -- rTask ) hook (h1,DisplayHook(res,n) )
     """)
 
 
@@ -437,7 +437,7 @@ val objSlot = Slot(task3)  // we create a slot over the task3
 val task1Capsule = Capsule(task1)
 
 
-((task1Capsule --  objSlot) & (task1Capsule -- task2 -- objSlot)) hook ToStringHook()
+((task1Capsule --  objSlot) & (task1Capsule -- task2 -- objSlot)) hook DisplayHook()
  """)
 
 @br

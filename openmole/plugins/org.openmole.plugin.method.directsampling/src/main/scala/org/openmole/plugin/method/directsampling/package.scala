@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.method
 
-import monocle.macros.Lenses
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.plugin.domain.distribution._
@@ -27,19 +26,18 @@ import org.openmole.plugin.hook.file._
 
 package object directsampling {
 
-  implicit def extension = DSLContainerExtension(DirectSamplingMethodContainer.container)
+  class DirectSampling
 
-  @Lenses case class DirectSamplingMethodContainer(container: DSLContainer, scope: DefinitionScope) {
-    def save(
+  implicit class DirectSamplingDSL(dsl: DSLContainer[DirectSampling]) extends DSLContainerHook(dsl) {
+    def hook(
       file:       FromContext[File],
       values:     Seq[Val[_]]                           = Vector.empty,
       header:     OptionalArgument[FromContext[String]] = None,
-      arrayOnRow: Boolean                               = false) = {
-      implicit val defScope = scope
-      this hook CSVHook(file = file, values = values, header = header, arrayOnRow = arrayOnRow)
+      arrayOnRow: Boolean                               = false): DSLContainer[DirectSampling] = {
+      implicit val defScope = dsl.scope
+      dsl hook CSVHook(file = file, values = values, header = header, arrayOnRow = arrayOnRow)
     }
   }
-
   def Replication[T: Distribution](
     evaluation:       DSL,
     seed:             Val[T],
@@ -78,7 +76,7 @@ package object directsampling {
         wrap = wrap
       )
 
-    DirectSamplingMethodContainer(s, scope)
+    DSLContainerExtension[DirectSampling](s, new DirectSampling)
   }
 
 }

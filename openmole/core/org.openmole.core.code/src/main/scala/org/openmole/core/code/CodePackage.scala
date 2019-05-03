@@ -48,6 +48,26 @@ trait CodePackage extends FilePackage with StatisticsPackage with MathPackage {
   def withThreadClassLoader[R](classLoader: ClassLoader)(f: ⇒ R) =
     org.openmole.tool.thread.withThreadClassLoader(classLoader)(f)
 
+  def abs(d: Double) = math.abs(d)
+  def abs(i: Int) = math.abs(i)
+  def Pi = math.Pi
+  def exp(d: Double) = math.exp(d)
+  def log(d: Double) = math.log(d)
+  def log10(d: Double) = math.log10(d)
+  def cos(d: Double) = math.cos(d)
+  def sin(d: Double) = math.sin(d)
+  def tan(d: Double) = math.tan(d)
+
+  def acos(d: Double) = math.acos(d)
+  def asin(d: Double) = math.asin(d)
+  def atan(d: Double) = math.atan(d)
+
+  def pow(d: Double, e: Double) = math.pow(d, e)
+  def sqrt(d: Double) = math.sqrt(d)
+  def round(d: Double) = math.round(d)
+
+  def hypot(a: Double, b: Double) = math.hypot(a, b)
+
 }
 
 object CodePackage extends CodePackage {

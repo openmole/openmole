@@ -98,12 +98,10 @@ val evolution =
     termination = 100
   )
 
-// Definition of a hook to save the population of solutions to  workDirectory /evolution on the local machine running OpenMOLE
-val savePopulation = SavePopulationHook(evolution, workDirectory / "evolution/")
-
 // Construction of the complete workflow with the execution environment, and the hook.
+// A hook is attached to save the population of solutions to  workDirectory /evolution on the local machine running OpenMOLE
 // Here the generated workflow will run using 4 threads of the local machine.
-(evolution hook savePopulation on LocalEnvironment(4))""", name = "nsga2 example")
+evolution hook (workDirectory / "evolution/") on LocalEnvironment(4)""", name = "nsga2 example")
 
   @br
   Notice that the objectives are given as a sequence of model outputs variables to @b{minimize}.
@@ -112,19 +110,16 @@ So if you want to reach specific target values, like Pi and 42  you can use the 
   @br @hl.openmole(s"""
 $model
 
-val evolution =
-  NSGA2Evolution(
-    genome = Seq(
-      x in (0.0, 1.0),
-      y in (0.0, 1.0),
-      s in List("apple", "banana", "strawberry")),
-    objectives = Seq(o1, o2),
-    evaluation = model -- DeltaTask(o1 -> math.Pi, o2 -> 42),
-    parallelism = 10,
-    termination = 100
-  )
-
-evolution""", name = "nsga2 delta example")
+NSGA2Evolution(
+  genome = Seq(
+    x in (0.0, 1.0),
+    y in (0.0, 1.0),
+    s in List("apple", "banana", "strawberry")),
+  objectives = Seq(o1, o2),
+  evaluation = model -- DeltaTask(o1 -> math.Pi, o2 -> 42),
+  parallelism = 10,
+  termination = 100
+)""", name = "nsga2 delta example")
   @br
   NB: in this case the results in the saved file will be the difference between the outputs of the model and your objectives.
   @br
@@ -136,19 +131,16 @@ $model
 
 val maximize = ScalaTask("o1 = -o1") set ((inputs, outputs) += (o1, o2))
 
-val evolution =
-  NSGA2Evolution(
-    genome = Seq(
-      x in (0.0, 1.0),
-      y in (0.0, 1.0),
-      s in List("apple", "banana", "strawberry")),
-    objectives = Seq(o1, o2),
-    evaluation = model -- maximize,
-    parallelism = 10,
-    termination = 100
-  )
 
-evolution""", name = "nsga2 maximize example")
+NSGA2Evolution(
+  genome = Seq(
+    x in (0.0, 1.0),
+    y in (0.0, 1.0),
+    s in List("apple", "banana", "strawberry")),
+  objectives = Seq(o1, o2),
+  evaluation = model -- maximize,
+  parallelism = 10,
+  termination = 100)""", name = "nsga2 maximize example")
 
 
 @br

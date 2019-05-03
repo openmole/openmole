@@ -27,6 +27,7 @@ package mole {
 package object mole {
 
   def Hook = FromContextHook
+  def Source = FromContextSource
 
   case class Hooks(map: Map[MoleCapsule, Traversable[Hook]])
 

@@ -28,7 +28,7 @@ val my_model = EmptyTask() set( (inputs, outputs) += my_input)
 
 val exploration =
   DirectSampling(
-    evaluation = my_model hook ToStringHook(),
+    evaluation = my_model hook DisplayHook(),
     sampling= (my_input in (UniformDistribution[Double](max=20) take 100)).map(x => x -10)
   )
 

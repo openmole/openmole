@@ -17,41 +17,33 @@
 
 package org.openmole.plugin.hook.display
 
-import monocle.macros.Lenses
-import org.openmole.core.context._
-import org.openmole.core.expansion._
-import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.validation._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
+import java.io.PrintStream
 
 object DisplayHook {
 
-  implicit def isIO: InputOutputBuilder[DisplayHook] = InputOutputBuilder(config)
-  implicit def isInfo = InfoBuilder(info)
+  def apply(toDisplay: FromContext[String])(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook =
+    Hook("DisplayHook") { parameters ⇒
+      import parameters._
+      executionContext.services.outputRedirection.output.println(toDisplay.from(context))
+      context
+    } validate { p ⇒
+      import p._
+      toDisplay.validate(inputs)
+    }
 
-  def apply(toDisplay: FromContext[String])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    new DisplayHook(
-      toDisplay,
-      config = InputOutputConfig(),
-      info = InfoConfig()
-    )
-}
+  def apply(out: PrintStream, prototypes: Val[_]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): Hook =
+    Hook("DisplayHook") { parameters ⇒
+      import parameters._
+      if (!prototypes.isEmpty) {
+        val filtered = Context(prototypes.flatMap(p ⇒ context.variable(p.asInstanceOf[Val[Any]])): _*)
+        executionContext.services.outputRedirection.output.println(filtered.toString)
+      }
+      else executionContext.services.outputRedirection.output.println(context.toString)
+      context
+    }
 
-@Lenses case class DisplayHook(
-  toDisplay: FromContext[String],
-  config:    InputOutputConfig,
-  info:      InfoConfig
-) extends Hook with ValidateHook {
-
-  override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
-    import p._
-    toDisplay.validate(inputs)
-  }
-
-  override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
-    import parameters._
-    executionContext.services.outputRedirection.output.println(toDisplay.from(context))
-    context
-  }
+  def apply(prototypes: Val[_]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): Hook = apply(System.out, prototypes: _*)
 
 }

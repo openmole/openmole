@@ -8,8 +8,6 @@ import monocle.macros.Lenses
 
 package object abc {
 
-  implicit def abcContainerExtension = DSLContainerExtension(ABC.ABCContainer.container)
-
   object ABC {
     val abcNamespace = Namespace("abc")
     val state = Val[MonAPMC.MonState]("state", abcNamespace)
@@ -18,10 +16,10 @@ package object abc {
     case class Observed(v: Val[Double], observed: Double)
     case class ABCParameters(state: Val[MonAPMC.MonState], step: Val[Int])
 
-    @Lenses case class ABCContainer(container: DSLContainer, parameters: ABCParameters, scope: DefinitionScope) {
-      def save(directory: FromContext[File]) = {
-        implicit val defScope = scope
-        this.hook(ABCHook(this, directory))
+    implicit class ABCContainer(dsl: DSLContainer[ABCParameters]) extends DSLContainerHook(dsl) {
+      def hook(directory: FromContext[File]): DSLContainer[ABC.ABCParameters] = {
+        implicit val defScope = dsl.scope
+        dsl hook ABCHook(dsl, directory)
       }
     }
 
@@ -60,7 +58,7 @@ package object abc {
           condition = !(stop: Condition)
         )
 
-      ABCContainer(DSLContainer(loop, output = Some(postStepTask), delegate = mapReduce.delegate), ABCParameters(state, step), scope)
+      DSLContainerExtension[ABCParameters](loop, output = Some(postStepTask), delegate = mapReduce.delegate, data = ABCParameters(state, step))
     }
 
   }
@@ -127,7 +125,7 @@ package object abc {
         stop = stop
       )
 
-    ABCContainer(DSLContainer(masterSlave, output = Some(master), delegate = Vector(slave)), ABCParameters(masterState, step), scope)
+    DSLContainerExtension(masterSlave, output = Some(master), delegate = Vector(slave), data = ABCParameters(masterState, step))
   }
 
 }

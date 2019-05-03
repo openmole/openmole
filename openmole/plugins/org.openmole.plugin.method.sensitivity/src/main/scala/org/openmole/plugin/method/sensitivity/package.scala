@@ -27,9 +27,6 @@ import org.openmole.plugin.tool.pattern._
 
 package object sensitivity {
 
-  implicit def saltelliExtension = DSLContainerExtension(Sensitivity.SaltelliMethodContainer.container)
-  implicit def morrisExtension = DSLContainerExtension(Sensitivity.MorrisMethodContainer.container)
-
   object Sensitivity {
     /**
       * For a given input of the model, and a given output of a the model,
@@ -77,18 +74,23 @@ package object sensitivity {
       } yield (i, o)
 
 
+    case class SaltelliParams(inputs: Seq[ScalarOrSequenceOfDouble[_]], outputs: Seq[Val[_]])
 
-    @Lenses case class SaltelliMethodContainer(container: DSLContainer, scope: DefinitionScope, inputs: Seq[ScalarOrSequenceOfDouble[_]], outputs: Seq[Val[_]]) {
-      def save(directory:       FromContext[File]) = {
-        implicit val defScope = scope
-        this hook SaltelliHook(this, directory)
+
+    implicit class SaltelliMethodContainer(dsl: DSLContainer[SaltelliParams])  extends DSLContainerHook(dsl) {
+      def hook(directory: FromContext[File]): DSLContainer[Sensitivity.SaltelliParams] = {
+        implicit val defScope = dsl.scope
+        dsl hook SaltelliHook(dsl, directory)
       }
     }
 
-    @Lenses case class MorrisMethodContainer(container: DSLContainer, scope: DefinitionScope, inputs: Seq[ScalarOrSequenceOfDouble[_]], outputs: Seq[Val[_]]) {
-      def save(directory:       FromContext[File]) = {
-        implicit val defScope = scope
-        this hook MorrisHook(this, directory)
+
+    case class MorrisParams(inputs: Seq[ScalarOrSequenceOfDouble[_]], outputs: Seq[Val[_]])
+
+    implicit class MorrisMethodContainer(dsl: DSLContainer[MorrisParams]) extends DSLContainerHook(dsl) {
+      def hook(directory: FromContext[File]): DSLContainer[Sensitivity.MorrisParams] = {
+        implicit val defScope = dsl.scope
+        dsl hook MorrisHook(dsl, directory)
       }
     }
 
@@ -130,7 +132,7 @@ package object sensitivity {
         aggregation = aggregation
       )
 
-    Sensitivity.MorrisMethodContainer(w, scope, inputs, outputs)
+    DSLContainerExtension(w, data = Sensitivity.MorrisParams(inputs, outputs))
   }
 
   def SensitivitySaltelli(
@@ -158,7 +160,7 @@ package object sensitivity {
         aggregation = aggregation
       )
 
-    Sensitivity.SaltelliMethodContainer(w, scope, inputs, outputs)
+    DSLContainerExtension(w, data = Sensitivity.SaltelliParams(inputs, outputs))
   }
 
 }

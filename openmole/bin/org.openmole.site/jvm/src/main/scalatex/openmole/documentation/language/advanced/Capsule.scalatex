@@ -42,7 +42,7 @@ val j = Val[Int]
 val t1 = ScalaTask("val i = 42") set (outputs += i)
 val t2 = ScalaTask("val j = 84") set (outputs += j)
 
-t1 -- (Strain(t2) hook ToStringHook(i, j))
+t1 -- (Strain(t2) hook DisplayHook(i, j))
 """)
 
 @p This workflow displays @hl.highlight("{i=42, j=84}", "plain")
@@ -78,7 +78,7 @@ val select =
 
 val finalTask = EmptyTask()
 
-val displayHook = ToStringHook()
+val displayHook = DisplayHook()
 
 val skel = exploration -< model -- (Master(select, archive) hook displayHook)
 val loop = select -- Slot(model)

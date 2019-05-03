@@ -90,12 +90,19 @@ package dsl {
     def ScalarOrSequenceOfDouble = org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
 
     type Hook = org.openmole.core.workflow.mole.Hook
+    type FromContextHook = org.openmole.core.workflow.mole.FromContextHook
     def Hook = org.openmole.core.workflow.mole.Hook
 
+    type Source = org.openmole.core.workflow.mole.Source
+    type FromContextSource = org.openmole.core.workflow.mole.FromContextSource
+    def Source = org.openmole.core.workflow.mole.Source
+
     type Task = org.openmole.core.workflow.task.Task
+    type FromContextTask = org.openmole.core.workflow.task.FromContextTask
     def Task = org.openmole.core.workflow.task.Task
 
     type Sampling = org.openmole.core.workflow.sampling.Sampling
+    type FromContextSampling = org.openmole.core.workflow.sampling.FromContextSampling
     def Sampling = org.openmole.core.workflow.sampling.Sampling
 
     type Namespace = org.openmole.core.context.Namespace
