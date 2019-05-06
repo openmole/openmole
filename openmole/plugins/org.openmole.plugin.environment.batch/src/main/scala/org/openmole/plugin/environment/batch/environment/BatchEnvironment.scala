@@ -306,7 +306,7 @@ object BatchEnvironment extends JavaLogger {
     }
 
     def lonelyJobs(registry: ExecutionJobRegistry) = registry.synchronized {
-      registry.executionJobs.view.groupBy(_.job).filter(j => !j._1.finished && j._2.isEmpty).unzip._1.toSeq
+      registry.executionJobs.view.groupBy(_.job).filter(j => !Job.finished(j._1) && j._2.isEmpty).unzip._1.toSeq
     }
   }
 
@@ -445,8 +445,8 @@ object BatchExecutionJob {
 class BatchExecutionJob(val job: Job, val environment: BatchEnvironment) extends ExecutionJob { bej ⇒
 
 
-  def moleJobs = job.moleJobs
-  def runnableTasks = job.moleJobs.map(RunnableTask(_))
+  def moleJobs = Job.moleJobs(job)
+  def runnableTasks = Job.moleJobs(job).map(RunnableTask(_))
 
   @transient lazy val plugins = pluginsAndFiles.plugins ++ closureBundleAndPlugins._1
   def files =  pluginsAndFiles.files
@@ -456,7 +456,7 @@ class BatchExecutionJob(val job: Job, val environment: BatchEnvironment) extends
   def closureBundleAndPlugins = {
     import environment.services._
     val replClasses = pluginsAndFiles.replClasses
-    environment.relpClassesCache.cache(job.moleExecution, pluginsAndFiles.replClasses.map(_.getName).toSet, preCompute = false) { _ =>
+    environment.relpClassesCache.cache(Job.moleExecution(job), pluginsAndFiles.replClasses.map(_.getName).toSet, preCompute = false) { _ =>
       BatchExecutionJob.replClassesToPlugins(replClasses)
     }
   }

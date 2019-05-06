@@ -50,8 +50,6 @@ object Environment {
   case class RuntimeLog(beginTime: Long, executionBeginTime: Long, executionEndTime: Long, endTime: Long)
 }
 
-import org.openmole.core.workflow.execution.Environment._
-
 sealed trait Environment <: Name {
   private[execution] val _done = new AtomicLong(0L)
   private[execution] val _failed = new AtomicLong(0L)
@@ -116,10 +114,10 @@ class LocalEnvironment(
   def exceptions = 0
 
   def submit(job: Job, executionContext: TaskExecutionContext): Unit =
-    submit(new LocalExecutionJob(executionContext, job.moleJobs, Some(job.moleExecution)))
+    submit(LocalExecutionJob(executionContext, Job.moleJobs(job), Some(Job.moleExecution(job))))
 
   def submit(moleJob: MoleJob, executionContext: TaskExecutionContext): Unit =
-    submit(new LocalExecutionJob(executionContext, List(moleJob), None))
+    submit(LocalExecutionJob(executionContext, List(moleJob), None))
 
   private def submit(ejob: LocalExecutionJob): Unit = {
     pool().enqueue(ejob)

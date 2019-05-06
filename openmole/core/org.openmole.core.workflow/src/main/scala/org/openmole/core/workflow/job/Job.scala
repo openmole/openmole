@@ -17,50 +17,52 @@
 
 package org.openmole.core.workflow.job
 
-import org.openmole.core.workflow.mole.MoleExecution
+import org.openmole.core.workflow.mole._
 
 /**
  * A computation job to be executed
  */
-sealed trait Job {
-  /**
-   * the [[MoleJob]] in this job
-   * @return
-   */
-  def moleJobs: Iterable[MoleJob]
-
-  /**
-   * the Job is finished if all mole jobs are finished
-   * @return
-   */
-  def finished: Boolean = moleJobs.forall { _.finished }
-
-  /**
-   * Execution of the job
-   * @return
-   */
-  def moleExecution: MoleExecution
-}
+sealed trait Job
 
 object Job {
 
   def apply(moleExecution: MoleExecution, moleJobs: Iterable[MoleJob]): Job =
     (moleJobs.size == 1) match {
       case true  ⇒ Job(moleExecution, moleJobs.head)
-      case false ⇒ new MultiJob(moleExecution, moleJobs.toArray)
+      case false ⇒ MultiJob(moleExecution, moleJobs.toArray)
     }
 
-  def apply(moleExecution: MoleExecution, moleJob: MoleJob): Job =
-    new SingleJob(moleExecution, moleJob)
+  def apply(moleExecution: MoleExecution, moleJob: MoleJob): Job = SingleJob(moleExecution, moleJob)
 
-  class SingleJob(val moleExecution: MoleExecution, val moleJob: MoleJob) extends Job {
-    def moleJobs = Vector(moleJob)
-  }
+  case class SingleJob(moleExecution: MoleExecution, moleJob: MoleJob) extends Job
+  case class MultiJob(moleExecution: MoleExecution, moleJobs: Array[MoleJob]) extends Job
 
-  class MultiJob(val moleExecution: MoleExecution, _moleJobs: Array[MoleJob]) extends Job {
-    def moleJobs = _moleJobs.toIterable
-  }
+  /**
+   * the [[MoleJob]] in this job
+   * @return
+   */
+  def moleJobs(job: Job) =
+    job match {
+      case sj: SingleJob ⇒ Vector(sj.moleJob)
+      case mj: MultiJob  ⇒ mj.moleJobs.toIterable
+    }
 
-  implicit def ordering = Ordering.by[Job, Iterable[MoleJob]](_.moleJobs)
+  /**
+   * the Job is finished if all mole jobs are finished
+   * @return
+   */
+  def finished(job: Job): Boolean = moleJobs(job).forall { _.finished }
+
+  /**
+   * Execution of the job
+   * @return
+   */
+  def moleExecution(job: Job): MoleExecution =
+    job match {
+      case sj: SingleJob ⇒ sj.moleExecution
+      case mj: MultiJob  ⇒ mj.moleExecution
+    }
+
+  implicit def ordering = Ordering.by[Job, Iterable[MoleJob]](moleJobs)
 
 }

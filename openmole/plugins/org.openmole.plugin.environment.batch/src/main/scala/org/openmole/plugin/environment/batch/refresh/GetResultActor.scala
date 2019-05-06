@@ -29,6 +29,7 @@ import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.tool.file._
 import org.openmole.tool.logger.JavaLogger
+import org.openmole.core.workflow.job._
 
 import scala.util.{ Failure, Success }
 
@@ -56,7 +57,7 @@ object GetResultActor extends JavaLogger {
 
     val runtimeResult = getRuntimeResult(outputFilePath, storageId, environment, download)
 
-    val stream = job.moleExecution.executionContext.services.outputRedirection.output
+    val stream = Job.moleExecution(job).executionContext.services.outputRedirection.output
     display(runtimeResult.stdOut, s"Output on ${runtimeResult.info.hostName}", stream)
 
     runtimeResult.result match {
@@ -67,7 +68,7 @@ object GetResultActor extends JavaLogger {
         services.eventDispatcher.trigger(environment: Environment, Environment.JobCompleted(batchJob, log, runtimeResult.info))
 
         //Try to download the results for all the jobs of the group
-        for (moleJob ← job.moleJobs) {
+        for (moleJob ← Job.moleJobs(job)) {
           if (contextResults.results.isDefinedAt(moleJob.id)) {
             val executionResult = contextResults.results(moleJob.id)
             executionResult match {

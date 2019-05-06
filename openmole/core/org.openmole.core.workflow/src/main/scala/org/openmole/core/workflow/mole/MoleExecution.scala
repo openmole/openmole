@@ -376,7 +376,7 @@ object MoleExecution extends JavaLogger {
   }.map { case (j, c) ⇒ submit(moleExecution, j, c) }
 
   def submit(moleExecution: MoleExecution, job: Job, capsule: MoleCapsule) =
-    if (!job.finished) {
+    if (!Job.finished(job)) {
       val env = moleExecution.environments.getOrElse(capsule, moleExecution.defaultEnvironment)
       import moleExecution.executionContext.services._
 

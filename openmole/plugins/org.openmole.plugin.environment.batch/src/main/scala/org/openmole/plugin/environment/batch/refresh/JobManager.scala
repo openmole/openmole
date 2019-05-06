@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.environment.batch.refresh
 
-import java.io.FileNotFoundException
 import java.util.concurrent.TimeUnit
 
 import org.openmole.core.tools.service.Retry.retry
@@ -25,8 +24,7 @@ import org.openmole.core.workflow.execution._
 import org.openmole.plugin.environment.batch.environment.{ BatchJobControl, _ }
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.thread._
-
-import scala.tools.reflect.WrappedProperties
+import org.openmole.core.workflow.job._
 
 object JobManager extends JavaLogger { self ⇒
   import Log._
@@ -45,9 +43,9 @@ object JobManager extends JavaLogger { self ⇒
   object DispatcherActor {
     def receive(dispatched: DispatchedMessage)(implicit services: BatchEnvironment.Services) =
       dispatched match {
-        case msg: Submit      ⇒ if (!msg.job.job.finished) SubmitActor.receive(msg) else self ! Kill(msg.job, None)
-        case msg: Refresh     ⇒ if (!msg.job.job.finished) RefreshActor.receive(msg) else self ! Kill(msg.job, Some(msg.batchJob))
-        case msg: GetResult   ⇒ if (!msg.job.job.finished) GetResultActor.receive(msg) else self ! Kill(msg.job, Some(msg.batchJob))
+        case msg: Submit      ⇒ if (!Job.finished(msg.job.job)) SubmitActor.receive(msg) else self ! Kill(msg.job, None)
+        case msg: Refresh     ⇒ if (!Job.finished(msg.job.job)) RefreshActor.receive(msg) else self ! Kill(msg.job, Some(msg.batchJob))
+        case msg: GetResult   ⇒ if (!Job.finished(msg.job.job)) GetResultActor.receive(msg) else self ! Kill(msg.job, Some(msg.batchJob))
         case msg: RetryAction ⇒ RetryActionActor.receive(msg)
         case msg: Error       ⇒ ErrorActor.receive(msg)
       }
@@ -75,7 +73,7 @@ object JobManager extends JavaLogger { self ⇒
       job.state = ExecutionState.KILLED
       try BatchEnvironment.finishedExecutionJob(job.environment, job)
       finally {
-        if (job.job.finished) BatchEnvironment.finishedJob(job.environment, job.job)
+        if (Job.finished(job.job)) BatchEnvironment.finishedJob(job.environment, job.job)
         else job.environment.submit(job.job)
         tryKillAndClean(job, batchJob)
       }
