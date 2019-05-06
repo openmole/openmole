@@ -440,20 +440,26 @@ object MoleExecution extends JavaLogger {
 
     val runningSet: java.util.HashSet[UUID] = {
       def submissionEnvironments = moleExecution.environments.values.toSeq.collect { case e: SubmissionEnvironment ⇒ e }
+      def localEnvironments = moleExecution.environments.values.toSeq.collect { case e: LocalEnvironment ⇒ e }
 
       val set = new java.util.HashSet[UUID](jobs.size + 1, 1.0f)
 
       for {
         env ← submissionEnvironments
         ej ← env.jobs
-        if (ej.state == ExecutionState.RUNNING)
+        if ej.state == ExecutionState.RUNNING
         mj ← ej.moleJobs
       } set.add(mj.id)
+
+      for {
+        env ← localEnvironments
+        ej ← env.runningJobs
+      } set.add(ej.id)
 
       set
     }
 
-    def isRunningOnEnvironment(moleJob: MoleJob): Boolean = runningSet.contains(moleJob.id)
+    def isRunning(moleJob: MoleJob): Boolean = runningSet.contains(moleJob.id)
 
     val ready = collection.mutable.Map[MoleCapsule, Long]()
     val running = collection.mutable.Map[MoleCapsule, Long]()
@@ -466,13 +472,8 @@ object MoleExecution extends JavaLogger {
     for {
       (capsule, moleJob) ← jobs
     } {
-      if (isRunningOnEnvironment(moleJob)) increment(running, capsule)
-      else
-        moleJob.state match {
-          case READY   ⇒ increment(ready, capsule)
-          case RUNNING ⇒ increment(running, capsule)
-          case _       ⇒
-        }
+      if (isRunning(moleJob)) increment(running, capsule)
+      else increment(ready, capsule)
     }
 
     moleExecution.mole.capsules.map { c ⇒

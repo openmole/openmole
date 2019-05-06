@@ -110,6 +110,8 @@ class LocalEnvironment(
 
   val pool = Cache(new ExecutorPool(nbThreads, WeakReference(this), threadProvider))
 
+  def runningJobs = pool().runningJobs
+
   def nbJobInQueue = pool().waiting
   def exceptions = 0
 

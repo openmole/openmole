@@ -48,6 +48,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
 
   var stop: Boolean = false
   @volatile var running: Boolean = false
+  @volatile var runningJob: Option[MoleJob] = None
 
   override def run = try {
     while (!stop) {
@@ -65,12 +66,15 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
 
                 for (moleJob ← executionJob.moleJobs) {
                   if (moleJob.state != State.CANCELED) {
-                    moleJob.perform(executionJob.executionContext)
+
+                    runningJob = Some(moleJob)
+                    try moleJob.perform(executionJob.executionContext)
+                    finally runningJob = None
+
                     moleJob.exception match {
                       case Some(e) ⇒ environment.eventDispatcherService.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
                       case _       ⇒
                     }
-
                   }
                 }
 
