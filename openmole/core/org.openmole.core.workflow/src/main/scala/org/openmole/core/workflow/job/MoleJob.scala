@@ -27,6 +27,7 @@ object MoleJob {
   implicit val moleJobOrdering = Ordering.by((_: MoleJob).id)
 
   type StateChangedCallBack = (MoleJob, State, State) ⇒ Unit
+  type Canceled = () ⇒ Boolean
 
   /**
    * Construct from context and UUID
@@ -40,10 +41,11 @@ object MoleJob {
     task:                 Task,
     context:              Context,
     id:                   UUID,
-    stateChangedCallBack: MoleJob.StateChangedCallBack
+    stateChangedCallBack: MoleJob.StateChangedCallBack,
+    subMoleCanceled:      Option[Canceled]
   ) = {
     val (prototypes, values) = compressContext(context)
-    new MoleJob(task, prototypes.toArray, values.toArray, id.getMostSignificantBits, id.getLeastSignificantBits, stateChangedCallBack)
+    new MoleJob(task, prototypes.toArray, values.toArray, id.getMostSignificantBits, id.getLeastSignificantBits, stateChangedCallBack, subMoleCanceled)
   }
   def compressContext(context: Context) =
     context.toSeq.map {
@@ -72,7 +74,8 @@ class MoleJob(
   private var prototypes: Array[Val[Any]],
   private var values:     Array[Any],
   mostSignificantBits:    Long, leastSignificantBits: Long,
-  stateChangedCallBack: MoleJob.StateChangedCallBack
+  stateChangedCallBack: MoleJob.StateChangedCallBack,
+  subMoleCanceled:      Option[Canceled]
 ) {
 
   var exception: Option[Throwable] = None
@@ -138,5 +141,7 @@ class MoleJob(
 
   def finished: Boolean = state.isFinal
   def cancel = state = CANCELED
+
+  def canceled = subMoleCanceled.map(_()).getOrElse(false)
 
 }

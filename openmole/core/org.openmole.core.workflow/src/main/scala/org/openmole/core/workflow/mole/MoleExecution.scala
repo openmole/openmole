@@ -171,7 +171,7 @@ object MoleExecution extends JavaLogger {
           subMoleExecutionState.masterCapsuleExecutor.submit {
             try {
               val savedContext = subMoleExecutionState.masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(Context.empty)
-              val moleJob: MoleJob = MoleJob(capsule.task, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, stateChanged)
+              val moleJob: MoleJob = MoleJob(capsule.task, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, stateChanged, Some(() ⇒ subMoleExecutionState.canceled))
               eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
               MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.RegisterJob(subMoleExecutionState, moleJob, capsule))
               val taskContext =
@@ -201,7 +201,7 @@ object MoleExecution extends JavaLogger {
             if (newState.isFinal) MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(job, newState, capsule, ticket))
           }
 
-          val moleJob: MoleJob = MoleJob(capsule.task, subMoleExecutionState.moleExecution.implicits + sourced + context, nextJobId(subMoleExecutionState.moleExecution), stateChanged)
+          val moleJob: MoleJob = MoleJob(capsule.task, subMoleExecutionState.moleExecution.implicits + sourced + context, nextJobId(subMoleExecutionState.moleExecution), stateChanged, Some(() ⇒ subMoleExecutionState.canceled))
           MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.RegisterJob(subMoleExecutionState, moleJob, capsule))
           eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
           group(subMoleExecutionState.moleExecution, moleJob, capsule)
@@ -496,7 +496,7 @@ object MoleExecution extends JavaLogger {
     var nbJobs = 0
     var children = collection.mutable.TreeMap[SubMoleExecution, SubMoleExecutionState]()
     var jobs = collection.mutable.TreeMap[MoleJob, MoleCapsule]()
-    var canceled = false
+    @volatile var canceled = false
     val onFinish = collection.mutable.ListBuffer[(SubMoleExecutionState ⇒ Any)]()
     val masterCapsuleRegistry = new MasterCapsuleRegistry
     val aggregationTransitionRegistry = new AggregationTransitionRegistry

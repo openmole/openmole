@@ -47,16 +47,13 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
   import LocalExecutor.Log._
 
   var stop: Boolean = false
-  @volatile var running: Boolean = false
   @volatile var runningJob: Option[MoleJob] = None
 
   override def run = try {
     while (!stop) {
       environment.get match {
         case Some(environment) ⇒
-          running = false
           val executionJob = environment.pool().takeNextJob
-          running = true
           val beginTime = System.currentTimeMillis
 
           try {
@@ -64,17 +61,17 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
               withRedirectedOutput(executionJob, environment.deinterleave) {
                 executionJob.state = ExecutionState.RUNNING
 
-                for (moleJob ← executionJob.moleJobs) {
-                  if (moleJob.state != State.CANCELED) {
+                for {
+                  moleJob ← executionJob.moleJobs
+                  if !moleJob.canceled
+                } {
+                  runningJob = Some(moleJob)
+                  try moleJob.perform(executionJob.executionContext)
+                  finally runningJob = None
 
-                    runningJob = Some(moleJob)
-                    try moleJob.perform(executionJob.executionContext)
-                    finally runningJob = None
-
-                    moleJob.exception match {
-                      case Some(e) ⇒ environment.eventDispatcherService.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
-                      case _       ⇒
-                    }
+                  moleJob.exception match {
+                    case Some(e) ⇒ environment.eventDispatcherService.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
+                    case _       ⇒
                   }
                 }
 
@@ -109,9 +106,6 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
   catch {
     case e: InterruptedException ⇒
     case e: ThreadDeath          ⇒
-  }
-  finally {
-    running = false
   }
 
   case class Output(stream: PrintStream, output: String, error: String)

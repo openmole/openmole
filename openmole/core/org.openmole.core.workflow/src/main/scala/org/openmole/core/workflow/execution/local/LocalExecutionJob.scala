@@ -19,7 +19,7 @@ package org.openmole.core.workflow.execution.local
 
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job.MoleJob
-import org.openmole.core.workflow.mole.MoleExecution
+import org.openmole.core.workflow.mole.{ MoleExecution, SubMoleExecution }
 import org.openmole.core.workflow.task._
 
 /**

@@ -70,7 +70,7 @@ class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment],
 
   def running: Int =
     executorMap.synchronized {
-      executorMap.toList.count { case (e, t) ⇒ e.running }
+      executorMap.toList.count { case (e, _) ⇒ e.runningJob.isDefined }
     }
 
   def stop() = {
