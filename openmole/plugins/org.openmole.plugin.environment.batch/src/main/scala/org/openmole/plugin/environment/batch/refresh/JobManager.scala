@@ -25,6 +25,8 @@ import org.openmole.plugin.environment.batch.environment.{ BatchJobControl, _ }
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.thread._
 import org.openmole.core.workflow.job._
+import org.openmole.core.workflow.mole.MoleExecution.SubMoleExecutionState
+import org.openmole.core.workflow.mole.{ MoleExecution, MoleExecutionMessage }
 
 object JobManager extends JavaLogger { self ⇒
   import Log._
@@ -43,9 +45,9 @@ object JobManager extends JavaLogger { self ⇒
   object DispatcherActor {
     def receive(dispatched: DispatchedMessage)(implicit services: BatchEnvironment.Services) =
       dispatched match {
-        case msg: Submit      ⇒ if (!Job.finished(msg.job.job)) SubmitActor.receive(msg) else self ! Kill(msg.job, None)
-        case msg: Refresh     ⇒ if (!Job.finished(msg.job.job)) RefreshActor.receive(msg) else self ! Kill(msg.job, Some(msg.batchJob))
-        case msg: GetResult   ⇒ if (!Job.finished(msg.job.job)) GetResultActor.receive(msg) else self ! Kill(msg.job, Some(msg.batchJob))
+        case msg: Submit      ⇒ sendToMoleExecution(msg.job.job) { state ⇒ if (!MoleExecution.jobIsFinished(state, msg.job.job)) SubmitActor.receive(msg) else self ! Kill(msg.job, None) }
+        case msg: Refresh     ⇒ sendToMoleExecution(msg.job.job) { state ⇒ if (!MoleExecution.jobIsFinished(state, msg.job.job)) RefreshActor.receive(msg) else self ! Kill(msg.job, Some(msg.batchJob)) }
+        case msg: GetResult   ⇒ sendToMoleExecution(msg.job.job) { state ⇒ if (!MoleExecution.jobIsFinished(state, msg.job.job)) GetResultActor.receive(msg) else self ! Kill(msg.job, Some(msg.batchJob)) }
         case msg: RetryAction ⇒ RetryActionActor.receive(msg)
         case msg: Error       ⇒ ErrorActor.receive(msg)
       }
@@ -73,8 +75,11 @@ object JobManager extends JavaLogger { self ⇒
       job.state = ExecutionState.KILLED
       try BatchEnvironment.finishedExecutionJob(job.environment, job)
       finally {
-        if (Job.finished(job.job)) BatchEnvironment.finishedJob(job.environment, job.job)
-        else job.environment.submit(job.job)
+        sendToMoleExecution(job.job) { state ⇒
+          if (MoleExecution.jobIsFinished(state, job.job)) BatchEnvironment.finishedJob(job.environment, job.job)
+          else job.environment.submit(job.job)
+        }
+
         tryKillAndClean(job, batchJob)
       }
 
@@ -84,12 +89,19 @@ object JobManager extends JavaLogger { self ⇒
       dispatch(Submit(job))
 
     case MoleJobError(mj, j, e) ⇒
-      val er = Environment.MoleJobExceptionRaised(j, e, WARNING, mj)
-      j.environment.error(er)
-      services.eventDispatcher.trigger(j.environment: Environment, er)
-      logger.log(FINE, "Error during job execution, it will be resubmitted.", e)
+      sendToMoleExecution(j.job) { state ⇒
+        if (!MoleExecution.jobIsFinished(state, j.job)) {
+          val er = Environment.MoleJobExceptionRaised(j, e, WARNING, mj)
+          j.environment.error(er)
+          services.eventDispatcher.trigger(j.environment: Environment, er)
+          logger.log(FINE, "Error during job execution, it will be resubmitted.", e)
+        }
+      }
 
   }
+
+  def sendToMoleExecution(job: Job)(f: MoleExecution ⇒ Unit) =
+    MoleExecutionMessage.send(Job.moleExecution(job)) { MoleExecutionMessage.WithMoleExecutionSate(f) }
 
   def tryKillAndClean(job: BatchExecutionJob, bj: Option[BatchJobControl])(implicit services: BatchEnvironment.Services) = {
     def kill(bj: BatchJobControl)(implicit services: BatchEnvironment.Services) = retry(services.preference(BatchEnvironment.killJobRetry))(bj.delete())

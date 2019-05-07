@@ -26,7 +26,7 @@ import org.openmole.core.context._
 object MoleJob {
   implicit val moleJobOrdering = Ordering.by((_: MoleJob).id)
 
-  type StateChangedCallBack = (MoleJob, State, State) ⇒ Unit
+  type JobFinished = (MoleJob, Either[Context, Throwable]) ⇒ Unit
   type Canceled = () ⇒ Boolean
 
   /**
@@ -34,19 +34,19 @@ object MoleJob {
    * @param task
    * @param context context for prototypes and values
    * @param id UUID
-   * @param stateChangedCallBack
+   * @param jobFinished
    * @return
    */
   def apply(
-    task:                 Task,
-    context:              Context,
-    id:                   UUID,
-    stateChangedCallBack: MoleJob.StateChangedCallBack,
-    subMoleCanceled:      Option[Canceled]
-  ) = {
+    task:            Task,
+    context:         Context,
+    id:              UUID,
+    jobFinished:     MoleJob.JobFinished,
+    subMoleCanceled: Canceled) = {
     val (prototypes, values) = compressContext(context)
-    new MoleJob(task, prototypes.toArray, values.toArray, id.getMostSignificantBits, id.getLeastSignificantBits, stateChangedCallBack, subMoleCanceled)
+    new MoleJob(task, prototypes.toArray, values.toArray, id.getMostSignificantBits, id.getLeastSignificantBits, jobFinished, subMoleCanceled)
   }
+
   def compressContext(context: Context) =
     context.toSeq.map {
       case (_, v) ⇒ (v.asInstanceOf[Variable[Any]].prototype, v.value)
@@ -54,7 +54,7 @@ object MoleJob {
 
   sealed trait StateChange
   case object Unchanged extends StateChange
-  case class Changed(old: State, state: State) extends StateChange
+  case class Changed(old: State, state: State, context: Context) extends StateChange
 }
 
 import MoleJob._
@@ -67,81 +67,28 @@ import MoleJob._
  * @param values values of prototypes
  * @param mostSignificantBits to construct the UUID
  * @param leastSignificantBits to construct the UUID
- * @param stateChangedCallBack what to do when the state is changed
+ * @param jobFinished what to do when the state is changed
  */
 class MoleJob(
-  val task:               Task,
-  private var prototypes: Array[Val[Any]],
-  private var values:     Array[Any],
-  mostSignificantBits:    Long, leastSignificantBits: Long,
-  stateChangedCallBack: MoleJob.StateChangedCallBack,
-  subMoleCanceled:      Option[Canceled]
-) {
+  val task:            Task,
+  prototypes:          Array[Val[Any]],
+  values:              Array[Any],
+  mostSignificantBits: Long, leastSignificantBits: Long,
+  jobFinished:     MoleJob.JobFinished,
+  subMoleCanceled: Canceled) {
 
-  var exception: Option[Throwable] = None
-
-  @volatile private var _state: State = READY
-
-  def state: State = _state
   def context: Context =
     Context((prototypes zip values).map { case (p, v) ⇒ Variable(p, v) }: _*)
 
-  private def context_=(ctx: Context) = {
-    val (_prototypes, _values) = MoleJob.compressContext(ctx)
-    prototypes = _prototypes.toArray
-    values = _values.toArray
-  }
-
   def id = new UUID(mostSignificantBits, leastSignificantBits)
 
-  private def changeState(state: State) = synchronized {
-    if (!_state.isFinal) {
-      val oldState = _state
-      _state = state
-      Changed(oldState, state)
-    }
-    else Unchanged
-  }
-
-  private def signalChanged(change: StateChange) =
-    change match {
-      case Changed(old, state) ⇒ stateChangedCallBack(this, old, state)
-      case _                   ⇒
+  def perform(executionContext: TaskExecutionContext): Either[Context, Throwable] =
+    try Left(task.perform(context, executionContext))
+    catch {
+      case t: Throwable ⇒ Right(t)
     }
 
-  private def state_=(state: State) = signalChanged(changeState(state))
-
-  private def failed(t: Throwable) =
-    if (!finished) {
-      exception = Some(t)
-      state = FAILED
-    }
-
-  def perform(executionContext: TaskExecutionContext) =
-    if (!finished) {
-      try {
-        state = RUNNING
-        context = task.perform(context, executionContext)
-        state = COMPLETED
-      }
-      catch {
-        case t: Throwable ⇒ failed(t)
-      }
-    }
-
-  def finish(_context: Context) = {
-    val changed =
-      synchronized {
-        if (!finished) context = _context
-        changeState(COMPLETED)
-      }
-
-    signalChanged(changed)
-  }
-
-  def finished: Boolean = state.isFinal
-  def cancel = state = CANCELED
-
-  def canceled = subMoleCanceled.map(_()).getOrElse(false)
+  def finish(result: Either[Context, Throwable]) = jobFinished(this, result)
+  def canceled = subMoleCanceled()
 
 }

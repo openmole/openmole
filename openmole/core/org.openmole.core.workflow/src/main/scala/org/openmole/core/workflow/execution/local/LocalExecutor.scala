@@ -66,12 +66,15 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                   if !moleJob.canceled
                 } {
                   runningJob = Some(moleJob)
-                  try moleJob.perform(executionJob.executionContext)
-                  finally runningJob = None
+                  val result =
+                    try moleJob.perform(executionJob.executionContext)
+                    finally runningJob = None
 
-                  moleJob.exception match {
-                    case Some(e) ⇒ environment.eventDispatcherService.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
-                    case _       ⇒
+                  moleJob.finish(result)
+
+                  result match {
+                    case Right(e) ⇒ environment.eventDispatcherService.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
+                    case _        ⇒
                   }
                 }
 

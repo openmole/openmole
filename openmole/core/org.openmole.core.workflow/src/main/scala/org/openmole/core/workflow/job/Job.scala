@@ -48,12 +48,6 @@ object Job {
     }
 
   /**
-   * the Job is finished if all mole jobs are finished
-   * @return
-   */
-  def finished(job: Job): Boolean = moleJobs(job).forall { _.finished }
-
-  /**
    * Execution of the job
    * @return
    */

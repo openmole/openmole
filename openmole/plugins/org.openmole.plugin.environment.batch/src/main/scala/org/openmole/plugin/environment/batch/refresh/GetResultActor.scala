@@ -72,8 +72,8 @@ object GetResultActor extends JavaLogger {
           if (contextResults.results.isDefinedAt(moleJob.id)) {
             val executionResult = contextResults.results(moleJob.id)
             executionResult match {
-              case Success(context) ⇒ moleJob.finish(context)
-              case Failure(e)       ⇒ if (!moleJob.finished) JobManager ! MoleJobError(moleJob, batchJob, e)
+              case Success(context) ⇒ moleJob.finish(Left(context))
+              case Failure(e)       ⇒ JobManager ! MoleJobError(moleJob, batchJob, e)
             }
           }
         }

@@ -304,10 +304,6 @@ object BatchEnvironment extends JavaLogger {
     def numberOfExecutionJobs(registry: ExecutionJobRegistry, job: Job) = registry.synchronized {
       registry.executionJobs.count(_.job == job)
     }
-
-    def lonelyJobs(registry: ExecutionJobRegistry) = registry.synchronized {
-      registry.executionJobs.view.groupBy(_.job).filter(j => !Job.finished(j._1) && j._2.isEmpty).unzip._1.toSeq
-    }
   }
 
   class ExecutionJobRegistry {
