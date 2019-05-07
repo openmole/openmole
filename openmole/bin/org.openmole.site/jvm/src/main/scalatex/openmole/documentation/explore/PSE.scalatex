@@ -27,6 +27,8 @@ PSE reveals the potential of your model: the variety of dynamics it is able to p
 
 @Resource.rawFrag(Resource.img.method.pseID)
 
+@br
+
 The PSE method is designed to cover the output space, hence it gets the highest possible score in output exploration.
 Since PSE is all about @i{covering} output space, it gets low scores in optimization and input space exploration.
 As the method discovers new patterns in the output space, you can get some insight about the sensitivity of the model by looking at the input values leading to these patterns.
@@ -70,7 +72,7 @@ With M, the model ; X, the input space ; Y, the output space ; and 𝓟(X) the p
 
 @br
 
-In other words: this function takes a model M (whose signature is (X→Y)), an element @i{y} of Y (y is the list of criterion values to reach) and finds a list of elements of X (noted @i{x}) such that M(x) are Pareto dominant compared to every image of other elements of X by M, regarding criterion @i{y}.
+In other words, this function takes a model M whose signature is (X→Y), an element @i{y} of Y representing the list of criterion values to reach, and finds a list @i{x} of elements of X such that M(@i{x}) are Pareto dominant compared to every image of other elements of X by M, regarding criterion @i{y}.
 
 
 
