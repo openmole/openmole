@@ -9,6 +9,7 @@ import org.openmole.core.workflow.job.{ Job, MoleJob }
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.task.Task
 import org.openmole.core.workspace._
+import org.openmole.tool.file._
 
 object JobStore {
 
@@ -18,8 +19,8 @@ object JobStore {
   }
 
   def store(jobStore: JobStore, moleJob: MoleJob)(implicit serializer: SerializerService): StoredMoleJob = {
-    val f = NewFile(jobStore.store).newFile("storedjob", ".bin")
-    serializer.serialize(moleJob.context, f)
+    val f = NewFile(jobStore.store).newFile("storedjob", ".bin.gz")
+    f.withGzippedOutputStream { os ⇒ serializer.serialize(moleJob.context, os) }
     new StoredMoleJob(
       f,
       moleJob.task,
@@ -34,7 +35,7 @@ object JobStore {
   }
 
   def load(storedMoleJob: StoredMoleJob)(implicit serializerService: SerializerService): MoleJob = {
-    val context = serializerService.deserialize[Context](storedMoleJob.context)
+    val context = storedMoleJob.context.withGzippedInputStream { is ⇒ serializerService.deserialize[Context](is) }
     MoleJob(
       task = storedMoleJob.task,
       context = context,
