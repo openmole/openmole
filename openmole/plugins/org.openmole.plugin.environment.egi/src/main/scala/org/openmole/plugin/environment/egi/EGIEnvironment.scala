@@ -163,7 +163,7 @@ object EGIEnvironment extends JavaLogger {
     name:           OptionalArgument[String]      = None
   )(implicit authentication: EGIAuthentication, services: BatchEnvironment.Services, cypher: Cypher, workspace: Workspace, varName: sourcecode.Name) = {
 
-    EnvironmentProvider { () ⇒
+    EnvironmentProvider { ms ⇒
       new EGIEnvironment(
         voName = voName,
         service = service,
@@ -175,7 +175,8 @@ object EGIEnvironment extends JavaLogger {
         openMOLEMemory = openMOLEMemory,
         debug = debug,
         name = name,
-        authentication = authentication
+        authentication = authentication,
+        services = services.set(ms)
       )
     }
   }
@@ -183,18 +184,19 @@ object EGIEnvironment extends JavaLogger {
 }
 
 class EGIEnvironment[A: EGIAuthenticationInterface](
-  val voName:         String,
-  val service:        Option[String],
-  val group:          Option[String],
-  val bdiiURL:        Option[String],
-  val vomsURLs:       Option[Seq[String]],
-  val fqan:           Option[String],
-  val cpuTime:        Option[Time],
-  val openMOLEMemory: Option[Information],
-  val debug:          Boolean,
-  val name:           Option[String],
-  val authentication: A
-)(implicit val services: BatchEnvironment.Services, workspace: Workspace) extends BatchEnvironment { env ⇒
+  val voName:            String,
+  val service:           Option[String],
+  val group:             Option[String],
+  val bdiiURL:           Option[String],
+  val vomsURLs:          Option[Seq[String]],
+  val fqan:              Option[String],
+  val cpuTime:           Option[Time],
+  val openMOLEMemory:    Option[Information],
+  val debug:             Boolean,
+  val name:              Option[String],
+  val authentication:    A,
+  implicit val services: BatchEnvironment.Services
+)(implicit workspace: Workspace) extends BatchEnvironment { env ⇒
 
   import services._
 

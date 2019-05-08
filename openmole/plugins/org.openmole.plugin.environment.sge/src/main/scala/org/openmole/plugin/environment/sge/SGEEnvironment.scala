@@ -55,7 +55,7 @@ object SGEEnvironment {
       threads = threads,
       storageSharedLocally = storageSharedLocally)
 
-    EnvironmentProvider { () ⇒
+    EnvironmentProvider { ms ⇒
       if (!localSubmission) {
         val userValue = user.mustBeDefined("user")
         val hostValue = host.mustBeDefined("host")
@@ -68,13 +68,15 @@ object SGEEnvironment {
           timeout = timeout.getOrElse(services.preference(SSHEnvironment.timeOut)),
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
-          authentication = SSHAuthentication.find(userValue, hostValue, portValue)
+          authentication = SSHAuthentication.find(userValue, hostValue, portValue),
+          services = services.set(ms)
         )
       }
       else
         new SGELocalEnvironment(
           parameters = parameters,
-          name = Some(name.getOrElse(varName.value))
+          name = Some(name.getOrElse(varName.value)),
+          services = services.set(ms)
         )
     }
   }
@@ -103,13 +105,14 @@ object SGEEnvironment {
 }
 
 class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
-  val user:           String,
-  val host:           String,
-  val port:           Int,
-  val timeout:        Time,
-  val parameters:     SGEEnvironment.Parameters,
-  val name:           Option[String],
-  val authentication: A)(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
+  val user:              String,
+  val host:              String,
+  val port:              Int,
+  val timeout:           Time,
+  val parameters:        SGEEnvironment.Parameters,
+  val name:              Option[String],
+  val authentication:    A,
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
 
   import services._
 
@@ -171,8 +174,9 @@ class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
 }
 
 class SGELocalEnvironment(
-  val parameters: SGEEnvironment.Parameters,
-  val name:       Option[String])(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
+  val parameters:        SGEEnvironment.Parameters,
+  val name:              Option[String],
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
 
   import services._
 

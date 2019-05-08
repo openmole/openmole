@@ -65,7 +65,7 @@ object CondorEnvironment {
       threads = threads,
       storageSharedLocally = storageSharedLocally)
 
-    EnvironmentProvider { () ⇒
+    EnvironmentProvider { ms ⇒
       if (!localSubmission) {
         val userValue = user.mustBeDefined("user")
         val hostValue = host.mustBeDefined("host")
@@ -78,13 +78,15 @@ object CondorEnvironment {
           timeout = timeout.getOrElse(services.preference(SSHEnvironment.timeOut)),
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
-          authentication = SSHAuthentication.find(userValue, hostValue, portValue)
+          authentication = SSHAuthentication.find(userValue, hostValue, portValue),
+          services = services.set(ms)
         )
       }
       else {
         new CondorLocalEnvironment(
           parameters = parameters,
-          name = Some(name.getOrElse(varName.value))
+          name = Some(name.getOrElse(varName.value)),
+          services = services.set(ms)
         )
       }
     }
@@ -116,13 +118,14 @@ object CondorEnvironment {
 }
 
 class CondorEnvironment[A: gridscale.ssh.SSHAuthentication](
-  val user:           String,
-  val host:           String,
-  val port:           Int,
-  val timeout:        Time,
-  val parameters:     CondorEnvironment.Parameters,
-  val name:           Option[String],
-  val authentication: A)(implicit val services: BatchEnvironment.Services) extends BatchEnvironment {
+  val user:              String,
+  val host:              String,
+  val port:              Int,
+  val timeout:           Time,
+  val parameters:        CondorEnvironment.Parameters,
+  val name:              Option[String],
+  val authentication:    A,
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment {
   env ⇒
 
   import services._
@@ -185,10 +188,12 @@ class CondorEnvironment[A: gridscale.ssh.SSHAuthentication](
 }
 
 class CondorLocalEnvironment(
-  val parameters: CondorEnvironment.Parameters,
-  val name:       Option[String])(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
+  val parameters:        CondorEnvironment.Parameters,
+  val name:              Option[String],
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
 
   import services._
+
   implicit val localInterpreter = gridscale.local.Local()
   implicit val systemInterpreter = effectaside.System()
 

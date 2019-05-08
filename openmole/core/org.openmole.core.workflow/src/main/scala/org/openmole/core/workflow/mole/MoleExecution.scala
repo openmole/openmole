@@ -660,7 +660,7 @@ class MoleExecution(
     map
   }
 
-  lazy val environmentInstances = environmentProviders.toVector.map { case (k, v) ⇒ v }.distinct.map { v ⇒ v → v() }.toMap
+  lazy val environmentInstances = environmentProviders.toVector.map { case (k, v) ⇒ v }.distinct.map { v ⇒ v → v(executionContext.services) }.toMap
   lazy val environments = environmentProviders.toVector.map { case (k, v) ⇒ k → environmentInstances(v) }.toMap
   lazy val defaultEnvironment = defaultEnvironmentProvider()
 
@@ -678,8 +678,8 @@ class MoleExecution(
 
   def exception(implicit s: MoleExecution.SynchronisationContext) = sync(_exception)
 
-  def duration: Option[Long] = synchronized {
-    (_startTime, _endTime) match {
+  def duration(implicit s: MoleExecution.SynchronisationContext): Option[Long] = sync {
+    (startTime, endTime) match {
       case (None, _)          ⇒ None
       case (Some(t), None)    ⇒ Some(System.currentTimeMillis - t)
       case (Some(s), Some(e)) ⇒ Some(e - s)

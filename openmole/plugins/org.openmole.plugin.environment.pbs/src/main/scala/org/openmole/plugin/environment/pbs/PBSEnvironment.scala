@@ -65,7 +65,7 @@ object PBSEnvironment extends JavaLogger {
       flavour = flavour
     )
 
-    EnvironmentProvider { () ⇒
+    EnvironmentProvider { ms ⇒
       if (!localSubmission) {
         val userValue = user.mustBeDefined("user")
         val hostValue = host.mustBeDefined("host")
@@ -78,12 +78,14 @@ object PBSEnvironment extends JavaLogger {
           timeout = timeout.getOrElse(services.preference(SSHEnvironment.timeOut)),
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
-          authentication = SSHAuthentication.find(userValue, hostValue, portValue)
+          authentication = SSHAuthentication.find(userValue, hostValue, portValue),
+          services = services.set(ms)
         )
       }
       else new PBSLocalEnvironment(
         parameters = parameters,
-        name = Some(name.getOrElse(varName.value))
+        name = Some(name.getOrElse(varName.value)),
+        services = services.set(ms)
       )
     }
   }
@@ -115,15 +117,14 @@ object PBSEnvironment extends JavaLogger {
 }
 
 class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
-  val user:           String,
-  val host:           String,
-  val port:           Int,
-  val timeout:        Time,
-  val parameters:     PBSEnvironment.Parameters,
-  val name:           Option[String],
-  val authentication: A
-)(implicit val services: BatchEnvironment.Services) extends BatchEnvironment {
-  env ⇒
+  val user:              String,
+  val host:              String,
+  val port:              Int,
+  val timeout:           Time,
+  val parameters:        PBSEnvironment.Parameters,
+  val name:              Option[String],
+  val authentication:    A,
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
   import services._
 
   implicit val sshInterpreter = gridscale.ssh.SSH()
@@ -187,9 +188,10 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
 }
 
 class PBSLocalEnvironment(
-  val parameters: PBSEnvironment.Parameters,
-  val name:       Option[String]
-)(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
+  val parameters:        PBSEnvironment.Parameters,
+  val name:              Option[String],
+  implicit val services: BatchEnvironment.Services
+) extends BatchEnvironment { env ⇒
 
   import services._
 

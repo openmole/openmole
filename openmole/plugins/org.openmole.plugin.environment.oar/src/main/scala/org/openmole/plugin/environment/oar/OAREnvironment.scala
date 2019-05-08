@@ -62,7 +62,7 @@ object OAREnvironment {
       bestEffort = bestEffort
     )
 
-    EnvironmentProvider { () ⇒
+    EnvironmentProvider { ms ⇒
       if (!localSubmission) {
         val userValue = user.mustBeDefined("user")
         val hostValue = host.mustBeDefined("host")
@@ -75,13 +75,15 @@ object OAREnvironment {
           timeout = timeout.getOrElse(services.preference(SSHEnvironment.timeOut)),
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
-          authentication = SSHAuthentication.find(userValue, hostValue, portValue)
+          authentication = SSHAuthentication.find(userValue, hostValue, portValue),
+          services = services.set(ms)
         )
       }
       else
         new OARLocalEnvironment(
           parameters = parameters,
-          name = Some(name.getOrElse(varName.value))
+          name = Some(name.getOrElse(varName.value)),
+          services = services.set(ms)
         )
     }
   }
@@ -115,14 +117,15 @@ object OAREnvironment {
 }
 
 class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
-  val parameters:     OAREnvironment.Parameters,
-  val user:           String,
-  val host:           String,
-  val port:           Int,
-  val timeout:        Time,
-  val name:           Option[String],
-  val authentication: A
-)(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
+  val parameters:        OAREnvironment.Parameters,
+  val user:              String,
+  val host:              String,
+  val port:              Int,
+  val timeout:           Time,
+  val name:              Option[String],
+  val authentication:    A,
+  implicit val services: BatchEnvironment.Services
+) extends BatchEnvironment { env ⇒
 
   import services._
 
@@ -184,9 +187,10 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
 }
 
 class OARLocalEnvironment(
-  val parameters: OAREnvironment.Parameters,
-  val name:       Option[String]
-)(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
+  val parameters:        OAREnvironment.Parameters,
+  val name:              Option[String],
+  implicit val services: BatchEnvironment.Services
+) extends BatchEnvironment { env ⇒
 
   import services._
   implicit val localInterpreter = gridscale.local.Local()

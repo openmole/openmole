@@ -70,7 +70,7 @@ object SLURMEnvironment {
       storageSharedLocally = storageSharedLocally,
       forceCopyOnNode = forceCopyOnNode)
 
-    EnvironmentProvider { () ⇒
+    EnvironmentProvider { ms ⇒
       if (!localSubmission) {
         val userValue = user.mustBeDefined("user")
         val hostValue = host.mustBeDefined("host")
@@ -83,13 +83,15 @@ object SLURMEnvironment {
           timeout = timeout.getOrElse(services.preference(SSHEnvironment.timeOut)),
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
-          authentication = SSHAuthentication.find(userValue, hostValue, portValue)
+          authentication = SSHAuthentication.find(userValue, hostValue, portValue),
+          services = services.set(ms)
         )
       }
       else
         new SLURMLocalEnvironment(
           parameters = parameters,
-          name = Some(name.getOrElse(varName.value))
+          name = Some(name.getOrElse(varName.value)),
+          services = services.set(ms)
         )
     }
 
@@ -124,13 +126,14 @@ object SLURMEnvironment {
 }
 
 class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
-  val user:           String,
-  val host:           String,
-  val port:           Int,
-  val timeout:        Time,
-  val parameters:     SLURMEnvironment.Parameters,
-  val name:           Option[String],
-  val authentication: A)(implicit val services: BatchEnvironment.Services) extends BatchEnvironment {
+  val user:              String,
+  val host:              String,
+  val port:              Int,
+  val timeout:           Time,
+  val parameters:        SLURMEnvironment.Parameters,
+  val name:              Option[String],
+  val authentication:    A,
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment {
   env ⇒
 
   import services._
@@ -194,8 +197,9 @@ class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
 }
 
 class SLURMLocalEnvironment(
-  val parameters: SLURMEnvironment.Parameters,
-  val name:       Option[String])(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
+  val parameters:        SLURMEnvironment.Parameters,
+  val name:              Option[String],
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
 
   import services._
 

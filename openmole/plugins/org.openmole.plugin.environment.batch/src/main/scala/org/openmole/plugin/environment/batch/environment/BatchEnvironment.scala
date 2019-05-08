@@ -35,6 +35,7 @@ import org.openmole.core.serializer.{PluginAndFilesListing, SerializerService}
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job._
+import org.openmole.core.workflow.mole.MoleServices
 import org.openmole.core.workspace._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment.ExecutionJobRegistry
 import org.openmole.plugin.environment.batch.refresh._
@@ -135,6 +136,44 @@ object BatchEnvironment extends JavaLogger {
       import services._
       new Services()
     }
+
+    def copy(services: Services)(
+      threadProvider:             ThreadProvider = services.threadProvider,
+      preference:        Preference = services.preference,
+      newFile:           NewFile = services.newFile,
+      serializerService: SerializerService = services.serializerService,
+      fileService:       FileService = services.fileService,
+      seeder:            Seeder = services.seeder,
+      randomProvider:    RandomProvider = services.randomProvider,
+      replicaCatalog:    ReplicaCatalog = services.replicaCatalog,
+      eventDispatcher:   EventDispatcher = services.eventDispatcher,
+      fileServiceCache:  FileServiceCache = services.fileServiceCache) =
+      new Services()(
+        threadProvider = threadProvider,
+        preference = preference,
+        newFile = newFile,
+        serializerService = serializerService,
+        fileService = fileService,
+        seeder = seeder,
+        randomProvider = randomProvider,
+        replicaCatalog = replicaCatalog,
+        eventDispatcher = eventDispatcher,
+        fileServiceCache = fileServiceCache)
+
+    def set(services: Services)(ms: MoleServices) =
+      new Services() (
+        threadProvider = ms.threadProvider,
+        preference = ms.preference,
+        newFile = ms.newFile,
+        serializerService = services.serializerService,
+        fileService = ms.fileService,
+        seeder = ms.seeder,
+        randomProvider = services.randomProvider,
+        replicaCatalog = services.replicaCatalog,
+        eventDispatcher = ms.eventDispatcher,
+        fileServiceCache = ms.fileServiceCache
+      )
+
   }
 
   class Services(
@@ -149,7 +188,33 @@ object BatchEnvironment extends JavaLogger {
     implicit val replicaCatalog:    ReplicaCatalog,
     implicit val eventDispatcher:   EventDispatcher,
     implicit val fileServiceCache:  FileServiceCache
-  )
+  ) { services =>
+
+    def set(ms: MoleServices) = Services.set(services)(ms)
+
+    def copy (
+      threadProvider:    ThreadProvider = services.threadProvider,
+      preference:        Preference = services.preference,
+      newFile:           NewFile = services.newFile,
+      serializerService: SerializerService = services.serializerService,
+      fileService:       FileService = services.fileService,
+      seeder:            Seeder = services.seeder,
+      randomProvider:    RandomProvider = services.randomProvider,
+      replicaCatalog:    ReplicaCatalog = services.replicaCatalog,
+      eventDispatcher:   EventDispatcher = services.eventDispatcher,
+      fileServiceCache:  FileServiceCache = services.fileServiceCache) =
+      Services.copy(services)(
+        threadProvider = threadProvider,
+        preference = preference,
+        newFile = newFile,
+        serializerService = serializerService,
+        fileService = fileService,
+        seeder = seeder,
+        randomProvider = randomProvider,
+        replicaCatalog = replicaCatalog,
+        eventDispatcher = eventDispatcher,
+        fileServiceCache = fileServiceCache)
+  }
 
   def jobFiles(job: BatchExecutionJob) =
     job.pluginsAndFiles.files.toVector ++
