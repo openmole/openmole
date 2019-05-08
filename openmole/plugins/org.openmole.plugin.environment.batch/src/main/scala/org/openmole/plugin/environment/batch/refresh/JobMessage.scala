@@ -27,10 +27,9 @@ sealed trait DispatchedMessage
 case class Submit(job: BatchExecutionJob) extends JobMessage with DispatchedMessage
 case class Submitted(job: BatchExecutionJob, batchJob: BatchJobControl) extends JobMessage
 case class Refresh(job: BatchExecutionJob, batchJob: BatchJobControl, delay: Time, consecutiveUpdateErrors: Int = 0) extends JobMessage with DispatchedMessage
-case class Resubmit(job: BatchExecutionJob, batchJob: BatchJobControl) extends JobMessage
 case class Delay(msg: JobMessage, delay: Time) extends JobMessage
 case class Error(job: BatchExecutionJob, exception: Throwable, stdOutErr: Option[(String, String)]) extends JobMessage with DispatchedMessage
-case class Kill(job: BatchExecutionJob, batchJob: Option[BatchJobControl]) extends JobMessage
+case class Kill(job: BatchExecutionJob, batchJob: Option[BatchJobControl]) extends JobMessage with DispatchedMessage
 case class GetResult(job: BatchExecutionJob, outputFilePath: String, batchJob: BatchJobControl) extends JobMessage with DispatchedMessage
 case class Manage(job: Job, environment: BatchEnvironment) extends JobMessage
 case class MoleJobError(moleJob: MoleJobId, job: BatchExecutionJob, exception: Throwable) extends JobMessage

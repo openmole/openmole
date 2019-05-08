@@ -139,7 +139,9 @@ class CondorEnvironment[A: gridscale.ssh.SSHAuthentication](
   }
 
   override def stop() = {
+    stopped = true
     cleanSSHStorage(storageService, background = false)
+    BatchEnvironment.waitJobKilled(this)
     sshInterpreter().close
   }
 
@@ -198,7 +200,11 @@ class CondorLocalEnvironment(
   implicit val systemInterpreter = effectaside.System()
 
   override def start() = { storage; space }
-  override def stop() = { HierarchicalStorageSpace.clean(storage, space, background = false) }
+  override def stop() = {
+    stopped = true
+    HierarchicalStorageSpace.clean(storage, space, background = false)
+    BatchEnvironment.waitJobKilled(this)
+  }
 
   import env.services.preference
   import org.openmole.plugin.environment.ssh._

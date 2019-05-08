@@ -17,28 +17,26 @@
 
 package org.openmole.plugin.environment.egi
 
+import gridscale.egi._
+import org.openmole.core.communication.storage.TransferOptions
 import org.openmole.core.exception.{ InternalProcessingError, MultipleException }
+import org.openmole.core.preference.{ ConfigurationLocation, Preference }
+import org.openmole.core.serializer.SerializerService
+import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
-import org.openmole.core.workflow.job.Job
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.environment.{ BatchJobControl, _ }
 import org.openmole.plugin.environment.batch.storage._
-import org.openmole.tool.crypto.Cypher
-import squants.information._
-
-import scala.collection.immutable.TreeSet
-import scala.collection.mutable.{ HashMap, ListBuffer, MultiMap, Set }
-import org.openmole.core.preference.{ ConfigurationLocation, Preference }
-import org.openmole.core.workflow.dsl.{ File, _ }
-import org.openmole.tool.logger.JavaLogger
-import org.openmole.tool.exception._
-import gridscale.egi._
-import org.openmole.core.communication.storage.TransferOptions
-import org.openmole.core.serializer.SerializerService
-import org.openmole.plugin.environment.batch.environment.JobStore.StoredJob
 import org.openmole.tool.cache._
+import org.openmole.tool.crypto.Cypher
+import org.openmole.tool.exception._
+import org.openmole.tool.logger.JavaLogger
+import squants.information._
 import squants.time.Time
 import squants.time.TimeConversions._
+
+import scala.collection.immutable.TreeSet
+import scala.collection.mutable.{ HashMap, MultiMap, Set }
 
 object EGIEnvironment extends JavaLogger {
 
@@ -136,7 +134,7 @@ object EGIEnvironment extends JavaLogger {
             jobKey.find(j ⇒ executionJobsMap(j).isEmpty) match {
               case Some(j) ⇒ j
               case None ⇒
-                jobKey.find(j ⇒ !executionJobsMap(j).exists(_.state != ExecutionState.SUBMITTED)) match {
+                jobKey.find(j ⇒ !executionJobsMap(j).exists(j ⇒ j.state != ExecutionState.SUBMITTED)) match {
                   case Some(j) ⇒ j
                   case None    ⇒ jobKey.head
                 }
@@ -225,7 +223,9 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   }
 
   override def stop() = {
+    stopped = true
     storages.map(_.toOption).flatten.foreach { case (space, storage) ⇒ HierarchicalStorageSpace.clean(storage, space, background = false) }
+    BatchEnvironment.waitJobKilled(this)
   }
 
   def bdiis: Seq[gridscale.egi.BDIIServer] =
@@ -367,6 +367,8 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     EGIJobService(s, env)
   }
 
-  override def finishedJob(job: ExecutionJob): Unit = EGIEnvironment.eagerSubmit(env)
+  override def finishedJob(job: ExecutionJob): Unit = {
+    if (!stopped) EGIEnvironment.eagerSubmit(env)
+  }
 
 }

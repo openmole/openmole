@@ -18,6 +18,7 @@
 package org.openmole.plugin.environment.batch.environment
 
 import java.io.File
+import java.util.concurrent.{CountDownLatch, Semaphore}
 
 import org.openmole.core.communication.message._
 import org.openmole.core.communication.storage.{RemoteStorage, TransferOptions}
@@ -43,6 +44,7 @@ import org.openmole.tool.random.{RandomProvider, Seeder, shuffled}
 import squants.information.Information
 import squants.information.InformationConversions._
 import squants.time.TimeConversions._
+import org.openmole.tool.lock._
 
 import scala.collection.immutable.TreeSet
 
@@ -327,24 +329,22 @@ object BatchEnvironment extends JavaLogger {
     environmentJobs.forall(_.state == ExecutionState.KILLED)
   }
 
-//  def finishedJob(environment: BatchEnvironment, job: Job) = {
-//    ExecutionJobRegistry.finished(environment.registry, job, environment)
-//  }
-
   def finishedExecutionJob(environment: BatchEnvironment, job: BatchExecutionJob) = {
     ExecutionJobRegistry.finished(environment.registry, job, environment)
     environment.finishedJob(job)
   }
 
-
   object ExecutionJobRegistry {
+
     def register(registry: ExecutionJobRegistry, ejob: BatchExecutionJob) = registry.synchronized {
       registry.executionJobs = ejob :: registry.executionJobs
+      registry.empty.drainPermits()
     }
 
     def finished(registry: ExecutionJobRegistry, job: BatchExecutionJob, environment: BatchEnvironment) = registry.synchronized {
-      def pruneJobs(registry: ExecutionJobRegistry) = registry.executionJobs.filter(j => j.state != ExecutionState.KILLED && j != job)
+      def pruneJobs(registry: ExecutionJobRegistry) = registry.executionJobs.filter(j => j != job)
       registry.executionJobs = pruneJobs(registry)
+      if(registry.executionJobs.isEmpty) registry.empty.release(1)
     }
 
     def executionJobs(registry: ExecutionJobRegistry) = registry.synchronized { registry.executionJobs }
@@ -352,6 +352,15 @@ object BatchEnvironment extends JavaLogger {
 
   class ExecutionJobRegistry {
     var executionJobs = List[BatchExecutionJob]()
+    val empty = new Semaphore(1)
+  }
+
+  def registryIsEmpty(environment: BatchEnvironment) = {
+    environment.registry.empty.availablePermits() == 0
+  }
+
+  def waitJobKilled(environment: BatchEnvironment) = {
+    environment.registry.empty.acquireAndRelease()
   }
 
   def defaultUpdateInterval(implicit preference: Preference) =
@@ -364,18 +373,23 @@ object BatchEnvironment extends JavaLogger {
 
 abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
+  @volatile var stopped = false
+
   implicit val services: BatchEnvironment.Services
   def eventDispatcherService = services.eventDispatcher
 
   def exceptions = services.preference(Environment.maxExceptionsLog)
-  def clean = BatchEnvironment.isClean(this)
+  def clean = BatchEnvironment.registryIsEmpty(env)
 
   lazy val registry = new ExecutionJobRegistry()
+
   def jobs = ExecutionJobRegistry.executionJobs(registry)
 
   lazy val relpClassesCache = new AssociativeCache[Set[String], (Seq[File], Seq[FileCache])]
+
   lazy val plugins = PluginManager.pluginsForClass(this.getClass)
   lazy val jobStore = JobStore(services.newFile.makeNewDir("jobstore"))
+
 
   override def submit(job: Job) = JobManager ! Manage(job, this)
 

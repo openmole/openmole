@@ -19,15 +19,14 @@ package org.openmole.plugin.environment.batch.refresh
 
 import java.util.concurrent.TimeUnit
 
-import org.openmole.core.tools.service.Retry.retry
 import org.openmole.core.workflow.execution._
-import org.openmole.plugin.environment.batch.environment.{ BatchJobControl, _ }
-import org.openmole.tool.logger.JavaLogger
-import org.openmole.tool.thread._
-import org.openmole.core.workflow.mole.MoleExecution.{ moleJobIsFinished }
+import org.openmole.core.workflow.mole.MoleExecution.moleJobIsFinished
 import org.openmole.core.workflow.mole.{ MoleExecution, MoleExecutionMessage }
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment.ExecutionJobRegistry
 import org.openmole.plugin.environment.batch.environment.JobStore.StoredJob
+import org.openmole.plugin.environment.batch.environment._
+import org.openmole.tool.logger.JavaLogger
+import org.openmole.tool.thread._
 
 object JobManager extends JavaLogger { self ⇒
   import Log._
@@ -47,84 +46,58 @@ object JobManager extends JavaLogger { self ⇒
   object DispatcherActor {
     def receive(dispatched: DispatchedMessage)(implicit services: BatchEnvironment.Services) =
       dispatched match {
-        case msg: Submit      ⇒ sendToMoleExecution(msg.job.storedJob) { state ⇒ if (!jobIsFinished(state, msg.job.storedJob)) SubmitActor.receive(msg) else self ! Kill(msg.job, None) }
-        case msg: Refresh     ⇒ sendToMoleExecution(msg.job.storedJob) { state ⇒ if (!jobIsFinished(state, msg.job.storedJob)) RefreshActor.receive(msg) else self ! Kill(msg.job, Some(msg.batchJob)) }
-        case msg: GetResult   ⇒ sendToMoleExecution(msg.job.storedJob) { state ⇒ if (!jobIsFinished(state, msg.job.storedJob)) GetResultActor.receive(msg) else self ! Kill(msg.job, Some(msg.batchJob)) }
+        case msg: Submit      ⇒ SubmitActor.receive(msg)
+        case msg: Refresh     ⇒ RefreshActor.receive(msg)
+        case msg: GetResult   ⇒ GetResultActor.receive(msg)
         case msg: RetryAction ⇒ RetryActionActor.receive(msg)
         case msg: Error       ⇒ ErrorActor.receive(msg)
+        case msg: Kill        ⇒ KillActor.receive(msg)
       }
   }
 
   def dispatch(msg: DispatchedMessage)(implicit services: BatchEnvironment.Services) = services.threadProvider.submit(messagePriority(msg)) { () ⇒ DispatcherActor.receive(msg) }
 
-  def !(msg: JobMessage)(implicit services: BatchEnvironment.Services): Unit = msg match {
-    case msg: Submit      ⇒ dispatch(msg)
-    case msg: Refresh     ⇒ dispatch(msg)
-    case msg: GetResult   ⇒ dispatch(msg)
-    case msg: RetryAction ⇒ dispatch(msg)
-    case msg: Error       ⇒ dispatch(msg)
+  def !(msg: JobMessage)(implicit services: BatchEnvironment.Services): Unit = {
+    msg match {
+      case msg: Submit      ⇒ shouldKill(msg.job.environment, msg.job.storedJob, Kill(msg.job, None)) { () ⇒ dispatch(msg) }
+      case msg: Refresh     ⇒ shouldKill(msg.job.environment, msg.job.storedJob, Kill(msg.job, Some(msg.batchJob))) { () ⇒ dispatch(msg) }
+      case msg: GetResult   ⇒ shouldKill(msg.job.environment, msg.job.storedJob, Kill(msg.job, Some(msg.batchJob))) { () ⇒ dispatch(msg) }
+      case msg: RetryAction ⇒ dispatch(msg)
+      case msg: Error       ⇒ dispatch(msg)
+      case msg: Kill        ⇒ dispatch(msg)
 
-    case Manage(job, environment) ⇒
-      val bej = BatchExecutionJob(job, environment)
-      ExecutionJobRegistry.register(environment.registry, bej)
-      services.eventDispatcher.trigger(environment, Environment.JobSubmitted(bej))
-      self ! Submit(bej)
+      case Manage(job, environment) ⇒
+        val bej = BatchExecutionJob(job, environment)
+        ExecutionJobRegistry.register(environment.registry, bej)
+        services.eventDispatcher.trigger(environment, Environment.JobSubmitted(bej))
+        self ! Submit(bej)
 
-    case Delay(msg, delay) ⇒
-      services.threadProvider.scheduler.schedule((self ! msg): Runnable, delay.millis, TimeUnit.MILLISECONDS)
+      case Delay(msg, delay) ⇒
+        services.threadProvider.scheduler.schedule((self ! msg): Runnable, delay.millis, TimeUnit.MILLISECONDS)
 
-    case Submitted(job, bj) ⇒
-      self ! Delay(Refresh(job, bj, bj.updateInterval.minUpdateInterval), bj.updateInterval.minUpdateInterval)
+      case Submitted(job, bj) ⇒
+        shouldKill(job.environment, job.storedJob, Kill(job, Some(bj))) { () ⇒ self ! Delay(Refresh(job, bj, bj.updateInterval.minUpdateInterval), bj.updateInterval.minUpdateInterval) }
 
-    case Kill(job, batchJob) ⇒
-      import services._
+      case MoleJobError(mj, j, e) ⇒
+        val er = Environment.MoleJobExceptionRaised(j, e, WARNING, mj)
+        j.environment.error(er)
+        services.eventDispatcher.trigger(j.environment: Environment, er)
+        logger.log(FINE, "Error during job execution, it will be resubmitted.", e)
 
-      job.state = ExecutionState.KILLED
-      try BatchEnvironment.finishedExecutionJob(job.environment, job)
-      finally {
-        sendToMoleExecution(job.storedJob) { state ⇒
-          if (jobIsFinished(state, job.storedJob)) BatchEnvironment.finishedExecutionJob(job.environment, job)
-          else job.environment.submit(JobStore.load(job.storedJob))
-        }
-
-        tryKillAndClean(job, batchJob)
-      }
-
-    case Resubmit(job, batchJob) ⇒
-      tryKillAndClean(job, Some(batchJob))
-      job.state = ExecutionState.READY
-      dispatch(Submit(job))
-
-    case MoleJobError(mj, j, e) ⇒
-      sendToMoleExecution(j.storedJob) { state ⇒
-        if (!jobIsFinished(state, j.storedJob)) {
-          val er = Environment.MoleJobExceptionRaised(j, e, WARNING, mj)
-          j.environment.error(er)
-          services.eventDispatcher.trigger(j.environment: Environment, er)
-          logger.log(FINE, "Error during job execution, it will be resubmitted.", e)
-        }
-      }
-
+    }
   }
 
-  def jobIsFinished(moleExecution: MoleExecution, job: StoredJob) = job.storedMoleJobs.map(_.id).forall(mj ⇒ moleJobIsFinished(moleExecution, mj))
+  def jobIsFinished(moleExecution: MoleExecution, job: StoredJob) = {
+    job.storedMoleJobs.map(_.id).forall(mj ⇒ moleJobIsFinished(moleExecution, mj))
+  }
 
   def sendToMoleExecution(job: StoredJob)(f: MoleExecution ⇒ Unit) =
     MoleExecutionMessage.send(job.moleExecution) { MoleExecutionMessage.WithMoleExecutionSate(f) }
 
-  def tryKillAndClean(job: BatchExecutionJob, bj: Option[BatchJobControl])(implicit services: BatchEnvironment.Services) = {
-    JobStore.clean(job.storedJob)
+  def canceled(storedJob: StoredJob) = storedJob.storedMoleJobs.forall(_.subMoleCanceled())
 
-    def kill(bj: BatchJobControl)(implicit services: BatchEnvironment.Services) = retry(services.preference(BatchEnvironment.killJobRetry))(bj.delete())
-    def clean(bj: BatchJobControl)(implicit services: BatchEnvironment.Services) = retry(services.preference(BatchEnvironment.cleanJobRetry))(bj.clean())
-
-    try bj.foreach(kill) catch {
-      case e: Throwable ⇒ self ! Error(job, e, None)
-    }
-
-    try bj.foreach(clean) catch {
-      case e: Throwable ⇒ self ! Error(job, e, None)
-    }
+  def shouldKill(environment: BatchEnvironment, storedJob: StoredJob, kill: Kill)(op: () ⇒ Unit)(implicit services: BatchEnvironment.Services) = {
+    if (environment.stopped || canceled(storedJob)) self ! kill
+    else sendToMoleExecution(storedJob) { state ⇒ if (!jobIsFinished(state, storedJob)) op() else self ! kill }
   }
-
 }

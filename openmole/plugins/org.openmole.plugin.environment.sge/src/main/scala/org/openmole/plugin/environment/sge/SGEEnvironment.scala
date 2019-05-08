@@ -125,10 +125,11 @@ class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
   }
 
   override def stop() = {
+    stopped = true
     cleanSSHStorage(storageService, background = false)
+    BatchEnvironment.waitJobKilled(this)
     sshInterpreter().close
   }
-
   lazy val accessControl = AccessControl(preference(SSHEnvironment.maxConnections))
   lazy val sshServer = gridscale.ssh.SSHServer(host, port, timeout)(authentication)
 
@@ -184,7 +185,11 @@ class SGELocalEnvironment(
   implicit val systemInterpreter = effectaside.System()
 
   override def start() = { storage; space }
-  override def stop() = { HierarchicalStorageSpace.clean(storage, space, background = false) }
+  override def stop() = {
+    stopped = true
+    HierarchicalStorageSpace.clean(storage, space, background = false)
+    BatchEnvironment.waitJobKilled(this)
+  }
 
   import env.services.preference
   import org.openmole.plugin.environment.ssh._

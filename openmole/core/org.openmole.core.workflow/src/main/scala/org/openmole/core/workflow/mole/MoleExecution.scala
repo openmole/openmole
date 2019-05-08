@@ -500,7 +500,9 @@ object MoleExecution extends JavaLogger {
     var nbJobs = 0
     var children = collection.mutable.TreeMap[SubMoleExecution, SubMoleExecutionState]()
     var jobs = collection.mutable.TreeSet[MoleJobId]()
+
     @volatile var canceled = false
+
     val onFinish = collection.mutable.ListBuffer[(SubMoleExecutionState ⇒ Any)]()
     val masterCapsuleRegistry = new MasterCapsuleRegistry
     val aggregationTransitionRegistry = new AggregationTransitionRegistry
@@ -577,10 +579,10 @@ object MoleExecutionMessage {
             MoleExecution.checkIfSubMoleIsFinished(state)
           }
         case msg: JobFinished           ⇒ if (!moleExecution._canceled) processJobFinished(moleExecution, msg)
-        case msg: WithMoleExecutionSate ⇒ if (!moleExecution._canceled) msg.operation(moleExecution)
         case msg: StartMoleExecution    ⇒ if (!moleExecution._canceled) MoleExecution.start(moleExecution, msg.context)
         case msg: CancelMoleExecution   ⇒ if (!moleExecution._canceled) MoleExecution.cancel(moleExecution, None)
         case msg: RegisterJob           ⇒ if (!moleExecution._canceled) MoleExecution.addJob(msg.subMoleExecution, msg.job.id, msg.capsule)
+        case msg: WithMoleExecutionSate ⇒ msg.operation(moleExecution)
         case msg: CleanMoleExecution    ⇒ MoleExecution.clean(moleExecution)
         case msg: MoleExecutionError    ⇒ MoleExecution.cancel(moleExecution, Some(MoleExecution.MoleExecutionError(msg.t)))
       }
@@ -633,7 +635,7 @@ class MoleExecution(
   def canceled(implicit s: MoleExecution.SynchronisationContext) = sync(_canceled)
   def finished(implicit s: MoleExecution.SynchronisationContext) = sync(_finished)
 
-  def cleaned(implicit s: MoleExecution.SynchronisationContext) = sync(_cleaned && allEnvironments.collect { case x: SubmissionEnvironment ⇒ x }.forall(_.clean))
+  def cleaned(implicit s: MoleExecution.SynchronisationContext) = sync(_cleaned)
 
   private[mole] var _startTime: Option[Long] = None
   private[mole] var _endTime: Option[Long] = None

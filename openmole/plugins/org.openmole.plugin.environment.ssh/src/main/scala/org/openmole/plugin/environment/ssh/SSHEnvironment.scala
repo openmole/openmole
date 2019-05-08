@@ -152,8 +152,10 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   }
 
   override def stop() = {
+    stopped = true
     cleanSSHStorage(storageService, background = false)
     jobUpdater.stop = true
+    BatchEnvironment.waitJobKilled(this)
     sshInterpreter().close
   }
 

@@ -58,7 +58,7 @@ package object abc {
           condition = !(stop: Condition)
         )
 
-      DSLContainerExtension[ABCParameters](loop, output = Some(postStepTask), delegate = mapReduce.delegate, data = ABCParameters(state, step))
+      DSLContainerExtension[ABCParameters](DSLContainer(loop), output = Some(postStepTask), delegate = mapReduce.delegate, data = ABCParameters(state, step))
     }
 
   }
@@ -125,7 +125,7 @@ package object abc {
         stop = stop
       )
 
-    DSLContainerExtension(masterSlave, output = Some(master), delegate = Vector(slave), data = ABCParameters(masterState, step))
+    DSLContainerExtension(DSLContainer(masterSlave), output = Some(master), delegate = Vector(slave), data = ABCParameters(masterState, step))
   }
 
 }
