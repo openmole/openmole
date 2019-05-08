@@ -24,9 +24,9 @@ import org.openmole.core.workflow.execution._
 import org.openmole.plugin.environment.batch.environment.{ BatchJobControl, _ }
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.thread._
-import org.openmole.core.workflow.job._
-import org.openmole.core.workflow.mole.MoleExecution.{ SubMoleExecutionState, moleJobIsFinished }
+import org.openmole.core.workflow.mole.MoleExecution.{ moleJobIsFinished }
 import org.openmole.core.workflow.mole.{ MoleExecution, MoleExecutionMessage }
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment.ExecutionJobRegistry
 import org.openmole.plugin.environment.batch.environment.JobStore.StoredJob
 
 object JobManager extends JavaLogger { self ⇒
@@ -36,11 +36,12 @@ object JobManager extends JavaLogger { self ⇒
 
   def messagePriority(message: DispatchedMessage) =
     message match {
-      case msg: Submit    ⇒ 50
-      case msg: Refresh   ⇒ 5
-      case msg: GetResult ⇒ 50
-      case msg: Error     ⇒ 100 // This is very quick to process
-      case _              ⇒ 1
+      case _: Refresh   ⇒ 5
+      case _: Submit    ⇒ 50
+      case _: GetResult ⇒ 50
+      case _: Manage    ⇒ 75
+      case _: Error     ⇒ 100 // This is very quick to process
+      case _            ⇒ 1
     }
 
   object DispatcherActor {
@@ -63,8 +64,11 @@ object JobManager extends JavaLogger { self ⇒
     case msg: RetryAction ⇒ dispatch(msg)
     case msg: Error       ⇒ dispatch(msg)
 
-    case Manage(job) ⇒
-      self ! Submit(job)
+    case Manage(job, environment) ⇒
+      val bej = BatchExecutionJob(job, environment)
+      ExecutionJobRegistry.register(environment.registry, bej)
+      services.eventDispatcher.trigger(environment, Environment.JobSubmitted(bej))
+      self ! Submit(bej)
 
     case Delay(msg, delay) ⇒
       services.threadProvider.scheduler.schedule((self ! msg): Runnable, delay.millis, TimeUnit.MILLISECONDS)

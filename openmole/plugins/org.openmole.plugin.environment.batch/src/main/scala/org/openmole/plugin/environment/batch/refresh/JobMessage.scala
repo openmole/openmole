@@ -32,6 +32,6 @@ case class Delay(msg: JobMessage, delay: Time) extends JobMessage
 case class Error(job: BatchExecutionJob, exception: Throwable, stdOutErr: Option[(String, String)]) extends JobMessage with DispatchedMessage
 case class Kill(job: BatchExecutionJob, batchJob: Option[BatchJobControl]) extends JobMessage
 case class GetResult(job: BatchExecutionJob, outputFilePath: String, batchJob: BatchJobControl) extends JobMessage with DispatchedMessage
-case class Manage(job: BatchExecutionJob) extends JobMessage
+case class Manage(job: Job, environment: BatchEnvironment) extends JobMessage
 case class MoleJobError(moleJob: MoleJobId, job: BatchExecutionJob, exception: Throwable) extends JobMessage
 case class RetryAction(action: () ⇒ Boolean) extends JobMessage with DispatchedMessage
