@@ -440,7 +440,6 @@ object BatchExecutionJob {
 
 class BatchExecutionJob(val job: Job, val environment: BatchEnvironment) extends ExecutionJob { bej ⇒
 
-
   def moleJobs = Job.moleJobs(job)
   def runnableTasks = Job.moleJobs(job).map(RunnableTask(_))
 

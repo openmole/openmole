@@ -353,7 +353,11 @@ object MoleExecution extends JavaLogger {
     ticket
   }
 
-  def nextJobId(moleExecution: MoleExecution) = UUID.randomUUID
+  def nextJobId(moleExecution: MoleExecution) = {
+    val id = moleExecution.moleId
+    moleExecution.moleId += 1
+    id
+  }
 
   def group(moleExecution: MoleExecution, moleJob: MoleJob, context: Context, capsule: MoleCapsule) = {
     moleExecution.grouping.get(capsule) match {
@@ -441,11 +445,11 @@ object MoleExecution extends JavaLogger {
 
   def capsuleStatuses(moleExecution: MoleExecution, jobs: Seq[(MoleJob, MoleCapsule)], completed: Map[MoleCapsule, Long]): CapsuleStatuses = {
 
-    val runningSet: java.util.HashSet[UUID] = {
+    val runningSet: java.util.HashSet[Long] = {
       def submissionEnvironments = moleExecution.environments.values.toSeq.collect { case e: SubmissionEnvironment ⇒ e }
       def localEnvironments = moleExecution.environments.values.toSeq.collect { case e: LocalEnvironment ⇒ e }
 
-      val set = new java.util.HashSet[UUID](jobs.size + 1, 1.0f)
+      val set = new java.util.HashSet[Long](jobs.size + 1, 1.0f)
 
       for {
         env ← submissionEnvironments
@@ -547,8 +551,8 @@ object MoleExecutionMessage {
     case _                      ⇒ false
   }
 
-  def messagePriority(moleExcutionMessage: MoleExecutionMessage) =
-    moleExcutionMessage match {
+  def messagePriority(moleExecutionMessage: MoleExecutionMessage) =
+    moleExecutionMessage match {
       case _: RegisterJob         ⇒ 200
       case _: CancelMoleExecution ⇒ 100
       case _: PerformTransition   ⇒ 10
@@ -642,6 +646,8 @@ class MoleExecution(
 
   private[mole] var ticketNumber = 1L
   private[mole] val rootTicket = Ticket(id, 0)
+
+  private[mole] var moleId = 0L
 
   private[mole] val newGroup = NewGroup()
 

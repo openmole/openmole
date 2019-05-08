@@ -17,8 +17,6 @@
 
 package org.openmole.core.workflow
 
-import java.util.UUID
-
 package object job {
-  type MoleJobId = UUID
+  type MoleJobId = Long
 }

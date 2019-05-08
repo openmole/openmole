@@ -17,8 +17,6 @@
 
 package org.openmole.core.workflow.job
 
-import java.util.UUID
-
 import org.openmole.core.workflow.job.State._
 import org.openmole.core.workflow.task._
 import org.openmole.core.context._
@@ -40,11 +38,11 @@ object MoleJob {
   def apply(
     task:            Task,
     context:         Context,
-    id:              UUID,
+    id:              Long,
     jobFinished:     MoleJob.JobFinished,
     subMoleCanceled: Canceled) = {
     val (prototypes, values) = compressContext(context)
-    new MoleJob(task, prototypes.toArray, values.toArray, id.getMostSignificantBits, id.getLeastSignificantBits, jobFinished, subMoleCanceled)
+    new MoleJob(task, prototypes.toArray, values.toArray, id, jobFinished, subMoleCanceled)
   }
 
   def compressContext(context: Context) =
@@ -65,22 +63,18 @@ import MoleJob._
  * @param task task to be executed
  * @param prototypes prototypes for the task
  * @param values values of prototypes
- * @param mostSignificantBits to construct the UUID
- * @param leastSignificantBits to construct the UUID
  * @param jobFinished what to do when the state is changed
  */
 class MoleJob(
-  val task:            Task,
-  prototypes:          Array[Val[Any]],
-  values:              Array[Any],
-  mostSignificantBits: Long, leastSignificantBits: Long,
+  val task:        Task,
+  prototypes:      Array[Val[Any]],
+  values:          Array[Any],
+  val id:          MoleJobId,
   jobFinished:     MoleJob.JobFinished,
   subMoleCanceled: Canceled) {
 
   def context: Context =
     Context((prototypes zip values).map { case (p, v) ⇒ Variable(p, v) }: _*)
-
-  def id = new UUID(mostSignificantBits, leastSignificantBits)
 
   def perform(executionContext: TaskExecutionContext): Either[Context, Throwable] =
     try Left(task.perform(context, executionContext))
