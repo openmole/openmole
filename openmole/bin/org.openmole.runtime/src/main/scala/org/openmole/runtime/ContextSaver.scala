@@ -39,14 +39,14 @@ class ContextSaver(val nbJobs: Int) {
   var _results = new TreeMap[MoleJobId, Try[Context]]
   def results = _results
 
-  def save(job: MoleJob, result: Either[Context, Throwable]) = synchronized {
+  def save(job: MoleJobId, result: Either[Context, Throwable]) = synchronized {
     result match {
       case Left(context) ⇒
-        logger.fine(s"Job success ${job.id} ${context}")
-        _results += job.id → Success(context)
+        logger.fine(s"Job success ${job} ${context}")
+        _results += job → Success(context)
       case Right(t) ⇒
-        logger.log(FINE, s"Job failure ${job.id}", t)
-        _results += job.id → Failure(t)
+        logger.log(FINE, s"Job failure ${job}", t)
+        _results += job → Failure(t)
     }
 
     nbFinished += 1

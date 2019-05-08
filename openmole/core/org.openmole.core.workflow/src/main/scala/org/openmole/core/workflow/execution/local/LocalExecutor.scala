@@ -62,7 +62,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                 executionJob.state = ExecutionState.RUNNING
 
                 for {
-                  moleJob ← executionJob.moleJobs
+                  moleJob ← executionJob.jobs
                   if !moleJob.canceled
                 } {
                   runningJob = Some(moleJob)
@@ -70,10 +70,10 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                     try moleJob.perform(executionJob.executionContext)
                     finally runningJob = None
 
-                  moleJob.finish(result)
+                  MoleJob.finish(moleJob, result)
 
                   result match {
-                    case Right(e) ⇒ environment.eventDispatcherService.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
+                    case Right(e) ⇒ environment.eventDispatcherService.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob.id))
                     case _        ⇒
                   }
                 }

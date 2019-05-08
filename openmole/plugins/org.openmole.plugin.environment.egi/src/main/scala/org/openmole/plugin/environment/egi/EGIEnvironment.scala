@@ -27,13 +27,15 @@ import org.openmole.tool.crypto.Cypher
 import squants.information._
 
 import scala.collection.immutable.TreeSet
-import scala.collection.mutable.{ HashMap, MultiMap, Set }
+import scala.collection.mutable.{ HashMap, ListBuffer, MultiMap, Set }
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.core.workflow.dsl.{ File, _ }
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.exception._
 import gridscale.egi._
 import org.openmole.core.communication.storage.TransferOptions
+import org.openmole.core.serializer.SerializerService
+import org.openmole.plugin.environment.batch.environment.JobStore.StoredJob
 import org.openmole.tool.cache._
 import squants.time.Time
 import squants.time.TimeConversions._
@@ -100,7 +102,7 @@ object EGIEnvironment extends JavaLogger {
   def stdOutFileName = "output"
   def stdErrFileName = "error"
 
-  def eagerSubmit(environment: EGIEnvironment[_])(implicit preference: Preference) = {
+  def eagerSubmit(environment: EGIEnvironment[_])(implicit preference: Preference, serializerService: SerializerService) = {
     val jobs = environment.jobs
     val jobSize = jobs.size
 
@@ -108,42 +110,45 @@ object EGIEnvironment extends JavaLogger {
     val numberOfSimultaneousExecutionForAJob = preference(EGIEnvironment.EagerSubmissionNumberOfJobs)
 
     var nbRessub = if (jobSize < minOversub) minOversub - jobSize else 0
-    lazy val executionJobs = jobs.groupBy(_.job)
+
+    type ExecutionJobId = collection.immutable.Set[Long]
+    lazy val executionJobsMap: Map[ExecutionJobId, List[BatchExecutionJob]] = jobs.groupBy(_.storedJob.storedMoleJobs.map(_.id).toSet)
 
     if (nbRessub > 0) {
       // Resubmit nbRessub jobs in a fair manner
-      val order = new HashMap[Int, Set[Job]] with MultiMap[Int, Job]
-      var keys = new TreeSet[Int]
+      val jobKeyMap = new HashMap[Int, Set[ExecutionJobId]] with MultiMap[Int, ExecutionJobId]
+      var nbRuns = new TreeSet[Int]
 
-      for (job ← executionJobs.keys) {
-        val nb = executionJobs(job).size
-        if (nb < numberOfSimultaneousExecutionForAJob) {
-          order.addBinding(nb, job)
-          keys += nb
+      for ((ids, jobs) ← executionJobsMap) {
+        val size = jobs.size
+        if (size < numberOfSimultaneousExecutionForAJob) {
+          jobKeyMap.addBinding(size, ids)
+          nbRuns += size
         }
       }
 
-      if (!keys.isEmpty) {
-        while (nbRessub > 0 && keys.head < numberOfSimultaneousExecutionForAJob) {
-          val key = keys.head
-          val jobs = order(keys.head)
+      if (!nbRuns.isEmpty) {
+        while (nbRessub > 0 && nbRuns.head < numberOfSimultaneousExecutionForAJob) {
+          val size = nbRuns.head
+          val jobKey = jobKeyMap(nbRuns.head)
+
           val job =
-            jobs.find(j ⇒ executionJobs(j).isEmpty) match {
+            jobKey.find(j ⇒ executionJobsMap(j).isEmpty) match {
               case Some(j) ⇒ j
               case None ⇒
-                jobs.find(j ⇒ !executionJobs(j).exists(_.state != ExecutionState.SUBMITTED)) match {
+                jobKey.find(j ⇒ !executionJobsMap(j).exists(_.state != ExecutionState.SUBMITTED)) match {
                   case Some(j) ⇒ j
-                  case None    ⇒ jobs.head
+                  case None    ⇒ jobKey.head
                 }
             }
 
-          environment.submit(job)
+          environment.submit(JobStore.load(executionJobsMap(job).head.storedJob))
 
-          order.removeBinding(key, job)
-          if (jobs.isEmpty) keys -= key
+          jobKeyMap.removeBinding(size, job)
+          if (jobKey.isEmpty) nbRuns -= size
 
-          order.addBinding(key + 1, job)
-          keys += (key + 1)
+          jobKeyMap.addBinding(size + 1, job)
+          nbRuns += (size + 1)
           nbRessub -= 1
         }
       }

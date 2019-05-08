@@ -33,5 +33,5 @@ case class Error(job: BatchExecutionJob, exception: Throwable, stdOutErr: Option
 case class Kill(job: BatchExecutionJob, batchJob: Option[BatchJobControl]) extends JobMessage
 case class GetResult(job: BatchExecutionJob, outputFilePath: String, batchJob: BatchJobControl) extends JobMessage with DispatchedMessage
 case class Manage(job: BatchExecutionJob) extends JobMessage
-case class MoleJobError(moleJob: MoleJob, job: BatchExecutionJob, exception: Throwable) extends JobMessage
+case class MoleJobError(moleJob: MoleJobId, job: BatchExecutionJob, exception: Throwable) extends JobMessage
 case class RetryAction(action: () ⇒ Boolean) extends JobMessage with DispatchedMessage

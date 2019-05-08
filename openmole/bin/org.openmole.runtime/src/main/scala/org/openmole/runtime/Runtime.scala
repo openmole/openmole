@@ -140,7 +140,7 @@ class Runtime {
 
       /* --- Submit all jobs to the local environment --*/
       logger.fine("Run the jobs")
-      val environment = LocalEnvironment(nbThreads = threads).apply()
+      val environment = new LocalEnvironment(nbThreads = threads, false, Some("runtime local"))
       environment.start()
 
       try {

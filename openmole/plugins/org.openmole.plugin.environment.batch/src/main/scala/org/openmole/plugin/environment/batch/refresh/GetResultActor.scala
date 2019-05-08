@@ -57,7 +57,7 @@ object GetResultActor extends JavaLogger {
 
     val runtimeResult = getRuntimeResult(outputFilePath, storageId, environment, download)
 
-    val stream = Job.moleExecution(job).executionContext.services.outputRedirection.output
+    val stream = batchJob.storedJob.moleExecution.executionContext.services.outputRedirection.output
     display(runtimeResult.stdOut, s"Output on ${runtimeResult.info.hostName}", stream)
 
     runtimeResult.result match {
@@ -68,12 +68,12 @@ object GetResultActor extends JavaLogger {
         services.eventDispatcher.trigger(environment: Environment, Environment.JobCompleted(batchJob, log, runtimeResult.info))
 
         //Try to download the results for all the jobs of the group
-        for (moleJob ← Job.moleJobs(job)) {
+        for (moleJob ← batchJob.storedJob.storedMoleJobs) {
           if (contextResults.results.isDefinedAt(moleJob.id)) {
             val executionResult = contextResults.results(moleJob.id)
             executionResult match {
-              case Success(context) ⇒ moleJob.finish(Left(context))
-              case Failure(e)       ⇒ JobManager ! MoleJobError(moleJob, batchJob, e)
+              case Success(context) ⇒ JobStore.finish(moleJob, Left(context))
+              case Failure(e)       ⇒ JobManager ! MoleJobError(moleJob.id, batchJob, e)
             }
           }
         }

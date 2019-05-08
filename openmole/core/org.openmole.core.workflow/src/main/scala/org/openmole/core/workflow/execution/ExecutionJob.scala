@@ -17,13 +17,12 @@
 
 package org.openmole.core.workflow.execution
 
-import org.openmole.core.event.EventDispatcher
 import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.core.workflow.job.MoleJob
+import org.openmole.core.workflow.job.{ MoleJob, MoleJobId }
 
 trait ExecutionJob {
   def environment: Environment
-  def moleJobs: Iterable[MoleJob]
+  def moleJobIds: Iterable[MoleJobId]
 
   private var _state: ExecutionState = READY
 

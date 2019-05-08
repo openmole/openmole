@@ -27,7 +27,7 @@ import org.openmole.core.tools.service._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.workflow.execution.local.{ ExecutorPool, LocalExecutionJob }
-import org.openmole.core.workflow.job.{ Job, MoleJob }
+import org.openmole.core.workflow.job.{ Job, MoleJob, MoleJobId }
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workflow.tools.{ ExceptionEvent, Name }
 import org.openmole.tool.cache._
@@ -43,7 +43,7 @@ object Environment {
 
   case class ExceptionRaised(exception: Throwable, level: Level) extends Event[Environment] with ExceptionEvent
   case class ExecutionJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level) extends Event[Environment] with ExceptionEvent
-  case class MoleJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level, moleJob: MoleJob) extends Event[Environment] with ExceptionEvent
+  case class MoleJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level, moleJob: MoleJobId) extends Event[Environment] with ExceptionEvent
 
   case class JobCompleted(job: ExecutionJob, log: RuntimeLog, info: RuntimeInfo) extends Event[Environment]
 
@@ -88,11 +88,18 @@ object LocalEnvironment {
     nbThreads:    OptionalArgument[Int]    = None,
     deinterleave: Boolean                  = false,
     name:         OptionalArgument[String] = OptionalArgument()
-  )(implicit varName: sourcecode.Name, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher) =
-    LocalEnvironmentProvider(() ⇒ new LocalEnvironment(nbThreads.getOrElse(1), deinterleave, Some(name.getOrElse(varName.value))))
+  )(implicit varName: sourcecode.Name) =
+    LocalEnvironmentProvider { ms ⇒
+      import ms._
+      new LocalEnvironment(nbThreads.getOrElse(1), deinterleave, Some(name.getOrElse(varName.value)))
+    }
 
-  def apply(threads: Int, deinterleave: Boolean)(implicit threadProvider: ThreadProvider, eventDispatcherService: EventDispatcher) =
-    LocalEnvironmentProvider(() ⇒ new LocalEnvironment(threads, deinterleave, None))
+  def apply(threads: Int, deinterleave: Boolean) =
+    LocalEnvironmentProvider { ms ⇒
+      import ms._
+      new LocalEnvironment(threads, deinterleave, None)
+    }
+
 }
 
 /**

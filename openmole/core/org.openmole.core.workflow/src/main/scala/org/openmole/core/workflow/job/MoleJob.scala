@@ -24,7 +24,7 @@ import org.openmole.core.context._
 object MoleJob {
   implicit val moleJobOrdering = Ordering.by((_: MoleJob).id)
 
-  type JobFinished = (MoleJob, Either[Context, Throwable]) ⇒ Unit
+  type JobFinished = (MoleJobId, Either[Context, Throwable]) ⇒ Unit
   type Canceled = () ⇒ Boolean
 
   /**
@@ -53,6 +53,9 @@ object MoleJob {
   sealed trait StateChange
   case object Unchanged extends StateChange
   case class Changed(old: State, state: State, context: Context) extends StateChange
+
+  def finish(moleJob: MoleJob, result: Either[Context, Throwable]) = moleJob.jobFinished(moleJob.id, result)
+
 }
 
 import MoleJob._
@@ -66,12 +69,12 @@ import MoleJob._
  * @param jobFinished what to do when the state is changed
  */
 class MoleJob(
-  val task:        Task,
-  prototypes:      Array[Val[Any]],
-  values:          Array[Any],
-  val id:          MoleJobId,
-  jobFinished:     MoleJob.JobFinished,
-  subMoleCanceled: Canceled) {
+  val task:            Task,
+  prototypes:          Array[Val[Any]],
+  values:              Array[Any],
+  val id:              MoleJobId,
+  val jobFinished:     MoleJob.JobFinished,
+  val subMoleCanceled: Canceled) {
 
   def context: Context =
     Context((prototypes zip values).map { case (p, v) ⇒ Variable(p, v) }: _*)
@@ -82,7 +85,6 @@ class MoleJob(
       case t: Throwable ⇒ Right(t)
     }
 
-  def finish(result: Either[Context, Throwable]) = jobFinished(this, result)
   def canceled = subMoleCanceled()
 
 }

@@ -38,6 +38,7 @@ import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole.MoleServices
 import org.openmole.core.workspace._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment.ExecutionJobRegistry
+import org.openmole.plugin.environment.batch.environment.JobStore.StoredJob
 import org.openmole.plugin.environment.batch.refresh._
 import org.openmole.tool.bytecode.listAllClasses
 import org.openmole.tool.cache._
@@ -217,8 +218,8 @@ object BatchEnvironment extends JavaLogger {
   }
 
   def jobFiles(job: BatchExecutionJob) =
-    job.pluginsAndFiles.files.toVector ++
-      job.pluginsAndFiles.plugins ++
+    job.files.toVector ++
+      job.plugins ++
       job.environment.plugins ++
       Seq(job.environment.jvmLinuxX64, job.environment.runtime)
 
@@ -262,10 +263,9 @@ object BatchEnvironment extends JavaLogger {
     val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins -- job.environment.plugins ++ (job.files.toSet & job.environment.plugins.toSet)
     val files = (new TreeSet[File]()(fileOrdering) ++ job.files) -- plugins
 
-    val runtime = replicateTheRuntime(job.job, job.environment, replicate)
+    val runtime = replicateTheRuntime(job.environment, replicate)
 
     val executionMessage = createExecutionMessage(
-      job.job,
       jobFile,
       files,
       plugins,
@@ -296,7 +296,6 @@ object BatchEnvironment extends JavaLogger {
 
 
   def replicateTheRuntime(
-    job:              Job,
     environment:      BatchEnvironment,
     replicate: (File, TransferOptions) => ReplicatedFile,
   )(implicit services: BatchEnvironment.Services) = {
@@ -312,7 +311,6 @@ object BatchEnvironment extends JavaLogger {
   }
 
   def createExecutionMessage(
-    job:                 Job,
     jobFile:             File,
     serializationFile:   Iterable[File],
     serializationPlugin: Iterable[File],
@@ -336,39 +334,27 @@ object BatchEnvironment extends JavaLogger {
     environmentJobs.forall(_.state == ExecutionState.KILLED)
   }
 
-  def finishedJob(environment: BatchEnvironment, job: Job) = {
-    ExecutionJobRegistry.finished(environment.registry, job, environment)
-  }
+//  def finishedJob(environment: BatchEnvironment, job: Job) = {
+//    ExecutionJobRegistry.finished(environment.registry, job, environment)
+//  }
 
   def finishedExecutionJob(environment: BatchEnvironment, job: BatchExecutionJob) = {
     ExecutionJobRegistry.finished(environment.registry, job, environment)
     environment.finishedJob(job)
   }
 
-  def numberOfExecutionJobs(environment: BatchEnvironment, job: Job) = {
-    ExecutionJobRegistry.numberOfExecutionJobs(environment.registry, job)
-  }
 
   object ExecutionJobRegistry {
     def register(registry: ExecutionJobRegistry, ejob: BatchExecutionJob) = registry.synchronized {
       registry.executionJobs = ejob :: registry.executionJobs
     }
 
-    def finished(registry: ExecutionJobRegistry, job: Job, environment: BatchEnvironment) = registry.synchronized {
-      val (newExecutionJobs, removed) = registry.executionJobs.partition(_.job != job)
-      registry.executionJobs = newExecutionJobs
-      removed
-    }
-
     def finished(registry: ExecutionJobRegistry, job: BatchExecutionJob, environment: BatchEnvironment) = registry.synchronized {
-      def pruneFinishedJobs(registry: ExecutionJobRegistry) = registry.executionJobs = registry.executionJobs.filter(_.state != ExecutionState.KILLED)
-      pruneFinishedJobs(registry)
+      def pruneJobs(registry: ExecutionJobRegistry) = registry.executionJobs.filter(j => j.state != ExecutionState.KILLED && j != job)
+      registry.executionJobs = pruneJobs(registry)
     }
 
     def executionJobs(registry: ExecutionJobRegistry) = registry.synchronized { registry.executionJobs }
-    def numberOfExecutionJobs(registry: ExecutionJobRegistry, job: Job) = registry.synchronized {
-      registry.executionJobs.count(_.job == job)
-    }
   }
 
   class ExecutionJobRegistry {
@@ -399,6 +385,8 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   lazy val plugins = PluginManager.pluginsForClass(this.getClass)
 
+  lazy val jobStore = JobStore(services.newFile.makeNewDir("jobstore"))
+
   override def submit(job: Job) = {
     val bej = BatchExecutionJob(job, this)
     ExecutionJobRegistry.register(registry, bej)
@@ -421,7 +409,6 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 }
 
 object BatchExecutionJob {
-  def apply(job: Job, environment: BatchEnvironment) = new BatchExecutionJob(job, environment)
 
   def toClassPath(c: String) = s"${c.replace('.', '/')}.class"
   def toClassName(p: String) = p.dropRight(".class".size).replace("/", ".")
@@ -501,25 +488,33 @@ object BatchExecutionJob {
   }
 
 
+  def apply(job: Job, environment: BatchEnvironment) = {
+    import environment.services._
+
+    val pluginsAndFiles = environment.services.serializerService.pluginsAndFiles(Job.moleJobs(job).map(RunnableTask(_)))
+
+    def closureBundleAndPlugins = {
+      import environment.services._
+      val replClasses = pluginsAndFiles.replClasses
+      environment.relpClassesCache.cache(Job.moleExecution(job), pluginsAndFiles.replClasses.map(_.getName).toSet, preCompute = false) { _ =>
+        BatchExecutionJob.replClassesToPlugins(replClasses)
+      }
+    }
+
+    val plugins = pluginsAndFiles.plugins ++ closureBundleAndPlugins._1
+    val storedJob = JobStore.store(environment.jobStore, job)
+
+    new BatchExecutionJob(storedJob, environment,  pluginsAndFiles.files, plugins)
+  }
 }
 
-class BatchExecutionJob(val job: Job, val environment: BatchEnvironment) extends ExecutionJob { bej ⇒
+class BatchExecutionJob(val storedJob: StoredJob, val environment: BatchEnvironment, val files: Seq[File], val plugins: Seq[File]) extends ExecutionJob { bej ⇒
 
-  def moleJobs = Job.moleJobs(job)
+  import environment.services._
+
+  def moleJobIds = storedJob.storedMoleJobs.map(_.id)
+  private def job = JobStore.load(storedJob)
   def runnableTasks = Job.moleJobs(job).map(RunnableTask(_))
-
-  @transient lazy val plugins = pluginsAndFiles.plugins ++ closureBundleAndPlugins._1
-  def files =  pluginsAndFiles.files
-
-  @transient lazy val pluginsAndFiles = environment.services.serializerService.pluginsAndFiles(runnableTasks)
-
-  def closureBundleAndPlugins = {
-    import environment.services._
-    val replClasses = pluginsAndFiles.replClasses
-    environment.relpClassesCache.cache(Job.moleExecution(job), pluginsAndFiles.replClasses.map(_.getName).toSet, preCompute = false) { _ =>
-      BatchExecutionJob.replClassesToPlugins(replClasses)
-    }
-  }
 
   def usedFiles: Iterable[File] =
     (files ++

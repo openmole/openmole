@@ -42,9 +42,9 @@ package object execution {
   type EnvironmentProvider = MoleServices ⇒ Environment
 
   object LocalEnvironmentProvider {
-    def apply(build: () ⇒ LocalEnvironment) = build
+    def apply(build: MoleServices ⇒ LocalEnvironment) = build
   }
 
-  type LocalEnvironmentProvider = () ⇒ LocalEnvironment
+  type LocalEnvironmentProvider = MoleServices ⇒ LocalEnvironment
 
 }
