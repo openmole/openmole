@@ -177,7 +177,7 @@ class ExecutionPanel {
                 }
               }
               addToBanner(execID, BannerAlert.div(failedDiv(execID)).critical)
-              (ExecutionDetails("0", 0, Some(f.error), f.environmentStates), info.state)
+              (ExecutionDetails("0", 0, Some(f.error), f.environmentStates), (if (!f.clean) "cleaning" else info.state))
             case f: ExecutionInfo.Finished ⇒
               addToBanner(execID, BannerAlert.div(succesDiv(execID)))
               (ExecutionDetails(ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates), (if (!f.clean) "cleaning" else info.state))
