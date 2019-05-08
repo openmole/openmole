@@ -28,19 +28,19 @@ For more details on the calibration using genetic algorithms, see the @aa("GA de
 
 
 @h2{Single criterion Calibration}
+@h3{Method scores}
 
 @Resource.rawFrag(Resource.img.method.GAsingleID)
 
-
-@h3{Method scores}
+@br
 
 The single criterion calibration method is designed to solve an optimization problem, so unsurprisingly it performs well regarding the optimization grade.
 Since it is only focused towards discovering the best performing individual (parameter set), this method doesn't provide insights about the model sensitivity regarding its input parameters, as it does not keep full records of the past input samplings leading to the optimal solution.
 
 @br
 
-For the same reason, this method does not intend to cover the entirety of the input and output spaces, and thus does not perform well regarding the input and output exploration grades.
-It concentrates the sampling of the input space towards the part wich minimizes the fitness, and therefore intentionally neglects the part of the input space leading to high fitness values.
+For the same reason, this method is not intended to cover the entirety of the input and output spaces, and thus does not perform well regarding the input and output exploration grades.
+It concentrates the sampling of the input space towards the part which minimizes the fitness, and therefore intentionally neglects the part of the input space leading to high fitness values.
 Calibration can handle stochasticity, using a @aa("specific method", href := stochasticityManagement.file).
 
 @br
@@ -55,7 +55,7 @@ However, the number of objectives (output dimensionality) should be limited to a
 
 @br
 
-Single criterion calibration answers the following question: for a given target value of output o1, what is(are) the parameter set(s) (i, j , k) that produce the closest values of o1 to the target?
+Single criterion calibration answers the following question: for a given target value of the output @b{o1}, what is(are) the parameter set(s) @b{(i, j , k)} producing the output value(s) closest to the target?
 
 
 @h3{Typed signature}
@@ -77,17 +77,17 @@ In other words, this function takes a model M whose signature is (X→Y) (since 
 
 
 
-@h2{Multi-criteria Calibration}
+@h2{Multi criteria Calibration}
+@h3{Method scores}
 
 @Resource.rawFrag(Resource.img.method.GAmultiID)
 
-
-@h3{Method scores}
+@br
 
 The multi criteria calibration method slightly differs from the single criterion version.
 It suffers the same limitations regarding input and output spaces.
 However, since it may reveal a Pareto frontier and the underlying trade-off, it reveals a little bit of the model sensitivity, showing that the model performance regarding a criterion is impacted by its performances regarding the others.
-This is not genuine sensitivity as in sensitivity analysis, but still, it reveals a variation of your model outputs, which is not bad after all!
+This is not genuine sensitivity as in sensitivity analysis, but still, it outlines a variation of your model outputs, which is not bad after all!
 
 @br@br
 
@@ -96,7 +96,7 @@ This is not genuine sensitivity as in sensitivity analysis, but still, it reveal
 
 @br
 
-Multi criteria calibration answers the following question: for a given target pattern (o1,o2), what are the parameter sets (i,j) that produce the closest output values to the target pattern ?
+Multi criteria calibration answers the following question: for a given target pattern @b{(o1,o2)}, what are the parameter sets @b{(i,j)} that produce the closest output values to the target pattern ?
 
 @br
 
@@ -106,8 +106,11 @@ Sometimes a Pareto Frontier may appear!
 @h3{Differences between single and multi criteria calibration}
 
 Calibration boils down to minimizing a distance measure between the model output and some data.
-When there is only a single distance measure considered, it is single criterion calibration.
-When there are more than one distances that matter, it is multi-criteria calibration.
+When there is only one distance measure considered, it is single criterion calibration.
+When there are more than one distance that matter, it is multi-criteria calibration.
+
+@br
+
 For example, one may study a prey-predator model and want to find parameter values for which the model reproduces some expected size of both the prey and predator populations.
 
 @br@br
@@ -144,19 +147,19 @@ In other words, this function takes a model M whose signature is (X→Y), an ele
 
 
 
-@h2{Calibration with OpenMOLE}
+@h2{Calibration within OpenMOLE}
 
 Single and multi-criteria calibration in OpenMOLE are both done with the NSGA2 algorithm.
 It takes the following parameters:
 
 @ul
-  @li{@hl.code("mu"): the population size,}
-  @li{@hl.code("genome"): a list of the model parameters and their respective variation intervals,}
-  @li{@hl.code("objectives"): a list of the distance measures (which in the single criterion case will contain only one measure),}
-  @li{@hl.code("algorithm"): the nsga2 algorithm defining the evolution,}
-  @li{@hl.code("evaluation"): the OpenMOLE task that runs the simulation,}
-  @li{@hl.code("parallelism"): the number of simulations that will be run in parallel,}
-  @li{@hl.code("termination"): the total number of evaluations (execution of the task passed to the parameter "evaluation") to be executed.}
+  @li{@code{mu} the population size,}
+  @li{@code{genome} a list of the model parameters and their respective variation intervals,}
+  @li{@code{objectives} a list of the distance measures (which in the single criterion case will contain only one measure),}
+  @li{@code{algorithm} the NSGA2 algorithm defining the evolution,}
+  @li{@code{evaluation} the OpenMOLE task that runs the simulation (@i{i.e.} the model),}
+  @li{@code{parallelism} the number of simulations that will be run in parallel,}
+  @li{@code{termination} the total number of evaluations (execution of the task passed to the parameter "evaluation") to be executed.}
 
 @br
 
@@ -191,11 +194,10 @@ Where @code{param1}, @code{param2}, @code{param3} and @code{param4} are inputs o
 The output of the genetic algorithm must be captured with a hook which saves the current optimal population. The arguments for the hook are:
 
 @ul
-  @li{@hl.code("evolution"): the genetic algorithm,}
-  @li{@hl.code("dir"): the directory in which to store the population files,}
-  @li{@hl.code("frequency"): (@i{Optional}, Long) the frequency at which the generations should be saved.}
+  @li{@code{evolution} the genetic algorithm,}
+  @li{@code{dir} the directory in which to store the population files,}
+  @li{@code{frequency} (@i{Optional}, Long) the frequency at which the generations should be saved.}
 
-@br@br
 
 A minimal working workflow is given below:
 
@@ -232,6 +234,7 @@ NSGA2Evolution(
 
 More details and advanced notions can be found on the @a("GA detailed page", href := geneticAlgorithm.file).
 
-@h2{Stochastic models}
 
-@a("You can check additional options to calibrate stochastic models on this page.", href := stochasticityManagement.file)
+@h3{Stochastic models}
+
+You can check additional options to calibrate stochastic models on @aa("this page", href := stochasticityManagement.file).

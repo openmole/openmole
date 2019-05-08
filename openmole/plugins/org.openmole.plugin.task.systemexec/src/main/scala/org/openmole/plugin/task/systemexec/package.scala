@@ -170,7 +170,7 @@ package object systemexec extends SystemExecPackage {
    * @param line
    * @return
    */
-  def parse(line: String) = {
+  def parse(line: String, keepQuotes: Boolean = false): Vector[String] = {
     var inDoubleQuote = false
     var inSingleQuote = false
     var blocked = false
@@ -198,19 +198,19 @@ package object systemexec extends SystemExecPackage {
 
         case (false, false, false, '"', _) ⇒
           inDoubleQuote = true
-        // currentArguments.append(character)
+          if (keepQuotes) currentArguments.append('"')
 
         case (true, false, false, '"', false) ⇒
           inDoubleQuote = false
-        //currentArguments.append(character)
+          if (keepQuotes) currentArguments.append('"')
 
         case (false, false, false, ''', _) ⇒
           inSingleQuote = true
-        //currentArguments.append(character)
+          if (keepQuotes) currentArguments.append(''')
 
         case (false, true, false, ''', false) ⇒
           inSingleQuote = false
-        //currentArguments.append(character)
+          if (keepQuotes) currentArguments.append(character)
 
         case (false, false, false, c, _) ⇒ currentArguments.append(c)
         case (true, false, false, c, _)  ⇒ currentArguments.append(c)
@@ -289,6 +289,9 @@ package object systemexec extends SystemExecPackage {
         )
       }
 
+      // debugging - please do not remove
+      //println("Running command:\n" + command.toList) //+ "\n" + inheritedEnvironment.mkString("\n") + "\n" + openmoleEnvironment.mkString("\n"))
+
       val returnCode = executeProcess(process, out, err)
 
       val result =
@@ -334,12 +337,23 @@ package object systemexec extends SystemExecPackage {
   sealed trait ExecutionCommand
   object ExecutionCommand {
 
-    case class Raw(command: String) extends ExecutionCommand
+    /**
+     * The raw command may be split depending on parsing level for quotes in different parts
+     * @param command
+     * @param keepQuotes
+     */
+    case class Raw(command: List[String], keepQuotes: List[Boolean]) extends ExecutionCommand
     case class Parsed(command: String*) extends ExecutionCommand
+
+    object Raw {
+      def apply(command: String): Raw = Raw(List(command), List(false))
+      def apply(commands: List[String]): Raw = Raw(commands, List.fill(commands.size)(false))
+      def apply(commands: List[String], keepQuotes: Boolean): Raw = Raw(commands, List.fill(commands.size)(keepQuotes))
+    }
 
     def parse(executionCommand: ExecutionCommand): Vector[String] =
       executionCommand match {
-        case c: Raw    ⇒ systemexec.parse(c.command)
+        case c: Raw    ⇒ c.command.zip(c.keepQuotes).map { case (com, k) ⇒ systemexec.parse(com, k) }.reduce(_ ++ _)
         case p: Parsed ⇒ p.command.toVector
       }
 
