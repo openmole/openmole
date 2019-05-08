@@ -134,7 +134,7 @@ object MoleTask {
 
       execution listen {
         case (_, ev: MoleExecution.JobFinished) ⇒
-          lastContextLock { if (ev.capsule == last) lastContext = Some(ev.moleJob.context) }
+          lastContextLock { if (ev.capsule == last) lastContext = Some(ev.context) }
       }
 
       (execution, moleServices.newFile)

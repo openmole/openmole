@@ -18,6 +18,8 @@ package org.openmole.core.workflow
 
 import java.io.PrintStream
 
+import org.openmole.core.workflow.mole.MoleServices
+
 package object execution {
 
   def display(stream: PrintStream, label: String, content: String) =
@@ -34,15 +36,15 @@ package object execution {
     }
 
   object EnvironmentProvider {
-    def apply[T <: Environment](build: () ⇒ T): EnvironmentProvider = build
+    def apply[T <: Environment](build: MoleServices ⇒ T): EnvironmentProvider = build
   }
 
-  type EnvironmentProvider = () ⇒ Environment
+  type EnvironmentProvider = MoleServices ⇒ Environment
 
   object LocalEnvironmentProvider {
-    def apply(build: () ⇒ LocalEnvironment) = build
+    def apply(build: MoleServices ⇒ LocalEnvironment) = build
   }
 
-  type LocalEnvironmentProvider = () ⇒ LocalEnvironment
+  type LocalEnvironmentProvider = MoleServices ⇒ LocalEnvironment
 
 }

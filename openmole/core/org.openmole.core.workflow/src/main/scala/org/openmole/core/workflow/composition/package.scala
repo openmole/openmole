@@ -313,23 +313,22 @@ package composition {
       )
 
     def DSLContainerExtension[T](
-      transitionDSL: DSL,
-      data:          T,
-      output:        Option[Task]                = None,
-      delegate:      Vector[Task]                = Vector.empty,
-      environment:   Option[EnvironmentProvider] = None,
-      grouping:      Option[Grouping]            = None,
-      hooks:         Vector[Hook]                = Vector.empty)(implicit definitionScope: DefinitionScope) =
+      dsl:         DSLContainer[_],
+      data:        T,
+      output:      Option[Task]                = None,
+      delegate:    Vector[Task]                = Vector.empty,
+      environment: Option[EnvironmentProvider] = None,
+      grouping:    Option[Grouping]            = None,
+      hooks:       Vector[Hook]                = Vector.empty)(implicit definitionScope: DefinitionScope) =
       composition.DSLContainer[T](
-        transitionDSL,
-        output,
-        delegate,
-        environment,
-        grouping,
-        hooks,
+        dsl,
+        output orElse dsl.output,
+        delegate ++ dsl.delegate,
+        environment orElse dsl.environment,
+        grouping orElse dsl.grouping,
+        hooks ++ dsl.hooks,
         data,
-        definitionScope
-      )
+        definitionScope)
 
     type DSLContainer[T] = composition.DSLContainer[T]
 
@@ -415,9 +414,16 @@ package composition {
               h ← container.hooks
             } yield o -> h
 
+          val environments =
+            for {
+              c ← container.delegate.map(d ⇒ slots(d).capsule)
+              e ← container.environment
+            } yield c -> e
+
           Puzzle.add(
             puzzle,
-            hooks = hooks
+            hooks = hooks,
+            environments = environments.toMap
           )
         }
 

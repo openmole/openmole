@@ -50,48 +50,37 @@ class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment],
   def priority(localExecutionJob: LocalExecutionJob) = 1
   private val jobs = PriorityQueue[LocalExecutionJob]()
 
-  private val executors = {
+  private val executorMap = {
     val map = mutable.HashMap[LocalExecutor, Thread]()
     (0 until nbThreads).foreach { _ ⇒ map += ExecutorPool.createExecutor(environment, threadProvider) }
     map
   }
 
-  override def finalize = executors.foreach {
+  def runningJobs = executorMap.map(_._1).flatMap(_.runningJob)
+
+  override def finalize = executorMap.foreach {
     case (exe, thread) ⇒ exe.stop = true; thread.interrupt
   }
 
-  private[local] def addExecutor() = executors.synchronized {
-    executors += ExecutorPool.createExecutor(environment, threadProvider)
-  }
-
-  private[local] def removeExecutor(ex: LocalExecutor) = executors.synchronized {
-    executors.remove(ex)
-  }
-
   private[local] def takeNextJob: LocalExecutionJob = jobs.dequeue
-
-  private[local] def idle(localExecutor: LocalExecutor) = {
-    val thread = executors.synchronized { executors.remove(localExecutor) }.get
-    addExecutor()
-  }
 
   def enqueue(job: LocalExecutionJob) = jobs.enqueue(job, priority(job))
 
   def waiting: Int = jobs.size
 
   def running: Int =
-    executors.synchronized {
-      executors.toList.count { case (e, t) ⇒ e.running }
+    executorMap.synchronized {
+      executorMap.toList.count { case (e, _) ⇒ e.runningJob.isDefined }
     }
 
   def stop() = {
-    executors.synchronized {
-      executors.foreach {
+    executorMap.synchronized {
+      executorMap.foreach {
         case (exe, thread) ⇒
           exe.stop = true
           thread.stop()
       }
-      executors.clear()
+      executorMap.clear()
     }
 
     jobs.clear()
