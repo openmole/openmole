@@ -30,8 +30,9 @@ object KillActor {
     job.state = ExecutionState.KILLED
 
     if (!JobManager.canceled(job.storedJob) && !job.environment.stopped) {
+      val loadedJob = JobStore.load(job.storedJob)
       JobManager.sendToMoleExecution(job.storedJob) { state ⇒
-        if (!JobManager.jobIsFinished(state, job.storedJob)) job.environment.submit(JobStore.load(job.storedJob))
+        if (!JobManager.jobIsFinished(state, job.storedJob)) job.environment.submit(loadedJob)
       }
     }
 
