@@ -358,13 +358,12 @@ lazy val gridscaleHTTP = OsgiProject(dir, "gridscale.http", imports = Seq("*"), 
 
 lazy val gridscaleSSH = OsgiProject(dir, "gridscale.ssh", imports = Seq("*")) settings (
   libraryDependencies += "fr.iscpif.gridscale" %% "ssh" % gridscaleVersion,
-  libraryDependencies += "net.i2p.crypto" % "eddsa" % "0.2.0",
   version := gridscaleVersion
-) settings(settings: _*) dependsOn(jzlib) dependsOn(gridscale)
+) settings(settings: _*) dependsOn(sshj) dependsOn(gridscale)
 
-lazy val jzlib = OsgiProject(dir, "com.jcraft.jzlib", imports = Seq("*")) settings (
-  libraryDependencies += "com.jcraft" % "jzlib" % "1.1.3",
-  version := "1.1.3"
+lazy val sshj = OsgiProject(dir, "com.hierynomus.sshj", imports = Seq("*"), exports = Seq("com.hierynomus.*", "net.schmizz.*"), privatePackages = Seq("!scala.*", "!org.bouncycastle.*", "!org.slf4j.*", "**"), dynamicImports = Seq("org.bouncycastle.*")) settings (
+  libraryDependencies += "com.hierynomus" % "sshj" % "0.27.0",
+  version := "0.27.0"
 ) settings(settings: _*)
 
 lazy val gridscaleCluster = OsgiProject(dir, "gridscale.cluster", imports = Seq("*")) settings (
