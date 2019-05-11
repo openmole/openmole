@@ -106,13 +106,13 @@ The Profile method takes the following parameters:
   @li{@hl.code("stochastic"): the seed provider, mandatory if your model contains randomness}
 @p
 
-@p To profile a parameter, use the GenomeProfile constructor like so:
+@p To profile a parameter, use the ProfileEvolution constructor like so:
   @br @hl.openmole("""
   val param1 = Val[Double]
   val param2 = Val[Double]
 
 
-  GenomeProfileEvolution(
+  ProfileEvolution(
     evaluation = modelTask,
     parallelism = 10,
     termination = 100,
