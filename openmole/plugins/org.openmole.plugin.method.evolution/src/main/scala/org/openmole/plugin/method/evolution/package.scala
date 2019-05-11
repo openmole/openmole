@@ -235,4 +235,8 @@ package object evolution {
     DSLContainerExtension[EvolutionWorkflow](DSLContainer(puzzle), output = Some(masterTask), delegate = Vector(islandTask), data = t)
   }
 
+  // For backward compatibility
+  def GenomeProfileEvolution = ProfileEvolution
+  def GenomeProfile = Profile
+
 }
