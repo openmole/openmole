@@ -67,7 +67,7 @@ object RTask {
     install:              Seq[String]                           = Seq.empty,
     libraries:            Seq[InstallCommand]                   = Seq.empty,
     forceUpdate:          Boolean                               = false,
-    version:              String                                = "3.3.3",
+    version:              String                                = "3.5.1",
     errorOnReturnValue:   Boolean                               = true,
     returnValue:          OptionalArgument[Val[Int]]            = None,
     stdOut:               OptionalArgument[Val[String]]         = None,
