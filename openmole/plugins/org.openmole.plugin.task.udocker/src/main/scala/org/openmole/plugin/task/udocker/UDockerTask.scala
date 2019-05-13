@@ -87,7 +87,7 @@ object UDockerTask {
     stdOut:             OptionalArgument[Val[String]]               = None,
     stdErr:             OptionalArgument[Val[String]]               = None,
     errorOnReturnValue: Boolean                                     = true,
-    hostFiles:          Seq[(String, String)]                       = Vector.empty,
+    hostFiles:          Seq[HostFile]                               = Vector.empty,
     workDirectory:      OptionalArgument[String]                    = None,
     containerPoolKey:   CacheKey[WithInstance[(File, ContainerID)]] = CacheKey()
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService): UDockerTask =
@@ -112,7 +112,7 @@ object UDockerTask {
     cacheInstall:   Boolean                  = true,
     forceUpdate:    Boolean                  = false,
     reuseContainer: Boolean                  = true,
-    hostFiles:      Seq[(String, String)]    = Vector.empty,
+    hostFiles:      Seq[HostFile]            = Vector.empty,
     workDirectory:  OptionalArgument[String] = None)(implicit newFile: NewFile, preference: Preference, threadProvider: ThreadProvider, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService) = {
     val uDocker =
       UDockerArguments(
@@ -123,7 +123,7 @@ object UDockerTask {
         mode = mode orElse Some("P1"),
         reuseContainer = reuseContainer,
         user = user,
-        hostFiles = hostFiles.map { case (f, t) ⇒ HostFile(f, t) }.toVector,
+        hostFiles = hostFiles.toVector,
         workDirectory = workDirectory.option)
 
     installLibraries(uDocker, install, cacheInstall, forceUpdate)
