@@ -130,6 +130,7 @@ object GUIServlet {
   def apply(arguments: GUIServer.ServletArguments) = {
     val servlet = new GUIServlet(arguments)
     Utils.addPluginRoutes(servlet.addRouter, GUIServices.ServicesProvider(arguments.services, servlet.cypher.get))
+    servlet addRouter (OMRouter[Api](AutowireServer.route[Api](servlet.apiImpl)))
     servlet
   }
 }
@@ -348,28 +349,21 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     }
   }
 
-  addRouter(OMRouter[Api](AutowireServer.route[Api](apiImpl)))
-
   def addRouter(router: OMRouter): Unit = {
     post(s"/${router.route}/*") {
-      val req = Await.result(
-        {
+      val is = request.getInputStream
+      val bytes: Array[Byte] = Iterator.continually(is.read()).takeWhile(_ != -1).map(_.asInstanceOf[Byte]).toArray[Byte]
+      val bb = ByteBuffer.wrap(bytes)
 
-          val is = request.getInputStream
-          val bytes: Array[Byte] = Iterator.continually(is.read()).takeWhile(_ != -1).map(_.asInstanceOf[Byte]).toArray[Byte]
-          val bb = ByteBuffer.wrap(bytes)
-          //val un = Unpickle[Map[String, ByteBuffer]].fromBytes(bb)
-          router.router(
-            autowire.Core.Request(
-              router.route.split("/").toSeq ++ multiParams("splat").head.split("/"),
-              Unpickle[Map[String, ByteBuffer]].fromBytes(bb)
-            )
+      val rout =
+        router.router(
+          autowire.Core.Request(
+            router.route.split("/").toSeq ++ multiParams("splat").head.split("/"),
+            Unpickle[Map[String, ByteBuffer]].fromBytes(bb)
           )
+        )
 
-        },
-        Duration.Inf
-      )
-
+      val req = Await.result(rout, Duration.Inf)
       val data = Array.ofDim[Byte](req.remaining)
       req.get(data)
       Ok(data)

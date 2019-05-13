@@ -19,15 +19,15 @@ package org.openmole.core.workflow.execution.local
 
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job.MoleJob
-import org.openmole.core.workflow.mole.MoleExecution
+import org.openmole.core.workflow.mole.{ MoleExecution, SubMoleExecution }
 import org.openmole.core.workflow.task._
 
 /**
  * An [[ExecutionJob]] on the local environment (retrieved from the [[TaskExecutionContext]])
  * @param executionContext
- * @param moleJobs
  * @param moleExecution
  */
-case class LocalExecutionJob(executionContext: TaskExecutionContext, moleJobs: Iterable[MoleJob], moleExecution: Option[MoleExecution]) extends ExecutionJob {
+case class LocalExecutionJob(executionContext: TaskExecutionContext, jobs: Iterable[MoleJob], moleExecution: Option[MoleExecution]) extends ExecutionJob {
+  def moleJobIds = jobs.map(_.id)
   def environment = executionContext.localEnvironment
 }

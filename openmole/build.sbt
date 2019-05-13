@@ -425,7 +425,7 @@ lazy val slurm = OsgiProject(pluginDir, "org.openmole.plugin.environment.slurm",
   (libraryDependencies += Libraries.gridscaleSLURM) settings (pluginSettings: _*)
 
 lazy val ssh = OsgiProject(pluginDir, "org.openmole.plugin.environment.ssh", imports = Seq("*")) dependsOn(openmoleDSL, event, batch, gridscale) settings
-  (libraryDependencies += Libraries.gridscaleSSH) settings (pluginSettings: _*)
+  (libraryDependencies ++= Libraries.gridscaleSSH) settings (pluginSettings: _*)
 
 
 /* Grouping */
@@ -726,7 +726,7 @@ def binDir = file("bin")
 
 
 def bundleFilter(m: ModuleID, artifact: Artifact) = {
-  def excludedLibraryDependencies = Set("slick", "squants", "shapeless", "sourcecode")
+  def excludedLibraryDependencies = Set("slick", "squants", "shapeless", "sourcecode", "eddsa", "sshj")
 
   def exclude =
     (m.organization != "org.openmole.library" && excludedLibraryDependencies.exists(m.name.contains)) ||
@@ -735,7 +735,7 @@ def bundleFilter(m: ModuleID, artifact: Artifact) = {
 
 
   def include = (artifact.`type` == "bundle" && m.name != "osgi") ||
-    (m.name == "sshj") ||
+    //(m.name == "sshj") ||
     m.organization == "org.bouncycastle" ||
     (m.name == "httpclient-osgi") || (m.name == "httpcore-osgi") ||
     (m.organization == "org.osgi" && m.name != "osgi")

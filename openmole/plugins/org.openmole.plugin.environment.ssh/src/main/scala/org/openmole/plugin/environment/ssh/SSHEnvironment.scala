@@ -58,7 +58,7 @@ object SSHEnvironment extends JavaLogger {
   )(implicit services: BatchEnvironment.Services, cypher: Cypher, authenticationStore: AuthenticationStore, varName: sourcecode.Name) = {
     import services._
 
-    EnvironmentProvider { () ⇒
+    EnvironmentProvider { ms ⇒
       new SSHEnvironment(
         user = user,
         host = host,
@@ -70,7 +70,8 @@ object SSHEnvironment extends JavaLogger {
         threads = threads,
         storageSharedLocally = storageSharedLocally,
         name = Some(name.getOrElse(varName.value)),
-        authentication = SSHAuthentication.find(user, host, port)
+        authentication = SSHAuthentication.find(user, host, port),
+        services = services.set(ms)
       )
     }
   }
@@ -124,9 +125,11 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   val threads:              Option[Int],
   val storageSharedLocally: Boolean,
   val name:                 Option[String],
-  val authentication:       A
-)(implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
+  val authentication:       A,
+  val services:             BatchEnvironment.Services
+) extends BatchEnvironment { env ⇒
 
+  implicit def servicesImplicit = services
   import services._
 
   lazy val jobUpdater = new SSHJobService.Updater(WeakReference(this))
@@ -149,8 +152,10 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   }
 
   override def stop() = {
+    stopped = true
     cleanSSHStorage(storageService, background = false)
     jobUpdater.stop = true
+    BatchEnvironment.waitJobKilled(this)
     sshInterpreter().close
   }
 

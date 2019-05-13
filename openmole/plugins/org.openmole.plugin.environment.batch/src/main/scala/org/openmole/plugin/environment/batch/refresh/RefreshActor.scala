@@ -19,7 +19,7 @@ package org.openmole.plugin.environment.batch.refresh
 
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchJobControl, ResubmitException }
+import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchJobControl }
 import org.openmole.tool.logger.JavaLogger
 
 object RefreshActor extends JavaLogger {
@@ -49,8 +49,6 @@ object RefreshActor extends JavaLogger {
         }
       }
       catch {
-        case _: ResubmitException ⇒
-          JobManager ! Resubmit(job, bj)
         case e: Throwable ⇒
           if (updateErrorsInARow >= preference(BatchEnvironment.MaxUpdateErrorsInARow)) {
             JobManager ! Error(job, e, BatchJobControl.tryStdOutErr(bj).toOption)

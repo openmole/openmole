@@ -31,16 +31,15 @@ class FileServiceGC(fileService: WeakReference[FileService]) extends IUpdatable 
       case Some(fileService) ⇒
         fileService.deleteEmpty.synchronized {
           def deleteEmpty(files: Vector[File]): Vector[File] = {
-            val (empty, nonEmpty) = files.partition(f ⇒ !f.exists() || f.isDirectoryEmpty)
-            empty.foreach { f ⇒ f.recursiveDelete }
-            if (!empty.isEmpty) deleteEmpty(nonEmpty) else nonEmpty
+            val (deletedDirectories, nonEmptyDirectories) = files.filter(_.exists()).partition(_.delete())
+            if (!deletedDirectories.isEmpty) deleteEmpty(nonEmptyDirectories) else nonEmptyDirectories
           }
 
           val nonEmpty = deleteEmpty(fileService.deleteEmpty.toVector)
+
           fileService.deleteEmpty.clear()
           fileService.deleteEmpty ++= nonEmpty
         }
-
         true
       case None ⇒ false
     }
