@@ -94,8 +94,8 @@ sealed class ExpMixtureThresholdSpatialSampling(
 object PercolationGridSpatialSampling {
   def apply(samples: FromContext[Int], gridSize: FromContext[Int],
             percolationProba: ScalarOrSequenceOfDouble[_], bordPoints: ScalarOrSequenceOfDouble[_],
-            linkwidth: ScalarOrSequenceOfDouble[_], prototype: Val[_]) =
-    new PercolationGridSpatialSampling(samples, gridSize, percolationProba, bordPoints, linkwidth, prototype)
+            linkwidth: ScalarOrSequenceOfDouble[_], maxIterations: Int = 10000, prototype: Val[_]) =
+    new PercolationGridSpatialSampling(samples, gridSize, percolationProba, bordPoints, linkwidth, prototype, maxIterations)
 }
 
 /**
@@ -115,6 +115,7 @@ sealed class PercolationGridSpatialSampling(
   val bordPoints:          ScalarOrSequenceOfDouble[_],
   val linkwidth:           ScalarOrSequenceOfDouble[_],
   val prototype:           Val[_],
+  val maxIterations:       Int                         = 10000,
   val morphologyPrototype: Option[Val[_]]              = None
 ) extends Sampling {
 
@@ -131,7 +132,7 @@ sealed class PercolationGridSpatialSampling(
     val bord: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(bordPoints), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
     val width: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(linkwidth), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
 
-    val generators = proba.zip(bord.zip(width)).map { case (p, (b, w)) ⇒ SpatialData.PercolationGridGenerator(size, p, b.toInt, w) }.toArray
+    val generators = proba.zip(bord.zip(width)).map { case (p, (b, w)) ⇒ SpatialData.PercolationGridGenerator(size, p, b.toInt, w, maxIterations) }.toArray
 
     def values: Array[RasterLayerData[Double]] = generators map { _.generateGrid(random()).map { _.map { case d ⇒ if (d > 0.0) 1.0 else 0.0 } } }
 
