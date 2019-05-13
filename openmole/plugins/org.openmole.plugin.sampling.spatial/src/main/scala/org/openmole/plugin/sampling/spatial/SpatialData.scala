@@ -571,11 +571,12 @@ object SpatialData {
     size:             Int,
     percolationProba: Double,
     bordPoints:       Int,
-    linkwidth:        Double
+    linkwidth:        Double,
+    maxIterations:    Int
   ) extends GridGenerator {
 
     override def generateGrid(implicit rng: Random): RasterLayerData[Double] = {
-      Network.networkToGrid(PercolationNetworkGenerator(size, percolationProba, bordPoints, linkwidth).generateNetwork(rng), linkwidth = linkwidth).map {
+      Network.networkToGrid(PercolationNetworkGenerator(size, percolationProba, bordPoints, linkwidth, maxIterations).generateNetwork(rng), linkwidth = linkwidth).map {
         _.map { 1.0 - _ }
       }
     }
@@ -683,9 +684,10 @@ object SpatialData {
     worldSize:        Int,
     percolationProba: Double,
     bordPoints:       Int,
-    linkwidth:        Double
+    linkwidth:        Double,
+    maxIterations:    Int
   ) extends NetworkGenerator {
-    override def generateNetwork(implicit rng: Random): Network = PercolationNetworkGenerator.bondPercolatedNetwork(worldSize, percolationProba, bordPoints, linkwidth)
+    override def generateNetwork(implicit rng: Random): Network = PercolationNetworkGenerator.bondPercolatedNetwork(worldSize, percolationProba, bordPoints, linkwidth, maxIterations)
   }
 
   object PercolationNetworkGenerator {
@@ -698,13 +700,13 @@ object SpatialData {
      * @param percolationProba
      * @return
      */
-    def bondPercolatedNetwork(worldSize: Int, percolationProba: Double, bordPoints: Int, linkwidth: Double, maxIterations: Int = 10000)(implicit rng: Random): Network = {
+    def bondPercolatedNetwork(worldSize: Int, percolationProba: Double, bordPoints: Int, linkwidth: Double, maxIterations: Int)(implicit rng: Random): Network = {
       var network = GridNetworkGenerator(worldSize).generateNetwork //.gridNetwork(worldSize/10,worldSize/10,worldSize)
       var bordConnected = 0
       val xmin = network.nodes.map { _.x }.min; val xmax = network.nodes.map { _.x }.max
       val ymin = network.nodes.map { _.y }.min; val ymax = network.nodes.map { _.y }.max
       var iteration = 0
-      while (bordConnected < bordPoints || iteration < maxIterations) {
+      while (bordConnected < bordPoints && iteration < maxIterations) {
         network = Network.percolate(network, percolationProba, linkFilter = {
           l: Link ⇒
             l.weight == 0.0 && (
@@ -776,7 +778,7 @@ object SpatialData {
         case "random"      ⇒ RandomGridGenerator(gridSize).generateGrid(rng).map { _.map { case d ⇒ if (d < randomDensity) 1.0 else 0.0 } }
         case "expMixture"  ⇒ ExpMixtureGenerator(gridSize, expMixtureCenters, 1.0, expMixtureRadius).generateGrid(rng).map { _.map { case d ⇒ if (d > expMixtureThreshold) 1.0 else 0.0 } }
         case "blocks"      ⇒ BlocksGridGenerator(gridSize, blocksNumber, blocksMinSize, blocksMaxSize).generateGrid(rng).map { _.map { case d ⇒ if (d > 0.0) 1.0 else 0.0 } }
-        case "percolation" ⇒ PercolationGridGenerator(gridSize, percolationProba, percolationBordPoints, percolationLinkWidth).generateGrid(rng)
+        case "percolation" ⇒ PercolationGridGenerator(gridSize, percolationProba, percolationBordPoints, percolationLinkWidth, 10000).generateGrid(rng)
         case _             ⇒ { assert(false, "Error : the requested generator does not exist"); Array.empty }
       }
 
