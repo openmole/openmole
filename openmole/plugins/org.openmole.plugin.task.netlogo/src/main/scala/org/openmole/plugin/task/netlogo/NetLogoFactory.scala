@@ -19,6 +19,10 @@ package org.openmole.plugin.task.netlogo
 
 import org.openmole.plugin.tool.netlogo.NetLogo
 
+
+/**
+  * Factory to retrieve NetLogo interface, which is instantiated by java classes using the NetLogo API
+  */
 trait NetLogoFactory {
   def apply(): NetLogo
 }
