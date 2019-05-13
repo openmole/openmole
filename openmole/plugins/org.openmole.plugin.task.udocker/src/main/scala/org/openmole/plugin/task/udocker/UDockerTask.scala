@@ -92,7 +92,7 @@ object UDockerTask {
     containerPoolKey:   CacheKey[WithInstance[(File, ContainerID)]] = CacheKey()
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService): UDockerTask =
     UDockerTask(
-      uDocker = createUDocker(image, install, user, mode, cacheInstall, forceUpdate, reuseContainer, hostFiles),
+      uDocker = createUDocker(image, install, user, mode, cacheInstall, forceUpdate, reuseContainer, hostFiles, workDirectory),
       commands = run, //Commands.value.modify(_.map(_.map(blockChars)))(run),
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
