@@ -69,14 +69,14 @@ object NetLogoTask {
 
   case class NetoLogoInstance(directory: File, workspaceDirectory: File, netLogo: NetLogo)
 
-  def openNetLogoWorkspace(netLogoFactory: NetLogoFactory, workspace: Workspace, directory: File) = {
+  def openNetLogoWorkspace(netLogoFactory: NetLogoFactory, workspace: Workspace, directory: File, switch3d: Boolean) = {
     val (workDir, script) = deployWorkspace(workspace, directory)
     val resolver = External.relativeResolver(workDir)(_)
     val netLogo = netLogoFactory()
 
     withThreadClassLoader(netLogo.getNetLogoClassLoader) {
       wrapError(s"Error while opening the file $script") {
-        netLogo.open(script.getAbsolutePath)
+        netLogo.open(script.getAbsolutePath, switch3d)
       }
     }
 
@@ -111,10 +111,10 @@ object NetLogoTask {
   def dispose(netLogo: NetLogo) =
     withThreadClassLoader(netLogo.getNetLogoClassLoader) { netLogo.dispose() }
 
-  def createPool(netLogoFactory: NetLogoFactory, workspace: NetLogoTask.Workspace, cached: Boolean)(implicit newFile: NewFile) = {
+  def createPool(netLogoFactory: NetLogoFactory, workspace: NetLogoTask.Workspace, cached: Boolean, switch3d: Boolean)(implicit newFile: NewFile) = {
     def createInstance = {
       val workspaceDirectory = newFile.newDir("netlogoworkpsace")
-      NetLogoTask.openNetLogoWorkspace(netLogoFactory, workspace, workspaceDirectory)
+      NetLogoTask.openNetLogoWorkspace(netLogoFactory, workspace, workspaceDirectory, switch3d)
     }
 
     def destroyInstance(instance: NetLogoTask.NetoLogoInstance) = {
@@ -268,6 +268,7 @@ trait NetLogoTask extends Task with ValidateTask {
   def seed: Option[Val[Int]]
   def external: External
   def reuseWorkspace: Boolean
+  def switch3d: Boolean
 
   override def validate = Validate { p ⇒
     import p._
@@ -280,7 +281,7 @@ trait NetLogoTask extends Task with ValidateTask {
   override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
     import parameters._
 
-    val pool = executionContext.cache.getOrElseUpdate(netLogoInstanceKey, NetLogoTask.createPool(netLogoFactory, workspace, reuseWorkspace))
+    val pool = executionContext.cache.getOrElseUpdate(netLogoInstanceKey, NetLogoTask.createPool(netLogoFactory, workspace, reuseWorkspace, switch3d))
 
     pool { instance ⇒
 
