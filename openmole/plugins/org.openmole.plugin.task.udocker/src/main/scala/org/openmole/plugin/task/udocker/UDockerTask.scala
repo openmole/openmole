@@ -87,18 +87,12 @@ object UDockerTask {
     stdOut:             OptionalArgument[Val[String]]               = None,
     stdErr:             OptionalArgument[Val[String]]               = None,
     errorOnReturnValue: Boolean                                     = true,
+    hostFiles:          Seq[(String, String)]                       = Vector.empty,
+    workDirectory:      OptionalArgument[String]                    = None,
     containerPoolKey:   CacheKey[WithInstance[(File, ContainerID)]] = CacheKey()
-  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService): UDockerTask = {
-
-    /*
-    def blockChars(s: String): String = {
-      val blocked = Set.empty[Char] // Set(''', '"') //, '\\')
-      s.flatMap { c ⇒ if (blocked.contains(c)) s"\\$c" else s"$c" }
-    }
-    */
-
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService): UDockerTask =
     UDockerTask(
-      uDocker = createUDocker(image, install, user, mode, cacheInstall, forceUpdate, reuseContainer),
+      uDocker = createUDocker(image, install, user, mode, cacheInstall, forceUpdate, reuseContainer, hostFiles),
       commands = run, //Commands.value.modify(_.map(_.map(blockChars)))(run),
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
@@ -109,7 +103,6 @@ object UDockerTask {
       info = InfoConfig(),
       containerPoolKey = containerPoolKey
     )
-  }
 
   def createUDocker(
     image:          ContainerImage,
@@ -118,7 +111,9 @@ object UDockerTask {
     mode:           OptionalArgument[String] = None,
     cacheInstall:   Boolean                  = true,
     forceUpdate:    Boolean                  = false,
-    reuseContainer: Boolean                  = true)(implicit newFile: NewFile, preference: Preference, threadProvider: ThreadProvider, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService) = {
+    reuseContainer: Boolean                  = true,
+    hostFiles:      Seq[(String, String)]    = Vector.empty,
+    workDirectory:  OptionalArgument[String] = None)(implicit newFile: NewFile, preference: Preference, threadProvider: ThreadProvider, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService) = {
     val uDocker =
       UDockerArguments(
         localDockerImage = toLocalImage(image) match {
@@ -127,7 +122,9 @@ object UDockerTask {
         },
         mode = mode orElse Some("P1"),
         reuseContainer = reuseContainer,
-        user = user)
+        user = user,
+        hostFiles = hostFiles.map { case (f, t) ⇒ HostFile(f, t) }.toVector,
+        workDirectory = workDirectory.option)
 
     installLibraries(uDocker, install, cacheInstall, forceUpdate)
 
