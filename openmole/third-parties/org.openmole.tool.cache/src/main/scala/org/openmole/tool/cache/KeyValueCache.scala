@@ -3,15 +3,15 @@ package org.openmole.tool.cache
 import java.util.UUID
 
 /**
-  * Wrapper for uuid key (random uuid by default)
-  * @param id
-  * @tparam T
-  */
+ * Wrapper for uuid key (random uuid by default)
+ * @param id
+ * @tparam T
+ */
 case class CacheKey[T](id: UUID = java.util.UUID.randomUUID())
 
 /**
-  * A Cache based on a HashMap
-  */
+ * A Cache based on a HashMap
+ */
 case class KeyValueCache() { self ⇒
 
   private case class Cached(t: Any, close: () ⇒ Unit)

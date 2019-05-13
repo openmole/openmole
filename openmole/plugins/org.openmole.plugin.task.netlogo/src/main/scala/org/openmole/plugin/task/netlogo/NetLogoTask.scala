@@ -41,20 +41,20 @@ object NetLogoTask {
   sealed trait Workspace
 
   /**
-    * Workspace is either a script, or a full directory
-    */
+   * Workspace is either a script, or a full directory
+   */
   object Workspace {
     case class Script(script: File, name: String) extends Workspace
     case class Directory(directory: File, name: String, script: String) extends Workspace
   }
 
   /**
-    * Errors as [[UserBadDataError]]
-    * @param msg
-    * @param f
-    * @tparam T
-    * @return
-    */
+   * Errors as [[UserBadDataError]]
+   * @param msg
+   * @param f
+   * @tparam T
+   * @return
+   */
   def wrapError[T](msg: String)(f: ⇒ T): T =
     try f
     catch {
@@ -140,10 +140,10 @@ object NetLogoTask {
   }
 
   /**
-    * Ensure a variable type is compatible with NetLogo. Goes recursively inside arrays at any level.
-    * @param x
-    * @return
-    */
+   * Ensure a variable type is compatible with NetLogo. Goes recursively inside arrays at any level.
+   * @param x
+   * @return
+   */
   def netLogoCompatibleType(x: Any) = {
     def convertArray(x: Any): AnyRef = x match {
       case a: Array[_] ⇒ a.asInstanceOf[Array[_]].map { x ⇒ convertArray(x.asInstanceOf[AnyRef]) }
@@ -168,12 +168,12 @@ object NetLogoTask {
   }
 
   /**
-    * Convert a netlogo collection to a Variable for which the prototype is expected to have the corresponding depth.
-    *
-    * @param netlogoCollection
-    * @param prototype
-    * @return
-    */
+   * Convert a netlogo collection to a Variable for which the prototype is expected to have the corresponding depth.
+   *
+   * @param netlogoCollection
+   * @param prototype
+   * @return
+   */
   def netLogoArrayToVariable(netlogoCollection: AbstractCollection[Any], prototype: Val[_]) = {
     // get arrayType and depth of multiple array prototype
     val (multiArrayType, depth): (ValType[_], Int) = ValType.unArrayify(prototype.`type`)
@@ -260,11 +260,11 @@ object NetLogoTask {
   }
 
   /**
-    * Check if provided inputs are compatible with NetLogo
-    *
-    * @param inputs
-    * @return
-    */
+   * Check if provided inputs are compatible with NetLogo
+   *
+   * @param inputs
+   * @return
+   */
   def validateNetLogoInputTypes(inputs: Seq[Val[_]]) = {
     def acceptedType(c: Class[_]): Boolean =
       if (c.isArray()) acceptedType(c.getComponentType)
@@ -280,30 +280,29 @@ object NetLogoTask {
   }
 }
 
-
 /**
-  * Generic NetLogoTask
-  */
+ * Generic NetLogoTask
+ */
 trait NetLogoTask extends Task with ValidateTask {
 
   lazy val netLogoInstanceKey = CacheKey[WithInstance[NetLogoTask.NetoLogoInstance]]()
 
   /**
-    * Workspace (either file or directory)
-    * @return
-    */
+   * Workspace (either file or directory)
+   * @return
+   */
   def workspace: NetLogoTask.Workspace
 
   /**
-    * Commands to run
-    * @return
-    */
+   * Commands to run
+   * @return
+   */
   def launchingCommands: Seq[FromContext[String]]
 
   /**
-    * Mapping of prototypes
-    * @return
-    */
+   * Mapping of prototypes
+   * @return
+   */
   def mapped: MappedInputOutputConfig
 
   def netLogoFactory: NetLogoFactory
