@@ -47,7 +47,7 @@ object ScilabTask {
     install: Seq[String]         = Seq.empty,
     //libraries:   Seq[InstallCommand] = Seq.empty,
     forceUpdate:          Boolean                            = false,
-    version:              String                             = "6.0.1",
+    version:              String                             = "6.0.2",
     errorOnReturnValue:   Boolean                            = true,
     returnValue:          OptionalArgument[Val[Int]]         = None,
     stdOut:               OptionalArgument[Val[String]]      = None,
