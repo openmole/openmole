@@ -32,8 +32,6 @@ object ScatterPlot {
     }
 
     val data = serie.yValues.map { y ⇒
-      println("x " + serie.xValues.values.toJSArray)
-      println("y " + y)
       serie.plotDataBuilder
         .x(serie.xValues.values.toJSArray)
         .y(y.values.toJSArray)
