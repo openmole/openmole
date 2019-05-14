@@ -11,19 +11,19 @@ import scala.concurrent.duration._
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.openmole.gui.ext.api.Api
-import org.scalajs.dom.raw.{ Event, HTMLElement }
-import scalatags.JsDom.all.{ raw, _ }
+import org.scalajs.dom.raw.{Event, HTMLElement}
+import scalatags.JsDom.all.{raw, _}
 import scalatags.JsDom.TypedTag
 import org.openmole.gui.ext.tool.client._
 import org.openmole.gui.client.core._
 import org.openmole.gui.ext.tool.client.FileManager
 import DataUtils._
 import net.scalapro.sortable._
-import org.openmole.gui.client.core.files.TreeNodeTab.{ EditableView, First100, Raw, RowFilter }
+import org.openmole.gui.client.core.files.TreeNodeTab.{EditableView, First100, Raw, RowFilter}
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.client.tool.plot.Plot._
 import org.openmole.gui.client.tool.plot._
-import scaladget.bootstrapnative.{ DataTable, ToggleButton }
+import scaladget.bootstrapnative.{DataTable, ToggleButton}
 import org.openmole.gui.ext.tool._
 import rx._
 
@@ -39,7 +39,7 @@ object TreeNodeTabs {
   object UnActive extends Activity
 
   val omsErrorCache =
-    //collection.mutable.HashMap[SafePath, Seq[(ErrorWithLocation, String)]]()
+  //collection.mutable.HashMap[SafePath, Seq[(ErrorWithLocation, String)]]()
     Var(HashMap[SafePath, EditorErrors]())
 
   //  def cache(sp: SafePath, editorErrors: EditorErrors) = {
@@ -162,7 +162,7 @@ object TreeNodeTab {
         compileDisabled.update(false)
         errorDataOption match {
           case Some(ce: CompilationErrorData) ⇒ setErrors(ce.errors)
-          case _                              ⇒
+          case _ ⇒
         }
       }
 
@@ -257,15 +257,14 @@ object TreeNodeTab {
   object All extends RowFilter
 
   def editable(
-    safePath:       SafePath,
-    initialContent: String,
-    dataTab:        DataTab,
-    plotter:        Plotter): TreeNodeTab = new TreeNodeTab {
+                safePath: SafePath,
+                initialContent: String,
+                dataTab: DataTab,
+                plotter: Plotter): TreeNodeTab = new TreeNodeTab {
 
     lazy val safePathTab = Var(safePath)
     lazy val isEditing = Var(dataTab.editing)
 
-    println("IS Editing  " + isEditing.now)
     Rx {
       editableEditor.setReadOnly(!isEditing())
     }
@@ -276,8 +275,8 @@ object TreeNodeTab {
 
     val filteredSequence = dataTab.filter match {
       case First100 ⇒ dataTab.sequence.content.take(100)
-      case Last100  ⇒ dataTab.sequence.content.takeRight(100)
-      case _        ⇒ dataTab.sequence.content
+      case Last100 ⇒ dataTab.sequence.content.takeRight(100)
+      case _ ⇒ dataTab.sequence.content
     }
 
     val dataNbColumns = dataTab.sequence.header.length
@@ -294,7 +293,6 @@ object TreeNodeTab {
     def editing = isEditing.now
 
     def download(afterRefresh: () ⇒ Unit): Unit = editor.synchronized {
-      println("DL ... ")
       FileManager.download(
         safePathTab.now,
         (p: ProcessState) ⇒ {
@@ -324,8 +322,7 @@ object TreeNodeTab {
         else
           saveTab
       }
-      // else
-      // download(afterRefresh)
+      else afterRefresh()
     }
 
     def resizeEditor = editableEditor.editor.resize()
@@ -348,7 +345,7 @@ object TreeNodeTab {
 
     val switchString = dataTab.view match {
       case Table ⇒ Raw.toString
-      case _     ⇒ Table.toString
+      case _ ⇒ Table.toString
     }
 
     def switchView(newSequence: SequenceData) = panels.treeNodeTabs.switchEditableTo(this, dataTab.copy(sequence = newSequence), Plotter.default)
@@ -357,13 +354,11 @@ object TreeNodeTab {
 
       def switch(editing: Boolean) = panels.treeNodeTabs.switchEditableTo(this, dataTab.copy(view = newView, editing = editing), plotter)
 
-      println("switch .... ")
       newView match {
         case Table | Plot ⇒
           // isEditing() = false
           switch(false)
         case _ ⇒
-          println("case raw " + editing)
           if (isEditing.now)
             refresh(() ⇒ {
               download(() ⇒ switch(isEditing.now))
@@ -418,12 +413,11 @@ object TreeNodeTab {
       (for (
         a ← dataTab.sequence.header.zipWithIndex
       ) yield {
-        println("x|Y : " + plotter.plotMode)
         selectableButton(a._1, plotter.toBePlotted.indexes.contains(a._2), onclick = () ⇒ {
           val newAxis = plotter.plotMode match {
-            case SplomMode   ⇒ if (plotter.toBePlotted.indexes.contains(a._2)) plotter.toBePlotted.indexes.filterNot(_ == a._2) else plotter.toBePlotted.indexes :+ a._2
+            case SplomMode ⇒ if (plotter.toBePlotted.indexes.contains(a._2)) plotter.toBePlotted.indexes.filterNot(_ == a._2) else plotter.toBePlotted.indexes :+ a._2
             case HeatMapMode ⇒ Seq()
-            case _           ⇒ Seq(plotter.toBePlotted.indexes.last, a._2)
+            case _ ⇒ Seq(plotter.toBePlotted.indexes.last, a._2)
           }
           toView(newAxis)
         })
@@ -563,7 +557,7 @@ object TreeNodeTab {
                   div(switchButton.render, filterRadios.render, plotModeRadios.render).render,
                   plotter.plotDimension match {
                     case LinePlot ⇒ div().render
-                    case _        ⇒ scalatags.JsDom.tags.span(axisCheckBoxes.render).render.withLabel("x|y axis")
+                    case _ ⇒ scalatags.JsDom.tags.span(axisCheckBoxes.render).render.withLabel("x|y axis")
                   },
                   options.render
                 )
@@ -602,19 +596,19 @@ object TreeNodeTab {
 }
 
 case class DataTab(
-  sequence: SequenceData,
-  view:     EditableView,
-  filter:   RowFilter,
-  editing:  Boolean
-)
+                    sequence: SequenceData,
+                    view: EditableView,
+                    filter: RowFilter,
+                    editing: Boolean
+                  )
 
 object DataTab {
   def build(
-    sequence: SequenceData,
-    view:     EditableView = Raw,
-    filter:   RowFilter    = First100,
-    editing:  Boolean      = false,
-    plotter:  Plotter      = Plotter.default) = DataTab(sequence, view, filter, editing)
+             sequence: SequenceData,
+             view: EditableView = Raw,
+             filter: RowFilter = First100,
+             editing: Boolean = false,
+             plotter: Plotter = Plotter.default) = DataTab(sequence, view, filter, editing)
 }
 
 class TreeNodeTabs() {
@@ -751,29 +745,29 @@ class TreeNodeTabs() {
             `class` := {
               t.activity() match {
                 case Active ⇒ "active"
-                case _      ⇒ ""
+                case _ ⇒ ""
               }
             }
           )(
-              a(
-                id := t.id,
-                tab_role,
-                pointer,
-                t.activity() match {
-                  case Active ⇒ activeTab
-                  case _      ⇒ unActiveTab
-                },
-                data("toggle") := "tab", onclick := { () ⇒
-                  t.editor.foreach {
-                    _.editor.focus
-                  }
-                  setActive(t)
+            a(
+              id := t.id,
+              tab_role,
+              pointer,
+              t.activity() match {
+                case Active ⇒ activeTab
+                case _ ⇒ unActiveTab
+              },
+              data("toggle") := "tab", onclick := { () ⇒
+                t.editor.foreach {
+                  _.editor.focus
                 }
-              )(
-                  button(ms("close") +++ tabClose, `type` := "button", onclick := { () ⇒ --(t) })(raw("&#215")),
-                  t.tabName()
-                )
+                setActive(t)
+              }
+            )(
+              button(ms("close") +++ tabClose, `type` := "button", onclick := { () ⇒ --(t) })(raw("&#215")),
+              t.tabName()
             )
+          )
         }
       ).render
 
@@ -785,18 +779,18 @@ class TreeNodeTabs() {
             ms("tab-pane " + {
               t.activity() match {
                 case Active ⇒ "active"
-                case _      ⇒ ""
+                case _ ⇒ ""
               }
             }), id := t.id
           )({
-              t.activity() match {
-                case Active ⇒
-                  temporaryControl() = t.controlElement
-                  t.block
-                case UnActive ⇒ div()
-              }
+            t.activity() match {
+              case Active ⇒
+                temporaryControl() = t.controlElement
+                t.block
+              case UnActive ⇒ div()
             }
-            )
+          }
+          )
         }
       )
 
