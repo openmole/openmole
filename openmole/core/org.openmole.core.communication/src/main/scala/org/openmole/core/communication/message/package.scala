@@ -45,9 +45,7 @@ package object message {
     def apply(moleJob: MoleJob) = new RunnableTask(moleJob.task, moleJob.context, moleJob.id)
   }
 
-  class RunnableTask(val task: Task, val context: Context, val id: MoleJobId) {
-    def toMoleJob(stateChangedCallBack: StateChangedCallBack) = MoleJob(task, context, id, stateChangedCallBack)
-  }
+  class RunnableTask(val task: Task, val context: Context, val id: MoleJobId)
 
   case class FileMessage(path: String, hash: String)
 

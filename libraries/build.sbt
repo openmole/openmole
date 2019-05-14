@@ -340,7 +340,7 @@ lazy val effectaside = OsgiProject(dir, "effectaside", imports = Seq("*")) setti
   version := effectasideVersion
 )
 
-def gridscaleVersion = "2.15"
+def gridscaleVersion = "2.16"
 lazy val gridscale = OsgiProject(dir, "gridscale", imports = Seq("*"), exports = Seq("gridscale.*", "enumeratum.*")) settings (
   libraryDependencies += "fr.iscpif.gridscale" %% "gridscale" % gridscaleVersion,
   version := gridscaleVersion
@@ -359,8 +359,12 @@ lazy val gridscaleHTTP = OsgiProject(dir, "gridscale.http", imports = Seq("*"), 
 lazy val gridscaleSSH = OsgiProject(dir, "gridscale.ssh", imports = Seq("*")) settings (
   libraryDependencies += "fr.iscpif.gridscale" %% "ssh" % gridscaleVersion,
   version := gridscaleVersion
-) settings(settings: _*) dependsOn(jzlib) dependsOn(gridscale)
+) settings(settings: _*) dependsOn(sshj) dependsOn(gridscale)
 
+lazy val sshj = OsgiProject(dir, "com.hierynomus.sshj", imports = Seq("*"), exports = Seq("com.hierynomus.*", "net.schmizz.*"), privatePackages = Seq("!scala.*", "!org.bouncycastle.*", "!org.slf4j.*", "**"), dynamicImports = Seq("org.bouncycastle.*")) settings (
+  libraryDependencies += "com.hierynomus" % "sshj" % "0.27.0",
+  version := "0.27.0"
+) settings(settings: _*)
 
 lazy val gridscaleCluster = OsgiProject(dir, "gridscale.cluster", imports = Seq("*")) settings (
   libraryDependencies += "fr.iscpif.gridscale" %% "cluster" % gridscaleVersion,
@@ -392,7 +396,6 @@ lazy val gridscaleSLURM = OsgiProject(dir, "gridscale.slurm", imports = Seq("*")
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, gridscaleCluster)
 
-
 lazy val gridscaleEGI = OsgiProject(dir, "gridscale.egi", imports = Seq("*")) settings (
   libraryDependencies += "fr.iscpif.gridscale" %% "egi" % gridscaleVersion,
   version := gridscaleVersion
@@ -410,7 +413,3 @@ lazy val gridscaleWebDAV = OsgiProject(dir, "gridscale.webdav", imports = Seq("*
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, gridscaleHTTP)
 
-lazy val jzlib = OsgiProject(dir, "com.jcraft.jzlib", imports = Seq("*")) settings (
-  libraryDependencies += "com.jcraft" % "jzlib" % "1.1.3",
-  version := "1.1.3"
-) settings(settings: _*)

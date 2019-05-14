@@ -23,11 +23,11 @@ import org.openmole.core.context.Context
 import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
 import org.openmole.core.workflow.tools.DefaultSet
 
-object GenomeProfile {
+object Profile {
 
   def apply(
     x:          Val[Double],
-    nX:         Int,
+    nX:         Int                          = 100,
     genome:     Genome,
     objective:  Objective[_],
     stochastic: OptionalArgument[Stochastic] = None,
@@ -54,13 +54,13 @@ object GenomeProfile {
 
 }
 
-object GenomeProfileEvolution {
+object ProfileEvolution {
 
   import org.openmole.core.dsl._
 
   def apply(
     x:            Val[Double],
-    nX:           Int,
+    nX:           Int                          = 100,
     genome:       Genome,
     objective:    Objective[_],
     evaluation:   DSL,
@@ -73,7 +73,7 @@ object GenomeProfileEvolution {
     scope:        DefinitionScope              = "profile") =
     EvolutionPattern.build(
       algorithm =
-        GenomeProfile(
+        Profile(
           x = x,
           nX = nX,
           genome = genome,

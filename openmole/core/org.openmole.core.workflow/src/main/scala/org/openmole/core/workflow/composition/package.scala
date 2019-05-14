@@ -203,7 +203,7 @@ package composition {
       case oo(o, d, _)        ⇒ TransitionOrigin.tasks(o) ++ d.flatMap(TransitionDestination.tasks)
       case &(a, b)            ⇒ tasks(a) ++ tasks(b)
       case Slot(d)            ⇒ tasks(d)
-      case Capsule(d, _)      ⇒ Vector(d)
+      case Capsule(d, _)      ⇒ tasks(d)
       case c: DSLContainer[_] ⇒ DSLContainer.taskNodes(c) ++ tasks(c.dsl)
       case TaskNodeDSL(n)     ⇒ Vector(n)
     }
@@ -281,7 +281,7 @@ package composition {
 
   case class TaskNodeDSL(node: TaskNode) extends DSL
   case class Slot(dsl: DSL) extends DSL
-  case class Capsule(node: TaskNode, id: Any = new Object) extends DSL
+  case class Capsule(dsl: DSL, id: Any = new Object) extends DSL
 
   trait CompositionPackage {
 
@@ -313,28 +313,27 @@ package composition {
       )
 
     def DSLContainerExtension[T](
-      transitionDSL: DSL,
-      data:          T,
-      output:        Option[Task]                = None,
-      delegate:      Vector[Task]                = Vector.empty,
-      environment:   Option[EnvironmentProvider] = None,
-      grouping:      Option[Grouping]            = None,
-      hooks:         Vector[Hook]                = Vector.empty)(implicit definitionScope: DefinitionScope) =
+      dsl:         DSLContainer[_],
+      data:        T,
+      output:      Option[Task]                = None,
+      delegate:    Vector[Task]                = Vector.empty,
+      environment: Option[EnvironmentProvider] = None,
+      grouping:    Option[Grouping]            = None,
+      hooks:       Vector[Hook]                = Vector.empty)(implicit definitionScope: DefinitionScope) =
       composition.DSLContainer[T](
-        transitionDSL,
-        output,
-        delegate,
-        environment,
-        grouping,
-        hooks,
+        dsl,
+        output orElse dsl.output,
+        delegate ++ dsl.delegate,
+        environment orElse dsl.environment,
+        grouping orElse dsl.grouping,
+        hooks ++ dsl.hooks,
         data,
-        definitionScope
-      )
+        definitionScope)
 
     type DSLContainer[T] = composition.DSLContainer[T]
 
     def Slot(dsl: DSL) = composition.Slot(dsl)
-    def Capsule(node: TaskNode) = composition.Capsule(node)
+    def Capsule(node: DSL) = composition.Capsule(node)
 
     /* ---------- Transition DSL to Puzzle -----------------*/
 
@@ -415,9 +414,16 @@ package composition {
               h ← container.hooks
             } yield o -> h
 
+          val environments =
+            for {
+              c ← container.delegate.map(d ⇒ slots(d).capsule)
+              e ← container.environment
+            } yield c -> e
+
           Puzzle.add(
             puzzle,
-            hooks = hooks
+            hooks = hooks,
+            environments = environments.toMap
           )
         }
 
@@ -435,7 +441,7 @@ package composition {
             case &(a, b)                              ⇒ Puzzle.merge(transitionDSLToPuzzle0(a, slots, converted), transitionDSLToPuzzle0(b, slots, converted))
             case c: DSLContainer[_]                   ⇒ dslContainerToPuzzle(c)
             case TaskNodeDSL(n)                       ⇒ taskNodeToPuzzle(n, slots)
-            case c @ Capsule(n, _)                    ⇒ taskNodeToPuzzle(n, taskToSlot(c))
+            case Capsule(d, _)                        ⇒ transitionDSLToPuzzle0(d, taskToSlot(d), collection.mutable.Map.empty) //taskNodeToPuzzle(n, taskToSlot(c))
             case Slot(d)                              ⇒ transitionDSLToPuzzle0(d, slots, converted)
           }
 

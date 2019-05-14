@@ -5,7 +5,9 @@ import sbt._
 
 object Libraries {
 
-  lazy val gridscaleVersion = "2.15"
+  lazy val gridscaleVersion = "2.16"
+  lazy val sshjVersion = "0.27.0"
+
   lazy val mgoVersion = "3.28"
   lazy val bouncyCastleVersion = "1.60"
   lazy val aceVersion = "01.08.2014"
@@ -111,7 +113,12 @@ object Libraries {
   lazy val toolxitBibtex = "org.openmole" %% "toolxit-bibtex" % "0.2"
 
   lazy val gridscale = "org.openmole.library" %% "gridscale" % gridscaleVersion
-  lazy val gridscaleSSH = "org.openmole.library" %% "gridscale-ssh" % gridscaleVersion
+  lazy val gridscaleSSH = 
+    Seq(
+      "org.openmole.library" %% "gridscale-ssh" % gridscaleVersion,
+      "org.openmole.library" %% "com-hierynomus-sshj" % sshjVersion
+    )
+  
   lazy val gridscalePBS = "org.openmole.library" %% "gridscale-pbs" % gridscaleVersion
   lazy val gridscaleSGE = "org.openmole.library" %% "gridscale-sge" % gridscaleVersion
   lazy val gridscaleCondor = "org.openmole.library" %% "gridscale-condor" % gridscaleVersion

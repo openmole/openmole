@@ -292,12 +292,12 @@ object UDocker {
         ExecutionCommand.Raw(
           List(
             uDockerRunCommandPrefix(
-            uDocker.user,
-            environmentVariables.toVector,
-            uDockerVolumes,
-            userWorkDirectory(uDocker),
-            uDockerExecutable,
-            container),
+              uDocker.user,
+              environmentVariables.toVector,
+              uDockerVolumes,
+              userWorkDirectory(uDocker),
+              uDockerExecutable,
+              container),
             ic: Id[String]))
     }
 

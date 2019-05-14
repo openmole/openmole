@@ -86,22 +86,21 @@ $model
 // termination is the termination criterion, here it runs for 100 generations. A time limit could be set as an
 // alternative by replacing 100 by 1 hour (hour is a duration type understood by OpenMOLE).
 // the parallelism specifies how many evaluation are concurrently submitted to the execution environment
-val evolution =
-  NSGA2Evolution(
-     genome = Seq(
-       x in (0.0, 1.0),
-       y in (0.0, 1.0),
-       s in List("apple", "banana", "strawberry")),
-    objectives = Seq(o1, o2),
-    evaluation = model,
-    parallelism = 10,
-    termination = 100
-  )
+NSGA2Evolution(
+   genome = Seq(
+     x in (0.0, 1.0),
+     y in (0.0, 1.0),
+     s in List("apple", "banana", "strawberry")),
+  objectives = Seq(o1, o2),
+  evaluation = model,
+  parallelism = 10,
+  termination = 100
+)
 
 // Construction of the complete workflow with the execution environment, and the hook.
 // A hook is attached to save the population of solutions to  workDirectory /evolution on the local machine running OpenMOLE
 // Here the generated workflow will run using 4 threads of the local machine.
-evolution hook (workDirectory / "evolution/") on LocalEnvironment(4)""", name = "nsga2 example")
+evolution hook (workDirectory / "evolution") on LocalEnvironment(4)""", name = "nsga2 example")
 
   @br
   Notice that the objectives are given as a sequence of model outputs variables to @b{minimize}.
@@ -119,7 +118,7 @@ NSGA2Evolution(
   evaluation = model -- DeltaTask(o1 -> math.Pi, o2 -> 42),
   parallelism = 10,
   termination = 100
-)""", name = "nsga2 delta example")
+) hook (workDirectory / "evolution")""", name = "nsga2 delta example")
   @br
   NB: in this case the results in the saved file will be the difference between the outputs of the model and your objectives.
   @br
@@ -140,7 +139,7 @@ NSGA2Evolution(
   objectives = Seq(o1, o2),
   evaluation = model -- maximize,
   parallelism = 10,
-  termination = 100)""", name = "nsga2 maximize example")
+  termination = 100) hook (workDirectory / "evolution")""", name = "nsga2 maximize example")
 
 
 @br

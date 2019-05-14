@@ -55,26 +55,27 @@ object RTask {
       }
 
     implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name, None)
-    implicit def stringCoupleToRLibrary(couple: (String, Option[String])): InstallCommand = RLibrary(couple._1, couple._2)
-    def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommand.toCommand)
+    implicit def stringCoupleToRLibrary(couple: (String, String)): InstallCommand = RLibrary(couple._1, Some(couple._2))
+    implicit def stringOptionCoupleToRLibrary(couple: (String, Option[String])): InstallCommand = RLibrary(couple._1, couple._2)
 
+    def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommand.toCommand)
   }
 
   def rImage(version: String) = DockerImage("openmole/r-base", version)
 
   def apply(
     script:               FromContext[String],
-    install:              Seq[String]                           = Seq.empty,
-    libraries:            Seq[InstallCommand]                   = Seq.empty,
-    forceUpdate:          Boolean                               = false,
-    version:              String                                = "3.3.3",
-    errorOnReturnValue:   Boolean                               = true,
-    returnValue:          OptionalArgument[Val[Int]]            = None,
-    stdOut:               OptionalArgument[Val[String]]         = None,
-    stdErr:               OptionalArgument[Val[String]]         = None,
-    hostFiles:            Vector[HostFile]                      = Vector.empty,
-    workDirectory:        OptionalArgument[String]              = None,
-    environmentVariables: Vector[(String, FromContext[String])] = Vector.empty
+    install:              Seq[String]                        = Seq.empty,
+    libraries:            Seq[InstallCommand]                = Seq.empty,
+    forceUpdate:          Boolean                            = false,
+    version:              String                             = "3.5.1",
+    errorOnReturnValue:   Boolean                            = true,
+    returnValue:          OptionalArgument[Val[Int]]         = None,
+    stdOut:               OptionalArgument[Val[String]]      = None,
+    stdErr:               OptionalArgument[Val[String]]      = None,
+    hostFiles:            Seq[HostFile]                      = Vector.empty,
+    workDirectory:        OptionalArgument[String]           = None,
+    environmentVariables: Seq[(String, FromContext[String])] = Vector.empty
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): RTask = {
 
     // add additional installation of devtools only if needed
@@ -95,10 +96,9 @@ object RTask {
         mode = "P1",
         reuseContainer = true
       ).copy(
-          environmentVariables = environmentVariables,
-          hostFiles = hostFiles,
-          workDirectory = workDirectory
-        )
+          environmentVariables = environmentVariables.toVector,
+          hostFiles = hostFiles.toVector,
+          workDirectory = workDirectory)
 
     RTask(
       script = script,

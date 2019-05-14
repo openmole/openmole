@@ -56,10 +56,4 @@ object State extends Enumeration {
    */
   val FAILED = new State("Failed", true)
 
-  /**
-   *
-   * The job has been canceled.
-   *
-   */
-  val CANCELED = new State("Canceled", true)
 }
