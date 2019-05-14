@@ -6,7 +6,7 @@ object ToolPlot {
 
   def error(dataBuilder: PlotDataBuilder, serie: Option[Serie]): PlotDataBuilder = {
     serie.map { e ⇒
-      dataBuilder.errorY(ErrorY.array(e.values.head.toDimension._result.values.get))
+      dataBuilder.errorY(ErrorY.array(e.yValues.head.toDimension._result.values.get))
     }.getOrElse(dataBuilder)
   }
 }

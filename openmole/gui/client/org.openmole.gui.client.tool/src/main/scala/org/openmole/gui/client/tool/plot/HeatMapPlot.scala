@@ -5,6 +5,7 @@ import com.definitelyscala.plotlyjs.all._
 import com.definitelyscala.plotlyjs.PlotlyImplicits._
 import scala.scalajs.js.JSConverters._
 import scalatags.JsDom.all._
+import scala.scalajs.js
 
 object HeatMapPlot {
 
@@ -15,10 +16,10 @@ object HeatMapPlot {
 
     lazy val plotDiv = Plot.baseDiv
 
-    val dims = serie.values.map { _.values.reverse }.transpose
+    val dims: js.Array[js.Array[String]] = serie.yValues.map { _.values.toJSArray }.reverse /*.reverse.toArray }.transpose.map { _.toJSArray }*/ .toJSArray
 
     val data = PlotData
-      .z(dims.map { _.toJSArray }.toJSArray)
+      .z(dims)
       .set(plotlytype.heatmap)
 
     val layout = Layout
