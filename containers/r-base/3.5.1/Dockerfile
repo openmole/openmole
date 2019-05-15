@@ -1,6 +1,6 @@
 ## Emacs, make this -*- mode: sh; -*-
  
-FROM debian:stretch-slim
+FROM debian:testing-slim
 
 MAINTAINER "Romain Reuillon"
 

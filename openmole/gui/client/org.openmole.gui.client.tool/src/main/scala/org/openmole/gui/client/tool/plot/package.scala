@@ -5,31 +5,58 @@ import com.definitelyscala.plotlyjs.PlotlyImplicits._
 import scalatags.JsDom.all._
 
 case class BasePlot(
-  title:  String        = "",
-  serie:  Serie,
-  legend: Boolean       = false,
-  error:  Option[Serie]) {
+  title:   String        = "",
+  serie:   Serie,
+  legend:  Boolean       = false,
+  plotter: Plotter,
+  error:   Option[Serie]) {
 
-  def scatter = ScatterPlot(title, serie, legend, error)
+  def scatter = ScatterPlot(title, serie, legend, plotter, error)
 
-  def line = XYPlot(title, serie, legend, error)
+  def line = XYPlot(title, serie, legend, plotter, error)
 
-  def splom = SplomPlot(title, serie, legend)
+  def splom = SplomPlot(title, serie, legend, plotter)
 
   def heatmap = HeatMapPlot(title, serie, legend)
 }
 
 object Plot {
 
-  sealed trait PlotMode
+  case class ToBePloted(indexes: Seq[Int])
 
-  object XYMode extends PlotMode
+  object PlotDimension {
+    def plotModes(plotDimension: PlotDimension): Seq[PlotMode] =
+      plotDimension match {
+        case ColumnPlot ⇒ Seq(ScatterMode, SplomMode)
+        case LinePlot   ⇒ Seq(XYMode, HeatMapMode)
+      }
+  }
 
-  object ScatterMode extends PlotMode
+  sealed trait PlotDimension
 
-  object SplomMode extends PlotMode
+  object ColumnPlot extends PlotDimension
 
-  object HeatMapMode extends PlotMode
+  object LinePlot extends PlotDimension
+
+  sealed trait PlotMode {
+    def name: String
+  }
+
+  object XYMode extends PlotMode {
+    def name = "1 row = 1 plot"
+  }
+
+  object ScatterMode extends PlotMode {
+    def name = "Scatter"
+  }
+
+  object SplomMode extends PlotMode {
+    def name = "SPLOM"
+  }
+
+  object HeatMapMode extends PlotMode {
+    def name = "Heat map"
+  }
 
   def baseDiv = div.render
 
@@ -48,13 +75,13 @@ object Plot {
     .margin(com.definitelyscala.plotlyjs.Margin.t(0)._result)
 
   def apply(
-    title:    String        = "",
-    serie:    Serie         = Serie(),
-    legend:   Boolean       = false,
-    plotMode: PlotMode,
-    error:    Option[Serie] = None) = {
-    val bpl = BasePlot(title, serie, legend, error)
-    plotMode match {
+    title:   String        = "",
+    serie:   Serie         = Serie(),
+    legend:  Boolean       = false,
+    plotter: Plotter,
+    error:   Option[Serie] = None) = {
+    val bpl = BasePlot(title, serie, legend, plotter, error)
+    plotter.plotMode match {
       case XYMode      ⇒ bpl.line
       case ScatterMode ⇒ bpl.scatter
       case SplomMode   ⇒ bpl.splom

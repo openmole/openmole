@@ -7,9 +7,7 @@ import boopickle.Default._
 import autowire._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.client.core._
-import org.openmole.gui.ext.data.DataUtils._
-
-import scala.concurrent.Future
+import org.openmole.gui.client.tool.plot.Plotter
 
 /*
  * Copyright (C) 07/05/15 // mathieu.leclaire@openmole.org
@@ -49,12 +47,12 @@ class FileDisplayer(val tabs: TreeNodeTabs) {
         case SVGExtension ⇒ tabs ++ TreeNodeTab.html(safePath, content)
         case ef: EditableFile ⇒
           if (DataUtils.isCSV(safePath)) {
-            post()[Api].sequence(safePath, ',').call().foreach { seq ⇒
-              tabs ++ TreeNodeTab.editable(safePath, content, EditableSettings.build(seq, view = TreeNodeTab.Table, editing = !ef.onDemand))
+            post()[Api].sequence(safePath).call().foreach { seq ⇒
+              tabs ++ TreeNodeTab.editable(safePath, content, DataTab.build(seq, view = TreeNodeTab.Table, editing = !ef.onDemand), Plotter.default)
             }
           }
           else {
-            tabs ++ TreeNodeTab.editable(safePath, content, EditableSettings.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw))
+            tabs ++ TreeNodeTab.editable(safePath, content, DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw), Plotter.default)
           }
         case _ ⇒ //FIXME for GUI workflows
       }
