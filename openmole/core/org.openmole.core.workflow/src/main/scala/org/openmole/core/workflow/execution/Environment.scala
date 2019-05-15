@@ -36,7 +36,7 @@ import org.openmole.tool.collection._
 import scala.ref.WeakReference
 
 object Environment {
-  val maxExceptionsLog = ConfigurationLocation("Environment", "MaxExceptionsLog", Some(1000))
+  val maxExceptionsLog = ConfigurationLocation("Environment", "MaxExceptionsLog", Some(200))
 
   case class JobSubmitted(job: ExecutionJob) extends Event[Environment]
   case class JobStateChanged(job: ExecutionJob, newState: ExecutionState, oldState: ExecutionState) extends Event[Environment]

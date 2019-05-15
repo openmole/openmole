@@ -18,7 +18,7 @@
 package org.openmole.tool.collection
 
 import java.util.concurrent.ConcurrentLinkedQueue
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 class SlidingList[T] {
 
@@ -29,7 +29,7 @@ class SlidingList[T] {
     queue.add(t)
   }
 
-  def elements: List[T] = queue.synchronized(queue.toList)
+  def elements: Vector[T] = queue.synchronized(queue.asScala.toVector)
 
   def clear() = synchronized {
     val v = elements
