@@ -28,7 +28,7 @@ For more details on the calibration using genetic algorithms, see the @aa("GA de
 
 
 @h2{Single criterion Calibration}
-@h3{Method scores}
+@h3{Method's score}
 
 @Resource.rawFrag(Resource.img.method.GAsingleID)
 
@@ -78,7 +78,7 @@ In other words, this function takes a model M whose signature is (X→Y) (since 
 
 
 @h2{Multi criteria Calibration}
-@h3{Method scores}
+@h3{Method's score}
 
 @Resource.rawFrag(Resource.img.method.GAmultiID)
 
