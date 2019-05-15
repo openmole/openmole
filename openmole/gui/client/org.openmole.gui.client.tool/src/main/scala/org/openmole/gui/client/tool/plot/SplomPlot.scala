@@ -20,7 +20,6 @@ object SplomPlot {
     val nbDims = plotter.toBePlotted.indexes.length
 
     if (nbDims > 1) {
-      println("plto !!")
       val size = nbDims * (if (nbDims < 3) 200 else 150)
       lazy val layout = Plot.baseLayout(title)
         .width(size)

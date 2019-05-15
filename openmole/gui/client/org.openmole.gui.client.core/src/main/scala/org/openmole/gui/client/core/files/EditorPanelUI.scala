@@ -1,15 +1,11 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.CoreUtils
-
-import scala.concurrent.Future
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.FileExtension._
 
 import scala.scalajs.js
 import scalatags.JsDom.all._
-import scalatags.JsDom.{ TypedTag, tags }
+import scalatags.JsDom.tags
 
 import scaladget.ace._
 import scaladget.bootstrapnative.bsn._
@@ -20,7 +16,7 @@ import scala.scalajs.js.JSConverters._
 import org.openmole.gui.ext.tool.client._
 import org.scalajs.dom.raw.Event
 import scaladget.bootstrapnative.Popup
-import scaladget.bootstrapnative.Popup.{ ClickPopup, Manual, PopupPosition }
+import scaladget.bootstrapnative.Popup.{ Manual, PopupPosition }
 import rx._
 
 /*
@@ -73,7 +69,7 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
                   } yield {
                     errors().find(_.errorWithLocation.line == Some(i)).map { e ⇒
                       e.errorWithLocation.line.map { l ⇒
-                        buildManualPopover(l, (i - scrollAsLines) * lineHeight, e.errorWithLocation.stackTrace, Popup.Left)
+                        buildManualPopover(l, (i - scrollAsLines) * lineHeight, span(e.errorWithLocation.stackTrace), Popup.Left)
                       }.getOrElse(div.render)
                     }.getOrElse(div.render)
                   }
