@@ -14,6 +14,7 @@ import org.openmole.gui.ext.api.Api
 import org.scalajs.dom.raw.{ Event, HTMLElement }
 import scalatags.JsDom.all.{ raw, _ }
 import scalatags.JsDom.TypedTag
+import scalatags.JsDom._
 import org.openmole.gui.ext.tool.client._
 import org.openmole.gui.client.core._
 import org.openmole.gui.ext.tool.client.FileManager
@@ -25,7 +26,9 @@ import org.openmole.gui.client.tool.plot.Plot._
 import org.openmole.gui.client.tool.plot._
 import scaladget.bootstrapnative.{ DataTable, ToggleButton }
 import org.openmole.gui.ext.tool._
+import scaladget.bootstrapnative.Popup._
 import rx._
+import scalatags.JsDom
 
 import scala.collection.immutable.HashMap
 import scala.scalajs.js.timers._
@@ -226,7 +229,7 @@ object TreeNodeTab {
       div(panelClass +++ panelDefault)(
         div(panelBody)(
           ms("mdRendering") +++ (padding := 10),
-          RawFrag(htmlContent)
+          JsDom.RawFrag(htmlContent)
         )
       )
     )
@@ -522,6 +525,26 @@ object TreeNodeTab {
         }): _*
       )
 
+    val infoStyle: ModifierSeq = Seq(
+      fontWeight.bold,
+      minWidth := 100,
+      textAlign := "right",
+      marginRight := 20
+    )
+
+    val plotModeInfo =
+      org.openmole.gui.client.tool.Popover(
+        div(glyph_info, pointer, marginLeft := 20),
+        0,
+        div(styles.display.flex, flexDirection.column, minWidth := 250)(
+          div(styles.display.flex, flexDirection.row)(tags.span(infoStyle)("Scatter"), tags.span("Plot a column dimension against an other one as points")),
+          div(styles.display.flex, flexDirection.row)(tags.span(infoStyle)("SPLOM"), tags.span("Scatter plots matrix on all selected columns")),
+          div(styles.display.flex, flexDirection.row)(tags.span(infoStyle)("1 row = 1 plot"), tags.span("Plot each line as a XY plot.")),
+          div(styles.display.flex, flexDirection.row)(tags.span(infoStyle)("Heat map"), tags.span("Plot the table as a matrix, colored by values."))
+        ),
+        Right
+      ).render
+
     def jsClosure(value: String, col: Int) = {
       val closure = closureInput.value
       if (closure.isEmpty) true
@@ -554,7 +577,7 @@ object TreeNodeTab {
             case Plot ⇒
               div(
                 vForm(
-                  div(switchButton.render, filterRadios.render, plotModeRadios.render).render,
+                  div(switchButton.render, filterRadios.render, plotModeRadios.render, plotModeInfo).render,
                   plotter.plotDimension match {
                     case LinePlot ⇒ div().render
                     case _        ⇒ scalatags.JsDom.tags.span(axisCheckBoxes.render).render.withLabel("x|y axis")
