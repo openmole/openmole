@@ -357,9 +357,8 @@ object TreeNodeTab {
       def switch(editing: Boolean) = panels.treeNodeTabs.switchEditableTo(this, dataTab.copy(view = newView, editing = editing), plotter)
 
       newView match {
-        case Table | Plot ⇒
-          // isEditing() = false
-          switch(false)
+        case Table ⇒ switch(false)
+        case Plot  ⇒ toView(ColumnPlot, ScatterMode)
         case _ ⇒
           if (isEditing.now)
             refresh(() ⇒ {
@@ -381,13 +380,20 @@ object TreeNodeTab {
     def toView(plotDimension: PlotDimension, newMode: PlotMode) = {
 
       val newPlotter = Plotter.toBePlotted(plotter.copy(plotDimension = plotDimension, plotMode = newMode), dataTab.sequence)
-      panels.treeNodeTabs.switchEditableTo(this, dataTab, newPlotter)
+      panels.treeNodeTabs.switchEditableTo(this, dataTab.copy(view = Plot), newPlotter._1)
     }
 
     def toView(newError: Option[IndexedAxis]) = panels.treeNodeTabs.switchEditableTo(this, dataTab, plotter.copy(error = newError))
 
     def toClosureView(newPlotClosure: Option[ClosureFilter]): Unit = {
       panels.treeNodeTabs.switchEditableTo(this, dataTab, plotter.copy(closureFilter = newPlotClosure))
+    }
+
+    def plotterAndSeqencedata(dataTab: DataTab, plotter: Plotter) = {
+      plotter.plotMode match {
+        case ScatterMode ⇒ Plotter.toBePlotted(plotter.copy(plotDimension = plotter.plotDimension, plotMode = plotter.plotMode), SequenceData(dataTab.sequence.header, filteredSequence))
+        case _           ⇒ (plotter, dataTab.sequence)
+      }
     }
 
     lazy val switchButton = radios(margin := 20)(
@@ -411,20 +417,26 @@ object TreeNodeTab {
       display.`table-cell`
     )
 
-    lazy val axisCheckBoxes = checkboxes(colStyle +++ (margin := 20))(
-      (for (
-        a ← dataTab.sequence.header.zipWithIndex
-      ) yield {
-        selectableButton(a._1, plotter.toBePlotted.indexes.contains(a._2), onclick = () ⇒ {
-          val newAxis = plotter.plotMode match {
-            case SplomMode   ⇒ if (plotter.toBePlotted.indexes.contains(a._2)) plotter.toBePlotted.indexes.filterNot(_ == a._2) else plotter.toBePlotted.indexes :+ a._2
-            case HeatMapMode ⇒ Seq()
-            case _           ⇒ Seq(plotter.toBePlotted.indexes.last, a._2)
-          }
-          toView(newAxis)
-        })
-      }): _*
-    )
+    lazy val axisCheckBoxes = {
+      val (newPlotter, newSequenceData) = plotterAndSeqencedata(dataTab, plotter)
+
+      checkboxes(colStyle +++ (margin := 20))(
+        (for (
+          a ← newSequenceData.header.zipWithIndex
+        ) yield {
+          selectableButton(a._1, newPlotter.toBePlotted.indexes.contains(a._2), onclick = () ⇒ {
+            val newAxis = newPlotter.plotMode match {
+              case SplomMode ⇒
+                if (newPlotter.toBePlotted.indexes.contains(a._2)) newPlotter.toBePlotted.indexes.filterNot(_ == a._2)
+                else newPlotter.toBePlotted.indexes :+ a._2
+              case HeatMapMode ⇒ Seq()
+              case _           ⇒ Seq(newPlotter.toBePlotted.indexes.last, a._2)
+            }
+            toView(newAxis)
+          })
+        }): _*
+      )
+    }
 
     def errorCheckBox = checkboxes(marginLeft := 20)(
       (for (
@@ -606,9 +618,10 @@ object TreeNodeTab {
             )
           case Raw ⇒ editorView
           case _ ⇒
+            val (newPlotter, newSequenceData) = plotterAndSeqencedata(dataTab, plotter)
             Plotter.plot(
-              SequenceData(dataTab.sequence.header, filteredSequence),
-              plotter
+              SequenceData(newSequenceData.header, newSequenceData.content),
+              newPlotter
             )
         }
       )

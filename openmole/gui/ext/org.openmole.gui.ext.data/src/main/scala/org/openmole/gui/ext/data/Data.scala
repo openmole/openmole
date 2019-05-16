@@ -823,7 +823,13 @@ package object data {
 
   type SequenceHeader = Seq[String]
 
-  case class SequenceData(header: SequenceHeader = Seq(), content: Seq[Array[String]] = Seq())
+  case class SequenceData(header: SequenceHeader = Seq(), content: Seq[Array[String]] = Seq()) {
+
+    def withRowIndexes =  {
+      val lineIndexes = (1 to content.length).map { _.toString }
+      copy(header = header :+ "Row index", content = content.zip(lineIndexes).map { case (l, i) ⇒ l :+ i })
+    }
+  }
 
   case class WizardModelData(
                               vals: String,
