@@ -79,12 +79,9 @@ object AppendToCSVFileHook {
     import parameters._
     import org.openmole.plugin.tool.csv
 
-    val ps =
-      if (prototypes.isEmpty) context.values.map { _.prototype }.toVector
-      else prototypes
-
     val excludeSet = exclude.map(_.name).toSet
-    val values = ps.filter { v ⇒ !excludeSet.contains(v.name) }.map(context(_))
+    val ps = (if (prototypes.isEmpty) context.values.map { _.prototype }.toVector else prototypes).filter { v ⇒ !excludeSet.contains(v.name) }
+    val values = ps.map(context(_))
 
     def headerLine = header.map(_.from(context)) getOrElse csv.header(ps, values, arraysOnSingleRow)
     csv.writeVariablesToCSV(file.from(context), headerLine, values, arraysOnSingleRow)
