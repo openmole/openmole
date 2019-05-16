@@ -27,6 +27,7 @@ import org.openmole.plugin.hook.file._
 package object directsampling {
 
   class DirectSampling
+  case class Replication(seed: Val[_])
 
   implicit class DirectSamplingDSL(dsl: DSLContainer[DirectSampling]) extends DSLContainerHook(dsl) {
     def hook(
@@ -38,6 +39,20 @@ package object directsampling {
       dsl hook CSVHook(file = file, values = values, header = header, arrayOnRow = arrayOnRow)
     }
   }
+
+  implicit class ReplicationDSL(dsl: DSLContainer[Replication]) extends DSLContainerHook(dsl) {
+    def hook(
+      file:        FromContext[File],
+      values:      Seq[Val[_]]                           = Vector.empty,
+      header:      OptionalArgument[FromContext[String]] = None,
+      arrayOnRow:  Boolean                               = false,
+      includeSeed: Boolean                               = false): DSLContainer[Replication] = {
+      implicit val defScope = dsl.scope
+      val exclude = if (!includeSeed) Seq(dsl.data.seed) else Seq()
+      dsl hook CSVHook(file = file, values = values, exclude = exclude, header = header, arrayOnRow = arrayOnRow)
+    }
+  }
+
   def Replication[T: Distribution](
     evaluation:       DSL,
     seed:             Val[T],
@@ -46,14 +61,23 @@ package object directsampling {
     aggregation:      OptionalArgument[DSL]  = None,
     wrap:             Boolean                = false,
     scope:            DefinitionScope        = "replication"
-  ) =
-    DirectSampling(
-      evaluation = evaluation,
-      sampling = seed in (TakeDomain(UniformDistribution[T](distributionSeed), replications)),
-      aggregation = aggregation,
-      wrap = wrap,
-      scope = scope
-    )
+  ) = {
+    implicit def defScope = scope
+
+    val sampling = seed in (TakeDomain(UniformDistribution[T](distributionSeed), replications))
+
+    val exploration = ExplorationTask(sampling)
+
+    val s =
+      MapReduce(
+        evaluation = evaluation,
+        sampler = exploration,
+        aggregation = aggregation,
+        wrap = wrap
+      )
+
+    DSLContainerExtension[Replication](s, new Replication(seed))
+  }
 
   def DirectSampling(
     evaluation:  DSL,
