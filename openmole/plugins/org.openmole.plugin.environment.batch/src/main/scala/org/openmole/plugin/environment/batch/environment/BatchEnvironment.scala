@@ -18,6 +18,7 @@
 package org.openmole.plugin.environment.batch.environment
 
 import java.io.File
+import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.{CountDownLatch, Semaphore}
 
 import org.openmole.core.communication.message._
@@ -34,10 +35,12 @@ import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole.MoleServices
+import org.openmole.core.workflow.tools.ExceptionEvent
 import org.openmole.core.workspace._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment.ExecutionJobRegistry
 import org.openmole.plugin.environment.batch.refresh._
 import org.openmole.tool.cache._
+import org.openmole.tool.collection.RingBuffer
 import org.openmole.tool.file._
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.random.{RandomProvider, Seeder, shuffled}
@@ -378,7 +381,12 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
   implicit val services: BatchEnvironment.Services
   def eventDispatcherService = services.eventDispatcher
 
-  def exceptions = services.preference(Environment.maxExceptionsLog)
+  private lazy val _errors = new RingBuffer[ExceptionEvent](services.preference(Environment.maxExceptionsLog))
+  def error(e: ExceptionEvent) = _errors.put(e)
+
+  def errors: Seq[ExceptionEvent] = _errors.elements
+  def clearErrors: Seq[ExceptionEvent] = _errors.clear()
+
   def clean = BatchEnvironment.registryIsEmpty(env)
 
   lazy val registry = new ExecutionJobRegistry()
@@ -400,6 +408,13 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   def submitted: Long = jobs.count { _.state == ExecutionState.SUBMITTED }
   def running: Long = jobs.count { _.state == ExecutionState.RUNNING }
+  def runningJobs = jobs.filter(_.state == ExecutionState.RUNNING)
+
+  private[environment] val _done = new AtomicLong(0L)
+  private[environment] val _failed = new AtomicLong(0L)
+
+  def done: Long = _done.get()
+  def failed: Long = _failed.get()
 
   def runtimeSettings = RuntimeSettings(archiveResult = false)
 

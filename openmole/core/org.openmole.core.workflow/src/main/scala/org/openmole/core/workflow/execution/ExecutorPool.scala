@@ -15,17 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.execution.local
+package org.openmole.core.workflow.execution
 
 import java.util.UUID
 
 import org.openmole.core.threadprovider.ThreadProvider
-
-import collection.mutable
-import scala.ref.WeakReference
-import org.openmole.core.workflow.execution._
-import org.openmole.core.workflow.task.MoleTask
 import org.openmole.tool.collection._
+
+import scala.collection.mutable
+import scala.ref.WeakReference
 
 object ExecutorPool {
 
@@ -62,7 +60,7 @@ class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment],
     case (exe, thread) ⇒ exe.stop = true; thread.interrupt
   }
 
-  private[local] def takeNextJob: LocalExecutionJob = jobs.dequeue
+  private[execution] def takeNextJob: LocalExecutionJob = jobs.dequeue
 
   def enqueue(job: LocalExecutionJob) = jobs.enqueue(job, priority(job))
 
