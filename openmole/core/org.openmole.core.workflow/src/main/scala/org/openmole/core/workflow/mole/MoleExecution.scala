@@ -450,8 +450,7 @@ object MoleExecution extends JavaLogger {
 
       for {
         env ← submissionEnvironments
-        ej ← env.jobs
-        if ej.state == ExecutionState.RUNNING
+        ej ← env.runningJobs
         id ← ej.moleJobIds
       } set.add(id)
 

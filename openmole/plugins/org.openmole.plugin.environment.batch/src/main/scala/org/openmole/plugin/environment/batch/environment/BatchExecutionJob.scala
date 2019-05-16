@@ -25,7 +25,8 @@ import org.openmole.core.communication.message.RunnableTask
 import org.openmole.core.fileservice.{ FileCache, FileService }
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.serializer.PluginAndFilesListing
-import org.openmole.core.workflow.execution.ExecutionJob
+import org.openmole.core.workflow.execution.{ Environment, ExecutionJob }
+import org.openmole.core.workflow.execution.ExecutionState.{ DONE, ExecutionState, FAILED, READY, KILLED }
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.workspace.NewFile
 import org.openmole.plugin.environment.batch.environment.JobStore.StoredJob
@@ -148,5 +149,24 @@ class BatchExecutionJob(val storedJob: StoredJob, val environment: BatchEnvironm
       environment.plugins ++ plugins).distinct
 
   def usedFileHashes = usedFiles.map(f ⇒ (f, environment.services.fileService.hash(f)(environment.services.newFile, environment.services.fileServiceCache)))
+
+  private var _state: ExecutionState = READY
+
+  def state = _state
+
+  def state_=(newState: ExecutionState) = synchronized {
+    if (state != KILLED && newState != state) {
+      newState match {
+        case DONE ⇒ environment._done.incrementAndGet()
+        case FAILED ⇒
+          if (state == DONE) environment._done.decrementAndGet()
+          environment._failed.incrementAndGet()
+        case _ ⇒
+      }
+
+      environment.eventDispatcherService.trigger(environment, new Environment.JobStateChanged(this, newState, this.state))
+      _state = newState
+    }
+  }
 
 }

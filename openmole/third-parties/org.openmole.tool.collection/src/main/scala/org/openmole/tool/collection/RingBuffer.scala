@@ -17,19 +17,16 @@
  */
 package org.openmole.tool.collection
 
-import java.util.concurrent.ConcurrentLinkedQueue
-import scala.collection.JavaConversions._
+import java.util
+import scala.collection.JavaConverters._
 
-class SlidingList[T] {
+class RingBuffer[T](size: Int) {
 
-  private val queue = new ConcurrentLinkedQueue[T]()
+  private val queue = new util.ArrayDeque[T](size)
 
-  def put(t: T, capacity: Int) = queue.synchronized {
-    while (queue.size() >= capacity) queue.poll()
-    queue.add(t)
-  }
+  def put(t: T) = queue.synchronized { queue.add(t) }
 
-  def elements: List[T] = queue.synchronized(queue.toList)
+  def elements: Vector[T] = queue.synchronized(queue.asScala.toVector)
 
   def clear() = synchronized {
     val v = elements

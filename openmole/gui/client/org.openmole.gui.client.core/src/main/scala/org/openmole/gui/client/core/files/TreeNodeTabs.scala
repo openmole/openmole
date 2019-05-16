@@ -25,6 +25,7 @@ import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.client.tool.plot.Plot._
 import org.openmole.gui.client.tool.plot._
 import scaladget.bootstrapnative.{ DataTable, ToggleButton }
+import org.openmole.gui.ext.tool._
 import scaladget.bootstrapnative.Popup._
 import rx._
 import scalatags.JsDom

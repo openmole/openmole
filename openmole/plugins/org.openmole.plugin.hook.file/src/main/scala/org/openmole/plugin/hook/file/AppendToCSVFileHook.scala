@@ -45,11 +45,13 @@ object AppendToCSVFileHook {
   def apply(
     file:       FromContext[File],
     values:     Seq[Val[_]]                           = Vector.empty,
+    exclude:    Seq[Val[_]]                           = Vector.empty,
     header:     OptionalArgument[FromContext[String]] = None,
     arrayOnRow: Boolean                               = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new AppendToCSVFileHook(
       file,
       values.toVector,
+      exclude = exclude,
       header = header,
       arraysOnSingleRow = arrayOnRow,
       config = InputOutputConfig(),
@@ -60,7 +62,8 @@ object AppendToCSVFileHook {
 
 @Lenses case class AppendToCSVFileHook(
   file:              FromContext[File],
-  prototypes:        Vector[Val[_]],
+  prototypes:        Seq[Val[_]],
+  exclude:           Seq[Val[_]],
   header:            Option[FromContext[String]],
   arraysOnSingleRow: Boolean,
   config:            InputOutputConfig,
@@ -76,10 +79,8 @@ object AppendToCSVFileHook {
     import parameters._
     import org.openmole.plugin.tool.csv
 
-    val ps =
-      if (prototypes.isEmpty) context.values.map { _.prototype }.toVector
-      else prototypes
-
+    val excludeSet = exclude.map(_.name).toSet
+    val ps = (if (prototypes.isEmpty) context.values.map { _.prototype }.toVector else prototypes).filter { v ⇒ !excludeSet.contains(v.name) }
     val values = ps.map(context(_))
 
     def headerLine = header.map(_.from(context)) getOrElse csv.header(ps, values, arraysOnSingleRow)

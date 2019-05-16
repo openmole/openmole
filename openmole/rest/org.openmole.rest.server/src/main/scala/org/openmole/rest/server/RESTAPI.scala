@@ -177,7 +177,7 @@ trait RESTAPI extends ScalatraServlet with ContentEncodingSupport
           def environments = moleExecution.environments.values.toSeq ++ Seq(moleExecution.defaultEnvironment)
           def environmentStatus = environments.map {
             env ⇒
-              def environmentErrors = env.clearErrors.map(e ⇒ Error(e.exception).copy(level = Some(e.level.toString)))
+              def environmentErrors = Environment.clearErrors(env).map(e ⇒ Error(e.exception).copy(level = Some(e.level.toString)))
               EnvironmentStatus(name = env.name, submitted = env.submitted, running = env.running, done = env.done, failed = env.failed, environmentErrors)
           }
           val statuses = moleExecution.capsuleStatuses

@@ -51,7 +51,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
         "Failed" → environment.failed
       )
     } println(s"$label: $number")
-    val errors = environment.errors
+    val errors = Environment.errors(environment)
     def low = errors.count(_.level.intValue() <= Level.INFO.intValue())
     def warning = errors.count(_.level.intValue() == Level.WARNING.intValue())
     def severe = errors.count(_.level.intValue() == Level.SEVERE.intValue())
@@ -89,9 +89,10 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
   implicit def stringToLevel(s: String) = Level.parse(s.toUpperCase)
 
   def errors(environment: Environment, level: Level = Level.INFO) = {
-    def filtered = environment.clearErrors.filter {
-      e ⇒ e.level.intValue() >= level.intValue()
-    }
+    def filtered =
+      Environment.clearErrors(environment).filter {
+        e ⇒ e.level.intValue() >= level.intValue()
+      }
 
     for {
       error ← filtered
