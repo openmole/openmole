@@ -48,7 +48,7 @@ val my_LHS_sampling =
 
 @h3{Usage in the DirectSampling task}
 
-Once a sampling is defined, you can just add it to a @code{DirectSampling} task (see @a("here", href:= directSampling.file) for the description of this task), under the @code{sampling} argument.
+Once a sampling is defined, you can just add it to a @code{DirectSampling} task (see @aa("here", href:= directSampling.file) for the description of this task), under the @code{sampling} argument.
 For example, supposing you have already declared inputs, outputs, and a model task called @code{myModel}, the sampling could be used like this:
 
 @br@br
@@ -88,7 +88,7 @@ val my_sobol_sampling =
 
 @h3{Usage in the DirectSampling task}
 
-Once a sampling is defined, you can just add it to a @code{DirectSampling} task (see @a("here", href:= directSampling.file) for the description of this task), under the @code{sampling} argument.
+Once a sampling is defined, you can just add it to a @code{DirectSampling} task (see @aa("here", href:= directSampling.file) for the description of this task), under the @code{sampling} argument.
 For example, supposing you have already declared inputs, outputs, and a model task called @code{myModel}, the sampling could be used like this:
 
 @br@br
