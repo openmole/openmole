@@ -58,7 +58,7 @@ object Search {
 
     val resultDiv = {
       lazy val results = div(
-        onkeypress := { (k: KeyboardEvent) ⇒
+        onkeydown := { (k: KeyboardEvent) ⇒
           val curItem = item.now
           if (k.keyCode == 40 && curItem.index < curItem.maxSize - 1) {
             item() = curItem.copy(index = curItem.index + 1)

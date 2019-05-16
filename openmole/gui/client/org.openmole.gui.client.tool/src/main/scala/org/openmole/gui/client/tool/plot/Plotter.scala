@@ -41,12 +41,13 @@ object Plotter {
       }
 
       val dataNbColumns = sequenceData.header.length
+      val indexes = plotter.toBePlotted.indexes.filterNot { _ >= dataNbColumns }
 
       val dims = plotter.plotDimension match {
         case ColumnPlot ⇒
           if (dataNbColumns >= nbDims) {
             val closureFilter = plotter.closureFilter.getOrElse(ClosureFilter.empty)
-            plotter.toBePlotted.indexes.foldLeft(Array[Dim]()) { (acc, col) ⇒
+            indexes.foldLeft(Array[Dim]()) { (acc, col) ⇒
               acc :+ Dim(DataTable.column(col, dataRow).values.filter(v ⇒ jsClosure(closureFilter, v, col)), sequenceData.header.lift(col).getOrElse(""))
             }
           }
@@ -76,17 +77,17 @@ object Plotter {
 
   val nothingToplot = div("No plot to display").render
 
-  def toBePlotted(plotter: Plotter, data: SequenceData): Plotter = {
-    plotter.copy(toBePlotted =
-      plotter.plotDimension match {
-        case ColumnPlot ⇒
-          plotter.plotMode match {
-            case SplomMode ⇒ ToBePloted(plotter.toBePlotted.indexes.take(5))
-            case _         ⇒ ToBePloted(plotter.toBePlotted.indexes.take(2))
-          }
-        case LinePlot ⇒ ToBePloted((1 to data.content.size))
-      }
-    )
+  def toBePlotted(plotter: Plotter, data: SequenceData): (Plotter, SequenceData) = {
+    val (newToBePlotted, newSequenceData) = plotter.plotDimension match {
+      case ColumnPlot ⇒
+        plotter.plotMode match {
+          case SplomMode ⇒ (ToBePloted(plotter.toBePlotted.indexes.take(5)), data)
+          case _ ⇒ (ToBePloted(plotter.toBePlotted.indexes.take(2)), data.withRowIndexes)
+        }
+      case LinePlot ⇒ (ToBePloted((1 to data.content.size)), data)
+    }
+
+    (plotter.copy(toBePlotted = newToBePlotted), newSequenceData)
   }
 
   def availableForError(header: SequenceHeader, plotter: Plotter) =
