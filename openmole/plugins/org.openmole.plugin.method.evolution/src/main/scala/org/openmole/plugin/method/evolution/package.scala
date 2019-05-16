@@ -116,7 +116,7 @@ package object evolution {
 
     val evolution = wfi(algorithm)
 
-    val wrapped = pattern.wrap(evaluation, evolution.inputPrototypes, evolution.objectivePrototypes, wrap)
+    val wrapped = pattern.wrap(evaluation, evolution.inputPrototypes, evolution.outputPrototypes, wrap)
     val randomGenomes = BreedTask(evolution, parallelism, suggestion) set ((inputs, outputs) += evolution.populationPrototype)
 
     val scaleGenome = ScalingGenomeTask(evolution)
@@ -128,16 +128,21 @@ package object evolution {
     val masterFirst =
       EmptyTask() set (
         (inputs, outputs) += (evolution.populationPrototype, evolution.genomePrototype, evolution.statePrototype),
-        (inputs, outputs) += (evolution.objectivePrototypes: _*)
+        (inputs, outputs) += (evolution.outputPrototypes: _*)
       )
 
     val masterLast =
       EmptyTask() set (
-        (inputs, outputs) += (evolution.populationPrototype, evolution.statePrototype, evolution.genomePrototype.toArray, evolution.terminatedPrototype, evolution.generationPrototype)
+        (inputs, outputs) += (
+          evolution.populationPrototype,
+          evolution.statePrototype,
+          evolution.genomePrototype.toArray,
+          evolution.terminatedPrototype,
+          evolution.generationPrototype)
       )
 
     val master =
-      ((masterFirst -- toOffspring keep (Seq(evolution.statePrototype, evolution.genomePrototype) ++ evolution.objectivePrototypes: _*)) -- elitism -- terminationTask -- breed -- masterLast) &
+      ((masterFirst -- toOffspring keep (Seq(evolution.statePrototype, evolution.genomePrototype) ++ evolution.outputPrototypes: _*)) -- elitism -- terminationTask -- breed -- masterLast) &
         (masterFirst -- elitism keep evolution.populationPrototype) &
         (elitism -- breed keep evolution.populationPrototype) &
         (elitism -- masterLast keep evolution.populationPrototype) &
