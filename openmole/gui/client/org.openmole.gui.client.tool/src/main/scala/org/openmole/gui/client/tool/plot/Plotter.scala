@@ -82,7 +82,7 @@ object Plotter {
       case ColumnPlot ⇒
         plotter.plotMode match {
           case SplomMode ⇒ (ToBePloted(plotter.toBePlotted.indexes.take(5)), data)
-          case _ ⇒ (ToBePloted(plotter.toBePlotted.indexes.take(2)), data.withRowIndexes)
+          case _         ⇒ (ToBePloted(plotter.toBePlotted.indexes.take(2)), data.withRowIndexes)
         }
       case LinePlot ⇒ (ToBePloted((1 to data.content.size)), data)
     }
