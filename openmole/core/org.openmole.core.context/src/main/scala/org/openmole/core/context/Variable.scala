@@ -54,16 +54,9 @@ object Variable {
   def unsecure[@specialized T](p: Val[T], v: Any): Variable[T] = Variable[T](p, v.asInstanceOf[T])
 
   /**
-   * Variable defined by OpenMOLE
-   * @param name
-   * @return
-   */
-  def openMOLE(name: String) = Val[Long](name, namespace = openMOLENameSpace)
-
-  /**
    * Seed for rng
    */
-  val openMOLESeed = openMOLE("seed")
+  val openMOLESeed = Val[Long]("seed", namespace = openMOLENameSpace)
 
   def copy[@specialized T](v: Variable[T])(prototype: Val[T] = v.prototype, value: T = v.value): Variable[T] = apply(prototype, value)
 }
