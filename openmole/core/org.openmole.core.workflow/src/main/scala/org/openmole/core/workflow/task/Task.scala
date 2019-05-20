@@ -25,11 +25,11 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.tools.obj.Id
-import org.openmole.core.workflow.builder.{DefinitionScope, InfoConfig, InputOutputConfig}
+import org.openmole.core.workflow.builder.{ DefinitionScope, InfoConfig, InputOutputConfig }
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.tools._
-import org.openmole.core.workspace.{NewFile, Workspace}
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.tool.cache._
 import org.openmole.tool.lock._
 import org.openmole.tool.logger.LoggerService

@@ -1,7 +1,6 @@
 package org.openmole.plugin.task.scilab
 
 import monocle.macros._
-import org.openmole.core.context.ValType
 import org.openmole.core.dsl._
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion._
