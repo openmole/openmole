@@ -1,13 +1,11 @@
 package org.openmole.plugin.task.scilab
 
 import monocle.macros._
-import org.openmole.core.context.ValType
 import org.openmole.core.dsl._
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.networkservice.NetworkService
-import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder._
@@ -19,7 +17,9 @@ import org.openmole.plugin.task.container
 import org.openmole.plugin.task.container._
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.task.systemexec._
+import org.openmole.tool.outputredirection.OutputRedirection
 
+import scala.annotation.tailrec
 import scala.reflect.ClassTag
 
 object ScilabTask {
@@ -85,6 +85,33 @@ object ScilabTask {
     )
   }
 
+  /*
+  def multiArrayScilab(v: Array[Array[Array[_]]]): String = {
+    // flatten the array after multidimensional transposition
+    def recTranspose(v: Any): Array[_] = {
+      v match {
+        case v: Array[Array[Array[_]]] ⇒ v.map(recTranspose).transpose
+        case v: Array[Array[_]]        ⇒ v.transpose
+      }
+    }
+    def getDimensions(v: Array[Array[Array[_]]]): Seq[Int] = {
+      @tailrec def getdims(v: Array[_], dims: Seq[Int]): Seq[Int] = {
+        v match {
+          case v: Array[Array[_]] ⇒ getdims(v(0), dims ++ Seq(v.length))
+          case v: Array[_]        ⇒ (dims ++ Seq(v.length))
+        }
+      }
+      getdims(v, Seq.empty)
+    }
+    val scilabVals = recTranspose(v).flatten.map { toScilab }
+    val dimensions = getDimensions(v)
+    // scilab syntax for hypermat
+    // M = hypermat([2 3 2 2],data) with data being flat column vector
+    // NOTE : going to string may be too large for very large arrays ? would need a proper serialization ?
+    "hypermat([" + dimensions.mkString(" ") + "],[" + scilabVals.mkString(";") + "])"
+  }
+  */
+
   def toScilab(v: Any): String = {
     v match {
       case v: Int     ⇒ v.toString
@@ -93,6 +120,7 @@ object ScilabTask {
       case v: Boolean ⇒ if (v) "%T" else "%F"
       case v: String  ⇒ '"' + v + '"'
       case v: Array[Array[Array[_]]] ⇒
+        //multiArrayScilab(v)
         throw new UserBadDataError(s"The array of more than 2D $v of type ${v.getClass} is not convertible to Scilab")
       case v: Array[Array[_]] ⇒
         def line(v: Array[_]) = v.map(toScilab).mkString(", ")

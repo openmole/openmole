@@ -33,7 +33,7 @@ import org.openmole.core.workflow.job._
 
 import scala.util.{ Failure, Success }
 
-object GetResultActor extends JavaLogger {
+object GetResultActor {
 
   case class JobRemoteExecutionException(message: String, cause: Throwable) extends InternalProcessingError(message, cause)
 

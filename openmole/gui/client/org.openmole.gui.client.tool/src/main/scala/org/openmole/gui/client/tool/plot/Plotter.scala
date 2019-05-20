@@ -3,14 +3,19 @@ package org.openmole.gui.client.tool.plot
 import org.openmole.gui.ext.data.{ SequenceData, SequenceHeader }
 import Plot._
 import scaladget.bootstrapnative.DataTable
+import scaladget.bootstrapnative.DataTable.DataRow
 import scalatags.JsDom.all._
 
 case class IndexedAxis(title: String, fullSequenceIndex: Int)
 
-case class ClosureFilter(closure: String = "", axis: Seq[IndexedAxis] = Seq())
+object IndexedAxis {
+  def noFilter = IndexedAxis("No filter set", -1)
+}
+
+case class ClosureFilter(closure: String = "", filteredAxis: Option[IndexedAxis])
 
 object ClosureFilter {
-  def empty = ClosureFilter("", Seq())
+  def empty = ClosureFilter("", None)
 }
 
 case class Plotter(
@@ -30,25 +35,38 @@ object Plotter {
     None
   )
 
+  def filterColumn(dataRows: Seq[DataRow], plotter: Plotter, nbLines: Int): Seq[Int] = {
+
+    val closureFilter = plotter.closureFilter.getOrElse(ClosureFilter.empty)
+
+    closureFilter.filteredAxis.map {
+      _.fullSequenceIndex
+    }.map { colToBeFiltered ⇒
+      DataTable.column(colToBeFiltered, dataRows).values.zipWithIndex.filter(v ⇒ jsClosure(closureFilter, v._1, colToBeFiltered)).map {
+        _._2
+      }
+    }.getOrElse(0 to nbLines - 1)
+  }
+
   def plot(sequenceData: SequenceData, plotter: Plotter) = {
 
     val dataNbLines = sequenceData.content.length
     val nbDims = plotter.toBePlotted.indexes.length
 
     if (dataNbLines > 0) {
-      val dataRow = sequenceData.content.map {
+      val dataRows = sequenceData.content.map {
         scaladget.bootstrapnative.DataTable.DataRow(_)
       }
 
       val dataNbColumns = sequenceData.header.length
       val indexes = plotter.toBePlotted.indexes.filterNot { _ >= dataNbColumns }
+      val filteredColumn = filterColumn(dataRows, plotter, dataNbLines)
 
       val dims = plotter.plotDimension match {
         case ColumnPlot ⇒
           if (dataNbColumns >= nbDims) {
-            val closureFilter = plotter.closureFilter.getOrElse(ClosureFilter.empty)
             indexes.foldLeft(Array[Dim]()) { (acc, col) ⇒
-              acc :+ Dim(DataTable.column(col, dataRow).values.filter(v ⇒ jsClosure(closureFilter, v, col)), sequenceData.header.lift(col).getOrElse(""))
+              acc :+ Dim(DataTable.column(col, dataRows).values.zipWithIndex.filter { id ⇒ filteredColumn.contains(id._2) }.map { _._1 }, sequenceData.header.lift(col).getOrElse(""))
             }
           }
           else Array[Dim]()
@@ -68,7 +86,7 @@ object Plotter {
           false,
           plotter,
           plotter.error.map { e ⇒
-            Serie(Dim(DataTable.column(e.fullSequenceIndex, dataRow).values, sequenceData.header.lift(e.fullSequenceIndex).getOrElse("")))
+            Serie(Dim(DataTable.column(e.fullSequenceIndex, dataRows).values, sequenceData.header.lift(e.fullSequenceIndex).getOrElse("")))
           }
         )
     }
@@ -101,26 +119,11 @@ object Plotter {
         }
     }
 
-  def availableForClosureFilter(header: SequenceHeader, plotter: Plotter) = {
-    val closure = plotter.closureFilter.map {
-      _.closure
-    }.getOrElse("")
-
-    ClosureFilter(
-      closure,
-      header.zipWithIndex.filter {
-        case (x, i) ⇒
-          plotter.toBePlotted.indexes.contains(i)
-      }.map { afe ⇒
-        IndexedAxis(afe._1, afe._2)
-      })
-  }
-
   def jsClosure(closureFilter: ClosureFilter, value: String, col: Int) = {
     if (closureFilter.closure.isEmpty) true
     else {
-      closureFilter.axis.find(_.fullSequenceIndex == col).map { pc ⇒
-        closureFilter.closure.replace("x", value)
+      closureFilter.filteredAxis.find(_.fullSequenceIndex == col).map { pc ⇒
+        value + closureFilter.closure
       }.map { cf ⇒
         scala.util.Try(scala.scalajs.js.eval(s"function func() { return ${cf};} func()").asInstanceOf[Boolean]).toOption.getOrElse(true)
       }.getOrElse(true)

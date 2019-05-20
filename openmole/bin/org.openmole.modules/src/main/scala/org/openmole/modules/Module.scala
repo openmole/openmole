@@ -25,7 +25,7 @@ import org.openmole.plugin.environment.pbs.PBSEnvironment
 import org.openmole.plugin.environment.sge.SGEEnvironment
 import org.openmole.plugin.environment.slurm.SLURMEnvironment
 import org.openmole.plugin.environment.ssh.SSHEnvironment
-import org.openmole.plugin.hook.file.AppendToCSVFileHook
+import org.openmole.plugin.hook.file.CSVHook
 import org.openmole.plugin.method.evolution.NSGA2
 import org.openmole.plugin.method.sensitivity.MorrisSampling
 import org.openmole.plugin.sampling.csv.CSVSampling
@@ -60,7 +60,7 @@ object module {
       ModuleEntry("NetLogo5", "Execute NetLogo 5 simulation models", components[NetLogo5Task]),
       ModuleEntry("SystemExec", "Execute system command", components[SystemExecTask]),
       ModuleEntry("Template", "Generate files", components[TemplateTask]),
-      ModuleEntry("CSVHook", "Save results in CSV files", components(AppendToCSVFileHook)),
+      ModuleEntry("CSVHook", "Save results in CSV files", components(CSVHook)),
       ModuleEntry("CSVSampling", "Generate sampling using CSV files", components(CSVSampling)),
       ModuleEntry("LHS", "Generate Latin Hypercube Sampling", components(LHS)),
       ModuleEntry("QuasiRandom", "Generate sampling using low-discrepency sequences", components(SobolSampling)),

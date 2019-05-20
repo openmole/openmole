@@ -17,10 +17,10 @@
 
 package org.openmole.runtime
 
-import org.openmole.core.logconfig.LoggerConfig
+import org.openmole.core.logconfig._
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.tool.file._
-import org.openmole.tool.logger.JavaLogger
+import org.openmole.tool.logger.{ JavaLogger, LoggerService }
 import scopt._
 import java.io.File
 
@@ -92,6 +92,7 @@ object SimExplorer extends JavaLogger {
             implicit val threadProvider = ThreadProvider(config.nbThread.get + 5)
             implicit val fileService = FileService()
             implicit val eventDispatcher = EventDispatcher()
+            implicit val loggerService = if (config.debug) LoggerService(level = finest) else LoggerService()
 
             try {
 

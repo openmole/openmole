@@ -13,7 +13,7 @@ import org.openmole.core.threadprovider._
 import org.openmole.tool.hash._
 import org.openmole.core.dsl._
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.outputredirection._
+import org.openmole.tool.outputredirection._
 import org.openmole.core.workflow.builder._
 import org.openmole.plugin.task.container._
 import org.openmole.plugin.task.systemexec._
@@ -21,6 +21,7 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.container
 import org.openmole.plugin.tool.json._
+import org.openmole.tool.outputredirection.OutputRedirection
 
 object RTask {
 

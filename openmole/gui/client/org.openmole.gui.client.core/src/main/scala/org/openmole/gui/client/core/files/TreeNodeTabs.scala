@@ -28,6 +28,7 @@ import scaladget.bootstrapnative.{ DataTable, ToggleButton }
 import org.openmole.gui.ext.tool._
 import scaladget.bootstrapnative.Popup._
 import rx._
+import scaladget.bootstrapnative.Selector.Options
 import scalatags.JsDom
 
 import scala.collection.immutable.HashMap
@@ -145,6 +146,10 @@ object TreeNodeTab {
     def refresh(onsaved: () ⇒ Unit) = save(safePathTab.now, omsEditor, onsaved)
 
     def resizeEditor = omsEditor.editor.resize()
+
+    def indexAxises(header: SequenceHeader) = header.zipWithIndex.map { afe ⇒
+      IndexedAxis(afe._1, afe._2)
+    }
 
     lazy val controlElement = {
       val compileDisabled = Var(false)
@@ -449,35 +454,29 @@ object TreeNodeTab {
       }): _*
     )
 
-    lazy val filterClosureRadios = checkboxes(marginLeft := 20)(
-      (for (
-        a ← Plotter.availableForClosureFilter(dataTab.sequence.header, plotter).axis
-      ) yield {
-        selectableButton(a.title, plotter.closureFilter.map {
-          _.axis
-        }.getOrElse(Seq()).contains(a), onclick = () ⇒ {
-          val axisSet = plotter.closureFilter.map {
-            _.axis
-          }.getOrElse(Seq())
-          toClosureView(plotter.closureFilter.map {
-            _.copy(closure = closureInput.value, axis = {
-              if (axisSet.contains(a)) axisSet.filterNot(_ == a)
-              else axisSet :+ a
-            })
-          })
-        })
-      }): _*
-    )
-
-    lazy val toggleFilter: ToggleButton = toggle(plotter.closureFilter.isDefined, "On", "Off", onToggled = () ⇒ {
-      if (toggleFilter.position.now) toClosureView(Some(ClosureFilter(closureInput.value, plotter.closureFilter.map {
-        _.axis
-      }.getOrElse(Seq()))))
-      else toClosureView(None)
+    lazy val filterAxisOptions: Options[IndexedAxis] = {
+      (IndexedAxis.noFilter +: dataTab.sequence.header.zipWithIndex.map { afe ⇒
+        IndexedAxis(afe._1, afe._2)
+      }).options(
+        plotter.closureFilter.flatMap {
+          _.filteredAxis.map {
+            _.fullSequenceIndex
+          }
+        }.getOrElse(-1) + 1,
+        btn_default,
+        (indexedAxis: IndexedAxis) ⇒ indexedAxis.title,
+        () ⇒ {
+          if (filterAxisOptions.content.now.map {
+            _.fullSequenceIndex
+          }.getOrElse(-1) != -1) {
+            toClosureView(Some(ClosureFilter(closure = closureInput.value, filteredAxis = filterAxisOptions.content.now)))
+          }
+          else toClosureView(None)
+        }
+      )
     }
-    )
 
-    lazy val closureInput = input(placeholder := "Filter closure. Ex: x < 10", marginLeft := 10)(value := plotter.closureFilter.map {
+    lazy val closureInput = input(placeholder := "Filter closure. Ex: < 10", marginLeft := 10)(value := plotter.closureFilter.map {
       _.closure
     }.getOrElse("")).render
 
@@ -499,28 +498,26 @@ object TreeNodeTab {
             case SplomMode | HeatMapMode ⇒ div()
             case _ ⇒
               scalatags.JsDom.tags.span(
-                hForm(
+                scalatags.JsDom.tags.span(
+                  toggleError.render,
                   scalatags.JsDom.tags.span(
-                    toggleError.render,
                     Rx {
                       if (toggleError.position()) scalatags.JsDom.tags.span(errorCheckBox.render).render
                       else {
                         scalatags.JsDom.tags.span.render
                       }
-                    }).render.withLabel("Error bar")
+                    }).render
                 ),
-                scalatags.JsDom.tags.span(hForm(
-                  scalatags.JsDom.tags.span(
-                    toggleFilter.render,
-                    Rx {
-                      if (toggleFilter.position()) scalatags.JsDom.tags.span(filterClosureRadios.render, closureInput, inputFilterValidation).render
-                      else {
-                        scalatags.JsDom.tags.span.render
-                      }
-                    }).render.withLabel("Filter")
+                scalatags.JsDom.tags.span(
+                  scalatags.JsDom.tags.span(scalatags.JsDom.tags.span(display.flex, flexDirection.row)(
+                    filterAxisOptions.selector,
+                    scalatags.JsDom.tags.span(
+                      Rx {
+                        if (filterAxisOptions.content().map { _.fullSequenceIndex } == Some(-1)) scalatags.JsDom.tags.span.render
+                        else scalatags.JsDom.tags.span(form(closureInput.render, inputFilterValidation)).render
+                      }))
+                  )
                 ))
-
-              )
           }
         case _ ⇒ div()
       }
@@ -562,7 +559,7 @@ object TreeNodeTab {
       if (closure.isEmpty) true
       else {
         plotter.closureFilter.map {
-          _.axis.find(_.fullSequenceIndex == col).map { pc ⇒
+          _.filteredAxis.find(_.fullSequenceIndex == col).map { pc ⇒
             closure.replace("x", value)
           }.map { cf ⇒
             scala.util.Try(scala.scalajs.js.eval(s"function func() { return ${cf};} func()").asInstanceOf[Boolean]).toOption.getOrElse(true)

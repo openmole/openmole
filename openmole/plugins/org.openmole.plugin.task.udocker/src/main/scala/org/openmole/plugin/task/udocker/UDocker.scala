@@ -21,11 +21,11 @@ import io.circe.jawn.{ decode, decodeFile }
 import io.circe.syntax._
 import monocle.macros.Lenses
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.Preference
 import org.openmole.core.tools.service.Retry
 import org.openmole.plugin.task.systemexec.{ ExecutionCommand, commandLine, execute, executeAll }
 import org.openmole.tool.file._
+import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.stream._
 import org.openmole.tool.stream.withClosable
 
