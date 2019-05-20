@@ -46,7 +46,7 @@ exploration -< (t1 hook DisplayHook())""")
 
 @br
 
-You can read more about @a("Explorations and Samplings", href := DocumentationPages.directSampling.file) in the relevant section of the documentation.
+You can read more about @a("Explorations and Samplings", href := DocumentationPages.samplings.file) in the relevant section of the documentation.
 
 
 @h3{Aggregating results from an exploration}
