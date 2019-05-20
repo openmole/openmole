@@ -2,9 +2,10 @@ package org.openmole.ui
 
 import java.io.File
 
-import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.services.{ Services, ServicesContainer }
 import org.openmole.tool.file._
+import org.openmole.tool.logger.LoggerService
+import org.openmole.tool.outputredirection.OutputRedirection
 
 object Test {
   def withTmpServices[T](f: Services ⇒ T) = {
@@ -41,6 +42,7 @@ object Test {
       implicit val outputRedirection = OutputRedirection()
       implicit val networkService = NetworkService(None)
       implicit val fileServiceCache = FileServiceCache()
+      implicit val loggerService = LoggerService()
 
       new ServicesContainer()
     }

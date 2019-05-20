@@ -178,6 +178,7 @@ object MoleExecution extends JavaLogger {
                   fileService,
                   workspace,
                   outputRedirection,
+                  loggerService,
                   subMoleExecutionState.moleExecution.taskCache,
                   subMoleExecutionState.moleExecution.lockRepository,
                   moleExecution = Some(subMoleExecutionState.moleExecution)
@@ -396,6 +397,7 @@ object MoleExecution extends JavaLogger {
               fileService,
               workspace,
               outputRedirection,
+              loggerService,
               moleExecution.taskCache,
               moleExecution.lockRepository,
               moleExecution = Some(moleExecution)
@@ -450,8 +452,7 @@ object MoleExecution extends JavaLogger {
 
       for {
         env ← submissionEnvironments
-        ej ← env.jobs
-        if ej.state == ExecutionState.RUNNING
+        ej ← env.runningJobs
         id ← ej.moleJobIds
       } set.add(id)
 

@@ -150,8 +150,8 @@ object ScalaCompilation {
        |      ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
        |    }
        |    import ${inputObject}._
-       |    implicit lazy val ${Variable.openMOLE("RNG").name}: util.Random = ${prefix}RNG()
-       |    implicit lazy val ${Variable.openMOLE("NewFile").name} = ${prefix}NewFile
+       |    implicit lazy val ${Val.name(Variable.openMOLENameSpace, "RNG")}: util.Random = ${prefix}RNG()
+       |    implicit lazy val ${Val.name(Variable.openMOLENameSpace, "NewFile")} = ${prefix}NewFile
        |    $source
        |    ${wrapping.wrapOutput}
        |  }: ${toScalaNativeType(returnType)}

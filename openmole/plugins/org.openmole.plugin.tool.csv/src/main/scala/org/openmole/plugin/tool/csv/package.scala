@@ -60,11 +60,24 @@ package object csv extends CSVPackage {
 
   def moreThanOneElement(l: List[_]) = !l.isEmpty && !l.tail.isEmpty
 
-  def dataToLists(values: Seq[Any]) =
+  object CSVData {
+    def toList(d: CSVData) =
+      d match {
+        case d: ArrayData  ⇒ d.v
+        case s: ScalarData ⇒ List(s.v)
+      }
+
+  }
+
+  sealed trait CSVData
+  case class ScalarData(v: Any) extends CSVData
+  case class ArrayData(v: List[Any]) extends CSVData
+
+  def valuesToData(values: Seq[Any]) =
     values.map {
-      case v: Array[_] ⇒ v.toList
-      case l: List[_]  ⇒ l
-      case v           ⇒ List(v)
+      case v: Array[_] ⇒ ArrayData(v.toList)
+      case l: List[_]  ⇒ ArrayData(l)
+      case v           ⇒ ScalarData(v)
     }.toList
 
   def header(prototypes: Seq[Val[_]], values: Seq[Any], arraysOnSingleRow: Boolean = false) = {
@@ -104,13 +117,32 @@ package object csv extends CSVPackage {
           case _          ⇒ List(o)
         }
 
-        @tailrec def write(lists: List[List[_]]): Unit =
-          if (lists.exists(_.isEmpty)) Unit
-          else if (arraysOnSingleRow || !lists.exists(moreThanOneElement)) writeLine(lists.flatten(flatAny))
-          else {
-            writeLine(lists.map { _.head })
-            write(lists.map { l ⇒ if (moreThanOneElement(l)) l.tail else l })
+        def writeData(data: List[CSVData]): Unit = {
+          val scalars = data.collect { case x: ScalarData ⇒ x }
+          if (scalars.size == data.size) writeLine(scalars.map(_.v))
+          else if (arraysOnSingleRow) {
+            val lists = data.map(CSVData.toList)
+            writeLine(lists.flatten(flatAny))
           }
+          else writeArrayData(data)
+        }
+
+        @tailrec def writeArrayData(data: List[CSVData]): Unit = {
+          if (data.collect { case l: ArrayData ⇒ l }.forall(_.v.isEmpty)) Unit
+          else {
+            val lists = data.map(CSVData.toList)
+            writeLine(lists.map { _.headOption.getOrElse("") })
+
+            def tail(d: CSVData) =
+              d match {
+                case a @ ArrayData(Nil) ⇒ a
+                case a: ArrayData       ⇒ a.copy(a.v.tail)
+                case s: ScalarData      ⇒ s
+              }
+
+            writeArrayData(data.map(tail))
+          }
+        }
 
         def writeLine[T](list: List[T]) = {
           fos.appendLine(list.map(l ⇒ {
@@ -121,7 +153,7 @@ package object csv extends CSVPackage {
           }).mkString(","))
         }
 
-        write(dataToLists(values))
+        writeData(valuesToData(values))
     }
   }
 

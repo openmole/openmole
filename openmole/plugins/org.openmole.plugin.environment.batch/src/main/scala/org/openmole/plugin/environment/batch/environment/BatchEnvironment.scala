@@ -18,6 +18,7 @@
 package org.openmole.plugin.environment.batch.environment
 
 import java.io.File
+import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.{CountDownLatch, Semaphore}
 
 import org.openmole.core.communication.message._
@@ -34,21 +35,24 @@ import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole.MoleServices
+import org.openmole.core.workflow.tools.ExceptionEvent
 import org.openmole.core.workspace._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment.ExecutionJobRegistry
 import org.openmole.plugin.environment.batch.refresh._
 import org.openmole.tool.cache._
+import org.openmole.tool.collection.RingBuffer
 import org.openmole.tool.file._
-import org.openmole.tool.logger.JavaLogger
+import org.openmole.tool.logger.{JavaLogger, LoggerService}
 import org.openmole.tool.random.{RandomProvider, Seeder, shuffled}
 import squants.information.Information
 import squants.information.InformationConversions._
 import squants.time.TimeConversions._
 import org.openmole.tool.lock._
+import org.openmole.tool.outputredirection.OutputRedirection
 
 import scala.collection.immutable.TreeSet
 
-object BatchEnvironment extends JavaLogger {
+object BatchEnvironment {
 
   trait Transfer {
     def id: Long
@@ -143,7 +147,9 @@ object BatchEnvironment extends JavaLogger {
       randomProvider:    RandomProvider = services.randomProvider,
       replicaCatalog:    ReplicaCatalog = services.replicaCatalog,
       eventDispatcher:   EventDispatcher = services.eventDispatcher,
-      fileServiceCache:  FileServiceCache = services.fileServiceCache) =
+      fileServiceCache:  FileServiceCache = services.fileServiceCache,
+      outputRedirection: OutputRedirection = services.outputRedirection,
+      loggerService: LoggerService) =
       new Services()(
         threadProvider = threadProvider,
         preference = preference,
@@ -154,7 +160,9 @@ object BatchEnvironment extends JavaLogger {
         randomProvider = randomProvider,
         replicaCatalog = replicaCatalog,
         eventDispatcher = eventDispatcher,
-        fileServiceCache = fileServiceCache)
+        fileServiceCache = fileServiceCache,
+        outputRedirection = outputRedirection,
+        loggerService = loggerService)
 
     def set(services: Services)(ms: MoleServices) =
       new Services() (
@@ -167,7 +175,9 @@ object BatchEnvironment extends JavaLogger {
         randomProvider = services.randomProvider,
         replicaCatalog = services.replicaCatalog,
         eventDispatcher = ms.eventDispatcher,
-        fileServiceCache = ms.fileServiceCache
+        fileServiceCache = ms.fileServiceCache,
+        outputRedirection = ms.outputRedirection,
+        loggerService = ms.loggerService
       )
 
   }
@@ -183,7 +193,9 @@ object BatchEnvironment extends JavaLogger {
     implicit val randomProvider:    RandomProvider,
     implicit val replicaCatalog:    ReplicaCatalog,
     implicit val eventDispatcher:   EventDispatcher,
-    implicit val fileServiceCache:  FileServiceCache
+    implicit val fileServiceCache:  FileServiceCache,
+    implicit val outputRedirection: OutputRedirection,
+    implicit val loggerService: LoggerService
   ) { services =>
 
     def set(ms: MoleServices) = Services.set(services)(ms)
@@ -198,7 +210,9 @@ object BatchEnvironment extends JavaLogger {
       randomProvider:    RandomProvider = services.randomProvider,
       replicaCatalog:    ReplicaCatalog = services.replicaCatalog,
       eventDispatcher:   EventDispatcher = services.eventDispatcher,
-      fileServiceCache:  FileServiceCache = services.fileServiceCache) =
+      fileServiceCache:  FileServiceCache = services.fileServiceCache,
+      outputRedirection: OutputRedirection = services.outputRedirection,
+      loggerService: LoggerService = services.loggerService) =
       Services.copy(services)(
         threadProvider = threadProvider,
         preference = preference,
@@ -209,7 +223,9 @@ object BatchEnvironment extends JavaLogger {
         randomProvider = randomProvider,
         replicaCatalog = replicaCatalog,
         eventDispatcher = eventDispatcher,
-        fileServiceCache = fileServiceCache)
+        fileServiceCache = fileServiceCache,
+        outputRedirection = outputRedirection,
+        loggerService = loggerService)
   }
 
   def jobFiles(job: BatchExecutionJob) =
@@ -378,7 +394,12 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
   implicit val services: BatchEnvironment.Services
   def eventDispatcherService = services.eventDispatcher
 
-  def exceptions = services.preference(Environment.maxExceptionsLog)
+  private lazy val _errors = new RingBuffer[ExceptionEvent](services.preference(Environment.maxExceptionsLog))
+  def error(e: ExceptionEvent) = _errors.put(e)
+
+  def errors: Seq[ExceptionEvent] = _errors.elements
+  def clearErrors: Seq[ExceptionEvent] = _errors.clear()
+
   def clean = BatchEnvironment.registryIsEmpty(env)
 
   lazy val registry = new ExecutionJobRegistry()
@@ -400,6 +421,13 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   def submitted: Long = jobs.count { _.state == ExecutionState.SUBMITTED }
   def running: Long = jobs.count { _.state == ExecutionState.RUNNING }
+  def runningJobs = jobs.filter(_.state == ExecutionState.RUNNING)
+
+  private[environment] val _done = new AtomicLong(0L)
+  private[environment] val _failed = new AtomicLong(0L)
+
+  def done: Long = _done.get()
+  def failed: Long = _failed.get()
 
   def runtimeSettings = RuntimeSettings(archiveResult = false)
 

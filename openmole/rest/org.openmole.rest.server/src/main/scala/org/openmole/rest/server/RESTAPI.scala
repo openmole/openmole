@@ -9,13 +9,13 @@ import javax.servlet.http.HttpServletRequest
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import org.openmole.core.event._
-import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.project._
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.mole.{ MoleExecution, MoleExecutionContext, MoleServices }
 import org.openmole.core.dsl._
 import org.openmole.rest.message._
 import org.openmole.tool.collection._
+import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.stream._
 import org.openmole.tool.tar.{ TarInputStream, TarOutputStream, _ }
 import org.scalatra._
@@ -177,7 +177,7 @@ trait RESTAPI extends ScalatraServlet with ContentEncodingSupport
           def environments = moleExecution.environments.values.toSeq ++ Seq(moleExecution.defaultEnvironment)
           def environmentStatus = environments.map {
             env ⇒
-              def environmentErrors = env.clearErrors.map(e ⇒ Error(e.exception).copy(level = Some(e.level.toString)))
+              def environmentErrors = Environment.clearErrors(env).map(e ⇒ Error(e.exception).copy(level = Some(e.level.toString)))
               EnvironmentStatus(name = env.name, submitted = env.submitted, running = env.running, done = env.done, failed = env.failed, environmentErrors)
           }
           val statuses = moleExecution.capsuleStatuses

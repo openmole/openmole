@@ -6,16 +6,16 @@ import gridscale.authentication.AuthenticationException
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchExecutionJob, FailedJobExecution, AccessControl }
-import org.openmole.tool.logger.JavaLogger
+import org.openmole.tool.logger._
 
-object ErrorActor extends JavaLogger {
+object ErrorActor {
   def receive(msg: Error)(implicit services: BatchEnvironment.Services) = {
     val Error(job, exception, output) = msg
     processError(job, exception, output)
   }
 
   def processError(job: BatchExecutionJob, exception: Throwable, output: Option[(String, String)])(implicit services: BatchEnvironment.Services) = {
-    import Log._
+    import services._
 
     def defaultMessage = """OpenMOLE job execution failed on remote environment"""
 
@@ -47,6 +47,6 @@ object ErrorActor extends JavaLogger {
     job.environment.error(er)
 
     services.eventDispatcher.trigger(job.environment: Environment, er)
-    logger.log(FINE, "Error in job refresh", detailedException)
+    LoggerService.log(FINE, "Error in job refresh", Some(detailedException))
   }
 }

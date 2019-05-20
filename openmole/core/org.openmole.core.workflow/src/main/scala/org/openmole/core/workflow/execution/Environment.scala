@@ -26,21 +26,18 @@ import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.tools.service._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.core.workflow.execution.local.{ ExecutorPool, LocalExecutionJob }
 import org.openmole.core.workflow.job.{ Job, MoleJob, MoleJobId }
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workflow.tools.{ ExceptionEvent, Name }
 import org.openmole.tool.cache._
-import org.openmole.tool.collection._
 
 import scala.ref.WeakReference
 
 object Environment {
-  val maxExceptionsLog = ConfigurationLocation("Environment", "MaxExceptionsLog", Some(1000))
+  val maxExceptionsLog = ConfigurationLocation("Environment", "MaxExceptionsLog", Some(200))
 
   case class JobSubmitted(job: ExecutionJob) extends Event[Environment]
   case class JobStateChanged(job: ExecutionJob, newState: ExecutionState, oldState: ExecutionState) extends Event[Environment]
-
   case class ExceptionRaised(exception: Throwable, level: Level) extends Event[Environment] with ExceptionEvent
   case class ExecutionJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level) extends Event[Environment] with ExceptionEvent
   case class MoleJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level, moleJob: MoleJobId) extends Event[Environment] with ExceptionEvent
@@ -48,24 +45,26 @@ object Environment {
   case class JobCompleted(job: ExecutionJob, log: RuntimeLog, info: RuntimeInfo) extends Event[Environment]
 
   case class RuntimeLog(beginTime: Long, executionBeginTime: Long, executionEndTime: Long, endTime: Long)
+
+  def errors(environment: Environment) =
+    environment match {
+      case e: SubmissionEnvironment ⇒ e.errors
+      case _: LocalEnvironment      ⇒ Seq()
+    }
+
+  def clearErrors(environment: Environment) =
+    environment match {
+      case e: SubmissionEnvironment ⇒ e.clearErrors
+      case _                        ⇒ Seq()
+    }
+
 }
 
 sealed trait Environment <: Name {
-  private[execution] val _done = new AtomicLong(0L)
-  private[execution] val _failed = new AtomicLong(0L)
-
-  def eventDispatcherService: EventDispatcher
-  def exceptions: Int
-
-  private lazy val _errors = new SlidingList[ExceptionEvent]
-  def error(e: ExceptionEvent) = _errors.put(e, exceptions)
-  def errors: List[ExceptionEvent] = _errors.elements
-  def clearErrors: List[ExceptionEvent] = _errors.clear()
-
   def submitted: Long
   def running: Long
-  def done: Long = _done.get()
-  def failed: Long = _failed.get()
+  def done: Long
+  def failed: Long
 
   def start(): Unit
   def stop(): Unit
@@ -79,7 +78,11 @@ sealed trait Environment <: Name {
 trait SubmissionEnvironment <: Environment {
   def submit(job: Job)
   def jobs: Iterable[ExecutionJob]
+  def runningJobs: Seq[ExecutionJob]
+
   def clean: Boolean
+  def errors: Seq[ExceptionEvent]
+  def clearErrors: Seq[ExceptionEvent]
 }
 
 object LocalEnvironment {
@@ -118,7 +121,6 @@ class LocalEnvironment(
   def runningJobs = pool().runningJobs
 
   def nbJobInQueue = pool().waiting
-  def exceptions = 0
 
   def submit(job: Job, executionContext: TaskExecutionContext): Unit =
     submit(LocalExecutionJob(executionContext, Job.moleJobs(job), Some(Job.moleExecution(job))))
@@ -128,8 +130,8 @@ class LocalEnvironment(
 
   private def submit(ejob: LocalExecutionJob): Unit = {
     pool().enqueue(ejob)
-    ejob.state = ExecutionState.SUBMITTED
-    eventDispatcherService.trigger(this, new Environment.JobSubmitted(ejob))
+    eventDispatcherService.trigger(this, Environment.JobSubmitted(ejob))
+    eventDispatcherService.trigger(this, Environment.JobStateChanged(ejob, ExecutionState.SUBMITTED, ExecutionState.READY))
   }
 
   def submitted: Long = pool().waiting
@@ -137,4 +139,11 @@ class LocalEnvironment(
 
   override def start() = {}
   override def stop() = pool().stop()
+
+  private[execution] val _done = new AtomicLong(0L)
+  private[execution] val _failed = new AtomicLong(0L)
+
+  def done: Long = _done.get()
+  def failed: Long = _failed.get()
+
 }

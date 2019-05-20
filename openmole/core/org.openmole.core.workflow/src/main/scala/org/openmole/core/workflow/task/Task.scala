@@ -35,6 +35,8 @@ import org.openmole.core.workflow.tools._
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.tool.cache._
 import org.openmole.tool.lock._
+import org.openmole.tool.logger.LoggerService
+import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.random
 import org.openmole.tool.random._
 import org.openmole.tool.thread._
@@ -61,10 +63,10 @@ case class TaskExecutionContext(
   fileService:                    FileService,
   implicit val workspace:         Workspace,
   implicit val outputRedirection: OutputRedirection,
+  implicit val loggerService:     LoggerService,
   cache:                          KeyValueCache,
   lockRepository:                 LockRepository[LockKey],
-  moleExecution:                  Option[MoleExecution]   = None
-)
+  moleExecution:                  Option[MoleExecution]   = None)
 
 object Task {
 

@@ -146,6 +146,9 @@ object Val {
   val caseArrayArrayLong = TypeCase[Val[Array[Array[Long]]]]
   val caseArrayArrayDouble = TypeCase[Val[Array[Array[Double]]]]
   val caseArrayArrayString = TypeCase[Val[Array[Array[String]]]]
+
+  def name(namespace: Namespace, simpleName: String) =
+    (if (namespace.isEmpty) "" else namespace.toString + "$") + simpleName
 }
 
 object Namespace {
@@ -175,7 +178,7 @@ class Val[T](val simpleName: String, val `type`: ValType[T], val namespace: Name
    *
    * @return the name of the prototype
    */
-  def name: String = (if (namespace.isEmpty) "" else namespace.toString + "$") + simpleName
+  def name: String = Val.name(namespace, simpleName)
 
   /**
    * Test if this prototype can be assigned from another prototype. This work

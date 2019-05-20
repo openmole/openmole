@@ -15,25 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.execution.local
+package org.openmole.core.workflow.execution
 
-import java.io.{ OutputStream, PrintStream }
+import java.io.PrintStream
 
-import org.openmole.core.event.EventDispatcher
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.tools.service
-import org.openmole.core.workflow.execution.ExecutionState
-import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.execution.Environment._
 import org.openmole.core.workflow.job._
-import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.mole.MoleExecutionMessage
 import org.openmole.tool.logger.JavaLogger
-import org.openmole.tool.stream._
 
-import ref.WeakReference
-import org.openmole.core.workflow.mole.{ MoleExecution, StrainerCapsule, StrainerTaskDecorator }
-import org.openmole.core.event._
-import org.openmole.tool.network.LocalHostName
+import scala.ref.WeakReference
 
 object LocalExecutor extends JavaLogger
 
@@ -59,7 +52,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
           try {
             val (log, output) =
               withRedirectedOutput(executionJob, environment.deinterleave) {
-                executionJob.state = ExecutionState.RUNNING
+                environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob, ExecutionState.RUNNING, ExecutionState.SUBMITTED))
 
                 for {
                   moleJob ← executionJob.jobs
@@ -73,12 +66,16 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                   MoleJob.finish(moleJob, result)
 
                   result match {
-                    case Right(e) ⇒ environment.eventDispatcherService.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob.id))
-                    case _        ⇒
+                    case Right(e) ⇒
+                      environment._failed.incrementAndGet()
+                      environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob, ExecutionState.FAILED, ExecutionState.RUNNING))
+                      environment.eventDispatcherService.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob.id))
+                    case _ ⇒
+                      environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob, ExecutionState.DONE, ExecutionState.RUNNING))
+                      environment._done.incrementAndGet()
+
                   }
                 }
-
-                executionJob.state = ExecutionState.DONE
 
                 val endTime = System.currentTimeMillis
                 RuntimeLog(beginTime, beginTime, endTime, endTime)
@@ -96,12 +93,11 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
             case e: InterruptedException ⇒ throw e
             case e: ThreadDeath          ⇒ throw e
             case e: Throwable ⇒
-              val er = ExecutionJobExceptionRaised(executionJob, e, SEVERE)
-              environment.error(er)
               logger.log(SEVERE, "Error in execution", e)
+              executionJob.moleExecution.foreach { me ⇒ MoleExecutionMessage.send(me)(MoleExecutionMessage.MoleExecutionError(e)) }
+              val er = ExecutionJobExceptionRaised(executionJob, e, SEVERE)
               environment.eventDispatcherService.trigger(environment: Environment, er)
           }
-          finally executionJob.state = ExecutionState.KILLED
         case None ⇒ stop = true
       }
     }

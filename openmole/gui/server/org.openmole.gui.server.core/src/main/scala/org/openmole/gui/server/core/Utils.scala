@@ -359,8 +359,6 @@ object Utils extends JavaLogger {
   }
 
   def expandDepsFile(template: File, to: File) = {
-
-    val from = File.createTempFile("openmole", "grammar")
     val rules = PluginInfo.keyWords.partition { kw ⇒
       kw match {
         case _@ (KeyWord.TaskKeyWord(_) | KeyWord.SourceKeyWord(_) | KeyWord.EnvironmentKeyWord(_) | KeyWord.HookKeyWord(_) | KeyWord.SamplingKeyWord(_) | KeyWord.DomainKeyWord(_) | KeyWord.PatternKeyWord(_)) ⇒ false

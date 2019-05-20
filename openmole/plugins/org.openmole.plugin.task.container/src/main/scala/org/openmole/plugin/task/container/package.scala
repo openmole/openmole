@@ -29,6 +29,10 @@ package container {
 
   import monocle.Lens
 
+  object HostFile {
+    implicit def tupleToHostFile(t: (String, String)) = HostFile(t._1, t._2)
+  }
+
   case class HostFile(path: String, destination: String)
 
   trait HostFiles[T] {

@@ -3,39 +3,50 @@ package org.openmole.gui.client.tool.plot
 import com.definitelyscala.plotlyjs._
 import com.definitelyscala.plotlyjs.all._
 import com.definitelyscala.plotlyjs.PlotlyImplicits._
+import scala.scalajs.js.JSConverters._
 import scala.scalajs.js
 import scalatags.JsDom.all._
 
 object ScatterPlot {
 
   def apply(
-    title:  String        = "",
-    serie:  Serie,
-    legend: Boolean       = false,
-    errors: Option[Serie] = None) = {
+    title:   String        = "",
+    serie:   Serie,
+    legend:  Boolean       = false,
+    plotter: Plotter,
+    error:   Option[Serie]) = {
     lazy val plotDiv = Plot.baseDiv
 
-    val dims = serie.values.take(2)
+    val nbDims = plotter.toBePlotted.indexes.length
 
-    if (dims.length == 2) {
-      val data = serie.plotDataBuilder
-        .x(dims.head.toDimension._result.values.get)
-        .y(dims(1).toDimension._result.values.get)
-        .set(plotlymode.markers)
-        .set(plotlytype.scatter)
+    lazy val baseLayout = Plot.baseLayout(title)
+      .width(800)
+      .xaxis(plotlyaxis.title(serie.xValues.label))
 
-      val plotDataArray: scalajs.js.Array[PlotData] = js.Array(
-        ToolPlot.error(data, errors)
-      )
-
-      lazy val layout = Plot.baseLayout(title)
-        .xaxis(plotlyaxis.title(dims.head.label))
-        .yaxis(plotlyaxis.title(dims(1).label))
-        .width(800)
-
-      Plotly.newPlot(plotDiv, plotDataArray, layout, Plot.baseConfig)
+    val layout = {
+      if (nbDims == 2)
+        baseLayout
+          .xaxis(plotlyaxis.title(serie.xValues.label))
+          .yaxis(plotlyaxis.title(serie.yValues.head.label))
+      else baseLayout
     }
 
+    val data = serie.yValues.map { y ⇒
+      serie.plotDataBuilder
+        .x(serie.xValues.values.toJSArray)
+        .y(y.values.toJSArray)
+        .set(plotlymode.markers)
+        .set(plotlytype.scatter)
+    }.toJSArray
+
+    val plotDataArray = {
+      if (nbDims == 2) js.Array(ToolPlot.error(data.head, error)._result)
+      else js.Array[PlotData]()
+    }
+
+    Plotly.newPlot(plotDiv, plotDataArray, layout, Plot.baseConfig)
+
     div(plotDiv.render).render
+
   }
 }

@@ -19,8 +19,6 @@ package org.openmole.core.context
 
 import org.openmole.core.exception._
 import org.openmole.core.preference._
-import org.openmole.core.workspace._
-import org.openmole.tool.random
 
 import scala.collection._
 import scala.collection.immutable.TreeMap
@@ -36,7 +34,7 @@ object Context {
     val variables = TreeMap.empty[String, Variable[_]] ++ v
   }
 
-  def apply(v: T forSome { type T <: Variable[_] }*): Context = Context.fromMap(v.map { v ⇒ v.prototype.name → v })
+  def apply(v: Variable[_]*): Context = Context.fromMap(v.map { v ⇒ v.prototype.name → v })
 
   val empty = apply()
 

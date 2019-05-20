@@ -7,7 +7,6 @@ import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.networkservice.NetworkService
-import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder._
@@ -19,6 +18,7 @@ import org.openmole.plugin.task.container
 import org.openmole.plugin.task.container._
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.task.systemexec._
+import org.openmole.tool.outputredirection.OutputRedirection
 
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
@@ -41,59 +41,33 @@ object ScilabTask {
     override def workDirectory = ScilabTask.uDocker composeLens UDockerArguments.workDirectory
   }
 
-  //  sealed trait InstallCommand
-  //  object InstallCommand {
-  //    case class ScilabLibrary(name: String) extends InstallCommand
-  //
-  //        def toCommand(installCommands: InstallCommand) =
-  //          installCommands match {
-  //            case ScilabLibrary(name) ⇒
-  //              //Vector(s"""R -e 'install.packages(c(${names.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'""")
-  //              s"""R --slave -e 'install.packages(c("$name"), dependencies = T); library("$name")'"""
-  //                 }
-  //
-  //        implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name, None)
-  //        implicit def stringCoupleToRLibrary(couple: (String, Option[String])): InstallCommand = RLibrary(couple._1, couple._2)
-  //        def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommand.toCommand)
-  //
-  //  }
-
   def scilabImage(version: String) = DockerImage("openmole/scilab", version)
 
   def apply(
-    script: FromContext[String],
-    //install:     Seq[String]         = Seq.empty,
+    script:  FromContext[String],
+    install: Seq[String]         = Seq.empty,
     //libraries:   Seq[InstallCommand] = Seq.empty,
-    forceUpdate:          Boolean                               = false,
-    version:              String                                = "6.0.1",
-    errorOnReturnValue:   Boolean                               = true,
-    returnValue:          OptionalArgument[Val[Int]]            = None,
-    stdOut:               OptionalArgument[Val[String]]         = None,
-    stdErr:               OptionalArgument[Val[String]]         = None,
-    environmentVariables: Vector[(String, FromContext[String])] = Vector.empty,
-    hostFiles:            Vector[HostFile]                      = Vector.empty,
-    workDirectory:        OptionalArgument[String]              = None)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): ScilabTask = {
-
-    //    // add additional installation of devtools only if needed
-    //    val installCommands =
-    //      if (libraries.exists { case l: InstallCommand.RLibrary ⇒ l.version.isDefined }) {
-    //        install ++ Seq("apt update", "apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev",
-    //          """R --slave -e 'install.packages("devtools", dependencies = T); library(devtools);""") ++
-    //          InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
-    //      }
-    //      else install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
+    forceUpdate:          Boolean                            = false,
+    version:              String                             = "6.0.2",
+    errorOnReturnValue:   Boolean                            = true,
+    returnValue:          OptionalArgument[Val[Int]]         = None,
+    stdOut:               OptionalArgument[Val[String]]      = None,
+    stdErr:               OptionalArgument[Val[String]]      = None,
+    environmentVariables: Seq[(String, FromContext[String])] = Vector.empty,
+    hostFiles:            Seq[HostFile]                      = Vector.empty,
+    workDirectory:        OptionalArgument[String]           = None)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): ScilabTask = {
 
     val uDockerArguments =
       UDockerTask.createUDocker(
         scilabImage(version),
-        install = Seq.empty,
+        install = install,
         cacheInstall = true,
         forceUpdate = forceUpdate,
         mode = "P1",
         reuseContainer = true
       ).copy(
-          environmentVariables = environmentVariables,
-          hostFiles = hostFiles,
+          environmentVariables = environmentVariables.toVector,
+          hostFiles = hostFiles.toVector,
           workDirectory = workDirectory
         )
 
