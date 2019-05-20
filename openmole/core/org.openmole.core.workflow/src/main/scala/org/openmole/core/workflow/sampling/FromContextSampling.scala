@@ -8,13 +8,13 @@ object FromContextSampling {
 }
 
 /**
-  * Generic class to write samplings, to be used for extension plugins
-  *
-  * @param samples the sampling function in itself
-  * @param i prototype set of inputs
-  * @param f sampled prototypes
-  * @param v function to validate parameters
-  */
+ * Generic class to write samplings, to be used for extension plugins
+ *
+ * @param samples the sampling function in itself
+ * @param i prototype set of inputs
+ * @param f sampled prototypes
+ * @param v function to validate parameters
+ */
 class FromContextSampling(samples: FromContext.Parameters ⇒ Iterator[Iterable[Variable[_]]], i: PrototypeSet, f: Iterable[Val[_]], v: FromContext.ValidationParameters ⇒ Seq[Throwable]) extends Sampling {
   override def prototypes: Iterable[Val[_]] = f
   override def inputs: PrototypeSet = i

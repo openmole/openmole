@@ -5,13 +5,13 @@ import collection.JavaConverters._
 object WithInstance {
 
   /**
-    * Get an instance of an object given a constructor, either pooled or new.
-    * @param f
-    * @param pooled
-    * @param close
-    * @tparam T
-    * @return
-    */
+   * Get an instance of an object given a constructor, either pooled or new.
+   * @param f
+   * @param pooled
+   * @param close
+   * @tparam T
+   * @return
+   */
   def apply[T](f: () ⇒ T, pooled: Boolean, close: T ⇒ Unit = (_: T) ⇒ {}): WithInstance[T] =
     if (pooled) Pool(f, close) else WithNewInstance(f, close)
 }
@@ -24,14 +24,13 @@ object Pool {
   def apply[T](f: () ⇒ T, close: T ⇒ Unit = (_: T) ⇒ {}): Pool[T] = new Pool(f, close)
 }
 
-
 /**
-  * A Pool of objects, given a constructor and a closing operator. A [[java.util.Stack]] of instances is maintained,
-  * on which operations are done concurrently
-  *
-  * @param f
-  * @param closeOp
-  */
+ * A Pool of objects, given a constructor and a closing operator. A [[java.util.Stack]] of instances is maintained,
+ * on which operations are done concurrently
+ *
+ * @param f
+ * @param closeOp
+ */
 class Pool[T](f: () ⇒ T, closeOp: T ⇒ Unit) extends WithInstance[T] {
 
   val instances: java.util.Stack[T] = new java.util.Stack()

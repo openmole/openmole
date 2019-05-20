@@ -24,14 +24,14 @@ object FromContextHook {
 }
 
 /**
-  * Generic class to write hooks from context
-  *
-  * @param className
-  * @param f hook function
-  * @param v validation
-  * @param config
-  * @param info
-  */
+ * Generic class to write hooks from context
+ *
+ * @param className
+ * @param f hook function
+ * @param v validation
+ * @param config
+ * @param info
+ */
 @Lenses case class FromContextHook(
   override val className: String,
   f:                      FromContextHook.Parameters ⇒ Context,

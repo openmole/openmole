@@ -97,6 +97,8 @@ package object csv extends CSVPackage {
         if (overwrite) file.content = ""
         if (file.size == 0) fos.appendLine { header }
 
+        // TODO add option to flatten multidim arrays here be be written on multiple lines
+
         def flatAny(o: Any): List[Any] = o match {
           case o: List[_] ⇒ o
           case _          ⇒ List(o)
