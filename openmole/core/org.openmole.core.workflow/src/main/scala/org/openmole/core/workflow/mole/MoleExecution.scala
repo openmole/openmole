@@ -178,6 +178,7 @@ object MoleExecution extends JavaLogger {
                   fileService,
                   workspace,
                   outputRedirection,
+                  loggerService,
                   subMoleExecutionState.moleExecution.taskCache,
                   subMoleExecutionState.moleExecution.lockRepository,
                   moleExecution = Some(subMoleExecutionState.moleExecution)
@@ -396,6 +397,7 @@ object MoleExecution extends JavaLogger {
               fileService,
               workspace,
               outputRedirection,
+              loggerService,
               moleExecution.taskCache,
               moleExecution.lockRepository,
               moleExecution = Some(moleExecution)

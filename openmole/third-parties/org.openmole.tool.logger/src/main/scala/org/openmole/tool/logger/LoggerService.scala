@@ -23,13 +23,16 @@ import org.openmole.tool.outputredirection._
 import sourcecode._
 
 object LoggerService {
-
-  def log(msg: ⇒ String, level: Level = Level.INFO)(implicit loggerService: LoggerService, name: FullName, line: Line, outputRedirection: OutputRedirection) =
-    if (level.intValue() > loggerService.level.intValue()) {
+  def log(l: Level, msg: ⇒ String, exception: Option[Throwable] = None)(implicit name: FullName, line: Line, loggerService: LoggerService, outputRedirection: OutputRedirection) =
+    if (l.intValue() > loggerService.level.intValue()) {
       OutputRedirection.println(s"""${name.value}:${line.value} - $msg""")
+      exception match {
+        case Some(e) ⇒
+          outputRedirection.output.print(s"Caused by: ${e}")
+          e.printStackTrace(outputRedirection.output)
+        case None ⇒
+      }
     }
-
 }
 
 case class LoggerService(level: Level = Level.WARNING)
-

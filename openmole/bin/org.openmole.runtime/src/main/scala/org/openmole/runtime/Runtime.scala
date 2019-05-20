@@ -24,7 +24,7 @@ import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.task.TaskExecutionContext
-import org.openmole.tool.logger.JavaLogger
+import org.openmole.tool.logger.{ JavaLogger, LoggerService }
 import org.openmole.core.tools.service.Retry
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.core.tools.service._
@@ -64,7 +64,7 @@ class Runtime {
     outputMessagePath: String,
     threads:           Int,
     debug:             Boolean
-  )(implicit serializerService: SerializerService, newFile: NewFile, fileService: FileService, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace) = {
+  )(implicit serializerService: SerializerService, newFile: NewFile, fileService: FileService, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace, loggerService: LoggerService) = {
 
     /*--- get execution message and job for runtime---*/
     val usedFiles = new HashMap[String, File]
@@ -145,7 +145,18 @@ class Runtime {
 
       try {
         val outputRedirection = OutputRedirection(outSt)
-        val taskExecutionContext = TaskExecutionContext(newFile.makeNewDir("runtime"), environment, preference, threadProvider, fileService, workspace, outputRedirection, KeyValueCache(), LockRepository[LockKey]())
+        val taskExecutionContext = TaskExecutionContext(
+          tmpDirectory = newFile.makeNewDir("runtime"),
+          localEnvironment = environment,
+          preference = preference,
+          threadProvider = threadProvider,
+          fileService = fileService,
+          workspace = workspace,
+          outputRedirection = outputRedirection,
+          loggerService = loggerService,
+          cache = KeyValueCache(),
+          lockRepository = LockRepository[LockKey]())
+
         for (toProcess ← allMoleJobs) environment.submit(toProcess, taskExecutionContext)
         saver.waitAllFinished
       }

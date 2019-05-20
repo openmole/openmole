@@ -42,16 +42,17 @@ import org.openmole.plugin.environment.batch.refresh._
 import org.openmole.tool.cache._
 import org.openmole.tool.collection.RingBuffer
 import org.openmole.tool.file._
-import org.openmole.tool.logger.JavaLogger
+import org.openmole.tool.logger.{JavaLogger, LoggerService}
 import org.openmole.tool.random.{RandomProvider, Seeder, shuffled}
 import squants.information.Information
 import squants.information.InformationConversions._
 import squants.time.TimeConversions._
 import org.openmole.tool.lock._
+import org.openmole.tool.outputredirection.OutputRedirection
 
 import scala.collection.immutable.TreeSet
 
-object BatchEnvironment extends JavaLogger {
+object BatchEnvironment {
 
   trait Transfer {
     def id: Long
@@ -146,7 +147,9 @@ object BatchEnvironment extends JavaLogger {
       randomProvider:    RandomProvider = services.randomProvider,
       replicaCatalog:    ReplicaCatalog = services.replicaCatalog,
       eventDispatcher:   EventDispatcher = services.eventDispatcher,
-      fileServiceCache:  FileServiceCache = services.fileServiceCache) =
+      fileServiceCache:  FileServiceCache = services.fileServiceCache,
+      outputRedirection: OutputRedirection = services.outputRedirection,
+      loggerService: LoggerService) =
       new Services()(
         threadProvider = threadProvider,
         preference = preference,
@@ -157,7 +160,9 @@ object BatchEnvironment extends JavaLogger {
         randomProvider = randomProvider,
         replicaCatalog = replicaCatalog,
         eventDispatcher = eventDispatcher,
-        fileServiceCache = fileServiceCache)
+        fileServiceCache = fileServiceCache,
+        outputRedirection = outputRedirection,
+        loggerService = loggerService)
 
     def set(services: Services)(ms: MoleServices) =
       new Services() (
@@ -170,7 +175,9 @@ object BatchEnvironment extends JavaLogger {
         randomProvider = services.randomProvider,
         replicaCatalog = services.replicaCatalog,
         eventDispatcher = ms.eventDispatcher,
-        fileServiceCache = ms.fileServiceCache
+        fileServiceCache = ms.fileServiceCache,
+        outputRedirection = ms.outputRedirection,
+        loggerService = ms.loggerService
       )
 
   }
@@ -186,7 +193,9 @@ object BatchEnvironment extends JavaLogger {
     implicit val randomProvider:    RandomProvider,
     implicit val replicaCatalog:    ReplicaCatalog,
     implicit val eventDispatcher:   EventDispatcher,
-    implicit val fileServiceCache:  FileServiceCache
+    implicit val fileServiceCache:  FileServiceCache,
+    implicit val outputRedirection: OutputRedirection,
+    implicit val loggerService: LoggerService
   ) { services =>
 
     def set(ms: MoleServices) = Services.set(services)(ms)
@@ -201,7 +210,9 @@ object BatchEnvironment extends JavaLogger {
       randomProvider:    RandomProvider = services.randomProvider,
       replicaCatalog:    ReplicaCatalog = services.replicaCatalog,
       eventDispatcher:   EventDispatcher = services.eventDispatcher,
-      fileServiceCache:  FileServiceCache = services.fileServiceCache) =
+      fileServiceCache:  FileServiceCache = services.fileServiceCache,
+      outputRedirection: OutputRedirection = services.outputRedirection,
+      loggerService: LoggerService = services.loggerService) =
       Services.copy(services)(
         threadProvider = threadProvider,
         preference = preference,
@@ -212,7 +223,9 @@ object BatchEnvironment extends JavaLogger {
         randomProvider = randomProvider,
         replicaCatalog = replicaCatalog,
         eventDispatcher = eventDispatcher,
-        fileServiceCache = fileServiceCache)
+        fileServiceCache = fileServiceCache,
+        outputRedirection = outputRedirection,
+        loggerService = loggerService)
   }
 
   def jobFiles(job: BatchExecutionJob) =
