@@ -34,7 +34,7 @@ object Variable {
    * @tparam T
    * @return
    */
-  implicit def tupleWithValToVariable[T](t: (Val[T], T)) = apply(t._1, t._2)
+  implicit def tupleWithValToVariable[@specialized T](t: (Val[T], T)): Variable[T] = apply(t._1, t._2)
 
   /**
    * implicit conversion of tuple (prototype name, value)
@@ -42,7 +42,7 @@ object Variable {
    * @tparam T
    * @return
    */
-  implicit def tupleToVariable[T: Manifest](t: (String, T)) = apply(Val[T](t._1), t._2)
+  implicit def tupleToVariable[@specialized T: Manifest](t: (String, T)): Variable[T] = apply(Val[T](t._1), t._2)
 
   /**
    * Unsecure constructor, trying to cast the provided value to the type of the prototype
@@ -51,21 +51,14 @@ object Variable {
    * @tparam T
    * @return
    */
-  def unsecure[T](p: Val[T], v: Any) = Variable[T](p, v.asInstanceOf[T])
-
-  /**
-   * Variable defined by OpenMOLE
-   * @param name
-   * @return
-   */
-  def openMOLE(name: String) = Val[Long](name, namespace = openMOLENameSpace)
+  def unsecure[@specialized T](p: Val[T], v: Any): Variable[T] = Variable[T](p, v.asInstanceOf[T])
 
   /**
    * Seed for rng
    */
-  val openMOLESeed = openMOLE("seed")
+  val openMOLESeed = Val[Long]("seed", namespace = openMOLENameSpace)
 
-  def copy[T](v: Variable[T])(prototype: Val[T] = v.prototype, value: T = v.value) = apply(prototype, value)
+  def copy[@specialized T](v: Variable[T])(prototype: Val[T] = v.prototype, value: T = v.value): Variable[T] = apply(prototype, value)
 }
 
 /**
@@ -74,7 +67,7 @@ object Variable {
  * @param value the value
  * @tparam T type of the Variable
  */
-case class Variable[T](prototype: Val[T], value: T) {
+case class Variable[@specialized T](prototype: Val[T], value: T) {
   override def toString: String = prettified(Int.MaxValue)
   def prettified(snipArray: Int) = prototype.name + "=" + (if (value != null) value.prettify(snipArray) else "null")
   def name = prototype.name

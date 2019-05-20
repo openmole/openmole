@@ -36,11 +36,11 @@ import org.openmole.plugin.task.udocker.DockerMetadata._
 import org.openmole.tool.cache._
 import org.openmole.core.dsl._
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.threadprovider._
 import org.openmole.plugin.task.container.HostFiles
 import org.openmole.tool.lock.LockKey
 import org.openmole.plugin.task.container._
+import org.openmole.tool.outputredirection.OutputRedirection
 
 import scala.language.postfixOps
 

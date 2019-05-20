@@ -44,7 +44,9 @@ object JobManager extends JavaLogger { self ⇒
     }
 
   object DispatcherActor {
-    def receive(dispatched: DispatchedMessage)(implicit services: BatchEnvironment.Services) =
+    def receive(dispatched: DispatchedMessage)(implicit services: BatchEnvironment.Services) = {
+      System.runFinalization // Help with finalization just in case
+
       dispatched match {
         case msg: Submit      ⇒ SubmitActor.receive(msg)
         case msg: Refresh     ⇒ RefreshActor.receive(msg)
@@ -53,6 +55,7 @@ object JobManager extends JavaLogger { self ⇒
         case msg: Error       ⇒ ErrorActor.receive(msg)
         case msg: Kill        ⇒ KillActor.receive(msg)
       }
+    }
   }
 
   def dispatch(msg: DispatchedMessage)(implicit services: BatchEnvironment.Services) = services.threadProvider.submit(messagePriority(msg)) { () ⇒ DispatcherActor.receive(msg) }

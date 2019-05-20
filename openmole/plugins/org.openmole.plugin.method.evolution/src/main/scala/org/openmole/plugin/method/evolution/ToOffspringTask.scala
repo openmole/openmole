@@ -31,7 +31,7 @@ object ToOffspringTask {
       val i = evolution.buildIndividual(context(evolution.genomePrototype), context)
       Context(Variable(evolution.offspringPrototype, Array(i)))
     } set (
-      inputs += (evolution.objectivePrototypes: _*),
+      inputs += (evolution.outputPrototypes: _*),
       inputs += (evolution.genomePrototype, evolution.statePrototype),
       outputs += (evolution.statePrototype, evolution.offspringPrototype)
     )

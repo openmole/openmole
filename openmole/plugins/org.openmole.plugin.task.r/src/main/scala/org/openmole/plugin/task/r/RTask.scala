@@ -21,6 +21,7 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.container
 import org.openmole.plugin.tool.json._
+import org.openmole.tool.outputredirection.OutputRedirection
 
 object RTask {
 

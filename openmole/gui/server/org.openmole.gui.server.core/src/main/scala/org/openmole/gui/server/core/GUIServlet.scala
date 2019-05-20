@@ -35,7 +35,6 @@ import java.util.concurrent.atomic.AtomicReference
 import org.openmole.core.authentication.AuthenticationStore
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.{ FileService, FileServiceCache }
-import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.Preference
 import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.serializer.SerializerService
@@ -49,6 +48,8 @@ import org.openmole.gui.ext.tool.server
 import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.file._
+import org.openmole.tool.logger.LoggerService
+import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.random.{ RandomProvider, Seeder }
 import org.openmole.tool.stream._
 import org.openmole.tool.tar._
@@ -74,6 +75,7 @@ object GUIServices {
     implicit def eventDispatcher: EventDispatcher = guiServices.eventDispatcher
     implicit def networkService: NetworkService = guiServices.networkService
     implicit def outputRedirection: OutputRedirection = guiServices.outputRedirection
+    implicit def loggerService: LoggerService = guiServices.loggerService
   }
 
   def apply(workspace: Workspace, httpProxy: Option[String]) = {
@@ -91,6 +93,7 @@ object GUIServices {
     implicit val networkService = NetworkService(httpProxy)
     implicit val fileServiceCache = FileServiceCache()
     implicit val replicaCatalog = ReplicaCatalog(ws)
+    implicit val loggerService = LoggerService()
 
     new GUIServices()
   }
@@ -123,7 +126,8 @@ class GUIServices(
   val randomProvider:      RandomProvider,
   val eventDispatcher:     EventDispatcher,
   val outputRedirection:   OutputRedirection,
-  val networkService:      NetworkService
+  val networkService:      NetworkService,
+  val loggerService:       LoggerService
 )
 
 object GUIServlet {
