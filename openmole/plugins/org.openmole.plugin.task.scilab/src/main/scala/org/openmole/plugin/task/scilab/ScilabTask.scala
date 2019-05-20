@@ -85,6 +85,7 @@ object ScilabTask {
     )
   }
 
+  /*
   def multiArrayScilab(v: Array[Array[Array[_]]]): String = {
     // flatten the array after multidimensional transposition
     def recTranspose(v: Any): Array[_] = {
@@ -109,6 +110,7 @@ object ScilabTask {
     // NOTE : going to string may be too large for very large arrays ? would need a proper serialization ?
     "hypermat([" + dimensions.mkString(" ") + "],[" + scilabVals.mkString(";") + "])"
   }
+  */
 
   def toScilab(v: Any): String = {
     v match {
@@ -118,8 +120,8 @@ object ScilabTask {
       case v: Boolean ⇒ if (v) "%T" else "%F"
       case v: String  ⇒ '"' + v + '"'
       case v: Array[Array[Array[_]]] ⇒
-        multiArrayScilab(v)
-      //throw new UserBadDataError(s"The array of more than 2D $v of type ${v.getClass} is not convertible to Scilab")
+        //multiArrayScilab(v)
+        throw new UserBadDataError(s"The array of more than 2D $v of type ${v.getClass} is not convertible to Scilab")
       case v: Array[Array[_]] ⇒
         def line(v: Array[_]) = v.map(toScilab).mkString(", ")
         "[" + v.map(line).mkString("; ") + "]"
