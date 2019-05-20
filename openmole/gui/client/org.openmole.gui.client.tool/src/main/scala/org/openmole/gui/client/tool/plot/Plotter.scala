@@ -123,7 +123,7 @@ object Plotter {
     if (closureFilter.closure.isEmpty) true
     else {
       closureFilter.filteredAxis.find(_.fullSequenceIndex == col).map { pc ⇒
-        closureFilter.closure.replace("x", value)
+        value + closureFilter.closure
       }.map { cf ⇒
         scala.util.Try(scala.scalajs.js.eval(s"function func() { return ${cf};} func()").asInstanceOf[Boolean]).toOption.getOrElse(true)
       }.getOrElse(true)
