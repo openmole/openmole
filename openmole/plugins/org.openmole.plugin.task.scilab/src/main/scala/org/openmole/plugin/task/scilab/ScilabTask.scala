@@ -120,7 +120,7 @@ object ScilabTask {
       case v: String  ⇒ '"' + v + '"'
       case v: Array[Array[Array[_]]] ⇒
         multiArrayScilab(v)
-        //throw new UserBadDataError(s"The array of more than 2D $v of type ${v.getClass} is not convertible to Scilab")
+      //throw new UserBadDataError(s"The array of more than 2D $v of type ${v.getClass} is not convertible to Scilab")
       case v: Array[Array[_]] ⇒
         def line(v: Array[_]) = v.map(toScilab).mkString(", ")
         "[" + v.map(line).mkString("; ") + "]"
