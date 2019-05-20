@@ -105,7 +105,7 @@ object UserGuide {
     current match {
       case p if ((DocumentationPages.packagedPages.sons.map { _.name } :+ DocumentationPages.packaged.name).contains(current.name)) ⇒ integratedPage(SideMenu.packaged, head = headerModel(current.name))
       case p if (parents.contains(DocumentationPages.run.name) || current.name == DocumentationPages.run.name) ⇒ integratedPage(SideMenu.run, head = headerModel(current.name))
-      case p if ((DocumentationPages.samplingPages.sons.map { _.name } :+ DocumentationPages.directSampling.name).contains(current.name)) ⇒ integratedPage(SideMenu.sampling, head = headerMethod(current.name))
+      case p if ((DocumentationPages.samplingPages.sons.map { _.name } :+ DocumentationPages.samplings.name).contains(current.name)) ⇒ integratedPage(SideMenu.sampling, head = headerMethod(current.name))
       case p if (parents.contains(DocumentationPages.explore.name) || current.name == DocumentationPages.explore.name) ⇒ integratedPage(SideMenu.explore, head = headerMethod(current.name))
       case p if (parents.contains(DocumentationPages.scale.name) || current.name == DocumentationPages.scale.name) ⇒ integratedPage(SideMenu.scale, head = headerEnvironment(current.name))
       case p if (parents.contains(DocumentationPages.advancedConcepts.name) || current.name == DocumentationPages.advancedConcepts.name) ⇒ integratedPage(SideMenu.advanced)

@@ -230,13 +230,14 @@ object DocumentationPages {
   lazy val packagedCCplusplus = DocumentationPage.fromScalatex(name = "C Cplusplus", content = scalatex.documentation.run.packaged.PackagedCCplusplus, title = Some("C/C++"))
 
   // Explore
-  def explorePages = pageNode(explore, Vector(directSampling, calibration, sensitivity, profile, pse))
+  def explorePages = pageNode(explore, Vector(samplings, calibration, sensitivity, profile, pse))
 
   lazy val explore = DocumentationPage.fromScalatex(name = "Explore", content = scalatex.documentation.explore.Explore, title = Some("Explore Your Model"))
 
-  def samplingPages = pageNode(directSampling, Vector(uniformSampling, oneFactorSampling, highDimensionSamplings, csvSampling, fileSampling, spatialSampling, advancedSampling))
+  def samplingPages = pageNode(samplings, Vector(gridSampling, uniformSampling, oneFactorSampling, highDimensionSamplings, csvSampling, fileSampling, spatialSampling, advancedSampling))
 
-  lazy val directSampling = DocumentationPage.fromScalatex(name = "Direct Sampling", content = scalatex.documentation.explore.sampling.DirectSampling)
+  lazy val samplings = DocumentationPage.fromScalatex(name = "Samplings", content = scalatex.documentation.explore.sampling.Samplings)
+  lazy val gridSampling = DocumentationPage.fromScalatex(name = "Grid Sampling", content = scalatex.documentation.explore.sampling.GridSampling)
   lazy val uniformSampling = DocumentationPage.fromScalatex(name = "Uniform Sampling", content = scalatex.documentation.explore.sampling.UniformSampling)
   lazy val oneFactorSampling = DocumentationPage.fromScalatex(name = "One Factor at a Time", content = scalatex.documentation.explore.sampling.OneFactorSampling)
   lazy val highDimensionSamplings = DocumentationPage.fromScalatex(name = "High Dimension Samplings", content = scalatex.documentation.explore.sampling.HighDimensionSamplings, title = Some("Samplings for High Dimension Spaces"))
