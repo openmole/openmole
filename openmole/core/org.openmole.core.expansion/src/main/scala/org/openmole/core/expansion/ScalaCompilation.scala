@@ -19,7 +19,6 @@ package org.openmole.core.expansion
 import java.io.File
 
 import org.openmole.core.console._
-import org.openmole.core.context.Variable.openMOLENameSpace
 import org.openmole.core.context._
 import org.openmole.core.exception._
 import org.openmole.core.fileservice.FileService

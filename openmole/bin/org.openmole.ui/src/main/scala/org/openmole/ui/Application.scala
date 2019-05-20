@@ -38,10 +38,10 @@ import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import org.openmole.core.{ location, module }
 import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference._
 import org.openmole.core.services._
 import org.openmole.core.networkservice._
+import org.openmole.tool.outputredirection.OutputRedirection
 
 object Application extends JavaLogger {
 

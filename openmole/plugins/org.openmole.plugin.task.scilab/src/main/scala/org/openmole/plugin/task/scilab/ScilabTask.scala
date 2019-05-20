@@ -7,7 +7,6 @@ import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.networkservice.NetworkService
-import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder._
@@ -19,6 +18,7 @@ import org.openmole.plugin.task.container
 import org.openmole.plugin.task.container._
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.task.systemexec._
+import org.openmole.tool.outputredirection.OutputRedirection
 
 import scala.reflect.ClassTag
 

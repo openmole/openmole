@@ -26,7 +26,6 @@ import org.openmole.tool.tar._
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.module
 import org.openmole.core.market
-import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.core.project._
 import org.openmole.core.services.Services
@@ -38,6 +37,7 @@ import org.openmole.gui.ext.tool.server.OMRouter
 import org.openmole.gui.ext.tool.server.Utils.authenticationKeysFile
 import org.openmole.gui.server.core.GUIServer.ApplicationControl
 import org.openmole.tool.crypto.Cypher
+import org.openmole.tool.outputredirection.OutputRedirection
 
 import scala.collection.JavaConverters._
 

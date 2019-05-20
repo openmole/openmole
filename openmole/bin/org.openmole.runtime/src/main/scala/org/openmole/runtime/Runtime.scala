@@ -33,7 +33,6 @@ import org.openmole.core.communication.message._
 import org.openmole.core.communication.storage._
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer._
 import org.openmole.core.threadprovider.ThreadProvider
@@ -46,6 +45,7 @@ import org.openmole.core.workflow.execution.Environment.RuntimeLog
 import org.openmole.core.workflow.job.MoleJob
 import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.lock._
+import org.openmole.tool.outputredirection.OutputRedirection
 import squants._
 
 object Runtime extends JavaLogger {
