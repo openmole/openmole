@@ -42,7 +42,7 @@ object BreedTask {
             }
 
           Context(
-            Variable(evolution.genomePrototype.array, random().shuffle(suggestedGenomes ++ gs).toArray(evolution.genomePrototype.`type`.manifest)),
+            evolution.genomePrototype.array -> random().shuffle(suggestedGenomes ++ gs).toArray(evolution.genomePrototype.`type`.manifest),
             Variable(evolution.statePrototype, news)
           )
         case (true, _, _) ⇒

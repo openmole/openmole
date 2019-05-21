@@ -85,6 +85,11 @@ object ScilabTask {
     )
   }
 
+  /**
+   * transpose and stringify a multidimensional array
+   * @param v
+   * @return
+   */
   def multiArrayScilab(v: Any): String = {
     // flatten the array after multidimensional transposition
     def recTranspose(v: Any): Seq[_] = {
