@@ -24,6 +24,7 @@ class PBSJobService[S, H](
     def buildScript(serializedJob: SerializedJob, outputPath: String) = {
       SharedStorage.buildScript(
         installation.apply,
+        jobDirectory,
         workDirectory,
         parameters.openMOLEMemory,
         parameters.threads,

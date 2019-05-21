@@ -94,6 +94,7 @@ object SharedStorage extends JavaLogger {
 
   def buildScript[S](
     runtimePath:    Runtime ⇒ String,
+    jobDirectory:   String,
     workDirectory:  String,
     openMOLEMemory: Option[Information],
     threads:        Option[Int],
@@ -117,7 +118,7 @@ object SharedStorage extends JavaLogger {
 
         script.content = content
 
-        val remoteScript = StorageService.child(storage, workDirectory, uniqName("run", ".sh"))
+        val remoteScript = StorageService.child(storage, jobDirectory, uniqName("run", ".sh"))
         StorageService.upload(storage, script, remoteScript, options = TransferOptions(raw = true, noLink = true, canMove = true))
         remoteScript
       }
