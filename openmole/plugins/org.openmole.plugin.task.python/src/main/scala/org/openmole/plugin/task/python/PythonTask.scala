@@ -91,7 +91,7 @@ object PythonTask {
         def inputMapping(dicoName: String): String =
           mapped.inputs.map { m ⇒ s"${m.name} = $dicoName['${m.name}']" }.mkString("\n")
 
-        def outputMapping: String = s"""{${mapped.outputs.map { m => "'"+m.name+"' : "+m.v }.mkString(",")}}"""
+        def outputMapping: String = s"""{${mapped.outputs.map { m => "'"+m.name+"' : "+m.name }.mkString(",")}}"""
 
 
         val userScript = script.from(p.context)(p.random, p.newFile, p.fileService)
