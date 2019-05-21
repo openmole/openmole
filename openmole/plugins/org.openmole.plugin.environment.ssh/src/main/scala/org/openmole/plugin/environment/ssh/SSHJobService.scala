@@ -63,6 +63,7 @@ class SSHJobService[S](s: S, tmpDirectory: String, services: BatchEnvironment.Se
 
       SharedStorage.buildScript(
         installation.apply,
+        jobDirectory,
         workDirectory,
         env.openMOLEMemory,
         env.threads,
@@ -75,7 +76,7 @@ class SSHJobService[S](s: S, tmpDirectory: String, services: BatchEnvironment.Se
     val remoteScript = buildScript(serializedJob)
     val jobDescription = gridscale.ssh.SSHJobDescription(
       command = s"/bin/bash $remoteScript",
-      workDirectory = workDirectory
+      workDirectory = jobDirectory
     )
 
     env.stateRegistry.registerJob(jobDescription, batchExecutionJob)

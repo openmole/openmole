@@ -234,19 +234,20 @@ object DocumentationPages {
 
   lazy val explore = DocumentationPage.fromScalatex(name = "Explore", content = scalatex.documentation.explore.Explore, title = Some("Explore Your Model"))
 
-  def samplingPages = pageNode(samplings, Vector(gridSampling, uniformSampling, oneFactorSampling, highDimensionSamplings, csvSampling, fileSampling, spatialSampling, advancedSampling))
+  def samplingPages = pageNode(samplings, Vector(elementarySamplings, highDimensionSamplings, uniformSampling, fileSampling, spatialSampling, customSampling, advancedSampling))
 
   lazy val samplings = DocumentationPage.fromScalatex(name = "Samplings", content = scalatex.documentation.explore.sampling.Samplings)
-  lazy val gridSampling = DocumentationPage.fromScalatex(name = "Grid Sampling", content = scalatex.documentation.explore.sampling.GridSampling)
+  lazy val elementarySamplings = DocumentationPage.fromScalatex(name = "Elementary Samplings", content = scalatex.documentation.explore.sampling.ElementarySamplings)
+  //lazy val gridSampling = DocumentationPage.fromScalatex(name = "Grid Sampling", content = scalatex.documentation.explore.sampling.GridSampling)
+  //lazy val oneFactorSampling = DocumentationPage.fromScalatex(name = "One Factor at a Time", content = scalatex.documentation.explore.sampling.OneFactorSampling)
   lazy val uniformSampling = DocumentationPage.fromScalatex(name = "Uniform Sampling", content = scalatex.documentation.explore.sampling.UniformSampling)
-  lazy val oneFactorSampling = DocumentationPage.fromScalatex(name = "One Factor at a Time", content = scalatex.documentation.explore.sampling.OneFactorSampling)
   lazy val highDimensionSamplings = DocumentationPage.fromScalatex(name = "High Dimension Samplings", content = scalatex.documentation.explore.sampling.HighDimensionSamplings, title = Some("Samplings for High Dimension Spaces"))
   //  lazy val lhsSampling = DocumentationPage.fromScalatex(name = "LHS Sampling", content = scalatex.documentation.explore.sampling.LHSSampling)
   //  lazy val sobolSampling = DocumentationPage.fromScalatex(name = "Sobol Sampling", content = scalatex.documentation.explore.sampling.SobolSampling)
-  lazy val csvSampling = DocumentationPage.fromScalatex(name = "CSV Sampling", content = scalatex.documentation.explore.sampling.CSVSampling)
+  lazy val customSampling = DocumentationPage.fromScalatex(name = "Custom Sampling", content = scalatex.documentation.explore.sampling.CustomSampling)
   lazy val fileSampling = DocumentationPage.fromScalatex(name = "Sampling Over Files", content = scalatex.documentation.explore.sampling.FileSampling)
   lazy val spatialSampling = DocumentationPage.fromScalatex(name = "Spatial Sampling", content = scalatex.documentation.explore.sampling.SpatialSampling)
-  lazy val advancedSampling = DocumentationPage.fromScalatex(name = "Advanced Samplings", content = scalatex.documentation.explore.sampling.AdvancedSampling)
+  lazy val advancedSampling = DocumentationPage.fromScalatex(name = "Operations on Samplings", content = scalatex.documentation.explore.sampling.AdvancedSampling, title = Some("Advanced Operations on Samplings"))
 
   lazy val calibration = DocumentationPage.fromScalatex(name = "Calibration", content = scalatex.documentation.explore.Calibration)
   lazy val sensitivity = DocumentationPage.fromScalatex(name = "Sensitivity", content = scalatex.documentation.explore.Sensitivity, title = Some("Stastistical Sensitivity Analysis"))

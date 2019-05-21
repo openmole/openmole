@@ -48,7 +48,7 @@ object SavePopulationHook {
 
         output match {
           case WritableOutput.FileValue(dir) ⇒
-            (dir / ExpandedString("population${" + t.generationPrototype.name + "}.csv")).from(context).withPrintStream(overwrite = false) { ps ⇒
+            (dir / ExpandedString("population${" + t.generationPrototype.name + "}.csv")).from(context).withPrintStream(overwrite = false, create = true) { ps ⇒
               writeVariablesToCSV(
                 ps,
                 Some(headerLine),
@@ -70,9 +70,9 @@ object SavePopulationHook {
 
   }
 
-  def apply[T](algorithm: T, dir: FromContext[File], frequency: OptionalArgument[Long] = None)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def apply[T](algorithm: T, output: WritableOutput, frequency: OptionalArgument[Long] = None)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
     val t = wfi(algorithm)
-    hook(t, dir, frequency)
+    hook(t, output, frequency)
   }
 
 }
@@ -89,7 +89,7 @@ object SaveLastPopulationHook {
       val values = SavePopulationHook.resultVariables(t).from(context).map(_.value)
       def headerLine = header(SavePopulationHook.resultVariables(t).from(context).map(_.prototype.array), values)
 
-      file.from(context).withPrintStream(append = false) { ps ⇒
+      file.from(context).withPrintStream(overwrite = true, create = true) { ps ⇒
         writeVariablesToCSV(
           ps,
           Some(headerLine),
