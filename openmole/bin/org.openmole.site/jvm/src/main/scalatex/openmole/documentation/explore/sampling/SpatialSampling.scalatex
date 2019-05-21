@@ -4,23 +4,28 @@
 @import DocumentationPages._
 
 
-@h2{Spatial sampling}
 
-Geosimulation models, in the broad sense of simulation models in which the spatial configuration of agents plays a significant roles in the underlying processes
-(think e.g. of spatial interaction models), are generally tested for sensitivity on processes or agents parameters, but less frequently on the spatial configuration itself.
+Geosimulation models, in the broad sense of simulation models in which the spatial configuration of agents plays a significant roles in the underlying processes (think e.g. of spatial interaction models), are generally tested for sensitivity on processes or agents parameters, but less frequently on the spatial configuration itself.
 A recent @aa("paper", href:= "https://arxiv.org/abs/1812.06008") proposed the generation of synthetic spatial configurations as a method to test the sensitivity of geosimulation models to the initial spatial configuration.
 Some complementary work (@aa("paper", href:= "https://arxiv.org/abs/1903.06807")) focused on similar generator at larger scales, namely generators for building configurations at the scale of the district.
+
+@br
+
 More generally, the @aa("spatial data library", href:= "https://github.com/openmole/spatialdata") developed by the OpenMOLE team integrates these kind of methods in a larger context, including for example synthetic networks and perturbation of real data.
 
+@br
+
 Some of the corresponding spatial generators are included in OpenMOLE as @i{Spatial Samplings}.
-
 In the current development version, only some grid generators are included, for a reason of simplicity of output data.
-
 All generators output the generated grids in a provided prototype, along with the generation parameters for the generators taking factors as arguments.
 
-@h3{Random grid sampling}
+
+
+@h2{Random grid sampling}
 
 A raster with random values:
+
+@br@br
 
 @hl.openmole("""
 RandomSpatialSampling(
@@ -31,15 +36,23 @@ RandomSpatialSampling(
   )
 """, name="random grid sampling")
 
-where @code{samples} is the number of grids to generate, @code{worldSize} is the width of the generated square grid,
-the factor for a density parameter is optional and produces a binary grid of given density in average if provided,
-and @code{prototype} is the prototype for the generated grid (must be a @code{Val[Array[Array[Double]]]}
+@br
+
+where
+
+@ul
+  @li{@code{samples} is the number of grids to generate,}
+  @li{@code{worldSize} is the width of the generated square grid,}
+  @li{the factor for a density parameter is optional and produces a binary grid of given density in average if provided,}
+  @li{@code{prototype} is the prototype for the generated grid (must be a @code{Val[Array[Array[Double]]]}).}
 
 
-@h3{Blocks grid sampling}
 
-A binary grid with random blocks (random size and position). With the same arguments as before, except the factors for the generator parameters:
-@code{blocksNumber} is the number of blocks positioned, @code{blocksMinSize}/@code{blocksMaxSize} minimal/maximal (exchanged if needed) width/height of blocks, each being uniformly drawn for each block.
+@h2{Blocks grid sampling}
+
+A binary grid with random blocks (random size and position). With the same arguments as before, except the factors for the generator parameters: @code{blocksNumber} is the number of blocks positioned, @code{blocksMinSize}/@code{blocksMaxSize} minimal/maximal (exchanged if needed) width/height of blocks, each being uniformly drawn for each block.
+
+@br@br
 
 @hl.openmole("""
 BlocksGridSpatialSampling(samples,worldSize,
@@ -51,9 +64,12 @@ BlocksGridSpatialSampling(samples,worldSize,
 """, name="block grid sampling")
 
 
-@h3{Thresholded exponential mixture sampling}
+
+@h2{Thresholded exponential mixture sampling}
 
 A binary grid created with an exponential mixture, with kernels of the form @code{exp(-r/r0)}. A threshold parameter is applied to produce the binary grid.
+
+@br@br
 
 @hl.openmole("""
 ExpMixtureThresholdSpatialSampling(samples,worldSize,
@@ -64,14 +80,28 @@ ExpMixtureThresholdSpatialSampling(samples,worldSize,
     )
 """, name="block grid sampling")
 
-with the specific parameters as factors for generator parameters: @code{expMixtureCenters} the number of kernels, @code{expMixtureRadius} the range of kernels, @code{expMixtureThreshold} the threshold to produce the binary grid.
+@br
 
-@h3{Percolated grid sampling}
+with the specific parameters as factors for generator parameters:
+
+@ul
+  @li{@code{expMixtureCenters} the number of kernels,}
+  @li{@code{expMixtureRadius} the range of kernels,}
+  @li{@code{expMixtureThreshold} the threshold to produce the binary grid.}
+
+
+
+@h2{Percolated grid sampling}
 
 @b{USE WITH CAUTION - SOME PARAMETER VALUES YIELD VERY LONG GENERATION RUNTIME}
 
+@br
+
 A binary grid resembling a labyrinthine building organisation, obtained by percolating a grid network (see details in @aa("paper", href:= "https://arxiv.org/abs/1903.06807")).
-It percolates a grid network until a fixed number of points on the boundaries of the world are linked through the giant cluster. The resulting network is transposed to a building configuration by assimilating each link to a street with a given width as a parameter.
+It percolates a grid network until a fixed number of points on the boundaries of the world are linked through the giant cluster.
+The resulting network is transposed to a building configuration by assimilating each link to a street with a given width as a parameter.
+
+@br@br
 
 @hl.openmole("""
 PercolationGridSpatialSampling(samples,worldSize,
@@ -82,15 +112,26 @@ PercolationGridSpatialSampling(samples,worldSize,
     )
 """, name="percolation grid sampling")
 
-with @code{percolationProba} the percolation probability, @code{percolationBordPoints} the number of points on the bord of the grid to belong to the giant cluster, @code{percolationLinkWidth} the width of the final streets.
+@br
+
+with
+
+@ul
+  @li{@code{percolationProba} the percolation probability,}
+  @li{@code{percolationBordPoints} the number of points on the bord of the grid to belong to the giant cluster,}
+  @li{@code{percolationLinkWidth} the width of the final streets.}
 
 
-@h3{Exponential mixture population grid sampling}
 
-At a smaller scale than the previous generators which are all binary grids (building configurations), population density grids can be considered at the metropolitan scale for example
-(a grid cell being of width 1km for example).
+@h2{Exponential mixture population grid sampling}
+
+At a smaller scale than the previous generators which are all binary grids (building configurations), population density grids can be considered at the metropolitan scale for example (a grid cell being of width 1km for example).
+
+@br
 
 A first simple generator for polycentric population densities uses an exponential mixture:
+
+@br@br
 
 @hl.openmole("""
 ExponentialMixtureSpatialSampling(
@@ -103,18 +144,29 @@ ExponentialMixtureSpatialSampling(
 )
 """, name="exp mixture grid sampling")
 
-where @code{gridSize} is the dimension of the world as @code{Either[Int, (Int, Int)]}, @code{centersNumber} is an integer giving the number of kernels,
-@code{maxValue} is optional (default to 1) and can be either a double giving the intensity at the center of each kernel, or a sequence of doubles giving the intensity for each kernel,
-@code{kernelRadius} is also optional and specifies similarly either all radius or the sequence of radius,
-@code{samples} is the number of grids to generate,
-@code{prototypes} is an arbitrary number of prototypes for the generated layers (must be of the same size as provided parameters if in sequence mode).
+@br
+
+where
+
+@ul
+  @li{@code{gridSize} is the dimension of the world as @code{Either[Int, (Int, Int)]},}
+  @li{@code{centersNumber} is an integer giving the number of kernels,}
+  @li{@code{maxValue} is optional (default to 1) and can be either a double giving the intensity at the center of each kernel, or a sequence of doubles giving the intensity for each kernel,}
+  @li{@code{kernelRadius} is also optional and specifies similarly either all radius or the sequence of radius,}
+  @li{@code{samples} is the number of grids to generate,}
+  @li{@code{prototypes} is an arbitrary number of prototypes for the generated layers (must be of the same size as provided parameters if in sequence mode).}
 
 
-@h3{Reaction diffusion population grid sampling}
+
+@h2{Reaction diffusion population grid sampling}
 
 Urban morphogenesis model for population density introduced by @aa("(Raimbault, 2018)", href:= "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0203516").
 
+@br
+
 @b{USE WITH CAUTION - SOME PARAMETER VALUES YIELD VERY LONG GENERATION RUNTIME}
+
+@br@br
 
 @hl.openmole("""
 ReactionDiffusionSpatialSampling(
@@ -129,12 +181,22 @@ ReactionDiffusionSpatialSampling(
 )
 """, name="reaction diffusion grid sampling")
 
-with @code{samples} number of grids to generate, @code{gridSize} width of the square grid,
-@code{prototype} the prototype for the generated grid, @code{alpha} strength of preferential attachment, @code{beta} strength of diffusion,
-@code{nBeta} number of times diffusion is operated at each time step, @code{growthRate} number of population added at each step,
-@code{totalPopulation} the final total population.
+@br
+
+with
+
+@ul
+  @li{@code{samples} number of grids to generate,}
+  @li{@code{gridSize} width of the square grid,}
+  @li{@code{prototype} the prototype for the generated grid,}
+  @li{@code{alpha} strength of preferential attachment,}
+  @li{@code{beta} strength of diffusion,}
+  @li{@code{nBeta} number of times diffusion is operated at each time step,}
+  @li{@code{growthRate} number of population added at each step,}
+  @li{@code{totalPopulation} the final total population.}
 
 
-@h3{OpenStreetMap buildings sampling}
+
+@h2{OpenStreetMap buildings sampling}
 
 @i{Currently being implemented}
