@@ -17,18 +17,61 @@ For higher dimension input space, specific statistics techniques ensuring low di
 
 @br
 
-You can also use your own design of experiment in OpenMOLE, by providing @a("a csv file", href := csvSampling.file) containing your samples to OpenMOLE.
+You can also use your own design of experiment in OpenMOLE, by providing a @a("CSV file", href := csvSampling.file) containing your samples to OpenMOLE.
 
 
-@h3{The @code{DirectSampling} task}
 
-A DoE is set up through the @code{DirectSampling} task in OpenMOLE.
+@h2{The DirectSampling task}
+
+In OpenMOLE, a DoE is set up through the @code{DirectSampling} task.
 This task  will generate a workflow, which is illustrated below.
 You may recognize the @i{map reduce} design pattern, provided that an aggregation operator is defined (otherwise it would just be a @i{map} :-) )
 
 @br@br
 
 @img(src := Resource.img.method.directSampling.file, center(50))
+
+
+@h3{Sampling over several inputs}
+
+Samplings can be performed over several inputs domains as well as on @b{several input types}, using the @b{cartesian product} operator @b{x} as follow:
+
+@br@br
+
+@hl.openmole("""
+ val i = Val[Int]
+ val j = Val[Double]
+ val k = Val[String]
+ val l = Val[Long]
+ val m = Val[File]
+
+ val exploration =
+   DirectSampling (
+   evaluation = myModel,
+   sampling =
+     (i in (0 to 10 by 2)) x
+     (j in (0.0 to 5.0 by 0.5)) x
+     (k in List("Leonardo", "Donatello", "Raphaël", "Michelangelo")) x
+     (l in (UniformDistribution[Long]() take 10)) x
+     (m in (workDirectory / "dir").files().filter(f => f.getName.startsWith("exp") && f.getName.endsWith(".csv")))
+   )
+  """, name = "several inputs")
+
+@br
+
+The @code{DirectSampling} task executes the model @b{myModel} for every possible combination of the 5 inputs provided in the @code{sampling} parameter.
+
+@br
+
+The @code{l} parameter is a uniform sampling of 10 numbers of the Long type, taken in the [Long.MIN_VALUE; Long.MAX_VALUE] domain of the Long native type.
+More details can be found @aa("here", href := uniformSampling.file).
+
+@br
+
+The @code{m} parameter is a sampling over different files that have been uploaded to the @b{workDirectory}.
+The files are explored as items of a list, gathered by the @code{files()} function and applied on the @code{dir} directory/
+Optionally, this list of files can be filtered with any @code{String => Boolean} functions such as @code{contains(), startswith(), endswith()} (see the @aa("Java Class String Documentation", href:= shared.link.javaString) for more details.
+More information on this sampling type @aa("here", href := fileSampling.file).
 
 
 
@@ -70,48 +113,3 @@ The arguments for @code{Replication} are the following:
     @li{@code{replications} (Int) is the number of replications,}
     @li{@code{distributionSeed} (@i{optional}, Long) is an optional seed to be given to he uniform distribution of the seed ("meta-seed"),}
     @li{@code{aggregation} (@i{optional}) is an aggregation task to be performed on the outputs of your evaluation task.}
-
-
-
-@h2{Sampling over several inputs}
-
-Samplings can be performed over several inputs domains as well as on @b{several input types}, using the @b{cartesian product} operator: @b{x} as follow:
-
-@br@br
-
-@hl.openmole("""
- val i = Val[Int]
- val j = Val[Double]
- val k = Val[String]
- val l = Val[Long]
- val m = Val[File]
-
- val exploration =
-   DirectSampling (
-   evaluation = myModel,
-   sampling =
-     (i in (0 to 10 by 2)) x
-     (j in (0.0 to 5.0 by 0.5)) x
-     (k in List("Leonardo", "Donatello", "Raphaël", "Michelangelo")) x
-     (l in (UniformDistribution[Long]() take 10)) x
-     (m in (workDirectory / "dir").files().filter(f => f.getName.startsWith("exp") && f.getName.endsWith(".csv")))
-   )
-  """, name = "several inputs")
-
-@br
-
-The @code{DirectSampling} task performs every combination between the 5 inputs of various types: Integer (i) , Double (j), String (k), Long (l), File (m).
-
-@br@br
-
-The @code{UniformDistribution[Long]() take 10} is a uniform sampling of 10 numbers of the Long type, taken in the [Long.MIN_VALUE; Long.MAX_VALUE] domain of the Long native type.
-More details can be found @aa("here", href := uniformSampling.file).
-
-@br@br
-
-Files are explored as items of a list.
-The items are gathered by the @code{files()} function applied on the @hl.highlight("dir","plain") directory, optionally filtered with any @code{String => Boolean} functions such as @hl.highlight("contains(), startswith(), endswith()", "plain") (see the @a("Java Class String Documentation", href:= shared.link.javaString) for more details).
-
-@br
-
-If your input is one file among many, or a line among a CSV file, use the @a("CSVSampling task", href := csvSampling.file) and @a("FileSampling task", href := fileSampling.file + "#Exploringasetoffiles").
