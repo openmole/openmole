@@ -12,12 +12,12 @@ In a model simulation context, it boils down to declaring the inputs under study
 
 @br
 
-Your model inputs can be sampled in the traditional way, by using a @a("grid (or regular) sampling", href:= gridSampling.file), or by @a("sampling uniformly", href:= uniformSampling.file) inside their respective domains.
+Your model inputs can be sampled in the traditional way, by using a @a("grid (or regular) sampling", href:= elementarySamplings.file + "#GridSampling"), or by @a("sampling uniformly", href:= uniformSampling.file) inside their respective domains.
 For higher dimension input space, specific statistics techniques ensuring low discrepency like @a("Latin Hypercube Sampling", href := highDimensionSamplings.file + "#LatinHypercubeSampling") and @a("SobolSequence", href := highDimensionSamplings.file + "#SobolSequence") are available.
 
 @br
 
-You can also use your own design of experiment in OpenMOLE, by providing a @a("CSV file", href := csvSampling.file) containing your samples to OpenMOLE.
+You can also use your own design of experiment in OpenMOLE, by providing a @a("CSV file", href := customSampling.file) containing your samples to OpenMOLE.
 
 
 
