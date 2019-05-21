@@ -40,6 +40,7 @@ class SLURMJobService[S, H](
       wallTime = parameters.wallTime,
       memory = parameters.memory,
       nodes = parameters.nodes,
+      ntasks = parameters.nodes,
       coresByNode = parameters.coresByNode orElse parameters.threads,
       qos = parameters.qos,
       gres = parameters.gres.toList,
