@@ -425,8 +425,9 @@ package file {
 
       def withOutputStream[T] = withClosable[OutputStream, T](bufferedOutputStream())(_)
 
-      def withPrintStream[T](append: Boolean = false, overwrite: Boolean = true) = {
+      def withPrintStream[T](append: Boolean = false, overwrite: Boolean = true, create: Boolean = false) = {
         def arg = append || !overwrite
+        if (create) file.createParentDir
         withClosable[PrintStream, T](new PrintStream(file.bufferedOutputStream(arg))) _
       }
 
