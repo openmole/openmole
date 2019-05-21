@@ -48,6 +48,7 @@ object CSVHook {
       output match {
         case WritableOutput.FileValue(file) ⇒
           val f = file.from(context)
+          f.createParentDir
           val h = if (f.isEmpty) Some(headerLine) else None
           f.withPrintStream(append = true) { ps ⇒ csv.writeVariablesToCSV(ps, h, vs, arrayOnRow) }
         case WritableOutput.PrintStreamValue(ps) ⇒
