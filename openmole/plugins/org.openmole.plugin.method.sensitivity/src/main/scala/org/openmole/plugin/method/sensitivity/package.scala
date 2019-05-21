@@ -18,7 +18,8 @@
 
 package org.openmole.plugin.method
 
-import monocle.macros.Lenses
+import java.io.PrintStream
+
 import org.openmole.core.dsl
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
@@ -52,16 +53,13 @@ package object sensitivity {
     }
 
 
-    def writeFile(file: File, inputs: Seq[Val[_]], outputs: Seq[Val[_]], coefficient: (Val[_], Val[_]) ⇒ Val[_]) = FromContext { p ⇒
+    def writeResults(ps: PrintStream, inputs: Seq[Val[_]], outputs: Seq[Val[_]], coefficient: (Val[_], Val[_]) ⇒ Val[_]) = FromContext { p ⇒
       import p._
-
-      file.createParentDir
-      file.delete
 
       outputs.foreach { o ⇒
         val vs = inputs.map { i ⇒ coefficient(i, o) }
         def headerLine = s"""output,${header(inputs, vs)}"""
-        writeVariablesToCSV(file, headerLine, Seq(o.name) ++ vs.map(v ⇒ context(v)))
+        writeVariablesToCSV(ps, Some(headerLine), Seq(o.name) ++ vs.map(v ⇒ context(v)))
       }
     }
 

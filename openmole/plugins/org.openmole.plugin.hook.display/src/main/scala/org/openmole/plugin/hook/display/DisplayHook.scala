@@ -26,7 +26,7 @@ object DisplayHook {
   def apply(toDisplay: FromContext[String])(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook =
     Hook("DisplayHook") { parameters ⇒
       import parameters._
-      executionContext.services.outputRedirection.output.println(toDisplay.from(context))
+      outputRedirection.output.println(toDisplay.from(context))
       context
     } validate { p ⇒
       import p._
@@ -38,9 +38,9 @@ object DisplayHook {
       import parameters._
       if (!prototypes.isEmpty) {
         val filtered = Context(prototypes.flatMap(p ⇒ context.variable(p.asInstanceOf[Val[Any]])): _*)
-        executionContext.services.outputRedirection.output.println(filtered.toString)
+        outputRedirection.output.println(filtered.toString)
       }
-      else executionContext.services.outputRedirection.output.println(context.toString)
+      else outputRedirection.output.println(context.toString)
       context
     }
 

@@ -5,21 +5,39 @@ import org.openmole.core.dsl.extension._
 
 object MorrisHook {
 
-  def apply(dsl: DSLContainer[Sensitivity.MorrisParams], dir: FromContext[File])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(dsl: DSLContainer[Sensitivity.MorrisParams], output: WritableOutput)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     Hook("MorrisHook") { p ⇒
       import p._
 
       val inputs = ScalarOrSequenceOfDouble.prototypes(dsl.data.inputs)
 
-      val muFile = dir / "mu.csv"
-      Sensitivity.writeFile(muFile.from(context), inputs, dsl.data.outputs, Morris.mu(_, _)).from(context)
+      output match {
+        case WritableOutput.FileValue(dirFC) ⇒
+          val dir = dirFC.from(context)
+          dir.mkdirs()
 
-      val muStarFile = dir / "muStar.csv"
-      Sensitivity.writeFile(muStarFile.from(context), inputs, dsl.data.outputs, Morris.muStar(_, _)).from(context)
+          (dir / "mu.csv").withPrintStream(overwrite = true) { ps ⇒
+            Sensitivity.writeResults(ps, inputs, dsl.data.outputs, Morris.mu(_, _)).from(context)
+          }
 
-      val sigmaFile = dir / "sigma.csv"
-      Sensitivity.writeFile(sigmaFile.from(context), inputs, dsl.data.outputs, Morris.sigma(_, _)).from(context)
+          (dir / "muStar.csv").withPrintStream(overwrite = true) { ps ⇒
+            Sensitivity.writeResults(ps, inputs, dsl.data.outputs, Morris.muStar(_, _)).from(context)
+          }
 
+          (dir / "sigma.csv").withPrintStream(overwrite = true) { ps ⇒
+            Sensitivity.writeResults(ps, inputs, dsl.data.outputs, Morris.sigma(_, _)).from(context)
+          }
+        case WritableOutput.PrintStreamValue(ps) ⇒
+          ps.println("mu")
+          Sensitivity.writeResults(ps, inputs, dsl.data.outputs, Morris.mu(_, _)).from(context)
+
+          ps.println("mu star")
+          Sensitivity.writeResults(ps, inputs, dsl.data.outputs, Morris.muStar(_, _)).from(context)
+
+          ps.println("sigma")
+          Sensitivity.writeResults(ps, inputs, dsl.data.outputs, Morris.sigma(_, _)).from(context)
+
+      }
       context
     }
 

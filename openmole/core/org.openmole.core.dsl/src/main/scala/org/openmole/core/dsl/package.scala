@@ -114,6 +114,11 @@ package dsl {
     type Context = org.openmole.core.context.Context
     def Context = org.openmole.core.context.Context
 
+    type WritableOutput = org.openmole.core.workflow.tools.WritableOutput
+    def WritableOutput = org.openmole.core.workflow.tools.WritableOutput
+
+    def ExpandedString = org.openmole.core.expansion.ExpandedString
+
     implicit def validationOfFromContext(f: FromContext[_]) =
       (p: FromContext.ValidationParameters) ⇒ f.validate(p.inputs)(p.newFile, p.fileService)
 

@@ -5,9 +5,14 @@ import org.openmole.core.workflow.builder._
 import org.openmole.core.context._
 import org.openmole.core.expansion._
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.preference.Preference
+import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.validation
 import org.openmole.core.workflow.validation.ValidateHook
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.tool.cache.KeyValueCache
+import org.openmole.tool.logger.LoggerService
+import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.random.RandomProvider
 
 object FromContextHook {
@@ -15,7 +20,18 @@ object FromContextHook {
   implicit def isBuilder: InputOutputBuilder[FromContextHook] = InputOutputBuilder(config)
   implicit def isInfo = InfoBuilder(FromContextHook.info)
 
-  case class Parameters(context: Context, executionContext: MoleExecutionContext, implicit val random: RandomProvider, implicit val newFile: NewFile, implicit val fileService: FileService)
+  case class Parameters(
+    context:                        Context,
+    cache:                          KeyValueCache,
+    implicit val preference:        Preference,
+    implicit val threadProvider:    ThreadProvider,
+    implicit val fileService:       FileService,
+    implicit val workspace:         Workspace,
+    implicit val outputRedirection: OutputRedirection,
+    implicit val loggerService:     LoggerService,
+    implicit val random:            RandomProvider,
+    implicit val newFile:           NewFile)
+
   case class ValidateParameters(inputs: Seq[Val[_]], implicit val newFile: NewFile, implicit val fileService: FileService)
 
   def apply(f: Parameters ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook = FromContextHook(name.value)(f)
@@ -41,8 +57,19 @@ object FromContextHook {
 
   override def validate(inputs: Seq[Val[_]]) = validation.Validate { p ⇒ v(FromContextHook.ValidateParameters(inputs, p.newFile, p.fileService)) }
 
-  override protected def process(executionContext: MoleExecutionContext) = FromContext { p ⇒
-    val fcp = FromContextHook.Parameters(p.context, executionContext, p.random, p.newFile, p.fileService)
+  override protected def process(executionContext: HookExecutionContext) = FromContext { p ⇒
+    import p._
+    val fcp = FromContextHook.Parameters(
+      context,
+      cache = executionContext.cache,
+      preference = executionContext.preference,
+      threadProvider = executionContext.threadProvider,
+      fileService = executionContext.fileService,
+      workspace = executionContext.workspace,
+      outputRedirection = executionContext.outputRedirection,
+      loggerService = executionContext.loggerService,
+      random = executionContext.random,
+      newFile = executionContext.newFile)
     f(fcp)
   }
 
