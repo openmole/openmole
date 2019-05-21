@@ -70,9 +70,9 @@ object SavePopulationHook {
 
   }
 
-  def apply[T](algorithm: T, dir: FromContext[File], frequency: OptionalArgument[Long] = None)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def apply[T](algorithm: T, output: WritableOutput, frequency: OptionalArgument[Long] = None)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
     val t = wfi(algorithm)
-    hook(t, dir, frequency)
+    hook(t, output, frequency)
   }
 
 }
