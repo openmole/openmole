@@ -11,7 +11,8 @@ import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder.{DefinitionScope, InfoConfig, InputOutputConfig, MappedInputOutputConfig}
-import org.openmole.core.workflow.execution.LocalEnvironment
+import org.openmole.core.workflow.execution.{EnvironmentProvider, LocalEnvironment, LocalEnvironmentProvider}
+import org.openmole.core.workflow.mole.MoleServices
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workspace.{NewFile, Workspace}
 import org.openmole.plugin.task.container.HostFile
@@ -53,13 +54,9 @@ object PythonTask {
              name: sourcecode.Name,
              definitionScope: DefinitionScope,
              workspace: Workspace,
-             preference: Preference,
-             threadProvider: ThreadProvider,
-             outputRedirection: OutputRedirection,
+             moleServices: MoleServices,
+             localEnvironmentProvider: LocalEnvironmentProvider,
              networkService: NetworkService,
-             localEnvironment: LocalEnvironment,
-             fileService: FileService,
-             loggerService: LoggerService,
              cache: KeyValueCache,
              lockRepository: LockRepository[lock.LockKey]
   ) = Task("PythonTask") {
@@ -79,7 +76,7 @@ object PythonTask {
           reuseContainer = true,
           hostFiles = hostFiles,
           workDirectory = workDirectory
-        )(p.newFile, preference, threadProvider, workspace, p.fileService, outputRedirection, networkService)/*.copy(
+        )(p.newFile, moleServices.preference, moleServices.threadProvider, workspace, p.fileService, moleServices.outputRedirection, networkService)/*.copy(
           environmentVariables = environmentVariables.toVector,
           hostFiles = hostFiles.toVector,
           workDirectory = workDirectory)*/
@@ -139,13 +136,13 @@ object PythonTask {
 
           val dockerTaskContext = TaskExecutionContext(
             workspace.tmpDir,
-            localEnvironment,
-            preference,
-            threadProvider,
-            fileService,
+            localEnvironmentProvider(moleServices),
+            moleServices.preference,
+            moleServices.threadProvider,
+            moleServices.fileService,
             workspace,
-            outputRedirection,
-            loggerService,
+            moleServices.outputRedirection,
+            moleServices.loggerService,
             cache,
             lockRepository
           )

@@ -36,7 +36,7 @@ class SGEJobService[S, H](
     val description = _root_.gridscale.sge.SGEJobDescription(
       command = s"/bin/bash $remoteScript",
       queue = parameters.queue,
-      workDirectory = workDirectory,
+      workDirectory = jobDirectory,
       wallTime = parameters.wallTime,
       memory = parameters.memory
     )
