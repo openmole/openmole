@@ -76,9 +76,11 @@ object PythonTask {
         import p._
         import org.json4s.jackson.JsonMethods._
 
-        def writeInputsJSON(file: File) = {
-          def values = mapped.inputs.map { m ⇒ Array(p.context(m.v)) }
-          file.content = compact(render(toJSONValue(values.toArray)))
+        def writeInputsJSON(file: File): Unit = {
+          //def values = mapped.inputs.map { m ⇒ Array(p.context(m.v)) }
+            // FIXME this shit does not write proper json !!!
+          //file.content = compact(render(toJSONValue(values.toArray)))
+          file.content = "{"+mapped.inputs.map {mio => s"'${mio.name}' :"+toJSONValue(p.context(mio.v))}.mkString(",")+"}"
         }
 
         def readOutputJSON(file: File) = {
