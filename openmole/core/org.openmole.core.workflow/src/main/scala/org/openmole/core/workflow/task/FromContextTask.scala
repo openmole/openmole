@@ -4,6 +4,7 @@ import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.preference.Preference
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.task
 import org.openmole.core.workflow.validation._
@@ -15,7 +16,14 @@ object FromContextTask {
   implicit def isBuilder: InputOutputBuilder[FromContextTask] = InputOutputBuilder(FromContextTask.config)
   implicit def isInfo = InfoBuilder(FromContextTask.info)
 
-  case class Parameters(context: Context, executionContext: TaskExecutionContext, implicit val random: RandomProvider, implicit val newFile: NewFile, implicit val fileService: FileService)
+  case class Parameters(
+    context:                  Context,
+    executionContext:         TaskExecutionContext,
+    implicit val preference:  Preference,
+    implicit val random:      RandomProvider,
+    implicit val newFile:     NewFile,
+    implicit val fileService: FileService
+  )
   case class ValidateParameters(implicit val newFile: NewFile, implicit val fileService: FileService)
 
   /**
@@ -57,7 +65,7 @@ object FromContextTask {
   }
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { p ⇒
-    val tp = FromContextTask.Parameters(p.context, executionContext, p.random, p.newFile, p.fileService)
+    val tp = FromContextTask.Parameters(p.context, executionContext, executionContext.preference, p.random, p.newFile, p.fileService)
     f(tp)
   }
 
