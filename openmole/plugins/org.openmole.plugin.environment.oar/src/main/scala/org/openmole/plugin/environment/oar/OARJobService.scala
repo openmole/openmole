@@ -35,7 +35,7 @@ class OARJobService[S, H](
 
     val description = gridscale.oar.OARJobDescription(
       command = s"/bin/bash $remoteScript",
-      workDirectory = workDirectory,
+      workDirectory = jobDirectory,
       queue = parameters.queue,
       cpu = parameters.cpu,
       core = OAREnvironment.nbCores(parameters),
