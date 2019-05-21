@@ -15,10 +15,13 @@ object FromContextTask {
 
   implicit def isBuilder: InputOutputBuilder[FromContextTask] = InputOutputBuilder(FromContextTask.config)
   implicit def isInfo = InfoBuilder(FromContextTask.info)
+  implicit def isMapped = MappedInputOutputBuilder(FromContextTask.mapped)
 
   case class Parameters(
     context:                  Context,
     executionContext:         TaskExecutionContext,
+    io:                       InputOutputConfig,
+    mapped:                   MappedInputOutputConfig,
     implicit val preference:  Preference,
     implicit val random:      RandomProvider,
     implicit val newFile:     NewFile,
@@ -37,6 +40,7 @@ object FromContextTask {
       fromContext,
       className = className,
       config = InputOutputConfig(),
+      mapped = MappedInputOutputConfig(),
       info = InfoConfig()
     )
 
@@ -56,6 +60,7 @@ object FromContextTask {
   v:                      FromContextTask.ValidateParameters ⇒ Seq[Throwable] = _ ⇒ Seq(),
   override val className: String,
   config:                 InputOutputConfig,
+  mapped:                 MappedInputOutputConfig,
   info:                   InfoConfig
 ) extends Task with ValidateTask {
 
@@ -65,7 +70,7 @@ object FromContextTask {
   }
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { p ⇒
-    val tp = FromContextTask.Parameters(p.context, executionContext, executionContext.preference, p.random, p.newFile, p.fileService)
+    val tp = FromContextTask.Parameters(p.context, executionContext, config, mapped, executionContext.preference, p.random, p.newFile, p.fileService)
     f(tp)
   }
 

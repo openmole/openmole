@@ -46,7 +46,6 @@ object PythonTask {
              workDirectory:        OptionalArgument[String]           = None,
              hostFiles:            Seq[HostFile]                      = Vector.empty,
              environmentVariables: Seq[(String, FromContext[String])] = Vector.empty,
-             mapped:             MappedInputOutputConfig = MappedInputOutputConfig(),
              errorOnReturnValue: Boolean = true,
              returnValue:        Option[Val[Int]] = None,
              stdOut:             Option[Val[String]] = None,
@@ -95,6 +94,9 @@ object PythonTask {
         def outputMapping: String = s"""{${mapped.outputs.map { m => "'"+m.name+"' : "+m.v }.mkString(",")}}"""
 
 
+        val userScript = script.from(p.context)(p.random, p.newFile, p.fileService)
+        val scriptString = if (userScript.endsWith(".py")) File(userScript).content else userScript
+
 
         val resultContext: Context = p.newFile.withTmpFile("script", ".py") { scriptFile ⇒
           p.newFile.withTmpFile("inputs", ".json") { jsonInputs ⇒
@@ -110,7 +112,7 @@ object PythonTask {
                  |import json
                  |$inputArrayName = json.load(open('/$inputJSONName'))
                  |${inputMapping(inputArrayName)}
-                 |${script.from(p.context)(p.random, p.newFile, p.fileService)}
+                 |${scriptString}
                  |json.dump($outputMapping, open('/$outputJSONName','w'))
           """.stripMargin
 
