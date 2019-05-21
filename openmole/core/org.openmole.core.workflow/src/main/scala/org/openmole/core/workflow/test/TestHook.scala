@@ -20,7 +20,7 @@ import monocle.macros.Lenses
 import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.mole.{ Hook, MoleExecutionContext }
+import org.openmole.core.workflow.mole.{ Hook, HookExecutionContext }
 import org.openmole.core.workflow.test.Stubs._
 
 object TestHook {
@@ -32,5 +32,5 @@ object TestHook {
   config: InputOutputConfig = InputOutputConfig(),
   info:   InfoConfig        = InfoConfig()
 ) extends Hook {
-  override protected def process(executionContext: MoleExecutionContext) = FromContext { p ⇒ f(p.context); p.context }
+  override protected def process(executionContext: HookExecutionContext) = FromContext { p ⇒ f(p.context); p.context }
 }

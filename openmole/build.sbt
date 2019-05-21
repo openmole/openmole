@@ -349,9 +349,7 @@ lazy val netLogo6API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo6
 ) settings (toolsSettings: _*)
 
 lazy val csvTool = OsgiProject(pluginDir, "org.openmole.plugin.tool.csv", imports = Seq("*")) dependsOn(exception, openmoleDSL) settings(
-  libraryDependencies += Libraries.opencsv,
-  defaultActivator
-) settings (toolsSettings: _*)
+  libraryDependencies += Libraries.opencsv, defaultActivator) settings (toolsSettings: _*)
 
 lazy val pattern = OsgiProject(pluginDir, "org.openmole.plugin.tool.pattern", imports = Seq("*")) dependsOn(exception, openmoleDSL) settings (toolsSettings: _*) settings (defaultActivator)
 

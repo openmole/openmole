@@ -106,7 +106,7 @@ object MoleExecution extends JavaLogger {
       executionContext.getOrElse(MoleExecutionContext()),
       startStopDefaultEnvironment,
       id = UUID.randomUUID().toString,
-      taskCache = taskCache,
+      keyValueCache = taskCache,
       lockRepository = lockRepository
     )
   }
@@ -179,7 +179,7 @@ object MoleExecution extends JavaLogger {
                   workspace,
                   outputRedirection,
                   loggerService,
-                  subMoleExecutionState.moleExecution.taskCache,
+                  subMoleExecutionState.moleExecution.keyValueCache,
                   subMoleExecutionState.moleExecution.lockRepository,
                   moleExecution = Some(subMoleExecutionState.moleExecution)
                 )
@@ -218,7 +218,23 @@ object MoleExecution extends JavaLogger {
     def ctxForHooks = (subMoleExecutionState.moleExecution.implicits + context) - Variable.openMOLESeed
 
     def executeHook(h: Hook) =
-      try h.perform(ctxForHooks, subMoleExecutionState.moleExecution.executionContext)
+      try {
+        def toHookExecutionContext(cache: KeyValueCache, executionContext: MoleExecutionContext) = {
+          val services = executionContext.services
+          HookExecutionContext(
+            cache = cache,
+            preference = services.preference,
+            threadProvider = services.threadProvider,
+            fileService = services.fileService,
+            workspace = services.workspace,
+            outputRedirection = services.outputRedirection,
+            loggerService = services.loggerService,
+            random = services.newRandom,
+            newFile = services.newFile)
+        }
+
+        h.perform(ctxForHooks, toHookExecutionContext(subMoleExecutionState.moleExecution.keyValueCache, subMoleExecutionState.moleExecution.executionContext))
+      }
       catch {
         case e: Throwable ⇒
           import subMoleExecutionState.moleExecution.executionContext.services._
@@ -331,7 +347,6 @@ object MoleExecution extends JavaLogger {
   def clean(moleExecution: MoleExecution) = {
     if (moleExecution.cleanOnFinish) {
       moleExecution.executionContext.services.newFile.baseDir.recursiveDelete
-      moleExecution.taskCache.close()
     }
     moleExecution._cleaned = true
     moleExecution.executionContext.services.eventDispatcher.trigger(moleExecution, MoleExecution.Cleaned())
@@ -398,7 +413,7 @@ object MoleExecution extends JavaLogger {
               workspace,
               outputRedirection,
               loggerService,
-              moleExecution.taskCache,
+              moleExecution.keyValueCache,
               moleExecution.lockRepository,
               moleExecution = Some(moleExecution)
             )
@@ -616,7 +631,7 @@ class MoleExecution(
   val executionContext:            MoleExecutionContext,
   val startStopDefaultEnvironment: Boolean,
   val id:                          String,
-  val taskCache:                   KeyValueCache,
+  val keyValueCache:               KeyValueCache,
   val lockRepository:              LockRepository[LockKey]
 ) {
 

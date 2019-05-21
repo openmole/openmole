@@ -49,7 +49,7 @@ object ConditionHook {
   info:      InfoConfig
 ) extends Hook {
 
-  override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
+  override protected def process(executionContext: HookExecutionContext) = FromContext { parameters ⇒
     import parameters._
     if (condition.from(context)) hook.perform(context, executionContext) else context
   }

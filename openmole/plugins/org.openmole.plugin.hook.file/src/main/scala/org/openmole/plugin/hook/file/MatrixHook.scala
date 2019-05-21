@@ -61,7 +61,7 @@ object MatrixHook {
     file.validate(inputs)
   }
 
-  override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
+  override protected def process(executionContext: HookExecutionContext) = FromContext { parameters ⇒
     import parameters._
 
     val f = file.from(context)

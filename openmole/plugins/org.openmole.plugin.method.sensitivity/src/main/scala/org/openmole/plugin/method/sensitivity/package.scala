@@ -18,7 +18,6 @@
 
 package org.openmole.plugin.method
 
-import monocle.macros.Lenses
 import org.openmole.core.dsl
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
@@ -61,7 +60,7 @@ package object sensitivity {
       outputs.foreach { o ⇒
         val vs = inputs.map { i ⇒ coefficient(i, o) }
         def headerLine = s"""output,${header(inputs, vs)}"""
-        writeVariablesToCSV(file, headerLine, Seq(o.name) ++ vs.map(v ⇒ context(v)))
+        file.withPrintStream() { ps => writeVariablesToCSV(ps, Some(headerLine), Seq(o.name) ++ vs.map(v ⇒ context(v))) }
       }
     }
 
