@@ -18,10 +18,10 @@
         @a(explore.title, href := explore.file)
     @ol
       @li
-        @a(directSampling.title, href := directSampling.file)
+        @a(samplings.title, href := samplings.file)
         @ol(listStyleType:= "lower-alpha")
           @sitemap.siteMapSection(samplingPages)
-      @sitemap.siteMapSection(explorePages.diff(Seq(directSampling)))
+      @sitemap.siteMapSection(explorePages.diff(Seq(samplings)))
   @li
     @h5
         @a(scale.title, href := scale.file)

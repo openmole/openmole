@@ -1,0 +1,117 @@
+@import org.openmole.site.stylesheet._
+@import org.openmole.site._
+@import org.openmole.site.tools._
+@import DocumentationPages._
+
+
+
+@h2{Design of Experiment}
+
+DoE is the art of setting up an experimentation.
+In a model simulation context, it boils down to declaring the inputs under study (most of the time, they're parameters) and the values they will take, for a batch of several simulations, with the idea of revealing a property of the model (@i{e.g.} sensitivity).
+
+@br
+
+Your model inputs can be sampled in the traditional way, by using a @a("grid (or regular) sampling", href:= gridSampling.file), or by @a("sampling uniformly", href:= uniformSampling.file) inside their respective domains.
+For higher dimension input space, specific statistics techniques ensuring low discrepency like @a("Latin Hypercube Sampling", href := highDimensionSamplings.file + "#LatinHypercubeSampling") and @a("SobolSequence", href := highDimensionSamplings.file + "#SobolSequence") are available.
+
+@br
+
+You can also use your own design of experiment in OpenMOLE, by providing @a("a csv file", href := csvSampling.file) containing your samples to OpenMOLE.
+
+
+@h3{The @code{DirectSampling} task}
+
+A DoE is set up through the @code{DirectSampling} task in OpenMOLE.
+This task  will generate a workflow, which is illustrated below.
+You may recognize the @i{map reduce} design pattern, provided that an aggregation operator is defined (otherwise it would just be a @i{map} :-) )
+
+@br@br
+
+@img(src := Resource.img.method.directSampling.file, center(50))
+
+
+
+@h2{Model replication}
+
+If your model is stochastic, you may want to define a replication task to run several replications of the model for the same parameter values.
+This is similar to using a uniform distribution sampling on the seed of the model, and OpenMOLE provides a specific constructor for this, the @code{Replication} task.
+
+@br
+
+The @code{Replication} sampling is used as follow:
+
+@br@br
+
+@hl.openmole("""
+val mySeed = Val[Int]
+val i = Val[Int]
+val o = Val[Double]
+
+val myModel =
+  ScalaTask("import scala.util.Random; val rng = new Random(mySeed); val o = i * 2 + 0.1 * rng.nextDouble()") set (
+    inputs += (i, mySeed),
+    outputs += (i, o)
+  )
+
+Replication(
+  evaluation = myModel,
+  seed = mySeed,
+  replications = 100
+)""", name="example of replication")
+
+@br
+
+The arguments for @code{Replication} are the following:
+
+@ul
+    @li{@code{evaluation} is the task (or a composition of tasks) that uses your inputs, typically your model task and a hook.}
+    @li{@code{seed} is the prototype for the seed, which will be sampled with an uniform distribution in its domain (Val[Int] or Val[Long]),}
+    @li{@code{replications} (Int) is the number of replications,}
+    @li{@code{distributionSeed} (@i{optional}, Long) is an optional seed to be given to he uniform distribution of the seed ("meta-seed"),}
+    @li{@code{aggregation} (@i{optional}) is an aggregation task to be performed on the outputs of your evaluation task.}
+
+
+
+@h2{Sampling over several inputs}
+
+Samplings can be performed over several inputs domains as well as on @b{several input types}, using the @b{cartesian product} operator: @b{x} as follow:
+
+@br@br
+
+@hl.openmole("""
+ val i = Val[Int]
+ val j = Val[Double]
+ val k = Val[String]
+ val l = Val[Long]
+ val m = Val[File]
+
+ val exploration =
+   DirectSampling (
+   evaluation = myModel,
+   sampling =
+     (i in (0 to 10 by 2)) x
+     (j in (0.0 to 5.0 by 0.5)) x
+     (k in List("Leonardo", "Donatello", "Raphaël", "Michelangelo")) x
+     (l in (UniformDistribution[Long]() take 10)) x
+     (m in (workDirectory / "dir").files().filter(f => f.getName.startsWith("exp") && f.getName.endsWith(".csv")))
+   )
+  """, name = "several inputs")
+
+@br
+
+The @code{DirectSampling} task performs every combination between the 5 inputs of various types: Integer (i) , Double (j), String (k), Long (l), File (m).
+
+@br@br
+
+The @code{UniformDistribution[Long]() take 10} is a uniform sampling of 10 numbers of the Long type, taken in the [Long.MIN_VALUE; Long.MAX_VALUE] domain of the Long native type.
+More details can be found @aa("here", href := uniformSampling.file).
+
+@br@br
+
+Files are explored as items of a list.
+The items are gathered by the @code{files()} function applied on the @hl.highlight("dir","plain") directory, optionally filtered with any @code{String => Boolean} functions such as @hl.highlight("contains(), startswith(), endswith()", "plain") (see the @a("Java Class String Documentation", href:= shared.link.javaString) for more details).
+
+@br
+
+If your input is one file among many, or a line among a CSV file, use the @a("CSVSampling task", href := csvSampling.file) and @a("FileSampling task", href := fileSampling.file + "#Exploringasetoffiles").

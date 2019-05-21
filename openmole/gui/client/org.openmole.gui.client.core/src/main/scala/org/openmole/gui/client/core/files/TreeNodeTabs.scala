@@ -476,7 +476,7 @@ object TreeNodeTab {
       )
     }
 
-    lazy val closureInput = input(placeholder := "Filter closure. Ex: x < 10", marginLeft := 10)(value := plotter.closureFilter.map {
+    lazy val closureInput = input(placeholder := "Filter closure. Ex: < 10", marginLeft := 10)(value := plotter.closureFilter.map {
       _.closure
     }.getOrElse("")).render
 
@@ -514,7 +514,7 @@ object TreeNodeTab {
                     scalatags.JsDom.tags.span(
                       Rx {
                         if (filterAxisOptions.content().map { _.fullSequenceIndex } == Some(-1)) scalatags.JsDom.tags.span.render
-                        else scalatags.JsDom.tags.span(closureInput.render, inputFilterValidation).render
+                        else scalatags.JsDom.tags.span(form(closureInput.render, inputFilterValidation)).render
                       }))
                   )
                 ))
