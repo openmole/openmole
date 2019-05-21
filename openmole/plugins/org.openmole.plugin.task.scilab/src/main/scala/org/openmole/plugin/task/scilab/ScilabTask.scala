@@ -85,24 +85,24 @@ object ScilabTask {
     )
   }
 
-  def multiArrayScilab(v: Array[Array[Array[_]]]): String = {
+  def multiArrayScilab(v: Any): String = {
     // flatten the array after multidimensional transposition
-    def recTranspose(v: Any): Array[_] = {
+    def recTranspose(v: Any): Seq[_] = {
       v match {
-        case v: Array[Array[Array[_]]] ⇒ v.map(recTranspose).transpose
-        case v: Array[Array[_]]        ⇒ v.transpose
+        case v: Array[Array[Array[_]]] ⇒ v.map { a ⇒ recTranspose(a) }.toSeq.transpose.flatten
+        case v: Array[Array[_]]        ⇒ v.map { _.toSeq }.toSeq.transpose.flatten
       }
     }
-    def getDimensions(v: Array[Array[Array[_]]]): Seq[Int] = {
-      @tailrec def getdims(v: Array[_], dims: Seq[Int]): Seq[Int] = {
+    def getDimensions(v: Any): Seq[Int] = {
+      @tailrec def getdims(v: Any, dims: Seq[Int]): Seq[Int] = {
         v match {
           case v: Array[Array[_]] ⇒ getdims(v(0), dims ++ Seq(v.length))
-          case v: Array[_]        ⇒ (dims ++ Seq(v.length))
+          case v: Array[_]        ⇒ dims ++ Seq(v.length)
         }
       }
       getdims(v, Seq.empty)
     }
-    val scilabVals = recTranspose(v).flatten.map { toScilab }
+    val scilabVals = recTranspose(v).map { vv ⇒ toScilab(vv) }
     val dimensions = getDimensions(v)
     // scilab syntax for hypermat
     // M = hypermat([2 3 2 2],data) with data being flat column vector
@@ -112,13 +112,13 @@ object ScilabTask {
 
   def toScilab(v: Any): String = {
     v match {
-      case v: Int     ⇒ v.toString
-      case v: Long    ⇒ v.toString
-      case v: Double  ⇒ v.toString
-      case v: Boolean ⇒ if (v) "%T" else "%F"
-      case v: String  ⇒ '"' + v + '"'
-      case v: Array[Array[Array[_]]] ⇒
-        multiArrayScilab(v)
+      case v: Int                    ⇒ v.toString
+      case v: Long                   ⇒ v.toString
+      case v: Double                 ⇒ v.toString
+      case v: Boolean                ⇒ if (v) "%T" else "%F"
+      case v: String                 ⇒ '"' + v + '"'
+      case v: Array[Array[Array[_]]] ⇒ multiArrayScilab(v)
+      //multiArrayScilab(v.map { _.map { _.toSeq }.toSeq }.toSeq)
       //throw new UserBadDataError(s"The array of more than 2D $v of type ${v.getClass} is not convertible to Scilab")
       case v: Array[Array[_]] ⇒
         def line(v: Array[_]) = v.map(toScilab).mkString(", ")

@@ -42,7 +42,7 @@ DirectSampling(
   sampling = arg in (0 to 10)
 )""")
 
-@p Notions from OpenMOLE are reused in this example. If you're not too familiar with @a("Environments", href := DocumentationPages.scale.file), @a("Groupings", href := DocumentationPages.scale.file + "#Grouping"), @a("Hooks", href := DocumentationPages.hook.file) or @a("Samplings", href := DocumentationPages.directSampling.file), check the relevant sections of the documentation.
+@p Notions from OpenMOLE are reused in this example. If you're not too familiar with @a("Environments", href := DocumentationPages.scale.file), @a("Groupings", href := DocumentationPages.scale.file + "#Grouping"), @a("Hooks", href := DocumentationPages.hook.file) or @a("Samplings", href := DocumentationPages.samplings.file), check the relevant sections of the documentation.
 
 @hr
 @footer
