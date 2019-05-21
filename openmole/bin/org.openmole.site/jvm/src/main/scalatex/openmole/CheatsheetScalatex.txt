@@ -8,7 +8,7 @@ All @h2 headers will automatically appear in a "Contents" section at the top of 
 
 SPACING
 Spaces around headers are automatically created, no need to put additional spaces when creating a new section
-To facilitate reading, manually add spaces around images (add @br@br before AND after the image) and code bits (add @br@br before and @br after the code bit).
+To facilitate reading, manually add spaces around images (add @br@br before AND only one after the image, except when the next element is a header) and code bits (add @br@br before and @br after the code bit).
 
 
 FORMATTING
