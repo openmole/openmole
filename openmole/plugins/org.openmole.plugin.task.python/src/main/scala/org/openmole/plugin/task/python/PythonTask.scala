@@ -110,6 +110,8 @@ object PythonTask {
             scriptFile.content =
               s"""
                  |import json
+                 |f = open('/$inputJSONName','r')
+                 |print(f.readlines())
                  |$inputArrayName = json.load(open('/$inputJSONName'))
                  |${inputMapping(inputArrayName)}
                  |${scriptString}
