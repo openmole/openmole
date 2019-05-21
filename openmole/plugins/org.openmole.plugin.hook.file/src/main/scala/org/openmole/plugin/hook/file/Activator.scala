@@ -35,7 +35,7 @@ class Activator extends PluginInfoActivator {
     val keyWords: Vector[KeyWord] =
       Vector(
         HookKeyWord(CSVHook.getClass),
-        HookKeyWord(classOf[AppendToFileHook]),
+        HookKeyWord(AppendToFileHook.getClass),
         HookKeyWord(classOf[CopyFileHook]),
         HookKeyWord(classOf[SaveHook]),
         HookKeyWord(classOf[MatrixHook])

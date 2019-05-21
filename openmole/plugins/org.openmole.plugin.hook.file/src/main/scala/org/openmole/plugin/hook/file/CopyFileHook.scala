@@ -75,15 +75,14 @@ object CopyFileHook {
     copies.flatMap(_._2.validate(inputs))
   }
 
-  override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
+  override protected def process(executionContext: HookExecutionContext) = FromContext { parameters ⇒
     import parameters._
 
     def copyFile(
-      context:          Context,
-      executionContext: MoleExecutionContext,
-      filePrototype:    Val[File],
-      destination:      FromContext[File],
-      options:          CopyOptions
+      context:       Context,
+      filePrototype: Val[File],
+      destination:   FromContext[File],
+      options:       CopyOptions
     ): Option[Variable[File]] = {
       val from = context(filePrototype)
       val to = destination.from(context)
@@ -107,7 +106,7 @@ object CopyFileHook {
       ret
     }
 
-    val moved = for ((p, d, options) ← copies) yield copyFile(context, executionContext, p, d, options)
+    val moved = for ((p, d, options) ← copies) yield copyFile(context, p, d, options)
     context ++ moved.flatten
   }
 

@@ -425,6 +425,11 @@ package file {
 
       def withOutputStream[T] = withClosable[OutputStream, T](bufferedOutputStream())(_)
 
+      def withPrintStream[T](append: Boolean = false, overwrite: Boolean = true) = {
+        def arg = append || !overwrite
+        withClosable[PrintStream, T](new PrintStream(file.bufferedOutputStream(arg))) _
+      }
+
       def withFileOutputStream[T] = withClosable[FileOutputStream, T](new FileOutputStream(file))(_)
 
       def withInputStream[T] = withClosable[InputStream, T](bufferedInputStream)(_)

@@ -19,8 +19,27 @@ package org.openmole.core.workflow.mole
 
 import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
+import org.openmole.core.fileservice.FileService
+import org.openmole.core.preference.Preference
+import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder.{ InfoConfig, InputOutputConfig }
 import org.openmole.core.workflow.tools._
+import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.tool.cache.KeyValueCache
+import org.openmole.tool.logger.LoggerService
+import org.openmole.tool.outputredirection.OutputRedirection
+import org.openmole.tool.random.RandomProvider
+
+case class HookExecutionContext(
+  cache:                          KeyValueCache,
+  implicit val preference:        Preference,
+  implicit val threadProvider:    ThreadProvider,
+  implicit val fileService:       FileService,
+  implicit val workspace:         Workspace,
+  implicit val outputRedirection: OutputRedirection,
+  implicit val loggerService:     LoggerService,
+  implicit val random:            RandomProvider,
+  implicit val newFile:           NewFile)
 
 trait Hook <: Name {
 
@@ -31,12 +50,10 @@ trait Hook <: Name {
   def defaults = config.defaults
   def name = info.name
 
-  def perform(context: Context, executionContext: MoleExecutionContext): Context = {
-    implicit val rng = executionContext.services.newRandom
-    import executionContext.services.newFile
-    import executionContext.services.fileService
-    InputOutputCheck.perform(this, inputs, outputs, defaults, process(executionContext))(executionContext.services.preference).from(context)
+  def perform(context: Context, executionContext: HookExecutionContext): Context = {
+    import executionContext._
+    InputOutputCheck.perform(this, inputs, outputs, defaults, process(executionContext))(preference).from(context)
   }
 
-  protected def process(executionContext: MoleExecutionContext): FromContext[Context]
+  protected def process(executionContext: HookExecutionContext): FromContext[Context]
 }

@@ -17,16 +17,11 @@
 
 package org.openmole.core.workflow.mole
 
-import java.io.{ File, PrintStream }
-
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.{ FileService, FileServiceCache }
-import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.preference.Preference
-import org.openmole.core.serializer._
 import org.openmole.core.threadprovider._
 import org.openmole.core.workspace._
-import org.openmole.core.workflow.dsl._
 import org.openmole.tool.cache._
 import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
