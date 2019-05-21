@@ -1,7 +1,7 @@
 
 package org.openmole.plugin.task.python
 
-import org.openmole.core.context.{Val, Context}
+import org.openmole.core.context.{Context, Val}
 import org.openmole.core.workflow.tools.OptionalArgument
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
@@ -11,12 +11,17 @@ import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder.{DefinitionScope, InfoConfig, InputOutputConfig, MappedInputOutputConfig}
+import org.openmole.core.workflow.execution.LocalEnvironment
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workspace.{NewFile, Workspace}
 import org.openmole.plugin.task.container.HostFile
 import org.openmole.plugin.task.external.{External, outputFiles, resources}
 import org.openmole.plugin.task.udocker.{DockerImage, UDockerTask}
 import org.openmole.plugin.tool.json._
+import org.openmole.tool.cache.KeyValueCache
+import org.openmole.tool.lock
+import org.openmole.tool.lock.LockRepository
+import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
 
 object PythonTask {
@@ -52,10 +57,14 @@ object PythonTask {
              threadProvider: ThreadProvider,
              outputRedirection: OutputRedirection,
              networkService: NetworkService,
-             taskExecutionContext: TaskExecutionContext
+             localEnvironment: LocalEnvironment,
+             fileService: FileService,
+             loggerService: LoggerService,
+             cache: KeyValueCache,
+             lockRepository: LockRepository[lock.LockKey]
   ) = Task("PythonTask") {
     p: org.openmole.core.workflow.task.FromContextTask.Parameters =>
-      import p._
+      //import p._
       import org.json4s.jackson.JsonMethods._
 
       lazy val containerPoolKey = UDockerTask.newCacheKey
@@ -76,7 +85,7 @@ object PythonTask {
           workDirectory = workDirectory)*/
 
       def writeInputsJSON(file: File) = {
-        def values = mapped.inputs.map { m ⇒ Array(context(m.v)) }
+        def values = mapped.inputs.map { m ⇒ Array(p.context(m.v)) }
         file.content = compact(render(toJSONValue(values.toArray)))
       }
 
@@ -128,7 +137,20 @@ object PythonTask {
               outputFiles += (outputJSONName, outputFile)
             )
 
-          val resultContext: org.openmole.core.context.Context = uDockerTask.process(taskExecutionContext).from(context)
+          val dockerTaskContext = TaskExecutionContext(
+            workspace.tmpDir,
+            localEnvironment,
+            preference,
+            threadProvider,
+            fileService,
+            workspace,
+            outputRedirection,
+            loggerService,
+            cache,
+            lockRepository
+          )
+
+          val resultContext: org.openmole.core.context.Context = uDockerTask.process(dockerTaskContext).from(p.context)(p.random,p.newFile,p.fileService)
           resultContext ++ readOutputJSON(resultContext(outputFile))
         }
       }
