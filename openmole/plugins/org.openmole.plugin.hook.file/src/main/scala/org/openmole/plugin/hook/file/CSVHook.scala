@@ -31,7 +31,8 @@ object CSVHook {
     values:     Seq[Val[_]]                           = Vector.empty,
     exclude:    Seq[Val[_]]                           = Vector.empty,
     header:     OptionalArgument[FromContext[String]] = None,
-    arrayOnRow: Boolean                               = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook =
+    arrayOnRow: Boolean                               = false,
+    overwrite:  Boolean = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook =
     Hook("CSVHook") { parameters ⇒
       import parameters._
       import org.openmole.plugin.tool.csv
@@ -46,6 +47,7 @@ object CSVHook {
       output match {
         case WritableOutput.FileValue(file) ⇒
           val f = file.from(context)
+          if (overwrite && !f.isEmpty) f.delete()
           val h = if (f.isEmpty) Some(headerLine) else None
           f.withPrintStream(append = true, create = true) { ps ⇒ csv.writeVariablesToCSV(ps, h, vs, arrayOnRow) }
         case WritableOutput.PrintStreamValue(ps) ⇒
