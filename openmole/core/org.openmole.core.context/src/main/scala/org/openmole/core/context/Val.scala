@@ -24,8 +24,16 @@ import shapeless.{ TypeCase, Typeable }
 import scala.annotation.tailrec
 import scala.reflect._
 
+/**
+ * Methods to deal with ValType
+ */
 object ValType {
 
+  /**
+   * Extract the atomic ValType of a (potentially multidimensional) Array
+   * @param t
+   * @return
+   */
   def unArrayify(t: ValType[_]): (ValType[_], Int) = {
     @tailrec def rec(c: ValType[_], level: Int = 0): (ValType[_], Int) =
       if (!c.isArray) (c, level)
@@ -33,24 +41,64 @@ object ValType {
     rec(t)
   }
 
+  /**
+   * Decorate ValType for implicit conversions to array type
+   * @param p
+   * @tparam T
+   */
   implicit class ValTypeDecorator[T](p: ValType[T]) {
+    /**
+     * convert to array
+     * @return
+     */
     def toArray = ValType[Array[T]](p.manifest.toArray)
+
+    /**
+     * alias of [[toArray]]
+     * @return
+     */
     def array = toArray
+
+    /**
+     * is it an array type
+     * @return
+     */
     def isArray = p.manifest.isArray
+
+    /**
+     * force conversion to array
+     * @return
+     */
     def asArray = p.asInstanceOf[ValType[Array[T]]]
   }
 
+  /**
+   * Decorate for conversion from array type
+   * @param p
+   * @tparam T
+   */
   implicit class ValTypeArrayDecorator[T](p: ValType[Array[T]]) {
     def fromArray = ValType[T](p.manifest.fromArray)
   }
 
   implicit def buildValType[T: Manifest]: ValType[T] = ValType[T]
 
+  /**
+   * Construct a ValType from an implicit manifest
+   * @param m
+   * @tparam T
+   * @return
+   */
   def apply[T](implicit m: Manifest[T]): ValType[T] =
     new ValType[T] {
       val manifest = m
     }
 
+  /**
+   * Force conversion
+   * @param c
+   * @return
+   */
   def unsecure(c: Manifest[_]): ValType[Any] = apply(c.asInstanceOf[Manifest[Any]])
 
 }
@@ -163,9 +211,12 @@ case class Namespace(names: String*) {
 }
 
 /**
- * The Val is a prototype in the sens of C language prototypes. It is
- * composed of a type and a name. It allows specifying typed data transfert in
- * OpenMOLE.
+ *  A Val represents variables to which a value can be attributed.
+ *  More precisely, this corresponds to a prototype in the sense of C language prototypes.
+ *  In C, function prototypes are defined in headers and can be understood as interfaces that can be implemented.
+ *  In model experiments, a given parameter will potentially take several values in different contexts, and in a functional programming fashion can thus be understood as a prototype in the previous sense.
+ *
+ *  The Val is in practice composed of a type and a name. It allows to specify typed data transfert in OpenMOLE.
  *
  * @param simpleName name of the prototype
  * @param `type` type given by a [[ValType]]
@@ -199,13 +250,41 @@ class Val[T](val simpleName: String, val `type`: ValType[T], val namespace: Name
   def accepts(obj: Any): Boolean =
     obj == null || classAssignable(obj.getClass, `type`.runtimeClass)
 
+  /**
+   * Create a new prototype with the given name and same type as the calling one
+   * @param name
+   * @return
+   */
   def withName(name: String) = Val[T](name, namespace = namespace)(`type`)
+
+  /**
+   * Create a new prototype with given type and same name as the calling one
+   * @tparam T
+   * @return
+   */
   def withType[T: ValType] = Val[T](simpleName, namespace = namespace)
+
+  /**
+   * Change the namespace of a prototype
+   * @param namespace
+   * @return
+   */
   def withNamespace(namespace: Namespace) = Val[T](name, namespace = namespace)(`type`)
 
+  /**
+   * Extract the value of a prototype from a given context
+   * @param context
+   * @return
+   */
   def from(context: ⇒ Context): T = context(this)
 
+  /**
+   * Unique id : name and type define a prototype
+   *  - Q : why is namespace not included here - two protos from different namespace are the same objects (in equals and hashcode sense)
+   * @return
+   */
   override def id = (name, `type`)
+
   override def toString = s"($name: ${`type`.toString})"
 }
 
