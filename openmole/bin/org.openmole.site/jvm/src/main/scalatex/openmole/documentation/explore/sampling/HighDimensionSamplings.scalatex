@@ -7,8 +7,8 @@
 
 @h2{Specific methods for high dimension spaces}
 
-High dimension spaces must be handled via specific methods of the literature, otherwise, cartesian products would be too memory consuming .
-OpenMOLE includes two of these methods: @b{Sobol Sequence} and @b{Latin Hypercube Sampling}, which can be passed as an argument to the @hl.highlight("DirectSampling","plain") task:
+High dimension spaces must be handled via specific methods of the literature, otherwise, cartesian products would be too memory consuming.
+OpenMOLE includes two of these methods: @b{Sobol Sequence} and @b{Latin Hypercube Sampling}, which can be passed as an argument to the @code{DirectSampling} task:
 
 @h3{Methods' score}
 
@@ -16,18 +16,19 @@ OpenMOLE includes two of these methods: @b{Sobol Sequence} and @b{Latin Hypercub
 
 @br
 
-These two methods perform well in terms of Input Space Exploration (which is normal as they were built for that), however, they are superior to uniform or grid samplings, while sharing the same intrinsic limitations.
-There is no special way of handling Stochasticity of the model, out of standard replications.
+These two methods perform well in terms of input space exploration (which is normal as they were built for that), however, they are superior to uniform or grid samplings, while sharing the same intrinsic limitations.
+There is no special way of handling stochasticity of the model, out of standard replications.
 
 @br
 
-These methods are not expensive @i{per se}, it depends on the magnitude of the Input Space you want to be covered.
+These methods are not expensive @i{per se}, it depends on the magnitude of the input space you want to be covered.
 
 
 
 @h2{Latin Hypercube Sampling}
 
-The syntax of the LHS sampling is the following:
+The @aa("Latin Hypercube Sampling", href := "https://en.wikipedia.org/wiki/Latin_hypercube_sampling") is a statistical method for generating a near-random sample of parameter values from a multidimensional distribution.
+The syntax of the LHS sampling in OpenMOLE is the following:
 
 @br@br
 
@@ -61,13 +62,14 @@ For example, supposing you have already declared inputs, outputs, and a model ta
     )
 
     myExploration
-    """)
+""")
 
 
 
 @h2{Sobol Sequence}
 
-The syntax of the Sobol sequence sampling is the following:
+A @aa("Sobol sequence", href := "https://en.wikipedia.org/wiki/Sobol_sequence") is a quasi-random low-discrepancy sequence.
+The syntax of the Sobol sequence sampling in OpenMOLE is the following:
 
 @br@br
 

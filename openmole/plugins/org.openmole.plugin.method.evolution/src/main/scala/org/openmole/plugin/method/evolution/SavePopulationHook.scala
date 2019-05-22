@@ -31,6 +31,7 @@ object SavePopulationHook {
   def hook(t: EvolutionWorkflow, output: WritableOutput, frequency: OptionalArgument[Long])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
     Hook("SavePopulationHook") { p ⇒
       import p._
+      import org.openmole.core.csv
 
       def save =
         frequency.option match {
@@ -44,19 +45,19 @@ object SavePopulationHook {
         import org.openmole.plugin.tool.csv._
 
         val values = resultVariables(t).from(context).map(_.value)
-        def headerLine = header(resultVariables(t).from(context).map(_.prototype.array), values)
+        def headerLine = csv.header(resultVariables(t).from(context).map(_.prototype.array), values)
 
         output match {
           case WritableOutput.FileValue(dir) ⇒
             (dir / ExpandedString("population${" + t.generationPrototype.name + "}.csv")).from(context).withPrintStream(overwrite = false, create = true) { ps ⇒
-              writeVariablesToCSV(
+              csv.writeVariablesToCSV(
                 ps,
                 Some(headerLine),
                 values
               )
             }
           case WritableOutput.PrintStreamValue(ps) ⇒
-            writeVariablesToCSV(
+            csv.writeVariablesToCSV(
               ps,
               Some(headerLine),
               values
@@ -83,14 +84,14 @@ object SaveLastPopulationHook {
     val t = wfi(algorithm)
 
     Hook("SaveLastPopulationHook") { p ⇒
-      import org.openmole.plugin.tool.csv._
       import p._
+      import org.openmole.core.csv
 
       val values = SavePopulationHook.resultVariables(t).from(context).map(_.value)
-      def headerLine = header(SavePopulationHook.resultVariables(t).from(context).map(_.prototype.array), values)
+      def headerLine = csv.header(SavePopulationHook.resultVariables(t).from(context).map(_.prototype.array), values)
 
       file.from(context).withPrintStream(overwrite = true, create = true) { ps ⇒
-        writeVariablesToCSV(
+        csv.writeVariablesToCSV(
           ps,
           Some(headerLine),
           values

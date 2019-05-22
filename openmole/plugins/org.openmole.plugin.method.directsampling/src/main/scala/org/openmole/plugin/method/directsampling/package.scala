@@ -19,6 +19,8 @@ package org.openmole.plugin.method
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
+import org.openmole.core.workflow.mole
+import org.openmole.core.workflow.mole.CSVHook
 import org.openmole.core.workflow.tools.WritableOutput
 import org.openmole.plugin.domain.distribution._
 import org.openmole.plugin.domain.modifier._
@@ -50,7 +52,7 @@ package object directsampling {
       includeSeed: Boolean                               = false): DSLContainer[Replication] = {
       implicit val defScope = dsl.scope
       val exclude = if (!includeSeed) Seq(dsl.data.seed) else Seq()
-      dsl hook CSVHook(output, values = values, exclude = exclude, header = header, arrayOnRow = arrayOnRow)
+      dsl hook mole.CSVHook(output, values = values, exclude = exclude, header = header, arrayOnRow = arrayOnRow)
     }
   }
 

@@ -22,6 +22,7 @@ package dsl {
   import org.openmole.core.context._
   import org.openmole.core.logconfig.LoggerConfig
   import cats._
+  import org.openmole.core.workflow.mole
   import org.openmole.tool.crypto.Cypher
   import squants.information._
 
@@ -89,8 +90,7 @@ package dsl {
     type ScalarOrSequenceOfDouble[T] = org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble[T]
     def ScalarOrSequenceOfDouble = org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
 
-    type Hook = org.openmole.core.workflow.mole.Hook
-    type FromContextHook = org.openmole.core.workflow.mole.FromContextHook
+    type Hook = mole.FromContextHook
     def Hook = org.openmole.core.workflow.mole.Hook
 
     type Source = org.openmole.core.workflow.mole.Source
@@ -99,7 +99,7 @@ package dsl {
 
     type Task = org.openmole.core.workflow.task.Task
     type FromContextTask = org.openmole.core.workflow.task.FromContextTask
-    def Task = org.openmole.core.workflow.task.Task
+    def Task = org.openmole.core.workflow.task.FromContextTask
 
     type Sampling = org.openmole.core.workflow.sampling.Sampling
     type FromContextSampling = org.openmole.core.workflow.sampling.FromContextSampling

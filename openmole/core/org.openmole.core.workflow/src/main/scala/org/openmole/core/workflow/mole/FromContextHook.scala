@@ -1,12 +1,12 @@
 package org.openmole.core.workflow.mole
 
 import monocle.macros._
-import org.openmole.core.workflow.builder._
 import org.openmole.core.context._
 import org.openmole.core.expansion._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.validation
 import org.openmole.core.workflow.validation.ValidateHook
 import org.openmole.core.workspace.{ NewFile, Workspace }
