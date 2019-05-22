@@ -51,7 +51,8 @@ object SLURMEnvironment {
     storageSharedLocally: Boolean                       = false,
     name:                 OptionalArgument[String]      = None,
     localSubmission:      Boolean                       = false,
-    forceCopyOnNode:      Boolean                       = false
+    forceCopyOnNode:      Boolean                       = false,
+    debug:                Boolean                       = false
   )(implicit services: BatchEnvironment.Services, authenticationStore: AuthenticationStore, cypher: Cypher, varName: sourcecode.Name) = {
     import services._
 
@@ -70,7 +71,8 @@ object SLURMEnvironment {
       workDirectory = workDirectory,
       threads = threads,
       storageSharedLocally = storageSharedLocally,
-      forceCopyOnNode = forceCopyOnNode)
+      forceCopyOnNode = forceCopyOnNode,
+      debug = debug)
 
     EnvironmentProvider { ms ⇒
       if (!localSubmission) {
@@ -114,7 +116,8 @@ object SLURMEnvironment {
     workDirectory:        Option[String],
     threads:              Option[Int],
     storageSharedLocally: Boolean,
-    forceCopyOnNode:      Boolean)
+    forceCopyOnNode:      Boolean,
+    debug:                Boolean)
 
   def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SLURMJobService[_, _])(implicit services: BatchEnvironment.Services) =
     submitToCluster(

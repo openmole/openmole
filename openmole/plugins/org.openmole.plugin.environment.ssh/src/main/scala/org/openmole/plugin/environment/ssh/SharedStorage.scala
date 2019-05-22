@@ -100,7 +100,8 @@ object SharedStorage extends JavaLogger {
     threads:        Option[Int],
     serializedJob:  SerializedJob,
     outputPath:     String,
-    storage:        S)(implicit newFile: NewFile, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
+    storage:        S,
+    debug:          Boolean             = false)(implicit newFile: NewFile, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
     val runtime = runtimePath(serializedJob.runtime) //preparedRuntime(serializedJob.runtime)
     val result = outputPath
     val workspace = StorageService.child(storage, workDirectory, UUID.randomUUID.toString)
@@ -111,7 +112,7 @@ object SharedStorage extends JavaLogger {
         val content =
           s"""export PATH=$runtime/jre/bin/:$$PATH; cd $runtime; mkdir -p $osgiWorkDir; export OPENMOLE_HOME=$workspace ; mkdir -p $$OPENMOLE_HOME ; """ +
             "sh run.sh " + BatchEnvironment.openMOLEMemoryValue(openMOLEMemory).toMegabytes.toInt + "m " + osgiWorkDir + " -s " + serializedJob.remoteStorage.path +
-            " -p envplugins/ -i " + serializedJob.inputPath + " -o " + result + " -t " + BatchEnvironment.threadsValue(threads) +
+            " -p envplugins/ -i " + serializedJob.inputPath + " -o " + result + " -t " + BatchEnvironment.threadsValue(threads) + (if (debug) " --debug" else "") +
             "; RETURNCODE=$?; rm -rf $OPENMOLE_HOME ; rm -rf " + osgiWorkDir + " ; exit $RETURNCODE;"
 
         Log.logger.fine("Script: " + content)
