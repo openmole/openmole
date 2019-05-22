@@ -363,6 +363,7 @@ object MoleExecution extends JavaLogger {
 
   def cancel(moleExecution: MoleExecution, t: Option[MoleExecutionFailed]): Unit = {
     if (!moleExecution._canceled) {
+      import moleExecution.executionContext.services._
       LoggerService.log(Level.FINE, s"cancel mole execution $moleExecution, with error $t")
 
       moleExecution._exception = t
