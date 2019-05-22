@@ -77,10 +77,9 @@ object PythonTask {
         import org.json4s.jackson.JsonMethods._
 
         def writeInputsJSON(file: File): Unit = {
-          //def values = mapped.inputs.map { m ⇒ Array(p.context(m.v)) }
-            // FIXME this shit does not write proper json !!!
-          //file.content = compact(render(toJSONValue(values.toArray)))
-          file.content = "{"+mapped.inputs.map {mio => s"'${mio.name}' :"+toJSONValue(p.context(mio.v))}.mkString(",")+"}"
+          def values = mapped.inputs.map { m ⇒ p.context(m.v) }
+          file.content = compact(render(toJSONValue(values.toArray)))
+          //file.content = "{"+mapped.inputs.map {mio => s"'${mio.name}' :"+toJSONValue(p.context(mio.v))}.mkString(",")+"}"
         }
 
         def readOutputJSON(file: File) = {
@@ -91,10 +90,11 @@ object PythonTask {
         }
 
         def inputMapping(dicoName: String): String =
-          mapped.inputs.map { m ⇒ s"${m.name} = $dicoName['${m.name}']" }.mkString("\n")
+          //mapped.inputs.map { m ⇒ s"${m.name} = $dicoName['${m.name}']" }.mkString("\n")
+          mapped.inputs.zipWithIndex.map { case (m,i) ⇒ s"${m.name} = $dicoName[${i}]" }.mkString("\n")
 
-        def outputMapping: String = s"""{${mapped.outputs.map { m => "'"+m.name+"' : "+m.name }.mkString(",")}}"""
-
+        def outputMapping: String = //s"""{${mapped.outputs.map { m => "'"+m.name+"' : "+m.name }.mkString(",")}}"""
+          s"""[${mapped.outputs.map { m => m.name}.mkString(",")}]"""
 
         val userScript = script.from(p.context)(p.random, p.newFile, p.fileService)
         val scriptString = if (userScript.endsWith(".py")) File(userScript).content else userScript
