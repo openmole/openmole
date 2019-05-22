@@ -19,7 +19,7 @@ object CSVHook {
     exclude:    Seq[Val[_]]                           = Vector.empty,
     header:     OptionalArgument[FromContext[String]] = None,
     arrayOnRow: Boolean                               = false,
-    overwrite:  Boolean = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): mole.FromContextHook =
+    overwrite:  Boolean                               = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): mole.FromContextHook =
 
     Hook("CSVHook") { parameters ⇒
       import parameters._
