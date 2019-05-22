@@ -19,6 +19,7 @@ package org.openmole.plugin.method
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
+import org.openmole.core.workflow.tools.WritableOutput
 import org.openmole.plugin.domain.distribution._
 import org.openmole.plugin.domain.modifier._
 import org.openmole.plugin.tool.pattern._
@@ -31,25 +32,25 @@ package object directsampling {
 
   implicit class DirectSamplingDSL(dsl: DSLContainer[DirectSampling]) extends DSLContainerHook(dsl) {
     def hook(
-      file:       FromContext[File],
+      output:     WritableOutput,
       values:     Seq[Val[_]]                           = Vector.empty,
       header:     OptionalArgument[FromContext[String]] = None,
       arrayOnRow: Boolean                               = false): DSLContainer[DirectSampling] = {
       implicit val defScope = dsl.scope
-      dsl hook CSVHook(file = file, values = values, header = header, arrayOnRow = arrayOnRow)
+      dsl hook CSVHook(output, values = values, header = header, arrayOnRow = arrayOnRow)
     }
   }
 
   implicit class ReplicationDSL(dsl: DSLContainer[Replication]) extends DSLContainerHook(dsl) {
     def hook(
-      file:        FromContext[File],
+      output:      WritableOutput,
       values:      Seq[Val[_]]                           = Vector.empty,
       header:      OptionalArgument[FromContext[String]] = None,
       arrayOnRow:  Boolean                               = false,
       includeSeed: Boolean                               = false): DSLContainer[Replication] = {
       implicit val defScope = dsl.scope
       val exclude = if (!includeSeed) Seq(dsl.data.seed) else Seq()
-      dsl hook CSVHook(file = file, values = values, exclude = exclude, header = header, arrayOnRow = arrayOnRow)
+      dsl hook CSVHook(output, values = values, exclude = exclude, header = header, arrayOnRow = arrayOnRow)
     }
   }
 

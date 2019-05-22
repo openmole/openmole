@@ -30,37 +30,17 @@ import org.openmole.tool.stream._
 
 object AppendToFileHook {
 
-  implicit def isIO: InputOutputBuilder[AppendToFileHook] = InputOutputBuilder(AppendToFileHook.config)
-  implicit def isInfo = InfoBuilder(info)
-
   def apply(file: FromContext[File], content: FromContext[String])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    new AppendToFileHook(
-      file,
-      content,
-      config = InputOutputConfig(),
-      info = InfoConfig()
-    )
+    Hook("AppendToFileHook") { p ⇒
+      import p._
+      val f = file.from(context)
+      f.createParentDir
+      f.withLock(_.append(content.from(context)))
+      context
+    } validate { p ⇒
+      import p._
+      file.validate(inputs) ++ content.validate(inputs)
+    }
 
 }
 
-@Lenses case class AppendToFileHook(
-  file:    FromContext[File],
-  content: FromContext[String],
-  config:  InputOutputConfig,
-  info:    InfoConfig
-) extends Hook with ValidateHook {
-
-  override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
-    import p._
-    file.validate(inputs) ++ content.validate(inputs)
-  }
-
-  override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
-    import parameters._
-    val f = file.from(context)
-    f.createParentDir
-    f.withLock(_.append(content.from(context)))
-    context
-  }
-
-}

@@ -22,6 +22,7 @@ class SLURMJobService[S, H](
     def buildScript(serializedJob: SerializedJob, outputPath: String) = {
       SharedStorage.buildScript(
         installation.apply,
+        jobDirectory,
         workDirectory,
         parameters.openMOLEMemory,
         parameters.threads,
@@ -36,10 +37,11 @@ class SLURMJobService[S, H](
     val description = _root_.gridscale.slurm.SLURMJobDescription(
       command = s"/bin/bash $remoteScript",
       queue = parameters.queue,
-      workDirectory = workDirectory,
+      workDirectory = jobDirectory,
       wallTime = parameters.wallTime,
       memory = parameters.memory,
       nodes = parameters.nodes,
+      ntasks = parameters.nodes,
       coresByNode = parameters.coresByNode orElse parameters.threads,
       qos = parameters.qos,
       gres = parameters.gres.toList,

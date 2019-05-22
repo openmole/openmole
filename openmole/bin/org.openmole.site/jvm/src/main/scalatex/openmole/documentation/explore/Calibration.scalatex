@@ -22,17 +22,17 @@ val modelTask = EmptyTask() set (
 
 Using Genetic Algorithms (GA), OpenMOLE finds the input set matching one or several criteria: this is called @b{calibration}.
 In practice, calibration is used to target @b{one} specific scenario or dynamic.
-Usually, one uses a fitness function that is commensurable to a distance from your target, so if your model is not able to match the objective dynamic, the calibration will find the parameterization leading to the closest possible dynamic.
+Usually, a fitness function is used to assess the distance between obtained dynamics and your target dynamic. In case your model is not able to match the target dynamic, the calibration will find the parameterization producing the closest (according to your fitness function)  possible dynamic.
 For more details on the calibration using genetic algorithms, see the @aa("GA detailed page", href := geneticAlgorithm.file).
-
+@br
 
 
 @h2{Single criterion Calibration}
 @h3{Method's score}
 
+@br@br
 @Resource.rawFrag(Resource.img.method.GAsingleID)
-
-@br
+@br@br
 
 The single criterion calibration method is designed to solve an optimization problem, so unsurprisingly it performs well regarding the optimization grade.
 Since it is only focused towards discovering the best performing individual (parameter set), this method doesn't provide insights about the model sensitivity regarding its input parameters, as it does not keep full records of the past input samplings leading to the optimal solution.
@@ -49,11 +49,9 @@ The dimensionality of the model input space is generally not an issue for this m
 However, the number of objectives (output dimensionality) should be limited to a maximum of 2 or 3 compromise objectives.
 
 @br@br
-
 @figure
  @img(src := Resource.img.method.calibrationMono.file, center(70))
-
-@br
+@br@br
 
 Single criterion calibration answers the following question: for a given target value of the output @b{o1}, what is(are) the parameter set(s) @b{(i, j , k)} producing the output value(s) closest to the target?
 

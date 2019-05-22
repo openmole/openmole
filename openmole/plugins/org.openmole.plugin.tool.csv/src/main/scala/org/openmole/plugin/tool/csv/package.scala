@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.tool
 
-import java.io.{ File, FileReader }
+import java.io.{ File, FileReader, PrintStream }
 import java.math.{ BigDecimal, BigInteger }
 
 import au.com.bytecode.opencsv.CSVReader
@@ -97,64 +97,56 @@ package object csv extends CSVPackage {
   }
 
   def writeVariablesToCSV(
-    file:              File,
-    header:            ⇒ String,
+    output:            PrintStream,
+    header:            ⇒ Option[String] = None,
     values:            Seq[Any],
-    arraysOnSingleRow: Boolean  = false,
-    overwrite:         Boolean  = false): Unit = {
+    arraysOnSingleRow: Boolean          = false): Unit = {
+    header.foreach(h ⇒ output.appendLine { h })
 
-    file.createParentDir
+    // TODO add option to flatten multidim arrays here be be written on multiple lines
 
-    file.withLock {
-      fos ⇒
-        if (overwrite) file.content = ""
-        if (file.size == 0) fos.appendLine { header }
-
-        // TODO add option to flatten multidim arrays here be be written on multiple lines
-
-        def flatAny(o: Any): List[Any] = o match {
-          case o: List[_] ⇒ o
-          case _          ⇒ List(o)
-        }
-
-        def writeData(data: List[CSVData]): Unit = {
-          val scalars = data.collect { case x: ScalarData ⇒ x }
-          if (scalars.size == data.size) writeLine(scalars.map(_.v))
-          else if (arraysOnSingleRow) {
-            val lists = data.map(CSVData.toList)
-            writeLine(lists.flatten(flatAny))
-          }
-          else writeArrayData(data)
-        }
-
-        @tailrec def writeArrayData(data: List[CSVData]): Unit = {
-          if (data.collect { case l: ArrayData ⇒ l }.forall(_.v.isEmpty)) Unit
-          else {
-            val lists = data.map(CSVData.toList)
-            writeLine(lists.map { _.headOption.getOrElse("") })
-
-            def tail(d: CSVData) =
-              d match {
-                case a @ ArrayData(Nil) ⇒ a
-                case a: ArrayData       ⇒ a.copy(a.v.tail)
-                case s: ScalarData      ⇒ s
-              }
-
-            writeArrayData(data.map(tail))
-          }
-        }
-
-        def writeLine[T](list: List[T]) = {
-          fos.appendLine(list.map(l ⇒ {
-            val prettified = l.prettify()
-            def shouldBeQuoted = prettified.contains(',') || prettified.contains('"')
-            def quote(s: String) = '"' + s.replaceAll("\"", "\"\"") + '"'
-            if (shouldBeQuoted) quote(prettified) else prettified
-          }).mkString(","))
-        }
-
-        writeData(valuesToData(values))
+    def flatAny(o: Any): List[Any] = o match {
+      case o: List[_] ⇒ o
+      case _          ⇒ List(o)
     }
+
+    def writeData(data: List[CSVData]): Unit = {
+      val scalars = data.collect { case x: ScalarData ⇒ x }
+      if (scalars.size == data.size) writeLine(scalars.map(_.v))
+      else if (arraysOnSingleRow) {
+        val lists = data.map(CSVData.toList)
+        writeLine(lists.flatten(flatAny))
+      }
+      else writeArrayData(data)
+    }
+
+    @tailrec def writeArrayData(data: List[CSVData]): Unit = {
+      if (data.collect { case l: ArrayData ⇒ l }.forall(_.v.isEmpty)) Unit
+      else {
+        val lists = data.map(CSVData.toList)
+        writeLine(lists.map { _.headOption.getOrElse("") })
+
+        def tail(d: CSVData) =
+          d match {
+            case a @ ArrayData(Nil) ⇒ a
+            case a: ArrayData       ⇒ a.copy(a.v.tail)
+            case s: ScalarData      ⇒ s
+          }
+
+        writeArrayData(data.map(tail))
+      }
+    }
+
+    def writeLine[T](list: List[T]) = {
+      output.appendLine(list.map(l ⇒ {
+        val prettified = l.prettify()
+        def shouldBeQuoted = prettified.contains(',') || prettified.contains('"')
+        def quote(s: String) = '"' + s.replaceAll("\"", "\"\"") + '"'
+        if (shouldBeQuoted) quote(prettified) else prettified
+      }).mkString(","))
+    }
+
+    writeData(valuesToData(values))
   }
 
   /**

@@ -17,27 +17,19 @@
 
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.context.Val
-import org.openmole.core.expansion._
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.context._
-import monocle.macros._
-import org.openmole.core.fileservice.FileService
-import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.validation._
-import org.openmole.core.workspace.NewFile
-import org.openmole.plugin.method.evolution.SavePopulationHook.resultVariables
-import org.openmole.tool.file._
-import org.openmole.tool.random.RandomProvider
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 
 object SavePopulationHook {
 
-  def resultVariables(t: EvolutionWorkflow, context: Context)(implicit randomProvider: RandomProvider, newFile: NewFile, fileService: FileService) =
-    context.variable(t.generationPrototype).toSeq ++ t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype)).from(context)
+  def resultVariables(t: EvolutionWorkflow) = FromContext { p ⇒
+    import p._
+    context.variable(t.generationPrototype).toSeq ++
+      t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype)).from(context)
+  }
 
-  def hook(t: EvolutionWorkflow, dir: FromContext[File], frequency: OptionalArgument[Long])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
-    FromContextHook("SavePopulationHook") { p ⇒
+  def hook(t: EvolutionWorkflow, output: WritableOutput, frequency: OptionalArgument[Long])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
+    Hook("SavePopulationHook") { p ⇒
       import p._
 
       def save =
@@ -49,19 +41,28 @@ object SavePopulationHook {
         }
 
       if (save) {
-        val resultFileLocation = dir / ExpandedString("population${" + t.generationPrototype.name + "}.csv")
-
         import org.openmole.plugin.tool.csv._
 
-        val values = resultVariables(t, context).map(_.value)
-        def headerLine = header(resultVariables(t, context).map(_.prototype.array), values)
+        val values = resultVariables(t).from(context).map(_.value)
+        def headerLine = header(resultVariables(t).from(context).map(_.prototype.array), values)
 
-        writeVariablesToCSV(
-          resultFileLocation.from(context),
-          headerLine,
-          values,
-          overwrite = true
-        )
+        output match {
+          case WritableOutput.FileValue(dir) ⇒
+            (dir / ExpandedString("population${" + t.generationPrototype.name + "}.csv")).from(context).withPrintStream(overwrite = false, create = true) { ps ⇒
+              writeVariablesToCSV(
+                ps,
+                Some(headerLine),
+                values
+              )
+            }
+          case WritableOutput.PrintStreamValue(ps) ⇒
+            writeVariablesToCSV(
+              ps,
+              Some(headerLine),
+              values
+            )
+        }
+
       }
 
       context
@@ -69,9 +70,9 @@ object SavePopulationHook {
 
   }
 
-  def apply[T](algorithm: T, dir: FromContext[File], frequency: OptionalArgument[Long] = None)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def apply[T](algorithm: T, output: WritableOutput, frequency: OptionalArgument[Long] = None)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
     val t = wfi(algorithm)
-    hook(t, dir, frequency)
+    hook(t, output, frequency)
   }
 
 }
@@ -81,19 +82,20 @@ object SaveLastPopulationHook {
   def apply[T](algorithm: T, file: FromContext[File])(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
     val t = wfi(algorithm)
 
-    FromContextHook("SaveLastPopulationHook") { p ⇒
-      import p._
+    Hook("SaveLastPopulationHook") { p ⇒
       import org.openmole.plugin.tool.csv._
+      import p._
 
-      val values = resultVariables(t, context).map(_.value)
-      def headerLine = header(resultVariables(t, context).map(_.prototype.array), values)
+      val values = SavePopulationHook.resultVariables(t).from(context).map(_.value)
+      def headerLine = header(SavePopulationHook.resultVariables(t).from(context).map(_.prototype.array), values)
 
-      writeVariablesToCSV(
-        file.from(context),
-        headerLine,
-        values,
-        overwrite = true
-      )
+      file.from(context).withPrintStream(overwrite = true, create = true) { ps ⇒
+        writeVariablesToCSV(
+          ps,
+          Some(headerLine),
+          values
+        )
+      }
 
       context
     } set (inputs += (t.populationPrototype, t.statePrototype))

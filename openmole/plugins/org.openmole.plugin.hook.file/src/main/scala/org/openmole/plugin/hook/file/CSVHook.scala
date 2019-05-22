@@ -19,14 +19,15 @@ package org.openmole.plugin.hook.file
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
+import org.openmole.core.workflow.tools.WritableOutput
 
 object CSVHook {
 
-  def apply(file: FromContext[File], values: Val[_]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook =
-    apply(file, values.toVector)
+  def apply(output: WritableOutput, values: Val[_]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook =
+    apply(output, values.toVector)
 
   def apply(
-    file:       FromContext[File],
+    output:     WritableOutput,
     values:     Seq[Val[_]]                           = Vector.empty,
     exclude:    Seq[Val[_]]                           = Vector.empty,
     header:     OptionalArgument[FromContext[String]] = None,
@@ -36,15 +37,27 @@ object CSVHook {
       import org.openmole.plugin.tool.csv
 
       val excludeSet = exclude.map(_.name).toSet
-      val ps = (if (values.isEmpty) context.values.map { _.prototype }.toVector else values).filter { v ⇒ !excludeSet.contains(v.name) }
+      val ps =
+        { if (values.isEmpty) context.values.map { _.prototype }.toVector else values }.filter { v ⇒ !excludeSet.contains(v.name) }
       val vs = ps.map(context(_))
 
       def headerLine = header.map(_.from(context)) getOrElse csv.header(ps, vs, arrayOnRow)
-      csv.writeVariablesToCSV(file.from(context), headerLine, vs, arrayOnRow)
+
+      output match {
+        case WritableOutput.FileValue(file) ⇒
+          val f = file.from(context)
+          val h = if (f.isEmpty) Some(headerLine) else None
+          f.withPrintStream(append = true, create = true) { ps ⇒ csv.writeVariablesToCSV(ps, h, vs, arrayOnRow) }
+        case WritableOutput.PrintStreamValue(ps) ⇒
+          val header = Some(headerLine)
+          csv.writeVariablesToCSV(ps, header, vs, arrayOnRow)
+      }
+
       context
     } validate { p ⇒
       import p._
-      file.validate(inputs) ++ header.option.toSeq.flatMap(_.validate(inputs))
+      WritableOutput.file(output).toSeq.flatMap(_.validate(inputs)) ++
+        header.option.toSeq.flatMap(_.validate(inputs))
     } set (inputs += (values: _*))
 
 }

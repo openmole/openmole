@@ -22,6 +22,7 @@ class SGEJobService[S, H](
     def buildScript(serializedJob: SerializedJob, outputPath: String) = {
       SharedStorage.buildScript(
         installation.apply,
+        jobDirectory,
         workDirectory,
         parameters.openMOLEMemory,
         parameters.threads,
@@ -36,7 +37,7 @@ class SGEJobService[S, H](
     val description = _root_.gridscale.sge.SGEJobDescription(
       command = s"/bin/bash $remoteScript",
       queue = parameters.queue,
-      workDirectory = workDirectory,
+      workDirectory = jobDirectory,
       wallTime = parameters.wallTime,
       memory = parameters.memory
     )

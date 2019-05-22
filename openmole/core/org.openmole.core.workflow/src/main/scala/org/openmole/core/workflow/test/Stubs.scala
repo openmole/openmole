@@ -8,6 +8,7 @@ import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.tool.crypto.Cypher
+import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.random.{ RandomProvider, Seeder }
 
@@ -33,4 +34,6 @@ object Stubs {
   implicit val outputRedirection = OutputRedirection()
   implicit val network = NetworkService(None)
   implicit val fileServiceCache = FileServiceCache()
+  implicit val loggerService = LoggerService()
+
 }
