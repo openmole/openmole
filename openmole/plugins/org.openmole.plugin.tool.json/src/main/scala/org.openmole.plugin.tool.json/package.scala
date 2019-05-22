@@ -21,6 +21,12 @@ package object json {
     }
   }
 
+  /*
+  def toJSONdictionary(v: Any): String = {
+
+  }
+  */
+
   def jValueToVariable(jValue: JValue, v: Val[_]): Variable[_] = {
     import org.json4s._
     import shapeless._

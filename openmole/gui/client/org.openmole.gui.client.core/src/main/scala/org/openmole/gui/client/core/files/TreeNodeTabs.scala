@@ -376,12 +376,8 @@ object TreeNodeTab {
 
     def toView(newFilter: RowFilter) = panels.treeNodeTabs.switchEditableTo(this, dataTab.copy(filter = newFilter), plotter)
 
-    def toView(newAxis: Seq[Int]) = {
-      val afe = plotter.error.map { _ ⇒ Plotter.availableForError(dataTab.sequence.header, plotter) }.map {
-        _.head
-      }
-      panels.treeNodeTabs.switchEditableTo(this, dataTab, plotter.copy(toBePlotted = ToBePloted(newAxis), error = afe))
-    }
+    def toView(newAxis: Seq[Int]) =
+      panels.treeNodeTabs.switchEditableTo(this, dataTab, plotter.copy(toBePlotted = ToBePloted(newAxis) /*, error = afe*/ ))
 
     def toView(plotDimension: PlotDimension, newMode: PlotMode) = {
 
@@ -444,15 +440,24 @@ object TreeNodeTab {
       )
     }
 
-    def errorCheckBox = checkboxes(marginLeft := 20)(
-      (for (
-        a ← Plotter.availableForError(dataTab.sequence.header, plotter)
-      ) yield {
-        selectableButton(a.title, plotter.error == Some(a), onclick = () ⇒ {
-          toView(Some(a))
-        })
-      }): _*
-    )
+    lazy val errorOptions: Options[IndexedAxis] = {
+      val forErrors = IndexedAxis.noErrorBar +: Plotter.availableForError(dataTab.sequence.header, plotter)
+      val init = forErrors.find { e ⇒ Some(e) == plotter.error }.map {
+        _.fullSequenceIndex
+      }
+
+      forErrors.options(
+        init.getOrElse(1) - 1,
+        btn_default,
+        (indexedAxis: IndexedAxis) ⇒ indexedAxis.title,
+        () ⇒ {
+          if (errorOptions.content.now.map {
+            _.fullSequenceIndex
+          }.getOrElse(-1) != -1) toView(errorOptions.content.now)
+          else toView(None)
+        }
+      )
+    }
 
     lazy val filterAxisOptions: Options[IndexedAxis] = {
       (IndexedAxis.noFilter +: dataTab.sequence.header.zipWithIndex.map { afe ⇒
@@ -486,38 +491,25 @@ object TreeNodeTab {
       })
     })
 
-    lazy val toggleError: ToggleButton = toggle(plotter.error.isDefined, "On", "Off", onToggled = () ⇒ {
-      if (toggleError.position.now) toView(Plotter.availableForError(dataTab.sequence.header, plotter).headOption)
-      else toView(None)
-    })
-
     lazy val options =
       plotter.plotDimension match {
         case ColumnPlot ⇒
           plotter.plotMode match {
             case SplomMode | HeatMapMode ⇒ div()
             case _ ⇒
-              scalatags.JsDom.tags.span(
-                scalatags.JsDom.tags.span(
-                  toggleError.render,
-                  scalatags.JsDom.tags.span(
-                    Rx {
-                      if (toggleError.position()) scalatags.JsDom.tags.span(errorCheckBox.render).render
-                      else {
-                        scalatags.JsDom.tags.span.render
-                      }
-                    }).render
-                ),
-                scalatags.JsDom.tags.span(
-                  scalatags.JsDom.tags.span(scalatags.JsDom.tags.span(display.flex, flexDirection.row)(
-                    filterAxisOptions.selector,
-                    scalatags.JsDom.tags.span(
-                      Rx {
-                        if (filterAxisOptions.content().map { _.fullSequenceIndex } == Some(-1)) scalatags.JsDom.tags.span.render
-                        else scalatags.JsDom.tags.span(form(closureInput.render, inputFilterValidation)).render
-                      }))
-                  )
-                ))
+              scalatags.JsDom.tags.span(display.flex, flexDirection.row, alignItems.center)(
+                scalatags.JsDom.tags.span("Error bars ", fontWeight.bold, marginRight := 10),
+                errorOptions.selector,
+                scalatags.JsDom.tags.span("Filter ", fontWeight.bold, marginLeft := 30),
+                scalatags.JsDom.tags.span(marginLeft := 10)(filterAxisOptions.selector),
+                scalatags.JsDom.tags.span(maxHeight := 34)(
+                  Rx {
+                    if (filterAxisOptions.content().map {
+                      _.fullSequenceIndex
+                    } == Some(-1)) Seq(scalatags.JsDom.tags.span(maxHeight := 34))
+                    else Seq(form(closureInput, inputFilterValidation))
+                  })
+              )
           }
         case _ ⇒ div()
       }
@@ -567,16 +559,6 @@ object TreeNodeTab {
         }.getOrElse(true)
       }
     }
-
-    //lazy val plotDimensionToggleButton = toggle(plotter.plotDimension == ColumnPlot, "Cols", "Rows", () ⇒ switchPlotDimension)
-
-    //    def switchPlotDimension: Unit = {
-    //      val plotDimension = plotDimensionToggleButton.position.now match {
-    //        case true ⇒ ColumnPlot
-    //        case _    ⇒ LinePlot
-    //      }
-    //      toView(plotDimension, plotter.plotMode)
-    //    }
 
     lazy val block: TypedTag[_ <: HTMLElement] = {
       div(

@@ -4,6 +4,7 @@ import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.preference.Preference
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.task
 import org.openmole.core.workflow.validation._
@@ -14,8 +15,18 @@ object FromContextTask {
 
   implicit def isBuilder: InputOutputBuilder[FromContextTask] = InputOutputBuilder(FromContextTask.config)
   implicit def isInfo = InfoBuilder(FromContextTask.info)
+  implicit def isMapped = MappedInputOutputBuilder(FromContextTask.mapped)
 
-  case class Parameters(context: Context, executionContext: TaskExecutionContext, implicit val random: RandomProvider, implicit val newFile: NewFile, implicit val fileService: FileService)
+  case class Parameters(
+    context:                  Context,
+    executionContext:         TaskExecutionContext,
+    io:                       InputOutputConfig,
+    mapped:                   MappedInputOutputConfig,
+    implicit val preference:  Preference,
+    implicit val random:      RandomProvider,
+    implicit val newFile:     NewFile,
+    implicit val fileService: FileService
+  )
   case class ValidateParameters(implicit val newFile: NewFile, implicit val fileService: FileService)
 
   /**
@@ -29,6 +40,7 @@ object FromContextTask {
       fromContext,
       className = className,
       config = InputOutputConfig(),
+      mapped = MappedInputOutputConfig(),
       info = InfoConfig()
     )
 
@@ -48,6 +60,7 @@ object FromContextTask {
   v:                      FromContextTask.ValidateParameters ⇒ Seq[Throwable] = _ ⇒ Seq(),
   override val className: String,
   config:                 InputOutputConfig,
+  mapped:                 MappedInputOutputConfig,
   info:                   InfoConfig
 ) extends Task with ValidateTask {
 
@@ -57,7 +70,7 @@ object FromContextTask {
   }
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { p ⇒
-    val tp = FromContextTask.Parameters(p.context, executionContext, p.random, p.newFile, p.fileService)
+    val tp = FromContextTask.Parameters(p.context, executionContext, config, mapped, executionContext.preference, p.random, p.newFile, p.fileService)
     f(tp)
   }
 
