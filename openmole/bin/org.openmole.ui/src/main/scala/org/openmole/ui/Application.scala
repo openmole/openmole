@@ -19,6 +19,7 @@ package org.openmole.ui
 
 import java.awt.Desktop
 import java.io.{ File, FileOutputStream, IOException }
+import java.util.logging.Level
 import java.net.URI
 
 import org.openmole.console.Console.ExitCodes
@@ -176,7 +177,9 @@ object Application extends JavaLogger {
 
     val config = parse(args.map(_.trim).toList)
 
-    config.loggerLevel.foreach(LoggerConfig.level)
+    val logLevel = config.loggerLevel.map(l ⇒ Level.parse(l.toUpperCase))
+    logLevel.foreach(LoggerConfig.level)
+
     val workspaceDirectory = config.workspace.getOrElse(org.openmole.core.workspace.defaultOpenMOLEDirectory)
     implicit val workspace = Workspace(workspaceDirectory)
     import org.openmole.tool.thread._
@@ -226,7 +229,7 @@ object Application extends JavaLogger {
           Console.ExitCodes.incorrectPassword
         }
         else {
-          Services.withServices(workspaceDirectory, passwordString, config.proxyURI) { services ⇒
+          Services.withServices(workspaceDirectory, passwordString, config.proxyURI, logLevel) { services ⇒
             val server = new RESTServer(config.port, config.hostName, services, config.httpSubDirectory)
             server.run()
           }
@@ -248,7 +251,7 @@ object Application extends JavaLogger {
           print(consoleSplash)
           println(consoleUsage)
           Console.dealWithLoadError(loadPlugins, !config.scriptFile.isDefined)
-          Services.withServices(workspaceDirectory, passwordString, config.proxyURI) { implicit services ⇒
+          Services.withServices(workspaceDirectory, passwordString, config.proxyURI, logLevel) { implicit services ⇒
             val console = new Console(config.scriptFile)
             console.run(config.args, config.consoleWorkDirectory)
           }
@@ -278,7 +281,7 @@ object Application extends JavaLogger {
 
             GUIServer.urlFile.content = url
 
-            GUIServices.withServices(workspace, config.proxyURI) { services ⇒
+            GUIServices.withServices(workspace, config.proxyURI, logLevel) { services ⇒
               val server = new GUIServer(port, config.remote, useHTTP, services, config.password, extraHeader, !config.unoptimizedJS, config.httpSubDirectory)
               server.start()
               if (config.browse && !config.remote) browse(url)

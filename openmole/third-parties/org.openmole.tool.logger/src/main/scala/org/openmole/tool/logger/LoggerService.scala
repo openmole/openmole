@@ -24,15 +24,15 @@ import sourcecode._
 
 object LoggerService {
   def log(l: Level, msg: ⇒ String, exception: Option[Throwable] = None)(implicit name: FullName, line: Line, loggerService: LoggerService, outputRedirection: OutputRedirection) =
-    if (l.intValue() > loggerService.level.intValue()) {
-      OutputRedirection.println(s"""${name.value}:${line.value} - $msg""")
+    if (l.intValue() >= loggerService.level.getOrElse(Level.WARNING).intValue()) {
+      outputRedirection.error.println(s"""${name.value}:${line.value} - $msg""")
       exception match {
         case Some(e) ⇒
-          outputRedirection.output.print(s"Caused by: ${e}")
-          e.printStackTrace(outputRedirection.output)
+          outputRedirection.error.print(s"Caused by: ${e}")
+          e.printStackTrace(outputRedirection.error)
         case None ⇒
       }
     }
 }
 
-case class LoggerService(level: Level = Level.WARNING)
+case class LoggerService(level: Option[Level] = None)

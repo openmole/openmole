@@ -355,7 +355,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
             case Failure(e) ⇒ Some(error(e))
             case Success(dsl) ⇒
               val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(outputStream))
-              Try(dslToPuzzle(dsl).toExecution(executionContext = MoleExecutionContext()(services))) match {
+              Try(dslToPuzzle(dsl).toExecution()(services)) match {
                 case Success(ex) ⇒
                   onEvaluated.foreach { _(ex, execId) }
                   None

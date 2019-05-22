@@ -86,7 +86,6 @@ object MoleExecution extends JavaLogger {
     implicits:                   Context                                    = Context.empty,
     defaultEnvironment:          OptionalArgument[LocalEnvironmentProvider] = None,
     cleanOnFinish:               Boolean                                    = true,
-    executionContext:            OptionalArgument[MoleExecutionContext]     = None,
     startStopDefaultEnvironment: Boolean                                    = true,
     taskCache:                   KeyValueCache                              = KeyValueCache(),
     lockRepository:              LockRepository[LockKey]                    = LockRepository()
@@ -103,7 +102,7 @@ object MoleExecution extends JavaLogger {
       defaultEnvironment.getOrElse(defaultDefaultEnvironment),
       cleanOnFinish,
       implicits,
-      executionContext.getOrElse(MoleExecutionContext()),
+      MoleExecutionContext()(moleServices),
       startStopDefaultEnvironment,
       id = UUID.randomUUID().toString,
       keyValueCache = taskCache,
@@ -310,6 +309,9 @@ object MoleExecution extends JavaLogger {
 
   def start(moleExecution: MoleExecution, context: Option[Context]) =
     if (!moleExecution._started) {
+      import moleExecution.executionContext.services._
+      LoggerService.log(Level.FINE, "Starting mole execution")
+
       def startEnvironments() = {
         if (moleExecution.startStopDefaultEnvironment) moleExecution.defaultEnvironment.start()
         moleExecution.environments.values.foreach(_.start())

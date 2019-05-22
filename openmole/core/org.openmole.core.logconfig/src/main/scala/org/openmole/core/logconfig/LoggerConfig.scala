@@ -23,9 +23,7 @@ import java.util.logging._
 
 object LoggerConfig {
 
-  def level(levelLabel: String) = {
-    val level = Level.parse(levelLabel.toUpperCase)
-
+  def level(level: Level) = {
     LogManager.getLogManager.reset
 
     val rootLogger = Logger.getLogger("")
@@ -41,7 +39,7 @@ object LoggerConfig {
     L4JLogger.getRootLogger.setLevel(L4JLevel.ERROR)
     val root = org.slf4j.LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).asInstanceOf[ch.qos.logback.classic.Logger]
     root.setLevel(ch.qos.logback.classic.Level.ERROR)
-    level("INFO")
+    level(Level.INFO)
   }
 
 }

@@ -117,7 +117,6 @@ package composition {
     def toExecution(
       implicits:          Context                                    = Context.empty,
       seed:               OptionalArgument[Long]                     = None,
-      executionContext:   OptionalArgument[MoleExecutionContext]     = None,
       defaultEnvironment: OptionalArgument[LocalEnvironmentProvider] = None)(implicit moleServices: MoleServices): MoleExecution =
       MoleExecution(
         mole = toMole,
@@ -126,8 +125,7 @@ package composition {
         environments = environments,
         grouping = grouping,
         implicits = implicits,
-        defaultEnvironment = defaultEnvironment,
-        executionContext = executionContext
+        defaultEnvironment = defaultEnvironment
       )
 
     def slots: Set[TransitionSlot] = (firstSlot :: transitions.map(_.end).toList).toSet
