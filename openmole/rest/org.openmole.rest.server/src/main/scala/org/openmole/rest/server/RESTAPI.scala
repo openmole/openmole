@@ -120,7 +120,7 @@ trait RESTAPI extends ScalatraServlet with ContentEncodingSupport
               case Success(res) ⇒
                 Try {
                   val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(directory.outputStream))
-                  dslToPuzzle(res).toExecution(executionContext = MoleExecutionContext()(services))
+                  dslToPuzzle(res).toExecution()(services)
                 } match {
                   case Success(ex) ⇒
                     ex listen { case (ex, ev: MoleExecution.Finished) ⇒ }

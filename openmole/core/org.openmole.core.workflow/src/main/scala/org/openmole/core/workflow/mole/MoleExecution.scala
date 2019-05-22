@@ -86,7 +86,6 @@ object MoleExecution extends JavaLogger {
     implicits:                   Context                                    = Context.empty,
     defaultEnvironment:          OptionalArgument[LocalEnvironmentProvider] = None,
     cleanOnFinish:               Boolean                                    = true,
-    executionContext:            OptionalArgument[MoleExecutionContext]     = None,
     startStopDefaultEnvironment: Boolean                                    = true,
     taskCache:                   KeyValueCache                              = KeyValueCache(),
     lockRepository:              LockRepository[LockKey]                    = LockRepository()
@@ -103,7 +102,7 @@ object MoleExecution extends JavaLogger {
       defaultEnvironment.getOrElse(defaultDefaultEnvironment),
       cleanOnFinish,
       implicits,
-      executionContext.getOrElse(MoleExecutionContext()),
+      MoleExecutionContext()(moleServices),
       startStopDefaultEnvironment,
       id = UUID.randomUUID().toString,
       keyValueCache = taskCache,
@@ -310,6 +309,9 @@ object MoleExecution extends JavaLogger {
 
   def start(moleExecution: MoleExecution, context: Option[Context]) =
     if (!moleExecution._started) {
+      import moleExecution.executionContext.services._
+      LoggerService.log(Level.FINE, "Starting mole execution")
+
       def startEnvironments() = {
         if (moleExecution.startStopDefaultEnvironment) moleExecution.defaultEnvironment.start()
         moleExecution.environments.values.foreach(_.start())
@@ -328,6 +330,9 @@ object MoleExecution extends JavaLogger {
 
   private def finish(moleExecution: MoleExecution, canceled: Boolean = false) =
     if (!moleExecution._finished) {
+      import moleExecution.executionContext.services._
+      LoggerService.log(Level.FINE, s"finish mole execution $moleExecution, canceled ${canceled}")
+
       moleExecution._finished = true
       moleExecution._endTime = Some(System.currentTimeMillis)
       moleExecution.executionContext.services.eventDispatcher.trigger(moleExecution, MoleExecution.Finished(canceled = canceled))
@@ -344,21 +349,29 @@ object MoleExecution extends JavaLogger {
       }
     }
 
-  def clean(moleExecution: MoleExecution) =
+  def clean(moleExecution: MoleExecution) = {
+    import moleExecution.executionContext.services._
+    LoggerService.log(Level.FINE, s"clean mole execution $moleExecution")
+
     try if (moleExecution.cleanOnFinish) moleExecution.executionContext.services.newFile.baseDir.recursiveDelete
     finally {
       moleExecution._cleaned = true
       moleExecution.cleanedSemaphore.release()
       moleExecution.executionContext.services.eventDispatcher.trigger(moleExecution, MoleExecution.Cleaned())
     }
+  }
 
-  def cancel(moleExecution: MoleExecution, t: Option[MoleExecutionFailed]): Unit =
+  def cancel(moleExecution: MoleExecution, t: Option[MoleExecutionFailed]): Unit = {
     if (!moleExecution._canceled) {
+      import moleExecution.executionContext.services._
+      LoggerService.log(Level.FINE, s"cancel mole execution $moleExecution, with error $t")
+
       moleExecution._exception = t
       cancel(moleExecution.rootSubMoleExecution)
       moleExecution._canceled = true
       finish(moleExecution, canceled = true)
     }
+  }
 
   def nextTicket(moleExecution: MoleExecution, parent: Ticket): Ticket = {
     val ticket = Ticket(parent, moleExecution.ticketNumber)
@@ -453,7 +466,7 @@ object MoleExecution extends JavaLogger {
 
   def checkMoleExecutionIsFinished(moleExecution: MoleExecution) = {
     import moleExecution.executionContext.services._
-    LoggerService.log(Level.FINE, s"check if mole execution is finished, message queue empty ${moleExecution.messageQueue.isEmpty}, number of jobs ${moleExecution.rootSubMoleExecution.nbJobs}")
+    LoggerService.log(Level.FINE, s"check if mole execution $moleExecution is finished, message queue empty ${moleExecution.messageQueue.isEmpty}, number of jobs ${moleExecution.rootSubMoleExecution.nbJobs}")
     if (moleExecution.messageQueue.isEmpty && moleExecution.rootSubMoleExecution.nbJobs == 0) MoleExecution.finish(moleExecution)
   }
 
