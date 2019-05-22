@@ -66,7 +66,9 @@ package builder {
    * @param v
    * @param name
    */
-  case class Mapped[T](v: Val[T], name: String) extends IO
+  case class Mapped[T](v: Val[T], name: String) extends IO {
+    def toTuple = (v, name)
+  }
 
   /**
    * Operations on inputs

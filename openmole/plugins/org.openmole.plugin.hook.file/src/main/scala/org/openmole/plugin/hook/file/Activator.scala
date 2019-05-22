@@ -19,6 +19,7 @@ package org.openmole.plugin.hook.file
 
 import org.openmole.core.pluginmanager._
 import org.openmole.core.preference.ConfigurationInfo
+import org.openmole.core.workflow.mole.CSVHook
 import org.osgi.framework.BundleContext
 
 class Activator extends PluginInfoActivator {

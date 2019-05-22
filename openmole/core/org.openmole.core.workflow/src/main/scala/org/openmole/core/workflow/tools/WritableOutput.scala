@@ -23,11 +23,14 @@ import org.openmole.core.expansion.FromContext
 
 object WritableOutput {
 
-  implicit def fromFile(file: FromContext[File]) = FileValue(file)
+  implicit def fromFile(file: File) = FileValue(file)
+  implicit def fromFileContext(file: FromContext[File]) = FileValue(file)
   implicit def fromPrintStream(ps: PrintStream) = PrintStreamValue(ps)
 
+  type Display = PrintStream
+
   case class FileValue(file: FromContext[File]) extends WritableOutput
-  case class PrintStreamValue(file: PrintStream) extends WritableOutput
+  case class PrintStreamValue(file: Display) extends WritableOutput
 
   def file(writableOutput: WritableOutput) =
     writableOutput match {
