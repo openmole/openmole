@@ -38,7 +38,7 @@ import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.collection.{ PriorityQueue, StaticArrayBuffer }
 import org.openmole.tool.lock._
 import org.openmole.tool.thread._
-import org.openmole.tool.logger.JavaLogger
+import org.openmole.tool.logger.{ JavaLogger, LoggerService }
 
 import scala.collection.mutable.{ Buffer, ListBuffer }
 
@@ -344,14 +344,13 @@ object MoleExecution extends JavaLogger {
       }
     }
 
-  def clean(moleExecution: MoleExecution) = {
-    if (moleExecution.cleanOnFinish) {
-      moleExecution.executionContext.services.newFile.baseDir.recursiveDelete
+  def clean(moleExecution: MoleExecution) =
+    try if (moleExecution.cleanOnFinish) moleExecution.executionContext.services.newFile.baseDir.recursiveDelete
+    finally {
+      moleExecution._cleaned = true
+      moleExecution.cleanedSemaphore.release()
+      moleExecution.executionContext.services.eventDispatcher.trigger(moleExecution, MoleExecution.Cleaned())
     }
-    moleExecution._cleaned = true
-    moleExecution.executionContext.services.eventDispatcher.trigger(moleExecution, MoleExecution.Cleaned())
-    moleExecution.cleanedSemaphore.release()
-  }
 
   def cancel(moleExecution: MoleExecution, t: Option[MoleExecutionFailed]): Unit =
     if (!moleExecution._canceled) {
@@ -452,8 +451,11 @@ object MoleExecution extends JavaLogger {
   def checkAllWaiting(moleExecution: MoleExecution) =
     if (moleExecution.rootSubMoleExecution.nbJobs <= moleExecution.nbWaiting) MoleExecution.submitAll(moleExecution)
 
-  def checkMoleExecutionIsFinished(moleExecution: MoleExecution) =
+  def checkMoleExecutionIsFinished(moleExecution: MoleExecution) = {
+    import moleExecution.executionContext.services._
+    LoggerService.log(Level.FINE, s"check if mole execution is finished, message queue empty ${moleExecution.messageQueue.isEmpty}, number of jobs ${moleExecution.rootSubMoleExecution.nbJobs}")
     if (moleExecution.messageQueue.isEmpty && moleExecution.rootSubMoleExecution.nbJobs == 0) MoleExecution.finish(moleExecution)
+  }
 
   def allJobIds(moleExecution: MoleExecution) = moleExecution.jobs.toVector
 
