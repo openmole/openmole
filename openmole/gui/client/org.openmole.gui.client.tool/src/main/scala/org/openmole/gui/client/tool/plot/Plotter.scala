@@ -10,6 +10,8 @@ case class IndexedAxis(title: String, fullSequenceIndex: Int)
 
 object IndexedAxis {
   def noFilter = IndexedAxis("No filter set", -1)
+
+  def noErrorBar = IndexedAxis("No error bar", -1)
 }
 
 case class ClosureFilter(closure: String = "", filteredAxis: Option[IndexedAxis])
@@ -59,14 +61,18 @@ object Plotter {
       }
 
       val dataNbColumns = sequenceData.header.length
-      val indexes = plotter.toBePlotted.indexes.filterNot { _ >= dataNbColumns }
+      val indexes = plotter.toBePlotted.indexes.filterNot {
+        _ >= dataNbColumns
+      }
       val filteredColumn = filterColumn(dataRows, plotter, dataNbLines)
 
       val dims = plotter.plotDimension match {
         case ColumnPlot ⇒
           if (dataNbColumns >= nbDims) {
             indexes.foldLeft(Array[Dim]()) { (acc, col) ⇒
-              acc :+ Dim(DataTable.column(col, dataRows).values.zipWithIndex.filter { id ⇒ filteredColumn.contains(id._2) }.map { _._1 }, sequenceData.header.lift(col).getOrElse(""))
+              acc :+ Dim(DataTable.column(col, dataRows).values.zipWithIndex.filter { id ⇒ filteredColumn.contains(id._2) }.map {
+                _._1
+              }, sequenceData.header.lift(col).getOrElse(""))
             }
           }
           else Array[Dim]()
@@ -86,7 +92,7 @@ object Plotter {
           false,
           plotter,
           plotter.error.map { e ⇒
-            Serie(Dim(DataTable.column(e.fullSequenceIndex, dataRows).values, sequenceData.header.lift(e.fullSequenceIndex).getOrElse("")))
+            Serie(yValues = Array(Dim(DataTable.column(e.fullSequenceIndex, dataRows).values, sequenceData.header.lift(e.fullSequenceIndex).getOrElse(""))))
           }
         )
     }
@@ -108,7 +114,7 @@ object Plotter {
     (plotter.copy(toBePlotted = newToBePlotted), newSequenceData)
   }
 
-  def availableForError(header: SequenceHeader, plotter: Plotter) =
+  def availableForError(header: SequenceHeader, plotter: Plotter) = {
     plotter.plotDimension match {
       case LinePlot ⇒ Seq()
       case ColumnPlot ⇒
@@ -118,6 +124,7 @@ object Plotter {
           IndexedAxis(afe._1, afe._2)
         }
     }
+  }
 
   def jsClosure(closureFilter: ClosureFilter, value: String, col: Int) = {
     if (closureFilter.closure.isEmpty) true
