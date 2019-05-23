@@ -47,6 +47,25 @@ package object udocker extends UDockerPackage {
   case class DockerImage(image: String, tag: String = "latest", registry: String = "https://registry-1.docker.io") extends ContainerImage
   case class SavedDockerImage(file: java.io.File, compressed: Boolean) extends ContainerImage
 
+  /**
+   * Trait for either string scripts or script file runnable in tasks based on the container task
+   */
+  sealed trait RunnableScript {
+    def script: String = {
+      this match {
+        case RawScript(s)  ⇒ s
+        case FileScript(f) ⇒ f.content
+      }
+    }
+  }
+  case class RawScript(rawscript: String) extends RunnableScript
+  case class FileScript(file: File) extends RunnableScript
+
+  object RunnableScript {
+    implicit def stringToRunnableScript(s: String): RunnableScript = RawScript(s)
+    implicit def fileToRunnableScript(f: File): RunnableScript = FileScript(f)
+  }
+
   import cats.data._
   import cats.implicits._
 

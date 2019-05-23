@@ -64,8 +64,10 @@ object CSVSampling {
   override def prototypes = InputOutputConfig.outputs.get(config)
   override def apply() = FromContext { p ⇒
     import p._
-    csvToVariables(
-      columns,
+    import org.openmole.core.csv
+
+    csv.csvToVariables(
+      columns.map(_.toTuple.swap),
       fileColumns,
       separator)(file.from(context), context)
   }

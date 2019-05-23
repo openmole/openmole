@@ -28,6 +28,7 @@ import org.openmole.tool.outputredirection.OutputRedirection
 package file {
 
   import org.openmole.core.expansion.FromContext
+  import org.openmole.core.workflow.mole.CSVHook
 
   trait FilePackage {
 
@@ -43,6 +44,4 @@ package file {
 
 package object file extends FilePackage {
   private[file] def pack = this
-
-  def display(implicit outputRedirection: OutputRedirection) = outputRedirection.output
 }

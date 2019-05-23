@@ -65,7 +65,7 @@ object RTask {
   def rImage(version: String) = DockerImage("openmole/r-base", version)
 
   def apply(
-    script:               FromContext[String],
+    script:               RunnableScript,
     install:              Seq[String]                        = Seq.empty,
     libraries:            Seq[InstallCommand]                = Seq.empty,
     forceUpdate:          Boolean                            = false,
@@ -118,7 +118,7 @@ object RTask {
 }
 
 @Lenses case class RTask(
-  script:             FromContext[String],
+  script:             RunnableScript,
   uDocker:            UDockerArguments,
   errorOnReturnValue: Boolean,
   returnValue:        Option[Val[Int]],
@@ -170,7 +170,7 @@ object RTask {
           |library("jsonlite")
           |$inputArrayName = fromJSON("/$inputJSONName", simplifyMatrix = FALSE)
           |${rInputMapping(inputArrayName)}
-          |${script.from(p.context)(p.random, p.newFile, p.fileService)}
+          |${script.script}
           |write_json($rOutputMapping, "/$outputJSONName", always_decimal = TRUE)
           """.stripMargin
 

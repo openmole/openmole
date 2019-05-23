@@ -23,8 +23,8 @@ import java.io.PrintStream
 import org.openmole.core.dsl
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import org.openmole.plugin.tool.csv.{header, writeVariablesToCSV}
 import org.openmole.plugin.tool.pattern._
+import org.openmole.core.csv
 
 package object sensitivity {
 
@@ -58,8 +58,8 @@ package object sensitivity {
 
       outputs.foreach { o ⇒
         val vs = inputs.map { i ⇒ coefficient(i, o) }
-        def headerLine = s"""output,${header(inputs, vs)}"""
-        writeVariablesToCSV(ps, Some(headerLine), Seq(o.name) ++ vs.map(v ⇒ context(v)))
+        def headerLine = s"""output,${csv.header(inputs, vs)}"""
+        csv.writeVariablesToCSV(ps, Some(headerLine), Seq(o.name) ++ vs.map(v ⇒ context(v)))
       }
     }
 

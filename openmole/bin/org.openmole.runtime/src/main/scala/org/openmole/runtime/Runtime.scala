@@ -88,6 +88,8 @@ class Runtime {
       OutputManager.redirectSystemError(outSt)
     }
 
+    val outputRedirection = if (!debug) OutputRedirection(outSt) else OutputRedirection(System.out, System.err)
+
     def getReplicatedFile(replicatedFile: ReplicatedFile, transferOptions: TransferOptions) =
       ReplicatedFile.download(replicatedFile) {
         (path, file) ⇒
@@ -144,7 +146,7 @@ class Runtime {
       environment.start()
 
       try {
-        val outputRedirection = OutputRedirection(outSt)
+
         val taskExecutionContext = TaskExecutionContext(
           tmpDirectory = newFile.makeNewDir("runtime"),
           localEnvironment = environment,

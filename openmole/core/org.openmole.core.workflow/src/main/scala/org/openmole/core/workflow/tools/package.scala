@@ -19,11 +19,8 @@ package org.openmole.core.workflow
 
 package tools {
 
-  import org.openmole.core.context.{ Context, Variable }
   import org.openmole.core.expansion.{ Expandable, ExpandedString, FromContext, ToFromContext }
-  import org.openmole.core.fileservice.FileService
-  import org.openmole.core.workspace.NewFile
-  import org.openmole.tool.random.RandomProvider
+  import org.openmole.tool.outputredirection.OutputRedirection
 
   trait ToolsPackage {
 
@@ -48,6 +45,10 @@ package tools {
     def Expression[T] = new {
       def apply[S](s: S)(implicit expandable: Expandable[S, T]) = expandable.expand(s)
     }
+
+    type Display = WritableOutput.Display
+
+    def display(implicit outputRedirection: OutputRedirection): Display = outputRedirection.output
 
   }
 }

@@ -18,6 +18,7 @@
 package org.openmole.modules
 
 import org.openmole.core.module._
+import org.openmole.core.workflow.mole.CSVHook
 import org.openmole.plugin.environment.condor.CondorEnvironment
 import org.openmole.plugin.environment.egi._
 import org.openmole.plugin.environment.oar.OAREnvironment
@@ -25,7 +26,6 @@ import org.openmole.plugin.environment.pbs.PBSEnvironment
 import org.openmole.plugin.environment.sge.SGEEnvironment
 import org.openmole.plugin.environment.slurm.SLURMEnvironment
 import org.openmole.plugin.environment.ssh.SSHEnvironment
-import org.openmole.plugin.hook.file.CSVHook
 import org.openmole.plugin.method.evolution.NSGA2
 import org.openmole.plugin.method.sensitivity.MorrisSampling
 import org.openmole.plugin.sampling.csv.CSVSampling

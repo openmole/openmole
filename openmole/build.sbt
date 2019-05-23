@@ -37,6 +37,7 @@ def defaultSettings = formatSettings ++
     resolvers += Resolver.sonatypeRepo("staging"),
     resolvers += Resolver.bintrayRepo("projectseptemberinc", "maven"), // For freek
     resolvers += Resolver.bintrayRepo("definitelyscala", "maven"), // For plotlyjs
+    resolvers += "osgeo" at "http://download.osgeo.org/webdav/geotools", // for geotools
     scalaVersion in Global := scalaVersionValue, // + "-bin-typelevel-4",
     scalacOptions ++= Seq("-target:jvm-1.8", "-language:higherKinds"),
     scalacOptions += "-Ypartial-unification",
@@ -149,8 +150,8 @@ def allCore = Seq(
   services,
   location,
   code,
-  networkService
-  )
+  networkService,
+  csv)
 
 
 lazy val keyword = OsgiProject(coreDir, "org.openmole.core.keyword", imports = Seq("*")) settings (coreSettings: _*)
@@ -182,7 +183,8 @@ lazy val workflow = OsgiProject(coreDir, "org.openmole.core.workflow", imports =
   threadProvider,
   code,
   networkService,
-  keyword) settings (coreSettings: _*)
+  keyword,
+  csv) settings (coreSettings: _*)
 
 lazy val serializer = OsgiProject(coreDir, "org.openmole.core.serializer", global = true, imports = Seq("*")) settings(
   libraryDependencies += Libraries.xstream,
@@ -192,9 +194,12 @@ lazy val serializer = OsgiProject(coreDir, "org.openmole.core.serializer", globa
 lazy val communication = OsgiProject(coreDir, "org.openmole.core.communication", imports = Seq("*")) dependsOn(workflow, workspace) settings (coreSettings: _*)
 
 lazy val openmoleDSL = OsgiProject(coreDir, "org.openmole.core.dsl", imports = Seq("*")) settings (
-  libraryDependencies += Libraries.squants) dependsOn(workflow, logconfig) settings (coreSettings: _*) settings (defaultActivator)
+  libraryDependencies += Libraries.squants) dependsOn(workflow, logconfig, csv) settings (coreSettings: _*) settings (defaultActivator)
 
 lazy val exception = OsgiProject(coreDir, "org.openmole.core.exception", imports = Seq("*")) settings (coreSettings: _*)
+
+lazy val csv = OsgiProject(coreDir, "org.openmole.core.csv", imports = Seq("*")) dependsOn(context) settings (coreSettings: _*) settings(
+  libraryDependencies += Libraries.opencsv)
 
 lazy val tools = OsgiProject(coreDir, "org.openmole.core.tools", global = true, imports = Seq("*")) settings
   (libraryDependencies ++= Seq(Libraries.xstream, Libraries.exec, Libraries.math, Libraries.scalatest, Libraries.equinoxOSGi), Libraries.addScalaLang(scalaVersionValue)) dependsOn
@@ -231,8 +236,7 @@ lazy val pluginManager = OsgiProject(
 ) settings (defaultActivator) dependsOn(exception, tools, location) settings (coreSettings: _*)
 
 lazy val fileService = OsgiProject(coreDir, "org.openmole.core.fileservice", imports = Seq("*")) dependsOn(tools, workspace, openmoleTar, preference, threadProvider) settings (coreSettings: _*) settings (defaultActivator) settings (
-  libraryDependencies += Libraries.guava
-  )
+  libraryDependencies += Libraries.guava)
 
 lazy val networkService = OsgiProject(coreDir, "org.openmole.core.networkservice", imports = Seq("*")) dependsOn(tools, workspace, preference) settings (coreSettings: _*) settings (defaultActivator)
 
@@ -484,7 +488,8 @@ lazy val quasirandomSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampl
   ) settings (pluginSettings: _*)
 
 lazy val spatialSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.spatial", imports = Seq("*")) dependsOn(exception, workflow, workspace) settings (
-  libraryDependencies += Libraries.math
+  libraryDependencies += Libraries.math,
+  libraryDependencies += Libraries.spatialdata
   ) settings (pluginSettings: _*)
 
 

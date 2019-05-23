@@ -90,10 +90,6 @@ object JobManager extends JavaLogger { self ⇒
     }
   }
 
-  def jobIsFinished(moleExecution: MoleExecution, job: StoredJob) = {
-    job.storedMoleJobs.map(_.id).forall(mj ⇒ moleJobIsFinished(moleExecution, mj))
-  }
-
   def sendToMoleExecution(job: StoredJob)(f: MoleExecution ⇒ Unit) =
     MoleExecutionMessage.send(job.moleExecution) { MoleExecutionMessage.WithMoleExecutionSate(f) }
 
@@ -101,6 +97,12 @@ object JobManager extends JavaLogger { self ⇒
 
   def shouldKill(environment: BatchEnvironment, storedJob: StoredJob, kill: Kill)(op: () ⇒ Unit)(implicit services: BatchEnvironment.Services) = {
     if (environment.stopped || canceled(storedJob)) self ! kill
-    else sendToMoleExecution(storedJob) { state ⇒ if (!jobIsFinished(state, storedJob)) op() else self ! kill }
+    else sendToMoleExecution(storedJob) { state ⇒
+      if (!jobIsFinished(state, storedJob)) op() else self ! kill
+    }
   }
+
+  def jobIsFinished(moleExecution: MoleExecution, job: StoredJob) =
+    job.storedMoleJobs.map(_.id).forall(mj ⇒ moleJobIsFinished(moleExecution, mj))
+
 }

@@ -31,6 +31,7 @@ import scala.concurrent.Await
 import scalatags.Text.all._
 import scalatags.Text.{ all ⇒ tags }
 import java.util.concurrent.atomic.AtomicReference
+import java.util.logging.Level
 
 import org.openmole.core.authentication.AuthenticationStore
 import org.openmole.core.event.EventDispatcher
@@ -78,7 +79,7 @@ object GUIServices {
     implicit def loggerService: LoggerService = guiServices.loggerService
   }
 
-  def apply(workspace: Workspace, httpProxy: Option[String]) = {
+  def apply(workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level]) = {
     implicit val ws = workspace
     implicit val preference = Preference(ws.persistentDir)
     implicit val newFile = NewFile(workspace)
@@ -93,7 +94,7 @@ object GUIServices {
     implicit val networkService = NetworkService(httpProxy)
     implicit val fileServiceCache = FileServiceCache()
     implicit val replicaCatalog = ReplicaCatalog(ws)
-    implicit val loggerService = LoggerService()
+    implicit val loggerService = LoggerService(logLevel)
 
     new GUIServices()
   }
@@ -103,8 +104,8 @@ object GUIServices {
     scala.util.Try(services.threadProvider.stop())
   }
 
-  def withServices[T](workspace: Workspace, httpProxy: Option[String])(f: GUIServices ⇒ T) = {
-    val services = GUIServices(workspace, httpProxy)
+  def withServices[T](workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level])(f: GUIServices ⇒ T) = {
+    val services = GUIServices(workspace, httpProxy, logLevel)
     try f(services)
     finally dispose(services)
   }

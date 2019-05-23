@@ -34,12 +34,13 @@ A grid sampling is declared via the @code{DirectSampling} task, in which the bou
    val input_j = Val[Double]
 
    DirectSampling(
-     evaluation = my_own_evaluation  ,
+     evaluation = my_own_model,
      sampling =
        (input_i in (0 to 10 by 2)) x
        (input_j in (0.0 to 5.0 by 0.5)),
-     aggregation= my_aggregation
-   )""", name = "syntax of DirectSampling Task")
+     aggregation = my_aggregation
+   )
+""", name = "syntax of DirectSampling Task")
 
 @br
 

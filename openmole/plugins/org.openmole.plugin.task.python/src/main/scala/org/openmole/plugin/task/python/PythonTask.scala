@@ -1,7 +1,6 @@
 
 package org.openmole.plugin.task.python
 
-import org.json4s.jackson.JsonMethods.{compact, render}
 import org.openmole.core.context.{Context, Val}
 import org.openmole.core.workflow.tools.OptionalArgument
 import org.openmole.core.dsl._
@@ -11,26 +10,19 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workflow.builder.{DefinitionScope, InfoConfig, InputOutputConfig, MappedInputOutputConfig}
-import org.openmole.core.workflow.execution.{EnvironmentProvider, LocalEnvironment, LocalEnvironmentProvider}
-import org.openmole.core.workflow.mole.MoleServices
-import org.openmole.core.workflow.task.TaskExecutionContext
+import org.openmole.core.workflow.builder._
 import org.openmole.core.workspace.{NewFile, Workspace}
 import org.openmole.plugin.task.container.HostFile
-import org.openmole.plugin.task.external.{External, outputFiles, resources}
-import org.openmole.plugin.task.udocker.{DockerImage, UDockerTask}
+import org.openmole.plugin.task.external._
+import org.openmole.plugin.task.udocker._
 import org.openmole.plugin.tool.json._
-import org.openmole.tool.cache.KeyValueCache
-import org.openmole.tool.lock
-import org.openmole.tool.lock.LockRepository
-import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
 
 object PythonTask {
 
 
   //  distinct images for python2 and python3 ? => pip for python3 only on dockerhub - provisory python3 only for tests
-  // FIXME openmole python docker image
+  // FIXME openmole python docker image - major is not taken into account for now
   //def dockerImage(major: Int) = DockerImage("openmole/python-"+major)
   def dockerImage(major: Int) = DockerImage("python")
 
@@ -38,7 +30,7 @@ object PythonTask {
     (install ++ libraries.map{ l => "pip install "+l}).toVector
 
   def apply(
-             script: FromContext[String],
+             script: RunnableScript,
              major: Int,
              libraries: Seq[String] = Seq.empty,
              install:              Seq[String]                        = Seq.empty,
@@ -76,9 +68,10 @@ object PythonTask {
         import p._
         import org.json4s.jackson.JsonMethods._
 
-        def writeInputsJSON(file: File) = {
-          def values = mapped.inputs.map { m ⇒ Array(p.context(m.v)) }
+        def writeInputsJSON(file: File): Unit = {
+          def values = mapped.inputs.map { m ⇒ p.context(m.v) }
           file.content = compact(render(toJSONValue(values.toArray)))
+          //file.content = "{"+mapped.inputs.map {mio => s"'${mio.name}' :"+toJSONValue(p.context(mio.v))}.mkString(",")+"}"
         }
 
         def readOutputJSON(file: File) = {
@@ -89,13 +82,15 @@ object PythonTask {
         }
 
         def inputMapping(dicoName: String): String =
-          mapped.inputs.map { m ⇒ s"${m.name} = $dicoName['${m.name}']" }.mkString("\n")
+          //mapped.inputs.map { m ⇒ s"${m.name} = $dicoName['${m.name}']" }.mkString("\n")
+          mapped.inputs.zipWithIndex.map { case (m,i) ⇒ s"${m.name} = $dicoName[${i}]" }.mkString("\n")
 
-        def outputMapping: String = s"""{${mapped.outputs.map { m => "'"+m.name+"' : "+m.name }.mkString(",")}}"""
+        def outputMapping: String = //s"""{${mapped.outputs.map { m => "'"+m.name+"' : "+m.name }.mkString(",")}}"""
+          s"""[${mapped.outputs.map { m => m.name}.mkString(",")}]"""
 
-
-        val userScript = script.from(p.context)(p.random, p.newFile, p.fileService)
-        val scriptString = if (userScript.endsWith(".py")) File(userScript).content else userScript
+        // RunnableScript replaces this more properly
+        //val userScript = script.from(p.context)(p.random, p.newFile, p.fileService)
+        //val scriptString = if (userScript.endsWith(".py")) File(userScript).content else userScript
 
 
         val resultContext: Context = p.newFile.withTmpFile("script", ".py") { scriptFile ⇒
@@ -110,9 +105,11 @@ object PythonTask {
             scriptFile.content =
               s"""
                  |import json
+                 |f = open('/$inputJSONName','r')
+                 |print(f.readlines())
                  |$inputArrayName = json.load(open('/$inputJSONName'))
                  |${inputMapping(inputArrayName)}
-                 |${scriptString}
+                 |${script.script}
                  |json.dump($outputMapping, open('/$outputJSONName','w'))
           """.stripMargin
 
