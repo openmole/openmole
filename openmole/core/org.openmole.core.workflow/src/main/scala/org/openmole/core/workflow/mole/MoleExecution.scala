@@ -126,6 +126,7 @@ object MoleExecution extends JavaLogger {
   type TransitionRegistry = RegistryWithTicket[ITransition, Iterable[Variable[_]]]
 
   def cancel(subMoleExecution: SubMoleExecutionState): Unit = {
+    subMoleExecution.jobs.foreach(removeJob(subMoleExecution, _))
     subMoleExecution.canceled = true
     subMoleExecution.children.values.toVector.foreach(cancel)
     subMoleExecution.parent.foreach(_.children.remove(subMoleExecution.id))
@@ -225,10 +226,6 @@ object MoleExecution extends JavaLogger {
         MoleExecution.checkIfSubMoleIsFinished(state)
       }
       finally removeJob(state, msg.job)
-    else {
-      import moleExecution.executionContext.services._
-      LoggerService.log(Level.FINE, s"job already finshed in ${moleExecution}")
-    }
   }
 
   def jobFinished(subMoleExecutionState: SubMoleExecutionState, job: MoleJobId, context: Context, capsule: MoleCapsule, ticket: Ticket) = {
