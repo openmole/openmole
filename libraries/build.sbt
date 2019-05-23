@@ -14,7 +14,7 @@ def settings = Seq(
   publishArtifact in (packageSrc in publishLocal) := false,
   organization := "org.openmole.library",
   isSnapshot := true
-) 
+)
 
 
 lazy val scalatraVersion = "2.6.3"
@@ -217,7 +217,7 @@ lazy val cats =
 
 lazy val squantsVersion = "1.3.0"
 
-lazy val squants = 
+lazy val squants =
   OsgiProject(dir, "squants") settings (
     libraryDependencies += "org.typelevel" %% "squants" % squantsVersion,
     version := squantsVersion
@@ -229,6 +229,15 @@ lazy val mgoVersion = "3.28"
 lazy val mgo = OsgiProject(dir, "mgo", exports = Seq("mgo.*", "freestyle.*"), imports = Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "*"), privatePackages = Seq("!scala.*", "!monocle.*", "!org.apache.commons.math3.*", "!cats.*", "!squants.*", "!scalaz.*", "*")) settings(
   libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
   version := mgoVersion) dependsOn(monocle, math, cats, squants) settings(settings: _*)
+
+
+lazy val spatialdataVersion = "0.1-SNAPSHOT"
+
+lazy val spatialdata = OsgiProject(dir, "org.openmole.spatialdata", exports = Seq("org.openmole.spatialdata.*","!org.postgresql","!org.mongodb"), imports = Seq("!org.apache.commons.math3.*","!better.*", "*")
+, privatePackages = Seq("!scala.*", "!monocle.*","!org.apache.commons.math3.*" , "!cats.*", "!squants.*", "!scalaz.*", "*")) settings(
+    libraryDependencies += "org.openmole.library" %% "spatialdata" % spatialdataVersion,
+    version := spatialdataVersion) settings(settings: _*)
+
 
 /*lazy val familyVersion = "1.3"
 lazy val family = OsgiProject(dir, "fr.iscpif.family") settings(
@@ -412,4 +421,3 @@ lazy val gridscaleWebDAV = OsgiProject(dir, "gridscale.webdav", imports = Seq("*
   libraryDependencies += "fr.iscpif.gridscale" %% "webdav" % gridscaleVersion,
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, gridscaleHTTP)
-
