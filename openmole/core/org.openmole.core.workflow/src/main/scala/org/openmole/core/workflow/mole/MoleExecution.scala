@@ -132,6 +132,9 @@ object MoleExecution extends JavaLogger {
   }
 
   def updateNbJobs(subMoleExecutionState: SubMoleExecutionState, v: Int): Unit = {
+    import subMoleExecutionState.moleExecution.executionContext.services._
+    LoggerService.log(Level.FINE, s"update number of jobs of sub mole execution ${subMoleExecutionState}, add ${v} to ${subMoleExecutionState.nbJobs}")
+
     subMoleExecutionState.nbJobs = subMoleExecutionState.nbJobs + v
     subMoleExecutionState.parent.foreach(s ⇒ updateNbJobs(s, v))
   }
