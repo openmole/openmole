@@ -36,4 +36,6 @@ Bit of code which will NOT be checked by the compiler with @hl.openmoleNoTest(""
                                                              Like an example for instance
                                                            """)
 Include an image with @img(src := path.to.the.image, center(100))
-Include a link with @a("text to write", href := link.to.something)
+
+Include a link with @a("text to write", href := "external.www.url.link.to.something")
+Include a link with @a("text to write", href := internal.no.quoted.link.to.something)
