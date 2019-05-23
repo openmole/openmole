@@ -5,27 +5,74 @@
 
 
 @def model = """
-val i1 = Val[Double]
-val i2 = Val[Double]
-val i3 = Val[Double]
-
-val o1 = Val[Double]
-val o2 = Val[Double]
-
-// Define the model task that computes an estimation of pi
-val model =
-  EmptyTask() set (
-    inputs += (i1, i2, i3),
-    outputs += (o1, o2)
-  )"""
+val param1 = Val[Double]
+val param2 = Val[Double]
+val output1 = Val[Double]
+val output2 = Val[Double]
+    val modelTask = EmptyTask() set (
+    inputs += (param1,param2),
+    outputs += (output1, output2)
+    ) """
 
 
-Statistical sensitivity analyses are used to characterize using statistical indicators. In general they involve an a priori sampling of the input space and a statistical method of analysis of the co-variance of the inputs and outputs of the model. There are either global, they depict the effects of model inputs in the complete input space, or local, they depict the effect of inputs around a given value. OpenMOLE implements 2 methods for global sensitivity analysis.
 
-@h2{Morris}
 
-@a("Morris", href := "https://en.wikipedia.org/wiki/Morris_method") is a statistical method for global sensitivity analysis. Here is how you can make use of it in OpenMOLE:
-@br @hl.openmole("""
+@h2{Sensitivity analysis}
+
+
+Sensitivity analysis is the study of how a model reacts to a change in its inputs.
+The goal of these statistical methods is to measure how variation propagates from the inputs to the outputs.
+More specifically, A. Saltelli defines Sensitivity Analysis as describing the «relative importance of each input in determining [output] variability».
+As a consequence,  typical result of such methods is an ordering of its inputs according to their sensitivity.
+@br
+Sensitivity analysis generally involve an a priori sampling of the input space and a statistical method to analyse the co-variance of the inputs and outputs of the model.
+
+@br@br
+Sensitivity analysis comes in two flavors : global, and local.
+Global methods depict the effects of inputs variation in the complete input space, local methods depict the effect of inputs variation around a given point of the input space. The  @a("One factor at a time method", href :=DocumentationPages.elementarySamplings.file) can be viewed as a local sensitivity method, as only one factor vary, the other remaining fixed at their nominal value.
+
+OpenMOLE offers 2 methods for global sensitivity analysis : Morris and Saltelli.
+
+
+
+
+
+@h2{Morris method}
+@h3{Principle}
+
+@a("Morris", href := "https://en.wikipedia.org/wiki/Morris_method") is a statistical method for global sensitivity analysis.
+It's a @i{screening} method, which means that the input space is (surprise!) @i{screened}, i.e. sampled via a grid sampling with fixed binwidth in each dimension.
+Resulting samples are evenly spaced in the input hypercube: in each dimension there is the same number of points.
+This number is a parameter of the method and determines the thickness of hypercube "slices".
+@br@br
+
+Trajectories are sampled among these points; the idea of the method is to observe output variation when one of the trajectory points is moved to one of its closest neighbors. It generates a small variation called "elementary effect".
+
+A certain number of trajectories are generated, in order to observe the consequence of elementary effects "almost everywhere" in the input space. the
+Then, the method uses these elementary effect as base material to estimate consequent variation in the output space.
+
+
+@h3{Results and Interpretation}
+
+Morris method computes three sensitivity indicators for each model input:
+
+@ul
+    @li{the final sensitivity measure, @b{mu@sub{i}} is the average of the elementary effects along the sampled trajectories.
+        It is interpreted as the overall influence of the input @b{i} on the model output variability.}
+    @li{a more advanced version of the final sensitivity measure, @b{mu@sup{*}@sub{i}}, is computed with the absolute value of the elementary effects, granting robustness against non-monotonic models.
+         It is interpreted the same way as @b{mu@sub{i}}}
+     @li{ @b{sigma@sub{i}}is interpreted as the extent of interaction and non-linear effects of each input. It is based on the variance of previous @b{mu@sub{i}} measures.}
+
+
+
+
+
+@h2{Morris method within OpenMOLE}
+
+Here is how you can make use of it in OpenMOLE:
+@br
+
+@hl.openmole("""
 SensitivityMorris(
   evaluation = model,
   inputs = Seq(
@@ -35,13 +82,29 @@ SensitivityMorris(
   outputs = Seq(o1, o2),
   repetitions = 10,
   levels = 10
-) hook DisplayHook()
+) hook display
 """,header=model, name = "Morris")
 
-@h2{Saltelli}
+
+@h3{Additional material}
+Paper describing method and its evaluation :  @a("Campolongo F, Saltelli A, Cariboni, J, 2011, From screening to quantitative sensitivity analysis. A unified approach, Computer Physics Communication. 182 4, pp. 978-988." , href := "http://www.andreasaltelli.eu/file/repository/Screening_CPC_2011.pdf")
+
+@br
+
+@a("OpenMOLE Market example", href:="https://github.com/openmole/openmole-market")
+
+
+@h2{Saltelli's method}
 
 Saltelli is a statistical method for global sensitivity analysis. Here is how you can make use of it in OpenMOLE:
-@br @hl.openmole("""
+
+
+
+@h2{Saltelli's method within OpenMOLE}
+
+@br
+
+@hl.openmole("""
 SensitivitySaltelli(
   evaluation = model,
   inputs = Seq(
@@ -50,5 +113,8 @@ SensitivitySaltelli(
     i3 in (0.0, 1.0)),
   outputs = Seq(o1, o2),
   samples = 100
-) hook DisplayHook()
+) hook display
 """,header=model, name = "Saltelli")
+
+
+
