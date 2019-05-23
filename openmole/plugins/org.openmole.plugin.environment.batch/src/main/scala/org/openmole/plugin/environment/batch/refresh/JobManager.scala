@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
 
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.mole.MoleExecution.moleJobIsFinished
-import org.openmole.core.workflow.mole.{MoleExecution, MoleExecutionMessage}
+import org.openmole.core.workflow.mole.{ MoleExecution, MoleExecutionMessage }
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment.ExecutionJobRegistry
 import org.openmole.plugin.environment.batch.environment.JobStore.StoredJob
 import org.openmole.plugin.environment.batch.environment._
@@ -89,7 +89,6 @@ object JobManager extends JavaLogger { self ⇒
 
     }
   }
-
 
   def sendToMoleExecution(job: StoredJob)(f: MoleExecution ⇒ Unit) =
     MoleExecutionMessage.send(job.moleExecution) { MoleExecutionMessage.WithMoleExecutionSate(f) }
