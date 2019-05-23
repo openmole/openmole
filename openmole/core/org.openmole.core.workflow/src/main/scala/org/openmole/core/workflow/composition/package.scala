@@ -24,15 +24,18 @@ package org.openmole.core.workflow
  */
 package composition {
 
+  import java.io.PrintStream
+
   import org.openmole.core.context.{ Context, Val }
   import org.openmole.core.expansion.Condition
   import org.openmole.core.outputmanager.OutputManager
   import org.openmole.core.workflow.builder.DefinitionScope
   import org.openmole.core.workflow.execution.{ EnvironmentProvider, LocalEnvironmentProvider }
-  import org.openmole.core.workflow.mole.{ Grouping, Hook, MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source }
+  import org.openmole.core.workflow.mole.{ CSVHook, Grouping, Hook, MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source }
   import org.openmole.core.workflow.sampling.Sampling
   import org.openmole.core.workflow.task.{ EmptyTask, ExplorationTask, Task }
-  import org.openmole.core.workflow.tools.OptionalArgument
+  import org.openmole.core.workflow.tools.{ OptionalArgument, WritableOutput }
+  import org.openmole.core.workflow.tools.WritableOutput.Display
   import org.openmole.core.workflow.transition._
   import org.openmole.core.workflow.validation.TypeUtil
   import shapeless.{ ::, HList }
@@ -114,7 +117,6 @@ package composition {
     def toExecution(
       implicits:          Context                                    = Context.empty,
       seed:               OptionalArgument[Long]                     = None,
-      executionContext:   OptionalArgument[MoleExecutionContext]     = None,
       defaultEnvironment: OptionalArgument[LocalEnvironmentProvider] = None)(implicit moleServices: MoleServices): MoleExecution =
       MoleExecution(
         mole = toMole,
@@ -123,8 +125,7 @@ package composition {
         environments = environments,
         grouping = grouping,
         implicits = implicits,
-        defaultEnvironment = defaultEnvironment,
-        executionContext = executionContext
+        defaultEnvironment = defaultEnvironment
       )
 
     def slots: Set[TransitionSlot] = (firstSlot :: transitions.map(_.end).toList).toSet
@@ -137,6 +138,7 @@ package composition {
     def on(environment: EnvironmentProvider) = copy(environment = Some(environment))
     def by(strategy: Grouping) = copy(grouping = Some(strategy))
     def hook(hooks: Hook*) = copy(hooks = this.hooks ++ hooks)
+    def hook(output: WritableOutput, values: Val[_]*)(implicit definitionScope: DefinitionScope): TaskNode = hook(CSVHook(output = output, values: _*))
     def source(sources: Source*) = copy(sources = this.sources ++ sources)
   }
 

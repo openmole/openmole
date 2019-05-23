@@ -24,7 +24,10 @@ class RingBuffer[T](size: Int) {
 
   private val queue = new util.ArrayDeque[T](size)
 
-  def put(t: T) = queue.synchronized { queue.add(t) }
+  def put(t: T) = queue.synchronized {
+    if (queue.size() == size) queue.removeLast()
+    queue.addFirst(t)
+  }
 
   def elements: Vector[T] = queue.synchronized(queue.asScala.toVector)
 

@@ -1,6 +1,7 @@
 package org.openmole.core
 
 import java.io.PrintStream
+import java.util.logging.Level
 
 import org.openmole.core.authentication._
 import org.openmole.core.event._
@@ -34,8 +35,8 @@ package object services {
      * @tparam T
      * @return
      */
-    def withServices[T](workspace: File, password: String, httpProxy: Option[String])(f: Services ⇒ T) = {
-      val services = Services(workspace, password, httpProxy)
+    def withServices[T](workspace: File, password: String, httpProxy: Option[String], logLevel: Option[Level])(f: Services ⇒ T) = {
+      val services = Services(workspace, password, httpProxy, logLevel)
       try f(services)
       finally dispose(services)
     }
@@ -53,7 +54,7 @@ package object services {
      * @param httpProxy optional http proxy
      * @return
      */
-    def apply(workspace: File, password: String, httpProxy: Option[String]) = {
+    def apply(workspace: File, password: String, httpProxy: Option[String], logLevel: Option[Level]) = {
       implicit val ws = Workspace(workspace)
       implicit val cypher = Cypher(password)
       implicit val preference = Services.preference(ws)
@@ -69,7 +70,7 @@ package object services {
       implicit val outputRedirection = OutputRedirection()
       implicit val networkService = NetworkService(httpProxy)
       implicit val fileServiceCache = FileServiceCache()
-      implicit val loggerService = LoggerService()
+      implicit val loggerService = LoggerService(logLevel)
 
       new ServicesContainer()
     }

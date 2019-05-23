@@ -20,8 +20,11 @@ package org.openmole.core.workflow
 import scala.language.implicitConversions
 
 package mole {
-
-  trait MolePackage
+  trait MolePackage {
+    def CSVHook = mole.CSVHook
+    type FromContextHook = mole.FromContextHook
+    type FromContextSource = mole.FromContextSource
+  }
 }
 
 package object mole {
@@ -30,7 +33,6 @@ package object mole {
   def Source = FromContextSource
 
   case class Hooks(map: Map[MoleCapsule, Traversable[Hook]])
-
   case class Sources(map: Map[MoleCapsule, Traversable[Source]])
 
   implicit def hooksToMap(h: Hooks): Map[MoleCapsule, Traversable[Hook]] = h.map.withDefault(_ ⇒ List.empty)

@@ -43,8 +43,8 @@ object ScilabTask {
   def scilabImage(version: String) = DockerImage("openmole/scilab", version)
 
   def apply(
-    script:  FromContext[String],
-    install: Seq[String]         = Seq.empty,
+    script:  RunnableScript,
+    install: Seq[String]    = Seq.empty,
     //libraries:   Seq[InstallCommand] = Seq.empty,
     forceUpdate:          Boolean                            = false,
     version:              String                             = "6.0.2",
@@ -187,7 +187,7 @@ object ScilabTask {
 }
 
 @Lenses case class ScilabTask(
-  script:             FromContext[String],
+  script:             RunnableScript,
   uDocker:            UDockerArguments,
   errorOnReturnValue: Boolean,
   returnValue:        Option[Val[Int]],
@@ -224,7 +224,7 @@ object ScilabTask {
         s"""
           |${if (majorVersion < 6) """errcatch(-1,"stop")""" else ""}
           |$scilabInputMapping
-          |${script.from(context)}
+          |${script.script}
           |${scilabOutputMapping}
           |quit
         """.stripMargin

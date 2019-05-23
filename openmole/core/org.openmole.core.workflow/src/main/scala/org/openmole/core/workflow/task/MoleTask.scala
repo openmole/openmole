@@ -127,7 +127,6 @@ object MoleTask {
         mole,
         implicits = implicitsValues,
         defaultEnvironment = localEnvironment,
-        executionContext = MoleExecutionContext(),
         cleanOnFinish = false,
         taskCache = executionContext.cache,
         lockRepository = executionContext.lockRepository
