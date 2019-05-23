@@ -487,7 +487,8 @@ lazy val quasirandomSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampl
   ) settings (pluginSettings: _*)
 
 lazy val spatialSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.spatial", imports = Seq("*")) dependsOn(exception, workflow, workspace) settings (
-  libraryDependencies += Libraries.math
+  libraryDependencies += Libraries.math,
+  libraryDependencies += Libraries.spatialdata
   ) settings (pluginSettings: _*)
 
 
