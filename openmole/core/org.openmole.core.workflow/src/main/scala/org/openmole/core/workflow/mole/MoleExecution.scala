@@ -210,6 +210,7 @@ object MoleExecution extends JavaLogger {
 
           MoleExecution.addJob(subMoleExecutionState, moleJob.id, capsule)
           eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
+
           group(subMoleExecutionState.moleExecution, moleJob, newContext, capsule)
       }
 
@@ -224,6 +225,10 @@ object MoleExecution extends JavaLogger {
         MoleExecution.checkIfSubMoleIsFinished(state)
       }
       finally removeJob(state, msg.job)
+    else {
+      import moleExecution.executionContext.services._
+      LoggerService.log(Level.FINE, s"job already finshed in ${moleExecution}")
+    }
   }
 
   def jobFinished(subMoleExecutionState: SubMoleExecutionState, job: MoleJobId, context: Context, capsule: MoleCapsule, ticket: Ticket) = {
