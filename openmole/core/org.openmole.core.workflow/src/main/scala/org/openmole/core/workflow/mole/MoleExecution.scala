@@ -218,15 +218,15 @@ object MoleExecution extends JavaLogger {
     }
   }
 
-  def processJobFinished(moleExecution: MoleExecution, msg: mole.MoleExecutionMessage.JobFinished) = {
-    val state = moleExecution.subMoleExecutions(msg.subMoleExecution)
-    if (!MoleExecution.moleJobIsFinished(moleExecution, msg.job))
+  def processJobFinished(moleExecution: MoleExecution, msg: mole.MoleExecutionMessage.JobFinished) =
+    if (!MoleExecution.moleJobIsFinished(moleExecution, msg.job)) {
+      val state = moleExecution.subMoleExecutions(msg.subMoleExecution)
       try {
         MoleExecution.finalState(state, msg.job, msg.result, msg.capsule, msg.ticket)
         MoleExecution.checkIfSubMoleIsFinished(state)
       }
       finally removeJob(state, msg.job)
-  }
+    }
 
   def jobFinished(subMoleExecutionState: SubMoleExecutionState, job: MoleJobId, context: Context, capsule: MoleCapsule, ticket: Ticket) = {
     val mole = subMoleExecutionState.moleExecution.mole
