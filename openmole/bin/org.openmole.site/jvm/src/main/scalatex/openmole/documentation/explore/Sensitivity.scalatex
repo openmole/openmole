@@ -134,7 +134,7 @@ The generic way to use it is to write either @code{hook(workDirectory / "path/of
 
 Here is how you can make use of this constructor in OpenMOLE:
 
-@brb@br
+@br@br
 
 @hl.openmole("""
 SensitivitySaltelli(
@@ -146,4 +146,4 @@ SensitivitySaltelli(
   outputs = Seq(o1, o2),
   samples = 100
 ) hook display
-""",header=model, name = "Saltelli")
+""", name = "Saltelli")
