@@ -120,7 +120,7 @@ The appended string can be a combination of variables from the data flow and pla
 @hl.openmole("""
     val i = Val[Int]
 
-    val h = AppendToFileHook("path/of/the/file.txt", "string ${i} to append")
+    val h = AppendToFileHook(workDirectory / "path/of/the/file.txt", "string ${i} to append")
 """, name = "append to file hook")
 
 
@@ -134,7 +134,7 @@ The appended string can be a combination of variables from the data flow and pla
     val file = Val[File]
     val i = Val[Int]
 
-    val h = AppendToFileHook("${file.content}", "path/to/a/file/or/dir${i}.csv")
+    val h = AppendToFileHook(workDirectory / "path/to/a/file/or/dir${i}.csv", "${file.content}")
 """, name = "append file to file hook")
 
 @br
@@ -152,12 +152,12 @@ The hook @code{AppendToCSVFileHook} takes data from the data flow and appends it
 @hl.openmole("""
     val i = Val[Int]
 
-    val h = AppendToCSVFileHook("path/to/a/file/or/dir${i}.csv")
+    val h = AppendToCSVFileHook(workDirectory / "path/to/a/file/or/dir${i}.csv")
 """, name = "csv hook")
 
 @br
 
-Some additional optional parameters can be passed to the @code{AppendToCSVFileHook}:
+Some additional optional parameters can be passed to the @code{CSVHook}:
 @ul
    @li{@code{values = Seq(i, j)} specifies which variables from the data flow should be written in the file. The default behaviour when this list is not specified is to dump all the variables from the dataflow to the file.}
    @li{@code{header = "Col1, Col2, ColZ"} customises the header of the CSV file to be created with the string it receives as a parameter. Please note that this only happens if the file doesn't exist when the hook is executed.}
@@ -167,7 +167,7 @@ Some additional optional parameters can be passed to the @code{AppendToCSVFileHo
     val i = Val[Int]
     val j = Val[Array[Int]]
 
-    val h = AppendToCSVFileHook("path/to/a/file/or/dir${i}.csv", values = Seq(i, j), header = "i, j", arrayOnRow = true)""", name = "csv hook with options")
+    val h = CSVHook(workDirectory / "path/to/a/file/or/dir${i}.csv", values = Seq(i, j), header = "i, j", arrayOnRow = true)""", name = "csv hook with options")
 
 
 @h3{Write a matrix into a file}
@@ -200,7 +200,7 @@ The @code{CopyFileHook} makes it possible to copy a file or directory from the d
   val file = Val[File]
   val i = Val[Int]
 
-  val h = CopyFileHook(file, "path/to/copy/the/file${i}.txt")
+  val h = CopyFileHook(file, workDirectory / "path/to/copy/the/file${i}.txt")
 """, name = "copy file hook")
 
 
