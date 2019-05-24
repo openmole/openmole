@@ -84,8 +84,9 @@ In other words: this function takes a model M (whose signature is (X→Y)), an e
 
 
 @h2{Profile within OpenMOLE}
+@h3{Specific constructor}
 
-The ProfileEvolution method takes the following arguments:
+The @code{ProfileEvolution} constructor takes the following arguments:
 
 @ul
   @li{@hl.code("evaluation"): the model task, that has to be previously declared in your script,}
@@ -98,7 +99,26 @@ The ProfileEvolution method takes the following arguments:
   @li{@hl.code("termination"): a "quantity" of model evaluation allocated to the profile task. Can be given in number of evaluations (@i{e.g.} 20000) or in computation time units (@i{e.g.} 230 minutes, 2 days...),}
   @li{@hl.code("distribution"): (optional) computation distribution strategy, default is "steadyState".}
 
-To build a profile task, use the @code{ProfileEvolution} constructor.
+
+@h3{Hook}
+
+The output of the genetic algorithm must be captured with a hook which saves the current optimal population.
+The generic way to use it is to write either @code{hook(workDirectory / "path/of/a/file.csv")} to save the results in a CSV file, or @code{hook display} to display the results in the standard output.
+
+@br
+
+The hook arguments which can be specified to the @code{ProfileEvolution} task are:
+
+@ul
+  @li{@code{output} the directory in which to store the population files,}
+  @li{@code{frequency} (@i{Optional}, Long) the frequency at which the generations should be saved.}
+
+For more details about hooks, check the corresponding @aa("Language", href := hook.file) page.
+
+
+@h3{Use example}
+
+To build a profile exploration, use the @code{ProfileEvolution} constructor.
 Here is an example :
 
 @br@br
@@ -117,29 +137,14 @@ Here is an example :
     genome = Seq(
         param1 in (0.0, 99.0),
         param2 in (0.0, 99.0)
-        ),
+    ),
     objective = fitness,
     stochastic = Stochastic(seed = seed, replications = 100)
     parallelism = 500,
     termination = 200000,
     distribution = Island(10 minutes)
+  ) hook(workDirectory / "path/to/a/directory")
 """, name = "Profile")
-
-
-@h3{Hook}
-
-The output of the genetic algorithm must be captured with a hook which saves the current optimal population.
-The generic way to use it is to write either @code{hook(workDirectory / "path/of/a/file.csv")} to save the results in a CSV file, or @code{hook display} to display the results in the standard output.
-
-@br
-
-The hook arguments which can be specified to the @code{ProfileEvolution} task are:
-
-@ul
-  @li{@code{output} the directory in which to store the population files,}
-  @li{@code{frequency} (@i{Optional}, Long) the frequency at which the generations should be saved.}
-
-For more details about hooks, check the corresponding @aa("Language", href := hook.file) page.
 
 
 

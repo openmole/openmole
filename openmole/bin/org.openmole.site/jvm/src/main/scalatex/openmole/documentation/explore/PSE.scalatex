@@ -1,18 +1,7 @@
-
 @import org.openmole.site.tools._
 @import org.openmole.site._
 @import org.openmole.site.stylesheet._
 @import DocumentationPages._
-
-@def model = """
-val param1 = Val[Double]
-val param2 = Val[Double]
-val output1 = Val[Double]
-val output2 = Val[Double]
-    val modelTask = EmptyTask() set (
-    inputs += (param1,param2),
-    outputs += (output1, output2)
-    ) """
 
 
 
@@ -26,7 +15,6 @@ PSE reveals the potential of your model: the variety of dynamics it is able to p
 @h3{Method's score}
 
 @Resource.rawFrag(Resource.img.method.pseID)
-
 @br
 
 The PSE method is designed to cover the output space, hence it gets the highest possible score in output exploration.
@@ -44,7 +32,7 @@ PSE handles stochasticity in the sense that the selected patterns are estimated 
 
 The PSE method searches for diverse output values.
 As with all evolutionary algorithms, PSE generates new individuals through a combination of genetic inheritance from the parent individuals and mutation.
-PSE (inspired by @a("novelty search", href := shared.link.noveltySearch)) selects for the parents whose output values are rare compared to the rest of the population and to the previous generations.
+PSE (inspired by @aa("novelty search", href := shared.link.noveltySearch)) selects for the parents whose output values are rare compared to the rest of the population and to the previous generations.
 In order to evaluate the rarity of an output value, PSE discretises the output space, dividing it into cells.
 Each time a simulation is run and its output is known, a counter is incremented in the corresponding cell.
 PSE preferentially selects the parents whose associated cells have low counters.
@@ -77,9 +65,11 @@ In other words, this function takes a model M whose signature is (X→Y), an ele
 
 
 @h2{PSE within OpenMOLE}
+@h3{Specific constructor}
 
-The OpenMOLE task for PSE is @code{PSEEvolution}.
+The OpenMOLE constructor for PSE is @code{PSEEvolution}.
 It takes the following parameters:
+
 @ul
   @li{@code{evaluation} the OpenMOLE task that runs the simulation, @i{i.e.} the model,}
   @li{@code{parallelism} the number of simulations that will be run in parallel,}
@@ -87,6 +77,25 @@ It takes the following parameters:
   @li{@code{genome} a list of the model parameters and their respective variation intervals,}
   @li{@code{objectives} a list of indicators measured for each evaluation of the model within which we search for diversity, with a discretization step,}
   @li{@code{stochastic} the seed generator, which generates suitable seeds for the method. Mandatory if your model contains randomness. The generated seed for the model task is transmitted through the variable given as an argument of @code{Stochastic} (here myseed).}
+
+
+@h3{Hook}
+
+The outputs of PSE must be captured with a hook.
+The generic way to use it is to write either @code{hook(workDirectory / "path/of/a/file.csv")} to save the results in a CSV file, or @code{hook display} to display the results in the standard output.
+
+@br
+
+The hook arguments which can be specified to the @code{PSEEvolution} constructor are:
+
+@ul
+  @li{@code{output} the directory in which to store the population files,}
+  @li{@code{frequency} (@i{Optional}, Long) the frequency at which the generations should be saved.}
+
+For more details about hooks, check the corresponding @aa("Language", href := hook.file) page.
+
+
+@h3{Use example}
 
 Here is a use example of the PSE method in an OpenMOLE script:
 
@@ -109,7 +118,7 @@ PSEEvolution(
     output2 in (0.0 to 4000.0 by 50.0)),
   stochastic = Stochastic(seed = myseed)
 ) hook (workDirectory / "results", frequency = 100)
-""",header=model, name = "PSE")
+""", name = "PSE")
 
 @br
 

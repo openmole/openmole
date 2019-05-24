@@ -21,10 +21,10 @@ You can also use your own DoE in OpenMOLE, by providing a @a("CSV file", href :=
 
 
 
-@h2{The DirectSampling task}
+@h2{The DirectSampling constructor}
 
-In OpenMOLE, a DoE is set up through the @code{DirectSampling} task.
-This task  will generate a workflow, which is illustrated below.
+In OpenMOLE, a DoE is set up through the @code{DirectSampling} constructor.
+This constructor will generate a workflow, which is illustrated below.
 You may recognize the @i{map reduce} design pattern, provided that an aggregation operator is defined (otherwise it would just be a @i{map} :-) )
 
 @br@br
