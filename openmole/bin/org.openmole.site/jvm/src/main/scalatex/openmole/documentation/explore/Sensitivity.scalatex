@@ -4,73 +4,83 @@
 @import DocumentationPages._
 
 
-@def model = """
-val param1 = Val[Double]
-val param2 = Val[Double]
-val output1 = Val[Double]
-val output2 = Val[Double]
-    val modelTask = EmptyTask() set (
-    inputs += (param1,param2),
-    outputs += (output1, output2)
-    ) """
-
-
-
 
 @h2{Sensitivity analysis}
-
 
 Sensitivity analysis is the study of how a model reacts to a change in its inputs.
 The goal of these statistical methods is to measure how variation propagates from the inputs to the outputs.
 More specifically, A. Saltelli defines Sensitivity Analysis as describing the «relative importance of each input in determining [output] variability».
 As a consequence,  typical result of such methods is an ordering of its inputs according to their sensitivity.
+
 @br
+
 Sensitivity analysis generally involve an a priori sampling of the input space and a statistical method to analyse the co-variance of the inputs and outputs of the model.
 
 @br@br
+
 Sensitivity analysis comes in two flavors : global, and local.
-Global methods depict the effects of inputs variation in the complete input space, local methods depict the effect of inputs variation around a given point of the input space. The  @a("One factor at a time method", href :=DocumentationPages.elementarySamplings.file) can be viewed as a local sensitivity method, as only one factor vary, the other remaining fixed at their nominal value.
+Global methods depict the effects of inputs variation in the complete input space, local methods depict the effect of inputs variation around a given point of the input space.
+The @aa("one factor at a time method", href := DocumentationPages.elementarySamplings.file) can be viewed as a local sensitivity method, as only one factor vary, the other remaining fixed at their nominal value.
 
-OpenMOLE offers 2 methods for global sensitivity analysis : Morris and Saltelli.
+@br
+
+OpenMOLE offers 2 methods for global sensitivity analysis: Morris and Saltelli.
 
 
 
-
-
-@h2{Morris method}
+@h2{Morris' method}
 @h3{Principle}
 
-@a("Morris", href := "https://en.wikipedia.org/wiki/Morris_method") is a statistical method for global sensitivity analysis.
-It's a @i{screening} method, which means that the input space is (surprise!) @i{screened}, i.e. sampled via a grid sampling with fixed binwidth in each dimension.
+@aa("Morris", href := "https://en.wikipedia.org/wiki/Morris_method") is a statistical method for global sensitivity analysis.
+It's a @i{screening} method, which means that the input space is (surprise!) @i{screened}, @i{i.e.} sampled via a grid sampling with fixed binwidth in each dimension.
 Resulting samples are evenly spaced in the input hypercube: in each dimension there is the same number of points.
 This number is a parameter of the method and determines the thickness of hypercube "slices".
+
 @br@br
 
-Trajectories are sampled among these points; the idea of the method is to observe output variation when one of the trajectory points is moved to one of its closest neighbors. It generates a small variation called "elementary effect".
-
-A certain number of trajectories are generated, in order to observe the consequence of elementary effects "almost everywhere" in the input space. the
+Trajectories are sampled among these points; the idea of the method is to observe output variation when one of the trajectory points is moved to one of its closest neighbors.
+It generates a small variation called "elementary effect".
+A certain number of trajectories are generated, in order to observe the consequence of elementary effects "almost everywhere" in the input space.
 Then, the method uses these elementary effect as base material to estimate consequent variation in the output space.
 
 
 @h3{Results and Interpretation}
 
-Morris method computes three sensitivity indicators for each model input:
+Morris' method computes three sensitivity indicators for each model input:
 
 @ul
     @li{the final sensitivity measure, @b{mu@sub{i}} is the average of the elementary effects along the sampled trajectories.
-        It is interpreted as the overall influence of the input @b{i} on the model output variability.}
+        It is interpreted as the overall influence of the input @b{i} on the model output variability,}
     @li{a more advanced version of the final sensitivity measure, @b{mu@sup{*}@sub{i}}, is computed with the absolute value of the elementary effects, granting robustness against non-monotonic models.
-         It is interpreted the same way as @b{mu@sub{i}}}
+         It is interpreted the same way as @b{mu@sub{i}},}
      @li{ @b{sigma@sub{i}}is interpreted as the extent of interaction and non-linear effects of each input. It is based on the variance of previous @b{mu@sub{i}} measures.}
 
 
 
+@h2{Morris' method within OpenMOLE}
+@h3{Specific constructor}
+
+The @code{SensitivityMorris} constructor is defined in OpenMOLE and can take the following parameters:
+
+@ul
+  @li{@code{evaluation} is the task (or a composition of tasks) that uses your inputs, typically your model task,}
+  @li{@code{inputs} is the list of your model's inputs,}
+  @li{@code{outputs} is the list of your model's outputs,}
+  @li{@code{repetitions},}
+  @li{@code{levels}.}
 
 
-@h2{Morris method within OpenMOLE}
+@h3{Hook}
 
-Here is how you can make use of it in OpenMOLE:
-@br
+The @code{hook} keyword is used to save or display results generated during the execution of a workflow.
+The generic way to use it is to write either @code{hook(workDirectory / "path/of/a/file.csv")} to save the results in a CSV file, or @code{hook display} to display the results in the standard output.
+
+
+@h3{Use example}
+
+Here is how you can make use of this constructor in OpenMOLE:
+
+@br@br
 
 @hl.openmole("""
 SensitivityMorris(
@@ -83,10 +93,11 @@ SensitivityMorris(
   repetitions = 10,
   levels = 10
 ) hook display
-""",header=model, name = "Morris")
+""", name = "Morris")
 
 
 @h3{Additional material}
+
 Paper describing method and its evaluation :  @a("Campolongo F, Saltelli A, Cariboni, J, 2011, From screening to quantitative sensitivity analysis. A unified approach, Computer Physics Communication. 182 4, pp. 978-988." , href := "http://www.andreasaltelli.eu/file/repository/Screening_CPC_2011.pdf")
 
 @br
@@ -94,15 +105,36 @@ Paper describing method and its evaluation :  @a("Campolongo F, Saltelli A, Cari
 @a("OpenMOLE Market example", href:="https://github.com/openmole/openmole-market")
 
 
+
 @h2{Saltelli's method}
 
-Saltelli is a statistical method for global sensitivity analysis. Here is how you can make use of it in OpenMOLE:
+Saltelli is a statistical method for global sensitivity analysis
 
 
 
 @h2{Saltelli's method within OpenMOLE}
+@h3{Specific constructor}
 
-@br
+The @code{SensitivitySaltelli} constructor is defined in OpenMOLE and can take the following parameters:
+
+@ul
+  @li{@code{evaluation} is the task (or a composition of tasks) that uses your inputs, typically your model task,}
+  @li{@code{inputs} is the list of your model's inputs,}
+  @li{@code{outputs} is the list of your model's outputs,}
+  @li{@code{samples}.}
+
+
+@h3{Hook}
+
+The @code{hook} keyword is used to save or display results generated during the execution of a workflow.
+The generic way to use it is to write either @code{hook(workDirectory / "path/of/a/file.csv")} to save the results in a CSV file, or @code{hook display} to display the results in the standard output.
+
+
+@h3{Use example}
+
+Here is how you can make use of this constructor in OpenMOLE:
+
+@brb@br
 
 @hl.openmole("""
 SensitivitySaltelli(
@@ -115,6 +147,3 @@ SensitivitySaltelli(
   samples = 100
 ) hook display
 """,header=model, name = "Saltelli")
-
-
-
