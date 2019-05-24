@@ -3,98 +3,105 @@
 @import org.openmole.site.stylesheet._
 @import DocumentationPages._
 
-@def modelAndVariables = """
-val param1 = Val[Double]
-val param2 = Val[Double]
-val output1 = Val[Double]
-val output2 = Val[Double]
-val modelTask = EmptyTask() set (
-    inputs += (param1,param2),
-    outputs += (output1, output2)
-    )
-val myseed = Val[Int]
-val x = Val[Double]
-val fitness = Val[Double]"""
+
+
 @h2{Profile parameters}
+
 The profile (or calibration profile) method is designed to test the sensitivity of the input parameters in a calibration context.
 Calibration profile algorithm differs from traditional sensitivity analysis: it captures the full effect of a parameter variation on the model fitness, @b{every other input being calibrated} to optimize the calibration criterion.
 
- @br@br
- In the following we will use the term of @b{fitness} to denote the calibration error function, or calibration criterion. Several types of evaluation functions can be used as fitness. Most of the time, they are either some kind of distance between model dynamics and data, or statistical measures performed on the output dynamics.
+@br@br
+
+In the following we will use the term of @b{fitness} to denote the calibration error function, or calibration criterion.
+Several types of evaluation functions can be used as fitness.
+Most of the time, they are either some kind of distance between model dynamics and data, or statistical measures performed on the output dynamics.
 
 
+@h3{Method's score}
 
-@h3{Method scores}
 @Resource.rawFrag(Resource.img.method.profileID)
 @br
 
 The calibration profile method is suited to reveal a model's sensitivity regarding its parameter, hence the highest score possible in sensitivity.
 However, it does not retrieve information about the input space nor the output space structures, as it focus on @b{one} parameter/input, every other input being let free (to be calibrated).
 As the studied parameter varies, the other parameter are calibrated, so this method scores very well
-regarding calibration. For the same reason, it can handle stochasticity.
-Finally, the profile method realizes calibrations on the other inputs for each interval of the input under study, so the more inputs, the more
-sensitivity to dimensionality of input space.
+regarding calibration.
+For the same reason, it can handle stochasticity.
+Finally, the profile method realizes calibrations on the other inputs for each interval of the input under study, so the more inputs, the more sensitivity to dimensionality of input space.
 
-@br@br
+@br
 @Resource.rawFrag(Resource.img.method.profileAnim)
 @br
 
 @basicButton("Run", classIs(btn ++ btn_danger))(id := shared.profile.button, stylesheet.svgRunButton(-70))
 
-@br@br
+@br
+
 Given a fitness function, the profile of a selected parameter @b{i} is constructed by dividing its interval into subintervals of equal size.
- For each subinterval, @b{i} is fixed, and the model is calibrated to minimise the fitness, similarly to @a("Calibration", href :=DocumentationPages.calibration.file). The optimisation is performed over the other parameters of the model.
+For each subinterval, @b{i} is fixed, and the model is calibrated to minimise the fitness, similarly to @a("Calibration", href :=DocumentationPages.calibration.file).
+The optimisation is performed over the other parameters of the model.
 
 @br@br
+
 As an example, let's consider a model with 3 parameters @b{i}, @b{j} and @b{k}, each taking real values between 1 and 10.
-The profile of the parameter   @b{i} is made by splitting the [1,10] interval into 9 intervals of size 1.
-Then, Calibration is performed in parallel within each  subinterval of @b{i}.
-At the end of the calibration, we obtain sets of @b{i},@b{j} and @b{k} values minimising the fitness, with @b{i}  taking values in each subinterval.
-By plotting the fitness against the values of @b{i} , one can visually determine if the model, within each of @b{i}  subintervals, is able to produce acceptable dynamics.
-An important nuance is that for each point of this fitness vs. @b{i} values plot, fitness values has been obtained by "adjusting" @b{j} and @b{k} to counterbalance the effect of @b{i}'s values on the model dynamics.
+The profile of the parameter @b{i} is made by splitting the [1,10] interval into 9 intervals of size 1.
+Then, calibration is performed in parallel within each subinterval of @b{i}.
+
+@br
+
+At the end of the calibration, we obtain sets of @b{i},@b{j} and @b{k} values minimising the fitness, with @b{i} taking values in each subinterval.
+By plotting the fitness against the values of @b{i}, one can visually determine if the model, within each of @b{i}  subintervals, is able to produce acceptable dynamics.
+
+@br
+
+An important nuance is that for each point of this fitness vs @b{i} values plot, fitness values has been obtained by "adjusting" @b{j} and @b{k} to counterbalance the effect of @b{i}'s values on the model dynamics.
 This means that @b{j} and @b{k} values vary for each point of the @b{i} parameter profile plot.
 
 
-
 @h3{Typed signature}
+
 The profile method can be typed  likewise:
-@br@br
-@div(style:="text-align:center")
-    Profile :   ((𝓧@sub{1},...,𝓧@sub{k},) → {1,...,k} → [(𝓧,Y)]
-@div(style:="text-align:center")
-    such that : Profile(M)(i) = [(𝒙@sub{i1},y@sub{1}), ... , (𝒙@sub{in}, y@sub{n})],
-@div(style:="text-align:center")
-                ∀ j ∈ [1;n], y@sub{j} =min@sub{𝒙∈X@sub{@RawFrag{-i}}}@RawFrag{(M(𝒙))}
-@div(style:="text-align:center")
-                X@sub{@RawFrag{-i}}={𝒙∈𝓧@sub{1} x ... x 𝓧@sub{i-1} x {𝒙@sub{i}} x 𝓧@sub{i+1} x ... x 𝓧@sub{k}}
-@br
-With M, the model, X , the Input space, Y, the output space, 𝓟(X) the power set of X ( i.e. every subset of X , including X and ∅ )
-@br
-In other words : this function takes a model M ( whose signature is (X→Y) ) , an element @i{y} of Y (y is the list of criterion value to reach) and  find a list of elements of X (noted @i{x}) such that, M(x) are Pareto dominant compared to every image of other elements of X by M , regarding criterion @i{y})
-
 
 @br@br
 
-@h2{Profile within OpenMOLE }
+@div(style:="text-align:center")
+    Profile:   (𝓧@sub{1},...,𝓧@sub{k},) → {1,...,k} → [(𝓧,Y)]
+@div(style:="text-align:center")
+    such that: Profile(M)(i) = [(𝒙@sub{i1},y@sub{1}), ... , (𝒙@sub{in}, y@sub{n})],
+@div(style:="text-align:center")
+                ∀ j ∈ [1;n], y@sub{j} = min@sub{𝒙∈X@sub{@RawFrag{-i}}}@RawFrag{(M(𝒙))}
+@div(style:="text-align:center")
+                X@sub{@RawFrag{-i}} = {𝒙∈𝓧@sub{1} x ... x 𝓧@sub{i-1} x {𝒙@sub{i}} x 𝓧@sub{i+1} x ... x 𝓧@sub{k}}
+
+@br
+
+With M, the model, X, the input space, Y, the output space, 𝓟(X) the power set of X (@i{i.e.} every subset of X, including X and ∅).
+
+@br
+
+In other words: this function takes a model M (whose signature is (X→Y)), an element @i{y} of Y (y is the list of criterion value to reach) and find a list of elements of X (noted @i{x}) such that M(x) are Pareto dominant compared to every image of other elements of X by M, regarding criterion @i{y}.
+
+
+
+@h2{Profile within OpenMOLE}
+
 The ProfileEvolution method takes the following arguments:
-@ul
-  @li{@hl.code("evaluation"): the model task, that has to be previously declared in your script.  }
-  @li{@hl.code("genome"): a list of the model input parameters with their values interval declared with the @hl.code("in") operator }
-  @li{@hl.code("objective"): the fitness, an output variable defined in the OpenMOLE script that is used to evaluate the model dynamics, to be minimized }
-  @li{@hl.code("x"): the parameter to profile}
-  @li{@hl.code("nX"): the size of the subintervals in  @b{x} domain }
-  @li{@hl.code("stochastic"): (optional) the seed provider, mandatory if your model contains randomness}
-  @li{@hl.code("parallelism"): (optional)  number of parallel calibration performed within @b{i} subinterval, default is 1 }
-  @li{@hl.code("termination"): a "quantity" of model evaluation allocated to the profile task. Can be given in number of evaluations (e.g. 20000) or in computation time units (e.g. 230 minutes, 2 days, ...)  }
-  @li{@hl.code("distribution"): (optional): computation distribution strategy, default is "steadyState" }
 
+@ul
+  @li{@hl.code("evaluation"): the model task, that has to be previously declared in your script,}
+  @li{@hl.code("genome"): a list of the model input parameters with their values interval declared with the @hl.code("in") operator,}
+  @li{@hl.code("objective"): the fitness, an output variable defined in the OpenMOLE script that is used to evaluate the model dynamics, to be minimized,}
+  @li{@hl.code("x"): the parameter to profile,}
+  @li{@hl.code("nX"): the size of the subintervals in  @b{x} domain,}
+  @li{@hl.code("stochastic"): (optional) the seed provider, mandatory if your model contains randomness,}
+  @li{@hl.code("parallelism"): (optional) number of parallel calibration performed within @b{i} subinterval, default is 1,}
+  @li{@hl.code("termination"): a "quantity" of model evaluation allocated to the profile task. Can be given in number of evaluations (@i{e.g.} 20000) or in computation time units (@i{e.g.} 230 minutes, 2 days...),}
+  @li{@hl.code("distribution"): (optional) computation distribution strategy, default is "steadyState".}
+
+To build a profile task, use the @code{ProfileEvolution} constructor.
+Here is an example :
 
 @br@br
-
-To build a profile task, use the ProfileEvolution constructor. Here is an example :
-
-
-@br
 
 @hl.openmole("""
   val param1 = Val[Double]
@@ -116,18 +123,38 @@ To build a profile task, use the ProfileEvolution constructor. Here is an exampl
     parallelism = 500,
     termination = 200000,
     distribution = Island(10 minutes)
-""", header= modelAndVariables , name = "Profile")
+""", name = "Profile")
 
 
-@br@br
+@h3{Hook}
+
+The output of the genetic algorithm must be captured with a hook which saves the current optimal population.
+The generic way to use it is to write either @code{hook(workDirectory / "path/of/a/file.csv")} to save the results in a CSV file, or @code{hook display} to display the results in the standard output.
+
+@br
+
+The hook arguments which can be specified to the @code{ProfileEvolution} task are:
+
+@ul
+  @li{@code{output} the directory in which to store the population files,}
+  @li{@code{frequency} (@i{Optional}, Long) the frequency at which the generations should be saved.}
+
+For more details about hooks, check the corresponding @aa("Language", href := hook.file) page.
+
+
 
 @h2{Interpretation guide}
-A calibration profile is a 2D plot with the value of the profiled parameter represented on the X-axis and the best possible calibration error (i.e. fitness value) on the Y-axis.
-To ease the interpretation of the profiles, we define an acceptance threshold on the calibration error (i.e fitness).
-Under this acceptance threshold the calibration error is considered sufficiently satisfying and the dynamics exposed by the model sufficiently acceptable.
+
+A calibration profile is a 2D plot with the value of the profiled parameter represented on the X-axis and the best possible calibration error (@i{i.e.} fitness value) on the Y-axis.
+To ease the interpretation of the profiles, we define an acceptance threshold on the calibration error (@i{i.e.} fitness).
+Under this acceptance threshold, the calibration error is considered sufficiently satisfying and the dynamics exposed by the model sufficiently acceptable.
 Over this acceptance threshold the calibration error is considered too high and the dynamics exposed by the model are considered unacceptable, or at least non-pertinent.
 
-@br The computed calibration profiles may take very diverse shapes depending on the effect of the parameter of the model dynamics, however some of this shapes are recurrent. The most typical shapes are shown on the figure bellow.
+@br
+
+The computed calibration profiles may take very diverse shapes depending on the effect of the parameter of the model dynamics, however some of this shapes are recurrent.
+The most typical shapes are shown on the figure bellow.
+
 @br@br
 @img(src := Resource.img.method.profileInterpretation.file, center(70))
 @br
@@ -137,9 +164,6 @@ Over this acceptance threshold the calibration error is considered too high and 
   @li{Shape 2 occurs when a parameter is constraining the dynamic of the model (with respect to the fitness calibration criterion), but the validity domain of the parameter is not connected. It might mean that several qualitatively different dynamics of the model meet the fitness requirement. In this case, model dynamics should be observed directly to determine if every kind of dynamics is suitable or if the fitness should be revised.}
   @li{Shape 3 occurs when the model "resists" to calibration. The profile does not expose any acceptable dynamic according to the calibration criterion. In this case, the model should be improved or the calibration criterion should be revised.}
   @li{Shape 4 occurs when a parameter does not constrain sufficiently the model dynamics (with respect to the fitness calibration criterion). The model can always be calibrated whatever the value of the profiled parameter. In this case this parameter constitute a superfluous degree of liberty for the model : its effect is compensated by a variation of the other parameters. In general it means that either this parameter should be fixed, or that a mechanism of the model should be removed, or that the model should be reduced by expressing the value of this parameter as a function of the other parameters.}
-
-
-@br@br
 
 The calibration profile algorithm has been published in the following paper:
 

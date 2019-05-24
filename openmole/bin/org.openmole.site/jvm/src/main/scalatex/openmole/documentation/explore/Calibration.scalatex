@@ -16,9 +16,8 @@ For more details on calibration using genetic algorithms, see the @aa("GA detail
 @h2{Single criterion Calibration}
 @h3{Method's score}
 
-@br@br
 @Resource.rawFrag(Resource.img.method.GAsingleID)
-@br@br
+@br
 
 The single criterion calibration method is designed to solve an optimization problem, so unsurprisingly it performs well regarding the optimization grade.
 Since it is only focused towards discovering the best performing individual (parameter set), this method doesn't provide insights about the model sensitivity regarding its input parameters, as it does not keep full records of the past input samplings leading to the optimal solution.
@@ -37,7 +36,7 @@ However, the number of objectives (output dimensionality) should be limited to a
 @br@br
 @figure
  @img(src := Resource.img.method.calibrationMono.file, center(70))
-@br@br
+@br
 
 Single criterion calibration answers the following question: for a given target value of the output @b{o1}, what is(are) the parameter set(s) @b{(i, j , k)} producing the output value(s) closest to the target?
 
@@ -65,7 +64,6 @@ In other words, this function takes a model M whose signature is (X→Y) (since 
 @h3{Method's score}
 
 @Resource.rawFrag(Resource.img.method.GAmultiID)
-
 @br
 
 The multi criteria calibration method slightly differs from the single criterion version.
@@ -74,10 +72,8 @@ However, since it may reveal a Pareto frontier and the underlying trade-off, it 
 This is not genuine sensitivity as in sensitivity analysis, but still, it outlines a variation of your model outputs, which is not bad after all!
 
 @br@br
-
 @figure
   @img(src := Resource.img.method.calibrationMulti.file, center(70))
-
 @br
 
 Multi criteria calibration answers the following question: for a given target pattern @b{(o1,o2)}, what are the parameter sets @b{(i,j)} that produce the closest output values to the target pattern ?
