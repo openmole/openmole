@@ -224,7 +224,7 @@ object DocumentationPages {
   lazy val r = DocumentationPage.fromScalatex(name = "R", content = scalatex.documentation.run.R)
   lazy val scilab = DocumentationPage.fromScalatex(name = "Scilab", content = scalatex.documentation.run.Scilab)
 
-  def packagedPages = pageNode(packaged, Vector(packagedPython, packagedCCplusplus))
+  def packagedPages = pageNode(packaged, Vector(packagedCCplusplus))
 
   lazy val packaged = DocumentationPage.fromScalatex(name = "Package Native Code", content = scalatex.documentation.run.packaged.Packaged)
   lazy val packagedCCplusplus = DocumentationPage.fromScalatex(name = "C Cplusplus", content = scalatex.documentation.run.packaged.PackagedCCplusplus, title = Some("C/C++"))
