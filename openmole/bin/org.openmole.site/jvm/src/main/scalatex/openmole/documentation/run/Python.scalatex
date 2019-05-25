@@ -1,0 +1,60 @@
+
+@import org.openmole.site.tools._
+@import org.openmole.site._
+@import org.openmole.site.content.Native._
+
+
+@h3{PythonTask syntax}
+
+The @code{PythonTask} relies on an underlying @code{ContainerTask} but is designed to be transparent and takes only R-related arguments.
+The current version of R used is @b{@shared.rTask.rVersion}.
+It takes the following arguments :
+
+@ul
+   @li{@code{script} String, mandatory. The R script to be executed.}
+   @li{@code{major} Int, optional (default = 3). Major version of python to run.}
+   @li{@code{install} Sequence of strings, optional (default = empty). The commands to be executed prior to any python packages installation and script execution (to install libraries on the system).}
+   @li{@code{libraries} Sequence of strings, optional (default = empty). The name of python libraries (through pip) that will be used by the script and need to be installed before (note: as detailed below, installations are only achieved during the first execution of the script, and then stored in a docker image in cache. To force an update, use the @i{forceUpdate} argument).}
+   @li{@code{forceUpdate} Boolean, optional (default = false). Should the libraries installation be forced (to ensure an update for example). If true, the task will perform the installation (and thus the update) even if the library was already installed.}
+
+@h2{Embedding a Python script}
+
+@p The toy Python script for this test case is:
+@br @hl.highlight("""
+import sys
+
+f = open("output.txt", 'w')
+f.write(str(arg))
+""", "python")
+
+@p We save this to @i{hello.py}. It does nothing but printing its first argument to the file passed as a second argument.
+
+@p To run this script in OpenMOLE upload @i{hello.py} in you workspace. You can then use the following script:
+@br @hl.openmole("""
+/// Declare the variable
+val arg = Val[Int]
+val output = Val[File]
+
+// python task
+val pythonTask =
+  PythonTask(workDirectory / "hello.py") set (
+    inputs += arg.mapped,
+    outputs += arg,
+    outputs += output mapped "output.txt",
+  )
+
+val copy = CopyFileHook(output, workDirectory / "result/hello${arg}.txt")
+val env = LocalEnvironment(2)
+
+DirectSampling(
+  evaluation = pythonTask,
+  sampling = arg in (0 to 10)
+) hook copy on env""")
+
+@p Notions from OpenMOLE are reused in this example. If you're not too familiar with @a("Environments", href := DocumentationPages.scale.file), @a("Groupings", href := DocumentationPages.scale.file + "#Grouping"), @a("Hooks", href := DocumentationPages.hook.file) or @a("Samplings", href := DocumentationPages.samplings.file), check the relevant sections of the documentation.
+
+
+@p
+
+@hr
+@footer

@@ -1,7 +1,7 @@
 package org.openmole.plugin.task.r
 
 import monocle.macros.Lenses
-import org.openmole.core.context.{ Namespace, Variable }
+import org.openmole.core.context.{Namespace, Val, Variable}
 import org.openmole.plugin.task.udocker._
 import org.openmole.core.fileservice._
 import org.openmole.core.preference._
@@ -138,39 +138,40 @@ object RTask {
     import p._
     import org.json4s._
     import org.json4s.jackson.JsonMethods._
+    import Mapped.noFile
 
     def writeInputsJSON(file: File) = {
-      def values = mapped.inputs.map { m ⇒ Array(context(m.v)) }
+      def values = noFile(mapped.inputs).map { m ⇒ Array(context(m.v)) }
       file.content = compact(render(toJSONValue(values.toArray)))
     }
 
     def rInputMapping(arrayName: String) =
-      mapped.inputs.zipWithIndex.map { case (m, i) ⇒ s"${m.name} = $arrayName[[${i + 1}]][[1]]" }.mkString("\n")
+      noFile(mapped.inputs).zipWithIndex.map { case (m, i) ⇒ s"${m.name} = $arrayName[[${i + 1}]][[1]]" }.mkString("\n")
 
     def rOutputMapping =
-      s"""list(${mapped.outputs.map { _.name }.mkString(",")})"""
+      s"""list(${noFile(mapped.outputs).map { _.name }.mkString(",")})"""
 
     def readOutputJSON(file: File) = {
       import org.json4s._
       import org.json4s.jackson.JsonMethods._
       val outputValues = parse(file.content)
-      (outputValues.asInstanceOf[JArray].arr zip mapped.outputs.map(_.v)).map { case (jvalue, v) ⇒ jValueToVariable(jvalue, v) }
+      (outputValues.asInstanceOf[JArray].arr zip noFile(mapped.outputs).map(_.v)).map { case (jvalue, v) ⇒ jValueToVariable(jvalue, v) }
     }
 
     newFile.withTmpFile("script", ".R") { scriptFile ⇒
       newFile.withTmpFile("inputs", ".json") { jsonInputs ⇒
 
         def inputArrayName = "generatedomarray"
-        def rScriptName = "generatedomscript.R"
-        def inputJSONName = "generatedominputs.json"
-        def outputJSONName = "generatedomoutputs.json"
+        def rScriptName = "_generatedomscript_.R"
+        def inputJSONName = "_generatedominputs_.json"
+        def outputJSONName = "_generatedomoutputs_.json"
 
         writeInputsJSON(jsonInputs)
         scriptFile.content = s"""
           |library("jsonlite")
           |$inputArrayName = fromJSON("/$inputJSONName", simplifyMatrix = FALSE)
           |${rInputMapping(inputArrayName)}
-          |${script.script}
+          |${RunnableScript.content(script)}
           |write_json($rOutputMapping, "/$outputJSONName", always_decimal = TRUE)
           """.stripMargin
 
@@ -189,7 +190,9 @@ object RTask {
             containerPoolKey = containerPoolKey) set (
             resources += (scriptFile, rScriptName, true),
             resources += (jsonInputs, inputJSONName, true),
-            outputFiles += (outputJSONName, outputFile)
+            outputFiles += (outputJSONName, outputFile),
+            Mapped.files(mapped.inputs).map { case m ⇒ inputFiles +=[UDockerTask] (m.v, m.name, true) },
+            Mapped.files(mapped.outputs).map { case m ⇒ outputFiles +=[UDockerTask] (m.name, m.v) }
           )
 
         val resultContext = uDockerTask.process(executionContext).from(context)

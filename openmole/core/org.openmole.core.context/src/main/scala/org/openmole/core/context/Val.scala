@@ -182,6 +182,7 @@ object Val {
   val caseLong = TypeCase[Val[Long]]
   val caseDouble = TypeCase[Val[Double]]
   val caseString = TypeCase[Val[String]]
+  val caseFile = TypeCase[Val[java.io.File]]
 
   val caseArrayBoolean = TypeCase[Val[Array[Boolean]]]
   val caseArrayInt = TypeCase[Val[Array[Int]]]

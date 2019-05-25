@@ -11,13 +11,14 @@ package object json {
     import org.json4s._
 
     v match {
-      case v: Int      ⇒ JInt(v)
-      case v: Long     ⇒ JLong(v)
-      case v: String   ⇒ JString(v)
-      case v: Float    ⇒ JDouble(v)
-      case v: Double   ⇒ JDouble(v)
-      case v: Array[_] ⇒ JArray(v.map(toJSONValue).toList)
-      case _           ⇒ throw new UserBadDataError(s"Value $v of type ${v.getClass} is not convertible to JSON")
+      case v: Int          ⇒ JInt(v)
+      case v: Long         ⇒ JLong(v)
+      case v: String       ⇒ JString(v)
+      case v: Float        ⇒ JDouble(v)
+      case v: Double       ⇒ JDouble(v)
+      case v: Array[_]     ⇒ JArray(v.map(toJSONValue).toList)
+      case v: java.io.File ⇒ JString(v.getAbsolutePath)
+      case _               ⇒ throw new UserBadDataError(s"Value $v of type ${v.getClass} is not convertible to JSON")
     }
   }
 
@@ -106,6 +107,7 @@ package object json {
       case (value: JValue, Val.caseDouble(v)) ⇒ Variable(v, jValueToDouble(value))
       case (value: JValue, Val.caseString(v)) ⇒ Variable(v, jValueToString(value))
       case (value: JValue, Val.caseBoolean(v)) ⇒ Variable(v, jValueToBoolean(value))
+      case (value: JValue, Val.caseFile(v)) ⇒ Variable(v, new java.io.File(jValueToString(value)))
 
       case _ ⇒ cannotConvert
     }

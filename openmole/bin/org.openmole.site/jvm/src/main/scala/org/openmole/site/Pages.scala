@@ -214,19 +214,19 @@ object DocumentationPages {
   val faq = DocumentationPage.fromScalatex(name = "FAQ", content = scalatex.FAQ, title = Some("Frequently Asked Questions"))
 
   // Run
-  def runPages = pageNode(run, Vector(scala, java, netLogo, r, scilab, packaged))
+  def runPages = pageNode(run, Vector(scala, java, netLogo, python, r, scilab, packaged))
 
   lazy val run = DocumentationPage.fromScalatex(name = "Run", content = scalatex.documentation.run.Run, title = Some("Run Your Model"))
   lazy val scala = DocumentationPage.fromScalatex(name = "Scala", content = scalatex.documentation.run.Scala)
   lazy val java = DocumentationPage.fromScalatex(name = "Java", content = scalatex.documentation.run.Java)
   lazy val netLogo = DocumentationPage.fromScalatex(name = "NetLogo", content = scalatex.documentation.run.NetLogo)
+  lazy val python = DocumentationPage.fromScalatex(name = "Python", content = scalatex.documentation.run.Python)
   lazy val r = DocumentationPage.fromScalatex(name = "R", content = scalatex.documentation.run.R)
   lazy val scilab = DocumentationPage.fromScalatex(name = "Scilab", content = scalatex.documentation.run.Scilab)
 
   def packagedPages = pageNode(packaged, Vector(packagedPython, packagedCCplusplus))
 
   lazy val packaged = DocumentationPage.fromScalatex(name = "Package Native Code", content = scalatex.documentation.run.packaged.Packaged)
-  lazy val packagedPython = DocumentationPage.fromScalatex(name = "Python", content = scalatex.documentation.run.packaged.PackagedPython)
   lazy val packagedCCplusplus = DocumentationPage.fromScalatex(name = "C Cplusplus", content = scalatex.documentation.run.packaged.PackagedCCplusplus, title = Some("C/C++"))
 
   // Explore

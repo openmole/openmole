@@ -61,13 +61,27 @@ package builder {
    */
   case class RawVal[T](v: Val[T]) extends IO
 
+  object Mapped {
+    def files(mapped: Vector[Mapped[_]]) =
+      mapped.flatMap {
+        case Mapped(Val.caseFile(v), name) ⇒ Seq(Mapped[java.io.File](v, name))
+        case m                             ⇒ Seq()
+      }
+
+    def noFile(mapped: Vector[Mapped[_]]) =
+      mapped.flatMap {
+        case Mapped(Val.caseFile(v), _) ⇒ Seq[Mapped[_]]()
+        case m                          ⇒ Seq(m)
+      }
+  }
+
   /**
    * Prototype mapped to a variable name
    * @param v
    * @param name
    */
   case class Mapped[T](v: Val[T], name: String) extends IO {
-    def toTuple = (v, name)
+    def toTuple = v -> name
   }
 
   /**

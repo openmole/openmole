@@ -16,8 +16,8 @@ import org.openmole.tool.cache.{ CacheKey, WithInstance }
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 import org.openmole.tool.lock._
-
 import org.openmole.plugin.task.container._
+import org.openmole.plugin.task.udocker.{ FileScript, RawScript, RunnableScript }
 
 package udocker {
 
@@ -50,21 +50,21 @@ package object udocker extends UDockerPackage {
   /**
    * Trait for either string scripts or script file runnable in tasks based on the container task
    */
-  sealed trait RunnableScript {
-    def script: String = {
-      this match {
+  object RunnableScript {
+    implicit def stringToRunnableScript(s: String): RunnableScript = RawScript(s)
+    implicit def fileToRunnableScript(f: File): RunnableScript = FileScript(f)
+
+    def content(script: RunnableScript): String = {
+      script match {
         case RawScript(s)  ⇒ s
         case FileScript(f) ⇒ f.content
       }
     }
   }
+
+  sealed trait RunnableScript
   case class RawScript(rawscript: String) extends RunnableScript
   case class FileScript(file: File) extends RunnableScript
-
-  object RunnableScript {
-    implicit def stringToRunnableScript(s: String): RunnableScript = RawScript(s)
-    implicit def fileToRunnableScript(f: File): RunnableScript = FileScript(f)
-  }
 
   import cats.data._
   import cats.implicits._

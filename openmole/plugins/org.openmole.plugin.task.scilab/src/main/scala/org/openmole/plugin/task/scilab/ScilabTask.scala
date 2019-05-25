@@ -224,7 +224,7 @@ object ScilabTask {
         s"""
           |${if (majorVersion < 6) """errcatch(-1,"stop")""" else ""}
           |$scilabInputMapping
-          |${script.script}
+          |${RunnableScript.content(script)}
           |${scilabOutputMapping}
           |quit
         """.stripMargin
