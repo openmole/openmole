@@ -14,7 +14,6 @@ To make your code portable from machine to machine (Linux to Linux) you may eith
 This section intends to be general and seeks to explain how to embed any native code into OpenMOLE.
 More specific documentation pages on how to package some languages/platforms are available for:
 @ul
-  @li{@aa("Python", href := DocumentationPages.packagedPython.file)}
   @li{@aa("C and C++", href := DocumentationPages.packagedCCplusplus.file)}
 
 @br
@@ -22,7 +21,113 @@ More specific documentation pages on how to package some languages/platforms are
 If you have an example of a successful packaging for a language or software that may benefit other users, share it!
 For that, check @a("how to contribute", href := DocumentationPages.howToContribute.file).
 
+@h2{Packaging with Docker}
 
+The @code{ContainerTask} runs docker container in OpenMOLE.
+It is based on a container engine running without administration privileges called @aa("udocker", href := "https://github.com/indigo-dc/udocker").
+Using this task, you can run containers from the @aa("docker hub", href := "https://hub.docker.com/"), or containers exported from docker.
+
+
+@h3{Containers from the docker hub}
+
+A simple task running a python container would look like:
+
+@br@br
+
+@openmole(s"""
+val container =
+  ContainerTask(
+    "python:3.6-stretch",
+    ${tq}python -c 'print("youpi")'${tq}
+  )
+""")
+
+@br
+
+You can run this task.
+At launch time, it downloads the python image from the docker hub in order to be able to run it afterwards.
+
+@br@br
+
+Let's imagine a slightly more complete example: we will use the following python script, which uses the @i{numpy} library to multiply a matrix (stored in a csv file) by a scalar number.
+
+@br@br
+
+@hl("""
+import sys
+import numpy
+from numpy import *
+from array import *
+import csv
+
+input = open(sys.argv[1],'r')
+n = float(sys.argv[2])
+
+print("reading the matrix")
+data = csv.reader(input)
+headers = next(data, None)
+
+array = numpy.array(list(data)).astype(float)
+
+print(array)
+print(n)
+mult = array * n
+
+print("saving the matrix")
+numpy.savetxt(sys.argv[3], mult, fmt='%g')
+""", "python")
+
+@br
+
+An example input file would look like this:
+
+@br@br
+
+@hl("""
+col1,col2,col3
+31,82,80
+4,48,7
+""", "csv")
+
+@br
+
+For this example, we consider that we have a @i{data} directory, containing a set of csv files in the @i{workDirectory}.
+We want to compute the python script for each of this csv file and for a set of values for the second argument of the python script.
+The OpenMOLE workflow would then look like this:
+
+@br@br
+
+@openmole(s"""
+val dataFile = Val[File]
+val dataFileName = Val[String]
+val i = Val[Int]
+val resultFile = Val[File]
+
+val container =
+  ContainerTask(
+    "python:3.6-stretch",
+    ${tq}python matrix.py data.csv $${i} out.csv${tq},
+    install = Seq("pip install numpy")
+  ) set (
+    resources += workDirectory / "matrix.py",
+    inputFiles += (dataFile, "data.csv"),
+    outputFiles += ("out.csv", resultFile),
+    (inputs, outputs) += (i, dataFileName)
+  )
+
+DirectSampling(
+  sampling =
+    (dataFile in (workDirectory / "data") withName dataFileName) x
+    (i in (0 to 3)),
+  evaluation =
+    container hook CopyFileHook(resultFile, workDirectory / "results/$${dataFileName.dropRight(4)}_$${i}.csv")
+)
+
+""")
+
+@br
+
+The @b{install} parameter contains a set of command used to install some components in the container once and for all, when the task is instantiated.
 
 @h2{Packaging with CARE}
 
@@ -246,110 +351,3 @@ Using CARE and OpenMOLE for reproducible science has been covered in the followi
 
 
 
-@h2{Packaging with Docker}
-
-The @code{ContainerTask} runs docker container in OpenMOLE.
-It is based on a container engine running without administration privileges called @aa("udocker", href := "https://github.com/indigo-dc/udocker").
-Using this task, you can run containers from the @aa("docker hub", href := "https://hub.docker.com/"), or containers exported from docker.
-
-
-@h3{Containers from the docker hub}
-
-A simple task running a python container would look like:
-
-@br@br
-
-@openmole(s"""
-val container =
-  ContainerTask(
-    "python:3.6-stretch",
-    ${tq}python -c 'print("youpi")'${tq}
-  )
-""")
-
-@br
-
-You can run this task.
-At launch time, it downloads the python image from the docker hub in order to be able to run it afterwards.
-
-@br@br
-
-Let's imagine a slightly more complete example: we will use the following python script, which uses the @i{numpy} library to multiply a matrix (stored in a csv file) by a scalar number.
-
-@br@br
-
-@hl("""
-import sys
-import numpy
-from numpy import *
-from array import *
-import csv
-
-input = open(sys.argv[1],'r')
-n = float(sys.argv[2])
-
-print("reading the matrix")
-data = csv.reader(input)
-headers = next(data, None)
-
-array = numpy.array(list(data)).astype(float)
-
-print(array)
-print(n)
-mult = array * n
-
-print("saving the matrix")
-numpy.savetxt(sys.argv[3], mult, fmt='%g')
-""", "python")
-
-@br
-
-An example input file would look like this:
-
-@br@br
-
-@hl("""
-col1,col2,col3
-31,82,80
-4,48,7
-""", "csv")
-
-@br
-
-For this example, we consider that we have a @i{data} directory, containing a set of csv files in the @i{workDirectory}.
-We want to compute the python script for each of this csv file and for a set of values for the second argument of the python script.
-The OpenMOLE workflow would then look like this:
-
-@br@br
-
-@openmole(s"""
-val dataFile = Val[File]
-val dataFileName = Val[String]
-val i = Val[Int]
-val resultFile = Val[File]
-
-val container =
-  ContainerTask(
-    "python:3.6-stretch",
-    ${tq}python matrix.py data.csv $${i} out.csv${tq},
-    install = Seq("pip install numpy")
-  ) set (
-    resources += workDirectory / "matrix.py",
-    inputFiles += (dataFile, "data.csv"),
-    outputFiles += ("out.csv", resultFile),
-    (inputs, outputs) += (i, dataFileName)
-  )
-
-DirectSampling(
-  sampling =
-    (dataFile in (workDirectory / "data") withName dataFileName) x
-    (i in (0 to 3)),
-  evaluation =
-    container hook CopyFileHook(resultFile, workDirectory / "results/$${dataFileName.dropRight(4)}_$${i}.csv")
-)
-
-""")
-
-@br
-
-The @b{install} parameter contains a set of command used to install some components in the container once and for all, when the task is instantiated.
