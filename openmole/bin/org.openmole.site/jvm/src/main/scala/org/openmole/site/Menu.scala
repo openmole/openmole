@@ -29,8 +29,6 @@ object Menu {
   val inputStyle = paddingTop := 15
   val navId = "omwesite"
 
-  def banner(sitePage: SitePage) = div
-
   //  def banner(sitePage: SitePage) = match {
   //    case cp: ContentPage ⇒ div(
   //      marginTop := 10,
@@ -50,7 +48,6 @@ object Menu {
 
   def build(sitePage: SitePage) = {
     div(classIs("container"))(
-      banner(sitePage),
       tags2.nav(navClass, paddingRight := 20)(
         div(classIs(container_fluid))(
           div(classIs(navbar_header))(
