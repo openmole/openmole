@@ -222,7 +222,7 @@ object DocumentationPages {
   lazy val python = DocumentationPage.fromScalatex(name = "Python", content = scalatex.documentation.run.Python)
   lazy val r = DocumentationPage.fromScalatex(name = "R", content = scalatex.documentation.run.R)
   lazy val scilab = DocumentationPage.fromScalatex(name = "Scilab", content = scalatex.documentation.run.Scilab)
-  lazy val packaged = DocumentationPage.fromScalatex(name = "Package Native Code", content = scalatex.documentation.run.Packaged)
+  lazy val packaged = DocumentationPage.fromScalatex(name = "Linux Executable", content = scalatex.documentation.run.Packaged)
 
   // Explore
   def explorePages = pageNode(explore, Vector(samplings, calibration, sensitivity, profile, pse))

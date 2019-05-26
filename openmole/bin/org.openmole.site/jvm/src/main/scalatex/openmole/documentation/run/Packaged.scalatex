@@ -217,7 +217,7 @@ val container =
 """)
 
 
-@h3{Calling a local program}
+@h2{Calling a local program}
 
 The @i{ContainerTask} was designed to be portable from one machine to another. However, some use-cases require executing specific commands installed on a given cluster. To achieve that you should use another task called @code{SystemExecTask}. This task is made to launch native commands on the execution host.
 There is two modes for using this task:
