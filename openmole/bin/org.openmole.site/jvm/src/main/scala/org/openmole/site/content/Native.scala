@@ -10,8 +10,8 @@ object Native {
   def introPackagingForRPythonCplusplus = paragraph(
     div("Most of the time, model code is not designed to be portable. OpenMOLE handles natively Java, Scala, NetLogo and R via specific Tasks. However, if no specific task has yet been designed for the language/platform you can still embed you code into OpenMOLE using:", marginTop := 30),
       ul(
-        li("either the ", a("container task documentation", href := DocumentationPages.packaged.file, targetBlank)),
-        li("or the ", a("native packaging documentation", href := DocumentationPages.packaged.file, targetBlank), "."),
+        li("either the ", a("container task documentation", href := DocumentationPages.container.file, targetBlank)),
+        li("or the ", a("native packaging documentation", href := DocumentationPages.container.file, targetBlank), "."),
       )
     )
 
@@ -40,7 +40,7 @@ object Native {
     li(RawFrag(s"The procedure to package an application ${b("is always the same")},  regardless of the underlying programming language / framework used.")),
     li(RawFrag(s"The ${hl.openmoleNoTest("CARETask")} is not different from the SystemExecTask to the extent of the archive given as a first parameter.")),
 
-    p, "These two aspects make it really ", b("easy to embed native applications"), " in OpenMOLE. You can also read more about packaging your native models for OpenMOLE in ", a("the dedicated section", href := DocumentationPages.packaged.file), "."
+    p, "These two aspects make it really ", b("easy to embed native applications"), " in OpenMOLE. You can also read more about packaging your native models for OpenMOLE in ", a("the dedicated section", href := DocumentationPages.container.file), "."
   )
 
   def linuxOnly(taskName: String) =

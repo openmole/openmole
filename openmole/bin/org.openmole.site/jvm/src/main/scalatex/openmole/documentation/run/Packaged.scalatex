@@ -182,7 +182,7 @@ This option takes the path of a file on the execution host and binds it to the s
 
 @br@br
 
-@hl.openmole("""
+@hl.openmole(s"""
 ContainerTask(
   "debian:testing-slim",
   ${tq}ls /bind${tq},
@@ -194,7 +194,7 @@ ContainerTask(
 
 You may set the directory within the container where to start the execution from.
 
-@hl.openmole("""
+@hl.openmole(s"""
 ContainerTask(
   "debian:testing-slim",
   ${tq}ls${tq},
