@@ -250,14 +250,13 @@ object DocumentationPages {
   lazy val pse = DocumentationPage.fromScalatex(name = "PSE", content = scalatex.documentation.explore.PSE, title = Some("Pattern Space Exploration"))
 
   // Scale
-  def scalePages = pageNode(scale, Vector(multithread, ssh, cluster, egi, island))
+  def scalePages = pageNode(scale, Vector(multithread, ssh, cluster, egi))
 
   lazy val scale = DocumentationPage.fromScalatex(name = "Scale", content = scalatex.documentation.scale.Scale, title = Some("Scale on Different Environments"))
   lazy val multithread = DocumentationPage.fromScalatex(name = "Multithread", content = scalatex.documentation.scale.Multithread)
   lazy val ssh = DocumentationPage.fromScalatex(name = "SSH", content = scalatex.documentation.scale.SSH)
   lazy val cluster = DocumentationPage.fromScalatex(name = "Cluster", content = scalatex.documentation.scale.Cluster)
   lazy val egi = DocumentationPage.fromScalatex(name = "EGI", content = scalatex.documentation.scale.EGI, title = Some("European Grid Infrastructure"))
-  lazy val island = DocumentationPage.fromScalatex(name = "Island", content = scalatex.documentation.scale.Island)
 
   // Language
   def languagePages = pageNode(language, Vector(fileManagement, scalaFunction, hook, transition, source, capsule, moleTask))
@@ -273,12 +272,14 @@ object DocumentationPages {
   lazy val moleTask = DocumentationPage.fromScalatex(name = "Mole Task", content = scalatex.documentation.language.advanced.MoleTask)
 
   // Advanced Concepts
-  def advancedConceptsPages = pageNode(advancedConcepts, Vector(geneticAlgorithm, stochasticityManagement))
+  def advancedConceptsPages = pageNode(advancedConcepts, Vector(geneticAlgorithm, island, stochasticityManagement))
 
   //lazy val resumableWorkflow = DocumentationPage.fromScalatex(name = "Resumable Workflow", content = scalatex.documentation.advancedConcepts.ResumableWorkflow)
 
   lazy val advancedConcepts = DocumentationPage.fromScalatex(name = "Advanced concepts", content = scalatex.documentation.advancedConcepts.AdvancedConcepts)
   lazy val geneticAlgorithm = DocumentationPage.fromScalatex(name = "Genetic Algorithms", content = scalatex.documentation.advancedConcepts.GA.GeneticAlgorithm)
+  lazy val island = DocumentationPage.fromScalatex(name = "Island", content = scalatex.documentation.advancedConcepts.GA.Island)
+
   lazy val stochasticityManagement = DocumentationPage.fromScalatex(name = "Stochasticity Management", content = scalatex.documentation.advancedConcepts.GA.StochasticityManagement)
 
   // Developers
