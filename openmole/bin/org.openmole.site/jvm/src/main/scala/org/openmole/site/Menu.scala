@@ -29,22 +29,24 @@ object Menu {
   val inputStyle = paddingTop := 15
   val navId = "omwesite"
 
-  def banner(sitePage: SitePage) = sitePage match {
-    case cp: ContentPage ⇒ div(
-      marginTop := 10,
-      textAlign := "center",
-      display := "block",
-      marginLeft := "auto",
-      marginRight := "auto",
-      zIndex := 2000,
-      `class` := "banner")(
-        a(
-          img(src := "img/banner/banner.png", width := "450px"),
-          href := "http://exmodelo.org", target := "_blank"
-        )
-      )
-    case _ ⇒ div
-  }
+  def banner(sitePage: SitePage) = sitePage
+
+//  match {
+//    case cp: ContentPage ⇒ div(
+//      marginTop := 10,
+//      textAlign := "center",
+//      display := "block",
+//      marginLeft := "auto",
+//      marginRight := "auto",
+//      zIndex := 2000,
+//      `class` := "banner")(
+//        a(
+//          img(src := "img/banner/banner.png", width := "450px"),
+//          href := "http://exmodelo.org", target := "_blank"
+//        )
+//      )
+//    case _ ⇒ div
+//  }
 
   def build(sitePage: SitePage) = {
     div(classIs("container"))(
