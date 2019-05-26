@@ -231,13 +231,13 @@ lazy val mgo = OsgiProject(dir, "mgo", exports = Seq("mgo.*", "freestyle.*"), im
   version := mgoVersion) dependsOn(monocle, math, cats, squants) settings(settings: _*)
 
 
-lazy val spatialdataVersion = "0.1-SNAPSHOT"
+/*lazy val spatialdataVersion = "0.1-SNAPSHOT"
 
 lazy val spatialdata = OsgiProject(dir, "org.openmole.spatialdata", exports = Seq("org.openmole.spatialdata.*","!org.postgresql","!org.mongodb"), imports = Seq("!org.apache.commons.math3.*","!better.*", "*")
 , privatePackages = Seq("!scala.*", "!monocle.*","!org.apache.commons.math3.*" , "!cats.*", "!squants.*", "!scalaz.*", "*")) settings(
     libraryDependencies += "org.openmole.library" %% "spatialdata" % spatialdataVersion,
     version := spatialdataVersion) settings(settings: _*)
-
+*/
 
 /*lazy val familyVersion = "1.3"
 lazy val family = OsgiProject(dir, "fr.iscpif.family") settings(
