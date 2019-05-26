@@ -24,7 +24,7 @@ import scala.reflect.ClassTag
 
 object ScilabTask {
 
-  implicit def isTask: InputOutputBuilder[ScilabTask] = InputOutputBuilder(ScilabTask._config)
+  implicit def isTask: InputOutputBuilder[ScilabTask] = InputOutputBuilder(ScilabTask.config)
   implicit def isExternal: ExternalBuilder[ScilabTask] = ExternalBuilder(ScilabTask.external)
   implicit def isInfo = InfoBuilder(info)
   implicit def isMapped = MappedInputOutputBuilder(ScilabTask.mapped)
@@ -46,15 +46,15 @@ object ScilabTask {
     script:  RunnableScript,
     install: Seq[String]    = Seq.empty,
     //libraries:   Seq[InstallCommand] = Seq.empty,
-    forceUpdate:          Boolean                            = false,
-    version:              String                             = "6.0.2",
-    errorOnReturnValue:   Boolean                            = true,
-    returnValue:          OptionalArgument[Val[Int]]         = None,
-    stdOut:               OptionalArgument[Val[String]]      = None,
-    stdErr:               OptionalArgument[Val[String]]      = None,
-    environmentVariables: Seq[(String, FromContext[String])] = Vector.empty,
-    hostFiles:            Seq[HostFile]                      = Vector.empty,
-    workDirectory:        OptionalArgument[String]           = None)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): ScilabTask = {
+    forceUpdate:          Boolean                       = false,
+    version:              String                        = "6.0.2",
+    errorOnReturnValue:   Boolean                       = true,
+    returnValue:          OptionalArgument[Val[Int]]    = None,
+    stdOut:               OptionalArgument[Val[String]] = None,
+    stdErr:               OptionalArgument[Val[String]] = None,
+    environmentVariables: Seq[EnvironmentVariable]      = Vector.empty,
+    hostFiles:            Seq[HostFile]                 = Vector.empty,
+    workDirectory:        OptionalArgument[String]      = None)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): ScilabTask = {
 
     val uDockerArguments =
       UDockerTask.createUDocker(
@@ -63,12 +63,10 @@ object ScilabTask {
         cacheInstall = true,
         forceUpdate = forceUpdate,
         mode = "P1",
-        reuseContainer = true
-      ).copy(
-          environmentVariables = environmentVariables.toVector,
-          hostFiles = hostFiles.toVector,
-          workDirectory = workDirectory
-        )
+        reuseContainer = true,
+        environmentVariables = environmentVariables.toVector,
+        hostFiles = hostFiles.toVector,
+        workDirectory = workDirectory)
 
     ScilabTask(
       script = script,
@@ -77,12 +75,14 @@ object ScilabTask {
       returnValue = returnValue,
       stdOut = stdOut,
       stdErr = stdErr,
-      _config = InputOutputConfig(),
+      config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
       mapped = MappedInputOutputConfig(),
       version = version
-    )
+    ) set (
+        outputs += (Seq(returnValue.option, stdOut.option, stdErr.option).flatten: _*)
+      )
   }
 
   /**
@@ -193,7 +193,7 @@ object ScilabTask {
   returnValue:        Option[Val[Int]],
   stdOut:             Option[Val[String]],
   stdErr:             Option[Val[String]],
-  _config:            InputOutputConfig,
+  config:             InputOutputConfig,
   external:           External,
   info:               InfoConfig,
   mapped:             MappedInputOutputConfig,
@@ -201,7 +201,6 @@ object ScilabTask {
 
   lazy val containerPoolKey = UDockerTask.newCacheKey
 
-  override def config = UDockerTask.config(_config, returnValue, stdOut, stdErr)
   override def validate = container.validateContainer(Vector(), uDocker.environmentVariables, external, inputs)
 
   override def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
@@ -241,7 +240,7 @@ object ScilabTask {
           returnValue,
           stdOut,
           stdErr,
-          _config,
+          config,
           external,
           info,
           containerPoolKey = containerPoolKey) set (

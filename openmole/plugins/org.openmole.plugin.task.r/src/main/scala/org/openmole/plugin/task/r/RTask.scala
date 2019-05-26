@@ -25,7 +25,7 @@ import org.openmole.tool.outputredirection.OutputRedirection
 
 object RTask {
 
-  implicit def isTask: InputOutputBuilder[RTask] = InputOutputBuilder(RTask._config)
+  implicit def isTask: InputOutputBuilder[RTask] = InputOutputBuilder(RTask.config)
   implicit def isExternal: ExternalBuilder[RTask] = ExternalBuilder(RTask.external)
   implicit def isInfo = InfoBuilder(info)
   implicit def isMapped = MappedInputOutputBuilder(RTask.mapped)
@@ -76,7 +76,7 @@ object RTask {
     stdErr:               OptionalArgument[Val[String]]      = None,
     hostFiles:            Seq[HostFile]                      = Vector.empty,
     workDirectory:        OptionalArgument[String]           = None,
-    environmentVariables: Seq[(String, FromContext[String])] = Vector.empty
+    environmentVariables: Seq[EnvironmentVariable] = Vector.empty
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): RTask = {
 
     // add additional installation of devtools only if needed
@@ -95,9 +95,8 @@ object RTask {
         cacheInstall = true,
         forceUpdate = forceUpdate,
         mode = "P1",
-        reuseContainer = true
-      ).copy(
-          environmentVariables = environmentVariables.toVector,
+        reuseContainer = true,
+        environmentVariables = environmentVariables.toVector,
           hostFiles = hostFiles.toVector,
           workDirectory = workDirectory)
 
@@ -108,11 +107,13 @@ object RTask {
       returnValue = returnValue,
       stdOut = stdOut,
       stdErr = stdErr,
-      _config = InputOutputConfig(),
+      config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
       mapped = MappedInputOutputConfig()
-    )
+    ) set (
+        outputs += (Seq(returnValue.option, stdOut.option, stdErr.option).flatten: _*)
+      )
   }
 
 }
@@ -124,14 +125,13 @@ object RTask {
   returnValue:        Option[Val[Int]],
   stdOut:             Option[Val[String]],
   stdErr:             Option[Val[String]],
-  _config:            InputOutputConfig,
+  config:            InputOutputConfig,
   external:           External,
   info:               InfoConfig,
   mapped:             MappedInputOutputConfig) extends Task with ValidateTask {
 
   lazy val containerPoolKey = UDockerTask.newCacheKey
 
-  override def config = UDockerTask.config(_config, returnValue, stdOut, stdErr)
   override def validate = container.validateContainer(Vector(), uDocker.environmentVariables, external, inputs)
 
   override def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
@@ -184,7 +184,7 @@ object RTask {
             returnValue,
             stdOut,
             stdErr,
-            _config,
+            config,
             external,
             info,
             containerPoolKey = containerPoolKey) set (

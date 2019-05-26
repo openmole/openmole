@@ -35,11 +35,11 @@ object PythonTask {
     forceUpdate:          Boolean                            = false,
     workDirectory:        OptionalArgument[String]           = None,
     hostFiles:            Seq[HostFile]                      = Vector.empty,
-    environmentVariables: Seq[(String, FromContext[String])] = Vector.empty,
+    environmentVariables: Seq[EnvironmentVariable] = Vector.empty,
     errorOnReturnValue:   Boolean                            = true,
-    returnValue:          Option[Val[Int]]                   = None,
-    stdOut:               Option[Val[String]]                = None,
-    stdErr:               Option[Val[String]]                = None)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService) = {
+    returnValue:          OptionalArgument[Val[Int]]                   = None,
+    stdOut:               OptionalArgument[Val[String]]                = None,
+    stdErr:               OptionalArgument[Val[String]]                = None)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService) = {
 
     lazy val containerPoolKey = UDockerTask.newCacheKey
 
@@ -52,8 +52,8 @@ object PythonTask {
         mode = "P1",
         reuseContainer = true,
         hostFiles = hostFiles,
-        workDirectory = workDirectory
-      ).copy(environmentVariables = environmentVariables.toVector)
+        workDirectory = workDirectory,
+        environmentVariables = environmentVariables.toVector)
 
     Task("PythonTask") { p ⇒
       import org.json4s.jackson.JsonMethods._
@@ -104,14 +104,15 @@ object PythonTask {
 
           def uDockerTask =
             UDockerTask(
-              udocker, s"python $scriptName",
-              errorOnReturnValue,
-              returnValue,
-              stdOut,
-              stdErr,
-              InputOutputConfig(),
-              External(),
-              InfoConfig(),
+              udocker,
+              commands = s"python $scriptName",//Commands.value.modify(_.map(_.map(blockChars)))(run),
+              errorOnReturnValue = errorOnReturnValue,
+              returnValue = returnValue,
+              stdOut = stdOut,
+              stdErr = stdErr,
+              config = InputOutputConfig(),
+              external = External(),
+              info = InfoConfig(),
               containerPoolKey = containerPoolKey) set (
                 resources += (scriptFile, scriptName, true),
                 resources += (jsonInputs, inputJSONName, true),
@@ -125,7 +126,9 @@ object PythonTask {
         }
       }
       resultContext
-    } validate { _ ⇒ Seq.empty }
+    } validate { _ ⇒ Seq.empty } set (
+      outputs += (Seq(returnValue.option, stdOut.option, stdErr.option).flatten: _*)
+    )
   }
 
 }

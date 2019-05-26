@@ -22,7 +22,7 @@ import org.openmole.core.context.PrototypeSet
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.dsl._
-import org.openmole.plugin.task.external.External
+import org.openmole.plugin.task.external._
 import org.openmole.core.workflow.validation._
 
 package container {
@@ -86,8 +86,6 @@ package object container extends ContainerPackage {
     else rootDirectory / absolutePathInArchive
   }
 
-  type EnvironmentVariable = (String, FromContext[String])
-
   def validateContainer(
     commands:             Vector[FromContext[String]],
     environmentVariables: Vector[EnvironmentVariable],
@@ -97,7 +95,7 @@ package object container extends ContainerPackage {
     import p._
 
     val allInputs = External.PWD :: inputs.toList
-    val validateVariables = environmentVariables.map(_._2).flatMap(_.validate(allInputs))
+    val validateVariables = environmentVariables.flatMap(v ⇒ Seq(v.name, v.value)).flatMap(_.validate(allInputs))
 
     commands.flatMap(_.validate(allInputs)) ++
       validateVariables ++

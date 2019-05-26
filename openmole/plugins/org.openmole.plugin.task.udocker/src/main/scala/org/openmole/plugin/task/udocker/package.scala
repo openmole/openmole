@@ -1,23 +1,9 @@
 package org.openmole.plugin.task
 
-import java.util.UUID
-
-import cats.Applicative
-import monocle.Lens
 import monocle.macros.Lenses
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.task.TaskExecutionContext
-import org.openmole.core.workspace.{ NewFile, Workspace }
-import org.openmole.plugin.task.external.External
-import org.openmole.plugin.task.systemexec._
-import org.openmole.plugin.task.udocker.DockerMetadata.{ ContainerID, ImageManifestV2Schema1 }
-import org.openmole.plugin.task.udocker.Registry.LayerElement
-import org.openmole.tool.cache.{ CacheKey, WithInstance }
-import org.openmole.tool.file._
-import org.openmole.tool.stream._
-import org.openmole.tool.lock._
 import org.openmole.plugin.task.container._
-import org.openmole.plugin.task.udocker.{ FileScript, RawScript, RunnableScript }
+import org.openmole.plugin.task.external._
+import org.openmole.tool.file._
 
 package udocker {
 
@@ -66,7 +52,6 @@ package object udocker extends UDockerPackage {
   case class RawScript(rawscript: String) extends RunnableScript
   case class FileScript(file: File) extends RunnableScript
 
-  import cats.data._
   import cats.implicits._
 
   case class Err(msg: String) {
@@ -87,17 +72,16 @@ package object udocker extends UDockerPackage {
 
   @Lenses case class UDockerArguments(
     localDockerImage:     UDocker.LocalDockerImage,
-    environmentVariables: Vector[(String, FromContext[String])] = Vector.empty,
-    hostFiles:            Vector[HostFile]                      = Vector.empty,
-    workDirectory:        Option[String]                        = None,
-    reuseContainer:       Boolean                               = true,
-    user:                 Option[String]                        = None,
-    mode:                 Option[String]                        = None)
+    environmentVariables: Vector[EnvironmentVariable] = Vector.empty,
+    hostFiles:            Vector[HostFile]            = Vector.empty,
+    workDirectory:        Option[String]              = None,
+    reuseContainer:       Boolean                     = true,
+    user:                 Option[String]              = None,
+    mode:                 Option[String]              = None)
 
   def userWorkDirectory(uDocker: UDockerArguments) = {
     import io.circe.generic.extras.auto._
-    import io.circe.jawn.{ decode, decodeFile }
-    import io.circe.syntax._
+    import io.circe.jawn.decode
     import org.openmole.plugin.task.udocker.DockerMetadata._
 
     val imageJSONE = decode[ImageJSON](uDocker.localDockerImage.imageJSON)

@@ -103,6 +103,7 @@ package builder {
   class Outputs {
     def +=[T: OutputBuilder](d: Val[_]*): T ⇒ T =
       implicitly[OutputBuilder[T]].outputs.modify(_ ++ d)
+
     def +=[T: MappedOutputBuilder: OutputBuilder](mapped: IO*): T ⇒ T =
       (this ++= IO.collectVals(mapped)) andThen implicitly[MappedOutputBuilder[T]].mappedOutputs.modify(_ ++ IO.collectMapped(mapped))
 

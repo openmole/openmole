@@ -6,13 +6,9 @@
 @ul( listStyleType := "none")
   @li
     @h5
-        @a(run.title, href := run.file)
+      @a(run.title, href := run.file)
     @ol
-      @sitemap.siteMapSection(runPages.diff(Seq(packaged)))
-      @li
-        @a(packaged.title, href := packaged.file)
-        @ol(listStyleType:= "lower-alpha")
-          @sitemap.siteMapSection(packagedPages)
+      @sitemap.siteMapSection(runPages)
   @li
     @h5
         @a(explore.title, href := explore.file)
