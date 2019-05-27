@@ -241,7 +241,7 @@ imports = Seq("!*") //Seq("!org.apache.commons.math3.*","!better.*", "*")
     libraryDependencies += "org.openmole.library" %% "spatialdata" % spatialdataVersion,
     version := spatialdataVersion,
     OsgiKeys.embeddedJars := (Keys.externalDependencyClasspath in Compile).value map (_.data) filter (f=> (f.getName startsWith "gt-"))
-) settings(settings: _*)
+) settings(settings: _*)*/
 
 
 
