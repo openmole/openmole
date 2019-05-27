@@ -19,13 +19,15 @@ import org.openmole.tool.outputredirection.OutputRedirection
 
 object PythonTask {
 
-  //  distinct images for python2 and python3 ? => pip for python3 only on dockerhub - provisory python3 only for tests
-  // FIXME openmole python docker image - major is not taken into account for now
-  //def dockerImage(major: Int) = DockerImage("openmole/python-"+major)
+  // could to make distinct image for python 2 and 3
   def dockerImage(major: Int) = DockerImage("python")
 
-  def installCommands(install: Seq[String], libraries: Seq[String]): Vector[String] =
-    (install ++ libraries.map { l ⇒ "pip install " + l }).toVector
+  def installCommands(install: Seq[String], libraries: Seq[String], major: Int): Vector[String] = {
+    // need to install pip2 in case of python 2
+    val effintsall = install++(if (major==2) Seq("curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py","python2 get-pip.py") else Seq.empty)
+    (effintsall ++ libraries.map { l ⇒ "pip"+major+" install " + l }).toVector
+  }
+
 
   def apply(
     script:               RunnableScript,
@@ -105,7 +107,7 @@ object PythonTask {
           def uDockerTask =
             UDockerTask(
               udocker,
-              commands = s"python $scriptName",//Commands.value.modify(_.map(_.map(blockChars)))(run),
+              commands = s"python${major.toString} $scriptName",
               errorOnReturnValue = errorOnReturnValue,
               returnValue = returnValue,
               stdOut = stdOut,
