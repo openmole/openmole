@@ -260,7 +260,9 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     Utils.move(fromFile, toFile)
   }
 
-  def duplicate(safePath: SafePath, newName: String): SafePath = Utils.copy(safePath, newName)
+  def duplicate(safePath: SafePath, newName: String): SafePath = {
+    Utils.copy(safePath, newName, followSymlinks = true)
+  }
 
   def mdToHtml(safePath: SafePath): String = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
