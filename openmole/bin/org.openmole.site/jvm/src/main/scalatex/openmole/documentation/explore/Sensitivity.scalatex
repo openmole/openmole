@@ -66,8 +66,8 @@ The @code{SensitivityMorris} constructor is defined in OpenMOLE and can take the
   @li{@code{evaluation} is the task (or a composition of tasks) that uses your inputs, typically your model task,}
   @li{@code{inputs} is the list of your model's inputs,}
   @li{@code{outputs} is the list of your model's outputs,}
-  @li{@code{repetitions},}
-  @li{@code{levels}.}
+  @li{@code{repetitions} is the number of trajectories sampled,}
+  @li{@code{levels} is the resolution of relative variations (increases in variables will be in +- 1 / levels).}
 
 
 @h3{Hook}
@@ -121,7 +121,7 @@ The @code{SensitivitySaltelli} constructor is defined in OpenMOLE and can take t
   @li{@code{evaluation} is the task (or a composition of tasks) that uses your inputs, typically your model task,}
   @li{@code{inputs} is the list of your model's inputs,}
   @li{@code{outputs} is the list of your model's outputs,}
-  @li{@code{samples}.}
+  @li{@code{samples} number of samples to draw for the estimation of the relative variances.}
 
 
 @h3{Hook}
