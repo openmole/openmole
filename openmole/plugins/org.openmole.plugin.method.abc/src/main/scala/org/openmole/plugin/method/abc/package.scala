@@ -4,7 +4,9 @@ import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.plugin.tool.pattern._
 import mgo.abc._
+import org.openmole.core.workflow.domain.Bounds
 import monocle.macros.Lenses
+import org.openmole.core.keyword.In
 
 package object abc {
 
@@ -12,8 +14,39 @@ package object abc {
     val abcNamespace = Namespace("abc")
     val state = Val[MonAPMC.MonState]("state", abcNamespace)
 
+    object Prior {
+      implicit def inToPrior[D](in: In[Val[Double], D])(implicit bounds: Bounds[D, Double]) = Prior(in.value, bounds.min(in.domain), bounds.max(in.domain))
+    }
+
     case class Prior(v: Val[Double], low: FromContext[Double], high: FromContext[Double])
-    case class Observed(v: Val[Double], observed: Double)
+
+    object Observed {
+
+      object Observable {
+        def apply[T](f: T ⇒ Array[Double]) = new Observable[T] {
+          def apply(t: T) = f(t)
+        }
+
+        implicit def intObservable = Observable[Int](i ⇒ Array(i.toDouble))
+        implicit def doubleObservable = Observable[Double](d ⇒ Array(d))
+        implicit def iterableDouble = Observable[Iterable[Double]](_.toArray)
+        implicit def iterableInt = Observable[Iterable[Int]](i ⇒ i.toArray.map(_.toDouble))
+        implicit def arrayDouble = Observable[Array[Double]](identity)
+        implicit def arrayInt = Observable[Array[Int]](_.map(_.toDouble))
+      }
+
+      trait Observable[T] {
+        def apply(t: T): Array[Double]
+      }
+
+      implicit def tupleToObserved[T: Observable](t: (Val[T], T)) = Observed(t._1, t._2)
+
+      def fromContext[T](observed: Observed[T], context: Context) = context(observed.v.array).map(v ⇒ observed.obs(v))
+      def value[T](observed: Observed[T]) = observed.obs(observed.observed)
+    }
+
+    case class Observed[T](v: Val[T], observed: T)(implicit val obs: Observed.Observable[T])
+
     case class ABCParameters(state: Val[MonAPMC.MonState], step: Val[Int])
 
     implicit class ABCContainer(dsl: DSLContainer[ABCParameters]) extends DSLContainerHook(dsl) {
@@ -26,7 +59,7 @@ package object abc {
     def apply(
       evaluation:           DSL,
       prior:                Seq[Prior],
-      observed:             Seq[Observed],
+      observed:             Seq[Observed[_]],
       sample:               Int,
       generated:            Int,
       minAcceptedRatio:     OptionalArgument[Double] = 0.01,
@@ -68,7 +101,7 @@ package object abc {
   def IslandABC(
     evaluation:  DSL,
     prior:       Seq[Prior],
-    observed:    Seq[Observed],
+    observed:    Seq[Observed[_]],
     sample:      Int,
     generated:   Int,
     parallelism: Int,

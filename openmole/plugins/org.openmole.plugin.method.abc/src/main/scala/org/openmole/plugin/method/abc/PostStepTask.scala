@@ -15,7 +15,7 @@ object PostStepTask {
     nAlpha:               Int,
     stopSampleSizeFactor: Int,
     prior:                Seq[ABC.Prior],
-    observed:             Seq[ABC.Observed],
+    observed:             Seq[ABC.Observed[_]],
     state:                Val[MonAPMC.MonState],
     stepState:            Val[MonAPMC.StepState],
     minAcceptedRatio:     Option[Double],
@@ -33,8 +33,8 @@ object PostStepTask {
         if (inside) 1.0 / volume else 0.0
       }
 
-      val xs = observed.toArray.map(o ⇒ context(o.v.array)).transpose
-      val s = Try(MonAPMC.postStep(n, nAlpha, density, observed.map(_.observed).toArray, context(stepState), xs)(random()))
+      val xs = observed.toArray.flatMap(o ⇒ ABC.Observed.fromContext(o, context)).transpose
+      val s = Try(MonAPMC.postStep(n, nAlpha, density, observed.flatMap(o ⇒ ABC.Observed.value(o)).toArray, context(stepState), xs)(random()))
 
       s match {
         case Success(s) ⇒
