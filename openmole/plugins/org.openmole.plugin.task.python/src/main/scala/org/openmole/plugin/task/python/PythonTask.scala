@@ -48,7 +48,7 @@ object PythonTask {
     val udocker =
       UDockerTask.createUDocker(
         dockerImage(major),
-        install = installCommands(install, libraries),
+        install = installCommands(install, libraries,major),
         cacheInstall = true,
         forceUpdate = forceUpdate,
         mode = "P1",
