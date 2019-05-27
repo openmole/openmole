@@ -72,17 +72,17 @@ val errdensity = Val[Array[Double]]
 val errresistance = Val[Array[Double]]
 val score = Val[Double]
 
-val sklearnclassifier = PythonTask(
-    workDirectory / "logisticregression.py",3,
+val sklearnclassifier =
+  PythonTask(
+    workDirectory / "logisticregression.py",
     libraries = Seq("pandas","numpy","sklearn")
-) set (
-  inputs += training mapped "data/training.csv",
-  inputs += validation mapped "data/validation.csv",
-  outputs += errdensity mapped "errdensity",
-  outputs += errresistance mapped "errresistance",
-  outputs += score mapped "score"
-)
-""")
+  ) set (
+    inputs += training mapped "data/training.csv",
+    inputs += validation mapped "data/validation.csv",
+    outputs += errdensity mapped "errdensity",
+    outputs += errresistance mapped "errresistance",
+    outputs += score mapped "score"
+  )""")
 
 @br
 with the following python script:

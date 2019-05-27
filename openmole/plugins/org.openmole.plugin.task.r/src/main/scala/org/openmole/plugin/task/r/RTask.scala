@@ -111,9 +111,7 @@ object RTask {
       external = External(),
       info = InfoConfig(),
       mapped = MappedInputOutputConfig()
-    ) set (
-        outputs += (Seq(returnValue.option, stdOut.option, stdErr.option).flatten: _*)
-      )
+    ) set (outputs += (Seq(returnValue.option, stdOut.option, stdErr.option).flatten: _*))
   }
 
 }
