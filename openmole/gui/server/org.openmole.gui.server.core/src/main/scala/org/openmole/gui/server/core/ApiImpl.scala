@@ -11,6 +11,7 @@ import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import java.io._
 import java.nio.file._
+import java.util.zip.GZIPInputStream
 
 import au.com.bytecode.opencsv.CSVReader
 import org.openmole.core.console.ScalaREPL
@@ -518,5 +519,19 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
       implicitResource,
       paths.size + implicitResource.size
     )
+  }
+
+  def downloadHTTP(url: String, path: SafePath, extract: Boolean): Unit = {
+    import org.openmole.tool.stream._
+    val dest = safePathToFile(path)(ServerFileSystemContext.project, workspace)
+
+    gridscale.http.getStream(url) { is ⇒
+      if (extract) {
+        val tis = new TarInputStream(new GZIPInputStream(is))
+        try tis.extract(dest)
+        finally tis.close
+      }
+      else dest.withOutputStream(os ⇒ copy(is, os))
+    }
   }
 }
