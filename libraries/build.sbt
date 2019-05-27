@@ -233,11 +233,17 @@ lazy val mgo = OsgiProject(dir, "mgo", exports = Seq("mgo.*", "freestyle.*"), im
 
 /*lazy val spatialdataVersion = "0.1-SNAPSHOT"
 
-lazy val spatialdata = OsgiProject(dir, "org.openmole.spatialdata", exports = Seq("org.openmole.spatialdata.*","!org.postgresql","!org.mongodb"), imports = Seq("!org.apache.commons.math3.*","!better.*", "*")
-, privatePackages = Seq("!scala.*", "!monocle.*","!org.apache.commons.math3.*" , "!cats.*", "!squants.*", "!scalaz.*", "*")) settings(
+lazy val spatialdata = OsgiProject(dir, "org.openmole.spatialdata",
+  exports = Seq("org.openmole.spatialdata.*"),
+imports = Seq("!*") //Seq("!org.apache.commons.math3.*","!better.*", "*")
+, privatePackages = Seq("**"),//privatePackages = Seq("!scala.*","!org.apache.commons.math3.*" , "*")
+) settings( // ,"**"
     libraryDependencies += "org.openmole.library" %% "spatialdata" % spatialdataVersion,
-    version := spatialdataVersion) settings(settings: _*)
-*/
+    version := spatialdataVersion,
+    OsgiKeys.embeddedJars := (Keys.externalDependencyClasspath in Compile).value map (_.data) filter (f=> (f.getName startsWith "gt-"))
+) settings(settings: _*)*/
+
+
 
 /*lazy val familyVersion = "1.3"
 lazy val family = OsgiProject(dir, "fr.iscpif.family") settings(
