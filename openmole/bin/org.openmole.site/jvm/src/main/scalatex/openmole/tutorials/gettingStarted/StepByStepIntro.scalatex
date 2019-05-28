@@ -14,7 +14,7 @@ The composition of a full exploration experiment is achieved by writing a script
 Such a script is called a @i{workflow} and should contain:
   @ul
     @li
-      some @a("tasks", href := run.file + "#Tasks") (the model to explore needs to be embedded in a task for instance),
+      some @a("tasks", href := embed.file + "#Tasks") (the model to explore needs to be embedded in a task for instance),
     @li
       their inputs and outputs as @a("objects", href := language.file + "#Constructobjects"),
     @li
