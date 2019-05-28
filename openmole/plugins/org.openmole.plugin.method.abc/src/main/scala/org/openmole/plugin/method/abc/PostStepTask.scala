@@ -33,7 +33,8 @@ object PostStepTask {
         if (inside) 1.0 / volume else 0.0
       }
 
-      val xs = observed.toArray.flatMap(o ⇒ ABC.Observed.fromContext(o, context)).transpose
+      val xs = observed.toArray.map(o ⇒ ABC.Observed.fromContext(o, context).flatten).transpose
+
       val s = Try(MonAPMC.postStep(n, nAlpha, density, observed.flatMap(o ⇒ ABC.Observed.value(o)).toArray, context(stepState), xs)(random()))
 
       s match {
@@ -45,14 +46,13 @@ object PostStepTask {
           context + Variable(state, s) + Variable(stop, stopValue(s)) + Variable(step, context(step) + 1)
 
         case Failure(f: APMC.SingularCovarianceException) ⇒
-          def copyState(s: MonAPMC.MonState, ns: APMC.State) =
+          def copyState(s: Option[MonAPMC.MonState], ns: APMC.State) =
             s match {
-              case MonAPMC.Empty()  ⇒ s
-              case s: MonAPMC.State ⇒ s.copy(s = ns)
+              case Some(MonAPMC.Empty()) | None ⇒ MonAPMC.Empty()
+              case Some(s: MonAPMC.State)       ⇒ s.copy(s = ns)
             }
 
-          context + Variable(state, copyState(context(state), f.s)) + Variable(stop, true) + Variable(step, context(step) + 1)
-
+          context + Variable(state, copyState(context.get(state), f.s)) + Variable(stop, true) + Variable(step, context(step) + 1)
         case Failure(f) ⇒ throw f
       }
     } set (

@@ -1,5 +1,7 @@
 package org.openmole.core.workflow.test
 
+import java.util.logging.Level
+
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.{ FileService, FileServiceCache }
 import org.openmole.core.networkservice.NetworkService

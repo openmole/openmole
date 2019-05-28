@@ -20,6 +20,7 @@ package org.openmole.core.workflow.job
 import org.openmole.core.workflow.job.State._
 import org.openmole.core.workflow.task._
 import org.openmole.core.context._
+import org.openmole.core.exception.InternalProcessingError
 
 object MoleJob {
   implicit val moleJobOrdering = Ordering.by((_: MoleJob).id)
@@ -56,6 +57,8 @@ object MoleJob {
 
   def finish(moleJob: MoleJob, result: Either[Context, Throwable]) = moleJob.jobFinished(moleJob.id, result)
 
+  class SubMoleCanceled extends Exception
+
 }
 
 import MoleJob._
@@ -80,11 +83,11 @@ class MoleJob(
     Context((prototypes zip values).map { case (p, v) ⇒ Variable(p, v) }: _*)
 
   def perform(executionContext: TaskExecutionContext): Either[Context, Throwable] =
-    try Left(task.perform(context, executionContext))
-    catch {
-      case t: Throwable ⇒ Right(t)
-    }
-
-  def canceled = subMoleCanceled()
+    if (!subMoleCanceled())
+      try Left(task.perform(context, executionContext))
+      catch {
+        case t: Throwable ⇒ Right(t)
+      }
+    else Right(new SubMoleCanceled)
 
 }

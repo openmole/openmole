@@ -56,7 +56,6 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
 
                 for {
                   moleJob ← executionJob.jobs
-                  if !moleJob.canceled
                 } {
                   runningJob = Some(moleJob)
                   val result =
@@ -66,6 +65,8 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                   MoleJob.finish(moleJob, result)
 
                   result match {
+                    case Right(_: MoleJob.SubMoleCanceled) ⇒
+                      environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob, ExecutionState.KILLED, ExecutionState.RUNNING))
                     case Right(e) ⇒
                       environment._failed.incrementAndGet()
                       environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob, ExecutionState.FAILED, ExecutionState.RUNNING))
