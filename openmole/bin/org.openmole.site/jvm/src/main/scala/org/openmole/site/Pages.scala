@@ -252,7 +252,7 @@ object DocumentationPages {
   // Scale
   def scalePages = pageNode(scale, Vector(multithread, ssh, cluster, egi))
 
-  lazy val scale = DocumentationPage.fromScalatex(name = "Scale", content = scalatex.documentation.scale.Scale, title = Some("Scale on Different Environments"))
+  lazy val scale = DocumentationPage.fromScalatex(name = "Scale Up", content = scalatex.documentation.scale.Scale, title = Some("Scale Up Your Experiments"))
   lazy val multithread = DocumentationPage.fromScalatex(name = "Multithread", content = scalatex.documentation.scale.Multithread)
   lazy val ssh = DocumentationPage.fromScalatex(name = "SSH", content = scalatex.documentation.scale.SSH)
   lazy val cluster = DocumentationPage.fromScalatex(name = "Cluster", content = scalatex.documentation.scale.Cluster)

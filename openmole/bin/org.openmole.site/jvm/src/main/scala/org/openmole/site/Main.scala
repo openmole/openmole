@@ -45,7 +45,7 @@ object Main {
           div(rowTag)(
             div(colTag, mainTitle)("EMBED"),
             div(colTag, mainTitle)("EXPLORE"),
-            div(colTag, mainTitle)("SCALE")
+            div(colTag, mainTitle)("SCALE UP")
           ),
           div(rowTag, paddingBottom := 5)(
             div(colTag)(div(mainText, width := 220, embedText)),
@@ -83,7 +83,7 @@ object Main {
             ),
             div(colTag)(
               div(rowTag)(img(src := Resource.img.environment.scale.file, width := 120)),
-              div(rowTag, mainTitle)("SCALE"),
+              div(rowTag, mainTitle)("SCALE UP"),
               div(rowTag)(div(mainText, width := 200, scaleText)),
               div(rowTag)(readMore(DocumentationPages.scale))
             )
