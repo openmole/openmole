@@ -132,7 +132,8 @@ object MoleExecution extends JavaLogger {
     allJobs.foreach(j ⇒ removeJob(subMoleExecution, j))
     assert(subMoleExecution.jobs.isEmpty)
 
-    subMoleExecution.children.values.toVector.foreach(cancel)
+    val children = subMoleExecution.children.values.toVector
+    children.foreach(cancel)
     subMoleExecution.parent.foreach(_.children.remove(subMoleExecution.id))
   }
 
