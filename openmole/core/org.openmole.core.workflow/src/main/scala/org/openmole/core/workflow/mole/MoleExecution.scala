@@ -142,11 +142,11 @@ object MoleExecution extends JavaLogger {
     updateNbJobs(subMoleExecutionState, -1)
   }
 
-  def addJob(subMoleExecutionState: SubMoleExecutionState, job: MoleJobId, capsule: MoleCapsule) = {
-    assert(!subMoleExecutionState.canceled)
-    subMoleExecutionState.jobs.add(job)
-    subMoleExecutionState.moleExecution.jobs.put(job, capsule)
-  }
+  def addJob(subMoleExecution: SubMoleExecutionState, job: MoleJobId, capsule: MoleCapsule) =
+    if (!subMoleExecution.canceled) {
+      subMoleExecution.jobs.add(job)
+      subMoleExecution.moleExecution.jobs.put(job, capsule)
+    }
 
   def updateNbJobs(subMoleExecutionState: SubMoleExecutionState, v: Int): Unit = {
     import subMoleExecutionState.moleExecution.executionContext.services._
