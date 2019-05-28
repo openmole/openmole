@@ -90,13 +90,13 @@ The @code{ProfileEvolution} constructor takes the following arguments:
 
 @ul
   @li{@hl.code("evaluation"): the model task, that has to be previously declared in your script,}
-  @li{@hl.code("genome"): a list of the model input parameters with their values interval declared with the @hl.code("in") operator,}
   @li{@hl.code("objective"): the fitness, an output variable defined in the OpenMOLE script that is used to evaluate the model dynamics, to be minimized,}
   @li{@hl.code("x"): the parameter to profile,}
   @li{@hl.code("nX"): the size of the subintervals in  @b{x} domain,}
-  @li{@hl.code("stochastic"): (optional) the seed provider, mandatory if your model contains randomness,}
-  @li{@hl.code("parallelism"): (optional) number of parallel calibration performed within @b{i} subinterval, default is 1,}
+  @li{@hl.code("genome"): a list of the model input parameters with their values interval declared with the @hl.code("in") operator,}
   @li{@hl.code("termination"): a "quantity" of model evaluation allocated to the profile task. Can be given in number of evaluations (@i{e.g.} 20000) or in computation time units (@i{e.g.} 230 minutes, 2 days...),}
+  @li{@hl.code("parallelism"): (optional) number of parallel calibration performed within @b{i} subinterval, default is 1,}
+  @li{@hl.code("stochastic"): (optional) the seed provider, mandatory if your model contains randomness,}
   @li{@hl.code("distribution"): (optional) computation distribution strategy, default is "steadyState".}
 
 
@@ -130,18 +130,16 @@ Here is an example :
 
   ProfileEvolution(
     evaluation = modelTask,
-    parallelism = 10,
-    termination = 100,
+    objective = fitness,
     x = param1,
     nX = 20,
     genome = Seq(
         param1 in (0.0, 99.0),
         param2 in (0.0, 99.0)
     ),
-    objective = fitness,
-    stochastic = Stochastic(seed = seed, replications = 100)
-    parallelism = 500,
     termination = 200000,
+    parallelism = 500,
+    stochastic = Stochastic(seed = seed, replications = 100),
     distribution = Island(10 minutes)
   ) hook(workDirectory / "path/to/a/directory")
 """, name = "Profile")
