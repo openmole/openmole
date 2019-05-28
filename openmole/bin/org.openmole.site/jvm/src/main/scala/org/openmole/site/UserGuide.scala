@@ -56,17 +56,17 @@ object UserGuide {
     ))
     case _ ⇒ header(span(
       tools.to(DocumentationPages.explore)(img(src := Resource.img.method.exploreMapAnimated.file, headerImg)),
-      span(s"Explore: $method", h1Like)
+      span(s"Explore with $method", h1Like)
     ))
   }
 
   def headerEnvironment(env: String) = env match {
-    case "Scale" ⇒ header(span(
+    case "Scale Up" ⇒ header(span(
       tools.to(DocumentationPages.scale)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
-      span(s"Scale on different environments"), h1Like))
+      span(s"Scale up your experiments"), h1Like))
     case _ ⇒ header(span(
       tools.to(DocumentationPages.scale)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
-      span(s"Scale: $env"), h1Like
+      span(s"Scale up on $env"), h1Like
     ))
   }
 
