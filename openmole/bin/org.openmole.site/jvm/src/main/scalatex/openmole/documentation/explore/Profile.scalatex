@@ -58,30 +58,6 @@ An important nuance is that for each point of this fitness vs @b{i} values plot,
 This means that @b{j} and @b{k} values vary for each point of the @b{i} parameter profile plot.
 
 
-@h3{Typed signature}
-
-The profile method can be typed  likewise:
-
-@br@br
-
-@div(style:="text-align:center")
-    Profile:   (𝓧@sub{1},...,𝓧@sub{k},) → {1,...,k} → [(𝓧,Y)]
-@div(style:="text-align:center")
-    such that: Profile(M)(i) = [(𝒙@sub{i1},y@sub{1}), ... , (𝒙@sub{in}, y@sub{n})],
-@div(style:="text-align:center")
-                ∀ j ∈ [1;n], y@sub{j} = min@sub{𝒙∈X@sub{@RawFrag{-i}}}@RawFrag{(M(𝒙))}
-@div(style:="text-align:center")
-                X@sub{@RawFrag{-i}} = {𝒙∈𝓧@sub{1} x ... x 𝓧@sub{i-1} x {𝒙@sub{i}} x 𝓧@sub{i+1} x ... x 𝓧@sub{k}}
-
-@br
-
-With M, the model, X, the input space, Y, the output space, 𝓟(X) the power set of X (@i{i.e.} every subset of X, including X and ∅).
-
-@br
-
-In other words: this function takes a model M (whose signature is (X→Y)), an element @i{y} of Y (y is the list of criterion value to reach) and find a list of elements of X (noted @i{x}) such that M(x) are Pareto dominant compared to every image of other elements of X by M, regarding criterion @i{y}.
-
-
 
 @h2{Profile within OpenMOLE}
 @h3{Specific constructor}

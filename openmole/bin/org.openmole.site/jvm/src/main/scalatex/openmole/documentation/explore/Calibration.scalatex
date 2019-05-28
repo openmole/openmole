@@ -41,24 +41,6 @@ However, the number of objectives (output dimensionality) should be limited to a
 Single criterion calibration answers the following question: for a given target value of the output @b{o1}, what is(are) the parameter set(s) @b{(i, j , k)} producing the output value(s) closest to the target?
 
 
-@h3{Typed signature}
-
-The single criterion calibration of a model can be seen as a general function, whose signature can be typed, and be noted as:
-
-@br@br
-
-@div(style:="text-align:center")
-    Calibration@sub{single} :  (X → Y) → Y → X
-
-@br
-
-With X the input space, and Y the output space.
-
-@br@br
-
-In other words, this function takes a model M whose signature is (X→Y) (since it transforms inputs into outputs), an element @i{y} of Y representing the criterion value to reach, and finds an element @i{x} of X such that M(@i{x}) is the "closest" possible value to @i{y}.
-
-
 
 @h2{Multi criteria Calibration}
 @h3{Method's score}
@@ -106,24 +88,6 @@ Two pairs such as (10, 50) and (50, 10) each have one element smaller than the o
 There is no natural way to tell which pair represents the smallest distance between the model and the data.
 Thus, in the multi-criteria case, we keep all the parameter sets (e.g. {(i1, j1, k1), (i2, j2, k2), ...}) yielding such equivalent distances (e.g. {(d11, d21), (d12, d22), ...}).
 The set of all these parameter sets is called the Pareto front.
-
-
-@h3{Typed signature}
-
-The signature function of multi-criteria calibration can be typed as:
-
-@br@br
-
-@div(style:="text-align:center")
-    Calibration@sub{multi} : (X → Y) → Y → [X]
-
-@br
-
-With X the input space, and Y the output space.
-
-@br@br
-
-In other words, this function takes a model M whose signature is (X→Y), an element @i{y} of Y representing the list of criteria values to reach, and finds a list @i{x} of elements of X such that M(@i{x}) is Pareto dominant compared to every image of other elements of X by M, regarding criterion @i{y}.
 
 
 
