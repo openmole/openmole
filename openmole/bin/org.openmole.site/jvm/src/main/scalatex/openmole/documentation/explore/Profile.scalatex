@@ -58,30 +58,6 @@ An important nuance is that for each point of this fitness vs @b{i} values plot,
 This means that @b{j} and @b{k} values vary for each point of the @b{i} parameter profile plot.
 
 
-@h3{Typed signature}
-
-The profile method can be typed  likewise:
-
-@br@br
-
-@div(style:="text-align:center")
-    Profile:   (𝓧@sub{1},...,𝓧@sub{k},) → {1,...,k} → [(𝓧,Y)]
-@div(style:="text-align:center")
-    such that: Profile(M)(i) = [(𝒙@sub{i1},y@sub{1}), ... , (𝒙@sub{in}, y@sub{n})],
-@div(style:="text-align:center")
-                ∀ j ∈ [1;n], y@sub{j} = min@sub{𝒙∈X@sub{@RawFrag{-i}}}@RawFrag{(M(𝒙))}
-@div(style:="text-align:center")
-                X@sub{@RawFrag{-i}} = {𝒙∈𝓧@sub{1} x ... x 𝓧@sub{i-1} x {𝒙@sub{i}} x 𝓧@sub{i+1} x ... x 𝓧@sub{k}}
-
-@br
-
-With M, the model, X, the input space, Y, the output space, 𝓟(X) the power set of X (@i{i.e.} every subset of X, including X and ∅).
-
-@br
-
-In other words: this function takes a model M (whose signature is (X→Y)), an element @i{y} of Y (y is the list of criterion value to reach) and find a list of elements of X (noted @i{x}) such that M(x) are Pareto dominant compared to every image of other elements of X by M, regarding criterion @i{y}.
-
-
 
 @h2{Profile within OpenMOLE}
 @h3{Specific constructor}
@@ -90,28 +66,28 @@ The @code{ProfileEvolution} constructor takes the following arguments:
 
 @ul
   @li{@hl.code("evaluation"): the model task, that has to be previously declared in your script,}
-  @li{@hl.code("genome"): a list of the model input parameters with their values interval declared with the @hl.code("in") operator,}
   @li{@hl.code("objective"): the fitness, an output variable defined in the OpenMOLE script that is used to evaluate the model dynamics, to be minimized,}
   @li{@hl.code("x"): the parameter to profile,}
-  @li{@hl.code("nX"): the size of the subintervals in  @b{x} domain,}
-  @li{@hl.code("stochastic"): (optional) the seed provider, mandatory if your model contains randomness,}
-  @li{@hl.code("parallelism"): (optional) number of parallel calibration performed within @b{i} subinterval, default is 1,}
+  @li{@hl.code("nX"): the size of the subintervals in @b{x} domain,}
+  @li{@hl.code("genome"): a list of the model input parameters with their values interval declared with the @hl.code("in") operator,}
   @li{@hl.code("termination"): a "quantity" of model evaluation allocated to the profile task. Can be given in number of evaluations (@i{e.g.} 20000) or in computation time units (@i{e.g.} 230 minutes, 2 days...),}
-  @li{@hl.code("distribution"): (optional) computation distribution strategy, default is "steadyState".}
+  @li{@hl.code("parallelism"): (optional) number of parallel calibrations performed within @b{i} subinterval, defaults to 1,}
+  @li{@hl.code("stochastic"): (optional) the seed provider, mandatory if your model contains randomness,}
+  @li{@hl.code("distribution"): (optional) computation distribution strategy, default is "SteadyState".}
 
 
 @h3{Hook}
 
 The output of the genetic algorithm must be captured with a hook which saves the current optimal population.
-The generic way to use it is to write either @code{hook(workDirectory / "path/of/a/file.csv")} to save the results in a CSV file, or @code{hook display} to display the results in the standard output.
+The generic way to use it is to write either @code{hook(workDirectory / "path/of/a/directory")} to save the results as CSV files in a specific directory, or @code{hook display} to display the results in the standard output.
 
 @br
 
-The hook arguments which can be specified to the @code{ProfileEvolution} task are:
+The hook arguments which can be specified to the @code{ProfileEvolution} constructor are:
 
 @ul
-  @li{@code{output} the directory in which to store the population files,}
-  @li{@code{frequency} (@i{Optional}, Long) the frequency at which the generations should be saved.}
+  @li{@code{output}: the directory in which to store the population files,}
+  @li{@code{frequency}: (optional, Long) the frequency at which the generations should be saved.}
 
 For more details about hooks, check the corresponding @aa("Language", href := hook.file) page.
 
@@ -130,18 +106,16 @@ Here is an example :
 
   ProfileEvolution(
     evaluation = modelTask,
-    parallelism = 10,
-    termination = 100,
+    objective = fitness,
     x = param1,
     nX = 20,
     genome = Seq(
         param1 in (0.0, 99.0),
         param2 in (0.0, 99.0)
     ),
-    objective = fitness,
-    stochastic = Stochastic(seed = seed, replications = 100)
-    parallelism = 500,
     termination = 200000,
+    parallelism = 500,
+    stochastic = Stochastic(seed = seed, replications = 100),
     distribution = Island(10 minutes)
   ) hook(workDirectory / "path/to/a/directory")
 """, name = "Profile")

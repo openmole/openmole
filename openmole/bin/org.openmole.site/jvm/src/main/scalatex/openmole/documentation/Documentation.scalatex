@@ -6,9 +6,9 @@
 @ul( listStyleType := "none")
   @li
     @h5
-      @a(run.title, href := run.file)
+      @a(embed.title, href := embed.file)
     @ol
-      @sitemap.siteMapSection(runPages)
+      @sitemap.siteMapSection(embedPages)
   @li
     @h5
         @a(explore.title, href := explore.file)

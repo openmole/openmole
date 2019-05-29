@@ -41,24 +41,6 @@ However, the number of objectives (output dimensionality) should be limited to a
 Single criterion calibration answers the following question: for a given target value of the output @b{o1}, what is(are) the parameter set(s) @b{(i, j , k)} producing the output value(s) closest to the target?
 
 
-@h3{Typed signature}
-
-The single criterion calibration of a model can be seen as a general function, whose signature can be typed, and be noted as:
-
-@br@br
-
-@div(style:="text-align:center")
-    Calibration@sub{single} :  (X → Y) → Y → X
-
-@br
-
-With X the input space, and Y the output space.
-
-@br@br
-
-In other words, this function takes a model M whose signature is (X→Y) (since it transforms inputs into outputs), an element @i{y} of Y representing the criterion value to reach, and finds an element @i{x} of X such that M(@i{x}) is the "closest" possible value to @i{y}.
-
-
 
 @h2{Multi criteria Calibration}
 @h3{Method's score}
@@ -108,24 +90,6 @@ Thus, in the multi-criteria case, we keep all the parameter sets (e.g. {(i1, j1,
 The set of all these parameter sets is called the Pareto front.
 
 
-@h3{Typed signature}
-
-The signature function of multi-criteria calibration can be typed as:
-
-@br@br
-
-@div(style:="text-align:center")
-    Calibration@sub{multi} : (X → Y) → Y → [X]
-
-@br
-
-With X the input space, and Y the output space.
-
-@br@br
-
-In other words, this function takes a model M whose signature is (X→Y), an element @i{y} of Y representing the list of criteria values to reach, and finds a list @i{x} of elements of X such that M(@i{x}) is Pareto dominant compared to every image of other elements of X by M, regarding criterion @i{y}.
-
-
 
 @h2{Calibration within OpenMOLE}
 @h3{Specific constructor}
@@ -134,13 +98,14 @@ Single and multi-criteria calibration in OpenMOLE are both done with the NSGA2 a
 It takes the following parameters:
 
 @ul
-  @li{@code{mu} the population size,}
-  @li{@code{genome} a list of the model parameters and their respective variation intervals,}
-  @li{@code{objectives} a list of the distance measures (which in the single criterion case will contain only one measure),}
-  @li{@code{algorithm} the NSGA2 algorithm defining the evolution,}
-  @li{@code{evaluation} the OpenMOLE task that runs the simulation (@i{i.e.} the model),}
-  @li{@code{parallelism} the number of simulations that will be run in parallel,}
-  @li{@code{termination} the total number of evaluations (execution of the task passed to the parameter "evaluation") to be executed.}
+  @li{@code{evaluation}: the OpenMOLE task that runs the simulation (@i{i.e.} the model),}
+  @li{@code{objectives}: a list of the distance measures (which in the single criterion case will contain only one measure),}
+  @li{@code{mu}: the population size,}
+  @li{@code{genome}: a list of the model parameters and their respective variation intervals,}
+  @li{@code{termination}: the total number of evaluations (execution of the task passed to the parameter "evaluation") to be executed,}
+  @li{@code{parallelism}: (optional) the number of simulations that will be run in parallel, defaults to 1,}
+  @li{@code{stochastic}: (optional) the seed provider, mandatory if your model contains randomness,}
+  @li{@code{distribution}: (optional) computation distribution strategy, default is "SteadyState".}
 
 Where @code{param1}, @code{param2}, @code{param3} and @code{param4} are inputs of the @code{modelTask}, and @code{distance1} and @code{distance2} are its outputs.
 
@@ -152,15 +117,15 @@ More details and advanced notions can be found on the @aa("GA detailed page", hr
 @h3{Hook}
 
 The output of the genetic algorithm must be captured with a hook which saves the current optimal population.
-The generic way to use it is to write either @code{hook(workDirectory / "path/of/a/file.csv")} to save the results in a CSV file, or @code{hook display} to display the results in the standard output.
+The generic way to use it is to write either @code{hook(workDirectory / "path/of/a/directory")} to save the results as CSV files in a specific directory, or @code{hook display} to display the results in the standard output.
 
 @br
 
 The hook arguments which can be specified to the @code{NSGA2Evolution} constructor are:
 
 @ul
-  @li{@code{output} the directory in which to store the population files,}
-  @li{@code{frequency} (@i{Optional}, Long) the frequency at which the generations should be saved.}
+  @li{@code{output}: the directory in which to store the population files,}
+  @li{@code{frequency}: (optional, Long) the frequency at which the generations should be saved.}
 
 For more details about hooks, check the corresponding @aa("Language", href := hook.file) page.
 
@@ -179,14 +144,15 @@ val param4 = Val[String]
 
 NSGA2Evolution(
   evaluation = modelTask,
-  parallelism = 10,
-  termination = 100,
+  objectives = Seq(distance1, distance2),
+  mu = 200,
   genome = Seq(
     param1 in (0.0, 99.0),
     param2 in (0.0, 99.0),
     param3 in (0, 5),
     param4 in List("apple", "banana", "strawberry")),
-  objectives = Seq(distance1, distance2)
+  termination = 100,
+  parallelism = 10
 ) hook (workDirectory / "path/to/a/directory")
 """, name = "Calibration")
 
