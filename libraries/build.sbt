@@ -139,7 +139,7 @@ lazy val netlogo5 = OsgiProject(
       "asm" % "asm-all" % "3.3.1" % "provided",
       "org.picocontainer" % "picocontainer" % "2.13.6" % "provided"), version := netLogo5Version, scalaVersion := "2.9.2", crossPaths := false) settings(settings: _*)
 
-lazy val netLogo6Version = "6.0.4"
+lazy val netLogo6Version = "6.1.0"
 
 lazy val netlogo6 = OsgiProject(
   dir,
@@ -150,13 +150,15 @@ lazy val netlogo6 = OsgiProject(
   //resolvers += Resolver.bintrayRepo("netlogo", "NetLogo-JVM"),
   libraryDependencies ++= Seq(
     "org.nlogo" % "netlogo" % netLogo6Version % "provided" from s"https://dl.bintray.com/netlogo/NetLogo-JVM/org/nlogo/netlogo/$netLogo6Version/netlogo-$netLogo6Version.jar",
-    "org.scala-lang" % "scala-library" % "2.12.4" % "provided",
+    "org.scala-lang" % "scala-library" % "2.12.8" % "provided",
     "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.5" % "provided",
     "commons-codec" % "commons-codec" % "1.10" % "provided",
     "org.ow2.asm" % "asm-all" % "5.0.4" % "provided",
     "org.picocontainer" % "picocontainer" % "2.13.6" % "provided",
-    "org.parboiled" %% "parboiled" % "2.1.3" % "provided"
-  ), version := netLogo6Version, scalaVersion := "2.12.4", crossPaths := false) settings(settings: _*)
+    "org.parboiled" %% "parboiled" % "2.1.3" % "provided",
+    "com.typesafe" % "config" % "1.3.1" % "provided",
+    "net.lingala.zip4j" % "zip4j" % "1.3.2" % "provided"
+  ), version := netLogo6Version, scalaVersion := "2.12.8", crossPaths := false) settings(settings: _*)
 
 lazy val scalaTagsVersion = "0.6.5"
 lazy val scalaRxVersion = "0.4.0"

@@ -47,13 +47,10 @@ public class NetLogo6 implements NetLogo {
 
     @Override
     public void open(String script, boolean switch3d) throws Exception {
-        System.setProperty("org.nlogo.is3d", "false");
         // FIXME this is only a temporary fix - running simultaneously 3d and 2d models will fail anyway
-        if (switch3d&&script.endsWith("3d")) {
-            // set the 3d property in the case of a 3d model
-            System.setProperty("org.nlogo.is3d", "true");
-        }
-        getWorkspace().open(script);
+        if (switch3d && script.endsWith("3d")) System.setProperty("org.nlogo.is3d", "true");
+        else System.setProperty("org.nlogo.is3d", "false");
+        getWorkspace().open(script, false);
     }
 
     @Override
