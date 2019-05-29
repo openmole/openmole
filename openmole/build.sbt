@@ -1044,18 +1044,21 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     copy((assemble in openmole).value, s"/openmole")
     runRaw(
       """apt update && \
-              apt install -y python python-pycurl bash tar gzip ca-certificates ca-certificates-java && \
-              rm -rf /var/lib/apt/lists/* && \
-              mkdir -p /lib/modules""")
+       apt install -y python python-pycurl bash tar gzip ca-certificates ca-certificates-java sudo && \
+       rm -rf /var/lib/apt/lists/* && \
+       mkdir -p /lib/modules""")
     runRaw(
       """groupadd -r openmole && \
-              useradd -r -g openmole openmole --home-dir /var/openmole/ --create-home && \
-              chown openmole:openmole -R /var/openmole && \
-              chmod +x /openmole/openmole && \
-              ln -s /openmole/openmole /usr/bin/openmole""")
-    expose(8443)
-    user("openmole")
+         useradd -r -g openmole openmole --home-dir /var/openmole/ --create-home && \
+         chown openmole:openmole -R /var/openmole""")
+    runRaw(
+      """chmod +x /openmole/openmole && \
+        |ln -s /openmole/openmole /usr/bin/openmole""".stripMargin)
+    runRaw(
+      """echo 'mkdir -p /var/openmole/ && chown openmole:openmole /var/openmole && sudo -u openmole openmole --http --mem 2G --port 8443 --remote $@' >/usr/bin/openmole-docker && \
+        |chmod +x /usr/bin/openmole-docker""".stripMargin)
     volume("/var/openmole")
-    cmdShell("openmole", "--port", "8443", "--remote")
+    expose(8443)
+    cmdShell("openmole-docker")
   }
 )
