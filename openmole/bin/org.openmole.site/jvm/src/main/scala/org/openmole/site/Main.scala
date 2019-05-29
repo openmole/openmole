@@ -27,9 +27,9 @@ object Main {
 
   def build = {
 
-    def runText = "OpenMOLE runs your own program, whatever the language. Java, Binary exe, NetLogo, R, SciLab, Python, C++..."
-    def exploreText = "Explore spaces of parameters, optimize, test the sensitivity of your model through innovative methods"
-    def scaleText = "Scale up your experimentations with no effort on servers, clusters, grids, clouds, ..."
+    def embedText = "Embed your own model in OpenMOLE, regardless of the programming language: Java, binary exe, NetLogo, R, SciLab, Python, C++..."
+    def exploreText = "Explore, test, optimize your model through innovative methods: calibration, sensitivity, profile..."
+    def scaleText = "Scale up your experiments easily on servers, clusters, grids, clouds..."
 
     def desktop = {
       def colTag: Seq[Modifier] = Seq(classIs("col-md-4"), attr("align") := "center")
@@ -43,17 +43,17 @@ object Main {
             div(colTag)(img(src := Resource.img.environment.scale.file, width := 120, paddingBottom := 10))
           ),
           div(rowTag)(
-            div(colTag, mainTitle)("RUN"),
+            div(colTag, mainTitle)("EMBED"),
             div(colTag, mainTitle)("EXPLORE"),
-            div(colTag, mainTitle)("SCALE")
+            div(colTag, mainTitle)("SCALE UP")
           ),
           div(rowTag, paddingBottom := 5)(
-            div(colTag)(div(mainText, width := 220, runText)),
+            div(colTag)(div(mainText, width := 220, embedText)),
             div(colTag)(div(mainText, width := 220, exploreText)),
             div(colTag)(div(mainText, width := 220, scaleText))
           ),
           div(rowTag)(
-            div(colTag)(readMore(DocumentationPages.run)),
+            div(colTag)(readMore(DocumentationPages.embed)),
             div(colTag)(readMore(DocumentationPages.explore)),
             div(colTag)(readMore(DocumentationPages.scale))
           )
@@ -71,9 +71,9 @@ object Main {
           div(rowTag)(
             div(colTag, paddingBottom := 30)(
               div(rowTag)(img(src := Resource.img.model.code.file, width := 120)),
-              div(rowTag, mainTitle)("RUN"),
-              div(rowTag)(div(mainText, width := 200, runText)),
-              div(rowTag)(readMore(DocumentationPages.run))
+              div(rowTag, mainTitle)("EMBED"),
+              div(rowTag)(div(mainText, width := 200, embedText)),
+              div(rowTag)(readMore(DocumentationPages.embed))
             ),
             div(colTag, paddingBottom := 30)(
               div(rowTag)(img(src := Resource.img.method.exploreMap.file, width := 120)),
@@ -83,7 +83,7 @@ object Main {
             ),
             div(colTag)(
               div(rowTag)(img(src := Resource.img.environment.scale.file, width := 120)),
-              div(rowTag, mainTitle)("SCALE"),
+              div(rowTag, mainTitle)("SCALE UP"),
               div(rowTag)(div(mainText, width := 200, scaleText)),
               div(rowTag)(readMore(DocumentationPages.scale))
             )
