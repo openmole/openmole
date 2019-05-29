@@ -26,7 +26,7 @@ object Libraries {
   lazy val json4sVersion = "3.5.0"
   lazy val circeVersion = "0.10.0"
   lazy val catsVersion = "1.0.1"
-  lazy val scalajsVersion = "0.6.23"
+  lazy val scalajsVersion = "0.6.28"
   lazy val squantsVersion = "1.3.0"
   lazy val xstreamVersion = "1.4.11"
   lazy val scalaURIVersion = "1.1.1"
@@ -136,7 +136,7 @@ object Libraries {
   lazy val gridscaleOAR = "org.openmole.library" %% "gridscale-oar" % gridscaleVersion
 
   lazy val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.8"
-  lazy val guava = "com.google.guava" % "guava" % "19.0"
+  lazy val guava = "com.google.guava" % "guava" % "27.1-jre"
   lazy val spray = "io.spray" %% "spray-json" % "1.3.2"
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
   lazy val equinoxOSGi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.13.200"

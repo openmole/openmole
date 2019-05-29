@@ -235,8 +235,7 @@ lazy val pluginManager = OsgiProject(
   imports = Seq("*")
 ) settings (defaultActivator) dependsOn(exception, tools, location) settings (coreSettings: _*)
 
-lazy val fileService = OsgiProject(coreDir, "org.openmole.core.fileservice", imports = Seq("*")) dependsOn(tools, workspace, openmoleTar, preference, threadProvider) settings (coreSettings: _*) settings (defaultActivator) settings (
-  libraryDependencies += Libraries.guava)
+lazy val fileService = OsgiProject(coreDir, "org.openmole.core.fileservice", imports = Seq("*")) dependsOn(tools, workspace, openmoleTar, preference, threadProvider) settings (coreSettings: _*) settings (defaultActivator) settings (libraryDependencies += Libraries.guava)
 
 lazy val networkService = OsgiProject(coreDir, "org.openmole.core.networkservice", imports = Seq("*")) dependsOn(tools, workspace, preference) settings (coreSettings: _*) settings (defaultActivator)
 

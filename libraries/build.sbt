@@ -164,7 +164,7 @@ lazy val scalaDomVersion = "0.9.3"
 lazy val scalaUpickleVersion = "0.4.4"
 lazy val scalaBoopickleVersion = "1.2.6"
 lazy val scalaAutowireVersion = "0.2.6"
-lazy val scalajsVersion = "0.6.23"
+lazy val scalajsVersion = "0.6.28"
 
 lazy val rx = OsgiProject(dir, "rx", exports = Seq("rx.*")) settings(
   libraryDependencies ++= Seq("com.lihaoyi" %% "scalarx" % scalaRxVersion),
@@ -427,3 +427,4 @@ lazy val gridscaleWebDAV = OsgiProject(dir, "gridscale.webdav", imports = Seq("*
   libraryDependencies += "fr.iscpif.gridscale" %% "webdav" % gridscaleVersion,
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, gridscaleHTTP)
+
