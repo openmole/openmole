@@ -47,7 +47,7 @@ package object abc {
 
     case class Observed[T](v: Val[T], observed: T)(implicit val obs: Observed.Observable[T])
 
-    case class ABCParameters(state: Val[MonAPMC.MonState], step: Val[Int])
+    case class ABCParameters(state: Val[MonAPMC.MonState], step: Val[Int], prior: Seq[Prior])
 
     implicit class ABCContainer(dsl: DSLContainer[ABCParameters]) extends DSLContainerHook(dsl) {
       def hook(directory: FromContext[File]): DSLContainer[ABC.ABCParameters] = {
@@ -91,7 +91,7 @@ package object abc {
           condition = !(stop: Condition)
         )
 
-      DSLContainerExtension[ABCParameters](DSLContainer(loop), output = Some(postStepTask), delegate = mapReduce.delegate, data = ABCParameters(state, step))
+      DSLContainerExtension[ABCParameters](DSLContainer(loop), output = Some(postStepTask), delegate = mapReduce.delegate, data = ABCParameters(state, step, prior))
     }
 
   }
@@ -158,7 +158,7 @@ package object abc {
         stop = stop
       )
 
-    DSLContainerExtension(DSLContainer(masterSlave), output = Some(master), delegate = Vector(slave), data = ABCParameters(masterState, step))
+    DSLContainerExtension(DSLContainer(masterSlave), output = Some(master), delegate = Vector(slave), data = ABCParameters(masterState, step, prior))
   }
 
 }
