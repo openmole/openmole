@@ -525,11 +525,24 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
   def downloadHTTP(url: String, path: SafePath, extract: Boolean): Either[Unit, ErrorData] = {
     import org.openmole.tool.stream._
-    val dest = safePathToFile(path)(ServerFileSystemContext.project, workspace)
 
     val result =
       Try {
-        gridscale.http.getStream(url) { is ⇒
+        gridscale.http.getResponse(url) { response ⇒
+          def extractName = url.split("/").last
+          val name =
+            response.headers.flatMap {
+              case ("Content-Disposition", value) ⇒
+                value.split(";").map(_.split("=")).find(_.head.trim == "filename").map { filename ⇒
+                  val name = filename.last.trim
+                  if (name.startsWith("\"") && name.endsWith("\"")) name.drop(1).dropRight(1) else name
+                }
+              case _ ⇒ None
+            }.headOption.getOrElse(extractName)
+          val dest = safePathToFile(path / name)(ServerFileSystemContext.project, workspace)
+
+          val is = response.inputStream
+
           if (extract) {
             val tis = new TarInputStream(new GZIPInputStream(is))
             try tis.extract(dest)

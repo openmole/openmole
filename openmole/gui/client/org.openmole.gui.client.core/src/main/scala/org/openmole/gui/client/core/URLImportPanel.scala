@@ -39,25 +39,14 @@ class URLImportPanel {
       else ifNotExists()
     }
 
-  def download(url: String) =
-    for {
-      project ← url.split("/").lastOption
-      args = project.split('.')
-      name ← args.headOption
-      ext = args.tail.mkString(".")
-      urlFile = URLFile(name, ext)
-      path = manager.current.now ++ urlFile.file
-    } yield {
-      exists(path, () ⇒ {
-        downloading.update(Processing())
-        post()[Api].downloadHTTP(url, path, extractCheckBox.checked).call().foreach { d ⇒
-          downloading.update(Processed())
-          dialog.hide
-          TreeNodePanel.refreshAndDraw
-        }
-      }
-      )
+  def download(url: String) = {
+    downloading.update(Processing())
+    post()[Api].downloadHTTP(url, manager.current.now, extractCheckBox.checked).call().foreach { d ⇒
+      downloading.update(Processed())
+      dialog.hide
+      TreeNodePanel.refreshAndDraw
     }
+  }
 
   def deleteFileAndDownloadURL(sp: SafePath, url: String) =
     post()[Api].deleteFile(sp, ServerFileSystemContext.project).call().foreach { d ⇒

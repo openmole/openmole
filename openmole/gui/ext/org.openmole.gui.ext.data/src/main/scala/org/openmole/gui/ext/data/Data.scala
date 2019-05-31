@@ -220,6 +220,7 @@ package object data {
   case class SafePath(path: Seq[String], context: ServerFileSystemContext = ProjectFileSystem()) {
 
     def ++(s: String) = sp(this.path :+ s)
+    def /(child: String) = copy(path = path :+ child)
 
     def parent: SafePath = SafePath.sp(path.dropRight(1))
 
