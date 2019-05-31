@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.alert.{ AbsolutePositioning, AlertPanel }
+import org.openmole.gui.client.core.alert.{ AbsolutePositioning, AlertPanel, BannerAlert }
 import AbsolutePositioning.CenterPagePosition
 import org.openmole.gui.ext.tool.client._
 
@@ -44,7 +44,10 @@ class URLImportPanel {
     post()[Api].downloadHTTP(url, manager.current.now, extractCheckBox.checked).call().foreach { d ⇒
       downloading.update(Processed())
       dialog.hide
-      TreeNodePanel.refreshAndDraw
+      d match {
+        case Left(_)   ⇒ TreeNodePanel.refreshAndDraw
+        case Right(ex) ⇒ BannerAlert.registerWithDetails("Download failed", ErrorData.stackTrace(ex))
+      }
     }
   }
 
