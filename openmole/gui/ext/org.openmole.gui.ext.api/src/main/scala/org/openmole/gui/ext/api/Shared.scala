@@ -95,5 +95,5 @@ trait Api {
   //MODEL WIZARDS
   def models(archivePath: SafePath): Seq[SafePath]
   def expandResources(resources: Resources): Resources
-  def downloadHTTP(url: String, path: SafePath, extract: Boolean): Unit
+  def downloadHTTP(url: String, path: SafePath, extract: Boolean): Either[Unit, ErrorData]
 }

@@ -523,17 +523,25 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     )
   }
 
-  def downloadHTTP(url: String, path: SafePath, extract: Boolean): Unit = {
+  def downloadHTTP(url: String, path: SafePath, extract: Boolean): Either[Unit, ErrorData] = {
     import org.openmole.tool.stream._
     val dest = safePathToFile(path)(ServerFileSystemContext.project, workspace)
 
-    gridscale.http.getStream(url) { is ⇒
-      if (extract) {
-        val tis = new TarInputStream(new GZIPInputStream(is))
-        try tis.extract(dest)
-        finally tis.close
+    val result =
+      Try {
+        gridscale.http.getStream(url) { is ⇒
+          if (extract) {
+            val tis = new TarInputStream(new GZIPInputStream(is))
+            try tis.extract(dest)
+            finally tis.close
+          }
+          else dest.withOutputStream(os ⇒ copy(is, os))
+        }
       }
-      else dest.withOutputStream(os ⇒ copy(is, os))
+
+    result match {
+      case Success(value) ⇒ Left(value)
+      case Failure(e)     ⇒ Right(ErrorData(e))
     }
   }
 }
