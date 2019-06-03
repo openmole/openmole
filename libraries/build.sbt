@@ -233,17 +233,19 @@ lazy val mgo = OsgiProject(dir, "mgo", exports = Seq("mgo.*", "freestyle.*"), im
   version := mgoVersion) dependsOn(monocle, math, cats, squants) settings(settings: _*)
 
 
-/*lazy val spatialdataVersion = "0.1-SNAPSHOT"
+
+lazy val spatialdataVersion = "0.1-SNAPSHOT"
 
 lazy val spatialdata = OsgiProject(dir, "org.openmole.spatialdata",
   exports = Seq("org.openmole.spatialdata.*"),
-imports = Seq("!*") //Seq("!org.apache.commons.math3.*","!better.*", "*")
-, privatePackages = Seq("**"),//privatePackages = Seq("!scala.*","!org.apache.commons.math3.*" , "*")
-) settings( // ,"**"
-    libraryDependencies += "org.openmole.library" %% "spatialdata" % spatialdataVersion,
-    version := spatialdataVersion,
-    OsgiKeys.embeddedJars := (Keys.externalDependencyClasspath in Compile).value map (_.data) filter (f=> (f.getName startsWith "gt-"))
-) settings(settings: _*)*/
+  privatePackages = Seq("!scala.*","!org.apache.commons.math3.*","*")
+) settings(
+  resolvers += "osgeo" at  "http://download.osgeo.org/webdav/geotools/",
+  libraryDependencies += "org.openmole.library" %% "spatialdata" % spatialdataVersion,
+  version := spatialdataVersion//,
+  //embeddedJars := (Keys.externalDependencyClasspath in Compile).value map (_.data) filter (f=> (f.getName startsWith "gt-")) // embed geotools jars
+) settings(settings: _*)
+
 
 
 
