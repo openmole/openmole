@@ -10,7 +10,6 @@ object Libraries {
 
   lazy val mgoVersion = "3.28"
   lazy val bouncyCastleVersion = "1.60"
-  lazy val aceVersion = "01.08.2014"
   lazy val d3Version = "3.5.12"
   lazy val tooltipserVersion = "3.3.0"
   lazy val netLogo5Version = "5.3.1"
@@ -21,7 +20,7 @@ object Libraries {
   lazy val boopickleVersion = "1.2.6"
   lazy val scalaAutowireVersion = "0.2.6"
   lazy val sourcecodeVersion = "0.1.4"
-  lazy val scaladgetVersion = "1.2.4"
+  lazy val scaladgetVersion = "1.3.0-SNAPSHOT"
   lazy val sortableVersion = "0.2.1"
   lazy val json4sVersion = "3.5.0"
   lazy val circeVersion = "0.10.0"
