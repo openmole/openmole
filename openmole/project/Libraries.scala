@@ -20,7 +20,7 @@ object Libraries {
   lazy val boopickleVersion = "1.2.6"
   lazy val scalaAutowireVersion = "0.2.6"
   lazy val sourcecodeVersion = "0.1.4"
-  lazy val scaladgetVersion = "1.2.4"
+  lazy val scaladgetVersion = "1.2.7"
   lazy val sortableVersion = "0.2.1"
   lazy val json4sVersion = "3.5.0"
   lazy val circeVersion = "0.10.0"
