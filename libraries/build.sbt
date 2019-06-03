@@ -240,9 +240,10 @@ lazy val spatialdata = OsgiProject(dir, "org.openmole.spatialdata",
   exports = Seq("org.openmole.spatialdata.*"),
   privatePackages = Seq("!scala.*","!org.apache.commons.math3.*","*")
 ) settings(
-    libraryDependencies += "org.openmole.library" %% "spatialdata" % spatialdataVersion,
-    version := spatialdataVersion//,
-    //embeddedJars := (Keys.externalDependencyClasspath in Compile).value map (_.data) filter (f=> (f.getName startsWith "gt-")) // embed geotools jars
+  resolvers += "osgeo" at  "http://download.osgeo.org/webdav/geotools/",
+  libraryDependencies += "org.openmole.library" %% "spatialdata" % spatialdataVersion,
+  version := spatialdataVersion//,
+  //embeddedJars := (Keys.externalDependencyClasspath in Compile).value map (_.data) filter (f=> (f.getName startsWith "gt-")) // embed geotools jars
 ) settings(settings: _*)
 
 
