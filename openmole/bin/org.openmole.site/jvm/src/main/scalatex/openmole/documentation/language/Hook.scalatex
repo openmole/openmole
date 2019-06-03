@@ -4,6 +4,7 @@
 @import DocumentationPages._
 
 
+
 @h2{What is a Hook?}
 
 Tasks in OpenMOLE are mute pieces of software.
@@ -20,6 +21,11 @@ Different hooks are available for different actions that need to be performed.
 
 @h3{How to plug a hook to a task}
 
+The @code{hook} keyword is used to save or display results generated during the execution of a workflow.
+The generic way to use it is to write either @code{hook(workDirectory / "path/of/a/file.csv")} to save the results in a CSV file, or @code{hook display} to display the results in the standard output.
+
+@br
+
 Let's consider this simple workflow:
 
 @br@br
@@ -34,78 +40,28 @@ Let's consider this simple workflow:
     outputs += i
   )
 
-  // Define a Hook
-  val h = DisplayHook()
-
   // Define an exploration task
   DirectSampling(
-    evaluation = (hello hook h),
+    evaluation = (hello hook display),
     sampling = i in (0 to 9)
   )
 """, name = "plug a hook")
 
 @br
 
-The hook @code{h} is plugged to the end of the @code{hello} task, which means that every time @code{hello} finishes, the hook @code{h} is executed.
+The @code{hook} is plugged to the end of the @code{hello} task in the @code{DirectSampling}, which means that every time @code{hello} finishes, the hook is executed.
 Here it means that the dataflow will be printed in the standard output, so all the output values for @code{i} will be displayed.
 
 
-@h3{Plugging multiple hooks to the same task}
 
-You can define as many hooks as you want in a workflow, and plug them to the same task or to different tasks.
-See the following workflow:
-
-@br@br
-
-@hl.openmole("""
-  val i = Val[Int]
-
-  val hello = ScalaTask("val i = 2") set (
-    outputs += i
-  )
-
-  val h1 = DisplayHook()
-  val h2 = DisplayHook()
-  val h3 = DisplayHook()
-
-  (hello hook (h1, h2, h3))
-""", name = "plug multiple hooks")
-
-@br
-
-Here the hooks @code{h1}, @code{h2}, and @code{h3} are all plugged to the @code{hello} task and will all be executed upon its completion.
-However, we should point out that plugging the same hook multiple times to the same task is usually of limited interest...!
-
-
-
-@h2{Default hooks}
+@h3{Default hooks}
 
 Most OpenMOLE methods come with a default hook to save their results in a properly formatted file.
 To use these embedded hooks, you can directly give the required arguments (@i{eg} the path of the created file) to the @code{hook} keyword.
-For instance, in a direct sampling you can do:
-
-@br@br
-
-@hl.openmole("""
-val i = Val[Int]
-
-//Define the "myModel" task
-val myModel =
-  ScalaTask("val o = i * 2") set (
-    inputs += i,
-    outputs += (i, o)
-  )
-
-// Define the exploration task
-DirectSampling(
-  evaluation = myModel,
-  sampling = i in (0 to 10 by 1)
-) hook (workDirectory / "result.csv")
-""", name="default hook")
 
 @br
 
-The result of the direct sampling will be saved in the file @i{result.csv}.
+The specific arguments of the default hooks for each method, when they exist, are described in the corresponding documentation page in the @aa("Explore", href := explore.file) section.
 
 
 
