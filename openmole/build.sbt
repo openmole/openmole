@@ -472,7 +472,7 @@ lazy val sensitivity = OsgiProject(pluginDir, "org.openmole.plugin.method.sensit
 /* Sampling */
 
 // FIXME problem with osgi bundling for spatialSampling
-def allSampling = Seq(combineSampling, csvSampling,oneFactorSampling, lhsSampling, quasirandomSampling)//, spatialSampling)
+def allSampling = Seq(combineSampling, csvSampling,oneFactorSampling, lhsSampling, quasirandomSampling, spatialSampling)
 
 lazy val combineSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.combine", imports = Seq("*")) dependsOn(exception, modifierDomain, collectionDomain, workflow) settings (pluginSettings: _*)
 
@@ -487,6 +487,7 @@ lazy val lhsSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.lhs"
 lazy val quasirandomSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.quasirandom", imports = Seq("*")) dependsOn(exception, workflow, workspace) settings (
   libraryDependencies += Libraries.math
   ) settings (pluginSettings: _*)
+
 
 lazy val spatialSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.spatial", imports = Seq("*")) dependsOn(exception, workflow, workspace) settings (
   libraryDependencies += Libraries.math,
@@ -733,11 +734,11 @@ def binDir = file("bin")
 def bundleFilter(m: ModuleID, artifact: Artifact) = {
   def excludedLibraryDependencies = Set("slick", "squants", "shapeless", "sourcecode", "eddsa", "sshj")
 
-  def exclude =
+  def exclude = 
     (m.organization != "org.openmole.library" && excludedLibraryDependencies.exists(m.name.contains)) ||
       (m.name contains "scala-xml") ||
-      (m.name contains "protobuf")
-
+      (m.name contains "protobuf") ||
+      (m.name contains "jts-core") || (m.name contains "si-quantity") || (m.name contains "systems-common-java8") || (m.name contains "uom-lib-common") || (m.name contains "unit-api") || (m.name contains "uom-se") // geotools bundled dependancies
 
   def include = (artifact.`type` == "bundle" && m.name != "osgi") ||
     //(m.name == "sshj") ||
