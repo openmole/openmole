@@ -178,7 +178,7 @@ object Utils extends JavaLogger {
     }
   }
 
-  def copy(safePath: SafePath, newName: String)(implicit workspace: Workspace): SafePath = {
+  def copy(safePath: SafePath, newName: String, followSymlinks: Boolean = false)(implicit workspace: Workspace): SafePath = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
     val toPath = safePath.copy(path = safePath.path.dropRight(1) :+ newName)
@@ -186,7 +186,7 @@ object Utils extends JavaLogger {
 
     val from: File = safePath
     val replica: File = safePath.parent ++ newName
-    FileDecorator(from).copy(replica)
+    FileDecorator(from).copy(replica, followSymlinks = followSymlinks)
 
     replica
   }

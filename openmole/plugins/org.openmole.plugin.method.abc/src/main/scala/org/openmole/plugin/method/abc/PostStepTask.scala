@@ -15,7 +15,7 @@ object PostStepTask {
     nAlpha:               Int,
     stopSampleSizeFactor: Int,
     prior:                Seq[ABC.Prior],
-    observed:             Seq[ABC.Observed],
+    observed:             Seq[ABC.Observed[_]],
     state:                Val[MonAPMC.MonState],
     stepState:            Val[MonAPMC.StepState],
     minAcceptedRatio:     Option[Double],
@@ -33,8 +33,19 @@ object PostStepTask {
         if (inside) 1.0 / volume else 0.0
       }
 
-      val xs = observed.toArray.map(o ⇒ context(o.v.array)).transpose
-      val s = Try(MonAPMC.postStep(n, nAlpha, density, observed.map(_.observed).toArray, context(stepState), xs)(random()))
+      def zipObserved(obs: Array[Array[Array[Double]]]) = {
+        def zip2(o1: Array[Array[Double]], o2: Array[Array[Double]]) =
+          for {
+            l1 ← o1
+            l2 ← o2
+          } yield l1 ++ l2
+
+        obs.reduceLeft { zip2 }
+      }
+
+      val xs = zipObserved(observed.toArray.map(o ⇒ ABC.Observed.fromContext(o, context)))
+
+      val s = Try(MonAPMC.postStep(n, nAlpha, density, observed.flatMap(o ⇒ ABC.Observed.value(o)).toArray, context(stepState), xs)(random()))
 
       s match {
         case Success(s) ⇒
@@ -45,14 +56,13 @@ object PostStepTask {
           context + Variable(state, s) + Variable(stop, stopValue(s)) + Variable(step, context(step) + 1)
 
         case Failure(f: APMC.SingularCovarianceException) ⇒
-          def copyState(s: MonAPMC.MonState, ns: APMC.State) =
+          def copyState(s: Option[MonAPMC.MonState], ns: APMC.State) =
             s match {
-              case MonAPMC.Empty()  ⇒ s
-              case s: MonAPMC.State ⇒ s.copy(s = ns)
+              case Some(MonAPMC.Empty()) | None ⇒ MonAPMC.Empty()
+              case Some(s: MonAPMC.State)       ⇒ s.copy(s = ns)
             }
 
-          context + Variable(state, copyState(context(state), f.s)) + Variable(stop, true) + Variable(step, context(step) + 1)
-
+          context + Variable(state, copyState(context.get(state), f.s)) + Variable(stop, true) + Variable(step, context(step) + 1)
         case Failure(f) ⇒ throw f
       }
     } set (

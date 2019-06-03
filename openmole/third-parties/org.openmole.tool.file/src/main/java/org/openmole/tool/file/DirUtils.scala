@@ -32,7 +32,6 @@ object DirUtils {
    */
   @throws[IOException]
   def copy(from: Path, to: Path, followSymlinks: Boolean = false): Path = {
-
     val copyOptions = getCopyOptions(followSymlinks)
     copy(from, to, EnumSet.noneOf(classOf[FileVisitOption]), copyOptions.toArray)
   }

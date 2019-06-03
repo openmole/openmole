@@ -1,0 +1,92 @@
+@import org.openmole.site.tools._
+@import org.openmole.site._
+@import org.openmole.site.stylesheet._
+@import DocumentationPages._
+
+
+
+Typed signatures of OpenMOLE methods.
+
+
+
+@h2{Single criterion Calibration}
+
+The single criterion calibration of a model can be seen as a general function, whose signature can be typed, and be noted as:
+
+@br@br
+
+@div(style:="text-align:center")
+    Calibration@sub{single} :  (X → Y) → Y → X
+
+@br
+
+With X the input space, and Y the output space.
+
+@br@br
+
+In other words, this function takes a model M whose signature is (X→Y) (since it transforms inputs into outputs), an element @i{y} of Y representing the criterion value to reach, and finds an element @i{x} of X such that M(@i{x}) is the "closest" possible value to @i{y}.
+
+
+
+@h2{Multi criteria Calibration}
+
+The signature function of multi-criteria calibration can be typed as:
+
+@br@br
+
+@div(style:="text-align:center")
+    Calibration@sub{multi} : (X → Y) → Y → [X]
+
+@br
+
+With X the input space, and Y the output space.
+
+@br@br
+
+In other words, this function takes a model M whose signature is (X→Y), an element @i{y} of Y representing the list of criteria values to reach, and finds a list @i{x} of elements of X such that M(@i{x}) is Pareto dominant compared to every image of other elements of X by M, regarding criterion @i{y}.
+
+
+
+@h2{Profile}
+
+The profile method can be typed likewise:
+
+@br@br
+
+@div(style:="text-align:center")
+    Profile:   (𝓧@sub{1},...,𝓧@sub{k},) → {1,...,k} → [(𝓧,Y)]
+@div(style:="text-align:center")
+    such that: Profile(M)(i) = [(𝒙@sub{i1},y@sub{1}), ... , (𝒙@sub{in}, y@sub{n})],
+@div(style:="text-align:center")
+                ∀ j ∈ [1;n], y@sub{j} = min@sub{𝒙∈X@sub{@RawFrag{-i}}}@RawFrag{(M(𝒙))}
+@div(style:="text-align:center")
+                X@sub{@RawFrag{-i}} = {𝒙∈𝓧@sub{1} x ... x 𝓧@sub{i-1} x {𝒙@sub{i}} x 𝓧@sub{i+1} x ... x 𝓧@sub{k}}
+
+@br
+
+With M, the model, X, the input space, Y, the output space, 𝓟(X) the power set of X (@i{i.e.} every subset of X, including X and ∅).
+
+@br
+
+In other words: this function takes a model M (whose signature is (X→Y)), an element @i{y} of Y (y is the list of criterion value to reach) and find a list of elements of X (noted @i{x}) such that M(x) are Pareto dominant compared to every image of other elements of X by M, regarding criterion @i{y}.
+
+
+
+@h2{PSE}
+
+The PSE method can be typed as:
+
+@br@br
+
+@div(style:="text-align:center")
+    PSE :   (X → Y) → 𝓟(X)
+    @br
+    such that : PSE(M) = M(X)
+
+@br
+
+With M, the model ; X, the input space ; Y, the output space ; and 𝓟(X) the power set of X (@i{i.e.} every subset of X, including X and ∅).
+
+@br
+
+In other words, this function takes a model M whose signature is (X→Y), an element @i{y} of Y representing the list of criterion values to reach, and finds a list @i{x} of elements of X such that M(@i{x}) are Pareto dominant compared to every image of other elements of X by M, regarding criterion @i{y}.

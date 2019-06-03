@@ -11,6 +11,7 @@ import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import java.io._
 import java.nio.file._
+import java.util.zip.GZIPInputStream
 
 import au.com.bytecode.opencsv.CSVReader
 import org.openmole.core.console.ScalaREPL
@@ -51,7 +52,7 @@ import scala.collection.JavaConverters._
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See theMarketIndexEntry
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -259,7 +260,9 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     Utils.move(fromFile, toFile)
   }
 
-  def duplicate(safePath: SafePath, newName: String): SafePath = Utils.copy(safePath, newName)
+  def duplicate(safePath: SafePath, newName: String): SafePath = {
+    Utils.copy(safePath, newName, followSymlinks = true)
+  }
 
   def mdToHtml(safePath: SafePath): String = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
@@ -518,5 +521,40 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
       implicitResource,
       paths.size + implicitResource.size
     )
+  }
+
+  def downloadHTTP(url: String, path: SafePath, extract: Boolean): Either[Unit, ErrorData] = {
+    import org.openmole.tool.stream._
+
+    val result =
+      Try {
+        gridscale.http.getResponse(url) { response ⇒
+          def extractName = url.split("/").last
+          val name =
+            response.headers.flatMap {
+              case ("Content-Disposition", value) ⇒
+                value.split(";").map(_.split("=")).find(_.head.trim == "filename").map { filename ⇒
+                  val name = filename.last.trim
+                  if (name.startsWith("\"") && name.endsWith("\"")) name.drop(1).dropRight(1) else name
+                }
+              case _ ⇒ None
+            }.headOption.getOrElse(extractName)
+          val dest = safePathToFile(path / name)(ServerFileSystemContext.project, workspace)
+
+          val is = response.inputStream
+
+          if (extract) {
+            val tis = new TarInputStream(new GZIPInputStream(is))
+            try tis.extract(dest)
+            finally tis.close
+          }
+          else dest.withOutputStream(os ⇒ copy(is, os))
+        }
+      }
+
+    result match {
+      case Success(value) ⇒ Left(value)
+      case Failure(e)     ⇒ Right(ErrorData(e))
+    }
   }
 }

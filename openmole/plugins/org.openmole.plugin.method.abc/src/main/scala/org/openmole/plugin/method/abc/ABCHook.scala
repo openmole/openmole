@@ -22,10 +22,11 @@ object ABCHook {
           val size = s.thetas.size
           val dim = s.thetas(0).size
 
+          val paramNames = abc.data.prior.map { x ⇒ x.v.name }
+
           val header =
             (Vector("epsilon,pAcc,t,ts,rhos,weight") ++
-              Vector.tabulate(dim) { i ⇒ "theta" ++ i.toString })
-              .mkString(",")
+              paramNames).mkString(",")
 
           val data =
             (Vector.fill(size)(s.epsilon) zip
@@ -42,13 +43,6 @@ object ABCHook {
           file.createParentDir
 
           file.content = header ++ "\n" ++ data
-
-        /*writeVariablesToCSV(
-            resultFileLocation.from(context),
-            resultVariables(algorithm, context).map(_.prototype.array),
-            resultVariables(algorithm, context).map(_.value),
-            overwrite = true
-          )*/
 
       }
 

@@ -4,7 +4,9 @@ import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.plugin.tool.pattern._
 import mgo.abc._
+import org.openmole.core.workflow.domain.Bounds
 import monocle.macros.Lenses
+import org.openmole.core.keyword.In
 
 package object abc {
 
@@ -12,21 +14,49 @@ package object abc {
     val abcNamespace = Namespace("abc")
     val state = Val[MonAPMC.MonState]("state", abcNamespace)
 
-    case class Prior(v: Val[Double], low: FromContext[Double], high: FromContext[Double])
-    case class Observed(v: Val[Double], observed: Double)
-    case class ABCParameters(state: Val[MonAPMC.MonState], step: Val[Int])
-
-    implicit class ABCContainer(dsl: DSLContainer[ABCParameters]) extends DSLContainerHook(dsl) {
-      def hook(directory: FromContext[File]): DSLContainer[ABC.ABCParameters] = {
-        implicit val defScope = dsl.scope
-        dsl hook ABCHook(dsl, directory)
-      }
+    object Prior {
+      implicit def inToPrior[D](in: In[Val[Double], D])(implicit bounds: Bounds[D, Double]) = Prior(in.value, bounds.min(in.domain), bounds.max(in.domain))
     }
+
+    case class Prior(v: Val[Double], low: FromContext[Double], high: FromContext[Double])
+
+    object Observed {
+
+      object Observable {
+        def apply[T](f: T ⇒ Array[Double]) = new Observable[T] {
+          def apply(t: T) = f(t)
+        }
+
+        implicit def intObservable = Observable[Int](i ⇒ Array(i.toDouble))
+        implicit def doubleObservable = Observable[Double](d ⇒ Array(d))
+        implicit def arrayDouble = Observable[Array[Double]](identity)
+        implicit def arrayInt = Observable[Array[Int]](_.map(_.toDouble))
+      }
+
+      trait Observable[T] {
+        def apply(t: T): Array[Double]
+      }
+
+      implicit def tupleIntToObserved(t: (Val[Int], Int)) = Observed(t._1, t._2)
+      implicit def tupleDoubleToObserved(t: (Val[Double], Double)) = Observed(t._1, t._2)
+      implicit def tupleIterableIntToObserved(t: (Val[Array[Int]], Iterable[Int])) = Observed(t._1, t._2.toArray)
+      implicit def tupleIterableDoubleToObserved(t: (Val[Array[Double]], Iterable[Double])) = Observed(t._1, t._2.toArray)
+      implicit def tupleIterableArrayIntToObserved(t: (Val[Array[Int]], Array[Int])) = Observed(t._1, t._2)
+      implicit def tupleIterableArrayDoubleToObserved(t: (Val[Array[Double]], Array[Double])) = Observed(t._1, t._2)
+      //implicit def tupleToObserved[T: Observable](t: (Val[T], T)) = Observed(t._1, t._2)
+
+      def fromContext[T](observed: Observed[T], context: Context) = context(observed.v.array).map(v ⇒ observed.obs(v))
+      def value[T](observed: Observed[T]) = observed.obs(observed.observed)
+    }
+
+    case class Observed[T](v: Val[T], observed: T)(implicit val obs: Observed.Observable[T])
+
+    case class ABCParameters(state: Val[MonAPMC.MonState], step: Val[Int], prior: Seq[Prior])
 
     def apply(
       evaluation:           DSL,
       prior:                Seq[Prior],
-      observed:             Seq[Observed],
+      observed:             Seq[Observed[_]],
       sample:               Int,
       generated:            Int,
       minAcceptedRatio:     OptionalArgument[Double] = 0.01,
@@ -58,7 +88,7 @@ package object abc {
           condition = !(stop: Condition)
         )
 
-      DSLContainerExtension[ABCParameters](DSLContainer(loop), output = Some(postStepTask), delegate = mapReduce.delegate, data = ABCParameters(state, step))
+      DSLContainerExtension[ABCParameters](DSLContainer(loop), output = Some(postStepTask), delegate = mapReduce.delegate, data = ABCParameters(state, step, prior))
     }
 
   }
@@ -68,7 +98,7 @@ package object abc {
   def IslandABC(
     evaluation:  DSL,
     prior:       Seq[Prior],
-    observed:    Seq[Observed],
+    observed:    Seq[Observed[_]],
     sample:      Int,
     generated:   Int,
     parallelism: Int,
@@ -125,7 +155,14 @@ package object abc {
         stop = stop
       )
 
-    DSLContainerExtension(DSLContainer(masterSlave), output = Some(master), delegate = Vector(slave), data = ABCParameters(masterState, step))
+    DSLContainerExtension[ABCParameters](DSLContainer(masterSlave), output = Some(master), delegate = Vector(slave), data = ABCParameters(masterState, step, prior))
+  }
+
+  implicit class ABCContainer(dsl: DSLContainer[ABCParameters]) extends DSLContainerHook(dsl) {
+    def hook(directory: FromContext[File]): DSLContainer[ABC.ABCParameters] = {
+      implicit val defScope = dsl.scope
+      dsl hook ABCHook(dsl, directory)
+    }
   }
 
 }

@@ -33,6 +33,8 @@ object LoggerService {
         case None ⇒
       }
     }
+
+  def apply(level: Level): LoggerService = LoggerService(Some(level))
 }
 
 case class LoggerService(level: Option[Level] = None)

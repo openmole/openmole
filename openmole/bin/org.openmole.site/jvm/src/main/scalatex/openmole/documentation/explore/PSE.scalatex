@@ -43,26 +43,6 @@ By selecting parents with rare output values, we try and increase the chances to
 @basicButton("Run", classIs(btn ++ btn_danger))(id := shared.pse.button, stylesheet.svgRunButton(-50))
 
 
-@h3{Typed signature}
-
-The PSE method can be typed as:
-
-@br@br
-
-@div(style:="text-align:center")
-    PSE :   (X → Y) → 𝓟(X)
-    @br
-    such that : PSE(M) = M(X)
-
-@br
-
-With M, the model ; X, the input space ; Y, the output space ; and 𝓟(X) the power set of X (@i{i.e.} every subset of X, including X and ∅).
-
-@br
-
-In other words, this function takes a model M whose signature is (X→Y), an element @i{y} of Y representing the list of criterion values to reach, and finds a list @i{x} of elements of X such that M(@i{x}) are Pareto dominant compared to every image of other elements of X by M, regarding criterion @i{y}.
-
-
 
 @h2{PSE within OpenMOLE}
 @h3{Specific constructor}
