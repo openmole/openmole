@@ -47,7 +47,7 @@ val my_LHS_sampling =
 """, name = "lhs sampling in sensitivity")
 
 
-@h3{Usage in the DirectSampling task}
+@h3{Use in the DirectSampling task}
 
 Once a sampling is defined, you can just add it to a @code{DirectSampling} task (see @aa("here", href:= samplings.file) for the description of this task), under the @code{sampling} argument.
 For example, supposing you have already declared inputs, outputs, and a model task called @code{myModel}, the sampling could be used like this:
@@ -61,7 +61,7 @@ For example, supposing you have already declared inputs, outputs, and a model ta
       aggregation = mean
     )
 
-    myExploration
+    myExploration hook display
 """)
 
 
@@ -88,7 +88,7 @@ val my_sobol_sampling =
 """, name = "sobol sampling in sensitivity")
 
 
-@h3{Usage in the DirectSampling task}
+@h3{Use in the DirectSampling task}
 
 Once a sampling is defined, you can just add it to a @code{DirectSampling} task (see @aa("here", href:= samplings.file) for the description of this task), under the @code{sampling} argument.
 For example, supposing you have already declared inputs, outputs, and a model task called @code{myModel}, the sampling could be used like this:
@@ -102,5 +102,5 @@ For example, supposing you have already declared inputs, outputs, and a model ta
       aggregation = mean
     )
 
-    myExploration
+    myExploration hook display
     """)

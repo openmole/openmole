@@ -52,7 +52,7 @@ val myModel =
 
 // Define the exploration of myModel for various i values sampled in the file
 val exploration = DirectSampling(
-  evaluation = myModel hook DisplayHook() ,
+  evaluation = myModel hook display,
   sampling = mySampling
 )
 

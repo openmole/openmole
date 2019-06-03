@@ -32,7 +32,7 @@ Notice how the upper bound of the second parameter depends on the value of the f
        (i in (0 to 10 by 2)) x
        (j in Range[Double]("0.0", "2 * i", "0.5")),
      evaluation = myModel
-   )
+   ) hook display
 """, name = "combine sampling", header = "val myModel = EmptyTask()")
 
 
@@ -120,7 +120,7 @@ When running this snippet however, the file is renamed by the ScalaTask and its 
 
     DirectSampling(
       sampling = file in (workDirectory / "dir") withName name,
-      evaluation = (t hook DisplayHook())
+      evaluation = (t hook display)
     )
   """, name = "zip with name sampling")
 
@@ -148,7 +148,7 @@ If you need to go through several levels of files you may use a sampling like th
     sampling =
       (dir in (workDirectory / "test") withName dirName) x
       (file in dir withName fileName),
-    evaluation = t hook DisplayHook()
+    evaluation = t hook display
   )
 """, name = "multilevel file sampling")
 
@@ -255,7 +255,7 @@ Here is how such higher level samplings would be used within a workflow:
 
     DirectSampling(
       sampling = (f1 x f2) bootstrap (5, 10),
-      evaluation = stat hook DisplayHook()
+      evaluation = stat hook display
     )
 """, name = "bootstrap example sampling")
 
@@ -278,6 +278,6 @@ DirectSampling(
     (i in (0 until 10)) x
     (j is "i * 2") x
     (k in Range[Int]("j", "j + 7")),
-  evaluation = myModel
+  evaluation = myModel hook display
 )
 """, header = "val myModel = EmptyTask()")
