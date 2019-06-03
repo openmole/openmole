@@ -7,10 +7,10 @@
 
 @h2{Sensitivity analysis}
 
-Sensitivity analysis is the study of how a model reacts to a change in its inputs.
+Sensitivity analysis correspond to a set of methods capturing how a model reacts to a change in its inputs.
 The goal of these statistical methods is to measure how variation propagates from the inputs to the outputs.
-More specifically, A. Saltelli defines Sensitivity Analysis as describing the «relative importance of each input in determining [output] variability».
-As a consequence,  typical result of such methods is an ordering of its inputs according to their sensitivity.
+More specifically, sensitivity analysis is defined by (Saltelli et al., 2008) as describing the «relative importance of each input in determining [output] variability».
+As a consequence, typical result of such methods is an ordering of its inputs according to their sensitivity.
 
 @br
 
@@ -18,30 +18,30 @@ Sensitivity analysis generally involve an a priori sampling of the input space a
 
 @br@br
 
-Sensitivity analysis comes in two flavors : global, and local.
-Global methods depict the effects of inputs variation in the complete input space, local methods depict the effect of inputs variation around a given point of the input space.
+Sensitivity analysis can be done at a global or local level.
+Global methods provide summary statistics of the effects of inputs variation in the complete input space, whereas local methods focus the effect of inputs variation around a given point of the input space (think of a Jacobian matrix e.g.).
 The @aa("one factor at a time method", href := DocumentationPages.elementarySamplings.file) can be viewed as a local sensitivity method, as only one factor vary, the other remaining fixed at their nominal value.
 
 @br
 
-OpenMOLE offers 2 methods for global sensitivity analysis: Morris and Saltelli.
+OpenMOLE implements two classical methods for global sensitivity analysis: Morris and Saltelli.
 
 
 
 @h2{Morris' method}
 @h3{Principle}
 
-@aa("Morris", href := "https://en.wikipedia.org/wiki/Morris_method") is a statistical method for global sensitivity analysis.
-It's a @i{screening} method, which means that the input space is (surprise!) @i{screened}, @i{i.e.} sampled via a grid sampling with fixed binwidth in each dimension.
-Resulting samples are evenly spaced in the input hypercube: in each dimension there is the same number of points.
-This number is a parameter of the method and determines the thickness of hypercube "slices".
+@aa("Morris method", href := "https://en.wikipedia.org/wiki/Morris_method") is a statistical method for global sensitivity analysis.
+This method is of the type "one-factor-at-a-time", and was conceived as a preliminary computational experiment, to grasp the relative influence of each factor.
+In comparison to LHS screening, it has the advantage to provide information for each factor.
 
-@br@br
-
-Trajectories are sampled among these points; the idea of the method is to observe output variation when one of the trajectory points is moved to one of its closest neighbors.
-It generates a small variation called "elementary effect".
-A certain number of trajectories are generated, in order to observe the consequence of elementary effects "almost everywhere" in the input space.
-Then, the method uses these elementary effect as base material to estimate consequent variation in the output space.
+The input space is considered as a grid and trajectories are sampled among these points.
+The method captures output variation when one of the trajectory points is moved to one of its closest neighbors.
+This variation is called an elementary effect.
+A certain number of trajectories are generated, in order to observe the consequence of elementary effects anywhere in the input space
+ (trajectories are generated such that given a starting point, any point at fixed distance is equiprobable - note that the method is still subject
+ to the curse of dimensionality for trajectories to fill the input space).
+Finally, the method summarizes these elementary effect to estimate global sensitivity in the output space.
 
 
 @h3{Results and Interpretation}
@@ -108,7 +108,7 @@ Paper describing method and its evaluation :  @a("Campolongo F, Saltelli A, Cari
 
 @h2{Saltelli's method}
 
-Saltelli is a statistical method for global sensitivity analysis
+Saltelli is a statistical method for global sensitivity analysis. It estimates at the first order the relative variance along each input factor.
 
 
 

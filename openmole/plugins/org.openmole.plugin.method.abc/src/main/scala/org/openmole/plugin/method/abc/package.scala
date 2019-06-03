@@ -29,8 +29,6 @@ package object abc {
 
         implicit def intObservable = Observable[Int](i ⇒ Array(i.toDouble))
         implicit def doubleObservable = Observable[Double](d ⇒ Array(d))
-        implicit def iterableDouble = Observable[Iterable[Double]](_.toArray)
-        implicit def iterableInt = Observable[Iterable[Int]](i ⇒ i.toArray.map(_.toDouble))
         implicit def arrayDouble = Observable[Array[Double]](identity)
         implicit def arrayInt = Observable[Array[Int]](_.map(_.toDouble))
       }
@@ -39,7 +37,13 @@ package object abc {
         def apply(t: T): Array[Double]
       }
 
-      implicit def tupleToObserved[T: Observable](t: (Val[T], T)) = Observed(t._1, t._2)
+      implicit def tupleIntToObserved(t: (Val[Int], Int)) = Observed(t._1, t._2)
+      implicit def tupleDoubleToObserved(t: (Val[Double], Double)) = Observed(t._1, t._2)
+      implicit def tupleIterableIntToObserved(t: (Val[Array[Int]], Iterable[Int])) = Observed(t._1, t._2.toArray)
+      implicit def tupleIterableDoubleToObserved(t: (Val[Array[Double]], Iterable[Double])) = Observed(t._1, t._2.toArray)
+      implicit def tupleIterableArrayIntToObserved(t: (Val[Array[Int]], Array[Int])) = Observed(t._1, t._2)
+      implicit def tupleIterableArrayDoubleToObserved(t: (Val[Array[Double]], Array[Double])) = Observed(t._1, t._2)
+      //implicit def tupleToObserved[T: Observable](t: (Val[T], T)) = Observed(t._1, t._2)
 
       def fromContext[T](observed: Observed[T], context: Context) = context(observed.v.array).map(v ⇒ observed.obs(v))
       def value[T](observed: Observed[T]) = observed.obs(observed.observed)
@@ -48,13 +52,6 @@ package object abc {
     case class Observed[T](v: Val[T], observed: T)(implicit val obs: Observed.Observable[T])
 
     case class ABCParameters(state: Val[MonAPMC.MonState], step: Val[Int], prior: Seq[Prior])
-
-    implicit class ABCContainer(dsl: DSLContainer[ABCParameters]) extends DSLContainerHook(dsl) {
-      def hook(directory: FromContext[File]): DSLContainer[ABC.ABCParameters] = {
-        implicit val defScope = dsl.scope
-        dsl hook ABCHook(dsl, directory)
-      }
-    }
 
     def apply(
       evaluation:           DSL,
@@ -158,7 +155,14 @@ package object abc {
         stop = stop
       )
 
-    DSLContainerExtension(DSLContainer(masterSlave), output = Some(master), delegate = Vector(slave), data = ABCParameters(masterState, step, prior))
+    DSLContainerExtension[ABCParameters](DSLContainer(masterSlave), output = Some(master), delegate = Vector(slave), data = ABCParameters(masterState, step, prior))
+  }
+
+  implicit class ABCContainer(dsl: DSLContainer[ABCParameters]) extends DSLContainerHook(dsl) {
+    def hook(directory: FromContext[File]): DSLContainer[ABC.ABCParameters] = {
+      implicit val defScope = dsl.scope
+      dsl hook ABCHook(dsl, directory)
+    }
   }
 
 }
