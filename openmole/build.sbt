@@ -623,7 +623,7 @@ def guiClientDir = guiDir / "client"
 lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins (ExecNpmPlugin) dependsOn
   (sharedGUI, clientToolGUI, market, dataGUI, extClientTool) settings(
   libraryDependencies += Libraries.async,
-  npmDeps in Compile += Dep("ace-builds", "1.4.1", List("mode-scala.js", "theme-github.js", "ext-language_tools.js"), true),
+  npmDeps in Compile += Dep("ace-builds/src-min", "1.4.3", List("mode-scala.js", "theme-github.js", "ext-language_tools.js"), true),
   npmDeps in Compile += Dep("sortablejs", "1.7.0", List("Sortable.min.js"))
 ) settings (defaultSettings: _*)
 
