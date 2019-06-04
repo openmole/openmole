@@ -234,7 +234,7 @@ lazy val mgo = OsgiProject(dir, "mgo", exports = Seq("mgo.*", "freestyle.*"), im
 
 
 
-lazy val spatialdataVersion = "0.1-SNAPSHOT"
+lazy val spatialdataVersion = "0.2"
 
 lazy val spatialdata = OsgiProject(dir, "org.openmole.spatialdata",
   exports = Seq("org.openmole.spatialdata.*"),
