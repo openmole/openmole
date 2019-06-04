@@ -4,10 +4,6 @@
 
 
 
-
-
-Model inputs come in many shapes;
-
 @h2{Exploring a set of files}
 
 Data processing often involves manipulating a large number of files, and browsing through these files.
@@ -73,7 +69,7 @@ To explore files located in several directories of your workspace, use:
 
 @br
 
-@code{"subdir${i}"} allows you to select one single file for each value of @code{i}.
+"subdir${i}" allows you to select one single file for each value of @code{i}.
 
 
 
@@ -124,8 +120,6 @@ You can find full examples using OpenMOLE's capabilities to process a dataset in
     @a("FSL-Fast", href := shared.link.repo.market + "/tree/8-dev/fsl-fast")
   @li
     @a("Random Forest", href := shared.link.repo.market + "/tree/8-dev/randomforest")
-
-@br
 
 Files can also be injected in the dataflow through @aa("Sources", href := source.file).
 They provide more powerful file filtering possibilities using regular expressions, and can also target directories only.
