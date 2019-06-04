@@ -17,7 +17,7 @@ import rx._
 import org.openmole.gui.client.core.alert.BannerAlert
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.tool.client.FileManager
-import squants.time.TimeConversions._
+import scala.concurrent.duration.DurationInt
 
 /*
  * Copyright (C) 10/08/15 // mathieu.leclaire@openmole.org
