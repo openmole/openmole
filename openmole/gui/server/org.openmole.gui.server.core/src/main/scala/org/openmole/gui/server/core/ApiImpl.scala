@@ -347,8 +347,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     val script: File = safePathToFile(scriptData.scriptPath)
 
     try {
-      val project = Project(script.getParentFileSafe)
-      project.compile(script, Seq.empty)(Services.copy(services)(outputRedirection = OutputRedirection(outputStream))) match {
+      Project.compile(script.getParentFileSafe, script, Seq.empty)(Services.copy(services)(outputRedirection = OutputRedirection(outputStream))) match {
         case ScriptFileDoesNotExists() ⇒ Some(message("Script file does not exist"))
         case ErrorInCode(e)            ⇒ Some(error(e))
         case ErrorInCompiler(e)        ⇒ Some(error(e))

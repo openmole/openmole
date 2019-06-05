@@ -109,15 +109,13 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
 
   def loadAny(file: File, args: Seq[String] = Seq.empty)(implicit services: Services): Any =
     try {
-      val project =
-        new Project(
-          variables.workDirectory,
-          (v: ConsoleVariables) ⇒ {
-            ConsoleVariables.bindVariables(console, v)
-            console
-          }
-        )
-      project.compile(file, args) match {
+      val newRepl =
+        (v: ConsoleVariables) ⇒ {
+          ConsoleVariables.bindVariables(console, v)
+          console
+        }
+
+      Project.compile(variables.workDirectory, file, args, newREPL = Some(newRepl)) match {
         case ScriptFileDoesNotExists() ⇒ throw new IOException("File " + file + " doesn't exist.")
         case e: CompilationError       ⇒ throw e.error
         case Compiled(compiled)        ⇒ compiled.apply()

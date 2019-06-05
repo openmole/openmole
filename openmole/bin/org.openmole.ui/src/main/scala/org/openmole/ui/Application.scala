@@ -317,9 +317,8 @@ object Application extends JavaLogger {
               }
 
             val res = if (!success(file).exists) {
-              val project = Project(file.getParentFileSafe)
               println(s"Testing: ${file.getName}")
-              file → processResult(project.compile(file, args))
+              file → processResult(Project.compile(file.getParentFileSafe, file, args))
             }
             else {
               file -> util.Success("Compilation succeeded (from previous test)")

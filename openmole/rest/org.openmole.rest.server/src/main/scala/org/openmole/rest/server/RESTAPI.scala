@@ -111,8 +111,7 @@ trait RESTAPI extends ScalatraServlet with ContentEncodingSupport
           }
         }
 
-        val project = Project(directory.workDirectory)
-        project.compile(directory.workDirectory / script, Seq.empty) match {
+        Project.compile(directory.workDirectory, directory.workDirectory / script, Seq.empty) match {
           case ScriptFileDoesNotExists() ⇒ ExpectationFailed(Error("The script doesn't exist").toJson)
           case e: CompilationError       ⇒ error(e.error)
           case compiled: Compiled ⇒

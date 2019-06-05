@@ -25,6 +25,7 @@ import monocle.function.all._
 import monocle.std.all._
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.project
 import org.openmole.core.services._
 import org.openmole.core.workflow.composition.DSL
 import org.openmole.core.workspace.NewFile
@@ -117,41 +118,13 @@ object Project {
      """.stripMargin
   }
 
-  def apply(workDirectory: File)(implicit newFile: NewFile, fileService: FileService) =
-    new Project(workDirectory, v ⇒ Project.newREPL(v))
-
   trait OMSScript {
     def run(): DSL
   }
 
-}
+  def compile(workDirectory: File, script: File, args: Seq[String], newREPL: Option[ConsoleVariables ⇒ ScalaREPL] = None)(implicit services: Services): CompileResult = {
+    import services._
 
-sealed trait CompileResult
-case class ScriptFileDoesNotExists() extends CompileResult
-sealed trait CompilationError extends CompileResult {
-  def error: Throwable
-}
-case class ErrorInCode(error: ScalaREPL.CompilationError) extends CompilationError
-case class ErrorInCompiler(error: Throwable) extends CompilationError
-
-case class Compiled(result: ScalaREPL.Compiled) extends CompileResult {
-
-  def eval =
-    result.apply().asInstanceOf[Project.OMSScript].run() match {
-      case p: DSL ⇒ p
-      case e      ⇒ throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
-    }
-}
-
-class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL) {
-
-  def pluginsDirectory: File = workDirectory / "plugins"
-
-  def plugins = pluginsDirectory.listFilesSafe
-
-  def loadPlugins = PluginManager.load(plugins)
-
-  def compile(script: File, args: Seq[String])(implicit services: Services): CompileResult = {
     if (!script.exists) ScriptFileDoesNotExists()
     else {
       def header =
@@ -173,7 +146,7 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL) {
            |$footer""".stripMargin
 
       def compile(content: String, args: Seq[String]): CompileResult = {
-        val loop = newREPL(ConsoleVariables(args, workDirectory))
+        val loop = newREPL.getOrElse { (v: project.ConsoleVariables) ⇒ Project.newREPL(v) }.apply(ConsoleVariables(args, workDirectory))
         try {
           Option(loop.compile(content)) match {
             case Some(compiled) ⇒ Compiled(compiled)
@@ -208,6 +181,21 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL) {
     }
   }
 
-  def scriptsObjects(script: File) = Project.scriptsObjects(script)
+}
 
+sealed trait CompileResult
+case class ScriptFileDoesNotExists() extends CompileResult
+sealed trait CompilationError extends CompileResult {
+  def error: Throwable
+}
+case class ErrorInCode(error: ScalaREPL.CompilationError) extends CompilationError
+case class ErrorInCompiler(error: Throwable) extends CompilationError
+
+case class Compiled(result: ScalaREPL.Compiled) extends CompileResult {
+
+  def eval =
+    result.apply().asInstanceOf[Project.OMSScript].run() match {
+      case p: DSL ⇒ p
+      case e      ⇒ throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
+    }
 }
