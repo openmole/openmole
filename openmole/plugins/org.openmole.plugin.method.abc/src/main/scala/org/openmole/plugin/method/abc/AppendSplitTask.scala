@@ -12,7 +12,7 @@ object AppendSplitTask {
       import p._
       val newState = MonAPMC.append(nAlpha, context(masterState), context(islandState))
       val (ns1, ns2) = MonAPMC.split(newState)
-      context + (islandState.array -> Array(ns1)) + (masterState -> ns2) + (step -> (context(step) + 1))
+      context + (masterState -> ns1) + (islandState.array -> Array(ns2)) + (step -> (context(step) + 1))
     } set (
       (inputs, outputs) += (masterState, step),
       inputs += islandState,
