@@ -55,11 +55,11 @@ package object sensitivity {
 
     def writeResults(ps: PrintStream, inputs: Seq[Val[_]], outputs: Seq[Val[_]], coefficient: (Val[_], Val[_]) ⇒ Val[_]) = FromContext { p ⇒
       import p._
-
-      outputs.foreach { o ⇒
+      
+      outputs.zipWithIndex.foreach { case (o, i) ⇒
         val vs = inputs.map { i ⇒ coefficient(i, o) }
-        def headerLine = s"""output,${csv.header(inputs, vs)}"""
-        csv.writeVariablesToCSV(ps, Some(headerLine), Seq(o.name) ++ vs.map(v ⇒ context(v)))
+        val headerLine = if(i == 0) Some(s"""output,${csv.header(inputs, vs)}""") else None
+        csv.writeVariablesToCSV(ps, headerLine, Seq(o.name) ++ vs.map(v ⇒ context(v)))
       }
     }
 
