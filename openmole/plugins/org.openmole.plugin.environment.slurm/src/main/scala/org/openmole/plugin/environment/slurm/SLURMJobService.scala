@@ -46,7 +46,8 @@ class SLURMJobService[S, H](
       coresByNode = parameters.coresByNode orElse parameters.threads,
       qos = parameters.qos,
       gres = parameters.gres.toList,
-      constraints = parameters.constraints.toList
+      constraints = parameters.constraints.toList,
+      reservation = parameters.reservation
     )
 
     accessControl { gridscale.slurm.submit(h, description) }
