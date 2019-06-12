@@ -5,7 +5,8 @@
 
 
 
-@h2{What is a Hook?}
+@h2{Default hooks}
+@h3{What is a Hook?}
 
 Tasks in OpenMOLE are mute pieces of software.
 They are not conceived to write files, display values, or generally present any side effects at all.
@@ -22,7 +23,10 @@ Different hooks are available for different actions that need to be performed.
 @h3{How to plug a hook to a task}
 
 The @code{hook} keyword is used to save or display results generated during the execution of a workflow.
-The generic way to use it is to write either @code{hook(workDirectory / "path/of/a/file.csv")} to save the results in a CSV file, or @code{hook display} to display the results in the standard output.
+There is only one mandatory argument to specify, the kind of @code{output} you want:
+@ul
+    @li{@code{hook display} to display the results in the standard output, note that it is completely equivalent to writing @code{hook(display)} or @code{hook(output = display)}
+    @li{@code{hook(workDirectory / "path/to/a/file.csv")} to save the results in a CSV file}
 
 @br
 
@@ -42,7 +46,7 @@ Let's consider this simple workflow:
 
   // Define an exploration task
   DirectSampling(
-    evaluation = (hello hook display),
+    evaluation = (hello hook(workDirectory / "results/helloTask_${i}.csv"),
     sampling = i in (0 to 9)
   )
 """, name = "plug a hook")
@@ -50,8 +54,7 @@ Let's consider this simple workflow:
 @br
 
 The @code{hook} is plugged to the end of the @code{hello} task in the @code{DirectSampling}, which means that every time @code{hello} finishes, the hook is executed.
-Here it means that the dataflow will be printed in the standard output, so all the output values for @code{i} will be displayed.
-
+Here it means that for each @code{i} value, the dataflow will be printed in files named @b{helloTask_1.csv}, @b{helloTask_2.csv}, etc., located in the @b{results} repository (which will be automatically created if it does not exist yet).
 
 
 @h3{Default hooks}
