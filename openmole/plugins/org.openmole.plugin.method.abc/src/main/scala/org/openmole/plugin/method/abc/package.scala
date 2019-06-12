@@ -96,13 +96,12 @@ package object abc {
   import ABC._
 
   def IslandABC(
-    evaluation:  DSL,
-    prior:       Seq[Prior],
-    observed:    Seq[Observed[_]],
-    sample:      Int,
-    generated:   Int,
-    parallelism: Int,
-    //islandGenerated:      Int                   = 1,
+    evaluation:           DSL,
+    prior:                Seq[Prior],
+    observed:             Seq[Observed[_]],
+    sample:               Int,
+    generated:            Int,
+    parallelism:          Int,
     minAcceptedRatio:     Double                = 0.01,
     stopSampleSizeFactor: Int                   = 1,
     maxStep:              OptionalArgument[Int] = None,

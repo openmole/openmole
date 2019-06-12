@@ -33,7 +33,7 @@ Due to a data loss in 2016, only the versions from OpenMOLE 6 are available.
 
 
 
-@h2{Why is my ssh authentication not working?}
+@h2{Why is my SSH authentication not working?}
 
 When one of the SSH authentications you've added to OpenMOLE is marked as failed, you can try these few steps to identify the problem.
 

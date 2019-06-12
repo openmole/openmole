@@ -1,4 +1,3 @@
-
 @import org.openmole.site.tools._
 @import org.openmole.site._
 @import org.openmole.core.buildinfo._
@@ -6,7 +5,11 @@
 
 
 
-@h2{8.0 | TODO Set version }
+@h2{9.0 Prolific Parrot}
+
+
+
+@h2{8.0 Origami Orchid}
 @h6{Core}
 @ul
   @li{Migrate to build to SBT 1.0}

@@ -37,7 +37,13 @@ object ABCHook {
               s.weights zip
               s.thetas).map {
                 case ((((((epsilon, pAcc), t), ti), rhoi), wi), thetai) ⇒
-                  epsilon.toString ++ "," ++ pAcc.toString ++ "," ++ t.toString ++ "," ++ ti.toString ++ "," ++ rhoi.toString ++ "," ++ wi.toString ++ "," ++ thetai.mkString(",")
+                  epsilon.formatted("%.12f") ++ "," ++
+                    pAcc.formatted("%.12f") ++ "," ++
+                    t.formatted("%d") ++ "," ++
+                    ti.formatted("%d") ++ "," ++
+                    rhoi.formatted("%.12f") ++ "," ++
+                    wi.formatted("%.12f") ++ "," ++
+                    thetai.map { _.formatted("%.12f") }.mkString(",")
               }.mkString("\n")
 
           file.createParentDir
