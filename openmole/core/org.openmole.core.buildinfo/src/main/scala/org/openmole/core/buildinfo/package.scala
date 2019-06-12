@@ -21,7 +21,7 @@ import java.util.{ Calendar, Locale }
 
 package object buildinfo {
 
-  def name = "O... O..."
+  def name = "P... P..."
 
   case class Version(value: String, name: String, time: Long) {
     override def toString = value
