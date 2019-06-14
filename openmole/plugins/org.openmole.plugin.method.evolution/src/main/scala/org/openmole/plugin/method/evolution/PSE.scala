@@ -58,7 +58,6 @@ object PSEAlgorithm {
   @Lenses case class Individual(
     genome:        Genome,
     phenotype:     Array[Double],
-    mapped:        Boolean       = false,
     foundedIsland: Boolean       = false)
 
   case class Result(continuous: Vector[Double], discrete: Vector[Int], pattern: Vector[Int], phenotype: Vector[Double])
@@ -104,8 +103,7 @@ object PSEAlgorithm {
     PSEOperations.elitism[M, Individual, Vector[Double]](
       i ⇒ values(Individual.genome.get(i), continuous),
       vectorPhenotype.get,
-      pattern,
-      Individual.mapped)
+      pattern)
 
   def expression(phenotype: (Vector[Double], Vector[Int]) ⇒ Vector[Double], continuous: Vector[C]): Genome ⇒ Individual =
     deterministic.expression[Genome, Individual](
@@ -141,8 +139,7 @@ object NoisyPSEAlgorithm {
   @Lenses case class Individual[P](
     genome:           Genome,
     historyAge:       Long,
-    phenotypeHistory: Array[P],
-    mapped:           Boolean  = false)
+    phenotypeHistory: Array[P])
 
   def buildIndividual[P: Manifest](genome: Genome, phenotype: P) = Individual(genome, 1, Array(phenotype))
   def vectorPhenotype[P: Manifest] = Individual.phenotypeHistory[P] composeLens arrayToVectorLens
@@ -182,7 +179,6 @@ object NoisyPSEAlgorithm {
       vectorPhenotype[P],
       aggregation,
       pattern,
-      Individual.mapped,
       Individual.historyAge,
       historySize)
 
@@ -334,7 +330,6 @@ object PSE {
 
         def migrateFromIsland(population: Vector[I], state: S) =
           population.filter(i ⇒ !PSEAlgorithm.Individual.foundedIsland.get(i)).
-            map(PSEAlgorithm.Individual.mapped.set(false)).
             map(PSEAlgorithm.Individual.foundedIsland.set(false))
       }
 
