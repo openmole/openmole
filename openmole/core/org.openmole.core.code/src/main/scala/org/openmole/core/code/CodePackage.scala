@@ -18,13 +18,13 @@ package org.openmole.core.code
 
 import org.openmole.core.workspace._
 import org.openmole.tool.file.FilePackage
-import org.openmole.tool.random
 import org.openmole.tool.random.RandomProvider
 import org.openmole.tool.statistics.StatisticsPackage
 
 trait CodePackage extends FilePackage with StatisticsPackage with MathPackage {
-  def Random(seed: Long): java.util.Random = random.Random.apply(seed)
+  def Random(seed: Long): java.util.Random = org.openmole.tool.random.Random.apply(seed)
   def Random()(implicit randomProvider: RandomProvider): java.util.Random = newRandom(randomProvider().nextLong())
+  def random(implicit randomProvider: RandomProvider) = randomProvider()
 
   @deprecated("8.0")
   def newRNG(seed: Long): java.util.Random = Random(seed)
