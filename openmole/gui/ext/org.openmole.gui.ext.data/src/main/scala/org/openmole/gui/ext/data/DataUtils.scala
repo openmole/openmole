@@ -52,10 +52,10 @@ object DataUtils {
   }
 
   implicit def fileToExtension(fileName: String): FileExtension = fileName match {
-    case x if x.endsWith(".oms")   ⇒ OMS
-    case x if x.endsWith(".csv")   ⇒ CSV
-    case x if x.endsWith(".nlogo") ⇒ NETLOGO
-    case x if x.endsWith(".R")     ⇒ R
+    case x if x.endsWith(".oms")                            ⇒ OMS
+    case x if x.endsWith(".csv")                            ⇒ CSV
+    case x if x.endsWith(".nlogo") | x.endsWith(".nlogo3d") ⇒ NETLOGO
+    case x if x.endsWith(".R")                              ⇒ R
     case x if x.endsWith(".gaml") |
       x.endsWith(".py") |
       x.endsWith(".txt") | x.endsWith(".nls") ⇒ TEXT
@@ -72,7 +72,7 @@ object DataUtils {
   }
 
   implicit class CleanName(s: String) {
-    def clean = s.split('-').reduce(_ + _.capitalize).filterNot(Seq('?', ' ').contains)
+    def clean = s.split('-').reduce(_ + _.capitalize).filterNot(Seq('?', ' ').contains).replaceAll("%", "percent")
   }
 
   def isCSV(safePath: SafePath) = {

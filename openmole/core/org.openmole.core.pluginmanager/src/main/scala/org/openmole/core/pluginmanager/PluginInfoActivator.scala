@@ -65,22 +65,22 @@ sealed trait KeyWord {
 
 object KeyWord {
 
-  implicit def fromString(s: String) = Word(s)
+  implicit def fromString(s: String) = WordKeyWord(s)
   implicit def classToString(c: Class[_]) = c.getSimpleName
 
   def objectName(o: Any) = o.getClass.getSimpleName.reverse.dropWhile(_ == '$').reverse
 
-  case class Task(name: String) extends KeyWord
-  case class Hook(name: String) extends KeyWord
-  case class Source(name: String) extends KeyWord
-  case class Environment(name: String) extends KeyWord
-  case class Setter(name: String) extends KeyWord
-  case class Adder(name: String) extends KeyWord
-  case class Pattern(name: String) extends KeyWord
-  case class Transition(name: String) extends KeyWord
-  case class Sampling(name: String) extends KeyWord
-  case class Word(name: String) extends KeyWord
-  case class Domain(name: String) extends KeyWord
+  case class TaskKeyWord(name: String) extends KeyWord
+  case class HookKeyWord(name: String) extends KeyWord
+  case class SourceKeyWord(name: String) extends KeyWord
+  case class EnvironmentKeyWord(name: String) extends KeyWord
+  case class SetterKeyWord(name: String) extends KeyWord
+  case class AdderKeyWord(name: String) extends KeyWord
+  case class PatternKeyWord(name: String) extends KeyWord
+  case class TransitionKeyWord(name: String) extends KeyWord
+  case class SamplingKeyWord(name: String) extends KeyWord
+  case class WordKeyWord(name: String) extends KeyWord
+  case class DomainKeyWord(name: String) extends KeyWord
 }
 
 trait PluginInfoActivator extends BundleActivator {

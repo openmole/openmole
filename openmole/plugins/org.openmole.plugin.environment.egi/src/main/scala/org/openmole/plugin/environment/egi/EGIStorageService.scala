@@ -158,7 +158,7 @@ object CurlRemoteStorage {
         (e: String) ⇒ error.append("\n" + e)
       )
 
-    val exit = Process(Seq("bash", "-c", cmd)) ! logger
+    val exit = Process(Seq("bash", "-c", s"unset http_proxy; unset https_proxy; $cmd")) ! logger
     if (exit != 0) throw new RuntimeException(s"Command $cmd had a non 0 return value.\n Output: ${output.toString}. Error: ${error.toString}")
     output.toString
   }

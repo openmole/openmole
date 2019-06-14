@@ -29,10 +29,11 @@ import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.tool.file._
 import org.openmole.tool.logger.JavaLogger
+import org.openmole.core.workflow.job._
 
 import scala.util.{ Failure, Success }
 
-object GetResultActor extends JavaLogger {
+object GetResultActor {
 
   case class JobRemoteExecutionException(message: String, cause: Throwable) extends InternalProcessingError(message, cause)
 
@@ -56,7 +57,7 @@ object GetResultActor extends JavaLogger {
 
     val runtimeResult = getRuntimeResult(outputFilePath, storageId, environment, download)
 
-    val stream = job.moleExecution.executionContext.services.outputRedirection.output
+    val stream = batchJob.storedJob.moleExecution.executionContext.services.outputRedirection.output
     display(runtimeResult.stdOut, s"Output on ${runtimeResult.info.hostName}", stream)
 
     runtimeResult.result match {
@@ -67,12 +68,12 @@ object GetResultActor extends JavaLogger {
         services.eventDispatcher.trigger(environment: Environment, Environment.JobCompleted(batchJob, log, runtimeResult.info))
 
         //Try to download the results for all the jobs of the group
-        for (moleJob ← job.moleJobs) {
+        for (moleJob ← batchJob.storedJob.storedMoleJobs) {
           if (contextResults.results.isDefinedAt(moleJob.id)) {
             val executionResult = contextResults.results(moleJob.id)
             executionResult match {
-              case Success(context) ⇒ moleJob.finish(context)
-              case Failure(e)       ⇒ if (!moleJob.finished) JobManager ! MoleJobError(moleJob, batchJob, e)
+              case Success(context) ⇒ JobStore.finish(moleJob, Left(context))
+              case Failure(e)       ⇒ JobManager ! MoleJobError(moleJob.id, batchJob, e)
             }
           }
         }
@@ -114,13 +115,13 @@ object GetResultActor extends JavaLogger {
                   }
             }.toMap
 
-          val res = serializerService.deserialiseReplaceFiles[ContextResults](serializedResults.contextResults, fileReplacement)
+          val res = serializerService.deserializeReplaceFiles[ContextResults](serializedResults.contextResults, fileReplacement)
           fileReplacement.values.foreach(services.fileService.deleteWhenGarbageCollected)
           serializedResults.contextResults.delete()
           res
         }
       case serializedResults: ArchiveContextResults ⇒
-        val (res, files) = serializerService.deserialiseAndExtractFiles[ContextResults](serializedResults.contextResults)
+        val (res, files) = serializerService.deserializeAndExtractFiles[ContextResults](serializedResults.contextResults)
         files.foreach(services.fileService.deleteWhenGarbageCollected)
         serializedResults.contextResults.delete()
         res

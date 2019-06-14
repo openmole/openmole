@@ -25,8 +25,8 @@ package task {
 
   trait TaskPackage {
     implicit class TaskToCapsuleDecorator(task: Task) {
-      def toCapsule = Capsule(task)
-      def toCapsule(strainer: Boolean) = Capsule(task, true)
+      def toCapsule = MoleCapsule(task)
+      def toCapsule(strainer: Boolean) = MoleCapsule(task, true)
     }
 
     def newRNG(context: Context) = Task.buildRNG(context)
@@ -38,5 +38,3 @@ package task {
   }
 
 }
-
-package object task

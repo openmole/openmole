@@ -31,10 +31,11 @@ import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.external._
 import org.openmole.tool.random._
 import cats.syntax.traverse._
+import org.openmole.core.dsl.outputs
 
 object SystemExecTask {
 
-  implicit def isTask: InputOutputBuilder[SystemExecTask] = InputOutputBuilder(SystemExecTask._config)
+  implicit def isTask: InputOutputBuilder[SystemExecTask] = InputOutputBuilder(SystemExecTask.config)
   implicit def isExternal: ExternalBuilder[SystemExecTask] = ExternalBuilder(SystemExecTask.external)
   implicit def isInfo = InfoBuilder(info)
 
@@ -72,7 +73,7 @@ object SystemExecTask {
     stdOut:             OptionalArgument[Val[String]] = None,
     stdErr:             OptionalArgument[Val[String]] = None,
     shell:              Shell                         = Bash,
-    environmentVariables: Vector[(String, FromContext[String])] = Vector.empty)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): SystemExecTask =
+    environmentVariables: Vector[EnvironmentVariable] = Vector.empty)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): SystemExecTask =
     new SystemExecTask(
       commands = commands.map(c ⇒ OSCommands(OS(), c)).toVector,
       workDirectory = workDirectory,
@@ -82,10 +83,10 @@ object SystemExecTask {
       stdErr = stdErr,
       shell = shell,
       environmentVariables = environmentVariables,
-      _config = InputOutputConfig(),
+      config = InputOutputConfig(),
       external = External(),
       info = InfoConfig()
-    )
+    ) set (outputs += (Seq(returnValue.option, stdOut.option, stdErr.option).flatten: _*))
 
 }
 
@@ -97,15 +98,11 @@ object SystemExecTask {
   stdOut:               Option[Val[String]],
   stdErr:               Option[Val[String]],
   shell:                Shell,
-  environmentVariables: Vector[(String, FromContext[String])],
-  _config:              InputOutputConfig,
+  environmentVariables: Vector[EnvironmentVariable],
+  config:              InputOutputConfig,
   external:             External,
   info: InfoConfig
 ) extends Task with ValidateTask {
-
-  import SystemExecTask._
-
-  def config = InputOutputConfig.outputs.modify(_ ++ Seq(stdOut, stdErr, returnValue).flatten)(_config)
 
   override def validate =
     Validate { p ⇒
@@ -120,7 +117,7 @@ object SystemExecTask {
           e ← exp.validate(allInputs)
         } yield e
 
-      val variableErrors = environmentVariables.map(_._2).flatMap(_.validate(allInputs))
+      val variableErrors = environmentVariables.flatMap(v => Seq(v.name, v.value)).flatMap(_.validate(allInputs))
 
       commandsError ++ variableErrors ++ External.validate(external)(allInputs).apply
     }
@@ -157,7 +154,7 @@ object SystemExecTask {
       val executionResult =
         executeAll(
           workDir,
-          environmentVariables.map { case (name, variable) ⇒ name → variable.from(preparedContext) },
+          environmentVariables.map { v ⇒ v.name.from(context) → v.value.from(preparedContext) },
           shellCommands.toList,
           errorOnReturnValue && !returnValue.isDefined,
           stdOut.isDefined,

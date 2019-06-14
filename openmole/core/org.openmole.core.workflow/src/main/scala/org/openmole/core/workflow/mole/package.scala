@@ -20,36 +20,35 @@ package org.openmole.core.workflow
 import scala.language.implicitConversions
 
 package mole {
-
-  trait MolePackage
+  trait MolePackage {
+    def CSVHook = mole.CSVHook
+    type FromContextHook = mole.FromContextHook
+    type FromContextSource = mole.FromContextSource
+  }
 }
 
 package object mole {
 
-  case class Hooks(map: Map[Capsule, Traversable[Hook]])
+  def Hook = FromContextHook
+  def Source = FromContextSource
 
-  case class Sources(map: Map[Capsule, Traversable[Source]])
+  case class Hooks(map: Map[MoleCapsule, Traversable[Hook]])
+  case class Sources(map: Map[MoleCapsule, Traversable[Source]])
 
-  implicit def hooksToMap(h: Hooks): Map[Capsule, Traversable[Hook]] = h.map.withDefault(_ ⇒ List.empty)
+  implicit def hooksToMap(h: Hooks): Map[MoleCapsule, Traversable[Hook]] = h.map.withDefault(_ ⇒ List.empty)
+  implicit def mapToHooks(m: Map[MoleCapsule, Traversable[Hook]]): Hooks = new Hooks(m)
+  implicit def iterableTupleToHooks(h: Iterable[(MoleCapsule, Hook)]): Hooks = new Hooks(h.groupBy(_._1).mapValues(_.map(_._2)))
 
-  implicit def mapToHooks(m: Map[Capsule, Traversable[Hook]]): Hooks = new Hooks(m)
-
-  implicit def iterableTupleToHooks(h: Iterable[(Capsule, Hook)]): Hooks =
-    new Hooks(h.groupBy(_._1).mapValues(_.map(_._2)))
-
-  implicit def sourcesToMap(s: Sources): Map[Capsule, Traversable[Source]] = s.map.withDefault(_ ⇒ List.empty)
-
-  implicit def mapToSources(m: Map[Capsule, Traversable[Source]]): Sources = new Sources(m)
-
-  implicit def iterableTupleToSources(s: Iterable[(Capsule, Source)]): Sources =
-    new Sources(s.groupBy(_._1).mapValues(_.map(_._2)))
+  implicit def sourcesToMap(s: Sources): Map[MoleCapsule, Traversable[Source]] = s.map.withDefault(_ ⇒ List.empty)
+  implicit def mapToSources(m: Map[MoleCapsule, Traversable[Source]]): Sources = new Sources(m)
+  implicit def iterableTupleToSources(s: Iterable[(MoleCapsule, Source)]): Sources = new Sources(s.groupBy(_._1).mapValues(_.map(_._2)))
 
   object Hooks {
-    def empty = Map.empty[Capsule, Traversable[Hook]]
+    def empty = Map.empty[MoleCapsule, Traversable[Hook]]
   }
 
   object Sources {
-    def empty = Map.empty[Capsule, Traversable[Source]]
+    def empty = Map.empty[MoleCapsule, Traversable[Source]]
   }
 
 }

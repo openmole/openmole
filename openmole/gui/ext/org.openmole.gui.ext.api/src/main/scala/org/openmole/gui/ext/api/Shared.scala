@@ -64,14 +64,15 @@ trait Api {
   def saveFile(path: SafePath, fileContent: String): Unit
   def saveFiles(fileContents: Seq[AlterableFileContent]): Unit
   def size(safePath: SafePath): Long
-  def sequence(safePath: SafePath): SequenceData
+  def sequence(safePath: SafePath, separator: Char = ','): SequenceData
 
   //EXECUTIONS
   def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])
   def staticInfos(): Seq[(ExecutionId, StaticExecutionInfo)]
   def cancelExecution(id: ExecutionId): Unit
   def removeExecution(id: ExecutionId): Unit
-  def runScript(scriptData: ScriptData): Unit
+  def compileScript(scriptData: ScriptData): Option[ErrorData]
+  def runScript(scriptData: ScriptData, validateScript: Boolean): Unit
   def clearEnvironmentErrors(environmentId: EnvironmentId): Unit
   def runningErrorEnvironmentData(environmentId: EnvironmentId, lines: Int): EnvironmentErrorData
 
@@ -80,7 +81,7 @@ trait Api {
   def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Unit
 
   //CORE PLUGINS
-  def addUploadedPlugins(nodes: Seq[String]): Seq[Error]
+  def addUploadedPlugins(nodes: Seq[String]): Seq[ErrorData]
   def autoAddPlugins(path: SafePath): Unit
   def isPlugin(path: SafePath): Boolean
   def allPluggableIn(path: SafePath): Seq[SafePath]
@@ -94,4 +95,5 @@ trait Api {
   //MODEL WIZARDS
   def models(archivePath: SafePath): Seq[SafePath]
   def expandResources(resources: Resources): Resources
+  def downloadHTTP(url: String, path: SafePath, extract: Boolean): Either[Unit, ErrorData]
 }

@@ -16,37 +16,33 @@
  */
 package org.openmole.plugin.tool.pattern
 
-import org.openmole.core.context.Val
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.transition._
-
-import shapeless._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 
 object MasterSlave {
 
-  @deprecated("use the uncurried apply function", "7")
   def apply(
-    bootstrap: Puzzle,
+    bootstrap: DSL,
     master:    Task,
-    state:     Val[_]*
-  )(slave: Puzzle): Puzzle = apply(bootstrap, master, slave, state: _*)
+    slave:     DSL,
+    state:     Seq[Val[_]],
+    slaves:    OptionalArgument[Int]       = None,
+    stop:      OptionalArgument[Condition] = None
+  )(implicit scope: DefinitionScope = "master slave"): DSL = {
+    val masterCapsule = Master(master, persist = state: _*)
+    val masterSlaveLast = Strain(EmptyTask())
 
-  def apply(
-    bootstrap: Puzzle,
-    master:    Task,
-    slave:     Puzzle,
-    state:     Val[_]*
-  ): Puzzle = {
-    val masterCapsule = MasterCapsule(master, state: _*)
-    val masterSlot = Slot(masterCapsule)
-    val slaveSlot2 = Slot(slave.first)
-    val puzzle = (bootstrap -< slave -- masterSlot) & (masterCapsule -<- slaveSlot2) & (bootstrap oo (masterSlot, state: _*))
-    puzzle :: Elements(masterSlot, slave) :: HNil
+    val skel = stop.option match {
+      case Some(s) ⇒ bootstrap -< slave -- (masterCapsule >| masterSlaveLast when s)
+      case None    ⇒ bootstrap -< slave -- masterCapsule
+    }
+
+    val wf =
+      skel &
+        (masterCapsule -<- Slot(slave) slaves slaves) &
+        (bootstrap oo masterCapsule keep (state: _*))
+
+    DSLContainer(wf, output = Some(master), delegate = DSL.tasks(slave).map(_.task))
   }
-
-  case class Elements(master: Slot, slave: Puzzle)
 
 }

@@ -17,18 +17,19 @@
 
 package org.openmole.plugin.sampling.lhs
 
-import org.openmole.core.context._
-import org.openmole.core.expansion._
-import org.openmole.core.tools.math._
-import org.openmole.core.workflow.domain._
-import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.tools._
-import cats.implicits._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 
 object LHS {
 
   def apply(samples: FromContext[Int], factors: ScalarOrSequenceOfDouble[_]*) =
-    new LHS(samples, factors: _*)
+    Sampling { p ⇒
+      import p._
+      val s = samples.from(context)
+      val vectorSize = factors.map(_.size(context)).sum
+      def values = LHS.lhsValues(vectorSize, s, random())
+      values.map(v ⇒ ScalarOrSequenceOfDouble.unflatten(factors, v).from(context)).toIterator
+    } validate { samples } inputs { factors.flatMap(_.inputs) } prototypes { factors.map(_.prototype) }
 
   def lhsValues(dimensions: Int, samples: Int, rng: scala.util.Random) = Array.fill(dimensions) {
     org.openmole.tool.random.shuffled(0 until samples)(rng).map { i ⇒ (i + rng.nextDouble) / samples }.toArray
@@ -36,17 +37,3 @@ object LHS {
 
 }
 
-sealed class LHS(val samples: FromContext[Int], val factors: ScalarOrSequenceOfDouble[_]*) extends Sampling {
-
-  override def inputs = factors.flatMap(_.inputs)
-  override def prototypes = factors.map { _.prototype }
-
-  override def apply() = FromContext { p ⇒
-    import p._
-    val s = samples.from(context)
-    val vectorSize = factors.map(_.size(context)).sum
-    def values = LHS.lhsValues(vectorSize, s, random())
-    values.map(v ⇒ ScalarOrSequenceOfDouble.scaled(factors, v).from(context)).toIterator
-  }
-
-}

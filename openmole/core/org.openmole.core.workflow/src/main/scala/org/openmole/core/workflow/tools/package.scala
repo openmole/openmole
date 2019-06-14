@@ -20,6 +20,7 @@ package org.openmole.core.workflow
 package tools {
 
   import org.openmole.core.expansion.{ Expandable, ExpandedString, FromContext, ToFromContext }
+  import org.openmole.tool.outputredirection.OutputRedirection
 
   trait ToolsPackage {
 
@@ -37,12 +38,17 @@ package tools {
     def OptionalArgument = tools.OptionalArgument
     type OptionalArgument[T] = tools.OptionalArgument[T]
 
+    implicit def optionalCondition[T](t: T)(implicit toCondition: ToFromContext[T, Boolean]) = OptionalArgument(Some(toCondition.apply(t)))
     implicit def optionalArgumentToOption[T](optionalArgument: OptionalArgument[T]) = optionalArgument.option
     implicit def fromStringToExpandedStringOptionalArgument(s: String) = OptionalArgument[FromContext[String]](Some(ExpandedString(s)))
 
     def Expression[T] = new {
       def apply[S](s: S)(implicit expandable: Expandable[S, T]) = expandable.expand(s)
     }
+
+    type Display = WritableOutput.Display
+
+    def display(implicit outputRedirection: OutputRedirection): Display = outputRedirection.output
 
   }
 }

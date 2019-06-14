@@ -2,34 +2,26 @@ package org.openmole.rest.server
 
 import java.io.{ File, PrintStream }
 import java.util.UUID
-import java.util.logging.Level
-import java.util.zip.{ GZIPInputStream, GZIPOutputStream }
+import java.util.zip.GZIPInputStream
+
 import javax.servlet.annotation.MultipartConfig
 import javax.servlet.http.HttpServletRequest
-
-import org.json4s.JsonDSL._
 import org.json4s._
-import org.openmole.core.project._
+import org.json4s.jackson.JsonMethods._
 import org.openmole.core.event._
+import org.openmole.core.project._
 import org.openmole.core.workflow.execution.Environment
-import org.openmole.core.workflow.execution.Environment.ExecutionJobExceptionRaised
 import org.openmole.core.workflow.mole.{ MoleExecution, MoleExecutionContext, MoleServices }
-import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workspace.Workspace
-import org.openmole.tool.tar.{ TarInputStream, TarOutputStream }
+import org.openmole.core.dsl._
+import org.openmole.rest.message._
+import org.openmole.tool.collection._
+import org.openmole.tool.outputredirection.OutputRedirection
+import org.openmole.tool.stream._
+import org.openmole.tool.tar.{ TarInputStream, TarOutputStream, _ }
 import org.scalatra._
 import org.scalatra.servlet.FileUploadSupport
-import org.openmole.rest.message._
-import org.openmole.tool.file._
-import org.openmole.tool.stream._
-import org.openmole.tool.tar._
 
 import scala.util.{ Failure, Success, Try }
-import org.openmole.tool.collection._
-import org.json4s.jackson.JsonMethods._
-import org.openmole.core.outputredirection.OutputRedirection
-import org.openmole.core.preference.Preference
 
 case class EnvironmentException(environment: Environment, error: Error)
 
@@ -56,7 +48,7 @@ case class WorkDirectory(workDirectory: File) {
 }
 
 @MultipartConfig(fileSizeThreshold = 1024 * 1024) //research scala multipart config
-trait RESTAPI extends ScalatraServlet with GZipSupport
+trait RESTAPI extends ScalatraServlet with ContentEncodingSupport
   with FileUploadSupport
   with FlashMapSupport
   with Authentication {
@@ -111,7 +103,7 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
         }
 
         def start(ex: MoleExecution) = {
-          Try(ex.start) match {
+          Try(ex.start(false)) match {
             case Failure(e) ⇒ error(e)
             case Success(ex) ⇒
               moles.add(id, Execution(directory, ex))
@@ -128,7 +120,7 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
               case Success(res) ⇒
                 Try {
                   val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(directory.outputStream))
-                  res.toExecution(executionContext = MoleExecutionContext()(services))
+                  dslToPuzzle(res).toExecution()(services)
                 } match {
                   case Success(ex) ⇒
                     ex listen { case (ex, ev: MoleExecution.Finished) ⇒ }
@@ -185,7 +177,7 @@ trait RESTAPI extends ScalatraServlet with GZipSupport
           def environments = moleExecution.environments.values.toSeq ++ Seq(moleExecution.defaultEnvironment)
           def environmentStatus = environments.map {
             env ⇒
-              def environmentErrors = env.clearErrors.map(e ⇒ Error(e.exception).copy(level = Some(e.level.toString)))
+              def environmentErrors = Environment.clearErrors(env).map(e ⇒ Error(e.exception).copy(level = Some(e.level.toString)))
               EnvironmentStatus(name = env.name, submitted = env.submitted, running = env.running, done = env.done, failed = env.failed, environmentErrors)
           }
           val statuses = moleExecution.capsuleStatuses

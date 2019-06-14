@@ -18,12 +18,11 @@
 package org.openmole.plugin.environment.batch.environment
 
 import java.io.File
-import java.util.UUID
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.{CountDownLatch, Semaphore}
 
 import org.openmole.core.communication.message._
 import org.openmole.core.communication.storage.{RemoteStorage, TransferOptions}
-import org.openmole.core.console.ScalaREPL.ReferencedClasses
-import org.openmole.core.console.{REPLClassloader, ScalaREPL}
 import org.openmole.core.event.{Event, EventDispatcher}
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice.{FileCache, FileService, FileServiceCache}
@@ -35,20 +34,25 @@ import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job._
+import org.openmole.core.workflow.mole.MoleServices
+import org.openmole.core.workflow.tools.ExceptionEvent
 import org.openmole.core.workspace._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment.ExecutionJobRegistry
 import org.openmole.plugin.environment.batch.refresh._
 import org.openmole.tool.cache._
+import org.openmole.tool.collection.RingBuffer
 import org.openmole.tool.file._
-import org.openmole.tool.logger.JavaLogger
+import org.openmole.tool.logger.{JavaLogger, LoggerService}
 import org.openmole.tool.random.{RandomProvider, Seeder, shuffled}
 import squants.information.Information
 import squants.information.InformationConversions._
 import squants.time.TimeConversions._
+import org.openmole.tool.lock._
+import org.openmole.tool.outputredirection.OutputRedirection
 
 import scala.collection.immutable.TreeSet
 
-object BatchEnvironment extends JavaLogger {
+object BatchEnvironment {
 
   trait Transfer {
     def id: Long
@@ -99,12 +103,11 @@ object BatchEnvironment extends JavaLogger {
 
   val GetTokenInterval = ConfigurationLocation("BatchEnvironment", "GetTokenInterval", Some(1 minutes))
 
-  val MinUpdateInterval = ConfigurationLocation("BatchEnvironment", "MinUpdateInterval", Some(1 minutes))
-  val MaxUpdateInterval = ConfigurationLocation("BatchEnvironment", "MaxUpdateInterval", Some(10 minutes))
-  val IncrementUpdateInterval = ConfigurationLocation("BatchEnvironment", "IncrementUpdateInterval", Some(1 minutes))
+  val MinUpdateInterval = ConfigurationLocation("BatchEnvironment", "MinUpdateInterval", Some(20 seconds))
+  val IncrementUpdateInterval = ConfigurationLocation("BatchEnvironment", "IncrementUpdateInterval", Some(20 seconds))
+  val MaxUpdateInterval = ConfigurationLocation("BatchEnvironment", "MaxUpdateInterval", Some(5 minutes))
 
   val MaxUpdateErrorsInARow = ConfigurationLocation("BatchEnvironment", "MaxUpdateErrorsInARow", Some(3))
-  val RuntimeMemoryMargin = ConfigurationLocation("BatchEnvironment", "RuntimeMemoryMargin", Some(400 megabytes))
 
   val downloadResultRetry = ConfigurationLocation("BatchEnvironment", "DownloadResultRetry", Some(3))
   val killJobRetry = ConfigurationLocation("BatchEnvironment", "KillJobRetry", Some(3))
@@ -125,11 +128,6 @@ object BatchEnvironment extends JavaLogger {
     case Some(m) ⇒ m
   }
 
-  def requiredMemory(openMOLEMemory: Option[Information], memory: Option[Information])(implicit preference: Preference) = memory match {
-    case Some(m) ⇒ m
-    case None    ⇒ openMOLEMemoryValue(openMOLEMemory) + preference(BatchEnvironment.RuntimeMemoryMargin)
-  }
-
   def threadsValue(threads: Option[Int]) = threads.getOrElse(1)
 
   object Services {
@@ -138,6 +136,50 @@ object BatchEnvironment extends JavaLogger {
       import services._
       new Services()
     }
+
+    def copy(services: Services)(
+      threadProvider:             ThreadProvider = services.threadProvider,
+      preference:        Preference = services.preference,
+      newFile:           NewFile = services.newFile,
+      serializerService: SerializerService = services.serializerService,
+      fileService:       FileService = services.fileService,
+      seeder:            Seeder = services.seeder,
+      randomProvider:    RandomProvider = services.randomProvider,
+      replicaCatalog:    ReplicaCatalog = services.replicaCatalog,
+      eventDispatcher:   EventDispatcher = services.eventDispatcher,
+      fileServiceCache:  FileServiceCache = services.fileServiceCache,
+      outputRedirection: OutputRedirection = services.outputRedirection,
+      loggerService: LoggerService) =
+      new Services()(
+        threadProvider = threadProvider,
+        preference = preference,
+        newFile = newFile,
+        serializerService = serializerService,
+        fileService = fileService,
+        seeder = seeder,
+        randomProvider = randomProvider,
+        replicaCatalog = replicaCatalog,
+        eventDispatcher = eventDispatcher,
+        fileServiceCache = fileServiceCache,
+        outputRedirection = outputRedirection,
+        loggerService = loggerService)
+
+    def set(services: Services)(ms: MoleServices) =
+      new Services() (
+        threadProvider = ms.threadProvider,
+        preference = ms.preference,
+        newFile = ms.newFile,
+        serializerService = services.serializerService,
+        fileService = ms.fileService,
+        seeder = ms.seeder,
+        randomProvider = services.randomProvider,
+        replicaCatalog = services.replicaCatalog,
+        eventDispatcher = ms.eventDispatcher,
+        fileServiceCache = ms.fileServiceCache,
+        outputRedirection = ms.outputRedirection,
+        loggerService = ms.loggerService
+      )
+
   }
 
   class Services(
@@ -151,12 +193,44 @@ object BatchEnvironment extends JavaLogger {
     implicit val randomProvider:    RandomProvider,
     implicit val replicaCatalog:    ReplicaCatalog,
     implicit val eventDispatcher:   EventDispatcher,
-    implicit val fileServiceCache:  FileServiceCache
-  )
+    implicit val fileServiceCache:  FileServiceCache,
+    implicit val outputRedirection: OutputRedirection,
+    implicit val loggerService: LoggerService
+  ) { services =>
+
+    def set(ms: MoleServices) = Services.set(services)(ms)
+
+    def copy (
+      threadProvider:    ThreadProvider = services.threadProvider,
+      preference:        Preference = services.preference,
+      newFile:           NewFile = services.newFile,
+      serializerService: SerializerService = services.serializerService,
+      fileService:       FileService = services.fileService,
+      seeder:            Seeder = services.seeder,
+      randomProvider:    RandomProvider = services.randomProvider,
+      replicaCatalog:    ReplicaCatalog = services.replicaCatalog,
+      eventDispatcher:   EventDispatcher = services.eventDispatcher,
+      fileServiceCache:  FileServiceCache = services.fileServiceCache,
+      outputRedirection: OutputRedirection = services.outputRedirection,
+      loggerService: LoggerService = services.loggerService) =
+      Services.copy(services)(
+        threadProvider = threadProvider,
+        preference = preference,
+        newFile = newFile,
+        serializerService = serializerService,
+        fileService = fileService,
+        seeder = seeder,
+        randomProvider = randomProvider,
+        replicaCatalog = replicaCatalog,
+        eventDispatcher = eventDispatcher,
+        fileServiceCache = fileServiceCache,
+        outputRedirection = outputRedirection,
+        loggerService = loggerService)
+  }
 
   def jobFiles(job: BatchExecutionJob) =
-    job.pluginsAndFiles.files.toVector ++
-      job.pluginsAndFiles.plugins ++
+    job.files.toVector ++
+      job.plugins ++
       job.environment.plugins ++
       Seq(job.environment.jvmLinuxX64, job.environment.runtime)
 
@@ -195,15 +269,14 @@ object BatchEnvironment extends JavaLogger {
 
     import services._
 
-    serializerService.serialise(job.runnableTasks, jobFile)
+    serializerService.serialize(job.runnableTasks, jobFile)
 
-    val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins
-    val files = (new TreeSet[File]()(fileOrdering) ++ job.files) diff plugins
+    val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins -- job.environment.plugins ++ (job.files.toSet & job.environment.plugins.toSet)
+    val files = (new TreeSet[File]()(fileOrdering) ++ job.files) -- plugins
 
-    val runtime = replicateTheRuntime(job.job, job.environment, replicate)
+    val runtime = replicateTheRuntime(job.environment, replicate)
 
     val executionMessage = createExecutionMessage(
-      job.job,
       jobFile,
       files,
       plugins,
@@ -214,7 +287,7 @@ object BatchEnvironment extends JavaLogger {
     /* ---- upload the execution message ----*/
     val inputPath =
       newFile.withTmpFile("job", ".tar") { executionMessageFile ⇒
-        serializerService.serialiseAndArchiveFiles(executionMessage, executionMessageFile)
+        serializerService.serializeAndArchiveFiles(executionMessage, executionMessageFile)
         signalUpload(eventDispatcher.eventId, upload(executionMessageFile, TransferOptions(noLink = true, canMove = true)), executionMessageFile, job.environment, storageId)
       }
 
@@ -222,7 +295,7 @@ object BatchEnvironment extends JavaLogger {
       services.newFile.withTmpFile("remoteStorage", ".tar") { storageFile ⇒
         import org.openmole.tool.hash._
         import services._
-        services.serializerService.serialiseAndArchiveFiles(remoteStorage, storageFile)
+        services.serializerService.serializeAndArchiveFiles(remoteStorage, storageFile)
         val hash = storageFile.hash().toString()
         val path = signalUpload(eventDispatcher.eventId, upload(storageFile, TransferOptions(noLink = true, canMove = true, raw = true)), storageFile, job.environment, storageId)
         FileMessage(path, hash)
@@ -234,7 +307,6 @@ object BatchEnvironment extends JavaLogger {
 
 
   def replicateTheRuntime(
-    job:              Job,
     environment:      BatchEnvironment,
     replicate: (File, TransferOptions) => ReplicatedFile,
   )(implicit services: BatchEnvironment.Services) = {
@@ -250,7 +322,6 @@ object BatchEnvironment extends JavaLogger {
   }
 
   def createExecutionMessage(
-    job:                 Job,
     jobFile:             File,
     serializationFile:   Iterable[File],
     serializationPlugin: Iterable[File],
@@ -274,47 +345,38 @@ object BatchEnvironment extends JavaLogger {
     environmentJobs.forall(_.state == ExecutionState.KILLED)
   }
 
-  def finishedJob(environment: BatchEnvironment, job: Job) = {
-    ExecutionJobRegistry.finished(environment.registry, job, environment)
-  }
-
   def finishedExecutionJob(environment: BatchEnvironment, job: BatchExecutionJob) = {
     ExecutionJobRegistry.finished(environment.registry, job, environment)
     environment.finishedJob(job)
   }
 
-  def numberOfExecutionJobs(environment: BatchEnvironment, job: Job) = {
-    ExecutionJobRegistry.numberOfExecutionJobs(environment.registry, job)
-  }
-
   object ExecutionJobRegistry {
+
     def register(registry: ExecutionJobRegistry, ejob: BatchExecutionJob) = registry.synchronized {
       registry.executionJobs = ejob :: registry.executionJobs
-    }
-
-    def finished(registry: ExecutionJobRegistry, job: Job, environment: BatchEnvironment) = registry.synchronized {
-      val (newExecutionJobs, removed) = registry.executionJobs.partition(_.job != job)
-      registry.executionJobs = newExecutionJobs
-      removed
+      registry.empty.drainPermits()
     }
 
     def finished(registry: ExecutionJobRegistry, job: BatchExecutionJob, environment: BatchEnvironment) = registry.synchronized {
-      def pruneFinishedJobs(registry: ExecutionJobRegistry) = registry.executionJobs = registry.executionJobs.filter(_.state != ExecutionState.KILLED)
-      pruneFinishedJobs(registry)
+      def pruneJobs(registry: ExecutionJobRegistry) = registry.executionJobs.filter(j => j != job)
+      registry.executionJobs = pruneJobs(registry)
+      if(registry.executionJobs.isEmpty) registry.empty.release(1)
     }
 
     def executionJobs(registry: ExecutionJobRegistry) = registry.synchronized { registry.executionJobs }
-    def numberOfExecutionJobs(registry: ExecutionJobRegistry, job: Job) = registry.synchronized {
-      registry.executionJobs.count(_.job == job)
-    }
-
-    def lonelyJobs(registry: ExecutionJobRegistry) = registry.synchronized {
-      registry.executionJobs.view.groupBy(_.job).filter(j => !j._1.finished && j._2.isEmpty).unzip._1.toSeq
-    }
   }
 
   class ExecutionJobRegistry {
     var executionJobs = List[BatchExecutionJob]()
+    val empty = new Semaphore(1)
+  }
+
+  def registryIsEmpty(environment: BatchEnvironment) = {
+    environment.registry.empty.availablePermits() == 0
+  }
+
+  def waitJobKilled(environment: BatchEnvironment) = {
+    environment.registry.empty.acquireAndRelease()
   }
 
   def defaultUpdateInterval(implicit preference: Preference) =
@@ -327,26 +389,30 @@ object BatchEnvironment extends JavaLogger {
 
 abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
+  @volatile var stopped = false
+
   implicit val services: BatchEnvironment.Services
   def eventDispatcherService = services.eventDispatcher
 
-  def exceptions = services.preference(Environment.maxExceptionsLog)
+  private lazy val _errors = new RingBuffer[ExceptionEvent](services.preference(Environment.maxExceptionsLog))
+  def error(e: ExceptionEvent) = _errors.put(e)
 
-  def clean = BatchEnvironment.isClean(this)
+  def errors: Seq[ExceptionEvent] = _errors.elements
+  def clearErrors: Seq[ExceptionEvent] = _errors.clear()
+
+  def clean = BatchEnvironment.registryIsEmpty(env)
 
   lazy val registry = new ExecutionJobRegistry()
+
   def jobs = ExecutionJobRegistry.executionJobs(registry)
 
-  lazy val replBundleCache = new AssociativeCache[ReferencedClasses, FileCache]()
+  lazy val relpClassesCache = new AssociativeCache[Set[String], (Seq[File], Seq[FileCache])]
 
   lazy val plugins = PluginManager.pluginsForClass(this.getClass)
+  lazy val jobStore = JobStore(services.newFile.makeNewDir("jobstore"))
 
-  override def submit(job: Job) = {
-    val bej = BatchExecutionJob(job, this)
-    ExecutionJobRegistry.register(registry, bej)
-    eventDispatcherService.trigger(this, new Environment.JobSubmitted(bej))
-    JobManager ! Manage(bej)
-  }
+
+  override def submit(job: Job) = JobManager ! Manage(job, this)
 
   def execute(batchExecutionJob: BatchExecutionJob): BatchJobControl
 
@@ -355,6 +421,13 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   def submitted: Long = jobs.count { _.state == ExecutionState.SUBMITTED }
   def running: Long = jobs.count { _.state == ExecutionState.RUNNING }
+  def runningJobs = jobs.filter(_.state == ExecutionState.RUNNING)
+
+  private[environment] val _done = new AtomicLong(0L)
+  private[environment] val _failed = new AtomicLong(0L)
+
+  def done: Long = _done.get()
+  def failed: Long = _failed.get()
 
   def runtimeSettings = RuntimeSettings(archiveResult = false)
 
@@ -362,51 +435,3 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
 }
 
-object BatchExecutionJob {
-  def apply(job: Job, environment: BatchEnvironment) = new BatchExecutionJob(job, environment)
-}
-
-class BatchExecutionJob(val job: Job, val environment: BatchEnvironment) extends ExecutionJob { bej ⇒
-
-  def moleJobs = job.moleJobs
-  def runnableTasks = job.moleJobs.map(RunnableTask(_))
-
-  def plugins = pluginsAndFiles.plugins ++ closureBundle.map(_.file) ++ referencedClosures.toSeq.flatMap(_.plugins)
-  def files = pluginsAndFiles.files
-
-  @transient lazy val pluginsAndFiles = environment.services.serializerService.pluginsAndFiles(runnableTasks)
-
-  @transient lazy val referencedClosures = {
-    if (pluginsAndFiles.replClasses.isEmpty) None
-    else {
-      def referenced =
-        pluginsAndFiles.replClasses.map { c ⇒
-          val replClassloader = c.getClassLoader.asInstanceOf[REPLClassloader]
-          replClassloader.referencedClasses(Seq(c))
-        }.fold(ReferencedClasses.empty)(ReferencedClasses.merge)
-      Some(referenced)
-    }
-  }
-
-  def closureBundle =
-    referencedClosures.map { closures ⇒
-      environment.replBundleCache.cache(job.moleExecution, closures, preCompute = false) { rc ⇒
-        val bundle = environment.services.newFile.newFile("closureBundle", ".jar")
-        try ScalaREPL.bundleFromReferencedClass(closures, "closure-" + UUID.randomUUID.toString, "1.0", bundle)
-        catch {
-          case e: Throwable ⇒
-            bundle.delete()
-            throw e
-        }
-        FileCache(bundle)(environment.services.fileService)
-      }
-    }
-
-  def usedFiles: Iterable[File] =
-    (files ++
-      Seq(environment.runtime, environment.jvmLinuxX64) ++
-      environment.plugins ++ plugins).distinct
-
-  def usedFileHashes = usedFiles.map(f ⇒ (f, environment.services.fileService.hash(f)(environment.services.newFile, environment.services.fileServiceCache)))
-
-}

@@ -42,7 +42,7 @@ Functions calls generally require the parameters to be provided in a predefined 
 @h2
     Going further
 
-What you have read so far should be sufficient in order to get started with OpenMOLE. To begin with the OpenMOLE syntax you should have a look at the @a("Getting started", href := DocumentationPages.stepByStepIntro.file). You may also want to look at the @a("Task documentation", href := DocumentationPages.run.file) and other h2ions detailing specific concepts.
+What you have read so far should be sufficient in order to get started with OpenMOLE. To begin with the OpenMOLE syntax you should have a look at the @a("Getting started", href := DocumentationPages.stepByStepIntro.file). You may also want to look at the @a("Task documentation", href := DocumentationPages.embed.file) and other h2ions detailing specific concepts.
 
 @p Scala is a very nice language with an extensive very well designed standard library. To get more insights on this language, check these links:
 @ul

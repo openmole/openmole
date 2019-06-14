@@ -75,21 +75,20 @@ object SideMenu {
   def fromStrings(title: String, stringMenus: String*) =
     SideMenu(preText = title, links = stringMenus.map { a ⇒ Link(a, Link.intern(a)) })
 
-  val run = SideMenu(DocumentationPages.runPages, classIs(btn ++ btn_default), "Available tasks")
-  val packaged = SideMenu(DocumentationPages.packagedPages, classIs(btn ++ btn_default), "Package your code")
+  val embed = SideMenu(DocumentationPages.embedPages, classIs(btn ++ btn_default), "Available tasks")
   val explore = SideMenu(DocumentationPages.explorePages, classIs(btn ++ btn_default), "Available methods")
   val sampling = SideMenu(DocumentationPages.samplingPages, classIs(btn ++ btn_default), "Sampling methods")
   val scale = SideMenu(DocumentationPages.scalePages, classIs(btn ++ btn_default), "Available environments")
   val language = SideMenu(DocumentationPages.languagePages, classIs(btn ++ btn_default), "Language")
   val advanced = SideMenu(DocumentationPages.advancedConceptsPages, classIs(btn ++ btn_default), "Advanced concepts")
   val developers = SideMenu(DocumentationPages.developersPages, classIs(btn ++ btn_default), "Developer's documentation")
-  val tutorials = SideMenu(DocumentationPages.menuTutoPages, classIs(btn ++ btn_default), "Tutorials")
+  val tutorials = SideMenu(DocumentationPages.tutoPages, classIs(btn ++ btn_default), "Tutorials")
   val community = SideMenu(DocumentationPages.communityPages, classIs(btn ++ btn_default), "Community")
-  val download = SideMenu(DocumentationPages.downloadPage, classIs(btn ++ btn_default), "Download")
+  val download = SideMenu(DocumentationPages.downloadPages, classIs(btn ++ btn_default), "Download")
 
   def more(current: Page) = SideMenu(
     Seq(
-      DocumentationPages.run,
+      DocumentationPages.embed,
       DocumentationPages.explore,
       DocumentationPages.scale,
       DocumentationPages.language,

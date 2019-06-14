@@ -3,78 +3,98 @@
 @import org.openmole.site.content.Environment._
 @import DocumentationPages._
 
-@def tasks = """
-  // Define the variables that are transmitted between the tasks
-  val i = Val[Double]
-  val res = Val[Double]
 
-  // Define the model, here it is a simple task executing "res = i * 2", but it can be your model
-  val model =
-    ScalaTask("val res = i * 2") set (
-      inputs += i,
-      outputs += (i, res)
-    )"""
 
-A key feature in OpenMOLE is the possibility to delegate the workload to a remote execution environment. Tasks in OpenMOLE have been designed so that the delegation a part of the workload to a remote environment is declarative.
+A key feature in OpenMOLE is the possibility to delegate the workload to a remote execution environment.
+Tasks in OpenMOLE have been designed so that delegating a part of the workload to a remote environment is declarative.
+
+
 
 @h2{Setting up an Authentication}
 
-You first need to define an authentication method for the environment(s) you want to use.
-The way to achieve this is describe in the @aa("GUI guide", href := DocumentationPages.gui.file)
-Have a look @a("here", href := DocumentationPages.console.file + anchor("Authentications")) to set up authentication in console mode.
+You first need to declare the environments you want to use and the corresponding authentication credentials, in the OpenMOLE GUI (see the @aa("GUI guide", href := gui.file + "#Authentications") for more information).
+Have a look @a("here", href := console.file + "#Authentications") to set up an authentication in console mode.
 
-@h2{Defining an execution Environment}
 
-The actual delegation of the task is noted by the keyword @hl.openmoleNoTest("on") followed by a defined @i{Environment}:
-@br @hl.openmole(s"""
-$tasks
+
+@h2{Defining an execution environment}
+
+The actual delegation of the task is noted by the keyword @code{on} followed by a defined @i{Environment}:
+
+@br@br
+
+@hl.openmole(s"""
+// Define the variables that are transmitted between the tasks
+val i = Val[Double]
+val res = Val[Double]
+
+// Define the model, here it is a simple task executing "res = i * 2", but it can be your model
+val model =
+  ScalaTask("val res = i * 2") set (
+    inputs += i,
+    outputs += (i, res)
+  )
 
 // Declare a local environment using 10 cores of the local machine
 val env = LocalEnvironment(10)
 
 // Make the model run on the the local environment
 DirectSampling(
-  evaluation = model on env hook ToStringHook(),
+  evaluation = model on env hook display,
   sampling = i in (0.0 to 100.0 by 1.0)
-)""")
+)
+""")
 
-@p You do not need to install anything or perform any kind of configuration on the target execution environment for
-OpenMOLE to work. It reuses the infrastructure in place. You will however be required to provide the authentication
-information in order for OpenMOLE to access the remote environment. At this point, just specify the credentials you're
-using to login to this environment outside of OpenMOLE. Voila! That's all you need to do to use your environment
-through OpenMOLE. In case you face authentication problems when targeting an environment through SSH, please refer
-to the corresponding entry in the @a("FAQ", href := faq.file).
+@br
 
-@p When no specific environment is specified for a task, or a group of tasks, they will be executed sequentially on your
-local machine.
+You do not need to install anything or perform any kind of configuration on the target execution environment, OpenMOLE does all the work and uses the infrastructure in place.
+You will however be required to provide the authentication information in order for OpenMOLE to access the remote environment (see @a("here", href := "#SettingupanAuthentication")).
+In case you face authentication problems when targeting an environment through SSH, please refer to the corresponding entry in the @aa("FAQ", href := faq.file + "#WhyismySSHauthenticationnotworking").
+
+@br
+
+When no specific environment is specified for a task or a group of tasks, they will be executed sequentially on your local machine.
+
+
 
 @h2{Grouping}
 
-The use of a batch environment is generally not suited for short tasks (less than a 1 minute for a cluster, or less
-than 1 hour for a grid). In case your tasks are short you can group several executions. To group the execution by 100
-in each job submitted to the environment, use the keyword @hl.openmoleNoTest("by"):
-@br @hl.openmole(s"""
-$tasks
+The use of a batch environment is generally not suited for short tasks (less than 1 minute for a cluster, or less
+than 1 hour for a grid).
+In case your tasks are short, you can group several executions with the keyword @code{by} in your workflow.
+For instance, the workflow below groups the execution of @b{model} by 100 in each job submitted to the environment:
+
+@br@br
+
+@hl.openmole(s"""
+// Define the variables that are transmitted between the tasks
+val i = Val[Double]
+val res = Val[Double]
+
+// Define the model, here it is a simple task executing "res = i * 2", but it can be your model
+val model =
+  ScalaTask("val res = i * 2") set (
+    inputs += i,
+    outputs += (i, res)
+  )
+
+// Declare a local environment using 10 cores of the local machine
+val env = LocalEnvironment(10)
 
 // Make the model run on the the local environment
 DirectSampling(
-  evaluation = model on env by 100 hook ToStringHook(),
+  evaluation = model on env by 100 hook display,
   sampling = i in (0.0 to 1000.0 by 1.0)
 )
-""", header = """
-val env = LocalEnvironment(10)
 """)
+
+
 
 @h2{Available environments}
 
-Multiple environments are available to delegate your workload, depending the kind of resources you have on disposal.
-@p The @a("Multi-thread", href := DocumentationPages.multithread.file) permits to execute the tasks concurrently on your machine,
- the @a("SSH", href := DocumentationPages.ssh.file) one to execute tasks on remote server through SSH.
- You can also access a wide variety of @aa("clusters", href := DocumentationPages.cluster.file) like
- @aa("PBS/Torque", href := DocumentationPages.cluster.file +"#PBS"),
- @aa("SGE", href := DocumentationPages.cluster.file + "#SGE"),
- @aa("Slurm", href := DocumentationPages.cluster.file + "#Slurm"),
- @aa("Condor", href := DocumentationPages.cluster.file + "#Condor"),
- or @aa("OAR", href := DocumentationPages.cluster.file + "#OAR").
- You can also use @aa("EGI", href := DocumentationPages.egi.file) to execute tasks on the @aa("EGI grid", href := shared.link.egi).
-
+Multiple environments are available to delegate your workload, depending on the kind of resources you have at your disposal.
+@ul
+  @li{@a("Multi-thread", href := multithread.file) permits to execute the tasks concurrently on your own machine,}
+  @li{@a("SSH", href := ssh.file) allows to execute tasks on a remote server, connecting through SSH,}
+  @li{a wide variety of @a("clusters", href := cluster.file) are also available, such as @aa("PBS/Torque", href := cluster.file +"#PBS"), @aa("SGE", href := cluster.file + "#SGE"), @aa("Slurm", href := cluster.file + "#Slurm"), @aa("Condor", href := cluster.file + "#Condor"), or @aa("OAR", href := cluster.file + "#OAR"),}
+  @li{finally, you can also use the @aa("European Grid Infrastructure", href := egi.file) to execute tasks.}

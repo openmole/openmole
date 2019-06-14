@@ -32,7 +32,7 @@ class Activator extends BundleActivator {
 
     val keyWords =
       Vector(
-        Environment(classOf[EGIEnvironment[_]])
+        EnvironmentKeyWord(classOf[EGIEnvironment[_]])
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)

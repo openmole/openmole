@@ -23,10 +23,12 @@ import org.openmole.core.context.Val
 import org.openmole.core.dsl._
 import org.openmole.core.workflow.builder._
 import org.openmole.plugin.hook.file.CopyFileHook.{ CopyFileHookBuilder, CopyOptions }
+import org.openmole.tool.outputredirection.OutputRedirection
 
 package file {
 
   import org.openmole.core.expansion.FromContext
+  import org.openmole.core.workflow.mole.CSVHook
 
   trait FilePackage {
 
@@ -36,17 +38,7 @@ package file {
           (inputs += prototype) andThen (if (move) (outputs += prototype) else identity)
     }
 
-    def csvHeader = new {
-      def :=[T: AppendToCSVFileHookBuilder](h: OptionalArgument[FromContext[String]]) =
-        implicitly[AppendToCSVFileHookBuilder[T]].csvHeader.set(h)
-    }
-
-    def arraysOnSingleRow = new {
-      def :=[T: AppendToCSVFileHookBuilder](b: Boolean) =
-        implicitly[AppendToCSVFileHookBuilder[T]].arraysOnSingleRow.set(b)
-    }
-
-    lazy val CSVHook = AppendToCSVFileHook
+    lazy val AppendToCSVFileHook = CSVHook
   }
 }
 

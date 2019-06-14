@@ -21,7 +21,7 @@ import java.util.{ Calendar, Locale }
 
 package object buildinfo {
 
-  def name = "Origami Orchid"
+  def name = "P... P..."
 
   case class Version(value: String, name: String, time: Long) {
     override def toString = value
@@ -43,7 +43,7 @@ package object buildinfo {
   def siteURL =
     development match {
       case true  ⇒ "http://next.openmole.org"
-      case false ⇒ s"http://www.openmole.org/all/${version.value}"
+      case false ⇒ s"http://openmole.org/all/${version.value}"
     }
 
   def marketName = "market.json"

@@ -1,0 +1,105 @@
+@import org.openmole.site._
+@import org.openmole.site.tools._
+@import org.openmole.site.stylesheet._
+@import DocumentationPages._
+
+
+@h2{First time setup}
+
+@h3{Prerequisites}
+
+You will need the following tools to get a local copy of OpenMOLE running:
+@ul
+    @li
+        A java 8 (or higher) @b{JDK} (N.B. not only the JRE!). Check your version by typing @code{javac -version} in a terminal.
+    @li
+        The @aa("git", href := shared.link.git) software and the @aa("LFS", href := shared.link.gitlfs) extension.
+    @li
+        @aa("SBT", href := shared.link.sbt), the Scala Building Tool.
+    @li
+        @aa("npm", href := shared.link.npm), library required to build the website.
+
+As a suggestion, we recommend the @aa("IntelliJ IDE", href := shared.link.intelliJ) to edit the Scala source code of the project.
+
+
+@h3{Get the project and set it up}
+
+The following commands are to be typed in your command shell (prompt $> )
+
+@ol
+    @li
+        Clone the OpenMOLE repository:
+        @br@br
+        @hl.highlight("""
+          $> git lfs install
+          $> git lfs clone git@github.com:openmole/openmole.git
+        """, "plain")
+    @li
+        Publish locally the content of the @code{build-system} and @code{libraries} subdirectories:
+        @br@br
+        @hl.highlight("""
+          $> cd openmole/build-system
+          $> sbt publishLocal
+          $> cd ../libraries/
+          $> sbt publishLocal
+        """, "plain")
+
+These commands may take some time to execute (a few minutes at least).
+
+
+
+@h2{Build the OpenMOLE application}
+
+@h3{Build from sources}
+
+To build the OpenMOLE application, use the @code{sbt assemble} command inside the openmole subdirectory.
+
+@br@br
+
+@hl.highlight("""
+$> cd openmole
+$> sbt
+# following commands occur inside sbt prompt
+sbt:openmole-root> project openmole
+openmole> assemble
+""", "plain")
+
+Upon completion, the executable is placed under @code{/openmole/openmole/bin/openmole/target/assemble} and is launched as any executable via the @code{./openmole} command.
+The app should then pop up in your default web browser, the URL should be something like @code{http://localhost:44961/app}.
+
+
+@h3{Create a standalone archive}
+
+You can create a standalone archive of your fresh OpenMOLE build and ship it around by using @code{sbt openmole:tar}.
+You will find the resulting archive in @code{bin/openmole/target/openmole.tar.gz}.
+
+@p{Publish the bundles}
+@hl.highlight("""
+$> cd build-system
+$> sbt publish
+$> cd ../libraries
+$> sbt publish
+$> cd ../openmole
+$> sbt publish""", "plain")
+
+
+@h3{Compile within Docker}
+
+An easy way to get an OpenMOLE compilation environment up and running is to use docker.
+Once docker is installed on your machine you can do:
+
+@br@br
+
+@hl.highlight("""
+$> git clone """ + shared.link.repo.openMOLEDockerBuild +
+"""
+$> cd docker-build
+$> ./run -v /a/local/path/on/your/system
+# You should be in the docker container now, execute
+clone
+compile
+""", "plain")
+
+@br
+
+You can now find the compiled OpenMOLE app in @code{/a/local/path/on/your/system/openmole/openmole/bin/openmole/target/assemble/}.

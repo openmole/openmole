@@ -19,8 +19,6 @@ package org.openmole.core.context
 
 import org.openmole.core.exception._
 import org.openmole.core.preference._
-import org.openmole.core.workspace._
-import org.openmole.tool.random
 
 import scala.collection._
 import scala.collection.immutable.TreeMap
@@ -36,14 +34,14 @@ object Context {
     val variables = TreeMap.empty[String, Variable[_]] ++ v
   }
 
-  def apply(v: T forSome { type T <: Variable[_] }*): Context = Context.fromMap(v.map { v ⇒ v.prototype.name → v })
+  def apply(v: Variable[_]*): Context = Context.fromMap(v.map { v ⇒ v.prototype.name → v })
 
   val empty = apply()
 
 }
 
 /**
- * Context represents a bunch of variables used by the task excutions.
+ * Context represents a set of variables used by the task executions.
  * A task execution can remove variables from context, change the values of
  * the variables and add values to it.
  */
@@ -89,31 +87,35 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    */
   def option[T](proto: Val[T]): Option[T] = option[T](proto.name)
 
+  /**
+   * Get the value of the prototype or a default value if it is not defined
+   * @param v prototype
+   * @param f default value
+   * @return
+   */
   def getOrElse[T](v: Val[T], f: ⇒ T): T = option(v).getOrElse(f)
 
   /**
-   * Get a variable valaue given a prototype name. This method get the variable by its
+   * Get a variable value given a prototype name. This method get the variable by its
    * name and then cast it to the correct type.
    *
    * @param name the name of the variable
    * @return value the value
-   * @throws a UserBadDataError if the variable hasn't been found
+   * @throws UserBadDataError if the variable hasn't been found
    */
   def apply[T](name: String): T = option(name).getOrElse(throw new UserBadDataError(s"Variable $name has not been found in the context"))
 
   /**
-   * Get a variable valaue given a prototype name. This method get the variable by its
-   * name and then cast it to the correct type.
+   * Get a variable value from a prototype
    *
-   * @param p the prototype that matches the name of the variable
+   * @param p the prototype
    * @return value the value
-   * @throws a UserBadDataError if the variable hasn't been found
+   * @throws UserBadDataError if the variable hasn't been found
    */
   def apply[T](p: Val[T]): T = option(p).getOrElse(throw new UserBadDataError(s"Variable $p has not been found in the context"))
 
   /**
-   * Build a new context containing the variables of the current context plus the
-   * variable constructed from the parameters.
+   * Build a new context containing the variables of the current context plus the [[Variable]] with the provided prototype and value
    *
    * @param p the prototype of the variable
    * @param value the value of the variable
@@ -130,8 +132,18 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    */
   def +[T](tuple: (Val[T], T)): Context = this.+(tuple._1, tuple._2)
 
+  /**
+   * Build a new context containing the variables in the current context and the provided variable
+   * @param v additional variable
+   * @return
+   */
   def +[T](v: Variable[T]) = Context.fromMap(variables + (v.prototype.name → v))
 
+  /**
+   * Concatenate the current context with the provided context
+   * @param ctx context to append
+   * @return
+   */
   def +(ctx: Context) = Context.fromMap(variables ++ ctx)
 
   override def +[B1 >: Variable[_]](kv: (String, B1)) = variables + kv
@@ -143,7 +155,6 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    * @param vs the variables to add
    * @return the new context
    */
-
   def ++(vs: Traversable[Variable[_]]): Context = Context.fromMap(variables ++ (vs.map { v ⇒ v.prototype.name → v }))
 
   /**
@@ -155,17 +166,35 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    */
   def --(names: Traversable[String]): Context = Context.fromMap(variables -- names)
 
+  /**
+   * Check if this context contains a prototype and if the prototype stored is effectively compatible with the provided prototype
+   * @param p
+   * @return
+   */
   def contains(p: Val[_]): Boolean =
     variable(p.name) match {
       case None    ⇒ false
       case Some(v) ⇒ p.isAssignableFrom(v.prototype)
     }
 
-  def -(name: String) = Context.fromMap(variables - name)
+  /**
+   * Remove by name a variable from the context
+   * @param name
+   * @return
+   */
+  def -(name: String): Context = Context.fromMap(variables - name)
+
+  /**
+   * Remove a prototype from the context
+   * @param v
+   * @return
+   */
+  def -(v: Val[_]): Context = this - v.name
 
   override def empty = Context.empty
 
   def get(key: String) = variables.get(key)
+  def get[T](proto: Val[T]): Option[T] = option[T](proto)
 
   def update[T](p: Val[T], v: T) = this + Variable(p, v)
 
@@ -173,6 +202,10 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
 
   override def toString = prettified(Int.MaxValue)
 
+  /**
+   * Get the prototypes in this context
+   * @return
+   */
   def prototypes = values.map { _.prototype }
 
   def prettified(stripSize: Int): String =

@@ -1,0 +1,70 @@
+@import org.openmole.site.stylesheet._
+@import org.openmole.site._
+@import org.openmole.site.tools._
+@import DocumentationPages._
+
+
+
+@h2{Write your own sampling}
+
+You can define a custom sampling in a CSV file and inject it in OpenMOLE.
+The provided CSV file must be formatted according to the following template:
+
+@br@br
+
+@hl.highlight("""
+colD, colFileName,  i
+0.7,  fic1,         8
+0.9,  fic2,         19
+0.8,  fic2,         19
+""", "plain")
+
+
+
+@h2{Use your custom sampling in OpenMOLE}
+
+The @code{CSVSampling} task is used to import your custom sampling into OpenMOLE.
+Here is an example of how to use this task in a simple workflow:
+
+@br@br
+
+@hl.openmole("""
+val i = Val[Int]
+val o = Val[Int]
+val d = Val[Double]
+val f = Val[File]
+
+// Define the sampling by mapping the columns of the CSV file to OpenMOLE variables
+val mySampling = CSVSampling("/path/to/a/file.csv") set (
+  columns += i,
+  columns += ("colD", d),
+  fileColumns += ("colFileName", "/path/of/the/base/dir/", f),
+  // comma ',' is the default separator, but you can specify a different one using
+  separator := ','
+)
+
+// Define the model, here it just takes i as input
+val myModel =
+  ScalaTask("val o = i * 2 ") set (
+    inputs += i,
+    outputs += (i,o)
+  )
+
+// Define the exploration of myModel for various i values sampled in the file
+val exploration = DirectSampling(
+  evaluation = myModel hook display,
+  sampling = mySampling
+)
+
+exploration
+
+""")
+
+@br
+
+In this example the column @b{i} in the CSV file is mapped to the OpenMOLE variable @code{i}, @b{colD} is mapped to the OpenMOLE variable @code{d}, and @b{colFileName} is appended to the base directory @b{/path/of/the/base/dir/} and used as a file in OpenMOLE.
+
+@br
+
+As a sampling, the @code{CSVSampling} task can directly be injected in a @code{DirectSampling} task under the @code{sampling} parameter.
+It will generate a different task for each entry in the file.

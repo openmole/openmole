@@ -34,9 +34,9 @@ class Activator extends PluginInfoActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector(
-        Task(objectName(AssignTask)),
-        Task(objectName(FlattenTask)),
-        Task(objectName(MergeTask))
+        TaskKeyWord(objectName(AssignTask)),
+        TaskKeyWord(objectName(FlattenTask)),
+        TaskKeyWord(objectName(MergeTask))
 
       )
 

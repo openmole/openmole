@@ -165,7 +165,8 @@ package object ssh {
     submit: (SerializedJob, String, String) => J,
     state: J => ExecutionState,
     delete: J => Unit,
-    stdOutErr: J => (String, String))(implicit services: BatchEnvironment.Services) = {
+    stdOutErr: J => (String, String),
+    refresh: Option[Time] = None)(implicit services: BatchEnvironment.Services) = {
     import services._
 
     val jobDirectory = HierarchicalStorageSpace.createJobDirectory(storage, space)
@@ -192,7 +193,7 @@ package object ssh {
 
       BatchJobControl(
         batchExecutionJob.environment,
-        BatchEnvironment.defaultUpdateInterval(services.preference),
+        refresh.map(UpdateInterval.fixed) getOrElse BatchEnvironment.defaultUpdateInterval(services.preference),
         StorageService.id(storage),
         () => state(job),
         () ⇒ delete(job),

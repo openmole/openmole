@@ -18,10 +18,11 @@
 
 package org.openmole.plugin.tool.netlogo;
 
+
 public interface NetLogo {
   public String[] globals() throws Exception;
   public String[] reporters() throws Exception;
-  public void open(String script) throws Exception;
+  public void open(String script,boolean switch3d) throws Exception;
   void command(String cmd) throws Exception;
   boolean isNetLogoException(Throwable exception);
   Object report(String variable) throws Exception;
@@ -29,3 +30,10 @@ public interface NetLogo {
   void dispose() throws Exception;
   ClassLoader getNetLogoClassLoader();
 }
+
+
+
+
+
+
+

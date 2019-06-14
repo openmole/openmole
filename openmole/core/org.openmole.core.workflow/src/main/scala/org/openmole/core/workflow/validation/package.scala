@@ -19,6 +19,10 @@ package object validation {
     def apply(vs: Validate*): Validate = new Validate {
       override def apply(implicit newFile: NewFile, fileService: FileService): Seq[Throwable] = vs.flatMap(_.apply)
     }
+
+    def success = Validate { _ ⇒ Seq.empty }
+
+    implicit def fromThrowables(t: Seq[Throwable]) = Validate { _ ⇒ t }
   }
 
   trait ValidationPackage

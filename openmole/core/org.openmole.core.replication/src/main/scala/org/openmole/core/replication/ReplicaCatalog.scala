@@ -19,7 +19,6 @@ package org.openmole.core.replication
 
 import java.io.File
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.locks.ReentrantLock
 
 import com.google.common.cache._
 import org.openmole.core.db.{ Replica, replicas }
@@ -52,6 +51,11 @@ object ReplicaCatalog extends JavaLogger {
 
 }
 
+/**
+ * Manage [[Replica]]s in the database
+ * @param database
+ * @param preference
+ */
 class ReplicaCatalog(database: Database, preference: Preference) {
 
   import ReplicaCatalog.Log._
@@ -223,10 +227,13 @@ class ReplicaCatalog(database: Database, preference: Preference) {
   private def cacheKey(r: Replica) = (r.source, r.hash, r.storage)
 
   def remove(id: Long) = {
-    logger.fine(s"Remove replica with id $id")
 
     def q = replicas.filter(_.id === id)
     val replica = query { q.result }.headOption
+
+    val (source, storage, path) = if (replica.nonEmpty) (replica.get.source, replica.get.storage, replica.get.path) else ("None", "None", "None")
+    logger.fine(s"Remove replica with id $id, from source $source, storage $storage, path $path")
+
     query { q.delete }
 
     replica.foreach { r ⇒ replicaCache.invalidate(cacheKey(r)) }

@@ -24,6 +24,7 @@ class PBSJobService[S, H](
     def buildScript(serializedJob: SerializedJob, outputPath: String) = {
       SharedStorage.buildScript(
         installation.apply,
+        jobDirectory,
         workDirectory,
         parameters.openMOLEMemory,
         parameters.threads,
@@ -37,10 +38,10 @@ class PBSJobService[S, H](
 
     val description = gridscale.pbs.PBSJobDescription(
       command = s"/bin/bash $remoteScript",
-      workDirectory = workDirectory,
+      workDirectory = jobDirectory,
       queue = parameters.queue,
       wallTime = parameters.wallTime,
-      memory = Some(BatchEnvironment.requiredMemory(parameters.openMOLEMemory, parameters.memory)),
+      memory = parameters.memory,
       nodes = parameters.nodes,
       coreByNode = parameters.coreByNode orElse parameters.threads,
       flavour = parameters.flavour

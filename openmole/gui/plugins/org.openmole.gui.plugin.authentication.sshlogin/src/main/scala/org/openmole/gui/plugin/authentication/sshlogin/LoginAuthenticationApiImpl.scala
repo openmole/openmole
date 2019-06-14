@@ -55,7 +55,7 @@ class LoginAuthenticationApiImpl(s: Services) extends LoginAuthenticationAPI {
     Seq(
       SSHAuthentication.test(coreObject(data)) match {
         case Success(_) ⇒ Test.passed()
-        case Failure(f) ⇒ Test.error("failed", ErrorBuilder(f))
+        case Failure(f) ⇒ Test.error("failed", ErrorData(f))
       }
     )
 

@@ -1,0 +1,106 @@
+@import org.openmole.site.stylesheet._
+@import org.openmole.site._
+@import org.openmole.site.tools._
+@import DocumentationPages._
+
+
+
+@h2{Specific methods for high dimension spaces}
+
+High dimension spaces must be handled via specific methods of the literature, otherwise, cartesian products would be too memory consuming.
+OpenMOLE includes two of these methods: @b{Sobol Sequence} and @b{Latin Hypercube Sampling}, which can be passed as an argument to the @code{DirectSampling} task:
+
+@h3{Methods' score}
+
+@Resource.rawFrag(Resource.img.method.sobolLHSID)
+
+@br
+
+These two methods perform well in terms of input space exploration (which is normal as they were built for that), however, they are superior to uniform or grid samplings, while sharing the same intrinsic limitations.
+There is no special way of handling stochasticity of the model, out of standard replications.
+
+@br
+
+These methods are not expensive @i{per se}, it depends on the magnitude of the input space you want to be covered.
+
+
+
+@h2{Latin Hypercube Sampling}
+
+The @aa("Latin Hypercube Sampling", href := "https://en.wikipedia.org/wiki/Latin_hypercube_sampling") is a statistical method for generating a near-random sample of parameter values from a multidimensional distribution.
+The syntax of the LHS sampling in OpenMOLE is the following:
+
+@br@br
+
+@hl.openmole("""
+val i = Val[Double]
+val j = Val[Double]
+val values = Val[Array[Double]]
+
+val my_LHS_sampling =
+    LHS(
+      100, // Number of points of the LHS
+      i in (0.0, 10.0),
+      j in (0.0, 5.0),
+      values in Vector((0.0, 1.0), (0.0, 10.0), (5.0, 9.0)) // Generate part of the LHS sampling inside the array of values
+    )
+""", name = "lhs sampling in sensitivity")
+
+
+@h3{Use in the DirectSampling task}
+
+Once a sampling is defined, you can just add it to a @code{DirectSampling} task (see @aa("here", href:= samplings.file) for the description of this task), under the @code{sampling} argument.
+For example, supposing you have already declared inputs, outputs, and a model task called @code{myModel}, the sampling could be used like this:
+
+@br@br
+
+@hl.openmoleNoTest("""
+    val myExploration = DirectSampling(
+      evaluation = myModel ,
+      sampling = my_lhs_sampling,
+      aggregation = mean
+    )
+
+    myExploration hook display
+""")
+
+
+
+@h2{Sobol Sequence}
+
+A @aa("Sobol sequence", href := "https://en.wikipedia.org/wiki/Sobol_sequence") is a quasi-random low-discrepancy sequence.
+The syntax of the Sobol sequence sampling in OpenMOLE is the following:
+
+@br@br
+
+@hl.openmole("""
+val i = Val[Double]
+val j = Val[Double]
+val values = Val[Array[Double]]
+
+val my_sobol_sampling =
+  SobolSampling(
+    100, // Number of points
+    i in (0.0, 10.0),
+    j in (0.0, 5.0),
+    values in Vector((0.0, 1.0), (0.0, 10.0), (5.0, 9.0)) // Generate part of the Sobol sampling inside the array of values
+  )
+""", name = "sobol sampling in sensitivity")
+
+
+@h3{Use in the DirectSampling task}
+
+Once a sampling is defined, you can just add it to a @code{DirectSampling} task (see @aa("here", href:= samplings.file) for the description of this task), under the @code{sampling} argument.
+For example, supposing you have already declared inputs, outputs, and a model task called @code{myModel}, the sampling could be used like this:
+
+@br@br
+
+@hl.openmoleNoTest("""
+    val myExploration = DirectSampling(
+      evaluation = myModel ,
+      sampling = my_sobol_sampling,
+      aggregation = mean
+    )
+
+    myExploration hook display
+    """)

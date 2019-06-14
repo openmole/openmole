@@ -17,23 +17,40 @@
 
 package org.openmole.plugin.domain
 
-import org.openmole.core.context.{ Val, PrototypeSet }
+import org.openmole.core.context.{ PrototypeSet, Val }
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
+import org.openmole.tool.types._
 
-package object collection {
+import scala.reflect.ClassTag
 
-  implicit def iterableIsDiscrete[T] = new Finite[Iterable[T], T] {
-    override def computeValues(domain: Iterable[T]) = domain
+package collection {
+
+  // Avoid clash with iterableOfToArrayIsFix when T is of type Array[T]
+  trait LowPriorityImplicits {
+    implicit def iterableIsDiscrete[T] = new Finite[Iterable[T], T] {
+      override def computeValues(domain: Iterable[T]) = domain
+    }
+
+    implicit def iterableIsFix[T] = new Fix[Iterable[T], T] {
+      override def apply(domain: Iterable[T]): Iterable[T] = domain
+    }
+
+    implicit def iterableIsSized[T] = new Sized[Iterable[T]] {
+      override def apply(domain: Iterable[T]) = domain.size
+    }
+  }
+}
+
+package object collection extends LowPriorityImplicits {
+
+  implicit def iterableOfToArrayIsFinite[T: ClassTag, A1[_]: ToArray] = new Finite[Iterable[A1[T]], Array[T]] {
+    override def computeValues(domain: Iterable[A1[T]]) = domain.map(implicitly[ToArray[A1]].apply[T])
   }
 
-  implicit def iterableIsFix[T] = new Fix[Iterable[T], T] {
-    override def apply(domain: Iterable[T]): Iterable[T] = domain
-  }
-
-  implicit def iterableIsSized[T] = new Sized[Iterable[T]] {
-    override def apply(domain: Iterable[T]) = domain.size
+  implicit def iterableOfToArrayIsFix[T: ClassTag, A1[_]: ToArray] = new Fix[Iterable[A1[T]], Array[T]] {
+    override def apply(domain: Iterable[A1[T]]) = domain.map(implicitly[ToArray[A1]].apply[T])
   }
 
   implicit def arrayIsFinite[T] = new Finite[Array[T], T] {
@@ -56,9 +73,9 @@ package object collection {
     override def iterator(domain: FromContext[Iterator[T]]) = domain
   }
 
-  implicit def booleanPrototypeIsFactor(p: Val[Boolean]) = Factor(p, List(true, false))
+  implicit def booleanValIsFactor(p: Val[Boolean]) = Factor(p, Vector(true, false))
 
-  implicit def arrayPrototypeIsFinite[T] = new Finite[Val[Array[T]], T] with DomainInputs[Val[Array[T]]] {
+  implicit def arrayValIsFinite[T] = new Finite[Val[Array[T]], T] with DomainInputs[Val[Array[T]]] {
     override def inputs(domain: Val[Array[T]]): PrototypeSet = Seq(domain)
     override def computeValues(domain: Val[Array[T]]) = FromContext { p ⇒
       p.context(domain).toIterable

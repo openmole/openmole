@@ -194,11 +194,15 @@ object ScriptClient {
         modelWizardPanel.dialog.show
       })
 
+      lazy val fromURLProject = MenuAction("From URL", () ⇒ {
+        urlImportPanel.dialog.show
+      })
+
       lazy val marketPlaceProject = MenuAction("From market place", () ⇒ {
         marketPanel.dialog.show
       })
 
-      lazy val elements = Seq(newEmpty, importModel, marketPlaceProject)
+      lazy val elements = Seq(newEmpty, importModel, marketPlaceProject, fromURLProject)
 
       lazy val menuActions: Options[MenuAction] = elements.options(
         key = btn_danger,

@@ -7,9 +7,7 @@ import boopickle.Default._
 import autowire._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.client.core._
-import org.openmole.gui.ext.data.DataUtils._
-
-import scala.concurrent.Future
+import org.openmole.gui.client.tool.plot.Plotter
 
 /*
  * Copyright (C) 07/05/15 // mathieu.leclaire@openmole.org
@@ -28,11 +26,6 @@ import scala.concurrent.Future
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object FileDisplayer {
-  def editor(fileType: FileExtension, initCode: String): EditorPanelUI = EditorPanelUI(fileType, initCode)
-
-}
-
 class FileDisplayer(val tabs: TreeNodeTabs) {
 
   def alreadyDisplayed(safePath: SafePath) =
@@ -45,7 +38,9 @@ class FileDisplayer(val tabs: TreeNodeTabs) {
       case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
       case _ ⇒ fileExtension match {
         case OpenMOLEScript ⇒
-          tabs ++ TreeNodeTab.oms(safePath, content)
+          val tab = TreeNodeTab.oms(safePath, content)
+          tabs ++ tab
+          tab.omsEditor.editor.focus
         case MDScript ⇒ post()[Api].mdToHtml(safePath).call().foreach { htmlString ⇒
           tabs ++ TreeNodeTab.html(safePath, htmlString)
         }
@@ -53,11 +48,11 @@ class FileDisplayer(val tabs: TreeNodeTabs) {
         case ef: EditableFile ⇒
           if (DataUtils.isCSV(safePath)) {
             post()[Api].sequence(safePath).call().foreach { seq ⇒
-              tabs ++ TreeNodeTab.editable(safePath, content, seq, TreeNodeTab.Table, !ef.onDemand)
+              tabs ++ TreeNodeTab.editable(safePath, content, DataTab.build(seq, view = TreeNodeTab.Table, editing = !ef.onDemand), Plotter.default)
             }
           }
           else {
-            tabs ++ TreeNodeTab.editable(safePath, content, SequenceData(Seq(), Seq()), TreeNodeTab.Raw)
+            tabs ++ TreeNodeTab.editable(safePath, content, DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw), Plotter.default)
           }
         case _ ⇒ //FIXME for GUI workflows
       }

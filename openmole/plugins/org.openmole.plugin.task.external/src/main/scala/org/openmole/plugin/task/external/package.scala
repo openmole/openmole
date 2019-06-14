@@ -85,7 +85,7 @@ package external {
           this.+=(variable.getOrElse(prototype.name), FromContext.prototype(prototype).map(_.toString)) andThen
             (inputs += prototype)
 
-        def +=[T: EnvironmentVariables: InputOutputBuilder](variable: String, value: FromContext[String]): T ⇒ T =
+        def +=[T: EnvironmentVariables: InputOutputBuilder](variable: FromContext[String], value: FromContext[String]): T ⇒ T =
           (implicitly[EnvironmentVariables[T]].environmentVariables add (variable → value))
       }
   }
@@ -93,8 +93,16 @@ package external {
 
 package object external extends ExternalPackage {
 
+  object EnvironmentVariable {
+    implicit def fromTuple[N, V](tuple: (N, V))(implicit toFromContextN: ToFromContext[N, String], toFromContextV: ToFromContext[V, String]): EnvironmentVariable =
+      EnvironmentVariable(toFromContextN(tuple._1), toFromContextV(tuple._2))
+
+  }
+
+  case class EnvironmentVariable(name: FromContext[String], value: FromContext[String])
+
   trait EnvironmentVariables[T] {
-    def environmentVariables: monocle.Lens[T, Vector[(String, FromContext[String])]]
+    def environmentVariables: monocle.Lens[T, Vector[EnvironmentVariable]]
   }
 
   import org.openmole.tool.file._

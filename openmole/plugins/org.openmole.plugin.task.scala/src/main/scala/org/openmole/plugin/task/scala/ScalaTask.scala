@@ -21,18 +21,19 @@ import java.io.File
 
 import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Variable }
-import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion.{ FromContext, ScalaCompilation }
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.mole.FromContextHook
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace.NewFile
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
 import org.openmole.plugin.task.jvm._
-import org.openmole.tool.cache.{ Cache, CacheKey }
+import org.openmole.core.dsl._
+import org.openmole.core.workflow.mole.FromContextHook
+import org.openmole.tool.cache._
 
 import scala.util._
 
@@ -47,7 +48,7 @@ object ScalaTask {
     override def plugins = ScalaTask.plugins
   }
 
-  def apply(source: String)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(source: String)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
     new ScalaTask(
       source,
       plugins = Vector.empty,
@@ -56,6 +57,7 @@ object ScalaTask {
       external = External(),
       info = InfoConfig()
     )
+  }
 
   def apply(f: (Context, ⇒ Random) ⇒ Seq[Variable[_]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     ClosureTask("ScalaTask")((ctx, rng, _) ⇒ Context(f(ctx, rng()): _*))
@@ -87,12 +89,24 @@ object ScalaTask {
     )
   }
 
-  override def validate = Validate { p ⇒
-    import p._
+  override def validate = {
+    def libraryErrors = libraries.flatMap { l ⇒
+      l.exists() match {
+        case false ⇒ Some(new UserBadDataError(s"Library file $l does not exist"))
+        case true  ⇒ None
+      }
+    }
 
-    Try(compile) match {
-      case Success(_) ⇒ Seq.empty
-      case Failure(e) ⇒ Seq(e)
+    Validate { p ⇒
+      import p._
+
+      def compilationError =
+        Try(compile) match {
+          case Success(_) ⇒ Seq.empty
+          case Failure(e) ⇒ Seq(e)
+        }
+
+      libraryErrors ++ compilationError
     }
   }
 

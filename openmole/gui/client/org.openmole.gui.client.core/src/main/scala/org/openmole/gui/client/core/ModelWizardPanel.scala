@@ -362,10 +362,10 @@ class ModelWizardPanel {
   )
 
   val step2 = div(
-    div(grey)("The systems detects automatically the launching command and propose you the creation of some OpenMOLE Variables so that" +
-      " your model will be able to be feeded with variable values coming from the workflow you will build afterwards. In the case of Java, Scala, Netlogo" +
-      "(ie codes working on the JVM) the OpenMOLE variables can be set directly in the command line. Otherwise, they have to be set inside ${} statements." +
-      " By default he systems detects automatically your Variable changes and update the launching command. However, this option can be desactivated.")
+    div(grey)("The system detects automatically the launching command and propose you the creation of some OpenMOLE variables so that" +
+      " your model will be able to be feeded with variable values coming from the workflow you will build afterwards. In the case of Java, Scala or Netlogo" +
+      " (ie codes working on the JVM), the OpenMOLE variables can be set directly in the command line. Otherwise, they have to be set inside ${} statements." +
+      " By default the system detects automatically your variable changes and update the launching command. However, this option can be desactivated.")
   )
 
   val autoModeTag = div(onecolumn +++ (paddingTop := 20))(
@@ -415,7 +415,7 @@ class ModelWizardPanel {
               }
               else {
                 dialog.hide
-                BannerAlert.registerWithDetails("Plugin import failed", wtt.errors.map { _.stackTrace }.mkString("\n"))
+                BannerAlert.registerWithDetails("Plugin import failed", wtt.errors.map { ErrorData.stackTrace }.mkString("\n"))
               }
           }
       }

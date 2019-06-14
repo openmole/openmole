@@ -46,14 +46,16 @@ object NetLogo6Task {
     launchingCommands: Seq[FromContext[String]],
     seed:              OptionalArgument[Val[Int]],
     ignoreError:       Boolean,
-    reuseWorkspace:    Boolean
+    reuseWorkspace:    Boolean,
+    switch3d:          Boolean
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): NetLogo6Task =
     withDefaultArgs(
       workspace = Workspace.Directory(directory = workspace, script = script, name = workspace.getName),
       launchingCommands = launchingCommands,
       seed = seed,
       ignoreError = ignoreError,
-      reuseWorkspace = reuseWorkspace
+      reuseWorkspace = reuseWorkspace,
+      switch3d = switch3d
     ) set (
         inputs += (seed.option.toSeq: _*)
       )
@@ -63,14 +65,16 @@ object NetLogo6Task {
     launchingCommands: Seq[FromContext[String]],
     seed:              OptionalArgument[Val[Int]],
     ignoreError:       Boolean,
-    reuseWorkspace:    Boolean
+    reuseWorkspace:    Boolean,
+    switch3d:          Boolean
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): NetLogo6Task =
     withDefaultArgs(
       workspace = Workspace.Script(script = script, name = script.getName),
       launchingCommands = launchingCommands,
       seed = seed,
       ignoreError = ignoreError,
-      reuseWorkspace = reuseWorkspace
+      reuseWorkspace = reuseWorkspace,
+      switch3d = switch3d
     ) set (
         inputs += (seed.option.toSeq: _*)
       )
@@ -81,17 +85,19 @@ object NetLogo6Task {
     embedWorkspace:    Boolean                    = false,
     seed:              OptionalArgument[Val[Int]] = None,
     ignoreError:       Boolean                    = false,
-    reuseWorkspace:    Boolean                    = false
+    reuseWorkspace:    Boolean                    = false,
+    switch3d:          Boolean                    = false
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): NetLogo6Task =
-    if (embedWorkspace) workspace(script.getCanonicalFile.getParentFile, script.getName, launchingCommands, seed = seed, ignoreError = ignoreError, reuseWorkspace = reuseWorkspace)
-    else file(script, launchingCommands, seed = seed, ignoreError = ignoreError, reuseWorkspace = reuseWorkspace)
+    if (embedWorkspace) workspace(script.getCanonicalFile.getParentFile, script.getName, launchingCommands, seed = seed, ignoreError = ignoreError, reuseWorkspace = reuseWorkspace, switch3d = switch3d)
+    else file(script, launchingCommands, seed = seed, ignoreError = ignoreError, reuseWorkspace = reuseWorkspace, switch3d)
 
   private def withDefaultArgs(
     workspace:         NetLogoTask.Workspace,
     launchingCommands: Seq[FromContext[String]],
     seed:              Option[Val[Int]],
     ignoreError:       Boolean,
-    reuseWorkspace:    Boolean
+    reuseWorkspace:    Boolean,
+    switch3d:          Boolean
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     NetLogo6Task(
       config = InputOutputConfig(),
@@ -102,7 +108,8 @@ object NetLogo6Task {
       launchingCommands = launchingCommands,
       seed = seed,
       ignoreError = ignoreError,
-      reuseWorkspace = reuseWorkspace
+      reuseWorkspace = reuseWorkspace,
+      switch3d = switch3d
     )
 
 }
@@ -116,7 +123,8 @@ object NetLogo6Task {
   launchingCommands: Seq[FromContext[String]],
   seed:              Option[Val[Int]],
   ignoreError:       Boolean,
-  reuseWorkspace:    Boolean
+  reuseWorkspace:    Boolean,
+  switch3d:          Boolean
 ) extends NetLogoTask {
   override def netLogoFactory: NetLogoFactory = NetLogo6Task.factory
 }

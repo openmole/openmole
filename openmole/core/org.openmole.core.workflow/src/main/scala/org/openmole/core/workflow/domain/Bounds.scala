@@ -20,6 +20,12 @@ package org.openmole.core.workflow.domain
 import org.openmole.core.expansion._
 import scala.annotation.implicitNotFound
 
+/**
+ * Property of being bounded for a domain
+ *
+ * @tparam D domain type
+ * @tparam T variable type
+ */
 @implicitNotFound("${D} is not a bounded variation domain of type ${T}")
 trait Bounds[-D, T] {
   def min(domain: D): FromContext[T]

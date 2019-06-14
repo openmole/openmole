@@ -28,7 +28,6 @@ import org.openmole.plugin.task.external.External._
  * task after its execution.
  *
  */
-
 object ExternalBuilder {
 
   def apply[T](l: Lens[T, External]): ExternalBuilder[T] = new ExternalBuilder[T] {

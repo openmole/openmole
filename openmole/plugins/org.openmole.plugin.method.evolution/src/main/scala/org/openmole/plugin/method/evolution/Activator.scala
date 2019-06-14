@@ -33,29 +33,22 @@ class Activator extends PluginInfoActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector(
-        Task(objectName(BreedTask)),
-        Task(objectName(DeltaTask)),
-        Task(objectName(ElitismTask)),
-        Task(objectName(FromIslandTask)),
-        Task(objectName(GenerateIslandTask)),
-        Task(objectName(ReassignStateRNGTask)),
-        Task(objectName(ScalingGenomeTask)),
-        Task(objectName(TerminationTask)),
-        Task(objectName(InitialStateTask)),
-        Pattern(objectName(NichedNSGA2)),
-        Pattern(objectName(NichedNSGA2Evolution)),
-        Pattern(objectName(GenomeProfile)),
-        Pattern(objectName(GenomeProfileEvolution)),
-        Pattern(objectName(NSGA2)),
-        Pattern(objectName(NSGA2Evolution)),
-        Pattern(objectName(OSE)),
-        Pattern(objectName(OSEEvolution)),
-        Pattern(objectName(PSE)),
-        Pattern(objectName(PSEEvolution)),
-        Pattern("SteadyStateEvolution"),
-        Pattern("IslandEvolution"),
-        Word(Stochastic.getClass),
-        Hook(objectName(SavePopulationHook))
+        TaskKeyWord(objectName(BreedTask)),
+        TaskKeyWord(objectName(DeltaTask)),
+        TaskKeyWord(objectName(ElitismTask)),
+        TaskKeyWord(objectName(FromIslandTask)),
+        TaskKeyWord(objectName(GenerateIslandTask)),
+        TaskKeyWord(objectName(ReassignStateRNGTask)),
+        TaskKeyWord(objectName(ScalingGenomeTask)),
+        TaskKeyWord(objectName(TerminationTask)),
+        TaskKeyWord(objectName(InitialStateTask)),
+        PatternKeyWord(objectName(NichedNSGA2Evolution)),
+        PatternKeyWord(objectName(GenomeProfileEvolution)),
+        PatternKeyWord(objectName(NSGA2Evolution)),
+        PatternKeyWord(objectName(OSEEvolution)),
+        PatternKeyWord(objectName(PSEEvolution)),
+        WordKeyWord(Stochastic.getClass),
+        HookKeyWord(objectName(SavePopulationHook))
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)

@@ -58,12 +58,14 @@ package object tar {
       if (!directory.exists()) directory.mkdirs()
       if (!Files.isDirectory(directory)) throw new IOException(directory.toString + " is not a directory.")
 
+      val directoryRights = ListBuffer[(Path, Int)]()
+
       Iterator.continually(tis.getNextEntry).takeWhile(_ != null).foreach {
         e ⇒
           val dest = Paths.get(directory.toString, e.getName)
           if (e.isDirectory) {
             Files.createDirectories(dest)
-            dest.toFile.mode = e.getMode
+            directoryRights += (dest -> e.getMode)
           }
           else {
             Files.createDirectories(dest.getParent)
@@ -77,6 +79,12 @@ package object tar {
             }
           }
       }
+
+      // Set directory right after extraction in case some directory are not writable
+      for {
+        (path, mode) ← directoryRights
+      } path.toFile.mode = mode
+
     }
   }
 

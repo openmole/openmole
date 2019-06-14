@@ -32,12 +32,4 @@ trait Classes {
   lazy val ExplorationTask = task.ExplorationTask
   lazy val MoleTask = task.MoleTask
 
-  lazy val Capsule = mole.Capsule
-  lazy val StrainerCapsule = mole.StrainerCapsule
-  lazy val MasterCapsule = mole.MasterCapsule
-
-  lazy val Slot = transition.Slot
-
-  lazy val Puzzle = puzzle.Puzzle
-
 }

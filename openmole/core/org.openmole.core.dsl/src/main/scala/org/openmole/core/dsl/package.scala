@@ -21,11 +21,9 @@ package dsl {
 
   import org.openmole.core.context._
   import org.openmole.core.logconfig.LoggerConfig
-  import org.openmole.core.workspace._
   import cats._
+  import org.openmole.core.workflow.mole
   import org.openmole.tool.crypto.Cypher
-  import org.openmole.tool.types._
-  import squants._
   import squants.information._
 
   trait DSLPackage <: Commands
@@ -77,6 +75,53 @@ package dsl {
     }
 
     type Data = File
+  }
+
+  object extension {
+    type FromContext[T] = org.openmole.core.expansion.FromContext[T]
+    lazy val FromContext = org.openmole.core.expansion.FromContext
+
+    type DefinitionScope = org.openmole.core.workflow.builder.DefinitionScope
+    def DefinitionScope = org.openmole.core.workflow.builder.DefinitionScope
+
+    type CacheKey[T] = org.openmole.tool.cache.CacheKey[T]
+    def CacheKey = org.openmole.tool.cache.CacheKey
+
+    type ScalarOrSequenceOfDouble[T] = org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble[T]
+    def ScalarOrSequenceOfDouble = org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
+
+    type Hook = mole.FromContextHook
+    def Hook = org.openmole.core.workflow.mole.Hook
+
+    type Source = org.openmole.core.workflow.mole.Source
+    type FromContextSource = org.openmole.core.workflow.mole.FromContextSource
+    def Source = org.openmole.core.workflow.mole.Source
+
+    type Task = org.openmole.core.workflow.task.Task
+    type FromContextTask = org.openmole.core.workflow.task.FromContextTask
+    def Task = org.openmole.core.workflow.task.FromContextTask
+
+    type Sampling = org.openmole.core.workflow.sampling.Sampling
+    type FromContextSampling = org.openmole.core.workflow.sampling.FromContextSampling
+    def Sampling = org.openmole.core.workflow.sampling.Sampling
+
+    type Namespace = org.openmole.core.context.Namespace
+    def Namespace = org.openmole.core.context.Namespace
+
+    type Variable[T] = org.openmole.core.context.Variable[T]
+    def Variable = org.openmole.core.context.Variable
+
+    type Context = org.openmole.core.context.Context
+    def Context = org.openmole.core.context.Context
+
+    type WritableOutput = org.openmole.core.workflow.tools.WritableOutput
+    def WritableOutput = org.openmole.core.workflow.tools.WritableOutput
+
+    def ExpandedString = org.openmole.core.expansion.ExpandedString
+
+    implicit def validationOfFromContext(f: FromContext[_]) =
+      (p: FromContext.ValidationParameters) ⇒ f.validate(p.inputs)(p.newFile, p.fileService)
+
   }
 
 }

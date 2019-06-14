@@ -45,9 +45,7 @@ package object message {
     def apply(moleJob: MoleJob) = new RunnableTask(moleJob.task, moleJob.context, moleJob.id)
   }
 
-  class RunnableTask(val task: Task, val context: Context, val id: MoleJobId) {
-    def toMoleJob(stateChangedCallBack: StateChangedCallBack) = MoleJob(task, context, id, stateChangedCallBack)
-  }
+  class RunnableTask(val task: Task, val context: Context, val id: MoleJobId)
 
   case class FileMessage(path: String, hash: String)
 
@@ -116,7 +114,7 @@ package object message {
 
   object ExecutionMessage {
     def load(file: File)(implicit serialiserService: SerializerService, fileService: FileService, newFile: NewFile) = {
-      serialiserService.deserialiseAndExtractFiles[ExecutionMessage](file)
+      serialiserService.deserializeAndExtractFiles[ExecutionMessage](file)
     }
   }
 
@@ -124,7 +122,7 @@ package object message {
 
   object RuntimeResult {
     def load(file: File)(implicit serialiserService: SerializerService, fileService: FileService, newFile: NewFile) =
-      serialiserService.deserialiseAndExtractFiles[RuntimeResult](file)
+      serialiserService.deserializeAndExtractFiles[RuntimeResult](file)
   }
 
   case class RuntimeResult(stdOut: Option[File], result: Try[(SerializedContextResults, RuntimeLog)], info: RuntimeInfo)

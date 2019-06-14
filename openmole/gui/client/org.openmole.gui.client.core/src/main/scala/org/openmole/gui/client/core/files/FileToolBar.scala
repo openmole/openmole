@@ -307,7 +307,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
               if (errs.isEmpty) {
                 pluginPanel.dialog.show
               }
-              else AlertPanel.detail("Plugin import failed", errs.head.stackTrace, transform = RelativeCenterPosition, zone = FileZone)
+              else AlertPanel.detail("Plugin import failed", ErrorData.stackTrace(errs.head), transform = RelativeCenterPosition, zone = FileZone)
           }
           unselectToolAndRefreshTree
       }

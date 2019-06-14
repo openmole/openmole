@@ -22,7 +22,7 @@ import scala.collection._
 
 package object bytecode {
 
-  def listAllClasses(byteCode: Array[Byte]) = {
+  def listAllClasses(byteCode: Array[Byte]): List[Type] = {
     val classes = mutable.HashSet[Type]()
 
     val cv = new ClassVisitor(Opcodes.ASM5) {

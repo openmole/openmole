@@ -20,8 +20,8 @@ package org.openmole.core.console
 import java.net.URLClassLoader
 import java.util
 import java.util.UUID
-import javax.script._
 
+import javax.script._
 import org.openmole.core.exception._
 import org.openmole.core.pluginmanager._
 import org.osgi.framework.Bundle
@@ -73,7 +73,7 @@ object ScalaREPL {
 
   case class BundledClass(name: String, bundle: Option[Bundle])
   case class REPLClass(name: String, path: String, classLoader: REPLClassloader) {
-    def byteCode = classLoader.findClassFile(name).getOrElse(throw new InternalProcessingError("Class not found in this classloader")).toByteArray
+    //    def byteCode = classLoader.findClassFile(name).getOrElse(throw new InternalProcessingError("Class not found in this classloader")).toByteArray
   }
   case class ReferencedClasses(repl: Vector[REPLClass], other: Vector[BundledClass]) {
     def plugins = other.flatMap(_.bundle).flatMap(PluginManager.allPluginDependencies).distinct.map(_.file)
@@ -85,28 +85,28 @@ object ScalaREPL {
     def empty = ReferencedClasses(Vector.empty, Vector.empty)
   }
 
-  def bundleFromReferencedClass(ref: ReferencedClasses, bundleName: String, bundleVersion: String, bundle: java.io.File) = {
-    val classByteCode = ref.repl.distinct.map(c ⇒ ClassByteCode(c.path, c.byteCode))
-
-    def packageName(c: String) = c.reverse.dropWhile(_ != '.').drop(1).reverse
-    def importPackages = ref.other.filter(_.bundle.isDefined).groupBy(_.bundle).toSeq.flatMap {
-      case (b, cs) ⇒
-        for {
-          c ← cs
-          p = packageName(c.name)
-          if !p.isEmpty
-        } yield VersionedPackage(p, b.map(_.getVersion.toString))
-    }.distinct
-
-    createBundle(
-      name = bundleName,
-      version = bundleVersion,
-      classes = classByteCode,
-      exportedPackages = ref.repl.map(c ⇒ packageName(c.name)).distinct.filter(p ⇒ !p.isEmpty),
-      importedPackages = importPackages,
-      bundle = bundle
-    )
-  }
+  //    def bundleFromReferencedClass(ref: ReferencedClasses, bundleName: String, bundleVersion: String, bundle: java.io.File) = {
+  //      val classByteCode = ref.repl.distinct.map(c ⇒ ClassByteCode(c.path, c.byteCode))
+  //
+  //      def packageName(c: String) = c.reverse.dropWhile(_ != '.').drop(1).reverse
+  //      def importPackages = ref.other.filter(_.bundle.isDefined).groupBy(_.bundle).toSeq.flatMap {
+  //        case (b, cs) ⇒
+  //          for {
+  //            c ← cs
+  //            p = packageName(c.name)
+  //            if !p.isEmpty
+  //          } yield VersionedPackage(p, b.map(_.getVersion.toString))
+  //      }.distinct
+  //
+  //      createBundle(
+  //        name = bundleName,
+  //        version = bundleVersion,
+  //        classes = classByteCode,
+  //        exportedPackages = ref.repl.map(c ⇒ packageName(c.name)).distinct.filter(p ⇒ !p.isEmpty),
+  //        importedPackages = importPackages,
+  //        bundle = bundle
+  //      )
+  //    }
 
   class OMIMain(settings: Settings, priorityBundles: ⇒ Seq[Bundle], jars: Seq[JFile], quiet: Boolean) extends IMain(settings) {
     var storeErrors: Boolean = true
@@ -122,7 +122,7 @@ object ScalaREPL {
               case NoPosition ⇒ ErrorMessage(msg, msg, None)
               case _ ⇒
                 val compiled = new String(pos.source.content).split("\n")
-                val firstLine = compiled.zipWithIndex.find { case (l, _) ⇒ l.contains(firstLineTag) }.map(_._2 + 1).getOrElse(0)
+                val firstLine = compiled.zipWithIndex.find { case (l, _) ⇒ l.contains(firstLineTag) }.map(_._2 + 3).getOrElse(0)
                 val offset = compiled.take(firstLine).map(_.length + 1).sum
                 def errorPos = ErrorPosition(pos.line - firstLine, pos.start - offset, pos.end - offset, pos.point - offset)
                 def decoratedMessage = {
@@ -150,7 +150,7 @@ object ScalaREPL {
       //settings.exposeEmptyPackage.value = true
       //settings.outputDirs setSingleOutput replOutput.dir
       //println(settings.outputDirs.getSingleOutput)
-      if (Activator.osgi) OSGiScalaCompiler(settings, reporter, priorityBundles, jars)
+      if (Activator.osgi) OSGiScalaCompiler(settings, reporter)
       else {
         //settings.usejavacp.value = true
         super.newCompiler(settings, reporter)
@@ -183,64 +183,21 @@ object ScalaREPL {
 
 import ScalaREPL._
 
-class REPLClassloader(val file: AbstractFile, parent: ClassLoader) extends scala.reflect.internal.util.AbstractFileClassLoader(file, parent) { cl ⇒
+class REPLClassloader(val file: AbstractFile, classLoader: ClassLoader) extends scala.reflect.internal.util.AbstractFileClassLoader(file, null) { cl ⇒
 
-  def classFiles = {
-    def all(fs: AbstractFile): List[AbstractFile] = {
-      if (fs.isDirectory) fs :: fs.iterator.flatMap(all).toList
-      else List(fs)
-    }
-    all(file).filterNot(_.isDirectory)
-  }
+  lazy val abstractFileLoader = new scala.reflect.internal.util.AbstractFileClassLoader(file, null)
+  lazy val compositeClassLoader = new CompositeClassLoader(abstractFileLoader, classLoader)
 
-  def toClassPath(c: String) = s"${c.replace('.', '/')}.class"
-  def toAbsoluteClassPath(c: String) = s"${file.name}/${toClassPath(c)}"
-  def findClassFile(name: String): Option[AbstractFile] = classFiles.find(_.path == toAbsoluteClassPath(name))
-  def findClassFile(c: Class[_]): Option[AbstractFile] = findClassFile(c.getClass.getName)
-
-  def referencedClasses(
-    classes:           Seq[Class[_]],
-    additionalClasses: Seq[Class[_]] = Seq(classOf[scala.runtime.AbstractFunction1[_, _]])
-  ) = {
-
-    import org.openmole.tool.bytecode._
-
-    val seen = collection.mutable.HashSet[String]()
-    val toProcess = collection.mutable.Stack[String]()
-
-    classes.foreach(c ⇒ seen.add(c.getName))
-    classes.foreach(c ⇒ toProcess.push(c.getName))
-    additionalClasses.foreach(c ⇒ seen.add(c.getName))
-
-    while (!toProcess.isEmpty) {
-      val processing = toProcess.pop
-      for {
-        classFile ← findClassFile(processing).toSeq
-        refClass ← listAllClasses(classFile.toByteArray)
-        if !seen.contains(refClass.getClassName)
-      } {
-        seen += refClass.getClassName
-        toProcess push refClass.getClassName
-      }
-    }
-
-    val (repl, other) = seen.toVector.sorted.partition(c ⇒ findClassFile(c).isDefined)
-
-    val replClasses = repl.map { c ⇒
-      REPLClass(c, cl.toClassPath(c), cl)
-    }
-
-    val bundledOther = other.map { c ⇒
-      val bundle = tryToLoadClass(c).flatMap(PluginManager.bundleForClass)
-      BundledClass(name = c, bundle = bundle)
-    }
-
-    ReferencedClasses(replClasses, bundledOther)
-  }
+  override def loadClass(s: String, b: Boolean): Class[_] = compositeClassLoader.loadClass(s, b)
+  override def getResource(s: String) = compositeClassLoader.getResource(s)
+  override def getResources(s: String) = compositeClassLoader.getResources(s)
+  override def getResourceAsStream(s: String) = compositeClassLoader.getResourceAsStream(s)
+  override def getPackage(name: String): Package = abstractFileLoader.getPackage(name)
+  override def getPackages(): Array[Package] = abstractFileLoader.getPackages()
 
 }
 
-class ScalaREPL(priorityBundles: ⇒ Seq[Bundle], jars: Seq[JFile], quiet: Boolean, classDirectory: java.io.File) extends ILoop { repl ⇒
+class ScalaREPL(priorityBundles: ⇒ Seq[Bundle], jars: Seq[JFile], quiet: Boolean, classDirectory: java.io.File, firstPackageLineNumber: Int = 100000000) extends ILoop { repl ⇒
 
   def storeErrors = omIMain.storeErrors
   def storeErrors_=(b: Boolean) = omIMain.storeErrors = b
@@ -311,6 +268,19 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle], jars: Seq[JFile], quiet: Boole
   }
 
   lazy val omIMain = new OMIMain(settings, priorityBundles, jars, quiet)
+
+  /* To avoid name clash with remote environment scala code interpretation
+     when repl classes are copied to a bundle and shipped away. If some
+     package name $linex are exported from a bundle it prevents the compilation
+     of the matching line in the interpreter.*/
+  val clField = omIMain.naming.getClass.getDeclaredField("freshLineId")
+  val freshLineId = {
+    var x = firstPackageLineNumber
+    () ⇒ { x += 1; x }
+  }
+  clField.setAccessible(true)
+  clField.set(omIMain.naming, freshLineId)
+
   intp = omIMain
 
 }
@@ -327,13 +297,8 @@ object Interpreter {
 class Interpreter(priorityBundles: ⇒ Seq[Bundle], jars: Seq[JFile], quiet: Boolean, classDirectory: java.io.File) {
   def eval(code: String) = compile(code).apply()
   def compile(code: String): ScalaREPL.Compiled = synchronized {
-    val s = new Scripted(new Scripted.Factory, OSGiScalaCompiler.createSettings(new Settings, priorityBundles, jars, classDirectory), new NewLinePrintWriter(new ConsoleWriter, true))
-    // val settings = OSGiScalaCompiler.createSettings(new Settings, priorityBundles, jars, classDirectory)
-    // val s = Scripted(settings = settings)
-    // settings.usejavacp.value = false
-
-    val compiled = s.compile(code)
-    () ⇒ compiled.eval()
+    val s = new ScalaREPL(priorityBundles, jars, quiet, classDirectory, 1)
+    s.compile(code)
   }
 }
 

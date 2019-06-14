@@ -19,12 +19,9 @@
     )
 """
 
-@h2
-    OpenMOLE Strategy to handle Stochastic Models Calibration
+@h2{OpenMOLE Strategy to handle Stochastic Models Calibration}
 
-  @p Calibration of stochastic models leads to noisy fitness functions that may jeopardize Genetic Algorithm convergence.
-   An efficient strategy to deal with such fitness functions is implemented in OpenMOLE. This strategy automatically balances the need for replications and
-  the discovery of new solutions. In case you want to explore a stochastic model with a genetic algorithm you can do:
+@p Calibration of stochastic models leads to noisy fitness functions that may jeopardize Genetic Algorithm convergence. An efficient strategy to deal with such fitness functions is implemented in OpenMOLE. This strategy automatically balances the need for replications and the discovery of new solutions. In case you want to explore a stochastic model with a genetic algorithm you can do:
 @br
 @br
 
@@ -32,36 +29,26 @@
   val seed = Val[Long]
 
   val evolution =
-    SteadyStateEvolution(
-      // Definition of the optimisation algorithm
-      // mu is the size of the population
-      // genome (of individuals) is the inputs prototype and their variation ranges
-      // objectives are the objectives to minimise
-      algorithm =
-        NSGA2(
-          mu = 100,
-          genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
-          objectives = Seq(o1, o2),
-          // OpenMOLE provide a seed for your stochastic model to use (it is optional)
-          // 20% of the evaluations are used for replicating existing solutions
-          // 100 replication are stored at max for each individual
-          stochastic = Stochastic(seed = seed, reevaluate = 0.2, replications = 100)
-        ),
+    NSGA2Evolution(
+      mu = 100, // mu is the size of the population
+      genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)), // genome (of individuals) is the inputs prototype and their variation ranges
+      objectives = Seq(o1, o2), // objectives are the objectives to minimise
+      // OpenMOLE provide a seed for your stochastic model to use (it is optional)
+      // 20% of the evaluations are used for replicating existing solutions
+      // 100 replication are stored at max for each individual
+      stochastic = Stochastic(seed = seed, reevaluate = 0.2, replications = 100),
       evaluation = model,
       termination = 100
     )""", header = model)
 
 
-@h2
-    The problem of stochasticity in Model Calibration
+@h2{The problem of stochasticity in Model Calibration}
 @p
     Genetic algorithms don’t cope well with stochasticity.
 
-     This is especially the case for algorithms with evolution strategies of type "µ + λ" (such as NSGA2, the GA used in OpenMOLE)
-     which preserves best solutions (individuals) from a generation to another.
+    This is especially the case for algorithms with evolution strategies of type "µ + λ" (such as NSGA2, the GA used in OpenMOLE) which preserves best solutions (individuals) from a generation to another.
 
-    In that kind of optimization, the quality of a solution is only @b{estimated}.
-    Since it is subject to variation from a replication to another, the quality can either be overvalued or
+    In that kind of optimization, the quality of a solution is only @b{estimated}. Since it is subject to variation from a replication to another, the quality can either be overvalued or
     undervalued i.e. estimated at a significantly greater or lower value than the one obtained for an infinite
     number of replications.
 
@@ -77,8 +64,7 @@
     This behaviour can greatly slow down the convergence of the calibration algorithm and even make it converge toward
     set of parameters producing very unstable dynamics, very likely to produce false positive good solutions.
 
-@h3
-    Existing solutions
+@h3{Existing solutions}
 @p
     To reduce the influence of the fitness fluctuation, the simplest approach is  "resampling". It consists in
     replicating the fitness evaluation of individuals. The computed "quality" of an individual is then
@@ -95,8 +81,7 @@
 @br
     See @aa("this paper" , href:=Resource.literature.rakshit2016.file) for an extensive review of noisy fitness management in Evolutionary Computation.
 
-@h3
-    OpenMOLE's solution
+@h3{OpenMOLE's solution}
 
 @p
     To overcome these limitations, OpenMOLE uses an auto-adaptive strategy called "stochastic resampling".
@@ -144,15 +129,11 @@
 @p
 
     This method adds only two new parameters:
-    @ol
-        @li
-            @hl.code("""reevaluate"""), the probability of resampling an individual at each generation
-        @li
-            @hl.code("""replications"""), the maximum number of evaluation values for an individual, to limit the
-            memory used to store an individual.
+    @ol{
+      @li{@hl.code("""reevaluate"""), the probability of resampling an individual at each generation}
+      @li{@hl.code("""replications"""), the maximum number of evaluation values for an individual, to limit the memory used to store an individual.}
+    }
 
 See the line @hl.code("""stochastic = Stochastic(seed = seed, reevaluate = 0.2, replications = 100)""") in the example.
 
-
-
-This method has been implemented in the library for evolutionary computing: MGO5, and is currently being benchmarked against other stochasticity management methods (see  @aa("the repository" , href:=shared.link.repo.mgobench))
+This method has been implemented in the library for evolutionary computing: MGO, and is currently being benchmarked against other stochasticity management methods (see  @aa("the repository" , href:=shared.link.repo.mgobench))

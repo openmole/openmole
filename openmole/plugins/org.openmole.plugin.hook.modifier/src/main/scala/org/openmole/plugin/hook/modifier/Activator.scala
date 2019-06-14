@@ -32,9 +32,9 @@ class Activator extends PluginInfoActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector(
-        Hook(classOf[ConditionHook]),
-        Word("when"),
-        Word("condition")
+        HookKeyWord(classOf[ConditionHook]),
+        WordKeyWord("when"),
+        WordKeyWord("condition")
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)

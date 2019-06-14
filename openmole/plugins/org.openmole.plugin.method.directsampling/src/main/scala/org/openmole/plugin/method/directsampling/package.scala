@@ -17,54 +17,93 @@
 
 package org.openmole.plugin.method
 
-import org.openmole.core.context._
-import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.workflow.builder.DefinitionScope
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.validation.DataflowProblem._
-import org.openmole.core.workflow.validation._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
+import org.openmole.core.workflow.mole
+import org.openmole.core.workflow.mole.CSVHook
+import org.openmole.core.workflow.tools.WritableOutput
 import org.openmole.plugin.domain.distribution._
 import org.openmole.plugin.domain.modifier._
 import org.openmole.plugin.tool.pattern._
-import org.openmole.core.expansion._
+import org.openmole.plugin.hook.file._
 
 package object directsampling {
 
-  implicit def scope = DefinitionScope.Internal
+  class DirectSampling
+  case class Replication(seed: Val[_])
+
+  implicit class DirectSamplingDSL(dsl: DSLContainer[DirectSampling]) extends DSLContainerHook(dsl) {
+    def hook(
+      output:     WritableOutput,
+      values:     Seq[Val[_]]                           = Vector.empty,
+      header:     OptionalArgument[FromContext[String]] = None,
+      arrayOnRow: Boolean                               = false): DSLContainer[DirectSampling] = {
+      implicit val defScope = dsl.scope
+      dsl hook CSVHook(output, values = values, header = header, arrayOnRow = arrayOnRow)
+    }
+  }
+
+  implicit class ReplicationDSL(dsl: DSLContainer[Replication]) extends DSLContainerHook(dsl) {
+    def hook(
+      output:      WritableOutput,
+      values:      Seq[Val[_]]                           = Vector.empty,
+      header:      OptionalArgument[FromContext[String]] = None,
+      arrayOnRow:  Boolean                               = false,
+      includeSeed: Boolean                               = false): DSLContainer[Replication] = {
+      implicit val defScope = dsl.scope
+      val exclude = if (!includeSeed) Seq(dsl.data.seed) else Seq()
+      dsl hook mole.CSVHook(output, values = values, exclude = exclude, header = header, arrayOnRow = arrayOnRow)
+    }
+  }
 
   def Replication[T: Distribution](
-    evaluation:       Puzzle,
+    evaluation:       DSL,
     seed:             Val[T],
     replications:     Int,
-    distributionSeed: OptionalArgument[Long]   = None,
-    aggregation:      OptionalArgument[Puzzle] = None
-  ): Puzzle =
-    DirectSampling(
-      evaluation = evaluation,
-      sampling = seed in (TakeDomain(UniformDistribution[T](distributionSeed), replications)),
-      aggregation = aggregation
-    )
+    distributionSeed: OptionalArgument[Long] = None,
+    aggregation:      OptionalArgument[DSL]  = None,
+    wrap:             Boolean                = false,
+    scope:            DefinitionScope        = "replication"
+  ) = {
+    implicit def defScope = scope
 
-  def DirectSampling[P](
-    evaluation:  Puzzle,
-    sampling:    Sampling,
-    aggregation: OptionalArgument[Puzzle] = None,
-    condition:   Condition                = Condition.True
-  ): Puzzle = {
+    val sampling = seed in (TakeDomain(UniformDistribution[T](distributionSeed), replications))
+
     val exploration = ExplorationTask(sampling)
-    val explorationCapsule = Capsule(exploration, strain = true)
 
-    aggregation.option match {
-      case Some(aggregation) ⇒
-        (explorationCapsule -< (evaluation when condition) >- aggregation) &
-          (explorationCapsule -- (aggregation block (evaluation.outputs: _*)))
-      case None ⇒
-        explorationCapsule -< (evaluation when condition)
-    }
+    val s =
+      MapReduce(
+        evaluation = evaluation,
+        sampler = exploration,
+        aggregation = aggregation,
+        wrap = wrap
+      )
+
+    DSLContainerExtension[Replication](s, new Replication(seed))
+  }
+
+  def DirectSampling(
+    evaluation:  DSL,
+    sampling:    Sampling,
+    aggregation: OptionalArgument[DSL] = None,
+    condition:   Condition             = Condition.True,
+    wrap:        Boolean               = false,
+    scope:       DefinitionScope       = "direct sampling"
+  ) = {
+    implicit def defScope = scope
+
+    val exploration = ExplorationTask(sampling)
+
+    val s =
+      MapReduce(
+        evaluation = evaluation,
+        sampler = exploration,
+        condition = condition,
+        aggregation = aggregation,
+        wrap = wrap
+      )
+
+    DSLContainerExtension[DirectSampling](s, new DirectSampling)
   }
 
 }
