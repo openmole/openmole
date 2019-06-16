@@ -83,7 +83,12 @@ Here is a use example of the PSE method in an OpenMOLE script:
 
 @hl.openmole("""
 // Seed declaration for random number generation
-val myseed =Val[Int]
+val myseed = Val[Int]
+
+val param1 = Val[Double]
+val param2 = Val[Double]
+val output1 = Val[Double]
+val output2 = Val[Double]
 
 // PSE method
 PSEEvolution(
@@ -98,7 +103,7 @@ PSEEvolution(
     output2 in (0.0 to 4000.0 by 50.0)),
   stochastic = Stochastic(seed = myseed)
 ) hook (workDirectory / "results", frequency = 100)
-""", name = "PSE")
+""", name = "PSE", header = "val modelTask = EmptyTask()")
 
 @br
 
