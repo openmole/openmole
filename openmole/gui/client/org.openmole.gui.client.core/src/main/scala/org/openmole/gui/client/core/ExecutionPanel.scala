@@ -216,7 +216,7 @@ class ExecutionPanel {
               VarCell(tags.span(tags.span(Utils.longToDate(staticInf(execID).startDate)).tooltip("Starting time")), 1),
               VarCell(tags.span(glyphAndText(glyph_flash, details.running.toString).tooltip("Running jobs")), 2),
               VarCell(tags.span(glyphAndText(glyph_flag, details.ratio.toString).tooltip("Finished/Total jobs")), 3),
-              VarCell(tags.span(tags.span(durationString).tooltip("Elapsed time")), 4),
+              VarCell(tags.span(tags.span(durationString).tooltip("Execution time")), 4),
               VarCell(tags.span(subLink(SubCompile, execID, execStatus, defaultModifier = executionState(info)).tooltip("Execution state")), 5),
               VarCell(tags.span(subLink(SubEnvironment, execID, "Executions").tooltip("Computation environment details")), 6),
               VarCell(tags.span(subLink(SubOutput, execID, glyphicon = glyph_list).tooltip("Standard output")), 7),
