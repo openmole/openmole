@@ -126,7 +126,7 @@ object NSGA2 {
           }
 
         def migrateToIsland(population: Vector[I]) = DeterministicGAIntegration.migrateToIsland(population)
-        def migrateFromIsland(population: Vector[I], state: S) = population
+        def migrateFromIsland(population: Vector[I], state: S) = DeterministicGAIntegration.migrateFromIsland(population)
 
         def afterGeneration(g: Long, population: Vector[I]): M[Boolean] = interpret { impl ⇒
           import impl._

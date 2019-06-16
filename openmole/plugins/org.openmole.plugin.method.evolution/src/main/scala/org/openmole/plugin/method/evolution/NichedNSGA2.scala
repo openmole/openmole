@@ -98,17 +98,8 @@ object NoisyNichedNSGA2Algorithm {
   import cats.implicits._
   import shapeless._
 
-  def aggregatedFitness[P: Manifest](aggregation: Vector[P] ⇒ Vector[Double]): Individual[P] ⇒ Vector[Double] =
-    NoisyNSGA2Operations.aggregated[Individual[P], P](vectorFitness[P].get, aggregation)(_)
-
+  def aggregatedFitness[P: Manifest](aggregation: Vector[P] ⇒ Vector[Double]): Individual[P] ⇒ Vector[Double] = NoisyNSGA2.fitness[P](aggregation)
   case class Result[N](continuous: Vector[Double], discrete: Vector[Int], fitness: Vector[Double], niche: N, replications: Int)
-
-  //  def result[N, P: Manifest](
-  //                              population: Vector[Individual[P]],
-  //                              aggregation: Vector[P] => Vector[Double],
-  //                              niche: Individual[P] => N,
-  //                              continuous: Vector[C],
-  //                              onlyOldest: Boolean) = {
 
   def result[N, P: Manifest](
     population:  Vector[Individual[P]],
@@ -119,12 +110,12 @@ object NoisyNichedNSGA2Algorithm {
     def nicheResult(population: Vector[Individual[P]]) =
       if (population.isEmpty) population
       else if (onlyOldest) {
-        val firstFront = keepFirstFront(population, NoisyNSGA2Operations.aggregated(vectorFitness[P].get, aggregation))
+        val firstFront = keepFirstFront(population, NoisyNSGA2.fitness[P](aggregation))
         val sorted = firstFront.sortBy(-_.fitnessHistory.size)
         val maxHistory = sorted.head.fitnessHistory.size
         firstFront.filter(_.fitnessHistory.size == maxHistory)
       }
-      else keepFirstFront(population, NoisyNSGA2Operations.aggregated(vectorFitness[P].get, aggregation))
+      else keepFirstFront(population, NoisyNSGA2.fitness[P](aggregation))
 
     nicheElitism[Id, Individual[P], N](population, nicheResult, niche).map { i ⇒
       val (c, d, f, r) = NoisyIndividual.aggregate[P](i, aggregation, continuous)
@@ -152,8 +143,7 @@ object NoisyNichedNSGA2Algorithm {
 
   def adaptiveBreeding[M[_]: cats.Monad: Random: Generation, P: Manifest](lambda: Int, operatorExploration: Double, cloneProbability: Double, aggregation: Vector[P] ⇒ Vector[Double], discrete: Vector[D]): Breeding[M, Individual[P], Genome] =
     NoisyNSGA2Operations.adaptiveBreeding[M, Individual[P], Genome, P](
-      vectorFitness[P].get,
-      aggregation,
+      aggregatedFitness(aggregation),
       Individual.genome.get,
       continuousValues.get,
       continuousOperator.get,
@@ -166,15 +156,16 @@ object NoisyNichedNSGA2Algorithm {
       operatorExploration,
       cloneProbability)
 
-  def elitism[M[_]: cats.Monad: Random: Generation, N, P: Manifest](niche: Niche[Individual[P], N], muByNiche: Int, historySize: Int, aggregation: Vector[P] ⇒ Vector[Double], components: Vector[C]): Elitism[M, Individual[P]] =
+  def elitism[M[_]: cats.Monad: Random: Generation, N, P: Manifest](niche: Niche[Individual[P], N], muByNiche: Int, historySize: Int, aggregation: Vector[P] ⇒ Vector[Double], components: Vector[C]): Elitism[M, Individual[P]] = {
+    def individualValues(i: Individual[P]) = values(Individual.genome.get(i), components)
+
     NoisyProfileOperations.elitism[M, Individual[P], N, P](
-      vectorFitness[P],
-      aggregation,
-      i ⇒ values(Individual.genome.get(i), components),
-      Individual.historyAge,
-      historySize,
+      aggregatedFitness(aggregation),
+      mergeHistories(individualValues, vectorFitness, Individual.historyAge, historySize),
+      individualValues,
       niche,
       muByNiche)
+  }
 
   def expression[P: Manifest](fitness: (util.Random, Vector[Double], Vector[Int]) ⇒ P, continuous: Vector[C]): (util.Random, Genome) ⇒ Individual[P] =
     NoisyIndividual.expression(fitness, continuous)

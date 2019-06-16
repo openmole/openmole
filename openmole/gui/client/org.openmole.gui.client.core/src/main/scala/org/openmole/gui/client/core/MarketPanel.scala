@@ -114,7 +114,7 @@ class MarketPanel {
     }.map {
       case (e, state: Var[ProcessState]) ⇒
         state.withTransferWaiter { _ ⇒
-          if (selectedEntry.now == Some(e)) buttonIcon(" Download", btn_warning, glyph_download_alt, todo) else tags.div()
+          if (selectedEntry.now == Some(e)) buttonIcon(" Download", btn_danger, glyph_download_alt, todo) else tags.div()
         }
       case _ ⇒ tags.div()
     }.getOrElse(tags.div())

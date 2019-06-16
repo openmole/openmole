@@ -3,7 +3,7 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.ext.data._
 import org.scalajs.dom.html.Input
 
-import scala.util.Try
+import scala.util._
 import scalatags.JsDom.tags
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
@@ -209,13 +209,24 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   def updateFilter: Unit = updateFilter(fileFilter.now.copy(threshold = thresholdInput.value, nameFilter = nameInput.value))
 
-  def resetFilterTools = {
-    if (thresholdInput.value > "1000") {
-      thresholdInput.value = "1000"
-      thresholdChanged() = true
+  def resetFilterThresold = {
+    thresholdInput.value = "1000"
+    thresholdChanged() = true
+  }
+
+  def resetFilterTools: Unit = {
+    Try {
+      val th = thresholdInput.value.toInt
+      if (th > 1000 || thresholdInput.value == "") resetFilterThresold
+      else thresholdChanged() = false
+    } match {
+      case Failure(exception) ⇒
+        resetFilterThresold
+        resetFilterTools
+      case Success(_) ⇒
+        updateFilter(fileFilter.now.copy(threshold = thresholdInput.value, nameFilter = nameInput.value))
     }
-    else thresholdChanged() = false
-    updateFilter(fileFilter.now.copy(threshold = thresholdInput.value, nameFilter = nameInput.value))
+
   }
 
   def filterSubmit: () ⇒ Boolean = () ⇒ {
