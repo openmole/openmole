@@ -211,13 +211,13 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   def resetFilterThresold = {
     thresholdInput.value = "1000"
-        thresholdChanged() = true
+    thresholdChanged() = true
   }
 
   def resetFilterTools: Unit = {
     Try {
       val th = thresholdInput.value.toInt
-      if ( th > 1000 || thresholdInput.value == "") resetFilterThresold
+      if (th > 1000 || thresholdInput.value == "") resetFilterThresold
       else thresholdChanged() = false
     } match {
       case Failure(exception) ⇒

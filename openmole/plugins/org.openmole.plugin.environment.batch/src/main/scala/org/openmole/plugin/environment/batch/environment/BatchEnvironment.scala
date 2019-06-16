@@ -98,8 +98,9 @@ object BatchEnvironment {
   }
 
   val MemorySizeForRuntime = ConfigurationLocation("BatchEnvironment", "MemorySizeForRuntime", Some(1024 megabytes))
-
+  
   val CheckInterval = ConfigurationLocation("BatchEnvironment", "CheckInterval", Some(1 minutes))
+  val SubmitRetryInterval = ConfigurationLocation("BatchEnvironment", "SubmitRetryInterval", Some(30 seconds))
 
   val GetTokenInterval = ConfigurationLocation("BatchEnvironment", "GetTokenInterval", Some(1 minutes))
 
