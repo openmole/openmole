@@ -46,9 +46,7 @@ class AuthenticationPanel {
     lazy val authenticationSelector: Options[AuthenticationPluginFactory] = {
       val factories = Plugins.authenticationFactories.now
       val currentInd = {
-        val ind = factories.map {
-          _.name
-        }.indexOf(currentFactory.name)
+        val ind = factories.map { _.name }.indexOf(currentFactory.name)
         if (ind == -1) 0 else ind
       }
 
