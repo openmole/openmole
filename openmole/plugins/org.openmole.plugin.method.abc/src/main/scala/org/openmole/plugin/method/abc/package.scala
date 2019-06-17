@@ -113,7 +113,7 @@ package object abc {
     val masterState = Val[MonAPMC.MonState]("masterState", abcNamespace)
     val islandState = state
 
-    val step = Val[Int]("step", abcNamespace)
+    val step = Val[Int]("masterStep", abcNamespace)
     val stop = Val[Boolean]
 
     val n = sample + generated
@@ -127,7 +127,8 @@ package object abc {
 
     val master =
       MoleTask(appendSplit -- terminationTask) set (
-        exploredOutputs += islandState.array
+        exploredOutputs += islandState.array,
+        step := 0
       )
 
     val slave =
@@ -158,9 +159,9 @@ package object abc {
   }
 
   implicit class ABCContainer(dsl: DSLContainer[ABCParameters]) extends DSLContainerHook(dsl) {
-    def hook(directory: FromContext[File]): DSLContainer[ABC.ABCParameters] = {
+    def hook(directory: FromContext[File], frequency: Long = 1): DSLContainer[ABC.ABCParameters] = {
       implicit val defScope = dsl.scope
-      dsl hook ABCHook(dsl, directory)
+      dsl hook ABCHook(dsl, directory, frequency)
     }
   }
 
