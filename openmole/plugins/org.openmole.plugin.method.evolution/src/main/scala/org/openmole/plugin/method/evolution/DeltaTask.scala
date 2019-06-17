@@ -1,23 +1,47 @@
 package org.openmole.plugin.method.evolution
 
 import org.openmole.core.dsl._
-import org.openmole.core.workflow.task.ClosureTask
-import org.openmole.core.context.Variable
-import org.openmole.core.workflow.builder.DefinitionScope
-
+import org.openmole.core.dsl.extension._
+import org.openmole.tool.types.ToDouble
 object DeltaTask {
-  def apply(objective: (Val[Double], Double)*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    ClosureTask("DeltaTask") { (context, _, _) ⇒
-      context ++ objective.map { case (v, o) ⇒ Variable(v, math.abs(context(v) - o)) }
+
+  def apply(objective: Delta*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+    Task("DeltaTask") { p ⇒
+      import p._
+      context ++ objective.map {
+        case DeltaDouble(v, o) ⇒ Variable(v, math.abs(context(v) - o))
+        case DeltaInt(v, o)    ⇒ Variable(v, math.abs(context(v) - o))
+        case DeltaLong(v, o)   ⇒ Variable(v, math.abs(context(v) - o))
+      }
     } set (
-      (inputs, outputs) += (objective.map(_._1): _*)
+      (inputs, outputs) += (objective.map(Delta.v): _*)
     )
+
+  sealed trait Delta
+  case class DeltaDouble(v: Val[Double], objective: Double) extends Delta
+  case class DeltaInt(v: Val[Int], objective: Int) extends Delta
+  case class DeltaLong(v: Val[Long], objective: Long) extends Delta
+
+  object Delta {
+    implicit def fromTupleDouble[T](t: (Val[Double], T))(implicit toDouble: ToDouble[T]) = DeltaDouble(t._1, toDouble(t._2))
+    implicit def fromTupleInt(t: (Val[Int], Int)) = DeltaInt(t._1, t._2)
+    implicit def fromTupleLong(t: (Val[Long], Long)) = DeltaLong(t._1, t._2)
+
+    def v(delta: Delta) =
+      delta match {
+        case DeltaDouble(v, _) ⇒ v
+        case DeltaInt(v, _)    ⇒ v
+        case DeltaLong(v, _)   ⇒ v
+      }
+
+  }
+
 }
 
 object Delta {
   import org.openmole.core.workflow.builder.DefinitionScope
 
-  def apply(dsl: DSL, objective: (Val[Double], Double)*)(implicit definitionScope: DefinitionScope) =
+  def apply(dsl: DSL, objective: DeltaTask.Delta*)(implicit definitionScope: DefinitionScope) =
     dsl -- DeltaTask(objective: _*)
 
 }

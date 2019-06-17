@@ -10,6 +10,7 @@ import org.openmole.gui.server.core.Utils._
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import java.io._
+import java.net.URL
 import java.nio.file._
 import java.util.zip.GZIPInputStream
 
@@ -527,8 +528,14 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
     val result =
       Try {
-        gridscale.http.getResponse(url) { response ⇒
-          def extractName = url.split("/").last
+        val checkedURL =
+          java.net.URI.create(url).getScheme match {
+            case null ⇒ "http://" + url
+            case _    ⇒ url
+          }
+
+        gridscale.http.getResponse(checkedURL) { response ⇒
+          def extractName = checkedURL.split("/").last
           val name =
             response.headers.flatMap {
               case ("Content-Disposition", value) ⇒
@@ -538,16 +545,19 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
                 }
               case _ ⇒ None
             }.headOption.getOrElse(extractName)
-          val dest = safePathToFile(path / name)(ServerFileSystemContext.project, workspace)
 
           val is = response.inputStream
 
           if (extract) {
+            val dest = safePathToFile(path)(ServerFileSystemContext.project, workspace)
             val tis = new TarInputStream(new GZIPInputStream(is))
             try tis.extract(dest)
             finally tis.close
           }
-          else dest.withOutputStream(os ⇒ copy(is, os))
+          else {
+            val dest = safePathToFile(path / name)(ServerFileSystemContext.project, workspace)
+            dest.withOutputStream(os ⇒ copy(is, os))
+          }
         }
       }
 
