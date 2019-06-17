@@ -113,7 +113,7 @@ package object abc {
     val masterState = Val[MonAPMC.MonState]("masterState", abcNamespace)
     val islandState = state
 
-    val step = Val[Int]("step", abcNamespace)
+    val step = Val[Int]("masterStep", abcNamespace)
     val stop = Val[Boolean]
 
     val n = sample + generated
@@ -127,7 +127,8 @@ package object abc {
 
     val master =
       MoleTask(appendSplit -- terminationTask) set (
-        exploredOutputs += islandState.array
+        exploredOutputs += islandState.array,
+        step := 0
       )
 
     val slave =
