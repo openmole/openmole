@@ -159,9 +159,9 @@ package object abc {
   }
 
   implicit class ABCContainer(dsl: DSLContainer[ABCParameters]) extends DSLContainerHook(dsl) {
-    def hook(directory: FromContext[File]): DSLContainer[ABC.ABCParameters] = {
+    def hook(directory: FromContext[File], frequency: Long = 1): DSLContainer[ABC.ABCParameters] = {
       implicit val defScope = dsl.scope
-      dsl hook ABCHook(dsl, directory)
+      dsl hook ABCHook(dsl, directory, frequency)
     }
   }
 
