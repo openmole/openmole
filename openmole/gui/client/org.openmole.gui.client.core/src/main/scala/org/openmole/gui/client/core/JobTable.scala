@@ -150,7 +150,7 @@ class JobTable(executionId: ExecutionId) {
             }
         }, errOpen.map { _.getOrElse(EnvironmentId(i), false) })),
       bsTableStyle = BSTableStyle(tableStyle = `class` := "table executionTable")
-    ).addHeaders("Name", "Elapsed time", "Uploads", "Downloads", "Submitted", "Running", "Finished", "Failed", "Errors")
+    ).addHeaders("Name", "Execution time", "Uploads", "Downloads", "Submitted", "Running", "Finished", "Failed", "Errors")
       .render(minWidth := 1000)
   }
 
