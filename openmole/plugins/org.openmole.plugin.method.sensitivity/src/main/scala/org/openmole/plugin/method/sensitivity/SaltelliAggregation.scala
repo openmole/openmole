@@ -28,7 +28,9 @@ object SaltelliAggregation {
     val NB = fB.size
     val k = fC.size //Number of parameters
     val f02 = math.pow(fB.sum / NB.toDouble, 2)
-    val varY = fB.map(fBj ⇒ math.pow(fBj, 2)).sum / NB.toDouble - f02
+    // val varY = fB.map(fBj ⇒ math.pow(fBj, 2)).sum / NB.toDouble - f02
+    val f0 = fB.sum / NB.toDouble
+    val varY = fB.map(fBj ⇒ math.pow(fBj - f0, 2)).sum / NB.toDouble
     def avgProduct(u: Array[Double], v: Array[Double]): Double = {
       val prods = (u zip v).map({ case (uj, vj) ⇒ uj * vj })
       prods.sum / prods.size.toDouble
