@@ -37,6 +37,7 @@ class Activator extends BundleActivator {
         WordKeyWord("inputs"),
         WordKeyWord("outputs"),
         WordKeyWord("hook"),
+        WordKeyWord("display"),
         WordKeyWord("workDirectory"),
         WordKeyWord("plugins"),
         WordKeyWord("pluginsOf"),
