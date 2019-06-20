@@ -27,7 +27,7 @@ package composition {
   import java.io.PrintStream
 
   import org.openmole.core.context.{ Context, Val }
-  import org.openmole.core.expansion.Condition
+  import org.openmole.core.expansion.{ Condition, FromContext }
   import org.openmole.core.outputmanager.OutputManager
   import org.openmole.core.workflow.builder.DefinitionScope
   import org.openmole.core.workflow.execution.{ EnvironmentProvider, LocalEnvironmentProvider }
@@ -138,7 +138,11 @@ package composition {
     def on(environment: EnvironmentProvider) = copy(environment = Some(environment))
     def by(strategy: Grouping) = copy(grouping = Some(strategy))
     def hook(hooks: Hook*) = copy(hooks = this.hooks ++ hooks)
-    def hook(output: WritableOutput, values: Val[_]*)(implicit definitionScope: DefinitionScope): TaskNode = hook(CSVHook(output = output, values: _*))
+    def hook(
+      output:     WritableOutput,
+      values:     Seq[Val[_]]                           = Vector.empty,
+      header:     OptionalArgument[FromContext[String]] = None,
+      arrayOnRow: Boolean                               = false)(implicit definitionScope: DefinitionScope): TaskNode = hook(CSVHook(output, values = values, header = header, arrayOnRow = arrayOnRow))
     def source(sources: Source*) = copy(sources = this.sources ++ sources)
   }
 
