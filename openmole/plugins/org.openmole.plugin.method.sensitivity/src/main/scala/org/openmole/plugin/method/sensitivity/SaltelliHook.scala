@@ -19,7 +19,7 @@ object SaltelliHook {
             Sensitivity.writeResults(ps, inputs, dsl.data.outputs, Saltelli.firstOrder(_, _)).from(context)
           }
 
-          (dir / "firstOrderTotalOrder.csv").withPrintStream(overwrite = true) { ps ⇒
+          (dir / "totalOrderIndices.csv").withPrintStream(overwrite = true) { ps ⇒
             Sensitivity.writeResults(ps, inputs, dsl.data.outputs, Saltelli.totalOrder(_, _)).from(context)
           }
         case WritableOutput.PrintStreamValue(ps) ⇒
