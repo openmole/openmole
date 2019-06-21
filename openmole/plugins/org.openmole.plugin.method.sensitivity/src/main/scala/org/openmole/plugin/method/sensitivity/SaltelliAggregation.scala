@@ -100,7 +100,6 @@ object SaltelliAggregation {
       val ftoi: Array[(Array[Double], Array[Double])] =
         (fA zip fB zip fC).map { case ((fAo, fBo), fCo) ⇒ firstAndTotalOrderIndices(fAo, fBo, fCo) }
 
-
       // first order indices
       // fosi(o)(i) contains first order index for input i on output o.
       val fosi = ftoi.map { _._1.toArray }.toArray
@@ -120,6 +119,9 @@ object SaltelliAggregation {
           (on, oi) ← modelOutputs.zipWithIndex
           v ← ScalarOrSequenceOfDouble.unflatten(modelInputs, tosi(oi), scale = false).from(context)
         } yield v.value
+
+      println("fOOutputs " ++ fOOutputs.toString)
+      println("fosiv " ++ fosiv.toString)
 
       context ++
         (fOOutputs zip fosiv).map { case (fo, v) ⇒ Variable.unsecure(fo, v) } ++

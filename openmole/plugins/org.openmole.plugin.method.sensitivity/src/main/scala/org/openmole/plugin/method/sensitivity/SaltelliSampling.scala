@@ -79,5 +79,4 @@ class SaltelliSampling(val samples: FromContext[Int], val factors: ScalarOrSeque
 
     (aVariables ++ bVariables ++ cVariables).toIterator
   }
-
 }
