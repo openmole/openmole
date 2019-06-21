@@ -112,9 +112,17 @@ object MorrisAggregation {
     modelInputs:  Seq[ScalarOrSequenceOfDouble[_]],
     modelOutputs: Seq[Val[Double]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
 
-    val muOutputs = Sensitivity.outputs(modelInputs, modelOutputs).map { case (i, o) ⇒ Morris.mu(i, o) }
-    val muStarOutputs = Sensitivity.outputs(modelInputs, modelOutputs).map { case (i, o) ⇒ Morris.muStar(i, o) }
-    val sigmaOutputs = Sensitivity.outputs(modelInputs, modelOutputs).map { case (i, o) ⇒ Morris.sigma(i, o) }
+    def morrisOutputs(
+      modelInputs:  Seq[ScalarOrSequenceOfDouble[_]],
+      modelOutputs: Seq[Val[Double]]) =
+      for {
+        i ← ScalarOrSequenceOfDouble.prototypes(modelInputs)
+        o ← modelOutputs
+      } yield (i, o)
+
+    val muOutputs = morrisOutputs(modelInputs, modelOutputs).map { case (i, o) ⇒ Morris.mu(i, o) }
+    val muStarOutputs = morrisOutputs(modelInputs, modelOutputs).map { case (i, o) ⇒ Morris.muStar(i, o) }
+    val sigmaOutputs = morrisOutputs(modelInputs, modelOutputs).map { case (i, o) ⇒ Morris.sigma(i, o) }
 
     FromContextTask("MorrisAggregation") { p ⇒
       import p._
@@ -126,7 +134,7 @@ object MorrisAggregation {
       // for each part of the space we were asked to explore, compute the elementary effects and returns them
       // into the variables passed by the user
       val List(mu, muStar, sigma) =
-        Sensitivity.outputs(modelInputs, modelOutputs).map {
+        morrisOutputs(modelInputs, modelOutputs).map {
           case (input, output) ⇒
             val outputValues: Array[Double] = context(output.toArray)
             MorrisSampling.Log.logger.fine("Processing the elementary change for input " + input + " on " + output)

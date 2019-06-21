@@ -63,14 +63,6 @@ package object sensitivity {
       }
     }
 
-    def outputs(
-      modelInputs: Seq[ScalarOrSequenceOfDouble[_]],
-      modelOutputs: Seq[Val[Double]]) =
-      for {
-        i ← ScalarOrSequenceOfDouble.prototypes(modelInputs)
-        o ← modelOutputs
-      } yield (i, o)
-
 
     case class SaltelliParams(inputs: Seq[ScalarOrSequenceOfDouble[_]], outputs: Seq[Val[_]])
     case class MorrisParams(inputs: Seq[ScalarOrSequenceOfDouble[_]], outputs: Seq[Val[_]])
