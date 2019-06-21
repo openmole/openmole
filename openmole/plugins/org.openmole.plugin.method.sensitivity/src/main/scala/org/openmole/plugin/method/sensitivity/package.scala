@@ -73,26 +73,26 @@ package object sensitivity {
 
 
     case class SaltelliParams(inputs: Seq[ScalarOrSequenceOfDouble[_]], outputs: Seq[Val[_]])
-
-
-    implicit class SaltelliMethodContainer(dsl: DSLContainer[SaltelliParams])  extends DSLContainerHook(dsl) {
-      def hook(directory: FromContext[File]): DSLContainer[Sensitivity.SaltelliParams] = {
-        implicit val defScope = dsl.scope
-        dsl hook SaltelliHook(dsl, directory)
-      }
-    }
-
-
     case class MorrisParams(inputs: Seq[ScalarOrSequenceOfDouble[_]], outputs: Seq[Val[_]])
-
-    implicit class MorrisMethodContainer(dsl: DSLContainer[MorrisParams]) extends DSLContainerHook(dsl) {
-      def hook(directory: FromContext[File]): DSLContainer[Sensitivity.MorrisParams] = {
-        implicit val defScope = dsl.scope
-        dsl hook MorrisHook(dsl, directory)
-      }
-    }
-
   }
+
+
+  implicit class SaltelliMethodContainer(dsl: DSLContainer[Sensitivity.SaltelliParams])  extends DSLContainerHook(dsl) {
+    def hook(directory: FromContext[File]): DSLContainer[Sensitivity.SaltelliParams] = {
+      implicit val defScope = dsl.scope
+      dsl hook SaltelliHook(dsl, directory)
+    }
+  }
+
+
+
+  implicit class MorrisMethodContainer(dsl: DSLContainer[Sensitivity.MorrisParams]) extends DSLContainerHook(dsl) {
+    def hook(directory: FromContext[File]): DSLContainer[Sensitivity.MorrisParams] = {
+      implicit val defScope = dsl.scope
+      dsl hook MorrisHook(dsl, directory)
+    }
+  }
+
 
   /**
    * A Morris Sensitivity Analysis takes a puzzle (a model) that we want to analyse,
