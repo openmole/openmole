@@ -19,7 +19,7 @@ object SaltelliSampling {
 
   def buildLineOfC(i: Int, lineOfA: Array[Double], lineOfB: Array[Double]) =
     (lineOfA zip lineOfB zipWithIndex) map {
-      case ((a, b), index) ⇒ if (index == i) a else b
+      case ((a, b), index) ⇒ if (index == i) b else a
     }
 
   val namespace = Namespace("saltelli")

@@ -95,11 +95,18 @@ object SaltelliAggregation {
       val fC: Array[Array[Array[Double]]] =
         modelInputs.map { i ⇒ reindex("c$" ++ i.prototype.name) }.toArray.transpose
 
+      // ftoi(o)._1(i) contains first order index for input i on output o.
+      // ftoi(o)._2(i) contains total order index for input i on output o.
       val ftoi: Array[(Array[Double], Array[Double])] =
         (fA zip fB zip fC).map { case ((fAo, fBo), fCo) ⇒ firstAndTotalOrderIndices(fAo, fBo, fCo) }
 
+
       // first order indices
+      // fosi(o)(i) contains first order index for input i on output o.
       val fosi = ftoi.map { _._1.toArray }.toArray
+
+      // total order indices
+      // tosi(o)(i) contains total order index for input i on output o.
       val tosi = ftoi.map { _._2.toArray }.toArray
 
       val fosiv =
