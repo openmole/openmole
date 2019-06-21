@@ -65,8 +65,16 @@ object SaltelliAggregation {
     firstOrderSI: Val[Array[Array[Double]]]        = Val[Array[Array[Double]]]("firstOrderSI"),
     totalOrderSI: Val[Array[Array[Double]]]        = Val[Array[Array[Double]]]("totalOrderSI"))(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
 
-    val fOOutputs = Sensitivity.outputs(modelInputs, modelOutputs).map { case (i, o) ⇒ Saltelli.firstOrder(i, o) }
-    val tOOutputs = Sensitivity.outputs(modelInputs, modelOutputs).map { case (i, o) ⇒ Saltelli.totalOrder(i, o) }
+    def saltelliOutputs(
+      modelInputs:  Seq[ScalarOrSequenceOfDouble[_]],
+      modelOutputs: Seq[Val[Double]]) =
+      for {
+        o ← modelOutputs
+        i ← ScalarOrSequenceOfDouble.prototypes(modelInputs)
+      } yield (i, o)
+
+    val fOOutputs = saltelliOutputs(modelInputs, modelOutputs).map { case (i, o) ⇒ Saltelli.firstOrder(i, o) }
+    val tOOutputs = saltelliOutputs(modelInputs, modelOutputs).map { case (i, o) ⇒ Saltelli.totalOrder(i, o) }
 
     FromContextTask("SaltelliAggregation") { p ⇒
       import p._
@@ -99,7 +107,6 @@ object SaltelliAggregation {
       // ftoi(o)._2(i) contains total order index for input i on output o.
       val ftoi: Array[(Array[Double], Array[Double])] =
         (fA zip fB zip fC).map { case ((fAo, fBo), fCo) ⇒ firstAndTotalOrderIndices(fAo, fBo, fCo) }
-
 
       // first order indices
       // fosi(o)(i) contains first order index for input i on output o.
