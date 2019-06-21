@@ -67,8 +67,8 @@ package object sensitivity {
       modelInputs: Seq[ScalarOrSequenceOfDouble[_]],
       modelOutputs: Seq[Val[Double]]) =
       for {
-        i ← ScalarOrSequenceOfDouble.prototypes(modelInputs)
         o ← modelOutputs
+        i ← ScalarOrSequenceOfDouble.prototypes(modelInputs)
       } yield (i, o)
 
 

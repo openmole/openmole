@@ -28,7 +28,9 @@ object SaltelliAggregation {
     val NB = fB.size
     val k = fC.size //Number of parameters
     val f02 = math.pow(fB.sum / NB.toDouble, 2)
-    val varY = fB.map(fBj ⇒ math.pow(fBj, 2)).sum / NB.toDouble - f02
+    // val varY = fB.map(fBj ⇒ math.pow(fBj, 2)).sum / NB.toDouble - f02
+    val f0 = fB.sum / NB.toDouble
+    val varY = fB.map(fBj ⇒ math.pow(fBj - f0, 2)).sum / NB.toDouble
     def avgProduct(u: Array[Double], v: Array[Double]): Double = {
       val prods = (u zip v).map({ case (uj, vj) ⇒ uj * vj })
       prods.sum / prods.size.toDouble
@@ -93,11 +95,18 @@ object SaltelliAggregation {
       val fC: Array[Array[Array[Double]]] =
         modelInputs.map { i ⇒ reindex("c$" ++ i.prototype.name) }.toArray.transpose
 
+      // ftoi(o)._1(i) contains first order index for input i on output o.
+      // ftoi(o)._2(i) contains total order index for input i on output o.
       val ftoi: Array[(Array[Double], Array[Double])] =
         (fA zip fB zip fC).map { case ((fAo, fBo), fCo) ⇒ firstAndTotalOrderIndices(fAo, fBo, fCo) }
 
+
       // first order indices
+      // fosi(o)(i) contains first order index for input i on output o.
       val fosi = ftoi.map { _._1.toArray }.toArray
+
+      // total order indices
+      // tosi(o)(i) contains total order index for input i on output o.
       val tosi = ftoi.map { _._2.toArray }.toArray
 
       val fosiv =
