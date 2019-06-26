@@ -122,6 +122,10 @@ package dsl {
     implicit def validationOfFromContext(f: FromContext[_]) =
       (p: FromContext.ValidationParameters) ⇒ f.validate(p.inputs)(p.newFile, p.fileService)
 
+    type Negative[A] = org.openmole.core.keyword.Negative[A]
+    type Under[A, B] = org.openmole.core.keyword.Under[A, B]
+    type In[A, B] = org.openmole.core.keyword.In[A, B]
+    type :=[A, B] = org.openmole.core.keyword.:=[A, B]
   }
 
 }
