@@ -123,7 +123,7 @@ object RTask {
   returnValue:        Option[Val[Int]],
   stdOut:             Option[Val[String]],
   stdErr:             Option[Val[String]],
-  config:            InputOutputConfig,
+  config:             InputOutputConfig,
   external:           External,
   info:               InfoConfig,
   mapped:             MappedInputOutputConfig) extends Task with ValidateTask {
