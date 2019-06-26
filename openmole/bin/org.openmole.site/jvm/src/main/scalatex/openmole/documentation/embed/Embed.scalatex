@@ -10,7 +10,7 @@
 @h2{Tasks}
 
 Tasks are the atomic computing elements of OpenMOLE: they describe what OpenMOLE should execute.
-There is a number of tasks in OpenMOLE especially designed to embed your own models and/or programs, depending on the language your model uses (binary executable, Java, R, etc.).
+There are a number of tasks in OpenMOLE especially designed to embed your own models and/or programs, depending on the language your model uses (binary executable, Java, R, etc.).
 You need to choose the adequate task for your model.
 @br
 All the available tasks are documented in this section, just click on an item in the list on the left menu.
@@ -71,11 +71,7 @@ People from the lab gave you a huge CSV file with each line containing various e
 What you want to do is to run a simulation for each line of this file, execute it on the lab's cluster, and gather the results.
 Your OpenMOLE script would look like that:
 
-Let's say you have a model that takes a string as input and do some stuff with it, like launching a simulation with the parameters contained in the input string.
-People from the lab gave you a huge CSV file with each line containing various experimental setup parameters.
-@br
-What you want to do is to run a simulation for each line of this file, execute it on the lab's cluster, and gather the results.
-Your OpenMOLE script would look like that:
+
 
 @br@br
 
