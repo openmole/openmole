@@ -8,7 +8,7 @@
 @h2{Overview}
 
 In this tutorial, we mean to present how to prepare and run an experiment, in order to explore a simple model with OpenMOLE.
-The toy model is Ants.nlogo, since we already know how to import and run it from the previous tutorial.
+We will import the toy model - Ants.nlogo, as we are familiar with it from our previous tutorial.
 
 @br
 
@@ -29,7 +29,7 @@ OpenMOLE workflows should end by giving the task to be run: in the previous tuto
 @br
 
 Other types of task are provided by methods.
-The method @code{Replication} takes a model task and repeats it a given number of times: this is necessary for stochastic models which outcome will be different each time.
+The method @code{Replication} takes a model task and repeats it a given number of times: this is necessary for stochastic models as outcome will be different each time.
 
 @br
 
@@ -90,9 +90,9 @@ This will be precisely the aim of design of experiments, sensitivity analysis an
 
 @br
 
-Let illustrate a simple experiment of a grid search of the parameter space.
+Let us illustrate a simple experiment of a grid search of the parameter space.
 Each parameter will take a finite number of values within a defined interval.
-Rate parameters are between 0 and 100, and let say we consider ant populations of size between 50 and 150. With a step of 50 for each parameter, the complete grid has a size of 27 (3x3x3) parameter points.
+Rate parameters are between 0 and 100, and let's say we consider ant populations of size between 50 and 150. With a step of 50 for each parameter, the complete grid has a size of 27 (3x3x3) parameter points.
 The syntax to attribute these values to Vals in OpenMOLE is the following:
 
 @br
