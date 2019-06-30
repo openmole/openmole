@@ -126,6 +126,9 @@ package dsl {
     type Under[A, B] = org.openmole.core.keyword.Under[A, B]
     type In[A, B] = org.openmole.core.keyword.In[A, B]
     type :=[A, B] = org.openmole.core.keyword.:=[A, B]
+    type Aggregate[A, B] = org.openmole.core.keyword.Aggregate[A, B]
+
+    def Aggregate = org.openmole.core.keyword.Aggregate
   }
 
 }

@@ -18,6 +18,8 @@ package org.openmole.plugin.method.evolution
 
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 import cats._
 import cats.data._
 import cats.implicits._
@@ -27,7 +29,7 @@ import mgo.evolution.breeding._
 import mgo.evolution.contexts._
 import mgo.evolution.elitism._
 import mgo.evolution.niche._
-import mgo.tagtools._
+
 import mgo.tools.CanBeNaN
 import monocle.macros.GenLens
 import org.openmole.core.context.{ Context, Val, Variable }
@@ -251,11 +253,13 @@ object PSE {
 
       def afterGeneration(g: Long, population: Vector[I]): M[Boolean] = interpret { impl ⇒
         import impl._
+        import mgo.tagtools._
         zipWithState(mgo.evolution.afterGeneration[DSL, I](g).run(population)).eval
       }
 
       def afterDuration(d: squants.Time, population: Vector[I]): M[Boolean] = interpret { impl ⇒
         import impl._
+        import mgo.tagtools._
         zipWithState(mgo.evolution.afterDuration[DSL, I](d).run(population)).eval
       }
 
@@ -290,6 +294,7 @@ object PSE {
           (Genome.continuous(om.genome) map2 Genome.discrete(om.genome)) { (continuous, discrete) ⇒
             interpret { impl ⇒
               import impl._
+              import mgo.tagtools._
               implicitly[Generation[DSL]]
 
               zipWithState(
@@ -302,6 +307,7 @@ object PSE {
           Genome.discrete(om.genome).map { discrete ⇒
             interpret { impl ⇒
               import impl._
+              import mgo.tagtools._
               zipWithState(
                 PSEAlgorithm.adaptiveBreeding[DSL](
                   n,
@@ -315,6 +321,7 @@ object PSE {
           Genome.continuous(om.genome).map { continuous ⇒
             interpret { impl ⇒
               import impl._
+              import mgo.tagtools._
               def step =
                 for {
                   elited ← PSEAlgorithm.elitism[DSL](om.pattern, continuous) apply (population, candidates)
@@ -385,11 +392,13 @@ object PSE {
 
       def afterGeneration(g: Long, population: Vector[I]): M[Boolean] = interpret { impl ⇒
         import impl._
+        import mgo.tagtools._
         zipWithState(mgo.evolution.afterGeneration[DSL, I](g).run(population)).eval
       }
 
       def afterDuration(d: squants.Time, population: Vector[I]): M[Boolean] = interpret { impl ⇒
         import impl._
+        import mgo.tagtools._
         zipWithState(mgo.evolution.afterDuration[DSL, I](d).run(population)).eval
       }
 
@@ -421,6 +430,7 @@ object PSE {
           (Genome.continuous(om.genome) map2 Genome.discrete(om.genome)) { (continuous, discrete) ⇒
             interpret { impl ⇒
               import impl._
+              import mgo.tagtools._
               zipWithState(NoisyPSEAlgorithm.initialGenomes[DSL](n, continuous, discrete)).eval
             }
           }
@@ -429,6 +439,7 @@ object PSE {
           Genome.discrete(om.genome).map { discrete ⇒
             interpret { impl ⇒
               import impl._
+              import mgo.tagtools._
               zipWithState(NoisyPSEAlgorithm.adaptiveBreeding[DSL, Array[Any]](
                 n,
                 om.operatorExploration,
@@ -443,6 +454,7 @@ object PSE {
           Genome.continuous(om.genome).map { continuous ⇒
             interpret { impl ⇒
               import impl._
+              import mgo.tagtools._
               def step =
                 for {
                   elited ← NoisyPSEAlgorithm.elitism[DSL, Array[Any]](

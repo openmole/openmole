@@ -4,10 +4,14 @@ package org.openmole.core
  * Generic keywords and their DSL
  */
 package keyword {
+
+  import scala.reflect.ClassTag
+
   case class In[A, B](value: A, domain: B)
   case class Under[A, B](value: A, under: B)
   case class :=[A, B](value: A, equal: B)
   case class Negative[A](value: A)
+  case class Aggregate[A, B](value: A, aggregate: B)
 
   trait KeyWordPackage {
     implicit class InDecorator[A](a: A) {
@@ -25,6 +29,12 @@ package keyword {
     implicit class NegativeDecorator[A](a: A) {
       def unary_- = Negative(a)
     }
+
+    implicit class AggregateDecorator[A](a: A) {
+      def aggregate[B, C](b: Vector[B] ⇒ C) = Aggregate(a, b)
+    }
+
+    implicit def aggregationFunctionConvertor[B: ClassTag, C](f: Array[B] ⇒ C) = (v: Vector[B]) ⇒ f(v.toArray)
   }
 
 }

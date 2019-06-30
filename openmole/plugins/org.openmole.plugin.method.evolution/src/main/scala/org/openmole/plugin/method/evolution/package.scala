@@ -33,12 +33,6 @@ package object evolution {
   type Objectives = Seq[Objective[_]]
   type Genome = Seq[Genome.GenomeBound]
 
-  case class Aggregate[A, B](value: A, aggregate: B)
-
-  implicit class AggregateDecorator[A, B](a: A) {
-    def aggregate[B, C](b: Vector[B] ⇒ C) = Aggregate(a, b)
-  }
-
   implicit def intToCounterTerminationConverter(n: Long): AfterGeneration = AfterGeneration(n)
   implicit def durationToDurationTerminationConverter(d: Time): AfterDuration = AfterDuration(d)
 
