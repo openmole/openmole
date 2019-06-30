@@ -214,6 +214,12 @@ package composition {
       case TaskNodeDSL(n)     ⇒ Vector(n)
     }
 
+    def delegate(t: DSL) =
+      t match {
+        case c: DSLContainer[_] ⇒ c.delegate
+        case t                  ⇒ tasks(t).map(_.task)
+      }
+
   }
 
   /* -------------------- Transition DSL ---------------------- */
