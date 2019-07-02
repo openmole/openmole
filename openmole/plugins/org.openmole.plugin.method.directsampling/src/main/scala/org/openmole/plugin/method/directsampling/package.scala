@@ -32,6 +32,8 @@ package object directsampling {
   class DirectSampling
   case class Replication(seed: Val[_])
 
+  type Aggregation = AggregateTask.AggregateVal[_, _]
+
   implicit class DirectSamplingDSL(dsl: DSLContainer[DirectSampling]) extends DSLContainerHook(dsl) {
     def hook(
       output:     WritableOutput,
@@ -61,21 +63,26 @@ package object directsampling {
     seed:             Val[T],
     replications:     Int,
     distributionSeed: OptionalArgument[Long] = None,
-    aggregation:      OptionalArgument[DSL]  = None,
+    aggregation:      Seq[Aggregation]       = Seq.empty,
     wrap:             Boolean                = false,
     scope:            DefinitionScope        = "replication"
   ) = {
     implicit def defScope = scope
 
     val sampling = seed in (TakeDomain(UniformDistribution[T](distributionSeed), replications))
-
     val exploration = ExplorationTask(sampling)
+
+    val aggregateTask: OptionalArgument[DSL] =
+      aggregation match {
+        case Seq() ⇒ None
+        case s     ⇒ AggregateTask(s: _*)
+      }
 
     val s =
       MapReduce(
         evaluation = evaluation,
         sampler = exploration,
-        aggregation = aggregation,
+        aggregation = aggregateTask,
         wrap = wrap
       )
 
@@ -85,21 +92,27 @@ package object directsampling {
   def DirectSampling(
     evaluation:  DSL,
     sampling:    Sampling,
-    aggregation: OptionalArgument[DSL] = None,
-    condition:   Condition             = Condition.True,
-    wrap:        Boolean               = false,
-    scope:       DefinitionScope       = "direct sampling"
+    aggregation: Seq[Aggregation] = Seq(),
+    condition:   Condition        = Condition.True,
+    wrap:        Boolean          = false,
+    scope:       DefinitionScope  = "direct sampling"
   ) = {
     implicit def defScope = scope
 
     val exploration = ExplorationTask(sampling)
+
+    val aggregateTask: OptionalArgument[DSL] =
+      aggregation match {
+        case Seq() ⇒ None
+        case s     ⇒ AggregateTask(s: _*)
+      }
 
     val s =
       MapReduce(
         evaluation = evaluation,
         sampler = exploration,
         condition = condition,
-        aggregation = aggregation,
+        aggregation = aggregateTask,
         wrap = wrap
       )
 

@@ -198,6 +198,12 @@ object Val {
 
   def name(namespace: Namespace, simpleName: String) =
     (if (namespace.isEmpty) "" else namespace.toString + "$") + simpleName
+
+  def copy(v: Val[_])(
+    name:      String     = v.name,
+    `type`:    ValType[_] = v.`type`,
+    namespace: Namespace  = v.namespace
+  ) = new Val(name, `type`, namespace)
 }
 
 object Namespace {

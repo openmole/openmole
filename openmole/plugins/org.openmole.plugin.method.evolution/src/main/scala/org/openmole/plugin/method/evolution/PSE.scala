@@ -29,7 +29,6 @@ import mgo.evolution.breeding._
 import mgo.evolution.contexts._
 import mgo.evolution.elitism._
 import mgo.evolution.niche._
-
 import mgo.tools.CanBeNaN
 import monocle.macros.GenLens
 import org.openmole.core.context.{ Context, Val, Variable }
@@ -44,6 +43,7 @@ import org.openmole.tool.types.ToDouble
 import squants.time.Time
 
 import scala.language.higherKinds
+import scala.reflect.ClassTag
 
 object PSEAlgorithm {
 
@@ -485,7 +485,7 @@ object PSE {
 
   object PatternAxe {
 
-    implicit def fromAggregationDoubleDomainToPatternAxe[D, DT](a: In[Aggregate[Val[DT], Vector[DT] ⇒ Double], D])(implicit fix: Fix[D, Double]): PatternAxe =
+    implicit def fromAggregationDoubleDomainToPatternAxe[D, DT: ClassTag](a: In[Aggregate[Val[DT], Array[DT] ⇒ Double], D])(implicit fix: Fix[D, Double]): PatternAxe =
       PatternAxe(Objective.aggregateToObjective(Aggregate(a.value.value, a.value.aggregate)), fix(a.domain).toVector)
 
     implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit fix: Fix[D, Double]): PatternAxe =

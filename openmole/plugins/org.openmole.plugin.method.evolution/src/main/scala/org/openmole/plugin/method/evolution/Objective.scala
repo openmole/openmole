@@ -5,6 +5,8 @@ import org.openmole.core.dsl.extension._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.tool.types.ToDouble
 
+import scala.reflect.ClassTag
+
 object Objective {
   implicit def valToObjective[T](v: Val[T])(implicit td: ToDouble[T]) =
     ExactObjective[T](v, _(v), td.apply, negative = false)
@@ -12,10 +14,10 @@ object Objective {
   implicit def negativeValToObjective[T](v: Negative[Val[T]])(implicit td: ToDouble[T]) =
     ExactObjective[T](v.value, _(v.value), td.apply, negative = true)
 
-  implicit def aggregateToObjective[T](a: Aggregate[Val[T], Vector[T] ⇒ Double]) =
+  implicit def aggregateToObjective[T: ClassTag](a: Aggregate[Val[T], Array[T] ⇒ Double]) =
     NoisyObjective(a.value, _(a.value), a.aggregate, negative = false)
 
-  implicit def negativeAggregateToObjective[T](a: Aggregate[Negative[Val[T]], Vector[T] ⇒ Double]) =
+  implicit def negativeAggregateToObjective[T: ClassTag](a: Aggregate[Negative[Val[T]], Array[T] ⇒ Double]) =
     NoisyObjective(a.value.value, _(a.value.value), a.aggregate, negative = true)
 
   def index(obj: Objectives, v: Val[_]) = obj.indexWhere(o ⇒ prototype(o) == v) match {
@@ -40,12 +42,12 @@ object Objective {
       case n: NoisyObjective[P] ⇒ throw new UserBadDataError(s"Objective $n cannot be noisy it should be exact.")
     }
 
-  def toNoisy[P](o: Objective[P]) =
+  def toNoisy[P: ClassTag](o: Objective[P]) =
     o match {
       case n: NoisyObjective[P] ⇒ n
       case e: ExactObjective[P] ⇒
         import org.openmole.tool.statistics._
-        def pMedian(p: Vector[P]) = p.map(e.toDouble).median
+        def pMedian = (p: Array[P]) ⇒ p.map(e.toDouble).median
         NoisyObjective(e.prototype, e.get, pMedian, e.negative)
     }
 
@@ -67,6 +69,10 @@ object NoisyObjective {
     for {
       (vs, obj) ← v.transpose zip objectives
     } yield NoisyObjective.aggregateAny(obj, vs)
+
+  def apply[P: ClassTag](prototype: Val[P], get: Context ⇒ P, aggregate: Array[P] ⇒ Double, negative: Boolean): NoisyObjective[P] =
+    NoisyObjective(prototype, get, (a: Vector[P]) ⇒ aggregate(a.toArray), negative)
+
 }
 
-case class NoisyObjective[P](prototype: Val[P], get: Context ⇒ P, aggregate: Vector[P] ⇒ Double, negative: Boolean) extends Objective[P]
+case class NoisyObjective[P] private (prototype: Val[P], get: Context ⇒ P, aggregate: Vector[P] ⇒ Double, negative: Boolean) extends Objective[P]

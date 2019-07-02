@@ -129,6 +129,8 @@ package dsl {
     type Aggregate[A, B] = org.openmole.core.keyword.Aggregate[A, B]
 
     def Aggregate = org.openmole.core.keyword.Aggregate
+
+    def ValType = org.openmole.core.context.ValType
   }
 
 }

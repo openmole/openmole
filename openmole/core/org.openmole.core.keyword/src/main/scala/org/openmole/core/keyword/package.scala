@@ -31,10 +31,10 @@ package keyword {
     }
 
     implicit class AggregateDecorator[A](a: A) {
-      def aggregate[B, C](b: Vector[B] ⇒ C) = Aggregate(a, b)
+      def aggregate[B, C](b: Array[B] ⇒ C) = Aggregate(a, b)
     }
 
-    implicit def aggregationFunctionConvertor[B: ClassTag, C](f: Array[B] ⇒ C) = (v: Vector[B]) ⇒ f(v.toArray)
+    implicit def aggregationFunctionConvertor[B, C](f: Vector[B] ⇒ C) = (v: Array[B]) ⇒ f(v.toVector)
   }
 
 }
