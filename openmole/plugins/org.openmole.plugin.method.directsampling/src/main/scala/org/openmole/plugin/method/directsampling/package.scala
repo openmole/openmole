@@ -75,7 +75,7 @@ package object directsampling {
     val aggregateTask: OptionalArgument[DSL] =
       aggregation match {
         case Seq() ⇒ None
-        case s     ⇒ AggregateTask(s: _*)
+        case s     ⇒ AggregateTask(s)
       }
 
     val s =
@@ -104,7 +104,7 @@ package object directsampling {
     val aggregateTask: OptionalArgument[DSL] =
       aggregation match {
         case Seq() ⇒ None
-        case s     ⇒ AggregateTask(s: _*)
+        case s     ⇒ AggregateTask(s)
       }
 
     val s =

@@ -60,19 +60,19 @@ case class ExactObjective[P](prototype: Val[P], get: Context ⇒ P, toDouble: P 
 
 object NoisyObjective {
 
-  def aggregateAny[P](n: NoisyObjective[P], values: Vector[Any]) = {
-    def value = n.aggregate(values.map(_.asInstanceOf[P]))
-    if (!n.negative) value else -value
-  }
-
   def aggregate(objectives: Seq[NoisyObjective[_]])(v: Vector[Array[Any]]): Vector[Double] =
     for {
       (vs, obj) ← v.transpose zip objectives
-    } yield NoisyObjective.aggregateAny(obj, vs)
+    } yield obj.aggregateAny(vs)
 
-  def apply[P: ClassTag](prototype: Val[P], get: Context ⇒ P, aggregate: Array[P] ⇒ Double, negative: Boolean): NoisyObjective[P] =
-    NoisyObjective(prototype, get, (a: Vector[P]) ⇒ aggregate(a.toArray), negative)
+  //  def apply[P: ClassTag](prototype: Val[P], get: Context ⇒ P, aggregate: Array[P] ⇒ Double, negative: Boolean): NoisyObjective[P] =
+  //    NoisyObjective(prototype, get, (a: Vector[P]) ⇒ aggregate(a.toArray), negative)
 
 }
 
-case class NoisyObjective[P] private (prototype: Val[P], get: Context ⇒ P, aggregate: Vector[P] ⇒ Double, negative: Boolean) extends Objective[P]
+case class NoisyObjective[P: ClassTag] private (prototype: Val[P], get: Context ⇒ P, aggregate: Array[P] ⇒ Double, negative: Boolean) extends Objective[P] {
+  def aggregateAny(values: Vector[Any]) = {
+    def value = aggregate(values.map(_.asInstanceOf[P]).toArray)
+    if (!negative) value else -value
+  }
+}

@@ -49,7 +49,6 @@ package tools {
     type Display = WritableOutput.Display
 
     def display(implicit outputRedirection: OutputRedirection): Display = outputRedirection.output
-
   }
 }
 

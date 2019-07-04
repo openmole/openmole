@@ -189,7 +189,7 @@ object NSGA2 {
         def aggregate(v: Vector[Array[Any]]): Vector[Double] =
           for {
             (vs, obj) ← v.transpose zip om.objectives
-          } yield NoisyObjective.aggregateAny(obj, vs)
+          } yield obj.aggregateAny(vs)
 
         def result(population: Vector[I], state: S) = FromContext { p ⇒
           import p._
@@ -242,7 +242,7 @@ object NSGA2 {
           import impl._
           zipWithState(mgo.evolution.afterDuration[DSL, I](d).run(population)).eval
         }
-
+        NoisyObjective
         def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland[I](population, CDGenome.NoisyIndividual.Individual.historyAge)
         def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Array[Any]](population, CDGenome.NoisyIndividual.Individual.historyAge, CDGenome.NoisyIndividual.Individual.fitnessHistory)
       }
