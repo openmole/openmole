@@ -24,8 +24,6 @@ import org.openmole.gui.client.core.files.TreeNodeTab.{ EditableView, First100, 
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.client.tool.plot.Plot._
 import org.openmole.gui.client.tool.plot._
-import scaladget.bootstrapnative.{ DataTable, ToggleButton }
-import org.openmole.gui.ext.tool._
 import scaladget.bootstrapnative.Popup._
 import rx._
 import scaladget.bootstrapnative.Selector.Options
@@ -748,6 +746,29 @@ class TreeNodeTabs() {
 
   implicit def modToModSeq(m: Modifier): ModifierSeq = Seq(m)
 
+  def fontSizeLink(size: Int) = {
+    div("A", fontSize := s"${size}px", pointer, padding := 3, onclick := { () ⇒
+      for {
+        ts ← tabs.now
+        t ← ts.editor
+      } yield {
+        t.updateFont(size)
+      }
+    }
+    )
+
+    //      tabs.now.foreach { _.editor.foreach{
+    //        _. updateFont(size)
+    //      }}
+    //  })
+  }
+
+  val fontSizeControl = div(display.flex, flexDirection.row, alignItems.baseline, justifyContent.flexEnd)(
+    fontSizeLink(15),
+    fontSizeLink(25),
+    fontSizeLink(35)
+  )
+
   val render = div(
     //Headers
     Rx {
@@ -755,7 +776,7 @@ class TreeNodeTabs() {
         for (t ← tabs()) yield {
           li(
             omsheet.color("yellow"),
-            paddingTop := 35,
+            marginTop := -30,
             presentation_role,
             `class` := {
               t.activity() match {
@@ -820,6 +841,7 @@ class TreeNodeTabs() {
       })
 
       div(role := "tabpanel")(
+        fontSizeControl,
         tabList,
         tabDiv
       )
