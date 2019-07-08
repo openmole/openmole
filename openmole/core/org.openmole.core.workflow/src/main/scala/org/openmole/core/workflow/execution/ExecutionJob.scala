@@ -17,30 +17,9 @@
 
 package org.openmole.core.workflow.execution
 
-import org.openmole.core.event.EventDispatcher
-import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.core.workflow.job.MoleJob
+import org.openmole.core.workflow.job._
 
 trait ExecutionJob {
   def environment: Environment
-  def moleJobs: Iterable[MoleJob]
-
-  private var _state: ExecutionState = READY
-
-  def state = _state
-
-  def state_=(newState: ExecutionState) = synchronized {
-    if (state != KILLED && newState != state) {
-      newState match {
-        case DONE ⇒ environment._done.incrementAndGet()
-        case FAILED ⇒
-          if (state == DONE) environment._done.decrementAndGet()
-          environment._failed.incrementAndGet()
-        case _ ⇒
-      }
-
-      environment.eventDispatcherService.trigger(environment, new Environment.JobStateChanged(this, newState, this.state))
-      _state = newState
-    }
-  }
+  def moleJobIds: Iterable[MoleJobId]
 }

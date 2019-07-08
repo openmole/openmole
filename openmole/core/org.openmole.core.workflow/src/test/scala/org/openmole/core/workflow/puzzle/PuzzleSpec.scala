@@ -6,6 +6,7 @@ import org.openmole.core.workflow.execution.LocalEnvironment
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.test.TestHook
+import org.openmole.core.workflow.validation.Validation
 import org.scalatest._
 
 class PuzzleSpec extends FlatSpec with Matchers {
@@ -22,7 +23,7 @@ class PuzzleSpec extends FlatSpec with Matchers {
     val task = EmptyTask()
     val test = DSLContainer(task) :: 9 :: HNil
 
-    (test: DSLContainer).run()
+    (test: DSLContainer[_]).run()
     (test: MoleExecution).run()
     test.run()
     test on LocalEnvironment(1)
@@ -96,4 +97,13 @@ class PuzzleSpec extends FlatSpec with Matchers {
 
     hookExecuted should equal(true)
   }
+
+  "DSL" should "be compatible with script generation" in {
+    def dsl(i: Int): DSL = EmptyTask()
+
+    val wf = EmptyTask() -- (0 until 2).map(dsl)
+
+    Validation(wf).isEmpty should be(true)
+  }
+
 }

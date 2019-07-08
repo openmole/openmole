@@ -47,6 +47,7 @@ object OMTags {
   val glyph_data = toClass("glyphicon icon-database")
   val glyph_share = toClass("glyphicon glyphicon-share-alt")
   val glyph_transfer = toClass("glyphicon glyphicon-transfer")
+  val options = toClass("glyphicon glyphicon-option-horizontal")
 
   case class AlertAction(action: () ⇒ Unit)
 

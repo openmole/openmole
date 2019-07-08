@@ -23,7 +23,7 @@ val e = Val[Double]
 val t1 = ScalaTask("val d = 42.0") set ( outputs += d )
 val t2 = ScalaTask("val e = d / 42") set ( inputs += d, outputs += e)
 
-t1 -- (t2 hook ToStringHook())""")
+t1 -- (t2 hook DisplayHook())""")
 
 
 @h3{Exploration transition}
@@ -42,11 +42,11 @@ val t1 = ScalaTask("d = d * 2") set ( inputs += d, outputs += d )
 //Define the exploration strategy
 val exploration = ExplorationTask(d in (0.0 to 99.0 by 10.0))
 
-exploration -< (t1 hook ToStringHook())""")
+exploration -< (t1 hook DisplayHook())""")
 
 @br
 
-You can read more about @a("Explorations and Samplings", href := DocumentationPages.directSampling.file) in the relevant section of the documentation.
+You can read more about @a("Explorations and Samplings", href := DocumentationPages.samplings.file) in the relevant section of the documentation.
 
 
 @h3{Aggregating results from an exploration}
@@ -68,7 +68,7 @@ val aggregate = ScalaTask("val d = input.d.sum") set (
   outputs += d
 )
 
-exploration -< t1 >- (aggregate hook ToStringHook())""")
+exploration -< t1 >- (aggregate hook DisplayHook())""")
 
 @br
 
@@ -91,7 +91,7 @@ val t1 = ScalaTask("d = d * 42") set ( inputs += d, outputs += d )
 val t2 = ScalaTask("d = d + 100") set ( inputs += d, outputs += d)
 val exploration = ExplorationTask( d in (0.0 to 99.0 by 10.0) )
 
-exploration -< t1 -- (t2 hook ToStringHook())""")
+exploration -< t1 -- (t2 hook DisplayHook())""")
 
 
 @h3{Tasks in parallel}
@@ -108,7 +108,7 @@ val t2 = ScalaTask("d = d + 100") set ( inputs += d, outputs += d)
 val t3 = ScalaTask("d = d - 100") set ( inputs += d, outputs += d)
 val exploration = ExplorationTask( d in (0.0 to 99.0 by 10.0) )
 
-exploration -< t1 -- (t2 hook ToStringHook(), (t3 hook ToStringHook()))""")
+exploration -< t1 -- (t2 hook DisplayHook(), (t3 hook DisplayHook()))""")
 
 
 @h2{Conditions}
@@ -129,7 +129,7 @@ val t1 = ScalaTask("d = d * 42") set ( inputs += d, outputs += d )
 val t2 = ScalaTask("d = d + 100") set ( inputs += d, outputs += d)
 val exploration = ExplorationTask( d in (0.0 to 99.0 by 10.0) )
 
-exploration -< (t1 -- t2 hook ToStringHook() when "d < 1000")""")
+exploration -< (t1 -- t2 hook DisplayHook() when "d < 1000")""")
 
 @br
 
@@ -199,9 +199,9 @@ val t2 = ScalaTask("d = d + 100") set ( inputs += d, outputs += d)
 val t3 = ScalaTask("d = d - 100") set ( inputs += d, outputs += d)
 val exploration = ExplorationTask( d in (0.0 to 99.0 by 10.0) )
 
-exploration -< t1 -- (t2 hook ToStringHook(), (t3 hook ToStringHook()))
+exploration -< t1 -- (t2 hook DisplayHook(), (t3 hook DisplayHook()))
 
-(exploration -< t1) & (t1 -- t2) & (t1 -- t3) & (t2 hook ToStringHook()) & (t3 hook ToStringHook())""")
+(exploration -< t1) & (t1 -- t2) & (t1 -- t3) & (t2 hook DisplayHook()) & (t3 hook DisplayHook())""")
 
 
 @h3{Loops}
@@ -215,7 +215,7 @@ val i = Val[Int]
 val t0 = ScalaTask("val i = 0") set (outputs += i)
 val t1 = ScalaTask("i = i + 1") set ((inputs, outputs) += i)
 
-(t0 -- (t1 hook ToStringHook())) & (t1 -- Slot(t1) when "i < 100")""")
+(t0 -- (t1 hook DisplayHook())) & (t1 -- Slot(t1) when "i < 100")""")
 
 
 

@@ -1,6 +1,7 @@
 package org.openmole.core
 
 import java.io.PrintStream
+import java.util.logging.Level
 
 import org.openmole.core.authentication._
 import org.openmole.core.event._
@@ -13,15 +14,29 @@ import org.openmole.core.workspace._
 import org.openmole.tool.crypto._
 import org.openmole.tool.random._
 import org.openmole.tool.file._
-import org.openmole.core.outputredirection._
+import org.openmole.tool.outputredirection._
 import org.openmole.core.networkservice._
+import org.openmole.tool.logger.LoggerService
+import org.openmole.tool.outputredirection.OutputRedirection
 
 package object services {
 
+  /**
+   * Methods to get implicit services (workspace, files, random provider, network, etc.)
+   */
   object Services {
 
-    def withServices[T](workspace: File, password: String, httpProxy: Option[String])(f: Services ⇒ T) = {
-      val services = Services(workspace, password, httpProxy)
+    /**
+     * Execute a function with services provided
+     * @param workspace
+     * @param password
+     * @param httpProxy
+     * @param f
+     * @tparam T
+     * @return
+     */
+    def withServices[T](workspace: File, password: String, httpProxy: Option[String], logLevel: Option[Level])(f: Services ⇒ T) = {
+      val services = Services(workspace, password, httpProxy, logLevel)
       try f(services)
       finally dispose(services)
     }
@@ -29,7 +44,17 @@ package object services {
     def preference(workspace: Workspace) = Preference(workspace.persistentDir)
     def authenticationStore(workspace: Workspace) = AuthenticationStore(workspace.persistentDir)
 
-    def apply(workspace: File, password: String, httpProxy: Option[String]) = {
+    /**
+     * Construct Service from user modifiable options
+     *
+     *  -> this method can be extended to add user defined services (e.g. change output redirection at this level ?)
+     *
+     * @param workspace workspace path
+     * @param password password to be encrypted
+     * @param httpProxy optional http proxy
+     * @return
+     */
+    def apply(workspace: File, password: String, httpProxy: Option[String], logLevel: Option[Level]) = {
       implicit val ws = Workspace(workspace)
       implicit val cypher = Cypher(password)
       implicit val preference = Services.preference(ws)
@@ -45,15 +70,26 @@ package object services {
       implicit val outputRedirection = OutputRedirection()
       implicit val networkService = NetworkService(httpProxy)
       implicit val fileServiceCache = FileServiceCache()
+      implicit val loggerService = LoggerService(logLevel)
 
       new ServicesContainer()
     }
 
+    /**
+     * Dispose of services (deleted tmp directories ; stop the thread provider)
+     * @param services
+     * @return
+     */
     def dispose(services: Services) = {
       util.Try(services.workspace.tmpDir.recursiveDelete)
       util.Try(services.threadProvider.stop())
     }
 
+    /**
+     * reset user password
+     * @param authenticationStore
+     * @param preference
+     */
     def resetPassword(implicit authenticationStore: AuthenticationStore, preference: Preference) = {
       authenticationStore.delete()
       preference.clear()
@@ -74,7 +110,8 @@ package object services {
       eventDispatcher:     EventDispatcher     = services.eventDispatcher,
       outputRedirection:   OutputRedirection   = services.outputRedirection,
       networkService:      NetworkService      = services.networkService,
-      fileServiceCache:    FileServiceCache    = services.fileServiceCache
+      fileServiceCache:    FileServiceCache    = services.fileServiceCache,
+      loggerService:       LoggerService       = services.loggerService
     ) =
       new ServicesContainer()(
         workspace = workspace,
@@ -91,11 +128,15 @@ package object services {
         randomProvider = randomProvider,
         eventDispatcher = eventDispatcher,
         outputRedirection = outputRedirection,
-        networkService = networkService
+        networkService = networkService,
+        loggerService = loggerService
       )
 
   }
 
+  /**
+   * Trait for services
+   */
   trait Services {
     implicit def workspace: Workspace
     implicit def preference: Preference
@@ -112,8 +153,27 @@ package object services {
     implicit def outputRedirection: OutputRedirection
     implicit def networkService: NetworkService
     implicit def fileServiceCache: FileServiceCache
+    implicit def loggerService: LoggerService
   }
 
+  /**
+   * A container for services, constructed with implicit arguments
+   * @param workspace workspace
+   * @param preference user preferences
+   * @param cypher encrypter for password
+   * @param threadProvider
+   * @param seeder provides seed for rng
+   * @param replicaCatalog replica database manager
+   * @param newFile new files/dirs and tmp files / dir in a given directory
+   * @param authenticationStore
+   * @param serializerService serializer
+   * @param fileService file management
+   * @param randomProvider rng
+   * @param eventDispatcher
+   * @param outputRedirection
+   * @param networkService network properties (proxies)
+   * @param fileServiceCache
+   */
   class ServicesContainer(implicit
     val workspace: Workspace,
                           val preference:          Preference,
@@ -129,6 +189,7 @@ package object services {
                           val eventDispatcher:     EventDispatcher,
                           val outputRedirection:   OutputRedirection,
                           val networkService:      NetworkService,
-                          val fileServiceCache:    FileServiceCache) extends Services
+                          val fileServiceCache:    FileServiceCache,
+                          val loggerService:       LoggerService) extends Services
 
 }

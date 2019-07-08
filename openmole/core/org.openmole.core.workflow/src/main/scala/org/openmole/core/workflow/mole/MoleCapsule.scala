@@ -50,6 +50,7 @@ object MoleCapsule {
       noStrainer.forall(_ == true)
     }
   }
+
 }
 
 /**
@@ -66,7 +67,7 @@ class MoleCapsule(_task: Task, val strainer: Boolean) {
       case true  ⇒ new StrainerTaskDecorator(_task)
     }
 
-  /*
+  /**
    * Get the inputs data taken by this capsule, generally it is empty if the capsule
    * is empty or the input of the task inside the capsule. It can be different
    * in some cases.
@@ -76,7 +77,7 @@ class MoleCapsule(_task: Task, val strainer: Boolean) {
   def inputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
     strainerInputs(mole, sources, hooks) ++ capsuleInputs(mole, sources, hooks)
 
-  /*
+  /**
    * Get the outputs data taken by this capsule, generally it is empty if the capsule
    * is empty or the output of the task inside the capsule. It can be different
    * in some cases.
@@ -156,7 +157,5 @@ object MasterCapsule {
 }
 
 class MasterCapsule(task: Task, val persist: Seq[String] = Seq.empty, strainer: Boolean) extends MoleCapsule(task, strainer) {
-  def toPersist(context: Context): Context =
-    persist.map { n ⇒ context.variable(n).get }
-
+  def toPersist(context: Context): Context = persist.map { n ⇒ context.getOrElse(n, throw new UserBadDataError(s"Variable $n has not been found in the context")) }
 }

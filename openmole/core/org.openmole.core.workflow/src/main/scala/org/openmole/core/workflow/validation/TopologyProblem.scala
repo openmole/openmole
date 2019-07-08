@@ -21,6 +21,9 @@ import org.openmole.core.workflow.mole.MoleCapsule
 import org.openmole.core.workflow.task.MoleTask
 import org.openmole.core.workflow.transition.{ DataChannel, ITransition }
 
+/**
+ * Problems with the validation of Puzzle's topology
+ */
 object TopologyProblem {
 
   case class DuplicatedTransition(transitions: Iterable[ITransition]) extends TopologyProblem {

@@ -17,29 +17,26 @@
 
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.context.{ Context, Variable }
-import org.openmole.core.workflow.builder.DefinitionScope
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.task._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 
 object ElitismTask {
 
-  def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
-    val t = wfi(algorithm)
-    FromContextTask("ElitismTask") { p ⇒
+  def apply[T](evolution: EvolutionWorkflow)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
+    Task("ElitismTask") { p ⇒
       import p._
 
       val (newState, newPopulation) =
-        t.operations.elitism(context(t.populationPrototype).toVector, context(t.offspringPrototype).toVector).from(context).
-          run(context(t.statePrototype)).value
+        evolution.operations.elitism(context(evolution.populationPrototype).toVector, context(evolution.offspringPrototype).toVector).from(context).
+          run(context(evolution.statePrototype)).value
 
       Context(
-        Variable(t.populationPrototype, newPopulation.toArray(t.individualPrototype.`type`.manifest)),
-        Variable(t.statePrototype, newState)
+        Variable(evolution.populationPrototype, newPopulation.toArray(evolution.individualPrototype.`type`.manifest)),
+        Variable(evolution.statePrototype, newState)
       )
     } set (
-      inputs += (t.statePrototype, t.populationPrototype, t.offspringPrototype),
-      outputs += (t.populationPrototype, t.statePrototype)
+      inputs += (evolution.statePrototype, evolution.populationPrototype, evolution.offspringPrototype),
+      outputs += (evolution.populationPrototype, evolution.statePrototype)
     )
   }
 

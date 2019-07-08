@@ -22,11 +22,15 @@ import org.openmole.core.expansion._
 import cats.implicits._
 
 /**
- * The parameter is a variable wich is injected in the data flow during the
- * workflow execution just before the begining of a task execution. It can be
+ * The parameter is a variable which is injected in the data flow during the
+ * workflow execution just before the beginning of a task execution. It can be
  * useful for testing purposes and for defining default value of inputs of a
  * task.
  *
+ * @param prototype prototype taking the value by default
+ * @param value value by default from the context
+ * @param `override` should the default value override conflicting variable values
+ * @tparam T type of the Val
  */
 case class Default[T](prototype: Val[T], value: FromContext[T], `override`: Boolean) {
   def toVariable = value.map(v ⇒ Variable(prototype, v))

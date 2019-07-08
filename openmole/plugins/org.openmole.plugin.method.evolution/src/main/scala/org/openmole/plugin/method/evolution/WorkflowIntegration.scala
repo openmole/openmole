@@ -95,8 +95,8 @@ object WorkflowIntegration {
         operations.buildIndividual(genome, variablesToPhenotype(context), context)
 
       def inputPrototypes = Genome.toVals(a.genome)
-      def objectivePrototypes = a.objectives.map(Objective.prototype)
-      def resultPrototypes = (inputPrototypes ++ objectivePrototypes).distinct
+      def outputPrototypes = a.objectives.map(Objective.prototype)
+      def resultPrototypes = (inputPrototypes ++ outputPrototypes).distinct
 
       def genomeToVariables(genome: G): FromContext[Vector[Variable[_]]] = {
         val (cs, is) = operations.genomeValues(genome)
@@ -112,7 +112,7 @@ object WorkflowIntegration {
       def mgoAG = a.ag
 
       type V = (Vector[Double], Vector[Int])
-      type P = Vector[Any]
+      type P = Array[Any]
 
       lazy val integration = a.algorithm
 
@@ -120,7 +120,7 @@ object WorkflowIntegration {
         operations.buildIndividual(genome, variablesToPhenotype(context), context)
 
       def inputPrototypes = Genome.toVals(a.genome) ++ a.replication.seed.prototype
-      def objectivePrototypes = a.objectives.map(Objective.prototype)
+      def outputPrototypes = a.objectives.map(Objective.prototype)
 
       def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] = {
         val (continuous, discrete) = operations.genomeValues(genome)
@@ -128,7 +128,7 @@ object WorkflowIntegration {
         (Genome.toVariables(a.genome, continuous, discrete, scale = true) map2 FromContext { p ⇒ seeder(p.random()) })(_ ++ _)
       }
 
-      def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ Objective.prototype(o)).map(context.apply(_)).toVector
+      def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ Objective.prototype(o)).map(context.apply(_)).toArray
     }
 
   case class DeterministicGA[AG](
@@ -152,15 +152,19 @@ object WorkflowIntegration {
     replication: Stochastic
   )(
     implicit
-    val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Vector[Any]]
+    val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Array[Any]]
   )
 
   object StochasticGA {
-    implicit def stochasticGAIntegration[AG]: WorkflowIntegration[StochasticGA[AG]] = new WorkflowIntegration[StochasticGA[AG]] {
+    implicit def stochasticGAIntegration[AG, P]: WorkflowIntegration[StochasticGA[AG]] = new WorkflowIntegration[StochasticGA[AG]] {
       override def apply(a: StochasticGA[AG]) = WorkflowIntegration.stochasticGAIntegration(a)
     }
 
     def toEvolutionWorkflow(a: StochasticGA[_]): EvolutionWorkflow = WorkflowIntegration.stochasticGAIntegration(a)
+  }
+
+  def apply[T](f: T ⇒ EvolutionWorkflow) = new WorkflowIntegration[T] {
+    def apply(t: T) = f(t)
   }
 
 }
@@ -204,7 +208,7 @@ trait EvolutionWorkflow {
   def buildIndividual(genome: G, context: Context): I
 
   def inputPrototypes: Seq[Val[_]]
-  def objectivePrototypes: Seq[Val[_]]
+  def outputPrototypes: Seq[Val[_]]
 
   def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]]
 

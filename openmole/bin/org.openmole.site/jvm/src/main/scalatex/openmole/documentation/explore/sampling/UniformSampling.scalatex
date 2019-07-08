@@ -5,34 +5,51 @@
 
 
 
-@def variables = """
-val density = Val[Double]
-val seed = Val[Int]
-val burned = Val[Double]
-"""
+@h2{Sample within a uniform distribution}
 
-@def gridSampling = "Grid Sampling"
-@def csvSampling = "CSV Sampling"
-@def severalInputs = "Exploration of several inputs"
-@def advancedSampling = "Advanced sampling"
+Samplings can be performed at random within a domain following a uniform ditribution, via the @code{UniformDistribution(maximum)} command.
+This task generates values uniformly distributed between zero and the maximum argument:
 
+@br
 
-@h2{Uniform Distribution Sampling}
+In the following example, 100 values are generated at random, uniformly distributed between 0 and 20.
 
-Sampling can also be performed at random within a domain via a @hl.code("UniformDistribution(maximum)").
-This task generates values uniformly distributed between zero and the maximum argument. Custom domains can be defined using transformations, as in the example below that generates values between -10 and + 10.
+@br@br
 
- @hl.openmole("""
+@hl.openmole("""
 val my_input = Val[Double]
 val my_model = EmptyTask() set( (inputs, outputs) += my_input)
 
 val exploration =
   DirectSampling(
-    evaluation = my_model hook ToStringHook(),
-    sampling= (my_input in (UniformDistribution[Double](max=20) take 100)).map(x => x -10)
+    evaluation = my_model hook display,
+    sampling= (my_input in (UniformDistribution[Double](max=20) take 100))
   )
 
 exploration""", name = "uniform sampling example")
 
 
-@br N.B. @hl.code("DirectSampling") usage is not limited to uniform or grid sampling, and accepts any type of more @a("advanced sampling", href := anchor(advancedSampling)).
+
+@h2{Sample within a skewed uniform distribution}
+
+Custom domains can be defined using transformations on the uniform distribution.
+For instance in this next example, 100 values uniformly distributed between 0 and 20 are still generated at random, however, each one is then shifted by -10 through the @code{map} function.
+Thus, the sampling will be comprised of 100 values uniformly distributed between -10 and 10.
+
+@br@br
+
+@hl.openmole("""
+val my_input = Val[Double]
+val my_model = EmptyTask() set( (inputs, outputs) += my_input)
+
+val exploration =
+  DirectSampling(
+    evaluation = my_model hook display,
+    sampling= (my_input in (UniformDistribution[Double](max=20) take 100)).map(x => x -10)
+  )
+
+exploration""", name = "uniform sampling custom example")
+
+@br
+
+For more information on the @code{map} function, or other transformation functions, see the @aa("Language", href := language.file) section.

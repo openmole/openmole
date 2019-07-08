@@ -31,11 +31,11 @@ import scala.concurrent.Await
 import scalatags.Text.all._
 import scalatags.Text.{ all ⇒ tags }
 import java.util.concurrent.atomic.AtomicReference
+import java.util.logging.Level
 
 import org.openmole.core.authentication.AuthenticationStore
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.{ FileService, FileServiceCache }
-import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.Preference
 import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.serializer.SerializerService
@@ -49,6 +49,8 @@ import org.openmole.gui.ext.tool.server
 import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.file._
+import org.openmole.tool.logger.LoggerService
+import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.random.{ RandomProvider, Seeder }
 import org.openmole.tool.stream._
 import org.openmole.tool.tar._
@@ -74,16 +76,16 @@ object GUIServices {
     implicit def eventDispatcher: EventDispatcher = guiServices.eventDispatcher
     implicit def networkService: NetworkService = guiServices.networkService
     implicit def outputRedirection: OutputRedirection = guiServices.outputRedirection
+    implicit def loggerService: LoggerService = guiServices.loggerService
   }
 
-  def apply(workspace: Workspace, httpProxy: Option[String]) = {
+  def apply(workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level]) = {
     implicit val ws = workspace
     implicit val preference = Preference(ws.persistentDir)
     implicit val newFile = NewFile(workspace)
     implicit val seeder = Seeder()
     implicit val serializerService = SerializerService()
     implicit val threadProvider = ThreadProvider()
-    implicit val replicaCatalog = ReplicaCatalog(ws)
     implicit val authenticationStore = AuthenticationStore(ws.persistentDir)
     implicit val fileService = FileService()
     implicit val randomProvider = RandomProvider(seeder.newRNG)
@@ -91,6 +93,8 @@ object GUIServices {
     implicit val outputRedirection = OutputRedirection()
     implicit val networkService = NetworkService(httpProxy)
     implicit val fileServiceCache = FileServiceCache()
+    implicit val replicaCatalog = ReplicaCatalog(ws)
+    implicit val loggerService = LoggerService(logLevel)
 
     new GUIServices()
   }
@@ -100,8 +104,8 @@ object GUIServices {
     scala.util.Try(services.threadProvider.stop())
   }
 
-  def withServices[T](workspace: Workspace, httpProxy: Option[String])(f: GUIServices ⇒ T) = {
-    val services = GUIServices(workspace, httpProxy)
+  def withServices[T](workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level])(f: GUIServices ⇒ T) = {
+    val services = GUIServices(workspace, httpProxy, logLevel)
     try f(services)
     finally dispose(services)
   }
@@ -123,13 +127,15 @@ class GUIServices(
   val randomProvider:      RandomProvider,
   val eventDispatcher:     EventDispatcher,
   val outputRedirection:   OutputRedirection,
-  val networkService:      NetworkService
+  val networkService:      NetworkService,
+  val loggerService:       LoggerService
 )
 
 object GUIServlet {
   def apply(arguments: GUIServer.ServletArguments) = {
     val servlet = new GUIServlet(arguments)
     Utils.addPluginRoutes(servlet.addRouter, GUIServices.ServicesProvider(arguments.services, servlet.cypher.get))
+    servlet addRouter (OMRouter[Api](AutowireServer.route[Api](servlet.apiImpl)))
     servlet
   }
 }
@@ -348,28 +354,21 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     }
   }
 
-  addRouter(OMRouter[Api](AutowireServer.route[Api](apiImpl)))
-
   def addRouter(router: OMRouter): Unit = {
     post(s"/${router.route}/*") {
-      val req = Await.result(
-        {
+      val is = request.getInputStream
+      val bytes: Array[Byte] = Iterator.continually(is.read()).takeWhile(_ != -1).map(_.asInstanceOf[Byte]).toArray[Byte]
+      val bb = ByteBuffer.wrap(bytes)
 
-          val is = request.getInputStream
-          val bytes: Array[Byte] = Iterator.continually(is.read()).takeWhile(_ != -1).map(_.asInstanceOf[Byte]).toArray[Byte]
-          val bb = ByteBuffer.wrap(bytes)
-          //val un = Unpickle[Map[String, ByteBuffer]].fromBytes(bb)
-          router.router(
-            autowire.Core.Request(
-              router.route.split("/").toSeq ++ multiParams("splat").head.split("/"),
-              Unpickle[Map[String, ByteBuffer]].fromBytes(bb)
-            )
+      val rout =
+        router.router(
+          autowire.Core.Request(
+            router.route.split("/").toSeq ++ multiParams("splat").head.split("/"),
+            Unpickle[Map[String, ByteBuffer]].fromBytes(bb)
           )
+        )
 
-        },
-        Duration.Inf
-      )
-
+      val req = Await.result(rout, Duration.Inf)
       val data = Array.ofDim[Byte](req.remaining)
       req.get(data)
       Ok(data)

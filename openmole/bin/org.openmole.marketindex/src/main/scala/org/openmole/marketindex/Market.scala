@@ -33,6 +33,7 @@ object Market {
     }
 
   object Tags {
+    lazy val abc = Tag("ABC")
     lazy val stochastic = Tag("Stochastic")
     lazy val simulation = Tag("Simulation")
     lazy val machineLearning = Tag("Machine Learning")
@@ -69,6 +70,7 @@ object Market {
   def entries = Seq(
     MarketRepository(
       githubMarket,
+      MarketEntry("ABC", "abc", Seq(abc, stochastic, calibration, tutorial)),
       MarketEntry("Pi Computation", "pi", Seq(stochastic, simulation, scala)),
       MarketEntry("Random Forest", "randomforest", Seq(stochastic, machineLearning, native, data, python)),
       MarketEntry("Hello World in R", "R-hello", Seq(R)),
@@ -80,7 +82,8 @@ object Market {
       MarketEntry("SimpopLocal", "simpoplocal", Seq(stochastic, simulation, ga, scala, calibration)),
       MarketEntry("Metamimetic Networks", "metamimetic-networks", Seq(stochastic, simulation, netlogo)),
       MarketEntry("Segmentation with FSL", "fsl-fast", Seq(fsl, data, native, neuroscience)),
-      MarketEntry("Sensitivity Analysis", "sensitivity", Seq(netlogo, sensitivity, simulation)),
+      MarketEntry("Morris Sensitivity Analysis", "sensitivity/morris", Seq(netlogo, sensitivity, simulation)),
+      MarketEntry("Saltelli Sensitivity Analysis", "sensitivity/saltelli", Seq(sensitivity, simulation)),
       //MarketEntry("Explore a GAMA Model", "gama", Seq(gama, stochastic, simulation)),
       MarketEntry("Workflow Tutorial", "tutorials/workflow", Seq(tutorial, scala, workflow)),
       MarketEntry("Native Application Tutorial", "tutorials/native", Seq(tutorial, native, data, python)),

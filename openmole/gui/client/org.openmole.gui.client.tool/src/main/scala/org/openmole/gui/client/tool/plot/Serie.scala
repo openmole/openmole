@@ -10,8 +10,9 @@ case class Dim(values: Seq[String], label: String = "") {
 }
 
 case class Serie(
-  dimensionSize:   Int               = 0,
-  values:          Seq[Dim]          = Seq(),
+  // dimensionSize:   Int               = 0,
+  xValues:         Dim               = Dim(Seq()),
+  yValues:         Array[Dim]        = Array(),
   plotDataBuilder: PlotDataBuilder   = PlotData.set(plotlymode.markers.lines),
   markerBuilder:   PlotMarkerBuilder = plotlymarker.set(plotlysymbol.cross),
   colorScale:      ColorScale        = ColorScale.blues

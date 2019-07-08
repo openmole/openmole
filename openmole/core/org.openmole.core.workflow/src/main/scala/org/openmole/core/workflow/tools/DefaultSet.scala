@@ -41,12 +41,27 @@ object DefaultSet {
 
 }
 
+/**
+ * A set of default values for prototypes
+ * @param defaults
+ */
 case class DefaultSet(defaults: Iterable[Default[_]]) {
 
   @transient lazy val defaultMap =
     TreeMap.empty[String, Default[_]] ++ defaults.map { p ⇒ (p.prototype.name, p) }
 
+  /**
+   * add a Default to the DefaultSet
+   * @param p
+   * @return
+   */
   def +(p: Default[_]) = DefaultSet(p :: defaults.toList.filter(_.prototype != p.prototype))
+
+  /**
+   * Remove a default
+   * @param p
+   * @return
+   */
   def -(p: Default[_]) = DefaultSet((defaultMap - p.prototype.name).values.toList)
   def contains(p: Default[_]) = defaultMap.contains(p.prototype.name)
   def get(name: String): Option[Default[_]] = defaultMap.get(name)

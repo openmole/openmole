@@ -26,21 +26,18 @@ import org.openmole.core.workflow.task._
 
 object InitialStateTask {
 
-  def apply[T](algorithm: T)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
-    val t = wfi(algorithm)
-
+  def apply(evolution: EvolutionWorkflow)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     ClosureTask("InitialStateTask") { (context, _, _) ⇒
       def initialisedState =
-        t.operations.startTimeLens.set(System.currentTimeMillis) andThen
-          t.operations.generationLens.set(0L) apply context(t.statePrototype)
+        evolution.operations.startTimeLens.set(System.currentTimeMillis) andThen
+          evolution.operations.generationLens.set(0L) apply context(evolution.statePrototype)
 
-      Context(Variable(t.statePrototype, initialisedState))
+      Context(Variable(evolution.statePrototype, initialisedState))
     } set (
-      inputs += (t.statePrototype, t.populationPrototype),
-      outputs += (t.statePrototype, t.populationPrototype),
-      t.statePrototype := FromContext(p ⇒ t.operations.initialState(p.random())),
-      t.populationPrototype := Array.empty[t.I](t.integration.iManifest)
+      inputs += (evolution.statePrototype, evolution.populationPrototype),
+      outputs += (evolution.statePrototype, evolution.populationPrototype),
+      evolution.statePrototype := FromContext(p ⇒ evolution.operations.initialState(p.random())),
+      evolution.populationPrototype := Array.empty[evolution.I](evolution.integration.iManifest)
     )
-  }
 
 }

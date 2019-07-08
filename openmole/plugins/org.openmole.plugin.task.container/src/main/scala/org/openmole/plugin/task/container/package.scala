@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2017 Jonathan Passerat-Palmbach
  * Copyright (C) 2017 Romain Reuillon
  *
@@ -22,12 +22,16 @@ import org.openmole.core.context.PrototypeSet
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.dsl._
-import org.openmole.plugin.task.external.External
+import org.openmole.plugin.task.external._
 import org.openmole.core.workflow.validation._
 
 package container {
 
   import monocle.Lens
+
+  object HostFile {
+    implicit def tupleToHostFile(t: (String, String)) = HostFile(t._1, t._2)
+  }
 
   case class HostFile(path: String, destination: String)
 
@@ -49,12 +53,13 @@ package object container extends ContainerPackage {
   type FileBinding = (String, String)
 
   /**
+   * FIXME maybe make it an option to avoid passing "" when inputDirectory is empty
+   *
    * @param inputDirectory Directory used to store input files / folder from the dataflow
    * @param baseDirectory
    * @param path Target location
    * @return
    */
-  // FIXME maybe make it an option to avoid passing "" when inputDirectory is empty
   def inputPathResolver(inputDirectory: File, baseDirectory: String)(path: String): File = {
     if (File(path).isAbsolute) inputDirectory / path
     else inputDirectory / baseDirectory / path
@@ -81,8 +86,6 @@ package object container extends ContainerPackage {
     else rootDirectory / absolutePathInArchive
   }
 
-  type EnvironmentVariable = (String, FromContext[String])
-
   def validateContainer(
     commands:             Vector[FromContext[String]],
     environmentVariables: Vector[EnvironmentVariable],
@@ -92,7 +95,7 @@ package object container extends ContainerPackage {
     import p._
 
     val allInputs = External.PWD :: inputs.toList
-    val validateVariables = environmentVariables.map(_._2).flatMap(_.validate(allInputs))
+    val validateVariables = environmentVariables.flatMap(v ⇒ Seq(v.name, v.value)).flatMap(_.validate(allInputs))
 
     commands.flatMap(_.validate(allInputs)) ++
       validateVariables ++

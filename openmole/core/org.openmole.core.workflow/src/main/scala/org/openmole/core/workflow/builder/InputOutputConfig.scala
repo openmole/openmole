@@ -30,11 +30,24 @@ object InputOutputConfig {
     def addOutput(output: Val[_]*) = add(outputs = output)
   }
 
+  /**
+   * Operator to add inputs and outputs to a config
+   * @param inputs
+   * @param outputs
+   * @return
+   */
   def add(inputs: Seq[Val[_]] = Seq.empty, outputs: Seq[Val[_]] = Seq.empty) =
     InputOutputConfig.inputs.modify(_ ++ outputs) andThen
       InputOutputConfig.outputs.modify(_ ++ outputs)
 }
 
+/**
+ * Input/Output configuration for tasks, hooks and sources
+ *
+ * @param inputs prototype set of inputs
+ * @param outputs prototype set of outputs
+ * @param defaults default values for prototypes
+ */
 @Lenses case class InputOutputConfig(
   inputs:   PrototypeSet = PrototypeSet.empty,
   outputs:  PrototypeSet = PrototypeSet.empty,

@@ -36,11 +36,11 @@ import org.openmole.plugin.task.udocker.DockerMetadata._
 import org.openmole.tool.cache._
 import org.openmole.core.dsl._
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.threadprovider._
 import org.openmole.plugin.task.container.HostFiles
 import org.openmole.tool.lock.LockKey
 import org.openmole.plugin.task.container._
+import org.openmole.tool.outputredirection.OutputRedirection
 
 import scala.language.postfixOps
 
@@ -60,7 +60,7 @@ object UDockerTask {
   val RegistryTimeout = ConfigurationLocation("UDockerTask", "RegistryTimeout", Some(1 minutes))
   val RegistryRetryOnError = ConfigurationLocation("UDockerTask", "RegistryRetryOnError", Some(5))
 
-  implicit def isTask: InputOutputBuilder[UDockerTask] = InputOutputBuilder(UDockerTask._config)
+  implicit def isTask: InputOutputBuilder[UDockerTask] = InputOutputBuilder(UDockerTask.config)
   implicit def isExternal: ExternalBuilder[UDockerTask] = ExternalBuilder(UDockerTask.external)
   implicit def isInfo = InfoBuilder(info)
 
@@ -75,48 +75,49 @@ object UDockerTask {
   }
 
   def apply(
-    image:              ContainerImage,
-    run:                Commands,
-    install:            Seq[String]                                 = Vector.empty,
-    user:               OptionalArgument[String]                    = None,
-    mode:               OptionalArgument[String]                    = None,
-    reuseContainer:     Boolean                                     = true,
-    cacheInstall:       Boolean                                     = true,
-    forceUpdate:        Boolean                                     = false,
-    returnValue:        OptionalArgument[Val[Int]]                  = None,
-    stdOut:             OptionalArgument[Val[String]]               = None,
-    stdErr:             OptionalArgument[Val[String]]               = None,
-    errorOnReturnValue: Boolean                                     = true,
-    containerPoolKey:   CacheKey[WithInstance[(File, ContainerID)]] = CacheKey()
-  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService): UDockerTask = {
-
-    def blockChars(s: String): String = {
-      val blocked = Set(''', '"', '\\')
-      s.flatMap { c ⇒ if (blocked.contains(c)) s"\\$c" else s"$c" }
-    }
-
+    image:                ContainerImage,
+    run:                  Commands,
+    install:              Seq[String]                                 = Vector.empty,
+    user:                 OptionalArgument[String]                    = None,
+    mode:                 OptionalArgument[String]                    = None,
+    reuseContainer:       Boolean                                     = true,
+    cacheInstall:         Boolean                                     = true,
+    forceUpdate:          Boolean                                     = false,
+    returnValue:          OptionalArgument[Val[Int]]                  = None,
+    stdOut:               OptionalArgument[Val[String]]               = None,
+    stdErr:               OptionalArgument[Val[String]]               = None,
+    errorOnReturnValue:   Boolean                                     = true,
+    hostFiles:            Seq[HostFile]                               = Vector.empty,
+    workDirectory:        OptionalArgument[String]                    = None,
+    environmentVariables: Seq[EnvironmentVariable]                    = Vector.empty,
+    containerPoolKey:     CacheKey[WithInstance[(File, ContainerID)]] = CacheKey()
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService): UDockerTask =
     UDockerTask(
-      uDocker = createUDocker(image, install, user, mode, cacheInstall, forceUpdate, reuseContainer),
-      commands = Commands.value.modify(_.map(_.map(blockChars)))(run),
+      uDocker = createUDocker(image, install, user, mode, cacheInstall, forceUpdate, reuseContainer, hostFiles, workDirectory, environmentVariables),
+      commands = run, //Commands.value.modify(_.map(_.map(blockChars)))(run),
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
       stdErr = stdErr,
-      _config = InputOutputConfig(),
+      config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
       containerPoolKey = containerPoolKey
-    )
-  }
+    ) set (
+        outputs += (Seq(returnValue.option, stdOut.option, stdErr.option).flatten: _*)
+      )
 
   def createUDocker(
-    image:          ContainerImage,
-    install:        Seq[String]              = Vector.empty,
-    user:           OptionalArgument[String] = None,
-    mode:           OptionalArgument[String] = None,
-    cacheInstall:   Boolean                  = true,
-    forceUpdate:    Boolean                  = false,
-    reuseContainer: Boolean                  = true)(implicit newFile: NewFile, preference: Preference, threadProvider: ThreadProvider, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService) = {
+    image:                ContainerImage,
+    install:              Seq[String]              = Vector.empty,
+    user:                 OptionalArgument[String] = None,
+    mode:                 OptionalArgument[String] = None,
+    cacheInstall:         Boolean                  = true,
+    forceUpdate:          Boolean                  = false,
+    reuseContainer:       Boolean                  = true,
+    hostFiles:            Seq[HostFile]            = Vector.empty,
+    workDirectory:        OptionalArgument[String] = None,
+    environmentVariables: Seq[EnvironmentVariable] = Vector.empty)(implicit newFile: NewFile, preference: Preference, threadProvider: ThreadProvider, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService) = {
     val uDocker =
       UDockerArguments(
         localDockerImage = toLocalImage(image) match {
@@ -125,10 +126,12 @@ object UDockerTask {
         },
         mode = mode orElse Some("P1"),
         reuseContainer = reuseContainer,
-        user = user)
+        user = user,
+        hostFiles = hostFiles.toVector,
+        workDirectory = workDirectory.option,
+        environmentVariables = environmentVariables.toVector)
 
     installLibraries(uDocker, install, cacheInstall, forceUpdate)
-
   }
 
   def installLibraries(uDocker: UDockerArguments, installCommands: Seq[String], cacheInstall: Boolean, forceUpdate: Boolean)(implicit newFile: NewFile, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService) = {
@@ -219,12 +222,6 @@ object UDockerTask {
 
   lazy val installLockKey = LockKey()
 
-  def config(
-    config:      InputOutputConfig,
-    returnValue: Option[Val[Int]],
-    stdOut:      Option[Val[String]],
-    stdErr:      Option[Val[String]]) = config.addOutput(Seq(stdOut, stdErr, returnValue).flatten: _*)
-
 }
 
 @Lenses case class UDockerTask(
@@ -234,12 +231,11 @@ object UDockerTask {
   returnValue:        Option[Val[Int]],
   stdOut:             Option[Val[String]],
   stdErr:             Option[Val[String]],
-  _config:            InputOutputConfig,
+  config:             InputOutputConfig,
   external:           External,
   info:               InfoConfig,
   containerPoolKey:   CacheKey[WithInstance[(File, ContainerID)]]) extends Task with ValidateTask { self ⇒
 
-  override def config = UDockerTask.config(_config, returnValue, stdOut, stdErr)
   override def validate = container.validateContainer(commands.value, uDocker.environmentVariables, external, inputs)
 
   override def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
@@ -317,17 +313,23 @@ object UDockerTask {
             val rootDirectory = containersDirectory / runId / "ROOT"
 
             val containerEnvironmentVariables =
-              uDocker.environmentVariables.map { case (name, variable) ⇒ name -> variable.from(preparedContext) }
+              uDocker.environmentVariables.map { v ⇒ v.name.from(preparedContext) -> v.value.from(preparedContext) }
 
             def expandCommand(command: FromContext[String]) =
-              ExecutionCommand.Raw(UDocker.uDockerRunCommand(
-                uDocker.user,
-                containerEnvironmentVariables,
-                volumes,
-                userWorkDirectory(uDocker),
-                uDockerExecutable,
-                runId,
-                command.from(preparedContext)))
+              ExecutionCommand.Raw(
+                List(
+                  UDocker.uDockerRunCommandPrefix(
+                    uDocker.user,
+                    containerEnvironmentVariables,
+                    volumes,
+                    userWorkDirectory(uDocker),
+                    uDockerExecutable,
+                    runId
+                  ),
+                  command.from(preparedContext)
+                ),
+                List(false, true)
+              )
 
             val executionResult = executeAll(
               taskWorkDirectory,

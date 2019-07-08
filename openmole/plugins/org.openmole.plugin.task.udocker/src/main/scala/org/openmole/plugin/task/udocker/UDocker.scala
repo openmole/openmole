@@ -21,11 +21,11 @@ import io.circe.jawn.{ decode, decodeFile }
 import io.circe.syntax._
 import monocle.macros.Lenses
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.Preference
 import org.openmole.core.tools.service.Retry
 import org.openmole.plugin.task.systemexec.{ ExecutionCommand, commandLine, execute, executeAll }
 import org.openmole.tool.file._
+import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.stream._
 import org.openmole.tool.stream.withClosable
 
@@ -289,14 +289,16 @@ object UDocker {
     stdErr:               PrintStream              = System.err)(implicit newFile: NewFile) = newFile.withTmpDir { tmpDirectory ⇒
     val runInstall = commands.map {
       ic ⇒
-        ExecutionCommand.Raw(uDockerRunCommand(
-          uDocker.user,
-          environmentVariables.toVector,
-          uDockerVolumes,
-          userWorkDirectory(uDocker),
-          uDockerExecutable,
-          container,
-          ic: Id[String]))
+        ExecutionCommand.Raw(
+          List(
+            uDockerRunCommandPrefix(
+              uDocker.user,
+              environmentVariables.toVector,
+              uDockerVolumes,
+              userWorkDirectory(uDocker),
+              uDockerExecutable,
+              container),
+            ic: Id[String]))
     }
 
     executeAll(
@@ -338,14 +340,15 @@ object UDocker {
 
   def imageId(uDocker: UDockerArguments) = s"${uDocker.localDockerImage.image}:${uDocker.localDockerImage.tag}"
 
-  def uDockerRunCommand(
+  def uDockerRunCommandPrefix(
     user:                 Option[String],
     environmentVariables: Vector[(String, String)],
     volumes:              Vector[MountPoint],
     workDirectory:        String,
     uDocker:              File,
-    runId:                String,
-    command:              String): String = {
+    runId:                String //,
+  //command:              String
+  ): String = {
 
     def volumesArgument(volumes: Vector[MountPoint]) = volumes.map { case (host, container) ⇒ s"""-v "$host":"$container"""" }.mkString(" ")
 
@@ -356,7 +359,7 @@ object UDocker {
 
     val variablesArgument = environmentVariables.map { case (name, variable) ⇒ s"""-e ${name}="${variable}"""" }.mkString(" ")
 
-    s"""/usr/bin/env python2 ${uDocker.getAbsolutePath} run --workdir="$workDirectory" $userArgument  $variablesArgument ${volumesArgument(volumes)} $runId $command"""
+    s"""/usr/bin/env python2 ${uDocker.getAbsolutePath} run --workdir="$workDirectory" $userArgument  $variablesArgument ${volumesArgument(volumes)} $runId""" // $command"""
   }
 
   // TODO refactor

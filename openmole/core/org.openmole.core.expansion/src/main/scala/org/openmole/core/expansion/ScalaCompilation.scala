@@ -34,21 +34,49 @@ trait CompilationClosure[+T] extends ScalaCompilation.ContextClosure[T] {
   def apply(context: Context, rng: RandomProvider, newFile: NewFile): T
 }
 
+/**
+ * Methods for compiling scala code
+ */
 object ScalaCompilation {
 
+  /**
+   * OpenMOLE namespace to import
+   * @return
+   */
   def openMOLEImports = Seq(s"${org.openmole.core.code.CodePackage.namespace}._")
 
+  /**
+   * Prepend OpenMOLE imports to a script
+   * @param code
+   * @return
+   */
   def addImports(code: String) =
     s"""
     |${openMOLEImports.map("import " + _).mkString("\n")}
     |
     |$code""".stripMargin
 
+  /**
+   * Get osgi bundles given a sequence of plugins
+   * @param plugins
+   * @return
+   */
   def priorityBundles(plugins: Seq[File]) = {
     val pluginBundles = plugins.flatMap(PluginManager.bundle)
     pluginBundles ++ pluginBundles.flatMap(PluginManager.allPluginDependencies) ++ PluginManager.bundleForClass(this.getClass)
   }
 
+  /**
+   * Compile scala code using a [[org.openmole.core.console.Interpreter]]
+   *
+   * @param code
+   * @param plugins
+   * @param libraries
+   * @param newFile
+   * @param fileService
+   * @tparam RETURN
+   * @return
+   */
   def compile[RETURN](code: String, plugins: Seq[File] = Seq.empty, libraries: Seq[File] = Seq.empty)(implicit newFile: NewFile, fileService: FileService) = {
     val osgiMode = org.openmole.core.console.Activator.osgi
     val interpreter =
@@ -85,8 +113,6 @@ object ScalaCompilation {
     native getOrElse t
   }
 
-  def prefix = "_input_value_"
-
   def function[RETURN](inputs: Seq[Val[_]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: NewFile, fileService: FileService) = {
     val s = script(inputs, source, wrapping, returnType)
     compile[CompilationClosure[RETURN]](s, plugins, libraries)
@@ -95,6 +121,28 @@ object ScalaCompilation {
   def closure[RETURN](inputs: Seq[Val[_]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: NewFile, fileService: FileService) =
     function[RETURN](inputs, source, plugins, libraries, wrapping, returnType)
 
+  /**
+   * prefix used for input values in [[script]] construction
+   * @return
+   */
+  def prefix = "_input_value_"
+
+  /**
+   * name of the input object in [[script]] construction
+   * @return
+   */
+  def inputObject = "input"
+
+  /**
+   * Embed script elements in a compilable String.
+   *  - an object of the runtime class of the CompilationClosure, parametrized with return type forced to scala native, is created by this code.
+   * @param inputs input prototypes
+   * @param source the source code in itself
+   * @param wrapping how outputs are wrapped as code string
+   * @param returnType the return type of the script
+   * @tparam RETURN
+   * @return
+   */
   def script[RETURN](inputs: Seq[Val[_]], source: String, wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN]) =
     s"""new ${classOf[CompilationClosure[_]].getName}[${toScalaNativeType(returnType)}] {
        |  def apply(${prefix}context: ${manifest[Context].toString}, ${prefix}RNG: ${manifest[RandomProvider].toString}, ${prefix}NewFile: ${manifest[NewFile].toString}) = {
@@ -102,14 +150,13 @@ object ScalaCompilation {
        |      ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
        |    }
        |    import ${inputObject}._
-       |    implicit lazy val ${Variable.openMOLE("RNG").name}: util.Random = ${prefix}RNG()
-       |    implicit lazy val ${Variable.openMOLE("NewFile").name} = ${prefix}NewFile
+       |    implicit def ${Val.name(Variable.openMOLENameSpace, "RNGProvider")} = ${prefix}RNG
+       |    implicit def ${Val.name(Variable.openMOLENameSpace, "NewFile")} = ${prefix}NewFile
+       |
        |    $source
        |    ${wrapping.wrapOutput}
        |  }: ${toScalaNativeType(returnType)}
        |}""".stripMargin
-
-  def inputObject = "input"
 
   def static[R](
     code:      String,
@@ -170,6 +217,10 @@ object ScalaCompilation {
     def wrapOutput: String
   }
 
+  /**
+   * Wraps a prototype set as compilable code (used to build the [[script]])
+   * @param outputs
+   */
   case class WrappedOutput(outputs: PrototypeSet) extends OutputWrapping[java.util.Map[String, Any]] {
 
     def wrapOutput =

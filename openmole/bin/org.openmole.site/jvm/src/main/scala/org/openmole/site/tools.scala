@@ -62,6 +62,7 @@ package object tools {
     def code(code: String) = openmoleNoTest(code)
     def plain(code: String) = highlight(code, "plain")
     def openmoleNoTest(code: String) = highlight(code, "scala")
+    def python(code: String) = highlight(code, "python")
   }
 
   def openmole(code: String, header: String = "", name: hl.OptionalName = hl.OptionalName(None)) = hl.openmole(code, header, name)

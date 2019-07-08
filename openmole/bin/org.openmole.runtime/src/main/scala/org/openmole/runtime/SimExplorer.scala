@@ -17,12 +17,13 @@
 
 package org.openmole.runtime
 
-import org.openmole.core.logconfig.LoggerConfig
+import org.openmole.core.logconfig._
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.tool.file._
-import org.openmole.tool.logger.JavaLogger
+import org.openmole.tool.logger.{ JavaLogger, LoggerService }
 import scopt._
 import java.io.File
+import java.util.logging.Level
 
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.communication.storage.RemoteStorage
@@ -83,7 +84,7 @@ object SimExplorer extends JavaLogger {
         config.test match {
           case false ⇒
 
-            if (config.debug) LoggerConfig.level("ALL")
+            if (config.debug) LoggerConfig.level(Level.FINEST)
 
             implicit val workspace = Workspace(new File(config.workspace.get).getCanonicalFile)
             implicit val newFile = NewFile(workspace)
@@ -92,6 +93,7 @@ object SimExplorer extends JavaLogger {
             implicit val threadProvider = ThreadProvider(config.nbThread.get + 5)
             implicit val fileService = FileService()
             implicit val eventDispatcher = EventDispatcher()
+            implicit val loggerService = if (config.debug) LoggerService(level = Some(finest)) else LoggerService()
 
             try {
 

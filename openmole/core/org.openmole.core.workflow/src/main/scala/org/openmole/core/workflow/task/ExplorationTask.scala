@@ -29,8 +29,19 @@ import cats.implicits._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.tools._
 
+/**
+ * ExplorationTask is a wrapper for a sampling
+ */
 object ExplorationTask {
 
+  /**
+   * Explore a given sampling: gets the prototype values in the sampling from the context to construct the context with all values,
+   * wrapped as a [[FromContextTask]].
+   * Values assignment is done with insecure casting, and an exception is caught and piped as a [[UserBadDataError]] if the conversion can not be done.
+   *
+   * @param sampling
+   * @return
+   */
   def apply(sampling: Sampling)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     FromContextTask("ExplorationTask") { p ⇒
       import p._
@@ -62,6 +73,11 @@ object ExplorationTask {
       exploredOutputs += (sampling.prototypes.toSeq.map(_.toArray): _*)
     )
 
+  /**
+   * Given a [[MoleCapsule]], function to test if a given prototype is explored by it
+   * @param c
+   * @return
+   */
   def explored(c: MoleCapsule) = (p: Val[_]) ⇒ c.task.outputs.explored(p)
 
 }

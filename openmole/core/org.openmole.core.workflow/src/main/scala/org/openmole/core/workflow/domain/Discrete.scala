@@ -20,6 +20,11 @@ package org.openmole.core.workflow.domain
 import org.openmole.core.expansion._
 import scala.annotation.implicitNotFound
 
+/**
+ * Property of being discrete for a domain
+ * @tparam D
+ * @tparam T
+ */
 @implicitNotFound("${D} is not a discrete variation domain of type ${T}")
 trait Discrete[-D, +T] {
   def iterator(domain: D): FromContext[Iterator[T]]

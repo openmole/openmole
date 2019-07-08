@@ -22,11 +22,12 @@ import java.util.concurrent.Future
 import monocle.macros.Lenses
 import org.openmole.core.event.Listner
 import org.openmole.core.workflow.builder.DefinitionScope
-import org.openmole.core.workflow.execution.Environment
+import org.openmole.core.workflow.execution.{ Environment, SubmissionEnvironment }
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.gui.ext.data._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
 import org.openmole.plugin.environment.batch._
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment
 import org.openmole.tool.file.readableByteCount
 import org.openmole.tool.stream.StringPrintStream
 
@@ -123,14 +124,12 @@ class Execution {
   }
 
   def deleteEnvironmentErrors(id: EnvironmentId): Unit = atomic { implicit ctx ⇒
-    runningEnvironments.get(id).foreach(_.environment.clearErrors)
-  }
+    runningEnvironments.get(id).map { case RunningEnvironment(e, _, _) ⇒ e }
+  }.foreach(Environment.clearErrors)
 
   def removeRunningEnvironments(id: ExecutionId) = atomic { implicit ctx ⇒
     environmentIds.remove(id).foreach {
-      _.foreach {
-        runningEnvironments.remove
-      }
+      _.foreach { runningEnvironments.remove }
     }
   }
 
@@ -195,7 +194,9 @@ class Execution {
     val errorMap = getRunningEnvironments(environmentId).toMap
     val info = errorMap(environmentId)
 
-    info.environment.errors.map { ex ⇒
+    val errors = Environment.errors(info.environment)
+
+    errors.map { ex ⇒
       ex.exception match {
         case fje: environment.FailedJobExecution ⇒ EnvironmentError(environmentId, fje.message, ErrorData(fje.cause) + MessageErrorData(s"\nDETAILS:\n${fje.detail}"), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
         case _                                   ⇒ EnvironmentError(environmentId, ex.exception.getMessage, ErrorData(ex.exception), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))

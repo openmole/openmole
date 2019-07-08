@@ -9,14 +9,15 @@ import scalatags.JsDom.all._
 object SplomPlot {
 
   def apply(
-    title:  String  = "",
-    serie:  Serie,
-    legend: Boolean = false) = {
+    title:   String  = "",
+    serie:   Serie,
+    legend:  Boolean = false,
+    plotter: Plotter) = {
 
     lazy val plotDiv = Plot.baseDiv
 
-    val dims = serie.values
-    val nbDims = dims.length
+    val dims = serie.yValues
+    val nbDims = plotter.toBePlotted.indexes.length
 
     if (nbDims > 1) {
       val size = nbDims * (if (nbDims < 3) 200 else 150)

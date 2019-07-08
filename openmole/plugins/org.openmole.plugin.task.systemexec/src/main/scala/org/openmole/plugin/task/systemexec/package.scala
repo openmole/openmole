@@ -155,11 +155,22 @@ package object systemexec extends SystemExecPackage {
       }
   }
 
+  /**
+   * Result of a system execution
+   * @param returnCode
+   * @param output
+   * @param errorOutput
+   */
   case class ExecutionResult(returnCode: Int, output: Option[String], errorOutput: Option[String])
 
   def commandLine(cmd: String) = parse(cmd).toArray
 
-  def parse(line: String) = {
+  /**
+   * parse a command line
+   * @param line
+   * @return
+   */
+  def parse(line: String, keepQuotes: Boolean = false): Vector[String] = {
     var inDoubleQuote = false
     var inSingleQuote = false
     var blocked = false
@@ -187,19 +198,19 @@ package object systemexec extends SystemExecPackage {
 
         case (false, false, false, '"', _) ⇒
           inDoubleQuote = true
-        // currentArguments.append(character)
+          if (keepQuotes) currentArguments.append('"')
 
         case (true, false, false, '"', false) ⇒
           inDoubleQuote = false
-        //currentArguments.append(character)
+          if (keepQuotes) currentArguments.append('"')
 
         case (false, false, false, ''', _) ⇒
           inSingleQuote = true
-        //currentArguments.append(character)
+          if (keepQuotes) currentArguments.append(''')
 
         case (false, true, false, ''', false) ⇒
           inSingleQuote = false
-        //currentArguments.append(character)
+          if (keepQuotes) currentArguments.append(character)
 
         case (false, false, false, c, _) ⇒ currentArguments.append(c)
         case (true, false, false, c, _)  ⇒ currentArguments.append(c)
@@ -215,6 +226,20 @@ package object systemexec extends SystemExecPackage {
     arguments.toVector
   }
 
+  /**
+   * Execute a parsed command
+   * @param command
+   * @param workDir
+   * @param environmentVariables
+   * @param captureOutput
+   * @param captureError
+   * @param errorOnReturnValue
+   * @param displayOutput
+   * @param displayError
+   * @param stdOut
+   * @param stdErr
+   * @return
+   */
   def execute(
     command:              Array[String],
     workDir:              File,
@@ -264,6 +289,9 @@ package object systemexec extends SystemExecPackage {
         )
       }
 
+      // debugging - please do not remove
+      //println("Running command:\n" + command.toList) //+ "\n" + inheritedEnvironment.mkString("\n") + "\n" + openmoleEnvironment.mkString("\n"))
+
       val returnCode = executeProcess(process, out, err)
 
       val result =
@@ -288,6 +316,12 @@ package object systemexec extends SystemExecPackage {
     }
   }
 
+  /**
+   * Throw an error for a command and its result
+   * @param commandLine
+   * @param executionResult
+   * @return
+   */
   def error(commandLine: Vector[String], executionResult: ExecutionResult) = {
     def output = executionResult.output.map(o ⇒ s"\nStandard output was:\n$o")
     def error = executionResult.errorOutput.map(e ⇒ s"\nError output was:\n$e")
@@ -303,18 +337,43 @@ package object systemexec extends SystemExecPackage {
   sealed trait ExecutionCommand
   object ExecutionCommand {
 
-    case class Raw(command: String) extends ExecutionCommand
+    /**
+     * The raw command may be split depending on parsing level for quotes in different parts
+     * @param command
+     * @param keepQuotes
+     */
+    case class Raw(command: List[String], keepQuotes: List[Boolean]) extends ExecutionCommand
     case class Parsed(command: String*) extends ExecutionCommand
+
+    object Raw {
+      def apply(command: String): Raw = Raw(List(command), List(false))
+      def apply(commands: List[String]): Raw = Raw(commands, List.fill(commands.size)(false))
+      def apply(commands: List[String], keepQuotes: Boolean): Raw = Raw(commands, List.fill(commands.size)(keepQuotes))
+    }
 
     def parse(executionCommand: ExecutionCommand): Vector[String] =
       executionCommand match {
-        case c: Raw    ⇒ systemexec.parse(c.command)
+        case c: Raw    ⇒ c.command.zip(c.keepQuotes).map { case (com, k) ⇒ systemexec.parse(com, k) }.reduce(_ ++ _)
         case p: Parsed ⇒ p.command.toVector
       }
 
     implicit def stringToRaw(c: String) = Raw(c)
   }
 
+  /**
+   * Execute a list of commands
+   * @param workDirectory
+   * @param environmentVariables
+   * @param commands
+   * @param errorOnReturnValue
+   * @param captureOutput
+   * @param captureError
+   * @param displayOutput
+   * @param displayError
+   * @param stdOut
+   * @param stdErr
+   * @return
+   */
   def executeAll(
     workDirectory:        File,
     environmentVariables: Vector[(String, String)],

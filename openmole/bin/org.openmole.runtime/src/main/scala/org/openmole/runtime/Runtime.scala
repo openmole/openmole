@@ -24,7 +24,7 @@ import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.task.TaskExecutionContext
-import org.openmole.tool.logger.JavaLogger
+import org.openmole.tool.logger.{ JavaLogger, LoggerService }
 import org.openmole.core.tools.service.Retry
 import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.core.tools.service._
@@ -33,7 +33,6 @@ import org.openmole.core.communication.message._
 import org.openmole.core.communication.storage._
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer._
 import org.openmole.core.threadprovider.ThreadProvider
@@ -43,10 +42,10 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import util.{ Failure, Success }
 import org.openmole.core.workflow.execution.Environment.RuntimeLog
+import org.openmole.core.workflow.job.MoleJob
 import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.lock._
-import org.openmole.tool.file._
-import squants.time.TimeConversions._
+import org.openmole.tool.outputredirection.OutputRedirection
 import squants._
 
 object Runtime extends JavaLogger {
@@ -65,7 +64,7 @@ class Runtime {
     outputMessagePath: String,
     threads:           Int,
     debug:             Boolean
-  )(implicit serializerService: SerializerService, newFile: NewFile, fileService: FileService, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace) = {
+  )(implicit serializerService: SerializerService, newFile: NewFile, fileService: FileService, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace, loggerService: LoggerService) = {
 
     /*--- get execution message and job for runtime---*/
     val usedFiles = new HashMap[String, File]
@@ -88,6 +87,8 @@ class Runtime {
       OutputManager.redirectSystemOutput(outSt)
       OutputManager.redirectSystemError(outSt)
     }
+
+    val outputRedirection = if (!debug) OutputRedirection(outSt) else OutputRedirection(System.out, System.err)
 
     def getReplicatedFile(replicatedFile: ReplicatedFile, transferOptions: TransferOptions) =
       ReplicatedFile.download(replicatedFile) {
@@ -135,18 +136,29 @@ class Runtime {
       val runnableTasks = serializerService.deserializeReplaceFiles[Seq[RunnableTask]](executionMessage.jobs, usedFiles)
 
       val saver = new ContextSaver(runnableTasks.size)
-      val allMoleJobs = runnableTasks.map { _.toMoleJob(saver.save) }
+      val allMoleJobs = runnableTasks.map { t ⇒ MoleJob(t.task, t.context, t.id, saver.save, () ⇒ false) }
 
       val beginExecutionTime = System.currentTimeMillis
 
       /* --- Submit all jobs to the local environment --*/
       logger.fine("Run the jobs")
-      val environment = LocalEnvironment(nbThreads = threads).apply()
+      val environment = new LocalEnvironment(nbThreads = threads, false, Some("runtime local"))
       environment.start()
 
       try {
-        val outputRedirection = OutputRedirection(outSt)
-        val taskExecutionContext = TaskExecutionContext(newFile.makeNewDir("runtime"), environment, preference, threadProvider, fileService, workspace, outputRedirection, KeyValueCache(), LockRepository[LockKey]())
+
+        val taskExecutionContext = TaskExecutionContext(
+          tmpDirectory = newFile.makeNewDir("runtime"),
+          localEnvironment = environment,
+          preference = preference,
+          threadProvider = threadProvider,
+          fileService = fileService,
+          workspace = workspace,
+          outputRedirection = outputRedirection,
+          loggerService = loggerService,
+          cache = KeyValueCache(),
+          lockRepository = LockRepository[LockKey]())
+
         for (toProcess ← allMoleJobs) environment.submit(toProcess, taskExecutionContext)
         saver.waitAllFinished
       }

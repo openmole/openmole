@@ -1,0 +1,57 @@
+package org.openmole.plugin.method.directsampling
+
+/*
+ * Copyright (C) 2019 Romain Reuillon
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
+import org.openmole.tool.types.FromArray
+
+object AggregateTask {
+
+  object AggregateVal {
+    implicit def fromAggregate[A, B: Manifest, V[_]: FromArray](a: Aggregate[Val[A], V[A] ⇒ B]) = AggregateVal(a, a.value.withType[B])
+    implicit def fromInAggregate[A, B: Manifest, V[_]: FromArray](in: In[Aggregate[Val[A], V[A] ⇒ B], Val[B]]) = AggregateVal(in.value, in.domain)
+    implicit def fromVal[A: Manifest](v: Val[A]) = AggregateVal[A, Array[A], Array](v aggregate identity, v.toArray)
+    implicit def fromInVal[A: Manifest](v: In[Val[A], Val[Array[A]]]) = AggregateVal(Aggregate[Val[A], Array[A] ⇒ Array[A]](v.value, identity), v.domain)
+
+    def apply[A, B: Manifest, V[_]: FromArray](a: Aggregate[Val[A], V[A] ⇒ B], _outputVal: Val[B]): AggregateVal[A, B] = new AggregateVal[A, B] {
+      def aggregate(context: Context): Variable[B] = {
+        val fromArray = implicitly[FromArray[V]]
+        Variable(outputVal, a.aggregate(fromArray(context.apply(a.value.toArray))))
+      }
+      def outputVal: Val[B] = _outputVal
+      def value: Val[A] = a.value
+    }
+  }
+
+  trait AggregateVal[A, B] {
+    def aggregate(context: Context): Variable[B]
+    def outputVal: Val[B]
+    def value: Val[A]
+  }
+
+  def apply(aggregates: Seq[AggregateVal[_, _]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+    Task("AggregateTask") { p ⇒
+      import p._
+      context ++ aggregates.map { case a ⇒ a.aggregate(context) }
+    } set (
+      inputs += (aggregates.map(_.value.toArray): _*),
+      outputs += (aggregates.map(_.outputVal): _*)
+    )
+
+}

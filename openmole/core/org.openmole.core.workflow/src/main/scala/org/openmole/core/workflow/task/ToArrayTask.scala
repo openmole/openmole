@@ -23,9 +23,19 @@ import org.openmole.core.workflow.dsl._
 
 import scala.reflect.ClassTag
 
+/**
+ * Task to force the conversion of prototype to prototypes of arrays
+ */
 object ToArrayTask {
 
+  /**
+   * ToArrayTask from a set of prototypes (whatever the type T of each)
+   *
+   * @param prototypes
+   * @return
+   */
   def apply(prototypes: Val[T] forSome { type T }*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+    // FIXME seems to be never used ?
     ClosureTask("ToArrayTask") {
       (context, _, _) ⇒
         prototypes.map {

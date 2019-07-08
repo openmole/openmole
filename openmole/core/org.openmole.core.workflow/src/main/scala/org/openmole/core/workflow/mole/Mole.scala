@@ -18,7 +18,7 @@
 package org.openmole.core.workflow.mole
 
 import org.openmole.core.context.PrototypeSet
-import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.workflow.transition._
 
 import scala.collection._
@@ -37,6 +37,13 @@ object Mole {
       case t: ITransition               ⇒ t → lvl
     }
 
+  /**
+   * Computes and checks the levels of capsules in a [[org.openmole.core.workflow.mole.Mole]].
+   * The root level is 0, explorations increase the level whereas aggregation decrease it.
+   *
+   * @param mole
+   * @return
+   */
   def levels(mole: Mole) = {
     val cache = mutable.HashMap(mole.root → 0)
     val toProceed = mutable.ListBuffer(mole.root → 0)
@@ -56,6 +63,14 @@ object Mole {
 
 }
 
+/**
+ * A Mole contains a [[org.openmole.core.workflow.mole.MoleCapsule]] and associates it to transitions, data channels and inputs.
+ *
+ * @param root
+ * @param transitions
+ * @param dataChannels
+ * @param inputs
+ */
 case class Mole(
   root:         MoleCapsule,
   transitions:  Iterable[ITransition] = Iterable.empty,
@@ -71,5 +86,9 @@ case class Mole(
   lazy val outputDataChannels = dataChannels.groupBy(_.start).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
 
   lazy val levels = Mole.levels(this)
-  def level(c: MoleCapsule) = levels(c)
+  def level(c: MoleCapsule) =
+    levels.get(c) match {
+      case Some(l) ⇒ l
+      case None    ⇒ throw new InternalProcessingError(s"Capsule $c not found in $this")
+    }
 }

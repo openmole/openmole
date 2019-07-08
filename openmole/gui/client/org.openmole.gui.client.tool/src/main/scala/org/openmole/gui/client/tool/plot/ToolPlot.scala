@@ -5,8 +5,12 @@ import com.definitelyscala.plotlyjs._
 object ToolPlot {
 
   def error(dataBuilder: PlotDataBuilder, serie: Option[Serie]): PlotDataBuilder = {
-    serie.map { e ⇒
-      dataBuilder.errorY(ErrorY.array(e.values.head.toDimension._result.values.get))
+    serie.flatMap {
+      _.yValues.headOption.map { y ⇒
+        dataBuilder.errorY(ErrorY.array(
+          y.toDimension._result.values.get
+        ))
+      }
     }.getOrElse(dataBuilder)
   }
 }

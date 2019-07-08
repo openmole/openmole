@@ -221,7 +221,7 @@ object Utils extends JavaLogger {
     }
   }
 
-  def copy(safePath: SafePath, newName: String)(implicit workspace: Workspace): SafePath = {
+  def copy(safePath: SafePath, newName: String, followSymlinks: Boolean = false)(implicit workspace: Workspace): SafePath = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
     val toPath = safePath.copy(path = safePath.path.dropRight(1) :+ newName)
@@ -229,7 +229,7 @@ object Utils extends JavaLogger {
 
     val from: File = safePath
     val replica: File = safePath.parent ++ newName
-    FileDecorator(from).copy(replica)
+    FileDecorator(from).copy(replica, followSymlinks = followSymlinks)
 
     replica
   }
@@ -402,11 +402,9 @@ object Utils extends JavaLogger {
   }
 
   def expandDepsFile(template: File, to: File) = {
-
-    val from = File.createTempFile("openmole", "grammar")
     val rules = PluginInfo.keyWords.partition { kw ⇒
       kw match {
-        case _@ (KeyWord.Task(_) | KeyWord.Source(_) | KeyWord.Environment(_) | KeyWord.Hook(_) | KeyWord.Sampling(_) | KeyWord.Domain(_) | KeyWord.Pattern(_)) ⇒ false
+        case _@ (KeyWord.TaskKeyWord(_) | KeyWord.SourceKeyWord(_) | KeyWord.EnvironmentKeyWord(_) | KeyWord.HookKeyWord(_) | KeyWord.SamplingKeyWord(_) | KeyWord.DomainKeyWord(_) | KeyWord.PatternKeyWord(_)) ⇒ false
         case _ ⇒ true
       }
     }
@@ -469,6 +467,15 @@ object Utils extends JavaLogger {
         }
       }
     }
+  }
+
+  def catchAll[T](f: ⇒ T): Try[T] = {
+    val res =
+      try Success(f)
+      catch {
+        case t: Throwable ⇒ Failure(t)
+      }
+    res
   }
 
 }

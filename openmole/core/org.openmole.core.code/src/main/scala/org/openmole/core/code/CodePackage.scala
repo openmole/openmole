@@ -18,13 +18,13 @@ package org.openmole.core.code
 
 import org.openmole.core.workspace._
 import org.openmole.tool.file.FilePackage
-import org.openmole.tool.random
 import org.openmole.tool.random.RandomProvider
 import org.openmole.tool.statistics.StatisticsPackage
 
 trait CodePackage extends FilePackage with StatisticsPackage with MathPackage {
-  def Random(seed: Long): java.util.Random = random.Random.apply(seed)
+  def Random(seed: Long): java.util.Random = org.openmole.tool.random.Random.apply(seed)
   def Random()(implicit randomProvider: RandomProvider): java.util.Random = newRandom(randomProvider().nextLong())
+  def random(implicit randomProvider: RandomProvider) = randomProvider()
 
   @deprecated("8.0")
   def newRNG(seed: Long): java.util.Random = Random(seed)
@@ -47,6 +47,26 @@ trait CodePackage extends FilePackage with StatisticsPackage with MathPackage {
 
   def withThreadClassLoader[R](classLoader: ClassLoader)(f: ⇒ R) =
     org.openmole.tool.thread.withThreadClassLoader(classLoader)(f)
+
+  def abs(d: Double) = math.abs(d)
+  def abs(i: Int) = math.abs(i)
+  def Pi = math.Pi
+  def exp(d: Double) = math.exp(d)
+  def log(d: Double) = math.log(d)
+  def log10(d: Double) = math.log10(d)
+  def cos(d: Double) = math.cos(d)
+  def sin(d: Double) = math.sin(d)
+  def tan(d: Double) = math.tan(d)
+
+  def acos(d: Double) = math.acos(d)
+  def asin(d: Double) = math.asin(d)
+  def atan(d: Double) = math.atan(d)
+
+  def pow(d: Double, e: Double) = math.pow(d, e)
+  def sqrt(d: Double) = math.sqrt(d)
+  def round(d: Double) = math.round(d)
+
+  def hypot(a: Double, b: Double) = math.hypot(a, b)
 
 }
 

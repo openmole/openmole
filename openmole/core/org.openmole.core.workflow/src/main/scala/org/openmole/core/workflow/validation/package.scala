@@ -21,6 +21,8 @@ package object validation {
     }
 
     def success = Validate { _ ⇒ Seq.empty }
+
+    implicit def fromThrowables(t: Seq[Throwable]) = Validate { _ ⇒ t }
   }
 
   trait ValidationPackage

@@ -19,6 +19,7 @@ package org.openmole.ui
 
 import java.awt.Desktop
 import java.io.{ File, FileOutputStream, IOException }
+import java.util.logging.Level
 import java.net.URI
 
 import org.openmole.console.Console.ExitCodes
@@ -38,10 +39,10 @@ import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import org.openmole.core.{ location, module }
 import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference._
 import org.openmole.core.services._
 import org.openmole.core.networkservice._
+import org.openmole.tool.outputredirection.OutputRedirection
 
 object Application extends JavaLogger {
 
@@ -176,7 +177,9 @@ object Application extends JavaLogger {
 
     val config = parse(args.map(_.trim).toList)
 
-    config.loggerLevel.foreach(LoggerConfig.level)
+    val logLevel = config.loggerLevel.map(l ⇒ Level.parse(l.toUpperCase))
+    logLevel.foreach(LoggerConfig.level)
+
     val workspaceDirectory = config.workspace.getOrElse(org.openmole.core.workspace.defaultOpenMOLEDirectory)
     implicit val workspace = Workspace(workspaceDirectory)
     import org.openmole.tool.thread._
@@ -226,7 +229,7 @@ object Application extends JavaLogger {
           Console.ExitCodes.incorrectPassword
         }
         else {
-          Services.withServices(workspaceDirectory, passwordString, config.proxyURI) { services ⇒
+          Services.withServices(workspaceDirectory, passwordString, config.proxyURI, logLevel) { services ⇒
             val server = new RESTServer(config.port, config.hostName, services, config.httpSubDirectory)
             server.run()
           }
@@ -248,7 +251,7 @@ object Application extends JavaLogger {
           print(consoleSplash)
           println(consoleUsage)
           Console.dealWithLoadError(loadPlugins, !config.scriptFile.isDefined)
-          Services.withServices(workspaceDirectory, passwordString, config.proxyURI) { implicit services ⇒
+          Services.withServices(workspaceDirectory, passwordString, config.proxyURI, logLevel) { implicit services ⇒
             val console = new Console(config.scriptFile)
             console.run(config.args, config.consoleWorkDirectory)
           }
@@ -278,7 +281,7 @@ object Application extends JavaLogger {
 
             GUIServer.urlFile.content = url
 
-            GUIServices.withServices(workspace, config.proxyURI) { services ⇒
+            GUIServices.withServices(workspace, config.proxyURI, logLevel) { services ⇒
               val server = new GUIServer(port, config.remote, useHTTP, services, config.password, extraHeader, !config.unoptimizedJS, config.httpSubDirectory)
               server.start()
               if (config.browse && !config.remote) browse(url)
@@ -314,9 +317,8 @@ object Application extends JavaLogger {
               }
 
             val res = if (!success(file).exists) {
-              val project = Project(file.getParentFileSafe)
               println(s"Testing: ${file.getName}")
-              file → processResult(project.compile(file, args))
+              file → processResult(Project.compile(file.getParentFileSafe, file, args))
             }
             else {
               file -> util.Success("Compilation succeeded (from previous test)")

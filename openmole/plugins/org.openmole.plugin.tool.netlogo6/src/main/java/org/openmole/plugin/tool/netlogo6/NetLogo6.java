@@ -46,8 +46,11 @@ public class NetLogo6 implements NetLogo {
     }
 
     @Override
-    public void open(String script) throws Exception {
-        getWorkspace().open(script);
+    public void open(String script, boolean switch3d) throws Exception {
+        // FIXME this is only a temporary fix - running simultaneously 3d and 2d models will fail anyway
+        if (switch3d && script.endsWith("3d")) System.setProperty("org.nlogo.is3d", "true");
+        else System.setProperty("org.nlogo.is3d", "false");
+        getWorkspace().open(script, false);
     }
 
     @Override
@@ -114,7 +117,7 @@ public class NetLogo6 implements NetLogo {
      * @param array
      * @return
      */
-    public static LogoList arrayToList(Object[] array){
+    private static LogoList arrayToList(Object[] array){
         LogoListBuilder list = new LogoListBuilder();
         for(Object o:array){
             if(o instanceof Object[]){list.add(arrayToList((Object[]) o));}

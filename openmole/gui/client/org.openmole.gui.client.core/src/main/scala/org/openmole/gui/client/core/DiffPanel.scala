@@ -63,7 +63,8 @@ class DiffPanel {
       post()[Api].saveFile(sp, diff.now.getEditors().right.session.getValue).call().foreach { _ ⇒
         panels.treeNodePanel.invalidCacheAndDraw
         panels.treeNodeTabs.tabs.now.filter { t ⇒ t.safePathTab.now == sp }.foreach { t ⇒
-          t.refresh(content)
+          t.setContent(content)
+          t.refresh()
         }
         dialog.hide
       }

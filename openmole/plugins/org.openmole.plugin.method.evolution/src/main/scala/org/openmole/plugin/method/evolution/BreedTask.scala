@@ -17,61 +17,55 @@
 
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.context.{ Context, Variable }
-import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools.DefaultSet
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
+import org.openmole.core.workflow.builder.ValueAssignment
 
 object BreedTask {
 
-  def apply[T: WorkflowIntegration](algorithm: T, size: Int, suggestion: Seq[Seq[ValueAssignment[_]]] = Seq.empty)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
-    lazy val t = wfi(algorithm)
-
-    FromContextTask("BreedTask") { p ⇒
+  def apply(evolution: EvolutionWorkflow, size: Int, suggestion: Seq[Seq[ValueAssignment[_]]] = Seq.empty)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+    Task("BreedTask") { p ⇒
       import p._
 
       def defaultSetToVariables(ds: Seq[ValueAssignment[_]]) = ds.map(v ⇒ Variable.unsecure(v.value, v.equal.from(context))).toVector
-      val suggestedGenomes = suggestion.map(ds ⇒ t.operations.buildGenome(defaultSetToVariables(ds)).from(context))
+      val suggestedGenomes = suggestion.map(ds ⇒ evolution.operations.buildGenome(defaultSetToVariables(ds)).from(context))
 
-      val population = context(t.populationPrototype)
-      val s = context(t.statePrototype)
+      val population = context(evolution.populationPrototype)
+      val s = context(evolution.statePrototype)
 
-      (population.isEmpty, t.operations.generationLens.get(s), suggestedGenomes.isEmpty) match {
+      (population.isEmpty, evolution.operations.generationLens.get(s), suggestedGenomes.isEmpty) match {
         case (true, 0, false) ⇒
           val (news, gs) =
             size - suggestedGenomes.size match {
-              case x if x > 0 ⇒ t.operations.initialGenomes(x)(context).run(s).value
+              case x if x > 0 ⇒ evolution.operations.initialGenomes(x)(context).run(s).value
               case x          ⇒ (s, Vector.empty)
             }
 
           Context(
-            Variable(t.genomePrototype.array, random().shuffle(suggestedGenomes ++ gs).toArray(t.genomePrototype.`type`.manifest)),
-            Variable(t.statePrototype, news)
+            evolution.genomePrototype.array -> random().shuffle(suggestedGenomes ++ gs).toArray(evolution.genomePrototype.`type`.manifest),
+            Variable(evolution.statePrototype, news)
           )
         case (true, _, _) ⇒
-          val (news, gs) = t.operations.initialGenomes(size)(context).run(s).value
+          val (news, gs) = evolution.operations.initialGenomes(size)(context).run(s).value
 
           Context(
-            Variable(t.genomePrototype.array, gs.toArray(t.genomePrototype.`type`.manifest)),
-            Variable(t.statePrototype, news)
+            Variable(evolution.genomePrototype.array, gs.toArray(evolution.genomePrototype.`type`.manifest)),
+            Variable(evolution.statePrototype, news)
           )
         case (false, _, _) ⇒
-          val (newState, breeded) = t.operations.breeding(population.toVector, size).from(context).run(s).value
+          val (newState, breeded) = evolution.operations.breeding(population.toVector, size).from(context).run(s).value
 
           Context(
-            Variable(t.genomePrototype.array, breeded.toArray(t.genomePrototype.`type`.manifest)),
-            Variable(t.statePrototype, newState)
+            Variable(evolution.genomePrototype.array, breeded.toArray(evolution.genomePrototype.`type`.manifest)),
+            Variable(evolution.statePrototype, newState)
           )
       }
 
     } set (
-      inputs += (t.populationPrototype, t.statePrototype),
-      outputs += (t.statePrototype),
-      exploredOutputs += (t.genomePrototype.array)
+      inputs += (evolution.populationPrototype, evolution.statePrototype),
+      outputs += (evolution.statePrototype),
+      exploredOutputs += (evolution.genomePrototype.array)
     )
-  }
 
 }
 

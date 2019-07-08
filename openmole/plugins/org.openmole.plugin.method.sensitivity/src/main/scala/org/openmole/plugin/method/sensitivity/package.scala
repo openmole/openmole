@@ -18,16 +18,13 @@
 
 package org.openmole.plugin.method
 
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.workflow.builder.DefinitionScope
-import org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
-import org.openmole.core.workflow.validation.DataflowProblem._
-import org.openmole.core.workflow.validation._
-import org.openmole.core.workflow.transition.TransitionSlot
+import java.io.PrintStream
+
 import org.openmole.core.dsl
 import org.openmole.core.dsl._
-import org.openmole.plugin.method.directsampling._
+import org.openmole.core.dsl.extension._
+import org.openmole.plugin.tool.pattern._
+import org.openmole.core.csv
 
 package object sensitivity {
 
@@ -56,14 +53,39 @@ package object sensitivity {
     }
 
 
-    def outputs(
-      modelInputs: Seq[ScalarOrSequenceOfDouble[_]],
-      modelOutputs: Seq[Val[Double]]) =
-      for {
-        i ← ScalarOrSequenceOfDouble.prototypes(modelInputs)
-        o ← modelOutputs
-      } yield (i, o)
+    def writeResults(ps: PrintStream, inputs: Seq[Val[_]], outputs: Seq[Val[_]], coefficient: (Val[_], Val[_]) ⇒ Val[_]) = FromContext { p ⇒
+      import p._
+      
+      outputs.zipWithIndex.foreach { case (o, i) ⇒
+        val vs = inputs.map { i ⇒ coefficient(i, o) }
+        val headerLine = if(i == 0) Some(s"""output,${csv.header(inputs, vs)}""") else None
+        csv.writeVariablesToCSV(ps, headerLine, Seq(o.name) ++ vs.map(v ⇒ context(v)))
+      }
+    }
+
+
+    case class SaltelliParams(inputs: Seq[ScalarOrSequenceOfDouble[_]], outputs: Seq[Val[_]])
+    case class MorrisParams(inputs: Seq[ScalarOrSequenceOfDouble[_]], outputs: Seq[Val[_]])
   }
+
+
+  implicit class SaltelliMethodContainer(dsl: DSLContainer[Sensitivity.SaltelliParams])  extends DSLContainerHook(dsl) {
+    def hook(directory: FromContext[File]): DSLContainer[Sensitivity.SaltelliParams] = {
+      implicit val defScope = dsl.scope
+      dsl hook SaltelliHook(dsl, directory)
+    }
+  }
+
+
+
+  implicit class MorrisMethodContainer(dsl: DSLContainer[Sensitivity.MorrisParams]) extends DSLContainerHook(dsl) {
+    def hook(directory: FromContext[File]): DSLContainer[Sensitivity.MorrisParams] = {
+      implicit val defScope = dsl.scope
+      dsl hook MorrisHook(dsl, directory)
+    }
+  }
+
+
   /**
    * A Morris Sensitivity Analysis takes a puzzle (a model) that we want to analyse,
    * the list of the inputs (and their ranges), the list of outputs we want
@@ -92,12 +114,15 @@ package object sensitivity {
     // to interpret the results
     val aggregation = MorrisAggregation(inputs, outputs)
 
-    DirectSampling(
-      evaluation = evaluation,
-      sampling = sampling,
-      aggregation = aggregation,
-      scope = scope
-    )
+
+    val w =
+      MapReduce(
+        evaluation = evaluation,
+        sampler = ExplorationTask(sampling),
+        aggregation = aggregation
+      )
+
+    DSLContainerExtension(w, data = Sensitivity.MorrisParams(inputs, outputs))
   }
 
   def SensitivitySaltelli(
@@ -106,7 +131,6 @@ package object sensitivity {
     outputs: Seq[Val[Double]],
     samples:      FromContext[Int],
     scope: DefinitionScope = "sensitivity saltelli") = {
-
     implicit def defScope = scope
 
     val sampling = SaltelliSampling(samples, inputs: _*)
@@ -119,12 +143,14 @@ package object sensitivity {
         dsl.inputs += (SaltelliSampling.matrixName.array, SaltelliSampling.matrixIndex.array)
       )
 
-    DirectSampling(
-      evaluation = evaluation,
-      sampling = sampling,
-      aggregation = aggregation,
-      scope = scope
-    )
+    val w =
+      MapReduce(
+        evaluation = evaluation,
+        sampler = ExplorationTask(sampling),
+        aggregation = aggregation
+      )
+
+    DSLContainerExtension(w, data = Sensitivity.SaltelliParams(inputs, outputs))
   }
 
 }

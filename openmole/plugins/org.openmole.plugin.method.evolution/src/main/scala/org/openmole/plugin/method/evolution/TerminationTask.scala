@@ -24,24 +24,21 @@ import org.openmole.core.workflow.task._
 
 object TerminationTask {
 
-  def apply[T](algorithm: T, termination: OMTermination)(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
-    val t = wfi(algorithm)
-
+  def apply[T](evolution: EvolutionWorkflow, termination: OMTermination)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     ClosureTask("TerminationTask") { (context, _, _) ⇒
-      val term = OMTermination.toTermination(termination, t)
+      val term = OMTermination.toTermination(termination, evolution)
 
-      val (newState, te) = term(context(t.populationPrototype).toVector).run(context(t.statePrototype)).value
+      val (newState, te) = term(context(evolution.populationPrototype).toVector).run(context(evolution.statePrototype)).value
 
       Context(
-        Variable(t.terminatedPrototype, te),
-        Variable(t.statePrototype, newState),
-        Variable(t.generationPrototype, t.operations.generationLens.get(newState))
+        Variable(evolution.terminatedPrototype, te),
+        Variable(evolution.statePrototype, newState),
+        Variable(evolution.generationPrototype, evolution.operations.generationLens.get(newState))
       )
     } set (
-      inputs += (t.statePrototype, t.populationPrototype),
-      outputs += (t.statePrototype, t.terminatedPrototype, t.generationPrototype)
+      inputs += (evolution.statePrototype, evolution.populationPrototype),
+      outputs += (evolution.statePrototype, evolution.terminatedPrototype, evolution.generationPrototype)
     )
-  }
 
 }
 

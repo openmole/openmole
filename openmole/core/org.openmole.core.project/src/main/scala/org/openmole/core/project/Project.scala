@@ -17,7 +17,6 @@
  */
 package org.openmole.core.project
 
-import javax.script.CompiledScript
 import org.openmole.core.console._
 import org.openmole.core.pluginmanager._
 import org.openmole.core.project.Imports.{ SourceFile, Tree }
@@ -26,7 +25,7 @@ import monocle.function.all._
 import monocle.std.all._
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.outputmanager.OutputManager
+import org.openmole.core.project
 import org.openmole.core.services._
 import org.openmole.core.workflow.composition.DSL
 import org.openmole.core.workspace.NewFile
@@ -55,7 +54,7 @@ object Project {
     def makeVal(identifier: String, file: File) =
       s"""lazy val ${identifier} = ${uniqueName(file)}"""
 
-    def makeScriptImports(sourceFile: SourceFile) = {
+    def makeScriptWithImports(sourceFile: SourceFile) = {
       def imports = makeImportTree(Tree.insertAll(sourceFile.importedFiles))
 
       val name = uniqueName(sourceFile.file)
@@ -69,12 +68,31 @@ object Project {
            """
     }
 
-    def makeScript(sourceFile: SourceFile) = {
+    def makeImportedScript(sourceFile: SourceFile) = {
+      def removeTerms(classContent: String) = {
+        import _root_.scala.meta._
+
+        val source = classContent.parse[Source].get
+        val cls = source.stats.last.asInstanceOf[Defn.Object]
+        val lastStat = cls.templ.stats.last
+
+        def filterTermAndAddLazy(stat: Stat) =
+          stat match {
+            case _: Term ⇒ None
+            case v: Defn.Val if v.mods.collect { case x: Mod.Lazy ⇒ x }.isEmpty ⇒ Some(v.copy(mods = v.mods ++ Seq(Mod.Lazy())))
+            case s ⇒ Some(s)
+          }
+
+        val newCls = cls.copy(templ = cls.templ.copy(stats = cls.templ.stats.flatMap(filterTermAndAddLazy)))
+        source.copy(stats = source.stats.dropRight(1) ++ Seq(newCls))
+      }
+
       def imports = makeImportTree(Tree.insertAll(sourceFile.importedFiles))
 
       val name = uniqueName(sourceFile.file)
 
-      s"""class ${name}Class {
+      val classContent =
+        s"""object ${name} {
            |lazy val _imports = new {
            |$imports
            |}
@@ -82,58 +100,31 @@ object Project {
            |import _imports._
            |
            |private lazy val ${ConsoleVariables.workDirectory} = File(new java.net.URI("${sourceFile.file.getParentFileSafe.toURI}").getPath)
+           |
            |${sourceFile.file.content}
            |}
-           |
-           |lazy val ${name} = new ${name}Class
-         """.stripMargin
+        """.stripMargin
+
+      removeTerms(classContent)
     }
 
     val allImports = Imports.importedFiles(script)
 
     // The first script is the script being compiled itself, no need to include its vars and defs, it would be redundant
-    def importHeader = { allImports.take(1).map(makeScriptImports) ++ allImports.drop(1).map(makeScript) }.mkString("\n")
+    def importHeader = { allImports.take(1).map(makeScriptWithImports) ++ allImports.drop(1).map(makeImportedScript) }.mkString("\n")
 
     s"""
        |$importHeader
      """.stripMargin
   }
 
-  def apply(workDirectory: File)(implicit newFile: NewFile, fileService: FileService) =
-    new Project(workDirectory, v ⇒ Project.newREPL(v))
-
   trait OMSScript {
     def run(): DSL
   }
 
-}
+  def compile(workDirectory: File, script: File, args: Seq[String], newREPL: Option[ConsoleVariables ⇒ ScalaREPL] = None)(implicit services: Services): CompileResult = {
+    import services._
 
-sealed trait CompileResult
-case class ScriptFileDoesNotExists() extends CompileResult
-sealed trait CompilationError extends CompileResult {
-  def error: Throwable
-}
-case class ErrorInCode(error: ScalaREPL.CompilationError) extends CompilationError
-case class ErrorInCompiler(error: Throwable) extends CompilationError
-
-case class Compiled(result: ScalaREPL.Compiled) extends CompileResult {
-
-  def eval =
-    result.apply().asInstanceOf[Project.OMSScript].run() match {
-      case p: DSL ⇒ p
-      case e      ⇒ throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
-    }
-}
-
-class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL) {
-
-  def pluginsDirectory: File = workDirectory / "plugins"
-
-  def plugins = pluginsDirectory.listFilesSafe
-
-  def loadPlugins = PluginManager.load(plugins)
-
-  def compile(script: File, args: Seq[String])(implicit services: Services): CompileResult = {
     if (!script.exists) ScriptFileDoesNotExists()
     else {
       def header =
@@ -155,7 +146,7 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL) {
            |$footer""".stripMargin
 
       def compile(content: String, args: Seq[String]): CompileResult = {
-        val loop = newREPL(ConsoleVariables(args, workDirectory))
+        val loop = newREPL.getOrElse { (v: project.ConsoleVariables) ⇒ Project.newREPL(v) }.apply(ConsoleVariables(args, workDirectory))
         try {
           Option(loop.compile(content)) match {
             case Some(compiled) ⇒ Compiled(compiled)
@@ -190,6 +181,21 @@ class Project(workDirectory: File, newREPL: (ConsoleVariables) ⇒ ScalaREPL) {
     }
   }
 
-  def scriptsObjects(script: File) = Project.scriptsObjects(script)
+}
 
+sealed trait CompileResult
+case class ScriptFileDoesNotExists() extends CompileResult
+sealed trait CompilationError extends CompileResult {
+  def error: Throwable
+}
+case class ErrorInCode(error: ScalaREPL.CompilationError) extends CompilationError
+case class ErrorInCompiler(error: Throwable) extends CompilationError
+
+case class Compiled(result: ScalaREPL.Compiled) extends CompileResult {
+
+  def eval =
+    result.apply().asInstanceOf[Project.OMSScript].run() match {
+      case p: DSL ⇒ p
+      case e      ⇒ throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
+    }
 }

@@ -23,7 +23,7 @@ assemble:
     - sftp -i ~/.ssh/identity -b ./tonext -P 21022 user@docker.openmole.org
   only:
     refs:
-      - 9-dev
+      - 10-dev
    
 
 

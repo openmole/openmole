@@ -39,13 +39,18 @@ object MoleTask {
   implicit def isTask = InputOutputBuilder(MoleTask.config)
   implicit def isInfo = InfoBuilder(MoleTask.info)
 
+  /**
+   * Constructor used to construct the MoleTask corresponding to the full puzzle
+   *
+   * @param dsl
+   * @return
+   */
   def apply(dsl: DSL)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): MoleTask = {
     val puzzle = dslToPuzzle(dsl)
     apply(puzzle.toMole, puzzle.lasts.head)
   }
 
   /**
-   * *
    * @param mole the mole executed by this task.
    * @param last the capsule which returns the results
    */
@@ -59,6 +64,11 @@ object MoleTask {
     )
   }
 
+  /**
+   * Check if a given [[MoleJob]] contains a [[MoleTask]] (a mole job wraps a task which is not necessarily a Mole Task).
+   * @param moleJob
+   * @return
+   */
   def containsMoleTask(moleJob: MoleJob) =
     moleJob.task match {
       case _: MoleTask              ⇒ true
@@ -68,6 +78,15 @@ object MoleTask {
 
 }
 
+/**
+ * Task executing a Mole
+ *
+ * @param _mole the Mole to be executed
+ * @param last the MoleCapsule finishing the Mole
+ * @param implicits names of implicits, which values are imported explicitly from the context
+ * @param config inputs and outputs prototypes, and defaults
+ * @param info name and definition scope
+ */
 @Lenses case class MoleTask(
   _mole:     Mole,
   last:      MoleCapsule,
@@ -76,6 +95,10 @@ object MoleTask {
   info:      InfoConfig
 ) extends Task {
 
+  /**
+   * mole of the MoleTask, with inputs from the config: InputOutputConfig
+   * @return
+   */
   def mole = _mole.copy(inputs = inputs)
 
   protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { p ⇒
@@ -93,6 +116,7 @@ object MoleTask {
       import executionContext.threadProvider
       import executionContext.workspace
       import executionContext.outputRedirection
+      import executionContext.loggerService
 
       val localEnvironment =
         LocalEnvironment(1, executionContext.localEnvironment.deinterleave)
@@ -103,7 +127,6 @@ object MoleTask {
         mole,
         implicits = implicitsValues,
         defaultEnvironment = localEnvironment,
-        executionContext = MoleExecutionContext(),
         cleanOnFinish = false,
         taskCache = executionContext.cache,
         lockRepository = executionContext.lockRepository
@@ -111,7 +134,7 @@ object MoleTask {
 
       execution listen {
         case (_, ev: MoleExecution.JobFinished) ⇒
-          lastContextLock { if (ev.capsule == last) lastContext = Some(ev.moleJob.context) }
+          lastContextLock { if (ev.capsule == last) lastContext = Some(ev.context) }
       }
 
       (execution, moleServices.newFile)

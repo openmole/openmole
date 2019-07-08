@@ -16,12 +16,8 @@
  */
 package org.openmole.plugin.tool.pattern
 
-import org.openmole.core.context.Val
-import org.openmole.core.dsl.DSL
-import org.openmole.core.workflow.builder.DefinitionScope
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.task._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 
 object MasterSlave {
 

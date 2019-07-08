@@ -50,13 +50,18 @@ class GitApiImpl(s: Services) extends GitAPI {
 
     val targetFolder = repositoryName map { r ⇒ folder ++ r }
 
+    println("repo name " + repositoryName)
+    println("target folder " + targetFolder)
+
     scala.util.Try(
       targetFolder map { tf ⇒
         val ff: java.io.File = tf
         Git.cloneRepository().setURI(url).setDirectory(ff).call()
       }) match {
-        case scala.util.Failure(e: Exception) ⇒ Some(ErrorData(e))
-        case _                                ⇒ None
+        case scala.util.Failure(e: Exception) ⇒
+          println("Failure " + e.getStackTrace)
+          Some(ErrorData(e))
+        case _ ⇒ None
       }
   }
 

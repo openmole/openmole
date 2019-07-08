@@ -26,57 +26,63 @@ import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.tools.service._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.core.workflow.execution.local.{ ExecutorPool, LocalExecutionJob }
-import org.openmole.core.workflow.job.{ Job, MoleJob }
+import org.openmole.core.workflow.job.{ Job, MoleJob, MoleJobId }
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workflow.tools.{ ExceptionEvent, Name }
 import org.openmole.tool.cache._
-import org.openmole.tool.collection._
 
 import scala.ref.WeakReference
 
 object Environment {
-  val maxExceptionsLog = ConfigurationLocation("Environment", "MaxExceptionsLog", Some(1000))
+  val maxExceptionsLog = ConfigurationLocation("Environment", "MaxExceptionsLog", Some(200))
 
   case class JobSubmitted(job: ExecutionJob) extends Event[Environment]
   case class JobStateChanged(job: ExecutionJob, newState: ExecutionState, oldState: ExecutionState) extends Event[Environment]
-
   case class ExceptionRaised(exception: Throwable, level: Level) extends Event[Environment] with ExceptionEvent
   case class ExecutionJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level) extends Event[Environment] with ExceptionEvent
-  case class MoleJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level, moleJob: MoleJob) extends Event[Environment] with ExceptionEvent
+  case class MoleJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level, moleJob: MoleJobId) extends Event[Environment] with ExceptionEvent
 
   case class JobCompleted(job: ExecutionJob, log: RuntimeLog, info: RuntimeInfo) extends Event[Environment]
 
   case class RuntimeLog(beginTime: Long, executionBeginTime: Long, executionEndTime: Long, endTime: Long)
-}
 
-import org.openmole.core.workflow.execution.Environment._
+  def errors(environment: Environment) =
+    environment match {
+      case e: SubmissionEnvironment ⇒ e.errors
+      case _: LocalEnvironment      ⇒ Seq()
+    }
+
+  def clearErrors(environment: Environment) =
+    environment match {
+      case e: SubmissionEnvironment ⇒ e.clearErrors
+      case _                        ⇒ Seq()
+    }
+
+}
 
 sealed trait Environment <: Name {
-  private[execution] val _done = new AtomicLong(0L)
-  private[execution] val _failed = new AtomicLong(0L)
-
-  def eventDispatcherService: EventDispatcher
-  def exceptions: Int
-
-  private lazy val _errors = new SlidingList[ExceptionEvent]
-  def error(e: ExceptionEvent) = _errors.put(e, exceptions)
-  def errors: List[ExceptionEvent] = _errors.elements
-  def clearErrors: List[ExceptionEvent] = _errors.clear()
-
   def submitted: Long
   def running: Long
-  def done: Long = _done.get()
-  def failed: Long = _failed.get()
+  def done: Long
+  def failed: Long
 
-  def start(): Unit = {}
-  def stop(): Unit = {}
+  def start(): Unit
+  def stop(): Unit
 }
 
+/**
+ * An environment with the properties of submitting jobs, getting jobs, and cleaning.
+ *
+ * This trait is implemented by environment plugins, and not the more generic [[Environment]]
+ */
 trait SubmissionEnvironment <: Environment {
   def submit(job: Job)
   def jobs: Iterable[ExecutionJob]
+  def runningJobs: Seq[ExecutionJob]
+
   def clean: Boolean
+  def errors: Seq[ExceptionEvent]
+  def clearErrors: Seq[ExceptionEvent]
 }
 
 object LocalEnvironment {
@@ -85,13 +91,25 @@ object LocalEnvironment {
     nbThreads:    OptionalArgument[Int]    = None,
     deinterleave: Boolean                  = false,
     name:         OptionalArgument[String] = OptionalArgument()
-  )(implicit varName: sourcecode.Name, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher) =
-    LocalEnvironmentProvider(() ⇒ new LocalEnvironment(nbThreads.getOrElse(1), deinterleave, Some(name.getOrElse(varName.value))))
+  )(implicit varName: sourcecode.Name) =
+    LocalEnvironmentProvider { ms ⇒
+      import ms._
+      new LocalEnvironment(nbThreads.getOrElse(1), deinterleave, Some(name.getOrElse(varName.value)))
+    }
 
-  def apply(threads: Int, deinterleave: Boolean)(implicit threadProvider: ThreadProvider, eventDispatcherService: EventDispatcher) =
-    LocalEnvironmentProvider(() ⇒ new LocalEnvironment(threads, deinterleave, None))
+  def apply(threads: Int, deinterleave: Boolean) =
+    LocalEnvironmentProvider { ms ⇒
+      import ms._
+      new LocalEnvironment(threads, deinterleave, None)
+    }
+
 }
 
+/**
+ * Local environment
+ * @param nbThreads number of parallel threads
+ * @param deinterleave get the outputs of executions as strings
+ */
 class LocalEnvironment(
   val nbThreads:     Int,
   val deinterleave:  Boolean,
@@ -100,19 +118,20 @@ class LocalEnvironment(
 
   val pool = Cache(new ExecutorPool(nbThreads, WeakReference(this), threadProvider))
 
+  def runningJobs = pool().runningJobs
+
   def nbJobInQueue = pool().waiting
-  def exceptions = 0
 
   def submit(job: Job, executionContext: TaskExecutionContext): Unit =
-    submit(new LocalExecutionJob(executionContext, job.moleJobs, Some(job.moleExecution)))
+    submit(LocalExecutionJob(executionContext, Job.moleJobs(job), Some(Job.moleExecution(job))))
 
   def submit(moleJob: MoleJob, executionContext: TaskExecutionContext): Unit =
-    submit(new LocalExecutionJob(executionContext, List(moleJob), None))
+    submit(LocalExecutionJob(executionContext, List(moleJob), None))
 
   private def submit(ejob: LocalExecutionJob): Unit = {
     pool().enqueue(ejob)
-    ejob.state = ExecutionState.SUBMITTED
-    eventDispatcherService.trigger(this, new Environment.JobSubmitted(ejob))
+    eventDispatcherService.trigger(this, Environment.JobSubmitted(ejob))
+    eventDispatcherService.trigger(this, Environment.JobStateChanged(ejob, ExecutionState.SUBMITTED, ExecutionState.READY))
   }
 
   def submitted: Long = pool().waiting
@@ -120,4 +139,11 @@ class LocalEnvironment(
 
   override def start() = {}
   override def stop() = pool().stop()
+
+  private[execution] val _done = new AtomicLong(0L)
+  private[execution] val _failed = new AtomicLong(0L)
+
+  def done: Long = _done.get()
+  def failed: Long = _failed.get()
+
 }

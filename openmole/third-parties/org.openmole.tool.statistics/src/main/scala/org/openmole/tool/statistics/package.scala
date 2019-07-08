@@ -26,8 +26,13 @@ package statistics {
       def median: Double = stat.median(s.map(td.apply))
       def medianAbsoluteDeviation = stat.medianAbsoluteDeviation(s.map(td.apply))
       def average = stat.average(s.map(td.apply))
+      def variance = stat.variance(s.map(td.apply))
       def meanSquaredError = stat.meanSquaredError(s.map(td.apply))
+      def standardDeviation = stat.standardDeviation(s.map(td.apply))
       def rootMeanSquaredError = stat.rootMeanSquaredError(s.map(td.apply))
+
+      def absoluteDistance[T2](to: Seq[T2])(implicit td2: ToDouble[T2]) = stat.absoluteDistance(s.map(td.apply), to.map(td2.apply))
+      def squareDistance[T2](to: Seq[T2])(implicit td2: ToDouble[T2]) = stat.squareDistance(s.map(td.apply), to.map(td2.apply))
     }
 
     implicit def statisticArrayOfDoubleDecorator[T: ToDouble](s: Array[T]) = new StatisticIterableOfDoubleDecorator(s.toVector)

@@ -57,13 +57,13 @@ object CARETask extends JavaLogger {
   def apply(
     archive:              File,
     command:              String,
-    returnValue:          OptionalArgument[Val[Int]]            = None,
-    stdOut:               OptionalArgument[Val[String]]         = None,
-    stdErr:               OptionalArgument[Val[String]]         = None,
-    errorOnReturnValue:   Boolean                               = true,
-    environmentVariables: Vector[(String, FromContext[String])] = Vector.empty,
-    hostFiles:            Vector[HostFile]                      = Vector.empty,
-    workDirectory:        OptionalArgument[String]              = None)(implicit sourceCodeName: sourcecode.Name, definitionScope: DefinitionScope): CARETask =
+    returnValue:          OptionalArgument[Val[Int]]    = None,
+    stdOut:               OptionalArgument[Val[String]] = None,
+    stdErr:               OptionalArgument[Val[String]] = None,
+    errorOnReturnValue:   Boolean                       = true,
+    environmentVariables: Vector[EnvironmentVariable]   = Vector.empty,
+    hostFiles:            Vector[HostFile]              = Vector.empty,
+    workDirectory:        OptionalArgument[String]      = None)(implicit sourceCodeName: sourcecode.Name, definitionScope: DefinitionScope): CARETask =
     new CARETask(
       archive = archive,
       command = command,
@@ -90,7 +90,7 @@ object CARETask extends JavaLogger {
   returnValue:          Option[Val[Int]],
   stdOut:               Option[Val[String]],
   stdErr:               Option[Val[String]],
-  environmentVariables: Vector[(String, FromContext[String])],
+  environmentVariables: Vector[EnvironmentVariable],
   _config:              InputOutputConfig,
   external:             External,
   info:                 InfoConfig
@@ -192,7 +192,7 @@ object CARETask extends JavaLogger {
 
       def prootNoSeccomp = if (preference(CARETask.disableSeccomp)) Vector(("PROOT_NO_SECCOMP", "1")) else Vector()
 
-      val allEnvironmentVariables = environmentVariables.map { case (varName, variable) ⇒ (varName, variable.from(context)) } ++ prootNoSeccomp
+      val allEnvironmentVariables = environmentVariables.map { v ⇒ v.name.from(context) -> v.value.from(context) } ++ prootNoSeccomp
       val executionResult = execute(cl, extractedArchive, allEnvironmentVariables, stdOut.isDefined, stdErr.isDefined)
 
       if (errorOnReturnValue && returnValue.isEmpty && executionResult.returnCode != 0) throw error(cl.toVector, executionResult)

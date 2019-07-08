@@ -1,15 +1,11 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.CoreUtils
-
-import scala.concurrent.Future
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.FileExtension._
 
 import scala.scalajs.js
 import scalatags.JsDom.all._
-import scalatags.JsDom.{ TypedTag, tags }
+import scalatags.JsDom.tags
 
 import scaladget.ace._
 import scaladget.bootstrapnative.bsn._
@@ -20,7 +16,7 @@ import scala.scalajs.js.JSConverters._
 import org.openmole.gui.ext.tool.client._
 import org.scalajs.dom.raw.Event
 import scaladget.bootstrapnative.Popup
-import scaladget.bootstrapnative.Popup.{ ClickPopup, Manual, PopupPosition }
+import scaladget.bootstrapnative.Popup.{ Manual, PopupPosition }
 import rx._
 
 /*
@@ -47,12 +43,22 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
   val editorDiv = tags.div(id := "editor").render
   val editor = ace.edit(editorDiv)
 
-  val lineHeight = 15
+  val lineHeight = Var(15)
   val scrollTop = Var(0.0)
   val changed = Var(false)
 
-  editor.container.style.lineHeight = s"${lineHeight}px"
-  editor.renderer.updateFontSize
+  def fontDimension = lineHeight.now - 3
+
+  def updateFont(lHeight: Int) = {
+    lineHeight.update(lHeight)
+  }
+
+  lineHeight.trigger {
+    editor.container.style.lineHeight = s"${lineHeight.now}px"
+    editor.container.style.fontSize = s"${fontDimension}px"
+    editor.renderer.updateFontSize
+    ()
+  }
 
   val extension: FileExtension = safePath.name
   lazy val view = {
@@ -62,7 +68,7 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
           editor.container,
           div(`class` := "gutterDecoration")(
             Rx {
-              val scrollAsLines = scrollTop() / lineHeight
+              val scrollAsLines = scrollTop() / lineHeight()
               val max = editor.renderer.getLastVisibleRow
               if (extension == OMS && org.openmole.gui.client.core.panels.treeNodeTabs.isActive(safePath)() == TreeNodeTabs.Active) {
                 div(
@@ -73,7 +79,7 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
                   } yield {
                     errors().find(_.errorWithLocation.line == Some(i)).map { e ⇒
                       e.errorWithLocation.line.map { l ⇒
-                        buildManualPopover(l, (i - scrollAsLines) * lineHeight, e.errorWithLocation.stackTrace, Popup.Left)
+                        buildManualPopover(l, (i - scrollAsLines) * lineHeight() - (lineHeight() - 15), span(e.errorWithLocation.stackTrace), Popup.Left)
                       }.getOrElse(div.render)
                     }.getOrElse(div.render)
                   }
@@ -122,7 +128,7 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
   })
 
   def buildManualPopover(line: Int, topPosition: Double, title: String, position: PopupPosition) = {
-    lazy val pop1 = div(line)(`class` := "gutterError", top := topPosition,
+    lazy val pop1 = div(line)(`class` := "gutterError", fontSize := s"${fontDimension}px", top := topPosition, height := s"${lineHeight.now + 3}px", width := s"${lineHeight.now + 5}px",
       backgroundColor := Rx {
         if (changed()) "rgba(255,204,0)"
         else "rgba(255,128,128)"

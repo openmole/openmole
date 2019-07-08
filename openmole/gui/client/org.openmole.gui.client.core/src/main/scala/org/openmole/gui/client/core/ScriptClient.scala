@@ -198,11 +198,15 @@ object ScriptClient {
         versioningPanel.dialog.show
       })
 
+      lazy val fromURLProject = MenuAction("From URL", () ⇒ {
+        urlImportPanel.dialog.show
+      })
+
       lazy val marketPlaceProject = MenuAction("From market place", () ⇒ {
         marketPanel.dialog.show
       })
 
-      lazy val elements = Seq(newEmpty, importModel, marketPlaceProject, cloneRepositiory)
+      lazy val elements = Seq(newEmpty, importModel, marketPlaceProject, fromURLProject, cloneRepositiory)
 
       lazy val menuActions: Options[MenuAction] = elements.options(
         key = btn_danger,

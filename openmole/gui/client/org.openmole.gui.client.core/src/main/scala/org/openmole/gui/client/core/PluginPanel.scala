@@ -17,6 +17,7 @@ import rx._
 import org.openmole.gui.client.core.alert.BannerAlert
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.tool.client.FileManager
+import scala.concurrent.duration.DurationInt
 
 /*
  * Copyright (C) 10/08/15 // mathieu.leclaire@openmole.org
@@ -70,7 +71,7 @@ class PluginPanel {
         UploadPlugin(),
         () ⇒ {
           val plugins = FileManager.fileNames(fileInput.files)
-          post()[Api].addUploadedPlugins(plugins).call().foreach { ex ⇒
+          post(timeout = 5 minutes)[Api].addUploadedPlugins(plugins).call().foreach { ex ⇒
             if (ex.isEmpty) getPlugins
             else {
               dialog.hide

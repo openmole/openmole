@@ -43,7 +43,10 @@ public class NetLogo5 implements NetLogo {
     }
 
     @Override
-    public void open(String script) throws Exception {
+    public void open(String script,boolean switch3d) throws Exception {
+        // FIXME this is only a temporary fix - running simultaneously 3d and 2d models will fail anyway
+        if (switch3d && script.endsWith("3d")) System.setProperty("org.nlogo.is3d", "true");
+        else System.setProperty("org.nlogo.is3d", "false");
         getWorkspace().open(script);
     }
 
@@ -87,6 +90,7 @@ public class NetLogo5 implements NetLogo {
         }
         return nlGlobalList;
     }
+
 
     public String[] reporters() {
         LinkedList<String> reporters = new LinkedList<String>();

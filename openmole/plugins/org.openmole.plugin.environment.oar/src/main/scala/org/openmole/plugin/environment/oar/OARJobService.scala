@@ -22,6 +22,7 @@ class OARJobService[S, H](
     def buildScript(serializedJob: SerializedJob, outputPath: String) = {
       SharedStorage.buildScript(
         installation.apply,
+        jobDirectory,
         workDirectory,
         parameters.openMOLEMemory,
         parameters.threads,
@@ -35,7 +36,7 @@ class OARJobService[S, H](
 
     val description = gridscale.oar.OARJobDescription(
       command = s"/bin/bash $remoteScript",
-      workDirectory = workDirectory,
+      workDirectory = jobDirectory,
       queue = parameters.queue,
       cpu = parameters.cpu,
       core = OAREnvironment.nbCores(parameters),

@@ -213,7 +213,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val s = TestSource() set (inputs += t)
     val ex: MoleExecution = t1 source s
 
-    val errors = Validation.sourceTypeErrors(ex.mole, List.empty, sources = ex.sources, Hooks.empty)
+    val errors = Validation.sourceErrors(ex.mole, List.empty, sources = ex.sources, Hooks.empty)
     errors.headOption should matchPattern { case Some(MissingSourceInput(_, _, _)) ⇒ }
   }
 

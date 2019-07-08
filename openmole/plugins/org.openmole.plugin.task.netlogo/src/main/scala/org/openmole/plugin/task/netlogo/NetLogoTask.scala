@@ -40,11 +40,21 @@ import scala.collection.mutable.ArrayBuffer
 object NetLogoTask {
   sealed trait Workspace
 
+  /**
+   * Workspace is either a script, or a full directory
+   */
   object Workspace {
     case class Script(script: File, name: String) extends Workspace
     case class Directory(directory: File, name: String, script: String) extends Workspace
   }
 
+  /**
+   * Errors as [[UserBadDataError]]
+   * @param msg
+   * @param f
+   * @tparam T
+   * @return
+   */
   def wrapError[T](msg: String)(f: ⇒ T): T =
     try f
     catch {
@@ -69,14 +79,14 @@ object NetLogoTask {
 
   case class NetoLogoInstance(directory: File, workspaceDirectory: File, netLogo: NetLogo)
 
-  def openNetLogoWorkspace(netLogoFactory: NetLogoFactory, workspace: Workspace, directory: File) = {
+  def openNetLogoWorkspace(netLogoFactory: NetLogoFactory, workspace: Workspace, directory: File, switch3d: Boolean) = {
     val (workDir, script) = deployWorkspace(workspace, directory)
     val resolver = External.relativeResolver(workDir)(_)
     val netLogo = netLogoFactory()
 
     withThreadClassLoader(netLogo.getNetLogoClassLoader) {
       wrapError(s"Error while opening the file $script") {
-        netLogo.open(script.getAbsolutePath)
+        netLogo.open(script.getAbsolutePath, switch3d)
       }
     }
 
@@ -111,10 +121,10 @@ object NetLogoTask {
   def dispose(netLogo: NetLogo) =
     withThreadClassLoader(netLogo.getNetLogoClassLoader) { netLogo.dispose() }
 
-  def createPool(netLogoFactory: NetLogoFactory, workspace: NetLogoTask.Workspace, cached: Boolean)(implicit newFile: NewFile) = {
+  def createPool(netLogoFactory: NetLogoFactory, workspace: NetLogoTask.Workspace, cached: Boolean, switch3d: Boolean)(implicit newFile: NewFile) = {
     def createInstance = {
       val workspaceDirectory = newFile.newDir("netlogoworkpsace")
-      NetLogoTask.openNetLogoWorkspace(netLogoFactory, workspace, workspaceDirectory)
+      NetLogoTask.openNetLogoWorkspace(netLogoFactory, workspace, workspaceDirectory, switch3d)
     }
 
     def destroyInstance(instance: NetLogoTask.NetoLogoInstance) = {
@@ -129,6 +139,11 @@ object NetLogoTask {
     )
   }
 
+  /**
+   * Ensure a variable type is compatible with NetLogo. Goes recursively inside arrays at any level.
+   * @param x
+   * @return
+   */
   def netLogoCompatibleType(x: Any) = {
     def convertArray(x: Any): AnyRef = x match {
       case a: Array[_] ⇒ a.asInstanceOf[Array[_]].map { x ⇒ convertArray(x.asInstanceOf[AnyRef]) }
@@ -152,6 +167,13 @@ object NetLogoTask {
     }
   }
 
+  /**
+   * Convert a netlogo collection to a Variable for which the prototype is expected to have the corresponding depth.
+   *
+   * @param netlogoCollection
+   * @param prototype
+   * @return
+   */
   def netLogoArrayToVariable(netlogoCollection: AbstractCollection[Any], prototype: Val[_]) = {
     // get arrayType and depth of multiple array prototype
     val (multiArrayType, depth): (ValType[_], Int) = ValType.unArrayify(prototype.`type`)
@@ -177,13 +199,10 @@ object NetLogoTask {
     try {
       val array = java.lang.reflect.Array.newInstance(multiArrayType.runtimeClass.asInstanceOf[Class[_]], dims: _*)
 
-      /**
-       * Manually do conversions to java native types ; necessary to add an output cast feature,
-       *   e.g. NetLogo numeric ~ java.lang.Double -> Int or String and not necessarily Double,
-       *   the target type being the one of the prototype
-       * @param value
-       * @param arrayType
-       */
+      //
+      // Manually do conversions to java native types ; necessary to add an output cast feature,
+      // e.g. NetLogo numeric ~ java.lang.Double -> Int or String and not necessarily Double,
+      // the target type being the one of the prototype
       def safeOutput(value: AnyRef, arrayType: Class[_]) = {
         try {
           arrayType match {
@@ -219,14 +238,13 @@ object NetLogoTask {
                 case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when adding a variable of type ${v.getClass} in an array of type ${multiArrayType}")
               }
             }
-            case _ ⇒ {
+            case _ ⇒
               try {
                 setMultiArray(v.asInstanceOf[AbstractCollection[Any]], java.lang.reflect.Array.get(currentArray, i), arrayType, maxdepth - 1)
               }
               catch {
                 case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when recursing at depth ${maxdepth} in a multi array of type ${multiArrayType}")
               }
-            }
           }
         }
       }
@@ -241,6 +259,12 @@ object NetLogoTask {
     }
   }
 
+  /**
+   * Check if provided inputs are compatible with NetLogo
+   *
+   * @param inputs
+   * @return
+   */
   def validateNetLogoInputTypes(inputs: Seq[Val[_]]) = {
     def acceptedType(c: Class[_]): Boolean =
       if (c.isArray()) acceptedType(c.getComponentType)
@@ -256,12 +280,29 @@ object NetLogoTask {
   }
 }
 
+/**
+ * Generic NetLogoTask
+ */
 trait NetLogoTask extends Task with ValidateTask {
 
   lazy val netLogoInstanceKey = CacheKey[WithInstance[NetLogoTask.NetoLogoInstance]]()
 
+  /**
+   * Workspace (either file or directory)
+   * @return
+   */
   def workspace: NetLogoTask.Workspace
+
+  /**
+   * Commands to run
+   * @return
+   */
   def launchingCommands: Seq[FromContext[String]]
+
+  /**
+   * Mapping of prototypes
+   * @return
+   */
   def mapped: MappedInputOutputConfig
 
   def netLogoFactory: NetLogoFactory
@@ -269,6 +310,7 @@ trait NetLogoTask extends Task with ValidateTask {
   def seed: Option[Val[Int]]
   def external: External
   def reuseWorkspace: Boolean
+  def switch3d: Boolean
 
   override def validate = Validate { p ⇒
     import p._
@@ -281,7 +323,7 @@ trait NetLogoTask extends Task with ValidateTask {
   override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
     import parameters._
 
-    val pool = executionContext.cache.getOrElseUpdate(netLogoInstanceKey, NetLogoTask.createPool(netLogoFactory, workspace, reuseWorkspace))
+    val pool = executionContext.cache.getOrElseUpdate(netLogoInstanceKey, NetLogoTask.createPool(netLogoFactory, workspace, reuseWorkspace, switch3d))
 
     pool { instance ⇒
 

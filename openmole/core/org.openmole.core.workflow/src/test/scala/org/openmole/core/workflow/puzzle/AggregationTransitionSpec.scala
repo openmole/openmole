@@ -101,7 +101,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     val mole = ExplicitSampling(i, data) -< emptyT >- testT
 
-    mole.start.cancel
+    mole.start(false).cancel
     endCapsExecuted.set(0)
     mole.run
     endCapsExecuted.get() should equal(1)

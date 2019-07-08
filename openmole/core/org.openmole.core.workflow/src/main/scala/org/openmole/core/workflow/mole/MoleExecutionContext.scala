@@ -17,29 +17,41 @@
 
 package org.openmole.core.workflow.mole
 
-import java.io.{ File, PrintStream }
-
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.{ FileService, FileServiceCache }
-import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.Preference
-import org.openmole.core.serializer._
 import org.openmole.core.threadprovider._
 import org.openmole.core.workspace._
-import org.openmole.core.workflow.dsl._
 import org.openmole.tool.cache._
+import org.openmole.tool.logger.LoggerService
+import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.random.Seeder
 
 object MoleExecutionContext {
   def apply()(implicit moleServices: MoleServices) = new MoleExecutionContext()
 }
 
+/**
+ * Wrapper for [[MoleServices]] which are implicit
+ * @param services implicit services
+ */
 class MoleExecutionContext(implicit val services: MoleServices)
 
 object MoleServices {
 
-  implicit def create(implicit preference: Preference, seeder: Seeder, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, newFile: NewFile, fileService: FileService, workspace: Workspace, outputRedirection: OutputRedirection) = {
+  /**
+   * create a MoleService from implicit parameters
+   * @param preference
+   * @param seeder
+   * @param threadProvider
+   * @param eventDispatcher
+   * @param newFile
+   * @param fileService
+   * @param workspace
+   * @param outputRedirection
+   * @return
+   */
+  implicit def create(implicit preference: Preference, seeder: Seeder, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, newFile: NewFile, fileService: FileService, workspace: Workspace, outputRedirection: OutputRedirection, loggerService: LoggerService) = {
     new MoleServices()(
       preference = preference,
       seeder = Seeder(seeder.newSeed),
@@ -49,7 +61,8 @@ object MoleServices {
       workspace = workspace,
       fileService = fileService,
       fileServiceCache = FileServiceCache(),
-      outputRedirection = outputRedirection
+      outputRedirection = outputRedirection,
+      loggerService = loggerService
     )
   }
 
@@ -62,7 +75,8 @@ object MoleServices {
     fileService:       FileService       = moleServices.fileService,
     fileServiceCache:  FileServiceCache  = moleServices.fileServiceCache,
     workspace:         Workspace         = moleServices.workspace,
-    outputRedirection: OutputRedirection = moleServices.outputRedirection) =
+    outputRedirection: OutputRedirection = moleServices.outputRedirection,
+    loggerService:     LoggerService     = moleServices.loggerService) =
     new MoleServices()(
       preference = preference,
       seeder = seeder,
@@ -72,10 +86,24 @@ object MoleServices {
       workspace = workspace,
       fileService = fileService,
       fileServiceCache = fileServiceCache,
-      outputRedirection = outputRedirection
+      outputRedirection = outputRedirection,
+      loggerService = loggerService
     )
 }
 
+/**
+ * implicit services for the execution of a Mole
+ *
+ * @param preference preferences
+ * @param seeder
+ * @param threadProvider
+ * @param eventDispatcher
+ * @param newFile
+ * @param workspace
+ * @param fileService
+ * @param fileServiceCache
+ * @param outputRedirection
+ */
 class MoleServices(
   implicit
   val preference:        Preference,
@@ -86,7 +114,8 @@ class MoleServices(
   val workspace:         Workspace,
   val fileService:       FileService,
   val fileServiceCache:  FileServiceCache,
-  val outputRedirection: OutputRedirection
+  val outputRedirection: OutputRedirection,
+  val loggerService:     LoggerService
 ) {
   def newRandom = Lazy(seeder.newRNG)
   implicit lazy val defaultRandom = newRandom

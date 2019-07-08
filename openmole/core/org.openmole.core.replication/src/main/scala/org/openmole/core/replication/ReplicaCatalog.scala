@@ -19,7 +19,6 @@ package org.openmole.core.replication
 
 import java.io.File
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.locks.ReentrantLock
 
 import com.google.common.cache._
 import org.openmole.core.db.{ Replica, replicas }
@@ -52,6 +51,11 @@ object ReplicaCatalog extends JavaLogger {
 
 }
 
+/**
+ * Manage [[Replica]]s in the database
+ * @param database
+ * @param preference
+ */
 class ReplicaCatalog(database: Database, preference: Preference) {
 
   import ReplicaCatalog.Log._

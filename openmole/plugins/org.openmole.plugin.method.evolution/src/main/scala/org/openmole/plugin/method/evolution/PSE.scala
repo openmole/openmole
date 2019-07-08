@@ -18,6 +18,8 @@ package org.openmole.plugin.method.evolution
 
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 import cats._
 import cats.data._
 import cats.implicits._
@@ -27,7 +29,6 @@ import mgo.evolution.breeding._
 import mgo.evolution.contexts._
 import mgo.evolution.elitism._
 import mgo.evolution.niche._
-import mgo.tagtools._
 import mgo.tools.CanBeNaN
 import monocle.macros.GenLens
 import org.openmole.core.context.{ Context, Val, Variable }
@@ -42,6 +43,7 @@ import org.openmole.tool.types.ToDouble
 import squants.time.Time
 
 import scala.language.higherKinds
+import scala.reflect.ClassTag
 
 object PSEAlgorithm {
 
@@ -58,7 +60,6 @@ object PSEAlgorithm {
   @Lenses case class Individual(
     genome:        Genome,
     phenotype:     Array[Double],
-    mapped:        Boolean       = false,
     foundedIsland: Boolean       = false)
 
   case class Result(continuous: Vector[Double], discrete: Vector[Int], pattern: Vector[Int], phenotype: Vector[Double])
@@ -104,8 +105,7 @@ object PSEAlgorithm {
     PSEOperations.elitism[M, Individual, Vector[Double]](
       i ⇒ values(Individual.genome.get(i), continuous),
       vectorPhenotype.get,
-      pattern,
-      Individual.mapped)
+      pattern)
 
   def expression(phenotype: (Vector[Double], Vector[Int]) ⇒ Vector[Double], continuous: Vector[C]): Genome ⇒ Individual =
     deterministic.expression[Genome, Individual](
@@ -141,8 +141,7 @@ object NoisyPSEAlgorithm {
   @Lenses case class Individual[P](
     genome:           Genome,
     historyAge:       Long,
-    phenotypeHistory: Array[P],
-    mapped:           Boolean  = false)
+    phenotypeHistory: Array[P])
 
   def buildIndividual[P: Manifest](genome: Genome, phenotype: P) = Individual(genome, 1, Array(phenotype))
   def vectorPhenotype[P: Manifest] = Individual.phenotypeHistory[P] composeLens arrayToVectorLens
@@ -182,7 +181,6 @@ object NoisyPSEAlgorithm {
       vectorPhenotype[P],
       aggregation,
       pattern,
-      Individual.mapped,
       Individual.historyAge,
       historySize)
 
@@ -255,11 +253,13 @@ object PSE {
 
       def afterGeneration(g: Long, population: Vector[I]): M[Boolean] = interpret { impl ⇒
         import impl._
+        import mgo.tagtools._
         zipWithState(mgo.evolution.afterGeneration[DSL, I](g).run(population)).eval
       }
 
       def afterDuration(d: squants.Time, population: Vector[I]): M[Boolean] = interpret { impl ⇒
         import impl._
+        import mgo.tagtools._
         zipWithState(mgo.evolution.afterDuration[DSL, I](d).run(population)).eval
       }
 
@@ -294,6 +294,7 @@ object PSE {
           (Genome.continuous(om.genome) map2 Genome.discrete(om.genome)) { (continuous, discrete) ⇒
             interpret { impl ⇒
               import impl._
+              import mgo.tagtools._
               implicitly[Generation[DSL]]
 
               zipWithState(
@@ -306,6 +307,7 @@ object PSE {
           Genome.discrete(om.genome).map { discrete ⇒
             interpret { impl ⇒
               import impl._
+              import mgo.tagtools._
               zipWithState(
                 PSEAlgorithm.adaptiveBreeding[DSL](
                   n,
@@ -319,6 +321,7 @@ object PSE {
           Genome.continuous(om.genome).map { continuous ⇒
             interpret { impl ⇒
               import impl._
+              import mgo.tagtools._
               def step =
                 for {
                   elited ← PSEAlgorithm.elitism[DSL](om.pattern, continuous) apply (population, candidates)
@@ -334,7 +337,6 @@ object PSE {
 
         def migrateFromIsland(population: Vector[I], state: S) =
           population.filter(i ⇒ !PSEAlgorithm.Individual.foundedIsland.get(i)).
-            map(PSEAlgorithm.Individual.mapped.set(false)).
             map(PSEAlgorithm.Individual.foundedIsland.set(false))
       }
 
@@ -359,13 +361,17 @@ object PSE {
       }
     }
 
+    implicit def arrayCanBeNaN[T](implicit cbn: CanBeNaN[T]) = new CanBeNaN[Array[T]] {
+      override def isNaN(t: Array[T]): Boolean = t.exists(cbn.isNaN)
+    }
+
     import mgo.evolution.algorithm.{ PSE ⇒ _, NoisyPSE ⇒ _, _ }
     import cats.data._
     import mgo.evolution.contexts._
 
-    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Vector[Any]] { api ⇒
+    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Array[Any]] { api ⇒
       type G = CDGenome.Genome
-      type I = NoisyPSEAlgorithm.Individual[Vector[Any]]
+      type I = NoisyPSEAlgorithm.Individual[Array[Any]]
       type S = EvolutionState[HitMapState]
 
       def iManifest = implicitly
@@ -386,11 +392,13 @@ object PSE {
 
       def afterGeneration(g: Long, population: Vector[I]): M[Boolean] = interpret { impl ⇒
         import impl._
+        import mgo.tagtools._
         zipWithState(mgo.evolution.afterGeneration[DSL, I](g).run(population)).eval
       }
 
       def afterDuration(d: squants.Time, population: Vector[I]): M[Boolean] = interpret { impl ⇒
         import impl._
+        import mgo.tagtools._
         zipWithState(mgo.evolution.afterDuration[DSL, I](d).run(population)).eval
       }
 
@@ -403,7 +411,7 @@ object PSE {
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
 
-        def buildIndividual(genome: G, phenotype: Vector[Any], context: Context) = NoisyPSEAlgorithm.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Array[Any], context: Context) = NoisyPSEAlgorithm.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[HitMapState](random = rng, s = Map())
 
         def result(population: Vector[I], state: S) = FromContext { p ⇒
@@ -422,6 +430,7 @@ object PSE {
           (Genome.continuous(om.genome) map2 Genome.discrete(om.genome)) { (continuous, discrete) ⇒
             interpret { impl ⇒
               import impl._
+              import mgo.tagtools._
               zipWithState(NoisyPSEAlgorithm.initialGenomes[DSL](n, continuous, discrete)).eval
             }
           }
@@ -430,7 +439,8 @@ object PSE {
           Genome.discrete(om.genome).map { discrete ⇒
             interpret { impl ⇒
               import impl._
-              zipWithState(NoisyPSEAlgorithm.adaptiveBreeding[DSL, Vector[Any]](
+              import mgo.tagtools._
+              zipWithState(NoisyPSEAlgorithm.adaptiveBreeding[DSL, Array[Any]](
                 n,
                 om.operatorExploration,
                 om.cloneProbability,
@@ -444,9 +454,10 @@ object PSE {
           Genome.continuous(om.genome).map { continuous ⇒
             interpret { impl ⇒
               import impl._
+              import mgo.tagtools._
               def step =
                 for {
-                  elited ← NoisyPSEAlgorithm.elitism[DSL, Vector[Any]](
+                  elited ← NoisyPSEAlgorithm.elitism[DSL, Array[Any]](
                     om.pattern,
                     NoisyObjective.aggregate(om.objectives),
                     om.historySize,
@@ -465,7 +476,7 @@ object PSE {
           StochasticGAIntegration.migrateToIsland[I](population, NoisyPSEAlgorithm.Individual.historyAge)
 
         def migrateFromIsland(population: Vector[I], state: S) =
-          StochasticGAIntegration.migrateFromIsland[I, Vector[Any]](population, NoisyPSEAlgorithm.Individual.historyAge, NoisyPSEAlgorithm.Individual.phenotypeHistory)
+          StochasticGAIntegration.migrateFromIsland[I, Array[Any]](population, NoisyPSEAlgorithm.Individual.historyAge, NoisyPSEAlgorithm.Individual.phenotypeHistory)
 
       }
 
@@ -474,7 +485,7 @@ object PSE {
 
   object PatternAxe {
 
-    implicit def fromAggregationDoubleDomainToPatternAxe[D, DT](a: In[Aggregate[Val[DT], Vector[DT] ⇒ Double], D])(implicit fix: Fix[D, Double]): PatternAxe =
+    implicit def fromAggregationDoubleDomainToPatternAxe[D, DT: ClassTag](a: In[Aggregate[Val[DT], Array[DT] ⇒ Double], D])(implicit fix: Fix[D, Double]): PatternAxe =
       PatternAxe(Objective.aggregateToObjective(Aggregate(a.value.value, a.value.aggregate)), fix(a.domain).toVector)
 
     implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit fix: Fix[D, Double]): PatternAxe =

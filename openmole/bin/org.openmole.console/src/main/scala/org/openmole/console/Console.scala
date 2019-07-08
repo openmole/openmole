@@ -115,8 +115,7 @@ class Console(script: Option[String] = None) {
         }
       case Some(script) ⇒
         val scriptFile = new File(script)
-        val project = Project(workDirectory.getOrElse(scriptFile.getParentFileSafe))
-        project.compile(scriptFile, args) match {
+        Project.compile(workDirectory.getOrElse(scriptFile.getParentFileSafe), scriptFile, args) match {
           case ScriptFileDoesNotExists() ⇒
             println("File " + scriptFile + " doesn't exist.")
             ExitCodes.scriptDoesNotExist

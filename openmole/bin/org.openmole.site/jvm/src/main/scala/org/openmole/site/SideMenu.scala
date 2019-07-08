@@ -75,8 +75,7 @@ object SideMenu {
   def fromStrings(title: String, stringMenus: String*) =
     SideMenu(preText = title, links = stringMenus.map { a ⇒ Link(a, Link.intern(a)) })
 
-  val run = SideMenu(DocumentationPages.runPages, classIs(btn ++ btn_default), "Available tasks")
-  val packaged = SideMenu(DocumentationPages.packagedPages, classIs(btn ++ btn_default), "Package your code")
+  val embed = SideMenu(DocumentationPages.embedPages, classIs(btn ++ btn_default), "Available tasks")
   val explore = SideMenu(DocumentationPages.explorePages, classIs(btn ++ btn_default), "Available methods")
   val sampling = SideMenu(DocumentationPages.samplingPages, classIs(btn ++ btn_default), "Sampling methods")
   val scale = SideMenu(DocumentationPages.scalePages, classIs(btn ++ btn_default), "Available environments")
@@ -89,7 +88,7 @@ object SideMenu {
 
   def more(current: Page) = SideMenu(
     Seq(
-      DocumentationPages.run,
+      DocumentationPages.embed,
       DocumentationPages.explore,
       DocumentationPages.scale,
       DocumentationPages.language,

@@ -10,7 +10,9 @@ import org.openmole.gui.server.core.Utils._
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import java.io._
+import java.net.URL
 import java.nio.file._
+import java.util.zip.GZIPInputStream
 
 import au.com.bytecode.opencsv.CSVReader
 import org.openmole.core.console.ScalaREPL
@@ -18,7 +20,7 @@ import org.openmole.core.expansion.ScalaCompilation
 import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
 
 import scala.util.{ Failure, Success, Try }
-import org.openmole.core.workflow.mole.{ MoleExecutionContext, MoleServices }
+import org.openmole.core.workflow.mole.{ MoleExecution, MoleExecutionContext, MoleServices }
 import org.openmole.tool.stream.StringPrintStream
 
 import scala.concurrent.stm._
@@ -26,7 +28,6 @@ import org.openmole.tool.tar._
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.module
 import org.openmole.core.market
-import org.openmole.core.outputredirection.OutputRedirection
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.core.project._
 import org.openmole.core.services.Services
@@ -38,6 +39,7 @@ import org.openmole.gui.ext.tool.server.OMRouter
 import org.openmole.gui.ext.tool.server.Utils.authenticationKeysFile
 import org.openmole.gui.server.core.GUIServer.ApplicationControl
 import org.openmole.tool.crypto.Cypher
+import org.openmole.tool.outputredirection.OutputRedirection
 
 import scala.collection.JavaConverters._
 
@@ -51,7 +53,7 @@ import scala.collection.JavaConverters._
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See theMarketIndexEntry
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -259,7 +261,9 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     Utils.move(fromFile, toFile)
   }
 
-  def duplicate(safePath: SafePath, newName: String): SafePath = Utils.copy(safePath, newName)
+  def duplicate(safePath: SafePath, newName: String): SafePath = {
+    Utils.copy(safePath, newName, followSymlinks = true)
+  }
 
   def mdToHtml(safePath: SafePath): String = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
@@ -289,9 +293,9 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     safePathToFile(safePath).length
   }
 
-  def sequence(safePath: SafePath): SequenceData = {
+  def sequence(safePath: SafePath, separator: Char = ','): SequenceData = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
-    val reader = new CSVReader(new FileReader(safePath), ',')
+    val reader = new CSVReader(new FileReader(safePath), separator)
     val content = reader.readAll.asScala.toSeq
     content.headOption.map { c ⇒
       SequenceData(c, content.tail)
@@ -303,13 +307,79 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
   def removeExecution(id: ExecutionId): Unit = execution.remove(id)
 
-  def runScript(scriptData: ScriptData): Unit = {
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+  def compileScript(scriptData: ScriptData) = {
+    val (execId, outputStream) = compilationData(scriptData)
+    synchronousCompilation(execId, scriptData, outputStream)
+  }
 
-    val execId = ExecutionId(getUUID)
-    val script = safePathToFile(scriptData.scriptPath)
-    val content = script.content
-    val outputStream = StringPrintStream(Some(preference(outputSize)))
+  def runScript(scriptData: ScriptData, validateScript: Boolean) = {
+    asynchronousCompilation(
+      scriptData,
+      Some(execId ⇒ execution.compiled(execId)),
+      Some(processRun(_, _, validateScript))
+    )
+  }
+
+  private def compilationData(scriptData: ScriptData) = {
+    (ExecutionId(getUUID) /*, safePathToFile(scriptData.scriptPath)*/ , StringPrintStream(Some(preference(outputSize))))
+  }
+
+  def synchronousCompilation(
+    execId:       ExecutionId,
+    scriptData:   ScriptData,
+    outputStream: StringPrintStream,
+    onCompiled:   Option[ExecutionId ⇒ Unit]                  = None,
+    onEvaluated:  Option[(MoleExecution, ExecutionId) ⇒ Unit] = None): Option[ErrorData] = {
+
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    def error(t: Throwable): ErrorData = {
+      t match {
+        case ce: ScalaREPL.CompilationError ⇒
+          def toErrorWithLocation(em: ScalaREPL.ErrorMessage) =
+            ErrorWithLocation(em.rawMessage, em.position.map { _.line }, em.position.map { _.start }, em.position.map { _.end })
+
+          ErrorData(ce.errorMessages.map(toErrorWithLocation), t)
+        case _ ⇒ ErrorData(t)
+      }
+    }
+
+    def message(message: String) = MessageErrorData(message)
+
+    val script: File = safePathToFile(scriptData.scriptPath)
+
+    try {
+      Project.compile(script.getParentFileSafe, script, Seq.empty)(Services.copy(services)(outputRedirection = OutputRedirection(outputStream))) match {
+        case ScriptFileDoesNotExists() ⇒ Some(message("Script file does not exist"))
+        case ErrorInCode(e)            ⇒ Some(error(e))
+        case ErrorInCompiler(e)        ⇒ Some(error(e))
+        case compiled: Compiled ⇒
+          onCompiled.foreach { _(execId) }
+          catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
+            case Failure(e) ⇒ Some(error(e))
+            case Success(dsl) ⇒
+              val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(outputStream))
+              Try(dslToPuzzle(dsl).toExecution()(services)) match {
+                case Success(ex) ⇒
+                  onEvaluated.foreach { _(ex, execId) }
+                  None
+                case Failure(e) ⇒ Some(error(e))
+              }
+          }
+      }
+
+    }
+    catch {
+      case t: Throwable ⇒ Some(error(t))
+    }
+
+  }
+
+  def asynchronousCompilation(scriptData: ScriptData, onEvaluated: Option[ExecutionId ⇒ Unit] = None, onCompiled: Option[(MoleExecution, ExecutionId) ⇒ Unit] = None): Unit = {
+
+    val (execId, outputStream) = compilationData(scriptData)
+
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    val content = safePathToFile(scriptData.scriptPath).content
 
     execution.addStaticInfo(execId, StaticExecutionInfo(scriptData.scriptPath, content, System.currentTimeMillis()))
     execution.addOutputStreams(execId, outputStream)
@@ -318,69 +388,24 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
     val compilationFuture =
       threadProvider.submit(ThreadProvider.maxPriority) { () ⇒
-
-        def error(t: Throwable): Unit = {
-          t match {
-            case ce: ScalaREPL.CompilationError ⇒
-              def toErrorWithLocation(em: ScalaREPL.ErrorMessage) = ErrorWithLocation(em.rawMessage, em.position.map { _.line }, em.position.map { _.start }, em.position.map { _.end })
-
-              execution.addError(
-                execId,
-                Failed(
-                  Vector.empty,
-                  ErrorData(ce.errorMessages.map(toErrorWithLocation), t),
-                  Seq()))
-            case _ ⇒ execution.addError(execId, Failed(Vector.empty, ErrorData(t), Seq()))
-          }
-        }
-
-        def message(message: String): Unit = execution.addError(execId, Failed(Vector.empty, MessageErrorData(message), Seq()))
-
-        try {
-          val project = Project(script.getParentFileSafe)
-          project.compile(script, Seq.empty)(Services.copy(services)(outputRedirection = OutputRedirection(outputStream))) match {
-            case ScriptFileDoesNotExists() ⇒ message("Script file does not exist")
-            case ErrorInCode(e)            ⇒ error(e)
-            case ErrorInCompiler(e)        ⇒ error(e)
-            case compiled: Compiled ⇒
-              execution.compiled(execId)
-
-              def catchAll[T](f: ⇒ T): Try[T] = {
-                val res =
-                  try Success(f)
-                  catch {
-                    case t: Throwable ⇒ Failure(t)
-                  }
-                res
-              }
-
-              catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
-                case Failure(e) ⇒ error(e)
-                case Success(dsl) ⇒
-                  val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(outputStream))
-                  Try(dslToPuzzle(dsl).toExecution(executionContext = MoleExecutionContext()(services))) match {
-                    case Success(ex) ⇒
-                      val envIds = (ex.allEnvironments).map { env ⇒ EnvironmentId(getUUID) → env }
-                      execution.addRunning(execId, envIds)
-                      envIds.foreach { case (envId, env) ⇒ env.listen(execution.environmentListener(envId)) }
-
-                      catchAll(ex.start) match {
-                        case Failure(e) ⇒ error(e)
-                        case Success(_) ⇒
-                          val inserted = execution.addMoleExecution(execId, ex)
-                          if (!inserted) ex.cancel
-                      }
-                    case Failure(e) ⇒ error(e)
-                  }
-              }
-          }
-        }
-        catch {
-          case t: Throwable ⇒ error(t)
-        }
+        val errorData = synchronousCompilation(execId, scriptData, outputStream, onEvaluated, onCompiled)
+        errorData.foreach { ed ⇒ execution.addError(execId, Failed(Vector.empty, ed, Seq.empty)) }
       }
 
     execution.addCompilation(execId, compilationFuture)
+  }
+
+  def processRun(ex: MoleExecution, execId: ExecutionId, validateScript: Boolean) = {
+    val envIds = (ex.allEnvironments).map { env ⇒ EnvironmentId(getUUID) → env }
+    execution.addRunning(execId, envIds)
+    envIds.foreach { case (envId, env) ⇒ env.listen(execution.environmentListener(envId)) }
+
+    catchAll(ex.start(validateScript)) match {
+      case Failure(e) ⇒ execution.addError(execId, Failed(Vector.empty, ErrorData(e), Seq.empty))
+      case Success(_) ⇒
+        val inserted = execution.addMoleExecution(execId, ex)
+        if (!inserted) ex.cancel
+    }
   }
 
   def allStates(lines: Int) = execution.allStates(lines)
@@ -497,5 +522,49 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
       implicitResource,
       paths.size + implicitResource.size
     )
+  }
+
+  def downloadHTTP(url: String, path: SafePath, extract: Boolean): Either[Unit, ErrorData] = {
+    import org.openmole.tool.stream._
+
+    val result =
+      Try {
+        val checkedURL =
+          java.net.URI.create(url).getScheme match {
+            case null ⇒ "http://" + url
+            case _    ⇒ url
+          }
+
+        gridscale.http.getResponse(checkedURL) { response ⇒
+          def extractName = checkedURL.split("/").last
+          val name =
+            response.headers.flatMap {
+              case ("Content-Disposition", value) ⇒
+                value.split(";").map(_.split("=")).find(_.head.trim == "filename").map { filename ⇒
+                  val name = filename.last.trim
+                  if (name.startsWith("\"") && name.endsWith("\"")) name.drop(1).dropRight(1) else name
+                }
+              case _ ⇒ None
+            }.headOption.getOrElse(extractName)
+
+          val is = response.inputStream
+
+          if (extract) {
+            val dest = safePathToFile(path)(ServerFileSystemContext.project, workspace)
+            val tis = new TarInputStream(new GZIPInputStream(is))
+            try tis.extract(dest)
+            finally tis.close
+          }
+          else {
+            val dest = safePathToFile(path / name)(ServerFileSystemContext.project, workspace)
+            dest.withOutputStream(os ⇒ copy(is, os))
+          }
+        }
+      }
+
+    result match {
+      case Success(value) ⇒ Left(value)
+      case Failure(e)     ⇒ Right(ErrorData(e))
+    }
   }
 }

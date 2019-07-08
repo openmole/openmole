@@ -1,90 +1,167 @@
-/*
- * Copyright (C) 16/01/14 Romain Reuillon
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 package org.openmole.plugin.method
 
-import fr.iscpif.scalabc.algorithm.Lenormand
-import org.openmole.core.context.Val
-import org.openmole.core.expansion.{ Condition, FromContext }
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.transition._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
+import org.openmole.plugin.tool.pattern._
+import mgo.abc._
+import org.openmole.core.workflow.domain.Bounds
+import monocle.macros.Lenses
+import org.openmole.core.keyword.In
 
 package object abc {
 
-  trait ABCPuzzle {
-    def iteration: Val[Int]
-    def algorithm: ABC
+  object ABC {
+    val abcNamespace = Namespace("abc")
+    val state = Val[MonAPMC.MonState]("state", abcNamespace)
+
+    object Prior {
+      implicit def inToPrior[D](in: In[Val[Double], D])(implicit bounds: Bounds[D, Double]) = Prior(in.value, bounds.min(in.domain), bounds.max(in.domain))
+    }
+
+    case class Prior(v: Val[Double], low: FromContext[Double], high: FromContext[Double])
+
+    object Observed {
+
+      object Observable {
+        def apply[T](f: T ⇒ Array[Double]) = new Observable[T] {
+          def apply(t: T) = f(t)
+        }
+
+        implicit def intObservable = Observable[Int](i ⇒ Array(i.toDouble))
+        implicit def doubleObservable = Observable[Double](d ⇒ Array(d))
+        implicit def arrayDouble = Observable[Array[Double]](identity)
+        implicit def arrayInt = Observable[Array[Int]](_.map(_.toDouble))
+      }
+
+      trait Observable[T] {
+        def apply(t: T): Array[Double]
+      }
+
+      implicit def tupleIntToObserved(t: (Val[Int], Int)) = Observed(t._1, t._2)
+      implicit def tupleDoubleToObserved(t: (Val[Double], Double)) = Observed(t._1, t._2)
+      implicit def tupleIterableIntToObserved(t: (Val[Array[Int]], Iterable[Int])) = Observed(t._1, t._2.toArray)
+      implicit def tupleIterableDoubleToObserved(t: (Val[Array[Double]], Iterable[Double])) = Observed(t._1, t._2.toArray)
+      implicit def tupleIterableArrayIntToObserved(t: (Val[Array[Int]], Array[Int])) = Observed(t._1, t._2)
+      implicit def tupleIterableArrayDoubleToObserved(t: (Val[Array[Double]], Array[Double])) = Observed(t._1, t._2)
+      //implicit def tupleToObserved[T: Observable](t: (Val[T], T)) = Observed(t._1, t._2)
+
+      def fromContext[T](observed: Observed[T], context: Context) = context(observed.v.array).map(v ⇒ observed.obs(v))
+      def value[T](observed: Observed[T]) = observed.obs(observed.observed)
+    }
+
+    case class Observed[T](v: Val[T], observed: T)(implicit val obs: Observed.Observable[T])
+
+    case class ABCParameters(state: Val[MonAPMC.MonState], step: Val[Int], prior: Seq[Prior])
+
+    def apply(
+      evaluation:           DSL,
+      prior:                Seq[Prior],
+      observed:             Seq[Observed[_]],
+      sample:               Int,
+      generated:            Int,
+      minAcceptedRatio:     OptionalArgument[Double] = 0.01,
+      stopSampleSizeFactor: Int                      = 1,
+      maxStep:              OptionalArgument[Int]    = None,
+      scope:                DefinitionScope          = "abc") = {
+      implicit def defScope = scope
+      val stepState = Val[MonAPMC.StepState]("stepState", abcNamespace)
+      val step = Val[Int]("step", abcNamespace)
+
+      val stop = Val[Boolean]
+
+      val n = sample + generated
+      val nAlpha = sample
+
+      val preStepTask = PreStepTask(n, nAlpha, prior, state, stepState, step)
+      val postStepTask = PostStepTask(n, nAlpha, stopSampleSizeFactor, prior, observed, state, stepState, minAcceptedRatio, maxStep, stop, step)
+
+      val mapReduce =
+        MapReduce(
+          sampler = preStepTask,
+          evaluation = evaluation,
+          aggregation = postStepTask
+        )
+
+      val loop =
+        While(
+          evaluation = mapReduce,
+          condition = !(stop: Condition)
+        )
+
+      DSLContainerExtension[ABCParameters](DSLContainer(loop), output = Some(postStepTask), delegate = mapReduce.delegate, data = ABCParameters(state, step, prior))
+    }
+
   }
 
-  def abc(
-    algorithm: Lenormand with ABC,
-    model:     Puzzle
+  import ABC._
+
+  def IslandABC(
+    evaluation:           DSL,
+    prior:                Seq[Prior],
+    observed:             Seq[Observed[_]],
+    sample:               Int,
+    generated:            Int,
+    parallelism:          Int,
+    minAcceptedRatio:     Double                = 0.01,
+    stopSampleSizeFactor: Int                   = 1,
+    maxStep:              OptionalArgument[Int] = None,
+    islandSteps:          Int                   = 1,
+    scope:                DefinitionScope       = "abc island"
   ) = {
-    val methodName = "abc"
-    val acceptedPrototype = Val[Double](methodName + "Accepted")
-    val iterationPrototype = Val[Int](methodName + "Iteration")
-    val statePrototype = Val[Lenormand#STATE](methodName + "State")
-    val terminatedPrototype = Val[Boolean](methodName + "Terminated")
-    val preModel = StrainerCapsule(EmptyTask() set (name := methodName + "PreModel"))
-    val postModel = Slot(StrainerCapsule(EmptyTask() set (name := methodName + "PostModel")))
-    val last = StrainerCapsule(EmptyTask() set (name := methodName + "Last"))
+    implicit def defScope = scope
 
-    val sampling = LenormandSampling(algorithm, statePrototype)
-    val explorationTask = ExplorationTask(sampling) set (
-      name := methodName + "Exploration",
-      statePrototype := FromContext(_ ⇒ algorithm.initialState),
-      outputs += statePrototype
-    )
+    val masterState = Val[MonAPMC.MonState]("masterState", abcNamespace)
+    val islandState = state
 
-    val exploration = StrainerCapsule(explorationTask)
+    val step = Val[Int]("masterStep", abcNamespace)
+    val stop = Val[Boolean]
 
-    val analyseTask =
-      LenormandAnalyseTask(
-        algorithm,
-        statePrototype,
-        terminatedPrototype,
-        iterationPrototype,
-        acceptedPrototype
+    val n = sample + generated
+    val nAlpha = sample
+
+    val appendSplit = AppendSplitTask(n, nAlpha, masterState, islandState, step)
+    val terminationTask =
+      IslandTerminationTask(n, nAlpha, minAcceptedRatio, stopSampleSizeFactor, masterState, step, maxStep, stop) set (
+        (inputs, outputs) += islandState.array
       )
 
-    val analyse = Slot(StrainerCapsule(analyseTask))
+    val master =
+      MoleTask(appendSplit -- terminationTask) set (
+        exploredOutputs += islandState.array,
+        step := 0
+      )
 
-    val terminated: Condition = terminatedPrototype
+    val slave =
+      MoleTask(
+        ABC.apply(
+          evaluation = evaluation,
+          prior = prior,
+          observed = observed,
+          sample = sample,
+          generated = generated,
+          minAcceptedRatio = minAcceptedRatio,
+          maxStep = islandSteps,
+          stopSampleSizeFactor = stopSampleSizeFactor
+        )
+      )
 
-    val modelVariables = algorithm.priorPrototypes ++ algorithm.targetPrototypes
+    val masterSlave =
+      MasterSlave(
+        SplitTask(masterState, islandState, parallelism),
+        master = master,
+        slave = slave,
+        state = Seq(masterState, step),
+        slaves = parallelism,
+        stop = stop
+      )
 
-    val puzzle =
-      (exploration -< (preModel filter Block(statePrototype)) -- model -- postModel >- analyse -- (last when terminated)) &
-        (exploration -- (analyse filter Block(modelVariables: _*))) &
-        (preModel -- postModel) &
-        (exploration oo (model.firstSlot, filter = Block(modelVariables: _*))) &
-        (analyse -- (exploration when !terminated filter Block(modelVariables: _*)))
+    DSLContainerExtension[ABCParameters](DSLContainer(masterSlave), output = Some(master), delegate = Vector(slave), data = ABCParameters(masterState, step, prior))
+  }
 
-    val _algorithm = algorithm
-
-    new Puzzle(puzzle) with ABCPuzzle {
-      val output = analyse
-      val state = statePrototype
-      val accepted = acceptedPrototype
-      val iteration = iterationPrototype
-      val algorithm = _algorithm
+  implicit class ABCContainer(dsl: DSLContainer[ABCParameters]) extends DSLContainerHook(dsl) {
+    def hook(directory: FromContext[File], frequency: Long = 1): DSLContainer[ABC.ABCParameters] = {
+      implicit val defScope = dsl.scope
+      dsl hook ABCHook(dsl, directory, frequency)
     }
   }
 

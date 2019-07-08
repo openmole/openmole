@@ -5,28 +5,31 @@ import sbt._
 
 object Libraries {
 
-  lazy val gridscaleVersion = "2.15"
-  lazy val mgoVersion = "3.25"
+  lazy val gridscaleVersion = "2.21"
+  lazy val sshjVersion = "0.27.0"
+
+  lazy val mgoVersion = "3.29"
   lazy val bouncyCastleVersion = "1.60"
   lazy val d3Version = "3.5.12"
   lazy val tooltipserVersion = "3.3.0"
   lazy val netLogo5Version = "5.3.1"
-  lazy val netLogo6Version = "6.0.4"
+  lazy val netLogo6Version = "6.1.0"
   lazy val scalaTagsVersion = "0.6.5"
   lazy val scalaJSDomVersion = "0.9.3"
   lazy val rxVersion = "0.4.0"
   lazy val boopickleVersion = "1.2.6"
   lazy val scalaAutowireVersion = "0.2.6"
   lazy val sourcecodeVersion = "0.1.4"
-  lazy val scaladgetVersion = "1.2.4"
+  lazy val scaladgetVersion = "1.2.7"
   lazy val sortableVersion = "0.2.1"
   lazy val json4sVersion = "3.5.0"
   lazy val circeVersion = "0.10.0"
   lazy val catsVersion = "1.0.1"
-  lazy val scalajsVersion = "0.6.23"
+  lazy val scalajsVersion = "0.6.28"
   lazy val squantsVersion = "1.3.0"
   lazy val xstreamVersion = "1.4.11"
   lazy val scalaURIVersion = "1.1.1"
+  lazy val spatialdataVersion = "0.2"
 
   lazy val bootstrapnative = libraryDependencies += "fr.iscpif.scaladget" %%% "bootstrapnative" % scaladgetVersion
   lazy val lunr = libraryDependencies += "fr.iscpif.scaladget" %%% "lunr" % scaladgetVersion
@@ -43,19 +46,23 @@ object Libraries {
   lazy val sourcecodeJS = libraryDependencies += "com.lihaoyi" %%% "sourcecode" % sourcecodeVersion
   lazy val scalajsMarked = libraryDependencies += "com.github.karasiq" %%% "scalajs-marked" % "1.0.2"
   lazy val htmlparser2 = libraryDependencies += "com.definitelyscala" %%% "scala-js-htmlparser2" % "1.0.2"
-  lazy val plotlyJS =  libraryDependencies += "com.definitelyscala" %%% "scala-js-plotlyjs" % "1.1.9"
+  lazy val plotlyJS =  libraryDependencies += "com.definitelyscala" %%% "scala-js-plotlyjs" % "1.1.10"
 
   lazy val scalatest = "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 
   /** ------- Bundles -------------- */
 
-  def addScalaLang(scalaVersion: String) = libraryDependencies += "org.openmole.library" %% "org-scala-lang-scala-library" % scalaVersion
+  def addScalaLang(scalaVersion: String) =
+    libraryDependencies ++= Seq(
+      "org.openmole.library" %% "org-scala-lang-scala-library" % scalaVersion,
+      "org.scalameta" %% "scalameta" % "4.1.0"
+    )
 
   lazy val scalatra = "org.openmole.library" %% "org-scalatra" % "2.6.3"
   lazy val logback = "org.openmole.library" %% "ch-qos-logback" % "1.0.9"
   lazy val h2 = "org.openmole.library" %% "org-h2" % "1.4.199"
   lazy val bonecp = "org.openmole.library" %% "com-jolbox-bonecp" % "0.8.0-rc1"
-  lazy val slick = "org.openmole.library" %% "com-typesafe-slick" % "3.2.0"
+  lazy val slick = "org.openmole.library" %% "com-typesafe-slick" % "3.3.0"
   lazy val slf4j = "org.openmole.library" %% "org-slf4j" % "1.7.10"
   lazy val xstream = "org.openmole.library" %% "com-thoughtworks-xstream" % xstreamVersion
   lazy val jasypt = "org.openmole.library" %% "org-jasypt-encryption" % "1.9.2"
@@ -95,7 +102,8 @@ object Libraries {
   lazy val netlogo6 = "org.openmole.library" % "ccl-northwestern-edu-netlogo6" % netLogo6Version
   lazy val sourceCode = "org.openmole.library" %% "sourcecode" % sourcecodeVersion
   lazy val txtmark = "org.openmole.library" %% "com-github-rjeschke-txtmark" % "0.13"
-
+  lazy val spatialdata = "org.openmole.library" %% "org-openmole-spatialdata" % spatialdataVersion
+  
   def httpClientVersion = "4.5.3"
   lazy val httpClient =
     Seq(
@@ -107,7 +115,12 @@ object Libraries {
   lazy val toolxitBibtex = "org.openmole" %% "toolxit-bibtex" % "0.2"
 
   lazy val gridscale = "org.openmole.library" %% "gridscale" % gridscaleVersion
-  lazy val gridscaleSSH = "org.openmole.library" %% "gridscale-ssh" % gridscaleVersion
+  lazy val gridscaleSSH = 
+    Seq(
+      "org.openmole.library" %% "gridscale-ssh" % gridscaleVersion,
+      "org.openmole.library" %% "com-hierynomus-sshj" % sshjVersion
+    )
+  
   lazy val gridscalePBS = "org.openmole.library" %% "gridscale-pbs" % gridscaleVersion
   lazy val gridscaleSGE = "org.openmole.library" %% "gridscale-sge" % gridscaleVersion
   lazy val gridscaleCondor = "org.openmole.library" %% "gridscale-condor" % gridscaleVersion
@@ -123,7 +136,7 @@ object Libraries {
   lazy val gridscaleOAR = "org.openmole.library" %% "gridscale-oar" % gridscaleVersion
 
   lazy val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.8"
-  lazy val guava = "com.google.guava" % "guava" % "19.0"
+  lazy val guava = "com.google.guava" % "guava" % "27.1-jre"
   lazy val spray = "io.spray" %% "spray-json" % "1.3.2"
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
   lazy val equinoxOSGi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.13.200"

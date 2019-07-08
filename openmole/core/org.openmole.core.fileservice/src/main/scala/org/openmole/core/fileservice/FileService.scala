@@ -47,8 +47,13 @@ object FileService {
 
   def apply()(implicit preference: Preference, threadProvider: ThreadProvider) = {
     val fs = new FileService
-    fs.start
+    start(fs)
     fs
+  }
+
+  def start(fileService: FileService)(implicit preference: Preference, threadProvider: ThreadProvider): Unit = {
+    fileService.fileDeleter.start(threadProvider)
+    Updater.delay(fileService.gc, preference(FileService.GCInterval))
   }
 }
 
@@ -105,20 +110,9 @@ class FileService(implicit preference: Preference) {
   }
 
   def deleteWhenEmpty(directory: File) =
-    if (directory.exists) {
-      if (directory.isEmpty) directory.recursiveDelete
-      else
-        deleteEmpty.synchronized {
-          deleteEmpty += directory
-        }
-    }
+    if (directory.exists() && !directory.delete()) deleteEmpty.synchronized { deleteEmpty += directory }
 
   def asynchronousRemove(file: File): Boolean = fileDeleter.asynchronousRemove(file)
-
-  def start(implicit preference: Preference, threadProvider: ThreadProvider): Unit = {
-    fileDeleter.start(threadProvider)
-    Updater.delay(gc, preference(FileService.GCInterval))
-  }
 
 }
 
