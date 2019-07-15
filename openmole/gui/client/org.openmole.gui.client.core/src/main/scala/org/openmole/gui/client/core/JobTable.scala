@@ -51,7 +51,7 @@ class JobTable(executionId: ExecutionId) {
   }
 
   def updateEnvErrors(environmentId: EnvironmentId) =
-    post()[Api].runningErrorEnvironmentData(environmentId, panels.executionPanel.envErrorHistory.value.toInt).call().foreach {
+    post()[Api].runningErrorEnvironmentData(environmentId, 500).call().foreach {
       err ⇒
         envError() = envError.now + (environmentId → err)
     }

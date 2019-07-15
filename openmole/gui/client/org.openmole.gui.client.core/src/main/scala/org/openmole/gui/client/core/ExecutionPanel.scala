@@ -266,7 +266,7 @@ class ExecutionPanel {
     }
 
     if (updating.compareAndSet(false, true)) {
-      post()[Api].allStates(outputHistory.value.toInt).call().andThen {
+      post()[Api].allStates(200).call().andThen {
         case Success((executionInfos, runningOutputData)) ⇒
           executionInfo() = executionInfos.toMap
           outputInfo() = runningOutputData
@@ -297,9 +297,6 @@ class ExecutionPanel {
     jobTables() = jobTables.now.updated(id, jTable)
     jTable
   }
-
-  val outputHistory = inputTag("500")(placeholder := "# outputs").render
-  val envErrorHistory = inputTag("500")(placeholder := "# environment errors").render
 
   def ratio(completed: Long, running: Long, ready: Long) = s"${
     completed
@@ -357,11 +354,6 @@ class ExecutionPanel {
     executionsDisplayedInBanner() = executionsDisplayedInBanner.now - id
   }
 
-  val settingsForm = vForm(width := 200)(
-    outputHistory.withLabel("# outputs"),
-    envErrorHistory.withLabel("# environment errors")
-  )
-
   val dialog = ModalDialog(
     omsheet.panelWidth(92),
     onopen = () ⇒ {
@@ -376,13 +368,7 @@ class ExecutionPanel {
 
   dialog.header(
     div(height := 55)(
-      b("Executions"),
-      div(omsheet.panelHeaderSettings)(
-        settingsForm.dropdown(
-          buttonModifierSeq = btn_default,
-          buttonIcon = glyph_settings
-        ).render
-      )
+      b("Executions")
     )
   )
 

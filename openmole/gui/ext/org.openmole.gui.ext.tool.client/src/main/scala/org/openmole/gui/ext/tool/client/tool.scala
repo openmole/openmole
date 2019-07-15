@@ -475,11 +475,6 @@ package object client {
   )
 
   //EXECUTION PANEL
-  lazy val panelHeaderSettings: ModifierSeq = Seq(
-    floatRight,
-    marginRight := 200
-  )
-
   lazy val execOutput: ModifierSeq = Seq(
     marginRight := -10,
     marginTop := 5
