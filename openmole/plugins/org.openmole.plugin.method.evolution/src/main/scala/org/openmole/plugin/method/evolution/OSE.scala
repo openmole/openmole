@@ -10,6 +10,7 @@ import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
 import org.openmole.plugin.method.evolution.Genome.GenomeBound
+import org.openmole.plugin.method.evolution.Objective.{ ToExactObjective, ToNoisyObjective }
 import org.openmole.tool.types.ToDouble
 
 import scala.language.higherKinds
@@ -330,11 +331,14 @@ object OSE {
   case class DiscreteSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfInt, scale: Vector[Vector[Int]]) extends OriginAxe
 
   object FitnessPattern {
-    implicit def fromUnderToObjective[T](v: Under[Val[T], T])(implicit td: ToDouble[T]) = FitnessPattern(v.value, td(v.under))
-    implicit def fromNegativeUnderToObjective[T](v: Under[Negative[Val[T]], T])(implicit td: ToDouble[T]) = FitnessPattern(v.value, td(v.under))
+    implicit def fromUnderExactToPattern[T, V](v: Under[T, V])(implicit td: ToDouble[V], te: ToExactObjective[T]) = FitnessPattern(te.apply(v.value), td(v.under))
+    implicit def fromUnderNoisyToPattern[T, V](v: Under[T, V])(implicit td: ToDouble[V], te: ToNoisyObjective[T]) = FitnessPattern(te.apply(v.value), td(v.under))
 
-    implicit def fromAggregate[DT: ClassTag, T](v: Under[Aggregate[Val[DT], Array[DT] ⇒ Double], T])(implicit td: ToDouble[T]) = FitnessPattern(Objective.aggregateToObjective(v.value), td(v.under))
-    implicit def fromNegativeAggregate[DT: ClassTag, T](v: Under[Aggregate[Negative[Val[DT]], Array[DT] ⇒ Double], T])(implicit td: ToDouble[T]) = FitnessPattern(v.value, td(v.under))
+    //    implicit def fromUnderToObjective[T](v: Under[Val[T], T])(implicit td: ToDouble[T]) = FitnessPattern(v.value, td(v.under))
+    //    implicit def fromNegativeUnderToObjective[T](v: Under[Negative[Val[T]], T])(implicit td: ToDouble[T]) = FitnessPattern(v.value, td(v.under))
+
+    //    implicit def fromAggregate[DT: ClassTag, T](v: Under[Aggregate[Val[DT], Array[DT] ⇒ Double], T])(implicit td: ToDouble[T]) = FitnessPattern(Objective.aggregateToObjective(v.value), td(v.under))
+    //    implicit def fromNegativeAggregate[DT: ClassTag, T](v: Under[Aggregate[Negative[Val[DT]], Array[DT] ⇒ Double], T])(implicit td: ToDouble[T]) = FitnessPattern(v.value, td(v.under))
 
     def toLimit(f: Seq[FitnessPattern]) = f.toVector.map(_.limit)
     def toObjectives(f: Seq[FitnessPattern]) = f.map(_.objective)

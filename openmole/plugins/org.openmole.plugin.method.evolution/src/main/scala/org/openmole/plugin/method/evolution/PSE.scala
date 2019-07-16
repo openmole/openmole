@@ -39,6 +39,7 @@ import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.tools.OptionalArgument
 import org.openmole.plugin.method.evolution.Genome.GenomeBound
 import org.openmole.plugin.method.evolution.NichedNSGA2.NichedElement
+import org.openmole.plugin.method.evolution.Objective.{ ToExactObjective, ToNoisyObjective }
 import org.openmole.tool.types.ToDouble
 import squants.time.Time
 
@@ -484,9 +485,8 @@ object PSE {
   }
 
   object PatternAxe {
-
-    implicit def fromAggregationDoubleDomainToPatternAxe[D, DT: ClassTag](a: In[Aggregate[Val[DT], Array[DT] ⇒ Double], D])(implicit fix: Fix[D, Double]): PatternAxe =
-      PatternAxe(Objective.aggregateToObjective(Aggregate(a.value.value, a.value.aggregate)), fix(a.domain).toVector)
+    implicit def fromInExactToPatternAxe[T, D](v: In[T, D])(implicit fix: Fix[D, Double], te: ToExactObjective[T]) = PatternAxe(te.apply(v.value), fix(v.domain).toVector)
+    implicit def fromInNoisyToPatternAxe[T, D](v: In[T, D])(implicit fix: Fix[D, Double], te: ToNoisyObjective[T]) = PatternAxe(te.apply(v.value), fix(v.domain).toVector)
 
     implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit fix: Fix[D, Double]): PatternAxe =
       PatternAxe(f.value, fix(f.domain).toVector)

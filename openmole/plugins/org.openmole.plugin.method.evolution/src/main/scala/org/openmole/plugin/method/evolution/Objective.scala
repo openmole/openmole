@@ -8,17 +8,47 @@ import org.openmole.tool.types.ToDouble
 import scala.reflect.ClassTag
 
 object Objective {
-  implicit def valToObjective[T](v: Val[T])(implicit td: ToDouble[T]) =
-    ExactObjective[T](v, _(v), td.apply, negative = false)
 
-  implicit def negativeValToObjective[T](v: Negative[Val[T]])(implicit td: ToDouble[T]) =
-    ExactObjective[T](v.value, _(v.value), td.apply, negative = true)
+  object ToExactObjective {
+    implicit def valIsToExact[T](implicit td: ToDouble[T]) =
+      new ToExactObjective[Val[T]] {
+        override def apply(v: Val[T]) = ExactObjective[T](v, _(v), td.apply, negative = false)
+      }
 
-  implicit def aggregateToObjective[T: ClassTag](a: Aggregate[Val[T], Array[T] ⇒ Double]) =
-    NoisyObjective(a.value, _(a.value), a.aggregate, negative = false)
+    implicit def negativeToExact[T](implicit exact: ToExactObjective[T]) =
+      new ToExactObjective[Negative[T]] {
+        override def apply(t: Negative[T]): ExactObjective[_] = exact.apply(t.value).copy(negative = true)
+      }
+  }
 
-  implicit def negativeAggregateToObjective[T: ClassTag](a: Aggregate[Negative[Val[T]], Array[T] ⇒ Double]) =
-    NoisyObjective(a.value.value, _(a.value.value), a.aggregate, negative = true)
+  trait ToExactObjective[T] {
+    def apply(t: T): ExactObjective[_]
+  }
+
+  implicit def toExactObjective[T: ToExactObjective](t: T) = implicitly[ToExactObjective[T]].apply(t)
+
+  object ToNoisyObjective {
+    implicit def aggregateArrayIsToNoisy[T: ClassTag] =
+      new ToNoisyObjective[Aggregate[Val[T], Array[T] ⇒ Double]] {
+        override def apply(a: Aggregate[Val[T], Array[T] ⇒ Double]) = NoisyObjective(a.value, _(a.value), a.aggregate, negative = false)
+      }
+
+    implicit def aggregateVectorIsToNoisy[T: ClassTag] =
+      new ToNoisyObjective[Aggregate[Val[T], Vector[T] ⇒ Double]] {
+        override def apply(a: Aggregate[Val[T], Vector[T] ⇒ Double]) = NoisyObjective(a.value, _(a.value), (v: Array[T]) ⇒ a.aggregate(v.toVector), negative = false)
+      }
+
+    implicit def negativeIsAggregate[T](implicit noisy: ToNoisyObjective[T]) =
+      new ToNoisyObjective[Negative[T]] {
+        override def apply(t: Negative[T]): NoisyObjective[_] = noisy.apply(t.value).copy(negative = true)
+      }
+  }
+
+  trait ToNoisyObjective[T] {
+    def apply(t: T): NoisyObjective[_]
+  }
+
+  implicit def toNoisyObjective[T: ToNoisyObjective](t: T) = implicitly[ToNoisyObjective[T]].apply(t)
 
   def index(obj: Objectives, v: Val[_]) = obj.indexWhere(o ⇒ prototype(o) == v) match {
     case -1 ⇒ None
@@ -64,9 +94,6 @@ object NoisyObjective {
     for {
       (vs, obj) ← v.transpose zip objectives
     } yield obj.aggregateAny(vs)
-
-  //  def apply[P: ClassTag](prototype: Val[P], get: Context ⇒ P, aggregate: Array[P] ⇒ Double, negative: Boolean): NoisyObjective[P] =
-  //    NoisyObjective(prototype, get, (a: Vector[P]) ⇒ aggregate(a.toArray), negative)
 
 }
 
