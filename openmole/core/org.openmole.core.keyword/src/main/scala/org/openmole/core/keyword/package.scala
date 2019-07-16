@@ -12,6 +12,7 @@ package keyword {
   case class :=[A, B](value: A, equal: B)
   case class Negative[A](value: A)
   case class Aggregate[A, B](value: A, aggregate: B)
+  case class Delta[A, B](value: A, delta: B)
 
   trait KeyWordPackage {
     implicit class InDecorator[A](a: A) {
@@ -32,6 +33,10 @@ package keyword {
 
     implicit class AggregateDecorator[A](a: A) {
       def aggregate[B, C](b: B ⇒ C) = Aggregate(a, b)
+    }
+
+    implicit class DeltaDecorator[A](a: A) {
+      def delta[B](b: B) = Delta(a, b)
     }
   }
 

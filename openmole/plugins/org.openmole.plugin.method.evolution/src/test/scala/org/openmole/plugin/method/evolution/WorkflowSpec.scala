@@ -252,6 +252,34 @@ class WorkflowSpec extends FlatSpec with Matchers {
     Validation(nsga).isEmpty should equal(true)
   }
 
+  "NSGAEvolution with delta" should "be valid" in {
+    val a = Val[Double]
+    val b = Val[Double]
+
+    val wf = NSGA2Evolution(
+      evaluation = EmptyTask() set (inputs += a, outputs += b),
+      objectives = Seq(b delta 1.0),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100
+    )
+
+    Validation(wf).isEmpty should equal(true)
+  }
+
+  "NSGAEvolution with maximisation" should "be valid" in {
+    val a = Val[Double]
+    val b = Val[Double]
+
+    val wf = NSGA2Evolution(
+      evaluation = EmptyTask() set (inputs += a, outputs += b),
+      objectives = Seq(-b),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100
+    )
+
+    Validation(wf).isEmpty should equal(true)
+  }
+
   "Stochastic NSGAEvolution" should "be valid" in {
     val a = Val[Double]
     val b = Val[Double]
@@ -259,6 +287,21 @@ class WorkflowSpec extends FlatSpec with Matchers {
     val nsga = NSGA2Evolution(
       evaluation = EmptyTask() set (inputs += a, outputs += b),
       objectives = Seq(b),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100,
+      stochastic = Stochastic()
+    )
+
+    Validation(nsga).isEmpty should equal(true)
+  }
+
+  "Stochastic NSGAEvolution with aggregate and delta" should "be valid" in {
+    val a = Val[Double]
+    val b = Val[Double]
+
+    val nsga = NSGA2Evolution(
+      evaluation = EmptyTask() set (inputs += a, outputs += b),
+      objectives = Seq(b aggregate median delta 100),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       stochastic = Stochastic()
