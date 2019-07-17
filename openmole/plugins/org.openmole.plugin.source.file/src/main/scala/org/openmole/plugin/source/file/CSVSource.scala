@@ -66,7 +66,7 @@ object CSVSource {
 
     val file = new File(path.from(context))
     val transposed =
-      csv.csvToVariables(columns.map(_.toTuple.swap), fileColumns, separator)(file, context).toSeq.transpose
+      csv.csvToVariables(file, columns.map(_.toTuple.swap), fileColumns, separator).toSeq.transpose
 
     def variables =
       for {

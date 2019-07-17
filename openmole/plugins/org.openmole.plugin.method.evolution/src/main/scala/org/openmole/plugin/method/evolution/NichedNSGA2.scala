@@ -18,6 +18,7 @@ import monocle.macros.GenLens
 import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
+import org.openmole.plugin.method.evolution.Genome.Suggestion
 import org.openmole.plugin.method.evolution.NichedNSGA2.NichedElement
 
 import scala.language.higherKinds
@@ -533,7 +534,7 @@ object NichedNSGA2Evolution {
     stochastic:   OptionalArgument[Stochastic] = None,
     parallelism:  Int                          = 1,
     distribution: EvolutionPattern             = SteadyState(),
-    suggestion:   Seq[Seq[ValueAssignment[_]]] = Seq(),
+    suggestion:   Suggestion                   = Suggestion.empty,
     scope:        DefinitionScope              = "niched nsga2") =
     EvolutionPattern.build(
       algorithm =
@@ -549,7 +550,7 @@ object NichedNSGA2Evolution {
       stochastic = stochastic,
       parallelism = parallelism,
       distribution = distribution,
-      suggestion = suggestion,
+      suggestion = suggestion(genome),
       scope = scope
     )
 

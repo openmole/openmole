@@ -4,6 +4,9 @@ import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.tools.math._
+import org.openmole.core.workflow.builder.ValueAssignment
+
+import java.io.File
 
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
@@ -226,4 +229,45 @@ object Genome {
       value.zipWithIndex.foreach { case (v, i) ⇒ java.lang.reflect.Array.set(array, i, v) }
       Variable.unsecure(b.v.toArray, array)
   }
+
+  object ToSuggestion {
+
+    def loadFromFile(f: File, genome: Genome) = {
+      import org.openmole.core.csv.csvToVariables
+      import org.openmole.core.keyword.:=
+
+      def toAssignment[T](v: Variable[T]): :=[Val[T], FromContext[T]] = :=(v.prototype, v.value)
+
+      val columns = genome.map(GenomeBound.toVal).map(v ⇒ v.name -> v)
+      csvToVariables(f, columns).map(_.map(v ⇒ toAssignment(v)).toSeq).toSeq
+    }
+
+    implicit def fromFile =
+      new ToSuggestion[File] {
+        override def apply(t: File): Suggestion = genome ⇒ loadFromFile(t, genome)
+      }
+
+    implicit def fromString =
+      new ToSuggestion[String] {
+        override def apply(t: String): Suggestion = genome ⇒ loadFromFile(new java.io.File(t), genome)
+      }
+
+    implicit def fromAssignment[T] =
+      new ToSuggestion[Seq[Seq[ValueAssignment[T]]]] {
+        override def apply(t: Seq[Seq[ValueAssignment[T]]]): Suggestion = genome ⇒ t
+      }
+  }
+
+  sealed trait ToSuggestion[T] {
+    def apply(t: T): Suggestion
+  }
+
+  implicit def toSuggestion[T](t: T)(implicit ts: ToSuggestion[T]): Suggestion = ts.apply(t)
+
+  object Suggestion {
+    def empty = (genome: Genome) ⇒ Seq()
+  }
+
+  type Suggestion = Genome ⇒ Seq[Seq[ValueAssignment[_]]]
+
 }

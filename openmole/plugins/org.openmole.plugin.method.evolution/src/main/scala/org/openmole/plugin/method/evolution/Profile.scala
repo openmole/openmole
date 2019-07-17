@@ -22,6 +22,7 @@ import cats._
 import org.openmole.core.context.Context
 import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
 import org.openmole.core.workflow.tools.DefaultSet
+import org.openmole.plugin.method.evolution.Genome.Suggestion
 
 object Profile {
 
@@ -69,7 +70,7 @@ object ProfileEvolution {
     stochastic:   OptionalArgument[Stochastic] = None,
     parallelism:  Int                          = 1,
     distribution: EvolutionPattern             = SteadyState(),
-    suggestion:   Seq[Seq[ValueAssignment[_]]] = Seq(),
+    suggestion:   Suggestion                   = Suggestion.empty,
     scope:        DefinitionScope              = "profile") =
     EvolutionPattern.build(
       algorithm =
@@ -86,7 +87,7 @@ object ProfileEvolution {
       stochastic = stochastic,
       parallelism = parallelism,
       distribution = distribution,
-      suggestion = suggestion,
+      suggestion = suggestion(genome),
       scope = scope
     )
 

@@ -36,6 +36,7 @@ import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
 import org.openmole.core.workflow.composition.DSLContainer
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
+import org.openmole.plugin.method.evolution.Genome.Suggestion
 import org.openmole.plugin.method.evolution.NichedNSGA2.NichedElement
 import squants.time.Time
 
@@ -303,7 +304,7 @@ object NSGA2Evolution {
     stochastic:   OptionalArgument[Stochastic] = None,
     parallelism:  Int                          = 1,
     distribution: EvolutionPattern             = SteadyState(),
-    suggestion:   Seq[Seq[ValueAssignment[_]]] = Seq(),
+    suggestion:   Suggestion                   = Suggestion.empty,
     scope:        DefinitionScope              = "nsga2") =
     EvolutionPattern.build(
       algorithm =
@@ -318,7 +319,7 @@ object NSGA2Evolution {
       stochastic = stochastic,
       parallelism = parallelism,
       distribution = distribution,
-      suggestion = suggestion,
+      suggestion = suggestion(genome),
       scope = scope
     )
 

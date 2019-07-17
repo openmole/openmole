@@ -9,7 +9,7 @@ import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
-import org.openmole.plugin.method.evolution.Genome.GenomeBound
+import org.openmole.plugin.method.evolution.Genome.{ GenomeBound, Suggestion }
 import org.openmole.plugin.method.evolution.Objective.{ ToExactObjective, ToNoisyObjective }
 import org.openmole.tool.types.ToDouble
 
@@ -410,7 +410,7 @@ object OSEEvolution {
     stochastic:   OptionalArgument[Stochastic] = None,
     parallelism:  Int                          = 1,
     distribution: EvolutionPattern             = SteadyState(),
-    suggestion:   Seq[Seq[ValueAssignment[_]]] = Seq(),
+    suggestion:   Suggestion                   = Suggestion.empty,
     scope:        DefinitionScope              = "ose") =
     EvolutionPattern.build(
       algorithm =
@@ -426,7 +426,7 @@ object OSEEvolution {
       stochastic = stochastic,
       parallelism = parallelism,
       distribution = distribution,
-      suggestion = suggestion,
+      suggestion = suggestion(genome),
       scope = scope
     )
 

@@ -126,9 +126,10 @@ package object csv {
    *
    */
   def csvToVariables(
-    columns:     Vector[(String, Val[_])],
-    fileColumns: Vector[(String, File, Val[File])],
-    separator:   Option[Char])(file: File, context: Context): Iterator[Iterable[Variable[_]]] = {
+    file:        File,
+    columns:     Seq[(String, Val[_])],
+    fileColumns: Seq[(String, File, Val[File])] = Seq.empty,
+    separator:   Option[Char]                   = None): Iterator[Iterable[Variable[_]]] = {
     val reader = new CSVReader(new FileReader(file), separator.getOrElse(','))
     val headers = reader.readNext.toArray
 

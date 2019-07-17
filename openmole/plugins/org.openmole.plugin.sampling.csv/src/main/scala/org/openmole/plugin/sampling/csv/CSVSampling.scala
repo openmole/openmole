@@ -67,9 +67,10 @@ object CSVSampling {
     import org.openmole.core.csv
 
     csv.csvToVariables(
+      file.from(context),
       columns.map(_.toTuple.swap),
       fileColumns,
-      separator)(file.from(context), context)
+      separator)
   }
 
 }
