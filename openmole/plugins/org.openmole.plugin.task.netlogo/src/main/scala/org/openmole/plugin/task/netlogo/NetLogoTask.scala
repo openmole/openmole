@@ -118,10 +118,16 @@ object NetLogoTask {
   def report(netLogo: NetLogo, name: String) =
     withThreadClassLoader(netLogo.getNetLogoClassLoader) { netLogo.report(name) }
 
-  def dispose(netLogo: NetLogo) =
-    withThreadClassLoader(netLogo.getNetLogoClassLoader) { netLogo.dispose() }
+  def dispose(netLogo: NetLogo, ignoreErrorOnDispose: Boolean) =
+    withThreadClassLoader(netLogo.getNetLogoClassLoader) {
+      try netLogo.dispose()
+      catch {
+        //FIXME it hapen with the nw extension, it might be caused by a bug in the dispose method of netlogo, unproperly setting the classloaders
+        case t: NoClassDefFoundError ⇒ if (!ignoreErrorOnDispose) throw t
+      }
+    }
 
-  def createPool(netLogoFactory: NetLogoFactory, workspace: NetLogoTask.Workspace, cached: Boolean, switch3d: Boolean)(implicit newFile: NewFile) = {
+  def createPool(netLogoFactory: NetLogoFactory, workspace: NetLogoTask.Workspace, cached: Boolean, ignoreErrorOnDispose: Boolean, switch3d: Boolean)(implicit newFile: NewFile) = {
     def createInstance = {
       val workspaceDirectory = newFile.newDir("netlogoworkpsace")
       NetLogoTask.openNetLogoWorkspace(netLogoFactory, workspace, workspaceDirectory, switch3d)
@@ -129,7 +135,7 @@ object NetLogoTask {
 
     def destroyInstance(instance: NetLogoTask.NetoLogoInstance) = {
       instance.directory.recursiveDelete
-      instance.netLogo.dispose()
+      dispose(instance.netLogo, ignoreErrorOnDispose)
     }
 
     WithInstance[NetLogoTask.NetoLogoInstance](
@@ -310,6 +316,8 @@ trait NetLogoTask extends Task with ValidateTask {
   def seed: Option[Val[Int]]
   def external: External
   def reuseWorkspace: Boolean
+  def ignoreErrorOnDispose: Boolean
+
   def switch3d: Boolean
 
   override def validate = Validate { p ⇒
@@ -323,7 +331,7 @@ trait NetLogoTask extends Task with ValidateTask {
   override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
     import parameters._
 
-    val pool = executionContext.cache.getOrElseUpdate(netLogoInstanceKey, NetLogoTask.createPool(netLogoFactory, workspace, reuseWorkspace, switch3d))
+    val pool = executionContext.cache.getOrElseUpdate(netLogoInstanceKey, NetLogoTask.createPool(netLogoFactory, workspace, reuseWorkspace, ignoreErrorOnDispose = ignoreErrorOnDispose, switch3d = switch3d))
 
     pool { instance ⇒
 
