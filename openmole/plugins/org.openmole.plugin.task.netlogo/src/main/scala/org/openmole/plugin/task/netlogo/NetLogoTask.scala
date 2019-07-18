@@ -122,7 +122,8 @@ object NetLogoTask {
     withThreadClassLoader(netLogo.getNetLogoClassLoader) {
       try netLogo.dispose()
       catch {
-        case t: Throwable ⇒ if (!ignoreErrorOnDispose) throw t
+        //FIXME it hapen with the nw extension, it might be caused by a bug in the dispose method of netlogo, unproperly setting the classloaders
+        case t: NoClassDefFoundError ⇒ if (!ignoreErrorOnDispose) throw t
       }
     }
 
