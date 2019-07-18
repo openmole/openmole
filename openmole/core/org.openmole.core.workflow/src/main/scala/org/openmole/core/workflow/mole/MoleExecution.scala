@@ -498,7 +498,7 @@ object MoleExecution extends JavaLogger {
 
     val runningSet: java.util.HashSet[Long] = {
       def submissionEnvironments = moleExecution.environments.values.toSeq.collect { case e: SubmissionEnvironment ⇒ e }
-      def localEnvironments = moleExecution.environments.values.toSeq.collect { case e: LocalEnvironment ⇒ e }
+      def localEnvironments = moleExecution.environments.values.toSeq.collect { case e: LocalEnvironment ⇒ e } ++ Seq(moleExecution.defaultEnvironment)
 
       val set = new java.util.HashSet[Long](jobs.size + 1, 1.0f)
 
