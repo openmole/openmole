@@ -90,7 +90,7 @@ object NetLogo5Task {
     seed:                 OptionalArgument[Val[Int]] = None,
     ignoreError:          Boolean                    = false,
     reuseWorkspace:       Boolean                    = false,
-    ignoreErrorOnDispose: Boolean                    = true,
+    ignoreErrorOnDispose: Boolean                    = false,
     switch3d:             Boolean                    = false
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): NetLogo5Task =
     if (embedWorkspace) workspace(script.getCanonicalFile.getParentFile, script.getName, launchingCommands, seed = seed, ignoreError = ignoreError, reuseWorkspace = reuseWorkspace, ignoreErrorOnDispose = ignoreErrorOnDispose, switch3d = switch3d)
