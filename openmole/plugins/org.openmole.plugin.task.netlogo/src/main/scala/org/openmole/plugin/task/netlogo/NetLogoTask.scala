@@ -122,7 +122,7 @@ object NetLogoTask {
     withThreadClassLoader(netLogo.getNetLogoClassLoader) {
       try netLogo.dispose()
       catch {
-        //FIXME it hapen with the nw extension, it might be caused by a bug in the dispose method of netlogo, unproperly setting the classloaders
+        //FIXME it hapen with the nw extension, this error actually leaks memory. Bug report: https://github.com/NetLogo/NetLogo/issues/1766
         case t: NoClassDefFoundError ⇒ if (!ignoreErrorOnDispose) throw t
       }
     }
