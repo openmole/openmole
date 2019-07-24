@@ -52,7 +52,6 @@ package object tar {
     }
     finally tis.close
 
-    // new model using NIO
     def extract(directory: File, overwrite: Boolean = false) = {
 
       if (!directory.exists()) directory.mkdirs()

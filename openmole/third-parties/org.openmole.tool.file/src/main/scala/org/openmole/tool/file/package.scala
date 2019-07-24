@@ -245,14 +245,10 @@ package file {
       }
 
       def mode = {
-        val f = file.realPath;
-        {
-          if (Files.isReadable(f)) READ_MODE else 0
-        } | {
-          if (Files.isWritable(f)) WRITE_MODE else 0
-        } | {
-          if (Files.isExecutable(f)) EXEC_MODE else 0
-        }
+        val f = file.realPath
+        (if (Files.isReadable(f)) READ_MODE else 0) |
+          (if (Files.isWritable(f)) WRITE_MODE else 0) |
+          (if (Files.isExecutable(f)) EXEC_MODE else 0)
       }
 
       /** set mode from an integer as retrieved from a Tar archive */
