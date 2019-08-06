@@ -18,32 +18,21 @@
 package org.openmole.plugin.sampling.quasirandom
 
 import org.apache.commons.math3.random.SobolSequenceGenerator
-import org.openmole.core.context._
-import org.openmole.core.expansion._
-import org.openmole.core.tools.math._
-import org.openmole.core.workflow.domain._
-import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.tools._
+import org.openmole.core.dsl.extension._
 
 object SobolSampling {
 
   def apply(samples: FromContext[Int], factors: ScalarOrSequenceOfDouble[_]*) =
-    new SobolSampling(samples, factors: _*)
+    Sampling { p ⇒
+      import p._
+      SobolSampling.sobolValues(factors.size,samples.from(context)).map{ScalarOrSequenceOfDouble.unflatten(factors,_)(context)}
+    } validate { samples } inputs { factors.flatMap(_.inputs) } prototypes { factors.map(_.prototype) }
 
-}
-
-sealed class SobolSampling[D](val samples: FromContext[Int], val factors: ScalarOrSequenceOfDouble[_]*) extends Sampling {
-
-  override def inputs = factors.flatMap(_.inputs)
-  override def prototypes = factors.map { _.prototype }
-
-  override def apply() = FromContext { p ⇒
-    import p._
-    val sequence = new SobolSequenceGenerator(factors.size)
-    val s = samples.from(context)
-
+  def sobolValues(dimension: Int, samples: Int) = {
+    val sequence = new SobolSequenceGenerator(dimension)
     for {
-      v ← Iterator.continually(sequence.nextVector()).take(s)
-    } yield ScalarOrSequenceOfDouble.unflatten(factors, v.toSeq)(context)
+      v ← Iterator.continually(sequence.nextVector()).take(samples)
+    } yield v.toSeq
   }
+
 }
