@@ -1,4 +1,5 @@
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
 import sbt.Keys._
 import sbt._
@@ -8,7 +9,7 @@ object Libraries {
   lazy val gridscaleVersion = "2.21"
   lazy val sshjVersion = "0.27.0"
 
-  lazy val mgoVersion = "3.29"
+  lazy val mgoVersion = "3.30"
   lazy val bouncyCastleVersion = "1.60"
   lazy val d3Version = "3.5.12"
   lazy val tooltipserVersion = "3.3.0"
@@ -26,7 +27,7 @@ object Libraries {
   lazy val circeVersion = "0.10.0"
   lazy val catsVersion = "1.0.1"
   lazy val scalajsVersion = "0.6.28"
-  lazy val squantsVersion = "1.3.0"
+  lazy val squantsVersion = "1.4.0"
   lazy val xstreamVersion = "1.4.11"
   lazy val scalaURIVersion = "1.1.1"
   lazy val spatialdataVersion = "0.2"

@@ -87,7 +87,7 @@ object WorkflowIntegration {
       def mgoAG = a.ag
 
       type V = (Vector[Double], Vector[Int])
-      type P = Vector[Double]
+      type P = Array[Any]
 
       lazy val integration = a.algorithm
 
@@ -103,7 +103,8 @@ object WorkflowIntegration {
         Genome.toVariables(a.genome, cs, is, scale = true)
       }
 
-      def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ Objective.toDouble(o, context)).toVector
+      def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ Objective.prototype(o)).map(context.apply(_)).toArray
+      //def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ Objective.toDouble(o, context)).toVector
     }
 
   def stochasticGAIntegration[AG](a: StochasticGA[AG]): EvolutionWorkflow =
@@ -135,7 +136,7 @@ object WorkflowIntegration {
     ag:         AG,
     genome:     Genome,
     objectives: Seq[ExactObjective[_]]
-  )(implicit val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Vector[Double]])
+  )(implicit val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Array[Any]])
 
   object DeterministicGA {
     implicit def deterministicGAIntegration[AG]: WorkflowIntegration[DeterministicGA[AG]] = new WorkflowIntegration[DeterministicGA[AG]] {
@@ -248,9 +249,9 @@ object GAIntegration {
 
   def objectivesOfPopulationToVariables[I](objectives: Seq[Objective[_]], phenotypeValues: Vector[Vector[Double]]): FromContext[Vector[Variable[_]]] =
     objectives.toVector.zipWithIndex.map {
-      case (p, i) ⇒
+      case (objective, i) ⇒
         Variable(
-          Objective.prototype(p).withType[Array[Double]],
+          Objective.prototype(objective).withType[Array[Double]],
           phenotypeValues.map(_(i)).toArray
         )
     }
@@ -258,8 +259,8 @@ object GAIntegration {
 }
 
 object DeterministicGAIntegration {
-  def migrateToIsland(population: Vector[mgo.evolution.algorithm.CDGenome.DeterministicIndividual.Individual]) = population
-  def migrateFromIsland(population: Vector[mgo.evolution.algorithm.CDGenome.DeterministicIndividual.Individual]) = population
+  def migrateToIsland[P](population: Vector[mgo.evolution.algorithm.CDGenome.DeterministicIndividual.Individual[P]]) = population
+  def migrateFromIsland[P](population: Vector[mgo.evolution.algorithm.CDGenome.DeterministicIndividual.Individual[P]]) = population
 }
 
 object StochasticGAIntegration {

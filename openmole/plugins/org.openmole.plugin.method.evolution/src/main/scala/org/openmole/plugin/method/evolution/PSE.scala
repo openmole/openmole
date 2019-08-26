@@ -58,20 +58,20 @@ object PSEAlgorithm {
   import GenomeVectorDouble._
   import CDGenome._
 
-  @Lenses case class Individual(
+  @Lenses case class Individual[P](
     genome:        Genome,
-    phenotype:     Array[Double],
-    foundedIsland: Boolean       = false)
+    phenotype:     P,
+    foundedIsland: Boolean = false)
 
   case class Result(continuous: Vector[Double], discrete: Vector[Int], pattern: Vector[Int], phenotype: Vector[Double])
 
-  def result(population: Vector[Individual], continuous: Vector[C], pattern: Vector[Double] ⇒ Vector[Int]) =
+  def result[P](population: Vector[Individual[P]], continuous: Vector[C], pattern: Vector[Double] ⇒ Vector[Int], phenotype: P ⇒ Vector[Double]) =
     population.map { i ⇒
       Result(
         scaleContinuousValues(continuousValues.get(i.genome), continuous),
         Individual.genome composeLens discreteValues get i,
-        pattern(i.phenotype.toVector),
-        i.phenotype.toVector)
+        pattern(phenotype(i.phenotype)),
+        phenotype(i.phenotype))
     }
 
   def state[M[_]: cats.Monad: StartTime: Random: Generation](implicit hitmap: HitMap[M]) = for {
@@ -79,37 +79,37 @@ object PSEAlgorithm {
     s ← mgo.evolution.algorithm.state[M, Map[Vector[Int], Int]](map)
   } yield s
 
-  def buildIndividual(g: Genome, f: Vector[Double]) = Individual(g, f.toArray)
-  def vectorPhenotype = Individual.phenotype composeLens arrayToVectorLens
+  def buildIndividual[P](g: Genome, p: P) = Individual(g, p)
+  // def vectorPhenotype = Individual.phenotype composeLens arrayToVectorLens
 
   def initialGenomes[M[_]: cats.Monad: Random](lambda: Int, continuous: Vector[C], discrete: Vector[D]) =
     CDGenome.initialGenomes[M](lambda, continuous, discrete)
 
-  def adaptiveBreeding[M[_]: Generation: Random: cats.Monad: HitMap](
+  def adaptiveBreeding[M[_]: Generation: Random: cats.Monad: HitMap, P](
     lambda:              Int,
     operatorExploration: Double,
     discrete:            Vector[D],
-    pattern:             Vector[Double] ⇒ Vector[Int]): Breeding[M, Individual, Genome] =
-    PSEOperations.adaptiveBreeding[M, Individual, Genome](
+    pattern:             P ⇒ Vector[Int]): Breeding[M, Individual[P], Genome] =
+    PSEOperations.adaptiveBreeding[M, Individual[P], Genome](
       Individual.genome.get,
       continuousValues.get,
       continuousOperator.get,
       discreteValues.get,
       discreteOperator.get,
       discrete,
-      vectorPhenotype.get _ andThen pattern,
+      Individual.phenotype[P].get _ andThen pattern,
       buildGenome,
       lambda,
       operatorExploration)
 
-  def elitism[M[_]: cats.Monad: StartTime: Random: HitMap: Generation](pattern: Vector[Double] ⇒ Vector[Int], continuous: Vector[C]) =
-    PSEOperations.elitism[M, Individual, Vector[Double]](
+  def elitism[M[_]: cats.Monad: StartTime: Random: HitMap: Generation, P: CanBeNaN](pattern: P ⇒ Vector[Int], continuous: Vector[C]) =
+    PSEOperations.elitism[M, Individual[P], P](
       i ⇒ values(Individual.genome.get(i), continuous),
-      vectorPhenotype.get,
+      Individual.phenotype[P].get,
       pattern)
 
-  def expression(phenotype: (Vector[Double], Vector[Int]) ⇒ Vector[Double], continuous: Vector[C]): Genome ⇒ Individual =
-    deterministic.expression[Genome, Individual](
+  def expression[P](phenotype: (Vector[Double], Vector[Int]) ⇒ P, continuous: Vector[C]): Genome ⇒ Individual[P] =
+    deterministic.expression[Genome, P, Individual[P]](
       values(_, continuous),
       buildIndividual,
       phenotype)
@@ -218,6 +218,18 @@ object NoisyPSEAlgorithm {
 
 object PSE {
 
+  implicit def anyCanBeNan: CanBeNaN[Any] = new CanBeNaN[Any] {
+    override def isNaN(t: Any): Boolean = t match {
+      case x: Double ⇒ x.isNaN
+      case x: Float  ⇒ x.isNaN
+      case x         ⇒ false
+    }
+  }
+
+  implicit def arrayCanBeNaN[T](implicit cbn: CanBeNaN[T]) = new CanBeNaN[Array[T]] {
+    override def isNaN(t: Array[T]): Boolean = t.exists(cbn.isNaN)
+  }
+
   case class DeterministicParams(
     pattern:             Vector[Double] ⇒ Vector[Int],
     genome:              Genome,
@@ -231,9 +243,9 @@ object PSE {
     import cats.data._
     import mgo.evolution.contexts._
 
-    implicit def integration = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Vector[Double]] { api ⇒
+    implicit def integration = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Array[Any]] { api ⇒
       type G = CDGenome.Genome
-      type I = PSEAlgorithm.Individual
+      type I = PSEAlgorithm.Individual[Array[Any]]
       type S = EvolutionState[HitMapState]
 
       def iManifest = implicitly
@@ -274,7 +286,7 @@ object PSE {
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
 
-        def buildIndividual(genome: G, phenotype: Vector[Double], context: Context) = PSEAlgorithm.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Array[Any], context: Context) = PSEAlgorithm.buildIndividual(genome, phenotype)
 
         def initialState(rng: util.Random) = EvolutionState[HitMapState](random = rng, s = Map())
 
@@ -284,7 +296,7 @@ object PSE {
         def result(population: Vector[I], state: S) = FromContext { p ⇒
           import p._
 
-          val res = PSEAlgorithm.result(population, Genome.continuous(om.genome).from(context), om.pattern)
+          val res = PSEAlgorithm.result[Array[Any]](population, Genome.continuous(om.genome).from(context), om.pattern, ExactObjective.toFitnessFunction(om.objectives))
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype)).from(context)
 
@@ -304,17 +316,19 @@ object PSE {
             }
           }
 
+        private def pattern(p: Array[Any]) = om.pattern(ExactObjective.toFitnessFunction(om.objectives)(p))
+
         def breeding(individuals: Vector[I], n: Int) =
           Genome.discrete(om.genome).map { discrete ⇒
             interpret { impl ⇒
               import impl._
               import mgo.tagtools._
               zipWithState(
-                PSEAlgorithm.adaptiveBreeding[DSL](
+                PSEAlgorithm.adaptiveBreeding[DSL, Array[Any]](
                   n,
                   om.operatorExploration,
                   discrete,
-                  om.pattern).run(individuals)).eval
+                  pattern).run(individuals)).eval
             }
           }
 
@@ -325,7 +339,7 @@ object PSE {
               import mgo.tagtools._
               def step =
                 for {
-                  elited ← PSEAlgorithm.elitism[DSL](om.pattern, continuous) apply (population, candidates)
+                  elited ← PSEAlgorithm.elitism[DSL, Array[Any]](pattern, continuous) apply (population, candidates)
                   _ ← mgo.evolution.elitism.incrementGeneration[DSL]
                 } yield elited
 
@@ -353,18 +367,6 @@ object PSE {
     operatorExploration: Double)
 
   object StochasticParams {
-
-    implicit def anyCanBeNan: CanBeNaN[Any] = new CanBeNaN[Any] {
-      override def isNaN(t: Any): Boolean = t match {
-        case x: Double ⇒ x.isNaN
-        case x: Float  ⇒ x.isNaN
-        case x         ⇒ false
-      }
-    }
-
-    implicit def arrayCanBeNaN[T](implicit cbn: CanBeNaN[T]) = new CanBeNaN[Array[T]] {
-      override def isNaN(t: Array[T]): Boolean = t.exists(cbn.isNaN)
-    }
 
     import mgo.evolution.algorithm.{ PSE ⇒ _, NoisyPSE ⇒ _, _ }
     import cats.data._

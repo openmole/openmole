@@ -71,12 +71,6 @@ object Objective {
     case x  ⇒ Some(x)
   }
 
-  def toDouble[P](o: ExactObjective[P], context: Context) = {
-    def value = o.toDouble(o.get(context))
-    def deltaValue = o.delta.map(d ⇒ math.abs(value - d)).getOrElse(value)
-    if (!o.negative) deltaValue else -deltaValue
-  }
-
   def prototype(o: Objective[_]) =
     o match {
       case e: ExactObjective[_] ⇒ e.prototype
@@ -103,7 +97,25 @@ object Objective {
 }
 
 sealed trait Objective[P]
-case class ExactObjective[P](prototype: Val[P], get: Context ⇒ P, toDouble: P ⇒ Double, negative: Boolean, delta: Option[Double]) extends Objective[P]
+
+object ExactObjective {
+
+  def toDouble[P](o: ExactObjective[P], context: Context) = {
+    def value = o.toDouble(o.get(context))
+    def deltaValue = o.delta.map(d ⇒ math.abs(value - d)).getOrElse(value)
+    if (!o.negative) deltaValue else -deltaValue
+  }
+
+  def toFitnessFunction(objectives: Seq[ExactObjective[_]])(phenotype: Array[Any]) =
+    for {
+      (o, p) ← (objectives zip phenotype).toVector
+    } yield o.fromAny(p)
+
+}
+
+case class ExactObjective[P](prototype: Val[P], get: Context ⇒ P, toDouble: P ⇒ Double, negative: Boolean, delta: Option[Double]) extends Objective[P] {
+  def fromAny(v: Any) = toDouble(v.asInstanceOf[P])
+}
 
 object NoisyObjective {
 

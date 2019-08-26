@@ -50,9 +50,9 @@ object NSGA2 {
     import cats.data._
     import mgo.evolution.contexts._
 
-    implicit def integration: MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Vector[Double]] = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Vector[Double]] {
+    implicit def integration: MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Array[Any]] = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Array[Any]] {
       type G = CDGenome.Genome
-      type I = CDGenome.DeterministicIndividual.Individual
+      type I = CDGenome.DeterministicIndividual.Individual[Array[Any]]
       type S = EvolutionState[Unit]
 
       def iManifest = implicitly
@@ -81,13 +81,13 @@ object NSGA2 {
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
 
-        def buildIndividual(genome: G, phenotype: Vector[Double], context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Array[Any], context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
         def initialState(rng: util.Random) = EvolutionState[Unit](random = rng, s = ())
 
         def result(population: Vector[I], state: S) = FromContext { p ⇒
           import p._
 
-          val res = MGONSGA2.result(population, Genome.continuous(om.genome).from(context))
+          val res = MGONSGA2.result[Array[Any]](population, Genome.continuous(om.genome).from(context), ExactObjective.toFitnessFunction(om.objectives))
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness)).from(context)
 
@@ -108,7 +108,7 @@ object NSGA2 {
           Genome.discrete(om.genome).map { discrete ⇒
             interpret { impl ⇒
               import impl._
-              zipWithState(MGONSGA2.adaptiveBreeding[DSL](n, om.operatorExploration, discrete).run(individuals)).eval
+              zipWithState(MGONSGA2.adaptiveBreeding[DSL, Array[Any]](n, om.operatorExploration, discrete, ExactObjective.toFitnessFunction(om.objectives)).run(individuals)).eval
             }
           }
 
@@ -118,7 +118,7 @@ object NSGA2 {
               import impl._
               def step =
                 for {
-                  elited ← MGONSGA2.elitism[DSL](om.mu, continuous) apply (population, candidates)
+                  elited ← MGONSGA2.elitism[DSL, Array[Any]](om.mu, continuous, ExactObjective.toFitnessFunction(om.objectives)) apply (population, candidates)
                   _ ← mgo.evolution.elitism.incrementGeneration[DSL]
                 } yield elited
 
@@ -245,7 +245,7 @@ object NSGA2 {
         }
         NoisyObjective
         def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland[I](population, CDGenome.NoisyIndividual.Individual.historyAge)
-        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Array[Any]](population, CDGenome.NoisyIndividual.Individual.historyAge, CDGenome.NoisyIndividual.Individual.fitnessHistory)
+        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Array[Any]](population, CDGenome.NoisyIndividual.Individual.historyAge, CDGenome.NoisyIndividual.Individual.phenotypeHistory[Array[Any]])
       }
 
     }

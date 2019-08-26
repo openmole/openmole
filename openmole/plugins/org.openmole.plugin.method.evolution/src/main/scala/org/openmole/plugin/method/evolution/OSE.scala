@@ -23,7 +23,7 @@ object OSE {
     origin:              (Vector[Double], Vector[Int]) ⇒ Vector[Int],
     limit:               Vector[Double],
     genome:              Genome,
-    objectives:          Objectives,
+    objectives:          Seq[ExactObjective[_]],
     operatorExploration: Double)
 
   object DeterministicParams {
@@ -33,16 +33,16 @@ object OSE {
     import mgo.evolution.algorithm.{ OSE ⇒ MGOOSE, _ }
     import mgo.evolution.contexts._
 
-    implicit def integration = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Vector[Double]] { api ⇒
+    implicit def integration = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Array[Any]] { api ⇒
       type G = CDGenome.Genome
-      type I = CDGenome.DeterministicIndividual.Individual
-      type S = EvolutionState[OSEState]
+      type I = CDGenome.DeterministicIndividual.Individual[Array[Any]]
+      type S = EvolutionState[OSEState[Array[Any]]]
 
       def iManifest = implicitly
       def gManifest = implicitly
       def sManifest = implicitly
 
-      private def interpret[U](f: MGOOSE.OSEImplicits ⇒ (S, U)) = State[S, U] { (s: S) ⇒
+      private def interpret[U](f: MGOOSE.OSEImplicits[Array[Any]] ⇒ (S, U)) = State[S, U] { (s: S) ⇒
         MGOOSE.run(s)(f)
       }
 
@@ -50,7 +50,7 @@ object OSE {
         import cats.implicits._
         for {
           t ← op
-          newState ← MGOOSE.state[M]
+          newState ← MGOOSE.state[M, Array[Any]]
         } yield (newState, t)
       }
 
@@ -76,9 +76,9 @@ object OSE {
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
 
-        def buildIndividual(genome: G, phenotype: Vector[Double], context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Array[Any], context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
 
-        def initialState(rng: util.Random) = EvolutionState[OSEState](random = rng, s = (Array.empty, Array.empty))
+        def initialState(rng: util.Random) = EvolutionState[OSEState[Array[Any]]](random = rng, s = (Array.empty, Array.empty))
 
         def afterGeneration(g: Long, population: Vector[I]) = api.afterGeneration(g, population)
         def afterDuration(d: squants.Time, population: Vector[I]) = api.afterDuration(d, population)
@@ -86,7 +86,7 @@ object OSE {
         def result(population: Vector[I], state: S) = FromContext { p ⇒
           import p._
 
-          val res = MGOOSE.result(state, Genome.continuous(om.genome).from(context))
+          val res = MGOOSE.result[Array[Any]](state, Genome.continuous(om.genome).from(context), ExactObjective.toFitnessFunction(om.objectives))
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness)).from(context)
 
@@ -110,11 +110,12 @@ object OSE {
               import mgo.tagtools._
               import impl._
               zipWithState(
-                MGOOSE.adaptiveBreeding[mgo.tagtools.DSL](
+                MGOOSE.adaptiveBreeding[mgo.tagtools.DSL, Array[Any]](
                   n,
                   om.operatorExploration,
                   discrete,
-                  om.origin).run(individuals)).eval
+                  om.origin,
+                  ExactObjective.toFitnessFunction(om.objectives)).run(individuals)).eval
             }
           }
 
@@ -125,7 +126,7 @@ object OSE {
               import impl._
               def step =
                 for {
-                  elited ← MGOOSE.elitism[mgo.tagtools.DSL](om.mu, om.limit, om.origin, continuous) apply (population, candidates)
+                  elited ← MGOOSE.elitism[mgo.tagtools.DSL, Array[Any]](om.mu, om.limit, om.origin, continuous, ExactObjective.toFitnessFunction(om.objectives)) apply (population, candidates)
                   _ ← mgo.evolution.elitism.incrementGeneration[mgo.tagtools.DSL]
                 } yield elited
 
@@ -264,7 +265,7 @@ object OSE {
         def afterDuration(d: squants.Time, population: Vector[I]) = api.afterDuration(d, population)
 
         def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland[I](population, CDGenome.NoisyIndividual.Individual.historyAge)
-        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Array[Any]](population ++ state.s._1, CDGenome.NoisyIndividual.Individual.historyAge, CDGenome.NoisyIndividual.Individual.fitnessHistory)
+        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Array[Any]](population ++ state.s._1, CDGenome.NoisyIndividual.Individual.historyAge, CDGenome.NoisyIndividual.Individual.phenotypeHistory[Array[Any]])
 
       }
 
