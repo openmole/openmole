@@ -163,7 +163,7 @@ object SystemExecTask {
           stdErr = executionContext.outputRedirection.output
         )
 
-      val retContext: Context = External.fetchOutputFiles(external, outputs, preparedContext, External.relativeResolver(workDir), tmpDir)
+      val retContext: Context = External.fetchOutputFiles(external, outputs, preparedContext, External.relativeResolver(workDir), Seq(tmpDir))
 
       retContext ++
         List(

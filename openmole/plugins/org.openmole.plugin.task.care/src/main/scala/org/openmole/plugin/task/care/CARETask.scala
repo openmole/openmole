@@ -201,7 +201,7 @@ object CARETask extends JavaLogger {
 
       def outputPathResolver = container.outputPathResolver(preparedFileBindings, hostFileBindings, inputDirectory, userWorkDirectory, rootDirectory) _
 
-      val retContext = External.fetchOutputFiles(external, outputs, preparedContext, outputPathResolver, taskWorkDirectory)
+      val retContext = External.fetchOutputFiles(external, outputs, preparedContext, outputPathResolver, Seq(taskWorkDirectory))
 
       retContext ++
         List(

@@ -351,7 +351,7 @@ trait NetLogoTask extends Task with ValidateTask {
       for (cmd ← launchingCommands.map(_.from(context))) NetLogoTask.executeNetLogo(instance.netLogo, cmd, ignoreError)
 
       val contextResult =
-        External.fetchOutputFiles(external, outputs, preparedContext, resolver, instance.workspaceDirectory) ++ mapped.outputs.map {
+        External.fetchOutputFiles(external, outputs, preparedContext, resolver, Seq(instance.workspaceDirectory)) ++ mapped.outputs.map {
           case mapped ⇒
             try {
               val outputValue = NetLogoTask.report(instance.netLogo, mapped.name)

@@ -36,6 +36,7 @@ import org.openmole.plugin.task.udocker.DockerMetadata._
 import org.openmole.tool.cache._
 import org.openmole.core.dsl._
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.threadprovider._
 import org.openmole.plugin.task.container.HostFiles
 import org.openmole.tool.lock.LockKey
@@ -342,7 +343,7 @@ object UDockerTask {
               stdErr = executionContext.outputRedirection.output
             )
 
-            val retContext = External.fetchOutputFiles(external, outputs, preparedContext, outputPathResolver(rootDirectory), rootDirectory)
+            val retContext = External.fetchOutputFiles(external, outputs, preparedContext, outputPathResolver(rootDirectory), Seq(rootDirectory, taskWorkDirectory))
             (retContext, executionResult)
           }
 
