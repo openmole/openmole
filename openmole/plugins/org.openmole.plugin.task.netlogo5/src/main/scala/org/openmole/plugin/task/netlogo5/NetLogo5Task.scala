@@ -41,14 +41,13 @@ object NetLogo5Task {
   implicit def isMapped = MappedInputOutputBuilder(NetLogo5Task.mapped)
 
   def workspace(
-    workspace:            File,
-    script:               String,
-    launchingCommands:    Seq[FromContext[String]],
-    seed:                 OptionalArgument[Val[Int]],
-    ignoreError:          Boolean,
-    reuseWorkspace:       Boolean,
-    ignoreErrorOnDispose: Boolean,
-    switch3d:             Boolean
+    workspace:         File,
+    script:            String,
+    launchingCommands: Seq[FromContext[String]],
+    seed:              OptionalArgument[Val[Int]],
+    ignoreError:       Boolean,
+    reuseWorkspace:    Boolean,
+    switch3d:          Boolean
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): NetLogo5Task =
     withDefaultArgs(
       workspace = Workspace.Directory(directory = workspace, script = script, name = workspace.getName),
@@ -56,20 +55,18 @@ object NetLogo5Task {
       seed = seed,
       ignoreError = ignoreError,
       reuseWorkspace = reuseWorkspace,
-      ignoreErrorOnDispose = ignoreErrorOnDispose,
       switch3d = switch3d
     ) set (
         inputs += (seed.option.toSeq: _*)
       )
 
   def file(
-    script:               File,
-    launchingCommands:    Seq[FromContext[String]],
-    seed:                 OptionalArgument[Val[Int]],
-    ignoreError:          Boolean,
-    reuseWorkspace:       Boolean,
-    ignoreErrorOnDispose: Boolean,
-    switch3d:             Boolean
+    script:            File,
+    launchingCommands: Seq[FromContext[String]],
+    seed:              OptionalArgument[Val[Int]],
+    ignoreError:       Boolean,
+    reuseWorkspace:    Boolean,
+    switch3d:          Boolean
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): NetLogo5Task =
     withDefaultArgs(
       workspace = Workspace.Script(script = script, name = script.getName),
@@ -77,7 +74,6 @@ object NetLogo5Task {
       seed = seed,
       ignoreError = ignoreError,
       reuseWorkspace = reuseWorkspace,
-      ignoreErrorOnDispose = ignoreErrorOnDispose,
       switch3d = switch3d
     ) set (
         inputs += (seed.option.toSeq: _*)
@@ -93,17 +89,16 @@ object NetLogo5Task {
     ignoreErrorOnDispose: Boolean                    = false,
     switch3d:             Boolean                    = false
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): NetLogo5Task =
-    if (embedWorkspace) workspace(script.getCanonicalFile.getParentFile, script.getName, launchingCommands, seed = seed, ignoreError = ignoreError, reuseWorkspace = reuseWorkspace, ignoreErrorOnDispose = ignoreErrorOnDispose, switch3d = switch3d)
-    else file(script, launchingCommands, seed = seed, ignoreError = ignoreError, reuseWorkspace = reuseWorkspace, ignoreErrorOnDispose = ignoreErrorOnDispose, switch3d = switch3d)
+    if (embedWorkspace) workspace(script.getCanonicalFile.getParentFile, script.getName, launchingCommands, seed = seed, ignoreError = ignoreError, reuseWorkspace = reuseWorkspace, switch3d)
+    else file(script, launchingCommands, seed = seed, ignoreError = ignoreError, reuseWorkspace = reuseWorkspace, switch3d)
 
   private def withDefaultArgs(
-    workspace:            NetLogoTask.Workspace,
-    launchingCommands:    Seq[FromContext[String]],
-    seed:                 Option[Val[Int]],
-    ignoreError:          Boolean,
-    reuseWorkspace:       Boolean,
-    ignoreErrorOnDispose: Boolean,
-    switch3d:             Boolean
+    workspace:         NetLogoTask.Workspace,
+    launchingCommands: Seq[FromContext[String]],
+    seed:              Option[Val[Int]],
+    ignoreError:       Boolean,
+    reuseWorkspace:    Boolean,
+    switch3d:          Boolean
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     NetLogo5Task(
       config = InputOutputConfig(),
@@ -115,24 +110,22 @@ object NetLogo5Task {
       seed = seed,
       ignoreError = ignoreError,
       reuseWorkspace = reuseWorkspace,
-      ignoreErrorOnDispose = ignoreErrorOnDispose,
       switch3d = switch3d
     )
 
 }
 
 @Lenses case class NetLogo5Task(
-  config:               InputOutputConfig,
-  external:             External,
-  info:                 InfoConfig,
-  mapped:               MappedInputOutputConfig,
-  workspace:            NetLogoTask.Workspace,
-  launchingCommands:    Seq[FromContext[String]],
-  seed:                 Option[Val[Int]],
-  ignoreError:          Boolean,
-  reuseWorkspace:       Boolean,
-  ignoreErrorOnDispose: Boolean,
-  switch3d:             Boolean
+  config:            InputOutputConfig,
+  external:          External,
+  info:              InfoConfig,
+  mapped:            MappedInputOutputConfig,
+  workspace:         NetLogoTask.Workspace,
+  launchingCommands: Seq[FromContext[String]],
+  seed:              Option[Val[Int]],
+  ignoreError:       Boolean,
+  reuseWorkspace:    Boolean,
+  switch3d:          Boolean
 ) extends NetLogoTask {
   override def netLogoFactory: NetLogoFactory = NetLogo5Task.factory
 }
