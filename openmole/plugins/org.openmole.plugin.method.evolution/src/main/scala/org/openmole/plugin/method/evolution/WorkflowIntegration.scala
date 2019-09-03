@@ -215,6 +215,7 @@ trait EvolutionWorkflow {
 
   // Variables
   import GAIntegration.namespace
+
   def genomePrototype = Val[G]("genome", namespace)(genomeType)
   def individualPrototype = Val[I]("individual", namespace)(individualType)
   def populationPrototype = Val[Pop]("population", namespace)(populationType)
@@ -276,7 +277,6 @@ object StochasticGAIntegration {
 object MGOAPI {
 
   trait Integration[A, V, P] {
-    type M[T] = cats.data.State[S, T]
     type I
     type G
     type S
@@ -288,30 +288,33 @@ object MGOAPI {
     def operations(a: A): Ops
 
     trait Ops {
-      def initialState(rng: util.Random): S
-      def initialGenomes(n: Int): FromContext[M[Vector[G]]]
+      def initialState: S
+      def initialGenomes(n: Int, rng: scala.util.Random): FromContext[Vector[G]]
+
       def buildIndividual(genome: G, phenotype: P, context: Context): I
 
       def genomeValues(genome: G): V
       def buildGenome(values: V): G
       def buildGenome(context: Vector[Variable[_]]): FromContext[G]
 
-      def randomLens: monocle.Lens[S, util.Random]
       def startTimeLens: monocle.Lens[S, Long]
       def generationLens: monocle.Lens[S, Long]
-      def breeding(individuals: Vector[I], n: Int): FromContext[M[Vector[G]]]
-      def elitism(population: Vector[I], candidates: Vector[I]): FromContext[M[Vector[I]]]
+
+      def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random): FromContext[Vector[G]]
+      def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random): FromContext[(S, Vector[I])]
 
       def migrateToIsland(i: Vector[I]): Vector[I]
       def migrateFromIsland(population: Vector[I], state: S): Vector[I]
 
-      def afterGeneration(g: Long, population: Vector[I]): M[Boolean]
-      def afterDuration(d: squants.Time, population: Vector[I]): M[Boolean]
+      def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean
+      def afterDuration(d: squants.Time, s: S, population: Vector[I]): Boolean
 
       def result(population: Vector[I], state: S): FromContext[Seq[Variable[_]]]
     }
 
   }
+
+  import mgo.evolution.algorithm._
 
   def paired[G, C, D](continuous: G ⇒ C, discrete: G ⇒ D) = (g: G) ⇒ (continuous(g), discrete(g))
 

@@ -28,12 +28,12 @@ object TerminationTask {
     ClosureTask("TerminationTask") { (context, _, _) ⇒
       val term = OMTermination.toTermination(termination, evolution)
 
-      val (newState, te) = term(context(evolution.populationPrototype).toVector).run(context(evolution.statePrototype)).value
+      val state = context(evolution.statePrototype)
+      val te = term(state, context(evolution.populationPrototype).toVector)
 
       Context(
         Variable(evolution.terminatedPrototype, te),
-        Variable(evolution.statePrototype, newState),
-        Variable(evolution.generationPrototype, evolution.operations.generationLens.get(newState))
+        Variable(evolution.generationPrototype, evolution.operations.generationLens.get(state))
       )
     } set (
       inputs += (evolution.statePrototype, evolution.populationPrototype),

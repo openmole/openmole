@@ -39,8 +39,8 @@ package object evolution {
   object OMTermination {
     def toTermination(oMTermination: OMTermination, integration: EvolutionWorkflow) =
       oMTermination match {
-        case AfterGeneration(s) ⇒ (population: Vector[integration.I]) ⇒ integration.operations.afterGeneration(s, population)
-        case AfterDuration(d) ⇒ (population: Vector[integration.I]) ⇒ integration.operations.afterDuration(d, population)
+        case AfterGeneration(g) ⇒ (s: integration.S, population: Vector[integration.I]) ⇒ integration.operations.afterGeneration(g, s, population)
+        case AfterDuration(d) ⇒ (s: integration.S, population: Vector[integration.I]) ⇒ integration.operations.afterDuration(d, s, population)
       }
   }
 
@@ -190,8 +190,7 @@ package object evolution {
     val elitism = ElitismTask(t)
     val generateIsland = GenerateIslandTask(t, sample, 1, islandPopulationPrototype)
     val terminationTask = TerminationTask(t, termination)
-    val islandPopulationToPopulation = AssignTask(islandPopulationPrototype → t.populationPrototype)
-    val reassingRNG = ReassignStateRNGTask(t)
+    val islandPopulationToPopulation = AssignTask(islandPopulationPrototype → t.populationPrototype) set ((inputs, outputs) += t.statePrototype)
 
     val fromIsland = FromIslandTask(t)
 
@@ -214,7 +213,7 @@ package object evolution {
 
     val slaveFist = EmptyTask() set ((inputs, outputs) += (t.statePrototype, islandPopulationPrototype))
 
-    val slave = slaveFist -- (islandPopulationToPopulation, reassingRNG) -- islandTask -- fromIsland -- populationToOffspring
+    val slave = slaveFist -- islandPopulationToPopulation -- islandTask -- fromIsland -- populationToOffspring
 
     val masterSlave = MasterSlave(
       generateInitialIslands,

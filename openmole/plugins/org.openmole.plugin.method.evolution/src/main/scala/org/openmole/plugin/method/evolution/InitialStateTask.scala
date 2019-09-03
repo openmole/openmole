@@ -36,7 +36,7 @@ object InitialStateTask {
     } set (
       inputs += (evolution.statePrototype, evolution.populationPrototype),
       outputs += (evolution.statePrototype, evolution.populationPrototype),
-      evolution.statePrototype := FromContext(p ⇒ evolution.operations.initialState(p.random())),
+      evolution.statePrototype := FromContext(p ⇒ evolution.operations.initialState),
       evolution.populationPrototype := Array.empty[evolution.I](evolution.integration.iManifest)
     )
 

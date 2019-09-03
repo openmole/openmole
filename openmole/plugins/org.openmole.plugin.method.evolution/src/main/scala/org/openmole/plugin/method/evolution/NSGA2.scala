@@ -27,17 +27,14 @@ import cats.implicits._
 import mgo.evolution._
 import mgo.evolution.algorithm._
 import mgo.evolution.breeding._
-import mgo.evolution.contexts._
 import mgo.evolution.elitism._
 import mgo.evolution.niche._
-import mgo.tagtools._
 import monocle.macros.GenLens
 import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
 import org.openmole.core.workflow.composition.DSLContainer
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
 import org.openmole.plugin.method.evolution.Genome.Suggestion
-import org.openmole.plugin.method.evolution.NichedNSGA2.NichedElement
 import squants.time.Time
 
 import scala.language.higherKinds
@@ -48,7 +45,6 @@ object NSGA2 {
     import mgo.evolution.algorithm.{ NSGA2 ⇒ MGONSGA2, _ }
     import mgo.evolution.algorithm.CDGenome
     import cats.data._
-    import mgo.evolution.contexts._
 
     implicit def integration: MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Array[Any]] = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Array[Any]] {
       type G = CDGenome.Genome
@@ -59,30 +55,16 @@ object NSGA2 {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      private def interpret[U](f: mgo.evolution.contexts.run.Implicits ⇒ (S, U)) = State[S, U] { (s: S) ⇒
-        MGONSGA2.run(s)(f)
-      }
-
-      private def zipWithState[M[_]: cats.Monad: StartTime: Random: Generation, T](op: M[T]): M[(S, T)] = {
-        import cats.implicits._
-        for {
-          t ← op
-          newState ← mgo.evolution.algorithm.NSGA2.state[M]
-        } yield (newState, t)
-      }
-
       def operations(om: DeterministicParams) = new Ops {
 
-        def randomLens = GenLens[S](_.random)
-        def startTimeLens = GenLens[S](_.startTime)
-        def generationLens = GenLens[S](_.generation)
+        def startTimeLens = GenLens[EvolutionState[Unit]](_.startTime)
+        def generationLens = GenLens[EvolutionState[Unit]](_.generation)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
-
         def buildIndividual(genome: G, phenotype: Array[Any], context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
-        def initialState(rng: util.Random) = EvolutionState[Unit](random = rng, s = ())
+        def initialState = EvolutionState[Unit](s = ())
 
         def result(population: Vector[I], state: S) = FromContext { p ⇒
           import p._
@@ -94,50 +76,28 @@ object NSGA2 {
           genomes ++ fitness
         }
 
-        def initialGenomes(n: Int) =
+        def initialGenomes(n: Int, rng: scala.util.Random) =
           (Genome.continuous(om.genome) map2 Genome.discrete(om.genome)) { (continuous, discrete) ⇒
-            interpret { impl ⇒
-              import impl._
-              zipWithState(
-                MGONSGA2.initialGenomes[DSL](n, continuous, discrete)
-              ).eval
-            }
+            MGONSGA2.initialGenomes(n, continuous, discrete, rng)
           }
 
-        def breeding(individuals: Vector[I], n: Int) =
+        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) =
           Genome.discrete(om.genome).map { discrete ⇒
-            interpret { impl ⇒
-              import impl._
-              zipWithState(MGONSGA2.adaptiveBreeding[DSL, Array[Any]](n, om.operatorExploration, discrete, ExactObjective.toFitnessFunction(om.objectives)).run(individuals)).eval
-            }
+            MGONSGA2.adaptiveBreeding[S, Array[Any]](n, om.operatorExploration, discrete, ExactObjective.toFitnessFunction(om.objectives))(s, individuals, rng)
           }
 
-        def elitism(population: Vector[I], candidates: Vector[I]) =
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           Genome.continuous(om.genome).map { continuous ⇒
-            interpret { impl ⇒
-              import impl._
-              def step =
-                for {
-                  elited ← MGONSGA2.elitism[DSL, Array[Any]](om.mu, continuous, ExactObjective.toFitnessFunction(om.objectives)) apply (population, candidates)
-                  _ ← mgo.evolution.elitism.incrementGeneration[DSL]
-                } yield elited
-
-              zipWithState(step).eval
-            }
+            val (s2, elited) = MGONSGA2.elitism[S, Array[Any]](om.mu, continuous, ExactObjective.toFitnessFunction(om.objectives))(s, population, candidates, rng)
+            val s3 = EvolutionState.generation.modify(_ + 1)(s2)
+            (s3, elited)
           }
 
         def migrateToIsland(population: Vector[I]) = DeterministicGAIntegration.migrateToIsland(population)
         def migrateFromIsland(population: Vector[I], state: S) = DeterministicGAIntegration.migrateFromIsland(population)
 
-        def afterGeneration(g: Long, population: Vector[I]): M[Boolean] = interpret { impl ⇒
-          import impl._
-          zipWithState(mgo.evolution.afterGeneration[DSL, I](g).run(population)).eval
-        }
-
-        def afterDuration(d: Time, population: Vector[I]): M[Boolean] = interpret { impl ⇒
-          import impl._
-          zipWithState(mgo.evolution.afterDuration[DSL, I](d).run(population)).eval
-        }
+        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, EvolutionState.generation)(s, population)
+        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, EvolutionState.startTime)(s, population)
       }
 
     }
@@ -154,7 +114,6 @@ object NSGA2 {
     import mgo.evolution.algorithm.{ NoisyNSGA2 ⇒ MGONoisyNSGA2, _ }
     import mgo.evolution.algorithm.CDGenome
     import cats.data._
-    import mgo.evolution.contexts._
 
     implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Array[Any]] {
       type G = CDGenome.Genome
@@ -165,18 +124,8 @@ object NSGA2 {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      private def interpret[U](f: mgo.evolution.contexts.run.Implicits ⇒ (S, U)) = State[S, U] { (s: S) ⇒ MGONoisyNSGA2.run(s)(f) }
-
-      private def zipWithState[M[_]: cats.Monad: StartTime: Random: Generation, T](op: M[T]): M[(S, T)] = {
-        import cats.implicits._
-        for {
-          t ← op
-          newState ← MGONoisyNSGA2.state[M]
-        } yield (newState, t)
-      }
-
       def operations(om: StochasticParams) = new Ops {
-        def randomLens = GenLens[S](_.random)
+
         def startTimeLens = GenLens[S](_.startTime)
         def generationLens = GenLens[S](_.generation)
 
@@ -185,7 +134,7 @@ object NSGA2 {
         def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
 
         def buildIndividual(genome: G, phenotype: Array[Any], context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
-        def initialState(rng: util.Random) = EvolutionState[Unit](random = rng, s = ())
+        def initialState = EvolutionState[Unit](s = ())
 
         def aggregate(v: Vector[Array[Any]]): Vector[Double] =
           for {
@@ -204,48 +153,28 @@ object NSGA2 {
           genomes ++ fitness ++ Seq(samples)
         }
 
-        def initialGenomes(n: Int) =
+        def initialGenomes(n: Int, rng: util.Random) =
           (Genome.continuous(om.genome) map2 Genome.discrete(om.genome)) { (continuous, discrete) ⇒
-            interpret { impl ⇒
-              import impl._
-              zipWithState(MGONoisyNSGA2.initialGenomes[DSL](n, continuous, discrete)).eval
-            }
+            MGONoisyNSGA2.initialGenomes(n, continuous, discrete, rng)
           }
 
-        def breeding(individuals: Vector[I], n: Int) =
+        def breeding(individuals: Vector[I], n: Int, s: S, rng: util.Random) =
           Genome.discrete(om.genome).map { discrete ⇒
-            interpret { impl ⇒
-              import impl._
-              zipWithState(MGONoisyNSGA2.adaptiveBreeding[DSL, Array[Any]](n, om.operatorExploration, om.cloneProbability, aggregate, discrete).run(individuals)).eval
-            }
+            MGONoisyNSGA2.adaptiveBreeding[S, Array[Any]](n, om.operatorExploration, om.cloneProbability, aggregate, discrete) apply (s, individuals, rng)
           }
 
-        def elitism(population: Vector[I], candidates: Vector[I]) =
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: util.Random) =
           Genome.continuous(om.genome).map { continuous ⇒
-            interpret { impl ⇒
-              import impl._
-              def step =
-                for {
-                  elited ← MGONoisyNSGA2.elitism[DSL, Array[Any]](om.mu, om.historySize, aggregate, continuous) apply (population, candidates)
-                  _ ← mgo.evolution.elitism.incrementGeneration[DSL]
-                } yield elited
-
-              zipWithState(step).eval
-            }
+            val (s2, elited) = MGONoisyNSGA2.elitism[S, Array[Any]](om.mu, om.historySize, aggregate, continuous) apply (s, population, candidates, rng)
+            val s3 = EvolutionState.generation.modify(_ + 1)(s2)
+            (s3, elited)
           }
 
-        def afterGeneration(g: Long, population: Vector[I]): M[Boolean] = interpret { impl ⇒
-          import impl._
-          zipWithState(mgo.evolution.afterGeneration[DSL, I](g).run(population)).eval
-        }
-
-        def afterDuration(d: Time, population: Vector[I]): M[Boolean] = interpret { impl ⇒
-          import impl._
-          zipWithState(mgo.evolution.afterDuration[DSL, I](d).run(population)).eval
-        }
-        NoisyObjective
         def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland[I](population, CDGenome.NoisyIndividual.Individual.historyAge)
         def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Array[Any]](population, CDGenome.NoisyIndividual.Individual.historyAge, CDGenome.NoisyIndividual.Individual.phenotypeHistory[Array[Any]])
+
+        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, EvolutionState.generation)(s, population)
+        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, EvolutionState.startTime)(s, population)
       }
 
     }

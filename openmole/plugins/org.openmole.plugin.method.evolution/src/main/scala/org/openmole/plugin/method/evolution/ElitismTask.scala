@@ -27,8 +27,11 @@ object ElitismTask {
       import p._
 
       val (newState, newPopulation) =
-        evolution.operations.elitism(context(evolution.populationPrototype).toVector, context(evolution.offspringPrototype).toVector).from(context).
-          run(context(evolution.statePrototype)).value
+        evolution.operations.elitism(
+          context(evolution.populationPrototype).toVector,
+          context(evolution.offspringPrototype).toVector,
+          context(evolution.statePrototype),
+          random()).from(context)
 
       Context(
         Variable(evolution.populationPrototype, newPopulation.toArray(evolution.individualPrototype.`type`.manifest)),
