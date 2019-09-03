@@ -432,3 +432,9 @@ lazy val gridscaleWebDAV = OsgiProject(dir, "gridscale.webdav", imports = Seq("*
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, gridscaleHTTP)
 
+lazy val xzJava = OsgiProject(dir, "xzjava", imports = Seq("*"), exports = Seq("org.tukaani.*")) settings (
+  libraryDependencies +=  "org.tukaani" % "xz" % "1.8",
+  version := "1.8"
+) settings(settings: _*)
+
+

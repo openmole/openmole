@@ -16,11 +16,14 @@
  */
 package org.openmole.tool
 
-import java.io.{ IOException, File }
+import java.io._
 import java.nio.file._
+
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
-import scala.collection.mutable.{ Stack, ListBuffer }
+import org.tukaani.xz.{ LZMA2Options, XZInputStream, XZOutputStream }
+
+import scala.collection.mutable.{ ListBuffer, Stack }
 import scala.collection.JavaConverters._
 
 package object tar {
@@ -87,6 +90,48 @@ package object tar {
     }
   }
 
+  implicit class XZFileDecorator(file: File) {
+
+    def extractXZ(to: File) = {
+      if (!file.getName.endsWith(".xz")) throw new java.io.IOException(s"$file is not a XZ file")
+      else {
+        val inputStream = new FileInputStream(file)
+        val outputStream = new FileOutputStream(to)
+        val inxz = extractToStream
+
+        val buffer = new Array[Byte](inputStream.available)
+        Iterator.continually(inxz.read(buffer)).takeWhile(_ != -1).foreach {
+          outputStream.write(buffer, 0, _)
+        }
+
+        inxz.close
+      }
+    }
+
+    def extractToStream: InputStream = {
+      if (!file.getName.endsWith(".xz")) throw new java.io.IOException(s"$file is not a XZ file")
+      else {
+        val inputStream = new FileInputStream(file)
+        new XZInputStream(inputStream, 100 * 1024)
+      }
+    }
+
+    def compressXZ(to: File) = {
+
+      val outfile = new FileOutputStream(to)
+      val outxz = new XZOutputStream(outfile, new LZMA2Options(8), org.tukaani.xz.XZ.CHECK_SHA256)
+
+      val infile = new FileInputStream(file)
+      val buffer = new Array[Byte](8192)
+
+      Iterator.continually(infile.read(buffer)).takeWhile(_ != -1).foreach { size ⇒
+        outxz.write(buffer, 0, size)
+      }
+
+      outxz.finish
+    }
+  }
+
   implicit class FileTarArchiveDecorator(file: File) {
 
     def archive(dest: File, time: Boolean = true) =
@@ -109,6 +154,12 @@ package object tar {
       withClosable(new TarInputStream(file.gzippedBufferedInputStream)) {
         _.extract(dest, overwrite)
       }
+
+    def extractUncompressXZ(dest: File, overwrite: Boolean = false) = {
+      withClosable(new TarInputStream(file.extractToStream)) {
+        _.extract(dest, overwrite)
+      }
+    }
 
     def copyCompress(toF: File): File = {
       if (toF.isDirectory) file.archiveCompress(toF)
