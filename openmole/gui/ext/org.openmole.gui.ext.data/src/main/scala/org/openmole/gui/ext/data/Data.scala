@@ -141,6 +141,10 @@ package object data {
     def displayable = false
   }
 
+  object TarXz extends FileExtension {
+    def displayable = false
+  }
+
   object Tar extends FileExtension {
     def displayable = false
   }
@@ -170,6 +174,7 @@ package object data {
     val NO_EXTENSION = EditableFile("text")
     val SVG = SVGExtension
     val TGZ = TarGz
+    val TXZ = TarXz
     val TAR = Tar
     val ZIP = Zip
     val TGZBIN = TgzBin
@@ -505,7 +510,7 @@ package object data {
       else if (fileName.endsWith("nlogo")) CodeFile(NetLogoLanguage())
       else if (fileName.endsWith("R")) CodeFile(RLanguage())
       else if (fileName.endsWith("jar")) JarArchive
-      else if (fileName.endsWith("tgz") || fileName.endsWith("tar.gz")) Archive
+      else if (fileName.endsWith("tgz") || fileName.endsWith("tar.gz") || fileName.endsWith("tar.xz")) Archive
       else UndefinedFileType
     }
 
@@ -826,8 +831,10 @@ package object data {
 
   case class SequenceData(header: SequenceHeader = Seq(), content: Seq[Array[String]] = Seq()) {
 
-    def withRowIndexes =  {
-      val lineIndexes = (1 to content.length).map { _.toString }
+    def withRowIndexes = {
+      val lineIndexes = (1 to content.length).map {
+        _.toString
+      }
       copy(header = header :+ "Row index", content = content.zip(lineIndexes).map { case (l, i) ⇒ l :+ i })
     }
   }

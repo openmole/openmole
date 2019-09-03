@@ -103,6 +103,7 @@ object Libraries {
   lazy val sourceCode = "org.openmole.library" %% "sourcecode" % sourcecodeVersion
   lazy val txtmark = "org.openmole.library" %% "com-github-rjeschke-txtmark" % "0.13"
   lazy val spatialdata = "org.openmole.library" %% "org-openmole-spatialdata" % spatialdataVersion
+  lazy val xzJava = "org.openmole.library" %% "xzjava" % "1.8"
   
   def httpClientVersion = "4.5.3"
   lazy val httpClient =
