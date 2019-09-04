@@ -98,8 +98,8 @@ object RTask {
         mode = "P1",
         reuseContainer = true,
         environmentVariables = environmentVariables.toVector,
-          hostFiles = hostFiles.toVector,
-          workDirectory = workDirectory,
+        hostFiles = hostFiles.toVector,
+        workDirectory = workDirectory,
         noSeccomp = noSeccomp)
 
     RTask(
