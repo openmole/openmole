@@ -50,18 +50,18 @@ object PythonTask {
 
     def apply(
       script:               RunnableScript,
-      major:                Int                                = 3,
+      major:                Int = 3,
       libraries:            Seq[String]                        = Seq.empty,
       install:              Seq[String]                        = Seq.empty,
       forceUpdate:          Boolean                            = false,
       workDirectory:        OptionalArgument[String]           = None,
       hostFiles:            Seq[HostFile]                      = Vector.empty,
-      environmentVariables: Seq[EnvironmentVariable]           = Vector.empty,
+      environmentVariables: Seq[EnvironmentVariable] = Vector.empty,
       errorOnReturnValue:   Boolean                            = true,
-      returnValue:          OptionalArgument[Val[Int]]         = None,
-      stdOut:               OptionalArgument[Val[String]]      = None,
-      stdErr:               OptionalArgument[Val[String]]      = None,
-      noSeccomp:            Boolean                            = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService) = {
+      returnValue:          OptionalArgument[Val[Int]]                   = None,
+      stdOut:               OptionalArgument[Val[String]]                = None,
+      stdErr:               OptionalArgument[Val[String]]                = None,
+      noSeccomp: Boolean = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService) = {
 
       val uDocker =
         UDockerTask.createUDocker(
