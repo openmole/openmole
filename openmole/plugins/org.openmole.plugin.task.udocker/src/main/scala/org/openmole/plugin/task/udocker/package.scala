@@ -77,7 +77,8 @@ package object udocker extends UDockerPackage {
     workDirectory:        Option[String]              = None,
     reuseContainer:       Boolean                     = true,
     user:                 Option[String]              = None,
-    mode:                 Option[String]              = None)
+    mode:                 Option[String]              = None,
+    noSeccomp:            Boolean                     = false)
 
   def userWorkDirectory(uDocker: UDockerArguments) = {
     import io.circe.generic.extras.auto._

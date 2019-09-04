@@ -60,7 +60,8 @@ object PythonTask {
       errorOnReturnValue:   Boolean                            = true,
       returnValue:          OptionalArgument[Val[Int]]                   = None,
       stdOut:               OptionalArgument[Val[String]]                = None,
-      stdErr:               OptionalArgument[Val[String]]                = None)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService) = {
+      stdErr:               OptionalArgument[Val[String]]                = None,
+      noSeccomp: Boolean = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService) = {
 
       val uDocker =
         UDockerTask.createUDocker(
@@ -72,7 +73,8 @@ object PythonTask {
           reuseContainer = true,
           hostFiles = hostFiles,
           workDirectory = workDirectory,
-          environmentVariables = environmentVariables.toVector)
+          environmentVariables = environmentVariables.toVector,
+          noSeccomp = noSeccomp)
 
      new PythonTask(
         script = script,

@@ -261,7 +261,8 @@ object UDocker {
     layersDirectory:     File,
     installDirectory:    File,
     tarball:             File,
-    logLevel:            Int  = 1) =
+    logLevel:            Int     = 1,
+    noSeccomp:           Boolean = false) =
     Vector(
       "UDOCKER_TMPDIR" → tmpDirectory.getAbsolutePath,
       "UDOCKER_LOGLEVEL" → logLevel.toString,
@@ -271,7 +272,8 @@ object UDocker {
       "UDOCKER_LAYERS" → layersDirectory.getAbsolutePath,
       "UDOCKER_DIR" → installDirectory.getAbsolutePath,
       "UDOCKER_TARBALL" → tarball.getAbsolutePath
-    )
+    ) ++
+      (if (noSeccomp) Seq("PROOT_NO_SECCOMP" -> "1") else Seq())
 
   def runCommands(
     uDocker:              UDockerArguments,
