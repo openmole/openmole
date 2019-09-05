@@ -23,7 +23,7 @@ object ABCHook {
             val size = s.thetas.size
             val dim = s.thetas(0).size
 
-            val paramNames = abc.data.prior.map { x ⇒ x.v.name }
+            val paramNames = abc.data.prior.v.map { _.name }
 
             val header =
               (Vector("epsilon,pAcc,t,ts,rhos,weight") ++

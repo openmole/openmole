@@ -14,7 +14,7 @@ object PostStepTask {
     n:                    Int,
     nAlpha:               Int,
     stopSampleSizeFactor: Int,
-    prior:                Seq[ABC.Prior],
+    prior:                Prior,
     observed:             Seq[ABC.Observed[_]],
     state:                Val[MonAPMC.MonState],
     stepState:            Val[MonAPMC.StepState],
@@ -24,14 +24,6 @@ object PostStepTask {
     step:                 Val[Int])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     FromContextTask("postStepTask") { p ⇒
       import p._
-
-      val priorBounds = prior.map(pr ⇒ (pr.low.from(context), pr.high.from(context)))
-      val volume = priorBounds.map { case (min, max) ⇒ math.abs(max - min) }.reduceLeft(_ * _)
-
-      def density(point: Array[Double]) = {
-        val inside = (priorBounds zip point).forall { case ((min, max), p) ⇒ p >= min && p <= max }
-        if (inside) 1.0 / volume else 0.0
-      }
 
       def zipObserved(obs: Array[Array[Array[Double]]]) = {
         def zip2(o1: Array[Array[Double]], o2: Array[Array[Double]]) =
@@ -45,7 +37,7 @@ object PostStepTask {
 
       val xs = zipObserved(observed.toArray.map(o ⇒ ABC.Observed.fromContext(o, context)))
 
-      val s = Try(MonAPMC.postStep(n, nAlpha, density, observed.flatMap(o ⇒ ABC.Observed.value(o)).toArray, context(stepState), xs)(random()))
+      val s = Try(MonAPMC.postStep(n, nAlpha, prior.density(p), observed.flatMap(o ⇒ ABC.Observed.value(o)).toArray, context(stepState), xs)(random()))
 
       s match {
         case Success(s) ⇒

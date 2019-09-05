@@ -1,24 +1,21 @@
 package org.openmole.plugin.method
 
+import mgo.abc._
+import monocle.macros.Lenses
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import org.openmole.plugin.tool.pattern._
-import mgo.abc._
-import org.openmole.core.workflow.domain.Bounds
-import monocle.macros.Lenses
 import org.openmole.core.keyword.In
+import org.openmole.core.tools.math._
+import org.openmole.core.workflow.domain.Bounds
+import org.openmole.core.workflow.task.FromContextTask
+import org.openmole.plugin.tool.pattern._
+import org.openmole.tool.random.RandomProvider
 
 package object abc {
 
   object ABC {
     val abcNamespace = Namespace("abc")
     val state = Val[MonAPMC.MonState]("state", abcNamespace)
-
-    object Prior {
-      implicit def inToPrior[D](in: In[Val[Double], D])(implicit bounds: Bounds[D, Double]) = Prior(in.value, bounds.min(in.domain), bounds.max(in.domain))
-    }
-
-    case class Prior(v: Val[Double], low: FromContext[Double], high: FromContext[Double])
 
     object Observed {
 
@@ -51,11 +48,11 @@ package object abc {
 
     case class Observed[T](v: Val[T], observed: T)(implicit val obs: Observed.Observable[T])
 
-    case class ABCParameters(state: Val[MonAPMC.MonState], step: Val[Int], prior: Seq[Prior])
+    case class ABCParameters(state: Val[MonAPMC.MonState], step: Val[Int], prior: Prior)
 
     def apply(
       evaluation:           DSL,
-      prior:                Seq[Prior],
+      prior:                Prior,
       observed:             Seq[Observed[_]],
       sample:               Int,
       generated:            Int,
@@ -97,7 +94,7 @@ package object abc {
 
   def IslandABC(
     evaluation:           DSL,
-    prior:                Seq[Prior],
+    prior:                Prior,
     observed:             Seq[Observed[_]],
     sample:               Int,
     generated:            Int,
