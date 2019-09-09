@@ -107,7 +107,7 @@ lazy val scalaLang = OsgiProject(
   privatePackages = Seq("*", "META-INF.native.**"), imports = Seq("!org.apache.tools.ant.*", "!sun.misc.*" ,"*")) settings
   (libraryDependencies ++= {
     Seq(
-      "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
+      "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
       "org.scala-lang" % "scala-library" % scalaVersion.value,
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "org.scala-lang" % "scalap" % scalaVersion.value,
@@ -306,7 +306,7 @@ lazy val ant = OsgiProject(dir, "org.apache.ant") settings
   (libraryDependencies += "org.apache.ant" % "ant" % "1.8.0", version := "1.8.0") settings(settings: _*)
 
 lazy val codec = OsgiProject(dir, "org.apache.commons.codec") settings
-  (libraryDependencies += "commons-codec" % "commons-codec" % "1.10", version := "1.10") settings(settings: _*)
+  (libraryDependencies += "commons-codec" % "commons-codec" % "1.13", version := "1.13") settings(settings: _*)
 
 lazy val collections = OsgiProject(dir, "org.apache.commons.collections", exports = Seq("org.apache.commons.collections4.*")) settings
   (libraryDependencies += "org.apache.commons" % "commons-collections4" % "4.1", version := "4.1") settings(settings: _*)
@@ -359,7 +359,7 @@ lazy val effectaside = OsgiProject(dir, "effectaside", imports = Seq("*")) setti
   version := effectasideVersion
 )
 
-def gridscaleVersion = "2.21"
+def gridscaleVersion = "2.22"
 lazy val gridscale = OsgiProject(dir, "gridscale", imports = Seq("*"), exports = Seq("gridscale.*", "enumeratum.*")) settings (
   libraryDependencies += "fr.iscpif.gridscale" %% "gridscale" % gridscaleVersion,
   version := gridscaleVersion
@@ -420,10 +420,11 @@ lazy val gridscaleEGI = OsgiProject(dir, "gridscale.egi", imports = Seq("*")) se
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, gridscaleHTTP)
 
-lazy val gridscaleDIRAC = OsgiProject(dir, "gridscale.dirac", imports = Seq("*"), privatePackages = Seq("gridscale.dirac.*", "org.apache.commons.compress.*", "org.brotli.*", "org.tukaani.*")) settings (
+lazy val gridscaleDIRAC = OsgiProject(dir, "gridscale.dirac", imports = Seq("*"), privatePackages = Seq("gridscale.dirac.*", "org.apache.commons.compress.*", "org.brotli.*", "org.tukaani.*", "com.github.luben.*")) settings (
   libraryDependencies += "fr.iscpif.gridscale" %% "dirac" % gridscaleVersion,
   libraryDependencies += "org.brotli" % "dec" % "0.1.2",
   libraryDependencies += "org.tukaani" % "xz" % "1.6",
+  libraryDependencies += "com.github.luben" % "zstd-jni" % "1.4.3-1",
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, gridscaleHTTP)
 
