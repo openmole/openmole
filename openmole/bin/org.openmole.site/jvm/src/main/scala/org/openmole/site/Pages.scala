@@ -277,10 +277,9 @@ object DocumentationPages {
 
   //lazy val resumableWorkflow = DocumentationPage.fromScalatex(name = "Resumable Workflow", content = scalatex.documentation.advancedConcepts.ResumableWorkflow)
 
-  lazy val advancedConcepts = DocumentationPage.fromScalatex(name = "Advanced concepts", content = scalatex.documentation.advancedConcepts.AdvancedConcepts)
+  lazy val advancedConcepts = DocumentationPage.fromScalatex(name = "Advanced Concepts", content = scalatex.documentation.advancedConcepts.AdvancedConcepts)
   lazy val geneticAlgorithm = DocumentationPage.fromScalatex(name = "Genetic Algorithms", content = scalatex.documentation.advancedConcepts.GA.GeneticAlgorithm)
-  lazy val island = DocumentationPage.fromScalatex(name = "Island", content = scalatex.documentation.advancedConcepts.GA.Island)
-
+  lazy val island = DocumentationPage.fromScalatex(name = "Island Distribution Scheme", content = scalatex.documentation.advancedConcepts.GA.Island)
   lazy val stochasticityManagement = DocumentationPage.fromScalatex(name = "Stochasticity Management", content = scalatex.documentation.advancedConcepts.GA.StochasticityManagement)
 
   // Developers
