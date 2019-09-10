@@ -48,6 +48,7 @@ package object combine {
     def shuffle = ShuffleSampling(s)
     def filter(keep: Condition) = FilteredSampling(s, keep)
     def take(n: FromContext[Int]) = TakeSampling(s, n)
+    def subset(n: Int, size: FromContext[Int] = 100) = Subset(s, n, size = size)
   }
 
   implicit class DiscreteFactorDecorator[D, T](factor: Factor[D, T])(implicit discrete: Discrete[D, T]) extends AbstractSamplingCombineDecorator {
