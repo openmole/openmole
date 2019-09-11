@@ -21,7 +21,7 @@ class FromContextSampling(samples: FromContext.Parameters ⇒ Iterator[Iterable[
   override def apply(): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext(samples) validate (v)
 
   def prototypes(f2: Iterable[Val[_]]) = new FromContextSampling(samples, i, f2, v)
-  def inputs(i2: Seq[Val[_]]) = new FromContextSampling(samples, i2, f, v)
+  def inputs(i2: Iterable[Val[_]]) = new FromContextSampling(samples, i2, f, v)
 
   def validate(v2: FromContext.ValidationParameters ⇒ Seq[Throwable]) = {
     def nv(p: FromContext.ValidationParameters) = v(p) ++ v2(p)

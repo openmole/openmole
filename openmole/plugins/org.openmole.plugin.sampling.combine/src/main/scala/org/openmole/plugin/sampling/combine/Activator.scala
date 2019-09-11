@@ -50,7 +50,8 @@ class Activator extends PluginInfoActivator {
         "repeat",
         "take",
         "filter",
-        "withName"
+        "withName",
+        "subset"
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)

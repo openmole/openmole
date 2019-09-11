@@ -20,12 +20,12 @@ package org.openmole.plugin.sampling.combine
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
-object Subset {
+object SubsetSampling {
 
   def apply(s: Sampling, n: Int, size: FromContext[Int] = 100) = Sampling { p ⇒
     import p._
     val sizeValue = size.from(context)
     s().from(context).drop(n * sizeValue).take(sizeValue)
-  }
+  }.prototypes(s.prototypes).inputs(s.inputs)
 
 }
