@@ -1,27 +1,65 @@
 @import org.openmole.site.tools._
 @import org.openmole.site.stylesheet._
 @import org.openmole.site._
+@import DocumentationPages._
 
-The OpenMOLE Market Place is accessible through this @aa("repository", href := shared.link.repo.market) or directly from the GUI application (@i{New Project > From Market Place}).
-Clicking on a project allows to download it in the application and run it instantly!
+
+
+@h2{What is the Market Place for?}
+
+The OpenMOLE Market Place is accessible through this @aa("repository", href := shared.link.repo.market) or directly from the GUI application: @i{New Project > From Market Place}.
+Clicking on a project will download it in the application, and you will be able to run it immediately!
 
 @br
 
 There you will find examples handling some use cases of OpenMOLE.
-Don't focus too much on the applications or programming languages serving as a use case.
-These examples are more about how to do things the OpenMOLE way.
+Don't focus too much on the applications or programming languages serving as a use case, these examples are more about how to do things the OpenMOLE way.
+
+
+
+@h2{Sneak peek into the Market Place contents}
+
+@h3{Hello World}
+These examples demonstrate how to embed models written in different languages in OpenMOLE.
+There are examples for R, Scilab, and Java.
+For Java, there are two examples: one to embed the Java model as any other language, and the second to embed it as a plugin.
+
+
+@h3{Applicative tutorials}
+@ul
+  @li
+    @b{Native application} how to package your own application on Linux to make it portable and explore it with OpenMOLE
+  @li
+    @b{Workflow example} basic principles of OpenMOLE
+  @li
+    @b{Model exploration}
+  @li
+    @b{Approximate Bayesian Computation}
+
+Some of these tutorials are also detailed in the @aa("Tutorials", href := tutorials.file) section.
+
+
+@h3{NetLogo examples}
+There are a number of NetLogo examples, to illustrate various OpenMOLE methods.
+Two classic NetLogo models are used in these examples: the Fire model and the Ants model.
+
+@br@br
+
+Not all examples are listed here, for a full list look at the GitHub @aa("repository", href := shared.link.repo.market) or in the GUI.
 
 @br@br
 
 @img(src := Resource.img.guiGuide.market.file, center(95))
 
-@br@br
 
-You can contribute to the market place either by providing a pull request on the @aa("central OpenMOLE market place", href := shared.link.repo.market), or by pushing your example workflow on your own git repository and post it to the @aa("user mailing list", href:=shared.link.mailingList).
+
+@h2{Contribute your example/tutorial!}
+
+You can contribute to the market place either by making a pull request on the @aa("central OpenMOLE market place", href := shared.link.repo.market), or by pushing your example workflow on your own git repository and post it to the @aa("user mailing list", href:=shared.link.mailingList).
 
 @br
 
-To contribute to the market place you should provide @b{self-contained working examples}.
+To contribute to the market place you should only provide @b{self-contained working examples}.
 All resources needed to execute the workflow should be located in a single directory.
-One or several @i("oms") files can be provided and a @i{README.md} must explain what the workflow computes.
+One or several @i(".oms") files can be provided, and a @i{README.md} must explain what the workflow computes.
 A workflow is included in this section @b{only if it compiles} within the matching OpenMOLE version.
