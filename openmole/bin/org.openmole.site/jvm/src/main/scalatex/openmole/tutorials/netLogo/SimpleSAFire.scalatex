@@ -123,7 +123,7 @@ We obtain the following results, displayed as boxplots every percent (but result
 
 
 @br
-As we can see, stochasticity has an high effect right in the middle of the transition of regime, reaching maximum at 54%.
+As we can see, stochasticity has an high effect right in the middle of the transition of regime, reaching maximum at 59%.
 Another interesting thing to investigate what would be the density from which the fire propagates to the end of the zone (right side of NetLogo World). A slight modification of the model code would do the trick (hint:
 @hl.highlight("any? patches with-max [pxcor] ... ","plain") would be a good starting point :-) but we let you do it on your own (any successful attempt would win the right to be displayed right here ! )
 
