@@ -19,6 +19,7 @@ package org.openmole.plugin.task.netlogo
 
 import java.util.AbstractCollection
 import java.lang.Class
+import java.util
 
 import scala.reflect.ClassTag
 import org.openmole.core.context.{ Context, Val, ValType, Variable }
@@ -358,7 +359,13 @@ trait NetLogoTask extends Task with ValidateTask {
               if (outputValue == null) throw new InternalProcessingError(s"Value of netlogo output ${mapped.name} has been reported as null by netlogo")
               if (!mapped.v.`type`.runtimeClass.isArray) Variable.unsecure(mapped.v, outputValue)
               else {
-                val netLogoCollection = outputValue.asInstanceOf[AbstractCollection[Any]]
+                val netLogoCollection: util.AbstractCollection[Any] =
+                  if (classOf[AbstractCollection[Any]].isAssignableFrom(outputValue.getClass)) outputValue.asInstanceOf[AbstractCollection[Any]]
+                  else {
+                    val newArray = new util.LinkedList[Any]()
+                    newArray.add(outputValue)
+                    newArray
+                  }
                 NetLogoTask.netLogoArrayToVariable(netLogoCollection, mapped.v)
               }
             }
