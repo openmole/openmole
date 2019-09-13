@@ -1041,12 +1041,12 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     )
   ),
   dockerfile in docker := new Dockerfile {
-    from("openjdk:11-jre")
+    from("ubuntu:bionic")
     maintainer("Romain Reuillon <romain.reuillon@iscpif.fr>, Jonathan Passerat-Palmbach <j.passerat-palmbach@imperial.ac.uk>")
     copy((assemble in openmole).value, s"/openmole")
     runRaw(
-      """apt update && \
-       apt-get install -y python python-pycurl bash tar gzip ca-certificates ca-certificates-java sudo && \
+      """apt-get update && \
+       apt-get install --no-install-recommends -y ca-certificates default-jre-headless ca-certificates-java python python-pycurl bash tar gzip sudo && \
        apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \
        mkdir -p /lib/modules""")
     runRaw(
