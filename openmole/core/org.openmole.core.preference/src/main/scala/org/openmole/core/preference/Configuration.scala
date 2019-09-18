@@ -23,35 +23,16 @@ import org.openmole.tool.file._
 import org.apache.commons.configuration2._
 import org.apache.commons.configuration2.builder._
 import org.apache.commons.configuration2.builder.fluent._
+import org.openmole.core.preferencemacro.{ ClearConfigurationLocation, CypheredConfigurationLocation }
 import org.openmole.tool.types._
 import org.openmole.tool.thread._
 import org.openmole.tool.lock._
-
 import squants._
 import squants.information._
 
 object ConfigurationLocation {
-
-  def apply[T](group: String, name: String, default: ⇒ Option[T]) =
-    new ClearConfigurationLocation[T](group, name, default)
-
+  def apply[T](group: String, name: String, default: ⇒ Option[T]) = new ClearConfigurationLocation[T](group, name, default)
   def cyphered[T](group: String, name: String, default: ⇒ Option[T]) = new CypheredConfigurationLocation[T](group, name, default)
-
-}
-
-sealed trait ConfigurationLocation[T] {
-  def group: String
-  def name: String
-  def default: Option[T]
-  override def toString = s"$group.$name"
-}
-
-class ClearConfigurationLocation[T](val group: String, val name: String, _default: ⇒ Option[T]) extends ConfigurationLocation[T] {
-  def default = _default
-}
-
-class CypheredConfigurationLocation[T](val group: String, val name: String, _default: ⇒ Option[T]) extends ConfigurationLocation[T] {
-  def default = _default
 }
 
 object ConfigurationFile {
