@@ -152,6 +152,7 @@ object ScalaREPL {
       //println(settings.outputDirs.getSingleOutput)
       if (Activator.osgi) OSGiScalaCompiler(settings, reporter)
       else {
+        //TODO might be useless since we use the mirror compiler in this case
         //settings.usejavacp.value = true
         super.newCompiler(settings, reporter)
       }
@@ -297,8 +298,16 @@ object Interpreter {
 class Interpreter(priorityBundles: ⇒ Seq[Bundle], jars: Seq[JFile], quiet: Boolean, classDirectory: java.io.File) {
   def eval(code: String) = compile(code).apply()
   def compile(code: String): ScalaREPL.Compiled = synchronized {
-    val s = new ScalaREPL(priorityBundles, jars, quiet, classDirectory, 1)
-    s.compile(code)
+    if (Activator.osgi) {
+      val s = new ScalaREPL(priorityBundles, jars, quiet, classDirectory, 1)
+      s.compile(code)
+    }
+    else {
+      import scala.reflect.runtime.universe
+      import scala.tools.reflect.ToolBox
+      val tb = universe.runtimeMirror(getClass.getClassLoader).mkToolBox()
+      tb.compile(tb.parse(code))
+    }
   }
 }
 
