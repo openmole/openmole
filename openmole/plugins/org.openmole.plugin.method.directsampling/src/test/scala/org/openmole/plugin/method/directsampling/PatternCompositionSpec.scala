@@ -135,7 +135,8 @@ class PatternCompositionSpec extends FlatSpec with Matchers {
 
     val model =
       EmptyTask() set (
-        inputs += (l, seed)
+        inputs += (l, seed),
+        outputs += l
       )
 
     val agg =
@@ -146,14 +147,14 @@ class PatternCompositionSpec extends FlatSpec with Matchers {
     val mole =
       init --
         DirectSampling(
-          Replication(model, seed, 10, aggregation = agg),
+          Replication(model, seed, 10, aggregation = Seq(l)),
           ExplicitSampling(i, Seq(1, 2))
-        )
+        ) -- agg
 
     mole.run
   }
 
-  "Direct samplings" should "transmit explored value to aggregation task" in {
+  "Direct samplings" should "transmit explored value to post aggregation task" in {
     val l = Val[Double]
     val i = Val[Int]
     val j = Val[Int]
@@ -176,26 +177,26 @@ class PatternCompositionSpec extends FlatSpec with Matchers {
     val mole =
       init --
         DirectSampling(
-          Replication(model, seed, 10, aggregation = agg),
+          Replication(model, seed, 10, aggregation = Seq(j)) -- agg,
           ExplicitSampling(i, Seq(1, 2)),
-          aggregation = globalAgg
-        )
+          aggregation = Seq(j)
+        ) -- globalAgg
 
     mole.run
   }
 
   "Direct samplings" should "transmit explored value to a hook in an nested exploration" in {
     val l = Val[Double]
+    val i = Val[Double]
     val seed = Val[Int]
 
-    val model = EmptyTask() set (inputs += (l, seed))
-    val agg = EmptyTask()
+    val model = EmptyTask() set (inputs += (l, i, seed), outputs += i, i := 42)
 
     val h = TestHook() set (inputs += l)
 
     val mole =
       DirectSampling(
-        Replication(model, seed, 10, aggregation = agg) hook h,
+        Replication(model, seed, 10, aggregation = Seq(i)) hook h,
         ExplicitSampling(l, Seq(1.0, 2.0))
       )
 

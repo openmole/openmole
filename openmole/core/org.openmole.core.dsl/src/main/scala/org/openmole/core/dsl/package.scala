@@ -128,6 +128,7 @@ package dsl {
     type :=[A, B] = org.openmole.core.keyword.:=[A, B]
     type Aggregate[A, B] = org.openmole.core.keyword.Aggregate[A, B]
     type Delta[A, B] = org.openmole.core.keyword.Delta[A, B]
+    type As[A, B] = org.openmole.core.keyword.As[A, B]
 
     def Aggregate = org.openmole.core.keyword.Aggregate
 
