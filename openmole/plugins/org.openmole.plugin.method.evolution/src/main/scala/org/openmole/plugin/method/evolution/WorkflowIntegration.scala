@@ -252,7 +252,7 @@ object GAIntegration {
     objectives.toVector.zipWithIndex.map {
       case (objective, i) ⇒
         Variable(
-          Objective.prototype(objective).withType[Array[Double]],
+          Objective.resultPrototype(objective).withType[Array[Double]],
           phenotypeValues.map(_(i)).toArray
         )
     }

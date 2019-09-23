@@ -208,6 +208,8 @@ object Val {
 
 object Namespace {
   def empty = Namespace()
+
+  implicit def fromSeqString(s: Seq[String]) = Namespace(s: _*)
 }
 
 case class Namespace(names: String*) {
