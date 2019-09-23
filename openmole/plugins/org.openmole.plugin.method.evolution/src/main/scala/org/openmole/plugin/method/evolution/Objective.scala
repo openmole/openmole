@@ -114,7 +114,7 @@ object ExactObjective {
 }
 
 case class ExactObjective[P](prototype: Val[P], get: Context ⇒ P, toDouble: P ⇒ Double, negative: Boolean, delta: Option[Double]) extends Objective[P] {
-  def fromAny(v: Any) = toDouble(v.asInstanceOf[P])
+  private def fromAny(v: Any) = toDouble(v.asInstanceOf[P])
 }
 
 object NoisyObjective {
@@ -127,7 +127,7 @@ object NoisyObjective {
 }
 
 case class NoisyObjective[P: ClassTag] private (prototype: Val[P], get: Context ⇒ P, aggregate: Array[P] ⇒ Double, negative: Boolean, delta: Option[Double]) extends Objective[P] {
-  def aggregateAny(values: Vector[Any]) = {
+  private def aggregateAny(values: Vector[Any]) = {
     def value = aggregate(values.map(_.asInstanceOf[P]).toArray)
     def deltaValue = delta.map(d ⇒ math.abs(value - d)).getOrElse(value)
     if (!negative) deltaValue else -deltaValue

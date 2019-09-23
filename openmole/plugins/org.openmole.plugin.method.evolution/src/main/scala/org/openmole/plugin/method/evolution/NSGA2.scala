@@ -136,10 +136,7 @@ object NSGA2 {
         def buildIndividual(genome: G, phenotype: Array[Any], context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
         def initialState = EvolutionState[Unit](s = ())
 
-        def aggregate(v: Vector[Array[Any]]): Vector[Double] =
-          for {
-            (vs, obj) ← v.transpose zip om.objectives
-          } yield obj.aggregateAny(vs)
+        def aggregate(v: Vector[Array[Any]]): Vector[Double] = NoisyObjective.aggregate(om.objectives)(v)
 
         def result(population: Vector[I], state: S) = FromContext { p ⇒
           import p._
