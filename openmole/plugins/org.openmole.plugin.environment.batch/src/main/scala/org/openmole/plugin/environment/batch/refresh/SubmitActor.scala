@@ -18,7 +18,7 @@
 package org.openmole.plugin.environment.batch.refresh
 
 import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, AccessControl }
+import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment }
 
 object SubmitActor {
 
@@ -27,7 +27,7 @@ object SubmitActor {
 
     val Submit(job) = submit
 
-    if (job.state != KILLED) {
+    JobManager.killOr(job, Kill(job, None)) { () ⇒
       try {
         val bj = job.environment.execute(job)
         job.state = SUBMITTED
