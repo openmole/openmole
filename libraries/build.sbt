@@ -43,11 +43,10 @@ lazy val shapeless =  OsgiProject(dir, "com.chuusai.shapeless", exports = Seq("s
   version := shapelessVersion
 ) settings(settings: _*)
 
-lazy val circeVersion = "0.10.0"
+lazy val circeVersion = "0.12.2"
 lazy val circe = OsgiProject(dir, "io.circe",
   exports = Seq("io.circe.*", "!cats.*", "!scala.*", "!shapeless.*"),
   privatePackages = Seq("jawn.*"),
-  // TODO force cats version to be >= 0.9.0
   imports = Seq("scala.*", "cats.*", "shapeless.*")) settings (
   libraryDependencies ++= Seq(
     "io.circe" %% "circe-core",
@@ -209,7 +208,7 @@ lazy val closureCompilerVersion = "v20130603"
 lazy val closureCompiler = OsgiProject(dir, "closure-compiler", exports = Seq("com.google.javascript.*")) settings(
   libraryDependencies += "com.google.javascript" % "closure-compiler" % closureCompilerVersion, version := closureCompilerVersion) settings(settings: _*)
 
-lazy val catsVersion = "1.0.1"
+lazy val catsVersion = "2.0.0"
 lazy val cats =
   OsgiProject(dir, "cats") settings (
     libraryDependencies += "org.typelevel" %% "cats-core" % catsVersion,
@@ -217,7 +216,7 @@ lazy val cats =
     version := catsVersion
   ) settings(settings: _*)
 
-lazy val squantsVersion = "1.4.0"
+lazy val squantsVersion = "1.5.0"
 
 lazy val squants =
   OsgiProject(dir, "squants") settings (
@@ -226,10 +225,10 @@ lazy val squants =
   ) settings(settings: _*)
 
 
-lazy val mgoVersion = "3.32"
+lazy val mgoVersion = "3.37"
 
 lazy val mgo = OsgiProject(dir, "mgo", exports = Seq("mgo.*", "freestyle.*"), imports = Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "*"), privatePackages = Seq("!scala.*", "!monocle.*", "!org.apache.commons.math3.*", "!cats.*", "!squants.*", "!scalaz.*", "*")) settings(
-  libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
+  libraryDependencies += "org.openmole" %% "mgo" % mgoVersion,
   version := mgoVersion) dependsOn(monocle, math, cats, squants) settings(settings: _*)
 
 
