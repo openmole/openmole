@@ -25,7 +25,6 @@ import org.apache.commons.lang3.StringEscapeUtils
 //import org.openmole.marketindex.GeneratedMarketEntry
 
 import scala.collection.JavaConversions._
-import scalaz._
 import org.openmole.site.tools._
 
 object MD {

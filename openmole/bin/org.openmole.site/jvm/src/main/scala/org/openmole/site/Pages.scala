@@ -26,7 +26,6 @@ import scalatex.{ openmole ⇒ scalatex }
 import org.openmole.tool.file._
 
 import scalatags.Text
-import scalaz.Reader
 
 import PageTree._
 object Pages {

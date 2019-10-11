@@ -178,9 +178,6 @@ object Site extends App {
           write.over(outputRoot / "js" / "index.js", "var index = " + JsArray(res.toVector).compactPrint)
         }
 
-        import scalaz._
-        import Scalaz._
-
         lazy val pagesFrag = Pages.all.map {
           _.content
         } /*.toVector.traverseU { p ⇒ Pages.decorate(p).map(PageFrag(p, _)) }.run(new java.io.File("") /*parameters.resources.get*/)*/
