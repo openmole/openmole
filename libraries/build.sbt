@@ -322,8 +322,8 @@ lazy val clapper = OsgiProject(dir, "org.clapper", exports = Seq("!scala.*","!gr
 
 val monocleVersion = "1.5.0"
 lazy val monocle = OsgiProject(dir, "monocle",
-  privatePackages = Seq("!scala.*", "!scalaz.*", "!shapeless.*", "*"),
-  imports = Seq("scala.*", "shapeless.*", "scalaz.*")) settings(
+  privatePackages = Seq("!scala.*", "!shapeless.*", "*"),
+  imports = Seq("scala.*", "shapeless.*")) settings(
   libraryDependencies ++= Seq (
     "com.github.julien-truffaut" %% "monocle-core",
     "com.github.julien-truffaut" %% "monocle-generic",
