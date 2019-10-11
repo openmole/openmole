@@ -195,15 +195,15 @@ object EGIAuthentication extends JavaLogger {
   def getToken[A: EGIAuthenticationInterface](a: A, voName: String)(implicit workspace: Workspace, preference: Preference) = EGI { implicits ⇒
     import implicits._
     import gridscale.dirac._
-    val service = getService(voName, preference(EGIEnvironment.DiracConnectionTimeout))
+    val service = getService(voName, CACertificatesDir, preference(EGIEnvironment.DiracConnectionTimeout))
     val s = server(service, implicitly[EGIAuthenticationInterface[A]].apply(a), CACertificatesDir)
     token(s)
 
   }
 
-  def DIRACVos(implicit preference: Preference) = EGI { implicits ⇒
+  def DIRACVos(implicit workspace: Workspace, preference: Preference) = EGI { implicits ⇒
     import implicits._
-    gridscale.dirac.supportedVOs(preference(EGIEnvironment.DiracConnectionTimeout))
+    gridscale.dirac.supportedVOs(CACertificatesDir, preference(EGIEnvironment.DiracConnectionTimeout))
   }
 
   implicit def defaultAuthentication(implicit workspace: Workspace, authenticationStore: AuthenticationStore, serializerService: SerializerService): EGIAuthentication =
