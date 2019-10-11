@@ -267,7 +267,7 @@ lazy val outputManager = OsgiProject(coreDir, "org.openmole.core.outputmanager",
 lazy val console = OsgiProject(coreDir, "org.openmole.core.console", global = true, imports = Seq("*"), exports = Seq("org.openmole.core.console.*", "$line5.*")) dependsOn (pluginManager) settings(
   OsgiKeys.importPackage := Seq("*"),
   Libraries.addScalaLang(scalaVersionValue),
-  libraryDependencies += Libraries.monocle,
+  libraryDependencies ++= Libraries.monocle,
   macroParadise,
   defaultActivator
 ) dependsOn(openmoleOSGi, workspace, fileService) settings (coreSettings: _*)
@@ -585,7 +585,7 @@ def guiExtTarget = guiExt / "target"
 lazy val dataGUI = OsgiProject(guiExt, "org.openmole.gui.ext.data") enablePlugins (ScalaJSPlugin) settings(
   Libraries.scalaTagsJS,
   Libraries.scalajsDomJS,
-  libraryDependencies += Libraries.monocle
+  libraryDependencies ++= Libraries.monocle
 ) settings (defaultSettings: _*)
 
 lazy val extServerTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool.server") dependsOn(dataGUI, workspace, module) settings(

@@ -93,7 +93,7 @@ object Libraries {
   lazy val scalajs = "org.openmole.library" %% "scalajs" % scalajsVersion
   lazy val mgo = "org.openmole.library" %% "mgo" % mgoVersion
   lazy val family = "org.openmole.library" %% "fr-iscpif-family" % "1.3"
-  lazy val monocle = "org.openmole.library" %% "monocle" % "1.5.0"
+  lazy val monocle = Seq("org.openmole.library" %% "monocle" % "1.5.0", scalaz)
   lazy val boopickle = "org.openmole.library" %% "boopickle" % boopickleVersion
   lazy val autowire = "org.openmole.library" %% "autowire" % scalaAutowireVersion
   lazy val scalaTags = "org.openmole.library" %% "com-scalatags" % scalaTagsVersion
@@ -136,7 +136,7 @@ object Libraries {
   lazy val gridscaleLocal = "org.openmole.library" %% "gridscale-local" % gridscaleVersion
   lazy val gridscaleOAR = "org.openmole.library" %% "gridscale-oar" % gridscaleVersion
 
-  lazy val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.8"
+  lazy val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.28"
   lazy val guava = "com.google.guava" % "guava" % "27.1-jre"
   lazy val spray = "io.spray" %% "spray-json" % "1.3.2"
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
