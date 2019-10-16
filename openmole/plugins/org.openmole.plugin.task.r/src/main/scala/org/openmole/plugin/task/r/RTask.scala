@@ -76,7 +76,8 @@ object RTask {
     stdErr:               OptionalArgument[Val[String]]      = None,
     hostFiles:            Seq[HostFile]                      = Vector.empty,
     workDirectory:        OptionalArgument[String]           = None,
-    environmentVariables: Seq[EnvironmentVariable] = Vector.empty
+    environmentVariables: Seq[EnvironmentVariable] = Vector.empty,
+    noSeccomp:            Boolean                                     = false
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): RTask = {
 
     // add additional installation of devtools only if needed
@@ -98,7 +99,8 @@ object RTask {
         reuseContainer = true,
         environmentVariables = environmentVariables.toVector,
           hostFiles = hostFiles.toVector,
-          workDirectory = workDirectory)
+          workDirectory = workDirectory,
+        noSeccomp = noSeccomp)
 
     RTask(
       script = script,

@@ -1,5 +1,6 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
+@import DocumentationPages._
 
 @def variables = """
   val inputString = Val[String]
@@ -71,8 +72,6 @@ People from the lab gave you a huge CSV file with each line containing various e
 What you want to do is to run a simulation for each line of this file, execute it on the lab's cluster, and gather the results.
 Your OpenMOLE script would look like that:
 
-
-
 @br@br
 
 @hl.openmoleNoTest("""
@@ -102,3 +101,8 @@ Your OpenMOLE script would look like that:
       evaluation = my_model_execution on env hook catch_output,
       sampling = all_the_lines
     )""")
+
+@br
+
+You can find some working examples of simple exploration tasks in the @aa("Market Place", href := market.file).
+Be sure to also check out our @aa("Getting Started", href := stepByStepIntro.file) tutorial!

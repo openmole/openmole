@@ -8,7 +8,7 @@ def settings = Seq(
   resolvers += Resolver.sonatypeRepo("snapshots"),
   resolvers += Resolver.sonatypeRepo("releases"),
   resolvers += Resolver.sonatypeRepo("staging"),
-  scalaVersion in Global := "2.12.7",
+  scalaVersion in Global := "2.12.10",
   scalacOptions ++= Seq("-deprecation"),
   publishArtifact in (packageDoc in publishLocal) := false,
   publishArtifact in (packageSrc in publishLocal) := false,
@@ -43,11 +43,10 @@ lazy val shapeless =  OsgiProject(dir, "com.chuusai.shapeless", exports = Seq("s
   version := shapelessVersion
 ) settings(settings: _*)
 
-lazy val circeVersion = "0.10.0"
+lazy val circeVersion = "0.12.2"
 lazy val circe = OsgiProject(dir, "io.circe",
   exports = Seq("io.circe.*", "!cats.*", "!scala.*", "!shapeless.*"),
-  privatePackages = Seq("jawn.*"),
-  // TODO force cats version to be >= 0.9.0
+  privatePackages = Seq("org.typelevel.jawn.*"),
   imports = Seq("scala.*", "cats.*", "shapeless.*")) settings (
   libraryDependencies ++= Seq(
     "io.circe" %% "circe-core",
@@ -96,8 +95,8 @@ lazy val xstream = OsgiProject(
     "!javax.*",
     "*"),
   privatePackages = Seq("!scala.*", "META-INF.services.*", "*")) settings(
-  libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.11", "net.sf.kxml" % "kxml2" % "2.3.0"),
-  version := "1.4.11") settings(settings: _*)
+  libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.11.1", "net.sf.kxml" % "kxml2" % "2.3.0"),
+  version := "1.4.11.1") settings(settings: _*)
 
 lazy val scalaLang = OsgiProject(
   dir,
@@ -107,7 +106,7 @@ lazy val scalaLang = OsgiProject(
   privatePackages = Seq("*", "META-INF.native.**"), imports = Seq("!org.apache.tools.ant.*", "!sun.misc.*" ,"*")) settings
   (libraryDependencies ++= {
     Seq(
-      "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
+      "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
       "org.scala-lang" % "scala-library" % scalaVersion.value,
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "org.scala-lang" % "scalap" % scalaVersion.value,
@@ -166,7 +165,7 @@ lazy val scalaDomVersion = "0.9.3"
 lazy val scalaUpickleVersion = "0.4.4"
 lazy val scalaBoopickleVersion = "1.2.6"
 lazy val scalaAutowireVersion = "0.2.6"
-lazy val scalajsVersion = "0.6.28"
+lazy val scalajsVersion = "0.6.29"
 
 lazy val rx = OsgiProject(dir, "rx", exports = Seq("rx.*")) settings(
   libraryDependencies ++= Seq("com.lihaoyi" %% "scalarx" % scalaRxVersion),
@@ -209,7 +208,7 @@ lazy val closureCompilerVersion = "v20130603"
 lazy val closureCompiler = OsgiProject(dir, "closure-compiler", exports = Seq("com.google.javascript.*")) settings(
   libraryDependencies += "com.google.javascript" % "closure-compiler" % closureCompilerVersion, version := closureCompilerVersion) settings(settings: _*)
 
-lazy val catsVersion = "1.0.1"
+lazy val catsVersion = "2.0.0"
 lazy val cats =
   OsgiProject(dir, "cats") settings (
     libraryDependencies += "org.typelevel" %% "cats-core" % catsVersion,
@@ -217,7 +216,7 @@ lazy val cats =
     version := catsVersion
   ) settings(settings: _*)
 
-lazy val squantsVersion = "1.3.0"
+lazy val squantsVersion = "1.5.0"
 
 lazy val squants =
   OsgiProject(dir, "squants") settings (
@@ -226,10 +225,10 @@ lazy val squants =
   ) settings(settings: _*)
 
 
-lazy val mgoVersion = "3.29"
+lazy val mgoVersion = "3.37"
 
 lazy val mgo = OsgiProject(dir, "mgo", exports = Seq("mgo.*", "freestyle.*"), imports = Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "*"), privatePackages = Seq("!scala.*", "!monocle.*", "!org.apache.commons.math3.*", "!cats.*", "!squants.*", "!scalaz.*", "*")) settings(
-  libraryDependencies += "fr.iscpif" %% "mgo" % mgoVersion,
+  libraryDependencies += "org.openmole" %% "mgo" % mgoVersion,
   version := mgoVersion) dependsOn(monocle, math, cats, squants) settings(settings: _*)
 
 
@@ -240,7 +239,7 @@ lazy val spatialdata = OsgiProject(dir, "org.openmole.spatialdata",
   exports = Seq("org.openmole.spatialdata.*"),
   privatePackages = Seq("!scala.*","!org.apache.commons.math3.*","*")
 ) settings(
-  resolvers += "osgeo" at  "http://download.osgeo.org/webdav/geotools/",
+  resolvers += "osgeo" at  "https://download.osgeo.org/webdav/geotools/",
   libraryDependencies += "org.openmole.library" %% "spatialdata" % spatialdataVersion,
   version := spatialdataVersion//,
   //embeddedJars := (Keys.externalDependencyClasspath in Compile).value map (_.data) filter (f=> (f.getName startsWith "gt-")) // embed geotools jars
@@ -306,7 +305,7 @@ lazy val ant = OsgiProject(dir, "org.apache.ant") settings
   (libraryDependencies += "org.apache.ant" % "ant" % "1.8.0", version := "1.8.0") settings(settings: _*)
 
 lazy val codec = OsgiProject(dir, "org.apache.commons.codec") settings
-  (libraryDependencies += "commons-codec" % "commons-codec" % "1.10", version := "1.10") settings(settings: _*)
+  (libraryDependencies += "commons-codec" % "commons-codec" % "1.13", version := "1.13") settings(settings: _*)
 
 lazy val collections = OsgiProject(dir, "org.apache.commons.collections", exports = Seq("org.apache.commons.collections4.*")) settings
   (libraryDependencies += "org.apache.commons" % "commons-collections4" % "4.1", version := "4.1") settings(settings: _*)
@@ -324,14 +323,13 @@ lazy val clapper = OsgiProject(dir, "org.clapper", exports = Seq("!scala.*","!gr
 val monocleVersion = "1.5.0"
 lazy val monocle = OsgiProject(dir, "monocle",
   privatePackages = Seq("!scala.*", "!scalaz.*", "!shapeless.*", "*"),
-  imports = Seq("scala.*", "shapeless.*", "scalaz.*")) settings(
+  imports = Seq("scala.*", "shapeless.*")) settings(
   libraryDependencies ++= Seq (
     "com.github.julien-truffaut" %% "monocle-core",
     "com.github.julien-truffaut" %% "monocle-generic",
     "com.github.julien-truffaut" %% "monocle-macro"
   ).map(_ % monocleVersion),
-  version := monocleVersion
-  ) settings(settings: _*) dependsOn(shapeless)
+  version := monocleVersion) settings(settings: _*) dependsOn(shapeless)
 
 val asmVersion = "5.1"
 
@@ -359,24 +357,24 @@ lazy val effectaside = OsgiProject(dir, "effectaside", imports = Seq("*")) setti
   version := effectasideVersion
 )
 
-def gridscaleVersion = "2.21"
+def gridscaleVersion = "2.27"
 lazy val gridscale = OsgiProject(dir, "gridscale", imports = Seq("*"), exports = Seq("gridscale.*", "enumeratum.*")) settings (
-  libraryDependencies += "fr.iscpif.gridscale" %% "gridscale" % gridscaleVersion,
+  libraryDependencies += "org.openmole.gridscale" %% "gridscale" % gridscaleVersion,
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(effectaside)
 
 lazy val gridscaleLocal = OsgiProject(dir, "gridscale.local", imports = Seq("*")) settings (
-  libraryDependencies += "fr.iscpif.gridscale" %% "local" % gridscaleVersion,
+  libraryDependencies += "org.openmole.gridscale" %% "local" % gridscaleVersion,
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale)
 
 lazy val gridscaleHTTP = OsgiProject(dir, "gridscale.http", imports = Seq("*"), privatePackages = Seq("org.htmlparser.*")) settings (
-  libraryDependencies += "fr.iscpif.gridscale" %% "http" % gridscaleVersion,
+  libraryDependencies += "org.openmole.gridscale" %% "http" % gridscaleVersion,
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, codec)
 
 lazy val gridscaleSSH = OsgiProject(dir, "gridscale.ssh", imports = Seq("*")) settings (
-  libraryDependencies += "fr.iscpif.gridscale" %% "ssh" % gridscaleVersion,
+  libraryDependencies += "org.openmole.gridscale" %% "ssh" % gridscaleVersion,
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(sshj) dependsOn(gridscale)
 
@@ -386,49 +384,56 @@ lazy val sshj = OsgiProject(dir, "com.hierynomus.sshj", imports = Seq("*"), expo
 ) settings(settings: _*)
 
 lazy val gridscaleCluster = OsgiProject(dir, "gridscale.cluster", imports = Seq("*")) settings (
-  libraryDependencies += "fr.iscpif.gridscale" %% "cluster" % gridscaleVersion,
+  libraryDependencies += "org.openmole.gridscale" %% "cluster" % gridscaleVersion,
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscaleSSH)
 
 lazy val gridscaleOAR = OsgiProject(dir, "gridscale.oar", imports = Seq("*")) settings (
-  libraryDependencies += "fr.iscpif.gridscale" %% "oar" % gridscaleVersion,
+  libraryDependencies += "org.openmole.gridscale" %% "oar" % gridscaleVersion,
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, gridscaleCluster)
 
 lazy val gridscalePBS = OsgiProject(dir, "gridscale.pbs", imports = Seq("*")) settings (
-  libraryDependencies += "fr.iscpif.gridscale" %% "pbs" % gridscaleVersion,
+  libraryDependencies += "org.openmole.gridscale" %% "pbs" % gridscaleVersion,
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, gridscaleCluster)
 
 lazy val gridscaleSGE = OsgiProject(dir, "gridscale.sge", imports = Seq("*")) settings (
-  libraryDependencies += "fr.iscpif.gridscale" %% "sge" % gridscaleVersion,
+  libraryDependencies += "org.openmole.gridscale" %% "sge" % gridscaleVersion,
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, gridscaleCluster)
 
 lazy val gridscaleCondor = OsgiProject(dir, "gridscale.condor", imports = Seq("*")) settings (
-  libraryDependencies += "fr.iscpif.gridscale" %% "condor" % gridscaleVersion,
+  libraryDependencies += "org.openmole.gridscale" %% "condor" % gridscaleVersion,
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, gridscaleCluster)
 
 lazy val gridscaleSLURM = OsgiProject(dir, "gridscale.slurm", imports = Seq("*")) settings (
-  libraryDependencies += "fr.iscpif.gridscale" %% "slurm" % gridscaleVersion,
+  libraryDependencies += "org.openmole.gridscale" %% "slurm" % gridscaleVersion,
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, gridscaleCluster)
 
 lazy val gridscaleEGI = OsgiProject(dir, "gridscale.egi", imports = Seq("*")) settings (
-  libraryDependencies += "fr.iscpif.gridscale" %% "egi" % gridscaleVersion,
+  libraryDependencies += "org.openmole.gridscale" %% "egi" % gridscaleVersion,
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, gridscaleHTTP)
 
-lazy val gridscaleDIRAC = OsgiProject(dir, "gridscale.dirac", imports = Seq("*"), privatePackages = Seq("gridscale.dirac.*", "org.apache.commons.compress.*", "org.brotli.*", "org.tukaani.*")) settings (
-  libraryDependencies += "fr.iscpif.gridscale" %% "dirac" % gridscaleVersion,
+lazy val gridscaleDIRAC = OsgiProject(dir, "gridscale.dirac", imports = Seq("*"), privatePackages = Seq("gridscale.dirac.*", "org.apache.commons.compress.*", "org.brotli.*", "org.tukaani.*", "com.github.luben.*")) settings (
+  libraryDependencies += "org.openmole.gridscale" %% "dirac" % gridscaleVersion,
   libraryDependencies += "org.brotli" % "dec" % "0.1.2",
   libraryDependencies += "org.tukaani" % "xz" % "1.6",
+  libraryDependencies += "com.github.luben" % "zstd-jni" % "1.4.3-1",
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, gridscaleHTTP)
 
 lazy val gridscaleWebDAV = OsgiProject(dir, "gridscale.webdav", imports = Seq("*")) settings (
-  libraryDependencies += "fr.iscpif.gridscale" %% "webdav" % gridscaleVersion,
+  libraryDependencies += "org.openmole.gridscale" %% "webdav" % gridscaleVersion,
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, gridscaleHTTP)
+
+lazy val xzJava = OsgiProject(dir, "xzjava", imports = Seq("*"), exports = Seq("org.tukaani.*")) settings (
+  libraryDependencies +=  "org.tukaani" % "xz" % "1.8",
+  version := "1.8"
+) settings(settings: _*)
+
 

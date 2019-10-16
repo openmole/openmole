@@ -347,7 +347,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
     val nsga = NSGA2Evolution(
       evaluation = EmptyTask() set (inputs += a, outputs += b),
-      objectives = Seq(b aggregate f),
+      objectives = Seq(b aggregate f as "aggF"),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       stochastic = Stochastic()

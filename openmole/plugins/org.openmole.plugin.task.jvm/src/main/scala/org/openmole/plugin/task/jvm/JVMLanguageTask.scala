@@ -35,7 +35,7 @@ object JVMLanguageTask {
     newFile.withTmpDir { pwd ⇒
       val preparedContext = External.deployInputFilesAndResources(external, p.context, External.relativeResolver(pwd)) + Variable(JVMLanguageTask.workDirectory, pwd)
       val resultContext = processCode(preparedContext)
-      val resultContextWithFiles = External.fetchOutputFiles(external, outputs, resultContext, External.relativeResolver(pwd), pwd)
+      val resultContextWithFiles = External.fetchOutputFiles(external, outputs, resultContext, External.relativeResolver(pwd), Seq(pwd))
       resultContextWithFiles
     }
   }

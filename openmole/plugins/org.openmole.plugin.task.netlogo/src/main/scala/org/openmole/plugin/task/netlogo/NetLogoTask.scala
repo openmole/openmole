@@ -19,6 +19,7 @@ package org.openmole.plugin.task.netlogo
 
 import java.util.AbstractCollection
 import java.lang.Class
+import java.util
 
 import scala.reflect.ClassTag
 import org.openmole.core.context.{ Context, Val, ValType, Variable }
@@ -118,10 +119,16 @@ object NetLogoTask {
   def report(netLogo: NetLogo, name: String) =
     withThreadClassLoader(netLogo.getNetLogoClassLoader) { netLogo.report(name) }
 
-  def dispose(netLogo: NetLogo) =
-    withThreadClassLoader(netLogo.getNetLogoClassLoader) { netLogo.dispose() }
+  def dispose(netLogo: NetLogo, ignoreErrorOnDispose: Boolean) =
+    withThreadClassLoader(netLogo.getNetLogoClassLoader) {
+      try netLogo.dispose()
+      catch {
+        //FIXME it hapen with the nw extension, this error actually leaks memory. Bug report: https://github.com/NetLogo/NetLogo/issues/1766
+        case t: NoClassDefFoundError ⇒ if (!ignoreErrorOnDispose) throw t
+      }
+    }
 
-  def createPool(netLogoFactory: NetLogoFactory, workspace: NetLogoTask.Workspace, cached: Boolean, switch3d: Boolean)(implicit newFile: NewFile) = {
+  def createPool(netLogoFactory: NetLogoFactory, workspace: NetLogoTask.Workspace, cached: Boolean, ignoreErrorOnDispose: Boolean, switch3d: Boolean)(implicit newFile: NewFile) = {
     def createInstance = {
       val workspaceDirectory = newFile.newDir("netlogoworkpsace")
       NetLogoTask.openNetLogoWorkspace(netLogoFactory, workspace, workspaceDirectory, switch3d)
@@ -129,7 +136,7 @@ object NetLogoTask {
 
     def destroyInstance(instance: NetLogoTask.NetoLogoInstance) = {
       instance.directory.recursiveDelete
-      instance.netLogo.dispose()
+      dispose(instance.netLogo, ignoreErrorOnDispose)
     }
 
     WithInstance[NetLogoTask.NetoLogoInstance](
@@ -310,6 +317,8 @@ trait NetLogoTask extends Task with ValidateTask {
   def seed: Option[Val[Int]]
   def external: External
   def reuseWorkspace: Boolean
+  def ignoreErrorOnDispose: Boolean
+
   def switch3d: Boolean
 
   override def validate = Validate { p ⇒
@@ -323,7 +332,7 @@ trait NetLogoTask extends Task with ValidateTask {
   override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
     import parameters._
 
-    val pool = executionContext.cache.getOrElseUpdate(netLogoInstanceKey, NetLogoTask.createPool(netLogoFactory, workspace, reuseWorkspace, switch3d))
+    val pool = executionContext.cache.getOrElseUpdate(netLogoInstanceKey, NetLogoTask.createPool(netLogoFactory, workspace, reuseWorkspace, ignoreErrorOnDispose = ignoreErrorOnDispose, switch3d = switch3d))
 
     pool { instance ⇒
 
@@ -343,14 +352,20 @@ trait NetLogoTask extends Task with ValidateTask {
       for (cmd ← launchingCommands.map(_.from(context))) NetLogoTask.executeNetLogo(instance.netLogo, cmd, ignoreError)
 
       val contextResult =
-        External.fetchOutputFiles(external, outputs, preparedContext, resolver, instance.workspaceDirectory) ++ mapped.outputs.map {
+        External.fetchOutputFiles(external, outputs, preparedContext, resolver, Seq(instance.workspaceDirectory)) ++ mapped.outputs.map {
           case mapped ⇒
             try {
               val outputValue = NetLogoTask.report(instance.netLogo, mapped.name)
               if (outputValue == null) throw new InternalProcessingError(s"Value of netlogo output ${mapped.name} has been reported as null by netlogo")
               if (!mapped.v.`type`.runtimeClass.isArray) Variable.unsecure(mapped.v, outputValue)
               else {
-                val netLogoCollection = outputValue.asInstanceOf[AbstractCollection[Any]]
+                val netLogoCollection: util.AbstractCollection[Any] =
+                  if (classOf[AbstractCollection[Any]].isAssignableFrom(outputValue.getClass)) outputValue.asInstanceOf[AbstractCollection[Any]]
+                  else {
+                    val newArray = new util.LinkedList[Any]()
+                    newArray.add(outputValue)
+                    newArray
+                  }
                 NetLogoTask.netLogoArrayToVariable(netLogoCollection, mapped.v)
               }
             }

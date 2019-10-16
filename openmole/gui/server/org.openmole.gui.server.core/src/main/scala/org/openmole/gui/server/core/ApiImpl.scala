@@ -151,7 +151,10 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
           from.extractUncompress(to, true)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))
         case Zip ⇒ Utils.unzip(from, to)
-        case _   ⇒ throw new Throwable("Unknown compression format for " + from.getName)
+        case TarXz ⇒
+          from.extractUncompressXZ(to, true)
+          to.applyRecursive((f: File) ⇒ f.setWritable(true))
+        case _ ⇒ throw new Throwable("Unknown compression format for " + from.getName)
       }
     } match {
       case Success(_) ⇒ ExtractResult.ok
@@ -161,7 +164,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
   def extractTGZ(safePath: SafePath): ExtractResult = {
     DataUtils.fileToExtension(safePath.name) match {
-      case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP ⇒
+      case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP | FileExtension.TXZ ⇒
         val archiveFile = safePathToFile(safePath)(ServerFileSystemContext.project, workspace)
         val toFile: File = safePathToFile(safePath.parent)(ServerFileSystemContext.project, workspace)
         extractArchiveFromFiles(archiveFile, toFile)(ServerFileSystemContext.project)
@@ -336,7 +339,13 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
       t match {
         case ce: ScalaREPL.CompilationError ⇒
           def toErrorWithLocation(em: ScalaREPL.ErrorMessage) =
-            ErrorWithLocation(em.rawMessage, em.position.map { _.line }, em.position.map { _.start }, em.position.map { _.end })
+            ErrorWithLocation(em.rawMessage, em.position.map {
+              _.line
+            }, em.position.map {
+              _.start
+            }, em.position.map {
+              _.end
+            })
 
           ErrorData(ce.errorMessages.map(toErrorWithLocation), t)
         case _ ⇒ ErrorData(t)
@@ -353,14 +362,18 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
         case ErrorInCode(e)            ⇒ Some(error(e))
         case ErrorInCompiler(e)        ⇒ Some(error(e))
         case compiled: Compiled ⇒
-          onCompiled.foreach { _(execId) }
+          onCompiled.foreach {
+            _(execId)
+          }
           catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
             case Failure(e) ⇒ Some(error(e))
             case Success(dsl) ⇒
               val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(outputStream))
               Try(dslToPuzzle(dsl).toExecution()(services)) match {
                 case Success(ex) ⇒
-                  onEvaluated.foreach { _(ex, execId) }
+                  onEvaluated.foreach {
+                    _(ex, execId)
+                  }
                   None
                 case Failure(e) ⇒ Some(error(e))
               }
@@ -536,6 +549,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
         gridscale.http.getResponse(checkedURL) { response ⇒
           def extractName = checkedURL.split("/").last
+
           val name =
             response.headers.flatMap {
               case ("Content-Disposition", value) ⇒

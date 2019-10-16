@@ -1,14 +1,15 @@
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
 import sbt.Keys._
 import sbt._
 
 object Libraries {
 
-  lazy val gridscaleVersion = "2.21"
+  lazy val gridscaleVersion = "2.27"
   lazy val sshjVersion = "0.27.0"
 
-  lazy val mgoVersion = "3.29"
+  lazy val mgoVersion = "3.37"
   lazy val bouncyCastleVersion = "1.60"
   lazy val d3Version = "3.5.12"
   lazy val tooltipserVersion = "3.3.0"
@@ -23,11 +24,11 @@ object Libraries {
   lazy val scaladgetVersion = "1.2.7"
   lazy val sortableVersion = "0.2.1"
   lazy val json4sVersion = "3.5.0"
-  lazy val circeVersion = "0.10.0"
-  lazy val catsVersion = "1.0.1"
-  lazy val scalajsVersion = "0.6.28"
-  lazy val squantsVersion = "1.3.0"
-  lazy val xstreamVersion = "1.4.11"
+  lazy val circeVersion = "0.12.2"
+  lazy val catsVersion = "2.0.0"
+  lazy val scalajsVersion = "0.6.29"
+  lazy val squantsVersion = "1.5.0"
+  lazy val xstreamVersion = "1.4.11.1"
   lazy val scalaURIVersion = "1.1.1"
   lazy val spatialdataVersion = "0.2"
 
@@ -78,7 +79,7 @@ object Libraries {
   lazy val logging = "org.openmole.library" %% "org-apache-commons-logging" % "1.2"
   lazy val lang3 = "org.openmole.library" %% "org-apache-commons-lang3" % "3.4"
   lazy val ant = "org.openmole.library" %% "org-apache-ant" % "1.8.0"
-  lazy val codec = "org.openmole.library" %% "org-apache-commons-codec" % "1.10"
+  lazy val codec = "org.openmole.library" %% "org-apache-commons-codec" % "1.13"
   lazy val async = "org.openmole.library" %% "scala-async" % "0.9.6"
   lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % "4.11"
   lazy val cats = "org.openmole.library" %% "cats" % catsVersion
@@ -92,7 +93,7 @@ object Libraries {
   lazy val scalajs = "org.openmole.library" %% "scalajs" % scalajsVersion
   lazy val mgo = "org.openmole.library" %% "mgo" % mgoVersion
   lazy val family = "org.openmole.library" %% "fr-iscpif-family" % "1.3"
-  lazy val monocle = "org.openmole.library" %% "monocle" % "1.5.0"
+  lazy val monocle = Seq("org.openmole.library" %% "monocle" % "1.5.0", scalaz)
   lazy val boopickle = "org.openmole.library" %% "boopickle" % boopickleVersion
   lazy val autowire = "org.openmole.library" %% "autowire" % scalaAutowireVersion
   lazy val scalaTags = "org.openmole.library" %% "com-scalatags" % scalaTagsVersion
@@ -102,6 +103,7 @@ object Libraries {
   lazy val sourceCode = "org.openmole.library" %% "sourcecode" % sourcecodeVersion
   lazy val txtmark = "org.openmole.library" %% "com-github-rjeschke-txtmark" % "0.13"
   lazy val spatialdata = "org.openmole.library" %% "org-openmole-spatialdata" % spatialdataVersion
+  lazy val xzJava = "org.openmole.library" %% "xzjava" % "1.8"
   
   def httpClientVersion = "4.5.3"
   lazy val httpClient =
@@ -134,7 +136,7 @@ object Libraries {
   lazy val gridscaleLocal = "org.openmole.library" %% "gridscale-local" % gridscaleVersion
   lazy val gridscaleOAR = "org.openmole.library" %% "gridscale-oar" % gridscaleVersion
 
-  lazy val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.8"
+  lazy val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.28"
   lazy val guava = "com.google.guava" % "guava" % "27.1-jre"
   lazy val spray = "io.spray" %% "spray-json" % "1.3.2"
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion

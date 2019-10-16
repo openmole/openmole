@@ -27,7 +27,7 @@ def formatSettings =
     scalariformAutoformat := true
   )
 
-lazy val scalaVersionValue = "2.12.7"
+lazy val scalaVersionValue = "2.12.10"
 
 def defaultSettings = formatSettings ++
   Seq(
@@ -37,7 +37,7 @@ def defaultSettings = formatSettings ++
     resolvers += Resolver.sonatypeRepo("staging"),
     resolvers += Resolver.bintrayRepo("projectseptemberinc", "maven"), // For freek
     resolvers += Resolver.bintrayRepo("definitelyscala", "maven"), // For plotlyjs
-    resolvers += "osgeo" at "http://download.osgeo.org/webdav/geotools", // for geotools
+    resolvers += "osgeo" at "https://download.osgeo.org/webdav/geotools", // for geotools
     scalaVersion in Global := scalaVersionValue, // + "-bin-typelevel-4",
     scalacOptions ++= Seq("-target:jvm-1.8", "-language:higherKinds"),
     scalacOptions += "-Ypartial-unification",
@@ -87,7 +87,7 @@ def allThirdParties = Seq(
   txtmark)
 
 lazy val openmoleCache = OsgiProject(thirdPartiesDir, "org.openmole.tool.cache", imports = Seq("*")) dependsOn (openmoleLogger) settings (thirdPartiesSettings: _*) settings (libraryDependencies += Libraries.squants, libraryDependencies += Libraries.cats)
-lazy val openmoleTar = OsgiProject(thirdPartiesDir, "org.openmole.tool.tar", imports = Seq("*")) dependsOn (openmoleFile) settings (thirdPartiesSettings: _*)
+lazy val openmoleTar = OsgiProject(thirdPartiesDir, "org.openmole.tool.tar", imports = Seq("*")) dependsOn (openmoleFile) settings (thirdPartiesSettings: _*) settings(libraryDependencies += Libraries.xzJava)
 lazy val openmoleFile = OsgiProject(thirdPartiesDir, "org.openmole.tool.file", imports = Seq("*")) dependsOn(openmoleLock, openmoleStream, openmoleLogger) settings (thirdPartiesSettings: _*)
 lazy val openmoleLock = OsgiProject(thirdPartiesDir, "org.openmole.tool.lock", imports = Seq("*")) settings (thirdPartiesSettings: _*)
 lazy val openmoleLogger = OsgiProject(thirdPartiesDir, "org.openmole.tool.logger", imports = Seq("*")) dependsOn(openmoleOutputRedirection) settings (thirdPartiesSettings: _*) settings (libraryDependencies += Libraries.sourceCode)
@@ -219,6 +219,9 @@ lazy val db = OsgiProject(coreDir, "org.openmole.core.db", imports = Seq("*")) s
   libraryDependencies ++= Seq(Libraries.slick, Libraries.xstream, Libraries.h2, Libraries.scopt)) settings (coreSettings: _*) dependsOn(openmoleNetwork, exception, openmoleCrypto, openmoleFile, openmoleLogger)
 
 lazy val preference = OsgiProject(coreDir, "org.openmole.core.preference", imports = Seq("*")) settings(
+  libraryDependencies ++= Seq(Libraries.configuration, Libraries.squants), Libraries.addScalaLang(scalaVersionValue)) settings (coreSettings: _*) dependsOn(openmoleNetwork, openmoleCrypto, openmoleFile, openmoleThread, openmoleTypes, openmoleLock, exception, preferenceMacro)
+
+lazy val preferenceMacro = OsgiProject(coreDir, "org.openmole.core.preferencemacro", imports = Seq("*")) settings(
   libraryDependencies ++= Seq(Libraries.configuration, Libraries.squants), Libraries.addScalaLang(scalaVersionValue)) settings (coreSettings: _*) dependsOn(openmoleNetwork, openmoleCrypto, openmoleFile, openmoleThread, openmoleTypes, openmoleLock, exception)
 
 lazy val workspace = OsgiProject(coreDir, "org.openmole.core.workspace", imports = Seq("*")) dependsOn
@@ -264,7 +267,7 @@ lazy val outputManager = OsgiProject(coreDir, "org.openmole.core.outputmanager",
 lazy val console = OsgiProject(coreDir, "org.openmole.core.console", global = true, imports = Seq("*"), exports = Seq("org.openmole.core.console.*", "$line5.*")) dependsOn (pluginManager) settings(
   OsgiKeys.importPackage := Seq("*"),
   Libraries.addScalaLang(scalaVersionValue),
-  libraryDependencies += Libraries.monocle,
+  libraryDependencies ++= Libraries.monocle,
   macroParadise,
   defaultActivator
 ) dependsOn(openmoleOSGi, workspace, fileService) settings (coreSettings: _*)
@@ -582,7 +585,7 @@ def guiExtTarget = guiExt / "target"
 lazy val dataGUI = OsgiProject(guiExt, "org.openmole.gui.ext.data") enablePlugins (ScalaJSPlugin) settings(
   Libraries.scalaTagsJS,
   Libraries.scalajsDomJS,
-  libraryDependencies += Libraries.monocle
+  libraryDependencies ++= Libraries.monocle
 ) settings (defaultSettings: _*)
 
 lazy val extServerTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool.server") dependsOn(dataGUI, workspace, module) settings(
@@ -866,7 +869,6 @@ lazy val api = Project("api", binDir / "target" / "api") settings (defaultSettin
 
 
 lazy val site = crossProject.in(binDir / "org.openmole.site") settings (defaultSettings: _*) jvmSettings (scalatex.SbtPlugin.projectSettings) jvmSettings(
-  libraryDependencies += Libraries.scalaz,
   libraryDependencies += Libraries.scalatexSite,
   libraryDependencies += Libraries.json4s,
   libraryDependencies += Libraries.spray,
@@ -1041,13 +1043,13 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     )
   ),
   dockerfile in docker := new Dockerfile {
-    from("openjdk:11-jre-slim")
+    from("ubuntu:bionic")
     maintainer("Romain Reuillon <romain.reuillon@iscpif.fr>, Jonathan Passerat-Palmbach <j.passerat-palmbach@imperial.ac.uk>")
     copy((assemble in openmole).value, s"/openmole")
     runRaw(
-      """apt update && \
-       apt install -y python python-pycurl bash tar gzip ca-certificates ca-certificates-java sudo && \
-       rm -rf /var/lib/apt/lists/* && \
+      """apt-get update && \
+       apt-get install --no-install-recommends -y ca-certificates default-jre-headless ca-certificates-java python python-pycurl bash tar gzip sudo && \
+       apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \
        mkdir -p /lib/modules""")
     runRaw(
       """groupadd -r openmole && \
@@ -1057,8 +1059,8 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
       """chmod +x /openmole/openmole && \
         |ln -s /openmole/openmole /usr/bin/openmole""".stripMargin)
     runRaw(
-      """echo '#!/bin/bash' > /usr/bin/openmole-docker && \ 
-         |echo 'mkdir -p /var/openmole/ && chown openmole:openmole /var/openmole && sudo -u openmole openmole --http --mem 2G --port 8443 --remote $@' >>/usr/bin/openmole-docker && \
+      """echo '#!/bin/bash' > /usr/bin/openmole-docker && \
+         |echo 'export HOME=/var/openmole && mkdir -p $HOME && chown openmole:openmole $HOME && sudo -u openmole openmole --http --mem 2G --port 8443 --remote $@' >>/usr/bin/openmole-docker && \
          |chmod +x /usr/bin/openmole-docker""".stripMargin)
     volume("/var/openmole")
     expose(8443)

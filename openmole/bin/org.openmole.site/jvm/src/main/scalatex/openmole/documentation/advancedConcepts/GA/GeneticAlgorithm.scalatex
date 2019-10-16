@@ -30,8 +30,7 @@
 
 The various @a("methods", href:= DocumentationPages.explore.file) available in OpenMOLE make an extensive use of genetic algorithms (GA).
 For instance, it is the case for @a("the model calibration method", href := DocumentationPages.calibration.file) (which is an optimization problem), or the search for output diversity with the @a("PSE", href:= DocumentationPages.pse.file) method (which boils down to a GA with a novelty incentive).
-
-@br@br
+@br
 GAs can be smartly distributed on grid environments using an @a("island scheme", href:= DocumentationPages.island.file), and are able to deal with @a("stochastic", href:=DocumentationPages.stochasticityManagement.file) models.
 
 
@@ -40,11 +39,9 @@ GAs can be smartly distributed on grid environments using an @a("island scheme",
 
 OpenMOLE provides advanced methods to help you calibrate your model.
 These methods automatically generate workflows to explore the parameter space of your model towards the best parameter set, according to a previously defined @b{criterion} or @b{objective}.
-This is commonly addressed in the literature as a calibration/optimization problem.
-
-@p
+This is commonly addressed in the literature as a calibration, or optimization, problem.
+@br
 The different calibration methods in OpenMOLE use GAs to explore the parameter space of a simulation model, looking for parameter sets that will produce outputs reaching one or several given @b{objectives}.
-
 @b{Objectives functions}, also called @b{fitness functions}, compute quantities from the model outputs that have to be minimized or maximized.
 They are a quantification of the @i{optimal model output} you are looking for.
 
@@ -53,19 +50,15 @@ They are a quantification of the @i{optimal model output} you are looking for.
 A common optimization problem is data fitting.
 In this particular case, the objective function could compute the distance between simulation results and data, a classical example is the Squared Error function.
 @br
+If you want your model to reproduce several characteristics (sometimes called stylised facts), you need several objectives, each of them quantifying the similarity between your model outputs and the characteristics you want to reproduce.
 
-If you want your model to reproduce several characteristics (sometimes called stylised facts), you need
-several objectives, each of them quantifying the similarity between your model outputs
-and the characteristics you want to reproduce.
+@br@br
 
-@p
 To calibrate your model, you need to define:
-
  @ul
     @li
-        the @b{genome} of your model, i.e. the parameters to be calibrated. They are the dimensions of the parameter
-         space that will be explored by the GA. The GA will try different genomes, and keep the best one
-         discovered yet.
+        the @b{genome} of your model, @i{i.e.} the parameters to be calibrated. They are the dimensions of the parameter
+         space that will be explored by the GA. The GA will try different genomes, and keep the best one discovered yet.
     @li
         the @b{objectives} you want to reach, expressed as variables to be @b{minimized}.
     @li
@@ -75,9 +68,13 @@ To calibrate your model, you need to define:
 
 @h2{Dummy Model Optimization Example}
 
-This workflow optimizes a dummy model using the generational NSGA II multi-objective algorithm. You can replace the instances of @i{model} by your own model, and adapt the variation range of the input variables. If you are not familiar with parameter tuning using GA, you should first consult the @aa("tutorial explaining how to calibrate a NetLogo model with a GA", href := DocumentationPages.netLogoGA.file).
+This workflow optimizes a dummy model using the generational NSGA II multi-objective algorithm.
+You can replace the instances of @i{model} by your own model, and adapt the variation range of the input variables.
+If you are not familiar with parameter tuning using GA, you should first consult the @aa("tutorial", href := DocumentationPages.netLogoGA.file) explaining how to calibrate a NetLogo model with a GA.
 
-@br@br @hl.openmole(s"""
+@br@br
+
+@hl.openmole(s"""
 $model
 
 // Construction of the workflow orchestrating the genetic algorithm
@@ -102,11 +99,14 @@ NSGA2Evolution(
 // Here the generated workflow will run using 4 threads of the local machine.
 evolution hook (workDirectory / "evolution") on LocalEnvironment(4)""", name = "nsga2 example")
 
-  @br
-  Notice that the objectives are given as a sequence of model outputs variables to @b{minimize}.
-So if you want to reach specific target values, like Pi and 42  you can use the DeltaTask and plug it after your model:
+@br
 
-  @br @hl.openmole(s"""
+Notice that the objectives are given as a sequence of model outputs variables to @b{minimize}.
+So if you want to reach specific target values, like Pi and 42, you can use the @code{DeltaTask} and plug it after your model:
+
+@br@br
+
+@hl.openmole(s"""
 $model
 
 NSGA2Evolution(
@@ -119,13 +119,19 @@ NSGA2Evolution(
   parallelism = 10,
   termination = 100
 ) hook (workDirectory / "evolution")""", name = "nsga2 delta example")
-  @br
-  NB: in this case the results in the saved file will be the difference between the outputs of the model and your objectives.
-  @br
 
-  @br
-  Obviously, maximization problems are performed by taking the opposite of variables as objectives. You may use a ScalaTask in place of the DeltaTask to perform such a small computation in the workflow.
-@br @hl.openmole(s"""
+@br
+
+NB: in this case the results in the saved file will be the difference between the outputs of the model and your objectives.
+
+@br@br
+
+Obviously, maximization problems are performed by taking the opposite of variables as objectives.
+You may use a @code{ScalaTask} in place of the @code{DeltaTask} to perform such a small computation in the workflow.
+
+@br@br
+
+@hl.openmole(s"""
 $model
 
 val maximize = ScalaTask("o1 = -o1") set ((inputs, outputs) += (o1, o2))
@@ -141,18 +147,18 @@ NSGA2Evolution(
   parallelism = 10,
   termination = 100) hook (workDirectory / "evolution")""", name = "nsga2 maximize example")
 
-
 @br
+
 
 
 @h2{Outputs of NSGA2Evolution}
 
 As an output, the method will produce in output a population file for each generation in the directory provided to the @code{SavePopulationHook}, named by the generation number as @code{populationN.csv}.
-Each csv file contains a column with the generation number; the values of parameters; the median value of the objectives at each point; and in the variable @code{evolution$samples}, the number of runs of the model used for the evaluation (in the case of stochastic models).
+Each csv file contains a column with the generation number, the values of parameters, the median value of the objectives at each point, and in the variable @code{evolution$samples}, the number of runs of the model used for the evaluation (in the case of stochastic models).
 
-@br
+
 
 @h2{Real world Example}
 
-@a("This tutorial exposes", href:=DocumentationPages.netLogoGA.file) how to use Genetic Algorithms to perform optimization on a NetLogo model.
+This @a("tutorial", href:=DocumentationPages.netLogoGA.file) exposes how to use Genetic Algorithms to perform optimization on a NetLogo model.
 

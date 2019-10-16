@@ -19,35 +19,30 @@
 
 
 
+@h2{A custom distribution method}
 
-@i{Islands : a Custom Distribution Method for GA on distributed environments}
+For distributed environments, the island distribution scheme is well adapted.
+Islands of population evolve for a while on a remote node.
+When an island is finished, its final population is merged back into a global archive.
+A new island is then generated until the termination criterion, @i{i.e.} the total number of islands to generate, is met.
 
-@p For distributed environments the island distribution scheme is well adapted. Islands of population evolve for a
-while on a remote node. When an island is finished, its final population is merged back into a global archive.
-A new island is then generated until the termination criterion: i.e. the total number of islands to generate is met.
+@br@br
 
-@br
-
-@p
-
-  Islands scheme  is  used via a specific task, @hl.code("""IslandEvolution""") to be added in the workflow.
-@br
-  The task take three parameters:
+The island scheme is used via the specific task @code{Island} to be added in the workflow.
+This task takes three parameters:
 
   @ul
     @li
-        an evolution task method, which is the calibration task (@hl.code("""SteadyStateEvolution""") in the example
-         below ), to be distributed on the nodes of the distributed environment
+        an evolution task method, which is the calibration task (@code{SteadyStateEvolution} in the example below), to be distributed on the nodes of the distributed environment
     @li
-       @hl.code("""parallelism""") : the number of concurrent islands that evolve at a given time
+       @code{parallelism} is the maximum number of concurrent islands
     @li
-       the @hl.code("""termination""")  criterion is the total number of evolutions performed by all the islands.
-       In the example below, each island performs 100 iterations of their evolution tasks, so for 100 islands,
-       this parameter is set to 100*100= 10000.
+       the @code{termination} criterion is the total number of evolutions performed by all the islands.
+       It can be a number of evolution or a duration.
+       In the example below, each island performs its evolution tasks for 5 minutes.
 
 
-
-  @br @hl.openmole("""
+@hl.openmole("""
   // Generate a workflow that orchestrates 100 concurrent islands.
   // The workflow stops when 10,000 islands of 5 minutes have completed.
   val evolution =

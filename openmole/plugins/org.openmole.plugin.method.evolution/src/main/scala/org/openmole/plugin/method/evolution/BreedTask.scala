@@ -35,29 +35,26 @@ object BreedTask {
 
       (population.isEmpty, evolution.operations.generationLens.get(s), suggestedGenomes.isEmpty) match {
         case (true, 0, false) ⇒
-          val (news, gs) =
+          val gs =
             size - suggestedGenomes.size match {
-              case x if x > 0 ⇒ evolution.operations.initialGenomes(x)(context).run(s).value
-              case x          ⇒ (s, Vector.empty)
+              case x if x > 0 ⇒ evolution.operations.initialGenomes(x, random())(context)
+              case x          ⇒ Vector.empty
             }
 
           Context(
-            evolution.genomePrototype.array -> random().shuffle(suggestedGenomes ++ gs).toArray(evolution.genomePrototype.`type`.manifest),
-            Variable(evolution.statePrototype, news)
+            evolution.genomePrototype.array -> random().shuffle(suggestedGenomes ++ gs).toArray(evolution.genomePrototype.`type`.manifest)
           )
         case (true, _, _) ⇒
-          val (news, gs) = evolution.operations.initialGenomes(size)(context).run(s).value
+          val gs = evolution.operations.initialGenomes(size, random())(context)
 
           Context(
-            Variable(evolution.genomePrototype.array, gs.toArray(evolution.genomePrototype.`type`.manifest)),
-            Variable(evolution.statePrototype, news)
+            Variable(evolution.genomePrototype.array, gs.toArray(evolution.genomePrototype.`type`.manifest))
           )
         case (false, _, _) ⇒
-          val (newState, breeded) = evolution.operations.breeding(population.toVector, size).from(context).run(s).value
+          val breeded = evolution.operations.breeding(population.toVector, size, s, random()).from(context)
 
           Context(
-            Variable(evolution.genomePrototype.array, breeded.toArray(evolution.genomePrototype.`type`.manifest)),
-            Variable(evolution.statePrototype, newState)
+            Variable(evolution.genomePrototype.array, breeded.toArray(evolution.genomePrototype.`type`.manifest))
           )
       }
 

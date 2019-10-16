@@ -5,6 +5,7 @@ import java.util.UUID
 import org.openmole.tool.crypto._
 import org.openmole.tool.file._
 import org.openmole.core.exception._
+import org.openmole.core.preferencemacro._
 
 object Preference {
 

@@ -12,24 +12,21 @@ import scala.util.Random
 
 object PreStepTask {
 
-  def apply(n: Int, nAlpha: Int, prior: Seq[ABC.Prior], state: Val[MonAPMC.MonState], stepState: Val[MonAPMC.StepState], step: Val[Int])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(n: Int, nAlpha: Int, prior: Prior, state: Val[MonAPMC.MonState], stepState: Val[MonAPMC.StepState], step: Val[Int])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     FromContextTask("preStepTask") { p ⇒
       import p._
 
-      val priorBounds = prior.map(pr ⇒ (pr.low.from(context), pr.high.from(context)))
-      def priorSampler(bound: (Double, Double))(rng: util.Random): Double = rng.nextDouble.scale(bound._1, bound._2)
-      val priorSamplers = (rng: Random) ⇒ priorBounds.toArray.map(b ⇒ priorSampler(b)(rng))
-
       val s = context(state)
-      val (ns, matrix: Array[Array[Double]]) = MonAPMC.preStep(n, nAlpha, priorSamplers, s)(random())
+      val (ns, matrix: Array[Array[Double]]) =
+        MonAPMC.preStep(n, nAlpha, prior.sample(p)(_), prior.density(p)(_), s)(random())
 
-      val samples = (prior.map(_.v) zip matrix.toVector.transpose).map { case (v, samples) ⇒ Variable(v.array, samples.toArray) }
+      val samples = (prior.v zip matrix.toVector.transpose).map { case (v, samples) ⇒ Variable(v.array, samples.toArray) }
 
       context ++ samples + Variable(stepState, ns)
     } set (
       (inputs, outputs) += step,
       inputs += state,
-      exploredOutputs ++= prior.map(_.v.array),
+      exploredOutputs ++= prior.v.map(_.array),
       outputs += stepState,
 
       state := MonAPMC.Empty(),

@@ -87,7 +87,7 @@ object WorkflowIntegration {
       def mgoAG = a.ag
 
       type V = (Vector[Double], Vector[Int])
-      type P = Vector[Double]
+      type P = Array[Any]
 
       lazy val integration = a.algorithm
 
@@ -103,7 +103,8 @@ object WorkflowIntegration {
         Genome.toVariables(a.genome, cs, is, scale = true)
       }
 
-      def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ Objective.toDouble(o, context)).toVector
+      def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ Objective.prototype(o)).map(context.apply(_)).toArray
+      //def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ Objective.toDouble(o, context)).toVector
     }
 
   def stochasticGAIntegration[AG](a: StochasticGA[AG]): EvolutionWorkflow =
@@ -135,7 +136,7 @@ object WorkflowIntegration {
     ag:         AG,
     genome:     Genome,
     objectives: Seq[ExactObjective[_]]
-  )(implicit val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Vector[Double]])
+  )(implicit val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Array[Any]])
 
   object DeterministicGA {
     implicit def deterministicGAIntegration[AG]: WorkflowIntegration[DeterministicGA[AG]] = new WorkflowIntegration[DeterministicGA[AG]] {
@@ -214,6 +215,7 @@ trait EvolutionWorkflow {
 
   // Variables
   import GAIntegration.namespace
+
   def genomePrototype = Val[G]("genome", namespace)(genomeType)
   def individualPrototype = Val[I]("individual", namespace)(individualType)
   def populationPrototype = Val[Pop]("population", namespace)(populationType)
@@ -248,9 +250,9 @@ object GAIntegration {
 
   def objectivesOfPopulationToVariables[I](objectives: Seq[Objective[_]], phenotypeValues: Vector[Vector[Double]]): FromContext[Vector[Variable[_]]] =
     objectives.toVector.zipWithIndex.map {
-      case (p, i) ⇒
+      case (objective, i) ⇒
         Variable(
-          Objective.prototype(p).withType[Array[Double]],
+          Objective.resultPrototype(objective).withType[Array[Double]],
           phenotypeValues.map(_(i)).toArray
         )
     }
@@ -258,8 +260,8 @@ object GAIntegration {
 }
 
 object DeterministicGAIntegration {
-  def migrateToIsland(population: Vector[mgo.evolution.algorithm.CDGenome.DeterministicIndividual.Individual]) = population
-  def migrateFromIsland(population: Vector[mgo.evolution.algorithm.CDGenome.DeterministicIndividual.Individual]) = population
+  def migrateToIsland[P](population: Vector[mgo.evolution.algorithm.CDGenome.DeterministicIndividual.Individual[P]]) = population
+  def migrateFromIsland[P](population: Vector[mgo.evolution.algorithm.CDGenome.DeterministicIndividual.Individual[P]]) = population
 }
 
 object StochasticGAIntegration {
@@ -275,7 +277,6 @@ object StochasticGAIntegration {
 object MGOAPI {
 
   trait Integration[A, V, P] {
-    type M[T] = cats.data.State[S, T]
     type I
     type G
     type S
@@ -287,30 +288,33 @@ object MGOAPI {
     def operations(a: A): Ops
 
     trait Ops {
-      def initialState(rng: util.Random): S
-      def initialGenomes(n: Int): FromContext[M[Vector[G]]]
+      def initialState: S
+      def initialGenomes(n: Int, rng: scala.util.Random): FromContext[Vector[G]]
+
       def buildIndividual(genome: G, phenotype: P, context: Context): I
 
       def genomeValues(genome: G): V
       def buildGenome(values: V): G
       def buildGenome(context: Vector[Variable[_]]): FromContext[G]
 
-      def randomLens: monocle.Lens[S, util.Random]
       def startTimeLens: monocle.Lens[S, Long]
       def generationLens: monocle.Lens[S, Long]
-      def breeding(individuals: Vector[I], n: Int): FromContext[M[Vector[G]]]
-      def elitism(population: Vector[I], candidates: Vector[I]): FromContext[M[Vector[I]]]
+
+      def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random): FromContext[Vector[G]]
+      def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random): FromContext[(S, Vector[I])]
 
       def migrateToIsland(i: Vector[I]): Vector[I]
       def migrateFromIsland(population: Vector[I], state: S): Vector[I]
 
-      def afterGeneration(g: Long, population: Vector[I]): M[Boolean]
-      def afterDuration(d: squants.Time, population: Vector[I]): M[Boolean]
+      def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean
+      def afterDuration(d: squants.Time, s: S, population: Vector[I]): Boolean
 
       def result(population: Vector[I], state: S): FromContext[Seq[Variable[_]]]
     }
 
   }
+
+  import mgo.evolution.algorithm._
 
   def paired[G, C, D](continuous: G ⇒ C, discrete: G ⇒ D) = (g: G) ⇒ (continuous(g), discrete(g))
 

@@ -232,7 +232,7 @@ class FileToolBox(initSafePath: SafePath) {
     div(omsheet.centerElement)(
       downloadTrigger,
       DataUtils.fileToExtension(initSafePath.name) match {
-        case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP ⇒
+        case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP | FileExtension.TXZ ⇒
           iconAction(fileaction.extract, archive, "extract")
         case _ ⇒ span
       },

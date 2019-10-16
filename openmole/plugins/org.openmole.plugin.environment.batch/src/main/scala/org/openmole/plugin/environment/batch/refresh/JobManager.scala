@@ -63,9 +63,9 @@ object JobManager extends JavaLogger { self ⇒
 
   def !(msg: JobMessage)(implicit services: BatchEnvironment.Services): Unit = {
     msg match {
-      case msg: Submit      ⇒ shouldKill(msg.job.environment, msg.job.storedJob, Kill(msg.job, None)) { () ⇒ dispatch(msg) }
-      case msg: Refresh     ⇒ shouldKill(msg.job.environment, msg.job.storedJob, Kill(msg.job, Some(msg.batchJob))) { () ⇒ dispatch(msg) }
-      case msg: GetResult   ⇒ shouldKill(msg.job.environment, msg.job.storedJob, Kill(msg.job, Some(msg.batchJob))) { () ⇒ dispatch(msg) }
+      case msg: Submit      ⇒ killOr(msg.job.environment, msg.job.storedJob, Kill(msg.job, None)) { () ⇒ dispatch(msg) }
+      case msg: Refresh     ⇒ killOr(msg.job.environment, msg.job.storedJob, Kill(msg.job, Some(msg.batchJob))) { () ⇒ dispatch(msg) }
+      case msg: GetResult   ⇒ killOr(msg.job.environment, msg.job.storedJob, Kill(msg.job, Some(msg.batchJob))) { () ⇒ dispatch(msg) }
       case msg: RetryAction ⇒ dispatch(msg)
       case msg: Error       ⇒ dispatch(msg)
       case msg: Kill        ⇒ dispatch(msg)
@@ -80,7 +80,7 @@ object JobManager extends JavaLogger { self ⇒
         services.threadProvider.scheduler.schedule((self ! msg): Runnable, delay.millis, TimeUnit.MILLISECONDS)
 
       case Submitted(job, bj) ⇒
-        shouldKill(job.environment, job.storedJob, Kill(job, Some(bj))) { () ⇒ self ! Delay(Refresh(job, bj, bj.updateInterval.minUpdateInterval), bj.updateInterval.minUpdateInterval) }
+        killOr(job.environment, job.storedJob, Kill(job, Some(bj))) { () ⇒ self ! Delay(Refresh(job, bj, bj.updateInterval.minUpdateInterval), bj.updateInterval.minUpdateInterval) }
 
       case MoleJobError(mj, j, e) ⇒
         val er = Environment.MoleJobExceptionRaised(j, e, WARNING, mj)
@@ -96,7 +96,13 @@ object JobManager extends JavaLogger { self ⇒
 
   def canceled(storedJob: StoredJob) = storedJob.storedMoleJobs.forall(_.subMoleCanceled())
 
-  def shouldKill(environment: BatchEnvironment, storedJob: StoredJob, kill: Kill)(op: () ⇒ Unit)(implicit services: BatchEnvironment.Services) = {
+  def killOr(batchJob: BatchExecutionJob, kill: Kill)(op: () ⇒ Any)(implicit services: BatchEnvironment.Services) = {
+    if (batchJob.state == ExecutionState.KILLED) Unit
+    else if (canceled(batchJob.storedJob)) self ! kill
+    else op()
+  }
+
+  def killOr(environment: BatchEnvironment, storedJob: StoredJob, kill: Kill)(op: () ⇒ Unit)(implicit services: BatchEnvironment.Services) = {
     if (environment.stopped || canceled(storedJob)) self ! kill
     else sendToMoleExecution(storedJob) { state ⇒
       if (!jobIsFinished(state, storedJob)) op() else self ! kill

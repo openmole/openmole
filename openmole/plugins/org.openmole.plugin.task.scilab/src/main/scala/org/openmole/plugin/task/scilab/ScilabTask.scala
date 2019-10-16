@@ -54,7 +54,8 @@ object ScilabTask {
     stdErr:               OptionalArgument[Val[String]] = None,
     environmentVariables: Seq[EnvironmentVariable]      = Vector.empty,
     hostFiles:            Seq[HostFile]                 = Vector.empty,
-    workDirectory:        OptionalArgument[String]      = None)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): ScilabTask = {
+    workDirectory:        OptionalArgument[String]      = None,
+    noSeccomp:            Boolean                       = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): ScilabTask = {
 
     val uDockerArguments =
       UDockerTask.createUDocker(
@@ -66,7 +67,8 @@ object ScilabTask {
         reuseContainer = true,
         environmentVariables = environmentVariables.toVector,
         hostFiles = hostFiles.toVector,
-        workDirectory = workDirectory)
+        workDirectory = workDirectory,
+        noSeccomp = noSeccomp)
 
     ScilabTask(
       script = script,

@@ -28,7 +28,8 @@ object RefreshActor extends JavaLogger {
     import services._
 
     val Refresh(job, bj, delay, updateErrorsInARow) = refresh
-    if (job.state != KILLED) {
+
+    JobManager.killOr(job, Kill(job, Some(bj))) { () ⇒
       try {
         val oldState = job.state
         job.state = bj.updateState()
@@ -59,7 +60,6 @@ object RefreshActor extends JavaLogger {
             JobManager ! Delay(Refresh(job, bj, delay, updateErrorsInARow + 1), delay)
           }
       }
-
     }
   }
 }

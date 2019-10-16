@@ -361,7 +361,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         g ← group
       } yield gridscale.dirac.Service(s, g)
 
-    val diracService = userDiracService getOrElse getService(voName)
+    val diracService = userDiracService getOrElse getService(voName, EGIAuthentication.CACertificatesDir)
     val s = server(diracService, implicitly[EGIAuthenticationInterface[A]].apply(authentication), EGIAuthentication.CACertificatesDir)
     delegate(s, implicitly[EGIAuthenticationInterface[A]].apply(authentication), tokenCache())
     EGIJobService(s, env)

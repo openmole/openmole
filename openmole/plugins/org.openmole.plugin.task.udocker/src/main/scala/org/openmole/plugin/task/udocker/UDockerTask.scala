@@ -36,6 +36,7 @@ import org.openmole.plugin.task.udocker.DockerMetadata._
 import org.openmole.tool.cache._
 import org.openmole.core.dsl._
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.threadprovider._
 import org.openmole.plugin.task.container.HostFiles
 import org.openmole.tool.lock.LockKey
@@ -90,10 +91,11 @@ object UDockerTask {
     hostFiles:            Seq[HostFile]                               = Vector.empty,
     workDirectory:        OptionalArgument[String]                    = None,
     environmentVariables: Seq[EnvironmentVariable]                    = Vector.empty,
-    containerPoolKey:     CacheKey[WithInstance[(File, ContainerID)]] = CacheKey()
+    containerPoolKey:     CacheKey[WithInstance[(File, ContainerID)]] = CacheKey(),
+    noSeccomp:            Boolean                                     = false
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService): UDockerTask =
     UDockerTask(
-      uDocker = createUDocker(image, install, user, mode, cacheInstall, forceUpdate, reuseContainer, hostFiles, workDirectory, environmentVariables),
+      uDocker = createUDocker(image, install, user, mode, cacheInstall, forceUpdate, reuseContainer, hostFiles, workDirectory, environmentVariables, noSeccomp),
       commands = run, //Commands.value.modify(_.map(_.map(blockChars)))(run),
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
@@ -117,7 +119,8 @@ object UDockerTask {
     reuseContainer:       Boolean                  = true,
     hostFiles:            Seq[HostFile]            = Vector.empty,
     workDirectory:        OptionalArgument[String] = None,
-    environmentVariables: Seq[EnvironmentVariable] = Vector.empty)(implicit newFile: NewFile, preference: Preference, threadProvider: ThreadProvider, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService) = {
+    environmentVariables: Seq[EnvironmentVariable] = Vector.empty,
+    noSeccomp:            Boolean                  = false)(implicit newFile: NewFile, preference: Preference, threadProvider: ThreadProvider, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService) = {
     val uDocker =
       UDockerArguments(
         localDockerImage = toLocalImage(image) match {
@@ -129,7 +132,8 @@ object UDockerTask {
         user = user,
         hostFiles = hostFiles.toVector,
         workDirectory = workDirectory.option,
-        environmentVariables = environmentVariables.toVector)
+        environmentVariables = environmentVariables.toVector,
+        noSeccomp = noSeccomp)
 
     installLibraries(uDocker, install, cacheInstall, forceUpdate)
   }
@@ -152,7 +156,8 @@ object UDockerTask {
           repositoryDirectory = repositoryDirectory,
           layersDirectory = layersDirectory,
           installDirectory = uDockerInstallDirectory,
-          tarball = uDockerTarball
+          tarball = uDockerTarball,
+          noSeccomp = uDocker.noSeccomp
         )
 
         val container = UDocker.createContainer(uDocker, uDockerExecutable, containersDirectory, uDockerVariables, Vector.empty, imageId(uDocker))
@@ -290,7 +295,8 @@ object UDockerTask {
         repositoryDirectory = repositoryDirectory,
         layersDirectory = layersDirectory,
         installDirectory = uDockerInstallDirectory,
-        tarball = uDockerTarball
+        tarball = uDockerTarball,
+        noSeccomp = uDocker.noSeccomp
       )
 
       def createPool =
@@ -342,7 +348,7 @@ object UDockerTask {
               stdErr = executionContext.outputRedirection.output
             )
 
-            val retContext = External.fetchOutputFiles(external, outputs, preparedContext, outputPathResolver(rootDirectory), rootDirectory)
+            val retContext = External.fetchOutputFiles(external, outputs, preparedContext, outputPathResolver(rootDirectory), Seq(rootDirectory, taskWorkDirectory))
             (retContext, executionResult)
           }
 
