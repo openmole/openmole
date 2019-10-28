@@ -14,7 +14,7 @@ import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workflow.tools.OptionalArgument
 import org.openmole.core.workflow.validation.ValidateTask
 import org.openmole.core.workspace.{NewFile, Workspace}
-import org.openmole.plugin.task.container.{HostFile, HostFiles}
+import org.openmole.plugin.task.container.{DockerImage, HostFile, HostFiles}
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.task.udocker._
 import org.openmole.plugin.tool.json._

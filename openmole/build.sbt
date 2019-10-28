@@ -530,7 +530,9 @@ lazy val template = OsgiProject(pluginDir, "org.openmole.plugin.task.template", 
 lazy val systemexec = OsgiProject(pluginDir, "org.openmole.plugin.task.systemexec", imports = Seq("*")) dependsOn(openmoleDSL, external, workspace) settings (
   libraryDependencies += Libraries.exec) settings (pluginSettings: _*)
 
-lazy val container = OsgiProject(pluginDir, "org.openmole.plugin.task.container", imports = Seq("*")) dependsOn(openmoleFile, pluginManager, external, expansion, exception) settings (pluginSettings: _*)
+lazy val container = OsgiProject(pluginDir, "org.openmole.plugin.task.container", imports = Seq("*")) dependsOn(openmoleFile, pluginManager, external, expansion, exception) settings (pluginSettings: _*) settings(
+  libraryDependencies += Libraries.container
+)
 
 lazy val care = OsgiProject(pluginDir, "org.openmole.plugin.task.care", imports = Seq("*")) dependsOn(systemexec, container) settings (
   libraryDependencies += Libraries.scalatest) settings (pluginSettings: _*)

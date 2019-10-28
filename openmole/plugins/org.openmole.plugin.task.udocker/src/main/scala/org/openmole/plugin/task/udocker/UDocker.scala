@@ -28,6 +28,7 @@ import org.openmole.tool.file._
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.stream._
 import org.openmole.tool.stream.withClosable
+import org.openmole.plugin.task.container._
 
 object UDocker {
 

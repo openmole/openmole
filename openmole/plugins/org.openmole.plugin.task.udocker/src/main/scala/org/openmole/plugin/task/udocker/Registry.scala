@@ -22,6 +22,7 @@ import org.openmole.tool.file.{ FileDecorator, File ⇒ OMFile }
 import org.openmole.core.networkservice._
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.services._
+import org.openmole.plugin.task.container._
 
 object Registry {
 

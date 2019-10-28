@@ -108,9 +108,7 @@ package file {
       }
 
       private def copyFile(toF: File, followSymlinks: Boolean = false) = {
-
         val copyOptions = getCopyOptions(followSymlinks)
-
         Files.copy(file, toF, copyOptions: _*)
         toF.mode = file
       }

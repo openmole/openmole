@@ -46,6 +46,24 @@ package container {
     }
   }
 
+  object ContainerImage {
+    implicit def fileToContainerImage(f: java.io.File) = {
+      def compressed = f.getName.endsWith(".tgz") || f.getName.endsWith(".gz")
+      SavedDockerImage(f, compressed)
+    }
+    implicit def stringToContainerImage(s: String) =
+      if (s.contains(":")) {
+        val Vector(image, tag) = s.split(":").toVector
+        DockerImage(image, tag)
+      }
+      else DockerImage(s)
+
+  }
+
+  sealed trait ContainerImage
+  case class DockerImage(image: String, tag: String = "latest", registry: String = "https://registry-1.docker.io") extends ContainerImage
+  case class SavedDockerImage(file: java.io.File, compressed: Boolean) extends ContainerImage
+
 }
 
 package object container extends ContainerPackage {
@@ -105,5 +123,8 @@ package object container extends ContainerPackage {
   def ArchiveNotFound(archive: File) = Seq(new UserBadDataError(s"Cannot find specified Archive $archive in your work directory. Did you prefix the path with `workDirectory / `?"))
 
   lazy val ArchiveOK = Seq.empty[UserBadDataError]
+
+  sealed trait ContainerSystem
+  case class Proot(noSeccomp: Boolean = false, kernel: String = "3.2.1") extends ContainerSystem
 
 }

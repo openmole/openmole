@@ -42,6 +42,7 @@ import org.openmole.plugin.task.container.HostFiles
 import org.openmole.tool.lock.LockKey
 import org.openmole.plugin.task.container._
 import org.openmole.tool.outputredirection.OutputRedirection
+import org.openmole.plugin.task.container._
 
 import scala.language.postfixOps
 
@@ -300,15 +301,11 @@ object UDockerTask {
       )
 
       def createPool =
-        WithInstance[(File, ContainerID)](
-          () ⇒ {
-            val containersDirectory = newFile.newDir("container")
-            val id = UDocker.createContainer(uDocker, uDockerExecutable, containersDirectory, uDockerVariables(containersDirectory), volumes, imageId)
-            (containersDirectory, id)
-          },
-          close = _._1.recursiveDelete,
-          pooled = uDocker.reuseContainer
-        )
+        WithInstance[(File, ContainerID)] { () ⇒
+          val containersDirectory = newFile.newDir("container")
+          val id = UDocker.createContainer(uDocker, uDockerExecutable, containersDirectory, uDockerVariables(containersDirectory), volumes, imageId)
+          (containersDirectory, id)
+        }(close = _._1.recursiveDelete, pooled = uDocker.reuseContainer)
 
       val pool = executionContext.cache.getOrElseUpdate(containerPoolKey, createPool)
 

@@ -121,7 +121,7 @@ object MoleTask {
       val localEnvironment =
         LocalEnvironment(1, executionContext.localEnvironment.deinterleave)
 
-      val moleServices = MoleServices.create
+      val moleServices = MoleServices.create()
 
       val execution = MoleExecution(
         mole,

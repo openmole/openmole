@@ -45,25 +45,30 @@ object MoleServices {
    * @param seeder
    * @param threadProvider
    * @param eventDispatcher
-   * @param newFile
+   * @param _newFile
    * @param fileService
    * @param workspace
-   * @param outputRedirection
+   * @param _outputRedirection
    * @return
    */
-  implicit def create(implicit preference: Preference, seeder: Seeder, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, newFile: NewFile, fileService: FileService, workspace: Workspace, outputRedirection: OutputRedirection, loggerService: LoggerService) = {
+  def create(newFile: Option[NewFile] = None, outputRedirection: Option[OutputRedirection] = None)(implicit preference: Preference, seeder: Seeder, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, _newFile: NewFile, fileService: FileService, workspace: Workspace, _outputRedirection: OutputRedirection, loggerService: LoggerService) = {
     new MoleServices()(
       preference = preference,
       seeder = Seeder(seeder.newSeed),
       threadProvider = threadProvider,
       eventDispatcher = eventDispatcher,
-      newFile = NewFile(newFile.newDir("execution")),
+      newFile = newFile.getOrElse(NewFile(_newFile.newDir("execution"))),
       workspace = workspace,
       fileService = fileService,
       fileServiceCache = FileServiceCache(),
-      outputRedirection = outputRedirection,
+      outputRedirection = outputRedirection.getOrElse(_outputRedirection),
       loggerService = loggerService
     )
+  }
+
+  def clean(moleServices: MoleServices) = {
+    import org.openmole.tool.file._
+    moleServices.newFile.baseDir.recursiveDelete
   }
 
   def copy(moleServices: MoleServices)(

@@ -294,7 +294,9 @@ object PluginManager extends JavaLogger {
 
   /* For debugging purposes */
   def printBundles = println(Activator.contextOrException.getBundles.mkString("\n"))
-  def printDirectDependencies(b: Long) = println(directDependingBundles(Activator.contextOrException.getBundle(b)).mkString("\n"))
+  def printDirectDepending(b: Long) = println(directDependingBundles(Activator.contextOrException.getBundle(b)).mkString("\n"))
+  def printDirectDependencies(b: Long) = println(directDependencies(Activator.contextOrException.getBundle(b)).mkString("\n"))
   def printIsPlugin(b: Long) = println(isPlugin(b))
+  def printPluginsForClass(c: Class[_]) = println(pluginsForClass(c).mkString("\n"))
 
 }

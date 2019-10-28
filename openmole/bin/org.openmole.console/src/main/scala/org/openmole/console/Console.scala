@@ -115,18 +115,20 @@ class Console(script: Option[String] = None) {
         }
       case Some(script) ⇒
         val scriptFile = new File(script)
+
         Project.compile(workDirectory.getOrElse(scriptFile.getParentFileSafe), scriptFile, args) match {
           case ScriptFileDoesNotExists() ⇒
             println("File " + scriptFile + " doesn't exist.")
             ExitCodes.scriptDoesNotExist
           case e: CompilationError ⇒
+            newFile.baseDir.recursiveDelete
             println(e.error.stackString)
             ExitCodes.compilationError
           case compiled: Compiled ⇒
             Try(compiled.eval) match {
               case Success(res) ⇒
-                MoleServices.create
-                val ex = dslToPuzzle(res).toExecution()
+                val moleServices = MoleServices.create()
+                val ex = dslToPuzzle(res).toExecution()(moleServices)
                 Try(ex.run) match {
                   case Failure(e) ⇒
                     println(e.stackString)
@@ -135,6 +137,7 @@ class Console(script: Option[String] = None) {
                     ExitCodes.ok
                 }
               case Failure(e) ⇒
+                newFile.baseDir.recursiveDelete
                 println(s"Error during script evaluation: ")
                 print(e.stackString)
                 ExitCodes.compilationError

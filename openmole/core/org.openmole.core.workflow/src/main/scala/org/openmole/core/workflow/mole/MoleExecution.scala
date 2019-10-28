@@ -374,7 +374,7 @@ object MoleExecution extends JavaLogger {
     import moleExecution.executionContext.services._
     LoggerService.log(Level.FINE, s"clean mole execution $moleExecution")
 
-    try if (moleExecution.cleanOnFinish) moleExecution.executionContext.services.newFile.baseDir.recursiveDelete
+    try if (moleExecution.cleanOnFinish) MoleServices.clean(moleExecution.executionContext.services)
     finally {
       moleExecution._cleaned = true
       moleExecution.cleanedSemaphore.release()

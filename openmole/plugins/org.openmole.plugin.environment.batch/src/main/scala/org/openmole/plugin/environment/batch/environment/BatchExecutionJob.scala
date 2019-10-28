@@ -23,10 +23,11 @@ import java.util.UUID
 
 import org.openmole.core.communication.message.RunnableTask
 import org.openmole.core.fileservice.{ FileCache, FileService }
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.serializer.PluginAndFilesListing
 import org.openmole.core.workflow.execution.{ Environment, ExecutionJob }
-import org.openmole.core.workflow.execution.ExecutionState.{ DONE, ExecutionState, FAILED, READY, KILLED }
+import org.openmole.core.workflow.execution.ExecutionState.{ DONE, ExecutionState, FAILED, KILLED, READY }
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.workspace.NewFile
 import org.openmole.plugin.environment.batch.environment.JobStore.StoredJob

@@ -33,6 +33,7 @@ import org.openmole.core.project._
 import org.openmole.core.services.Services
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.dsl._
+import org.openmole.core.workspace.NewFile
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.plugin.server._
 import org.openmole.gui.ext.tool.server.OMRouter
@@ -356,26 +357,29 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
     val script: File = safePathToFile(scriptData.scriptPath)
 
+    val executionOutputRedirection = OutputRedirection(outputStream)
+    val executionNewFile = NewFile(services.newFile.newDir("execution"))
+
     try {
-      Project.compile(script.getParentFileSafe, script, Seq.empty)(Services.copy(services)(outputRedirection = OutputRedirection(outputStream))) match {
+      Project.compile(script.getParentFileSafe, script, Seq.empty)(Services.copy(services)(outputRedirection = executionOutputRedirection, newFile = executionNewFile)) match {
         case ScriptFileDoesNotExists() ⇒ Some(message("Script file does not exist"))
         case ErrorInCode(e)            ⇒ Some(error(e))
         case ErrorInCompiler(e)        ⇒ Some(error(e))
         case compiled: Compiled ⇒
+          val executionServices = MoleServices.create(outputRedirection = Some(executionOutputRedirection), newFile = Some(executionNewFile))
           onCompiled.foreach {
             _(execId)
           }
           catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
             case Failure(e) ⇒ Some(error(e))
             case Success(dsl) ⇒
-              val services = MoleServices.copy(MoleServices.create)(outputRedirection = OutputRedirection(outputStream))
-              Try(dslToPuzzle(dsl).toExecution()(services)) match {
+              Try(dslToPuzzle(dsl).toExecution()(executionServices)) match {
                 case Success(ex) ⇒
-                  onEvaluated.foreach {
-                    _(ex, execId)
-                  }
+                  onEvaluated.foreach { _(ex, execId) }
                   None
-                case Failure(e) ⇒ Some(error(e))
+                case Failure(e) ⇒
+                  MoleServices.clean(executionServices)
+                  Some(error(e))
               }
           }
       }
