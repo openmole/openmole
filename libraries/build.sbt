@@ -232,7 +232,7 @@ lazy val mgo = OsgiProject(dir, "mgo", exports = Seq("mgo.*", "freestyle.*"), im
   version := mgoVersion) dependsOn(monocle, math, cats, squants) settings(settings: _*)
 
 
-lazy val containerVersion = "1.1-SNAPSHOT"
+lazy val containerVersion = "1.1"
 
 lazy val container = OsgiProject(dir, "container", exports = Seq("container.*"), imports = Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "!com.github.luben.*", "!org.apache.avalon.*", "!org.apache.log.*", "!org.brotli.dec.*", "!javax.*","*"), privatePackages = Seq("!scala.*", "!monocle.*", "!org.apache.commons.math3.*", "!cats.*", "!squants.*", "!scalaz.*", "!io.circe.*", "!shapeless.*", "*")) settings(
   libraryDependencies += "org.openmole" %% "container" % containerVersion,
