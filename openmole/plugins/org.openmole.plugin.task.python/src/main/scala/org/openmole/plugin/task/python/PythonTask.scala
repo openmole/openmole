@@ -14,7 +14,7 @@ import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workflow.tools.OptionalArgument
 import org.openmole.core.workflow.validation.ValidateTask
 import org.openmole.core.workspace.{NewFile, Workspace}
-import org.openmole.plugin.task.container.{DockerImage, HostFile, HostFiles}
+import org.openmole.plugin.task.container._
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.task.udocker._
 import org.openmole.plugin.tool.json._
@@ -28,16 +28,6 @@ object PythonTask {
   implicit def isExternal: ExternalBuilder[PythonTask] = ExternalBuilder(PythonTask.external)
   implicit def isInfo = InfoBuilder(info)
   implicit def isMapped = MappedInputOutputBuilder(PythonTask.mapped)
-
-  implicit def isBuilder = new ReturnValue[PythonTask] with ErrorOnReturnValue[PythonTask] with StdOutErr[PythonTask] with EnvironmentVariables[PythonTask] with HostFiles[PythonTask] with WorkDirectory[PythonTask] { builder ⇒
-    override def returnValue = PythonTask.returnValue
-    override def errorOnReturnValue = PythonTask.errorOnReturnValue
-    override def stdOut = PythonTask.stdOut
-    override def stdErr = PythonTask.stdErr
-    override def environmentVariables = PythonTask.uDocker composeLens UDockerArguments.environmentVariables
-    override def hostFiles = PythonTask.uDocker composeLens UDockerArguments.hostFiles
-    override def workDirectory = PythonTask.uDocker composeLens UDockerArguments.workDirectory
-  }
 
     // could to make distinct image for python 2 and 3
     def dockerImage(major: Int) = DockerImage("python")
@@ -61,28 +51,18 @@ object PythonTask {
       returnValue:          OptionalArgument[Val[Int]]                   = None,
       stdOut:               OptionalArgument[Val[String]]                = None,
       stdErr:               OptionalArgument[Val[String]]                = None,
-      noSeccomp: Boolean = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService) = {
-
-      val uDocker =
-        UDockerTask.createUDocker(
-          dockerImage(major),
-          install = installCommands(install, libraries,major),
-          cacheInstall = true,
-          forceUpdate = forceUpdate,
-          mode = "P1",
-          reuseContainer = true,
-          hostFiles = hostFiles,
-          workDirectory = workDirectory,
-          environmentVariables = environmentVariables.toVector,
-          noSeccomp = noSeccomp)
+      containerSystem:    ContainerSystem                                    = Proot())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService) = {
 
      new PythonTask(
         script = script,
-        uDocker,
+        image = ContainerTask.prepare(containerSystem, dockerImage(major), installCommands(install, libraries,major), workDirectory.option),
         errorOnReturnValue = errorOnReturnValue,
         returnValue = returnValue,
         stdOut = stdOut,
         stdErr = stdErr,
+        hostFiles = hostFiles,
+        environmentVariables = environmentVariables,
+        containerSystem = containerSystem,
         config = InputOutputConfig(),
         external = External(),
         info = InfoConfig(),
@@ -93,21 +73,24 @@ object PythonTask {
 }
 
 @Lenses case class PythonTask(
-  script:             RunnableScript,
-  uDocker:            UDockerArguments,
-  errorOnReturnValue: Boolean,
-  returnValue:        Option[Val[Int]],
-  stdOut:             Option[Val[String]],
-  stdErr:             Option[Val[String]],
-  config:             InputOutputConfig,
-  external:           External,
-  info:               InfoConfig,
-  mapped:             MappedInputOutputConfig,
-  major: Int) extends Task with ValidateTask {
+  script:               RunnableScript,
+  image:                PreparedImage,
+  errorOnReturnValue:   Boolean,
+  returnValue:          Option[Val[Int]],
+  stdOut:               Option[Val[String]],
+  stdErr:               Option[Val[String]],
+  hostFiles:            Seq[HostFile],
+  environmentVariables: Seq[EnvironmentVariable],
+  containerSystem:      ContainerSystem,
+  config:               InputOutputConfig,
+  external:             External,
+  info:                 InfoConfig,
+  mapped:               MappedInputOutputConfig,
+  major:                Int) extends Task with ValidateTask {
 
-  lazy val containerPoolKey = UDockerTask.newCacheKey
+  lazy val containerPoolKey = ContainerTask.newCacheKey
 
-  override def validate = container.validateContainer(Vector(), uDocker.environmentVariables, external, inputs)
+  override def validate = container.validateContainer(Vector(), environmentVariables, external, inputs)
 
 
   override def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
@@ -157,12 +140,17 @@ object PythonTask {
 
         val outputFile = Val[File]("outputFile", Namespace("PythonTask"))
 
-        def uDockerTask =
-          UDockerTask(
-            uDocker,
-            commands = s"python${major.toString} $scriptName",
+        def containerTask =
+          ContainerTask(
+            containerSystem = containerSystem,
+            image = image,
+            command = s"python${major.toString} $scriptName",
+            workDirectory = None,
             errorOnReturnValue = errorOnReturnValue,
             returnValue = returnValue,
+            hostFiles = hostFiles,
+            environmentVariables = environmentVariables,
+            reuseContainer = true,
             stdOut = stdOut,
             stdErr = stdErr,
             config = InputOutputConfig(),
@@ -172,11 +160,12 @@ object PythonTask {
               resources += (scriptFile, scriptName, true),
               resources += (jsonInputs, inputJSONName, true),
               outputFiles += (outputJSONName, outputFile),
-            Mapped.files(mapped.inputs).map { case m ⇒ inputFiles +=[UDockerTask] (m.v, m.name, true) },
-            Mapped.files(mapped.outputs).map { case m ⇒ outputFiles +=[UDockerTask] (m.name, m.v) }
+              Mapped.files(mapped.inputs).map { case m ⇒ inputFiles +=[ContainerTask] (m.v, m.name, true) },
+              Mapped.files(mapped.outputs).map { case m ⇒ outputFiles +=[ContainerTask] (m.name, m.v) }
             )
 
-        val resultContext = uDockerTask.process(executionContext).from(p.context)(p.random, p.newFile, p.fileService)
+
+        val resultContext = containerTask.process(executionContext).from(p.context)(p.random, p.newFile, p.fileService)
         resultContext ++ readOutputJSON(resultContext(outputFile))
       }
     }

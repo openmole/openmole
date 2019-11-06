@@ -105,8 +105,8 @@ package object container extends ContainerPackage {
   }
 
   def validateContainer(
-    commands:             Vector[FromContext[String]],
-    environmentVariables: Vector[EnvironmentVariable],
+    commands:             Seq[FromContext[String]],
+    environmentVariables: Seq[EnvironmentVariable],
     external:             External,
     inputs:               PrototypeSet
   ) = Validate { p ⇒
@@ -127,4 +127,5 @@ package object container extends ContainerPackage {
   sealed trait ContainerSystem
   case class Proot(noSeccomp: Boolean = false, kernel: String = "3.2.1") extends ContainerSystem
 
+  type PreparedImage = _root_.container.FlatImage
 }

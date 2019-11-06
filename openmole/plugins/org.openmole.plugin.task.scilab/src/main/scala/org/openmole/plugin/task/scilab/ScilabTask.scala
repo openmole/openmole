@@ -29,23 +29,11 @@ object ScilabTask {
   implicit def isInfo = InfoBuilder(info)
   implicit def isMapped = MappedInputOutputBuilder(ScilabTask.mapped)
 
-  @deprecated
-  implicit def isBuilder = new ReturnValue[ScilabTask] with ErrorOnReturnValue[ScilabTask] with StdOutErr[ScilabTask] with EnvironmentVariables[ScilabTask] with HostFiles[ScilabTask] with WorkDirectory[ScilabTask] { builder ⇒
-    override def returnValue = ScilabTask.returnValue
-    override def errorOnReturnValue = ScilabTask.errorOnReturnValue
-    override def stdOut = ScilabTask.stdOut
-    override def stdErr = ScilabTask.stdErr
-    override def environmentVariables = ScilabTask.uDocker composeLens UDockerArguments.environmentVariables
-    override def hostFiles = ScilabTask.uDocker composeLens UDockerArguments.hostFiles
-    override def workDirectory = ScilabTask.uDocker composeLens UDockerArguments.workDirectory
-  }
-
   def scilabImage(version: String) = DockerImage("openmole/scilab", version)
 
   def apply(
-    script:  RunnableScript,
-    install: Seq[String]    = Seq.empty,
-    //libraries:   Seq[InstallCommand] = Seq.empty,
+    script:               RunnableScript,
+    install:              Seq[String]                   = Seq.empty,
     forceUpdate:          Boolean                       = false,
     version:              String                        = "6.0.2",
     errorOnReturnValue:   Boolean                       = true,
@@ -55,28 +43,18 @@ object ScilabTask {
     environmentVariables: Seq[EnvironmentVariable]      = Vector.empty,
     hostFiles:            Seq[HostFile]                 = Vector.empty,
     workDirectory:        OptionalArgument[String]      = None,
-    noSeccomp:            Boolean                       = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): ScilabTask = {
-
-    val uDockerArguments =
-      UDockerTask.createUDocker(
-        scilabImage(version),
-        install = install,
-        cacheInstall = true,
-        forceUpdate = forceUpdate,
-        mode = "P1",
-        reuseContainer = true,
-        environmentVariables = environmentVariables.toVector,
-        hostFiles = hostFiles.toVector,
-        workDirectory = workDirectory,
-        noSeccomp = noSeccomp)
+    containerSystem:      ContainerSystem               = Proot())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): ScilabTask = {
 
     ScilabTask(
       script = script,
-      uDockerArguments,
+      image = ContainerTask.prepare(containerSystem, scilabImage(version), install, workDirectory.option),
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
       stdErr = stdErr,
+      hostFiles = hostFiles,
+      environmentVariables = environmentVariables,
+      containerSystem = containerSystem,
       config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
@@ -189,21 +167,24 @@ object ScilabTask {
 }
 
 @Lenses case class ScilabTask(
-  script:             RunnableScript,
-  uDocker:            UDockerArguments,
-  errorOnReturnValue: Boolean,
-  returnValue:        Option[Val[Int]],
-  stdOut:             Option[Val[String]],
-  stdErr:             Option[Val[String]],
-  config:             InputOutputConfig,
-  external:           External,
-  info:               InfoConfig,
-  mapped:             MappedInputOutputConfig,
-  version:            String) extends Task with ValidateTask {
+  script:               RunnableScript,
+  image:                PreparedImage,
+  errorOnReturnValue:   Boolean,
+  returnValue:          Option[Val[Int]],
+  stdOut:               Option[Val[String]],
+  stdErr:               Option[Val[String]],
+  hostFiles:            Seq[HostFile],
+  environmentVariables: Seq[EnvironmentVariable],
+  containerSystem:      ContainerSystem,
+  config:               InputOutputConfig,
+  external:             External,
+  info:                 InfoConfig,
+  mapped:               MappedInputOutputConfig,
+  version:              String) extends Task with ValidateTask {
 
-  lazy val containerPoolKey = UDockerTask.newCacheKey
+  lazy val containerPoolKey = ContainerTask.newCacheKey
 
-  override def validate = container.validateContainer(Vector(), uDocker.environmentVariables, external, inputs)
+  override def validate = container.validateContainer(Vector(), environmentVariables, external, inputs)
 
   override def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
     import p._
@@ -234,23 +215,28 @@ object ScilabTask {
         if (majorVersion >= 6) s"""scilab-cli -nb -quit -f $scriptName"""
         else s"""scilab-cli -nb -f $scriptName"""
 
-      def uDockerTask =
-        UDockerTask(
-          uDocker,
-          launchCommand,
-          errorOnReturnValue,
-          returnValue,
-          stdOut,
-          stdErr,
-          config,
-          external,
-          info,
+      def containerTask =
+        ContainerTask(
+          containerSystem = containerSystem,
+          image = image,
+          command = launchCommand,
+          workDirectory = None,
+          errorOnReturnValue = errorOnReturnValue,
+          returnValue = returnValue,
+          hostFiles = hostFiles,
+          environmentVariables = environmentVariables,
+          reuseContainer = true,
+          stdOut = stdOut,
+          stdErr = stdErr,
+          config = config,
+          external = external,
+          info = info,
           containerPoolKey = containerPoolKey) set (
           resources += (scriptFile, scriptName, true),
-          mapped.outputs.map { m ⇒ outputFiles.+=[UDockerTask](outputFileName(m.v), outputValName(m.v)) }
+          mapped.outputs.map { m ⇒ outputFiles.+=[ContainerTask](outputFileName(m.v), outputValName(m.v)) }
         )
 
-      val resultContext = uDockerTask.process(executionContext).from(context)
+      val resultContext = containerTask.process(executionContext).from(context)
       resultContext ++ mapped.outputs.map { m ⇒ ScilabTask.fromScilab(resultContext(outputValName(m.v)).content, m.v) }
     }
 
