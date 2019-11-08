@@ -326,16 +326,20 @@ lazy val clapperVersion = "1.1.2"
 lazy val clapper = OsgiProject(dir, "org.clapper", exports = Seq("!scala.*","!grizzled.*","!jline.*","!org.fusesource.*","!org.slf4j.*","*")) settings (
   libraryDependencies += "org.clapper" %% "classutil" % clapperVersion, version := clapperVersion) settings(settings: _*)
 
+val scalazVersion = "7.2.9"
+lazy val scalaz = OsgiProject(dir, "org.scalaz", exports = Seq("!scala.*","*")) settings (
+  libraryDependencies += "org.scalaz" %% "scalaz-core" % scalazVersion, version := scalazVersion) settings(settings: _*)
+
 val monocleVersion = "1.5.0"
 lazy val monocle = OsgiProject(dir, "monocle",
   privatePackages = Seq("!scala.*", "!scalaz.*", "!shapeless.*", "*"),
-  imports = Seq("scala.*", "shapeless.*")) settings(
+  imports = Seq("scala.*", "shapeless.*", "scalaz.*")) settings(
   libraryDependencies ++= Seq (
     "com.github.julien-truffaut" %% "monocle-core",
     "com.github.julien-truffaut" %% "monocle-generic",
     "com.github.julien-truffaut" %% "monocle-macro"
   ).map(_ % monocleVersion),
-  version := monocleVersion) settings(settings: _*) dependsOn(shapeless)
+  version := monocleVersion) settings(settings: _*) dependsOn(shapeless, scalaz)
 
 val asmVersion = "5.1"
 
