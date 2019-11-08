@@ -78,7 +78,7 @@ object RTask {
 
     RTask(
       script = script,
-      ContainerTask.prepare(containerSystem, rImage(version), install, workDirectory.option),
+      ContainerTask.prepare(containerSystem, rImage(version), installCommands, workDirectory.option),
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
