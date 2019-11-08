@@ -1032,8 +1032,6 @@ lazy val consoleBin = OsgiProject(binDir, "org.openmole.console", imports = Seq(
   module
 ) settings (defaultSettings: _*)
 
-
-
 lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdocker.DockerPlugin) settings(
   imageNames in docker := Seq(
     ImageName("openmole/openmole:latest"),
@@ -1050,9 +1048,17 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     copy((assemble in openmole).value, s"/openmole")
     runRaw(
       """apt-get update && \
-       apt-get install --no-install-recommends -y ca-certificates default-jre-headless ca-certificates-java python python-pycurl bash tar gzip sudo && \
+       apt-get install --no-install-recommends -y ca-certificates default-jre-headless ca-certificates-java python python-pycurl bash tar gzip sudo locales && \
        apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \
        mkdir -p /lib/modules""")
+    runRaw(
+      """sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+        |dpkg-reconfigure --frontend=noninteractive locales && \
+        |update-locale LANG=en_US.UTF-8""".stripMargin
+    )
+    env("LC_ALL", "en_US.UTF-8")
+    env("ENV LANG", "en_US.UTF-8")
+    env("LANGUAGE", "en_US.UTF-8")
     runRaw(
       """groupadd -r openmole && \
          useradd -r -g openmole openmole --home-dir /var/openmole/ --create-home && \
