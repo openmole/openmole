@@ -8,7 +8,7 @@ object Libraries {
 
   lazy val gridscaleVersion = "2.27"
   lazy val sshjVersion = "0.27.0"
-  lazy val containerVersion = "1.1"
+  lazy val containerVersion = "1.2"
   lazy val mgoVersion = "3.37"
   lazy val bouncyCastleVersion = "1.60"
   lazy val d3Version = "3.5.12"
