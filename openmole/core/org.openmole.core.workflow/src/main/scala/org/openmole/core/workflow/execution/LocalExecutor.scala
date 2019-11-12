@@ -62,7 +62,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                     try moleJob.perform(executionJob.executionContext)
                     finally runningJob = None
 
-                  MoleJob.finish(moleJob, result)
+                  MoleJob.finish(moleJob, result, executionJob.executionContext)
 
                   result match {
                     case Right(_: MoleJob.SubMoleCanceled) ⇒

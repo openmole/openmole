@@ -60,7 +60,7 @@ object TemplateFileTask {
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
     import parameters._
-    val file = executionContext.tmpDirectory.newFile(template.getName, ".tmp")
+    val file = executionContext.moleExecutionDirectory.newFile(template.getName, ".tmp")
     file.content = expanded.from(context)
     context + (output → file)
   }
@@ -83,7 +83,7 @@ object TemplateFileFromInputTask {
   override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
     import parameters._
     val expanded = template.from(context).withInputStream { is ⇒ ExpandedString(is).from(context) }
-    val file = executionContext.tmpDirectory.newFile("template", ".tmp")
+    val file = executionContext.moleExecutionDirectory.newFile("template", ".tmp")
     file.content = expanded
     context + (output → file)
   }

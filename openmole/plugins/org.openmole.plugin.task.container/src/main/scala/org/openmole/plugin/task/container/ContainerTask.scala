@@ -205,7 +205,7 @@ import ContainerTask._
       containerSystem match {
         case proot: Proot ⇒
           executionContext.lockRepository.withLock(ContainerTask.installLockKey) {
-            (ContainerTask.installProot(executionContext.tmpDirectory), proot.noSeccomp, proot.kernel)
+            (ContainerTask.installProot(executionContext.moleExecutionDirectory), proot.noSeccomp, proot.kernel)
           }
       }
 

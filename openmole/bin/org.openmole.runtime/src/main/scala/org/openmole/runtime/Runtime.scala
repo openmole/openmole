@@ -148,7 +148,8 @@ class Runtime {
       try {
 
         val taskExecutionContext = TaskExecutionContext(
-          tmpDirectory = newFile.makeNewDir("runtime"),
+          moleExecutionDirectory = newFile.makeNewDir("runtime"),
+          taskExecutionDirectory = newFile.makeNewDir("task"),
           localEnvironment = environment,
           preference = preference,
           threadProvider = threadProvider,

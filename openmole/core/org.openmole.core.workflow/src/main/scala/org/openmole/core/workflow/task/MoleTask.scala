@@ -111,7 +111,7 @@ object MoleTask {
       implicit val eventDispatcher = EventDispatcher()
       val implicitsValues = implicits.flatMap(i ⇒ context.get(i))
       implicit val seeder = Seeder(random().nextLong())
-      implicit val newFile = NewFile(executionContext.tmpDirectory)
+      implicit val newFile = NewFile(executionContext.moleExecutionDirectory)
       import executionContext.preference
       import executionContext.threadProvider
       import executionContext.workspace

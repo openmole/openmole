@@ -195,6 +195,7 @@ object MoleExecution extends JavaLogger {
               val taskContext =
                 TaskExecutionContext(
                   newFile.baseDir,
+                  newFile.makeNewDir("taskExecution"),
                   subMoleExecutionState.moleExecution.defaultEnvironment,
                   preference,
                   threadProvider,
@@ -208,7 +209,7 @@ object MoleExecution extends JavaLogger {
                 )
 
               val result = moleJob.perform(taskContext)
-              MoleJob.finish(moleJob, result) // Does nothing
+              MoleJob.finish(moleJob, result, taskContext) // Does nothing
 
               result match {
                 case Left(newContext) ⇒ subMoleExecutionState.masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(newContext))
@@ -438,6 +439,7 @@ object MoleExecution extends JavaLogger {
           job,
           TaskExecutionContext(
             newFile.baseDir,
+            newFile.makeNewDir("taskExecution"),
             env,
             preference,
             threadProvider,

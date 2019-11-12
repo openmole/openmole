@@ -39,7 +39,8 @@ import org.openmole.tool.random
 /**
  * Execution context for a task
  *
- * @param tmpDirectory tmp dir
+ * @param moleExecutionDirectory tmp dir cleaned at the end of the mole execution
+ * @param taskExecutionDirectory tmp dir cleaned at the end of the task execution
  * @param localEnvironment local environment
  * @param preference
  * @param threadProvider
@@ -51,7 +52,8 @@ import org.openmole.tool.random
  * @param moleExecution
  */
 case class TaskExecutionContext(
-  tmpDirectory:                   File,
+  moleExecutionDirectory:         File,
+  taskExecutionDirectory:         File,
   localEnvironment:               LocalEnvironment,
   implicit val preference:        Preference,
   implicit val threadProvider:    ThreadProvider,
@@ -93,7 +95,7 @@ trait Task <: Name with Id {
    */
   def perform(context: Context, executionContext: TaskExecutionContext): Context = {
     lazy val rng = Lazy(Task.buildRNG(context))
-    InputOutputCheck.perform(this, inputs, outputs, defaults, process(executionContext))(executionContext.preference).from(context)(rng, NewFile(executionContext.tmpDirectory), executionContext.fileService)
+    InputOutputCheck.perform(this, inputs, outputs, defaults, process(executionContext))(executionContext.preference).from(context)(rng, NewFile(executionContext.moleExecutionDirectory), executionContext.fileService)
   }
 
   /**

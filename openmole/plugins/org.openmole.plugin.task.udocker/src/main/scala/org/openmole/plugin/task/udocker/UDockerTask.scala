@@ -249,7 +249,7 @@ object UDockerTask {
 
     val (uDockerExecutable, uDockerInstallDirectory, uDockerTarball) =
       executionContext.lockRepository.withLock(UDockerTask.installLockKey) {
-        UDocker.install(executionContext.tmpDirectory)
+        UDocker.install(executionContext.moleExecutionDirectory)
       }
 
     val layersDirectory = UDockerTask.layersDirectory(executionContext.workspace)
@@ -290,7 +290,7 @@ object UDockerTask {
       val imageId = s"${uDocker.localDockerImage.image}:${uDocker.localDockerImage.tag}"
 
       def uDockerVariables(containersDirectory: File) = UDocker.environmentVariables(
-        tmpDirectory = executionContext.tmpDirectory,
+        tmpDirectory = executionContext.moleExecutionDirectory,
         homeDirectory = taskWorkDirectory,
         containersDirectory = containersDirectory,
         repositoryDirectory = repositoryDirectory,
