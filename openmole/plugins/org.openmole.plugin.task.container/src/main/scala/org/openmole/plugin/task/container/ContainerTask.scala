@@ -211,7 +211,7 @@ import ContainerTask._
 
     def createPool =
       WithInstance { () ⇒
-        val containersDirectory = newFile.newDir("container")
+        val containersDirectory = executionContext.moleExecutionDirectory.newDir("container")
         _root_.container.ImageBuilder.duplicateFlatImage(image, containersDirectory)
       }(close = _.file.recursiveDelete, pooled = reuseContainer)
 
@@ -245,52 +245,51 @@ import ContainerTask._
         hostFiles.map { h ⇒ h.path → h.destination } ++
         volumesInfo.map { case (f, d) ⇒ f.toString → d }
 
-    newFile.withTmpDir { taskWorkDirectory ⇒
-      pool { container ⇒
-        val workDirectoryValue = workDirectory.orElse(container.workDirectory.filter(!_.trim.isEmpty)).getOrElse("/")
-        val inputDirectory = taskWorkDirectory /> "inputs"
+    pool { container ⇒
+      val workDirectoryValue = workDirectory.orElse(container.workDirectory.filter(!_.trim.isEmpty)).getOrElse("/")
+      val inputDirectory = executionContext.taskExecutionDirectory /> "inputs"
 
-        def containerPathResolver = inputPathResolver(File("/"), workDirectoryValue) _
+      def containerPathResolver = inputPathResolver(File("/"), workDirectoryValue) _
 
-        val (preparedContext, preparedFilesInfo) = External.deployAndListInputFiles(external, context, inputPathResolver(inputDirectory, workDirectoryValue))
-        val volumes = prepareVolumes(preparedFilesInfo, containerPathResolver, hostFiles).toVector
+      val (preparedContext, preparedFilesInfo) = External.deployAndListInputFiles(external, context, inputPathResolver(inputDirectory, workDirectoryValue))
+      val volumes = prepareVolumes(preparedFilesInfo, containerPathResolver, hostFiles).toVector
 
-        def outputPathResolverValue(rootDirectory: File) = outputPathResolver(
-          preparedFilesInfo.map { case (f, d) ⇒ f.toString → d.toString },
-          hostFiles.map { h ⇒ h.path → h.destination },
-          inputDirectory,
-          workDirectoryValue,
-          rootDirectory
-        ) _
+      def outputPathResolverValue(rootDirectory: File) = outputPathResolver(
+        preparedFilesInfo.map { case (f, d) ⇒ f.toString → d.toString },
+        hostFiles.map { h ⇒ h.path → h.destination },
+        inputDirectory,
+        workDirectoryValue,
+        rootDirectory
+      ) _
 
-        val containerEnvironmentVariables =
-          environmentVariables.map { v ⇒ v.name.from(preparedContext) -> v.value.from(preparedContext) }
+      val containerEnvironmentVariables =
+        environmentVariables.map { v ⇒ v.name.from(preparedContext) -> v.value.from(preparedContext) }
 
-        val retCode =
-          _root_.container.Proot.execute(
-            container,
-            taskWorkDirectory / "tmp",
-            commands = command.value.map(_.from(context)),
-            workDirectory = Some(workDirectoryValue),
-            proot = proot.getAbsolutePath,
-            logger = scala.sys.process.ProcessLogger.apply(processOutput, processErr),
-            noSeccomp = noSeccomp,
-            kernel = Some(kernel),
-            bind = volumes,
-            environmentVariables = containerEnvironmentVariables
-          )
+      val retCode =
+        _root_.container.Proot.execute(
+          container,
+          executionContext.taskExecutionDirectory / "tmp",
+          commands = command.value.map(_.from(context)),
+          workDirectory = Some(workDirectoryValue),
+          proot = proot.getAbsolutePath,
+          logger = scala.sys.process.ProcessLogger.apply(processOutput, processErr),
+          noSeccomp = noSeccomp,
+          kernel = Some(kernel),
+          bind = volumes,
+          environmentVariables = containerEnvironmentVariables
+        )
 
-        if (errorOnReturnValue && !returnValue.isDefined && retCode != 0)
-          throw new UserBadDataError(s"Process exited a non 0 return code ($retCode), you can chose ignore this by settings errorOnReturnValue = true")
+      if (errorOnReturnValue && !returnValue.isDefined && retCode != 0)
+        throw new UserBadDataError(s"Process exited a non 0 return code ($retCode), you can chose ignore this by settings errorOnReturnValue = true")
 
-        val rootDirectory = container.file / _root_.container.FlatImage.rootfsName
-        val retContext = External.fetchOutputFiles(external, outputs, preparedContext, outputPathResolverValue(rootDirectory), Seq(rootDirectory, taskWorkDirectory))
+      val rootDirectory = container.file / _root_.container.FlatImage.rootfsName
+      val retContext = External.fetchOutputFiles(external, outputs, preparedContext, outputPathResolverValue(rootDirectory), Seq(rootDirectory, executionContext.taskExecutionDirectory))
 
-        retContext ++
-          returnValue.map(v ⇒ Variable(v, retCode)) ++
-          stdOut.map(v ⇒ Variable(v, stdOut.toString)) ++
-          stdErr.map(v ⇒ Variable(v, stdErr.toString))
-      }
+      retContext ++
+        returnValue.map(v ⇒ Variable(v, retCode)) ++
+        stdOut.map(v ⇒ Variable(v, stdOut.toString)) ++
+        stdErr.map(v ⇒ Variable(v, stdErr.toString))
+
     }
   }
 
