@@ -190,8 +190,6 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath) = Utils.copyProjectFilesTo(safePaths, to)
 
-  def copyToPluginUploadDir(safePaths: Seq[SafePath]): Unit = Utils.copyToPluginUploadDirectory(safePaths)
-
   def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath] = Utils.testExistenceAndCopyProjectFilesTo(safePaths, to)
 
   // Test whether safePathToTest exists in "in"
@@ -266,7 +264,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   }
 
   def duplicate(safePath: SafePath, newName: String): SafePath = {
-    Utils.copy(safePath, newName, followSymlinks = true)
+    Utils.copyProjectFile(safePath, newName, followSymlinks = true)
   }
 
   def mdToHtml(safePath: SafePath): String = {
@@ -470,12 +468,22 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   }
 
   //PLUGINS
-  def addUploadedPlugins(nodes: Seq[String]): Seq[ErrorData] = {
-    val files = nodes.map(Utils.pluginUpdoadDirectory / _)
-    val errors = org.openmole.core.module.addPluginsFiles(files, true, Some(org.openmole.core.module.pluginDirectory))
-    files.foreach(_.recursiveDelete)
-    errors.map(e ⇒ ErrorData(e._2))
+  def addUploadedPlugins(directoryName: String, nodes: Seq[String]): Seq[ErrorData] = {
+    val pluginDirectory = Utils.pluginUpdoadDirectory(directoryName)
+    try {
+      val files = nodes.map(pluginDirectory / _)
+      val errors = org.openmole.core.module.addPluginsFiles(files, true, org.openmole.core.module.pluginDirectory)
+      errors.map(e ⇒ ErrorData(e._2))
+    }
+    finally pluginDirectory.recursiveDelete
   }
+
+  def copyToPluginUploadDir(directoryName: String, safePaths: Seq[SafePath]): Unit =
+    safePaths.map { sp ⇒
+      val from = safePathToFile(sp)(ServerFileSystemContext.project, workspace)
+      val pluginDirectory = Utils.pluginUpdoadDirectory(directoryName)
+      copyFile(from, pluginDirectory, create = true)
+    }
 
   def autoAddPlugins(path: SafePath) = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
@@ -486,7 +494,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
       PluginManager.listBundles(f).toList ::: subPlugins
     }
 
-    module.addPluginsFiles(recurse(file), false)
+    module.addPluginsFiles(recurse(file), false, module.moduleDirectory)
   }
 
   def isPlugin(path: SafePath): Boolean = Utils.isPlugin(path)

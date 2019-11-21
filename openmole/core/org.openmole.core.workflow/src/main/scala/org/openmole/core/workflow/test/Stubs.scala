@@ -26,7 +26,7 @@ object Stubs {
 
   implicit lazy val cypher = Cypher("")
   implicit lazy val preference = Preference(workspace.persistentDir)
-  implicit lazy val newFile = NewFile(workspace)
+  implicit lazy val newFile = NewFile(dir)
   implicit lazy val seeder = Seeder()
   implicit val serializer = SerializerService()
   implicit val threadProvider = ThreadProvider(Some(10))

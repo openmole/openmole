@@ -52,13 +52,13 @@ object Workspace {
 
   // Workspace should be cleaned manualy
   def apply(location: File): Workspace = {
-    val tmpDir = location / tmpLocation /> UUID.randomUUID.toString
+    //val tmpDir = location / tmpLocation /> UUID.randomUUID.toString
     val persistentDir = location /> persistentLocation
-    new Workspace(location, tmpDir, persistentDir)
+    new Workspace(location, /*tmpDir,*/ persistentDir)
   }
 
-  def clean(ws: Workspace) = ws.tmpDir.recursiveDelete
+  def clean(ws: Workspace) = {} // ws.tmpDir.recursiveDelete
 }
 
-class Workspace(val location: File, val tmpDir: File, val persistentDir: File)
+class Workspace(val location: File, /*val tmpDir: File,*/ val persistentDir: File)
 

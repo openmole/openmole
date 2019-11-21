@@ -66,8 +66,7 @@ trait RESTAPI extends ScalatraServlet with ContentEncodingSupport
   implicit def services = arguments.services
   import arguments.services._
 
-  def baseDirectory = workspace.tmpDir /> "rest"
-
+  def baseDirectory = newFile.newDir("rest")
   def exceptionToHttpError(e: Throwable) = InternalServerError(Error(e).toJson)
 
   post("/token") {

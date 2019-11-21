@@ -37,10 +37,7 @@ package object module {
     preference(ModuleIndex.moduleIndexes).map(ExpandedString(_).from(Context("version" → buildinfo.version)))
 
   def pluginDirectory(implicit workspace: Workspace) = workspace.location /> "plugins"
-
-  def moduleDirectory(implicit workspace: Workspace) =
-    if (buildinfo.development) workspace.tmpDir /> "modules" /> buildinfo.version.major
-    else workspace.persistentDir /> "modules" /> buildinfo.version.major
+  def moduleDirectory(implicit workspace: Workspace) = workspace.persistentDir /> "modules" /> buildinfo.version.major
 
   def allModules(implicit workspace: Workspace) =
     (pluginDirectory.listFilesSafe ++ moduleDirectory.listFilesSafe).flatMap(PluginManager.listBundles)
@@ -64,16 +61,14 @@ package object module {
         http.getStream(gridscale.RemotePath.child(c.baseURL, c.component.location))(_.copy(f))
         f
     }
-    addPluginsFiles(files, true)
+    addPluginsFiles(files, true, moduleDirectory)
   }
 
   def components[T](implicit m: Manifest[T]) = PluginManager.pluginsForClass(m.erasure).toSeq
   def components(o: Object) = PluginManager.pluginsForClass(o.getClass).toSeq
 
-  def addPluginsFiles(files: Seq[File], move: Boolean, directory: Option[File] = None)(implicit workspace: Workspace): Seq[(File, Throwable)] = synchronized {
-    val dir = directory.getOrElse(moduleDirectory)
-
-    val destinations = files.map { file ⇒ file → (dir / file.getName) }
+  def addPluginsFiles(files: Seq[File], move: Boolean, directory: File)(implicit workspace: Workspace, newFile: NewFile): Seq[(File, Throwable)] = synchronized {
+    val destinations = files.map { file ⇒ file → (directory / file.getName) }
 
     destinations.filter(_._2.exists).toList match {
       case Nil ⇒

@@ -1,6 +1,7 @@
 package org.openmole.core
 
 import java.io.PrintStream
+import java.util.UUID
 import java.util.logging.Level
 
 import org.openmole.core.authentication._
@@ -36,7 +37,8 @@ package object services {
      * @return
      */
     def withServices[T](workspace: File, password: String, httpProxy: Option[String], logLevel: Option[Level])(f: Services ⇒ T) = {
-      val services = Services(workspace, password, httpProxy, logLevel)
+      val tmpDirectory = workspace / Workspace.tmpLocation /> UUID.randomUUID.toString
+      val services = Services(workspace, tmpDirectory, password, httpProxy, logLevel)
       try f(services)
       finally dispose(services)
     }
@@ -54,11 +56,11 @@ package object services {
      * @param httpProxy optional http proxy
      * @return
      */
-    def apply(workspace: File, password: String, httpProxy: Option[String], logLevel: Option[Level]) = {
+    def apply(workspace: File, tmpDirectory: File, password: String, httpProxy: Option[String], logLevel: Option[Level]) = {
       implicit val ws = Workspace(workspace)
       implicit val cypher = Cypher(password)
       implicit val preference = Services.preference(ws)
-      implicit val newFile = NewFile(ws)
+      implicit val newFile = NewFile(workspace)
       implicit val seeder = Seeder()
       implicit val serializerService = SerializerService()
       implicit val threadProvider = ThreadProvider()
@@ -81,7 +83,7 @@ package object services {
      * @return
      */
     def dispose(services: Services) = {
-      util.Try(services.workspace.tmpDir.recursiveDelete)
+      util.Try(NewFile.dispose(services.newFile))
       util.Try(services.threadProvider.stop())
     }
 

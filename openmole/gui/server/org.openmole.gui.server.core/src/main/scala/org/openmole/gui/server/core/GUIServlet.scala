@@ -100,7 +100,7 @@ object GUIServices {
   }
 
   def dispose(services: GUIServices) = {
-    scala.util.Try(services.workspace.tmpDir.recursiveDelete)
+    scala.util.Try(NewFile.dispose(services.newFile))
     scala.util.Try(services.threadProvider.stop())
   }
 
@@ -152,13 +152,6 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   //FIXME val connectedUsers: Var[Seq[UserID]] = Var(Seq())
   val USER_ID = "UserID"
 
-  // def connection = html("OM.ScriptClient().connection();")
-
-  //  def application = html("OM.ScriptClient().run();")
-
-  // def stopped = html("OM.ScriptClient().stopped();")
-
-  //  def resetPassword = html("OM.ScriptClient().resetPassword();")
   def connection = html("connection();")
 
   def application = html("run();")
@@ -187,12 +180,6 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   val cssFiles = (arguments.webapp / "css").listFilesSafe.map {
     _.getName
   }.sorted
-
-  /* def isLoggedIn: Boolean =
-    //FIXME
-  userIDFromSession.map {
-    connectedUsers.now.contains
-  }.getOrElse(false)*/
 
   def recordUser(u: UserID) = {
     session.put(USER_ID, u)
@@ -265,7 +252,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
       fileType match {
         case "project"        ⇒ copyTo(Utils.webUIDirectory)
         case "authentication" ⇒ copyTo(server.Utils.authenticationKeysFile)
-        case "plugin"         ⇒ copyTo(Utils.pluginUpdoadDirectory)
+        case "plugin"         ⇒ copyTo(Utils.pluginUpdoadDirectory(params("directoryName")))
         case "absolute"       ⇒ copyTo(new File(""))
       }
     }

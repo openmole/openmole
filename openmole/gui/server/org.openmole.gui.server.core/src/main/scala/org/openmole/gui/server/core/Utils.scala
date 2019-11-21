@@ -49,7 +49,7 @@ object Utils extends JavaLogger {
 
   implicit def fileToExtension(f: File): FileExtension = DataUtils.fileToExtension(f.getName)
 
-  def pluginUpdoadDirectory()(implicit workspace: Workspace) = workspace.tmpDir / "pluginUpload"
+  def pluginUpdoadDirectory(tmpDirectory: String)(implicit newFile: NewFile) = newFile.directory / tmpDirectory
 
   def webUIDirectory()(implicit workspace: Workspace) = workspace.location /> "webui"
 
@@ -178,7 +178,7 @@ object Utils extends JavaLogger {
     }
   }
 
-  def copy(safePath: SafePath, newName: String, followSymlinks: Boolean = false)(implicit workspace: Workspace): SafePath = {
+  def copyProjectFile(safePath: SafePath, newName: String, followSymlinks: Boolean = false)(implicit workspace: Workspace): SafePath = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
     val toPath = safePath.copy(path = safePath.path.dropRight(1) :+ newName)
@@ -189,6 +189,11 @@ object Utils extends JavaLogger {
     FileDecorator(from).copy(replica, followSymlinks = followSymlinks)
 
     replica
+  }
+
+  def copyFile(from: File, to: File, create: Boolean = false): Unit = {
+    if (create) to.mkdirs()
+    if (from.exists && to.exists) from.copy(new File(to, from.getName))
   }
 
   private def buildClassTrees(classes: Seq[Seq[String]]): Seq[ClassTree] = {
@@ -217,11 +222,6 @@ object Utils extends JavaLogger {
       from.move(new File(to, from.getName))
     }
 
-  def copy(from: File, to: File): Unit =
-    if (from.exists && to.exists) {
-      from.copy(new File(to, from.getName))
-    }
-
   def exists(safePath: SafePath)(implicit workspace: Workspace) = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     safePathToFile(safePath).exists
@@ -242,21 +242,13 @@ object Utils extends JavaLogger {
     }.filter(exists)
   }
 
-  def copyToPluginUploadDirectory(safePaths: Seq[SafePath])(implicit workspace: Workspace) = {
-    safePaths.map { sp ⇒
-      val from = safePathToFile(sp)(ServerFileSystemContext.project, workspace)
-      pluginUpdoadDirectory.mkdirs
-      copy(from, pluginUpdoadDirectory)
-    }
-  }
-
   def copyFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath])(implicit workspace: Workspace): Unit = {
     val tmp: File = safePathToFile(tmpSafePath)(ServerFileSystemContext.absolute, workspace)
 
     filesToBeMovedTo.foreach { f ⇒
       val from = getFile(tmp, Seq(f.name))
       val toFile: File = safePathToFile(f.parent)(ServerFileSystemContext.project, workspace)
-      copy(from, toFile)
+      copyFile(from, toFile)
     }
 
   }

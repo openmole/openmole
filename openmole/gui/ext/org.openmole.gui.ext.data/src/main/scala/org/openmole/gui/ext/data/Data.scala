@@ -258,7 +258,7 @@ package object data {
     def typeName = "authentication"
   }
 
-  case class UploadPlugin() extends UploadType {
+  case class UploadPlugin(tmpDirectoryName: String) extends UploadType {
     def typeName = "plugin"
   }
 

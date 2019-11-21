@@ -151,7 +151,7 @@ object MoleTask {
 
     try execution.run(Some(context), validate = false)
     finally {
-      fileService.deleteWhenEmpty(executionNewFile.baseDir)
+      fileService.deleteWhenEmpty(executionNewFile.directory)
       (executionContext.moleExecution zip listenerKey).foreach { case (moleExecution, key) ⇒ moleExecution.executionContext.services.eventDispatcher.unregister(key) }
     }
 

@@ -296,23 +296,24 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     }
   })
 
-  val pluginButton = button("Plug", btn_default, onclick := { () ⇒
-    {
-      post()[Api].copyToPluginUploadDir(manager.selected.now).call().foreach {
-        c ⇒
-          post()[Api].addUploadedPlugins(manager.selected.now.map {
-            _.name
-          }).call().foreach {
+  val pluginButton =
+    button(
+      "Plug",
+      btn_default,
+      onclick := { () ⇒
+        val directoryName = s"uploadPlugin${java.util.UUID.randomUUID().toString}"
+        post()[Api].copyToPluginUploadDir(directoryName, manager.selected.now).call().foreach { _ ⇒
+          import scala.concurrent.duration._
+          val names = manager.selected.now.map(_.name)
+          post(timeout = 5 minutes)[Api].addUploadedPlugins(directoryName, names).call().foreach {
             errs ⇒
-              if (errs.isEmpty) {
-                pluginPanel.dialog.show
-              }
+              if (errs.isEmpty) pluginPanel.dialog.show
               else AlertPanel.detail("Plugin import failed", ErrorData.stackTrace(errs.head), transform = RelativeCenterPosition, zone = FileZone)
           }
           unselectToolAndRefreshTree
+        }
       }
-    }
-  })
+    )
 
   //Filter
   implicit def stringToIntOption(s: String): Option[Int] = Try(s.toInt).toOption

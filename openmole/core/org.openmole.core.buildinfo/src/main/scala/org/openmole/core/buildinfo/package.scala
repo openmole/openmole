@@ -37,7 +37,6 @@ package object buildinfo {
   }
 
   def version = Version(BuildInfo.version, name, BuildInfo.buildTime)
-
   def development = version.isDevelopment
 
   def siteURL =

@@ -121,7 +121,7 @@ class Console(script: Option[String] = None) {
             println("File " + scriptFile + " doesn't exist.")
             ExitCodes.scriptDoesNotExist
           case e: CompilationError ⇒
-            newFile.baseDir.recursiveDelete
+            newFile.directory.recursiveDelete
             println(e.error.stackString)
             ExitCodes.compilationError
           case compiled: Compiled ⇒
@@ -137,7 +137,7 @@ class Console(script: Option[String] = None) {
                     ExitCodes.ok
                 }
               case Failure(e) ⇒
-                newFile.baseDir.recursiveDelete
+                newFile.directory.recursiveDelete
                 println(s"Error during script evaluation: ")
                 print(e.stackString)
                 ExitCodes.compilationError

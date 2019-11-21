@@ -68,7 +68,7 @@ object MoleServices {
 
   def clean(moleServices: MoleServices) = {
     import org.openmole.tool.file._
-    moleServices.newFile.baseDir.recursiveDelete
+    moleServices.newFile.directory.recursiveDelete
   }
 
   def copy(moleServices: MoleServices)(

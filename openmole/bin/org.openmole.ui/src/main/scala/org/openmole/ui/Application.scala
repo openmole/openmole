@@ -28,7 +28,7 @@ import org.openmole.core.console.ScalaREPL
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.logconfig.LoggerConfig
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.workspace.{ NewFile, Workspace }
 import org.openmole.rest.server.RESTServer
 import org.openmole.tool.logger.JavaLogger
 
@@ -181,11 +181,13 @@ object Application extends JavaLogger {
     logLevel.foreach(LoggerConfig.level)
 
     val workspaceDirectory = config.workspace.getOrElse(org.openmole.core.workspace.defaultOpenMOLEDirectory)
+
     implicit val workspace = Workspace(workspaceDirectory)
     import org.openmole.tool.thread._
-    Runtime.getRuntime.addShutdownHook(thread(Workspace.clean(workspace)))
 
-    def loadPlugins = {
+    //Runtime.getRuntime.addShutdownHook(thread(Workspace.clean(workspace)))
+
+    def loadPlugins(implicit workspace: Workspace) = {
       val (existingUserPlugins, notExistingUserPlugins) = config.userPlugins.span(new File(_).exists)
 
       if (!notExistingUserPlugins.isEmpty) logger.warning(s"""Some plugins or plugin folders don't exist: ${notExistingUserPlugins.mkString(",")}""")

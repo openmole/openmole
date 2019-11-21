@@ -194,7 +194,7 @@ object MoleExecution extends JavaLogger {
 
               val taskContext =
                 TaskExecutionContext(
-                  newFile.baseDir,
+                  newFile.directory,
                   newFile.makeNewDir("taskExecution"),
                   subMoleExecutionState.moleExecution.defaultEnvironment,
                   preference,
@@ -341,7 +341,7 @@ object MoleExecution extends JavaLogger {
 
       import moleExecution.executionContext.services._
 
-      newFile.baseDir.mkdirs()
+      newFile.directory.mkdirs()
       moleExecution._started = true
       moleExecution._startTime = Some(System.currentTimeMillis)
       eventDispatcher.trigger(moleExecution, new MoleExecution.Started)
@@ -438,7 +438,7 @@ object MoleExecution extends JavaLogger {
         env.submit(
           job,
           TaskExecutionContext(
-            newFile.baseDir,
+            newFile.directory,
             newFile.makeNewDir("taskExecution"),
             env,
             preference,

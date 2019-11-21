@@ -62,22 +62,21 @@ class PluginPanel {
     pluginRight +++ uploadPlugin +++ "inputFileStyle",
     OMTags.uploadButton((fileInput: HTMLInputElement) ⇒ {
       fileInput.accept = ".jar"
+
+      val directoryName = s"uploadPlugin${java.util.UUID.randomUUID().toString}"
+
       FileManager.upload(
         fileInput,
         SafePath.empty,
-        (p: ProcessState) ⇒ {
-          transferring() = p
-        },
-        UploadPlugin(),
+        (p: ProcessState) ⇒ { transferring() = p },
+        UploadPlugin(directoryName),
         () ⇒ {
           val plugins = FileManager.fileNames(fileInput.files)
-          post(timeout = 5 minutes)[Api].addUploadedPlugins(plugins).call().foreach { ex ⇒
+          post(timeout = 5 minutes)[Api].addUploadedPlugins(directoryName, plugins).call().foreach { ex ⇒
             if (ex.isEmpty) getPlugins
             else {
               dialog.hide
-              plugins.foreach { p ⇒
-                post()[Api].removePlugin(Plugin(p)).call()
-              }
+              plugins.foreach { p ⇒ post()[Api].removePlugin(Plugin(p)).call() }
               BannerAlert.registerWithDetails("Plugin import failed", ErrorData.stackTrace(ex.head))
             }
           }

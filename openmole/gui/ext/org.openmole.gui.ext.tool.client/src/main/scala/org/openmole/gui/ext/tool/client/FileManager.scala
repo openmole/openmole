@@ -45,7 +45,12 @@ object FileManager {
     val fileList = inputElement.files
     val formData = new FormData
 
-    formData.append("fileType", uploadType.typeName)
+    uploadType match {
+      case UploadPlugin(tmpDirectoryName) ⇒
+        formData.append("fileType", uploadType.typeName)
+        formData.append("directoryName", tmpDirectoryName)
+      case _ ⇒ formData.append("fileType", uploadType.typeName)
+    }
 
     for (i ← 0 to fileList.length - 1) {
       val file = fileList(i)

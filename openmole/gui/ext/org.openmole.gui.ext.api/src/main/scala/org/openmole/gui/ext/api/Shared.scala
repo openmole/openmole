@@ -57,7 +57,7 @@ trait Api {
   def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit
   def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath]
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Unit
-  def copyToPluginUploadDir(safePaths: Seq[SafePath]): Unit
+  def copyToPluginUploadDir(directoryName: String, safePaths: Seq[SafePath]): Unit
   def copyFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
   def uuid(): String = java.util.UUID.randomUUID.toString
   def renameFile(safePath: SafePath, name: String): SafePath
@@ -81,7 +81,7 @@ trait Api {
   def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Unit
 
   //CORE PLUGINS
-  def addUploadedPlugins(nodes: Seq[String]): Seq[ErrorData]
+  def addUploadedPlugins(directoryName: String, nodes: Seq[String]): Seq[ErrorData]
   def autoAddPlugins(path: SafePath): Unit
   def isPlugin(path: SafePath): Boolean
   def allPluggableIn(path: SafePath): Seq[SafePath]
