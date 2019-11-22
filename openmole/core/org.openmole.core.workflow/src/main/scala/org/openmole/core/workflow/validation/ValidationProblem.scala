@@ -23,7 +23,7 @@ import org.openmole.core.tools.io.Prettifier
 import org.openmole.core.workflow.mole.{ Hook, _ }
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 
 trait ValidateTask {
   def validate: Validate

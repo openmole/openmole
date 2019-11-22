@@ -18,7 +18,7 @@ package org.openmole.plugin.environment.gridscale
 
 import gridscale.local
 import org.openmole.core.communication.storage._
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageSpace }
 import org.openmole.tool.file._
 
@@ -54,12 +54,12 @@ object LogicalLinkStorage {
 
   def remote(s: LogicalLinkStorage, jobDirectory: String) =
     new RemoteStorage {
-      override def upload(src: File, dest: Option[String], options: TransferOptions)(implicit newFile: NewFile): String = {
+      override def upload(src: File, dest: Option[String], options: TransferOptions)(implicit newFile: TmpDirectory): String = {
         val uploadDestination = dest.getOrElse(LogicalLinkStorage.child(s, jobDirectory, StorageSpace.timedUniqName))
         LogicalLinkStorage.upload(s, src, uploadDestination, options)
         uploadDestination
       }
-      override def download(src: String, dest: File, options: TransferOptions)(implicit newFile: NewFile): Unit = LogicalLinkStorage.download(s, src, dest, options)
+      override def download(src: String, dest: File, options: TransferOptions)(implicit newFile: TmpDirectory): Unit = LogicalLinkStorage.download(s, src, dest, options)
     }
 
 }

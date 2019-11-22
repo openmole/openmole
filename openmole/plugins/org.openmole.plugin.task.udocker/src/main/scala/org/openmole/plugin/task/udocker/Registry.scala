@@ -16,7 +16,7 @@ import squants.time._
 import cats.implicits._
 import org.apache.http.protocol.HttpContext
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.stream._
 import org.openmole.tool.file.{ FileDecorator, File ⇒ OMFile }
 import org.openmole.core.networkservice._
@@ -191,7 +191,7 @@ object Registry {
    * @param timeout Download timeout
    * @param newFile OM temporary file creation service
    */
-  def downloadLayer(dockerImage: DockerImage, layer: Layer, layersDirectory: OMFile, layerFile: File, timeout: Time)(implicit newFile: NewFile, networkservice: NetworkService): Unit =
+  def downloadLayer(dockerImage: DockerImage, layer: Layer, layersDirectory: OMFile, layerFile: File, timeout: Time)(implicit newFile: TmpDirectory, networkservice: NetworkService): Unit =
     newFile.withTmpFile { tmpFile ⇒
       blob(dockerImage, layer, tmpFile, timeout)
       layersDirectory.withLockInDirectory { if (!layerFile.exists) tmpFile move layerFile }

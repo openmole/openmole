@@ -23,7 +23,7 @@ import java.util.zip._
 
 import scala.collection.JavaConversions.enumerationAsScalaIterator
 import org.openmole.core.pluginmanager.{ PluginInfo, PluginManager }
-import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.ListSorting._
@@ -49,7 +49,7 @@ object Utils extends JavaLogger {
 
   implicit def fileToExtension(f: File): FileExtension = DataUtils.fileToExtension(f.getName)
 
-  def pluginUpdoadDirectory(tmpDirectory: String)(implicit newFile: NewFile) = newFile.directory / tmpDirectory
+  def pluginUpdoadDirectory(tmpDirectory: String)(implicit newFile: TmpDirectory) = newFile.directory / tmpDirectory
 
   def webUIDirectory()(implicit workspace: Workspace) = workspace.location /> "webui"
 
@@ -308,7 +308,7 @@ object Utils extends JavaLogger {
   val openmoleGrammarName = "openmole_grammar_template.js"
   val openmoleGrammarMode = "mode-openmole.js"
 
-  def updateIfChanged(file: File)(update: File ⇒ Unit)(implicit fileService: FileService, newFile: NewFile) = {
+  def updateIfChanged(file: File)(update: File ⇒ Unit)(implicit fileService: FileService, newFile: TmpDirectory) = {
     import org.openmole.core.fileservice._
 
     def hash(f: File) = new File(f + "-hash")
@@ -331,7 +331,7 @@ object Utils extends JavaLogger {
     }
   }
 
-  def openmoleFile(optimizedJS: Boolean)(implicit workspace: Workspace, newFile: NewFile, fileService: FileService) = {
+  def openmoleFile(optimizedJS: Boolean)(implicit workspace: Workspace, newFile: TmpDirectory, fileService: FileService) = {
     val jsPluginDirectory = webUIDirectory / "jsplugin"
     updateJsPluginDirectory(jsPluginDirectory)
 

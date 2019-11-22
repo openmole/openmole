@@ -23,7 +23,7 @@ import org.openmole.core.communication.storage.TransferOptions
 import org.openmole.core.preference.Preference
 import org.openmole.core.workflow.dsl.{File, uniqName}
 import org.openmole.core.workflow.execution.ExecutionState.ExecutionState
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 import org.openmole.plugin.environment.batch.environment.{AccessControl, BatchEnvironment, BatchExecutionJob, BatchJobControl, Runtime, SerializedJob, UpdateInterval}
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.plugin.environment.gridscale.{LocalStorage, LogicalLinkStorage}
@@ -126,7 +126,7 @@ package object ssh {
     frontend:       Frontend,
     storage: S,
     baseDirectory: String,
-  )(implicit preference: Preference, newFile: NewFile, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) {
+  )(implicit preference: Preference, newFile: TmpDirectory, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) {
 
     val installMap = collection.mutable.Map[Runtime, String]()
 

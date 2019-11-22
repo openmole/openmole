@@ -22,7 +22,7 @@ import java.nio.file.FileAlreadyExistsException
 
 import gridscale.http
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 import org.openmole.core.expansion._
@@ -33,7 +33,7 @@ import org.openmole.tool.random.RandomProvider
 
 package object module {
 
-  def indexes(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile, fileService: FileService) =
+  def indexes(implicit preference: Preference, randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
     preference(ModuleIndex.moduleIndexes).map(ExpandedString(_).from(Context("version" → buildinfo.version)))
 
   def pluginDirectory(implicit workspace: Workspace) = workspace.location /> "plugins"
@@ -51,7 +51,7 @@ package object module {
 
   case class SelectableModule(baseURL: String, module: Module)
 
-  def install(modules: Seq[SelectableModule])(implicit newFile: NewFile, workspace: Workspace) = newFile.withTmpDir { dir ⇒
+  def install(modules: Seq[SelectableModule])(implicit newFile: TmpDirectory, workspace: Workspace) = newFile.withTmpDir { dir ⇒
     case class DownloadableComponent(baseURL: String, component: Component)
     val downloadableComponents = modules.flatMap { m ⇒ m.module.components.map(c ⇒ DownloadableComponent(m.baseURL, c)) }
     val hashes = downloadableComponents.map(_.component.hash).distinct.toSet -- PluginManager.bundleHashes.map(_.toString)
@@ -67,7 +67,7 @@ package object module {
   def components[T](implicit m: Manifest[T]) = PluginManager.pluginsForClass(m.erasure).toSeq
   def components(o: Object) = PluginManager.pluginsForClass(o.getClass).toSeq
 
-  def addPluginsFiles(files: Seq[File], move: Boolean, directory: File)(implicit workspace: Workspace, newFile: NewFile): Seq[(File, Throwable)] = synchronized {
+  def addPluginsFiles(files: Seq[File], move: Boolean, directory: File)(implicit workspace: Workspace, newFile: TmpDirectory): Seq[(File, Throwable)] = synchronized {
     val destinations = files.map { file ⇒ file → (directory / file.getName) }
 
     destinations.filter(_._2.exists).toList match {

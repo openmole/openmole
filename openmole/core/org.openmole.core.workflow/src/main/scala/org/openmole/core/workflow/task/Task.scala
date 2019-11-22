@@ -29,7 +29,7 @@ import org.openmole.core.workflow.builder.{ DefinitionScope, InfoConfig, InputOu
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.tools._
-import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.tool.cache._
 import org.openmole.tool.lock._
 import org.openmole.tool.logger.LoggerService
@@ -41,6 +41,7 @@ import org.openmole.tool.random
  *
  * @param moleExecutionDirectory tmp dir cleaned at the end of the mole execution
  * @param taskExecutionDirectory tmp dir cleaned at the end of the task execution
+ * @param applicationExecutionDirectory tmp dir cleaned at the end of the application
  * @param localEnvironment local environment
  * @param preference
  * @param threadProvider
@@ -54,6 +55,7 @@ import org.openmole.tool.random
 case class TaskExecutionContext(
   moleExecutionDirectory:         File,
   taskExecutionDirectory:         File,
+  applicationExecutionDirectory:  File,
   localEnvironment:               LocalEnvironment,
   implicit val preference:        Preference,
   implicit val threadProvider:    ThreadProvider,
@@ -95,7 +97,7 @@ trait Task <: Name with Id {
    */
   def perform(context: Context, executionContext: TaskExecutionContext): Context = {
     lazy val rng = Lazy(Task.buildRNG(context))
-    InputOutputCheck.perform(this, inputs, outputs, defaults, process(executionContext))(executionContext.preference).from(context)(rng, NewFile(executionContext.moleExecutionDirectory), executionContext.fileService)
+    InputOutputCheck.perform(this, inputs, outputs, defaults, process(executionContext))(executionContext.preference).from(context)(rng, TmpDirectory(executionContext.moleExecutionDirectory), executionContext.fileService)
   }
 
   /**

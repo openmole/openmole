@@ -31,7 +31,7 @@ import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 
 object SimExplorer extends JavaLogger {
 
@@ -87,7 +87,7 @@ object SimExplorer extends JavaLogger {
             if (config.debug) LoggerConfig.level(Level.FINEST)
 
             implicit val workspace = Workspace(new File(config.workspace.get).getCanonicalFile)
-            implicit val newFile = NewFile(workspace)
+            implicit val newFile = TmpDirectory(workspace)
             implicit val serializerService = SerializerService()
             implicit val preference = Preference.memory()
             implicit val threadProvider = ThreadProvider(config.nbThread.get + 5)

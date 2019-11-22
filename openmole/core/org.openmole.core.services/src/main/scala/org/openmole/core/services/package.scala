@@ -60,7 +60,7 @@ package object services {
       implicit val ws = Workspace(workspace)
       implicit val cypher = Cypher(password)
       implicit val preference = Services.preference(ws)
-      implicit val newFile = NewFile(workspace)
+      implicit val tmpDirectory = TmpDirectory(workspace)
       implicit val seeder = Seeder()
       implicit val serializerService = SerializerService()
       implicit val threadProvider = ThreadProvider()
@@ -83,7 +83,7 @@ package object services {
      * @return
      */
     def dispose(services: Services) = {
-      util.Try(NewFile.dispose(services.newFile))
+      util.Try(TmpDirectory.dispose(services.tmpDirectory))
       util.Try(services.threadProvider.stop())
     }
 
@@ -104,7 +104,7 @@ package object services {
       threadProvider:      ThreadProvider      = services.threadProvider,
       seeder:              Seeder              = services.seeder,
       replicaCatalog:      ReplicaCatalog      = services.replicaCatalog,
-      newFile:             NewFile             = services.newFile,
+      newFile:             TmpDirectory        = services.tmpDirectory,
       authenticationStore: AuthenticationStore = services.authenticationStore,
       serializerService:   SerializerService   = services.serializerService,
       fileService:         FileService         = services.fileService,
@@ -122,7 +122,7 @@ package object services {
         threadProvider = threadProvider,
         seeder = seeder,
         replicaCatalog = replicaCatalog,
-        newFile = newFile,
+        tmpDirectory = newFile,
         authenticationStore = authenticationStore,
         serializerService = serializerService,
         fileService = fileService,
@@ -146,7 +146,7 @@ package object services {
     implicit def threadProvider: ThreadProvider
     implicit def seeder: Seeder
     implicit def replicaCatalog: ReplicaCatalog
-    implicit def newFile: NewFile
+    implicit def tmpDirectory: TmpDirectory
     implicit def authenticationStore: AuthenticationStore
     implicit def serializerService: SerializerService
     implicit def fileService: FileService
@@ -166,7 +166,7 @@ package object services {
    * @param threadProvider
    * @param seeder provides seed for rng
    * @param replicaCatalog replica database manager
-   * @param newFile new files/dirs and tmp files / dir in a given directory
+   * @param tmpDirectory new files/dirs and tmp files / dir in a given directory
    * @param authenticationStore
    * @param serializerService serializer
    * @param fileService file management
@@ -183,7 +183,7 @@ package object services {
                           val threadProvider:      ThreadProvider,
                           val seeder:              Seeder,
                           val replicaCatalog:      ReplicaCatalog,
-                          val newFile:             NewFile,
+                          val tmpDirectory:        TmpDirectory,
                           val authenticationStore: AuthenticationStore,
                           val serializerService:   SerializerService,
                           val fileService:         FileService,

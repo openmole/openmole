@@ -27,7 +27,7 @@ import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.core.services._
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 import org.openmole.core.dsl._
 
 import scala.annotation.tailrec
@@ -121,13 +121,13 @@ class Console(script: Option[String] = None) {
             println("File " + scriptFile + " doesn't exist.")
             ExitCodes.scriptDoesNotExist
           case e: CompilationError ⇒
-            newFile.directory.recursiveDelete
+            tmpDirectory.directory.recursiveDelete
             println(e.error.stackString)
             ExitCodes.compilationError
           case compiled: Compiled ⇒
             Try(compiled.eval) match {
               case Success(res) ⇒
-                val moleServices = MoleServices.create()
+                val moleServices = MoleServices.create(applicationExecutionDirectory = services.tmpDirectory.directory)
                 val ex = dslToPuzzle(res).toExecution()(moleServices)
                 Try(ex.run) match {
                   case Failure(e) ⇒
@@ -137,7 +137,7 @@ class Console(script: Option[String] = None) {
                     ExitCodes.ok
                 }
               case Failure(e) ⇒
-                newFile.directory.recursiveDelete
+                tmpDirectory.directory.recursiveDelete
                 println(s"Error during script evaluation: ")
                 print(e.stackString)
                 ExitCodes.compilationError
@@ -147,7 +147,7 @@ class Console(script: Option[String] = None) {
     }
   }
 
-  def withREPL[T](args: ConsoleVariables)(f: ScalaREPL ⇒ T)(implicit newFile: NewFile, fileService: FileService) = {
+  def withREPL[T](args: ConsoleVariables)(f: ScalaREPL ⇒ T)(implicit newFile: TmpDirectory, fileService: FileService) = {
     val loop =
       OpenMOLEREPL.newREPL(
         args,

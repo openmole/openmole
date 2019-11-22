@@ -8,7 +8,7 @@ import org.openmole.core.preference.Preference
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.task
 import org.openmole.core.workflow.validation._
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.random.RandomProvider
 
 object FromContextTask {
@@ -24,10 +24,10 @@ object FromContextTask {
     mapped:                   MappedInputOutputConfig,
     implicit val preference:  Preference,
     implicit val random:      RandomProvider,
-    implicit val newFile:     NewFile,
+    implicit val newFile:     TmpDirectory,
     implicit val fileService: FileService
   )
-  case class ValidateParameters(implicit val newFile: NewFile, implicit val fileService: FileService)
+  case class ValidateParameters(implicit val newFile: TmpDirectory, implicit val fileService: FileService)
 
   /**
    * Construct from a [[FromContext.Parameters]] => [[Context]] function

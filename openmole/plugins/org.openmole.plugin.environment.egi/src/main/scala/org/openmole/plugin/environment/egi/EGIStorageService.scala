@@ -55,7 +55,7 @@ package org.openmole.plugin.environment.egi
 import effectaside.Effect
 import gridscale.egi.VOMS
 import org.openmole.core.communication.storage._
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment }
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.cache.TimeCache
@@ -141,7 +141,7 @@ import java.net.URI
 
 import org.openmole.core.communication.storage
 import org.openmole.core.communication.storage.RemoteStorage
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 import squants._
 import java.net._
 
@@ -179,7 +179,7 @@ case class CurlRemoteStorage(location: String, jobDirectory: String, voName: Str
   @transient lazy val curl = CurlRemoteStorage.Curl(voName, debug, timeout)
   def resolve(dest: String) = gridscale.RemotePath.child(location, dest)
 
-  override def upload(src: File, dest: Option[String], options: storage.TransferOptions)(implicit newFile: NewFile): String = {
+  override def upload(src: File, dest: Option[String], options: storage.TransferOptions)(implicit newFile: TmpDirectory): String = {
     val uploadDestination = dest.getOrElse(child(jobDirectory, StorageSpace.timedUniqName))
 
     try {
@@ -204,7 +204,7 @@ case class CurlRemoteStorage(location: String, jobDirectory: String, voName: Str
     }
   }
 
-  override def download(src: String, dest: File, options: storage.TransferOptions)(implicit newFile: NewFile): Unit = {
+  override def download(src: String, dest: File, options: storage.TransferOptions)(implicit newFile: TmpDirectory): Unit = {
     try {
       if (options.raw) CurlRemoteStorage.run(curl.download(resolve(src), dest.getAbsolutePath))
       else newFile.withTmpFile { tmpFile ⇒

@@ -25,7 +25,7 @@ import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.workflow.dsl
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation._
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 
 class SlaveTransition(start: MoleCapsule, end: TransitionSlot, condition: Condition = Condition.True, filter: BlockList = BlockList.empty, slaves: Option[Int] = None) extends ExplorationTransition(start, end, condition, filter) with ISlaveTransition with ValidateTransition {
 

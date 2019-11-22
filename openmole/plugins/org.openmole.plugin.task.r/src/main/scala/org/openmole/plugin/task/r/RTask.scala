@@ -65,7 +65,7 @@ object RTask {
     workDirectory:        OptionalArgument[String]           = None,
     environmentVariables: Seq[EnvironmentVariable] = Vector.empty,
     containerSystem:    ContainerSystem                                    = Proot()
-  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): RTask = {
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): RTask = {
 
     // add additional installation of devtools only if needed
     val installCommands =

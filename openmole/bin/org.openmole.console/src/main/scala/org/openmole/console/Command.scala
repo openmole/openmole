@@ -35,7 +35,7 @@ import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.preference.Preference
 import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.core.services._
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.random.{ RandomProvider, Seeder }
@@ -99,7 +99,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
     } println(s"${error.level.toString}: ${exceptionToString(error.exception)}")
   }
 
-  def verify(mole: Mole)(implicit newFile: NewFile, fileService: FileService): Unit = Validation(mole).foreach(println)
+  def verify(mole: Mole)(implicit newFile: TmpDirectory, fileService: FileService): Unit = Validation(mole).foreach(println)
 
   def encrypted(implicit cypher: Cypher): String = encrypt(Console.askPassword())
 
@@ -129,7 +129,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
       case x        ⇒ throw new UserBadDataError("The result is not a puzzle")
     }
 
-  def modules(urls: OptionalArgument[Seq[String]] = None)(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile, fileService: FileService): Unit = {
+  def modules(urls: OptionalArgument[Seq[String]] = None)(implicit preference: Preference, randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService): Unit = {
     val installedBundles = PluginManager.bundleHashes.map(_.toString).toSet
     def installed(components: Seq[String]) = (components.toSet -- installedBundles).isEmpty
 
@@ -143,8 +143,8 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
     }.sorted.foreach(println)
   }
 
-  def install(name: String*)(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile, workspace: Workspace, fileService: FileService): Unit = install(name)
-  def install(names: Seq[String], urls: OptionalArgument[Seq[String]] = None)(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile, workspace: Workspace, fileService: FileService): Unit = {
+  def install(name: String*)(implicit preference: Preference, randomProvider: RandomProvider, newFile: TmpDirectory, workspace: Workspace, fileService: FileService): Unit = install(name)
+  def install(names: Seq[String], urls: OptionalArgument[Seq[String]] = None)(implicit preference: Preference, randomProvider: RandomProvider, newFile: TmpDirectory, workspace: Workspace, fileService: FileService): Unit = {
     val toInstall = urls.getOrElse(module.indexes).flatMap(url ⇒ module.selectableModules(url)).filter(sm ⇒ names.contains(sm.module.name))
     if (toInstall.isEmpty) println("The module(s) is/are already installed.")
     else

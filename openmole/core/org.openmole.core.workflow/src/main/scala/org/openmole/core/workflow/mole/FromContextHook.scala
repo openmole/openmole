@@ -9,7 +9,7 @@ import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.validation
 import org.openmole.core.workflow.validation.ValidateHook
-import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
@@ -30,9 +30,9 @@ object FromContextHook {
     implicit val outputRedirection: OutputRedirection,
     implicit val loggerService:     LoggerService,
     implicit val random:            RandomProvider,
-    implicit val newFile:           NewFile)
+    implicit val newFile:           TmpDirectory)
 
-  case class ValidateParameters(inputs: Seq[Val[_]], implicit val newFile: NewFile, implicit val fileService: FileService)
+  case class ValidateParameters(inputs: Seq[Val[_]], implicit val newFile: TmpDirectory, implicit val fileService: FileService)
 
   def apply(f: Parameters ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook = FromContextHook(name.value)(f)
   def apply(className: String)(f: Parameters ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook = FromContextHook(className, f, _ ⇒ Seq.empty, InputOutputConfig(), InfoConfig())

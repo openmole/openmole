@@ -25,7 +25,7 @@ import org.openmole.tool.file._
 import cats._
 import cats.implicits._
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 
 import scala.annotation.tailrec
 
@@ -86,7 +86,7 @@ object FromContext extends LowPriorityFromContext {
     implicit val monad: Monad[FromContext] = new Monad[FromContext] {
       def tailRecM[A, B](a: A)(f: A ⇒ FromContext[Either[A, B]]): FromContext[B] = {
 
-        @tailrec def computeB(a: A, context: Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): B = {
+        @tailrec def computeB(a: A, context: Context)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): B = {
           f(a)(context) match {
             case Left(a)  ⇒ computeB(a, context)
             case Right(b) ⇒ b
@@ -190,8 +190,8 @@ object FromContext extends LowPriorityFromContext {
    * @param newFile
    * @param fileService
    */
-  case class Parameters(context: Context, implicit val random: RandomProvider, implicit val newFile: NewFile, implicit val fileService: FileService)
-  case class ValidationParameters(inputs: Seq[Val[_]], implicit val newFile: NewFile, implicit val fileService: FileService)
+  case class Parameters(context: Context, implicit val random: RandomProvider, implicit val newFile: TmpDirectory, implicit val fileService: FileService)
+  case class ValidationParameters(inputs: Seq[Val[_]], implicit val newFile: TmpDirectory, implicit val fileService: FileService)
 
   /**
    * Construct a FromContext from a function of [[Parameters]]
@@ -240,9 +240,9 @@ object FromContext extends LowPriorityFromContext {
 }
 
 class FromContext[+T](c: FromContext.Parameters ⇒ T, v: FromContext.ValidationParameters ⇒ Seq[Throwable]) {
-  def apply(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): T = c(FromContext.Parameters(context, rng, newFile, fileService))
-  def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): T = apply(context)
-  def validate(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService): Seq[Throwable] = v(FromContext.ValidationParameters(inputs, newFile, fileService))
+  def apply(context: ⇒ Context)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): T = c(FromContext.Parameters(context, rng, newFile, fileService))
+  def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): T = apply(context)
+  def validate(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable] = v(FromContext.ValidationParameters(inputs, newFile, fileService))
 
   def validate(v2: FromContext.ValidationParameters ⇒ Seq[Throwable]) = {
     def nv(p: FromContext.ValidationParameters) = v(p) ++ v2(p)

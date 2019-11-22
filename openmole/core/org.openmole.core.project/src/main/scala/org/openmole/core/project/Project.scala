@@ -28,14 +28,14 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.project
 import org.openmole.core.services._
 import org.openmole.core.workflow.composition.DSL
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.hash._
 
 object Project {
 
   def scriptExtension = ".oms"
   def isScript(file: File) = file.exists() && file.getName.endsWith(scriptExtension)
-  def newREPL(variables: ConsoleVariables, quiet: Boolean = true)(implicit newFile: NewFile, fileService: FileService) = OpenMOLEREPL.newREPL(variables, quiet = quiet)
+  def newREPL(variables: ConsoleVariables, quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = OpenMOLEREPL.newREPL(variables, quiet = quiet)
 
   def uniqueName(source: File) = s"_${source.getCanonicalPath.hash()}"
 

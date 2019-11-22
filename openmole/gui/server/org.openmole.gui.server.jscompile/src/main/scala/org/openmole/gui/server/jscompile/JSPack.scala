@@ -29,7 +29,7 @@ import org.openmole.core.workspace._
 
 object JSPack {
 
-  def link(inputDirectory: File, outputJSFile: File, optimizedJS: Boolean)(implicit newFile: NewFile): Unit =
+  def link(inputDirectory: File, outputJSFile: File, optimizedJS: Boolean)(implicit newFile: TmpDirectory): Unit =
     newFile.withTmpFile("lib", "jar") { jar ⇒
       getClass.getClassLoader.getResourceAsStream("scalajs-library.jar") copy jar
 

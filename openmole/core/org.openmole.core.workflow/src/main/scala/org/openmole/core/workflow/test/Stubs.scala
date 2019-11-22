@@ -8,7 +8,7 @@ import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
@@ -26,7 +26,7 @@ object Stubs {
 
   implicit lazy val cypher = Cypher("")
   implicit lazy val preference = Preference(workspace.persistentDir)
-  implicit lazy val newFile = NewFile(dir)
+  implicit lazy val newFile = TmpDirectory(dir)
   implicit lazy val seeder = Seeder()
   implicit val serializer = SerializerService()
   implicit val threadProvider = ThreadProvider(Some(10))

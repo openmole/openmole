@@ -22,7 +22,7 @@ import java.io.InputStream
 import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.stream.{ StringInputStream, StringOutputStream }
 import org.openmole.tool.random._
 

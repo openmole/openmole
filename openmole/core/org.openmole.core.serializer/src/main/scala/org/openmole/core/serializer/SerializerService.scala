@@ -32,7 +32,7 @@ import java.util.concurrent.locks.{ ReadWriteLock, ReentrantReadWriteLock }
 import com.thoughtworks.xstream.converters.Converter
 import com.thoughtworks.xstream.mapper.Mapper
 import com.thoughtworks.xstream.security._
-import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.stream
 import org.openmole.tool.tar._
@@ -83,13 +83,13 @@ class SerializerService { service ⇒
 
   def deserialize[T](is: InputStream): T = buildXStream().fromXML(is).asInstanceOf[T]
 
-  def deserializeAndExtractFiles[T](file: File)(implicit newFile: NewFile): (T, Iterable[File]) = {
+  def deserializeAndExtractFiles[T](file: File)(implicit newFile: TmpDirectory): (T, Iterable[File]) = {
     val tis = new TarInputStream(file.bufferedInputStream)
     try deserializeAndExtractFiles(tis)
     finally tis.close
   }
 
-  def deserializeAndExtractFiles[T](tis: TarInputStream)(implicit newFile: NewFile): (T, Iterable[File]) = {
+  def deserializeAndExtractFiles[T](tis: TarInputStream)(implicit newFile: TmpDirectory): (T, Iterable[File]) = {
     newFile.withTmpDir { archiveExtractDir ⇒
       tis.extract(archiveExtractDir)
       val fileReplacement = FileSerialisation.deserialiseFileReplacements(archiveExtractDir, fileSerialisation())
@@ -98,13 +98,13 @@ class SerializerService { service ⇒
     }
   }
 
-  def serializeAndArchiveFiles(obj: Any, f: File)(implicit newFile: NewFile): Unit = {
+  def serializeAndArchiveFiles(obj: Any, f: File)(implicit newFile: TmpDirectory): Unit = {
     val os = new TarOutputStream(f.bufferedOutputStream())
     try serializeAndArchiveFiles(obj, os)
     finally os.close
   }
 
-  def serializeAndArchiveFiles(obj: Any, tos: TarOutputStream)(implicit newFile: NewFile): Unit = {
+  def serializeAndArchiveFiles(obj: Any, tos: TarOutputStream)(implicit newFile: TmpDirectory): Unit = {
     newFile.withTmpFile { objSerial ⇒
       serialize(obj, objSerial)
       tos.addFile(objSerial, content)

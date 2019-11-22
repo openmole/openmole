@@ -24,7 +24,7 @@ import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder.{ InfoConfig, InputOutputConfig }
 import org.openmole.core.workflow.tools._
-import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
@@ -39,7 +39,7 @@ case class HookExecutionContext(
   implicit val outputRedirection: OutputRedirection,
   implicit val loggerService:     LoggerService,
   implicit val random:            RandomProvider,
-  implicit val newFile:           NewFile)
+  implicit val newFile:           TmpDirectory)
 
 trait Hook <: Name {
 

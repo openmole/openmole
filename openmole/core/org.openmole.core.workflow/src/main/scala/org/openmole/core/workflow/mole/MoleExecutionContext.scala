@@ -26,6 +26,7 @@ import org.openmole.tool.cache._
 import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.random.Seeder
+import org.openmole.tool.file._
 
 object MoleExecutionContext {
   def apply()(implicit moleServices: MoleServices) = new MoleExecutionContext()
@@ -51,13 +52,13 @@ object MoleServices {
    * @param _outputRedirection
    * @return
    */
-  def create(newFile: Option[NewFile] = None, outputRedirection: Option[OutputRedirection] = None)(implicit preference: Preference, seeder: Seeder, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, _newFile: NewFile, fileService: FileService, workspace: Workspace, _outputRedirection: OutputRedirection, loggerService: LoggerService) = {
-    new MoleServices()(
+  def create(applicationExecutionDirectory: File, newFile: Option[TmpDirectory] = None, outputRedirection: Option[OutputRedirection] = None)(implicit preference: Preference, seeder: Seeder, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, _newFile: TmpDirectory, fileService: FileService, workspace: Workspace, _outputRedirection: OutputRedirection, loggerService: LoggerService) = {
+    new MoleServices(applicationExecutionDirectory)(
       preference = preference,
       seeder = Seeder(seeder.newSeed),
       threadProvider = threadProvider,
       eventDispatcher = eventDispatcher,
-      newFile = newFile.getOrElse(NewFile(_newFile.newDir("execution"))),
+      tmpDirectory = newFile.getOrElse(TmpDirectory(_newFile.newDir("execution"))),
       workspace = workspace,
       fileService = fileService,
       fileServiceCache = FileServiceCache(),
@@ -67,8 +68,7 @@ object MoleServices {
   }
 
   def clean(moleServices: MoleServices) = {
-    import org.openmole.tool.file._
-    moleServices.newFile.directory.recursiveDelete
+    TmpDirectory.dispose(moleServices.tmpDirectory)
   }
 
   def copy(moleServices: MoleServices)(
@@ -76,18 +76,18 @@ object MoleServices {
     seeder:            Seeder            = moleServices.seeder,
     threadProvider:    ThreadProvider    = moleServices.threadProvider,
     eventDispatcher:   EventDispatcher   = moleServices.eventDispatcher,
-    newFile:           NewFile           = moleServices.newFile,
+    newFile:           TmpDirectory      = moleServices.tmpDirectory,
     fileService:       FileService       = moleServices.fileService,
     fileServiceCache:  FileServiceCache  = moleServices.fileServiceCache,
     workspace:         Workspace         = moleServices.workspace,
     outputRedirection: OutputRedirection = moleServices.outputRedirection,
     loggerService:     LoggerService     = moleServices.loggerService) =
-    new MoleServices()(
+    new MoleServices(moleServices.applicationExecutionDirectory)(
       preference = preference,
       seeder = seeder,
       threadProvider = threadProvider,
       eventDispatcher = eventDispatcher,
-      newFile = newFile,
+      tmpDirectory = newFile,
       workspace = workspace,
       fileService = fileService,
       fileServiceCache = fileServiceCache,
@@ -103,19 +103,19 @@ object MoleServices {
  * @param seeder
  * @param threadProvider
  * @param eventDispatcher
- * @param newFile
+ * @param tmpDirectory
  * @param workspace
  * @param fileService
  * @param fileServiceCache
  * @param outputRedirection
  */
-class MoleServices(
+class MoleServices(val applicationExecutionDirectory: File)(
   implicit
   val preference:        Preference,
   val seeder:            Seeder,
   val threadProvider:    ThreadProvider,
   val eventDispatcher:   EventDispatcher,
-  val newFile:           NewFile,
+  val tmpDirectory:      TmpDirectory,
   val workspace:         Workspace,
   val fileService:       FileService,
   val fileServiceCache:  FileServiceCache,

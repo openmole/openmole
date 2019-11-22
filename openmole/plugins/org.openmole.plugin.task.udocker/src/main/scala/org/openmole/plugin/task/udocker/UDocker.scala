@@ -50,7 +50,7 @@ object UDocker {
     lazy val id = UUID.randomUUID().toString
   }
 
-  def downloadImage(dockerImage: DockerImage, manifestDirectory: File, layersDirectory: File, timeout: Time, retry: Int)(implicit newFile: NewFile, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkservice: NetworkService) = {
+  def downloadImage(dockerImage: DockerImage, manifestDirectory: File, layersDirectory: File, timeout: Time, retry: Int)(implicit newFile: TmpDirectory, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkservice: NetworkService) = {
     import Registry._
 
     def layerFile(layer: Layer) = layersDirectory / layer.digest
@@ -170,7 +170,7 @@ object UDocker {
    *
    * Assume v1.x Image JSON format and registry protocol v2 Schema 1
    */
-  def loadImage(dockerImage: SavedDockerImage)(implicit newFile: NewFile, workspace: Workspace, networkservice: NetworkService): Either[Err, LocalDockerImage] = newFile.withTmpDir { extractedImage ⇒
+  def loadImage(dockerImage: SavedDockerImage)(implicit newFile: TmpDirectory, workspace: Workspace, networkservice: NetworkService): Either[Err, LocalDockerImage] = newFile.withTmpDir { extractedImage ⇒
 
     import org.openmole.tool.tar._
 
@@ -289,7 +289,7 @@ object UDocker {
     displayOutput:        Boolean                  = true,
     displayError:         Boolean                  = true,
     stdOut:               PrintStream              = System.out,
-    stdErr:               PrintStream              = System.err)(implicit newFile: NewFile) = newFile.withTmpDir { tmpDirectory ⇒
+    stdErr:               PrintStream              = System.err)(implicit newFile: TmpDirectory) = newFile.withTmpDir { tmpDirectory ⇒
     val runInstall = commands.map {
       ic ⇒
         ExecutionCommand.Raw(
@@ -317,7 +317,7 @@ object UDocker {
     )
   }
 
-  def createContainer(uDocker: UDockerArguments, uDockerExecutable: File, containerDirectory: File, uDockerVariables: Vector[(String, String)], uDockerVolumes: Vector[(String, String)], imageId: String)(implicit newFile: NewFile) = newFile.withTmpDir { tmpDirectory ⇒
+  def createContainer(uDocker: UDockerArguments, uDockerExecutable: File, containerDirectory: File, uDockerVariables: Vector[(String, String)], uDockerVolumes: Vector[(String, String)], imageId: String)(implicit newFile: TmpDirectory) = newFile.withTmpDir { tmpDirectory ⇒
 
     val (id, createstdout) =
       uDocker.localDockerImage.container match {

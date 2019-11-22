@@ -23,7 +23,7 @@ import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 import org.eclipse.jetty.server.{ Server, ServerConnector }
 import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.webapp._
-import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.scalatra.servlet.ScalatraListener
 import javax.servlet.ServletContext
 
@@ -42,7 +42,7 @@ object GUIServer {
 
   def fromWebAppLocation = openMOLELocation / "webapp"
 
-  def webapp(optimizedJS: Boolean)(implicit newFile: NewFile, workspace: Workspace, fileService: FileService) = {
+  def webapp(optimizedJS: Boolean)(implicit newFile: TmpDirectory, workspace: Workspace, fileService: FileService) = {
     val from = fromWebAppLocation
     val to = newFile.newDir("webapp")
 

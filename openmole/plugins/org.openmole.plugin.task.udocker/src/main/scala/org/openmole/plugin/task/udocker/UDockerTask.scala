@@ -94,7 +94,7 @@ object UDockerTask {
     environmentVariables: Seq[EnvironmentVariable]                    = Vector.empty,
     containerPoolKey:     CacheKey[WithInstance[(File, ContainerID)]] = CacheKey(),
     noSeccomp:            Boolean                                     = false
-  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService): UDockerTask =
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, threadProvider: ThreadProvider, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService): UDockerTask =
     UDockerTask(
       uDocker = createUDocker(image, install, user, mode, cacheInstall, forceUpdate, reuseContainer, hostFiles, workDirectory, environmentVariables, noSeccomp),
       commands = run, //Commands.value.modify(_.map(_.map(blockChars)))(run),
@@ -121,7 +121,7 @@ object UDockerTask {
     hostFiles:            Seq[HostFile]            = Vector.empty,
     workDirectory:        OptionalArgument[String] = None,
     environmentVariables: Seq[EnvironmentVariable] = Vector.empty,
-    noSeccomp:            Boolean                  = false)(implicit newFile: NewFile, preference: Preference, threadProvider: ThreadProvider, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService) = {
+    noSeccomp:            Boolean                  = false)(implicit newFile: TmpDirectory, preference: Preference, threadProvider: ThreadProvider, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService) = {
     val uDocker =
       UDockerArguments(
         localDockerImage = toLocalImage(image) match {
@@ -139,7 +139,7 @@ object UDockerTask {
     installLibraries(uDocker, install, cacheInstall, forceUpdate)
   }
 
-  def installLibraries(uDocker: UDockerArguments, installCommands: Seq[String], cacheInstall: Boolean, forceUpdate: Boolean)(implicit newFile: NewFile, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService) = {
+  def installLibraries(uDocker: UDockerArguments, installCommands: Seq[String], cacheInstall: Boolean, forceUpdate: Boolean)(implicit newFile: TmpDirectory, workspace: Workspace, fileService: FileService, outputRedirection: OutputRedirection, networkService: NetworkService) = {
     def installLibrariesInContainer(destination: File) =
       newFile.withTmpFile { tmpDirectory ⇒
         val layersDirectory = UDockerTask.layersDirectory(workspace)
@@ -213,7 +213,7 @@ object UDockerTask {
     installedUDockerContainer()
   }
 
-  def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: NewFile, workspace: Workspace, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkservice: NetworkService): Either[Err, LocalDockerImage] =
+  def toLocalImage(containerImage: ContainerImage)(implicit preference: Preference, newFile: TmpDirectory, workspace: Workspace, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkservice: NetworkService): Either[Err, LocalDockerImage] =
     containerImage match {
       case i: DockerImage      ⇒ downloadImage(i, manifestDirectory(workspace), layersDirectory(workspace), preference(RegistryTimeout), preference(RegistryRetryOnError))
       case i: SavedDockerImage ⇒ loadImage(i)

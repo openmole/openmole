@@ -24,7 +24,7 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.workflow.dsl
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation._
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.lock._
 
 import scala.util.{ Failure, Success, Try }

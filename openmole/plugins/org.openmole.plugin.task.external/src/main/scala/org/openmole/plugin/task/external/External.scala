@@ -29,7 +29,7 @@ import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.dsl.{ File, _ }
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.InputOutputCheck
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.random._
 import org.openmole.core.workflow.validation._
 import shapeless.TypeCase
@@ -89,12 +89,12 @@ object External {
       external.resources.flatMap(resourceExists)
   }
 
-  protected def listInputFiles(inputFiles: Vector[InputFile], context: Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): Vector[(Val[File], DeployedFile)] =
+  protected def listInputFiles(inputFiles: Vector[InputFile], context: Context)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Vector[(Val[File], DeployedFile)] =
     inputFiles.map {
       case InputFile(prototype, name, link) ⇒ prototype → DeployedFile(context(prototype), name.from(context), link, deployedFileType = DeployedFileType.InputFile)
     }
 
-  protected def listInputFileArray(inputFileArrays: Vector[InputFileArray], context: Context)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): Vector[(Val[Array[File]], Seq[DeployedFile])] =
+  protected def listInputFileArray(inputFileArrays: Vector[InputFileArray], context: Context)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Vector[(Val[Array[File]], Seq[DeployedFile])] =
     for {
       ifa ← inputFileArrays
     } yield {
@@ -107,7 +107,7 @@ object External {
       )
     }
 
-  protected def listResources(resources: Vector[External.Resource], context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): Iterable[DeployedFile] = {
+  protected def listResources(resources: Vector[External.Resource], context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Iterable[DeployedFile] = {
     val byLocation =
       resources groupBy {
         case Resource(_, name, _, _) ⇒ resolver(name.from(context)).getCanonicalPath
@@ -140,14 +140,14 @@ object External {
 
   private def destination(resolver: PathResolver, f: DeployedFile) = resolver(f.expandedUserPath)
 
-  def deployResources(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService) =
+  def deployResources(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
     for { f ← listResources(external.resources, context, resolver) } yield {
       val d = destination(resolver, f)
       copyFile(f, d)
       (f → d)
     }
 
-  def deployInputFiles(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService) = {
+  def deployInputFiles(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) = {
     val (copiedFilesVariable, copiedFilesInfo) =
       listInputFiles(external.inputFiles, context).map {
         case (p, f) ⇒
@@ -171,16 +171,16 @@ object External {
     (context ++ copiedFilesVariable ++ copiedArrayFilesVariable, copiedFilesInfo ++ copiedFilesArrayInfo.flatten)
   }
 
-  def deployInputFilesAndResources(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService) =
+  def deployInputFilesAndResources(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
     deployAndListInputFiles(external: External, context, resolver)._1
 
-  def deployAndListInputFiles(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService) = {
+  def deployAndListInputFiles(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) = {
     val resourcesFiles = deployResources(external, context, resolver)
     val (newContext, inputFilesInfo) = deployInputFiles(external, context, resolver)
     (newContext, resourcesFiles ++ inputFilesInfo)
   }
 
-  protected def outputFileVariables(outputFiles: Vector[External.OutputFile], context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService) =
+  protected def outputFileVariables(outputFiles: Vector[External.OutputFile], context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
     outputFiles.map {
       case OutputFile(name, prototype) ⇒
         val fileName = name.from(context)
@@ -191,7 +191,7 @@ object External {
   def contextFiles(outputs: PrototypeSet, context: Context): Seq[Variable[File]] =
     InputOutputCheck.filterOutput(outputs, context).values.filter { v ⇒ v.prototype.`type` == ValType[File] }.map(_.asInstanceOf[Variable[File]]).toSeq
 
-  def fetchOutputFiles(external: External, outputs: PrototypeSet, context: Context, resolver: PathResolver, workDirectories: Seq[File])(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): Context = {
+  def fetchOutputFiles(external: External, outputs: PrototypeSet, context: Context, resolver: PathResolver, workDirectories: Seq[File])(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Context = {
     val resultContext = listOutputFiles(external.outputFiles, outputs, context, resolver, workDirectories)
     val resultDirectory = newFile.newDir("externalresult")
     val outputContext = context ++ resultContext
@@ -200,7 +200,7 @@ object External {
     result
   }
 
-  def listOutputFiles(outputFiles: Vector[External.OutputFile], outputs: PrototypeSet, context: Context, resolver: PathResolver, workDirectories: Seq[File])(implicit rng: RandomProvider, newFile: NewFile, fileService: FileService): Vector[Variable[File]] = {
+  def listOutputFiles(outputFiles: Vector[External.OutputFile], outputs: PrototypeSet, context: Context, resolver: PathResolver, workDirectories: Seq[File])(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Vector[Variable[File]] = {
     val fileOutputs = outputFileVariables(outputFiles, context, resolver)
     val allFiles = (fileOutputs ++ contextFiles(outputs, context)).distinct
 
@@ -217,7 +217,7 @@ object External {
   }
 
   def moveFilesOutOfWorkDirectory(outputs: PrototypeSet, context: Context, workDirectories: Seq[File], resultDirectory: File)(implicit fileService: FileService) = {
-    val newFile = NewFile(resultDirectory)
+    val newFile = TmpDirectory(resultDirectory)
 
     contextFiles(outputs, context).map { v ⇒
       val movedFile =

@@ -66,7 +66,7 @@ trait RESTAPI extends ScalatraServlet with ContentEncodingSupport
   implicit def services = arguments.services
   import arguments.services._
 
-  def baseDirectory = newFile.newDir("rest")
+  def baseDirectory = tmpDirectory.newDir("rest")
   def exceptionToHttpError(e: Throwable) = InternalServerError(Error(e).toJson)
 
   post("/token") {
@@ -116,7 +116,7 @@ trait RESTAPI extends ScalatraServlet with ContentEncodingSupport
           case compiled: Compiled ⇒
             Try(compiled.eval) match {
               case Success(res) ⇒
-                val moleServices = MoleServices.create(outputRedirection = Some(OutputRedirection(directory.outputStream)))
+                val moleServices = MoleServices.create(applicationExecutionDirectory = directory.workDirectory, outputRedirection = Some(OutputRedirection(directory.outputStream)))
                 Try {
                   dslToPuzzle(res).toExecution()(moleServices)
                 } match {

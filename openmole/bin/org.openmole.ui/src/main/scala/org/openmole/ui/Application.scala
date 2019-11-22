@@ -28,7 +28,7 @@ import org.openmole.core.console.ScalaREPL
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.logconfig.LoggerConfig
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.rest.server.RESTServer
 import org.openmole.tool.logger.JavaLogger
 

@@ -27,7 +27,7 @@ import cats.implicits._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.workflow.dsl
 import org.openmole.core.workflow.mole.MoleExecutionMessage.PerformTransition
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 
 object Transition extends JavaLogger
 

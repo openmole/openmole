@@ -128,7 +128,7 @@ object ScalarOrSequenceOfDouble {
   def prototypes(scales: Seq[ScalarOrSequenceOfDouble[_]]) = scales.map(_.prototype)
 
   def unflatten(scales: Seq[ScalarOrSequenceOfDouble[_]], values: Seq[Double], scale: Boolean = true): FromContext[List[Variable[_]]] = {
-    @tailrec def scaled0(scales: List[ScalarOrSequenceOfDouble[_]], values: List[Double], acc: List[Variable[_]] = Nil)(context: ⇒ Context, rng: RandomProvider, newFile: NewFile, fileService: FileService): List[Variable[_]] =
+    @tailrec def scaled0(scales: List[ScalarOrSequenceOfDouble[_]], values: List[Double], acc: List[Variable[_]] = Nil)(context: ⇒ Context, rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): List[Variable[_]] =
       if (scales.isEmpty || values.isEmpty) acc.reverse
       else {
         val input = scales.head

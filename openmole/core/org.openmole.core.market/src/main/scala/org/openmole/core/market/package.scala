@@ -39,10 +39,10 @@ package object market {
   import org.json4s.jackson.Serialization
   implicit val formats = Serialization.formats(NoTypeHints)
 
-  def indexURL(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile, fileService: FileService) =
+  def indexURL(implicit preference: Preference, randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
     ExpandedString(preference(MarketIndex.marketIndexLocation)).from(Context("version" → buildinfo.version))
 
-  def marketIndex(implicit preference: Preference, randomProvider: RandomProvider, newFile: NewFile, fileService: FileService) =
+  def marketIndex(implicit preference: Preference, randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
     Serialization.read[MarketIndex](http.get(indexURL))
 
   def downloadEntry(entry: MarketIndexEntry, path: File) = try {

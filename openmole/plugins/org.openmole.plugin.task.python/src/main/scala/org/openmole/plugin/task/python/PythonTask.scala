@@ -13,7 +13,7 @@ import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workflow.tools.OptionalArgument
 import org.openmole.core.workflow.validation.ValidateTask
-import org.openmole.core.workspace.{NewFile, Workspace}
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.plugin.task.container._
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.task.udocker._
@@ -51,7 +51,7 @@ object PythonTask {
       returnValue:          OptionalArgument[Val[Int]]                   = None,
       stdOut:               OptionalArgument[Val[String]]                = None,
       stdErr:               OptionalArgument[Val[String]]                = None,
-      containerSystem:    ContainerSystem                                    = Proot())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService) = {
+      containerSystem:    ContainerSystem                                    = Proot())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService) = {
 
      new PythonTask(
         script = script,

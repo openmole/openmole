@@ -24,14 +24,14 @@ import org.openmole.core.exception._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.pluginmanager._
 import org.openmole.core.tools.obj.ClassUtils._
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.cache._
 import org.openmole.tool.random._
 
 import scala.util._
 
 trait CompilationClosure[+T] extends ScalaCompilation.ContextClosure[T] {
-  def apply(context: Context, rng: RandomProvider, newFile: NewFile): T
+  def apply(context: Context, rng: RandomProvider, newFile: TmpDirectory): T
 }
 
 /**
@@ -77,7 +77,7 @@ object ScalaCompilation {
    * @tparam RETURN
    * @return
    */
-  def compile[RETURN](code: String, plugins: Seq[File] = Seq.empty, libraries: Seq[File] = Seq.empty)(implicit newFile: NewFile, fileService: FileService) = {
+  def compile[RETURN](code: String, plugins: Seq[File] = Seq.empty, libraries: Seq[File] = Seq.empty)(implicit newFile: TmpDirectory, fileService: FileService) = {
     val osgiMode = org.openmole.core.console.Activator.osgi
     val interpreter =
       if (osgiMode) Interpreter(priorityBundles(plugins), libraries)
@@ -113,12 +113,12 @@ object ScalaCompilation {
     native getOrElse t
   }
 
-  def function[RETURN](inputs: Seq[Val[_]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: NewFile, fileService: FileService) = {
+  def function[RETURN](inputs: Seq[Val[_]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: TmpDirectory, fileService: FileService) = {
     val s = script(inputs, source, wrapping, returnType)
     compile[CompilationClosure[RETURN]](s, plugins, libraries)
   }
 
-  def closure[RETURN](inputs: Seq[Val[_]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: NewFile, fileService: FileService) =
+  def closure[RETURN](inputs: Seq[Val[_]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: TmpDirectory, fileService: FileService) =
     function[RETURN](inputs, source, plugins, libraries, wrapping, returnType)
 
   /**
@@ -145,7 +145,7 @@ object ScalaCompilation {
    */
   def script[RETURN](inputs: Seq[Val[_]], source: String, wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN]) =
     s"""new ${classOf[CompilationClosure[_]].getName}[${toScalaNativeType(returnType)}] {
-       |  def apply(${prefix}context: ${manifest[Context].toString}, ${prefix}RNG: ${manifest[RandomProvider].toString}, ${prefix}NewFile: ${manifest[NewFile].toString}) = {
+       |  def apply(${prefix}context: ${manifest[Context].toString}, ${prefix}RNG: ${manifest[RandomProvider].toString}, ${prefix}NewFile: ${manifest[TmpDirectory].toString}) = {
        |    object $inputObject {
        |      ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
        |    }
@@ -164,7 +164,7 @@ object ScalaCompilation {
     wrapping:  OutputWrapping[R] = RawOutput(),
     libraries: Seq[File]         = Seq.empty,
     plugins:   Seq[File]         = Seq.empty
-  )(implicit m: Manifest[_ <: R], newFile: NewFile, fileService: FileService) =
+  )(implicit m: Manifest[_ <: R], newFile: TmpDirectory, fileService: FileService) =
     closure[R](inputs, code, plugins, libraries, wrapping, ValType(m)).get
 
   def dynamic[R: Manifest](code: String, wrapping: OutputWrapping[R] = RawOutput[R]()) = {
@@ -174,12 +174,12 @@ object ScalaCompilation {
 
       val cache = Cache(collection.mutable.HashMap[Seq[Val[_]], Try[ContextClosure[R]]]())
 
-      def compiled(context: Context)(implicit newFile: NewFile, fileService: FileService): Try[ContextClosure[R]] = {
+      def compiled(context: Context)(implicit newFile: TmpDirectory, fileService: FileService): Try[ContextClosure[R]] = {
         val contextPrototypes = context.toSeq.map { case (_, v) ⇒ v.prototype }
         compiled(contextPrototypes)
       }
 
-      def compiled(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService): Try[ContextClosure[R]] =
+      def compiled(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService): Try[ContextClosure[R]] =
         cache().synchronized {
           val allInputMap = inputs.groupBy(_.name)
 
@@ -197,21 +197,21 @@ object ScalaCompilation {
           }
         }
 
-      def validate(inputs: Seq[Val[_]])(implicit newFile: NewFile, fileService: FileService): Option[Throwable] = {
+      def validate(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService): Option[Throwable] = {
         compiled(inputs) match {
           case Success(_) ⇒ None
           case Failure(e) ⇒ Some(e)
         }
       }
 
-      def apply()(implicit newFile: NewFile, fileService: FileService): FromContext[R] = FromContext { p ⇒ compiled(p.context).get(p.context, p.random, p.newFile) }
+      def apply()(implicit newFile: TmpDirectory, fileService: FileService): FromContext[R] = FromContext { p ⇒ compiled(p.context).get(p.context, p.random, p.newFile) }
 
     }
 
     new ScalaWrappedCompilation()
   }
 
-  type ContextClosure[+R] = (Context, RandomProvider, NewFile) ⇒ R
+  type ContextClosure[+R] = (Context, RandomProvider, TmpDirectory) ⇒ R
 
   trait OutputWrapping[+R] {
     def wrapOutput: String

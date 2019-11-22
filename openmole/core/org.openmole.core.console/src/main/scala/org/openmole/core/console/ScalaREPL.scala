@@ -35,7 +35,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.tools.nsc.interpreter._
 import monocle.macros._
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 
 import scala.tools.nsc.io.AbstractFile
 import org.openmole.tool.osgi._
@@ -45,7 +45,7 @@ import scala.tools.nsc
 
 object ScalaREPL {
 
-  def apply(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true)(implicit newFile: NewFile, fileService: FileService) = {
+  def apply(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = {
     val classDirectory = newFile.newDir("classDirectory")
     fileService.deleteWhenGarbageCollected(classDirectory)
     new ScalaREPL(priorityBundles, jars, quiet, classDirectory)
@@ -288,7 +288,7 @@ class ScalaREPL(priorityBundles: ⇒ Seq[Bundle], jars: Seq[JFile], quiet: Boole
 
 object Interpreter {
 
-  def apply(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true)(implicit newFile: NewFile, fileService: FileService) = {
+  def apply(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = {
     val classDirectory = newFile.newDir("classDirectory")
     fileService.deleteWhenGarbageCollected(classDirectory)
     new Interpreter(priorityBundles, jars, quiet, classDirectory)

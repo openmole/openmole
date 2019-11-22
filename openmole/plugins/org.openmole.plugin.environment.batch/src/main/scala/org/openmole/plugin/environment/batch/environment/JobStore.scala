@@ -19,7 +19,7 @@ object JobStore {
   }
 
   def store(jobStore: JobStore, moleJob: MoleJob)(implicit serializer: SerializerService): StoredMoleJob = {
-    val f = NewFile(jobStore.store).newFile("storedjob", ".bin.gz")
+    val f = TmpDirectory(jobStore.store).newFile("storedjob", ".bin.gz")
     f.withGzippedOutputStream { os ⇒ serializer.serialize(moleJob.context, os) }
     new StoredMoleJob(
       f,

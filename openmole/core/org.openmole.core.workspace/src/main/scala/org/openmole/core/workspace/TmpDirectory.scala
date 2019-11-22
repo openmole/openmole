@@ -5,16 +5,16 @@ import java.util.UUID
 import org.openmole.core.workspace.Workspace._
 import org.openmole.tool.file._
 
-object NewFile {
-  def apply(workspace: Workspace): NewFile = {
+object TmpDirectory {
+  def apply(workspace: Workspace): TmpDirectory = {
     val tmpDirectory = workspace.location / Workspace.tmpLocation /> UUID.randomUUID.toString
-    NewFile(tmpDirectory)
+    TmpDirectory(tmpDirectory)
   }
 
-  def dispose(newFile: NewFile) = newFile.directory.recursiveDelete
+  def dispose(newFile: TmpDirectory) = newFile.directory.recursiveDelete
 }
 
-case class NewFile(directory: File) {
+case class TmpDirectory(directory: File) {
   def makeNewDir(prefix: String = fixedDir): File = {
     val dir = newDir(prefix)
     dir.mkdirs()

@@ -34,9 +34,9 @@ trait CodePackage extends FilePackage with StatisticsPackage with MathPackage {
   def newRandom(seed: Long): java.util.Random = Random(seed)
   def newRandom()(implicit randomProvider: RandomProvider): java.util.Random = Random()
 
-  def newFile(prefix: String = Workspace.fixedPrefix, suffix: String = Workspace.fixedPostfix)(implicit newFile: NewFile) = newFile.newFile(prefix, suffix)
-  def newDir(prefix: String = Workspace.fixedDir)(implicit newFile: NewFile) = newFile.newDir(prefix)
-  def mkDir(prefix: String = Workspace.fixedDir)(implicit newFile: NewFile) = {
+  def newFile(prefix: String = Workspace.fixedPrefix, suffix: String = Workspace.fixedPostfix)(implicit newFile: TmpDirectory) = newFile.newFile(prefix, suffix)
+  def newDir(prefix: String = Workspace.fixedDir)(implicit newFile: TmpDirectory) = newFile.newDir(prefix)
+  def mkDir(prefix: String = Workspace.fixedDir)(implicit newFile: TmpDirectory) = {
     val dir = newFile.newDir(prefix)
     dir.mkdirs
     dir

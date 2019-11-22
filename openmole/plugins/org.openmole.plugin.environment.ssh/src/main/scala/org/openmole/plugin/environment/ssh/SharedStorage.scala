@@ -21,7 +21,7 @@ import java.util.UUID
 
 import org.openmole.tool.file._
 import org.openmole.core.preference.Preference
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.core.communication.storage._
@@ -32,7 +32,7 @@ import squants.information.Information
 
 object SharedStorage extends JavaLogger {
 
-  def installRuntime[S](runtime: Runtime, storage: S, frontend: Frontend, baseDirectory: String)(implicit preference: Preference, newFile: NewFile, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
+  def installRuntime[S](runtime: Runtime, storage: S, frontend: Frontend, baseDirectory: String)(implicit preference: Preference, newFile: TmpDirectory, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
     val runtimePrefix = "runtime"
     val runtimeInstall = runtimePrefix + runtime.runtime.hash
 
@@ -101,7 +101,7 @@ object SharedStorage extends JavaLogger {
     serializedJob:  SerializedJob,
     outputPath:     String,
     storage:        S,
-    debug:          Boolean             = false)(implicit newFile: NewFile, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
+    debug:          Boolean             = false)(implicit newFile: TmpDirectory, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
     val runtime = runtimePath(serializedJob.runtime) //preparedRuntime(serializedJob.runtime)
     val result = outputPath
     val workspace = StorageService.child(storage, workDirectory, UUID.randomUUID.toString)

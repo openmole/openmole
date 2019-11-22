@@ -30,7 +30,7 @@ import org.openmole.core.workflow.builder.MappedInputOutputConfig
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.tool.netlogo.NetLogo
 import org.openmole.tool.cache._
@@ -128,7 +128,7 @@ object NetLogoTask {
       }
     }
 
-  def createPool(netLogoFactory: NetLogoFactory, workspace: NetLogoTask.Workspace, cached: Boolean, ignoreErrorOnDispose: Boolean, switch3d: Boolean)(implicit newFile: NewFile) = {
+  def createPool(netLogoFactory: NetLogoFactory, workspace: NetLogoTask.Workspace, cached: Boolean, ignoreErrorOnDispose: Boolean, switch3d: Boolean)(implicit newFile: TmpDirectory) = {
     def createInstance = {
       val workspaceDirectory = newFile.newDir("netlogoworkpsace")
       NetLogoTask.openNetLogoWorkspace(netLogoFactory, workspace, workspaceDirectory, switch3d)

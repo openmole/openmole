@@ -77,7 +77,7 @@ class FileService(implicit preference: Preference) {
 
   private[fileservice] val deleteEmpty = ListBuffer[File]()
 
-  def hashNoCache(file: File, hashType: HashType = SHA1)(implicit newFile: NewFile) = {
+  def hashNoCache(file: File, hashType: HashType = SHA1)(implicit newFile: TmpDirectory) = {
     if (file.isDirectory) newFile.withTmpFile { archive ⇒
       file.archive(archive, time = false)
       hashFile(archive, hashType)
@@ -85,12 +85,12 @@ class FileService(implicit preference: Preference) {
     else hashFile(file, hashType)
   }
 
-  def hash(file: File)(implicit newFile: NewFile, fileServiceCache: FileServiceCache): Hash = {
+  def hash(file: File)(implicit newFile: TmpDirectory, fileServiceCache: FileServiceCache): Hash = {
     def hash = hashFile(if (file.isDirectory) archiveForDir(file).file else file)
     fileServiceCache.hashCache.get(file.getCanonicalPath, hash)
   }
 
-  def archiveForDir(directory: File)(implicit newFile: NewFile, fileServiceCache: FileServiceCache): FileCache = {
+  def archiveForDir(directory: File)(implicit newFile: TmpDirectory, fileServiceCache: FileServiceCache): FileCache = {
     def archive = {
       val ret = newFile.newFile("archive", ".tar")
       directory.archive(ret, time = false)

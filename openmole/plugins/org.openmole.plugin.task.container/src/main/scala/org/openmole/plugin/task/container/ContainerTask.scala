@@ -28,7 +28,7 @@ import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder.{ DefinitionScope, InfoBuilder, InfoConfig, InputOutputBuilder, InputOutputConfig }
 import org.openmole.core.workflow.task.{ Task, TaskExecutionContext }
 import org.openmole.core.workflow.validation.ValidateTask
-import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.plugin.task.container.ContainerTask.{ Commands, downloadImage, extractImage, repositoryDirectory }
 import org.openmole.plugin.task.external.{ EnvironmentVariable, External, ExternalBuilder }
 import org.openmole.tool.cache.{ CacheKey, WithInstance }
@@ -108,7 +108,7 @@ object ContainerTask {
     stdOut:               OptionalArgument[Val[String]]                      = None,
     stdErr:               OptionalArgument[Val[String]]                      = None,
     reuseContainer:       Boolean                                            = true,
-    containerPoolKey:     CacheKey[WithInstance[_root_.container.FlatImage]] = CacheKey())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: NewFile, networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, outputRedirection: OutputRedirection) = {
+    containerPoolKey:     CacheKey[WithInstance[_root_.container.FlatImage]] = CacheKey())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, outputRedirection: OutputRedirection) = {
     new ContainerTask(
       containerSystem,
       prepare(containerSystem, image, install, workDirectory.option),
@@ -127,10 +127,10 @@ object ContainerTask {
       containerPoolKey = containerPoolKey)
   }
 
-  def prepare(containerSystem: ContainerSystem, image: ContainerImage, install: Seq[String], workDirectory: Option[String])(implicit newFile: NewFile, outputRedirection: OutputRedirection, networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference) =
+  def prepare(containerSystem: ContainerSystem, image: ContainerImage, install: Seq[String], workDirectory: Option[String])(implicit newFile: TmpDirectory, outputRedirection: OutputRedirection, networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference) =
     executeInstall(containerSystem, localImage(image), install, workDirectory)
 
-  def executeInstall(containerSystem: ContainerSystem, image: _root_.container.FlatImage, install: Seq[String], workDirectory: Option[String])(implicit newFile: NewFile, outputRedirection: OutputRedirection) =
+  def executeInstall(containerSystem: ContainerSystem, image: _root_.container.FlatImage, install: Seq[String], workDirectory: Option[String])(implicit newFile: TmpDirectory, outputRedirection: OutputRedirection) =
     if (install.isEmpty) image
     else {
       val retCode =
@@ -156,7 +156,7 @@ object ContainerTask {
       image
     }
 
-  def localImage(image: ContainerImage)(implicit networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, newFile: NewFile) = {
+  def localImage(image: ContainerImage)(implicit networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, newFile: TmpDirectory) = {
     val flattened =
       image match {
         case image: DockerImage ⇒ downloadImage(image, repositoryDirectory(workspace))

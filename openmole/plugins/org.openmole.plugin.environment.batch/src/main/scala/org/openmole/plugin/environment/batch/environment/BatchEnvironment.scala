@@ -141,7 +141,7 @@ object BatchEnvironment {
     def copy(services: Services)(
       threadProvider:             ThreadProvider = services.threadProvider,
       preference:        Preference = services.preference,
-      newFile:           NewFile = services.newFile,
+      newFile:           TmpDirectory = services.newFile,
       serializerService: SerializerService = services.serializerService,
       fileService:       FileService = services.fileService,
       seeder:            Seeder = services.seeder,
@@ -169,7 +169,7 @@ object BatchEnvironment {
       new Services() (
         threadProvider = ms.threadProvider,
         preference = ms.preference,
-        newFile = ms.newFile,
+        newFile = ms.tmpDirectory,
         serializerService = services.serializerService,
         fileService = ms.fileService,
         seeder = ms.seeder,
@@ -184,36 +184,36 @@ object BatchEnvironment {
   }
 
   class Services(
-    implicit
-    val threadProvider:             ThreadProvider,
-    implicit val preference:        Preference,
-    implicit val newFile:           NewFile,
-    implicit val serializerService: SerializerService,
-    implicit val fileService:       FileService,
-    implicit val seeder:            Seeder,
-    implicit val randomProvider:    RandomProvider,
-    implicit val replicaCatalog:    ReplicaCatalog,
-    implicit val eventDispatcher:   EventDispatcher,
-    implicit val fileServiceCache:  FileServiceCache,
-    implicit val outputRedirection: OutputRedirection,
-    implicit val loggerService: LoggerService
+                  implicit
+                  val threadProvider:             ThreadProvider,
+                  implicit val preference:        Preference,
+                  implicit val newFile:           TmpDirectory,
+                  implicit val serializerService: SerializerService,
+                  implicit val fileService:       FileService,
+                  implicit val seeder:            Seeder,
+                  implicit val randomProvider:    RandomProvider,
+                  implicit val replicaCatalog:    ReplicaCatalog,
+                  implicit val eventDispatcher:   EventDispatcher,
+                  implicit val fileServiceCache:  FileServiceCache,
+                  implicit val outputRedirection: OutputRedirection,
+                  implicit val loggerService: LoggerService
   ) { services =>
 
     def set(ms: MoleServices) = Services.set(services)(ms)
 
     def copy (
-      threadProvider:    ThreadProvider = services.threadProvider,
-      preference:        Preference = services.preference,
-      newFile:           NewFile = services.newFile,
-      serializerService: SerializerService = services.serializerService,
-      fileService:       FileService = services.fileService,
-      seeder:            Seeder = services.seeder,
-      randomProvider:    RandomProvider = services.randomProvider,
-      replicaCatalog:    ReplicaCatalog = services.replicaCatalog,
-      eventDispatcher:   EventDispatcher = services.eventDispatcher,
-      fileServiceCache:  FileServiceCache = services.fileServiceCache,
-      outputRedirection: OutputRedirection = services.outputRedirection,
-      loggerService: LoggerService = services.loggerService) =
+               threadProvider:    ThreadProvider = services.threadProvider,
+               preference:        Preference = services.preference,
+               newFile:           TmpDirectory = services.newFile,
+               serializerService: SerializerService = services.serializerService,
+               fileService:       FileService = services.fileService,
+               seeder:            Seeder = services.seeder,
+               randomProvider:    RandomProvider = services.randomProvider,
+               replicaCatalog:    ReplicaCatalog = services.replicaCatalog,
+               eventDispatcher:   EventDispatcher = services.eventDispatcher,
+               fileServiceCache:  FileServiceCache = services.fileServiceCache,
+               outputRedirection: OutputRedirection = services.outputRedirection,
+               loggerService: LoggerService = services.loggerService) =
       Services.copy(services)(
         threadProvider = threadProvider,
         preference = preference,

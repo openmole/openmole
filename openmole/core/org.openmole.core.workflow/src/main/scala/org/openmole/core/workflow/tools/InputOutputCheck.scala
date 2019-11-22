@@ -22,7 +22,7 @@ import org.openmole.core.exception._
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.random._
 
 /**
@@ -105,7 +105,7 @@ object InputOutputCheck {
    * @param context context to be extended
    * @return the new context
    */
-  def initializeInput(defaults: DefaultSet, context: Context)(implicit randomProvider: RandomProvider, newFile: NewFile, fileService: FileService): Context =
+  def initializeInput(defaults: DefaultSet, context: Context)(implicit randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService): Context =
     context ++
       defaults.flatMap {
         parameter ⇒

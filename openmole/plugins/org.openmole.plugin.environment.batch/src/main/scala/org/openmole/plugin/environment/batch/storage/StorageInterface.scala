@@ -30,8 +30,8 @@ object StorageInterface {
 
   def remote[S: StorageInterface: HierarchicalStorageInterface](s: S, communicationDirectory: String) =
     new RemoteStorage {
-      override def upload(src: File, dest: Option[String], options: TransferOptions)(implicit newFile: NewFile): String = StorageService.uploadInDirectory(s, src, communicationDirectory, options)
-      override def download(src: String, dest: File, options: TransferOptions)(implicit newFile: NewFile): Unit = StorageService.download(s, src, dest, options)
+      override def upload(src: File, dest: Option[String], options: TransferOptions)(implicit newFile: TmpDirectory): String = StorageService.uploadInDirectory(s, src, communicationDirectory, options)
+      override def download(src: String, dest: File, options: TransferOptions)(implicit newFile: TmpDirectory): Unit = StorageService.download(s, src, dest, options)
     }
 
   def upload(compressed: Boolean, uploadStream: (() ⇒ InputStream, String) ⇒ Unit)(src: File, dest: String, options: TransferOptions = TransferOptions.default): Unit = {

@@ -194,17 +194,18 @@ object MoleExecution extends JavaLogger {
 
               val taskContext =
                 TaskExecutionContext(
-                  newFile.directory,
-                  newFile.makeNewDir("taskExecution"),
-                  subMoleExecutionState.moleExecution.defaultEnvironment,
-                  preference,
-                  threadProvider,
-                  fileService,
-                  workspace,
-                  outputRedirection,
-                  loggerService,
-                  subMoleExecutionState.moleExecution.keyValueCache,
-                  subMoleExecutionState.moleExecution.lockRepository,
+                  moleExecutionDirectory = tmpDirectory.directory,
+                  taskExecutionDirectory = tmpDirectory.makeNewDir("taskExecution"),
+                  applicationExecutionDirectory = applicationExecutionDirectory,
+                  localEnvironment = subMoleExecutionState.moleExecution.defaultEnvironment,
+                  preference = preference,
+                  threadProvider = threadProvider,
+                  fileService = fileService,
+                  workspace = workspace,
+                  outputRedirection = outputRedirection,
+                  loggerService = loggerService,
+                  cache = subMoleExecutionState.moleExecution.keyValueCache,
+                  lockRepository = subMoleExecutionState.moleExecution.lockRepository,
                   moleExecution = Some(subMoleExecutionState.moleExecution)
                 )
 
@@ -263,7 +264,7 @@ object MoleExecution extends JavaLogger {
             outputRedirection = services.outputRedirection,
             loggerService = services.loggerService,
             random = services.newRandom,
-            newFile = services.newFile)
+            newFile = services.tmpDirectory)
         }
 
         h.perform(ctxForHooks, toHookExecutionContext(subMoleExecutionState.moleExecution.keyValueCache, subMoleExecutionState.moleExecution.executionContext))
@@ -341,7 +342,7 @@ object MoleExecution extends JavaLogger {
 
       import moleExecution.executionContext.services._
 
-      newFile.directory.mkdirs()
+      tmpDirectory.directory.mkdirs()
       moleExecution._started = true
       moleExecution._startTime = Some(System.currentTimeMillis)
       eventDispatcher.trigger(moleExecution, new MoleExecution.Started)
@@ -438,17 +439,18 @@ object MoleExecution extends JavaLogger {
         env.submit(
           job,
           TaskExecutionContext(
-            newFile.directory,
-            newFile.makeNewDir("taskExecution"),
-            env,
-            preference,
-            threadProvider,
-            fileService,
-            workspace,
-            outputRedirection,
-            loggerService,
-            moleExecution.keyValueCache,
-            moleExecution.lockRepository,
+            moleExecutionDirectory = tmpDirectory.directory,
+            taskExecutionDirectory = tmpDirectory.makeNewDir("taskExecution"),
+            applicationExecutionDirectory = applicationExecutionDirectory,
+            localEnvironment = env,
+            preference = preference,
+            threadProvider = threadProvider,
+            fileService = fileService,
+            workspace = workspace,
+            outputRedirection = outputRedirection,
+            loggerService = loggerService,
+            cache = moleExecution.keyValueCache,
+            lockRepository = moleExecution.lockRepository,
             moleExecution = Some(moleExecution)
           )
         )

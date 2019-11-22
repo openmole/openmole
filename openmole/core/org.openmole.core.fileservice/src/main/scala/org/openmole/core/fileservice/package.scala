@@ -19,7 +19,7 @@ package org.openmole.core
 
 import java.io.File
 
-import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
 import squants.time.Time

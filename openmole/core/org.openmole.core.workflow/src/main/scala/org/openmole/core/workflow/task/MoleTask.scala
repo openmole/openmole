@@ -30,7 +30,7 @@ import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.job.MoleJob
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.lock._
 import org.openmole.tool.random.Seeder
 
@@ -111,7 +111,7 @@ object MoleTask {
       implicit val eventDispatcher = EventDispatcher()
       val implicitsValues = implicits.flatMap(i ⇒ context.get(i))
       implicit val seeder = Seeder(random().nextLong())
-      implicit val newFile = NewFile(executionContext.moleExecutionDirectory)
+      implicit val newFile = TmpDirectory(executionContext.moleExecutionDirectory)
       import executionContext.preference
       import executionContext.threadProvider
       import executionContext.workspace
@@ -121,7 +121,7 @@ object MoleTask {
       val localEnvironment =
         LocalEnvironment(1, executionContext.localEnvironment.deinterleave)
 
-      val moleServices = MoleServices.create()
+      val moleServices = MoleServices.create(executionContext.applicationExecutionDirectory)
 
       val execution = MoleExecution(
         mole,
@@ -137,7 +137,7 @@ object MoleTask {
           lastContextLock { if (ev.capsule == last) lastContext = Some(ev.context) }
       }
 
-      (execution, moleServices.newFile)
+      (execution, moleServices.tmpDirectory)
     }
 
     val listenerKey =

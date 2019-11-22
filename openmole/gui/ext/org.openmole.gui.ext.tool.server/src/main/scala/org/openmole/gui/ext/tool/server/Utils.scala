@@ -3,7 +3,7 @@ package org.openmole.gui.ext.tool.server
 import org.openmole.core.module
 import org.openmole.core.pluginmanager._
 import org.openmole.gui.ext.data._
-import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 
 import scala.io.Source
 
@@ -60,7 +60,7 @@ object Utils {
     }
   }
 
-  def addPlugins(safePaths: Seq[SafePath])(implicit workspace: Workspace, newFile: NewFile): Seq[ErrorData] = {
+  def addPlugins(safePaths: Seq[SafePath])(implicit workspace: Workspace, newFile: TmpDirectory): Seq[ErrorData] = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     val files: Seq[File] = safePaths.map {
       safePathToFile
@@ -68,7 +68,7 @@ object Utils {
     addFilePlugins(files)
   }
 
-  def addFilePlugins(files: Seq[File])(implicit workspace: Workspace, newFile: NewFile): Seq[ErrorData] = {
+  def addFilePlugins(files: Seq[File])(implicit workspace: Workspace, newFile: TmpDirectory): Seq[ErrorData] = {
     val errors = org.openmole.core.module.addPluginsFiles(files, false, org.openmole.core.module.pluginDirectory)
     errors.map(e ⇒ ErrorData(e._2))
   }

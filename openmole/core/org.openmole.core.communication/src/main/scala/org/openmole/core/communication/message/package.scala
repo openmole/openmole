@@ -27,7 +27,7 @@ import org.openmole.core.workflow.execution.Environment.RuntimeLog
 import org.openmole.core.workflow.job.MoleJob._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.task.Task
-import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 
 import util.Try
 import org.openmole.tool.file._
@@ -50,7 +50,7 @@ package object message {
   case class FileMessage(path: String, hash: String)
 
   object ReplicatedFile {
-    def download(replicatedFile: ReplicatedFile)(download: (String, File) ⇒ Unit, verifyHash: Boolean = false)(implicit newFile: NewFile, fileService: FileService) = {
+    def download(replicatedFile: ReplicatedFile)(download: (String, File) ⇒ Unit, verifyHash: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService) = {
       val localDirectory = newFile.makeNewDir("replica")
       try {
         def verify(cache: File) =
@@ -90,7 +90,7 @@ package object message {
       finally fileService.deleteWhenEmpty(localDirectory)
     }
 
-    def upload(file: File, upload: File ⇒ String)(implicit newFile: NewFile) = {
+    def upload(file: File, upload: File ⇒ String)(implicit newFile: TmpDirectory) = {
       val isDir = file.isDirectory
 
       val toReplicate =
@@ -113,7 +113,7 @@ package object message {
   case class RuntimeSettings(archiveResult: Boolean)
 
   object ExecutionMessage {
-    def load(file: File)(implicit serialiserService: SerializerService, fileService: FileService, newFile: NewFile) = {
+    def load(file: File)(implicit serialiserService: SerializerService, fileService: FileService, newFile: TmpDirectory) = {
       serialiserService.deserializeAndExtractFiles[ExecutionMessage](file)
     }
   }
@@ -121,7 +121,7 @@ package object message {
   case class ExecutionMessage(plugins: Iterable[ReplicatedFile], files: Iterable[ReplicatedFile], jobs: File, runtimeSettings: RuntimeSettings)
 
   object RuntimeResult {
-    def load(file: File)(implicit serialiserService: SerializerService, fileService: FileService, newFile: NewFile) =
+    def load(file: File)(implicit serialiserService: SerializerService, fileService: FileService, newFile: TmpDirectory) =
       serialiserService.deserializeAndExtractFiles[RuntimeResult](file)
   }
 

@@ -43,7 +43,7 @@ import org.openmole.core.services.Services
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.networkservice._
 import org.openmole.gui.ext.api.Api
-import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.gui.ext.data.routes._
 import org.openmole.gui.ext.tool.server
 import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
@@ -67,7 +67,7 @@ object GUIServices {
     implicit def threadProvider = guiServices.threadProvider
     implicit def seeder = guiServices.seeder
     implicit def replicaCatalog = guiServices.replicaCatalog
-    implicit def newFile = guiServices.newFile
+    implicit def tmpDirectory = guiServices.newFile
     implicit def authenticationStore = guiServices.authenticationStore
     implicit def serializerService = guiServices.serializerService
     implicit def fileService = guiServices.fileService
@@ -82,7 +82,7 @@ object GUIServices {
   def apply(workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level]) = {
     implicit val ws = workspace
     implicit val preference = Preference(ws.persistentDir)
-    implicit val newFile = NewFile(workspace)
+    implicit val newFile = TmpDirectory(workspace)
     implicit val seeder = Seeder()
     implicit val serializerService = SerializerService()
     implicit val threadProvider = ThreadProvider()
@@ -100,7 +100,7 @@ object GUIServices {
   }
 
   def dispose(services: GUIServices) = {
-    scala.util.Try(NewFile.dispose(services.newFile))
+    scala.util.Try(TmpDirectory.dispose(services.newFile))
     scala.util.Try(services.threadProvider.stop())
   }
 
@@ -119,7 +119,7 @@ class GUIServices(
   val threadProvider:      ThreadProvider,
   val seeder:              Seeder,
   val replicaCatalog:      ReplicaCatalog,
-  val newFile:             NewFile,
+  val newFile:             TmpDirectory,
   val authenticationStore: AuthenticationStore,
   val serializerService:   SerializerService,
   val fileService:         FileService,

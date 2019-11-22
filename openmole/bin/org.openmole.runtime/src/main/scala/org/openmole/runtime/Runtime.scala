@@ -26,7 +26,7 @@ import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.tool.logger.{ JavaLogger, LoggerService }
 import org.openmole.core.tools.service.Retry
-import org.openmole.core.workspace.{ NewFile, Workspace }
+import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.core.tools.service._
 import org.openmole.core.workflow.execution._
 import org.openmole.core.communication.message._
@@ -64,7 +64,7 @@ class Runtime {
     outputMessagePath: String,
     threads:           Int,
     debug:             Boolean
-  )(implicit serializerService: SerializerService, newFile: NewFile, fileService: FileService, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace, loggerService: LoggerService) = {
+  )(implicit serializerService: SerializerService, newFile: TmpDirectory, fileService: FileService, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace, loggerService: LoggerService) = {
 
     /*--- get execution message and job for runtime---*/
     val usedFiles = new HashMap[String, File]
@@ -148,6 +148,7 @@ class Runtime {
       try {
 
         val taskExecutionContext = TaskExecutionContext(
+          applicationExecutionDirectory = newFile.makeNewDir("application"),
           moleExecutionDirectory = newFile.makeNewDir("runtime"),
           taskExecutionDirectory = newFile.makeNewDir("task"),
           localEnvironment = environment,

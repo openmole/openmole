@@ -30,7 +30,7 @@ object Test {
       implicit val ws = Workspace(workspace)
       implicit val cypher = Cypher(password)
       implicit val preference = Services.preference(ws)
-      implicit val newFile = NewFile(workspace)
+      implicit val newFile = TmpDirectory(workspace)
       implicit val seeder = Seeder()
       implicit val serializerService = SerializerService()
       implicit val threadProvider = ThreadProvider()

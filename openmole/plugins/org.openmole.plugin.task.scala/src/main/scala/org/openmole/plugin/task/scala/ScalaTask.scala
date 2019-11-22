@@ -28,7 +28,7 @@ import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
 import org.openmole.plugin.task.jvm._
 import org.openmole.core.dsl._
@@ -78,7 +78,7 @@ object ScalaTask {
 
   lazy val compilation = CacheKey[ScalaCompilation.ContextClosure[java.util.Map[String, Any]]]()
 
-  def compile(implicit newFile: NewFile, fileService: FileService) = {
+  def compile(implicit newFile: TmpDirectory, fileService: FileService) = {
     implicit def m = manifest[java.util.Map[String, Any]]
     ScalaCompilation.static(
       sourceCode,

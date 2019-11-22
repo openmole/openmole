@@ -23,7 +23,7 @@ import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.pluginmanager.PluginInfo
 import org.openmole.core.workflow.tools._
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 
 object OpenMOLEREPL {
 
@@ -54,7 +54,7 @@ object OpenMOLEREPL {
       keywordNamespaceCode
     )
 
-  def newREPL(args: ConsoleVariables, quiet: Boolean = false)(implicit newFile: NewFile, fileService: FileService) = {
+  def newREPL(args: ConsoleVariables, quiet: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService) = {
     def initialise(loop: ScalaREPL) = {
       args.workDirectory.mkdirs()
       loop.beQuietDuring {

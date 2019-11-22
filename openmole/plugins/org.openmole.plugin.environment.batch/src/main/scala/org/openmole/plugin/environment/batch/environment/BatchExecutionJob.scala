@@ -29,7 +29,7 @@ import org.openmole.core.serializer.PluginAndFilesListing
 import org.openmole.core.workflow.execution.{ Environment, ExecutionJob }
 import org.openmole.core.workflow.execution.ExecutionState.{ DONE, ExecutionState, FAILED, KILLED, READY }
 import org.openmole.core.workflow.job.Job
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 import org.openmole.plugin.environment.batch.environment.JobStore.StoredJob
 import org.openmole.tool.bytecode.listAllClasses
 import org.openmole.tool.osgi.{ ClassFile, VersionedPackage, createBundle }
@@ -63,7 +63,7 @@ object BatchExecutionJob {
 
   case class ClosuresBundle(classes: Seq[ClassFile], exported: Seq[String], dependencies: Seq[VersionedPackage], plugins: Seq[File])
 
-  def replClassesToPlugins(replClasses: Seq[Class[_]])(implicit newFile: NewFile, fileService: FileService) = {
+  def replClassesToPlugins(replClasses: Seq[Class[_]])(implicit newFile: TmpDirectory, fileService: FileService) = {
     val replDirectories = replClasses.map(c ⇒ c.getClassLoader -> BatchExecutionJob.replClassDirectory(c)).distinct
 
     def bundle(directory: File, classLoader: ClassLoader) = {

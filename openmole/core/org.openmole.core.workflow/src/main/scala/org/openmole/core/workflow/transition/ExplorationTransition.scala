@@ -28,7 +28,7 @@ import org.openmole.core.workflow.mole.MoleExecution.{ AggregationTransitionRegi
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.lock._
 
 import scala.collection.mutable.{ HashSet, ListBuffer }

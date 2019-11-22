@@ -33,7 +33,7 @@ import org.openmole.core.project._
 import org.openmole.core.services.Services
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.dsl._
-import org.openmole.core.workspace.NewFile
+import org.openmole.core.workspace.TmpDirectory
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.plugin.server._
 import org.openmole.gui.ext.tool.server.OMRouter
@@ -175,7 +175,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
   def temporaryFile(): SafePath = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.absolute
-    val dir = services.newFile.newDir("openmoleGUI")
+    val dir = services.tmpDirectory.newDir("openmoleGUI")
     dir.mkdirs()
     dir
   }
@@ -356,7 +356,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     val script: File = safePathToFile(scriptData.scriptPath)
 
     val executionOutputRedirection = OutputRedirection(outputStream)
-    val executionNewFile = NewFile(services.newFile.newDir("execution"))
+    val executionNewFile = TmpDirectory(services.tmpDirectory.newDir("execution"))
 
     try {
       Project.compile(script.getParentFileSafe, script, Seq.empty)(Services.copy(services)(outputRedirection = executionOutputRedirection, newFile = executionNewFile)) match {
@@ -364,7 +364,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
         case ErrorInCode(e)            ⇒ Some(error(e))
         case ErrorInCompiler(e)        ⇒ Some(error(e))
         case compiled: Compiled ⇒
-          val executionServices = MoleServices.create(outputRedirection = Some(executionOutputRedirection), newFile = Some(executionNewFile))
+          val executionServices = MoleServices.create(applicationExecutionDirectory = s.tmpDirectory.directory, outputRedirection = Some(executionOutputRedirection), newFile = Some(executionNewFile))
           onCompiled.foreach {
             _(execId)
           }
