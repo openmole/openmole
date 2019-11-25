@@ -240,9 +240,9 @@ object FromContext extends LowPriorityFromContext {
 }
 
 class FromContext[+T](c: FromContext.Parameters ⇒ T, v: FromContext.ValidationParameters ⇒ Seq[Throwable]) {
-  def apply(context: ⇒ Context)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): T = c(FromContext.Parameters(context, rng, newFile, fileService))
-  def from(context: ⇒ Context)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): T = apply(context)
-  def validate(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable] = v(FromContext.ValidationParameters(inputs, newFile, fileService))
+  def apply(context: ⇒ Context)(implicit rng: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): T = c(FromContext.Parameters(context, rng, tmpDirectory, fileService))
+  def from(context: ⇒ Context)(implicit rng: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): T = apply(context)
+  def validate(inputs: Seq[Val[_]])(implicit tmpDirectory: TmpDirectory, fileService: FileService): Seq[Throwable] = v(FromContext.ValidationParameters(inputs, tmpDirectory, fileService))
 
   def validate(v2: FromContext.ValidationParameters ⇒ Seq[Throwable]) = {
     def nv(p: FromContext.ValidationParameters) = v(p) ++ v2(p)

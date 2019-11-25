@@ -100,7 +100,7 @@ object GUIServices {
   }
 
   def dispose(services: GUIServices) = {
-    scala.util.Try(TmpDirectory.dispose(services.newFile))
+    scala.util.Try(Workspace.clean(services.workspace))
     scala.util.Try(services.threadProvider.stop())
   }
 

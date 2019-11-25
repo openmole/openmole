@@ -24,6 +24,7 @@ import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
+import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder.{ DefinitionScope, InfoBuilder, InfoConfig, InputOutputBuilder, InputOutputConfig }
 import org.openmole.core.workflow.task.{ Task, TaskExecutionContext }
@@ -32,6 +33,7 @@ import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.plugin.task.container.ContainerTask.{ Commands, downloadImage, extractImage, repositoryDirectory }
 import org.openmole.plugin.task.external.{ EnvironmentVariable, External, ExternalBuilder }
 import org.openmole.tool.cache.{ CacheKey, WithInstance }
+import org.openmole.tool.hash.hashString
 import org.openmole.tool.lock._
 import org.openmole.tool.outputredirection._
 import org.openmole.tool.stream._
@@ -108,10 +110,10 @@ object ContainerTask {
     stdOut:               OptionalArgument[Val[String]]                      = None,
     stdErr:               OptionalArgument[Val[String]]                      = None,
     reuseContainer:       Boolean                                            = true,
-    containerPoolKey:     CacheKey[WithInstance[_root_.container.FlatImage]] = CacheKey())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, outputRedirection: OutputRedirection) = {
+    containerPoolKey:     CacheKey[WithInstance[_root_.container.FlatImage]] = CacheKey())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, tmpDirectory: TmpDirectory, networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, outputRedirection: OutputRedirection, serializerService: SerializerService) = {
     new ContainerTask(
       containerSystem,
-      prepare(containerSystem, image, install, workDirectory.option),
+      prepare(containerSystem, image, install),
       command,
       workDirectory = workDirectory.option,
       errorOnReturnValue = errorOnReturnValue,
@@ -127,14 +129,39 @@ object ContainerTask {
       containerPoolKey = containerPoolKey)
   }
 
-  def prepare(containerSystem: ContainerSystem, image: ContainerImage, install: Seq[String], workDirectory: Option[String])(implicit newFile: TmpDirectory, outputRedirection: OutputRedirection, networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference) =
-    executeInstall(containerSystem, localImage(image), install, workDirectory)
+  def prepare(containerSystem: ContainerSystem, image: ContainerImage, install: Seq[String])(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace) = {
+    def cacheId(image: ContainerImage): Seq[String] =
+      image match {
+        case image: DockerImage ⇒ Seq(image.image, image.tag, image.registry)
+        case image: SavedDockerImage ⇒
+          import org.openmole.tool.hash._
+          Seq(image.file.hash().toString)
+      }
 
-  def executeInstall(containerSystem: ContainerSystem, image: _root_.container.FlatImage, install: Seq[String], workDirectory: Option[String])(implicit newFile: TmpDirectory, outputRedirection: OutputRedirection) =
+    val cacheKey: String = hashString((cacheId(image) ++ install).mkString("\n")).toString
+    val cacheDirectory = workspace.tmpDirectory /> "container" /> "cached" /> cacheKey
+    val serializedFlatImage = cacheDirectory / "flatimage.bin"
+
+    //OutputManager.systemOutput.println("test " + serializedFlatImage + " " + serializedFlatImage.exists)
+
+    cacheDirectory.withLockInDirectory {
+      if (serializedFlatImage.exists) serializerService.deserialize[_root_.container.FlatImage](serializedFlatImage)
+      else {
+        val containerDirectory = cacheDirectory / "fs"
+        val img = localImage(image, containerDirectory)
+        val installedImage = executeInstall(containerSystem, img, install)
+        serializerService.serialize(installedImage, serializedFlatImage)
+        //OutputManager.systemOutput.println("created " + serializedFlatImage + " " + serializedFlatImage.exists)
+        installedImage
+      }
+    }
+  }
+
+  def executeInstall(containerSystem: ContainerSystem, image: _root_.container.FlatImage, install: Seq[String])(implicit tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection) =
     if (install.isEmpty) image
     else {
       val retCode =
-        newFile.withTmpDir { directory ⇒
+        tmpDirectory.withTmpDir { directory ⇒
           val (proot, noSeccomp, kernel) =
             containerSystem match {
               case proot: Proot ⇒ (installProot(directory), proot.noSeccomp, proot.kernel)
@@ -144,7 +171,6 @@ object ContainerTask {
             image,
             directory / "tmp",
             commands = install,
-            workDirectory = workDirectory,
             proot = proot.getAbsolutePath,
             logger = scala.sys.process.ProcessLogger.apply(s ⇒ outputRedirection.output.println(s), s ⇒ outputRedirection.error.println(s)),
             kernel = Some(kernel),
@@ -154,20 +180,20 @@ object ContainerTask {
 
       if (retCode != 0) throw new UserBadDataError(s"Process exited a non 0 return code ($retCode)")
       image
+
     }
 
-  def localImage(image: ContainerImage)(implicit networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, newFile: TmpDirectory) = {
-    val flattened =
-      image match {
-        case image: DockerImage ⇒ downloadImage(image, repositoryDirectory(workspace))
-        case image: SavedDockerImage ⇒
-          val imageDirectory = newDir("image")
-          extractImage(image, imageDirectory)
-      }
-
-    val containersDirectory = newFile.newDir("container")
-    _root_.container.ImageBuilder.flattenImage(flattened, containersDirectory)
-  }
+  def localImage(image: ContainerImage, containerDirectory: File)(implicit networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, tmpDirectory: TmpDirectory) =
+    image match {
+      case image: DockerImage ⇒
+        val savedImage = downloadImage(image, repositoryDirectory(workspace))
+        _root_.container.ImageBuilder.flattenImage(savedImage, containerDirectory)
+      case image: SavedDockerImage ⇒
+        tmpDirectory.withTmpDir { imageDirectory ⇒
+          val savedImage = extractImage(image, imageDirectory)
+          _root_.container.ImageBuilder.flattenImage(savedImage, containerDirectory)
+        }
+    }
 
   def newCacheKey = CacheKey[WithInstance[PreparedImage]]()
 

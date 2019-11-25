@@ -194,9 +194,9 @@ object MoleExecution extends JavaLogger {
 
               val taskContext =
                 TaskExecutionContext(
-                  moleExecutionDirectory = tmpDirectory.directory,
-                  taskExecutionDirectory = tmpDirectory.makeNewDir("taskExecution"),
                   applicationExecutionDirectory = applicationExecutionDirectory,
+                  moleExecutionDirectory = moleExecutionDirectory,
+                  taskExecutionDirectory = moleExecutionDirectory.newDir("taskExecution"),
                   localEnvironment = subMoleExecutionState.moleExecution.defaultEnvironment,
                   preference = preference,
                   threadProvider = threadProvider,
@@ -439,8 +439,8 @@ object MoleExecution extends JavaLogger {
         env.submit(
           job,
           TaskExecutionContext(
-            moleExecutionDirectory = tmpDirectory.directory,
-            taskExecutionDirectory = tmpDirectory.makeNewDir("taskExecution"),
+            moleExecutionDirectory = moleExecutionDirectory,
+            taskExecutionDirectory = moleExecutionDirectory.newDir("taskExecution"),
             applicationExecutionDirectory = applicationExecutionDirectory,
             localEnvironment = env,
             preference = preference,

@@ -37,8 +37,7 @@ package object services {
      * @return
      */
     def withServices[T](workspace: File, password: String, httpProxy: Option[String], logLevel: Option[Level])(f: Services ⇒ T) = {
-      val tmpDirectory = workspace / Workspace.tmpLocation /> UUID.randomUUID.toString
-      val services = Services(workspace, tmpDirectory, password, httpProxy, logLevel)
+      val services = Services(workspace, password, httpProxy, logLevel)
       try f(services)
       finally dispose(services)
     }
@@ -56,7 +55,7 @@ package object services {
      * @param httpProxy optional http proxy
      * @return
      */
-    def apply(workspace: File, tmpDirectory: File, password: String, httpProxy: Option[String], logLevel: Option[Level]) = {
+    def apply(workspace: File, password: String, httpProxy: Option[String], logLevel: Option[Level]) = {
       implicit val ws = Workspace(workspace)
       implicit val cypher = Cypher(password)
       implicit val preference = Services.preference(ws)
@@ -83,7 +82,7 @@ package object services {
      * @return
      */
     def dispose(services: Services) = {
-      util.Try(TmpDirectory.dispose(services.tmpDirectory))
+      util.Try(Workspace.clean(services.workspace))
       util.Try(services.threadProvider.stop())
     }
 

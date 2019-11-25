@@ -7,6 +7,7 @@ import org.openmole.core.expansion._
 import org.openmole.core.fileservice._
 import org.openmole.core.networkservice._
 import org.openmole.core.preference._
+import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.task._
@@ -65,7 +66,7 @@ object RTask {
     workDirectory:        OptionalArgument[String]           = None,
     environmentVariables: Seq[EnvironmentVariable] = Vector.empty,
     containerSystem:    ContainerSystem                                    = Proot()
-  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): RTask = {
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): RTask = {
 
     // add additional installation of devtools only if needed
     val installCommands =
@@ -78,7 +79,7 @@ object RTask {
 
     RTask(
       script = script,
-      ContainerTask.prepare(containerSystem, rImage(version), installCommands, workDirectory.option),
+      ContainerTask.prepare(containerSystem, rImage(version), installCommands),
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,

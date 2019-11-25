@@ -6,11 +6,7 @@ import org.openmole.core.workspace.Workspace._
 import org.openmole.tool.file._
 
 object TmpDirectory {
-  def apply(workspace: Workspace): TmpDirectory = {
-    val tmpDirectory = workspace.location / Workspace.tmpLocation /> UUID.randomUUID.toString
-    TmpDirectory(tmpDirectory)
-  }
-
+  def apply(workspace: Workspace): TmpDirectory = TmpDirectory(workspace.tmpDirectory)
   def dispose(newFile: TmpDirectory) = newFile.directory.recursiveDelete
 }
 

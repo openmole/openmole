@@ -52,13 +52,14 @@ object MoleServices {
    * @param _outputRedirection
    * @return
    */
-  def create(applicationExecutionDirectory: File, newFile: Option[TmpDirectory] = None, outputRedirection: Option[OutputRedirection] = None)(implicit preference: Preference, seeder: Seeder, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, _newFile: TmpDirectory, fileService: FileService, workspace: Workspace, _outputRedirection: OutputRedirection, loggerService: LoggerService) = {
-    new MoleServices(applicationExecutionDirectory)(
+  def create(applicationExecutionDirectory: File, moleExecutionDirectory: Option[File] = None, outputRedirection: Option[OutputRedirection] = None)(implicit preference: Preference, seeder: Seeder, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, _newFile: TmpDirectory, fileService: FileService, workspace: Workspace, _outputRedirection: OutputRedirection, loggerService: LoggerService) = {
+    val executionDirectory = moleExecutionDirectory.getOrElse(applicationExecutionDirectory.newDir("execution"))
+    new MoleServices(applicationExecutionDirectory, executionDirectory)(
       preference = preference,
       seeder = Seeder(seeder.newSeed),
       threadProvider = threadProvider,
       eventDispatcher = eventDispatcher,
-      tmpDirectory = newFile.getOrElse(TmpDirectory(_newFile.newDir("execution"))),
+      tmpDirectory = TmpDirectory(executionDirectory),
       workspace = workspace,
       fileService = fileService,
       fileServiceCache = FileServiceCache(),
@@ -82,7 +83,7 @@ object MoleServices {
     workspace:         Workspace         = moleServices.workspace,
     outputRedirection: OutputRedirection = moleServices.outputRedirection,
     loggerService:     LoggerService     = moleServices.loggerService) =
-    new MoleServices(moleServices.applicationExecutionDirectory)(
+    new MoleServices(moleServices.applicationExecutionDirectory, moleServices.moleExecutionDirectory)(
       preference = preference,
       seeder = seeder,
       threadProvider = threadProvider,
@@ -109,7 +110,7 @@ object MoleServices {
  * @param fileServiceCache
  * @param outputRedirection
  */
-class MoleServices(val applicationExecutionDirectory: File)(
+class MoleServices(val applicationExecutionDirectory: File, val moleExecutionDirectory: File)(
   implicit
   val preference:        Preference,
   val seeder:            Seeder,

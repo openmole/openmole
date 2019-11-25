@@ -7,6 +7,7 @@ import org.openmole.core.expansion._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
+import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.task._
@@ -43,11 +44,11 @@ object ScilabTask {
     environmentVariables: Seq[EnvironmentVariable]      = Vector.empty,
     hostFiles:            Seq[HostFile]                 = Vector.empty,
     workDirectory:        OptionalArgument[String]      = None,
-    containerSystem:      ContainerSystem               = Proot())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService): ScilabTask = {
+    containerSystem:      ContainerSystem               = Proot())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): ScilabTask = {
 
     ScilabTask(
       script = script,
-      image = ContainerTask.prepare(containerSystem, scilabImage(version), install, workDirectory.option),
+      image = ContainerTask.prepare(containerSystem, scilabImage(version), install),
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,

@@ -232,6 +232,7 @@ object Application extends JavaLogger {
         }
         else {
           Services.withServices(workspaceDirectory, passwordString, config.proxyURI, logLevel) { services ⇒
+            Runtime.getRuntime.addShutdownHook(thread(Services.dispose(services)))
             val server = new RESTServer(config.port, config.hostName, services, config.httpSubDirectory)
             server.run()
           }
@@ -254,6 +255,7 @@ object Application extends JavaLogger {
           println(consoleUsage)
           Console.dealWithLoadError(loadPlugins, !config.scriptFile.isDefined)
           Services.withServices(workspaceDirectory, passwordString, config.proxyURI, logLevel) { implicit services ⇒
+            Runtime.getRuntime.addShutdownHook(thread(Services.dispose(services)))
             val console = new Console(config.scriptFile)
             console.run(config.args, config.consoleWorkDirectory)
           }
@@ -284,6 +286,7 @@ object Application extends JavaLogger {
             GUIServer.urlFile.content = url
 
             GUIServices.withServices(workspace, config.proxyURI, logLevel) { services ⇒
+              Runtime.getRuntime.addShutdownHook(thread(GUIServices.dispose(services)))
               val server = new GUIServer(port, config.remote, useHTTP, services, config.password, extraHeader, !config.unoptimizedJS, config.httpSubDirectory)
               server.start()
               if (config.browse && !config.remote) browse(url)

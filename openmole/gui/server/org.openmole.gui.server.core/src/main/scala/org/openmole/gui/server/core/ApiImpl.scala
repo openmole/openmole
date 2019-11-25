@@ -356,18 +356,20 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     val script: File = safePathToFile(scriptData.scriptPath)
 
     val executionOutputRedirection = OutputRedirection(outputStream)
-    val executionNewFile = TmpDirectory(services.tmpDirectory.newDir("execution"))
+    val executionTmpDirectory = services.tmpDirectory.newDir("execution")
 
     try {
-      Project.compile(script.getParentFileSafe, script, Seq.empty)(Services.copy(services)(outputRedirection = executionOutputRedirection, newFile = executionNewFile)) match {
+      Project.compile(script.getParentFileSafe, script, Seq.empty)(Services.copy(services)(outputRedirection = executionOutputRedirection, newFile = TmpDirectory(executionTmpDirectory))) match {
         case ScriptFileDoesNotExists() ⇒ Some(message("Script file does not exist"))
         case ErrorInCode(e)            ⇒ Some(error(e))
         case ErrorInCompiler(e)        ⇒ Some(error(e))
         case compiled: Compiled ⇒
-          val executionServices = MoleServices.create(applicationExecutionDirectory = s.tmpDirectory.directory, outputRedirection = Some(executionOutputRedirection), newFile = Some(executionNewFile))
-          onCompiled.foreach {
-            _(execId)
-          }
+          val executionServices =
+            MoleServices.create(
+              applicationExecutionDirectory = s.workspace.tmpDirectory,
+              moleExecutionDirectory = Some(executionTmpDirectory),
+              outputRedirection = Some(executionOutputRedirection))
+          onCompiled.foreach { _(execId) }
           catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
             case Failure(e) ⇒ Some(error(e))
             case Success(dsl) ⇒
