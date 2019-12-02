@@ -92,7 +92,7 @@ object Libraries {
   lazy val scalajsTools = "org.openmole.library" %% "scalajs-tools" % scalajsVersion
   lazy val scalajs = "org.openmole.library" %% "scalajs" % scalajsVersion
   lazy val mgo = "org.openmole.library" %% "mgo" % mgoVersion
-  lazy val monocle = Seq("org.openmole.library" %% "monocle" % "1.5.0", scalaz)
+  lazy val monocle = Seq("org.openmole.library" %% "monocle" % "2.0.0", scalaz)
   lazy val container = "org.openmole.library" %% "container" % containerVersion
   lazy val boopickle = "org.openmole.library" %% "boopickle" % boopickleVersion
   lazy val autowire = "org.openmole.library" %% "autowire" % scalaAutowireVersion
