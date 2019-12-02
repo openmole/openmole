@@ -126,7 +126,7 @@ package object container extends ContainerPackage {
 
   sealed trait ContainerSystem
   case class Proot(noSeccomp: Boolean = false, kernel: String = "3.2.1") extends ContainerSystem
-  case class Docker()
+  case class Singularity(command: String = "singularity") extends ContainerSystem
 
   type PreparedImage = _root_.container.FlatImage
 }

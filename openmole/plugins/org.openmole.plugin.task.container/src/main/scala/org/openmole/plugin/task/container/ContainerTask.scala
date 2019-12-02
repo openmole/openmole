@@ -97,23 +97,69 @@ object ContainerTask {
     proot
   }
 
+  def runCommandInContainer(
+    containerSystem:      ContainerSystem,
+    image:                _root_.container.FlatImage,
+    commands:             Seq[String],
+    volumes:              Seq[(String, String)]           = Seq.empty,
+    environmentVariables: Seq[(String, String)]           = Seq.empty,
+    workDirectory:        Option[String]                  = None,
+    logger:               scala.sys.process.ProcessLogger)(implicit tmpDirectory: TmpDirectory) = {
+    val retCode =
+      containerSystem match {
+        case Proot(noSeccomp, kernel) ⇒
+          tmpDirectory.withTmpDir { directory ⇒
+            val proot = installProot(directory)
+
+            _root_.container.Proot.execute(
+              image,
+              directory / "tmp",
+              commands = commands,
+              proot = proot.getAbsolutePath,
+              logger = logger,
+              kernel = Some(kernel),
+              noSeccomp = noSeccomp,
+              bind = volumes,
+              environmentVariables = environmentVariables,
+              workDirectory = workDirectory
+            )
+          }
+        case Singularity(command) ⇒
+          tmpDirectory.withTmpDir { directory ⇒
+            _root_.container.Singularity.executeFlatImage(
+              image,
+              directory / "tmp",
+              commands = commands,
+              logger = logger,
+              bind = volumes,
+              environmentVariables = environmentVariables,
+              workDirectory = workDirectory,
+              singularityCommand = command
+            )
+          }
+      }
+
+    retCode
+  }
+
   def apply(
-    image:                ContainerImage,
-    command:              Commands,
-    containerSystem:      ContainerSystem                                    = Proot(),
-    install:              Seq[String]                                        = Vector.empty,
-    workDirectory:        OptionalArgument[String]                           = None,
-    hostFiles:            Seq[HostFile]                                      = Vector.empty,
-    environmentVariables: Seq[EnvironmentVariable]                           = Vector.empty,
-    errorOnReturnValue:   Boolean                                            = true,
-    returnValue:          OptionalArgument[Val[Int]]                         = None,
-    stdOut:               OptionalArgument[Val[String]]                      = None,
-    stdErr:               OptionalArgument[Val[String]]                      = None,
-    reuseContainer:       Boolean                                            = true,
-    containerPoolKey:     CacheKey[WithInstance[_root_.container.FlatImage]] = CacheKey())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, tmpDirectory: TmpDirectory, networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, outputRedirection: OutputRedirection, serializerService: SerializerService) = {
+    image:                  ContainerImage,
+    command:                Commands,
+    containerSystem:        ContainerSystem                                    = Proot(),
+    installContainerSystem: ContainerSystem                                    = Proot(),
+    install:                Seq[String]                                        = Vector.empty,
+    workDirectory:          OptionalArgument[String]                           = None,
+    hostFiles:              Seq[HostFile]                                      = Vector.empty,
+    environmentVariables:   Seq[EnvironmentVariable]                           = Vector.empty,
+    errorOnReturnValue:     Boolean                                            = true,
+    returnValue:            OptionalArgument[Val[Int]]                         = None,
+    stdOut:                 OptionalArgument[Val[String]]                      = None,
+    stdErr:                 OptionalArgument[Val[String]]                      = None,
+    reuseContainer:         Boolean                                            = true,
+    containerPoolKey:       CacheKey[WithInstance[_root_.container.FlatImage]] = CacheKey())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, tmpDirectory: TmpDirectory, networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, outputRedirection: OutputRedirection, serializerService: SerializerService) = {
     new ContainerTask(
       containerSystem,
-      prepare(containerSystem, image, install),
+      prepare(installContainerSystem, image, install),
       command,
       workDirectory = workDirectory.option,
       errorOnReturnValue = errorOnReturnValue,
@@ -160,27 +206,9 @@ object ContainerTask {
   def executeInstall(containerSystem: ContainerSystem, image: _root_.container.FlatImage, install: Seq[String])(implicit tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection) =
     if (install.isEmpty) image
     else {
-      val retCode =
-        tmpDirectory.withTmpDir { directory ⇒
-          val (proot, noSeccomp, kernel) =
-            containerSystem match {
-              case proot: Proot ⇒ (installProot(directory), proot.noSeccomp, proot.kernel)
-            }
-
-          _root_.container.Proot.execute(
-            image,
-            directory / "tmp",
-            commands = install,
-            proot = proot.getAbsolutePath,
-            logger = scala.sys.process.ProcessLogger.apply(s ⇒ outputRedirection.output.println(s), s ⇒ outputRedirection.error.println(s)),
-            kernel = Some(kernel),
-            noSeccomp = noSeccomp
-          )
-        }
-
+      val retCode = runCommandInContainer(containerSystem, image, install, logger = scala.sys.process.ProcessLogger.apply(s ⇒ outputRedirection.output.println(s), s ⇒ outputRedirection.error.println(s)))
       if (retCode != 0) throw new UserBadDataError(s"Process exited a non 0 return code ($retCode)")
       image
-
     }
 
   def localImage(image: ContainerImage, containerDirectory: File)(implicit networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, tmpDirectory: TmpDirectory) =
@@ -227,13 +255,13 @@ import ContainerTask._
   override def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
     import parameters._
 
-    val (proot, noSeccomp, kernel) =
-      containerSystem match {
-        case proot: Proot ⇒
-          executionContext.lockRepository.withLock(ContainerTask.installLockKey) {
-            (ContainerTask.installProot(executionContext.moleExecutionDirectory), proot.noSeccomp, proot.kernel)
-          }
-      }
+    //    val (proot, noSeccomp, kernel) =
+    //      containerSystem match {
+    //        case proot: Proot ⇒
+    //          executionContext.lockRepository.withLock(ContainerTask.installLockKey) {
+    //            (ContainerTask.installProot(executionContext.moleExecutionDirectory), proot.noSeccomp, proot.kernel)
+    //          }
+    //      }
 
     def createPool =
       WithInstance { () ⇒
@@ -292,18 +320,29 @@ import ContainerTask._
         environmentVariables.map { v ⇒ v.name.from(preparedContext) -> v.value.from(preparedContext) }
 
       val retCode =
-        _root_.container.Proot.execute(
-          container,
-          executionContext.taskExecutionDirectory / "tmp",
+        runCommandInContainer(
+          containerSystem,
+          image = container,
           commands = command.value.map(_.from(context)),
           workDirectory = Some(workDirectoryValue),
-          proot = proot.getAbsolutePath,
           logger = scala.sys.process.ProcessLogger.apply(processOutput, processErr),
-          noSeccomp = noSeccomp,
-          kernel = Some(kernel),
-          bind = volumes,
+          volumes = volumes,
           environmentVariables = containerEnvironmentVariables
         )
+
+      //      val retCode =
+      //        _root_.container.Proot.execute(
+      //          container,
+      //          executionContext.taskExecutionDirectory / "tmp",
+      //          commands = command.value.map(_.from(context)),
+      //          workDirectory = Some(workDirectoryValue),
+      //          proot = proot.getAbsolutePath,
+      //          logger = scala.sys.process.ProcessLogger.apply(processOutput, processErr),
+      //          noSeccomp = noSeccomp,
+      //          kernel = Some(kernel),
+      //          bind = volumes,
+      //          environmentVariables = containerEnvironmentVariables
+      //        )
 
       if (errorOnReturnValue && !returnValue.isDefined && retCode != 0)
         throw new UserBadDataError(s"Process exited a non 0 return code ($retCode), you can chose ignore this by settings errorOnReturnValue = true")
