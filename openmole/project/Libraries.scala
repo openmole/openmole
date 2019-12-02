@@ -143,6 +143,6 @@ object Libraries {
   lazy val equinoxOSGi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.13.200"
   lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.3.1"
 
-  lazy val shapeless = "org.openmole.library" %% "com-chuusai-shapeless" % "2.3.2"
+  lazy val shapeless = "org.openmole.library" %% "com-chuusai-shapeless" % "2.3.3"
 
 }
