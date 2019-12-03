@@ -332,14 +332,14 @@ lazy val scalaz = OsgiProject(dir, "org.scalaz", exports = Seq("!scala.*","*")) 
 
 val monocleVersion = "2.0.0"
 lazy val monocle = OsgiProject(dir, "monocle",
-  privatePackages = Seq("!scala.*", "!scalaz.*", "!shapeless.*", "*"),
-  imports = Seq("scala.*", "shapeless.*", "scalaz.*")) settings(
+  privatePackages = Seq("!scala.*", "!scalaz.*", "!shapeless.*", "!cats.*", "*"),
+  imports = Seq("scala.*", "shapeless.*", "scalaz.*", "cats.*")) settings(
   libraryDependencies ++= Seq (
     "com.github.julien-truffaut" %% "monocle-core",
     "com.github.julien-truffaut" %% "monocle-generic",
     "com.github.julien-truffaut" %% "monocle-macro"
   ).map(_ % monocleVersion),
-  version := monocleVersion) settings(settings: _*) dependsOn(shapeless, scalaz)
+  version := monocleVersion) settings(settings: _*) dependsOn(shapeless, scalaz, cats)
 
 val asmVersion = "5.1"
 
