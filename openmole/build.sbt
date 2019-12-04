@@ -508,7 +508,7 @@ lazy val fileSource = OsgiProject(pluginDir, "org.openmole.plugin.source.file", 
 
 /* Task */
 
-def allTask = Seq(toolsTask, external, netLogo, netLogo5, netLogo6, jvm, scala, template, systemexec, container, udocker, r, scilab, python, timing)
+def allTask = Seq(toolsTask, external, netLogo, netLogo5, netLogo6, jvm, scala, template, systemexec, container, r, scilab, python, timing)
 
 lazy val toolsTask = OsgiProject(pluginDir, "org.openmole.plugin.task.tools", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings: _*)
 
@@ -534,16 +534,11 @@ lazy val container = OsgiProject(pluginDir, "org.openmole.plugin.task.container"
   libraryDependencies += Libraries.container
 )
 
-lazy val udocker = OsgiProject(pluginDir, "org.openmole.plugin.task.udocker", imports = Seq("!jawn.*", "*")) dependsOn(systemexec, container, openmoleOutputRedirection, networkService, services) settings(
-  libraryDependencies += Libraries.scalatest,
-  libraryDependencies += Libraries.circe,
-  libraryDependencies ++= Libraries.httpClient) settings (pluginSettings: _*)
+lazy val r = OsgiProject(pluginDir, "org.openmole.plugin.task.r", imports = Seq("*")) dependsOn (container, json) settings (pluginSettings: _*)
 
-lazy val r = OsgiProject(pluginDir, "org.openmole.plugin.task.r", imports = Seq("*")) dependsOn (udocker, json) settings (pluginSettings: _*)
+lazy val scilab = OsgiProject(pluginDir, "org.openmole.plugin.task.scilab", imports = Seq("*")) dependsOn (container) settings (pluginSettings: _*)
 
-lazy val scilab = OsgiProject(pluginDir, "org.openmole.plugin.task.scilab", imports = Seq("*")) dependsOn (udocker) settings (pluginSettings: _*)
-
-lazy val python = OsgiProject(pluginDir, "org.openmole.plugin.task.python", imports = Seq("*")) dependsOn (udocker, json) settings (pluginSettings: _*)
+lazy val python = OsgiProject(pluginDir, "org.openmole.plugin.task.python", imports = Seq("*")) dependsOn (container, json) settings (pluginSettings: _*)
 
 lazy val timing = OsgiProject(pluginDir, "org.openmole.plugin.task.timing", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings: _*)
 

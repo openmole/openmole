@@ -129,4 +129,23 @@ package object container extends ContainerPackage {
   case class Singularity(command: String = "singularity") extends ContainerSystem
 
   type PreparedImage = _root_.container.FlatImage
+
+  /**
+   * Trait for either string scripts or script file runnable in tasks based on the container task
+   */
+  object RunnableScript {
+    implicit def stringToRunnableScript(s: String): RunnableScript = RawScript(s)
+    implicit def fileToRunnableScript(f: File): RunnableScript = FileScript(f)
+
+    def content(script: RunnableScript): String = {
+      script match {
+        case RawScript(s)  ⇒ s
+        case FileScript(f) ⇒ f.content
+      }
+    }
+  }
+
+  sealed trait RunnableScript
+  case class RawScript(rawscript: String) extends RunnableScript
+  case class FileScript(file: File) extends RunnableScript
 }

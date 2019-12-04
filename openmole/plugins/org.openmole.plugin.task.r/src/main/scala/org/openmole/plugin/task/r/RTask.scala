@@ -17,7 +17,6 @@ import org.openmole.plugin.task.container
 import org.openmole.plugin.task.container.ContainerTask.prepare
 import org.openmole.plugin.task.container._
 import org.openmole.plugin.task.external._
-import org.openmole.plugin.task.udocker._
 import org.openmole.plugin.tool.json._
 import org.openmole.tool.outputredirection.OutputRedirection
 
