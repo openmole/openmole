@@ -18,15 +18,14 @@ package org.openmole.gui.server.core
  */
 
 import java.util.concurrent.Semaphore
-import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 
+import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 import org.eclipse.jetty.server.{ Server, ServerConnector }
 import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.webapp._
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.scalatra.servlet.ScalatraListener
 import javax.servlet.ServletContext
-
 import org.scalatra._
 import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
 import org.openmole.core.fileservice.FileService
@@ -37,6 +36,8 @@ import org.openmole.core.services._
 import org.openmole.tool.crypto.KeyStore
 import org.openmole.tool.network.Network
 import org.openmole.core.location._
+
+import scala.xml.XML
 
 object GUIServer {
 
@@ -105,9 +106,10 @@ class StartingPage extends ScalatraServlet with LifeCycle {
   }
 
   get("/*") {
+
     def content =
       <html>
-        <meta http-equiv="refresh" content="3;url=/"/>
+        <meta http-equiv="refresh" content={ "3;url=" + request.uri }/>
         <link href="/css/style.css" rel="stylesheet"/>
         <body>
           <div>OpenMOLE is launching...<div class="loader" style="float: right"></div><br/></div>
