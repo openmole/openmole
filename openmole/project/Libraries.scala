@@ -26,7 +26,7 @@ object Libraries {
   lazy val json4sVersion = "3.5.0"
   lazy val circeVersion = "0.12.2"
   lazy val catsVersion = "2.0.0"
-  lazy val scalajsVersion = "0.6.29"
+  lazy val scalajsVersion = "0.6.31"
   lazy val squantsVersion = "1.5.0"
   lazy val xstreamVersion = "1.4.11.1"
   lazy val scalaURIVersion = "1.1.1"
