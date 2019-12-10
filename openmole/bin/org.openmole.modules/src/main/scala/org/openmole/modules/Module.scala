@@ -31,7 +31,7 @@ import org.openmole.plugin.method.sensitivity.MorrisSampling
 import org.openmole.plugin.sampling.csv.CSVSampling
 import org.openmole.plugin.sampling.lhs.LHS
 import org.openmole.plugin.sampling.quasirandom.SobolSampling
-import org.openmole.plugin.task.care.CARETask
+import org.openmole.plugin.task.container.ContainerTask
 import org.openmole.plugin.task.netlogo5.NetLogo5Task
 import org.openmole.plugin.task.systemexec.SystemExecTask
 import org.openmole.plugin.task.template.TemplateTask
@@ -56,7 +56,7 @@ object module {
       ModuleEntry("SGE", "Delegate workload to an SGE cluster", components(SGEEnvironment)),
       ModuleEntry("SLURM", "Delegate workload to a SLURM cluster", components(SLURMEnvironment)),
       ModuleEntry("SSH", "Delegate workload to a server via SSH", components(SSHEnvironment)),
-      ModuleEntry("CARE", "Execute CARE archive", components[CARETask]),
+      ModuleEntry("Container", "Execute a container", components[ContainerTask]),
       ModuleEntry("NetLogo5", "Execute NetLogo 5 simulation models", components[NetLogo5Task]),
       ModuleEntry("SystemExec", "Execute system command", components[SystemExecTask]),
       ModuleEntry("Template", "Generate files", components[TemplateTask]),
