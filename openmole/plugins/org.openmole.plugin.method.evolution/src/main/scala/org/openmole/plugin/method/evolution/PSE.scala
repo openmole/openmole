@@ -81,6 +81,7 @@ object PSEAlgorithm {
 
   def adaptiveBreeding[S, P](
     lambda:              Int,
+    filter:              Option[CDGenome.Genome ⇒ Boolean],
     operatorExploration: Double,
     discrete:            Vector[D],
     pattern:             P ⇒ Vector[Int],
@@ -95,6 +96,7 @@ object PSEAlgorithm {
       Individual.phenotype[P].get _ andThen pattern,
       buildGenome,
       lambda,
+      filter,
       operatorExploration,
       hitmap)
 
@@ -134,6 +136,7 @@ object NoisyPSEAlgorithm {
 
   def adaptiveBreeding[S, P: Manifest](
     lambda:              Int,
+    filter:              Option[Genome ⇒ Boolean],
     operatorExploration: Double,
     cloneProbability:    Double,
     aggregation:         Vector[P] ⇒ Vector[Double],
@@ -150,6 +153,7 @@ object NoisyPSEAlgorithm {
       vectorPhenotype.get _ andThen aggregation andThen pattern,
       buildGenome,
       lambda,
+      filter,
       operatorExploration,
       cloneProbability,
       hitmap)
@@ -215,7 +219,8 @@ object PSE {
     pattern:             Vector[Double] ⇒ Vector[Int],
     genome:              Genome,
     objectives:          Seq[ExactObjective[_]],
-    operatorExploration: Double
+    operatorExploration: Double,
+    filter:              Option[Condition]
   )
 
   object DeterministicParams {
@@ -264,15 +269,18 @@ object PSE {
 
         private def pattern(p: Array[Any]) = om.pattern(ExactObjective.toFitnessFunction(om.objectives)(p))
 
-        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) =
-          Genome.discrete(om.genome).map { discrete ⇒
-            PSEAlgorithm.adaptiveBreeding[S, Array[Any]](
-              n,
-              om.operatorExploration,
-              discrete,
-              pattern,
-              EvolutionState.s)(s, individuals, rng)
-          }
+        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
+          import p._
+          val discrete = Genome.discrete(om.genome).from(context)
+          val filterValue = om.filter.map(f ⇒ GAIntegration.filterValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+          PSEAlgorithm.adaptiveBreeding[S, Array[Any]](
+            n,
+            filterValue,
+            om.operatorExploration,
+            discrete,
+            pattern,
+            EvolutionState.s)(s, individuals, rng)
+        }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           Genome.continuous(om.genome).map { continuous ⇒
@@ -297,7 +305,8 @@ object PSE {
     objectives:          Seq[NoisyObjective[_]],
     historySize:         Int,
     cloneProbability:    Double,
-    operatorExploration: Double)
+    operatorExploration: Double,
+    filter:              Option[Condition])
 
   object StochasticParams {
 
@@ -345,17 +354,20 @@ object PSE {
             NoisyPSEAlgorithm.initialGenomes(n, continuous, discrete, rng)
           }
 
-        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) =
-          Genome.discrete(om.genome).map { discrete ⇒
-            NoisyPSEAlgorithm.adaptiveBreeding[S, Array[Any]](
-              n,
-              om.operatorExploration,
-              om.cloneProbability,
-              NoisyObjective.aggregate(om.objectives),
-              discrete,
-              om.pattern,
-              EvolutionState.s) apply (s, individuals, rng)
-          }
+        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
+          import p._
+          val discrete = Genome.discrete(om.genome).from(context)
+          val filterValue = om.filter.map(f ⇒ GAIntegration.filterValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+          NoisyPSEAlgorithm.adaptiveBreeding[S, Array[Any]](
+            n,
+            filterValue,
+            om.operatorExploration,
+            om.cloneProbability,
+            NoisyObjective.aggregate(om.objectives),
+            discrete,
+            om.pattern,
+            EvolutionState.s) apply (s, individuals, rng)
+        }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           Genome.continuous(om.genome).map { continuous ⇒
@@ -401,7 +413,8 @@ object PSE {
   def apply(
     genome:     Genome,
     objectives: Seq[PatternAxe],
-    stochastic: OptionalArgument[Stochastic] = None
+    stochastic: OptionalArgument[Stochastic] = None,
+    filter:     OptionalArgument[Condition]  = None
   ) =
     WorkflowIntegration.stochasticity(objectives.map(_.p), stochastic.option) match {
       case None ⇒
@@ -412,7 +425,8 @@ object PSE {
             mgo.evolution.niche.irregularGrid(objectives.map(_.scale).toVector),
             genome,
             exactObjectives,
-            operatorExploration),
+            operatorExploration,
+            filter = filter.option),
           genome,
           exactObjectives)(DeterministicParams.integration)
 
@@ -427,7 +441,8 @@ object PSE {
             objectives = noisyObjectives,
             historySize = stochasticValue.replications,
             cloneProbability = stochasticValue.reevaluate,
-            operatorExploration = operatorExploration),
+            operatorExploration = operatorExploration,
+            filter = filter.option),
           genome,
           noisyObjectives,
           stochasticValue)(StochasticParams.integration)
@@ -447,6 +462,7 @@ object PSEEvolution {
     evaluation:   DSL,
     termination:  OMTermination,
     stochastic:   OptionalArgument[Stochastic] = None,
+    filter:       OptionalArgument[Condition]  = None,
     parallelism:  Int                          = 1,
     distribution: EvolutionPattern             = SteadyState(),
     suggestion:   Suggestion                   = Suggestion.empty,
@@ -456,7 +472,8 @@ object PSEEvolution {
         PSE(
           genome = genome,
           objectives = objectives,
-          stochastic = stochastic
+          stochastic = stochastic,
+          filter = filter
         ),
       evaluation = evaluation,
       termination = termination,

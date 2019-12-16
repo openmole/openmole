@@ -25,7 +25,8 @@ object OSE {
     limit:               Vector[Double],
     genome:              Genome,
     objectives:          Seq[ExactObjective[_]],
-    operatorExploration: Double)
+    operatorExploration: Double,
+    filter:              Option[Condition])
 
   object DeterministicParams {
 
@@ -72,15 +73,18 @@ object OSE {
             MGOOSE.initialGenomes(n, continuous, discrete, rng)
           }
 
-        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) =
-          Genome.discrete(om.genome).map { discrete ⇒
-            MGOOSE.adaptiveBreeding[Array[Any]](
-              n,
-              om.operatorExploration,
-              discrete,
-              om.origin,
-              ExactObjective.toFitnessFunction(om.objectives)) apply (s, individuals, rng)
-          }
+        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
+          import p._
+          val discrete = Genome.discrete(om.genome).from(context)
+          val filterValue = om.filter.map(f ⇒ GAIntegration.filterValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+          MGOOSE.adaptiveBreeding[Array[Any]](
+            n,
+            om.operatorExploration,
+            discrete,
+            om.origin,
+            ExactObjective.toFitnessFunction(om.objectives),
+            filterValue) apply (s, individuals, rng)
+        }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           Genome.continuous(om.genome).map { continuous ⇒
@@ -104,7 +108,8 @@ object OSE {
     objectives:          Seq[NoisyObjective[_]],
     historySize:         Int,
     cloneProbability:    Double,
-    operatorExploration: Double)
+    operatorExploration: Double,
+    filter:              Option[Condition])
 
   object StochasticParams {
 
@@ -152,17 +157,21 @@ object OSE {
             MGONoisyOSE.initialGenomes(n, continuous, discrete, rng)
           }
 
-        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) =
-          Genome.discrete(om.genome).map { discrete ⇒
-            MGONoisyOSE.adaptiveBreeding[Array[Any]](
-              n,
-              om.operatorExploration,
-              om.cloneProbability,
-              NoisyObjective.aggregate(om.objectives),
-              discrete,
-              om.origin,
-              om.limit) apply (s, individuals, rng)
-          }
+        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
+          import p._
+          val discrete = Genome.discrete(om.genome).from(context)
+          val filterValue = om.filter.map(f ⇒ GAIntegration.filterValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+
+          MGONoisyOSE.adaptiveBreeding[Array[Any]](
+            n,
+            om.operatorExploration,
+            om.cloneProbability,
+            NoisyObjective.aggregate(om.objectives),
+            discrete,
+            om.origin,
+            om.limit,
+            filterValue) apply (s, individuals, rng)
+        }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           Genome.continuous(om.genome).map { continuous ⇒
@@ -265,7 +274,8 @@ object OSE {
     objectives: Seq[FitnessPattern],
     genome:     Genome                       = Seq(),
     mu:         Int                          = 200,
-    stochastic: OptionalArgument[Stochastic] = None): EvolutionWorkflow =
+    stochastic: OptionalArgument[Stochastic] = None,
+    filter:     OptionalArgument[Condition]  = None): EvolutionWorkflow =
     WorkflowIntegration.stochasticity(objectives.map(_.objective), stochastic.option) match {
       case None ⇒
         val exactObjectives = FitnessPattern.toObjectives(objectives).map(o ⇒ Objective.toExact(o))
@@ -279,7 +289,8 @@ object OSE {
               genome = fg,
               objectives = exactObjectives,
               limit = FitnessPattern.toLimit(objectives),
-              operatorExploration = operatorExploration),
+              operatorExploration = operatorExploration,
+              filter = filter.option),
             fg,
             exactObjectives
           )
@@ -299,7 +310,8 @@ object OSE {
               limit = FitnessPattern.toLimit(objectives),
               operatorExploration = operatorExploration,
               historySize = stochasticValue.replications,
-              cloneProbability = stochasticValue.reevaluate),
+              cloneProbability = stochasticValue.reevaluate,
+              filter = filter.option),
             fg,
             noisyObjectives,
             stochasticValue
@@ -322,6 +334,7 @@ object OSEEvolution {
     mu:           Int                          = 200,
     genome:       Genome                       = Seq(),
     stochastic:   OptionalArgument[Stochastic] = None,
+    filter:       OptionalArgument[Condition]  = None,
     parallelism:  Int                          = 1,
     distribution: EvolutionPattern             = SteadyState(),
     suggestion:   Suggestion                   = Suggestion.empty,
@@ -333,7 +346,8 @@ object OSEEvolution {
           genome = genome,
           objectives = objectives,
           stochastic = stochastic,
-          mu = mu
+          mu = mu,
+          filter = filter
         ),
       evaluation = evaluation,
       termination = termination,

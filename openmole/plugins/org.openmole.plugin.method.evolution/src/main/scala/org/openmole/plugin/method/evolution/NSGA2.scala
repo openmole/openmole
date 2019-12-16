@@ -17,23 +17,10 @@
 
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.context.{ Context, Val, Variable }
-import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.tools.OptionalArgument
-import cats._
-import cats.data._
 import cats.implicits._
-import mgo.evolution._
-import mgo.evolution.algorithm._
-import mgo.evolution.breeding._
-import mgo.evolution.elitism._
-import mgo.evolution.niche._
 import monocle.macros.GenLens
-import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
-import org.openmole.core.workflow.composition.DSLContainer
-import org.openmole.core.workflow.domain._
-import org.openmole.core.workflow.sampling._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 import org.openmole.plugin.method.evolution.Genome.Suggestion
 import squants.time.Time
 
@@ -42,9 +29,7 @@ import scala.language.higherKinds
 object NSGA2 {
 
   object DeterministicParams {
-    import mgo.evolution.algorithm.{ NSGA2 ⇒ MGONSGA2, _ }
-    import mgo.evolution.algorithm.CDGenome
-    import cats.data._
+    import mgo.evolution.algorithm.{ CDGenome, NSGA2 ⇒ MGONSGA2, _ }
 
     implicit def integration: MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Array[Any]] = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Array[Any]] {
       type G = CDGenome.Genome
@@ -58,12 +43,17 @@ object NSGA2 {
       def operations(om: DeterministicParams) = new Ops {
 
         def startTimeLens = GenLens[EvolutionState[Unit]](_.startTime)
+
         def generationLens = GenLens[EvolutionState[Unit]](_.generation)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
+
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+
         def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
+
         def buildIndividual(genome: G, phenotype: Array[Any], context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
+
         def initialState = EvolutionState[Unit](s = ())
 
         def result(population: Vector[I], state: S) = FromContext { p ⇒
@@ -81,10 +71,12 @@ object NSGA2 {
             MGONSGA2.initialGenomes(n, continuous, discrete, rng)
           }
 
-        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) =
-          Genome.discrete(om.genome).map { discrete ⇒
-            MGONSGA2.adaptiveBreeding[S, Array[Any]](n, om.operatorExploration, discrete, ExactObjective.toFitnessFunction(om.objectives))(s, individuals, rng)
-          }
+        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
+          import p._
+          val discrete = Genome.discrete(om.genome).from(context)
+          val filterValue = om.filter.map(f ⇒ GAIntegration.filterValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+          MGONSGA2.adaptiveBreeding[S, Array[Any]](n, om.operatorExploration, discrete, ExactObjective.toFitnessFunction(om.objectives), filterValue)(s, individuals, rng)
+        }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           Genome.continuous(om.genome).map { continuous ⇒
@@ -108,12 +100,11 @@ object NSGA2 {
     mu:                  Int,
     genome:              Genome,
     objectives:          Seq[ExactObjective[_]],
-    operatorExploration: Double)
+    operatorExploration: Double,
+    filter:              Option[Condition])
 
   object StochasticParams {
-    import mgo.evolution.algorithm.{ NoisyNSGA2 ⇒ MGONoisyNSGA2, _ }
-    import mgo.evolution.algorithm.CDGenome
-    import cats.data._
+    import mgo.evolution.algorithm.{ CDGenome, NoisyNSGA2 ⇒ MGONoisyNSGA2, _ }
 
     implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Array[Any]] {
       type G = CDGenome.Genome
@@ -155,10 +146,12 @@ object NSGA2 {
             MGONoisyNSGA2.initialGenomes(n, continuous, discrete, rng)
           }
 
-        def breeding(individuals: Vector[I], n: Int, s: S, rng: util.Random) =
-          Genome.discrete(om.genome).map { discrete ⇒
-            MGONoisyNSGA2.adaptiveBreeding[S, Array[Any]](n, om.operatorExploration, om.cloneProbability, aggregate, discrete) apply (s, individuals, rng)
-          }
+        def breeding(individuals: Vector[I], n: Int, s: S, rng: util.Random) = FromContext { p ⇒
+          import p._
+          val discrete = Genome.discrete(om.genome).from(context)
+          val filterValue = om.filter.map(f ⇒ GAIntegration.filterValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+          MGONoisyNSGA2.adaptiveBreeding[S, Array[Any]](n, om.operatorExploration, om.cloneProbability, aggregate, discrete, filterValue) apply (s, individuals, rng)
+        }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: util.Random) =
           Genome.continuous(om.genome).map { continuous ⇒
@@ -183,20 +176,22 @@ object NSGA2 {
     genome:              Genome,
     objectives:          Seq[NoisyObjective[_]],
     historySize:         Int,
-    cloneProbability:    Double
+    cloneProbability:    Double,
+    filter:              Option[Condition]
   )
 
   def apply[P](
     genome:     Genome,
     objectives: Objectives,
     mu:         Int                          = 200,
-    stochastic: OptionalArgument[Stochastic] = None
+    stochastic: OptionalArgument[Stochastic] = None,
+    filter:     OptionalArgument[Condition]  = None
   ): EvolutionWorkflow =
     WorkflowIntegration.stochasticity(objectives, stochastic.option) match {
       case None ⇒
         val exactObjectives = objectives.map(o ⇒ Objective.toExact(o))
         val integration: WorkflowIntegration.DeterministicGA[_] = WorkflowIntegration.DeterministicGA(
-          DeterministicParams(mu, genome, exactObjectives, operatorExploration),
+          DeterministicParams(mu, genome, exactObjectives, operatorExploration, filter),
           genome,
           exactObjectives
         )(DeterministicParams.integration)
@@ -206,7 +201,7 @@ object NSGA2 {
         val noisyObjectives = objectives.map(o ⇒ Objective.toNoisy(o))
 
         val integration: WorkflowIntegration.StochasticGA[_] = WorkflowIntegration.StochasticGA(
-          StochasticParams(mu, operatorExploration, genome, noisyObjectives, stochasticValue.replications, stochasticValue.reevaluate),
+          StochasticParams(mu, operatorExploration, genome, noisyObjectives, stochasticValue.replications, stochasticValue.reevaluate, filter.option),
           genome,
           noisyObjectives,
           stochasticValue
@@ -228,6 +223,7 @@ object NSGA2Evolution {
     termination:  OMTermination,
     mu:           Int                          = 200,
     stochastic:   OptionalArgument[Stochastic] = None,
+    filter:       OptionalArgument[Condition]  = None,
     parallelism:  Int                          = 1,
     distribution: EvolutionPattern             = SteadyState(),
     suggestion:   Suggestion                   = Suggestion.empty,
@@ -238,7 +234,8 @@ object NSGA2Evolution {
           mu = mu,
           genome = genome,
           objectives = objectives,
-          stochastic = stochastic
+          stochastic = stochastic,
+          filter = filter
         ),
       evaluation = evaluation,
       termination = termination,

@@ -145,11 +145,13 @@ lazy val netlogo6 = OsgiProject(
   "ccl.northwestern.edu.netlogo6",
   exports = Seq("org.nlogo.*"),
   privatePackages = Seq("**"),
-  imports = Seq("!*")) settings (
+  imports = Seq("empty;resolution:=optional")) settings (
   //resolvers += Resolver.bintrayRepo("netlogo", "NetLogo-JVM"),
   libraryDependencies ++= Seq(
     "org.nlogo" % "netlogo" % netLogo6Version % "provided" from s"https://dl.bintray.com/netlogo/NetLogo-JVM/org/nlogo/netlogo/$netLogo6Version/netlogo-$netLogo6Version.jar",
     "org.scala-lang" % "scala-library" % "2.12.8" % "provided",
+    //"org.scala-lang" % "scala-reflect" % "2.12.8" % "provided",
+    //"org.scala-lang" % "scala-compiler" % "2.12.8" % "provided",
     "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.5" % "provided",
     "commons-codec" % "commons-codec" % "1.10" % "provided",
     "org.ow2.asm" % "asm-all" % "5.0.4" % "provided",
@@ -157,7 +159,7 @@ lazy val netlogo6 = OsgiProject(
     "org.parboiled" %% "parboiled" % "2.1.3" % "provided",
     "com.typesafe" % "config" % "1.3.1" % "provided",
     "net.lingala.zip4j" % "zip4j" % "1.3.2" % "provided"
-  ), version := netLogo6Version, scalaVersion := "2.12.8", crossPaths := false) settings(settings: _*)
+  ), version := netLogo6Version, scalaVersion := "2.12.8", crossPaths := false) settings(settings: _*) 
 
 lazy val scalaTagsVersion = "0.6.5"
 lazy val scalaRxVersion = "0.4.0"
@@ -225,7 +227,7 @@ lazy val squants =
   ) settings(settings: _*)
 
 
-lazy val mgoVersion = "3.38"
+lazy val mgoVersion = "3.39"
 
 lazy val mgo = OsgiProject(dir, "mgo", exports = Seq("mgo.*", "freestyle.*"), imports = Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "*"), privatePackages = Seq("!scala.*", "!monocle.*", "!org.apache.commons.math3.*", "!cats.*", "!squants.*", "!scalaz.*", "*")) settings(
   libraryDependencies += "org.openmole" %% "mgo" % mgoVersion,

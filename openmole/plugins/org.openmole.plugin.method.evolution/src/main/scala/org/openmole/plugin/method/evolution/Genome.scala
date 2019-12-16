@@ -174,7 +174,7 @@ object Genome {
     fromVariables0(genome.toList, List(), List())
   }
 
-  def toVariables(genome: Genome, continuousValues: Vector[Double], discreteValue: Vector[Int], scale: Boolean) = {
+  def toVariables(genome: Genome, continuousValues: Vector[Double], discreteValue: Vector[Int], scale: Boolean = true) = {
 
     @tailrec def toVariables0(genome: List[Genome.GenomeBound], continuousValues: List[Double], discreteValues: List[Int], acc: List[FromContext[Variable[_]]]): FromContext[Vector[Variable[_]]] = {
       genome match {

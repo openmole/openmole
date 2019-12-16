@@ -230,6 +230,14 @@ object GAIntegration {
   def namespace = Namespace("evolution")
   def samples = Val[Int]("samples", namespace)
 
+  def genomeToVariable(
+    genome: Genome,
+    values: (Vector[Double], Vector[Int]),
+    scale:  Boolean) = {
+    val (continuous, discrete) = values
+    Genome.toVariables(genome, continuous, discrete, scale)
+  }
+
   def genomesOfPopulationToVariables[I](
     genome: Genome,
     values: Vector[(Vector[Double], Vector[Int])],
@@ -256,6 +264,12 @@ object GAIntegration {
           phenotypeValues.map(_(i)).toArray
         )
     }
+
+  def filterValue[G](filter: Condition, genome: Genome, continuous: G ⇒ Vector[Double], discrete: G ⇒ Vector[Int]) = FromContext { p ⇒ (g: G) ⇒
+    import p._
+    val genomeVariables = GAIntegration.genomeToVariable(genome, (continuous(g), discrete(g)), scale = true).from(context)
+    filter.from(genomeVariables)
+  }
 
 }
 

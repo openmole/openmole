@@ -32,6 +32,7 @@ object Profile {
     genome:     Genome,
     objective:  Objective[_],
     stochastic: OptionalArgument[Stochastic] = None,
+    filter:     OptionalArgument[Condition]  = None,
     nicheSize:  OptionalArgument[Int]        = None
   ) = {
     stochastic.option match {
@@ -40,7 +41,8 @@ object Profile {
           Vector(NichedNSGA2.NichedElement.Continuous(x, nX)),
           genome,
           objectives = Seq(objective),
-          nicheSize = nicheSize.option.getOrElse(1)
+          nicheSize = nicheSize.option.getOrElse(1),
+          filter = filter
         )
       case Some(stochastic) ⇒
         NichedNSGA2(
@@ -48,7 +50,8 @@ object Profile {
           genome,
           Seq(objective),
           nicheSize.option.getOrElse(10),
-          stochastic = stochastic
+          stochastic = stochastic,
+          filter = filter
         )
     }
   }
@@ -68,6 +71,7 @@ object ProfileEvolution {
     termination:  OMTermination,
     nicheSize:    OptionalArgument[Int]        = None,
     stochastic:   OptionalArgument[Stochastic] = None,
+    filter:       OptionalArgument[Condition]  = None,
     parallelism:  Int                          = 1,
     distribution: EvolutionPattern             = SteadyState(),
     suggestion:   Suggestion                   = Suggestion.empty,
@@ -80,7 +84,8 @@ object ProfileEvolution {
           genome = genome,
           objective = objective,
           stochastic = stochastic,
-          nicheSize = nicheSize
+          nicheSize = nicheSize,
+          filter = filter
         ),
       evaluation = evaluation,
       termination = termination,

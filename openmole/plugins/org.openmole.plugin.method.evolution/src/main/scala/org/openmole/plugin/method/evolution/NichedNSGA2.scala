@@ -2,7 +2,7 @@ package org.openmole.plugin.method.evolution
 
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.expansion.{ FromContext, Condition }
 import org.openmole.core.workflow.tools.OptionalArgument
 import cats._
 import cats.implicits._
@@ -59,7 +59,7 @@ object NichedNSGA2Algorithm {
   def initialGenomes(lambda: Int, continuous: Vector[C], discrete: Vector[D], rng: scala.util.Random) =
     CDGenome.initialGenomes(lambda, continuous, discrete, rng)
 
-  def adaptiveBreeding[S, P](lambda: Int, operatorExploration: Double, discrete: Vector[D], fitness: P ⇒ Vector[Double]) =
+  def adaptiveBreeding[S, P](lambda: Int, filter: Option[Genome ⇒ Boolean], operatorExploration: Double, discrete: Vector[D], fitness: P ⇒ Vector[Double]) =
     NSGA2Operations.adaptiveBreeding[S, Individual[P], Genome](
       i ⇒ fitness(i.phenotype),
       Individual.genome.get,
@@ -71,6 +71,7 @@ object NichedNSGA2Algorithm {
       buildGenome,
       logOfPopulationSize,
       lambda,
+      filter,
       operatorExploration)
 
   def expression[P](fitness: (Vector[Double], Vector[Int]) ⇒ P, components: Vector[C]): Genome ⇒ Individual[P] =
@@ -135,7 +136,7 @@ object NoisyNichedNSGA2Algorithm {
   def gridObjectiveProfile[P: Manifest](aggregation: Vector[P] ⇒ Vector[Double], x: Int, intervals: Vector[Double]): Niche[Individual[P], Int] =
     mgo.evolution.niche.gridContinuousProfile[Individual[P]](aggregatedFitness(aggregation), x, intervals)
 
-  def adaptiveBreeding[S, P: Manifest](lambda: Int, operatorExploration: Double, cloneProbability: Double, aggregation: Vector[P] ⇒ Vector[Double], discrete: Vector[D]) =
+  def adaptiveBreeding[S, P: Manifest](lambda: Int, filter: Option[Genome ⇒ Boolean], operatorExploration: Double, cloneProbability: Double, aggregation: Vector[P] ⇒ Vector[Double], discrete: Vector[D]) =
     NoisyNSGA2Operations.adaptiveBreeding[S, Individual[P], Genome, P](
       aggregatedFitness(aggregation),
       Individual.genome.get,
@@ -147,6 +148,7 @@ object NoisyNichedNSGA2Algorithm {
       buildGenome,
       logOfPopulationSize,
       lambda,
+      filter,
       operatorExploration,
       cloneProbability)
 
@@ -258,10 +260,12 @@ object NichedNSGA2 {
             mgo.evolution.algorithm.Profile.initialGenomes(n, continuous, discrete, rng)
           }
 
-        def breeding(population: Vector[I], n: Int, s: S, rng: scala.util.Random) =
-          Genome.discrete(om.genome).map { discrete ⇒
-            mgo.evolution.algorithm.Profile.adaptiveBreeding[Array[Any]](n, om.operatorExploration, discrete, ExactObjective.toFitnessFunction(om.objectives)) apply (s, population, rng)
-          }
+        def breeding(population: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
+          import p._
+          val discrete = Genome.discrete(om.genome).from(context)
+          val filterValue = om.filter.map(f ⇒ GAIntegration.filterValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+          mgo.evolution.algorithm.Profile.adaptiveBreeding[Array[Any]](n, om.operatorExploration, discrete, ExactObjective.toFitnessFunction(om.objectives), filterValue) apply (s, population, rng)
+        }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) = FromContext { p ⇒
           import p._
@@ -285,7 +289,8 @@ object NichedNSGA2 {
     niche:               FromContext[Niche[CDGenome.DeterministicIndividual.Individual[Array[Any]], Vector[Int]]],
     genome:              Genome,
     objectives:          Seq[ExactObjective[_]],
-    operatorExploration: Double)
+    operatorExploration: Double,
+    filter:              Option[Condition])
 
   object StochasticParams {
 
@@ -358,10 +363,12 @@ object NichedNSGA2 {
             NoisyNichedNSGA2Algorithm.initialGenomes(n, continuous, discrete, rng)
           }
 
-        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) =
-          Genome.discrete(om.genome).map { discrete ⇒
-            NoisyNichedNSGA2Algorithm.adaptiveBreeding[S, Array[Any]](n, om.operatorExploration, om.cloneProbability, NoisyObjective.aggregate(om.objectives), discrete) apply (s, individuals, rng)
-          }
+        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
+          import p._
+          val discrete = Genome.discrete(om.genome).from(context)
+          val filterValue = om.filter.map(f ⇒ GAIntegration.filterValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+          NoisyNichedNSGA2Algorithm.adaptiveBreeding[S, Array[Any]](n, filterValue, om.operatorExploration, om.cloneProbability, NoisyObjective.aggregate(om.objectives), discrete) apply (s, individuals, rng)
+        }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           FromContext { p ⇒
@@ -394,14 +401,16 @@ object NichedNSGA2 {
     genome:              Genome,
     objectives:          Seq[NoisyObjective[_]],
     historySize:         Int,
-    cloneProbability:    Double)
+    cloneProbability:    Double,
+    filter:              Option[Condition])
 
   def apply[P](
     niche:      Seq[NichedElement],
     genome:     Genome,
     objectives: Objectives,
     nicheSize:  Int,
-    stochastic: OptionalArgument[Stochastic] = None
+    stochastic: OptionalArgument[Stochastic] = None,
+    filter:     OptionalArgument[Condition]  = None
   ): EvolutionWorkflow =
     WorkflowIntegration.stochasticity(objectives, stochastic.option) match {
       case None ⇒
@@ -412,8 +421,8 @@ object NichedNSGA2 {
             objectives = exactObjectives,
             niche = DeterministicParams.niche(genome, exactObjectives, niche),
             operatorExploration = operatorExploration,
-            nicheSize = nicheSize
-          ),
+            nicheSize = nicheSize,
+            filter = filter.option),
           genome,
           exactObjectives
         )
@@ -431,7 +440,8 @@ object NichedNSGA2 {
             genome = genome,
             objectives = noisyObjectives,
             historySize = stochasticValue.replications,
-            cloneProbability = stochasticValue.reevaluate),
+            cloneProbability = stochasticValue.reevaluate,
+            filter = filter.option),
           genome,
           noisyObjectives,
           stochasticValue
@@ -455,6 +465,7 @@ object NichedNSGA2Evolution {
     nicheSize:    Int,
     stochastic:   OptionalArgument[Stochastic] = None,
     parallelism:  Int                          = 1,
+    filter:       OptionalArgument[Condition]  = None,
     distribution: EvolutionPattern             = SteadyState(),
     suggestion:   Suggestion                   = Suggestion.empty,
     scope:        DefinitionScope              = "niched nsga2") =
@@ -465,7 +476,8 @@ object NichedNSGA2Evolution {
           genome = genome,
           nicheSize = nicheSize,
           objectives = objectives,
-          stochastic = stochastic
+          stochastic = stochastic,
+          filter = filter
         ),
       evaluation = evaluation,
       termination = termination,
