@@ -1,0 +1,9 @@
+
+cd /sources/openmole/
+cd build-system
+sbt publish-local
+cd ../libraries
+sbt publish-local
+cd ../openmole
+sbt "project openmole" assemble
+
