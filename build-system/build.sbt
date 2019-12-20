@@ -9,7 +9,7 @@ organization := "org.openmole"
 
 //resolvers += Classpaths.sbtPluginSnapshots
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.9.5")
+addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.9.2")
 
 libraryDependencies ++= Seq(
   "com.jsuereth" %% "scala-arm" % "2.0",
