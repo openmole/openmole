@@ -74,8 +74,8 @@ object NSGA2 {
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
           import p._
           val discrete = Genome.discrete(om.genome).from(context)
-          val filterValue = om.filter.map(f ⇒ GAIntegration.filterValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          MGONSGA2.adaptiveBreeding[S, Array[Any]](n, om.operatorExploration, discrete, ExactObjective.toFitnessFunction(om.objectives), filterValue)(s, individuals, rng)
+          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+          MGONSGA2.adaptiveBreeding[S, Array[Any]](n, om.operatorExploration, discrete, ExactObjective.toFitnessFunction(om.objectives), rejectValue)(s, individuals, rng)
         }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
@@ -101,7 +101,7 @@ object NSGA2 {
     genome:              Genome,
     objectives:          Seq[ExactObjective[_]],
     operatorExploration: Double,
-    filter:              Option[Condition])
+    reject:              Option[Condition])
 
   object StochasticParams {
     import mgo.evolution.algorithm.{ CDGenome, NoisyNSGA2 ⇒ MGONoisyNSGA2, _ }
@@ -149,8 +149,8 @@ object NSGA2 {
         def breeding(individuals: Vector[I], n: Int, s: S, rng: util.Random) = FromContext { p ⇒
           import p._
           val discrete = Genome.discrete(om.genome).from(context)
-          val filterValue = om.filter.map(f ⇒ GAIntegration.filterValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          MGONoisyNSGA2.adaptiveBreeding[S, Array[Any]](n, om.operatorExploration, om.cloneProbability, aggregate, discrete, filterValue) apply (s, individuals, rng)
+          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+          MGONoisyNSGA2.adaptiveBreeding[S, Array[Any]](n, om.operatorExploration, om.cloneProbability, aggregate, discrete, rejectValue) apply (s, individuals, rng)
         }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: util.Random) =
@@ -177,7 +177,7 @@ object NSGA2 {
     objectives:          Seq[NoisyObjective[_]],
     historySize:         Int,
     cloneProbability:    Double,
-    filter:              Option[Condition]
+    reject:              Option[Condition]
   )
 
   def apply[P](
@@ -185,13 +185,13 @@ object NSGA2 {
     objectives: Objectives,
     mu:         Int                          = 200,
     stochastic: OptionalArgument[Stochastic] = None,
-    filter:     OptionalArgument[Condition]  = None
+    reject:     OptionalArgument[Condition]  = None
   ): EvolutionWorkflow =
     WorkflowIntegration.stochasticity(objectives, stochastic.option) match {
       case None ⇒
         val exactObjectives = objectives.map(o ⇒ Objective.toExact(o))
         val integration: WorkflowIntegration.DeterministicGA[_] = WorkflowIntegration.DeterministicGA(
-          DeterministicParams(mu, genome, exactObjectives, operatorExploration, filter),
+          DeterministicParams(mu, genome, exactObjectives, operatorExploration, reject),
           genome,
           exactObjectives
         )(DeterministicParams.integration)
@@ -201,7 +201,7 @@ object NSGA2 {
         val noisyObjectives = objectives.map(o ⇒ Objective.toNoisy(o))
 
         val integration: WorkflowIntegration.StochasticGA[_] = WorkflowIntegration.StochasticGA(
-          StochasticParams(mu, operatorExploration, genome, noisyObjectives, stochasticValue.replications, stochasticValue.reevaluate, filter.option),
+          StochasticParams(mu, operatorExploration, genome, noisyObjectives, stochasticValue.replications, stochasticValue.reevaluate, reject.option),
           genome,
           noisyObjectives,
           stochasticValue
@@ -223,7 +223,7 @@ object NSGA2Evolution {
     termination:  OMTermination,
     mu:           Int                          = 200,
     stochastic:   OptionalArgument[Stochastic] = None,
-    filter:       OptionalArgument[Condition]  = None,
+    reject:       OptionalArgument[Condition]  = None,
     parallelism:  Int                          = 1,
     distribution: EvolutionPattern             = SteadyState(),
     suggestion:   Suggestion                   = Suggestion.empty,
@@ -235,7 +235,7 @@ object NSGA2Evolution {
           genome = genome,
           objectives = objectives,
           stochastic = stochastic,
-          filter = filter
+          reject = reject
         ),
       evaluation = evaluation,
       termination = termination,

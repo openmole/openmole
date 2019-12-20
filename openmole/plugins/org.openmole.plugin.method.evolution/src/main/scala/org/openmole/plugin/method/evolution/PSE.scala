@@ -81,7 +81,7 @@ object PSEAlgorithm {
 
   def adaptiveBreeding[S, P](
     lambda:              Int,
-    filter:              Option[CDGenome.Genome ⇒ Boolean],
+    reject:              Option[CDGenome.Genome ⇒ Boolean],
     operatorExploration: Double,
     discrete:            Vector[D],
     pattern:             P ⇒ Vector[Int],
@@ -96,7 +96,7 @@ object PSEAlgorithm {
       Individual.phenotype[P].get _ andThen pattern,
       buildGenome,
       lambda,
-      filter,
+      reject,
       operatorExploration,
       hitmap)
 
@@ -136,7 +136,7 @@ object NoisyPSEAlgorithm {
 
   def adaptiveBreeding[S, P: Manifest](
     lambda:              Int,
-    filter:              Option[Genome ⇒ Boolean],
+    reject:              Option[Genome ⇒ Boolean],
     operatorExploration: Double,
     cloneProbability:    Double,
     aggregation:         Vector[P] ⇒ Vector[Double],
@@ -153,7 +153,7 @@ object NoisyPSEAlgorithm {
       vectorPhenotype.get _ andThen aggregation andThen pattern,
       buildGenome,
       lambda,
-      filter,
+      reject,
       operatorExploration,
       cloneProbability,
       hitmap)
@@ -220,7 +220,7 @@ object PSE {
     genome:              Genome,
     objectives:          Seq[ExactObjective[_]],
     operatorExploration: Double,
-    filter:              Option[Condition]
+    reject:              Option[Condition]
   )
 
   object DeterministicParams {
@@ -272,10 +272,10 @@ object PSE {
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
           import p._
           val discrete = Genome.discrete(om.genome).from(context)
-          val filterValue = om.filter.map(f ⇒ GAIntegration.filterValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
           PSEAlgorithm.adaptiveBreeding[S, Array[Any]](
             n,
-            filterValue,
+            rejectValue,
             om.operatorExploration,
             discrete,
             pattern,
@@ -306,7 +306,7 @@ object PSE {
     historySize:         Int,
     cloneProbability:    Double,
     operatorExploration: Double,
-    filter:              Option[Condition])
+    reject:              Option[Condition])
 
   object StochasticParams {
 
@@ -357,10 +357,10 @@ object PSE {
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
           import p._
           val discrete = Genome.discrete(om.genome).from(context)
-          val filterValue = om.filter.map(f ⇒ GAIntegration.filterValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
           NoisyPSEAlgorithm.adaptiveBreeding[S, Array[Any]](
             n,
-            filterValue,
+            rejectValue,
             om.operatorExploration,
             om.cloneProbability,
             NoisyObjective.aggregate(om.objectives),
@@ -414,7 +414,7 @@ object PSE {
     genome:     Genome,
     objectives: Seq[PatternAxe],
     stochastic: OptionalArgument[Stochastic] = None,
-    filter:     OptionalArgument[Condition]  = None
+    reject:     OptionalArgument[Condition]  = None
   ) =
     WorkflowIntegration.stochasticity(objectives.map(_.p), stochastic.option) match {
       case None ⇒
@@ -426,7 +426,7 @@ object PSE {
             genome,
             exactObjectives,
             operatorExploration,
-            filter = filter.option),
+            reject = reject.option),
           genome,
           exactObjectives)(DeterministicParams.integration)
 
@@ -442,7 +442,7 @@ object PSE {
             historySize = stochasticValue.replications,
             cloneProbability = stochasticValue.reevaluate,
             operatorExploration = operatorExploration,
-            filter = filter.option),
+            reject = reject.option),
           genome,
           noisyObjectives,
           stochasticValue)(StochasticParams.integration)
@@ -462,7 +462,7 @@ object PSEEvolution {
     evaluation:   DSL,
     termination:  OMTermination,
     stochastic:   OptionalArgument[Stochastic] = None,
-    filter:       OptionalArgument[Condition]  = None,
+    reject:       OptionalArgument[Condition]  = None,
     parallelism:  Int                          = 1,
     distribution: EvolutionPattern             = SteadyState(),
     suggestion:   Suggestion                   = Suggestion.empty,
@@ -473,7 +473,7 @@ object PSEEvolution {
           genome = genome,
           objectives = objectives,
           stochastic = stochastic,
-          filter = filter
+          reject = reject
         ),
       evaluation = evaluation,
       termination = termination,

@@ -227,7 +227,7 @@ lazy val squants =
   ) settings(settings: _*)
 
 
-lazy val mgoVersion = "3.39"
+lazy val mgoVersion = "3.40"
 
 lazy val mgo = OsgiProject(dir, "mgo", exports = Seq("mgo.*", "freestyle.*"), imports = Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "*"), privatePackages = Seq("!scala.*", "!monocle.*", "!org.apache.commons.math3.*", "!cats.*", "!squants.*", "!scalaz.*", "*")) settings(
   libraryDependencies += "org.openmole" %% "mgo" % mgoVersion,

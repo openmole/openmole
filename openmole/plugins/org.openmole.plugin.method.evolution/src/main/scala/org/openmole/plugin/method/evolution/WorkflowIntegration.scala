@@ -265,10 +265,10 @@ object GAIntegration {
         )
     }
 
-  def filterValue[G](filter: Condition, genome: Genome, continuous: G ⇒ Vector[Double], discrete: G ⇒ Vector[Int]) = FromContext { p ⇒ (g: G) ⇒
+  def rejectValue[G](reject: Condition, genome: Genome, continuous: G ⇒ Vector[Double], discrete: G ⇒ Vector[Int]) = FromContext { p ⇒ (g: G) ⇒
     import p._
     val genomeVariables = GAIntegration.genomeToVariable(genome, (continuous(g), discrete(g)), scale = true).from(context)
-    filter.from(genomeVariables)
+    reject.from(genomeVariables)
   }
 
 }
