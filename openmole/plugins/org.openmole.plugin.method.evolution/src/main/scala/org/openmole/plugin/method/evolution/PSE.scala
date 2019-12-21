@@ -76,8 +76,8 @@ object PSEAlgorithm {
   def buildIndividual[P](g: CDGenome.Genome, p: P) = Individual(g, p)
   // def vectorPhenotype = Individual.phenotype composeLens arrayToVectorLens
 
-  def initialGenomes(lambda: Int, continuous: Vector[C], discrete: Vector[D], rng: scala.util.Random) =
-    CDGenome.initialGenomes(lambda, continuous, discrete, rng)
+  def initialGenomes(lambda: Int, continuous: Vector[C], discrete: Vector[D], reject: Option[Genome ⇒ Boolean], rng: scala.util.Random) =
+    CDGenome.initialGenomes(lambda, continuous, discrete, reject, rng)
 
   def adaptiveBreeding[S, P](
     lambda:              Int,
@@ -131,8 +131,8 @@ object NoisyPSEAlgorithm {
   def buildIndividual[P: Manifest](genome: CDGenome.Genome, phenotype: P) = Individual(genome, 1, Array(phenotype))
   def vectorPhenotype[P: Manifest] = Individual.phenotypeHistory[P] composeLens arrayToVectorLens
 
-  def initialGenomes(lambda: Int, continuous: Vector[C], discrete: Vector[D], rng: scala.util.Random) =
-    CDGenome.initialGenomes(lambda, continuous, discrete, rng)
+  def initialGenomes(lambda: Int, continuous: Vector[C], discrete: Vector[D], reject: Option[Genome ⇒ Boolean], rng: scala.util.Random) =
+    CDGenome.initialGenomes(lambda, continuous, discrete, reject, rng)
 
   def adaptiveBreeding[S, P: Manifest](
     lambda:              Int,
@@ -264,8 +264,13 @@ object PSE {
           genomes ++ fitness
         }
 
-        def initialGenomes(n: Int, rng: scala.util.Random) =
-          (Genome.continuous(om.genome) map2 Genome.discrete(om.genome)) { (continuous, discrete) ⇒ PSEAlgorithm.initialGenomes(n, continuous, discrete, rng) }
+        def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
+          import p._
+          val continuous = Genome.continuous(om.genome).from(context)
+          val discrete = Genome.discrete(om.genome).from(context)
+          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+          PSEAlgorithm.initialGenomes(n, continuous, discrete, rejectValue, rng)
+        }
 
         private def pattern(p: Array[Any]) = om.pattern(ExactObjective.toFitnessFunction(om.objectives)(p))
 
@@ -349,10 +354,13 @@ object PSE {
           genomes ++ fitness ++ Seq(samples)
         }
 
-        def initialGenomes(n: Int, rng: scala.util.Random) =
-          (Genome.continuous(om.genome) map2 Genome.discrete(om.genome)) { (continuous, discrete) ⇒
-            NoisyPSEAlgorithm.initialGenomes(n, continuous, discrete, rng)
-          }
+        def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
+          import p._
+          val continuous = Genome.continuous(om.genome).from(context)
+          val discrete = Genome.discrete(om.genome).from(context)
+          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+          NoisyPSEAlgorithm.initialGenomes(n, continuous, discrete, rejectValue, rng)
+        }
 
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
           import p._

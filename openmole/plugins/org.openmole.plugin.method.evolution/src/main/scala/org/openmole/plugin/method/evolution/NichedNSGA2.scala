@@ -56,8 +56,8 @@ object NichedNSGA2Algorithm {
   def gridObjectiveProfile[P](x: Int, intervals: Vector[Double], fitness: P ⇒ Vector[Double]): Niche[Individual[P], Int] =
     mgo.evolution.niche.gridContinuousProfile[Individual[P]](i ⇒ fitness(i.phenotype), x, intervals)
 
-  def initialGenomes(lambda: Int, continuous: Vector[C], discrete: Vector[D], rng: scala.util.Random) =
-    CDGenome.initialGenomes(lambda, continuous, discrete, rng)
+  def initialGenomes(lambda: Int, continuous: Vector[C], discrete: Vector[D], reject: Option[Genome ⇒ Boolean], rng: scala.util.Random) =
+    CDGenome.initialGenomes(lambda, continuous, discrete, reject, rng)
 
   def adaptiveBreeding[S, P](lambda: Int, reject: Option[Genome ⇒ Boolean], operatorExploration: Double, discrete: Vector[D], fitness: P ⇒ Vector[Double]) =
     NSGA2Operations.adaptiveBreeding[S, Individual[P], Genome](
@@ -166,8 +166,8 @@ object NoisyNichedNSGA2Algorithm {
   def expression[P: Manifest](fitness: (util.Random, Vector[Double], Vector[Int]) ⇒ P, continuous: Vector[C]): (util.Random, Genome) ⇒ Individual[P] =
     NoisyIndividual.expression(fitness, continuous)
 
-  def initialGenomes(lambda: Int, continuous: Vector[C], discrete: Vector[D], rng: scala.util.Random) =
-    CDGenome.initialGenomes(lambda, continuous, discrete, rng)
+  def initialGenomes(lambda: Int, continuous: Vector[C], discrete: Vector[D], reject: Option[Genome ⇒ Boolean], rng: scala.util.Random) =
+    CDGenome.initialGenomes(lambda, continuous, discrete, reject, rng)
 
 }
 
@@ -255,10 +255,13 @@ object NichedNSGA2 {
           genomes ++ fitness
         }
 
-        def initialGenomes(n: Int, rng: scala.util.Random) =
-          (Genome.continuous(om.genome) map2 Genome.discrete(om.genome)) { (continuous, discrete) ⇒
-            mgo.evolution.algorithm.Profile.initialGenomes(n, continuous, discrete, rng)
-          }
+        def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
+          import p._
+          val continuous = Genome.continuous(om.genome).from(context)
+          val discrete = Genome.discrete(om.genome).from(context)
+          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+          mgo.evolution.algorithm.Profile.initialGenomes(n, continuous, discrete, rejectValue, rng)
+        }
 
         def breeding(population: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
           import p._
@@ -358,10 +361,13 @@ object NichedNSGA2 {
           genomes ++ fitness ++ Seq(samples)
         }
 
-        def initialGenomes(n: Int, rng: scala.util.Random) =
-          (Genome.continuous(om.genome) map2 Genome.discrete(om.genome)) { (continuous, discrete) ⇒
-            NoisyNichedNSGA2Algorithm.initialGenomes(n, continuous, discrete, rng)
-          }
+        def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
+          import p._
+          val continuous = Genome.continuous(om.genome).from(context)
+          val discrete = Genome.discrete(om.genome).from(context)
+          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+          NoisyNichedNSGA2Algorithm.initialGenomes(n, continuous, discrete, rejectValue, rng)
+        }
 
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
           import p._

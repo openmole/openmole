@@ -68,10 +68,13 @@ object OSE {
           genomes ++ fitness
         }
 
-        def initialGenomes(n: Int, rng: scala.util.Random) =
-          (Genome.continuous(om.genome) map2 Genome.discrete(om.genome)) { (continuous, discrete) ⇒
-            MGOOSE.initialGenomes(n, continuous, discrete, rng)
-          }
+        def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
+          import p._
+          val continuous = Genome.continuous(om.genome).from(context)
+          val discrete = Genome.discrete(om.genome).from(context)
+          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+          MGOOSE.initialGenomes(n, continuous, discrete, rejectValue, rng)
+        }
 
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
           import p._
@@ -152,10 +155,13 @@ object OSE {
           genomes ++ fitness ++ Seq(samples)
         }
 
-        def initialGenomes(n: Int, rng: scala.util.Random) =
-          (Genome.continuous(om.genome) map2 Genome.discrete(om.genome)) { (continuous, discrete) ⇒
-            MGONoisyOSE.initialGenomes(n, continuous, discrete, rng)
-          }
+        def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
+          import p._
+          val continuous = Genome.continuous(om.genome).from(context)
+          val discrete = Genome.discrete(om.genome).from(context)
+          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+          MGONoisyOSE.initialGenomes(n, continuous, discrete, rejectValue, rng)
+        }
 
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
           import p._
