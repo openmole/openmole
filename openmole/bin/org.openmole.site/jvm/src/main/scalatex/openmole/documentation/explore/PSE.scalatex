@@ -57,6 +57,7 @@ It takes the following parameters:
   @li{@code{genome} a list of the model parameters and their respective variation intervals,}
   @li{@code{objectives} a list of indicators measured for each evaluation of the model within which we search for diversity, with a discretization step,}
   @li{@code{stochastic} the seed generator, which generates suitable seeds for the method. Mandatory if your model contains randomness. The generated seed for the model task is transmitted through the variable given as an argument of @code{Stochastic} (here myseed).}
+  @li{@code{reject}: (optional) a predicate which is true for genomes that must be rejected by the genome sampler (for instance "i1 > 50").}
 
 
 @h3{Hook}

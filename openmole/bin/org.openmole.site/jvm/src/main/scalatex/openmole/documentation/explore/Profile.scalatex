@@ -74,6 +74,7 @@ The @code{ProfileEvolution} constructor takes the following arguments:
   @li{@hl.code("parallelism"): (optional) number of parallel calibrations performed within @b{i} subinterval, defaults to 1,}
   @li{@hl.code("stochastic"): (optional) the seed provider, mandatory if your model contains randomness,}
   @li{@hl.code("distribution"): (optional) computation distribution strategy, default is "SteadyState".}
+  @li{@code{reject}: (optional) a predicate which is true for genomes that must be rejected by the genome sampler (for instance "i1 > 50").}
 
 
 @h3{Hook}
