@@ -52,7 +52,7 @@ object Range {
   ): SizeRange[T] =
     SizeRange[T](Range[T](min, max), size)
 
-  def rangeCenter[T](r: Range[T]): FromContext[T] = (r.min |@| r.max) map { (min, max) ⇒
+  def rangeCenter[T](r: Range[T]): FromContext[T] = (r.min, r.max) mapN { (min, max) ⇒
     import r.ops._
     min + ((max - min) / fromInt(2))
   }

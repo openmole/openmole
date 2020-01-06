@@ -7,6 +7,7 @@ import org.openmole.plugin.environment.batch.storage.{ HierarchicalStorageInterf
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import org.openmole.plugin.environment.pbs.PBSEnvironment.Parameters
 import org.openmole.plugin.environment.ssh.{ RuntimeInstallation, SharedStorage }
+import _root_.gridscale.effectaside
 
 class PBSJobService[S, H](
   s:                 S,

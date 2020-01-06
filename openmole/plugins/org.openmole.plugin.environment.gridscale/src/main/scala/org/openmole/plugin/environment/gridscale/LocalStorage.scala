@@ -26,7 +26,7 @@ import org.openmole.tool.file._
 
 object LocalStorage {
 
-  import effectaside._
+  import gridscale.effectaside._
   import gridscale.local
 
   def home(implicit interpreter: Effect[local.Local]) = interpreter().home()

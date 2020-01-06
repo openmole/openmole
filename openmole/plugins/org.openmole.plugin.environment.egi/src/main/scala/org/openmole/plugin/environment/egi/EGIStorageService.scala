@@ -52,7 +52,7 @@
 
 package org.openmole.plugin.environment.egi
 
-import effectaside.Effect
+import gridscale.effectaside.Effect
 import gridscale.egi.VOMS
 import org.openmole.core.communication.storage._
 import org.openmole.core.workspace.TmpDirectory

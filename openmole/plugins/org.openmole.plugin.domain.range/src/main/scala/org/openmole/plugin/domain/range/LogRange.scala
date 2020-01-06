@@ -51,7 +51,7 @@ sealed class LogRange[T](val range: Range[T], val steps: FromContext[Int])(impli
 
   import range._
 
-  def computeValues = (min |@| max |@| steps) map { (min, max, steps) ⇒
+  def computeValues = (min, max, steps) mapN { (min, max, steps) ⇒
     val logMin: T = lg.log(min)
     val logMax: T = lg.log(max)
 

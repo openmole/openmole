@@ -10,6 +10,7 @@ import scala.util._
 import squants.time.TimeConversions._
 import gridscale._
 import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment }
 import org.openmole.plugin.environment.batch.refresh.{ JobManager, RetryAction }
 import org.openmole.tool.cache.Lazy
@@ -137,7 +138,9 @@ object HierarchicalStorageSpace extends JavaLogger {
     util.Try(hierarchicalStorageInterface.makeDir(s, basePath)) match {
       case util.Success(_) ⇒ basePath
       case util.Failure(e) ⇒
-        if (storageInterface.exists(s, basePath)) basePath else throw e
+        if (isConnectionError(e)) throw e
+        else if (storageInterface.exists(s, basePath)) basePath
+        else throw e
     }
   }
 

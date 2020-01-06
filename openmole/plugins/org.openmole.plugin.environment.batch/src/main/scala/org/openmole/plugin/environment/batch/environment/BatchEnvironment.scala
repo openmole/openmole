@@ -403,7 +403,7 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   def clean = BatchEnvironment.registryIsEmpty(env)
 
-  lazy val registry = new ExecutionJobRegistry()
+  val registry = new ExecutionJobRegistry()
 
   def jobs = ExecutionJobRegistry.executionJobs(registry)
 

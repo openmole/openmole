@@ -5,6 +5,7 @@ import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchE
 import org.openmole.plugin.environment.batch.storage.{ HierarchicalStorageInterface, StorageInterface }
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import org.openmole.plugin.environment.ssh.{ RuntimeInstallation, SharedStorage }
+import _root_.gridscale.effectaside
 
 class CondorJobService[S, H](
   s:                 S,

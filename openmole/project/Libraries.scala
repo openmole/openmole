@@ -6,11 +6,11 @@ import sbt._
 
 object Libraries {
 
-  lazy val gridscaleVersion = "2.27"
+  lazy val gridscaleVersion = "2.28"
   lazy val sshjVersion = "0.27.0"
-  lazy val containerVersion = "1.4"
-  lazy val mgoVersion = "3.41"
-  lazy val bouncyCastleVersion = "1.60"
+  lazy val containerVersion = "1.5"
+  lazy val mgoVersion = "3.42"
+  lazy val bouncyCastleVersion = "1.64"
   lazy val d3Version = "3.5.12"
   lazy val tooltipserVersion = "3.3.0"
   lazy val netLogo5Version = "5.3.1"
@@ -20,16 +20,17 @@ object Libraries {
   lazy val rxVersion = "0.4.0"
   lazy val boopickleVersion = "1.2.6"
   lazy val scalaAutowireVersion = "0.2.6"
-  lazy val sourcecodeVersion = "0.1.4"
+  lazy val sourcecodeVersion = "0.1.9"
   lazy val scaladgetVersion = "1.2.7"
   lazy val sortableVersion = "0.2.1"
   lazy val json4sVersion = "3.5.0"
   lazy val circeVersion = "0.12.2"
   lazy val catsVersion = "2.0.0"
   lazy val scalajsVersion = "0.6.31"
-  lazy val squantsVersion = "1.5.0"
+  lazy val squantsVersion = "1.6.0"
   lazy val xstreamVersion = "1.4.11.1"
   lazy val scalaURIVersion = "1.1.1"
+  lazy val scoptVersion = "3.7.1"
   lazy val spatialdataVersion = "0.2"
 
   lazy val bootstrapnative = libraryDependencies += "fr.iscpif.scaladget" %%% "bootstrapnative" % scaladgetVersion
@@ -69,7 +70,7 @@ object Libraries {
   lazy val opencsv = "org.openmole.library" %% "au-com-bytecode-opencsv" % "2.3"
   lazy val arm = "org.openmole.library" %% "com-jsuereth-scala-arm" % "2.0"
   lazy val scalajHttp = "org.openmole.library" %% "org-scalaj-scalaj-http" % "2.3.0"
-  lazy val scopt = "org.openmole.library" %% "com-github-scopt" % "3.5.0"
+  lazy val scopt = "org.openmole.library" %% "com-github-scopt" % scoptVersion
   lazy val scalabc = "org.openmole.library" %% "fr-iscpif-scalabc" % "0.4"
   lazy val scalatexSite = "org.openmole.library" %% "com-lihaoyi-scalatex-site" % "0.3.12"
   lazy val math = "org.openmole.library" %% "org-apache-commons-math" % "3.6.1"

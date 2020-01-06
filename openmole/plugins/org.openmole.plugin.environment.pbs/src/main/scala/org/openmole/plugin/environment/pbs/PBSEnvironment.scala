@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.environment.pbs
 
+import _root_.gridscale.effectaside
 import org.openmole.core.authentication._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._

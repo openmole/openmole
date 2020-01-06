@@ -20,6 +20,7 @@ package org.openmole.plugin.environment.egi
 import gridscale.egi._
 import org.openmole.core.communication.storage.TransferOptions
 import org.openmole.core.exception.{ InternalProcessingError, MultipleException }
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.preference.{ ConfigurationLocation, Preference }
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workflow.dsl._
@@ -37,6 +38,7 @@ import squants.time.TimeConversions._
 
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable.{ HashMap, MultiMap, Set }
+import scala.concurrent.{ Await, Future }
 
 object EGIEnvironment extends JavaLogger {
 
@@ -218,32 +220,41 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
   override def start() = {
     proxyCache()
-    if (storages.map(_.toOption).flatten.isEmpty) throw new InternalProcessingError(s"No webdav storage is working for the VO $voName", MultipleException(storages.collect { case util.Failure(e) ⇒ e }))
+    if (storages().map(_.toOption).flatten.isEmpty) throw new InternalProcessingError(s"No webdav storage is working for the VO $voName", MultipleException(storages().collect { case util.Failure(e) ⇒ e }))
     jobService
   }
 
   override def stop() = {
     stopped = true
-    storages.map(_.toOption).flatten.foreach { case (space, storage) ⇒ HierarchicalStorageSpace.clean(storage, space, background = false) }
+    storages().map(_.toOption).flatten.foreach { case (space, storage) ⇒ HierarchicalStorageSpace.clean(storage, space, background = false) }
     BatchEnvironment.waitJobKilled(this)
   }
 
   def bdiis: Seq[gridscale.egi.BDIIServer] =
     bdiiURL.map(b ⇒ Seq(EGIEnvironment.toBDII(new java.net.URI(b)))).getOrElse(EGIEnvironment.defaultBDIIs)
 
-  lazy val storages = {
+  val storages = Lazy {
     val webdavStorages = findFirstWorking(bdiis) { b: BDIIServer ⇒ webDAVs(b, voName) }
-    if (!webdavStorages.isEmpty) webdavStorages.map { location ⇒
-      def isConnectionError(t: Throwable) = t match {
-        case _: _root_.gridscale.authentication.AuthenticationException ⇒ true
-        case _ ⇒ false
-      }
 
-      val storage = WebDavStorage(location, AccessControl(preference(EGIEnvironment.ConnexionsByWebDAVSE)), QualityControl(preference(BatchEnvironment.QualityHysteresis)), proxyCache, env)
-      def storageSpace = util.Try { HierarchicalStorageSpace.create(storage, "", location, isConnectionError) }
-      storageSpace.map(s ⇒ (s, storage))
+    if (!webdavStorages.isEmpty) {
+      webdavStorages.map { location ⇒
+        threadProvider.submit {
+          def isConnectionError(t: Throwable) = {
+            (t, t.getCause) match {
+              case (_: _root_.gridscale.authentication.AuthenticationException, _) ⇒ true
+              case (_, _: java.net.SocketException) ⇒ true
+              case _ ⇒ false
+            }
+          }
+
+          val storage = WebDavStorage(location, AccessControl(preference(EGIEnvironment.ConnexionsByWebDAVSE)), QualityControl(preference(BatchEnvironment.QualityHysteresis)), proxyCache, env)
+          val storageSpace = util.Try { HierarchicalStorageSpace.create(storage, "", location, isConnectionError) }
+          storageSpace.map { s ⇒ (s, storage) }
+        }
+      }.map(Await.result(_, scala.concurrent.duration.Duration.Inf))
     }
     else throw new InternalProcessingError(s"No WebDAV storage available for the VO $voName")
+
   }
 
   def execute(batchExecutionJob: BatchExecutionJob) = {
@@ -252,7 +263,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     import org.openmole.tool.file._
 
     def selectStorage = {
-      val sss = storages.map(_.toOption).flatten
+      val sss = storages().map(_.toOption).flatten
       if (sss.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
 
       if (sss.size == 1) sss.head

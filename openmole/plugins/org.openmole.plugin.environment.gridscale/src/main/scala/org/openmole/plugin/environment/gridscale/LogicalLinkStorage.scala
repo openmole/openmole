@@ -24,7 +24,7 @@ import org.openmole.tool.file._
 
 object LogicalLinkStorage {
 
-  import effectaside._
+  import gridscale.effectaside._
 
   implicit def interpreter = _root_.gridscale.local.Local()
 

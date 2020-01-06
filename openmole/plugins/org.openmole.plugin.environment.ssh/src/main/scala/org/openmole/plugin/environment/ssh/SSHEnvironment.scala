@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.ssh
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.locks.ReentrantLock
 
-import effectaside._
+import gridscale.effectaside._
 import org.openmole.core.authentication.AuthenticationStore
 import org.openmole.core.preference.ConfigurationLocation
 import org.openmole.core.threadprovider.Updater

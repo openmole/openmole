@@ -50,6 +50,8 @@ class ThreadProvider(poolSize: Int) {
   lazy val scheduler = Executors.newScheduledThreadPool(1, threadFactory)
   lazy val taskQueue = PriorityQueue[ThreadProvider.Closure](true)
 
+  implicit lazy val executionContext: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.fromExecutor(pool)
+
   var stopped = false
 
   def stop() = synchronized {
@@ -63,6 +65,8 @@ class ThreadProvider(poolSize: Int) {
     taskQueue.enqueue(task, priority)
     pool.submit(new ThreadProvider.RunClosure(taskQueue))
   }
+
+  def submit[T](t: ⇒ T) = scala.concurrent.Future[T] { t }
 
   def newThread(runnable: Runnable, groupName: Option[String] = None) = synchronized {
     if (stopped) throw new RuntimeException("Thread provider has been stopped")

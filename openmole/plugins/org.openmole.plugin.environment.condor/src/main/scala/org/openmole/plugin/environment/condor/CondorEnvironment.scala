@@ -27,6 +27,7 @@ import org.openmole.plugin.environment.ssh._
 import org.openmole.tool.crypto.Cypher
 import squants.Time
 import squants.information._
+import _root_.gridscale.effectaside
 
 object CondorEnvironment {
 

@@ -1,6 +1,6 @@
 package org.openmole.plugin.environment.ssh
 
-import effectaside.Effect
+import _root_.gridscale.effectaside
 import org.openmole.core.threadprovider.IUpdatable
 import org.openmole.core.workflow.execution.Environment.ExceptionRaised
 import org.openmole.core.workflow.execution.{ Environment, ExecutionState }
@@ -52,7 +52,7 @@ object SSHJobService extends JavaLogger {
 
 }
 
-class SSHJobService[S](s: S, tmpDirectory: String, services: BatchEnvironment.Services, installation: RuntimeInstallation[_], env: SSHEnvironment[_], val accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], sshEffect: Effect[_root_.gridscale.ssh.SSH], systemEffect: Effect[effectaside.System]) {
+class SSHJobService[S](s: S, tmpDirectory: String, services: BatchEnvironment.Services, installation: RuntimeInstallation[_], env: SSHEnvironment[_], val accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], sshEffect: effectaside.Effect[_root_.gridscale.ssh.SSH], systemEffect: effectaside.Effect[effectaside.System]) {
 
   def register(batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob, outputPath: String, jobDirectory: String) = {
 

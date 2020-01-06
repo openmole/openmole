@@ -18,6 +18,7 @@
 
 package org.openmole.plugin.environment.slurm
 
+import _root_.gridscale.effectaside
 import org.openmole.core.authentication._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._

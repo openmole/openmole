@@ -18,7 +18,7 @@ package org.openmole.plugin.environment
 
 import java.net.URI
 
-import effectaside._
+import _root_.gridscale.effectaside._
 import org.openmole.core.communication.storage.TransferOptions
 import org.openmole.core.preference.Preference
 import org.openmole.core.workflow.dsl.{File, uniqName}
