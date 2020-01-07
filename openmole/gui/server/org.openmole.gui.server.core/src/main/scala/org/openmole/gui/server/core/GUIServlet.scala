@@ -21,7 +21,7 @@ import java.nio.ByteBuffer
 import org.scalatra._
 import org.scalatra.auth.{ ScentryConfig, ScentrySupport }
 import org.scalatra.auth.strategy.BasicAuthSupport
-import org.scalatra.servlet.{ FileItem, FileUploadSupport, MultipartConfig }
+import org.scalatra.servlet.{ FileItem, FileSingleParams, FileUploadSupport, MultipartConfig }
 import org.scalatra.util.MultiMapHeadView
 import boopickle.Default._
 
@@ -182,7 +182,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   }.sorted
 
   def recordUser(u: UserID) = {
-    session.put(USER_ID, u)
+    session.setAttribute(USER_ID, u)
     // connectedUsers() = connectedUsers.now :+ u
   }
 
@@ -233,9 +233,10 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   }
 
   post(uploadFilesRoute) {
-    def move(fileParams: MultiMapHeadView[String, FileItem], fileType: String) = {
+    def move(fileParams: FileSingleParams, fileType: String) = {
+
       def copyTo(rootFile: File) =
-        for (file ← fileParams) yield {
+        for (file ← fileParams) {
           val path = new java.net.URI(file._1).getPath
           val destination = new File(rootFile, path)
           destination.getParentFile.mkdirs()
@@ -246,7 +247,6 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
             destination.setExecutable(true)
           }
           finally stream.close
-          destination
         }
 
       fileType match {

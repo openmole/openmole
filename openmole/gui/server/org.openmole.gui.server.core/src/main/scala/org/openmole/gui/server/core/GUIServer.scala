@@ -19,25 +19,19 @@ package org.openmole.gui.server.core
 
 import java.util.concurrent.Semaphore
 
-import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
-import org.eclipse.jetty.server.{ Server, ServerConnector }
-import org.eclipse.jetty.servlet.DefaultServlet
-import org.eclipse.jetty.webapp._
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
-import org.scalatra.servlet.ScalatraListener
 import javax.servlet.ServletContext
-import org.scalatra._
+import org.eclipse.jetty.server.{ Server, ServerConnector }
 import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
+import org.eclipse.jetty.webapp._
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.preference.{ ConfigurationLocation, Preference }
-import org.openmole.tool.hash._
-import org.openmole.tool.file._
-import org.openmole.core.services._
-import org.openmole.tool.crypto.KeyStore
-import org.openmole.tool.network.Network
 import org.openmole.core.location._
-
-import scala.xml.XML
+import org.openmole.core.preference.{ ConfigurationLocation, Preference }
+import org.openmole.core.workspace.{ TmpDirectory, Workspace }
+import org.openmole.tool.crypto.KeyStore
+import org.openmole.tool.file._
+import org.openmole.tool.network.Network
+import org.scalatra._
+import org.scalatra.servlet.ScalatraListener
 
 object GUIServer {
 
@@ -122,17 +116,19 @@ class StartingPage extends ScalatraServlet with LifeCycle {
 
 }
 
-import GUIServer._
+import org.openmole.gui.server.core.GUIServer._
 
 class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServices, password: Option[String], extraHeader: String, optimizedJS: Boolean, subDir: Option[String]) {
 
-  val server = new Server()
+  lazy val server = new Server()
   var exitStatus: GUIServer.ExitStatus = GUIServer.Ok
   val semaphore = new Semaphore(0)
 
   import services._
 
   def start() = {
+    //org.eclipse.jetty.util.log.Log.setLog(new log.StdErrLog())
+
     lazy val contextFactory = {
       val contextFactory = new org.eclipse.jetty.util.ssl.SslContextFactory()
 
@@ -149,16 +145,19 @@ class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServi
 
     val connector = if (!http) new ServerConnector(server, contextFactory) else new ServerConnector(server)
     connector.setPort(port)
+
     if (!localhost) connector.setHost("localhost")
 
     server.addConnector(connector)
 
     val startingContext = new WebAppContext()
+
+    startingContext.setContextPath(subDir.map { s ⇒ "/" + s }.getOrElse("") + "/")
+
+    startingContext.setBaseResource(Res.newResource(classOf[StartingPage].getClassLoader.getResource("/")))
     startingContext.setClassLoader(classOf[StartingPage].getClassLoader)
     startingContext.setInitParameter(ScalatraListener.LifeCycleKey, classOf[StartingPage].getCanonicalName)
-    startingContext.setResourceBase(fromWebAppLocation.getAbsolutePath)
-    startingContext.setContextPath("/")
-    startingContext.setContextPath(subDir.map { s ⇒ "/" + s }.getOrElse("") + "/")
+
     startingContext.addEventListener(new ScalatraListener)
 
     server.setHandler(startingContext)
@@ -181,8 +180,6 @@ class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServi
     context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(services, password, applicationControl, webappCache, extraHeader, subDir))
 
     context.setContextPath(subDir.map { s ⇒ "/" + s }.getOrElse("") + "/")
-
-    import services._
 
     context.setResourceBase(webappCache.getAbsolutePath)
     context.setClassLoader(classOf[GUIServer].getClassLoader)

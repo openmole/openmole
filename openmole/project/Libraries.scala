@@ -18,7 +18,7 @@ object Libraries {
   lazy val scalaTagsVersion = "0.6.5"
   lazy val scalaJSDomVersion = "0.9.3"
   lazy val rxVersion = "0.4.0"
-  lazy val boopickleVersion = "1.2.6"
+  lazy val boopickleVersion = "1.3.1"
   lazy val scalaAutowireVersion = "0.2.6"
   lazy val sourcecodeVersion = "0.1.9"
   lazy val scaladgetVersion = "1.2.7"
@@ -29,6 +29,7 @@ object Libraries {
   lazy val scalajsVersion = "0.6.31"
   lazy val squantsVersion = "1.6.0"
   lazy val xstreamVersion = "1.4.11.1"
+  lazy val scalatraVersion = "2.7.0-RC1"
   lazy val scalaURIVersion = "1.1.1"
   lazy val scoptVersion = "3.7.1"
   lazy val spatialdataVersion = "0.2"
@@ -51,6 +52,7 @@ object Libraries {
 
   lazy val scalatest = "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 
+
   /** ------- Bundles -------------- */
 
   def addScalaLang(scalaVersion: String) =
@@ -59,10 +61,10 @@ object Libraries {
       "org.scalameta" %% "scalameta" % "4.1.0"
     )
 
-  lazy val scalatra = "org.openmole.library" %% "org-scalatra" % "2.6.3"
+  lazy val scalatra = "org.openmole.library" %% "org-scalatra" % scalatraVersion
   lazy val logback = "org.openmole.library" %% "ch-qos-logback" % "1.0.9"
   lazy val h2 = "org.openmole.library" %% "org-h2" % "1.4.199"
-  lazy val bonecp = "org.openmole.library" %% "com-jolbox-bonecp" % "0.8.0-rc1"
+  lazy val bonecp = "org.openmole.library" %% "com-jolbox-bonecp" % "0.8.0.RELEASE"
   lazy val slick = "org.openmole.library" %% "com-typesafe-slick" % "3.3.0"
   lazy val slf4j = "org.openmole.library" %% "org-slf4j" % "1.7.10"
   lazy val xstream = "org.openmole.library" %% "com-thoughtworks-xstream" % xstreamVersion
@@ -81,7 +83,7 @@ object Libraries {
   lazy val lang3 = "org.openmole.library" %% "org-apache-commons-lang3" % "3.4"
   lazy val ant = "org.openmole.library" %% "org-apache-ant" % "1.8.0"
   lazy val codec = "org.openmole.library" %% "org-apache-commons-codec" % "1.13"
-  lazy val async = "org.openmole.library" %% "scala-async" % "0.9.6"
+  lazy val async = "org.openmole.library" %% "scala-async" % "0.10.0"
   lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % "4.11"
   lazy val cats = "org.openmole.library" %% "cats" % catsVersion
   lazy val squants = "org.openmole.library" %% "squants" % squantsVersion

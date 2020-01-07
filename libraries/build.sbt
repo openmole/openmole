@@ -17,13 +17,15 @@ def settings = Seq(
 )
 
 
-lazy val scalatraVersion = "2.6.3"
-lazy val jettyVersion = "9.3.25.v20180904"
+lazy val scalatraVersion = "2.7.0-RC1"
+lazy val jettyVersion = "9.4.24.v20191120"
+//lazy val jettyVersion = "9.3.25.v20180904"
 
 lazy val scalatra = OsgiProject(dir, "org.scalatra",
   exports = Seq("org.scalatra.*, org.fusesource.*", "grizzled.*", "org.eclipse.jetty.*", "javax.*"),
-  privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"),
-  imports = Seq("scala.*", "org.slf4j.*")) settings(
+  privatePackages = Seq("!scala.*", "!org.slf4j.*", "**"),
+  imports = Seq("scala.*", "org.slf4j.*"),
+  global = true) settings(
   libraryDependencies += "org.scalatra" %% "scalatra" % scalatraVersion,
   libraryDependencies += "org.scalatra" %% "scalatra-auth" % scalatraVersion,
   libraryDependencies += "org.eclipse.jetty" % "jetty-webapp" % jettyVersion,
@@ -63,7 +65,7 @@ lazy val h2 = OsgiProject(dir, "org.h2", dynamicImports = Seq("*"), privatePacka
   (libraryDependencies += "com.h2database" % "h2" % h2Version, version := h2Version) settings(settings: _*)
 
 lazy val bonecp = OsgiProject(dir, "com.jolbox.bonecp", dynamicImports = Seq("*")) settings
-  (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0-rc1", version := "0.8.0-rc1") settings(settings: _*)
+  (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0.RELEASE", version := "0.8.0.RELEASE") settings(settings: _*)
 
 lazy val slickVersion = "3.3.0"
 lazy val slick = OsgiProject(dir,"com.typesafe.slick", exports = Seq("slick.*"), privatePackages = Seq("org.reactivestreams.*")) settings
@@ -164,7 +166,7 @@ lazy val scalaTagsVersion = "0.6.5"
 lazy val scalaRxVersion = "0.4.0"
 lazy val scalaDomVersion = "0.9.3"
 lazy val scalaUpickleVersion = "0.4.4"
-lazy val scalaBoopickleVersion = "1.2.6"
+lazy val scalaBoopickleVersion = "1.3.1"
 lazy val scalaAutowireVersion = "0.2.6"
 lazy val scalajsVersion = "0.6.31"
 
@@ -275,8 +277,8 @@ lazy val scopt = OsgiProject(dir, "com.github.scopt", exports = Seq("scopt.*")) 
 
 lazy val async =
   OsgiProject(dir, "scala-async") settings (
-    libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.6",
-    version := "0.9.6",
+    libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.10.0",
+    version := "0.10.0",
     exportPackage := Seq("scala.async.*")) settings(settings: _*)
 
 lazy val mathVersion = "3.6.1"
