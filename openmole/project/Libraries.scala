@@ -23,7 +23,7 @@ object Libraries {
   lazy val sourcecodeVersion = "0.1.9"
   lazy val scaladgetVersion = "1.2.7"
   lazy val sortableVersion = "0.2.1"
-  lazy val json4sVersion = "3.5.0"
+  lazy val json4sVersion = "3.6.7"
   lazy val circeVersion = "0.12.3"
   lazy val catsVersion = "2.1.0"
   lazy val scalajsVersion = "0.6.31"
