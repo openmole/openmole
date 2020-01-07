@@ -15,7 +15,7 @@ object Libraries {
   lazy val tooltipserVersion = "3.3.0"
   lazy val netLogo5Version = "5.3.1"
   lazy val netLogo6Version = "6.1.1"
-  lazy val scalaTagsVersion = "0.6.5"
+  lazy val scalaTagsVersion = "0.8.3"
   lazy val scalaJSDomVersion = "0.9.3"
   lazy val rxVersion = "0.4.0"
   lazy val boopickleVersion = "1.3.1"
@@ -62,11 +62,11 @@ object Libraries {
     )
 
   lazy val scalatra = "org.openmole.library" %% "org-scalatra" % scalatraVersion
-  lazy val logback = "org.openmole.library" %% "ch-qos-logback" % "1.0.9"
+  lazy val logback = "org.openmole.library" %% "ch-qos-logback" % "1.2.3"
   lazy val h2 = "org.openmole.library" %% "org-h2" % "1.4.199"
   lazy val bonecp = "org.openmole.library" %% "com-jolbox-bonecp" % "0.8.0.RELEASE"
   lazy val slick = "org.openmole.library" %% "com-typesafe-slick" % "3.3.0"
-  lazy val slf4j = "org.openmole.library" %% "org-slf4j" % "1.7.10"
+  lazy val slf4j = "org.openmole.library" %% "org-slf4j" % "1.7.30"
   lazy val xstream = "org.openmole.library" %% "com-thoughtworks-xstream" % xstreamVersion
   lazy val jasypt = "org.openmole.library" %% "org-jasypt-encryption" % "1.9.2"
   lazy val opencsv = "org.openmole.library" %% "au-com-bytecode-opencsv" % "2.3"
@@ -76,7 +76,7 @@ object Libraries {
   lazy val scalabc = "org.openmole.library" %% "fr-iscpif-scalabc" % "0.4"
   lazy val scalatexSite = "org.openmole.library" %% "com-lihaoyi-scalatex-site" % "0.3.12"
   lazy val math = "org.openmole.library" %% "org-apache-commons-math" % "3.6.1"
-  lazy val collections = "org.openmole.library" %% "org-apache-commons-collections" % "4.1"
+  lazy val collections = "org.openmole.library" %% "org-apache-commons-collections" % "4.4"
   lazy val exec = "org.openmole.library" %% "org-apache-commons-exec" % "1.3"
   lazy val log4j = "org.openmole.library" %% "org-apache-log4j" % "1.2.17"
   lazy val logging = "org.openmole.library" %% "org-apache-commons-logging" % "1.2"
@@ -84,11 +84,11 @@ object Libraries {
   lazy val ant = "org.openmole.library" %% "org-apache-ant" % "1.8.0"
   lazy val codec = "org.openmole.library" %% "org-apache-commons-codec" % "1.13"
   lazy val async = "org.openmole.library" %% "scala-async" % "0.10.0"
-  lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % "4.11"
+  lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % "5.6.0"
   lazy val cats = "org.openmole.library" %% "cats" % catsVersion
   lazy val squants = "org.openmole.library" %% "squants" % squantsVersion
-  lazy val clapper = "org.openmole.library" %% "org-clapper" % "1.1.2"
-  lazy val asm = "org.openmole.library" %% "org-objectweb-asm" % "5.1"
+  lazy val clapper = "org.openmole.library" %% "org-clapper" % "1.5.1"
+  lazy val asm = "org.openmole.library" %% "org-objectweb-asm" % "7.2"
   lazy val configuration = "org.openmole.library" %% "org-apache-commons-configuration2" % "2.2"
   lazy val json4s = "org.openmole.library" %% "org-json4s" % json4sVersion
   lazy val circe = "org.openmole.library" %% "io-circe" % circeVersion
@@ -139,7 +139,7 @@ object Libraries {
   lazy val gridscaleLocal = "org.openmole.library" %% "gridscale-local" % gridscaleVersion
   lazy val gridscaleOAR = "org.openmole.library" %% "gridscale-oar" % gridscaleVersion
 
-  lazy val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.28"
+  lazy val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.30"
   lazy val guava = "com.google.guava" % "guava" % "27.1-jre"
   lazy val spray = "io.spray" %% "spray-json" % "1.3.2"
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion

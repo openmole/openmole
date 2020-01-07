@@ -21,7 +21,7 @@ import java.io.{ ByteArrayOutputStream, IOException }
 
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
 import ch.qos.logback.classic.spi.ILoggingEvent
-import ch.qos.logback.core.AppenderBase
+import ch.qos.logback.core.{ AppenderBase, OutputStreamAppender }
 import org.openmole.tool.logger.JavaLogger
 
 class OpenMOLEAppender extends AppenderBase[ILoggingEvent] with JavaLogger {
@@ -32,7 +32,9 @@ class OpenMOLEAppender extends AppenderBase[ILoggingEvent] with JavaLogger {
   override def start {
     if (encoder != null) {
       try {
-        encoder.init(byteOutputStream)
+        val app = new OutputStreamAppender
+        app.setOutputStream(byteOutputStream)
+        encoder.setParent(app)
       }
       catch {
         case e: IOException ⇒
@@ -44,7 +46,7 @@ class OpenMOLEAppender extends AppenderBase[ILoggingEvent] with JavaLogger {
 
   def append(event: ILoggingEvent) {
     try {
-      encoder.doEncode(event)
+      encoder.encode(event)
       Log.logger.fine(byteOutputStream.toString)
       byteOutputStream.reset
     }

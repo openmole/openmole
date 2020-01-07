@@ -36,8 +36,8 @@ lazy val json4s = OsgiProject(dir, "org.json4s",
   exports = Seq("org.json4s.*"),
   privatePackages = Seq("!scala.*", "!org.slf4j.*", "!com.thoughtworks.paranamer.*", "*"),
   imports = Seq("scala.*", "org.slf4j.*", "com.thoughtworks.paranamer.*", "")) settings (
-  libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.5.0",
-  version := "3.5.0") settings(settings: _*)
+  libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.6.7",
+  version := "3.6.7") settings(settings: _*)
 
 lazy val shapelessVersion = "2.3.3"
 lazy val shapeless =  OsgiProject(dir, "com.chuusai.shapeless", exports = Seq("shapeless.*")) settings (
@@ -58,7 +58,7 @@ lazy val circe = OsgiProject(dir, "io.circe",
   version := circeVersion) settings(settings: _*) dependsOn(shapeless)
 
 lazy val logback = OsgiProject(dir, "ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl"), dynamicImports = Seq("*")) settings
-  (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9", version := "1.0.9") settings(settings: _*)
+  (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3", version := "1.2.3") settings(settings: _*)
 
 lazy val h2Version = "1.4.199"
 lazy val h2 = OsgiProject(dir, "org.h2", dynamicImports = Seq("*"), privatePackages = Seq("META-INF.*")) settings
@@ -72,8 +72,8 @@ lazy val slick = OsgiProject(dir,"com.typesafe.slick", exports = Seq("slick.*"),
   (libraryDependencies += "com.typesafe.slick" %% "slick" % slickVersion, version := slickVersion) settings(settings: _*)
 
 lazy val slf4j = OsgiProject(dir,"org.slf4j") settings(
-  libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.10",
-  version := "1.7.10") settings(settings: _*)
+  libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.30",
+  version := "1.7.30") settings(settings: _*)
 
 lazy val xstream = OsgiProject(
   dir,
@@ -112,9 +112,9 @@ lazy val scalaLang = OsgiProject(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "org.scala-lang" % "scalap" % scalaVersion.value,
       "jline" % "jline" % "2.12.1",
-      "org.scala-stm" %% "scala-stm" % "0.8",
+      "org.scala-stm" %% "scala-stm" % "0.9.1",
       "com.typesafe" % "config" % "1.2.1",
-      "org.scalameta" %% "scalameta" % "4.1.0",
+      "org.scalameta" %% "scalameta" % "4.3.0",
       "org.scala-lang" % "scala-compiler" % scalaVersion.value
     )
   }, version := scalaVersion.value) settings(settings: _*)
@@ -162,7 +162,7 @@ lazy val netlogo6 = OsgiProject(
     "net.lingala.zip4j" % "zip4j" % "1.3.2" % "provided"
   ), version := netLogo6Version, scalaVersion := "2.12.8", crossPaths := false) settings(settings: _*) 
 
-lazy val scalaTagsVersion = "0.6.5"
+lazy val scalaTagsVersion = "0.8.3"
 lazy val scalaRxVersion = "0.4.0"
 lazy val scalaDomVersion = "0.9.3"
 lazy val scalaUpickleVersion = "0.4.4"
@@ -182,7 +182,7 @@ lazy val scalaJS = OsgiProject(dir, "scalajs", exports = Seq("scala.scalajs.*"),
   version := scalajsVersion
   ) settings(settings: _*)
 
-lazy val scalaTags = OsgiProject(dir, "com.scalatags", exports = Seq("scalatags.*")) settings(
+lazy val scalaTags = OsgiProject(dir, "com.scalatags", exports = Seq("scalatags.*"), privatePackages = Seq("geny.*")) settings(
   libraryDependencies ++= Seq("com.lihaoyi" %% "scalatags" % scalaTagsVersion),
   version := scalaTagsVersion) settings(settings: _*)
 
@@ -303,19 +303,19 @@ lazy val codec = OsgiProject(dir, "org.apache.commons.codec") settings
   (libraryDependencies += "commons-codec" % "commons-codec" % "1.13", version := "1.13") settings(settings: _*)
 
 lazy val collections = OsgiProject(dir, "org.apache.commons.collections", exports = Seq("org.apache.commons.collections4.*")) settings
-  (libraryDependencies += "org.apache.commons" % "commons-collections4" % "4.1", version := "4.1") settings(settings: _*)
+  (libraryDependencies += "org.apache.commons" % "commons-collections4" % "4.4", version := "4.4") settings(settings: _*)
 
 lazy val jgit = OsgiProject(dir, "org.eclipse.jgit", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
-  libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit" % "4.11.0.201803080745-r", version := "4.11" ) settings(settings: _*)
+  libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit" % "5.6.0.201912101111-r", version := "4.6.0" ) settings(settings: _*)
 
 lazy val txtmark = OsgiProject(dir, "com.github.rjeschke.txtmark", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
   libraryDependencies += "com.github.rjeschke" % "txtmark" % "0.13", version := "0.13" ) settings(settings: _*)
 
-lazy val clapperVersion = "1.1.2"
+lazy val clapperVersion = "1.5.1"
 lazy val clapper = OsgiProject(dir, "org.clapper", exports = Seq("!scala.*","!grizzled.*","!jline.*","!org.fusesource.*","!org.slf4j.*","*")) settings (
   libraryDependencies += "org.clapper" %% "classutil" % clapperVersion, version := clapperVersion) settings(settings: _*)
 
-val scalazVersion = "7.2.9"
+val scalazVersion = "7.2.30"
 lazy val scalaz = OsgiProject(dir, "org.scalaz", exports = Seq("!scala.*","*")) settings (
   libraryDependencies += "org.scalaz" %% "scalaz-core" % scalazVersion, version := scalazVersion) settings(settings: _*)
 
@@ -330,7 +330,7 @@ lazy val monocle = OsgiProject(dir, "monocle",
   ).map(_ % monocleVersion),
   version := monocleVersion) settings(settings: _*) dependsOn(shapeless, scalaz, cats)
 
-val asmVersion = "5.1"
+val asmVersion = "7.2"
 
 lazy val asm = OsgiProject(dir, "org.objectweb.asm") settings (
   libraryDependencies += "org.ow2.asm" % "asm" % asmVersion,
