@@ -8,7 +8,7 @@ Warning: The REST API of OpenMOLE is still experimental, it might be subject to 
 
 @p OpenMOLE ships with a web server providing a REST API to @b{start} workflows, @b{manage} their execution and @b{retrieve} their output data. To start the OpenMOLE REST API, run the command: "openmole --rest --port 8080" from the console. If you need to launch it automatically in a deamon for instance you should also you the --password-file argument to provide the password for encryption of the preferences.
 
-@p The web server can be accessed at the URL https://localhost:8080. Replace @i{localhost} with the remote machine's hostname or IP address if the web server is not running on your local system.
+@p The web server can be accessed at the URL http://localhost:8080. Replace @i{localhost} with the remote machine's hostname or IP address if the web server is not running on your local system.
 
 @h2{API Reference}
 
