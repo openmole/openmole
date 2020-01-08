@@ -158,7 +158,7 @@ trait RESTAPI extends ScalatraServlet
   }
 
   get("/job/:id/output") {
-    getExecution { ex ⇒ Ok(Output(ex.jobDirectory.readOutput).toJson) }
+    getExecution { ex ⇒ Ok(ex.jobDirectory.readOutput) }
   }
 
   get("/job/:id/state") {
