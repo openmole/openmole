@@ -60,14 +60,14 @@ lazy val circe = OsgiProject(dir, "io.circe",
 lazy val logback = OsgiProject(dir, "ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl"), dynamicImports = Seq("*")) settings
   (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3", version := "1.2.3") settings(settings: _*)
 
-lazy val h2Version = "1.4.199"
+lazy val h2Version = "1.4.200"
 lazy val h2 = OsgiProject(dir, "org.h2", dynamicImports = Seq("*"), privatePackages = Seq("META-INF.*")) settings
   (libraryDependencies += "com.h2database" % "h2" % h2Version, version := h2Version) settings(settings: _*)
 
 lazy val bonecp = OsgiProject(dir, "com.jolbox.bonecp", dynamicImports = Seq("*")) settings
   (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0.RELEASE", version := "0.8.0.RELEASE") settings(settings: _*)
 
-lazy val slickVersion = "3.3.0"
+lazy val slickVersion = "3.3.2"
 lazy val slick = OsgiProject(dir,"com.typesafe.slick", exports = Seq("slick.*"), privatePackages = Seq("org.reactivestreams.*")) settings
   (libraryDependencies += "com.typesafe.slick" %% "slick" % slickVersion, version := slickVersion) settings(settings: _*)
 
@@ -119,7 +119,7 @@ lazy val scalaLang = OsgiProject(
     )
   }, version := scalaVersion.value) settings(settings: _*)
 
-lazy val jasyptVersion = "1.9.2"
+lazy val jasyptVersion = "1.9.3"
 lazy val jasypt = OsgiProject(dir, "org.jasypt.encryption", exports = Seq("org.jasypt.*")) settings(
   libraryDependencies += "org.jasypt" % "jasypt" % jasyptVersion,
   version := jasyptVersion
@@ -165,7 +165,7 @@ lazy val netlogo6 = OsgiProject(
 lazy val scalaTagsVersion = "0.8.3"
 lazy val scalaRxVersion = "0.4.0"
 lazy val scalaDomVersion = "0.9.3"
-lazy val scalaUpickleVersion = "0.4.4"
+//lazy val scalaUpickleVersion = "0.9.6"
 lazy val scalaBoopickleVersion = "1.3.1"
 lazy val scalaAutowireVersion = "0.2.6"
 lazy val scalajsVersion = "0.6.31"
@@ -191,9 +191,9 @@ lazy val scalatexSite =
     libraryDependencies += "com.lihaoyi" %% "scalatex-site" % "0.3.12",
     version := "0.3.12") settings(settings: _*)
 
-lazy val upickle = OsgiProject(dir, "upickle", exports = Seq("upickle.*", "jawn.*", "derive.*"), imports = Seq("*")) settings(
+/*lazy val upickle = OsgiProject(dir, "upickle", exports = Seq("upickle.*", "jawn.*", "derive.*"), imports = Seq("*")) settings(
   libraryDependencies ++= Seq("com.lihaoyi" %% "upickle" % scalaUpickleVersion),
-  version := scalaUpickleVersion) settings(settings: _*) dependsOn(sourceCode)
+  version := scalaUpickleVersion) settings(settings: _*) dependsOn(sourceCode)*/ 
 
 lazy val boopickle = OsgiProject(dir, "boopickle", exports = Seq("boopickle.*"), imports = Seq("*")) settings(
   libraryDependencies ++= Seq("io.suzaku" %% "boopickle" % scalaBoopickleVersion),
@@ -265,8 +265,8 @@ lazy val arm = OsgiProject(dir, "com.jsuereth.scala-arm") settings(
   exportPackage := Seq("resource.*")) settings(settings: _*)
 
 lazy val scalajHttp = OsgiProject(dir, "org.scalaj.scalaj-http") settings(
-  libraryDependencies += "org.scalaj" %% "scalaj-http" % "2.3.0",
-  version := "2.3.0",
+  libraryDependencies += "org.scalaj" %% "scalaj-http" % "2.4.2",
+  version := "2.4.2",
   exportPackage := Seq("scalaj.http.*")
   ) settings(settings: _*)
 
@@ -294,13 +294,13 @@ lazy val logging = OsgiProject(dir, "org.apache.commons.logging") settings
   (libraryDependencies += "commons-logging" % "commons-logging" % "1.2", version := "1.2") settings(settings: _*)
 
 lazy val lang3 = OsgiProject(dir, "org.apache.commons.lang3") settings (
-  libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.4", version := "3.4") settings(settings: _*)
+  libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.9", version := "3.9") settings(settings: _*)
 
 lazy val ant = OsgiProject(dir, "org.apache.ant") settings
-  (libraryDependencies += "org.apache.ant" % "ant" % "1.8.0", version := "1.8.0") settings(settings: _*)
+  (libraryDependencies += "org.apache.ant" % "ant" % "1.10.7", version := "1.10.7") settings(settings: _*)
 
 lazy val codec = OsgiProject(dir, "org.apache.commons.codec") settings
-  (libraryDependencies += "commons-codec" % "commons-codec" % "1.13", version := "1.13") settings(settings: _*)
+  (libraryDependencies += "commons-codec" % "commons-codec" % "1.14", version := "1.14") settings(settings: _*)
 
 lazy val collections = OsgiProject(dir, "org.apache.commons.collections", exports = Seq("org.apache.commons.collections4.*")) settings
   (libraryDependencies += "org.apache.commons" % "commons-collections4" % "4.4", version := "4.4") settings(settings: _*)
@@ -339,9 +339,9 @@ lazy val asm = OsgiProject(dir, "org.objectweb.asm") settings (
 lazy val config = OsgiProject(dir, "org.apache.commons.configuration2",
   privatePackages = Seq("!scala.*", "!org.apache.commons.logging.*","*"),
   imports = Seq("org.apache.commons.logging.*")) settings (
-  libraryDependencies += "org.apache.commons" % "commons-configuration2" % "2.2",
-  libraryDependencies += "commons-beanutils" % "commons-beanutils" % "1.9.2",
-  version := "2.2") settings(settings: _*) dependsOn (logging)
+  libraryDependencies += "org.apache.commons" % "commons-configuration2" % "2.6",
+  libraryDependencies += "commons-beanutils" % "commons-beanutils" % "1.9.4",
+  version := "2.6") settings(settings: _*) dependsOn (logging)
 
 def sourceCodeVersion = "0.1.9"
 lazy val sourceCode = OsgiProject(dir, "sourcecode") settings (
@@ -414,8 +414,8 @@ lazy val gridscaleEGI = OsgiProject(dir, "gridscale.egi", imports = Seq("*")) se
 lazy val gridscaleDIRAC = OsgiProject(dir, "gridscale.dirac", imports = Seq("*"), privatePackages = Seq("gridscale.dirac.*", "org.apache.commons.compress.*", "org.brotli.*", "org.tukaani.*", "com.github.luben.*")) settings (
   libraryDependencies += "org.openmole.gridscale" %% "dirac" % gridscaleVersion,
   libraryDependencies += "org.brotli" % "dec" % "0.1.2",
-  libraryDependencies += "org.tukaani" % "xz" % "1.6",
-  libraryDependencies += "com.github.luben" % "zstd-jni" % "1.4.3-1",
+  libraryDependencies += "org.tukaani" % "xz" % "1.8",
+  libraryDependencies += "com.github.luben" % "zstd-jni" % "1.4.4-3",
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, gridscaleHTTP)
 

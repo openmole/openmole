@@ -79,7 +79,6 @@ trait RESTAPI extends ScalatraServlet with ContentEncodingSupport
   }
 
   post("/start") {
-    authenticate()
     (params get "script") match {
       case None ⇒ ExpectationFailed(Error("Missing mandatory script parameter.").toJson)
       case Some(script) ⇒
@@ -134,7 +133,6 @@ trait RESTAPI extends ScalatraServlet with ContentEncodingSupport
   }
 
   post("/download") {
-    authenticate()
     getExecution { ex ⇒
       val path = (params get "path").getOrElse("")
       val file = ex.workDirectory.workDirectory / path
@@ -155,12 +153,10 @@ trait RESTAPI extends ScalatraServlet with ContentEncodingSupport
   }
 
   post("/output") {
-    authenticate()
     getExecution { ex ⇒ Ok(Output(ex.workDirectory.readOutput).toJson) }
   }
 
   post("/state") {
-    authenticate()
     getExecution { ex ⇒
       val moleExecution = ex.moleExecution
       val state: State = (moleExecution.exception, moleExecution.finished) match {
@@ -191,7 +187,6 @@ trait RESTAPI extends ScalatraServlet with ContentEncodingSupport
   }
 
   post("/remove") {
-    authenticate()
     getId {
       moles.remove(_) match {
         case None ⇒ ExpectationFailed(Error("Execution not found").toJson)
@@ -205,7 +200,6 @@ trait RESTAPI extends ScalatraServlet with ContentEncodingSupport
   }
 
   post("/list") {
-    authenticate()
     Ok(moles.getKeys.toSeq.toJson)
   }
 
@@ -222,14 +216,5 @@ trait RESTAPI extends ScalatraServlet with ContentEncodingSupport
       case Failure(_)  ⇒ ExpectationFailed(Error("id is missing").toJson)
       case Success(id) ⇒ success(ExecutionId(id))
     }
-
-  def authenticate()(implicit r: HttpServletRequest) = {
-    def fail = halt(401, Error("This service requires a valid token").toJson)
-
-    Try(params("token")(r)) match {
-      case Failure(_) ⇒ fail
-      case Success(k) ⇒ if (!checkToken(k)) fail
-    }
-  }
 
 }

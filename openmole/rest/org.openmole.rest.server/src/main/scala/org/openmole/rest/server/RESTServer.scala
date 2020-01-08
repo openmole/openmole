@@ -47,26 +47,16 @@ class RESTLifeCycle extends LifeCycle {
 
 }
 
-class RESTServer(sslPort: Option[Int], hostName: Option[String], services: Services, subDir: Option[String]) {
+class RESTServer(port: Option[Int], hostName: Option[String], services: Services, subDir: Option[String]) {
 
   private lazy val server = {
-    val sslP = sslPort getOrElse 8443
+    val portValue = port getOrElse 8080
 
     val server = new Server()
+    logger.info(s"binding HTTP REST API to port $portValue")
 
-    val contextFactory = new org.eclipse.jetty.util.ssl.SslContextFactory()
-    def keyStorePassword = "openmole"
-    val ks = KeyStore(services.workspace.persistentDir / "keystorerest", keyStorePassword)
-    contextFactory.setKeyStore(ks.keyStore)
-    contextFactory.setKeyStorePassword(keyStorePassword)
-    contextFactory.setKeyManagerPassword(keyStorePassword)
-    contextFactory.setTrustStore(ks.keyStore)
-    contextFactory.setTrustStorePassword(keyStorePassword)
-
-    logger.info(s"binding https to port $sslP")
-
-    val connector = new org.eclipse.jetty.server.ServerConnector(server, contextFactory)
-    connector.setPort(sslP)
+    val connector = new org.eclipse.jetty.server.ServerConnector(server)
+    connector.setPort(portValue)
     server.addConnector(connector)
 
     val context = new WebAppContext()
@@ -75,22 +65,22 @@ class RESTServer(sslPort: Option[Int], hostName: Option[String], services: Servi
     context.setBaseResource(Res.newResource(classOf[RESTServer].getClassLoader.getResource("/")))
     context.setClassLoader(classOf[RESTServer].getClassLoader)
     hostName foreach (context.setInitParameter(ScalatraBase.HostNameKey, _))
-    context.setInitParameter("org.scalatra.Port", sslP.toString)
+    context.setInitParameter("org.scalatra.Port", portValue.toString)
     context.setInitParameter(ScalatraBase.ForceHttpsKey, true.toString)
 
     context.setAttribute(RESTLifeCycle.arguments, RESTLifeCycle.Arguments(services))
     context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[RESTLifeCycle].getCanonicalName)
     context.addEventListener(new ScalatraListener)
 
-    val constraintHandler = new ConstraintSecurityHandler
-    val constraintMapping = new ConstraintMapping
-    constraintMapping.setPathSpec("/*")
-    constraintMapping.setConstraint({
-      val r = new org.eclipse.jetty.util.security.Constraint(); r.setDataConstraint(1); r
-    })
-    constraintHandler.addConstraintMapping(constraintMapping)
-
-    context.setSecurityHandler(constraintHandler)
+    //    val constraintHandler = new ConstraintSecurityHandler
+    //    val constraintMapping = new ConstraintMapping
+    //    constraintMapping.setPathSpec("/*")
+    //    constraintMapping.setConstraint({
+    //      val r = new org.eclipse.jetty.util.security.Constraint(); r.setDataConstraint(1); r
+    //    })
+    //    constraintHandler.addConstraintMapping(constraintMapping)
+    //
+    //    context.setSecurityHandler(constraintHandler)
     server.setHandler(context)
     server
   }
