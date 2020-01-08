@@ -13,6 +13,8 @@ import org.openmole.core.project._
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.mole.{ MoleExecution, MoleExecutionContext, MoleServices }
 import org.openmole.core.dsl._
+import org.openmole.core.services.Services
+import org.openmole.core.workspace.TmpDirectory
 import org.openmole.rest.message._
 import org.openmole.tool.collection._
 import org.openmole.tool.outputredirection.OutputRedirection
@@ -26,14 +28,17 @@ import scala.util.{ Failure, Success, Try }
 case class EnvironmentException(environment: Environment, error: Error)
 
 case class Execution(
-  workDirectory: WorkDirectory,
+  jobDirectory:  JobDirectory,
   moleExecution: MoleExecution
 )
 
-case class WorkDirectory(workDirectory: File) {
+case class JobDirectory(jobDirectory: File) {
 
-  val output = workDirectory.newFile("output", ".txt")
+  val output = jobDirectory.newFile("output", ".txt")
   lazy val outputStream = new PrintStream(output.bufferedOutputStream())
+
+  def tmpDirectory = jobDirectory /> "tmp"
+  def workDirectory = jobDirectory /> "workDirectory"
 
   def readOutput = {
     outputStream.flush
@@ -42,20 +47,20 @@ case class WorkDirectory(workDirectory: File) {
 
   def clean = {
     outputStream.close
-    workDirectory.recursiveDelete
+    jobDirectory.recursiveDelete
   }
 
 }
 
 @MultipartConfig(fileSizeThreshold = 1024 * 1024) //research scala multipart config
-trait RESTAPI extends ScalatraServlet with ContentEncodingSupport
+trait RESTAPI extends ScalatraServlet
+  with ContentEncodingSupport
   with FileUploadSupport
-  with FlashMapSupport
-  with Authentication {
+  with FlashMapSupport {
 
   protected implicit val jsonFormats: Formats = DefaultFormats.withBigDecimal
-  private val logger = Log.log
 
+  private val logger = Log.log
   private lazy val moles = DataHandler[ExecutionId, Execution]()
 
   implicit class ToJsonDecorator(x: Any) {
@@ -63,59 +68,60 @@ trait RESTAPI extends ScalatraServlet with ContentEncodingSupport
   }
 
   val arguments: RESTLifeCycle.Arguments
+
   implicit def services = arguments.services
   import arguments.services._
 
-  def baseDirectory = tmpDirectory.newDir("rest")
+  lazy val baseDirectory = workspace.tmpDirectory.newDir("rest")
   def exceptionToHttpError(e: Throwable) = InternalServerError(Error(e).toJson)
 
-  post("/token") {
-    Try(params("password")) map issueToken match {
-      case Failure(_) ⇒ ExpectationFailed(Error("No password sent with request").toJson)
-      case Success(Failure(InvalidPasswordException(msg))) ⇒ Forbidden(Error(msg).toJson)
-      case Success(Failure(e)) ⇒ exceptionToHttpError(e)
-      case Success(Success(AuthenticationToken(token, start, end))) ⇒ Accepted(Token(token, end - start).toJson)
-    }
-  }
-
-  post("/start") {
+  post("/job") {
     (params get "script") match {
       case None ⇒ ExpectationFailed(Error("Missing mandatory script parameter.").toJson)
       case Some(script) ⇒
         logger.info("starting the create operation")
 
         val id = ExecutionId(UUID.randomUUID().toString)
-        val directory = WorkDirectory(baseDirectory / id.id)
+        val directory = JobDirectory(baseDirectory / id.id)
 
-        def extract =
-          for {
-            archive ← fileParams get "workDirectory"
-          } {
-            val is = new TarInputStream(new GZIPInputStream(archive.getInputStream))
-            try is.extract(directory.workDirectory) finally is.close
-          }
+        for {
+          archive ← fileParams get "workDirectory"
+        } {
+          val is = new TarInputStream(new GZIPInputStream(archive.getInputStream))
+          try is.extract(directory.workDirectory) finally is.close
+        }
 
         def error(e: Throwable) = {
           directory.clean
           ExpectationFailed(Error(e).toJson)
         }
 
-        def start(ex: MoleExecution) = {
-          Try(ex.start(false)) match {
+        def start(ex: MoleExecution) =
+          Try(ex.start(true)) match {
             case Failure(e) ⇒ error(e)
             case Success(ex) ⇒
               moles.add(id, Execution(directory, ex))
               Ok(id.toJson)
           }
-        }
 
-        Project.compile(directory.workDirectory, directory.workDirectory / script, Seq.empty) match {
+        val jobServices =
+          Services.copy(services)(
+            outputRedirection = OutputRedirection(directory.outputStream),
+            newFile = TmpDirectory(directory.tmpDirectory)
+          )
+
+        Project.compile(directory.workDirectory, directory.workDirectory / script, Seq.empty)(jobServices) match {
           case ScriptFileDoesNotExists() ⇒ ExpectationFailed(Error("The script doesn't exist").toJson)
           case e: CompilationError       ⇒ error(e.error)
           case compiled: Compiled ⇒
             Try(compiled.eval) match {
               case Success(res) ⇒
-                val moleServices = MoleServices.create(applicationExecutionDirectory = directory.workDirectory, outputRedirection = Some(OutputRedirection(directory.outputStream)))
+                val moleServices =
+                  MoleServices.create(
+                    applicationExecutionDirectory = baseDirectory,
+                    moleExecutionDirectory = Some(directory.tmpDirectory),
+                    outputRedirection = Some(OutputRedirection(directory.outputStream))
+                  )
                 Try {
                   dslToPuzzle(res).toExecution()(moleServices)
                 } match {
@@ -126,16 +132,14 @@ trait RESTAPI extends ScalatraServlet with ContentEncodingSupport
                 }
               case Failure(e) ⇒ error(e)
             }
-
         }
     }
-
   }
 
-  post("/download") {
+  get("/job/:id/workDirectory/:path") {
     getExecution { ex ⇒
       val path = (params get "path").getOrElse("")
-      val file = ex.workDirectory.workDirectory / path
+      val file = ex.jobDirectory.workDirectory / path
       val gzOs = response.getOutputStream.toGZ
 
       if (file.isDirectory) {
@@ -148,15 +152,16 @@ trait RESTAPI extends ScalatraServlet with ContentEncodingSupport
       else {
         file.copy(gzOs)
       }
+
       Ok()
     }
   }
 
-  post("/output") {
-    getExecution { ex ⇒ Ok(Output(ex.workDirectory.readOutput).toJson) }
+  get("/job/:id/output") {
+    getExecution { ex ⇒ Ok(Output(ex.jobDirectory.readOutput).toJson) }
   }
 
-  post("/state") {
+  get("/job/:id/state") {
     getExecution { ex ⇒
       val moleExecution = ex.moleExecution
       val state: State = (moleExecution.exception, moleExecution.finished) match {
@@ -186,20 +191,19 @@ trait RESTAPI extends ScalatraServlet with ContentEncodingSupport
     }
   }
 
-  post("/remove") {
+  delete("/job/:id") {
     getId {
       moles.remove(_) match {
         case None ⇒ ExpectationFailed(Error("Execution not found").toJson)
         case Some(ex) ⇒
           ex.moleExecution.cancel
-          ex.workDirectory.clean
+          ex.jobDirectory.clean
           Ok()
       }
     }
-
   }
 
-  post("/list") {
+  get("/job/") {
     Ok(moles.getKeys.toSeq.toJson)
   }
 

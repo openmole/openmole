@@ -29,7 +29,6 @@ package object message {
   }
   case class Error(message: String, stackTrace: Option[String] = None, level: Option[String] = None)
 
-  case class Token(token: String, duration: Long)
   case class ExecutionId(id: String)
   case class Output(output: String)
 

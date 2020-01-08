@@ -72,15 +72,6 @@ class RESTServer(port: Option[Int], hostName: Option[String], services: Services
     context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[RESTLifeCycle].getCanonicalName)
     context.addEventListener(new ScalatraListener)
 
-    //    val constraintHandler = new ConstraintSecurityHandler
-    //    val constraintMapping = new ConstraintMapping
-    //    constraintMapping.setPathSpec("/*")
-    //    constraintMapping.setConstraint({
-    //      val r = new org.eclipse.jetty.util.security.Constraint(); r.setDataConstraint(1); r
-    //    })
-    //    constraintHandler.addConstraintMapping(constraintMapping)
-    //
-    //    context.setSecurityHandler(constraintHandler)
     server.setHandler(context)
     server
   }

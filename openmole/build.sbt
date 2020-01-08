@@ -553,7 +553,8 @@ lazy val message = OsgiProject(restDir, "org.openmole.rest.message") settings (d
 lazy val server = OsgiProject(
   restDir,
   "org.openmole.rest.server",
-  imports = Seq("org.h2", "!com.sun.*", "*")
+  imports = Seq("org.h2", "!com.sun.*", "*"),
+  dynamicImports = Seq("org.eclipse.jetty.*")
 ) dependsOn(workflow, openmoleTar, openmoleCollection, project, message, openmoleCrypto, services) settings(
   libraryDependencies ++= Seq(Libraries.bouncyCastle, Libraries.logback, Libraries.scalatra, Libraries.arm, Libraries.codec, Libraries.json4s), Libraries.addScalaLang(scalaVersionValue)) settings (defaultSettings: _*)
 
