@@ -6,25 +6,16 @@
 
 Warning: The REST API of OpenMOLE is still experimental, it might be subject to some backward incompatible changes in the future.
 
-@p OpenMOLE ships with a web server providing a REST API to @b{start} workflows, @b{manage} their execution and @b{retrieve} their output data. To start the OpenMOLE REST API, run the command: "openmole --rest --port 8843" from the console. If you need to launch it automatically in a deamon for instance you should also you the --password-file argument to provide the password for encryption of the preferences.
+@p OpenMOLE ships with a web server providing a REST API to @b{start} workflows, @b{manage} their execution and @b{retrieve} their output data. To start the OpenMOLE REST API, run the command: "openmole --rest --port 8080" from the console. If you need to launch it automatically in a deamon for instance you should also you the --password-file argument to provide the password for encryption of the preferences.
 
-@p The web server can be accessed at the URL https://localhost:8443. Replace @i{localhost} with the remote machine's hostname or IP address if the web server is not running on your local system.
+@p The web server can be accessed at the URL https://localhost:8080. Replace @i{localhost} with the remote machine's hostname or IP address if the web server is not running on your local system.
 
 @h2{API Reference}
 
-The API of the web server uses exclusively the POST method:
+The API of the web server exposes the following routes:
 @ul
-@li{@b{token} - return a temporary token in order to use the web service. It has the following parameters:
+@li{@b{POST /job} - start a mole execution. It has the following parameters:
   @ul
-    @li{@b{password} - the password of the server}
-  It return a structure containing:
-  @ul
-    @li{@b{token} - the token}
-    @li{@b{duration} - the duration of the token in milliseconds}
-}
-@li{@b{start} - start a mole execution. It has the following parameters:
-  @ul
-    @li{@b{token} - the authentication token}
     @li{@b{workDirectory} - a tar.gz archive containing the workDirectory for the script},
     @li{@b{script} - the path (relative to the workDirectory) of script to execute, the last line should be a puzzle}
   When successful, it return a structure containing:
@@ -35,9 +26,8 @@ The API of the web server uses exclusively the POST method:
     @li{@b{message} - the error message}
     @li{@b{stackTrace} - optionally a stack trace if the error has been caused by an exception}
 }
-@li{@b{state} - return the state of a mole execution. It has the following parameters:
+@li{GET @b{/job/:id/state} - return the state of a mole execution. It has the following parameters:
   @ul
-    @li{@b{token} - the authentication token}
     @li{@b{id} - the id of the mole execution}
   When successful, it returns a structure the state:
   @ul
@@ -50,26 +40,86 @@ The API of the web server uses exclusively the POST method:
   @ul
     @li{@b{error}: a JSON structure containing the message (message) and the stack (stackTrace)}
 }
-@li{@b{output} - returns the output of a mole execution as a string. It has the following parameters:
+@li{GET @b{/job/:id/output} - returns the output of a mole execution as a string. It has the following parameters:
   @ul
-    @li{@b{token} - the authentication token}
     @li{@b{id} - the id of the mole execution}
 }
-@li{@b{download} - download a file or a directory from the server. It returns the gunziped content of the file or a tar.gz archive of the directory. It has the following parameters:
+@li{GET @b{/job/:id/workDirectory/:file} - download a file or a directory from the server. It returns the gunziped content of the file or a tar.gz archive of the directory. It has the following parameters:
   @ul
-    @li{@b{token} - the authentication token}
     @li{@b{id} - the id of the mole execution}
     @li{@b{path}} - the path of the file to download}
 }
-@li{@b{remove} - cancel and remove an execution from the server. It has the following parameters:
+@li{DELETE @b{/job/:id} - cancel and remove an execution from the server. It has the following parameters:
   @ul
-    @li{@b{token} - the authentication token}
     @li{@b{id} - the id of the mole execution}
 }
-@li{@b{list} - list execution ids on the server. It has the following parameters:
- @ul
-    @li{@b{token} - the authentication token}
+@li{GET @b{/job/} - list execution ids on the server.
 }
+
+@h2{Example}
+
+Launch the REST server:
+@plain("""
+[reuillon:~] $ openmole --rest
+Enter your OpenMOLE password (for preferences encryption): *******
+Jan 08, 2020 3:34:41 PM org.openmole.rest.server.RESTServer server$lzycompute
+INFO: binding HTTP REST API to port 8080
+""")
+
+Prepare the work directory:
+@plain(s"""
+[reuillon:~] $$ cd /tmp/pi/
+[reuillon:/tmp/pi] $$ ls
+Pi.oms
+[reuillon:/tmp/pi] $$ cat Pi.oms
+// Define the variables that are transmitted between the tasks
+val seed = Val[Long]
+val pi = Val[Double]
+
+val piAvg = Val[Double]
+val piMed = Val[Double]
+val testFile = Val[File]
+
+// Define the model task that computes an estimation of pi
+val model =
+  ScalaTask(${tq}
+    |val random = newRNG(seed)
+    |val points = 10000
+    |val inside =
+    |  for {
+    |    i <- (0 until points).toIterator
+    |    x = random.nextDouble()
+    |    y = random.nextDouble()
+    |  } yield { (x * x) + (y * y) }
+    |val pi = (inside.count(_ < 1).toDouble / points) * 4
+    |${tq}.stripMargin) set (
+      inputs += seed,
+      outputs += pi
+    )
+
+
+Replication(
+  evaluation = model,
+  seed = seed,
+  replications = 100,
+  aggregation = Seq(pi aggregate average as piAvg, pi aggregate median as piMed)
+) hook display
+
+[reuillon:/tmp/pi] $$ tar -cvzf pi.tgz *
+""")
+
+Submit the job:
+@plain("""
+[reuillon:/tmp/pi] 1m59s $ curl -X POST -F 'script=Pi.oms' -F 'workDirectory=@/tmp/pi.tgz' http://localhost:8080/job
+{
+  "id" : "160ba693-199c-48e8-9ee1-6a1f9ac66e62"
+}[reuillon:/tmp/pi] 3m12s $ curl -X GET http://localhost:8080/job/160ba693-199c-48e8-9ee1-6a1f9ac66e62/state
+{
+  "state" : "finished"
+}[reuillon:/tmp/pi] 4m5s $ curl -X GET http://localhost:8080/job/160ba693-199c-48e8-9ee1-6a1f9ac66e62/output
+piAvg,piMed
+3.1415440000000006,3.1416
+""")
 
 
 
