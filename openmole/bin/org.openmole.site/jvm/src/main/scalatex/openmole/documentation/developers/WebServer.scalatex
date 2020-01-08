@@ -16,7 +16,7 @@ The API of the web server exposes the following routes:
 @ul
 @li{@b{POST /job} - start a mole execution. It has the following parameters:
   @ul
-    @li{@b{workDirectory} - a tar.gz archive containing the workDirectory for the script},
+    @li{@b{workDirectory} - a tar.gz archive containing the workDirectory for the script}
     @li{@b{script} - the path (relative to the workDirectory) of script to execute, the last line should be a puzzle}
   When successful, it return a structure containing:
   @ul
