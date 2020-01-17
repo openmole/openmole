@@ -25,7 +25,7 @@ Different hooks are available for different actions that need to be performed.
 The @code{hook} keyword is used to save or display results generated during the execution of a workflow.
 There is only one mandatory argument to specify, the kind of @code{output} you want:
 @ul
-    @li{@code{hook display} to display the results in the standard output, note that it is completely equivalent to writing @code{hook(display)} or @code{hook(output = display)}
+    @li{@code{hook display} to display the results in the standard output, note that it is completely equivalent to writing @code{hook(display)} or @code{hook(output = display)}}
     @li{@code{hook(workDirectory / "path/to/a/file.csv")} to save the results in a CSV file}
 
 @br

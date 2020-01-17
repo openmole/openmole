@@ -12,7 +12,7 @@ Some useful functions are usable anywhere in OpenMOLE where you would use scala 
 
 @h2{Data processing}
 
-OpenMOLE provides a useful function to aggregate data. This function can be called on array and vectors. For instance:
+OpenMOLE provides a useful functions to aggregate data. Theses functions can be called on array and vectors. For instance:
 
 @hl.openmole("""
 val pi = Val[Double]
@@ -38,6 +38,15 @@ This task takes place after an exploration and compute the average of many value
   @li
     @hl.code("""def rootMeanSquaredError: Double"""), compute the root of the mean square error of the vector.
 
+@h2{Data comparison}
+
+OpenMOLE provides a useful functions to compare data series. This function can be called on array and vectors. For instance:
+@ul
+  @li
+    @hl.code("""def absoluteDistance(s1: Array[Double], s2: Array[Double]): Double"""), compute the sum of the absolute distance between the respective elements of s1 and s2,
+  @li
+    @hl.code("""def squareDistance(s1: Array[Double], s2: Array[Double]): Double"""), compute the sum of the squared distance between the respective elements of s1 and s2.
+    
 @h2{File creation}
 
 It might be useful to create files and folders in ScalaTask code. To do that use one of the folowing functions:

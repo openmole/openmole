@@ -164,18 +164,25 @@ object Site extends App {
         }
 
         override def generateHtml(outputRoot: Path) = {
+          outputRoot.toIO.mkdirs()
+
           val res = Pages.all.map { page ⇒
             val txt = html(
               head(headFrags(page)),
               bodyFrag(bodyFrag(page))
             ).render
+
             val cb = CharBuffer.wrap("<!DOCTYPE html>" + txt)
             val bytes = scala.io.Codec.UTF8.encoder.encode(cb)
             val target = outputRoot / page.file
             write.over(target, bytes.array())
             LunrIndex.Index(page.file, page.name, txt)
           }
-          write.over(outputRoot / "js" / "index.js", "var index = " + JsArray(res.toVector).compactPrint)
+
+          val jsDir = outputRoot / "js"
+          jsDir.toIO.mkdirs()
+
+          write.over(jsDir / "index.js", "var index = " + JsArray(res.toVector).compactPrint)
         }
 
         lazy val pagesFrag = Pages.all.map {
