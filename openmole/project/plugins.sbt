@@ -8,7 +8,7 @@ addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.31")
 
 addSbtPlugin("fr.iscpif" % "scalajs-execnpm" % "0.7")
 
-addSbtPlugin("com.lihaoyi" % "scalatex-sbt-plugin" % "0.4.1")
+addSbtPlugin("com.lihaoyi" % "scalatex-sbt-plugin" % "0.4.2")
 
 addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.7.0")
 
