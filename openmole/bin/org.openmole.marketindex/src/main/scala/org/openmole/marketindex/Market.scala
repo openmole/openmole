@@ -51,6 +51,7 @@ object Market {
     lazy val plugin = Tag("Plugin")
     lazy val python = Tag("Python")
     lazy val calibration = Tag("Calibration")
+    lazy val optimisation = Tag("Optimisation")
     lazy val tutorial = Tag("Tutorial")
     lazy val workflow = Tag("Workflow")
     lazy val sensitivity = Tag("Sensitivity")
@@ -89,6 +90,8 @@ object Market {
       MarketEntry("Native Application Tutorial", "tutorials/native", Seq(tutorial, native, data, python)),
       MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration, tutorial, sensitivity)),
       MarketEntry("Packaging an R Code", "R-care", Seq(R, data, native)),
+      MarketEntry("Optimize Ackley function in Python", "ackley-python", Seq(python, ga, native, optimisation))
+
     )
   )
 
