@@ -88,7 +88,7 @@ object Market {
       MarketEntry("Workflow Tutorial", "tutorials/workflow", Seq(tutorial, scala, workflow)),
       MarketEntry("Native Application Tutorial", "tutorials/native", Seq(tutorial, native, data, python)),
       MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration, tutorial, sensitivity)),
-      MarketEntry("Optimize Ackley function in Python", "ackley-python", Seq(python, ga, native, optimisation)),
+      MarketEntry("Optimise Ackley function in Python", "ackley-python", Seq(python, ga, native, optimisation)),
       MarketEntry("ABC", "abc", Seq(abc, stochastic, calibration, tutorial)),
 
     )
