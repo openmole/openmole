@@ -717,14 +717,14 @@ class TreeNodeTabs() {
     setActive(to)
   }
 
-  def alterables: Seq[AlterableFileContent] = tabs.now.filter {
-    _.editable
-  }.map { t ⇒ AlterableFileContent(t.safePathTab.now, t.content) }
+  def alterables: Seq[AlterableFileContent] =
+    tabs.now.filter {
+      t ⇒ t.editable
+    }.map { t ⇒ AlterableFileContent(t.safePathTab.now, t.content) }
 
   def saveAllTabs(onsave: () ⇒ Unit) = {
-    org.openmole.gui.client.core.post()[Api].saveFiles(alterables).call().foreach { s ⇒
-      onsave()
-    }
+    //if(org.scalajs.dom.document.hasFocus())
+    org.openmole.gui.client.core.post()[Api].saveFiles(alterables).call().foreach { s ⇒ onsave() }
   }
 
   def checkTabs = tabs.now.foreach { t: TreeNodeTab ⇒

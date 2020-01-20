@@ -38,8 +38,6 @@ import rx._
 
 class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtension, containerModifierSeq: ModifierSeq) {
 
-  def save(onsave: () ⇒ Unit) = {}
-
   val editorDiv = tags.div(id := "editor").render
   val editor = ace.edit(editorDiv)
 
