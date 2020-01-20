@@ -21,6 +21,9 @@ import scala.math._
 
 trait Stat {
 
+  def head = (sequence: Seq[Double]) ⇒ sequence.head
+  def sum = (sequence: Seq[Double]) ⇒ sequence.sum
+
   def median = (sequence: Seq[Double]) ⇒ {
     val sortedSerie = sequence.toArray.filterNot(_.isNaN).sorted
     val size = sortedSerie.size
