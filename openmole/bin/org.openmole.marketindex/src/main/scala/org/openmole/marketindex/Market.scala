@@ -71,7 +71,6 @@ object Market {
   def entries = Seq(
     MarketRepository(
       githubMarket,
-      MarketEntry("ABC", "abc", Seq(abc, stochastic, calibration, tutorial)),
       MarketEntry("Pi Computation", "pi", Seq(stochastic, simulation, scala)),
       MarketEntry("Random Forest", "randomforest", Seq(stochastic, machineLearning, native, data, python)),
       MarketEntry("Hello World in R", "R-hello", Seq(R)),
@@ -89,8 +88,8 @@ object Market {
       MarketEntry("Workflow Tutorial", "tutorials/workflow", Seq(tutorial, scala, workflow)),
       MarketEntry("Native Application Tutorial", "tutorials/native", Seq(tutorial, native, data, python)),
       MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration, tutorial, sensitivity)),
-      MarketEntry("Packaging an R Code", "R-care", Seq(R, data, native)),
-      MarketEntry("Optimize Ackley function in Python", "ackley-python", Seq(python, ga, native, optimisation))
+      MarketEntry("Optimize Ackley function in Python", "ackley-python", Seq(python, ga, native, optimisation)),
+      MarketEntry("ABC", "abc", Seq(abc, stochastic, calibration, tutorial)),
 
     )
   )
