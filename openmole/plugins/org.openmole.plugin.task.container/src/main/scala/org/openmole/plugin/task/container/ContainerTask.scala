@@ -352,8 +352,8 @@ import ContainerTask._
 
       retContext ++
         returnValue.map(v ⇒ Variable(v, retCode)) ++
-        stdOut.map(v ⇒ Variable(v, stdOut.toString)) ++
-        stdErr.map(v ⇒ Variable(v, stdErr.toString))
+        stdOut.map(v ⇒ Variable(v, stdOutBuffer.toString)) ++
+        stdErr.map(v ⇒ Variable(v, stdErrBuffer.toString))
 
     }
   }

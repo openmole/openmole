@@ -39,6 +39,7 @@ object PythonTask {
 
     def apply(
       script:               RunnableScript,
+      arguments: OptionalArgument[String] = None,
       major:                Int = 3,
       libraries:            Seq[String]                        = Seq.empty,
       install:              Seq[String]                        = Seq.empty,
@@ -54,6 +55,7 @@ object PythonTask {
 
      new PythonTask(
         script = script,
+       arguments = arguments.option,
         image = ContainerTask.prepare(containerSystem, dockerImage(major), installCommands(install, libraries,major)),
         errorOnReturnValue = errorOnReturnValue,
         returnValue = returnValue,
@@ -74,6 +76,7 @@ object PythonTask {
 @Lenses case class PythonTask(
   script:               RunnableScript,
   image:                PreparedImage,
+  arguments: Option[String],
   errorOnReturnValue:   Boolean,
   returnValue:          Option[Val[Int]],
   stdOut:               Option[Val[String]],
@@ -130,7 +133,6 @@ object PythonTask {
           s"""
              |import json
              |f = open('/$inputJSONName','r')
-             |print(f.readlines())
              |$inputArrayName = json.load(open('/$inputJSONName'))
              |${inputMapping(inputArrayName)}
              |${RunnableScript.content(script)}
@@ -139,11 +141,13 @@ object PythonTask {
 
         val outputFile = Val[File]("outputFile", Namespace("PythonTask"))
 
+        val argumentsValue = arguments.map(" " + _).getOrElse("")
+
         def containerTask =
           ContainerTask(
             containerSystem = containerSystem,
             image = image,
-            command = s"python${major.toString} $scriptName",
+            command = s"python${major.toString} $scriptName" + argumentsValue,
             workDirectory = None,
             errorOnReturnValue = errorOnReturnValue,
             returnValue = returnValue,
