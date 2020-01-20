@@ -11,4 +11,4 @@ In this section you will find information on:
   @li{How to use OpenMOLE in interactive @a("console mode", href := DocumentationPages.console.file)}
   @li{How to develop your own @a("plugin", href := DocumentationPages.pluginDevelopment.file) to have full control over your code, and how to integrate it in OpenMOLE: }
   @li{How to develop an OpenMOLE extension @a("extension", href := DocumentationPages.extensionAPI.file) }
-  @li{How to command your OpenMOLE @a("server and REST API", href := DocumentationPages.webServer.file)}
+  @li{How to use the OpenMOLE @a("REST API", href := DocumentationPages.restAPI.file)}

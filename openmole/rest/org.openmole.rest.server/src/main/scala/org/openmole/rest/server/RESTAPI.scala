@@ -32,6 +32,9 @@ case class Execution(
   moleExecution: MoleExecution
 )
 
+case class Plugin(name: String, active: Boolean)
+case class PluginError(name: String, error: Error)
+
 case class JobDirectory(jobDirectory: File) {
 
   val output = jobDirectory.newFile("output", ".txt")
@@ -205,6 +208,73 @@ trait RESTAPI extends ScalatraServlet
 
   get("/job/") {
     Ok(moles.getKeys.toSeq.toJson)
+  }
+
+  /* --------------- Plugin API ----------- */
+
+  get("/plugin/") {
+    val plugins =
+      org.openmole.core.module.pluginDirectory.listFilesSafe.map { p ⇒
+        Plugin(
+          p.getName,
+          active = org.openmole.core.pluginmanager.PluginManager.bundle(p).isDefined
+        )
+      }
+
+    Ok(plugins.toSeq.toJson)
+  }
+
+  post("/plugin") {
+    (fileMultiParams get "file") match {
+      case None ⇒ ExpectationFailed(Error("Missing mandatory file parameter.").toJson)
+      case Some(files) ⇒
+        val extractDirectory = baseDirectory.newDir("plugins")
+        extractDirectory.mkdirs()
+
+        val (plugins, errors) =
+          try {
+            val plugins =
+              for {
+                file ← files
+              } yield {
+                val plugin = extractDirectory / file.name
+                file.getInputStream.copy(plugin)
+                plugin
+              }
+
+            (plugins.map(_.getName), org.openmole.core.module.addPluginsFiles(plugins, true, org.openmole.core.module.pluginDirectory))
+          }
+          finally extractDirectory.recursiveDelete
+
+        if (!errors.isEmpty) errors.map(e ⇒ PluginError(e._1.getName, Error(e._2))).toJson
+        else Ok()
+    }
+  }
+
+  delete("/plugin") {
+    (multiParams get "name") match {
+      case None ⇒ ExpectationFailed(Error("Missing mandatory name parameter.").toJson)
+      case Some(names) ⇒
+        import org.openmole.core.pluginmanager._
+
+        val allNames =
+          for {
+            name ← names
+          } yield {
+            val file = org.openmole.core.module.pluginDirectory / name
+            val allDependingFiles = PluginManager.allDepending(file, b ⇒ !b.isProvided)
+
+            val allNames = allDependingFiles.map(_.getName)
+            val bundle = PluginManager.bundle(file)
+
+            bundle.foreach(PluginManager.remove)
+            allDependingFiles.filter(f ⇒ !PluginManager.bundle(f).isDefined).foreach(_.recursiveDelete)
+            file.recursiveDelete
+            allNames
+          }
+
+        Ok(allNames.flatten.toJson)
+    }
   }
 
   def getExecution(success: Execution ⇒ ActionResult)(implicit r: HttpServletRequest): ActionResult =
