@@ -51,14 +51,7 @@ object NSGA2 {
           generation ← generations.sortBy(_.generation)
         } yield {
           val rObj = robustObjectives(generation.objectives)
-
-          def hv =
-            nadir match {
-              case Some(nadir) ⇒
-                if (rObj.isEmpty) None else Some(Hypervolume(rObj, nadir))
-              case None ⇒ None
-            }
-
+          def hv = nadir.flatMap { nadir ⇒  if (rObj.isEmpty) None else Some(Hypervolume(rObj, nadir)) }
           def mins = if (rObj.isEmpty) None else Some(rObj.transpose.map(_.min))
 
           GenerationConvergence(generation.generation, hv, mins)
