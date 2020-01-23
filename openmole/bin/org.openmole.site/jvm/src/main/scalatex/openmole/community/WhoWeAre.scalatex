@@ -39,24 +39,27 @@
     CNRS Researcher Engineer at ISC-PIF (UPS 3611) and Géographie-cités (UMR 8504).
     Developer of the OpenMOLE Platform, he developed both the @aa("Scaladget", href := shared.link.repo.scaladget) library and @aa("ScalaWUI", href := shared.link.repo.scalawui) skeleton. @b("Lead developer of the graphical user interface").
 
+@member(Resource.img.people.jo, "Jonathan PASSERAT-PALMBACH")
+@div(width := "75%", paddingLeft := 70)
+  Research associate at Imperial College London, in the @a("BioMedIA group", href := shared.link.partner.biomedia). Developer of the OpenMOLE Platform, he co-developed @aa("GridScale", href := shared.link.repo.gridscale). Regularly inserts bugs in the code to keep his team-mates on task.
+
 @member(Resource.img.people.julien, "Julien PERRET")
 @div(width := "75%", paddingLeft := 70)
   Sustainable development Researcher at IGN and EHESS.
-
-@member(Resource.img.people.seb, "Sebastien REY-COYREHOURCQ")
-@div(width := "75%", paddingLeft := 70)
-  Research Engineer in Geomatics at UMR IDEES Rouen. I love Complex Systems, Agent-Based Models, and Evolutionary Algorithm. I probably compile and beta test every dev version of OpenMOLE since 2010 :) I also participate in developing the @aa("MGO", href := shared.link.repo.mgo) framework and the @aa("Gama-plugin", href := shared.link.repo.gamaPlugin).
 
 @member(Resource.img.people.juste, "Juste RAIMBAULT")
 @div(width := "75%", paddingLeft := 70)
   CNRS Postdoc at UCL CASA (Centre for Advanced Spatial Analysis) and Research Associate at Géographie-cités (UMR CNRS 8504). As a geographer, he contributes to the development of exploration methods for models of simulation.
 
-@member(Resource.img.people.romain, "Romain REUILLON")
+@member(Resource.img.people.seb, "Sebastien REY-COYREHOURCQ")
 @div(width := "75%", paddingLeft := 70)
-   CNRS Researcher at ISC-PIF and Géographie-cités. Scientific Manager and @b("lead developer of OpenMOLE"), he developed both @aa("MGO", href := shared.link.repo.mgo) and @aa("GridScale", href := shared.link.repo.gridscale).
+  Research Engineer in Geomatics at UMR IDEES Rouen. I love Complex Systems, Agent-Based Models, and Evolutionary Algorithm. I probably compile and beta test every dev version of OpenMOLE since 2010 :) I also participate in developing the @aa("MGO", href := shared.link.repo.mgo) framework and the @aa("Gama-plugin", href := shared.link.repo.gamaPlugin).
 
-@member(Resource.img.people.jo, "Jonathan PASSERAT-PALMBACH")
+@member(Resource.img.people.seb, "Sebastien REY-COYREHOURCQ")
 @div(width := "75%", paddingLeft := 70)
-  Research associate at Imperial College London, in the @a("BioMedIA group", href := shared.link.partner.biomedia). Developer of the OpenMOLE Platform, he co-developed @aa("GridScale", href := shared.link.repo.gridscale). Regularly inserts bugs in the code to keep his team-mates on task.
+  Research Engineer in Geomatics at UMR IDEES Rouen. I love Complex Systems, Agent-Based Models, and Evolutionary Algorithm. I probably compile and beta test every dev version of OpenMOLE since 2010 :) I also participate in developing the @aa("MGO", href := shared.link.repo.mgo) framework and the @aa("Gama-plugin", href := shared.link.repo.gamaPlugin).
+
+
+
 
 
