@@ -14,19 +14,9 @@
   @a(img(src := Resource.img.partner.geocite.file, partners), href := shared.link.partner.parisgeo, target := "_blank")
 }
 
-@member(Resource.img.people.romain, "Romain REUILLON")
+@member(Resource.img.people.helene, "Hélène ARDUIN")
 @div(width := "75%", paddingLeft := 70)
-    CNRS Researcher at Géographie-cités and ISC-PIF. Scientific Manager of the OpenMOLE Platform leader of the development for scientific simulation and computing, he developed both @aa("MGO", href := shared.link.repo.mgo) and @aa("GridScale", href := shared.link.repo.gridscale).
-
-
-@member(Resource.img.people.mathieu, "Mathieu LECLAIRE")
-@div(width := "75%", paddingLeft := 70)
-    CNRS Researcher Engineer at ISC-PIF (UPS 3611) and Géographie-cités (UMR 8504).
-    Developer of the OpenMOLE Platform, he developed both the @aa("Scaladget", href := shared.link.repo.scaladget) library and @aa("ScalaWUI", href := shared.link.repo.scalawui) skeleton.
-
-@member(Resource.img.people.jo, "Jonathan PASSERAT-PALMBACH")
-@div(width := "75%", paddingLeft := 70)
-  Research associate at Imperial College London, in the @a("BioMedIA group", href := shared.link.partner.biomedia). Developer of the OpenMOLE Platform, he co-developed @aa("GridScale", href := shared.link.repo.gridscale). Regularly inserts bugs in the code to keep his team-mates on task.
+  CNRS Postdoc at IDEE (UMR 6266). As a modeller and advanced user of OpenMOLE she @b("leads the development of the OpenMOLE documentation").
 
 @member(Resource.img.people.paul, "Paul CHAPRON")
 @div(width := "75%", paddingLeft := 70)
@@ -44,6 +34,11 @@
   PhD in geography, agent-based model addict, he is currently in a postdoctoral fellowship in Dakar (Senegal).
   Inside the OpenMole project, he is a beta user and contributor to the communication and documentation efforts.
 
+@member(Resource.img.people.mathieu, "Mathieu LECLAIRE")
+@div(width := "75%", paddingLeft := 70)
+    CNRS Researcher Engineer at ISC-PIF (UPS 3611) and Géographie-cités (UMR 8504).
+    Developer of the OpenMOLE Platform, he developed both the @aa("Scaladget", href := shared.link.repo.scaladget) library and @aa("ScalaWUI", href := shared.link.repo.scalawui) skeleton. @b("Lead developer of the graphical user interface").
+
 @member(Resource.img.people.julien, "Julien PERRET")
 @div(width := "75%", paddingLeft := 70)
   Sustainable development Researcher at IGN and EHESS.
@@ -54,6 +49,14 @@
 
 @member(Resource.img.people.juste, "Juste RAIMBAULT")
 @div(width := "75%", paddingLeft := 70)
-  CNRS Postdoc at ISC-PIF (UPS CNRS 3611) and Research Associate at Géographie-cités (UMR CNRS 8504). As a geographer, he contributes to the development of exploration methods for models of simulation.
+  CNRS Postdoc at UCL CASA (Centre for Advanced Spatial Analysis) and Research Associate at Géographie-cités (UMR CNRS 8504). As a geographer, he contributes to the development of exploration methods for models of simulation.
+
+@member(Resource.img.people.romain, "Romain REUILLON")
+@div(width := "75%", paddingLeft := 70)
+   CNRS Researcher at ISC-PIF and Géographie-cités. Scientific Manager and @b("lead developer of OpenMOLE"), he developed both @aa("MGO", href := shared.link.repo.mgo) and @aa("GridScale", href := shared.link.repo.gridscale).
+
+@member(Resource.img.people.jo, "Jonathan PASSERAT-PALMBACH")
+@div(width := "75%", paddingLeft := 70)
+  Research associate at Imperial College London, in the @a("BioMedIA group", href := shared.link.partner.biomedia). Developer of the OpenMOLE Platform, he co-developed @aa("GridScale", href := shared.link.repo.gridscale). Regularly inserts bugs in the code to keep his team-mates on task.
 
 
