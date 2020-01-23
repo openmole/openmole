@@ -1,3 +1,4 @@
 *.tar.gz filter=lfs diff=lfs merge=lfs -text
 plugins/org.openmole.plugin.task.udocker/src/main/resources/udocker.tar.gz filter=lfs diff=lfs merge=lfs -text
 bin/org.openmole.site/src/main/resources/care filter=lfs diff=lfs merge=lfs -text
+*.png filter=lfs diff=lfs merge=lfs -text
