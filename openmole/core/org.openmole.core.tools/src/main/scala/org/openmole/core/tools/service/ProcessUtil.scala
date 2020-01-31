@@ -36,7 +36,10 @@ object ProcessUtil {
       try process.waitFor
       catch {
         case e: Throwable ⇒
-          process.destroyForcibly()
+          def kill(p: ProcessHandle) = p.destroyForcibly()
+          process.descendants().forEach(kill)
+          kill(process.toHandle)
+
           throw e
       }
       finally {

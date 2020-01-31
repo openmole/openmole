@@ -17,6 +17,8 @@ package org.openmole.plugin.task.container
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.io.PrintStream
+
 import monocle.macros.Lenses
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
@@ -101,10 +103,11 @@ object ContainerTask {
     containerSystem:      ContainerSystem,
     image:                _root_.container.FlatImage,
     commands:             Seq[String],
-    volumes:              Seq[(String, String)]           = Seq.empty,
-    environmentVariables: Seq[(String, String)]           = Seq.empty,
-    workDirectory:        Option[String]                  = None,
-    logger:               scala.sys.process.ProcessLogger)(implicit tmpDirectory: TmpDirectory) = {
+    volumes:              Seq[(String, String)]      = Seq.empty,
+    environmentVariables: Seq[(String, String)]      = Seq.empty,
+    workDirectory:        Option[String]             = None,
+    output:               PrintStream,
+    error:                PrintStream)(implicit tmpDirectory: TmpDirectory) = {
     val retCode =
       containerSystem match {
         case Proot(noSeccomp, kernel) ⇒
@@ -116,7 +119,8 @@ object ContainerTask {
               directory / "tmp",
               commands = commands,
               proot = proot.getAbsolutePath,
-              logger = logger,
+              output = output,
+              error = error,
               kernel = Some(kernel),
               noSeccomp = noSeccomp,
               bind = volumes,
@@ -130,7 +134,8 @@ object ContainerTask {
               image,
               directory / "tmp",
               commands = commands,
-              logger = logger,
+              output = output,
+              error = error,
               bind = volumes,
               environmentVariables = environmentVariables,
               workDirectory = workDirectory,
@@ -206,7 +211,7 @@ object ContainerTask {
   def executeInstall(containerSystem: ContainerSystem, image: _root_.container.FlatImage, install: Seq[String])(implicit tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection) =
     if (install.isEmpty) image
     else {
-      val retCode = runCommandInContainer(containerSystem, image, install, logger = scala.sys.process.ProcessLogger.apply(s ⇒ outputRedirection.output.println(s), s ⇒ outputRedirection.error.println(s)))
+      val retCode = runCommandInContainer(containerSystem, image, install, output = outputRedirection.output, error = outputRedirection.error)
       if (retCode != 0) throw new UserBadDataError(s"Process exited a non 0 return code ($retCode)")
       image
     }
@@ -271,24 +276,16 @@ import ContainerTask._
 
     val pool = executionContext.cache.getOrElseUpdate(containerPoolKey, createPool)
 
-    val stdOutBuffer = new StringBuilder()
-    val stdErrBuffer = new StringBuilder()
+    val outBuilder = new StringOutputStream
+    val errBuilder = new StringOutputStream
 
-    def processOutput(s: String) = {
-      executionContext.outputRedirection.output.println(s)
-      if (stdOut.isDefined) {
-        stdOutBuffer.append(s)
-        stdOutBuffer.append('\n')
-      }
-    }
+    val out: PrintStream =
+      if (stdOut.isDefined) new PrintStream(MultiplexedOutputStream(outBuilder, executionContext.outputRedirection.output))
+      else executionContext.outputRedirection.output
 
-    def processErr(s: String) = {
-      executionContext.outputRedirection.error.println(s)
-      if (stdErr.isDefined) {
-        stdErrBuffer.append(s)
-        stdErrBuffer.append('\n')
-      }
-    }
+    val err =
+      if (stdErr.isDefined) new PrintStream(MultiplexedOutputStream(errBuilder, executionContext.outputRedirection.error))
+      else executionContext.outputRedirection.error
 
     def prepareVolumes(
       preparedFilesInfo:     Iterable[FileInfo],
@@ -325,7 +322,8 @@ import ContainerTask._
           image = container,
           commands = command.value.map(_.from(context)),
           workDirectory = Some(workDirectoryValue),
-          logger = scala.sys.process.ProcessLogger.apply(processOutput, processErr),
+          output = out,
+          error = err,
           volumes = volumes,
           environmentVariables = containerEnvironmentVariables
         )
@@ -352,8 +350,8 @@ import ContainerTask._
 
       retContext ++
         returnValue.map(v ⇒ Variable(v, retCode)) ++
-        stdOut.map(v ⇒ Variable(v, stdOutBuffer.toString)) ++
-        stdErr.map(v ⇒ Variable(v, stdErrBuffer.toString))
+        stdOut.map(v ⇒ Variable(v, out.toString)) ++
+        stdErr.map(v ⇒ Variable(v, err.toString))
 
     }
   }
