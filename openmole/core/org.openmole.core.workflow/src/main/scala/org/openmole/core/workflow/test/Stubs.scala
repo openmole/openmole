@@ -8,6 +8,7 @@ import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
+import org.openmole.core.workflow.mole.MoleServices
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.logger.LoggerService
@@ -37,5 +38,7 @@ object Stubs {
   implicit val network = NetworkService(None)
   implicit val fileServiceCache = FileServiceCache()
   implicit val loggerService = LoggerService()
+
+  implicit val moleServices: MoleServices = MoleServices.create(dir)
 
 }

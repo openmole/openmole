@@ -1,15 +1,13 @@
 package org.openmole.plugin.method.abc
 
-import org.apache.commons.math3.linear.LUDecomposition
-import org.apache.commons.math3.linear.MatrixUtils
-import org.apache.commons.math3.distribution.NormalDistribution
 import org.apache.commons.math3.distribution.MixtureMultivariateNormalDistribution
-import org.apache.commons.math3.random.RandomGenerator
-import org.apache.commons.math3.random.Well1024a
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics
+import org.apache.commons.math3.linear.{ LUDecomposition, MatrixUtils }
+
 import org.openmole.core.dsl._
+
 import org.openmole.core.workflow.test._
 import org.scalatest.{ FlatSpec, Matchers }
+
 import scala.util.Random
 
 class ABCSpec extends FlatSpec with Matchers {
@@ -106,4 +104,5 @@ class ABCSpec extends FlatSpec with Matchers {
 
     abc run ()
   }
+
 }

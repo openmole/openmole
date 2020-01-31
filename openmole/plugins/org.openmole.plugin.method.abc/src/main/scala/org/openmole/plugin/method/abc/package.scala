@@ -48,11 +48,11 @@ package object abc {
 
     case class Observed[T](v: Val[T], observed: T)(implicit val obs: Observed.Observable[T])
 
-    case class ABCParameters(state: Val[MonAPMC.MonState], step: Val[Int], prior: Prior)
+    case class ABCParameters(state: Val[MonAPMC.MonState], step: Val[Int], prior: IndependentPriors)
 
     def apply(
       evaluation:           DSL,
-      prior:                Prior,
+      prior:                Seq[UnivariatePrior],
       observed:             Seq[Observed[_]],
       sample:               Int,
       generated:            Int,
@@ -68,9 +68,10 @@ package object abc {
 
       val n = sample + generated
       val nAlpha = sample
+      val priorValue = IndependentPriors(prior)
 
-      val preStepTask = PreStepTask(n, nAlpha, prior, state, stepState, step)
-      val postStepTask = PostStepTask(n, nAlpha, stopSampleSizeFactor, prior, observed, state, stepState, minAcceptedRatio, maxStep, stop, step)
+      val preStepTask = PreStepTask(n, nAlpha, priorValue, state, stepState, step)
+      val postStepTask = PostStepTask(n, nAlpha, stopSampleSizeFactor, priorValue, observed, state, stepState, minAcceptedRatio, maxStep, stop, step)
 
       val mapReduce =
         MapReduce(
@@ -85,7 +86,7 @@ package object abc {
           condition = !(stop: Condition)
         )
 
-      DSLContainerExtension[ABCParameters](DSLContainer(loop), output = Some(postStepTask), delegate = mapReduce.delegate, data = ABCParameters(state, step, prior))
+      DSLContainerExtension[ABCParameters](DSLContainer(loop), output = Some(postStepTask), delegate = mapReduce.delegate, data = ABCParameters(state, step, priorValue))
     }
 
   }
@@ -94,7 +95,7 @@ package object abc {
 
   def IslandABC(
     evaluation:           DSL,
-    prior:                Prior,
+    prior:                Seq[UnivariatePrior],
     observed:             Seq[Observed[_]],
     sample:               Int,
     generated:            Int,
@@ -115,6 +116,8 @@ package object abc {
 
     val n = sample + generated
     val nAlpha = sample
+
+    val priorValue = IndependentPriors(prior)
 
     val appendSplit = AppendSplitTask(n, nAlpha, masterState, islandState, step)
     val terminationTask =
@@ -152,7 +155,7 @@ package object abc {
         stop = stop
       )
 
-    DSLContainerExtension[ABCParameters](DSLContainer(masterSlave), output = Some(master), delegate = Vector(slave), data = ABCParameters(masterState, step, prior))
+    DSLContainerExtension[ABCParameters](DSLContainer(masterSlave), output = Some(master), delegate = Vector(slave), data = ABCParameters(masterState, step, priorValue))
   }
 
   implicit class ABCContainer(dsl: DSLContainer[ABCParameters]) extends DSLContainerHook(dsl) {

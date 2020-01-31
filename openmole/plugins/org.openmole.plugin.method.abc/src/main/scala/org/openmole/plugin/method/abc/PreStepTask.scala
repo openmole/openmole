@@ -12,7 +12,7 @@ import scala.util.Random
 
 object PreStepTask {
 
-  def apply(n: Int, nAlpha: Int, prior: Prior, state: Val[MonAPMC.MonState], stepState: Val[MonAPMC.StepState], step: Val[Int])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(n: Int, nAlpha: Int, prior: IndependentPriors, state: Val[MonAPMC.MonState], stepState: Val[MonAPMC.StepState], step: Val[Int])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     FromContextTask("preStepTask") { p ⇒
       import p._
 

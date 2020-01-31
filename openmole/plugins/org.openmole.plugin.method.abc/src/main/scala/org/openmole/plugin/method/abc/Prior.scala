@@ -31,36 +31,49 @@ object Prior {
   }
 
   // Openmole script syntactic sugar
-  def apply(univariatePriors: UnivariatePrior*): IndependentPrior =
-    IndependentPrior(univariatePriors.toArray)
+  def apply(univariatePriors: UnivariatePrior*): Seq[UnivariatePrior] = univariatePriors
+
 }
 
-sealed trait Prior {
-  val v: Array[Val[Double]]
-  def density(p: FromContextTask.Parameters)(x: Array[Double]): Double
-  def sample(p: FromContextTask.Parameters)(implicit rng: util.Random): Array[Double]
-
-  def dimension = v.length
-}
-
-case class IndependentPrior(priors: Array[UnivariatePrior])
-  extends Prior {
+case class IndependentPriors(priors: Seq[UnivariatePrior]) {
   val v = priors.map { _.v }
 
   def density(p: FromContextTask.Parameters)(x: Array[Double]): Double =
     (priors zip x).map { case (prior, xi) ⇒ prior.density(p)(xi) }.product
 
   def sample(p: FromContextTask.Parameters)(implicit rng: util.Random): Array[Double] =
-    priors.map { _.sample(p) }
+    priors.toArray.map { _.sample(p) }
 }
 
-case class MultivariateNormalPrior(
-  v:    Array[Val[Double]],
-  mean: Array[Double],
-  cov:  Array[Array[Double]])
-  extends Prior {
-  def density(p: FromContextTask.Parameters)(x: Array[Double]): Double = ???
-  def sample(p: FromContextTask.Parameters)(implicit rng: util.Random): Array[Double] = ???
+//case class MultivariateNormalPrior(
+//  v:    Array[Val[Double]],
+//  mean: Array[Double],
+//  cov:  Array[Array[Double]])
+//  extends Prior {
+//  def density(p: FromContextTask.Parameters)(x: Array[Double]): Double = ???
+//  def sample(p: FromContextTask.Parameters)(implicit rng: util.Random): Array[Double] = ???
+//}
+
+object UnivariatePrior {
+  object ToUnivariatePrior {
+    import org.openmole.core.workflow.domain._
+    import org.openmole.core.workflow.sampling._
+
+    def apply[T](f: T ⇒ UnivariatePrior) =
+      new ToUnivariatePrior[T] {
+        def apply(t: T) = f(t)
+      }
+
+    implicit def factorIsPrior[D](implicit bounded: Bounds[D, Double]) =
+      ToUnivariatePrior[Factor[D, Double]](f ⇒ UniformPrior(f.value, bounded.min(f.domain), bounded.max(f.domain)))
+
+  }
+
+  trait ToUnivariatePrior[T] {
+    def apply(t: T): UnivariatePrior
+  }
+
+  implicit def toPrior[T: ToUnivariatePrior](t: T): UnivariatePrior = implicitly[ToUnivariatePrior[T]].apply(t)
 }
 
 sealed trait UnivariatePrior {
