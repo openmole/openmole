@@ -42,7 +42,7 @@ object Site extends App {
         |  _paq.push(['trackPageView']);
         |  _paq.push(['enableLinkTracking']);
         |  (function() {
-        |    var u="//piwik.iscpif.fr/";
+        |    var u="//matomo.openmole.org/";
         |    _paq.push(['setTrackerUrl', u+'piwik.php']);
         |    _paq.push(['setSiteId', 1]);
         |    _paq.push(['enableLinkTracking']);
