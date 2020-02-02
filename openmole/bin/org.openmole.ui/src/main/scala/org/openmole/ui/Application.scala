@@ -48,18 +48,6 @@ object Application extends JavaLogger {
 
   import Log._
 
-  lazy val consoleSplash =
-    """
-      |  ___                   __  __  ___  _     _____    ___
-      | / _ \ _ __   ___ _ __ |  \/  |/ _ \| |   | ____|  ( _ )
-      || | | | '_ \ / _ \ '_ \| |\/| | | | | |   |  _|    / _ \
-      || |_| | |_) |  __/ | | | |  | | |_| | |___| |___  | (_) |
-      | \___/| .__/ \___|_| |_|_|  |_|\___/|_____|_____|  \___/
-      |      |_|
-      |""".stripMargin
-
-  lazy val consoleUsage = "(Type :q to quit)"
-
   def run(args: Array[String]): Int = {
 
     sealed trait LaunchMode
@@ -251,8 +239,6 @@ object Application extends JavaLogger {
           Console.ExitCodes.incorrectPassword
         }
         else {
-          print(consoleSplash)
-          println(consoleUsage)
           Console.dealWithLoadError(loadPlugins, !config.scriptFile.isDefined)
           Services.withServices(workspaceDirectory, passwordString, config.proxyURI, logLevel) { implicit services ⇒
             Runtime.getRuntime.addShutdownHook(thread(Services.dispose(services)))

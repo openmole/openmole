@@ -35,6 +35,18 @@ import scala.util._
 
 object Console extends JavaLogger {
 
+  lazy val consoleSplash =
+    """
+      |  ___                   __  __  ___  _     _____   _  ___
+      | / _ \ _ __   ___ _ __ |  \/  |/ _ \| |   | ____| / |/ _ \
+      || | | | '_ \ / _ \ '_ \| |\/| | | | | |   |  _|   | | | | |
+      || |_| | |_) |  __/ | | | |  | | |_| | |___| |___  | | |_| |
+      | \___/| .__/ \___|_| |_|_|  |_|\___/|_____|_____| |_|\___/
+      |      |_|
+      |""".stripMargin
+
+  lazy val consoleUsage = "(Type :q to quit)"
+
   private def passwordReader = {
     val reader = new ConsoleReader()
     reader.setExpandEvents(false)
@@ -103,8 +115,13 @@ class Console(script: Option[String] = None) {
 
   def commandsName = "_commands_"
 
-  def run(args: Seq[String], workDirectory: Option[File])(implicit services: Services): Int = {
+  def run(args: Seq[String], workDirectory: Option[File], splash: Boolean = true)(implicit services: Services): Int = {
     import services._
+
+    if (splash) {
+      println(consoleSplash)
+      println(consoleUsage)
+    }
 
     script match {
       case None ⇒
