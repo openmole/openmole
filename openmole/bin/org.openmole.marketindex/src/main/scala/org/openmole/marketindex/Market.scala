@@ -71,26 +71,29 @@ object Market {
   def entries = Seq(
     MarketRepository(
       githubMarket,
-      MarketEntry("Pi Computation", "pi", Seq(stochastic, simulation, scala)),
-      MarketEntry("Random Forest", "randomforest", Seq(stochastic, machineLearning, native, data, python)),
+      MarketEntry("Hello World in Python", "python-hello", Seq(python)),
       MarketEntry("Hello World in R", "R-hello", Seq(R)),
       MarketEntry("Hello World in Scilab", "scilab-hello", Seq(scilab)),
-      MarketEntry("Fire in NetLogo", "fire", Seq(netlogo, stochastic, simulation)),
       MarketEntry("Hello World in Java", "java-hello", Seq(java)),
-      MarketEntry("Calibration of Ants", "ants", Seq(netlogo, ga, simulation, calibration)),
+      MarketEntry("Hello World in NetLogo", "fire", Seq(netlogo, stochastic, simulation)),
       MarketEntry("Hello with OpenMOLE plugin", "hello-plugin", Seq(scala, java, plugin)),
+
+      MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration, tutorial, sensitivity)),
+      MarketEntry("Native Application Tutorial", "tutorials/native", Seq(tutorial, native, data, python)),
+      MarketEntry("Workflow Tutorial", "tutorials/workflow", Seq(tutorial, scala, workflow)),
+
+      MarketEntry("Morris Sensitivity Analysis", "sensitivity/morris", Seq(netlogo, sensitivity, simulation)),
+      MarketEntry("Saltelli Sensitivity Analysis", "sensitivity/saltelli", Seq(sensitivity, simulation)),
+      MarketEntry("ABC", "abc", Seq(abc, stochastic, calibration, tutorial)),
+      MarketEntry("Calibration of Ants", "ants", Seq(netlogo, ga, simulation, calibration)),
+      MarketEntry("Optimise Ackley function in Python", "ackley", Seq(python, ga, native, optimisation)),
+
+      MarketEntry("Pi Computation", "pi", Seq(stochastic, simulation, scala)),
+      MarketEntry("Random Forest", "randomforest", Seq(stochastic, machineLearning, native, data, python)),
       MarketEntry("SimpopLocal", "simpoplocal", Seq(stochastic, simulation, ga, scala, calibration)),
       MarketEntry("Metamimetic Networks", "metamimetic-networks", Seq(stochastic, simulation, netlogo)),
       MarketEntry("Segmentation with FSL", "fsl-fast", Seq(fsl, data, native, neuroscience)),
-      MarketEntry("Morris Sensitivity Analysis", "sensitivity/morris", Seq(netlogo, sensitivity, simulation)),
-      MarketEntry("Saltelli Sensitivity Analysis", "sensitivity/saltelli", Seq(sensitivity, simulation)),
       //MarketEntry("Explore a GAMA Model", "gama", Seq(gama, stochastic, simulation)),
-      MarketEntry("Workflow Tutorial", "tutorials/workflow", Seq(tutorial, scala, workflow)),
-      MarketEntry("Native Application Tutorial", "tutorials/native", Seq(tutorial, native, data, python)),
-      MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration, tutorial, sensitivity)),
-      MarketEntry("Optimise Ackley function in Python", "ackley", Seq(python, ga, native, optimisation)),
-      MarketEntry("ABC", "abc", Seq(abc, stochastic, calibration, tutorial)),
-
     )
   )
 
