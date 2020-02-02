@@ -19,12 +19,12 @@ object SaltelliSampling {
       val vectorSize = factors.map(_.size(context)).sum
       val isSobol = sobolSampling.from(context)
 
-      val (a, b) = if (isSobol) {
-        val ab = SobolSampling.sobolValues(2 * vectorSize, s).map(_.toArray).toArray
-        (ab.transpose.take(vectorSize).transpose, ab.transpose.takeRight(vectorSize).transpose)
-      }
-      else
-        (LHS.lhsValues(vectorSize, s, random()), LHS.lhsValues(vectorSize, s, random()))
+      val (a, b) =
+        if (isSobol) {
+          val ab = SobolSampling.sobolValues(2 * vectorSize, s).map(_.toArray).toArray
+          (ab.transpose.take(vectorSize).transpose, ab.transpose.takeRight(vectorSize).transpose)
+        }
+        else (LHS.lhsValues(vectorSize, s, random()), LHS.lhsValues(vectorSize, s, random()))
 
       val cIndices =
         for {
@@ -59,10 +59,9 @@ object SaltelliSampling {
         }
 
       (aVariables ++ bVariables ++ cVariables).toIterator
-    } validate { samples } inputs { factors.flatMap(_.inputs) } prototypes { factors.map(_.prototype) }
+    } validate { samples } inputs { factors.flatMap(_.inputs) } prototypes { factors.map(_.prototype) ++ matrix }
 
-  def apply(samples: FromContext[Int], factors: ScalarOrSequenceOfDouble[_]*): FromContextSampling =
-    SaltelliSampling(samples, true, factors: _*)
+  def apply(samples: FromContext[Int], factors: ScalarOrSequenceOfDouble[_]*): FromContextSampling = SaltelliSampling(samples, true, factors: _*)
 
   def buildC(
     i: Int,

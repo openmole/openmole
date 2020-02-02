@@ -70,18 +70,18 @@ package object sensitivity {
 
 
   implicit class SaltelliMethodContainer(dsl: DSLContainer[Sensitivity.SaltelliParams])  extends DSLContainerHook(dsl) {
-    def hook(directory: FromContext[File]): DSLContainer[Sensitivity.SaltelliParams] = {
+    def hook(output: WritableOutput): DSLContainer[Sensitivity.SaltelliParams] = {
       implicit val defScope = dsl.scope
-      dsl hook SaltelliHook(dsl, directory)
+      dsl hook SaltelliHook(dsl, output)
     }
   }
 
 
 
   implicit class MorrisMethodContainer(dsl: DSLContainer[Sensitivity.MorrisParams]) extends DSLContainerHook(dsl) {
-    def hook(directory: FromContext[File]): DSLContainer[Sensitivity.MorrisParams] = {
+    def hook(output: WritableOutput): DSLContainer[Sensitivity.MorrisParams] = {
       implicit val defScope = dsl.scope
-      dsl hook MorrisHook(dsl, directory)
+      dsl hook MorrisHook(dsl, output)
     }
   }
 

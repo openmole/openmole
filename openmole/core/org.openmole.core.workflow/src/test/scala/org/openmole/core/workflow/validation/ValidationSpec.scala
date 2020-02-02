@@ -41,7 +41,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val mole: Mole = t1 -- t2
 
     val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
-    errors.headOption should matchPattern { case Some(MissingInput(_, `p`)) ⇒ }
+    errors.headOption should matchPattern { case Some(MissingInput(_, `p`, _)) ⇒ }
   }
 
   "Validation" should "not detect a missing input error" in {
@@ -102,7 +102,7 @@ class ValidationSpec extends FlatSpec with Matchers {
 
     val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
 
-    errors.headOption should matchPattern { case Some(MissingInput(_, `p`)) ⇒ }
+    errors.headOption should matchPattern { case Some(MissingInput(_, `p`, _)) ⇒ }
   }
 
   "Validation" should "detect a missing input in the submole" in {
@@ -115,7 +115,7 @@ class ValidationSpec extends FlatSpec with Matchers {
 
     val errors = Validation(mt)
 
-    errors.headOption should matchPattern { case Some(MoleTaskDataFlowProblem(_, MissingInput(_, `p`))) ⇒ }
+    errors.headOption should matchPattern { case Some(MoleTaskDataFlowProblem(_, MissingInput(_, `p`, _))) ⇒ }
 
   }
 

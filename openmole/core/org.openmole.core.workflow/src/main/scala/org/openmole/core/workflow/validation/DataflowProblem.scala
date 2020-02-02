@@ -47,11 +47,12 @@ object DataflowProblem {
   }
 
   case class MissingInput(
-    slot: TransitionSlot,
-    data: Val[_]
+    slot:    TransitionSlot,
+    data:    Val[_],
+    reaches: Seq[Val[_]]
   ) extends SlotDataflowProblem {
 
-    override def toString = "Input " + data + " is missing when reaching the " + slot + "."
+    override def toString = "Input " + data + " is missing when reaching the " + slot + s""", available inputs are ${reaches.mkString(",")}."""
   }
 
   case class DuplicatedName(

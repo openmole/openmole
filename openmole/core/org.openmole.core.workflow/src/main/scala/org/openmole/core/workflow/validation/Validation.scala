@@ -30,6 +30,7 @@ import org.openmole.core.workflow.validation.ValidationProblem.{ HookValidationP
 import org.openmole.core.workspace.TmpDirectory
 
 import scala.collection.immutable.TreeMap
+import scala.collection.mutable
 import scala.collection.mutable.{ HashMap, Queue }
 import scala.util.{ Failure, Success, Try }
 
@@ -93,7 +94,13 @@ object Validation {
         case (None, None, Some(source), impl, param)     ⇒ checkPrototypeMatch(source)
         case (None, None, None, Some(impl), _)           ⇒ checkPrototypeMatch(impl)
         case (None, None, None, None, Some(parameter))   ⇒ checkPrototypeMatch(parameter)
-        case (None, None, None, None, None)              ⇒ Some(MissingInput(s, input))
+        case (None, None, None, None, None) ⇒
+          val inputs = mutable.TreeSet[Val[_]]()
+          inputs ++= defaultNonOverride
+          inputs ++= receivedImplicit
+          inputs ++= receivedInputs.map(_._2.toPrototype)
+          inputs ++= defaultOverride
+          Some(MissingInput(s, input, inputs.toSeq))
       }
     }).flatten
   }

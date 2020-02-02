@@ -79,10 +79,8 @@ object SaltelliAggregation {
     FromContextTask("SaltelliAggregation") { p ⇒
       import p._
 
-      val matrixNames: Array[String] =
-        context(SaltelliSampling.matrixName.array)
-      val matrixIndex: Array[Int] =
-        context(SaltelliSampling.matrixIndex.array)
+      val matrixNames: Array[String] = context(SaltelliSampling.matrixName.array)
+      val matrixIndex: Array[Int] = context(SaltelliSampling.matrixIndex.array)
       // outputValues(i)(j) gives the j-th value for output i.
       val outputValues: Array[Array[Double]] =
         modelOutputs.map(o ⇒ context(o.toArray)).toArray
