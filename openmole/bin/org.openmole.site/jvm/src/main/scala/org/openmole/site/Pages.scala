@@ -224,7 +224,7 @@ object DocumentationPages {
   lazy val container = DocumentationPage.fromScalatex(name = "Linux Executable", content = scalatex.documentation.embed.Container)
 
   // Explore
-  def explorePages = pageNode(explore, Vector(samplings, calibration, sensitivity, profile, pse, ose))
+  def explorePages = pageNode(explore, Vector(samplings, calibration, sensitivity, profile, pse, ose, abc))
 
   lazy val explore = DocumentationPage.fromScalatex(name = "Explore", content = scalatex.documentation.explore.Explore, title = Some("Explore Your Model"))
 
@@ -248,6 +248,7 @@ object DocumentationPages {
   lazy val profile = DocumentationPage.fromScalatex(name = "Profile", content = scalatex.documentation.explore.Profile)
   lazy val pse = DocumentationPage.fromScalatex(name = "PSE", content = scalatex.documentation.explore.PSE, title = Some("Pattern Space Exploration"))
   lazy val ose = DocumentationPage.fromScalatex(name = "OSE", content = scalatex.documentation.explore.OSE, title = Some("Origin Space Exploration"))
+  lazy val abc = DocumentationPage.fromScalatex(name = "ABC", content = scalatex.documentation.explore.ABC, title = Some("Approximate Bayesian computation"))
 
   // Scale
   def scalePages = pageNode(scale, Vector(multithread, ssh, cluster, egi))
