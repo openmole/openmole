@@ -22,9 +22,9 @@ assemble:
     - chmod 644 ~/.ssh/known_hosts
     - echo "put -r ./openmole/site/* next" >./tonext     
     - sftp -i ~/.ssh/identity -b ./tonext -P 21022 user@docker.openmole.org
-  only:
-    refs:
-      - 10-dev
+  #only:
+  #  refs:
+  #    - 10-dev
    
 
 
