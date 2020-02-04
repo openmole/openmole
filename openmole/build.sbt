@@ -559,13 +559,6 @@ lazy val server = OsgiProject(
   libraryDependencies ++= Seq(Libraries.bouncyCastle, Libraries.logback, Libraries.scalatra, Libraries.arm, Libraries.codec, Libraries.json4s), Libraries.addScalaLang(scalaVersionValue)) settings (defaultSettings: _*)
 
 
-lazy val client = Project("org-openmole-rest-client", restDir / "client") settings(
-  libraryDependencies ++= Libraries.httpClient,
-  libraryDependencies += "org.json4s" %% "json4s-jackson" % Libraries.json4sVersion
-) dependsOn(message, openmoleTar) settings (defaultSettings: _*)
-
-
-
 /* -------------------- GUI --------------------- */
 
 
