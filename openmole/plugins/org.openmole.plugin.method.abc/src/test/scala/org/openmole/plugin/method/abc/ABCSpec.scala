@@ -65,6 +65,13 @@ class ABCSpec extends FlatSpec with Matchers {
     outputs += (o1, o2)
   )
 
+  val seed = Val[Long]
+
+  val testTaskSeed = TestTask { context ⇒ context + (o1 -> context(x1)) + (o2 -> context(x2)) } set (
+    inputs += (x1, x2, seed),
+    outputs += (o1, o2)
+  )
+
   "abc map reduce" should "run" in {
     val abc =
       ABC(
@@ -100,6 +107,20 @@ class ABCSpec extends FlatSpec with Matchers {
         observed = observed,
         sample = 10,
         generated = 10
+      )
+
+    abc run ()
+  }
+
+  "abc with a stochastic model" should "compile" in {
+    val abc =
+      ABC(
+        evaluation = testTaskSeed,
+        prior = priors,
+        observed = observed,
+        sample = 10,
+        generated = 10,
+        seed = seed
       )
 
     abc run ()

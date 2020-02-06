@@ -2,17 +2,23 @@ package org.openmole.plugin.method.abc
 
 import org.openmole.core.workflow.task.FromContextTask
 import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 import mgo.abc._
 import org.openmole.core.context.Variable
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.tools.math._
 import org.openmole.core.workflow.builder.DefinitionScope
 
-import scala.util.Random
-
 object PreStepTask {
 
-  def apply(n: Int, nAlpha: Int, prior: IndependentPriors, state: Val[MonAPMC.MonState], stepState: Val[MonAPMC.StepState], step: Val[Int])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(
+    n:         Int,
+    nAlpha:    Int,
+    prior:     IndependentPriors,
+    state:     Val[MonAPMC.MonState],
+    stepState: Val[MonAPMC.StepState],
+    step:      Val[Int],
+    seed:      Seed)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     FromContextTask("preStepTask") { p ⇒
       import p._
 
@@ -20,13 +26,18 @@ object PreStepTask {
       val (ns, matrix: Array[Array[Double]]) =
         MonAPMC.preStep(n, nAlpha, prior.sample(p)(_), prior.density(p)(_), s)(random())
 
-      val samples = (prior.v zip matrix.toVector.transpose).map { case (v, samples) ⇒ Variable(v.array, samples.toArray) }
+      val rng = random()
+      val samples =
+        (prior.v zip matrix.toVector.transpose).flatMap {
+          case (v, samples) ⇒
+            Seq(Variable(v.array, samples.toArray)) ++ seed.array(samples.size, rng).toSeq
+        }
 
       context ++ samples + Variable(stepState, ns)
     } set (
       (inputs, outputs) += step,
       inputs += state,
-      exploredOutputs ++= prior.v.map(_.array),
+      exploredOutputs ++= prior.v.map(_.array) ++ seed.prototype.map(_.array).toSeq,
       outputs += stepState,
 
       state := MonAPMC.Empty(),

@@ -17,54 +17,20 @@
 
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.context._
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.dsl._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 
 import scala.language.higherKinds
-import scala.util.Random
+
 import cats._
 import cats.implicits._
+
 import org.openmole.core.exception.UserBadDataError
-import shapeless.TypeCase
-
-object GASeeder {
-
-  def empty = new GASeeder {
-    def apply(rng: Random) = None
-    def prototype = None
-  }
-
-  implicit def prototypeToSeeder[T](p: Val[T])(implicit seed: Seed[T]) = new GASeeder {
-    def apply(rng: Random) = Some(Variable(p, seed(rng)))
-    def prototype = Some(p)
-  }
-
-  object Seed {
-    implicit val longIsSeed = new Seed[Long] {
-      override def apply(rng: Random): Long = rng.nextLong()
-    }
-
-    implicit val intIsSeed = new Seed[Int] {
-      override def apply(rng: Random): Int = rng.nextInt()
-    }
-  }
-
-  trait Seed[T] {
-    def apply(rng: Random): T
-  }
-
-}
-
-trait GASeeder {
-  def apply(rng: Random): Option[Variable[_]]
-  def prototype: Option[Val[_]]
-}
 
 case class Stochastic(
-  seed:         GASeeder = GASeeder.empty,
-  replications: Int      = 100,
-  reevaluate:   Double   = 0.2
+  seed:         Seed   = Seed.empty,
+  replications: Int    = 100,
+  reevaluate:   Double = 0.2
 )
 
 object WorkflowIntegration {
@@ -244,8 +210,11 @@ object GAIntegration {
     scale:  Boolean): FromContext[Vector[Variable[_]]] = {
 
     val variables =
-      values.traverse[FromContext, Vector[Variable[_]]] {
-        case (continuous, discrete) ⇒ Genome.toVariables(genome, continuous, discrete, scale)
+      FromContext { p ⇒
+        import p._
+        values.map {
+          case (continuous, discrete) ⇒ Genome.toVariables(genome, continuous, discrete, scale).from(context)
+        }
       }
 
     variables.map {

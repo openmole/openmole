@@ -59,6 +59,7 @@ package object abc {
       minAcceptedRatio:     OptionalArgument[Double] = 0.01,
       stopSampleSizeFactor: Int                      = 1,
       maxStep:              OptionalArgument[Int]    = None,
+      seed:                 Seed                     = None,
       scope:                DefinitionScope          = "abc") = {
       implicit def defScope = scope
       val stepState = Val[MonAPMC.StepState]("stepState", abcNamespace)
@@ -70,7 +71,7 @@ package object abc {
       val nAlpha = sample
       val priorValue = IndependentPriors(prior)
 
-      val preStepTask = PreStepTask(n, nAlpha, priorValue, state, stepState, step)
+      val preStepTask = PreStepTask(n, nAlpha, priorValue, state, stepState, step, seed)
       val postStepTask = PostStepTask(n, nAlpha, stopSampleSizeFactor, priorValue, observed, state, stepState, minAcceptedRatio, maxStep, stop, step)
 
       val mapReduce =
@@ -104,6 +105,7 @@ package object abc {
     stopSampleSizeFactor: Int                   = 1,
     maxStep:              OptionalArgument[Int] = None,
     islandSteps:          Int                   = 1,
+    seed:                 Seed                  = None,
     scope:                DefinitionScope       = "abc island"
   ) = {
     implicit def defScope = scope
