@@ -52,11 +52,15 @@ object MoleServices {
    * @param _outputRedirection
    * @return
    */
-  def create(applicationExecutionDirectory: File, moleExecutionDirectory: Option[File] = None, outputRedirection: Option[OutputRedirection] = None)(implicit preference: Preference, seeder: Seeder, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, _newFile: TmpDirectory, fileService: FileService, workspace: Workspace, _outputRedirection: OutputRedirection, loggerService: LoggerService) = {
+  def create(
+    applicationExecutionDirectory: File,
+    moleExecutionDirectory:        Option[File]              = None,
+    outputRedirection:             Option[OutputRedirection] = None,
+    seed:                          Option[Long]              = None)(implicit preference: Preference, seeder: Seeder, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, _newFile: TmpDirectory, fileService: FileService, workspace: Workspace, _outputRedirection: OutputRedirection, loggerService: LoggerService) = {
     val executionDirectory = moleExecutionDirectory.getOrElse(applicationExecutionDirectory.newDir("execution"))
     new MoleServices(applicationExecutionDirectory, executionDirectory)(
       preference = preference,
-      seeder = Seeder(seeder.newSeed),
+      seeder = Seeder(seed.getOrElse(seeder.newSeed)),
       threadProvider = threadProvider,
       eventDispatcher = eventDispatcher,
       tmpDirectory = TmpDirectory(executionDirectory),

@@ -51,16 +51,16 @@ package object abc {
     case class ABCParameters(state: Val[MonAPMC.MonState], step: Val[Int], prior: IndependentPriors)
 
     def apply(
-               evaluation:           DSL,
-               prior:                Seq[UnivariatePrior],
-               observed:             Seq[Observed[_]],
-               sample:               Int,
-               generated:            Int,
-               minAcceptedRatio:     OptionalArgument[Double] = 0.01,
-               stopSampleSizeFactor: Int                      = 1,
-               maxStep:              OptionalArgument[Int]    = None,
-               seed:                 SeedVariable                     = None,
-               scope:                DefinitionScope          = "abc") = {
+      evaluation:           DSL,
+      prior:                Seq[UnivariatePrior],
+      observed:             Seq[Observed[_]],
+      sample:               Int,
+      generated:            Int,
+      minAcceptedRatio:     OptionalArgument[Double] = 0.01,
+      stopSampleSizeFactor: Int                      = 1,
+      maxStep:              OptionalArgument[Int]    = None,
+      seed:                 SeedVariable             = None,
+      scope:                DefinitionScope          = "abc") = {
       implicit def defScope = scope
       val stepState = Val[MonAPMC.StepState]("stepState", abcNamespace)
       val step = Val[Int]("step", abcNamespace)
@@ -95,18 +95,18 @@ package object abc {
   import ABC._
 
   def IslandABC(
-                 evaluation:           DSL,
-                 prior:                Seq[UnivariatePrior],
-                 observed:             Seq[Observed[_]],
-                 sample:               Int,
-                 generated:            Int,
-                 parallelism:          Int,
-                 minAcceptedRatio:     Double                = 0.01,
-                 stopSampleSizeFactor: Int                   = 1,
-                 maxStep:              OptionalArgument[Int] = None,
-                 islandSteps:          Int                   = 1,
-                 seed:                 SeedVariable                  = None,
-                 scope:                DefinitionScope       = "abc island"
+    evaluation:           DSL,
+    prior:                Seq[UnivariatePrior],
+    observed:             Seq[Observed[_]],
+    sample:               Int,
+    generated:            Int,
+    parallelism:          Int,
+    minAcceptedRatio:     Double                = 0.01,
+    stopSampleSizeFactor: Int                   = 1,
+    maxStep:              OptionalArgument[Int] = None,
+    islandSteps:          Int                   = 1,
+    seed:                 SeedVariable          = None,
+    scope:                DefinitionScope       = "abc island"
   ) = {
     implicit def defScope = scope
 

@@ -116,7 +116,6 @@ package composition {
 
     def toExecution(
       implicits:          Context                                    = Context.empty,
-      seed:               OptionalArgument[Long]                     = None,
       defaultEnvironment: OptionalArgument[LocalEnvironmentProvider] = None)(implicit moleServices: MoleServices): MoleExecution =
       MoleExecution(
         mole = toMole,
