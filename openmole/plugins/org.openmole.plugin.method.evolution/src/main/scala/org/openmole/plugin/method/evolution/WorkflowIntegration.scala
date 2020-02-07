@@ -28,9 +28,9 @@ import cats.implicits._
 import org.openmole.core.exception.UserBadDataError
 
 case class Stochastic(
-  seed:         Seed   = Seed.empty,
-  replications: Int    = 100,
-  reevaluate:   Double = 0.2
+                       seed:         SeedVariable   = SeedVariable.empty,
+                       replications: Int    = 100,
+                       reevaluate:   Double = 0.2
 )
 
 object WorkflowIntegration {

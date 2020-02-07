@@ -5,16 +5,16 @@ import org.openmole.core.context.Val
 import scala.reflect.ClassTag
 import scala.util.Random
 
-object Seed {
+object SeedVariable {
 
-  def empty = new Seed {
+  def empty = new SeedVariable {
     type T = None.type
     def apply(rng: Random) = None
     def prototype = None
     def array(size: Int, rng: Random) = None
   }
 
-  implicit def prototypeToSeeder[P: ClassTag](p: Val[P])(implicit seed: SeedType[P]): Seed = new Seed {
+  implicit def prototypeToSeeder[P: ClassTag](p: Val[P])(implicit seed: SeedType[P]): SeedVariable = new SeedVariable {
     type T = P
     def apply(rng: Random) = Some(Variable(p, seed(rng)))
     def array(size: Int, rng: Random) = {
@@ -25,7 +25,7 @@ object Seed {
     def prototype = Some(p)
   }
 
-  implicit def noneToSeeder(none: None.type): Seed = empty
+  implicit def noneToSeeder(none: None.type): SeedVariable = empty
 
   object SeedType {
     implicit val longIsSeed = new SeedType[Long] {
@@ -43,7 +43,7 @@ object Seed {
 
 }
 
-trait Seed {
+trait SeedVariable {
   type T
   def apply(rng: Random): Option[Variable[T]]
   def prototype: Option[Val[T]]

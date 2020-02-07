@@ -18,7 +18,7 @@ object PreStepTask {
     state:     Val[MonAPMC.MonState],
     stepState: Val[MonAPMC.StepState],
     step:      Val[Int],
-    seed:      Seed)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+    seed:      SeedVariable)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     FromContextTask("preStepTask") { p ⇒
       import p._
 
