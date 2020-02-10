@@ -3,20 +3,20 @@
 @import org.openmole.site._
 @import DocumentationPages._
 
-The OpenMOLE community has been steadliy growing these past years, and we are always happy to welcome new users!
+The OpenMOLE community has been steadily growing these past years, and we are always happy to welcome new users!
 
 @br@br
 
 Several tools are available to keep the community alive:
 @ul
   @li
-    Ask questions and get help on the @a("forum", href := shared.link.mailingList)
+    Ask questions and get help on the @aa("forum", href := shared.link.mailingList)
   @li
-    Get more help on the @a("chat", href := shared.link.chat)
+    Get more help on the @aa("chat", href := shared.link.chat)
   @li
-    Stay informed about the latest OpenMOLE news on the @a("blog", href := shared.link.blog) or via @a("Twitter", href := shared.link.twitter)
+    Stay informed about the latest OpenMOLE news on the @aa("blog", href := shared.link.blog) or via @aa("Twitter", href := shared.link.twitter)
 
-It is also possible to @a("report a bug", href := shared.link.issue) and @a("help make OpenMOLE better", href := howToContribute.file).
+It is also possible to @aa("report a bug", href := shared.link.issue) and @a("help make OpenMOLE better", href := howToContribute.file).
 So many possibilities!
 
 @br@br
