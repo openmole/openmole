@@ -1,58 +1,91 @@
-@import org.openmole.site.tools._
 @import org.openmole.site._
+@import org.openmole.site.tools._
+@import org.openmole.site.stylesheet._
+@import DocumentationPages._
 
-@p The OpenMOLE console language is an extension of the Scala language designed for distributed computing. It supports all the scala constructs and additional operators and classes especially designed to compose workflows. OpenMOLE workflows expose explicit parallel aspect of the workload that can be delegated to distributed computing environments in a transparent manner. The philosophy of OpenMOLE is test small (on your computer) and scale for free (on remote distributed computing environments).
 
-@p A good way to get a first glimpse at what OpenMOLE can do is to read this @aa("research paper", href := Resource.paper.fgcs2013.file).
+The OpenMOLE console language is an extension of the Scala language designed for distributed computing.
+It supports all the Scala constructs, and additional operators and classes specifically designed to compose workflows.
+OpenMOLE workflows expose explicit parallel aspect of the workload that can be delegated to distributed computing environments in a transparent manner.
+The philosophy of OpenMOLE is test small (on your computer) and scale for free (on remote distributed computing environments).
 
-@h2
-    OpenMOLE scripts
-The OpenMOLE scripts are stored in the GUI in .oms files. They can eventually be split into several different files.
-To import the content of an .oms file (let say MyExp.oms) in a given .oms file located in the same directory:
+@br@br
 
- @hl.openmoleNoTest("""
- import _file_.MyExp._""")
+A good way to get a first glimpse of what OpenMOLE can do is to read this @aa("research paper", href := Resource.paper.fgcs2013.file).
 
-To refer to an .oms in a parent directory, use the @i{parent} keyword:
- @hl.openmoleNoTest("""
-  import _parent_._file_.MyExp._""")
 
-@h2
-    Basic scala constructs
-You need only a very basic understanding of the scala language in order to design OpenMOLE workflows.
- @hl.openmoleNoTest("""
- val a = 1 // declares a variable a of type Int
- val b = "Text" // declares a variable a of type String
- val c = if(condition) 5 else 10 // declare a variable c of type Int, the value of c depends on the condition""")
 
-@h2
-    Construct objects
- OpenMOLE takes advantage of the object oriented aspect of scala. It proposes a set of objects that you can build and assemble together to specify your workflow. In general, an object is instantiated using the "new" keyword:
- @br @hl.openmole("""val f = new File("/tmp/file.txt")""")
- @p In OpenMOLE we have choosen to use factories instead of directly constructing objects, that's why most of the OpenMOLE scripts doesn't contain the "new" keyword at all.
- @p For instance: @hl.openmole("""val l = File("/tmp/file.txt")""")
- @p Under the hood, it calls a method that is in charge of building the file.")
+@h2{OpenMOLE scripts}
 
-@h2
-    Named parameters
-Functions calls generally require the parameters to be provided in a predefined order. In scala you can get rid of this ordering constraint by using named parameters. OpenMOLE scripts will often make use of this pattern:
-@br @hl.openmoleNoTest("val t = SomeClass(value1, value2, otherParam = otherValue)")
-@p It means that @i{value1} and @i{value2} are the values for the first two parameters and that the parameter named @i{otherParam} is set to the value @i{otherValue}. Unspecified parameters are set to their default value.
+The OpenMOLE scripts are stored in the GUI in @b{.oms} files.
+One workflow can be split into several files.
+@br
+To be able to use the content of a @b{.oms} file (let's call it @code{file2.oms}) in another one (say @code{file1.oms}), located in the same directory, @code{file2.oms} needs to be imported in @code{file1.oms}.
+The following line needs to be written at the beginning of @code{file1.oms}:
 
-@h2
-    Going further
+@br@br
 
-What you have read so far should be sufficient in order to get started with OpenMOLE. To begin with the OpenMOLE syntax you should have a look at the @a("Getting started", href := DocumentationPages.stepByStepIntro.file). You may also want to look at the @a("Task documentation", href := DocumentationPages.embed.file) and other h2ions detailing specific concepts.
+@hl.openmoleNoTest("""
+    import _file_.file2._
+""")
 
-@p Scala is a very nice language with an extensive very well designed standard library. To get more insights on this language, check these links:
+@br
+
+To refer to a file located in a parent directory, use the @code{parent} keyword:
+
+@br@br
+
+@hl.openmoleNoTest("""
+    import _parent_._file_.file2._
+""")
+
+
+
+@h2{Basic Scala constructs}
+
+You need only a very basic understanding of the Scala language in order to be able to design OpenMOLE workflows.
+
+
+@h3{Declare variables}
+@hl.openmoleNoTest("""
+    val a = 1 // declares a variable a of type Int
+    val b = "Text" // declares a variable a of type String
+    val c = if(condition) 5 else 10 // declare a variable c of type Int, the value of c depends on the condition
+""")
+
+
+@h3{Construct objects}
+OpenMOLE takes advantage of the object oriented aspect of Scala.
+A set of objects are available to build and assemble together to specify your workflow.
+Usually, an object is instantiated using the @code{new} keyword: @hl.openmole("""val f = new File("/tmp/file.txt")""")
+
+@br
+
+However, in OpenMOLE we have chosen to use factories instead of directly constructing objects, that's why most of OpenMOLE scripts don't contain the @code{new} keyword at all.
+For instance: @hl.openmole("""val l = File("/tmp/file.txt")""").
+Under the hood, it calls a method that is in charge of building the file.
+
+
+@h3{Named parameters }
+Function calls generally require the parameters to be provided in a predefined order.
+In Scala you can get rid of this ordering constraint by using named parameters.
+OpenMOLE scripts will often make use of this pattern: @hl.openmoleNoTest("val t = SomeClass(value1, value2, otherParam = otherValue)").
+Here it means that @code{value1} and @code{value2} are the values for the first two (unnamed) parameters, and that the parameter named @code{otherParam} is set to the value @code{otherValue}.
+Unspecified parameters are set to their default value.
+
+
+
+@h2{Going further}
+
+What you have read so far should be sufficient in order to get started with OpenMOLE.
+To begin with the OpenMOLE syntax you should have a look at the @a("Getting started", href := stepByStepIntro.file).
+You may also want to look at the @a("Task documentation", href := embed.file), and more generally the @a("Documentation", href := documentation.file).
+
+@br@br
+
+Scala is a very nice language, with an extensive and very well designed standard library.
+To get more insights on this language, check these links:
 @ul
  @li{ @aa("Scala website", href := shared.link.scala) }
  @li{ @aa("Scala books", href := shared.link.scalaBook) }
  @li{ @aa("Standard API documentation", href := shared.link.scalaDoc) }
-
-@h2
-    API documentation
-
-You can browse OpenMOLE's @a("automatically generated documentation", href := Resource.api.file + "/index.html")
-
-
