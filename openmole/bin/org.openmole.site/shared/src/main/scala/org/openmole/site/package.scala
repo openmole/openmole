@@ -61,7 +61,7 @@ package object shared {
 
     // Community
     lazy val mailingList = "http://ask.openmole.org"
-    lazy val chat = "https://chat.iscpif.fr/channel/openmole"
+    lazy val chat = "https://chat.openmole.org/channel/general"
     lazy val blog = "https://blog.openmole.org"
     lazy val openMOLEWiki = "https://github.com/openmole/openmole/wiki"
     lazy val twitter = "https://twitter.com/OpenMOLE"
