@@ -167,7 +167,7 @@ It can be provided as an argument to Java or Scala function calls as it is.
 @h2{Output files}
 
 When files are produced by a task, they should be set as an output of this task in order to be collected and persist after the execution of the task.
-These files are assigned to a variable of type @code{Val[File]} and can be transmitted to another task, or copied in the work directory using @code{CopyFileHook} (see @a("here", href := hooks.file) for more info on hooks).
+These files are assigned to a variable of type @code{Val[File]} and can be transmitted to another task, or copied in the work directory using @code{CopyFileHook} (see @a("here", href := hook.file) for more info on hooks).
 For external tasks (all but the @code{ScalaTask}), the way to collect files after a task execution is by using the @code{outputFiles} keyword.
 The case of the @code{ScalaTask} is explained in a separate section.
 
