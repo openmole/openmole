@@ -13,7 +13,7 @@ assemble:
     - '(cd ./build-system && sbt publishLocal)'
     - '(cd ./libraries && sbt publishLocal)'
     - '(cd ./openmole && ./generateSite $PWD/site)'
-    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    #- 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     #- mkdir -p ~/.ssh
     #- chmod 700 ~/.ssh
     #- echo "$SSH_PRIVATE_KEY" >~/.ssh/identity
