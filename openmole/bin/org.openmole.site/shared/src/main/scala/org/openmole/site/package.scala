@@ -67,6 +67,7 @@ package object shared {
     lazy val twitter = "https://twitter.com/OpenMOLE"
     lazy val shortTrainings = "https://iscpif.fr/events/formationsjedi/"
     lazy val longTrainings = "http://cnrsformation.cnrs.fr"
+    lazy val exmodelo = "https://exmodelo.org"
 
     // Resources
     lazy val scala = "http://www.scala-lang.org/"
