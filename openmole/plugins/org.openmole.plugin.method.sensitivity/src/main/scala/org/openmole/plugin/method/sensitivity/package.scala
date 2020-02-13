@@ -68,7 +68,10 @@ package object sensitivity {
     case class MorrisParams(inputs: Seq[ScalarOrSequenceOfDouble[_]], outputs: Seq[Val[_]])
   }
 
-
+  /**
+    * Decorator of the Saltelli method to implicitely call SaltelliHook in the DSL with hook.
+    * @param dsl
+    */
   implicit class SaltelliMethodContainer(dsl: DSLContainer[Sensitivity.SaltelliParams])  extends DSLContainerHook(dsl) {
     def hook(output: WritableOutput): DSLContainer[Sensitivity.SaltelliParams] = {
       implicit val defScope = dsl.scope
@@ -77,7 +80,10 @@ package object sensitivity {
   }
 
 
-
+  /**
+    * Decorator of the Morris method to implicitely call MorrisHook in the DSL with hook.
+    * @param dsl
+    */
   implicit class MorrisMethodContainer(dsl: DSLContainer[Sensitivity.MorrisParams]) extends DSLContainerHook(dsl) {
     def hook(output: WritableOutput): DSLContainer[Sensitivity.MorrisParams] = {
       implicit val defScope = dsl.scope
@@ -93,7 +99,7 @@ package object sensitivity {
    * and in how many levels inputs should be analyzed on.
    *
    * The sensitivity analysis is driven as an exploration based on the Morris sampling,
-   * running the model, and aggregating the result to produce the sensitivty outputs.
+   * running the model, and aggregating the result to produce the sensitivity outputs.
    */
   def SensitivityMorris(
     evaluation:  DSL,
@@ -125,6 +131,17 @@ package object sensitivity {
     DSLContainerExtension(w, data = Sensitivity.MorrisParams(inputs, outputs))
   }
 
+  /**
+    * Variance-based sensitivity indices (Saltelli method).
+    *   Saltelli, A., Annoni, P., Azzini, I., Campolongo, F., Ratto, M., & Tarantola, S. (2010). Variance based sensitivity analysis of model output. Design and estimator for the total sensitivity index. Computer Physics Communications, 181(2), 259-270.
+    *
+    * @param evaluation
+    * @param inputs input prototypes
+    * @param outputs outputs double prototypes
+    * @param samples number of samples to estimates sensitivity indices
+    * @param scope
+    * @return
+    */
   def SensitivitySaltelli(
     evaluation:   DSL,
     inputs:  Seq[ScalarOrSequenceOfDouble[_]],

@@ -38,43 +38,49 @@ In comparison to LHS screening, it has the advantage to provide information for 
 The input space is considered as a grid and trajectories are sampled among these points.
 The method captures output variation when one of the trajectory points is moved to one of its closest neighbors.
 This variation is called an elementary effect.
-A certain number of trajectories are generated, in order to observe the consequence of elementary effects anywhere in the input space
+A certain number of trajectories @b{R} are generated, in order to observe the consequence of elementary effects anywhere in the input space
  (trajectories are generated such that given a starting point, any point at fixed distance is equiprobable - note that the method is still subject
  to the curse of dimensionality for trajectories to fill the input space).
 Finally, the method summarizes these elementary effect to estimate global sensitivity in the output space.
 
+This method is computationally cheap, as each trajectory has @b{k+1} parameter points if @{k} is the number of factors.
+The total number of model runs will thus be @b{R*(k+1)}, so the number of trajectory can be adjusted to the computational budget.
 
 @h3{Results and Interpretation}
 
-Morris' method computes three sensitivity indicators for each model input:
+Morris' method computes three sensitivity indicators for each model input and each model output.
+An elementary effect for input @b{i} and output @b{y@sub{j}} is obtained when the factor @b{x@sub{i}} is changed during one trajectory by a step @b{delta@sub{i}} from an point @b{x@sub{0}}, and computed as @b{epsilon@sub{ij} = (y@sub{j}(x@sub{0}) - y@sub{j}(x@sub{0} + delta@sub{i})) / delta@sub{i}}.
+These are computed as summary statistics on simulated elementary effects and are:
 
 @ul
-    @li{the final sensitivity measure, @b{mu@sub{i}} is the average of the elementary effects along the sampled trajectories.
-        It is interpreted as the overall influence of the input @b{i} on the model output variability,}
-    @li{a more advanced version of the final sensitivity measure, @b{mu@sup{*}@sub{i}}, is computed with the absolute value of the elementary effects, granting robustness against non-monotonic models.
-         It is interpreted the same way as @b{mu@sub{i}},}
-     @li{ @b{sigma@sub{i}}is interpreted as the extent of interaction and non-linear effects of each input. It is based on the variance of previous @b{mu@sub{i}} measures.}
+    @li{The overall sensitivity measure, @b{mu@sub{ij}} is the average of the elementary effects @b{epsilon@sub{ij}}, computed on effects for which factor @b{i} was changed (by construction there are exactly $b{R} such effects, one for each trajectory, and they are independent).
+        It is interpreted as the average influence of the input @b{i} on the model output @b{j} variability. Note that it can aggregate very different strengths of effects, and more dramatically will cancel opposite effects: an indicator which profile along a dimension is a squared function for example will be considered as unsensitive to the input regarding this sensitivity index.}
+    @li{A more robust version of the final sensitivity measure, @b{mu@sup{*}@sub{ij}}, is computed as the average of the absolute value of the elementary effects, ensuring robustness against non-monotonic models. It is still an average and will miss non-linear effects.}
+     @li{To account for non-linearities or interactions between factors, the measure @b{sigma@sub{ij}} is computed as the standard deviation of the elementary effects.
+      A low standard deviation means that effects are constant, i.e. the output is linear on this factor. A high value will mean either that the indicator is non-linear on this factor (low variations at some places and high variations are others) or that variations change a lot when changing other factor values, i.e. that this factor has interactions with others. Both are equivalent regarding a projection on the dimension of factor considered.}
 
 
 
 @h2{Morris' method within OpenMOLE}
 @h3{Specific constructor}
 
-The @code{SensitivityMorris} constructor is defined in OpenMOLE and can take the following parameters:
+The @code{SensitivityMorris} constructor is defined in OpenMOLE and takes the following parameters:
 
 @ul
-  @li{@code{evaluation} is the task (or a composition of tasks) that uses your inputs, typically your model task,}
-  @li{@code{inputs} is the list of your model's inputs,}
-  @li{@code{outputs} is the list of your model's outputs,}
-  @li{@code{repetitions} is the number of trajectories sampled,}
-  @li{@code{levels} is the resolution of relative variations (increases in variables will be in +- 1 / levels).}
+  @li{@code{evaluation} is the task (or a composition of tasks) that uses your inputs, typically your model task.}
+  @li{@code{inputs} is the list of your model's inputs.}
+  @li{@code{outputs} is the list of your model's outputs, which behavior is evaluated by the method.}
+  @li{@code{repetitions} is the number of trajectories sampled, which in practice will determine the accuracy of estimation of sensitivity indices but also the total number of runs.}
+  @li{@code{levels} is the resolution of relative variations, i.e. the number of steps @{p} for each dimension of the grid in which trajectories are sampled. In other words, any variation of a factor @b{delta@sub{i}} will be a multiple of @b{1/p}. It should be adapted to the number of trajectories: a higher number of levels will be more suited to a high number of trajectories, to not miss parts of the space with a small number of local trajectories.}
 
 
 @h3{Hook}
 
 The @code{hook} keyword is used to save or display results generated during the execution of a workflow.
-The generic way to use it is to write either @code{hook(workDirectory / "path/of/a/file.csv")} to save the results in a CSV file, or @code{hook display} to display the results in the standard output.
+The generic way to use it is to write either @code{hook(workDirectory / "path/of/a/directory")} to save results in CSV files, or @code{hook display} to display the results in the standard output.
+In practice, one file will be generated for each sensitivity index: @code{workDirectory / "path/of/a/directory" / "mu.csv"}, @code{workDirectory / "path/of/a/directory" / "muStar.csv"} and @code{workDirectory / "path/of/a/directory" / "sigma.csv"}, each file containing in a matrix format the global indicators (outputs in rows, factors in columns).
 
+You may want to get the set of all simulation results and elementary effects: for this you can plug a CSV hook instead of just the path which calls an underlying specific @code{MorrisHook}. This is not recommended as will also capture all unwanted intermediate stages of the computation.
 
 @h3{Use example}
 
@@ -98,7 +104,9 @@ SensitivityMorris(
 
 @h3{Additional material}
 
-Paper describing method and its evaluation :  @a("Campolongo F, Saltelli A, Cariboni, J, 2011, From screening to quantitative sensitivity analysis. A unified approach, Computer Physics Communication. 182 4, pp. 978-988." , href := "http://www.andreasaltelli.eu/file/repository/Screening_CPC_2011.pdf")
+Paper describing method and its evaluation:  @a("Campolongo F, Saltelli A, Cariboni, J, 2011, From screening to quantitative sensitivity analysis. A unified approach, Computer Physics Communication. 182 4, pp. 978-988." , href := "http://www.andreasaltelli.eu/file/repository/Screening_CPC_2011.pdf")
+
+The book on sensitivity analysis is also a good reference for the description of sensitivity analysis methods and case studies of their applications: Saltelli, A., Tarantola, S., Campolongo, F., & Ratto, M. (2004). Sensitivity analysis in practice: a guide to assessing scientific models (Vol. 1). New York: Wiley.
 
 @br
 
@@ -108,9 +116,17 @@ Paper describing method and its evaluation :  @a("Campolongo F, Saltelli A, Cari
 
 @h2{Saltelli's method}
 
-Saltelli is a statistical method for global sensitivity analysis. It estimates at the first order the relative variance along each input factor.
+Saltelli is a statistical method for global sensitivity analysis. It estimates sensitivity indices based on relative variances.
+More precisely, the first order sensitivity coefficient for factor @b{x@sub{i}} and output indicator @b{y@sub{j}} is computed by first conditionally to any @b{x@sub{i}} value, estimating the expectancy of @b{y@sub{j}} conditionally to the value of  @b{x@sub{i}} with all other factors varying, and then considering the variance of these local conditional expectancies.
+In simpler words, it is the variance after projecting along the dimension of the factor.
+It is written as @b{Var@sub{x@sub{i}}[E@sub{X@sub{~i}}(y@sub{j} | x@sub{i})] / Var[y@sub{j}]} where @b{X@sub{~i}} are all other factors but @b{x@sub{i}}.
 
+An other global sensitivity index does not consider a projection but the full behavior along the factor for all other possible parameter values.
+This corresponds to the total effect, i.e. first order but also interactions with other factors.
+This index is written as @b{E@sub{X@sub{~i}}[Var@sub{x@sub{i}}(y@sub{j}|X@sub{~i})] / Var[y@sub{j}]}.
 
+In practice, Sobol quasi-random sequences are used to estimate the indices.
+The computational budget for this method is fixed by the number of Sobol points drawn, so in practice the user controls directly the number of model runs.
 
 @h2{Saltelli's method within OpenMOLE}
 @h3{Specific constructor}
@@ -118,17 +134,18 @@ Saltelli is a statistical method for global sensitivity analysis. It estimates a
 The @code{SensitivitySaltelli} constructor is defined in OpenMOLE and can take the following parameters:
 
 @ul
-  @li{@code{evaluation} is the task (or a composition of tasks) that uses your inputs, typically your model task,}
-  @li{@code{inputs} is the list of your model's inputs,}
-  @li{@code{outputs} is the list of your model's outputs,}
-  @li{@code{samples} number of samples to draw for the estimation of the relative variances.}
+  @li{@code{evaluation} is the task (or a composition of tasks) that uses your inputs, typically your model task.}
+  @li{@code{inputs} is the list of your model's inputs}
+  @li{@code{outputs} is the list of your model's outputs for which the sensitivity indices will be computed.}
+  @li{@code{samples} number of samples to draw for the estimation of the relative variances, which correspond exactly to the number of model runs. The higher the dimension, the poorer the estimation of indices will be for low number of samples.}
 
 
 @h3{Hook}
 
 The @code{hook} keyword is used to save or display results generated during the execution of a workflow.
-The generic way to use it is to write either @code{hook(workDirectory / "path/of/a/file.csv")} to save the results in a CSV file, or @code{hook display} to display the results in the standard output.
+The generic way to use it is to write either @code{hook(workDirectory / "path/of/a/directory")} to save the results in a CSV file, or @code{hook display} to display the results in the standard output.
 
+In the output directory are stored files for each index: @code{firstOrderIndices.csv} and @code{totalOrderIndices.csv}, which contain each the matrices of indices for each factor and each indicator.
 
 @h3{Use example}
 
@@ -147,3 +164,11 @@ SensitivitySaltelli(
   samples = 100
 ) hook display
 """, name = "Saltelli")
+
+
+@h3{Additional material}
+
+The variance-based Saltelli method is well described in the paper: Saltelli, A., Annoni, P., Azzini, I., Campolongo, F., Ratto, M., & Tarantola, S. (2010). Variance based sensitivity analysis of model output. Design and estimator for the total sensitivity index. Computer Physics Communications, 181(2), 259-270.
+
+Methods for checking the convergence of indices have been introduced in the literature (see e.g. Sarrazin, F., Pianosi, F., & Wagener, T. (2016). Global Sensitivity Analysis of environmental models: Convergence and validation. Environmental Modelling & Software, 79, 135-152.), and will soon be introduced in OpenMOLE.
+
