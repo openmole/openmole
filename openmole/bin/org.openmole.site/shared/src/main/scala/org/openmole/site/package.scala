@@ -130,6 +130,8 @@ package object shared {
       lazy val epb2018 = "http://journals.sagepub.com/doi/abs/10.1177/2399808318774335"
       lazy val epb2018arxiv = "https://arxiv.org/pdf/1804.09416.pdf"
       lazy val pone2018 = "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0203516"
+      lazy val jasss2019 = "http://jasss.soc.surrey.ac.uk/22/4/10.html"
+      lazy val rcr2020 = "https://www.sciencedirect.com/science/article/pii/S0921344919304446"
     }
 
     object partner {
