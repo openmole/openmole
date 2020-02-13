@@ -143,7 +143,8 @@ package object abc {
           generated = generated,
           minAcceptedRatio = minAcceptedRatio,
           maxStep = islandSteps,
-          stopSampleSizeFactor = stopSampleSizeFactor
+          stopSampleSizeFactor = stopSampleSizeFactor,
+          seed = seed
         )
       )
 
