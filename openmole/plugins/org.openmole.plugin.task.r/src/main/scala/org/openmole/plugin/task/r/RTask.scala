@@ -63,8 +63,9 @@ object RTask {
     stdErr:               OptionalArgument[Val[String]]      = None,
     hostFiles:            Seq[HostFile]                      = Vector.empty,
     workDirectory:        OptionalArgument[String]           = None,
-    environmentVariables: Seq[EnvironmentVariable] = Vector.empty,
-    containerSystem:    ContainerSystem                                    = Proot()
+    environmentVariables: Seq[EnvironmentVariable]           = Vector.empty,
+    containerSystem:        ContainerSystem                  = ContainerSystem.default,
+    installContainerSystem: ContainerSystem                  = ContainerSystem.default,
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): RTask = {
 
     // add additional installation of devtools only if needed
@@ -78,7 +79,7 @@ object RTask {
 
     RTask(
       script = script,
-      ContainerTask.prepare(containerSystem, rImage(version), installCommands),
+      ContainerTask.prepare(installContainerSystem, rImage(version), installCommands),
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,

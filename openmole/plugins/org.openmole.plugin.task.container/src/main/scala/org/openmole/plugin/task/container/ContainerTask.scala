@@ -150,8 +150,8 @@ object ContainerTask {
   def apply(
     image:                  ContainerImage,
     command:                Commands,
-    containerSystem:        ContainerSystem                                    = Proot(),
-    installContainerSystem: ContainerSystem                                    = Proot(),
+    containerSystem:        ContainerSystem                                    = ContainerSystem.default,
+    installContainerSystem: ContainerSystem                                    = ContainerSystem.default,
     install:                Seq[String]                                        = Vector.empty,
     workDirectory:          OptionalArgument[String]                           = None,
     hostFiles:              Seq[HostFile]                                      = Vector.empty,

@@ -48,15 +48,16 @@ object PythonTask {
       hostFiles:            Seq[HostFile]                      = Vector.empty,
       environmentVariables: Seq[EnvironmentVariable] = Vector.empty,
       errorOnReturnValue:   Boolean                            = true,
-      returnValue:          OptionalArgument[Val[Int]]                   = None,
-      stdOut:               OptionalArgument[Val[String]]                = None,
-      stdErr:               OptionalArgument[Val[String]]                = None,
-      containerSystem:    ContainerSystem                                    = Proot())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) = {
+      returnValue:          OptionalArgument[Val[Int]]         = None,
+      stdOut:               OptionalArgument[Val[String]]      = None,
+      stdErr:               OptionalArgument[Val[String]]      = None,
+      containerSystem:        ContainerSystem                  = ContainerSystem.default,
+      installContainerSystem: ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) = {
 
      new PythonTask(
         script = script,
-       arguments = arguments.option,
-        image = ContainerTask.prepare(containerSystem, dockerImage(major), installCommands(install, libraries,major)),
+        arguments = arguments.option,
+        image = ContainerTask.prepare(installContainerSystem, dockerImage(major), installCommands(install, libraries,major)),
         errorOnReturnValue = errorOnReturnValue,
         returnValue = returnValue,
         stdOut = stdOut,
@@ -74,21 +75,21 @@ object PythonTask {
 }
 
 @Lenses case class PythonTask(
-  script:               RunnableScript,
-  image:                PreparedImage,
-  arguments: Option[String],
-  errorOnReturnValue:   Boolean,
-  returnValue:          Option[Val[Int]],
-  stdOut:               Option[Val[String]],
-  stdErr:               Option[Val[String]],
-  hostFiles:            Seq[HostFile],
-  environmentVariables: Seq[EnvironmentVariable],
-  containerSystem:      ContainerSystem,
-  config:               InputOutputConfig,
-  external:             External,
-  info:                 InfoConfig,
-  mapped:               MappedInputOutputConfig,
-  major:                Int) extends Task with ValidateTask {
+  script:                 RunnableScript,
+  image:                  PreparedImage,
+  arguments:              Option[String],
+  errorOnReturnValue:     Boolean,
+  returnValue:            Option[Val[Int]],
+  stdOut:                 Option[Val[String]],
+  stdErr:                 Option[Val[String]],
+  hostFiles:              Seq[HostFile],
+  environmentVariables:   Seq[EnvironmentVariable],
+  containerSystem:        ContainerSystem,
+  config:                 InputOutputConfig,
+  external:               External,
+  info:                   InfoConfig,
+  mapped:                 MappedInputOutputConfig,
+  major:                  Int) extends Task with ValidateTask {
 
   lazy val containerPoolKey = ContainerTask.newCacheKey
 

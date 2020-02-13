@@ -31,22 +31,23 @@ object ScilabTask {
   def scilabImage(version: String) = DockerImage("openmole/scilab", version)
 
   def apply(
-    script:               RunnableScript,
-    install:              Seq[String]                   = Seq.empty,
-    forceUpdate:          Boolean                       = false,
-    version:              String                        = "6.0.2",
-    errorOnReturnValue:   Boolean                       = true,
-    returnValue:          OptionalArgument[Val[Int]]    = None,
-    stdOut:               OptionalArgument[Val[String]] = None,
-    stdErr:               OptionalArgument[Val[String]] = None,
-    environmentVariables: Seq[EnvironmentVariable]      = Vector.empty,
-    hostFiles:            Seq[HostFile]                 = Vector.empty,
-    workDirectory:        OptionalArgument[String]      = None,
-    containerSystem:      ContainerSystem               = Proot())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): ScilabTask = {
+    script:                 RunnableScript,
+    install:                Seq[String]                   = Seq.empty,
+    forceUpdate:            Boolean                       = false,
+    version:                String                        = "6.0.2",
+    errorOnReturnValue:     Boolean                       = true,
+    returnValue:            OptionalArgument[Val[Int]]    = None,
+    stdOut:                 OptionalArgument[Val[String]] = None,
+    stdErr:                 OptionalArgument[Val[String]] = None,
+    environmentVariables:   Seq[EnvironmentVariable]      = Vector.empty,
+    hostFiles:              Seq[HostFile]                 = Vector.empty,
+    workDirectory:          OptionalArgument[String]      = None,
+    containerSystem:        ContainerSystem               = ContainerSystem.default,
+    installContainerSystem: ContainerSystem               = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): ScilabTask = {
 
     ScilabTask(
       script = script,
-      image = ContainerTask.prepare(containerSystem, scilabImage(version), install),
+      image = ContainerTask.prepare(installContainerSystem, scilabImage(version), install),
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
