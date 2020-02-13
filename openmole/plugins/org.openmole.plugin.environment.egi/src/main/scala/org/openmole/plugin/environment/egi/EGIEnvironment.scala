@@ -43,10 +43,10 @@ import scala.concurrent.{ Await, Future }
 object EGIEnvironment extends JavaLogger {
 
   val FetchResourcesTimeOut = ConfigurationLocation("EGIEnvironment", "FetchResourcesTimeOut", Some(1 minutes))
-  val CACertificatesSite = ConfigurationLocation("EGIEnvironment", "CACertificatesSite", Some("http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/"))
+  val CACertificatesSite = ConfigurationLocation("EGIEnvironment", "CACertificatesSite", Some("https://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/"))
   val CACertificatesCacheTime = ConfigurationLocation("EGIEnvironment", "CACertificatesCacheTime", Some(7 days))
   val CACertificatesDownloadTimeOut = ConfigurationLocation("EGIEnvironment", "CACertificatesDownloadTimeOut", Some(2 minutes))
-  val VOInformationSite = ConfigurationLocation("EGIEnvironment", "VOInformationSite", Some("http://operations-portal.egi.eu/xml/voIDCard/public/all/true"))
+  val VOInformationSite = ConfigurationLocation("EGIEnvironment", "VOInformationSite", Some("https://operations-portal.egi.eu/xml/voIDCard/public/all/true"))
   val VOCardDownloadTimeOut = ConfigurationLocation("EGIEnvironment", "VOCardDownloadTimeOut", Some(2 minutes))
   val VOCardCacheTime = ConfigurationLocation("EGIEnvironment", "VOCardCacheTime", Some(6 hours))
 
