@@ -106,7 +106,10 @@ Some details:
 
 In the case of models requiring a long time to run, or for preliminary experiments, one may want to proceed to a sampling similar to the grid sampling, with a reduced number of total runs.
 For this, one can vary each factor successively in its domain, the others being fixed to a nominal value.
+Note that this type of sampling first will necessarily miss potential interactions between factors, and secondly will explore only a very small fraction of the parameter space.
+The computational load in terms of number of model runs will then be only the sum of the sizes of factor domains, instead of their product in the case of a full grid.
 
+For example, with two factors @b{x@sub{1}} and @b{x@sub{2}} varying each between 0 and 1 with a step of 0.1, if their nominal value is 0.5, the one factor sampling will take first @b{x@sub{1} = 0, 0.1, ... , 1} while @b{x@sub{2} = 0.5}, and then the contrary.
 
 @h3{Use within OpenMOLE}
 

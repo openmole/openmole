@@ -59,3 +59,31 @@ For example the following sampling assigns uniformally a sequence of doubles to 
     } validate { _ => Seq.empty} inputs {prototypes} prototypes {prototypes}
   }
 """)
+
+
+
+
+@h2{Integrating your extension into the build}
+
+OpenMOLE uses OSGI bundles to integrate its different components into a single application. This allows for example loading bundle in a dynamical way, what is done when adding user plugins through the GUI.
+To integrate your module into the build process of OpenMOLE, several steps have thus to be performed:
+
+@ul
+    @li{Add your module as an Osgi project into the main build file @b{build.sbt}. For example, in the case of a new sampling, the syntax would be similar to the sobol sampling: @hl.code("""
+    lazy val quasirandomSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.quasirandom", imports = Seq("*")) dependsOn(exception, workflow, workspace, openmoleDSL) settings (
+          libraryDependencies += Libraries.math
+          ) settings (pluginSettings: _*)
+    """). Note that you need to specify the bundles you use in your code, and the external libraries dependencies.
+    You also need to add your module to the integrated ones, by adding the project to @code{allSamplings} for example.
+    If your library dependency requires specific resolvers, these can be added to @code{defaultSettings} or only locally to your project.
+    }
+    @li{Add your library dependencies to the @code{Libraries} object in the file @b{openmole/project/Libraries.scala}. For the code above, you would have to specify the @code{Libraries.math} value, which in this particular case is the apache common math library: @code{lazy val math = "org.openmole.library" %% "org-apache-commons-math" % "3.6.1"}. The library is defined as a bundle under the organisation org.openmole.library. The construction of this bundle is detailed in the next step.}
+    @li{Transform the required library dependencies into OSGI bundles. This step is done during the library publishing step of OpenMOLE compilation: you have thus to modify @code{libraries/build.sbt} by adding a new OSGI project, for example @hlcode("""
+    lazy val math = OsgiProject(dir, "org.apache.commons.math", exports = Seq("org.apache.commons.math3.*"), privatePackages = Seq("assets.*")) settings (
+    libraryDependencies += "org.apache.commons" % "commons-math3" % mathVersion, version := mathVersion) settings(settings: _*)
+    """). At this stage, the exports statement is important since it is thanks to it that the classes will be visible to other OSGI bundles and more particularly your plugin.}
+    @li{A last step may be necessary in the case your dependencies have themselves dependencies which are already OSGI bundle.
+    In that case, a conflict will occur and they must be added to a bundle filter used during the final assembly of OpenMOLE.
+    This filter is defined as @code{bundleFilter} in main build. Add the names of the offending libraries in the @code{bundleFilter.exclude} function.
+    }
+
