@@ -218,7 +218,6 @@ package composition {
         case c: DSLContainer[_] ⇒ c.delegate
         case t                  ⇒ tasks(t).map(_.task)
       }
-
   }
 
   /* -------------------- Transition DSL ---------------------- */
@@ -412,16 +411,21 @@ package composition {
 
           val plugged = merged.copy(firstSlot = originPuzzle.firstSlot, lasts = destinationPuzzle.unzip._1.flatMap(_.lasts))
           add(plugged, transitions)
-
         }
 
         def dslContainerToPuzzle(container: DSLContainer[_]) = {
           val puzzle = transitionDSLToPuzzle0(container.dsl, slots, converted)
-          def outputs = container.output.map(t ⇒ Vector(slots(t).capsule)).getOrElse(puzzle.lasts)
+
+          def outputs(dsl: DSL): Iterable[MoleCapsule] =
+            dsl match {
+              case c: DSLContainer[_] if c.output.isDefined ⇒ Vector(slots(c.output.get).capsule)
+              case c: DSLContainer[_]                       ⇒ outputs(c.dsl)
+              case dsl                                      ⇒ transitionDSLToPuzzle0(dsl, slots, converted).lasts
+            }
 
           val hooks =
             for {
-              o ← outputs
+              o ← outputs(container)
               h ← container.hooks
             } yield o -> h
 
