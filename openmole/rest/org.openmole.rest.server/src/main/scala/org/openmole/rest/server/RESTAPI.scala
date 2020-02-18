@@ -79,20 +79,17 @@ trait RESTAPI extends ScalatraServlet
   def exceptionToHttpError(e: Throwable) = InternalServerError(Error(e).toJson)
 
   post("/job") {
-    (params get "script") match {
-      case None ⇒ ExpectationFailed(Error("Missing mandatory script parameter.").toJson)
-      case Some(script) ⇒
+    (params get "script", fileParams get "workDirectory") match {
+      case (_, None) ⇒ ExpectationFailed(Error("Missing mandatory workDirectory parameter.").toJson)
+      case (None, _) ⇒ ExpectationFailed(Error("Missing mandatory script parameter.").toJson)
+      case (Some(script), Some(archive)) ⇒
         logger.info("starting the create operation")
 
         val id = ExecutionId(UUID.randomUUID().toString)
         val directory = JobDirectory(baseDirectory / id.id)
 
-        for {
-          archive ← fileParams get "workDirectory"
-        } {
-          val is = new TarInputStream(new GZIPInputStream(archive.getInputStream))
-          try is.extract(directory.workDirectory) finally is.close
-        }
+        val is = new TarInputStream(new GZIPInputStream(archive.getInputStream))
+        try is.extract(directory.workDirectory) finally is.close
 
         def error(e: Throwable) = {
           directory.clean
