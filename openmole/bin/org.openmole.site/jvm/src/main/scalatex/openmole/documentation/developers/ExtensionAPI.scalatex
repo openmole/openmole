@@ -78,7 +78,7 @@ To integrate your module into the build process of OpenMOLE, several steps have 
     If your library dependency requires specific resolvers, these can be added to @code{defaultSettings} or only locally to your project.
     }
     @li{Add your library dependencies to the @code{Libraries} object in the file @b{openmole/project/Libraries.scala}. For the code above, you would have to specify the @code{Libraries.math} value, which in this particular case is the apache common math library: @code{lazy val math = "org.openmole.library" %% "org-apache-commons-math" % "3.6.1"}. The library is defined as a bundle under the organisation org.openmole.library. The construction of this bundle is detailed in the next step.}
-    @li{Transform the required library dependencies into OSGI bundles. This step is done during the library publishing step of OpenMOLE compilation: you have thus to modify @code{libraries/build.sbt} by adding a new OSGI project, for example @hlcode("""
+    @li{Transform the required library dependencies into OSGI bundles. This step is done during the library publishing step of OpenMOLE compilation: you have thus to modify @code{libraries/build.sbt} by adding a new OSGI project, for example @hl.code("""
     lazy val math = OsgiProject(dir, "org.apache.commons.math", exports = Seq("org.apache.commons.math3.*"), privatePackages = Seq("assets.*")) settings (
     libraryDependencies += "org.apache.commons" % "commons-math3" % mathVersion, version := mathVersion) settings(settings: _*)
     """). At this stage, the exports statement is important since it is thanks to it that the classes will be visible to other OSGI bundles and more particularly your plugin.}

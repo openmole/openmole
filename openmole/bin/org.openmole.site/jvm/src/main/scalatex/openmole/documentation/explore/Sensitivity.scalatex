@@ -43,13 +43,13 @@ A certain number of trajectories @b{R} are generated, in order to observe the co
  to the curse of dimensionality for trajectories to fill the input space).
 Finally, the method summarizes these elementary effect to estimate global sensitivity in the output space.
 
-This method is computationally cheap, as each trajectory has @b{k+1} parameter points if @{k} is the number of factors.
+This method is computationally cheap, as each trajectory has @b{k+1} parameter points if @b{k} is the number of factors.
 The total number of model runs will thus be @b{R*(k+1)}, so the number of trajectory can be adjusted to the computational budget.
 
 @h3{Results and Interpretation}
 
 Morris' method computes three sensitivity indicators for each model input and each model output.
-An elementary effect for input @b{i} and output @b{y@sub{j}} is obtained when the factor @b{x@sub{i}} is changed during one trajectory by a step @b{delta@sub{i}} from an point @b{x@sub{0}}, and computed as @b{epsilon@sub{ij} = (y@sub{j}(x@sub{0}) - y@sub{j}(x@sub{0} + delta@sub{i})) / delta@sub{i}}.
+An elementary effect for input @b{i} and output @b{y@sub{j}} is obtained when the factor @b{x@sub{i}} is changed during one trajectory by a step @b{delta@sub{i}} from an point @b{x@sub{0}}, and computed as @b{epsilon@sub{ij} = (y@sub{j} * (x@sub{0}) - y@sub{j} * (x@sub{0} + delta@sub{i})) / delta@sub{i}}.
 These are computed as summary statistics on simulated elementary effects and are:
 
 @ul
@@ -119,7 +119,7 @@ The book on sensitivity analysis is also a good reference for the description of
 Saltelli is a statistical method for global sensitivity analysis. It estimates sensitivity indices based on relative variances.
 More precisely, the first order sensitivity coefficient for factor @b{x@sub{i}} and output indicator @b{y@sub{j}} is computed by first conditionally to any @b{x@sub{i}} value, estimating the expectancy of @b{y@sub{j}} conditionally to the value of  @b{x@sub{i}} with all other factors varying, and then considering the variance of these local conditional expectancies.
 In simpler words, it is the variance after projecting along the dimension of the factor.
-It is written as @b{Var@sub{x@sub{i}}[E@sub{X@sub{~i}}(y@sub{j} | x@sub{i})] / Var[y@sub{j}]} where @b{X@sub{~i}} are all other factors but @b{x@sub{i}}.
+It is written as @b{Var@sub{x@sub{~i}}[E@sub{X@sub{i}} * (y@sub{j} | x@sub{i})] / Var[y@sub{j}]} where @b{X@sub{~i}} are all other factors but @b{x@sub{i}}.
 
 An other global sensitivity index does not consider a projection but the full behavior along the factor for all other possible parameter values.
 This corresponds to the total effect, i.e. first order but also interactions with other factors.
