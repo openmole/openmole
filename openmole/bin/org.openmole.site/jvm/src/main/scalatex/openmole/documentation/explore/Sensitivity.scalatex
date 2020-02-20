@@ -119,7 +119,7 @@ The book on sensitivity analysis is also a good reference for the description of
 Saltelli is a statistical method for global sensitivity analysis. It estimates sensitivity indices based on relative variances.
 More precisely, the first order sensitivity coefficient for factor @b{x@sub{i}} and output indicator @b{y@sub{j}} is computed by first conditionally to any @b{x@sub{i}} value, estimating the expectancy of @b{y@sub{j}} conditionally to the value of  @b{x@sub{i}} with all other factors varying, and then considering the variance of these local conditional expectancies.
 In simpler words, it is the variance after projecting along the dimension of the factor.
-It is written as @b{Var@sub{x@sub{~i}}[E@sub{X@sub{i}} * (y@sub{j} | x@sub{i})] / Var[y@sub{j}]} where @b{X@sub{~i}} are all other factors but @b{x@sub{i}}.
+It is written as @b{Var@sub{x@sub{~i}}[E@sub{X@sub{i}}(y@sub{j} | x@sub{i})] / Var[y@sub{j}]} where @b{X@sub{~i}} are all other factors but @b{x@sub{i}}.
 
 An other global sensitivity index does not consider a projection but the full behavior along the factor for all other possible parameter values.
 This corresponds to the total effect, i.e. first order but also interactions with other factors.
