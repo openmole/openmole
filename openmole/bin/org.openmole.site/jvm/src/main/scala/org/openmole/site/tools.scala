@@ -34,8 +34,6 @@ package object tools {
 
   def aa = a(targetBlank)
 
-  def todo(content: String) = ""
-
   val break = br(br)
 
   object api {

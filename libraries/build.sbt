@@ -188,8 +188,8 @@ lazy val scalaTags = OsgiProject(dir, "com.scalatags", exports = Seq("scalatags.
 
 lazy val scalatexSite =
   OsgiProject(dir, "com.lihaoyi.scalatex-site", exports = Seq("scalatex.*", "ammonite.*", "fastparse.*"), privatePackages = Seq("META-INF.**", "pprint.*", "scalaj.*", "scalaparse.*", "geny.*"), imports = Seq("*")) settings (
-    libraryDependencies += "org.openmole" %% "scalatex-site" % "0.4.4",
-    version := "0.4.4") settings(settings: _*)
+    libraryDependencies += "org.openmole" %% "scalatex-site" % "0.4.5",
+    version := "0.4.5") settings(settings: _*)
 
 /*lazy val upickle = OsgiProject(dir, "upickle", exports = Seq("upickle.*", "jawn.*", "derive.*"), imports = Seq("*")) settings(
   libraryDependencies ++= Seq("com.lihaoyi" %% "upickle" % scalaUpickleVersion),
