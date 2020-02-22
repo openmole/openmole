@@ -88,8 +88,7 @@ object TypeUtil {
       varNames += d.name
 
       t match {
-        case _: IAggregationTransition ⇒
-          toArray.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
+        case _: IAggregationTransition ⇒ toArray.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
         case _: IExplorationTransition ⇒ setFromArray
         case _: ISlaveTransition       ⇒ setFromArray
         case _                         ⇒ direct.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
@@ -101,6 +100,7 @@ object TypeUtil {
       if (DataChannel.levelDelta(mole)(dc) >= 0) direct.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
       else toArray.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
     }
+
     (varNames.toSet, direct.toMap, toArray.toMap, fromArray.toMap)
   }
 }

@@ -35,20 +35,38 @@ object MoleCapsule {
 
   def isStrainer(c: MoleCapsule) = c.strainer
 
-  def reachNoStrainer(mole: Mole)(slot: TransitionSlot, seen: Set[TransitionSlot] = Set.empty): Boolean = {
-    if (slot.capsule == mole.root) true
-    else if (seen.contains(slot)) false
-    else {
-      val capsules = mole.inputTransitions(slot).map { _.start } ++ mole.inputDataChannels(slot).map { _.start }
-      val noStrainer =
-        for {
-          c ← capsules
-          if isStrainer(c)
-          s ← mole.slots(c)
-        } yield reachNoStrainer(mole)(s, seen + slot)
+  /* Test wether there is a path from this slot reaching the root of the mole without looping to the capsule it is bounded to */
+  def reachRootWithNoLoop(mole: Mole)(slot: TransitionSlot): Boolean = {
+    def previousCapsules(s: TransitionSlot) = (mole.inputTransitions(s).map { _.start } ++ mole.inputDataChannels(s).map { _.start })
+    def loopToCapsule(s: TransitionSlot) = previousCapsules(s).exists(_ == slot.capsule)
 
-      noStrainer.forall(_ == true)
+    var reachRoot = false
+
+    val seen = collection.mutable.Set[MoleCapsule]()
+    val toProceed = collection.mutable.Stack[TransitionSlot]()
+
+    toProceed.pushAll(previousCapsules(slot).flatMap(mole.slots))
+
+    while (!reachRoot && !toProceed.isEmpty) {
+      val s = toProceed.pop()
+
+      if (!loopToCapsule(s)) {
+        if (s.capsule == mole.root) reachRoot = true
+        else {
+          val capsules = previousCapsules(s)
+
+          for {
+            c ← capsules
+            if !seen.contains(c)
+            s ← mole.slots(c)
+          } toProceed.push(s)
+
+          seen ++= capsules
+        }
+      }
     }
+
+    reachRoot
   }
 
 }
@@ -111,7 +129,7 @@ class MoleCapsule(_task: Task, val strainer: Boolean) {
     if (this == mole.root) mole.inputs
     else {
       val slots = mole.slots(this)
-      val noStrainer = slots.toSeq.filter(s ⇒ MoleCapsule.reachNoStrainer(mole)(s))
+      val noStrainer = slots.toSeq.filter(s ⇒ MoleCapsule.reachRootWithNoLoop(mole)(s))
 
       val bySlot =
         for {
@@ -137,7 +155,9 @@ class MoleCapsule(_task: Task, val strainer: Boolean) {
       prototypes
     }
 
-  override def toString = s"capsule@$hashCode:$task"
+  override def toString =
+    (if (!strainer) "capsule" else "strainerCapsule") + s"@$hashCode:$task"
+
 }
 
 class StrainerTaskDecorator(val task: Task) extends Task {
