@@ -24,6 +24,7 @@ import org.openmole.core.dsl._
 import org.openmole.core.workflow.sampling.ExplicitSampling
 import org.openmole.core.workflow.task.FromContextTask
 import org.scalatest._
+import org.openmole.core.workflow.test._
 
 class PatternSpec extends FlatSpec with Matchers {
 
@@ -114,13 +115,46 @@ class PatternSpec extends FlatSpec with Matchers {
 
     val i = Val[Int]
 
-    val test = FromContextTask("test") { p ⇒
-      import p._
-      testExecuted += 1
-      context + (i -> (context(i) + 1))
-    } set ((inputs, outputs) += i, i := 0)
+    val increment =
+      TestTask { context ⇒
+        testExecuted += 1
+        context + (i -> (context(i) + 1))
+      } set ((inputs, outputs) += i, i := 0)
 
-    While(test, "i < 10") run ()
+    val test =
+      TestTask { context ⇒
+        context(i) should equal(10)
+        context
+      } set (inputs += i)
+
+    (While(increment, "i < 10") -- test) run ()
+
+    testExecuted should equal(10)
+  }
+
+  "While" should "accept a preceding the task" in {
+    @volatile var testExecuted = 0
+
+    val i = Val[Int]
+
+    val preceding =
+      TestTask { context ⇒
+        context + (i -> 0)
+      } set (outputs += i)
+
+    val increment =
+      TestTask { context ⇒
+        testExecuted += 1
+        context + (i -> (context(i) + 1))
+      } set ((inputs, outputs) += i)
+
+    val test =
+      TestTask { context ⇒
+        context(i) should equal(10)
+        context
+      } set (inputs += i)
+
+    (preceding -- While(increment, "i < 10") -- test) run ()
 
     testExecuted should equal(10)
   }
