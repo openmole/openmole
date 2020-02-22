@@ -4,12 +4,12 @@ package org.openmole.plugin.method.directsampling
 import java.util.concurrent.atomic.AtomicInteger
 
 import org.openmole.core.dsl._
-import org.openmole.core.workflow.task.ClosureTask
 import org.openmole.core.workflow.sampling.ExplicitSampling
 import org.openmole.core.context.Variable
 import org.openmole.core.workflow.test.TestHook
 import org.openmole.plugin.tool.pattern._
 import org.scalatest._
+import org.openmole.core.workflow.test._
 
 class PatternCompositionSpec extends FlatSpec with Matchers {
   import org.openmole.core.workflow.test.Stubs._
@@ -18,10 +18,9 @@ class PatternCompositionSpec extends FlatSpec with Matchers {
     val i = Val[Int]
 
     val model =
-      ClosureTask("model") {
-        (context, _, _) ⇒
-          context(i) should equal(1)
-          context
+      TestTask { context ⇒
+        context(i) should equal(1)
+        context
       } set (inputs += i)
 
     val mole =
@@ -38,10 +37,9 @@ class PatternCompositionSpec extends FlatSpec with Matchers {
     val seed = Val[Int]
 
     val model =
-      ClosureTask("model") {
-        (context, _, _) ⇒
-          context(i) should equal(1)
-          context
+      TestTask { context ⇒
+        context(i) should equal(1)
+        context
       } set (inputs += (i, seed))
 
     val replication =
@@ -68,10 +66,9 @@ class PatternCompositionSpec extends FlatSpec with Matchers {
     val l = Val[Double]
 
     val model =
-      ClosureTask("model") {
-        (context, _, _) ⇒
-          counter.incrementAndGet()
-          context + (step -> (context(step) + 1))
+      TestTask { context ⇒
+        counter.incrementAndGet()
+        context + (step -> (context(step) + 1))
       } set (
         (inputs, outputs) += (step, seed, l),
         step := 1L
@@ -105,10 +102,9 @@ class PatternCompositionSpec extends FlatSpec with Matchers {
     )
 
     val model =
-      ClosureTask("model") {
-        (context, _, _) ⇒
-          context(l) should equal(2.0)
-          context
+      TestTask { context ⇒
+        context(l) should equal(2.0)
+        context
       } set (
         inputs += l
       )
@@ -165,21 +161,16 @@ class PatternCompositionSpec extends FlatSpec with Matchers {
       l := 2.0
     )
 
-    val model =
-      ClosureTask("model") { (_, _, _) ⇒ Seq(Variable(j, 2)) } set (inputs += (l, seed), outputs += j)
-
-    val agg =
-      ClosureTask("agg") { (_, _, _) ⇒ Seq(Variable(j, 2)) } set (inputs += (i, j.array), outputs += j)
-
-    val globalAgg =
-      EmptyTask() set (inputs += (i.array, j.array))
+    val model = TestTask { _ + (j, 2) } set (inputs += (l, seed), outputs += j)
+    val agg = TestTask { _ + (j, 2) } set (inputs += (i, j.array), outputs += j)
+    val globalAgg = EmptyTask() set (inputs += (i.array, j.array))
 
     val mole =
       init --
         DirectSampling(
           Replication(model, seed, 10, aggregation = Seq(j)) -- agg,
           ExplicitSampling(i, Seq(1, 2)),
-          aggregation = Seq(j)
+          aggregation = Seq(j, i)
         ) -- globalAgg
 
     mole.run
@@ -191,7 +182,6 @@ class PatternCompositionSpec extends FlatSpec with Matchers {
     val seed = Val[Int]
 
     val model = EmptyTask() set (inputs += (l, i, seed), outputs += i, i := 42)
-
     val h = TestHook() set (inputs += l)
 
     val mole =
