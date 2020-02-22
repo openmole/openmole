@@ -77,15 +77,19 @@ object TypeUtil {
     val direct = new HashMap[String, ListBuffer[ValType[_]]] // Direct transmission through transition or data channel
     val toArray = new HashMap[String, ListBuffer[ValType[_]]] // Transmission through exploration transition
     val fromArray = new HashMap[String, ListBuffer[ValType[_]]] // Transmission through aggregation transition
-    val varNames = new HashSet[String]
 
-    for (t ← transitions; d ← t.data(mole, sources, hooks)) {
+    val transitionVarNames = new HashSet[String]
+
+    for {
+      t ← transitions
+      d ← t.data(mole, sources, hooks)
+    } {
       def explored = ExplorationTask.explored(t.start)
       def setFromArray =
         if (explored(d)) fromArray.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
         else direct.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
 
-      varNames += d.name
+      transitionVarNames += d.name
 
       t match {
         case _: IAggregationTransition ⇒ toArray.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
@@ -95,12 +99,18 @@ object TypeUtil {
       }
     }
 
-    for (dc ← dataChannels; d ← dc.data(mole, sources, hooks)) {
-      varNames += d.name
+    val dataChannelVarNames = ListBuffer[String]()
+
+    for {
+      dc ← dataChannels
+      d ← dc.data(mole, sources, hooks)
+      if !transitionVarNames.contains(d.name)
+    } {
+      dataChannelVarNames += d.name
       if (DataChannel.levelDelta(mole)(dc) >= 0) direct.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
       else toArray.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
     }
 
-    (varNames.toSet, direct.toMap, toArray.toMap, fromArray.toMap)
+    ((transitionVarNames ++ dataChannelVarNames).toSet, direct.toMap, toArray.toMap, fromArray.toMap)
   }
 }

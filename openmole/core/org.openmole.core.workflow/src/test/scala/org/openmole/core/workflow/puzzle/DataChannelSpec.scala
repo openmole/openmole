@@ -47,8 +47,24 @@ class DataChannelSpec extends FlatSpec with Matchers {
     ex.run()
   }
 
-  "A data channel" should "be able to transmit the value to the multiple execution of an explored task" in {
+  "A datachannel" should "not conflict with variable values to be transmitted by a transition" in {
+    val p = Val[String]
 
+    val t1 = TestTask { _ + (p → "Test") } set (outputs += p)
+    val t2 = TestTask { _ + (p -> "Correct") } set { (inputs, outputs) += p }
+
+    val t3 =
+      TestTask { context ⇒
+        context(p) should equal("Correct")
+        context
+      } set (inputs += p)
+
+    val ex = (t1 -- t2 -- t3) & (t1 oo t3)
+
+    ex.run()
+  }
+
+  "A data channel" should "be able to transmit the value to the multiple execution of an explored task" in {
     val j = Val[String]
     val tw = TestTask { _ + (j → "J") } set (outputs += j)
 

@@ -37,7 +37,7 @@ object MoleCapsule {
 
   /* Test wether there is a path from this slot reaching the root of the mole without looping to the capsule it is bounded to */
   def reachRootWithNoLoop(mole: Mole)(slot: TransitionSlot): Boolean = {
-    def previousCapsules(s: TransitionSlot) = (mole.inputTransitions(s).map { _.start } ++ mole.inputDataChannels(s).map { _.start })
+    def previousCapsules(s: TransitionSlot) = mole.inputTransitions(s).map { _.start }
     def loopToCapsule(s: TransitionSlot) = previousCapsules(s).exists(_ == slot.capsule)
 
     var reachRoot = false
