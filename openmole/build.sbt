@@ -465,8 +465,8 @@ lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolutio
   openmoleDSL, csvTool, toolsTask, pattern, collectionDomain % "test", boundsDomain % "test"
 ) settings(libraryDependencies += Libraries.mgo, libraryDependencies += Libraries.shapeless) settings (pluginSettings: _*)
 
-lazy val abc = OsgiProject(pluginDir, "org.openmole.plugin.method.abc", imports = Seq("*")) dependsOn(openmoleDSL, csvTool, toolsTask, pattern) settings
-  (libraryDependencies += Libraries.mgo, libraryDependencies += Libraries.shapeless) settings (pluginSettings: _*)
+lazy val abc = OsgiProject(pluginDir, "org.openmole.plugin.method.abc", imports = Seq("*")) dependsOn(openmoleDSL, csvTool, toolsTask, pattern, boundsDomain % "test") settings(
+  libraryDependencies += Libraries.mgo, libraryDependencies += Libraries.shapeless) settings (pluginSettings: _*)
 
 lazy val directSampling = OsgiProject(pluginDir, "org.openmole.plugin.method.directsampling", imports = Seq("*")) dependsOn(openmoleDSL, distributionDomain, pattern, modifierDomain, fileHook) settings (pluginSettings: _*)
 
