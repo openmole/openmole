@@ -7,6 +7,7 @@ import org.openmole.core.dsl._
 
 import org.openmole.core.workflow.test._
 import org.scalatest.{ FlatSpec, Matchers }
+import org.openmole.plugin.domain.bounds._
 
 import scala.util.Random
 
@@ -53,7 +54,6 @@ class ABCSpec extends FlatSpec with Matchers {
   val testTask = TestTask { context ⇒
     val input = Vector(context(x1), context(x2))
     val Vector(o1Value, o2Value) = toyModel(input, rng)
-
     context + (o1 -> o1Value) + (o2 -> o2Value)
   } set (
     inputs += (x1, x2),
@@ -124,6 +124,34 @@ class ABCSpec extends FlatSpec with Matchers {
       )
 
     abc run ()
+  }
+
+  "abc" should "accept preceding task" in {
+    val seed = Val[Int]
+    val theta1 = Val[Double]
+    val initialValue = Val[Double]
+    val o1 = Val[Double]
+
+    val testTask = TestTask { context ⇒ context + (initialValue -> 1.0) } set (outputs += initialValue)
+
+    val model = TestTask { context ⇒ context + (o1 -> context(theta1)) } set (
+      inputs += (theta1, initialValue, seed),
+      outputs += o1
+    )
+
+    val abc =
+      ABC(
+        evaluation = model,
+        prior = Seq(theta1 in (-10.0, 10.0)),
+        observed = Seq(ABC.Observed(o1, 12.0)),
+        sample = 10,
+        generated = 10,
+        minAcceptedRatio = 0.01,
+        stopSampleSizeFactor = 5,
+        seed = seed)
+
+    //abc
+    (testTask -- abc) run ()
   }
 
 }

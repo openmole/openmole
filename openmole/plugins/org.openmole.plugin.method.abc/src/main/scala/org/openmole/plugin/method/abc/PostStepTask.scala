@@ -54,7 +54,7 @@ object PostStepTask {
               case Some(s: MonAPMC.State)       ⇒ s.copy(s = ns)
             }
 
-          context + Variable(state, copyState(context.get(state), f.s)) + Variable(stop, true) + Variable(step, context(step) + 1)
+          context + Variable(state, context.getOrElse(state, MonAPMC.Empty())) + Variable(stop, true) + Variable(step, context(step) + 1)
         case Failure(f) ⇒ throw f
       }
     } set (
