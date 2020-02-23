@@ -24,7 +24,7 @@ OpenMOLE is installed and works out of the box!
 
 @br@br
 
-@linkButton(s"Download ${org.openmole.core.buildinfo.version.value}", Resource.script.openmole.file, classIs(btn ++ btn_danger))
+@linkButton(s"Download ${org.openmole.core.buildinfo.version.value} - ${org.openmole.core.buildinfo.version.name} ", Resource.script.openmole.file, classIs(btn ++ btn_danger))
 
 @br@br
 
