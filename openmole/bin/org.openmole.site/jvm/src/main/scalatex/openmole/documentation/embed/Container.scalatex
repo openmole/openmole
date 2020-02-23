@@ -9,11 +9,16 @@ When your model is written in a language for which a specific OpenMOLE task does
 
 @br@br
 
+
 @h2{Packaging with Docker}
 
 The @code{ContainerTask} runs docker container in OpenMOLE.
 It is based on a container engine running without administration privileges called @aa("udocker", href := "https://github.com/indigo-dc/udocker").
 Using this task, you can run containers from the @aa("docker hub", href := "https://hub.docker.com/"), or containers exported from docker.
+
+@h3{Preliminary remark}
+
+@usesSingularity("ContainerTask")
 
 
 @h3{Containers from the docker hub}

@@ -4,9 +4,16 @@
 @import org.openmole.site.content.Native._
 
 
-@h3{PythonTask syntax}
+
+@h2{PythonTask syntax}
+
+@h3{Preliminary remark}
+
+@usesSingularity("PythonTask")
 
 The @code{PythonTask} relies on an underlying @code{ContainerTask} but is designed to be transparent and takes only python-related arguments.
+
+@h3{Arguments of the PythonTask}
 
 It takes the following arguments :
 

@@ -125,7 +125,7 @@ package object container extends ContainerPackage {
   lazy val ArchiveOK = Seq.empty[UserBadDataError]
 
   object ContainerSystem {
-    def default = Proot()
+    def default = Singularity()
   }
 
   sealed trait ContainerSystem

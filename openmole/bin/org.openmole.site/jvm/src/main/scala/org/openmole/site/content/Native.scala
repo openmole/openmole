@@ -43,11 +43,13 @@ object Native {
     p, "These two aspects make it really ", b("easy to embed native applications"), " in OpenMOLE. You can also read more about packaging your native models for OpenMOLE in ", a("the dedicated section", href := DocumentationPages.container.file), "."
   )
 
-  def linuxOnly(taskName: String) =
+  val singularity = a("the Singularity container system", href := org.openmole.site.shared.link.singularity )
+
+  def usesSingularity(taskName: String) =
     paragraph(
       "The ",
       org.openmole.site.tools.code(taskName),
-      s""" only works on Linux systems. If you are running OpenMOLE on a different system you won't be able to use it. This limitation may be overcome in the future when docker is installed on MacOS and Windows."""
+      s" uses ", singularity, ". You should install Singularity on your system otherwise you won't be able to use it."
     )
 
 }

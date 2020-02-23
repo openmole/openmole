@@ -68,6 +68,7 @@ package object shared {
     lazy val shortTrainings = "https://iscpif.fr/events/formationsjedi/"
     lazy val longTrainings = "http://cnrsformation.cnrs.fr"
     lazy val exmodelo = "https://exmodelo.org"
+    lazy val dockerHub = "https://hub.docker.com/repository/docker/openmole/openmole"
 
     // Resources
     lazy val scala = "http://www.scala-lang.org/"
@@ -84,6 +85,7 @@ package object shared {
     lazy val CAREsite = "https://proot-me.github.io/"
     lazy val CAREmailing = "https://groups.google.com/forum/?fromgroups#!forum/reproducible"
     lazy val egi = "http://www.egi.eu/"
+    lazy val singularity = "https://sylabs.io/"
 
     // Models
     lazy val simpluDemo = "https://simplu.openmole.org"

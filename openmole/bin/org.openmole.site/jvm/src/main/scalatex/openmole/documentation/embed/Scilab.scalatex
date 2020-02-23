@@ -10,14 +10,11 @@ Scilab is an open source software initially designed for numerical computation (
 It provides its own high-level scripting language and can be used as a computing kernel only. Note that it includes most of proprietary Matlab's functionalities
 and that a set of conversion tools exists (@aa("doc", href:= "https://help.scilab.org/docs/6.0.1/fr_FR/mfile2sci.html")).
 
+@h3{Preliminary remark}
 
+@usesSingularity("ScilabTask")
 
-
-@h2{Preliminary remark}
-
-@linuxOnly("ScilabTask")
-
-@h2{Simple ScilabTask}
+@h3{Simple ScilabTask}
 
 Here is a dummy workflow multiplying a vector @i{dArray} by @i{i} using a @i{ScilabTask}:
 

@@ -11,13 +11,15 @@ You can try OpenMOLE online using our @aa("demo website", href := shared.link.de
 Please note that the service is reset every 6 hours, so don't be surprised if your current script suddenly vanishes :-)
 
 
+@h2{Install OpenMOLE}
 
-@h2{Download OpenMOLE}
+@h3{Prerequisites}
 
-To run correctly on your own computer, OpenMOLE requires Java version 8 or above.
-Check our @aa("FAQ", href := faq.file) to access your Java version information.
+@ul
+  @li{@i{Java >= 9} : to run on your own computer, OpenMOLE requires Java version 9 or above. Check our @aa("FAQ", href := faq.file) to access your Java version information.}
+  @li{@i{Singularity} : some OpenMOLE tasks require @org.openmole.site.content.Native.singularity. You must install it on your system if you want to use some tasks such as Python, R, Scilab, Container.}
 
-@br
+@h3{Download}
 
 When Java is installed, you just need to download and extract the archive below, and you're done!
 OpenMOLE is installed and works out of the box!
@@ -28,17 +30,7 @@ OpenMOLE is installed and works out of the box!
 
 @br@br
 
-However, if you prefer building the OpenMOLE application from sources you can do so as explained @aa("here", href := buildSources.file).
-
-@br@br
-
-Previous versions of the OpenMOLE application and documentation are available @aa("here", href := shared.link.allOpenMOLE).
-The previous version logs are gathered @aa("here", href := DocumentationPages.releaseNotes.file).
-Due to a data loss in 2016, only the versions from OpenMOLE 6 are available.
-
-
-
-@h2{Run OpenMOLE on Linux}
+@h2{Run OpenMOLE}
 
 Once you downloaded OpenMOLE, you can then launch it by executing the @i{openmole} file in the installation directory with the @hl.code("./openmole") command.
 It will bring up you web browser and you should see something like this:
@@ -62,3 +54,18 @@ Other @a("Tutorials", href := tutorials.file) are also available, and you should
 @br
 
 If you have questions or problems, don't hesitate to contact our great @a("Community", href := OMcommunity.file) through the @aa("forum", href := shared.link.mailingList) or the @aa("chat", href := shared.link.chat)!
+
+@h2{Alternative Install}
+
+@h3{Build From Sources}
+
+If you prefer building the OpenMOLE application from sources you can do so as explained @aa("here", href := buildSources.file).
+
+@h3{Run In Docker}
+
+You can run OpenMOLE using a Docker containers published @a("on the Docker Hub", href := org.openmole.site.shared.link.dockerHub).
+
+@h3{Get a Previous Version}
+
+Previous versions of the OpenMOLE application and documentation are available @aa("here", href := shared.link.allOpenMOLE).
+The previous version logs are gathered @aa("here", href := DocumentationPages.releaseNotes.file).

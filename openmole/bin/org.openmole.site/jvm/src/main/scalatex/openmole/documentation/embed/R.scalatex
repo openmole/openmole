@@ -10,6 +10,11 @@ R is a scripted language initially designed for statistics, but whose applicatio
 It may be convenient to use specific R libraries within a workflow, and therefore OpenMOLE provides a specific @i{RTask}.
 
 
+@h3{Preliminary remark}
+
+@usesSingularity("ScilabTask")
+
+
 @h3{RTask syntax}
 
 The @code{RTask} relies on an underlying @code{ContainerTask} but is designed to be transparent and takes only R-related arguments.
