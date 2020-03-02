@@ -56,7 +56,7 @@ object RTask {
     install:              Seq[String]                        = Seq.empty,
     libraries:            Seq[InstallCommand]                = Seq.empty,
     forceUpdate:          Boolean                            = false,
-    version:              String                             = "3.5.1",
+    version:              String                             = "3.6.2",
     errorOnReturnValue:   Boolean                            = true,
     returnValue:          OptionalArgument[Val[Int]]         = None,
     stdOut:               OptionalArgument[Val[String]]      = None,
@@ -79,7 +79,7 @@ object RTask {
 
     RTask(
       script = script,
-      ContainerTask.prepare(installContainerSystem, rImage(version), installCommands),
+      image = ContainerTask.prepare(installContainerSystem, rImage(version), installCommands),
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
