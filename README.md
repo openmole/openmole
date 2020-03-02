@@ -7,9 +7,19 @@ OpenMOLE is distributed under the [AGPLv3](http://www.gnu.org/licenses/agpl.html
 
 ## OpenMOLE by example ##
 
-Imagine that you want to understand and/or optimize some parameters of an executable that you generally set in an empirical or arbitrary manner. Then embed the executable in OpenMOLE (*5 minutes*), use one of the distributed genetic algorithms provided by OpenMOLE (*5 minutes*) and launch the workflow on a distributed execution environment with thousands of machines (*1 minute*).
+Before you use OpenMOLE, you need:
+  * a program you want to study
+  * to be able to run this program using a command line
+  * to be able to set some inputs of the program
+  * to be able to get some outputs variable or some output files out of this program
 
-To summarize, you can **design large scale distributed programs** reusing **legacy code** and advanced numeric methods in approximately **10 minutes**.
+Then use OpenMOLE:
+  * embed the executable of your program in OpenMOLE using (*5 minutes*)
+  * use one of the distributed exploration algorithms provided by OpenMOLE (*5 minutes*)
+  * launch the exploration indeferently on your laptop (*10 seconds*)
+  * or on a distributed execution environment with thousands of machines (*1 minute*).
+
+To summarize, you can **model exploration processes at scale** reusing **legacy code** and advanced numeric methods in approximately **10 minutes**.
 
 ## Try it! ##
 
