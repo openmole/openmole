@@ -86,20 +86,15 @@ sealed trait TreeNodeTab {
   }
 
   def onActivate: () ⇒ Unit = () ⇒ {}
-
   def onDesactivate: () ⇒ Unit = () ⇒ {}
 
   def extension: FileExtension = safePathTab.now.name
 
   // Get the file content to be saved
   def content: String
-
   def editor: Option[EditorPanelUI]
-
   def editable: Boolean
-
   def editing: Boolean
-
   def refresh(afterRefresh: () ⇒ Unit = () ⇒ {}): Unit
 
   def resizeEditor: Unit
@@ -125,7 +120,6 @@ object TreeNodeTab {
   def oms(safePath: SafePath, initialContent: String) = new TreeNodeTab {
 
     lazy val safePathTab = Var(safePath)
-
     lazy val omsEditor = EditorPanelUI(safePath, FileExtension.OMS, initialContent)
 
     def editor = Some(omsEditor)
@@ -133,21 +127,14 @@ object TreeNodeTab {
     omsEditor.initEditor
 
     def editable = true
-
     def editing = true
 
-    override def onActivate: () ⇒ Unit = () ⇒ {
-    }
+    override def onActivate: () ⇒ Unit = () ⇒ {}
 
     def content = omsEditor.code
-
     def refresh(onsaved: () ⇒ Unit) = save(safePathTab.now, omsEditor, onsaved)
-
     def resizeEditor = omsEditor.editor.resize()
-
-    def indexAxises(header: SequenceHeader) = header.zipWithIndex.map { afe ⇒
-      IndexedAxis(afe._1, afe._2)
-    }
+    def indexAxises(header: SequenceHeader) = header.zipWithIndex.map { afe ⇒ IndexedAxis(afe._1, afe._2) }
 
     lazy val controlElement = {
       val compileDisabled = Var(false)
@@ -155,14 +142,13 @@ object TreeNodeTab {
 
       def unsetErrors = setErrors(Seq())
 
-      def setErrors(errors: Seq[ErrorWithLocation]) = {
+      def setErrors(errors: Seq[ErrorWithLocation]) =
         for {
           tab ← panels.treeNodeTabs.find(safePath)
           editor ← tab.editor
         } yield {
           editor.setErrors(errors)
         }
-      }
 
       def setError(errorDataOption: Option[ErrorData]) = {
         compileDisabled.update(false)
@@ -213,18 +199,11 @@ object TreeNodeTab {
     lazy val safePathTab = Var(safePath)
 
     def content: String = htmlContent
-
     def editor = None
-
     def editable: Boolean = false
-
     def editing: Boolean = false
-
-    def refresh(afterRefresh: () ⇒ Unit): Unit = () ⇒ {
-    }
-
-    def resizeEditor = {
-    }
+    def refresh(afterRefresh: () ⇒ Unit): Unit = () ⇒ {}
+    def resizeEditor = {}
 
     lazy val controlElement: TypedTag[HTMLElement] = div()
 
@@ -255,9 +234,7 @@ object TreeNodeTab {
   }
 
   sealed trait RowFilter
-
   object First100 extends RowFilter
-
   object Last100 extends RowFilter
 
   object All extends RowFilter
@@ -271,12 +248,9 @@ object TreeNodeTab {
     lazy val safePathTab = Var(safePath)
     lazy val isEditing = Var(dataTab.editing)
 
-    Rx {
-      editableEditor.setReadOnly(!isEditing())
-    }
+    Rx { editableEditor.setReadOnly(!isEditing()) }
 
     def content: String = editableEditor.code
-
     def isCSV = DataUtils.isCSV(safePath)
 
     val filteredSequence = dataTab.filter match {
@@ -301,16 +275,12 @@ object TreeNodeTab {
     def download(afterRefresh: () ⇒ Unit): Unit = editor.synchronized {
       FileManager.download(
         safePathTab.now,
-        (p: ProcessState) ⇒ {
-        },
+        (p: ProcessState) ⇒ {},
         (cont: String) ⇒ {
           editableEditor.setCode(cont)
           if (isCSV) {
             post()[Api].sequence(safePathTab.now).call().foreach {
-              seq ⇒
-                //  sequence() = seq
-                switchView(seq)
-              // afterRefresh()
+              seq ⇒ switchView(seq)
             }
           }
           else afterRefresh()
@@ -339,8 +309,7 @@ object TreeNodeTab {
           if (isEditing()) div()
           else if (dataTab.view == Raw) {
             button("Edit", btn_primary, onclick := {
-              () ⇒
-                isEditing() = !isEditing.now
+              () ⇒ isEditing() = !isEditing.now
             })
           }
           else div()
@@ -502,9 +471,7 @@ object TreeNodeTab {
                 scalatags.JsDom.tags.span(marginLeft := 10)(filterAxisOptions.selector),
                 scalatags.JsDom.tags.span(maxHeight := 34)(
                   Rx {
-                    if (filterAxisOptions.content().map {
-                      _.fullSequenceIndex
-                    } == Some(-1)) Seq(scalatags.JsDom.tags.span(maxHeight := 34))
+                    if (filterAxisOptions.content().map { _.fullSequenceIndex } == Some(-1)) Seq(scalatags.JsDom.tags.span(maxHeight := 34))
                     else Seq(form(closureInput, inputFilterValidation))
                   })
               )
@@ -624,7 +591,7 @@ object DataTab {
     plotter:  Plotter      = Plotter.default) = DataTab(sequence, view, filter, editing)
 }
 
-class TreeNodeTabs() {
+class TreeNodeTabs {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
@@ -634,11 +601,7 @@ class TreeNodeTabs() {
 
   def stopTimerIfNoTabs = {
     if (tabs.now.isEmpty) {
-      timer.map {
-        _.foreach {
-          clearInterval
-        }
-      }
+      timer.map { _.foreach { clearInterval } }
       timer() = None
     }
   }
@@ -647,17 +610,13 @@ class TreeNodeTabs() {
     timer.now match {
       case None ⇒
         timer() = Some(setInterval(15000) {
-          tabs.now.foreach {
-            _.refresh()
-          }
+          tabs.now.foreach { _.refresh() }
         })
       case _ ⇒
     }
 
   def setActive(tab: TreeNodeTab) = {
-    if (tabs.now.contains(tab)) {
-      unActiveAll
-    }
+    if (tabs.now.contains(tab)) { unActiveAll }
     tab.activate
   }
 
@@ -667,10 +626,8 @@ class TreeNodeTabs() {
     _.activity
   }.headOption.getOrElse(Var(TreeNodeTabs.UnActive))
 
-  def unActiveAll = tabs.map {
-    _.foreach { t ⇒
-      t.desactivate
-    }
+  def unActiveAll = tabs.foreach {
+    _.foreach { t ⇒ t.desactivate }
   }
 
   def ++(tab: TreeNodeTab) = {
@@ -681,14 +638,10 @@ class TreeNodeTabs() {
 
   def removeTab(tab: TreeNodeTab) = {
     tab.desactivate
-    val newTabs = tabs.now.filterNot {
-      _ == tab
-    }
+    val newTabs = tabs.now.filterNot { _ == tab }
     tabs() = newTabs
     if (tabs.now.isEmpty) temporaryControl() = div()
-    newTabs.lastOption.map { t ⇒
-      setActive(t)
-    }
+    newTabs.lastOption.map { t ⇒ setActive(t) }
   }
 
   def --(tab: TreeNodeTab): Unit = tab.refresh(() ⇒ removeTab(tab))
@@ -718,9 +671,7 @@ class TreeNodeTabs() {
   }
 
   def alterables: Seq[AlterableFileContent] =
-    tabs.now.filter {
-      t ⇒ t.editable
-    }.map { t ⇒ AlterableFileContent(t.safePathTab.now, t.content) }
+    tabs.now.filter { t ⇒ t.editable }.map { t ⇒ AlterableFileContent(t.safePathTab.now, t.content) }
 
   def saveAllTabs(onsave: () ⇒ Unit) = {
     //if(org.scalajs.dom.document.hasFocus())
@@ -757,10 +708,6 @@ class TreeNodeTabs() {
     }
     )
 
-    //      tabs.now.foreach { _.editor.foreach{
-    //        _. updateFont(size)
-    //      }}
-    //  })
   }
 
   val fontSizeControl = div(display.flex, flexDirection.row, alignItems.baseline, justifyContent.flexEnd)(
@@ -807,38 +754,46 @@ class TreeNodeTabs() {
         }
       ).render
 
-      //Panes
-      val tabDiv = div(tabContent)(
-        for (t ← tabs()) yield {
-          div(
-            role := "tabpanel",
-            ms("tab-pane " + {
-              t.activity() match {
-                case Active ⇒ "active"
-                case _      ⇒ ""
+      val tabDiv =
+        div(tabContent) {
+          tabs() match {
+            case t if t.isEmpty ⇒
+              div(centerElement, marginTop := "40px", "To start, create and/or open a file with a .oms extension using the file panel on the left (ex: test.oms).")
+            case tabs ⇒
+              for { t ← tabs } yield {
+                div(
+                  role := "tabpanel",
+                  ms("tab-pane " + {
+                    t.activity() match {
+                      case Active ⇒ "active"
+                      case _      ⇒ ""
+                    }
+                  }), id := t.id
+                )({
+                    t.activity() match {
+                      case Active ⇒
+                        temporaryControl() = t.controlElement
+                        t.block
+                      case UnActive ⇒ div()
+                    }
+                  }
+                  )
               }
-            }), id := t.id
-          )({
-              t.activity() match {
-                case Active ⇒
-                  temporaryControl() = t.controlElement
-                  t.block
-                case UnActive ⇒ div()
-              }
-            }
-            )
+          }
+        }
+
+      new Sortable(
+        tabList,
+        new SortableProps {
+          override val onEnd = scala.scalajs.js.defined {
+            (event: EventS) ⇒
+              val oldI = event.oldIndex.asInstanceOf[Int]
+              val newI = event.newIndex.asInstanceOf[Int]
+              tabs() = tabs.now.updated(oldI, tabs.now(newI)).updated(newI, tabs.now(oldI))
+              setActive(tabs.now(newI))
+          }
         }
       )
-
-      new Sortable(tabList, new SortableProps {
-        override val onEnd = scala.scalajs.js.defined {
-          (event: EventS) ⇒
-            val oldI = event.oldIndex.asInstanceOf[Int]
-            val newI = event.newIndex.asInstanceOf[Int]
-            tabs() = tabs.now.updated(oldI, tabs.now(newI)).updated(newI, tabs.now(oldI))
-            setActive(tabs.now(newI))
-        }
-      })
 
       div(role := "tabpanel")(
         fontSizeControl,
