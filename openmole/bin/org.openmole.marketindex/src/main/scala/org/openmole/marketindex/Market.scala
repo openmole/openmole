@@ -76,6 +76,7 @@ object Market {
       MarketEntry("Hello World in Scilab", "scilab-hello", Seq(scilab)),
       MarketEntry("Hello World in Java", "java-hello", Seq(java)),
       MarketEntry("Hello World in NetLogo", "fire", Seq(netlogo, stochastic, simulation)),
+      MarketEntry("Hello World in GAMA", "gama", Seq(gama, stochastic, simulation)),
       MarketEntry("Hello with OpenMOLE plugin", "hello-plugin", Seq(scala, java, plugin)),
 
       MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration, tutorial, sensitivity)),
@@ -93,7 +94,6 @@ object Market {
       MarketEntry("SimpopLocal", "simpoplocal", Seq(stochastic, simulation, ga, scala, calibration)),
       MarketEntry("Metamimetic Networks", "metamimetic-networks", Seq(stochastic, simulation, netlogo)),
       MarketEntry("Segmentation with FSL", "fsl-fast", Seq(fsl, data, native, neuroscience)),
-      //MarketEntry("Explore a GAMA Model", "gama", Seq(gama, stochastic, simulation)),
     )
   )
 
