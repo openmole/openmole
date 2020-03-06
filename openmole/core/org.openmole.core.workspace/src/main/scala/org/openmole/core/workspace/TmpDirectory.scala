@@ -34,7 +34,7 @@ case class TmpDirectory(directory: File) {
   def withTmpDir[T](f: File ⇒ T): T = {
     val file = newFile()
     try {
-      file.mkdir()
+      file.mkdirs()
       f(file)
     }
     finally file.recursiveDelete

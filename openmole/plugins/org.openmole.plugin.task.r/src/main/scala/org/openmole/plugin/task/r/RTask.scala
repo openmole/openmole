@@ -55,7 +55,6 @@ object RTask {
     script:               RunnableScript,
     install:              Seq[String]                        = Seq.empty,
     libraries:            Seq[InstallCommand]                = Seq.empty,
-    forceUpdate:          Boolean                            = false,
     version:              String                             = "3.6.2",
     errorOnReturnValue:   Boolean                            = true,
     returnValue:          OptionalArgument[Val[Int]]         = None,

@@ -33,7 +33,6 @@ object ScilabTask {
   def apply(
     script:                 RunnableScript,
     install:                Seq[String]                   = Seq.empty,
-    forceUpdate:            Boolean                       = false,
     version:                String                        = "6.1.0",
     errorOnReturnValue:     Boolean                       = true,
     returnValue:            OptionalArgument[Val[Int]]    = None,
