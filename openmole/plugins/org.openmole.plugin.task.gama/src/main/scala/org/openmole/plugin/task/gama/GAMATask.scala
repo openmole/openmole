@@ -166,8 +166,35 @@ object GAMATask {
 
   override def validate =
     container.validateContainer(Vector(), environmentVariables, external, inputs) ++ {
-      if ((XML.loadFile(image.file / _root_.container.FlatImage.rootfsName / GAMATask.inputXML) \ "Simulation").isEmpty) Seq(new UserBadDataError(s"Experiment ${experiment} has not been found, make sure it is defined in your gaml file"))
-      else Seq()
+      import xml._
+
+      val inputXML = XML.loadFile(image.file / _root_.container.FlatImage.rootfsName / GAMATask.inputXML)
+      val parameters = (inputXML \ "Simulation" \ "Parameters" \ "Parameter").collect { case x: Elem => x }
+
+      def parameter(name: String) =
+        parameters.filter(e => e.attribute("var").flatMap(_.headOption).map(_.text) == Some(name) || e.attribute("name").flatMap(_.headOption).map(_.text) == Some(name)).headOption
+
+      def typeMatch(v: Val[_], t: String) =
+        v match {
+          case Val.caseInt(v) => t == "INT" | t == "FLOAT"
+          case Val.caseDouble(v) => t == "INT" | t == "FLOAT"
+          case Val.caseString(v) => t == "STRING"
+          case Val.caseBoolean(v) => t == "BOOLEAN"
+          case _ => false
+        }
+
+      def validateInputs =
+        mapped.inputs.flatMap { m =>
+          parameter(m.name) match {
+            case Some(p) =>
+              val gamaType = p.attribute("type").get.head.text
+              if(!typeMatch(m.v, gamaType)) Some(new UserBadDataError(s"Type mismatch between mapped input ${m.v} and input ${m.name} of type ${gamaType}.")) else None
+            case None => Some(new UserBadDataError(s"Mapped input ${m.name} has not been found in the simulation, make sure it is defined in your gaml file"))
+          }
+        }
+
+      if ((inputXML \ "Simulation").isEmpty) Seq(new UserBadDataError(s"Experiment ${experiment} has not been found, make sure it is defined in your gaml file"))
+      else validateInputs
     }
 
   override def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
@@ -278,6 +305,5 @@ object GAMATask {
           }
         }
     }
-
   }
 }
