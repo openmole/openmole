@@ -3,7 +3,7 @@ package org.openmole.plugin.task.gama
 import monocle.macros._
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
+import org.openmole.core.exception.{UserBadDataError}
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
@@ -170,9 +170,13 @@ object GAMATask {
 
       val inputXML = XML.loadFile(image.file / _root_.container.FlatImage.rootfsName / GAMATask.inputXML)
       val parameters = (inputXML \ "Simulation" \ "Parameters" \ "Parameter").collect { case x: Elem => x }
+      val outputs = (inputXML \ "Simulation" \ "Outputs" \ "Output").collect { case x: Elem => x }
 
       def parameter(name: String) =
         parameters.filter(e => e.attribute("var").flatMap(_.headOption).map(_.text) == Some(name) || e.attribute("name").flatMap(_.headOption).map(_.text) == Some(name)).headOption
+
+      def output(name: String) =
+        outputs.filter(e => e.attribute("name").flatMap(_.headOption).map(_.text) == Some(name)).headOption
 
       def typeMatch(v: Val[_], t: String) =
         v match {
@@ -188,13 +192,21 @@ object GAMATask {
           parameter(m.name) match {
             case Some(p) =>
               val gamaType = p.attribute("type").get.head.text
-              if(!typeMatch(m.v, gamaType)) Some(new UserBadDataError(s"Type mismatch between mapped input ${m.v} and input ${m.name} of type ${gamaType}.")) else None
-            case None => Some(new UserBadDataError(s"Mapped input ${m.name} has not been found in the simulation, make sure it is defined in your gaml file"))
+              if(!typeMatch(m.v, gamaType)) Some(new UserBadDataError(s"""Type mismatch between mapped input ${m.v} and input "${m.name}" of type ${gamaType}.""")) else None
+            case None => Some(new UserBadDataError(s"""Mapped input "${m.name}" has not been found in the simulation, make sure it is defined in your gaml file"""))
+          }
+        }
+
+      def validateOutputs =
+        mapped.outputs.flatMap { m =>
+          output(m.name) match {
+            case Some(_) => None
+            case None => Some(new UserBadDataError(s"""Mapped output "${m.name}" has not been found in the simulation, make sure it is defined in your gaml file"""))
           }
         }
 
       if ((inputXML \ "Simulation").isEmpty) Seq(new UserBadDataError(s"Experiment ${experiment} has not been found, make sure it is defined in your gaml file"))
-      else validateInputs
+      else validateInputs ++ validateOutputs
     }
 
   override def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
