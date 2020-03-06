@@ -77,6 +77,7 @@ object Market {
       MarketEntry("Hello World in Java", "java-hello", Seq(java)),
       MarketEntry("Hello World in NetLogo", "fire", Seq(netlogo, stochastic, simulation)),
       MarketEntry("Hello World in GAMA", "gama", Seq(gama, stochastic, simulation)),
+      MarketEntry("Hello World in a Container", "hello-container", Seq(native)),
       MarketEntry("Hello with OpenMOLE plugin", "hello-plugin", Seq(scala, java, plugin)),
 
       MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration, tutorial, sensitivity)),

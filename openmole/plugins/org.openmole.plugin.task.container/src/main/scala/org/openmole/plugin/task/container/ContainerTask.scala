@@ -177,7 +177,9 @@ object ContainerTask {
       config = InputOutputConfig(),
       info = InfoConfig(),
       external = External(),
-      containerPoolKey = containerPoolKey)
+      containerPoolKey = containerPoolKey) set (
+      outputs += (Seq(returnValue.option, stdOut.option, stdErr.option).flatten: _*)
+    )
   }
 
   def prepare(containerSystem: ContainerSystem, image: ContainerImage, install: Seq[String], volumes: Seq[(String, String)] = Seq.empty)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace) = {
