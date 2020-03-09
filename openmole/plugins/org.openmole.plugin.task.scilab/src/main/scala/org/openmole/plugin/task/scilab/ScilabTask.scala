@@ -220,6 +220,7 @@ object ScilabTask {
           image = image,
           command = launchCommand,
           workDirectory = None,
+          relativePathRoot = None,
           errorOnReturnValue = errorOnReturnValue,
           returnValue = returnValue,
           hostFiles = hostFiles,

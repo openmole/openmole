@@ -154,6 +154,7 @@ object ContainerTask {
     installContainerSystem: ContainerSystem                                    = ContainerSystem.default,
     install:                Seq[String]                                        = Vector.empty,
     workDirectory:          OptionalArgument[String]                           = None,
+    relativePathRoot:       OptionalArgument[String]                           = None,
     hostFiles:              Seq[HostFile]                                      = Vector.empty,
     environmentVariables:   Seq[EnvironmentVariable]                           = Vector.empty,
     errorOnReturnValue:     Boolean                                            = true,
@@ -167,6 +168,7 @@ object ContainerTask {
       prepare(installContainerSystem, image, install),
       command,
       workDirectory = workDirectory.option,
+      relativePathRoot = relativePathRoot,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue.option,
       hostFiles = hostFiles,
@@ -245,6 +247,7 @@ import ContainerTask._
   image:                PreparedImage,
   command:              Commands,
   workDirectory:        Option[String],
+  relativePathRoot:     Option[String],
   hostFiles:            Seq[HostFile],
   environmentVariables: Seq[EnvironmentVariable],
   errorOnReturnValue:   Boolean,
@@ -261,14 +264,6 @@ import ContainerTask._
 
   override def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
     import parameters._
-
-    //    val (proot, noSeccomp, kernel) =
-    //      containerSystem match {
-    //        case proot: Proot ⇒
-    //          executionContext.lockRepository.withLock(ContainerTask.installLockKey) {
-    //            (ContainerTask.installProot(executionContext.moleExecutionDirectory), proot.noSeccomp, proot.kernel)
-    //          }
-    //      }
 
     def createPool =
       WithInstance { () ⇒
@@ -300,20 +295,13 @@ import ContainerTask._
 
     pool { container ⇒
       val workDirectoryValue = workDirectory.orElse(container.workDirectory.filter(!_.trim.isEmpty)).getOrElse("/")
+      val relativePathRootValue = relativePathRoot.getOrElse(workDirectoryValue)
       val inputDirectory = executionContext.taskExecutionDirectory /> "inputs"
 
-      def containerPathResolver = inputPathResolver(File("/"), workDirectoryValue) _
+      def containerPathResolver = inputPathResolver(File("/"), relativePathRootValue) _
 
-      val (preparedContext, preparedFilesInfo) = External.deployAndListInputFiles(external, context, inputPathResolver(inputDirectory, workDirectoryValue))
+      val (preparedContext, preparedFilesInfo) = External.deployAndListInputFiles(external, context, inputPathResolver(inputDirectory, relativePathRootValue))
       val volumes = prepareVolumes(preparedFilesInfo, containerPathResolver, hostFiles).toVector
-
-      def outputPathResolverValue(rootDirectory: File) = outputPathResolver(
-        preparedFilesInfo.map { case (f, d) ⇒ f.toString → d.toString },
-        hostFiles.map { h ⇒ h.path → h.destination },
-        inputDirectory,
-        workDirectoryValue,
-        rootDirectory
-      ) _
 
       val containerEnvironmentVariables =
         environmentVariables.map { v ⇒ v.name.from(preparedContext) -> v.value.from(preparedContext) }
@@ -330,25 +318,21 @@ import ContainerTask._
           environmentVariables = containerEnvironmentVariables
         )
 
-      //      val retCode =
-      //        _root_.container.Proot.execute(
-      //          container,
-      //          executionContext.taskExecutionDirectory / "tmp",
-      //          commands = command.value.map(_.from(context)),
-      //          workDirectory = Some(workDirectoryValue),
-      //          proot = proot.getAbsolutePath,
-      //          logger = scala.sys.process.ProcessLogger.apply(processOutput, processErr),
-      //          noSeccomp = noSeccomp,
-      //          kernel = Some(kernel),
-      //          bind = volumes,
-      //          environmentVariables = containerEnvironmentVariables
-      //        )
-
       if (errorOnReturnValue && !returnValue.isDefined && retCode != 0)
         throw new UserBadDataError(s"Process exited a non 0 return code ($retCode), you can chose ignore this by settings errorOnReturnValue = true")
 
       val rootDirectory = container.file / _root_.container.FlatImage.rootfsName
-      val retContext = External.fetchOutputFiles(external, outputs, preparedContext, outputPathResolverValue(rootDirectory), Seq(rootDirectory, executionContext.taskExecutionDirectory))
+
+      def outputPathResolverValue =
+        outputPathResolver(
+          preparedFilesInfo.map { case (f, d) ⇒ f.toString → d.toString },
+          hostFiles.map { h ⇒ h.path → h.destination },
+          inputDirectory,
+          relativePathRootValue,
+          rootDirectory
+        ) _
+
+      val retContext = External.fetchOutputFiles(external, outputs, preparedContext, outputPathResolverValue, Seq(rootDirectory, executionContext.taskExecutionDirectory))
 
       retContext ++
         returnValue.map(v ⇒ Variable(v, retCode)) ++

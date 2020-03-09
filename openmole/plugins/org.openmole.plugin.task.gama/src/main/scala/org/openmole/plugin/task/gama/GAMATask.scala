@@ -228,92 +228,93 @@ object GAMATask {
 
       def launchCommand = s"gama-headless -hpc 1 $inputFileName $outputDirectory"
 
-        newFile.withTmpDir { tmpOutputDirectory =>
-          def containerTask =
-            ContainerTask(
-              containerSystem = containerSystem,
-              image = image,
-              command = launchCommand,
-              workDirectory = None,
-              errorOnReturnValue = errorOnReturnValue,
-              returnValue = returnValue,
-              hostFiles = hostFiles,
-              environmentVariables = environmentVariables,
-              reuseContainer = true,
-              stdOut = stdOut,
-              stdErr = stdErr,
-              config = config,
-              external = external,
-              info = info,
-              containerPoolKey = containerPoolKey) set(
-              resources += (inputFile, inputFileName, true),
-              volumes.map { case (lv, cv) ⇒ resources +=[ContainerTask](lv, cv, true) },
-              resources += (tmpOutputDirectory, outputDirectory, true)
-            )
+      newFile.withTmpDir { tmpOutputDirectory =>
+        def containerTask =
+          ContainerTask(
+            image = image,
+            command = launchCommand,
+            containerSystem = containerSystem,
+            workDirectory = None,
+            relativePathRoot = Some(GAMATask.workspaceDirectory),
+            errorOnReturnValue = errorOnReturnValue,
+            returnValue = returnValue,
+            hostFiles = hostFiles,
+            environmentVariables = environmentVariables,
+            reuseContainer = true,
+            stdOut = stdOut,
+            stdErr = stdErr,
+            config = config,
+            external = external,
+            info = info,
+            containerPoolKey = containerPoolKey) set(
+            resources += (inputFile, inputFileName, true),
+            volumes.map { case (lv, cv) ⇒ resources +=[ContainerTask](lv, cv, true) },
+            resources += (tmpOutputDirectory, outputDirectory, true)
+          )
 
-          val resultContext = containerTask.process(executionContext).from(context)
+        val resultContext = containerTask.process(executionContext).from(context)
 
-          frameRate.option match {
-            case None =>
-              import xml._
+        frameRate.option match {
+          case None =>
+            import xml._
 
-              def toVariable(v: Val[_], value: String) =
-                v match {
-                  case Val.caseInt(v) => Variable(v, value.toInt)
-                  case Val.caseDouble(v) => Variable(v, value.toDouble)
-                  case Val.caseString(v) => Variable(v, value)
-                  case Val.caseBoolean(v) => Variable(v, value.toBoolean)
-                  case _ => throw new UserBadDataError(s"Unsupported type of output variable $v")
-                }
-
-              val outputs = Map[String, Val[_]]() ++ mapped.outputs.map { m => (m.name, m.v) }
-              def outputValue(e: Elem) =
-                for {
-                  a <- e.attribute("name").flatMap(_.headOption)
-                  value <- outputs.get(a.text)
-                } yield toVariable(value, e.child.text)
-
-              def extractOutputs(n: Node) =
-                (n \ "Variable").flatMap {
-                  case e: Elem => outputValue(e)
-                  case _ => None
-                }
-
-              val simulationOutput = XML.loadFile(tmpOutputDirectory / "simulation-outputs0.xml") \ "Step"
-              resultContext ++ extractOutputs(simulationOutput.last)
-            case Some(f) =>
-              import xml._
-
-              def toVariable(v: Val[_], value: Array[String]) =
-                v match {
-                  case Val.caseArrayInt(v) => Variable(v, value.map(_.toInt))
-                  case Val.caseArrayDouble(v) => Variable(v, value.map(_.toDouble))
-                  case Val.caseArrayString(v) => Variable(v, value)
-                  case Val.caseArrayBoolean(v) => Variable(v, value.map(_.toBoolean))
-                  case _ => throw new UserBadDataError(s"Unsupported type of output variable $v")
-                }
-
-              def outputValue(e: Elem, name: String) =
-                for {
-                  a <- e.attribute("name").flatMap(_.headOption)
-                  if a.text == name
-                } yield e.child.text
-
-              val simulationOutput = XML.loadFile(tmpOutputDirectory / "simulation-outputs0.xml") \ "Step"
-
-              resultContext ++ mapped.outputs.map { m =>
-                val values =
-                  for {
-                    o <- simulationOutput
-                    v <- o \ "Variable"
-                  } yield
-                    v match {
-                      case o: Elem => outputValue(o, m.name)
-                      case _ => None
-                    }
-
-                toVariable(m.v, values.flatten.toArray)
+            def toVariable(v: Val[_], value: String) =
+              v match {
+                case Val.caseInt(v) => Variable(v, value.toInt)
+                case Val.caseDouble(v) => Variable(v, value.toDouble)
+                case Val.caseString(v) => Variable(v, value)
+                case Val.caseBoolean(v) => Variable(v, value.toBoolean)
+                case _ => throw new UserBadDataError(s"Unsupported type of output variable $v")
               }
+
+            val outputs = Map[String, Val[_]]() ++ mapped.outputs.map { m => (m.name, m.v) }
+            def outputValue(e: Elem) =
+              for {
+                a <- e.attribute("name").flatMap(_.headOption)
+                value <- outputs.get(a.text)
+              } yield toVariable(value, e.child.text)
+
+            def extractOutputs(n: Node) =
+              (n \ "Variable").flatMap {
+                case e: Elem => outputValue(e)
+                case _ => None
+              }
+
+            val simulationOutput = XML.loadFile(tmpOutputDirectory / "simulation-outputs0.xml") \ "Step"
+            resultContext ++ extractOutputs(simulationOutput.last)
+          case Some(f) =>
+            import xml._
+
+            def toVariable(v: Val[_], value: Array[String]) =
+              v match {
+                case Val.caseArrayInt(v) => Variable(v, value.map(_.toInt))
+                case Val.caseArrayDouble(v) => Variable(v, value.map(_.toDouble))
+                case Val.caseArrayString(v) => Variable(v, value)
+                case Val.caseArrayBoolean(v) => Variable(v, value.map(_.toBoolean))
+                case _ => throw new UserBadDataError(s"Unsupported type of output variable $v")
+              }
+
+            def outputValue(e: Elem, name: String) =
+              for {
+                a <- e.attribute("name").flatMap(_.headOption)
+                if a.text == name
+              } yield e.child.text
+
+            val simulationOutput = XML.loadFile(tmpOutputDirectory / "simulation-outputs0.xml") \ "Step"
+
+            resultContext ++ mapped.outputs.map { m =>
+              val values =
+                for {
+                  o <- simulationOutput
+                  v <- o \ "Variable"
+                } yield
+                  v match {
+                    case o: Elem => outputValue(o, m.name)
+                    case _ => None
+                  }
+
+              toVariable(m.v, values.flatten.toArray)
+            }
           }
         }
     }

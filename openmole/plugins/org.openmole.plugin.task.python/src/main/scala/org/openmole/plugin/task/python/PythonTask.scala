@@ -149,6 +149,7 @@ object PythonTask {
             image = image,
             command = s"python${major.toString} $scriptName" + argumentsValue,
             workDirectory = None,
+            relativePathRoot = None,
             errorOnReturnValue = errorOnReturnValue,
             returnValue = returnValue,
             hostFiles = hostFiles,

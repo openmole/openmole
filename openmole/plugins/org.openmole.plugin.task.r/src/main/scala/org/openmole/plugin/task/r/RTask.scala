@@ -162,6 +162,7 @@ object RTask {
             image = image,
             command = s"R --slave -f $rScriptName",
             workDirectory = None,
+            relativePathRoot = None,
             errorOnReturnValue = errorOnReturnValue,
             returnValue = returnValue,
             hostFiles = hostFiles,
