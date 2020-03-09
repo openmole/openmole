@@ -132,9 +132,7 @@ with
   @li{@code{percolationLinkWidth} the width of the final streets.}
 
 
-/*
-
-@h2{Exponential mixture population grid sampling}
+/* @h2{Exponential mixture population grid sampling}
 
 At a smaller scale than the previous generators which are all binary grids (building configurations), population density grids can be considered at the metropolitan scale for example (a grid cell being of width 1km for example).
 
@@ -165,9 +163,7 @@ where
   @li{@code{maxValue} is optional (default to 1) and can be either a double giving the intensity at the center of each kernel, or a sequence of doubles giving the intensity for each kernel,}
   @li{@code{kernelRadius} is also optional and specifies similarly either all radius or the sequence of radius,}
   @li{@code{samples} is the number of grids to generate,}
-  @li{@code{prototypes} is an arbitrary number of prototypes for the generated layers (must be of the same size as provided parameters if in sequence mode).}
-
-*/
+  @li{@code{prototypes} is an arbitrary number of prototypes for the generated layers (must be of the same size as provided parameters if in sequence mode).} */
 
 @h2{Reaction diffusion population grid sampling}
 
@@ -192,7 +188,7 @@ ReactionDiffusionSpatialSampling(
   growthRate,
   totalPopulation
 )
-""", header = "val samples = 10; val worldSize = 10; val alpha = 10.0; val beta = 10.0; val growthRate = 10.0; val totalPopulation = 10", name="reaction diffusion grid sampling")
+""", header = "val samples = 10; val worldSize = 10; val alpha = 10.0; val beta = 10.0; val growthRate = 10.0; val totalPopulation = 10", name="reaction diffusion grid sampling")
 
 @br
 

@@ -55,7 +55,7 @@ val exploration =
       (l in (UniformDistribution[Long]() take 10)) x
       (m in (workDirectory / "dir").files().filter(f => f.getName.startsWith("exp") && f.getName.endsWith(".csv")))
   ) hook(workDirectory / "path/of/a/file.csv")
-""", name = "several inputs")
+""", header = "val myModel = EmptyTask()", name = "several inputs")
 
 @br
 
@@ -201,7 +201,7 @@ Replication(
   replications = 100
 ) hook(
   output = display,
-  values = Seq(i)
+  values = Seq(i),
   includeSeed = true)
 """, name="hook replication")
 
