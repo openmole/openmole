@@ -55,7 +55,7 @@ val exploration =
       (l in (UniformDistribution[Long]() take 10)) x
       (m in (workDirectory / "dir").files().filter(f => f.getName.startsWith("exp") && f.getName.endsWith(".csv")))
   ) hook(workDirectory / "path/of/a/file.csv")
-""", name = "several inputs")
+""", header = "val myModel = EmptyTask()", name = "several inputs")
 
 @br
 
@@ -110,11 +110,12 @@ val exploration =
     evaluation = myModel,
     sampling =
       (i in (0 to 10 by 2)) x
-      (j in (0.0 to 5.0 by 0.5)))
-  ) hook(output = display,
-         values = Seq(i),
-         arrayOnRow = true)
-""", name = "hook direct sampling")
+      (j in (0.0 to 5.0 by 0.5))
+  ) hook(
+    output = display,
+    values = Seq(i),
+    arrayOnRow = true)
+""", header = "val myModel = EmptyTask()", name = "hook direct sampling")
 
 @br
 
@@ -139,7 +140,7 @@ val i = Val[Int]
 val o = Val[Double]
 
 val myModel =
-  ScalaTask("import scala.util.Random; val rng = new Random(mySeed); val o = i * 2 + 0.1 * rng.nextDouble()") set (
+  ScalaTask("val rng = Random(mySeed); val o = i * 2 + 0.1 * rng.nextDouble()") set (
     inputs += (i, mySeed),
     outputs += (i, o)
   )
@@ -179,7 +180,7 @@ There are some arguments specific to the @code{Replication} task which can be ad
   @li{@code{arrayOnRow = true} forces the flattening of input lists such that all list variables are written to a single row/line of the CSV file, it defaults to @code{false},}
   @li{@code{includeSeed} is a @code{Boolean} to specify whether you want the seed from the @code{Replication} task to be saved with the workflow variables, @code{false} by default.}
 
-Here is a use example:
+Here is a use example:f
 
 @br@br
 
@@ -198,9 +199,10 @@ Replication(
   evaluation = myModel,
   seed = mySeed,
   replications = 100
-) hook(output = display,
-       values = Seq(i)
-       includeSeed = true)
+) hook(
+  output = display,
+  values = Seq(i),
+  includeSeed = true)
 """, name="hook replication")
 
 @br

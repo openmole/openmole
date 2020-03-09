@@ -89,6 +89,13 @@ Here is how you can make use of this constructor in OpenMOLE:
 @br@br
 
 @hl.openmole("""
+val i1 = Val[Double]
+val i2 = Val[Double]
+val i3 = Val[Double]
+
+val o1 = Val[Double]
+val o2 = Val[Double]
+
 SensitivityMorris(
   evaluation = model,
   inputs = Seq(
@@ -99,7 +106,7 @@ SensitivityMorris(
   repetitions = 10,
   levels = 10
 ) hook display
-""", name = "Morris")
+""", header = "val model = EmptyTask()", name = "Morris")
 
 
 @h3{Additional material}
@@ -154,6 +161,13 @@ Here is how you can make use of this constructor in OpenMOLE:
 @br@br
 
 @hl.openmole("""
+val i1 = Val[Double]
+val i2 = Val[Double]
+val i3 = Val[Double]
+
+val o1 = Val[Double]
+val o2 = Val[Double]
+
 SensitivitySaltelli(
   evaluation = model,
   inputs = Seq(
@@ -163,7 +177,7 @@ SensitivitySaltelli(
   outputs = Seq(o1, o2),
   samples = 100
 ) hook display
-""", name = "Saltelli")
+""", header = "val model = EmptyTask()", name = "Saltelli")
 
 
 @h3{Additional material}

@@ -83,16 +83,17 @@ $model
 // termination is the termination criterion, here it runs for 100 generations. A time limit could be set as an
 // alternative by replacing 100 by 1 hour (hour is a duration type understood by OpenMOLE).
 // the parallelism specifies how many evaluation are concurrently submitted to the execution environment
-NSGA2Evolution(
-   genome = Seq(
-     x in (0.0, 1.0),
-     y in (0.0, 1.0),
-     s in List("apple", "banana", "strawberry")),
-  objectives = Seq(o1, o2),
-  evaluation = model,
-  parallelism = 10,
-  termination = 100
-)
+val evolution =
+  NSGA2Evolution(
+    genome = Seq(
+      x in (0.0, 1.0),
+      y in (0.0, 1.0),
+      s in List("apple", "banana", "strawberry")),
+    objectives = Seq(o1, o2),
+    evaluation = model,
+    parallelism = 10,
+    termination = 100
+  )
 
 // Construction of the complete workflow with the execution environment, and the hook.
 // A hook is attached to save the population of solutions to  workDirectory /evolution on the local machine running OpenMOLE

@@ -17,11 +17,7 @@
 
 package org.openmole.core.workflow.sampling
 
-import org.openmole.core.workflow.sampling._
-
-import scala.util.Random
-
-class EmptySampling extends Sampling {
+case class EmptySampling() extends Sampling {
   override def prototypes = List.empty
   override def apply() = Iterator.empty
 }
