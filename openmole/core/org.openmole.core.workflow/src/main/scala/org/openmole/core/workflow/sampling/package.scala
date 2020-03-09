@@ -43,6 +43,7 @@ package sampling {
 
     type Sampling = sampling.Sampling
 
+    def EmptySampling() = sampling.EmptySampling()
   }
 }
 

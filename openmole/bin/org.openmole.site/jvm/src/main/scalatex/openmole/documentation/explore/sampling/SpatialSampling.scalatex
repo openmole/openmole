@@ -28,13 +28,14 @@ A raster with random values:
 @br@br
 
 @hl.openmole("""
+val grid = Val[Array[Array[Double]]]
+
 RandomSpatialSampling(
   samples,
   worldSize,
-  density in Range(0.0,1.0),
-  prototype
-  )
-""", name="random grid sampling")
+  density in Range(0.0, 1.0),
+  grid)
+""", header = "val samples = 10; val worldSize = 10; val density = Val[Double]", name= "random grid sampling")
 
 @br
 
@@ -55,13 +56,16 @@ A binary grid with random blocks (random size and position). With the same argum
 @br@br
 
 @hl.openmole("""
-BlocksGridSpatialSampling(samples,worldSize,
-    blocksNumber in Range(1.0,20.0),
-    blocksMinSize in Range(1.0,10.0),
-    blocksMaxSize in Range(2.0,30.0),
-    prototype
-    )
-""", name="block grid sampling")
+val grid = Val[Array[Array[Double]]]
+
+BlocksGridSpatialSampling(
+  samples,
+  worldSize,
+  blocksNumber in Range(1.0, 20.0),
+  blocksMinSize in Range(1.0, 10.0),
+  blocksMaxSize in Range(2.0, 30.0),
+  grid)
+""", header = "val samples = 10; val worldSize = 10; val blocksNumber = Val[Double]; val blocksMinSize = Val[Double]; val blocksMaxSize = Val[Double]", name="block grid sampling")
 
 
 
@@ -72,13 +76,16 @@ A binary grid created with an exponential mixture, with kernels of the form @cod
 @br@br
 
 @hl.openmole("""
-ExpMixtureThresholdSpatialSampling(samples,worldSize,
-    expMixtureCenters in Range(1.0,20.0),
-    expMixtureRadius in Range(1.0,10.0),
-    expMixtureThreshold in Range(2.0,30.0),
-    prototype
-    )
-""", name="block grid sampling")
+val grid = Val[Array[Array[Double]]]
+
+ExpMixtureThresholdSpatialSampling(
+  samples,
+  worldSize,
+  expMixtureCenters in Range(1.0,20.0),
+  expMixtureRadius in Range(1.0,10.0),
+  expMixtureThreshold in Range(2.0,30.0),
+  grid)
+""", header = "val samples = 10; val worldSize = 10; val expMixtureCenters = Val[Double]; val expMixtureRadius = Val[Double]; val expMixtureThreshold = Val[Double]", name="block grid sampling")
 
 @br
 
@@ -104,13 +111,16 @@ The resulting network is transposed to a building configuration by assimilating 
 @br@br
 
 @hl.openmole("""
-PercolationGridSpatialSampling(samples,worldSize,
-    percolationProba in Range(0.1,1.0),
-    percolationBordPoints in Range(1.0,30.0),
-    percolationLinkWidth in Range(1.0,5.0),
-    prototype
-    )
-""", name="percolation grid sampling")
+val grid = Val[Array[Array[Double]]]
+
+PercolationGridSpatialSampling(
+  samples,
+  worldSize,
+  percolationProba in Range(0.1,1.0),
+  percolationBordPoints in Range(1.0,30.0),
+  percolationLinkWidth in Range(1.0,5.0),
+  grid)
+""", header = "val samples = 10; val worldSize = 10; val percolationProba = Val[Double]; val percolationBordPoints = Val[Double]; val percolationLinkWidth = Val[Double]", name="percolation grid sampling")
 
 @br
 
@@ -122,8 +132,7 @@ with
   @li{@code{percolationLinkWidth} the width of the final streets.}
 
 
-
-@h2{Exponential mixture population grid sampling}
+/* @h2{Exponential mixture population grid sampling}
 
 At a smaller scale than the previous generators which are all binary grids (building configurations), population density grids can be considered at the metropolitan scale for example (a grid cell being of width 1km for example).
 
@@ -154,9 +163,7 @@ where
   @li{@code{maxValue} is optional (default to 1) and can be either a double giving the intensity at the center of each kernel, or a sequence of doubles giving the intensity for each kernel,}
   @li{@code{kernelRadius} is also optional and specifies similarly either all radius or the sequence of radius,}
   @li{@code{samples} is the number of grids to generate,}
-  @li{@code{prototypes} is an arbitrary number of prototypes for the generated layers (must be of the same size as provided parameters if in sequence mode).}
-
-
+  @li{@code{prototypes} is an arbitrary number of prototypes for the generated layers (must be of the same size as provided parameters if in sequence mode).} */
 
 @h2{Reaction diffusion population grid sampling}
 
@@ -169,17 +176,19 @@ Urban morphogenesis model for population density introduced by @aa("(Raimbault, 
 @br@br
 
 @hl.openmole("""
+val grid = Val[Array[Array[Double]]]
+
 ReactionDiffusionSpatialSampling(
   samples,
   gridSize,
-  prototype,
+  grid,
   alpha,
   beta,
   nBeta,
   growthRate,
   totalPopulation
 )
-""", name="reaction diffusion grid sampling")
+""", header = "val samples = 10; val worldSize = 10; val alpha = 10.0; val beta = 10.0; val growthRate = 10.0; val totalPopulation = 10", name="reaction diffusion grid sampling")
 
 @br
 

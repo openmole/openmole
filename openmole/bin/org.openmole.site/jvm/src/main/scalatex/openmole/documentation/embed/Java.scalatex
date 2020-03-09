@@ -296,10 +296,11 @@ Once this code is added, you can produce the  bundle by simply executing a build
 @p
     When defining the task on the OpenMOLE script, you have to ensure that all JAI classes are managed by the same class loader by using the dedicated function @em{withThreadClassLoader}. When using the Java code as a library, it requires some update on the script as follow (for example, for the TiffReaderTask) :
 
-    @hl.openmole("""
-        val GeoTifWriter = ScalaTask($tq
-          |import fr.openmole.geotools.tiff._
-          |withThreadClassLoader(TiffReaderTask.getClassLoader())(TiffWriterTask.write(fileIn, fileOut))".stripMargin
+    @hl.openmole(s"""
+        val GeoTifWriter =
+          ScalaTask($tq
+            |import fr.openmole.geotools.tiff._
+            |withThreadClassLoader(TiffReaderTask.getClassLoader())(TiffWriterTask.write(fileIn, fileOut))$tq.stripMargin
           $tq.stripMargin) set (
           libraries += workDirectory / "test-mupcity-openmole-0.0.1-SNAPSHOT-shaded.jar",
           fileIn :=  workDirectory / "data" / "test.tif",

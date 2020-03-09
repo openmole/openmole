@@ -101,7 +101,7 @@ The syntax to attribute these values to Vals in OpenMOLE is the following:
   (diffusionRate in (0.0 to 100.0 by 50.0)) x
   (evaporationRate in (0.0 to 100.0 by 50.0)) x
   (population in (50.0 to 150.0 by 50.0))
-""")
+""", header = """val diffusionRate = Val[Double]; val evaporationRate = Val[Double]; val population = Val[Double]""")
 
 @br
 

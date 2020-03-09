@@ -44,8 +44,8 @@ The operator @code{::} does so:
 @br@br
 
 @hl.openmole("""
-((i in Seq(0,1))x(j is 2.0))::((i is 10)x(j is 666.0))
-""", name ="concatenate samplings")
+((i in Seq(0, 1)) x (j is 2.0)) :: ((i is 10) x (j is 666.0))
+""", header = "val i = Val[Int]; val j = Val[Double]", name ="concatenate samplings")
 
 
 
