@@ -14,7 +14,7 @@ Please note that the service is reset every 6 hours, so don't be surprised if yo
 
 @h2{Download OpenMOLE}
 
-To run correctly on your own computer, OpenMOLE requires Java version 8 or above.
+To run correctly on your own computer, OpenMOLE requires Java version 9 or above.
 Check our @aa("FAQ", href := faq.file) to access your Java version information.
 
 @br
