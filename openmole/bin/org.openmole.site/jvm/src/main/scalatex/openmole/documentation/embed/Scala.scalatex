@@ -102,21 +102,17 @@ val element = Val[Double]
 val multiplied = Val[Double]
 val result = Val[Double]
 
-val expensive = ScalaTask("val multiplied = element * 2") set (
-  inputs += element,
-  outputs += multiplied
-)
-
-val sum = ScalaTask("val result = multiplied.sum") set (
-  inputs += multiplied.toArray,
-  outputs += result
-)
+val expensive =
+  ScalaTask("val multiplied = element * 2") set (
+    inputs += element,
+    outputs += multiplied
+  )
 
 DirectSampling (
   evaluation = expensive,
   sampling = element in List(8.0, 9.0, 10.0),
-  aggregation = sum hook DisplayHook()
-)""")
+  aggregation = Seq(multiplied aggregate sum)
+) hook display""")
 
 @p
   The execution of this workflow can be distributed using OpenMOLE's environments. Check the page dedicated to @a("environments", href := DocumentationPages.scale.file) to learn more on this process.

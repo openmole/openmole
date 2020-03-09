@@ -198,7 +198,7 @@ You may set the directory within the container where to start the execution from
 ContainerTask(
   "debian:testing-slim",
   ${tq}ls${tq},
-  workDirectory = "/bin")
+  workDirectory = "/bin"
 )""")
 
 
@@ -249,7 +249,7 @@ Both commands' standard and error outputs are gathered and concatenated to a sin
       stdErr := error
     )
 
-   scriptTask hook DisplayHook()""")
+  tscriptTask hook display""")
 
 @br
 

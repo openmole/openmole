@@ -143,6 +143,9 @@ val param2 = Val[Double]
 val param3 = Val[Int]
 val param4 = Val[String]
 
+val distance1 = Val[Double]
+val distance2 = Val[Double]
+
 NSGA2Evolution(
   evaluation = modelTask,
   objectives = Seq(distance1, distance2),
@@ -155,7 +158,7 @@ NSGA2Evolution(
   termination = 100,
   parallelism = 10
 ) hook (workDirectory / "path/to/a/directory")
-""", name = "Calibration")
+""", header = "val modelTask = EmptyTask()", name = "Calibration")
 
 
 @h3{Stochastic models}

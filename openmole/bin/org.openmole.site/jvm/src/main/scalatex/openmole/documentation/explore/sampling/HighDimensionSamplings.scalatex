@@ -47,22 +47,21 @@ val my_LHS_sampling =
 """, name = "lhs sampling in sensitivity")
 
 
-@h3{Use in the DirectSampling task}
+@h3{Use in the DirectSampling method}
 
-Once a sampling is defined, you can just add it to a @code{DirectSampling} task (see @aa("here", href:= samplings.file) for the description of this task), under the @code{sampling} argument.
+Once a sampling is defined, you can just add it to a @code{DirectSampling} method (see @aa("here", href:= samplings.file) for the description of this method), under the @code{sampling} argument.
 For example, supposing you have already declared inputs, outputs, and a model task called @code{myModel}, the sampling could be used like this:
 
 @br@br
 
-@hl.openmoleNoTest("""
+@hl.openmole("""
     val myExploration = DirectSampling(
       evaluation = myModel ,
-      sampling = my_lhs_sampling,
-      aggregation = mean
+      sampling = my_lhs_sampling
     )
 
     myExploration hook display
-""")
+""", header = """val myModel = EmptyTask(); val my_lhs_sampling = EmptySampling()""")
 
 
 
@@ -88,19 +87,18 @@ val my_sobol_sampling =
 """, name = "sobol sampling in sensitivity")
 
 
-@h3{Use in the DirectSampling task}
+@h3{Use in the DirectSampling method}
 
-Once a sampling is defined, you can just add it to a @code{DirectSampling} task (see @aa("here", href:= samplings.file) for the description of this task), under the @code{sampling} argument.
+Once a sampling is defined, you can just add it to a @code{DirectSampling} method (see @aa("here", href:= samplings.file) for the description of this method), under the @code{sampling} argument.
 For example, supposing you have already declared inputs, outputs, and a model task called @code{myModel}, the sampling could be used like this:
 
 @br@br
 
-@hl.openmoleNoTest("""
+@hl.openmole("""
     val myExploration = DirectSampling(
       evaluation = myModel ,
-      sampling = my_sobol_sampling,
-      aggregation = mean
+      sampling = my_sobol_sampling
     )
 
     myExploration hook display
-    """)
+    """, header = """val myModel = EmptyTask(); val my_sobol_sampling = EmptySampling()""")

@@ -104,6 +104,7 @@ Here is an example :
   val param1 = Val[Double]
   val param2 = Val[Double]
   val fitness = Val[Double]
+  val seed = Val[Long]
 
   ProfileEvolution(
     evaluation = modelTask,
