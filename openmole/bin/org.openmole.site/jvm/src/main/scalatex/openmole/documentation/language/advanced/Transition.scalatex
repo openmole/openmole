@@ -130,7 +130,7 @@ val t1 = ScalaTask("d = d * 42") set ( inputs += d, outputs += d )
 val t2 = ScalaTask("d = d + 100") set ( inputs += d, outputs += d)
 val exploration = ExplorationTask( d in (0.0 to 99.0 by 10.0) )
 
-exploration -< t1 -- (t2 hook display when "d < 1000")""")
+exploration -< t1 -- (t2 hook display) when "d < 1000" """)
 
 @br
 
