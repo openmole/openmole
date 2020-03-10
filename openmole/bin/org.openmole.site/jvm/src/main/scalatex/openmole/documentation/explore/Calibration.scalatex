@@ -131,7 +131,7 @@ The hook arguments which can be specified to the @code{NSGA2Evolution} construct
 For more details about hooks, check the corresponding @aa("Language", href := hook.file) page.
 
 
-@h3{Use example}
+@h3{Example}
 
 In your OpenMOLE script, the NSGA2 algorithm scheme is defined like so:
 
@@ -159,6 +159,31 @@ NSGA2Evolution(
   parallelism = 10
 ) hook (workDirectory / "path/to/a/directory")
 """, header = "val modelTask = EmptyTask()", name = "Calibration")
+
+
+@h3{Calibrating a high number of inputs}
+
+If you want to calibrate an important number of parameters you can use arrays directly in the genome. For that you must provide an array of boundaries. In this example, the an array of 100 inputs varying between 0 an 100 an a single double value varying from 1 to 10.
+
+@hl.openmole("""
+val param1 = Val[Array[Double]]
+val param2 = Val[Double]
+
+val distance = Val[Double]
+
+val model = ScalaTask("val distance = param1.sum * param2") set (inputs += (param1, param2), outputs += distance)
+
+NSGA2Evolution(
+  evaluation = model ,
+  objectives = Seq(distance),
+  mu = 200,
+  genome = Seq(
+    param1 in Array.fill(100)(0.0, 99.0),
+    param2 in (1.0, 10.0)),
+  termination = 100,
+  parallelism = 10
+) hook display
+""")
 
 
 @h3{Stochastic models}
