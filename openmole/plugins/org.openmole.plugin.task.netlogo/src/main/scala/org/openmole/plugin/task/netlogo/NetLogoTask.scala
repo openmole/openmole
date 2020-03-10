@@ -183,20 +183,20 @@ object NetLogoTask {
 
     // recurse to get sizes, Nested LogoLists assumed rectangular : size of first element is taken for each dimension
     // will fail if the depth of the prototype is not the depth of the LogoList
-    @tailrec def getdims(collection: AbstractCollection[Any], dims: Seq[Int], maxdepth: Int): Seq[Int] = {
-      maxdepth match {
-        case d if d == 1 ⇒ (dims ++ Seq(collection.size()))
-        case _           ⇒ getdims(collection.iterator().next().asInstanceOf[AbstractCollection[Any]], dims ++ Seq(collection.size()), maxdepth - 1)
+    @tailrec def getdims(collection: AbstractCollection[Any], dims: Seq[Int], maxDepth: Int): Seq[Int] = {
+      maxDepth match {
+        case d if d == 1 ⇒ dims ++ Seq(collection.size())
+        case _ ⇒
+          if (collection.isEmpty) getdims(collection, dims ++ Seq(0), maxDepth - 1)
+          else getdims(collection.iterator().next().asInstanceOf[AbstractCollection[Any]], dims ++ Seq(collection.size()), maxDepth - 1)
       }
     }
 
-    var dims: Seq[Int] = Seq.empty
-    try {
-      dims = getdims(netlogoCollection, Seq.empty, depth)
-    }
-    catch {
-      case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when mapping a prototype array of depth ${depth} and type ${multiArrayType} with nested LogoLists")
-    }
+    val dims: Seq[Int] =
+      try getdims(netlogoCollection, Seq.empty, depth)
+      catch {
+        case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when mapping a prototype array of depth ${depth} and type ${multiArrayType} with nested LogoLists")
+      }
 
     // create multi array
     try {
