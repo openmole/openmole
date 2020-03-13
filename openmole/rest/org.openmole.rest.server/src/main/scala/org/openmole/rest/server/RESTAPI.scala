@@ -136,24 +136,47 @@ trait RESTAPI extends ScalatraServlet
     }
   }
 
-  get("/job/:id/workDirectory/:path") {
+  get("/job/:id/workDirectory/*") {
     getExecution { ex ⇒
-      val path = (params get "path").getOrElse("")
+      val path = multiParams("splat").headOption.getOrElse("") //(params get "path").getOrElse("")
       val file = ex.jobDirectory.workDirectory / path
-      val gzOs = response.getOutputStream.toGZ
 
-      if (file.isDirectory) {
-        val os = new TarOutputStream(gzOs)
-        contentType = "application/octet-stream"
-        response.setHeader("Content-Disposition", "attachment; filename=" + "archive.tgz")
-        os.archive(file)
-        os.close
-      }
+      if (!file.exists()) NotFound(Error("File not found").toJson)
       else {
-        file.copy(gzOs)
-      }
+        val gzOs = response.getOutputStream.toGZ
 
-      Ok()
+        if (file.isDirectory) {
+          val os = new TarOutputStream(gzOs)
+          contentType = "application/octet-stream"
+          response.setHeader("Content-Disposition", "attachment; filename=" + "archive.tgz")
+          os.archive(file)
+          os.close
+        }
+        else {
+          file.copy(gzOs)
+        }
+
+        Ok()
+      }
+    }
+  }
+
+  propfind("/job/:id/workDirectory/*") {
+    getExecution { ex ⇒
+      val pathParam = multiParams("splat").headOption //params get "path"
+      val path = pathParam.getOrElse("")
+      val file = ex.jobDirectory.workDirectory / path
+
+      if (!file.exists()) NotFound(Error("File not found").toJson)
+      else if (file.isDirectory) {
+        val entries = file.listFilesSafe.toVector.map { f ⇒
+          val size = if (f.isFile) Some(f.size) else None
+          val entryType = if (f.isDirectory) FileType.directory else FileType.file
+          DirectoryEntryProperty(f.getName, modified = f.lastModified(), size = size, `type` = entryType)
+        }
+        Ok(DirectoryProperty(entries, modified = file.lastModified()).toJson)
+      }
+      else Ok(FileProperty(file.size, modified = file.lastModified()).toJson)
     }
   }
 
@@ -167,7 +190,7 @@ trait RESTAPI extends ScalatraServlet
       val state: State = (moleExecution.exception, moleExecution.finished) match {
         case (Some(t), _) ⇒
           MoleExecution.MoleExecutionFailed.capsule(t) match {
-            case Some(c) ⇒ Failed(Error(t.exception).copy(message = s"Mole execution failed when execution capsule: ${c}"))
+            case Some(c) ⇒ Failed(Error(t.exception).copy(message = s"Mole execution failed when executing capsule: ${c}"))
             case None    ⇒ Failed(Error(t.exception).copy(message = s"Mole execution failed"))
           }
 
@@ -194,7 +217,7 @@ trait RESTAPI extends ScalatraServlet
   delete("/job/:id") {
     getId {
       moles.remove(_) match {
-        case None ⇒ ExpectationFailed(Error("Execution not found").toJson)
+        case None ⇒ NotFound(Error("Execution not found").toJson)
         case Some(ex) ⇒
           ex.moleExecution.cancel
           ex.jobDirectory.clean
@@ -277,7 +300,7 @@ trait RESTAPI extends ScalatraServlet
   def getExecution(success: Execution ⇒ ActionResult)(implicit r: HttpServletRequest): ActionResult =
     getId {
       moles.get(_) match {
-        case None     ⇒ ExpectationFailed(Error("Execution not found").toJson)
+        case None     ⇒ NotFound(Error("Execution not found").toJson)
         case Some(ex) ⇒ success(ex)
       }
     }(r)
@@ -287,5 +310,7 @@ trait RESTAPI extends ScalatraServlet
       case Failure(_)  ⇒ ExpectationFailed(Error("id is missing").toJson)
       case Success(id) ⇒ success(ExecutionId(id))
     }
+
+  def propfind(transformers: RouteTransformer*)(action: ⇒ Any): Route = addRoute(HttpMethod("PROPFIND"), transformers, action)
 
 }

@@ -48,4 +48,16 @@ package object message {
 
   case class EnvironmentStatus(name: Option[String], submitted: Long, running: Long, done: Long, failed: Long, errors: Seq[Error])
   case class CapsuleState(ready: Long, running: Long, completed: Long)
+
+  object FileType {
+    type FileType = String
+    val directory: FileType = "directory"
+    val file: FileType = "file"
+  }
+
+  sealed trait Property
+  case class FileProperty(size: Long, modified: Long, `type`: FileType.FileType = FileType.file) extends Property
+  case class DirectoryProperty(entries: Vector[DirectoryEntryProperty], modified: Long, `type`: FileType.FileType = FileType.directory) extends Property
+  case class DirectoryEntryProperty(name: String, size: Option[Long], modified: Long, `type`: FileType.FileType) extends Property
+
 }
