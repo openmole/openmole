@@ -169,11 +169,20 @@ trait RESTAPI extends ScalatraServlet
 
       if (!file.exists()) NotFound(Error("File not found").toJson)
       else if (file.isDirectory) {
-        val entries = file.listFilesSafe.toVector.map { f ⇒
-          val size = if (f.isFile) Some(f.size) else None
-          val entryType = if (f.isDirectory) FileType.directory else FileType.file
-          DirectoryEntryProperty(f.getName, modified = f.lastModified(), size = size, `type` = entryType)
-        }
+
+        def filter(fs: Array[File]) =
+          params get "last" match {
+            case Some(l) ⇒ fs.sortBy(-_.lastModified).take(l.toInt)
+            case None    ⇒ fs.sortBy(-_.lastModified)
+          }
+
+        val entries =
+          filter(file.listFilesSafe).toVector.map { f ⇒
+            val size = if (f.isFile) Some(f.size) else None
+            val entryType = if (f.isDirectory) FileType.directory else FileType.file
+            DirectoryEntryProperty(f.getName, modified = f.lastModified(), size = size, `type` = entryType)
+          }
+
         Ok(DirectoryProperty(entries, modified = file.lastModified()).toJson)
       }
       else Ok(FileProperty(file.size, modified = file.lastModified()).toJson)
