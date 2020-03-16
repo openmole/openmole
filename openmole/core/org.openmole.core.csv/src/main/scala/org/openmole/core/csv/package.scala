@@ -126,14 +126,12 @@ package object csv {
    *
    */
   def csvToVariables(
-    file:        File,
-    columns:     Seq[(String, Val[_])],
-    fileColumns: Seq[(String, File, Val[File])] = Seq.empty,
-    separator:   Option[Char]                   = None): Iterator[Iterable[Variable[_]]] = {
+    file:      File,
+    columns:   Seq[(String, Val[_])],
+    separator: Option[Char]          = None): Iterator[Iterable[Variable[_]]] = {
     val reader = new CSVReader(new FileReader(file), separator.getOrElse(','))
     val headers = reader.readNext.toArray
 
-    //test wether prototype names belong to header names
     val columnsIndexes = columns.map {
       case (name, _) ⇒
         val i = headers.indexOf(name)
@@ -141,24 +139,11 @@ package object csv {
         else i
     }
 
-    val fileColumnsIndexes =
-      fileColumns.map {
-        case (name, _, _) ⇒
-          val i = headers.indexOf(name)
-          if (i == -1) throw new UserBadDataError("Unknown column name : " + name)
-          else i
+    Iterator.continually(reader.readNext).takeWhile(_ != null).map { line ⇒
+      (columns zip columnsIndexes).map {
+        case ((_, v), i) ⇒ Variable.unsecure(v, converter(v)(line(i)))
       }
-
-    Iterator.continually(reader.readNext).takeWhile(_ != null).map {
-      line ⇒
-        (columns zip columnsIndexes).map {
-          case ((_, v), i) ⇒ Variable.unsecure(v, converter(v)(line(i)))
-        } ++
-          (fileColumns zip fileColumnsIndexes).map {
-            case ((_, f, p), i) ⇒ Variable(p, new File(f, line(i)))
-          }
     }
-
   }
 
   val conveters = Map[Class[_], (String ⇒ _)](

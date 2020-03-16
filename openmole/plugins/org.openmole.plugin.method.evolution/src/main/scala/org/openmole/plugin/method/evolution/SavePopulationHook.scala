@@ -42,8 +42,6 @@ object SavePopulationHook {
         }
 
       if (save) {
-        import org.openmole.plugin.tool.csv._
-
         val values = resultVariables(t).from(context).map(_.value)
         def headerLine = csv.header(resultVariables(t).from(context).map(_.prototype.array), values)
 

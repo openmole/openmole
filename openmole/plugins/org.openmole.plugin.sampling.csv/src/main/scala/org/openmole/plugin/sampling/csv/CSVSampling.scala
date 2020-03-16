@@ -21,21 +21,17 @@ import java.io.File
 
 import monocle.Lens
 import monocle.macros.Lenses
-import org.openmole.core.context.Val
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig, Mapped, MappedInputBuilder }
+import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig, Mapped, MappedOutputBuilder }
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.tools._
-import org.openmole.plugin.tool.csv._
 
 object CSVSampling {
 
   implicit def isIO = InputOutputBuilder(CSVSampling.config)
 
-  implicit def isBuilder: CSVToVariablesBuilder[CSVSampling] = new CSVToVariablesBuilder[CSVSampling] {
+  implicit def isBuilder = new MappedOutputBuilder[CSVSampling] {
     override def mappedOutputs: Lens[CSVSampling, Vector[Mapped[_]]] = CSVSampling.columns
-    override def fileColumns = CSVSampling.fileColumns
-    override def separator = CSVSampling.separator
   }
 
   def apply(file: FromContext[File], separator: OptionalArgument[Char] = None): CSVSampling =
@@ -43,7 +39,6 @@ object CSVSampling {
       file,
       config = InputOutputConfig(),
       columns = Vector.empty,
-      fileColumns = Vector.empty,
       separator = separator.option
     )
 
@@ -53,11 +48,10 @@ object CSVSampling {
 }
 
 @Lenses case class CSVSampling(
-  file:        FromContext[File],
-  config:      InputOutputConfig,
-  columns:     Vector[Mapped[_]],
-  fileColumns: Vector[(String, File, Val[File])],
-  separator:   Option[Char]
+  file:      FromContext[File],
+  config:    InputOutputConfig,
+  columns:   Vector[Mapped[_]],
+  separator: Option[Char]
 ) extends Sampling {
 
   override def inputs = InputOutputConfig.inputs.get(config)
@@ -69,7 +63,6 @@ object CSVSampling {
     csv.csvToVariables(
       file.from(context),
       columns.map(_.toTuple.swap),
-      fileColumns,
       separator)
   }
 

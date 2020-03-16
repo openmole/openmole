@@ -9,7 +9,6 @@ object ABCHook {
   def apply(abc: DSLContainer[ABC.ABCParameters], dir: FromContext[File], frequency: Long = 1)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     Hook("ABCHook") { p ⇒
       import p._
-      import org.openmole.plugin.tool.csv._
 
       if (context(abc.data.step) % frequency == 0) {
         context(abc.data.state) match {

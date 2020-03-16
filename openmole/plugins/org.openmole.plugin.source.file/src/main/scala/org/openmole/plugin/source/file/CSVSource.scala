@@ -17,14 +17,12 @@
 
 package org.openmole.plugin.source.file
 
-import javax.swing.JPopupMenu.Separator
 import monocle.macros.Lenses
-import org.openmole.core.context.{ Context, Val, Variable }
+import org.openmole.core.context.{ Variable }
 import org.openmole.core.dsl._
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.mole.{ MoleExecutionContext, Source }
-import org.openmole.plugin.tool.csv._
 
 import scala.reflect.ClassTag
 
@@ -33,10 +31,8 @@ object CSVSource {
   implicit def isIO = InputOutputBuilder(CSVSource.config)
   implicit def isInfo = InfoBuilder(CSVSource.info)
 
-  implicit def isCSV = new CSVToVariablesBuilder[CSVSource] {
+  implicit def isCSV = new MappedOutputBuilder[CSVSource] {
     override def mappedOutputs = CSVSource.columns
-    override def fileColumns = CSVSource.fileColumns
-    override def separator = CSVSource.separator
   }
 
   def apply(path: FromContext[String], separator: OptionalArgument[Char])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
@@ -45,19 +41,17 @@ object CSVSource {
       config = InputOutputConfig(),
       info = InfoConfig(),
       columns = Vector.empty,
-      fileColumns = Vector.empty,
       separator = None
     )
 
 }
 
 @Lenses case class CSVSource(
-  path:        FromContext[String],
-  config:      InputOutputConfig,
-  info:        InfoConfig,
-  columns:     Vector[Mapped[_]],
-  fileColumns: Vector[(String, File, Val[File])],
-  separator:   Option[Char]
+  path:      FromContext[String],
+  config:    InputOutputConfig,
+  info:      InfoConfig,
+  columns:   Vector[Mapped[_]],
+  separator: Option[Char]
 ) extends Source {
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
@@ -66,7 +60,7 @@ object CSVSource {
 
     val file = new File(path.from(context))
     val transposed =
-      csv.csvToVariables(file, columns.map(_.toTuple.swap), fileColumns, separator).toSeq.transpose
+      csv.csvToVariables(file, columns.map(_.toTuple.swap), separator).toSeq.transpose
 
     def variables =
       for {
