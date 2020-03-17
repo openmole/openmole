@@ -20,33 +20,45 @@ object CSVHook {
     header:     OptionalArgument[FromContext[String]] = None,
     arrayOnRow: Boolean                               = false,
     overwrite:  Boolean                               = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): mole.FromContextHook =
+    FormattedFileHook(
+      format = CSVFormat(header = header, arrayOnRow = arrayOnRow, overwrite = overwrite),
+      output = output,
+      values = values,
+      exclude = exclude,
+      name = Some("CSVHook")
+    )
 
-    Hook("CSVHook") { parameters ⇒
-      import parameters._
+  object CSVFormat {
 
-      val excludeSet = exclude.map(_.name).toSet
-      val ps =
-        { if (values.isEmpty) context.values.map { _.prototype }.toVector else values }.filter { v ⇒ !excludeSet.contains(v.name) }
-      val vs = ps.map(context(_))
+    implicit def format: FileFormat[CSVFormat] = new FileFormat[CSVFormat] {
+      override def write(format: CSVFormat, output: WritableOutput, ps: Seq[Val[_]]): FromContext[Unit] = FromContext { p ⇒
+        import p._
 
-      def headerLine = header.map(_.from(context)) getOrElse csv.header(ps, vs, arrayOnRow)
+        val vs = ps.map(context(_))
+        def headerLine = format.header.map(_.from(context)) getOrElse csv.header(ps, vs, format.arrayOnRow)
 
-      output match {
-        case WritableOutput.FileValue(file) ⇒
-          val f = file.from(context)
-          if (overwrite && !f.isEmpty) f.delete()
-          val h = if (f.isEmpty) Some(headerLine) else None
-          f.withPrintStream(append = true, create = true) { ps ⇒ csv.writeVariablesToCSV(ps, h, vs, arrayOnRow) }
-        case WritableOutput.PrintStreamValue(ps) ⇒
-          val header = Some(headerLine)
-          csv.writeVariablesToCSV(ps, header, vs, arrayOnRow)
+        output match {
+          case WritableOutput.FileValue(file) ⇒
+            val f = file.from(context)
+            if (format.overwrite && !f.isEmpty) f.delete()
+            val h = if (f.isEmpty) Some(headerLine) else None
+            f.withPrintStream(append = true, create = true) { ps ⇒ csv.writeVariablesToCSV(ps, h, vs, format.arrayOnRow) }
+          case WritableOutput.PrintStreamValue(ps) ⇒
+            val header = Some(headerLine)
+            csv.writeVariablesToCSV(ps, header, vs, format.arrayOnRow)
+        }
       }
 
-      context
-    } validate { p ⇒
-      import p._
-      WritableOutput.file(output).toSeq.flatMap(_.validate(inputs)) ++
-        header.option.toSeq.flatMap(_.validate(inputs))
-    } set (inputs += (values: _*))
+      override def validate(format: CSVFormat) = { p ⇒
+        import p._
+        format.header.option.toSeq.flatMap(_.validate(inputs))
+      }
+    }
+  }
+
+  case class CSVFormat(
+    header:     OptionalArgument[FromContext[String]] = None,
+    arrayOnRow: Boolean                               = false,
+    overwrite:  Boolean                               = false)
 
 }
