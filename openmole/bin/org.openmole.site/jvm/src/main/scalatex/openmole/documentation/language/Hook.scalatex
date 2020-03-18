@@ -103,14 +103,14 @@ The variables or expressions written between @b{${}} are evaluated and replaced 
 
 @h3{Write into a CSV file}
 
-The hook @code{AppendToCSVFileHook} takes data from the data flow and appends it to a file formatted as CSV.
+The hook @code{CSVHook} takes data from the data flow and appends it to a file formatted as CSV.
 
 @br@br
 
 @hl.openmole("""
     val i = Val[Int]
 
-    val h = AppendToCSVFileHook(workDirectory / "path/to/a/file/or/dir${i}.csv")
+    val h = CSVHook(workDirectory / "path/to/a/file/or/dir${i}.csv")
 """, name = "csv hook")
 
 @br

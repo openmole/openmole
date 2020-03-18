@@ -22,6 +22,8 @@ import scala.language.implicitConversions
 package mole {
   trait MolePackage {
     def CSVHook = mole.CSVHook
+    def CSVFormat = mole.CSVHook.CSVFormat
+
     type FromContextHook = mole.FromContextHook
     type FromContextSource = mole.FromContextSource
   }

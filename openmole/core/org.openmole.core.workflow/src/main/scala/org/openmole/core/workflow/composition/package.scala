@@ -31,7 +31,8 @@ package composition {
   import org.openmole.core.outputmanager.OutputManager
   import org.openmole.core.workflow.builder.DefinitionScope
   import org.openmole.core.workflow.execution.{ EnvironmentProvider, LocalEnvironmentProvider }
-  import org.openmole.core.workflow.mole.{ CSVHook, Grouping, Hook, MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source }
+  import org.openmole.core.workflow.mole.CSVHook.CSVFormat
+  import org.openmole.core.workflow.mole.{ CSVHook, FileFormat, FormattedFileHook, Grouping, Hook, MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source }
   import org.openmole.core.workflow.sampling.Sampling
   import org.openmole.core.workflow.task.{ EmptyTask, ExplorationTask, Task }
   import org.openmole.core.workflow.tools.{ OptionalArgument, WritableOutput }
@@ -137,11 +138,10 @@ package composition {
     def on(environment: EnvironmentProvider) = copy(environment = Some(environment))
     def by(strategy: Grouping) = copy(grouping = Some(strategy))
     def hook(hooks: Hook*) = copy(hooks = this.hooks ++ hooks)
-    def hook(
-      output:     WritableOutput,
-      values:     Seq[Val[_]]                           = Vector.empty,
-      header:     OptionalArgument[FromContext[String]] = None,
-      arrayOnRow: Boolean                               = false)(implicit definitionScope: DefinitionScope): TaskNode = hook(CSVHook(output, values = values, header = header, arrayOnRow = arrayOnRow))
+    def hook[F](
+      output: WritableOutput,
+      values: Seq[Val[_]]    = Vector.empty,
+      format: F              = CSVFormat())(implicit definitionScope: DefinitionScope, fileFormat: FileFormat[F]): TaskNode = hook(FormattedFileHook(output = output, values = values, format = format))
     def source(sources: Source*) = copy(sources = this.sources ++ sources)
   }
 
