@@ -1,11 +1,13 @@
 package org.openmole.plugin.tool
 
-import org.json4s.JsonAST.JValue
+import org.json4s.JsonAST.{ JObject, JValue }
 import org.openmole.core.context._
 import org.openmole.core.exception.UserBadDataError
-import shapeless._
 
 package object json {
+
+  def variablesToJValue(variables: Seq[Variable[_]]) =
+    JObject(variables.toList.map { v ⇒ v.name -> toJSONValue(v.value) })
 
   def toJSONValue(v: Any): org.json4s.JValue = {
     import org.json4s._
@@ -21,12 +23,6 @@ package object json {
       case _               ⇒ throw new UserBadDataError(s"Value $v of type ${v.getClass} is not convertible to JSON")
     }
   }
-
-  /*
-  def toJSONdictionary(v: Any): String = {
-
-  }
-  */
 
   def jValueToVariable(jValue: JValue, v: Val[_]): Variable[_] = {
     import org.json4s._

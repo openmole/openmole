@@ -21,17 +21,17 @@ object CSVHook {
     arrayOnRow: Boolean                               = false,
     overwrite:  Boolean                               = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): mole.FromContextHook =
     FormattedFileHook(
-      format = CSVFormat(header = header, arrayOnRow = arrayOnRow, overwrite = overwrite),
+      format = CSVOutputFormat(header = header, arrayOnRow = arrayOnRow, overwrite = overwrite),
       output = output,
       values = values,
       exclude = exclude,
       name = Some("CSVHook")
     )
 
-  object CSVFormat {
+  object CSVOutputFormat {
 
-    implicit def format: FileFormat[CSVFormat] = new FileFormat[CSVFormat] {
-      override def write(format: CSVFormat, output: WritableOutput, ps: Seq[Val[_]]): FromContext[Unit] = FromContext { p ⇒
+    implicit def format: OutputFormat[CSVOutputFormat] = new OutputFormat[CSVOutputFormat] {
+      override def write(format: CSVOutputFormat, output: WritableOutput, ps: Seq[Val[_]]): FromContext[Unit] = FromContext { p ⇒
         import p._
 
         val vs = ps.map(context(_))
@@ -49,14 +49,14 @@ object CSVHook {
         }
       }
 
-      override def validate(format: CSVFormat) = { p ⇒
+      override def validate(format: CSVOutputFormat) = { p ⇒
         import p._
         format.header.option.toSeq.flatMap(_.validate(inputs))
       }
     }
   }
 
-  case class CSVFormat(
+  case class CSVOutputFormat(
     header:     OptionalArgument[FromContext[String]] = None,
     arrayOnRow: Boolean                               = false,
     overwrite:  Boolean                               = false)

@@ -441,17 +441,18 @@ lazy val onvariableGrouping = OsgiProject(pluginDir, "org.openmole.plugin.groupi
 
 /* Hook */
 
-def allHook = Seq(displayHook, fileHook, modifierHook)
+def allHook = Seq(displayHook, fileHook, modifierHook, jsonHook)
 
 lazy val displayHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.display", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings: _*)
 
 lazy val fileHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.file", imports = Seq("*")) dependsOn(openmoleDSL, replication % "test") settings (
-  libraryDependencies += Libraries.scalatest
-  ) settings (pluginSettings: _*)
+  libraryDependencies += Libraries.scalatest) settings (pluginSettings: _*)
 
 lazy val modifierHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.modifier", imports = Seq("*")) dependsOn (openmoleDSL) settings (
-  libraryDependencies += Libraries.scalatest
-  ) settings (pluginSettings: _*)
+  libraryDependencies += Libraries.scalatest) settings (pluginSettings: _*)
+
+lazy val jsonHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.json", imports = Seq("*")) dependsOn(openmoleDSL,json, replication % "test") settings (
+  libraryDependencies += Libraries.scalatest) settings (pluginSettings: _*)
 
 
 /* Method */

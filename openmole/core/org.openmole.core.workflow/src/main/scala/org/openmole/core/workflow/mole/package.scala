@@ -22,9 +22,9 @@ import scala.language.implicitConversions
 package mole {
   trait MolePackage {
     def CSVHook = mole.CSVHook
-    def CSVFormat = mole.CSVHook.CSVFormat
+    def CSVOutputFormat = mole.CSVHook.CSVOutputFormat
 
-    type FileFormat[T] = mole.FileFormat[T]
+    type OutputFormat[T] = mole.OutputFormat[T]
     type FromContextHook = mole.FromContextHook
     type FromContextSource = mole.FromContextSource
   }

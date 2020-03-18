@@ -41,7 +41,7 @@ package object extension {
   def Context = org.openmole.core.context.Context
 
   type WritableOutput = org.openmole.core.workflow.tools.WritableOutput
-  def WritableOutput = org.openmole.core.workflow.tools.WritableOutput
+  val WritableOutput = org.openmole.core.workflow.tools.WritableOutput
 
   def ExpandedString = org.openmole.core.expansion.ExpandedString
 

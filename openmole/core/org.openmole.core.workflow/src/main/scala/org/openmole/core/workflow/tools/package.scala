@@ -46,7 +46,7 @@ package tools {
       def apply[S](s: S)(implicit expandable: Expandable[S, T]) = expandable.expand(s)
     }
 
-    type Display = WritableOutput.Display
+    type Display = tools.WritableOutput.Display
 
     def display(implicit outputRedirection: OutputRedirection): Display = outputRedirection.output
   }

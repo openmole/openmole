@@ -7,19 +7,19 @@ import org.openmole.core.context._
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder._
 
-trait FileFormat[T] {
+trait OutputFormat[T] {
   def write(format: T, output: WritableOutput, ps: Seq[Val[_]]): FromContext[Unit]
   def validate(format: T): FromContextHook.ValidateParameters ⇒ Seq[Throwable]
 }
 
 object FormattedFileHook {
 
-  def apply[T: FileFormat](
+  def apply[T: OutputFormat](
     format:  T,
     output:  WritableOutput,
     values:  Seq[Val[_]]    = Vector.empty,
     exclude: Seq[Val[_]]    = Vector.empty,
-    name:    Option[String] = None)(implicit valName: sourcecode.Name, definitionScope: DefinitionScope, fileFormat: FileFormat[T]): mole.FromContextHook =
+    name:    Option[String] = None)(implicit valName: sourcecode.Name, definitionScope: DefinitionScope, fileFormat: OutputFormat[T]): mole.FromContextHook =
 
     Hook(name getOrElse "FileFormatHook") { parameters ⇒
       import parameters._
