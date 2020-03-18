@@ -20,7 +20,7 @@ package org.openmole.plugin.method
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.workflow.mole
-import org.openmole.core.workflow.mole.CSVHook
+import org.openmole.core.workflow.mole.FormattedFileHook
 import org.openmole.core.workflow.tools.WritableOutput
 import org.openmole.plugin.domain.distribution._
 import org.openmole.plugin.domain.modifier._
@@ -35,26 +35,24 @@ package object directsampling {
   type Aggregation = AggregateTask.AggregateVal[_, _]
 
   implicit class DirectSamplingDSL(dsl: DSLContainer[DirectSampling]) extends DSLContainerHook(dsl) {
-    def hook(
-      output:     WritableOutput,
-      values:     Seq[Val[_]]                           = Vector.empty,
-      header:     OptionalArgument[FromContext[String]] = None,
-      arrayOnRow: Boolean                               = false): DSLContainer[DirectSampling] = {
+    def hook[T: FileFormat](
+      output: WritableOutput,
+      values: Seq[Val[_]]    = Vector.empty,
+      format: T              = CSVFormat()): DSLContainer[DirectSampling] = {
       implicit val defScope = dsl.scope
-      dsl hook CSVHook(output, values = values, header = header, arrayOnRow = arrayOnRow)
+      dsl hook FormattedFileHook(output = output, values = values, format = format)
     }
   }
 
   implicit class ReplicationDSL(dsl: DSLContainer[Replication]) extends DSLContainerHook(dsl) {
-    def hook(
+    def hook[T: FileFormat](
       output:      WritableOutput,
-      values:      Seq[Val[_]]                           = Vector.empty,
-      header:      OptionalArgument[FromContext[String]] = None,
-      arrayOnRow:  Boolean                               = false,
-      includeSeed: Boolean                               = false): DSLContainer[Replication] = {
+      values:      Seq[Val[_]]    = Vector.empty,
+      includeSeed: Boolean        = false,
+      format:      T              = CSVFormat()): DSLContainer[Replication] = {
       implicit val defScope = dsl.scope
       val exclude = if (!includeSeed) Seq(dsl.data.seed) else Seq()
-      dsl hook mole.CSVHook(output, values = values, exclude = exclude, header = header, arrayOnRow = arrayOnRow)
+      dsl hook FormattedFileHook(output = output, values = values, exclude = exclude, format = format)
     }
   }
 
