@@ -33,7 +33,10 @@ class Activator extends PluginInfoActivator {
     import org.openmole.core.pluginmanager.KeyWord._
 
     val keyWords: Vector[KeyWord] =
-      Vector()
+      Vector(
+        TaskKeyWord(objectName(JSONHook)),
+        OtherKeyWord(objectName(JSONOutputFormat))
+      )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
     ConfigurationInfo.register(

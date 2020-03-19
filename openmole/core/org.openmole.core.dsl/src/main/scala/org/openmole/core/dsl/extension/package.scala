@@ -15,6 +15,7 @@ package object extension {
 
   type Hook = org.openmole.core.workflow.mole.FromContextHook
   def Hook = org.openmole.core.workflow.mole.Hook
+  def FormattedFileHook = org.openmole.core.workflow.mole.FormattedFileHook
 
   type Source = org.openmole.core.workflow.mole.Source
   type FromContextSource = org.openmole.core.workflow.mole.FromContextSource

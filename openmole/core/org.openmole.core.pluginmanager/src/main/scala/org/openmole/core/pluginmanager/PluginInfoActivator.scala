@@ -81,6 +81,7 @@ object KeyWord {
   case class SamplingKeyWord(name: String) extends KeyWord
   case class WordKeyWord(name: String) extends KeyWord
   case class DomainKeyWord(name: String) extends KeyWord
+  case class OtherKeyWord(name: String) extends KeyWord
 }
 
 trait PluginInfoActivator extends BundleActivator {
