@@ -31,11 +31,10 @@ object CSVHook {
   object CSVOutputFormat {
 
     implicit def format: OutputFormat[CSVOutputFormat] = new OutputFormat[CSVOutputFormat] {
-      override def write(format: CSVOutputFormat, output: WritableOutput, ps: Seq[Val[_]]): FromContext[Unit] = FromContext { p ⇒
+      override def write(format: CSVOutputFormat, output: WritableOutput, variables: Seq[Variable[_]]): FromContext[Unit] = FromContext { p ⇒
         import p._
 
-        val vs = ps.map(context(_))
-        def headerLine = format.header.map(_.from(context)) getOrElse csv.header(ps, vs, format.arrayOnRow)
+        def headerLine = format.header.map(_.from(context)) getOrElse csv.header(variables.map(_.prototype), variables, format.arrayOnRow)
 
         output match {
           case WritableOutput.FileValue(file) ⇒
@@ -44,12 +43,12 @@ object CSVHook {
 
             val h = if (f.isEmpty) Some(headerLine) else None
 
-            if (create) f.atomicWithPrintStream { ps ⇒ csv.writeVariablesToCSV(ps, h, vs, format.arrayOnRow) }
-            else f.withPrintStream(append = true, create = true) { ps ⇒ csv.writeVariablesToCSV(ps, h, vs, format.arrayOnRow) }
+            if (create) f.atomicWithPrintStream { ps ⇒ csv.writeVariablesToCSV(ps, h, variables.map(_.value), format.arrayOnRow) }
+            else f.withPrintStream(append = true, create = true) { ps ⇒ csv.writeVariablesToCSV(ps, h, variables.map(_.value), format.arrayOnRow) }
 
           case WritableOutput.PrintStreamValue(ps) ⇒
             val header = Some(headerLine)
-            csv.writeVariablesToCSV(ps, header, vs, format.arrayOnRow)
+            csv.writeVariablesToCSV(ps, header, variables, format.arrayOnRow)
         }
       }
 

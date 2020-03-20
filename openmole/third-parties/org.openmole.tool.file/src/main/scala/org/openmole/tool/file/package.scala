@@ -431,9 +431,9 @@ package file {
 
       def atomicWithPrintStream[T](f: PrintStream ⇒ T) = {
         file.createParentDirectory
-        val tmpFile = java.io.File.createTempFile("printstream", ".tmp", file.getParentFile)
+        val tmpFile = java.io.File.createTempFile("stream", ".tmp", file.getParentFile)
         try {
-          val printStream = new PrintStream(file.bufferedOutputStream())
+          val printStream = new PrintStream(tmpFile.bufferedOutputStream())
           try f(printStream)
           finally printStream.close()
         }
