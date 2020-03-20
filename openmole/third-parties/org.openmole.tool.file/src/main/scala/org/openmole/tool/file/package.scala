@@ -405,9 +405,14 @@ package file {
         finally lockFile.delete()
       }
 
-      def bufferedInputStream = new BufferedInputStream(new FileInputStream(file))
+      def bufferedInputStream = new BufferedInputStream(Files.newInputStream(file))
 
-      def bufferedOutputStream(append: Boolean = false) = new BufferedOutputStream(new FileOutputStream(file, append))
+      private def writeOptions(append: Boolean) = {
+        import StandardOpenOption._
+        if (append) Seq(CREATE, APPEND, WRITE) else Seq(CREATE, TRUNCATE_EXISTING, WRITE)
+      }
+
+      def bufferedOutputStream(append: Boolean = false) = new BufferedOutputStream(Files.newOutputStream(file.toPath, writeOptions(append): _*))
 
       def gzippedBufferedInputStream = new GZIPInputStream(bufferedInputStream)
 
@@ -428,9 +433,9 @@ package file {
 
       def withInputStream[T] = withClosable[InputStream, T](bufferedInputStream)(_)
 
-      def withReader[T] = withClosable[Reader, T](new InputStreamReader(bufferedInputStream))(_)
+      def withReader[T] = withClosable[Reader, T](Files.newBufferedReader(file.toPath))(_)
 
-      def withWriter[T](append: Boolean = false) = withClosable[Writer, T](new OutputStreamWriter(bufferedOutputStream(append)))(_)
+      def withWriter[T](append: Boolean = false) = withClosable[Writer, T](Files.newBufferedWriter(file.toPath, writeOptions(append = append): _*))(_)
 
       def withDirectoryStream[T](filter: Option[java.nio.file.DirectoryStream.Filter[Path]] = None) = {
         def open =
