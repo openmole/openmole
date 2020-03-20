@@ -79,7 +79,7 @@ object FileSerialisation {
           }
           else {
             val dest = newFile.newFile("fileFromArchive", ".bin")
-            dest.createParentDir
+            dest.createParentDirectory
             if (exists) fromArchive.move(dest)
             else dest.delete
             dest

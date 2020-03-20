@@ -27,6 +27,7 @@ object JSONOutputFormat {
     }
 
     override def validate(format: JSONOutputFormat): FromContextHook.ValidateParameters ⇒ Seq[Throwable] = { p ⇒ Seq() }
+    override def extension = ".json"
   }
 
 }

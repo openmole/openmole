@@ -87,7 +87,7 @@ object CopyFileHook {
       val from = context(filePrototype)
       val to = destination.from(context)
 
-      to.createParentDir
+      to.createParentDirectory
       val ret: Option[Variable[File]] =
         if (options.move) {
           from.realFile.move(to)

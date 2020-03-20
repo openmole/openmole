@@ -384,7 +384,7 @@ package file {
         }
       }
 
-      def createParentDir = wrapError {
+      def createParentDirectory = wrapError {
         file.getCanonicalFile.getParentFileSafe.mkdirs
       }
 
@@ -425,8 +425,20 @@ package file {
       def withOutputStream[T] = withClosable[OutputStream, T](bufferedOutputStream())(_)
 
       def withPrintStream[T](append: Boolean = false, create: Boolean = false) = {
-        if (create) file.createParentDir
+        if (create) file.createParentDirectory
         withClosable[PrintStream, T](new PrintStream(file.bufferedOutputStream(append = append))) _
+      }
+
+      def atomicWithPrintStream[T](f: PrintStream ⇒ T) = {
+        file.createParentDirectory
+        val tmpFile = java.io.File.createTempFile("printstream", ".tmp", file.getParentFile)
+        try {
+          val printStream = new PrintStream(file.bufferedOutputStream())
+          try f(printStream)
+          finally printStream.close()
+        }
+        finally Files.move(tmpFile.toPath, file.toPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
+
       }
 
       def withFileOutputStream[T] = withClosable[FileOutputStream, T](new FileOutputStream(file))(_)

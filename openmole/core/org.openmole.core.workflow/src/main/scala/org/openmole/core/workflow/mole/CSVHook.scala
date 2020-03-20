@@ -44,7 +44,7 @@ object CSVHook {
 
             val h = if (f.isEmpty) Some(headerLine) else None
 
-            if (create) f.withPrintStream(create = true) { ps ⇒ csv.writeVariablesToCSV(ps, h, vs, format.arrayOnRow) }
+            if (create) f.atomicWithPrintStream { ps ⇒ csv.writeVariablesToCSV(ps, h, vs, format.arrayOnRow) }
             else f.withPrintStream(append = true, create = true) { ps ⇒ csv.writeVariablesToCSV(ps, h, vs, format.arrayOnRow) }
 
           case WritableOutput.PrintStreamValue(ps) ⇒
@@ -57,6 +57,8 @@ object CSVHook {
         import p._
         format.header.option.toSeq.flatMap(_.validate(inputs))
       }
+
+      override def extension: String = ".csv"
     }
   }
 

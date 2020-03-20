@@ -46,7 +46,7 @@ object ABCHook {
                       thetai.map { _.formatted("%.12f") }.mkString(",")
                 }.mkString("\n")
 
-            file.createParentDir
+            file.createParentDirectory
 
             file.content = header ++ "\n" ++ data
 

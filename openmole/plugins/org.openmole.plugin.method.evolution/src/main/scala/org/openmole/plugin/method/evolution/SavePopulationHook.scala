@@ -28,7 +28,7 @@ object SavePopulationHook {
       t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype)).from(context)
   }
 
-  def hook(t: EvolutionWorkflow, output: WritableOutput, frequency: OptionalArgument[Long])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def hook[F](t: EvolutionWorkflow, output: WritableOutput, frequency: OptionalArgument[Long], format: F = CSVOutputFormat(overwrite = true))(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F]) = {
     Hook("SavePopulationHook") { p ⇒
       import p._
       import org.openmole.core.csv
@@ -42,12 +42,13 @@ object SavePopulationHook {
         }
 
       if (save) {
+
         val values = resultVariables(t).from(context).map(_.value)
         def headerLine = csv.header(resultVariables(t).from(context).map(_.prototype.array), values)
 
         output match {
           case WritableOutput.FileValue(dir) ⇒
-            (dir / ExpandedString("population${" + t.generationPrototype.name + "}.csv")).from(context).withPrintStream(create = true) { ps ⇒
+            (dir / ExpandedString("population${" + t.generationPrototype.name + "}.csv")).from(context).withPrintStream(overwrite = false, create = true) { ps ⇒
               csv.writeVariablesToCSV(
                 ps,
                 Some(headerLine),
@@ -65,7 +66,7 @@ object SavePopulationHook {
       }
 
       context
-    } set (inputs += (t.populationPrototype, t.statePrototype))
+    } validate { p ⇒ outputFormat.validate(format)(p) } set (inputs += (t.populationPrototype, t.statePrototype))
 
   }
 

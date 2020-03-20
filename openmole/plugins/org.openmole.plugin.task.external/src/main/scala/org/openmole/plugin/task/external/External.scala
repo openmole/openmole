@@ -129,7 +129,7 @@ object External {
   }
 
   private def copyFile(f: DeployedFile, to: File) = {
-    to.createParentDir
+    to.createParentDirectory
 
     if (f.link) to.createLinkTo(f.file.getCanonicalFile)
     else {

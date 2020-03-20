@@ -65,7 +65,7 @@ object MatrixHook {
     import parameters._
 
     val f = file.from(context)
-    f.createParentDir
+    f.createParentDirectory
     f.content = ""
 
     for {

@@ -34,7 +34,7 @@ object AppendToFileHook {
     Hook("AppendToFileHook") { p ⇒
       import p._
       val f = file.from(context)
-      f.createParentDir
+      f.createParentDirectory
       // FIXME lock may not be necessary anymore - see you in 2020
       f.withLock(_.append(content.from(context)))
       context

@@ -10,6 +10,7 @@ import org.openmole.core.workflow.builder._
 trait OutputFormat[T] {
   def write(format: T, output: WritableOutput, ps: Seq[Val[_]]): FromContext[Unit]
   def validate(format: T): FromContextHook.ValidateParameters ⇒ Seq[Throwable]
+  def extension: String
 }
 
 object FormattedFileHook {
