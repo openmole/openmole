@@ -40,9 +40,13 @@ object CSVHook {
         output match {
           case WritableOutput.FileValue(file) ⇒
             val f = file.from(context)
-            if (format.overwrite && !f.isEmpty) f.delete()
+            val create = format.overwrite || f.isEmpty
+
             val h = if (f.isEmpty) Some(headerLine) else None
-            f.withPrintStream(append = true, create = true) { ps ⇒ csv.writeVariablesToCSV(ps, h, vs, format.arrayOnRow) }
+
+            if (create) f.withPrintStream(create = true) { ps ⇒ csv.writeVariablesToCSV(ps, h, vs, format.arrayOnRow) }
+            else f.withPrintStream(append = true, create = true) { ps ⇒ csv.writeVariablesToCSV(ps, h, vs, format.arrayOnRow) }
+
           case WritableOutput.PrintStreamValue(ps) ⇒
             val header = Some(headerLine)
             csv.writeVariablesToCSV(ps, header, vs, format.arrayOnRow)

@@ -16,15 +16,15 @@ object MorrisHook {
           val dir = dirFC.from(context)
           dir.mkdirs()
 
-          (dir / "mu.csv").withPrintStream(overwrite = true) { ps ⇒
+          (dir / "mu.csv").withPrintStream() { ps ⇒
             Sensitivity.writeResults(ps, inputs, dsl.data.outputs, Morris.mu(_, _)).from(context)
           }
 
-          (dir / "muStar.csv").withPrintStream(overwrite = true) { ps ⇒
+          (dir / "muStar.csv").withPrintStream() { ps ⇒
             Sensitivity.writeResults(ps, inputs, dsl.data.outputs, Morris.muStar(_, _)).from(context)
           }
 
-          (dir / "sigma.csv").withPrintStream(overwrite = true) { ps ⇒
+          (dir / "sigma.csv").withPrintStream() { ps ⇒
             Sensitivity.writeResults(ps, inputs, dsl.data.outputs, Morris.sigma(_, _)).from(context)
           }
         case WritableOutput.PrintStreamValue(ps) ⇒

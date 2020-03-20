@@ -15,11 +15,11 @@ object SaltelliHook {
         case WritableOutput.FileValue(dirFC) ⇒
           val dir = dirFC.from(context)
 
-          (dir / "firstOrderIndices.csv").withPrintStream(overwrite = true, create = true) { ps ⇒
+          (dir / "firstOrderIndices.csv").withPrintStream(create = true) { ps ⇒
             Sensitivity.writeResults(ps, inputs, dsl.data.outputs, Saltelli.firstOrder(_, _)).from(context)
           }
 
-          (dir / "totalOrderIndices.csv").withPrintStream(overwrite = true) { ps ⇒
+          (dir / "totalOrderIndices.csv").withPrintStream() { ps ⇒
             Sensitivity.writeResults(ps, inputs, dsl.data.outputs, Saltelli.totalOrder(_, _)).from(context)
           }
         case WritableOutput.PrintStreamValue(ps) ⇒
