@@ -28,25 +28,34 @@ object SavePopulationHook {
       t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype)).from(context)
   }
 
-  def hook[F](t: EvolutionWorkflow, output: WritableOutput, frequency: OptionalArgument[Long], format: F)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F]) = {
+  def hook[F](t: EvolutionWorkflow, output: WritableOutput, frequency: Option[Long], last: Boolean, format: F)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F]) = {
     Hook("SavePopulationHook") { p ⇒
       import p._
 
-      def save =
-        frequency.option match {
-          case None ⇒ true
-          case Some(f) ⇒
-            val generation = context(t.generationPrototype)
-            (generation % f) == 0
+      def saveFile(dir: FromContext[File]) =
+        (frequency, last) match {
+          case (_, true) ⇒ Some(dir / ExpandedString("population" + outputFormat.extension))
+          case (None, _) ⇒ Some(dir / ExpandedString("population${" + t.generationPrototype.name + "}" + outputFormat.extension))
+          case (Some(f), _) if context(t.generationPrototype) % f == 0 ⇒
+            Some(dir / ExpandedString("population${" + t.generationPrototype.name + "}" + outputFormat.extension))
+          case _ ⇒ None
         }
 
-      if (save) {
-        output match {
-          case WritableOutput.FileValue(dir) ⇒
-            val outputFile = dir / ExpandedString("population${" + t.generationPrototype.name + "}" + outputFormat.extension)
-            outputFormat.write(format, outputFile, resultVariables(t).from(context)).from(context)
-          case o ⇒ outputFormat.write(format, o, resultVariables(t).from(context)).from(context)
-        }
+      output match {
+        case WritableOutput.FileValue(dir) ⇒
+          saveFile(dir) match {
+            case Some(outputFile) ⇒ outputFormat.write(format, outputFile.from(context), resultVariables(t).from(context)).from(context)
+            case None             ⇒
+          }
+        case o ⇒
+          val save =
+            (frequency, last) match {
+              case (_, true)    ⇒ true
+              case (Some(f), _) ⇒ context(t.generationPrototype) % f == 0
+              case _            ⇒ false
+            }
+
+          if (save) outputFormat.write(format, o, resultVariables(t).from(context)).from(context)
       }
 
       context
@@ -54,9 +63,9 @@ object SavePopulationHook {
 
   }
 
-  def apply[T, F: OutputFormat](algorithm: T, output: WritableOutput, frequency: OptionalArgument[Long] = None, format: F = CSVOutputFormat(overwrite = true))(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def apply[T, F: OutputFormat](algorithm: T, output: WritableOutput, frequency: OptionalArgument[Long] = None, last: Boolean = false, format: F = CSVOutputFormat(overwrite = true))(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
     val t = wfi(algorithm)
-    hook(t, output, frequency, format)
+    hook(t, output, frequency.option, last = last, format = format)
   }
 
 }
