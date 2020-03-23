@@ -145,16 +145,21 @@ trait RESTAPI extends ScalatraServlet
       else {
         val gzOs = response.getOutputStream.toGZ
 
-        if (file.isDirectory) {
-          val os = new TarOutputStream(gzOs)
-          contentType = "application/octet-stream"
-          response.setHeader("Content-Disposition", "attachment; filename=" + "archive.tgz")
-          os.archive(file)
-          os.close
+        try {
+          if (file.isDirectory) {
+            val os = new TarOutputStream(gzOs)
+            contentType = "application/octet-stream"
+            response.setHeader("Content-Disposition", "attachment; filename=" + "archive.tgz")
+            os.archive(file)
+            os.close
+          }
+          else {
+            contentType = "application/octet-stream"
+            response.setHeader("Content-Disposition", "attachment; filename=" + file.getName + ".gz")
+            file.copy(gzOs)
+          }
         }
-        else {
-          file.copy(gzOs)
-        }
+        finally gzOs.flushClose
 
         Ok()
       }
