@@ -65,14 +65,14 @@ The API of exposes the following routes to submit and manage executions:
             } ],
             "modified" : 1584980668517,
             "type" : "directory"
-           """)
+           }""")
           The fields contains the following info:
           @ul
             @li{@b{name}} - the name of the file
             @li{@b{type}} - the type of the file. It can be (directory or file)
             @li{@b{modified}} - the date of the last modification of this file
             @li{@b{size}} - mentioned only for the entry of type "file". It contains the size of the file.
-        }
+    }
     @li{@b{DELETE /job/:id} - cancel and remove an execution from the server. It has the following parameters:
       @ul
         @li{@b{id} - the id of the mole execution}
