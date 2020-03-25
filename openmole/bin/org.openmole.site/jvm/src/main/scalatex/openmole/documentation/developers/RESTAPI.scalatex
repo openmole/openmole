@@ -47,31 +47,31 @@ The API of exposes the following routes to submit and manage executions:
     @li{@b{GET /job/:id/workDirectory/:file} - download a file or a directory from the server. It returns the gunziped content of the file or a tar.gz archive of the directory. It has the following parameters:
       @ul
         @li{@b{id} - the id of the mole execution}
-        @li{@b{path}} - the path of the file to download}
+        @li{@b{path} - the path of the file to download}
     }
     @li{@b{PROPFIND /job/:id/workDirectory/:file} - get info of a file or a directory from the server. It has the following parameters:
           @ul
             @li{@b{id} - the id of the mole execution}
-            @li{@b{path}} - the path of the file to download}
-            @li{@b{last}} - this parameter is optional - an integer to list only the last n files.
+            @li{@b{path} - the path of the file to download}
+            @li{@b{last} - this parameter is optional - an integer to list only the last n files.}
           When successful, it returns a listing of the directory, that look like this:
-          @hl.plain("""
-          {
-            "entries" : [ {
-              "name" : "Pi.oms",
-              "size" : 909,
-              "modified" : 1584980668517,
-              "type" : "file"
-            } ],
-            "modified" : 1584980668517,
-            "type" : "directory"
-           }""")
+          @hl.plain("""{
+  "entries" : [ {
+    "name" : "Pi.oms",
+    "size" : 909,
+    "modified" : 1584980668517,
+    "type" : "file"
+  } ],
+  "modified" : 1584980668517,
+  "type" : "directory"
+}""")
+
           The fields contains the following info:
           @ul
-            @li{@b{name}} - the name of the file
-            @li{@b{type}} - the type of the file. It can be (directory or file)
-            @li{@b{modified}} - the date of the last modification of this file
-            @li{@b{size}} - mentioned only for the entry of type "file". It contains the size of the file.
+            @li{@b{name} - the name of the file}
+            @li{@b{type} - the type of the file. It can be (directory or file)}
+            @li{@b{modified} - the date of the last modification of this file}
+            @li{@b{size} - mentioned only for the entry of type "file". It contains the size of the file.}
     }
     @li{@b{DELETE /job/:id} - cancel and remove an execution from the server. It has the following parameters:
       @ul
