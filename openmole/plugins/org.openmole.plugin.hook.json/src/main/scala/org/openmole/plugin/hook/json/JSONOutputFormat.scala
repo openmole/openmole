@@ -20,7 +20,8 @@ object JSONOutputFormat {
           file.from(context).withPrintStream(append = false, create = true) { ps ⇒
             ps.print(compact(render(variablesToJValue(variables))))
           }
-        case WritableOutput.PrintStreamValue(ps) ⇒
+        case WritableOutput.StreamValue(ps, prelude) ⇒
+          prelude.foreach(ps.print)
           ps.println(pretty(render(variablesToJValue(variables))))
       }
     }

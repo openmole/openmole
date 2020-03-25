@@ -20,6 +20,7 @@ package object json {
       case v: Double       ⇒ JDouble(v)
       case v: Array[_]     ⇒ JArray(v.map(toJSONValue).toList)
       case v: java.io.File ⇒ JString(v.getAbsolutePath)
+      case v: Seq[_]       ⇒ JArray(v.map(toJSONValue).toList)
       case _               ⇒ throw new UserBadDataError(s"Value $v of type ${v.getClass} is not convertible to JSON")
     }
   }

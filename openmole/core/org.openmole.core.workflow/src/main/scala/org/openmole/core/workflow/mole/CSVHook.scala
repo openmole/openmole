@@ -21,7 +21,7 @@ object CSVHook {
     arrayOnRow: Boolean                               = false,
     overwrite:  Boolean                               = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): mole.FromContextHook =
     FormattedFileHook(
-      format = CSVOutputFormat(header = header, arrayOnRow = arrayOnRow, overwrite = overwrite),
+      format = CSVOutputFormat(header = header, arrayOnRow = arrayOnRow, append = !overwrite),
       output = output,
       values = values,
       exclude = exclude,
@@ -39,14 +39,15 @@ object CSVHook {
         output match {
           case WritableOutput.FileValue(file) ⇒
             val f = file.from(context)
-            val create = format.overwrite || f.isEmpty
+            val create = !format.append || f.isEmpty
 
             val h = if (f.isEmpty) Some(headerLine) else None
 
             if (create) f.atomicWithPrintStream { ps ⇒ csv.writeVariablesToCSV(ps, h, variables.map(_.value), format.arrayOnRow) }
             else f.withPrintStream(append = true, create = true) { ps ⇒ csv.writeVariablesToCSV(ps, h, variables.map(_.value), format.arrayOnRow) }
 
-          case WritableOutput.PrintStreamValue(ps) ⇒
+          case WritableOutput.StreamValue(ps, prelude) ⇒
+            prelude.foreach(ps.print)
             val header = Some(headerLine)
             csv.writeVariablesToCSV(ps, header, variables, format.arrayOnRow)
         }
@@ -64,6 +65,6 @@ object CSVHook {
   case class CSVOutputFormat(
     header:     OptionalArgument[FromContext[String]] = None,
     arrayOnRow: Boolean                               = false,
-    overwrite:  Boolean                               = false)
+    append:     Boolean                               = false)
 
 }

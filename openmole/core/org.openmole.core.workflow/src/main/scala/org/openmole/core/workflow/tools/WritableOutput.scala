@@ -25,12 +25,12 @@ object WritableOutput {
 
   implicit def fromFile(file: File) = FileValue(file)
   implicit def fromFileContext(file: FromContext[File]) = FileValue(file)
-  implicit def fromPrintStream(ps: PrintStream) = PrintStreamValue(ps)
+  implicit def fromPrintStream(ps: PrintStream) = StreamValue(ps)
 
   type Display = PrintStream
 
   case class FileValue(file: FromContext[File]) extends WritableOutput
-  case class PrintStreamValue(file: Display) extends WritableOutput
+  case class StreamValue(stream: Display, prelude: Option[String] = None) extends WritableOutput
 
   def file(writableOutput: WritableOutput) =
     writableOutput match {

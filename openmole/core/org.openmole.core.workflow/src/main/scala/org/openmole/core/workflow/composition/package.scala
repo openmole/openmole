@@ -141,7 +141,7 @@ package composition {
     def hook[F](
       output: WritableOutput,
       values: Seq[Val[_]]    = Vector.empty,
-      format: F              = CSVOutputFormat())(implicit definitionScope: DefinitionScope, fileFormat: OutputFormat[F]): TaskNode = hook(FormattedFileHook(output = output, values = values, format = format))
+      format: F              = CSVOutputFormat(append = true))(implicit definitionScope: DefinitionScope, fileFormat: OutputFormat[F]): TaskNode = hook(FormattedFileHook(output = output, values = values, format = format))
     def source(sources: Source*) = copy(sources = this.sources ++ sources)
   }
 
