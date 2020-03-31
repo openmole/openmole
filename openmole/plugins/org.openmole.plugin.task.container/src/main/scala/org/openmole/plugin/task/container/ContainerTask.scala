@@ -184,7 +184,7 @@ object ContainerTask {
     )
   }
 
-  def prepare(containerSystem: ContainerSystem, image: ContainerImage, install: Seq[String], volumes: Seq[(String, String)] = Seq.empty)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace) = {
+  def prepare(containerSystem: ContainerSystem, image: ContainerImage, install: Seq[String], volumes: Seq[(String, String)] = Seq.empty, errorDetail: Int ⇒ Option[String] = _ ⇒ None)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace) = {
     def cacheId(image: ContainerImage): Seq[String] =
       image match {
         case image: DockerImage ⇒ Seq(image.image, image.tag, image.registry)
@@ -197,26 +197,23 @@ object ContainerTask {
     val cacheDirectory = workspace.tmpDirectory /> "container" /> "cached" /> cacheKey
     val serializedFlatImage = cacheDirectory / "flatimage.bin"
 
-    //OutputManager.systemOutput.println("test " + serializedFlatImage + " " + serializedFlatImage.exists)
-
     cacheDirectory.withLockInDirectory {
       if (serializedFlatImage.exists) serializerService.deserialize[_root_.container.FlatImage](serializedFlatImage)
       else {
         val containerDirectory = cacheDirectory / "fs"
         val img = localImage(image, containerDirectory)
-        val installedImage = executeInstall(containerSystem, img, install, volumes = volumes)
+        val installedImage = executeInstall(containerSystem, img, install, volumes = volumes, errorDetail = errorDetail)
         serializerService.serialize(installedImage, serializedFlatImage)
-        //OutputManager.systemOutput.println("created " + serializedFlatImage + " " + serializedFlatImage.exists)
         installedImage
       }
     }
   }
 
-  def executeInstall(containerSystem: ContainerSystem, image: _root_.container.FlatImage, install: Seq[String], volumes: Seq[(String, String)])(implicit tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection) =
+  def executeInstall(containerSystem: ContainerSystem, image: _root_.container.FlatImage, install: Seq[String], volumes: Seq[(String, String)], errorDetail: Int ⇒ Option[String])(implicit tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection) =
     if (install.isEmpty) image
     else {
       val retCode = runCommandInContainer(containerSystem, image, install, output = outputRedirection.output, error = outputRedirection.error, volumes = volumes)
-      if (retCode != 0) throw new UserBadDataError(s"Process exited a non 0 return code ($retCode)")
+      if (retCode != 0) throw new UserBadDataError(s"Process exited a non 0 return code ($retCode)" + errorDetail(retCode).map(m ⇒ s": $m").getOrElse(""))
       image
     }
 
