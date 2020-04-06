@@ -33,6 +33,7 @@ import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.alert.BannerAlert
 import org.openmole.gui.client.core.alert.BannerAlert.BannerMessage
 import org.openmole.gui.client.core.files.TreeNodeTabs
+import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.ExecutionInfo.Failed
 import org.openmole.gui.ext.tool.client.Utils
@@ -219,7 +220,7 @@ class ExecutionPanel {
               VarCell(tags.span(tags.span(durationString).tooltip("Execution time")), 4),
               VarCell(tags.span(subLink(SubCompile, execID, execStatus, defaultModifier = executionState(info)).tooltip("Execution state")), 5),
               VarCell(tags.span(subLink(SubEnvironment, execID, "Executions").tooltip("Computation environment details")), 6),
-              VarCell(tags.span(subLink(SubOutput, execID, glyphicon = glyph_list).tooltip("Standard output")), 7),
+              VarCell(tags.span(subLink(SubOutput, execID, glyphicon = OMTags.glyph_eye_open).tooltip("Hook display & standard output")), 7),
               FixedCell(tags.span(tags.span(glyph_remove +++ ms("removeExecution"), onclick := {
                 () ⇒
                   cancelExecution(execID)
