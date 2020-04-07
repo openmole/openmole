@@ -46,7 +46,8 @@ object GAMATask {
     experiment:             String,
     install:                Seq[String],
     installContainerSystem: ContainerSystem,
-    version:                String)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, _workspace: Workspace) = {
+    version:                String,
+    clearCache:             Boolean)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, _workspace: Workspace) = {
 
     val (modelName, volumesValue) = volumes(workspace, model)
 
@@ -59,7 +60,7 @@ object GAMATask {
         case _ => None
       }
 
-    ContainerTask.prepare(installContainerSystem, gamaImage(version), installCommands, volumesValue.map { case (lv, cv) ⇒ lv.getAbsolutePath -> cv }, error)
+    ContainerTask.prepare(installContainerSystem, gamaImage(version), installCommands, volumesValue.map { case (lv, cv) ⇒ lv.getAbsolutePath -> cv }, error, clearCache = clearCache)
   }
 
   def apply(
@@ -78,6 +79,7 @@ object GAMATask {
     environmentVariables:   Seq[EnvironmentVariable]      = Vector.empty,
     hostFiles:              Seq[HostFile]                 = Vector.empty,
     workDirectory:          OptionalArgument[String]      = None,
+    clearContainerCache:    Boolean                       = false,
     containerSystem:        ContainerSystem               = ContainerSystem.default,
     installContainerSystem: ContainerSystem               = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): GAMATask = {
 
@@ -88,7 +90,7 @@ object GAMATask {
       case _ ⇒
     }
 
-    val preparedImage = prepare(workspace, model, experiment, install, installContainerSystem, version)
+    val preparedImage = prepare(workspace, model, experiment, install, installContainerSystem, version, clearCache = clearContainerCache)
 
     GAMATask(
       workspace = workspace,

@@ -60,6 +60,15 @@ package container {
 
   }
 
+  object DockerImage {
+    def toRegistryImage(image: DockerImage) =
+      _root_.container.RegistryImage(
+        name = image.image,
+        tag = image.tag,
+        registry = image.registry
+      )
+  }
+
   sealed trait ContainerImage
   case class DockerImage(image: String, tag: String = "latest", registry: String = "https://registry-1.docker.io") extends ContainerImage
   case class SavedDockerImage(file: java.io.File, compressed: Boolean) extends ContainerImage

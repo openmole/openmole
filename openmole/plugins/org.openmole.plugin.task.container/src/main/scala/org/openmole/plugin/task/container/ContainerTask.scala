@@ -69,11 +69,7 @@ object ContainerTask {
     import _root_.container._
 
     ImageDownloader.downloadContainerImage(
-      _root_.container.RegistryImage(
-        imageName = image.image,
-        tag = image.tag,
-        registry = image.registry
-      ),
+      DockerImage.toRegistryImage(image),
       repository,
       timeout = preference(RegistryTimeout),
       retry = Some(preference(RegistryRetryOnError)),
@@ -162,6 +158,7 @@ object ContainerTask {
     stdOut:                 OptionalArgument[Val[String]]                      = None,
     stdErr:                 OptionalArgument[Val[String]]                      = None,
     reuseContainer:         Boolean                                            = true,
+    clearCache:             Boolean                                            = false,
     containerPoolKey:       CacheKey[WithInstance[_root_.container.FlatImage]] = CacheKey())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, tmpDirectory: TmpDirectory, networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, outputRedirection: OutputRedirection, serializerService: SerializerService) = {
     new ContainerTask(
       containerSystem,
@@ -184,7 +181,7 @@ object ContainerTask {
     )
   }
 
-  def prepare(containerSystem: ContainerSystem, image: ContainerImage, install: Seq[String], volumes: Seq[(String, String)] = Seq.empty, errorDetail: Int ⇒ Option[String] = _ ⇒ None)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace) = {
+  def prepare(containerSystem: ContainerSystem, image: ContainerImage, install: Seq[String], volumes: Seq[(String, String)] = Seq.empty, errorDetail: Int ⇒ Option[String] = _ ⇒ None, clearCache: Boolean = false)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace) = {
     def cacheId(image: ContainerImage): Seq[String] =
       image match {
         case image: DockerImage ⇒ Seq(image.image, image.tag, image.registry)
@@ -198,10 +195,16 @@ object ContainerTask {
     val serializedFlatImage = cacheDirectory / "flatimage.bin"
 
     cacheDirectory.withLockInDirectory {
+      val containerDirectory = cacheDirectory / "fs"
+
+      if (clearCache) {
+        serializedFlatImage.delete
+        containerDirectory.recursiveDelete
+      }
+
       if (serializedFlatImage.exists) serializerService.deserialize[_root_.container.FlatImage](serializedFlatImage)
       else {
-        val containerDirectory = cacheDirectory / "fs"
-        val img = localImage(image, containerDirectory)
+        val img = localImage(image, containerDirectory, clearCache = clearCache)
         val installedImage = executeInstall(containerSystem, img, install, volumes = volumes, errorDetail = errorDetail)
         serializerService.serialize(installedImage, serializedFlatImage)
         installedImage
@@ -217,9 +220,10 @@ object ContainerTask {
       image
     }
 
-  def localImage(image: ContainerImage, containerDirectory: File)(implicit networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, tmpDirectory: TmpDirectory) =
+  def localImage(image: ContainerImage, containerDirectory: File, clearCache: Boolean)(implicit networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, tmpDirectory: TmpDirectory) =
     image match {
       case image: DockerImage ⇒
+        if (clearCache) _root_.container.ImageDownloader.imageDirectory(repositoryDirectory(workspace), DockerImage.toRegistryImage(image)).recursiveDelete
         val savedImage = downloadImage(image, repositoryDirectory(workspace))
         _root_.container.ImageBuilder.flattenImage(savedImage, containerDirectory)
       case image: SavedDockerImage ⇒
