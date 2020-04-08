@@ -43,7 +43,8 @@ object NetLogo5Task {
   def workspace(
     workspace:            File,
     script:               String,
-    launchingCommands:    Seq[FromContext[String]],
+    go:                   Seq[FromContext[String]],
+    setup:                Seq[FromContext[String]],
     seed:                 OptionalArgument[Val[Int]],
     ignoreError:          Boolean,
     reuseWorkspace:       Boolean,
@@ -52,7 +53,8 @@ object NetLogo5Task {
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): NetLogo5Task =
     withDefaultArgs(
       workspace = Workspace.Directory(directory = workspace, script = script, name = workspace.getName),
-      launchingCommands = launchingCommands,
+      go = go,
+      setup = setup,
       seed = seed,
       ignoreError = ignoreError,
       reuseWorkspace = reuseWorkspace,
@@ -64,7 +66,8 @@ object NetLogo5Task {
 
   def file(
     script:               File,
-    launchingCommands:    Seq[FromContext[String]],
+    go:                   Seq[FromContext[String]],
+    setup:                Seq[FromContext[String]],
     seed:                 OptionalArgument[Val[Int]],
     ignoreError:          Boolean,
     reuseWorkspace:       Boolean,
@@ -73,7 +76,8 @@ object NetLogo5Task {
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): NetLogo5Task =
     withDefaultArgs(
       workspace = Workspace.Script(script = script, name = script.getName),
-      launchingCommands = launchingCommands,
+      go = go,
+      setup = setup,
       seed = seed,
       ignoreError = ignoreError,
       reuseWorkspace = reuseWorkspace,
@@ -85,7 +89,8 @@ object NetLogo5Task {
 
   def apply(
     script:               File,
-    launchingCommands:    Seq[FromContext[String]],
+    go:                   Seq[FromContext[String]],
+    setup:                Seq[FromContext[String]]   = Seq(),
     embedWorkspace:       Boolean                    = false,
     seed:                 OptionalArgument[Val[Int]] = None,
     ignoreError:          Boolean                    = false,
@@ -93,12 +98,13 @@ object NetLogo5Task {
     ignoreErrorOnDispose: Boolean                    = false,
     switch3d:             Boolean                    = false
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): NetLogo5Task =
-    if (embedWorkspace) workspace(script.getCanonicalFile.getParentFile, script.getName, launchingCommands, seed = seed, ignoreError = ignoreError, reuseWorkspace = reuseWorkspace, ignoreErrorOnDispose = ignoreErrorOnDispose, switch3d = switch3d)
-    else file(script, launchingCommands, seed = seed, ignoreError = ignoreError, reuseWorkspace = reuseWorkspace, ignoreErrorOnDispose = ignoreErrorOnDispose, switch3d = switch3d)
+    if (embedWorkspace) workspace(script.getCanonicalFile.getParentFile, script.getName, go = go, setup = setup, seed = seed, ignoreError = ignoreError, reuseWorkspace = reuseWorkspace, ignoreErrorOnDispose = ignoreErrorOnDispose, switch3d = switch3d)
+    else file(script, go = go, setup = setup, seed = seed, ignoreError = ignoreError, reuseWorkspace = reuseWorkspace, ignoreErrorOnDispose = ignoreErrorOnDispose, switch3d = switch3d)
 
   private def withDefaultArgs(
     workspace:            NetLogoTask.Workspace,
-    launchingCommands:    Seq[FromContext[String]],
+    go:                   Seq[FromContext[String]],
+    setup:                Seq[FromContext[String]],
     seed:                 Option[Val[Int]],
     ignoreError:          Boolean,
     reuseWorkspace:       Boolean,
@@ -111,7 +117,8 @@ object NetLogo5Task {
       info = InfoConfig(),
       mapped = MappedInputOutputConfig(),
       workspace = workspace,
-      launchingCommands = launchingCommands,
+      go = go,
+      setup = setup,
       seed = seed,
       ignoreError = ignoreError,
       reuseWorkspace = reuseWorkspace,
@@ -127,7 +134,8 @@ object NetLogo5Task {
   info:                 InfoConfig,
   mapped:               MappedInputOutputConfig,
   workspace:            NetLogoTask.Workspace,
-  launchingCommands:    Seq[FromContext[String]],
+  go:                   Seq[FromContext[String]],
+  setup:                Seq[FromContext[String]],
   seed:                 Option[Val[Int]],
   ignoreError:          Boolean,
   reuseWorkspace:       Boolean,

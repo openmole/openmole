@@ -300,7 +300,8 @@ trait NetLogoTask extends Task with ValidateTask {
    * Commands to run
    * @return
    */
-  def launchingCommands: Seq[FromContext[String]]
+  def go: Seq[FromContext[String]]
+  def setup: Seq[FromContext[String]]
 
   /**
    * Mapping of prototypes
@@ -320,7 +321,7 @@ trait NetLogoTask extends Task with ValidateTask {
   override def validate = Validate { p ⇒
     import p._
     val allInputs = External.PWD :: inputs.toList
-    launchingCommands.flatMap(_.validate(allInputs)) ++
+    go.flatMap(_.validate(allInputs)) ++
       External.validate(external)(allInputs).apply ++
       NetLogoTask.validateNetLogoInputTypes(mapped.inputs.map(_.v))
   }
@@ -338,6 +339,8 @@ trait NetLogoTask extends Task with ValidateTask {
 
       NetLogoTask.executeNetLogo(instance.netLogo, "clear-all")
 
+      for (cmd ← setup.map(_.from(context))) NetLogoTask.executeNetLogo(instance.netLogo, cmd, ignoreError)
+
       seed.foreach { s ⇒ NetLogoTask.executeNetLogo(instance.netLogo, s"random-seed ${context(s)}") }
 
       for (inBinding ← mapped.inputs) {
@@ -345,7 +348,7 @@ trait NetLogoTask extends Task with ValidateTask {
         NetLogoTask.setGlobal(instance.netLogo, inBinding.name, v)
       }
 
-      for (cmd ← launchingCommands.map(_.from(context))) NetLogoTask.executeNetLogo(instance.netLogo, cmd, ignoreError)
+      for (cmd ← go.map(_.from(context))) NetLogoTask.executeNetLogo(instance.netLogo, cmd, ignoreError)
 
       val contextResult =
         External.fetchOutputFiles(external, outputs, preparedContext, resolver, Seq(instance.workspaceDirectory)) ++ mapped.outputs.map {
