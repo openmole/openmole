@@ -17,6 +17,7 @@
 
 package org.openmole.core.context
 
+import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.tools.obj.ClassUtils._
 import org.openmole.core.tools.obj.{ ClassUtils, Id }
 import shapeless.{ TypeCase, Typeable }
@@ -39,6 +40,12 @@ object ValType {
       if (!c.isArray) (c, level)
       else rec(c.asArray.fromArray, level + 1)
     rec(t)
+  }
+
+  def unsecureFromArray(t: ValType[_]): ValType[_] = {
+    val (res, level) = unArrayify(t)
+    if (level == 0) throw new UserBadDataError(s"ValType $t is no an array type")
+    res
   }
 
   /**

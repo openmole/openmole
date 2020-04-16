@@ -1,6 +1,9 @@
 package org.openmole.core
 
 import au.com.bytecode.opencsv.CSVReader
+import org.openmole.core.context.ValType
+
+import scala.reflect.ClassTag
 
 /*
  * Copyright (C) 2019 Romain Reuillon
@@ -141,23 +144,36 @@ package object csv {
 
     Iterator.continually(reader.readNext).takeWhile(_ != null).map { line ⇒
       (columns zip columnsIndexes).map {
-        case ((_, v), i) ⇒ Variable.unsecure(v, converter(v)(line(i)))
+        case ((name, v), i) ⇒ Variable.unsecure(v, matchConverter(v, line(i), name))
       }
     }
   }
 
-  val conveters = Map[Class[_], (String ⇒ _)](
-    classOf[BigInteger] → (new BigInteger(_: String)),
-    classOf[BigDecimal] → (new BigDecimal(_: String)),
-    classOf[Double] → ((_: String).toDouble),
-    classOf[String] → ((_: String).toString),
-    classOf[Boolean] → ((_: String).toBoolean),
-    classOf[Int] → ((_: String).toInt),
-    classOf[Float] → ((_: String).toFloat),
-    classOf[Long] → ((_: String).toLong)
-  )
+  def matchConverter(v: Val[_], s: String, name: String): Any = {
+    def matchArray[T: ClassTag](s: String, convert: String ⇒ T): Array[T] = {
+      val trimed = s.trim
+      if (!trimed.startsWith("[") || !trimed.endsWith("]")) throw new UserBadDataError(s"Array in CSV files should have the following format [.., .., ..], found $s")
+      s.drop(1).dropRight(1).split(",").map { s ⇒ convert(s.trim) }
+    }
 
-  def converter[T](p: Val[_]): String ⇒ _ =
-    conveters.getOrElse(p.`type`.runtimeClass, throw new UserBadDataError("Unmanaged type for csv sampling for column binded to prototype " + p))
+    v match {
+      case Val.caseDouble(v)            ⇒ s.toDouble
+      case Val.caseString(v)            ⇒ s
+      case Val.caseBoolean(v)           ⇒ s.toBoolean
+      case Val.caseInt(v)               ⇒ s.toInt
+      case Val.caseLong(v)              ⇒ s.toLong
+      case Val.caseArrayDouble(v)       ⇒ matchArray(s, _.toDouble)
+      case Val.caseArrayInt(v)          ⇒ matchArray(s, _.toInt)
+      case Val.caseArrayLong(v)         ⇒ matchArray(s, _.toLong)
+      case Val.caseArrayString(v)       ⇒ matchArray(s, identity)
+      case Val.caseArrayBoolean(v)      ⇒ matchArray(s, _.toBoolean)
+      case Val.caseArrayArrayDouble(v)  ⇒ matchArray(s, matchArray(_, _.toDouble))
+      case Val.caseArrayArrayInt(v)     ⇒ matchArray(s, matchArray(_, _.toInt))
+      case Val.caseArrayArrayLong(v)    ⇒ matchArray(s, matchArray(_, _.toLong))
+      case Val.caseArrayArrayString(v)  ⇒ matchArray(s, matchArray(_, identity))
+      case Val.caseArrayArrayBoolean(v) ⇒ matchArray(s, matchArray(_, _.toBoolean))
+      case _                            ⇒ throw new UserBadDataError(s"Unsupported type in CSV sampling prototype $v mapped to column $name")
+    }
+  }
 
 }
