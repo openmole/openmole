@@ -42,11 +42,12 @@ package object csv {
         case s: ScalarData ⇒ List(s.v)
       }
 
+    sealed trait CSVData
+    case class ScalarData(v: Any) extends CSVData
+    case class ArrayData(v: List[Any]) extends CSVData
   }
 
-  sealed trait CSVData
-  case class ScalarData(v: Any) extends CSVData
-  case class ArrayData(v: List[Any]) extends CSVData
+  import CSVData._
 
   def valuesToData(values: Seq[Any]) =
     values.map {
@@ -55,73 +56,60 @@ package object csv {
       case v           ⇒ ScalarData(v)
     }.toList
 
-  def header(prototypes: Seq[Val[_]], values: Seq[Any], arraysOnSingleRow: Boolean = false) = {
-    val lists =
-      values.map {
-        case v: Array[_] ⇒ v.toList
-        case l: List[_]  ⇒ l
-        case v           ⇒ List(v)
-      }.toList
-
-    (prototypes zip lists).flatMap {
-      case (p, l) ⇒
-        if (arraysOnSingleRow && moreThanOneElement(l))
-          (0 until l.size).map(i ⇒ s"${p.name}$i")
-        else List(p.name)
-    }.mkString(",")
-  }
+  def header(prototypes: Seq[Val[_]]) = prototypes.map(_.name).mkString(",")
 
   def writeVariablesToCSV(
-    output:            PrintStream,
-    header:            ⇒ Option[String] = None,
-    values:            Seq[Any],
-    arraysOnSingleRow: Boolean          = false): Unit = {
+    output:      PrintStream,
+    header:      ⇒ Option[String] = None,
+    values:      Seq[Any],
+    unrollArray: Boolean          = false): Unit = {
+
     header.foreach(h ⇒ output.appendLine { h })
 
-    // TODO add option to flatten multidim arrays here be be written on multiple lines
-
-    def flatAny(o: Any): List[Any] = o match {
-      case o: List[_] ⇒ o
-      case _          ⇒ List(o)
-    }
-
-    def writeData(data: List[CSVData]): Unit = {
-      val scalars = data.collect { case x: ScalarData ⇒ x }
-      if (scalars.size == data.size) writeLine(scalars.map(_.v))
-      else if (arraysOnSingleRow) {
-        val lists = data.map(CSVData.toList)
-        writeLine(lists.flatten(flatAny))
+    def quote(v: Any): String =
+      v match {
+        case v: Array[_] ⇒ s""""${format(v)}""""
+        case v: Seq[_]   ⇒ s""""${format(v)}""""
+        case v           ⇒ v.prettify()
       }
-      else writeArrayData(data)
-    }
 
-    @tailrec def writeArrayData(data: List[CSVData]): Unit = {
-      if (data.collect { case l: ArrayData ⇒ l }.forall(_.v.isEmpty)) Unit
-      else {
-        val lists = data.map(CSVData.toList)
-        writeLine(lists.map { _.headOption.getOrElse("") })
+    def format(v: Any): String =
+      v match {
+        case v: Array[_] ⇒ s"[${v.map(format).mkString(",")}]"
+        case v: Seq[_]   ⇒ s"[${v.map(format).mkString(",")}]"
+        case v           ⇒ v.prettify()
+      }
 
-        def tail(d: CSVData) =
-          d match {
-            case a @ ArrayData(Nil) ⇒ a
-            case a: ArrayData       ⇒ a.copy(a.v.tail)
-            case s: ScalarData      ⇒ s
+    def csvLine(v: Seq[Any]): String = v.map(quote).mkString(",")
+
+    def unroll(v: Seq[Any]) = {
+      def writeLines(lists: Seq[List[Any]]): Unit = {
+        output.appendLine(csvLine(lists.map(_.head)))
+
+        val lastLine = lists.forall(_.tail.isEmpty)
+        if (!lastLine) {
+          val skipHead = lists.map {
+            case h :: Nil ⇒ h :: Nil
+            case _ :: t   ⇒ t
+            case Nil      ⇒ Nil
           }
 
-        writeArrayData(data.map(tail))
+          writeLines(skipHead)
+        }
       }
+
+      def lists: Seq[List[Any]] =
+        v map {
+          case v: Array[_] ⇒ v.toList
+          case v: Seq[_]   ⇒ v.toList
+          case v           ⇒ List(v)
+        }
+
+      writeLines(lists)
     }
 
-    def writeLine[T](list: List[T]) = {
-      output.appendLine(list.map(l ⇒ {
-        val prettified = l.prettify()
-        def shouldBeQuoted = prettified.contains(',') || prettified.contains('"')
-        def quote(s: String) = '"' + s.replaceAll("\"", "\"\"") + '"'
-        if (shouldBeQuoted) quote(prettified) else prettified
-      }).mkString(","))
-    }
-
-    writeData(valuesToData(values))
+    if (unrollArray) unroll(values)
+    else output.appendLine(csvLine(values))
   }
 
   /**

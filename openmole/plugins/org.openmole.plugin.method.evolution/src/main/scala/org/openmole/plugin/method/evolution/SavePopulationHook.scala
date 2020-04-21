@@ -63,7 +63,7 @@ object SavePopulationHook {
 
   }
 
-  def apply[T, F: OutputFormat](algorithm: T, output: WritableOutput, frequency: OptionalArgument[Long] = None, last: Boolean = false, format: F = CSVOutputFormat())(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def apply[T, F: OutputFormat](algorithm: T, output: WritableOutput, frequency: OptionalArgument[Long] = None, last: Boolean = false, format: F = CSVOutputFormat(unrollArray = true))(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
     val t = wfi(algorithm)
     hook(t, output, frequency.option, last = last, format = format)
   }
@@ -72,24 +72,14 @@ object SavePopulationHook {
 
 object SaveLastPopulationHook {
 
-  def apply[T](algorithm: T, file: FromContext[File])(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def apply[T, F](algorithm: T, output: WritableOutput, format: F = CSVOutputFormat(unrollArray = true))(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F]) = {
     val t = wfi(algorithm)
 
     Hook("SaveLastPopulationHook") { p ⇒
       import p._
       import org.openmole.core.csv
 
-      val values = SavePopulationHook.resultVariables(t).from(context).map(_.value)
-      def headerLine = csv.header(SavePopulationHook.resultVariables(t).from(context).map(_.prototype.array), values)
-
-      file.from(context).withPrintStream(create = true) { ps ⇒
-        csv.writeVariablesToCSV(
-          ps,
-          Some(headerLine),
-          values
-        )
-      }
-
+      outputFormat.write(format, output, SavePopulationHook.resultVariables(t).from(context)).from(context)
       context
     } set (inputs += (t.populationPrototype, t.statePrototype))
 

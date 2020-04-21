@@ -38,7 +38,7 @@ package object directsampling {
     def hook[T: OutputFormat](
       output: WritableOutput,
       values: Seq[Val[_]]    = Vector.empty,
-      format: T              = CSVOutputFormat()): DSLContainer[DirectSampling] = {
+      format: T              = CSVOutputFormat(append = true)): DSLContainer[DirectSampling] = {
       implicit val defScope = dsl.scope
       dsl hook FormattedFileHook(output = output, values = values, format = format)
     }
@@ -49,7 +49,7 @@ package object directsampling {
       output:      WritableOutput,
       values:      Seq[Val[_]]    = Vector.empty,
       includeSeed: Boolean        = false,
-      format:      T              = CSVOutputFormat()): DSLContainer[Replication] = {
+      format:      T              = CSVOutputFormat(append = true)): DSLContainer[Replication] = {
       implicit val defScope = dsl.scope
       val exclude = if (!includeSeed) Seq(dsl.data.seed) else Seq()
       dsl hook FormattedFileHook(output = output, values = values, exclude = exclude, format = format)
