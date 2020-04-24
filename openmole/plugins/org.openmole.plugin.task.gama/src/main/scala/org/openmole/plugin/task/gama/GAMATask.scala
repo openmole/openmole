@@ -52,7 +52,7 @@ object GAMATask {
     val (modelName, volumesValue) = volumes(workspace, model)
 
     def installCommands =
-      install ++ Seq(s"gama-headless -xml $experiment $workspaceDirectory/$modelName $inputXML", s"ls ${inputXML}")
+      install ++ Seq(s"gama-headless -xml '$experiment' '$workspaceDirectory/$modelName' '$inputXML'", s"ls '${inputXML}'")
 
     def error(retCode: Int) =
       retCode match {
