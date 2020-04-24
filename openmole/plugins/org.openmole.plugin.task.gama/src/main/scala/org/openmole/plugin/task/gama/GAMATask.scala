@@ -262,8 +262,9 @@ object GAMATask {
 
         val resultContext = containerTask.process(executionContext).from(context)
 
-        frameRate.option match {
-          case None =>
+        (mapped.outputs.isEmpty, frameRate.option) match {
+          case (true, _) => resultContext
+          case (false, None) =>
             import xml._
 
             def toVariable(v: Val[_], value: String) =
@@ -288,9 +289,10 @@ object GAMATask {
                 case _ => None
               }
 
+
             val simulationOutput = XML.loadFile(tmpOutputDirectory / "simulation-outputs0.xml") \ "Step"
             resultContext ++ extractOutputs(simulationOutput.last)
-          case Some(f) =>
+          case (false, Some(f)) =>
             import xml._
 
             def toVariable(v: Val[_], value: Array[String]) =
