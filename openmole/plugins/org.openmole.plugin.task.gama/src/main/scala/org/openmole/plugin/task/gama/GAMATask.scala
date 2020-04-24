@@ -27,7 +27,7 @@ object GAMATask {
   implicit def isInfo = InfoBuilder(info)
   implicit def isMapped = MappedInputOutputBuilder(GAMATask.mapped)
 
-  def gamaImage(version: String) = DockerImage("gamaplatform/gama", version)
+  def gamaImage(image: String, version: String) = DockerImage(image, version)
 
   def inputXML = "/_model_input_.xml"
   def workspaceDirectory = "/_workspace_"
@@ -46,6 +46,7 @@ object GAMATask {
     experiment:             String,
     install:                Seq[String],
     installContainerSystem: ContainerSystem,
+    dockerImage: String,
     version:                String,
     clearCache:             Boolean)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, _workspace: Workspace) = {
 
@@ -60,7 +61,7 @@ object GAMATask {
         case _ => None
       }
 
-    ContainerTask.prepare(installContainerSystem, gamaImage(version), installCommands, volumesValue.map { case (lv, cv) ⇒ lv.getAbsolutePath -> cv }, error, clearCache = clearCache)
+    ContainerTask.prepare(installContainerSystem, gamaImage(dockerImage, version), installCommands, volumesValue.map { case (lv, cv) ⇒ lv.getAbsolutePath -> cv }, error, clearCache = clearCache)
   }
 
   def apply(
@@ -71,6 +72,7 @@ object GAMATask {
     seed:                   OptionalArgument[Val[Long]]   = None,
     frameRate:              OptionalArgument[Int]         = None,
     install:                Seq[String]                   = Seq.empty,
+    dockerImage: String = "gamaplatform/gama",
     version:                String                        = "1.8.0",
     errorOnReturnValue:     Boolean                       = true,
     returnValue:            OptionalArgument[Val[Int]]    = None,
@@ -90,7 +92,7 @@ object GAMATask {
       case _ ⇒
     }
 
-    val preparedImage = prepare(workspace, model, experiment, install, installContainerSystem, version, clearCache = clearContainerCache)
+    val preparedImage = prepare(workspace, model, experiment, install, installContainerSystem, dockerImage, version, clearCache = clearContainerCache)
 
     GAMATask(
       workspace = workspace,
@@ -110,8 +112,7 @@ object GAMATask {
       config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
-      mapped = MappedInputOutputConfig(),
-      version = version
+      mapped = MappedInputOutputConfig()
     ) set (
         inputs += (seed.option.toSeq: _*),
         outputs += (Seq(returnValue.option, stdOut.option, stdErr.option).flatten: _*)
@@ -167,8 +168,7 @@ object GAMATask {
   config:               InputOutputConfig,
   external:             External,
   info:                 InfoConfig,
-  mapped:               MappedInputOutputConfig,
-  version:              String) extends Task with ValidateTask {
+  mapped:               MappedInputOutputConfig) extends Task with ValidateTask {
 
   lazy val containerPoolKey = ContainerTask.newCacheKey
 
