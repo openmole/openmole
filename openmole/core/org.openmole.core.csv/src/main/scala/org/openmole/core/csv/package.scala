@@ -33,54 +33,47 @@ package object csv {
 
   import scala.annotation.tailrec
 
-  def moreThanOneElement(l: List[_]) = !l.isEmpty && !l.tail.isEmpty
+  def header(prototypes: Seq[Val[_]], values: Seq[Any], arrayOnRow: Boolean) =
+    if (!arrayOnRow) prototypes.map(_.name).mkString(",")
+    else {
+      def arrayHeaders(v: Any, h: String): Seq[String] =
+        v match {
+          case v: Array[_] ⇒ (v zipWithIndex).flatMap { case (e, i) ⇒ arrayHeaders(e, s"${h}$$${i}") }
+          case v: Seq[_]   ⇒ (v zipWithIndex).flatMap { case (e, i) ⇒ arrayHeaders(e, s"${h}$$${i}") }
+          case v           ⇒ Seq(h)
+        }
 
-  object CSVData {
-    def toList(d: CSVData) =
-      d match {
-        case d: ArrayData  ⇒ d.v
-        case s: ScalarData ⇒ List(s.v)
-      }
-
-    sealed trait CSVData
-    case class ScalarData(v: Any) extends CSVData
-    case class ArrayData(v: List[Any]) extends CSVData
-  }
-
-  import CSVData._
-
-  def valuesToData(values: Seq[Any]) =
-    values.map {
-      case v: Array[_] ⇒ ArrayData(v.toList)
-      case l: List[_]  ⇒ ArrayData(l)
-      case v           ⇒ ScalarData(v)
-    }.toList
-
-  def header(prototypes: Seq[Val[_]]) = prototypes.map(_.name).mkString(",")
+      (prototypes zip values).flatMap {
+        case (p, v) ⇒ arrayHeaders(v, "").map(h ⇒ s"${p.name}$h")
+      }.mkString(",")
+    }
 
   def writeVariablesToCSV(
     output:      PrintStream,
     header:      ⇒ Option[String] = None,
     values:      Seq[Any],
-    unrollArray: Boolean          = false): Unit = {
+    unrollArray: Boolean          = false,
+    arrayOnRow:  Boolean          = false): Unit = {
 
     header.foreach(h ⇒ output.appendLine { h })
 
-    def quote(v: Any): String =
-      v match {
-        case v: Array[_] ⇒ s""""${format(v)}""""
-        case v: Seq[_]   ⇒ s""""${format(v)}""""
-        case v           ⇒ v.prettify()
-      }
+    def csvLine(v: Seq[Any]): String = {
+      def format(v: Any): String =
+        v match {
+          case v: Array[_] ⇒ s"[${v.map(format).mkString(",")}]"
+          case v: Seq[_]   ⇒ s"[${v.map(format).mkString(",")}]"
+          case v           ⇒ v.prettify()
+        }
 
-    def format(v: Any): String =
-      v match {
-        case v: Array[_] ⇒ s"[${v.map(format).mkString(",")}]"
-        case v: Seq[_]   ⇒ s"[${v.map(format).mkString(",")}]"
-        case v           ⇒ v.prettify()
-      }
+      def quote(v: Any): String =
+        v match {
+          case v: Array[_] ⇒ s""""${format(v)}""""
+          case v: Seq[_]   ⇒ s""""${format(v)}""""
+          case v           ⇒ v.prettify()
+        }
 
-    def csvLine(v: Seq[Any]): String = v.map(quote).mkString(",")
+      v.map(quote).mkString(",")
+    }
 
     def unroll(v: Seq[Any]) = {
       def writeLines(lists: Seq[List[Any]]): Unit = {
@@ -108,7 +101,19 @@ package object csv {
       writeLines(lists)
     }
 
+    def onRow(v: Seq[Any]) = {
+      def arrayValues(v: Any): Seq[Any] =
+        v match {
+          case v: Array[_] ⇒ v.flatMap(arrayValues)
+          case v: Seq[_]   ⇒ v.flatMap(arrayValues)
+          case v           ⇒ Seq(v)
+        }
+
+      output.appendLine(csvLine(arrayValues(v)))
+    }
+
     if (unrollArray) unroll(values)
+    else if (arrayOnRow) onRow(values)
     else output.appendLine(csvLine(values))
   }
 
