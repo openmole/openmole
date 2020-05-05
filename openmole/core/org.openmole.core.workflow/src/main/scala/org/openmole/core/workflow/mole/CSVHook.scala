@@ -30,8 +30,8 @@ object CSVHook {
 
   object CSVOutputFormat {
 
-    implicit def format: OutputFormat[CSVOutputFormat] = new OutputFormat[CSVOutputFormat] {
-      override def write(format: CSVOutputFormat, output: WritableOutput, variables: Seq[Variable[_]]): FromContext[Unit] = FromContext { p ⇒
+    implicit def format: OutputFormat[CSVOutputFormat, Any] = new OutputFormat[CSVOutputFormat, Any] {
+      override def write(format: CSVOutputFormat, output: WritableOutput, variables: Seq[Variable[_]], method: Any): FromContext[Unit] = FromContext { p ⇒
         import p._
 
         def headerLine = format.header.map(_.from(context)) getOrElse csv.header(variables.map(_.prototype), variables.map(_.value), arrayOnRow = format.arrayOnRow)

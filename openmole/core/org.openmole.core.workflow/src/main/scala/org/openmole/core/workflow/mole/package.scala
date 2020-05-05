@@ -24,7 +24,7 @@ package mole {
     def CSVHook = mole.CSVHook
     def CSVOutputFormat = mole.CSVHook.CSVOutputFormat
 
-    type OutputFormat[T] = mole.OutputFormat[T]
+    type OutputFormat[T, D] = mole.OutputFormat[T, D]
     type FromContextHook = mole.FromContextHook
     type FromContextSource = mole.FromContextSource
   }

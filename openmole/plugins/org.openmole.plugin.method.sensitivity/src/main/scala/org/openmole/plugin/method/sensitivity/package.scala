@@ -53,7 +53,7 @@ package object sensitivity {
     }
 
 
-    def writeResults[F](format: F, output: WritableOutput, inputs: Seq[Val[_]], outputs: Seq[Val[_]], coefficient: (Val[_], Val[_]) ⇒ Val[_])(implicit outputFormat: OutputFormat[F]) = FromContext { p ⇒
+    def writeResults[F, D](format: F, method: D, output: WritableOutput, inputs: Seq[Val[_]], outputs: Seq[Val[_]], coefficient: (Val[_], Val[_]) ⇒ Val[_])(implicit outputFormat: OutputFormat[F, D]) = FromContext { p ⇒
       import p._
 
       def results = outputs.map { o ⇒
@@ -64,7 +64,7 @@ package object sensitivity {
       def allVals = Seq(Val[String]("output")) ++ inputs
       val data = (results.transpose zip allVals).map { case (value, v) => Variable.unsecure(v.array, value) }
 
-      outputFormat.write(format, output, data).from(context)
+      outputFormat.write(format, output, data, method = method).from(context)
     }
 
 
@@ -77,7 +77,7 @@ package object sensitivity {
     * @param dsl
     */
   implicit class SaltelliMethodContainer(dsl: DSLContainer[Sensitivity.SaltelliParams])  extends DSLContainerHook(dsl) {
-    def hook[F: OutputFormat](output: WritableOutput, format: F = CSVOutputFormat()): DSLContainer[Sensitivity.SaltelliParams] = {
+    def hook[F](output: WritableOutput, format: F = CSVOutputFormat())(implicit outputFormat: OutputFormat[F, Sensitivity.SaltelliParams]): DSLContainer[Sensitivity.SaltelliParams] = {
       implicit val defScope = dsl.scope
       dsl hook SaltelliHook(dsl, output, format)
     }
@@ -89,7 +89,7 @@ package object sensitivity {
     * @param dsl
     */
   implicit class MorrisMethodContainer(dsl: DSLContainer[Sensitivity.MorrisParams]) extends DSLContainerHook(dsl) {
-    def hook[F: OutputFormat](output: WritableOutput, format: F = CSVOutputFormat()): DSLContainer[Sensitivity.MorrisParams] = {
+    def hook[F](output: WritableOutput, format: F = CSVOutputFormat())(implicit outputFormat: OutputFormat[F, Sensitivity.MorrisParams]): DSLContainer[Sensitivity.MorrisParams] = {
       implicit val defScope = dsl.scope
       dsl hook MorrisHook(dsl, output, format)
     }

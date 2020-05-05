@@ -8,20 +8,21 @@ import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder._
 
-trait OutputFormat[T] {
-  def write(format: T, output: WritableOutput, variables: Seq[Variable[_]]): FromContext[Unit]
+trait OutputFormat[T, -M] {
+  def write(format: T, output: WritableOutput, variables: Seq[Variable[_]], method: M): FromContext[Unit]
   def validate(format: T): FromContextHook.ValidateParameters ⇒ Seq[Throwable]
   def extension: String
 }
 
 object FormattedFileHook {
 
-  def apply[T: OutputFormat](
+  def apply[T, M](
     format:  T,
     output:  WritableOutput,
     values:  Seq[Val[_]]    = Vector.empty,
     exclude: Seq[Val[_]]    = Vector.empty,
-    name:    Option[String] = None)(implicit valName: sourcecode.Name, definitionScope: DefinitionScope, fileFormat: OutputFormat[T]): mole.FromContextHook =
+    method:  M              = None,
+    name:    Option[String] = None)(implicit valName: sourcecode.Name, definitionScope: DefinitionScope, fileFormat: OutputFormat[T, M]): mole.FromContextHook =
 
     Hook(name getOrElse "FileFormatHook") { parameters ⇒
       import parameters._
@@ -30,7 +31,7 @@ object FormattedFileHook {
       val ps = { if (values.isEmpty) context.values.map { _.prototype }.toVector else values }.filter { v ⇒ !excludeSet.contains(v.name) }
       val variables = ps.map(p ⇒ context.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p not found in hook $this")))
 
-      fileFormat.write(format, output, variables).from(context)
+      fileFormat.write(format, output, variables, method).from(context)
 
       context
     } validate { p ⇒

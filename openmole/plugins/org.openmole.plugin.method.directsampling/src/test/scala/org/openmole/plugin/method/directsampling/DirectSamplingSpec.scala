@@ -11,7 +11,7 @@ import org.openmole.plugin.tool.pattern._
 import org.scalatest._
 import org.openmole.core.workflow.test._
 
-class PatternCompositionSpec extends FlatSpec with Matchers {
+class DirectSamplingSpec extends FlatSpec with Matchers {
   import org.openmole.core.workflow.test.Stubs._
 
   "Direct sampling" should "transmit explored inputs" in {
@@ -191,6 +191,17 @@ class PatternCompositionSpec extends FlatSpec with Matchers {
       )
 
     mole.run
+  }
+
+  "Direct samplings" should "accept display hook" in {
+    val l = Val[Double]
+
+    val model = EmptyTask() set (inputs += l)
+
+    DirectSampling(
+      model,
+      ExplicitSampling(l, Seq(1.0, 2.0))
+    ) hook display
   }
 
 }

@@ -37,8 +37,7 @@ class HookSpec extends FlatSpec with Matchers {
 
   "A hook" should "intercept the execution of a task" in {
     val executed = new AtomicInteger(0)
-
-    val p = Val[String]("p")
+    val p = Val[String]
 
     val t1 =
       TestTask { _ + (p → "test") } set (
@@ -66,7 +65,6 @@ class HookSpec extends FlatSpec with Matchers {
 
     val t1 =
       TestTask { _ + (p → "test") } set (
-        name := "Test",
         outputs += p
       )
 
@@ -81,6 +79,12 @@ class HookSpec extends FlatSpec with Matchers {
     ex.run
 
     executed should equal(true)
+  }
+
+  "Display hook" should "be accepted" in {
+    val t1 = EmptyTask()
+    val ex = t1 hook display
+    ex.run
   }
 
 }

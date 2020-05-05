@@ -35,24 +35,24 @@ package object directsampling {
   type Aggregation = AggregateTask.AggregateVal[_, _]
 
   implicit class DirectSamplingDSL(dsl: DSLContainer[DirectSampling]) extends DSLContainerHook(dsl) {
-    def hook[T: OutputFormat](
+    def hook[T](
       output: WritableOutput,
       values: Seq[Val[_]]    = Vector.empty,
-      format: T              = CSVOutputFormat(append = true)): DSLContainer[DirectSampling] = {
+      format: T              = CSVOutputFormat(append = true))(implicit outputFormat: OutputFormat[T, DirectSampling]): DSLContainer[DirectSampling] = {
       implicit val defScope = dsl.scope
-      dsl hook FormattedFileHook(output = output, values = values, format = format)
+      dsl hook FormattedFileHook(output = output, values = values, format = format, method = dsl.data)
     }
   }
 
   implicit class ReplicationDSL(dsl: DSLContainer[Replication]) extends DSLContainerHook(dsl) {
-    def hook[T: OutputFormat](
+    def hook[T](
       output:      WritableOutput,
       values:      Seq[Val[_]]    = Vector.empty,
       includeSeed: Boolean        = false,
-      format:      T              = CSVOutputFormat(append = true)): DSLContainer[Replication] = {
+      format:      T              = CSVOutputFormat(append = true))(implicit outputFormat: OutputFormat[T, Replication]): DSLContainer[Replication] = {
       implicit val defScope = dsl.scope
       val exclude = if (!includeSeed) Seq(dsl.data.seed) else Seq()
-      dsl hook FormattedFileHook(output = output, values = values, exclude = exclude, format = format)
+      dsl hook FormattedFileHook(output = output, values = values, exclude = exclude, format = format, method = dsl.data)
     }
   }
 

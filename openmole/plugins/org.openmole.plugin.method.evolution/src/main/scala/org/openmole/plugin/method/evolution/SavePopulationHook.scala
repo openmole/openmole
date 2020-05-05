@@ -22,13 +22,17 @@ import org.openmole.core.dsl.extension._
 
 object SavePopulationHook {
 
+  case class EvolutionData()
+
+  def evolutionData(t: EvolutionWorkflow) = EvolutionData()
+
   def resultVariables(t: EvolutionWorkflow) = FromContext { p ⇒
     import p._
     context.variable(t.generationPrototype).toSeq ++
       t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype)).from(context)
   }
 
-  def hook[F](t: EvolutionWorkflow, output: WritableOutput, frequency: Option[Long], last: Boolean, format: F)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F]) = {
+  def hook[F](t: EvolutionWorkflow, output: WritableOutput, frequency: Option[Long], last: Boolean, format: F)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, EvolutionData]) = {
     Hook("SavePopulationHook") { p ⇒
       import p._
 
@@ -44,7 +48,7 @@ object SavePopulationHook {
       output match {
         case WritableOutput.FileValue(dir) ⇒
           saveFile(dir) match {
-            case Some(outputFile) ⇒ outputFormat.write(format, outputFile.from(context), resultVariables(t).from(context)).from(context)
+            case Some(outputFile) ⇒ outputFormat.write(format, outputFile.from(context), resultVariables(t).from(context), evolutionData(t)).from(context)
             case None             ⇒
           }
         case o ⇒
@@ -55,7 +59,7 @@ object SavePopulationHook {
               case _            ⇒ false
             }
 
-          if (save) outputFormat.write(format, o, resultVariables(t).from(context)).from(context)
+          if (save) outputFormat.write(format, o, resultVariables(t).from(context), evolutionData(t)).from(context)
       }
 
       context
@@ -63,7 +67,7 @@ object SavePopulationHook {
 
   }
 
-  def apply[T, F: OutputFormat](algorithm: T, output: WritableOutput, frequency: OptionalArgument[Long] = None, last: Boolean = false, format: F = CSVOutputFormat(unrollArray = true))(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def apply[T, F](algorithm: T, output: WritableOutput, frequency: OptionalArgument[Long] = None, last: Boolean = false, format: F = CSVOutputFormat(unrollArray = true))(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, EvolutionData]) = {
     val t = wfi(algorithm)
     hook(t, output, frequency.option, last = last, format = format)
   }
@@ -72,14 +76,14 @@ object SavePopulationHook {
 
 object SaveLastPopulationHook {
 
-  def apply[T, F](algorithm: T, output: WritableOutput, format: F = CSVOutputFormat(unrollArray = true))(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F]) = {
+  def apply[T, F](algorithm: T, output: WritableOutput, format: F = CSVOutputFormat(unrollArray = true))(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, SavePopulationHook.EvolutionData]) = {
     val t = wfi(algorithm)
 
     Hook("SaveLastPopulationHook") { p ⇒
       import p._
       import org.openmole.core.csv
 
-      outputFormat.write(format, output, SavePopulationHook.resultVariables(t).from(context)).from(context)
+      outputFormat.write(format, output, SavePopulationHook.resultVariables(t).from(context), SavePopulationHook.evolutionData(t)).from(context)
       context
     } set (inputs += (t.populationPrototype, t.statePrototype))
 
