@@ -53,9 +53,10 @@ package object csv {
     header:      ⇒ Option[String] = None,
     values:      Seq[Any],
     unrollArray: Boolean          = false,
-    arrayOnRow:  Boolean          = false): Unit = {
+    arrayOnRow:  Boolean          = false,
+    margin:      String           = ""): Unit = {
 
-    header.foreach(h ⇒ output.appendLine { h })
+    header.foreach(h ⇒ output.appendLine { margin + h })
 
     def csvLine(v: Seq[Any]): String = {
       def format(v: Any): String =
@@ -77,7 +78,7 @@ package object csv {
 
     def unroll(v: Seq[Any]) = {
       def writeLines(lists: Seq[List[Any]]): Unit = {
-        output.appendLine(csvLine(lists.map(_.head)))
+        output.appendLine(margin + csvLine(lists.map(_.head)))
 
         val lastLine = lists.forall(_.tail.isEmpty)
         if (!lastLine) {
@@ -109,12 +110,12 @@ package object csv {
           case v           ⇒ Seq(v)
         }
 
-      output.appendLine(csvLine(arrayValues(v)))
+      output.appendLine(margin + csvLine(arrayValues(v)))
     }
 
     if (unrollArray) unroll(values)
     else if (arrayOnRow) onRow(values)
-    else output.appendLine(csvLine(values))
+    else output.appendLine(margin + csvLine(values))
   }
 
   /**

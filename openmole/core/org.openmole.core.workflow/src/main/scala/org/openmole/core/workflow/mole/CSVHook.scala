@@ -1,5 +1,7 @@
 package org.openmole.core.workflow.mole
 
+import java.io.PrintStream
+
 import org.openmole.core.csv
 import org.openmole.core.workflow.mole
 import org.openmole.core.workflow.tools.{ OptionalArgument, WritableOutput }
@@ -31,25 +33,48 @@ object CSVHook {
   object CSVOutputFormat {
 
     implicit def format: OutputFormat[CSVOutputFormat, Any] = new OutputFormat[CSVOutputFormat, Any] {
-      override def write(format: CSVOutputFormat, output: WritableOutput, variables: Seq[Variable[_]], method: Any): FromContext[Unit] = FromContext { p ⇒
+      override def write(format: CSVOutputFormat, output: WritableOutput, content: OutputFormat.OutputContent, method: Any): FromContext[Unit] = FromContext { p ⇒
         import p._
 
-        def headerLine = format.header.map(_.from(context)) getOrElse csv.header(variables.map(_.prototype), variables.map(_.value), arrayOnRow = format.arrayOnRow)
+        def headerLine(variables: Seq[Variable[_]]) = format.header.map(_.from(context)) getOrElse csv.header(variables.map(_.prototype), variables.map(_.value), arrayOnRow = format.arrayOnRow)
 
-        output match {
-          case WritableOutput.FileValue(file) ⇒
-            val f = file.from(context)
-            val create = !format.append || f.isEmpty
+        def writeFile(f: File, variables: Seq[Variable[_]]) = {
+          val create = !format.append || f.isEmpty
+          val h = if (f.isEmpty) Some(headerLine(variables)) else None
+          if (create) f.atomicWithPrintStream { ps ⇒ csv.writeVariablesToCSV(ps, h, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow) }
+          else f.withPrintStream(append = true, create = true) { ps ⇒ csv.writeVariablesToCSV(ps, h, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow) }
+        }
 
-            val h = if (f.isEmpty) Some(headerLine) else None
+        def writeStream(ps: PrintStream, section: Option[String], variables: Seq[Variable[_]]) =
+          section match {
+            case None ⇒
+              val header = Some(headerLine(variables))
+              csv.writeVariablesToCSV(ps, header, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow)
+            case Some(section) ⇒
+              ps.println(section + ":")
+              val header = Some(headerLine(variables))
+              csv.writeVariablesToCSV(ps, header, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow, margin = "  ")
+          }
 
-            if (create) f.atomicWithPrintStream { ps ⇒ csv.writeVariablesToCSV(ps, h, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow) }
-            else f.withPrintStream(append = true, create = true) { ps ⇒ csv.writeVariablesToCSV(ps, h, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow) }
+        import WritableOutput._
+        import OutputFormat._
 
-          case WritableOutput.StreamValue(ps, prelude) ⇒
-            prelude.foreach(ps.print)
-            val header = Some(headerLine)
-            csv.writeVariablesToCSV(ps, header, variables, unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow)
+        (output, content) match {
+          case (FileValue(file), PlainContent(variables, name)) ⇒
+            val f =
+              name match {
+                case None       ⇒ file.from(context)
+                case Some(name) ⇒ file.from(context) / s"${name.from(context)}.csv"
+              }
+
+            writeFile(f, variables)
+          case (FileValue(file), SectionContent(sections)) ⇒
+            val directory = file.from(context)
+            for { section ← sections } writeFile(directory / s"${section.name.from(context)}.csv", section.variables)
+          case (StreamValue(ps), PlainContent(variables, name)) ⇒
+            writeStream(ps, name.map(_.from(context)), variables)
+          case (StreamValue(ps), SectionContent(sections)) ⇒
+            for { section ← sections } writeStream(ps, Some(section.name.from(context)), section.variables)
         }
       }
 
@@ -57,8 +82,6 @@ object CSVHook {
         import p._
         format.header.option.toSeq.flatMap(_.validate(inputs))
       }
-
-      override def extension: String = ".csv"
     }
   }
 

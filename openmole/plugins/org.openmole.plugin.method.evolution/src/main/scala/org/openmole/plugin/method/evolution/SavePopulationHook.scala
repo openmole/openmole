@@ -36,31 +36,16 @@ object SavePopulationHook {
     Hook("SavePopulationHook") { p ⇒
       import p._
 
-      def saveFile(dir: FromContext[File]) =
+      def fileName =
         (frequency, last) match {
-          case (_, true) ⇒ Some(dir / ExpandedString("population" + outputFormat.extension))
-          case (None, _) ⇒ Some(dir / ExpandedString("population${" + t.generationPrototype.name + "}" + outputFormat.extension))
-          case (Some(f), _) if context(t.generationPrototype) % f == 0 ⇒
-            Some(dir / ExpandedString("population${" + t.generationPrototype.name + "}" + outputFormat.extension))
+          case (_, true) ⇒ Some(ExpandedString("population"))
+          case (None, _) ⇒ Some(ExpandedString("population${" + t.generationPrototype.name + "}"))
+          case (Some(f), _) if context(t.generationPrototype) % f == 0 ⇒ Some(ExpandedString("population${" + t.generationPrototype.name + "}"))
           case _ ⇒ None
         }
 
-      output match {
-        case WritableOutput.FileValue(dir) ⇒
-          saveFile(dir) match {
-            case Some(outputFile) ⇒ outputFormat.write(format, outputFile.from(context), resultVariables(t).from(context), evolutionData(t)).from(context)
-            case None             ⇒
-          }
-        case o ⇒
-          val save =
-            (frequency, last) match {
-              case (_, true)    ⇒ true
-              case (Some(f), _) ⇒ context(t.generationPrototype) % f == 0
-              case _            ⇒ false
-            }
-
-          if (save) outputFormat.write(format, o, resultVariables(t).from(context), evolutionData(t)).from(context)
-      }
+      val section = OutputFormat.PlainContent(resultVariables(t).from(context), fileName)
+      outputFormat.write(format, output, section, evolutionData(t)).from(context)
 
       context
     } validate { p ⇒ outputFormat.validate(format)(p) } set (inputs += (t.populationPrototype, t.statePrototype))

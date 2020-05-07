@@ -53,7 +53,7 @@ package object sensitivity {
     }
 
 
-    def writeResults[F, D](format: F, method: D, output: WritableOutput, inputs: Seq[Val[_]], outputs: Seq[Val[_]], coefficient: (Val[_], Val[_]) ⇒ Val[_])(implicit outputFormat: OutputFormat[F, D]) = FromContext { p ⇒
+    def variableResults[F, D](inputs: Seq[Val[_]], outputs: Seq[Val[_]], coefficient: (Val[_], Val[_]) ⇒ Val[_])(implicit outputFormat: OutputFormat[F, D]) = FromContext { p ⇒
       import p._
 
       def results = outputs.map { o ⇒
@@ -62,9 +62,7 @@ package object sensitivity {
       }
 
       def allVals = Seq(Val[String]("output")) ++ inputs
-      val data = (results.transpose zip allVals).map { case (value, v) => Variable.unsecure(v.array, value) }
-
-      outputFormat.write(format, output, data, method = method).from(context)
+      (results.transpose zip allVals).map { case (value, v) => Variable.unsecure(v.array, value) }
     }
 
 

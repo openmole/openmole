@@ -12,14 +12,15 @@ object SaltelliHook {
 
       val inputs = ScalarOrSequenceOfDouble.prototypes(dsl.data.inputs)
 
-      output match {
-        case FileValue(dirFC) ⇒
-          Sensitivity.writeResults(format, dsl.data, FileValue(dirFC / s"firstOrderIndices${outputFormat.extension}"), inputs, dsl.data.outputs, Saltelli.firstOrder(_, _)).from(context)
-          Sensitivity.writeResults(format, dsl.data, FileValue(dirFC / s"totalOrderIndices${outputFormat.extension}"), inputs, dsl.data.outputs, Saltelli.totalOrder(_, _)).from(context)
-        case StreamValue(ps, prelude) ⇒
-          Sensitivity.writeResults(format, dsl.data, StreamValue(ps, Some(prelude.getOrElse("") + "first order\n")), inputs, dsl.data.outputs, Saltelli.firstOrder(_, _)).from(context)
-          Sensitivity.writeResults(format, dsl.data, StreamValue(ps, Some("total order\n")), inputs, dsl.data.outputs, Saltelli.totalOrder(_, _)).from(context)
-      }
+      import OutputFormat._
+
+      def sections =
+        Seq(
+          OutputSection("firstOrderIndices", Sensitivity.variableResults(inputs, dsl.data.outputs, Saltelli.firstOrder(_, _)).from(context)),
+          OutputSection("totalOrderIndices", Sensitivity.variableResults(inputs, dsl.data.outputs, Saltelli.totalOrder(_, _)).from(context))
+        )
+
+      outputFormat.write(format, output, sections, dsl.data).from(context)
 
       context
     }

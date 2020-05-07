@@ -30,7 +30,7 @@ object WritableOutput {
   type Display = PrintStream
 
   case class FileValue(file: FromContext[File]) extends WritableOutput
-  case class StreamValue(stream: Display, prelude: Option[String] = None) extends WritableOutput
+  case class StreamValue(stream: PrintStream) extends WritableOutput
 
   def file(writableOutput: WritableOutput) =
     writableOutput match {
