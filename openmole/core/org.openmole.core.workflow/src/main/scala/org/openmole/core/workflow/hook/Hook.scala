@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.mole
+package org.openmole.core.workflow.hook
 
 import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext

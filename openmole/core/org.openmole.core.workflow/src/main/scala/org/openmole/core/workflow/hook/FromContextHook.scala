@@ -1,4 +1,4 @@
-package org.openmole.core.workflow.mole
+package org.openmole.core.workflow.hook
 
 import monocle.macros._
 import org.openmole.core.context._

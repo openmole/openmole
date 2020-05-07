@@ -2,7 +2,7 @@ package org.openmole.core.workflow
 
 import org.openmole.core.pluginmanager.PluginInfo
 import org.openmole.core.preference.ConfigurationInfo
-import org.openmole.core.workflow.mole.CSVHook.CSVOutputFormat
+import org.openmole.core.workflow.format.CSVOutputFormat
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
 class Activator extends BundleActivator {
@@ -54,8 +54,6 @@ class Activator extends BundleActivator {
         TaskKeyWord(objectName(ClosureTask)),
         TaskKeyWord(objectName(ToArrayTask)),
         TaskKeyWord(objectName(MoleTask)),
-        TaskKeyWord(objectName(FromContextTask)),
-        HookKeyWord(objectName(FromContextHook)),
         OtherKeyWord(objectName(CSVOutputFormat))
       )
     }

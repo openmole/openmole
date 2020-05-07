@@ -25,6 +25,7 @@ import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.plugin.tool.pattern._
 import org.openmole.core.csv
+import org.openmole.core.workflow.format.WritableOutput
 
 package object sensitivity {
 

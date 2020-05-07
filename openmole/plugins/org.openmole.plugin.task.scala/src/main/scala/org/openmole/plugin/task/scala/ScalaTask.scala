@@ -32,7 +32,7 @@ import org.openmole.core.workspace.TmpDirectory
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
 import org.openmole.plugin.task.jvm._
 import org.openmole.core.dsl._
-import org.openmole.core.workflow.mole.FromContextHook
+import org.openmole.core.workflow.hook.FromContextHook
 import org.openmole.tool.cache._
 
 import scala.util._

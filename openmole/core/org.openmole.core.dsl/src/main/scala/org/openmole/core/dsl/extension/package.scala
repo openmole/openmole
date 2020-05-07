@@ -13,9 +13,9 @@ package object extension {
   type ScalarOrSequenceOfDouble[T] = org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble[T]
   def ScalarOrSequenceOfDouble = org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
 
-  type Hook = org.openmole.core.workflow.mole.FromContextHook
-  def Hook = org.openmole.core.workflow.mole.Hook
-  def FormattedFileHook = org.openmole.core.workflow.mole.FormattedFileHook
+  type Hook = org.openmole.core.workflow.hook.FromContextHook
+  def Hook = org.openmole.core.workflow.hook.Hook
+  def FormattedFileHook = org.openmole.core.workflow.hook.FormattedFileHook
 
   type Source = org.openmole.core.workflow.mole.Source
   type FromContextSource = org.openmole.core.workflow.mole.FromContextSource
@@ -41,8 +41,12 @@ package object extension {
   type Context = org.openmole.core.context.Context
   def Context = org.openmole.core.context.Context
 
-  type WritableOutput = org.openmole.core.workflow.tools.WritableOutput
-  val WritableOutput = org.openmole.core.workflow.tools.WritableOutput
+  type WritableOutput = org.openmole.core.workflow.format.WritableOutput
+  val WritableOutput = org.openmole.core.workflow.format.WritableOutput
+
+  val OutputFormat = org.openmole.core.workflow.format.OutputFormat
+  type OutputFormat[T, D] = org.openmole.core.workflow.format.OutputFormat[T, D]
+  type OutputContent = OutputFormat.OutputContent
 
   def ExpandedString = org.openmole.core.expansion.ExpandedString
 

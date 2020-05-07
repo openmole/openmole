@@ -17,26 +17,19 @@
 
 package org.openmole.core.workflow
 
+import org.openmole.core.workflow.hook.Hook
+
 import scala.language.implicitConversions
 
 package mole {
+
   trait MolePackage {
-    def CSVHook = mole.CSVHook
-    def CSVOutputFormat = mole.CSVHook.CSVOutputFormat
-
-    val FromContextHook = mole.FromContextHook
-    type FromContextHook = mole.FromContextHook
     type FromContextSource = mole.FromContextSource
-
-    val OutputFormat = mole.OutputFormat
-    type OutputFormat[T, D] = mole.OutputFormat[T, D]
-    type OutputContent = OutputFormat.OutputContent
   }
 }
 
 package object mole {
 
-  def Hook = FromContextHook
   def Source = FromContextSource
 
   case class Hooks(map: Map[MoleCapsule, Traversable[Hook]])

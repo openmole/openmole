@@ -31,12 +31,13 @@ package composition {
   import org.openmole.core.outputmanager.OutputManager
   import org.openmole.core.workflow.builder.DefinitionScope
   import org.openmole.core.workflow.execution.{ EnvironmentProvider, LocalEnvironmentProvider }
-  import org.openmole.core.workflow.mole.CSVHook.CSVOutputFormat
-  import org.openmole.core.workflow.mole.{ CSVHook, OutputFormat, FormattedFileHook, Grouping, Hook, MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source }
+  import org.openmole.core.workflow.format.{ OutputFormat, WritableOutput, CSVOutputFormat }
+  import org.openmole.core.workflow.hook.{ FormattedFileHook, Hook }
+  import org.openmole.core.workflow.mole.{ Grouping, MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source }
   import org.openmole.core.workflow.sampling.Sampling
   import org.openmole.core.workflow.task.{ EmptyTask, ExplorationTask, Task }
-  import org.openmole.core.workflow.tools.{ OptionalArgument, WritableOutput }
-  import org.openmole.core.workflow.tools.WritableOutput.Display
+  import org.openmole.core.workflow.tools.OptionalArgument
+  import org.openmole.core.workflow.format.WritableOutput.Display
   import org.openmole.core.workflow.transition._
   import org.openmole.core.workflow.validation.TypeUtil
   import shapeless.{ ::, HList }

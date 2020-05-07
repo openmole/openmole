@@ -25,6 +25,7 @@ import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.hook.{ Hook, HookExecutionContext }
 import org.openmole.core.workflow.mole.{ MoleExecutionContext, _ }
 import org.openmole.core.workflow.validation._
 import org.openmole.plugin.hook.file.CopyFileHook._

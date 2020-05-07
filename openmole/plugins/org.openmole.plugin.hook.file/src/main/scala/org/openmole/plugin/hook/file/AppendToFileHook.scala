@@ -19,13 +19,9 @@ package org.openmole.plugin.hook.file
 
 import java.io.File
 
-import monocle.macros.Lenses
-import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.builder._
 import org.openmole.core.dsl._
-import org.openmole.core.workflow.mole.{ MoleExecutionContext, _ }
-import org.openmole.core.workflow.validation._
+import org.openmole.core.dsl.extension._
 import org.openmole.tool.stream._
 
 object AppendToFileHook {

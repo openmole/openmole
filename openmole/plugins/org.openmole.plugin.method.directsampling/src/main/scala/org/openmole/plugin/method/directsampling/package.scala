@@ -19,9 +19,9 @@ package org.openmole.plugin.method
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
+import org.openmole.core.workflow.format.WritableOutput
+import org.openmole.core.workflow.hook.FormattedFileHook
 import org.openmole.core.workflow.mole
-import org.openmole.core.workflow.mole.FormattedFileHook
-import org.openmole.core.workflow.tools.WritableOutput
 import org.openmole.plugin.domain.distribution._
 import org.openmole.plugin.domain.modifier._
 import org.openmole.plugin.tool.pattern._

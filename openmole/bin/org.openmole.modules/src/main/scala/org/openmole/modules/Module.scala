@@ -18,7 +18,7 @@
 package org.openmole.modules
 
 import org.openmole.core.module._
-import org.openmole.core.workflow.mole.CSVHook
+import org.openmole.core.workflow.hook.CSVHook
 import org.openmole.plugin.environment.condor.CondorEnvironment
 import org.openmole.plugin.environment.egi._
 import org.openmole.plugin.environment.oar.OAREnvironment

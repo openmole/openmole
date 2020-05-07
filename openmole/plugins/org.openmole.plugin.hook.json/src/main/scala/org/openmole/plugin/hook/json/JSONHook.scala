@@ -2,6 +2,7 @@ package org.openmole.plugin.hook.json
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
+import org.openmole.core.workflow.format.WritableOutput
 
 object JSONHook {
   def apply(output: WritableOutput, values: Val[_]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook =

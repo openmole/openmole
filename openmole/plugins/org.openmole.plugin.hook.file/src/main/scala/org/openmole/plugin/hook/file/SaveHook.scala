@@ -25,6 +25,7 @@ import org.openmole.core.exception._
 import org.openmole.core.expansion._
 import org.openmole.core.serializer._
 import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.hook.{ Hook, HookExecutionContext }
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.validation._
 import org.openmole.tool.random._

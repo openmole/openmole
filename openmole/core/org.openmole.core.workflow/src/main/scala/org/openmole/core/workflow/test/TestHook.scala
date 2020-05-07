@@ -20,7 +20,7 @@ import monocle.macros.Lenses
 import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.mole.{ Hook, HookExecutionContext }
+import org.openmole.core.workflow.hook.{ Hook, HookExecutionContext }
 import org.openmole.core.workflow.test.Stubs._
 
 object TestHook {

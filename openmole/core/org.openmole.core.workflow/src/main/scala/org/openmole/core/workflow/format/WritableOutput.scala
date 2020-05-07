@@ -1,4 +1,4 @@
-package org.openmole.core.workflow.tools
+package org.openmole.core.workflow.format
 
 /*
  * Copyright (C) 2019 Romain Reuillon

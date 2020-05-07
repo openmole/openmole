@@ -19,6 +19,7 @@ package org.openmole.plugin.method.evolution
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
+import org.openmole.core.workflow.format.WritableOutput
 
 object SavePopulationHook {
 

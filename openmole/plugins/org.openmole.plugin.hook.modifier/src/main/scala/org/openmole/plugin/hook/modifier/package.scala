@@ -17,9 +17,10 @@
 
 package org.openmole.plugin.hook
 
-import org.openmole.core.workflow.mole.{ Hook, _ }
+import org.openmole.core.workflow.mole._
 import org.openmole.core.expansion._
 import org.openmole.core.workflow.builder.DefinitionScope
+import org.openmole.core.workflow.hook.Hook
 
 package object modifier {
 

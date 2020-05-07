@@ -2,7 +2,7 @@
 //
 //import org.openmole.core.dsl._
 //import org.openmole.core.dsl.extension._
-//import org.openmole.core.workflow.mole.FromContextHook
+//import org.openmole.core.workflow.hook.FromContextHook
 //import org.openmole.plugin.tool.json._
 //
 //object OMROutputFormat {

@@ -20,7 +20,8 @@ package org.openmole.core.workflow.validation
 import org.openmole.core.context.Val
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.tools.io.Prettifier
-import org.openmole.core.workflow.mole.{ Hook, _ }
+import org.openmole.core.workflow.hook.Hook
+import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workspace.TmpDirectory
