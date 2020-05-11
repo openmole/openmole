@@ -303,12 +303,9 @@ public class TarEntry extends Object implements Cloneable {
     /**
      * Set this entry's modification time.
      * 
-     * @param time
-     *            This entry's new modification time.
+     * @return This entry's new modification time.
      */
-    public Date getModTime() {
-        return new Date(this.modTime * MILLIS_PER_SECOND);
-    }
+    public long getModTime() { return this.modTime * MILLIS_PER_SECOND;  }
 
     /**
      * Get this entry's name.

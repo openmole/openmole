@@ -80,6 +80,7 @@ package object tar {
               dest.toFile.mode = e.getMode
             }
           }
+          dest.setLastModified(e.getModTime)
       }
 
       // Set directory right after extraction in case some directory are not writable
@@ -117,7 +118,6 @@ package object tar {
     }
 
     def compressXZ(to: File) = {
-
       val outfile = new FileOutputStream(to)
       val outxz = new XZOutputStream(outfile, new LZMA2Options(8), org.tukaani.xz.XZ.CHECK_SHA256)
 
@@ -198,7 +198,8 @@ package object tar {
             }
           }
           // create the actual tar entry for the directory
-          new TarEntry(entryName + '/')
+          val e = new TarEntry(entryName + '/')
+          e
         }
         // tar distinguishes symlinks
         else if (isSymbolicLink) {
@@ -216,8 +217,11 @@ package object tar {
       // complete current entry by fixing its modes and writing it to the archive
       if (source != directory) {
         if (!isSymbolicLink) e.setMode(source.mode)
+        e.setModTime(source.lastModified)
+
         additionalCommand(e)
         tos.putNextEntry(e)
+
         if (Files.isRegularFile(source, LinkOption.NOFOLLOW_LINKS)) try Files.copy(source, tos)
         finally tos.closeEntry
       }
