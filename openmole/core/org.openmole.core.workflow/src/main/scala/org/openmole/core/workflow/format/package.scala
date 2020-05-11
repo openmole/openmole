@@ -6,7 +6,7 @@ package format {
 
   trait FormatPackage {
     type Display = WritableOutput.Display
-    def display(implicit outputRedirection: OutputRedirection): Display = outputRedirection.output
+    def display(implicit outputRedirection: OutputRedirection): Display = WritableOutput.Display(outputRedirection.output)
     def CSVOutputFormat = format.CSVOutputFormat
   }
 }

@@ -34,7 +34,7 @@ class Activator extends PluginInfoActivator {
 
     val keyWords: Vector[KeyWord] =
       Vector( //        TaskKeyWord(objectName(JSONHook)),
-      //        OtherKeyWord(objectName(JSONOutputFormat))
+        OtherKeyWord(objectName(OMROutputFormat))
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
