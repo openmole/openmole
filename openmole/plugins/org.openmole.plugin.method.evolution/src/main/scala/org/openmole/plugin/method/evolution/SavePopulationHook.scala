@@ -45,8 +45,12 @@ object SavePopulationHook {
           case _ ⇒ None
         }
 
-      val section = OutputFormat.PlainContent(resultVariables(t).from(context), fileName)
-      outputFormat.write(format, output, section, evolutionData(t)).from(context)
+      fileName match {
+        case Some(fileName) ⇒
+          val content = OutputFormat.PlainContent(resultVariables(t).from(context), Some(fileName))
+          outputFormat.write(format, output, content, evolutionData(t)).from(context)
+        case None ⇒
+      }
 
       context
     } validate { p ⇒ outputFormat.validate(format)(p) } set (inputs += (t.populationPrototype, t.statePrototype))
