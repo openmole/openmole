@@ -45,7 +45,7 @@ lazy val shapeless =  OsgiProject(dir, "com.chuusai.shapeless", exports = Seq("s
   version := shapelessVersion
 ) settings(settings: _*)
 
-lazy val circeVersion = "0.12.3"
+lazy val circeVersion = "0.13.0"
 lazy val circe = OsgiProject(dir, "io.circe",
   exports = Seq("io.circe.*", "!cats.*", "!scala.*", "!shapeless.*"),
   privatePackages = Seq("org.typelevel.jawn.*"),
@@ -53,6 +53,7 @@ lazy val circe = OsgiProject(dir, "io.circe",
   libraryDependencies ++= Seq(
     "io.circe" %% "circe-core",
     "io.circe" %% "circe-generic",
+    "io.circe" %% "circe-generic-extras",
     "io.circe" %% "circe-parser"
   ).map(_ % circeVersion),
   version := circeVersion) settings(settings: _*) dependsOn(shapeless)
