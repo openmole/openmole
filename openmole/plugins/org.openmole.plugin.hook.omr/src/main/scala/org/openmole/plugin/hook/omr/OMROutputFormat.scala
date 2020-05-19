@@ -2,28 +2,55 @@ package org.openmole.plugin.hook.omr
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
+import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workflow.format.CSVOutputFormat
 import org.openmole.core.workflow.hook.FromContextHook
 import org.openmole.plugin.tool.json._
+import io.circe._
+import org.openmole.core.workflow.format.OutputFormat.{ PlainContent, SectionContent }
+import org.openmole.core.workflow.format.WritableOutput.Store
+import org.openmole.plugin.hook.json.JSONOutputFormat
 
 object OMROutputFormat {
 
-  implicit def outputFormat: OutputFormat[OMROutputFormat, Any] = new OutputFormat[OMROutputFormat, Any] {
-    override def write(format: OMROutputFormat, output: WritableOutput, content: OutputContent, method: Any): FromContext[Unit] = FromContext { p ⇒
+  implicit def outputFormat[MD](implicit encoder: Encoder[MD]): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD] {
+    override def write(executionContext: HookExecutionContext)(format: OMROutputFormat, output: WritableOutput, content: OutputContent, method: MD): FromContext[Unit] = FromContext { p ⇒
       import p._
       import org.json4s._
       import org.json4s.jackson.JsonMethods._
 
-      implicit val formats = DefaultFormats
-
       output match {
-        case WritableOutput.Display(stream) => implicitly[OutputFormat[CSVOutputFormat, Any]].write(CSVOutputFormat(), output, content, method)
-        case WritableOutput.Store(file) =>
-          import org.openmole.tool.tar._
+        case WritableOutput.Display(stream) ⇒ implicitly[OutputFormat[CSVOutputFormat, Any]].write(executionContext)(CSVOutputFormat(), output, content, method).from(context)
+        case WritableOutput.Store(file) ⇒
+          import io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
 
-//          file.from(context).withTarGZOutputStream {
-//
-//          }
+          content match {
+            case PlainContent(variables, name) ⇒
+              val (f, m) =
+                name match {
+                  case Some(n) ⇒ (file / "data" / s"${n.from(context)}.json.gz", file / "method.omr")
+                  case None    ⇒ (file / "data.json.gz", file / "method.omr")
+                }
+
+              f.from(context).withPrintStream(append = false, create = true, gz = true) { ps ⇒
+                ps.print(compact(render(variablesToJValue(variables))))
+              }
+
+              m.from(context).withPrintStream(create = true, gz = true)(_.print(method.asJson.noSpaces))
+            case sections: SectionContent ⇒
+              def sectionContent(sections: SectionContent) =
+                JObject(
+                  sections.sections.map { section ⇒ section.name.from(context) -> variablesToJValue(section.variables) }.toList
+                )
+
+              val (f, m) = (file / "data.json.gz", file / "method.omr")
+
+              f.from(context).withPrintStream(append = false, create = true, gz = true) { ps ⇒
+                ps.print(compact(render(sectionContent(sections))))
+              }
+
+              m.from(context).withPrintStream(create = true, gz = true)(_.print(method.asJson.noSpaces))
+          }
       }
     }
 

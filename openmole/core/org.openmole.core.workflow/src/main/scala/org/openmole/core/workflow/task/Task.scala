@@ -23,6 +23,7 @@ import org.openmole.core.context._
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
+import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.tools.obj.Id
 import org.openmole.core.workflow.builder.{ DefinitionScope, InfoConfig, InputOutputConfig }
@@ -63,6 +64,7 @@ case class TaskExecutionContext(
   implicit val workspace:         Workspace,
   implicit val outputRedirection: OutputRedirection,
   implicit val loggerService:     LoggerService,
+  implicit val serializerService: SerializerService,
   cache:                          KeyValueCache,
   lockRepository:                 LockRepository[LockKey],
   moleExecution:                  Option[MoleExecution]   = None)

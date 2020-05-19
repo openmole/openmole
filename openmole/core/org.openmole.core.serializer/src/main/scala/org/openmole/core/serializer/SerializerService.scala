@@ -30,6 +30,7 @@ import org.openmole.core.serializer.converter._
 import java.util.concurrent.locks.{ ReadWriteLock, ReentrantReadWriteLock }
 
 import com.thoughtworks.xstream.converters.Converter
+import com.thoughtworks.xstream.io.json._
 import com.thoughtworks.xstream.mapper.Mapper
 import com.thoughtworks.xstream.security._
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
@@ -50,13 +51,16 @@ object SerializerService {
  */
 class SerializerService { service ⇒
 
-  private[serializer] def buildXStream() = {
+  private[serializer] def buildXStream(json: Boolean = false) = {
     val lookup = new DefaultConverterLookup()
+
+    val driver =
+      if (json) new JsonHierarchicalStreamDriver() else new BinaryStreamDriver()
 
     val xs =
       new XStream(
         null,
-        new BinaryStreamDriver(),
+        driver,
         new ClassLoaderReference(this.getClass.getClassLoader),
         null: Mapper,
         lookup,
@@ -71,7 +75,7 @@ class SerializerService { service ⇒
 
   private val content = "content.xml"
 
-  private def fileSerialisation() = buildXStream
+  private def fileSerialisation() = buildXStream()
   private def pluginAndFileListing() = new Serialiser(service) with PluginAndFilesListing
   private def deserializerWithFileInjection() = new Serialiser(service) with FileInjection
 
@@ -131,9 +135,9 @@ class SerializerService { service ⇒
 
   def serialize(obj: Any, os: OutputStream) = buildXStream().toXML(obj, os)
 
-  def serialize(obj: Any, file: File): Unit = {
+  def serialize(obj: Any, file: File, json: Boolean = false): Unit = {
     val os = file.bufferedOutputStream()
-    try serialize(obj, os)
+    try buildXStream(json = json).toXML(obj, os)
     finally os.close
   }
 

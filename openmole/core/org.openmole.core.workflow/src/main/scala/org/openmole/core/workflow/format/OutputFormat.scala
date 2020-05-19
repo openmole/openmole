@@ -2,7 +2,7 @@ package org.openmole.core.workflow.format
 
 import org.openmole.core.context._
 import org.openmole.core.expansion._
-import org.openmole.core.workflow.hook.FromContextHook
+import org.openmole.core.workflow.hook.{ FromContextHook, HookExecutionContext }
 
 object OutputFormat {
   object OutputContent {
@@ -18,6 +18,6 @@ object OutputFormat {
 }
 
 trait OutputFormat[T, -M] {
-  def write(format: T, output: WritableOutput, content: OutputFormat.OutputContent, method: M): FromContext[Unit]
+  def write(executionContext: HookExecutionContext)(format: T, output: WritableOutput, content: OutputFormat.OutputContent, method: M): FromContext[Unit]
   def validate(format: T): FromContextHook.ValidateParameters ⇒ Seq[Throwable]
 }

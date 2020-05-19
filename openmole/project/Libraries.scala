@@ -28,7 +28,7 @@ object Libraries {
   lazy val catsVersion = "2.1.0"
   lazy val scalajsVersion = "0.6.31"
   lazy val squantsVersion = "1.6.0"
-  lazy val xstreamVersion = "1.4.11.1"
+  lazy val xstreamVersion = "1.4.12"
   lazy val scalatraVersion = "2.7.0-RC1"
   lazy val scalaURIVersion = "1.1.1"
   lazy val scoptVersion = "3.7.1"

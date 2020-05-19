@@ -277,7 +277,11 @@ package file {
         else false
       }
 
-      def content_=(content: String) = Files.write(file, content.getBytes, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
+      def content_=(content: String) = {
+        createParentDirectory
+        Files.write(file, content.getBytes, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
+      }
+
       def <(c: String) = content_=(c)
 
       def content = withSource(_.mkString)
@@ -412,7 +416,11 @@ package file {
         if (append) Seq(CREATE, APPEND, WRITE) else Seq(CREATE, TRUNCATE_EXISTING, WRITE)
       }
 
-      def bufferedOutputStream(append: Boolean = false) = new BufferedOutputStream(Files.newOutputStream(file.toPath, writeOptions(append): _*))
+      def bufferedOutputStream(append: Boolean = false, gz: Boolean = false) = {
+        file.createParentDirectory
+        if (!gz) new BufferedOutputStream(Files.newOutputStream(file.toPath, writeOptions(append): _*))
+        else new BufferedOutputStream(Files.newOutputStream(file.toPath, writeOptions(append): _*).toGZ)
+      }
 
       def gzippedBufferedInputStream = new GZIPInputStream(bufferedInputStream)
 
@@ -424,9 +432,9 @@ package file {
 
       def withOutputStream[T] = withClosable[OutputStream, T](bufferedOutputStream())(_)
 
-      def withPrintStream[T](append: Boolean = false, create: Boolean = false) = {
+      def withPrintStream[T](append: Boolean = false, create: Boolean = false, gz: Boolean = false) = {
         if (create) file.createParentDirectory
-        withClosable[PrintStream, T](new PrintStream(file.bufferedOutputStream(append = append))) _
+        withClosable[PrintStream, T](new PrintStream(file.bufferedOutputStream(append = append, gz = gz))) _
       }
 
       def atomicWithPrintStream[T](f: PrintStream ⇒ T) = {

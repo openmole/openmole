@@ -6,12 +6,13 @@ import org.openmole.core.context.{ Val, Variable }
 import org.openmole.core.csv
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.hook.HookExecutionContext
 import org.openmole.core.workflow.tools.OptionalArgument
 
 object CSVOutputFormat {
 
   implicit def format: OutputFormat[CSVOutputFormat, Any] = new OutputFormat[CSVOutputFormat, Any] {
-    override def write(format: CSVOutputFormat, output: WritableOutput, content: OutputFormat.OutputContent, method: Any): FromContext[Unit] = FromContext { p ⇒
+    override def write(executionContext: HookExecutionContext)(format: CSVOutputFormat, output: WritableOutput, content: OutputFormat.OutputContent, method: Any): FromContext[Unit] = FromContext { p ⇒
       import p._
 
       def headerLine(variables: Seq[Variable[_]]) = format.header.map(_.from(context)) getOrElse csv.header(variables.map(_.prototype), variables.map(_.value), arrayOnRow = format.arrayOnRow)

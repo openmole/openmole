@@ -159,7 +159,8 @@ class Runtime {
           outputRedirection = outputRedirection,
           loggerService = loggerService,
           cache = KeyValueCache(),
-          lockRepository = LockRepository[LockKey]())
+          lockRepository = LockRepository[LockKey](),
+          serializerService = serializerService)
 
         for (toProcess ← allMoleJobs) environment.submit(toProcess, taskExecutionContext)
         saver.waitAllFinished

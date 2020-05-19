@@ -386,4 +386,22 @@ class WorkflowSpec extends FlatSpec with Matchers {
     )
   }
 
+  "OMRHook" should "work with NSGA" in {
+    import org.openmole.plugin.hook.omr._
+
+    val a = Val[Double]
+    val b = Val[Double]
+
+    val nsga =
+      NSGA2Evolution(
+        evaluation = EmptyTask() set (inputs += a, outputs += b),
+        objectives = Seq(b),
+        genome = Seq(a in (0.0, 1.0)),
+        termination = 100,
+        stochastic = Stochastic()
+      )
+
+    nsga hook ("/tmp/test", format = OMROutputFormat())
+  }
+
 }

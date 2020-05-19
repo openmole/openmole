@@ -23,7 +23,8 @@ import org.openmole.core.expansion.FromContext
 
 object WritableOutput {
 
-  implicit def fromFile(file: File) = Store(file)
+  implicit def fromString(s: String): Store = fromFile(new File(s))
+  implicit def fromFile(file: File): Store = Store(file)
   implicit def fromFileContext(file: FromContext[File]) = Store(file)
   implicit def fromPrintStream(ps: PrintStream) = Display(ps)
 

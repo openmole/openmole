@@ -21,7 +21,7 @@ object SaltelliHook {
           OutputSection("totalOrderIndices", Sensitivity.variableResults(inputs, dsl.data.outputs, Saltelli.totalOrder(_, _)).from(context))
         )
 
-      outputFormat.write(format, output, sections, dsl.data).from(context)
+      outputFormat.write(executionContext)(format, output, sections, dsl.data).from(context)
 
       context
     }

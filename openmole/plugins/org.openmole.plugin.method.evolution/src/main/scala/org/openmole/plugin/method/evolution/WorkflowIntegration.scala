@@ -161,6 +161,7 @@ trait EvolutionWorkflow {
   type G = integration.G
   type I = integration.I
   type S = integration.S
+
   type V
   type P
 
@@ -271,6 +272,8 @@ object MGOAPI {
     def operations(a: A): Ops
 
     trait Ops {
+      def metadata(generation: Long, frequency: Option[Long]): FromContext[Metadata] = FromContext { _ ⇒ Metadata.none }
+
       def initialState: S
       def initialGenomes(n: Int, rng: scala.util.Random): FromContext[Vector[G]]
 

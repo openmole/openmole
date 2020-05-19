@@ -207,7 +207,8 @@ object MoleExecution extends JavaLogger {
                   loggerService = loggerService,
                   cache = subMoleExecutionState.moleExecution.keyValueCache,
                   lockRepository = subMoleExecutionState.moleExecution.lockRepository,
-                  moleExecution = Some(subMoleExecutionState.moleExecution)
+                  moleExecution = Some(subMoleExecutionState.moleExecution),
+                  serializerService = serializerService
                 )
 
               val result = moleJob.perform(taskContext)
@@ -265,7 +266,8 @@ object MoleExecution extends JavaLogger {
             outputRedirection = services.outputRedirection,
             loggerService = services.loggerService,
             random = services.newRandom,
-            newFile = services.tmpDirectory)
+            newFile = services.tmpDirectory,
+            serializerService = services.serializerService)
         }
 
         h.perform(ctxForHooks, toHookExecutionContext(subMoleExecutionState.moleExecution.keyValueCache, subMoleExecutionState.moleExecution.executionContext))
@@ -452,7 +454,8 @@ object MoleExecution extends JavaLogger {
             loggerService = loggerService,
             cache = moleExecution.keyValueCache,
             lockRepository = moleExecution.lockRepository,
-            moleExecution = Some(moleExecution)
+            moleExecution = Some(moleExecution),
+            serializerService = serializerService
           )
         )
     }

@@ -234,7 +234,6 @@ object NichedNSGA2 {
       def sManifest = implicitly
 
       def operations(om: DeterministicParams) = new Ops {
-
         def startTimeLens = GenLens[S](_.startTime)
         def generationLens = GenLens[S](_.generation)
 
@@ -339,7 +338,6 @@ object NichedNSGA2 {
       def sManifest = implicitly
 
       def operations(om: StochasticParams) = new Ops {
-
         def startTimeLens = GenLens[S](_.startTime)
         def generationLens = GenLens[S](_.generation)
 

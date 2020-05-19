@@ -84,7 +84,6 @@ lazy val xstream = OsgiProject(
     "!com.ctc.wstx.stax.*",
     "!net.sf.cglib.*",
     "!nu.xom.*",
-    "!org.codehaus.jettison.*",
     "!org.dom4j.*",
     "!org.jdom.*",
     "!org.jdom2.*",
@@ -97,8 +96,8 @@ lazy val xstream = OsgiProject(
     "!javax.*",
     "*"),
   privatePackages = Seq("!scala.*", "META-INF.services.*", "*")) settings(
-  libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.11.1", "net.sf.kxml" % "kxml2" % "2.3.0"),
-  version := "1.4.11.1") settings(settings: _*)
+  libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.12", "net.sf.kxml" % "kxml2" % "2.3.0", "org.codehaus.jettison" % "jettison" % "1.4.1"),
+  version := "1.4.12") settings(settings: _*)
 
 lazy val scalaLang = OsgiProject(
   dir,

@@ -21,6 +21,7 @@ import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
+import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder.{ InfoConfig, InputOutputConfig }
 import org.openmole.core.workflow.tools._
@@ -39,7 +40,8 @@ case class HookExecutionContext(
   implicit val outputRedirection: OutputRedirection,
   implicit val loggerService:     LoggerService,
   implicit val random:            RandomProvider,
-  implicit val newFile:           TmpDirectory)
+  implicit val newFile:           TmpDirectory,
+  implicit val serializerService: SerializerService)
 
 trait Hook <: Name {
 

@@ -21,7 +21,7 @@ import cats.implicits._
 import monocle.macros.GenLens
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import org.openmole.plugin.method.evolution.Genome.Suggestion
+import org.openmole.plugin.method.evolution.Genome.{ Suggestion }
 import squants.time.Time
 
 import scala.language.higherKinds
@@ -29,6 +29,7 @@ import scala.language.higherKinds
 object NSGA2 {
 
   object stochastic {
+
     case class SavedGeneration(generation: Long, objectives: Vector[SavedObjective])
     case class SavedObjective(objectives: Vector[Double], samples: Int)
 
@@ -74,7 +75,6 @@ object NSGA2 {
       def sManifest = implicitly
 
       def operations(om: DeterministicParams) = new Ops {
-
         def startTimeLens = GenLens[EvolutionState[Unit]](_.startTime)
 
         def generationLens = GenLens[EvolutionState[Unit]](_.generation)
@@ -152,6 +152,16 @@ object NSGA2 {
       def sManifest = implicitly
 
       def operations(om: StochasticParams) = new Ops {
+
+        override def metadata(generation: Long, frequency: Option[Long]) = FromContext { p ⇒
+          import p._
+          import Metadata._
+          nsga2(
+            om.genome.map(GenomeBoundData(_).from(context)),
+            generation = generation,
+            frequency = frequency
+          )
+        }
 
         def startTimeLens = GenLens[S](_.startTime)
         def generationLens = GenLens[S](_.generation)

@@ -100,7 +100,7 @@ package object evolution {
   implicit def workflowIntegration = WorkflowIntegration[DSLContainer[EvolutionWorkflow]](_.data)
 
   implicit class EvolutionMethodContainer(dsl: DSLContainer[EvolutionWorkflow]) extends DSLContainerHook(dsl) {
-    def hook[F](output: WritableOutput, frequency: OptionalArgument[Long] = None, last: Boolean = false, format: F = CSVOutputFormat(unrollArray = true))(implicit outputFormat: OutputFormat[F, SavePopulationHook.EvolutionData]): DSLContainer[EvolutionWorkflow] = {
+    def hook[F](output: WritableOutput, frequency: OptionalArgument[Long] = None, last: Boolean = false, format: F = CSVOutputFormat(unrollArray = true))(implicit outputFormat: OutputFormat[F, Metadata]): DSLContainer[EvolutionWorkflow] = {
       implicit val defScope = dsl.scope
       dsl.hook(SavePopulationHook(dsl, output, frequency = frequency, last = last, format = format))
     }

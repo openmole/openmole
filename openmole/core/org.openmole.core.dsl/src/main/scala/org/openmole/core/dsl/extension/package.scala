@@ -47,6 +47,7 @@ package object extension {
   val OutputFormat = org.openmole.core.workflow.format.OutputFormat
   type OutputFormat[T, D] = org.openmole.core.workflow.format.OutputFormat[T, D]
   type OutputContent = OutputFormat.OutputContent
+  type HookExecutionContext = org.openmole.core.workflow.hook.HookExecutionContext
 
   def ExpandedString = org.openmole.core.expansion.ExpandedString
 

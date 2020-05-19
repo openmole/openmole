@@ -117,6 +117,7 @@ object MoleTask {
       import executionContext.workspace
       import executionContext.outputRedirection
       import executionContext.loggerService
+      import executionContext.serializerService
 
       val localEnvironment =
         LocalEnvironment(1, executionContext.localEnvironment.deinterleave)

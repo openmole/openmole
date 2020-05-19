@@ -20,6 +20,7 @@ package org.openmole.core.workflow.mole
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.{ FileService, FileServiceCache }
 import org.openmole.core.preference.Preference
+import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider._
 import org.openmole.core.workspace._
 import org.openmole.tool.cache._
@@ -56,7 +57,7 @@ object MoleServices {
     applicationExecutionDirectory: File,
     moleExecutionDirectory:        Option[File]              = None,
     outputRedirection:             Option[OutputRedirection] = None,
-    seed:                          Option[Long]              = None)(implicit preference: Preference, seeder: Seeder, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, _newFile: TmpDirectory, fileService: FileService, workspace: Workspace, _outputRedirection: OutputRedirection, loggerService: LoggerService) = {
+    seed:                          Option[Long]              = None)(implicit preference: Preference, seeder: Seeder, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, _newFile: TmpDirectory, fileService: FileService, workspace: Workspace, _outputRedirection: OutputRedirection, loggerService: LoggerService, serializerService: SerializerService) = {
     val executionDirectory = moleExecutionDirectory.getOrElse(applicationExecutionDirectory.newDir("execution"))
     new MoleServices(applicationExecutionDirectory, executionDirectory)(
       preference = preference,
@@ -68,7 +69,8 @@ object MoleServices {
       fileService = fileService,
       fileServiceCache = FileServiceCache(),
       outputRedirection = outputRedirection.getOrElse(_outputRedirection),
-      loggerService = loggerService
+      loggerService = loggerService,
+      serializerService = serializerService
     )
   }
 
@@ -86,7 +88,8 @@ object MoleServices {
     fileServiceCache:  FileServiceCache  = moleServices.fileServiceCache,
     workspace:         Workspace         = moleServices.workspace,
     outputRedirection: OutputRedirection = moleServices.outputRedirection,
-    loggerService:     LoggerService     = moleServices.loggerService) =
+    loggerService:     LoggerService     = moleServices.loggerService,
+    serializerService: SerializerService = moleServices.serializerService) =
     new MoleServices(moleServices.applicationExecutionDirectory, moleServices.moleExecutionDirectory)(
       preference = preference,
       seeder = seeder,
@@ -97,7 +100,8 @@ object MoleServices {
       fileService = fileService,
       fileServiceCache = fileServiceCache,
       outputRedirection = outputRedirection,
-      loggerService = loggerService
+      loggerService = loggerService,
+      serializerService = serializerService
     )
 }
 
@@ -125,7 +129,8 @@ class MoleServices(val applicationExecutionDirectory: File, val moleExecutionDir
   val fileService:       FileService,
   val fileServiceCache:  FileServiceCache,
   val outputRedirection: OutputRedirection,
-  val loggerService:     LoggerService
+  val loggerService:     LoggerService,
+  val serializerService: SerializerService
 ) {
   def newRandom = Lazy(seeder.newRNG)
   implicit lazy val defaultRandom = newRandom

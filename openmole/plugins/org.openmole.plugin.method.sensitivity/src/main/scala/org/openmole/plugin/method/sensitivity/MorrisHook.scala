@@ -22,7 +22,7 @@ object MorrisHook {
           OutputSection("sigma", Sensitivity.variableResults(inputs, dsl.data.outputs, Morris.sigma(_, _)).from(context))
         )
 
-      outputFormat.write(format, output, sections, dsl.data).from(context)
+      outputFormat.write(executionContext)(format, output, sections, dsl.data).from(context)
 
       context
     }
