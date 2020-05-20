@@ -156,8 +156,9 @@ object NSGA2 {
         override def metadata(generation: Long, frequency: Option[Long]) = FromContext { p ⇒
           import p._
           import Metadata._
-          nsga2(
-            om.genome.map(GenomeBoundData(_).from(context)),
+          StochasticNSGA2(
+            genome = om.genome.map(GenomeBoundData(_).from(context)),
+            objective = om.objectives.map(NoisyObjectiveData(_)),
             generation = generation,
             frequency = frequency
           )

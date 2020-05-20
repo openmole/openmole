@@ -26,17 +26,11 @@ sealed trait GUIPlugin
 
 trait AuthenticationPlugin extends GUIPlugin {
   type AuthType <: AuthenticationData
-
   def data: AuthType
-
   def factory: AuthenticationPluginFactory
-
   def panel: TypedTag[HTMLElement]
-
   def save(onsave: () ⇒ Unit): Unit
-
   def remove(onremoved: () ⇒ Unit): Unit
-
   def test: Future[Seq[Test]]
 }
 
@@ -46,18 +40,13 @@ sealed trait GUIPluginFactory {
 
 trait AuthenticationPluginFactory extends GUIPluginFactory {
   type AuthType <: AuthenticationData
-
   def build(data: AuthType): AuthenticationPlugin
-
   def buildEmpty: AuthenticationPlugin
-
   def getData: Future[Seq[AuthType]]
 }
 
 trait WizardGUIPlugin extends GUIPlugin {
-
   def factory: WizardPluginFactory
-
   val panel: TypedTag[HTMLElement]
 
   def save(
@@ -71,10 +60,7 @@ trait WizardGUIPlugin extends GUIPlugin {
 }
 
 trait WizardPluginFactory extends GUIPluginFactory {
-
   def build(safePath: SafePath, onPanelFilled: (LaunchingCommand) ⇒ Unit): WizardGUIPlugin
-
   def fileType: FileType
-
   def parse(safePath: SafePath): Future[Option[LaunchingCommand]]
 }
