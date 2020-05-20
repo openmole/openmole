@@ -411,14 +411,14 @@ object NichedNSGA2 {
   def apply[P](
     niche:      Seq[NichedElement],
     genome:     Genome,
-    objectives: Objectives,
+    objective:  Objectives,
     nicheSize:  Int,
     stochastic: OptionalArgument[Stochastic] = None,
     reject:     OptionalArgument[Condition]  = None
   ): EvolutionWorkflow =
-    WorkflowIntegration.stochasticity(objectives, stochastic.option) match {
+    WorkflowIntegration.stochasticity(objective, stochastic.option) match {
       case None ⇒
-        val exactObjectives = objectives.map(o ⇒ Objective.toExact(o))
+        val exactObjectives = objective.map(o ⇒ Objective.toExact(o))
         val integration: WorkflowIntegration.DeterministicGA[_] = new WorkflowIntegration.DeterministicGA(
           DeterministicParams(
             genome = genome,
@@ -434,7 +434,7 @@ object NichedNSGA2 {
         WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
 
       case Some(stochasticValue) ⇒
-        val noisyObjectives = objectives.map(o ⇒ Objective.toNoisy(o))
+        val noisyObjectives = objective.map(o ⇒ Objective.toNoisy(o))
 
         val integration: WorkflowIntegration.StochasticGA[_] = WorkflowIntegration.StochasticGA(
           StochasticParams(
@@ -465,7 +465,7 @@ object NichedNSGA2Evolution {
     termination:  OMTermination,
     niche:        Seq[NichedElement],
     genome:       Genome,
-    objectives:   Objectives,
+    objective:    Objectives,
     nicheSize:    Int,
     stochastic:   OptionalArgument[Stochastic] = None,
     parallelism:  Int                          = 1,
@@ -479,7 +479,7 @@ object NichedNSGA2Evolution {
           niche = niche,
           genome = genome,
           nicheSize = nicheSize,
-          objectives = objectives,
+          objective = objective,
           stochastic = stochastic,
           reject = reject
         ),

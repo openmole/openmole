@@ -277,14 +277,14 @@ object OSE {
 
   def apply(
     origin:     Seq[OriginAxe],
-    objectives: Seq[FitnessPattern],
+    objective:  Seq[FitnessPattern],
     genome:     Genome                       = Seq(),
     mu:         Int                          = 200,
     stochastic: OptionalArgument[Stochastic] = None,
     reject:     OptionalArgument[Condition]  = None): EvolutionWorkflow =
-    WorkflowIntegration.stochasticity(objectives.map(_.objective), stochastic.option) match {
+    WorkflowIntegration.stochasticity(objective.map(_.objective), stochastic.option) match {
       case None ⇒
-        val exactObjectives = FitnessPattern.toObjectives(objectives).map(o ⇒ Objective.toExact(o))
+        val exactObjectives = FitnessPattern.toObjectives(objective).map(o ⇒ Objective.toExact(o))
         val fg = OriginAxe.fullGenome(origin, genome)
 
         val integration: WorkflowIntegration.DeterministicGA[_] =
@@ -294,7 +294,7 @@ object OSE {
               origin = OriginAxe.toOrigin(origin, genome),
               genome = fg,
               objectives = exactObjectives,
-              limit = FitnessPattern.toLimit(objectives),
+              limit = FitnessPattern.toLimit(objective),
               operatorExploration = operatorExploration,
               reject = reject.option),
             fg,
@@ -304,7 +304,7 @@ object OSE {
         WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
       case Some(stochasticValue) ⇒
         val fg = OriginAxe.fullGenome(origin, genome)
-        val noisyObjectives = FitnessPattern.toObjectives(objectives).map(o ⇒ Objective.toNoisy(o))
+        val noisyObjectives = FitnessPattern.toObjectives(objective).map(o ⇒ Objective.toNoisy(o))
 
         val integration: WorkflowIntegration.StochasticGA[_] =
           WorkflowIntegration.StochasticGA(
@@ -313,7 +313,7 @@ object OSE {
               origin = OriginAxe.toOrigin(origin, genome),
               genome = fg,
               objectives = noisyObjectives,
-              limit = FitnessPattern.toLimit(objectives),
+              limit = FitnessPattern.toLimit(objective),
               operatorExploration = operatorExploration,
               historySize = stochasticValue.replications,
               cloneProbability = stochasticValue.reevaluate,
@@ -334,7 +334,7 @@ object OSEEvolution {
 
   def apply(
     origin:       Seq[OSE.OriginAxe],
-    objectives:   Seq[OSE.FitnessPattern],
+    objective:    Seq[OSE.FitnessPattern],
     evaluation:   DSL,
     termination:  OMTermination,
     mu:           Int                          = 200,
@@ -350,7 +350,7 @@ object OSEEvolution {
         OSE(
           origin = origin,
           genome = genome,
-          objectives = objectives,
+          objective = objective,
           stochastic = stochastic,
           mu = mu,
           reject = reject

@@ -21,9 +21,10 @@ object CSVHook {
     exclude:     Seq[Val[_]]                           = Vector.empty,
     header:      OptionalArgument[FromContext[String]] = None,
     unrollArray: Boolean                               = false,
+    arrayOnRow:  Boolean                               = false,
     overwrite:   Boolean                               = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook =
     FormattedFileHook(
-      format = CSVOutputFormat(header = header, unrollArray = unrollArray, append = !overwrite),
+      format = CSVOutputFormat(header = header, unrollArray = unrollArray, append = !overwrite, arrayOnRow = arrayOnRow),
       output = output,
       values = values,
       exclude = exclude,

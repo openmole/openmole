@@ -418,17 +418,17 @@ object PSE {
 
   def apply(
     genome:     Genome,
-    objectives: Seq[PatternAxe],
+    objective:  Seq[PatternAxe],
     stochastic: OptionalArgument[Stochastic] = None,
     reject:     OptionalArgument[Condition]  = None
   ) =
-    WorkflowIntegration.stochasticity(objectives.map(_.p), stochastic.option) match {
+    WorkflowIntegration.stochasticity(objective.map(_.p), stochastic.option) match {
       case None ⇒
-        val exactObjectives = objectives.map(o ⇒ Objective.toExact(o.p))
+        val exactObjectives = objective.map(o ⇒ Objective.toExact(o.p))
 
         val integration: WorkflowIntegration.DeterministicGA[_] = WorkflowIntegration.DeterministicGA(
           DeterministicParams(
-            mgo.evolution.niche.irregularGrid(objectives.map(_.scale).toVector),
+            mgo.evolution.niche.irregularGrid(objective.map(_.scale).toVector),
             genome,
             exactObjectives,
             operatorExploration,
@@ -438,11 +438,11 @@ object PSE {
 
         WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
       case Some(stochasticValue) ⇒
-        val noisyObjectives = objectives.map(o ⇒ Objective.toNoisy(o.p))
+        val noisyObjectives = objective.map(o ⇒ Objective.toNoisy(o.p))
 
         val integration: WorkflowIntegration.StochasticGA[_] = WorkflowIntegration.StochasticGA(
           StochasticParams(
-            pattern = mgo.evolution.niche.irregularGrid(objectives.map(_.scale).toVector),
+            pattern = mgo.evolution.niche.irregularGrid(objective.map(_.scale).toVector),
             genome = genome,
             objectives = noisyObjectives,
             historySize = stochasticValue.replications,
@@ -464,7 +464,7 @@ object PSEEvolution {
 
   def apply(
     genome:       Genome,
-    objectives:   Seq[PSE.PatternAxe],
+    objective:    Seq[PSE.PatternAxe],
     evaluation:   DSL,
     termination:  OMTermination,
     stochastic:   OptionalArgument[Stochastic] = None,
@@ -477,7 +477,7 @@ object PSEEvolution {
       algorithm =
         PSE(
           genome = genome,
-          objectives = objectives,
+          objective = objective,
           stochastic = stochastic,
           reject = reject
         ),

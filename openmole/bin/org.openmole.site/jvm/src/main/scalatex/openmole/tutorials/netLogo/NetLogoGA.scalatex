@@ -15,23 +15,22 @@
     val food3 = Val[Double]
 
     // Define the NetlogoTask
-    val cmds = Seq("run-to-grid")
     val ants =
-      NetLogo5Task(workDirectory / "Ants.nlogo", cmds, seed = seed) set (
+      NetLogo5Task(workDirectory / "Ants.nlogo", go = Seq("run-to-grid"), seed = seed) set (
         // Map the OpenMOLE variables to NetLogo variables
-        netLogoInputs += (gPopulation, "gpopulation"),
-        netLogoInputs += (gDiffusionRate, "gdiffusion-rate"),
-        netLogoInputs += (gEvaporationRate, "gevaporation-rate"),
-        netLogoOutputs += ("final-ticks-food1", food1),
-        netLogoOutputs += ("final-ticks-food2", food2),
-        netLogoOutputs += ("final-ticks-food3", food3),
+        inputs += gPopulation mapped "gpopulation",
+        inputs += gDiffusionRate mapped "gdiffusion-rate",
+        inputs += gEvaporationRate mapped "gevaporation-rate",
+        outputs += food1 mapped "final-ticks-food1",
+        outputs += food2 mapped "final-ticks-food2",
+        outputs += food3 mapped "final-ticks-food3",
+
         // Define default values for inputs of the model
         seed := 42,
         gPopulation := 125.0,
         gDiffusionRate := 50.0,
         gEvaporationRate := 50
       )"""
-
 
 @p
   This example presents how to explore a NetLogo model step by step with an Evolutionary/Genetic Algorithm (EA/GA) in
@@ -129,37 +128,27 @@ This script describes how to use the NSGA2 multi-objective optimisation algorith
 The result files are written to @hl.highlight("/tmp/ants", "plain").
 Notice how the @hl.highlight("evaluation", "plain") parameter of the @hl.highlight("SteadyStateEvolution", "plain")
 method, is the netlogo task i.e. running the model, which indeed provides an @b{evaluation} of the genome
-(parameter settings) efficiency regarding the @hl.highlight("objectives","plain").
+(parameter settings) efficiency regarding the @hl.highlight("objective","plain").
 
 @br @hl.openmole("""
-// Define the population size: 100.
 // Define the inputs and their respective variation bounds.
 // Define the objectives to minimize.
 // Tell OpenMOLE that this model is stochastic and that it should generate a seed for each execution
 // Define the fitness evaluation
 // Define the parallelism level
 // Terminate after 10000 evaluations
-val evolution =
-  SteadyStateEvolution(
-    // Define the population (10) and the number of generations (100).
-    // Define the inputs and their respective variation bounds.
-    // Define the objectives to minimize.
-    algorithm =
-      NSGA2(
-        mu = 100,
-        genome = Seq(gDiffusionRate in (0.0, 99.0), gEvaporationRate in (0.0, 99.0)),
-        objectives = Seq(food1, food2, food3),
-        stochastic = Stochastic(seed = seed)
-      ),
-    evaluation = ants,
-    parallelism = 10,
-    termination = 1000
-  )
-
 // Define a hook to save the Pareto frontier
-evolution hook (workDirectory / "results")
+NSGA2Evolution(
+  // Define the inputs and their respective variation bounds.
+  // Define the objectives to minimize.
+  genome = Seq(gDiffusionRate in (0.0, 99.0), gEvaporationRate in (0.0, 99.0)),
+  objective = Seq(food1, food2, food3),
+  stochastic = Stochastic(seed = seed),
+  evaluation = ants,
+  parallelism = 10,
+  termination = 1000
+) hook (workDirectory / "results")
 """, header = model, name = "ga netlogo evolution")
-
 
 @h2{Scale up}
 
@@ -169,30 +158,17 @@ script changes to implement islands in the workflow. Here we compute 2,000 islan
 1 hour on the European grid:
 
 @br @hl.openmole("""
-val evolution =
-SteadyStateEvolution(
-  algorithm =
-    NSGA2(
-      mu = 100,
-      genome = Seq(gDiffusionRate in (0.0, 99.0), gEvaporationRate in (0.0, 99.0)),
-      objectives = Seq(food1, food2, food3),
-      stochastic = Stochastic(seed = seed)
-    ),
-    evaluation = ants,
-    termination = 1 hour
-)
+// Define the execution environment
+val env = EGIEnvironment("vo.complex-systems.eu")
 
 // Define the island model with 1,000 concurrent islands. Each island gets 50 individuals sampled from the global
 // population. The algorithm stops after 100,000 islands evaluations.
-val island =
-  IslandEvolution(
-    evolution,
-    parallelism = 1000,
-    termination = 100000
-  )
-
-// Define the execution environment
-val env = EGIEnvironment("biomed", openMOLEMemory = 1200 megabytes, cpuTime = 4 hours)
-
-// Define the workflow
-island on env hook (workDirectory / "results")""", header = model, name = "ga netlogo islands")
+NSGA2Evolution(
+  genome = Seq(gDiffusionRate in (0.0, 99.0), gEvaporationRate in (0.0, 99.0)),
+  objective = Seq(food1, food2, food3),
+  stochastic = Stochastic(seed = seed),
+  evaluation = ants,
+  termination = 100000,
+  parallelism = 1000,
+  distribution = Island(1 hour)
+) on env hook (workDirectory / "results")""", header = model, name = "ga netlogo islands")

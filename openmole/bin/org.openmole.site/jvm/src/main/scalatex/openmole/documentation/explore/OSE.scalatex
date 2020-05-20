@@ -31,7 +31,7 @@ OSEEvolution(
   origin = Seq(
     param1  in (0.0 to 1.0 by 0.1),
     param2 in (-10.0 to 10.0 by 1.0)),
-  objectives = Seq(
+  objective = Seq(
     output1 under 5.0,
     output2 under 50.0),
   stochastic = Stochastic(seed = myseed)
@@ -39,4 +39,4 @@ OSEEvolution(
 """, name = "OSE", header = "val modelTask = EmptyTask()")
 
 
-@i{origin} describes the discrete space of possible origins. Each cell is considered a potential origin. @i{objectives} describe the pattern to reach with inequalities. The sought patten is considered as reached when all the objective are under their threshold value. In this example OSE computes a maximal diversity of inputs for which all the outputs are under their respective threshold values.
+@i{origin} describes the discrete space of possible origins. Each cell is considered a potential origin. @i{objective} describe the pattern to reach with inequalities. The sought patten is considered as reached when all the objective are under their threshold value. In this example OSE computes a maximal diversity of inputs for which all the outputs are under their respective threshold values.

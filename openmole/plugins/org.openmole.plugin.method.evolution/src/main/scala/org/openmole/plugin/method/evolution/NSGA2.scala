@@ -232,14 +232,14 @@ object NSGA2 {
 
   def apply[P](
     genome:     Genome,
-    objectives: Objectives,
+    objective:  Objectives,
     mu:         Int                          = 200,
     stochastic: OptionalArgument[Stochastic] = None,
     reject:     OptionalArgument[Condition]  = None
   ): EvolutionWorkflow =
-    WorkflowIntegration.stochasticity(objectives, stochastic.option) match {
+    WorkflowIntegration.stochasticity(objective, stochastic.option) match {
       case None ⇒
-        val exactObjectives = objectives.map(o ⇒ Objective.toExact(o))
+        val exactObjectives = objective.map(o ⇒ Objective.toExact(o))
         val integration: WorkflowIntegration.DeterministicGA[_] = WorkflowIntegration.DeterministicGA(
           DeterministicParams(mu, genome, exactObjectives, operatorExploration, reject),
           genome,
@@ -248,7 +248,7 @@ object NSGA2 {
 
         WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
       case Some(stochasticValue) ⇒
-        val noisyObjectives = objectives.map(o ⇒ Objective.toNoisy(o))
+        val noisyObjectives = objective.map(o ⇒ Objective.toNoisy(o))
 
         val integration: WorkflowIntegration.StochasticGA[_] = WorkflowIntegration.StochasticGA(
           StochasticParams(mu, operatorExploration, genome, noisyObjectives, stochasticValue.replications, stochasticValue.reevaluate, reject.option),
@@ -268,7 +268,7 @@ object NSGA2Evolution {
 
   def apply(
     genome:       Genome,
-    objectives:   Objectives,
+    objective:    Objectives,
     evaluation:   DSL,
     termination:  OMTermination,
     mu:           Int                          = 200,
@@ -283,7 +283,7 @@ object NSGA2Evolution {
         NSGA2(
           mu = mu,
           genome = genome,
-          objectives = objectives,
+          objective = objective,
           stochastic = stochastic,
           reject = reject
         ),

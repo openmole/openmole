@@ -79,7 +79,7 @@ $model
 
 // Construction of the workflow orchestrating the genetic algorithm
 // genome is the inputs prototype and their variation ranges
-// objectives are the objectives to minimize
+// objective sets the objectives to minimize
 // termination is the termination criterion, here it runs for 100 generations. A time limit could be set as an
 // alternative by replacing 100 by 1 hour (hour is a duration type understood by OpenMOLE).
 // the parallelism specifies how many evaluation are concurrently submitted to the execution environment
@@ -89,7 +89,7 @@ val evolution =
       x in (0.0, 1.0),
       y in (0.0, 1.0),
       s in List("apple", "banana", "strawberry")),
-    objectives = Seq(o1, o2),
+    objective = Seq(o1, o2),
     evaluation = model,
     parallelism = 10,
     termination = 100
@@ -115,7 +115,7 @@ NSGA2Evolution(
     x in (0.0, 1.0),
     y in (0.0, 1.0),
     s in List("apple", "banana", "strawberry")),
-  objectives = Seq(o1, o2),
+  objective = Seq(o1, o2),
   evaluation = model -- DeltaTask(o1 -> math.Pi, o2 -> 42),
   parallelism = 10,
   termination = 100
@@ -143,7 +143,7 @@ NSGA2Evolution(
     x in (0.0, 1.0),
     y in (0.0, 1.0),
     s in List("apple", "banana", "strawberry")),
-  objectives = Seq(o1, o2),
+  objective = Seq(o1, o2),
   evaluation = model -- maximize,
   parallelism = 10,
   termination = 100) hook (workDirectory / "evolution")""", name = "nsga2 maximize example")

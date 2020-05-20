@@ -46,7 +46,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
       algorithm =
         NSGA2(
           genome = Seq(x in (0.0, 1.0), y in ("0.0", "1.0")),
-          objectives = Seq(x, y),
+          objective = Seq(x, y),
           stochastic = Stochastic()
         ),
       evaluation = puzzle,
@@ -71,7 +71,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
       algorithm =
         PSE(
           genome = Seq(population in (0.0, 1.0), state in ("0.0", "1.0")),
-          objectives =
+          objective =
             Seq(
               population in (0.0 to 1.0 by 0.1),
               state in (0.0 to 1.0 by 0.1)
@@ -91,7 +91,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
     NSGA2(
       mu = 200,
       genome = Seq(xArray in Vector.fill(5)((0.0, 1.0)), yArray in Vector.fill(5)(("0", "1"))),
-      objectives = Seq()
+      objective = Seq()
     )
   }
 
@@ -130,7 +130,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
     val nsga = NSGA2Evolution(
       evaluation = testTask,
-      objectives = Seq(a),
+      objective = Seq(a),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       parallelism = 10
@@ -155,7 +155,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
     val nsga = NSGA2Evolution(
       evaluation = testTask,
-      objectives = Seq(a),
+      objective = Seq(a),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       distribution = Island(5)
@@ -213,7 +213,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
     val nsga = NSGA2Evolution(
       evaluation = EmptyTask() set (inputs += a, outputs += b),
-      objectives = Seq(b),
+      objective = Seq(b),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100
     )
@@ -228,7 +228,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
     def nsga(i: Int) =
       NSGA2Evolution(
         evaluation = EmptyTask() set (inputs += a, outputs += b),
-        objectives = Seq(b),
+        objective = Seq(b),
         genome = Seq(a in (0.0, 1.0)),
         termination = 100
       )
@@ -243,7 +243,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
     val nsga = NSGA2Evolution(
       evaluation = EmptyTask() set (inputs += a, outputs += b),
-      objectives = Seq(b),
+      objective = Seq(b),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       distribution = Island(1)
@@ -258,7 +258,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
     val wf = NSGA2Evolution(
       evaluation = EmptyTask() set (inputs += a, outputs += b),
-      objectives = Seq(b delta 1.0),
+      objective = Seq(b delta 1.0),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100
     )
@@ -272,7 +272,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
     val wf = NSGA2Evolution(
       evaluation = EmptyTask() set (inputs += a, outputs += b),
-      objectives = Seq(-b),
+      objective = Seq(-b),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100
     )
@@ -286,7 +286,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
     val nsga = NSGA2Evolution(
       evaluation = EmptyTask() set (inputs += a, outputs += b),
-      objectives = Seq(b),
+      objective = Seq(b),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       stochastic = Stochastic()
@@ -301,7 +301,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
     val nsga = NSGA2Evolution(
       evaluation = EmptyTask() set (inputs += a, outputs += b),
-      objectives = Seq(b aggregate median delta 100),
+      objective = Seq(b aggregate median delta 100),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       stochastic = Stochastic()
@@ -316,7 +316,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
     val nsga = NSGA2Evolution(
       evaluation = EmptyTask() set (inputs += a, outputs += b),
-      objectives = Seq(b),
+      objective = Seq(b),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       stochastic = Stochastic(),
@@ -331,7 +331,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
     NSGA2Evolution(
       evaluation = EmptyTask(),
-      objectives = Seq(a),
+      objective = Seq(a),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       suggestion = Seq(Seq(a := 0.5))
@@ -347,7 +347,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
     val nsga = NSGA2Evolution(
       evaluation = EmptyTask() set (inputs += a, outputs += b),
-      objectives = Seq(b aggregate f as "aggF"),
+      objective = Seq(b aggregate f as "aggF"),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       stochastic = Stochastic()
@@ -363,7 +363,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
     PSEEvolution(
       evaluation = EmptyTask(),
-      objectives = Seq(a aggregate f in (0.0 to 1.0 by 0.1), b in (0.2 to 0.5 by 0.1)),
+      objective = Seq(a aggregate f in (0.0 to 1.0 by 0.1), b in (0.2 to 0.5 by 0.1)),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       stochastic = Stochastic()
@@ -379,7 +379,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
     OSEEvolution(
       origin = Seq(o in (0.0 to 1.0 by 0.1)),
       evaluation = EmptyTask(),
-      objectives = Seq(a aggregate f under 9, b under 3.0),
+      objective = Seq(a aggregate f under 9, b under 3.0),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       stochastic = Stochastic()
@@ -395,7 +395,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
     val nsga =
       NSGA2Evolution(
         evaluation = EmptyTask() set (inputs += a, outputs += b),
-        objectives = Seq(b),
+        objective = Seq(b),
         genome = Seq(a in (0.0, 1.0)),
         termination = 100,
         stochastic = Stochastic()

@@ -55,7 +55,7 @@ It takes the following parameters:
   @li{@code{parallelism} the number of simulations that will be run in parallel,}
   @li{@code{termination} the total number of evaluations to be executed,}
   @li{@code{genome} a list of the model parameters and their respective variation intervals,}
-  @li{@code{objectives} a list of indicators measured for each evaluation of the model within which we search for diversity, with a discretization step,}
+  @li{@code{objective} a list of indicators measured for each evaluation of the model within which we search for diversity, with a discretization step,}
   @li{@code{stochastic} the seed generator, which generates suitable seeds for the method. Mandatory if your model contains randomness. The generated seed for the model task is transmitted through the variable given as an argument of @code{Stochastic} (here myseed).}
   @li{@code{reject}: (optional) a predicate which is true for genomes that must be rejected by the genome sampler (for instance "i1 > 50").}
 
@@ -99,7 +99,7 @@ PSEEvolution(
   genome = Seq(
     param1  in (0.0, 1.0),
     param2 in (-10.0, 10.0)),
-  objectives = Seq(
+  objective = Seq(
     output1 in (0.0 to 40.0 by 5.0),
     output2 in (0.0 to 4000.0 by 50.0)),
   stochastic = Stochastic(seed = myseed)

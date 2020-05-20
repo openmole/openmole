@@ -40,7 +40,7 @@ object Profile {
         NichedNSGA2(
           Vector(NichedNSGA2.NichedElement.Continuous(x, nX)),
           genome,
-          objectives = Seq(objective),
+          objective = Seq(objective),
           nicheSize = nicheSize.option.getOrElse(1),
           reject = reject
         )

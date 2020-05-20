@@ -99,7 +99,7 @@ It takes the following parameters:
 
 @ul
   @li{@code{evaluation}: the OpenMOLE task that runs the simulation (@i{i.e.} the model),}
-  @li{@code{objectives}: a list of the distance measures (which in the single criterion case will contain only one measure),}
+  @li{@code{objective}: a list of the distance measures (which in the single criterion case will contain only one measure),}
   @li{@code{mu}: the population size,}
   @li{@code{genome}: a list of the model parameters and their respective variation intervals,}
   @li{@code{termination}: the total number of evaluations (execution of the task passed to the parameter "evaluation") to be executed,}
@@ -148,7 +148,7 @@ val distance2 = Val[Double]
 
 NSGA2Evolution(
   evaluation = modelTask,
-  objectives = Seq(distance1, distance2),
+  objective = Seq(distance1, distance2),
   mu = 200,
   genome = Seq(
     param1 in (0.0, 99.0),
@@ -175,7 +175,7 @@ val model = ScalaTask("val distance = param1.sum * param2") set (inputs += (para
 
 NSGA2Evolution(
   evaluation = model ,
-  objectives = Seq(distance),
+  objective = Seq(distance),
   mu = 200,
   genome = Seq(
     param1 in Array.fill(100)(0.0, 99.0),

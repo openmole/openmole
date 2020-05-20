@@ -54,8 +54,8 @@ object Metadata {
   }
 
   case class NoisyObjectiveData(
-    name: String,
-    delta: Option[Double],
+    name:     String,
+    delta:    Option[Double],
     negative: Boolean)
 
   def fromString(s: String): Metadata =

@@ -34,11 +34,11 @@ val o = Val[Int]
 val d = Val[Double]
 
 // Define the sampling by mapping the columns of the CSV file to OpenMOLE variables
-val mySampling = CSVSampling(workDirectory / "file.csv") set (
+// comma ',' is the default separator, but you can specify a different one using
+val mySampling = CSVSampling(workDirectory / "file.csv", separator = ',') set (
   outputs += i.mapped,
   outputs += d mapped "colD",
-  // comma ',' is the default separator, but you can specify a different one using
-  separator := ','
+
 )
 
 // Define the model, here it just takes i as input

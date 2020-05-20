@@ -114,7 +114,7 @@ val exploration =
   ) hook(
     output = display,
     values = Seq(i),
-    arrayOnRow = true)
+    format = CSVOutputFormat(arrayOnRow = true))
 """, header = "val myModel = EmptyTask()", name = "hook direct sampling")
 
 @br
