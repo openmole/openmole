@@ -47,7 +47,7 @@ class Saltelli extends FlatSpec with Matchers {
 
   val sen = SensitivitySaltelli(
     evaluation = model,
-    samples = 10000,
+    sample = 10000,
     inputs = Seq(x1 in (0.0, 1.0), x2 in (0.0, 1.0)),
     outputs = Seq(y1, y2, y3)
   )

@@ -70,17 +70,9 @@ The @code{SensitivityMorris} constructor is defined in OpenMOLE and takes the fo
   @li{@code{evaluation} is the task (or a composition of tasks) that uses your inputs, typically your model task.}
   @li{@code{inputs} is the list of your model's inputs.}
   @li{@code{outputs} is the list of your model's outputs, which behavior is evaluated by the method.}
-  @li{@code{repetitions} is the number of trajectories sampled, which in practice will determine the accuracy of estimation of sensitivity indices but also the total number of runs.}
+  @li{@code{sample} is the number of trajectories sampled, which in practice will determine the accuracy of estimation of sensitivity indices but also the total number of runs.}
   @li{@code{levels} is the resolution of relative variations, i.e. the number of steps @{p} for each dimension of the grid in which trajectories are sampled. In other words, any variation of a factor @b{delta@sub{i}} will be a multiple of @b{1/p}. It should be adapted to the number of trajectories: a higher number of levels will be more suited to a high number of trajectories, to not miss parts of the space with a small number of local trajectories.}
 
-
-@h3{Hook}
-
-The @code{hook} keyword is used to save or display results generated during the execution of a workflow.
-The generic way to use it is to write either @code{hook(workDirectory / "path/of/a/directory")} to save results in CSV files, or @code{hook display} to display the results in the standard output.
-In practice, one file will be generated for each sensitivity index: @code{workDirectory / "path/of/a/directory" / "mu.csv"}, @code{workDirectory / "path/of/a/directory" / "muStar.csv"} and @code{workDirectory / "path/of/a/directory" / "sigma.csv"}, each file containing in a matrix format the global indicators (outputs in rows, factors in columns).
-
-You may want to get the set of all simulation results and elementary effects: for this you can plug a CSV hook instead of just the path which calls an underlying specific @code{MorrisHook}. This is not recommended as will also capture all unwanted intermediate stages of the computation.
 
 @h3{Use example}
 
@@ -175,7 +167,7 @@ SensitivitySaltelli(
     i2 in (0.0, 1.0),
     i3 in (0.0, 1.0)),
   outputs = Seq(o1, o2),
-  samples = 100
+  sample = 100
 ) hook display
 """, header = "val model = EmptyTask()", name = "Saltelli")
 

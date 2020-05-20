@@ -108,15 +108,15 @@ package object sensitivity {
     evaluation:  DSL,
     inputs:      Seq[ScalarOrSequenceOfDouble[_]],
     outputs:     Seq[Val[Double]],
-    repetitions: Int,
-    levels:      Int,
+    sample:      Int,
+    level:       Int,
     scope: DefinitionScope = "sensitivity morris") = {
 
     implicit def defScope = scope
 
     // the sampling for Morris is a One At a Time one,
     // with respect to the user settings for repetitions, levels and inputs
-    val sampling = MorrisSampling(repetitions, levels, inputs)
+    val sampling = MorrisSampling(sample, level, inputs)
 
     // the aggregation obviously is a Morris aggregation!
     // it collects all the specific inputs added from the sampling
@@ -141,7 +141,7 @@ package object sensitivity {
     * @param evaluation
     * @param inputs input prototypes
     * @param outputs outputs double prototypes
-    * @param samples number of samples to estimates sensitivity indices
+    * @param sample number of samples to estimates sensitivity indices
     * @param scope
     * @return
     */
@@ -149,11 +149,11 @@ package object sensitivity {
     evaluation:   DSL,
     inputs:  Seq[ScalarOrSequenceOfDouble[_]],
     outputs: Seq[Val[Double]],
-    samples:      FromContext[Int],
+    sample:      FromContext[Int],
     scope: DefinitionScope = "sensitivity saltelli") = {
     implicit def defScope = scope
 
-    val sampling = SaltelliSampling(samples, inputs: _*)
+    val sampling = SaltelliSampling(sample, inputs: _*)
 
     val aggregation =
       SaltelliAggregation(
