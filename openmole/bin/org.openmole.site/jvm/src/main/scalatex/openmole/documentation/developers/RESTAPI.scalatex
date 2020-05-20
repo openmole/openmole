@@ -139,7 +139,7 @@ val model =
 Replication(
   evaluation = model,
   seed = seed,
-  replications = 100,
+  sample = 100,
   aggregation = Seq(pi aggregate average as piAvg, pi aggregate median as piMed)
 ) hook display hook (workDirectory / "result.json", format = JSONOutputFormat())
 

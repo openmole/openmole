@@ -40,7 +40,7 @@ In case you want to explore a stochastic model with a GA you can do:
       // OpenMOLE provide a seed for your stochastic model to use (it is optional)
       // 20% of the evaluations are used for replicating existing solutions
       // 100 replication are stored at max for each individual
-      stochastic = Stochastic(seed = seed, reevaluate = 0.2, replications = 100),
+      stochastic = Stochastic(seed = seed, reevaluate = 0.2, sample = 100),
       evaluation = model,
       termination = 100
     )""", header = model)
@@ -111,10 +111,10 @@ By doing so, we let the multi-objective optimization algorithm handle the compro
 This method adds only two new parameters:
     @ol{
       @li{@hl.code("""reevaluate"""), the probability of resampling an individual at each generation}
-      @li{@hl.code("""replications"""), the maximum number of evaluation values for an individual, to limit the memory used to store an individual.}
+      @li{@hl.code("""sample"""), the maximum number of evaluation values for an individual, to limit the memory used to store an individual.}
     }
 
-See the line @hl.code("""stochastic = Stochastic(seed = seed, reevaluate = 0.2, replications = 100)""") in the example.
+See the line @hl.code("""stochastic = Stochastic(seed = seed, reevaluate = 0.2, sample = 100)""") in the example.
 
 @br@br
 

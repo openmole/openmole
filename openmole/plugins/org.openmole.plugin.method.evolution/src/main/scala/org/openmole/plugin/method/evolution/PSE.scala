@@ -445,7 +445,7 @@ object PSE {
             pattern = mgo.evolution.niche.irregularGrid(objective.map(_.scale).toVector),
             genome = genome,
             objectives = noisyObjectives,
-            historySize = stochasticValue.replications,
+            historySize = stochasticValue.sample,
             cloneProbability = stochasticValue.reevaluate,
             operatorExploration = operatorExploration,
             reject = reject.option),

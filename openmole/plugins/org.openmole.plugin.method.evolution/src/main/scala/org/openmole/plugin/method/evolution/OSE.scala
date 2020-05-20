@@ -315,7 +315,7 @@ object OSE {
               objectives = noisyObjectives,
               limit = FitnessPattern.toLimit(objective),
               operatorExploration = operatorExploration,
-              historySize = stochasticValue.replications,
+              historySize = stochasticValue.sample,
               cloneProbability = stochasticValue.reevaluate,
               reject = reject.option),
             fg,

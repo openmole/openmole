@@ -381,6 +381,6 @@ The hook stores the file @code{g} in your @b{Workspace}, and displays the @code{
     Replication(
       evaluation = task1 -- (rTask hook h1),
       seed = seed,
-      replications = 100
+      sample = 100
     )""")
 

@@ -443,7 +443,7 @@ object NichedNSGA2 {
             operatorExploration = operatorExploration,
             genome = genome,
             objectives = noisyObjectives,
-            historySize = stochasticValue.replications,
+            historySize = stochasticValue.sample,
             cloneProbability = stochasticValue.reevaluate,
             reject = reject.option),
           genome,

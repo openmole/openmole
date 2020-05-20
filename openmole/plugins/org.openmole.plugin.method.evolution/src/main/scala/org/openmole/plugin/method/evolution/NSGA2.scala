@@ -251,7 +251,7 @@ object NSGA2 {
         val noisyObjectives = objective.map(o ⇒ Objective.toNoisy(o))
 
         val integration: WorkflowIntegration.StochasticGA[_] = WorkflowIntegration.StochasticGA(
-          StochasticParams(mu, operatorExploration, genome, noisyObjectives, stochasticValue.replications, stochasticValue.reevaluate, reject.option),
+          StochasticParams(mu, operatorExploration, genome, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
           genome,
           noisyObjectives,
           stochasticValue

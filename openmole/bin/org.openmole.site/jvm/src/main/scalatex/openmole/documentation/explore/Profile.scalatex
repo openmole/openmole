@@ -117,7 +117,7 @@ Here is an example :
     ),
     termination = 200000,
     parallelism = 500,
-    stochastic = Stochastic(seed = seed, replications = 100),
+    stochastic = Stochastic(seed = seed, sample = 100),
     distribution = Island(10 minutes)
   ) hook(workDirectory / "path/to/a/directory")
 """, header = "val modelTask = EmptyTask()", name = "Profile")

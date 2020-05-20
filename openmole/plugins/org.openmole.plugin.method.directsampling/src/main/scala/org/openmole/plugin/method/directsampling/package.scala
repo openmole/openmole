@@ -59,7 +59,7 @@ package object directsampling {
   def Replication[T: Distribution](
     evaluation:       DSL,
     seed:             Val[T],
-    replications:     Int,
+    sample:           Int,
     distributionSeed: OptionalArgument[Long] = None,
     aggregation:      Seq[Aggregation]       = Seq.empty,
     wrap:             Boolean                = false,
@@ -67,7 +67,7 @@ package object directsampling {
   ) = {
     implicit def defScope = scope
 
-    val sampling = seed in (TakeDomain(UniformDistribution[T](distributionSeed), replications))
+    val sampling = seed in (TakeDomain(UniformDistribution[T](distributionSeed), sample))
     val exploration = ExplorationTask(sampling)
 
     val aggregateTask: OptionalArgument[DSL] =
