@@ -27,6 +27,9 @@ Here is a use example:
 
 @provideOptions:
   @ul
+    @li{@user,}
+    @li{@host,}
+    @li{@slots,}
     @li{@port,}
     @li{@openMOLEMemory,}
     @li{@threads,}
