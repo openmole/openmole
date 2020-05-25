@@ -343,7 +343,7 @@ lazy val config = OsgiProject(dir, "org.apache.commons.configuration2",
   libraryDependencies += "commons-beanutils" % "commons-beanutils" % "1.9.4",
   version := "2.6") settings(settings: _*) dependsOn (logging)
 
-def sourceCodeVersion = "0.1.9"
+def sourceCodeVersion = "0.2.1"
 lazy val sourceCode = OsgiProject(dir, "sourcecode") settings (
   libraryDependencies += "com.lihaoyi" %% "sourcecode" % sourceCodeVersion,
   version := sourceCodeVersion
