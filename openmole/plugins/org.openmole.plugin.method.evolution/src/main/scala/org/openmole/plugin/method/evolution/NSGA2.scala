@@ -289,7 +289,6 @@ object NSGA2Evolution {
         ),
       evaluation = evaluation,
       termination = termination,
-      stochastic = stochastic,
       parallelism = parallelism,
       distribution = distribution,
       suggestion = suggestion(genome),

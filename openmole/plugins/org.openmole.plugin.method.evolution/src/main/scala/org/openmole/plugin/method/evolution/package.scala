@@ -56,7 +56,6 @@ package object evolution {
       algorithm:    T,
       evaluation:   DSL,
       termination:  OMTermination,
-      stochastic:   OptionalArgument[Stochastic] = None,
       parallelism:  Int                          = 1,
       distribution: EvolutionPattern             = SteadyState(),
       suggestion:   Seq[Seq[ValueAssignment[_]]],
