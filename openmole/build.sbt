@@ -233,6 +233,8 @@ lazy val services = OsgiProject(coreDir, "org.openmole.core.services", imports =
 
 lazy val location = OsgiProject(coreDir, "org.openmole.core.location", imports = Seq("*")) dependsOn (exception) settings (coreSettings: _*)
 
+lazy val metadata =  OsgiProject(coreDir, "org.openmole.core.metadata", imports = Seq("*")) dependsOn (exception) settings (coreSettings: _*)
+
 
 lazy val pluginManager = OsgiProject(
   coreDir,
