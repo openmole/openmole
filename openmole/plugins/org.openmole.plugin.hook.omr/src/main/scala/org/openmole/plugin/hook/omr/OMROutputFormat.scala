@@ -22,34 +22,38 @@ object OMROutputFormat {
       output match {
         case WritableOutput.Display(stream) ⇒ implicitly[OutputFormat[CSVOutputFormat, Any]].write(executionContext)(CSVOutputFormat(), output, content, method).from(context)
         case WritableOutput.Store(file) ⇒
-          import io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
+          val directory = file.from(context)
 
-          content match {
-            case PlainContent(variables, name) ⇒
-              val (f, m) =
-                name match {
-                  case Some(n) ⇒ (file / "data" / s"${n.from(context)}.json.gz", file / "method.omr")
-                  case None    ⇒ (file / "data.json.gz", file / "method.omr")
+          directory.withLockInDirectory {
+            import io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
+
+            content match {
+              case PlainContent(variables, name) ⇒
+                val (f, m) =
+                  name match {
+                    case Some(n) ⇒ (directory / "data" / s"${n.from(context)}.json.gz", directory / "method.omr")
+                    case None    ⇒ (directory / "data.json.gz", directory / "method.omr")
+                  }
+
+                f.withPrintStream(append = false, create = true, gz = true) { ps ⇒
+                  ps.print(compact(render(variablesToJValue(variables))))
                 }
 
-              f.from(context).withPrintStream(append = false, create = true, gz = true) { ps ⇒
-                ps.print(compact(render(variablesToJValue(variables))))
-              }
+                m.withPrintStream(create = true, gz = true)(_.print(method.asJson.noSpaces))
+              case sections: SectionContent ⇒
+                def sectionContent(sections: SectionContent) =
+                  JObject(
+                    sections.sections.map { section ⇒ section.name.from(context) -> variablesToJValue(section.variables) }.toList
+                  )
 
-              m.from(context).withPrintStream(create = true, gz = true)(_.print(method.asJson.noSpaces))
-            case sections: SectionContent ⇒
-              def sectionContent(sections: SectionContent) =
-                JObject(
-                  sections.sections.map { section ⇒ section.name.from(context) -> variablesToJValue(section.variables) }.toList
-                )
+                val (f, m) = (directory / "data.json.gz", directory / "method.omr")
 
-              val (f, m) = (file / "data.json.gz", file / "method.omr")
+                f.withPrintStream(append = false, create = true, gz = true) { ps ⇒
+                  ps.print(compact(render(sectionContent(sections))))
+                }
 
-              f.from(context).withPrintStream(append = false, create = true, gz = true) { ps ⇒
-                ps.print(compact(render(sectionContent(sections))))
-              }
-
-              m.from(context).withPrintStream(create = true, gz = true)(_.print(method.asJson.noSpaces))
+                m.withPrintStream(create = true, gz = true)(_.print(method.asJson.noSpaces))
+            }
           }
       }
     }

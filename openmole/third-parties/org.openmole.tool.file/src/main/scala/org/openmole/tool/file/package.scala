@@ -403,6 +403,7 @@ package file {
       }
 
       def withLockInDirectory[T](f: ⇒ T, lockName: String = ".lock"): T = {
+        file.mkdirs()
         val lockFile = file / lockName
         lockFile.createNewFile()
         try lockFile.withLock { _ ⇒ f }

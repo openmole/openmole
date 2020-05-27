@@ -41,6 +41,7 @@ object PluginInfo {
   object NameSpace {
     implicit def apply(p: Package): NameSpace = NameSpace(p.getName)
   }
+
   case class NameSpace(value: String)
 
   object KeyWordTrait {

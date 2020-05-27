@@ -160,7 +160,9 @@ object NSGA2 {
             genome = om.genome.map(GenomeBoundData(_).from(context)),
             objective = om.objectives.map(NoisyObjectiveData(_)),
             generation = generation,
-            frequency = frequency
+            frequency = frequency,
+            sample = om.historySize,
+            mu = om.mu
           )
         }
 

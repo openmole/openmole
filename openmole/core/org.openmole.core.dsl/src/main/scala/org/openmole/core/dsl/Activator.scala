@@ -18,7 +18,7 @@
 package org.openmole.core.dsl
 
 import org.openmole.core.pluginmanager.PluginInfo
-import org.openmole.core.preference.ConfigurationInfo
+import org.openmole.core.preference.ConfigurationLocationRegistry
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
 class Activator extends BundleActivator {

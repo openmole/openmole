@@ -1,14 +1,14 @@
 package org.openmole.core.workflow
 
 import org.openmole.core.pluginmanager.PluginInfo
-import org.openmole.core.preference.ConfigurationInfo
+import org.openmole.core.preference.ConfigurationLocationRegistry
 import org.openmole.core.workflow.format.CSVOutputFormat
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
 class Activator extends BundleActivator {
 
   override def stop(context: BundleContext): Unit = {
-    ConfigurationInfo.unregister(this)
+    ConfigurationLocationRegistry.unregister(this)
     PluginInfo.unregister(this)
   }
   override def start(context: BundleContext): Unit = {
@@ -58,7 +58,7 @@ class Activator extends BundleActivator {
       )
     }
 
-    ConfigurationInfo.register(this, ConfigurationInfo.list(org.openmole.core.workflow.execution.Environment) ++ ConfigurationInfo.list(org.openmole.core.workflow.execution.LocalEnvironment))
+    ConfigurationLocationRegistry.register(this, ConfigurationLocationRegistry.list(org.openmole.core.workflow.execution.Environment) ++ ConfigurationLocationRegistry.list(org.openmole.core.workflow.execution.LocalEnvironment))
     PluginInfo.register(this, keyWords = keyWords)
   }
 

@@ -21,6 +21,8 @@ object Metadata {
     objective:  Seq[NoisyObjectiveData],
     generation: Long,
     frequency:  Option[Long],
+    sample:     Int,
+    mu:         Int,
     method:     String                  = method) extends Metadata
 
   case object none extends Metadata

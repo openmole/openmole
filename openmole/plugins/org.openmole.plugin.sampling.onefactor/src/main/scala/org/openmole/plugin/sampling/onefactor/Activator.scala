@@ -1,13 +1,13 @@
 package org.openmole.plugin.sampling.onefactor
 
 import org.openmole.core.pluginmanager._
-import org.openmole.core.preference.ConfigurationInfo
+import org.openmole.core.preference.ConfigurationLocationRegistry
 import org.osgi.framework.BundleContext
 
 class Activator extends PluginInfoActivator {
   override def stop(context: BundleContext): Unit = {
     PluginInfo.unregister(this)
-    ConfigurationInfo.unregister(this)
+    ConfigurationLocationRegistry.unregister(this)
   }
 
   override def start(context: BundleContext): Unit = {
@@ -19,9 +19,9 @@ class Activator extends PluginInfoActivator {
       )
 
     PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
-    ConfigurationInfo.register(
+    ConfigurationLocationRegistry.register(
       this,
-      ConfigurationInfo.list()
+      ConfigurationLocationRegistry.list()
     )
   }
 }
