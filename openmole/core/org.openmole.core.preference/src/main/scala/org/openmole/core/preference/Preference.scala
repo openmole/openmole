@@ -9,8 +9,8 @@ import org.openmole.core.preferencemacro._
 
 object Preference {
 
-  lazy val uniqueID = ConfigurationLocation[String]("Global", "UniqueID", None)
-  def passwordTest = ConfigurationLocation.cyphered[String]("Preference", "passwordTest", Some(passwordTestString))
+  lazy val uniqueID = PreferenceLocation[String]("Global", "UniqueID", None)
+  def passwordTest = PreferenceLocation.cyphered[String]("Preference", "passwordTest", Some(passwordTestString))
   def passwordTestString = "test"
   def preferences = "preferences"
 
@@ -55,65 +55,65 @@ trait Preference {
   //
   //  def isSet[T](location: ConfigurationLocation[T]): Boolean
 
-  def apply[T: ConfigurationString](location: ClearConfigurationLocation[T]): T =
+  def apply[T: ConfigurationString](location: ClearPreferenceLocation[T]): T =
     preferenceOption(location) getOrElse (throw new UserBadDataError(s"No value found for $location and no default is defined for this property."))
 
-  def apply[T: ConfigurationString](location: CypheredConfigurationLocation[T])(implicit cypher: Cypher) =
+  def apply[T: ConfigurationString](location: CypheredPreferenceLocation[T])(implicit cypher: Cypher) =
     preferenceOption(location) getOrElse (throw new UserBadDataError(s"No value found for $location and no default is defined for this property."))
 
-  def preferenceOption[T: ConfigurationString](location: ConfigurationLocation[T])(implicit cypher: Cypher): Option[T] =
+  def preferenceOption[T: ConfigurationString](location: PreferenceLocation[T])(implicit cypher: Cypher): Option[T] =
     location match {
-      case c: ClearConfigurationLocation[T]    ⇒ preferenceOption(c)
-      case c: CypheredConfigurationLocation[T] ⇒ preferenceOption(c)
+      case c: ClearPreferenceLocation[T]    ⇒ preferenceOption(c)
+      case c: CypheredPreferenceLocation[T] ⇒ preferenceOption(c)
     }
 
-  def preferenceOption[T](location: ClearConfigurationLocation[T])(implicit fromString: ConfigurationString[T]): Option[T] = synchronized {
+  def preferenceOption[T](location: ClearPreferenceLocation[T])(implicit fromString: ConfigurationString[T]): Option[T] = synchronized {
     val confVal = getRawPreference(location)
     confVal.map(fromString.fromString) orElse location.default
   }
 
-  def preferenceOption[T](location: CypheredConfigurationLocation[T])(implicit fromString: ConfigurationString[T], cypher: Cypher): Option[T] = synchronized {
+  def preferenceOption[T](location: CypheredPreferenceLocation[T])(implicit fromString: ConfigurationString[T], cypher: Cypher): Option[T] = synchronized {
     val confVal = getRawPreference(location)
     def v = confVal.map(cypher.decrypt(_))
     v.map(fromString.fromString) orElse location.default
   }
 
-  def setPreference[T: ConfigurationString](location: ConfigurationLocation[T], value: T)(implicit cypher: Cypher): Unit =
+  def setPreference[T: ConfigurationString](location: PreferenceLocation[T], value: T)(implicit cypher: Cypher): Unit =
     location match {
-      case c: ClearConfigurationLocation[T]    ⇒ setPreference(c, value)
-      case c: CypheredConfigurationLocation[T] ⇒ setPreference(c, value)
+      case c: ClearPreferenceLocation[T]    ⇒ setPreference(c, value)
+      case c: CypheredPreferenceLocation[T] ⇒ setPreference(c, value)
 
     }
 
-  def setPreference[T](location: ClearConfigurationLocation[T], value: T)(implicit configurationString: ConfigurationString[T]) = synchronized {
+  def setPreference[T](location: ClearPreferenceLocation[T], value: T)(implicit configurationString: ConfigurationString[T]) = synchronized {
     val v = configurationString.toString(value)
     setRawPreference(location, v)
   }
 
-  def setPreference[T](location: CypheredConfigurationLocation[T], value: T)(implicit configurationString: ConfigurationString[T], cypher: Cypher) = synchronized {
+  def setPreference[T](location: CypheredPreferenceLocation[T], value: T)(implicit configurationString: ConfigurationString[T], cypher: Cypher) = synchronized {
     val v = configurationString.toString(value)
     val prop = cypher.encrypt(v)
     setRawPreference(location, prop)
   }
 
-  def isSet[T](location: ConfigurationLocation[T]) = synchronized { getRawPreference(location).isDefined }
+  def isSet[T](location: PreferenceLocation[T]) = synchronized { getRawPreference(location).isDefined }
 
-  def clearPreference[T](location: ConfigurationLocation[T])
+  def clearPreference[T](location: PreferenceLocation[T])
   def clear()
 
-  protected def setRawPreference(location: ConfigurationLocation[_], value: String)
-  protected def getRawPreference[T](location: ConfigurationLocation[T]): Option[String]
+  protected def setRawPreference(location: PreferenceLocation[_], value: String)
+  protected def getRawPreference[T](location: PreferenceLocation[T]): Option[String]
 }
 
 case class FilePreference(configurationFile: ConfigurationFile) extends Preference {
 
-  protected def getRawPreference[T](location: ConfigurationLocation[T]) = synchronized { configurationFile.value(location.group, location.name) }
+  protected def getRawPreference[T](location: PreferenceLocation[T]) = synchronized { configurationFile.value(location.group, location.name) }
 
-  protected def setRawPreference(location: ConfigurationLocation[_], value: String) = synchronized {
+  protected def setRawPreference(location: PreferenceLocation[_], value: String) = synchronized {
     configurationFile.setValue(location.group, location.name, value)
   }
 
-  def clearPreference[T](location: ConfigurationLocation[T]) = synchronized { configurationFile.clearValue(location.group, location.name) }
+  def clearPreference[T](location: PreferenceLocation[T]) = synchronized { configurationFile.clearValue(location.group, location.name) }
 
   def clear() = {
     val uniqueId = getRawPreference(Preference.uniqueID)
@@ -129,17 +129,17 @@ class MemoryPreference() extends Preference {
 
   lazy val map = collection.mutable.Map[(String, String), String]()
 
-  override def clearPreference[T](location: ConfigurationLocation[T]): Unit = synchronized {
+  override def clearPreference[T](location: PreferenceLocation[T]): Unit = synchronized {
     map.remove((location.group, location.name))
   }
 
   override def clear(): Unit = synchronized(map.clear())
 
-  override protected def setRawPreference(location: ConfigurationLocation[_], value: String): Unit = synchronized {
+  override protected def setRawPreference(location: PreferenceLocation[_], value: String): Unit = synchronized {
     map((location.group, location.name)) = value
   }
 
-  override protected def getRawPreference[T](location: ConfigurationLocation[T]): Option[String] = synchronized {
+  override protected def getRawPreference[T](location: PreferenceLocation[T]): Option[String] = synchronized {
     map.get((location.group, location.name))
   }
 }

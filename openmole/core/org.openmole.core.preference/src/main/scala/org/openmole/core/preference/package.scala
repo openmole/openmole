@@ -17,5 +17,5 @@ package org.openmole.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package object preference {
-
+  type PreferenceLocation[T] = org.openmole.core.preferencemacro.PreferenceLocation[T]
 }

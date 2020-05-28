@@ -17,20 +17,16 @@
 
 package org.openmole.plugin.domain.distribution
 
-import org.openmole.core.pluginmanager.PluginInfo
+import org.openmole.core.pluginregistry.{ PluginInfo, PluginRegistry }
 import org.osgi.framework._
 
 class Activator extends BundleActivator {
-  override def stop(context: BundleContext): Unit = {
-    PluginInfo.unregister(this)
-  }
+  override def stop(context: BundleContext): Unit = PluginRegistry.unregister(this)
 
   override def start(context: BundleContext): Unit = {
-    import org.openmole.core.pluginmanager.KeyWord._
-
-    val keyWords = Vector(DomainKeyWord(classOf[UniformDistribution[_]]))
-
-    PluginInfo.register(this, namespaces = Vector(this.getClass.getPackage), keyWords = keyWords)
+    import org.openmole.core.highlight.HighLight._
+    val highLights = Vector(DomainHighLight(classOf[UniformDistribution[_]]))
+    PluginRegistry.register(this, nameSpaces = Vector(this.getClass.getPackage), highLight = highLights)
   }
 }
 

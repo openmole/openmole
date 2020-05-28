@@ -20,8 +20,8 @@ package org.openmole.plugin.task.systemexec
 import java.io.File
 
 import monocle.macros.Lenses
-import org.openmole.core.context.{Context, Val, Variable}
-import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
+import org.openmole.core.context.{ Context, Val, Variable }
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.tools.service.OS
 import org.openmole.core.workflow.builder._
@@ -57,8 +57,8 @@ object SystemExecTask {
    */
   def apply(commands: Command*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): SystemExecTask =
     SystemExecTask(
-      commands = Vector.empty,
-    ) set (pack.commands += (OS(), commands: _*))
+      commands = commands.toVector
+    )
 
   /**
    * System exec task execute an external process.
@@ -66,14 +66,14 @@ object SystemExecTask {
    * value of the process.
    */
   def apply(
-    commands:           Seq[Command],
-    workDirectory:      OptionalArgument[String]      = None,
-    errorOnReturnValue: Boolean                       = true,
-    returnValue:        OptionalArgument[Val[Int]]    = None,
-    stdOut:             OptionalArgument[Val[String]] = None,
-    stdErr:             OptionalArgument[Val[String]] = None,
-    shell:              Shell                         = Bash,
-    environmentVariables: Vector[EnvironmentVariable] = Vector.empty)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): SystemExecTask =
+    commands:             Seq[Command],
+    workDirectory:        OptionalArgument[String]      = None,
+    errorOnReturnValue:   Boolean                       = true,
+    returnValue:          OptionalArgument[Val[Int]]    = None,
+    stdOut:               OptionalArgument[Val[String]] = None,
+    stdErr:               OptionalArgument[Val[String]] = None,
+    shell:                Shell                         = Bash,
+    environmentVariables: Vector[EnvironmentVariable]   = Vector.empty)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): SystemExecTask =
     new SystemExecTask(
       commands = commands.map(c ⇒ OSCommands(OS(), c)).toVector,
       workDirectory = workDirectory,
@@ -91,7 +91,7 @@ object SystemExecTask {
 }
 
 @Lenses case class SystemExecTask(
-  commands:              Vector[OSCommands],
+  commands:             Vector[OSCommands],
   workDirectory:        Option[String],
   errorOnReturnValue:   Boolean,
   returnValue:          Option[Val[Int]],
@@ -99,9 +99,9 @@ object SystemExecTask {
   stdErr:               Option[Val[String]],
   shell:                Shell,
   environmentVariables: Vector[EnvironmentVariable],
-  config:              InputOutputConfig,
+  config:               InputOutputConfig,
   external:             External,
-  info: InfoConfig
+  info:                 InfoConfig
 ) extends Task with ValidateTask {
 
   override def validate =
@@ -117,7 +117,7 @@ object SystemExecTask {
           e ← exp.validate(allInputs)
         } yield e
 
-      val variableErrors = environmentVariables.flatMap(v => Seq(v.name, v.value)).flatMap(_.validate(allInputs))
+      val variableErrors = environmentVariables.flatMap(v ⇒ Seq(v.name, v.value)).flatMap(_.validate(allInputs))
 
       commandsError ++ variableErrors ++ External.validate(external)(allInputs).apply
     }
@@ -147,7 +147,7 @@ object SystemExecTask {
 
       val shellCommands =
         shell match {
-          case Bash ⇒ expandedCommands.map(cmd => ExecutionCommand.Parsed("bash", "-c", cmd))
+          case Bash    ⇒ expandedCommands.map(cmd ⇒ ExecutionCommand.Parsed("bash", "-c", cmd))
           case NoShell ⇒ expandedCommands.map(ExecutionCommand.Raw(_))
         }
 

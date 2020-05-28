@@ -18,10 +18,10 @@
 package org.openmole.core.module
 
 import org.openmole.core.buildinfo
-import org.openmole.core.preference.ConfigurationLocation
+import org.openmole.core.preference.PreferenceLocation
 
 object ModuleIndex {
-  val moduleIndexes = ConfigurationLocation("Module", "Indexes", Some(Seq[String](buildinfo.moduleAddress)))
+  val moduleIndexes = PreferenceLocation("Module", "Indexes", Some(Seq[String](buildinfo.moduleAddress)))
 }
 
 case class Component(location: String, hash: String)

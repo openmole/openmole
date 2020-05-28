@@ -17,42 +17,36 @@
 
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.pluginmanager._
-import org.openmole.core.preference.ConfigurationLocationRegistry
-import org.osgi.framework.BundleContext
+import org.openmole.core.highlight.HighLight
+import org.openmole.core.pluginregistry.PluginRegistry
+import org.osgi.framework.{ BundleActivator, BundleContext }
 
-class Activator extends PluginInfoActivator {
+class Activator extends BundleActivator {
 
-  override def stop(context: BundleContext): Unit = {
-    PluginInfo.unregister(this)
-    ConfigurationLocationRegistry.unregister(this)
-  }
+  override def stop(context: BundleContext): Unit =
+    PluginRegistry.unregister(this)
 
   override def start(context: BundleContext): Unit = {
-    import org.openmole.core.pluginmanager.KeyWord._
+    import org.openmole.core.highlight.HighLight._
 
-    val keyWords: Vector[KeyWord] =
+    val keyWords: Vector[HighLight] =
       Vector(
-        TaskKeyWord(objectName(BreedTask)),
-        TaskKeyWord(objectName(DeltaTask)),
-        TaskKeyWord(objectName(ElitismTask)),
-        TaskKeyWord(objectName(FromIslandTask)),
-        TaskKeyWord(objectName(GenerateIslandTask)),
-        TaskKeyWord(objectName(ScalingGenomeTask)),
-        TaskKeyWord(objectName(TerminationTask)),
-        TaskKeyWord(objectName(InitialStateTask)),
-        PatternKeyWord(objectName(GenomeProfileEvolution)),
-        PatternKeyWord(objectName(NSGA2Evolution)),
-        PatternKeyWord(objectName(OSEEvolution)),
-        PatternKeyWord(objectName(PSEEvolution)),
-        WordKeyWord(Stochastic.getClass),
-        HookKeyWord(objectName(SavePopulationHook))
+        TaskHighLight(objectName(BreedTask)),
+        TaskHighLight(objectName(DeltaTask)),
+        TaskHighLight(objectName(ElitismTask)),
+        TaskHighLight(objectName(FromIslandTask)),
+        TaskHighLight(objectName(GenerateIslandTask)),
+        TaskHighLight(objectName(ScalingGenomeTask)),
+        TaskHighLight(objectName(TerminationTask)),
+        TaskHighLight(objectName(InitialStateTask)),
+        PatternHighLight(objectName(GenomeProfileEvolution)),
+        PatternHighLight(objectName(NSGA2Evolution)),
+        PatternHighLight(objectName(OSEEvolution)),
+        PatternHighLight(objectName(PSEEvolution)),
+        WordHighLight(Stochastic.getClass),
+        HookHighLight(objectName(SavePopulationHook))
       )
 
-    PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
-    ConfigurationLocationRegistry.register(
-      this,
-      ConfigurationLocationRegistry.list()
-    )
+    PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords)
   }
 }

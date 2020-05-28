@@ -6,7 +6,6 @@ object MethodName {
 
 case class MethodName(name: String) extends AnyRef
 
-
 trait Metadata {
   def method: MethodName
 }

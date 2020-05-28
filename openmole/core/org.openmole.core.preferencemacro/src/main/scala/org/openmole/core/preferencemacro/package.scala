@@ -21,13 +21,13 @@ import scala.reflect.macros.whitebox._
 package object preferencemacro {
   import scala.language.experimental.macros
 
-  def list[T](t: T): Seq[ConfigurationLocation[_]] = macro list_impl[T]
+  def list[T](t: T): Vector[PreferenceLocation[_]] = macro list_impl[T]
 
-  def list_impl[T: c.WeakTypeTag](c: Context)(t: c.Expr[T]): c.Expr[Seq[ConfigurationLocation[_]]] = {
+  def list_impl[T: c.WeakTypeTag](c: Context)(t: c.Expr[T]): c.Expr[Vector[PreferenceLocation[_]]] = {
     import c.universe._
 
     val tType = weakTypeOf[T]
-    val configurationLocationType = weakTypeOf[ConfigurationLocation[_]]
+    val configurationLocationType = weakTypeOf[PreferenceLocation[_]]
 
     val configurations =
       tType.members.collect {
@@ -36,8 +36,8 @@ package object preferencemacro {
       }
 
     val configurationValues = configurations.map { c ⇒ q"$t.$c" }
-    val result = q"""Seq(..$configurationValues)"""
+    val result = q"""Vector(..$configurationValues)"""
 
-    c.Expr[Seq[ConfigurationLocation[_]]](result)
+    c.Expr[Vector[PreferenceLocation[_]]](result)
   }
 }

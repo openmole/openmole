@@ -1,33 +1,27 @@
 
 package org.openmole.plugin.sampling.spatial
 
-import org.openmole.core.pluginmanager.{ KeyWord, PluginInfo, PluginInfoActivator, _ }
-import org.openmole.core.preference.ConfigurationLocationRegistry
-import org.osgi.framework.BundleContext
+import org.openmole.core.pluginregistry.PluginRegistry
+import org.osgi.framework.{ BundleActivator, BundleContext }
 
-class Activator extends PluginInfoActivator {
-  override def stop(context: BundleContext): Unit = {
-    PluginInfo.unregister(this)
-    ConfigurationLocationRegistry.unregister(this)
-  }
+class Activator extends BundleActivator {
+  override def stop(context: BundleContext): Unit =
+    PluginRegistry.unregister(this)
 
   override def start(context: BundleContext): Unit = {
-    import org.openmole.core.pluginmanager.KeyWord._
+    import org.openmole.core.highlight.HighLight
+    import HighLight._
 
-    val keyWords: Vector[KeyWord] =
+    val keyWords: Vector[HighLight] =
       Vector(
-        SamplingKeyWord(objectName(RandomSpatialSampling)),
-        SamplingKeyWord(objectName(ExponentialMixtureSpatialSampling)),
-        SamplingKeyWord(objectName(ReactionDiffusionSpatialSampling)),
-        SamplingKeyWord(objectName(BlocksGridSpatialSampling)),
-        SamplingKeyWord(objectName(PercolationGridSpatialSampling)),
-        SamplingKeyWord(objectName(ExpMixtureThresholdSpatialSampling))
+        SamplingHighLight(objectName(RandomSpatialSampling)),
+        SamplingHighLight(objectName(ExponentialMixtureSpatialSampling)),
+        SamplingHighLight(objectName(ReactionDiffusionSpatialSampling)),
+        SamplingHighLight(objectName(BlocksGridSpatialSampling)),
+        SamplingHighLight(objectName(PercolationGridSpatialSampling)),
+        SamplingHighLight(objectName(ExpMixtureThresholdSpatialSampling))
       )
 
-    PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
-    ConfigurationLocationRegistry.register(
-      this,
-      ConfigurationLocationRegistry.list()
-    )
+    PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords)
   }
 }

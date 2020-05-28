@@ -17,7 +17,7 @@
  */
 package org.openmole.gui.plugin.authentication.egi
 
-import org.openmole.core.preference.ConfigurationLocation
+import org.openmole.core.preference.PreferenceLocation
 import org.openmole.gui.ext.data._
 import org.openmole.plugin.environment.egi._
 import org.openmole.gui.ext.tool.server
@@ -26,7 +26,7 @@ import org.openmole.core.services._
 import scala.util.{ Failure, Success, Try }
 
 object EGIAuthenticationAPIImpl {
-  val voTest = ConfigurationLocation[Seq[String]]("AuthenicationPanel", "voTest", Some(Seq[String]()))
+  val voTest = PreferenceLocation[Seq[String]]("AuthenicationPanel", "voTest", Some(Seq[String]()))
 }
 
 class EGIAuthenticationAPIImpl(s: Services) extends EGIAuthenticationAPI {

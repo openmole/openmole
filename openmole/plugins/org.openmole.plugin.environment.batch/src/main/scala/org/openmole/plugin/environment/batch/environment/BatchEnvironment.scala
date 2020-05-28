@@ -28,7 +28,7 @@ import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice.{FileCache, FileService, FileServiceCache}
 import org.openmole.core.location._
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.preference.{ConfigurationLocation, Preference}
+import org.openmole.core.preference.{PreferenceLocation, Preference}
 import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
@@ -97,24 +97,24 @@ object BatchEnvironment {
     res
   }
 
-  val MemorySizeForRuntime = ConfigurationLocation("BatchEnvironment", "MemorySizeForRuntime", Some(1024 megabytes))
+  val MemorySizeForRuntime = PreferenceLocation("BatchEnvironment", "MemorySizeForRuntime", Some(1024 megabytes))
   
-  val CheckInterval = ConfigurationLocation("BatchEnvironment", "CheckInterval", Some(1 minutes))
-  val SubmitRetryInterval = ConfigurationLocation("BatchEnvironment", "SubmitRetryInterval", Some(30 seconds))
+  val CheckInterval = PreferenceLocation("BatchEnvironment", "CheckInterval", Some(1 minutes))
+  val SubmitRetryInterval = PreferenceLocation("BatchEnvironment", "SubmitRetryInterval", Some(30 seconds))
 
-  val GetTokenInterval = ConfigurationLocation("BatchEnvironment", "GetTokenInterval", Some(1 minutes))
+  val GetTokenInterval = PreferenceLocation("BatchEnvironment", "GetTokenInterval", Some(1 minutes))
 
-  val MinUpdateInterval = ConfigurationLocation("BatchEnvironment", "MinUpdateInterval", Some(20 seconds))
-  val IncrementUpdateInterval = ConfigurationLocation("BatchEnvironment", "IncrementUpdateInterval", Some(20 seconds))
-  val MaxUpdateInterval = ConfigurationLocation("BatchEnvironment", "MaxUpdateInterval", Some(5 minutes))
+  val MinUpdateInterval = PreferenceLocation("BatchEnvironment", "MinUpdateInterval", Some(20 seconds))
+  val IncrementUpdateInterval = PreferenceLocation("BatchEnvironment", "IncrementUpdateInterval", Some(20 seconds))
+  val MaxUpdateInterval = PreferenceLocation("BatchEnvironment", "MaxUpdateInterval", Some(5 minutes))
 
-  val MaxUpdateErrorsInARow = ConfigurationLocation("BatchEnvironment", "MaxUpdateErrorsInARow", Some(3))
+  val MaxUpdateErrorsInARow = PreferenceLocation("BatchEnvironment", "MaxUpdateErrorsInARow", Some(3))
 
-  val downloadResultRetry = ConfigurationLocation("BatchEnvironment", "DownloadResultRetry", Some(3))
-  val killJobRetry = ConfigurationLocation("BatchEnvironment", "KillJobRetry", Some(3))
-  val cleanJobRetry = ConfigurationLocation("BatchEnvironment", "KillJobRetry", Some(3))
+  val downloadResultRetry = PreferenceLocation("BatchEnvironment", "DownloadResultRetry", Some(3))
+  val killJobRetry = PreferenceLocation("BatchEnvironment", "KillJobRetry", Some(3))
+  val cleanJobRetry = PreferenceLocation("BatchEnvironment", "KillJobRetry", Some(3))
 
-  val QualityHysteresis = ConfigurationLocation("BatchEnvironment", "QualityHysteresis", Some(100))
+  val QualityHysteresis = PreferenceLocation("BatchEnvironment", "QualityHysteresis", Some(100))
 
   private def runtimeDirLocation = openMOLELocation / "runtime"
 

@@ -1,27 +1,21 @@
 package org.openmole.plugin.sampling.onefactor
 
-import org.openmole.core.pluginmanager._
-import org.openmole.core.preference.ConfigurationLocationRegistry
-import org.osgi.framework.BundleContext
+import org.openmole.core.highlight.HighLight
+import org.openmole.core.pluginregistry.PluginRegistry
+import org.osgi.framework.{ BundleActivator, BundleContext }
 
-class Activator extends PluginInfoActivator {
-  override def stop(context: BundleContext): Unit = {
-    PluginInfo.unregister(this)
-    ConfigurationLocationRegistry.unregister(this)
-  }
+class Activator extends BundleActivator {
+  override def stop(context: BundleContext): Unit =
+    PluginRegistry.unregister(this)
 
   override def start(context: BundleContext): Unit = {
-    import org.openmole.core.pluginmanager.KeyWord._
+    import org.openmole.core.highlight.HighLight._
 
-    val keyWords: Vector[KeyWord] =
+    val keyWords: Vector[HighLight] =
       Vector(
-        SamplingKeyWord(classOf[OneFactorSampling])
+        SamplingHighLight(classOf[OneFactorSampling])
       )
 
-    PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
-    ConfigurationLocationRegistry.register(
-      this,
-      ConfigurationLocationRegistry.list()
-    )
+    PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords)
   }
 }

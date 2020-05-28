@@ -17,27 +17,26 @@
 
 package org.openmole.plugin.environment.batch
 
-import org.openmole.core.pluginmanager.PluginInfo
-import org.openmole.core.preference.ConfigurationLocationRegistry
+import org.openmole.core.pluginregistry.PluginRegistry
+import org.openmole.core.preference.PreferenceLocation
 import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment
 import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageService, StorageSpace }
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
 class Activator extends BundleActivator {
-  override def stop(context: BundleContext): Unit = {
-    PluginInfo.unregister(this)
-    ConfigurationLocationRegistry.unregister(this)
-  }
+  override def stop(context: BundleContext): Unit =
+    PluginRegistry.unregister(this)
 
   override def start(context: BundleContext): Unit = {
-    PluginInfo.register(this, Vector(this.getClass.getPackage))
-    ConfigurationLocationRegistry.register(
-      this.getClass,
-      ConfigurationLocationRegistry.list(BatchEnvironment) ++
-        ConfigurationLocationRegistry.list(ReplicaCatalog) ++
-        ConfigurationLocationRegistry.list(StorageService) ++
-        ConfigurationLocationRegistry.list(StorageSpace)
+    PluginRegistry.register(
+      this,
+      Vector(this.getClass.getPackage),
+      preferenceLocation =
+        PreferenceLocation.list(BatchEnvironment) ++
+          PreferenceLocation.list(ReplicaCatalog) ++
+          PreferenceLocation.list(StorageService) ++
+          PreferenceLocation.list(StorageSpace)
     )
   }
 }

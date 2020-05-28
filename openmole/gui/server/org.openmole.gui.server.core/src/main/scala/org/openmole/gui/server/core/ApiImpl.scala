@@ -28,7 +28,7 @@ import org.openmole.tool.tar._
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.module
 import org.openmole.core.market
-import org.openmole.core.preference.{ ConfigurationLocation, Preference }
+import org.openmole.core.preference.{ PreferenceLocation, Preference }
 import org.openmole.core.project._
 import org.openmole.core.services.Services
 import org.openmole.core.threadprovider.ThreadProvider
@@ -69,7 +69,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
   import s._
 
-  val outputSize = ConfigurationLocation[Int]("gui", "outputsize", Some(10 * 1024 * 1024))
+  val outputSize = PreferenceLocation[Int]("gui", "outputsize", Some(10 * 1024 * 1024))
 
   val execution = new Execution
 

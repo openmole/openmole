@@ -17,35 +17,33 @@
 
 package org.openmole.plugin.hook.file
 
+import org.openmole.core.highlight.HighLight
 import org.openmole.core.pluginmanager._
-import org.openmole.core.preference.ConfigurationLocationRegistry
+import org.openmole.core.pluginregistry.{ PluginInfo, PluginRegistry }
 import org.openmole.core.workflow.hook.CSVHook
-import org.osgi.framework.BundleContext
+import org.osgi.framework.{ BundleActivator, BundleContext }
 
-class Activator extends PluginInfoActivator {
-  override def keyWordTraits = List(classOf[FilePackage])
+class Activator extends BundleActivator {
 
-  override def stop(context: BundleContext): Unit = {
-    PluginInfo.unregister(this)
-    ConfigurationLocationRegistry.unregister(this)
-  }
+  override def stop(context: BundleContext): Unit =
+    PluginRegistry.unregister(this)
 
   override def start(context: BundleContext): Unit = {
-    import org.openmole.core.pluginmanager.KeyWord._
+    import org.openmole.core.highlight.HighLight._
 
-    val keyWords: Vector[KeyWord] =
+    val keyWords: Vector[HighLight] =
       Vector(
-        HookKeyWord(CSVHook.getClass),
-        HookKeyWord(AppendToFileHook.getClass),
-        HookKeyWord(classOf[CopyFileHook]),
-        HookKeyWord(classOf[SaveHook]),
-        HookKeyWord(classOf[MatrixHook])
+        HookHighLight(CSVHook.getClass),
+        HookHighLight(AppendToFileHook.getClass),
+        HookHighLight(classOf[CopyFileHook]),
+        HookHighLight(classOf[SaveHook]),
+        HookHighLight(classOf[MatrixHook])
       )
 
-    PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
-    ConfigurationLocationRegistry.register(
+    PluginRegistry.register(
       this,
-      ConfigurationLocationRegistry.list()
-    )
+      nameSpaces = Vector(this.getClass.getPackage),
+      nameSpaceTraits = Vector(classOf[FilePackage]),
+      highLight = keyWords)
   }
 }

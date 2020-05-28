@@ -2,7 +2,7 @@ package org.openmole.plugin.environment.batch.storage
 
 import java.nio.file.spi.FileTypeDetector
 
-import org.openmole.core.preference.{ ConfigurationLocation, Preference }
+import org.openmole.core.preference.{ PreferenceLocation, Preference }
 import org.openmole.core.replication.ReplicaCatalog
 import java.util.regex.Pattern
 
@@ -31,8 +31,8 @@ object StorageSpace {
 }
 
 object HierarchicalStorageSpace extends JavaLogger {
-  val TmpDirRemoval = ConfigurationLocation("StorageService", "TmpDirRemoval", Some(30 days))
-  val TmpDirCreation = ConfigurationLocation("StorageService", "TmpDirCreation", Some(1 hours))
+  val TmpDirRemoval = PreferenceLocation("StorageService", "TmpDirRemoval", Some(30 days))
+  val TmpDirCreation = PreferenceLocation("StorageService", "TmpDirCreation", Some(1 hours))
 
   def create[S](s: S, root: String, storageId: String, isConnectionError: Throwable ⇒ Boolean)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], preference: Preference) = {
     val persistent = "persistent/"

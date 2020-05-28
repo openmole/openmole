@@ -17,6 +17,6 @@
 
 package org.openmole.plugin.environment.gridscale
 
-import org.openmole.core.pluginmanager.PluginInfoActivator
+import org.openmole.core.pluginregistry._
 
-class Activator extends PluginInfoActivator
+class Activator extends PluginRegistryActivator

@@ -25,7 +25,7 @@ import scala.collection.immutable.TreeMap
 
 object Context {
 
-  def ErrorArraySnipSize = ConfigurationLocation[Int]("Display", "ErrorArraySnipSize", Some(10))
+  def ErrorArraySnipSize = PreferenceLocation[Int]("Display", "ErrorArraySnipSize", Some(10))
 
   implicit def variableToContextConverter(variable: Variable[_]) = Context(variable)
   implicit def variablesToContextConverter(variables: Iterable[Variable[_]]): Context = Context(variables.toSeq: _*)

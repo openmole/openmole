@@ -17,28 +17,27 @@
 
 package org.openmole.plugin.task.external
 
-import org.openmole.core.pluginmanager._
-import org.osgi.framework.BundleContext
+import org.openmole.core.highlight.HighLight
+import org.openmole.core.pluginregistry.PluginRegistry
+import org.osgi.framework.{ BundleActivator, BundleContext }
 
-class Activator extends PluginInfoActivator {
-  override def keyWordTraits = List(classOf[ExternalPackage])
+class Activator extends BundleActivator {
 
-  override def stop(context: BundleContext): Unit = {
-    PluginInfo.unregister(this)
-  }
+  override def stop(context: BundleContext): Unit =
+    PluginRegistry.unregister(this)
 
   override def start(context: BundleContext): Unit = {
-    import org.openmole.core.pluginmanager.KeyWord._
+    import org.openmole.core.highlight.HighLight._
 
-    val keyWords: Vector[KeyWord] =
+    val keyWords: Vector[HighLight] =
       Vector(
-        WordKeyWord("as"),
-        WordKeyWord("inputFiles"),
-        WordKeyWord("outputFiles"),
-        WordKeyWord("resources"),
-        WordKeyWord("inputFileArrays")
+        WordHighLight("as"),
+        WordHighLight("inputFiles"),
+        WordHighLight("outputFiles"),
+        WordHighLight("resources"),
+        WordHighLight("inputFileArrays")
       )
 
-    PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
+    PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords, nameSpaceTraits = Vector(classOf[ExternalPackage]))
   }
 }

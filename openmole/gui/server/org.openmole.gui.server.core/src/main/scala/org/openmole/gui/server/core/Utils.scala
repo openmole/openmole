@@ -22,7 +22,7 @@ import java.util.logging.Level
 import java.util.zip._
 
 import scala.collection.JavaConversions.enumerationAsScalaIterator
-import org.openmole.core.pluginmanager.{ PluginInfo, PluginManager }
+import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
@@ -32,13 +32,14 @@ import org.openmole.tool.file._
 import org.openmole.core.fileservice._
 import java.nio.file.attribute._
 
+import org.openmole.core.highlight.HighLight
+import org.openmole.core.pluginregistry.{ PluginInfo, PluginRegistry }
 import org.openmole.gui.ext.plugin.server.PluginActivator
 import org.openmole.gui.ext.tool.server.OMRouter
 import org.openmole.gui.server.jscompile.JSPack
 
 import scala.io.{ BufferedSource, Codec }
 import org.openmole.core.services._
-import org.openmole.core.pluginmanager.KeyWord
 
 import scala.annotation.tailrec
 import scala.util.{ Failure, Success, Try }
@@ -351,9 +352,9 @@ object Utils extends JavaLogger {
   }
 
   def expandDepsFile(template: File, to: File) = {
-    val rules = PluginInfo.keyWords.partition { kw ⇒
+    val rules = PluginRegistry.highLights.partition { kw ⇒
       kw match {
-        case _@ (KeyWord.TaskKeyWord(_) | KeyWord.SourceKeyWord(_) | KeyWord.EnvironmentKeyWord(_) | KeyWord.HookKeyWord(_) | KeyWord.SamplingKeyWord(_) | KeyWord.DomainKeyWord(_) | KeyWord.PatternKeyWord(_)) ⇒ false
+        case _@ (HighLight.TaskHighLight(_) | HighLight.SourceHighLight(_) | HighLight.EnvironmentHighLight(_) | HighLight.HookHighLight(_) | HighLight.SamplingHighLight(_) | HighLight.DomainHighLight(_) | HighLight.PatternHighLight(_)) ⇒ false
         case _ ⇒ true
       }
     }

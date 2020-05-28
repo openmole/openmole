@@ -34,12 +34,12 @@ import scala.concurrent.Await
 import scala.util.{ Success, Try }
 
 object ReplicaCatalog extends JavaLogger {
-  val NoAccessCleanTime = ConfigurationLocation("ReplicaCatalog", "NoAccessCleanTime", Some(30 days))
-  val ReplicaCacheTime = ConfigurationLocation("ReplicaCatalog", "ReplicaCacheTime", Some(30 minutes))
-  val ReplicaCacheSize = ConfigurationLocation("ReplicaCatalog", "ReplicaCacheSize", Some(1000))
-  val ReplicaGraceTime = ConfigurationLocation("ReplicaCatalog", "ReplicaGraceTime", Some(1 days))
-  val LockTimeout = ConfigurationLocation("ReplicaCatalog", "LockTimeout", Some(1 minutes))
-  val CheckFileExistsInterval = ConfigurationLocation("ReplicaCatalog", "CheckFileExistsInterval", Some(30 minutes))
+  val NoAccessCleanTime = PreferenceLocation("ReplicaCatalog", "NoAccessCleanTime", Some(30 days))
+  val ReplicaCacheTime = PreferenceLocation("ReplicaCatalog", "ReplicaCacheTime", Some(30 minutes))
+  val ReplicaCacheSize = PreferenceLocation("ReplicaCatalog", "ReplicaCacheSize", Some(1000))
+  val ReplicaGraceTime = PreferenceLocation("ReplicaCatalog", "ReplicaGraceTime", Some(1 days))
+  val LockTimeout = PreferenceLocation("ReplicaCatalog", "LockTimeout", Some(1 minutes))
+  val CheckFileExistsInterval = PreferenceLocation("ReplicaCatalog", "CheckFileExistsInterval", Some(30 minutes))
 
   def apply(workspace: Workspace)(implicit preference: Preference): ReplicaCatalog = {
     val dbDirectory = org.openmole.core.db.dbDirectory(workspace.location)

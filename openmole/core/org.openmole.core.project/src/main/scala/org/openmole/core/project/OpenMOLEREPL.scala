@@ -21,20 +21,20 @@ import org.openmole.core.console.ScalaREPL
 import org.openmole.core.dsl._
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.pluginmanager.PluginInfo
+import org.openmole.core.pluginregistry.{ PluginInfo, PluginRegistry }
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workspace.TmpDirectory
 
 object OpenMOLEREPL {
 
-  def autoImports: Seq[String] = PluginInfo.pluginsInfo.toSeq.flatMap(_.namespaces).map(n ⇒ s"$n._")
+  def autoImports: Seq[String] = PluginRegistry.pluginsInfo.toSeq.flatMap(_.namespaces).map(n ⇒ s"${n.value}._")
   def keywordNamespace = "om"
 
-  def keywordNamespaceCode = {
+  def autoImportTraitsCode = {
     def withPart = {
-      val keyWordTraits = PluginInfo.pluginsInfo.flatMap(_.keyWordTraits)
-      if (keyWordTraits.isEmpty) ""
-      else s"""with ${PluginInfo.pluginsInfo.flatMap(_.keyWordTraits).mkString(" with ")}"""
+      val namespaceTraits = PluginRegistry.pluginsInfo.flatMap(_.namespaceTraits)
+      if (namespaceTraits.isEmpty) ""
+      else s"""with ${namespaceTraits.map(_.value).mkString(" with ")}"""
     }
     s"""
        |object $keywordNamespace extends ${classOf[DSLPackage].getCanonicalName} $withPart
@@ -51,7 +51,7 @@ object OpenMOLEREPL {
   def initialisationCommands(imports: Seq[String]) =
     Seq(
       imports.map("import " + _).mkString("; "),
-      keywordNamespaceCode
+      autoImportTraitsCode
     )
 
   def newREPL(args: ConsoleVariables, quiet: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService) = {

@@ -17,53 +17,50 @@
 
 package org.openmole.core.dsl
 
-import org.openmole.core.pluginmanager.PluginInfo
-import org.openmole.core.preference.ConfigurationLocationRegistry
+import org.openmole.core.pluginregistry.{ PluginInfo, PluginRegistry }
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
 class Activator extends BundleActivator {
-  override def stop(context: BundleContext): Unit = {
-    PluginInfo.unregister(this)
-  }
+  override def stop(context: BundleContext): Unit = PluginRegistry.unregister(this)
 
   override def start(context: BundleContext): Unit = {
-    import org.openmole.core.pluginmanager.KeyWord._
+    import org.openmole.core.highlight.HighLight._
 
-    val keyWords = Vector(
-      WordKeyWord("byte"),
-      WordKeyWord("bytes"),
-      WordKeyWord("kilobyte"),
-      WordKeyWord("kilobytes"),
-      WordKeyWord("megabyte"),
-      WordKeyWord("megabytes"),
-      WordKeyWord("gigabyte"),
-      WordKeyWord("gigabytes"),
-      WordKeyWord("terabyte"),
-      WordKeyWord("terabytes"),
-      WordKeyWord("petabyte"),
-      WordKeyWord("petabytes"),
-      WordKeyWord("exabyte"),
-      WordKeyWord("exabytes"),
-      WordKeyWord("zettabyte"),
-      WordKeyWord("zettabytes"),
-      WordKeyWord("yottabyte"),
-      WordKeyWord("yottabytes"),
-      WordKeyWord("nanosecond"),
-      WordKeyWord("nanoseconds"),
-      WordKeyWord("microsecond"),
-      WordKeyWord("microseconds"),
-      WordKeyWord("millisecond"),
-      WordKeyWord("milliseconds"),
-      WordKeyWord("second"),
-      WordKeyWord("seconds"),
-      WordKeyWord("minute"),
-      WordKeyWord("minutes"),
-      WordKeyWord("hour"),
-      WordKeyWord("hours"),
-      WordKeyWord("day"),
-      WordKeyWord("days")
+    val highLight = Vector(
+      WordHighLight("byte"),
+      WordHighLight("bytes"),
+      WordHighLight("kilobyte"),
+      WordHighLight("kilobytes"),
+      WordHighLight("megabyte"),
+      WordHighLight("megabytes"),
+      WordHighLight("gigabyte"),
+      WordHighLight("gigabytes"),
+      WordHighLight("terabyte"),
+      WordHighLight("terabytes"),
+      WordHighLight("petabyte"),
+      WordHighLight("petabytes"),
+      WordHighLight("exabyte"),
+      WordHighLight("exabytes"),
+      WordHighLight("zettabyte"),
+      WordHighLight("zettabytes"),
+      WordHighLight("yottabyte"),
+      WordHighLight("yottabytes"),
+      WordHighLight("nanosecond"),
+      WordHighLight("nanoseconds"),
+      WordHighLight("microsecond"),
+      WordHighLight("microseconds"),
+      WordHighLight("millisecond"),
+      WordHighLight("milliseconds"),
+      WordHighLight("second"),
+      WordHighLight("seconds"),
+      WordHighLight("minute"),
+      WordHighLight("minutes"),
+      WordHighLight("hour"),
+      WordHighLight("hours"),
+      WordHighLight("day"),
+      WordHighLight("days")
     )
 
-    PluginInfo.register(this, keyWords = keyWords)
+    PluginRegistry.register(this, highLight = highLight)
   }
 }

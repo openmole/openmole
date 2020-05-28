@@ -17,6 +17,6 @@
 
 package org.openmole.plugin.grouping.onvariable
 
-import org.openmole.core.pluginmanager.PluginInfoActivator
+import org.openmole.core.pluginregistry.PluginRegistryActivator
 
-class Activator extends PluginInfoActivator
+class Activator extends PluginRegistryActivator

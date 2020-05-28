@@ -25,7 +25,7 @@ import org.openmole.core.dsl.extension._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.preference.{ ConfigurationLocation, Preference }
+import org.openmole.core.preference.{ PreferenceLocation, Preference }
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder.{ DefinitionScope, InfoBuilder, InfoConfig, InputOutputBuilder, InputOutputConfig }
@@ -46,8 +46,8 @@ object ContainerTask {
   implicit def isExternal: ExternalBuilder[ContainerTask] = ExternalBuilder(ContainerTask.external)
   implicit def isInfo = InfoBuilder(ContainerTask.info)
 
-  val RegistryTimeout = ConfigurationLocation("ContainerTask", "RegistryTimeout", Some(1 minutes))
-  val RegistryRetryOnError = ConfigurationLocation("ContainerTask", "RegistryRetryOnError", Some(5))
+  val RegistryTimeout = PreferenceLocation("ContainerTask", "RegistryTimeout", Some(1 minutes))
+  val RegistryRetryOnError = PreferenceLocation("ContainerTask", "RegistryRetryOnError", Some(5))
 
   lazy val installLockKey = LockKey()
 

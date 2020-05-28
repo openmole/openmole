@@ -17,22 +17,22 @@
 
 package org.openmole.plugin.environment.condor
 
-import org.openmole.core.pluginmanager.{ KeyWord, PluginInfo }
+import org.openmole.core.highlight.HighLight
+import org.openmole.core.pluginregistry.PluginRegistry
 import org.osgi.framework._
 
 class Activator extends BundleActivator {
-  override def stop(context: BundleContext): Unit = {
-    PluginInfo.unregister(this)
-  }
+  override def stop(context: BundleContext): Unit =
+    PluginRegistry.unregister(this)
 
   override def start(context: BundleContext): Unit = {
-    import org.openmole.core.pluginmanager.KeyWord._
+    import org.openmole.core.highlight.HighLight._
 
-    val keyWords: Vector[KeyWord] =
+    val keyWords: Vector[HighLight] =
       Vector(
-        EnvironmentKeyWord(classOf[CondorEnvironment[_]])
+        EnvironmentHighLight(classOf[CondorEnvironment[_]])
       )
 
-    PluginInfo.register(this, namespaces = Vector(this.getClass.getPackage), keyWords = keyWords)
+    PluginRegistry.register(this, nameSpaces = Vector(this.getClass.getPackage), highLight = keyWords)
   }
 }

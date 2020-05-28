@@ -25,7 +25,7 @@ import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
 import org.eclipse.jetty.webapp._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.location._
-import org.openmole.core.preference.{ ConfigurationLocation, Preference }
+import org.openmole.core.preference.{ PreferenceLocation, Preference }
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.tool.crypto.KeyStore
 import org.openmole.tool.file._
@@ -51,7 +51,7 @@ object GUIServer {
     to
   }
 
-  val port = ConfigurationLocation("GUIServer", "Port", Some(Network.freePort))
+  val port = PreferenceLocation("GUIServer", "Port", Some(Network.freePort))
 
   def initialisePreference(preference: Preference) = {
     if (!preference.isSet(port)) preference.setPreference(port, Network.freePort)

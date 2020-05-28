@@ -21,7 +21,7 @@ import gridscale.egi._
 import org.openmole.core.communication.storage.TransferOptions
 import org.openmole.core.exception.{ InternalProcessingError, MultipleException }
 import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.preference.{ ConfigurationLocation, Preference }
+import org.openmole.core.preference.{ PreferenceLocation, Preference }
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
@@ -42,45 +42,45 @@ import scala.concurrent.{ Await, Future }
 
 object EGIEnvironment extends JavaLogger {
 
-  val FetchResourcesTimeOut = ConfigurationLocation("EGIEnvironment", "FetchResourcesTimeOut", Some(1 minutes))
-  val CACertificatesSite = ConfigurationLocation("EGIEnvironment", "CACertificatesSite", Some("https://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/"))
-  val CACertificatesCacheTime = ConfigurationLocation("EGIEnvironment", "CACertificatesCacheTime", Some(7 days))
-  val CACertificatesDownloadTimeOut = ConfigurationLocation("EGIEnvironment", "CACertificatesDownloadTimeOut", Some(2 minutes))
-  val VOInformationSite = ConfigurationLocation("EGIEnvironment", "VOInformationSite", Some("https://operations-portal.egi.eu/xml/voIDCard/public/all/true"))
-  val VOCardDownloadTimeOut = ConfigurationLocation("EGIEnvironment", "VOCardDownloadTimeOut", Some(2 minutes))
-  val VOCardCacheTime = ConfigurationLocation("EGIEnvironment", "VOCardCacheTime", Some(6 hours))
+  val FetchResourcesTimeOut = PreferenceLocation("EGIEnvironment", "FetchResourcesTimeOut", Some(1 minutes))
+  val CACertificatesSite = PreferenceLocation("EGIEnvironment", "CACertificatesSite", Some("https://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/"))
+  val CACertificatesCacheTime = PreferenceLocation("EGIEnvironment", "CACertificatesCacheTime", Some(7 days))
+  val CACertificatesDownloadTimeOut = PreferenceLocation("EGIEnvironment", "CACertificatesDownloadTimeOut", Some(2 minutes))
+  val VOInformationSite = PreferenceLocation("EGIEnvironment", "VOInformationSite", Some("https://operations-portal.egi.eu/xml/voIDCard/public/all/true"))
+  val VOCardDownloadTimeOut = PreferenceLocation("EGIEnvironment", "VOCardDownloadTimeOut", Some(2 minutes))
+  val VOCardCacheTime = PreferenceLocation("EGIEnvironment", "VOCardCacheTime", Some(6 hours))
 
-  val EagerSubmissionMinNumberOfJobs = ConfigurationLocation("EGIEnvironment", "EagerSubmissionMinNumberOfJobs", Some(100))
-  val EagerSubmissionNumberOfJobs = ConfigurationLocation("EGIEnvironment", "EagerSubmissionNumberOfJobs", Some(3))
+  val EagerSubmissionMinNumberOfJobs = PreferenceLocation("EGIEnvironment", "EagerSubmissionMinNumberOfJobs", Some(100))
+  val EagerSubmissionNumberOfJobs = PreferenceLocation("EGIEnvironment", "EagerSubmissionNumberOfJobs", Some(3))
 
   //  val ConnectionsBySRMSE = ConfigurationLocation("EGIEnvironment", "ConnectionsSRMSE", Some(10))
-  val ConnexionsByWebDAVSE = ConfigurationLocation("EGIEnvironment", "ConnectionsByWebDAVSE", Some(100))
-  val ConnectionsToDIRAC = ConfigurationLocation("EGIEnvironment", "ConnectionsToDIRAC", Some(10))
+  val ConnexionsByWebDAVSE = PreferenceLocation("EGIEnvironment", "ConnectionsByWebDAVSE", Some(100))
+  val ConnectionsToDIRAC = PreferenceLocation("EGIEnvironment", "ConnectionsToDIRAC", Some(10))
   //
-  val ProxyLifeTime = ConfigurationLocation("EGIEnvironment", "ProxyTime", Some(24 hours))
+  val ProxyLifeTime = PreferenceLocation("EGIEnvironment", "ProxyTime", Some(24 hours))
   //  val MyProxyTime = ConfigurationLocation("EGIEnvironment", "MyProxyTime", Some(7 days))
-  val ProxyRenewalTime = ConfigurationLocation("EGIEnvironment", "ProxyRenewalTime", Some(1 hours))
-  val TokenRenewalTime = ConfigurationLocation("EGIEnvironment", "TokenRenewalTime", Some(1 hours))
-  val JobGroupRefreshInterval = ConfigurationLocation("EGIEnvironment", "JobGroupRefreshInterval", Some(1 minutes))
+  val ProxyRenewalTime = PreferenceLocation("EGIEnvironment", "ProxyRenewalTime", Some(1 hours))
+  val TokenRenewalTime = PreferenceLocation("EGIEnvironment", "TokenRenewalTime", Some(1 hours))
+  val JobGroupRefreshInterval = PreferenceLocation("EGIEnvironment", "JobGroupRefreshInterval", Some(1 minutes))
   //  val JobShakingHalfLife = ConfigurationLocation("EGIEnvironment", "JobShakingHalfLife", Some(30 minutes))
   //  val JobShakingMaxReady = ConfigurationLocation("EGIEnvironment", "JobShakingMaxReady", Some(100))
   //
-  val RemoteCopyTimeout = ConfigurationLocation("EGIEnvironment", "RemoteCopyTimeout", Some(30 minutes))
+  val RemoteCopyTimeout = PreferenceLocation("EGIEnvironment", "RemoteCopyTimeout", Some(30 minutes))
   //  val QualityHysteresis = ConfigurationLocation("EGIEnvironment", "QualityHysteresis", Some(100))
-  val MinValueForSelectionExploration = ConfigurationLocation("EGIEnvironment", "MinValueForSelectionExploration", Some(0.001))
+  val MinValueForSelectionExploration = PreferenceLocation("EGIEnvironment", "MinValueForSelectionExploration", Some(0.001))
   //  val ShallowWMSRetryCount = ConfigurationLocation("EGIEnvironment", "ShallowWMSRetryCount", Some(5))
   //
   //  val JobServiceFitnessPower = ConfigurationLocation("EGIEnvironment", "JobServiceFitnessPower", Some(2.0))
 
-  val StorageFitnessPower = ConfigurationLocation("EGIEnvironment", "StorageFitnessPower", Some(2.0))
+  val StorageFitnessPower = PreferenceLocation("EGIEnvironment", "StorageFitnessPower", Some(2.0))
   //
-  val StorageSizeFactor = ConfigurationLocation("EGIEnvironment", "StorageSizeFactor", Some(5.0))
-  val StorageTimeFactor = ConfigurationLocation("EGIEnvironment", "StorageTimeFactor", Some(1.0))
+  val StorageSizeFactor = PreferenceLocation("EGIEnvironment", "StorageSizeFactor", Some(5.0))
+  val StorageTimeFactor = PreferenceLocation("EGIEnvironment", "StorageTimeFactor", Some(1.0))
   //    val StorageAvailabilityFactor = ConfigurationLocation("EGIEnvironment", "StorageAvailabilityFactor", Some(10.0))
-  val StorageSuccessRateFactor = ConfigurationLocation("EGIEnvironment", "StorageSuccessRateFactor", Some(10.0))
+  val StorageSuccessRateFactor = PreferenceLocation("EGIEnvironment", "StorageSuccessRateFactor", Some(10.0))
 
-  val DiracConnectionTimeout = ConfigurationLocation("EGIEnvironment", "DiracConnectionTimeout", Some(1 minutes))
-  val VOMSTimeout = ConfigurationLocation("EGIEnvironment", "VOMSTimeout", Some(1 minutes))
+  val DiracConnectionTimeout = PreferenceLocation("EGIEnvironment", "DiracConnectionTimeout", Some(1 minutes))
+  val VOMSTimeout = PreferenceLocation("EGIEnvironment", "VOMSTimeout", Some(1 minutes))
 
   val ldapURLs =
     Seq(
@@ -92,7 +92,7 @@ object EGIEnvironment extends JavaLogger {
       "egee-bdii.cnaf.infn.it"
     ).map(h ⇒ s"ldap://$h:2170")
 
-  val DefaultBDIIs = ConfigurationLocation("EGIEnvironment", "DefaultBDIIs", Some(ldapURLs))
+  val DefaultBDIIs = PreferenceLocation("EGIEnvironment", "DefaultBDIIs", Some(ldapURLs))
 
   def toBDII(bdii: java.net.URI)(implicit preference: Preference) = BDIIServer(bdii.getHost, bdii.getPort, preference(FetchResourcesTimeOut))
 

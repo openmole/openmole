@@ -17,8 +17,15 @@
 
 package org.openmole.plugin.task.jvm
 
-import org.openmole.core.pluginmanager.PluginInfoActivator
+import org.openmole.core.pluginregistry.PluginRegistry
+import org.osgi.framework.{ BundleActivator, BundleContext }
 
-class Activator extends PluginInfoActivator {
-  override def keyWordTraits = List(classOf[JVMPackage])
+class Activator extends BundleActivator {
+
+  override def stop(context: BundleContext): Unit =
+    PluginRegistry.unregister(this)
+
+  override def start(context: BundleContext): Unit =
+    PluginRegistry.register(this, Vector(this.getClass.getPackage), nameSpaceTraits = Vector(classOf[JVMPackage]))
+
 }

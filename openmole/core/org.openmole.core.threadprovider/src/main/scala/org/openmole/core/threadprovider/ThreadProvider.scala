@@ -11,7 +11,7 @@ import scala.concurrent.ExecutionContext
 object ThreadProvider {
 
   val maxPriority = Int.MaxValue
-  val maxPoolSize = ConfigurationLocation("ThreadProvider", "MaxPoolSize", Some(50))
+  val maxPoolSize = PreferenceLocation("ThreadProvider", "MaxPoolSize", Some(50))
 
   def apply(maxPoolSize: Option[Int] = None)(implicit preference: Preference) =
     new ThreadProvider(maxPoolSize.getOrElse(preference(ThreadProvider.maxPoolSize)))

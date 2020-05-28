@@ -87,53 +87,9 @@ package systemexec {
     def workDirectory: Lens[T, Option[String]]
   }
 
-  trait SystemExecPackage {
-
-    @deprecated("Use task arguments", "8")
-    lazy val errorOnReturnValue =
-      new {
-        def :=[T: ErrorOnReturnValue](b: Boolean) =
-          implicitly[ErrorOnReturnValue[T]].errorOnReturnValue.set(b)
-      }
-
-    @deprecated("Use task arguments", "8")
-    lazy val returnValue =
-      new {
-        def :=[T: ReturnValue](v: OptionalArgument[Val[Int]]) =
-          implicitly[ReturnValue[T]].returnValue.set(v)
-      }
-
-    @deprecated("Use task arguments", "8")
-    lazy val stdOut =
-      new {
-        def :=[T: StdOutErr](v: OptionalArgument[Val[String]]) =
-          implicitly[StdOutErr[T]].stdOut.set(v)
-      }
-
-    @deprecated("Use task arguments", "8")
-    lazy val stdErr =
-      new {
-        def :=[T: StdOutErr](v: OptionalArgument[Val[String]]) =
-          implicitly[StdOutErr[T]].stdErr.set(v)
-      }
-
-    @deprecated("Use task arguments", "8")
-    lazy val commands = new {
-      def +=[T: SystemExecTaskBuilder](os: OS, cmd: Command*): T ⇒ T =
-        (implicitly[SystemExecTaskBuilder[T]].commands add OSCommands(os, cmd: _*))
-    }
-
-    @deprecated("Use task arguments", "8")
-    lazy val customWorkDirectory =
-      new {
-        def :=[T: WorkDirectory](s: OptionalArgument[String]) =
-          implicitly[WorkDirectory[T]].workDirectory.set(s)
-      }
-
-  }
 }
 
-package object systemexec extends SystemExecPackage {
+package object systemexec {
 
   private[systemexec] def pack = this
 

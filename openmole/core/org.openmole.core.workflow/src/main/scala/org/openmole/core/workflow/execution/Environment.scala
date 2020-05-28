@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.logging.Level
 
 import org.openmole.core.event.{ Event, EventDispatcher }
-import org.openmole.core.preference.{ ConfigurationLocation, Preference }
+import org.openmole.core.preference.{ PreferenceLocation, Preference }
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.tools.service._
 import org.openmole.core.workflow.dsl._
@@ -34,7 +34,7 @@ import org.openmole.tool.cache._
 import scala.ref.WeakReference
 
 object Environment {
-  val maxExceptionsLog = ConfigurationLocation("Environment", "MaxExceptionsLog", Some(200))
+  val maxExceptionsLog = PreferenceLocation("Environment", "MaxExceptionsLog", Some(200))
 
   case class JobSubmitted(job: ExecutionJob) extends Event[Environment]
   case class JobStateChanged(job: ExecutionJob, newState: ExecutionState, oldState: ExecutionState) extends Event[Environment]

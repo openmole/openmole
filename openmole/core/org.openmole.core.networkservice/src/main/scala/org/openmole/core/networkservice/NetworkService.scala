@@ -18,12 +18,12 @@
 package org.openmole.core.networkservice
 
 import org.openmole.core.networkservice.NetworkService.HttpHost
-import org.openmole.core.preference.{ ConfigurationLocation, Preference }
+import org.openmole.core.preference.{ PreferenceLocation, Preference }
 
 object NetworkService {
 
-  val httpProxyEnabled = ConfigurationLocation("NetworkService", "HttpProxyEnabled", Some(false))
-  val httpProxyURI = ConfigurationLocation("NetworkService", "httpProxyURI", Option.empty[String])
+  val httpProxyEnabled = PreferenceLocation("NetworkService", "HttpProxyEnabled", Some(false))
+  val httpProxyURI = PreferenceLocation("NetworkService", "httpProxyURI", Option.empty[String])
 
   def httpHostFromPreferences(implicit preference: Preference): Option[HttpHost] = {
     val isEnabledOpt: Option[Boolean] = preference.preferenceOption(NetworkService.httpProxyEnabled)

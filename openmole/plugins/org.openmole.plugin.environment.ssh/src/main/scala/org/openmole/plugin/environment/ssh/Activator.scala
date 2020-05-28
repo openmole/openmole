@@ -17,28 +17,29 @@
 
 package org.openmole.plugin.environment.ssh
 
-import org.openmole.core.pluginmanager.{ KeyWord, PluginInfo, PluginInfoActivator }
-import org.openmole.core.preference.ConfigurationLocationRegistry
+import org.openmole.core.highlight.HighLight
+import org.openmole.core.pluginregistry.{ PluginInfo, PluginRegistry }
+import org.openmole.core.preference.PreferenceLocation
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
 class Activator extends BundleActivator {
   override def stop(context: BundleContext): Unit = {
-    PluginInfo.unregister(this)
-    ConfigurationLocationRegistry.unregister(this)
+    PluginRegistry.unregister(this)
   }
 
   override def start(context: BundleContext): Unit = {
-    import org.openmole.core.pluginmanager.KeyWord._
+    import org.openmole.core.highlight.HighLight._
 
-    val keyWords: Vector[KeyWord] =
+    val keyWords: Vector[HighLight] =
       Vector(
-        EnvironmentKeyWord(classOf[SSHEnvironment[_]])
+        EnvironmentHighLight(classOf[SSHEnvironment[_]])
       )
 
-    PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
-    ConfigurationLocationRegistry.register(
+    PluginRegistry.register(
       this,
-      ConfigurationLocationRegistry.list(SSHEnvironment)
+      nameSpaces = Vector(this.getClass.getPackage),
+      highLight = keyWords, preferenceLocation =
+        PreferenceLocation.list(SSHEnvironment)
     )
   }
 }

@@ -21,7 +21,7 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 import com.google.common.cache._
-import org.openmole.core.preference.{ ConfigurationLocation, Preference }
+import org.openmole.core.preference.{ PreferenceLocation, Preference }
 import org.openmole.core.threadprovider.{ ThreadProvider, Updater }
 import org.openmole.tool.hash._
 import org.openmole.core.workspace._
@@ -37,13 +37,13 @@ import scala.collection.mutable.{ ListBuffer, WeakHashMap }
 import scala.ref.WeakReference
 
 object FileService {
-  val GCInterval = ConfigurationLocation("FileService", "GCInterval", Some(1 minutes))
+  val GCInterval = PreferenceLocation("FileService", "GCInterval", Some(1 minutes))
 
-  val hashCacheSize = ConfigurationLocation("FileService", "HashCacheSize", Some(1000))
-  val hashCacheTime = ConfigurationLocation("FileService", "HashCacheTime", Some(10 minutes))
+  val hashCacheSize = PreferenceLocation("FileService", "HashCacheSize", Some(1000))
+  val hashCacheTime = PreferenceLocation("FileService", "HashCacheTime", Some(10 minutes))
 
-  val archiveCacheSize = ConfigurationLocation("FileService", "ArchiveCacheSize", Some(1000))
-  val archiveCacheTime = ConfigurationLocation("FileService", "ArchiveCacheTime", Some(10 minutes))
+  val archiveCacheSize = PreferenceLocation("FileService", "ArchiveCacheSize", Some(1000))
+  val archiveCacheTime = PreferenceLocation("FileService", "ArchiveCacheTime", Some(10 minutes))
 
   def apply()(implicit preference: Preference, threadProvider: ThreadProvider) = {
     val fs = new FileService

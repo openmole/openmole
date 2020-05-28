@@ -17,12 +17,12 @@
 package org.openmole.core.market
 
 import org.openmole.core.buildinfo
-import org.openmole.core.preference.ConfigurationLocation
+import org.openmole.core.preference.PreferenceLocation
 import org.openmole.core.workspace.Workspace
 
 object MarketIndex {
   // FIXME support list of indexes
-  val marketIndexLocation = ConfigurationLocation("Market", "Index", Some(buildinfo.marketAddress))
+  val marketIndexLocation = PreferenceLocation("Market", "Index", Some(buildinfo.marketAddress))
 }
 
 case class MarketIndexEntry(name: String, archive: String, readme: Option[String], tags: Seq[String]) {

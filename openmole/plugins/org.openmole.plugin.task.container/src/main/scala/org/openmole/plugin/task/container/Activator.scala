@@ -17,22 +17,22 @@
 
 package org.openmole.plugin.task.container
 
-import org.openmole.core.pluginmanager.{ KeyWord, PluginInfo, PluginInfoActivator }
-import org.osgi.framework.BundleContext
+import org.openmole.core.highlight.HighLight
+import org.openmole.core.pluginregistry.PluginRegistry
+import org.osgi.framework.{ BundleActivator, BundleContext }
 
-class Activator extends PluginInfoActivator {
-  override def stop(context: BundleContext): Unit = {
-    PluginInfo.unregister(this)
-  }
+class Activator extends BundleActivator {
+  override def stop(context: BundleContext): Unit =
+    PluginRegistry.unregister(this)
 
   override def start(context: BundleContext): Unit = {
-    import org.openmole.core.pluginmanager.KeyWord._
+    import org.openmole.core.highlight.HighLight._
 
-    val keyWords: Vector[KeyWord] =
+    val keyWords: Vector[HighLight] =
       Vector(
-        TaskKeyWord("ContainerTask")
+        TaskHighLight("ContainerTask")
       )
 
-    PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
+    PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords)
   }
 }

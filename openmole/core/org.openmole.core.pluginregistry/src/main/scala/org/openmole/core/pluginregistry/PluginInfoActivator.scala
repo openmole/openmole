@@ -1,7 +1,5 @@
-package org.openmole.core.preferencemacro
-
 /*
- * Copyright (C) 2019 Romain Reuillon
+ * Copyright (C) 2015 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,17 +15,12 @@ package org.openmole.core.preferencemacro
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-sealed trait ConfigurationLocation[T] {
-  def group: String
-  def name: String
-  def default: Option[T]
-  override def toString = s"$group.$name"
+package org.openmole.core.pluginregistry
+
+import org.osgi.framework.{ BundleActivator, BundleContext }
+
+trait PluginRegistryActivator extends BundleActivator {
+  override def start(bundleContext: BundleContext): Unit = PluginRegistry.register(this, Vector(this.getClass.getPackage))
+  override def stop(bundleContext: BundleContext): Unit = PluginRegistry.unregister(this)
 }
 
-class ClearConfigurationLocation[T](val group: String, val name: String, _default: ⇒ Option[T]) extends ConfigurationLocation[T] {
-  def default = _default
-}
-
-class CypheredConfigurationLocation[T](val group: String, val name: String, _default: ⇒ Option[T]) extends ConfigurationLocation[T] {
-  def default = _default
-}

@@ -17,28 +17,27 @@
 
 package org.openmole.plugin.environment.egi
 
-import org.openmole.core.pluginmanager.PluginInfo
-import org.openmole.core.preference.ConfigurationLocationRegistry
+import org.openmole.core.pluginregistry.{ PluginInfo, PluginRegistry }
+import org.openmole.core.preference.PreferenceLocation
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
 class Activator extends BundleActivator {
-  override def stop(context: BundleContext): Unit = {
-    PluginInfo.unregister(this)
-    ConfigurationLocationRegistry.unregister(this)
-  }
+  override def stop(context: BundleContext): Unit =
+    PluginRegistry.unregister(this)
 
   override def start(context: BundleContext): Unit = {
-    import org.openmole.core.pluginmanager.KeyWord._
+    import org.openmole.core.highlight.HighLight._
 
     val keyWords =
       Vector(
-        EnvironmentKeyWord(classOf[EGIEnvironment[_]])
+        EnvironmentHighLight(classOf[EGIEnvironment[_]])
       )
 
-    PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
-    ConfigurationLocationRegistry.register(
+    PluginRegistry.register(
       this,
-      ConfigurationLocationRegistry.list(EGIEnvironment) //++ ConfigurationInfo.list(DIRACEnvironment)
+      Vector(this.getClass.getPackage),
+      highLight = keyWords,
+      preferenceLocation = PreferenceLocation.list(EGIEnvironment)
     )
   }
 }

@@ -17,30 +17,28 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.pluginmanager.{ KeyWord, _ }
-import org.openmole.core.preference.ConfigurationLocationRegistry
-import org.osgi.framework.BundleContext
+import org.openmole.core.highlight.HighLight
+import org.openmole.core.pluginregistry.PluginRegistry
+import org.osgi.framework.{ BundleActivator, BundleContext }
 
-class Activator extends PluginInfoActivator {
-  override def stop(context: BundleContext): Unit = {
-    PluginInfo.unregister(this)
-    ConfigurationLocationRegistry.unregister(this)
-  }
+class Activator extends BundleActivator {
+  override def stop(context: BundleContext): Unit =
+    PluginRegistry.unregister(this)
 
   override def start(context: BundleContext): Unit = {
-    import org.openmole.core.pluginmanager.KeyWord._
+    import org.openmole.core.highlight.HighLight._
 
-    val keyWords: Vector[KeyWord] =
+    val keyWords: Vector[HighLight] =
       Vector(
-        SamplingKeyWord(classOf[CompleteSampling]),
-        SamplingKeyWord(classOf[ConcatenateSampling]),
-        SamplingKeyWord(classOf[FilteredSampling]),
-        SamplingKeyWord(classOf[RepeatSampling]),
-        SamplingKeyWord(classOf[SampleSampling]),
-        SamplingKeyWord(classOf[ShuffleSampling]),
-        SamplingKeyWord(classOf[TakeSampling]),
-        SamplingKeyWord(classOf[ZipWithIndexSampling]),
-        SamplingKeyWord(classOf[ZipWithNameSampling[_, _]]),
+        SamplingHighLight(classOf[CompleteSampling]),
+        SamplingHighLight(classOf[ConcatenateSampling]),
+        SamplingHighLight(classOf[FilteredSampling]),
+        SamplingHighLight(classOf[RepeatSampling]),
+        SamplingHighLight(classOf[SampleSampling]),
+        SamplingHighLight(classOf[ShuffleSampling]),
+        SamplingHighLight(classOf[TakeSampling]),
+        SamplingHighLight(classOf[ZipWithIndexSampling]),
+        SamplingHighLight(classOf[ZipWithNameSampling[_, _]]),
         "zip",
         "withIndex",
         "sample",
@@ -54,10 +52,6 @@ class Activator extends PluginInfoActivator {
         "subset"
       )
 
-    PluginInfo.register(this, Vector(this.getClass.getPackage), keyWords = keyWords)
-    ConfigurationLocationRegistry.register(
-      this,
-      ConfigurationLocationRegistry.list()
-    )
+    PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords)
   }
 }

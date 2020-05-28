@@ -20,14 +20,14 @@ package org.openmole.plugin.environment.batch.storage
 import java.io._
 
 import org.openmole.core.communication.storage._
-import org.openmole.core.preference.ConfigurationLocation
+import org.openmole.core.preference.PreferenceLocation
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.refresh._
 import org.openmole.tool.logger.JavaLogger
 import squants.time.TimeConversions._
 
 object StorageService extends JavaLogger {
-  val DirRegenerate = ConfigurationLocation("StorageService", "DirRegenerate", Some(1 hours))
+  val DirRegenerate = PreferenceLocation("StorageService", "DirRegenerate", Some(1 hours))
 
   def rmFile[S](s: S, path: String, background: Boolean)(implicit services: BatchEnvironment.Services, storageInterface: StorageInterface[S]): Unit = {
     def action = { rmFile(s, path); false }

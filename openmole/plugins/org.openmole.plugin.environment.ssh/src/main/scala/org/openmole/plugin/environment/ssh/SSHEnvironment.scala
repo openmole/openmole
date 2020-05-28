@@ -22,7 +22,7 @@ import java.util.concurrent.locks.ReentrantLock
 
 import gridscale.effectaside._
 import org.openmole.core.authentication.AuthenticationStore
-import org.openmole.core.preference.ConfigurationLocation
+import org.openmole.core.preference.PreferenceLocation
 import org.openmole.core.threadprovider.Updater
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
@@ -38,11 +38,11 @@ import scala.ref.WeakReference
 
 object SSHEnvironment extends JavaLogger {
 
-  val maxLocalOperations = ConfigurationLocation("ClusterEnvironment", "MaxLocalOperations", Some(100))
-  val maxConnections = ConfigurationLocation("SSHEnvironment", "MaxConnections", Some(5))
+  val maxLocalOperations = PreferenceLocation("ClusterEnvironment", "MaxLocalOperations", Some(100))
+  val maxConnections = PreferenceLocation("SSHEnvironment", "MaxConnections", Some(5))
 
-  val updateInterval = ConfigurationLocation("SSHEnvironment", "UpdateInterval", Some(10 seconds))
-  val timeOut = ConfigurationLocation("SSHEnvironment", "Timeout", Some(1 minutes))
+  val updateInterval = PreferenceLocation("SSHEnvironment", "UpdateInterval", Some(10 seconds))
+  val timeOut = PreferenceLocation("SSHEnvironment", "Timeout", Some(1 minutes))
 
   def apply(
     user:                 String,

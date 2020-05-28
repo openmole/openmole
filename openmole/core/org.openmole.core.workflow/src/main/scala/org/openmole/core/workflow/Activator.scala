@@ -1,65 +1,61 @@
 package org.openmole.core.workflow
 
-import org.openmole.core.pluginmanager.PluginInfo
-import org.openmole.core.preference.ConfigurationLocationRegistry
+import org.openmole.core.highlight.HighLight._
+import org.openmole.core.pluginregistry.PluginRegistry
+import org.openmole.core.preference.PreferenceLocation
 import org.openmole.core.workflow.format.CSVOutputFormat
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
 class Activator extends BundleActivator {
 
-  override def stop(context: BundleContext): Unit = {
-    ConfigurationLocationRegistry.unregister(this)
-    PluginInfo.unregister(this)
-  }
+  override def stop(context: BundleContext): Unit = PluginRegistry.unregister(this)
+
   override def start(context: BundleContext): Unit = {
 
-    val keyWords = {
-      import org.openmole.core.pluginmanager.KeyWord._
+    val highLight = {
       import org.openmole.core.context._
-      import org.openmole.core.workflow.mole._
-      import org.openmole.core.workflow.transition.{ TransitionSlot }
       import org.openmole.core.workflow.execution.{ LocalEnvironment }
       import org.openmole.core.workflow.task.{ EmptyTask, ExplorationTask, ClosureTask, ToArrayTask, MoleTask, FromContextTask }
 
       Vector(
-        WordKeyWord(classOf[Val[_]]),
-        WordKeyWord("Capsule"),
-        WordKeyWord("Slot"),
-        WordKeyWord("Capsule"),
-        WordKeyWord("Strain"),
-        WordKeyWord("in"),
-        WordKeyWord("is"),
-        WordKeyWord("on"),
-        WordKeyWord("by"),
-        WordKeyWord("set"),
-        WordKeyWord("+="),
-        WordKeyWord(":="),
-        WordKeyWord("/"),
-        WordKeyWord("inputs"),
-        WordKeyWord("outputs"),
-        WordKeyWord("hook"),
-        WordKeyWord("display"),
-        WordKeyWord("workDirectory"),
-        WordKeyWord("plugins"),
-        WordKeyWord("pluginsOf"),
-        TransitionKeyWord("--"),
-        TransitionKeyWord("-<"),
-        TransitionKeyWord(">-"),
-        TransitionKeyWord("-<-"),
-        TransitionKeyWord(">|"),
-        TransitionKeyWord("oo"),
-        EnvironmentKeyWord(classOf[LocalEnvironment]),
-        TaskKeyWord(objectName(EmptyTask)),
-        TaskKeyWord(objectName(ExplorationTask)),
-        TaskKeyWord(objectName(ClosureTask)),
-        TaskKeyWord(objectName(ToArrayTask)),
-        TaskKeyWord(objectName(MoleTask)),
-        OtherKeyWord(objectName(CSVOutputFormat))
+        WordHighLight(classOf[Val[_]]),
+        WordHighLight("Capsule"),
+        WordHighLight("Slot"),
+        WordHighLight("Capsule"),
+        WordHighLight("Strain"),
+        WordHighLight("in"),
+        WordHighLight("is"),
+        WordHighLight("on"),
+        WordHighLight("by"),
+        WordHighLight("set"),
+        WordHighLight("+="),
+        WordHighLight(":="),
+        WordHighLight("/"),
+        WordHighLight("inputs"),
+        WordHighLight("outputs"),
+        WordHighLight("hook"),
+        WordHighLight("display"),
+        WordHighLight("workDirectory"),
+        WordHighLight("plugins"),
+        WordHighLight("pluginsOf"),
+        TransitionHighLight("--"),
+        TransitionHighLight("-<"),
+        TransitionHighLight(">-"),
+        TransitionHighLight("-<-"),
+        TransitionHighLight(">|"),
+        TransitionHighLight("oo"),
+        EnvironmentHighLight(classOf[LocalEnvironment]),
+        TaskHighLight(objectName(EmptyTask)),
+        TaskHighLight(objectName(ExplorationTask)),
+        TaskHighLight(objectName(ClosureTask)),
+        TaskHighLight(objectName(ToArrayTask)),
+        TaskHighLight(objectName(MoleTask)),
+        OtherHighLight(objectName(CSVOutputFormat))
       )
     }
 
-    ConfigurationLocationRegistry.register(this, ConfigurationLocationRegistry.list(org.openmole.core.workflow.execution.Environment) ++ ConfigurationLocationRegistry.list(org.openmole.core.workflow.execution.LocalEnvironment))
-    PluginInfo.register(this, keyWords = keyWords)
+    PluginRegistry.register(this, highLight = highLight, preferenceLocation = PreferenceLocation.list(org.openmole.core.workflow.execution.Environment) ++ PreferenceLocation.list(org.openmole.core.workflow.execution.LocalEnvironment))
+
   }
 
 }
