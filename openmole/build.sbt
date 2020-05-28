@@ -153,7 +153,6 @@ def allCore = Seq(
   networkService,
   csv,
   highlight,
-  metadata,
   namespace,
   pluginRegistry)
 
@@ -237,8 +236,6 @@ lazy val location = OsgiProject(coreDir, "org.openmole.core.location", imports =
 
 lazy val highlight = OsgiProject(coreDir, "org.openmole.core.highlight", imports = Seq("*")) dependsOn (exception) settings (coreSettings: _*)
 
-lazy val metadata = OsgiProject(coreDir, "org.openmole.core.metadata", imports = Seq("*")) dependsOn (exception) settings (coreSettings: _*)
-
 lazy val namespace = OsgiProject(coreDir, "org.openmole.core.namespace", imports = Seq("*")) dependsOn (exception) settings (coreSettings: _*)
 
 lazy val pluginManager = OsgiProject(
@@ -247,7 +244,7 @@ lazy val pluginManager = OsgiProject(
   imports = Seq("*")
 ) settings (defaultActivator) dependsOn(exception, tools, location) settings (coreSettings: _*)
 
-lazy val pluginRegistry = OsgiProject(coreDir, "org.openmole.core.pluginregistry", imports = Seq("*")) dependsOn (exception, metadata, highlight, namespace, preference) settings (coreSettings: _*)
+lazy val pluginRegistry = OsgiProject(coreDir, "org.openmole.core.pluginregistry", imports = Seq("*")) dependsOn (exception, highlight, namespace, preference) settings (coreSettings: _*)
 
 
 lazy val fileService = OsgiProject(coreDir, "org.openmole.core.fileservice", imports = Seq("*")) dependsOn(tools, workspace, openmoleTar, preference, threadProvider, pluginRegistry) settings (coreSettings: _*) settings (defaultActivator) settings (libraryDependencies += Libraries.guava)
@@ -473,7 +470,7 @@ lazy val omrHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.omr", import
 def allMethod = Seq(evolution, directSampling, sensitivity, abc)
 
 lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolution", imports = Seq("*")) dependsOn(
-  openmoleDSL, toolsTask, pattern, collectionDomain % "test", boundsDomain % "test", omrHook % "test"
+  openmoleDSL, toolsTask, pattern, omrHook, collectionDomain % "test", boundsDomain % "test"
 ) settings(
   libraryDependencies += Libraries.mgo,
   libraryDependencies += Libraries.shapeless,

@@ -13,46 +13,56 @@ import org.openmole.plugin.hook.json.JSONOutputFormat
 
 object OMROutputFormat {
 
-  implicit def outputFormat[MD](implicit encoder: Encoder[MD]): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD] {
+  def methodFile = "method.omr"
+  def dataDirectory = "data"
+
+  implicit def outputFormat[MD](implicit encoder: Encoder[MD], methodData: MethodData[MD]): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD] {
     override def write(executionContext: HookExecutionContext)(format: OMROutputFormat, output: WritableOutput, content: OutputContent, method: MD): FromContext[Unit] = FromContext { p ⇒
       import p._
       import org.json4s._
       import org.json4s.jackson.JsonMethods._
 
       output match {
-        case WritableOutput.Display(stream) ⇒ implicitly[OutputFormat[CSVOutputFormat, Any]].write(executionContext)(CSVOutputFormat(), output, content, method).from(context)
+        case WritableOutput.Display(_) ⇒ implicitly[OutputFormat[CSVOutputFormat, Any]].write(executionContext)(CSVOutputFormat(), output, content, method).from(context)
         case WritableOutput.Store(file) ⇒
           val directory = file.from(context)
+
+          def methodFormat(json: Json) = {
+            json.deepDropNullValues.mapObject(_.add("method", Json.fromString(methodData.name(method))))
+          }
 
           directory.withLockInDirectory {
             import io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
 
             content match {
               case PlainContent(variables, name) ⇒
-                val (f, m) =
+                val f =
                   name match {
-                    case Some(n) ⇒ (directory / "data" / s"${n.from(context)}.json.gz", directory / "method.omr")
-                    case None    ⇒ (directory / "data.json.gz", directory / "method.omr")
+                    case Some(n) ⇒ directory / dataDirectory / s"${n.from(context)}.json.gz"
+                    case None    ⇒ directory / dataDirectory / "data.json.gz"
                   }
 
                 f.withPrintStream(append = false, create = true, gz = true) { ps ⇒
                   ps.print(compact(render(variablesToJValue(variables))))
                 }
 
-                m.withPrintStream(create = true, gz = true)(_.print(method.asJson.noSpaces))
+                val m = directory / methodFile
+
+                m.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson).noSpaces))
               case sections: SectionContent ⇒
                 def sectionContent(sections: SectionContent) =
                   JObject(
                     sections.sections.map { section ⇒ section.name.from(context) -> variablesToJValue(section.variables) }.toList
                   )
 
-                val (f, m) = (directory / "data.json.gz", directory / "method.omr")
+                val f = directory / dataDirectory / "data.json.gz"
 
                 f.withPrintStream(append = false, create = true, gz = true) { ps ⇒
                   ps.print(compact(render(sectionContent(sections))))
                 }
 
-                m.withPrintStream(create = true, gz = true)(_.print(method.asJson.noSpaces))
+                val m = directory / methodFile
+                m.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson).noSpaces))
             }
           }
       }

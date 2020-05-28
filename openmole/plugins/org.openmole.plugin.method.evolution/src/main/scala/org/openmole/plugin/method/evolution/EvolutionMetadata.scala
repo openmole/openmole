@@ -8,13 +8,15 @@ import io.circe.generic.extras.semiauto._
 import io.circe.generic.extras.Configuration
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.tools.io.Prettifier._
+import org.openmole.plugin.hook.omr.MethodData
 
-object Metadata {
+object EvolutionMetadata {
 
   def method = "evolution"
 
   implicit val genDevConfig: Configuration = Configuration.default.withDiscriminator("implementation").withKebabCaseMemberNames
-  implicit val metadataEncoder: Encoder[Metadata] = deriveConfiguredEncoder[Metadata]
+  implicit val metadataEncoder: Encoder[EvolutionMetadata] = deriveConfiguredEncoder[EvolutionMetadata]
+  implicit val methodData = MethodData[EvolutionMetadata](_ ⇒ method)
 
   case class StochasticNSGA2(
     genome:     Seq[GenomeBoundData],
@@ -22,10 +24,9 @@ object Metadata {
     generation: Long,
     frequency:  Option[Long],
     sample:     Int,
-    mu:         Int,
-    method:     String                  = method) extends Metadata
+    mu:         Int) extends EvolutionMetadata
 
-  case object none extends Metadata
+  case object none extends EvolutionMetadata
 
   sealed trait GenomeBoundData
 
@@ -60,12 +61,12 @@ object Metadata {
     delta:    Option[Double],
     negative: Boolean)
 
-  def fromString(s: String): Metadata =
-    decode[Metadata](s) match {
+  def fromString(s: String): EvolutionMetadata =
+    decode[EvolutionMetadata](s) match {
       case Left(e)  ⇒ throw new InternalProcessingError(s"Error parsing metadata $s", e)
       case Right(m) ⇒ m
     }
 
 }
 
-sealed trait Metadata
+sealed trait EvolutionMetadata

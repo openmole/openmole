@@ -272,7 +272,7 @@ object MGOAPI {
     def operations(a: A): Ops
 
     trait Ops {
-      def metadata(generation: Long, frequency: Option[Long]): FromContext[Metadata] = FromContext { _ ⇒ Metadata.none }
+      def metadata(generation: Long, frequency: Option[Long]): FromContext[EvolutionMetadata] = FromContext { _ ⇒ EvolutionMetadata.none }
 
       def initialState: S
       def initialGenomes(n: Int, rng: scala.util.Random): FromContext[Vector[G]]
