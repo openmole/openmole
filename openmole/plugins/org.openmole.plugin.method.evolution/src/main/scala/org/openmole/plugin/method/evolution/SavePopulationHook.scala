@@ -40,21 +40,24 @@ object SavePopulationHook {
 
       def fileName =
         (frequency.option, last) match {
-          case (_, true) ⇒ Some(ExpandedString("population"))
-          case (None, _) ⇒ Some(ExpandedString("population${" + t.generationPrototype.name + "}"))
-          case (Some(f), _) if context(t.generationPrototype) % f == 0 ⇒ Some(ExpandedString("population${" + t.generationPrototype.name + "}"))
+          case (_, true) ⇒ Some("population")
+          case (None, _) ⇒ Some("population${" + t.generationPrototype.name + "}")
+          case (Some(f), _) if context(t.generationPrototype) % f == 0 ⇒ Some("population${" + t.generationPrototype.name + "}")
           case _ ⇒ None
         }
 
-      def evolutionData =
-        t.operations.metadata(
-          generation = context(t.generationPrototype),
-          frequency = frequency
-        ).from(context)
-
       fileName match {
         case Some(fileName) ⇒
-          val content = OutputFormat.PlainContent(resultVariables(t).from(context), Some(fileName))
+          def savedData = SavedData(
+            generation = context(t.generationPrototype),
+            frequency = frequency,
+            name = fileName,
+            last = last
+          )
+
+          def evolutionData = t.operations.metadata(savedData).from(context)
+
+          val content = OutputFormat.PlainContent(resultVariables(t).from(context), Some(ExpandedString(fileName)))
           outputFormat.write(executionContext)(format, output, content, evolutionData).from(context)
         case None ⇒
       }

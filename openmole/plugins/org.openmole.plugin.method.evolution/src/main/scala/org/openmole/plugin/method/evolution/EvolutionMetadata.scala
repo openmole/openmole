@@ -10,6 +10,12 @@ import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.tools.io.Prettifier._
 import org.openmole.plugin.hook.omr.MethodData
 
+case class SavedData(
+  generation: Long,
+  frequency:  Option[Long],
+  name:       String,
+  last:       Boolean)
+
 object EvolutionMetadata {
 
   def method = "evolution"
@@ -19,12 +25,11 @@ object EvolutionMetadata {
   implicit val methodData = MethodData[EvolutionMetadata](_ ⇒ method)
 
   case class StochasticNSGA2(
-    genome:     Seq[GenomeBoundData],
-    objective:  Seq[NoisyObjectiveData],
-    generation: Long,
-    frequency:  Option[Long],
-    sample:     Int,
-    mu:         Int) extends EvolutionMetadata
+    genome:    Seq[GenomeBoundData],
+    objective: Seq[NoisyObjectiveData],
+    mu:        Int,
+    sample:    Int,
+    saved:     SavedData) extends EvolutionMetadata
 
   case object none extends EvolutionMetadata
 

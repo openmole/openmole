@@ -153,16 +153,15 @@ object NSGA2 {
 
       def operations(om: StochasticParams) = new Ops {
 
-        override def metadata(generation: Long, frequency: Option[Long]) = FromContext { p ⇒
+        override def metadata(savedData: SavedData) = FromContext { p ⇒
           import p._
           import EvolutionMetadata._
           StochasticNSGA2(
             genome = om.genome.map(GenomeBoundData(_).from(context)),
             objective = om.objectives.map(NoisyObjectiveData(_)),
-            generation = generation,
-            frequency = frequency,
             sample = om.historySize,
-            mu = om.mu
+            mu = om.mu,
+            saved = savedData
           )
         }
 
