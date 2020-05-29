@@ -92,14 +92,14 @@ package object csv {
         }
       }
 
-      def lists: Seq[List[Any]] =
+      val lists: Seq[List[Any]] =
         v map {
           case v: Array[_] ⇒ v.toList
           case v: Seq[_]   ⇒ v.toList
           case v           ⇒ List(v)
         }
 
-      writeLines(lists)
+      if (lists.forall(!_.isEmpty)) writeLines(lists)
     }
 
     def onRow(v: Seq[Any]) = {
