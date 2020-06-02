@@ -40,13 +40,37 @@ object ExpandedString {
 
   def apply(s: String): FromContext[String] = apply(new StringInputStream(s))
 
+  def expandValues(s: String, context: Context) = {
+    parse(new StringInputStream(s)).map {
+      case UnexpandedElement(s) ⇒ s
+      case ValueElement(v)      ⇒ v
+      case CodeElement(code) ⇒
+        context.variable(code) match {
+          case Some(v) ⇒ v.value
+          case None    ⇒ throw new UserBadDataError(s"'$code' is not a value, cannot expands string '$s'")
+        }
+    }
+  }
+
   /**
    * Expand an input stream as an [[FromContext]]
    * @param is
    * @return
    */
   def apply(is: InputStream): FromContext[String] = {
-    val expandedElements = ListBuffer[ExpandedElement]()
+    val expandedFC = parse(is).map(ExpansionElement.fromContext)
+
+    FromContext { p ⇒
+      import p._
+      expandedFC.map(_.from(context)).mkString
+    } validate { p ⇒
+      import p._
+      expandedFC.flatMap(_.validate(inputs))
+    }
+  }
+
+  def parse(is: InputStream) = {
+    val expandedElements = ListBuffer[ExpansionElement]()
 
     val it = Iterator.continually(is.read).takeWhile(_ != -1)
 
@@ -77,7 +101,7 @@ object ExpandedString {
           if (dollar) {
             expandedElements += UnexpandedElement(os.clear())
             val toExpand = nextToExpand(it)
-            expandedElements += ExpandedElement(toExpand)
+            expandedElements += ExpansionElement(toExpand)
           }
           else os.write(c)
           dollar = false
@@ -91,35 +115,30 @@ object ExpandedString {
       }
     }
     if (dollar) os.write('$')
+
     expandedElements += UnexpandedElement(os.clear())
-
-    val expandedFC = expandedElements.map(ExpandedElement.fromContext)
-
-    FromContext { p ⇒
-      import p._
-      expandedFC.map(_.from(context)).mkString
-    } validate { p ⇒
-      import p._
-      expandedFC.flatMap(_.validate(inputs))
-    }
+    expandedElements.toList
   }
 
   /**
    * An ExpandedElement distinguishes between value strings and code strings
    */
-  object ExpandedElement {
-    def apply(code: String): ExpandedElement = {
-      if (code.isEmpty) ValueElement(code)
-      else
+  object ExpansionElement {
+    def apply(code: String): ExpansionElement =
+      if (isValue(code)) ValueElement(code)
+      else CodeElement(code)
+
+    def isValue(code: String) =
+      code.isEmpty || {
         Try(code.toDouble).toOption orElse
           Try(code.toLong).toOption orElse
           Try(code.toLowerCase.toBoolean).toOption match {
-            case Some(v) ⇒ ValueElement(code)
-            case None    ⇒ CodeElement(code)
+            case Some(v) ⇒ true
+            case None    ⇒ false
           }
-    }
+      }
 
-    def fromContext(expansionElement: ExpandedElement) =
+    def fromContext(expansionElement: ExpansionElement) =
       expansionElement match {
         case e: UnexpandedElement ⇒ FromContext(_ ⇒ e.string)
         case e: ValueElement      ⇒ FromContext(_ ⇒ e.v)
@@ -139,25 +158,26 @@ object ExpandedString {
       }
   }
 
-  sealed trait ExpandedElement
+  sealed trait ExpansionElement
 
   /**
-   * An [[ExpandedElement]] which has not been expanded yet (a String)
+   * An [[ExpansionElement]] which has not been expanded yet (a String)
+   *
    * @param string
    */
-  case class UnexpandedElement(string: String) extends ExpandedElement
+  case class UnexpandedElement(string: String) extends ExpansionElement
 
   /**
    * A value element
    * @param v
    */
-  case class ValueElement(v: String) extends ExpandedElement
+  case class ValueElement(v: String) extends ExpansionElement
 
   /**
    * A code element - the code is compiled only at each deserialization (@transient lazy val pattern for the proxy dynamically compiling here)
    * @param code
    */
-  case class CodeElement(code: String) extends ExpandedElement {
+  case class CodeElement(code: String) extends ExpansionElement {
     @transient lazy val proxy = ScalaCompilation.dynamic[Any](code)
   }
 
