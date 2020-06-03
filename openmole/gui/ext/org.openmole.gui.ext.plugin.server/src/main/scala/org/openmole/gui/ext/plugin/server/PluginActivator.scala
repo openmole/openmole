@@ -43,15 +43,13 @@ object PluginActivator {
     instances.filter {
       classOf[WizardPluginFactory].isAssignableFrom
     }
+
+  def unregister(info: PluginInfo) = PluginActivator.plugins -= info.clientInstance
+  def register(info: PluginInfo) = PluginActivator.plugins += info.clientInstance → info
 }
 
 trait PluginActivator extends BundleActivator {
   def info: PluginInfo
-
-  override def stop(context: BundleContext): Unit =
-    PluginActivator.plugins -= info.clientInstance
-
-  override def start(context: BundleContext): Unit = {
-    PluginActivator.plugins += info.clientInstance → info
-  }
+  override def stop(context: BundleContext): Unit = PluginActivator.unregister(info)
+  override def start(context: BundleContext): Unit = PluginActivator.register(info)
 }
