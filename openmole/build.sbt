@@ -37,7 +37,6 @@ def defaultSettings = formatSettings ++
     resolvers += Resolver.sonatypeRepo("staging"),
     resolvers += Resolver.bintrayRepo("projectseptemberinc", "maven"), // For freek
     resolvers += Resolver.bintrayRepo("definitelyscala", "maven"), // For plotlyjs
-    resolvers += "osgeo" at "https://repo.osgeo.org/repository/release/", // for geotools
     scalaVersion in Global := scalaVersionValue, // + "-bin-typelevel-4",
     scalacOptions ++= Seq("-target:jvm-1.8", "-language:higherKinds"),
     scalacOptions += "-Ypartial-unification",
