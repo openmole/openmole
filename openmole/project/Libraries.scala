@@ -32,7 +32,7 @@ object Libraries {
   lazy val scalatraVersion = "2.7.0-RC1"
   lazy val scalaURIVersion = "1.1.1"
   lazy val scoptVersion = "3.7.1"
-  lazy val spatialdataVersion = "0.2"
+  lazy val spatialsamplingVersion = "0.1"
 
   lazy val bootstrapnative = libraryDependencies += "fr.iscpif.scaladget" %%% "bootstrapnative" % scaladgetVersion
   lazy val lunr = libraryDependencies += "fr.iscpif.scaladget" %%% "lunr" % scaladgetVersion
@@ -105,7 +105,7 @@ object Libraries {
   lazy val netlogo6 = "org.openmole.library" % "ccl-northwestern-edu-netlogo6" % netLogo6Version
   lazy val sourceCode = "org.openmole.library" %% "sourcecode" % sourcecodeVersion
   lazy val txtmark = "org.openmole.library" %% "com-github-rjeschke-txtmark" % "0.13"
-  lazy val spatialdata = "org.openmole.library" %% "org-openmole-spatialdata" % spatialdataVersion
+  lazy val spatialsampling = "org.openmole.library" %% "org-openmole-spatialsampling" % spatialsamplingVersion
   lazy val xzJava = "org.openmole.library" %% "xzjava" % "1.8"
   
   def httpClientVersion = "4.5.3"

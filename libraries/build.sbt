@@ -242,16 +242,15 @@ lazy val container = OsgiProject(dir, "container", exports = Seq("container.*"),
   //libraryDependencies += "com.github.luben" % "zstd-jni" % "1.4.3-1",
   version := containerVersion) dependsOn(cats, squants, circe, shapeless) settings(settings: _*)
 
-lazy val spatialdataVersion = "0.2"
+lazy val spatialsamplingVersion = "0.1"
 
-lazy val spatialdata = OsgiProject(dir, "org.openmole.spatialdata",
-  exports = Seq("org.openmole.spatialdata.*"),
+lazy val spatialdata = OsgiProject(dir, "org.openmole.spatialsampling",
+  exports = Seq("org.openmole.spatialsampling.*"),
   privatePackages = Seq("!scala.*","!org.apache.commons.math3.*","*")
 ) settings(
-  resolvers += "osgeo" at  "https://repo.osgeo.org/repository/release/",
-  libraryDependencies += "org.openmole.library" %% "spatialdata" % spatialdataVersion,
-  version := spatialdataVersion//,
-  //embeddedJars := (Keys.externalDependencyClasspath in Compile).value map (_.data) filter (f=> (f.getName startsWith "gt-")) // embed geotools jars
+  //resolvers += "osgeo" at  "https://repo.osgeo.org/repository/release/",
+  libraryDependencies += "org.openmole.library" %% "spatialsampling" % spatialsamplingVersion,
+  version := spatialsamplingVersion
 ) settings(settings: _*)
 
 lazy val opencsv = OsgiProject(dir, "au.com.bytecode.opencsv") settings(

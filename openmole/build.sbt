@@ -486,7 +486,6 @@ lazy val sensitivity = OsgiProject(pluginDir, "org.openmole.plugin.method.sensit
 
 /* Sampling */
 
-// FIXME problem with osgi bundling for spatialSampling
 def allSampling = Seq(combineSampling, csvSampling,oneFactorSampling, lhsSampling, quasirandomSampling, spatialSampling)
 
 lazy val combineSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.combine", imports = Seq("*")) dependsOn(exception, modifierDomain, collectionDomain, workflow) settings (pluginSettings: _*)
@@ -506,7 +505,7 @@ lazy val quasirandomSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampl
 
 lazy val spatialSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.spatial", imports = Seq("*")) dependsOn(exception, workflow, workspace) settings (
   libraryDependencies += Libraries.math,
-  libraryDependencies += Libraries.spatialdata
+  libraryDependencies += Libraries.spatialsampling
   ) settings (pluginSettings: _*)
 
 
