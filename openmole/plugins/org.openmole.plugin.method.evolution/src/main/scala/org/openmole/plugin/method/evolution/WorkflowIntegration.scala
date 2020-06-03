@@ -188,7 +188,7 @@ trait EvolutionWorkflow {
   def populationPrototype = Val[Pop]("population", namespace)(populationType)
   def offspringPrototype = Val[Pop]("offspring", namespace)(populationType)
   def statePrototype = Val[S]("state", namespace)(stateType)
-  def generationPrototype = Val[Long]("generation", namespace)
+  def generationPrototype = GAIntegration.generationPrototype
   def terminatedPrototype = Val[Boolean]("terminated", namespace)
 }
 
@@ -196,6 +196,7 @@ object GAIntegration {
 
   def namespace = Namespace("evolution")
   def samples = Val[Int]("samples", namespace)
+  def generationPrototype = Val[Long]("generation", namespace)
 
   def genomeToVariable(
     genome: Genome,

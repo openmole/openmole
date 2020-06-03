@@ -40,7 +40,7 @@ object ExpandedString {
 
   def apply(s: String): FromContext[String] = apply(new StringInputStream(s))
 
-  def expandValues(s: String, context: Context) = {
+  def expandValues(s: String, context: Context) =
     parse(new StringInputStream(s)).map {
       case UnexpandedElement(s) ⇒ s
       case ValueElement(v)      ⇒ v
@@ -49,8 +49,7 @@ object ExpandedString {
           case Some(v) ⇒ v.value
           case None    ⇒ throw new UserBadDataError(s"'$code' is not a value, cannot expands string '$s'")
         }
-    }
-  }
+    }.mkString
 
   /**
    * Expand an input stream as an [[FromContext]]

@@ -21,7 +21,10 @@ object EvolutionMetadata {
   def method = "evolution"
 
   implicit val genDevConfig: Configuration = Configuration.default.withDiscriminator("implementation").withKebabCaseMemberNames
+
   implicit val metadataEncoder: Encoder[EvolutionMetadata] = deriveConfiguredEncoder[EvolutionMetadata]
+  implicit val metadataDecoder: Decoder[EvolutionMetadata] = deriveConfiguredDecoder[EvolutionMetadata]
+
   implicit val methodData = MethodData[EvolutionMetadata](_ ⇒ method)
 
   case class StochasticNSGA2(

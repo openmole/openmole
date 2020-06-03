@@ -2,14 +2,11 @@ package org.openmole.plugin.hook.omr
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workflow.format.CSVOutputFormat
 import org.openmole.core.workflow.hook.FromContextHook
 import org.openmole.plugin.tool.json._
 import io.circe._
 import org.openmole.core.workflow.format.OutputFormat.{ PlainContent, SectionContent }
-import org.openmole.core.workflow.format.WritableOutput.Store
-import org.openmole.plugin.hook.json.JSONOutputFormat
 
 object OMROutputFormat {
 
