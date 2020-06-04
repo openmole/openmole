@@ -229,7 +229,7 @@ lazy val squants =
   ) settings(settings: _*)
 
 
-lazy val mgoVersion = "3.43"
+lazy val mgoVersion = "3.44"
 
 lazy val mgo = OsgiProject(dir, "mgo", exports = Seq("mgo.*", "freestyle.*"), imports = Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "*"), privatePackages = Seq("!scala.*", "!monocle.*", "!org.apache.commons.math3.*", "!cats.*", "!squants.*", "!scalaz.*", "*")) settings(
   libraryDependencies += "org.openmole" %% "mgo" % mgoVersion,
@@ -350,7 +350,7 @@ lazy val sourceCode = OsgiProject(dir, "sourcecode") settings (
 ) settings(settings: _*)
 
 
-def gridscaleVersion = "2.28"
+def gridscaleVersion = "2.29"
 lazy val gridscale = OsgiProject(dir, "gridscale", imports = Seq("*"), exports = Seq("gridscale.*", "enumeratum.*")) settings (
   libraryDependencies += "org.openmole.gridscale" %% "gridscale" % gridscaleVersion,
   version := gridscaleVersion
