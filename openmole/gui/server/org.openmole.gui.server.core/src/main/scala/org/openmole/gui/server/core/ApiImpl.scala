@@ -143,7 +143,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
   private def extractArchiveFromFiles(from: File, to: File)(implicit context: ServerFileSystemContext): ExtractResult = {
     Try {
-      val ext = DataUtils.fileToExtension(from.getName)
+      val ext = FileExtension(from.getName)
       ext match {
         case org.openmole.gui.ext.data.Tar ⇒
           from.extract(to)
@@ -164,7 +164,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   }
 
   def extractTGZ(safePath: SafePath): ExtractResult = {
-    DataUtils.fileToExtension(safePath.name) match {
+    FileExtension(safePath.name) match {
       case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP | FileExtension.TXZ ⇒
         val archiveFile = safePathToFile(safePath)(ServerFileSystemContext.project, workspace)
         val toFile: File = safePathToFile(safePath.parent)(ServerFileSystemContext.project, workspace)

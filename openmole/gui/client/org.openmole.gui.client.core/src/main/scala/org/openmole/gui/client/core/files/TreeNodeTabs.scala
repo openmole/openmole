@@ -88,7 +88,7 @@ sealed trait TreeNodeTab {
   def onActivate: () ⇒ Unit = () ⇒ {}
   def onDesactivate: () ⇒ Unit = () ⇒ {}
 
-  def extension: FileExtension = safePathTab.now.name
+  def extension: FileExtension = FileExtension(safePathTab.now.name)
 
   // Get the file content to be saved
   def content: String

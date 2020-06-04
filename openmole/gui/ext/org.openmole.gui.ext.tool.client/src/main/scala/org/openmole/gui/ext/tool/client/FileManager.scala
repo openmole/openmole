@@ -92,7 +92,7 @@ object FileManager {
 
       xhr.onloadend = (e: ProgressEvent) ⇒ {
         fileTransferState(Processed())
-        if (DataUtils.fileToExtension(safePath.name).displayable) {
+        if (FileExtension(safePath.name).displayable) {
           onLoadEnded(xhr.responseText)
         }
       }

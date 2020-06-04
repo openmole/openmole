@@ -48,8 +48,6 @@ object Utils extends JavaLogger {
 
   import Log._
 
-  implicit def fileToExtension(f: File): FileExtension = DataUtils.fileToExtension(f.getName)
-
   def pluginUpdoadDirectory(tmpDirectory: String)(implicit newFile: TmpDirectory) = newFile.directory / tmpDirectory
 
   def webUIDirectory()(implicit workspace: Workspace) = workspace.location /> "webui"

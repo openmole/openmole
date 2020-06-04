@@ -231,17 +231,17 @@ class FileToolBox(initSafePath: SafePath) {
   val contentRoot = {
     div(omsheet.centerElement)(
       downloadTrigger,
-      DataUtils.fileToExtension(initSafePath.name) match {
+      FileExtension(initSafePath.name) match {
         case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP | FileExtension.TXZ ⇒
           iconAction(fileaction.extract, archive, "extract")
         case _ ⇒ span
       },
-      DataUtils.fileToExtension(initSafePath.name) match {
+      FileExtension(initSafePath.name) match {
         case FileExtension.OMS ⇒
           iconAction(fileaction.execute, execute, "run")
         case _ ⇒ span
       },
-      DataUtils.fileToExtension(initSafePath.name) match {
+      FileExtension(initSafePath.name) match {
         case FileExtension.JAR | FileExtension.TGZBIN | FileExtension.NETLOGO | FileExtension.R | FileExtension.TGZ ⇒
           iconAction(fileaction.toScript, toScript, "to OMS")
         case _ ⇒ span

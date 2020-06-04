@@ -278,7 +278,7 @@ class TreeNodePanel {
 
   def displayNode(tn: TreeNode) = tn match {
     case fn: FileNode ⇒
-      val ext = DataUtils.fileToExtension(tn.name.now)
+      val ext = FileExtension(tn.name.now)
       val tnSafePath = manager.current.now ++ tn.name.now
       if (ext.displayable) {
         downloadFile(tnSafePath, false, (content: String) ⇒ {

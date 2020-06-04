@@ -58,7 +58,8 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
     ()
   }
 
-  val extension: FileExtension = safePath.name
+  val extension: FileExtension = FileExtension(safePath.name)
+
   lazy val view = {
     div(editorContainer +++ container +++ containerModifierSeq)(
       div(panelClass +++ panelDefault)(
