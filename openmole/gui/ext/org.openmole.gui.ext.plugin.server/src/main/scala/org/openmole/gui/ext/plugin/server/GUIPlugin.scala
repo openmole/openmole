@@ -28,17 +28,17 @@ object GUIPlugin {
 
   def toGUIPlugins(c: Class[_]): GUIPluginAsJS = GUIPluginAsJS(c.getName)
 
-  private def instances = plugins.values.toSeq.map { _.clientInstance }
+  private def extensions = plugins.values.toSeq.flatMap { _.extensions }
 
   def routers = plugins.map(_._2.router)
-  def authentications: Seq[GUIPluginAsJS] = instances.filter { classOf[AuthenticationPluginFactory].isAssignableFrom }.map(toGUIPlugins)
-  def wizards: Seq[GUIPluginAsJS] = instances.filter { classOf[WizardPluginFactory].isAssignableFrom }.map(toGUIPlugins)
+  def authentications: Seq[GUIPluginAsJS] = extensions.filter { classOf[AuthenticationPluginFactory].isAssignableFrom }.map(toGUIPlugins)
+  def wizards: Seq[GUIPluginAsJS] = extensions.filter { classOf[WizardPluginFactory].isAssignableFrom }.map(toGUIPlugins)
 
   def unregister(key: AnyRef) = GUIPlugin.plugins -= key
   def register(key: AnyRef, info: GUIPlugin) = GUIPlugin.plugins += key → info
 }
 
 case class GUIPlugin(
-  clientInstance: Class[_],
-  router:         Services ⇒ OMRouter
+  extensions: Seq[Class[_]],
+  router:     Services ⇒ OMRouter
 )

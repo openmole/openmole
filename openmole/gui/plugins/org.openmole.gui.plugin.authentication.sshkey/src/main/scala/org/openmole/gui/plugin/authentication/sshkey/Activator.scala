@@ -27,7 +27,7 @@ import boopickle.Default._
 class Activator extends BundleActivator {
 
   def info: GUIPlugin = GUIPlugin(
-    classOf[PrivateKeyAuthenticationFactory],
+    Seq(classOf[PrivateKeyAuthenticationFactory]),
     s ⇒ OMRouter[PrivateKeyAuthenticationAPI](AutowireServer.route[PrivateKeyAuthenticationAPI](new PrivateKeyAuthenticationApiImpl(s)))
   )
 

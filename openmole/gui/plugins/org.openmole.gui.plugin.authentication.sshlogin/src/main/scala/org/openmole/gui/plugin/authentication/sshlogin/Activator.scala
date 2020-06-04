@@ -26,7 +26,7 @@ import org.osgi.framework.{ BundleActivator, BundleContext }
 
 class Activator extends BundleActivator {
   def info: GUIPlugin = GUIPlugin(
-    classOf[LoginAuthenticationFactory],
+    Seq(classOf[LoginAuthenticationFactory]),
     s ⇒ OMRouter[LoginAuthenticationAPI](AutowireServer.route[LoginAuthenticationAPI](new LoginAuthenticationApiImpl(s)))
   )
 

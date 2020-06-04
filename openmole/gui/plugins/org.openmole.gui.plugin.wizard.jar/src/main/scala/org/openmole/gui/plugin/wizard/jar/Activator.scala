@@ -27,7 +27,7 @@ import org.osgi.framework.{ BundleActivator, BundleContext }
 class Activator extends BundleActivator {
 
   def info: GUIPlugin = GUIPlugin(
-    classOf[JarWizardFactory],
+    Seq(classOf[JarWizardFactory]),
     s ⇒ OMRouter[JarWizardAPI](AutowireServer.route[JarWizardAPI](new JarWizardApiImpl(s)))
   )
 

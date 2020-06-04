@@ -27,7 +27,7 @@ import boopickle.Default._
 class Activator extends BundleActivator {
 
   def info: GUIPlugin = GUIPlugin(
-    classOf[RWizardFactory],
+    Seq(classOf[RWizardFactory]),
     s ⇒ OMRouter[RWizardAPI](AutowireServer.route[RWizardAPI](new RWizardApiImpl(s)))
   )
 
