@@ -108,6 +108,7 @@ lazy val scalaLang = OsgiProject(
   (libraryDependencies ++= {
     Seq(
       "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
+      "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.6",
       "org.scala-lang" % "scala-library" % scalaVersion.value,
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "org.scala-lang" % "scalap" % scalaVersion.value,
