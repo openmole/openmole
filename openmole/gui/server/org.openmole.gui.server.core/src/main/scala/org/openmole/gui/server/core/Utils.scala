@@ -34,7 +34,7 @@ import java.nio.file.attribute._
 
 import org.openmole.core.highlight.HighLight
 import org.openmole.core.pluginregistry.{ PluginInfo, PluginRegistry }
-import org.openmole.gui.ext.plugin.server.PluginActivator
+import org.openmole.gui.ext.plugin.server.GUIPlugin
 import org.openmole.gui.ext.tool.server.OMRouter
 import org.openmole.gui.server.jscompile.JSPack
 
@@ -380,7 +380,7 @@ object Utils extends JavaLogger {
 
   def addPluginRoutes(route: OMRouter ⇒ Unit, services: Services) = {
     logger.info("Loading GUI plugins")
-    PluginActivator.plugins.foreach { p ⇒ route(p._2.router(services)) }
+    GUIPlugin.routers.foreach { _(services) }
   }
 
   // Extract .zip archive

@@ -17,15 +17,20 @@
  */
 package org.openmole.gui.plugin.authentication.sshkey
 
-import org.openmole.gui.ext.plugin.server.{ PluginActivator, PluginInfo }
+import org.openmole.gui.ext.plugin.server.GUIPlugin
 import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
-import boopickle.Default._
+import org.osgi.framework.{ BundleActivator, BundleContext }
+
 import scala.concurrent.ExecutionContext.Implicits.global
+import boopickle.Default._
 
-class Activator extends PluginActivator {
+class Activator extends BundleActivator {
 
-  def info: PluginInfo = PluginInfo(
+  def info: GUIPlugin = GUIPlugin(
     classOf[PrivateKeyAuthenticationFactory],
     s ⇒ OMRouter[PrivateKeyAuthenticationAPI](AutowireServer.route[PrivateKeyAuthenticationAPI](new PrivateKeyAuthenticationApiImpl(s)))
   )
+
+  override def start(context: BundleContext): Unit = GUIPlugin.register(this, info)
+  override def stop(context: BundleContext): Unit = GUIPlugin.unregister(this)
 }

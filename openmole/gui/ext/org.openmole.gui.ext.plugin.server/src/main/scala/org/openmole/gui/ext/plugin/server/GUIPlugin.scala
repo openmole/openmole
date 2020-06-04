@@ -1,0 +1,44 @@
+/**
+ * Created by Romain Reuillon on 29/11/16.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+package org.openmole.gui.ext.plugin.server
+
+import org.openmole.core.services._
+import org.openmole.gui.ext.data.{ AuthenticationPluginFactory, GUIPluginAsJS, WizardPluginFactory }
+import org.openmole.gui.ext.tool.server.OMRouter
+
+import scala.collection.JavaConverters._
+
+object GUIPlugin {
+  private lazy val plugins = new java.util.concurrent.ConcurrentHashMap[AnyRef, GUIPlugin]().asScala
+
+  def toGUIPlugins(c: Class[_]): GUIPluginAsJS = GUIPluginAsJS(c.getName)
+
+  private def instances = plugins.values.toSeq.map { _.clientInstance }
+
+  def routers = plugins.map(_._2.router)
+  def authentications: Seq[GUIPluginAsJS] = instances.filter { classOf[AuthenticationPluginFactory].isAssignableFrom }.map(toGUIPlugins)
+  def wizards: Seq[GUIPluginAsJS] = instances.filter { classOf[WizardPluginFactory].isAssignableFrom }.map(toGUIPlugins)
+
+  def unregister(key: AnyRef) = GUIPlugin.plugins -= key
+  def register(key: AnyRef, info: GUIPlugin) = GUIPlugin.plugins += key → info
+}
+
+case class GUIPlugin(
+  clientInstance: Class[_],
+  router:         Services ⇒ OMRouter
+)

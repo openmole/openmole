@@ -513,8 +513,8 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   def getGUIPlugins(): AllPluginExtensionData = {
 
     AllPluginExtensionData(
-      PluginActivator.authentications,
-      PluginActivator.wizards
+      GUIPlugin.authentications,
+      GUIPlugin.wizards
     )
   }
 
