@@ -37,7 +37,6 @@ def defaultSettings = formatSettings ++
     resolvers += Resolver.sonatypeRepo("staging"),
     resolvers += Resolver.bintrayRepo("projectseptemberinc", "maven"), // For freek
     resolvers += Resolver.bintrayRepo("definitelyscala", "maven"), // For plotlyjs
-    resolvers += "osgeo" at "https://repo.osgeo.org/repository/release/", // for geotools
     scalaVersion in Global := scalaVersionValue, // + "-bin-typelevel-4",
     scalacOptions ++= Seq("-target:jvm-1.8", "-language:higherKinds"),
     scalacOptions += "-Ypartial-unification",
@@ -486,7 +485,6 @@ lazy val sensitivity = OsgiProject(pluginDir, "org.openmole.plugin.method.sensit
 
 /* Sampling */
 
-// FIXME problem with osgi bundling for spatialSampling
 def allSampling = Seq(combineSampling, csvSampling,oneFactorSampling, lhsSampling, quasirandomSampling, spatialSampling)
 
 lazy val combineSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.combine", imports = Seq("*")) dependsOn(exception, modifierDomain, collectionDomain, workflow) settings (pluginSettings: _*)
@@ -506,7 +504,7 @@ lazy val quasirandomSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampl
 
 lazy val spatialSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.spatial", imports = Seq("*")) dependsOn(exception, workflow, workspace) settings (
   libraryDependencies += Libraries.math,
-  libraryDependencies += Libraries.spatialdata
+  libraryDependencies += Libraries.spatialsampling
   ) settings (pluginSettings: _*)
 
 

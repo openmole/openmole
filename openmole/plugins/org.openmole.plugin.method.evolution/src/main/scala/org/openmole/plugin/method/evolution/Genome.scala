@@ -239,7 +239,7 @@ object Genome {
       def toAssignment[T](v: Variable[T]): :=[Val[T], FromContext[T]] = :=(v.prototype, v.value)
 
       val columns = genome.map(GenomeBound.toVal).map(v ⇒ v.name -> v)
-      csvToVariables(f, columns).map(_.map(v ⇒ toAssignment(v)).toSeq).toSeq
+      csvToVariables(f, columns).map(_.map(v ⇒ toAssignment(v)).toVector).toVector
     }
 
     implicit def fromFile =

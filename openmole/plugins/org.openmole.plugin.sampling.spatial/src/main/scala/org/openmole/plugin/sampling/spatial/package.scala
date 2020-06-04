@@ -1,13 +1,12 @@
 package org.openmole.plugin.sampling
 
-import org.openmole.spatialdata
+import org.openmole.spatialsampling
 
 package object spatial {
 
-  type RasterLayerData[N] = spatialdata.RasterLayerData[N]
-  type RasterData[N] = spatialdata.RasterData[N]
-  type RasterDim = spatialdata.RasterDim
-  type Point2D = spatialdata.Point2D
-  type Coordinate = spatialdata.Coordinate
+  type RasterLayerData[N] = spatialsampling.RasterLayerData[N]
+  type RasterData[N] = spatialsampling.RasterData[N]
+  type RasterDim = spatialsampling.RasterDim
+  type Point = spatialsampling.Point
 
 }
