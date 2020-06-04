@@ -177,7 +177,6 @@ package object data {
     val TXZ = TarXz
     val TAR = Tar
     val ZIP = Zip
-    val TGZBIN = TgzBin
     val JAR = Jar
     val BINARY = BinaryFile
 
@@ -195,7 +194,6 @@ package object data {
         case x if x.endsWith(".tar.xz") ⇒ TXZ
         case x if x.endsWith(".tar") ⇒ TAR
         case x if x.endsWith(".zip") ⇒ ZIP
-        case x if x.endsWith(".tgz.bin") | x.endsWith(".tar.gz.bin") ⇒ TGZBIN
         case x if x.endsWith(".jar") ⇒ JAR
         case x if x.endsWith(".scala") ⇒ SCALA
         case x if x.endsWith(".sh") ⇒ SH
