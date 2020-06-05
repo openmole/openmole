@@ -118,11 +118,10 @@ object ScriptClient {
   def run(): Unit = {
     implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
-    Plugins.fetch { _ ⇒
+    Plugins.fetch { plugins ⇒
       val maindiv = div()
-      //  val settingsView = new SettingsView
 
-      val authenticationPanel = new AuthenticationPanel
+      val authenticationPanel = new AuthenticationPanel(plugins.authenticationFactories)
 
       val openFileTree = Var(true)
 
@@ -191,7 +190,7 @@ object ScriptClient {
       )
 
       lazy val importModel = MenuAction("Import your model", () ⇒ {
-        modelWizardPanel.dialog.show
+        modelWizardPanel(plugins.wizardFactories).dialog.show
       })
 
       lazy val fromURLProject = MenuAction("From URL", () ⇒ {

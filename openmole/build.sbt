@@ -661,8 +661,7 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", d
   project,
   openmoleDSL,
   batch,
-  //egi,
-  //ssh,
+  omrHook,
   openmoleStream,
   txtmark,
   openmoleCrypto,
@@ -720,6 +719,11 @@ lazy val jarWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wi
   libraryDependencies += Libraries.equinoxOSGi,
 ) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ScalaJSPlugin)
 
+lazy val evolutionAnalysisPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.analysis.evolution") settings(
+  guiPluginSettings,
+  libraryDependencies += Libraries.equinoxOSGi,
+) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace, evolution) enablePlugins (ScalaJSPlugin)
+
 val guiPlugins = Seq(
   guiEnvironmentSSHLoginPlugin,
   guiEnvironmentSSHKeyPlugin,
@@ -727,7 +731,8 @@ val guiPlugins = Seq(
   netlogoWizardPlugin,
   nativeWizardPlugin,
   rWizardPlugin,
-  jarWizardPlugin) //, guiEnvironmentDesktopGridPlugin)
+  jarWizardPlugin,
+  evolutionAnalysisPlugin) //, guiEnvironmentDesktopGridPlugin)
 
 /* -------------------- Bin ------------------------- */
 

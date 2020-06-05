@@ -96,4 +96,7 @@ trait Api {
   def models(archivePath: SafePath): Seq[SafePath]
   def expandResources(resources: Resources): Resources
   def downloadHTTP(url: String, path: SafePath, extract: Boolean): Either[Unit, ErrorData]
+
+  //METHOD PLUGINS
+  def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS]
 }

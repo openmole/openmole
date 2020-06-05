@@ -28,7 +28,7 @@ import org.openmole.tool.tar._
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.module
 import org.openmole.core.market
-import org.openmole.core.preference.{ PreferenceLocation, Preference }
+import org.openmole.core.preference.{ Preference, PreferenceLocation }
 import org.openmole.core.project._
 import org.openmole.core.services.Services
 import org.openmole.core.threadprovider.ThreadProvider
@@ -39,6 +39,7 @@ import org.openmole.gui.ext.plugin.server._
 import org.openmole.gui.ext.tool.server.OMRouter
 import org.openmole.gui.ext.tool.server.Utils.authenticationKeysFile
 import org.openmole.gui.server.core.GUIServer.ApplicationControl
+import org.openmole.plugin.hook.omr.OMROutputFormat
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.outputredirection.OutputRedirection
 
@@ -511,11 +512,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   //GUI OM PLUGINS
 
   def getGUIPlugins(): AllPluginExtensionData = {
-
-    AllPluginExtensionData(
-      GUIPlugin.authentications,
-      GUIPlugin.wizards
-    )
+    AllPluginExtensionData(GUIPlugin.authentications, GUIPlugin.wizards)
   }
 
   def isOSGI(safePath: SafePath): Boolean = {
@@ -593,5 +590,12 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
       case Success(value) ⇒ Left(value)
       case Failure(e)     ⇒ Right(ErrorData(e))
     }
+  }
+
+  // Method plugins
+  override def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS] = {
+    val omrFile = safePathToFile(result)(ServerFileSystemContext.project, workspace)
+    val name = OMROutputFormat.methodName(omrFile)
+    GUIPlugin.analysis.find(_._1 == name).map(_._2)
   }
 }

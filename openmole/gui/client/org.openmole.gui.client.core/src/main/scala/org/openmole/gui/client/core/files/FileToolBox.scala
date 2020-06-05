@@ -162,10 +162,12 @@ class FileToolBox(initSafePath: SafePath) {
             true
           case fileaction.toScript ⇒
             withSafePath { sp ⇒
-              val wizardPanel = panels.modelWizardPanel
-              wizardPanel.dialog.show
-              wizardPanel.fromSafePath(sp)
-              Popover.hide
+              Plugins.fetch { p ⇒
+                val wizardPanel = panels.modelWizardPanel(p.wizardFactories)
+                wizardPanel.dialog.show
+                wizardPanel.fromSafePath(sp)
+                Popover.hide
+              }
             }
             true
           case _ ⇒ false

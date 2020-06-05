@@ -630,7 +630,7 @@ class TreeNodeTabs {
     _.foreach { t ⇒ t.desactivate }
   }
 
-  def ++(tab: TreeNodeTab) = {
+  def +=(tab: TreeNodeTab) = {
     tabs() = tabs.now :+ tab
     startTimerIfStopped
     setActive(tab)

@@ -28,8 +28,8 @@ import boopickle.Default._
 class Activator extends BundleActivator {
 
   def info: GUIPlugin = GUIPlugin(
-    Seq(classOf[EGIAuthenticationGUIFactory]),
-    s ⇒ OMRouter[EGIAuthenticationAPI](AutowireServer.route[EGIAuthenticationAPI](new EGIAuthenticationAPIImpl(s)))
+    authentication = Some(classOf[EGIAuthenticationGUIFactory]),
+    router = Some(s ⇒ OMRouter[EGIAuthenticationAPI](AutowireServer.route[EGIAuthenticationAPI](new EGIAuthenticationAPIImpl(s))))
   )
 
   override def start(context: BundleContext): Unit = GUIPlugin.register(this, info)

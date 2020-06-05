@@ -65,3 +65,7 @@ trait WizardPluginFactory extends GUIPluginFactory {
   def fileType: FileType
   def parse(safePath: SafePath): Future[Option[LaunchingCommand]]
 }
+
+trait MethodAnalysisPlugin extends GUIPlugin {
+  val panel: TypedTag[HTMLElement]
+}

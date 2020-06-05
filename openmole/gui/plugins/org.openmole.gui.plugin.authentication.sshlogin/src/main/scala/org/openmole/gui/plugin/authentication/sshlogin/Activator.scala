@@ -25,9 +25,10 @@ import boopickle.Default._
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
 class Activator extends BundleActivator {
+
   def info: GUIPlugin = GUIPlugin(
-    Seq(classOf[LoginAuthenticationFactory]),
-    s ⇒ OMRouter[LoginAuthenticationAPI](AutowireServer.route[LoginAuthenticationAPI](new LoginAuthenticationApiImpl(s)))
+    authentication = Some(classOf[LoginAuthenticationFactory]),
+    router = Some(s ⇒ OMRouter[LoginAuthenticationAPI](AutowireServer.route[LoginAuthenticationAPI](new LoginAuthenticationApiImpl(s))))
   )
 
   override def start(context: BundleContext): Unit = GUIPlugin.register(this, info)

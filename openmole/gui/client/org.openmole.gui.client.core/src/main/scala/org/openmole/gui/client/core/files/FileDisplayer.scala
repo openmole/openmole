@@ -34,28 +34,39 @@ class FileDisplayer(val tabs: TreeNodeTabs) {
     }
 
   def display(safePath: SafePath, content: String, fileExtension: FileExtension) = {
+
     alreadyDisplayed(safePath) match {
       case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
-      case _ ⇒ fileExtension match {
-        case OpenMOLEScript ⇒
-          val tab = TreeNodeTab.oms(safePath, content)
-          tabs ++ tab
-          tab.omsEditor.editor.focus
-        case MDScript ⇒ post()[Api].mdToHtml(safePath).call().foreach { htmlString ⇒
-          tabs ++ TreeNodeTab.html(safePath, htmlString)
-        }
-        case SVGExtension ⇒ tabs ++ TreeNodeTab.html(safePath, content)
-        case ef: EditableFile ⇒
-          if (DataUtils.isCSV(safePath)) {
-            post()[Api].sequence(safePath).call().foreach { seq ⇒
-              tabs ++ TreeNodeTab.editable(safePath, content, DataTab.build(seq, view = TreeNodeTab.Table, editing = !ef.onDemand), Plotter.default)
+      case _ ⇒
+        fileExtension match {
+          case OpenMOLEScript ⇒
+            val tab = TreeNodeTab.oms(safePath, content)
+            tabs += tab
+            tab.omsEditor.editor.focus
+          case OpenMOLEResult ⇒
+            post()[Api].findAnalysisPlugin(safePath).call.foreach {
+              case Some(plugin) ⇒
+                println(plugin)
+                val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
+                val tab = TreeNodeTab.html(safePath, analysis.panel.render.textContent)
+                tabs += tab
+              case None ⇒
             }
+          case MDScript ⇒ post()[Api].mdToHtml(safePath).call().foreach { htmlString ⇒
+            tabs += TreeNodeTab.html(safePath, htmlString)
           }
-          else {
-            tabs ++ TreeNodeTab.editable(safePath, content, DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw), Plotter.default)
-          }
-        case _ ⇒ //FIXME for GUI workflows
-      }
+          case SVGExtension ⇒ tabs += TreeNodeTab.html(safePath, content)
+          case editableFile: EditableFile ⇒
+            if (DataUtils.isCSV(safePath)) {
+              post()[Api].sequence(safePath).call().foreach { seq ⇒
+                tabs += TreeNodeTab.editable(safePath, content, DataTab.build(seq, view = TreeNodeTab.Table, editing = !editableFile.onDemand), Plotter.default)
+              }
+            }
+            else {
+              tabs += TreeNodeTab.editable(safePath, content, DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw), Plotter.default)
+            }
+          case _ ⇒ //FIXME for GUI workflows
+        }
     }
   }
 

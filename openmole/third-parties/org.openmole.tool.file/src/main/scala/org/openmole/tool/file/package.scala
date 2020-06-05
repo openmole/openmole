@@ -284,7 +284,10 @@ package file {
 
       def <(c: String) = content_=(c)
 
-      def content = withSource(_.mkString)
+      def content: String = content()
+      def content(gz: Boolean = false): String =
+        if (gz) withGzippedInputStream(is ⇒ Source.fromInputStream(is).mkString)
+        else withSource(_.mkString)
 
       def append(s: String) = Files.write(file, s.getBytes, StandardOpenOption.APPEND)
       def <<(s: String) = append(s)
@@ -428,7 +431,6 @@ package file {
       def gzippedBufferedOutputStream = new GZIPOutputStream(bufferedOutputStream())
 
       def withGzippedOutputStream[T] = withClosable[GZIPOutputStream, T](gzippedBufferedOutputStream)(_)
-
       def withGzippedInputStream[T] = withClosable[GZIPInputStream, T](gzippedBufferedInputStream)(_)
 
       def withOutputStream[T] = withClosable[OutputStream, T](bufferedOutputStream())(_)

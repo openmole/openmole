@@ -1,5 +1,5 @@
 /**
- * Created by Mathieu Leclaire on 19/04/18.
+ * Created by Romain Reuillon on 29/11/16.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,20 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.gui.plugin.wizard.netlogo
+package org.openmole.gui.plugin.analysis.evolution
 
 import org.openmole.gui.ext.plugin.server.GUIPlugin
 import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
+import org.openmole.plugin.method.evolution.EvolutionMetadata
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-
 class Activator extends BundleActivator {
-
   def info: GUIPlugin = GUIPlugin(
-    wizard = Some(classOf[NetlogoWizardFactory]),
-    router = Some(s ⇒ OMRouter[NetlogoWizardAPI](AutowireServer.route[NetlogoWizardAPI](new NetlogoWizardApiImpl(s))))
+    analysis = Some(EvolutionMetadata.method -> classOf[EvolutionAnalysis]),
+    router = Some(s ⇒ OMRouter[EvolutionAnalysisAPI](AutowireServer.route[EvolutionAnalysisAPI](new EvolutionAnalysisAPIImpl)))
   )
 
   override def start(context: BundleContext): Unit = GUIPlugin.register(this, info)

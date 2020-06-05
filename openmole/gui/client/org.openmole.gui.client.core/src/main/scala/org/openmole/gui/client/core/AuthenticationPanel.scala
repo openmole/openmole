@@ -32,7 +32,7 @@ import org.openmole.gui.ext.data._
 import rx._
 import scaladget.bootstrapnative.Selector.{ Dropdown, Options }
 
-class AuthenticationPanel {
+class AuthenticationPanel(authenticationFactories: Seq[AuthenticationPluginFactory]) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
@@ -44,7 +44,8 @@ class AuthenticationPanel {
 
   def getAuthSelector(currentFactory: AuthenticationPluginFactory) = {
     lazy val authenticationSelector: Options[AuthenticationPluginFactory] = {
-      val factories = Plugins.authenticationFactories.now
+      val factories = authenticationFactories
+
       val currentInd = {
         val ind = factories.map { _.name }.indexOf(currentFactory.name)
         if (ind == -1) 0 else ind
@@ -59,7 +60,7 @@ class AuthenticationPanel {
   }
 
   def getAuthentications =
-    Plugins.authenticationFactories.now.map { factory ⇒
+    authenticationFactories.map { factory ⇒
       val data = factory.getData
       auths() = Seq()
       data.foreach { d ⇒
@@ -147,9 +148,7 @@ class AuthenticationPanel {
   }
 
   val newButton = button("New", btn_primary, onclick := { () ⇒
-    authSetting() = Plugins.authenticationFactories.now.headOption.map {
-      _.buildEmpty
-    }
+    authSetting() = authenticationFactories.headOption.map { _.buildEmpty }
   })
 
   val saveButton = button("Save", btn_primary, onclick := { () ⇒

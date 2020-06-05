@@ -1,6 +1,7 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.files.{ FileDisplayer, TreeNodePanel, TreeNodeTabs }
+import org.openmole.gui.ext.data.{ GUIPluginAsJS, WizardPluginFactory }
 
 /*
  * Copyright (C) 24/07/15 // mathieu.leclaire@openmole.org
@@ -24,7 +25,7 @@ package object panels {
   val treeNodeTabs = new TreeNodeTabs()
   val fileDisplayer = new FileDisplayer(treeNodeTabs)
   val treeNodePanel = TreeNodePanel()
-  def modelWizardPanel = new ModelWizardPanel
+  def modelWizardPanel(wizards: Seq[WizardPluginFactory]) = new ModelWizardPanel(wizards)
   def urlImportPanel = new URLImportPanel
   val marketPanel = new MarketPanel
   val pluginPanel = new PluginPanel

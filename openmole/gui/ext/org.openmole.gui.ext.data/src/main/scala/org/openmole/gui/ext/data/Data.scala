@@ -121,6 +121,10 @@ package object data {
     val highlighter = "openmole"
   }
 
+  object OpenMOLEResult extends FileExtension {
+    val displayable = true
+  }
+
   object MDScript extends FileExtension {
     val displayable = true
   }
@@ -132,6 +136,8 @@ package object data {
   case class EditableFile(highlighter: String, onDemand: Boolean = false) extends FileExtension with HighlightedFile {
     val displayable = true
   }
+
+
 
   object BinaryFile extends FileExtension {
     val displayable = false
@@ -163,6 +169,7 @@ package object data {
 
   object FileExtension {
     val OMS = OpenMOLEScript
+    val OMR = OpenMOLEResult
     val SCALA = EditableFile("scala")
     val NETLOGO = EditableFile("text")
     val R = EditableFile("R")
@@ -183,6 +190,7 @@ package object data {
     def apply(fileName: String): FileExtension = {
       fileName match {
         case x if x.endsWith(".oms")                            ⇒ OMS
+        case x if x.endsWith(".omr")                            ⇒ OMR
         case x if x.endsWith(".csv")                            ⇒ CSV
         case x if x.endsWith(".nlogo") | x.endsWith(".nlogo3d") ⇒ NETLOGO
         case x if x.endsWith(".R")                              ⇒ R

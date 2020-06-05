@@ -18,7 +18,7 @@
 package org.openmole.gui.ext.plugin.server
 
 import org.openmole.core.services._
-import org.openmole.gui.ext.data.{ AuthenticationPluginFactory, GUIPluginAsJS, WizardPluginFactory }
+import org.openmole.gui.ext.data.{ AuthenticationPluginFactory, GUIPluginAsJS, WizardPluginFactory, MethodAnalysisPlugin }
 import org.openmole.gui.ext.tool.server.OMRouter
 
 import scala.collection.JavaConverters._
@@ -28,17 +28,20 @@ object GUIPlugin {
 
   def toGUIPlugins(c: Class[_]): GUIPluginAsJS = GUIPluginAsJS(c.getName)
 
-  private def extensions = plugins.values.toSeq.flatMap { _.extensions }
+  def routers = plugins.flatMap(_._2.router).toSeq
 
-  def routers = plugins.map(_._2.router)
-  def authentications: Seq[GUIPluginAsJS] = extensions.filter { classOf[AuthenticationPluginFactory].isAssignableFrom }.map(toGUIPlugins)
-  def wizards: Seq[GUIPluginAsJS] = extensions.filter { classOf[WizardPluginFactory].isAssignableFrom }.map(toGUIPlugins)
+  def authentications: Seq[GUIPluginAsJS] = plugins.values.flatMap(_.authentication).map(toGUIPlugins).toSeq
+  def wizards: Seq[GUIPluginAsJS] = plugins.values.flatMap(_.wizard).map(toGUIPlugins).toSeq
+
+  def analysis: Seq[(String, GUIPluginAsJS)] = plugins.values.flatMap(_.analysis).map(a ⇒ a._1 -> toGUIPlugins(a._2)).toSeq
 
   def unregister(key: AnyRef) = GUIPlugin.plugins -= key
   def register(key: AnyRef, info: GUIPlugin) = GUIPlugin.plugins += key → info
 }
 
 case class GUIPlugin(
-  extensions: Seq[Class[_]],
-  router:     Services ⇒ OMRouter
+  router:         Option[Services ⇒ OMRouter]                        = None,
+  authentication: Option[Class[_ <: AuthenticationPluginFactory]]    = None,
+  wizard:         Option[Class[_ <: WizardPluginFactory]]            = None,
+  analysis:       Option[(String, Class[_ <: MethodAnalysisPlugin])] = None
 )

@@ -41,9 +41,9 @@ object Analysis {
     case class Convergence(nadir: Option[Vector[Double]], generations: Vector[GenerationConvergence])
     case class GenerationConvergence(generation: Long, hypervolume: Option[Double], minimums: Option[Vector[Double]])
 
-    def analyse(metaData: EvolutionMetadata.StochasticNSGA2, directory: File) = {
-      println(Analysis.dataFiles(directory, metaData.saved.name, metaData.saved.generation, metaData.saved.frequency))
-    }
+    //    def analyse(metaData: EvolutionMetadata.StochasticNSGA2, directory: File) = {
+    //      println(Analysis.dataFiles(directory, metaData.saved.name, metaData.saved.generation, metaData.saved.frequency))
+    //    }
 
     def converge(generations: Vector[SavedGeneration], samples: Int) = {
       import _root_.mgo.tools.metric.Hypervolume

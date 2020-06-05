@@ -44,7 +44,7 @@ import org.openmole.gui.ext.tool.client.FileManager
 
 import scala.concurrent.Future
 
-class ModelWizardPanel {
+class ModelWizardPanel(wizards: Seq[WizardPluginFactory]) {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
   sealed trait VariableRole[T] {
@@ -117,7 +117,6 @@ class ModelWizardPanel {
   })
 
   val scriptNameInput = inputTag()(modelNameInput, placeholder := "Script name").render
-  val factories = Plugins.wizardFactories.now
 
   launchingCommand.triggerLater {
     if (autoMode.now) {
@@ -276,9 +275,7 @@ class ModelWizardPanel {
   def factory(fileName: String): Option[WizardPluginFactory] = {
     val fileType: FileType = fileName
 
-    factories.filter {
-      _.fileType == fileType
-    }.headOption
+    wizards.filter { _.fileType == fileType }.headOption
   }
 
   def buildForm(safePath: SafePath) = {

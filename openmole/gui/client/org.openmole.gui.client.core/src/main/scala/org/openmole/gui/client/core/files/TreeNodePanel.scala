@@ -54,7 +54,6 @@ object TreeNodePanel {
   }
 
   def refreshAndDraw = instance.invalidCacheAndDraw
-
 }
 
 class TreeNodePanel {
