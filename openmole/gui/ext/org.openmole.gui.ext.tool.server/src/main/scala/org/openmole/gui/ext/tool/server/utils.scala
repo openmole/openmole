@@ -72,7 +72,6 @@ object utils {
       case _: ProjectFileSystem ⇒ getFile(webUIDirectory, s.path)
       case _                    ⇒ getFile(new File(""), s.path)
     }
-
   }
 
   def fileToTreeNodeData(f: File)(implicit context: ServerFileSystemContext = ProjectFileSystem()): Option[TreeNodeData] = {
@@ -337,4 +336,28 @@ object utils {
     res
   }
 
+  def authenticationKeysFile(implicit workspace: Workspace) = workspace.persistentDir / "keys"
+
+  def addPlugins(safePaths: Seq[SafePath])(implicit workspace: Workspace, newFile: TmpDirectory): Seq[ErrorData] = {
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    val files: Seq[File] = safePaths.map {
+      safePathToFile
+    }
+    addFilePlugins(files)
+  }
+
+  def addFilePlugins(files: Seq[File])(implicit workspace: Workspace, newFile: TmpDirectory): Seq[ErrorData] = {
+    val errors = org.openmole.core.module.addPluginsFiles(files, false, org.openmole.core.module.pluginDirectory)
+    errors.map(e ⇒ ErrorData(e._2))
+  }
+
+  def removePlugin(plugin: Plugin)(implicit workspace: Workspace): Unit = synchronized {
+    import org.openmole.core.module
+    val file = module.pluginDirectory / plugin.name
+    val allDependingFiles = PluginManager.allDepending(file, b ⇒ !b.isProvided)
+    val bundle = PluginManager.bundle(file)
+    bundle.foreach(PluginManager.remove)
+    allDependingFiles.filter(f ⇒ !PluginManager.bundle(f).isDefined).foreach(_.recursiveDelete)
+    file.recursiveDelete
+  }
 }

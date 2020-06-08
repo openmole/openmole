@@ -22,8 +22,8 @@ import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.DataUtils._
 import org.openmole.gui.ext.tool.server.WizardUtils._
-import org.openmole.gui.ext.tool.server.Utils
-import org.openmole.gui.ext.tool.server.Utils._
+import org.openmole.gui.ext.tool.server.utils._
+import org.openmole.tool.file._
 
 class RWizardApiImpl(s: Services) extends RWizardAPI {
 
@@ -51,7 +51,7 @@ class RWizardApiImpl(s: Services) extends RWizardAPI {
       expandWizardData(modelData) +
       s""")\n\n$task hook ToStringHook()"""
 
-    target.write(content)
+    target.toFile.content = content
     WizardToTask(target)
   }
 

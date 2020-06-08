@@ -292,7 +292,7 @@ package file {
       def append(s: String) = Files.write(file, s.getBytes, StandardOpenOption.APPEND)
       def <<(s: String) = append(s)
 
-      def lines = withSource(_.getLines.toList)
+      def lines = withSource(_.getLines.toVector)
 
       def contentOption =
         try Some(file.content)

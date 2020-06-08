@@ -251,7 +251,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
 
       fileType match {
         case "project"        ⇒ copyTo(utils.webUIDirectory)
-        case "authentication" ⇒ copyTo(server.Utils.authenticationKeysFile)
+        case "authentication" ⇒ copyTo(server.utils.authenticationKeysFile)
         case "plugin"         ⇒ copyTo(utils.pluginUpdoadDirectory(params("directoryName")))
         case "absolute"       ⇒ copyTo(new File(""))
       }

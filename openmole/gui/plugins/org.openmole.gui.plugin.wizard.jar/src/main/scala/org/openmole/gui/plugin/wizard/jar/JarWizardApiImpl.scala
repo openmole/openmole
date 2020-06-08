@@ -27,8 +27,9 @@ import org.openmole.core.services._
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
+import org.openmole.gui.ext.tool.server.utils._
+import org.openmole.tool.file._
 import org.openmole.gui.ext.tool.client.OMPost
-import org.openmole.gui.ext.tool.server.Utils._
 import org.openmole.gui.ext.tool.server.WizardUtils
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
@@ -55,8 +56,8 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
     val jarResourceLine: (String, Seq[org.openmole.gui.ext.data.ErrorData]) = {
       if (data.embedAsPlugin) {
         data.plugin.map { p ⇒
-          val errors = org.openmole.gui.ext.tool.server.Utils.addPlugins(Seq(data.jarPath))
-          if (!errors.isEmpty) org.openmole.gui.ext.tool.server.Utils.removePlugin(Plugin(data.jarPath.name))
+          val errors = org.openmole.gui.ext.tool.server.utils.addPlugins(Seq(data.jarPath))
+          if (!errors.isEmpty) org.openmole.gui.ext.tool.server.utils.removePlugin(Plugin(data.jarPath.name))
           (s"""  plugins += pluginsOf(${p}),\n""", errors)
         }.getOrElse(("", Seq()))
       }
@@ -70,7 +71,7 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
       WizardUtils.expandWizardData(modelData) +
       s""")\n\n$task hook ToStringHook()"""
 
-    target.write(content)
+    target.toFile.content = content
     WizardToTask(target, jarResourceLine._2)
   }
 
@@ -78,7 +79,7 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
     Some(BasicLaunchingCommand(Some(JavaLikeLanguage()), ""))
 
   def jarClasses(jarPath: SafePath) = {
-    val zip = new ZipInputStream(new FileInputStream(jarPath))
+    val zip = new ZipInputStream(jarPath.toFile.bufferedInputStream)
 
     var classes: Seq[FullClass] = Seq()
 
@@ -100,7 +101,7 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
 
   def jarMethods(jarPath: SafePath, classString: String): Seq[JarMethod] = {
 
-    val classLoader = new URLClassLoader(Seq(jarPath.toURI.toURL), this.getClass.getClassLoader)
+    val classLoader = new URLClassLoader(Seq(jarPath.toFile.toURI.toURL), this.getClass.getClassLoader)
     val clazz = Class.forName(classString, true, classLoader)
 
     clazz.getDeclaredMethods.map { m ⇒

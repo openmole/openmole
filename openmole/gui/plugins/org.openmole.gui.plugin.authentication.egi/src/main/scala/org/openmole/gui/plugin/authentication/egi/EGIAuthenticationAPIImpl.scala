@@ -35,7 +35,7 @@ class EGIAuthenticationAPIImpl(s: Services) extends EGIAuthenticationAPI {
   import services._
 
   private def authenticationFile(p: String) = {
-    def path = p.replace(EGIAuthenticationData.authenticationDirectory, server.Utils.authenticationKeysFile.getAbsolutePath)
+    def path = p.replace(EGIAuthenticationData.authenticationDirectory, server.utils.authenticationKeysFile.getAbsolutePath)
     new java.io.File(path)
   }
 

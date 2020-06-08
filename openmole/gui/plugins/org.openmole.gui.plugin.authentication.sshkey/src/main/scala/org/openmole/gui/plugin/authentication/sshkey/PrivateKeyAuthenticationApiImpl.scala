@@ -19,16 +19,15 @@ package org.openmole.gui.plugin.authentication.sshkey
 
 import org.openmole.core.services._
 import org.openmole.gui.ext.data.{ ErrorData, Test }
-import org.openmole.gui.ext.tool.server.Utils
 import org.openmole.plugin.environment.ssh._
-
+import org.openmole.gui.ext.tool.server._
 import scala.util._
 
 class PrivateKeyAuthenticationApiImpl(s: Services) extends PrivateKeyAuthenticationAPI {
 
   import s._
 
-  private def authenticationFile(key: String) = new java.io.File(Utils.authenticationKeysFile, key)
+  private def authenticationFile(key: String) = new java.io.File(utils.authenticationKeysFile, key)
 
   private def coreObject(data: PrivateKeyAuthenticationData) =
     data.privateKey match {

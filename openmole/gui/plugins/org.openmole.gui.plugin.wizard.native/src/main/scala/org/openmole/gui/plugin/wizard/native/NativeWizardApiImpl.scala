@@ -22,18 +22,14 @@ import java.nio.channels.FileChannel
 import java.util.zip.GZIPInputStream
 
 import org.openmole.core.services._
-import org.openmole.core.workspace.Workspace
-import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.tool.server.WizardUtils._
-import org.openmole.tool.file.File
+import org.openmole.tool.file._
 import org.openmole.tool.stream.StringOutputStream
 import org.openmole.tool.tar.TarInputStream
 import org.openmole.tool.stream._
 import resource.{ managed, _ }
-import org.openmole.gui.ext.tool.server.Utils
-import org.openmole.gui.ext.tool.server.Utils._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.data.DataUtils._
+import org.openmole.gui.ext.tool.server.utils._
 
 class NativeWizardApiImpl(s: Services) extends NativeWizardAPI {
 
@@ -58,7 +54,7 @@ class NativeWizardApiImpl(s: Services) extends NativeWizardAPI {
       expandWizardData(data) +
       s""")\n\n$task hook ToStringHook()"""
 
-    target.write(content)
+    target.toFile.content = content
     WizardToTask(target)
   }
 

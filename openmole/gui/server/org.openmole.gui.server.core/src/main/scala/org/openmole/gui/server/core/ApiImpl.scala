@@ -37,7 +37,6 @@ import org.openmole.core.workspace.TmpDirectory
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.plugin.server._
 import org.openmole.gui.ext.tool.server.{ OMRouter, utils }
-import org.openmole.gui.ext.tool.server.Utils.authenticationKeysFile
 import org.openmole.gui.server.core.GUIServer.ApplicationControl
 import org.openmole.plugin.hook.omr.OMROutputFormat
 import org.openmole.tool.crypto.Cypher
@@ -490,7 +489,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   def listPlugins(): Iterable[Plugin] =
     module.pluginDirectory.listFilesSafe.map(p ⇒ Plugin(p.getName, new SimpleDateFormat("dd/MM/yyyy HH:mm").format(p.lastModified)))
 
-  def removePlugin(plugin: Plugin): Unit = org.openmole.gui.ext.tool.server.Utils.removePlugin(plugin)
+  def removePlugin(plugin: Plugin): Unit = org.openmole.gui.ext.tool.server.utils.removePlugin(plugin)
 
   //GUI OM PLUGINS
 

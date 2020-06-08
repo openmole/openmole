@@ -21,9 +21,9 @@ import org.openmole.core.services._
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.DataUtils._
+import org.openmole.tool.file._
 import org.openmole.gui.ext.tool.server.WizardUtils._
-import org.openmole.gui.ext.tool.server.Utils
-import org.openmole.gui.ext.tool.server.Utils._
+import org.openmole.gui.ext.tool.server.utils._
 
 class NetlogoWizardApiImpl(s: Services) extends NetlogoWizardAPI {
 
@@ -51,13 +51,13 @@ class NetlogoWizardApiImpl(s: Services) extends NetlogoWizardAPI {
       expandWizardData(modelData) +
       s""")\n\n$task hook ToStringHook()"""
 
-    target.write(content)
+    target.toFile.content = content
     WizardToTask(target)
   }
 
   def parse(safePath: SafePath): Option[LaunchingCommand] = {
 
-    val lines = Utils.lines(safePath)
+    val lines = safePath.toFile.lines
 
     def parse0(lines: Seq[(String, Int)], args: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair]): (Seq[ProtoTypePair], Seq[ProtoTypePair]) = {
       if (lines.isEmpty) (ProtoTypePair("seed", ProtoTYPE.INT, "0", None) +: args, outputs)
