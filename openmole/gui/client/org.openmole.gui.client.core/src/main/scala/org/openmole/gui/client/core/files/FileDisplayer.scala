@@ -41,29 +41,28 @@ class FileDisplayer(val tabs: TreeNodeTabs) {
         fileExtension match {
           case OpenMOLEScript ⇒
             val tab = TreeNodeTab.oms(safePath, content)
-            tabs += tab
+            tabs add tab
             tab.omsEditor.editor.focus
           case OpenMOLEResult ⇒
             post()[Api].findAnalysisPlugin(safePath).call.foreach {
               case Some(plugin) ⇒
-                println(plugin)
                 val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
-                val tab = TreeNodeTab.html(safePath, analysis.panel.render.textContent)
-                tabs += tab
+                val tab = TreeNodeTab.html(safePath, analysis.panel)
+                tabs add tab
               case None ⇒
             }
           case MDScript ⇒ post()[Api].mdToHtml(safePath).call().foreach { htmlString ⇒
-            tabs += TreeNodeTab.html(safePath, htmlString)
+            tabs add TreeNodeTab.html(safePath, TreeNodeTab.mdBlock(htmlString))
           }
-          case SVGExtension ⇒ tabs += TreeNodeTab.html(safePath, content)
+          case SVGExtension ⇒ tabs add TreeNodeTab.html(safePath, TreeNodeTab.rawBlock(content))
           case editableFile: EditableFile ⇒
             if (DataUtils.isCSV(safePath)) {
               post()[Api].sequence(safePath).call().foreach { seq ⇒
-                tabs += TreeNodeTab.editable(safePath, content, DataTab.build(seq, view = TreeNodeTab.Table, editing = !editableFile.onDemand), Plotter.default)
+                tabs add TreeNodeTab.editable(safePath, content, DataTab.build(seq, view = TreeNodeTab.Table, editing = !editableFile.onDemand), Plotter.default)
               }
             }
             else {
-              tabs += TreeNodeTab.editable(safePath, content, DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw), Plotter.default)
+              tabs add TreeNodeTab.editable(safePath, content, DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw), Plotter.default)
             }
           case _ ⇒ //FIXME for GUI workflows
         }

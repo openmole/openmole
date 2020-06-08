@@ -91,10 +91,10 @@ sealed trait TreeNodeTab {
   def extension: FileExtension = FileExtension(safePathTab.now.name)
 
   // Get the file content to be saved
-  def content: String
+  def editableContent: Option[String]
   def editor: Option[EditorPanelUI]
-  def editable: Boolean
   def editing: Boolean
+
   def refresh(afterRefresh: () ⇒ Unit = () ⇒ {}): Unit
 
   def resizeEditor: Unit
@@ -126,12 +126,11 @@ object TreeNodeTab {
 
     omsEditor.initEditor
 
-    def editable = true
     def editing = true
 
     override def onActivate: () ⇒ Unit = () ⇒ {}
 
-    def content = omsEditor.code
+    def editableContent = Some(omsEditor.code)
     def refresh(onsaved: () ⇒ Unit) = save(safePathTab.now, omsEditor, onsaved)
     def resizeEditor = omsEditor.editor.resize()
     def indexAxises(header: SequenceHeader) = header.zipWithIndex.map { afe ⇒ IndexedAxis(afe._1, afe._2) }
@@ -195,19 +194,15 @@ object TreeNodeTab {
     lazy val block = omsEditor.view
   }
 
-  def html(safePath: SafePath, htmlContent: String) = new TreeNodeTab {
-    lazy val safePathTab = Var(safePath)
+  def rawBlock(htmlContent: String) =
+    div(editorContainer +++ container)(
+      div(panelClass +++ panelDefault)(
+        div(panelBody)(JsDom.RawFrag(htmlContent))
+      )
+    )
 
-    def content: String = htmlContent
-    def editor = None
-    def editable: Boolean = false
-    def editing: Boolean = false
-    def refresh(afterRefresh: () ⇒ Unit): Unit = () ⇒ {}
-    def resizeEditor = {}
-
-    lazy val controlElement: TypedTag[HTMLElement] = div()
-
-    lazy val block: TypedTag[_ <: HTMLElement] = div(editorContainer +++ container)(
+  def mdBlock(htmlContent: String) =
+    div(editorContainer +++ container)(
       div(panelClass +++ panelDefault)(
         div(panelBody)(
           ms("mdRendering") +++ (padding := 10),
@@ -215,6 +210,19 @@ object TreeNodeTab {
         )
       )
     )
+
+  def html(safePath: SafePath, _block: TypedTag[_ <: HTMLElement]) = new TreeNodeTab {
+    lazy val safePathTab = Var(safePath)
+
+    def editableContent = None
+    def editor = None
+    def editing: Boolean = false
+
+    def refresh(afterRefresh: () ⇒ Unit): Unit = () ⇒ {}
+    def resizeEditor = {}
+
+    lazy val controlElement: TypedTag[HTMLElement] = div()
+    lazy val block: TypedTag[_ <: HTMLElement] = _block
   }
 
   sealed trait EditableView {
@@ -250,7 +258,7 @@ object TreeNodeTab {
 
     Rx { editableEditor.setReadOnly(!isEditing()) }
 
-    def content: String = editableEditor.code
+    def editableContent = Some(editableEditor.code)
     def isCSV = DataUtils.isCSV(safePath)
 
     val filteredSequence = dataTab.filter match {
@@ -267,8 +275,6 @@ object TreeNodeTab {
     def editor = Some(editableEditor)
 
     editableEditor.initEditor
-
-    def editable = true
 
     def editing = isEditing.now
 
@@ -587,8 +593,7 @@ object DataTab {
     sequence: SequenceData,
     view:     EditableView = Raw,
     filter:   RowFilter    = First100,
-    editing:  Boolean      = false,
-    plotter:  Plotter      = Plotter.default) = DataTab(sequence, view, filter, editing)
+    editing:  Boolean      = false) = DataTab(sequence, view, filter, editing)
 }
 
 class TreeNodeTabs {
@@ -630,30 +635,24 @@ class TreeNodeTabs {
     _.foreach { t ⇒ t.desactivate }
   }
 
-  def +=(tab: TreeNodeTab) = {
+  def add(tab: TreeNodeTab) = {
     tabs() = tabs.now :+ tab
     startTimerIfStopped
     setActive(tab)
   }
 
-  def removeTab(tab: TreeNodeTab) = {
+  def remove(tab: TreeNodeTab) = {
     tab.desactivate
     val newTabs = tabs.now.filterNot { _ == tab }
     tabs() = newTabs
     if (tabs.now.isEmpty) temporaryControl() = div()
-    newTabs.lastOption.map { t ⇒ setActive(t) }
+    newTabs.lastOption.map { t ⇒ setActive(t) }.isDefined
   }
 
-  def --(tab: TreeNodeTab): Unit = tab.refresh(() ⇒ removeTab(tab))
-
-  def --(safePath: SafePath): Unit = {
-    find(safePath).map {
-      removeTab
-    }
-  }
+  def remove(safePath: SafePath): Unit = find(safePath).map { remove }
 
   def switchEditableTo(tab: TreeNodeTab, dataTab: DataTab, plotter: Plotter) = {
-    val newTab = TreeNodeTab.editable(tab.safePathTab.now, tab.content, dataTab, plotter)
+    val newTab = TreeNodeTab.editable(tab.safePathTab.now, tab.editableContent.getOrElse(""), dataTab, plotter)
     switchTab(tab, newTab)
   }
 
@@ -664,14 +663,14 @@ class TreeNodeTabs {
       else i
     }
 
-    removeTab(tab)
+    remove(tab)
     tabs() = tabs.now.take(index) ++ Seq(to) ++ tabs.now.takeRight(tabs.now.size - index)
 
     setActive(to)
   }
 
   def alterables: Seq[AlterableFileContent] =
-    tabs.now.filter { t ⇒ t.editable }.map { t ⇒ AlterableFileContent(t.safePathTab.now, t.content) }
+    tabs.now.flatMap { t ⇒ t.editableContent.map(c ⇒ AlterableFileContent(t.safePathTab.now, c)) }
 
   def saveAllTabs(onsave: () ⇒ Unit) = {
     //if(org.scalajs.dom.document.hasFocus())
@@ -680,7 +679,7 @@ class TreeNodeTabs {
 
   def checkTabs = tabs.now.foreach { t: TreeNodeTab ⇒
     org.openmole.gui.client.core.post()[Api].exists(t.safePathTab.now).call().foreach { e ⇒
-      if (!e) removeTab(t)
+      if (!e) remove(t)
     }
   }
 
@@ -747,7 +746,7 @@ class TreeNodeTabs {
                   setActive(t)
                 }
               )(
-                  button(ms("close") +++ tabClose, `type` := "button", onclick := { () ⇒ --(t) })(raw("&#215")),
+                  button(ms("close") +++ tabClose, `type` := "button", onclick := { () ⇒ println(s"close $t"); remove(t) })(raw("&#215")),
                   t.tabName()
                 )
             )

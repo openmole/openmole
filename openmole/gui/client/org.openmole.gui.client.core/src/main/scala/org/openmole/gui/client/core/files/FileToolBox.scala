@@ -94,7 +94,7 @@ class FileToolBox(initSafePath: SafePath) {
             withSafePath { safePath ⇒
               CoreUtils.trashNode(safePath) {
                 () ⇒
-                  treeNodeTabs -- safePath
+                  treeNodeTabs remove safePath
                   treeNodeTabs.checkTabs
                   treeNodePanel.invalidCacheAndDraw
                   Popover.hide

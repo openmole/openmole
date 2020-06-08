@@ -406,7 +406,7 @@ class ModelWizardPanel(wizards: Seq[WizardPluginFactory]) {
         ).foreach {
             wtt ⇒
               if (wtt.errors.isEmpty) {
-                treeNodeTabs -- wtt.safePath
+                treeNodeTabs remove wtt.safePath
                 treeNodePanel.displayNode(FileNode(Var(wtt.safePath.name), 0L, 0L))
                 TreeNodePanel.refreshAndDraw
               }
