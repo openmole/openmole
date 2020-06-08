@@ -2,7 +2,7 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.alert.{ AbsolutePositioning, AlertPanel, BannerAlert }
 import AbsolutePositioning.CenterPagePosition
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._

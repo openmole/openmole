@@ -25,7 +25,7 @@ import org.openmole.core.workflow.builder.DefinitionScope
 import org.openmole.core.workflow.execution.{ Environment, SubmissionEnvironment }
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.tool.server.utils
+import org.openmole.gui.ext.server.utils
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
 import org.openmole.plugin.environment.batch._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment

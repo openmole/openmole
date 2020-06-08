@@ -6,7 +6,6 @@ import java.text.SimpleDateFormat
 import org.openmole.core.buildinfo
 import org.openmole.core.event._
 import org.openmole.core.pluginmanager._
-import org.openmole.gui.ext.tool.server.utils._
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import java.io._
@@ -35,7 +34,8 @@ import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.dsl._
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.server.{ OMRouter, utils, GUIPlugin }
+import org.openmole.gui.ext.server.{ GUIPlugin, utils }
+import org.openmole.gui.ext.server.utils._
 import org.openmole.gui.server.core.GUIServer.ApplicationControl
 import org.openmole.plugin.hook.omr.OMROutputFormat
 import org.openmole.tool.crypto.Cypher
@@ -488,7 +488,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   def listPlugins(): Iterable[Plugin] =
     module.pluginDirectory.listFilesSafe.map(p ⇒ Plugin(p.getName, new SimpleDateFormat("dd/MM/yyyy HH:mm").format(p.lastModified)))
 
-  def removePlugin(plugin: Plugin): Unit = org.openmole.gui.ext.tool.server.utils.removePlugin(plugin)
+  def removePlugin(plugin: Plugin): Unit = utils.removePlugin(plugin)
 
   //GUI OM PLUGINS
 

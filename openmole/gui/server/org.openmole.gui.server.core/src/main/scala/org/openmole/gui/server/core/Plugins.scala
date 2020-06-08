@@ -8,11 +8,10 @@ import org.openmole.tool.stream._
 import org.openmole.core.pluginmanager._
 import org.openmole.core.pluginregistry._
 import org.openmole.core.workspace._
-import org.openmole.gui.ext.tool.server.{ GUIPlugin, OMRouter }
-import org.openmole.gui.ext.tool.server.utils._
 import org.openmole.gui.server.jscompile.JSPack
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.core.services.Services
+import org.openmole.gui.ext.server._
 
 import collection.JavaConverters._
 
@@ -42,10 +41,10 @@ object Plugins extends JavaLogger {
   }
 
   def openmoleFile(optimizedJS: Boolean)(implicit workspace: Workspace, newFile: TmpDirectory, fileService: FileService) = {
-    val jsPluginDirectory = webUIDirectory / "jsplugin"
+    val jsPluginDirectory = utils.webUIDirectory / "jsplugin"
     updateJsPluginDirectory(jsPluginDirectory)
 
-    val jsFile = workspace.persistentDir /> "webui" / openmoleFileName
+    val jsFile = workspace.persistentDir /> "webui" / utils.openmoleFileName
 
     def update = {
       Log.logger.info("Building GUI plugins ...")
@@ -56,7 +55,7 @@ object Plugins extends JavaLogger {
     (jsPluginDirectory / "optimized_mode").content = optimizedJS.toString
 
     if (!jsFile.exists) update
-    else updateIfChanged(jsPluginDirectory) { _ ⇒ update }
+    else utils.updateIfChanged(jsPluginDirectory) { _ ⇒ update }
     jsFile
   }
 

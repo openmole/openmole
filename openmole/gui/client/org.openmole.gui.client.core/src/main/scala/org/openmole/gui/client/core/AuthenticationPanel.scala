@@ -22,7 +22,7 @@ import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 
 import scalatags.JsDom.tags
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 
 import scala.concurrent.Future
 import boopickle.Default._

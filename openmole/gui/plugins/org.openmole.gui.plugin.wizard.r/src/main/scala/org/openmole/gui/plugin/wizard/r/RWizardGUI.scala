@@ -19,12 +19,12 @@ package org.openmole.gui.plugin.wizard.r
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
-import org.openmole.gui.ext.tool.client.OMPost
+import org.openmole.gui.ext.client.OMPost
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import autowire._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.tool.client
+import org.openmole.gui.ext.client
 import org.scalajs.dom.raw.HTMLElement
 
 import scala.concurrent.Future

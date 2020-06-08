@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import scala.util.{ Failure, Success }
 import scalatags.JsDom.all._
 import scalatags.JsDom._
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 
 import scala.scalajs.js.timers._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,8 +35,8 @@ import org.openmole.gui.client.core.alert.BannerAlert.BannerMessage
 import org.openmole.gui.client.core.files.TreeNodeTabs
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.client.Utils
 import org.openmole.gui.ext.data.ExecutionInfo.Failed
-import org.openmole.gui.ext.tool.client.Utils
 import org.scalajs.dom.raw.{ HTMLElement, HTMLSpanElement }
 import rx._
 import scaladget.bootstrapnative.Table.{ BSTableStyle, FixedCell, ReactiveRow, SubRow, VarCell }

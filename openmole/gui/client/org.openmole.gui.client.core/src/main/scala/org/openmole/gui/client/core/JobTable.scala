@@ -2,7 +2,7 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.ExecutionPanel.{ CapsuleView, EnvironmentView, JobView, SubScript }
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.tool.client.omsheet
+import org.openmole.gui.ext.client.omsheet
 import scaladget.bootstrapnative.bsn
 import bsn._
 import org.openmole.gui.ext.api.Api

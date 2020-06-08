@@ -13,8 +13,9 @@ import scalatags.JsDom.all._
 import scaladget.bootstrapnative.bsn._
 import org.openmole.gui.client.core.panels._
 import org.openmole.gui.client.tool.OMTags
+import org.openmole.gui.ext.client
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 import org.scalajs.dom.raw._
 import rx._
 
@@ -130,7 +131,7 @@ class FileToolBox(initSafePath: SafePath) {
             true
           case fileaction.download ⇒
             withSafePath { sp ⇒
-              org.scalajs.dom.document.location.href = s"downloadFile?path=${org.openmole.gui.ext.tool.client.Utils.toURI(sp.path)}"
+              org.scalajs.dom.document.location.href = s"downloadFile?path=${client.Utils.toURI(sp.path)}"
               Popover.hide
             }
             true

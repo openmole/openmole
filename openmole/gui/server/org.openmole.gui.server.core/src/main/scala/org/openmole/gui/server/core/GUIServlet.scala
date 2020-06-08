@@ -45,8 +45,7 @@ import org.openmole.core.networkservice._
 import org.openmole.gui.ext.api.Api
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.gui.ext.data.routes._
-import org.openmole.gui.ext.tool.server
-import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter, utils }
+import org.openmole.gui.ext.server.{ AutowireServer, OMRouter, utils }
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.file._
 import org.openmole.tool.logger.LoggerService
@@ -251,7 +250,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
 
       fileType match {
         case "project"        ⇒ copyTo(utils.webUIDirectory)
-        case "authentication" ⇒ copyTo(server.utils.authenticationKeysFile)
+        case "authentication" ⇒ copyTo(utils.authenticationKeysFile)
         case "plugin"         ⇒ copyTo(utils.pluginUpdoadDirectory(params("directoryName")))
         case "absolute"       ⇒ copyTo(new File(""))
       }

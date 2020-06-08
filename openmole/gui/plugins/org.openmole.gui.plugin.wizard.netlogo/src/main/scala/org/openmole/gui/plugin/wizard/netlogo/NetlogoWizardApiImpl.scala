@@ -22,8 +22,8 @@ import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.DataUtils._
 import org.openmole.tool.file._
-import org.openmole.gui.ext.tool.server.WizardUtils._
-import org.openmole.gui.ext.tool.server.utils._
+import org.openmole.gui.ext.server._
+import org.openmole.gui.ext.server.utils._
 
 class NetlogoWizardApiImpl(s: Services) extends NetlogoWizardAPI {
 
@@ -40,7 +40,7 @@ class NetlogoWizardApiImpl(s: Services) extends NetlogoWizardAPI {
     resources:      Resources,
     data:           NetlogoWizardData): WizardToTask = {
 
-    val modelData = wizardModelData(inputs, outputs, resources.all.map {
+    val modelData = WizardUtils.wizardModelData(inputs, outputs, resources.all.map {
       _.safePath.name
     }, Some("inputs"), Some("outputs"))
     val task = s"${executableName.split('.').head.toLowerCase}Task"
@@ -48,7 +48,7 @@ class NetlogoWizardApiImpl(s: Services) extends NetlogoWizardAPI {
     val content = modelData.vals +
       s"""\nval launch = List("${(Seq("setup") ++ (command.split('\n').toSeq)).mkString("\",\"")}")
             \nval $task = NetLogo6Task(workDirectory / ${executableName.split('/').map { s ⇒ s"""\"$s\"""" }.mkString(" / ")}, launch, embedWorkspace = ${data.embedWorkspace}, seed=seed) set(\n""".stripMargin +
-      expandWizardData(modelData) +
+      WizardUtils.expandWizardData(modelData) +
       s""")\n\n$task hook ToStringHook()"""
 
     target.toFile.content = content

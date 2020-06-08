@@ -5,7 +5,7 @@ import scalatags.JsDom.all._
 import scaladget.bootstrapnative.bsn._
 
 import rx._
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 
 /*
  * Copyright (C) 03/08/15 // mathieu.leclaire@openmole.org

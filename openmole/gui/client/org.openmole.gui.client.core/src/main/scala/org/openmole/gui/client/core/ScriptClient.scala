@@ -5,7 +5,6 @@ import org.openmole.gui.client.core.panels._
 import scala.scalajs.js.annotation._
 import org.scalajs.dom
 import rx._
-
 import scalatags.JsDom.all._
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
@@ -14,7 +13,6 @@ import org.scalajs.dom.KeyboardEvent
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import autowire._
-
 import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
 import org.openmole.gui.client.core.files.TreeNodePanel
@@ -22,7 +20,8 @@ import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client.FileManager
+import org.openmole.gui.ext.client._
 import org.scalajs.dom.raw.HTMLDivElement
 
 import scala.concurrent.duration._

@@ -5,7 +5,7 @@ import org.openmole.gui.ext.data._
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import autowire._
-import org.openmole.gui.ext.tool.client.Utils._
+import org.openmole.gui.ext.client.Utils._
 
 import scala.concurrent.duration._
 import scaladget.bootstrapnative.bsn._
@@ -15,15 +15,15 @@ import org.scalajs.dom.raw.{ Event, HTMLElement }
 import scalatags.JsDom.all.{ raw, _ }
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom._
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 import org.openmole.gui.client.core._
-import org.openmole.gui.ext.tool.client.FileManager
 import DataUtils._
 import net.scalapro.sortable._
 import org.openmole.gui.client.core.files.TreeNodeTab.{ EditableView, First100, Raw, RowFilter }
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.client.tool.plot.Plot._
 import org.openmole.gui.client.tool.plot._
+import org.openmole.gui.ext.client.FileManager
 import scaladget.bootstrapnative.Popup._
 import rx._
 import scaladget.bootstrapnative.Selector.Options

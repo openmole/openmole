@@ -20,8 +20,8 @@ package org.openmole.gui.plugin.authentication.egi
 import org.openmole.core.preference.PreferenceLocation
 import org.openmole.gui.ext.data._
 import org.openmole.plugin.environment.egi._
-import org.openmole.gui.ext.tool.server
 import org.openmole.core.services._
+import org.openmole.gui.ext.server.utils
 
 import scala.util.{ Failure, Success, Try }
 
@@ -35,7 +35,7 @@ class EGIAuthenticationAPIImpl(s: Services) extends EGIAuthenticationAPI {
   import services._
 
   private def authenticationFile(p: String) = {
-    def path = p.replace(EGIAuthenticationData.authenticationDirectory, server.utils.authenticationKeysFile.getAbsolutePath)
+    def path = p.replace(EGIAuthenticationData.authenticationDirectory, utils.authenticationKeysFile.getAbsolutePath)
     new java.io.File(path)
   }
 

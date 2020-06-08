@@ -27,7 +27,7 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.location._
 import org.openmole.core.preference.{ Preference, PreferenceLocation }
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
-import org.openmole.gui.ext.tool.server.utils
+import org.openmole.gui.ext.server.utils
 import org.openmole.tool.crypto.KeyStore
 import org.openmole.tool.file._
 import org.openmole.tool.network.Network

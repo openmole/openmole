@@ -17,7 +17,7 @@
  */
 package org.openmole.gui.plugin.analysis.evolution
 
-import org.openmole.gui.ext.tool.server.{ AutowireServer, GUIPlugin, OMRouter }
+import org.openmole.gui.ext.server.{ AutowireServer, GUIPlugin, OMRouter }
 import org.openmole.plugin.method.evolution.EvolutionMetadata
 import org.osgi.framework.{ BundleActivator, BundleContext }
 

@@ -29,7 +29,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement, HTMLInputElement }
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 import rx._
 import scalatags.JsDom.{ TypedTag, tags }
 import scalatags.JsDom.all._
@@ -39,8 +39,8 @@ import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.openmole.gui.client.tool.{ OMTags, OptionsDiv }
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.client.FileManager
 import scaladget.bootstrapnative.Selector.Options
-import org.openmole.gui.ext.tool.client.FileManager
 
 import scala.concurrent.Future
 

@@ -13,7 +13,8 @@ import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import autowire._
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import org.scalajs.dom.raw.{ HTMLButtonElement, HTMLElement, HTMLInputElement, HTMLSpanElement }
@@ -25,7 +26,7 @@ import org.openmole.gui.client.core.panels._
 import org.openmole.gui.client.tool._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.client.core._
-import org.openmole.gui.ext.tool.client.FileManager
+import org.openmole.gui.ext.client.FileManager
 
 /*
  * Copyright (C) 20/01/16 // mathieu.leclaire@openmole.org

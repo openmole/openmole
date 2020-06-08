@@ -12,7 +12,7 @@ import boopickle.Default._
 import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.openmole.gui.client.core.panels.{ treeNodePanel, treeNodeTabs }
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.client.OMPost
+import org.openmole.gui.ext.client.OMPost
 import org.scalajs.dom
 import rx.Var
 

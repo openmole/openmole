@@ -13,7 +13,7 @@ import scaladget.tools._
 import org.openmole.gui.ext.data.DataUtils._
 
 import scala.scalajs.js.JSConverters._
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 import org.scalajs.dom.raw.Event
 import scaladget.bootstrapnative.Popup
 import scaladget.bootstrapnative.Popup.{ Manual, PopupPosition }

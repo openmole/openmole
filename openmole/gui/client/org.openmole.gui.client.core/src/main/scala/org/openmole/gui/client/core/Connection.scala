@@ -2,7 +2,7 @@ package org.openmole.gui.client.core
 
 import scaladget.bootstrapnative.bsn._
 
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 import org.scalajs.dom.raw.HTMLFormElement
 
 import scalatags.JsDom.all._

@@ -20,7 +20,7 @@ package org.openmole.gui.plugin.wizard.jar
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.tool.client.{InputFilter, OMPost}
+import org.openmole.gui.ext.client.{InputFilter, OMPost}
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import autowire._
@@ -33,7 +33,7 @@ import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.DataUtils._
-import org.openmole.gui.ext.tool.client
+import org.openmole.gui.ext.client
 import rx._
 
 @JSExportTopLevel("org.openmole.gui.plugin.wizard.jar.JarWizardFactory")

@@ -7,7 +7,7 @@ import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.panels._
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.scalajs.dom.html.Input
@@ -23,6 +23,7 @@ import TreeNode._
 import autowire._
 import rx._
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.client.FileManager
 import org.scalajs.dom
 import scaladget.bootstrapnative.Popup
 import scaladget.bootstrapnative.Popup.Manual

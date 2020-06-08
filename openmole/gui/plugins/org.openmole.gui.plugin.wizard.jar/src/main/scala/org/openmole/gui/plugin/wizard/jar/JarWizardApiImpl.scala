@@ -20,19 +20,22 @@ package org.openmole.gui.plugin.wizard.jar
 import java.io.FileInputStream
 import java.lang.reflect.Modifier
 import java.util.zip.ZipInputStream
+
 import autowire._
 import boopickle.Default._
-
 import org.openmole.core.services._
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.tool.server.utils._
+import org.openmole.gui.ext.server
+import org.openmole.gui.ext.server._
 import org.openmole.tool.file._
-import org.openmole.gui.ext.tool.client.OMPost
-import org.openmole.gui.ext.tool.server.WizardUtils
+import org.openmole.gui.ext.client.OMPost
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
+import org.openmole.gui.ext.server._
+import org.openmole.gui.ext.server.utils._
 
 class JarWizardApiImpl(s: Services) extends JarWizardAPI {
 
@@ -56,8 +59,8 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
     val jarResourceLine: (String, Seq[org.openmole.gui.ext.data.ErrorData]) = {
       if (data.embedAsPlugin) {
         data.plugin.map { p ⇒
-          val errors = org.openmole.gui.ext.tool.server.utils.addPlugins(Seq(data.jarPath))
-          if (!errors.isEmpty) org.openmole.gui.ext.tool.server.utils.removePlugin(Plugin(data.jarPath.name))
+          val errors = utils.addPlugins(Seq(data.jarPath))
+          if (!errors.isEmpty) server.utils.removePlugin(Plugin(data.jarPath.name))
           (s"""  plugins += pluginsOf(${p}),\n""", errors)
         }.getOrElse(("", Seq()))
       }

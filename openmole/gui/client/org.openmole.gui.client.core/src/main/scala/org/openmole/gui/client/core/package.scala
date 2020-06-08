@@ -1,7 +1,8 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.alert.BannerAlert
-import org.openmole.gui.ext.tool.client.OMPost
+import org.openmole.gui.ext.client.OMPost
+
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration._
 /*

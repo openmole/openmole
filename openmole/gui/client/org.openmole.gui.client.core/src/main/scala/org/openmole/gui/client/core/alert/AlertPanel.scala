@@ -25,7 +25,7 @@ import org.openmole.gui.client.core.panels._
 import org.openmole.gui.client.tool.OMTags._
 import org.openmole.gui.ext.data.SafePath
 import org.openmole.gui.client.tool._
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 import org.scalajs.dom.html.Div
 import org.scalajs.dom.raw.HTMLDivElement
 import rx._

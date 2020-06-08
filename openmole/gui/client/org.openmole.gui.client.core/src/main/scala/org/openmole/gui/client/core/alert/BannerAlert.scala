@@ -22,8 +22,8 @@ import rx._
 import scalatags.JsDom.all._
 import scaladget.tools._
 import scalatags.JsDom.all.{ onclick, raw, span }
-import org.openmole.gui.ext.tool.client._
-import org.openmole.gui.ext.tool.client.Utils._
+import org.openmole.gui.ext.client._
+import org.openmole.gui.ext.client.Utils._
 import org.scalajs.dom.raw.HTMLDivElement
 import scaladget.bootstrapnative.bsn.btn_default
 import scalatags.JsDom.{ TypedTag, tags }

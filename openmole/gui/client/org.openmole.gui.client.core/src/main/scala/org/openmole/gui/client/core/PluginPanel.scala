@@ -11,12 +11,13 @@ import scalatags.JsDom.tags
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 import autowire._
 import rx._
 import org.openmole.gui.client.core.alert.BannerAlert
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.client.FileManager
+import org.openmole.gui.ext.client.FileManager
+
 import scala.concurrent.duration.DurationInt
 
 /*

@@ -19,8 +19,9 @@ package org.openmole.gui.plugin.authentication.sshkey
 
 import org.openmole.core.services._
 import org.openmole.gui.ext.data.{ ErrorData, Test }
+import org.openmole.gui.ext.server.utils
 import org.openmole.plugin.environment.ssh._
-import org.openmole.gui.ext.tool.server._
+
 import scala.util._
 
 class PrivateKeyAuthenticationApiImpl(s: Services) extends PrivateKeyAuthenticationAPI {

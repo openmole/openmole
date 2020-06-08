@@ -3,11 +3,10 @@ package org.openmole.gui.client.core
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.tool.client._
 import scalatags.JsDom.{ TypedTag, tags }
 import scalatags.JsDom.all._
-import org.openmole.gui.ext.tool.client.Utils
 import org.scalajs.dom.raw.{ HTMLElement, HTMLLabelElement }
+import org.openmole.gui.ext.client._
 import rx._
 import scaladget.bootstrapnative.Table.{ FixedCell, ReactiveRow, SubRow, VarCell }
 import scaladget.bootstrapnative.ToggleButton
@@ -70,7 +69,7 @@ class EnvironmentErrorPanel(environmentErrorData: EnvironmentErrorData, environm
             Seq(
               FixedCell(tags.span(wordWrap := "break-word")(tags.a(error.errorMessage, pointer +++ Seq(fontSize := 13, scalatags.JsDom.all.color := "#222", textDecoration.underline), onclick := { () ⇒ toggleDetail(id) })), 0),
               FixedCell(levelLabel(error.level)(badge(nb.toString, environmentErrorBadge)), 1),
-              FixedCell(span(fontSize := 13, textCenter)(Utils.longToDate(date)), 2)
+              FixedCell(span(fontSize := 13, textCenter)(org.openmole.gui.ext.client.Utils.longToDate(date)), 2)
             ), Seq(borderTop := "2px solid white" /*, backgroundColor := "#ff000033"*/ )
           )
         }),
