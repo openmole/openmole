@@ -17,8 +17,7 @@
  */
 package org.openmole.gui.plugin.wizard.native
 
-import org.openmole.gui.ext.plugin.server.GUIPlugin
-import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
+import org.openmole.gui.ext.tool.server.{ AutowireServer, GUIPlugin, OMRouter }
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
 import scala.concurrent.ExecutionContext.Implicits.global

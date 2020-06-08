@@ -587,9 +587,10 @@ lazy val dataGUI = OsgiProject(guiExt, "org.openmole.gui.ext.data") enablePlugin
   libraryDependencies ++= Libraries.monocle
 ) settings (defaultSettings: _*)
 
-lazy val extServerTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool.server") dependsOn(dataGUI, workspace, module) settings(
+lazy val extServerTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool.server") dependsOn(dataGUI, workspace, module, services) settings(
   libraryDependencies += Libraries.autowire,
-  libraryDependencies += Libraries.boopickle
+  libraryDependencies += Libraries.boopickle,
+  libraryDependencies += Libraries.equinoxOSGi
 ) settings (defaultSettings: _*)
 
 lazy val extClientTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool.client") enablePlugins (ScalaJSPlugin) dependsOn(dataGUI, sharedGUI) settings(
@@ -601,9 +602,6 @@ lazy val extClientTool = OsgiProject(guiExt, "org.openmole.gui.ext.tool.client")
   Libraries.bootstrapnative,
   Libraries.scalaTagsJS
 ) settings (defaultSettings: _*)
-
-lazy val extPluginGUIServer = OsgiProject(guiExt, "org.openmole.gui.ext.plugin.server") dependsOn(extServerTool, services) settings (
-  libraryDependencies += Libraries.equinoxOSGi) settings (defaultSettings: _*)
 
 lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.ext.api") dependsOn(dataGUI, market) settings (defaultSettings: _*)
 
@@ -668,7 +666,6 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", d
   module,
   market,
   extServerTool,
-  extPluginGUIServer,
   jsCompile,
   services,
   location
@@ -684,47 +681,47 @@ lazy val guiEnvironmentEGIPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.p
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi,
   Libraries.bootstrapnative
-) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, egi) enablePlugins (ScalaJSPlugin)
+) dependsOn(extServerTool, extClientTool, dataGUI, workspace, egi) enablePlugins (ScalaJSPlugin)
 
 lazy val guiEnvironmentSSHKeyPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.sshkey") settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi,
   Libraries.bootstrapnative
-) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, ssh) enablePlugins (ScalaJSPlugin)
+) dependsOn(extServerTool, extClientTool, dataGUI, workspace, ssh) enablePlugins (ScalaJSPlugin)
 
 lazy val guiEnvironmentSSHLoginPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.sshlogin") settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi,
   Libraries.bootstrapnative
-) dependsOn(extPluginGUIServer, extClientTool, dataGUI, workspace, ssh) enablePlugins (ScalaJSPlugin)
+) dependsOn(extServerTool, extClientTool, dataGUI, workspace, ssh) enablePlugins (ScalaJSPlugin)
 
 lazy val netlogoWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.netlogo", imports = Seq("!org.scalajs.*", "!rx.*", "!scaladget.*", "*")) settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi
-) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ScalaJSPlugin)
+) dependsOn(extServerTool, extClientTool, extServerTool, workspace) enablePlugins (ScalaJSPlugin)
 
 lazy val nativeWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.native") settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi,
   libraryDependencies += Libraries.arm
-) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ScalaJSPlugin)
+) dependsOn(extServerTool, extClientTool, extServerTool, workspace) enablePlugins (ScalaJSPlugin)
 
 lazy val rWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.r") settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi,
-) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ScalaJSPlugin)
+) dependsOn(extServerTool, extClientTool, extServerTool, workspace) enablePlugins (ScalaJSPlugin)
 
 lazy val jarWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.jar") settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi,
-) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace) enablePlugins (ScalaJSPlugin)
+) dependsOn(extServerTool, extClientTool, extServerTool, workspace) enablePlugins (ScalaJSPlugin)
 
 lazy val evolutionAnalysisPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.analysis.evolution") settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi,
-) dependsOn(extPluginGUIServer, extClientTool, extServerTool, workspace, evolution) enablePlugins (ScalaJSPlugin)
+) dependsOn(extServerTool, extClientTool, extServerTool, workspace, evolution) enablePlugins (ScalaJSPlugin)
 
-val guiPlugins = Seq(
+def guiPlugins = Seq(
   guiEnvironmentSSHLoginPlugin,
   guiEnvironmentSSHKeyPlugin,
   guiEnvironmentEGIPlugin,

@@ -15,11 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.gui.ext.plugin.server
+package org.openmole.gui.ext.tool.server
 
+import org.openmole.gui.ext.data.{ AuthenticationPluginFactory, GUIPluginAsJS, MethodAnalysisPlugin, WizardPluginFactory }
 import org.openmole.core.services._
-import org.openmole.gui.ext.data.{ AuthenticationPluginFactory, GUIPluginAsJS, WizardPluginFactory, MethodAnalysisPlugin }
-import org.openmole.gui.ext.tool.server.OMRouter
 
 import scala.collection.JavaConverters._
 

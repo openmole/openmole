@@ -35,8 +35,7 @@ import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.dsl._
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.plugin.server._
-import org.openmole.gui.ext.tool.server.{ OMRouter, utils }
+import org.openmole.gui.ext.tool.server.{ OMRouter, utils, GUIPlugin }
 import org.openmole.gui.server.core.GUIServer.ApplicationControl
 import org.openmole.plugin.hook.omr.OMROutputFormat
 import org.openmole.tool.crypto.Cypher

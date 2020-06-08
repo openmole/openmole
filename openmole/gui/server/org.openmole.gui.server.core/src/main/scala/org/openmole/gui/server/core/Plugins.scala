@@ -8,12 +8,12 @@ import org.openmole.tool.stream._
 import org.openmole.core.pluginmanager._
 import org.openmole.core.pluginregistry._
 import org.openmole.core.workspace._
-import org.openmole.gui.ext.plugin.server.GUIPlugin
-import org.openmole.gui.ext.tool.server.OMRouter
+import org.openmole.gui.ext.tool.server.{ GUIPlugin, OMRouter }
 import org.openmole.gui.ext.tool.server.utils._
 import org.openmole.gui.server.jscompile.JSPack
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.core.services.Services
+
 import collection.JavaConverters._
 
 object Plugins extends JavaLogger {
