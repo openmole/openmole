@@ -9,10 +9,10 @@ import org.openmole.core.exception.InternalProcessingError
 
 object Analysis {
 
-  def loadMetadata(directory: File): EvolutionMetadata = {
-    decode[EvolutionMetadata]((directory / OMROutputFormat.methodFile).content) match {
+  def loadMetadata(file: File): EvolutionMetadata = {
+    decode[EvolutionMetadata](file.content) match {
       case Right(v) ⇒ v
-      case Left(e)  ⇒ throw new InternalProcessingError(s"Error parsing ${directory / OMROutputFormat.methodFile}", e)
+      case Left(e)  ⇒ throw new InternalProcessingError(s"Error parsing ${file}", e)
     }
   }
 
@@ -20,12 +20,6 @@ object Analysis {
     (0L to generation by frequency.getOrElse(1L)) map { g ⇒
       val fileNameValue = ExpandedString.expandValues(fileName, Context(GAIntegration.generationPrototype -> g))
       directory / OMROutputFormat.dataDirectory / fileNameValue
-    }
-
-  def analyse(directory: File) =
-    loadMetadata(directory) match {
-      case s: EvolutionMetadata.StochasticNSGA2 ⇒ s
-      case EvolutionMetadata.none               ⇒ EvolutionAnalysis.none
     }
 
   object EvolutionAnalysis {
@@ -41,9 +35,9 @@ object Analysis {
     case class Convergence(nadir: Option[Vector[Double]], generations: Vector[GenerationConvergence])
     case class GenerationConvergence(generation: Long, hypervolume: Option[Double], minimums: Option[Vector[Double]])
 
-    //    def analyse(metaData: EvolutionMetadata.StochasticNSGA2, directory: File) = {
-    //      println(Analysis.dataFiles(directory, metaData.saved.name, metaData.saved.generation, metaData.saved.frequency))
-    //    }
+    def analyse(metaData: EvolutionMetadata.StochasticNSGA2, directory: File) = {
+      println(Analysis.dataFiles(directory, metaData.saved.name, metaData.saved.generation, metaData.saved.frequency))
+    }
 
     def converge(generations: Vector[SavedGeneration], samples: Int) = {
       import _root_.mgo.tools.metric.Hypervolume

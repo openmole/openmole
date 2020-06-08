@@ -134,7 +134,7 @@ class GUIServices(
 object GUIServlet {
   def apply(arguments: GUIServer.ServletArguments) = {
     val servlet = new GUIServlet(arguments)
-    Utils.addPluginRoutes(servlet.addRouter, GUIServices.ServicesProvider(arguments.services, servlet.cypher.get))
+    utils.addPluginRoutes(servlet.addRouter, GUIServices.ServicesProvider(arguments.services, servlet.cypher.get))
     servlet addRouter (OMRouter[Api](AutowireServer.route[Api](servlet.apiImpl)))
     servlet
   }
@@ -166,9 +166,9 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     tags.head(
       tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset=UTF-8"),
       cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
-      tags.script(tags.`type` := "text/javascript", tags.src := "js/" + Utils.openmoleFileName),
-      tags.script(tags.`type` := "text/javascript", tags.src := "js/" + Utils.depsFileName),
-      tags.script(tags.`type` := "text/javascript", tags.src := "js/" + Utils.openmoleGrammarMode),
+      tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.openmoleFileName),
+      tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.depsFileName),
+      tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.openmoleGrammarMode),
       RawFrag(arguments.extraHeader)
     ),
     tags.body(
@@ -250,9 +250,9 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
         }
 
       fileType match {
-        case "project"        ⇒ copyTo(Utils.webUIDirectory)
+        case "project"        ⇒ copyTo(utils.webUIDirectory)
         case "authentication" ⇒ copyTo(server.Utils.authenticationKeysFile)
-        case "plugin"         ⇒ copyTo(Utils.pluginUpdoadDirectory(params("directoryName")))
+        case "plugin"         ⇒ copyTo(utils.pluginUpdoadDirectory(params("directoryName")))
         case "absolute"       ⇒ copyTo(new File(""))
       }
     }
@@ -263,7 +263,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   get(downloadFileRoute) {
 
     val path = params("path")
-    val f = new File(Utils.webUIDirectory, path)
+    val f = new File(utils.webUIDirectory, path)
 
     if (!f.exists()) NotFound("The file " + path + " does not exist.")
     else {

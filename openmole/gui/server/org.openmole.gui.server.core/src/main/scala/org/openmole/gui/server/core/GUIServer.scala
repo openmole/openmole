@@ -45,9 +45,9 @@ object GUIServer {
     from / "fonts" copy to / "fonts"
     from / "img" copy to / "img"
 
-    Utils.expandDepsFile(from / "js" / Utils.openmoleGrammarName, to /> "js" / Utils.openmoleGrammarMode)
-    (from / "js" / Utils.depsFileName) copy (to /> "js" / Utils.depsFileName)
-    Utils.openmoleFile(optimizedJS) copy (to /> "js" / Utils.openmoleFileName)
+    utils.expandDepsFile(from / "js" / utils.openmoleGrammarName, to /> "js" / utils.openmoleGrammarMode)
+    (from / "js" / utils.depsFileName) copy (to /> "js" / utils.depsFileName)
+    utils.openmoleFile(optimizedJS) copy (to /> "js" / utils.openmoleFileName)
     to
   }
 
@@ -58,12 +58,12 @@ object GUIServer {
   }
 
   def lockFile(implicit workspace: Workspace) = {
-    val file = Utils.webUIDirectory() / "GUI.lock"
+    val file = utils.webUIDirectory() / "GUI.lock"
     file.createNewFile
     file
   }
 
-  def urlFile(implicit workspace: Workspace) = Utils.webUIDirectory() / "GUI.url"
+  def urlFile(implicit workspace: Workspace) = utils.webUIDirectory() / "GUI.url"
 
   val servletArguments = "servletArguments"
 

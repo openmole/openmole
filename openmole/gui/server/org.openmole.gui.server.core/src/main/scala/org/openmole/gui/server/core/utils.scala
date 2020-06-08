@@ -44,7 +44,7 @@ import org.openmole.core.services._
 import scala.annotation.tailrec
 import scala.util.{ Failure, Success, Try }
 
-object Utils extends JavaLogger {
+object utils extends JavaLogger {
 
   import Log._
 
@@ -63,34 +63,42 @@ object Utils extends JavaLogger {
 
   def allPluggableIn(path: SafePath)(implicit workspace: Workspace): Seq[SafePath] = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
-    path.listFiles().filter { f ⇒
-      PluginManager.isBundle(f)
-    }.toSeq
+    path.toFile.listFilesSafe.filter { f ⇒ PluginManager.isBundle(f) }.map(_.toSafePath).toSeq
   }
 
   def treeNodeToSafePath(tnd: TreeNodeData, parent: SafePath): SafePath = parent ++ tnd.name
 
-  implicit def fileToSafePath(f: File)(implicit context: ServerFileSystemContext, workspace: Workspace): SafePath = {
+  implicit class SafePathDecorator(s: SafePath) {
+    def toFile(implicit context: ServerFileSystemContext, workspace: Workspace) = safePathToFile(s)
+
+    def copy(toPath: SafePath, withName: Option[String] = None)(implicit workspace: Workspace) = {
+      import org.openmole.gui.ext.data.ServerFileSystemContext.project
+
+      val from: File = s.toFile
+      val to: File = toPath.toFile
+      if (from.exists && to.exists) {
+        FileDecorator(from).copy(toF = new File(to, withName.getOrElse(from.getName)), followSymlinks = true)
+      }
+    }
+  }
+
+  implicit class SafePathFileDecorator(f: File) {
+    def toSafePath(implicit context: ServerFileSystemContext, workspace: Workspace) = fileToSafePath(f)
+  }
+
+  def fileToSafePath(f: File)(implicit context: ServerFileSystemContext, workspace: Workspace): SafePath = {
     context match {
       case _: ProjectFileSystem ⇒ SafePath(getPathArray(f, projectsDirectory))
       case _                    ⇒ SafePath(getPathArray(f, new File("")))
     }
   }
 
-  implicit def safePathToFile(s: SafePath)(implicit context: ServerFileSystemContext, workspace: Workspace): File = {
+  def safePathToFile(s: SafePath)(implicit context: ServerFileSystemContext, workspace: Workspace): File = {
     context match {
       case _: ProjectFileSystem ⇒ getFile(webUIDirectory, s.path)
       case _                    ⇒ getFile(new File(""), s.path)
     }
 
-  }
-
-  implicit def seqOfSafePathToSeqOfFile(s: Seq[SafePath])(implicit context: ServerFileSystemContext, workspace: Workspace): Seq[File] = s.map {
-    safePathToFile
-  }
-
-  implicit def seqOfFileToSeqOfSafePath(s: Seq[File])(implicit context: ServerFileSystemContext, workspace: Workspace): Seq[SafePath] = s.map {
-    fileToSafePath
   }
 
   def fileToTreeNodeData(f: File)(implicit context: ServerFileSystemContext = ProjectFileSystem()): Option[TreeNodeData] = {
@@ -114,19 +122,6 @@ object Utils extends JavaLogger {
   implicit def javaLevelToErrorLevel(level: Level): ErrorStateLevel = {
     if (level.intValue >= java.util.logging.Level.WARNING.intValue) ErrorLevel()
     else DebugLevel()
-  }
-
-  implicit class SafePathDecorator(sp: SafePath) {
-
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
-
-    def copy(toPath: SafePath, withName: Option[String] = None)(implicit workspace: Workspace) = {
-      val from: File = sp
-      val to: File = toPath
-      if (from.exists && to.exists) {
-        FileDecorator(from).copy(toF = new File(to, withName.getOrElse(from.getName)), followSymlinks = true)
-      }
-    }
   }
 
   def getPathArray(f: File, until: File): Seq[String] = {
@@ -181,13 +176,13 @@ object Utils extends JavaLogger {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
     val toPath = safePath.copy(path = safePath.path.dropRight(1) :+ newName)
-    if (toPath.isDirectory()) toPath.mkdir
+    if (toPath.toFile.isDirectory()) toPath.toFile.mkdir
 
-    val from: File = safePath
-    val replica: File = safePath.parent ++ newName
-    FileDecorator(from).copy(replica, followSymlinks = followSymlinks)
+    val from = safePath.toFile
+    val replica = (safePath.parent ++ newName).toFile
+    from.copy(replica, followSymlinks = followSymlinks)
 
-    replica
+    replica.toSafePath
   }
 
   def copyFile(from: File, to: File, create: Boolean = false): Unit = {
@@ -278,8 +273,8 @@ object Utils extends JavaLogger {
 
   //copy safePaths files to 'to' folder in overwriting in they exist
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath)(implicit workspace: Workspace) = {
-    safePaths.foreach { sp ⇒ sp.copy(to) }
-
+    import ServerFileSystemContext.project
+    safePaths.foreach { sp ⇒ sp.toFile.copy(to.toFile) }
   }
 
   def deleteFile(safePath: SafePath, context: ServerFileSystemContext)(implicit workspace: Workspace): Unit = {
