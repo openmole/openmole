@@ -25,7 +25,7 @@ import org.osgi.framework.{ BundleActivator, BundleContext }
 class Activator extends BundleActivator {
   def info: GUIPlugin = GUIPlugin(
     analysis = Some(EvolutionMetadata.method -> classOf[EvolutionAnalysis]),
-    router = Some(s ⇒ OMRouter[EvolutionAnalysisAPI](AutowireServer.route[EvolutionAnalysisAPI](new EvolutionAnalysisAPIImpl)))
+    router = Some(s ⇒ OMRouter[EvolutionAnalysisAPI](AutowireServer.route[EvolutionAnalysisAPI](new EvolutionAnalysisAPIImpl(s))))
   )
 
   override def start(context: BundleContext): Unit = GUIPlugin.register(this, info)

@@ -1,28 +1,29 @@
-/**
- * Created by Romain Reuillon on 30/11/16.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- */
 package org.openmole.gui.server.core
 
+import org.openmole.core.fileservice._
+import org.openmole.core.highlight.HighLight
 import org.openmole.core.pluginmanager._
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
+import org.openmole.core.pluginmanager._
+import org.openmole.core.pluginregistry._
+import org.openmole.core.workspace._
+import org.openmole.gui.ext.plugin.server.GUIPlugin
+import org.openmole.gui.ext.tool.server.OMRouter
+import org.openmole.gui.ext.tool.server.utils._
+import org.openmole.gui.server.jscompile.JSPack
+import org.openmole.tool.logger.JavaLogger
+import org.openmole.core.services.Services
 import collection.JavaConverters._
 
-object Plugins {
+object Plugins extends JavaLogger {
+
+  def updateJsPluginDirectory(jsPluginDirectory: File) = {
+    jsPluginDirectory.recursiveDelete
+    jsPluginDirectory.mkdirs
+    Plugins.gatherJSIRFiles(jsPluginDirectory)
+    jsPluginDirectory
+  }
 
   def gatherJSIRFiles(dest: File) = {
     def bundles =
@@ -40,4 +41,54 @@ object Plugins {
     }
   }
 
+  def openmoleFile(optimizedJS: Boolean)(implicit workspace: Workspace, newFile: TmpDirectory, fileService: FileService) = {
+    val jsPluginDirectory = webUIDirectory / "jsplugin"
+    updateJsPluginDirectory(jsPluginDirectory)
+
+    val jsFile = workspace.persistentDir /> "webui" / openmoleFileName
+
+    def update = {
+      Log.logger.info("Building GUI plugins ...")
+      jsFile.delete
+      JSPack.link(jsPluginDirectory, jsFile, optimizedJS)
+    }
+
+    (jsPluginDirectory / "optimized_mode").content = optimizedJS.toString
+
+    if (!jsFile.exists) update
+    else updateIfChanged(jsPluginDirectory) { _ ⇒ update }
+    jsFile
+  }
+
+  def expandDepsFile(template: File, to: File) = {
+    val rules = PluginRegistry.highLights.partition { kw ⇒
+      kw match {
+        case _@ (HighLight.TaskHighLight(_) | HighLight.SourceHighLight(_) | HighLight.EnvironmentHighLight(_) | HighLight.HookHighLight(_) | HighLight.SamplingHighLight(_) | HighLight.DomainHighLight(_) | HighLight.PatternHighLight(_)) ⇒ false
+        case _ ⇒ true
+      }
+    }
+
+    to.content =
+      s"""${template.content}""" // ${AceOpenMOLEMode.content}
+        .replace(
+          "##OMKeywords##",
+          s""" "${
+            rules._1.map {
+              _.name
+            }.mkString("|")
+          }" """)
+        .replace(
+          "##OMClasses##",
+          s""" "${
+            rules._2.map {
+              _.name
+            }.mkString("|")
+          }" """)
+
+  }
+
+  def addPluginRoutes(route: OMRouter ⇒ Unit, services: Services) = {
+    Log.logger.info("Loading GUI plugins")
+    GUIPlugin.routers.foreach { _(services) }
+  }
 }

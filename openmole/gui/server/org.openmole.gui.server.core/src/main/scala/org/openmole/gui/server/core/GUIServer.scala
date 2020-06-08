@@ -25,8 +25,9 @@ import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
 import org.eclipse.jetty.webapp._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.location._
-import org.openmole.core.preference.{ PreferenceLocation, Preference }
+import org.openmole.core.preference.{ Preference, PreferenceLocation }
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
+import org.openmole.gui.ext.tool.server.utils
 import org.openmole.tool.crypto.KeyStore
 import org.openmole.tool.file._
 import org.openmole.tool.network.Network
@@ -45,9 +46,9 @@ object GUIServer {
     from / "fonts" copy to / "fonts"
     from / "img" copy to / "img"
 
-    utils.expandDepsFile(from / "js" / utils.openmoleGrammarName, to /> "js" / utils.openmoleGrammarMode)
+    Plugins.expandDepsFile(from / "js" / utils.openmoleGrammarName, to /> "js" / utils.openmoleGrammarMode)
     (from / "js" / utils.depsFileName) copy (to /> "js" / utils.depsFileName)
-    utils.openmoleFile(optimizedJS) copy (to /> "js" / utils.openmoleFileName)
+    Plugins.openmoleFile(optimizedJS) copy (to /> "js" / utils.openmoleFileName)
     to
   }
 

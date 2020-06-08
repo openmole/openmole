@@ -1,52 +1,26 @@
-package org.openmole.gui.server.core
+package org.openmole.gui.ext.tool.server
 
-/*
- * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-import java.io.{ File, _ }
+import java.io.FileOutputStream
+import java.nio.file.attribute.BasicFileAttributes
 import java.util.logging.Level
-import java.util.zip._
+import java.util.zip.ZipFile
 
-import scala.collection.JavaConversions.enumerationAsScalaIterator
-import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.fileservice._
+import org.openmole.core.highlight.HighLight
+import org.openmole.core.pluginmanager._
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.data.ListSorting._
-import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.file._
-import org.openmole.core.fileservice._
-import java.nio.file.attribute._
-
-import org.openmole.core.highlight.HighLight
-import org.openmole.core.pluginregistry.{ PluginInfo, PluginRegistry }
-import org.openmole.gui.ext.plugin.server.GUIPlugin
-import org.openmole.gui.ext.tool.server.OMRouter
-import org.openmole.gui.server.jscompile.JSPack
-
-import scala.io.{ BufferedSource, Codec }
-import org.openmole.core.services._
+import org.openmole.tool.logger.JavaLogger
 
 import scala.annotation.tailrec
+import scala.io.{ BufferedSource, Codec }
 import scala.util.{ Failure, Success, Try }
 
-object utils extends JavaLogger {
+import collection.JavaConverters._
 
-  import Log._
+object utils {
 
   def pluginUpdoadDirectory(tmpDirectory: String)(implicit newFile: TmpDirectory) = newFile.directory / tmpDirectory
 
@@ -290,13 +264,6 @@ object utils extends JavaLogger {
 
   def getUUID: String = java.util.UUID.randomUUID.toString
 
-  def updateJsPluginDirectory(jsPluginDirectory: File) = {
-    jsPluginDirectory.recursiveDelete
-    jsPluginDirectory.mkdirs
-    Plugins.gatherJSIRFiles(jsPluginDirectory)
-    jsPluginDirectory
-  }
-
   val openmoleFileName = "openmole.js"
   val depsFileName = "deps.js"
   val openmoleGrammarName = "openmole_grammar_template.js"
@@ -325,64 +292,13 @@ object utils extends JavaLogger {
     }
   }
 
-  def openmoleFile(optimizedJS: Boolean)(implicit workspace: Workspace, newFile: TmpDirectory, fileService: FileService) = {
-    val jsPluginDirectory = webUIDirectory / "jsplugin"
-    updateJsPluginDirectory(jsPluginDirectory)
-
-    val jsFile = workspace.persistentDir /> "webui" / openmoleFileName
-
-    def update = {
-      logger.info("Building GUI plugins ...")
-      jsFile.delete
-      JSPack.link(jsPluginDirectory, jsFile, optimizedJS)
-    }
-
-    (jsPluginDirectory / "optimized_mode").content = optimizedJS.toString
-
-    if (!jsFile.exists) update
-    else updateIfChanged(jsPluginDirectory) { _ ⇒ update }
-    jsFile
-  }
-
-  def expandDepsFile(template: File, to: File) = {
-    val rules = PluginRegistry.highLights.partition { kw ⇒
-      kw match {
-        case _@ (HighLight.TaskHighLight(_) | HighLight.SourceHighLight(_) | HighLight.EnvironmentHighLight(_) | HighLight.HookHighLight(_) | HighLight.SamplingHighLight(_) | HighLight.DomainHighLight(_) | HighLight.PatternHighLight(_)) ⇒ false
-        case _ ⇒ true
-      }
-    }
-
-    to.content =
-      s"""${template.content}""" // ${AceOpenMOLEMode.content}
-        .replace(
-          "##OMKeywords##",
-          s""" "${
-            rules._1.map {
-              _.name
-            }.mkString("|")
-          }" """)
-        .replace(
-          "##OMClasses##",
-          s""" "${
-            rules._2.map {
-              _.name
-            }.mkString("|")
-          }" """)
-
-  }
-
-  def addPluginRoutes(route: OMRouter ⇒ Unit, services: Services) = {
-    logger.info("Loading GUI plugins")
-    GUIPlugin.routers.foreach { _(services) }
-  }
-
   // Extract .zip archive
   def unzip(from: File, to: File) = {
     val basename = from.getName.substring(0, from.getName.lastIndexOf("."))
     to.getParentFile.mkdirs
 
     val zip = new ZipFile(from)
-    zip.entries.foreach { entry ⇒
+    zip.entries.asScala.foreach { entry ⇒
       val entryName = entry.getName
       if (entryName != s"$basename/") {
         val entryPath = {

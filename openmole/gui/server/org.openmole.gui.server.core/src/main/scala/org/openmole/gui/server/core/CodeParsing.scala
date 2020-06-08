@@ -5,7 +5,7 @@ import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.DataUtils._
 
 import scala.io.Source
-import org.openmole.gui.server.core.utils._
+import org.openmole.gui.ext.tool.server.utils._
 
 /*
  * Copyright (C) 10/11/15 // mathieu.leclaire@openmole.org

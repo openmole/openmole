@@ -46,7 +46,7 @@ import org.openmole.gui.ext.api.Api
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.gui.ext.data.routes._
 import org.openmole.gui.ext.tool.server
-import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
+import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter, utils }
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.file._
 import org.openmole.tool.logger.LoggerService
@@ -134,7 +134,7 @@ class GUIServices(
 object GUIServlet {
   def apply(arguments: GUIServer.ServletArguments) = {
     val servlet = new GUIServlet(arguments)
-    utils.addPluginRoutes(servlet.addRouter, GUIServices.ServicesProvider(arguments.services, servlet.cypher.get))
+    Plugins.addPluginRoutes(servlet.addRouter, GUIServices.ServicesProvider(arguments.services, servlet.cypher.get))
     servlet addRouter (OMRouter[Api](AutowireServer.route[Api](servlet.apiImpl)))
     servlet
   }

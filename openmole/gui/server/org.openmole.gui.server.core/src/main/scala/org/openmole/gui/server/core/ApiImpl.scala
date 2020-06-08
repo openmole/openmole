@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat
 import org.openmole.core.buildinfo
 import org.openmole.core.event._
 import org.openmole.core.pluginmanager._
-import org.openmole.gui.server.core.utils._
+import org.openmole.gui.ext.tool.server.utils._
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import java.io._
@@ -36,7 +36,7 @@ import org.openmole.core.dsl._
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.plugin.server._
-import org.openmole.gui.ext.tool.server.OMRouter
+import org.openmole.gui.ext.tool.server.{ OMRouter, utils }
 import org.openmole.gui.ext.tool.server.Utils.authenticationKeysFile
 import org.openmole.gui.server.core.GUIServer.ApplicationControl
 import org.openmole.plugin.hook.omr.OMROutputFormat
