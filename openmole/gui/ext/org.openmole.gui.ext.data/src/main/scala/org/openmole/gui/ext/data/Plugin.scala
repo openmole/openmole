@@ -67,5 +67,5 @@ trait WizardPluginFactory extends GUIPluginFactory {
 }
 
 trait MethodAnalysisPlugin extends GUIPlugin {
-  val panel: TypedTag[HTMLElement]
+  def panel(safePath: SafePath): TypedTag[HTMLElement]
 }

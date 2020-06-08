@@ -47,7 +47,7 @@ class FileDisplayer(val tabs: TreeNodeTabs) {
             post()[Api].findAnalysisPlugin(safePath).call.foreach {
               case Some(plugin) ⇒
                 val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
-                val tab = TreeNodeTab.html(safePath, analysis.panel)
+                val tab = TreeNodeTab.html(safePath, analysis.panel(safePath))
                 tabs add tab
               case None ⇒
             }

@@ -746,7 +746,7 @@ class TreeNodeTabs {
                   setActive(t)
                 }
               )(
-                  button(ms("close") +++ tabClose, `type` := "button", onclick := { () ⇒ println(s"close $t"); remove(t) })(raw("&#215")),
+                  button(ms("close") +++ tabClose, `type` := "button", onclick := { () ⇒ remove(t) })(raw("&#215")),
                   t.tabName()
                 )
             )
