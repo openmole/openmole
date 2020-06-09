@@ -17,6 +17,8 @@ assemble:
 
 publish:
   stage: publish
+  dependencies: 
+    - assemble
   only:
     refs:
       - 11-dev
