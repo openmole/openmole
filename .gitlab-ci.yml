@@ -24,7 +24,7 @@ publish:
     - assemble
   only:
     refs:
-      - 11-dev
+      - $CI_DEFAULT_BRANCH
   script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - mkdir -p ~/.ssh
