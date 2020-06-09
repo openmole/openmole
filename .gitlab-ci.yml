@@ -23,8 +23,10 @@ publish:
   dependencies: 
     - assemble
   only:
-    refs:
-      - $CI_DEFAULT_BRANCH
+    variables:
+      - $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH
+    #refs:
+    #  - 11-dev
   script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - mkdir -p ~/.ssh
