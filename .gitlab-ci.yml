@@ -1,5 +1,6 @@
 stages:
   - assemble
+  - publish
 
 image: openmole/build
 
@@ -13,6 +14,13 @@ assemble:
     - '(cd ./build-system && sbt publishLocal)'
     - '(cd ./libraries && sbt publishLocal)'
     - '(cd ./openmole && ./generateSite $PWD/site)'
+
+publish:
+  stage: publish
+  only:
+    refs:
+      - 11-dev
+  script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
@@ -22,8 +30,4 @@ assemble:
     - chmod 644 ~/.ssh/known_hosts
     - echo "put -r ./openmole/site/* next" >./tonext     
     - sftp -i ~/.ssh/identity -b ./tonext -P 21022 user@docker.openmole.org
-  #only:
-  #  refs:
-  #    - 10-dev
-
-
+    
