@@ -6,6 +6,8 @@ image: openmole/build
 
 assemble:
   stage: assemble
+  artifacts:
+    untracked: true
   script:
     #- bash -x build.sh
     #- '(cd openmole && sbt test)' # Metaspace error to be solved
