@@ -469,7 +469,7 @@ package file {
         withClosable[DirectoryStream[Path], T](open)(_)
       }
 
-      def withSource[T] = withClosable[Source, T](Source.fromFile(file))(_)
+      def withSource[T] = withClosable[Source, T](Source.fromInputStream(bufferedInputStream))(_)
 
       def wrapError[T](f: ⇒ T): T =
         try f

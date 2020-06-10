@@ -51,16 +51,16 @@ class FileDisplayer(val tabs: TreeNodeTabs) {
                 tabs add tab
               case None ⇒
             }
-          case MDScript ⇒ post()[Api].mdToHtml(safePath).call().foreach { htmlString ⇒
-            tabs add TreeNodeTab.html(safePath, TreeNodeTab.mdBlock(htmlString))
-          }
+          case MDScript ⇒
+            post()[Api].mdToHtml(safePath).call().foreach { htmlString ⇒
+              tabs add TreeNodeTab.html(safePath, TreeNodeTab.mdBlock(htmlString))
+            }
           case SVGExtension ⇒ tabs add TreeNodeTab.html(safePath, TreeNodeTab.rawBlock(content))
           case editableFile: EditableFile ⇒
-            if (DataUtils.isCSV(safePath)) {
+            if (DataUtils.isCSV(safePath))
               post()[Api].sequence(safePath).call().foreach { seq ⇒
                 tabs add TreeNodeTab.editable(safePath, content, DataTab.build(seq, view = TreeNodeTab.Table, editing = !editableFile.onDemand), Plotter.default)
               }
-            }
             else {
               tabs add TreeNodeTab.editable(safePath, content, DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw), Plotter.default)
             }

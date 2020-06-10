@@ -87,7 +87,7 @@ class AuthenticationPanel(authenticationFactories: Seq[AuthenticationPluginFacto
           case PassedTest(_) ⇒ lab(label_success).render
           case PendingTest() ⇒ lab(label_warning).render
           case _ ⇒ lab(label_danger +++ pointer)(onclick := { () ⇒
-            currentStack() = ErrorData.stackTrace(test.errorStack)
+            currentStack() = test.error.map(ErrorData.stackTrace).getOrElse("")
             errorOn() = !errorOn.now
           }).render
         }

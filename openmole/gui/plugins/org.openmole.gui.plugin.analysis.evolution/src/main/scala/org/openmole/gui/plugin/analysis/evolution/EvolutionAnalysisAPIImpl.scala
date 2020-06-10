@@ -4,13 +4,18 @@ import org.openmole.gui.ext.data._
 import org.openmole.plugin.method.evolution
 import org.openmole.core.services.Services
 import org.openmole.gui.ext.server.utils._
+import org.openmole.plugin.method.evolution.EvolutionMetadata
 
 class EvolutionAnalysisAPIImpl(services: Services) extends EvolutionAnalysisAPI {
 
-  def analyse(path: SafePath) = {
+  def load(path: SafePath) = {
     import ServerFileSystemContext.project
     import services.workspace
-    evolution.Analysis.loadMetadata(path.toFile)
+
+    try Right(evolution.Analysis.loadMetadata(path.toFile))
+    catch {
+      case e ⇒ Left(ErrorData(e))
+    }
   }
 
 }

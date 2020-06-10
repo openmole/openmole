@@ -10,7 +10,7 @@ import org.openmole.core.exception.InternalProcessingError
 object Analysis {
 
   def loadMetadata(file: File): EvolutionMetadata = {
-    decode[EvolutionMetadata](file.content) match {
+    decode[EvolutionMetadata](file.content(gz = true)) match {
       case Right(v) ⇒ v
       case Left(e)  ⇒ throw new InternalProcessingError(s"Error parsing ${file}", e)
     }

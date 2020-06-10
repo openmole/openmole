@@ -468,12 +468,15 @@ lazy val omrHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.omr", import
 
 def allMethod = Seq(evolution, directSampling, sensitivity, abc)
 
+//FIXME: use crossProject, generated jar is heavy
 lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolution", imports = Seq("*")) dependsOn(
   openmoleDSL, toolsTask, pattern, omrHook, collectionDomain % "test", boundsDomain % "test"
 ) settings(
   libraryDependencies += Libraries.mgo,
   libraryDependencies += Libraries.shapeless,
-  libraryDependencies += Libraries.circe) settings (pluginSettings: _*)
+  libraryDependencies += Libraries.circe) settings (pluginSettings: _*) enablePlugins(ScalaJSPlugin)
+
+
 
 lazy val abc = OsgiProject(pluginDir, "org.openmole.plugin.method.abc", imports = Seq("*")) dependsOn(openmoleDSL, toolsTask, pattern, boundsDomain % "test") settings(
   libraryDependencies += Libraries.mgo, libraryDependencies += Libraries.shapeless) settings (pluginSettings: _*)

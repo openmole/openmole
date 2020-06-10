@@ -333,7 +333,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
       }
     }
 
-    def message(message: String) = MessageErrorData(message)
+    def message(message: String) = MessageErrorData(message, None)
 
     val script: File = safePathToFile(scriptData.scriptPath)
 

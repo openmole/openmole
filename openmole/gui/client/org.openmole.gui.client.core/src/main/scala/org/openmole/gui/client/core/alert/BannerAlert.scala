@@ -27,6 +27,7 @@ import org.openmole.gui.ext.client.Utils._
 import org.scalajs.dom.raw.HTMLDivElement
 import scaladget.bootstrapnative.bsn.btn_default
 import scalatags.JsDom.{ TypedTag, tags }
+import org.openmole.gui.ext.data._
 
 object BannerAlert {
 
@@ -81,6 +82,9 @@ object BannerAlert {
       stackPanel.content() = details
       stackPanel.dialog.show
     })), CriticalBannerLevel))
+
+  def registerWithStack(message: String, e: ErrorData) =
+    BannerAlert.registerWithDetails(message, ErrorData.stackTrace(e))
 
   private def color = {
     if (bannerMessages.now.exists(_.bannerLevel == CriticalBannerLevel)) omsheet.RED

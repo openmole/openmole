@@ -21,7 +21,11 @@ import org.openmole.gui.ext.server.{ AutowireServer, GUIPlugin, OMRouter }
 import org.openmole.plugin.method.evolution.EvolutionMetadata
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
+import boopickle.Default._
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class Activator extends BundleActivator {
+
   def info: GUIPlugin = GUIPlugin(
     analysis = Some(EvolutionMetadata.method -> classOf[EvolutionAnalysis]),
     router = Some(s ⇒ OMRouter[EvolutionAnalysisAPI](AutowireServer.route[EvolutionAnalysisAPI](new EvolutionAnalysisAPIImpl(s))))
