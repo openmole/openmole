@@ -25,10 +25,10 @@ object panels {
   lazy val executionPanel = new ExecutionPanel
   lazy val treeNodeTabs = new TreeNodeTabs()
   lazy val fileDisplayer = new FileDisplayer(treeNodeTabs)
-  lazy val treeNodePanel = new TreeNodePanel()
-  def modelWizardPanel(wizards: Seq[WizardPluginFactory]) = new ModelWizardPanel(wizards)
-  def urlImportPanel = new URLImportPanel
-  lazy val marketPanel = new MarketPanel
+  lazy val treeNodePanel = new TreeNodePanel(treeNodeManager)
+  def modelWizardPanel(wizards: Seq[WizardPluginFactory]) = new ModelWizardPanel(treeNodeManager, wizards)
+  def urlImportPanel = new URLImportPanel(treeNodeManager)
+  lazy val marketPanel = new MarketPanel(treeNodeManager)
   lazy val pluginPanel = new PluginPanel
   lazy val stackPanel = new TextPanel("Error stack")
 }

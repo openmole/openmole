@@ -43,7 +43,7 @@ import scaladget.bootstrapnative.Selector.Options
 
 import scala.concurrent.Future
 
-class ModelWizardPanel(wizards: Seq[WizardPluginFactory]) {
+class ModelWizardPanel(manager: TreeNodeManager, wizards: Seq[WizardPluginFactory]) {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
   sealed trait VariableRole[T] {
@@ -168,7 +168,7 @@ class ModelWizardPanel(wizards: Seq[WizardPluginFactory]) {
                   resources() = Resources.empty
                   val fileName = fInput.files.item(0).name
                   labelName() = Some(fileName)
-                  filePath() = Some(panels.treeNodeManager.current.now ++ fileName)
+                  filePath() = Some(manager.current.now ++ fileName)
                   filePath.now.map {
                     fp ⇒
                       moveFilesAndBuildForm(fInput, fileName, fp)
@@ -387,7 +387,7 @@ class ModelWizardPanel(wizards: Seq[WizardPluginFactory]) {
     factory ⇒
       currentPluginPanel.now.foreach {
         _.save(
-          panels.treeNodeManager.current.now ++ s"${
+          manager.current.now ++ s"${
             scriptNameInput.value.clean
           }.oms",
           labelName.now.getOrElse("script"),

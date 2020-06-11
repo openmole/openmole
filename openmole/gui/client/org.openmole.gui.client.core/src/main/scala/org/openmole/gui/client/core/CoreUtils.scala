@@ -94,9 +94,8 @@ object CoreUtils {
     post()[Api].listFiles(safePath, fileFilter).call()
   }
 
-  def pluggables(safePath: SafePath, todo: () ⇒ Unit) = post()[Api].allPluggableIn(safePath).call.foreach { p ⇒
-    panels.treeNodeManager.pluggables() = p
-    todo()
+  def pluggables(safePath: SafePath, todo: Seq[SafePath] ⇒ Unit) = post()[Api].allPluggableIn(safePath).call.foreach { p ⇒
+    todo(p)
   }
 
   def addJSScript(relativeJSPath: String) = {

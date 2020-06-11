@@ -124,7 +124,13 @@ class TreeNodeManager {
   }
 
   def computePluggables(todo: () ⇒ Unit) = current.foreach { sp ⇒
-    CoreUtils.pluggables(sp, todo)
+    CoreUtils.pluggables(
+      sp,
+      p ⇒ {
+        pluggables() = p
+        todo()
+      }
+    )
   }
 
   def isRootCurrent = current.now == root

@@ -31,13 +31,14 @@ import org.openmole.gui.client.core.CoreUtils._
 import org.openmole.gui.ext.data._
 import Waiter._
 import autowire._
+import org.openmole.gui.client.core.files.TreeNodeManager
 import rx._
 import scalatags.JsDom.tags
 import scalatags.JsDom.all._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.client.InputFilter
 
-class MarketPanel {
+class MarketPanel(manager: TreeNodeManager) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
@@ -71,7 +72,7 @@ class MarketPanel {
                 })
               ),
               div(colMD(2))(downloadButton(entry, () ⇒ {
-                exists(panels.treeNodeManager.current.now ++ entry.name, entry)
+                exists(manager.current.now ++ entry.name, entry)
               })),
               div(colMD(7) +++ (paddingTop := 7))(
                 entry.tags.map { e ⇒ tags.label(e)(label_primary +++ omsheet.tableTag) }
@@ -98,7 +99,7 @@ class MarketPanel {
     }
 
   def download(entry: MarketIndexEntry) = {
-    val path = panels.treeNodeManager.current.now ++ entry.name
+    val path = manager.current.now ++ entry.name
     downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processing())))
     post()[Api].getMarketEntry(entry, path).call().foreach { d ⇒
       downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processed())))
@@ -148,7 +149,7 @@ class MarketPanel {
             e.name + " already exists. Overwrite ? ",
             () ⇒ {
               overwriteAlert() = None
-              deleteFile(panels.treeNodeManager.current() ++ e.name, e)
+              deleteFile(manager.current() ++ e.name, e)
             }, () ⇒ {
               overwriteAlert() = None
             }, CenterPagePosition
