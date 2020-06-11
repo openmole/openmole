@@ -7,7 +7,6 @@ import org.openmole.gui.ext.client._
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import org.openmole.gui.client.core.files.TreeNodePanel
-import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.openmole.gui.client.core.CoreUtils._
@@ -41,7 +40,7 @@ class URLImportPanel {
 
   def download(url: String) = {
     downloading.update(Processing())
-    post()[Api].downloadHTTP(url, manager.current.now, extractCheckBox.checked).call().foreach { d ⇒
+    post()[Api].downloadHTTP(url, panels.treeNodeManager.current.now, extractCheckBox.checked).call().foreach { d ⇒
       downloading.update(Processed())
       dialog.hide
       d match {
@@ -84,7 +83,7 @@ class URLImportPanel {
             sp.name + " already exists. Overwrite ? ",
             () ⇒ {
               overwriteAlert() = None
-              deleteFileAndDownloadURL(manager.current() ++ sp.name, urlInput.value)
+              deleteFileAndDownloadURL(panels.treeNodeManager.current() ++ sp.name, urlInput.value)
             }, () ⇒ {
               overwriteAlert() = None
             }, CenterPagePosition

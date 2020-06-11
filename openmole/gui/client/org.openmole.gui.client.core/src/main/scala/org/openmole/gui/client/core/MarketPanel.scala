@@ -25,8 +25,6 @@ import org.openmole.gui.ext.client._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
-import org.openmole.gui.client.core.files.TreeNodePanel
-import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.openmole.gui.client.core.CoreUtils._
@@ -73,7 +71,7 @@ class MarketPanel {
                 })
               ),
               div(colMD(2))(downloadButton(entry, () ⇒ {
-                exists(manager.current.now ++ entry.name, entry)
+                exists(panels.treeNodeManager.current.now ++ entry.name, entry)
               })),
               div(colMD(7) +++ (paddingTop := 7))(
                 entry.tags.map { e ⇒ tags.label(e)(label_primary +++ omsheet.tableTag) }
@@ -100,7 +98,7 @@ class MarketPanel {
     }
 
   def download(entry: MarketIndexEntry) = {
-    val path = manager.current.now ++ entry.name
+    val path = panels.treeNodeManager.current.now ++ entry.name
     downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processing())))
     post()[Api].getMarketEntry(entry, path).call().foreach { d ⇒
       downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processed())))
@@ -150,7 +148,7 @@ class MarketPanel {
             e.name + " already exists. Overwrite ? ",
             () ⇒ {
               overwriteAlert() = None
-              deleteFile(manager.current() ++ e.name, e)
+              deleteFile(panels.treeNodeManager.current() ++ e.name, e)
             }, () ⇒ {
               overwriteAlert() = None
             }, CenterPagePosition

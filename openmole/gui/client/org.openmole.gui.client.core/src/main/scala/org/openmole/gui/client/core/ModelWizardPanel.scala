@@ -27,7 +27,6 @@ import org.scalajs.dom.html.TextArea
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
-import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement, HTMLInputElement }
 import org.openmole.gui.ext.client._
 import rx._
@@ -169,7 +168,7 @@ class ModelWizardPanel(wizards: Seq[WizardPluginFactory]) {
                   resources() = Resources.empty
                   val fileName = fInput.files.item(0).name
                   labelName() = Some(fileName)
-                  filePath() = Some(manager.current.now ++ fileName)
+                  filePath() = Some(panels.treeNodeManager.current.now ++ fileName)
                   filePath.now.map {
                     fp ⇒
                       moveFilesAndBuildForm(fInput, fileName, fp)
@@ -388,7 +387,7 @@ class ModelWizardPanel(wizards: Seq[WizardPluginFactory]) {
     factory ⇒
       currentPluginPanel.now.foreach {
         _.save(
-          manager.current.now ++ s"${
+          panels.treeNodeManager.current.now ++ s"${
             scriptNameInput.value.clean
           }.oms",
           labelName.now.getOrElse("script"),

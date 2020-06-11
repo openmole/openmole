@@ -19,7 +19,6 @@ import org.openmole.gui.client.core.files.TreeNodePanel
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
-import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.openmole.gui.ext.client.FileManager
 import org.openmole.gui.ext.client._
 import org.scalajs.dom.raw.HTMLDivElement
@@ -153,8 +152,8 @@ object ScriptClient {
 
       lazy val newEmpty = MenuAction("Empty project", () ⇒ {
         val fileName = "newProject.oms"
-        CoreUtils.addFile(manager.current.now, fileName, () ⇒ {
-          val toDisplay = manager.current.now ++ fileName
+        CoreUtils.addFile(panels.treeNodeManager.current.now, fileName, () ⇒ {
+          val toDisplay = panels.treeNodeManager.current.now ++ fileName
           FileManager.download(
             toDisplay,
             onLoadEnded = (content: String) ⇒ {

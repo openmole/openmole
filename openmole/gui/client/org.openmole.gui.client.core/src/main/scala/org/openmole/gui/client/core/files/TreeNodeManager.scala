@@ -26,12 +26,6 @@ import org.openmole.gui.client.core.files.TreeNode.ListFiles
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-package object treenodemanager {
-  val instance = new TreeNodeManager
-
-  def apply = instance
-}
-
 class TreeNodeManager {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val ROOTDIR = "projects"

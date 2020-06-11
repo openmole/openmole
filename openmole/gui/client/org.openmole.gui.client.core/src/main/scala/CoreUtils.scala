@@ -9,7 +9,6 @@ import org.openmole.gui.client.core.alert.AlertPanel
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
-import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.openmole.gui.client.core.panels.{ treeNodePanel, treeNodeTabs }
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.client.OMPost
@@ -96,7 +95,7 @@ object CoreUtils {
   }
 
   def pluggables(safePath: SafePath, todo: () ⇒ Unit) = post()[Api].allPluggableIn(safePath).call.foreach { p ⇒
-    manager.pluggables() = p
+    panels.treeNodeManager.pluggables() = p
     todo()
   }
 

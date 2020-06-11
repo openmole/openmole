@@ -11,7 +11,6 @@ import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.client.core.CoreUtils
-import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import autowire._
 import org.openmole.gui.ext.client._
 
@@ -100,7 +99,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   def resetFilter = {
     selectedTool.now match {
-      case Some(FilterTool) ⇒ manager.invalidCurrentCache
+      case Some(FilterTool) ⇒ panels.treeNodeManager.invalidCurrentCache
       case _                ⇒
     }
     nameInput.value = ""
@@ -129,8 +128,8 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
       tool match {
         case CopyTool | TrashTool ⇒ treeNodePanel.turnSelectionTo(true)
         case PluginTool ⇒
-          manager.computePluggables(() ⇒
-            if (manager.pluggables.now.isEmpty)
+          panels.treeNodeManager.computePluggables(() ⇒
+            if (panels.treeNodeManager.pluggables.now.isEmpty)
               message() = tags.div(omsheet.color("white"), "No plugin could be found in this folder.")
             else {
               clearMessage
@@ -157,7 +156,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     )
 
   private val upButton = upbtn((fileInput: HTMLInputElement) ⇒ {
-    FileManager.upload(fileInput, manager.current.now, (p: ProcessState) ⇒ transferring() = p, UploadProject(), () ⇒ treeNodePanel.invalidCacheAndDraw)
+    FileManager.upload(fileInput, panels.treeNodeManager.current.now, (p: ProcessState) ⇒ transferring() = p, UploadProject(), () ⇒ treeNodePanel.invalidCacheAndDraw)
   })
 
   // New file tool
@@ -245,7 +244,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   def createNewNode = {
     val newFile = newNodeInput.value
-    val currentDirNode = manager.current
+    val currentDirNode = panels.treeNodeManager.current
     addRootDirButton.get match {
       case Some(dt: DirNodeType)  ⇒ CoreUtils.addDirectory(currentDirNode.now, newFile, () ⇒ unselectToolAndRefreshTree)
       case Some(ft: FileNodeType) ⇒ CoreUtils.addFile(currentDirNode.now, newFile, () ⇒ unselectToolAndRefreshTree)
@@ -272,7 +271,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   def unselectTool = {
     clearMessage
     resetFilter
-    manager.clearSelection
+    panels.treeNodeManager.clearSelection
     newNodeInput.value = ""
     treeNodePanel.treeWarning() = true
     treeNodePanel.turnSelectionTo(false)
@@ -282,7 +281,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   val deleteButton = button("Delete", btn_danger, onclick := { () ⇒
     {
-      CoreUtils.trashNodes(manager.selected.now) {
+      CoreUtils.trashNodes(panels.treeNodeManager.selected.now) {
         () ⇒
           unselectToolAndRefreshTree
       }
@@ -291,7 +290,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   val copyButton = button("Copy", btn_default, onclick := { () ⇒
     {
-      manager.setSelectedAsCopied
+      panels.treeNodeManager.setSelectedAsCopied
       unselectTool
       treeNodePanel.drawTree
     }
@@ -303,9 +302,9 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
       btn_default,
       onclick := { () ⇒
         val directoryName = s"uploadPlugin${java.util.UUID.randomUUID().toString}"
-        post()[Api].copyToPluginUploadDir(directoryName, manager.selected.now).call().foreach { _ ⇒
+        post()[Api].copyToPluginUploadDir(directoryName, panels.treeNodeManager.selected.now).call().foreach { _ ⇒
           import scala.concurrent.duration._
-          val names = manager.selected.now.map(_.name)
+          val names = panels.treeNodeManager.selected.now.map(_.name)
           post(timeout = 5 minutes)[Api].addUploadedPlugins(directoryName, names).call().foreach {
             errs ⇒
               if (errs.isEmpty) pluginPanel.dialog.show
@@ -367,7 +366,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     )
   }
 
-  def getIfSelected(butt: TypedTag[HTMLButtonElement]) = manager.selected.map {
+  def getIfSelected(butt: TypedTag[HTMLButtonElement]) = panels.treeNodeManager.selected.map {
     m ⇒
       if (m.isEmpty) tags.div else butt
   }
@@ -400,7 +399,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
             case Some(TrashTool)        ⇒ getIfSelected(deleteButton)
             case Some(PluginTool)       ⇒ getIfSelected(pluginButton)
             case Some(CopyTool) ⇒
-              manager.emptyCopied
+              panels.treeNodeManager.emptyCopied
               getIfSelected(copyButton)
             case _ ⇒ tags.div()
           },

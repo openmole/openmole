@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.files.{ FileDisplayer, TreeNodePanel, TreeNodeTabs }
+import org.openmole.gui.client.core.files.{ FileDisplayer, TreeNodeManager, TreeNodePanel, TreeNodeTabs }
 import org.openmole.gui.ext.data.{ GUIPluginAsJS, WizardPluginFactory }
 
 /*
@@ -20,14 +20,15 @@ import org.openmole.gui.ext.data.{ GUIPluginAsJS, WizardPluginFactory }
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package object panels {
-  val executionPanel = new ExecutionPanel
-  val treeNodeTabs = new TreeNodeTabs()
-  val fileDisplayer = new FileDisplayer(treeNodeTabs)
-  val treeNodePanel = new TreeNodePanel()
+object panels {
+  lazy val treeNodeManager = new TreeNodeManager()
+  lazy val executionPanel = new ExecutionPanel
+  lazy val treeNodeTabs = new TreeNodeTabs()
+  lazy val fileDisplayer = new FileDisplayer(treeNodeTabs)
+  lazy val treeNodePanel = new TreeNodePanel()
   def modelWizardPanel(wizards: Seq[WizardPluginFactory]) = new ModelWizardPanel(wizards)
   def urlImportPanel = new URLImportPanel
-  val marketPanel = new MarketPanel
-  val pluginPanel = new PluginPanel
-  val stackPanel = new TextPanel("Error stack")
+  lazy val marketPanel = new MarketPanel
+  lazy val pluginPanel = new PluginPanel
+  lazy val stackPanel = new TextPanel("Error stack")
 }
