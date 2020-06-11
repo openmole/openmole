@@ -70,19 +70,19 @@ object CoreUtils {
 
   def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {
     post()[Api].deleteFile(path, ServerFileSystemContext.project).call().foreach { d ⇒
-      TreeNodePanel.refreshAnd(ontrashed)
+      panels.treeNodePanel.refreshAnd(ontrashed)
     }
   }
 
   def trashNodes(paths: Seq[SafePath])(ontrashed: () ⇒ Unit): Unit = {
     post()[Api].deleteFiles(paths, ServerFileSystemContext.project).call().foreach { d ⇒
-      TreeNodePanel.refreshAnd(ontrashed)
+      panels.treeNodePanel.refreshAnd(ontrashed)
     }
   }
 
   def duplicate(safePath: SafePath, newName: String): Unit =
     post()[Api].duplicate(safePath, newName).call().foreach { y ⇒
-      TreeNodePanel.refreshAndDraw
+      panels.treeNodePanel.refreshAndDraw
     }
 
   def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Seq[SafePath]] =

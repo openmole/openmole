@@ -45,18 +45,6 @@ import scaladget.bootstrapnative.Popup.Manual
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object TreeNodePanel {
-  val instance = new TreeNodePanel
-
-  def apply() = instance
-
-  def refreshAnd(todo: () ⇒ Unit) = {
-    instance.invalidCacheAnd(todo)
-  }
-
-  def refreshAndDraw = instance.invalidCacheAndDraw
-}
-
 class TreeNodePanel {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
@@ -207,6 +195,9 @@ class TreeNodePanel {
     manager.invalidCurrentCache
     todo()
   }
+
+  def refreshAnd(todo: () ⇒ Unit) = invalidCacheAnd(todo)
+  def refreshAndDraw = invalidCacheAndDraw
 
   def computePluggables = fileToolBar.selectedTool.now match {
     case Some(PluginTool) ⇒ manager.computePluggables(() ⇒ if (!manager.pluggables.now.isEmpty) turnSelectionTo(true))
@@ -503,7 +494,7 @@ class TreeNodePanel {
                 b ⇒
                   manager.invalidCache(to)
                   manager.invalidCache(dragged)
-                  TreeNodePanel.refreshAndDraw
+                  panels.treeNodePanel.refreshAndDraw
                   treeNodeTabs.checkTabs
               }
             })

@@ -286,7 +286,7 @@ class ModelWizardPanel(wizards: Seq[WizardPluginFactory]) {
         post()[Api].models(safePath).call().foreach {
           models ⇒
             modelSelector.setContents(models, () ⇒ {
-              TreeNodePanel.refreshAnd(() ⇒
+              panels.treeNodePanel.refreshAnd(() ⇒
                 fileToUploadPath() = modelSelector.get
               )
             })
@@ -295,7 +295,7 @@ class ModelWizardPanel(wizards: Seq[WizardPluginFactory]) {
         factory(safePath).foreach { factory ⇒
           scriptNameInput.value = safePath.nameWithNoExtension
           fileToUploadPath() = Some(safePath)
-          TreeNodePanel.refreshAndDraw
+          panels.treeNodePanel.refreshAndDraw
           factory.parse(safePath).foreach { b ⇒
             currentPluginPanel() = Some(factory.build(safePath, (lc: LaunchingCommand) ⇒ {
               setLaunchingComand(Some(lc), safePath)
@@ -408,7 +408,7 @@ class ModelWizardPanel(wizards: Seq[WizardPluginFactory]) {
               if (wtt.errors.isEmpty) {
                 treeNodeTabs remove wtt.safePath
                 treeNodePanel.displayNode(FileNode(Var(wtt.safePath.name), 0L, 0L))
-                TreeNodePanel.refreshAndDraw
+                panels.treeNodePanel.refreshAndDraw
               }
               else {
                 dialog.hide

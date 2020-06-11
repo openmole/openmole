@@ -158,7 +158,7 @@ object ScriptClient {
           FileManager.download(
             toDisplay,
             onLoadEnded = (content: String) ⇒ {
-              TreeNodePanel.refreshAndDraw
+              panels.treeNodePanel.refreshAndDraw
               fileDisplayer.display(toDisplay, content, FileExtension.OMS)
             }
           )

@@ -45,7 +45,7 @@ class URLImportPanel {
       downloading.update(Processed())
       dialog.hide
       d match {
-        case Left(_)   ⇒ TreeNodePanel.refreshAndDraw
+        case Left(_)   ⇒ panels.treeNodePanel.refreshAndDraw
         case Right(ex) ⇒ BannerAlert.registerWithDetails("Download failed", ErrorData.stackTrace(ex))
       }
     }

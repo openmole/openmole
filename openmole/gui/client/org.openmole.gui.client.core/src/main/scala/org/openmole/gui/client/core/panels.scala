@@ -24,7 +24,7 @@ package object panels {
   val executionPanel = new ExecutionPanel
   val treeNodeTabs = new TreeNodeTabs()
   val fileDisplayer = new FileDisplayer(treeNodeTabs)
-  val treeNodePanel = TreeNodePanel()
+  val treeNodePanel = new TreeNodePanel()
   def modelWizardPanel(wizards: Seq[WizardPluginFactory]) = new ModelWizardPanel(wizards)
   def urlImportPanel = new URLImportPanel
   val marketPanel = new MarketPanel
