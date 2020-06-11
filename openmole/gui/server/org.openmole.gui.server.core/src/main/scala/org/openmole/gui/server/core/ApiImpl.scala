@@ -34,7 +34,7 @@ import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.dsl._
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.server.{ GUIPlugin, utils }
+import org.openmole.gui.ext.server.{ GUIPluginRegistry, utils }
 import org.openmole.gui.ext.server.utils._
 import org.openmole.gui.server.core.GUIServer.ApplicationControl
 import org.openmole.plugin.hook.omr.OMROutputFormat
@@ -493,7 +493,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   //GUI OM PLUGINS
 
   def getGUIPlugins(): AllPluginExtensionData = {
-    AllPluginExtensionData(GUIPlugin.authentications, GUIPlugin.wizards)
+    AllPluginExtensionData(GUIPluginRegistry.authentications, GUIPluginRegistry.wizards)
   }
 
   def isOSGI(safePath: SafePath): Boolean = {
@@ -573,6 +573,6 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   override def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS] = {
     val omrFile = safePathToFile(result)(ServerFileSystemContext.project, workspace)
     val name = OMROutputFormat.methodName(omrFile)
-    GUIPlugin.analysis.find(_._1 == name).map(_._2)
+    GUIPluginRegistry.analysis.find(_._1 == name).map(_._2)
   }
 }

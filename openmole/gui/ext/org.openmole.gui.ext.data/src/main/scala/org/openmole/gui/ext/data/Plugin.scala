@@ -61,7 +61,7 @@ trait WizardGUIPlugin extends GUIPlugin {
 
 trait WizardPluginFactory extends GUIPluginFactory {
   def name: String
-  def build(safePath: SafePath, onPanelFilled: (LaunchingCommand) ⇒ Unit): WizardGUIPlugin
+  def build(safePath: SafePath, onPanelFilled: LaunchingCommand ⇒ Unit): WizardGUIPlugin
   def fileType: FileType
   def parse(safePath: SafePath): Future[Option[LaunchingCommand]]
 }
