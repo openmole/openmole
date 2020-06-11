@@ -56,9 +56,9 @@ import org.openmole.tool.tar._
 
 import scala.util.{ Failure, Success, Try }
 
-object GUIServices {
+object GUIServerServices {
 
-  case class ServicesProvider(guiServices: GUIServices, cypherProvider: () ⇒ Cypher) extends Services {
+  case class ServicesProvider(guiServices: GUIServerServices, cypherProvider: () ⇒ Cypher) extends Services {
     implicit def services = guiServices
     implicit def workspace = guiServices.workspace
     implicit def preference = guiServices.preference
@@ -95,23 +95,23 @@ object GUIServices {
     implicit val replicaCatalog = ReplicaCatalog(ws)
     implicit val loggerService = LoggerService(logLevel)
 
-    new GUIServices()
+    new GUIServerServices()
   }
 
-  def dispose(services: GUIServices) = {
+  def dispose(services: GUIServerServices) = {
     scala.util.Try(Workspace.clean(services.workspace))
     scala.util.Try(services.threadProvider.stop())
   }
 
-  def withServices[T](workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level])(f: GUIServices ⇒ T) = {
-    val services = GUIServices(workspace, httpProxy, logLevel)
+  def withServices[T](workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level])(f: GUIServerServices ⇒ T) = {
+    val services = GUIServerServices(workspace, httpProxy, logLevel)
     try f(services)
     finally dispose(services)
   }
 
 }
 
-class GUIServices(
+class GUIServerServices(
   implicit
   val workspace:           Workspace,
   val preference:          Preference,
@@ -133,7 +133,7 @@ class GUIServices(
 object GUIServlet {
   def apply(arguments: GUIServer.ServletArguments) = {
     val servlet = new GUIServlet(arguments)
-    Plugins.addPluginRoutes(servlet.addRouter, GUIServices.ServicesProvider(arguments.services, servlet.cypher.get))
+    Plugins.addPluginRoutes(servlet.addRouter, GUIServerServices.ServicesProvider(arguments.services, servlet.cypher.get))
     servlet addRouter (OMRouter[Api](AutowireServer.route[Api](servlet.apiImpl)))
     servlet
   }
@@ -143,7 +143,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   configureMultipartHandling(MultipartConfig(maxFileSize = Some(20 * 1024 * 1024 * 1024), fileSizeThreshold = Some(1024 * 1024))) // Limited to files of 20Go with 1Mo chunks
 
   val cypher = new AtomicReference[Cypher](Cypher(arguments.password))
-  val services = GUIServices.ServicesProvider(arguments.services, cypher.get)
+  val services = GUIServerServices.ServicesProvider(arguments.services, cypher.get)
   val apiImpl = new ApiImpl(services, arguments.applicationControl)
 
   import services._

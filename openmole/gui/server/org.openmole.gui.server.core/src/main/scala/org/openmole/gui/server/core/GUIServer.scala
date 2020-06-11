@@ -69,7 +69,7 @@ object GUIServer {
   val servletArguments = "servletArguments"
 
   case class ServletArguments(
-    services:           GUIServices,
+    services:           GUIServerServices,
     password:           Option[String],
     applicationControl: ApplicationControl,
     webapp:             File,
@@ -119,7 +119,7 @@ class StartingPage extends ScalatraServlet with LifeCycle {
 
 import org.openmole.gui.server.core.GUIServer._
 
-class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServices, password: Option[String], extraHeader: String, optimizedJS: Boolean, subDir: Option[String]) {
+class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServerServices, password: Option[String], extraHeader: String, optimizedJS: Boolean, subDir: Option[String]) {
 
   lazy val server = new Server()
   var exitStatus: GUIServer.ExitStatus = GUIServer.Ok

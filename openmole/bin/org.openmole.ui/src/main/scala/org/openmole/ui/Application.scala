@@ -271,8 +271,8 @@ object Application extends JavaLogger {
 
             GUIServer.urlFile.content = url
 
-            GUIServices.withServices(workspace, config.proxyURI, logLevel) { services ⇒
-              Runtime.getRuntime.addShutdownHook(thread(GUIServices.dispose(services)))
+            GUIServerServices.withServices(workspace, config.proxyURI, logLevel) { services ⇒
+              Runtime.getRuntime.addShutdownHook(thread(GUIServerServices.dispose(services)))
               val server = new GUIServer(port, config.remote, useHTTP, services, config.password, extraHeader, !config.unoptimizedJS, config.httpSubDirectory)
               server.start()
               if (config.browse && !config.remote) browse(url)

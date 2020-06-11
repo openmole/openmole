@@ -42,8 +42,4 @@ object Plugins {
 
   case class Parameters(authenticationFactories: Seq[AuthenticationPluginFactory], wizardFactories: Seq[WizardPluginFactory])
 
-  //  def buildAndLoad = post()[Api].loadPlugins().call.foreach { _ ⇒
-  //    org.scalajs.dom.document.location.reload(true)
-  //
-  //  }
 }

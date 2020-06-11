@@ -24,8 +24,8 @@ import rx._
 
 @JSExportTopLevel("org.openmole.gui.plugin.analysis.evolution.EvolutionAnalysis")
 class EvolutionAnalysis extends MethodAnalysisPlugin {
-  override def panel(safePath: SafePath): TypedTag[HTMLElement] = {
 
+  override def panel(safePath: SafePath): TypedTag[HTMLElement] = {
     val metadata: Var[Option[Either[ErrorData, EvolutionMetadata]]] = Var(None)
 
     OMPost()[EvolutionAnalysisAPI].load(safePath).call().foreach {
