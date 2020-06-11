@@ -31,13 +31,13 @@ import autowire._
 import org.openmole.gui.ext.data.{ ErrorData ⇒ ExecError }
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.alert.BannerAlert
-import org.openmole.gui.client.core.alert.BannerAlert.BannerMessage
+import org.openmole.gui.client.core.alert.BannerAlert.{ BannerLevel, BannerMessage }
 import org.openmole.gui.client.core.files.TreeNodeTabs
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.client.Utils
 import org.openmole.gui.ext.data.ExecutionInfo.Failed
-import org.scalajs.dom.raw.{ HTMLElement, HTMLSpanElement }
+import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement, HTMLSpanElement }
 import rx._
 import scaladget.bootstrapnative.Table.{ BSTableStyle, FixedCell, ReactiveRow, SubRow, VarCell }
 
@@ -177,10 +177,10 @@ class ExecutionPanel {
                   case _                        ⇒
                 }
               }
-              addToBanner(execID, BannerAlert.div(failedDiv(execID)).critical)
+              addToBanner(execID, failedDiv(execID), BannerLevel.Critical)
               (ExecutionDetails("0", 0, Some(f.error), f.environmentStates), (if (!f.clean) "cleaning" else info.state))
             case f: ExecutionInfo.Finished ⇒
-              addToBanner(execID, BannerAlert.div(succesDiv(execID)))
+              addToBanner(execID, succesDiv(execID), BannerLevel.Regular)
               (ExecutionDetails(ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates), (if (!f.clean) "cleaning" else info.state))
             case r: ExecutionInfo.Running ⇒
               panels.treeNodeTabs.find(staticInfo.now(execID).path).foreach { tab ⇒ tab.editor.foreach { _.setErrors(Seq()) } }
@@ -312,9 +312,9 @@ class ExecutionPanel {
 
   def hasBeenDisplayed(id: ExecutionId) = executionsDisplayedInBanner() = (executionsDisplayedInBanner.now + id)
 
-  def addToBanner(id: ExecutionId, bannerMessage: BannerMessage) = {
+  def addToBanner(id: ExecutionId, message: TypedTag[HTMLDivElement], level: BannerLevel) = {
     if (!executionsDisplayedInBanner.now.contains(id)) {
-      BannerAlert.register(bannerMessage)
+      BannerAlert.registerDiv(message, level)
       hasBeenDisplayed(id)
     }
   }
