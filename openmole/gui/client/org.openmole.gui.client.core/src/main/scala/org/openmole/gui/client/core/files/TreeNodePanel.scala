@@ -6,7 +6,6 @@ import org.openmole.gui.client.core.files.FileToolBar.{ FilterTool, PluginTool, 
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.client.core.panels._
 import org.openmole.gui.ext.client._
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
@@ -44,7 +43,7 @@ import scaladget.bootstrapnative.Popup.Manual
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class TreeNodePanel(val manager: TreeNodeManager) {
+class TreeNodePanel(val manager: TreeNodeManager, fileDisplayer: FileDisplayer) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val selectionMode = Var(false)
@@ -488,13 +487,13 @@ class TreeNodePanel(val manager: TreeNodeManager) {
       dragged ⇒
         if (isDir) {
           if (dragged != to) {
-            treeNodeTabs.saveAllTabs(() ⇒ {
+            panels.treeNodeTabs.saveAllTabs(() ⇒ {
               post()[Api].move(dragged, to).call().foreach {
                 b ⇒
                   manager.invalidCache(to)
                   manager.invalidCache(dragged)
                   refreshAndDraw
-                  treeNodeTabs.checkTabs
+                  panels.treeNodeTabs.checkTabs
               }
             })
           }

@@ -1,21 +1,20 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.alert.AbsolutePositioning.CenterPagePosition
-
 import scalatags.JsDom._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import org.openmole.gui.client.core.alert.AlertPanel
-import org.openmole.gui.client.core.panels._
 import org.scalajs.dom
 import org.openmole.gui.ext.client.Utils._
-
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.{ JVMInfos, routes }
 import org.openmole.gui.ext.client._
 import autowire._
+import org.openmole.gui.client.core.files.FileDisplayer
 import rx._
 
 import scala.scalajs.js.timers
@@ -40,7 +39,7 @@ import scalatags.JsDom.all._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class SettingsView {
+class SettingsView(fileDisplayer: FileDisplayer) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val jvmInfos: Var[Option[JVMInfos]] = Var(None)
