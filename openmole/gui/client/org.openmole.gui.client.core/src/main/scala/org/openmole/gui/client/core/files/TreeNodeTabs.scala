@@ -710,6 +710,9 @@ class TreeNodeTabs {
 
   }
 
+  def setErrors(path: SafePath, errors: Seq[ErrorWithLocation]) =
+    find(path).foreach { tab ⇒ tab.editor.foreach { _.setErrors(errors) } }
+
   val fontSizeControl = div(display.flex, flexDirection.row, alignItems.baseline, justifyContent.flexEnd)(
     fontSizeLink(15),
     fontSizeLink(25),

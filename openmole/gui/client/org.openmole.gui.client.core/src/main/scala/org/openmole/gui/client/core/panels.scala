@@ -1,5 +1,6 @@
 package org.openmole.gui.client.core
 
+import org.openmole.gui.client.core.alert.BannerAlert
 import org.openmole.gui.client.core.files.{ FileDisplayer, TreeNodeManager, TreeNodePanel, TreeNodeTabs }
 import org.openmole.gui.ext.data.{ GUIPluginAsJS, WizardPluginFactory }
 
@@ -22,28 +23,42 @@ import org.openmole.gui.ext.data.{ GUIPluginAsJS, WizardPluginFactory }
 
 object panels {
   lazy val treeNodeManager = new TreeNodeManager()
-  lazy val executionPanel = new ExecutionPanel
+
+  lazy val executionPanel =
+    new ExecutionPanel(
+      setEditorErrors = treeNodeTabs.setErrors,
+      bannerAlert = bannerAlert)
+
   lazy val treeNodeTabs = new TreeNodeTabs()
 
   lazy val fileDisplayer =
     new FileDisplayer(
-      treeNodeTabs,
+      treeNodeTabs = treeNodeTabs,
       showExecution = () ⇒ executionPanel.dialog.show
     )
 
   lazy val treeNodePanel =
     new TreeNodePanel(
-      treeNodeManager,
-      fileDisplayer,
-      showExecution = () ⇒ executionPanel.dialog.show)
+      treeNodeManager = treeNodeManager,
+      fileDisplayer = fileDisplayer,
+      showExecution = () ⇒ executionPanel.dialog.show,
+      treeNodeTabs = treeNodeTabs)
 
-  def modelWizardPanel(wizards: Seq[WizardPluginFactory]) = new ModelWizardPanel(treeNodeManager, wizards)
-  def urlImportPanel = new URLImportPanel(treeNodeManager)
+  def modelWizardPanel(wizards: Seq[WizardPluginFactory]) =
+    new ModelWizardPanel(
+      treeNodeManager = treeNodeManager,
+      treeNodeTabs = treeNodeTabs,
+      bannerAlert = bannerAlert,
+      wizards = wizards)
+
+  def urlImportPanel = new URLImportPanel(treeNodeManager, bannerAlert = bannerAlert)
 
   lazy val marketPanel = new MarketPanel(treeNodeManager)
-  lazy val pluginPanel = new PluginPanel
+  lazy val pluginPanel = new PluginPanel(bannerAlert = bannerAlert)
 
   lazy val stackPanel = new TextPanel("Error stack")
   lazy val settingsView = new SettingsView(fileDisplayer)
   lazy val connection = new Connection
+
+  lazy val bannerAlert = new BannerAlert
 }

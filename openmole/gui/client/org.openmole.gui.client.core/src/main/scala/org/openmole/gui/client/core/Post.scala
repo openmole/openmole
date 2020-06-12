@@ -1,7 +1,6 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.alert.BannerAlert
-import org.openmole.gui.client.core.alert.BannerAlert.BannerLevel
+import org.openmole.gui.client.core.alert.{ BannerLevel }
 import org.openmole.gui.ext.client.OMPost
 
 import scala.concurrent.duration.Duration
@@ -28,8 +27,8 @@ object post {
     OMPost(
       timeout,
       warningTimeout,
-      (request: String) ⇒ BannerAlert.register(s"The request ${request} failed.", BannerLevel.Critical),
-      () ⇒ BannerAlert.register("The request is very long. Please check your connection.")
+      (request: String) ⇒ panels.bannerAlert.register(s"The request ${request} failed.", BannerLevel.Critical),
+      () ⇒ panels.bannerAlert.register("The request is very long. Please check your connection.")
     )
   }
 }

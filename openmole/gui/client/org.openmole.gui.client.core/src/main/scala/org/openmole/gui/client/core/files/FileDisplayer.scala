@@ -26,43 +26,43 @@ import org.openmole.gui.client.tool.plot.Plotter
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class FileDisplayer(val tabs: TreeNodeTabs, showExecution: () ⇒ Unit) {
+class FileDisplayer(val treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) {
 
   def alreadyDisplayed(safePath: SafePath) =
-    tabs.tabs.now.find { t ⇒
+    treeNodeTabs.tabs.now.find { t ⇒
       t.safePathTab.now.path == safePath.path
     }
 
   def display(safePath: SafePath, content: String, fileExtension: FileExtension) = {
 
     alreadyDisplayed(safePath) match {
-      case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
+      case Some(t: TreeNodeTab) ⇒ treeNodeTabs.setActive(t)
       case _ ⇒
         fileExtension match {
           case OpenMOLEScript ⇒
             val tab = TreeNodeTab.oms(safePath, content, showExecution)
-            tabs add tab
+            treeNodeTabs add tab
             tab.omsEditor.editor.focus
           case OpenMOLEResult ⇒
             post()[Api].findAnalysisPlugin(safePath).call.foreach {
               case Some(plugin) ⇒
                 val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
                 val tab = TreeNodeTab.html(safePath, analysis.panel(safePath))
-                tabs add tab
+                treeNodeTabs add tab
               case None ⇒
             }
           case MDScript ⇒
             post()[Api].mdToHtml(safePath).call().foreach { htmlString ⇒
-              tabs add TreeNodeTab.html(safePath, TreeNodeTab.mdBlock(htmlString))
+              treeNodeTabs add TreeNodeTab.html(safePath, TreeNodeTab.mdBlock(htmlString))
             }
-          case SVGExtension ⇒ tabs add TreeNodeTab.html(safePath, TreeNodeTab.rawBlock(content))
+          case SVGExtension ⇒ treeNodeTabs add TreeNodeTab.html(safePath, TreeNodeTab.rawBlock(content))
           case editableFile: EditableFile ⇒
             if (DataUtils.isCSV(safePath))
               post()[Api].sequence(safePath).call().foreach { seq ⇒
-                tabs add TreeNodeTab.editable(safePath, content, DataTab.build(seq, view = TreeNodeTab.Table, editing = !editableFile.onDemand), Plotter.default)
+                treeNodeTabs add TreeNodeTab.editable(safePath, content, DataTab.build(seq, view = TreeNodeTab.Table, editing = !editableFile.onDemand), Plotter.default)
               }
             else {
-              tabs add TreeNodeTab.editable(safePath, content, DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw), Plotter.default)
+              treeNodeTabs add TreeNodeTab.editable(safePath, content, DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw), Plotter.default)
             }
           case _ ⇒ //FIXME for GUI workflows
         }

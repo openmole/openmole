@@ -43,7 +43,7 @@ import scaladget.bootstrapnative.Selector.Options
 
 import scala.concurrent.Future
 
-class ModelWizardPanel(manager: TreeNodeManager, wizards: Seq[WizardPluginFactory]) {
+class ModelWizardPanel(treeNodeManager: TreeNodeManager, treeNodeTabs: TreeNodeTabs, bannerAlert: BannerAlert, wizards: Seq[WizardPluginFactory]) {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
   sealed trait VariableRole[T] {
@@ -168,7 +168,7 @@ class ModelWizardPanel(manager: TreeNodeManager, wizards: Seq[WizardPluginFactor
                   resources() = Resources.empty
                   val fileName = fInput.files.item(0).name
                   labelName() = Some(fileName)
-                  filePath() = Some(manager.current.now ++ fileName)
+                  filePath() = Some(treeNodeManager.current.now ++ fileName)
                   filePath.now.map {
                     fp ⇒
                       moveFilesAndBuildForm(fInput, fileName, fp)
@@ -387,7 +387,7 @@ class ModelWizardPanel(manager: TreeNodeManager, wizards: Seq[WizardPluginFactor
     factory ⇒
       currentPluginPanel.now.foreach {
         _.save(
-          manager.current.now ++ s"${
+          treeNodeManager.current.now ++ s"${
             scriptNameInput.value.clean
           }.oms",
           labelName.now.getOrElse("script"),
@@ -411,7 +411,7 @@ class ModelWizardPanel(manager: TreeNodeManager, wizards: Seq[WizardPluginFactor
               }
               else {
                 dialog.hide
-                BannerAlert.registerWithDetails("Plugin import failed", wtt.errors.map { ErrorData.stackTrace }.mkString("\n"))
+                bannerAlert.registerWithDetails("Plugin import failed", wtt.errors.map { ErrorData.stackTrace }.mkString("\n"))
               }
           }
       }

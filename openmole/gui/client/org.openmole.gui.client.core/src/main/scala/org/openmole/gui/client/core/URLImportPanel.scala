@@ -20,7 +20,7 @@ import scalatags.JsDom.all._
 import org.openmole.gui.ext.api.Api
 import Waiter._
 
-class URLImportPanel(manager: TreeNodeManager) {
+class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
 
   case class URLFile(name: String, extension: String) {
     def file = s"$name.$extension"
@@ -45,7 +45,7 @@ class URLImportPanel(manager: TreeNodeManager) {
       dialog.hide
       d match {
         case Left(_)   ⇒ panels.treeNodePanel.refreshAndDraw
-        case Right(ex) ⇒ BannerAlert.registerWithDetails("Download failed", ErrorData.stackTrace(ex))
+        case Right(ex) ⇒ bannerAlert.registerWithDetails("Download failed", ErrorData.stackTrace(ex))
       }
     }
   }

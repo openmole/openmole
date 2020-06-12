@@ -9,7 +9,6 @@ import org.openmole.gui.client.core.alert.AlertPanel
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
-import org.openmole.gui.client.core.panels.{ treeNodePanel, treeNodeTabs }
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.client.OMPost
 import org.scalajs.dom

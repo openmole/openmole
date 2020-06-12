@@ -1,7 +1,6 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core._
-import org.openmole.gui.client.core.panels.treeNodeTabs
 import autowire._
 import boopickle.Default._
 import org.openmole.gui.client.core.alert.AbsolutePositioning._
@@ -47,7 +46,7 @@ object FileToolBox {
 
 import FileToolBox._
 
-class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit) {
+class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTabs: TreeNodeTabs) {
 
   import scaladget.tools._
 

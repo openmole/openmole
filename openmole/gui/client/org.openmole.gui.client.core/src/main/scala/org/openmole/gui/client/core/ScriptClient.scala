@@ -215,7 +215,7 @@ object ScriptClient {
         dom.document.body.appendChild(
           div(
             div(`class` := "fullpanel")(
-              BannerAlert.banner,
+              panels.bannerAlert.banner,
               theNavBar,
               div(
                 `class` := Rx {
@@ -235,7 +235,7 @@ object ScriptClient {
                 `class` := Rx {
                   "centerpanel " +
                     CoreUtils.ifOrNothing(openFileTree(), "reduce") +
-                    CoreUtils.ifOrNothing(BannerAlert.isOpen(), " banneropen")
+                    CoreUtils.ifOrNothing(panels.bannerAlert.isOpen(), " banneropen")
                 }
               )(
                   treeNodeTabs.render,

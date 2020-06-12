@@ -29,18 +29,18 @@ import scaladget.bootstrapnative.bsn.btn_default
 import scalatags.JsDom.{ TypedTag, tags }
 import org.openmole.gui.ext.data._
 
-object BannerAlert {
+object BannerLevel {
+  object Regular extends BannerLevel
+  object Critical extends BannerLevel
+}
+
+sealed trait BannerLevel
+
+case class BannerMessage(messageDiv: TypedTag[HTMLDivElement], bannerLevel: BannerLevel)
+
+class BannerAlert {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-
-  object BannerLevel {
-    object Regular extends BannerLevel
-    object Critical extends BannerLevel
-  }
-
-  sealed trait BannerLevel
-
-  case class BannerMessage(messageDiv: TypedTag[HTMLDivElement], bannerLevel: BannerLevel)
 
   private val bannerMessages: Var[Seq[BannerMessage]] = Var(Seq())
   val isOpen = bannerMessages.map { bm ⇒ !bm.isEmpty }
@@ -71,7 +71,7 @@ object BannerAlert {
     bannerMessages() = (bannerMessages.now :+ bannerMessage).distinct.takeRight(2)
 
   def registerWithDetails(message: String, details: String) =
-    BannerAlert.registerMessage(
+    registerMessage(
       BannerMessage(
         tags.div(tags.span(message), tags.button(btn_default +++ (marginLeft := 10), "Details", onclick := { () ⇒
           stackPanel.content() = details
@@ -82,14 +82,14 @@ object BannerAlert {
     )
 
   def register(message: String, bannerLevel: BannerLevel = BannerLevel.Regular): Unit =
-    BannerAlert.registerMessage(BannerMessage(tags.div(tags.span(message)), bannerLevel))
+    registerMessage(BannerMessage(tags.div(tags.span(message)), bannerLevel))
 
   def registerDiv(messageDiv: TypedTag[HTMLDivElement], level: BannerLevel = BannerLevel.Regular) =
-    BannerAlert.registerMessage(BannerMessage(messageDiv, level))
+    registerMessage(BannerMessage(messageDiv, level))
 
   def registerWithStack(message: String, stack: Option[String]) =
     stack match {
-      case Some(s) ⇒ BannerAlert.registerWithDetails(message, s)
+      case Some(s) ⇒ registerWithDetails(message, s)
       case None    ⇒ register(message)
     }
 

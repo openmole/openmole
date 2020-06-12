@@ -30,8 +30,7 @@ import boopickle.Default._
 import autowire._
 import org.openmole.gui.ext.data.{ ErrorData ⇒ ExecError }
 import org.openmole.gui.ext.data._
-import org.openmole.gui.client.core.alert.BannerAlert
-import org.openmole.gui.client.core.alert.BannerAlert.{ BannerLevel, BannerMessage }
+import org.openmole.gui.client.core.alert.{ BannerAlert, BannerLevel }
 import org.openmole.gui.client.core.files.TreeNodeTabs
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
@@ -70,7 +69,7 @@ object ExecutionPanel {
 
 import ExecutionPanel._
 
-class ExecutionPanel {
+class ExecutionPanel(setEditorErrors: (SafePath, Seq[ErrorWithLocation]) ⇒ Unit, bannerAlert: BannerAlert) {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
   case class ExInfo(id: ExecutionId, info: Var[ExecutionInfo])
@@ -171,11 +170,9 @@ class ExecutionPanel {
 
           val (details, execStatus) = info match {
             case f: ExecutionInfo.Failed ⇒
-              panels.treeNodeTabs.find(staticInfo.now(execID).path).foreach { tab ⇒
-                f.error match {
-                  case ce: CompilationErrorData ⇒ tab.editor.foreach { _.setErrors(ce.errors) }
-                  case _                        ⇒
-                }
+              f.error match {
+                case ce: CompilationErrorData ⇒ setEditorErrors(staticInfo.now(execID).path, ce.errors)
+                case _                        ⇒
               }
               addToBanner(execID, failedDiv(execID), BannerLevel.Critical)
               (ExecutionDetails("0", 0, Some(f.error), f.environmentStates), (if (!f.clean) "cleaning" else info.state))
@@ -183,7 +180,7 @@ class ExecutionPanel {
               addToBanner(execID, succesDiv(execID), BannerLevel.Regular)
               (ExecutionDetails(ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates), (if (!f.clean) "cleaning" else info.state))
             case r: ExecutionInfo.Running ⇒
-              panels.treeNodeTabs.find(staticInfo.now(execID).path).foreach { tab ⇒ tab.editor.foreach { _.setErrors(Seq()) } }
+              setEditorErrors(staticInfo.now(execID).path, Seq())
               (ExecutionDetails(ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates), info.state)
             case c: ExecutionInfo.Canceled ⇒
               hasBeenDisplayed(execID)
@@ -314,7 +311,7 @@ class ExecutionPanel {
 
   def addToBanner(id: ExecutionId, message: TypedTag[HTMLDivElement], level: BannerLevel) = {
     if (!executionsDisplayedInBanner.now.contains(id)) {
-      BannerAlert.registerDiv(message, level)
+      bannerAlert.registerDiv(message, level)
       hasBeenDisplayed(id)
     }
   }
@@ -324,7 +321,7 @@ class ExecutionPanel {
       staticInfo.now(id).path.name
     } ", a("failed", bold(WHITE) +++ pointer, onclick := {
       () ⇒
-        BannerAlert.clear
+        bannerAlert.clear
         dialog.show
     })
   )
@@ -334,7 +331,7 @@ class ExecutionPanel {
       staticInfo.now(id).path.name
     } has ", a("finished", bold(WHITE) +++ pointer, onclick := {
       () ⇒
-        BannerAlert.clear
+        bannerAlert.clear
         dialog.show
     })
   )

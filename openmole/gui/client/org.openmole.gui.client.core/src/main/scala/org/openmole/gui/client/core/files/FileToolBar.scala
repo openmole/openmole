@@ -83,7 +83,7 @@ object FileToolBar {
 import FileToolBar._
 
 class FileToolBar(treeNodePanel: TreeNodePanel) {
-  def manager = treeNodePanel.manager
+  def manager = treeNodePanel.treeNodeManager
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 

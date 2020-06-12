@@ -48,7 +48,7 @@ class SettingsView(fileDisplayer: FileDisplayer) {
   private def alertPanel(warnMessage: String, route: String) = AlertPanel.string(
     warnMessage,
     () ⇒ {
-      fileDisplayer.tabs.saveAllTabs(() ⇒ {
+      fileDisplayer.treeNodeTabs.saveAllTabs(() ⇒ {
         CoreUtils.setRoute(route)
       })
     },

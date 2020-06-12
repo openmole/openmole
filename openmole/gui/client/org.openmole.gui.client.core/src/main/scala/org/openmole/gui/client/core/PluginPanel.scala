@@ -37,7 +37,7 @@ import scala.concurrent.duration.DurationInt
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class PluginPanel {
+class PluginPanel(bannerAlert: BannerAlert) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
@@ -78,7 +78,7 @@ class PluginPanel {
             else {
               dialog.hide
               plugins.foreach { p ⇒ post()[Api].removePlugin(Plugin(p)).call() }
-              BannerAlert.registerWithDetails("Plugin import failed", ErrorData.stackTrace(ex.head))
+              bannerAlert.registerWithDetails("Plugin import failed", ErrorData.stackTrace(ex.head))
             }
           }
         }
