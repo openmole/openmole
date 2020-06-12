@@ -1,7 +1,7 @@
 package org.openmole.gui.client.tool.plot
 
-import com.definitelyscala.plotlyjs._
-import com.definitelyscala.plotlyjs.PlotlyImplicits._
+import org.openmole.plotlyjs._
+import org.openmole.plotlyjs.PlotlyImplicits._
 import scalatags.JsDom.all._
 
 case class BasePlot(
@@ -72,7 +72,7 @@ object Plot {
     .autosize(true)
     .xaxis(axis)
     .yaxis(axis)
-    .margin(com.definitelyscala.plotlyjs.Margin.t(0)._result)
+    .margin(org.openmole.plotlyjs.Margin.t(0)._result)
 
   def apply(
     title:   String        = "",

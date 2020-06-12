@@ -86,15 +86,20 @@ sealed trait TreeNodeTab {
   }
 
   def onActivate: () ⇒ Unit = () ⇒ {}
+
   def onDesactivate: () ⇒ Unit = () ⇒ {}
 
   def extension: FileExtension = safePathTab.now.name
 
   // Get the file content to be saved
   def content: String
+
   def editor: Option[EditorPanelUI]
+
   def editable: Boolean
+
   def editing: Boolean
+
   def refresh(afterRefresh: () ⇒ Unit = () ⇒ {}): Unit
 
   def resizeEditor: Unit
@@ -127,13 +132,17 @@ object TreeNodeTab {
     omsEditor.initEditor
 
     def editable = true
+
     def editing = true
 
     override def onActivate: () ⇒ Unit = () ⇒ {}
 
     def content = omsEditor.code
+
     def refresh(onsaved: () ⇒ Unit) = save(safePathTab.now, omsEditor, onsaved)
+
     def resizeEditor = omsEditor.editor.resize()
+
     def indexAxises(header: SequenceHeader) = header.zipWithIndex.map { afe ⇒ IndexedAxis(afe._1, afe._2) }
 
     lazy val controlElement = {
@@ -199,10 +208,15 @@ object TreeNodeTab {
     lazy val safePathTab = Var(safePath)
 
     def content: String = htmlContent
+
     def editor = None
+
     def editable: Boolean = false
+
     def editing: Boolean = false
+
     def refresh(afterRefresh: () ⇒ Unit): Unit = () ⇒ {}
+
     def resizeEditor = {}
 
     lazy val controlElement: TypedTag[HTMLElement] = div()
@@ -234,7 +248,9 @@ object TreeNodeTab {
   }
 
   sealed trait RowFilter
+
   object First100 extends RowFilter
+
   object Last100 extends RowFilter
 
   object All extends RowFilter
@@ -248,9 +264,12 @@ object TreeNodeTab {
     lazy val safePathTab = Var(safePath)
     lazy val isEditing = Var(dataTab.editing)
 
-    Rx { editableEditor.setReadOnly(!isEditing()) }
+    Rx {
+      editableEditor.setReadOnly(!isEditing())
+    }
 
     def content: String = editableEditor.code
+
     def isCSV = DataUtils.isCSV(safePath)
 
     val filteredSequence = dataTab.filter match {
@@ -471,7 +490,9 @@ object TreeNodeTab {
                 scalatags.JsDom.tags.span(marginLeft := 10)(filterAxisOptions.selector),
                 scalatags.JsDom.tags.span(maxHeight := 34)(
                   Rx {
-                    if (filterAxisOptions.content().map { _.fullSequenceIndex } == Some(-1)) Seq(scalatags.JsDom.tags.span(maxHeight := 34))
+                    if (filterAxisOptions.content().map {
+                      _.fullSequenceIndex
+                    } == Some(-1)) Seq(scalatags.JsDom.tags.span(maxHeight := 34))
                     else Seq(form(closureInput, inputFilterValidation))
                   })
               )
@@ -601,7 +622,11 @@ class TreeNodeTabs {
 
   def stopTimerIfNoTabs = {
     if (tabs.now.isEmpty) {
-      timer.map { _.foreach { clearInterval } }
+      timer.map {
+        _.foreach {
+          clearInterval
+        }
+      }
       timer() = None
     }
   }
@@ -610,13 +635,17 @@ class TreeNodeTabs {
     timer.now match {
       case None ⇒
         timer() = Some(setInterval(15000) {
-          tabs.now.foreach { _.refresh() }
+          tabs.now.foreach {
+            _.refresh()
+          }
         })
       case _ ⇒
     }
 
   def setActive(tab: TreeNodeTab) = {
-    if (tabs.now.contains(tab)) { unActiveAll }
+    if (tabs.now.contains(tab)) {
+      unActiveAll
+    }
     tab.activate
   }
 
@@ -638,7 +667,9 @@ class TreeNodeTabs {
 
   def removeTab(tab: TreeNodeTab) = {
     tab.desactivate
-    val newTabs = tabs.now.filterNot { _ == tab }
+    val newTabs = tabs.now.filterNot {
+      _ == tab
+    }
     tabs() = newTabs
     if (tabs.now.isEmpty) temporaryControl() = div()
     newTabs.lastOption.map { t ⇒ setActive(t) }
@@ -782,18 +813,16 @@ class TreeNodeTabs {
           }
         }
 
-      new Sortable(
+      Sortable(
         tabList,
-        new SortableProps {
-          override val onEnd = scala.scalajs.js.defined {
-            (event: EventS) ⇒
-              val oldI = event.oldIndex.asInstanceOf[Int]
-              val newI = event.newIndex.asInstanceOf[Int]
-              tabs() = tabs.now.updated(oldI, tabs.now(newI)).updated(newI, tabs.now(oldI))
-              setActive(tabs.now(newI))
+        SortableOptions.onEnd(
+          (event: EventS) ⇒ {
+            val oldI = event.oldIndex.asInstanceOf[Int]
+            val newI = event.newIndex.asInstanceOf[Int]
+            tabs() = tabs.now.updated(oldI, tabs.now(newI)).updated(newI, tabs.now(oldI))
+            setActive(tabs.now(newI))
           }
-        }
-      )
+        ))
 
       div(role := "tabpanel")(
         fontSizeControl,

@@ -1,8 +1,8 @@
 package org.openmole.gui.client.tool.plot
 
-import com.definitelyscala.plotlyjs._
-import com.definitelyscala.plotlyjs.all._
-import com.definitelyscala.plotlyjs.PlotlyImplicits._
+import org.openmole.plotlyjs._
+import org.openmole.plotlyjs.all._
+import org.openmole.plotlyjs.PlotlyImplicits._
 import scala.scalajs.js.JSConverters._
 import scala.scalajs._
 import scalatags.JsDom.all._

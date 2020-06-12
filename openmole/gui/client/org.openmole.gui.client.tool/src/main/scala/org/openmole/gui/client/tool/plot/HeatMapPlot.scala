@@ -1,8 +1,8 @@
 package org.openmole.gui.client.tool.plot
 
-import com.definitelyscala.plotlyjs._
-import com.definitelyscala.plotlyjs.all._
-import com.definitelyscala.plotlyjs.PlotlyImplicits._
+import org.openmole.plotlyjs._
+import org.openmole.plotlyjs.all._
+import org.openmole.plotlyjs.PlotlyImplicits._
 import scala.scalajs.js.JSConverters._
 import scalatags.JsDom.all._
 import scala.scalajs.js
@@ -18,9 +18,8 @@ object HeatMapPlot {
 
     val dims: js.Array[js.Array[String]] = serie.yValues.map { _.values.toJSArray }.reverse /*.reverse.toArray }.transpose.map { _.toJSArray }*/ .toJSArray
 
-    val data = PlotData
+    val data = heatmap
       .z(dims)
-      .set(plotlytype.heatmap)
 
     val layout = Layout
       .title(title)

@@ -35,7 +35,7 @@ import scala.scalajs.js.annotation._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 
-@JSExportTopLevel("org.openmole.gui.plugin.authentication.desktopgrid.DesktopGridAuthenticationFactory")
+@JSExportTopLevel("DesktopGridAuthenticationFactory")
 class DesktopGridAuthenticationFactory extends AuthenticationPluginFactory {
   type AuthType = DesktopGridAuthenticationData
 
@@ -48,7 +48,7 @@ class DesktopGridAuthenticationFactory extends AuthenticationPluginFactory {
   def getData: Future[Seq[AuthType]] = OMPost()[DesktopGridAuthenticationAPI].desktopGridAuthentications().call()
 }
 
-@JSExportTopLevel("org.openmole.gui.plugin.authentication.desktopgrid.DesktopGridAuthenticationGUI")
+@JSExportTopLevel("DesktopGridAuthenticationGUI")
 class DesktopGridAuthenticationGUI(val data: DesktopGridAuthenticationData = DesktopGridAuthenticationData()) extends AuthenticationPlugin {
   type AuthType = DesktopGridAuthenticationData
 

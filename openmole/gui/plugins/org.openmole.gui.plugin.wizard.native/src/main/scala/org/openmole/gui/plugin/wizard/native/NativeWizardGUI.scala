@@ -30,7 +30,7 @@ import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import rx._
 
-@JSExportTopLevel("org.openmole.gui.plugin.wizard.native.NativeWizardFactory")
+@JSExportTopLevel("NativeWizardFactory")
 class NativeWizardFactory extends WizardPluginFactory {
   val fileType = CareArchive
 
@@ -43,7 +43,7 @@ class NativeWizardFactory extends WizardPluginFactory {
 
 case class NativeWizardData() extends WizardData
 
-@JSExportTopLevel("org.openmole.gui.plugin.wizard.native.NativeWizardGUI")
+@JSExportTopLevel("NativeWizardGUI")
 class NativeWizardGUI extends WizardGUIPlugin {
 
   type WizardType = NativeWizardData

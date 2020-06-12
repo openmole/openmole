@@ -21,7 +21,7 @@ import java.io.{ File, _ }
 import java.util.logging.Level
 import java.util.zip._
 
-import scala.collection.JavaConversions.enumerationAsScalaIterator
+import scala.collection.JavaConverters._
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.gui.ext.data
@@ -341,6 +341,8 @@ object Utils extends JavaLogger {
     def update = {
       logger.info("Building GUI plugins ...")
       jsFile.delete
+      println("jsPlugin directory " + jsPluginDirectory.getAbsolutePath)
+      println("js file " + jsFile.getAbsolutePath)
       JSPack.link(jsPluginDirectory, jsFile, optimizedJS)
     }
 
@@ -389,7 +391,7 @@ object Utils extends JavaLogger {
     to.getParentFile.mkdirs
 
     val zip = new ZipFile(from)
-    zip.entries.foreach { entry ⇒
+    zip.entries.asScala.foreach { entry ⇒
       val entryName = entry.getName
       if (entryName != s"$basename/") {
         val entryPath = {

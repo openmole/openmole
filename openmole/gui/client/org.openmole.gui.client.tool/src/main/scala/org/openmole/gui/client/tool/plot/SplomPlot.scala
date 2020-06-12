@@ -1,8 +1,8 @@
 package org.openmole.gui.client.tool.plot
 
-import com.definitelyscala.plotlyjs._
-import com.definitelyscala.plotlyjs.all._
-import com.definitelyscala.plotlyjs.PlotlyImplicits._
+import org.openmole.plotlyjs._
+import org.openmole.plotlyjs.all._
+import org.openmole.plotlyjs.PlotlyImplicits._
 import scala.scalajs.js.JSConverters._
 import scalatags.JsDom.all._
 
@@ -51,10 +51,10 @@ object SplomPlot {
         plotDiv,
         scalajs.js.Array(serie.plotDataBuilder
           .set(dimensions)
-          .set(plotlytype.splom)
-          .set(plotlymarker
-            .set(Color.array(colors))
-            .set(ColorScale.viridis)
+          .set(plottype.splom)
+          .set(marker
+            .color(Color.array(colors))
+            .colorScale(ColorScale.viridis)
           )._result
         ),
         layout,

@@ -36,7 +36,7 @@ import org.openmole.gui.ext.data.DataUtils._
 import org.openmole.gui.ext.tool.client
 import rx._
 
-@JSExportTopLevel("org.openmole.gui.plugin.wizard.jar.JarWizardFactory")
+@JSExportTopLevel("JarWizardFactory")
 class JarWizardFactory extends WizardPluginFactory {
   type WizardType = JarWizardData
 
@@ -49,7 +49,7 @@ class JarWizardFactory extends WizardPluginFactory {
   def name: String = "Jar"
 }
 
-@JSExportTopLevel("org.openmole.gui.plugin.wizard.jar.JarWizardGUI")
+@JSExportTopLevel("JarWizardGUI")
 class JarWizardGUI(safePath: SafePath, onMethodSelected: (LaunchingCommand) ⇒ Unit) extends WizardGUIPlugin {
   type WizardType = JarWizardData
 

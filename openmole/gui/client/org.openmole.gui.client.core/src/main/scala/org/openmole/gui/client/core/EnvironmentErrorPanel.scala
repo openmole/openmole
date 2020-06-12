@@ -68,7 +68,7 @@ class EnvironmentErrorPanel(environmentErrorData: EnvironmentErrorData, environm
           ReactiveRow(
             id,
             Seq(
-              FixedCell(tags.span(wordWrap := "break-word")(tags.a(error.errorMessage, pointer +++ Seq(fontSize := 13, scalatags.JsDom.all.color := "#222", textDecoration.underline), onclick := { () ⇒ toggleDetail(id) })), 0),
+              FixedCell(tags.span(wordWrap := "break-word")(tags.a(error.errorMessage, pointer, fontSize := 13, scalatags.JsDom.all.color := "#222", textDecoration.underline, onclick := { () ⇒ toggleDetail(id) })), 0),
               FixedCell(levelLabel(error.level)(badge(nb.toString, environmentErrorBadge)), 1),
               FixedCell(span(fontSize := 13, textCenter)(Utils.longToDate(date)), 2)
             ), Seq(borderTop := "2px solid white" /*, backgroundColor := "#ff000033"*/ )

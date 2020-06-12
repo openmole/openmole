@@ -1,6 +1,6 @@
 package org.openmole.gui.client.tool.plot
 
-import com.definitelyscala.plotlyjs._
+import org.openmole.plotlyjs._
 
 object ToolPlot {
 

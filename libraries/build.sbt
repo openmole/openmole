@@ -8,7 +8,7 @@ def settings = Seq(
   resolvers += Resolver.sonatypeRepo("snapshots"),
   resolvers += Resolver.sonatypeRepo("releases"),
   resolvers += Resolver.sonatypeRepo("staging"),
-  scalaVersion in Global := "2.12.10",
+  scalaVersion in Global := "2.12.8",
   scalacOptions ++= Seq("-deprecation"),
   publishArtifact in (packageDoc in publishLocal) := false,
   publishArtifact in (packageSrc in publishLocal) := false,
@@ -17,8 +17,8 @@ def settings = Seq(
 )
 
 
-lazy val scalatraVersion = "2.7.0-RC1"
-lazy val jettyVersion = "9.4.24.v20191120"
+lazy val scalatraVersion = "2.7.0"
+lazy val jettyVersion = "9.4.28.v20200408"
 //lazy val jettyVersion = "9.3.25.v20180904"
 
 lazy val scalatra = OsgiProject(dir, "org.scalatra",
@@ -162,21 +162,31 @@ lazy val netlogo6 = OsgiProject(
     "net.lingala.zip4j" % "zip4j" % "1.3.2" % "provided"
   ), version := netLogo6Version, scalaVersion := "2.12.8", crossPaths := false) settings(settings: _*) 
 
-lazy val scalaTagsVersion = "0.8.3"
-lazy val scalaRxVersion = "0.4.0"
-lazy val scalaDomVersion = "0.9.3"
-//lazy val scalaUpickleVersion = "0.9.6"
-lazy val scalaBoopickleVersion = "1.3.1"
-lazy val scalaAutowireVersion = "0.2.6"
-lazy val scalajsVersion = "0.6.31"
+lazy val scalaTagsVersion = "0.9.1"
+lazy val scalaRxVersion = "0.4.2"
+lazy val scalaDomVersion = "1.0.0"
+lazy val scalaBoopickleVersion = "1.3.3"
+lazy val scalaAutowireVersion = "0.3.2"
+lazy val scalajsVersion = "1.1.0"
 
 lazy val rx = OsgiProject(dir, "rx", exports = Seq("rx.*")) settings(
   libraryDependencies ++= Seq("com.lihaoyi" %% "scalarx" % scalaRxVersion),
   version := scalaRxVersion) settings(settings: _*)
 
-lazy val scalajsTools = OsgiProject(dir, "scalajs-tools", exports = Seq("scala.scalajs.*", "org.scalajs.core.tools.*", "org.scalajs.core.ir.*", "com.google.javascript.*", "com.google.common.*", "rhino_ast.java.com.google.javascript.rhino.*", "com.google.gson.*", "com.google.debugging.sourcemap.*", "org.json.*", "java7compat.nio.charset.*", "com.google.protobuf.*")) settings(
-  libraryDependencies += "org.scala-js" %% "scalajs-tools" % scalajsVersion, version := scalajsVersion) settings(settings: _*)
+/*lazy val scalajsTools = OsgiProject(dir, "scalajs-tools", exports = Seq("scala.scalajs.*", "org.scalajs.core.tools.*", "org.scalajs.core.ir.*", "com.google.javascript.*", "com.google.common.*", "rhino_ast.java.com.google.javascript.rhino.*", "com.google.gson.*", "com.google.debugging.sourcemap.*", "org.json.*", "java7compat.nio.charset.*", "com.google.protobuf.*")) settings(
+  libraryDependencies += "org.scala-js" %% "scalajs-tools" % scalajsVersion, version := scalajsVersion) settings(settings: _*)*/
 
+lazy val scalajsLinker = OsgiProject(dir, "scalajs-linker", exports = Seq("org.scalajs.linker.*", "org.scalajs.ir.*", "com.google.javascript.*", "com.google.common.*", "rhino_ast.java.com.google.javascript.rhino.*", "com.google.gson.*", "com.google.debugging.sourcemap.*", "org.json.*", "java7compat.nio.charset.*", "com.google.protobuf.*")) settings(
+  libraryDependencies += "org.scala-js" %% "scalajs-linker" % scalajsVersion,
+////  libraryDependencies += "org.scala-js" %% "scalajs-logging" % scalajsVersion,
+//    //"org.scala-js" %% "scalajs-linker-interface" % scalajsVersion),
+    version := scalajsVersion) settings(settings: _*)
+//
+
+lazy val scalajsLogging = OsgiProject(dir, "scalajs-logging", exports = Seq("org.scalajs.logging.*")) settings(
+  libraryDependencies += "org.scala-js" %% "scalajs-logging" % scalajsVersion,
+  version := scalajsVersion) settings(settings: _*)
+  
 lazy val scalaJS = OsgiProject(dir, "scalajs", exports = Seq("scala.scalajs.*"), imports = Seq("*")) settings (
   libraryDependencies += "org.scala-js" %% "scalajs-library" % scalajsVersion,
   version := scalajsVersion
@@ -190,10 +200,6 @@ lazy val scalatexSite =
   OsgiProject(dir, "com.lihaoyi.scalatex-site", exports = Seq("scalatex.*", "ammonite.*", "fastparse.*"), privatePackages = Seq("META-INF.**", "pprint.*", "scalaj.*", "scalaparse.*", "geny.*"), imports = Seq("*")) settings (
     libraryDependencies += "org.openmole" %% "scalatex-site" % "0.4.5",
     version := "0.4.5") settings(settings: _*)
-
-/*lazy val upickle = OsgiProject(dir, "upickle", exports = Seq("upickle.*", "jawn.*", "derive.*"), imports = Seq("*")) settings(
-  libraryDependencies ++= Seq("com.lihaoyi" %% "upickle" % scalaUpickleVersion),
-  version := scalaUpickleVersion) settings(settings: _*) dependsOn(sourceCode)*/ 
 
 lazy val boopickle = OsgiProject(dir, "boopickle", exports = Seq("boopickle.*"), imports = Seq("*")) settings(
   libraryDependencies ++= Seq("io.suzaku" %% "boopickle" % scalaBoopickleVersion),

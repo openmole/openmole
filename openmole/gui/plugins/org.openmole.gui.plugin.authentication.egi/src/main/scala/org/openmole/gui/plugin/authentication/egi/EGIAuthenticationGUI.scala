@@ -30,7 +30,7 @@ import scala.concurrent.Future
 import scala.scalajs.js.annotation._
 import scalatags.JsDom.all._
 
-@JSExportTopLevel("org.openmole.gui.plugin.authentication.egi.EGIAuthenticationGUIFactory")
+@JSExportTopLevel("EGIAuthenticationGUIFactory")
 class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory {
   type AuthType = EGIAuthenticationData
 
@@ -43,7 +43,7 @@ class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory {
   def getData: Future[Seq[AuthType]] = OMPost()[EGIAuthenticationAPI].egiAuthentications().call()
 }
 
-@JSExportTopLevel("org.openmole.gui.plugin.authentication.egi.EGIAuthenticationGUI")
+@JSExportTopLevel("EGIAuthenticationGUI")
 class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationData()) extends AuthenticationPlugin {
   type AuthType = EGIAuthenticationData
 

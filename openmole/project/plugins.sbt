@@ -4,9 +4,9 @@ addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.4.2")
 
 addSbtPlugin("org.openmole" % "openmole-buildsystem-plugin" % "1.8-SNAPSHOT")
 
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.31")
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.1.0")
 
-addSbtPlugin("fr.iscpif" % "scalajs-execnpm" % "0.7")
+addSbtPlugin("org.openmole" % "scalajs-execnpm" % "0.10")
 
 addSbtPlugin("org.openmole" % "scalatex-sbt-plugin" % "0.4.5")
 
@@ -18,3 +18,4 @@ addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.2")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "1.0.0")
 
+addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.0.0")

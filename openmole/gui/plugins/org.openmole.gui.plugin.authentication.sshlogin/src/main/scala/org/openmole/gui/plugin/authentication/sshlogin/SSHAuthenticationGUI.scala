@@ -34,7 +34,7 @@ import scala.scalajs.js.annotation._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 
-@JSExportTopLevel("org.openmole.gui.plugin.authentication.sshlogin.LoginAuthenticationFactory")
+@JSExportTopLevel("LoginAuthenticationFactory")
 class LoginAuthenticationFactory extends AuthenticationPluginFactory {
   type AuthType = LoginAuthenticationData
 
@@ -47,7 +47,7 @@ class LoginAuthenticationFactory extends AuthenticationPluginFactory {
   def getData: Future[Seq[AuthType]] = OMPost()[LoginAuthenticationAPI].loginAuthentications().call()
 }
 
-@JSExportTopLevel("org.openmole.gui.plugin.authentication.sshlogin.LoginAuthenticationGUI")
+@JSExportTopLevel("LoginAuthenticationGUI")
 class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthenticationData()) extends AuthenticationPlugin {
   type AuthType = LoginAuthenticationData
 

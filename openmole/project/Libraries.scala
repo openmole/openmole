@@ -11,44 +11,46 @@ object Libraries {
   lazy val containerVersion = "1.11"
   lazy val mgoVersion = "3.43"
   lazy val bouncyCastleVersion = "1.64"
-  lazy val d3Version = "3.5.12"
-  lazy val tooltipserVersion = "3.3.0"
   lazy val netLogo5Version = "5.3.1"
   lazy val netLogo6Version = "6.1.1"
-  lazy val scalaTagsVersion = "0.8.3"
-  lazy val scalaJSDomVersion = "0.9.3"
-  lazy val rxVersion = "0.4.0"
-  lazy val boopickleVersion = "1.3.1"
-  lazy val scalaAutowireVersion = "0.2.6"
+  lazy val scalaTagsVersion = "0.9.1"
+  lazy val scalaJSDomVersion = "1.0.0"
+  lazy val rxVersion = "0.4.2"
+  lazy val boopickleVersion = "1.3.3"
+  lazy val scalaAutowireVersion = "0.3.2"
   lazy val sourcecodeVersion = "0.2.1"
-  lazy val scaladgetVersion = "1.2.7"
-  lazy val sortableVersion = "0.2.1"
+  lazy val scaladgetVersion = "1.3.6"
+  lazy val sortableVersion = "0.7.2"
   lazy val json4sVersion = "3.6.7"
   lazy val circeVersion = "0.13.0"
   lazy val catsVersion = "2.1.0"
-  lazy val scalajsVersion = "0.6.31"
+  lazy val scalajsVersion = "1.1.0"
   lazy val squantsVersion = "1.6.0"
   lazy val xstreamVersion = "1.4.12"
-  lazy val scalatraVersion = "2.7.0-RC1"
+  lazy val scalatraVersion = "2.7.0"
   lazy val scalaURIVersion = "1.1.1"
   lazy val scoptVersion = "3.7.1"
   lazy val spatialdataVersion = "0.2"
 
-  lazy val bootstrapnative = libraryDependencies += "fr.iscpif.scaladget" %%% "bootstrapnative" % scaladgetVersion
-  lazy val lunr = libraryDependencies += "fr.iscpif.scaladget" %%% "lunr" % scaladgetVersion
+  lazy val bootstrapnative = libraryDependencies += "org.openmole.scaladget" %%% "bootstrapnative" % scaladgetVersion
+  lazy val lunr = libraryDependencies += "org.openmole.scaladget" %%% "lunr" % scaladgetVersion
 
-  lazy val sortable = libraryDependencies += "net.scalapro" %%% "sortable-js-facade" % sortableVersion
-  lazy val ace = libraryDependencies += "fr.iscpif.scaladget" %%% "ace" % scaladgetVersion
-  lazy val scaladgetTools = libraryDependencies += "fr.iscpif.scaladget" %%% "tools" % scaladgetVersion
+  lazy val sortable = libraryDependencies += "org.openmole" %%% "sortable-js-facade" % sortableVersion
+  lazy val ace = libraryDependencies += "org.openmole.scaladget" %%% "ace" % scaladgetVersion
+  lazy val scaladgetTools = libraryDependencies += "org.openmole.scaladget" %%% "tools" % scaladgetVersion
   lazy val scalajsDomJS = libraryDependencies += "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion
   lazy val rxJS = libraryDependencies += "com.lihaoyi" %%% "scalarx" % rxVersion
   lazy val scalaTagsJS = libraryDependencies += "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
   lazy val autowireJS = libraryDependencies += "com.lihaoyi" %%% "autowire" % scalaAutowireVersion
   lazy val boopickleJS = libraryDependencies += "io.suzaku" %%% "boopickle" % boopickleVersion
   lazy val sourcecodeJS = libraryDependencies += "com.lihaoyi" %%% "sourcecode" % sourcecodeVersion
-  lazy val scalajsMarked = libraryDependencies += "com.github.karasiq" %%% "scalajs-marked" % "1.0.2"
+  lazy val scalajsMarked = libraryDependencies += "org.openmole.scaladget" %%% "highlightjs" % scaladgetVersion
   lazy val htmlparser2 = libraryDependencies += "com.definitelyscala" %%% "scala-js-htmlparser2" % "1.0.2"
-  lazy val plotlyJS =  libraryDependencies += "com.definitelyscala" %%% "scala-js-plotlyjs" % "1.1.10"
+  lazy val plotlyJS =  libraryDependencies += "org.openmole" %%% "scala-js-plotlyjs" % "1.6.0"
+ // lazy val scalajsLinkerJS = libraryDependencies += "org.scala-js" %%% "scalajs-linker" % scalajsVersion
+ // lazy val scalajsLoggingJS = libraryDependencies += "org.scala-js" %%% "scalajs-logging" % scalajsVersion
+  lazy val scalaCompatJS =  libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.6"
+
 
   lazy val scalatest = "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 
@@ -92,7 +94,9 @@ object Libraries {
   lazy val configuration = "org.openmole.library" %% "org-apache-commons-configuration2" % "2.6"
   lazy val json4s = "org.openmole.library" %% "org-json4s" % json4sVersion
   lazy val circe = "org.openmole.library" %% "io-circe" % circeVersion
-  lazy val scalajsTools = "org.openmole.library" %% "scalajs-tools" % scalajsVersion
+  lazy val scalajsLinker = "org.openmole.library" %% "scalajs-linker" % scalajsVersion
+  lazy val scalajsLogging = "org.openmole.library" %% "scalajs-logging" % scalajsVersion
+  lazy val scalaCompat = "org.openmole.library" %% "scala-collection-compat" % "2.1.4"
   lazy val scalajs = "org.openmole.library" %% "scalajs" % scalajsVersion
   lazy val mgo = "org.openmole.library" %% "mgo" % mgoVersion
   lazy val monocle = Seq("org.openmole.library" %% "monocle" % "2.0.0", scalaz)

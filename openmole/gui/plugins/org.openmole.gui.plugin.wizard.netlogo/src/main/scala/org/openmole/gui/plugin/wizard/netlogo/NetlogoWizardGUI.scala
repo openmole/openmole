@@ -33,7 +33,7 @@ import scala.scalajs.js.annotation._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 
-@JSExportTopLevel("org.openmole.gui.plugin.wizard.netlogo.NetlogoWizardFactory")
+@JSExportTopLevel("NetlogoWizardFactory")
 class NetlogoWizardFactory extends WizardPluginFactory {
   type WizardType = NetlogoWizardData
 
@@ -48,7 +48,7 @@ class NetlogoWizardFactory extends WizardPluginFactory {
   def name: String = "NetLogo"
 }
 
-@JSExportTopLevel("org.openmole.gui.plugin.wizard.netlogo.NetlogoWizardGUI")
+@JSExportTopLevel("NetlogoWizardGUI")
 class NetlogoWizardGUI extends WizardGUIPlugin {
   type WizardType = NetlogoWizardData
 
