@@ -49,13 +49,13 @@ class JobTable(executionId: ExecutionId, executionPanel: ExecutionPanel) {
   }
 
   def updateEnvErrors(environmentId: EnvironmentId) =
-    post()[Api].runningErrorEnvironmentData(environmentId, 500).call().foreach {
+    Post()[Api].runningErrorEnvironmentData(environmentId, 500).call().foreach {
       err ⇒
         envError() = envError.now + (environmentId → err)
     }
 
   def clearEnvErrors(environmentId: EnvironmentId) =
-    post()[Api].clearEnvironmentErrors(environmentId).call().foreach {
+    Post()[Api].clearEnvironmentErrors(environmentId).call().foreach {
       _ ⇒
         envError() = envError.now - environmentId
     }

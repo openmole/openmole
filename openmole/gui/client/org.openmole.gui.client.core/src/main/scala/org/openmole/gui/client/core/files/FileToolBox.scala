@@ -150,7 +150,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
           case fileaction.execute ⇒
             import scala.concurrent.duration._
             withSafePath { sp ⇒
-              post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(sp), true).call().foreach { execInfo ⇒
+              Post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(sp), true).call().foreach { execInfo ⇒
                 Popover.hide
                 showExecution()
               }
@@ -250,7 +250,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
   }
 
   def extractTGZ(safePath: SafePath) =
-    post()[Api].extractTGZ(safePath).call().foreach {
+    Post()[Api].extractTGZ(safePath).call().foreach {
       r ⇒
         r.error match {
           case Some(e: org.openmole.gui.ext.data.ErrorData) ⇒
@@ -263,7 +263,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     val newTitle = editTitle.value
     val newSafePath = safePath.parent ++ newTitle
     treeNodeTabs.saveAllTabs(() ⇒ {
-      post()[Api].existsExcept(newSafePath, false).call().foreach {
+      Post()[Api].existsExcept(newSafePath, false).call().foreach {
         b ⇒
           if (b) {
             overwriting() = true
@@ -281,7 +281,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
 
   def rename(safePath: SafePath, replacing: () ⇒ Unit) = {
     val newTitle = editTitle.value
-    post()[Api].renameFile(safePath, newTitle).call().foreach {
+    Post()[Api].renameFile(safePath, newTitle).call().foreach {
       newNode ⇒
         treeNodeTabs.rename(safePath, newNode)
         treeNodePanel.invalidCacheAndDraw

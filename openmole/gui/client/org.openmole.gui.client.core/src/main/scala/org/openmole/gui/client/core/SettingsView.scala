@@ -93,7 +93,7 @@ class SettingsView(fileDisplayer: FileDisplayer) {
   }).render
 
   def updateJVMInfos = {
-    post()[Api].jvmInfos.call().foreach { j ⇒
+    Post()[Api].jvmInfos.call().foreach { j ⇒
       jvmInfos() = Some(j)
     }
   }

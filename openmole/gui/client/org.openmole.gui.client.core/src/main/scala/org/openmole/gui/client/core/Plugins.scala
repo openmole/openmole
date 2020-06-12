@@ -30,7 +30,7 @@ import scala.scalajs.js
 object Plugins {
 
   def fetch(f: Parameters ⇒ Unit) = {
-    post()[Api].getGUIPlugins.call().foreach { p ⇒
+    Post()[Api].getGUIPlugins.call().foreach { p ⇒
       val authFact = p.authentications.map { gp ⇒ Plugins.buildJSObject[AuthenticationPluginFactory](gp) }
       val wizardFactories = p.wizards.map { gp ⇒ Plugins.buildJSObject[WizardPluginFactory](gp) }
       f(Parameters(authFact, wizardFactories))

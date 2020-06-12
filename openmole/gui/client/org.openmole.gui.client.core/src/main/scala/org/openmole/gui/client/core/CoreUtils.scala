@@ -48,52 +48,51 @@ object CoreUtils {
   }
 
   def withTmpFile(todo: SafePath ⇒ Unit): Unit = {
-    post()[Api].temporaryFile.call().foreach { tempFile ⇒
+    Post()[Api].temporaryFile.call().foreach { tempFile ⇒
       todo(tempFile)
     }
   }
 
   def addDirectory(in: SafePath, dirName: String, onadded: () ⇒ Unit = () ⇒ {}) =
-    post()[Api].addDirectory(in, dirName).call().foreach { b ⇒
+    Post()[Api].addDirectory(in, dirName).call().foreach { b ⇒
       if (b) onadded()
       else AlertPanel.string(s"$dirName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
-
     }
 
   def addFile(safePath: SafePath, fileName: String, onadded: () ⇒ Unit = () ⇒ {}) =
-    post()[Api].addFile(safePath, fileName).call().foreach { b ⇒
+    Post()[Api].addFile(safePath, fileName).call().foreach { b ⇒
       if (b) onadded()
       else AlertPanel.string(s" $fileName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
     }
 
   def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {
-    post()[Api].deleteFile(path, ServerFileSystemContext.project).call().foreach { d ⇒
+    Post()[Api].deleteFile(path, ServerFileSystemContext.project).call().foreach { d ⇒
       panels.treeNodePanel.refreshAnd(ontrashed)
     }
   }
 
   def trashNodes(paths: Seq[SafePath])(ontrashed: () ⇒ Unit): Unit = {
-    post()[Api].deleteFiles(paths, ServerFileSystemContext.project).call().foreach { d ⇒
+    Post()[Api].deleteFiles(paths, ServerFileSystemContext.project).call().foreach { d ⇒
       panels.treeNodePanel.refreshAnd(ontrashed)
     }
   }
 
   def duplicate(safePath: SafePath, newName: String): Unit =
-    post()[Api].duplicate(safePath, newName).call().foreach { y ⇒
+    Post()[Api].duplicate(safePath, newName).call().foreach { y ⇒
       panels.treeNodePanel.refreshAndDraw
     }
 
   def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Seq[SafePath]] =
-    post()[Api].testExistenceAndCopyProjectFilesTo(safePaths, to).call()
+    Post()[Api].testExistenceAndCopyProjectFilesTo(safePaths, to).call()
 
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Unit] =
-    post()[Api].copyProjectFilesTo(safePaths, to).call()
+    Post()[Api].copyProjectFilesTo(safePaths, to).call()
 
-  def getSons(safePath: SafePath, fileFilter: FileFilter): Future[ListFilesData] = {
-    post()[Api].listFiles(safePath, fileFilter).call()
+  def listFiles(safePath: SafePath, fileFilter: FileFilter): Future[ListFilesData] = {
+    Post()[Api].listFiles(safePath, fileFilter).call()
   }
 
-  def pluggables(safePath: SafePath, todo: Seq[SafePath] ⇒ Unit) = post()[Api].allPluggableIn(safePath).call.foreach { p ⇒
+  def pluggables(safePath: SafePath, todo: Seq[SafePath] ⇒ Unit) = Post()[Api].allPluggableIn(safePath).call.foreach { p ⇒
     todo(p)
   }
 

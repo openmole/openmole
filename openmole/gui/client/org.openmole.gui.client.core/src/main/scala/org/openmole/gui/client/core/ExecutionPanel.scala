@@ -264,7 +264,7 @@ class ExecutionPanel(setEditorErrors: (SafePath, Seq[ErrorWithLocation]) ⇒ Uni
     }
 
     if (updating.compareAndSet(false, true)) {
-      post()[Api].allStates(200).call().andThen {
+      Post()[Api].allStates(200).call().andThen {
         case Success((executionInfos, runningOutputData)) ⇒
           executionInfo() = executionInfos.toMap
           outputInfo() = runningOutputData
@@ -274,7 +274,7 @@ class ExecutionPanel(setEditorErrors: (SafePath, Seq[ErrorWithLocation]) ⇒ Uni
     }
   }
 
-  def updateStaticInfos = post()[Api].staticInfos.call().foreach {
+  def updateStaticInfos = Post()[Api].staticInfos.call().foreach {
     s ⇒
       staticInfo() = s.toMap
       setTimeout(0) {
@@ -338,14 +338,14 @@ class ExecutionPanel(setEditorErrors: (SafePath, Seq[ErrorWithLocation]) ⇒ Uni
 
   def cancelExecution(id: ExecutionId) = {
     // setIDTabInStandBy(id)
-    post()[Api].cancelExecution(id).call().foreach {
+    Post()[Api].cancelExecution(id).call().foreach {
       r ⇒
         updateExecutionInfo
     }
   }
 
   def removeExecution(id: ExecutionId) = {
-    post()[Api].removeExecution(id).call().foreach {
+    Post()[Api].removeExecution(id).call().foreach {
       r ⇒
         updateExecutionInfo
     }

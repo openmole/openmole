@@ -22,14 +22,24 @@ import scala.concurrent.duration._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object post {
-  def apply(timeout: Duration = 60 seconds, warningTimeout: Duration = 10 seconds) = {
+case class PostContext(
+  timeout:        Duration                     = 60 seconds,
+  warningTimeout: Duration                     = 10 seconds,
+  alert:          (String, BannerLevel) ⇒ Unit)
+
+object Post {
+
+  def apply(
+    timeout:        Duration                     = 60 seconds,
+    warningTimeout: Duration                     = 10 seconds,
+    alert:          (String, BannerLevel) ⇒ Unit = panels.bannerAlert.register) = {
     OMPost(
       timeout,
       warningTimeout,
-      (request: String) ⇒ panels.bannerAlert.register(s"The request ${request} failed.", BannerLevel.Critical),
-      () ⇒ panels.bannerAlert.register("The request is very long. Please check your connection.")
+      (request: String) ⇒ alert(s"The request ${request} failed.", BannerLevel.Critical),
+      () ⇒ alert("The request is very long. Please check your connection.", BannerLevel.Regular)
     )
   }
+
 }
 

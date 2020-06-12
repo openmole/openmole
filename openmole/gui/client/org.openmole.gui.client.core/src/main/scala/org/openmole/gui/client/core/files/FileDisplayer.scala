@@ -44,7 +44,7 @@ class FileDisplayer(val treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) 
             treeNodeTabs add tab
             tab.omsEditor.editor.focus
           case OpenMOLEResult ⇒
-            post()[Api].findAnalysisPlugin(safePath).call.foreach {
+            Post()[Api].findAnalysisPlugin(safePath).call.foreach {
               case Some(plugin) ⇒
                 val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
                 val tab = TreeNodeTab.html(safePath, analysis.panel(safePath))
@@ -52,13 +52,13 @@ class FileDisplayer(val treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) 
               case None ⇒
             }
           case MDScript ⇒
-            post()[Api].mdToHtml(safePath).call().foreach { htmlString ⇒
+            Post()[Api].mdToHtml(safePath).call().foreach { htmlString ⇒
               treeNodeTabs add TreeNodeTab.html(safePath, TreeNodeTab.mdBlock(htmlString))
             }
           case SVGExtension ⇒ treeNodeTabs add TreeNodeTab.html(safePath, TreeNodeTab.rawBlock(content))
           case editableFile: EditableFile ⇒
             if (DataUtils.isCSV(safePath))
-              post()[Api].sequence(safePath).call().foreach { seq ⇒
+              Post()[Api].sequence(safePath).call().foreach { seq ⇒
                 treeNodeTabs add TreeNodeTab.editable(safePath, content, DataTab.build(seq, view = TreeNodeTab.Table, editing = !editableFile.onDemand), Plotter.default)
               }
             else {

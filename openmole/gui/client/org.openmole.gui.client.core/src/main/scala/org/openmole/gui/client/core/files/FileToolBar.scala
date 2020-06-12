@@ -304,10 +304,10 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
       btn_default,
       onclick := { () ⇒
         val directoryName = s"uploadPlugin${java.util.UUID.randomUUID().toString}"
-        post()[Api].copyToPluginUploadDir(directoryName, manager.selected.now).call().foreach { _ ⇒
+        Post()[Api].copyToPluginUploadDir(directoryName, manager.selected.now).call().foreach { _ ⇒
           import scala.concurrent.duration._
           val names = manager.selected.now.map(_.name)
-          post(timeout = 5 minutes)[Api].addUploadedPlugins(directoryName, names).call().foreach {
+          Post(timeout = 5 minutes)[Api].addUploadedPlugins(directoryName, names).call().foreach {
             errs ⇒
               if (errs.isEmpty) pluginPanel.dialog.show
               else AlertPanel.detail("Plugin import failed", ErrorData.stackTrace(errs.head), transform = RelativeCenterPosition, zone = FileZone)

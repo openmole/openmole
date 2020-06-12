@@ -66,7 +66,7 @@ object ScriptClient {
       )
     ).render
 
-    post()[Api].shutdown().call()
+    Post()[Api].shutdown().call()
     dom.document.body.appendChild(stoppedDiv)
   }
 
@@ -76,7 +76,7 @@ object ScriptClient {
 
     def setTimer = {
       timer() = Some(setInterval(5000) {
-        post(3 seconds, 5 minutes)[Api].isAlive().call().foreach { x ⇒
+        Post(3 seconds, 5 minutes)[Api].isAlive().call().foreach { x ⇒
           if (x) {
             CoreUtils.setRoute(routes.connectionRoute)
             timer.now.foreach {
@@ -97,7 +97,7 @@ object ScriptClient {
       )
     ).render
 
-    post()[Api].restart().call()
+    Post()[Api].restart().call()
     dom.document.body.appendChild(restartedDiv)
   }
 

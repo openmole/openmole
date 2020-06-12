@@ -112,7 +112,7 @@ object TreeNodeTab {
 
   def save(safePath: SafePath, editorPanelUI: EditorPanelUI, afterSave: () ⇒ Unit) =
     editorPanelUI.synchronized {
-      post()[Api].saveFile(safePath, editorPanelUI.code).call().foreach { _ ⇒
+      Post()[Api].saveFile(safePath, editorPanelUI.code).call().foreach { _ ⇒
         afterSave()
       }
     }
@@ -167,7 +167,7 @@ object TreeNodeTab {
               unsetErrors
               compileDisabled.update(true)
               refresh(() ⇒
-                post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].compileScript(ScriptData(safePathTab.now)).call().foreach { errorDataOption ⇒
+                Post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].compileScript(ScriptData(safePathTab.now)).call().foreach { errorDataOption ⇒
                   setError(errorDataOption)
                 })
             })
@@ -176,7 +176,7 @@ object TreeNodeTab {
           button("Run", btn_primary, marginLeft := 10, onclick := { () ⇒
             unsetErrors
             refresh(() ⇒
-              post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePathTab.now), validateButton.position.now).call().foreach { execInfo ⇒
+              Post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePathTab.now), validateButton.position.now).call().foreach { execInfo ⇒
                 showExecution()
               }
             )
@@ -286,7 +286,7 @@ object TreeNodeTab {
         (cont: String) ⇒ {
           editableEditor.setCode(cont)
           if (isCSV) {
-            post()[Api].sequence(safePathTab.now).call().foreach {
+            Post()[Api].sequence(safePathTab.now).call().foreach {
               seq ⇒ switchView(seq)
             }
           }
@@ -675,11 +675,11 @@ class TreeNodeTabs {
 
   def saveAllTabs(onsave: () ⇒ Unit) = {
     //if(org.scalajs.dom.document.hasFocus())
-    org.openmole.gui.client.core.post()[Api].saveFiles(alterables).call().foreach { s ⇒ onsave() }
+    org.openmole.gui.client.core.Post()[Api].saveFiles(alterables).call().foreach { s ⇒ onsave() }
   }
 
   def checkTabs = tabs.now.foreach { t: TreeNodeTab ⇒
-    org.openmole.gui.client.core.post()[Api].exists(t.safePathTab.now).call().foreach { e ⇒
+    org.openmole.gui.client.core.Post()[Api].exists(t.safePathTab.now).call().foreach { e ⇒
       if (!e) remove(t)
     }
   }

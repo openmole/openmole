@@ -224,7 +224,7 @@ class ModelWizardPanel(treeNodeManager: TreeNodeManager, treeNodeTabs: TreeNodeT
           },
           UploadAbsolute(),
           () ⇒ {
-            post()[Api].extractAndTestExistence(tempFile ++ fileName, uploadPath.parent).call().foreach {
+            Post()[Api].extractAndTestExistence(tempFile ++ fileName, uploadPath.parent).call().foreach {
               existing ⇒
                 val fileType: FileType = uploadPath
                 val targetPath = fileType match {
@@ -234,10 +234,10 @@ class ModelWizardPanel(treeNodeManager: TreeNodeManager, treeNodeTabs: TreeNodeT
 
                 // Move files from tmp to target path
                 if (existing.isEmpty) {
-                  post()[Api].copyAllTmpTo(tempFile, targetPath).call().foreach {
+                  Post()[Api].copyAllTmpTo(tempFile, targetPath).call().foreach {
                     b ⇒
                       fileToUploadPath() = Some(uploadPath)
-                      post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
+                      Post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
                   }
                 }
                 else {
@@ -248,11 +248,11 @@ class ModelWizardPanel(treeNodeManager: TreeNodeManager, treeNodeTabs: TreeNodeT
                       optionsDiv.div
                     ),
                     () ⇒ {
-                      post()[Api].copyFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/ ).call().foreach {
+                      Post()[Api].copyFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/ ).call().foreach {
                         b ⇒
                           //buildForm(uploadPath)
                           fileToUploadPath() = Some(uploadPath)
-                          post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
+                          Post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
                       }
                     }, () ⇒ {
                     }, buttonGroupClass = "right"
@@ -282,7 +282,7 @@ class ModelWizardPanel(treeNodeManager: TreeNodeManager, treeNodeTabs: TreeNodeT
     pathFileType match {
       case Archive ⇒
         currentPluginPanel() = None
-        post()[Api].models(safePath).call().foreach {
+        Post()[Api].models(safePath).call().foreach {
           models ⇒
             modelSelector.setContents(models, () ⇒ {
               panels.treeNodePanel.refreshAnd(() ⇒
@@ -319,7 +319,7 @@ class ModelWizardPanel(treeNodeManager: TreeNodeManager, treeNodeTabs: TreeNodeT
       mp ⇒
         val modelName = mp.name
         val resourceDir = mp.parent
-        post()[Api].listFiles(resourceDir).call().foreach {
+        Post()[Api].listFiles(resourceDir).call().foreach {
           b ⇒
             val l = b.list.filterNot {
               _.name == modelName
@@ -329,7 +329,7 @@ class ModelWizardPanel(treeNodeManager: TreeNodeManager, treeNodeTabs: TreeNodeT
                 Resource(sp, 0L)
             }
             resources() = resources.now.copy(implicits = l, number = l.size)
-            post()[Api].expandResources(resources.now).call().foreach {
+            Post()[Api].expandResources(resources.now).call().foreach {
               lf ⇒
                 resources() = lf
             }

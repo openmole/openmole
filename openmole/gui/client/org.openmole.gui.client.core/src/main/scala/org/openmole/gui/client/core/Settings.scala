@@ -26,5 +26,5 @@ import boopickle.Default._
 
 object Settings {
 
-  val settings: Future[OMSettings] = post()[Api].settings().call()
+  val settings: Future[OMSettings] = Post()[Api].settings().call()
 }
