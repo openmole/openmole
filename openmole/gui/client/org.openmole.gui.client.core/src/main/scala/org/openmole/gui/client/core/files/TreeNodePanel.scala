@@ -43,7 +43,7 @@ import scaladget.bootstrapnative.Popup.Manual
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class TreeNodePanel(val manager: TreeNodeManager, fileDisplayer: FileDisplayer) {
+class TreeNodePanel(val manager: TreeNodeManager, fileDisplayer: FileDisplayer, showExecution: () ⇒ Unit) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val selectionMode = Var(false)
@@ -351,7 +351,7 @@ class TreeNodePanel(val manager: TreeNodeManager, fileDisplayer: FileDisplayer) 
 
     def addToSelection: Unit = addToSelection(!treeStates.now.selected)
 
-    val toolBox = FileToolBox(tnSafePath)
+    val toolBox = new FileToolBox(tnSafePath, showExecution)
 
     def inPopover(element: HTMLElement) = {
       val popClass = "popover"

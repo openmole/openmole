@@ -43,15 +43,11 @@ object FileToolBox {
     val toScript: FileAction = "to-script"
   }
 
-  def apply(initSafePath: SafePath) = {
-    new FileToolBox(initSafePath)
-  }
-
 }
 
 import FileToolBox._
 
-class FileToolBox(initSafePath: SafePath) {
+class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit) {
 
   import scaladget.tools._
 
@@ -157,7 +153,7 @@ class FileToolBox(initSafePath: SafePath) {
             withSafePath { sp ⇒
               post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(sp), true).call().foreach { execInfo ⇒
                 Popover.hide
-                org.openmole.gui.client.core.panels.executionPanel.dialog.show
+                showExecution()
               }
             }
             true

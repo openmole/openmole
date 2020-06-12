@@ -21,15 +21,13 @@ import scala.scalajs.js.timers
 import scala.scalajs.js.timers.SetTimeoutHandle
 
 object JobTable {
-  def apply(executionId: ExecutionId) = new JobTable(executionId)
-
   private def displaySize(size: Long, readable: String, operations: Int) =
     if (size > 0) s"$operations ($readable)" else s"$operations"
 }
 
 import JobTable._
 
-class JobTable(executionId: ExecutionId) {
+class JobTable(executionId: ExecutionId, executionPanel: ExecutionPanel) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
@@ -70,7 +68,7 @@ class JobTable(executionId: ExecutionId) {
 
   def delay: SetTimeoutHandle = {
     timers.setTimeout(8000) {
-      panels.executionPanel.executionInfo.now.filter(_._1 == executionId).map {
+      executionPanel.executionInfo.now.filter(_._1 == executionId).map {
         _._2
       }.headOption.foreach { e ⇒
         executionInfo() = Some(e)

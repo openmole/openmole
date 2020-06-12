@@ -294,7 +294,7 @@ class ExecutionPanel {
   )
 
   def jobTable(id: ExecutionId) = {
-    val jTable = JobTable(id)
+    val jTable = new JobTable(id, this)
     jobTables() = jobTables.now.updated(id, jTable)
     jTable
   }

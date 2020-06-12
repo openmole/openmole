@@ -117,7 +117,7 @@ object TreeNodeTab {
       }
     }
 
-  def oms(safePath: SafePath, initialContent: String) = new TreeNodeTab {
+  def oms(safePath: SafePath, initialContent: String, showExecution: () ⇒ Unit) = new TreeNodeTab {
 
     lazy val safePathTab = Var(safePath)
     lazy val omsEditor = EditorPanelUI(safePath, FileExtension.OMS, initialContent)
@@ -177,8 +177,9 @@ object TreeNodeTab {
             unsetErrors
             refresh(() ⇒
               post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePathTab.now), validateButton.position.now).call().foreach { execInfo ⇒
-                org.openmole.gui.client.core.panels.executionPanel.dialog.show
-              })
+                showExecution()
+              }
+            )
           }),
           Rx {
             if (runOption()) div(display.flex, flexDirection.row)(
