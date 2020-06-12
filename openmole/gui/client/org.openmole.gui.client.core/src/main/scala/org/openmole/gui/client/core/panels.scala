@@ -31,4 +31,6 @@ object panels {
   lazy val marketPanel = new MarketPanel(treeNodeManager)
   lazy val pluginPanel = new PluginPanel
   lazy val stackPanel = new TextPanel("Error stack")
+  lazy val settingsView = new SettingsView
+  lazy val connection = new Connection
 }

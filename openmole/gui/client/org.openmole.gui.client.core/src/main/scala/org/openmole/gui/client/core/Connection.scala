@@ -25,7 +25,7 @@ import scalatags.JsDom.tags
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object Connection {
+class Connection {
 
   lazy val connectButton = tags.button("Connect", btn_primary, `type` := "submit").render
 
@@ -51,7 +51,7 @@ object Connection {
 
   val render = {
     div(
-      SettingsView.renderConnection,
+      panels.settingsView.renderConnection,
       div(omsheet.connectionTabOverlay)(
         div(
           img(src := "img/openmole.png", omsheet.openmoleLogo),

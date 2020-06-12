@@ -49,7 +49,7 @@ object ScriptClient {
   def connection(): Unit =
     dom.document.body.appendChild(
       div(
-        Connection.render,
+        panels.connection.render,
         alert
       ).render
     )
@@ -133,7 +133,7 @@ object ScriptClient {
 
       val envItem = navItem(div(glyph_exclamation, itemStyle).render, () ⇒ stackPanel.open)
 
-      val settingsItem = navItem(div(SettingsView.renderApp, itemStyle).render, () ⇒ {}).right
+      val settingsItem = navItem(div(panels.settingsView.renderApp, itemStyle).render, () ⇒ {}).right
 
       val actionItem = navItem(div(
         Rx {
@@ -141,10 +141,9 @@ object ScriptClient {
         }).render)
 
       dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
-        if ((k.keyCode == 83 && k.ctrlKey)) {
+        if (k.keyCode == 83 && k.ctrlKey) {
           k.preventDefault
           false
-
         }
       }
 

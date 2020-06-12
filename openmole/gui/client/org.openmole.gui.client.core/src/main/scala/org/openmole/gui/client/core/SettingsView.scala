@@ -40,7 +40,7 @@ import scalatags.JsDom.all._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object SettingsView {
+class SettingsView {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val jvmInfos: Var[Option[JVMInfos]] = Var(None)
