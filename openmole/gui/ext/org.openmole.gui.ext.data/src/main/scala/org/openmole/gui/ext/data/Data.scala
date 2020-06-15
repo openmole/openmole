@@ -112,13 +112,8 @@ package object data {
     def displayable: Boolean
   }
 
-  trait HighlightedFile {
-    def highlighter: String
-  }
-
-  object OpenMOLEScript extends FileExtension with HighlightedFile {
+  object OpenMOLEScript extends FileExtension {
     val displayable = true
-    val highlighter = "openmole"
   }
 
   object OpenMOLEResult extends FileExtension {
@@ -133,7 +128,7 @@ package object data {
     val displayable = true
   }
 
-  case class EditableFile(highlighter: String, onDemand: Boolean = false) extends FileExtension with HighlightedFile {
+  case class EditableFile(highlighter: String, onDemand: Boolean = false) extends FileExtension {
     val displayable = true
   }
 

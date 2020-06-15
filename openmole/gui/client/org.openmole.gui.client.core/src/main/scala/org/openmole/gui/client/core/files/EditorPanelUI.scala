@@ -53,6 +53,16 @@ object EditorPanelUI {
   private def editor(safePath: SafePath, initCode: String = "", language: FileExtension, containerModifierSeq: ModifierSeq) =
     new EditorPanelUI(safePath, initCode, language, containerModifierSeq)
 
+  object HighlightedFile {
+    def apply(ext: FileExtension): Option[HighlightedFile] =
+      ext match {
+        case OpenMOLEScript  ⇒ Some(HighlightedFile("openmole"))
+        case e: EditableFile ⇒ Some(HighlightedFile(e.highlighter))
+        case _               ⇒ None
+      }
+  }
+  case class HighlightedFile(highlighter: String)
+
 }
 
 class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtension, containerModifierSeq: ModifierSeq) {
@@ -64,9 +74,8 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
   lazy val editor = {
     val ed = ace.edit(editorDiv)
 
-    fileType match {
-      case ef: HighlightedFile ⇒ ed.getSession().setMode("ace/mode/" + ef.highlighter)
-      case _                   ⇒
+    EditorPanelUI.HighlightedFile(fileType).foreach { h ⇒
+      ed.getSession().setMode("ace/mode/" + h)
     }
 
     ed.getSession().setValue(initCode)
