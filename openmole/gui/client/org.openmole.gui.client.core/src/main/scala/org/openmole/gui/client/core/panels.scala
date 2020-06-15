@@ -61,6 +61,9 @@ object panels {
   lazy val settingsView = new SettingsView(fileDisplayer)
   lazy val connection = new Connection
 
-  lazy val bannerAlert = new BannerAlert
+  lazy val bannerAlert =
+    new BannerAlert(
+      resizeTabs = () ⇒ treeNodeTabs.tabs.now.foreach { t ⇒ t.resizeEditor }
+    )
 
 }

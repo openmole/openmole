@@ -17,6 +17,7 @@ package org.openmole.gui.client.core.alert
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.client.core.files.TreeNodeTabs
 import org.openmole.gui.client.core.panels.stackPanel
 import rx._
 import scalatags.JsDom.all._
@@ -38,7 +39,7 @@ sealed trait BannerLevel
 
 case class BannerMessage(messageDiv: TypedTag[HTMLDivElement], bannerLevel: BannerLevel)
 
-class BannerAlert {
+class BannerAlert(resizeTabs: () ⇒ Unit) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
@@ -60,9 +61,7 @@ class BannerAlert {
   )(height := 70)
 
   lazy val banner = isOpen.expandDiv(bannerDiv, () ⇒ {
-    org.openmole.gui.client.core.panels.treeNodeTabs.tabs.now.foreach { t ⇒
-      t.resizeEditor
-    }
+    resizeTabs()
   })
 
   def clear = bannerMessages() = Seq()
