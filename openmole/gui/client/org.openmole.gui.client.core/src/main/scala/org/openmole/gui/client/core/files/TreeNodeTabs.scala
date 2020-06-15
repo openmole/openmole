@@ -35,34 +35,30 @@ import scala.scalajs.js.timers._
 object TreeNodeTabs {
 
   sealed trait Activity
-
   object Active extends Activity
-
   object UnActive extends Activity
 
-  val omsErrorCache =
-    //collection.mutable.HashMap[SafePath, Seq[(ErrorWithLocation, String)]]()
-    Var(HashMap[SafePath, EditorErrors]())
+  private def findOMSTab(safePath: SafePath) = panels.treeNodeTabs.find(safePath).collect { case x: TreeNodeTab.OMS ⇒ x }
 
-  //  def cache(sp: SafePath, editorErrors: EditorErrors) = {
-  //    omsErrorCache.update(omsErrorCache.now.updated(sp, editorErrors))
-  //  }
+  def errors(safePath: SafePath): Rx[Seq[ErrorFromCompiler]] =
+    findOMSTab(safePath).map { oms ⇒
+      oms.omsErrorCache.map(_.errorsFromCompiler)
+    }.getOrElse(Rx(Seq()))
 
-  def errors(safePath: SafePath)(implicit ctx: Ctx.Owner): Rx[Seq[ErrorFromCompiler]] = omsErrorCache.map {
-    _.get(safePath).map { ee ⇒ ee.errorsFromCompiler }.getOrElse(Seq())
-  }
+  def errorsInEditor(safePath: SafePath): Rx[Seq[Int]] =
+    findOMSTab(safePath).collect { case x: TreeNodeTab.OMS ⇒ x }.map { oms ⇒
+      oms.omsErrorCache.map(_.errorsInEditor)
+    }.getOrElse(Rx(Seq()))
 
-  def errorsInEditor(safePath: SafePath)(implicit ctx: Ctx.Owner): Rx[Seq[Int]] = omsErrorCache.map {
-    _.get(safePath).map { ee ⇒ ee.errorsInEditor }.getOrElse(Seq())
-  }
+  def updateErrorsInEditor(safePath: SafePath, n: Seq[Int]) =
+    findOMSTab(safePath).foreach { oms ⇒
+      oms.omsErrorCache() = oms.omsErrorCache.now.copy(errorsInEditor = n)
+    }
 
-  def updateErrorsInEditor(safePath: SafePath, n: Seq[Int]) = {
-    omsErrorCache.update(omsErrorCache.now.updated(safePath, omsErrorCache.now.getOrElse(safePath, EditorErrors()).copy(errorsInEditor = n)))
-  }
-
-  def updateErrors(safePath: SafePath, errorsFromCompiler: Seq[ErrorFromCompiler]) = {
-    omsErrorCache.update(omsErrorCache.now.updated(safePath, omsErrorCache.now.getOrElse(safePath, EditorErrors()).copy(errorsFromCompiler = errorsFromCompiler)))
-  }
+  def updateErrors(safePath: SafePath, errorsFromCompiler: Seq[ErrorFromCompiler]) =
+    findOMSTab(safePath).foreach { oms ⇒
+      oms.omsErrorCache() = oms.omsErrorCache.now.copy(errorsFromCompiler = errorsFromCompiler)
+    }
 
   def setErrors(treeNodeTabs: TreeNodeTabs, safePath: SafePath, errors: Seq[ErrorWithLocation]) =
     for {
@@ -121,6 +117,8 @@ object TreeNodeTab {
     initialContent:  String,
     showExecution:   () ⇒ Unit,
     setEditorErrors: Seq[ErrorWithLocation] ⇒ Unit) extends TreeNodeTab {
+
+    val omsErrorCache = Var(EditorErrors())
 
     lazy val safePathTab = Var(safePath)
 

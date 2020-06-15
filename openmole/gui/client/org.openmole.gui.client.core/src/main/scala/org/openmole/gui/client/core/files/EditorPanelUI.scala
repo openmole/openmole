@@ -59,6 +59,8 @@ object EditorPanelUI {
 
 class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtension, containerModifierSeq: ModifierSeq) {
 
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
+
   val editorDiv = tags.div(id := "editor").render
   val editor = ace.edit(editorDiv)
 
