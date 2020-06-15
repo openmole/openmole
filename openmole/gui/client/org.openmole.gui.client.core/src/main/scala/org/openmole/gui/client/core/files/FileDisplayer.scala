@@ -59,10 +59,10 @@ class FileDisplayer(val treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) 
           case editableFile: EditableFile ⇒
             if (DataUtils.isCSV(safePath))
               Post()[Api].sequence(safePath).call().foreach { seq ⇒
-                treeNodeTabs add TreeNodeTab.Editable(safePath, content, DataTab.build(seq, view = TreeNodeTab.Table, editing = !editableFile.onDemand), Plotter.default)
+                treeNodeTabs add TreeNodeTab.Editable(treeNodeTabs, safePath, content, DataTab.build(seq, view = TreeNodeTab.Table, editing = !editableFile.onDemand), Plotter.default)
               }
             else {
-              treeNodeTabs add TreeNodeTab.Editable(safePath, content, DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw), Plotter.default)
+              treeNodeTabs add TreeNodeTab.Editable(treeNodeTabs, safePath, content, DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw), Plotter.default)
             }
           case _ ⇒ //FIXME for GUI workflows
         }

@@ -29,7 +29,6 @@ import rx._
 import scaladget.bootstrapnative.Selector.Options
 import scalatags.JsDom
 
-import scala.collection.immutable.HashMap
 import scala.scalajs.js.timers._
 
 object TreeNodeTabs {
@@ -76,8 +75,8 @@ object TreeNodeTabs {
       )
     }
 
-  def isActive(treeNodeTabs: TreeNodeTabs, safePath: SafePath)(implicit ctx: Ctx.Data) = {
-    treeNodeTabs.isActive(safePath)() == TreeNodeTabs.Active
+  def isActive(treeNodeTabs: TreeNodeTabs, safePath: SafePath) = {
+    treeNodeTabs.isActive(safePath).now == TreeNodeTabs.Active
   }
 }
 
@@ -118,7 +117,7 @@ sealed trait TreeNodeTab {
 
 object TreeNodeTab {
 
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
+  implicit val ctx = Ctx.Owner.safe()
 
   case class OMS(
     treeNodeTabs:    TreeNodeTabs,
@@ -131,7 +130,7 @@ object TreeNodeTab {
 
     lazy val safePathTab = Var(safePath)
 
-    lazy val omsEditor = EditorPanelUI(safePath, FileExtension.OMS, initialContent)
+    lazy val omsEditor = EditorPanelUI(safePath, () ⇒ TreeNodeTabs.isActive(treeNodeTabs, safePath), FileExtension.OMS, initialContent)
 
     def editor = Some(omsEditor)
 
@@ -206,6 +205,7 @@ object TreeNodeTab {
   }
 
   case class Editable(
+    treeNodeTabs:   TreeNodeTabs,
     safePath:       SafePath,
     initialContent: String,
     dataTab:        DataTab,
@@ -231,7 +231,7 @@ object TreeNodeTab {
     val dataNbColumns = dataTab.sequence.header.length
     val dataNbLines = filteredSequence.size
 
-    lazy val editableEditor = EditorPanelUI(safePath, extension, initialContent, if (isCSV) paddingBottom := 80 else emptyMod)
+    lazy val editableEditor = EditorPanelUI(safePath, () ⇒ TreeNodeTabs.isActive(treeNodeTabs, safePath), extension, initialContent, if (isCSV) paddingBottom := 80 else emptyMod)
 
     def editor = Some(editableEditor)
 
@@ -288,11 +288,11 @@ object TreeNodeTab {
       case _     ⇒ Table.toString
     }
 
-    def switchView(newSequence: SequenceData) = panels.treeNodeTabs.switchEditableTo(this, dataTab.copy(sequence = newSequence), Plotter.default)
+    def switchView(newSequence: SequenceData) = treeNodeTabs.switchEditableTo(this, dataTab.copy(sequence = newSequence), Plotter.default)
 
     def switchView(newView: EditableView) = {
 
-      def switch(editing: Boolean) = panels.treeNodeTabs.switchEditableTo(this, dataTab.copy(view = newView, editing = editing), plotter)
+      def switch(editing: Boolean) = treeNodeTabs.switchEditableTo(this, dataTab.copy(view = newView, editing = editing), plotter)
 
       newView match {
         case Table ⇒ switch(false)
@@ -306,21 +306,21 @@ object TreeNodeTab {
       }
     }
 
-    def toView(newFilter: RowFilter) = panels.treeNodeTabs.switchEditableTo(this, dataTab.copy(filter = newFilter), plotter)
+    def toView(newFilter: RowFilter) = treeNodeTabs.switchEditableTo(this, dataTab.copy(filter = newFilter), plotter)
 
     def toView(newAxis: Seq[Int]) =
-      panels.treeNodeTabs.switchEditableTo(this, dataTab, plotter.copy(toBePlotted = ToBePloted(newAxis) /*, error = afe*/ ))
+      treeNodeTabs.switchEditableTo(this, dataTab, plotter.copy(toBePlotted = ToBePloted(newAxis) /*, error = afe*/ ))
 
     def toView(plotDimension: PlotDimension, newMode: PlotMode) = {
 
       val newPlotter = Plotter.toBePlotted(plotter.copy(plotDimension = plotDimension, plotMode = newMode), dataTab.sequence)
-      panels.treeNodeTabs.switchEditableTo(this, dataTab.copy(view = Plot), newPlotter._1)
+      treeNodeTabs.switchEditableTo(this, dataTab.copy(view = Plot), newPlotter._1)
     }
 
-    def toView(newError: Option[IndexedAxis]) = panels.treeNodeTabs.switchEditableTo(this, dataTab, plotter.copy(error = newError))
+    def toView(newError: Option[IndexedAxis]) = treeNodeTabs.switchEditableTo(this, dataTab, plotter.copy(error = newError))
 
     def toClosureView(newPlotClosure: Option[ClosureFilter]): Unit = {
-      panels.treeNodeTabs.switchEditableTo(this, dataTab, plotter.copy(closureFilter = newPlotClosure))
+      treeNodeTabs.switchEditableTo(this, dataTab, plotter.copy(closureFilter = newPlotClosure))
     }
 
     def plotterAndSeqencedata(dataTab: DataTab, plotter: Plotter) = {
@@ -631,11 +631,12 @@ class TreeNodeTabs {
     tab.activate
   }
 
-  def isActive(safePath: SafePath) = tabs.now.filter {
-    _.safePathTab.now == safePath
-  }.map {
-    _.activity
-  }.headOption.getOrElse(Var(TreeNodeTabs.UnActive))
+  def isActive(safePath: SafePath) =
+    tabs.now.filter {
+      _.safePathTab.now == safePath
+    }.map {
+      _.activity
+    }.headOption.getOrElse(Var(TreeNodeTabs.UnActive))
 
   def unActiveAll = tabs.foreach {
     _.foreach { t ⇒ t.desactivate }
@@ -658,7 +659,7 @@ class TreeNodeTabs {
   def remove(safePath: SafePath): Unit = find(safePath).map { remove }
 
   def switchEditableTo(tab: TreeNodeTab, dataTab: DataTab, plotter: Plotter) = {
-    val newTab = TreeNodeTab.Editable(tab.safePathTab.now, tab.editableContent.getOrElse(""), dataTab, plotter)
+    val newTab = TreeNodeTab.Editable(this, tab.safePathTab.now, tab.editableContent.getOrElse(""), dataTab, plotter)
     switchTab(tab, newTab)
   }
 

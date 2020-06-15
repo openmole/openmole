@@ -38,11 +38,11 @@ import rx._
 
 object EditorPanelUI {
 
-  def apply(safePath: SafePath, fileType: FileExtension, initCode: String, containerModifierSeq: ModifierSeq = emptyMod) =
+  def apply(safePath: SafePath, isActive: () ⇒ Boolean, fileType: FileExtension, initCode: String, containerModifierSeq: ModifierSeq = emptyMod) =
     fileType match {
-      case OMS   ⇒ new EditorPanelUI(safePath, initCode, OMS, containerModifierSeq)
-      case SCALA ⇒ new EditorPanelUI(safePath, initCode, SCALA, containerModifierSeq)
-      case _     ⇒ new EditorPanelUI(safePath, initCode, NO_EXTENSION, containerModifierSeq)
+      case OMS   ⇒ new EditorPanelUI(safePath, isActive, initCode, OMS, containerModifierSeq)
+      case SCALA ⇒ new EditorPanelUI(safePath, isActive, initCode, SCALA, containerModifierSeq)
+      case _     ⇒ new EditorPanelUI(safePath, isActive, initCode, NO_EXTENSION, containerModifierSeq)
     }
 
   def highlightedFile(ext: FileExtension): Option[HighlightedFile] =
@@ -55,7 +55,7 @@ object EditorPanelUI {
   case class HighlightedFile(highlighter: String)
 }
 
-class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtension, containerModifierSeq: ModifierSeq) {
+class EditorPanelUI(safePath: SafePath, isActive: () ⇒ Boolean, initCode: String, fileType: FileExtension, containerModifierSeq: ModifierSeq) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
@@ -124,7 +124,7 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
               val scrollAsLines = scrollTop() / lineHeight()
               val max = editor.renderer.getLastVisibleRow
 
-              if (extension == OMS && TreeNodeTabs.isActive(org.openmole.gui.client.core.panels.treeNodeTabs, safePath)) {
+              if (extension == OMS && isActive()) {
                 div(
                   for {
                     i ← TreeNodeTabs.errorsInEditor(safePath)().filter { e ⇒
