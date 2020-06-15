@@ -68,7 +68,7 @@ object TreeNodeTabs {
       editor.changed.update(false)
       TreeNodeTabs.updateErrors(
         safePath,
-        errors.map { ewl ⇒ ErrorFromCompiler(ewl, ewl.line.map { l ⇒ editor.session.doc.getLine(l) }.getOrElse("")) }
+        errors.map { ewl ⇒ ErrorFromCompiler(ewl, ewl.line.map { l ⇒ editor.editor.getSession().doc.getLine(l) }.getOrElse("")) }
       )
       TreeNodeTabs.updateErrorsInEditor(
         safePath,
@@ -131,11 +131,7 @@ object TreeNodeTab {
 
     lazy val safePathTab = Var(safePath)
 
-    lazy val omsEditor = {
-      val editor = EditorPanelUI(safePath, FileExtension.OMS, initialContent)
-      editor.initEditor
-      editor
-    }
+    lazy val omsEditor = EditorPanelUI(safePath, FileExtension.OMS, initialContent)
 
     def editor = Some(omsEditor)
 
@@ -235,11 +231,7 @@ object TreeNodeTab {
     val dataNbColumns = dataTab.sequence.header.length
     val dataNbLines = filteredSequence.size
 
-    lazy val editableEditor = {
-      val editor = EditorPanelUI(safePath, extension, initialContent, if (isCSV) paddingBottom := 80 else emptyMod)
-      editor.initEditor
-      editor
-    }
+    lazy val editableEditor = EditorPanelUI(safePath, extension, initialContent, if (isCSV) paddingBottom := 80 else emptyMod)
 
     def editor = Some(editableEditor)
 

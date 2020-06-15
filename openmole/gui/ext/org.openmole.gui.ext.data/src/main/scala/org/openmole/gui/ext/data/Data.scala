@@ -137,8 +137,6 @@ package object data {
     val displayable = true
   }
 
-
-
   object BinaryFile extends FileExtension {
     val displayable = false
   }
