@@ -89,16 +89,11 @@ sealed trait TreeNodeTab {
 
   def activate = {
     activity() = Active
-    onActivate()
   }
 
   def desactivate = {
     activity() = UnActive
-    onDesactivate()
   }
-
-  def onActivate: () ⇒ Unit = () ⇒ {}
-  def onDesactivate: () ⇒ Unit = () ⇒ {}
 
   def extension: FileExtension = FileExtension(safePathTab.now.name)
 
@@ -122,29 +117,22 @@ object TreeNodeTab {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
-  def save(safePath: SafePath, editorPanelUI: EditorPanelUI, afterSave: () ⇒ Unit) =
-    editorPanelUI.synchronized {
-      Post()[Api].saveFile(safePath, editorPanelUI.code).call().foreach { _ ⇒
-        afterSave()
-      }
-    }
-
-  def oms(
+  case class OMS(
     safePath:        SafePath,
     initialContent:  String,
     showExecution:   () ⇒ Unit,
-    setEditorErrors: Seq[ErrorWithLocation] ⇒ Unit) = new TreeNodeTab {
+    setEditorErrors: Seq[ErrorWithLocation] ⇒ Unit) extends TreeNodeTab {
 
     lazy val safePathTab = Var(safePath)
-    lazy val omsEditor = EditorPanelUI(safePath, FileExtension.OMS, initialContent)
+
+    lazy val omsEditor = {
+      val editor = EditorPanelUI(safePath, FileExtension.OMS, initialContent)
+      editor.initEditor
+      editor
+    }
 
     def editor = Some(omsEditor)
-
-    omsEditor.initEditor
-
     def editing = true
-
-    override def onActivate: () ⇒ Unit = () ⇒ {}
 
     def editableContent = Some(omsEditor.code)
     def refresh(onsaved: () ⇒ Unit) = save(safePathTab.now, omsEditor, onsaved)
@@ -203,24 +191,7 @@ object TreeNodeTab {
     lazy val block = omsEditor.view
   }
 
-  def rawBlock(htmlContent: String) =
-    div(editorContainer +++ container)(
-      div(panelClass +++ panelDefault)(
-        div(panelBody)(JsDom.RawFrag(htmlContent))
-      )
-    )
-
-  def mdBlock(htmlContent: String) =
-    div(editorContainer +++ container)(
-      div(panelClass +++ panelDefault)(
-        div(panelBody)(
-          ms("mdRendering") +++ (padding := 10),
-          JsDom.RawFrag(htmlContent)
-        )
-      )
-    )
-
-  def html(safePath: SafePath, _block: TypedTag[_ <: HTMLElement]) = new TreeNodeTab {
+  case class HTML(safePath: SafePath, _block: TypedTag[_ <: HTMLElement]) extends TreeNodeTab {
     lazy val safePathTab = Var(safePath)
 
     def editableContent = None
@@ -234,33 +205,11 @@ object TreeNodeTab {
     lazy val block: TypedTag[_ <: HTMLElement] = _block
   }
 
-  sealed trait EditableView {
-    toString: String
-  }
-
-  object Raw extends EditableView {
-    override def toString = "Raw"
-  }
-
-  object Table extends EditableView {
-    override def toString = "Table"
-  }
-
-  object Plot extends EditableView {
-    override def toString = "Plot"
-  }
-
-  sealed trait RowFilter
-  object First100 extends RowFilter
-  object Last100 extends RowFilter
-
-  object All extends RowFilter
-
-  def editable(
+  case class Editable(
     safePath:       SafePath,
     initialContent: String,
     dataTab:        DataTab,
-    plotter:        Plotter): TreeNodeTab = new TreeNodeTab {
+    plotter:        Plotter) extends TreeNodeTab {
 
     lazy val safePathTab = Var(safePath)
     lazy val isEditing = Var(dataTab.editing)
@@ -279,12 +228,13 @@ object TreeNodeTab {
     val dataNbColumns = dataTab.sequence.header.length
     val dataNbLines = filteredSequence.size
 
-    lazy val editableEditor = EditorPanelUI(safePath, extension, initialContent, if (isCSV) paddingBottom := 80 else emptyMod)
+    lazy val editableEditor = {
+      val editor = EditorPanelUI(safePath, extension, initialContent, if (isCSV) paddingBottom := 80 else emptyMod)
+      editor.initEditor
+      editor
+    }
 
     def editor = Some(editableEditor)
-
-    editableEditor.initEditor
-
     def editing = isEditing.now
 
     def download(afterRefresh: () ⇒ Unit): Unit = editor.synchronized {
@@ -588,6 +538,53 @@ object TreeNodeTab {
     }
 
   }
+
+  def save(safePath: SafePath, editorPanelUI: EditorPanelUI, afterSave: () ⇒ Unit) =
+    editorPanelUI.synchronized {
+      Post()[Api].saveFile(safePath, editorPanelUI.code).call().foreach { _ ⇒
+        afterSave()
+      }
+    }
+
+  def rawBlock(htmlContent: String) =
+    div(editorContainer +++ container)(
+      div(panelClass +++ panelDefault)(
+        div(panelBody)(JsDom.RawFrag(htmlContent))
+      )
+    )
+
+  def mdBlock(htmlContent: String) =
+    div(editorContainer +++ container)(
+      div(panelClass +++ panelDefault)(
+        div(panelBody)(
+          ms("mdRendering") +++ (padding := 10),
+          JsDom.RawFrag(htmlContent)
+        )
+      )
+    )
+
+  sealed trait EditableView {
+    toString: String
+  }
+
+  object Raw extends EditableView {
+    override def toString = "Raw"
+  }
+
+  object Table extends EditableView {
+    override def toString = "Table"
+  }
+
+  object Plot extends EditableView {
+    override def toString = "Plot"
+  }
+
+  sealed trait RowFilter
+  object First100 extends RowFilter
+  object Last100 extends RowFilter
+
+  object All extends RowFilter
+
 }
 
 case class DataTab(
@@ -661,7 +658,7 @@ class TreeNodeTabs {
   def remove(safePath: SafePath): Unit = find(safePath).map { remove }
 
   def switchEditableTo(tab: TreeNodeTab, dataTab: DataTab, plotter: Plotter) = {
-    val newTab = TreeNodeTab.editable(tab.safePathTab.now, tab.editableContent.getOrElse(""), dataTab, plotter)
+    val newTab = TreeNodeTab.Editable(tab.safePathTab.now, tab.editableContent.getOrElse(""), dataTab, plotter)
     switchTab(tab, newTab)
   }
 

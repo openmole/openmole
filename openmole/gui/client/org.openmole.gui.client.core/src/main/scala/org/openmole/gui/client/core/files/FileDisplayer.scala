@@ -40,29 +40,29 @@ class FileDisplayer(val treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) 
       case _ ⇒
         fileExtension match {
           case OpenMOLEScript ⇒
-            val tab = TreeNodeTab.oms(safePath, content, showExecution, TreeNodeTabs.setErrors(treeNodeTabs, safePath, _))
+            val tab = TreeNodeTab.OMS(safePath, content, showExecution, TreeNodeTabs.setErrors(treeNodeTabs, safePath, _))
             treeNodeTabs add tab
             tab.omsEditor.editor.focus
           case OpenMOLEResult ⇒
             Post()[Api].findAnalysisPlugin(safePath).call.foreach {
               case Some(plugin) ⇒
                 val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
-                val tab = TreeNodeTab.html(safePath, analysis.panel(safePath))
+                val tab = TreeNodeTab.HTML(safePath, analysis.panel(safePath))
                 treeNodeTabs add tab
               case None ⇒
             }
           case MDScript ⇒
             Post()[Api].mdToHtml(safePath).call().foreach { htmlString ⇒
-              treeNodeTabs add TreeNodeTab.html(safePath, TreeNodeTab.mdBlock(htmlString))
+              treeNodeTabs add TreeNodeTab.HTML(safePath, TreeNodeTab.mdBlock(htmlString))
             }
-          case SVGExtension ⇒ treeNodeTabs add TreeNodeTab.html(safePath, TreeNodeTab.rawBlock(content))
+          case SVGExtension ⇒ treeNodeTabs add TreeNodeTab.HTML(safePath, TreeNodeTab.rawBlock(content))
           case editableFile: EditableFile ⇒
             if (DataUtils.isCSV(safePath))
               Post()[Api].sequence(safePath).call().foreach { seq ⇒
-                treeNodeTabs add TreeNodeTab.editable(safePath, content, DataTab.build(seq, view = TreeNodeTab.Table, editing = !editableFile.onDemand), Plotter.default)
+                treeNodeTabs add TreeNodeTab.Editable(safePath, content, DataTab.build(seq, view = TreeNodeTab.Table, editing = !editableFile.onDemand), Plotter.default)
               }
             else {
-              treeNodeTabs add TreeNodeTab.editable(safePath, content, DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw), Plotter.default)
+              treeNodeTabs add TreeNodeTab.Editable(safePath, content, DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw), Plotter.default)
             }
           case _ ⇒ //FIXME for GUI workflows
         }
