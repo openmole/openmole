@@ -40,29 +40,19 @@ object EditorPanelUI {
 
   def apply(safePath: SafePath, fileType: FileExtension, initCode: String, containerModifierSeq: ModifierSeq = emptyMod) =
     fileType match {
-      case OMS   ⇒ editor(safePath, initCode, OMS, containerModifierSeq)
-      case SCALA ⇒ editor(safePath, initCode, SCALA, containerModifierSeq)
-      case _     ⇒ empty(safePath, initCode, containerModifierSeq)
+      case OMS   ⇒ new EditorPanelUI(safePath, initCode, OMS, containerModifierSeq)
+      case SCALA ⇒ new EditorPanelUI(safePath, initCode, SCALA, containerModifierSeq)
+      case _     ⇒ new EditorPanelUI(safePath, initCode, NO_EXTENSION, containerModifierSeq)
     }
 
-  def empty(
-    safePath:             SafePath,
-    initCode:             String,
-    containerModifierSeq: ModifierSeq) = new EditorPanelUI(safePath, initCode, NO_EXTENSION, containerModifierSeq)
+  def highlightedFile(ext: FileExtension): Option[HighlightedFile] =
+    ext match {
+      case OpenMOLEScript  ⇒ Some(HighlightedFile("openmole"))
+      case e: EditableFile ⇒ Some(HighlightedFile(e.highlighter))
+      case _               ⇒ None
+    }
 
-  private def editor(safePath: SafePath, initCode: String = "", language: FileExtension, containerModifierSeq: ModifierSeq) =
-    new EditorPanelUI(safePath, initCode, language, containerModifierSeq)
-
-  object HighlightedFile {
-    def apply(ext: FileExtension): Option[HighlightedFile] =
-      ext match {
-        case OpenMOLEScript  ⇒ Some(HighlightedFile("openmole"))
-        case e: EditableFile ⇒ Some(HighlightedFile(e.highlighter))
-        case _               ⇒ None
-      }
-  }
   case class HighlightedFile(highlighter: String)
-
 }
 
 class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtension, containerModifierSeq: ModifierSeq) {
@@ -74,7 +64,7 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
   lazy val editor = {
     val ed = ace.edit(editorDiv)
 
-    EditorPanelUI.HighlightedFile(fileType).foreach { h ⇒
+    EditorPanelUI.highlightedFile(fileType).foreach { h ⇒
       ed.getSession().setMode("ace/mode/" + h)
     }
 
