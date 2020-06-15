@@ -65,7 +65,15 @@ object TreeNodeTabs {
       tab ← treeNodeTabs.find(safePath)
       editor ← tab.editor
     } {
-      editor.setErrors(errors)
+      editor.changed.update(false)
+      TreeNodeTabs.updateErrors(
+        safePath,
+        errors.map { ewl ⇒ ErrorFromCompiler(ewl, ewl.line.map { l ⇒ editor.session.doc.getLine(l) }.getOrElse("")) }
+      )
+      TreeNodeTabs.updateErrorsInEditor(
+        safePath,
+        errors.flatMap { _.line }
+      )
     }
 
   def isActive(treeNodeTabs: TreeNodeTabs, safePath: SafePath)(implicit ctx: Ctx.Data) = {
@@ -113,6 +121,7 @@ object TreeNodeTab {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
   case class OMS(
+    treeNodeTabs:    TreeNodeTabs,
     safePath:        SafePath,
     initialContent:  String,
     showExecution:   () ⇒ Unit,
@@ -714,8 +723,8 @@ class TreeNodeTabs {
 
   }
 
-  def setErrors(path: SafePath, errors: Seq[ErrorWithLocation]) =
-    find(path).foreach { tab ⇒ tab.editor.foreach { _.setErrors(errors) } }
+  //  def setErrors(path: SafePath, errors: Seq[ErrorWithLocation]) =
+  //    find(path).foreach { tab ⇒ tab.editor.foreach { _.setErrors(errors) } }
 
   val fontSizeControl = div(display.flex, flexDirection.row, alignItems.baseline, justifyContent.flexEnd)(
     fontSizeLink(15),

@@ -27,7 +27,7 @@ object panels {
 
   lazy val executionPanel =
     new ExecutionPanel(
-      setEditorErrors = treeNodeTabs.setErrors,
+      setEditorErrors = TreeNodeTabs.setErrors(treeNodeTabs, _, _),
       bannerAlert = bannerAlert)
 
   lazy val treeNodeTabs = new TreeNodeTabs()

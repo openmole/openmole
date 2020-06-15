@@ -53,8 +53,6 @@ object EditorPanelUI {
   private def editor(safePath: SafePath, initCode: String = "", language: FileExtension, containerModifierSeq: ModifierSeq) =
     new EditorPanelUI(safePath, initCode, language, containerModifierSeq)
 
-  //def sh(initCode: String = "") = EditorPanelUI(SH, initCode)
-
 }
 
 class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtension, containerModifierSeq: ModifierSeq) {
@@ -96,11 +94,11 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
               if (extension == OMS && TreeNodeTabs.isActive(org.openmole.gui.client.core.panels.treeNodeTabs, safePath)) {
                 div(
                   for {
-                    i ← errorsInEditor().filter { e ⇒
+                    i ← TreeNodeTabs.errorsInEditor(safePath)().filter { e ⇒
                       e > scrollAsLines && e < max
                     }
                   } yield {
-                    errors().find(_.errorWithLocation.line == Some(i)).map { e ⇒
+                    TreeNodeTabs.errors(safePath)().find(_.errorWithLocation.line == Some(i)).map { e ⇒
                       e.errorWithLocation.line.map { l ⇒
                         buildManualPopover(l, (i - scrollAsLines) * lineHeight() - (lineHeight() - 15), span(e.errorWithLocation.stackTrace), Popup.Left)
                       }.getOrElse(div.render)
@@ -114,19 +112,6 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
         )
       )
     )
-  }
-
-  def errors = TreeNodeTabs.errors(safePath)
-
-  def errorsInEditor = TreeNodeTabs.errorsInEditor(safePath)
-
-  def setErrors(errorsWithLocation: Seq[ErrorWithLocation]): Unit = {
-    changed.update(false)
-    TreeNodeTabs.updateErrors(safePath, errorsWithLocation.map { ewl ⇒ ErrorFromCompiler(ewl, ewl.line.map { l ⇒ session.doc.getLine(l) }.getOrElse("")) })
-    TreeNodeTabs.updateErrorsInEditor(safePath, errorsWithLocation.flatMap {
-      _.line
-    })
-
   }
 
   def session = editor.getSession()
