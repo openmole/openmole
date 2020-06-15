@@ -26,14 +26,21 @@ import scaladget.tools._
 import autowire._
 import org.openmole.gui.ext.tool.client
 import org.scalajs.dom.raw.HTMLElement
-import scaladget.bootstrapnative.{ SelectableButtons, ToggleButton }
+import scaladget.bootstrapnative.{ ToggleButton }
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
+import scala.scalajs.js
 
-@JSExportTopLevel("NetlogoWizardFactory")
+object TopLevelExports {
+  @JSExportTopLevel("netlogo")
+  val netlogo = js.Object {
+    new org.openmole.gui.plugin.wizard.netlogo.NetlogoWizardFactory
+  }
+}
+
 class NetlogoWizardFactory extends WizardPluginFactory {
   type WizardType = NetlogoWizardData
 
@@ -48,7 +55,6 @@ class NetlogoWizardFactory extends WizardPluginFactory {
   def name: String = "NetLogo"
 }
 
-@JSExportTopLevel("NetlogoWizardGUI")
 class NetlogoWizardGUI extends WizardGUIPlugin {
   type WizardType = NetlogoWizardData
 

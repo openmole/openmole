@@ -118,10 +118,12 @@ object ScriptClient {
   def run(): Unit = {
     implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
+    println("RUM")
     Plugins.fetch { _ ⇒
       val maindiv = div()
       //  val settingsView = new SettingsView
 
+      println("in FETECH")
       val authenticationPanel = new AuthenticationPanel
 
       val openFileTree = Var(true)
@@ -215,6 +217,7 @@ object ScriptClient {
 
       // Define the option sequence
 
+      println("BEFOR SETTINGS")
       Settings.settings.map { sets ⇒
         dom.document.body.appendChild(
           div(

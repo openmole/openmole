@@ -17,12 +17,14 @@ package org.openmole.gui.ext.tool.client
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.ext.data.GUIPluginFactory
 import org.scalajs.dom.raw.{ Event, HTMLElement }
 import scalatags.JsDom.all._
 import rx._
 import scalatags.JsDom.TypedTag
 import scaladget.tools._
 
+import scala.scalajs.js
 import scala.scalajs.js.Date
 
 object Utils {
@@ -45,6 +47,10 @@ object Utils {
 
       expanded
     }
+  }
+
+  def toJSObject(pluginFactory: GUIPluginFactory) = new js.Object {
+    val factory = pluginFactory
   }
 
 }

@@ -20,9 +20,7 @@ package org.openmole.gui.plugin.authentication.egi
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory }
 import org.openmole.gui.ext.tool.client.{ FileUploaderUI, OMPost }
-
 import scaladget.bootstrapnative.bsn._
-
 import boopickle.Default._
 import autowire._
 
@@ -30,7 +28,15 @@ import scala.concurrent.Future
 import scala.scalajs.js.annotation._
 import scalatags.JsDom.all._
 
-@JSExportTopLevel("EGIAuthenticationGUIFactory")
+import scala.scalajs.js
+
+object TopLevelExports {
+  @JSExportTopLevel("egi")
+  val egi = js.Object {
+    new org.openmole.gui.plugin.authentication.egi.EGIAuthenticationGUIFactory
+  }
+}
+
 class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory {
   type AuthType = EGIAuthenticationData
 
@@ -43,7 +49,6 @@ class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory {
   def getData: Future[Seq[AuthType]] = OMPost()[EGIAuthenticationAPI].egiAuthentications().call()
 }
 
-@JSExportTopLevel("EGIAuthenticationGUI")
 class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationData()) extends AuthenticationPlugin {
   type AuthType = EGIAuthenticationData
 

@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.data.{ AllPluginExtensionData, AuthenticationPluginFactory, WizardPluginFactory }
+import org.openmole.gui.ext.data.{ AllPluginExtensionData, AuthenticationPluginFactory, GUIPluginFactory, WizardPluginFactory }
 import autowire._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -9,6 +9,7 @@ import boopickle.Default._
 import rx._
 
 import scala.scalajs.js
+import scala.scalajs.js.annotation.JSExportTopLevel
 /*
  * Copyright (C) 30/11/16 // mathieu.leclaire@openmole.org
  *
@@ -33,18 +34,14 @@ object Plugins {
 
   def fetch(f: AllPluginExtensionData ⇒ Unit) = {
     post()[Api].getGUIPlugins.call().foreach { p ⇒
-      authenticationFactories() = p.authentications.map { gp ⇒ Plugins.buildJSObject(gp.jsObject).asInstanceOf[AuthenticationPluginFactory] }
+      authenticationFactories() = p.authentications.map { gp ⇒
+        Plugins.buildJSObject(gp.jsObject).asInstanceOf[AuthenticationPluginFactory]
+      }
       wizardFactories() = p.wizards.map { gp ⇒ Plugins.buildJSObject(gp.jsObject).asInstanceOf[WizardPluginFactory] }
       f(p)
     }
   }
-
   def buildJSObject(obj: String) = {
-    scalajs.js.eval(s"new $obj")
+    scalajs.js.eval(s"${obj.split('.').takeRight(2).head}")
   }
-
-  //  def buildAndLoad = post()[Api].loadPlugins().call.foreach { _ ⇒
-  //    org.scalajs.dom.document.location.reload(true)
-  //
-  //  }
 }

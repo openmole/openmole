@@ -18,24 +18,21 @@
 package org.openmole.gui.plugin.authentication.desktopgrid
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory }
+import org.openmole.gui.ext.data.{AuthenticationPlugin, AuthenticationPluginFactory}
 import org.openmole.gui.ext.tool.client.OMPost
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
-
-import autowire._
-import sheet._
-import bs._
 import org.scalajs.dom.raw.HTMLElement
 import org.openmole.gui.ext.data._
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
-import scalatags.JsDom.TypedTag
-import scalatags.JsDom.all._
 
-@JSExportTopLevel("DesktopGridAuthenticationFactory")
+object TopLevelExports {
+  @JSExportTopLevel("desktopgrid")
+  val desktopgrid = js.Object {
+    new org.openmole.gui.plugin.authentication.desktopgrid.DesktopGridAuthenticationFactory
+  }
+}
+
 class DesktopGridAuthenticationFactory extends AuthenticationPluginFactory {
   type AuthType = DesktopGridAuthenticationData
 
@@ -48,7 +45,6 @@ class DesktopGridAuthenticationFactory extends AuthenticationPluginFactory {
   def getData: Future[Seq[AuthType]] = OMPost()[DesktopGridAuthenticationAPI].desktopGridAuthentications().call()
 }
 
-@JSExportTopLevel("DesktopGridAuthenticationGUI")
 class DesktopGridAuthenticationGUI(val data: DesktopGridAuthenticationData = DesktopGridAuthenticationData()) extends AuthenticationPlugin {
   type AuthType = DesktopGridAuthenticationData
 

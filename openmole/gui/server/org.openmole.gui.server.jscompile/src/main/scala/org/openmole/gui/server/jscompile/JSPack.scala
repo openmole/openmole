@@ -51,7 +51,7 @@ object JSPack {
 
         linker = StandardImpl.linker(config)
         _ ← linker.link(sjsirFiles, Nil, LinkerOutput(PathOutputFile(outputJSFile.toPath)), NullLogger)
-      } yield () )
+      } yield ())
 
       Await.result(result, Duration.Inf)
     }

@@ -23,18 +23,24 @@ import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFac
 import org.openmole.gui.ext.tool.client.OMPost
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
-
 import autowire._
-
 import org.scalajs.dom.raw.HTMLElement
 import org.openmole.gui.ext.data._
+import org.openmole.gui.ext.tool.client
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
+import scalajs.js
 
-@JSExportTopLevel("LoginAuthenticationFactory")
+object TopLevelExports {
+  @JSExportTopLevel("sshlogin")
+  val sshlogin = js.Object {
+    new org.openmole.gui.plugin.authentication.sshlogin.LoginAuthenticationFactory
+  }
+}
+
 class LoginAuthenticationFactory extends AuthenticationPluginFactory {
   type AuthType = LoginAuthenticationData
 
@@ -47,7 +53,6 @@ class LoginAuthenticationFactory extends AuthenticationPluginFactory {
   def getData: Future[Seq[AuthType]] = OMPost()[LoginAuthenticationAPI].loginAuthentications().call()
 }
 
-@JSExportTopLevel("LoginAuthenticationGUI")
 class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthenticationData()) extends AuthenticationPlugin {
   type AuthType = LoginAuthenticationData
 

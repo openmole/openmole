@@ -32,7 +32,15 @@ import scala.scalajs.js.annotation._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 
-@JSExportTopLevel("RWizardFactory")
+import scala.scalajs.js
+
+object TopLevelExports {
+  @JSExportTopLevel("r")
+  val r = js.Object {
+    new org.openmole.gui.plugin.wizard.r.RWizardFactory
+  }
+}
+
 class RWizardFactory extends WizardPluginFactory {
   val fileType = CodeFile(RLanguage())
 
@@ -45,7 +53,6 @@ class RWizardFactory extends WizardPluginFactory {
 
 case class RWizardData() extends WizardData
 
-@JSExportTopLevel("RWizardGUI")
 class RWizardGUI extends WizardGUIPlugin {
 
   def factory = new RWizardFactory

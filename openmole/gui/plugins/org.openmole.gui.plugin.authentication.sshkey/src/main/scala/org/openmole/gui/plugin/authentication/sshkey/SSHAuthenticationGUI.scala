@@ -21,17 +21,23 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory }
 import org.openmole.gui.ext.tool.client.{ FileUploaderUI, OMPost }
-
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
-
 import autowire._
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
 import scalatags.JsDom.all._
 
-@JSExportTopLevel("PrivateKeyAuthenticationFactory")
+import scala.scalajs.js
+
+object TopLevelExports {
+  @JSExportTopLevel("sshkey")
+  val sshkey = js.Object {
+    new org.openmole.gui.plugin.authentication.sshkey.PrivateKeyAuthenticationFactory
+  }
+}
+
 class PrivateKeyAuthenticationFactory extends AuthenticationPluginFactory {
   type AuthType = PrivateKeyAuthenticationData
 
@@ -44,7 +50,6 @@ class PrivateKeyAuthenticationFactory extends AuthenticationPluginFactory {
   def getData: Future[Seq[AuthType]] = OMPost()[PrivateKeyAuthenticationAPI].privateKeyAuthentications().call()
 }
 
-@JSExportTopLevel("PrivateKeyAuthenticationGUI")
 class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = PrivateKeyAuthenticationData()) extends AuthenticationPlugin {
   type AuthType = PrivateKeyAuthenticationData
 

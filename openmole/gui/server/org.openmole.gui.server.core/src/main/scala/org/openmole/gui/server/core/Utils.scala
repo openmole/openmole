@@ -341,8 +341,6 @@ object Utils extends JavaLogger {
     def update = {
       logger.info("Building GUI plugins ...")
       jsFile.delete
-      println("jsPlugin directory " + jsPluginDirectory.getAbsolutePath)
-      println("js file " + jsFile.getAbsolutePath)
       JSPack.link(jsPluginDirectory, jsFile, optimizedJS)
     }
 
