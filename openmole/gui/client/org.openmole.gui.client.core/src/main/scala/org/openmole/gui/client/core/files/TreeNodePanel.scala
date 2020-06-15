@@ -487,13 +487,13 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
       dragged ⇒
         if (isDir) {
           if (dragged != to) {
-            panels.treeNodeTabs.saveAllTabs(() ⇒ {
+            treeNodeTabs.saveAllTabs(() ⇒ {
               Post()[Api].move(dragged, to).call().foreach {
                 b ⇒
                   treeNodeManager.invalidCache(to)
                   treeNodeManager.invalidCache(dragged)
                   refreshAndDraw
-                  panels.treeNodeTabs.checkTabs
+                  treeNodeTabs.checkTabs
               }
             })
           }

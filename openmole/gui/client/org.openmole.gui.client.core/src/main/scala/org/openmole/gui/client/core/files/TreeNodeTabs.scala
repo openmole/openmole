@@ -37,47 +37,34 @@ object TreeNodeTabs {
   object Active extends Activity
   object UnActive extends Activity
 
-  private def findOMSTab(safePath: SafePath) = panels.treeNodeTabs.find(safePath).collect { case x: TreeNodeTab.OMS ⇒ x }
+  private def findOMSTab(treeNodeTabs: TreeNodeTabs, safePath: SafePath) =
+    treeNodeTabs.find(safePath).collect { case x: TreeNodeTab.OMS ⇒ x }
 
-  def errors(safePath: SafePath): Rx[Seq[ErrorFromCompiler]] =
-    findOMSTab(safePath).map { oms ⇒
-      oms.omsErrorCache.map(_.errorsFromCompiler)
+  def errorsFromCompiler(treeNodeTabs: TreeNodeTabs, safePath: SafePath): Rx[Seq[ErrorFromCompiler]] =
+    findOMSTab(treeNodeTabs, safePath).map { oms ⇒
+      oms.errors.map(_.errorsFromCompiler)
     }.getOrElse(Rx(Seq()))
 
-  def errorsInEditor(safePath: SafePath): Rx[Seq[Int]] =
-    findOMSTab(safePath).collect { case x: TreeNodeTab.OMS ⇒ x }.map { oms ⇒
-      oms.omsErrorCache.map(_.errorsInEditor)
+  def errorsInEditor(treeNodeTabs: TreeNodeTabs, safePath: SafePath): Rx[Seq[Int]] =
+    findOMSTab(treeNodeTabs, safePath).collect { case x: TreeNodeTab.OMS ⇒ x }.map { oms ⇒
+      oms.errors.map(_.errorsInEditor)
     }.getOrElse(Rx(Seq()))
 
-  def updateErrorsInEditor(safePath: SafePath, n: Seq[Int]) =
-    findOMSTab(safePath).foreach { oms ⇒
-      oms.omsErrorCache() = oms.omsErrorCache.now.copy(errorsInEditor = n)
-    }
-
-  def updateErrors(safePath: SafePath, errorsFromCompiler: Seq[ErrorFromCompiler]) =
-    findOMSTab(safePath).foreach { oms ⇒
-      oms.omsErrorCache() = oms.omsErrorCache.now.copy(errorsFromCompiler = errorsFromCompiler)
-    }
+  def errors(treeNodeTabs: TreeNodeTabs, safePath: SafePath) =
+    findOMSTab(treeNodeTabs, safePath).map(_.errors).getOrElse(Rx(EditorErrors()))
 
   def setErrors(treeNodeTabs: TreeNodeTabs, safePath: SafePath, errors: Seq[ErrorWithLocation]) =
     for {
-      tab ← treeNodeTabs.find(safePath)
+      tab ← findOMSTab(treeNodeTabs, safePath)
       editor ← tab.editor
     } {
       editor.changed.update(false)
-      TreeNodeTabs.updateErrors(
-        safePath,
-        errors.map { ewl ⇒ ErrorFromCompiler(ewl, ewl.line.map { l ⇒ editor.editor.getSession().doc.getLine(l) }.getOrElse("")) }
-      )
-      TreeNodeTabs.updateErrorsInEditor(
-        safePath,
-        errors.flatMap { _.line }
+      tab.errors() = EditorErrors(
+        errorsFromCompiler = errors.map { ewl ⇒ ErrorFromCompiler(ewl, ewl.line.map { l ⇒ editor.editor.getSession().doc.getLine(l) }.getOrElse("")) },
+        errorsInEditor = errors.flatMap { _.line }
       )
     }
 
-  def isActive(treeNodeTabs: TreeNodeTabs, safePath: SafePath) = {
-    treeNodeTabs.isActive(safePath).now == TreeNodeTabs.Active
-  }
 }
 
 import TreeNodeTabs._
@@ -126,11 +113,11 @@ object TreeNodeTab {
     showExecution:   () ⇒ Unit,
     setEditorErrors: Seq[ErrorWithLocation] ⇒ Unit) extends TreeNodeTab {
 
-    val omsErrorCache = Var(EditorErrors())
+    val errors = Var(EditorErrors())
 
     lazy val safePathTab = Var(safePath)
 
-    lazy val omsEditor = EditorPanelUI(safePath, () ⇒ TreeNodeTabs.isActive(treeNodeTabs, safePath), FileExtension.OMS, initialContent)
+    lazy val omsEditor = EditorPanelUI(treeNodeTabs, safePath, FileExtension.OMS, initialContent)
 
     def editor = Some(omsEditor)
 
@@ -231,7 +218,7 @@ object TreeNodeTab {
     val dataNbColumns = dataTab.sequence.header.length
     val dataNbLines = filteredSequence.size
 
-    lazy val editableEditor = EditorPanelUI(safePath, () ⇒ TreeNodeTabs.isActive(treeNodeTabs, safePath), extension, initialContent, if (isCSV) paddingBottom := 80 else emptyMod)
+    lazy val editableEditor = EditorPanelUI(treeNodeTabs, safePath, extension, initialContent, if (isCSV) paddingBottom := 80 else emptyMod)
 
     def editor = Some(editableEditor)
 

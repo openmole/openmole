@@ -38,11 +38,11 @@ import rx._
 
 object EditorPanelUI {
 
-  def apply(safePath: SafePath, isActive: () ⇒ Boolean, fileType: FileExtension, initCode: String, containerModifierSeq: ModifierSeq = emptyMod) =
+  def apply(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: FileExtension, initCode: String, containerModifierSeq: ModifierSeq = emptyMod) =
     fileType match {
-      case OMS   ⇒ new EditorPanelUI(safePath, isActive, initCode, OMS, containerModifierSeq)
-      case SCALA ⇒ new EditorPanelUI(safePath, isActive, initCode, SCALA, containerModifierSeq)
-      case _     ⇒ new EditorPanelUI(safePath, isActive, initCode, NO_EXTENSION, containerModifierSeq)
+      case OMS   ⇒ new EditorPanelUI(treeNodeTabs, safePath, initCode, OMS, containerModifierSeq)
+      case SCALA ⇒ new EditorPanelUI(treeNodeTabs, safePath, initCode, SCALA, containerModifierSeq)
+      case _     ⇒ new EditorPanelUI(treeNodeTabs, safePath, initCode, NO_EXTENSION, containerModifierSeq)
     }
 
   def highlightedFile(ext: FileExtension): Option[HighlightedFile] =
@@ -55,7 +55,7 @@ object EditorPanelUI {
   case class HighlightedFile(highlighter: String)
 }
 
-class EditorPanelUI(safePath: SafePath, isActive: () ⇒ Boolean, initCode: String, fileType: FileExtension, containerModifierSeq: ModifierSeq) {
+class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, initCode: String, fileType: FileExtension, containerModifierSeq: ModifierSeq) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
@@ -65,7 +65,7 @@ class EditorPanelUI(safePath: SafePath, isActive: () ⇒ Boolean, initCode: Stri
     val ed = ace.edit(editorDiv)
 
     EditorPanelUI.highlightedFile(fileType).foreach { h ⇒
-      ed.getSession().setMode("ace/mode/" + h)
+      ed.getSession().setMode("ace/mode/" + h.highlighter)
     }
 
     ed.getSession().setValue(initCode)
@@ -124,14 +124,17 @@ class EditorPanelUI(safePath: SafePath, isActive: () ⇒ Boolean, initCode: Stri
               val scrollAsLines = scrollTop() / lineHeight()
               val max = editor.renderer.getLastVisibleRow
 
-              if (extension == OMS && isActive()) {
+              def isActive =
+                treeNodeTabs.isActive(safePath)() == TreeNodeTabs.Active
+
+              if (extension == OMS && isActive) {
+                val errors = TreeNodeTabs.errors(treeNodeTabs, safePath)()
+
                 div(
                   for {
-                    i ← TreeNodeTabs.errorsInEditor(safePath)().filter { e ⇒
-                      e > scrollAsLines && e < max
-                    }
+                    i ← errors.errorsInEditor.filter { e ⇒ e > scrollAsLines && e < max }
                   } yield {
-                    TreeNodeTabs.errors(safePath)().find(_.errorWithLocation.line == Some(i)).map { e ⇒
+                    errors.errorsFromCompiler.find(_.errorWithLocation.line == Some(i)).map { e ⇒
                       e.errorWithLocation.line.map { l ⇒
                         buildManualPopover(l, (i - scrollAsLines) * lineHeight() - (lineHeight() - 15), span(e.errorWithLocation.stackTrace), Popup.Left)
                       }.getOrElse(div.render)
