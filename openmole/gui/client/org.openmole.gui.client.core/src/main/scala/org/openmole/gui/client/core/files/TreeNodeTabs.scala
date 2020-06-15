@@ -100,7 +100,6 @@ sealed trait TreeNodeTab {
   // Get the file content to be saved
   def editableContent: Option[String]
   def editor: Option[EditorPanelUI]
-  def editing: Boolean
 
   def refresh(afterRefresh: () ⇒ Unit = () ⇒ {}): Unit
 
@@ -196,7 +195,6 @@ object TreeNodeTab {
 
     def editableContent = None
     def editor = None
-    def editing: Boolean = false
 
     def refresh(afterRefresh: () ⇒ Unit): Unit = () ⇒ {}
     def resizeEditor = {}
@@ -212,9 +210,12 @@ object TreeNodeTab {
     plotter:        Plotter) extends TreeNodeTab {
 
     lazy val safePathTab = Var(safePath)
-    lazy val isEditing = Var(dataTab.editing)
 
-    Rx { editableEditor.setReadOnly(!isEditing()) }
+    lazy val isEditing = {
+      val ed = Var(dataTab.editing)
+      ed.trigger(e ⇒ editableEditor.setReadOnly(!e))
+      ed
+    }
 
     def editableContent = Some(editableEditor.code)
     def isCSV = DataUtils.isCSV(safePath)
@@ -235,7 +236,6 @@ object TreeNodeTab {
     }
 
     def editor = Some(editableEditor)
-    def editing = isEditing.now
 
     def download(afterRefresh: () ⇒ Unit): Unit = editor.synchronized {
       FileManager.download(
@@ -260,8 +260,7 @@ object TreeNodeTab {
         if (isCSV) {
           if (dataTab.view == Raw) saveTab
         }
-        else
-          saveTab
+        else saveTab
       }
       else afterRefresh()
     }
@@ -271,13 +270,16 @@ object TreeNodeTab {
     lazy val controlElement: TypedTag[HTMLElement] =
       div(
         Rx {
-          if (isEditing()) div()
+          if (isEditing()) Seq()
           else if (dataTab.view == Raw) {
-            button("Edit", btn_primary, onclick := {
-              () ⇒ isEditing() = !isEditing.now
-            })
+            Seq(
+              button(
+                "Edit",
+                btn_primary, onclick := { () ⇒ isEditing() = !isEditing.now }
+              )
+            )
           }
-          else div()
+          else Seq()
         }
       )
 
