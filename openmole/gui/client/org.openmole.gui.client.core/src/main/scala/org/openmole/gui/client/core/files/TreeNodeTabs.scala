@@ -63,6 +63,18 @@ object TreeNodeTabs {
   def updateErrors(safePath: SafePath, errorsFromCompiler: Seq[ErrorFromCompiler]) = {
     omsErrorCache.update(omsErrorCache.now.updated(safePath, omsErrorCache.now.getOrElse(safePath, EditorErrors()).copy(errorsFromCompiler = errorsFromCompiler)))
   }
+
+  def setErrors(treeNodeTabs: TreeNodeTabs, safePath: SafePath, errors: Seq[ErrorWithLocation]) =
+    for {
+      tab ← treeNodeTabs.find(safePath)
+      editor ← tab.editor
+    } {
+      editor.setErrors(errors)
+    }
+
+  def isActive(treeNodeTabs: TreeNodeTabs, safePath: SafePath)(implicit ctx: Ctx.Data) = {
+    treeNodeTabs.isActive(safePath)() == TreeNodeTabs.Active
+  }
 }
 
 import TreeNodeTabs._
@@ -117,7 +129,11 @@ object TreeNodeTab {
       }
     }
 
-  def oms(safePath: SafePath, initialContent: String, showExecution: () ⇒ Unit) = new TreeNodeTab {
+  def oms(
+    safePath:        SafePath,
+    initialContent:  String,
+    showExecution:   () ⇒ Unit,
+    setEditorErrors: Seq[ErrorWithLocation] ⇒ Unit) = new TreeNodeTab {
 
     lazy val safePathTab = Var(safePath)
     lazy val omsEditor = EditorPanelUI(safePath, FileExtension.OMS, initialContent)
@@ -139,20 +155,12 @@ object TreeNodeTab {
       val compileDisabled = Var(false)
       val runOption = Var(false)
 
-      def unsetErrors = setErrors(Seq())
-
-      def setErrors(errors: Seq[ErrorWithLocation]) =
-        for {
-          tab ← panels.treeNodeTabs.find(safePath)
-          editor ← tab.editor
-        } yield {
-          editor.setErrors(errors)
-        }
+      def unsetErrors = setEditorErrors(Seq())
 
       def setError(errorDataOption: Option[ErrorData]) = {
         compileDisabled.update(false)
         errorDataOption match {
-          case Some(ce: CompilationErrorData) ⇒ setErrors(ce.errors)
+          case Some(ce: CompilationErrorData) ⇒ setEditorErrors(ce.errors)
           case _                              ⇒
         }
       }

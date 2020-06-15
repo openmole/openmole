@@ -40,7 +40,7 @@ class FileDisplayer(val treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) 
       case _ ⇒
         fileExtension match {
           case OpenMOLEScript ⇒
-            val tab = TreeNodeTab.oms(safePath, content, showExecution)
+            val tab = TreeNodeTab.oms(safePath, content, showExecution, TreeNodeTabs.setErrors(treeNodeTabs, safePath, _))
             treeNodeTabs add tab
             tab.omsEditor.editor.focus
           case OpenMOLEResult ⇒

@@ -52,7 +52,10 @@ object panels {
       bannerAlert = bannerAlert,
       wizards = wizards)
 
-  def urlImportPanel = new URLImportPanel(treeNodeManager, bannerAlert = bannerAlert)
+  def urlImportPanel =
+    new URLImportPanel(
+      treeNodeManager,
+      bannerAlert = bannerAlert)
 
   lazy val marketPanel = new MarketPanel(treeNodeManager)
   lazy val pluginPanel = new PluginPanel(bannerAlert = bannerAlert)

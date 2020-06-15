@@ -36,6 +36,27 @@ import rx._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+object EditorPanelUI {
+
+  def apply(safePath: SafePath, fileType: FileExtension, initCode: String, containerModifierSeq: ModifierSeq = emptyMod) =
+    fileType match {
+      case OMS   ⇒ editor(safePath, initCode, OMS, containerModifierSeq)
+      case SCALA ⇒ editor(safePath, initCode, SCALA, containerModifierSeq)
+      case _     ⇒ empty(safePath, initCode, containerModifierSeq)
+    }
+
+  def empty(
+    safePath:             SafePath,
+    initCode:             String,
+    containerModifierSeq: ModifierSeq) = new EditorPanelUI(safePath, initCode, NO_EXTENSION, containerModifierSeq)
+
+  private def editor(safePath: SafePath, initCode: String = "", language: FileExtension, containerModifierSeq: ModifierSeq) =
+    new EditorPanelUI(safePath, initCode, language, containerModifierSeq)
+
+  //def sh(initCode: String = "") = EditorPanelUI(SH, initCode)
+
+}
+
 class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtension, containerModifierSeq: ModifierSeq) {
 
   val editorDiv = tags.div(id := "editor").render
@@ -69,7 +90,8 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
             Rx {
               val scrollAsLines = scrollTop() / lineHeight()
               val max = editor.renderer.getLastVisibleRow
-              if (extension == OMS && org.openmole.gui.client.core.panels.treeNodeTabs.isActive(safePath)() == TreeNodeTabs.Active) {
+
+              if (extension == OMS && TreeNodeTabs.isActive(org.openmole.gui.client.core.panels.treeNodeTabs, safePath)) {
                 div(
                   for {
                     i ← errorsInEditor().filter { e ⇒
@@ -170,18 +192,3 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
 
 }
 
-object EditorPanelUI {
-
-  def apply(safePath: SafePath, fileType: FileExtension, initCode: String, containerModifierSeq: ModifierSeq = emptyMod) = fileType match {
-    case OMS   ⇒ editor(safePath, initCode, OMS, containerModifierSeq)
-    case SCALA ⇒ editor(safePath, initCode, SCALA, containerModifierSeq)
-    case _     ⇒ empty(safePath, initCode, containerModifierSeq)
-  }
-
-  def empty(safePath: SafePath, initCode: String, containerModifierSeq: ModifierSeq) = new EditorPanelUI(safePath, initCode, NO_EXTENSION, containerModifierSeq)
-
-  private def editor(safePath: SafePath, initCode: String = "", language: FileExtension, containerModifierSeq: ModifierSeq = emptyMod) = new EditorPanelUI(safePath, initCode, language, containerModifierSeq)
-
-  //def sh(initCode: String = "") = EditorPanelUI(SH, initCode)
-
-}
