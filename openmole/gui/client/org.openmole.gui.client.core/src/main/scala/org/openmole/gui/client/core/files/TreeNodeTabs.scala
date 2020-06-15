@@ -131,7 +131,6 @@ object TreeNodeTab {
     }
 
     def editor = Some(omsEditor)
-    def editing = true
 
     def editableContent = Some(omsEditor.code)
     def refresh(onsaved: () ⇒ Unit) = save(safePathTab.now, omsEditor, onsaved)
