@@ -56,13 +56,13 @@ object CoreUtils {
   def addDirectory(in: SafePath, dirName: String, onadded: () ⇒ Unit = () ⇒ {}) =
     Post()[Api].addDirectory(in, dirName).call().foreach { b ⇒
       if (b) onadded()
-      else AlertPanel.string(s"$dirName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
+      else panels.alertPanel.string(s"$dirName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
     }
 
   def addFile(safePath: SafePath, fileName: String, onadded: () ⇒ Unit = () ⇒ {}) =
     Post()[Api].addFile(safePath, fileName).call().foreach { b ⇒
       if (b) onadded()
-      else AlertPanel.string(s" $fileName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
+      else panels.alertPanel.string(s" $fileName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
     }
 
   def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {

@@ -18,7 +18,7 @@ package org.openmole.gui.client.core.files
  */
 
 import org.openmole.gui.client.core.alert.AlertPanel
-import org.openmole.gui.client.core.CoreUtils
+import org.openmole.gui.client.core.{ CoreUtils, panels }
 import org.openmole.gui.ext.data.{ FileFilter, ListFilesData, SafePath }
 import rx._
 import org.openmole.gui.client.core.files.TreeNode.ListFiles
@@ -46,11 +46,11 @@ class TreeNodeManager {
   val pluggables: Var[Seq[SafePath]] = Var(Seq())
 
   error.trigger {
-    error.now.foreach(AlertPanel.treeNodeErrorDiv)
+    error.now.foreach(panels.alertPanel.treeNodeErrorDiv)
   }
 
   comment.trigger {
-    comment.now.foreach(AlertPanel.treeNodeCommentDiv)
+    comment.now.foreach(panels.alertPanel.treeNodeCommentDiv)
   }
 
   def isSelected(tn: TreeNode) = selected.now.contains(tn)

@@ -145,7 +145,7 @@ class MarketPanel(manager: TreeNodeManager) {
     Rx {
       overwriteAlert() match {
         case Some(e: MarketIndexEntry) ⇒
-          AlertPanel.string(
+          panels.alertPanel.string(
             e.name + " already exists. Overwrite ? ",
             () ⇒ {
               overwriteAlert() = None

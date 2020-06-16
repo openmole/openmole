@@ -242,7 +242,7 @@ class ModelWizardPanel(treeNodeManager: TreeNodeManager, treeNodeTabs: TreeNodeT
                 }
                 else {
                   val optionsDiv = OptionsDiv(existing, SafePath.naming)
-                  AlertPanel.div(
+                  panels.alertPanel.alertDiv(
                     tags.div(
                       "Some files already exist, overwrite ?",
                       optionsDiv.div

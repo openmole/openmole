@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.alert.BannerAlert
+import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
 import org.openmole.gui.client.core.files.{ FileDisplayer, TreeNodeManager, TreeNodePanel, TreeNodeTabs }
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.{ GUIPluginAsJS, WizardPluginFactory }
@@ -68,5 +68,7 @@ object panels {
     new BannerAlert(
       resizeTabs = () ⇒ treeNodeTabs.tabs.now.foreach { t ⇒ t.resizeEditor }
     )
+
+  lazy val alertPanel = new AlertPanel
 
 }

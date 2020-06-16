@@ -279,10 +279,10 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
   }
 
   def stringAlert(message: String, okaction: () ⇒ Unit) =
-    AlertPanel.string(message, okaction, transform = RelativeCenterPosition, zone = FileZone)
+    panels.alertPanel.string(message, okaction, transform = RelativeCenterPosition, zone = FileZone)
 
   def stringAlertWithDetails(message: String, detail: String) =
-    AlertPanel.detail(message, detail, transform = RelativeCenterPosition, zone = FileZone)
+    panels.alertPanel.detail(message, detail, transform = RelativeCenterPosition, zone = FileZone)
 
   var currentSafePath: Var[Option[SafePath]] = Var(None)
 

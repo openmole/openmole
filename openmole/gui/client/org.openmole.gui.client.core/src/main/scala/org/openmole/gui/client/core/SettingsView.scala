@@ -45,7 +45,7 @@ class SettingsView(fileDisplayer: FileDisplayer) {
   val jvmInfos: Var[Option[JVMInfos]] = Var(None)
   val timer: Var[Option[SetIntervalHandle]] = Var(None)
 
-  private def alertPanel(warnMessage: String, route: String) = AlertPanel.string(
+  private def alertPanel(warnMessage: String, route: String) = panels.alertPanel.string(
     warnMessage,
     () ⇒ {
       fileDisplayer.treeNodeTabs.saveAllTabs(() ⇒ {

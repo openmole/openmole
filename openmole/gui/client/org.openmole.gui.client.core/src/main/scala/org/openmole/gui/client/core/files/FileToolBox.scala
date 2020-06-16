@@ -254,7 +254,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
       r ⇒
         r.error match {
           case Some(e: org.openmole.gui.ext.data.ErrorData) ⇒
-            AlertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
+            panels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
           case _ ⇒ treeNodePanel.invalidCacheAndDraw
         }
     }

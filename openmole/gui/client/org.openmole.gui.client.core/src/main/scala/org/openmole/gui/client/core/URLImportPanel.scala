@@ -79,7 +79,7 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
     Rx {
       overwriteAlert() match {
         case Some(sp: SafePath) ⇒
-          AlertPanel.string(
+          panels.alertPanel.string(
             sp.name + " already exists. Overwrite ? ",
             () ⇒ {
               overwriteAlert() = None

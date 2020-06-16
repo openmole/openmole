@@ -50,7 +50,7 @@ object ScriptClient {
     dom.document.body.appendChild(
       div(
         panels.connection.render,
-        alert
+        panels.alertPanel.alertDiv
       ).render
     )
 
@@ -107,7 +107,7 @@ object ScriptClient {
     dom.document.body.appendChild(
       div(
         resetPassword.resetPassDiv,
-        alert
+        panels.alertPanel.alertDiv
       ).render
     )
   }
@@ -247,12 +247,11 @@ object ScriptClient {
                   )
                 )
             ),
-            alert
+            panels.alertPanel.alertDiv
           ).render
         )
       }
     }
   }
 
-  def alert = AlertPanel.alertDiv
 }

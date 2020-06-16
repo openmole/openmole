@@ -310,7 +310,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
           Post(timeout = 5 minutes)[Api].addUploadedPlugins(directoryName, names).call().foreach {
             errs ⇒
               if (errs.isEmpty) pluginPanel.dialog.show
-              else AlertPanel.detail("Plugin import failed", ErrorData.stackTrace(errs.head), transform = RelativeCenterPosition, zone = FileZone)
+              else panels.alertPanel.detail("Plugin import failed", ErrorData.stackTrace(errs.head), transform = RelativeCenterPosition, zone = FileZone)
           }
           unselectToolAndRefreshTree
         }
