@@ -4,7 +4,7 @@ import org.scalajs.dom._
 import org.scalajs.dom.raw.HTMLElement
 
 import scala.util.{ Failure, Success }
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scalatags.JsDom.all._
 import rx._
 

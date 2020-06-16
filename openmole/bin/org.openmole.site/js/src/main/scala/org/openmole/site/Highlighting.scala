@@ -1,6 +1,6 @@
 package org.openmole.site
 
-import com.karasiq.highlightjs.HighlightJS
+import scaladget.highlightjs.HighlightJS
 
 import scala.scalajs.js
 import js.Dynamic.{ literal ⇒ lit }
@@ -32,7 +32,7 @@ object Highlighting {
     "contains" → js.Array("NAME")
   )
 
-  def openmoleGrammar(highlightJS: HighlightJS) = lit(
+  def openmoleGrammar() = lit(
     "keywords" → lit(
       "literal" → js.RegExp("true false null"),
       "keyword" → js.RegExp("type yield lazy override def with val var sealed abstract private trait object if forSome for while throw finally protected extends import final return else break new catch super class case package default try this match continue throws implicit")

@@ -1,6 +1,5 @@
 package org.openmole.site
 
-import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation._
 import scalatags.JsDom.all._
 import rx._
@@ -26,11 +25,11 @@ import scala.scalajs.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-@JSExportTopLevel("site.SiteJS")
-object SiteJS extends JSApp {
+@JSExportTopLevel("SiteJS")
+object SiteJS {
 
-  @JSExport()
-  def main(): Unit = {
+  @JSExport
+  def main(args: Array[String]): Unit = {
     Highlighting.init
     div.render
   }

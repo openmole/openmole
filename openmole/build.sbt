@@ -886,7 +886,7 @@ lazy val site = crossProject(JSPlatform, JVMPlatform).in(binDir / "org.openmole.
   Libraries.lunr,
   Libraries.scaladgetTools,
   Libraries.scalajsDomJS,
-  Libraries.scalajsMarked
+  Libraries.highlightJS
 )
 
 lazy val siteJS = site.js enablePlugins (ExecNpmPlugin) settings (test := {})

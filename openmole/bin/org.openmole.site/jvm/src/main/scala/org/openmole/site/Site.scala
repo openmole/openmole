@@ -150,7 +150,7 @@ object Site extends App {
         }
 
         private def onLoadString(sitepage: org.openmole.site.PageTree) = {
-          def siteJS = "org.openmole.site.SiteJS()"
+          def siteJS = "SiteJS"
 
           def commonJS = s"$siteJS.main();$siteJS.loadIndex(index);"
 

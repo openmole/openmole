@@ -44,11 +44,9 @@ object Libraries {
   lazy val autowireJS = libraryDependencies += "com.lihaoyi" %%% "autowire" % scalaAutowireVersion
   lazy val boopickleJS = libraryDependencies += "io.suzaku" %%% "boopickle" % boopickleVersion
   lazy val sourcecodeJS = libraryDependencies += "com.lihaoyi" %%% "sourcecode" % sourcecodeVersion
-  lazy val scalajsMarked = libraryDependencies += "org.openmole.scaladget" %%% "highlightjs" % scaladgetVersion
+  lazy val highlightJS = libraryDependencies += "org.openmole.scaladget" %%% "highlightjs" % scaladgetVersion
   lazy val htmlparser2 = libraryDependencies += "com.definitelyscala" %%% "scala-js-htmlparser2" % "1.0.2"
   lazy val plotlyJS =  libraryDependencies += "org.openmole" %%% "scala-js-plotlyjs" % "1.5.2"
- // lazy val scalajsLinkerJS = libraryDependencies += "org.scala-js" %%% "scalajs-linker" % scalajsVersion
- // lazy val scalajsLoggingJS = libraryDependencies += "org.scala-js" %%% "scalajs-logging" % scalajsVersion
   lazy val scalaCompatJS =  libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.6"
 
 
@@ -76,7 +74,7 @@ object Libraries {
   lazy val scalajHttp = "org.openmole.library" %% "org-scalaj-scalaj-http" % "2.4.2"
   lazy val scopt = "org.openmole.library" %% "com-github-scopt" % scoptVersion
   lazy val scalabc = "org.openmole.library" %% "fr-iscpif-scalabc" % "0.4"
-  lazy val scalatexSite = "org.openmole.library" %% "com-lihaoyi-scalatex-site" % "0.4.5"
+  lazy val scalatexSite = "org.openmole.library" %% "com-lihaoyi-scalatex-site" % "0.4.6"
   lazy val math = "org.openmole.library" %% "org-apache-commons-math" % "3.6.1"
   lazy val collections = "org.openmole.library" %% "org-apache-commons-collections" % "4.4"
   lazy val exec = "org.openmole.library" %% "org-apache-commons-exec" % "1.3"
