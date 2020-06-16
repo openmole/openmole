@@ -21,7 +21,7 @@ import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 
 import org.scalajs.dom.raw.HTMLFormElement
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags
 class ResetPassword {

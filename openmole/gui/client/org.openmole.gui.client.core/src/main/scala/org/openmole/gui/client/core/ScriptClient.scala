@@ -5,7 +5,6 @@ import org.openmole.gui.client.core.panels._
 import scala.scalajs.js.annotation._
 import org.scalajs.dom
 import rx._
-
 import scalatags.JsDom.all._
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
@@ -14,15 +13,14 @@ import org.scalajs.dom.KeyboardEvent
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import autowire._
-
 import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
 import org.openmole.gui.client.core.files.TreeNodePanel
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
-import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client.FileManager
+import org.openmole.gui.ext.client._
 import org.scalajs.dom.raw.HTMLDivElement
 
 import scala.concurrent.duration._
@@ -51,8 +49,8 @@ object ScriptClient {
   def connection(): Unit =
     dom.document.body.appendChild(
       div(
-        Connection.render,
-        alert
+        panels.connection.render,
+        panels.alertPanel.alertDiv
       ).render
     )
 
@@ -68,7 +66,7 @@ object ScriptClient {
       )
     ).render
 
-    post()[Api].shutdown().call()
+    Post()[Api].shutdown().call()
     dom.document.body.appendChild(stoppedDiv)
   }
 
@@ -78,7 +76,7 @@ object ScriptClient {
 
     def setTimer = {
       timer() = Some(setInterval(5000) {
-        post(3 seconds, 5 minutes)[Api].isAlive().call().foreach { x ⇒
+        Post(3 seconds, 5 minutes)[Api].isAlive().call().foreach { x ⇒
           if (x) {
             CoreUtils.setRoute(routes.connectionRoute)
             timer.now.foreach {
@@ -99,7 +97,7 @@ object ScriptClient {
       )
     ).render
 
-    post()[Api].restart().call()
+    Post()[Api].restart().call()
     dom.document.body.appendChild(restartedDiv)
   }
 
@@ -109,7 +107,7 @@ object ScriptClient {
     dom.document.body.appendChild(
       div(
         resetPassword.resetPassDiv,
-        alert
+        panels.alertPanel.alertDiv
       ).render
     )
   }
@@ -118,13 +116,10 @@ object ScriptClient {
   def run(): Unit = {
     implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
-    println("RUM")
-    Plugins.fetch { _ ⇒
+    Plugins.fetch { plugins ⇒
       val maindiv = div()
-      //  val settingsView = new SettingsView
 
-      println("in FETECH")
-      val authenticationPanel = new AuthenticationPanel
+      val authenticationPanel = new AuthenticationPanel(plugins.authenticationFactories)
 
       val openFileTree = Var(true)
 
@@ -138,7 +133,7 @@ object ScriptClient {
 
       val envItem = navItem(div(glyph_exclamation, itemStyle).render, () ⇒ stackPanel.open)
 
-      val settingsItem = navItem(div(SettingsView.renderApp, itemStyle).render, () ⇒ {}).right
+      val settingsItem = navItem(div(panels.settingsView.renderApp, itemStyle).render, () ⇒ {}).right
 
       val actionItem = navItem(div(
         Rx {
@@ -146,10 +141,9 @@ object ScriptClient {
         }).render)
 
       dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
-        if ((k.keyCode == 83 && k.ctrlKey)) {
+        if (k.keyCode == 83 && k.ctrlKey) {
           k.preventDefault
           false
-
         }
       }
 
@@ -157,12 +151,12 @@ object ScriptClient {
 
       lazy val newEmpty = MenuAction("Empty project", () ⇒ {
         val fileName = "newProject.oms"
-        CoreUtils.addFile(manager.current.now, fileName, () ⇒ {
-          val toDisplay = manager.current.now ++ fileName
+        CoreUtils.addFile(panels.treeNodeManager.current.now, fileName, () ⇒ {
+          val toDisplay = panels.treeNodeManager.current.now ++ fileName
           FileManager.download(
             toDisplay,
             onLoadEnded = (content: String) ⇒ {
-              TreeNodePanel.refreshAndDraw
+              panels.treeNodePanel.refreshAndDraw
               fileDisplayer.display(toDisplay, content, FileExtension.OMS)
             }
           )
@@ -193,7 +187,7 @@ object ScriptClient {
       )
 
       lazy val importModel = MenuAction("Import your model", () ⇒ {
-        modelWizardPanel.dialog.show
+        modelWizardPanel(plugins.wizardFactories).dialog.show
       })
 
       lazy val fromURLProject = MenuAction("From URL", () ⇒ {
@@ -222,7 +216,7 @@ object ScriptClient {
         dom.document.body.appendChild(
           div(
             div(`class` := "fullpanel")(
-              BannerAlert.banner,
+              panels.bannerAlert.banner,
               theNavBar,
               div(
                 `class` := Rx {
@@ -242,7 +236,7 @@ object ScriptClient {
                 `class` := Rx {
                   "centerpanel " +
                     CoreUtils.ifOrNothing(openFileTree(), "reduce") +
-                    CoreUtils.ifOrNothing(BannerAlert.isOpen(), " banneropen")
+                    CoreUtils.ifOrNothing(panels.bannerAlert.isOpen(), " banneropen")
                 }
               )(
                   treeNodeTabs.render,
@@ -254,12 +248,11 @@ object ScriptClient {
                   )
                 )
             ),
-            alert
+            panels.alertPanel.alertDiv
           ).render
         )
       }
     }
   }
 
-  def alert = AlertPanel.alertDiv
 }

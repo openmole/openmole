@@ -25,6 +25,7 @@ import org.openmole.core.workflow.builder.DefinitionScope
 import org.openmole.core.workflow.execution.{ Environment, SubmissionEnvironment }
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.gui.ext.data._
+import org.openmole.gui.ext.server.utils
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
 import org.openmole.plugin.environment.batch._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment
@@ -198,8 +199,10 @@ class Execution {
 
     errors.map { ex ⇒
       ex.exception match {
-        case fje: environment.FailedJobExecution ⇒ EnvironmentError(environmentId, fje.message, ErrorData(fje.cause) + MessageErrorData(s"\nDETAILS:\n${fje.detail}"), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
-        case _                                   ⇒ EnvironmentError(environmentId, ex.exception.getMessage, ErrorData(ex.exception), ex.creationTime, Utils.javaLevelToErrorLevel(ex.level))
+        case fje: environment.FailedJobExecution ⇒
+          EnvironmentError(environmentId, fje.message, MessageErrorData(fje.message, Some(fje.cause + s"\nDETAILS:\n${fje.detail}")), ex.creationTime, utils.javaLevelToErrorLevel(ex.level))
+        case _ ⇒
+          EnvironmentError(environmentId, ex.exception.getMessage, ErrorData(ex.exception), ex.creationTime, utils.javaLevelToErrorLevel(ex.level))
       }
     }
   }

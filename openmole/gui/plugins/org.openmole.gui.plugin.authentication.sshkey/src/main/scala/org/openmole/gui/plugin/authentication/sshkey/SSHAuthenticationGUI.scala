@@ -20,7 +20,8 @@ package org.openmole.gui.plugin.authentication.sshkey
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory }
-import org.openmole.gui.ext.tool.client.{ FileUploaderUI, OMPost }
+import org.openmole.gui.ext.client.{ FileUploaderUI, OMPost }
+
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import autowire._

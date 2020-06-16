@@ -21,24 +21,24 @@ import org.openmole.core.market._
 import org.openmole.gui.client.core.alert.{ AbsolutePositioning, AlertPanel }
 import AbsolutePositioning.CenterPagePosition
 import org.openmole.gui.ext.data.{ ProcessState, Processing }
-import org.openmole.gui.ext.tool.client.{ InputFilter, _ }
+import org.openmole.gui.ext.client._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
-import org.openmole.gui.client.core.files.TreeNodePanel
-import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.openmole.gui.client.core.CoreUtils._
 import org.openmole.gui.ext.data._
 import Waiter._
 import autowire._
+import org.openmole.gui.client.core.files.TreeNodeManager
 import rx._
 import scalatags.JsDom.tags
 import scalatags.JsDom.all._
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.client.InputFilter
 
-class MarketPanel {
+class MarketPanel(manager: TreeNodeManager) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
@@ -93,7 +93,7 @@ class MarketPanel {
   )
 
   def exists(sp: SafePath, entry: MarketIndexEntry) =
-    post()[Api].exists(sp).call().foreach { b ⇒
+    Post()[Api].exists(sp).call().foreach { b ⇒
       if (b) overwriteAlert() = Some(entry)
       else download(entry)
     }
@@ -101,10 +101,10 @@ class MarketPanel {
   def download(entry: MarketIndexEntry) = {
     val path = manager.current.now ++ entry.name
     downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processing())))
-    post()[Api].getMarketEntry(entry, path).call().foreach { d ⇒
+    Post()[Api].getMarketEntry(entry, path).call().foreach { d ⇒
       downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processed())))
       downloading.now.headOption.foreach(_ ⇒ dialog.hide)
-      TreeNodePanel.refreshAndDraw
+      panels.treeNodePanel.refreshAndDraw
     }
   }
 
@@ -121,7 +121,7 @@ class MarketPanel {
   }
 
   def deleteFile(sp: SafePath, marketIndexEntry: MarketIndexEntry) =
-    post()[Api].deleteFile(sp, ServerFileSystemContext.project).call().foreach { d ⇒
+    Post()[Api].deleteFile(sp, ServerFileSystemContext.project).call().foreach { d ⇒
       download(marketIndexEntry)
     }
 
@@ -129,7 +129,7 @@ class MarketPanel {
     omsheet.panelWidth(92),
     onopen = () ⇒ {
       marketIndex.now match {
-        case None ⇒ post()[Api].marketIndex.call().foreach { m ⇒
+        case None ⇒ Post()[Api].marketIndex.call().foreach { m ⇒
           marketIndex() = Some(m)
         }
         case _ ⇒
@@ -145,7 +145,7 @@ class MarketPanel {
     Rx {
       overwriteAlert() match {
         case Some(e: MarketIndexEntry) ⇒
-          AlertPanel.string(
+          panels.alertPanel.string(
             e.name + " already exists. Overwrite ? ",
             () ⇒ {
               overwriteAlert() = None

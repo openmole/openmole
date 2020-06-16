@@ -6,10 +6,10 @@ import sbt._
 
 object Libraries {
 
-  lazy val gridscaleVersion = "2.28"
+  lazy val gridscaleVersion = "2.29"
   lazy val sshjVersion = "0.27.0"
   lazy val containerVersion = "1.11"
-  lazy val mgoVersion = "3.43"
+  lazy val mgoVersion = "3.44"
   lazy val bouncyCastleVersion = "1.64"
   lazy val netLogo5Version = "5.3.1"
   lazy val netLogo6Version = "6.1.1"
@@ -30,7 +30,7 @@ object Libraries {
   lazy val scalatraVersion = "2.7.0"
   lazy val scalaURIVersion = "1.1.1"
   lazy val scoptVersion = "3.7.1"
-  lazy val spatialdataVersion = "0.2"
+  lazy val spatialsamplingVersion = "0.1"
 
   lazy val bootstrapnative = libraryDependencies += "org.openmole.scaladget" %%% "bootstrapnative" % scaladgetVersion
   lazy val lunr = libraryDependencies += "org.openmole.scaladget" %%% "lunr" % scaladgetVersion
@@ -107,7 +107,7 @@ object Libraries {
   lazy val netlogo6 = "org.openmole.library" % "ccl-northwestern-edu-netlogo6" % netLogo6Version
   lazy val sourceCode = "org.openmole.library" %% "sourcecode" % sourcecodeVersion
   lazy val txtmark = "org.openmole.library" %% "com-github-rjeschke-txtmark" % "0.13"
-  lazy val spatialdata = "org.openmole.library" %% "org-openmole-spatialdata" % spatialdataVersion
+  lazy val spatialsampling = "org.openmole.library" %% "org-openmole-spatialsampling" % spatialsamplingVersion
   lazy val xzJava = "org.openmole.library" %% "xzjava" % "1.8"
   
   def httpClientVersion = "4.5.3"

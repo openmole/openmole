@@ -25,75 +25,13 @@ import org.openmole.gui.client.core.panels._
 import org.openmole.gui.client.tool.OMTags._
 import org.openmole.gui.ext.data.SafePath
 import org.openmole.gui.client.tool._
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 import org.scalajs.dom.html.Div
 import org.scalajs.dom.raw.HTMLDivElement
 import rx._
 
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags }
-
-object AlertPanel {
-  private val panel = new AlertPanel
-
-  val alertDiv = panel.alertDiv
-
-  def div(
-    messageDiv:       TypedTag[HTMLDivElement],
-    okaction:         () ⇒ Unit,
-    cancelaction:     () ⇒ Unit                = () ⇒ {},
-    transform:        Position                 = CenterPagePosition,
-    zone:             Zone                     = FullPage,
-    alertType:        ModifierSeq              = btn_danger,
-    buttonGroupClass: ModifierSeq              = floatRight,
-    okString:         String                   = "OK"
-  ): Unit = {
-    panel.popup(messageDiv, Seq(AlertAction(okaction), AlertAction(cancelaction)), transform, zone, alertType, buttonGroupClass, okString)
-  }
-
-  def treeNodeErrorDiv(error: TreeNodeError): Unit = div(
-    tags.div(
-      error.message,
-      OptionsDiv(error.filesInError, SafePath.naming).div
-    ), okaction = error.okaction, cancelaction = error.cancelaction, zone = FileZone
-  )
-
-  def treeNodeCommentDiv(error: TreeNodeComment): Unit = {
-    panel.popup(
-      tags.div(
-        error.message,
-        OptionsDiv(error.filesInError, SafePath.naming).div
-      ), Seq(AlertAction(error.okaction)), CenterPagePosition, FileZone, warning, floatRight
-    )
-  }
-
-  def string(
-    message:          String,
-    okaction:         () ⇒ Unit,
-    cancelaction:     () ⇒ Unit   = () ⇒ {},
-    transform:        Position    = CenterPagePosition,
-    zone:             Zone        = FullPage,
-    alertType:        ModifierSeq = btn_danger,
-    buttonGroupClass: ModifierSeq = Seq(floatLeft, marginLeft := 20)
-  ): Unit = div(tags.div(message), okaction, cancelaction, transform, zone, alertType, buttonGroupClass)
-
-  def detail(
-    message:          String,
-    detail:           String,
-    cancelaction:     () ⇒ Unit   = () ⇒ {},
-    transform:        Position    = CenterPagePosition,
-    zone:             Zone        = FullPage,
-    alertType:        ModifierSeq = btn_danger,
-    buttonGroupClass: ModifierSeq = Seq(floatLeft, marginLeft := 20)
-  ): Unit =
-    div(
-      tags.div(message),
-      () ⇒ {
-        stackPanel.content() = detail
-        stackPanel.dialog.show
-      }, cancelaction, transform, zone, alertType, buttonGroupClass, "Details"
-    )
-}
 
 class AlertPanel {
 
@@ -137,4 +75,59 @@ class AlertPanel {
     visible() = false
   }
 
+  def alertDiv(
+    messageDiv:       TypedTag[HTMLDivElement],
+    okaction:         () ⇒ Unit,
+    cancelaction:     () ⇒ Unit                = () ⇒ {},
+    transform:        Position                 = CenterPagePosition,
+    zone:             Zone                     = FullPage,
+    alertType:        ModifierSeq              = btn_danger,
+    buttonGroupClass: ModifierSeq              = floatRight,
+    okString:         String                   = "OK"
+  ): Unit = {
+    popup(messageDiv, Seq(AlertAction(okaction), AlertAction(cancelaction)), transform, zone, alertType, buttonGroupClass, okString)
+  }
+
+  def treeNodeErrorDiv(error: TreeNodeError): Unit = alertDiv(
+    tags.div(
+      error.message,
+      OptionsDiv(error.filesInError, SafePath.naming).div
+    ), okaction = error.okaction, cancelaction = error.cancelaction, zone = FileZone
+  )
+
+  def treeNodeCommentDiv(error: TreeNodeComment): Unit = {
+    popup(
+      tags.div(
+        error.message,
+        OptionsDiv(error.filesInError, SafePath.naming).div
+      ), Seq(AlertAction(error.okaction)), CenterPagePosition, FileZone, warning, floatRight
+    )
+  }
+
+  def string(
+    message:          String,
+    okaction:         () ⇒ Unit,
+    cancelaction:     () ⇒ Unit   = () ⇒ {},
+    transform:        Position    = CenterPagePosition,
+    zone:             Zone        = FullPage,
+    alertType:        ModifierSeq = btn_danger,
+    buttonGroupClass: ModifierSeq = Seq(floatLeft, marginLeft := 20)
+  ): Unit = alertDiv(tags.div(message), okaction, cancelaction, transform, zone, alertType, buttonGroupClass)
+
+  def detail(
+    message:          String,
+    detail:           String,
+    cancelaction:     () ⇒ Unit   = () ⇒ {},
+    transform:        Position    = CenterPagePosition,
+    zone:             Zone        = FullPage,
+    alertType:        ModifierSeq = btn_danger,
+    buttonGroupClass: ModifierSeq = Seq(floatLeft, marginLeft := 20)
+  ): Unit =
+    alertDiv(
+      tags.div(message),
+      () ⇒ {
+        stackPanel.content() = detail
+        stackPanel.dialog.show
+      }, cancelaction, transform, zone, alertType, buttonGroupClass, "Details"
+    )
 }

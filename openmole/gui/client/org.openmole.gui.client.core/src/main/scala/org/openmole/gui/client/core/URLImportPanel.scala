@@ -2,12 +2,11 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.alert.{ AbsolutePositioning, AlertPanel, BannerAlert }
 import AbsolutePositioning.CenterPagePosition
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
-import org.openmole.gui.client.core.files.TreeNodePanel
-import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
+import org.openmole.gui.client.core.files.{ TreeNodeManager, TreeNodePanel }
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.openmole.gui.client.core.CoreUtils._
@@ -21,7 +20,7 @@ import scalatags.JsDom.all._
 import org.openmole.gui.ext.api.Api
 import Waiter._
 
-class URLImportPanel {
+class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
 
   case class URLFile(name: String, extension: String) {
     def file = s"$name.$extension"
@@ -34,25 +33,25 @@ class URLImportPanel {
   val overwriteAlert: Var[Option[SafePath]] = Var(None)
 
   def exists(sp: SafePath, ifNotExists: () ⇒ {}) =
-    post()[Api].exists(sp).call().foreach { b ⇒
+    Post()[Api].exists(sp).call().foreach { b ⇒
       if (b) overwriteAlert.update(Some(sp))
       else ifNotExists()
     }
 
   def download(url: String) = {
     downloading.update(Processing())
-    post()[Api].downloadHTTP(url, manager.current.now, extractCheckBox.checked).call().foreach { d ⇒
+    Post()[Api].downloadHTTP(url, manager.current.now, extractCheckBox.checked).call().foreach { d ⇒
       downloading.update(Processed())
       dialog.hide
       d match {
-        case Left(_)   ⇒ TreeNodePanel.refreshAndDraw
-        case Right(ex) ⇒ BannerAlert.registerWithDetails("Download failed", ErrorData.stackTrace(ex))
+        case Left(_)   ⇒ panels.treeNodePanel.refreshAndDraw
+        case Right(ex) ⇒ bannerAlert.registerWithDetails("Download failed", ErrorData.stackTrace(ex))
       }
     }
   }
 
   def deleteFileAndDownloadURL(sp: SafePath, url: String) =
-    post()[Api].deleteFile(sp, ServerFileSystemContext.project).call().foreach { d ⇒
+    Post()[Api].deleteFile(sp, ServerFileSystemContext.project).call().foreach { d ⇒
       download(url)
     }
 
@@ -80,7 +79,7 @@ class URLImportPanel {
     Rx {
       overwriteAlert() match {
         case Some(sp: SafePath) ⇒
-          AlertPanel.string(
+          panels.alertPanel.string(
             sp.name + " already exists. Overwrite ? ",
             () ⇒ {
               overwriteAlert() = None

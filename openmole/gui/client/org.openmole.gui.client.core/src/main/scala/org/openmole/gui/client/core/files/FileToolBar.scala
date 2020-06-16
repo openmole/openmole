@@ -11,9 +11,9 @@ import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.client.core.CoreUtils
-import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import autowire._
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import org.scalajs.dom.raw.{ HTMLButtonElement, HTMLElement, HTMLInputElement, HTMLSpanElement }
@@ -25,7 +25,7 @@ import org.openmole.gui.client.core.panels._
 import org.openmole.gui.client.tool._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.client.core._
-import org.openmole.gui.ext.tool.client.FileManager
+import org.openmole.gui.ext.client.FileManager
 
 /*
  * Copyright (C) 20/01/16 // mathieu.leclaire@openmole.org
@@ -83,6 +83,8 @@ object FileToolBar {
 import FileToolBar._
 
 class FileToolBar(treeNodePanel: TreeNodePanel) {
+  def manager = treeNodePanel.treeNodeManager
+
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
   val selectedTool: Var[Option[SelectedTool]] = Var(None)
@@ -302,13 +304,13 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
       btn_default,
       onclick := { () ⇒
         val directoryName = s"uploadPlugin${java.util.UUID.randomUUID().toString}"
-        post()[Api].copyToPluginUploadDir(directoryName, manager.selected.now).call().foreach { _ ⇒
+        Post()[Api].copyToPluginUploadDir(directoryName, manager.selected.now).call().foreach { _ ⇒
           import scala.concurrent.duration._
           val names = manager.selected.now.map(_.name)
-          post(timeout = 5 minutes)[Api].addUploadedPlugins(directoryName, names).call().foreach {
+          Post(timeout = 5 minutes)[Api].addUploadedPlugins(directoryName, names).call().foreach {
             errs ⇒
               if (errs.isEmpty) pluginPanel.dialog.show
-              else AlertPanel.detail("Plugin import failed", ErrorData.stackTrace(errs.head), transform = RelativeCenterPosition, zone = FileZone)
+              else panels.alertPanel.detail("Plugin import failed", ErrorData.stackTrace(errs.head), transform = RelativeCenterPosition, zone = FileZone)
           }
           unselectToolAndRefreshTree
         }

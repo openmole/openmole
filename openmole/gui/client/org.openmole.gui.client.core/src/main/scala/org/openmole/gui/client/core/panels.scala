@@ -1,6 +1,9 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.files.{ FileDisplayer, TreeNodePanel, TreeNodeTabs }
+import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
+import org.openmole.gui.client.core.files.{ FileDisplayer, TreeNodeManager, TreeNodePanel, TreeNodeTabs }
+import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.data.{ GUIPluginAsJS, WizardPluginFactory }
 
 /*
  * Copyright (C) 24/07/15 // mathieu.leclaire@openmole.org
@@ -19,14 +22,53 @@ import org.openmole.gui.client.core.files.{ FileDisplayer, TreeNodePanel, TreeNo
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package object panels {
-  val executionPanel = new ExecutionPanel
-  val treeNodeTabs = new TreeNodeTabs()
-  val fileDisplayer = new FileDisplayer(treeNodeTabs)
-  val treeNodePanel = TreeNodePanel()
-  def modelWizardPanel = new ModelWizardPanel
-  def urlImportPanel = new URLImportPanel
-  val marketPanel = new MarketPanel
-  val pluginPanel = new PluginPanel
-  val stackPanel = new TextPanel("Error stack")
+object panels {
+  lazy val treeNodeManager = new TreeNodeManager()
+
+  lazy val executionPanel =
+    new ExecutionPanel(
+      setEditorErrors = TreeNodeTabs.setErrors(treeNodeTabs, _, _),
+      bannerAlert = bannerAlert)
+
+  lazy val treeNodeTabs = new TreeNodeTabs()
+
+  lazy val fileDisplayer =
+    new FileDisplayer(
+      treeNodeTabs = treeNodeTabs,
+      showExecution = () ⇒ executionPanel.dialog.show
+    )
+
+  lazy val treeNodePanel =
+    new TreeNodePanel(
+      treeNodeManager = treeNodeManager,
+      fileDisplayer = fileDisplayer,
+      showExecution = () ⇒ executionPanel.dialog.show,
+      treeNodeTabs = treeNodeTabs)
+
+  def modelWizardPanel(wizards: Seq[WizardPluginFactory]) =
+    new ModelWizardPanel(
+      treeNodeManager = treeNodeManager,
+      treeNodeTabs = treeNodeTabs,
+      bannerAlert = bannerAlert,
+      wizards = wizards)
+
+  def urlImportPanel =
+    new URLImportPanel(
+      treeNodeManager,
+      bannerAlert = bannerAlert)
+
+  lazy val marketPanel = new MarketPanel(treeNodeManager)
+  lazy val pluginPanel = new PluginPanel(bannerAlert = bannerAlert)
+
+  lazy val stackPanel = new TextPanel("Error stack")
+  lazy val settingsView = new SettingsView(fileDisplayer)
+  lazy val connection = new Connection
+
+  lazy val bannerAlert =
+    new BannerAlert(
+      resizeTabs = () ⇒ treeNodeTabs.tabs.now.foreach { t ⇒ t.resizeEditor }
+    )
+
+  lazy val alertPanel = new AlertPanel
+
 }

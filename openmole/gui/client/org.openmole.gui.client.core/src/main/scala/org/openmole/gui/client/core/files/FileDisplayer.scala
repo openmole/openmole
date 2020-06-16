@@ -26,36 +26,46 @@ import org.openmole.gui.client.tool.plot.Plotter
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class FileDisplayer(val tabs: TreeNodeTabs) {
+class FileDisplayer(val treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) {
 
   def alreadyDisplayed(safePath: SafePath) =
-    tabs.tabs.now.find { t ⇒
+    treeNodeTabs.tabs.now.find { t ⇒
       t.safePathTab.now.path == safePath.path
     }
 
   def display(safePath: SafePath, content: String, fileExtension: FileExtension) = {
+
     alreadyDisplayed(safePath) match {
-      case Some(t: TreeNodeTab) ⇒ tabs.setActive(t)
-      case _ ⇒ fileExtension match {
-        case OpenMOLEScript ⇒
-          val tab = TreeNodeTab.oms(safePath, content)
-          tabs ++ tab
-          tab.omsEditor.editor.focus
-        case MDScript ⇒ post()[Api].mdToHtml(safePath).call().foreach { htmlString ⇒
-          tabs ++ TreeNodeTab.html(safePath, htmlString)
-        }
-        case SVGExtension ⇒ tabs ++ TreeNodeTab.html(safePath, content)
-        case ef: EditableFile ⇒
-          if (DataUtils.isCSV(safePath)) {
-            post()[Api].sequence(safePath).call().foreach { seq ⇒
-              tabs ++ TreeNodeTab.editable(safePath, content, DataTab.build(seq, view = TreeNodeTab.Table, editing = !ef.onDemand), Plotter.default)
+      case Some(t: TreeNodeTab) ⇒ treeNodeTabs.setActive(t)
+      case _ ⇒
+        fileExtension match {
+          case OpenMOLEScript ⇒
+            val tab = TreeNodeTab.OMS(treeNodeTabs, safePath, content, showExecution, TreeNodeTabs.setErrors(treeNodeTabs, safePath, _))
+            treeNodeTabs add tab
+            tab.omsEditor.editor.focus
+          case OpenMOLEResult ⇒
+            Post()[Api].findAnalysisPlugin(safePath).call.foreach {
+              case Some(plugin) ⇒
+                val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
+                val tab = TreeNodeTab.HTML(safePath, analysis.panel(safePath))
+                treeNodeTabs add tab
+              case None ⇒
             }
-          }
-          else {
-            tabs ++ TreeNodeTab.editable(safePath, content, DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw), Plotter.default)
-          }
-        case _ ⇒ //FIXME for GUI workflows
-      }
+          case MDScript ⇒
+            Post()[Api].mdToHtml(safePath).call().foreach { htmlString ⇒
+              treeNodeTabs add TreeNodeTab.HTML(safePath, TreeNodeTab.mdBlock(htmlString))
+            }
+          case SVGExtension ⇒ treeNodeTabs add TreeNodeTab.HTML(safePath, TreeNodeTab.rawBlock(content))
+          case editableFile: EditableFile ⇒
+            if (DataUtils.isCSV(safePath))
+              Post()[Api].sequence(safePath).call().foreach { seq ⇒
+                treeNodeTabs add TreeNodeTab.Editable(treeNodeTabs, safePath, content, DataTab.build(seq, view = TreeNodeTab.Table, editing = !editableFile.onDemand), Plotter.default)
+              }
+            else {
+              treeNodeTabs add TreeNodeTab.Editable(treeNodeTabs, safePath, content, DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw), Plotter.default)
+            }
+          case _ ⇒ //FIXME for GUI workflows
+        }
     }
   }
 

@@ -39,8 +39,12 @@ object EGIAuthenticationTest {
     dirac:    Test   = Test.pending
   ): Test = {
     val all = Seq(password, proxy, dirac)
-    if (all.exists { t ⇒ t == Test.pending }) Test.pending
-    else if (all.exists { t ⇒ t.errorStack != ErrorData.empty }) Test.error("failed", MessageErrorData(s"${ErrorData.stackTrace(password.errorStack)} \n\n ${ErrorData.stackTrace(proxy.errorStack)} \n\n ${ErrorData.stackTrace(dirac.errorStack)}"))
-    else Test.passed(message)
+    val error = all.flatMap(_.error).headOption
+
+    error match {
+      case Some(e) ⇒ Test.error("failed", e)
+      case None if all.exists { t ⇒ t == Test.pending } ⇒ Test.pending
+      case _ ⇒ Test.passed(message)
+    }
   }
 }

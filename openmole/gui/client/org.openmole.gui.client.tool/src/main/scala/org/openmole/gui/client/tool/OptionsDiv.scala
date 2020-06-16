@@ -20,7 +20,7 @@ package org.openmole.gui.client.tool
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 
-import org.openmole.gui.ext.tool.client.omsheet
+import org.openmole.gui.ext.client.omsheet
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw.HTMLInputElement
 

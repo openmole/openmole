@@ -20,13 +20,12 @@ package org.openmole.gui.plugin.authentication.sshlogin
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory }
-import org.openmole.gui.ext.tool.client.OMPost
+import org.openmole.gui.ext.client.OMPost
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import autowire._
 import org.scalajs.dom.raw.HTMLElement
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.tool.client
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._

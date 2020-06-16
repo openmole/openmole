@@ -20,8 +20,8 @@ package org.openmole.gui.plugin.authentication.egi
 import org.openmole.core.preference.PreferenceLocation
 import org.openmole.gui.ext.data._
 import org.openmole.plugin.environment.egi._
-import org.openmole.gui.ext.tool.server
 import org.openmole.core.services._
+import org.openmole.gui.ext.server.utils
 
 import scala.util.{ Failure, Success, Try }
 
@@ -35,7 +35,7 @@ class EGIAuthenticationAPIImpl(s: Services) extends EGIAuthenticationAPI {
   import services._
 
   private def authenticationFile(p: String) = {
-    def path = p.replace(EGIAuthenticationData.authenticationDirectory, server.Utils.authenticationKeysFile.getAbsolutePath)
+    def path = p.replace(EGIAuthenticationData.authenticationDirectory, utils.authenticationKeysFile.getAbsolutePath)
     new java.io.File(path)
   }
 
@@ -73,14 +73,14 @@ class EGIAuthenticationAPIImpl(s: Services) extends EGIAuthenticationAPI {
         case Success(_) ⇒ Test.passed()
         case Failure(f) ⇒ Test.error("Invalid Password", ErrorData(f))
       }
-    }.getOrElse(Test.error("Unknown error", MessageErrorData("Unknown " + data.name)))
+    }.getOrElse(Test.error("Unknown error", MessageErrorData("Unknown " + data.name, None)))
 
     def test(data: EGIAuthenticationData, voName: String, test: (EGIAuthentication, String) ⇒ Try[Boolean]): Test = coreObject(data).map { d ⇒
       test(d, voName) match {
         case Success(_) ⇒ Test.passed(voName)
         case Failure(f) ⇒ Test.error("Invalid Password", ErrorData(f))
       }
-    }.getOrElse(Test.error("Unknown error", MessageErrorData("Unknown " + data.name)))
+    }.getOrElse(Test.error("Unknown error", MessageErrorData("Unknown " + data.name, None)))
 
     val vos = services.preference(EGIAuthenticationAPIImpl.voTest)
 

@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import scala.util.{ Failure, Success }
 import scalatags.JsDom.all._
 import scalatags.JsDom._
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 
 import scala.scalajs.js.timers._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -30,14 +30,13 @@ import boopickle.Default._
 import autowire._
 import org.openmole.gui.ext.data.{ ErrorData ⇒ ExecError }
 import org.openmole.gui.ext.data._
-import org.openmole.gui.client.core.alert.BannerAlert
-import org.openmole.gui.client.core.alert.BannerAlert.BannerMessage
+import org.openmole.gui.client.core.alert.{ BannerAlert, BannerLevel }
 import org.openmole.gui.client.core.files.TreeNodeTabs
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.client.Utils
 import org.openmole.gui.ext.data.ExecutionInfo.Failed
-import org.openmole.gui.ext.tool.client.Utils
-import org.scalajs.dom.raw.{ HTMLElement, HTMLSpanElement }
+import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement, HTMLSpanElement }
 import rx._
 import scaladget.bootstrapnative.Table.{ BSTableStyle, FixedCell, ReactiveRow, SubRow, VarCell }
 
@@ -70,7 +69,7 @@ object ExecutionPanel {
 
 import ExecutionPanel._
 
-class ExecutionPanel {
+class ExecutionPanel(setEditorErrors: (SafePath, Seq[ErrorWithLocation]) ⇒ Unit, bannerAlert: BannerAlert) {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
   case class ExInfo(id: ExecutionId, info: Var[ExecutionInfo])
@@ -171,19 +170,17 @@ class ExecutionPanel {
 
           val (details, execStatus) = info match {
             case f: ExecutionInfo.Failed ⇒
-              panels.treeNodeTabs.find(staticInfo.now(execID).path).foreach { tab ⇒
-                f.error match {
-                  case ce: CompilationErrorData ⇒ tab.editor.foreach { _.setErrors(ce.errors) }
-                  case _                        ⇒
-                }
+              f.error match {
+                case ce: CompilationErrorData ⇒ setEditorErrors(staticInfo.now(execID).path, ce.errors)
+                case _                        ⇒
               }
-              addToBanner(execID, BannerAlert.div(failedDiv(execID)).critical)
+              addToBanner(execID, failedDiv(execID), BannerLevel.Critical)
               (ExecutionDetails("0", 0, Some(f.error), f.environmentStates), (if (!f.clean) "cleaning" else info.state))
             case f: ExecutionInfo.Finished ⇒
-              addToBanner(execID, BannerAlert.div(succesDiv(execID)))
+              addToBanner(execID, succesDiv(execID), BannerLevel.Regular)
               (ExecutionDetails(ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates), (if (!f.clean) "cleaning" else info.state))
             case r: ExecutionInfo.Running ⇒
-              panels.treeNodeTabs.find(staticInfo.now(execID).path).foreach { tab ⇒ tab.editor.foreach { _.setErrors(Seq()) } }
+              setEditorErrors(staticInfo.now(execID).path, Seq())
               (ExecutionDetails(ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates), info.state)
             case c: ExecutionInfo.Canceled ⇒
               hasBeenDisplayed(execID)
@@ -267,7 +264,7 @@ class ExecutionPanel {
     }
 
     if (updating.compareAndSet(false, true)) {
-      post()[Api].allStates(200).call().andThen {
+      Post()[Api].allStates(200).call().andThen {
         case Success((executionInfos, runningOutputData)) ⇒
           executionInfo() = executionInfos.toMap
           outputInfo() = runningOutputData
@@ -277,7 +274,7 @@ class ExecutionPanel {
     }
   }
 
-  def updateStaticInfos = post()[Api].staticInfos.call().foreach {
+  def updateStaticInfos = Post()[Api].staticInfos.call().foreach {
     s ⇒
       staticInfo() = s.toMap
       setTimeout(0) {
@@ -294,7 +291,7 @@ class ExecutionPanel {
   )
 
   def jobTable(id: ExecutionId) = {
-    val jTable = JobTable(id)
+    val jTable = new JobTable(id, this)
     jobTables() = jobTables.now.updated(id, jTable)
     jTable
   }
@@ -312,9 +309,9 @@ class ExecutionPanel {
 
   def hasBeenDisplayed(id: ExecutionId) = executionsDisplayedInBanner() = (executionsDisplayedInBanner.now + id)
 
-  def addToBanner(id: ExecutionId, bannerMessage: BannerMessage) = {
+  def addToBanner(id: ExecutionId, message: TypedTag[HTMLDivElement], level: BannerLevel) = {
     if (!executionsDisplayedInBanner.now.contains(id)) {
-      BannerAlert.register(bannerMessage)
+      bannerAlert.registerDiv(message, level)
       hasBeenDisplayed(id)
     }
   }
@@ -324,7 +321,7 @@ class ExecutionPanel {
       staticInfo.now(id).path.name
     } ", a("failed", bold(WHITE) +++ pointer, onclick := {
       () ⇒
-        BannerAlert.clear
+        bannerAlert.clear
         dialog.show
     })
   )
@@ -334,21 +331,21 @@ class ExecutionPanel {
       staticInfo.now(id).path.name
     } has ", a("finished", bold(WHITE) +++ pointer, onclick := {
       () ⇒
-        BannerAlert.clear
+        bannerAlert.clear
         dialog.show
     })
   )
 
   def cancelExecution(id: ExecutionId) = {
     // setIDTabInStandBy(id)
-    post()[Api].cancelExecution(id).call().foreach {
+    Post()[Api].cancelExecution(id).call().foreach {
       r ⇒
         updateExecutionInfo
     }
   }
 
   def removeExecution(id: ExecutionId) = {
-    post()[Api].removeExecution(id).call().foreach {
+    Post()[Api].removeExecution(id).call().foreach {
       r ⇒
         updateExecutionInfo
     }

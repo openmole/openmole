@@ -34,12 +34,12 @@ trait AuthenticationPlugin extends GUIPlugin {
   def test: Future[Seq[Test]]
 }
 
-sealed trait GUIPluginFactory {
-  def name: String
-}
+sealed trait GUIPluginFactory
 
 trait AuthenticationPluginFactory extends GUIPluginFactory {
   type AuthType <: AuthenticationData
+
+  def name: String
   def build(data: AuthType): AuthenticationPlugin
   def buildEmpty: AuthenticationPlugin
   def getData: Future[Seq[AuthType]]
@@ -60,7 +60,12 @@ trait WizardGUIPlugin extends GUIPlugin {
 }
 
 trait WizardPluginFactory extends GUIPluginFactory {
-  def build(safePath: SafePath, onPanelFilled: (LaunchingCommand) ⇒ Unit): WizardGUIPlugin
+  def name: String
+  def build(safePath: SafePath, onPanelFilled: LaunchingCommand ⇒ Unit): WizardGUIPlugin
   def fileType: FileType
   def parse(safePath: SafePath): Future[Option[LaunchingCommand]]
+}
+
+trait MethodAnalysisPlugin extends GUIPlugin {
+  def panel(safePath: SafePath): TypedTag[HTMLElement]
 }

@@ -17,34 +17,31 @@ package org.openmole.gui.client.core.alert
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.client.core.files.TreeNodeTabs
 import org.openmole.gui.client.core.panels.stackPanel
 import rx._
 import scalatags.JsDom.all._
 import scaladget.tools._
 import scalatags.JsDom.all.{ onclick, raw, span }
-import org.openmole.gui.ext.tool.client._
-import org.openmole.gui.ext.tool.client.Utils._
+import org.openmole.gui.ext.client._
+import org.openmole.gui.ext.client.Utils._
 import org.scalajs.dom.raw.HTMLDivElement
 import scaladget.bootstrapnative.bsn.btn_default
 import scalatags.JsDom.{ TypedTag, tags }
+import org.openmole.gui.ext.data._
 
-object BannerAlert {
+object BannerLevel {
+  object Regular extends BannerLevel
+  object Critical extends BannerLevel
+}
+
+sealed trait BannerLevel
+
+case class BannerMessage(messageDiv: TypedTag[HTMLDivElement], bannerLevel: BannerLevel)
+
+class BannerAlert(resizeTabs: () ⇒ Unit) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-
-  sealed trait BannerLevel
-
-  object RegularBannerLevel extends BannerLevel
-
-  object CriticalBannerLevel extends BannerLevel
-
-  def message(message: String, bannerLevel: BannerLevel = RegularBannerLevel) = div(tags.div(message), bannerLevel)
-
-  def div(messageDiv: TypedTag[HTMLDivElement], bannerLevel: BannerLevel = RegularBannerLevel) = BannerMessage(messageDiv, bannerLevel)
-
-  case class BannerMessage(messageDiv: TypedTag[HTMLDivElement], bannerLevel: BannerLevel) {
-    def critical = copy(bannerLevel = CriticalBannerLevel)
-  }
 
   private val bannerMessages: Var[Seq[BannerMessage]] = Var(Seq())
   val isOpen = bannerMessages.map { bm ⇒ !bm.isEmpty }
@@ -64,26 +61,39 @@ object BannerAlert {
   )(height := 70)
 
   lazy val banner = isOpen.expandDiv(bannerDiv, () ⇒ {
-    org.openmole.gui.client.core.panels.treeNodeTabs.tabs.now.foreach { t ⇒
-      t.resizeEditor
-    }
+    resizeTabs()
   })
 
-  def clear = {
-    bannerMessages() = Seq()
-  }
+  def clear = bannerMessages() = Seq()
 
-  def register(bannerMessage: BannerMessage) =
+  private def registerMessage(bannerMessage: BannerMessage) =
     bannerMessages() = (bannerMessages.now :+ bannerMessage).distinct.takeRight(2)
 
   def registerWithDetails(message: String, details: String) =
-    BannerAlert.register(BannerMessage(tags.div(tags.span(message), tags.button(btn_default +++ (marginLeft := 10), "Details", onclick := { () ⇒
-      stackPanel.content() = details
-      stackPanel.dialog.show
-    })), CriticalBannerLevel))
+    registerMessage(
+      BannerMessage(
+        tags.div(tags.span(message), tags.button(btn_default +++ (marginLeft := 10), "Details", onclick := { () ⇒
+          stackPanel.content() = details
+          stackPanel.dialog.show
+        })),
+        BannerLevel.Critical
+      )
+    )
+
+  def register(message: String, bannerLevel: BannerLevel = BannerLevel.Regular): Unit =
+    registerMessage(BannerMessage(tags.div(tags.span(message)), bannerLevel))
+
+  def registerDiv(messageDiv: TypedTag[HTMLDivElement], level: BannerLevel = BannerLevel.Regular) =
+    registerMessage(BannerMessage(messageDiv, level))
+
+  def registerWithStack(message: String, stack: Option[String]) =
+    stack match {
+      case Some(s) ⇒ registerWithDetails(message, s)
+      case None    ⇒ register(message)
+    }
 
   private def color = {
-    if (bannerMessages.now.exists(_.bannerLevel == CriticalBannerLevel)) omsheet.RED
+    if (bannerMessages.now.exists(_.bannerLevel == BannerLevel.Critical)) omsheet.RED
     else if (bannerMessages.now.isEmpty) omsheet.DARK_GREY
     else omsheet.BLUE
   }

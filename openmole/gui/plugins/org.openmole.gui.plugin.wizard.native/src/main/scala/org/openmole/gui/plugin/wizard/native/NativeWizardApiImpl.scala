@@ -22,18 +22,14 @@ import java.nio.channels.FileChannel
 import java.util.zip.GZIPInputStream
 
 import org.openmole.core.services._
-import org.openmole.core.workspace.Workspace
-import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.tool.server.WizardUtils._
-import org.openmole.tool.file.File
+import org.openmole.tool.file._
 import org.openmole.tool.stream.StringOutputStream
 import org.openmole.tool.tar.TarInputStream
 import org.openmole.tool.stream._
 import resource.{ managed, _ }
-import org.openmole.gui.ext.tool.server.Utils
-import org.openmole.gui.ext.tool.server.Utils._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.data.DataUtils._
+import org.openmole.gui.ext.server._
+import org.openmole.gui.ext.server.utils._
 
 class NativeWizardApiImpl(s: Services) extends NativeWizardAPI {
 
@@ -50,15 +46,15 @@ class NativeWizardApiImpl(s: Services) extends NativeWizardAPI {
     resources:      Resources,
     data:           NativeWizardData): WizardToTask = {
 
-    val data = wizardModelData(inputs, outputs, resources.all.map { _.safePath.name }, Some("inputs"), Some("outputs"))
+    val data = WizardUtils.wizardModelData(inputs, outputs, resources.all.map { _.safePath.name }, Some("inputs"), Some("outputs"))
     val task = s"${executableName.split('.').head.toLowerCase}Task"
 
     val content = data.vals +
       s"""\n\nval $task = CARETask(workDirectory / "$executableName", "$command") set(\n""" +
-      expandWizardData(data) +
+      WizardUtils.expandWizardData(data) +
       s""")\n\n$task hook ToStringHook()"""
 
-    target.write(content)
+    target.toFile.content = content
     WizardToTask(target)
   }
 

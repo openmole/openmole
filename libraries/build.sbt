@@ -8,7 +8,7 @@ def settings = Seq(
   resolvers += Resolver.sonatypeRepo("snapshots"),
   resolvers += Resolver.sonatypeRepo("releases"),
   resolvers += Resolver.sonatypeRepo("staging"),
-  scalaVersion in Global := "2.12.8",
+  scalaVersion in Global := "2.12.10",
   scalacOptions ++= Seq("-deprecation"),
   publishArtifact in (packageDoc in publishLocal) := false,
   publishArtifact in (packageSrc in publishLocal) := false,
@@ -108,6 +108,7 @@ lazy val scalaLang = OsgiProject(
   (libraryDependencies ++= {
     Seq(
       "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
+      "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.6",
       "org.scala-lang" % "scala-library" % scalaVersion.value,
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "org.scala-lang" % "scalap" % scalaVersion.value,
@@ -234,7 +235,7 @@ lazy val squants =
   ) settings(settings: _*)
 
 
-lazy val mgoVersion = "3.43"
+lazy val mgoVersion = "3.44"
 
 lazy val mgo = OsgiProject(dir, "mgo", exports = Seq("mgo.*", "freestyle.*"), imports = Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "*"), privatePackages = Seq("!scala.*", "!monocle.*", "!org.apache.commons.math3.*", "!cats.*", "!squants.*", "!scalaz.*", "*")) settings(
   libraryDependencies += "org.openmole" %% "mgo" % mgoVersion,
@@ -248,16 +249,15 @@ lazy val container = OsgiProject(dir, "container", exports = Seq("container.*"),
   //libraryDependencies += "com.github.luben" % "zstd-jni" % "1.4.3-1",
   version := containerVersion) dependsOn(cats, squants, circe, shapeless) settings(settings: _*)
 
-lazy val spatialdataVersion = "0.2"
+lazy val spatialsamplingVersion = "0.1"
 
-lazy val spatialdata = OsgiProject(dir, "org.openmole.spatialdata",
-  exports = Seq("org.openmole.spatialdata.*"),
+lazy val spatialdata = OsgiProject(dir, "org.openmole.spatialsampling",
+  exports = Seq("org.openmole.spatialsampling.*"),
   privatePackages = Seq("!scala.*","!org.apache.commons.math3.*","*")
 ) settings(
-  resolvers += "osgeo" at  "https://repo.osgeo.org/repository/release/",
-  libraryDependencies += "org.openmole.library" %% "spatialdata" % spatialdataVersion,
-  version := spatialdataVersion//,
-  //embeddedJars := (Keys.externalDependencyClasspath in Compile).value map (_.data) filter (f=> (f.getName startsWith "gt-")) // embed geotools jars
+  //resolvers += "osgeo" at  "https://repo.osgeo.org/repository/release/",
+  libraryDependencies += "org.openmole.library" %% "spatialsampling" % spatialsamplingVersion,
+  version := spatialsamplingVersion
 ) settings(settings: _*)
 
 lazy val opencsv = OsgiProject(dir, "au.com.bytecode.opencsv") settings(
@@ -356,7 +356,7 @@ lazy val sourceCode = OsgiProject(dir, "sourcecode") settings (
 ) settings(settings: _*)
 
 
-def gridscaleVersion = "2.28"
+def gridscaleVersion = "2.29"
 lazy val gridscale = OsgiProject(dir, "gridscale", imports = Seq("*"), exports = Seq("gridscale.*", "enumeratum.*")) settings (
   libraryDependencies += "org.openmole.gridscale" %% "gridscale" % gridscaleVersion,
   version := gridscaleVersion

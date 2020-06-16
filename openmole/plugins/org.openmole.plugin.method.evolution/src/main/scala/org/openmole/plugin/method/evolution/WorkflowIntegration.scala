@@ -188,7 +188,7 @@ trait EvolutionWorkflow {
   def populationPrototype = Val[Pop]("population", namespace)(populationType)
   def offspringPrototype = Val[Pop]("offspring", namespace)(populationType)
   def statePrototype = Val[S]("state", namespace)(stateType)
-  def generationPrototype = Val[Long]("generation", namespace)
+  def generationPrototype = GAIntegration.generationPrototype
   def terminatedPrototype = Val[Boolean]("terminated", namespace)
 }
 
@@ -196,6 +196,7 @@ object GAIntegration {
 
   def namespace = Namespace("evolution")
   def samples = Val[Int]("samples", namespace)
+  def generationPrototype = Val[Long]("generation", namespace)
 
   def genomeToVariable(
     genome: Genome,
@@ -272,7 +273,7 @@ object MGOAPI {
     def operations(a: A): Ops
 
     trait Ops {
-      def metadata(generation: Long, frequency: Option[Long]): FromContext[EvolutionMetadata] = FromContext { _ ⇒ EvolutionMetadata.none }
+      def metadata(data: SavedData): FromContext[EvolutionMetadata] = FromContext { _ ⇒ EvolutionMetadata.none }
 
       def initialState: S
       def initialGenomes(n: Int, rng: scala.util.Random): FromContext[Vector[G]]

@@ -25,8 +25,9 @@ import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
 import org.eclipse.jetty.webapp._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.location._
-import org.openmole.core.preference.{ PreferenceLocation, Preference }
+import org.openmole.core.preference.{ Preference, PreferenceLocation }
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
+import org.openmole.gui.ext.server.utils
 import org.openmole.tool.crypto.KeyStore
 import org.openmole.tool.file._
 import org.openmole.tool.network.Network
@@ -45,9 +46,9 @@ object GUIServer {
     from / "fonts" copy to / "fonts"
     from / "img" copy to / "img"
 
-    Utils.expandDepsFile(from / "js" / Utils.openmoleGrammarName, to /> "js" / Utils.openmoleGrammarMode)
-    (from / "js" / Utils.depsFileName) copy (to /> "js" / Utils.depsFileName)
-    Utils.openmoleFile(optimizedJS) copy (to /> "js" / Utils.openmoleFileName)
+    Plugins.expandDepsFile(from / "js" / utils.openmoleGrammarName, to /> "js" / utils.openmoleGrammarMode)
+    (from / "js" / utils.depsFileName) copy (to /> "js" / utils.depsFileName)
+    Plugins.openmoleFile(optimizedJS) copy (to /> "js" / utils.openmoleFileName)
     to
   }
 
@@ -58,17 +59,17 @@ object GUIServer {
   }
 
   def lockFile(implicit workspace: Workspace) = {
-    val file = Utils.webUIDirectory() / "GUI.lock"
+    val file = utils.webUIDirectory() / "GUI.lock"
     file.createNewFile
     file
   }
 
-  def urlFile(implicit workspace: Workspace) = Utils.webUIDirectory() / "GUI.url"
+  def urlFile(implicit workspace: Workspace) = utils.webUIDirectory() / "GUI.url"
 
   val servletArguments = "servletArguments"
 
   case class ServletArguments(
-    services:           GUIServices,
+    services:           GUIServerServices,
     password:           Option[String],
     applicationControl: ApplicationControl,
     webapp:             File,
@@ -118,7 +119,7 @@ class StartingPage extends ScalatraServlet with LifeCycle {
 
 import org.openmole.gui.server.core.GUIServer._
 
-class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServices, password: Option[String], extraHeader: String, optimizedJS: Boolean, subDir: Option[String]) {
+class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServerServices, password: Option[String], extraHeader: String, optimizedJS: Boolean, subDir: Option[String]) {
 
   lazy val server = new Server()
   var exitStatus: GUIServer.ExitStatus = GUIServer.Ok

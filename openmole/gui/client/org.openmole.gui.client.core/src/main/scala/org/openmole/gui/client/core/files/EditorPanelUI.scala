@@ -13,7 +13,7 @@ import scaladget.tools._
 import org.openmole.gui.ext.data.DataUtils._
 
 import scala.scalajs.js.JSConverters._
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 import org.scalajs.dom.raw.Event
 import scaladget.bootstrapnative.Popup
 import scaladget.bootstrapnative.Popup.{ Manual, PopupPosition }
@@ -36,29 +36,84 @@ import rx._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtension, containerModifierSeq: ModifierSeq) {
+object EditorPanelUI {
 
-  val editorDiv = tags.div(id := "editor").render
-  val editor = ace.edit(editorDiv)
+  def apply(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: FileExtension, initCode: String, containerModifierSeq: ModifierSeq = emptyMod) =
+    fileType match {
+      case OMS   ⇒ new EditorPanelUI(treeNodeTabs, safePath, initCode, OMS, containerModifierSeq)
+      case SCALA ⇒ new EditorPanelUI(treeNodeTabs, safePath, initCode, SCALA, containerModifierSeq)
+      case _     ⇒ new EditorPanelUI(treeNodeTabs, safePath, initCode, NO_EXTENSION, containerModifierSeq)
+    }
 
-  val lineHeight = Var(15)
-  val scrollTop = Var(0.0)
-  val changed = Var(false)
+  def highlightedFile(ext: FileExtension): Option[HighlightedFile] =
+    ext match {
+      case OpenMOLEScript  ⇒ Some(HighlightedFile("openmole"))
+      case e: EditableFile ⇒ Some(HighlightedFile(e.highlighter))
+      case _               ⇒ None
+    }
+
+  case class HighlightedFile(highlighter: String)
+}
+
+class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, initCode: String, fileType: FileExtension, containerModifierSeq: ModifierSeq) {
+
+  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
+
+  lazy val editorDiv = tags.div(id := "editor").render
+
+  lazy val editor = {
+    val ed = ace.edit(editorDiv)
+
+    EditorPanelUI.highlightedFile(fileType).foreach { h ⇒
+      ed.getSession().setMode("ace/mode/" + h.highlighter)
+    }
+
+    ed.getSession().setValue(initCode)
+    ed.setTheme("ace/theme/github")
+    ace.require("ace/ext/language_tools")
+    ed.renderer.setShowGutter(true)
+    ed.setShowPrintMargin(true)
+    ed.setAutoScrollEditorIntoView(true)
+
+    ed.setOptions(js.Dynamic.literal(
+      "enableBasicAutocompletion" -> true,
+      "enableSnippets" -> true,
+      "enableLiveAutocompletion" -> true
+    ))
+
+    def updateScrollTop = scrollTop.update(ed.renderer.getScrollTop)
+
+    ed.getSession().on("change", (x) ⇒ {
+      changed.update(true)
+      updateScrollTop
+    })
+
+    ed.getSession().on("changeScrollTop", x ⇒ { updateScrollTop })
+    ed
+  }
+
+  lazy val lineHeight = {
+    val h = Var(15)
+    h.trigger { v ⇒
+      editor.container.style.lineHeight = s"${v}px"
+      editor.container.style.fontSize = s"${v - 3}px"
+      editor.renderer.updateFontSize
+      ()
+    }
+    h
+  }
 
   def fontDimension = lineHeight.now - 3
+
+  lazy val scrollTop = Var(0.0)
+  lazy val changed = Var(false)
 
   def updateFont(lHeight: Int) = {
     lineHeight.update(lHeight)
   }
 
-  lineHeight.trigger {
-    editor.container.style.lineHeight = s"${lineHeight.now}px"
-    editor.container.style.fontSize = s"${fontDimension}px"
-    editor.renderer.updateFontSize
-    ()
-  }
+  val extension: FileExtension = FileExtension(safePath.name)
 
-  val extension: FileExtension = safePath.name
   lazy val view = {
     div(editorContainer +++ container +++ containerModifierSeq)(
       div(panelClass +++ panelDefault)(
@@ -68,14 +123,18 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
             Rx {
               val scrollAsLines = scrollTop() / lineHeight()
               val max = editor.renderer.getLastVisibleRow
-              if (extension == OMS && org.openmole.gui.client.core.panels.treeNodeTabs.isActive(safePath)() == TreeNodeTabs.Active) {
+
+              def isActive =
+                treeNodeTabs.isActive(safePath)() == TreeNodeTabs.Active
+
+              if (extension == OMS && isActive) {
+                val errors = TreeNodeTabs.errors(treeNodeTabs, safePath)()
+
                 div(
                   for {
-                    i ← errorsInEditor().filter { e ⇒
-                      e > scrollAsLines && e < max
-                    }
+                    i ← errors.errorsInEditor.filter { e ⇒ e > scrollAsLines && e < max }
                   } yield {
-                    errors().find(_.errorWithLocation.line == Some(i)).map { e ⇒
+                    errors.errorsFromCompiler.find(_.errorWithLocation.line == Some(i)).map { e ⇒
                       e.errorWithLocation.line.map { l ⇒
                         buildManualPopover(l, (i - scrollAsLines) * lineHeight() - (lineHeight() - 15), span(e.errorWithLocation.stackTrace), Popup.Left)
                       }.getOrElse(div.render)
@@ -91,51 +150,25 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
     )
   }
 
-  def errors = TreeNodeTabs.errors(safePath)
-
-  def errorsInEditor = TreeNodeTabs.errorsInEditor(safePath)
-
-  def setErrors(errorsWithLocation: Seq[ErrorWithLocation]): Unit = {
-    changed.update(false)
-    TreeNodeTabs.updateErrors(safePath, errorsWithLocation.map { ewl ⇒ ErrorFromCompiler(ewl, ewl.line.map { l ⇒ session.doc.getLine(l) }.getOrElse("")) })
-    TreeNodeTabs.updateErrorsInEditor(safePath, errorsWithLocation.flatMap {
-      _.line
-    })
-
-  }
-
-  def session = editor.getSession()
-
-  def aceDoc = session.getDocument()
-
-  def code: String = session.getValue()
+  def aceDoc = editor.getSession().getDocument()
+  def code: String = editor.getSession().getValue()
 
   def setCode(content: String) = editor.getSession().setValue(content)
 
   def setReadOnly(b: Boolean) = editor.setReadOnly(b)
 
-  def updateScrollTop = scrollTop.update(editor.renderer.getScrollTop)
-
-  session.on("change", (x) ⇒ {
-    changed.update(true)
-    updateScrollTop
-  })
-
-  session.on("changeScrollTop", x ⇒ {
-    updateScrollTop
-  })
-
   def buildManualPopover(line: Int, topPosition: Double, title: String, position: PopupPosition) = {
-    lazy val pop1 = div(line)(`class` := "gutterError", fontSize := s"${fontDimension}px", top := topPosition, height := s"${lineHeight.now + 3}px", width := s"${lineHeight.now + 5}px",
-      backgroundColor := Rx {
-        if (changed()) "rgba(255,204,0)"
-        else "rgba(255,128,128)"
-      }
-    ).popover(
-        title,
-        position,
-        Manual
-      )
+    lazy val pop1 =
+      div(line)(`class` := "gutterError", fontSize := s"${fontDimension}px", top := topPosition, height := s"${lineHeight.now + 3}px", width := s"${lineHeight.now + 5}px",
+        backgroundColor := Rx {
+          if (changed()) "rgba(255,204,0)"
+          else "rgba(255,128,128)"
+        }
+      ).popover(
+          title,
+          position,
+          Manual
+        )
 
     lazy val pop1Render = pop1.render
 
@@ -147,40 +180,5 @@ class EditorPanelUI(safePath: SafePath, initCode: String, fileType: FileExtensio
     pop1Render
   }
 
-  def initEditor = {
-    fileType match {
-      case ef: HighlightedFile ⇒ editor.getSession().setMode("ace/mode/" + ef.highlighter)
-      case _                   ⇒
-    }
-
-    setCode(initCode)
-    editor.setTheme("ace/theme/github")
-    ace.require("ace/ext/language_tools")
-    editor.renderer.setShowGutter(true)
-    editor.setShowPrintMargin(true)
-    editor.setAutoScrollEditorIntoView(true)
-
-    editor.setOptions(js.Dynamic.literal(
-      "enableBasicAutocompletion" -> true,
-      "enableSnippets" -> true,
-      "enableLiveAutocompletion" -> true
-    ))
-  }
-
 }
 
-object EditorPanelUI {
-
-  def apply(safePath: SafePath, fileType: FileExtension, initCode: String, containerModifierSeq: ModifierSeq = emptyMod) = fileType match {
-    case OMS   ⇒ editor(safePath, initCode, OMS, containerModifierSeq)
-    case SCALA ⇒ editor(safePath, initCode, SCALA, containerModifierSeq)
-    case _     ⇒ empty(safePath, initCode, containerModifierSeq)
-  }
-
-  def empty(safePath: SafePath, initCode: String, containerModifierSeq: ModifierSeq) = new EditorPanelUI(safePath, initCode, NO_EXTENSION, containerModifierSeq)
-
-  private def editor(safePath: SafePath, initCode: String = "", language: FileExtension, containerModifierSeq: ModifierSeq = emptyMod) = new EditorPanelUI(safePath, initCode, language, containerModifierSeq)
-
-  //def sh(initCode: String = "") = EditorPanelUI(SH, initCode)
-
-}

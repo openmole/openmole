@@ -1,5 +1,6 @@
 package org.openmole.gui.client.core
 
+import org.openmole.gui.ext.data.GUIPluginAsJS
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.{ AllPluginExtensionData, AuthenticationPluginFactory, GUIPluginFactory, WizardPluginFactory }
 import autowire._
@@ -29,19 +30,18 @@ import scala.scalajs.js.annotation.JSExportTopLevel
 
 object Plugins {
 
-  val authenticationFactories: Var[Seq[AuthenticationPluginFactory]] = Var(Seq())
-  val wizardFactories: Var[Seq[WizardPluginFactory]] = Var(Seq())
-
-  def fetch(f: AllPluginExtensionData ⇒ Unit) = {
-    post()[Api].getGUIPlugins.call().foreach { p ⇒
-      authenticationFactories() = p.authentications.map { gp ⇒
-        Plugins.buildJSObject(gp.jsObject).asInstanceOf[AuthenticationPluginFactory]
-      }
-      wizardFactories() = p.wizards.map { gp ⇒ Plugins.buildJSObject(gp.jsObject).asInstanceOf[WizardPluginFactory] }
-      f(p)
+  def fetch(f: Parameters ⇒ Unit) = {
+    Post()[Api].getGUIPlugins.call().foreach { p ⇒
+      val authFact = p.authentications.map { gp ⇒ Plugins.buildJSObject[AuthenticationPluginFactory](gp) }
+      val wizardFactories = p.wizards.map { gp ⇒ Plugins.buildJSObject[WizardPluginFactory](gp) }
+      f(Parameters(authFact, wizardFactories))
     }
   }
-  def buildJSObject(obj: String) = {
-    scalajs.js.eval(s"${obj.split('.').takeRight(2).head}")
+
+  def buildJSObject[T](obj: GUIPluginAsJS) = {
+    scalajs.js.eval(s"${obj.jsObject.split('.').takeRight(2).head}").asInstanceOf[T]
   }
+
+  case class Parameters(authenticationFactories: Seq[AuthenticationPluginFactory], wizardFactories: Seq[WizardPluginFactory])
+
 }

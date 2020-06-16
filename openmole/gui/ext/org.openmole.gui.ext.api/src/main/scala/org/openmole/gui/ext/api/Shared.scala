@@ -48,7 +48,6 @@ trait Api {
   def exists(safePath: SafePath): Boolean
   def existsExcept(exception: SafePath, exceptItSelf: Boolean): Boolean
   def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
-  def safePath(safePaths: Seq[SafePath]): Seq[SafePath]
   def listFiles(path: SafePath, fileFilter: FileFilter = FileFilter()): ListFilesData
   def isEmpty(safePath: SafePath): Boolean
   def mdToHtml(safePath: SafePath): String
@@ -96,4 +95,7 @@ trait Api {
   def models(archivePath: SafePath): Seq[SafePath]
   def expandResources(resources: Resources): Resources
   def downloadHTTP(url: String, path: SafePath, extract: Boolean): Either[Unit, ErrorData]
+
+  //METHOD PLUGINS
+  def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS]
 }

@@ -22,7 +22,7 @@ import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 
 import scalatags.JsDom.tags
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 
 import scala.concurrent.Future
 import boopickle.Default._
@@ -32,7 +32,7 @@ import org.openmole.gui.ext.data._
 import rx._
 import scaladget.bootstrapnative.Selector.{ Dropdown, Options }
 
-class AuthenticationPanel {
+class AuthenticationPanel(authenticationFactories: Seq[AuthenticationPluginFactory]) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
@@ -44,7 +44,8 @@ class AuthenticationPanel {
 
   def getAuthSelector(currentFactory: AuthenticationPluginFactory) = {
     lazy val authenticationSelector: Options[AuthenticationPluginFactory] = {
-      val factories = Plugins.authenticationFactories.now
+      val factories = authenticationFactories
+
       val currentInd = {
         val ind = factories.map { _.name }.indexOf(currentFactory.name)
         if (ind == -1) 0 else ind
@@ -59,7 +60,7 @@ class AuthenticationPanel {
   }
 
   def getAuthentications =
-    Plugins.authenticationFactories.now.map { factory ⇒
+    authenticationFactories.map { factory ⇒
       val data = factory.getData
       auths() = Seq()
       data.foreach { d ⇒
@@ -86,7 +87,7 @@ class AuthenticationPanel {
           case PassedTest(_) ⇒ lab(label_success).render
           case PendingTest() ⇒ lab(label_warning).render
           case _ ⇒ lab(label_danger +++ pointer)(onclick := { () ⇒
-            currentStack() = ErrorData.stackTrace(test.errorStack)
+            currentStack() = test.error.map(ErrorData.stackTrace).getOrElse("")
             errorOn() = !errorOn.now
           }).render
         }
@@ -147,9 +148,7 @@ class AuthenticationPanel {
   }
 
   val newButton = button("New", btn_primary, onclick := { () ⇒
-    authSetting() = Plugins.authenticationFactories.now.headOption.map {
-      _.buildEmpty
-    }
+    authSetting() = authenticationFactories.headOption.map { _.buildEmpty }
   })
 
   val saveButton = button("Save", btn_primary, onclick := { () ⇒

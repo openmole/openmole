@@ -359,7 +359,7 @@ object OSEEvolution {
       termination = termination,
       parallelism = parallelism,
       distribution = distribution,
-      suggestion = suggestion(genome),
+      suggestion = suggestion(OSE.OriginAxe.fullGenome(origin, genome)),
       scope = scope
     )
 

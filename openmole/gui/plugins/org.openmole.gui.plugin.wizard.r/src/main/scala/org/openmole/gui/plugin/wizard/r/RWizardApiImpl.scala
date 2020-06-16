@@ -21,9 +21,9 @@ import org.openmole.core.services._
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.DataUtils._
-import org.openmole.gui.ext.tool.server.WizardUtils._
-import org.openmole.gui.ext.tool.server.Utils
-import org.openmole.gui.ext.tool.server.Utils._
+import org.openmole.tool.file._
+import org.openmole.gui.ext.server._
+import org.openmole.gui.ext.server.utils._
 
 class RWizardApiImpl(s: Services) extends RWizardAPI {
 
@@ -40,7 +40,7 @@ class RWizardApiImpl(s: Services) extends RWizardAPI {
     resources:      Resources,
     data:           RWizardData): WizardToTask = {
 
-    val modelData = wizardModelData(inputs, outputs, resources.all.map {
+    val modelData = WizardUtils.wizardModelData(inputs, outputs, resources.all.map {
       _.safePath.name
     } :+ executableName, Some("inputs"), Some("ouputs"))
 
@@ -48,10 +48,10 @@ class RWizardApiImpl(s: Services) extends RWizardAPI {
 
     val content = modelData.vals +
       s"""\nval $task = RTask(\"\"\"\n   source("$executableName")\n   \"\"\") set(\n""".stripMargin +
-      expandWizardData(modelData) +
+      WizardUtils.expandWizardData(modelData) +
       s""")\n\n$task hook ToStringHook()"""
 
-    target.write(content)
+    target.toFile.content = content
     WizardToTask(target)
   }
 

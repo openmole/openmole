@@ -27,9 +27,8 @@ import org.scalajs.dom.html.TextArea
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
-import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement, HTMLInputElement }
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 import rx._
 import scalatags.JsDom.{ TypedTag, tags }
 import scalatags.JsDom.all._
@@ -39,12 +38,12 @@ import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.openmole.gui.client.tool.{ OMTags, OptionsDiv }
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.client.FileManager
 import scaladget.bootstrapnative.Selector.Options
-import org.openmole.gui.ext.tool.client.FileManager
 
 import scala.concurrent.Future
 
-class ModelWizardPanel {
+class ModelWizardPanel(treeNodeManager: TreeNodeManager, treeNodeTabs: TreeNodeTabs, bannerAlert: BannerAlert, wizards: Seq[WizardPluginFactory]) {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
   sealed trait VariableRole[T] {
@@ -117,7 +116,6 @@ class ModelWizardPanel {
   })
 
   val scriptNameInput = inputTag()(modelNameInput, placeholder := "Script name").render
-  val factories = Plugins.wizardFactories.now
 
   launchingCommand.triggerLater {
     if (autoMode.now) {
@@ -170,7 +168,7 @@ class ModelWizardPanel {
                   resources() = Resources.empty
                   val fileName = fInput.files.item(0).name
                   labelName() = Some(fileName)
-                  filePath() = Some(manager.current.now ++ fileName)
+                  filePath() = Some(treeNodeManager.current.now ++ fileName)
                   filePath.now.map {
                     fp ⇒
                       moveFilesAndBuildForm(fInput, fileName, fp)
@@ -226,7 +224,7 @@ class ModelWizardPanel {
           },
           UploadAbsolute(),
           () ⇒ {
-            post()[Api].extractAndTestExistence(tempFile ++ fileName, uploadPath.parent).call().foreach {
+            Post()[Api].extractAndTestExistence(tempFile ++ fileName, uploadPath.parent).call().foreach {
               existing ⇒
                 val fileType: FileType = uploadPath
                 val targetPath = fileType match {
@@ -236,25 +234,25 @@ class ModelWizardPanel {
 
                 // Move files from tmp to target path
                 if (existing.isEmpty) {
-                  post()[Api].copyAllTmpTo(tempFile, targetPath).call().foreach {
+                  Post()[Api].copyAllTmpTo(tempFile, targetPath).call().foreach {
                     b ⇒
                       fileToUploadPath() = Some(uploadPath)
-                      post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
+                      Post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
                   }
                 }
                 else {
                   val optionsDiv = OptionsDiv(existing, SafePath.naming)
-                  AlertPanel.div(
+                  panels.alertPanel.alertDiv(
                     tags.div(
                       "Some files already exist, overwrite ?",
                       optionsDiv.div
                     ),
                     () ⇒ {
-                      post()[Api].copyFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/ ).call().foreach {
+                      Post()[Api].copyFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/ ).call().foreach {
                         b ⇒
                           //buildForm(uploadPath)
                           fileToUploadPath() = Some(uploadPath)
-                          post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
+                          Post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
                       }
                     }, () ⇒ {
                     }, buttonGroupClass = "right"
@@ -276,9 +274,7 @@ class ModelWizardPanel {
   def factory(fileName: String): Option[WizardPluginFactory] = {
     val fileType: FileType = fileName
 
-    factories.filter {
-      _.fileType == fileType
-    }.headOption
+    wizards.filter { _.fileType == fileType }.headOption
   }
 
   def buildForm(safePath: SafePath) = {
@@ -286,10 +282,10 @@ class ModelWizardPanel {
     pathFileType match {
       case Archive ⇒
         currentPluginPanel() = None
-        post()[Api].models(safePath).call().foreach {
+        Post()[Api].models(safePath).call().foreach {
           models ⇒
             modelSelector.setContents(models, () ⇒ {
-              TreeNodePanel.refreshAnd(() ⇒
+              panels.treeNodePanel.refreshAnd(() ⇒
                 fileToUploadPath() = modelSelector.get
               )
             })
@@ -298,7 +294,7 @@ class ModelWizardPanel {
         factory(safePath).foreach { factory ⇒
           scriptNameInput.value = safePath.nameWithNoExtension
           fileToUploadPath() = Some(safePath)
-          TreeNodePanel.refreshAndDraw
+          panels.treeNodePanel.refreshAndDraw
           factory.parse(safePath).foreach { b ⇒
             currentPluginPanel() = Some(factory.build(safePath, (lc: LaunchingCommand) ⇒ {
               setLaunchingComand(Some(lc), safePath)
@@ -323,7 +319,7 @@ class ModelWizardPanel {
       mp ⇒
         val modelName = mp.name
         val resourceDir = mp.parent
-        post()[Api].listFiles(resourceDir).call().foreach {
+        Post()[Api].listFiles(resourceDir).call().foreach {
           b ⇒
             val l = b.list.filterNot {
               _.name == modelName
@@ -333,7 +329,7 @@ class ModelWizardPanel {
                 Resource(sp, 0L)
             }
             resources() = resources.now.copy(implicits = l, number = l.size)
-            post()[Api].expandResources(resources.now).call().foreach {
+            Post()[Api].expandResources(resources.now).call().foreach {
               lf ⇒
                 resources() = lf
             }
@@ -391,7 +387,7 @@ class ModelWizardPanel {
     factory ⇒
       currentPluginPanel.now.foreach {
         _.save(
-          manager.current.now ++ s"${
+          treeNodeManager.current.now ++ s"${
             scriptNameInput.value.clean
           }.oms",
           labelName.now.getOrElse("script"),
@@ -409,13 +405,13 @@ class ModelWizardPanel {
         ).foreach {
             wtt ⇒
               if (wtt.errors.isEmpty) {
-                treeNodeTabs -- wtt.safePath
+                treeNodeTabs remove wtt.safePath
                 treeNodePanel.displayNode(FileNode(Var(wtt.safePath.name), 0L, 0L))
-                TreeNodePanel.refreshAndDraw
+                panels.treeNodePanel.refreshAndDraw
               }
               else {
                 dialog.hide
-                BannerAlert.registerWithDetails("Plugin import failed", wtt.errors.map { ErrorData.stackTrace }.mkString("\n"))
+                bannerAlert.registerWithDetails("Plugin import failed", wtt.errors.map { ErrorData.stackTrace }.mkString("\n"))
               }
           }
       }

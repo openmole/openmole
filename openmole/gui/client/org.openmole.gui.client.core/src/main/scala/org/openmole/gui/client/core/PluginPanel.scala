@@ -11,12 +11,13 @@ import scalatags.JsDom.tags
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 import autowire._
 import rx._
 import org.openmole.gui.client.core.alert.BannerAlert
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.tool.client.FileManager
+import org.openmole.gui.ext.client.FileManager
+
 import scala.concurrent.duration.DurationInt
 
 /*
@@ -36,7 +37,7 @@ import scala.concurrent.duration.DurationInt
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class PluginPanel {
+class PluginPanel(bannerAlert: BannerAlert) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
@@ -53,7 +54,7 @@ class PluginPanel {
   private val selected: Var[Seq[IndexedPlugin]] = Var(Seq())
 
   def getPlugins = {
-    post()[Api].listPlugins.call().foreach { a ⇒
+    Post()[Api].listPlugins.call().foreach { a ⇒
       plugins() = a.toSeq.zipWithIndex.map { x ⇒ IndexedPlugin(x._1, x._2) }
     }
   }
@@ -72,12 +73,12 @@ class PluginPanel {
         UploadPlugin(directoryName),
         () ⇒ {
           val plugins = FileManager.fileNames(fileInput.files)
-          post(timeout = 5 minutes)[Api].addUploadedPlugins(directoryName, plugins).call().foreach { ex ⇒
+          Post(timeout = 5 minutes)[Api].addUploadedPlugins(directoryName, plugins).call().foreach { ex ⇒
             if (ex.isEmpty) getPlugins
             else {
               dialog.hide
-              plugins.foreach { p ⇒ post()[Api].removePlugin(Plugin(p)).call() }
-              BannerAlert.registerWithDetails("Plugin import failed", ErrorData.stackTrace(ex.head))
+              plugins.foreach { p ⇒ Post()[Api].removePlugin(Plugin(p)).call() }
+              bannerAlert.registerWithDetails("Plugin import failed", ErrorData.stackTrace(ex.head))
             }
           }
         }
@@ -154,7 +155,7 @@ class PluginPanel {
   }
 
   def removePlugin(plugin: Plugin) =
-    post()[Api].removePlugin(plugin).call().foreach {
+    Post()[Api].removePlugin(plugin).call().foreach {
       p ⇒
         getPlugins
     }

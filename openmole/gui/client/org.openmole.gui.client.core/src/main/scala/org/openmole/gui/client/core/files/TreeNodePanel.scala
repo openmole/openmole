@@ -6,8 +6,7 @@ import org.openmole.gui.client.core.files.FileToolBar.{ FilterTool, PluginTool, 
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.client.core.panels._
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.scalajs.dom.html.Input
@@ -15,7 +14,6 @@ import org.scalajs.dom.raw._
 import org.openmole.gui.client.core._
 import scalatags.JsDom.all._
 import scalatags.JsDom.{ TypedTag, tags }
-import org.openmole.gui.client.core.files.treenodemanager.{ instance ⇒ manager }
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
@@ -23,6 +21,7 @@ import TreeNode._
 import autowire._
 import rx._
 import org.openmole.gui.ext.api.Api
+import org.openmole.gui.ext.client.FileManager
 import org.scalajs.dom
 import scaladget.bootstrapnative.Popup
 import scaladget.bootstrapnative.Popup.Manual
@@ -44,20 +43,7 @@ import scaladget.bootstrapnative.Popup.Manual
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object TreeNodePanel {
-  val instance = new TreeNodePanel
-
-  def apply() = instance
-
-  def refreshAnd(todo: () ⇒ Unit) = {
-    instance.invalidCacheAnd(todo)
-  }
-
-  def refreshAndDraw = instance.invalidCacheAndDraw
-
-}
-
-class TreeNodePanel {
+class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDisplayer, showExecution: () ⇒ Unit, treeNodeTabs: TreeNodeTabs) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val selectionMode = Var(false)
@@ -65,7 +51,7 @@ class TreeNodePanel {
   val draggedNode: Var[Option[SafePath]] = Var(None)
 
   selectionMode.trigger {
-    if (!selectionMode.now) manager.clearSelection
+    if (!selectionMode.now) treeNodeManager.clearSelection
   }
 
   def turnSelectionTo(b: Boolean) = selectionMode() = b
@@ -81,11 +67,11 @@ class TreeNodePanel {
   ).render
 
   lazy val fileControler = Rx {
-    val current = manager.current()
+    val current = treeNodeManager.current()
     div(ms("tree-path"))(
-      goToDirButton(manager.root, glyph_home +++ floatLeft +++ "treePathItems"),
+      goToDirButton(treeNodeManager.root, glyph_home +++ floatLeft +++ "treePathItems"),
       Seq(current.parent, current).filterNot { sp ⇒
-        sp.isEmpty || sp == manager.root
+        sp.isEmpty || sp == treeNodeManager.root
       }.map { sp ⇒
         goToDirButton(sp, "treePathItems", s"| ${sp.name}")
       }
@@ -96,12 +82,12 @@ class TreeNodePanel {
     div(
       Rx {
         div(
-          if (manager.copied().isEmpty) tags.div
+          if (treeNodeManager.copied().isEmpty) tags.div
           else
             buttonGroup(omsheet.pasteLabel)(
-              button(btn_danger, "Paste", onclick := { () ⇒ paste(manager.copied(), manager.current()) }),
+              button(btn_danger, "Paste", onclick := { () ⇒ paste(treeNodeManager.copied(), treeNodeManager.current()) }),
               button(btn_default, "Cancel", onclick := { () ⇒
-                manager.emptyCopied
+                treeNodeManager.emptyCopied
                 fileToolBar.unselectTool
                 drawTree
               }
@@ -123,12 +109,12 @@ class TreeNodePanel {
 
   private def paste(safePaths: Seq[SafePath], to: SafePath) = {
     def refreshWithNoError = {
-      manager.noError
+      treeNodeManager.noError
       invalidCacheAndDraw
     }
 
     def onpasted = {
-      manager.emptyCopied
+      treeNodeManager.emptyCopied
       // unselectTool
     }
 
@@ -141,7 +127,7 @@ class TreeNodePanel {
           refreshWithNoError
           onpasted
         }
-        else manager.setFilesInError(
+        else treeNodeManager.setFilesInError(
           "Some files already exists, overwrite ?",
           existing,
           () ⇒ CoreUtils.copyProjectFilesTo(safePaths, to).foreach { b ⇒
@@ -154,10 +140,10 @@ class TreeNodePanel {
         )
       }
     }
-    else manager.setFilesInComment(
+    else treeNodeManager.setFilesInComment(
       "Paste a folder in itself is not allowed",
       same,
-      () ⇒ manager.noError
+      () ⇒ treeNodeManager.noError
     )
   }
 
@@ -178,7 +164,7 @@ class TreeNodePanel {
       onclick := {
         () ⇒
           fileToolBar.clearMessage
-          manager.switch(safePath)
+          treeNodeManager.switch(safePath)
           drawTree
       },
       dropPairs,
@@ -204,21 +190,24 @@ class TreeNodePanel {
   }
 
   def invalidCacheAnd(todo: () ⇒ Unit) = {
-    manager.invalidCurrentCache
+    treeNodeManager.invalidCurrentCache
     todo()
   }
 
+  def refreshAnd(todo: () ⇒ Unit) = invalidCacheAnd(todo)
+  def refreshAndDraw = invalidCacheAndDraw
+
   def computePluggables = fileToolBar.selectedTool.now match {
-    case Some(PluginTool) ⇒ manager.computePluggables(() ⇒ if (!manager.pluggables.now.isEmpty) turnSelectionTo(true))
+    case Some(PluginTool) ⇒ treeNodeManager.computePluggables(() ⇒ if (!treeNodeManager.pluggables.now.isEmpty) turnSelectionTo(true))
     case _                ⇒
   }
 
   def drawTree: Unit = {
     computePluggables
-    tree() = manager.computeCurrentSons(filter).withFutureWaiter("Get files", (sons: ListFiles) ⇒ {
+    tree() = treeNodeManager.computeCurrentSons(filter).withFutureWaiter("Get files", (sons: ListFiles) ⇒ {
 
       tags.table(
-        if (manager.isRootCurrent && manager.isProjectsEmpty) {
+        if (treeNodeManager.isRootCurrent && treeNodeManager.isProjectsEmpty) {
           div("Create a first OpenMOLE script (.oms)")(ms("message"))
         }
         else {
@@ -268,7 +257,7 @@ class TreeNodePanel {
         displayNode(fn)
       })
     case dn: DirNode ⇒ ReactiveLine(dn, TreeNodeType.folder, () ⇒ {
-      manager switch (dn.name.now)
+      treeNodeManager switch (dn.name.now)
       fileToolBar.clearMessage
       fileToolBar.unselectTool
       treeWarning() = true
@@ -278,8 +267,8 @@ class TreeNodePanel {
 
   def displayNode(tn: TreeNode) = tn match {
     case fn: FileNode ⇒
-      val ext = DataUtils.fileToExtension(tn.name.now)
-      val tnSafePath = manager.current.now ++ tn.name.now
+      val ext = FileExtension(tn.name.now)
+      val tnSafePath = treeNodeManager.current.now ++ tn.name.now
       if (ext.displayable) {
         downloadFile(tnSafePath, false, (content: String) ⇒ {
           fileDisplayer.display(tnSafePath, content, ext)
@@ -290,10 +279,10 @@ class TreeNodePanel {
   }
 
   def stringAlert(message: String, okaction: () ⇒ Unit) =
-    AlertPanel.string(message, okaction, transform = RelativeCenterPosition, zone = FileZone)
+    panels.alertPanel.string(message, okaction, transform = RelativeCenterPosition, zone = FileZone)
 
   def stringAlertWithDetails(message: String, detail: String) =
-    AlertPanel.detail(message, detail, transform = RelativeCenterPosition, zone = FileZone)
+    panels.alertPanel.detail(message, detail, transform = RelativeCenterPosition, zone = FileZone)
 
   var currentSafePath: Var[Option[SafePath]] = Var(None)
 
@@ -303,9 +292,9 @@ class TreeNodePanel {
 
   class ReactiveLine(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) {
 
-    val tnSafePath = manager.current.now ++ tn.name.now
+    val tnSafePath = treeNodeManager.current.now ++ tn.name.now
 
-    case class TreeStates(settingsSet: Boolean, edition: Boolean, replication: Boolean, selected: Boolean = manager.isSelected(tn)) {
+    case class TreeStates(settingsSet: Boolean, edition: Boolean, replication: Boolean, selected: Boolean = treeNodeManager.isSelected(tn)) {
       def settingsOn = treeStates() = copy(settingsSet = true)
 
       def editionOn = treeStates() = copy(edition = true)
@@ -352,17 +341,17 @@ class TreeNodePanel {
 
     def clearSelectionExecpt(safePath: SafePath) = {
       treeStates.now.setSelected(true)
-      manager.clearSelectionExecpt(safePath)
+      treeNodeManager.clearSelectionExecpt(safePath)
     }
 
     def addToSelection(b: Boolean): Unit = {
       treeStates.now.setSelected(b)
-      manager.setSelected(tnSafePath, treeStates.now.selected)
+      treeNodeManager.setSelected(tnSafePath, treeStates.now.selected)
     }
 
     def addToSelection: Unit = addToSelection(!treeStates.now.selected)
 
-    val toolBox = FileToolBox(tnSafePath)
+    val toolBox = new FileToolBox(tnSafePath, showExecution, treeNodeTabs)
 
     def inPopover(element: HTMLElement) = {
       val popClass = "popover"
@@ -431,7 +420,7 @@ class TreeNodePanel {
             ondrop := { (e: DragEvent) ⇒
               e.dataTransfer
               e.preventDefault()
-              dropAction(manager.current.now ++ tn.name.now, tn match {
+              dropAction(treeNodeManager.current.now ++ tn.name.now, tn match {
                 case _: DirNode ⇒ true
                 case _          ⇒ false
               })
@@ -455,7 +444,7 @@ class TreeNodePanel {
               if (treeStates().selected) {
                 fileToolBar.selectedTool() match {
                   case Some(TrashTool) ⇒ omsheet.fileSelectedForDeletion
-                  case Some(PluginTool) if manager.pluggables().contains(tn) ⇒ omsheet.fileSelected
+                  case Some(PluginTool) if treeNodeManager.pluggables().contains(tn) ⇒ omsheet.fileSelected
                   case _ ⇒ omsheet.fileSelected
                 }
               }
@@ -499,11 +488,11 @@ class TreeNodePanel {
         if (isDir) {
           if (dragged != to) {
             treeNodeTabs.saveAllTabs(() ⇒ {
-              post()[Api].move(dragged, to).call().foreach {
+              Post()[Api].move(dragged, to).call().foreach {
                 b ⇒
-                  manager.invalidCache(to)
-                  manager.invalidCache(dragged)
-                  TreeNodePanel.refreshAndDraw
+                  treeNodeManager.invalidCache(to)
+                  treeNodeManager.invalidCache(dragged)
+                  refreshAndDraw
                   treeNodeTabs.checkTabs
               }
             })

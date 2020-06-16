@@ -17,15 +17,18 @@
  */
 package org.openmole.gui.plugin.wizard.jar
 
-import org.openmole.gui.ext.plugin.server.{ PluginActivator, PluginInfo }
-import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
+import org.openmole.gui.ext.server._
+import org.osgi.framework.{ BundleActivator, BundleContext }
 
-class Activator extends PluginActivator {
+class Activator extends BundleActivator {
 
-  def info: PluginInfo = PluginInfo(
-    classOf[JarWizardFactory],
-    s ⇒ OMRouter[JarWizardAPI](AutowireServer.route[JarWizardAPI](new JarWizardApiImpl(s)))
+  def info = GUIPluginInfo(
+    wizard = Some(classOf[JarWizardFactory]),
+    router = Some(s ⇒ OMRouter[JarWizardAPI](AutowireServer.route[JarWizardAPI](new JarWizardApiImpl(s))))
   )
+
+  override def start(context: BundleContext): Unit = GUIPluginRegistry.register(this, info)
+  override def stop(context: BundleContext): Unit = GUIPluginRegistry.unregister(this)
 }

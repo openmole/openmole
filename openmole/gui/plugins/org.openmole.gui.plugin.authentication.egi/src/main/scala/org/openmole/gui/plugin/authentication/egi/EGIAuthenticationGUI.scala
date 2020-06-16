@@ -19,7 +19,8 @@ package org.openmole.gui.plugin.authentication.egi
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory }
-import org.openmole.gui.ext.tool.client.{ FileUploaderUI, OMPost }
+import org.openmole.gui.ext.client.{ FileUploaderUI, OMPost }
+
 import scaladget.bootstrapnative.bsn._
 import boopickle.Default._
 import autowire._

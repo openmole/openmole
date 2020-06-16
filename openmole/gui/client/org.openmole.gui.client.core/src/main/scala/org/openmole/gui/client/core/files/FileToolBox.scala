@@ -1,7 +1,6 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core._
-import org.openmole.gui.client.core.panels.treeNodeTabs
 import autowire._
 import boopickle.Default._
 import org.openmole.gui.client.core.alert.AbsolutePositioning._
@@ -13,8 +12,9 @@ import scalatags.JsDom.all._
 import scaladget.bootstrapnative.bsn._
 import org.openmole.gui.client.core.panels._
 import org.openmole.gui.client.tool.OMTags
+import org.openmole.gui.ext.client
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.tool.client._
+import org.openmole.gui.ext.client._
 import org.scalajs.dom.raw._
 import rx._
 
@@ -42,15 +42,11 @@ object FileToolBox {
     val toScript: FileAction = "to-script"
   }
 
-  def apply(initSafePath: SafePath) = {
-    new FileToolBox(initSafePath)
-  }
-
 }
 
 import FileToolBox._
 
-class FileToolBox(initSafePath: SafePath) {
+class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTabs: TreeNodeTabs) {
 
   import scaladget.tools._
 
@@ -94,7 +90,7 @@ class FileToolBox(initSafePath: SafePath) {
             withSafePath { safePath ⇒
               CoreUtils.trashNode(safePath) {
                 () ⇒
-                  treeNodeTabs -- safePath
+                  treeNodeTabs remove safePath
                   treeNodeTabs.checkTabs
                   treeNodePanel.invalidCacheAndDraw
                   Popover.hide
@@ -130,7 +126,7 @@ class FileToolBox(initSafePath: SafePath) {
             true
           case fileaction.download ⇒
             withSafePath { sp ⇒
-              org.scalajs.dom.document.location.href = s"downloadFile?path=${org.openmole.gui.ext.tool.client.Utils.toURI(sp.path)}"
+              org.scalajs.dom.document.location.href = s"downloadFile?path=${client.Utils.toURI(sp.path)}"
               Popover.hide
             }
             true
@@ -154,18 +150,20 @@ class FileToolBox(initSafePath: SafePath) {
           case fileaction.execute ⇒
             import scala.concurrent.duration._
             withSafePath { sp ⇒
-              post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(sp), true).call().foreach { execInfo ⇒
+              Post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(sp), true).call().foreach { execInfo ⇒
                 Popover.hide
-                org.openmole.gui.client.core.panels.executionPanel.dialog.show
+                showExecution()
               }
             }
             true
           case fileaction.toScript ⇒
             withSafePath { sp ⇒
-              val wizardPanel = panels.modelWizardPanel
-              wizardPanel.dialog.show
-              wizardPanel.fromSafePath(sp)
-              Popover.hide
+              Plugins.fetch { p ⇒
+                val wizardPanel = panels.modelWizardPanel(p.wizardFactories)
+                wizardPanel.dialog.show
+                wizardPanel.fromSafePath(sp)
+                Popover.hide
+              }
             }
             true
           case _ ⇒ false
@@ -231,18 +229,18 @@ class FileToolBox(initSafePath: SafePath) {
   val contentRoot = {
     div(omsheet.centerElement)(
       downloadTrigger,
-      DataUtils.fileToExtension(initSafePath.name) match {
+      FileExtension(initSafePath.name) match {
         case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP | FileExtension.TXZ ⇒
           iconAction(fileaction.extract, archive, "extract")
         case _ ⇒ span
       },
-      DataUtils.fileToExtension(initSafePath.name) match {
+      FileExtension(initSafePath.name) match {
         case FileExtension.OMS ⇒
           iconAction(fileaction.execute, execute, "run")
         case _ ⇒ span
       },
-      DataUtils.fileToExtension(initSafePath.name) match {
-        case FileExtension.JAR | FileExtension.TGZBIN | FileExtension.NETLOGO | FileExtension.R | FileExtension.TGZ ⇒
+      FileExtension(initSafePath.name) match {
+        case FileExtension.JAR | FileExtension.NETLOGO | FileExtension.R | FileExtension.TGZ ⇒
           iconAction(fileaction.toScript, toScript, "to OMS")
         case _ ⇒ span
       },
@@ -252,11 +250,11 @@ class FileToolBox(initSafePath: SafePath) {
   }
 
   def extractTGZ(safePath: SafePath) =
-    post()[Api].extractTGZ(safePath).call().foreach {
+    Post()[Api].extractTGZ(safePath).call().foreach {
       r ⇒
         r.error match {
           case Some(e: org.openmole.gui.ext.data.ErrorData) ⇒
-            AlertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
+            panels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
           case _ ⇒ treeNodePanel.invalidCacheAndDraw
         }
     }
@@ -265,7 +263,7 @@ class FileToolBox(initSafePath: SafePath) {
     val newTitle = editTitle.value
     val newSafePath = safePath.parent ++ newTitle
     treeNodeTabs.saveAllTabs(() ⇒ {
-      post()[Api].existsExcept(newSafePath, false).call().foreach {
+      Post()[Api].existsExcept(newSafePath, false).call().foreach {
         b ⇒
           if (b) {
             overwriting() = true
@@ -283,7 +281,7 @@ class FileToolBox(initSafePath: SafePath) {
 
   def rename(safePath: SafePath, replacing: () ⇒ Unit) = {
     val newTitle = editTitle.value
-    post()[Api].renameFile(safePath, newTitle).call().foreach {
+    Post()[Api].renameFile(safePath, newTitle).call().foreach {
       newNode ⇒
         treeNodeTabs.rename(safePath, newNode)
         treeNodePanel.invalidCacheAndDraw

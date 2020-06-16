@@ -51,29 +51,6 @@ object DataUtils {
     IOArgs(jarMethod.argumentTypes, typeStringToVariableElement(jarMethod.returnType, jarMethod.argumentTypes.size))
   }
 
-  implicit def fileToExtension(fileName: String): FileExtension = {
-    fileName match {
-      case x if x.endsWith(".oms")                            ⇒ OMS
-      case x if x.endsWith(".csv")                            ⇒ CSV
-      case x if x.endsWith(".nlogo") | x.endsWith(".nlogo3d") ⇒ NETLOGO
-      case x if x.endsWith(".R")                              ⇒ R
-      case x if x.endsWith(".gaml") |
-        x.endsWith(".py") |
-        x.endsWith(".txt") | x.endsWith(".nls") ⇒ TEXT
-      case x if x.endsWith(".md") ⇒ MD
-      case x if x.endsWith(".tgz") | x.endsWith(".tar.gz") ⇒ TGZ
-      case x if x.endsWith(".tar.xz") ⇒ TXZ
-      case x if x.endsWith(".tar") ⇒ TAR
-      case x if x.endsWith(".zip") ⇒ ZIP
-      case x if x.endsWith(".tgz.bin") | x.endsWith(".tar.gz.bin") ⇒ TGZBIN
-      case x if x.endsWith(".jar") ⇒ JAR
-      case x if x.endsWith(".scala") ⇒ SCALA
-      case x if x.endsWith(".sh") ⇒ SH
-      case x if x.endsWith(".svg") ⇒ SVG
-      case _ ⇒ BINARY
-    }
-  }
-
   implicit class CleanName(s: String) {
     def clean = s.split('-').reduce(_ + _.capitalize).filterNot(Seq('?', ' ').contains).replaceAll("%", "percent")
   }

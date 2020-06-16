@@ -45,8 +45,7 @@ import org.openmole.core.networkservice._
 import org.openmole.gui.ext.api.Api
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.gui.ext.data.routes._
-import org.openmole.gui.ext.tool.server
-import org.openmole.gui.ext.tool.server.{ AutowireServer, OMRouter }
+import org.openmole.gui.ext.server.{ AutowireServer, OMRouter, utils }
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.file._
 import org.openmole.tool.logger.LoggerService
@@ -57,9 +56,9 @@ import org.openmole.tool.tar._
 
 import scala.util.{ Failure, Success, Try }
 
-object GUIServices {
+object GUIServerServices {
 
-  case class ServicesProvider(guiServices: GUIServices, cypherProvider: () ⇒ Cypher) extends Services {
+  case class ServicesProvider(guiServices: GUIServerServices, cypherProvider: () ⇒ Cypher) extends Services {
     implicit def services = guiServices
     implicit def workspace = guiServices.workspace
     implicit def preference = guiServices.preference
@@ -96,23 +95,23 @@ object GUIServices {
     implicit val replicaCatalog = ReplicaCatalog(ws)
     implicit val loggerService = LoggerService(logLevel)
 
-    new GUIServices()
+    new GUIServerServices()
   }
 
-  def dispose(services: GUIServices) = {
+  def dispose(services: GUIServerServices) = {
     scala.util.Try(Workspace.clean(services.workspace))
     scala.util.Try(services.threadProvider.stop())
   }
 
-  def withServices[T](workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level])(f: GUIServices ⇒ T) = {
-    val services = GUIServices(workspace, httpProxy, logLevel)
+  def withServices[T](workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level])(f: GUIServerServices ⇒ T) = {
+    val services = GUIServerServices(workspace, httpProxy, logLevel)
     try f(services)
     finally dispose(services)
   }
 
 }
 
-class GUIServices(
+class GUIServerServices(
   implicit
   val workspace:           Workspace,
   val preference:          Preference,
@@ -134,7 +133,7 @@ class GUIServices(
 object GUIServlet {
   def apply(arguments: GUIServer.ServletArguments) = {
     val servlet = new GUIServlet(arguments)
-    Utils.addPluginRoutes(servlet.addRouter, GUIServices.ServicesProvider(arguments.services, servlet.cypher.get))
+    Plugins.addPluginRoutes(servlet.addRouter, GUIServerServices.ServicesProvider(arguments.services, servlet.cypher.get))
     servlet addRouter (OMRouter[Api](AutowireServer.route[Api](servlet.apiImpl)))
     servlet
   }
@@ -144,7 +143,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   configureMultipartHandling(MultipartConfig(maxFileSize = Some(20 * 1024 * 1024 * 1024), fileSizeThreshold = Some(1024 * 1024))) // Limited to files of 20Go with 1Mo chunks
 
   val cypher = new AtomicReference[Cypher](Cypher(arguments.password))
-  val services = GUIServices.ServicesProvider(arguments.services, cypher.get)
+  val services = GUIServerServices.ServicesProvider(arguments.services, cypher.get)
   val apiImpl = new ApiImpl(services, arguments.applicationControl)
 
   import services._
@@ -166,9 +165,9 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     tags.head(
       tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset=UTF-8"),
       cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
-      tags.script(tags.`type` := "text/javascript", tags.src := "js/" + Utils.openmoleFileName),
-      tags.script(tags.`type` := "text/javascript", tags.src := "js/" + Utils.depsFileName),
-      tags.script(tags.`type` := "text/javascript", tags.src := "js/" + Utils.openmoleGrammarMode),
+      tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.openmoleFileName),
+      tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.depsFileName),
+      tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.openmoleGrammarMode),
       RawFrag(arguments.extraHeader)
     ),
     tags.body(
@@ -250,9 +249,9 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
         }
 
       fileType match {
-        case "project"        ⇒ copyTo(Utils.webUIDirectory)
-        case "authentication" ⇒ copyTo(server.Utils.authenticationKeysFile)
-        case "plugin"         ⇒ copyTo(Utils.pluginUpdoadDirectory(params("directoryName")))
+        case "project"        ⇒ copyTo(utils.webUIDirectory)
+        case "authentication" ⇒ copyTo(utils.authenticationKeysFile)
+        case "plugin"         ⇒ copyTo(utils.pluginUpdoadDirectory(params("directoryName")))
         case "absolute"       ⇒ copyTo(new File(""))
       }
     }
@@ -263,7 +262,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   get(downloadFileRoute) {
 
     val path = params("path")
-    val f = new File(Utils.webUIDirectory, path)
+    val f = new File(utils.webUIDirectory, path)
 
     if (!f.exists()) NotFound("The file " + path + " does not exist.")
     else {

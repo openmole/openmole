@@ -2,19 +2,18 @@ package org.openmole.plugin.hook.omr
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workflow.format.CSVOutputFormat
 import org.openmole.core.workflow.hook.FromContextHook
 import org.openmole.plugin.tool.json._
 import io.circe._
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.format.OutputFormat.{ PlainContent, SectionContent }
-import org.openmole.core.workflow.format.WritableOutput.Store
-import org.openmole.plugin.hook.json.JSONOutputFormat
 
 object OMROutputFormat {
 
   def methodFile = "method.omr"
   def dataDirectory = "data"
+  def methodNameField = "method"
 
   implicit def outputFormat[MD](implicit encoder: Encoder[MD], methodData: MethodData[MD]): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD] {
     override def write(executionContext: HookExecutionContext)(format: OMROutputFormat, output: WritableOutput, content: OutputContent, method: MD): FromContext[Unit] = FromContext { p ⇒
@@ -28,7 +27,7 @@ object OMROutputFormat {
           val directory = file.from(context)
 
           def methodFormat(json: Json) = {
-            json.deepDropNullValues.mapObject(_.add("method", Json.fromString(methodData.name(method))))
+            json.deepDropNullValues.mapObject(_.add(methodNameField, Json.fromString(methodData.name(method))))
           }
 
           directory.withLockInDirectory {
@@ -69,6 +68,21 @@ object OMROutputFormat {
     }
 
     override def validate(format: OMROutputFormat): FromContextHook.ValidateParameters ⇒ Seq[Throwable] = { p ⇒ Seq() }
+  }
+
+  def methodName(file: File): String = {
+    import io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
+    val content = file.content(gz = true)
+    val parseResult = parse(content)
+    parseResult match {
+      case Right(r) ⇒
+        r.hcursor.downField(methodNameField).as[String] match {
+          case Right(r) ⇒ r
+          case Left(e)  ⇒ throw new InternalProcessingError(s"Unable to get field $methodNameField in json:\n$content", e)
+        }
+      case Left(e) ⇒ throw new InternalProcessingError(s"Error while parsing omr file $file with content:\n$content", e)
+    }
+
   }
 
 }

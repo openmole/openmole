@@ -28,40 +28,6 @@ import scala.language.higherKinds
 
 object NSGA2 {
 
-  object stochastic {
-
-    case class SavedGeneration(generation: Long, objectives: Vector[SavedObjective])
-    case class SavedObjective(objectives: Vector[Double], samples: Int)
-
-    case class Convergence(nadir: Option[Vector[Double]], generations: Vector[GenerationConvergence])
-    case class GenerationConvergence(generation: Long, hypervolume: Option[Double], minimums: Option[Vector[Double]])
-
-    def converge(generations: Vector[SavedGeneration], samples: Int) = {
-      import _root_.mgo.tools.metric.Hypervolume
-
-      def robustObjectives(objectives: Vector[SavedObjective]) =
-        objectives.filter(_.samples >= samples).map(_.objectives)
-
-      val nadir = {
-        val allRobustObjectives = generations.flatMap(g ⇒ robustObjectives(g.objectives))
-        if (allRobustObjectives.isEmpty) None else Some(Hypervolume.nadir(allRobustObjectives))
-      }
-
-      val generationsConvergence =
-        for {
-          generation ← generations.sortBy(_.generation)
-        } yield {
-          val rObj = robustObjectives(generation.objectives)
-          def hv = nadir.flatMap { nadir ⇒ if (rObj.isEmpty) None else Some(Hypervolume(rObj, nadir)) }
-          def mins = if (rObj.isEmpty) None else Some(rObj.transpose.map(_.min))
-
-          GenerationConvergence(generation.generation, hv, mins)
-        }
-
-      Convergence(nadir, generationsConvergence)
-    }
-  }
-
   object DeterministicParams {
     import mgo.evolution.algorithm.{ CDGenome, NSGA2 ⇒ MGONSGA2, _ }
 
@@ -153,16 +119,15 @@ object NSGA2 {
 
       def operations(om: StochasticParams) = new Ops {
 
-        override def metadata(generation: Long, frequency: Option[Long]) = FromContext { p ⇒
+        override def metadata(savedData: SavedData) = FromContext { p ⇒
           import p._
           import EvolutionMetadata._
           StochasticNSGA2(
             genome = om.genome.map(GenomeBoundData(_).from(context)),
             objective = om.objectives.map(NoisyObjectiveData(_)),
-            generation = generation,
-            frequency = frequency,
             sample = om.historySize,
-            mu = om.mu
+            mu = om.mu,
+            saved = savedData
           )
         }
 

@@ -112,13 +112,12 @@ package object data {
     def displayable: Boolean
   }
 
-  trait HighlightedFile {
-    def highlighter: String
+  object OpenMOLEScript extends FileExtension {
+    val displayable = true
   }
 
-  object OpenMOLEScript extends FileExtension with HighlightedFile {
+  object OpenMOLEResult extends FileExtension {
     val displayable = true
-    val highlighter = "openmole"
   }
 
   object MDScript extends FileExtension {
@@ -129,7 +128,7 @@ package object data {
     val displayable = true
   }
 
-  case class EditableFile(highlighter: String, onDemand: Boolean = false) extends FileExtension with HighlightedFile {
+  case class EditableFile(highlighter: String, onDemand: Boolean = false) extends FileExtension {
     val displayable = true
   }
 
@@ -163,6 +162,7 @@ package object data {
 
   object FileExtension {
     val OMS = OpenMOLEScript
+    val OMR = OpenMOLEResult
     val SCALA = EditableFile("scala")
     val NETLOGO = EditableFile("text")
     val R = EditableFile("R")
@@ -177,9 +177,31 @@ package object data {
     val TXZ = TarXz
     val TAR = Tar
     val ZIP = Zip
-    val TGZBIN = TgzBin
     val JAR = Jar
     val BINARY = BinaryFile
+
+    def apply(fileName: String): FileExtension = {
+      fileName match {
+        case x if x.endsWith(".oms")                            ⇒ OMS
+        case x if x.endsWith(".omr")                            ⇒ OMR
+        case x if x.endsWith(".csv")                            ⇒ CSV
+        case x if x.endsWith(".nlogo") | x.endsWith(".nlogo3d") ⇒ NETLOGO
+        case x if x.endsWith(".R")                              ⇒ R
+        case x if x.endsWith(".gaml") |
+          x.endsWith(".py") |
+          x.endsWith(".txt") | x.endsWith(".nls") ⇒ TEXT
+        case x if x.endsWith(".md") ⇒ MD
+        case x if x.endsWith(".tgz") | x.endsWith(".tar.gz") ⇒ TGZ
+        case x if x.endsWith(".tar.xz") ⇒ TXZ
+        case x if x.endsWith(".tar") ⇒ TAR
+        case x if x.endsWith(".zip") ⇒ ZIP
+        case x if x.endsWith(".jar") ⇒ JAR
+        case x if x.endsWith(".scala") ⇒ SCALA
+        case x if x.endsWith(".sh") ⇒ SH
+        case x if x.endsWith(".svg") ⇒ SVG
+        case _ ⇒ BINARY
+      }
+    }
   }
 
   sealed trait FileContent
@@ -278,7 +300,7 @@ package object data {
   case class ScriptData(scriptPath: SafePath)
 
   object ErrorData {
-    def empty = MessageErrorData("")
+    def empty = MessageErrorData("", None)
 
     def toStackTrace(t: Throwable) = {
       val sw = new StringWriter()
@@ -287,25 +309,19 @@ package object data {
     }
 
     def apply(errors: Seq[ErrorWithLocation], t: Throwable) = CompilationErrorData(errors, toStackTrace(t))
+    def apply(t: Throwable): MessageErrorData = MessageErrorData(t.getMessage, Some(toStackTrace(t)))
 
-    def apply(t: Throwable): MessageErrorData = MessageErrorData(toStackTrace(t))
-
-    def apply(stackTrace: String) = MessageErrorData(stackTrace)
-
+    def apply(message: String) = MessageErrorData(message, None)
 
     def stackTrace(e: ErrorData) =
       e match {
-        case MessageErrorData(stackTrace) => stackTrace
+        case MessageErrorData(msg, stackTrace) => msg + stackTrace.map("\n" + _).getOrElse("")
         case CompilationErrorData(_, stackTrace) => stackTrace
       }
   }
 
   sealed trait ErrorData
-
-  case class MessageErrorData(stackTrace: String) extends ErrorData {
-    def +(error: MessageErrorData) = MessageErrorData(stackTrace + error.stackTrace)
-  }
-
+  case class MessageErrorData(message: String, stackTrace: Option[String]) extends ErrorData
   case class CompilationErrorData(errors: Seq[ErrorWithLocation], stackTrace: String) extends ErrorData
 
 
@@ -793,36 +809,29 @@ package object data {
 
   sealed trait Test {
     def passed: Boolean
-
     def message: String
-
-    def errorStack: ErrorData
+    def error: Option[ErrorData]
   }
 
   case class PendingTest() extends Test {
     def passed = false
-
     def message = "pending"
-
-    def errorStack = ErrorData.empty
+    def error = None
   }
 
-  case class FailedTest(message: String, errorStack: ErrorData) extends Test {
+  case class FailedTest(message: String, error: Some[ErrorData]) extends Test {
     def passed = false
   }
 
   case class PassedTest(message: String) extends Test {
     def passed = true
-
-    override def errorStack = ErrorData.empty
+    def error = None
   }
 
   object Test {
     def passed(message: String = "OK") = PassedTest(message)
-
     def pending = PendingTest()
-
-    def error(msg: String, err: ErrorData) = FailedTest(msg, err)
+    def error(msg: String, err: ErrorData) = FailedTest(msg, Some(err))
   }
 
   case class JVMInfos(javaVersion: String, jvmImplementation: String, processorAvailable: Int, allocatedMemory: Long, totalMemory: Long)

@@ -18,19 +18,13 @@ package org.openmole.gui.client.core.files
  */
 
 import org.openmole.gui.client.core.alert.AlertPanel
-import org.openmole.gui.client.core.CoreUtils
+import org.openmole.gui.client.core.{ CoreUtils, panels }
 import org.openmole.gui.ext.data.{ FileFilter, ListFilesData, SafePath }
 import rx._
 import org.openmole.gui.client.core.files.TreeNode.ListFiles
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-
-package object treenodemanager {
-  val instance = new TreeNodeManager
-
-  def apply = instance
-}
 
 class TreeNodeManager {
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
@@ -52,11 +46,11 @@ class TreeNodeManager {
   val pluggables: Var[Seq[SafePath]] = Var(Seq())
 
   error.trigger {
-    error.now.foreach(AlertPanel.treeNodeErrorDiv)
+    error.now.foreach(panels.alertPanel.treeNodeErrorDiv)
   }
 
   comment.trigger {
-    comment.now.foreach(AlertPanel.treeNodeCommentDiv)
+    comment.now.foreach(panels.alertPanel.treeNodeCommentDiv)
   }
 
   def isSelected(tn: TreeNode) = selected.now.contains(tn)
@@ -106,7 +100,7 @@ class TreeNodeManager {
   def computeCurrentSons(fileFilter: FileFilter): Future[ListFiles] = {
     val cur = current.now
 
-    def getAndUpdateSons(safePath: SafePath): Future[ListFiles] = CoreUtils.getSons(safePath, fileFilter).map { newsons ⇒
+    def getAndUpdateSons(safePath: SafePath): Future[ListFiles] = CoreUtils.listFiles(safePath, fileFilter).map { newsons ⇒
       sons() = {
         val ns: ListFiles = newsons
         sons.now.updated(cur, ns)
@@ -130,7 +124,13 @@ class TreeNodeManager {
   }
 
   def computePluggables(todo: () ⇒ Unit) = current.foreach { sp ⇒
-    CoreUtils.pluggables(sp, todo)
+    CoreUtils.pluggables(
+      sp,
+      p ⇒ {
+        pluggables() = p
+        todo()
+      }
+    )
   }
 
   def isRootCurrent = current.now == root
