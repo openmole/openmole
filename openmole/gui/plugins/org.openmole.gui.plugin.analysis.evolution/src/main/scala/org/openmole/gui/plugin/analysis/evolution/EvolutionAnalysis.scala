@@ -24,7 +24,7 @@ import rx._
 import scala.scalajs.js
 
 object TopLevelExports {
-  @JSExportTopLevel("egi")
+  @JSExportTopLevel("evolution")
   val egi = js.Object {
     new org.openmole.gui.plugin.analysis.evolution.EvolutionAnalysis
   }

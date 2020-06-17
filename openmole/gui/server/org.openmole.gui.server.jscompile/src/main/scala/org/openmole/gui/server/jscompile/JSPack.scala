@@ -27,7 +27,7 @@ import java.io.File
 
 import org.openmole.tool.file._
 import org.openmole.core.workspace._
-import org.scalajs.logging.NullLogger
+import org.scalajs.logging.{ NullLogger, ScalaConsoleLogger }
 
 object JSPack {
 
