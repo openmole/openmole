@@ -164,7 +164,7 @@ lazy val netlogo6 = OsgiProject(
   ), version := netLogo6Version, scalaVersion := "2.12.8", crossPaths := false) settings(settings: _*) 
 
 lazy val scalaTagsVersion = "0.9.1"
-lazy val scalaRxVersion = "0.4.2"
+lazy val scalaRxVersion = "0.4.3"
 lazy val scalaDomVersion = "1.0.0"
 lazy val scalaBoopickleVersion = "1.3.3"
 lazy val scalaAutowireVersion = "0.3.2"
