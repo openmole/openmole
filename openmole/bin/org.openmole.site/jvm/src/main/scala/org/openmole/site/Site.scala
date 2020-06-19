@@ -50,7 +50,7 @@ object Site {
         |    g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
         |  })();
         |</script>
-        |<noscript><p><img src="//piwik.iscpif.fr/piwik.php?idsite=1" style="border:0;" alt="" /></p></noscript>
+        |<noscript><p><img src="//matomo.openmole.org/piwik.php?idsite=1" style="border:0;" alt="" /></p></noscript>
         |<!-- End Piwik Code -->
       """.stripMargin
     )
