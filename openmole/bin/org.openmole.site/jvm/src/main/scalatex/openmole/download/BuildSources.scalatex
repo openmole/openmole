@@ -28,7 +28,7 @@ Clone the OpenMOLE repository by typing the following in your command shell (pro
 
 @br@br
 
-@hl.highlight("""
+@hl("""
 $> git lfs install
 $> git lfs clone git@github.com:openmole/openmole.git
 """, "plain")
@@ -43,7 +43,7 @@ To build the OpenMOLE application for the first time after cloning it, execute t
 
 @br@br
 
-@hl.highlight("""
+@hl("""
 $> cd openmole
 $> ./build.sh
 """, "plain")
@@ -59,7 +59,7 @@ In order to apply the changes after you updated your openmole version (by doing 
 
 @br@br
 
-@hl.highlight("""
+@hl("""
 $> ./clean.sh
 $> ./build.sh
 """, "plain")
@@ -76,7 +76,7 @@ Publish the bundles:
 
 @br@br
 
-@hl.highlight("""
+@hl("""
 $> cd build-system
 $> sbt publish
 $> cd ../libraries
@@ -92,7 +92,7 @@ Once docker is installed on your machine you can do:
 
 @br@br
 
-@hl.highlight("""
+@hl("""
 $> git clone """ + shared.link.repo.openMOLEDockerBuild +
 """
 $> cd docker-build

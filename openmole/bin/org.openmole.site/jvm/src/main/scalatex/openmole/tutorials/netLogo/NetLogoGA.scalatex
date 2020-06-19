@@ -68,13 +68,13 @@ different distances from the Ant colony.
 @br @img(src := Resource.img.example.antNumbers.file)
 
 @p It can be interesting to search the @b{best combination of the two parameters}
-@hl.highlight("evaporation-rate", "plain") and @hl.highlight("diffusion-rate", "plain")
+@hl("evaporation-rate", "plain") and @hl("diffusion-rate", "plain")
 which minimises the eating time of each food source.
 
 @p To build our fitness function, we modify the NetLogo Ants source code to store for each food source the first ticks
 indicating that this food source is empty.
 
-@p @hl.highlight("""
+@p @hl("""
 to compute-fitness
   if ((sum [food] of patches with [food-source-number = 1] = 0) and (final-ticks-food1 = 0)) [
     set final-ticks-food1 ticks ]
@@ -119,16 +119,16 @@ model_execution
 """, name = "ga netlogo model")
 
 @p The result of this execution should look like:
-@br @hl.highlight("{food1=746.0, food2=1000.0, food3=2109.0}", "plain")
+@br @hl("{food1=746.0, food2=1000.0, food3=2109.0}", "plain")
 
 @h2{The optimisation algorithm}
 
 We will try to find the parameter settings minimising these estimators.
 This script describes how to use the NSGA2 multi-objective optimisation algorithm in OpenMOLE.
-The result files are written to @hl.highlight("/tmp/ants", "plain").
-Notice how the @hl.highlight("evaluation", "plain") parameter of the @hl.highlight("SteadyStateEvolution", "plain")
+The result files are written to @hl("/tmp/ants", "plain").
+Notice how the @hl("evaluation", "plain") parameter of the @hl("SteadyStateEvolution", "plain")
 method, is the netlogo task i.e. running the model, which indeed provides an @b{evaluation} of the genome
-(parameter settings) efficiency regarding the @hl.highlight("objective","plain").
+(parameter settings) efficiency regarding the @hl("objective","plain").
 
 @br @hl.openmole("""
 // Define the inputs and their respective variation bounds.

@@ -34,7 +34,7 @@ object MD {
       def code = list.asScala.mkString("\n")
       val html =
         if (s == "openmole") hl.openmole(code)
-        else hl.highlight(code, s)
+        else hl(code, s)
       stringBuilder.append(html.render)
     }
   }

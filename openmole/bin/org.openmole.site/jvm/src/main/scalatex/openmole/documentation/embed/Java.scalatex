@@ -14,7 +14,7 @@ OpenMOLE makes the inclusion of your own Java code in a workflow simple. Since t
 @p
   Let us consider the simple code @em{Hello.java} in a directory named @i{hello} @("(to respect Java's package structure)"):
 
-  @hl.highlight("""
+  @hl("""
   package hello;
 
   public class Hello {
@@ -26,7 +26,7 @@ OpenMOLE makes the inclusion of your own Java code in a workflow simple. Since t
 @p 
   We compile the code and generate the JAR file as follows:
 
-  @hl.highlight("""
+  @hl("""
   mkdir hello
   mv Hello.java hello
   cd hello
@@ -53,7 +53,7 @@ OpenMOLE makes the inclusion of your own Java code in a workflow simple. Since t
 @p 
   The output should look like that (the order in which the lines are printed might be different in your case):
 
-  @hl.highlight("""
+  @hl("""
   Hello from Java! 0
   Hello from Java! 1
   Hello from Java! 2
@@ -70,7 +70,7 @@ OpenMOLE makes the inclusion of your own Java code in a workflow simple. Since t
 @p 
   In the general case a task is used to compute some output values depending on some input values. To illustrate that, let's consider another Java code:
 
-  @hl.highlight("""
+  @hl("""
   package hello;
 
   public class Hello {
@@ -182,7 +182,7 @@ OpenMOLE makes the inclusion of your own Java code in a workflow simple. Since t
 
 @p
 OpenMOLE can use complex Java libraries as they are well packaged. Maven, that manages Java project life-cycle and dependencies, has a plugin (maven-shade) that can produce such bundles. In order to allow the use of this plugin, you have to configure it in the plugin list of the maven project file. In the @em{<plugins> </plugins>} section, you have to add the following code.
-@hl.xml("""
+@hl("""
 <plugin>
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-shade-plugin</artifactId>
@@ -212,7 +212,7 @@ OpenMOLE can use complex Java libraries as they are well packaged. Maven, that m
             </configuration>
         </execution>
     </executions>
-</plugin>""")
+</plugin>""", "xml")
 
 
 Once this code is added, you can produce the  bundle by simply executing a build command (with @em{mvn install }for example), and it will be created into the @em{target} directory. The file is named name_of_youar_artifact-version-shaded.jar. You can now upload it into the OpenMOLE client and use it as described in the tutorial for simple Java code.

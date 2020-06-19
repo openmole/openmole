@@ -27,7 +27,7 @@ It takes the following arguments :
 @h2{Embedding a Python script}
 
 @p The toy Python script for this test case is:
-@br @hl.highlight("""
+@br @hl("""
 import sys
 
 f = open("output.txt", 'w')

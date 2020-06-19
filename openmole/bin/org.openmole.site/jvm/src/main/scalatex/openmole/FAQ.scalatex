@@ -69,7 +69,7 @@ The most common cases of badly configured keypairs are the following:
 
 @br
 
-If you still could not solve your SSH authentication problems, another option is to recreate a public/private keypair using the @hl.highlight("ssh-keygen", "bash") shell command.
+If you still could not solve your SSH authentication problems, another option is to recreate a public/private keypair using the @hl("ssh-keygen", "bash") shell command.
 Store it in a different file to avoid overwriting the already existing one.
 
 @br
@@ -78,7 +78,7 @@ You might also want to try a simple @hl.openmole{LoginPassword} authentication a
 
 @br@br
 
-Adding the @hl.highlight("-vvv", "bash") flag to your @code{ssh} command will give a lot more details on the communication between your client and the remote server.
+Adding the @hl("-vvv", "bash") flag to your @code{ssh} command will give a lot more details on the communication between your client and the remote server.
 This will allow you to find out which authentication is successful as well as the order in which the authentication modes are tried.
 
 
@@ -134,7 +134,7 @@ On a UNIX system, this procedure translates into the following commands.
 
 @br@br
 
-@hl.highlight("""
+@hl("""
 # assumes /data is not restricted by quotas
 cp -r ~/.openmole /data/openmole_data
 rm -rf ~/.openmole
@@ -167,7 +167,7 @@ This combined sampling will generate the following error when compiling the work
 
 @br@br
 
-@hl.highlight("""
+@hl("""
 found   : org.openmole.core.workflow.data.Prototype[Int]
 required: org.openmole.core.workflow.sampling.Sampling
 """, "plain")
@@ -182,38 +182,6 @@ Simply @b{wrapping the expression in parentheses} fixes the problem as shown in 
 (i in (1 to 10))
 """)
 
-
-
-@h2{I can't get CARE / PRoot to work}
-
-CARE has recently encountered some compatibility issues with recent versions of the Linux kernel (>= 4.8).
-If you had downloaded CARE before the release of OpenMOLE 6.0, you might be faced with this issue when trying to package new code.
-
-@br
-
-The typical behaviour of this problem is to terminate CARE or your re-execution by a @i{"signal 11" (Segmentation Fault)} message.
-The output will be similar to: @hl.highlight("care info: pid 24238: terminated with signal 11", "plain").
-
-@br
-
-The easiest option to solve this problem is to download a fixed version from @aa("GitHub", href := shared.link.care).
-This binary only works for 64 bits machines, which might not be the case of your workstation.
-Older versions of CARE are still available for different computer architecture from @aa("GitHub", href := shared.link.prootStatic).
-These versions require the @hl.highlight("PROOT_NO_SECCOMP", "plain") environment variable to be set to 1 when running CARE.
-The packaging command line becomes: @hl.highlight("PROOT_NO_SECCOMP=1 care -o foo.tgz.bin -r ~ my_app -input 42", "plain")
-
-@br
-
-You can also export this variable to your environment once and for all: @hl.highlight("export PROOT_NO_SECCOMP=1", "plain")
-You'll have to do that in every terminal you're using unless you set this variable in your shell's startup file (@i{~/.bashrc} if you're using @i{bash}).
-There is nothing to change in your OpenMOLE scripts, the good folks at OpenMOLE have everything under control ;)
-
-@br
-
-For more information about this specific problem, you can join this @aa("discussion", href := shared.link.prootIssue106).
-
-
-
 @h2{I get an error related to files on Linux and there is 'too many open files' written somewhere in the error}
 
 On Linux servers, the number of files a user can open is generally limited to 1024.
@@ -222,7 +190,7 @@ To check the current state of your system limit, execute @code{ulimit -a} in a t
 
 @br@br
 
-@hl.highlight("""
+@hl("""
 reuillon@docker-host1:~$ ulimit -a
 core file size          (blocks, -c) 0
 data seg size           (kbytes, -d) unlimited
@@ -264,7 +232,7 @@ The full error might look something like:
 
 @br@br
 
-@hl.highlight("""
+@hl("""
 QXcbConnection: Could not connect to display
 proot terminated with signal 6
 """, "plain")
@@ -278,7 +246,7 @@ The packaging would look like:
 
 @br@br
 
-@hl.highlight("""
+@hl("""
 care -o myapp.tgz.bin python3 myapp.py param1 param2
 """, "plain")
 
@@ -290,7 +258,7 @@ In our example, that would be:
 
 @br@br
 
-@hl.highlight("""
+@hl("""
 care -o myapp.tgz.bin xvfb-run python3 myapp.py param1 param2
 """, "plain")
 

@@ -107,7 +107,10 @@ object Site {
             //  link(rel := "stylesheet", href := Resource.css.file),
             link(rel := "stylesheet", href := Resource.css.github.file),
             link(rel := "stylesheet", href := Resource.css.docStyle.file),
+
             script(src := Resource.js.highlight.file),
+            script("hljs.initHighlightingOnLoad();"),
+
             script(`type` := "text/javascript", src := Resource.js.siteJS.file),
             script(`type` := "text/javascript", src := Resource.js.depsJS.file),
 

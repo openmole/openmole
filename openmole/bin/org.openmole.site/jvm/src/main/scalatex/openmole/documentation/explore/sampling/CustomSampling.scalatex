@@ -12,7 +12,7 @@ The provided CSV file must be formatted according to the following template:
 
 @br@br
 
-@hl.highlight("""
+@hl("""
 colD, i
 0.7,  8
 0.9,  19

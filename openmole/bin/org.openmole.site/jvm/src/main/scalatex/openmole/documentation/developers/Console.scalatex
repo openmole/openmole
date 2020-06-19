@@ -3,13 +3,13 @@
 
 
 @aa("OpenMOLE GUI", href := DocumentationPages.gui.file) implements all the OpenMOLE features. However you may be interested in using OpenMOLE in interactive console mode.
-To do so, use the @i("-c") argument in your console : @hl.highlight("""./openmole -c""", "plain")
+To do so, use the @i("-c") argument in your console : @hl("""./openmole -c""", "plain")
 @br
 The only difference between the script in the console mode and the ones from the editor concerns the way you launch the execution, you cancel it and you follow the execution progress. An console workflow is launched like this:
 
   @br @hl.code("""val ex = exploration -< (model on env) start""")
 
-  @p Using the ex and the env variables you can follow the progress of the execution by using the commands: @hl.highlight("print(ex)", "plain") and @hl.highlight("print(env)", "plain"). To cancel the execution you should use: @hl.highlight("ex.cancel", "plain").
+  @p Using the ex and the env variables you can follow the progress of the execution by using the commands: @hl("print(ex)", "plain") and @hl("print(env)", "plain"). To cancel the execution you should use: @hl("ex.cancel", "plain").
 
 
 @h2{Authentications}
@@ -36,13 +36,13 @@ A console workflow is launched like this:
 @hl.code("""
 val ex = exploration -< (model on env) start""")
 
-Note that you need to invoke the @hl.highlight("start", "plain") on your workflow, in contrary to Editor mode.
+Note that you need to invoke the @hl("start", "plain") on your workflow, in contrary to Editor mode.
 
 @break
 
 Using the @i{ex} and the @i{env} variables you can follow the progress of the execution by using the commands:
-@hl.highlight("print(ex)", "plain") and @hl.highlight("print(env)","plain").
+@hl("print(ex)", "plain") and @hl("print(env)","plain").
 
 @break
 
-To cancel the execution you should use: @hl.highlight("ex.cancel", "plain").
+To cancel the execution you should use: @hl("ex.cancel", "plain").

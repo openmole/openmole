@@ -25,7 +25,6 @@ import scalatags.generic.StylePair
 package object tools {
 
   import scalatags.Text.all._
-  import scalatex.site.{ Highlighter, Section }
 
   def listItem(content: Frag*): Frag = li(content)
   def htmlList(items: Frag*): Frag = ul(items)
@@ -42,9 +41,33 @@ package object tools {
     def newEntry(name: String, body: Frag*): Frag = Seq[Frag](apiEntryTitle(name), body)
   }
 
-  object hl extends Highlighter {
+  object hl {
 
-    def apply(code: String, lang: String) = highlight(code, lang)
+    def apply(content: String, lang: String) = highlight(content, lang)
+
+    def highlight(string: String, lang: String) = {
+      val lines = string.split("\n", -1)
+      if (lines.length == 1) {
+        scalatags.Text.all.code(
+          cls := lang + " " + "hljs",
+          display := "inline",
+          padding := 0,
+          margin := 0,
+          lines(0))
+      }
+      else {
+        val minIndent = lines.filter(_.trim != "").map(_.takeWhile(_ == ' ').length).min
+        val stripped = lines.map(_.drop(minIndent))
+          .dropWhile(_ == "")
+          .mkString("\n")
+
+        pre(
+          scalatags.Text.all.code(
+            cls := lang + " " + "hljs",
+            stripped)
+        )
+      }
+    }
 
     object OptionalName {
       implicit def fromString(s: String) = OptionalName(Some(s))
@@ -54,13 +77,13 @@ package object tools {
 
     def openmole(code: String, header: String = "", name: OptionalName = OptionalName(None)) = {
       if (Test.testing) Test.allTests += Test(header + "\n" + code, name.name)
-      highlight(code, "scala")
+      apply(code, "scala")
     }
 
     def code(code: String) = openmoleNoTest(code)
-    def plain(code: String) = highlight(code, "plain")
-    def openmoleNoTest(code: String) = highlight(code, "scala")
-    def python(code: String) = highlight(code, "python")
+    def plain(code: String) = apply(code, "plain")
+    def openmoleNoTest(code: String) = apply(code, "scala")
+    def python(code: String) = apply(code, "python")
   }
 
   def openmole(code: String, header: String = "", name: hl.OptionalName = hl.OptionalName(None)) = hl.openmole(code, header, name)

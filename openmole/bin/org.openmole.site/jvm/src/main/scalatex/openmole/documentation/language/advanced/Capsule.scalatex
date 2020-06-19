@@ -45,7 +45,7 @@ val t2 = ScalaTask("val j = 84") set (outputs += j)
 t1 -- (Strain(t2) hook DisplayHook(i, j))
 """)
 
-@p This workflow displays @hl.highlight("{i=42, j=84}", "plain")
+@p This workflow displays @hl("{i=42, j=84}", "plain")
 
 @h2{Master capsule}
 

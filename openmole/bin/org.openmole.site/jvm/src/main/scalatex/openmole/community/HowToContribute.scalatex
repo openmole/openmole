@@ -44,7 +44,7 @@ Here's how to build a local copy of the website/documentation.
 
 @br@br
 
-@hl.highlight("""
+@hl("""
 $> cd openmole/openmole
 $> sbt
 """, "plain")
@@ -54,7 +54,7 @@ Location of the generated pages can be set via the @code{--target} option, e.g.
 
 @br@br
 
-@hl.highlight("""
+@hl("""
 buildSite --target /tmp/
 ""","plain")
 
@@ -134,7 +134,7 @@ You can identify more precisely the git error by activating debug in the git com
 
 @br@br
 
-@hl.highlight("""$> GIT_TRACE=1 GIT_CURL_VERBOSE=1 git push <remote_repo> <branch_name>""", "plain")
+@hl("""$> GIT_TRACE=1 GIT_CURL_VERBOSE=1 git push <remote_repo> <branch_name>""", "plain")
 
 
 @h3{Error: git-lfs [...] You are not allowed to push code to this project}
@@ -143,7 +143,7 @@ When pushing your updates to the fork, you might encounter this error:
 
 @br@br
 
-@hl.highlight("""
+@hl("""
 $> GIT_TRACE=1 GIT_CURL_VERBOSE=1 git push <remote_repo> <branch_name>
 13:50:17.630529 trace git-lfs: run_command: ssh -p 20022 -- git@gitlab.iscpif.fr git-lfs-authenticate openmole/openmole.git upload
 13:50:23.191218 trace git-lfs: ssh: git@gitlab.iscpif.fr failed, error: exit status 1, message: GitLab: You are not allowed to push code to this project.
@@ -158,7 +158,7 @@ If you did not change the binaries, you might just skip that step by using the f
 
 @br@br
 
-@hl.highlight("""$> git push --no-verify <remote_repo> <branch_name>""", "plain")
+@hl("""$> git push --no-verify <remote_repo> <branch_name>""", "plain")
 
 
 @h3{Error: openmole compiles but fails at runtime because of a package not found}
@@ -167,7 +167,7 @@ Try a clean and complete rebuild:
 
 @br@br
 
-@hl.highlight("""
+@hl("""
 $> ./clean.sh
 [...]
 $> ./build.sh""", "plain")
