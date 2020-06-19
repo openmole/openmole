@@ -36,7 +36,7 @@ object JSPack {
   def link(inputDirectory: File, outputJSFile: File, optimizedJS: Boolean)(implicit newFile: TmpDirectory): Unit =
     newFile.withTmpFile("lib", ".jar") { jar ⇒
 
-      getClass.getClassLoader.getResourceAsStream("scalajs-library.jar") copy jar
+      JSPack.getClass.getClassLoader.getResourceAsStream("scalajs-library.jar") copy jar
 
       // Obtain VirtualScalaJSIRFile's from the input classpath
       val irCache = StandardImpl.irFileCache().newCache

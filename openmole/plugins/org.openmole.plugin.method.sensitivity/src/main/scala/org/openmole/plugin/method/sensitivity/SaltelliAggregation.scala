@@ -89,11 +89,11 @@ object SaltelliAggregation {
       val reindex: Map[String, Array[Array[Double]]] =
         (matrixNames zip (matrixIndex zip (outputValues.transpose[Double])))
           .groupBy { case (n, _) ⇒ n }
-          .mapValues { xs ⇒
+          .view.mapValues { xs ⇒
             xs.sortBy { case (_, (i, _)) ⇒ i }
               .map { case (_, (_, v)) ⇒ v }
               .transpose[Double]
-          }
+          }.toMap
 
       // Output value for each matrix. fA(i)(j) and fB(i)(j) gives the value of i-th model output evaluated on the j-th line of matrix A. fC(i)(k)(j) gives the value of the i-th model output evaluated on the j-th line of matrix Ck.
       val fA: Array[Array[Double]] = reindex("a")

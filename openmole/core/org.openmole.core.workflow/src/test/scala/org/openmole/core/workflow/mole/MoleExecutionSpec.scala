@@ -29,7 +29,6 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.builder._
 import org.scalatest._
-import org.scalatest.junit._
 
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.dsl._
@@ -60,7 +59,7 @@ class MoleExecutionSpec extends FlatSpec with Matchers {
 
     val testT = TestTask { context ⇒
       context.contains(i.toArray) should equal(true)
-      context(i.toArray).sorted.deep should equal(data.toArray.deep)
+      context(i.toArray).sorted.toVector should equal(data.toVector)
       context
     } set (inputs += i.array)
 

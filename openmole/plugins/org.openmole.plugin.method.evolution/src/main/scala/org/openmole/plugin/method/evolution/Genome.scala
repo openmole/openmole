@@ -164,7 +164,7 @@ object Genome {
           val is =
             (vs zip h.values).zipWithIndex.map {
               case ((v, hv), index) ⇒
-                val i = hv.indexOf(v)
+                val i = hv.indexWhere(_ == v)
                 if (i == -1) throw new UserBadDataError(s"Value ${v} does'nt match a element of enumeration ${hv} for at index $index of input ${h.v}")
                 i
             }

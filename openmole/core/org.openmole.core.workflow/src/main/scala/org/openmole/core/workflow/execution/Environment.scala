@@ -131,7 +131,7 @@ class LocalEnvironment(
   private def submit(ejob: LocalExecutionJob): Unit = {
     pool().enqueue(ejob)
     eventDispatcherService.trigger(this, Environment.JobSubmitted(ejob))
-    eventDispatcherService.trigger(this, Environment.JobStateChanged(ejob, ExecutionState.SUBMITTED, ExecutionState.READY))
+    eventDispatcherService.trigger(this, Environment.JobStateChanged(ejob, SUBMITTED, READY))
   }
 
   def submitted: Long = pool().waiting

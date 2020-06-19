@@ -84,7 +84,7 @@ class DataChannelSpec extends FlatSpec with Matchers {
 
     val ex = (tw -- ExplicitSampling(i, data) -< t) & (tw oo t)
     ex.run
-    res.toArray.sorted.deep should equal(data.toArray.deep)
+    res.toVector.sorted should equal(data.toVector)
   }
 
 }

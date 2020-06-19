@@ -27,7 +27,7 @@ import java.util.zip.{ GZIPInputStream, GZIPOutputStream, ZipFile }
 import org.openmole.tool.thread._
 import org.openmole.tool.lock._
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
 import scala.util.{ Success, Failure, Try }
@@ -79,7 +79,7 @@ package file {
       def realPath = file.toPath.toRealPath()
 
       def isDirectoryEmpty =
-        file.withDirectoryStream()(_.iterator().isEmpty)
+        file.withDirectoryStream()(_.iterator().asScala.isEmpty)
 
       def isEmpty =
         if (file.isDirectory) isDirectoryEmpty
@@ -198,7 +198,7 @@ package file {
 
           // wrap with try catch in case CARE Archive generates d--------- directories
           try f.withDirectoryStream() { s ⇒
-            for (f ← s) {
+            for (f ← s.asScala) {
               if (Files.isRegularFile(f)) return false
               else if (Files.isDirectory(f)) toProceed += f
             }

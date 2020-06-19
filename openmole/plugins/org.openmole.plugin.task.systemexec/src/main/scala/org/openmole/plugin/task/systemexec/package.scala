@@ -160,11 +160,11 @@ package object systemexec {
           inDoubleQuote = false
           if (keepQuotes) currentArguments.append('"')
 
-        case (false, false, false, ''', _) ⇒
+        case (false, false, false, '\'', _) ⇒
           inSingleQuote = true
-          if (keepQuotes) currentArguments.append(''')
+          if (keepQuotes) currentArguments.append('\'')
 
-        case (false, true, false, ''', false) ⇒
+        case (false, true, false, '\'', false) ⇒
           inSingleQuote = false
           if (keepQuotes) currentArguments.append(character)
 

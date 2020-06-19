@@ -30,7 +30,7 @@ object Context {
   implicit def variableToContextConverter(variable: Variable[_]) = Context(variable)
   implicit def variablesToContextConverter(variables: Iterable[Variable[_]]): Context = Context(variables.toSeq: _*)
 
-  def fromMap(v: Traversable[(String, Variable[_])]) = new Context {
+  def fromMap(v: Iterable[(String, Variable[_])]) = new Context {
     val variables = TreeMap.empty[String, Variable[_]] ++ v
   }
 
@@ -45,9 +45,11 @@ object Context {
  * A task execution can remove variables from context, change the values of
  * the variables and add values to it.
  */
-trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_], Context] {
+trait Context {
 
   def variables: TreeMap[String, Variable[_]]
+
+  def values = variables.values
 
   /**
    * Get a variable given its name.
@@ -144,9 +146,9 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    * @param ctx context to append
    * @return
    */
-  def +(ctx: Context) = Context.fromMap(variables ++ ctx)
+  def +(ctx: Context) = Context.fromMap(variables ++ ctx.variables.toSeq)
 
-  override def +[B1 >: Variable[_]](kv: (String, B1)) = variables + kv
+  def +[B1 >: Variable[_]](kv: (String, B1)) = variables + kv
 
   /**
    * Build a new context containing the variables of the current context plus the
@@ -155,7 +157,7 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    * @param vs the variables to add
    * @return the new context
    */
-  def ++(vs: Traversable[Variable[_]]): Context = Context.fromMap(variables ++ (vs.map { v ⇒ v.prototype.name → v }))
+  def ++(vs: Iterable[Variable[_]]): Context = Context.fromMap(variables ++ (vs.map { v ⇒ v.prototype.name → v }))
 
   /**
    * Build a new context containing the variables of the current context minus the
@@ -164,7 +166,7 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    * @param names the names of the variables
    * @return the new context
    */
-  def --(names: Traversable[String]): Context = Context.fromMap(variables -- names)
+  def --(names: Iterable[String]): Context = Context.fromMap(variables -- names)
 
   /**
    * Check if this context contains a prototype and if the prototype stored is effectively compatible with the provided prototype
@@ -176,6 +178,9 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
       case None    ⇒ false
       case Some(v) ⇒ p.isAssignableFrom(v.prototype)
     }
+
+  def contains(name: String) =
+    variables.contains(name)
 
   /**
    * Remove by name a variable from the context
@@ -191,22 +196,21 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    */
   def -(v: Val[_]): Context = this - v.name
 
-  override def empty = Context.empty
+  def empty = Context.empty
 
   def get(key: String) = variables.get(key)
   def get[T](proto: Val[T]): Option[T] = option[T](proto)
 
   def update[T](p: Val[T], v: T) = this + Variable(p, v)
 
-  override def iterator = variables.iterator
-
+  def iterator = variables.iterator
   override def toString = prettified(Int.MaxValue)
 
   /**
    * Get the prototypes in this context
    * @return
    */
-  def prototypes = values.map { _.prototype }
+  def prototypes = variables.values.map { _.prototype }
 
   def prettified(stripSize: Int): String =
     "{" + (if (variables.values.isEmpty) ""

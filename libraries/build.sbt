@@ -8,7 +8,7 @@ def settings = Seq(
   resolvers += Resolver.sonatypeRepo("snapshots"),
   resolvers += Resolver.sonatypeRepo("releases"),
   resolvers += Resolver.sonatypeRepo("staging"),
-  scalaVersion in Global := "2.12.10",
+  scalaVersion in Global := "2.13.2",
   scalacOptions ++= Seq("-deprecation"),
   publishArtifact in (packageDoc in publishLocal) := false,
   publishArtifact in (packageSrc in publishLocal) := false,
@@ -104,11 +104,12 @@ lazy val scalaLang = OsgiProject(
   "org.scala-lang.scala-library",
   global = true,
   exports = Seq("akka.*", "com.typesafe.*", "scala.*", "scalax.*", "jline.*"),
-  privatePackages = Seq("*", "META-INF.native.**"), imports = Seq("!org.apache.tools.ant.*", "!sun.misc.*" ,"*")) settings
+  privatePackages = Seq("*", "META-INF.native.**"), imports = Seq("!org.apache.sshd.*", "!org.mozilla.*", "!org.apache.tools.ant.*", "!sun.misc.*", "!javax.annotation.*", "*")) settings
   (libraryDependencies ++= {
     Seq(
       "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
       "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.6",
+      "org.scala-lang.modules" %% "scala-parallel-collections" % "0.2.0",
       "org.scala-lang" % "scala-library" % scalaVersion.value,
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "org.scala-lang" % "scalap" % scalaVersion.value,
@@ -249,7 +250,7 @@ lazy val container = OsgiProject(dir, "container", exports = Seq("container.*"),
   //libraryDependencies += "com.github.luben" % "zstd-jni" % "1.4.3-1",
   version := containerVersion) dependsOn(cats, squants, circe, shapeless) settings(settings: _*)
 
-lazy val spatialsamplingVersion = "0.1"
+lazy val spatialsamplingVersion = "0.2"
 
 lazy val spatialdata = OsgiProject(dir, "org.openmole.spatialsampling",
   exports = Seq("org.openmole.spatialsampling.*"),
@@ -266,8 +267,8 @@ lazy val opencsv = OsgiProject(dir, "au.com.bytecode.opencsv") settings(
   ) settings(settings: _*)
 
 lazy val arm = OsgiProject(dir, "com.jsuereth.scala-arm") settings(
-  libraryDependencies += "com.jsuereth" %% "scala-arm" % "2.0",
-  version := "2.0",
+  libraryDependencies += "com.michaelpollmeier" %% "scala-arm" % "2.1",
+  version := "2.1",
   exportPackage := Seq("resource.*")) settings(settings: _*)
 
 lazy val scalajHttp = OsgiProject(dir, "org.scalaj.scalaj-http") settings(

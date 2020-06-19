@@ -18,8 +18,8 @@
 package org.openmole.core.context
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.tools.obj.ClassUtils._
-import org.openmole.core.tools.obj.{ ClassUtils, Id }
+import org.openmole.tool.types.ClassUtils._
+import org.openmole.tool.types.{ ClassUtils, Id }
 import shapeless.{ TypeCase, Typeable }
 
 import scala.annotation.tailrec
@@ -258,7 +258,7 @@ class Val[T](val simpleName: String, val `type`: ValType[T], val namespace: Name
 
   /**
    * Test if a given object can be accepted by the prototype
-   * (compares runtime classes using [[org.openmole.core.tools.obj.ClassUtils.classAssignable]])
+   * (compares runtime classes using [[ClassUtils.classAssignable]])
    *
    * @param obj
    * @return

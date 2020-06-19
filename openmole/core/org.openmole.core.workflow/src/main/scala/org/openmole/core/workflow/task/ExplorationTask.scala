@@ -29,6 +29,8 @@ import cats.implicits._
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.tools._
 
+import scala.collection.mutable
+
 /**
  * ExplorationTask is a wrapper for a sampling
  */
@@ -46,7 +48,7 @@ object ExplorationTask {
     FromContextTask("ExplorationTask") { p ⇒
       import p._
 
-      val variablesValues = TreeMap.empty[Val[_], ArrayBuffer[Any]] ++ sampling.prototypes.map { p ⇒ p → p.`type`.manifest.newArrayBuilder().asInstanceOf[collection.mutable.ArrayBuilder[Any]] }
+      val variablesValues = TreeMap.empty[Val[_], mutable.ArrayBuilder[Any]] ++ sampling.prototypes.map { p ⇒ p → p.`type`.manifest.newArrayBuilder().asInstanceOf[collection.mutable.ArrayBuilder[Any]] }
 
       for {
         sample ← sampling().from(context)
@@ -61,7 +63,7 @@ object ExplorationTask {
           try {
             Variable.unsecure(
               k.toArray,
-              v.result
+              v.result()
             )
           }
           catch {

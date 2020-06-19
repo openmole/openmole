@@ -67,7 +67,7 @@ object OSGiScalaCompiler {
         newSettings
       }
 
-    newSettings.maxClassfileName.value = 100
+    //newSettings.maxClassfileName.value = 100
     newSettings
   }
 

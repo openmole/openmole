@@ -17,6 +17,8 @@
 
 package org.openmole.tool.hash
 
+import scala.util.hashing.MurmurHash3
+
 object Hash {
   val HEX_CHAR_TABLE = List('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f').map { _.toByte }.toArray
 
@@ -42,11 +44,11 @@ case class Hash(content: Array[Byte]) {
   def !=(hash: String) = !this.==(hash)
   def equals(hash: String) = this == hash
   override def toString: String = Hash.hexString(content)
-  override def hashCode: Int = content.deep.hashCode
+  override def hashCode: Int = MurmurHash3.arrayHash(content)
   override def equals(obj: Any): Boolean = {
     if (obj == null) return false
     if (getClass != obj.asInstanceOf[AnyRef].getClass) return false
     val other = obj.asInstanceOf[Hash]
-    content.deep == other.content.deep
+    content sameElements other.content
   }
 }

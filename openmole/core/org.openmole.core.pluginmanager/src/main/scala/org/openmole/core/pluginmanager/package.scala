@@ -24,7 +24,7 @@ import org.openmole.core.location._
 import org.osgi.framework._
 import org.osgi.framework.wiring.BundleWiring
 
-import scala.collection.JavaConversions._
+import scala.jdk.CollectionConverters._
 
 package object pluginmanager {
 
@@ -33,10 +33,10 @@ package object pluginmanager {
   implicit class BundleDecorator(b: Bundle) {
 
     def isSystem = b.getLocation.toLowerCase.contains("system bundle") || b.getLocation.startsWith("netigso:")
-    def headerExists(f: (String, String) ⇒ Boolean) = b.getHeaders.toSeq.exists { case (k, v) ⇒ f(k, v) }
+    def headerExists(f: (String, String) ⇒ Boolean) = b.getHeaders.asScala.toSeq.exists { case (k, v) ⇒ f(k, v) }
 
     def openMOLEScope: Seq[String] =
-      b.getHeaders.toSeq.find { case (k, v) ⇒ k.toLowerCase == "openmole-scope" }.toSeq.flatMap(_._2.split(","))
+      b.getHeaders.asScala.toSeq.find { case (k, v) ⇒ k.toLowerCase == "openmole-scope" }.toSeq.flatMap(_._2.split(","))
     def isProvided = openMOLEScope.exists(_.toLowerCase == "provided")
 
     def isFullDynamic = headerExists { (k, v) ⇒ k.contains("DynamicImport-Package") && v.split(",").toSet.contains("*") }

@@ -74,7 +74,7 @@ class PrototypeSet(val prototypes: Seq[Val[_]], val explore: Set[String] = Set.e
    * @param d names of prototypes to explore
    * @return
    */
-  def explore(d: String*) = PrototypeSet.copy(this)(explore = explore ++ d)
+  def explore(d: String*): PrototypeSet = PrototypeSet.copy(this)(explore = explore ++ d)
 
   /**
    * Concatenate with a set of prototypes

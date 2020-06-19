@@ -26,6 +26,8 @@ package dsl {
   import org.openmole.tool.crypto.Cypher
   import squants.information._
 
+  import scala.collection.immutable.NumericRange
+
   trait DSLPackage <: Commands
     with Serializer
     with Classes
@@ -75,6 +77,8 @@ package dsl {
     }
 
     type Data = File
+
+    implicit class DoubleRange(d: Double) extends org.openmole.tool.collection.DoubleRange(d)
   }
 
 }

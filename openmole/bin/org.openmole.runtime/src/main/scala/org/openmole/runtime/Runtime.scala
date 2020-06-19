@@ -38,7 +38,7 @@ import org.openmole.core.serializer._
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.tool.file.uniqName
 
-import scala.collection.JavaConversions._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable.HashMap
 import util.{ Failure, Success }
 import org.openmole.core.workflow.execution.Environment.RuntimeLog
@@ -127,7 +127,7 @@ class Runtime {
 
       for (repliURI ← executionMessage.files) {
         // To avoid getting twice the same plugin
-        if (!usedFiles.containsKey(repliURI.originalPath)) {
+        if (!usedFiles.contains(repliURI.originalPath)) {
           val local = getReplicatedFile(repliURI, TransferOptions())
           usedFiles.put(repliURI.originalPath, local)
         }

@@ -24,7 +24,7 @@ import org.openmole.core.buildinfo._
 
 object Menu {
 
-  val navClass = classIs(navbar ++ navbar_default ++ navbar_staticTop ++ navbar_fixedTop ++ navbar_inverse)
+  val navClass = classIs(navbar, navbar_default, navbar_staticTop, navbar_fixedTop, navbar_inverse)
   val liStyle = paddingTop := 0
   val inputStyle = paddingTop := 15
   val navId = "omwesite"
@@ -64,8 +64,8 @@ object Menu {
               img(alt := "", src := Resource.img.mole.openmoleText.file, Seq(width := 240, padding := 15, pointer))
             )
           ),
-          div(classIs(collapse ++ navbar_collapse), aria.expanded := false, paddingTop := 20, id := navId)(
-            ul(classIs(nav ++ navbar_nav ++ navbar_left), marginLeft := 200)(
+          div(classIs(collapse, navbar_collapse), aria.expanded := false, paddingTop := 20, id := navId)(
+            ul(classIs(nav, navbar_nav, navbar_left), marginLeft := 200)(
               li(innerLink(DocumentationPages.documentation, "DOC"), liStyle),
               li(innerLink(DocumentationPages.tutorials, "TUTORIALS"), liStyle),
               li(innerLink(DocumentationPages.OMcommunity, "COMMUNITY"), liStyle),

@@ -31,6 +31,6 @@ class HashMapConverter(mapper: Mapper) extends AbstractCollectionConverter(mappe
       list += k -> v
       reader.moveUp()
     }
-    scala.collection.immutable.HashMap(list: _*)
+    scala.collection.immutable.HashMap(list.toSeq: _*)
   }
 }

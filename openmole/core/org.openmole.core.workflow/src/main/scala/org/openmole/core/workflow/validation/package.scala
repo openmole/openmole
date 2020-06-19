@@ -11,10 +11,10 @@ package object validation {
   }
 
   object Validate {
-    case class Parameters(implicit val newFile: TmpDirectory, implicit val fileService: FileService)
+    class Parameters(implicit val newFile: TmpDirectory, implicit val fileService: FileService)
 
     def apply(f: Parameters ⇒ Seq[Throwable]): Validate = new Validate {
-      def apply(implicit newFile: TmpDirectory, fileService: FileService) = f(Parameters())
+      def apply(implicit newFile: TmpDirectory, fileService: FileService) = f(new Parameters())
     }
 
     def apply(vs: Validate*): Validate = new Validate {

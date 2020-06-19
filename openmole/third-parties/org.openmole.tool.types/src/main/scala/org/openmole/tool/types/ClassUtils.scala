@@ -15,18 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.tools.obj
+package org.openmole.tool.types
 
 import java.util
 
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import java.lang.reflect.{ Type ⇒ JType, Array ⇒ _, _ }
 import scala.reflect.ClassTag
 import scala.reflect.Manifest.{ classType, intersectionType, arrayType, wildcardType }
-import collection.JavaConversions._
 import scala.reflect.runtime.universe._
 
 object ClassUtils {
@@ -101,7 +99,7 @@ object ClassUtils {
         ClassUtils.getClass.getClassLoader.loadClass(s)
       }
       catch {
-        case e: ClassNotFoundException ⇒ throw new UserBadDataError(e, "The class " + s + " has not been found")
+        case e: ClassNotFoundException ⇒ throw new ClassNotFoundException("The class " + s + " has not been found", e)
       }
     }
   )
@@ -132,4 +130,17 @@ object ClassUtils {
         eqTo.runtimeClass.isAssignableFrom(eqFrom.runtimeClass)
     }
 
+  def callByName[U: ClassTag, T](o: AnyRef, name: String, args: Vector[Any]) = {
+    val handle = implicitly[ClassTag[U]].runtimeClass.getDeclaredMethods.find(_.getName == name).get
+    handle.setAccessible(true)
+    handle.invoke(o, args.toArray.map(_.asInstanceOf[Object]): _*).asInstanceOf[T]
+  }
+
+  def call(c: AnyRef, methodName: String, argsTypes: Seq[Class[_]], args: Seq[AnyRef]) = {
+    val m = c.getClass.getMethod(methodName, argsTypes: _*)
+    m.setAccessible(true)
+    m.invoke(c, args: _*)
+  }
+
 }
+

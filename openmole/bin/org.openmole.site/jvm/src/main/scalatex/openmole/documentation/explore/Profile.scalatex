@@ -33,7 +33,7 @@ Finally, the profile method realizes calibrations on the other inputs for each i
 @Resource.rawFrag(Resource.img.method.profileAnim)
 @br
 
-@basicButton("Run", classIs(btn ++ btn_danger))(id := shared.profile.button, stylesheet.svgRunButton(-70))
+@basicButton("Run", classIs(btn, btn_danger))(id := shared.profile.button, stylesheet.svgRunButton(-70))
 
 @br
 

@@ -30,7 +30,7 @@ object Libraries {
   lazy val scalatraVersion = "2.7.0"
   lazy val scalaURIVersion = "1.1.1"
   lazy val scoptVersion = "3.7.1"
-  lazy val spatialsamplingVersion = "0.1"
+  lazy val spatialsamplingVersion = "0.2"
 
   lazy val bootstrapnative = libraryDependencies += "org.openmole.scaladget" %%% "bootstrapnative" % scaladgetVersion
   lazy val lunr = libraryDependencies += "org.openmole.scaladget" %%% "lunr" % scaladgetVersion
@@ -50,7 +50,7 @@ object Libraries {
   lazy val scalaCompatJS =  libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.6"
 
 
-  lazy val scalatest = "org.scalatest" %% "scalatest" % "3.0.5" % "test"
+  lazy val scalatest = "org.scalatest" %% "scalatest" % "3.1.2" % "test"
 
 
   /** ------- Bundles -------------- */
@@ -58,7 +58,7 @@ object Libraries {
   def addScalaLang(scalaVersion: String) =
     libraryDependencies ++= Seq(
       "org.openmole.library" %% "org-scala-lang-scala-library" % scalaVersion,
-      "org.scalameta" %% "scalameta" % "4.1.0"
+      "org.scalameta" %% "scalameta" % "4.3.15"
     )
 
   lazy val scalatra = "org.openmole.library" %% "org-scalatra" % scalatraVersion
@@ -70,7 +70,7 @@ object Libraries {
   lazy val xstream = "org.openmole.library" %% "com-thoughtworks-xstream" % xstreamVersion
   lazy val jasypt = "org.openmole.library" %% "org-jasypt-encryption" % "1.9.3"
   lazy val opencsv = "org.openmole.library" %% "au-com-bytecode-opencsv" % "2.3"
-  lazy val arm = "org.openmole.library" %% "com-jsuereth-scala-arm" % "2.0"
+  lazy val arm = "org.openmole.library" %% "com-jsuereth-scala-arm" % "2.1"
   lazy val scalajHttp = "org.openmole.library" %% "org-scalaj-scalaj-http" % "2.4.2"
   lazy val scopt = "org.openmole.library" %% "com-github-scopt" % scoptVersion
   lazy val scalabc = "org.openmole.library" %% "fr-iscpif-scalabc" % "0.4"
@@ -143,7 +143,7 @@ object Libraries {
 
   lazy val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.30"
   lazy val guava = "com.google.guava" % "guava" % "27.1-jre"
-  lazy val spray = "io.spray" %% "spray-json" % "1.3.2"
+  lazy val spray = "io.spray" %% "spray-json" % "1.3.5"
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
   lazy val equinoxOSGi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.13.200"
   lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.3.1"

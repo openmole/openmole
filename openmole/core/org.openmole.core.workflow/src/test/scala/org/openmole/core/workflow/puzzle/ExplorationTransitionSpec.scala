@@ -47,7 +47,7 @@ class ExplorationTransitionSpec extends FlatSpec with Matchers {
 
     val ex = sampling -< t
     ex.run()
-    res.toArray.sorted.deep should equal(data.toArray.deep)
+    res.toVector.sorted should equal(data.toVector)
   }
 
   "Exploration transition" should "work with the DSL interface" in {
@@ -65,7 +65,7 @@ class ExplorationTransitionSpec extends FlatSpec with Matchers {
     } set (inputs += i)
 
     (ExplicitSampling(i, data) -< t).run()
-    res.toArray.sorted.deep should equal(data.toArray.deep)
+    res.toVector.sorted should equal(data.toVector)
   }
 
   "When keyword in exploration transition" should "should filter some values in the sampling" in {
@@ -86,6 +86,6 @@ class ExplorationTransitionSpec extends FlatSpec with Matchers {
 
     val ex = (sampling -< t when "i % 2 != 0")
     ex.run()
-    res.toArray.sorted.deep should equal(data.toArray.filter(_ % 2 != 0).deep)
+    res.toVector.sorted should equal(data.toVector.filter(_ % 2 != 0))
   }
 }

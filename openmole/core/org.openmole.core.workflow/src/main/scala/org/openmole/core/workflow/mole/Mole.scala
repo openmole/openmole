@@ -78,12 +78,12 @@ case class Mole(
   inputs:       PrototypeSet          = PrototypeSet.empty
 ) {
 
-  lazy val slots = (TransitionSlot(root) :: transitions.map(_.end).toList).groupBy(_.capsule).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
+  lazy val slots = (TransitionSlot(root) :: transitions.map(_.end).toList).groupBy(_.capsule).map { case (k, v) ⇒ k -> v.toSet }.withDefault(c ⇒ Iterable.empty)
   lazy val capsules = slots.keys
-  lazy val inputTransitions = transitions.groupBy(_.end).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
-  lazy val outputTransitions = transitions.groupBy(_.start).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
-  lazy val inputDataChannels = dataChannels.groupBy(_.end).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
-  lazy val outputDataChannels = dataChannels.groupBy(_.start).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
+  lazy val inputTransitions = transitions.groupBy(_.end).map { case (k, v) ⇒ k -> v.toSet }.withDefault(c ⇒ Iterable.empty)
+  lazy val outputTransitions = transitions.groupBy(_.start).map { case (k, v) ⇒ k -> v.toSet }.withDefault(c ⇒ Iterable.empty)
+  lazy val inputDataChannels = dataChannels.groupBy(_.end).map { case (k, v) ⇒ k -> v.toSet }.withDefault(c ⇒ Iterable.empty)
+  lazy val outputDataChannels = dataChannels.groupBy(_.start).map { case (k, v) ⇒ k -> v.toSet }.withDefault(c ⇒ Iterable.empty)
 
   lazy val levels = Mole.levels(this)
   def level(c: MoleCapsule) =

@@ -29,7 +29,6 @@ import org.openmole.core.workflow.composition.TaskNode
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.test.{ TestHook, TestTask }
 import org.scalatest._
-import org.scalatest.junit._
 
 class HookSpec extends FlatSpec with Matchers {
 

@@ -136,7 +136,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
       parallelism = 10
     )
 
-    nsga run ()
+    nsga run
 
     executed should be >= 100
   }
@@ -161,7 +161,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
       distribution = Island(5)
     )
 
-    nsga run ()
+    nsga run
 
     executed should be >= 500
   }

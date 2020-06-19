@@ -24,14 +24,14 @@ import com.github.rjeschke._
 import org.apache.commons.lang3.StringEscapeUtils
 //import org.openmole.marketindex.GeneratedMarketEntry
 
-import scala.collection.JavaConversions._
+import scala.jdk.CollectionConverters._
 import org.openmole.site.tools._
 
 object MD {
 
   val emiter = new txtmark.BlockEmitter {
     override def emitBlock(stringBuilder: StringBuilder, list: util.List[String], s: String): Unit = {
-      def code = list.mkString("\n")
+      def code = list.asScala.mkString("\n")
       val html =
         if (s == "openmole") hl.openmole(code)
         else hl.highlight(code, s)

@@ -19,7 +19,7 @@ affect the output(s) of a model. Basically it
 
 @img(src := Resource.img.method.sensitivityAnim.file, stylesheet.center(80))
 
-@basicButton("Run", classIs(btn ++ btn_danger))(id := shared.sensitivity.button, stylesheet.svgRunButton(10))
+@basicButton("Run", classIs(btn, btn_danger))(id := shared.sensitivity.button, stylesheet.svgRunButton(10))
 
 @break
 

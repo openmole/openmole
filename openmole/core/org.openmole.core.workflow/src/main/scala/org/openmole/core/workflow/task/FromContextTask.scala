@@ -27,7 +27,8 @@ object FromContextTask {
     implicit val newFile:     TmpDirectory,
     implicit val fileService: FileService
   )
-  case class ValidateParameters(implicit val newFile: TmpDirectory, implicit val fileService: FileService)
+
+  case class ValidateParameters()(implicit val newFile: TmpDirectory, implicit val fileService: FileService)
 
   /**
    * Construct from a [[FromContext.Parameters]] => [[Context]] function

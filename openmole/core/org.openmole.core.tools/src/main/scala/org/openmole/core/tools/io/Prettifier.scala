@@ -21,7 +21,7 @@ import java.io.{ PrintWriter, StringWriter }
 
 import org.openmole.tool.logger.JavaLogger
 
-import collection.JavaConversions._
+import scala.jdk.CollectionConverters._
 
 object Prettifier extends JavaLogger {
 
@@ -42,7 +42,7 @@ object Prettifier extends JavaLogger {
       case null                       ⇒ "null"
       case o: Array[_]                ⇒ snip(o, snipArray)
       case o: Seq[_]                  ⇒ snip(o, snipArray)
-      case o: java.util.Collection[_] ⇒ snip(o, snipArray)
+      case o: java.util.Collection[_] ⇒ snip(o.asScala, snipArray)
       case o                          ⇒ o.toString
     } catch {
       case t: Throwable ⇒
@@ -52,6 +52,8 @@ object Prettifier extends JavaLogger {
 
   implicit class ExceptionPretiffier(t: Throwable) {
 
+    def addMargin(s: String) = s.split("\n").map(" | " + _).mkString("\n")
+
     def stackString: String = {
       val sw = new StringWriter()
       val pw = new PrintWriter(sw)
@@ -59,11 +61,11 @@ object Prettifier extends JavaLogger {
       sw.toString
     }
 
-    def messageAndStackStringWithMargin =
-      s"""|${t.getClass}: ${t.getMessage}
-       """ + stackStringWithMargin
-
-    def stackStringWithMargin = t.stackString.split("\n").map(" | " + _).mkString("\n")
+    def messageAndStackStringWithMargin = {
+      val ml = t.getMessage.contains("\n")
+      addMargin(s"${t.getClass}:${if (ml) "\n" else " "}${t.getMessage}\n" + stackString)
+    }
+    def stackStringWithMargin = addMargin(stackString)
   }
 
 }

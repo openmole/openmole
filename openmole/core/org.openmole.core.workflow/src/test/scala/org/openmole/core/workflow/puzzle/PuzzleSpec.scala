@@ -93,7 +93,7 @@ class PuzzleSpec extends FlatSpec with Matchers {
 
     val h = TestHook { context ⇒ hookExecuted = true }
 
-    (container hook h) run ()
+    (container hook h) run
 
     hookExecuted should equal(true)
   }

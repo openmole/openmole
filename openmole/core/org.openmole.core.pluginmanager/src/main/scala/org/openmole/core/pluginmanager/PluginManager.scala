@@ -31,7 +31,7 @@ import org.osgi.framework.wiring.{ BundleWiring, FrameworkWiring }
 import scala.collection.immutable.{ HashMap, HashSet }
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
-import scala.collection.JavaConversions._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.stm._
 import scala.util.{ Failure, Success, Try }
 
@@ -248,7 +248,7 @@ object PluginManager extends JavaLogger {
       val bundles =
         for {
           wires ← Option(b.adapt(classOf[BundleWiring]))
-          requiered ← Option(wires.getRequiredWires(null)).map(_.filter(_ != null))
+          requiered ← Option(wires.getRequiredWires(null).asScala).map(_.filter(_ != null))
           bundles = requiered.flatMap(w ⇒ Option(w.getProvider)).flatMap(p ⇒ Option(p.getBundle))
         } yield bundles.filter(_.getBundleId != Constants.SYSTEM_BUNDLE_ID).distinct
 
@@ -257,7 +257,7 @@ object PluginManager extends JavaLogger {
 
   def directDependingBundles(b: Bundle) =
     b.adapt(classOf[BundleWiring]).
-      getProvidedWires(null).
+      getProvidedWires(null).asScala.
       map(_.getRequirer.getBundle).
       filter(b ⇒ b.getBundleId != Constants.SYSTEM_BUNDLE_ID && !b.isFullDynamic).
       distinct
@@ -283,7 +283,7 @@ object PluginManager extends JavaLogger {
     val wiring = Activator.contextOrException.getBundle(0).adapt(classOf[FrameworkWiring])
 
     bundles match {
-      case Some(s) ⇒ wiring.refreshBundles(s, listener)
+      case Some(s) ⇒ wiring.refreshBundles(s.asJava, listener)
       case None    ⇒ wiring.refreshBundles(null, listener)
     }
 

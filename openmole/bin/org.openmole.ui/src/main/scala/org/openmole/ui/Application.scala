@@ -316,7 +316,7 @@ object Application extends JavaLogger {
             }
 
             if (res._2.isSuccess) success(file) < "success"
-            print("\33[1A\33[2K")
+            print("\u001b[1A\u001b[2K")
             println(s"${res._1.getName}: ${res._2}")
 
             res

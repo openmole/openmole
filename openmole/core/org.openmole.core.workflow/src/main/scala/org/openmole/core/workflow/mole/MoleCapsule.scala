@@ -177,5 +177,5 @@ object MasterCapsule {
 }
 
 class MasterCapsule(task: Task, val persist: Seq[String] = Seq.empty, strainer: Boolean) extends MoleCapsule(task, strainer) {
-  def toPersist(context: Context): Context = persist.map { n ⇒ context.getOrElse(n, throw new UserBadDataError(s"Variable $n has not been found in the context")) }
+  def toPersist(context: Context): Context = persist.map { n ⇒ context.variables.getOrElse(n, throw new UserBadDataError(s"Variable $n has not been found in the context")) }
 }

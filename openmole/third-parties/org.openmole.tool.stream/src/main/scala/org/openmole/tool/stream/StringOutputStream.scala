@@ -20,7 +20,7 @@ package org.openmole.tool.stream
 import java.io.{ OutputStream, PrintStream }
 
 import org.apache.commons.collections4.queue._
-import collection.JavaConversions._
+import collection.JavaConverters._
 
 trait Builder {
   def append(c: Char): Unit
@@ -45,12 +45,12 @@ class SynchronizedRingBuilder(size: Int) extends Builder {
   def append(c: Char) = buffer.synchronized { buffer.add(c) }
 
   def clear(): String = buffer.synchronized {
-    val content = buffer.iterator().toArray.mkString
+    val content = buffer.iterator().asScala.toArray.mkString
     buffer.clear()
     content
   }
 
-  override def toString = buffer.synchronized { buffer.iterator().toArray.mkString }
+  override def toString = buffer.synchronized { buffer.iterator().asScala.toArray.mkString }
 
 }
 

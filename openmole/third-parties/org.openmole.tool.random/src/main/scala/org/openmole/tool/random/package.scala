@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.apache.commons.math3.random.{ RandomAdaptor, RandomGenerator }
 import org.openmole.tool.cache._
 
+import scala.reflect.ClassTag
+
 package object random {
 
   type RandomProvider = Lazy[util.Random]
@@ -51,7 +53,7 @@ package object random {
 
   def shuffled[T](a: Iterable[T])(implicit rng: util.Random) = {
     val indexed = a.toIndexedSeq
-    shuffle((0 until a.size).toArray).map(i ⇒ indexed(i))
+    shuffle((0 until a.size).toArray).toIndexedSeq.map(i ⇒ indexed(i))
   }
 
   implicit def randomDecorator(rng: util.Random) = new {
@@ -64,7 +66,7 @@ package object random {
   }
 
   implicit def iterableShuffleDecorator[T](a: Iterable[T]) = new {
-    def shuffled(implicit rng: util.Random): Seq[T] = random.shuffled(a)(rng)
+    def shuffled(implicit rng: util.Random): Seq[T] = random.shuffled(a)(rng).toSeq
   }
 
   class SynchronizedRandom(generator: RandomGenerator) extends java.util.Random {

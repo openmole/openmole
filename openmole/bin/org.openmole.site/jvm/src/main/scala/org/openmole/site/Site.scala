@@ -30,7 +30,7 @@ import spray.json._
 
 import scalaj.http._
 
-object Site extends App {
+object Site {
 
   lazy val piwik =
     RawFrag(
@@ -55,7 +55,7 @@ object Site extends App {
       """.stripMargin
     )
 
-  override def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit = {
     case class Parameters(
       target:   Option[File] = None,
       test:     Boolean      = false,
@@ -132,7 +132,7 @@ object Site extends App {
             Menu.build(sitePage),
             div(id := "main-content")(
               sitePage.header(
-                pageTree.source.map(source ⇒ tools.linkButton("Suggest edits", tools.modificationLink(source), classIs(btn ++ btn_danger))(stylesheet.suggest)
+                pageTree.source.map(source ⇒ tools.linkButton("Suggest edits", tools.modificationLink(source), classIs(btn, btn_danger))(stylesheet.suggest)
                 )),
               div(elementClass, id := "padding-element")(
                 if (pageTree.name == DocumentationPages.documentation.name) div

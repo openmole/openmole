@@ -70,21 +70,21 @@ object SideMenu {
 
   implicit def pageNodeToLink(pageTree: PageTree): Seq[Link] = pageTree.sons.map { pageToLink(_) }
 
-  def details(pages: Seq[Page]) = SideMenu(pages, classIs(btn ++ btn_default), otherTab = true)
+  def details(pages: Seq[Page]) = SideMenu(pages, classIs(btn, btn_default), otherTab = true)
 
   def fromStrings(title: String, stringMenus: String*) =
     SideMenu(preText = title, links = stringMenus.map { a ⇒ Link(a, Link.intern(a)) })
 
-  val embed = SideMenu(DocumentationPages.embedPages, classIs(btn ++ btn_default), "Available tasks")
-  val explore = SideMenu(DocumentationPages.explorePages, classIs(btn ++ btn_default), "Available methods")
-  val sampling = SideMenu(DocumentationPages.samplingPages, classIs(btn ++ btn_default), "Sampling methods")
-  val scale = SideMenu(DocumentationPages.scalePages, classIs(btn ++ btn_default), "Available environments")
-  val language = SideMenu(DocumentationPages.languagePages, classIs(btn ++ btn_default), "Language")
-  val advanced = SideMenu(DocumentationPages.advancedConceptsPages, classIs(btn ++ btn_default), "Advanced concepts")
-  val developers = SideMenu(DocumentationPages.developersPages, classIs(btn ++ btn_default), "Developer's documentation")
-  val tutorials = SideMenu(DocumentationPages.tutoPages, classIs(btn ++ btn_default), "Tutorials")
-  val community = SideMenu(DocumentationPages.communityPages, classIs(btn ++ btn_default), "Community")
-  val download = SideMenu(DocumentationPages.downloadPages, classIs(btn ++ btn_default), "Download")
+  val embed = SideMenu(DocumentationPages.embedPages, classIs(btn, btn_default), "Available tasks")
+  val explore = SideMenu(DocumentationPages.explorePages, classIs(btn, btn_default), "Available methods")
+  val sampling = SideMenu(DocumentationPages.samplingPages, classIs(btn, btn_default), "Sampling methods")
+  val scale = SideMenu(DocumentationPages.scalePages, classIs(btn, btn_default), "Available environments")
+  val language = SideMenu(DocumentationPages.languagePages, classIs(btn, btn_default), "Language")
+  val advanced = SideMenu(DocumentationPages.advancedConceptsPages, classIs(btn, btn_default), "Advanced concepts")
+  val developers = SideMenu(DocumentationPages.developersPages, classIs(btn, btn_default), "Developer's documentation")
+  val tutorials = SideMenu(DocumentationPages.tutoPages, classIs(btn, btn_default), "Tutorials")
+  val community = SideMenu(DocumentationPages.communityPages, classIs(btn, btn_default), "Community")
+  val download = SideMenu(DocumentationPages.downloadPages, classIs(btn, btn_default), "Download")
 
   def more(current: Page) = SideMenu(
     Seq(

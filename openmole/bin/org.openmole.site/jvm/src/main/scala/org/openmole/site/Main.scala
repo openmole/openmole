@@ -23,7 +23,7 @@ import stylesheet._
 
 object Main {
 
-  private def readMore(page: Page) = pageLinkButton("Read more", page, false, Seq(classIs(btn ++ btn_default), marginTop := 20))
+  private def readMore(page: Page) = pageLinkButton("Read more", page, false, Seq(classIs(btn, btn_default), marginTop := 20))
 
   def build = {
 

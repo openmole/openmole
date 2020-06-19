@@ -66,9 +66,9 @@ object TypeUtil {
             val allTypes = d.toList ++ t.map(_.toArray)
             val types = allTypes.distinct
             if (types.size == 1) ValidType(name, types.head, true)
-            else InvalidType(name, d, t, Seq.empty)
+            else InvalidType(name, d.toSeq, t.toSeq, Seq.empty)
           case (ListBuffer(), ListBuffer(), ListBuffer(f)) ⇒ ValidType(name, f.asArray.fromArray, false)
-          case (d, t, f)                                   ⇒ InvalidType(name, d, t, f)
+          case (d, t, f)                                   ⇒ InvalidType(name, d.toSeq, t.toSeq, f.toSeq)
         }
     }
   }

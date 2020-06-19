@@ -47,7 +47,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     val testT = TestTask { context ⇒
       context.contains(i.toArray) should equal(true)
-      context(i.toArray).sorted.deep should equal(data.toArray.deep)
+      context(i.toArray).sorted.toVector should equal(data.toVector)
       endCapsExecuted += 1
       context
     } set (inputs += i.array)
@@ -72,7 +72,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
       TestTask { context ⇒
         context.contains(i.toArray) should equal(true)
         context(i.toArray).getClass should equal(classOf[Array[Int]])
-        context(i.toArray).sorted.deep should equal(data.sorted.toArray.deep)
+        context(i.toArray).sorted.toVector should equal(data.sorted.toVector)
         endCapsExecuted += 1
         context
       } set (inputs += i.array)
@@ -94,7 +94,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
     val testT =
       TestTask { context ⇒
         context.contains(i.toArray) should equal(true)
-        context(i.toArray).sorted.deep should equal(data.toArray.deep)
+        context(i.toArray).sorted.toVector should equal(data.toVector)
         endCapsExecuted.incrementAndGet()
         context
       } set (inputs += i.array)
@@ -136,7 +136,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
     val executed = new AtomicInteger()
 
-    def exploration = ExplorationTask(ExplicitSampling(v, 0.0 until 10.0 by 1.0))
+    def exploration = ExplorationTask(ExplicitSampling(v, (BigDecimal(0.0) until 10.0 by 1.0).map(_.toDouble)))
 
     def main =
       EmptyTask() set (
@@ -164,7 +164,7 @@ class AggregationTransitionSpec extends FlatSpec with Matchers {
 
       val executed = new AtomicInteger()
 
-      val sampling = 0.0 to 100.0 by 1.0
+      val sampling = BigDecimal(0.0) to 100.0 by 1.0 map (_.toDouble)
 
       def main =
         EmptyTask() set ((inputs, outputs) += v)

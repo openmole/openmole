@@ -15,16 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.tools.obj
+package org.openmole.tool.types
 
-trait Id {
-  def id: AnyRef
-
-  override def hashCode = id.hashCode
-
-  override def equals(other: Any) = {
-    if (other == null) false
-    else if (!classOf[Id].isAssignableFrom(other.asInstanceOf[AnyRef].getClass)) false
-    else id.equals(other.asInstanceOf[Id].id)
+object OrderedTuple2Id {
+  implicit def orderedTuple2IdOrdering[T1 <% Ordered[T1], T2 <% Ordered[T2], O <: OrderedTuple2Id[T1, T2]] = new Ordering[O] {
+    override def compare(n1: O, n2: O) = {
+      val cmpId = n1._1.compare(n2._1)
+      if (cmpId != 0) cmpId
+      else n1._2.compare(n2._2)
+    }
   }
+}
+
+class OrderedTuple2Id[+T1 <% Ordered[T1], +T2 <% Ordered[T2]](val _1: T1, val _2: T2) extends Id {
+  def id = (_1, _2)
 }

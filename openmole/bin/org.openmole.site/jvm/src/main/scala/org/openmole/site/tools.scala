@@ -124,7 +124,7 @@ package object tools {
   }
 
   // SCALATAGS METHODS
-  def classIs(s: String): AttrPair = `class` := s
+  def classIs(s: String*): AttrPair = `class` := s.mkString(" ")
 
   def to(page: Page): TypedTag[String] = to(Pages.file(page), otherTab = false)
 
@@ -139,19 +139,19 @@ package object tools {
     def ++(s: String) = s"$ss $s"
   }
 
-  def linkButton(title: String, link: String, buttonStyle: AttrPair = classIs(btn ++ btn_selected), openInOtherTab: Boolean = true) =
+  def linkButton(title: String, link: String, buttonStyle: AttrPair = classIs(btn, btn_selected), openInOtherTab: Boolean = true) =
     a(href := link)(if (openInOtherTab) targetBlank else "")(span(buttonStyle, `type` := "button", title))
 
-  def divLinkButton(content: TypedTag[_], link: String, buttonStyle: AttrPair = classIs(btn ++ btn_default), openInOtherTab: Boolean = true) =
+  def divLinkButton(content: TypedTag[_], link: String, buttonStyle: AttrPair = classIs(btn, btn_default), openInOtherTab: Boolean = true) =
     a(href := link)(if (openInOtherTab) targetBlank else "")(span(content)(buttonStyle, `type` := "button"))
 
-  def pageLinkButton(title: String, page: Page, openInOtherTab: Boolean = true, buttonStyle: Seq[Modifier] = Seq(classIs(btn ++ btn_default))) =
+  def pageLinkButton(title: String, page: Page, openInOtherTab: Boolean = true, buttonStyle: Seq[Modifier] = Seq(classIs(btn, btn_default))) =
     to(page)(if (openInOtherTab) targetBlank else "")(span(buttonStyle, `type` := "button", title))
 
   def glyphSpan(glyphicon: String, style: Seq[Modifier], page: Page, text: String = ""): TypedTag[_ <: String] =
     to(page)(classIs(glyphicon), style, pointer, aria.hidden := "true")(text)
 
-  def leftGlyphButton(title: String, page: Page, glyph: String, openInOtherTab: Boolean = false, buttonStyle: Seq[Modifier] = Seq(classIs(btn ++ btn_default))) =
+  def leftGlyphButton(title: String, page: Page, glyph: String, openInOtherTab: Boolean = false, buttonStyle: Seq[Modifier] = Seq(classIs(btn, btn_default))) =
     to(page)(if (openInOtherTab) targetBlank else "")(
       span(buttonStyle, `type` := "button")(
         span(classIs(glyph)),
@@ -162,7 +162,7 @@ package object tools {
   def modificationLink(source: String) =
     s"https://github.com/openmole/openmole/edit/${org.openmole.core.buildinfo.version.major}-dev/openmole/bin/org.openmole.site/jvm/src/main/scalatex/$source"
 
-  def rightGlyphButton(title: String, page: Page, glyph: String, openInOtherTab: Boolean = false, buttonStyle: Seq[Modifier] = Seq(classIs(btn ++ btn_default))) =
+  def rightGlyphButton(title: String, page: Page, glyph: String, openInOtherTab: Boolean = false, buttonStyle: Seq[Modifier] = Seq(classIs(btn, btn_default))) =
     to(page)(if (openInOtherTab) targetBlank else "")(
       span(buttonStyle, `type` := "button")(
         span(s"$title "),
@@ -170,7 +170,7 @@ package object tools {
       )
     )
 
-  def basicButton(title: String, buttonStyle: AttrPair = classIs(btn ++ btn_default)) =
+  def basicButton(title: String, buttonStyle: AttrPair = classIs(btn, btn_default)) =
     span(buttonStyle, `type` := "button", title)
 
   /*def getPageTitle(page: Page) = page.title match {

@@ -42,6 +42,7 @@ import org.openmole.tool.lock._
 import org.openmole.tool.thread._
 import org.openmole.tool.logger.{ JavaLogger, LoggerService }
 
+import scala.collection.mutable
 import scala.collection.mutable.{ Buffer, ListBuffer }
 
 object MoleExecution extends JavaLogger {
@@ -77,7 +78,7 @@ object MoleExecution extends JavaLogger {
   case class HookExceptionRaised(hook: Hook, capsule: MoleCapsule, moleJob: MoleJobId, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
   case class MoleExecutionError(exception: Throwable) extends MoleExecutionFailed
 
-  private def listOfTupleToMap[K, V](l: Traversable[(K, V)]): Map[K, Traversable[V]] = l.groupBy(_._1).mapValues(_.map(_._2))
+  private def listOfTupleToMap[K, V](l: Iterable[(K, V)]): Map[K, Iterable[V]] = l.groupBy(_._1).map { case (k, v) ⇒ k -> v.map(_._2) }
 
   def apply(
     mole:                        Mole,
@@ -189,7 +190,7 @@ object MoleExecution extends JavaLogger {
           subMoleExecutionState.masterCapsuleExecutor.submit {
             try {
               val savedContext = subMoleExecutionState.masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(Context.empty)
-              val moleJob: MoleJob = MoleJob(capsule.task, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, (_, _) ⇒ Unit, () ⇒ subMoleExecutionState.canceled)
+              val moleJob: MoleJob = MoleJob(capsule.task, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, (_, _) ⇒ (), () ⇒ subMoleExecutionState.canceled)
 
               eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
 
@@ -283,7 +284,7 @@ object MoleExecution extends JavaLogger {
       }
 
     try {
-      val hooksVariables = subMoleExecutionState.moleExecution.hooks(capsule).flatMap(executeHook).unzip._2
+      val hooksVariables = subMoleExecutionState.moleExecution.hooks(capsule).flatMap(h ⇒ executeHook(h).values)
       val newContext = context ++ hooksVariables
       mole.outputDataChannels(capsule).toSeq.foreach { d ⇒ DataChannel.provides(d, subMoleExecutionState.moleExecution.implicits + newContext, ticket, subMoleExecutionState.moleExecution) }
 

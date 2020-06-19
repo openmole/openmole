@@ -20,7 +20,7 @@ package org.openmole.core.console
 import java.io.InputStream
 import java.net.URL
 import java.util
-import collection.JavaConversions._
+import scala.jdk.CollectionConverters._
 import scala.util._
 
 object CompositeClassLoader {
@@ -51,7 +51,7 @@ class CompositeClassLoader(val classLoaders: ClassLoader*) extends ClassLoader {
     val ret = new java.util.Vector[URL]
     for {
       cl ← classLoaders
-      r ← cl.getResources(s)
+      r ← cl.getResources(s).asScala
     } ret.add(r)
     ret.elements()
   }

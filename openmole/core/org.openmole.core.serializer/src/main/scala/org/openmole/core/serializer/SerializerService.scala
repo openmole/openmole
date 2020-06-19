@@ -29,7 +29,7 @@ import org.openmole.tool.file._
 import org.openmole.core.serializer.converter._
 import java.util.concurrent.locks.{ ReadWriteLock, ReentrantReadWriteLock }
 
-import com.thoughtworks.xstream.converters.Converter
+import com.thoughtworks.xstream.converters.{ Converter, ConverterRegistry }
 import com.thoughtworks.xstream.io.json._
 import com.thoughtworks.xstream.mapper.Mapper
 import com.thoughtworks.xstream.security._
@@ -64,13 +64,16 @@ class SerializerService { service ⇒
         new ClassLoaderReference(this.getClass.getClassLoader),
         null: Mapper,
         lookup,
-        (c: Converter, p: Int) ⇒ lookup.registerConverter(c, p))
+        new ConverterRegistry {
+          override def registerConverter(c: Converter, p: Int): Unit = lookup.registerConverter(c, p)
+        }
+      )
 
     xs.addPermission(NoTypePermission.NONE)
     xs.addPermission(new TypePermission {
       override def allows(`type`: Class[_]): Boolean = true
     })
-    xs.registerConverter(new converter.fix.HashMapConverter(xs.getMapper))
+    //xs.registerConverter(new converter.fix.HashMapConverter(xs.getMapper))
     xs
   }
 

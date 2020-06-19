@@ -18,12 +18,13 @@ package org.openmole.core.expansion
 
 import java.io.File
 
+import org.openmole.core.console.ScalaREPL.CompilationError
 import org.openmole.core.console._
 import org.openmole.core.context._
 import org.openmole.core.exception._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.pluginmanager._
-import org.openmole.core.tools.obj.ClassUtils._
+import org.openmole.tool.types.ClassUtils._
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.cache._
 import org.openmole.tool.random._
@@ -69,7 +70,7 @@ object ScalaCompilation {
   /**
    * Compile scala code using a [[org.openmole.core.console.Interpreter]]
    *
-   * @param code
+   * @param script
    * @param plugins
    * @param libraries
    * @param newFile
@@ -77,27 +78,37 @@ object ScalaCompilation {
    * @tparam RETURN
    * @return
    */
-  def compile[RETURN](code: String, plugins: Seq[File] = Seq.empty, libraries: Seq[File] = Seq.empty)(implicit newFile: TmpDirectory, fileService: FileService) = {
+  private def compile[RETURN](script: Script, plugins: Seq[File] = Seq.empty, libraries: Seq[File] = Seq.empty)(implicit newFile: TmpDirectory, fileService: FileService) = {
     val osgiMode = org.openmole.core.console.Activator.osgi
     val interpreter =
       if (osgiMode) Interpreter(priorityBundles(plugins), libraries)
       else Interpreter(jars = libraries)
 
+    def errorMsg =
+      if (osgiMode) s"""in osgi mode with priority bundles [${priorityBundles(plugins).map(b ⇒ s"${b.getSymbolicName}").mkString(", ")}], libraries [${libraries.mkString(", ")}], classpath [${OSGiScalaCompiler.classPath(priorityBundles(plugins), libraries).mkString(", ")}]."""
+      else s"""in non osgi mode with libraries ${libraries.mkString(", ")}"""
+
     Try[RETURN] {
-      val evaluated = interpreter.eval(addImports(code))
+      val evaluated = interpreter.eval(addImports(script.code))
 
       if (evaluated == null) throw new InternalProcessingError(
         s"""The return value of the script was null:
-           |$code""".stripMargin
+           |${script.code}""".stripMargin
       )
 
       evaluated.asInstanceOf[RETURN]
     } match {
       case util.Success(s) ⇒ Success(s)
-      case util.Failure(e) ⇒
-        def msg = if (osgiMode) s"""in osgi mode with priority bundles [${priorityBundles(plugins).map(b ⇒ s"${b.getSymbolicName}").mkString(", ")}], libraries [${libraries.mkString(", ")}], classpath [${OSGiScalaCompiler.classPath(priorityBundles(plugins), libraries).mkString(", ")}]."""
-        else s"""in non osgi mode with libraries ${libraries.mkString(", ")}"""
-        util.Failure(new InternalProcessingError(s"Error while compiling with intepreter $msg", e))
+      case util.Failure(e: CompilationError) ⇒
+        val errors = ScalaREPL.compilationMessage(e.errorMessages.filter(_.error), script.originalCode, lineOffset = script.headerLines + 1)
+        val userBadDataError =
+          new UserBadDataError(
+            s"""${errors}
+               |With interpreter $errorMsg"
+               |""".stripMargin
+          )
+        util.Failure(userBadDataError)
+      case util.Failure(e) ⇒ util.Failure(new InternalProcessingError(s"Error while compiling with interpreter $errorMsg", e))
     }
   }
 
@@ -143,20 +154,29 @@ object ScalaCompilation {
    * @tparam RETURN
    * @return
    */
-  def script[RETURN](inputs: Seq[Val[_]], source: String, wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN]) =
-    s"""new ${classOf[CompilationClosure[_]].getName}[${toScalaNativeType(returnType)}] {
-       |  def apply(${prefix}context: ${manifest[Context].toString}, ${prefix}RNG: ${manifest[RandomProvider].toString}, ${prefix}NewFile: ${manifest[TmpDirectory].toString}) = {
-       |    object $inputObject {
-       |      ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
-       |    }
-       |    import ${inputObject}._
-       |    implicit def ${Val.name(Variable.openMOLENameSpace, "RNGProvider")} = ${prefix}RNG
-       |    implicit def ${Val.name(Variable.openMOLENameSpace, "NewFile")} = ${prefix}NewFile
-       |
+  def script[RETURN](inputs: Seq[Val[_]], source: String, wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN]) = {
+    val header =
+      s"""new ${classOf[CompilationClosure[_]].getName}[${toScalaNativeType(returnType)}] {
+         |  def apply(${prefix}context: ${manifest[Context].toString}, ${prefix}RNG: ${manifest[RandomProvider].toString}, ${prefix}NewFile: ${manifest[TmpDirectory].toString}) = {
+         |    object $inputObject {
+         |      ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toScalaNativeType(i.`type`)}]""").mkString("; ")}
+         |    }
+         |    import ${inputObject}._
+         |    implicit def ${Val.name(Variable.openMOLENameSpace, "RNGProvider")} = ${prefix}RNG
+         |    implicit def ${Val.name(Variable.openMOLENameSpace, "NewFile")} = ${prefix}NewFile
+         |"""
+
+    val code =
+      s"""$header
        |    $source
        |    ${wrapping.wrapOutput}
        |  }: ${toScalaNativeType(returnType)}
        |}""".stripMargin
+
+    Script(code, source, header.split("\n").size + 1)
+  }
+
+  case class Script(code: String, originalCode: String, headerLines: Int)
 
   def static[R](
     code:      String,
@@ -175,7 +195,7 @@ object ScalaCompilation {
       val cache = Cache(collection.mutable.HashMap[Seq[Val[_]], Try[ContextClosure[R]]]())
 
       def compiled(context: Context)(implicit newFile: TmpDirectory, fileService: FileService): Try[ContextClosure[R]] = {
-        val contextPrototypes = context.toSeq.map { case (_, v) ⇒ v.prototype }
+        val contextPrototypes = context.values.map { _.prototype }.toSeq
         compiled(contextPrototypes)
       }
 
@@ -225,8 +245,7 @@ object ScalaCompilation {
 
     def wrapOutput =
       s"""
-         |import scala.collection.JavaConversions.mapAsJavaMap
-         |mapAsJavaMap(Map[String, Any]( ${outputs.toSeq.map(p ⇒ s""" "${p.name}" -> ${p.name}""").mkString(",")} ))
+         |scala.jdk.CollectionConverters.MapHasAsJava(Map[String, Any]( ${outputs.toSeq.map(p ⇒ s""" "${p.name}" -> ${p.name}""").mkString(",")} )).asJava
          |""".stripMargin
 
   }

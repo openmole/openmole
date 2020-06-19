@@ -16,6 +16,8 @@ release/*
 *.iml
 .idea/
 .idea/*
+.metals/
+metals.sbt
 *~
 .project
 .settings

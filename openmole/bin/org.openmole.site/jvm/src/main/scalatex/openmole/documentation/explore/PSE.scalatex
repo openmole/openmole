@@ -40,7 +40,7 @@ By selecting parents with rare output values, we try and increase the chances to
 
 @Resource.rawFrag(Resource.img.method.pseAnim)
 @br
-@basicButton("Run", classIs(btn ++ btn_danger))(id := shared.pse.button, stylesheet.svgRunButton(-50))
+@basicButton("Run", classIs(btn, btn_danger))(id := shared.pse.button, stylesheet.svgRunButton(-50))
 
 
 

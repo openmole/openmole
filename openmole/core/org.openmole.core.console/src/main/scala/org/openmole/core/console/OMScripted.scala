@@ -11,23 +11,20 @@ import ScriptContext.{ ENGINE_SCOPE, GLOBAL_SCOPE }
 import java.io.{ Closeable, Reader }
 
 import org.openmole.core.console.ScalaREPL.OMIMain
+import org.openmole.tool.types.ClassUtils
 
 import scala.tools.nsc.Settings
-import scala.tools.nsc.interpreter.IMain.{ defaultOut, defaultSettings }
-import scala.tools.nsc.interpreter.{ IMain, IR, JPrintWriter, OutputStream, ReplReporter, Scripted, WriterOutputStream, isReplDebug }
+
+//import scala.tools.nsc.interpreter.IMain.{ defaultOut, defaultSettings }
+
+//import scala.tools.nsc.interpreter.{ IMain, IR, JPrintWriter, OutputStream, ReplReporter, Scripted, WriterOutputStream, isReplDebug }
+import scala.tools.nsc.interpreter.Results.Result
+import scala.tools.nsc.interpreter.Results
+import scala.tools.nsc.interpreter.IMain
 import scala.tools.nsc.reporters.Reporter
 
-object OMScripted {
-
-  def call[U: ClassTag, T](o: AnyRef, name: String, args: Vector[Any]) = {
-    val handle = implicitly[ClassTag[U]].runtimeClass.getDeclaredMethods.find(_.getName == name).get
-    handle.setAccessible(true)
-    handle.invoke(o, args.toArray.map(_.asInstanceOf[Object]): _*).asInstanceOf[T]
-  }
-}
-
 /* A REPL adaptor for the javax.script API. */
-class OMScripted(val factory: ScriptEngineFactory, settings: Settings, out: JPrintWriter, val omIMain: IMain)
+class OMScripted(val factory: ScriptEngineFactory, val omIMain: IMain)
   extends AbstractScriptEngine with Compilable {
 
   def createBindings: Bindings = new SimpleBindings
@@ -48,7 +45,7 @@ class OMScripted(val factory: ScriptEngineFactory, settings: Settings, out: JPri
     case Right(other)              ⇒ throw new ScriptException(s"Unexpected value for context: $other")
   }
 
-  if (intp.isInitializeComplete) {
+  if (intp.initializeComplete) {
     // compile the dynamic ScriptContext object holder
     val ctxRes = scriptContextRep compile s"""
                                              |import _root_.javax.script._
@@ -111,11 +108,13 @@ class OMScripted(val factory: ScriptEngineFactory, settings: Settings, out: JPri
     withCompileContext(context) {
       val cat = code + script
       //intp.compile(cat, synthetic = false)
-      OMScripted.call[IMain, Either[IR.Result, intp.Request]](intp, "compile", Vector(cat, false)) match {
+      //ClassUtils.callByName[IMain, Either[IR.Result, intp.Request]](intp, "compile", Vector(cat, false))
+
+      intp.compile(cat, false) match {
         case Right(req) ⇒
           code = ""
           new WrappedRequest(req)
-        case Left(IR.Incomplete) | Left(IR.Success) ⇒
+        case Left(Results.Incomplete) | Left(Results.Success) ⇒
           code = cat + "\n"
           new CompiledScript {
             def eval(context: ScriptContext): Object = null
@@ -175,7 +174,9 @@ class OMScripted(val factory: ScriptEngineFactory, settings: Settings, out: JPri
           val instance = s"val $$INSTANCE = new ${req.lineRep.readPath};"
           val newline = (defines map (s ⇒ s"val ${s.name} = $$INSTANCE${req.accessPath}.${s.name}")).mkString(instance, ";", ";")
           //val newreq = intp.requestFromLine(newline).right.get
-          val newreq = OMScripted.call[IMain, Either[IR.Result, intp.Request]](intp, "requestFromLine", Vector(newline)).right.get
+
+          val newreq = ClassUtils.callByName[IMain, Either[Result, intp.Request]](intp, "requestFromLine", Vector(newline)).right.get
+
           val ok = newreq.compile
 
           val result = newreq.lineRep.evalEither match {

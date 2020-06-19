@@ -21,7 +21,7 @@ object FormattedFileHook {
       import parameters._
 
       val excludeSet = exclude.map(_.name).toSet
-      val ps = { if (values.isEmpty) context.values.map { _.prototype }.toVector else values }.filter { v ⇒ !excludeSet.contains(v.name) }
+      val ps = { if (values.isEmpty) context.variables.values.map { _.prototype }.toVector else values }.filter { v ⇒ !excludeSet.contains(v.name) }
       val variables = ps.map(p ⇒ context.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p not found in hook $this")))
 
       fileFormat.write(executionContext)(format, output, variables, method).from(context)

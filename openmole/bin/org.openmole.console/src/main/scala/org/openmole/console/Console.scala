@@ -176,8 +176,9 @@ class Console(script: Option[String] = None) {
       loop interpret s"import $commandsName._"
     }
 
-    try f(loop)
-    finally loop.close
+    f(loop)
+    //    try f(loop)
+    //    finally loop.close
   }
 
 }

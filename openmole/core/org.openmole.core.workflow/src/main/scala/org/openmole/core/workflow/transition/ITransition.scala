@@ -120,7 +120,7 @@ trait ITransition {
    * @param context
    * @return
    */
-  protected def filtered(context: Context): Context = context.filterNot { case (_, v) ⇒ filter(v.prototype) }
+  protected def filtered(context: Context): Context = context.values.filterNot { v ⇒ filter(v.prototype) }
 
   override def toString = this.getClass.getSimpleName + " from " + start + " to " + end
 

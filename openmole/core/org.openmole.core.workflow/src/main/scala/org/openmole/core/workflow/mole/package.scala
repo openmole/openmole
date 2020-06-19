@@ -32,23 +32,23 @@ package object mole {
 
   def Source = FromContextSource
 
-  case class Hooks(map: Map[MoleCapsule, Traversable[Hook]])
-  case class Sources(map: Map[MoleCapsule, Traversable[Source]])
+  case class Hooks(map: Map[MoleCapsule, Iterable[Hook]])
+  case class Sources(map: Map[MoleCapsule, Iterable[Source]])
 
-  implicit def hooksToMap(h: Hooks): Map[MoleCapsule, Traversable[Hook]] = h.map.withDefault(_ ⇒ List.empty)
-  implicit def mapToHooks(m: Map[MoleCapsule, Traversable[Hook]]): Hooks = new Hooks(m)
-  implicit def iterableTupleToHooks(h: Iterable[(MoleCapsule, Hook)]): Hooks = new Hooks(h.groupBy(_._1).mapValues(_.map(_._2)))
+  implicit def hooksToMap(h: Hooks): Map[MoleCapsule, Iterable[Hook]] = h.map.withDefault(_ ⇒ List.empty)
+  implicit def mapToHooks(m: Map[MoleCapsule, Iterable[Hook]]): Hooks = new Hooks(m)
+  implicit def iterableTupleToHooks(h: Iterable[(MoleCapsule, Hook)]): Hooks = new Hooks(h.groupBy(_._1).map { case (k, v) ⇒ k -> v.map(_._2) })
 
-  implicit def sourcesToMap(s: Sources): Map[MoleCapsule, Traversable[Source]] = s.map.withDefault(_ ⇒ List.empty)
-  implicit def mapToSources(m: Map[MoleCapsule, Traversable[Source]]): Sources = new Sources(m)
-  implicit def iterableTupleToSources(s: Iterable[(MoleCapsule, Source)]): Sources = new Sources(s.groupBy(_._1).mapValues(_.map(_._2)))
+  implicit def sourcesToMap(s: Sources): Map[MoleCapsule, Iterable[Source]] = s.map.withDefault(_ ⇒ List.empty)
+  implicit def mapToSources(m: Map[MoleCapsule, Iterable[Source]]): Sources = new Sources(m)
+  implicit def iterableTupleToSources(s: Iterable[(MoleCapsule, Source)]): Sources = new Sources(s.groupBy(_._1).map { case (k, v) ⇒ k -> v.map(_._2) })
 
   object Hooks {
-    def empty = Map.empty[MoleCapsule, Traversable[Hook]]
+    def empty = Map.empty[MoleCapsule, Iterable[Hook]]
   }
 
   object Sources {
-    def empty = Map.empty[MoleCapsule, Traversable[Source]]
+    def empty = Map.empty[MoleCapsule, Iterable[Source]]
   }
 
 }

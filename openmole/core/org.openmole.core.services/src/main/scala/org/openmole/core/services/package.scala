@@ -59,7 +59,7 @@ package object services {
       implicit val ws = Workspace(workspace)
       implicit val cypher = Cypher(password)
       implicit val preference = Services.preference(ws)
-      implicit val tmpDirectory = TmpDirectory(workspace)
+      implicit val tmpDirectory = TmpDirectory(ws)
       implicit val seeder = Seeder()
       implicit val serializerService = SerializerService()
       implicit val threadProvider = ThreadProvider()

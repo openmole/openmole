@@ -118,7 +118,7 @@ object ConfigurationString {
 
   implicit def seqConfiguration[T](implicit cs: ConfigurationString[T]) = new ConfigurationString[Seq[T]] {
     override def toString(t: Seq[T]): String = t.map(cs.toString).mkString(",")
-    override def fromString(s: String): Seq[T] = s.split(",").map(cs.fromString)
+    override def fromString(s: String): Seq[T] = s.split(",").toSeq.map(cs.fromString)
   }
 
 }

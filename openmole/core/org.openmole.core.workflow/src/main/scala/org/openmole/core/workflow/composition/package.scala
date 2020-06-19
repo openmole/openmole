@@ -319,7 +319,7 @@ package composition {
         environment,
         grouping,
         hooks,
-        Unit,
+        (),
         definitionScope
       )
 
