@@ -100,7 +100,7 @@ object ScalaCompilation {
     } match {
       case util.Success(s) ⇒ Success(s)
       case util.Failure(e: CompilationError) ⇒
-        val errors = ScalaREPL.compilationMessage(e.errorMessages.filter(_.error), script.originalCode, lineOffset = script.headerLines + 1)
+        val errors = ScalaREPL.compilationMessage(e.errorMessages.filter(_.error), script.originalCode, lineOffset = script.headerLines + 2)
         val userBadDataError =
           new UserBadDataError(
             s"""${errors}

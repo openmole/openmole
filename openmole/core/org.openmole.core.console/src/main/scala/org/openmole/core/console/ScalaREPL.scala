@@ -103,7 +103,7 @@ object ScalaREPL {
             case _ ⇒
               val compiled = new String(pos.source.content).split("\n")
 
-              val firstLine = compiled.zipWithIndex.find { case (l, _) ⇒ l.contains(firstLineTag) }.map(_._2 + 2).getOrElse(0)
+              val firstLine = compiled.zipWithIndex.find { case (l, _) ⇒ l.contains(firstLineTag) }.map(_._2 + 1).getOrElse(0)
               val offset = compiled.take(firstLine).map(_.length + 1).sum
 
               def errorPos = ErrorPosition(pos.line - firstLine, pos.start - offset, pos.end - offset, pos.point - offset)
