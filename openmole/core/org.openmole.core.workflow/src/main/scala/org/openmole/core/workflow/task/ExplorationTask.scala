@@ -52,15 +52,15 @@ object ExplorationTask {
         val samplingValue = sampling().from(context).toVector
 
         val values =
-          TreeMap.empty[Val[_], Array[Any]] ++ sampling.prototypes.map { p ⇒
-            p → p.`type`.manifest.newArray(samplingValue.size).asInstanceOf[Array[Any]]
+          TreeMap.empty[Val[_], Array[_]] ++ sampling.prototypes.map { p ⇒
+            p → p.`type`.manifest.newArray(samplingValue.size)
           }
 
         for {
           (sample, i) ← samplingValue.zipWithIndex
           v ← sample
         } values.get(v.prototype) match {
-          case Some(b) ⇒ b(i) = v.value
+          case Some(b) ⇒ java.lang.reflect.Array.set(b, i, v.value)
           case None    ⇒ throw new InternalProcessingError(s"Missing sample value for variable $v at position $i")
         }
 
