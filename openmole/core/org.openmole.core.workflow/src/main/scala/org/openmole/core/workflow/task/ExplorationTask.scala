@@ -18,7 +18,7 @@
 package org.openmole.core.workflow.task
 
 import org.openmole.core.context.{ Context, Val, Variable }
-import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.mole.MoleCapsule
 import org.openmole.core.workflow.sampling._
@@ -48,24 +48,28 @@ object ExplorationTask {
     FromContextTask("ExplorationTask") { p ⇒
       import p._
 
-      val variablesValues = TreeMap.empty[Val[_], mutable.ArrayBuilder[Any]] ++ sampling.prototypes.map { p ⇒ p → p.`type`.manifest.newArrayBuilder().asInstanceOf[collection.mutable.ArrayBuilder[Any]] }
+      val variablesValues = {
+        val samplingValue = sampling().from(context).toVector
 
-      for {
-        sample ← sampling().from(context)
-        v ← sample
-      } variablesValues.get(v.prototype) match {
-        case Some(b) ⇒ b += v.value
-        case None    ⇒
+        val values =
+          TreeMap.empty[Val[_], Array[Any]] ++ sampling.prototypes.map { p ⇒
+            p → p.`type`.manifest.newArray(samplingValue.size).asInstanceOf[Array[Any]]
+          }
+
+        for {
+          (sample, i) ← samplingValue.zipWithIndex
+          v ← sample
+        } values.get(v.prototype) match {
+          case Some(b) ⇒ b(i) = v.value
+          case None    ⇒ throw new InternalProcessingError(s"Missing sample value for variable $v at position $i")
+        }
+
+        values
       }
 
       variablesValues.map {
         case (k, v) ⇒
-          try {
-            Variable.unsecure(
-              k.toArray,
-              v.result()
-            )
-          }
+          try Variable.unsecure(k.toArray, v)
           catch {
             case e: ArrayStoreException ⇒ throw new UserBadDataError("Cannot fill factor values in " + k.toArray + ", values " + v)
           }

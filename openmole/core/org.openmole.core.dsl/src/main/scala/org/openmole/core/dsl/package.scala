@@ -78,7 +78,7 @@ package dsl {
 
     type Data = File
 
-    implicit class DoubleRange(d: Double) extends org.openmole.tool.collection.DoubleRange(d)
+    implicit def doubleRange(d: Double) = new org.openmole.tool.collection.DoubleRangeDecorator(d)
   }
 
 }

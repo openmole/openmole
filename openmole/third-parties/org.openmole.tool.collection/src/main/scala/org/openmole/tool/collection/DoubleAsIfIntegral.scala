@@ -1,31 +1,14 @@
 package org.openmole.tool.collection
 
-import scala.collection.immutable.NumericRange
+case class DoubleRange(l: Double, h: Double, s: Double, inclusive: Boolean) extends Iterable[Double] {
+  def by(ns: Double) = copy(s = ns)
 
-trait DoubleIsConflicted extends Numeric[Double] {
-  def plus(x: Double, y: Double): Double = x + y
-  def minus(x: Double, y: Double): Double = x - y
-  def times(x: Double, y: Double): Double = x * y
-  def negate(x: Double): Double = -x
-  def fromInt(x: Int): Double = x.toDouble
-  def toInt(x: Double): Int = x.toInt
-  def toLong(x: Double): Long = x.toLong
-  def toFloat(x: Double): Float = x.toFloat
-  def toDouble(x: Double): Double = x
-
-  def parseString(s: String) = util.Try(s.toDouble).toOption
-
-  // logic in Numeric base trait mishandles abs(-0.0)
-  override def abs(x: Double): Double = math.abs(x)
+  override def iterator: Iterator[Double] =
+    if (inclusive) BigDecimal(l) to h by s map (_.toDouble) iterator
+    else BigDecimal(l) until h by s map (_.toDouble) iterator
 }
 
-class DoubleAsIfIntegral extends DoubleIsConflicted with Integral[Double] with Ordering.Double.TotalOrdering {
-  def quot(x: Double, y: Double): Double = (BigDecimal(x) quot BigDecimal(y)).doubleValue
-  def rem(x: Double, y: Double): Double = (BigDecimal(x) remainder BigDecimal(y)).doubleValue
-}
-
-class DoubleRange(d: Double) {
-  implicit val doubleAsIfIntegral = new DoubleAsIfIntegral
-  def until(u: Double) = NumericRange(d, u, 1.0)
-  def to(u: Double) = NumericRange.inclusive(d, u, 1.0)
+class DoubleRangeDecorator(l: Double) {
+  def to(h: Double) = DoubleRange(l, h, 1.0, true)
+  def until(h: Double) = DoubleRange(l, h, 1.0, false)
 }
