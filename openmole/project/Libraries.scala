@@ -4,12 +4,12 @@ import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
 import sbt.Keys._
 import sbt._
 
+import openmole.common._
+
 object Libraries {
 
-  lazy val gridscaleVersion = "2.30"
   lazy val sshjVersion = "0.27.0"
   lazy val containerVersion = "1.11"
-  lazy val mgoVersion = "3.44"
   lazy val bouncyCastleVersion = "1.64"
   lazy val netLogo5Version = "5.3.1"
   lazy val netLogo6Version = "6.1.1"

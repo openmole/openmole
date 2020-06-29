@@ -5,6 +5,8 @@ import Keys.{libraryDependencies, _}
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import execnpm.NpmDeps.Dep
 
+import _root_.openmole.common._
+
 organization := "org.openmole"
 name := "openmole-root"
 

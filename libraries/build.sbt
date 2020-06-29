@@ -1,6 +1,8 @@
 import com.typesafe.sbt.osgi.OsgiKeys._
 import org.openmole.buildsystem._
 
+import openmole.common._
+
 def dir = file("bundles")
 
 def settings = Seq(
@@ -236,8 +238,6 @@ lazy val squants =
   ) settings(settings: _*)
 
 
-lazy val mgoVersion = "3.44"
-
 lazy val mgo = OsgiProject(dir, "mgo", exports = Seq("mgo.*", "freestyle.*"), imports = Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "*"), privatePackages = Seq("!scala.*", "!monocle.*", "!org.apache.commons.math3.*", "!cats.*", "!squants.*", "!scalaz.*", "*")) settings(
   libraryDependencies += "org.openmole" %% "mgo" % mgoVersion,
   version := mgoVersion) dependsOn(monocle, math, cats, squants) settings(settings: _*)
@@ -356,8 +356,6 @@ lazy val sourceCode = OsgiProject(dir, "sourcecode") settings (
   version := sourceCodeVersion
 ) settings(settings: _*)
 
-
-def gridscaleVersion = "2.30"
 lazy val gridscale = OsgiProject(dir, "gridscale", imports = Seq("*"), exports = Seq("gridscale.*", "enumeratum.*")) settings (
   libraryDependencies += "org.openmole.gridscale" %% "gridscale" % gridscaleVersion,
   version := gridscaleVersion
