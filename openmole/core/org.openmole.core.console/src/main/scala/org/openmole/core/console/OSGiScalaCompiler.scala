@@ -67,6 +67,7 @@ object OSGiScalaCompiler {
         newSettings
       }
 
+    newSettings.language.add(newSettings.languageFeatures.postfixOps.name)
     //newSettings.maxClassfileName.value = 100
     newSettings
   }
