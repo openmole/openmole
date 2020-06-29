@@ -19,10 +19,6 @@ def settings = Seq(
 )
 
 
-lazy val scalatraVersion = "2.7.0"
-lazy val jettyVersion = "9.4.28.v20200408"
-//lazy val jettyVersion = "9.3.25.v20180904"
-
 lazy val scalatra = OsgiProject(dir, "org.scalatra",
   exports = Seq("org.scalatra.*, org.fusesource.*", "grizzled.*", "org.eclipse.jetty.*", "javax.*"),
   privatePackages = Seq("!scala.*", "!org.slf4j.*", "**"),
@@ -38,16 +34,14 @@ lazy val json4s = OsgiProject(dir, "org.json4s",
   exports = Seq("org.json4s.*"),
   privatePackages = Seq("!scala.*", "!org.slf4j.*", "!com.thoughtworks.paranamer.*", "*"),
   imports = Seq("scala.*", "org.slf4j.*", "com.thoughtworks.paranamer.*", "")) settings (
-  libraryDependencies +=  "org.json4s" %% "json4s-jackson" % "3.6.7",
-  version := "3.6.7") settings(settings: _*)
+  libraryDependencies +=  "org.json4s" %% "json4s-jackson" % json4sVersion,
+  version := json4sVersion) settings(settings: _*)
 
-lazy val shapelessVersion = "2.3.3"
 lazy val shapeless =  OsgiProject(dir, "com.chuusai.shapeless", exports = Seq("shapeless.*")) settings (
   libraryDependencies += "com.chuusai" %% "shapeless" % shapelessVersion,
   version := shapelessVersion
 ) settings(settings: _*)
 
-lazy val circeVersion = "0.13.0"
 lazy val circe = OsgiProject(dir, "io.circe",
   exports = Seq("io.circe.*", "!cats.*", "!scala.*", "!shapeless.*"),
   privatePackages = Seq("org.typelevel.jawn.*"),
@@ -61,16 +55,14 @@ lazy val circe = OsgiProject(dir, "io.circe",
   version := circeVersion) settings(settings: _*) dependsOn(shapeless)
 
 lazy val logback = OsgiProject(dir, "ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl"), dynamicImports = Seq("*")) settings
-  (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3", version := "1.2.3") settings(settings: _*)
+  (libraryDependencies += "ch.qos.logback" % "logback-classic" % logbackVersion, version := logbackVersion) settings(settings: _*)
 
-lazy val h2Version = "1.4.200"
 lazy val h2 = OsgiProject(dir, "org.h2", dynamicImports = Seq("*"), privatePackages = Seq("META-INF.*")) settings
   (libraryDependencies += "com.h2database" % "h2" % h2Version, version := h2Version) settings(settings: _*)
 
 lazy val bonecp = OsgiProject(dir, "com.jolbox.bonecp", dynamicImports = Seq("*")) settings
   (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0.RELEASE", version := "0.8.0.RELEASE") settings(settings: _*)
 
-lazy val slickVersion = "3.3.2"
 lazy val slick = OsgiProject(dir,"com.typesafe.slick", exports = Seq("slick.*"), privatePackages = Seq("org.reactivestreams.*")) settings
   (libraryDependencies += "com.typesafe.slick" %% "slick" % slickVersion, version := slickVersion) settings(settings: _*)
 
@@ -123,13 +115,11 @@ lazy val scalaLang = OsgiProject(
     )
   }, version := scalaVersion.value) settings(settings: _*)
 
-lazy val jasyptVersion = "1.9.3"
 lazy val jasypt = OsgiProject(dir, "org.jasypt.encryption", exports = Seq("org.jasypt.*")) settings(
   libraryDependencies += "org.jasypt" % "jasypt" % jasyptVersion,
   version := jasyptVersion
   ) settings(settings: _*)
 
-lazy val netLogo5Version = "5.3.1"
 
 lazy val netlogo5 = OsgiProject(
   dir,
@@ -142,8 +132,6 @@ lazy val netlogo5 = OsgiProject(
       "org.scala-lang" % "scala-library" % "2.9.2" % "provided",
       "asm" % "asm-all" % "3.3.1" % "provided",
       "org.picocontainer" % "picocontainer" % "2.13.6" % "provided"), version := netLogo5Version, scalaVersion := "2.9.2", crossPaths := false) settings(settings: _*)
-
-lazy val netLogo6Version = "6.1.1"
 
 lazy val netlogo6 = OsgiProject(
   dir,
@@ -166,16 +154,9 @@ lazy val netlogo6 = OsgiProject(
     "net.lingala.zip4j" % "zip4j" % "1.3.2" % "provided"
   ), version := netLogo6Version, scalaVersion := "2.12.8", crossPaths := false) settings(settings: _*) 
 
-lazy val scalaTagsVersion = "0.9.1"
-lazy val scalaRxVersion = "0.4.3"
-lazy val scalaDomVersion = "1.0.0"
-lazy val scalaBoopickleVersion = "1.3.3"
-lazy val scalaAutowireVersion = "0.3.2"
-lazy val scalajsVersion = "1.1.0"
-
 lazy val rx = OsgiProject(dir, "rx", exports = Seq("rx.*")) settings(
-  libraryDependencies ++= Seq("com.lihaoyi" %% "scalarx" % scalaRxVersion),
-  version := scalaRxVersion) settings(settings: _*)
+  libraryDependencies ++= Seq("com.lihaoyi" %% "scalarx" % rxVersion),
+  version := rxVersion) settings(settings: _*)
 
 /*lazy val scalajsTools = OsgiProject(dir, "scalajs-tools", exports = Seq("scala.scalajs.*", "org.scalajs.core.tools.*", "org.scalajs.core.ir.*", "com.google.javascript.*", "com.google.common.*", "rhino_ast.java.com.google.javascript.rhino.*", "com.google.gson.*", "com.google.debugging.sourcemap.*", "org.json.*", "java7compat.nio.charset.*", "com.google.protobuf.*")) settings(
   libraryDependencies += "org.scala-js" %% "scalajs-tools" % scalajsVersion, version := scalajsVersion) settings(settings: _*)*/
@@ -206,30 +187,26 @@ lazy val scalatexSite =
     version := "0.4.6") settings(settings: _*)
 
 lazy val boopickle = OsgiProject(dir, "boopickle", exports = Seq("boopickle.*"), imports = Seq("*")) settings(
-  libraryDependencies ++= Seq("io.suzaku" %% "boopickle" % scalaBoopickleVersion),
-  version := scalaBoopickleVersion) settings(settings: _*)
+  libraryDependencies ++= Seq("io.suzaku" %% "boopickle" % boopickleVersion),
+  version := boopickleVersion) settings(settings: _*)
 
 lazy val autowire = OsgiProject(dir, "autowire", exports = Seq("autowire.*")) settings(
   libraryDependencies ++= Seq("com.lihaoyi" %% "autowire" % scalaAutowireVersion),
   version := scalaAutowireVersion) settings(settings: _*)
 
-lazy val jsonSimpleVersion = "1.1.1"
-lazy val jsonSimple = OsgiProject(dir, "json-simple", exports = Seq("org.json.simple.*")) settings(
-  libraryDependencies += "com.googlecode.json-simple" % "json-simple" % jsonSimpleVersion, version := jsonSimpleVersion) settings(settings: _*)
+//lazy val jsonSimple = OsgiProject(dir, "json-simple", exports = Seq("org.json.simple.*")) settings(
+//  libraryDependencies += "com.googlecode.json-simple" % "json-simple" % jsonSimpleVersion, version := jsonSimpleVersion) settings(settings: _*)
 
 lazy val closureCompilerVersion = "v20130603"
 lazy val closureCompiler = OsgiProject(dir, "closure-compiler", exports = Seq("com.google.javascript.*")) settings(
   libraryDependencies += "com.google.javascript" % "closure-compiler" % closureCompilerVersion, version := closureCompilerVersion) settings(settings: _*)
 
-lazy val catsVersion = "2.1.0"
 lazy val cats =
   OsgiProject(dir, "cats") settings (
     libraryDependencies += "org.typelevel" %% "cats-core" % catsVersion,
     libraryDependencies += "org.typelevel" %% "cats-free" % catsVersion,
     version := catsVersion
   ) settings(settings: _*)
-
-lazy val squantsVersion = "1.6.0"
 
 lazy val squants =
   OsgiProject(dir, "squants") settings (
@@ -243,14 +220,10 @@ lazy val mgo = OsgiProject(dir, "mgo", exports = Seq("mgo.*", "freestyle.*"), im
   version := mgoVersion) dependsOn(monocle, math, cats, squants) settings(settings: _*)
 
 
-lazy val containerVersion = "1.11"
-
 lazy val container = OsgiProject(dir, "container", exports = Seq("container.*"), imports = Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "!com.github.luben.*", "!org.apache.avalon.*", "!org.apache.log.*", "!org.brotli.dec.*", "!javax.*","*"), privatePackages = Seq("!scala.*", "!monocle.*", "!org.apache.commons.math3.*", "!cats.*", "!squants.*", "!scalaz.*", "!io.circe.*", "!shapeless.*", "*")) settings(
   libraryDependencies += "org.openmole" %% "container" % containerVersion,
   //libraryDependencies += "com.github.luben" % "zstd-jni" % "1.4.3-1",
   version := containerVersion) dependsOn(cats, squants, circe, shapeless) settings(settings: _*)
-
-lazy val spatialsamplingVersion = "0.2"
 
 lazy val spatialdata = OsgiProject(dir, "org.openmole.spatialsampling",
   exports = Seq("org.openmole.spatialsampling.*"),
@@ -288,7 +261,6 @@ lazy val async =
     version := "0.10.0",
     exportPackage := Seq("scala.async.*")) settings(settings: _*)
 
-lazy val mathVersion = "3.6.1"
 lazy val math = OsgiProject(dir, "org.apache.commons.math", exports = Seq("org.apache.commons.math3.*"), privatePackages = Seq("assets.*")) settings
   (libraryDependencies += "org.apache.commons" % "commons-math3" % mathVersion, version := mathVersion) settings(settings: _*)
 
@@ -322,11 +294,9 @@ lazy val clapperVersion = "1.5.1"
 lazy val clapper = OsgiProject(dir, "org.clapper", exports = Seq("!scala.*","!grizzled.*","!jline.*","!org.fusesource.*","!org.slf4j.*","*")) settings (
   libraryDependencies += "org.clapper" %% "classutil" % clapperVersion, version := clapperVersion) settings(settings: _*)
 
-val scalazVersion = "7.2.30"
 lazy val scalaz = OsgiProject(dir, "org.scalaz", exports = Seq("!scala.*","*")) settings (
   libraryDependencies += "org.scalaz" %% "scalaz-core" % scalazVersion, version := scalazVersion) settings(settings: _*)
 
-val monocleVersion = "2.0.0"
 lazy val monocle = OsgiProject(dir, "monocle",
   privatePackages = Seq("!scala.*", "!scalaz.*", "!shapeless.*", "!cats.*", "*"),
   imports = Seq("scala.*", "shapeless.*", "scalaz.*", "cats.*")) settings(
@@ -336,8 +306,6 @@ lazy val monocle = OsgiProject(dir, "monocle",
     "com.github.julien-truffaut" %% "monocle-macro"
   ).map(_ % monocleVersion),
   version := monocleVersion) settings(settings: _*) dependsOn(shapeless, scalaz, cats)
-
-val asmVersion = "7.2"
 
 lazy val asm = OsgiProject(dir, "org.objectweb.asm") settings (
   libraryDependencies += "org.ow2.asm" % "asm" % asmVersion,
@@ -350,10 +318,9 @@ lazy val config = OsgiProject(dir, "org.apache.commons.configuration2",
   libraryDependencies += "commons-beanutils" % "commons-beanutils" % "1.9.4",
   version := "2.6") settings(settings: _*) dependsOn (logging)
 
-def sourceCodeVersion = "0.2.1"
 lazy val sourceCode = OsgiProject(dir, "sourcecode") settings (
-  libraryDependencies += "com.lihaoyi" %% "sourcecode" % sourceCodeVersion,
-  version := sourceCodeVersion
+  libraryDependencies += "com.lihaoyi" %% "sourcecode" % sourcecodeVersion,
+  version := sourcecodeVersion
 ) settings(settings: _*)
 
 lazy val gridscale = OsgiProject(dir, "gridscale", imports = Seq("*"), exports = Seq("gridscale.*", "enumeratum.*")) settings (

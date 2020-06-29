@@ -607,7 +607,7 @@ lazy val extClient = OsgiProject(guiExt, "org.openmole.gui.ext.client") enablePl
 lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.ext.api") dependsOn(dataGUI, market) settings (defaultSettings: _*)
 
 lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompile", imports = Seq("*")) dependsOn(pluginManager, fileService, workspace, dataGUI) settings (defaultSettings: _*) settings(
-  libraryDependencies += "org.scala-js" %%% "scalajs-library" % Libraries.scalajsVersion % "provided" intransitive(),
+  libraryDependencies += "org.scala-js" %%% "scalajs-library" % scalajsVersion % "provided" intransitive(),
   libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.4" % "provided" intransitive(),
 
   libraryDependencies += Libraries.scalajsLogging,

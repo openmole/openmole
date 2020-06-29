@@ -8,30 +8,6 @@ import openmole.common._
 
 object Libraries {
 
-  lazy val sshjVersion = "0.27.0"
-  lazy val containerVersion = "1.11"
-  lazy val bouncyCastleVersion = "1.64"
-  lazy val netLogo5Version = "5.3.1"
-  lazy val netLogo6Version = "6.1.1"
-  lazy val scalaTagsVersion = "0.9.1"
-  lazy val scalaJSDomVersion = "1.0.0"
-  lazy val rxVersion = "0.4.3"
-  lazy val boopickleVersion = "1.3.3"
-  lazy val scalaAutowireVersion = "0.3.2"
-  lazy val sourcecodeVersion = "0.2.1"
-  lazy val scaladgetVersion = "1.3.7"
-  lazy val sortableVersion = "0.7.2"
-  lazy val json4sVersion = "3.6.7"
-  lazy val circeVersion = "0.13.0"
-  lazy val catsVersion = "2.1.0"
-  lazy val scalajsVersion = "1.1.0"
-  lazy val squantsVersion = "1.6.0"
-  lazy val xstreamVersion = "1.4.12"
-  lazy val scalatraVersion = "2.7.0"
-  lazy val scalaURIVersion = "1.1.1"
-  lazy val scoptVersion = "3.7.1"
-  lazy val spatialsamplingVersion = "0.2"
-
   lazy val bootstrapnative = libraryDependencies += "org.openmole.scaladget" %%% "bootstrapnative" % scaladgetVersion
   lazy val lunr = libraryDependencies += "org.openmole.scaladget" %%% "lunr" % scaladgetVersion
 
@@ -62,20 +38,20 @@ object Libraries {
     )
 
   lazy val scalatra = "org.openmole.library" %% "org-scalatra" % scalatraVersion
-  lazy val logback = "org.openmole.library" %% "ch-qos-logback" % "1.2.3"
-  lazy val h2 = "org.openmole.library" %% "org-h2" % "1.4.200"
+  lazy val logback = "org.openmole.library" %% "ch-qos-logback" % logbackVersion
+  lazy val h2 = "org.openmole.library" %% "org-h2" % h2Version
   lazy val bonecp = "org.openmole.library" %% "com-jolbox-bonecp" % "0.8.0.RELEASE"
-  lazy val slick = "org.openmole.library" %% "com-typesafe-slick" % "3.3.2"
+  lazy val slick = "org.openmole.library" %% "com-typesafe-slick" % slickVersion
   lazy val slf4j = "org.openmole.library" %% "org-slf4j" % "1.7.30"
   lazy val xstream = "org.openmole.library" %% "com-thoughtworks-xstream" % xstreamVersion
-  lazy val jasypt = "org.openmole.library" %% "org-jasypt-encryption" % "1.9.3"
+  lazy val jasypt = "org.openmole.library" %% "org-jasypt-encryption" % jasyptVersion
   lazy val opencsv = "org.openmole.library" %% "au-com-bytecode-opencsv" % "2.3"
   lazy val arm = "org.openmole.library" %% "com-jsuereth-scala-arm" % "2.1"
   lazy val scalajHttp = "org.openmole.library" %% "org-scalaj-scalaj-http" % "2.4.2"
   lazy val scopt = "org.openmole.library" %% "com-github-scopt" % scoptVersion
   lazy val scalabc = "org.openmole.library" %% "fr-iscpif-scalabc" % "0.4"
   lazy val scalatexSite = "org.openmole.library" %% "com-lihaoyi-scalatex-site" % "0.4.6"
-  lazy val math = "org.openmole.library" %% "org-apache-commons-math" % "3.6.1"
+  lazy val math = "org.openmole.library" %% "org-apache-commons-math" % mathVersion
   lazy val collections = "org.openmole.library" %% "org-apache-commons-collections" % "4.4"
   lazy val exec = "org.openmole.library" %% "org-apache-commons-exec" % "1.3"
   lazy val log4j = "org.openmole.library" %% "org-apache-log4j" % "1.2.17"
@@ -88,7 +64,7 @@ object Libraries {
   lazy val cats = "org.openmole.library" %% "cats" % catsVersion
   lazy val squants = "org.openmole.library" %% "squants" % squantsVersion
   lazy val clapper = "org.openmole.library" %% "org-clapper" % "1.5.1"
-  lazy val asm = "org.openmole.library" %% "org-objectweb-asm" % "7.2"
+  lazy val asm = "org.openmole.library" %% "org-objectweb-asm" % asmVersion
   lazy val configuration = "org.openmole.library" %% "org-apache-commons-configuration2" % "2.6"
   lazy val json4s = "org.openmole.library" %% "org-json4s" % json4sVersion
   lazy val circe = "org.openmole.library" %% "io-circe" % circeVersion
@@ -97,7 +73,7 @@ object Libraries {
   lazy val scalaCompat = "org.openmole.library" %% "scala-collection-compat" % "2.1.4"
   lazy val scalajs = "org.openmole.library" %% "scalajs" % scalajsVersion
   lazy val mgo = "org.openmole.library" %% "mgo" % mgoVersion
-  lazy val monocle = Seq("org.openmole.library" %% "monocle" % "2.0.0", scalaz)
+  lazy val monocle = Seq("org.openmole.library" %% "monocle" % monocleVersion, scalaz)
   lazy val container = "org.openmole.library" %% "container" % containerVersion
   lazy val boopickle = "org.openmole.library" %% "boopickle" % boopickleVersion
   lazy val autowire = "org.openmole.library" %% "autowire" % scalaAutowireVersion
@@ -141,13 +117,13 @@ object Libraries {
   lazy val gridscaleLocal = "org.openmole.library" %% "gridscale-local" % gridscaleVersion
   lazy val gridscaleOAR = "org.openmole.library" %% "gridscale-oar" % gridscaleVersion
 
-  lazy val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.30"
+  lazy val scalaz = "org.scalaz" %% "scalaz-core" % scalazVersion
   lazy val guava = "com.google.guava" % "guava" % "27.1-jre"
   lazy val spray = "io.spray" %% "spray-json" % "1.3.5"
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
   lazy val equinoxOSGi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.13.200"
   lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.3.1"
 
-  lazy val shapeless = "org.openmole.library" %% "com-chuusai-shapeless" % "2.3.3"
+  lazy val shapeless = "org.openmole.library" %% "com-chuusai-shapeless" % shapelessVersion
 
 }
