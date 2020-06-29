@@ -136,7 +136,7 @@ class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, initCode: St
                   } yield {
                     errors.errorsFromCompiler.find(_.errorWithLocation.line == Some(i)).map { e ⇒
                       e.errorWithLocation.line.map { l ⇒
-                        buildManualPopover(l, (i - scrollAsLines) * lineHeight() - (lineHeight() - 15), span(e.errorWithLocation.stackTrace), Popup.Left)
+                        buildManualPopover(l, (i - scrollAsLines) * lineHeight() - (lineHeight() - 15), span(e.errorWithLocation.stackTrace), Popup.Right)
                       }.getOrElse(div.render)
                     }.getOrElse(div.render)
                   }

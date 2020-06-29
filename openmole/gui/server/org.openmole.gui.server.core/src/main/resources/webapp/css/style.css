@@ -557,3 +557,7 @@ padding-bottom: 90px;
   opacity: 1;
   color:white; !important
 }
+
+.popover{
+    max-width: 50%;
+}
