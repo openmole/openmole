@@ -80,7 +80,7 @@ object GAMATask {
     stdErr:                 OptionalArgument[Val[String]] = None,
     environmentVariables:   Seq[EnvironmentVariable]      = Vector.empty,
     hostFiles:              Seq[HostFile]                 = Vector.empty,
-    workDirectory:          OptionalArgument[String]      = None,
+//    workDirectory:          OptionalArgument[String]      = None,
     clearContainerCache:    Boolean                       = false,
     containerSystem:        ContainerSystem               = ContainerSystem.default,
     installContainerSystem: ContainerSystem               = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): GAMATask = {
