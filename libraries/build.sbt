@@ -357,7 +357,7 @@ lazy val sourceCode = OsgiProject(dir, "sourcecode") settings (
 ) settings(settings: _*)
 
 
-def gridscaleVersion = "2.29"
+def gridscaleVersion = "2.30"
 lazy val gridscale = OsgiProject(dir, "gridscale", imports = Seq("*"), exports = Seq("gridscale.*", "enumeratum.*")) settings (
   libraryDependencies += "org.openmole.gridscale" %% "gridscale" % gridscaleVersion,
   version := gridscaleVersion

@@ -6,7 +6,7 @@ import sbt._
 
 object Libraries {
 
-  lazy val gridscaleVersion = "2.29"
+  lazy val gridscaleVersion = "2.30"
   lazy val sshjVersion = "0.27.0"
   lazy val containerVersion = "1.11"
   lazy val mgoVersion = "3.44"
