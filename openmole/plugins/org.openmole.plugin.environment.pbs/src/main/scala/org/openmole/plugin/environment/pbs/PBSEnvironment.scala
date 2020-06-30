@@ -48,7 +48,8 @@ object PBSEnvironment extends JavaLogger {
     timeout:              OptionalArgument[Time]        = None,
     flavour:              gridscale.pbs.PBSFlavour      = Torque,
     name:                 OptionalArgument[String]      = None,
-    localSubmission:      Boolean                       = false
+    localSubmission:      Boolean                       = false,
+    modules: Seq[String] = Vector(),
   )(implicit services: BatchEnvironment.Services, authenticationStore: AuthenticationStore, cypher: Cypher, varName: sourcecode.Name) = {
     import services._
 
@@ -63,7 +64,8 @@ object PBSEnvironment extends JavaLogger {
       workDirectory = workDirectory,
       threads = threads,
       storageSharedLocally = storageSharedLocally,
-      flavour = flavour
+      flavour = flavour,
+      modules = modules
     )
 
     EnvironmentProvider { ms ⇒
@@ -102,7 +104,8 @@ object PBSEnvironment extends JavaLogger {
     workDirectory:        Option[String],
     threads:              Option[Int],
     storageSharedLocally: Boolean,
-    flavour:              _root_.gridscale.pbs.PBSFlavour)
+    flavour:              _root_.gridscale.pbs.PBSFlavour,
+    modules:              Seq[String])
 
   def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: PBSJobService[_, _])(implicit services: BatchEnvironment.Services) =
     submitToCluster(

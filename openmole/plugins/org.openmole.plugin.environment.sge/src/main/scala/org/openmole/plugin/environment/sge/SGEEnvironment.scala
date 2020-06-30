@@ -43,7 +43,8 @@ object SGEEnvironment {
     storageSharedLocally: Boolean                       = false,
     timeout:              OptionalArgument[Time]        = None,
     name:                 OptionalArgument[String]      = None,
-    localSubmission:      Boolean                       = false)(implicit services: BatchEnvironment.Services, authenticationStore: AuthenticationStore, cypher: Cypher, varName: sourcecode.Name) = {
+    localSubmission:      Boolean                       = false,
+    modules:              Seq[String]                   = Vector())(implicit services: BatchEnvironment.Services, authenticationStore: AuthenticationStore, cypher: Cypher, varName: sourcecode.Name) = {
     import services._
 
     val parameters = Parameters(
@@ -54,7 +55,8 @@ object SGEEnvironment {
       sharedDirectory = sharedDirectory,
       workDirectory = workDirectory,
       threads = threads,
-      storageSharedLocally = storageSharedLocally)
+      storageSharedLocally = storageSharedLocally,
+      modules = modules)
 
     EnvironmentProvider { ms ⇒
       if (!localSubmission) {
@@ -90,7 +92,8 @@ object SGEEnvironment {
     sharedDirectory:      Option[String],
     workDirectory:        Option[String],
     threads:              Option[Int],
-    storageSharedLocally: Boolean)
+    storageSharedLocally: Boolean,
+    modules:              Seq[String])
 
   def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SGEJobService[_, _])(implicit services: BatchEnvironment.Services) =
     submitToCluster(

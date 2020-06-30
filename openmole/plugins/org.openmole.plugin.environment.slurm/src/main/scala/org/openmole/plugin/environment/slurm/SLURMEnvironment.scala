@@ -40,8 +40,8 @@ object SLURMEnvironment {
     wallTime:             OptionalArgument[Time]        = None,
     memory:               OptionalArgument[Information] = None,
     qos:                  OptionalArgument[String]      = None,
-    gres:                 Seq[Gres]                     = List(),
-    constraints:          Seq[String]                   = List(),
+    gres:                 Seq[Gres]                     = Vector(),
+    constraints:          Seq[String]                   = Vector(),
     nodes:                OptionalArgument[Int]         = None,
     nTasks:               OptionalArgument[Int]         = None,
     reservation:          OptionalArgument[String]      = None,
@@ -55,6 +55,7 @@ object SLURMEnvironment {
     localSubmission:      Boolean                       = false,
     forceCopyOnNode:      Boolean                       = false,
     refresh:              OptionalArgument[Time]        = None,
+    modules:              Seq[String]                   = Vector(),
     debug:                Boolean                       = false
   )(implicit services: BatchEnvironment.Services, authenticationStore: AuthenticationStore, cypher: Cypher, varName: sourcecode.Name) = {
     import services._
@@ -77,6 +78,7 @@ object SLURMEnvironment {
       storageSharedLocally = storageSharedLocally,
       forceCopyOnNode = forceCopyOnNode,
       refresh = refresh,
+      modules = modules,
       debug = debug)
 
     EnvironmentProvider { ms ⇒
@@ -124,6 +126,7 @@ object SLURMEnvironment {
     storageSharedLocally: Boolean,
     forceCopyOnNode:      Boolean,
     refresh:              Option[Time],
+    modules:              Seq[String],
     debug:                Boolean)
 
   def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SLURMJobService[_, _], refresh: Option[Time])(implicit services: BatchEnvironment.Services) =

@@ -69,7 +69,8 @@ class SSHJobService[S](s: S, tmpDirectory: String, services: BatchEnvironment.Se
         env.threads,
         serializedJob,
         outputPath,
-        s
+        s,
+        modules = env.modules
       )
     }
 

@@ -101,6 +101,7 @@ object SharedStorage extends JavaLogger {
     serializedJob:  SerializedJob,
     outputPath:     String,
     storage:        S,
+    modules:        Seq[String],
     debug:          Boolean             = false)(implicit newFile: TmpDirectory, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
     val runtime = runtimePath(serializedJob.runtime) //preparedRuntime(serializedJob.runtime)
     val result = outputPath
@@ -109,12 +110,26 @@ object SharedStorage extends JavaLogger {
 
     val remoteScript =
       newFile.withTmpFile("run", ".sh") { script ⇒
-        val content =
-          s"""export PATH=$runtime/jre/bin/:$$PATH; cd $runtime; mkdir -p $osgiWorkDir; export OPENMOLE_HOME=$workspace ; mkdir -p $$OPENMOLE_HOME ; """ +
-            "sh run.sh " + BatchEnvironment.openMOLEMemoryValue(openMOLEMemory).toMegabytes.toInt + "m " + osgiWorkDir + " -s " + serializedJob.remoteStorage.path +
-            " -p envplugins/ -i " + serializedJob.inputPath + " -o " + result + " -t " + BatchEnvironment.threadsValue(threads) + (if (debug) " --debug" else "") +
-            "; RETURNCODE=$?; rm -rf $OPENMOLE_HOME ; rm -rf " + osgiWorkDir + " ; exit $RETURNCODE;"
 
+        val loadModules = modules.map(m ⇒ s"module load $m")
+
+        val commands =
+          loadModules ++
+            Seq(
+              s"export PATH=$runtime/jre/bin/:$$PATH",
+              s"cd $runtime",
+              s"mkdir -p $osgiWorkDir",
+              s"export OPENMOLE_HOME=$workspace",
+              "mkdir -p $OPENMOLE_HOME",
+              s"sh run.sh " + BatchEnvironment.openMOLEMemoryValue(openMOLEMemory).toMegabytes.toInt + "m " + osgiWorkDir + " -s " + serializedJob.remoteStorage.path +
+                " -p envplugins/ -i " + serializedJob.inputPath + " -o " + result + " -t " + BatchEnvironment.threadsValue(threads) + (if (debug) " --debug" else ""),
+              "RETURNCODE=$?",
+              "rm -rf $OPENMOLE_HOME",
+              s"rm -rf $osgiWorkDir",
+              "exit $RETURNCODE"
+            )
+
+        val content = commands.mkString(" ; ")
         Log.logger.fine("Script: " + content)
 
         script.content = content
