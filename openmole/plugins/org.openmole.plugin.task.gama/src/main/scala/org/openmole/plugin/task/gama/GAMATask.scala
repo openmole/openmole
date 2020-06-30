@@ -73,7 +73,7 @@ object GAMATask {
     frameRate:              OptionalArgument[Int]         = None,
     install:                Seq[String]                   = Seq.empty,
     dockerImage: String = "gamaplatform/gama",
-    version:                String                        = "1.8.0",
+    version:                String                        = "1.8.1",
     errorOnReturnValue:     Boolean                       = true,
     returnValue:            OptionalArgument[Val[Int]]    = None,
     stdOut:                 OptionalArgument[Val[String]] = None,
