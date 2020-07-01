@@ -6,17 +6,17 @@
 
 
 Geosimulation models, in the broad sense of simulation models in which the spatial configuration of agents plays a significant roles in the underlying processes (think e.g. of spatial interaction models), are generally tested for sensitivity on processes or agents parameters, but less frequently on the spatial configuration itself.
-A recent @aa("paper", href:= "https://arxiv.org/abs/1812.06008") proposed the generation of synthetic spatial configurations as a method to test the sensitivity of geosimulation models to the initial spatial configuration.
-Some complementary work (@aa("paper", href:= "https://arxiv.org/abs/1903.06807")) focused on similar generator at larger scales, namely generators for building configurations at the scale of the district.
+A recent @aa("paper", href:= "http://jasss.soc.surrey.ac.uk/22/4/10.html") proposed the generation of synthetic spatial configurations as a method to test the sensitivity of geosimulation models to the initial spatial configuration.
+Some complementary work (@aa("paper", href:= "https://www.mitpressjournals.org/doi/abs/10.1162/isal_a_00159")) focused on similar generator at larger scales, namely generators for building configurations at the scale of the district.
 
 @br
 
-More generally, the @aa("spatial data library", href:= "https://github.com/openmole/spatialdata") developed by the OpenMOLE team integrates these kind of methods in a larger context, including for example synthetic networks and perturbation of real data.
+More generally, the @aa("spatial data library", href:= "https://github.com/openmole/spatialdata") developed by the OpenMOLE team integrates these kind of methods in a larger context, including for example synthetic spatial networks and perturbation of real data, but also spatial interaction models and urban dynamics models.
 
 @br
 
 Some of the corresponding spatial generators are included in OpenMOLE as @i{Spatial Samplings}.
-In the current development version, only some grid generators are included, for a reason of simplicity of output data.
+In the current development version, only some grid generators are included, for a reason of types for output prototypes (synthetic networks are difficult to represent as simple types and to feed as inputs to models).
 All generators output the generated grids in a provided prototype, along with the generation parameters for the generators taking factors as arguments.
 
 
@@ -45,7 +45,7 @@ where
   @li{@code{samples} is the number of grids to generate,}
   @li{@code{worldSize} is the width of the generated square grid,}
   @li{the factor for a density parameter is optional and produces a binary grid of given density in average if provided,}
-  @li{@code{prototype} is the prototype for the generated grid (must be a @code{Val[Array[Array[Double]]]}).}
+  @li{@code{prototype} is the prototype for the generated grid (must be a @code{Val[Array[Array[Double]]]} since the grid is represented as raster data).}
 
 
 
@@ -104,7 +104,7 @@ with the specific parameters as factors for generator parameters:
 
 @br
 
-A binary grid resembling a labyrinthine building organisation, obtained by percolating a grid network (see details in @aa("paper", href:= "https://arxiv.org/abs/1903.06807")).
+A binary grid resembling a labyrinthine building organisation, obtained by percolating a grid network (see details in @aa("paper", href:= "https://www.mitpressjournals.org/doi/abs/10.1162/isal_a_00159")).
 It percolates a grid network until a fixed number of points on the boundaries of the world are linked through the giant cluster.
 The resulting network is transposed to a building configuration by assimilating each link to a street with a given width as a parameter.
 
@@ -132,7 +132,7 @@ with
   @li{@code{percolationLinkWidth} the width of the final streets.}
 
 
-/* @h2{Exponential mixture population grid sampling}
+@h2{Exponential mixture population grid sampling}
 
 At a smaller scale than the previous generators which are all binary grids (building configurations), population density grids can be considered at the metropolitan scale for example (a grid cell being of width 1km for example).
 
