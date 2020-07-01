@@ -346,3 +346,10 @@ img{
     color:#333;
     text-transform: uppercase;
 }
+
+b,
+optgroup,
+strong {
+ font-weight:700;
+  color:black;
+}
