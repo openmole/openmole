@@ -343,9 +343,9 @@ lazy val gridscaleSSH = OsgiProject(dir, "gridscale.ssh", imports = Seq("*")) se
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(sshj) dependsOn(gridscale)
 
-lazy val sshj = OsgiProject(dir, "com.hierynomus.sshj", imports = Seq("*"), exports = Seq("com.hierynomus.*", "net.schmizz.*"), privatePackages = Seq("!scala.*", "!org.bouncycastle.*", "!org.slf4j.*", "**"), dynamicImports = Seq("org.bouncycastle.*")) settings (
-  libraryDependencies += "com.hierynomus" % "sshj" % "0.27.0",
-  version := "0.27.0"
+lazy val sshj = OsgiProject(dir, "com.hierynomus.sshj", imports = Seq("!sun.security.*", "*"), exports = Seq("com.hierynomus.*", "net.schmizz.*"), privatePackages = Seq("!scala.*", "!org.bouncycastle.*", "!org.slf4j.*", "**"), dynamicImports = Seq("org.bouncycastle.*")) settings (
+  libraryDependencies += "com.hierynomus" % "sshj" % sshjVersion,
+  version := sshjVersion
 ) settings(settings: _*)
 
 lazy val gridscaleCluster = OsgiProject(dir, "gridscale.cluster", imports = Seq("*")) settings (
