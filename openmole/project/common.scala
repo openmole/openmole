@@ -2,7 +2,7 @@
 package openmole
 
 object common {
-  def gridscaleVersion = "2.32-SNAPSHOT"
+  def gridscaleVersion = "2.31"
   def mgoVersion = "3.44"
   def sshjVersion = "0.29.0"
   def containerVersion = "1.11"
