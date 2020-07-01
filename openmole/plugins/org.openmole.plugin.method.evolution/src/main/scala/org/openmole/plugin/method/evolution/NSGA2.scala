@@ -121,7 +121,7 @@ object NSGA2 {
         override def metadata(savedData: SavedData) = FromContext { p ⇒
           import p._
           import org.openmole.plugin.method.evolution.data.EvolutionMetadata._
-          StochasticNSGA2Data(
+          EvolutionMetadata.StochasticNSGA2(
             genome = MetadataGeneration.genomeData(om.genome).from(context),
             objective = om.objectives.map(MetadataGeneration.noisyObjectiveData),
             sample = om.historySize,

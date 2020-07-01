@@ -34,20 +34,19 @@ object TopLevelExports {
 
 class EvolutionAnalysis extends MethodAnalysisPlugin {
 
-  override def panel(safePath: SafePath): TypedTag[HTMLElement] = {
-    val metadata: Var[Option[Either[ErrorData, EvolutionMetadata]]] = Var(None)
+  override def panel(safePath: SafePath, services: PluginServices): TypedTag[HTMLElement] = {
+    val metadata: Var[Option[EvolutionMetadata]] = Var(None)
 
     OMPost()[EvolutionAnalysisAPI].load(safePath).call().foreach {
-      case Right(m) ⇒ metadata() = Some(Right(m))
-      case Left(e)  ⇒ metadata() = Some(Left(e))
+      case Right(m) ⇒ metadata() = Some(m)
+      case Left(e)  ⇒ services.errorManager.signal("Error in evolution analysis", Some(ErrorData.stackTrace(e)))
     }
 
     div(
       Rx {
         metadata() match {
-          case None               ⇒ p("nop")
-          case Some(Right(value)) ⇒ p(value.toString)
-          case Some(Left(value))  ⇒ p(scrollableText(ErrorData.stackTrace(value)).view)
+          case None        ⇒ p("")
+          case Some(value) ⇒ p(value.toString)
         }
       }
     )

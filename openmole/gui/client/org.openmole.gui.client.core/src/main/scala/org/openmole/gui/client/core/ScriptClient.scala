@@ -157,7 +157,7 @@ object ScriptClient {
             toDisplay,
             onLoadEnded = (content: String) ⇒ {
               panels.treeNodePanel.refreshAndDraw
-              fileDisplayer.display(toDisplay, content, FileExtension.OMS)
+              fileDisplayer.display(toDisplay, content, FileExtension.OMS, panels.pluginServices)
             }
           )
         })

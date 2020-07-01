@@ -3,7 +3,7 @@ package org.openmole.gui.client.core
 import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
 import org.openmole.gui.client.core.files.{ FileDisplayer, TreeNodeManager, TreeNodePanel, TreeNodeTabs }
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.data.{ GUIPluginAsJS, WizardPluginFactory }
+import org.openmole.gui.ext.data.{ ErrorManager, GUIPluginAsJS, PluginServices, WizardPluginFactory }
 
 /*
  * Copyright (C) 24/07/15 // mathieu.leclaire@openmole.org
@@ -23,6 +23,13 @@ import org.openmole.gui.ext.data.{ GUIPluginAsJS, WizardPluginFactory }
  */
 
 object panels {
+  val pluginServices =
+    PluginServices(
+      errorManager = new ErrorManager {
+        override def signal(message: String, stack: Option[String]): Unit = panels.bannerAlert.registerWithStack(message, stack)
+      }
+    )
+
   lazy val treeNodeManager = new TreeNodeManager()
 
   lazy val executionPanel =
@@ -43,7 +50,8 @@ object panels {
       treeNodeManager = treeNodeManager,
       fileDisplayer = fileDisplayer,
       showExecution = () ⇒ executionPanel.dialog.show,
-      treeNodeTabs = treeNodeTabs)
+      treeNodeTabs = treeNodeTabs,
+      services = pluginServices)
 
   def modelWizardPanel(wizards: Seq[WizardPluginFactory]) =
     new ModelWizardPanel(

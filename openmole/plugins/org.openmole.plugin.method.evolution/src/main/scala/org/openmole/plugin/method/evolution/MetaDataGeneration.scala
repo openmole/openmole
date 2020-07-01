@@ -33,16 +33,16 @@ object MetadataGeneration {
     import p._
 
     b match {
-      case b: GenomeBound.ScalarDouble             ⇒ DoubleBoundData(b.v.name, b.low.from(context), b.high.from(context))
-      case b: GenomeBound.ScalarInt                ⇒ IntBoundData(b.v.name, b.low.from(context), b.high.from(context))
-      case b: GenomeBound.SequenceOfDouble         ⇒ DoubleSequenceBoundData(b.v.name, b.low.from(context), b.high.from(context))
-      case b: GenomeBound.SequenceOfInt            ⇒ IntSequenceBoundData(b.v.name, b.low.from(context), b.high.from(context))
-      case b: GenomeBound.Enumeration[_]           ⇒ EnumerationData(b.v.name, b.values.map(_.prettify()))
-      case b: GenomeBound.SequenceOfEnumeration[_] ⇒ EnumerationData(b.v.name, b.values.map(_.prettify()))
+      case b: GenomeBound.ScalarDouble             ⇒ GenomeBoundData.DoubleBound(b.v.name, b.low.from(context), b.high.from(context))
+      case b: GenomeBound.ScalarInt                ⇒ GenomeBoundData.IntBound(b.v.name, b.low.from(context), b.high.from(context))
+      case b: GenomeBound.SequenceOfDouble         ⇒ GenomeBoundData.DoubleSequenceBound(b.v.name, b.low.from(context), b.high.from(context))
+      case b: GenomeBound.SequenceOfInt            ⇒ GenomeBoundData.IntSequenceBound(b.v.name, b.low.from(context), b.high.from(context))
+      case b: GenomeBound.Enumeration[_]           ⇒ GenomeBoundData.Enumeration(b.v.name, b.values.map(_.prettify()))
+      case b: GenomeBound.SequenceOfEnumeration[_] ⇒ GenomeBoundData.Enumeration(b.v.name, b.values.map(_.prettify()))
     }
   }
 
-  def noisyObjectiveData(o: NoisyObjective[_]) = NoisyObjectiveData(o.as.getOrElse(o.prototype.name), o.delta, o.negative)
+  def noisyObjectiveData(o: NoisyObjective[_]) = ObjectiveData.NoisyObjective(o.as.getOrElse(o.prototype.name), o.delta, o.negative)
 
   def fromString(s: String): EvolutionMetadata =
     decode[EvolutionMetadata](s) match {

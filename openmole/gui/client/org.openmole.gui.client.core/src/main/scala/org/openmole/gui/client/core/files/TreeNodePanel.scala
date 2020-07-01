@@ -43,7 +43,7 @@ import scaladget.bootstrapnative.Popup.Manual
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDisplayer, showExecution: () ⇒ Unit, treeNodeTabs: TreeNodeTabs) {
+class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDisplayer, showExecution: () ⇒ Unit, treeNodeTabs: TreeNodeTabs, services: PluginServices) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val selectionMode = Var(false)
@@ -271,7 +271,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
       val tnSafePath = treeNodeManager.current.now ++ tn.name.now
       if (ext.displayable) {
         downloadFile(tnSafePath, false, (content: String) ⇒ {
-          fileDisplayer.display(tnSafePath, content, ext)
+          fileDisplayer.display(tnSafePath, content, ext, services)
           invalidCacheAndDraw
         })
       }

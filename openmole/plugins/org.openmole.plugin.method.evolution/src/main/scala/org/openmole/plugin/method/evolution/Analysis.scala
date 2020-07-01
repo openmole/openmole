@@ -38,7 +38,7 @@ object Analysis {
     case class Convergence(nadir: Option[Vector[Double]], generations: Vector[GenerationConvergence])
     case class GenerationConvergence(generation: Long, hypervolume: Option[Double], minimums: Option[Vector[Double]])
 
-    def analyse(metaData: StochasticNSGA2Data, directory: File) = {
+    def analyse(metaData: EvolutionMetadata.StochasticNSGA2, directory: File) = {
       println(Analysis.dataFiles(directory, metaData.saved.name, metaData.saved.generation, metaData.saved.frequency))
     }
 
