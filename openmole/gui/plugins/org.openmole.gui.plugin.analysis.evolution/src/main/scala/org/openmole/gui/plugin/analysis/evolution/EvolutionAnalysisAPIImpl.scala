@@ -4,7 +4,7 @@ import org.openmole.gui.ext.data._
 import org.openmole.plugin.method.evolution
 import org.openmole.core.services.Services
 import org.openmole.gui.ext.server.utils._
-import org.openmole.plugin.method.evolution.EvolutionMetadata
+import org.openmole.plugin.method.evolution.data.EvolutionMetadata
 
 class EvolutionAnalysisAPIImpl(services: Services) extends EvolutionAnalysisAPI {
 

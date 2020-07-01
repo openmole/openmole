@@ -20,7 +20,9 @@ import scalatags.JsDom.all._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.DataUtils._
 import org.openmole.gui.ext.client
+import org.openmole.plugin.method.evolution.data.EvolutionMetadata
 import rx._
+
 import scala.scalajs.js
 
 object TopLevelExports {

@@ -21,10 +21,9 @@ import cats.implicits._
 import monocle.macros.GenLens
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import org.openmole.plugin.method.evolution.Genome.{ Suggestion }
+import org.openmole.plugin.method.evolution.Genome.Suggestion
+import org.openmole.plugin.method.evolution.data._
 import squants.time.Time
-
-import scala.language.higherKinds
 
 object NSGA2 {
 
@@ -121,10 +120,10 @@ object NSGA2 {
 
         override def metadata(savedData: SavedData) = FromContext { p ⇒
           import p._
-          import EvolutionMetadata._
-          StochasticNSGA2(
-            genome = om.genome.map(GenomeBoundData(_).from(context)),
-            objective = om.objectives.map(NoisyObjectiveData(_)),
+          import org.openmole.plugin.method.evolution.data.EvolutionMetadata._
+          StochasticNSGA2Data(
+            genome = MetadataGeneration.genomeData(om.genome).from(context),
+            objective = om.objectives.map(MetadataGeneration.noisyObjectiveData),
             sample = om.historySize,
             mu = om.mu,
             saved = savedData

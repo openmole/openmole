@@ -18,10 +18,10 @@
 package org.openmole.gui.plugin.analysis.evolution
 
 import org.openmole.gui.ext.server._
-import org.openmole.plugin.method.evolution.EvolutionMetadata
 import org.osgi.framework.{ BundleActivator, BundleContext }
-
 import boopickle.Default._
+import org.openmole.plugin.method.evolution.data.EvolutionMetadata
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class Activator extends BundleActivator {

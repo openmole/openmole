@@ -21,11 +21,10 @@ import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
 import scala.language.higherKinds
-
 import cats._
 import cats.implicits._
-
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SavedData }
 
 case class Stochastic(
   seed:       SeedVariable = SeedVariable.empty,
