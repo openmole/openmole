@@ -1,18 +1,19 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 @import org.openmole.site.content.Native._
+@import DocumentationPages._
 
 
 
 @h2{RTask}
 
 R is a scripted language initially designed for statistics, but whose application range is much broader today (for example GIS, operational research, linear algebra, web applications, etc.), thanks to its large community and the variety of packages.
-It may be convenient to use specific R libraries within a workflow, and therefore OpenMOLE provides a specific @i{RTask}.
+It may be convenient to use specific R libraries within a workflow, and therefore OpenMOLE provides a specific @code{RTask}.
 
 
 @h3{Preliminary remark}
 
-@usesSingularity("ScilabTask")
+@usesSingularity("RTask")
 
 
 @h3{RTask syntax}
@@ -53,82 +54,90 @@ The toy R script for this first test case is:
     f = function(x){
           x+1
         }
-    j = f(2)""", "R")
+    j = f(2)
+""", "R")
 
-We save this to @code{Rscript1.R}, it will be used in the second part.
+@br
+
+We save this to @i{Rscript1.R}, it will be used in the second part.
 
 @br@br
 
 Here we create a function @code{f} and a variable @code{j} in which we store the result of the evaluation of the function.
-For this first script example, we write the R script directly in the RTask.
-We will see below how to import it from a @code{file.R}, deal with libraries, and plug inputs and outputs between OpenMOLE and R.
+For this first script example, we write the R script directly in the @code{RTask}.
+We will see below how to import it from a @i{file.R}, deal with libraries, and plug inputs and outputs between OpenMOLE and R.
 
 @br@br
 
 @openmole(s"""
-    val rTask1 =
-     RTask($tq
-       # Here you write code in R
-       f = function(x){
-             x+1
-           }
-       j = f(2)
-       $tq)
+    // Task
+    val rTask1 = RTask($tq
+        # Here you write code in R
+        f = function(x){
+            x+1
+        }
+        j = f(2)
+    $tq)
 
-    rTask1""" )
+    // Workflow
+    rTask1
+""" )
 
 
 @h3{Running a script from a file}
 
-You can now upload @code{Rscript1.R} to your OpenMOLE workspace.
+You can now upload @i{Rscript1.R} to your OpenMOLE workspace.
 
 @br
 
-Here is the OpenMOLE script to use in the RTask.
-In the @code{resources} field of the RTask, you have to provide the precise location of the @code{file.R}, which is then imported in the R script using the R primitive @code{source()}).
+Here is the OpenMOLE script to use in the @code{RTask}.
+In the @code{resources} field, you have to provide the precise location of the @i{file.R}, which is then imported in the R script using the R primitive @code{source()}).
 
 @br@br
 
 @openmole( s"""
-    val rTask2 =
-      RTask($tq
+    // Task
+    val rTask2 = RTask($tq
         source("Rscript1.R")
-      $tq) set (
+    $tq) set (
         resources += workDirectory / "Rscript1.R"
-      )
+    )
 
+    // Workflow
     rTask2
     """)
 
 
 @h3{Input and output values}
 
-In this script we want to pass the OpenMOLE variable @code{i} to the RTask.
+In this script we want to pass the OpenMOLE variable @code{i} to the @code{RTask}.
 It is possible to do so through an @code{input} in the @code{set} of the task.
 @code{i} can be a variable whose value is given by a previous task, but here we choose to set it manually to 3.
 
 @br
 
-Remark: here the OpenMOLE variable has the same name as the R variable @code{i}, but it is mandatory as we will see below.
-
+Remark: here the OpenMOLE variable has the same name as the R variable @code{i}, but it is not mandatory as we will see below.
 
 @br@br
 
 @openmole( s"""
-  val i = Val[Int]
+    // Declare variable
+    val i = Val[Int]
 
-  val rTask3 =
-    RTask($tq
-      f = function(x){
+    // Task
+    val rTask3 = RTask($tq
+        f = function(x){
             x+1
-          }
-      j = f(i)
+        }
+        j = f(i)
     $tq) set (
-      inputs += i.mapped,
-      i := 3
+        inputs += i.mapped,
+        i := 3
     )
 
- rTask3""")
+    // Workflow
+    rTask3
+""")
 
 @br
 
@@ -137,25 +146,25 @@ In the script below (@code{rTask4}), we add an output variable @code{j}, and we 
 @br@br
 
 @openmole( s"""
+    // Declare variables
+    val i = Val[Int]
+    val j = Val[Int]
 
-  val i = Val[Int]
-  val j = Val[Int]
-
-  val rTask4 =
-    RTask($tq
-      f= function(x){
-           x+1
-         }
-      j = f(varRi)
+    // Task
+    val rTask4 = RTask($tq
+        f= function(x){
+            x+1
+        }
+        j = f(varRi)
     $tq) set(
-      inputs += i mapped "varRi",
-      outputs += j.mapped,
-      i := 3
+        inputs += i mapped "varRi",
+        outputs += j.mapped,
+        i := 3
     )
 
-
-  rTask4 hook display
-   """)
+    // Workflow
+    rTask4 hook display
+""")
 
 @br
 
@@ -164,26 +173,30 @@ Remark: if you have several outputs, you can combine @code{mapped outputs} with 
 @br@br
 
 @openmole( s"""
-           val i = Val[Int]
-           val j = Val[Double]
-           val c = Val[Double]
+    // Declare variables
+    val i = Val[Int]
+    val j = Val[Double]
+    val c = Val[Double]
 
-           val rTask5 =
-             RTask($tq
-               f = function(x){
-                     x+1
-                   }
-               j = f(i)
-               $tq) set (
-                 inputs += i.mapped,
-                 (inputs, outputs) += c,
-                 outputs +=  j.mapped,
-                 outputs += i.mapped,
-                 i := 3 ,
-                 c:=2
-               )
-           rTask5 hook display
-           """)
+    // Task
+    val rTask5 =
+    RTask($tq
+        f = function(x){
+             x+1
+        }
+        j = f(i)
+    $tq) set (
+        inputs += i.mapped,
+        (inputs, outputs) += c,
+        outputs +=  j.mapped,
+        outputs += i.mapped,
+        i := 3 ,
+        c:=2
+    )
+
+    // Workflow
+    rTask5 hook display
+""")
 
 @br
 
@@ -196,64 +209,67 @@ Note that the last section presents an alternative.
 @h2{Example 2: Working with files}
 
 It is also possible to pass files as argument of the @code{RTask}.
-However, we can't pass them with @i{rInputs} as seen before, as it will result in a type mismatch with an error message like  @i{type class java.io.File is not convertible to JSON}.
-We thus use @i{inputFiles}, and  we give an illustration in the following workflow (@code{rTask}).
+However, we can't pass them with @code{rInputs} as seen before, as it will result in a type mismatch with an error message like @i{type class java.io.File is not convertible to JSON}.
+We thus use @code{inputFiles}, and  we give an illustration in the following workflow (@code{rTask}).
 We emphasize that @code{inputFiles} must be used here (and not @code{resources}), since it is used as a @code{Val} and can be acted upon in a workflow, whereas @code{resources} act differently since they are fixed.
 
 @br@br
 
 We have first a @code{ScalaTask} which writes numbers in a file.
-The file is the OpenMole variable  @code{g} of type @i{java.io.File}.
-In order to have access to this file in the RTask, we add @code{g} as an output of the ScalaTask.
-The R script in the RTask reads a file named @code{fileForR} (in the R script presented here, it is supposed to have numeric values, separated by a simple space), and creates a R variable @code{temp2}, which is a vector containing the value of the file @code{fileForR}.
+The file is the OpenMOLE variable  @code{g} of type @i{java.io.File}.
+In order to have access to this file in the @code{RTask}, we add @code{g} as an output of the @code{ScalaTask}.
+The R script in the @code{RTask} reads a file named @code{fileForR} (in the R script presented here, it is supposed to have numeric values, separated by a simple space), and creates a R variable @code{temp2}, which is a vector containing the value of the file @code{fileForR}.
 We then apply the function @code{f} to that vector.
-The end of the workflow simply tells OpenMOLE to chain the two tasks and to display the outputs of the last task (here the OpenMOLE  variable @code{resR}).
+The end of the workflow simply tells OpenMOLE to chain the two tasks and to display the outputs of the last task (here the OpenMOLE variable @code{resR}).
 
 @br@br
 
-Remark that the @code{g} is an OpenMole variable.
-If you want to see the file created in your workspace, you can use a @aa("hooks", href := DocumentationPages.hook.file).
-Note that you have to put @code{g} as an output of the RTask (see the section "A complete workflow", below to have a workflow example).
+Note that the @code{g} is an OpenMOLE variable.
+If you want to see the file created in your workspace, you can use a @aa("hook", href := hook.file).
+Note that you have to put @code{g} as an output of the @code{RTask} (see the section "A complete workflow", below to have a workflow example).
 
 @br@br
 
 @openmole( s"""
-   val g = Val[File]
+    // Declare variable
+    val g = Val[File]
 
-   val task1 =
-     ScalaTask($tq
-       val g = newFile()
-       g.content = "3 6 4"
-     $tq) set (
-       outputs += g
-     )
+    // Task
+    val task1 = ScalaTask($tq
+        val g = newFile()
+        g.content = "3 6 4"
+    $tq) set (
+        outputs += g
+    )
 
-   /////////////////////////////
+    /////////////////////////////
 
-   val resR =  Val[Array[Double]]
+    // Declare variable
+    val resR =  Val[Array[Double]]
 
-   val rTask =
-     RTask($tq
-       temp1=read.table("fileForR", sep="")
-       temp2=as.vector(temp1,mode = "numeric")
+    // Task
+    val rTask = RTask($tq
+        temp1=read.table("fileForR", sep="")
+        temp2=as.vector(temp1,mode = "numeric")
 
-       f= function(x) {
+        f= function(x) {
             x+1
-           }
-       k=f(temp2)
-     $tq) set(
-       inputFiles += (g, "fileForR"),
-       outputs += resR mapped "k"
-     )
+        }
+        k=f(temp2)
+    $tq) set(
+        inputFiles += (g, "fileForR"),
+        outputs += resR mapped "k"
+    )
 
-   task1 -- (rTask hook display)
-   """)
+    // Workflow
+    task1 -- (rTask hook display)
+""")
 
 
 
 @h2{Example 3: Use a library}
 
-Here we give an example of how to use a library in an RTask.
+Here we give an example of how to use a library in an @code{RTask}.
 We use the function @code{CHullArea} of the library @code{GeoRange} to compute the area in the convex envelop of a set of points.
 
 @br@br
@@ -261,7 +277,7 @@ We use the function @code{CHullArea} of the library @code{GeoRange} to compute t
 Write the names of the libraries you need in the field @code{libraries}, and adapt the @code{install} field accordingly.
 The @code{install} argument is a sequence of system commands which are executed prior to the installation of the R libraries.
 It can be used to install the packages which are required by the R libraries.
-The R task is based on a debian container, therefore you can use any debian command here including @code{apt} installation tool.
+The @code{RTask} is based on a Debian container, therefore you can use any Debian command here including @code{apt} installation tool.
 
 @br
 
@@ -274,10 +290,11 @@ Remark: the first time you use R with @code{libraries} or @code{packages}, it ta
 @br@br
 
 @openmole( s"""
+    // Declare variable
     val area = Val[Double]
 
-    val rTask3 =
-      RTask($tq
+    // Task
+    val rTask3 = RTask($tq
         library(GeoRange)
         n=40
         x = rexp(n, 5)
@@ -292,10 +309,11 @@ Remark: the first time you use R with @code{libraries} or @code{packages}, it ta
         $tq,
         install = Seq("apt update", "apt install -y libgdal-dev libproj-dev"),
         libraries = Seq("GeoRange")
-      ) set(
+    ) set(
         outputs += area.mapped
-      )
+    )
 
+    // Workflow
     rTask3 hook display
     """)
 
@@ -303,52 +321,52 @@ Remark: the first time you use R with @code{libraries} or @code{packages}, it ta
 
 @h2{Example 4: A complete workflow}
 
-Here is an example of an (almost complete) workflow using a RTask, it uses @code{rInputs, inputFiles, install} (you can add your R script using @code{resource})
+Here is an example of an (almost complete) workflow using a @code{RTask}, it uses @code{rInputs, inputFiles, install} (you can add your R script using @code{resource})
 
 @br@br
 
-The first task is a ScalaTask whose aim is to create OpenMOLE variables that will be used in the RTask.
+The first task is a @code{ScalaTask} whose aim is to create OpenMOLE variables that will be used in the @code{RTask}.
 We provide them to the @code{RTask} using @code{inputFiles} and @code{inputs} keywords.
 
 @br
 
-Notice that the conversion from the OpenMOLE type (scala) @code{Array[Double]} to the R type vector is made directly by the @code{inputs}.
+Notice that the conversion from the OpenMOLE type (Scala) @code{Array[Double]} to the R type vector is made directly by the @code{inputs}.
 
 @br
 
-The hook stores the file @code{g} in your @b{Workspace}, and displays the @code{area}.
+The hook stores the file @code{g} in your workspace} and displays the @code{area}.
 
 @br@br
 
 @openmole( s"""
+    // Declare variables
     val n = Val[Int]
     val g = Val[File]
     val y =  Val[Array[Double]]
 
     val seed = Val[Long]
 
-    val task1 =
-      ScalaTask($tq
-       val rng = Random(seed)
+    // Task
+    val task1 = ScalaTask($tq
+        val rng = Random(seed)
 
-       val dist1 = List.fill(n)(rng.nextDouble).mkString(" ")
+        val dist1 = List.fill(n)(rng.nextDouble).mkString(" ")
 
-       val g = newFile()
-       g.content = dist1
+        val g = newFile()
+        g.content = dist1
 
-       val y =  List.fill(n)(rng.nextDouble).toArray
+        val y =  List.fill(n)(rng.nextDouble).toArray
+    $tq) set (
+        inputs += (n, seed),
+        n := 10 ,
+        outputs += (g, n, y, seed),
+    )
 
-       $tq) set (
-         inputs += (n, seed),
-         n := 10 ,
-         outputs += (g, n, y, seed),
-       )
-
-
+    // Declare variable
     val res =  Val[Double]
 
-    val rTask =
-      RTask($tq
+    // Task
+    val rTask = RTask($tq
         library(GeoRange)
 
         # Read the file created by the first scala task
@@ -367,20 +385,21 @@ The hook stores the file @code{g} in your @b{Workspace}, and displays the @code{
         $tq,
         install = Seq("apt update", "apt install -y libgdal-dev libproj-dev"),
         libraries = Seq("GeoRange")
-        ) set(
-          inputs += (n, seed),
-          inputs += g mapped "fileForR",
-          inputs += y.mapped,
-          outputs += res mapped "area",
-          outputs += (g, n, seed)
-        )
+    ) set(
+        inputs += (n, seed),
+        inputs += g mapped "fileForR",
+        inputs += y.mapped,
+        outputs += res mapped "area",
+        outputs += (g, n, seed)
+    )
 
-
+    // Define hook
     val h1 = CopyFileHook(g, workDirectory / "random_points$${seed}.txt")
 
+    // Workflow
     Replication(
-      evaluation = task1 -- (rTask hook h1),
-      seed = seed,
-      sample = 100
-    )""")
-
+        evaluation = task1 -- (rTask hook h1),
+        seed = seed,
+        sample = 100
+    )
+""")

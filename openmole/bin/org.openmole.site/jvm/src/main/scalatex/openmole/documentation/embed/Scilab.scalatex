@@ -1,35 +1,45 @@
-
 @import org.openmole.site.tools._
 @import org.openmole.site._
 @import org.openmole.site.content.Native._
+@import DocumentationPages._
 
- 
+
+
 @h2{ScilabTask}
 
 Scilab is an open source software initially designed for numerical computation (see @aa("the official website", href:= "http://www.scilab.org/")).
-It provides its own high-level scripting language and can be used as a computing kernel only. Note that it includes most of proprietary Matlab's functionalities
-and that a set of conversion tools exists (@aa("doc", href:= "https://help.scilab.org/docs/6.0.1/fr_FR/mfile2sci.html")).
+It provides its own high-level scripting language and can be used as a computing kernel only.
+Note that it includes most of proprietary Matlab's functionalities and that a set of conversion tools exists (@aa("doc", href:= "https://help.scilab.org/docs/6.0.1/fr_FR/mfile2sci.html")).
+
 
 @h3{Preliminary remark}
 
 @usesSingularity("ScilabTask")
 
+
 @h3{Simple ScilabTask}
 
-Here is a dummy workflow multiplying a vector @i{dArray} by @i{i} using a @i{ScilabTask}:
+Here is a dummy workflow multiplying a vector @code{dArray} by @code{i} using a @code{ScilabTask}:
+
+@br@br
 
 @openmole("""
-val i = Val[Int]
-val dArray = Val[Array[Double]]
+    // Declare variables
+    val i = Val[Int]
+    val dArray = Val[Array[Double]]
 
-val m =
-  ScilabTask("dArray = dArray * i") set (
-    inputs += i mapped "i",
-    inputs += dArray mapped "dArray",
-    outputs += i,
-    outputs += dArray mapped "dArray",
-    i := 9,
-    dArray := Array(9.0, 8.0)
-  )
+    // Task
+    val m = ScilabTask("dArray = dArray * i") set (
+        inputs += i mapped "i",
+        inputs += dArray mapped "dArray",
+        outputs += i,
+        outputs += dArray mapped "dArray",
 
-m hook DisplayHook()""")
+        // Default values
+        i := 9,
+        dArray := Array(9.0, 8.0)
+    )
+
+    // Workflow
+    m hook DisplayHook()
+""")
