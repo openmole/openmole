@@ -1,14 +1,20 @@
 #!/bin/bash
 
 if [ $# -eq 0 ]; then
-    echo "Please supply the target path"
-    exit 1
+  echo "Please supply the target path"
+  exit 1
 fi
 
 TARGET=$1
 
+if [ -e ${TARGET} ]; then
+  echo "Destination directory \"$TARGET\" already exists"
+  exit 1
+fi
+
 mkdir -p "${TARGET}" && \
   sbt "buildSite --target \"${TARGET}\"" && \
+  (git clone https://gitlab.openmole.org/narduin/refonte-hp ${TARGET}/"build_hp" && cd ${TARGET}/"build_hp" && npm install && npm run build && cp -r dist/* ${TARGET}) && \
   sbt "project openmole" clean "set (tarPath := new File(\"${TARGET}/openmole.tar.gz\"))" tar && \
   #sbt "project org-openmole-daemon" clean "set (tarPath := new File(\"${TARGET}/daemon.tar.gz\"))" tar && \
   rm -rf "${TARGET}/api" && \
