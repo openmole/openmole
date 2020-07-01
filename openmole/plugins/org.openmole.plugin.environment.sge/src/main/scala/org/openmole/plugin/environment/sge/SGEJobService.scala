@@ -29,7 +29,8 @@ class SGEJobService[S, H](
         parameters.threads,
         serializedJob,
         outputPath,
-        s
+        s,
+        modules = parameters.modules
       )
     }
 

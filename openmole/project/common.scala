@@ -2,11 +2,11 @@
 package openmole
 
 object common {
-  def gridscaleVersion = "2.30"
+  def gridscaleVersion = "2.31"
   def mgoVersion = "3.44"
-  def sshjVersion = "0.27.0"
+  def sshjVersion = "0.29.0"
   def containerVersion = "1.11"
-  def bouncyCastleVersion = "1.64"
+  def bouncyCastleVersion = "1.65"
   def netLogo5Version = "5.3.1"
   def netLogo6Version = "6.1.1"
   def scalaTagsVersion = "0.9.1"
@@ -38,5 +38,7 @@ object common {
 
   def scalatraVersion = "2.7.0"
   def jettyVersion = "9.4.28.v20200408"
+
 }
+
 

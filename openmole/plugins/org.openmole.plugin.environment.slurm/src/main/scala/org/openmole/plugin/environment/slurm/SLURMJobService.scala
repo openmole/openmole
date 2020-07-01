@@ -30,7 +30,8 @@ class SLURMJobService[S, H](
         serializedJob,
         outputPath,
         s,
-        debug = parameters.debug
+        debug = parameters.debug,
+        modules = parameters.modules
       )
     }
 

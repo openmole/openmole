@@ -46,7 +46,8 @@ object OAREnvironment {
     name:                 OptionalArgument[String]      = None,
     bestEffort:           Boolean                       = true,
     timeout:              OptionalArgument[Time]        = None,
-    localSubmission:      Boolean                       = false
+    localSubmission:      Boolean                       = false,
+    modules: Seq[String] = Vector(),
   )(implicit services: BatchEnvironment.Services, authenticationStore: AuthenticationStore, cypher: Cypher, varName: sourcecode.Name) = {
     import services._
 
@@ -60,7 +61,8 @@ object OAREnvironment {
       workDirectory = workDirectory,
       threads = threads,
       storageSharedLocally = storageSharedLocally,
-      bestEffort = bestEffort
+      bestEffort = bestEffort,
+      modules = modules
     )
 
     EnvironmentProvider { ms ⇒
@@ -99,8 +101,8 @@ object OAREnvironment {
     workDirectory:        Option[String],
     threads:              Option[Int],
     storageSharedLocally: Boolean,
-    bestEffort:           Boolean
-  )
+    bestEffort:           Boolean,
+    modules:              Seq[String])
 
   def nbCores(parameters: Parameters) = parameters.core orElse parameters.threads
 

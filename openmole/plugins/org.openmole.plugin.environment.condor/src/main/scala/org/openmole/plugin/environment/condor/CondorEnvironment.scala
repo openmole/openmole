@@ -50,6 +50,7 @@ object CondorEnvironment {
     threads:              OptionalArgument[Int]         = None,
     storageSharedLocally: Boolean                       = false,
     localSubmission:      Boolean                       = false,
+    modules:              Seq[String]                   = Vector(),
     name:                 OptionalArgument[String]      = None
   )(implicit services: BatchEnvironment.Services, authenticationStore: AuthenticationStore, cypher: Cypher, varName: sourcecode.Name) = {
 
@@ -64,7 +65,8 @@ object CondorEnvironment {
       workDirectory = workDirectory,
       requirements = requirements,
       threads = threads,
-      storageSharedLocally = storageSharedLocally)
+      storageSharedLocally = storageSharedLocally,
+      modules = modules)
 
     EnvironmentProvider { ms ⇒
       if (!localSubmission) {
@@ -103,7 +105,8 @@ object CondorEnvironment {
     workDirectory:        Option[String],
     requirements:         Option[String],
     threads:              Option[Int],
-    storageSharedLocally: Boolean)
+    storageSharedLocally: Boolean,
+    modules:              Seq[String])
 
   def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: CondorJobService[_, _])(implicit services: BatchEnvironment.Services) =
     submitToCluster(
