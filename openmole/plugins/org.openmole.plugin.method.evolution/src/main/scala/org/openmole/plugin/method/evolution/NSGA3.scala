@@ -14,6 +14,8 @@ object NSGA3 {
 
   type ReferencePoints = mgo.evolution.algorithm.NSGA3Operations.ReferencePoints
 
+  type References = Either[Int, Vector[Vector[Double]]]
+
   object DeterministicParams {
     import mgo.evolution.algorithm.{ CDGenome, NSGA3 ⇒ MGONSGA3, _ }
 
@@ -68,6 +70,7 @@ object NSGA3 {
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           Genome.continuous(om.genome).map { continuous ⇒
+            println(continuous)
             val (s2, elited) = MGONSGA3.elitism[S, Array[Any]](om.mu, om.references, continuous, ExactObjective.toFitnessFunction(om.objectives))(s, population, candidates, rng)
             val s3 = EvolutionState.generation.modify(_ + 1)(s2)
             (s3, elited)
@@ -92,27 +95,117 @@ object NSGA3 {
     operatorExploration: Double,
     reject:              Option[Condition])
 
+  object StochasticParams {
+    import mgo.evolution.algorithm.{ CDGenome, NoisyNSGA3 ⇒ MGONoisyNSGA3, _ }
+
+    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Array[Any]] {
+      type G = CDGenome.Genome
+      type I = CDGenome.NoisyIndividual.Individual[Array[Any]]
+      type S = EvolutionState[Unit]
+
+      def iManifest = implicitly[Manifest[I]]
+      def gManifest = implicitly
+      def sManifest = implicitly
+
+      def operations(om: StochasticParams) = new Ops {
+
+        def startTimeLens = GenLens[S](_.startTime)
+        def generationLens = GenLens[S](_.generation)
+
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
+        def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+        def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
+
+        def buildIndividual(genome: G, phenotype: Array[Any], context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
+        def initialState = EvolutionState[Unit](s = ())
+
+        def aggregate(v: Vector[Array[Any]]): Vector[Double] = NoisyObjective.aggregate(om.objectives)(v)
+
+        def result(population: Vector[I], state: S) = FromContext { p ⇒
+          import p._
+
+          val res = MGONoisyNSGA3.result(population, aggregate(_), Genome.continuous(om.genome).from(context))
+          val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
+          val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness)).from(context)
+
+          val samples = Variable(GAIntegration.samples.array, res.map(_.replications).toArray)
+
+          genomes ++ fitness ++ Seq(samples)
+        }
+
+        def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
+          import p._
+          val continuous = Genome.continuous(om.genome).from(context)
+          val discrete = Genome.discrete(om.genome).from(context)
+          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+          MGONoisyNSGA3.initialGenomes(n, continuous, discrete, rejectValue, rng)
+        }
+
+        def breeding(individuals: Vector[I], n: Int, s: S, rng: util.Random) = FromContext { p ⇒
+          import p._
+          val discrete = Genome.discrete(om.genome).from(context)
+          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+          MGONoisyNSGA3.adaptiveBreeding[S, Array[Any]](om.operatorExploration, om.cloneProbability, discrete, aggregate, rejectValue) apply (s, individuals, rng)
+        }
+
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: util.Random) =
+          Genome.continuous(om.genome).map { continuous ⇒
+            println(continuous)
+            val (s2, elited) = MGONoisyNSGA3.elitism[S, Array[Any]](om.mu, om.references, om.historySize, aggregate, continuous) apply (s, population, candidates, rng)
+            val s3 = EvolutionState.generation.modify(_ + 1)(s2)
+            (s3, elited)
+          }
+
+        def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland[I](population, CDGenome.NoisyIndividual.Individual.historyAge)
+        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Array[Any]](population, CDGenome.NoisyIndividual.Individual.historyAge, CDGenome.NoisyIndividual.Individual.phenotypeHistory[Array[Any]])
+
+        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, EvolutionState.generation)(s, population)
+        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, EvolutionState.startTime)(s, population)
+      }
+
+    }
+  }
+
+  case class StochasticParams(
+    mu:                  Int,
+    references:          ReferencePoints,
+    operatorExploration: Double,
+    genome:              Genome,
+    objectives:          Seq[NoisyObjective[_]],
+    historySize:         Int,
+    cloneProbability:    Double,
+    reject:              Option[Condition]
+  )
+
   def apply[P](
     genome:     Genome,
     objective:  Objectives,
+    references: ReferencePoints,
     mu:         Int                          = 200,
-    references: Int                          = 50,
     stochastic: OptionalArgument[Stochastic] = None,
     reject:     OptionalArgument[Condition]  = None
   ): EvolutionWorkflow =
     WorkflowIntegration.stochasticity(objective, stochastic.option) match {
-      //case None ⇒ // FIXME
-      case _ ⇒
+      case None ⇒
         val exactObjectives = objective.map(o ⇒ Objective.toExact(o))
         val integration: WorkflowIntegration.DeterministicGA[_] = WorkflowIntegration.DeterministicGA(
-          DeterministicParams(mu, mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(references, objective.size), genome, exactObjectives, operatorExploration, reject),
+          DeterministicParams(mu, references, genome, exactObjectives, operatorExploration, reject),
           genome,
           exactObjectives
         )(DeterministicParams.integration)
 
         WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
-      //case Some(stochasticValue) ⇒
+      case Some(stochasticValue) ⇒
+        val noisyObjectives = objective.map(o ⇒ Objective.toNoisy(o))
 
+        val integration: WorkflowIntegration.StochasticGA[_] = WorkflowIntegration.StochasticGA(
+          StochasticParams(mu, references, operatorExploration, genome, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
+          genome,
+          noisyObjectives,
+          stochasticValue
+        )(StochasticParams.integration)
+
+        WorkflowIntegration.StochasticGA.toEvolutionWorkflow(integration)
     }
 
 }
@@ -127,18 +220,22 @@ object NSGA3Evolution {
     evaluation:   DSL,
     termination:  OMTermination,
     mu:           Int                          = 200,
-    references:   Int                          = 50,
+    references:   NSGA3.References             = Left(50),
     stochastic:   OptionalArgument[Stochastic] = None,
     reject:       OptionalArgument[Condition]  = None,
     parallelism:  Int                          = 1,
     distribution: EvolutionPattern             = SteadyState(),
     suggestion:   Suggestion                   = Suggestion.empty,
-    scope:        DefinitionScope              = "nsga3") =
+    scope:        DefinitionScope              = "nsga3") = {
+    val refPoints: NSGA3.ReferencePoints = references match {
+      case Left(i)  ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(i, objective.size)
+      case Right(p) ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(p)
+    }
     EvolutionPattern.build(
       algorithm =
         NSGA3(
           mu = mu,
-          references = references,
+          references = refPoints,
           genome = genome,
           objective = objective,
           stochastic = stochastic,
@@ -151,6 +248,7 @@ object NSGA3Evolution {
       suggestion = suggestion(genome),
       scope = scope
     )
+  }
 
 }
 
