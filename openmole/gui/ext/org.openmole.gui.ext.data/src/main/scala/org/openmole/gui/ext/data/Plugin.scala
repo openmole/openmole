@@ -67,5 +67,11 @@ trait WizardPluginFactory extends GUIPluginFactory {
 }
 
 trait MethodAnalysisPlugin extends GUIPlugin {
-  def panel(safePath: SafePath): TypedTag[HTMLElement]
+  def panel(safePath: SafePath, services: PluginServices): TypedTag[HTMLElement]
+}
+
+case class PluginServices(errorManager: ErrorManager)
+
+trait ErrorManager {
+  def signal(message: String, stack: Option[String] = None): Unit
 }

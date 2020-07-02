@@ -2,6 +2,8 @@
 @import org.openmole.{site=> site}
 @import org.openmole.site.stylesheet._
 @import site._
+@import DocumentationPages._
+
 
 @def variables = """
   val density = Val[Double]
@@ -46,8 +48,7 @@ OpenMOLE provides a NetLogo task which expects the following parameters:
     @li{the path to the NetLogo model, i.e. the @code{.nlogo} source file,}
     @li{the list of NetLogo commands to be run by OpenMOLE.}
 
-The task comes in two versions : @code{NetLogo5Task} and @code{NetLogo6Task}, be sure to select the right version of the task according to the version of NetLogo you used (5 or 6).
-
+The task comes in two versions : @code{NetLogo5Task} and @code{NetLogo6Task}, be sure to select the right version of the task according to the version of NetLogo you are using (5 or 6).
 Here is an example on how to write the NetLogo task for the model @code{Fire.nlogo}:
 
 @br@br
@@ -97,15 +98,15 @@ The properties to be adjusted with @code{set} :
     If the variables have the same name, you can use the shorter syntax @code{inputs += prototype.mapped}}
     @li{mapped output: similar syntax to collect outputs of the model (the string can be any NetLogo command)}
 
-The former mapping syntax using @code{netLogoInputs} and @code{netLogoOutputs} is deprecated, but still works until further notice for compatibility reasons.
+The former mapping syntax using @code{netLogoInputs} and @code{netLogoOutputs} is deprecated, but still works until further notice, for compatibility reasons.
 
 
 
 @h2{Embedding NetLogo extensions and sources}
 
-Several NetLogo models relies on extensions (which are basically jars providing new primitives in interaction with the NetLogo workspace).
-By default, NetLogo will search extensions in its installation folder (what will not work as OpenMole embeds NetLogo as a jar), but also in the model directory.
-To be able to run a model with extensions, put the extension folder in the same directory as the model source, and activate the option @i{embedWorkspace}.
+Several NetLogo models rely on extensions (which are basically jars providing new primitives in interaction with the NetLogo workspace).
+By default, NetLogo will search extensions in its installation folder (which will not work here, as OpenMole embeds NetLogo as a jar), but also in the model directory.
+To be able to run a model with extensions, put the extension folder in the same directory as the model source, and activate the option @code{embedWorkspace}.
 
 @br@br
 
@@ -115,8 +116,10 @@ It goes the same for all additional source files (@code{.nls} generally used for
 
 @h2{An example of NetLogo model exploration}
 
-We now present step by step how to explore a NetLogo model. @a("The Fire model", href := Resource.script.fireNLogo.file) is a common NetLogo example available in the NetLogo common model library.
-It studies the percolation of a fire in a forest depending on the density of the forest. This model has one input : @code{density} and one output : @code{percent-burned}
+We now present step by step how to explore a NetLogo model.
+@a("The Fire model", href := Resource.script.fireNLogo.file) is a common NetLogo example available in the NetLogo common model library.
+It studies the percolation of a fire in a forest depending on the density of the forest.
+This model has one input: @code{density}, and one output: @code{percent-burned}.
 
 @br@br
 
@@ -124,27 +127,30 @@ It studies the percolation of a fire in a forest depending on the density of the
 
 
 @h3{The simulation}
-We would like to study the impact of the @i{density} factor for a fixed population size.
-To do this, let's build a design of experiment where the @i{density} factor ranges from 20% to 80% by steps of 10.
+We would like to study the impact of the @code{density} factor for a fixed population size.
+To do this, let's build a design of experiment where the @code{density} factor ranges from 20% to 80% by steps of 10.
 
 @br@br
 
-Since the Fire model is stochastic, we are interested in doing replications for each instance of the @i{density} factor. Results for each replication will be stored it in a @i{CSV} file.
-In this example case, we will perform 10 replications per step. This stays a too small sample to draw up any robust conclusion on this simple model, but we take this value here for the sake of illustration.
+Since the Fire model is stochastic, we are interested in doing replications for each instance of the @code{density} factor.
+Results for each replication will be stored it in a @i{CSV} file.
+In this example case, we will perform 10 replications per step.
+This stays a too small sample to draw up any robust conclusion on this simple model, but we take this value here for the sake of illustration.
+@br
 When designing your experiment, you will have to find a compromise between the precision on stochasticity and the number of parameter points explored.
-More elaborated methods, in the case of a calibration of a stochastic model with a genetic algorithm for example, will automatically deal with this compromise (@i{link to GA calibration}).
+More elaborated methods, in the case of a calibration of a stochastic model with a genetic algorithm for example, will automatically deal with this compromise (see @aa("this page", href := geneticAlgorithm.file) for more info on genetic algorithms and calibration).
 
 @br@br
 
-You can get the NetLogo implementation of the model @a("here", href :=  Resource.script.fireNLogo.file).
+You can get the NetLogo implementation of the model @aa("here", href :=  Resource.script.fireNLogo.file).
 
 
 @h3{The Design of Experiment}
-We first need to define 2 OpenMOLE variables in order to repeat our experience 10 times for every step of the @i{density} exploration.
+We first need to define two OpenMOLE variables in order to repeat our experience 10 times for every step of the @code{density} exploration.
 These two variables are:
   @ul
     @li{an integer (Int) representing the seed of the random number generator for exploring the replications,}
-    @li{a Double to set the value of @i{density}}
+    @li{a Double to set the value of @code{density}}
 
 @hl.openmole(variables, name = "netlogo variables")
 
@@ -156,25 +162,23 @@ Given these variables, the definition of the exploration in OpenMOLE writes as f
 
 This design of experiment will generate 70 distinct sets of input values for the NetLogo model:
   @ul
-    @li{10 replications with 10 different seeds for @i{density} = 20%}
-    @li{10 replications with 10 different seeds for @i{density} = 30%}
+    @li{10 replications with 10 different seeds for @code{density} = 20%}
+    @li{10 replications with 10 different seeds for @code{density} = 30%}
     @li{...}
-    @li{10 replications with 10 different seeds for @i{density} = 80%}
+    @li{10 replications with 10 different seeds for @code{density} = 80%}
 
-We now need to compose this design of experiment in a complete workflow in order to run the 70 distinct
-experiments.
+We now need to compose this design of experiment in a complete workflow in order to run the 70 distinct experiments.
 
 
 @h3{Storing the results}
 OpenMOLE usually delegates the tasks execution to many different computers.
-To gather the results of these remote executions, we use a mechanism called @i{hooks}.
+To gather the results of these remote executions, we use a mechanism called @b{hooks}.
 Hooks can be assimilated to a listener that saves or display results.
-They are more thoroughly described in a @a("specific section of the documentation", href := DocumentationPages.hook.file).
+They are more thoroughly described in a @a("specific section of the documentation", href := hook.file).
 
 @br@br
 
-Here we will create a hook to listen to the model executions and save the results in a CSV file at the end of
-each of the 70 runs.
+Here we will create a hook to listen to the model executions and save the results in a CSV file at the end of each of the 70 runs.
 
 @br@br
 
@@ -205,27 +209,32 @@ DirectSampling(
 At the end of the execution, you will find the output values in a file called @i{result.csv}.
 
 
+
 @h2{Import wizard}
 
 When working with models with a large number of parameters and/or outputs, writing the script can be already painful just when defining the prototypes.
-Fortunately, OpenMOLE includes an import wizard in its interface, for several languages including NetLogo. To use it, use the button @code{New project} and the option @code{Import your model}.
-The wizard will detect your parameters and outputs (defined in the GUI), the resources used such as files, and propose in an interactive window to change these. Once you validate, a minimal script is created.
+Fortunately, OpenMOLE includes an import wizard in its interface, for several languages including NetLogo.
+To use it, use the button @code{New project} and the option @code{Import your model}.
+The wizard will detect your parameters and outputs (defined in the GUI), the resources used (such as external files), and propose in an interactive window to change these.
+Once you validate, a minimal script is created.
 
-@object C{val c = "Not that this feature is not useful when working with headless models."}
+@object C{val c = "Note that this feature is not useful when working with headless models."}
 
 
 
 @h2{Headless NetLogo model}
 
-The Netlogo combines a GUI created by the user, in which he can define parameters and run functions, which the source code in itself. Sometimes, you have to modify your code slightly to render it purely headless so that it can be run everywhere.
+Netlogo combines a GUI created by the user, in which they can define parameters and run functions, and the source code itself.
+Sometimes, you have to modify your code slightly to make it purely headless so that it can be run everywhere.
 
 @br
 
-NetLogo is a graphical framework. As such, many variables of a model developed in NetLogo are set through widgets
-(a graphical component). In the NetLogo World, setting or getting a value on the model inputs is generally achieved by
-calling set or get on the widget object. In OpenMoLE however, the NetLogo program has to be parameterised without the GUI.
-Models must be used in headless mode with OpenMole. This is not a problem because globals with unspecified values
-in the OpenMole NetLogo Task will take the default values defined in widgets.
+NetLogo is a graphical framework.
+As such, many variables of a model developed in NetLogo are set through widgets (a graphical component).
+In the NetLogo World, setting or getting a value on the model inputs is generally achieved by calling set or get on the widget object.
+In OpenMoLE however, the NetLogo program has to be parameterised without the GUI.
+Models must be used in headless mode with OpenMole.
+This is not a problem because globals with unspecified values in the OpenMole @code{NetLogoTask} will take the default values defined in widgets.
 
 @br
 
@@ -234,6 +243,8 @@ Global variables defined in the GUI (as sliders or switches for example) are sti
 
 @object C{val c = "//-> to be tested : direct variable setting on variables defined in gui : does it still work ?"}
 
+@br
+
 We recommend however the following ``best practices'':
 @ul
   @li{Do not keep any global variable in the GUI, so that reading the code of the headless model explicitly gives all globals}
@@ -241,7 +252,7 @@ We recommend however the following ``best practices'':
   This allows to know explicitly variables concerned by the experiments, and not forget to setup any global.
   This procedure can be used upstream the actual setup, acting as a setup of parameters in the GUI (the actual setup will need then to test if current mode is headless before clearing-all for example)}
   @li{The use of direct variable setting is particularly useful when dealing with large arrays that will fail with string substitution.
-  When using this way of setting the variables, the user must be careful of not calling the @code{clear-all} procedure at the beginning of his code (in practice, globals are set @i{before} the call to user commands - a clear-all is done before that, to ensure workspace is clean in the case of pooling)}
+  When using this way of setting the variables, the user must be careful of not calling the @code{clear-all} procedure at the beginning of his code (in practice, globals are set @i{before} the call to user commands - a @code{clear-all} is done before that, to ensure workspace is clean in the case of pooling)}
   @li{Keep two files of the model, one for the standard model and one for the headless. This imply having all the code within @code{.nls} include files (except globals, breed and variables declarations).
   A good way to proceed is to separate procedures by types of agents and/or purpose.}
 
@@ -250,18 +261,14 @@ We recommend however the following ``best practices'':
 @br
 
 These best practices may be too constraining for simple experiments, we give therefore the following less strict guidelines:
-
 @ul
-@li{ @b{Limit your usage of widget implicit globals.} We prefer explicit globals using the globals primitive, because
-you need to re-define all the important values from your program in OpenMoLE before you launch it on a remote
-computing environment.}
-@li{ @b{Do not use the same functions @i{setup} and @i{go} to setup your program on a remote environment}. On the remote environment,
-the NetLogo program is initialised and launched only once, so there is no need to call a @i{clear-all} primitive with each
-setup. When running on distributed environments, @i{clear-all} is @b{not} your best friend. @i{clear-all} erases all the
-globals passed by OpenMoLE to your program before it starts and will make it crash.} @object C{val c = "-> depends on how it is done : nuance that"}
-@li{ @b{Do not directly use the implicit globals created by means of a widget.} Although you can you can access and
-overwrite implicit globals in OpenMole, it prevents OpenMoLE from mapping explicitly its Prototypes to the NetLogo
-globals.}
+    @li{@b{Limit your usage of widget implicit globals.} We prefer explicit globals using the globals primitive, because you need to re-define all the important values from your program in OpenMoLE before you launch it on a remote computing environment.}
+    @li{@b{Do not use the same functions @code{setup} and @code{go} to setup your program on a remote environment}.
+    On the remote environment, the NetLogo program is initialised and launched only once, so there is no need to call a @code{clear-all} primitive with each setup.
+    When running on distributed environments, @code{clear-all} is @b{not} your best friend.
+    @code{clear-all} erases all the globals passed by OpenMoLE to your program before it starts and will make it crash.}
+    @object C{val c = "-> depends on how it is done : nuance that"}
+    @li{@b{Do not directly use the implicit globals created by means of a widget.} Although you can you can access and overwrite implicit globals in OpenMole, it prevents OpenMoLE from mapping explicitly its prototypes to the NetLogo globals.}
 
 @br
 
@@ -271,57 +278,60 @@ The following shows the application of these guidelines to the NetLogo model int
 
 @object C{val c = "Still, having a lot of parameters defined in your model might make you forget to override values in OpenMOLE. As a result, NetLogo would take widget values and your model would run a thousand times with a wrong set of parameter values! Let's study a simple method to avoid such a situation. This approach invites you to define all the parameters of your models prior to any run of your NetLogo models in OpenMOLE."}
 
-@br
 
 @h3{Application to the Fire model}
 
-@i{Fire.nlogo} has a widget slider named @i{density} which is a global implicit.
+@i{Fire.nlogo} has a widget slider named @code{density} which is a global implicit.
 
-@break @img(src := Resource.img.example.fireScreen.file)
+@br@br
 
-@p This excerpt shows the @i{initial-trees} and @i{burned-trees} variables which are explicit globals. They can be
-used directly in OpenMOLE.
+@img(src := Resource.img.example.fireScreen.file)
 
-@br @img(src := Resource.img.example.fireGlobals.file, center(50))
+@br@br
 
-@p We propose here a simple method to better organise your code in order to make it manipulable by OpenMOLE:
+This excerpt shows the @code{initial-trees} and @code{burned-trees} variables which are explicit globals.
+They can be used directly in OpenMOLE.
+
+@br@br
+
+@img(src := Resource.img.example.fireGlobals.file, center(50))
+
+@br@br
+
+We propose here a simple method to better organise your code in order to make it manipulable by OpenMOLE:
 @ul
-@li
-    First we do not use the implicit globals, so we create an @b{explicit global variable}, @i{myDensity}, corresponding to the implicit one (@i{density}) :
-    @br
-    @img(src := Resource.img.example.fireNewGlobals.file, center(60))
+    @li
+        First we do not use the implicit globals, so we create an @b{explicit global variable}, @code{myDensity}, corresponding to the implicit one (@code{density}) :
+        @br
+        @img(src := Resource.img.example.fireNewGlobals.file, center(60))
 
-@li
-    Second, we use this new variable in the setup procedure (it replaces the former):
-    @br
-    @img(src := Resource.img.example.fireMyDensity.file, center(55))
-    @break
-    And we update the explicit variable with the former implicit density variable
-    @img(src := Resource.img.example.fireNewFunction.file, center(70))
+    @li
+        Second, we use this new variable in the setup procedure (it replaces the former):
+        @br
+        @img(src := Resource.img.example.fireMyDensity.file, center(55))
+        @break
+        And we update the explicit variable with the former implicit density variable
+        @img(src := Resource.img.example.fireNewFunction.file, center(70))
             @br
-    At this moment, your program does not work any more in NetLogo, @b{it’s normal, don’t panic :)}.
-    @break
-@li
-    Third, we call this function in our setup function, after the clear-all primitives.
-    @img(src := Resource.img.example.fireOldSetup.file, center(50))
+        At this moment, your program does not work any more in NetLogo, @b{it’s normal, don’t panic :)}.
+        @break
 
-@li
-    Now, the program works in NetLogo’s graphical mode. We still need to create another setup function without the
-    call to @i{clear-all} and to @i{init-globals}. Remember that these two calls don't cope well with distributed
-    executions.
-  @img(src := Resource.img.example.fireRemoveClearAll.file,center(50) )
-}
+    @li
+        Third, we call this function in our setup function, after the @code{clear-all} primitives.
+        @img(src := Resource.img.example.fireOldSetup.file, center(50))
 
-@p The program is now ready to be parameterised and manipulated by OpenMOLE \o/
+    @li
+        Now, the program works in NetLogo’s graphical mode.
+        We still need to create another setup function without the call to @code{clear-all} and to @code{init-globals}.
+        Remember that these two calls don't cope well with distributed executions.
+    @img(src := Resource.img.example.fireRemoveClearAll.file,center(50) )
 
-
-
+The program is now ready to be parameterised and manipulated by OpenMOLE \o/
 
 
 
 @h2{Tutorials}
 
-@p More examples of working with NetLogo models can be found in specific tutorials.
-
-See this first tutorial on a simple sensitivity analysis @aa("Next tutorial: Simple Sensitivity Analysis with the NetLogo Fire Model", href := DocumentationPages.simpleSAFire.file)
-Check also this tutorial to learn how OpenMOLE can help you @aa("calibrate your NetLogo model using Genetic Algorithms", href := DocumentationPages.netLogoGA.file)
+More examples of working with NetLogo models can be found in specific tutorials.
+See this first tutorial on a @aa("simple sensitivity analysis", href := simpleSAFire.file) with the NetLogo Fire Model.
+Also check out this tutorial to learn how OpenMOLE can help you @aa("calibrate your NetLogo model using Genetic Algorithms", href := netLogoGA.file).

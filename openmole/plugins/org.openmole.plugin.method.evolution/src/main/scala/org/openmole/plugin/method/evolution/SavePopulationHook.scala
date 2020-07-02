@@ -20,6 +20,7 @@ package org.openmole.plugin.method.evolution
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.workflow.format.WritableOutput
+import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SavedData }
 
 object SavePopulationHook {
 

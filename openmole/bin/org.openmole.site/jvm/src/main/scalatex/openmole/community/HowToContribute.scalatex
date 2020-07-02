@@ -145,8 +145,8 @@ When pushing your updates to the fork, you might encounter this error:
 
 @hl("""
 $> GIT_TRACE=1 GIT_CURL_VERBOSE=1 git push <remote_repo> <branch_name>
-13:50:17.630529 trace git-lfs: run_command: ssh -p 20022 -- git@gitlab.iscpif.fr git-lfs-authenticate openmole/openmole.git upload
-13:50:23.191218 trace git-lfs: ssh: git@gitlab.iscpif.fr failed, error: exit status 1, message: GitLab: You are not allowed to push code to this project.
+13:50:17.630529 trace git-lfs: run_command: ssh -p 20022 -- git@gitlab.openmole.org git-lfs-authenticate openmole/openmole.git upload
+13:50:23.191218 trace git-lfs: ssh: git@gitlab.openmole.org failed, error: exit status 1, message: GitLab: You are not allowed to push code to this project.
 batch request: GitLab: You are not allowed to push code to this project.: exit status 1
 error: impossible de pousser des références vers 'https://github.com/<your_username>/openmole.git'
 """, "plain")

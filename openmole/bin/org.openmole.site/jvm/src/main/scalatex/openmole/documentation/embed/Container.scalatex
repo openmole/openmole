@@ -5,9 +5,8 @@
 @import DocumentationPages._
 
 
-When your model is written in a language for which a specific OpenMOLE task doesn't exist, or if it uses an assembly of tools, libraries, binaries, etc. you have to use a container task to make it potable, so that you can send it to any machine (with potentially varying OS installations).
+When your model is written in a language for which a specific OpenMOLE task doesn't exist, or if it uses an assembly of tools, libraries, binaries, etc. you have to use a container task to make it portable, so that you can send it to any machine (with potentially varying OS installations).
 
-@br@br
 
 
 @h2{Packaging with Docker}
@@ -16,6 +15,7 @@ The @code{ContainerTask} runs docker container in OpenMOLE.
 It is based on a container engine running without administration privileges called @aa("udocker", href := "https://github.com/indigo-dc/udocker").
 Using this task, you can run containers from the @aa("docker hub", href := "https://hub.docker.com/"), or containers exported from docker.
 
+
 @h3{Preliminary remark}
 
 @usesSingularity("ContainerTask")
@@ -23,26 +23,25 @@ Using this task, you can run containers from the @aa("docker hub", href := "http
 
 @h3{Containers from the docker hub}
 
-A simple task running a python container would look like:
+A simple task running a Python container would look like:
 
 @br@br
 
 @openmole(s"""
-val container =
-  ContainerTask(
-    "python:3.6-stretch",
-    ${tq}python -c 'print("youpi")'${tq}
-  )
+    val container = ContainerTask(
+        "python:3.6-stretch",
+        ${tq}python -c 'print("youpi")'${tq}
+    )
 """)
 
 @br
 
 You can run this task.
-At launch time, it downloads the python image from the docker hub in order to be able to run it afterwards.
+At launch time, it downloads the Python image from the docker hub in order to be able to run it afterwards.
 
 @br@br
 
-Let's imagine a slightly more complete example: we will use the following python script, which uses the @i{numpy} library to multiply a matrix (stored in a csv file) by a scalar number.
+Let's imagine a slightly more complete example: we will use the following Python script, which uses the @i{numpy} library to multiply a matrix (stored in a csv file) by a scalar number.
 
 @br@br
 
@@ -84,147 +83,174 @@ col1,col2,col3
 
 @br
 
-For this example, we consider that we have a @i{data} directory, containing a set of csv files in the @i{workDirectory}.
-We want to compute the python script for each of this csv file and for a set of values for the second argument of the python script.
+For this example, we consider that we have a @i{data} directory, containing a set of csv files in the @code{workDirectory}.
+We want to compute the Python script for each of this csv file and for a set of values for the second argument of the Python script.
 The OpenMOLE workflow would then look like this:
 
 @br@br
 
 @openmole(s"""
-val dataFile = Val[File]
-val dataFileName = Val[String]
-val i = Val[Int]
-val resultFile = Val[File]
+    // Declare variables
+    val dataFile = Val[File]
+    val dataFileName = Val[String]
+    val i = Val[Int]
+    val resultFile = Val[File]
 
-val container =
-  ContainerTask(
-    "python:3.6-stretch",
-    ${tq}python matrix.py data.csv $${i} out.csv${tq},
-    install = Seq("pip install numpy")
-  ) set (
-    resources += workDirectory / "matrix.py",
-    inputFiles += (dataFile, "data.csv"),
-    outputFiles += ("out.csv", resultFile),
-    (inputs, outputs) += (i, dataFileName)
-  )
+    // Task
+    val container = ContainerTask(
+        "python:3.6-stretch",
+        ${tq}python matrix.py data.csv $${i} out.csv${tq},
+        install = Seq("pip install numpy")
+    ) set (
+        resources += workDirectory / "matrix.py",
+        inputFiles += (dataFile, "data.csv"),
+        outputFiles += ("out.csv", resultFile),
+        (inputs, outputs) += (i, dataFileName)
+    )
 
-DirectSampling(
-  sampling =
-    (dataFile in (workDirectory / "data") withName dataFileName) x
-    (i in (0 to 3)),
-  evaluation =
-    container hook CopyFileHook(resultFile, workDirectory / "results/$${dataFileName.dropRight(4)}_$${i}.csv")
-)
-
+    // Workflow
+    DirectSampling(
+        sampling =
+            (dataFile in (workDirectory / "data") withName dataFileName) x
+            (i in (0 to 3)),
+        evaluation =
+            container hook CopyFileHook(resultFile, workDirectory / "results/$${dataFileName.dropRight(4)}_$${i}.csv")
+    )
 """)
 
 @br
 
-The @b{install} parameter contains a set of command used to install some components in the container once and for all, when the task is instantiated.
+The @code{install} parameter contains a set of command used to install some components in the container once and for all, when the task is instantiated.
 
 
 @h3{Advanced Options}
 
 @h6{Return value}
-Some applications disregarding standards might not return the expected 0 value upon completion. The return value of the application is used by OpenMOLE to determine whether the task has been successfully executed, or needs to be re-executed. Setting the boolean flag @code("errorOnReturnValue") to @i{false} will prevent OpenMOLE from re-scheduling a @i{ContainerTask} that has reported a return code different from 0. You can also get the return code in a variable using the @code("returnValue") setting. In case you set this option a return code different from 0 won't be considered an error and the task produce an output with the value of the return code.
+Some applications disregarding standards might not return the expected 0 value upon completion.
+The return value of the application is used by OpenMOLE to determine whether the task has been successfully executed, or needs to be re-executed.
+Setting the boolean flag @code("errorOnReturnValue") to @code{false} will prevent OpenMOLE from re-scheduling a @i{ContainerTask} that has reported a return code different from 0.
+You can also get the return code in a variable using the @code("returnValue") setting.
+In case you set this option, a return code different from 0 won't be considered an error and the task produce an output with the value of the return code.
+
+@br@br
 
 @openmole(s"""
-val ret = Val[Int]
+    // Declare variable
+    val ret = Val[Int]
 
-val container =
-  ContainerTask(
-    "python:3.6-stretch",
-    ${tq}python matrix.py${tq},
-    returnValue = ret
-  )
+    // Task
+    val container = ContainerTask(
+        "python:3.6-stretch",
+        ${tq}python matrix.py${tq},
+        returnValue = ret
+    )
+
+    // Workflow
+    container hook display
 """)
 
 @h6{Standard and error outputs}
-Another default behaviour is to print the standard and error outputs of each task in the OpenMOLE console. Some processes might display useful results on these outputs. A @i{ContainerTask}'s standard and error outputs can be set to OpenMOLE variables and thus injected in the data flow by summoning respectively the @code("stdOut") and @code("stdErr") actions on the task.
+Another default behaviour is to print the standard and error outputs of each task in the OpenMOLE console.
+Some processes might display useful results on these outputs.
+A @code{ContainerTask}'s standard and error outputs can be set to OpenMOLE variables and thus injected in the data flow by summoning respectively the @code("stdOut") and @code("stdErr") actions on the task.
+
+@br@br
 
 @openmole(s"""
-val myOut = Val[String]
+    // Declare variable
+    val myOut = Val[String]
 
-val container =
-  ContainerTask(
-    "debian:testing-slim",
-    ${tq}echo 'great !'${tq},
-    stdOut = myOut
-  )
+    // Tasks
+    val container = ContainerTask(
+        "debian:testing-slim",
+        ${tq}echo 'great !'${tq},
+        stdOut = myOut
+    )
 
-val parse =
-  ScalaTask(${tq}myOut = myOut.toUpperCase${tq}) set (
-    (inputs, outputs) += myOut
-  )
+    val parse = ScalaTask(${tq}myOut = myOut.toUpperCase${tq}) set (
+        (inputs, outputs) += myOut
+    )
 
-container -- (parse hook display)""")
+    // Workflow
+    container -- (parse hook display)
+""")
 
 @h6{Environment variables}
-As any other process, the applications contained in OpenMOLE's native tasks accept environment variables to influence their behaviour. Variables from the data flow can be injected as environment variables using the @code{environmentVariable} parameter. If no name is specified, the environment variable is named after the OpenMOLE variable.
+As any other process, the applications contained in OpenMOLE's native tasks accept environment variables to influence their behaviour.
+Variables from the data flow can be injected as environment variables using the @code{environmentVariable} parameter.
+If no name is specified, the environment variable is named after the OpenMOLE variable.
 Environment variables injected from the data flow are inserted in the pre-existing set of environment variables from the execution host.
 This shows particularly useful to preserve the behaviour of some toolkits when executed on local environments (ssh, clusters...) where users control their work environment.
 
+@br@br
+
 @openmole(s"""
-val name = Val[String]
+    // Declare variable
+    val name = Val[String]
 
-val container =
-  ContainerTask(
-    "debian:testing-slim",
-     ${tq}env${tq},
-     environmentVariables = Seq("NAME" -> "$${name.toUpperCase}")
-  ) set (inputs += name)
+    // Task
+    val container = ContainerTask(
+        "debian:testing-slim",
+        ${tq}env${tq},
+        environmentVariables = Seq("NAME" -> "$${name.toUpperCase}")
+    ) set (inputs += name)
 
+    // Workflow
+    DirectSampling(
+        sampling = name in List("Bender", "Fry", "Leila"),
+        evaluation = container
+    )
+""")
 
-DirectSampling(
-  sampling = name in List("Bender", "Fry", "Leila"),
-  evaluation = container
-)""")
-
-@h6{Using local Resources}
-
+@h6{Using local resources}
 To access data present on the execution node (outside the container filesystem) you should use a dedicated option of the @code{ContainerTask}: @code{hostFiles}.
 This option takes the path of a file on the execution host and binds it to the same path in the container filesystem.
 
 @br@br
 
 @hl.openmole(s"""
-ContainerTask(
-  "debian:testing-slim",
-  ${tq}ls /bind${tq},
-  hostFiles = Seq("/tmp" -> "/bind")
-)""")
-
+    ContainerTask(
+        "debian:testing-slim",
+        ${tq}ls /bind${tq},
+        hostFiles = Seq("/tmp" -> "/bind")
+    )
+""")
 
 @h6{WorkDirectory}
-
 You may set the directory within the container where to start the execution from.
 
+@br@br
+
 @hl.openmole(s"""
-ContainerTask(
-  "debian:testing-slim",
-  ${tq}ls${tq},
-  workDirectory = "/bin"
-)""")
+    ContainerTask(
+        "debian:testing-slim",
+        ${tq}ls${tq},
+        workDirectory = "/bin"
+    )
+""")
 
 
-@h3{Containers an archive}
+@h3{Containers and archive}
 
 You can use the ContainerTask to run a container exported from Docker:
 
 @br@br
 
 @openmole(s"""
-val container =
-  ContainerTask(
-    workDirectory / "container.tgz",
-    ${tq}python -c 'print("youpi")'${tq}
-  )
+    val container = ContainerTask(
+        workDirectory / "container.tgz",
+        ${tq}python -c 'print("youpi")'${tq}
+    )
 """)
+
 
 
 @h2{Calling a local program}
 
-The @i{ContainerTask} was designed to be portable from one machine to another. However, some use-cases require executing specific commands installed on a given cluster. To achieve that you should use another task called @code{SystemExecTask}. This task is made to launch native commands on the execution host.
+The @code{ContainerTask} was designed to be portable from one machine to another.
+However, some use-cases require executing specific commands installed on a given cluster.
+To achieve that you should use another task called @code{SystemExecTask}.
+This task is made to launch native commands on the execution host.
 There is two modes for using this task:
 @ul
   @li{Calling a command that is assumed to be available on any execution node of the environment. The command will be looked for in the system as it would from a traditional command line: searching in the default @i{PATH} or an absolute location.}
@@ -232,7 +258,9 @@ There is two modes for using this task:
 
 @br
 
-The @code{SystemExecTask} accepts an arbitrary number of commands. These commands will be executed sequentially on the same execution node where the task is instantiated. In other words, it is not possible to split the execution of multiple commands grouped in the same @code{SystemExecTask}.
+The @code{SystemExecTask} accepts an arbitrary number of commands.
+These commands will be executed sequentially on the same execution node where the task is instantiated.
+In other words, it is not possible to split the execution of multiple commands grouped in the same @code{SystemExecTask}.
 
 @br@br
 
@@ -242,32 +270,34 @@ Both commands' standard and error outputs are gathered and concatenated to a sin
 @br@br
 
 @hl.openmole("""
-  // Declare the variable
-  val output = Val[String]
-  val error  = Val[String]
+    // Declare variables
+    val output = Val[String]
+    val error  = Val[String]
 
-  // Any task
-  val scriptTask =
-    SystemExecTask("bash script.sh", "hostname") set (
-      resources += workDirectory / "script.sh",
-      stdOut := output,
-      stdErr := error
+    // Task
+    val scriptTask = SystemExecTask("bash script.sh", "hostname") set (
+        resources += workDirectory / "script.sh",
+        stdOut := output,
+        stdErr := error
     )
 
-  scriptTask hook display""")
+    // Workflow
+    scriptTask hook display
+""")
 
 @br
 
-In this case the bash script might depend on applications installed on the remote host. Similarly, we assume the presence of @code{/bin/hostname} on the execution node. Therefore this task cannot be considered as portable.
+In this case the bash script might depend on applications installed on the remote host.
+Similarly, we assume the presence of @code{/bin/hostname} on the execution node.
+Therefore this task cannot be considered as portable.
 
 @br
 
-Note that each execution is isolated in a separate folder on the execution host and that the task execution is considered as failed if the script returns a value different from 0. If you need another behaviour you can use the same advanced options as the @i{ContainerTask} regarding the return code.
+Note that each execution is isolated in a separate folder on the execution host and that the task execution is considered as failed if the script returns a value different from 0.
+If you need another behaviour you can use the same advanced options as the @code{ContainerTask} regarding the return code.
 
 
 @h3{File management}
 
-To provide files as input of a @code{ContainerTask} or @code{SystemExecTask} and to get files produced by these task, you should use the @code{inputFiles} and @code{outputFiles} keywords.
-See the @a("documentation on file management", href := DocumentationPages.fileManagement.file).
-
-
+To provide files as input of a @code{ContainerTask} or @code{SystemExecTask} and to get files produced by these tasks, you should use the @code{inputFiles} and @code{outputFiles} keywords.
+See the @a("documentation on file management", href := fileManagement.file).

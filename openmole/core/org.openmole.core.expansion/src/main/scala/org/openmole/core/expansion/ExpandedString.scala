@@ -45,7 +45,7 @@ object ExpandedString {
       case UnexpandedElement(s) ⇒ s
       case ValueElement(v)      ⇒ v
       case CodeElement(code) ⇒
-        context.variable(code) match {
+        context.variable[Any](code) match {
           case Some(v) ⇒ v.value
           case None    ⇒ throw new UserBadDataError(s"'$code' is not a value, cannot expands string '$s'")
         }

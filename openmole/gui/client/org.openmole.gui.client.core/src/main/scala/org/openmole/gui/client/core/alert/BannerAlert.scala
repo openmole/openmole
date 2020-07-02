@@ -69,7 +69,7 @@ class BannerAlert(resizeTabs: () ⇒ Unit) {
   private def registerMessage(bannerMessage: BannerMessage) =
     bannerMessages() = (bannerMessages.now :+ bannerMessage).distinct.takeRight(2)
 
-  def registerWithDetails(message: String, details: String) =
+  def registerWithDetails(message: String, details: String, bannerLevel: BannerLevel = BannerLevel.Regular) =
     registerMessage(
       BannerMessage(
         tags.div(tags.span(message), tags.button(btn_default +++ (marginLeft := 10), "Details", onclick := { () ⇒
@@ -86,10 +86,10 @@ class BannerAlert(resizeTabs: () ⇒ Unit) {
   def registerDiv(messageDiv: TypedTag[HTMLDivElement], level: BannerLevel = BannerLevel.Regular) =
     registerMessage(BannerMessage(messageDiv, level))
 
-  def registerWithStack(message: String, stack: Option[String]) =
+  def registerWithStack(message: String, stack: Option[String], bannerLevel: BannerLevel = BannerLevel.Regular) =
     stack match {
-      case Some(s) ⇒ registerWithDetails(message, s)
-      case None    ⇒ register(message)
+      case Some(s) ⇒ registerWithDetails(message, s, bannerLevel)
+      case None    ⇒ register(message, bannerLevel)
     }
 
   private def color = {

@@ -14,7 +14,7 @@ Tasks are the atomic computing elements of OpenMOLE: they describe what OpenMOLE
 There are a number of tasks in OpenMOLE especially designed to embed your own models and/or programs, depending on the language your model uses (binary executable, Java, R, etc.).
 You need to choose the adequate task for your model.
 @br
-All the available tasks are documented in this section, just click on an item in the list on the left menu.
+All the available tasks are documented in this section, just click on an item in the left menu list.
 
 @br@br
 
@@ -24,32 +24,29 @@ Below is a dummy task to illustrate this concept:
 @br@br
 
 @hl.openmole("""
-// Define a variable i of type Int
-val i = Val[Int]
-val j = Val[Int]
+    // Define two variables i and j of type Int
+    val i = Val[Int]
+    val j = Val[Int]
 
-// Instantiate a task that does nothing.
-// This task uses the variable i as input and j as output.
-// Any task immediately following this one in the workflow (i.e. linked with a transition) will be able to use the variable j containing the result of this task.
-val t = EmptyTask() set (
-  inputs += i,
-  outputs += j
-)""")
+    // Instantiate a simple task using the i variable as an input, and j as an output
+    // This task adds 2 to the input
+    val myTask = ScalaTask(val j = i + 2) set (
+        inputs += i,
+        outputs += j,
 
-It is also possible to specify default values which are used by the task in case no input data was provided in the dataflow:
+        // Default value for inputs
+        i := 3
+    )
+""")
+
+@br
+
+@code{j} contains the result of @code{myTask}, i.e. 5.
+Any task immediately following @code{myTask} in the workflow (i.e. linked to it with a transition) will be able to use @code{j} as an input.
+@br
+It is also possible to specify default values for inputs, which are used by the task in case no input data was provided in the dataflow.
 
 @br@br
-
-@hl.openmole("""
-val i = Val[Int]
-val j = Val[Int]
-
-val t = EmptyTask() set (
-  inputs += i,
-  outputs += j,
-  // set i's default value to 0
-  i := 0
-)""")
 
 Once your model is properly embedded in an OpenMOLE task, you can use an exploration method on it, and delegate the multiple executions of the task on remote computing environments.
 
@@ -57,52 +54,51 @@ Once your model is properly embedded in an OpenMOLE task, you can use an explora
 
 @h2{Exploration method}
 
-The composition of a full exploration experiment is achieved by writing a script in the OpenMOLE language.
+The composition of a full exploration experiment is achieved by writing a script in the OpenMOLE @a("language", href := language.file).
 A working OpenMOLE exploration script needs to define:
  @ul
    @li{one or several @b{tasks},}
    @li{their @b{inputs} and @b{outputs},}
-   @li{an @a("exploration method", href := DocumentationPages.explore.file),}
-   @li{one or several @a("hooks", href := DocumentationPages.hook.file),}
-   @li{possibly an @a("execution environment", href := DocumentationPages.scale.file).}
+   @li{an @a("exploration method", href := explore.file),}
+   @li{one or several @a("hooks", href := hook.file),}
+   @li{possibly an @a("execution environment", href := scale.file).}
 
-Let's say you have a model that takes a string as input and do some stuff with it, like launching a simulation with the parameters contained in the input string.
-People from the lab gave you a huge CSV file with each line containing various experimental setup parameters.
-@br
-What you want to do is to run a simulation for each line of this file, execute it on the lab's cluster, and gather the results.
-Your OpenMOLE script would look like that:
+Let's take the previous task, that adds 2 to an input.
+You want to execute this task for a great number of different inputs and gather all the results in a single file.
+The way to do it is shown in the following example:
 
 @br@br
 
-@hl.openmoleNoTest("""
-    val inputParameter: Val[Int]
-    val result: Val[Double]
+@hl.openmole("""
+    // Define two variables i and j of type Int
+    val i = Val[Int]
+    val j = Val[Int]
 
-    // Crawl the big file and take the lines
-    val all_the_lines = CSVSampling("EmpiricalData.CSV") set (columns += inputParameter)
+    // Define a task that adds 2 to the input
+    val myTask = ScalaTask(val j = i + 2) set (
+        inputs += i,
+        outputs += j,
 
-    // Encapsulate your model in an "execution" task that calls the main routine
-    val  my_model_execution =
-      ScalaTask("mainRun(inputParameter)",
-        inputs += inputString,
-        outputs += result
-      )
+        // Default value for inputs
+        i := 3
+    )
 
-    // A hook to catch the outputs of your model execution and write them in a CSV file
-    val catch_output = CSVHook(workDirectory / "path/to/save/it")
+    // Define an exploration task: a direct sampling varying i
+    val myExploration = DirectSampling(
+        evaluation = myTask,
+        sampling = (i in (0 to 1000 by 5))
+    )
 
-    // Declare your computing environment
-    val env = ClusterEnvironment(login, machineIP)
-
-    // The exploration method
-    // It says: explore the lines and run a model execution for each one, save the outputs, all that on the cluster
-    // (results are not brought back to the local computer yet).
-    DirectSampling(
-      evaluation = my_model_execution on env hook catch_output,
-      sampling = all_the_lines
-    )""")
+    // Execute the workflow
+    myExploration hook (workDirectory / "results.csv")
+""")
 
 @br
+
+In this script, @code{myTask} will be executed for each value of @code{i} from 0 to 1,000 with a step of 5.
+Each result @code{j} is written in the @i{results.csv} file through a @aa("hook", href := hook.file).
+
+@br@br
 
 You can find some working examples of simple exploration tasks in the @aa("Market Place", href := market.file).
 Be sure to also check out our @aa("Getting Started", href := stepByStepIntro.file) tutorial!

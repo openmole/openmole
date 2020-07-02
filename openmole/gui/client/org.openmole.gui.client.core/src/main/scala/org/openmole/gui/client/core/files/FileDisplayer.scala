@@ -33,7 +33,7 @@ class FileDisplayer(val treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) 
       t.safePathTab.now.path == safePath.path
     }
 
-  def display(safePath: SafePath, content: String, fileExtension: FileExtension) = {
+  def display(safePath: SafePath, content: String, fileExtension: FileExtension, pluginServices: PluginServices) = {
 
     alreadyDisplayed(safePath) match {
       case Some(t: TreeNodeTab) ⇒ treeNodeTabs.setActive(t)
@@ -47,7 +47,7 @@ class FileDisplayer(val treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) 
             Post()[Api].findAnalysisPlugin(safePath).call.foreach {
               case Some(plugin) ⇒
                 val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
-                val tab = TreeNodeTab.HTML(safePath, analysis.panel(safePath))
+                val tab = TreeNodeTab.HTML(safePath, analysis.panel(safePath, pluginServices))
                 treeNodeTabs add tab
               case None ⇒
             }
