@@ -41,6 +41,7 @@ class Activator extends BundleActivator {
         TaskHighLight(objectName(InitialStateTask)),
         PatternHighLight(objectName(GenomeProfileEvolution)),
         PatternHighLight(objectName(NSGA2Evolution)),
+        PatternHighLight(objectName(NSGA3Evolution)),
         PatternHighLight(objectName(OSEEvolution)),
         PatternHighLight(objectName(PSEEvolution)),
         WordHighLight(Stochastic.getClass),
