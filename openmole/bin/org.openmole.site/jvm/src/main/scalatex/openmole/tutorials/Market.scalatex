@@ -20,9 +20,9 @@ Don't focus too much on the applications or programming languages serving as a u
 @h2{Sneak peek into the Market Place contents}
 
 @h3{Hello World}
-These examples demonstrate how to embed models written in different languages in OpenMOLE.
+These examples demonstrate how to plug models written in different languages in OpenMOLE.
 There are examples for R, Scilab, and Java.
-For Java, there are two examples: one to embed the Java model as any other language, and the second to embed it as a plugin.
+For Java, there are two examples: one to plug the Java model as any other language, and the second to embed it as a plugin.
 
 
 @h3{Applicative tutorials}

@@ -11,7 +11,7 @@
 @h2{Tasks}
 
 Tasks are the atomic computing elements of OpenMOLE: they describe what OpenMOLE should execute.
-There are a number of tasks in OpenMOLE especially designed to embed your own models and/or programs, depending on the language your model uses (binary executable, Java, R, etc.).
+There are a number of tasks in OpenMOLE especially designed to plug your own models and/or programs, depending on the language your model uses (binary executable, Java, R, etc.).
 You need to choose the adequate task for your model.
 @br
 All the available tasks are documented in this section, just click on an item in the left menu list.
@@ -48,7 +48,7 @@ It is also possible to specify default values for inputs, which are used by the 
 
 @br@br
 
-Once your model is properly embedded in an OpenMOLE task, you can use an exploration method on it, and delegate the multiple executions of the task on remote computing environments.
+Once your model is properly plugged in an OpenMOLE task, you can use an exploration method on it, and delegate the multiple executions of the task on remote computing environments.
 
 
 

@@ -8,7 +8,7 @@ import scalatags.Text.all.{br, _}
 
 object Native {
   def introPackagingForRPythonCplusplus = paragraph(
-    div("Most of the time, model code is not designed to be portable. OpenMOLE handles natively Java, Scala, NetLogo and R via specific Tasks. However, if no specific task has yet been designed for the language/platform you can still embed you code into OpenMOLE using:", marginTop := 30),
+    div("Most of the time, model code is not designed to be portable. OpenMOLE handles natively Java, Scala, NetLogo and R via specific Tasks. However, if no specific task has yet been designed for the language/platform you can still plug you code into OpenMOLE using:", marginTop := 30),
       ul(
         li("either the ", a("container task documentation", href := DocumentationPages.container.file, targetBlank)),
         li("or the ", a("native packaging documentation", href := DocumentationPages.container.file, targetBlank), "."),

@@ -39,13 +39,13 @@ object UserGuide {
     )
 
   def headerModel(model: String) = model match {
-    case "Embed" ⇒ header(span(
-      tools.to(DocumentationPages.embed)(img(src := Resource.img.model.codeAnimated.file, headerImg)),
-      span(s"Embed your model", h1Like)
+    case "Plug" ⇒ header(span(
+      tools.to(DocumentationPages.plug)(img(src := Resource.img.model.codeAnimated.file, headerImg)),
+      span(s"Plug your model", h1Like)
     ))
     case _ ⇒ header(span(
-      tools.to(DocumentationPages.embed)(img(src := Resource.img.model.codeAnimated.file, headerImg)),
-      span(s"Embed your $model model", h1Like)
+      tools.to(DocumentationPages.plug)(img(src := Resource.img.model.codeAnimated.file, headerImg)),
+      span(s"Plug your $model model", h1Like)
     ))
   }
 
@@ -103,7 +103,7 @@ object UserGuide {
     val parents = parentPageTrees.map { _.name }
 
     current match {
-      case p if (parents.contains(DocumentationPages.embed.name) || current.name == DocumentationPages.embed.name) ⇒ integratedPage(SideMenu.embed, head = headerModel(current.name))
+      case p if (parents.contains(DocumentationPages.plug.name) || current.name == DocumentationPages.plug.name) ⇒ integratedPage(SideMenu.plug, head = headerModel(current.name))
       case p if ((DocumentationPages.samplingPages.sons.map { _.name } :+ DocumentationPages.samplings.name).contains(current.name)) ⇒ integratedPage(SideMenu.sampling, head = headerMethod(current.name))
       case p if (parents.contains(DocumentationPages.explore.name) || current.name == DocumentationPages.explore.name) ⇒ integratedPage(SideMenu.explore, head = headerMethod(current.name))
       case p if (parents.contains(DocumentationPages.scale.name) || current.name == DocumentationPages.scale.name) ⇒ integratedPage(SideMenu.scale, head = headerEnvironment(current.name))

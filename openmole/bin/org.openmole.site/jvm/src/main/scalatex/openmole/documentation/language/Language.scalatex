@@ -79,7 +79,7 @@ Unspecified parameters are set to their default value.
 
 What you have read so far should be sufficient in order to get started with OpenMOLE.
 To begin with the OpenMOLE syntax you should have a look at the @a("Getting started", href := stepByStepIntro.file).
-You may also want to look at the @a("Task documentation", href := embed.file), and more generally the @a("Documentation", href := documentation.file).
+You may also want to look at the @a("Task documentation", href := plug.file), and more generally the @a("Documentation", href := documentation.file).
 
 @br@br
 

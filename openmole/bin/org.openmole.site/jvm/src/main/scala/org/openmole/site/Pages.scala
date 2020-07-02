@@ -181,21 +181,21 @@ object DocumentationPages {
 
   def allPages = docPages.flatMap { _.sons } ++ tutoPages.sons ++ communityPages.sons ++ downloadPages.sons ++ headPages
 
-  def headPages: Seq[PageTree] = docPages ++ Seq(embedPages, explorePages, scalePages, languagePages, developersPages, tutoPages, communityPages, downloadPages)
+  def headPages: Seq[PageTree] = docPages ++ Seq(plugPages, explorePages, scalePages, languagePages, developersPages, tutoPages, communityPages, downloadPages)
 
-  val mainDocPages = embedPages.sons.map {
+  val mainDocPages = plugPages.sons.map {
     _.page
   } ++ explorePages.sons.map {
     _.page
   } ++ scalePages.sons.map {
     _.page
-  } ++ Seq(scale, explore, embed)
+  } ++ Seq(scale, explore, plug)
 
   // Documentation
   lazy val documentation = DocumentationPage.fromScalatex(name = "Documentation", content = scalatex.documentation.Documentation)
 
   def docPages = Seq(
-    embedPages,
+    plugPages,
     explorePages,
     samplingPages,
     scalePages,
@@ -211,17 +211,17 @@ object DocumentationPages {
   lazy val commandOptions = DocumentationPage.fromScalatex(name = "Command Options", content = scalatex.documentation.CommandOptions)
   val faq = DocumentationPage.fromScalatex(name = "FAQ", content = scalatex.FAQ, title = Some("Frequently Asked Questions"))
 
-  // Embed
-  def embedPages = pageNode(embed, Vector(scala, java, netLogo, python, r, scilab, container))
+  // Plug
+  def plugPages = pageNode(plug, Vector(scala, java, netLogo, python, r, scilab, container))
 
-  lazy val embed = DocumentationPage.fromScalatex(name = "Embed", content = scalatex.documentation.embed.Embed, title = Some("Embed Your Model"))
-  lazy val scala = DocumentationPage.fromScalatex(name = "Scala", content = scalatex.documentation.embed.Scala)
-  lazy val java = DocumentationPage.fromScalatex(name = "Java", content = scalatex.documentation.embed.Java)
-  lazy val netLogo = DocumentationPage.fromScalatex(name = "NetLogo", content = scalatex.documentation.embed.NetLogo)
-  lazy val python = DocumentationPage.fromScalatex(name = "Python", content = scalatex.documentation.embed.Python)
-  lazy val r = DocumentationPage.fromScalatex(name = "R", content = scalatex.documentation.embed.R)
-  lazy val scilab = DocumentationPage.fromScalatex(name = "Scilab", content = scalatex.documentation.embed.Scilab)
-  lazy val container = DocumentationPage.fromScalatex(name = "Linux Executable", content = scalatex.documentation.embed.Container)
+  lazy val plug = DocumentationPage.fromScalatex(name = "Plug", content = scalatex.documentation.plug.Plug, title = Some("Plug Your Model"))
+  lazy val scala = DocumentationPage.fromScalatex(name = "Scala", content = scalatex.documentation.plug.Scala)
+  lazy val java = DocumentationPage.fromScalatex(name = "Java", content = scalatex.documentation.plug.Java)
+  lazy val netLogo = DocumentationPage.fromScalatex(name = "NetLogo", content = scalatex.documentation.plug.NetLogo)
+  lazy val python = DocumentationPage.fromScalatex(name = "Python", content = scalatex.documentation.plug.Python)
+  lazy val r = DocumentationPage.fromScalatex(name = "R", content = scalatex.documentation.plug.R)
+  lazy val scilab = DocumentationPage.fromScalatex(name = "Scilab", content = scalatex.documentation.plug.Scilab)
+  lazy val container = DocumentationPage.fromScalatex(name = "Linux Executable", content = scalatex.documentation.plug.Container)
 
   // Explore
   def explorePages = pageNode(explore, Vector(samplings, calibration, sensitivity, profile, pse, ose, abc))

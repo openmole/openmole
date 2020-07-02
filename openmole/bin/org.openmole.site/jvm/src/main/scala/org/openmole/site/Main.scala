@@ -27,7 +27,7 @@ object Main {
 
   def build = {
 
-    def embedText = "Embed your own model in OpenMOLE, regardless of the programming language: Java, binary exe, NetLogo, R, SciLab, Python, C++..."
+    def plugText = "Plug your own model in OpenMOLE, regardless of the programming language: Java, binary exe, NetLogo, R, SciLab, Python, C++..."
     def exploreText = "Explore, test, optimize your model through innovative methods: calibration, sensitivity, profile..."
     def scaleText = "Scale up your experiments easily on servers, clusters, grids, clouds..."
 
@@ -48,12 +48,12 @@ object Main {
             div(colTag, mainTitle)("SCALE UP")
           ),
           div(rowTag, paddingBottom := 5)(
-            div(colTag)(div(mainText, width := 220, embedText)),
+            div(colTag)(div(mainText, width := 220, plugText)),
             div(colTag)(div(mainText, width := 220, exploreText)),
             div(colTag)(div(mainText, width := 220, scaleText))
           ),
           div(rowTag)(
-            div(colTag)(readMore(DocumentationPages.embed)),
+            div(colTag)(readMore(DocumentationPages.plug)),
             div(colTag)(readMore(DocumentationPages.explore)),
             div(colTag)(readMore(DocumentationPages.scale))
           )
@@ -72,8 +72,8 @@ object Main {
             div(colTag, paddingBottom := 30)(
               div(rowTag)(img(src := Resource.img.model.code.file, width := 120)),
               div(rowTag, mainTitle)("EMBED"),
-              div(rowTag)(div(mainText, width := 200, embedText)),
-              div(rowTag)(readMore(DocumentationPages.embed))
+              div(rowTag)(div(mainText, width := 200, plugText)),
+              div(rowTag)(readMore(DocumentationPages.plug))
             ),
             div(colTag, paddingBottom := 30)(
               div(rowTag)(img(src := Resource.img.method.exploreMap.file, width := 120)),

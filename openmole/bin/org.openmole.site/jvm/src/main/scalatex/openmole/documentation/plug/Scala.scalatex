@@ -30,7 +30,7 @@ You can write Scala code to be executed in the workflow using the @code("ScalaTa
 
 @br
 
-You can also embed you own Scala/Java code and libraries in OpenMOLE using an OpenMOLE @a("Plugin", href := pluginDevelopment.file).
+You can also plug you own Scala/Java code and libraries in OpenMOLE using an OpenMOLE @a("Plugin", href := pluginDevelopment.file).
 
 
 @h3("Useful functions")

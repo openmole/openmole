@@ -4,7 +4,7 @@
 
 
 
-@h2("Use a ScalaTask to embed Java code")
+@h2("Use a ScalaTask to plug Java code")
 
 OpenMOLE makes the inclusion of your own Java code in a workflow simple.
 Since the Scala compiler can compile Java code, Java code can be directly fed to a @code{ScalaTask} as shown in @aa("the ScalaTask example", href := scala.file).

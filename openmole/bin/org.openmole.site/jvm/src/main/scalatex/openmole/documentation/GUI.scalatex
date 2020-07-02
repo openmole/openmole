@@ -8,7 +8,7 @@
 
 This GUI is an advanced editor for OpenMOLE experiment description through OpenMOLE scripts.
 It allows editing, managing and running them.
-The way to write these experiments is fully explained in the @aa("main documentation of OpenMOLE", href := DocumentationPages.embed.file).
+The way to write these experiments is fully explained in the @aa("main documentation of OpenMOLE", href := DocumentationPages.plug.file).
 We focus here on the way to manage them in the application.
 
 @br@br
