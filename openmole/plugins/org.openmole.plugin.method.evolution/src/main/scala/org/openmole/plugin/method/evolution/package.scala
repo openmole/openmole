@@ -22,6 +22,7 @@ import org.openmole.core.dsl.extension._
 import org.openmole.core.workflow.builder._
 import monocle.macros._
 import org.openmole.core.workflow.format.WritableOutput
+import org.openmole.plugin.hook.omr.MethodData
 import org.openmole.plugin.method.evolution.data.EvolutionMetadata
 import org.openmole.plugin.task.tools._
 import org.openmole.plugin.tool.pattern
@@ -29,6 +30,17 @@ import org.openmole.plugin.tool.pattern.MasterSlave
 import squants.time.Time
 
 package object evolution {
+
+  import io.circe._
+  import io.circe.generic.extras.auto._
+  import io.circe.parser._
+  import io.circe.generic.extras.semiauto._
+  import io.circe.generic.extras.Configuration
+
+  implicit def methodData = MethodData[EvolutionMetadata](_ ⇒ EvolutionMetadata.method)
+  implicit def genDevConfig: Configuration = Configuration.default.withDiscriminator("implementation").withKebabCaseMemberNames
+  implicit def evolutionMetadataEncoder: Encoder[EvolutionMetadata] = deriveConfiguredEncoder[EvolutionMetadata]
+  implicit def evolutionMetadataDecoder: Decoder[EvolutionMetadata] = deriveConfiguredDecoder[EvolutionMetadata]
 
   val operatorExploration = 0.1
 

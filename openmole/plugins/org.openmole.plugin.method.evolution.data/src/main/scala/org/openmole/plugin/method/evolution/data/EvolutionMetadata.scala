@@ -38,3 +38,13 @@ object ObjectiveData {
     negative: Boolean)
 }
 
+object AnalysisData {
+
+  sealed trait Convergence
+
+  object StochasticNSGA2 {
+    case class Convergence(nadir: Option[Vector[Double]], generations: Vector[GenerationConvergence]) extends AnalysisData.Convergence
+    case class GenerationConvergence(generation: Long, hypervolume: Option[Double], minimums: Option[Vector[Double]])
+  }
+
+}

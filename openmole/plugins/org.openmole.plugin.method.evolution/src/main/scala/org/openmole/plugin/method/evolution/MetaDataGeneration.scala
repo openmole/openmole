@@ -14,13 +14,6 @@ import org.openmole.plugin.hook.omr.MethodData
 
 object MetadataGeneration {
 
-  implicit val genDevConfig: Configuration = Configuration.default.withDiscriminator("implementation").withKebabCaseMemberNames
-
-  implicit val metadataEncoder: Encoder[EvolutionMetadata] = deriveConfiguredEncoder[EvolutionMetadata]
-  implicit val metadataDecoder: Decoder[EvolutionMetadata] = deriveConfiguredDecoder[EvolutionMetadata]
-
-  implicit val methodData = MethodData[EvolutionMetadata](_ ⇒ EvolutionMetadata.method)
-
   import EvolutionMetadata._
 
   def genomeData(g: Genome) =

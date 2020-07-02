@@ -683,7 +683,7 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", d
 /* -------------------- GUI Plugin ----------------------- */
 
 def guiPluginSettings = defaultSettings ++ Seq(defaultActivator)
-def guiStrictImports = Seq("!org.scalajs.*", "!rx.*", "!scala.scalajs.*", "!scaladget.*", "*")
+def guiStrictImports = Seq("!org.scalajs.*", "!rx.*", "!scala.scalajs.*", "!scaladget.*", "!org.openmole.plotlyjs.*", "!org.querki.*", "*")
 
 def guiPluginDir = guiDir / "plugins"
 
@@ -729,6 +729,7 @@ lazy val jarWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wi
 lazy val evolutionAnalysisPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.analysis.evolution", imports = guiStrictImports) settings(
   guiPluginSettings,
   libraryDependencies += Libraries.equinoxOSGi,
+  Libraries.plotlyJS
 ) dependsOn(extServer, extClient, extServer, workspace, evolution) enablePlugins (ScalaJSPlugin)
 
 def guiPlugins = Seq(

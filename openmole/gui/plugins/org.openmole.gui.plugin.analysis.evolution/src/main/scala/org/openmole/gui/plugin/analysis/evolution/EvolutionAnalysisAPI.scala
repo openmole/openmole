@@ -4,5 +4,5 @@ import org.openmole.gui.ext.data._
 import org.openmole.plugin.method.evolution.data._
 
 trait EvolutionAnalysisAPI {
-  def load(path: SafePath): Either[ErrorData, EvolutionMetadata]
+  def analyse(path: SafePath): Either[ErrorData, AnalysisData.Convergence]
 }

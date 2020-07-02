@@ -8,11 +8,14 @@ import org.openmole.plugin.method.evolution.data._
 
 class EvolutionAnalysisAPIImpl(services: Services) extends EvolutionAnalysisAPI {
 
-  def load(path: SafePath): Either[ErrorData, EvolutionMetadata] = {
+  def analyse(path: SafePath) = {
     import ServerFileSystemContext.project
     import services.workspace
 
-    try Right(Analysis.loadMetadata(path.toFile))
+    try {
+      def m = Analysis.loadMetadata(path.toFile)
+      Right(Analysis.analyse(m, path.toFile.getParentFile))
+    }
     catch {
       case e ⇒ Left(ErrorData(e))
     }
