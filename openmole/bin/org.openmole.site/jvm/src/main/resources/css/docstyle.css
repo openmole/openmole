@@ -89,10 +89,8 @@ h6 {
 }
 
 h5{
-  color: #000;
-  font-size: 25px;
-  font-weight: 100;
-  text-transform: uppercase;
+  color: var(--green);
+  font-size: 3rem;
   padding-top: 50px;
   margin: 0 0 24px;
 }
@@ -115,7 +113,7 @@ a:hover {
 }
 
 a:visited {
-  color: var(--pink);
+
 }
 
 asitemap{
@@ -185,8 +183,16 @@ border-bottom: 1px solid #eee;
     min-height: 800px;
 }
 
+.navbar-inverse,
+.navbar-inverse .navbar-nav > li > a {
+    background-color : var(--purple);
+    color: #fff;
+}
+
 #footer {
-background-color : #222;
+background-color : var(--purple);
+color: #fff;
+width: 100%;
 }
 
 .sidebar-left {

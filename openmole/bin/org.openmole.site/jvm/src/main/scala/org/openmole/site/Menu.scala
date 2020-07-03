@@ -66,11 +66,11 @@ object Menu {
           ),
           div(classIs(collapse, navbar_collapse), aria.expanded := false, paddingTop := 20, id := navId)(
             ul(classIs(nav, navbar_nav, navbar_left), marginLeft := 200)(
-              li(innerLink(DocumentationPages.documentation, "DOC"), liStyle),
-              li(innerLink(DocumentationPages.tutorials, "TUTORIALS"), liStyle),
-              li(innerLink(DocumentationPages.OMcommunity, "COMMUNITY"), liStyle),
-              li(outerLink("DEMO", shared.link.demo), liStyle),
-              li(innerLink(DocumentationPages.download, "DOWNLOAD"), liStyle),
+              li(innerLink(DocumentationPages.documentation, "Documentation"), liStyle),
+              li(innerLink(DocumentationPages.tutorials, "Tutorials"), liStyle),
+              li(outerLink("Demo", shared.link.demo), liStyle),
+              li(innerLink(DocumentationPages.download, "Download"), liStyle),
+              li(innerLink(DocumentationPages.OMcommunity, "Community"), liStyle),
               li(marginTop := -8, inputStyle)(img(id := shared.searchImg, src := Resource.img.menu.search.file, Seq(width := 35, paddingTop := 5, paddingLeft := 10, pointer)))(
                 div(id := shared.searchDiv)
               )

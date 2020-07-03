@@ -23,7 +23,7 @@ import org.openmole.site.tools._
 
 object Footer {
 
-  val WHITE = color := "#e6e6e6"
+  val WHITE = color := "#ffffff"
 
   val titleStyle = Seq(
     marginLeft := 4
@@ -61,25 +61,25 @@ object Footer {
             div(classIs("inner-footer"))(
               div(classIs(s"$row"))(
                 div(classIs(colMD(3)), footerColStyle)(
-                  span("COMMUNITY", textAlign := "center"),
+                  span("Community", textAlign := "center"),
                   imgSubItem(Resource.img.footer.email, "Forum", shared.link.mailingList),
                   imgSubItem(Resource.img.footer.chat, "Chat", shared.link.chat),
                   imgSubItem(Resource.img.footer.faq, "FAQ", DocumentationPages.faq.file, false)
                 ),
                 div(classIs(colMD(3)), footerColStyle)(
-                  span("DEVELOPMENT", textAlign := "center"),
+                  span("Development", textAlign := "center"),
                   imgSubItem(Resource.img.footer.previousVersion, "Changes", DocumentationPages.releaseNotes.file, false),
                   imgSubItem(Resource.img.footer.github, "Sources", shared.link.repo.openmole),
                   imgSubItem(Resource.img.footer.contribute, "Join us!", DocumentationPages.howToContribute.file, false)
                 ),
                 div(classIs(colMD(3)), footerColStyle)(
-                  span("ABOUT US", textAlign := "center"),
+                  span("About us", textAlign := "center"),
                   imgSubItem(Resource.img.footer.paper, "Publications", DocumentationPages.communications.file, false),
                   imgSubItem(Resource.img.footer.whoarwe, "Team", DocumentationPages.whoWeAre.file, false),
                   imgSubItem(Resource.img.footer.partner, "Partners", DocumentationPages.partner.file, false)
                 ),
                 div(classIs(colMD(3)), footerColStyle)(
-                  span("COMMUNICATION", textAlign := "center"),
+                  span("Communication", textAlign := "center"),
                   imgSubItem(Resource.img.footer.blog, "Blog", shared.link.blog),
                   imgSubItem(Resource.img.footer.twitter, "Twitter", shared.link.twitter)
                 )
