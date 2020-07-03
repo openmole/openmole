@@ -12,9 +12,18 @@ import scala.language.higherKinds
 
 object NSGA3 {
 
-  type ReferencePoints = mgo.evolution.algorithm.NSGA3Operations.ReferencePoints
+  import mgo.evolution.algorithm.NSGA3Operations.ReferencePoints
 
-  type References = Either[Int, Vector[Vector[Double]]]
+  object References {
+    case object None extends References
+    case class Division(division: Int) extends References
+    case class List(points: Vector[Vector[Double]]) extends References
+
+    implicit def fromInt(i: Int) = Division(i)
+    implicit def fromVector(p: Vector[Vector[Double]]) = List(p)
+  }
+
+  sealed trait References
 
   object DeterministicParams {
     import mgo.evolution.algorithm.{ CDGenome, NSGA3 ⇒ MGONSGA3, _ }
@@ -219,17 +228,20 @@ object NSGA3Evolution {
     evaluation:   DSL,
     termination:  OMTermination,
     mu:           Int                          = 200,
-    references:   NSGA3.References             = Left(50),
+    references:   NSGA3.References             = NSGA3.References.None,
     stochastic:   OptionalArgument[Stochastic] = None,
     reject:       OptionalArgument[Condition]  = None,
     parallelism:  Int                          = 1,
     distribution: EvolutionPattern             = SteadyState(),
     suggestion:   Suggestion                   = Suggestion.empty,
     scope:        DefinitionScope              = "nsga3") = {
-    val refPoints: NSGA3.ReferencePoints = references match {
-      case Left(i)  ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(i, objective.size)
-      case Right(p) ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(p)
-    }
+
+    val refPoints =
+      references match {
+        case NSGA3.References.None        ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(50, objective.size)
+        case NSGA3.References.Division(i) ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(i, objective.size)
+        case NSGA3.References.List(p)     ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(p)
+      }
     EvolutionPattern.build(
       algorithm =
         NSGA3(

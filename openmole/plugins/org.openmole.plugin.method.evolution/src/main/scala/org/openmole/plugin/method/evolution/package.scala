@@ -250,10 +250,4 @@ package object evolution {
   def GenomeProfileEvolution = ProfileEvolution
   def GenomeProfile = Profile
 
-  // implicit conversion for NSGA3 reference points
-  type References = NSGA3.References
-
-  implicit def intToReferenceConversion(n: Int): References = Left(n)
-  implicit def refValuesToReferenceConversion(v: Seq[Seq[Double]]): References = Right(v.toVector.map(_.toVector))
-
 }
