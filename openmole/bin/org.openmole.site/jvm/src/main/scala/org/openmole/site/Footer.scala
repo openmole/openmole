@@ -40,7 +40,7 @@ object Footer {
   def imgSubItem(image: FileResource, title: String, link: String, otherTab: Boolean = true) =
     subItem(
       div(width := "100%")(
-        tools.to(link, otherTab = otherTab)(
+        tools.to(link, otherTab = otherTab, style = Seq(WHITE))(
           img(src := image.file, height := 20, paddingBottom := 5)(span(s"$title", titleStyle))
         )
       )
@@ -56,7 +56,7 @@ object Footer {
     div(
       //img(src := Resource.img.mole.openmole.file, stylesheet.leftMole),
       div(stylesheet.footer)(
-        div(classIs("container"))(
+        div(
           div(id := "footer")(
             div(classIs("inner-footer"))(
               div(classIs(s"$row"))(
@@ -74,7 +74,7 @@ object Footer {
                 ),
                 div(classIs(colMD(3)), footerColStyle)(
                   span("About us", textAlign := "center"),
-                  imgSubItem(Resource.img.footer.paper, "Publications", DocumentationPages.communications.file, false),
+                  imgSubItem(Resource.img.footer.paper, "Papers", DocumentationPages.communications.file, false),
                   imgSubItem(Resource.img.footer.whoarwe, "Team", DocumentationPages.whoWeAre.file, false),
                   imgSubItem(Resource.img.footer.partner, "Partners", DocumentationPages.partner.file, false)
                 ),
