@@ -43,7 +43,7 @@ object Main {
             div(colTag)(img(src := Resource.img.environment.scale.file, width := 120, paddingBottom := 10))
           ),
           div(rowTag)(
-            div(colTag, mainTitle)("EMBED"),
+            div(colTag, mainTitle)("PLUG"),
             div(colTag, mainTitle)("EXPLORE"),
             div(colTag, mainTitle)("SCALE UP")
           ),
@@ -71,7 +71,7 @@ object Main {
           div(rowTag)(
             div(colTag, paddingBottom := 30)(
               div(rowTag)(img(src := Resource.img.model.code.file, width := 120)),
-              div(rowTag, mainTitle)("EMBED"),
+              div(rowTag, mainTitle)("PLUG"),
               div(rowTag)(div(mainText, width := 200, plugText)),
               div(rowTag)(readMore(DocumentationPages.plug))
             ),

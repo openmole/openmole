@@ -60,6 +60,7 @@ package object shared {
     lazy val howToPR = "https://help.github.com/articles/about-pull-requests/"
 
     // Community
+    lazy val contact = "contact@openmole.org"
     lazy val mailingList = "http://ask.openmole.org"
     lazy val chat = "https://chat.openmole.org/channel/general"
     lazy val blog = "https://blog.openmole.org"
@@ -200,6 +201,7 @@ package object shared {
     repo.openMOLEDockerBuild,
     demo,
     twitter,
+    contact,
     blog,
     chat,
     simpluDemo,

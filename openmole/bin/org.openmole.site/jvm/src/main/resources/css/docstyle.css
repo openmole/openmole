@@ -38,7 +38,7 @@ span.hljs-tag, span.hljs-symbol{
     --grey: #e5e5e5;
     --dark: #222222;
     --pink: #F86D70;
-    --purpleaccent: #2F2E41;
+    --white: #fff;
 }
 
 body {
@@ -88,11 +88,17 @@ h6 {
   padding-top: 10px;
 }
 
-h5{
+h5 {
   color: var(--green);
   font-size: 3rem;
   padding-top: 50px;
   margin: 0 0 24px;
+}
+
+h4 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--white);
 }
 
 code{
@@ -103,17 +109,13 @@ code{
 }
 
 a,
-aa,
 a:visited {
   color: var(--dark);
   text-decoration: underline;
 }
 a:hover {
+  color: var(--green);
   text-decoration: none;
-}
-
-a:visited {
-
 }
 
 asitemap{
@@ -388,23 +390,36 @@ img{
 
 
 .btn.btn-default {
-    background-color:transparent;
-    color:#333;
-    border: 1px solid #ccc;
+    font-family: "glacial";
+    background-color: transparent;
+    color: var(--purple);
+    border: 1px solid var(--purple);
     text-transform: uppercase;
 }
 
 .btn.btn-selected {
-    border: 2px solid #a6bf26ff;
-    background-color:transparent;
+    background-color: var(--purple);
+    color: var(--green);
+    border: 1px solid var(--purple);
     font-weight: bold;
-    color:#333;
     text-transform: uppercase;
+}
+
+.btn:hover {
+    color: var(--green);
+    border: 1px solid var(--green);
+}
+
+.btn-danger:hover {
+    background-color: #c9302c;
+    color: var(--white);
+    border: 1px solid #c9302c;
+    font-weight: 100;
 }
 
 b,
 optgroup,
 strong {
- font-weight:700;
-  color:black;
+ font-weight: bold;
+  color: var(--dark);
 }

@@ -197,6 +197,8 @@ object Resource {
 
       val openmole = moleResource("openmole.svg")
 
+      val openmoleLogo = moleResource("logo-dark-full-nobg.svg")
+
       val openmoleText = moleResource("openmole.png")
 
       val openmoleTransp = moleResource("openmoleTransp.svg")
