@@ -46,8 +46,7 @@ object GAMATask {
     experiment:             String,
     install:                Seq[String],
     installContainerSystem: ContainerSystem,
-    dockerImage: String,
-    version:                String,
+    image:                  ContainerImage,
     clearCache:             Boolean)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, _workspace: Workspace) = {
 
     val (modelName, volumesValue) = volumes(workspace, model)
@@ -61,29 +60,30 @@ object GAMATask {
         case _ => None
       }
 
-    ContainerTask.prepare(installContainerSystem, gamaImage(dockerImage, version), installCommands, volumesValue.map { case (lv, cv) ⇒ lv.getAbsolutePath -> cv }, error, clearCache = clearCache)
+    ContainerTask.prepare(installContainerSystem, image, installCommands, volumesValue.map { case (lv, cv) ⇒ lv.getAbsolutePath -> cv }, error, clearCache = clearCache)
   }
 
   def apply(
     workspace:              File,
     experiment:             String,
     finalStep:              FromContext[Int],
-    model:                  OptionalArgument[String]      = None,
-    seed:                   OptionalArgument[Val[Long]]   = None,
-    frameRate:              OptionalArgument[Int]         = None,
-    install:                Seq[String]                   = Seq.empty,
-    dockerImage: String = "gamaplatform/gama",
-    version:                String                        = "1.8.1",
-    errorOnReturnValue:     Boolean                       = true,
-    returnValue:            OptionalArgument[Val[Int]]    = None,
-    stdOut:                 OptionalArgument[Val[String]] = None,
-    stdErr:                 OptionalArgument[Val[String]] = None,
-    environmentVariables:   Seq[EnvironmentVariable]      = Vector.empty,
-    hostFiles:              Seq[HostFile]                 = Vector.empty,
-//    workDirectory:          OptionalArgument[String]      = None,
-    clearContainerCache:    Boolean                       = false,
-    containerSystem:        ContainerSystem               = ContainerSystem.default,
-    installContainerSystem: ContainerSystem               = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): GAMATask = {
+    model:                  OptionalArgument[String]         = None,
+    seed:                   OptionalArgument[Val[Long]]      = None,
+    frameRate:              OptionalArgument[Int]            = None,
+    install:                Seq[String]                      = Seq.empty,
+    dockerImage:            String                           = "gamaplatform/gama",
+    version:                String                           = "1.8.1",
+    errorOnReturnValue:     Boolean                          = true,
+    returnValue:            OptionalArgument[Val[Int]]       = None,
+    stdOut:                 OptionalArgument[Val[String]]    = None,
+    stdErr:                 OptionalArgument[Val[String]]    = None,
+    environmentVariables:   Seq[EnvironmentVariable]         = Vector.empty,
+    hostFiles:              Seq[HostFile]                    = Vector.empty,
+//    workDirectory:          OptionalArgument[String]       = None,
+    clearContainerCache:    Boolean                          = false,
+    containerSystem:        ContainerSystem                  = ContainerSystem.default,
+    installContainerSystem: ContainerSystem                  = ContainerSystem.default,
+    containerImage:         OptionalArgument[ContainerImage] = None)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): GAMATask = {
 
     (model.option.isDefined, workspace.isDirectory) match {
       case (false, true) ⇒ throw new UserBadDataError(s"""$workspace is a directory, in this case you must specify you model path, model = "model.gaml"""")
@@ -92,7 +92,9 @@ object GAMATask {
       case _ ⇒
     }
 
-    val preparedImage = prepare(workspace, model, experiment, install, installContainerSystem, dockerImage, version, clearCache = clearContainerCache)
+    val gamaContainerImage = containerImage.option getOrElse gamaImage(dockerImage, version)
+
+    val preparedImage = prepare(workspace, model, experiment, install, installContainerSystem, gamaContainerImage, clearCache = clearContainerCache)
 
     GAMATask(
       workspace = workspace,
