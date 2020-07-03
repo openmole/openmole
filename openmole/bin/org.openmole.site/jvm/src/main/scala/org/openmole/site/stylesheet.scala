@@ -121,8 +121,8 @@ package object stylesheet {
   lazy val footer = Seq(
     position := "relative",
     clear := "both",
-    backgroundColor := "#222",
-    color := "white"
+    backgroundColor := "#f3d56",
+    color := "#ffffff"
   )
 
   val leftMole = Seq(

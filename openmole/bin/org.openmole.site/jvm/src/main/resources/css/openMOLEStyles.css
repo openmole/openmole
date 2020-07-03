@@ -121,7 +121,7 @@ code {
   position: relative;
 }
 .scalatex-content p{
-  text-align: justify;
+  text-align: left;
 }
 
 .scalatex-content {

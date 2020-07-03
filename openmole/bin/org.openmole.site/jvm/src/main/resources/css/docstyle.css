@@ -10,50 +10,87 @@ span.hljs-tag, span.hljs-symbol{
   font-style: normal;
 }
 
-body{
-  color: #555;
-  font-family: gi;
-  font-size: 18px;
-  line-height: 28px;
-  text-align: left;
+@font-face {
+  font-family: "glacial";
+  src: url("../fonts/GlacialIndifference-Regular.otf");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "glacial";
+  src: url("../fonts/GlacialIndifference-Bold.otf");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "pt_serif";
+  src: url("../fonts/PTF55F.ttf");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+    --purple: #3f3d56;
+    --green: #a6bf26;
+    --grey: #e5e5e5;
+    --dark: #222222;
+    --pink: #F86D70;
+    --purpleaccent: #2F2E41;
+}
+
+body {
+  margin: 0;
+  font-size: 2rem;
+  font-family: "glacial", sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1.3;
+  -moz-font-smoothing: antialiased;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  color: var(--dark);
   background-color: #f1f1f1;
 }
 
+
+
 h1{
-  color: #444;
-  font-size: 30px;
-  font-weight: bold;
-  text-transform: uppercase;
+  font-size: 5.2rem;
   padding-top: 40px;
 }
 
 h2{
-  color: #333;
-  font-size: 25px;
-  font-weight: 100;
-  text-transform: uppercase;
+  font-size: 3.6rem;
+  font-family: "pt_serif", serif;
+  font-weight: normal;
   padding-top: 30px;
   padding-bottom: 10px;
 }
 
 h3{
-  color: #444;
-  font-size: 22px;
+  font-size: 3rem;
+  font-family: "glacial";
+  font-weight: bold;
+  color: var(--green);
+  font-style: normal;
   padding-top: 10px;
 }
 
 h6 {
-  color: #444;
-  font-size: 18px;
-  font-weight: 150;
+  font-size: 2.2rem;
+  font-weight: bold;
   padding-top: 10px;
 }
 
 h5{
-  color: #000;
-  font-size: 25px;
-  font-weight: 100;
-  text-transform: uppercase;
+  color: var(--green);
+  font-size: 3rem;
   padding-top: 50px;
   margin: 0 0 24px;
 }
@@ -65,8 +102,18 @@ code{
   background-color: white;
 }
 
-a {
-  color: #4096c5;
+a,
+aa,
+a:visited {
+  color: var(--dark);
+  text-decoration: underline;
+}
+a:hover {
+  text-decoration: none;
+}
+
+a:visited {
+
 }
 
 asitemap{
@@ -101,7 +148,7 @@ border-bottom: 1px solid #eee;
 }
 
 .scalatex-site-Styles-content{
-  text-align: justify;
+  text-align: left;
 }
 
  .center-svg{
@@ -136,8 +183,16 @@ border-bottom: 1px solid #eee;
     min-height: 800px;
 }
 
+.navbar-inverse,
+.navbar-inverse .navbar-nav > li > a {
+    background-color : var(--purple);
+    color: #fff;
+}
+
 #footer {
-background-color : #222;
+background-color : var(--purple);
+color: #fff;
+width: 100%;
 }
 
 .sidebar-left {
