@@ -230,7 +230,7 @@ lazy val spatialdata = OsgiProject(dir, "org.openmole.spatialsampling",
   privatePackages = Seq("!scala.*","!org.apache.commons.math3.*","*")
 ) settings(
   //resolvers += "osgeo" at  "https://repo.osgeo.org/repository/release/",
-  libraryDependencies += "org.openmole.library" %% "spatialsampling" % spatialsamplingVersion,
+  libraryDependencies += "org.openmole" %% "spatialsampling" % spatialsamplingVersion,
   version := spatialsamplingVersion
 ) settings(settings: _*)
 
