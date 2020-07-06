@@ -75,12 +75,12 @@ package object stylesheet {
   )
 
   lazy val stepHeader = Seq(
-    width := "22%",
-    fontSize := "22px",
-    fontWeight := "bold",
-    margin := "0 auto",
-    minHeight := 85,
-    width := "95%"
+//    width := "22%",
+//    fontSize := "22px",
+//    fontWeight := "bold",
+//    margin := "0 auto",
+//    minHeight := 85,
+//    width := "95%"
   ) ++ center(90)
 
   val headerImg = Seq(
@@ -149,11 +149,11 @@ package object stylesheet {
   )
 
   val h1Like = Seq(
-    color := "#444",
-    fontSize := "35px",
-    fontWeight := "bold",
+//    color := "#444",
+    fontSize := "5.2rem",
+//    fontWeight := "bold",
     textTransform := "uppercase",
-    lineHeight := "50px"
+//    lineHeight := "50px"
   )
 
   def svgRunButton(top: Int) = Seq(
