@@ -25,7 +25,7 @@ object common {
   def xstreamVersion = "1.4.12"
   def scalaURIVersion = "1.1.1"
   def scoptVersion = "3.7.1"
-  def spatialsamplingVersion = "0.2"
+  def spatialsamplingVersion = "0.3"
   def logbackVersion = "1.2.3"
   def h2Version = "1.4.200"
   def shapelessVersion = "2.3.3"
