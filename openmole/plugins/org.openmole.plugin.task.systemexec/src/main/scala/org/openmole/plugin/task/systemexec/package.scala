@@ -66,27 +66,6 @@ package systemexec {
     implicit def seqOfStringToCommands(s: Seq[String]): OSCommands = OSCommands(OS(), s.map(s ⇒ Command(s)): _*)
   }
 
-  import org.openmole.core.context.Val
-  import org.openmole.core.workflow.builder.InputOutputBuilder
-  import org.openmole.plugin.task.external.ExternalPackage
-
-  trait ReturnValue[T] {
-    def returnValue: Lens[T, Option[Val[Int]]]
-  }
-
-  trait ErrorOnReturnValue[T] {
-    def errorOnReturnValue: Lens[T, Boolean]
-  }
-
-  trait StdOutErr[T] {
-    def stdOut: Lens[T, Option[Val[String]]]
-    def stdErr: Lens[T, Option[Val[String]]]
-  }
-
-  trait WorkDirectory[T] {
-    def workDirectory: Lens[T, Option[String]]
-  }
-
 }
 
 package object systemexec {
@@ -231,7 +210,7 @@ package object systemexec {
 
       val runtime = Runtime.getRuntime
 
-      import collection.JavaConverters._
+      import scala.jdk.CollectionConverters._
       val inheritedEnvironment = System.getenv.asScala.map { case (key, value) ⇒ s"$key=$value" }.toArray
 
       val openmoleEnvironment = environmentVariables.map { case (name, value) ⇒ name + "=" + value }.toArray

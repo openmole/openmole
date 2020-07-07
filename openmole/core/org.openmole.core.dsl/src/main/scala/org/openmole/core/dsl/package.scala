@@ -23,6 +23,7 @@ package dsl {
   import org.openmole.core.logconfig.LoggerConfig
   import cats._
   import org.openmole.core.workflow.mole
+
   import org.openmole.tool.crypto.Cypher
   import squants.information._
 

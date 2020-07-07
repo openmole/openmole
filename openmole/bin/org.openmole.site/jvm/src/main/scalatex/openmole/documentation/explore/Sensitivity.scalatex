@@ -95,8 +95,8 @@ SensitivityMorris(
     i2 in (0.0, 1.0),
     i3 in (0.0, 1.0)),
   outputs = Seq(o1, o2),
-  repetitions = 10,
-  levels = 10
+  sample = 10,
+  level = 10
 ) hook display
 """, header = "val model = EmptyTask()", name = "Morris")
 

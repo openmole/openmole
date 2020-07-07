@@ -319,11 +319,12 @@ Both commands' standard and error outputs are gathered and concatenated to a sin
     val error  = Val[String]
 
     // Task
-    val scriptTask = SystemExecTask("bash script.sh", "hostname") set (
-        resources += workDirectory / "script.sh",
-        stdOut := output,
-        stdErr := error
-    )
+    val scriptTask =
+      SystemExecTask(
+        command = Seq("bash script.sh", "hostname"),
+        stdOut = output,
+        stdErr = error
+      )
 
     // Workflow
     scriptTask hook display

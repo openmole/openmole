@@ -197,7 +197,7 @@ For the program to access external files, specify them to the task as @code{inpu
 
 @br@br
 
-@hl.openmole("""
+@hl.openmole(s"""
     // Declare variables
     val proto1 = Val[Int]
     val inputFile = Val[File]
@@ -219,7 +219,7 @@ For the program to access external files, specify them to the task as @code{inpu
     // Save the output file locally
     val copyHook = CopyFileHook(
         outputFile,
-        (workDirectory / "out-${proto1}.txt")
+        (workDirectory / "out-$${proto1}.txt")
     )
 
     // Workflow

@@ -39,17 +39,6 @@ object SystemExecTask {
   implicit def isExternal: ExternalBuilder[SystemExecTask] = ExternalBuilder(SystemExecTask.external)
   implicit def isInfo = InfoBuilder(info)
 
-  @deprecated
-  implicit def isSystemExec = new SystemExecTaskBuilder[SystemExecTask] {
-    override def commands = SystemExecTask.commands
-    override def environmentVariables = SystemExecTask.environmentVariables
-    override def returnValue = SystemExecTask.returnValue
-    override def errorOnReturnValue = SystemExecTask.errorOnReturnValue
-    override def stdOut = SystemExecTask.stdOut
-    override def stdErr = SystemExecTask.stdErr
-    override def workDirectory = SystemExecTask.workDirectory
-  }
-
   /**
    * System exec task execute an external process.
    * To communicate with the dataflow the result should be either a file / category or the return
@@ -57,7 +46,7 @@ object SystemExecTask {
    */
   def apply(commands: Command*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): SystemExecTask =
     SystemExecTask(
-      commands = commands.toVector
+      command = commands.toVector
     )
 
   /**
@@ -66,7 +55,7 @@ object SystemExecTask {
    * value of the process.
    */
   def apply(
-    commands:             Seq[Command],
+    command:              Seq[Command],
     workDirectory:        OptionalArgument[String]      = None,
     errorOnReturnValue:   Boolean                       = true,
     returnValue:          OptionalArgument[Val[Int]]    = None,
@@ -75,7 +64,7 @@ object SystemExecTask {
     shell:                Shell                         = Bash,
     environmentVariables: Vector[EnvironmentVariable]   = Vector.empty)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): SystemExecTask =
     new SystemExecTask(
-      commands = commands.map(c ⇒ OSCommands(OS(), c)).toVector,
+      command = command.map(c ⇒ OSCommands(OS(), c)).toVector,
       workDirectory = workDirectory,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
@@ -91,7 +80,7 @@ object SystemExecTask {
 }
 
 @Lenses case class SystemExecTask(
-  commands:             Vector[OSCommands],
+  command:              Vector[OSCommands],
   workDirectory:        Option[String],
   errorOnReturnValue:   Boolean,
   returnValue:          Option[Val[Int]],
@@ -112,7 +101,7 @@ object SystemExecTask {
 
       val commandsError =
         for {
-          c ← commands
+          c ← command
           exp ← c.expanded
           e ← exp.validate(allInputs)
         } yield e
@@ -139,7 +128,7 @@ object SystemExecTask {
       val preparedContext = External.deployInputFilesAndResources(external, context, External.relativeResolver(workDir))
 
       val osCommandLines =
-        commands.find { _.os.compatible }.map {
+        command.find { _.os.compatible }.map {
           cmd ⇒ cmd.expanded
         }.getOrElse(throw new UserBadDataError("No command line found for " + OS.actualOS))
 

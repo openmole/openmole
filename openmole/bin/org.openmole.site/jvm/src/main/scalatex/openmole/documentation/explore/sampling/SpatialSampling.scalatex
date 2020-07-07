@@ -28,14 +28,16 @@ A raster with random values:
 @br@br
 
 @hl.openmole("""
-val grid = Val[Array[Array[Double]]]
+val myGrid = Val[Array[Array[Double]]]
+val myDensity = Val[Double]
 
 RandomSpatialSampling(
-  samples,
-  worldSize,
-  density in Range(0.0, 1.0),
-  grid)
-""", header = "val samples = 10; val worldSize = 10; val density = Val[Double]", name= "random grid sampling")
+  grid = myGrid,
+  sample = 10,
+  gridSize = 10,
+  density = myDensity in (0.0, 1.0)
+)
+""", name= "random grid sampling")
 
 @br
 
@@ -56,17 +58,20 @@ A binary grid with random blocks (random size and position). With the same argum
 @br@br
 
 @hl.openmole("""
-val grid = Val[Array[Array[Double]]]
+val myGrid = Val[Array[Array[Double]]]
+val myBlocksNumber = Val[Double]
+val myBlocksMinSize = Val[Double]
+val myBlocksMaxSize = Val[Double]
 
 BlocksGridSpatialSampling(
-  samples,
-  worldSize,
-  blocksNumber in Range(1.0, 20.0),
-  blocksMinSize in Range(1.0, 10.0),
-  blocksMaxSize in Range(2.0, 30.0),
-  grid)
-""", header = "val samples = 10; val worldSize = 10; val blocksNumber = Val[Double]; val blocksMinSize = Val[Double]; val blocksMaxSize = Val[Double]", name="block grid sampling")
-
+  grid = myGrid,
+  sample = 10,
+  gridSize = 10,
+  number = myBlocksNumber in (1.0, 20.0),
+  minSize = myBlocksMinSize in (1.0, 10.0),
+  maxSize = myBlocksMaxSize in (2.0, 30.0)
+)
+""", name="block grid sampling")
 
 
 @h2{Thresholded exponential mixture sampling}
@@ -76,27 +81,29 @@ A binary grid created with an exponential mixture, with kernels of the form @cod
 @br@br
 
 @hl.openmole("""
-val grid = Val[Array[Array[Double]]]
+val myGrid = Val[Array[Array[Double]]]
+val myCenter = Val[Double]
+val myRadius = Val[Double]
+val myThreshold = Val[Double]
 
 ExpMixtureThresholdSpatialSampling(
-  samples,
-  worldSize,
-  expMixtureCenters in Range(1.0,20.0),
-  expMixtureRadius in Range(1.0,10.0),
-  expMixtureThreshold in Range(2.0,30.0),
-  grid)
-""", header = "val samples = 10; val worldSize = 10; val expMixtureCenters = Val[Double]; val expMixtureRadius = Val[Double]; val expMixtureThreshold = Val[Double]", name="block grid sampling")
+  grid = myGrid,
+  sample = 10,
+  worldSize = 10,
+  center = myCenter in (1.0, 20.0),
+  radius = myRadius in (1.0,10.0),
+  threshold = myThreshold in (2.0,30.0)
+)
+""", name="block grid sampling")
 
 @br
 
 with the specific parameters as factors for generator parameters:
 
 @ul
-  @li{@code{expMixtureCenters} the number of kernels,}
-  @li{@code{expMixtureRadius} the range of kernels,}
-  @li{@code{expMixtureThreshold} the threshold to produce the binary grid.}
-
-
+  @li{@code{center} the number of kernels,}
+  @li{@code{radius} the range of kernels,}
+  @li{@code{threshold} the threshold to produce the binary grid.}
 
 @h2{Percolated grid sampling}
 
@@ -111,25 +118,29 @@ The resulting network is transposed to a building configuration by assimilating 
 @br@br
 
 @hl.openmole("""
-val grid = Val[Array[Array[Double]]]
+val myGrid = Val[Array[Array[Double]]]
+val myPercolation = Val[Double]
+val myBordPoint = Val[Double]
+val myLinkWidth = Val[Double]
 
 PercolationGridSpatialSampling(
-  samples,
-  worldSize,
-  percolationProba in Range(0.1,1.0),
-  percolationBordPoints in Range(1.0,30.0),
-  percolationLinkWidth in Range(1.0,5.0),
-  grid)
-""", header = "val samples = 10; val worldSize = 10; val percolationProba = Val[Double]; val percolationBordPoints = Val[Double]; val percolationLinkWidth = Val[Double]", name="percolation grid sampling")
+  grid = myGrid,
+  sample = 10,
+  gridSize = 10,
+  percolation = myPercolation in (0.1, 1.0),
+  bordPoint = myBordPoint in (1.0, 30.0),
+  linkWidth = myLinkWidth in (1.0, 5.0)
+)
+""", name="percolation grid sampling")
 
 @br
 
 with
 
 @ul
-  @li{@code{percolationProba} the percolation probability,}
-  @li{@code{percolationBordPoints} the number of points on the bord of the grid to belong to the giant cluster,}
-  @li{@code{percolationLinkWidth} the width of the final streets.}
+  @li{@code{percolation} the percolation probability,}
+  @li{@code{bordPoint} the number of points on the bord of the grid to belong to the giant cluster,}
+  @li{@code{linkWidth} the width of the final streets.}
 
 
 @h2{Exponential mixture population grid sampling}
@@ -176,19 +187,19 @@ Urban morphogenesis model for population density introduced by @aa("(Raimbault, 
 @br@br
 
 @hl.openmole("""
-val grid = Val[Array[Array[Double]]]
+val myGrid = Val[Array[Array[Double]]]
 
 ReactionDiffusionSpatialSampling(
-  samples,
-  gridSize,
-  grid,
-  alpha,
-  beta,
-  nBeta,
-  growthRate,
-  totalPopulation
+  samples = 10,
+  gridSize = 10,
+  grid = myGrid,
+  alpha = 10.0,
+  beta = 10.0,
+  nBeta = 10,
+  growthRate = 10.0,
+  totalPopulation = 10
 )
-""", header = "val samples = 10; val worldSize = 10; val alpha = 10.0; val beta = 10.0; val growthRate = 10.0; val totalPopulation = 10", name="reaction diffusion grid sampling")
+""", name="reaction diffusion grid sampling")
 
 @br
 

@@ -2,12 +2,6 @@
 @import org.openmole.site._
 @import DocumentationPages._
 
-@def variables = """
-  val inputString = Val[String]
-  val Digits = Val[Double]"""
-
-
-
 @h2{Tasks}
 
 Tasks are the atomic computing elements of OpenMOLE: they describe what OpenMOLE should execute.
@@ -30,7 +24,7 @@ Below is a dummy task to illustrate this concept:
 
     // Instantiate a simple task using the i variable as an input, and j as an output
     // This task adds 2 to the input
-    val myTask = ScalaTask(val j = i + 2) set (
+    val myTask = ScalaTask("val j = i + 2") set (
         inputs += i,
         outputs += j,
 
@@ -75,7 +69,7 @@ The way to do it is shown in the following example:
     val j = Val[Int]
 
     // Define a task that adds 2 to the input
-    val myTask = ScalaTask(val j = i + 2) set (
+    val myTask = ScalaTask("val j = i + 2") set (
         inputs += i,
         outputs += j,
 

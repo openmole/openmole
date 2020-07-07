@@ -29,7 +29,7 @@ object SpatialSampling {
    * @return
    */
   def buildVariables(
-    prototype:           Val[_],
+    prototype:           Val[Array[Array[Double]]],
     values:              Array[Array[Array[Double]]],
     morphologyPrototype: Option[Val[_]],
     parameters:          (Val[_], Iterable[Double])*
@@ -46,11 +46,11 @@ object SpatialSampling {
     val arrayParams: List[(Val[_], Array[Double])] = parameters.map { case (p, v) ⇒ (p, v.toArray) }.toList
 
     values.zip(morphologies).zipWithIndex.map {
-      case ((v, morph), i) ⇒ List(
-        Variable(prototype.asInstanceOf[Val[Any]], v)
-      ) ++ (if (morphologyPrototype.isDefined) List(Variable(morphologyPrototype.get.asInstanceOf[Val[Any]], morph)) else List()
-        ) ++ arrayParams.map { case (p, vv) ⇒ Variable(p.asInstanceOf[Val[Any]], vv(i)) }
-    }.toIterator
+      case ((v, morph), i) ⇒
+        List(Variable(prototype, v)) ++
+          (if (morphologyPrototype.isDefined) List(Variable(morphologyPrototype.get.asInstanceOf[Val[Any]], morph)) else List()) ++
+          arrayParams.map { case (p, vv) ⇒ Variable(p.asInstanceOf[Val[Any]], vv(i)) }
+    }.iterator
   }
 
 }
@@ -60,28 +60,28 @@ object ExpMixtureThresholdSpatialSampling {
   /**
    * Sampling of binary density grids with a thresholded exponential mixture. Parameters are randomly sampled.
    *
-   * @param samples number of samples
+   * @param sample number of samples
    * @param gridSize size of the grid
-   * @param centers number of centers
+   * @param center number of centers
    * @param kernelRadius kernel radius
    * @param threshold threshold for the binary grid (max of kernels is at 1)
-   * @param prototype output prototype (must be an Array of Array of Double)
+   * @param grid output prototype (must be an Array of Array of Double)
    */
   def apply(
-    samples:             FromContext[Int],
+    grid:                Val[Array[Array[Double]]],
+    sample:              FromContext[Int],
     gridSize:            FromContext[Int],
-    centers:             ScalarOrSequenceOfDouble[_],
+    center:              ScalarOrSequenceOfDouble[_],
     kernelRadius:        ScalarOrSequenceOfDouble[_],
     threshold:           ScalarOrSequenceOfDouble[_],
-    prototype:           Val[_],
     morphologyPrototype: Option[Val[_]]              = None): FromContextSampling =
     Sampling {
       p ⇒
         import p._
 
-        val n = samples.from(context)
+        val n = sample.from(context)
         val size = gridSize.from(context)
-        val ncenters: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(centers), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
+        val ncenters: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(center), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
         val radius: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(kernelRadius), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
         val th: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(threshold), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
 
@@ -90,8 +90,8 @@ object ExpMixtureThresholdSpatialSampling {
 
         //def values: Array[RasterLayerData[Double]] = generators.zip(th).map { case (gen, t) ⇒ gen.generateGrid(random()).map { _.map { case d ⇒ if (d > t) 1.0 else 0.0 } } }
 
-        SpatialSampling.buildVariables(prototype, values, morphologyPrototype, (centers.prototype, ncenters), (kernelRadius.prototype, radius), (threshold.prototype, th))(random())
-    } prototypes { Seq(prototype, centers.prototype, kernelRadius.prototype, threshold.prototype) }
+        SpatialSampling.buildVariables(grid, values, morphologyPrototype, (center.prototype, ncenters), (kernelRadius.prototype, radius), (threshold.prototype, th))(random())
+    } prototypes { Seq(grid, center.prototype, kernelRadius.prototype, threshold.prototype) }
 
 }
 
@@ -100,39 +100,39 @@ object PercolationGridSpatialSampling {
   /**
    * Binary density grids through network percolation
    *
-   * @param samples number of samples
+   * @param sample number of samples
    * @param gridSize grid size
-   * @param percolationProba percolation probability
-   * @param bordPoints number of bord points
-   * @param linkwidth size of links
-   * @param prototype prototype
+   * @param percolation percolation probability
+   * @param bordPoint number of bord points
+   * @param linkWidth size of links
+   * @param grid prototype
    */
   def apply(
-    samples:             FromContext[Int],
+    grid:                Val[Array[Array[Double]]],
     gridSize:            FromContext[Int],
-    percolationProba:    ScalarOrSequenceOfDouble[_],
-    bordPoints:          ScalarOrSequenceOfDouble[_],
-    linkwidth:           ScalarOrSequenceOfDouble[_],
-    prototype:           Val[_],
-    maxIterations:       Int                         = 10000,
+    sample:              FromContext[Int],
+    percolation:         ScalarOrSequenceOfDouble[_],
+    bordPoint:           ScalarOrSequenceOfDouble[_],
+    linkWidth:           ScalarOrSequenceOfDouble[_],
+    maxIteration:        Int                         = 10000,
     morphologyPrototype: Option[Val[_]]              = None
   ): FromContextSampling = Sampling {
     p ⇒
       import p._
 
-      val n = samples.from(context)
+      val n = sample.from(context)
       val size = gridSize.from(context)
 
-      val proba: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(percolationProba), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
-      val bord: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(bordPoints), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
-      val width: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(linkwidth), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
+      val proba: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(percolation), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
+      val bord: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(bordPoint), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
+      val width: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(linkWidth), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
 
-      val values: Array[RasterLayerData[Double]] = proba.zip(bord.zip(width)).map { case (pp, (b, w)) ⇒ Generation.percolationGrid(size, pp, b.toInt, w, maxIterations)(random()).map { _.map { d ⇒ if (d > 0.0) 1.0 else 0.0 } } }.toArray
+      val values: Array[RasterLayerData[Double]] = proba.zip(bord.zip(width)).map { case (pp, (b, w)) ⇒ Generation.percolationGrid(size, pp, b.toInt, w, maxIteration)(random()).map { _.map { d ⇒ if (d > 0.0) 1.0 else 0.0 } } }.toArray
       //      val generators = proba.zip(bord.zip(width)).map { case (p, (b, w)) ⇒ PercolationGridGenerator(size, p, b.toInt, w, maxIterations) }.toArray
       //      def values: Array[RasterLayerData[Double]] = generators map { _.generateGrid(random()).map { _.map { case d ⇒ if (d > 0.0) 1.0 else 0.0 } } }
 
-      SpatialSampling.buildVariables(prototype, values, morphologyPrototype, (percolationProba.prototype, proba), (bordPoints.prototype, bord), (linkwidth.prototype, width))(random())
-  } prototypes { Seq(prototype, percolationProba.prototype, bordPoints.prototype, linkwidth.prototype) }
+      SpatialSampling.buildVariables(grid, values, morphologyPrototype, (percolation.prototype, proba), (bordPoint.prototype, bord), (linkWidth.prototype, width))(random())
+  } prototypes { Seq(grid, percolation.prototype, bordPoint.prototype, linkWidth.prototype) }
 }
 
 object BlocksGridSpatialSampling {
@@ -140,31 +140,31 @@ object BlocksGridSpatialSampling {
   /**
    * Binary density grid filled with blocks
    *
-   * @param samples samples
-   * @param blocks number of blocks
-   * @param blockMinSize min size
-   * @param blockMaxSize max size
-   * @param prototype prototype
+   * @param sample samples
+   * @param number number of blocks
+   * @param minSize min size
+   * @param maxSize max size
+   * @param grid prototype
    * @param gridSize size
    */
   def apply(
-    samples:             FromContext[Int],
+    grid:                Val[Array[Array[Double]]],
+    sample:              FromContext[Int],
     gridSize:            FromContext[Int],
-    blocks:              ScalarOrSequenceOfDouble[_],
-    blockMinSize:        ScalarOrSequenceOfDouble[_],
-    blockMaxSize:        ScalarOrSequenceOfDouble[_],
-    prototype:           Val[_],
+    number:              ScalarOrSequenceOfDouble[_],
+    minSize:             ScalarOrSequenceOfDouble[_],
+    maxSize:             ScalarOrSequenceOfDouble[_],
     morphologyPrototype: Option[Val[_]]              = None
   ): FromContextSampling = Sampling {
     p ⇒
       import p._
 
-      val n = samples.from(context)
+      val n = sample.from(context)
       val size = gridSize.from(context)
 
-      val blocksnum: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(blocks), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
-      val blocksmax: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(blockMinSize), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
-      val blocksmin: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(blockMaxSize), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
+      val blocksnum: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(number), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
+      val blocksmax: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(minSize), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
+      val blocksmin: List[Double] = ScalarOrSequenceOfDouble.unflatten(Seq.fill(n)(maxSize), Seq.fill(n)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
 
       val values: Array[RasterLayerData[Double]] = blocksnum.zip(blocksmax.zip(blocksmin)).map {
         case (bn, (bma, bmi)) ⇒
@@ -173,40 +173,40 @@ object BlocksGridSpatialSampling {
       //      val generators = blocksnum.zip(blocksmax.zip(blocksmin)).map { case (bn, (bma, bmi)) ⇒ BlocksGridGenerator(size, bn.toInt, bma.toInt, bmi.toInt) }.toArray
       //      def values: Array[RasterLayerData[Double]] = generators.map { _.generateGrid(random()).map { _.map { case d ⇒ if (d > 0.0) 1.0 else 0.0 } } }
 
-      SpatialSampling.buildVariables(prototype, values, morphologyPrototype, (blocks.prototype, blocksnum), (blockMinSize.prototype, blocksmin), (blockMaxSize.prototype, blocksmax))(random())
-  } prototypes { Seq(prototype, blocks.prototype, blockMinSize.prototype, blockMaxSize.prototype) }
+      SpatialSampling.buildVariables(grid, values, morphologyPrototype, (number.prototype, blocksnum), (minSize.prototype, blocksmin), (maxSize.prototype, blocksmax))(random())
+  } prototypes { Seq(grid, number.prototype, minSize.prototype, maxSize.prototype) }
 }
 
 object RandomSpatialSampling {
 
   /**
    * Random raster
-   * @param samples samples
-   * @param prototype prototype
+   * @param sample samples
+   * @param grid prototype
    * @param gridSize size
    */
   def apply(
-    samples:             FromContext[Int],
+    grid:                Val[Array[Array[Double]]],
+    sample:              FromContext[Int],
     gridSize:            FromContext[Int],
-    prototype:           Val[_],
     density:             OptionalArgument[ScalarOrSequenceOfDouble[_]] = None,
     morphologyPrototype: OptionalArgument[Val[_]]                      = None
   ): FromContextSampling = Sampling { p ⇒
     import p._
 
-    val s = samples.from(context)
+    val s = sample.from(context)
     val size = gridSize.from(context)
 
-    val densities: List[Double] = if (density.option.isDefined)
-      ScalarOrSequenceOfDouble.unflatten(Seq.fill(s)(density.option.get), Seq.fill(s)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
-    else List.fill(s)(0.5) // by default half cells are filled in average
+    val densities: List[Double] =
+      if (density.option.isDefined) ScalarOrSequenceOfDouble.unflatten(Seq.fill(s)(density.option.get), Seq.fill(s)(random().nextDouble())).from(context).map(_.value.asInstanceOf[Double])
+      else List.fill(s)(0.5) // by default half cells are filled in average
 
     val values: Array[RasterLayerData[Double]] = densities.toArray.map { d ⇒ Generation.randomGrid(Left(size))(random()).map { _.map { dd ⇒ if (dd < d) 1.0 else 0.0 } } }
     //def values: Array[Array[Array[Double]]] = densities.toArray.map { d ⇒ RandomGridGenerator(size).generateGrid(random()).map { _.map { dd ⇒ if (dd < d) 1.0 else 0.0 } } }
 
-    if (density.option.isDefined) SpatialSampling.buildVariables(prototype, values, morphologyPrototype.option, (density.option.get.prototype, densities))(random())
-    else SpatialSampling.buildVariables(prototype, values, morphologyPrototype.option)(random())
-  } prototypes { if (density.option.isDefined) Seq(prototype, density.option.get.prototype) else Seq(prototype) }
+    if (density.option.isDefined) SpatialSampling.buildVariables(grid, values, morphologyPrototype.option, (density.option.get.prototype, densities))(random())
+    else SpatialSampling.buildVariables(grid, values, morphologyPrototype.option)(random())
+  } prototypes { if (density.option.isDefined) Seq(grid, density.option.get.prototype) else Seq(grid) }
 }
 
 object OSMBuildingsGridSampling {
@@ -310,12 +310,12 @@ object ReactionDiffusionSpatialSampling {
   def apply(
     samples:         FromContext[Int],
     gridSize:        FromContext[Int],
-    prototype:       Val[_],
-    alpha:           FromContext[Double] = 1.0,
-    beta:            FromContext[Double] = 1.0,
-    nBeta:           FromContext[Int]    = 1,
-    growthRate:      FromContext[Double] = 100.0,
-    totalPopulation: FromContext[Double] = 1000.0
+    grid:            Val[Array[Array[Double]]],
+    alpha:           FromContext[Double]       = 1.0,
+    beta:            FromContext[Double]       = 1.0,
+    nBeta:           FromContext[Int]          = 1,
+    growthRate:      FromContext[Double]       = 100.0,
+    totalPopulation: FromContext[Double]       = 1000.0
   ): FromContextSampling = Sampling {
     p ⇒
       import p._
@@ -326,8 +326,8 @@ object ReactionDiffusionSpatialSampling {
         Generation.reactionDiffusionGrid(Left(gridSize.from(context)), growthRate.from(context), totalPopulation.from(context).toInt, alpha.from(context), beta.from(context), nBeta.from(context))(random())
       }
 
-      values.map { v ⇒ List(Variable(prototype.asInstanceOf[Val[Any]], v)) }.toIterator
-  } prototypes { Seq(prototype) }
+      values.map { v ⇒ List(Variable(grid.asInstanceOf[Val[Any]], v)) }.toIterator
+  } prototypes { Seq(grid) }
 
 }
 
