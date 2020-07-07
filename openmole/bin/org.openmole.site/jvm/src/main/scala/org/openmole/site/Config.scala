@@ -21,6 +21,7 @@ object Config {
   val baseURL = "http://www.openmole.org"
 
   lazy val closedIssues = Map(
+    "10" -> "https://github.com/openmole/openmole/milestone/8",
     "9" -> "https://github.com/openmole/openmole/milestone/7?closed=1",
     "8" -> "https://github.com/openmole/openmole/milestone/4?closed=1",
     "7" → "https://github.com/openmole/openmole/milestone/3?closed=1",
