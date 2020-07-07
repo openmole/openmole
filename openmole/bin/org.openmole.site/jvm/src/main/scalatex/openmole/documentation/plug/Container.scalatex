@@ -5,21 +5,18 @@
 @import DocumentationPages._
 
 
-When your model is written in a language for which a specific OpenMOLE task doesn't exist, or if it uses an assembly of tools, libraries, binaries, etc. you have to use a container task to make it portable, so that you can send it to any machine (with potentially varying OS installations).
+To call a native executable in an OpenMOLE task, you can either use:
+@ul
+  @li{the @code{ContainerTask} that runs your executable in a portable container,}
+  @li{or the @code{SystemExecTask} that executes a local command line as if you where in a terminal.}
 
+@h2{The ContainerTask: Run Docker Containers}
 
-
-@h2{Packaging with Docker}
-
-The @code{ContainerTask} runs docker container in OpenMOLE.
-It is based on a container engine running without administration privileges called @aa("udocker", href := "https://github.com/indigo-dc/udocker").
-Using this task, you can run containers from the @aa("docker hub", href := "https://hub.docker.com/"), or containers exported from docker.
-
+The @code{ContainerTask} runs @a(href := "https://www.docker.com/resources/what-container", "docker containers") in OpenMOLE. When your model is written in a language for which a specific OpenMOLE task doesn't exist, or if it uses an assembly of tools, libraries, binaries, etc. you might want to use a container task to make it portable, so that you can send it to any machine (with potentially varying OS installations).
 
 @h3{Preliminary remark}
 
 @usesSingularity("ContainerTask")
-
 
 @h3{Containers from the docker hub}
 
@@ -28,10 +25,10 @@ A simple task running a Python container would look like:
 @br@br
 
 @openmole(s"""
-    val container = ContainerTask(
-        "python:3.6-stretch",
-        ${tq}python -c 'print("youpi")'${tq}
-    )
+  val container = ContainerTask(
+    "python:3.6-stretch",
+    ${tq}python -c 'print("splendid!")'${tq}
+  )
 """)
 
 @br
@@ -98,29 +95,90 @@ The OpenMOLE workflow would then look like this:
 
     // Task
     val container = ContainerTask(
-        "python:3.6-stretch",
-        ${tq}python matrix.py data.csv $${i} out.csv${tq},
-        install = Seq("pip install numpy")
+      "python:3.6-stretch",
+      ${tq}python matrix.py data.csv $${i} out.csv${tq},
+      install = Seq("pip install numpy")
     ) set (
-        resources += workDirectory / "matrix.py",
-        inputFiles += (dataFile, "data.csv"),
-        outputFiles += ("out.csv", resultFile),
-        (inputs, outputs) += (i, dataFileName)
+      resources += workDirectory / "matrix.py",
+      inputFiles += (dataFile, "data.csv"),
+      outputFiles += ("out.csv", resultFile),
+      (inputs, outputs) += (i, dataFileName)
     )
 
     // Workflow
     DirectSampling(
-        sampling =
-            (dataFile in (workDirectory / "data") withName dataFileName) x
-            (i in (0 to 3)),
-        evaluation =
-            container hook CopyFileHook(resultFile, workDirectory / "results/$${dataFileName.dropRight(4)}_$${i}.csv")
+      sampling =
+        (dataFile in (workDirectory / "data") withName dataFileName) x
+          (i in (0 to 3)),
+      evaluation =
+        container hook CopyFileHook(resultFile, workDirectory / "results/$${dataFileName.dropRight(4)}_$${i}.csv")
     )
 """)
 
 @br
 
 The @code{install} parameter contains a set of command used to install some components in the container once and for all, when the task is instantiated.
+
+@h3{Containers and archive}
+
+You can also craft your own docker image on your machine, export it and then run it using the @code{ContainerTask}.
+
+@br
+
+For instance lets consider the following @i{DockerFile}:
+@code("""FROM debian:testing-slim
+RUN apt update && apt install -y fortune && apt clean""")
+
+@br
+
+You can build the container using docker:
+@plain("""[reuillon:/tmp/test] 19h25m27s $ docker build . -t mycontainer
+Sending build context to Docker daemon  2.048kB
+Step 1/2 : FROM debian:testing-slim
+testing-slim: Pulling from library/debian
+09da4619dc13: Pull complete
+Digest: sha256:fa46229fd1d1acc27c9ff99960abba8f3c7a29073767906e4f935a80f2f4dbef
+Status: Downloaded newer image for debian:testing-slim
+ ---> 282aee73ba41
+Step 2/2 : RUN apt update && apt install -y fortune && apt clean
+ ---> Running in f1b20c2572d8
+[...]
+The following NEW packages will be installed:
+  fortune-mod fortunes-min librecode0
+0 upgraded, 3 newly installed, 0 to remove and 20 not upgraded.
+[...]
+Removing intermediate container f1b20c2572d8
+ ---> bae4a6b38b4a
+Successfully built bae4a6b38b4a
+Successfully tagged mycontainer:latest""")
+
+@br
+
+Then save you container in an archive:
+@plain("""docker save mycontainer -o /tmp/container.tar""")
+
+@br
+
+You can now upload this archive in your OpenMOLE work directory and run it with a @code{"ContainerTask"}:
+
+@br@br
+
+@openmole(s"""
+val result = Val[String]
+
+val container = ContainerTask(
+  workDirectory / "container.tar",
+  "/usr/games/fortune",
+  stdOut = result
+)
+
+val upper =
+  ScalaTask("result = result.toUpperCase") set(
+    (inputs, outputs) += result
+  )
+
+container -- (upper hook display)
+""")
 
 
 @h3{Advanced Options}
@@ -140,9 +198,9 @@ In case you set this option, a return code different from 0 won't be considered
 
     // Task
     val container = ContainerTask(
-        "python:3.6-stretch",
-        ${tq}python matrix.py${tq},
-        returnValue = ret
+      "python:3.6-stretch",
+      ${tq}python matrix.py${tq},
+      returnValue = ret
     )
 
     // Workflow
@@ -162,13 +220,13 @@ A @code{ContainerTask}'s standard and error outputs can be set to OpenMOLE varia
 
     // Tasks
     val container = ContainerTask(
-        "debian:testing-slim",
-        ${tq}echo 'great !'${tq},
-        stdOut = myOut
+      "debian:testing-slim",
+      ${tq}echo 'great !'${tq},
+      stdOut = myOut
     )
 
     val parse = ScalaTask(${tq}myOut = myOut.toUpperCase${tq}) set (
-        (inputs, outputs) += myOut
+      (inputs, outputs) += myOut
     )
 
     // Workflow
@@ -190,15 +248,15 @@ This shows particularly useful to preserve the behaviour of some toolkits when e
 
     // Task
     val container = ContainerTask(
-        "debian:testing-slim",
-        ${tq}env${tq},
-        environmentVariables = Seq("NAME" -> "$${name.toUpperCase}")
+      "debian:testing-slim",
+      ${tq}env${tq},
+      environmentVariables = Seq("NAME" -> "$${name.toUpperCase}")
     ) set (inputs += name)
 
     // Workflow
     DirectSampling(
-        sampling = name in List("Bender", "Fry", "Leila"),
-        evaluation = container
+      sampling = name in List("Bender", "Fry", "Leila"),
+      evaluation = container
     )
 """)
 
@@ -210,9 +268,9 @@ This option takes the path of a file on the execution host and binds it to the s
 
 @hl.openmole(s"""
     ContainerTask(
-        "debian:testing-slim",
-        ${tq}ls /bind${tq},
-        hostFiles = Seq("/tmp" -> "/bind")
+      "debian:testing-slim",
+      ${tq}ls /bind${tq},
+      hostFiles = Seq("/tmp" -> "/bind")
     )
 """)
 
@@ -223,29 +281,15 @@ You may set the directory within the container where to start the execution from
 
 @hl.openmole(s"""
     ContainerTask(
-        "debian:testing-slim",
-        ${tq}ls${tq},
-        workDirectory = "/bin"
-    )
-""")
-
-
-@h3{Containers and archive}
-
-You can use the ContainerTask to run a container exported from Docker:
-
-@br@br
-
-@openmole(s"""
-    val container = ContainerTask(
-        workDirectory / "container.tgz",
-        ${tq}python -c 'print("youpi")'${tq}
+      "debian:testing-slim",
+      ${tq}ls${tq},
+      workDirectory = "/bin"
     )
 """)
 
 
 
-@h2{Calling a local program}
+@h2{The SystemExecTask: Call Local Programs}
 
 The @code{ContainerTask} was designed to be portable from one machine to another.
 However, some use-cases require executing specific commands installed on a given cluster.
