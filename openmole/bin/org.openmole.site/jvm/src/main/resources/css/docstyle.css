@@ -60,12 +60,13 @@ body {
 
 
 
-h1{
+h1, .h1 {
   font-size: 5.2rem;
-  padding-top: 40px;
+  /*font-weight: bold;*/
+  text-transform: uppercase;
 }
 
-h2{
+h2 {
   font-size: 3.6rem;
   font-family: "pt_serif", serif;
   font-weight: normal;
@@ -73,7 +74,7 @@ h2{
   padding-bottom: 10px;
 }
 
-h3{
+h3 {
   font-size: 3rem;
   font-family: "glacial";
   font-weight: bold;
@@ -88,13 +89,15 @@ h6 {
   padding-top: 10px;
 }
 
-h5 {
+/* not used */
+/*h5 {
   color: var(--green);
   font-size: 3rem;
   padding-top: 50px;
   margin: 0 0 24px;
-}
+}*/
 
+/* used for netlogo wizard */
 h4 {
   font-size: 2.2rem;
   font-weight: 700;
@@ -102,10 +105,10 @@ h4 {
 }
 
 code{
-  color: #c83771;
+  /*color: #c83771;*/
+  color: var(--pink);
   font-size: small;
   font-weight: bold;
-  background-color: white;
 }
 
 a,

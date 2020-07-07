@@ -5,12 +5,12 @@
 
 @ul( listStyleType := "none")
   @li
-    @h5
+    @h3
       @a(plug.title, href := plug.file)
     @ol
       @sitemap.siteMapSection(plugPages)
   @li
-    @h5
+    @h3
         @a(explore.title, href := explore.file)
     @ol
       @li
@@ -19,25 +19,25 @@
           @sitemap.siteMapSection(samplingPages)
       @sitemap.siteMapSection(explorePages.diff(Seq(samplings)))
   @li
-    @h5
+    @h3
         @a(scale.title, href := scale.file)
     @ol
       @sitemap.siteMapSection(scalePages)
   @li
-    @h5
+    @h3
         @a(language.title, href := language.file)
     @ol
       @sitemap.siteMapSection(languagePages)
   @li
-    @h5
+    @h3
         @a("Advanced Concepts", href := geneticAlgorithm.file)
     @ol
       @sitemap.siteMapSection(advancedConceptsPages)
   @li
-    @h5
+    @h3
         @a(developers.title, href := developers.file)
     @ol
       @sitemap.siteMapSection(developersPages)
-  @h5
+  @h3
     See also
   @sitemap.siteMapSection(docLonelyPages)

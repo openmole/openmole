@@ -4,12 +4,22 @@
 @import org.openmole.site.Config._
 
 
+@h2{V10 | Quadratic Quest}
 
-@h2{9.0 Prolific Parrot}
+@h6{@aa("Bug fixes", href := closedIssues("10"))}
 
 
 
-@h2{8.0 Origami Orchid}
+@h2{V9 | Prolific Parrot}
+
+@h6{@aa("Bug fixes", href := closedIssues("9"))}
+
+
+
+@h2{V8 | Origami Orchid}
+
+@h3{8.0}
+
 @h6{Core}
 @ul
   @li{Migrate to build to SBT 1.0}
@@ -28,7 +38,6 @@
     @li{Add a toOMS option on potential model files to launch the model import wizard from the file tree}
     @li{Multiple selection for plugin removal}
     @li{Revamp environment error from execution panel with a more reactive table}
-
 
 @h6{Plugins}
 @ul
@@ -50,10 +59,14 @@
     @li{Generate a "Contents" section for all pages}
     @li{Upgrade the search efficiency}
 
-@div
-  @aa("Bug fixes", href := closedIssues("8"))
+@h6{@aa("Bug fixes", href := closedIssues("8"))}
 
-@h2{7.0 | Nano Ninja}
+
+
+@h2{V7 | Nano Ninja}
+
+@h3{7.0}
+
 @ul
   @li{Simplification of the workflow construction: every method scheme has now its builder}
   @li{Revamp the MGO library}
@@ -71,22 +84,27 @@
   @li{Display JVM processor and memory info}
   @li{Revamp the website}
 
+
 @h3{7.1}
+
 @ul
   @li{Fix bug with NetLogo precompiled code}
 
-@div
-  @aa("Bug fixes", href := closedIssues("7"))
+@h6{@aa("Bug fixes", href := closedIssues("7"))}
 
-@h2{6.0 | Mostly Magic}
+
+
+@h2{V6 | Mostly Magic}
+
+@h3{6.0}
 
 Long time no release! More than a year!
 The OpenMOLE team is very proud to disclose "Mostly Magic", the 6th major version of OpenMOLE.
+@br
 As a reminder OpenMOLE is a software for parameter exploration, optimization, data processing which allows a simple access to large scale distributed execution environments.
 It has been designed to be useful for a wide range of users and is usable even for people with no knowledge in distributed computing.
 
-@p
-What's new?
+@h6{What's new?}
 
 @ul
   @li{A new task has been introduced, the CARETask. It makes it easier than ever to run your applications and their dependencies (C, Python, R, ...) in OpenMOLE. The access to EGI is now based on DIRAC and webdav. It is more reliable, more scalable and more efficient.}
@@ -98,25 +116,26 @@ What's new?
   @li{The execution panel has been widely improved.}
   @li{A new democratic (or is it?) process to decide on the release name :)}
 
-@p
-What's to come in next release?
-@p
-First we plan to avoid as much as possible the long release cycles such as this one, we will make our best to shorten the release cycle of OpenMOLE to a few months.
-A new website is under development (thanks Paul & Etienne aka jQuery team).
-The documentation will be empowered with a search function in the documentation (thanks Julien!!!).
-A new ContainerTask will offer support for Docker / OCI containers.
-A modular OpenMOLE, with additional plugins enabled on demand.
-Improvement of the interface to be even more user friendly, with more tooltips and integrated help.
+@h6{What's to come in next release?}
 
-@p
+First we plan to avoid as much as possible the long release cycles such as this one, we will make our best to shorten the release cycle of OpenMOLE to a few months.
+@ul
+    @li{A new website is under development (thanks Paul & Etienne aka jQuery team).}
+    @li{The documentation will be empowered with a search function in the documentation (thanks Julien!!!).}
+    @li{A new ContainerTask will offer support for Docker / OCI containers.}
+    @li{A modular OpenMOLE, with additional plugins enabled on demand.}
+    @li{Improvement of the interface to be even more user friendly, with more tooltips and integrated help.}
+
+@br
+
 A multi-user version that you can install on a server and be used by several user at the same time.
 The possibility to delegate computation to cloud provider such as Amazon, Azure... and cloud middleware such as open stack.
 
-@div
-  @aa("Bug fixes", href := closedIssues("6.0"))
+@h6{@aa("Bug fixes", href := closedIssues("6.0"))}
 
 
 @h3{6.1}
+
 @ul
   @li{CARE required a kernel version greater than 3.2 which is not suitable for grid executions. A new version as been released and linked in the doc which depends on the Linux kernel 2.6.32.}
   @li{The CARETask was failing on some systems due to argument parsing.}
@@ -124,11 +143,12 @@ The possibility to delegate computation to cloud provider such as Amazon, Azure.
   @li{The authentication add panel had no cancel button.}
   @li{A link to the demo site has been added on the website.}
 
-@aa("Bug fixes", href := closedIssues("6.1"))
+@h6{@aa("Bug fixes", href := closedIssues("6.1"))}
 
 
 @h3{6.2}
-Fix the deserialization of the authentications.
 
-@div
-  @aa("Bug fixes", href := closedIssues("6.2"))
+@ul
+    @li{Fix the deserialization of the authentications.}
+
+@h6{@aa("Bug fixes", href := closedIssues("6.2"))}

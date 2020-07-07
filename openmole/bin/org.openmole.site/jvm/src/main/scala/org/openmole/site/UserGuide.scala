@@ -33,7 +33,7 @@ object UserGuide {
   implicit def fromPageTreeToLinks(pageTree: PageTree): Seq[Link] = pageTree.sons.map { s ⇒ Link(s.page.name, s.page.file) }
 
   def header(sp: TypedTag[_ <: String]) =
-    div(paddingTop := 120)(
+    div(paddingTop := 40)(
       div(stepHeader)(sp),
       line
     )
@@ -41,32 +41,32 @@ object UserGuide {
   def headerModel(model: String) = model match {
     case "Plug" ⇒ header(span(
       tools.to(DocumentationPages.plug)(img(src := Resource.img.model.codeAnimated.file, headerImg)),
-      span(s"Plug your model", h1Like)
+      span(s"Plug your model", classIs("h1"))
     ))
     case _ ⇒ header(span(
       tools.to(DocumentationPages.plug)(img(src := Resource.img.model.codeAnimated.file, headerImg)),
-      span(s"Plug your $model model", h1Like)
+      span(s"Plug your $model model", classIs("h1"))
     ))
   }
 
   def headerMethod(method: String) = method match {
     case "Explore" ⇒ header(span(
       tools.to(DocumentationPages.explore)(img(src := Resource.img.method.exploreMapAnimated.file, headerImg)),
-      span(s"Explore your model", h1Like)
+      span(s"Explore your model", classIs("h1"))
     ))
     case _ ⇒ header(span(
       tools.to(DocumentationPages.explore)(img(src := Resource.img.method.exploreMapAnimated.file, headerImg)),
-      span(s"Explore with $method", h1Like)
+      span(s"Explore with $method", classIs("h1"))
     ))
   }
 
   def headerEnvironment(env: String) = env match {
     case "Scale Up" ⇒ header(span(
       tools.to(DocumentationPages.scale)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
-      span(s"Scale up your experiments"), h1Like))
+      span(s"Scale up your experiments"), classIs("h1")))
     case _ ⇒ header(span(
       tools.to(DocumentationPages.scale)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
-      span(s"Scale up on $env"), h1Like
+      span(s"Scale up on $env"), classIs("h1")
     ))
   }
 
