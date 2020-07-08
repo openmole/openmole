@@ -139,7 +139,13 @@ object ExactObjective {
 
   def toDouble[P](o: ExactObjective[P], context: Context) = {
     def value = o.toDouble(o.get(context))
-    def deltaValue = o.delta.map(d ⇒ math.abs(value - d)).getOrElse(value)
+
+    def deltaValue =
+      o.delta match {
+        case Some(delta) => math.abs(value - delta)
+        case None => value
+      }
+
     if (!o.negative) deltaValue else -deltaValue
   }
 
