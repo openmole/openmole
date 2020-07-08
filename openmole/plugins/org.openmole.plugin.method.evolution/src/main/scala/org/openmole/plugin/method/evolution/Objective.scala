@@ -142,8 +142,8 @@ object ExactObjective {
 
     def deltaValue =
       o.delta match {
-        case Some(delta) => math.abs(value - delta)
-        case None => value
+        case Some(delta) ⇒ math.abs(value - delta)
+        case None        ⇒ value
       }
 
     if (!o.negative) deltaValue else -deltaValue

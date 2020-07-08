@@ -27,29 +27,26 @@ A raster with random values:
 
 @br@br
 
-@hl.openmole("""
-val myGrid = Val[Array[Array[Double]]]
+@hl.openmole("""val myGrid = Val[Array[Array[Double]]]
 val myDensity = Val[Double]
 
-RandomSpatialSampling(
-  grid = myGrid,
-  sample = 10,
-  gridSize = 10,
-  density = myDensity in (0.0, 1.0)
-)
-""", name= "random grid sampling")
+val myModel =
+  ScalaTask("println(myGrid.size)") set (
+    (inputs, outputs) += myGrid
+  )
+
+DirectSampling(
+  sampling = (myDensity in (0.0 to 1.0 by 0.1)) x (myGrid is RandomSpatialSampling(gridSize = 10, density = myDensity)),
+  evaluation = myModel
+)""", name= "random grid sampling")
 
 @br
 
 where
 
 @ul
-  @li{@code{samples} is the number of grids to generate,}
   @li{@code{worldSize} is the width of the generated square grid,}
-  @li{the factor for a density parameter is optional and produces a binary grid of given density in average if provided,}
-  @li{@code{prototype} is the prototype for the generated grid (must be a @code{Val[Array[Array[Double]]]} since the grid is represented as raster data).}
-
-
+  @li{the density parameter is optional and produces a binary grid of given density in average if provided,}
 
 @h2{Blocks grid sampling}
 
@@ -59,19 +56,23 @@ A binary grid with random blocks (random size and position). With the same argum
 
 @hl.openmole("""
 val myGrid = Val[Array[Array[Double]]]
-val myBlocksNumber = Val[Double]
-val myBlocksMinSize = Val[Double]
-val myBlocksMaxSize = Val[Double]
+val myBlocksNumber = Val[Int]
+val myBlocksMinSize = Val[Int]
+val myBlocksMaxSize = Val[Int]
 
-BlocksGridSpatialSampling(
-  grid = myGrid,
-  sample = 10,
-  gridSize = 10,
-  number = myBlocksNumber in (1.0, 20.0),
-  minSize = myBlocksMinSize in (1.0, 10.0),
-  maxSize = myBlocksMaxSize in (2.0, 30.0)
-)
-""", name="block grid sampling")
+val myModel =
+  ScalaTask("println(myGrid.size)") set (
+    (inputs, outputs) += myGrid
+  )
+
+DirectSampling(
+  sampling =
+    (myBlocksNumber in (10 to 15)) x
+      (myBlocksMinSize in (1 to 3)) x
+      (myBlocksMaxSize in Range[Int]("myBlocksMinSize + 3", "myBlocksMinSize + 5")) x
+      (myGrid is BlocksGridSpatialSampling(gridSize = 10, number = myBlocksNumber, minSize = myBlocksMinSize, maxSize = myBlocksMaxSize)),
+  evaluation = myModel
+)""", name="block grid sampling")
 
 
 @h2{Thresholded exponential mixture sampling}
@@ -82,19 +83,23 @@ A binary grid created with an exponential mixture, with kernels of the form @cod
 
 @hl.openmole("""
 val myGrid = Val[Array[Array[Double]]]
-val myCenter = Val[Double]
+val myCenter = Val[Int]
 val myRadius = Val[Double]
 val myThreshold = Val[Double]
 
-ExpMixtureThresholdSpatialSampling(
-  grid = myGrid,
-  sample = 10,
-  worldSize = 10,
-  center = myCenter in (1.0, 20.0),
-  radius = myRadius in (1.0,10.0),
-  threshold = myThreshold in (2.0,30.0)
-)
-""", name="block grid sampling")
+val myModel =
+  ScalaTask("println(myGrid.size)") set (
+    (inputs, outputs) += myGrid
+  )
+
+DirectSampling(
+  sampling =
+    (myCenter in (1 to 20)) x
+      (myRadius in (1.0 to 20.0)) x
+      (myThreshold in (2.0 to 30.0)) x
+      (myGrid is ExpMixtureThresholdSpatialSampling(gridSize = 10, center = myCenter, radius = myRadius, threshold = myThreshold)),
+  evaluation = myModel
+)""", name="block grid sampling")
 
 @br
 
@@ -120,18 +125,22 @@ The resulting network is transposed to a building configuration by assimilating 
 @hl.openmole("""
 val myGrid = Val[Array[Array[Double]]]
 val myPercolation = Val[Double]
-val myBordPoint = Val[Double]
+val myBordPoint = Val[Int]
 val myLinkWidth = Val[Double]
 
-PercolationGridSpatialSampling(
-  grid = myGrid,
-  sample = 10,
-  gridSize = 10,
-  percolation = myPercolation in (0.1, 1.0),
-  bordPoint = myBordPoint in (1.0, 30.0),
-  linkWidth = myLinkWidth in (1.0, 5.0)
-)
-""", name="percolation grid sampling")
+val myModel =
+  ScalaTask("println(myGrid.size)") set (
+    (inputs, outputs) += myGrid
+  )
+
+DirectSampling(
+  sampling =
+    (myPercolation in (0.1 to 1.0 by 0.1)) x
+      (myBordPoint in (1 to 30)) x
+      (myLinkWidth in (1.0 to 5.0)) x
+      (myGrid is PercolationGridSpatialSampling(gridSize = 10, percolation = myPercolation, bordPoint = myBordPoint, linkWidth = myLinkWidth)),
+  evaluation = myModel
+)""", name="percolation grid sampling")
 
 @br
 
@@ -141,40 +150,6 @@ with
   @li{@code{percolation} the percolation probability,}
   @li{@code{bordPoint} the number of points on the bord of the grid to belong to the giant cluster,}
   @li{@code{linkWidth} the width of the final streets.}
-
-
-@h2{Exponential mixture population grid sampling}
-
-At a smaller scale than the previous generators which are all binary grids (building configurations), population density grids can be considered at the metropolitan scale for example (a grid cell being of width 1km for example).
-
-@br
-
-A first simple generator for polycentric population densities uses an exponential mixture:
-
-@br@br
-
-@hl.openmole("""
-ExponentialMixtureSpatialSampling(
-  gridSize,
-  centersNumber,
-  maxValue,
-  kernelRadius,
-  samples,
-  prototypes
-)
-""", name="exp mixture grid sampling")
-
-@br
-
-where
-
-@ul
-  @li{@code{gridSize} is the dimension of the world as @code{Either[Int, (Int, Int)]},}
-  @li{@code{centersNumber} is an integer giving the number of kernels,}
-  @li{@code{maxValue} is optional (default to 1) and can be either a double giving the intensity at the center of each kernel, or a sequence of doubles giving the intensity for each kernel,}
-  @li{@code{kernelRadius} is also optional and specifies similarly either all radius or the sequence of radius,}
-  @li{@code{samples} is the number of grids to generate,}
-  @li{@code{prototypes} is an arbitrary number of prototypes for the generated layers (must be of the same size as provided parameters if in sequence mode).} */
 
 @h2{Reaction diffusion population grid sampling}
 
@@ -188,27 +163,26 @@ Urban morphogenesis model for population density introduced by @aa("(Raimbault, 
 
 @hl.openmole("""
 val myGrid = Val[Array[Array[Double]]]
+val myGrowthRate = Val[Double]
 
-ReactionDiffusionSpatialSampling(
-  samples = 10,
-  gridSize = 10,
-  grid = myGrid,
-  alpha = 10.0,
-  beta = 10.0,
-  nBeta = 10,
-  growthRate = 10.0,
-  totalPopulation = 10
-)
-""", name="reaction diffusion grid sampling")
+val myModel =
+  ScalaTask("println(myGrid.size)") set (
+    (inputs, outputs) += myGrid
+  )
+
+DirectSampling(
+  sampling =
+    (myGrowthRate in (1.0 to 10.0)) x
+      (myGrid is ReactionDiffusionSpatialSampling(gridSize = 10, alpha = 10.0, beta = 10.0, nBeta = 10, growthRate = myGrowthRate, totalPopulation = 10)),
+  evaluation = myModel
+)""", name="reaction diffusion grid sampling")
 
 @br
 
 with
 
 @ul
-  @li{@code{samples} number of grids to generate,}
   @li{@code{gridSize} width of the square grid,}
-  @li{@code{prototype} the prototype for the generated grid,}
   @li{@code{alpha} strength of preferential attachment,}
   @li{@code{beta} strength of diffusion,}
   @li{@code{nBeta} number of times diffusion is operated at each time step,}
