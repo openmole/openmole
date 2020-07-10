@@ -49,7 +49,7 @@ DirectSampling(
 The GAMA task exposes the following arguments:
   @ul
     @li{@code{gamlOrWorkspace} The location of your gaml file or the location of your gama workspace directory (in this case the model argument must be set),}
-    @li{@code{model} the relative path of your gaml file in your workdirectory, this parameter must bet set only when gamlOrWorkspace is a directory},
+    @li{@code{model} the relative path of your gaml file in your workdirectory, this parameter must bet set only when gamlOrWorkspace is a directory}
     @li{@code{experiment} the name of your experiment as implemented the gaml file, mandatory}
     @li{@code{finalStep} the last simulation step of you simulation, mandatory}
     @li{@code{frameRate} the frame rate to sample you simulation dynamics, optional}
