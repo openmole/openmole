@@ -33,12 +33,17 @@ span.hljs-tag, span.hljs-symbol{
 }
 
 :root {
+    /* main colors */
     --purple: #3f3d56;
     --green: #a6bf26;
-    --grey: #e5e5e5;
+    /* secondary colors */
     --dark: #222222;
-    --pink: #F86D70;
     --white: #fff;
+    /* accent colors */
+    --pink: #F86D70;
+    --purple2;
+
+    --grey: #e5e5e5;
 }
 
 body {
@@ -104,12 +109,15 @@ h4 {
   color: var(--white);
 }
 
-code{
-  /*color: #c83771;*/
-  color: var(--pink);
-  font-size: small;
-  font-weight: bold;
+
+code,
+.hljs {
+    background-color: transparent;
+    color: var(--purple);
+    font-size: 80%;
+    font-weight: bold;
 }
+
 
 a,
 a:visited {
@@ -120,6 +128,17 @@ a:hover {
   color: var(--green);
   text-decoration: none;
 }
+
+
+ul {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+li {
+    padding-top: 5px;
+}
+
 
 asitemap{
   color : orange;
@@ -393,31 +412,34 @@ img{
 
 
 .btn.btn-default {
-    font-family: "glacial";
     background-color: transparent;
     color: var(--purple);
-    border: 1px solid var(--purple);
-    text-transform: uppercase;
-}
-
-.btn.btn-selected {
-    background-color: var(--purple);
-    color: var(--green);
-    border: 1px solid var(--purple);
-    font-weight: bold;
-    text-transform: uppercase;
+    border: 2px solid var(--purple);
+    font-family: "glacial";
+    font-size: 1.8rem;
+    /*font-weight: bold;
+    text-transform: uppercase;*/
 }
 
 .btn:hover {
+    border: 2px solid var(--green);
     color: var(--green);
-    border: 1px solid var(--green);
+}
+
+.btn.btn-selected,
+.btn.btn-selected:hover {
+    background-color: var(--purple);
+    color: var(--green);
+    border: 2px solid var(--purple);
+    font-size: 1.8rem;
+    font-weight: bold;
+    /*text-transform: uppercase;*/
 }
 
 .btn-danger:hover {
     background-color: #c9302c;
     color: var(--white);
     border: 1px solid #c9302c;
-    font-weight: 100;
 }
 
 b,

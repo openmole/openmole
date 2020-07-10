@@ -58,9 +58,9 @@ object SideMenu {
       )
     )
 
-  def right(current: Page, menus: SideMenu*) = build(menus, div(rightDetailButtons(100), id := "sidebar-right"), currentPage = Some(current))
+  def right(current: Page, menus: SideMenu*) = build(menus, div(rightDetailButtons(150), id := "sidebar-right"), currentPage = Some(current))
 
-  def left(current: Page, menus: SideMenu*) = build(menus, div(leftDetailButtons(230), `class` := "sidebar-left"), currentPage = Some(current), selectMode = true)
+  def left(current: Page, menus: SideMenu*) = build(menus, div(leftDetailButtons(280), `class` := "sidebar-left"), currentPage = Some(current), selectMode = true)
 
   implicit def pageToLink(p: Page): Link = Link(p.name, p.file)
 
