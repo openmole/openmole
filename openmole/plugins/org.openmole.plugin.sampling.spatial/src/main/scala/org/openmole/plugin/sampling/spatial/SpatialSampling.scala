@@ -250,7 +250,7 @@ object ExponentialMixtureSpatialSampling {
 
 */
 
-/* Matching doc
+  /* Matching doc
 
 @h2{Exponential mixture population grid sampling}
 
@@ -287,21 +287,21 @@ where
 }
 
 /**
-*  Reaction diffusion to generate population grids
-*/
+ *  Reaction diffusion to generate population grids
+ */
 object ReactionDiffusionSpatialSampling {
 
-def apply(
-  gridSize:        FromContext[Int],
-  alpha:           FromContext[Double] = 1.0,
-  beta:            FromContext[Double] = 1.0,
-  nBeta:           FromContext[Int]    = 1,
-  growthRate:      FromContext[Double] = 100.0,
-  totalPopulation: FromContext[Double] = 1000.0
-) = FromContext { p ⇒
-  import p._
-  Generation.reactionDiffusionGrid(Left(gridSize.from(context)), growthRate.from(context), totalPopulation.from(context).toInt, alpha.from(context), beta.from(context), nBeta.from(context))(random())
-}
+  def apply(
+    gridSize:        FromContext[Int],
+    alpha:           FromContext[Double] = 1.0,
+    beta:            FromContext[Double] = 1.0,
+    nBeta:           FromContext[Int]    = 1,
+    growthRate:      FromContext[Double] = 100.0,
+    totalPopulation: FromContext[Double] = 1000.0
+  ) = FromContext { p ⇒
+    import p._
+    Generation.reactionDiffusionGrid(Left(gridSize.from(context)), growthRate.from(context), totalPopulation.from(context).toInt, alpha.from(context), beta.from(context), nBeta.from(context))(random())
+  }
 
 }
 
