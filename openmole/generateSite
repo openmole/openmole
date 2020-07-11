@@ -14,7 +14,7 @@ fi
 
 mkdir -p "${TARGET}" && \
   sbt "buildSite --target \"${TARGET}\"" && \
-  (git clone https://gitlab.openmole.org/narduin/refonte-hp "${TARGET}/build_hp" && cd "${TARGET}/build_hp" && npm clean && rm -rf dist/ && npm install && npm run build && cp -r dist/index.html ${TARGET} && rm -rf "${TARGET}/build_hp") && \
+  (git clone https://gitlab.openmole.org/narduin/refonte-hp "${TARGET}/build_hp" && cd "${TARGET}/build_hp" && rm -rf dist/ && npm install && npm run build && cp -r dist/index.html ${TARGET} && rm -rf "${TARGET}/build_hp") && \
   sbt "project openmole" clean "set (tarPath := new File(\"${TARGET}/openmole.tar.gz\"))" tar && \
   #sbt "project org-openmole-daemon" clean "set (tarPath := new File(\"${TARGET}/daemon.tar.gz\"))" tar && \
   rm -rf "${TARGET}/api" && \
