@@ -144,6 +144,7 @@ package object shared {
       lazy val idf = "https://www.iledefrance.fr/"
       lazy val paris = "https://www.paris.fr/"
       lazy val ign = "http://www.ign.fr/"
+      lazy val ideesrouen = "http://umr-idees.fr/"
     }
 
     object repo {
@@ -177,6 +178,7 @@ package object shared {
     partner.idf,
     partner.paris,
     partner.ign,
+    partner.ideesrouen,
     paper.jassCP,
     paper.fgcs2013,
     paper.fgcs2013preprint,
