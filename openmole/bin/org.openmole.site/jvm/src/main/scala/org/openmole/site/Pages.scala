@@ -212,7 +212,7 @@ object DocumentationPages {
   val faq = DocumentationPage.fromScalatex(name = "FAQ", content = scalatex.FAQ, title = Some("Frequently Asked Questions"))
 
   // Plug
-  def plugPages = pageNode(plug, Vector(scala, java, netLogo, python, r, scilab, container))
+  def plugPages = pageNode(plug, Vector(scala, java, container, python, r, netLogo, gama, scilab))
 
   lazy val plug = DocumentationPage.fromScalatex(name = "Plug", content = scalatex.documentation.plug.Plug, title = Some("Plug Your Model"))
   lazy val scala = DocumentationPage.fromScalatex(name = "Scala", content = scalatex.documentation.plug.Scala)
@@ -221,6 +221,7 @@ object DocumentationPages {
   lazy val python = DocumentationPage.fromScalatex(name = "Python", content = scalatex.documentation.plug.Python)
   lazy val r = DocumentationPage.fromScalatex(name = "R", content = scalatex.documentation.plug.R)
   lazy val scilab = DocumentationPage.fromScalatex(name = "Scilab", content = scalatex.documentation.plug.Scilab)
+  lazy val gama = DocumentationPage.fromScalatex(name = "GAMA", content = scalatex.documentation.plug.GAMA)
   lazy val container = DocumentationPage.fromScalatex(name = "Executable", content = scalatex.documentation.plug.Container)
 
   // Explore
