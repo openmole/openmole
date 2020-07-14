@@ -1,0 +1,128 @@
+.menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  text-align: right;
+  width: 100vw;
+  background-color: var(--purple);
+  z-index: 1000;
+}
+
+.menu__label {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 4rem;
+  opacity: 1;
+  color: var(--green);
+  z-index: 999;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.menu__label--close {
+  font-size: 6rem;
+  color: var(--green);
+}
+
+.menu__burger {
+  display: inline-block;
+}
+
+.menu__links {
+  list-style-type: none;
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  position: absolute;
+  top: -50%;
+  left: 50%;
+  height: 100vh;
+  width: 100vw;
+  transform: translate(-50%, -100%);
+  text-align: center;
+  transition: transform 0.4s ease-in-out;
+  z-index: 99;
+}
+
+.menu__link {
+  display: block;
+  padding: 10px;
+  font-size: 3rem;
+  color: var(--white);
+  transition: color 0.2s ease-in-out;
+}
+.menu__link:visited {
+  color: white;
+}
+.menu__link:hover,
+.menu__link:focus {
+  color: var(--green);
+  transition: color 0.2s ease-in-out;
+}
+.menu__link:active {
+  border-bottom: 1px solid white;
+}
+
+.menu input:focus + .menu__label {
+  color: var(--dark);
+  transition: color 0.2s ease-in-out;
+}
+
+.menu input:checked + .menu__label {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.menu input:checked ~ .menu__links {
+  top: 0;
+  transform: translate(-50%, 0);
+  transition: transform 0.4s ease-in-out;
+}
+
+.menu__links:focus-within {
+  top: 0;
+  transform: translate(-50%, 0);
+  transition: transform 0.4s ease-in-out;
+}
+
+@media screen and (min-width: 768px) {
+  .menu__label {
+    border: 0 !important;
+    clip: rect(1px, 1px, 1px, 1px) !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    position: absolute !important;
+    width: 1px !important;
+  }
+
+  .menu__links {
+    position: static;
+    transform: none;
+    width: auto;
+    height: auto;
+    flex-flow: row wrap;
+    justify-content: flex-end;
+    max-width: 1004px;
+    margin: 0 auto;
+  }
+  .menu__links:focus-within {
+    transform: none;
+  }
+
+  .menu__link {
+    font-size: 2rem;
+  }
+
+  .menu__label--close {
+    border: 0 !important;
+    clip: rect(1px, 1px, 1px, 1px) !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    position: absolute !important;
+    width: 1px !important;
+  }
+}

@@ -1,0 +1,66 @@
+/* --- variables --- */
+
+:root {
+  --purple: #3f3d56;
+  --green: #a6bf26;
+  --grey: #e5e5e5;
+  --dark: #222222;
+  --white: #ffffff;
+}
+
+/* --- bg colors --- */
+
+.bg-green {
+  background-color: #a6bf26;
+}
+.bg-grey {
+  background-color: #e5e5e5;
+}
+
+.bg-white {
+  background-color: #fff;
+}
+
+.bg-purple {
+  background-color: #3f3d56;
+}
+
+.bg-dark {
+  background-color: #222222;
+}
+
+/* --- colors --- */
+
+.color-green {
+  color: #a6bf26;
+}
+
+.color-white {
+  color: #fff;
+}
+
+.color-purple {
+  color: #3f3d56;
+}
+
+.color-dark {
+  color: #222222;
+}
+
+/* --- boder colors --- */
+
+.border-green {
+  border-color: #a6bf26;
+}
+
+.border-white {
+  border-color: #fff;
+}
+
+.border-purple {
+  border-color: #3f3d56;
+}
+
+.border-dark {
+  border-color: #222222;
+}

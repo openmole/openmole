@@ -1,0 +1,58 @@
+{% set links = [
+    {
+        title: "Try the Demonstration Website",
+        url: "http://demo.openmole.org/app",
+        target: "_blank",
+        rel: ""
+    }, {
+        title: "Download the OpenMOLE Software",
+        url: "Download.html",
+        target: "_blank",
+        rel: ""
+    }, {
+        title: "Follow the Getting Started Guide",
+        url: "Step+By+Step+Introduction.html",
+        target: "_blank",
+        rel: ""
+    }, {
+        title: "Read the Full Documentation",
+        url: "Documentation.html",
+        target: "_blank",
+        rel: ""
+    }
+] %}
+
+<section class="prefooter">
+    <!--
+    <div class="prefooter__blog bg-purple">
+        <div class="blog__icon">
+            <svg width="52" height="53" viewbox="0 0 52 53" xmlns="http://www.w3.org/2000/svg">
+                <g fill="none" fill-rule="evenodd">
+                    <path d="M14.33333 45.2c0 3.75554-2.98476 6.8-6.66666 6.8S1 48.95554 1 45.2V7.8h13.33333v37.4z" fill="#DBF1FF" fill-rule="nonzero"/>
+                    <path d="M14.33333 45.2c0 3.75554-2.98476 6.8-6.66666 6.8S1 48.95554 1 45.2V7.8h13.33333v37.4z" fill="#F2F2F2" fill-rule="nonzero" opacity=".7005"/>
+                    <path d="M7.66667 52h36.66666C48.01523 52 51 48.95554 51 45.2V1H14.33333v44.2c0 3.75554-2.98476 6.8-6.66666 6.8" fill="#F2F2F2" fill-rule="nonzero"/>
+                    <path d="M7.66667 52h36.66666c2.71166-.0056 5.1498-1.68595 6.16667-4.25H13.83333c-1.01686 2.56405-3.45501 4.2444-6.16666 4.25z" fill="#000064" fill-rule="nonzero" opacity=".15"/>
+                    <path fill="#A6BF26" fill-rule="nonzero" d="M34.33333 14.6h10v13.6h-10z"/>
+                    <path d="M7.66667 52h36.66666C48.01523 52 51 48.95554 51 45.2V1H14.33333v6.8" stroke="#3F3D56" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M14.33333 45.2c0 3.75554-2.98476 6.8-6.66666 6.8S1 48.95554 1 45.2V7.8h13.33333v37.4zm30-37.4H21h23.33333zm0 27.2H21h23.33333zm0 6.8H21h23.33333zm-10-27.2h10v13.6h-10V14.6zm-6.66666 0h-5 5zm0 6.8H21h6.66667zm0 6.8H21h6.66667z" stroke="#3F3D56" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </g>
+            </svg>
+        </div>
+        <h3 class=" blog__title u-fs-30 u-lh-37 color-white">
+            Stay up to date, visit the
+            <a href="#">
+                <span class="blog__link color-green u-ff-bold">blog!</span></a>
+        </h3>
+    </div>
+    -->
+    <div class="prefooter__text">
+        <h2 class="prefooter__title">
+            Wanna try?
+        </h2>
+        <div class="prefooter__links">
+            {% for link in links %}
+                <a class="prefooter__link" href="{{ link.url | safe }}" target="{{ link.target | safe }}" rel="{{ link.rel | safe }}">{{ link.title | safe }}</a>
+            {% endfor %}
+        </div>
+    </div>
+</section>

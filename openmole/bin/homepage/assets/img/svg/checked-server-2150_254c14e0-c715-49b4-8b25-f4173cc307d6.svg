@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="82px" height="82px" viewBox="0 0 82 82" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 55.2 (78181) - https://sketchapp.com -->
+    <title>checked-server-2150_254c14e0-c715-49b4-8b25-f4173cc307d6</title>
+    <desc>Created with Sketch.</desc>
+    <g id="maquette" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Desktop-HD" transform="translate(-1019.000000, -1239.000000)">
+            <g id="push" transform="translate(219.000000, 1210.000000)">
+                <g id="card-3" transform="translate(682.000000, 0.000000)">
+                    <g id="title" transform="translate(100.682243, 30.000000)">
+                        <g id="checked-server-2150_254c14e0-c715-49b4-8b25-f4173cc307d6" transform="translate(18.940810, 0.000000)">
+                            <path d="M58.0085566,37.0298939 C61.7000102,37.0298939 65.3914638,38.0878909 68.5555669,39.9393856 L68.5555669,2.64499242 C68.5555669,1.19024659 67.3690282,0 65.9188143,0 L2.63675257,0 C1.18653866,0 0,1.19024659 0,2.64499242 L0,60.8348257 C0,62.2895716 1.18653866,63.4798182 2.63675257,63.4798182 L37.5737241,63.4798182 C34.5414587,52.2386004 41.2651777,40.7328833 52.4713762,37.691142 C54.1852653,37.2943932 56.1628298,37.0298939 58.0085566,37.0298939 Z" id="Path" fill="#F2F2F2" fill-rule="nonzero"></path>
+                            <path d="M5.27350514,60.8348257 L5.27350514,2.64499242 C5.27350514,1.19024659 6.4600438,0 7.91025771,0 L2.63675257,0 C1.18653866,0 0,1.19024659 0,2.64499242 L0,60.8348257 C0,62.2895716 1.18653866,63.4798182 2.63675257,63.4798182 L7.91025771,63.4798182 C6.4600438,63.4798182 5.27350514,62.2895716 5.27350514,60.8348257 Z" id="Path" fill="#000064" fill-rule="nonzero" opacity="0.18"></path>
+                            <path d="M68.5555669,39.9393856 C58.4040695,34.1204023 45.6158195,37.5588924 39.6831262,47.7421132 C33.7504329,57.9253341 37.3100489,70.7535473 47.4615463,76.5725307 C57.6130437,82.391514 70.4012937,78.9530238 76.3339869,68.769803 C78.1797137,65.5958121 79.2344148,61.8928227 79.1025771,58.0575837 C79.1025771,50.6516049 75.0156107,43.642375 68.5555669,39.9393856 Z" id="Path" fill="#A6BF26" fill-rule="nonzero"></path>
+                            <path d="M37.5737241,63.4798182 C35.0688092,54.2223447 39.1557757,44.5681223 47.4615463,39.807136 C36.914536,41.1296322 29.0042783,50.1226064 29.0042783,60.8348257 C29.0042783,61.7605731 29.0042783,62.5540708 29.1361159,63.4798182 L37.5737241,63.4798182 Z" id="Path" fill="#000064" fill-rule="nonzero" opacity="0.18"></path>
+                            <ellipse id="Oval" fill="#44D88D" fill-rule="nonzero" cx="11.8653866" cy="10.5799697" rx="1.31837629" ry="1.32249621"></ellipse>
+                            <ellipse id="Oval" fill="#44D88D" fill-rule="nonzero" cx="11.8653866" cy="31.7399091" rx="1.31837629" ry="1.32249621"></ellipse>
+                            <ellipse id="Oval" fill="#44D88D" fill-rule="nonzero" cx="11.8653866" cy="52.8998485" rx="1.31837629" ry="1.32249621"></ellipse>
+                            <path d="M67.2371906,53.0320981 L56.6901803,64.934564 L50.0982989,58.3220829 M37.5737241,63.4798182 L2.63675257,63.4798182 C1.18653866,63.4798182 0,62.2895716 0,60.8348257 L0,2.64499242 C0,1.19024659 1.18653866,0 2.63675257,0 L65.9188143,0 C67.3690282,0 68.5555669,1.19024659 68.5555669,2.64499242 L68.5555669,39.807136 M58.0085566,31.7399091 L36.914536,31.7399091 M58.0085566,10.5799697 L36.914536,10.5799697" id="Shape" stroke="#3F3D56" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <ellipse id="Oval" stroke="#3F3D56" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cx="11.8653866" cy="10.5799697" rx="1.31837629" ry="1.32249621"></ellipse>
+                            <ellipse id="Oval" stroke="#3F3D56" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cx="11.8653866" cy="31.7399091" rx="1.31837629" ry="1.32249621"></ellipse>
+                            <ellipse id="Oval" stroke="#3F3D56" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cx="11.8653866" cy="52.8998485" rx="1.31837629" ry="1.32249621"></ellipse>
+                            <path d="M68.5555669,21.1599394 L0,21.1599394 M44.0337679,42.3198788 L0,42.3198788" id="Shape" stroke="#3F3D56" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <ellipse id="Oval" stroke="#3F3D56" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cx="58.0085566" cy="58.1898333" rx="21.0940206" ry="21.1599394"></ellipse>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="88px" height="82px" viewBox="0 0 88 82" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 55.2 (78181) - https://sketchapp.com -->
+    <title>destination-map-908_9a6e6358-6592-4ec3-975f-f65d535d5fb2-2</title>
+    <desc>Created with Sketch.</desc>
+    <g id="maquette" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Desktop-HD" transform="translate(-676.000000, -1239.000000)">
+            <g id="push" transform="translate(219.000000, 1210.000000)">
+                <g id="card-2" transform="translate(341.000000, 0.000000)">
+                    <g id="title" transform="translate(82.000000, 30.000000)">
+                        <g id="destination-map-908_9a6e6358-6592-4ec3-975f-f65d535d5fb2-2" transform="translate(35.000000, 0.000000)">
+                            <polygon id="Path" fill="#F2F2F2" fill-rule="nonzero" points="85.7142857 8.57142857 85.7142857 80 54.2857143 71.4285714 31.4285714 80 0 71.4285714 0 0 31.4285714 8.57142857 54.2857143 0"></polygon>
+                            <polygon id="Path" fill="#000032" fill-rule="nonzero" opacity="0.2" points="31.4285714 8.57142857 54.2857143 0 54.2857143 71.4285714 31.4285714 80"></polygon>
+                            <path d="M85.7142857,8.57142857 L85.7142857,80 L54.2857143,71.4285714 L31.4285714,80 L0,71.4285714 L0,0 L31.4285714,8.57142857 L54.2857143,0 L85.7142857,8.57142857 Z M45,29.5714286 C47.5714286,27.1428571 51,25.7142857 54.5714286,25.7142857 L45,29.5714286 Z" id="Shape" stroke="#2E4369" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M39.5714286,44.5714286 C40,43.2857143 40.2857143,41.8571429 40.2857143,40.4285714 L40.2857143,40 C40.2857143,37.8571429 40.7142857,35.7142857 41.5714286,33.8571429 M27.4285714,54.2857143 C31.1428571,53.8571429 34.4285714,52.1428571 36.8571429,49.2857143 M11.1428571,54.2857143 L22,54.2857143 M0,54.2857143 L5.71428571,54.2857143" id="Shape" stroke="#2E4369" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <g id="Group" transform="translate(58.571429, 18.571429)" stroke="#A6BF26" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                                <path d="M0.142857143,0 L14.2857143,14.1428571" id="Path"></path>
+                                <path d="M0,14.2857143 L14.1428571,0.142857143" id="Path"></path>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

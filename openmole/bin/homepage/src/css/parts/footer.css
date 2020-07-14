@@ -1,0 +1,35 @@
+.footer {
+  padding: 40px 20px;
+}
+
+.footer__links {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1004px;
+  margin: 0 auto;
+}
+
+.footer__category {
+  width: 130px;
+  margin: 10px 0;
+  color: var(--white);
+}
+
+.footer__link {
+  text-transform: capitalize;
+  /* border-bottom: 2px solid var(--white); */
+  /* transition: border 0.2s ease-in-out; */
+  line-height: 2;
+  color: var(--white);
+}
+/* .footer__link:hover,
+.footer__link:focus {
+  border-color: transparent;
+}
+
+*/
+.footer__link:visited {
+  color: var(--white);
+}

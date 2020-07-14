@@ -1,0 +1,44 @@
+.how {
+  padding: 60px 0;
+  display: flex;
+  flex-flow: column-reverse wrap;
+  background-color: var(--grey);
+}
+
+.how__text {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.how__text li {
+  list-style-type: disc;
+}
+
+.how__text ul {
+  padding-left: 30px;
+}
+
+.how__illustration {
+  /* height: 310px; */
+  background-image: url("../img/svg/code.svg");
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  height: 320px;
+  background-size: contain;
+}
+
+@media (min-width: 768px) {
+  .how {
+    flex-flow: row nowrap;
+  }
+  .how__text {
+    max-width: 50%;
+    flex: 0 1 500px;
+  }
+  .how__illustration {
+    background-position: right 50%;
+    max-width: 50%;
+    flex: 1 1 100%;
+    height: auto;
+  }
+}

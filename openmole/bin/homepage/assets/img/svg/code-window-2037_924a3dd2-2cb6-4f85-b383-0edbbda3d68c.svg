@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100px" height="80px" viewBox="0 0 100 80" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 55.2 (78181) - https://sketchapp.com -->
+    <title>code-window-2037_924a3dd2-2cb6-4f85-b383-0edbbda3d68c</title>
+    <desc>Created with Sketch.</desc>
+    <g id="maquette" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Desktop-HD" transform="translate(-329.000000, -1239.000000)">
+            <g id="push" transform="translate(219.000000, 1210.000000)">
+                <g id="card-1">
+                    <g id="title" transform="translate(111.000000, 30.000000)">
+                        <g id="code-window-2037_924a3dd2-2cb6-4f85-b383-0edbbda3d68c">
+                            <polygon id="Path" fill="#F2F2F2" fill-rule="nonzero" points="0 19.5 97.5 19.5 97.5 78 0 78"></polygon>
+                            <polygon id="Path" fill="#A6BF26" fill-rule="nonzero" points="0 0 97.5 0 97.5 19.5 0 19.5"></polygon>
+                            <circle id="Oval" fill="#3F3D56" fill-rule="nonzero" cx="9.75" cy="9.75" r="1.625"></circle>
+                            <circle id="Oval" fill="#3F3D56" fill-rule="nonzero" cx="21.125" cy="9.75" r="1.625"></circle>
+                            <circle id="Oval" fill="#3F3D56" fill-rule="nonzero" cx="32.5" cy="9.75" r="1.625"></circle>
+                            <path d="M0,19.5 L6.5,19.5 L6.5,78 L0,78 L0,19.5 Z M0,0 L6.5,0 L6.5,19.5 L0,19.5 L0,0 Z" id="Shape" fill="#000064" fill-rule="nonzero" opacity="0.15"></path>
+                            <path d="M0,0 L97.5,0 L97.5,19.5 L0,19.5 L0,0 Z M0,19.5 L0,78 L97.5,78 L97.5,19.5 L0,19.5 Z" id="Shape" stroke="#3F3D56" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M58.5,35.75 L69.875,48.75 L58.5,61.75 M39,35.75 L27.625,48.75 L39,61.75" id="Shape" stroke="#3F3D56" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <circle id="Oval" stroke="#3F3D56" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cx="9.75" cy="9.75" r="1.625"></circle>
+                            <circle id="Oval" stroke="#3F3D56" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cx="21.125" cy="9.75" r="1.625"></circle>
+                            <circle id="Oval" stroke="#3F3D56" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cx="32.5" cy="9.75" r="1.625"></circle>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

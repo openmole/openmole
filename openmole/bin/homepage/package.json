@@ -1,0 +1,34 @@
+{
+  "name": "openMole",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:css": "postcss src/css/main.css -o assets/css/main.min.css",
+    "build:js": "cp ./src/js/*.js ./assets/js/main.min.js",
+    "build:assets": "rm -rf ./dist/assets && cp -r ./assets ./dist/",
+    "watch:js": "chokidar \"src/js/*.js\" -c \"npm run build:js\"",
+    "watch:css": "chokidar \"src/css/**/*.css\" -c \"npm run build:css\"",
+    "browsersync": "browser-sync start --server 'dist' --no-open --files='dist/**/*'",
+    "watch": "npm run watch:js & npm run watch:css & eleventy --watch & npm run browsersync",
+    "build": "npm run build:js & npm run build:css & eleventy"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@11ty/eleventy": "^0.11.0",
+    "browser-sync": "~2.26.7",
+    "chokidar-cli": "^2.1.0",
+    "autoprefixer": "^9.8.0",
+    "css-mqpacker": "^7.0.0",
+    "cssnano": "^4.1.10",
+    "postcss": "^7.0.32",
+    "postcss-cli": "^7.1.1",
+    "postcss-custom-properties": "^9.1.1",
+    "postcss-import": "^12.0.1",
+    "uglify-js": "^3.10.0",
+    "at-least-node": "^1.0.0"
+  }
+}

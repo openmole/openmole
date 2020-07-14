@@ -1,0 +1,124 @@
+.prefooter {
+  padding: 0;
+  margin: 60px 0;
+}
+
+.prefooter__title {
+  text-align: center;
+}
+
+/* .prefooter__blog {
+  margin-top: 60px;
+  height: 120px;
+  max-width: 100%;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 20px;
+}
+
+.blog__icon {
+  width: 50px;
+  margin-right: 20px;
+}
+
+.blog__link {
+  border-bottom: solid 2px transparent;
+  transition: border 0.2s ease-in-out;
+}
+
+.blog__link:hover {
+  border-color: var(--green);
+} */
+
+.prefooter__text {
+  margin-top: 40px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.prefooter__link,
+.prefooter__link:visited {
+  margin: 0 auto;
+  margin-bottom: 30px;
+  padding: 20px 15px;
+  display: block;
+  position: relative;
+  max-width: 236px;
+  text-decoration: none;
+  text-align: center;
+  list-style-type: none;
+  color: var(--purple);
+}
+.prefooter__link::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  border: solid 2px var(--purple);
+  transition: transform 0.3s ease-in-out;
+}
+.prefooter__link:hover::after,
+.prefooter__link:focus::after {
+  transform: scale(1.05);
+}
+
+.prefooter__title {
+  margin-bottom: 30px;
+}
+
+@media (min-width: 600px) and (max-width: 1024px) {
+  .prefooter__links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+    grid-template-rows: repeat(2, 1fr);
+    align-items: center;
+    justify-items: center;
+    grid-gap: 20px;
+    max-width: 1004px;
+    margin: 0 auto;
+  }
+
+  .prefooter__link:nth-child(odd) {
+    grid-column: span 1;
+    justify-self: end;
+  }
+  .prefooter__link:nth-child(even) {
+    grid-column: span 1;
+    justify-self: start;
+  }
+}
+
+@media (min-width: 768px) {
+  .prefooter {
+    margin-bottom: 70px;
+  }
+  .prefooter__blog {
+    justify-content: center;
+    margin-bottom: 80px;
+    margin-top: 80px;
+  }
+  .prefooter__text {
+    padding: 0 20px;
+    max-width: 1004px;
+    margin: 0 auto;
+  }
+
+  .prefooter__link {
+    margin: 0;
+  }
+}
+@media (min-width: 1024px) {
+  .prefooter__links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    align-items: center;
+    justify-items: center;
+    grid-gap: 20px;
+    max-width: 1004px;
+    margin: 0 auto;
+  }
+}

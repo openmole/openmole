@@ -1,0 +1,142 @@
+@font-face {
+  font-family: "glacial";
+  src: url("/assets/fonts/glacialindifference-regular-webfont.woff2")
+      format("woff2"),
+    url("/assets/fonts/glacialindifference-regular-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "glacial";
+  src: url("/assets/fonts/glacialindifference-bold-webfont.woff2")
+      format("woff2"),
+    url("/assets/fonts/glacialindifference-bold-webfont.woff") format("woff");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "pt_serif";
+  src: url("/assets/fonts/ptf55f-webfont.woff2") format("woff2"),
+    url("/assets/fonts/ptf55f-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+/* switching to border-box model for all elements */
+html {
+  box-sizing: border-box;
+  /* set base font-size to equiv "10px", which is adapted to rem unit */
+  font-size: 62.5%;
+  /* IE9-IE11 math fixing. See http://bit.ly/1g4X0bX */
+  font-size: calc(1em * 0.625);
+  scroll-behavior: smooth;
+}
+
+*,
+*::before,
+*::after {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-size: 2rem;
+  font-family: "glacial", "Helvetica", "Arial", sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1.3;
+  -moz-font-smoothing: antialiased;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  color: #222222;
+  background-color: #fff;
+}
+
+section {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+h1 {
+  font-size: 5.2rem;
+}
+h2 {
+  font-size: 3.6rem;
+  font-family: "pt_serif", serif;
+  font-weight: normal;
+}
+h3 {
+  font-size: 3.6rem;
+  font-family: "glacial", "Arial", sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: var(--green);
+}
+h4 {
+  font-size: 2.2rem;
+  font-weight: bold;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+}
+
+strong,
+b {
+  font-family: "glacial", "Arial", sans-serif;
+  font-style: normal;
+  font-weight: bold;
+}
+
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+a,
+a:visited {
+  text-decoration: underline;
+}
+a:hover {
+  text-decoration: none;
+}
+
+a:visited {
+  color: var(--green);
+}
+
+li {
+  list-style-type: none;
+}
+
+ul,
+li {
+  padding: 0;
+  margin: 0;
+}
+
+@media screen and (min-width: 768px;) {
+  h1 {
+    font-size: 6rem;
+  }
+  h2 {
+    font-size: 4rem;
+  }
+  h3 {
+    font-size: 3.8rem;
+  }
+}

@@ -1,0 +1,39 @@
+{# If we have to change all links to assets, we use a var to update all at once #}
+{%- set assetsPath = './assets/' -%}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>OpenMOLE</title>
+        <link rel="stylesheet" href="{{ assetsPath }}css/main.min.css">
+        <!-- Piwik -->
+        <script type="text/javascript">
+          var _paq = _paq || [];
+          _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
+          _paq.push(['trackPageView']);
+          _paq.push(['enableLinkTracking']);
+          (function() {
+            var u="//matomo.openmole.org/";
+            _paq.push(['setTrackerUrl', u+'piwik.php']);
+            _paq.push(['setSiteId', 1]);
+            _paq.push(['enableLinkTracking']);
+            var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+            g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+          })();
+        </script>
+        <noscript><p><img src="//matomo.openmole.org/piwik.php?idsite=1" style="border:0;" alt="" /></p></noscript>
+        <!-- End Piwik Code -->
+    </head>
+    <body>
+        {% include 'menu.njk' %}
+        {% include 'intro.njk' %}
+        {% include 'push.njk' %}
+        {% include 'how.njk' %}
+        {% include 'pre-footer.njk' %}
+        {% include 'footer.njk' %}
+
+        <script src="{{ assetsPath }}js/main.min.js"></script>
+    </body>
+</html>

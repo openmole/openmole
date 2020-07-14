@@ -1,0 +1,104 @@
+{% set cards = [
+    {
+        svg: "<svg width='100' height='80' viewBox='0 0 100 80' xmlns='http://www.w3.org/2000/svg'>
+                <g transform='translate(1 1)' fill='none' fill-rule='evenodd'>
+                    <path fill='#F2F2F2' fill-rule='nonzero' d='M0 19.5h97.5V78H0z' />
+                    <path fill='#A6BF26' fill-rule='nonzero' d='M0 0h97.5v19.5H0z' />
+                    <circle fill='#3F3D56' fill-rule='nonzero' cx='9.75' cy='9.75' r='1.625' />
+                    <circle fill='#3F3D56' fill-rule='nonzero' cx='21.125' cy='9.75' r='1.625' />
+                    <circle fill='#3F3D56' fill-rule='nonzero' cx='32.5' cy='9.75' r='1.625' />
+                    <path d='M0 19.5h6.5V78H0V19.5zM0 0h6.5v19.5H0V0z' fill='#000064' fill-rule='nonzero' opacity='.15' />
+                    <path d='M0 0h97.5v19.5H0V0zm0 19.5V78h97.5V19.5H0z' stroke='#3F3D56' stroke-width='2' stroke-linecap='round'
+                        stroke-linejoin='round' />
+                    <path d='M58.5 35.75l11.375 13-11.375 13m-19.5-26l-11.375 13L39 61.75' stroke='#3F3D56' stroke-width='2'
+                        stroke-linecap='round' stroke-linejoin='round' />
+                    <circle stroke='#3F3D56' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' cx='9.75' cy='9.75'
+                        r='1.625' />
+                    <circle stroke='#3F3D56' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' cx='21.125' cy='9.75'
+                        r='1.625' />
+                    <circle stroke='#3F3D56' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' cx='32.5' cy='9.75'
+                        r='1.625' />
+                </g>
+            </svg>",
+        title: "Plug",
+        text: "Plug your model in OpenMOLE and run it, whatever the language. Java, Binary exe, NetLogo, R, SciLab, C++, Python, etc.",
+        cta: "read more",
+        url: "Embed.html"
+    },
+    {
+        svg: "<svg height='82' viewbox='0 0 88 82' width='88' xmlns='http://www.w3.org/2000/svg'>
+                    <g fill='none' fill-rule='evenodd'>
+                        <path d='M86.71429 9.57143V81L55.2857 72.42857 32.42857 81 1 72.42857V1l31.42857 8.57143L55.28571 1z' fill='#F2F2F2' fill-rule='nonzero'></path>
+                        <path d='M32.42857 9.57143L55.28571 1v71.42857L32.42857 81z' fill='#000032' fill-rule='nonzero' opacity='.2'></path>
+                        <path d='M86.71429 9.57143V81L55.2857 72.42857 32.42857 81 1 72.42857V1l31.42857 8.57143L55.28571 1 86.7143 9.57143zM46 30.57143c2.57143-2.42857 6-3.85714 9.57143-3.85714L46 30.57143z' stroke='#2E4369' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'></path>
+                        <path d='M40.57143 45.57143c.42857-1.28572.71428-2.71429.71428-4.14286V41c0-2.14286.42858-4.28571 1.28572-6.14286M28.42857 55.28571c3.71429-.42857 7-2.14285 9.42857-5m-25.71428 5H23m-22 0h5.71429' stroke='#2E4369' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'></path>
+                        <g stroke='#A6BF26' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'>
+                            <path d='M59.71429 19.57143l14.14285 14.14286M59.57143 33.85714L73.71429 19.7143'></path>
+                        </g>
+                    </g>
+                </svg>",
+        title: "Explore",
+        text: "Explore your parameter space, optimize, perform sensitivity analyses on your model through innovative methods.",
+        cta: "read more",
+        url: "Explore.html"
+    },
+    {
+        svg: "<svg width='82' height='82' viewBox='0 0 82 82' xmlns='http://www.w3.org/2000/svg'>
+                <g transform='translate(1.62305 1)' fill='none' fill-rule='evenodd'>
+                    <path d='M58.00856 37.0299c3.69145 0 7.3829 1.058 10.547 2.90949V2.64499C68.55557 1.19025 67.36904 0 65.91882 0H2.63675C1.18654 0 0 1.19025 0 2.645v58.18983c0 1.45474 1.18654 2.64499 2.63675 2.64499h34.93697c-3.03226-11.24122 3.69146-22.74694 14.89766-25.78868 1.71389-.39675 3.69145-.66125 5.53718-.66125z' fill='#F2F2F2' fill-rule='nonzero'/>
+                    <path d='M5.2735 60.83483V2.64499C5.2735 1.19025 6.46005 0 7.91027 0h-5.2735C1.18653 0 0 1.19025 0 2.645v58.18983c0 1.45474 1.18654 2.64499 2.63675 2.64499h5.2735c-1.4502 0-2.63674-1.19025-2.63674-2.645z' fill='#000064' fill-rule='nonzero' opacity='.18'/>
+                    <path d='M68.55557 39.93939c-10.1515-5.81899-22.93975-2.3805-28.87244 7.80272-5.9327 10.18322-2.37308 23.01144 7.77842 28.83042 10.1515 5.81898 22.93974 2.3805 28.87244-7.80273 1.84572-3.17399 2.90042-6.87698 2.76859-10.71222 0-7.40598-4.08697-14.4152-10.54701-18.1182z' fill='#A6BF26' fill-rule='nonzero'/>
+                    <path d='M37.57372 63.47982c-2.50491-9.25748 1.58206-18.9117 9.88783-23.67268-10.54701 1.3225-18.45727 10.31547-18.45727 21.02769 0 .92574 0 1.71924.13184 2.64499h8.4376z' fill='#000064' fill-rule='nonzero' opacity='.18'/>
+                    <ellipse fill='#44D88D' fill-rule='nonzero' cx='11.86539' cy='10.57997' rx='1.31838' ry='1.3225'/>
+                    <ellipse fill='#44D88D' fill-rule='nonzero' cx='11.86539' cy='31.73991' rx='1.31838' ry='1.3225'/>
+                    <ellipse fill='#44D88D' fill-rule='nonzero' cx='11.86539' cy='52.89985' rx='1.31838' ry='1.3225'/>
+                    <path d='M67.2372 53.0321L56.69017 64.93456l-6.59188-6.61248m-12.52458 5.15774H2.63675C1.18654 63.47982 0 62.28957 0 60.83482V2.645C0 1.19025 1.18654 0 2.63675 0h63.28206c1.45022 0 2.63676 1.19025 2.63676 2.645v37.16214M58.00856 31.7399H36.91454m21.09402-21.15994H36.91454' stroke='#3F3D56' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>
+                    <ellipse stroke='#3F3D56' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' cx='11.86539' cy='10.57997' rx='1.31838' ry='1.3225'/>
+                    <ellipse stroke='#3F3D56' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' cx='11.86539' cy='31.73991' rx='1.31838' ry='1.3225'/>
+                    <ellipse stroke='#3F3D56' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' cx='11.86539' cy='52.89985' rx='1.31838' ry='1.3225'/>
+                    <path d='M68.55557 21.15994H0m44.03377 21.15994H0' stroke='#3F3D56' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>
+                    <ellipse stroke='#3F3D56' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' cx='58.00856' cy='58.18983' rx='21.09402' ry='21.15994'/>
+                </g>
+                </svg>",
+        title: "scale",
+        text: "Scale up your experiments with no effort on servers, clusters, grids, clouds, etc.",
+        cta: "read more",
+        url: "Scale+Up.html"
+    }
+]
+%}
+
+<section class="push">
+    <div class="push__text">
+        <h2 class="push__title">
+            What is OpenMOLE?
+        </h2>
+        <div class="push__description">
+            <p>OpenMOLE has been developed since 2008 as a
+                <strong>free and open-source</strong>
+                platform. It offers tools to run, explore, diagnose and optimize your numerical model, taking advantage of distributed computing environments. With OpenMOLE you can
+                <strong>
+                    explore your already developed model,
+                </strong>in any language (Java, Binary exe, NetLogo, R, SciLab, Python, C++, etc.)</p>
+            <p>OpenMOLE comes with a graphical user interface (GUI) to write
+                <strong>scripts around your model.</strong>
+                These scripts will use OpenMOLE methods to explore your model and
+                <strong>distribute</strong>
+                its executions on High Performing Computing (HPC) environments, with only a few lines of code!</p>
+            <p>
+                <strong>OpenMOLE is the tool you need</strong>
+                if you want to carry out real sensitivity analysis, calibration on mono or multi criterion, pattern diversity search in model dynamics, or any custom design of experiments.</p>
+        </div>
+    </div>
+
+    <div class="push__container">
+        {% for card in cards %}
+            <div class="push__card">
+                {{ card.svg | safe }}
+                <h3 class="push__subtitle">{{ card.title | safe }}</h3>
+                <p class="push__description">{{ card.text | safe }}</p>
+                <a href="{{ card.url | safe }}" class="cta cta-full push__cta">{{ card.cta | safe }}</a>
+            </div>
+        {% endfor %}
+    </div>
+</section>

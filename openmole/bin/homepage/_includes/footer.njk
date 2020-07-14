@@ -1,0 +1,112 @@
+{% set links = [
+    {
+        category: "Community",
+        subs: [
+            {
+            title: "forum",
+            url: "http://ask.openmole.org/",
+            target: "_blank",
+            rel: "nofollow"
+            },
+            {
+            title: "chat",
+            url: "https://chat.openmole.org",
+            target: "_blank",
+            rel: "nofollow"
+            },
+            {
+            title: "FAQ",
+            url: "FAQ.html",
+            target: "_blank",
+            rel: "nofollow"
+            }
+        ]
+    },
+    {
+        category: "Development",
+        subs: [
+            {
+            title: "changes",
+            url: "https://openmole.org/Release+Notes.html",
+            target: "_blank",
+            rel: "nofollow"
+            },
+            {
+            title: "sources",
+            url: "https://github.com/openmole/openmole",
+            target: "_blank",
+            rel: "nofollow"
+            },
+            {
+            title: "join us!",
+            url: "https://openmole.org/How+to+Contribute.html",
+            target: "_blank",
+            rel: "nofollow"
+            }
+        ]
+    },
+    {
+        category: "About us",
+        subs: [
+            {
+            title: "Publications",
+            url: "https://openmole.org/Publications.html",
+            target: "_blank",
+            rel: "nofollow"
+            },
+            {
+            title: "Team",
+            url: "https://openmole.org/Who+We+Are.html",
+            target: "_blank",
+            rel: "nofollow"
+            },
+            {
+            title: "Partners",
+            url: "https://openmole.org/Our+Partners.html",
+            target: "_blank",
+            rel: "nofollow"
+            }
+        ]
+    },
+    {
+        category: "Communication",
+        subs: [
+            {
+            title: "School",
+            url: "https://exmodelo.org/",
+            target: "_blank",
+            rel: "nofollow"
+            },
+            {
+            title: "Twitter",
+            url: "https://twitter.com/OpenMOLE",
+            target: "_blank",
+            rel: "nofollow"
+            },
+            {
+            title: "Contact",
+            url: "mailto:contact@openmole.org",
+            target: "_blank",
+            rel: "nofollow"
+            }
+        ]
+    }
+]
+%}
+
+<section class="footer bg-purple">
+    <div class="footer__links">
+            {% for link in links %}
+            <ul class="footer__category">
+                <li>
+                    <h4>{{ link.category }}</h4>
+                </li>
+                {% for sub in link.subs %}
+                <li>
+                    <a class="footer__link" href="{{ sub.url | safe }}" target="{{ sub.target | safe }}" rel="{{ sub.rel | safe }}" >{{ sub.title | safe }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endfor %}
+    </div>
+</section>

@@ -1,0 +1,91 @@
+/* Classes for font-family */
+.u-ff-book {
+    font-family: 'glacial', Arial, Helvetica, sans-serif;
+    font-style: normal;
+    font-weight: normal;
+}
+.u-ff-serif {
+    font-family: 'pt_serif', Arial, Helvetica, sans-serif;
+    font-style: normal;
+    font-weight: normal;
+}
+.u-ff-bold {
+    font-family: 'glacial', Arial, Helvetica, sans-serif;
+    font-style: normal;
+    font-weight: bold;
+}
+
+/* Text transform */
+.u-ttu {
+    text-transform: uppercase;
+}
+
+/* Font sizes - mobile */
+.u-fs-18 {
+    font-size: 1.8rem;
+}
+.u-fs-20 {
+    font-size: 2rem;
+}
+.u-fs-22 {
+    font-size: 2.2rem;
+}
+.u-fs-30 {
+    font-size: 3rem;
+}
+.u-fs-36 {
+    font-size: 3.6rem;
+}
+.u-fs-40 {
+    font-size: 4rem;
+}
+.u-fs-52 {
+    font-size: 5.2rem;
+}
+.u-fs-60 {
+    font-size: 6rem;
+}
+
+/* line-height - mobile */
+.u-lh-1 {
+    line-height: 1;
+}
+.u-lh-25 {
+    line-height: 2.5rem;
+}
+.u-lh-26 {
+    line-height: 2.6rem;
+}
+.u-lh-37 {
+    line-height: 3.7rem;
+}
+.u-lh-40 {
+    line-height: 4rem;
+}
+
+/* Font sizes - desktop */
+@media (min-width: 1024px) {
+    .u-fs-l-18 {
+        font-size: 1.8rem;
+    }
+
+    .u-fs-l-20 {
+        font-size: 2rem;
+    }
+
+    .u-fs-l-22 {
+        font-size: 2.2rem;
+    }
+
+    .u-fs-l-30 {
+        font-size: 3rem;
+    }
+
+    .u-fs-l-36 {
+        font-size: 3.6rem;
+    }
+
+    .u-fs-l-60 {
+        font-size: 6rem;
+    }
+}
