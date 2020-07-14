@@ -4,27 +4,32 @@
 @import DocumentationPages._
 
 
-@h2{GAMATask}
+@h2{Preliminary remark}
 
-@a("GAMA", href := "https://gama-platform.github.io/") is a modeling and simulation development environment for building spatially explicit agent-based simulations. OpenMOLE support GAMA model natively through the GAMA task.
-
-@h3{Preliminary remark}
-
+@a("GAMA", href := "https://gama-platform.github.io/") is a modelling and simulation development environment for building spatially explicit agent-based simulations.
+OpenMOLE supports GAMA model natively through the @code{GAMATask}.
+@br
 @usesSingularity("GAMATask")
 
+
+
+@h2{The GAMATask}
 @h3{GAMA by example}
 
-You can provide you .gaml file to the GAMATask to run you model and explore it with OpenMOLE. The example bellow illustrate an exploratin of the predator prey model of the GAMA model library using a direct sampling:
+You can provide your @i{.gaml} file to the @code{GAMATask} to run your model and explore it with OpenMOLE.
+The example below illustrates an exploration of the predator-prey model of the GAMA model library using a direct sampling:
+
+@br@br
 
 @openmole("""
-// Declare the variable
+// Declare the variables
 val numberOfPreys = Val[Double]
 val nbPreysInit = Val[Int]
 val seed = Val[Long]
 
 // Gama task
-// The first argument is the gaml
-// The second argument of the GamaTask is the gama experiment name
+// The first argument is the gaml file
+// The second argument is the Gama experiment name
 // The third argument is the number of steps
 val gama =
   GAMATask(workDirectory / "predatorPrey.gaml", experiment = "prey_predatorExp", finalStep = 100, seed = seed) set (
@@ -44,17 +49,17 @@ DirectSampling(
 )
 """)
 
-@h3{Task Arguments}
 
-The GAMA task exposes the following arguments:
+@h3{Task arguments}
+
+The GAMA task uses the following arguments:
   @ul
-    @li{@code{gamlOrWorkspace} The location of your gaml file or the location of your gama workspace directory (in this case the model argument must be set),}
-    @li{@code{model} the relative path of your gaml file in your workdirectory, this parameter must bet set only when gamlOrWorkspace is a directory}
-    @li{@code{experiment} the name of your experiment as implemented the gaml file, mandatory}
-    @li{@code{finalStep} the last simulation step of you simulation, mandatory}
-    @li{@code{frameRate} the frame rate to sample you simulation dynamics, optional}
-    @li{@code{seed} the OpenMOLE variable used to set the GAMA random number generator seed, optional, the seed is randomly drawn if not set}
-    @li{@code{version} the tag of the GAMA container used by OpenMOLE, optional}
-    @li{@code{install} some command to run on the host system to initialise the container, for instance @code("""Seq("apt update", "apt install mylib")"""), optional}
-    @li{@code{clearContainerCache} remove existing gama container in OpenMOLE cache, download the image from the docker hub an recreate it locally when set to true, optional}
-
+    @li{@code{gamlOrWorkspace} the location of your @i{.gaml} file or the location of your GAMA workspace directory (in this case the model argument must be set), @b{mandatory}}
+    @li{@code{model} the relative path of your @i{.gaml} file in your work directory, @b{optional} this parameter must bet set only when @code{gamlOrWorkspace} is a directory}
+    @li{@code{experiment} the name of your experiment as implemented in the @i{.gaml} file, @b{mandatory}}
+    @li{@code{finalStep} the last simulation step of you simulation, @b{mandatory}}
+    @li{@code{frameRate} the frame rate to sample you simulation dynamics, @b{optional}}
+    @li{@code{seed} the OpenMOLE variable used to set the GAMA random number generator seed, @b{optional} the seed is randomly drawn if not set}
+    @li{@code{version} the tag of the GAMA container used by OpenMOLE, @b{optional}}
+    @li{@code{install} some command to run on the host system to initialise the container, for instance @code("""Seq("apt update", "apt install mylib")"""), @b{optional}}
+    @li{@code{clearContainerCache} to remove existing GAMA container in OpenMOLE cache, download the image from the docker hub, and recreate it locally when set to true, @b{optional}}

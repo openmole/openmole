@@ -110,15 +110,6 @@ h4 {
 }
 
 
-code,
-.hljs {
-    background-color: transparent;
-    color: var(--purple);
-    font-size: 80%;
-    font-weight: bold;
-}
-
-
 a,
 a:visited {
   color: var(--dark);
@@ -447,4 +438,12 @@ optgroup,
 strong {
  font-weight: bold;
   color: var(--dark);
+}
+
+code,
+.hljs {
+    background-color: transparent;
+    color: var(--purple);
+    font-size: 1.5rem;
+    font-weight: bold;
 }
