@@ -194,8 +194,13 @@ case class ErrorInCompiler(error: Throwable) extends CompilationError
 case class Compiled(result: ScalaREPL.Compiled) extends CompileResult {
 
   def eval =
-    result.apply().asInstanceOf[Project.OMSScript].run() match {
-      case p: DSL ⇒ p
-      case e      ⇒ throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
+    result.apply() match {
+      case p: Project.OMSScript ⇒
+        p.run() match {
+          case p: DSL ⇒ p
+          case e      ⇒ throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
+        }
+      case e ⇒ throw new InternalProcessingError(s"Script compilation should produce an OMScript (found ${if (e == null) null else e.getClass}).")
     }
+
 }

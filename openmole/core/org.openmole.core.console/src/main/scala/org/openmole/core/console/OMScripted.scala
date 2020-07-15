@@ -114,17 +114,17 @@ class OMScripted(val factory: ScriptEngineFactory, val omIMain: IMain)
         case Right(req) ⇒
           code = ""
           new WrappedRequest(req)
-        case Left(Results.Incomplete) | Left(Results.Success) ⇒
-          code = cat + "\n"
-          new CompiledScript {
-            def eval(context: ScriptContext): Object = null
-            def getEngine: ScriptEngine = OMScripted.this
-          }
-        case Left(_) ⇒
+        case Left(s) ⇒
           code = ""
           throw firstError map {
             case (pos, msg) ⇒ new ScriptException(msg, script, pos.line, pos.column)
-          } getOrElse new ScriptException("compile-time error")
+          } getOrElse {
+            s match {
+              case Results.Incomplete ⇒ new ScriptException(s"Compile-time error, the input is incomplete. It might be caused by an unclosed multi-line comment '/*'.")
+              case _                  ⇒ new ScriptException(s"Compile-time error (result is $s)")
+            }
+
+          }
       }
     }
 
