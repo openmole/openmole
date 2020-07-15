@@ -110,7 +110,7 @@ class OMScripted(val factory: ScriptEngineFactory, val omIMain: IMain)
       //intp.compile(cat, synthetic = false)
       //ClassUtils.callByName[IMain, Either[IR.Result, intp.Request]](intp, "compile", Vector(cat, false))
 
-      intp.compile(cat, false, true) match {
+      intp.compile(cat, synthetic = false, fatally = true) match {
         case Right(req) ⇒
           code = ""
           new WrappedRequest(req)
