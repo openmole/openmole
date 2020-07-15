@@ -60,7 +60,9 @@ object OSGiScalaCompiler {
         val newSettings = settings.copy()
 
         classDirectory.mkdirs()
+
         newSettings.outputDirs.setSingleOutput(AbstractFile.getDirectory(classDirectory))
+        newSettings.Yreploutdir.value = classDirectory.getAbsolutePath
         newSettings.classpath.prepend(classDirectory.getCanonicalPath)
         bundles.foreach(newSettings.classpath.append)
 
