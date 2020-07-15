@@ -27,8 +27,6 @@ object GAMATask {
   implicit def isInfo = InfoBuilder(info)
   implicit def isMapped = MappedInputOutputBuilder(GAMATask.mapped)
 
-  def gamaImage(image: String, version: String) = DockerImage(image, version)
-
   def inputXML = "/_model_input_.xml"
   def workspaceDirectory = "/_workspace_"
 
@@ -71,8 +69,8 @@ object GAMATask {
     seed:                   OptionalArgument[Val[Long]]      = None,
     frameRate:              OptionalArgument[Int]            = None,
     install:                Seq[String]                      = Seq.empty,
-    dockerImage:            String                           = "gamaplatform/gama",
-    version:                String                           = "1.8.1",
+    containerImage:            ContainerImage                   = "gamaplatform/gama:1.8.1",
+    version:                OptionalArgument[String]         = None,
     errorOnReturnValue:     Boolean                          = true,
     returnValue:            OptionalArgument[Val[Int]]       = None,
     stdOut:                 OptionalArgument[Val[String]]    = None,
@@ -82,8 +80,7 @@ object GAMATask {
     //    workDirectory:          OptionalArgument[String]       = None,
     clearContainerCache:    Boolean                          = false,
     containerSystem:        ContainerSystem                  = ContainerSystem.default,
-    installContainerSystem: ContainerSystem                  = ContainerSystem.default,
-    containerImage:         OptionalArgument[ContainerImage] = None)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): GAMATask = {
+    installContainerSystem: ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): GAMATask = {
 
     (model.option.isDefined, gamlOrWorkspace.isDirectory) match {
       case (false, true) ⇒ throw new UserBadDataError(s"""$gamlOrWorkspace is a directory, in this case you must specify you model path, model = "model.gaml"""")
@@ -92,7 +89,12 @@ object GAMATask {
       case _ ⇒
     }
 
-    val gamaContainerImage = containerImage.option getOrElse gamaImage(dockerImage, version)
+    val gamaContainerImage: ContainerImage =
+      (version.option, containerImage) match {
+        case (None, c) => c
+        case (Some(v), c: DockerImage) => c.copy(tag = v)
+        case (Some(_), _: SavedDockerImage) => throw new UserBadDataError(s"Can not set both, a saved docker image, and, set the version of the container.")
+      }
 
     val preparedImage = prepare(gamlOrWorkspace, model, experiment, install, installContainerSystem, gamaContainerImage, clearCache = clearContainerCache)
 
