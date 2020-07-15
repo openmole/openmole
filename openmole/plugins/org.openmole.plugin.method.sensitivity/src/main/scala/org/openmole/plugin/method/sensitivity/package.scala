@@ -76,7 +76,7 @@ package object sensitivity {
     * @param dsl
     */
   implicit class SaltelliMethodContainer(dsl: DSLContainer[Sensitivity.SaltelliParams])  extends DSLContainerHook(dsl) {
-    def hook[F](output: WritableOutput, format: F = CSVOutputFormat())(implicit outputFormat: OutputFormat[F, Sensitivity.SaltelliParams]): DSLContainer[Sensitivity.SaltelliParams] = {
+    def hook[F](output: WritableOutput, format: F = CSVOutputFormat(unrollArray = true))(implicit outputFormat: OutputFormat[F, Sensitivity.SaltelliParams]): DSLContainer[Sensitivity.SaltelliParams] = {
       implicit val defScope = dsl.scope
       dsl hook SaltelliHook(dsl, output, format)
     }
@@ -88,7 +88,7 @@ package object sensitivity {
     * @param dsl
     */
   implicit class MorrisMethodContainer(dsl: DSLContainer[Sensitivity.MorrisParams]) extends DSLContainerHook(dsl) {
-    def hook[F](output: WritableOutput, format: F = CSVOutputFormat())(implicit outputFormat: OutputFormat[F, Sensitivity.MorrisParams]): DSLContainer[Sensitivity.MorrisParams] = {
+    def hook[F](output: WritableOutput, format: F = CSVOutputFormat(unrollArray = true))(implicit outputFormat: OutputFormat[F, Sensitivity.MorrisParams]): DSLContainer[Sensitivity.MorrisParams] = {
       implicit val defScope = dsl.scope
       dsl hook MorrisHook(dsl, output, format)
     }
