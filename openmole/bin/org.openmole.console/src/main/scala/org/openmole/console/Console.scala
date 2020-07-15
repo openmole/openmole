@@ -125,7 +125,7 @@ class Console(script: Option[String] = None) {
 
     script match {
       case None ⇒
-        val variables = ConsoleVariables(args = args, workDirectory = workDirectory.getOrElse(currentDirectory))
+        val variables = ConsoleVariables(args = args, workDirectory = workDirectory.getOrElse(currentDirectory), experiment = ConsoleVariables.Experiment("console"))
         withREPL(variables) { loop ⇒
           loop.storeErrors = false
           loop.loopWithExitCode

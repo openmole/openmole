@@ -26,11 +26,6 @@ object ConsoleVariables {
   def variablesName = "_variables_"
   def workDirectory = "workDirectory"
 
-  def empty(implicit services: Services) = ConsoleVariables(
-    args = Seq.empty,
-    workDirectory = currentDirectory
-  )
-
   def bindVariables(loop: ScalaREPL, variables: ConsoleVariables, variablesName: String = variablesName) =
     loop.beQuietDuring {
       loop.bind(variablesName, variables)
@@ -39,11 +34,21 @@ object ConsoleVariables {
         |import $variablesName.services._""".stripMargin)
     }
 
+  def experimentName(f: File) = {
+    val name = f.getName
+    if (name.endsWith(".oms")) name.dropRight(".oms".length) else name
+  }
+
+  case class Experiment(name: String, launchTime: Long = System.currentTimeMillis()) {
+    def launchDate = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date(launchTime))
+  }
+
 }
 
 case class ConsoleVariables(
   args:          Seq[String],
-  workDirectory: File
+  workDirectory: File,
+  experiment:    ConsoleVariables.Experiment
 )(
   implicit
   val services: Services

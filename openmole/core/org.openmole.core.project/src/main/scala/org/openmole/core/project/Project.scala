@@ -146,7 +146,8 @@ object Project {
            |$footer""".stripMargin
 
       def compile(content: String, args: Seq[String]): CompileResult = {
-        val loop = newREPL.getOrElse { (v: project.ConsoleVariables) ⇒ Project.newREPL(v) }.apply(ConsoleVariables(args, workDirectory))
+        def consoleVariables = ConsoleVariables(args, workDirectory, experiment = ConsoleVariables.Experiment(ConsoleVariables.experimentName(script)))
+        val loop = newREPL.getOrElse { (v: project.ConsoleVariables) ⇒ Project.newREPL(v) }.apply(consoleVariables)
         try {
           Option(loop.compile(content)) match {
             case Some(compiled) ⇒ Compiled(compiled)
