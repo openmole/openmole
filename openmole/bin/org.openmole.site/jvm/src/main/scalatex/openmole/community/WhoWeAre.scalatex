@@ -20,9 +20,7 @@
 
 @member(Resource.img.people.paul, "Paul CHAPRON")
 @div(width := "75%", paddingLeft := 70)
-  CNRS postdoc at @aa("ISC-PIF", href := shared.link.partner.iscpif) (UPS 3611). He applies OpenMOLE methods on some models. For instance, he carried out a @aa("study with OpenMOLE on the IGN SimPLU model", href := shared.link.simpluDemo), and tries to make the documentation user readable and noob-proof.
-  As a hobby, he animates SVG files and gives his opinion on the graphical design :-)
-
+  Sustainable development researcher at @aa("IGN", href := shared.link.partner.ign). interested in OpenMOLE-assisted modeling methodology, exploration of models and their results.
 @member(Resource.img.people.guillaume, "Guillaume CHEREL")
 @div(width := "75%", paddingLeft := 70)
   CNRS research engineer at @aa("ISC-PIF", href := shared.link.partner.iscpif). Scientific computing and simulation researcher, he worked on the conception of methods for simulation experiments and parameter space exploration and worked on the development of @aa("MGO", href := shared.link.repo.mgo).
