@@ -133,7 +133,7 @@ class Runtime {
         }
       }
 
-      val runnableTasks = serializerService.deserializeReplaceFiles[Seq[RunnableTask]](executionMessage.jobs, usedFiles)
+      val runnableTasks = serializerService.deserializeReplaceFiles[Iterable[RunnableTask]](executionMessage.jobs, usedFiles)
 
       val saver = new ContextSaver(runnableTasks.size)
       val allMoleJobs = runnableTasks.map { t ⇒ MoleJob(t.task, t.context, t.id, saver.save, () ⇒ false) }
