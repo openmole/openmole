@@ -26,8 +26,6 @@ def formatSettings =
     scalariformAutoformat := true
   )
 
-lazy val scalaVersionValue = "2.13.2"
-
 def defaultSettings = formatSettings ++
   Seq(
     organization := "org.openmole",
