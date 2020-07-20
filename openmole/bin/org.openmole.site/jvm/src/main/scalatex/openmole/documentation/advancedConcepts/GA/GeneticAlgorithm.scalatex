@@ -103,7 +103,7 @@ evolution hook (workDirectory / "evolution") on LocalEnvironment(4)""", name = "
 @br
 
 Notice that the objectives are given as a sequence of model outputs variables to @b{minimize}.
-So if you want to reach specific target values, like Pi and 42, you can use the @code{DeltaTask} and plug it after your model:
+So if you want to reach specific target values, like Pi and 42, you can use the @code{delta} keyword:
 
 @br@br
 
@@ -115,8 +115,8 @@ NSGA2Evolution(
     x in (0.0, 1.0),
     y in (0.0, 1.0),
     s in List("apple", "banana", "strawberry")),
-  objective = Seq(o1, o2),
-  evaluation = model -- DeltaTask(o1 -> math.Pi, o2 -> 42),
+  objective = Seq(o1 delta math.Pi, o2 delta 42),
+  evaluation = model,
   parallelism = 10,
   termination = 100
 ) hook (workDirectory / "evolution")""", name = "nsga2 delta example")
@@ -128,7 +128,7 @@ NB: in this case the results in the saved file will be the difference between th
 @br@br
 
 Obviously, maximization problems are performed by taking the opposite of variables as objectives.
-You may use a @code{ScalaTask} in place of the @code{DeltaTask} to perform such a small computation in the workflow.
+You may use a @code{-} keyword to minimise the opposite of o1 (i.e. maximize o1).
 
 @br@br
 
@@ -143,8 +143,8 @@ NSGA2Evolution(
     x in (0.0, 1.0),
     y in (0.0, 1.0),
     s in List("apple", "banana", "strawberry")),
-  objective = Seq(o1, o2),
-  evaluation = model -- maximize,
+  objective = Seq(-o1, o2),
+  evaluation = model,
   parallelism = 10,
   termination = 100) hook (workDirectory / "evolution")""", name = "nsga2 maximize example")
 
