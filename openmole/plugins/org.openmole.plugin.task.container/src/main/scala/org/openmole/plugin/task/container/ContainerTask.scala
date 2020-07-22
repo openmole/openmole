@@ -103,7 +103,13 @@ object ContainerTask {
     environmentVariables: Seq[(String, String)]      = Seq.empty,
     workDirectory:        Option[String]             = None,
     output:               PrintStream,
-    error:                PrintStream)(implicit tmpDirectory: TmpDirectory) = {
+    error:                PrintStream)(implicit tmpDirectory: TmpDirectory, networkService: NetworkService) = {
+    def proxyVariables =
+      networkService.httpProxy match {
+        case Some(proxy) ⇒ Seq("http_proxy" -> proxy.hostURI, "HTTP_PROXY" -> proxy.hostURI)
+        case None        ⇒ Seq()
+      }
+
     val retCode =
       containerSystem match {
         case Proot(noSeccomp, kernel) ⇒
@@ -120,7 +126,7 @@ object ContainerTask {
               kernel = Some(kernel),
               noSeccomp = noSeccomp,
               bind = volumes,
-              environmentVariables = environmentVariables,
+              environmentVariables = proxyVariables ++ environmentVariables,
               workDirectory = workDirectory
             )
           }
@@ -133,7 +139,7 @@ object ContainerTask {
               output = output,
               error = error,
               bind = volumes,
-              environmentVariables = environmentVariables,
+              environmentVariables = proxyVariables ++ environmentVariables,
               workDirectory = workDirectory,
               singularityCommand = command
             )
@@ -212,7 +218,7 @@ object ContainerTask {
     }
   }
 
-  def executeInstall(containerSystem: ContainerSystem, image: _root_.container.FlatImage, install: Seq[String], volumes: Seq[(String, String)], errorDetail: Int ⇒ Option[String])(implicit tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection) =
+  def executeInstall(containerSystem: ContainerSystem, image: _root_.container.FlatImage, install: Seq[String], volumes: Seq[(String, String)], errorDetail: Int ⇒ Option[String])(implicit tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection, networkService: NetworkService) =
     if (install.isEmpty) image
     else {
       val retCode = runCommandInContainer(containerSystem, image, install, output = outputRedirection.output, error = outputRedirection.error, volumes = volumes)
@@ -265,6 +271,7 @@ import ContainerTask._
 
   override def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
     import parameters._
+    import executionContext.networkService
 
     def createPool =
       WithInstance { () ⇒

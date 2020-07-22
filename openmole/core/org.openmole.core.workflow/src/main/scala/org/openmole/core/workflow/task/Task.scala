@@ -22,6 +22,7 @@ import java.io.File
 import org.openmole.core.context._
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
@@ -65,6 +66,7 @@ case class TaskExecutionContext(
   implicit val outputRedirection: OutputRedirection,
   implicit val loggerService:     LoggerService,
   implicit val serializerService: SerializerService,
+  implicit val networkService:    NetworkService,
   cache:                          KeyValueCache,
   lockRepository:                 LockRepository[LockKey],
   moleExecution:                  Option[MoleExecution]   = None)

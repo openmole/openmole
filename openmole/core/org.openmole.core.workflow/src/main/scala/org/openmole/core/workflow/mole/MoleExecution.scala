@@ -206,6 +206,7 @@ object MoleExecution extends JavaLogger {
                   workspace = workspace,
                   outputRedirection = outputRedirection,
                   loggerService = loggerService,
+                  networkService = networkService,
                   cache = subMoleExecutionState.moleExecution.keyValueCache,
                   lockRepository = subMoleExecutionState.moleExecution.lockRepository,
                   moleExecution = Some(subMoleExecutionState.moleExecution),
@@ -456,7 +457,8 @@ object MoleExecution extends JavaLogger {
             cache = moleExecution.keyValueCache,
             lockRepository = moleExecution.lockRepository,
             moleExecution = Some(moleExecution),
-            serializerService = serializerService
+            serializerService = serializerService,
+            networkService = networkService
           )
         )
     }
