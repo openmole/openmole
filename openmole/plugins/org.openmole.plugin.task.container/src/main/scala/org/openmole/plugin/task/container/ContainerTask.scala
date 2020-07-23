@@ -104,10 +104,17 @@ object ContainerTask {
     workDirectory:        Option[String]             = None,
     output:               PrintStream,
     error:                PrintStream)(implicit tmpDirectory: TmpDirectory, networkService: NetworkService) = {
+
     def proxyVariables =
       networkService.httpProxy match {
-        case Some(proxy) ⇒ Seq("http_proxy" -> proxy.hostURI, "HTTP_PROXY" -> proxy.hostURI)
-        case None        ⇒ Seq()
+        case Some(proxy) ⇒
+          Seq(
+            "http_proxy" -> proxy.hostURI,
+            "HTTP_PROXY" -> proxy.hostURI,
+            "https_proxy" -> proxy.hostURI,
+            "HTTPS_PROXY" -> proxy.hostURI
+          )
+        case None ⇒ Seq()
       }
 
     val retCode =
