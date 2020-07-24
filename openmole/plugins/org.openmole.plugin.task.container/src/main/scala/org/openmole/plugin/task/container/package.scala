@@ -135,6 +135,12 @@ package object container extends ContainerPackage {
 
   object ContainerSystem {
     def default = Singularity()
+
+    def sudo(containerSystem: ContainerSystem, cmd: String) =
+      containerSystem match {
+        case _: Proot       ⇒ s"sudo $cmd"
+        case _: Singularity ⇒ s"fakeroot $cmd"
+      }
   }
 
   sealed trait ContainerSystem

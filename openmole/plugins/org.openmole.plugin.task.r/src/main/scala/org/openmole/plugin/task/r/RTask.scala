@@ -55,7 +55,7 @@ object RTask {
     script:               RunnableScript,
     install:              Seq[String]                        = Seq.empty,
     libraries:            Seq[InstallCommand]                = Seq.empty,
-    version:              String                             = "3.6.2",
+    version:              String                             = "4.0.2",
     errorOnReturnValue:   Boolean                            = true,
     returnValue:          OptionalArgument[Val[Int]]         = None,
     stdOut:               OptionalArgument[Val[String]]      = None,
@@ -70,8 +70,9 @@ object RTask {
     // add additional installation of devtools only if needed
     val installCommands =
       if (libraries.exists { case l: InstallCommand.RLibrary ⇒ l.version.isDefined }) {
-        install ++ Seq("apt update", "apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev",
-          """R --slave -e 'install.packages("devtools", dependencies = T); library(devtools);""") ++
+        install ++
+          Seq("apt update", "apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev").map(c => ContainerSystem.sudo(containerSystem, c)) ++
+          Seq("""R --slave -e 'install.packages("devtools", dependencies = T); library(devtools);""") ++
           InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
       }
       else install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
