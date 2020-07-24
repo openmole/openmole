@@ -13,7 +13,7 @@ RUN useradd docker \
 	&& addgroup docker staff
 
 RUN apt-get update \ 
-	&& apt-get install -y --no-install-recommends ed less locales vim-tiny wget ca-certificates fonts-texgyre libldap-2.4-2 libtinfo5 \
+	&& apt-get install -y --no-install-recommends ed less locales vim-tiny wget ca-certificates fonts-texgyre libldap-2.4-2 libtinfo5 fakeroot sudo \
 	&& rm -rf /var/lib/apt/lists/*
 
 ## Configure default locale, see https://github.com/rocker-org/rocker/issues/19
