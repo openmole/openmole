@@ -36,7 +36,7 @@ esac
 
 for a in $@
 do
-  if [[ $a == "--debug" ]]; then FLAG+=("-XX:-OmitStackTraceInFastThrow"); fi
+  if [[ $a == "--debug" ]]; then FLAG="$FLAG -XX:-OmitStackTraceInFastThrow"; fi
 done
 
 
