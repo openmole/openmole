@@ -34,6 +34,12 @@ case "$JVMVERSION" in
   *64-Bit*) FLAG="-XX:+UseCompressedOops";;
 esac
 
+for a in $@
+do
+  if [[ $a == "--debug" ]]; then FLAG+=("-XX:-OmitStackTraceInFastThrow"); fi
+done
+
+
 CONFIGDIR="${TMPDIR}/config"
 mkdir -p "${CONFIGDIR}"
 
