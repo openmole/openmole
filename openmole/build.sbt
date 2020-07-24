@@ -1065,7 +1065,7 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
         |update-locale LANG=en_US.UTF-8""".stripMargin
     )
     env("LC_ALL", "en_US.UTF-8")
-    env("ENV LANG", "en_US.UTF-8")
+    env("LANG", "en_US.UTF-8")
     env("LANGUAGE", "en_US.UTF-8")
     runRaw(
       """groupadd -r openmole && \
