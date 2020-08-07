@@ -183,7 +183,7 @@ If you have several outputs, you can combine mapped outputs with classic outputs
     val c = Val[Double]
 
     // Task
-    val rTask5 =
+    val rTask4 =
     RTask($tq
         # Define the function
         f <- function(x) {
@@ -204,7 +204,7 @@ If you have several outputs, you can combine mapped outputs with classic outputs
     )
 
     // Workflow
-    rTask5 hook display
+    rTask4 hook display
 """)
 
 @br
