@@ -87,6 +87,7 @@ package object shared {
     lazy val CAREmailing = "https://groups.google.com/forum/?fromgroups#!forum/reproducible"
     lazy val egi = "http://www.egi.eu/"
     lazy val singularity = "https://sylabs.io/"
+    lazy val rcran = "https://cran.r-project.org/"
 
     // Models
     lazy val simpluDemo = "https://simplu.openmole.org"
