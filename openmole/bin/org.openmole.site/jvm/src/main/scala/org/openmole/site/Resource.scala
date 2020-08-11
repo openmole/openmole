@@ -123,6 +123,9 @@ object Resource {
     object tutorial {
       val modelImport = tutorialResource("modelImport.png")
       val modelExecution = tutorialResource("modelExecution.png")
+      val modelOutput = tutorialResource("modelOutput.png")
+      val repliOutput = tutorialResource("repliOutput.png")
+      val gridOutput = tutorialResource("gridOutput.png")
     }
 
     object people {
@@ -213,6 +216,7 @@ object Resource {
       val authentication = guiGuideResource("authentication.svg")
       val plugin = guiGuideResource("plugin.svg")
       val market = guiGuideResource("market.png")
+      val emptyGUI = guiGuideResource("emptyGUI.png")
     }
 
   }
