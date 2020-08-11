@@ -85,7 +85,7 @@ object Plotter {
           // If cells have array structure
           if (dims.head.values.headOption.map { Tools.isDataArray }.getOrElse(false)) {
 
-            val arrays = Tools.getDataArrays(dims.last.values)
+            val arrays = Tools.getDataArrays(dims.head.values)
 
             val xSize = arrays.headOption.map { _.length }.getOrElse(1)
             (Dim((1 to xSize).map { _.toString }, ""), arrays.map { d ⇒ Dim(d, dims.last.label) }.toArray)

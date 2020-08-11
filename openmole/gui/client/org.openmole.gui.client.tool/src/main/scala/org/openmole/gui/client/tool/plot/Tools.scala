@@ -24,4 +24,11 @@ object Tools {
     }
   }
 
+  def isOneColumnTemporal(data: Seq[Array[String]]) = (for {
+    firstLine ← data.headOption
+    isTemporal = firstLine.map { el ⇒ isDataArray(el) }
+  } yield {
+    isTemporal.find(_ == true).getOrElse(false)
+  }).getOrElse(false)
+
 }
