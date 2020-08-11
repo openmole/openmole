@@ -128,7 +128,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
           onpasted
         }
         else treeNodeManager.setFilesInError(
-          "Some files already exists, overwrite ?",
+          "Some files already exists, overwrite?",
           existing,
           () ⇒ CoreUtils.copyProjectFilesTo(safePaths, to).foreach { b ⇒
             refreshWithNoError
@@ -141,7 +141,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
       }
     }
     else treeNodeManager.setFilesInComment(
-      "Paste a folder in itself is not allowed",
+      "Pasting a folder in itself is not allowed",
       same,
       () ⇒ treeNodeManager.noError
     )
@@ -222,7 +222,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
                   div(
                     omsheet.moreEntriesText,
                     div(
-                      s"Only 1000 files maximum (${100000 / sons.nbFilesOnServer}%) can be displayed.",
+                      s"Max of 1,000 files (${100000 / sons.nbFilesOnServer}%) displayed simultaneously",
                       div(
                         "Use the ",
                         span(

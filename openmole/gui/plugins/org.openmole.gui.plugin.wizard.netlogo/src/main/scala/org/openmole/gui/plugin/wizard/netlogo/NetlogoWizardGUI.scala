@@ -50,7 +50,7 @@ class NetlogoWizardFactory extends WizardPluginFactory {
 
   def parse(safePath: SafePath): Future[Option[LaunchingCommand]] = OMPost()[NetlogoWizardAPI].parse(safePath).call()
 
-  def help: String = "If your NetLogo script depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace. Then set the embedWorkspace option to true in the oms script."
+  def help: String = "If your NetLogo script contains several files (.nls files) or depends on plugins, you should upload an archive (tar.gz or tgz) containing the entire root workspace. Then, set the embedWorkspace option to true."
 
   def name: String = "NetLogo"
 }
@@ -65,9 +65,9 @@ class NetlogoWizardGUI extends WizardGUIPlugin {
   lazy val panel: TypedTag[HTMLElement] = div(
     hForm(
       div(embedWorkspaceToggle.render)
-        .render.withLabel("EmbedWorkspace")
+        .render.withLabel("embedWorkspace")
     ),
-    div(client.modelHelp +++ client.columnCSS, "If your Netlogo script depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace. Then set the embedWorkspace option to true in the oms script.")
+    div(client.modelHelp +++ client.columnCSS, "If your NetLogo script contains several files (.nls files) or depends on plugins, you should upload an archive (tar.gz or tgz) containing the entire root workspace. Then, set the embedWorkspace option to true.")
   )
 
   def save(

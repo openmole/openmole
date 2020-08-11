@@ -46,10 +46,10 @@ class NetlogoWizardApiImpl(s: Services) extends NetlogoWizardAPI {
     val task = s"${executableName.split('.').head.toLowerCase}Task"
 
     val content = modelData.vals +
-      s"""\nval launch = List("${(Seq("setup") ++ (command.split('\n').toSeq)).mkString("\",\"")}")
-            \nval $task = NetLogo6Task(workDirectory / ${executableName.split('/').map { s ⇒ s"""\"$s\"""" }.mkString(" / ")}, launch, embedWorkspace = ${data.embedWorkspace}, seed=seed) set(\n""".stripMargin +
+      s"""\n\nval launch = List("${(Seq("setup") ++ (command.split('\n').toSeq)).mkString("\",\" ")}")
+            \nval $task = NetLogo6Task(workDirectory / ${executableName.split('/').map { s ⇒ s"""\"$s\"""" }.mkString(" / ")}, launch, embedWorkspace = ${data.embedWorkspace}, seed = mySeed) set(\n""".stripMargin +
       WizardUtils.expandWizardData(modelData) +
-      s""")\n\n$task hook ToStringHook()"""
+      s""")\n\n$task hook display"""
 
     target.toFile.content = content
     WizardToTask(target)
@@ -60,7 +60,7 @@ class NetlogoWizardApiImpl(s: Services) extends NetlogoWizardAPI {
     val lines = safePath.toFile.lines
 
     def parse0(lines: Seq[(String, Int)], args: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair]): (Seq[ProtoTypePair], Seq[ProtoTypePair]) = {
-      if (lines.isEmpty) (ProtoTypePair("seed", ProtoTYPE.INT, "0", None) +: args, outputs)
+      if (lines.isEmpty) (ProtoTypePair("mySeed", ProtoTYPE.INT, "0", None) +: args, outputs)
       else {
         val (line, index) = lines.head
         val tail = lines.tail

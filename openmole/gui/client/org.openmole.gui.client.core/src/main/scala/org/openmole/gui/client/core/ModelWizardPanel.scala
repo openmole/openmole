@@ -244,7 +244,7 @@ class ModelWizardPanel(treeNodeManager: TreeNodeManager, treeNodeTabs: TreeNodeT
                   val optionsDiv = OptionsDiv(existing, SafePath.naming)
                   panels.alertPanel.alertDiv(
                     tags.div(
-                      "Some files already exist, overwrite ?",
+                      "Some files already exist, overwrite?",
                       optionsDiv.div
                     ),
                     () ⇒ {
@@ -351,30 +351,29 @@ class ModelWizardPanel(treeNodeManager: TreeNodeManager, treeNodeTabs: TreeNodeT
   val step1 = tags.div(
     tags.h4("Step 1: Code import"),
     div(grey +++ rightBlock)(
-      "Pick your code up among jar archive, netlogo scripts, or any code packaged on linux with Care ( like Python, C, C++ " +
-        "R, etc). In the case of a Care archive, the packaging has to be done with the",
-      tags.b(" -o yourmodel.tar.gz.bin"), " or ", tags.b(" -o yourmodel.tgz.bin"), " option."
+      "Browse for your source file. Your file can be a Java archive, a NetLogo script, or in any language you want (Python, C, C++," +
+        " R, etc)."
     )
   )
 
   val step2 = div(
-    div(grey)("The system detects automatically the launching command and propose you the creation of some OpenMOLE variables so that" +
-      " your model will be able to be feeded with variable values coming from the workflow you will build afterwards. In the case of Java, Scala or Netlogo" +
-      " (ie codes working on the JVM), the OpenMOLE variables can be set directly in the command line. Otherwise, they have to be set inside ${} statements." +
-      " By default the system detects automatically your variable changes and update the launching command. However, this option can be desactivated.")
+    div(grey)("The system automatically detects the launching commands from your script, and offers to create the corresponding OpenMOLE variables." +
+      " This will allow you to feed values to these variables directly from the workflow you will build." +
+      " In the case of Java, Scala or NetLogo (i.e. programs working on the JVM), the OpenMOLE variables can be set directly in the command line." +
+      " Otherwise, they have to be set inside ${} statements." +
+      " By default, the system automatically detects variable changes, and updates the launching commands accordingly. However, this option can be deactivated.")
   )
 
   val autoModeTag = div(onecolumn +++ (paddingTop := 20))(
-    tags.b("Launching Command"),
+    tags.b("Launching commands"),
     div(floatRight +++ (paddingTop := 4))(
       "Automatic ",
       autoModeCheckBox,
-      span(grey)(" It is automatically updated (default), or it can be set manually")
+      span(grey)(" Check to automatically update the launching commands.")
     )
   )
 
   lazy val buildScriptButton = {
-
     tags.button("Build", btn_primary, onclick := {
       () ⇒
         save
@@ -551,14 +550,14 @@ class ModelWizardPanel(treeNodeManager: TreeNodeManager, treeNodeTabs: TreeNodeT
       tags.div(
         step1,
         transferring.now match {
-          case _: Processing ⇒ OMTags.waitingSpan(" Uploading ...", btn_danger + "certificate")
+          case _: Processing ⇒ OMTags.waitingSpan(" Uploading...", btn_danger + "certificate")
           case _: Processed  ⇒ topConfiguration
           case _             ⇒ topConfiguration
         },
         launchingCommand() match {
           case Some(lc: LaunchingCommand) ⇒
             div(paddingTop := 20)(
-              tags.h4("Step2: Task configuration"), step2,
+              tags.h4("Step 2: Task configuration"), step2,
               topButtons,
               if (tab == 0) {
                 tags.div({
