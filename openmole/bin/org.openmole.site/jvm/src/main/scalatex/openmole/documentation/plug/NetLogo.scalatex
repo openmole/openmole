@@ -105,7 +105,7 @@ The former mapping syntax using @code{netLogoInputs} and @code{netLogoOutputs} i
 @h2{Embedding NetLogo extensions and sources}
 
 Several NetLogo models rely on extensions (which are basically jars providing new primitives in interaction with the NetLogo workspace).
-By default, NetLogo will search extensions in its installation folder (which will not work here, as OpenMole embeds NetLogo as a jar), but also in the model directory.
+By default, NetLogo will search extensions in its installation folder (which will not work here, as OpenMOLE embeds NetLogo as a jar), but also in the model directory.
 To be able to run a model with extensions, put the extension folder in the same directory as the model source, and activate the option @code{embedWorkspace}.
 
 @br@br
@@ -232,9 +232,9 @@ Sometimes, you have to modify your code slightly to make it purely headless so t
 NetLogo is a graphical framework.
 As such, many variables of a model developed in NetLogo are set through widgets (a graphical component).
 In the NetLogo World, setting or getting a value on the model inputs is generally achieved by calling set or get on the widget object.
-In OpenMoLE however, the NetLogo program has to be parameterised without the GUI.
-Models must be used in headless mode with OpenMole.
-This is not a problem because globals with unspecified values in the OpenMole @code{NetLogoTask} will take the default values defined in widgets.
+In OpenMOLE however, the NetLogo program has to be parameterised without the GUI.
+Models must be used in headless mode with OpenMOLE.
+This is not a problem because globals with unspecified values in the OpenMOLE @code{NetLogoTask} will take the default values defined in widgets.
 
 @br
 
@@ -262,13 +262,13 @@ We recommend however the following ``best practices'':
 
 These best practices may be too constraining for simple experiments, we give therefore the following less strict guidelines:
 @ul
-    @li{@b{Limit your usage of widget implicit globals.} We prefer explicit globals using the globals primitive, because you need to re-define all the important values from your program in OpenMoLE before you launch it on a remote computing environment.}
+    @li{@b{Limit your usage of widget implicit globals.} We prefer explicit globals using the globals primitive, because you need to re-define all the important values from your program in OpenMOLE before you launch it on a remote computing environment.}
     @li{@b{Do not use the same functions @code{setup} and @code{go} to setup your program on a remote environment}.
     On the remote environment, the NetLogo program is initialised and launched only once, so there is no need to call a @code{clear-all} primitive with each setup.
     When running on distributed environments, @code{clear-all} is @b{not} your best friend.
-    @code{clear-all} erases all the globals passed by OpenMoLE to your program before it starts and will make it crash.}
+    @code{clear-all} erases all the globals passed by OpenMOLE to your program before it starts and will make it crash.}
     @object C{val c = "-> depends on how it is done : nuance that"}
-    @li{@b{Do not directly use the implicit globals created by means of a widget.} Although you can you can access and overwrite implicit globals in OpenMole, it prevents OpenMoLE from mapping explicitly its prototypes to the NetLogo globals.}
+    @li{@b{Do not directly use the implicit globals created by means of a widget.} Although you can you can access and overwrite implicit globals in OpenMOLE, it prevents OpenMOLE from mapping explicitly its prototypes to the NetLogo globals.}
 
 @br
 

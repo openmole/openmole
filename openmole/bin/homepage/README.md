@@ -1,5 +1,5 @@
-# OpenMole landing page redesign  
-_The new and improved design of the OpenMole landing page._
+# OpenMOLE landing page redesign  
+_The new and improved design of the OpenMOLE landing page._
 
 > This repository is still under active development.
 
