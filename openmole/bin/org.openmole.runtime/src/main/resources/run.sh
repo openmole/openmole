@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 #readlink -f does not work on mac, use alternate script
 TARGET_FILE="$0"

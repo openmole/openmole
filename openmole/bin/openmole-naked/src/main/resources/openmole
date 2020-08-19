@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function cd_or_die() {
   cd "$1" || (echo "Can't cd to $1" >&2; exit 3)
