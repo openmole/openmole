@@ -63,6 +63,7 @@ object RTask {
     hostFiles:            Seq[HostFile]                      = Vector.empty,
     workDirectory:        OptionalArgument[String]           = None,
     environmentVariables: Seq[EnvironmentVariable]           = Vector.empty,
+    clearContainerCache:    Boolean                          = false,
     containerSystem:        ContainerSystem                  = ContainerSystem.default,
     installContainerSystem: ContainerSystem                  = ContainerSystem.default,
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): RTask = {
@@ -79,7 +80,7 @@ object RTask {
 
     RTask(
       script = script,
-      image = ContainerTask.prepare(installContainerSystem, rImage(version), installCommands),
+      image = ContainerTask.prepare(installContainerSystem, rImage(version), installCommands, clearCache = clearContainerCache),
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
