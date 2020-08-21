@@ -18,6 +18,7 @@ package object json {
       case v: String       ⇒ JString(v)
       case v: Float        ⇒ JDouble(v)
       case v: Double       ⇒ JDouble(v)
+      case v: Boolean      ⇒ JBool(v)
       case v: Array[_]     ⇒ JArray(v.map(toJSONValue).toList)
       case v: java.io.File ⇒ JString(v.getAbsolutePath)
       case v: Seq[_]       ⇒ JArray(v.map(toJSONValue).toList)
