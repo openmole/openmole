@@ -253,7 +253,7 @@ object PSE {
         def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, EvolutionState.generation)(s, population)
         def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, EvolutionState.startTime)(s, population)
 
-        def result(population: Vector[I], state: S) = FromContext { p ⇒
+        def result(population: Vector[I], state: S, keepAll: Boolean) = FromContext { p ⇒
           import p._
 
           val res = PSEAlgorithm.result[Array[Any]](population, Genome.continuous(om.genome).from(context), om.pattern, ExactObjective.toFitnessFunction(om.objectives))
@@ -340,7 +340,7 @@ object PSE {
         def buildIndividual(genome: G, phenotype: Array[Any], context: Context) = NoisyPSEAlgorithm.buildIndividual(genome, phenotype)
         def initialState = EvolutionState[HitMapState](s = Map())
 
-        def result(population: Vector[I], state: S) = FromContext { p ⇒
+        def result(population: Vector[I], state: S, keepAll: Boolean) = FromContext { p ⇒
           import p._
           import org.openmole.core.context._
 
