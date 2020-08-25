@@ -19,7 +19,7 @@ object CSVOutputFormat {
 
       def writeFile(f: File, variables: Seq[Variable[_]]) = {
         val create = !format.append || f.isEmpty
-        val h = if (f.isEmpty) Some(headerLine(variables)) else None
+        val h = if (create || f.isEmpty) Some(headerLine(variables)) else None
         if (create) f.atomicWithPrintStream { ps ⇒ csv.writeVariablesToCSV(ps, h, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow) }
         else f.withPrintStream(append = true, create = true) { ps ⇒ csv.writeVariablesToCSV(ps, h, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow) }
       }
