@@ -64,8 +64,49 @@ If you prefer building the OpenMOLE application from sources you can do so as ex
 @h3{Run In Docker}
 
 You can run OpenMOLE using a Docker containers published @a("on the Docker Hub", href := org.openmole.site.shared.link.dockerHub).
+Running OpenMOLE using docker images facilitates the execution of multiple instances of OpenMOLE on different port, possibly with different 
+versions. It also facilitates the automatic restart of OpenMole or its update for a newer version. 
+
+@br
+
+You might run it using @code{docker} or @code{docker-compose}. In order to use the later, follow these steps:
+
+@ul
+  @li{@i{install docker-compose} : follow @aa("the docker documentation", href := "https://docs.docker.com/compose/install/") to install it on your system}
+  @li{@i{create a @code{docker-compose.yml} file} in a directory containing the information found @a("on the Docker Hub", href := org.openmole.site.shared.link.dockerHub)}
+  @li{@i{edit the @code{docker-compose.yml} file} as explained below
+  @li{@i{pull the docker image} by running @code{sudo docker-compose pull}}
+  @li{@i{start the docker image} by running @code{sudo docker-compose up}}
+  @li{@i{stop the docker image} by running @code{sudo docker-compose down}}
+  @li{@i{monitor the docker image} by running @code{sudo docker-compose top}, @code{sudo docker-compose ps}, or @code{sudo docker-compose logs -t}}
+
+In general, report to the @code{docker-compose} documentation and your favorite search engine to solve your problems.
+
+@br
+
+Here is an example of the configuration of a docker image of openmole. It runs the version 12 snapshot (unstable) of OpenMole, 
+displays the openmole web user interface on port 55555, runs behing a http proxy, and mounts the local directory @code{./data/openmole} as the directory for openmole settings
+and results.  It also restarts automatically on failure. 
+
+@hl("""
+version: "3"
+
+services:
+  openmole:
+    image: openmole/openmole:12.0-SNAPSHOT
+    hostname: mymachinenetworkname.mydomain.org
+    command: openmole-docker --proxy http://myproxy.mydomain.org:3128
+    volumes:
+      - ./data/openmole:/var/openmole/
+    ports:
+      - "55555:8080"
+    privileged: true
+    restart: on-failure:100000
+""")
+
 
 @h3{Get a Previous Version}
 
 Previous versions of the OpenMOLE application and documentation are available @aa("here", href := shared.link.allOpenMOLE).
 The previous version logs are gathered @aa("here", href := DocumentationPages.releaseNotes.file).
+
