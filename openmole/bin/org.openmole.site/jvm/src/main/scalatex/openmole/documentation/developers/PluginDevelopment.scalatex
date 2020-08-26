@@ -76,7 +76,7 @@ OsgiKeys.requireCapability := ${tq}osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1
     @code{privatePackage} means that every package in the project, or in the dependencies, should be embedded except for the package starting by the "scala" word. The scala packages provided by OpenMOLE will be used by the plugin instead.
 
 To build the plugin execute @hl.plain("sbt osgiBundle").
-SBT will then construct the plugin in @code{target/scala-2.12/myopenmoleplugin_2.12-1.0.jar}.
+SBT will then construct the plugin in @code{target/scala-2.13/myopenmoleplugin_2.13-1.0.jar}.
 
 @br
 
@@ -104,7 +104,7 @@ To enable your plugin in OpenMOLE, either use the plugin panel in the GUI, or us
 @br@br
 
 @hl.plain("""
-openmole -p target/scala-2.12/myopenmoleplugin_2.12-1.0.jar
+openmole -p target/scala-2.13/myopenmoleplugin_2.13-1.0.jar
 """)
 
 @br
