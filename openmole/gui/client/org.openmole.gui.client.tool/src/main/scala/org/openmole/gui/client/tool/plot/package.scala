@@ -27,8 +27,8 @@ object Plot {
   object PlotDimension {
     def plotModes(plotDimension: PlotDimension): Seq[PlotMode] =
       plotDimension match {
-        case ColumnPlot ⇒ Seq(ScatterMode, SplomMode)
-        case LinePlot   ⇒ Seq(XYMode, HeatMapMode)
+        case ColumnPlot ⇒ Seq(ScatterMode, SplomMode, XYMode)
+        case LinePlot   ⇒ Seq(HeatMapMode)
       }
   }
 
@@ -43,7 +43,7 @@ object Plot {
   }
 
   object XYMode extends PlotMode {
-    def name = "1 row = 1 plot"
+    def name = "Line"
   }
 
   object ScatterMode extends PlotMode {

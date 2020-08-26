@@ -34,7 +34,9 @@ import scala.scalajs.js.timers._
 object TreeNodeTabs {
 
   sealed trait Activity
+
   object Active extends Activity
+
   object UnActive extends Activity
 
   private def findOMSTab(treeNodeTabs: TreeNodeTabs, safePath: SafePath) =
@@ -61,7 +63,9 @@ object TreeNodeTabs {
       editor.changed.update(false)
       tab.errors() = EditorErrors(
         errorsFromCompiler = errors.map { ewl ⇒ ErrorFromCompiler(ewl, ewl.line.map { l ⇒ editor.editor.getSession().doc.getLine(l) }.getOrElse("")) },
-        errorsInEditor = errors.flatMap { _.line }
+        errorsInEditor = errors.flatMap {
+          _.line
+        }
       )
     }
 
@@ -89,6 +93,7 @@ sealed trait TreeNodeTab {
 
   // Get the file content to be saved
   def editableContent: Option[String]
+
   def editor: Option[EditorPanelUI]
 
   def refresh(afterRefresh: () ⇒ Unit = () ⇒ {}): Unit
@@ -120,6 +125,7 @@ object TreeNodeTab {
     lazy val omsEditor = EditorPanelUI(treeNodeTabs, safePath, FileExtension.OMS, initialContent)
 
     def editor = Some(omsEditor)
+
     def editableContent = Some(omsEditor.code)
 
     def refresh(onsaved: () ⇒ Unit) = save(safePathTab.now, omsEditor, onsaved)
@@ -184,6 +190,7 @@ object TreeNodeTab {
     lazy val safePathTab = Var(safePath)
 
     def editableContent = None
+
     def editor = None
 
     def refresh(afterRefresh: () ⇒ Unit): Unit = () ⇒ {}
@@ -210,6 +217,7 @@ object TreeNodeTab {
     }
 
     def editableContent = Some(editableEditor.code)
+
     def isCSV = DataUtils.isCSV(safePath)
 
     val filteredSequence = dataTab.filter match {
@@ -220,6 +228,12 @@ object TreeNodeTab {
 
     val dataNbColumns = dataTab.sequence.header.length
     val dataNbLines = filteredSequence.size
+    val plotModes = if (Tools.isOneColumnTemporal(dataTab.sequence.content)) {
+      Seq((XYMode, ColumnPlot))
+    }
+    else {
+      Seq((ScatterMode, ColumnPlot), (SplomMode, ColumnPlot), (HeatMapMode, LinePlot))
+    }
 
     lazy val editableEditor = EditorPanelUI(treeNodeTabs, safePath, extension, initialContent, if (isCSV) paddingBottom := 80 else emptyMod)
 
@@ -286,7 +300,7 @@ object TreeNodeTab {
 
       newView match {
         case Table ⇒ switch(false)
-        case Plot  ⇒ toView(ColumnPlot, ScatterMode)
+        case Plot  ⇒ toView(plotModes.head._2, plotModes.head._1)
         case _ ⇒
           if (isEditing.now)
             refresh(() ⇒ {
@@ -298,12 +312,18 @@ object TreeNodeTab {
 
     def toView(newFilter: RowFilter) = treeNodeTabs.switchEditableTo(this, dataTab.copy(filter = newFilter), plotter)
 
-    def toView(newAxis: Seq[Int]) =
+    def toView(newAxis: Seq[Int]) = {
       treeNodeTabs.switchEditableTo(this, dataTab, plotter.copy(toBePlotted = ToBePloted(newAxis) /*, error = afe*/ ))
+    }
 
     def toView(plotDimension: PlotDimension, newMode: PlotMode) = {
 
-      val newPlotter = Plotter.toBePlotted(plotter.copy(plotDimension = plotDimension, plotMode = newMode), dataTab.sequence)
+      val indexes = {
+        if (Tools.isOneColumnTemporal(dataTab.sequence.content)) ToBePloted(Seq(0, 0))
+        else plotter.toBePlotted
+      }
+
+      val newPlotter = Plotter.toBePlotted(plotter.copy(plotDimension = plotDimension, plotMode = newMode, toBePlotted = indexes), dataTab.sequence)
       treeNodeTabs.switchEditableTo(this, dataTab.copy(view = Plot), newPlotter._1)
     }
 
@@ -348,13 +368,15 @@ object TreeNodeTab {
         (for (
           a ← newSequenceData.header.zipWithIndex
         ) yield {
-          selectableButton(a._1, newPlotter.toBePlotted.indexes.contains(a._2), onclick = () ⇒ {
+          val defaultActive = newPlotter.toBePlotted.indexes.contains(a._2)
+          selectableButton(a._1, defaultActive, onclick = () ⇒ {
             val newAxis = newPlotter.plotMode match {
               case SplomMode ⇒
                 if (newPlotter.toBePlotted.indexes.contains(a._2)) newPlotter.toBePlotted.indexes.filterNot(_ == a._2)
                 else newPlotter.toBePlotted.indexes :+ a._2
               case HeatMapMode ⇒ Seq()
-              case _           ⇒ Seq(newPlotter.toBePlotted.indexes.last, a._2)
+              case XYMode if Tools.isOneColumnTemporal(dataTab.sequence.content) ⇒ Seq(a._2, a._2)
+              case _ ⇒ Seq(newPlotter.toBePlotted.indexes.last, a._2)
             }
             toView(newAxis)
           })
@@ -413,11 +435,12 @@ object TreeNodeTab {
       })
     })
 
-    lazy val options =
+    lazy val options = {
       plotter.plotDimension match {
         case ColumnPlot ⇒
           plotter.plotMode match {
-            case SplomMode | HeatMapMode ⇒ div()
+            case SplomMode | HeatMapMode                                       ⇒ div()
+            case XYMode if Tools.isOneColumnTemporal(dataTab.sequence.content) ⇒ div()
             case _ ⇒
               scalatags.JsDom.tags.span(display.flex, flexDirection.row, alignItems.center)(
                 scalatags.JsDom.tags.span("Error bars ", fontWeight.bold, marginRight := 10),
@@ -435,18 +458,19 @@ object TreeNodeTab {
           }
         case _ ⇒ div()
       }
+    }
 
     lazy val columnsOrLines = Var(ColumnPlot)
 
-    def plotModeRadios =
+    def plotModeRadios = {
+
       radios(marginLeft := 40)(
-        (for {
-          pd ← Seq(ColumnPlot, LinePlot)
-          pm ← PlotDimension.plotModes(pd)
-        } yield {
-          selectableButton(pm.name, plotter.plotMode == pm, onclick = () ⇒ toView(pd, pm))
-        }): _*
+        plotModes.map {
+          case (pm, pd) ⇒
+            selectableButton(pm.name, plotter.plotMode == pm, onclick = () ⇒ toView(pd, pm))
+        }: _*
       )
+    }
 
     val infoStyle: ModifierSeq = Seq(
       fontWeight.bold,
@@ -533,8 +557,9 @@ object TreeNodeTab {
 
   def save(safePath: SafePath, editorPanelUI: EditorPanelUI, afterSave: () ⇒ Unit) =
     editorPanelUI.synchronized {
-      Post()[Api].saveFile(safePath, editorPanelUI.code).call().foreach { _ ⇒
-        afterSave()
+      Post()[Api].saveFile(safePath, editorPanelUI.code).call().foreach {
+        _ ⇒
+          afterSave()
       }
     }
 
@@ -572,7 +597,9 @@ object TreeNodeTab {
   }
 
   sealed trait RowFilter
+
   object First100 extends RowFilter
+
   object Last100 extends RowFilter
 
   object All extends RowFilter
@@ -658,7 +685,9 @@ class TreeNodeTabs {
     newTabs.lastOption.map { t ⇒ setActive(t) }.isDefined
   }
 
-  def remove(safePath: SafePath): Unit = find(safePath).map { remove }
+  def remove(safePath: SafePath): Unit = find(safePath).map {
+    remove
+  }
 
   def switchEditableTo(tab: TreeNodeTab, dataTab: DataTab, plotter: Plotter) = {
     val newTab = TreeNodeTab.Editable(this, tab.safePathTab.now, tab.editableContent.getOrElse(""), dataTab, plotter)

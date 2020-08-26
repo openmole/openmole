@@ -2,6 +2,7 @@ package org.openmole.gui.client.tool.plot
 
 import org.openmole.gui.ext.data.{ SequenceData, SequenceHeader }
 import Plot._
+import org.openmole.gui.client.tool.plot
 import scaladget.bootstrapnative.DataTable
 import scaladget.bootstrapnative.DataTable.DataRow
 import scalatags.JsDom.all._
@@ -80,7 +81,18 @@ object Plotter {
       }
 
       val (xValues, yValues) = {
-        if (nbDims == 2) (dims.head, Array(dims.last))
+        if (nbDims == 2) {
+          // If cells have array structure
+          if (dims.head.values.headOption.map { Tools.isDataArray }.getOrElse(false)) {
+
+            val arrays = Tools.getDataArrays(dims.head.values)
+
+            val xSize = arrays.headOption.map { _.length }.getOrElse(1)
+            (Dim((1 to xSize).map { _.toString }, ""), arrays.map { d ⇒ Dim(d, dims.last.label) }.toArray)
+          }
+          else
+            (dims.head, Array(dims.last))
+        }
         else (Dim((1 to dims.length).map(_.toString), ""), dims)
       }
 
