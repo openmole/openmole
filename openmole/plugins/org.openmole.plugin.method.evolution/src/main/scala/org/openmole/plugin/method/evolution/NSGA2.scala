@@ -54,10 +54,10 @@ object NSGA2 {
 
         def initialState = EvolutionState[Unit](s = ())
 
-        def result(population: Vector[I], state: S) = FromContext { p ⇒
+        def result(population: Vector[I], state: S, keepAll: Boolean) = FromContext { p ⇒
           import p._
 
-          val res = MGONSGA2.result[Array[Any]](population, Genome.continuous(om.genome).from(context), ExactObjective.toFitnessFunction(om.objectives))
+          val res = MGONSGA2.result[Array[Any]](population, Genome.continuous(om.genome).from(context), ExactObjective.toFitnessFunction(om.objectives), keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness)).from(context)
 
@@ -142,10 +142,10 @@ object NSGA2 {
 
         def aggregate(v: Vector[Array[Any]]): Vector[Double] = NoisyObjective.aggregate(om.objectives)(v)
 
-        def result(population: Vector[I], state: S) = FromContext { p ⇒
+        def result(population: Vector[I], state: S, keepAll: Boolean) = FromContext { p ⇒
           import p._
 
-          val res = MGONoisyNSGA2.result(population, aggregate(_), Genome.continuous(om.genome).from(context))
+          val res = MGONoisyNSGA2.result(population, aggregate(_), Genome.continuous(om.genome).from(context), keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness)).from(context)
 

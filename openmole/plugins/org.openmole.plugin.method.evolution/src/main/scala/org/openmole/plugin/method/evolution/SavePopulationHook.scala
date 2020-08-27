@@ -24,17 +24,19 @@ import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SavedData 
 
 object SavePopulationHook {
 
-  def resultVariables(t: EvolutionWorkflow) = FromContext { p ⇒
+  def resultVariables(t: EvolutionWorkflow, keepAll: Boolean) = FromContext { p ⇒
     import p._
     context.variable(t.generationPrototype).toSeq ++
-      t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype)).from(context)
+      t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype), keepAll = keepAll).from(context)
   }
 
   def apply[T, F](
     algorithm: T,
     output:    WritableOutput,
     frequency: OptionalArgument[Long] = None,
-    last:      Boolean                = false, format: F = CSVOutputFormat(unrollArray = true))(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, EvolutionMetadata]) = {
+    last:      Boolean                = false,
+    keepAll:   Boolean                = false,
+    format:    F                      = CSVOutputFormat(unrollArray = true))(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, EvolutionMetadata]) = {
     val t = wfi(algorithm)
     Hook("SavePopulationHook") { p ⇒
       import p._
@@ -58,7 +60,7 @@ object SavePopulationHook {
 
           def evolutionData = t.operations.metadata(savedData).from(context)
 
-          val content = OutputFormat.PlainContent(resultVariables(t).from(context), Some(ExpandedString(fileName)))
+          val content = OutputFormat.PlainContent(resultVariables(t, keepAll = keepAll).from(context), Some(ExpandedString(fileName)))
           outputFormat.write(executionContext)(format, output, content, evolutionData).from(context)
         case None ⇒
       }
