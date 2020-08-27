@@ -11,13 +11,14 @@ You can try OpenMOLE online using our @aa("demo website", href := shared.link.de
 Please note that the service is reset every 6 hours, so don't be surprised if your current script suddenly vanishes :-)
 
 
-@h2{Install OpenMOLE}
 
+@h2{Install OpenMOLE}
 @h3{Prerequisites}
 
 @ul
-  @li{@i{Java >= 9} : to run on your own computer, OpenMOLE requires Java version 9 or above. Check our @aa("FAQ", href := faq.file) to access your Java version information.}
-  @li{@i{Singularity} : some OpenMOLE tasks require @org.openmole.site.content.Native.singularity. You must install it on your system if you want to use some tasks such as Python, R, Scilab, Container.}
+  @li{@i{Java >= 9}: to run on your own computer, OpenMOLE requires Java version 9 or above. Check our @aa("FAQ", href := faq.file) to access your Java version information.}
+  @li{@i{Singularity}: some OpenMOLE tasks require @org.openmole.site.content.Native.singularity. You must install it on your system if you want to use some tasks such as Python, R, Scilab, Container.}
+
 
 @h3{Download}
 
@@ -28,7 +29,7 @@ OpenMOLE is installed and works out of the box!
 
 @linkButton(s"Download ${org.openmole.core.buildinfo.version.value} - ${org.openmole.core.buildinfo.version.name} ", Resource.script.openmole.file, classIs(btn, btn_danger))
 
-@br@br
+
 
 @h2{Run OpenMOLE}
 
@@ -42,7 +43,7 @@ It will bring up you web browser and you should see something like this:
 @br@br
 
 OpenMOLE supports Chrome and Firefox.
-If you are using another web browser, you will need to copy paste the OpenMOLE url (something like http://localhost:[port]) in either Chrome or Firefox.
+If you are using another web browser, you will need to copy paste the OpenMOLE URL (something like @i{http://localhost:[port]}) in either Chrome or Firefox.
 
 
 
@@ -50,43 +51,44 @@ If you are using another web browser, you will need to copy paste the OpenMOLE u
 
 To get started with OpenMOLE and see a few simple use cases, you can follow our @a("Step by Step Introduction to OpenMOLE", href := stepByStepIntro.file).
 Other @a("Tutorials", href := tutorials.file) are also available, and you should find all the info you need in our @a("Documentation", href := documentation.file) section.
-
 @br
-
 If you have questions or problems, don't hesitate to contact our great @a("Community", href := OMcommunity.file) through the @aa("forum", href := shared.link.mailingList) or the @aa("chat", href := shared.link.chat)!
 
-@h2{Alternative Install}
 
+
+@h2{Alternative Install}
 @h3{Build From Sources}
 
 If you prefer building the OpenMOLE application from sources you can do so as explained @aa("here", href := buildSources.file).
 
-@h3{Run In Docker}
 
-You can run OpenMOLE using a Docker containers published @a("on the Docker Hub", href := org.openmole.site.shared.link.dockerHub).
-Running OpenMOLE using docker images facilitates the execution of multiple instances of OpenMOLE on different port, possibly with different 
-versions. It also facilitates the automatic restart of OpenMole or its update for a newer version. 
+@h3{Run in Docker}
 
+You can run OpenMOLE using a Docker container published @aa("on the Docker Hub", href := org.openmole.site.shared.link.dockerHub).
+Running OpenMOLE using Docker images facilitates the execution of multiple instances of OpenMOLE on different ports, possibly with different versions.
+It also facilitates the automatic restart of OpenMOLE or its update for a newer version.
 @br
-
-You might run it using @code{docker} or @code{docker-compose}. In order to use the later, follow these steps:
+You can run it using @code{docker} or @code{docker-compose}.
+In order to use the latter, follow these steps:
 
 @ul
-  @li{@i{install docker-compose} : follow @aa("the docker documentation", href := "https://docs.docker.com/compose/install/") to install it on your system}
-  @li{@i{create a @code{docker-compose.yml} file} in a directory containing the information found @a("on the Docker Hub", href := org.openmole.site.shared.link.dockerHub)}
-  @li{@i{edit the @code{docker-compose.yml} file} as explained below
-  @li{@i{pull the docker image} by running @code{sudo docker-compose pull}}
-  @li{@i{start the docker image} by running @code{sudo docker-compose up}}
-  @li{@i{stop the docker image} by running @code{sudo docker-compose down}}
-  @li{@i{monitor the docker image} by running @code{sudo docker-compose top}, @code{sudo docker-compose ps}, or @code{sudo docker-compose logs -t}}
+  @li{@i{install docker-compose}: follow @aa("the docker documentation", href := "https://docs.docker.com/compose/install/") to install it on your system,}
+  @li{@i{create a @code{docker-compose.yml} file} in a directory containing the information found @aa("on the Docker Hub", href := org.openmole.site.shared.link.dockerHub),}
+  @li{@i{edit the @code{docker-compose.yml} file} as explained below,}
+  @li{@i{pull the docker image} by running @code{sudo docker-compose pull},}
+  @li{@i{start the docker image} by running @code{sudo docker-compose up},}
+  @li{@i{stop the docker image} by running @code{sudo docker-compose down},}
+  @li{@i{monitor the docker image} by running @code{sudo docker-compose top}, @code{sudo docker-compose ps}, or @code{sudo docker-compose logs -t}.}
 
 In general, report to the @code{docker-compose} documentation and your favorite search engine to solve your problems.
 
-@br
+@br@br
 
-Here is an example of the configuration of a docker image of openmole. It runs the version 12 snapshot (unstable) of OpenMole, 
-displays the openmole web user interface on port 55555, runs behing a http proxy, and mounts the local directory @code{./data/openmole} as the directory for openmole settings
-and results.  It also restarts automatically on failure. 
+Here is an example of the configuration of a Docker image of OpenMOLE.
+It runs the version 12 snapshot (unstable) of OpenMOLE, displays the OpenMOLE web user interface on port 55555, runs behind a http proxy, and mounts the local directory @code{./data/openmole} as the directory for OpenMOLE settings and results.
+It also restarts automatically on failure.
+
+@br@br
 
 @hl("""
 version: "3"
@@ -105,8 +107,7 @@ services:
 """)
 
 
-@h3{Get a Previous Version}
+@h3{Get a previous version}
 
 Previous versions of the OpenMOLE application and documentation are available @aa("here", href := shared.link.allOpenMOLE).
-The previous version logs are gathered @aa("here", href := DocumentationPages.releaseNotes.file).
-
+The previous versions logs are gathered @aa("here", href := DocumentationPages.releaseNotes.file).
