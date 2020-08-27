@@ -104,7 +104,7 @@ services:
       - "55555:8080"
     privileged: true
     restart: on-failure:100000
-""")
+""", "plain")
 
 
 @h3{Get a previous version}
