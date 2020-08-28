@@ -104,7 +104,7 @@ Here is an example :
   val param1 = Val[Double]
   val param2 = Val[Double]
   val fitness = Val[Double]
-  val seed = Val[Long]
+  val mySeed = Val[Long]
 
   ProfileEvolution(
     evaluation = modelTask,
@@ -117,7 +117,7 @@ Here is an example :
     ),
     termination = 200000,
     parallelism = 500,
-    stochastic = Stochastic(seed = seed, sample = 100),
+    stochastic = Stochastic(seed = mySeed, sample = 100),
     distribution = Island(10 minutes)
   ) hook(workDirectory / "path/to/a/directory")
 """, header = "val modelTask = EmptyTask()", name = "Profile")

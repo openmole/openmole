@@ -25,14 +25,14 @@ The example below illustrates an exploration of the predator-prey model of the G
 // Declare the variables
 val numberOfPreys = Val[Double]
 val nbPreysInit = Val[Int]
-val seed = Val[Long]
+val mySeed = Val[Long]
 
 // Gama task
 // The first argument is the gaml file
 // The second argument is the Gama experiment name
 // The third argument is the number of steps
 val gama =
-  GAMATask(workDirectory / "predatorPrey.gaml", experiment = "prey_predatorExp", finalStep = 100, seed = seed) set (
+  GAMATask(workDirectory / "predatorPrey.gaml", experiment = "prey_predatorExp", finalStep = 100, seed = mySeed) set (
     inputs += (nbPreysInit mapped "nb_preys_init"),
     outputs += (numberOfPreys mapped "Number of preys")
   )
@@ -42,7 +42,7 @@ DirectSampling(
   evaluation =
     Replication(
       evaluation = gama,
-      seed = seed,
+      seed = mySeed,
       sample = 10,
       aggregation = Seq(numberOfPreys aggregate average)) hook(workDirectory / "result.csv"),
   sampling = nbPreysInit in (0 to 200 by 50)
