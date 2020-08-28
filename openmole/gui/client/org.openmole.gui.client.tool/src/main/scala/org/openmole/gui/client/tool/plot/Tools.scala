@@ -14,8 +14,6 @@ object Tools {
 
   val arrayRegEx = new RegExp("\\[[0-9].*,*\\]")
 
-  val scalarRegEx = new RegExp("/^-?\\d*\\.?\\d*$/")
-
   def isDataArray(value: String) = {
     arrayRegEx.test(value)
   }

@@ -66,6 +66,8 @@ object OSGiScalaCompiler {
         newSettings.classpath.prepend(classDirectory.getCanonicalPath)
         bundles.foreach(newSettings.classpath.append)
 
+        newSettings.deprecation.value = false
+
         newSettings
       }
 
