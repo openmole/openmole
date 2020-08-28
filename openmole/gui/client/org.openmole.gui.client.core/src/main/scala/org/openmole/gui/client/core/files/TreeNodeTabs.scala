@@ -228,12 +228,14 @@ object TreeNodeTab {
 
     val dataNbColumns = dataTab.sequence.header.length
     val dataNbLines = filteredSequence.size
-    val plotModes = if (Tools.isOneColumnTemporal(dataTab.sequence.content)) {
+    val plotModes = Seq((ScatterMode, ColumnPlot), (SplomMode, ColumnPlot), (HeatMapMode, LinePlot), (XYMode, ColumnPlot))
+
+    /*if (Tools.isOneColumnTemporal(dataTab.sequence.content)) {
       Seq((XYMode, ColumnPlot))
     }
     else {
       Seq((ScatterMode, ColumnPlot), (SplomMode, ColumnPlot), (HeatMapMode, LinePlot))
-    }
+    }*/
 
     lazy val editableEditor = EditorPanelUI(treeNodeTabs, safePath, extension, initialContent, if (isCSV) paddingBottom := 80 else emptyMod)
 
@@ -300,7 +302,7 @@ object TreeNodeTab {
 
       newView match {
         case Table ⇒ switch(false)
-        case Plot  ⇒ toView(plotModes.head._2, plotModes.head._1)
+        case Plot  ⇒ toView(ColumnPlot, ScatterMode)
         case _ ⇒
           if (isEditing.now)
             refresh(() ⇒ {
@@ -319,8 +321,18 @@ object TreeNodeTab {
     def toView(plotDimension: PlotDimension, newMode: PlotMode) = {
 
       val indexes = {
-        if (Tools.isOneColumnTemporal(dataTab.sequence.content)) ToBePloted(Seq(0, 0))
-        else plotter.toBePlotted
+        //   if (Tools.isOneColumnTemporal(dataTab.sequence.content)) ToBePloted(Seq(0, 0))
+        // else
+        val arrayColIndexes = dataTab.sequence.content.headOption.map {
+          Tools.dataArrayIndexes
+        }.getOrElse(Array()).toSeq
+        val scalarColIndexes = (0 to dataNbColumns).toArray.filterNot(arrayColIndexes.contains).toSeq
+
+        ToBePloted(newMode match {
+          case XYMode ⇒ arrayColIndexes
+          case _      ⇒ scalarColIndexes
+        })
+        // plotter.toBePlotted
       }
 
       val newPlotter = Plotter.toBePlotted(plotter.copy(plotDimension = plotDimension, plotMode = newMode, toBePlotted = indexes), dataTab.sequence)
@@ -364,24 +376,37 @@ object TreeNodeTab {
     lazy val axisCheckBoxes = {
       val (newPlotter, newSequenceData) = plotterAndSeqencedata(dataTab, plotter)
 
+      val arrayColIndexes = newSequenceData.content.headOption.map {
+        Tools.dataArrayIndexes
+      }.getOrElse(Array()).toSeq
+
+      val ind = plotter.plotMode match {
+        case XYMode ⇒ arrayColIndexes
+        case _      ⇒ (0 to dataNbColumns - 1).toArray.filterNot(arrayColIndexes.contains).toSeq
+      }
       checkboxes(colStyle +++ (margin := 20))(
-        (for (
-          a ← newSequenceData.header.zipWithIndex
-        ) yield {
-          val defaultActive = newPlotter.toBePlotted.indexes.contains(a._2)
+        newSequenceData.header.zipWithIndex.filter {
+          case (_, i) ⇒
+            ind.contains(i)
+        }.map { a ⇒
+          val defaultActive = {
+            plotter.plotMode match {
+              case XYMode ⇒ newPlotter.toBePlotted.indexes.head == a._2
+              case _      ⇒ newPlotter.toBePlotted.indexes.contains(a._2)
+            }
+          }
           selectableButton(a._1, defaultActive, onclick = () ⇒ {
             val newAxis = newPlotter.plotMode match {
               case SplomMode ⇒
                 if (newPlotter.toBePlotted.indexes.contains(a._2)) newPlotter.toBePlotted.indexes.filterNot(_ == a._2)
                 else newPlotter.toBePlotted.indexes :+ a._2
               case HeatMapMode ⇒ Seq()
-              case XYMode if Tools.isOneColumnTemporal(dataTab.sequence.content) ⇒ Seq(a._2, a._2)
-              case _ ⇒ Seq(newPlotter.toBePlotted.indexes.last, a._2)
+              case XYMode      ⇒ Seq(a._2, a._2)
+              case _           ⇒ Seq(newPlotter.toBePlotted.indexes.last, a._2)
             }
             toView(newAxis)
           })
-        }): _*
-      )
+        }: _*)
     }
 
     lazy val errorOptions: Options[IndexedAxis] = {
@@ -439,8 +464,8 @@ object TreeNodeTab {
       plotter.plotDimension match {
         case ColumnPlot ⇒
           plotter.plotMode match {
-            case SplomMode | HeatMapMode                                       ⇒ div()
-            case XYMode if Tools.isOneColumnTemporal(dataTab.sequence.content) ⇒ div()
+            case SplomMode | HeatMapMode ⇒ div()
+            case XYMode                  ⇒ div()
             case _ ⇒
               scalatags.JsDom.tags.span(display.flex, flexDirection.row, alignItems.center)(
                 scalatags.JsDom.tags.span("Error bars ", fontWeight.bold, marginRight := 10),
@@ -486,7 +511,7 @@ object TreeNodeTab {
         div(styles.display.flex, flexDirection.column, minWidth := 250)(
           div(styles.display.flex, flexDirection.row)(tags.span(infoStyle)("Scatter"), tags.span("Plot a column dimension against an other one as points")),
           div(styles.display.flex, flexDirection.row)(tags.span(infoStyle)("SPLOM"), tags.span("Scatter plots matrix on all selected columns")),
-          div(styles.display.flex, flexDirection.row)(tags.span(infoStyle)("1 row = 1 plot"), tags.span("Plot each line as a XY plot.")),
+          div(styles.display.flex, flexDirection.row)(tags.span(infoStyle)("Series"), tags.span("Plot a column of arrays.")),
           div(styles.display.flex, flexDirection.row)(tags.span(infoStyle)("Heat map"), tags.span("Plot the table as a matrix, colored by values."))
         ),
         Right
