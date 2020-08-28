@@ -43,7 +43,7 @@ object Plot {
   }
 
   object XYMode extends PlotMode {
-    def name = "Line"
+    def name = "Series"
   }
 
   object ScatterMode extends PlotMode {
