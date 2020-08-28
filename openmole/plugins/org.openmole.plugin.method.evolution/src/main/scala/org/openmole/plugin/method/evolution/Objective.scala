@@ -137,18 +137,6 @@ sealed trait Objective[P]
 
 object ExactObjective {
 
-  def toDouble[P](o: ExactObjective[P], context: Context) = {
-    def value = o.toDouble(o.get(context))
-
-    def deltaValue =
-      o.delta match {
-        case Some(delta) ⇒ math.abs(value - delta)
-        case None        ⇒ value
-      }
-
-    if (!o.negative) deltaValue else -deltaValue
-  }
-
   def toFitnessFunction(objectives: Seq[ExactObjective[_]])(phenotype: Array[Any]) =
     for {
       (o, p) ← (objectives zip phenotype).toVector
@@ -157,7 +145,17 @@ object ExactObjective {
 }
 
 case class ExactObjective[P](prototype: Val[P], get: Context ⇒ P, toDouble: P ⇒ Double, negative: Boolean, delta: Option[Double], as: Option[String]) extends Objective[P] {
-  private def fromAny(v: Any) = toDouble(v.asInstanceOf[P])
+  private def fromAny(v: Any) = {
+    val value = toDouble(v.asInstanceOf[P])
+
+    def deltaValue =
+      delta match {
+        case Some(delta) ⇒ math.abs(value - delta)
+        case None        ⇒ value
+      }
+
+    if (!negative) deltaValue else -deltaValue
+  }
 }
 
 object NoisyObjective {
