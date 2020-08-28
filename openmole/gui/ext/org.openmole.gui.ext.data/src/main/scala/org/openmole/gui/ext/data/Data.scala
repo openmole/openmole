@@ -182,11 +182,11 @@ package object data {
 
     def apply(fileName: String): FileExtension = {
       fileName match {
-        case x if x.endsWith(".oms")                            ⇒ OMS
-        case x if x.endsWith(".omr")                            ⇒ OMR
-        case x if x.endsWith(".csv")                            ⇒ CSV
+        case x if x.endsWith(".oms") ⇒ OMS
+        case x if x.endsWith(".omr") ⇒ OMR
+        case x if x.endsWith(".csv") ⇒ CSV
         case x if x.endsWith(".nlogo") | x.endsWith(".nlogo3d") ⇒ NETLOGO
-        case x if x.endsWith(".R")                              ⇒ R
+        case x if x.endsWith(".R") ⇒ R
         case x if x.endsWith(".gaml") |
           x.endsWith(".py") |
           x.endsWith(".txt") | x.endsWith(".nls") ⇒ TEXT
@@ -247,6 +247,7 @@ package object data {
   case class SafePath(path: Seq[String], context: ServerFileSystemContext = ProjectFileSystem()) {
 
     def ++(s: String) = sp(this.path :+ s)
+
     def /(child: String) = copy(path = path :+ child)
 
     def parent: SafePath = SafePath.sp(path.dropRight(1))
@@ -309,6 +310,7 @@ package object data {
     }
 
     def apply(errors: Seq[ErrorWithLocation], t: Throwable) = CompilationErrorData(errors, toStackTrace(t))
+
     def apply(t: Throwable): MessageErrorData = MessageErrorData(t.getMessage, Some(toStackTrace(t)))
 
     def apply(message: String) = MessageErrorData(message, None)
@@ -321,7 +323,9 @@ package object data {
   }
 
   sealed trait ErrorData
+
   case class MessageErrorData(message: String, stackTrace: Option[String]) extends ErrorData
+
   case class CompilationErrorData(errors: Seq[ErrorWithLocation], stackTrace: String) extends ErrorData
 
 
@@ -809,13 +813,17 @@ package object data {
 
   sealed trait Test {
     def passed: Boolean
+
     def message: String
+
     def error: Option[ErrorData]
   }
 
   case class PendingTest() extends Test {
     def passed = false
+
     def message = "pending"
+
     def error = None
   }
 
@@ -825,12 +833,15 @@ package object data {
 
   case class PassedTest(message: String) extends Test {
     def passed = true
+
     def error = None
   }
 
   object Test {
     def passed(message: String = "OK") = PassedTest(message)
+
     def pending = PendingTest()
+
     def error(msg: String, err: ErrorData) = FailedTest(msg, Some(err))
   }
 
