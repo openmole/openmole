@@ -98,8 +98,6 @@ class OMScripted(val factory: ScriptEngineFactory, val omIMain: IMain)
   // not obvious that ScriptEngine should accumulate code text
   private var code = ""
 
-  private var firstError: Option[(Position, String)] = None
-
   /* All scripts are compiled. The supplied context defines what references
    * not in REPL history are allowed, though a different context may be
    * supplied for evaluation of a compiled script.
@@ -116,14 +114,9 @@ class OMScripted(val factory: ScriptEngineFactory, val omIMain: IMain)
           new WrappedRequest(req)
         case Left(s) ⇒
           code = ""
-          throw firstError map {
-            case (pos, msg) ⇒ new ScriptException(msg, script, pos.line, pos.column)
-          } getOrElse {
-            s match {
-              case Results.Incomplete ⇒ new ScriptException(s"Compile-time error, the input is incomplete. It might be caused by an unclosed multi-line comment '/*'.")
-              case _                  ⇒ new ScriptException(s"Compile-time error (result is $s)")
-            }
-
+          throw s match {
+            case Results.Incomplete ⇒ new ScriptException(s"Compile-time error, the input is incomplete. It might be caused by an unclosed multi-line comment '/*'.")
+            case _                  ⇒ new ScriptException(s"Compile-time error (result is $s)")
           }
       }
     }
