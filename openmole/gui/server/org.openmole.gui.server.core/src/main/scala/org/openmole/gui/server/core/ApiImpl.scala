@@ -284,7 +284,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   def sequence(safePath: SafePath, separator: Char = ','): SequenceData = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     val content = safePath.toFile.content.split("\n")
-    val regex = """\[[^\]]+\]|[+-]?([0-9]*[.])?[0-9]+""".r
+    val regex = """\[[^\]]+\]|[+-]?[0-9][0-9]*\.?[0-9]*([Ee][+-]?[0-9]+)?""".r
 
     content.headOption.map { h ⇒
       SequenceData(
