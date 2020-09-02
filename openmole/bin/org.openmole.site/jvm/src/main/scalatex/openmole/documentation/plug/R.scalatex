@@ -318,7 +318,7 @@ Note: the first time you use R with @code{libraries} or @code{packages}, it take
         # require GeoRange
         area <- CHullArea(hull[, 1], hull[, 2])
         $tq,
-        install = Seq("apt update", "apt install -y libgdal-dev libproj-dev"),
+        install = Seq("apt-get update", "apt-get install -y libgdal-dev libproj-dev"),
         libraries = Seq("GeoRange")
     ) set(
         outputs += area.mapped
@@ -393,7 +393,7 @@ The hook stores the file @code{g} in your workspace} and displays the @code{area
         # require GeoRange
         area <- CHullArea(hull[, 1], hull[, 2])
         $tq,
-        install = Seq("apt update", "apt install -y libgdal-dev libproj-dev"),
+        install = Seq("apt-get update", "apt-get install -y libgdal-dev libproj-dev"),
         libraries = Seq("GeoRange")
     ) set(
         (inputs, outputs) += (n, mySeed),
@@ -413,3 +413,108 @@ The hook stores the file @code{g} in your workspace} and displays the @code{area
         sample = 100
     )
 """)
+
+
+@h2{Advanced RTask: use a library within docker}
+
+If you are starting openmole within docker, installing @code{R} packages in a @code{RTask} might require a slighlty different parameter setting.
+If you compare our example below with the example of library above, you'll observe differences in the @code{install} field: we prefix install commands with @code{fakeroot} 
+to get the permissions to use the Debian command @code{apt} for installation. 
+
+@br@br
+
+@openmole( s"""
+    // Declare variable
+    val area = Val[Double]
+
+    // Task
+    val rTask3 = RTask($tq
+        library(GeoRange)
+
+        n <- 40
+        x <- rexp(n, 5)
+        y <- rexp(n, 5)
+
+        # To have the convex envelop of the set of points we created
+        liste <- chull(x, y)
+        hull <- cbind(x, y) [liste,]
+
+        # require GeoRange
+        area <- CHullArea(hull[, 1], hull[, 2])
+        $tq,
+        install = Seq("fakeroot apt-get update", "fakeroot apt-get install -y libgdal-dev libproj-dev"),
+        libraries = Seq("GeoRange")
+    ) set(
+        outputs += area.mapped
+    )
+
+    // Workflow
+    rTask3 hook display
+""")
+
+
+@h2{Advanced RTask: usage of HTTP proxy}
+
+If you start openmole behind a HTTP proxy, you are probably familar already with the @code{--proxy} parameter you can add to the OpenMole command line, 
+which makes OpenMole use your proxy when downloading anything from the web. You can use it like @code{openmole --proxy http://myproxy:3128}. 
+This proxy will also be used by OpenMole to download any container, including the containers used behing the curtain to run a @code{RTask}.
+This proxy will also be used by the @code{RTask} to download packages from the web. 
+
+@h2{Advanced RTask: use alternative debian repositories}
+
+We show how using the @code{install} parameter of a @code{RTask} enables to use Debian installation tools such as @code{apt} to install packages 
+in the container running \code{R}.
+This downloads debian packages from the default international repositories (servers) for Debian.
+In some cases, you might be willing to use alternative repositories. 
+
+@br@br
+
+A first reason might be sleep: download and installation of packages might require hundreds of megabytes of download, leading to an important consumption of data and a slower construction of the container
+(only at the first execution, as the container is reused for further executions).
+If you institution is running a local Debian repository, you would save data and time by using this repository. 
+You might also need packages which are not part of the default Debian repositories. 
+
+@br@br
+
+You can do so by doing a smart usage of the @code{install} parameter to define your own repositories as shown in the example below. 
+
+
+@br@br
+
+@openmole( s"""
+    // Declare variable
+    val area = Val[Double]
+
+    // Task
+    val rTask3 = RTask($tq
+        library(ggplot2)
+        library(gganimate)
+      
+        # your R script here 
+        # [...]
+        $tq,
+        install = Seq(
+           // replace the initial Debian repositories by my repository
+           "fakeroot sed -i 's/deb.debian.org/linux.myinstitute.org/g' /etc/apt/sources.list",
+           // display the list on the console so I can double check what happens
+           "fakeroot cat /etc/apt/sources.list",
+           // update the list of available packages (here I disable HTTP proxy as this repository is in my network)
+           "fakeroot apt-get -o Acquire::http::proxy=false update ",
+           // install required R packages in their binary version (quicker, much stable!)
+           "DEBIAN_FRONTEND=noninteractive fakeroot apt-get -o Acquire::http::proxy=false install -y r-cran-ggplot2",
+           "DEBIAN_FRONTEND=noninteractive fakeroot apt-get -o Acquire::http::proxy=false install -y r-cran-gganimate",
+           "DEBIAN_FRONTEND=noninteractive fakeroot apt-get -o Acquire::http::proxy=false install -y r-cran-plotly",
+           "DEBIAN_FRONTEND=noninteractive fakeroot apt-get -o Acquire::http::proxy=false install -y r-cran-ggally",
+           // install the libs required for the compilation of R packages
+           "DEBIAN_FRONTEND=noninteractive fakeroot apt-get -o Acquire::http::proxy=false install -y libssl-dev libcurl4-openssl-dev libudunits2-dev",
+           // install ffmpeg to render videos 
+           "DEBIAN_FRONTEND=noninteractive fakeroot apt-get -o Acquire::http::proxy=false install -y ffmpeg"
+           ), //  
+        libraries = Seq("ggplot2", "gganimate", "plotly", "GGally")
+    ) set(
+        outputs += area.mapped
+    )
+""")
+
+
+
