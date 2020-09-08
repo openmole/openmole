@@ -1,9 +1,11 @@
 package org.openmole.plugin.task.gama
 
+import java.io.FileNotFoundException
+
 import monocle.macros._
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import org.openmole.core.exception.{UserBadDataError}
+import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
@@ -294,7 +296,13 @@ object GAMATask {
               }
 
 
-            val simulationOutput = XML.loadFile(tmpOutputDirectory / "simulation-outputs0.xml") \ "Step"
+            val gamaOutputFileName = "simulation-outputs0.xml"
+            val simulationOutput =
+              try XML.loadFile(tmpOutputDirectory / gamaOutputFileName) \ "Step"
+              catch {
+                case e: FileNotFoundException =>
+                  throw new InternalProcessingError(s"""GAMA result file "${gamaOutputFileName}" has not been found, the content of the output folder is: ${tmpOutputDirectory.list.mkString(", ")}""", e)
+              }
             resultContext ++ extractOutputs(simulationOutput.last)
           case (false, Some(f)) =>
             import xml._
