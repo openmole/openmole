@@ -16,6 +16,8 @@ release/*
 *.iml
 .idea/
 .idea/*
+.bsp/
+.bsp/*
 .metals/
 metals.sbt
 *~
