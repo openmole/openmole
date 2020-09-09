@@ -295,14 +295,18 @@ object GAMATask {
                 case _ => None
               }
 
+            val gamaOutputFile =
+              tmpOutputDirectory.
+                listFilesSafe.
+                filter(f => f.isFile && f.getName.startsWith("simulation-outputs") && f.getName.endsWith(".xml")).
+                sortBy(_.getName).headOption
 
-            val gamaOutputFileName = "simulation-outputs0.xml"
             val simulationOutput =
-              try XML.loadFile(tmpOutputDirectory / gamaOutputFileName) \ "Step"
-              catch {
-                case e: FileNotFoundException =>
-                  throw new InternalProcessingError(s"""GAMA result file "${gamaOutputFileName}" has not been found, the content of the output folder is: ${tmpOutputDirectory.list.mkString(", ")}""", e)
+              gamaOutputFile match {
+                case Some(f) =>  XML.loadFile(f) \ "Step"
+                case None => throw new InternalProcessingError(s"""GAMA result file (simulation-outputsXX.xml) has not been found, the content of the output folder is: [${tmpOutputDirectory.list.mkString(", ")}]""")
               }
+
             resultContext ++ extractOutputs(simulationOutput.last)
           case (false, Some(f)) =>
             import xml._
