@@ -43,7 +43,7 @@ package object shared {
   }
 
   object rTask {
-    lazy val rVersion = "3.3.3"
+    lazy val rVersion = "4.0.2"
   }
 
   def anchor(title: String) = title.filter(c ⇒ c.isLetterOrDigit)
