@@ -76,23 +76,7 @@ package object json {
         case jv: JBool ⇒ jv.value
         case _         ⇒ cannotConvert[Boolean](jv)
       }
-
-    def jValueToValue(value: Any, arrayType: Class[_]) =
-      (value, arrayType) match {
-        case (value: JValue, c) if c == classOf[Double] ⇒ jValueToDouble(value)
-        case (value: JValue, c) if c == classOf[Int] ⇒ jValueToInt(value)
-        case (value: JValue, c) if c == classOf[Long] ⇒ jValueToLong(value)
-        case (value: JValue, c) if c == classOf[Boolean] ⇒ jValueToBoolean(value)
-        case (value: JValue, c) if c == classOf[String] ⇒ jValueToString(value)
-        case c ⇒ throw new UserBadDataError(s"Can not fetch value of type $jValue to type ${c}")
-      }
-
-    //    def jValueToArray[T: Manifest](jv: JValue, convert: JValue ⇒ T) =
-    //      jv match {
-    //        case jv: JArray ⇒ jv.arr.map(convert).toArray[T]
-    //        case _          ⇒ cannotConvert
-    //      }
-
+    
     (jValue, v) match {
       case (value: JArray, Val.caseInt(v))     ⇒ Variable(v, jValueToInt(value.arr.head))
       case (value: JArray, Val.caseLong(v))    ⇒ Variable(v, jValueToLong(value.arr.head))
@@ -103,6 +87,16 @@ package object json {
       case (value: JArray, v) ⇒
         import scala.jdk.CollectionConverters._
 
+        def jValueToValue(value: Any, arrayType: Class[_]) =
+          (value, arrayType) match {
+            case (value: JValue, c) if c == classOf[Double] ⇒ jValueToDouble(value)
+            case (value: JValue, c) if c == classOf[Int] ⇒ jValueToInt(value)
+            case (value: JValue, c) if c == classOf[Long] ⇒ jValueToLong(value)
+            case (value: JValue, c) if c == classOf[Boolean] ⇒ jValueToBoolean(value)
+            case (value: JValue, c) if c == classOf[String] ⇒ jValueToString(value)
+            case c ⇒ throw new UserBadDataError(s"Can not fetch value of type $jValue to type ${c}")
+          }
+
         implicit def jArrayConstruct =
           new Variable.ConstructArray[JArray] {
             def size(t: JArray) = t.arr.size
@@ -110,18 +104,6 @@ package object json {
           }
 
         Variable.constructArray(v, value, jValueToValue)
-
-      //      case (value: JArray, Val.caseArrayInt(v)) ⇒ Variable(v, jValueToArray(value, jValueToInt))
-      //      case (value: JArray, Val.caseArrayLong(v)) ⇒ Variable(v, jValueToArray(value, jValueToLong))
-      //      case (value: JArray, Val.caseArrayDouble(v)) ⇒ Variable(v, jValueToArray(value, jValueToDouble))
-      //      case (value: JArray, Val.caseArrayString(v)) ⇒ Variable(v, jValueToArray(value, jValueToString))
-      //      case (value: JArray, Val.caseArrayBoolean(v)) ⇒ Variable(v, jValueToArray(value, jValueToBoolean))
-      //
-      //      case (value: JArray, Val.caseArrayArrayInt(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToInt)))
-      //      case (value: JArray, Val.caseArrayArrayLong(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToLong)))
-      //      case (value: JArray, Val.caseArrayArrayDouble(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToDouble)))
-      //      case (value: JArray, Val.caseArrayArrayString(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToString)))
-      //      case (value: JArray, Val.caseArrayArrayBoolean(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToBoolean)))
 
       case (value: JValue, Val.caseInt(v))     ⇒ Variable(v, jValueToInt(value))
       case (value: JValue, Val.caseLong(v))    ⇒ Variable(v, jValueToLong(value))
