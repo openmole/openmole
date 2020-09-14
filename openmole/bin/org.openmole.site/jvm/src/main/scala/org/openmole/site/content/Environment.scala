@@ -35,4 +35,5 @@ object Environment {
   def storageSharedLocally = newEntry("storageSharedLocally", " When set to ", hl.openmoleNoTest("true"), ", OpenMOLE will use symbolic links instead of physically copying files to the remote environment. This ", b("assumes that the OpenMOLE instance has access to the same storage space as the remote environment"), " (think same NFS filesystem on desktop machine and cluster). Defaults to ", hl.openmoleNoTest("false"), " and shouldn't be used unless you're 100% sure of what you're doing!")
   def workDirectory = newEntry("workDirectory", " the directory in which OpenMOLE will execute on the remote server, for instance ", hl.openmoleNoTest("workDirectory = \"${TMP}\""))
   def name = newEntry("name", "the name an environment will take in the logs")
+  def localSubmission = newEntry("localSubmission"," set to true if you are running OpenMOLE from a node of the cluster (useful for example if you have a cluster that you can only ssh behind a VPN but you can not set up the VPN where your OpenMOLE is running); user and host are not mandatory in this case")
 }
