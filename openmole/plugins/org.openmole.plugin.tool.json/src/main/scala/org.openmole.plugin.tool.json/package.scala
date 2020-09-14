@@ -1,5 +1,7 @@
 package org.openmole.plugin.tool
 
+import java.util
+
 import org.json4s.JsonAST.{ JObject, JValue }
 import org.openmole.core.context._
 import org.openmole.core.exception.UserBadDataError
@@ -30,7 +32,7 @@ package object json {
     import org.json4s._
     import shapeless._
 
-    def cannotConvert = throw new UserBadDataError(s"Can not fetch value of type $jValue to OpenMOLE variable $v")
+    def cannotConvert[T: Manifest](jValue: JValue) = throw new UserBadDataError(s"Can not fetch value of type $jValue to type ${manifest[T]}")
 
     def jValueToInt(jv: JValue) =
       jv match {
@@ -38,7 +40,7 @@ package object json {
         case jv: JInt     ⇒ jv.num.intValue
         case jv: JLong    ⇒ jv.num.intValue
         case jv: JDecimal ⇒ jv.num.intValue
-        case _            ⇒ cannotConvert
+        case _            ⇒ cannotConvert[Int](jv)
       }
 
     def jValueToLong(jv: JValue) =
@@ -47,7 +49,7 @@ package object json {
         case jv: JInt     ⇒ jv.num.longValue
         case jv: JLong    ⇒ jv.num.longValue
         case jv: JDecimal ⇒ jv.num.longValue
-        case _            ⇒ cannotConvert
+        case _            ⇒ cannotConvert[Long](jv)
       }
 
     def jValueToDouble(jv: JValue) =
@@ -56,7 +58,7 @@ package object json {
         case jv: JInt     ⇒ jv.num.doubleValue
         case jv: JLong    ⇒ jv.num.doubleValue
         case jv: JDecimal ⇒ jv.num.doubleValue
-        case _            ⇒ cannotConvert
+        case _            ⇒ cannotConvert[Double](jv)
       }
 
     def jValueToString(jv: JValue) =
@@ -66,48 +68,69 @@ package object json {
         case jv: JLong    ⇒ jv.num.toString
         case jv: JDecimal ⇒ jv.num.toString
         case jv: JString  ⇒ jv.s
-        case _            ⇒ cannotConvert
+        case _            ⇒ cannotConvert[String](jv)
       }
 
     def jValueToBoolean(jv: JValue) =
       jv match {
         case jv: JBool ⇒ jv.value
-        case _         ⇒ cannotConvert
+        case _         ⇒ cannotConvert[Boolean](jv)
       }
 
-    def jValueToArray[T: Manifest](jv: JValue, convert: JValue ⇒ T) =
-      jv match {
-        case jv: JArray ⇒ jv.arr.map(convert).toArray[T]
-        case _          ⇒ cannotConvert
+    def jValueToValue(value: Any, arrayType: Class[_]) =
+      (value, arrayType) match {
+        case (value: JValue, c) if c == classOf[Double] ⇒ jValueToDouble(value)
+        case (value: JValue, c) if c == classOf[Int] ⇒ jValueToInt(value)
+        case (value: JValue, c) if c == classOf[Long] ⇒ jValueToLong(value)
+        case (value: JValue, c) if c == classOf[Boolean] ⇒ jValueToBoolean(value)
+        case (value: JValue, c) if c == classOf[String] ⇒ jValueToString(value)
+        case c ⇒ throw new UserBadDataError(s"Can not fetch value of type $jValue to type ${c}")
       }
+
+    //    def jValueToArray[T: Manifest](jv: JValue, convert: JValue ⇒ T) =
+    //      jv match {
+    //        case jv: JArray ⇒ jv.arr.map(convert).toArray[T]
+    //        case _          ⇒ cannotConvert
+    //      }
 
     (jValue, v) match {
-      case (value: JArray, Val.caseInt(v)) ⇒ Variable(v, jValueToInt(value.arr.head))
-      case (value: JArray, Val.caseLong(v)) ⇒ Variable(v, jValueToLong(value.arr.head))
-      case (value: JArray, Val.caseDouble(v)) ⇒ Variable(v, jValueToDouble(value.arr.head))
-      case (value: JArray, Val.caseString(v)) ⇒ Variable(v, jValueToString(value.arr.head))
+      case (value: JArray, Val.caseInt(v))     ⇒ Variable(v, jValueToInt(value.arr.head))
+      case (value: JArray, Val.caseLong(v))    ⇒ Variable(v, jValueToLong(value.arr.head))
+      case (value: JArray, Val.caseDouble(v))  ⇒ Variable(v, jValueToDouble(value.arr.head))
+      case (value: JArray, Val.caseString(v))  ⇒ Variable(v, jValueToString(value.arr.head))
       case (value: JArray, Val.caseBoolean(v)) ⇒ Variable(v, jValueToBoolean(value.arr.head))
 
-      case (value: JArray, Val.caseArrayInt(v)) ⇒ Variable(v, jValueToArray(value, jValueToInt))
-      case (value: JArray, Val.caseArrayLong(v)) ⇒ Variable(v, jValueToArray(value, jValueToLong))
-      case (value: JArray, Val.caseArrayDouble(v)) ⇒ Variable(v, jValueToArray(value, jValueToDouble))
-      case (value: JArray, Val.caseArrayString(v)) ⇒ Variable(v, jValueToArray(value, jValueToString))
-      case (value: JArray, Val.caseArrayBoolean(v)) ⇒ Variable(v, jValueToArray(value, jValueToBoolean))
+      case (value: JArray, v) ⇒
+        import scala.jdk.CollectionConverters._
 
-      case (value: JArray, Val.caseArrayArrayInt(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToInt)))
-      case (value: JArray, Val.caseArrayArrayLong(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToLong)))
-      case (value: JArray, Val.caseArrayArrayDouble(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToDouble)))
-      case (value: JArray, Val.caseArrayArrayString(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToString)))
-      case (value: JArray, Val.caseArrayArrayBoolean(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToBoolean)))
+        implicit def jArrayConstruct =
+          new Variable.ConstructArray[JArray] {
+            def size(t: JArray) = t.arr.size
+            def iterable(t: JArray) = t.arr.asJava.asInstanceOf[java.lang.Iterable[Any]]
+          }
 
-      case (value: JValue, Val.caseInt(v)) ⇒ Variable(v, jValueToInt(value))
-      case (value: JValue, Val.caseLong(v)) ⇒ Variable(v, jValueToLong(value))
-      case (value: JValue, Val.caseDouble(v)) ⇒ Variable(v, jValueToDouble(value))
-      case (value: JValue, Val.caseString(v)) ⇒ Variable(v, jValueToString(value))
+        Variable.constructArray(v, value, jValueToValue)
+
+      //      case (value: JArray, Val.caseArrayInt(v)) ⇒ Variable(v, jValueToArray(value, jValueToInt))
+      //      case (value: JArray, Val.caseArrayLong(v)) ⇒ Variable(v, jValueToArray(value, jValueToLong))
+      //      case (value: JArray, Val.caseArrayDouble(v)) ⇒ Variable(v, jValueToArray(value, jValueToDouble))
+      //      case (value: JArray, Val.caseArrayString(v)) ⇒ Variable(v, jValueToArray(value, jValueToString))
+      //      case (value: JArray, Val.caseArrayBoolean(v)) ⇒ Variable(v, jValueToArray(value, jValueToBoolean))
+      //
+      //      case (value: JArray, Val.caseArrayArrayInt(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToInt)))
+      //      case (value: JArray, Val.caseArrayArrayLong(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToLong)))
+      //      case (value: JArray, Val.caseArrayArrayDouble(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToDouble)))
+      //      case (value: JArray, Val.caseArrayArrayString(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToString)))
+      //      case (value: JArray, Val.caseArrayArrayBoolean(v)) ⇒ Variable(v, jValueToArray(value, jValueToArray(_, jValueToBoolean)))
+
+      case (value: JValue, Val.caseInt(v))     ⇒ Variable(v, jValueToInt(value))
+      case (value: JValue, Val.caseLong(v))    ⇒ Variable(v, jValueToLong(value))
+      case (value: JValue, Val.caseDouble(v))  ⇒ Variable(v, jValueToDouble(value))
+      case (value: JValue, Val.caseString(v))  ⇒ Variable(v, jValueToString(value))
       case (value: JValue, Val.caseBoolean(v)) ⇒ Variable(v, jValueToBoolean(value))
-      case (value: JValue, Val.caseFile(v)) ⇒ Variable(v, new java.io.File(jValueToString(value)))
+      case (value: JValue, Val.caseFile(v))    ⇒ Variable(v, new java.io.File(jValueToString(value)))
 
-      case _ ⇒ cannotConvert
+      case _                                   ⇒ throw new UserBadDataError(s"Can not fetch value of type $jValue to OpenMOLE variable ${v}")
     }
 
   }

@@ -178,88 +178,31 @@ object NetLogoTask {
    * @return
    */
   def netLogoArrayToVariable(netlogoCollection: AbstractCollection[Any], prototype: Val[_]) = {
-    // get arrayType and depth of multiple array prototype
-    val (multiArrayType, depth): (ValType[_], Int) = ValType.unArrayify(prototype.`type`)
-
-    // recurse to get sizes, Nested LogoLists assumed rectangular : size of first element is taken for each dimension
-    // will fail if the depth of the prototype is not the depth of the LogoList
-    @tailrec def getdims(collection: AbstractCollection[Any], dims: Seq[Int], maxDepth: Int): Seq[Int] = {
-      maxDepth match {
-        case d if d == 1 ⇒ dims ++ Seq(collection.size())
-        case _ ⇒
-          if (collection.isEmpty) getdims(collection, dims ++ Seq(0), maxDepth - 1)
-          else getdims(collection.iterator().next().asInstanceOf[AbstractCollection[Any]], dims ++ Seq(collection.size()), maxDepth - 1)
+    // Manually do conversions to java native types ; necessary to add an output cast feature,
+    // e.g. NetLogo numeric ~ java.lang.Double -> Int or String and not necessarily Double,
+    // the target type being the one of the prototype
+    def safeOutput(value: Any, arrayType: Class[_]) = {
+      try {
+        arrayType match {
+          // all netlogo numeric are java.lang.Double
+          case c if c == classOf[Double]  ⇒ value.asInstanceOf[java.lang.Double].doubleValue()
+          case c if c == classOf[Float]   ⇒ value.asInstanceOf[java.lang.Double].floatValue()
+          case c if c == classOf[Int]     ⇒ value.asInstanceOf[java.lang.Double].intValue()
+          case c if c == classOf[Long]    ⇒ value.asInstanceOf[java.lang.Double].longValue()
+          // target boolean
+          case c if c == classOf[Boolean] ⇒ value.asInstanceOf[java.lang.Boolean].booleanValue()
+          // target string assume the origin type has a toString
+          case c if c == classOf[String]  ⇒ value.toString
+          // try casting anyway - NOTE : untested
+          case c                          ⇒ c.cast(value)
+        }
       }
-    }
-
-    val dims: Seq[Int] =
-      try getdims(netlogoCollection, Seq.empty, depth)
       catch {
-        case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when mapping a prototype array of depth ${depth} and type ${multiArrayType} with nested LogoLists")
+        case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when casting a variable of type ${value.getClass} to target type ${arrayType}")
       }
-
-    // create multi array
-    try {
-      val array = java.lang.reflect.Array.newInstance(multiArrayType.runtimeClass.asInstanceOf[Class[_]], dims: _*)
-
-      //
-      // Manually do conversions to java native types ; necessary to add an output cast feature,
-      // e.g. NetLogo numeric ~ java.lang.Double -> Int or String and not necessarily Double,
-      // the target type being the one of the prototype
-      def safeOutput(value: AnyRef, arrayType: Class[_]) = {
-        try {
-          arrayType match {
-            // all netlogo numeric are java.lang.Double
-            case c if c == classOf[Double]  ⇒ value.asInstanceOf[java.lang.Double].doubleValue()
-            case c if c == classOf[Float]   ⇒ value.asInstanceOf[java.lang.Double].floatValue()
-            case c if c == classOf[Int]     ⇒ value.asInstanceOf[java.lang.Double].intValue()
-            case c if c == classOf[Long]    ⇒ value.asInstanceOf[java.lang.Double].longValue()
-            // target boolean
-            case c if c == classOf[Boolean] ⇒ value.asInstanceOf[java.lang.Boolean].booleanValue()
-            // target string assume the origin type has a toString
-            case c if c == classOf[String]  ⇒ value.toString
-            // try casting anyway - NOTE : untested
-            case c                          ⇒ c.cast(value)
-          }
-        }
-        catch {
-          case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when casting a variable of type ${value.getClass} to target type ${arrayType}")
-        }
-      }
-
-      // recurse in the multi array
-      def setMultiArray(collection: AbstractCollection[Any], currentArray: AnyRef, arrayType: Class[_], maxdepth: Int): Unit = {
-        val it = collection.iterator()
-        for (i ← 0 until collection.size) {
-          val v = it.next
-          maxdepth match {
-            case d if d == 1 ⇒ {
-              try {
-                java.lang.reflect.Array.set(currentArray, i, safeOutput(v.asInstanceOf[AnyRef], arrayType))
-              }
-              catch {
-                case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when adding a variable of type ${v.getClass} in an array of type ${multiArrayType}")
-              }
-            }
-            case _ ⇒
-              try {
-                setMultiArray(v.asInstanceOf[AbstractCollection[Any]], java.lang.reflect.Array.get(currentArray, i), arrayType, maxdepth - 1)
-              }
-              catch {
-                case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when recursing at depth ${maxdepth} in a multi array of type ${multiArrayType}")
-              }
-          }
-        }
-      }
-
-      setMultiArray(netlogoCollection, array, multiArrayType.runtimeClass.asInstanceOf[Class[_]], depth)
-
-      // return Variable
-      Variable(prototype.asInstanceOf[Val[Any]], array)
     }
-    catch {
-      case e: Throwable ⇒ throw new UserBadDataError(e, s"Error constructing array with dims ${dims.toString()} and type ${multiArrayType.runtimeClass}")
-    }
+
+    Variable.constructArray[java.util.AbstractCollection[Any]](prototype, netlogoCollection, safeOutput(_, _))
   }
 
   /**
