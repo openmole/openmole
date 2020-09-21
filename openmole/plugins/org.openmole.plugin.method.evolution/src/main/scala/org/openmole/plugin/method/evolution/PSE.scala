@@ -422,7 +422,7 @@ object PSE {
             operatorExploration,
             reject = reject.option),
           genome,
-          exactObjectives)(DeterministicParams.integration)
+          exactObjectives.map(Objective.prototype))(DeterministicParams.integration)
 
         WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
       case Some(stochasticValue) ⇒
@@ -438,7 +438,7 @@ object PSE {
             operatorExploration = operatorExploration,
             reject = reject.option),
           genome,
-          noisyObjectives,
+          noisyObjectives.map(Objective.prototype),
           stochasticValue)(StochasticParams.integration)
 
         WorkflowIntegration.StochasticGA.toEvolutionWorkflow(integration)

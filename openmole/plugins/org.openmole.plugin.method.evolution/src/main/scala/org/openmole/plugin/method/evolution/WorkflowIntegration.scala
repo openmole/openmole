@@ -60,16 +60,14 @@ object WorkflowIntegration {
         operations.buildIndividual(genome, variablesToPhenotype(context), context)
 
       def inputPrototypes = Genome.toVals(a.genome)
-      def outputPrototypes = a.objectives.map(Objective.prototype)
-      def resultPrototypes = (inputPrototypes ++ outputPrototypes).distinct
+      def outputPrototypes = a.phenotype
 
       def genomeToVariables(genome: G): FromContext[Vector[Variable[_]]] = {
         val (cs, is) = operations.genomeValues(genome)
         Genome.toVariables(a.genome, cs, is, scale = true)
       }
 
-      def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, a.objectives.map(o ⇒ Objective.prototype(o)))
-      //def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ Objective.toDouble(o, context)).toVector
+      def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, a.phenotype)
     }
 
   def stochasticGAIntegration[AG](a: StochasticGA[AG]): EvolutionWorkflow =
@@ -86,7 +84,7 @@ object WorkflowIntegration {
         operations.buildIndividual(genome, variablesToPhenotype(context), context)
 
       def inputPrototypes = Genome.toVals(a.genome) ++ a.replication.seed.prototype
-      def outputPrototypes = a.objectives.map(Objective.prototype)
+      def outputPrototypes = a.phenotype
 
       def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] = {
         val (continuous, discrete) = operations.genomeValues(genome)
@@ -94,13 +92,13 @@ object WorkflowIntegration {
         (Genome.toVariables(a.genome, continuous, discrete, scale = true) map2 FromContext { p ⇒ seeder(p.random()) })(_ ++ _)
       }
 
-      def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, a.objectives.map(o ⇒ Objective.prototype(o)))
+      def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, a.phenotype)
     }
 
   case class DeterministicGA[AG](
-    ag:         AG,
-    genome:     Genome,
-    objectives: Seq[ExactObjective[_]]
+    ag:        AG,
+    genome:    Genome,
+    phenotype: Seq[Val[_]]
   )(implicit val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype])
 
   object DeterministicGA {
@@ -114,7 +112,7 @@ object WorkflowIntegration {
   case class StochasticGA[AG](
     ag:          AG,
     genome:      Genome,
-    objectives:  Seq[NoisyObjective[_]],
+    phenotype:   Seq[Val[_]],
     replication: Stochastic
   )(
     implicit

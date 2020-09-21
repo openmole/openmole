@@ -424,17 +424,18 @@ object NichedNSGA2 {
     WorkflowIntegration.stochasticity(objective, stochastic.option) match {
       case None ⇒
         val exactObjectives = objective.map(o ⇒ Objective.toExact(o))
-        val integration: WorkflowIntegration.DeterministicGA[_] = new WorkflowIntegration.DeterministicGA(
-          DeterministicParams(
-            genome = genome,
-            objectives = exactObjectives,
-            niche = DeterministicParams.niche(genome, exactObjectives, niche),
-            operatorExploration = operatorExploration,
-            nicheSize = nicheSize,
-            reject = reject.option),
-          genome,
-          exactObjectives
-        )
+        val integration: WorkflowIntegration.DeterministicGA[_] =
+          new WorkflowIntegration.DeterministicGA(
+            DeterministicParams(
+              genome = genome,
+              objectives = exactObjectives,
+              niche = DeterministicParams.niche(genome, exactObjectives, niche),
+              operatorExploration = operatorExploration,
+              nicheSize = nicheSize,
+              reject = reject.option),
+            genome,
+            exactObjectives.map(Objective.prototype)
+          )
 
         WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
 
@@ -452,7 +453,7 @@ object NichedNSGA2 {
             cloneProbability = stochasticValue.reevaluate,
             reject = reject.option),
           genome,
-          noisyObjectives,
+          noisyObjectives.map(Objective.prototype),
           stochasticValue
         )
 

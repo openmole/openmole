@@ -298,7 +298,7 @@ object OSE {
               operatorExploration = operatorExploration,
               reject = reject.option),
             fg,
-            exactObjectives
+            exactObjectives.map(Objective.prototype)
           )
 
         WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
@@ -319,7 +319,7 @@ object OSE {
               cloneProbability = stochasticValue.reevaluate,
               reject = reject.option),
             fg,
-            noisyObjectives,
+            noisyObjectives.map(Objective.prototype),
             stochasticValue
           )(StochasticParams.integration)
 

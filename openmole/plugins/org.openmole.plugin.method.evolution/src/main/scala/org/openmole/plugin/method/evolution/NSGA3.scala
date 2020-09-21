@@ -195,7 +195,7 @@ object NSGA3 {
         val integration: WorkflowIntegration.DeterministicGA[_] = WorkflowIntegration.DeterministicGA(
           DeterministicParams(mu, references, genome, exactObjectives, operatorExploration, reject),
           genome,
-          exactObjectives
+          exactObjectives.map(Objective.prototype)
         )(DeterministicParams.integration)
 
         WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
@@ -205,7 +205,7 @@ object NSGA3 {
         val integration: WorkflowIntegration.StochasticGA[_] = WorkflowIntegration.StochasticGA(
           StochasticParams(mu, references, operatorExploration, genome, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
           genome,
-          noisyObjectives,
+          noisyObjectives.map(Objective.prototype),
           stochasticValue
         )(StochasticParams.integration)
 
