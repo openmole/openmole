@@ -34,10 +34,10 @@ object OSE {
     import mgo.evolution.algorithm.OSE._
     import mgo.evolution.algorithm.{ OSE ⇒ MGOOSE, _ }
 
-    implicit def integration = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Array[Any]] { api ⇒
+    implicit def integration = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
       type G = CDGenome.Genome
-      type I = CDGenome.DeterministicIndividual.Individual[Array[Any]]
-      type S = OSEState[Array[Any]]
+      type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
+      type S = OSEState[Phenotype]
 
       def iManifest = implicitly
       def gManifest = implicitly
@@ -51,7 +51,7 @@ object OSE {
 
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
-        def buildIndividual(genome: G, phenotype: Array[Any], context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
 
         def initialState = EvolutionState(s = (Array.empty, Array.empty))
 
@@ -61,7 +61,7 @@ object OSE {
         def result(population: Vector[I], state: S, keepAll: Boolean) = FromContext { p ⇒
           import p._
 
-          val res = MGOOSE.result[Array[Any]](state, population, Genome.continuous(om.genome).from(context), ExactObjective.toFitnessFunction(om.objectives), keepAll = keepAll)
+          val res = MGOOSE.result[Phenotype](state, population, Genome.continuous(om.genome).from(context), ExactObjective.toFitnessFunction(om.objectives), keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness)).from(context)
 
@@ -80,7 +80,7 @@ object OSE {
           import p._
           val discrete = Genome.discrete(om.genome).from(context)
           val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          MGOOSE.adaptiveBreeding[Array[Any]](
+          MGOOSE.adaptiveBreeding[Phenotype](
             n,
             om.operatorExploration,
             discrete,
@@ -91,7 +91,7 @@ object OSE {
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           Genome.continuous(om.genome).map { continuous ⇒
-            val (s2, elited) = MGOOSE.elitism[Array[Any]](om.mu, om.limit, om.origin, continuous, ExactObjective.toFitnessFunction(om.objectives)) apply (s, population, candidates, rng)
+            val (s2, elited) = MGOOSE.elitism[Phenotype](om.mu, om.limit, om.origin, continuous, ExactObjective.toFitnessFunction(om.objectives)) apply (s, population, candidates, rng)
             val s3 = EvolutionState.generation.modify(_ + 1)(s2)
             (s3, elited)
           }
@@ -119,10 +119,10 @@ object OSE {
     import mgo.evolution.algorithm.NoisyOSE._
     import mgo.evolution.algorithm.{ NoisyOSE ⇒ MGONoisyOSE, _ }
 
-    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Array[Any]] { api ⇒
+    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
       type G = CDGenome.Genome
-      type I = CDGenome.NoisyIndividual.Individual[Array[Any]]
-      type S = OSEState[Array[Any]]
+      type I = CDGenome.NoisyIndividual.Individual[Phenotype]
+      type S = OSEState[Phenotype]
 
       def iManifest = implicitly
       def gManifest = implicitly
@@ -139,7 +139,7 @@ object OSE {
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
 
-        def buildIndividual(genome: G, phenotype: Array[Any], context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
 
         def initialState = EvolutionState(s = (Array.empty, Array.empty))
 
@@ -168,7 +168,7 @@ object OSE {
           val discrete = Genome.discrete(om.genome).from(context)
           val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
 
-          MGONoisyOSE.adaptiveBreeding[Array[Any]](
+          MGONoisyOSE.adaptiveBreeding[Phenotype](
             n,
             om.operatorExploration,
             om.cloneProbability,
@@ -182,7 +182,7 @@ object OSE {
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           Genome.continuous(om.genome).map { continuous ⇒
             val (s2, elited) =
-              MGONoisyOSE.elitism[Array[Any]](
+              MGONoisyOSE.elitism[Phenotype](
                 om.mu,
                 om.historySize,
                 NoisyObjective.aggregate(om.objectives),
@@ -194,7 +194,7 @@ object OSE {
           }
 
         def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland[I](population, CDGenome.NoisyIndividual.Individual.historyAge)
-        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Array[Any]](population ++ state.s._1, CDGenome.NoisyIndividual.Individual.historyAge, CDGenome.NoisyIndividual.Individual.phenotypeHistory[Array[Any]])
+        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Phenotype](population ++ state.s._1, CDGenome.NoisyIndividual.Individual.historyAge, CDGenome.NoisyIndividual.Individual.phenotypeHistory[Phenotype])
       }
 
     }

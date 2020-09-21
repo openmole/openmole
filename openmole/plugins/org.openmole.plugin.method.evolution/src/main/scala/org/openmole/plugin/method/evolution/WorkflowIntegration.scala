@@ -52,7 +52,7 @@ object WorkflowIntegration {
       def mgoAG = a.ag
 
       type V = (Vector[Double], Vector[Int])
-      type P = Array[Any]
+      type P = Phenotype
 
       lazy val integration = a.algorithm
 
@@ -68,7 +68,7 @@ object WorkflowIntegration {
         Genome.toVariables(a.genome, cs, is, scale = true)
       }
 
-      def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ Objective.prototype(o)).map(context.apply(_)).toArray
+      def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, a.objectives.map(o ⇒ Objective.prototype(o)))
       //def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ Objective.toDouble(o, context)).toVector
     }
 
@@ -78,7 +78,7 @@ object WorkflowIntegration {
       def mgoAG = a.ag
 
       type V = (Vector[Double], Vector[Int])
-      type P = Array[Any]
+      type P = Phenotype
 
       lazy val integration = a.algorithm
 
@@ -94,14 +94,14 @@ object WorkflowIntegration {
         (Genome.toVariables(a.genome, continuous, discrete, scale = true) map2 FromContext { p ⇒ seeder(p.random()) })(_ ++ _)
       }
 
-      def variablesToPhenotype(context: Context) = a.objectives.map(o ⇒ Objective.prototype(o)).map(context.apply(_)).toArray
+      def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, a.objectives.map(o ⇒ Objective.prototype(o)))
     }
 
   case class DeterministicGA[AG](
     ag:         AG,
     genome:     Genome,
     objectives: Seq[ExactObjective[_]]
-  )(implicit val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Array[Any]])
+  )(implicit val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype])
 
   object DeterministicGA {
     implicit def deterministicGAIntegration[AG]: WorkflowIntegration[DeterministicGA[AG]] = new WorkflowIntegration[DeterministicGA[AG]] {
@@ -118,7 +118,7 @@ object WorkflowIntegration {
     replication: Stochastic
   )(
     implicit
-    val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Array[Any]]
+    val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype]
   )
 
   object StochasticGA {

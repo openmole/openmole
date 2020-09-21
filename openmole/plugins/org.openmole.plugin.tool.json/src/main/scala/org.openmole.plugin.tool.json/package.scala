@@ -76,7 +76,7 @@ package object json {
         case jv: JBool ⇒ jv.value
         case _         ⇒ cannotConvert[Boolean](jv)
       }
-    
+
     (jValue, v) match {
       case (value: JArray, Val.caseInt(v))     ⇒ Variable(v, jValueToInt(value.arr.head))
       case (value: JArray, Val.caseLong(v))    ⇒ Variable(v, jValueToLong(value.arr.head))

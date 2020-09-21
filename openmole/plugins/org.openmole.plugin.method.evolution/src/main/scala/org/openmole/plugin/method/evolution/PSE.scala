@@ -203,18 +203,6 @@ object NoisyPSEAlgorithm {
 
 object PSE {
 
-  implicit def anyCanBeNan: CanBeNaN[Any] = new CanBeNaN[Any] {
-    override def isNaN(t: Any): Boolean = t match {
-      case x: Double ⇒ x.isNaN
-      case x: Float  ⇒ x.isNaN
-      case x         ⇒ false
-    }
-  }
-
-  implicit def arrayCanBeNaN[T](implicit cbn: CanBeNaN[T]) = new CanBeNaN[Array[T]] {
-    override def isNaN(t: Array[T]): Boolean = t.exists(cbn.isNaN)
-  }
-
   case class DeterministicParams(
     pattern:             Vector[Double] ⇒ Vector[Int],
     genome:              Genome,
@@ -228,9 +216,9 @@ object PSE {
     import mgo.evolution.algorithm.{ PSE ⇒ _, _ }
     import cats.data._
 
-    implicit def integration = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Array[Any]] { api ⇒
+    implicit def integration = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
       type G = CDGenome.Genome
-      type I = PSEAlgorithm.Individual[Array[Any]]
+      type I = PSEAlgorithm.Individual[Phenotype]
       type S = EvolutionState[HitMapState]
 
       def iManifest = implicitly
@@ -246,7 +234,7 @@ object PSE {
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
 
-        def buildIndividual(genome: G, phenotype: Array[Any], context: Context) = PSEAlgorithm.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = PSEAlgorithm.buildIndividual(genome, phenotype)
 
         def initialState = EvolutionState[HitMapState](s = Map())
 
@@ -256,7 +244,7 @@ object PSE {
         def result(population: Vector[I], state: S, keepAll: Boolean) = FromContext { p ⇒
           import p._
 
-          val res = PSEAlgorithm.result[Array[Any]](population, Genome.continuous(om.genome).from(context), om.pattern, ExactObjective.toFitnessFunction(om.objectives))
+          val res = PSEAlgorithm.result[Phenotype](population, Genome.continuous(om.genome).from(context), om.pattern, ExactObjective.toFitnessFunction(om.objectives))
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype)).from(context)
 
@@ -271,13 +259,13 @@ object PSE {
           PSEAlgorithm.initialGenomes(n, continuous, discrete, rejectValue, rng)
         }
 
-        private def pattern(p: Array[Any]) = om.pattern(ExactObjective.toFitnessFunction(om.objectives)(p))
+        private def pattern(p: Phenotype) = om.pattern(ExactObjective.toFitnessFunction(om.objectives)(p))
 
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
           import p._
           val discrete = Genome.discrete(om.genome).from(context)
           val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          PSEAlgorithm.adaptiveBreeding[S, Array[Any]](
+          PSEAlgorithm.adaptiveBreeding[S, Phenotype](
             n,
             rejectValue,
             om.operatorExploration,
@@ -288,7 +276,7 @@ object PSE {
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           Genome.continuous(om.genome).map { continuous ⇒
-            val (s2, elited) = PSEAlgorithm.elitism[S, Array[Any]](pattern, continuous, EvolutionState.s) apply (s, population, candidates, rng)
+            val (s2, elited) = PSEAlgorithm.elitism[S, Phenotype](pattern, continuous, EvolutionState.s) apply (s, population, candidates, rng)
             val s3 = EvolutionState.generation.modify(_ + 1)(s2)
             (s3, elited)
           }
@@ -317,9 +305,9 @@ object PSE {
     import mgo.evolution.algorithm.{ PSE ⇒ _, NoisyPSE ⇒ _, _ }
     import cats.data._
 
-    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Array[Any]] { api ⇒
+    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
       type G = CDGenome.Genome
-      type I = NoisyPSEAlgorithm.Individual[Array[Any]]
+      type I = NoisyPSEAlgorithm.Individual[Phenotype]
       type S = EvolutionState[HitMapState]
 
       def iManifest = implicitly
@@ -337,7 +325,7 @@ object PSE {
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
 
-        def buildIndividual(genome: G, phenotype: Array[Any], context: Context) = NoisyPSEAlgorithm.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = NoisyPSEAlgorithm.buildIndividual(genome, phenotype)
         def initialState = EvolutionState[HitMapState](s = Map())
 
         def result(population: Vector[I], state: S, keepAll: Boolean) = FromContext { p ⇒
@@ -364,7 +352,7 @@ object PSE {
           import p._
           val discrete = Genome.discrete(om.genome).from(context)
           val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          NoisyPSEAlgorithm.adaptiveBreeding[S, Array[Any]](
+          NoisyPSEAlgorithm.adaptiveBreeding[S, Phenotype](
             n,
             rejectValue,
             om.operatorExploration,
@@ -378,7 +366,7 @@ object PSE {
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           Genome.continuous(om.genome).map { continuous ⇒
             val (s2, elited) =
-              NoisyPSEAlgorithm.elitism[S, Array[Any]](
+              NoisyPSEAlgorithm.elitism[S, Phenotype](
                 om.pattern,
                 NoisyObjective.aggregate(om.objectives),
                 om.historySize,
@@ -392,7 +380,7 @@ object PSE {
           StochasticGAIntegration.migrateToIsland[I](population, NoisyPSEAlgorithm.Individual.historyAge)
 
         def migrateFromIsland(population: Vector[I], state: S) =
-          StochasticGAIntegration.migrateFromIsland[I, Array[Any]](population, NoisyPSEAlgorithm.Individual.historyAge, NoisyPSEAlgorithm.Individual.phenotypeHistory)
+          StochasticGAIntegration.migrateFromIsland[I, Phenotype](population, NoisyPSEAlgorithm.Individual.historyAge, NoisyPSEAlgorithm.Individual.phenotypeHistory)
 
       }
 
