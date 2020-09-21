@@ -206,6 +206,7 @@ object PSE {
   case class DeterministicParams(
     pattern:             Vector[Double] ⇒ Vector[Int],
     genome:              Genome,
+    phenotypeContent:    PhenotypeContent,
     objectives:          Seq[ExactObjective[_]],
     operatorExploration: Double,
     reject:              Option[Condition]
@@ -244,7 +245,7 @@ object PSE {
         def result(population: Vector[I], state: S, keepAll: Boolean) = FromContext { p ⇒
           import p._
 
-          val res = PSEAlgorithm.result[Phenotype](population, Genome.continuous(om.genome).from(context), om.pattern, ExactObjective.toFitnessFunction(om.objectives))
+          val res = PSEAlgorithm.result[Phenotype](population, Genome.continuous(om.genome).from(context), om.pattern, ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives))
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype)).from(context)
 
@@ -259,7 +260,7 @@ object PSE {
           PSEAlgorithm.initialGenomes(n, continuous, discrete, rejectValue, rng)
         }
 
-        private def pattern(p: Phenotype) = om.pattern(ExactObjective.toFitnessFunction(om.objectives)(p))
+        private def pattern(p: Phenotype) = om.pattern(ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives)(p))
 
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
           import p._
@@ -294,6 +295,7 @@ object PSE {
   case class StochasticParams(
     pattern:             Vector[Double] ⇒ Vector[Int],
     genome:              Genome,
+    phenotypeContent:    PhenotypeContent,
     objectives:          Seq[NoisyObjective[_]],
     historySize:         Int,
     cloneProbability:    Double,
@@ -332,7 +334,7 @@ object PSE {
           import p._
           import org.openmole.core.context._
 
-          val res = NoisyPSEAlgorithm.result(population, NoisyObjective.aggregate(om.objectives), om.pattern, Genome.continuous(om.genome).from(context))
+          val res = NoisyPSEAlgorithm.result(population, NoisyObjective.aggregate(om.phenotypeContent, om.objectives), om.pattern, Genome.continuous(om.genome).from(context))
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype)).from(context)
           val samples = Variable(GAIntegration.samples.array, res.map(_.replications).toArray)
@@ -357,7 +359,7 @@ object PSE {
             rejectValue,
             om.operatorExploration,
             om.cloneProbability,
-            NoisyObjective.aggregate(om.objectives),
+            NoisyObjective.aggregate(om.phenotypeContent, om.objectives),
             discrete,
             om.pattern,
             EvolutionState.s) apply (s, individuals, rng)
@@ -368,7 +370,7 @@ object PSE {
             val (s2, elited) =
               NoisyPSEAlgorithm.elitism[S, Phenotype](
                 om.pattern,
-                NoisyObjective.aggregate(om.objectives),
+                NoisyObjective.aggregate(om.phenotypeContent, om.objectives),
                 om.historySize,
                 continuous,
                 EvolutionState.s) apply (s, population, candidates, rng)
@@ -413,32 +415,37 @@ object PSE {
     WorkflowIntegration.stochasticity(objective.map(_.p), stochastic.option) match {
       case None ⇒
         val exactObjectives = objective.map(o ⇒ Objective.toExact(o.p))
+        val phenotypeContent = PhenotypeContent(exactObjectives)
 
         val integration: WorkflowIntegration.DeterministicGA[_] = WorkflowIntegration.DeterministicGA(
           DeterministicParams(
             mgo.evolution.niche.irregularGrid(objective.map(_.scale).toVector),
             genome,
+            phenotypeContent,
             exactObjectives,
             operatorExploration,
             reject = reject.option),
           genome,
-          exactObjectives.map(Objective.prototype))(DeterministicParams.integration)
+          phenotypeContent
+        )(DeterministicParams.integration)
 
         WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
       case Some(stochasticValue) ⇒
         val noisyObjectives = objective.map(o ⇒ Objective.toNoisy(o.p))
+        val phenotypeContent = PhenotypeContent(noisyObjectives)
 
         val integration: WorkflowIntegration.StochasticGA[_] = WorkflowIntegration.StochasticGA(
           StochasticParams(
             pattern = mgo.evolution.niche.irregularGrid(objective.map(_.scale).toVector),
             genome = genome,
+            phenotypeContent = phenotypeContent,
             objectives = noisyObjectives,
             historySize = stochasticValue.sample,
             cloneProbability = stochasticValue.reevaluate,
             operatorExploration = operatorExploration,
             reject = reject.option),
           genome,
-          noisyObjectives.map(Objective.prototype),
+          phenotypeContent,
           stochasticValue)(StochasticParams.integration)
 
         WorkflowIntegration.StochasticGA.toEvolutionWorkflow(integration)

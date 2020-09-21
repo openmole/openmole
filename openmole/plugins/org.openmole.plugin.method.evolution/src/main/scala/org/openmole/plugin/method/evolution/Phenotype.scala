@@ -17,9 +17,16 @@ object Phenotype {
     }
   }
 
-  def objective(objectives: Seq[Objective[_]], phenotype: Phenotype) = phenotype.value.take(objectives.size)
-  def fromContext(context: Context, objectives: Seq[Val[_]]) = new Phenotype(objectives.map(o ⇒ context(o)).toArray)
+  def objective(value: PhenotypeContent, phenotype: Phenotype) = phenotype.value.take(value.objectives.size)
+  def fromContext(context: Context, value: PhenotypeContent) = new Phenotype(value.objectives.map(o ⇒ context(o)).toArray)
 
 }
 
 class Phenotype(val value: Array[Any]) extends AnyVal
+
+object PhenotypeContent {
+  def apply(objectives: Seq[Objective[_]]): PhenotypeContent = new PhenotypeContent(objectives.map(Objective.prototype))
+  def toVals(p: PhenotypeContent) = p.objectives
+}
+
+class PhenotypeContent(val objectives: Seq[Val[_]])

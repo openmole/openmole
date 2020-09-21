@@ -51,7 +51,7 @@ object NSGA3 {
         def result(population: Vector[I], state: S, keepAll: Boolean) = FromContext { p ⇒
           import p._
 
-          val res = MGONSGA3.result[Phenotype](population, Genome.continuous(om.genome).from(context), ExactObjective.toFitnessFunction(om.objectives), keepAll = keepAll)
+          val res = MGONSGA3.result[Phenotype](population, Genome.continuous(om.genome).from(context), ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives), keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness)).from(context)
 
@@ -70,12 +70,12 @@ object NSGA3 {
           import p._
           val discrete = Genome.discrete(om.genome).from(context)
           val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          MGONSGA3.adaptiveBreeding[S, Phenotype](om.operatorExploration, discrete, ExactObjective.toFitnessFunction(om.objectives), rejectValue, lambda = n)(s, individuals, rng)
+          MGONSGA3.adaptiveBreeding[S, Phenotype](om.operatorExploration, discrete, ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives), rejectValue, lambda = n)(s, individuals, rng)
         }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           Genome.continuous(om.genome).map { continuous ⇒
-            val (s2, elited) = MGONSGA3.elitism[S, Phenotype](om.mu, om.references, continuous, ExactObjective.toFitnessFunction(om.objectives))(s, population, candidates, rng)
+            val (s2, elited) = MGONSGA3.elitism[S, Phenotype](om.mu, om.references, continuous, ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives))(s, population, candidates, rng)
             val s3 = EvolutionState.generation.modify(_ + 1)(s2)
             (s3, elited)
           }
@@ -95,6 +95,7 @@ object NSGA3 {
     mu:                  Int,
     references:          ReferencePoints,
     genome:              Genome,
+    phenotypeContent:    PhenotypeContent,
     objectives:          Seq[ExactObjective[_]],
     operatorExploration: Double,
     reject:              Option[Condition])
@@ -123,7 +124,7 @@ object NSGA3 {
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
         def initialState = EvolutionState[Unit](s = ())
 
-        def aggregate(v: Vector[Phenotype]): Vector[Double] = NoisyObjective.aggregate(om.objectives)(v)
+        def aggregate(v: Vector[Phenotype]): Vector[Double] = NoisyObjective.aggregate(om.phenotypeContent, om.objectives)(v)
 
         def result(population: Vector[I], state: S, keepAll: Boolean) = FromContext { p ⇒
           import p._
@@ -175,6 +176,7 @@ object NSGA3 {
     references:          ReferencePoints,
     operatorExploration: Double,
     genome:              Genome,
+    phenotypeContent:    PhenotypeContent,
     objectives:          Seq[NoisyObjective[_]],
     historySize:         Int,
     cloneProbability:    Double,
@@ -192,20 +194,21 @@ object NSGA3 {
     WorkflowIntegration.stochasticity(objective, stochastic.option) match {
       case None ⇒
         val exactObjectives = objective.map(o ⇒ Objective.toExact(o))
+        val phenotypeContent = PhenotypeContent(exactObjectives)
         val integration: WorkflowIntegration.DeterministicGA[_] = WorkflowIntegration.DeterministicGA(
-          DeterministicParams(mu, references, genome, exactObjectives, operatorExploration, reject),
+          DeterministicParams(mu, references, genome, phenotypeContent, exactObjectives, operatorExploration, reject),
           genome,
-          exactObjectives.map(Objective.prototype)
+          phenotypeContent
         )(DeterministicParams.integration)
 
         WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
       case Some(stochasticValue) ⇒
         val noisyObjectives = objective.map(o ⇒ Objective.toNoisy(o))
-
+        val phenotypeContent = PhenotypeContent(noisyObjectives)
         val integration: WorkflowIntegration.StochasticGA[_] = WorkflowIntegration.StochasticGA(
-          StochasticParams(mu, references, operatorExploration, genome, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
+          StochasticParams(mu, references, operatorExploration, genome, phenotypeContent, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
           genome,
-          noisyObjectives.map(Objective.prototype),
+          phenotypeContent,
           stochasticValue
         )(StochasticParams.integration)
 

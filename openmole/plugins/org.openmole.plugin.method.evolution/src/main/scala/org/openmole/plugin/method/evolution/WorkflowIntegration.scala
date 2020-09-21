@@ -60,14 +60,14 @@ object WorkflowIntegration {
         operations.buildIndividual(genome, variablesToPhenotype(context), context)
 
       def inputPrototypes = Genome.toVals(a.genome)
-      def outputPrototypes = a.phenotype
+      def outputPrototypes = PhenotypeContent.toVals(a.phenotypeContent)
 
       def genomeToVariables(genome: G): FromContext[Vector[Variable[_]]] = {
         val (cs, is) = operations.genomeValues(genome)
         Genome.toVariables(a.genome, cs, is, scale = true)
       }
 
-      def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, a.phenotype)
+      def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, a.phenotypeContent)
     }
 
   def stochasticGAIntegration[AG](a: StochasticGA[AG]): EvolutionWorkflow =
@@ -84,7 +84,7 @@ object WorkflowIntegration {
         operations.buildIndividual(genome, variablesToPhenotype(context), context)
 
       def inputPrototypes = Genome.toVals(a.genome) ++ a.replication.seed.prototype
-      def outputPrototypes = a.phenotype
+      def outputPrototypes = PhenotypeContent.toVals(a.phenotypeContent)
 
       def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] = {
         val (continuous, discrete) = operations.genomeValues(genome)
@@ -92,13 +92,13 @@ object WorkflowIntegration {
         (Genome.toVariables(a.genome, continuous, discrete, scale = true) map2 FromContext { p ⇒ seeder(p.random()) })(_ ++ _)
       }
 
-      def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, a.phenotype)
+      def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, a.phenotypeContent)
     }
 
   case class DeterministicGA[AG](
-    ag:        AG,
-    genome:    Genome,
-    phenotype: Seq[Val[_]]
+    ag:               AG,
+    genome:           Genome,
+    phenotypeContent: PhenotypeContent
   )(implicit val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype])
 
   object DeterministicGA {
@@ -110,10 +110,10 @@ object WorkflowIntegration {
   }
 
   case class StochasticGA[AG](
-    ag:          AG,
-    genome:      Genome,
-    phenotype:   Seq[Val[_]],
-    replication: Stochastic
+    ag:               AG,
+    genome:           Genome,
+    phenotypeContent: PhenotypeContent,
+    replication:      Stochastic
   )(
     implicit
     val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype]

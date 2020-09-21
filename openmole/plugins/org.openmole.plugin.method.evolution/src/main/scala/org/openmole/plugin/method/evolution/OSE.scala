@@ -24,6 +24,7 @@ object OSE {
     origin:              (Vector[Double], Vector[Int]) ⇒ Vector[Int],
     limit:               Vector[Double],
     genome:              Genome,
+    phenotypeContent:    PhenotypeContent,
     objectives:          Seq[ExactObjective[_]],
     operatorExploration: Double,
     reject:              Option[Condition])
@@ -61,7 +62,7 @@ object OSE {
         def result(population: Vector[I], state: S, keepAll: Boolean) = FromContext { p ⇒
           import p._
 
-          val res = MGOOSE.result[Phenotype](state, population, Genome.continuous(om.genome).from(context), ExactObjective.toFitnessFunction(om.objectives), keepAll = keepAll)
+          val res = MGOOSE.result[Phenotype](state, population, Genome.continuous(om.genome).from(context), ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives), keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness)).from(context)
 
@@ -85,13 +86,13 @@ object OSE {
             om.operatorExploration,
             discrete,
             om.origin,
-            ExactObjective.toFitnessFunction(om.objectives),
+            ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives),
             rejectValue) apply (s, individuals, rng)
         }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           Genome.continuous(om.genome).map { continuous ⇒
-            val (s2, elited) = MGOOSE.elitism[Phenotype](om.mu, om.limit, om.origin, continuous, ExactObjective.toFitnessFunction(om.objectives)) apply (s, population, candidates, rng)
+            val (s2, elited) = MGOOSE.elitism[Phenotype](om.mu, om.limit, om.origin, continuous, ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives)) apply (s, population, candidates, rng)
             val s3 = EvolutionState.generation.modify(_ + 1)(s2)
             (s3, elited)
           }
@@ -108,6 +109,7 @@ object OSE {
     origin:              (Vector[Double], Vector[Int]) ⇒ Vector[Int],
     limit:               Vector[Double],
     genome:              Genome,
+    phenotypeContent:    PhenotypeContent,
     objectives:          Seq[NoisyObjective[_]],
     historySize:         Int,
     cloneProbability:    Double,
@@ -147,7 +149,7 @@ object OSE {
           import org.openmole.core.context._
           import p._
 
-          val res = MGONoisyOSE.result(state, population, NoisyObjective.aggregate(om.objectives), Genome.continuous(om.genome).from(context), om.limit, keepAll = keepAll)
+          val res = MGONoisyOSE.result(state, population, NoisyObjective.aggregate(om.phenotypeContent, om.objectives), Genome.continuous(om.genome).from(context), om.limit, keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness)).from(context)
           val samples = Variable(GAIntegration.samples.array, res.map(_.replications).toArray)
@@ -172,7 +174,7 @@ object OSE {
             n,
             om.operatorExploration,
             om.cloneProbability,
-            NoisyObjective.aggregate(om.objectives),
+            NoisyObjective.aggregate(om.phenotypeContent, om.objectives),
             discrete,
             om.origin,
             om.limit,
@@ -185,7 +187,7 @@ object OSE {
               MGONoisyOSE.elitism[Phenotype](
                 om.mu,
                 om.historySize,
-                NoisyObjective.aggregate(om.objectives),
+                NoisyObjective.aggregate(om.phenotypeContent, om.objectives),
                 continuous,
                 om.origin,
                 om.limit) apply (s, population, candidates, rng)
@@ -285,6 +287,7 @@ object OSE {
     WorkflowIntegration.stochasticity(objective.map(_.objective), stochastic.option) match {
       case None ⇒
         val exactObjectives = FitnessPattern.toObjectives(objective).map(o ⇒ Objective.toExact(o))
+        val phenotypeContent = PhenotypeContent(exactObjectives)
         val fg = OriginAxe.fullGenome(origin, genome)
 
         val integration: WorkflowIntegration.DeterministicGA[_] =
@@ -293,18 +296,20 @@ object OSE {
               mu = mu,
               origin = OriginAxe.toOrigin(origin, genome),
               genome = fg,
+              phenotypeContent = phenotypeContent,
               objectives = exactObjectives,
               limit = FitnessPattern.toLimit(objective),
               operatorExploration = operatorExploration,
               reject = reject.option),
             fg,
-            exactObjectives.map(Objective.prototype)
+            phenotypeContent
           )
 
         WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
       case Some(stochasticValue) ⇒
         val fg = OriginAxe.fullGenome(origin, genome)
         val noisyObjectives = FitnessPattern.toObjectives(objective).map(o ⇒ Objective.toNoisy(o))
+        val phenotypeContent = PhenotypeContent(noisyObjectives)
 
         val integration: WorkflowIntegration.StochasticGA[_] =
           WorkflowIntegration.StochasticGA(
@@ -312,6 +317,7 @@ object OSE {
               mu = mu,
               origin = OriginAxe.toOrigin(origin, genome),
               genome = fg,
+              phenotypeContent = phenotypeContent,
               objectives = noisyObjectives,
               limit = FitnessPattern.toLimit(objective),
               operatorExploration = operatorExploration,
@@ -319,7 +325,7 @@ object OSE {
               cloneProbability = stochasticValue.reevaluate,
               reject = reject.option),
             fg,
-            noisyObjectives.map(Objective.prototype),
+            phenotypeContent,
             stochasticValue
           )(StochasticParams.integration)
 
