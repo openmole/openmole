@@ -26,16 +26,16 @@ object Genome {
     import org.openmole.core.workflow.domain._
     import org.openmole.core.workflow.sampling._
 
-    implicit def factorIsScalaDouble[D](f: Factor[D, Double])(implicit bounded: Bounds[D, Double]) =
+    implicit def factorIsScalaDouble[D](f: Factor[D, Double])(implicit bounded: BondsFromContext[D, Double]) =
       ScalarDouble(f.value, bounded.min(f.domain), bounded.max(f.domain))
 
-    implicit def factorIsScalarInt[D](f: Factor[D, Int])(implicit bounded: Bounds[D, Int]) =
+    implicit def factorIsScalarInt[D](f: Factor[D, Int])(implicit bounded: BondsFromContext[D, Int]) =
       ScalarInt(f.value, bounded.min(f.domain), bounded.max(f.domain))
 
-    implicit def factorIsSequenceOfDouble[D](f: Factor[D, Array[Double]])(implicit bounded: Bounds[D, Array[Double]], sized: Sized[D]) =
+    implicit def factorIsSequenceOfDouble[D](f: Factor[D, Array[Double]])(implicit bounded: BondsFromContext[D, Array[Double]], sized: Sized[D]) =
       SequenceOfDouble(f.value, bounded.min(f.domain), bounded.max(f.domain), sized(f.domain))
 
-    implicit def factorIsSequenceOfInt[D](f: Factor[D, Array[Int]])(implicit bounded: Bounds[D, Array[Int]], sized: Sized[D]) =
+    implicit def factorIsSequenceOfInt[D](f: Factor[D, Array[Int]])(implicit bounded: BondsFromContext[D, Array[Int]], sized: Sized[D]) =
       SequenceOfInt(f.value, bounded.min(f.domain), bounded.max(f.domain), sized(f.domain))
 
     implicit def factorIsIsEnumeration[D, T](f: Factor[D, T])(implicit fix: Fix[D, T]) =

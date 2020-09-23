@@ -23,7 +23,7 @@ import cats.implicits._
 
 object StepRange {
 
-  implicit def isFinite[T] = new Finite[StepRange[T], T] with Bounds[StepRange[T], T] with Center[StepRange[T], T] {
+  implicit def isFinite[T] = new FiniteFromContext[StepRange[T], T] with BondsFromContext[StepRange[T], T] with CenterFromContext[StepRange[T], T] {
     override def computeValues(domain: StepRange[T]) = domain.computeValues
     override def max(domain: StepRange[T]) = domain.max
     override def min(domain: StepRange[T]) = domain.min

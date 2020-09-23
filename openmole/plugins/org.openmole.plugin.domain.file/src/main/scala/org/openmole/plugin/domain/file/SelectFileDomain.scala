@@ -26,7 +26,7 @@ import cats.implicits._
 
 object SelectFileDomain {
 
-  implicit def isFinite = new Finite[SelectFileDomain, File] {
+  implicit def isFinite = new FiniteFromContext[SelectFileDomain, File] {
     override def computeValues(domain: SelectFileDomain) = domain.computeValues
 
   }

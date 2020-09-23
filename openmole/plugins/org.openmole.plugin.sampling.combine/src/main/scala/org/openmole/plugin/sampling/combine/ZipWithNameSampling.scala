@@ -26,11 +26,11 @@ import cats.implicits._
 
 object ZipWithNameSampling {
 
-  def apply[D, T: CanGetName](factor: Factor[D, T], name: Val[String])(implicit discrete: Discrete[D, T]) =
+  def apply[D, T: CanGetName](factor: Factor[D, T], name: Val[String])(implicit discrete: DiscreteFromContext[D, T]) =
     new ZipWithNameSampling(factor, name)
 }
 
-class ZipWithNameSampling[D, T: CanGetName](val factor: Factor[D, T], val name: Val[String])(implicit discrete: Discrete[D, T]) extends Sampling {
+class ZipWithNameSampling[D, T: CanGetName](val factor: Factor[D, T], val name: Val[String])(implicit discrete: DiscreteFromContext[D, T]) extends Sampling {
 
   override def inputs = FactorSampling(factor).inputs
   override def prototypes = List(factor.value, name)

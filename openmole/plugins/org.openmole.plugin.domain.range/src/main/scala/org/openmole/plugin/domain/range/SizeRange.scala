@@ -23,7 +23,7 @@ import org.openmole.core.workflow.domain._
 import cats.implicits._
 
 object SizeRange {
-  implicit def isFinite[T] = new Finite[SizeRange[T], T] with Bounds[SizeRange[T], T] with Center[SizeRange[T], T] {
+  implicit def isFinite[T] = new FiniteFromContext[SizeRange[T], T] with BondsFromContext[SizeRange[T], T] with CenterFromContext[SizeRange[T], T] {
     override def computeValues(domain: SizeRange[T]) = domain.computeValues
     override def max(domain: SizeRange[T]) = domain.max
     override def min(domain: SizeRange[T]) = domain.min

@@ -52,18 +52,18 @@ package object combine {
     def drop(n: Int) = DropSampling(s, n)
   }
 
-  implicit class DiscreteFactorDecorator[D, T](factor: Factor[D, T])(implicit discrete: Discrete[D, T]) extends AbstractSamplingCombineDecorator {
+  implicit class DiscreteFactorDecorator[D, T](factor: Factor[D, T])(implicit discrete: DiscreteFromContext[D, T]) extends AbstractSamplingCombineDecorator {
     def s: Sampling = FactorSampling(factor)
   }
 
-  implicit def withNameFactorDecorator[D, T: CanGetName](factor: Factor[D, T])(implicit discrete: Discrete[D, T]) = new {
+  implicit def withNameFactorDecorator[D, T: CanGetName](factor: Factor[D, T])(implicit discrete: DiscreteFromContext[D, T]) = new {
     @deprecated("Use withName", "5")
     def zipWithName(name: Val[String]): ZipWithNameSampling[D, T] = withName(name)
     def withName(name: Val[String]): ZipWithNameSampling[D, T] = new ZipWithNameSampling(factor, name)
   }
 
   implicit class TupleToZipSampling[T1, T2](ps: (Val[T1], Val[T2])) {
-    def in[D](d: D)(implicit discrete: Discrete[D, (T1, T2)]) = {
+    def in[D](d: D)(implicit discrete: DiscreteFromContext[D, (T1, T2)]) = {
       val d1 = discrete.iterator(d).map(_.map(_._1))
       val d2 = discrete.iterator(d).map(_.map(_._2))
       ZipSampling(ps._1 in d1, ps._2 in d2)

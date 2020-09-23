@@ -6,7 +6,7 @@ import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.keyword.In
 import org.openmole.core.tools.math._
-import org.openmole.core.workflow.domain.Bounds
+import org.openmole.core.workflow.domain.BondsFromContext
 import org.openmole.core.workflow.task.FromContextTask
 import org.openmole.plugin.tool.pattern._
 import org.openmole.tool.random.RandomProvider

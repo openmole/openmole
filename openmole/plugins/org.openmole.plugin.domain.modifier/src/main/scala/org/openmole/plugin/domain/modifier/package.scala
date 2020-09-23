@@ -35,7 +35,7 @@ package object modifier {
   implicit val fileGetName = new CanGetName[File] { def getName(f: File) = f.getName }
   implicit val pathGetName = new CanGetName[Path] { def getName(p: Path) = p.toFile.getName }
 
-  implicit def domainModifierDecorator[D, T: TypeTag](domain: D)(implicit discrete: Discrete[D, T], inputs: DomainInputs[D]) = new {
+  implicit def domainModifierDecorator[D, T: TypeTag](domain: D)(implicit discrete: DiscreteFromContext[D, T], inputs: DomainInputs[D]) = new {
     def take(n: FromContext[Int]) = TakeDomain(domain, n)
     def group(n: FromContext[Int])(implicit m: Manifest[T]) = GroupDomain(domain, n)
     def sliding(n: FromContext[Int], s: FromContext[Int] = 1)(implicit m: Manifest[T]) = SlidingDomain(domain, n, s)
@@ -46,13 +46,13 @@ package object modifier {
     def zipWithName(implicit cgn: CanGetName[T]) = zipWith(cgn.getName)
   }
 
-  implicit def finiteDomainModifierDecorator[D, T](domain: D)(implicit finite: Finite[D, T], inputs: DomainInputs[D]) = new {
+  implicit def finiteDomainModifierDecorator[D, T](domain: D)(implicit finite: FiniteFromContext[D, T], inputs: DomainInputs[D]) = new {
     def sort(implicit o: Ordering[T]) = SortedByDomain(domain, identity[T])
     def sortBy[S: Ordering](s: T ⇒ S) = SortedByDomain(domain, s)
     def shuffle = ShuffleDomain(domain)
   }
 
-  implicit def discreteFactorModifierDecorator[D, T: TypeTag](factor: Factor[D, T])(implicit discrete: Discrete[D, T]) = new {
+  implicit def discreteFactorModifierDecorator[D, T: TypeTag](factor: Factor[D, T])(implicit discrete: DiscreteFromContext[D, T]) = new {
     def take(n: FromContext[Int]) = factor.copy(domain = factor.domain.take(n))
     def group(n: FromContext[Int])(implicit m: Manifest[T]) = factor.copy(domain = factor.domain.group(n))
     def sliding(n: FromContext[Int], s: FromContext[Int] = 1)(implicit m: Manifest[T]) = factor.copy(domain = factor.domain.sliding(n, s))
@@ -63,7 +63,7 @@ package object modifier {
     def zipWithName(implicit cgn: CanGetName[T]) = factor.copy(domain = factor.domain.zipWithName)
   }
 
-  implicit def FiniteFactorModifierDecorator[D, T](factor: Factor[D, T])(implicit finite: Finite[D, T], inputs: DomainInputs[D]) = new {
+  implicit def FiniteFactorModifierDecorator[D, T](factor: Factor[D, T])(implicit finite: FiniteFromContext[D, T], inputs: DomainInputs[D]) = new {
     def sort(implicit o: Ordering[T]) = factor.copy(domain = factor.domain.sort)
     def sortBy[S: Ordering](s: T ⇒ S) = factor.copy(domain = factor.domain.sortBy(s))
     def shuffle = factor.copy(domain = factor.copy(domain = factor.domain.shuffle))

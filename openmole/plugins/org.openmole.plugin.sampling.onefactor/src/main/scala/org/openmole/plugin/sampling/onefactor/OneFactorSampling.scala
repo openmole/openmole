@@ -3,10 +3,10 @@ package org.openmole.plugin.sampling.onefactor
 
 import org.openmole.core.context.{ PrototypeSet, Val, Variable }
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.domain.Finite
+import org.openmole.core.workflow.domain.FiniteFromContext
 import org.openmole.core.workflow.sampling.{ ExplicitSampling, Factor, Sampling }
 
-case class NominalFactor[D, T](factor: Factor[D, T], nominalValue: T, values: Finite[D, T]) {
+case class NominalFactor[D, T](factor: Factor[D, T], nominalValue: T, values: FiniteFromContext[D, T]) {
   def prototype: Val[T] = factor.value
   def nominalVal: Sampling = ExplicitSampling(prototype, Seq(nominalValue))
 }

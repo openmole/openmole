@@ -18,9 +18,12 @@
 package org.openmole.core.workflow.domain
 
 import org.openmole.core.expansion._
+
 import scala.annotation.implicitNotFound
 import cats._
 import cats.implicits._
+import org.openmole.core.expansion
+
 import scala.language.higherKinds
 
 /**
@@ -31,7 +34,22 @@ import scala.language.higherKinds
  */
 @implicitNotFound("${D} is not a finite variation domain of type ${T}")
 trait Finite[-D, +T] extends Discrete[D, T] {
-  def computeValues(domain: D): FromContext[collection.Iterable[T]]
+  def computeValues(domain: D): collection.Iterable[T]
+  override def iterator(domain: D) = computeValues(domain).iterator
+}
+
+object FiniteFromContext {
+
+  implicit def finiteIsContextFinite[D, T](implicit finite: Finite[D, T]): FiniteFromContext[D, T] =
+    new FiniteFromContext[D, T] {
+      override def computeValues(domain: D): FromContext[Iterable[T]] = FromContext.value(finite.computeValues(domain))
+    }
+
+}
+
+@implicitNotFound("${D} is not a finite variation domain of type FromContext[${T}]")
+trait FiniteFromContext[-D, +T] extends DiscreteFromContext[D, T] {
+  def computeValues(domain: D): FromContext[Iterable[T]]
   override def iterator(domain: D) = computeValues(domain).map(_.iterator)
 }
 

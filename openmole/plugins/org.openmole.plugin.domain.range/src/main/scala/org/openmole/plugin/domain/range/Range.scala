@@ -18,18 +18,18 @@
 package org.openmole.plugin.domain.range
 
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.domain.{ Bounds, Center, Finite }
+import org.openmole.core.workflow.domain.{ BondsFromContext, CenterFromContext, FiniteFromContext }
 import cats.implicits._
 
 object Range {
 
-  implicit def isBounded[T] = new Bounds[Range[T], T] with Center[Range[T], T] {
+  implicit def isBounded[T] = new BondsFromContext[Range[T], T] with CenterFromContext[Range[T], T] {
     override def min(domain: Range[T]) = domain.min
     override def max(domain: Range[T]) = domain.max
     override def center(domain: Range[T]) = Range.rangeCenter(domain)
   }
 
-  implicit def rangeWithDefaultStepIsFinite[T](implicit step: DefaultStep[T]) = new Finite[Range[T], T] {
+  implicit def rangeWithDefaultStepIsFinite[T](implicit step: DefaultStep[T]) = new FiniteFromContext[Range[T], T] {
     override def computeValues(domain: Range[T]) = StepRange[T](domain, step.step).computeValues
   }
 
