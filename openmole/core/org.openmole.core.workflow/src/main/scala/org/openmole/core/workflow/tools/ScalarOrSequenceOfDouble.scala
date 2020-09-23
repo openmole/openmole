@@ -73,7 +73,7 @@ object Scalable {
     def convert(v: Double): T
   }
 
-  implicit def factorOfDoubleIsScalable[D, T: ScalableType](implicit bounded: BondsFromContext[D, T]) = new Scalable[Factor[D, T]] {
+  implicit def factorOfDoubleIsScalable[D, T: ScalableType](implicit bounded: BoundsFromContext[D, T]) = new Scalable[Factor[D, T]] {
     def isScalar(t: Factor[D, T]) = true
     override def inputs(t: Factor[D, T]) = Seq()
     override def prototype(t: Factor[D, T]): Val[_] = t.value
@@ -90,7 +90,7 @@ object Scalable {
     }
   }
 
-  implicit def factorOfSequenceIsScalable[D, T: ScalableType: ClassTag](implicit bounded: BondsFromContext[D, Array[T]]) = new Scalable[Factor[D, Array[T]]] {
+  implicit def factorOfSequenceIsScalable[D, T: ScalableType: ClassTag](implicit bounded: BoundsFromContext[D, Array[T]]) = new Scalable[Factor[D, Array[T]]] {
 
     def isScalar(t: Factor[D, Array[T]]) = false
     override def inputs(t: Factor[D, Array[T]]) = Seq()

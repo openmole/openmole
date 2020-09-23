@@ -32,10 +32,10 @@ trait Bounds[-D, +T] {
   def max(domain: D): T
 }
 
-object BondsFromContext {
+object BoundsFromContext {
 
-  implicit def boundsIsContextBounds[D, T](implicit bounds: Bounds[D, T]): BondsFromContext[D, T] =
-    new BondsFromContext[D, T] {
+  implicit def boundsIsContextBounds[D, T](implicit bounds: Bounds[D, T]): BoundsFromContext[D, T] =
+    new BoundsFromContext[D, T] {
       def min(d: D) = FromContext.value(bounds.min(d))
       def max(d: D) = FromContext.value(bounds.max(d))
     }
@@ -43,7 +43,7 @@ object BondsFromContext {
 }
 
 @implicitNotFound("${D} is not a bounded variation domain of type T | FromContext[${T}]")
-trait BondsFromContext[-D, +T] {
+trait BoundsFromContext[-D, +T] {
   def min(domain: D): FromContext[T]
   def max(domain: D): FromContext[T]
 }

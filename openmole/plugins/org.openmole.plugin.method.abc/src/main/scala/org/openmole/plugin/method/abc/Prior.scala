@@ -8,7 +8,7 @@ import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.keyword.In
 import org.openmole.core.tools.math._
-import org.openmole.core.workflow.domain.BondsFromContext
+import org.openmole.core.workflow.domain.BoundsFromContext
 import org.openmole.core.workflow.task.FromContextTask
 import org.openmole.plugin.tool.pattern._
 import org.openmole.tool.random.SynchronizedRandom
@@ -64,7 +64,7 @@ object UnivariatePrior {
         def apply(t: T) = f(t)
       }
 
-    implicit def factorIsPrior[D](implicit bounded: BondsFromContext[D, Double]) =
+    implicit def factorIsPrior[D](implicit bounded: BoundsFromContext[D, Double]) =
       ToUnivariatePrior[Factor[D, Double]](f ⇒ UniformPrior(f.value, bounded.min(f.domain), bounded.max(f.domain)))
 
   }
