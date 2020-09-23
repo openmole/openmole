@@ -12,7 +12,7 @@ object Tools {
     }
   ).toOption.getOrElse(Array(0.0))
 
-  val arrayRegEx = new RegExp("\\[[0-9].*,*\\]")
+  val arrayRegEx = new RegExp("\\[[+-?0-9].*,*\\]")
 
   def isDataArray(value: String) = {
     arrayRegEx.test(value)
