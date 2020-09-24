@@ -86,10 +86,11 @@ object WorkflowIntegration {
       def inputPrototypes = Genome.toVals(a.genome) ++ a.replication.seed.prototype
       def outputPrototypes = PhenotypeContent.toVals(a.phenotypeContent)
 
-      def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] = {
+      def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] = FromContext { p ⇒
+        import p._
         val (continuous, discrete) = operations.genomeValues(genome)
         val seeder = a.replication.seed
-        (Genome.toVariables(a.genome, continuous, discrete, scale = true) map2 FromContext { p ⇒ seeder(p.random()) })(_ ++ _)
+        Genome.toVariables(a.genome, continuous, discrete, scale = true) ++ seeder(p.random())
       }
 
       def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, a.phenotypeContent)
@@ -206,25 +207,13 @@ object GAIntegration {
   def genomesOfPopulationToVariables[I](
     genome: Genome,
     values: Vector[(Vector[Double], Vector[Int])],
-    scale:  Boolean): FromContext[Vector[Variable[_]]] = {
+    scale:  Boolean): Vector[Variable[_]] = {
 
-    val variables =
-      FromContext { p ⇒
-        import p._
-        values.map {
-          case (continuous, discrete) ⇒ Genome.toVariables(genome, continuous, discrete, scale).from(context)
-        }
-      }
-
-    variables.map {
-      v ⇒
-        genome.zipWithIndex.map {
-          case (g, i) ⇒ Genome.toArrayVariable(g, v.map(_(i).value))
-        }.toVector
-    }
+    val variables = values.map { case (continuous, discrete) ⇒ Genome.toVariables(genome, continuous, discrete, scale) }
+    genome.zipWithIndex.map { case (g, i) ⇒ Genome.toArrayVariable(g, variables.map(_(i).value)) }.toVector
   }
 
-  def objectivesOfPopulationToVariables[I](objectives: Seq[Objective[_]], phenotypeValues: Vector[Vector[Double]]): FromContext[Vector[Variable[_]]] =
+  def objectivesOfPopulationToVariables[I](objectives: Seq[Objective[_]], phenotypeValues: Vector[Vector[Double]]): Vector[Variable[_]] =
     objectives.toVector.zipWithIndex.map {
       case (objective, i) ⇒
         Variable(
@@ -233,10 +222,12 @@ object GAIntegration {
         )
     }
 
-  def rejectValue[G](reject: Condition, genome: Genome, continuous: G ⇒ Vector[Double], discrete: G ⇒ Vector[Int]) = FromContext { p ⇒ (g: G) ⇒
+  def rejectValue[G](reject: Condition, genome: Genome, continuous: G ⇒ Vector[Double], discrete: G ⇒ Vector[Int]) = FromContext { p ⇒
     import p._
-    val genomeVariables = GAIntegration.genomeToVariable(genome, (continuous(g), discrete(g)), scale = true).from(context)
-    reject.from(genomeVariables)
+    (g: G) ⇒ {
+      val genomeVariables = GAIntegration.genomeToVariable(genome, (continuous(g), discrete(g)), scale = true)
+      reject.from(genomeVariables)
+    }
   }
 
 }
@@ -270,20 +261,18 @@ object MGOAPI {
     def operations(a: A): Ops
 
     trait Ops {
-      def metadata(data: SavedData): FromContext[EvolutionMetadata] = FromContext { _ ⇒ EvolutionMetadata.none }
-
-      def initialState: S
-      def initialGenomes(n: Int, rng: scala.util.Random): FromContext[Vector[G]]
-
-      def buildIndividual(genome: G, phenotype: P, context: Context): I
+      def metadata(data: SavedData): EvolutionMetadata = EvolutionMetadata.none
 
       def genomeValues(genome: G): V
       def buildGenome(values: V): G
-      def buildGenome(context: Vector[Variable[_]]): FromContext[G]
+      def buildGenome(context: Vector[Variable[_]]): G
+      def buildIndividual(genome: G, phenotype: P, context: Context): I
 
       def startTimeLens: monocle.Lens[S, Long]
       def generationLens: monocle.Lens[S, Long]
 
+      def initialState: S
+      def initialGenomes(n: Int, rng: scala.util.Random): FromContext[Vector[G]]
       def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random): FromContext[Vector[G]]
       def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random): FromContext[(S, Vector[I])]
 
@@ -293,7 +282,7 @@ object MGOAPI {
       def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean
       def afterDuration(d: squants.Time, s: S, population: Vector[I]): Boolean
 
-      def result(population: Vector[I], state: S, keepAll: Boolean): FromContext[Seq[Variable[_]]]
+      def result(population: Vector[I], state: S, keepAll: Boolean): Seq[Variable[_]]
     }
 
   }

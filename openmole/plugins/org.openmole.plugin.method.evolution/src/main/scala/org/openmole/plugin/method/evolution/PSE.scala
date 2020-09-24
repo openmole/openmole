@@ -233,7 +233,7 @@ object PSE {
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
 
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
-        def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
+        def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
 
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = PSEAlgorithm.buildIndividual(genome, phenotype)
 
@@ -242,20 +242,18 @@ object PSE {
         def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, EvolutionState.generation)(s, population)
         def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, EvolutionState.startTime)(s, population)
 
-        def result(population: Vector[I], state: S, keepAll: Boolean) = FromContext { p ⇒
-          import p._
-
-          val res = PSEAlgorithm.result[Phenotype](population, Genome.continuous(om.genome).from(context), om.pattern, ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives))
-          val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
-          val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype)).from(context)
+        def result(population: Vector[I], state: S, keepAll: Boolean) = {
+          val res = PSEAlgorithm.result[Phenotype](population, Genome.continuous(om.genome), om.pattern, ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives))
+          val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
+          val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype))
 
           genomes ++ fitness
         }
 
         def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
           import p._
-          val continuous = Genome.continuous(om.genome).from(context)
-          val discrete = Genome.discrete(om.genome).from(context)
+          val continuous = Genome.continuous(om.genome)
+          val discrete = Genome.discrete(om.genome)
           val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
           PSEAlgorithm.initialGenomes(n, continuous, discrete, rejectValue, rng)
         }
@@ -264,7 +262,7 @@ object PSE {
 
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
           import p._
-          val discrete = Genome.discrete(om.genome).from(context)
+          val discrete = Genome.discrete(om.genome)
           val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
           PSEAlgorithm.adaptiveBreeding[S, Phenotype](
             n,
@@ -275,12 +273,11 @@ object PSE {
             EvolutionState.s)(s, individuals, rng)
         }
 
-        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
-          Genome.continuous(om.genome).map { continuous ⇒
-            val (s2, elited) = PSEAlgorithm.elitism[S, Phenotype](pattern, continuous, EvolutionState.s) apply (s, population, candidates, rng)
-            val s3 = EvolutionState.generation.modify(_ + 1)(s2)
-            (s3, elited)
-          }
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) = FromContext { p ⇒
+          val (s2, elited) = PSEAlgorithm.elitism[S, Phenotype](pattern, Genome.continuous(om.genome), EvolutionState.s) apply (s, population, candidates, rng)
+          val s3 = EvolutionState.generation.modify(_ + 1)(s2)
+          (s3, elited)
+        }
 
         def migrateToIsland(population: Vector[I]) = population.map(PSEAlgorithm.Individual.foundedIsland.set(true))
 
@@ -325,18 +322,15 @@ object PSE {
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
-        def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
+        def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
 
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = NoisyPSEAlgorithm.buildIndividual(genome, phenotype)
         def initialState = EvolutionState[HitMapState](s = Map())
 
-        def result(population: Vector[I], state: S, keepAll: Boolean) = FromContext { p ⇒
-          import p._
-          import org.openmole.core.context._
-
-          val res = NoisyPSEAlgorithm.result(population, NoisyObjective.aggregate(om.phenotypeContent, om.objectives), om.pattern, Genome.continuous(om.genome).from(context))
-          val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
-          val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype)).from(context)
+        def result(population: Vector[I], state: S, keepAll: Boolean) = {
+          val res = NoisyPSEAlgorithm.result(population, NoisyObjective.aggregate(om.phenotypeContent, om.objectives), om.pattern, Genome.continuous(om.genome))
+          val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
+          val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype))
           val samples = Variable(GAIntegration.samples.array, res.map(_.replications).toArray)
 
           genomes ++ fitness ++ Seq(samples)
@@ -344,15 +338,15 @@ object PSE {
 
         def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
           import p._
-          val continuous = Genome.continuous(om.genome).from(context)
-          val discrete = Genome.discrete(om.genome).from(context)
+          val continuous = Genome.continuous(om.genome)
+          val discrete = Genome.discrete(om.genome)
           val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
           NoisyPSEAlgorithm.initialGenomes(n, continuous, discrete, rejectValue, rng)
         }
 
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
           import p._
-          val discrete = Genome.discrete(om.genome).from(context)
+          val discrete = Genome.discrete(om.genome)
           val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
           NoisyPSEAlgorithm.adaptiveBreeding[S, Phenotype](
             n,
@@ -365,18 +359,17 @@ object PSE {
             EvolutionState.s) apply (s, individuals, rng)
         }
 
-        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
-          Genome.continuous(om.genome).map { continuous ⇒
-            val (s2, elited) =
-              NoisyPSEAlgorithm.elitism[S, Phenotype](
-                om.pattern,
-                NoisyObjective.aggregate(om.phenotypeContent, om.objectives),
-                om.historySize,
-                continuous,
-                EvolutionState.s) apply (s, population, candidates, rng)
-            val s3 = EvolutionState.generation.modify(_ + 1)(s2)
-            (s3, elited)
-          }
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) = FromContext { p ⇒
+          val (s2, elited) =
+            NoisyPSEAlgorithm.elitism[S, Phenotype](
+              om.pattern,
+              NoisyObjective.aggregate(om.phenotypeContent, om.objectives),
+              om.historySize,
+              Genome.continuous(om.genome),
+              EvolutionState.s) apply (s, population, candidates, rng)
+          val s3 = EvolutionState.generation.modify(_ + 1)(s2)
+          (s3, elited)
+        }
 
         def migrateToIsland(population: Vector[I]) =
           StochasticGAIntegration.migrateToIsland[I](population, NoisyPSEAlgorithm.Individual.historyAge)

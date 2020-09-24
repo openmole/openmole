@@ -26,8 +26,7 @@ object SavePopulationHook {
 
   def resultVariables(t: EvolutionWorkflow, keepAll: Boolean) = FromContext { p ⇒
     import p._
-    context.variable(t.generationPrototype).toSeq ++
-      t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype), keepAll = keepAll).from(context)
+    context.variable(t.generationPrototype).toSeq ++ t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype), keepAll = keepAll)
   }
 
   def apply[T, F](
@@ -58,7 +57,7 @@ object SavePopulationHook {
             last = last
           )
 
-          def evolutionData = t.operations.metadata(savedData).from(context)
+          def evolutionData = t.operations.metadata(savedData)
 
           val content = OutputFormat.PlainContent(resultVariables(t, keepAll = keepAll).from(context), Some(ExpandedString(fileName)))
           outputFormat.write(executionContext)(format, output, content, evolutionData).from(context)

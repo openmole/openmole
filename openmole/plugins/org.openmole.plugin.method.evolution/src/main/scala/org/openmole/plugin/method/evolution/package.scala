@@ -247,7 +247,7 @@ package object evolution {
   }
 
   // For backward compatibility
-  def GenomeProfileEvolution = ProfileEvolution
-  def GenomeProfile = Profile
+  //  def GenomeProfileEvolution = ProfileEvolution
+  //  def GenomeProfile = Profile
 
 }
