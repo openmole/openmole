@@ -35,7 +35,7 @@ case class Stochastic(
 object WorkflowIntegration {
 
   def stochasticity(objectives: Objectives, stochastic: Option[Stochastic]) =
-    (Objective.onlyExact(objectives), stochastic) match {
+    (Objectives.onlyExact(objectives), stochastic) match {
       case (true, None)     ⇒ None
       case (true, Some(s))  ⇒ Some(s)
       case (false, Some(s)) ⇒ Some(s)
@@ -282,7 +282,7 @@ object MGOAPI {
       def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean
       def afterDuration(d: squants.Time, s: S, population: Vector[I]): Boolean
 
-      def result(population: Vector[I], state: S, keepAll: Boolean): Seq[Variable[_]]
+      def result(population: Vector[I], state: S, keepAll: Boolean): FromContext[Seq[Variable[_]]]
     }
 
   }

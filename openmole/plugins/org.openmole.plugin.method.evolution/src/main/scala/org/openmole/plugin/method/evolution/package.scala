@@ -44,7 +44,6 @@ package object evolution {
 
   val operatorExploration = 0.1
 
-  type Objectives = Seq[Objective[_]]
   type Genome = Seq[Genome.GenomeBound]
 
   implicit def intToCounterTerminationConverter(n: Long): AfterGeneration = AfterGeneration(n)

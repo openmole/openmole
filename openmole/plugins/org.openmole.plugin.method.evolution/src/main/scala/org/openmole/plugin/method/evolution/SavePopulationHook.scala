@@ -26,7 +26,7 @@ object SavePopulationHook {
 
   def resultVariables(t: EvolutionWorkflow, keepAll: Boolean) = FromContext { p ⇒
     import p._
-    context.variable(t.generationPrototype).toSeq ++ t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype), keepAll = keepAll)
+    context.variable(t.generationPrototype).toSeq ++ t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype), keepAll = keepAll).from(context)
   }
 
   def apply[T, F](

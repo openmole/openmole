@@ -5,7 +5,6 @@ import org.openmole.core.dsl.extension._
 import cats.implicits._
 import monocle.macros.GenLens
 import org.openmole.core.context.{ Context, Variable }
-import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
@@ -59,7 +58,7 @@ object OSE {
         def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, EvolutionState.generation)(s, population)
         def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, EvolutionState.startTime)(s, population)
 
-        def result(population: Vector[I], state: S, keepAll: Boolean) = {
+        def result(population: Vector[I], state: S, keepAll: Boolean) = FromContext.value {
           val res = MGOOSE.result[Phenotype](state, population, Genome.continuous(om.genome), ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives), keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
@@ -142,7 +141,7 @@ object OSE {
 
         def initialState = EvolutionState(s = (Array.empty, Array.empty))
 
-        def result(population: Vector[I], state: S, keepAll: Boolean) = {
+        def result(population: Vector[I], state: S, keepAll: Boolean) = FromContext.value {
           val res = MGONoisyOSE.result(state, population, NoisyObjective.aggregate(om.phenotypeContent, om.objectives), Genome.continuous(om.genome), om.limit, keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))

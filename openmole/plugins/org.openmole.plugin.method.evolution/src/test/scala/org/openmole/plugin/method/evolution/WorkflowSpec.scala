@@ -45,7 +45,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
     SteadyStateEvolution(
       algorithm =
         NSGA2(
-          genome = Seq(x in (0.0, 1.0), y in ("0.0", "1.0")),
+          genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
           objective = Seq(x, y),
           stochastic = Stochastic()
         ),
@@ -70,7 +70,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
     SteadyStateEvolution(
       algorithm =
         PSE(
-          genome = Seq(population in (0.0, 1.0), state in ("0.0", "1.0")),
+          genome = Seq(population in (0.0, 1.0), state in (0.0, 1.0)),
           objective =
             Seq(
               population in (0.0 to 1.0 by 0.1),
@@ -90,7 +90,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
     NSGA2(
       mu = 200,
-      genome = Seq(xArray in Vector.fill(5)((0.0, 1.0)), yArray in Vector.fill(5)(("0", "1"))),
+      genome = Seq(xArray in Vector.fill(5)((0.0, 1.0)), yArray in Vector.fill(5)((0, 1))),
       objective = Seq()
     )
   }
