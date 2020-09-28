@@ -99,7 +99,7 @@ object Objective {
 
   }
 
-  trait ToObjective[T] {
+  trait ToObjective[-T] {
     def apply(t: T): Objective[_]
   }
 
@@ -152,29 +152,15 @@ object Objectives {
   def toExact(o: Objectives) = Objectives.value(o).map(o ⇒ Objective.toExact(o))
   def toNoisy(o: Objectives) = Objectives.value(o).map(o ⇒ Objective.toNoisy(o))
 
-  def index(obj: Objectives, v: Val[_]): Option[Int] = index(Objectives.value(obj), v)
-
-  def index(obj: Seq[Objective[_]], v: Val[_]): Option[Int] =
+  def index(obj: Objectives, v: Val[_]): Option[Int] =
     obj.indexWhere(o ⇒ Objective.prototype(o) == v) match {
       case -1 ⇒ None
       case x  ⇒ Some(x)
     }
 
-  implicit def singleToObjectives[T: ToObjective](t: T): Objectives = SingleObjective(implicitly[ToObjective[T]].apply(t))
-  implicit def multipleToObjectives[T: ToObjective](t: Seq[T]): Objectives = MultipleObjectives(t.map(implicitly[ToObjective[T]].apply))
-
-  case class SingleObjective(o: Objective[_]) extends Objectives
-  case class MultipleObjectives(o: Seq[Objective[_]]) extends Objectives
-
-  def value(o: Objectives) =
-    o match {
-      case s: SingleObjective    ⇒ Seq(s.o)
-      case m: MultipleObjectives ⇒ m.o
-    }
+  def value(o: Objectives) = o
 
 }
-
-sealed trait Objectives
 
 object ExactObjective {
 

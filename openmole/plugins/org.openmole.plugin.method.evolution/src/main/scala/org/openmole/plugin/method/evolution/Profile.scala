@@ -41,12 +41,45 @@ object Profile {
 
   import org.openmole.core.keyword._
 
-  object ProfileElement {
-    implicit def valToProfileElement(v: Val[Double]) = ProfileElement(v, 100)
-    implicit def inToProfileElement(b: In[Val[Double], Int]) = ProfileElement(b.value, b.domain)
+  object ToProfileElement {
+    implicit def valDoubleToProfileElement: ToProfileElement[Val[Double]] =
+      new ToProfileElement[Val[Double]] {
+        def apply(v: Val[Double]) = IntervalDoubleProfileElement(v, 100)
+      }
+
+    implicit def valIntToProfileElement: ToProfileElement[Val[Int]] =
+      new ToProfileElement[Val[Int]] {
+        def apply(v: Val[Int]) = IntervalIntProfileElement(v)
+      }
+
+    implicit def inToProfileElement: ToProfileElement[In[Val[Double], Int]] =
+      new ToProfileElement[In[Val[Double], Int]] {
+        override def apply(t: In[Val[Double], Int]): ProfileElement = IntervalDoubleProfileElement(t.value, t.domain)
+      }
+
+    implicit def fromDoubleDomainToPatternAxe[D](implicit fix: Fix[D, Double]) = {
+      new ToProfileElement[In[Val[Double], D]] {
+        override def apply(t: In[Val[Double], D]): ProfileElement =
+          FixDomainProfileElement(t.value, fix(t.domain).toVector)
+      }
+    }
+
   }
 
-  case class ProfileElement(v: Val[Double], n: Int)
+  trait ToProfileElement[-T] {
+    def apply(t: T): ProfileElement
+  }
+
+  object ProfileElement {
+    implicit def toProfileElement[T: ToProfileElement](t: T) = implicitly[ToProfileElement[T]].apply(t)
+  }
+
+  abstract trait ProfileElement
+  case class IntervalDoubleProfileElement(v: Val[Double], n: Int) extends ProfileElement
+  case class IntervalIntProfileElement(v: Val[Int]) extends ProfileElement
+  case class FixDomainProfileElement(v: Val[Double], intervals: Vector[Double]) extends ProfileElement
+
+  type ProfileElements = Seq[ProfileElement]
 
   object DeterministicParams {
 
@@ -55,12 +88,25 @@ object Profile {
     def niche(genome: Genome, profiled: Seq[ProfileElement]) = {
       def notFoundInGenome(v: Val[_]) = throw new UserBadDataError(s"Variable $v not found in the genome")
 
-      def continuousProfile[P](x: Int, nX: Int): Niche[Individual[P], Int] =
-        mgo.evolution.niche.continuousProfile[Individual[P]]((Individual.genome[P] composeLens CDGenome.continuousValues).get _, x, nX)
+      def continuousProfile(x: Int, nX: Int): Niche[Individual[Phenotype], Int] =
+        mgo.evolution.niche.continuousProfile((Individual.genome composeLens CDGenome.continuousValues).get _, x, nX)
 
-      val niches = profiled.toVector.map { c ⇒
-        val index = Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
-        continuousProfile[Phenotype](index, c.n)
+      def discreteProfile(x: Int): Niche[Individual[Phenotype], Int] =
+        mgo.evolution.niche.discreteProfile((Individual.genome composeLens CDGenome.discreteValues).get _, x)
+
+      def gridContinuousProfile(continuous: Vector[C], x: Int, intervals: Vector[Double]): Niche[Individual[Phenotype], Int] =
+        mgo.evolution.niche.gridContinuousProfile(i ⇒ scaleContinuousValues(CDGenome.continuousValues.get(i.genome), continuous), x, intervals)
+
+      val niches = profiled.toVector.map {
+        case c: IntervalDoubleProfileElement ⇒
+          val index = Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
+          continuousProfile(index, c.n)
+        case c: IntervalIntProfileElement ⇒
+          val index = Genome.discreteIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
+          discreteProfile(index)
+        case c: FixDomainProfileElement ⇒
+          val index = Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
+          gridContinuousProfile(Genome.continuous(genome), index, c.intervals)
       }
 
       FromContext.value(mgo.evolution.niche.sequenceNiches[CDGenome.DeterministicIndividual.Individual[Phenotype], Int](niches))
@@ -150,13 +196,26 @@ object Profile {
 
       import CDGenome.NoisyIndividual.Individual
 
-      def continuousProfile[P](x: Int, nX: Int): Niche[Individual[P], Int] =
-        mgo.evolution.niche.continuousProfile[Individual[P]]((Individual.genome[P] composeLens CDGenome.continuousValues).get _, x, nX)
+      def continuousProfile(x: Int, nX: Int): Niche[Individual[Phenotype], Int] =
+        mgo.evolution.niche.continuousProfile((Individual.genome composeLens CDGenome.continuousValues).get _, x, nX)
+
+      def discreteProfile(x: Int): Niche[Individual[Phenotype], Int] =
+        mgo.evolution.niche.discreteProfile((Individual.genome composeLens CDGenome.discreteValues).get _, x)
+
+      def gridContinuousProfile(continuous: Vector[C], x: Int, intervals: Vector[Double]): Niche[Individual[Phenotype], Int] =
+        mgo.evolution.niche.gridContinuousProfile(i ⇒ scaleContinuousValues(CDGenome.continuousValues.get(i.genome), continuous), x, intervals)
 
       val niches =
-        profiled.toVector.map { c ⇒
-          val index = Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
-          continuousProfile[Phenotype](index, c.n)
+        profiled.toVector.map {
+          case c: IntervalDoubleProfileElement ⇒
+            val index = Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
+            continuousProfile(index, c.n)
+          case c: IntervalIntProfileElement ⇒
+            val index = Genome.discreteIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
+            discreteProfile(index)
+          case c: FixDomainProfileElement ⇒
+            val index = Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
+            gridContinuousProfile(Genome.continuous(genome), index, c.intervals)
         }
 
       FromContext.value(mgo.evolution.niche.sequenceNiches[CDGenome.NoisyIndividual.Individual[Phenotype], Int](niches))
@@ -303,32 +362,23 @@ object Profile {
 object ProfileEvolution {
 
   def apply(
-    x:            OptionalArgument[Val[Double]] = None,
-    nX:           OptionalArgument[Int]         = None,
-    profile:      Seq[Profile.ProfileElement]   = Seq(),
+    profile:      Profile.ProfileElements,
     genome:       Genome,
     objective:    Objectives,
     evaluation:   DSL,
     termination:  OMTermination,
-    nicheSize:    Int                           = 10,
-    stochastic:   OptionalArgument[Stochastic]  = None,
-    reject:       OptionalArgument[Condition]   = None,
-    parallelism:  Int                           = 1,
-    distribution: EvolutionPattern              = SteadyState(),
-    suggestion:   Suggestion                    = Suggestion.empty,
-    scope:        DefinitionScope               = "profile") = {
-
-    val profileElements =
-      x.option match {
-        case None ⇒ profile
-        case Some(x) ⇒
-          Seq(Profile.ProfileElement(x, nX.option.getOrElse(100))) ++ profile
-      }
+    nicheSize:    Int                          = 10,
+    stochastic:   OptionalArgument[Stochastic] = None,
+    reject:       OptionalArgument[Condition]  = None,
+    parallelism:  Int                          = 1,
+    distribution: EvolutionPattern             = SteadyState(),
+    suggestion:   Suggestion                   = Suggestion.empty,
+    scope:        DefinitionScope              = "profile") = {
 
     EvolutionPattern.build(
       algorithm =
         Profile(
-          niche = profileElements,
+          niche = profile,
           genome = genome,
           objective = objective,
           stochastic = stochastic,

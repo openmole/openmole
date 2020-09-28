@@ -23,6 +23,7 @@ import org.openmole.core.workflow.builder._
 import monocle.macros._
 import org.openmole.core.workflow.format.WritableOutput
 import org.openmole.plugin.hook.omr.MethodData
+import org.openmole.plugin.method.evolution.Objective.ToObjective
 import org.openmole.plugin.method.evolution.data.EvolutionMetadata
 import org.openmole.plugin.task.tools._
 import org.openmole.plugin.tool.pattern
@@ -44,6 +45,7 @@ package object evolution {
 
   val operatorExploration = 0.1
 
+  type Objectives = Seq[Objective[_]]
   type Genome = Seq[Genome.GenomeBound]
 
   implicit def intToCounterTerminationConverter(n: Long): AfterGeneration = AfterGeneration(n)
