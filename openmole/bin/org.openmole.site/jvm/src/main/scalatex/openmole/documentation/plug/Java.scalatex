@@ -293,7 +293,7 @@ You can refer to a simple project that includes a very simple task that handles 
 
 @h3("Declaration of JAI")
 
-In order to declare the JAI functions, a code has to be prepared such as following em{initJai()} method that is defined for a TiffReaderTask class.
+In order to declare the JAI functions, a code has to be prepared such as following @em{initJai()} method that is defined for a TiffReaderTask class.
 
 @br@br
 
@@ -355,14 +355,14 @@ For example for the TiffReaderTask:
 
 @br@br
 
-@hl.openmole("""
-       public static double readGeoTiff(File file) throws IOException {
+@hl("""
+   public static double readGeoTiff(File file) throws IOException {
 
-        System.out.println("initJAI start");
-        initJAI();
-        System.out.println("initJAI end");
-        //Do something ...
-    """, "java")
+   System.out.println("initJAI start");
+   initJAI();
+   System.out.println("initJAI end");
+   //Do something ...
+""", "java")
 
 
 @h3("Handling the class loader")
@@ -373,18 +373,20 @@ When using the Java code as a library, it requires some update on the script as 
 @br@br
 
 @hl.openmole(s"""
-        val GeoTifWriter =
-          ScalaTask($tq
-            |import fr.openmole.geotools.tiff._
-            |withThreadClassLoader(TiffReaderTask.getClassLoader())(TiffWriterTask.write(fileIn, fileOut))$tq.stripMargin
-          $tq.stripMargin) set (
-          libraries += workDirectory / "test-mupcity-openmole-0.0.1-SNAPSHOT-shaded.jar",
-          fileIn :=  workDirectory / "data" / "test.tif",
-          fileOut :=  workDirectory / "data" / "out.tif",
-          inputs += (fileIn, fileOut),
-          outputs += (fileIn, fileOut)
-        )
-    """)
+val fileIn = Val[File]
+val fileOut = Val[File]
+
+val GeoTifWriter =
+  ScalaTask($tq
+    |import fr.openmole.geotools.tiff._
+    |withThreadClassLoader(TiffReaderTask.getClassLoader())(TiffWriterTask.write(fileIn, fileOut))
+  $tq.stripMargin) set (
+    inputs += fileIn,
+    outputs += fileOut,
+    libraries += workDirectory / "test-mupcity-openmole-0.0.1-SNAPSHOT-shaded.jar",
+    fileIn :=  workDirectory / "data" / "test.tif"
+  ) hook CopyFileHook(fileOut, workDirectory / "data" / "out.tif")
+""")
 
 @br
 
