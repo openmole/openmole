@@ -128,10 +128,6 @@ object WorkflowIntegration {
     def toEvolutionWorkflow(a: StochasticGA[_]): EvolutionWorkflow = WorkflowIntegration.stochasticGAIntegration(a)
   }
 
-  def apply[T](f: T ⇒ EvolutionWorkflow) = new WorkflowIntegration[T] {
-    def apply(t: T) = f(t)
-  }
-
 }
 
 trait WorkflowIntegration[T] {
@@ -142,8 +138,6 @@ object EvolutionWorkflow {
   implicit def isWorkflowIntegration: WorkflowIntegration[EvolutionWorkflow] = new WorkflowIntegration[EvolutionWorkflow] {
     def apply(t: EvolutionWorkflow) = t
   }
-
-  //case class EvolutionState[S](s: S, island)
 }
 
 trait EvolutionWorkflow {
