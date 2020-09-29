@@ -314,12 +314,12 @@ object Profile {
     stochastic: OptionalArgument[Stochastic] = None,
     reject:     OptionalArgument[Condition]  = None
   ): EvolutionWorkflow =
-    WorkflowIntegration.stochasticity(objective, stochastic.option) match {
+    EvolutionWorkflow.stochasticity(objective, stochastic.option) match {
       case None ⇒
         val exactObjectives = Objectives.toExact(objective)
         val phenotypeContent = PhenotypeContent(exactObjectives)
-        val integration: WorkflowIntegration.DeterministicGA[_] =
-          new WorkflowIntegration.DeterministicGA(
+        val integration =
+          EvolutionWorkflow.DeterministicGA(
             DeterministicParams(
               genome = genome,
               objectives = exactObjectives,
@@ -332,13 +332,13 @@ object Profile {
             phenotypeContent
           )
 
-        WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
+        EvolutionWorkflow.deterministicGAIntegration(integration)
 
       case Some(stochasticValue) ⇒
         val noisyObjectives = Objectives.toNoisy(objective)
         val phenotypeContent = PhenotypeContent(noisyObjectives)
 
-        val integration: WorkflowIntegration.StochasticGA[_] = WorkflowIntegration.StochasticGA(
+        val integration = EvolutionWorkflow.StochasticGA(
           StochasticParams(
             nicheSize = nicheSize,
             niche = niche,
@@ -354,7 +354,7 @@ object Profile {
           stochasticValue
         )
 
-        WorkflowIntegration.StochasticGA.toEvolutionWorkflow(integration)
+        EvolutionWorkflow.stochasticGAIntegration(integration)
     }
 
 }

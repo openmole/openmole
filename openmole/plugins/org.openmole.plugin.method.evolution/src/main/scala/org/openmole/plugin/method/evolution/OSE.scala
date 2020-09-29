@@ -276,14 +276,14 @@ object OSE {
     mu:         Int                          = 200,
     stochastic: OptionalArgument[Stochastic] = None,
     reject:     OptionalArgument[Condition]  = None): EvolutionWorkflow =
-    WorkflowIntegration.stochasticity(objective.map(_.objective), stochastic.option) match {
+    EvolutionWorkflow.stochasticity(objective.map(_.objective), stochastic.option) match {
       case None ⇒
         val exactObjectives = FitnessPattern.toObjectives(objective).map(o ⇒ Objective.toExact(o))
         val phenotypeContent = PhenotypeContent(exactObjectives)
         val fg = OriginAxe.fullGenome(origin, genome)
 
-        val integration: WorkflowIntegration.DeterministicGA[_] =
-          WorkflowIntegration.DeterministicGA(
+        val integration =
+          EvolutionWorkflow.DeterministicGA(
             DeterministicParams(
               mu = mu,
               origin = OriginAxe.toOrigin(origin, genome),
@@ -297,14 +297,14 @@ object OSE {
             phenotypeContent
           )
 
-        WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
+        EvolutionWorkflow.deterministicGAIntegration(integration)
       case Some(stochasticValue) ⇒
         val fg = OriginAxe.fullGenome(origin, genome)
         val noisyObjectives = FitnessPattern.toObjectives(objective).map(o ⇒ Objective.toNoisy(o))
         val phenotypeContent = PhenotypeContent(noisyObjectives)
 
-        val integration: WorkflowIntegration.StochasticGA[_] =
-          WorkflowIntegration.StochasticGA(
+        val integration =
+          EvolutionWorkflow.StochasticGA(
             StochasticParams(
               mu = mu,
               origin = OriginAxe.toOrigin(origin, genome),
@@ -321,7 +321,7 @@ object OSE {
             stochasticValue
           )(StochasticParams.integration)
 
-        WorkflowIntegration.StochasticGA.toEvolutionWorkflow(integration)
+        EvolutionWorkflow.stochasticGAIntegration(integration)
     }
 
 }

@@ -66,14 +66,14 @@ package object evolution {
   sealed trait EvolutionPattern
 
   object EvolutionPattern {
-    def build[T](
-      algorithm:    T,
+    def build(
+      algorithm:    EvolutionWorkflow,
       evaluation:   DSL,
       termination:  OMTermination,
       parallelism:  Int                          = 1,
       distribution: EvolutionPattern             = SteadyState(),
       suggestion:   Seq[Seq[ValueAssignment[_]]],
-      scope:        DefinitionScope)(implicit wfi: WorkflowIntegration[T]): DSLContainer[EvolutionWorkflow] =
+      scope:        DefinitionScope): DSLContainer[EvolutionWorkflow] =
       distribution match {
         case s: SteadyState ⇒
           SteadyStateEvolution(
@@ -117,10 +117,9 @@ package object evolution {
     }
   }
 
-  def SteadyStateEvolution[T](algorithm: T, evaluation: DSL, termination: OMTermination, parallelism: Int = 1, suggestion: Seq[Seq[ValueAssignment[_]]] = Seq.empty, wrap: Boolean = false, scope: DefinitionScope = "steady state evolution")(implicit wfi: WorkflowIntegration[T]) = {
+  def SteadyStateEvolution(algorithm: EvolutionWorkflow, evaluation: DSL, termination: OMTermination, parallelism: Int = 1, suggestion: Seq[Seq[ValueAssignment[_]]] = Seq.empty, wrap: Boolean = false, scope: DefinitionScope = "steady state evolution") = {
     implicit def defScope = scope
-
-    val evolution = wfi(algorithm)
+    val evolution = algorithm
 
     val wrapped = pattern.wrap(evaluation, evolution.inputPrototypes, evolution.outputPrototypes, wrap)
     val randomGenomes = BreedTask(evolution, parallelism, suggestion) set ((inputs, outputs) += evolution.populationPrototype)

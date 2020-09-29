@@ -26,13 +26,7 @@ import cats.implicits._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SavedData }
 
-case class Stochastic(
-  seed:       SeedVariable = SeedVariable.empty,
-  sample:     Int          = 100,
-  reevaluate: Double       = 0.2
-)
-
-object WorkflowIntegration {
+object EvolutionWorkflow {
 
   def stochasticity(objectives: Objectives, stochastic: Option[Stochastic]) =
     (Objectives.onlyExact(objectives), stochastic) match {
@@ -41,10 +35,6 @@ object WorkflowIntegration {
       case (false, Some(s)) ⇒ Some(s)
       case (false, None)    ⇒ throw new UserBadDataError("Aggregation have been specified for some objective, but no stochastic parameter is provided.")
     }
-
-  implicit def hlistContainingIntegration[H <: shapeless.HList, U](implicit hwi: WorkflowIntegrationSelector[H, U]) = new WorkflowIntegration[H] {
-    def apply(h: H) = hwi.selected(hwi(h))
-  }
 
   def deterministicGAIntegration[AG](a: DeterministicGA[AG]): EvolutionWorkflow =
     new EvolutionWorkflow {
@@ -102,14 +92,6 @@ object WorkflowIntegration {
     phenotypeContent: PhenotypeContent
   )(implicit val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype])
 
-  object DeterministicGA {
-    implicit def deterministicGAIntegration[AG]: WorkflowIntegration[DeterministicGA[AG]] = new WorkflowIntegration[DeterministicGA[AG]] {
-      def apply(a: DeterministicGA[AG]) = WorkflowIntegration.deterministicGAIntegration(a)
-    }
-
-    def toEvolutionWorkflow(a: DeterministicGA[_]): EvolutionWorkflow = WorkflowIntegration.deterministicGAIntegration(a)
-  }
-
   case class StochasticGA[AG](
     ag:               AG,
     genome:           Genome,
@@ -120,24 +102,6 @@ object WorkflowIntegration {
     val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype]
   )
 
-  object StochasticGA {
-    implicit def stochasticGAIntegration[AG, P]: WorkflowIntegration[StochasticGA[AG]] = new WorkflowIntegration[StochasticGA[AG]] {
-      override def apply(a: StochasticGA[AG]) = WorkflowIntegration.stochasticGAIntegration(a)
-    }
-
-    def toEvolutionWorkflow(a: StochasticGA[_]): EvolutionWorkflow = WorkflowIntegration.stochasticGAIntegration(a)
-  }
-
-}
-
-trait WorkflowIntegration[T] {
-  def apply(t: T): EvolutionWorkflow
-}
-
-object EvolutionWorkflow {
-  implicit def isWorkflowIntegration: WorkflowIntegration[EvolutionWorkflow] = new WorkflowIntegration[EvolutionWorkflow] {
-    def apply(t: EvolutionWorkflow) = t
-  }
 }
 
 trait EvolutionWorkflow {
@@ -183,6 +147,12 @@ trait EvolutionWorkflow {
   def generationPrototype = GAIntegration.generationPrototype
   def terminatedPrototype = Val[Boolean]("terminated", namespace)
 }
+
+case class Stochastic(
+  seed:       SeedVariable = SeedVariable.empty,
+  sample:     Int          = 100,
+  reevaluate: Double       = 0.2
+)
 
 object GAIntegration {
 
