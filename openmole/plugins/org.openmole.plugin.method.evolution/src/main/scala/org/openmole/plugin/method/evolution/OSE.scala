@@ -282,46 +282,40 @@ object OSE {
         val phenotypeContent = PhenotypeContent(exactObjectives)
         val fg = OriginAxe.fullGenome(origin, genome)
 
-        val integration =
-          EvolutionWorkflow.DeterministicGA(
-            DeterministicParams(
-              mu = mu,
-              origin = OriginAxe.toOrigin(origin, genome),
-              genome = fg,
-              phenotypeContent = phenotypeContent,
-              objectives = exactObjectives,
-              limit = FitnessPattern.toLimit(objective),
-              operatorExploration = operatorExploration,
-              reject = reject.option),
-            fg,
-            phenotypeContent
-          )
-
-        EvolutionWorkflow.deterministicGAIntegration(integration)
+        EvolutionWorkflow.deterministicGAIntegration(
+          DeterministicParams(
+            mu = mu,
+            origin = OriginAxe.toOrigin(origin, genome),
+            genome = fg,
+            phenotypeContent = phenotypeContent,
+            objectives = exactObjectives,
+            limit = FitnessPattern.toLimit(objective),
+            operatorExploration = operatorExploration,
+            reject = reject.option),
+          fg,
+          phenotypeContent
+        )
       case Some(stochasticValue) ⇒
         val fg = OriginAxe.fullGenome(origin, genome)
         val noisyObjectives = FitnessPattern.toObjectives(objective).map(o ⇒ Objective.toNoisy(o))
         val phenotypeContent = PhenotypeContent(noisyObjectives)
 
-        val integration =
-          EvolutionWorkflow.StochasticGA(
-            StochasticParams(
-              mu = mu,
-              origin = OriginAxe.toOrigin(origin, genome),
-              genome = fg,
-              phenotypeContent = phenotypeContent,
-              objectives = noisyObjectives,
-              limit = FitnessPattern.toLimit(objective),
-              operatorExploration = operatorExploration,
-              historySize = stochasticValue.sample,
-              cloneProbability = stochasticValue.reevaluate,
-              reject = reject.option),
-            fg,
-            phenotypeContent,
-            stochasticValue
-          )(StochasticParams.integration)
-
-        EvolutionWorkflow.stochasticGAIntegration(integration)
+        EvolutionWorkflow.stochasticGAIntegration(
+          StochasticParams(
+            mu = mu,
+            origin = OriginAxe.toOrigin(origin, genome),
+            genome = fg,
+            phenotypeContent = phenotypeContent,
+            objectives = noisyObjectives,
+            limit = FitnessPattern.toLimit(objective),
+            operatorExploration = operatorExploration,
+            historySize = stochasticValue.sample,
+            cloneProbability = stochasticValue.reevaluate,
+            reject = reject.option),
+          fg,
+          phenotypeContent,
+          stochasticValue
+        )
     }
 
 }

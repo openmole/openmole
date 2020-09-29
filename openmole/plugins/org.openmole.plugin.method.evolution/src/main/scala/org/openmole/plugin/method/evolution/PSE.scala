@@ -410,7 +410,7 @@ object PSE {
         val exactObjectives = Objectives.toExact(objective.map(_.p))
         val phenotypeContent = PhenotypeContent(exactObjectives)
 
-        val integration = EvolutionWorkflow.DeterministicGA(
+        EvolutionWorkflow.deterministicGAIntegration(
           DeterministicParams(
             mgo.evolution.niche.irregularGrid(objective.map(_.scale).toVector),
             genome,
@@ -420,14 +420,12 @@ object PSE {
             reject = reject.option),
           genome,
           phenotypeContent
-        )(DeterministicParams.integration)
-
-        EvolutionWorkflow.deterministicGAIntegration(integration)
+        )
       case Some(stochasticValue) ⇒
         val noisyObjectives = Objectives.toNoisy(objective.map(_.p))
         val phenotypeContent = PhenotypeContent(noisyObjectives)
 
-        val integration = EvolutionWorkflow.StochasticGA(
+        EvolutionWorkflow.stochasticGAIntegration(
           StochasticParams(
             pattern = mgo.evolution.niche.irregularGrid(objective.map(_.scale).toVector),
             genome = genome,
@@ -439,9 +437,8 @@ object PSE {
             reject = reject.option),
           genome,
           phenotypeContent,
-          stochasticValue)(StochasticParams.integration)
-
-        EvolutionWorkflow.stochasticGAIntegration(integration)
+          stochasticValue
+        )
     }
 
 }

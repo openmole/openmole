@@ -419,44 +419,40 @@ object NichedNSGA2 {
       case None ⇒
         val exactObjectives = Objectives.toExact(objective)
         val phenotypeContent = PhenotypeContent(exactObjectives)
-        val integration =
-          EvolutionWorkflow.DeterministicGA(
-            DeterministicParams(
-              genome = genome,
-              objectives = exactObjectives,
-              phenotypeContent = phenotypeContent,
-              niche = DeterministicParams.niche(genome, phenotypeContent, exactObjectives, niche),
-              operatorExploration = operatorExploration,
-              nicheSize = nicheSize,
-              reject = reject.option),
-            genome,
-            phenotypeContent
-          )
 
-        EvolutionWorkflow.deterministicGAIntegration(integration)
+        EvolutionWorkflow.deterministicGAIntegration(
+          DeterministicParams(
+            genome = genome,
+            objectives = exactObjectives,
+            phenotypeContent = phenotypeContent,
+            niche = DeterministicParams.niche(genome, phenotypeContent, exactObjectives, niche),
+            operatorExploration = operatorExploration,
+            nicheSize = nicheSize,
+            reject = reject.option),
+          genome,
+          phenotypeContent
+        )
 
       case Some(stochasticValue) ⇒
         val noisyObjectives = Objectives.toNoisy(objective)
         val phenotypeContent = PhenotypeContent(noisyObjectives)
 
-        val integration =
-          EvolutionWorkflow.StochasticGA(
-            StochasticParams(
-              nicheSize = nicheSize,
-              niche = StochasticParams.niche(genome, phenotypeContent, noisyObjectives, niche),
-              operatorExploration = operatorExploration,
-              genome = genome,
-              phenotypeContent = phenotypeContent,
-              objectives = noisyObjectives,
-              historySize = stochasticValue.sample,
-              cloneProbability = stochasticValue.reevaluate,
-              reject = reject.option),
-            genome,
-            phenotypeContent,
-            stochasticValue
-          )
+        EvolutionWorkflow.stochasticGAIntegration(
+          StochasticParams(
+            nicheSize = nicheSize,
+            niche = StochasticParams.niche(genome, phenotypeContent, noisyObjectives, niche),
+            operatorExploration = operatorExploration,
+            genome = genome,
+            phenotypeContent = phenotypeContent,
+            objectives = noisyObjectives,
+            historySize = stochasticValue.sample,
+            cloneProbability = stochasticValue.reevaluate,
+            reject = reject.option),
+          genome,
+          phenotypeContent,
+          stochasticValue
+        )
 
-        EvolutionWorkflow.stochasticGAIntegration(integration)
     }
 
 }

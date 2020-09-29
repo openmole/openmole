@@ -190,24 +190,22 @@ object NSGA3 {
       case None ⇒
         val exactObjectives = Objectives.toExact(objective)
         val phenotypeContent = PhenotypeContent(exactObjectives)
-        val integration = EvolutionWorkflow.DeterministicGA(
+
+        EvolutionWorkflow.deterministicGAIntegration(
           DeterministicParams(mu, references, genome, phenotypeContent, exactObjectives, operatorExploration, reject),
           genome,
           phenotypeContent
-        )(DeterministicParams.integration)
-
-        EvolutionWorkflow.deterministicGAIntegration(integration)
+        )
       case Some(stochasticValue) ⇒
         val noisyObjectives = Objectives.toNoisy(objective)
         val phenotypeContent = PhenotypeContent(noisyObjectives)
-        val integration = EvolutionWorkflow.StochasticGA(
+
+        EvolutionWorkflow.stochasticGAIntegration(
           StochasticParams(mu, references, operatorExploration, genome, phenotypeContent, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
           genome,
           phenotypeContent,
           stochasticValue
-        )(StochasticParams.integration)
-
-        EvolutionWorkflow.stochasticGAIntegration(integration)
+        )
     }
 
 }
