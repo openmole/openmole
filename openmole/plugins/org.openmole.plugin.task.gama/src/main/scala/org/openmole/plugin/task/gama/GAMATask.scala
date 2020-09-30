@@ -227,7 +227,7 @@ object GAMATask {
     import p._
 
     newFile.withTmpFile("inputs", ".xml") { inputFile ⇒
-      val seedValue = seed.map(_.from(context)).getOrElse(random().nextLong)
+      val seedValue = math.abs(seed.map(_.from(context)).getOrElse(random().nextLong))
 
       def inputMap = mapped.inputs.map { m ⇒ m.name -> context(m.v).toString }.toMap
       val inputXML = GAMATask.modifyInputXML(inputMap, finalStep.from(context), seedValue, frameRate.option).transform(XML.loadFile(image.file / _root_.container.FlatImage.rootfsName / GAMATask.inputXML))
