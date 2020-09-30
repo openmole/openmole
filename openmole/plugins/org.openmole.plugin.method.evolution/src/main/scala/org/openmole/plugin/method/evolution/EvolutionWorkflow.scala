@@ -26,123 +26,73 @@ import cats.implicits._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SavedData }
 
-case class Stochastic(
-  seed:       SeedVariable = SeedVariable.empty,
-  sample:     Int          = 100,
-  reevaluate: Double       = 0.2
-)
-
-object WorkflowIntegration {
+object EvolutionWorkflow {
 
   def stochasticity(objectives: Objectives, stochastic: Option[Stochastic]) =
-    (Objective.onlyExact(objectives), stochastic) match {
+    (Objectives.onlyExact(objectives), stochastic) match {
       case (true, None)     ⇒ None
       case (true, Some(s))  ⇒ Some(s)
       case (false, Some(s)) ⇒ Some(s)
       case (false, None)    ⇒ throw new UserBadDataError("Aggregation have been specified for some objective, but no stochastic parameter is provided.")
     }
 
-  implicit def hlistContainingIntegration[H <: shapeless.HList, U](implicit hwi: WorkflowIntegrationSelector[H, U]) = new WorkflowIntegration[H] {
-    def apply(h: H) = hwi.selected(hwi(h))
-  }
-
-  def deterministicGAIntegration[AG](a: DeterministicGA[AG]): EvolutionWorkflow =
-    new EvolutionWorkflow {
-      type MGOAG = AG
-      def mgoAG = a.ag
-
-      type V = (Vector[Double], Vector[Int])
-      type P = Phenotype
-
-      lazy val integration = a.algorithm
-
-      def buildIndividual(genome: G, context: Context): I =
-        operations.buildIndividual(genome, variablesToPhenotype(context), context)
-
-      def inputPrototypes = Genome.toVals(a.genome)
-      def outputPrototypes = PhenotypeContent.toVals(a.phenotypeContent)
-
-      def genomeToVariables(genome: G): FromContext[Vector[Variable[_]]] = {
-        val (cs, is) = operations.genomeValues(genome)
-        Genome.toVariables(a.genome, cs, is, scale = true)
-      }
-
-      def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, a.phenotypeContent)
-    }
-
-  def stochasticGAIntegration[AG](a: StochasticGA[AG]): EvolutionWorkflow =
-    new EvolutionWorkflow {
-      type MGOAG = AG
-      def mgoAG = a.ag
-
-      type V = (Vector[Double], Vector[Int])
-      type P = Phenotype
-
-      lazy val integration = a.algorithm
-
-      def buildIndividual(genome: G, context: Context): I =
-        operations.buildIndividual(genome, variablesToPhenotype(context), context)
-
-      def inputPrototypes = Genome.toVals(a.genome) ++ a.replication.seed.prototype
-      def outputPrototypes = PhenotypeContent.toVals(a.phenotypeContent)
-
-      def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] = {
-        val (continuous, discrete) = operations.genomeValues(genome)
-        val seeder = a.replication.seed
-        (Genome.toVariables(a.genome, continuous, discrete, scale = true) map2 FromContext { p ⇒ seeder(p.random()) })(_ ++ _)
-      }
-
-      def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, a.phenotypeContent)
-    }
-
-  case class DeterministicGA[AG](
+  def deterministicGAIntegration[AG](
     ag:               AG,
     genome:           Genome,
-    phenotypeContent: PhenotypeContent
-  )(implicit val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype])
+    phenotypeContent: PhenotypeContent)(implicit algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype]): EvolutionWorkflow =
+    new EvolutionWorkflow {
+      type MGOAG = AG
+      def mgoAG = ag
 
-  object DeterministicGA {
-    implicit def deterministicGAIntegration[AG]: WorkflowIntegration[DeterministicGA[AG]] = new WorkflowIntegration[DeterministicGA[AG]] {
-      def apply(a: DeterministicGA[AG]) = WorkflowIntegration.deterministicGAIntegration(a)
+      type V = (Vector[Double], Vector[Int])
+      type P = Phenotype
+
+      lazy val integration = algorithm
+
+      def buildIndividual(g: G, context: Context): I =
+        operations.buildIndividual(g, variablesToPhenotype(context), context)
+
+      def inputPrototypes = Genome.toVals(genome)
+      def outputPrototypes = PhenotypeContent.toVals(phenotypeContent)
+
+      def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+        val (cs, is) = operations.genomeValues(g)
+        Genome.toVariables(genome, cs, is, scale = true)
+      }
+
+      def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, phenotypeContent)
     }
 
-    def toEvolutionWorkflow(a: DeterministicGA[_]): EvolutionWorkflow = WorkflowIntegration.deterministicGAIntegration(a)
-  }
-
-  case class StochasticGA[AG](
+  def stochasticGAIntegration[AG](
     ag:               AG,
     genome:           Genome,
     phenotypeContent: PhenotypeContent,
-    replication:      Stochastic
-  )(
-    implicit
-    val algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype]
-  )
+    replication:      Stochastic)(implicit algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype]): EvolutionWorkflow =
+    new EvolutionWorkflow {
+      type MGOAG = AG
+      def mgoAG = ag
 
-  object StochasticGA {
-    implicit def stochasticGAIntegration[AG, P]: WorkflowIntegration[StochasticGA[AG]] = new WorkflowIntegration[StochasticGA[AG]] {
-      override def apply(a: StochasticGA[AG]) = WorkflowIntegration.stochasticGAIntegration(a)
+      type V = (Vector[Double], Vector[Int])
+      type P = Phenotype
+
+      lazy val integration = algorithm
+
+      def buildIndividual(genome: G, context: Context): I =
+        operations.buildIndividual(genome, variablesToPhenotype(context), context)
+
+      def inputPrototypes = Genome.toVals(genome) ++ replication.seed.prototype
+      def outputPrototypes = PhenotypeContent.toVals(phenotypeContent)
+
+      def genomeToVariables(g: G): FromContext[Seq[Variable[_]]] = FromContext { p ⇒
+        import p._
+        val (continuous, discrete) = operations.genomeValues(g)
+        val seeder = replication.seed
+        Genome.toVariables(genome, continuous, discrete, scale = true) ++ seeder(p.random())
+      }
+
+      def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, phenotypeContent)
     }
 
-    def toEvolutionWorkflow(a: StochasticGA[_]): EvolutionWorkflow = WorkflowIntegration.stochasticGAIntegration(a)
-  }
-
-  def apply[T](f: T ⇒ EvolutionWorkflow) = new WorkflowIntegration[T] {
-    def apply(t: T) = f(t)
-  }
-
-}
-
-trait WorkflowIntegration[T] {
-  def apply(t: T): EvolutionWorkflow
-}
-
-object EvolutionWorkflow {
-  implicit def isWorkflowIntegration: WorkflowIntegration[EvolutionWorkflow] = new WorkflowIntegration[EvolutionWorkflow] {
-    def apply(t: EvolutionWorkflow) = t
-  }
-
-  //case class EvolutionState[S](s: S, island)
 }
 
 trait EvolutionWorkflow {
@@ -189,6 +139,12 @@ trait EvolutionWorkflow {
   def terminatedPrototype = Val[Boolean]("terminated", namespace)
 }
 
+case class Stochastic(
+  seed:       SeedVariable = SeedVariable.empty,
+  sample:     Int          = 100,
+  reevaluate: Double       = 0.2
+)
+
 object GAIntegration {
 
   def namespace = Namespace("evolution")
@@ -206,25 +162,13 @@ object GAIntegration {
   def genomesOfPopulationToVariables[I](
     genome: Genome,
     values: Vector[(Vector[Double], Vector[Int])],
-    scale:  Boolean): FromContext[Vector[Variable[_]]] = {
+    scale:  Boolean): Vector[Variable[_]] = {
 
-    val variables =
-      FromContext { p ⇒
-        import p._
-        values.map {
-          case (continuous, discrete) ⇒ Genome.toVariables(genome, continuous, discrete, scale).from(context)
-        }
-      }
-
-    variables.map {
-      v ⇒
-        genome.zipWithIndex.map {
-          case (g, i) ⇒ Genome.toArrayVariable(g, v.map(_(i).value))
-        }.toVector
-    }
+    val variables = values.map { case (continuous, discrete) ⇒ Genome.toVariables(genome, continuous, discrete, scale) }
+    genome.zipWithIndex.map { case (g, i) ⇒ Genome.toArrayVariable(g, variables.map(_(i).value)) }.toVector
   }
 
-  def objectivesOfPopulationToVariables[I](objectives: Seq[Objective[_]], phenotypeValues: Vector[Vector[Double]]): FromContext[Vector[Variable[_]]] =
+  def objectivesOfPopulationToVariables[I](objectives: Seq[Objective[_]], phenotypeValues: Vector[Vector[Double]]): Vector[Variable[_]] =
     objectives.toVector.zipWithIndex.map {
       case (objective, i) ⇒
         Variable(
@@ -233,10 +177,12 @@ object GAIntegration {
         )
     }
 
-  def rejectValue[G](reject: Condition, genome: Genome, continuous: G ⇒ Vector[Double], discrete: G ⇒ Vector[Int]) = FromContext { p ⇒ (g: G) ⇒
+  def rejectValue[G](reject: Condition, genome: Genome, continuous: G ⇒ Vector[Double], discrete: G ⇒ Vector[Int]) = FromContext { p ⇒
     import p._
-    val genomeVariables = GAIntegration.genomeToVariable(genome, (continuous(g), discrete(g)), scale = true).from(context)
-    reject.from(genomeVariables)
+    (g: G) ⇒ {
+      val genomeVariables = GAIntegration.genomeToVariable(genome, (continuous(g), discrete(g)), scale = true)
+      reject.from(genomeVariables)
+    }
   }
 
 }
@@ -270,20 +216,18 @@ object MGOAPI {
     def operations(a: A): Ops
 
     trait Ops {
-      def metadata(data: SavedData): FromContext[EvolutionMetadata] = FromContext { _ ⇒ EvolutionMetadata.none }
-
-      def initialState: S
-      def initialGenomes(n: Int, rng: scala.util.Random): FromContext[Vector[G]]
-
-      def buildIndividual(genome: G, phenotype: P, context: Context): I
+      def metadata(data: SavedData): EvolutionMetadata = EvolutionMetadata.none
 
       def genomeValues(genome: G): V
       def buildGenome(values: V): G
-      def buildGenome(context: Vector[Variable[_]]): FromContext[G]
+      def buildGenome(context: Vector[Variable[_]]): G
+      def buildIndividual(genome: G, phenotype: P, context: Context): I
 
       def startTimeLens: monocle.Lens[S, Long]
       def generationLens: monocle.Lens[S, Long]
 
+      def initialState: S
+      def initialGenomes(n: Int, rng: scala.util.Random): FromContext[Vector[G]]
       def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random): FromContext[Vector[G]]
       def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random): FromContext[(S, Vector[I])]
 

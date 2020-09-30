@@ -23,6 +23,7 @@ import org.openmole.core.workflow.builder._
 import monocle.macros._
 import org.openmole.core.workflow.format.WritableOutput
 import org.openmole.plugin.hook.omr.MethodData
+import org.openmole.plugin.method.evolution.Objective.ToObjective
 import org.openmole.plugin.method.evolution.data.EvolutionMetadata
 import org.openmole.plugin.task.tools._
 import org.openmole.plugin.tool.pattern
@@ -65,14 +66,14 @@ package object evolution {
   sealed trait EvolutionPattern
 
   object EvolutionPattern {
-    def build[T](
-      algorithm:    T,
+    def build(
+      algorithm:    EvolutionWorkflow,
       evaluation:   DSL,
       termination:  OMTermination,
       parallelism:  Int                          = 1,
       distribution: EvolutionPattern             = SteadyState(),
       suggestion:   Seq[Seq[ValueAssignment[_]]],
-      scope:        DefinitionScope)(implicit wfi: WorkflowIntegration[T]): DSLContainer[EvolutionWorkflow] =
+      scope:        DefinitionScope): DSLContainer[EvolutionWorkflow] =
       distribution match {
         case s: SteadyState ⇒
           SteadyStateEvolution(
@@ -109,19 +110,16 @@ package object evolution {
   case class SteadyState(wrap: Boolean = false) extends EvolutionPattern
   case class Island(termination: OMTermination, sample: OptionalArgument[Int] = None) extends EvolutionPattern
 
-  implicit def workflowIntegration = WorkflowIntegration[DSLContainer[EvolutionWorkflow]](_.data)
-
   implicit class EvolutionMethodContainer(dsl: DSLContainer[EvolutionWorkflow]) extends DSLContainerHook(dsl) {
     def hook[F](output: WritableOutput, frequency: OptionalArgument[Long] = None, last: Boolean = false, keepAll: Boolean = false, format: F = CSVOutputFormat(unrollArray = true))(implicit outputFormat: OutputFormat[F, EvolutionMetadata]): DSLContainer[EvolutionWorkflow] = {
       implicit val defScope = dsl.scope
-      dsl.hook(SavePopulationHook(dsl, output, frequency = frequency, last = last, keepAll = keepAll, format = format))
+      dsl.hook(SavePopulationHook(dsl.data, output, frequency = frequency, last = last, keepAll = keepAll, format = format))
     }
   }
 
-  def SteadyStateEvolution[T](algorithm: T, evaluation: DSL, termination: OMTermination, parallelism: Int = 1, suggestion: Seq[Seq[ValueAssignment[_]]] = Seq.empty, wrap: Boolean = false, scope: DefinitionScope = "steady state evolution")(implicit wfi: WorkflowIntegration[T]) = {
+  def SteadyStateEvolution(algorithm: EvolutionWorkflow, evaluation: DSL, termination: OMTermination, parallelism: Int = 1, suggestion: Seq[Seq[ValueAssignment[_]]] = Seq.empty, wrap: Boolean = false, scope: DefinitionScope = "steady state evolution") = {
     implicit def defScope = scope
-
-    val evolution = wfi(algorithm)
+    val evolution = algorithm
 
     val wrapped = pattern.wrap(evaluation, evolution.inputPrototypes, evolution.outputPrototypes, wrap)
     val randomGenomes = BreedTask(evolution, parallelism, suggestion) set ((inputs, outputs) += evolution.populationPrototype)
@@ -247,7 +245,7 @@ package object evolution {
   }
 
   // For backward compatibility
-  def GenomeProfileEvolution = ProfileEvolution
-  def GenomeProfile = Profile
+  //  def GenomeProfileEvolution = ProfileEvolution
+  //  def GenomeProfile = Profile
 
 }

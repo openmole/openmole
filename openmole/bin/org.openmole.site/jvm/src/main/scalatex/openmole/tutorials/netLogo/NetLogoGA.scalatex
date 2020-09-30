@@ -26,7 +26,7 @@
         outputs += food3 mapped "final-ticks-food3",
 
         // Define default values for inputs of the model
-        seed := 42,
+        mySeed := 42,
         gPopulation := 125.0,
         gDiffusionRate := 50.0,
         gEvaporationRate := 50

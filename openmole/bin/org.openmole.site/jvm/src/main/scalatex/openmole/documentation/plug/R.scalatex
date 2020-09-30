@@ -116,7 +116,7 @@ If all the R code you need is written in your R script, you just need to provide
     val result = Val[Int]
 
     // Task
-    val rTask2 = RTask(script = (workDirectory / "myRScript.R") set (
+    val rTask2 = RTask(script = workDirectory / "myRScript.R") set (
         outputs += result mapped "j"
     )
 

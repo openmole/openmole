@@ -27,7 +27,8 @@ import org.openmole.core.workflow.task._
 object InitialStateTask {
 
   def apply(evolution: EvolutionWorkflow)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    ClosureTask("InitialStateTask") { (context, _, _) ⇒
+    Task("InitialStateTask") { p ⇒
+      import p._
       def initialisedState =
         evolution.operations.startTimeLens.set(System.currentTimeMillis) andThen
           evolution.operations.generationLens.set(0L) apply context(evolution.statePrototype)

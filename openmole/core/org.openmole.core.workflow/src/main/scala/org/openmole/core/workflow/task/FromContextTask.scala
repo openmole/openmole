@@ -28,7 +28,11 @@ object FromContextTask {
     implicit val fileService: FileService
   )
 
-  case class ValidateParameters()(implicit val newFile: TmpDirectory, implicit val fileService: FileService)
+  object ValidateParameter {
+    implicit def fromServices(implicit newFile: TmpDirectory, fileService: FileService) = ValidateParameter()
+  }
+
+  case class ValidateParameter()(implicit val newFile: TmpDirectory, implicit val fileService: FileService)
 
   /**
    * Construct from a [[FromContext.Parameters]] => [[Context]] function
@@ -58,7 +62,7 @@ object FromContextTask {
  */
 @Lenses case class FromContextTask(
   f:                      FromContextTask.Parameters ⇒ Context,
-  v:                      FromContextTask.ValidateParameters ⇒ Seq[Throwable] = _ ⇒ Seq(),
+  v:                      FromContextTask.ValidateParameter ⇒ Seq[Throwable] = _ ⇒ Seq(),
   override val className: String,
   config:                 InputOutputConfig,
   mapped:                 MappedInputOutputConfig,
@@ -66,7 +70,7 @@ object FromContextTask {
 ) extends Task with ValidateTask {
 
   override def validate = Validate { p ⇒
-    val fcp = FromContextTask.ValidateParameters()(p.newFile, p.fileService)
+    val fcp = FromContextTask.ValidateParameter()(p.newFile, p.fileService)
     v(fcp)
   }
 
@@ -75,8 +79,8 @@ object FromContextTask {
     f(tp)
   }
 
-  def validate(validate: task.FromContextTask.ValidateParameters ⇒ Seq[Throwable]) = {
-    def nv(p: task.FromContextTask.ValidateParameters) = v(p) ++ validate(p)
+  def validate(validate: task.FromContextTask.ValidateParameter ⇒ Seq[Throwable]) = {
+    def nv(p: task.FromContextTask.ValidateParameter) = v(p) ++ validate(p)
     copy(v = nv)
   }
 

@@ -24,14 +24,14 @@ import cats.implicits._
 
 object SortedByDomain {
 
-  implicit def isFinite[D, T, S] = new Finite[SortedByDomain[D, T, S], T] with DomainInputs[SortedByDomain[D, T, S]] {
+  implicit def isFinite[D, T, S] = new FiniteFromContext[SortedByDomain[D, T, S], T] with DomainInputs[SortedByDomain[D, T, S]] {
     override def computeValues(domain: SortedByDomain[D, T, S]) = domain.computeValues()
     override def inputs(domain: SortedByDomain[D, T, S]): PrototypeSet = domain.inputs
   }
 
 }
 
-case class SortedByDomain[D, T, S: scala.Ordering](domain: D, s: T ⇒ S)(implicit finite: Finite[D, T], domainInputs: DomainInputs[D]) {
+case class SortedByDomain[D, T, S: scala.Ordering](domain: D, s: T ⇒ S)(implicit finite: FiniteFromContext[D, T], domainInputs: DomainInputs[D]) {
   def inputs = domainInputs.inputs(domain)
   def computeValues() =
     for {

@@ -45,11 +45,11 @@ package object file {
     def select(path: FromContext[String]) = SelectFileDomain(f, path)
   }
 
-  implicit def prototypeOfFileIsFinite = new Finite[Val[File], File] {
+  implicit def prototypeOfFileIsFinite = new FiniteFromContext[Val[File], File] {
     override def computeValues(prototype: Val[File]) = FromContext.prototype(prototype).map { _.listFilesSafe }
   }
 
-  implicit def fileIsFinite = new Finite[File, File] {
+  implicit def fileIsFinite = new FiniteFromContext[File, File] {
     override def computeValues(f: File) = FromContext.value(f.listFilesSafe)
   }
 

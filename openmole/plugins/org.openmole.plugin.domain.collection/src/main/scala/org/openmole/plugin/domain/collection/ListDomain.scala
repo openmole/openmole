@@ -22,7 +22,7 @@ import org.openmole.core.workflow.domain._
 import cats.implicits._
 
 object ListDomain {
-  implicit def isFinite[T] = new Finite[ListDomain[T], T] {
+  implicit def isFinite[T] = new FiniteFromContext[ListDomain[T], T] {
     override def computeValues(domain: ListDomain[T]) = domain.values.toList.sequence.map(_.toIterable)
   }
 

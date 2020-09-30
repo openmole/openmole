@@ -34,12 +34,12 @@ package sampling {
       def is(d: FromContext[T]) = Factor(p, d)
     }
 
-    implicit def fromContextIsFinite[T] = new Finite[FromContext[T], T] {
+    implicit def fromContextIsFinite[T] = new FiniteFromContext[FromContext[T], T] {
       override def computeValues(domain: FromContext[T]): FromContext[Iterable[T]] =
         domain.map(v ⇒ Vector(v))
     }
 
-    implicit def discreteFactorIsSampling[D, T](f: Factor[D, T])(implicit discrete: Discrete[D, T]) = FactorSampling(f)
+    implicit def discreteFactorIsSampling[D, T](f: Factor[D, T])(implicit discrete: DiscreteFromContext[D, T]) = FactorSampling(f)
 
     type Sampling = sampling.Sampling
 

@@ -28,7 +28,7 @@ import cats.syntax._
 object LogRange {
 
   implicit def isFinite[T] =
-    new Finite[LogRange[T], T] with Center[LogRange[T], T] with Bounds[LogRange[T], T] {
+    new FiniteFromContext[LogRange[T], T] with CenterFromContext[LogRange[T], T] with BoundsFromContext[LogRange[T], T] {
       override def computeValues(domain: LogRange[T]) = domain.computeValues
       override def center(domain: LogRange[T]) = Range.rangeCenter(domain.range)
       override def max(domain: LogRange[T]) = domain.max

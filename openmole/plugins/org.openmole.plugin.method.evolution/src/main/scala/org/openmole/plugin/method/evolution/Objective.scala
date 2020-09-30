@@ -3,6 +3,7 @@ package org.openmole.plugin.method.evolution
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.plugin.method.evolution.Objective.ToObjective
 import org.openmole.tool.types.ToDouble
 
 import scala.reflect.ClassTag
@@ -40,8 +41,6 @@ object Objective {
   trait ToExactObjective[T] {
     def apply(t: T): ExactObjective[_]
   }
-
-  implicit def toExactObjective[T: ToExactObjective](t: T) = implicitly[ToExactObjective[T]].apply(t)
 
   object ToNoisyObjective {
     implicit def aggregateArrayIsToNoisy[T: ClassTag] =
@@ -85,12 +84,26 @@ object Objective {
     def apply(t: T): NoisyObjective[_]
   }
 
-  implicit def toNoisyObjective[T: ToNoisyObjective](t: T) = implicitly[ToNoisyObjective[T]].apply(t)
+  object ToObjective {
+    implicit def toNoisyObjective[T: ToNoisyObjective]: ToObjective[T] = new ToObjective[T] {
+      def apply(t: T) = implicitly[ToNoisyObjective[T]].apply(t)
+    }
 
-  def index(obj: Objectives, v: Val[_]) = obj.indexWhere(o ⇒ prototype(o) == v) match {
-    case -1 ⇒ None
-    case x  ⇒ Some(x)
+    implicit def toExactObjective[T: ToExactObjective]: ToObjective[T] = new ToObjective[T] {
+      def apply(t: T) = implicitly[ToExactObjective[T]].apply(t)
+    }
+
+    implicit def objectiveToObjective: ToObjective[Objective[_]] = new ToObjective[Objective[_]] {
+      def apply(t: Objective[_]) = t
+    }
+
   }
+
+  trait ToObjective[-T] {
+    def apply(t: T): Objective[_]
+  }
+
+  implicit def toObjective[T: ToObjective](t: T): Objective[_] = implicitly[ToObjective[T]].apply(t)
 
   def prototype(o: Objective[_]) =
     o match {
@@ -129,11 +142,25 @@ object Objective {
         NoisyObjective(e.prototype, e.get, pMedian, e.negative, e.delta, e.as)
     }
 
-  def onlyExact(o: Seq[Objective[_]]) = o.collect { case x: ExactObjective[_] ⇒ x }.size == o.size
-
 }
 
 sealed trait Objective[P]
+
+object Objectives {
+
+  def onlyExact(o: Objectives) = Objectives.value(o).collect { case x: ExactObjective[_] ⇒ x }.size == Objectives.value(o).size
+  def toExact(o: Objectives) = Objectives.value(o).map(o ⇒ Objective.toExact(o))
+  def toNoisy(o: Objectives) = Objectives.value(o).map(o ⇒ Objective.toNoisy(o))
+
+  def index(obj: Objectives, v: Val[_]): Option[Int] =
+    obj.indexWhere(o ⇒ Objective.prototype(o) == v) match {
+      case -1 ⇒ None
+      case x  ⇒ Some(x)
+    }
+
+  def value(o: Objectives) = o
+
+}
 
 object ExactObjective {
 

@@ -18,6 +18,8 @@ release/*
 .idea/*
 .bsp/
 .bsp/*
+.bloop/
+.bloop/*
 .metals/
 metals.sbt
 *~

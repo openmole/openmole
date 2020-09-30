@@ -23,14 +23,14 @@ import org.openmole.core.workflow.domain._
 
 object ZipWithDomain {
 
-  implicit def isDiscrete[D, I, O] = new Discrete[ZipWithDomain[D, I, O], (I, O)] with DomainInputs[ZipWithDomain[D, I, O]] {
+  implicit def isDiscrete[D, I, O] = new DiscreteFromContext[ZipWithDomain[D, I, O], (I, O)] with DomainInputs[ZipWithDomain[D, I, O]] {
     override def iterator(domain: ZipWithDomain[D, I, O]) = domain.iterator
     override def inputs(domain: ZipWithDomain[D, I, O]) = domain.inputs
   }
 
 }
 
-case class ZipWithDomain[D, I, O](domain: D, f: I ⇒ O)(implicit discrete: Discrete[D, I], domainInputs: DomainInputs[D]) { d ⇒
+case class ZipWithDomain[D, I, O](domain: D, f: I ⇒ O)(implicit discrete: DiscreteFromContext[D, I], domainInputs: DomainInputs[D]) { d ⇒
 
   def inputs = domainInputs.inputs(domain)
 
