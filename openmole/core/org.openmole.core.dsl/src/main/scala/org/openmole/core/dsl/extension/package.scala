@@ -64,4 +64,7 @@ package object extension {
 
   def Aggregate = org.openmole.core.keyword.Aggregate
 
+  type TmpDirectory = org.openmole.core.workspace.TmpDirectory
+  type FileService = org.openmole.core.fileservice.FileService
+
 }

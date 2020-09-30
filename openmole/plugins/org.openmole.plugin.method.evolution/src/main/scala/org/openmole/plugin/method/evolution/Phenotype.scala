@@ -17,16 +17,31 @@ object Phenotype {
     }
   }
 
-  def objective(value: PhenotypeContent, phenotype: Phenotype) = phenotype.value.take(value.objectives.size)
-  def fromContext(context: Context, value: PhenotypeContent) = new Phenotype(value.objectives.map(o ⇒ context(o)).toArray)
+  def objective(content: PhenotypeContent, phenotype: Phenotype) = phenotype.value.take(content.objectives.size)
+
+  def values(content: PhenotypeContent, phenotype: Phenotype) = phenotype.value.drop(content.objectives.size).take(content.values.size)
+  def valuesContext(content: PhenotypeContent, phenotype: Phenotype) = Context((content.values zip values(content, phenotype)).map { case (v, va) ⇒ Variable.unsecure(v, va) }: _*)
+
+  def fromContext(context: Context, content: PhenotypeContent) = {
+    val value = content.objectives.map(o ⇒ context(o)) ++ content.values.map(n ⇒ context(n))
+    new Phenotype(value.toArray)
+  }
 
 }
 
 class Phenotype(val value: Array[Any]) extends AnyVal
 
 object PhenotypeContent {
-  def apply(objectives: Seq[Objective[_]]): PhenotypeContent = new PhenotypeContent(objectives.map(Objective.prototype))
-  def toVals(p: PhenotypeContent) = p.objectives
+  def apply(
+    objectives: Seq[Objective[_]],
+    values:     Seq[Val[_]]       = Seq()): PhenotypeContent =
+    new PhenotypeContent(
+      objectives.map(Objective.prototype),
+      values)
+
+  def toVals(p: PhenotypeContent) =
+    p.objectives ++ p.values
+
 }
 
-class PhenotypeContent(val objectives: Seq[Val[_]])
+class PhenotypeContent(val objectives: Seq[Val[_]], val values: Seq[Val[_]])
