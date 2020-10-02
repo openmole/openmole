@@ -28,6 +28,9 @@ import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SavedData 
 
 object EvolutionWorkflow {
 
+  val operatorExploration = 0.1
+  val parallelism = 100
+
   def stochasticity(objectives: Objectives, stochastic: Option[Stochastic]) =
     (Objectives.onlyExact(objectives), stochastic) match {
       case (true, None)     ⇒ None

@@ -196,7 +196,7 @@ object NSGA3 {
         val phenotypeContent = PhenotypeContent(exactObjectives)
 
         EvolutionWorkflow.deterministicGAIntegration(
-          DeterministicParams(mu, references, genome, phenotypeContent, exactObjectives, operatorExploration, reject),
+          DeterministicParams(mu, references, genome, phenotypeContent, exactObjectives, EvolutionWorkflow.operatorExploration, reject),
           genome,
           phenotypeContent
         )
@@ -205,7 +205,7 @@ object NSGA3 {
         val phenotypeContent = PhenotypeContent(noisyObjectives)
 
         EvolutionWorkflow.stochasticGAIntegration(
-          StochasticParams(mu, references, operatorExploration, genome, phenotypeContent, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
+          StochasticParams(mu, references, EvolutionWorkflow.operatorExploration, genome, phenotypeContent, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
           genome,
           phenotypeContent,
           stochasticValue
@@ -227,7 +227,7 @@ object NSGA3Evolution {
     references:   NSGA3.References             = NSGA3.References.None,
     stochastic:   OptionalArgument[Stochastic] = None,
     reject:       OptionalArgument[Condition]  = None,
-    parallelism:  Int                          = 1,
+    parallelism:  Int                          = EvolutionWorkflow.parallelism,
     distribution: EvolutionPattern             = SteadyState(),
     suggestion:   Suggestion                   = Suggestion.empty,
     scope:        DefinitionScope              = "nsga3") = {

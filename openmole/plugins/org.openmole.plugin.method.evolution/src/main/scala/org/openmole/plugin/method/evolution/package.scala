@@ -43,8 +43,6 @@ package object evolution {
   implicit def evolutionMetadataEncoder: Encoder[EvolutionMetadata] = deriveConfiguredEncoder[EvolutionMetadata]
   implicit def evolutionMetadataDecoder: Decoder[EvolutionMetadata] = deriveConfiguredDecoder[EvolutionMetadata]
 
-  val operatorExploration = 0.1
-
   type Objectives = Seq[Objective[_]]
   type Genome = Seq[Genome.GenomeBound]
 
@@ -243,9 +241,5 @@ package object evolution {
 
     DSLContainerExtension[EvolutionWorkflow](DSLContainer(puzzle), output = Some(masterTask), delegate = Vector(islandTask), data = t)
   }
-
-  // For backward compatibility
-  //  def GenomeProfileEvolution = ProfileEvolution
-  //  def GenomeProfile = Profile
 
 }

@@ -422,7 +422,7 @@ object PSE {
             genome,
             phenotypeContent,
             exactObjectives,
-            operatorExploration,
+            EvolutionWorkflow.operatorExploration,
             reject = reject.option),
           genome,
           phenotypeContent
@@ -439,7 +439,7 @@ object PSE {
             objectives = noisyObjectives,
             historySize = stochasticValue.sample,
             cloneProbability = stochasticValue.reevaluate,
-            operatorExploration = operatorExploration,
+            operatorExploration = EvolutionWorkflow.operatorExploration,
             reject = reject.option),
           genome,
           phenotypeContent,
@@ -460,7 +460,7 @@ object PSEEvolution {
     termination:  OMTermination,
     stochastic:   OptionalArgument[Stochastic] = None,
     reject:       OptionalArgument[Condition]  = None,
-    parallelism:  Int                          = 1,
+    parallelism:  Int                          = EvolutionWorkflow.parallelism,
     distribution: EvolutionPattern             = SteadyState(),
     suggestion:   Suggestion                   = Suggestion.empty,
     scope:        DefinitionScope              = "pse") =

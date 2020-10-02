@@ -329,7 +329,7 @@ object Profile {
             objectives = exactObjectives,
             phenotypeContent = phenotypeContent,
             niche = niche,
-            operatorExploration = operatorExploration,
+            operatorExploration = EvolutionWorkflow.operatorExploration,
             nicheSize = nicheSize,
             reject = reject.option),
           genome,
@@ -343,7 +343,7 @@ object Profile {
           StochasticParams(
             nicheSize = nicheSize,
             niche = niche,
-            operatorExploration = operatorExploration,
+            operatorExploration = EvolutionWorkflow.operatorExploration,
             genome = genome,
             phenotypeContent = phenotypeContent,
             objectives = noisyObjectives,
@@ -369,7 +369,7 @@ object ProfileEvolution {
     nicheSize:    Int                          = 10,
     stochastic:   OptionalArgument[Stochastic] = None,
     reject:       OptionalArgument[Condition]  = None,
-    parallelism:  Int                          = 1,
+    parallelism:  Int                          = EvolutionWorkflow.parallelism,
     distribution: EvolutionPattern             = SteadyState(),
     suggestion:   Suggestion                   = Suggestion.empty,
     scope:        DefinitionScope              = "profile") = {

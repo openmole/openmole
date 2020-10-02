@@ -294,7 +294,7 @@ object OSE {
             phenotypeContent = phenotypeContent,
             objectives = exactObjectives,
             limit = FitnessPattern.toLimit(objective),
-            operatorExploration = operatorExploration,
+            operatorExploration = EvolutionWorkflow.operatorExploration,
             reject = reject.option),
           fg,
           phenotypeContent
@@ -312,7 +312,7 @@ object OSE {
             phenotypeContent = phenotypeContent,
             objectives = noisyObjectives,
             limit = FitnessPattern.toLimit(objective),
-            operatorExploration = operatorExploration,
+            operatorExploration = EvolutionWorkflow.operatorExploration,
             historySize = stochasticValue.sample,
             cloneProbability = stochasticValue.reevaluate,
             reject = reject.option),
@@ -337,7 +337,7 @@ object OSEEvolution {
     genome:       Genome                       = Seq(),
     stochastic:   OptionalArgument[Stochastic] = None,
     reject:       OptionalArgument[Condition]  = None,
-    parallelism:  Int                          = 1,
+    parallelism:  Int                          = EvolutionWorkflow.parallelism,
     distribution: EvolutionPattern             = SteadyState(),
     suggestion:   Suggestion                   = Suggestion.empty,
     scope:        DefinitionScope              = "ose") =
