@@ -24,7 +24,7 @@ object NichedNSGA2Algorithm {
   import CDGenome._
   import DeterministicIndividual._
 
-  case class Result[N](continuous: Vector[Double], discrete: Vector[Int], fitness: Vector[Double], niche: N)
+  case class Result[N, P](continuous: Vector[Double], discrete: Vector[Int], fitness: Vector[Double], niche: N, individual: Individual[P])
 
   def result[N, P](population: Vector[Individual[P]], niche: Individual[P] ⇒ N, continuous: Vector[C], fitness: P ⇒ Vector[Double], keepAll: Boolean) = {
     val individuals = if (keepAll) population else nicheElitism[Individual[P], N](population, keepFirstFront[Individual[P]](_, i ⇒ fitness(i.phenotype)), niche)
@@ -34,7 +34,9 @@ object NichedNSGA2Algorithm {
         scaleContinuousValues(continuousValues.get(i.genome), continuous),
         Individual.genome composeLens discreteValues get i,
         fitness(i.phenotype),
-        niche(i))
+        niche(i),
+        i
+      )
     }
   }
 
@@ -94,7 +96,7 @@ object NoisyNichedNSGA2Algorithm {
   import shapeless._
 
   def aggregatedFitness[P: Manifest](aggregation: Vector[P] ⇒ Vector[Double]): Individual[P] ⇒ Vector[Double] = NoisyNSGA2.fitness[P](aggregation)
-  case class Result[N](continuous: Vector[Double], discrete: Vector[Int], fitness: Vector[Double], niche: N, replications: Int)
+  case class Result[N, P](continuous: Vector[Double], discrete: Vector[Int], fitness: Vector[Double], niche: N, replications: Int, individual: Individual[P])
 
   def result[N, P: Manifest](
     population:  Vector[Individual[P]],
@@ -117,7 +119,7 @@ object NoisyNichedNSGA2Algorithm {
 
     individuals.map { i ⇒
       val (c, d, f, r) = NoisyIndividual.aggregate[P](i, aggregation, continuous)
-      Result(c, d, f, niche(i), r)
+      Result(c, d, f, niche(i), r, i)
     }
   }
 
@@ -197,7 +199,7 @@ object NichedNSGA2 {
       import p._
 
       (i: CDGenome.DeterministicIndividual.Individual[Phenotype]) ⇒ {
-        val context = Phenotype.valuesContext(phenotypeContent, i.phenotype)
+        val context = Context((phenotypeContent.outputs zip Phenotype.outputs(phenotypeContent, i.phenotype)).map { case (v, va) ⇒ Variable.unsecure(v, va) }: _*)
         niche.from(context).toVector
       }
     }
@@ -224,13 +226,15 @@ object NichedNSGA2 {
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
         def initialState = EvolutionState[Unit](s = ())
 
-        def result(population: Vector[I], state: S, keepAll: Boolean) = FromContext { p ⇒
+        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
           import p._
           val res = NichedNSGA2Algorithm.result(population, om.niche.from(context), Genome.continuous(om.genome), ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives), keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
 
-          genomes ++ fitness
+          val outputValues = if (includeOutputs) DeterministicGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotype)) else Seq()
+
+          genomes ++ fitness ++ outputValues
         }
 
         def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
@@ -280,8 +284,8 @@ object NichedNSGA2 {
       import p._
 
       (i: CDGenome.NoisyIndividual.Individual[Phenotype]) ⇒ {
-        val values = i.phenotypeHistory.map(Phenotype.values(phenotypeContent, _)).transpose
-        val context = (phenotypeContent.values.map(_.toArray) zip values).map { case (v, va) ⇒ Variable.unsecure(v, va) }
+        val values = i.phenotypeHistory.map(Phenotype.outputs(phenotypeContent, _)).transpose
+        val context = (phenotypeContent.outputs.map(_.toArray) zip values).map { case (v, va) ⇒ Variable.unsecure(v, va) }
         niche.from(context).toVector
       }
     }
@@ -306,7 +310,7 @@ object NichedNSGA2 {
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
         def initialState = EvolutionState[Unit](s = ())
 
-        def result(population: Vector[I], state: S, keepAll: Boolean) = FromContext { p ⇒
+        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
           import p._
 
           val res = NoisyNichedNSGA2Algorithm.result(population, NoisyObjective.aggregate(om.phenotypeContent, om.objectives), om.niche.from(context), Genome.continuous(om.genome), onlyOldest = true, keepAll = keepAll)
@@ -314,7 +318,9 @@ object NichedNSGA2 {
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
           val samples = Variable(GAIntegration.samples.array, res.map(_.replications).toArray)
 
-          genomes ++ fitness ++ Seq(samples)
+          val outputValues = if (includeOutputs) StochasticGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotypeHistory)) else Seq()
+
+          genomes ++ fitness ++ Seq(samples) ++ outputValues
         }
 
         def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
@@ -372,14 +378,14 @@ object NichedNSGA2 {
     genome:     Genome,
     objective:  Objectives,
     nicheSize:  Int,
-    inputs:     Seq[Val[_]],
+    outputs:    Seq[Val[_]]                  = Seq(),
     stochastic: OptionalArgument[Stochastic] = None,
     reject:     OptionalArgument[Condition]  = None
   ): EvolutionWorkflow = {
     EvolutionWorkflow.stochasticity(objective, stochastic.option) match {
       case None ⇒
         val exactObjectives = Objectives.toExact(objective)
-        val phenotypeContent = PhenotypeContent(exactObjectives, inputs)
+        val phenotypeContent = PhenotypeContent(exactObjectives, outputs)
 
         EvolutionWorkflow.deterministicGAIntegration(
           DeterministicParams(
@@ -396,7 +402,7 @@ object NichedNSGA2 {
 
       case Some(stochasticValue) ⇒
         val noisyObjectives = Objectives.toNoisy(objective)
-        val phenotypeContent = PhenotypeContent(noisyObjectives, inputs)
+        val phenotypeContent = PhenotypeContent(noisyObjectives, outputs)
 
         EvolutionWorkflow.stochasticGAIntegration(
           StochasticParams(
@@ -435,13 +441,12 @@ object NichedNSGA2Evolution {
     suggestion:   Suggestion                   = Suggestion.empty,
     scope:        DefinitionScope              = "niched nsga2") = {
 
-
     EvolutionPattern.build(
       algorithm =
         NichedNSGA2(
           niche = niche,
           genome = genome,
-          inputs = evaluation.outputs,
+          outputs = evaluation.outputs,
           nicheSize = nicheSize,
           objective = objective,
           stochastic = stochastic,

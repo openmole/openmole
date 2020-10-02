@@ -111,9 +111,9 @@ package object evolution {
   case class Island(termination: OMTermination, sample: OptionalArgument[Int] = None) extends EvolutionPattern
 
   implicit class EvolutionMethodContainer(dsl: DSLContainer[EvolutionWorkflow]) extends DSLContainerHook(dsl) {
-    def hook[F](output: WritableOutput, frequency: OptionalArgument[Long] = None, last: Boolean = false, keepAll: Boolean = false, format: F = CSVOutputFormat(unrollArray = true))(implicit outputFormat: OutputFormat[F, EvolutionMetadata]): DSLContainer[EvolutionWorkflow] = {
+    def hook[F](output: WritableOutput, frequency: OptionalArgument[Long] = None, last: Boolean = false, keepAll: Boolean = false, includeOutputs: Boolean = false, format: F = CSVOutputFormat(unrollArray = true))(implicit outputFormat: OutputFormat[F, EvolutionMetadata]): DSLContainer[EvolutionWorkflow] = {
       implicit val defScope = dsl.scope
-      dsl.hook(SavePopulationHook(dsl.data, output, frequency = frequency, last = last, keepAll = keepAll, format = format))
+      dsl.hook(SavePopulationHook(dsl.data, output, frequency = frequency, last = last, keepAll = keepAll, includeOutputs = includeOutputs, format = format))
     }
   }
 

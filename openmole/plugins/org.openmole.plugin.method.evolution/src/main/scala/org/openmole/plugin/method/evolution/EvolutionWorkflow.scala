@@ -188,8 +188,15 @@ object GAIntegration {
 }
 
 object DeterministicGAIntegration {
+
   def migrateToIsland[P](population: Vector[mgo.evolution.algorithm.CDGenome.DeterministicIndividual.Individual[P]]) = population
   def migrateFromIsland[P](population: Vector[mgo.evolution.algorithm.CDGenome.DeterministicIndividual.Individual[P]]) = population
+
+  def outputValues(phenotypeContent: PhenotypeContent, phenotypes: Seq[Phenotype]) = {
+    val outputs = phenotypes.map { p ⇒ Phenotype.outputs(phenotypeContent, p) }
+    (phenotypeContent.outputs zip outputs.transpose).map { case (v, va) ⇒ Variable.unsecure(v.toArray, va) }
+  }
+
 }
 
 object StochasticGAIntegration {
@@ -198,6 +205,11 @@ object StochasticGAIntegration {
   def migrateFromIsland[I, P](population: Vector[I], historyAge: monocle.Lens[I, Long], history: monocle.Lens[I, Array[P]]) = {
     def keepIslandHistoryPart(i: I) = history.modify(h ⇒ h.takeRight(historyAge.get(i).toInt))(i)
     population.filter(i ⇒ historyAge.get(i) > 0).map(keepIslandHistoryPart)
+  }
+
+  def outputValues(phenotypeContent: PhenotypeContent, phenotypeHistories: Seq[Array[Phenotype]]) = {
+    val outputs = phenotypeHistories.map { _.map { p ⇒ Phenotype.outputs(phenotypeContent, p) }.transpose }
+    (phenotypeContent.outputs zip outputs.transpose).map { case (v, va) ⇒ Variable.unsecure(v.toArray.toArray, va) }
   }
 
 }
@@ -237,7 +249,7 @@ object MGOAPI {
       def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean
       def afterDuration(d: squants.Time, s: S, population: Vector[I]): Boolean
 
-      def result(population: Vector[I], state: S, keepAll: Boolean): FromContext[Seq[Variable[_]]]
+      def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean): FromContext[Seq[Variable[_]]]
     }
 
   }

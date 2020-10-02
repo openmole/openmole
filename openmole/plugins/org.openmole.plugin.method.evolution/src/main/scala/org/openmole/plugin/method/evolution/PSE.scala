@@ -62,7 +62,7 @@ object PSEAlgorithm {
     phenotype:     P,
     foundedIsland: Boolean         = false)
 
-  case class Result(continuous: Vector[Double], discrete: Vector[Int], pattern: Vector[Int], phenotype: Vector[Double])
+  case class Result[P](continuous: Vector[Double], discrete: Vector[Int], pattern: Vector[Int], phenotype: Vector[Double], individual: Individual[P])
 
   def result[P](population: Vector[Individual[P]], continuous: Vector[C], pattern: Vector[Double] ⇒ Vector[Int], phenotype: P ⇒ Vector[Double]) =
     population.map { i ⇒
@@ -70,7 +70,9 @@ object PSEAlgorithm {
         scaleContinuousValues(continuousValues.get(i.genome), continuous),
         Individual.genome composeLens discreteValues get i,
         pattern(phenotype(i.phenotype)),
-        phenotype(i.phenotype))
+        phenotype(i.phenotype),
+        i
+      )
     }
 
   def buildIndividual[P](g: CDGenome.Genome, p: P) = Individual(g, p)
@@ -186,7 +188,7 @@ object NoisyPSEAlgorithm {
       (vectorPhenotype.get _ andThen aggregation andThen pattern)(i),
       Individual.phenotypeHistory.get(i).size)
 
-  case class Result(continuous: Vector[Double], discrete: Vector[Int], phenotype: Vector[Double], pattern: Vector[Int], replications: Int)
+  case class Result[P](continuous: Vector[Double], discrete: Vector[Int], phenotype: Vector[Double], pattern: Vector[Int], replications: Int, individual: Individual[P])
 
   def result[P: Manifest](
     population:  Vector[Individual[P]],
@@ -196,7 +198,7 @@ object NoisyPSEAlgorithm {
     population.map {
       i ⇒
         val (c, d, f, p, r) = aggregate(i, aggregation, pattern, continuous)
-        Result(c, d, f, p, r)
+        Result(c, d, f, p, r, i)
     }
 
 }
@@ -242,12 +244,14 @@ object PSE {
         def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, EvolutionState.generation)(s, population)
         def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, EvolutionState.startTime)(s, population)
 
-        def result(population: Vector[I], state: S, keepAll: Boolean) = FromContext.value {
+        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext.value {
           val res = PSEAlgorithm.result[Phenotype](population, Genome.continuous(om.genome), om.pattern, ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives))
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype))
 
-          genomes ++ fitness
+          val outputValues = if (includeOutputs) DeterministicGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotype)) else Seq()
+
+          genomes ++ fitness ++ outputValues
         }
 
         def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
@@ -327,13 +331,15 @@ object PSE {
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = NoisyPSEAlgorithm.buildIndividual(genome, phenotype)
         def initialState = EvolutionState[HitMapState](s = Map())
 
-        def result(population: Vector[I], state: S, keepAll: Boolean) = FromContext.value {
+        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext.value {
           val res = NoisyPSEAlgorithm.result(population, NoisyObjective.aggregate(om.phenotypeContent, om.objectives), om.pattern, Genome.continuous(om.genome))
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype))
           val samples = Variable(GAIntegration.samples.array, res.map(_.replications).toArray)
 
-          genomes ++ fitness ++ Seq(samples)
+          val outputValues = if (includeOutputs) StochasticGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotypeHistory)) else Seq()
+
+          genomes ++ fitness ++ Seq(samples) ++ outputValues
         }
 
         def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
