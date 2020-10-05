@@ -5,6 +5,7 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.workspace.TmpDirectory
 
 package object validation {
+
   trait Validate {
     def apply(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable]
     def ++(v: Validate) = Validate(this, v)
@@ -27,4 +28,5 @@ package object validation {
   }
 
   trait ValidationPackage
+
 }

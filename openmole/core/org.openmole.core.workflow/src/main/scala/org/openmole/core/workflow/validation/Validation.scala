@@ -26,7 +26,7 @@ import org.openmole.core.workflow.tools.{ Default, DefaultSet }
 import org.openmole.core.workflow.validation.DataflowProblem._
 import org.openmole.core.workflow.validation.TopologyProblem._
 import org.openmole.core.workflow.validation.TypeUtil._
-import org.openmole.core.workflow.validation.ValidationProblem.{ HookValidationProblem, SourceValidationProblem, TaskValidationProblem, TransitionValidationProblem }
+import org.openmole.core.workflow.validation.ValidationProblem.{ HookValidationProblem, MoleValidationProblem, SourceValidationProblem, TaskValidationProblem, TransitionValidationProblem }
 import org.openmole.core.workspace.TmpDirectory
 
 import scala.collection.immutable.TreeMap
@@ -346,6 +346,11 @@ object Validation {
     noTransitionProblems ++ negativeLevelProblem
   }
 
+  def moleValidateErrors(mole: Mole)(implicit newFile: TmpDirectory, fileService: FileService) = mole.validate.apply match {
+    case s if !s.isEmpty ⇒ Seq(MoleValidationProblem(mole, s))
+    case _               ⇒ Seq()
+  }
+
   def apply(mole: Mole, implicits: Context = Context.empty, sources: Sources = Sources.empty, hooks: Hooks = Hooks.empty)(implicit newFile: TmpDirectory, fileService: FileService): List[Problem] =
     allMoles(mole).flatMap {
       case (m, mt) ⇒
@@ -374,7 +379,8 @@ object Validation {
           incoherentTypeAggregation(m, sources, hooks) ++
           incoherentTypeBetweenSlots(m, sources, hooks) ++
           taskValidationErrors(m) ++
-          transitionValidationErrors(m, sources, hooks)
+          transitionValidationErrors(m, sources, hooks) ++
+          moleValidateErrors(m)
     }
 
 }

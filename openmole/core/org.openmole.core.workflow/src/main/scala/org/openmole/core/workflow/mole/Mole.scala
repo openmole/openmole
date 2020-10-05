@@ -20,6 +20,7 @@ package org.openmole.core.workflow.mole
 import org.openmole.core.context.PrototypeSet
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.workflow.transition._
+import org.openmole.core.workflow.validation.Validate
 
 import scala.collection._
 
@@ -75,7 +76,8 @@ case class Mole(
   root:         MoleCapsule,
   transitions:  Iterable[ITransition] = Iterable.empty,
   dataChannels: Iterable[DataChannel] = Iterable.empty,
-  inputs:       PrototypeSet          = PrototypeSet.empty
+  inputs:       PrototypeSet          = PrototypeSet.empty,
+  validate:     Validate              = Validate.success
 ) {
 
   lazy val slots = (TransitionSlot(root) :: transitions.map(_.end).toList).groupBy(_.capsule).map { case (k, v) ⇒ k -> v.toSet }.withDefault(c ⇒ Iterable.empty)

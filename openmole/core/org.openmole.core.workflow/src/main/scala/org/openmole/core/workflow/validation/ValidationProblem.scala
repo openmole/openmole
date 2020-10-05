@@ -59,6 +59,11 @@ object ValidationProblem {
   case class TransitionValidationProblem(transition: ITransition, errors: Seq[Throwable]) extends ValidationProblem {
     override def toString = s"Errors in validation of transition $transition:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).messageAndStackStringWithMargin).mkString("\n")
   }
+
+  case class MoleValidationProblem(mole: Mole, errors: Seq[Throwable]) extends ValidationProblem {
+    override def toString = s"Errors in validation of mole $mole:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).messageAndStackStringWithMargin).mkString("\n")
+  }
+
 }
 
 trait ValidationProblem extends Problem

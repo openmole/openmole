@@ -27,11 +27,12 @@ package composition {
   import java.io.PrintStream
 
   import org.openmole.core.context.{ Context, Val }
+  import org.openmole.core.workflow.validation.Validate
   import org.openmole.core.expansion.{ Condition, FromContext }
   import org.openmole.core.outputmanager.OutputManager
   import org.openmole.core.workflow.builder.DefinitionScope
   import org.openmole.core.workflow.execution.{ EnvironmentProvider, LocalEnvironmentProvider }
-  import org.openmole.core.workflow.format.{ OutputFormat, WritableOutput, CSVOutputFormat }
+  import org.openmole.core.workflow.format.{ CSVOutputFormat, OutputFormat, WritableOutput }
   import org.openmole.core.workflow.hook.{ FormattedFileHook, Hook }
   import org.openmole.core.workflow.mole.{ Grouping, MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source }
   import org.openmole.core.workflow.sampling.Sampling
@@ -65,7 +66,8 @@ package composition {
         (p1.sources.toList ::: p2.sources.toList).distinct,
         (p1.hooks.toList ::: p2.hooks.toList).distinct,
         p1.environments ++ p2.environments,
-        p1.grouping ++ p2.grouping
+        p1.grouping ++ p2.grouping,
+        p1.validate ++ p2.validate
       )
     }
 
@@ -76,14 +78,16 @@ package composition {
       sources:      Iterable[(MoleCapsule, Source)]       = Iterable.empty,
       hooks:        Iterable[(MoleCapsule, Hook)]         = Iterable.empty,
       environments: Map[MoleCapsule, EnvironmentProvider] = Map.empty,
-      grouping:     Map[MoleCapsule, Grouping]            = Map.empty) =
+      grouping:     Map[MoleCapsule, Grouping]            = Map.empty,
+      validate:     Validate                              = Validate.success) =
       p.copy(
         transitions = p.transitions ++ transitions,
         dataChannels = p.dataChannels ++ dataChannels,
         sources = p.sources ++ sources,
         hooks = p.hooks ++ hooks,
         environments = p.environments ++ environments,
-        grouping = p.grouping ++ grouping
+        grouping = p.grouping ++ grouping,
+        validate = p.validate ++ validate
       )
 
   }
@@ -109,9 +113,10 @@ package composition {
     sources:      Iterable[(MoleCapsule, Source)]       = Iterable.empty,
     hooks:        Iterable[(MoleCapsule, Hook)]         = Iterable.empty,
     environments: Map[MoleCapsule, EnvironmentProvider] = Map.empty,
-    grouping:     Map[MoleCapsule, Grouping]            = Map.empty) {
+    grouping:     Map[MoleCapsule, Grouping]            = Map.empty,
+    validate:     Validate                              = Validate.success) {
 
-    def toMole = new Mole(firstSlot.capsule, transitions, dataChannels)
+    def toMole = new Mole(firstSlot.capsule, transitions, dataChannels, validate = validate)
 
     def toExecution(implicit moleServices: MoleServices): MoleExecution =
       MoleExecution(toMole, sources, hooks, environments, grouping)
@@ -284,6 +289,7 @@ package composition {
     environment: Option[EnvironmentProvider] = None,
     grouping:    Option[Grouping]            = None,
     hooks:       Vector[Hook]                = Vector.empty,
+    validate:    Validate                    = Validate.success,
     data:        T,
     scope:       DefinitionScope) extends DSL {
     def on(environment: EnvironmentProvider) = copy(environment = Some(environment))
@@ -311,7 +317,8 @@ package composition {
       delegate:      Vector[Task]                = Vector.empty,
       environment:   Option[EnvironmentProvider] = None,
       grouping:      Option[Grouping]            = None,
-      hooks:         Vector[Hook]                = Vector.empty)(implicit definitionScope: DefinitionScope) =
+      hooks:         Vector[Hook]                = Vector.empty,
+      validate:      Validate                    = Validate.success)(implicit definitionScope: DefinitionScope) =
       composition.DSLContainer[Unit](
         transitionDSL,
         output,
@@ -319,6 +326,7 @@ package composition {
         environment,
         grouping,
         hooks,
+        validate,
         (),
         definitionScope
       )
@@ -330,7 +338,8 @@ package composition {
       delegate:    Vector[Task]                = Vector.empty,
       environment: Option[EnvironmentProvider] = None,
       grouping:    Option[Grouping]            = None,
-      hooks:       Vector[Hook]                = Vector.empty)(implicit definitionScope: DefinitionScope) =
+      hooks:       Vector[Hook]                = Vector.empty,
+      validate:    Validate                    = Validate.success)(implicit definitionScope: DefinitionScope) =
       composition.DSLContainer[T](
         dsl,
         output orElse dsl.output,
@@ -338,6 +347,7 @@ package composition {
         environment orElse dsl.environment,
         grouping orElse dsl.grouping,
         hooks ++ dsl.hooks,
+        validate,
         data,
         definitionScope)
 
@@ -439,7 +449,8 @@ package composition {
           Puzzle.add(
             puzzle,
             hooks = hooks,
-            environments = environments.toMap
+            environments = environments.toMap,
+            validate = container.validate
           )
         }
 
