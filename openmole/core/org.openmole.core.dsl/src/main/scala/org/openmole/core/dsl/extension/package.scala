@@ -67,4 +67,7 @@ package object extension {
   type TmpDirectory = org.openmole.core.workspace.TmpDirectory
   type FileService = org.openmole.core.fileservice.FileService
 
+  type Validate = org.openmole.core.workflow.validation.Validate
+  def Validate = org.openmole.core.workflow.validation.Validate
+
 }

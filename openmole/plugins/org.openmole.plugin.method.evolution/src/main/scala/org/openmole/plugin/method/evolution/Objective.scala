@@ -164,13 +164,9 @@ object Objectives {
 
 object ExactObjective {
 
-  //  def toFitnessFunction(objectives: Seq[ExactObjective[_]])(phenotype: Array[Any]) =
-  //    for {
-  //      (o, p) ← (objectives zip phenotype).toVector
-  //    } yield o.fromAny(p)
-
   def toFitnessFunction(phenotypeContent: PhenotypeContent, objectives: Seq[ExactObjective[_]])(phenotype: Phenotype) =
-    for { (o, p) ← (objectives zip Phenotype.objective(phenotypeContent, phenotype)).toVector } yield o.fromAny(p)
+    for { (o, p) ← (objectives zip Phenotype.objectives(phenotypeContent, phenotype)).toVector} yield o.fromAny(p)
+
 }
 
 case class ExactObjective[P](prototype: Val[P], get: Context ⇒ P, toDouble: P ⇒ Double, negative: Boolean, delta: Option[Double], as: Option[String]) extends Objective[P] {
@@ -191,7 +187,7 @@ object NoisyObjective {
 
   def aggregate(phenotypeContent: PhenotypeContent, objectives: Seq[NoisyObjective[_]])(v: Vector[Phenotype]): Vector[Double] =
     for {
-      (vs, obj) ← v.map(p ⇒ Phenotype.objective(phenotypeContent, p)).transpose zip objectives
+      (vs, obj) ← v.map(p ⇒ Phenotype.objectives(phenotypeContent, p)).transpose zip objectives
     } yield obj.aggregateAny(vs)
 
 }

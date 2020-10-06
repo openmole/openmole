@@ -195,12 +195,12 @@ object NichedNSGA2 {
 
   object DeterministicParams {
 
-    def niche(phenotypeContent: PhenotypeContent, niche: FromContext[Seq[Int]]) = FromContext { p ⇒
+    def niche(phenotypeContent: PhenotypeContent, niche: Seq[FromContext[Int]]) = FromContext { p ⇒
       import p._
 
       (i: CDGenome.DeterministicIndividual.Individual[Phenotype]) ⇒ {
         val context = Context((phenotypeContent.outputs zip Phenotype.outputs(phenotypeContent, i.phenotype)).map { case (v, va) ⇒ Variable.unsecure(v, va) }: _*)
-        niche.from(context).toVector
+        niche.map(_.from(context)).toVector
       }
     }
 
@@ -280,13 +280,13 @@ object NichedNSGA2 {
 
   object StochasticParams {
 
-    def niche(phenotypeContent: PhenotypeContent, niche: FromContext[Seq[Int]]) = FromContext { p ⇒
+    def niche(phenotypeContent: PhenotypeContent, niche: Seq[FromContext[Int]]) = FromContext { p ⇒
       import p._
 
       (i: CDGenome.NoisyIndividual.Individual[Phenotype]) ⇒ {
         val values = i.phenotypeHistory.map(Phenotype.outputs(phenotypeContent, _)).transpose
         val context = (phenotypeContent.outputs.map(_.toArray) zip values).map { case (v, va) ⇒ Variable.unsecure(v, va) }
-        niche.from(context).toVector
+        niche.map(_.from(context)).toVector
       }
     }
 
@@ -374,18 +374,22 @@ object NichedNSGA2 {
     reject:              Option[Condition])
 
   def apply[P](
-    niche:      FromContext[Seq[Int]],
+    niche:      Seq[FromContext[Int]],
     genome:     Genome,
     objective:  Objectives,
     nicheSize:  Int,
     outputs:    Seq[Val[_]]                  = Seq(),
     stochastic: OptionalArgument[Stochastic] = None,
-    reject:     OptionalArgument[Condition]  = None
-  ): EvolutionWorkflow = {
+    reject:     OptionalArgument[Condition]  = None): EvolutionWorkflow = {
     EvolutionWorkflow.stochasticity(objective, stochastic.option) match {
       case None ⇒
         val exactObjectives = Objectives.toExact(objective)
         val phenotypeContent = PhenotypeContent(exactObjectives, outputs)
+
+        def validation = Validate { p ⇒
+          import p._
+          niche.flatMap(_.validate(outputs))
+        }
 
         EvolutionWorkflow.deterministicGAIntegration(
           DeterministicParams(
@@ -397,12 +401,18 @@ object NichedNSGA2 {
             nicheSize = nicheSize,
             reject = reject.option),
           genome = genome,
-          phenotypeContent = phenotypeContent
+          phenotypeContent = phenotypeContent,
+          validate = validation
         )
 
       case Some(stochasticValue) ⇒
         val noisyObjectives = Objectives.toNoisy(objective)
         val phenotypeContent = PhenotypeContent(noisyObjectives, outputs)
+
+        def validation = Validate { p ⇒
+          import p._
+          niche.flatMap(_.validate(outputs.map(_.toArray)))
+        }
 
         EvolutionWorkflow.stochasticGAIntegration(
           StochasticParams(
@@ -417,7 +427,8 @@ object NichedNSGA2 {
             reject = reject.option),
           genome,
           phenotypeContent,
-          stochasticValue
+          stochasticValue,
+          validate = validation
         )
 
     }
@@ -430,7 +441,7 @@ object NichedNSGA2Evolution {
   def apply(
     evaluation:   DSL,
     termination:  OMTermination,
-    niche:        FromContext[Seq[Int]],
+    niche:        Seq[FromContext[Int]],
     genome:       Genome,
     objective:    Objectives,
     nicheSize:    Int,

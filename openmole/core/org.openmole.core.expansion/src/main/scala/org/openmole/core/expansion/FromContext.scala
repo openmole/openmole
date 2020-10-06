@@ -51,8 +51,6 @@ object ToFromContext extends LowPriorityToFromContext {
   implicit def codeToFromContextBigInt = ToFromContext(codeToFromContext[BigInt])
   implicit def codeToFromContextBoolean = ToFromContext(codeToFromContext[Boolean])
 
-  implicit def codeToFromContextSeqInt = ToFromContext(codeToFromContext[Seq[Int]])
-
   implicit def fileToString = ToFromContext[File, String](f ⇒ ExpandedString(f.getPath))
   implicit def stringToString = ToFromContext[String, String](s ⇒ ExpandedString(s))
   implicit def stringToFile = ToFromContext[String, File](s ⇒ ExpandedString(s).map(s ⇒ File(s)))
@@ -154,7 +152,6 @@ object FromContext extends LowPriorityFromContext {
   implicit def codeToFromContextBigDecimal(s: String) = contextConverter[String, BigDecimal](s)
   implicit def codeToFromContextBigInt(s: String) = contextConverter[String, BigInt](s)
   implicit def codeToFromContextBoolean(s: String) = contextConverter[String, Boolean](s)
-  implicit def codeToFromContextSeqInt(s: String) = contextConverter[String, Seq[Int]](s)
 
   implicit def fileToString(f: File) = contextConverter[File, String](f)
   implicit def stringToString(s: String) = contextConverter[String, String](s)

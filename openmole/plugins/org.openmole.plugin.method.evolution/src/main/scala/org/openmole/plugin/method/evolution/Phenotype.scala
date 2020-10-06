@@ -17,10 +17,16 @@ object Phenotype {
     }
   }
 
-  def objective(content: PhenotypeContent, phenotype: Phenotype) = phenotype.value.take(content.objectives.size)
+  def toContext(content: PhenotypeContent, phenotype: Phenotype) =
+    (PhenotypeContent.toVals(content) zip phenotype.value).map { case (v, va) ⇒ Variable.unsecure(v, va) }
+
+  def objectives(content: PhenotypeContent, phenotype: Phenotype) = {
+    val context: Context = toContext(content, phenotype)
+    content.objectives.map(v ⇒ context.apply(v)).toArray
+  }
 
   def outputs(content: PhenotypeContent, phenotype: Phenotype) = {
-    val context: Context = (PhenotypeContent.toVals(content) zip phenotype.value).map { case (v, va) ⇒ Variable.unsecure(v, va) }
+    val context: Context = toContext(content, phenotype)
     content.outputs.map(v ⇒ context.apply(v)).toArray
   }
 

@@ -42,9 +42,12 @@ object EvolutionWorkflow {
   def deterministicGAIntegration[AG](
     ag:               AG,
     genome:           Genome,
-    phenotypeContent: PhenotypeContent)(implicit algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype]): EvolutionWorkflow =
+    phenotypeContent: PhenotypeContent,
+    validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype]): EvolutionWorkflow = {
+    val _validate = validate
     new EvolutionWorkflow {
       type MGOAG = AG
+
       def mgoAG = ag
 
       type V = (Vector[Double], Vector[Int])
@@ -52,10 +55,13 @@ object EvolutionWorkflow {
 
       lazy val integration = algorithm
 
+      def validate = _validate
+
       def buildIndividual(g: G, context: Context): I =
         operations.buildIndividual(g, variablesToPhenotype(context), context)
 
       def inputPrototypes = Genome.toVals(genome)
+
       def outputPrototypes = PhenotypeContent.toVals(phenotypeContent)
 
       def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
@@ -65,12 +71,15 @@ object EvolutionWorkflow {
 
       def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, phenotypeContent)
     }
+  }
 
   def stochasticGAIntegration[AG](
     ag:               AG,
     genome:           Genome,
     phenotypeContent: PhenotypeContent,
-    replication:      Stochastic)(implicit algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype]): EvolutionWorkflow =
+    replication:      Stochastic,
+    validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype]): EvolutionWorkflow = {
+    val _validate = validate
     new EvolutionWorkflow {
       type MGOAG = AG
       def mgoAG = ag
@@ -79,6 +88,8 @@ object EvolutionWorkflow {
       type P = Phenotype
 
       lazy val integration = algorithm
+
+      def validate = _validate
 
       def buildIndividual(genome: G, context: Context): I =
         operations.buildIndividual(genome, variablesToPhenotype(context), context)
@@ -95,6 +106,7 @@ object EvolutionWorkflow {
 
       def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, phenotypeContent)
     }
+  }
 
 }
 
@@ -116,6 +128,8 @@ trait EvolutionWorkflow {
   type P
 
   type Pop = Array[I]
+
+  def validate: Validate
 
   def genomeType = ValType[G]
   def stateType = ValType[S]
