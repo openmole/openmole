@@ -284,8 +284,15 @@ object NichedNSGA2 {
       import p._
 
       (i: CDGenome.NoisyIndividual.Individual[Phenotype]) ⇒ {
+        import org.openmole.tool.types.ClassUtils._
         val values = i.phenotypeHistory.map(Phenotype.outputs(phenotypeContent, _)).transpose
-        val context = (phenotypeContent.outputs.map(_.toArray) zip values).map { case (v, va) ⇒ Variable.unsecure(v, va) }
+        val context =
+          (phenotypeContent.outputs zip values).map {
+            case (v, va) ⇒
+              val array = fillArray(v.`type`.manifest, va)
+              Variable.unsecure(v.toArray, array)
+          }
+
         niche.map(_.from(context)).toVector
       }
     }

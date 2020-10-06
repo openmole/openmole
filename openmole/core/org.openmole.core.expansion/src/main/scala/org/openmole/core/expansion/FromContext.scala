@@ -173,7 +173,12 @@ object FromContext extends LowPriorityFromContext {
       context(p)
     } validate { param ⇒
       import param._
-      if (inputs.exists(_ == p)) Seq.empty else Seq(new UserBadDataError(s"Prototype $p not found"))
+
+      inputs.find(_.name == p.name) match {
+        case Some(i) if p == i ⇒ Seq()
+        case None              ⇒ Seq(new UserBadDataError(s"FromContext validation failed, $p not found among inputs $inputs"))
+        case Some(i)           ⇒ Seq(new UserBadDataError(s"FromContext validation failed, $p has incorrect type, should be $i, among inputs $inputs"))
+      }
     }
 
   /**

@@ -61,10 +61,6 @@ object Prettifier extends JavaLogger {
       sw.toString
     }
 
-    def messageAndStackStringWithMargin = {
-      val ml = t.getMessage.contains("\n")
-      addMargin(s"${t.getClass}:${if (ml) "\n" else " "}${t.getMessage}\n" + stackString)
-    }
     def stackStringWithMargin = addMargin(stackString)
   }
 

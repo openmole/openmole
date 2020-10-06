@@ -142,5 +142,11 @@ object ClassUtils {
     m.invoke(c, args: _*)
   }
 
+  def fillArray(m: Manifest[_], s: Seq[_]) = {
+    val values = m.newArray(s.size)
+    s.zipWithIndex.foreach { case (v, i) ⇒ java.lang.reflect.Array.set(values, i, v) }
+    values
+  }
+
 }
 

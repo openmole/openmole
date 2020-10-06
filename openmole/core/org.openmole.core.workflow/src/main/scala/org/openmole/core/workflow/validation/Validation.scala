@@ -346,10 +346,11 @@ object Validation {
     noTransitionProblems ++ negativeLevelProblem
   }
 
-  def moleValidateErrors(mole: Mole)(implicit newFile: TmpDirectory, fileService: FileService) = mole.validate.apply match {
-    case s if !s.isEmpty ⇒ Seq(MoleValidationProblem(mole, s))
-    case _               ⇒ Seq()
-  }
+  def moleValidateErrors(mole: Mole)(implicit newFile: TmpDirectory, fileService: FileService) =
+    mole.validate.apply match {
+      case s if !s.isEmpty ⇒ Seq(MoleValidationProblem(mole, s))
+      case _               ⇒ Seq()
+    }
 
   def apply(mole: Mole, implicits: Context = Context.empty, sources: Sources = Sources.empty, hooks: Hooks = Hooks.empty)(implicit newFile: TmpDirectory, fileService: FileService): List[Problem] =
     allMoles(mole).flatMap {

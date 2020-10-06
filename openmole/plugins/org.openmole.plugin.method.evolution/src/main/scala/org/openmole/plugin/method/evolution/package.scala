@@ -169,7 +169,12 @@ package object evolution {
       (Strain(firstTask) -- masterSlave) &
         (firstTask oo wrapped block (evolution.populationPrototype, evolution.statePrototype))
 
-    DSLContainerExtension[EvolutionWorkflow](DSLContainer(puzzle), output = Some(masterTask), delegate = wrapped.delegate, data = evolution)
+    DSLContainerExtension[EvolutionWorkflow](
+      DSLContainer(puzzle),
+      output = Some(masterTask),
+      delegate = wrapped.delegate,
+      data = evolution,
+      validate = evolution.validate)
   }
 
   def IslandEvolution[T](
@@ -239,7 +244,11 @@ package object evolution {
       (Strain(first) -- masterSlave) &
         (first oo islandTask block (t.populationPrototype, t.statePrototype))
 
-    DSLContainerExtension[EvolutionWorkflow](DSLContainer(puzzle), output = Some(masterTask), delegate = Vector(islandTask), data = t)
+    DSLContainerExtension[EvolutionWorkflow](
+      DSLContainer(puzzle),
+      output = Some(masterTask),
+      delegate = Vector(islandTask),
+      data = t)
   }
 
 }

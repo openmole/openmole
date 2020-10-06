@@ -165,7 +165,7 @@ object Objectives {
 object ExactObjective {
 
   def toFitnessFunction(phenotypeContent: PhenotypeContent, objectives: Seq[ExactObjective[_]])(phenotype: Phenotype) =
-    for { (o, p) ← (objectives zip Phenotype.objectives(phenotypeContent, phenotype)).toVector} yield o.fromAny(p)
+    for { (o, p) ← (objectives zip Phenotype.objectives(phenotypeContent, phenotype)).toVector } yield o.fromAny(p)
 
 }
 
