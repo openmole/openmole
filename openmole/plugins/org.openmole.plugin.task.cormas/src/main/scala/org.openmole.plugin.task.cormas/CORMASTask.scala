@@ -44,12 +44,13 @@ object CORMASTask {
     stdErr:               OptionalArgument[Val[String]] = None,
     environmentVariables: Vector[EnvironmentVariable]   = Vector.empty,
     hostFiles:            Vector[HostFile]              = Vector.empty,
+    install:              Seq[String]                    = Seq.empty,
     clearContainerCache:    Boolean         = false,
     version:                String          = "latest",
     containerSystem:        ContainerSystem = ContainerSystem.default,
     installContainerSystem: ContainerSystem = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): CORMASTask = {
 
-    val preparedImage = ContainerTask.prepare(installContainerSystem, cormasImage("elcep/cormas", version), install = Seq(), clearCache = clearContainerCache)
+    val preparedImage = ContainerTask.prepare(installContainerSystem, cormasImage("elcep/cormas", version), install = install, clearCache = clearContainerCache)
 
     new CORMASTask(
       preparedImage,
