@@ -19,6 +19,7 @@ package org.openmole.core.project
 
 import org.openmole.core.console._
 import org.openmole.core.services._
+import org.openmole.core.timeservice.TimeService
 import org.openmole.tool.file._
 
 object ConsoleVariables {
@@ -39,7 +40,11 @@ object ConsoleVariables {
     if (name.endsWith(".oms")) name.dropRight(".oms".length) else name
   }
 
-  case class Experiment(name: String, launchTime: Long = System.currentTimeMillis()) {
+  object Experiment {
+    def apply(name: String)(implicit timeService: TimeService): Experiment = Experiment(name, timeService.currentTime)
+  }
+
+  case class Experiment(name: String, launchTime: Long) {
     def launchDate = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date(launchTime))
   }
 

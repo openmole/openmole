@@ -100,7 +100,6 @@ lazy val openmoleNetwork = OsgiProject(thirdPartiesDir, "org.openmole.tool.netwo
 lazy val openmoleException = OsgiProject(thirdPartiesDir, "org.openmole.tool.exception", imports = Seq("*")) settings (thirdPartiesSettings: _*)
 lazy val openmoleOutputRedirection = OsgiProject(thirdPartiesDir, "org.openmole.tool.outputredirection", imports = Seq("*")) settings (thirdPartiesSettings: _*)
 
-
 lazy val txtmark = OsgiProject(thirdPartiesDir, "com.quandora.txtmark", exports = Seq("com.github.rjeschke.txtmark.*"), imports = Seq("*")) settings (thirdPartiesSettings: _*)
 
 
@@ -147,6 +146,7 @@ def allCore = Seq(
   location,
   code,
   networkService,
+  timeService,
   csv,
   highlight,
   namespace,
@@ -226,7 +226,7 @@ lazy val workspace = OsgiProject(coreDir, "org.openmole.core.workspace", imports
 
 lazy val authentication = OsgiProject(coreDir, "org.openmole.core.authentication", imports = Seq("*")) dependsOn(workspace, serializer) settings (coreSettings: _*)
 
-lazy val services = OsgiProject(coreDir, "org.openmole.core.services", imports = Seq("*")) dependsOn(workspace, serializer, preference, fileService, networkService, threadProvider, replication, authentication, openmoleOutputRedirection) settings (coreSettings: _*)
+lazy val services = OsgiProject(coreDir, "org.openmole.core.services", imports = Seq("*")) dependsOn(workspace, serializer, preference, fileService, networkService, threadProvider, replication, authentication, openmoleOutputRedirection, timeService) settings (coreSettings: _*)
 
 lazy val location = OsgiProject(coreDir, "org.openmole.core.location", imports = Seq("*")) dependsOn (exception) settings (coreSettings: _*)
 
@@ -246,6 +246,8 @@ lazy val pluginRegistry = OsgiProject(coreDir, "org.openmole.core.pluginregistry
 lazy val fileService = OsgiProject(coreDir, "org.openmole.core.fileservice", imports = Seq("*")) dependsOn(tools, workspace, openmoleTar, preference, threadProvider, pluginRegistry) settings (coreSettings: _*) settings (defaultActivator) settings (libraryDependencies += Libraries.guava)
 
 lazy val networkService = OsgiProject(coreDir, "org.openmole.core.networkservice", imports = Seq("*")) dependsOn(tools, workspace, preference, pluginRegistry) settings (coreSettings: _*) settings (defaultActivator)
+
+lazy val timeService = OsgiProject(coreDir, "org.openmole.core.timeservice", imports = Seq("*"))  settings (coreSettings: _*) settings (defaultActivator)
 
 lazy val threadProvider = OsgiProject(coreDir, "org.openmole.core.threadprovider", imports = Seq("*")) dependsOn(tools, preference, pluginRegistry) settings (coreSettings: _*) settings (defaultActivator)
 

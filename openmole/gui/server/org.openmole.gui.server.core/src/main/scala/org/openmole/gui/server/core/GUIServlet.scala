@@ -42,6 +42,7 @@ import org.openmole.core.serializer.SerializerService
 import org.openmole.core.services.Services
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.networkservice._
+import org.openmole.core.timeservice.TimeService
 import org.openmole.gui.ext.api.Api
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.gui.ext.data.routes._
@@ -76,6 +77,7 @@ object GUIServerServices {
     implicit def networkService: NetworkService = guiServices.networkService
     implicit def outputRedirection: OutputRedirection = guiServices.outputRedirection
     implicit def loggerService: LoggerService = guiServices.loggerService
+    implicit def timeService: TimeService = guiServices.timeService
   }
 
   def apply(workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level]) = {
@@ -94,6 +96,7 @@ object GUIServerServices {
     implicit val fileServiceCache = FileServiceCache()
     implicit val replicaCatalog = ReplicaCatalog(ws)
     implicit val loggerService = LoggerService(logLevel)
+    implicit val timeService = TimeService()
 
     new GUIServerServices()
   }
@@ -127,7 +130,8 @@ class GUIServerServices(
   val eventDispatcher:     EventDispatcher,
   val outputRedirection:   OutputRedirection,
   val networkService:      NetworkService,
-  val loggerService:       LoggerService
+  val loggerService:       LoggerService,
+  val timeService:         TimeService
 )
 
 object GUIServlet {
