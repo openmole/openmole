@@ -161,6 +161,7 @@ The arguments for @code{Replication} are the following:
   @li{@code{evaluation} is the task (or a composition of tasks) that uses your inputs, typically your model task and a hook.}
   @li{@code{seed} is the prototype for the seed, which will be sampled with an uniform distribution in its domain (it must ba a Val[Int] or a Val[Long]). This prototype will be provided as an input to the model.}
   @li{@code{sample} (Int) is the number of replications.}
+  @li{@code{index} (@i{optional}, Val[Int]) is an optional variable Val that can provide you with a replication index for each replication.}
   @li{@code{distributionSeed} (@i{optional}, Long) is an optional seed to be given to he uniform distribution of the seed ("meta-seed"). Providing this value will fix the pseudo-random sequence generated for the prototype @code{seed}.}
   @li{@code{aggregation} (@i{optional}) is a list of aggregations to be performed on the outputs of your evaluation task.}
 
