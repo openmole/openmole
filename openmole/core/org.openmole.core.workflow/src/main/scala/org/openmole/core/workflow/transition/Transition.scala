@@ -46,10 +46,7 @@ class Transition(
   val filter:    BlockList      = BlockList.empty
 ) extends ITransition with ValidateTransition {
 
-  override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
-    import p._
-    condition.validate(inputs)
-  }
+  override def validate(inputs: Seq[Val[_]]) = condition.validate(inputs)
 
   override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, moleExecutionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
     PerformTransition(subMole) { subMoleState ⇒

@@ -15,32 +15,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.grouping.batch
+package org.openmole.core.workflow.grouping
 
-import org.openmole.core.context.Context
+import org.openmole.core.context._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole._
 import org.openmole.tool.random.RandomProvider
 
-object ByGrouping {
+object ShuffledGrouping {
 
-  def apply(numberOfMoleJobs: Int) = new ByGrouping(numberOfMoleJobs)
+  def apply(numberOfBatch: Int) = new ShuffledGrouping(numberOfBatch)
 
 }
 
 /**
- * Group mole jobs by group of numberOfMoleJobs.
+ * Group the mole jobs by distributing them at random among {{{numberOfBatch}}}
+ * groups.
  *
- * @param numberOfMoleJobs size of each batch
+ * @param numberOfBatch total number of groups
  */
-class ByGrouping(numberOfMoleJobs: Int) extends Grouping {
+class ShuffledGrouping(numberOfBatch: Int) extends Grouping {
 
-  override def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])])(implicit newGroup: NewGroup, randomProvider: RandomProvider): MoleJobGroup = {
-    groups.find { case (_, g) ⇒ g.size < numberOfMoleJobs } match {
-      case Some((mg, _)) ⇒ mg
-      case None          ⇒ newGroup()
-    }
-  }
+  override def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])])(implicit newGroup: NewGroup, randomProvider: RandomProvider): MoleJobGroup =
+    new MoleJobGroup(randomProvider().nextInt(numberOfBatch))
 
-  override def complete(jobs: Iterable[MoleJob]) = jobs.size >= numberOfMoleJobs
 }

@@ -36,10 +36,11 @@ object FromContextHook {
     implicit def serializerService: SerializerService = executionContext.serializerService
   }
 
-  case class ValidateParameters(inputs: Seq[Val[_]], implicit val newFile: TmpDirectory, implicit val fileService: FileService)
+  //case class ValidateParameters(inputs: Seq[Val[_]], implicit val newFile: TmpDirectory, implicit val fileService: FileService)
 
   def apply(f: Parameters ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook = FromContextHook(name.value)(f)
-  def apply(className: String)(f: Parameters ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook = FromContextHook(className, f, _ ⇒ Seq.empty, InputOutputConfig(), InfoConfig())
+  def apply(className: String)(f: Parameters ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook =
+    FromContextHook(className, f, _ ⇒ Validate.success, InputOutputConfig(), InfoConfig())
 
 }
 
@@ -55,11 +56,11 @@ object FromContextHook {
 @Lenses case class FromContextHook(
   override val className: String,
   f:                      FromContextHook.Parameters ⇒ Context,
-  v:                      FromContextHook.ValidateParameters ⇒ Seq[Throwable],
+  v:                      Seq[Val[_]] ⇒ Validate,
   config:                 InputOutputConfig,
   info:                   InfoConfig) extends Hook with ValidateHook {
 
-  override def validate(inputs: Seq[Val[_]]) = validation.Validate { p ⇒ v(FromContextHook.ValidateParameters(inputs, p.newFile, p.fileService)) }
+  override def validate(inputs: Seq[Val[_]]) = v(inputs)
 
   override protected def process(executionContext: HookExecutionContext) = FromContext { p ⇒
     import p._
@@ -70,8 +71,8 @@ object FromContextHook {
     f(fcp)
   }
 
-  def validate(validate: FromContextHook.ValidateParameters ⇒ Seq[Throwable]) = {
-    def nv(p: FromContextHook.ValidateParameters) = v(p) ++ validate(p)
+  def withValidate(validate: Seq[Val[_]] ⇒ Validate) = {
+    def nv(inputs: Seq[Val[_]]) = v(inputs) ++ validate(inputs)
     copy(v = nv)
   }
 

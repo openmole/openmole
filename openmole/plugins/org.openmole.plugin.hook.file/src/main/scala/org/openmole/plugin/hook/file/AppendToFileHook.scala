@@ -34,8 +34,7 @@ object AppendToFileHook {
       // FIXME lock may not be necessary anymore - see you in 2020
       f.withLock(_.append(content.from(context)))
       context
-    } validate { p ⇒
-      import p._
+    } withValidate { inputs ⇒
       file.validate(inputs) ++ content.validate(inputs)
     }
 

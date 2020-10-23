@@ -62,10 +62,7 @@ object ExpandedString {
     FromContext { p ⇒
       import p._
       expandedFC.map(_.from(context)).mkString
-    } validate { p ⇒
-      import p._
-      expandedFC.flatMap(_.validate(inputs))
-    }
+    } withValidate { inputs ⇒ expandedFC.map(_.validate(inputs)) }
   }
 
   def parse(is: InputStream) = {
@@ -148,10 +145,9 @@ object ExpandedString {
               case Some(value) ⇒ value.value.toString
               case None        ⇒ e.proxy().from(context).toString
             }
-          } validate { p ⇒
-            import p._
-            if (inputs.exists(_.name == e.code)) Seq.empty
-            else e.proxy.validate(inputs).toSeq
+          } withValidate { inputs ⇒
+            if (inputs.exists(_.name == e.code)) Validate.success
+            else e.proxy.validate(inputs)
           }
 
       }

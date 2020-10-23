@@ -69,7 +69,7 @@ object SavePopulationHook {
     }
 
     context
-  } validate { p ⇒ outputFormat.validate(format)(p) } set (inputs += (evolution.populationPrototype, evolution.statePrototype))
+  } withValidate { outputFormat.validate(format, _) } set (inputs += (evolution.populationPrototype, evolution.statePrototype))
 
 }
 

@@ -217,10 +217,12 @@ object ScalaCompilation {
           }
         }
 
-      def validate(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService): Option[Throwable] = {
+      def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
+        import p._
+
         compiled(inputs) match {
-          case Success(_) ⇒ None
-          case Failure(e) ⇒ Some(e)
+          case Success(_) ⇒ Seq()
+          case Failure(e) ⇒ Seq(e)
         }
       }
 

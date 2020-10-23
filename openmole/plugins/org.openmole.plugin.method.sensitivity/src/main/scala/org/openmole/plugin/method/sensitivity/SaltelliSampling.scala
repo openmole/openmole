@@ -58,8 +58,8 @@ object SaltelliSampling {
             )
         }
 
-      (aVariables ++ bVariables ++ cVariables).toIterator
-    } validate { samples } inputs { factors.flatMap(_.inputs) } prototypes { factors.map(_.prototype) ++ matrix }
+      (aVariables ++ bVariables ++ cVariables).iterator
+    } withValidate { samples.validate } inputs { factors.flatMap(_.inputs) } prototypes { factors.map(_.prototype) ++ matrix }
 
   def apply(samples: FromContext[Int], factors: ScalarOrSequenceOfDouble[_]*): FromContextSampling = SaltelliSampling(samples, true, factors: _*)
 

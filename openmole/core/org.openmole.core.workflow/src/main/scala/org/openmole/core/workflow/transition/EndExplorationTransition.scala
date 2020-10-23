@@ -31,10 +31,7 @@ import scala.util.{ Failure, Success, Try }
 
 class EndExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, val trigger: Condition, val filter: BlockList = BlockList.empty) extends IEndExplorationTransition with ValidateTransition {
 
-  override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
-    import p._
-    trigger.validate(inputs)
-  }
+  override def validate(inputs: Seq[Val[_]]) = trigger.validate(inputs)
 
   override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
     MoleExecutionMessage.PerformTransition(subMole) { subMoleState ⇒

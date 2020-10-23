@@ -19,6 +19,36 @@ package org.openmole.core
 
 package expansion {
 
+  import org.openmole.core.fileservice.FileService
+  import org.openmole.core.workspace.TmpDirectory
+
+  trait Validate extends Iterable[Validate] {
+    def apply(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable]
+    def ++(v: Validate) = Validate(this, v)
+  }
+
+  object Validate {
+    class Parameters(implicit val tmpDirectory: TmpDirectory, implicit val fileService: FileService)
+
+    case class LeafValidate(validate: Parameters ⇒ Seq[Throwable]) extends Validate {
+      def apply(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable] = validate(new Parameters())
+      override def iterator: Iterator[Validate] = Iterator(this)
+    }
+
+    case class SeqValidate(validate: Seq[Validate]) extends Validate {
+      def apply(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable] = validate.flatMap(_.apply)
+      override def iterator: Iterator[Validate] = validate.iterator
+    }
+
+    def apply(f: Parameters ⇒ Seq[Throwable]): Validate = LeafValidate(f)
+    def apply(vs: Validate*): Validate = SeqValidate(vs)
+
+    def success = Validate { _ ⇒ Seq.empty }
+
+    implicit def fromSeqValidate(v: Seq[Validate]) = apply(v: _*)
+    implicit def fromThrowables(t: Seq[Throwable]) = Validate { _ ⇒ t }
+  }
+
   trait ExpansionPackage {
     implicit def seqToSeqOfFromContext[T](s: Seq[T])(implicit toFromContext: ToFromContext[T, T]): Seq[FromContext[T]] = s.map(e ⇒ toFromContext(e))
     type Condition = expansion.Condition

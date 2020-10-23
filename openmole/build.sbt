@@ -316,7 +316,6 @@ def corePlugins =
     allSampling ++
     allMethod ++
     allHook ++
-    allGrouping ++
     allEnvironment ++
     allDomain ++
     allTools
@@ -432,15 +431,6 @@ lazy val slurm = OsgiProject(pluginDir, "org.openmole.plugin.environment.slurm",
 
 lazy val ssh = OsgiProject(pluginDir, "org.openmole.plugin.environment.ssh", imports = Seq("*")) dependsOn(openmoleDSL, event, batch, gridscale) settings
   (libraryDependencies ++= Libraries.gridscaleSSH) settings (pluginSettings: _*)
-
-
-/* Grouping */
-
-def allGrouping = Seq(batchGrouping, onvariableGrouping)
-
-lazy val batchGrouping = OsgiProject(pluginDir, "org.openmole.plugin.grouping.batch", imports = Seq("*")) dependsOn(exception, workflow, workspace) settings (pluginSettings: _*)
-
-lazy val onvariableGrouping = OsgiProject(pluginDir, "org.openmole.plugin.grouping.onvariable", imports = Seq("*")) dependsOn(exception, workflow) settings (pluginSettings: _*)
 
 
 /* Hook */
@@ -809,8 +799,7 @@ def minimumPlugins =
     modifierDomain,
     rangeDomain,
     combineSampling,
-    scala,
-    batchGrouping
+    scala
   )
 
 def openmoleNakedDependencies = allCore ++ Seq(openmoleUI) ++ minimumPlugins

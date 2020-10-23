@@ -93,23 +93,20 @@ object SystemExecTask {
   info:                 InfoConfig
 ) extends Task with ValidateTask {
 
-  override def validate =
-    Validate { p ⇒
-      import p._
+  override def validate = {
+    val allInputs = External.PWD :: inputs.toList
 
-      val allInputs = External.PWD :: inputs.toList
+    val commandsError =
+      for {
+        c ← command
+        exp ← c.expanded
+        e ← exp.validate(allInputs)
+      } yield e
 
-      val commandsError =
-        for {
-          c ← command
-          exp ← c.expanded
-          e ← exp.validate(allInputs)
-        } yield e
+    val variableErrors = environmentVariables.flatMap(v ⇒ Seq(v.name, v.value)).flatMap(_.validate(allInputs))
 
-      val variableErrors = environmentVariables.flatMap(v ⇒ Seq(v.name, v.value)).flatMap(_.validate(allInputs))
-
-      commandsError ++ variableErrors ++ External.validate(external)(allInputs).apply
-    }
+    commandsError ++ variableErrors ++ External.validate(external)(allInputs)
+  }
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
     import p._

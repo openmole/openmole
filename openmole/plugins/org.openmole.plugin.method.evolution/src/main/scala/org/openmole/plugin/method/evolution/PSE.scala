@@ -331,8 +331,10 @@ object PSE {
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = NoisyPSEAlgorithm.buildIndividual(genome, phenotype)
         def initialState = EvolutionState[HitMapState](s = Map())
 
-        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext.value {
-          val res = NoisyPSEAlgorithm.result(population, NoisyObjective.aggregate(om.phenotypeContent, om.objectives), om.pattern, Genome.continuous(om.genome))
+        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
+          import p._
+
+          val res = NoisyPSEAlgorithm.result(population, NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context), om.pattern, Genome.continuous(om.genome))
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype))
           val samples = Variable(GAIntegration.samples.array, res.map(_.replications).toArray)
@@ -359,17 +361,19 @@ object PSE {
             rejectValue,
             om.operatorExploration,
             om.cloneProbability,
-            NoisyObjective.aggregate(om.phenotypeContent, om.objectives),
+            NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context),
             discrete,
             om.pattern,
             EvolutionState.s) apply (s, individuals, rng)
         }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) = FromContext { p ⇒
+          import p._
+
           val (s2, elited) =
             NoisyPSEAlgorithm.elitism[S, Phenotype](
               om.pattern,
-              NoisyObjective.aggregate(om.phenotypeContent, om.objectives),
+              NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context),
               om.historySize,
               Genome.continuous(om.genome),
               EvolutionState.s) apply (s, population, candidates, rng)

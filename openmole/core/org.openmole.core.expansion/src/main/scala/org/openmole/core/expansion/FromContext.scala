@@ -118,10 +118,7 @@ object FromContext extends LowPriorityFromContext {
         import p._
         val res = fa.from(context)
         ff.from(context).apply(res)
-      } validate { p ⇒
-        import p._
-        fa.validate(inputs) ++ ff.validate(inputs)
-      }
+      } withValidate { inputs ⇒ fa.validate(inputs) ++ ff.validate(inputs) }
   }
 
   /**
@@ -137,10 +134,7 @@ object FromContext extends LowPriorityFromContext {
     FromContext[T] { p ⇒
       import p._
       proxy.apply.apply.from(context)
-    } validate { p ⇒
-      import p._
-      proxy().validate(inputs).toSeq
-    }
+    } withValidate proxy().validate
   }
 
   implicit def functionToFromContext[T](f: (Context ⇒ T)) = contextConverter(f)
@@ -171,11 +165,9 @@ object FromContext extends LowPriorityFromContext {
     FromContext[T] { param ⇒
       import param._
       context(p)
-    } validate { param ⇒
-      import param._
-
+    } withValidate { inputs ⇒
       inputs.find(_.name == p.name) match {
-        case Some(i) if p == i ⇒ Seq()
+        case Some(i) if p == i ⇒ Validate.success
         case None              ⇒ Seq(new UserBadDataError(s"FromContext validation failed, $p not found among inputs $inputs"))
         case Some(i)           ⇒ Seq(new UserBadDataError(s"FromContext validation failed, $p has incorrect type, should be $i, among inputs $inputs"))
       }
@@ -197,7 +189,7 @@ object FromContext extends LowPriorityFromContext {
    * @param fileService
    */
   case class Parameters(context: Context, implicit val random: RandomProvider, implicit val newFile: TmpDirectory, implicit val fileService: FileService)
-  case class ValidationParameters(inputs: Seq[Val[_]], implicit val newFile: TmpDirectory, implicit val fileService: FileService)
+  //case class ValidationParameters(inputs: Seq[Val[_]], implicit val tmpDirectory: TmpDirectory, implicit val fileService: FileService)
 
   /**
    * Construct a FromContext from a function of [[Parameters]]
@@ -205,7 +197,7 @@ object FromContext extends LowPriorityFromContext {
    * @tparam T
    * @return
    */
-  def apply[T](f: Parameters ⇒ T): FromContext[T] = new FromContext[T](f, _ ⇒ Seq.empty)
+  def apply[T](f: Parameters ⇒ T): FromContext[T] = new FromContext[T](f, _ ⇒ Validate.success)
 
   /**
    * Operators for boolean FromContext ([[Condition]] ~ FromContext[Boolean])
@@ -218,8 +210,7 @@ object FromContext extends LowPriorityFromContext {
       FromContext[Boolean] { p ⇒
         import p._
         f.from(context) && d.from(context)
-      } validate { p ⇒
-        import p._
+      } withValidate { inputs ⇒
         f.validate(inputs) ++ d.validate(inputs)
       }
 
@@ -227,8 +218,7 @@ object FromContext extends LowPriorityFromContext {
       FromContext[Boolean] { p ⇒
         import p._
         f.from(context) || d.from(context)
-      } validate { p ⇒
-        import p._
+      } withValidate { inputs ⇒
         f.validate(inputs) ++ d.validate(inputs)
       }
   }
@@ -245,15 +235,17 @@ object FromContext extends LowPriorityFromContext {
 
 }
 
-class FromContext[+T](c: FromContext.Parameters ⇒ T, v: FromContext.ValidationParameters ⇒ Seq[Throwable]) {
+class FromContext[+T](c: FromContext.Parameters ⇒ T, v: Seq[Val[_]] ⇒ Validate) {
   def apply(context: ⇒ Context)(implicit rng: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): T = c(FromContext.Parameters(context, rng, tmpDirectory, fileService))
   def from(context: ⇒ Context)(implicit rng: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): T = apply(context)
-  def validate(inputs: Seq[Val[_]])(implicit tmpDirectory: TmpDirectory, fileService: FileService): Seq[Throwable] = v(FromContext.ValidationParameters(inputs, tmpDirectory, fileService))
 
-  def validate(v2: FromContext.ValidationParameters ⇒ Seq[Throwable]) = {
-    def nv(p: FromContext.ValidationParameters) = v(p) ++ v2(p)
-    new FromContext(c, v = nv)
+  def validate(inputs: Seq[Val[_]]) = v(inputs)
+
+  def withValidate(validate: Seq[Val[_]] ⇒ Validate): FromContext[T] = {
+    def newValid = (inputs: Seq[Val[_]]) ⇒ v(inputs) ++ validate(inputs)
+    new FromContext(c, v = newValid)
   }
+
 }
 
 object Expandable {

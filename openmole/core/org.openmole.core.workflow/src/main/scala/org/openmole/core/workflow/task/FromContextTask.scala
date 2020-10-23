@@ -2,7 +2,7 @@ package org.openmole.core.workflow.task
 
 import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val }
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.expansion.{ FromContext, Validate }
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.workflow.builder._
@@ -27,12 +27,6 @@ object FromContextTask {
     implicit val newFile:     TmpDirectory,
     implicit val fileService: FileService
   )
-
-  object ValidateParameter {
-    implicit def fromServices(implicit newFile: TmpDirectory, fileService: FileService) = ValidateParameter()
-  }
-
-  case class ValidateParameter()(implicit val newFile: TmpDirectory, implicit val fileService: FileService)
 
   /**
    * Construct from a [[FromContext.Parameters]] => [[Context]] function
@@ -62,25 +56,22 @@ object FromContextTask {
  */
 @Lenses case class FromContextTask(
   f:                      FromContextTask.Parameters ⇒ Context,
-  v:                      FromContextTask.ValidateParameter ⇒ Seq[Throwable] = _ ⇒ Seq(),
+  v:                      Validate                             = Validate.success,
   override val className: String,
   config:                 InputOutputConfig,
   mapped:                 MappedInputOutputConfig,
   info:                   InfoConfig
 ) extends Task with ValidateTask {
 
-  override def validate = Validate { p ⇒
-    val fcp = FromContextTask.ValidateParameter()(p.newFile, p.fileService)
-    v(fcp)
-  }
+  override def validate = v
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { p ⇒
     val tp = FromContextTask.Parameters(p.context, executionContext, config, mapped, executionContext.preference, p.random, p.newFile, p.fileService)
     f(tp)
   }
 
-  def validate(validate: task.FromContextTask.ValidateParameter ⇒ Seq[Throwable]) = {
-    def nv(p: task.FromContextTask.ValidateParameter) = v(p) ++ validate(p)
+  def withValidate(validate: Validate) = {
+    def nv = v ++ validate
     copy(v = nv)
   }
 

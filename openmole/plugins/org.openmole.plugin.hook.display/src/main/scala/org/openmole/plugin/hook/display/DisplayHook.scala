@@ -28,10 +28,7 @@ object DisplayHook {
       import parameters._
       outputRedirection.output.println(toDisplay.from(context))
       context
-    } validate { p ⇒
-      import p._
-      toDisplay.validate(inputs)
-    }
+    } withValidate { toDisplay.validate }
 
   def apply(out: PrintStream, prototypes: Val[_]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): Hook =
     Hook("DisplayHook") { parameters ⇒

@@ -320,7 +320,7 @@ object NichedNSGA2 {
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
           import p._
 
-          val res = NoisyNichedNSGA2Algorithm.result(population, NoisyObjective.aggregate(om.phenotypeContent, om.objectives), om.niche.from(context), Genome.continuous(om.genome), onlyOldest = true, keepAll = keepAll)
+          val res = NoisyNichedNSGA2Algorithm.result(population, NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context), om.niche.from(context), Genome.continuous(om.genome), onlyOldest = true, keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
           val samples = Variable(GAIntegration.samples.array, res.map(_.replications).toArray)
@@ -342,7 +342,7 @@ object NichedNSGA2 {
           import p._
           val discrete = Genome.discrete(om.genome)
           val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          NoisyNichedNSGA2Algorithm.adaptiveBreeding[S, Phenotype](n, rejectValue, om.operatorExploration, om.cloneProbability, NoisyObjective.aggregate(om.phenotypeContent, om.objectives), discrete) apply (s, individuals, rng)
+          NoisyNichedNSGA2Algorithm.adaptiveBreeding[S, Phenotype](n, rejectValue, om.operatorExploration, om.cloneProbability, NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context), discrete) apply (s, individuals, rng)
         }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
@@ -352,7 +352,7 @@ object NichedNSGA2 {
               om.niche.from(context),
               om.nicheSize,
               om.historySize,
-              NoisyObjective.aggregate(om.phenotypeContent, om.objectives),
+              NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context),
               Genome.continuous(om.genome)) apply (s, population, candidates, rng)
 
             val s3 = EvolutionState.generation.modify(_ + 1)(s2)
@@ -393,10 +393,9 @@ object NichedNSGA2 {
         val exactObjectives = Objectives.toExact(objective)
         val phenotypeContent = PhenotypeContent(exactObjectives, outputs)
 
-        def validation = Validate { p ⇒
-          import p._
-          niche.flatMap(_.validate(outputs))
-        }
+        def validation: Validate =
+          niche.flatMap(_.validate(outputs)) ++
+            Objectives.validate(objective, outputs)
 
         EvolutionWorkflow.deterministicGAIntegration(
           DeterministicParams(
@@ -416,9 +415,10 @@ object NichedNSGA2 {
         val noisyObjectives = Objectives.toNoisy(objective)
         val phenotypeContent = PhenotypeContent(noisyObjectives, outputs)
 
-        def validation = Validate { p ⇒
-          import p._
-          niche.flatMap(_.validate(outputs.map(_.toArray)))
+        def validation: Validate = {
+          val aOutputs = outputs.map(_.toArray)
+          niche.flatMap(_.validate(aOutputs)) ++
+            Objectives.validate(objective, aOutputs)
         }
 
         EvolutionWorkflow.stochasticGAIntegration(

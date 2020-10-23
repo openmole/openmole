@@ -1,6 +1,7 @@
 package org.openmole.core.dsl
 
 package object extension {
+
   type FromContext[T] = org.openmole.core.expansion.FromContext[T]
   lazy val FromContext = org.openmole.core.expansion.FromContext
 
@@ -51,9 +52,6 @@ package object extension {
 
   def ExpandedString = org.openmole.core.expansion.ExpandedString
 
-  implicit def validationOfFromContext(f: FromContext[_]) =
-    (p: FromContext.ValidationParameters) ⇒ f.validate(p.inputs)(p.newFile, p.fileService)
-
   type Negative[A] = org.openmole.core.keyword.Negative[A]
   type Under[A, B] = org.openmole.core.keyword.Under[A, B]
   type In[A, B] = org.openmole.core.keyword.In[A, B]
@@ -65,9 +63,15 @@ package object extension {
   def Aggregate = org.openmole.core.keyword.Aggregate
 
   type TmpDirectory = org.openmole.core.workspace.TmpDirectory
+  def TmpDirectory = org.openmole.core.workspace.TmpDirectory
+
   type FileService = org.openmole.core.fileservice.FileService
 
-  type Validate = org.openmole.core.workflow.validation.Validate
-  def Validate = org.openmole.core.workflow.validation.Validate
+  type Validate = org.openmole.core.expansion.Validate
+  def Validate = org.openmole.core.expansion.Validate
+
+  type UserBadDataError = org.openmole.core.exception.UserBadDataError
+  type RandomProvider = org.openmole.tool.random.RandomProvider
+  type PrototypeSet = org.openmole.core.context.PrototypeSet
 
 }

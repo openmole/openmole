@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.grouping.onvariable
+package org.openmole.core.workflow.grouping
 
 import org.openmole.core.context._
 import org.openmole.core.workflow.job._

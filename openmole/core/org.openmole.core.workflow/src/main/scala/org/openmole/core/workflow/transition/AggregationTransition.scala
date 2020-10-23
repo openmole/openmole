@@ -109,10 +109,7 @@ object AggregationTransition {
 
 class AggregationTransition(val start: MoleCapsule, val end: TransitionSlot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty, val trigger: Condition = Condition.False) extends IAggregationTransition with ValidateTransition {
 
-  override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
-    import p._
-    condition.validate(inputs) ++ trigger.validate(inputs)
-  }
+  override def validate(inputs: Seq[Val[_]]) = condition.validate(inputs) ++ trigger.validate(inputs)
 
   override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
     MoleExecutionMessage.PerformTransition(subMole) { subMoleState ⇒

@@ -217,7 +217,7 @@ sealed class MorrisSampling(
     trajectoriesRaw.zipWithIndex.flatMap {
       case (t, idTraj) ⇒
         trajectoryToVariables(t, idTraj).from(context)
-    }.toIterator
+    }.iterator
   }
 
 }

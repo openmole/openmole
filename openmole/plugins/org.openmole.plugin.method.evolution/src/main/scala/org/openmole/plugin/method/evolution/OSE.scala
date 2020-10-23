@@ -143,8 +143,10 @@ object OSE {
 
         def initialState = EvolutionState(s = (Array.empty, Array.empty))
 
-        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext.value {
-          val res = MGONoisyOSE.result(state, population, NoisyObjective.aggregate(om.phenotypeContent, om.objectives), Genome.continuous(om.genome), om.limit, keepAll = keepAll)
+        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
+          import p._
+
+          val res = MGONoisyOSE.result(state, population, NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context), Genome.continuous(om.genome), om.limit, keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
           val samples = Variable(GAIntegration.samples.array, res.map(_.replications).toArray)
@@ -156,6 +158,7 @@ object OSE {
 
         def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
           import p._
+
           val continuous = Genome.continuous(om.genome)
           val discrete = Genome.discrete(om.genome)
           val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
@@ -171,7 +174,7 @@ object OSE {
             n,
             om.operatorExploration,
             om.cloneProbability,
-            NoisyObjective.aggregate(om.phenotypeContent, om.objectives),
+            NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context),
             discrete,
             om.origin,
             om.limit,
@@ -179,11 +182,13 @@ object OSE {
         }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) = FromContext { p ⇒
+          import p._
+
           val (s2, elited) =
             MGONoisyOSE.elitism[Phenotype](
               om.mu,
               om.historySize,
-              NoisyObjective.aggregate(om.phenotypeContent, om.objectives),
+              NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context),
               Genome.continuous(om.genome),
               om.origin,
               om.limit) apply (s, population, candidates, rng)

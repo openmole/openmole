@@ -67,7 +67,7 @@ object OMROutputFormat {
       }
     }
 
-    override def validate(format: OMROutputFormat): FromContextHook.ValidateParameters ⇒ Seq[Throwable] = { p ⇒ Seq() }
+    override def validate(format: OMROutputFormat, inputs: Seq[Val[_]]) = Validate.success
   }
 
   def methodName(file: File): String = {

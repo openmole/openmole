@@ -43,12 +43,27 @@ object Objective {
   }
 
   object ToNoisyObjective {
+
+    implicit def aggregateStringIsNoisy[T: ClassTag] =
+      new ToNoisyObjective[Aggregate[Val[T], String]] {
+        override def apply(t: Aggregate[Val[T], String]) = {
+          val fromContext: FromContext[Double] = t.aggregate
+
+          def aggregate = FromContext { p ⇒
+            import p._
+            (v: Array[T]) ⇒ fromContext.from(Context(t.value.toArray -> v))
+          }
+
+          NoisyObjective(t.value, _(t.value), aggregate, negative = false, delta = None, as = None, fromContext.validate)
+        }
+      }
+
     implicit def aggregateArrayIsToNoisy[T: ClassTag] =
       new ToNoisyObjective[Aggregate[Val[T], Array[T] ⇒ Double]] {
         override def apply(a: Aggregate[Val[T], Array[T] ⇒ Double]) = NoisyObjective(a.value, _(a.value), a.aggregate, negative = false, delta = None, as = None)
       }
 
-    implicit def aggregateSetIsToNoisy[T: ClassTag] =
+    implicit def aggregateSeqIsToNoisy[T: ClassTag] =
       new ToNoisyObjective[Aggregate[Val[T], Seq[T] ⇒ Double]] {
         override def apply(a: Aggregate[Val[T], Seq[T] ⇒ Double]) = NoisyObjective(a.value, _(a.value), (v: Array[T]) ⇒ a.aggregate(v.toVector), negative = false, delta = None, as = None)
       }
@@ -151,6 +166,13 @@ object Objectives {
   def onlyExact(o: Objectives) = Objectives.value(o).collect { case x: ExactObjective[_] ⇒ x }.size == Objectives.value(o).size
   def toExact(o: Objectives) = Objectives.value(o).map(o ⇒ Objective.toExact(o))
   def toNoisy(o: Objectives) = Objectives.value(o).map(o ⇒ Objective.toNoisy(o))
+  def validate(o: Objectives, inputs: Seq[Val[_]]) = Validate { p ⇒
+    import p._
+    o flatMap {
+      case e: ExactObjective[_] ⇒ e.validate(inputs).apply
+      case n: NoisyObjective[_] ⇒ n.validate(inputs).apply
+    }
+  }
 
   def index(obj: Objectives, v: Val[_]): Option[Int] =
     obj.indexWhere(o ⇒ Objective.prototype(o) == v) match {
@@ -169,7 +191,15 @@ object ExactObjective {
 
 }
 
-case class ExactObjective[P](prototype: Val[P], get: Context ⇒ P, toDouble: P ⇒ Double, negative: Boolean, delta: Option[Double], as: Option[String]) extends Objective[P] {
+case class ExactObjective[P](
+  prototype: Val[P],
+  get:       Context ⇒ P,
+  toDouble:  P ⇒ Double,
+  negative:  Boolean,
+  delta:     Option[Double],
+  as:        Option[String],
+  validate:  Seq[Val[_]] ⇒ Validate = _ ⇒ Validate.success) extends Objective[P] {
+
   private def fromAny(v: Any) = {
     val value = toDouble(v.asInstanceOf[P])
 
@@ -181,21 +211,37 @@ case class ExactObjective[P](prototype: Val[P], get: Context ⇒ P, toDouble: P 
 
     if (!negative) deltaValue else -deltaValue
   }
+
 }
 
 object NoisyObjective {
 
-  def aggregate(phenotypeContent: PhenotypeContent, objectives: Seq[NoisyObjective[_]])(v: Vector[Phenotype]): Vector[Double] =
-    for {
-      (vs, obj) ← v.map(p ⇒ Phenotype.objectives(phenotypeContent, p)).transpose zip objectives
-    } yield obj.aggregateAny(vs)
+  def aggregate(phenotypeContent: PhenotypeContent, objectives: Seq[NoisyObjective[_]]) = FromContext { p ⇒
+    import p._
+
+    (v: Vector[Phenotype]) ⇒
+      for {
+        (vs, obj) ← v.map(p ⇒ Phenotype.objectives(phenotypeContent, p)).transpose zip objectives
+      } yield obj.aggregateAny(vs).from(context)
+  }
 
 }
 
-case class NoisyObjective[P: ClassTag] private (prototype: Val[P], get: Context ⇒ P, aggregate: Array[P] ⇒ Double, negative: Boolean, delta: Option[Double], as: Option[String]) extends Objective[P] {
-  private def aggregateAny(values: Vector[Any]) = {
-    def value = aggregate(values.map(_.asInstanceOf[P]).toArray)
+case class NoisyObjective[P: ClassTag] private (
+  prototype: Val[P],
+  get:       Context ⇒ P,
+  aggregate: FromContext[Array[P] ⇒ Double],
+  negative:  Boolean,
+  delta:     Option[Double],
+  as:        Option[String],
+  validate:  Seq[Val[_]] ⇒ Validate = _ ⇒ Validate.success) extends Objective[P] {
+
+  private def aggregateAny(values: Vector[Any]) = FromContext { p ⇒
+    import p._
+
+    def value = aggregate.from(context).apply(values.map(_.asInstanceOf[P]).toArray)
     def deltaValue = delta.map(d ⇒ math.abs(value - d)).getOrElse(value)
     if (!negative) deltaValue else -deltaValue
   }
+
 }

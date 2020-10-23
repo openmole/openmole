@@ -27,18 +27,19 @@ package composition {
   import java.io.PrintStream
 
   import org.openmole.core.context.{ Context, Val }
-  import org.openmole.core.workflow.validation.Validate
-  import org.openmole.core.expansion.{ Condition, FromContext }
+  import org.openmole.core.expansion.{ Condition, FromContext, Validate }
+  import org.openmole.core.keyword.By
   import org.openmole.core.outputmanager.OutputManager
   import org.openmole.core.workflow.builder.DefinitionScope
   import org.openmole.core.workflow.execution.{ EnvironmentProvider, LocalEnvironmentProvider }
   import org.openmole.core.workflow.format.{ CSVOutputFormat, OutputFormat, WritableOutput }
   import org.openmole.core.workflow.hook.{ FormattedFileHook, Hook }
-  import org.openmole.core.workflow.mole.{ Grouping, MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source }
+  import org.openmole.core.workflow.mole.{ MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source }
   import org.openmole.core.workflow.sampling.Sampling
   import org.openmole.core.workflow.task.{ EmptyTask, ExplorationTask, Task }
   import org.openmole.core.workflow.tools.OptionalArgument
   import org.openmole.core.workflow.format.WritableOutput.Display
+  import org.openmole.core.workflow.grouping.{ ByGrouping, Grouping }
   import org.openmole.core.workflow.transition._
   import org.openmole.core.workflow.validation.TypeUtil
   import shapeless.{ ::, HList }
@@ -142,7 +143,6 @@ package composition {
 
   case class TaskNode(task: Task, strain: Boolean = false, master: Boolean = false, persist: Seq[Val[_]] = Seq.empty, environment: Option[EnvironmentProvider] = None, grouping: Option[Grouping] = None, hooks: Vector[Hook] = Vector.empty, sources: Vector[Source] = Vector.empty) {
     def on(environment: EnvironmentProvider) = copy(environment = Some(environment))
-    def by(strategy: Grouping) = copy(grouping = Some(strategy))
     def hook(hooks: Hook*) = copy(hooks = this.hooks ++ hooks)
     def hook[F](
       output: WritableOutput,
@@ -506,7 +506,7 @@ package composition {
 
       implicit def taskToOrigin = ToOrigin[Task] { t ⇒ TaskOrigin(TaskNode(t)) }
       implicit def transitionDSLToOrigin = ToOrigin[DSL] { TransitionDSLOrigin(_) }
-      implicit def taskTransitionPieceToOrigin = ToOrigin[TaskNode] { n ⇒ TaskOrigin(n) }
+      implicit def taskNodeToOrigin[T: ToNode] = ToOrigin[T] { t ⇒ TaskOrigin(implicitly[ToNode[T]].apply(t)) }
       implicit def samplingToOrigin(implicit scope: DefinitionScope) = ToOrigin[Sampling] { s ⇒ taskToOrigin(ExplorationTask(s)) }
     }
 
@@ -520,7 +520,7 @@ package composition {
       }
 
       implicit def taskToDestination = ToDestination[Task] { t ⇒ TaskDestination(TaskNode(t)) }
-      implicit def taskTransitionPieceToDestination = ToDestination[TaskNode] { t ⇒ TaskDestination(t) }
+      implicit def taskNodeToDestination[T: ToNode] = ToDestination[T] { t ⇒ TaskDestination(implicitly[ToNode[T]].apply(t)) }
       implicit def samplingToDestination(implicit scope: DefinitionScope) = ToDestination[Sampling] { s ⇒ taskToDestination(ExplorationTask(s)) }
       implicit def transitionDSLToDestination = ToDestination[DSL] { TransitionDSLDestination(_) }
     }
@@ -535,6 +535,10 @@ package composition {
       }
 
       implicit def taskToTransitionPiece = apply[Task](t ⇒ TaskNode(t))
+      implicit def nodeToNode = apply[TaskNode](identity)
+
+      implicit def byToNode[T: ToNode] = apply[By[T, Grouping]](t ⇒ implicitly[ToNode[T]].apply(t.value).copy(grouping = Some(t.by)))
+      implicit def byIntToNode[T: ToNode] = apply[By[T, Int]](t ⇒ implicitly[ToNode[T]].apply(t.value).copy(grouping = Some(ByGrouping(t.by))))
     }
 
     trait ToNode[-T] {

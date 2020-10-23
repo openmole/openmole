@@ -19,5 +19,5 @@ object OutputFormat {
 
 trait OutputFormat[T, -M] {
   def write(executionContext: HookExecutionContext)(format: T, output: WritableOutput, content: OutputFormat.OutputContent, method: M): FromContext[Unit]
-  def validate(format: T): FromContextHook.ValidateParameters ⇒ Seq[Throwable]
+  def validate(format: T, inputs: Seq[Val[_]]): Validate
 }

@@ -11,7 +11,7 @@ import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.task.{ Task, TaskExecutionContext }
 import org.openmole.core.workflow.validation.ValidateTask
-import org.openmole.plugin.task.container.{ ContainerSystem, ContainerTask, DockerImage, HostFile, HostFiles, PreparedImage }
+import org.openmole.plugin.task.container.{ ContainerSystem, ContainerTask, DockerImage, HostFile, PreparedImage }
 import org.openmole.plugin.task.external._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._

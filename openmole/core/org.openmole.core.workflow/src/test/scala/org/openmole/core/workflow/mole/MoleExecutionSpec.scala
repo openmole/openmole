@@ -32,6 +32,7 @@ import org.scalatest._
 
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.grouping.Grouping
 import org.openmole.core.workflow.test.TestTask
 import org.openmole.tool.random.RandomProvider
 
@@ -64,6 +65,24 @@ class MoleExecutionSpec extends FlatSpec with Matchers {
     } set (inputs += i.array)
 
     val ex = ExplorationTask(sampling) -< (emptyT by new JobGroupingBy2Test) >- testT
+
+    ex.run
+  }
+
+  "Grouping jobs syntax" should "accept int for by grouping" in {
+    val data = List("A", "A", "B", "C")
+    val i = Val[String]("i")
+
+    val sampling = ExplicitSampling(i, data)
+    val emptyT = EmptyTask() set ((inputs, outputs) += i)
+
+    val testT = TestTask { context ⇒
+      context.contains(i.toArray) should equal(true)
+      context(i.toArray).sorted.toVector should equal(data.toVector)
+      context
+    } set (inputs += i.array)
+
+    val ex = ExplorationTask(sampling) -< (emptyT by 10) >- testT
 
     ex.run
   }
