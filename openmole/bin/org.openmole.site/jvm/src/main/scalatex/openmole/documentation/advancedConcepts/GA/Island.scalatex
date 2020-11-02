@@ -53,12 +53,9 @@ This task takes three parameters:
       termination = 10000,
       parallelism = 100,
       distribution = Island(5 minutes)
-    )
-
-  // Definition of a hook to save the population of solutions on the local machine running OpenMOLE
-  val savePopulation = SavePopulationHook(evolution, workDirectory / "evolution")
+    ) hook (workDirectory / "evolution")
 
   // Construction of the complete mole with the execution environment, and the hook.
   // Here the generated workflow will run using 4 threads of the local machine.
-  (evolution on LocalEnvironment(4) hook savePopulation)""", header = model)
+  (evolution on LocalEnvironment(4))""", header = model)
 

@@ -82,7 +82,7 @@ class DirectSamplingSpec extends FlatSpec with Matchers {
           loop,
           seed,
           2,
-          42
+          distributionSeed = 42
         ),
         ExplicitSampling(l, Seq(0.1, 0.2))
       )

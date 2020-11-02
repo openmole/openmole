@@ -9,7 +9,10 @@ package keyword {
   case class Under[+A, +B](value: A, under: B)
   case class :=[+A, +B](value: A, equal: B)
   case class Negative[+A](value: A)
-  case class Aggregate[+A, +B](value: A, aggregate: B)
+
+  // Covariance on type B causes problem for Some implicit conversion, see: DirectSampling
+  case class Aggregate[+A, B](value: A, aggregate: B)
+
   case class Delta[+A, +B](value: A, delta: B)
   case class As[+A, +B](value: A, as: B)
   case class By[+A, +B](value: A, by: B)
