@@ -12,7 +12,6 @@ object common {
   def netLogo5Version = "5.3.1"
   def netLogo6Version = "6.1.1"
   def scalaTagsVersion = "0.9.1"
-  def scalaJSDomVersion = "1.0.0"
   def rxVersion = "0.4.3"
   def boopickleVersion = "1.3.3"
   def scalaAutowireVersion = "0.3.2"
@@ -22,7 +21,6 @@ object common {
   def json4sVersion = "3.6.7"
   def circeVersion = "0.13.0"
   def catsVersion = "2.1.0"
-  def scalajsVersion = "1.1.0"
   def squantsVersion = "1.6.0"
   def xstreamVersion = "1.4.12"
   def scalaURIVersion = "1.1.1"
@@ -37,6 +35,10 @@ object common {
   def scalazVersion = "7.2.30"
   def mathVersion = "3.6.1"
   def asmVersion = "7.2"
+
+  def scalajsVersion = "1.3.0"
+  def scalajsLoggingVersion = "1.1.0"
+  def scalaJSDomVersion = "1.0.0"
 
   def scalatraVersion = "2.7.0"
   def jettyVersion = "9.4.28.v20200408"
