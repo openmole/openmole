@@ -303,12 +303,18 @@ object OSE {
             operatorExploration = EvolutionWorkflow.operatorExploration,
             reject = reject.option),
           fg,
-          phenotypeContent
+          phenotypeContent,
+          validate = Objectives.validate(exactObjectives, outputs)
         )
       case Some(stochasticValue) ⇒
         val fg = OriginAxe.fullGenome(origin, genome)
         val noisyObjectives = FitnessPattern.toObjectives(objective).map(o ⇒ Objective.toNoisy(o))
         val phenotypeContent = PhenotypeContent(noisyObjectives.map(Objective.prototype), outputs)
+
+        def validation: Validate = {
+          val aOutputs = outputs.map(_.toArray)
+          Objectives.validate(noisyObjectives, aOutputs)
+        }
 
         EvolutionWorkflow.stochasticGAIntegration(
           StochasticParams(
@@ -324,7 +330,8 @@ object OSE {
             reject = reject.option),
           fg,
           phenotypeContent,
-          stochasticValue
+          stochasticValue,
+          validate = validation
         )
     }
 

@@ -434,7 +434,7 @@ object NichedNSGA2 {
 
         def validation: Validate =
           niche.map(n ⇒ NichedElement.validate(n, outputs)) ++
-            Objectives.validate(objective, outputs)
+            Objectives.validate(exactObjectives, outputs)
 
         EvolutionWorkflow.deterministicGAIntegration(
           DeterministicParams(
@@ -458,7 +458,7 @@ object NichedNSGA2 {
         def validation: Validate = {
           val aOutputs = outputs.map(_.toArray)
           niche.map(n ⇒ NichedElement.validate(n, aOutputs)) ++
-            Objectives.validate(objective, aOutputs)
+            Objectives.validate(noisyObjectives, aOutputs)
         }
 
         EvolutionWorkflow.stochasticGAIntegration(

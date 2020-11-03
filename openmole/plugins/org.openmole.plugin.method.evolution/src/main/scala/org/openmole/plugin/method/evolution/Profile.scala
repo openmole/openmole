@@ -17,10 +17,6 @@
 
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.expansion.{ FromContext, Condition }
-import org.openmole.core.context.{ Context, Val, Variable }
-import org.openmole.core.workflow.tools.OptionalArgument
 import cats._
 import cats.implicits._
 import mgo.evolution._
@@ -36,6 +32,7 @@ import org.openmole.plugin.method.evolution.Genome.Suggestion
 import org.openmole.plugin.method.evolution.NichedNSGA2.NichedElement
 import squants.time.Time
 import org.openmole.core.dsl._
+import org.openmole.core.dsl.`extension`._
 
 object Profile {
 
@@ -335,11 +332,17 @@ object Profile {
             nicheSize = nicheSize,
             reject = reject.option),
           genome,
-          phenotypeContent
+          phenotypeContent,
+          validate = Objectives.validate(objective, outputs)
         )
       case Some(stochasticValue) ⇒
         val noisyObjectives = Objectives.toNoisy(objective)
         val phenotypeContent = PhenotypeContent(noisyObjectives.map(Objective.prototype), outputs)
+
+        def validation: Validate = {
+          val aOutputs = outputs.map(_.toArray)
+          Objectives.validate(noisyObjectives, aOutputs)
+        }
 
         EvolutionWorkflow.stochasticGAIntegration(
           StochasticParams(
@@ -354,7 +357,8 @@ object Profile {
             reject = reject.option),
           genome,
           phenotypeContent,
-          stochasticValue
+          stochasticValue,
+          validate = validation
         )
     }
 
