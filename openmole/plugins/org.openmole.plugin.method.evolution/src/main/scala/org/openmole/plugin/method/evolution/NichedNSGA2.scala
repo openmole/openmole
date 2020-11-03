@@ -18,6 +18,7 @@ import squants.time.Time
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.workspace.TmpDirectory
+import org.openmole.tool.types.FromArray
 
 object NichedNSGA2Algorithm {
 
@@ -179,28 +180,65 @@ object NoisyNichedNSGA2Algorithm {
 object NichedNSGA2 {
 
   object NichedElement {
-    implicit def fromValDouble(v: (Val[Double], Int)) = Continuous(v._1, v._2)
     implicit def fromValInt(v: Val[Int]) = Discrete(v)
-    implicit def fromValString(v: Val[String]) = Discrete(v)
-    implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit fix: Fix[D, Double]) = GridContinuous(f.value, fix(f.domain).toVector)
 
-    case class GridContinuous(v: Val[Double], intervals: Vector[Double]) extends NichedElement
-    case class Continuous(v: Val[Double], n: Int) extends NichedElement
-    case class ContinuousSequence(v: Val[Array[Double]], i: Int, n: Int) extends NichedElement
-    case class Discrete(v: Val[_]) extends NichedElement
-    case class DiscreteSequence(v: Val[Array[_]], i: Int) extends NichedElement
+    implicit def fromAggregateString[A](a: Aggregate[Val[A], String]) = Aggregated(a.value, a.aggregate)
+
+    implicit def fromAggregate[A, V[_]: FromArray](a: Aggregate[Val[A], V[A] ⇒ Int]) = {
+      val f =
+        FromContext { p ⇒
+          import p._
+          a.aggregate(implicitly[FromArray[V]].apply(context(a.value.array)))
+        }
+
+      Aggregated(a.value, f)
+    }
+
+    case class Discrete(v: Val[Int]) extends NichedElement
+    case class Aggregated(v: Val[_], a: FromContext[Int]) extends NichedElement
+
+    def valContent(n: NichedElement): Val[_] =
+      n match {
+        case d: Discrete   ⇒ d.v
+        case a: Aggregated ⇒ a.v
+      }
+
+    def validate(n: NichedElement, inputs: Seq[Val[_]]): Validate =
+      n match {
+        case d: Discrete   ⇒ Validate.success
+        case a: Aggregated ⇒ a.a.validate(inputs)
+      }
+
+    type Exact = Val[Int]
+    type Noisy = FromContext[Int]
+
+    def toExact(n: NichedElement) =
+      n match {
+        case d: Discrete ⇒ d.v
+        case _           ⇒ throw new UserBadDataError(s"Niche element $n cannot be aggregated it should be exact.")
+      }
+
+    def toNoisy(n: NichedElement) = FromContext { p ⇒
+      import p._
+
+      n match {
+        case d: Discrete   ⇒ context(d.v.array).head
+        case a: Aggregated ⇒ a.a.from(context)
+      }
+    }
+
   }
 
   sealed trait NichedElement
 
   object DeterministicParams {
 
-    def niche(phenotypeContent: PhenotypeContent, niche: Seq[FromContext[Int]]) = FromContext { p ⇒
+    def niche(phenotypeContent: PhenotypeContent, niche: Seq[NichedElement.Exact]) = FromContext { p ⇒
       import p._
 
       (i: CDGenome.DeterministicIndividual.Individual[Phenotype]) ⇒ {
         val context = Context((phenotypeContent.outputs zip Phenotype.outputs(phenotypeContent, i.phenotype)).map { case (v, va) ⇒ Variable.unsecure(v, va) }: _*)
-        niche.map(_.from(context)).toVector
+        niche.map(n ⇒ context(n)).toVector
       }
     }
 
@@ -280,7 +318,7 @@ object NichedNSGA2 {
 
   object StochasticParams {
 
-    def niche(phenotypeContent: PhenotypeContent, niche: Seq[FromContext[Int]]) = FromContext { p ⇒
+    def niche(phenotypeContent: PhenotypeContent, niche: Seq[NichedElement.Noisy]) = FromContext { p ⇒
       import p._
 
       (i: CDGenome.NoisyIndividual.Individual[Phenotype]) ⇒ {
@@ -381,7 +419,7 @@ object NichedNSGA2 {
     reject:              Option[Condition])
 
   def apply[P](
-    niche:      Seq[FromContext[Int]],
+    niche:      Seq[NichedElement],
     genome:     Genome,
     objective:  Objectives,
     nicheSize:  Int,
@@ -391,10 +429,11 @@ object NichedNSGA2 {
     EvolutionWorkflow.stochasticity(objective, stochastic.option) match {
       case None ⇒
         val exactObjectives = Objectives.toExact(objective)
-        val phenotypeContent = PhenotypeContent(exactObjectives, outputs)
+        val nicheVals = niche.map(NichedElement.valContent)
+        val phenotypeContent = PhenotypeContent(exactObjectives.map(Objective.prototype) ++ nicheVals, outputs)
 
         def validation: Validate =
-          niche.flatMap(_.validate(outputs)) ++
+          niche.map(n ⇒ NichedElement.validate(n, outputs)) ++
             Objectives.validate(objective, outputs)
 
         EvolutionWorkflow.deterministicGAIntegration(
@@ -402,7 +441,7 @@ object NichedNSGA2 {
             genome = genome,
             objectives = exactObjectives,
             phenotypeContent = phenotypeContent,
-            niche = DeterministicParams.niche(phenotypeContent, niche),
+            niche = DeterministicParams.niche(phenotypeContent, niche.map(NichedElement.toExact)),
             operatorExploration = EvolutionWorkflow.operatorExploration,
             nicheSize = nicheSize,
             reject = reject.option),
@@ -413,18 +452,19 @@ object NichedNSGA2 {
 
       case Some(stochasticValue) ⇒
         val noisyObjectives = Objectives.toNoisy(objective)
-        val phenotypeContent = PhenotypeContent(noisyObjectives, outputs)
+        val nicheVals = niche.map(NichedElement.valContent)
+        val phenotypeContent = PhenotypeContent(noisyObjectives.map(Objective.prototype) ++ nicheVals, outputs)
 
         def validation: Validate = {
           val aOutputs = outputs.map(_.toArray)
-          niche.flatMap(_.validate(aOutputs)) ++
+          niche.map(n ⇒ NichedElement.validate(n, aOutputs)) ++
             Objectives.validate(objective, aOutputs)
         }
 
         EvolutionWorkflow.stochasticGAIntegration(
           StochasticParams(
             nicheSize = nicheSize,
-            niche = StochasticParams.niche(phenotypeContent, niche),
+            niche = StochasticParams.niche(phenotypeContent, niche.map(NichedElement.toNoisy)),
             operatorExploration = EvolutionWorkflow.operatorExploration,
             genome = genome,
             phenotypeContent = phenotypeContent,
@@ -448,7 +488,7 @@ object NichedNSGA2Evolution {
   def apply(
     evaluation:   DSL,
     termination:  OMTermination,
-    niche:        Seq[FromContext[Int]],
+    niche:        Seq[NichedElement],
     genome:       Genome,
     objective:    Objectives,
     nicheSize:    Int,

@@ -40,16 +40,10 @@ object Phenotype {
 class Phenotype(val value: Array[Any]) extends AnyVal
 
 object PhenotypeContent {
-  def apply(
-    objectives: Seq[Objective[_]],
-    outputs:    Seq[Val[_]]       = Seq()): PhenotypeContent =
-    new PhenotypeContent(
-      objectives.map(Objective.prototype),
-      outputs)
 
   def toVals(p: PhenotypeContent) =
     (p.objectives ++ p.outputs).distinct
 
 }
 
-class PhenotypeContent(val objectives: Seq[Val[_]], val outputs: Seq[Val[_]])
+case class PhenotypeContent(val objectives: Seq[Val[_]], val outputs: Seq[Val[_]] = Seq())

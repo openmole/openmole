@@ -316,13 +316,14 @@ object Profile {
     genome:     Genome,
     objective:  Objectives,
     nicheSize:  Int,
+    outputs:    Seq[Val[_]]                  = Seq(),
     stochastic: OptionalArgument[Stochastic] = None,
     reject:     OptionalArgument[Condition]  = None
   ): EvolutionWorkflow =
     EvolutionWorkflow.stochasticity(objective, stochastic.option) match {
       case None ⇒
         val exactObjectives = Objectives.toExact(objective)
-        val phenotypeContent = PhenotypeContent(exactObjectives)
+        val phenotypeContent = PhenotypeContent(exactObjectives.map(Objective.prototype), outputs)
 
         EvolutionWorkflow.deterministicGAIntegration(
           DeterministicParams(
@@ -338,7 +339,7 @@ object Profile {
         )
       case Some(stochasticValue) ⇒
         val noisyObjectives = Objectives.toNoisy(objective)
-        val phenotypeContent = PhenotypeContent(noisyObjectives)
+        val phenotypeContent = PhenotypeContent(noisyObjectives.map(Objective.prototype), outputs)
 
         EvolutionWorkflow.stochasticGAIntegration(
           StochasticParams(
@@ -381,6 +382,7 @@ object ProfileEvolution {
           niche = profile,
           genome = genome,
           objective = objective,
+          outputs = evaluation.outputs,
           stochastic = stochastic,
           nicheSize = nicheSize,
           reject = reject

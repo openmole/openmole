@@ -145,7 +145,7 @@ object Objective {
   def toExact[P](o: Objective[P]) =
     o match {
       case e: ExactObjective[P] ⇒ e
-      case n: NoisyObjective[P] ⇒ throw new UserBadDataError(s"Objective $n cannot be noisy it should be exact.")
+      case n: NoisyObjective[P] ⇒ throw new UserBadDataError(s"Objective $n cannot be aggregated it should be exact.")
     }
 
   def toNoisy[P: ClassTag](o: Objective[P]) =
@@ -166,6 +166,7 @@ object Objectives {
   def onlyExact(o: Objectives) = Objectives.value(o).collect { case x: ExactObjective[_] ⇒ x }.size == Objectives.value(o).size
   def toExact(o: Objectives) = Objectives.value(o).map(o ⇒ Objective.toExact(o))
   def toNoisy(o: Objectives) = Objectives.value(o).map(o ⇒ Objective.toNoisy(o))
+
   def validate(o: Objectives, inputs: Seq[Val[_]]) = Validate { p ⇒
     import p._
     o flatMap {

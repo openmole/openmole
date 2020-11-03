@@ -61,7 +61,6 @@ object EvolutionWorkflow {
         operations.buildIndividual(g, variablesToPhenotype(context), context)
 
       def inputPrototypes = Genome.toVals(genome)
-
       def outputPrototypes = PhenotypeContent.toVals(phenotypeContent)
 
       def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {

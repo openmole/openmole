@@ -281,6 +281,7 @@ object OSE {
   def apply(
     origin:     Seq[OriginAxe],
     objective:  Seq[FitnessPattern],
+    outputs:    Seq[Val[_]]                  = Seq(),
     genome:     Genome                       = Seq(),
     mu:         Int                          = 200,
     stochastic: OptionalArgument[Stochastic] = None,
@@ -288,7 +289,7 @@ object OSE {
     EvolutionWorkflow.stochasticity(objective.map(_.objective), stochastic.option) match {
       case None ⇒
         val exactObjectives = FitnessPattern.toObjectives(objective).map(o ⇒ Objective.toExact(o))
-        val phenotypeContent = PhenotypeContent(exactObjectives)
+        val phenotypeContent = PhenotypeContent(exactObjectives.map(Objective.prototype), outputs)
         val fg = OriginAxe.fullGenome(origin, genome)
 
         EvolutionWorkflow.deterministicGAIntegration(
@@ -307,7 +308,7 @@ object OSE {
       case Some(stochasticValue) ⇒
         val fg = OriginAxe.fullGenome(origin, genome)
         val noisyObjectives = FitnessPattern.toObjectives(objective).map(o ⇒ Objective.toNoisy(o))
-        val phenotypeContent = PhenotypeContent(noisyObjectives)
+        val phenotypeContent = PhenotypeContent(noisyObjectives.map(Objective.prototype), outputs)
 
         EvolutionWorkflow.stochasticGAIntegration(
           StochasticParams(
@@ -352,6 +353,7 @@ object OSEEvolution {
           origin = origin,
           genome = genome,
           objective = objective,
+          outputs = evaluation.outputs,
           stochastic = stochastic,
           mu = mu,
           reject = reject

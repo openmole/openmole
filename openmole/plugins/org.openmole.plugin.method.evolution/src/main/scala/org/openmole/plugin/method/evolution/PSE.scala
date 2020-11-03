@@ -412,13 +412,14 @@ object PSE {
   def apply(
     genome:     Genome,
     objective:  Seq[PatternAxe],
+    outputs:    Seq[Val[_]]                  = Seq(),
     stochastic: OptionalArgument[Stochastic] = None,
     reject:     OptionalArgument[Condition]  = None
   ) =
     EvolutionWorkflow.stochasticity(objective.map(_.p), stochastic.option) match {
       case None ⇒
         val exactObjectives = Objectives.toExact(objective.map(_.p))
-        val phenotypeContent = PhenotypeContent(exactObjectives)
+        val phenotypeContent = PhenotypeContent(exactObjectives.map(Objective.prototype), outputs)
 
         EvolutionWorkflow.deterministicGAIntegration(
           DeterministicParams(
@@ -433,7 +434,7 @@ object PSE {
         )
       case Some(stochasticValue) ⇒
         val noisyObjectives = Objectives.toNoisy(objective.map(_.p))
-        val phenotypeContent = PhenotypeContent(noisyObjectives)
+        val phenotypeContent = PhenotypeContent(noisyObjectives.map(Objective.prototype), outputs)
 
         EvolutionWorkflow.stochasticGAIntegration(
           StochasticParams(
@@ -473,6 +474,7 @@ object PSEEvolution {
         PSE(
           genome = genome,
           objective = objective,
+          outputs = evaluation.outputs,
           stochastic = stochastic,
           reject = reject
         ),
