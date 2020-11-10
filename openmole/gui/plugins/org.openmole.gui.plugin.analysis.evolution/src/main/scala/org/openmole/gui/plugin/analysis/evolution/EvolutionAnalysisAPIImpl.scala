@@ -10,7 +10,7 @@ class EvolutionAnalysisAPIImpl(services: Services) extends EvolutionAnalysisAPI 
 
   def analyse(path: SafePath) = {
     import ServerFileSystemContext.project
-    import services.workspace
+    import services._
 
     try {
       def m = Analysis.loadMetadata(path.toFile)

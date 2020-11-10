@@ -19,9 +19,9 @@ object Analysis {
     }
   }
 
-  def dataFiles(directory: File, fileName: String, generation: Long, frequency: Option[Long]) = {
+  def dataFiles(directory: File, fileName: String, generation: Long, frequency: Option[Long])(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) = {
     (0L to generation by frequency.getOrElse(1L)).drop(1).map { g ⇒
-      val fileNameValue = ExpandedString.expandValues(fileName, Context(GAIntegration.generationPrototype -> g))
+      val fileNameValue = (fileName: FromContext[String]).from(Context(GAIntegration.generationPrototype -> g))
       directory / OMROutputFormat.dataDirectory / s"$fileNameValue.json.gz"
     }.filter(_.exists)
   }
@@ -32,7 +32,7 @@ object Analysis {
 
   sealed trait EvolutionAnalysis
 
-  def analyse(metaData: EvolutionMetadata, directory: File) = {
+  def analyse(metaData: EvolutionMetadata, directory: File)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) = {
     metaData match {
       case m: EvolutionMetadata.StochasticNSGA2 ⇒ Analysis.StochasticNSGA2.analyse(m, directory)
       case EvolutionMetadata.none               ⇒ ???
@@ -45,7 +45,7 @@ object Analysis {
 
     import AnalysisData.StochasticNSGA2._
 
-    def analyse(metaData: EvolutionMetadata.StochasticNSGA2, directory: File) = {
+    def analyse(metaData: EvolutionMetadata.StochasticNSGA2, directory: File)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) = {
 
       def generations =
         Analysis.dataFiles(directory, metaData.saved.name, metaData.saved.generation, metaData.saved.frequency).map { f ⇒
