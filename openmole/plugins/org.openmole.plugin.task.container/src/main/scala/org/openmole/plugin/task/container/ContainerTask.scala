@@ -172,7 +172,7 @@ object ContainerTask {
     stdErr:                 OptionalArgument[Val[String]]                      = None,
     reuseContainer:         Boolean                                            = true,
     clearCache:             Boolean                                            = false,
-    containerPoolKey:       CacheKey[WithInstance[_root_.container.FlatImage]] = CacheKey())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, tmpDirectory: TmpDirectory, networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, outputRedirection: OutputRedirection, serializerService: SerializerService) = {
+    containerPoolKey:       CacheKey[WithInstance[_root_.container.FlatImage]] = CacheKey())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, tmpDirectory: TmpDirectory, networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, outputRedirection: OutputRedirection, serializerService: SerializerService, fileService: FileService) = {
     new ContainerTask(
       containerSystem,
       prepare(installContainerSystem, image, install),
@@ -194,16 +194,17 @@ object ContainerTask {
     )
   }
 
-  def prepare(containerSystem: ContainerSystem, image: ContainerImage, install: Seq[String], volumes: Seq[(String, String)] = Seq.empty, errorDetail: Int ⇒ Option[String] = _ ⇒ None, clearCache: Boolean = false)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace) = {
+  def prepare(containerSystem: ContainerSystem, image: ContainerImage, install: Seq[String], volumes: Seq[(String, String)] = Seq.empty, errorDetail: Int ⇒ Option[String] = _ ⇒ None, clearCache: Boolean = false)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService) = {
+    import org.openmole.tool.hash._
+
     def cacheId(image: ContainerImage): Seq[String] =
       image match {
-        case image: DockerImage ⇒ Seq(image.image, image.tag, image.registry)
-        case image: SavedDockerImage ⇒
-          import org.openmole.tool.hash._
-          Seq(image.file.hash().toString)
+        case image: DockerImage      ⇒ Seq(image.image, image.tag, image.registry)
+        case image: SavedDockerImage ⇒ Seq(image.file.hash().toString)
       }
 
-    val cacheKey: String = hashString((cacheId(image) ++ install).mkString("\n")).toString
+    val volumeCacheKey = volumes.map { case (f, _) ⇒ fileService.hashNoCache(f).toString } ++ volumes.map { case (_, d) ⇒ d }
+    val cacheKey: String = hashString((cacheId(image) ++ install ++ volumeCacheKey).mkString("\n")).toString
     val cacheDirectory = workspace.tmpDirectory /> "container" /> "cached" /> cacheKey
     val serializedFlatImage = cacheDirectory / "flatimage.bin"
 
@@ -316,6 +317,7 @@ import ContainerTask._
       def containerPathResolver = inputPathResolver(File("/"), relativePathRootValue) _
 
       val (preparedContext, preparedFilesInfo) = External.deployAndListInputFiles(external, context, inputPathResolver(inputDirectory, relativePathRootValue))
+
       val volumes = prepareVolumes(preparedFilesInfo, containerPathResolver, hostFiles).toVector
 
       val containerEnvironmentVariables =

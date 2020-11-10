@@ -47,7 +47,7 @@ object GAMATask {
     install:                Seq[String],
     installContainerSystem: ContainerSystem,
     image:                  ContainerImage,
-    clearCache:             Boolean)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, _workspace: Workspace) = {
+    clearCache:             Boolean)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, _workspace: Workspace, fileService: FileService) = {
 
     val (modelName, volumesValue) = volumes(workspace, model)
 
@@ -236,7 +236,6 @@ object GAMATask {
 
       inputFile.content =
         s"""<?xml version="1.0" encoding="UTF-8" standalone="no"?>${inputXML.mkString("")}"""
-
 
       val (_, volumes) = GAMATask.volumes(workspace, model)
 
