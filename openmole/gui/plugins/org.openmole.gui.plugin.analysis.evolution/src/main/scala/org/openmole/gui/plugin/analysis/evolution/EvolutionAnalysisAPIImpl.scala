@@ -13,8 +13,8 @@ class EvolutionAnalysisAPIImpl(services: Services) extends EvolutionAnalysisAPI 
     import services._
 
     try {
-      def m = Analysis.loadMetadata(path.toFile)
-      Right(Analysis.analyse(m, path.toFile.getParentFile))
+      val (omrData, methodData) = Analysis.loadMetadata(path.toFile)
+      Right(Analysis.analyse(omrData, methodData, path.toFile.getParentFile))
     }
     catch {
       case e ⇒ Left(ErrorData(e))

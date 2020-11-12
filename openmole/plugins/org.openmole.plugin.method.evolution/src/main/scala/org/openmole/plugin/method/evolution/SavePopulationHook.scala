@@ -20,7 +20,7 @@ package org.openmole.plugin.method.evolution
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.workflow.format.WritableOutput
-import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SavedData }
+import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SaveOption }
 
 object SavePopulationHook {
 
@@ -54,16 +54,10 @@ object SavePopulationHook {
 
     fileName match {
       case Some(fileName) ⇒
-        def savedData = SavedData(
-          generation = context(evolution.generationPrototype),
-          frequency = frequency,
-          name = fileName,
-          last = last
-        )
+        def saveOption = SaveOption(frequency = frequency, last = last)
+        def evolutionData = evolution.operations.metadata(context(evolution.generationPrototype), saveOption)
 
-        def evolutionData = evolution.operations.metadata(savedData)
-
-        val content = OutputFormat.PlainContent(resultVariables(evolution, keepAll = keepAll, includeOutputs = includeOutputs).from(context), Some(ExpandedString(fileName)))
+        val content = OutputFormat.PlainContent(resultVariables(evolution, keepAll = keepAll, includeOutputs = includeOutputs).from(context), Some(fileName))
         outputFormat.write(executionContext)(format, output, content, evolutionData).from(context)
       case None ⇒
     }

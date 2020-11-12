@@ -612,7 +612,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   // Method plugins
   override def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS] = {
     val omrFile = safePathToFile(result)(ServerFileSystemContext.project, workspace)
-    val name = OMROutputFormat.methodName(omrFile)
-    GUIPluginRegistry.analysis.find(_._1 == name).map(_._2)
+    val data = OMROutputFormat.omrData(omrFile)
+    GUIPluginRegistry.analysis.find(_._1 == data.method).map(_._2)
   }
 }

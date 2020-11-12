@@ -114,13 +114,14 @@ object NSGA2 {
 
       def operations(om: StochasticParams) = new Ops {
 
-        override def metadata(savedData: SavedData) =
+        override def metadata(generation: Long, saveOption: SaveOption) =
           EvolutionMetadata.StochasticNSGA2(
             genome = MetadataGeneration.genomeData(om.genome),
             objective = om.objectives.map(MetadataGeneration.noisyObjectiveData),
             sample = om.historySize,
-            mu = om.mu,
-            saved = savedData
+            populationSize = om.mu,
+            generation = generation,
+            saveOption = saveOption
           )
 
         def startTimeLens = GenLens[S](_.startTime)

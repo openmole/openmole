@@ -148,7 +148,7 @@ object FromContext extends LowPriorityFromContext {
   implicit def codeToFromContextBoolean(s: String) = contextConverter[String, Boolean](s)
 
   implicit def fileToString(f: File) = contextConverter[File, String](f)
-  implicit def stringToString(s: String) = contextConverter[String, String](s)
+  implicit def stringToString(s: String) = StringFromContext.fromString(s)
   implicit def stringToFile(s: String) = contextConverter[String, File](s)
   implicit def fileToFile(f: File) = contextConverter[File, File](f)
 
@@ -235,7 +235,7 @@ object FromContext extends LowPriorityFromContext {
 
 }
 
-class FromContext[+T](c: FromContext.Parameters ⇒ T, v: Seq[Val[_]] ⇒ Validate) {
+class FromContext[+T](val c: FromContext.Parameters ⇒ T, val v: Seq[Val[_]] ⇒ Validate) {
   def apply(context: ⇒ Context)(implicit rng: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): T = c(FromContext.Parameters(context, rng, tmpDirectory, fileService))
   def from(context: ⇒ Context)(implicit rng: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): T = apply(context)
 
@@ -245,7 +245,24 @@ class FromContext[+T](c: FromContext.Parameters ⇒ T, v: Seq[Val[_]] ⇒ Valida
     def newValid = (inputs: Seq[Val[_]]) ⇒ v(inputs) ++ validate(inputs)
     new FromContext(c, v = newValid)
   }
+}
 
+object StringFromContext {
+
+  implicit def fromString(s: String): StringFromContext[String] = {
+    val fc = FromContext.contextConverter[String, String](s)
+
+    new StringFromContext(
+      c = fc.c,
+      v = fc.v,
+      string = s
+    )
+  }
+
+}
+
+class StringFromContext[+T](c: FromContext.Parameters ⇒ T, v: Seq[Val[_]] ⇒ Validate, val string: String) extends FromContext(c, v) {
+  override def toString = s"FromContext($string)"
 }
 
 object Expandable {

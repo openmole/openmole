@@ -24,7 +24,7 @@ import scala.language.higherKinds
 import cats._
 import cats.implicits._
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SavedData }
+import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SaveOption }
 
 object EvolutionWorkflow {
 
@@ -244,7 +244,7 @@ object MGOAPI {
     def operations(a: A): Ops
 
     trait Ops {
-      def metadata(data: SavedData): EvolutionMetadata = EvolutionMetadata.none
+      def metadata(generation: Long, data: SaveOption): EvolutionMetadata = EvolutionMetadata.none
 
       def genomeValues(genome: G): V
       def buildGenome(values: V): G

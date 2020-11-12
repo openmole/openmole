@@ -6,15 +6,17 @@ import org.openmole.plugin.hook.omr.OMROutputFormat
 import io.circe._
 import io.circe.parser._
 import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.plugin.method.evolution.data._
 
 object Analysis {
 
   import MetadataGeneration._
 
-  def loadMetadata(file: File): EvolutionMetadata = {
+  def loadMetadata(file: File) = {
+    val omrData = OMROutputFormat.omrData(file)
     decode[EvolutionMetadata](file.content(gz = true)) match {
-      case Right(v) ⇒ v
+      case Right(v) ⇒ (omrData, v)
       case Left(e)  ⇒ throw new InternalProcessingError(s"Error parsing ${file}", e)
     }
   }
@@ -22,7 +24,7 @@ object Analysis {
   def dataFiles(directory: File, fileName: String, generation: Long, frequency: Option[Long])(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) = {
     (0L to generation by frequency.getOrElse(1L)).drop(1).map { g ⇒
       val fileNameValue = (fileName: FromContext[String]).from(Context(GAIntegration.generationPrototype -> g))
-      directory / OMROutputFormat.dataDirectory / s"$fileNameValue.json.gz"
+      directory / fileNameValue
     }.filter(_.exists)
   }
 
@@ -32,12 +34,11 @@ object Analysis {
 
   sealed trait EvolutionAnalysis
 
-  def analyse(metaData: EvolutionMetadata, directory: File)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) = {
+  def analyse(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata, directory: File)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) =
     metaData match {
-      case m: EvolutionMetadata.StochasticNSGA2 ⇒ Analysis.StochasticNSGA2.analyse(m, directory)
+      case m: EvolutionMetadata.StochasticNSGA2 ⇒ Analysis.StochasticNSGA2.analyse(omrData, m, directory)
       case EvolutionMetadata.none               ⇒ ???
     }
-  }
 
   object StochasticNSGA2 {
     case class SavedGeneration(generation: Long, objectives: Vector[SavedObjective])
@@ -45,10 +46,10 @@ object Analysis {
 
     import AnalysisData.StochasticNSGA2._
 
-    def analyse(metaData: EvolutionMetadata.StochasticNSGA2, directory: File)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) = {
+    def analyse(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata.StochasticNSGA2, directory: File)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) = {
 
       def generations =
-        Analysis.dataFiles(directory, metaData.saved.name, metaData.saved.generation, metaData.saved.frequency).map { f ⇒
+        Analysis.dataFiles(directory, omrData.fileName, metaData.generation, metaData.saveOption.frequency).map { f ⇒
           val json = parse(f.content(gz = true)).right.get.asObject.get
 
           def objectives: Vector[Vector[Double]] =

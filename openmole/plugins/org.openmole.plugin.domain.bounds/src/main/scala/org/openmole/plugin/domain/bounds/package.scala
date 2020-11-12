@@ -28,13 +28,13 @@ package object bounds {
   }
 
   implicit def iterableOfStringTuplesIsBounds[T: FromString: Manifest] = new BoundsFromContext[Iterable[(String, String)], Array[T]] {
-    override def min(domain: Iterable[(String, String)]) = domain.unzip._1.toVector.traverse(v ⇒ FromContext.codeToFromContext[T](v)).map(_.toArray)
-    override def max(domain: Iterable[(String, String)]) = domain.unzip._2.toVector.traverse(v ⇒ FromContext.codeToFromContext[T](v)).map(_.toArray)
+    override def min(domain: Iterable[(String, String)]) = domain.unzip._1.toVector.traverse(v ⇒ FromContext.codeToFromContext[T](v): FromContext[T]).map(_.toArray)
+    override def max(domain: Iterable[(String, String)]) = domain.unzip._2.toVector.traverse(v ⇒ FromContext.codeToFromContext[T](v): FromContext[T]).map(_.toArray)
   }
 
   implicit def arrayOfStringTuplesIsBounds[T: FromString: Manifest] = new BoundsFromContext[Array[(String, String)], Array[T]] {
-    override def min(domain: Array[(String, String)]) = domain.unzip._1.toVector.traverse(v ⇒ FromContext.codeToFromContext[T](v)).map(_.toArray)
-    override def max(domain: Array[(String, String)]) = domain.unzip._2.toVector.traverse(v ⇒ FromContext.codeToFromContext[T](v)).map(_.toArray)
+    override def min(domain: Array[(String, String)]) = domain.unzip._1.toVector.traverse(v ⇒ FromContext.codeToFromContext[T](v): FromContext[T]).map(_.toArray)
+    override def max(domain: Array[(String, String)]) = domain.unzip._2.toVector.traverse(v ⇒ FromContext.codeToFromContext[T](v): FromContext[T]).map(_.toArray)
   }
 
 }
