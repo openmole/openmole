@@ -34,7 +34,7 @@ In case you want to explore a stochastic model with a GA you can do:
 
   val evolution =
     NSGA2Evolution(
-      mu = 100, // mu is the size of the population
+      populationSize = 100, // populationSize is the size of the population
       genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)), // genome (of individuals) is the inputs prototype and their variation ranges
       objective = Seq(o1, o2), // objective sets the objectives to minimise
       // OpenMOLE provide a seed for your stochastic model to use (it is optional)

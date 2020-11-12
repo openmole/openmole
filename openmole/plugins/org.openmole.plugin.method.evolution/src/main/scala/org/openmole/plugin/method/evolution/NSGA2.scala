@@ -193,12 +193,12 @@ object NSGA2 {
   )
 
   def apply[P](
-    genome:     Genome,
-    objective:  Objectives,
-    outputs:    Seq[Val[_]]                  = Seq(),
-    mu:         Int                          = 200,
-    stochastic: OptionalArgument[Stochastic] = None,
-    reject:     OptionalArgument[Condition]  = None
+    genome:         Genome,
+    objective:      Objectives,
+    outputs:        Seq[Val[_]]                  = Seq(),
+    populationSize: Int                          = 200,
+    stochastic:     OptionalArgument[Stochastic] = None,
+    reject:         OptionalArgument[Condition]  = None
   ): EvolutionWorkflow =
     EvolutionWorkflow.stochasticity(objective, stochastic.option) match {
       case None ⇒
@@ -206,7 +206,7 @@ object NSGA2 {
         val phenotypeContent = PhenotypeContent(exactObjectives.map(Objective.prototype), outputs)
 
         EvolutionWorkflow.deterministicGAIntegration(
-          DeterministicParams(mu, genome, phenotypeContent, exactObjectives, EvolutionWorkflow.operatorExploration, reject),
+          DeterministicParams(populationSize, genome, phenotypeContent, exactObjectives, EvolutionWorkflow.operatorExploration, reject),
           genome,
           phenotypeContent,
           validate = Objectives.validate(exactObjectives, outputs)
@@ -221,7 +221,7 @@ object NSGA2 {
         }
 
         EvolutionWorkflow.stochasticGAIntegration(
-          StochasticParams(mu, EvolutionWorkflow.operatorExploration, genome, phenotypeContent, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
+          StochasticParams(populationSize, EvolutionWorkflow.operatorExploration, genome, phenotypeContent, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
           genome,
           phenotypeContent,
           stochasticValue,
@@ -236,21 +236,21 @@ object NSGA2Evolution {
   import org.openmole.core.dsl.DSL
 
   def apply(
-    genome:       Genome,
-    objective:    Objectives,
-    evaluation:   DSL,
-    termination:  OMTermination,
-    mu:           Int                          = 200,
-    stochastic:   OptionalArgument[Stochastic] = None,
-    reject:       OptionalArgument[Condition]  = None,
-    parallelism:  Int                          = EvolutionWorkflow.parallelism,
-    distribution: EvolutionPattern             = SteadyState(),
-    suggestion:   Suggestion                   = Suggestion.empty,
-    scope:        DefinitionScope              = "nsga2") =
+    genome:         Genome,
+    objective:      Objectives,
+    evaluation:     DSL,
+    termination:    OMTermination,
+    populationSize: Int                          = 200,
+    stochastic:     OptionalArgument[Stochastic] = None,
+    reject:         OptionalArgument[Condition]  = None,
+    parallelism:    Int                          = EvolutionWorkflow.parallelism,
+    distribution:   EvolutionPattern             = SteadyState(),
+    suggestion:     Suggestion                   = Suggestion.empty,
+    scope:          DefinitionScope              = "nsga2") =
     EvolutionPattern.build(
       algorithm =
         NSGA2(
-          mu = mu,
+          populationSize = populationSize,
           genome = genome,
           objective = objective,
           outputs = evaluation.outputs,

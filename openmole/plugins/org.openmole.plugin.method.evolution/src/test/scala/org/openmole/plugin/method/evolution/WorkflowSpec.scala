@@ -89,7 +89,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
     val yArray = Val[Array[Int]]
 
     NSGA2(
-      mu = 200,
+      populationSize = 200,
       genome = Seq(xArray in Vector.fill(5)((0.0, 1.0)), yArray in Vector.fill(5)((0, 1))),
       objective = Seq()
     )

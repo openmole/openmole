@@ -188,13 +188,13 @@ object NSGA3 {
   )
 
   def apply[P](
-    genome:     Genome,
-    objective:  Objectives,
-    references: ReferencePoints,
-    outputs:    Seq[Val[_]]                  = Seq(),
-    mu:         Int                          = 200,
-    stochastic: OptionalArgument[Stochastic] = None,
-    reject:     OptionalArgument[Condition]  = None
+    genome:         Genome,
+    objective:      Objectives,
+    references:     ReferencePoints,
+    outputs:        Seq[Val[_]]                  = Seq(),
+    populationSize: Int                          = 200,
+    stochastic:     OptionalArgument[Stochastic] = None,
+    reject:         OptionalArgument[Condition]  = None
   ): EvolutionWorkflow =
     EvolutionWorkflow.stochasticity(objective, stochastic.option) match {
       case None ⇒
@@ -202,7 +202,7 @@ object NSGA3 {
         val phenotypeContent = PhenotypeContent(exactObjectives.map(Objective.prototype), outputs)
 
         EvolutionWorkflow.deterministicGAIntegration(
-          DeterministicParams(mu, references, genome, phenotypeContent, exactObjectives, EvolutionWorkflow.operatorExploration, reject),
+          DeterministicParams(populationSize, references, genome, phenotypeContent, exactObjectives, EvolutionWorkflow.operatorExploration, reject),
           genome,
           phenotypeContent,
           validate = Objectives.validate(exactObjectives, outputs)
@@ -217,7 +217,7 @@ object NSGA3 {
         }
 
         EvolutionWorkflow.stochasticGAIntegration(
-          StochasticParams(mu, references, EvolutionWorkflow.operatorExploration, genome, phenotypeContent, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
+          StochasticParams(populationSize, references, EvolutionWorkflow.operatorExploration, genome, phenotypeContent, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
           genome,
           phenotypeContent,
           stochasticValue,
@@ -232,18 +232,18 @@ object NSGA3Evolution {
   import org.openmole.core.dsl.DSL
 
   def apply(
-    genome:       Genome,
-    objective:    Objectives,
-    evaluation:   DSL,
-    termination:  OMTermination,
-    mu:           Int                          = 200,
-    references:   NSGA3.References             = NSGA3.References.None,
-    stochastic:   OptionalArgument[Stochastic] = None,
-    reject:       OptionalArgument[Condition]  = None,
-    parallelism:  Int                          = EvolutionWorkflow.parallelism,
-    distribution: EvolutionPattern             = SteadyState(),
-    suggestion:   Suggestion                   = Suggestion.empty,
-    scope:        DefinitionScope              = "nsga3") = {
+    genome:         Genome,
+    objective:      Objectives,
+    evaluation:     DSL,
+    termination:    OMTermination,
+    populationSize: Int                          = 200,
+    references:     NSGA3.References             = NSGA3.References.None,
+    stochastic:     OptionalArgument[Stochastic] = None,
+    reject:         OptionalArgument[Condition]  = None,
+    parallelism:    Int                          = EvolutionWorkflow.parallelism,
+    distribution:   EvolutionPattern             = SteadyState(),
+    suggestion:     Suggestion                   = Suggestion.empty,
+    scope:          DefinitionScope              = "nsga3") = {
 
     val refPoints =
       references match {
@@ -254,7 +254,7 @@ object NSGA3Evolution {
     EvolutionPattern.build(
       algorithm =
         NSGA3(
-          mu = mu,
+          populationSize = populationSize,
           references = refPoints,
           genome = genome,
           outputs = evaluation.outputs,

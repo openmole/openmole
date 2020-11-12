@@ -279,13 +279,13 @@ object OSE {
   case class FitnessPattern(objective: Objective[_], limit: Double)
 
   def apply(
-    origin:     Seq[OriginAxe],
-    objective:  Seq[FitnessPattern],
-    outputs:    Seq[Val[_]]                  = Seq(),
-    genome:     Genome                       = Seq(),
-    mu:         Int                          = 200,
-    stochastic: OptionalArgument[Stochastic] = None,
-    reject:     OptionalArgument[Condition]  = None): EvolutionWorkflow =
+    origin:         Seq[OriginAxe],
+    objective:      Seq[FitnessPattern],
+    outputs:        Seq[Val[_]]                  = Seq(),
+    genome:         Genome                       = Seq(),
+    populationSize: Int                          = 200,
+    stochastic:     OptionalArgument[Stochastic] = None,
+    reject:         OptionalArgument[Condition]  = None): EvolutionWorkflow =
     EvolutionWorkflow.stochasticity(objective.map(_.objective), stochastic.option) match {
       case None ⇒
         val exactObjectives = FitnessPattern.toObjectives(objective).map(o ⇒ Objective.toExact(o))
@@ -294,7 +294,7 @@ object OSE {
 
         EvolutionWorkflow.deterministicGAIntegration(
           DeterministicParams(
-            mu = mu,
+            mu = populationSize,
             origin = OriginAxe.toOrigin(origin, genome),
             genome = fg,
             phenotypeContent = phenotypeContent,
@@ -318,7 +318,7 @@ object OSE {
 
         EvolutionWorkflow.stochasticGAIntegration(
           StochasticParams(
-            mu = mu,
+            mu = populationSize,
             origin = OriginAxe.toOrigin(origin, genome),
             genome = fg,
             phenotypeContent = phenotypeContent,
@@ -342,18 +342,18 @@ object OSEEvolution {
   import org.openmole.core.dsl._
 
   def apply(
-    origin:       Seq[OSE.OriginAxe],
-    objective:    Seq[OSE.FitnessPattern],
-    evaluation:   DSL,
-    termination:  OMTermination,
-    mu:           Int                          = 200,
-    genome:       Genome                       = Seq(),
-    stochastic:   OptionalArgument[Stochastic] = None,
-    reject:       OptionalArgument[Condition]  = None,
-    parallelism:  Int                          = EvolutionWorkflow.parallelism,
-    distribution: EvolutionPattern             = SteadyState(),
-    suggestion:   Suggestion                   = Suggestion.empty,
-    scope:        DefinitionScope              = "ose") =
+    origin:         Seq[OSE.OriginAxe],
+    objective:      Seq[OSE.FitnessPattern],
+    evaluation:     DSL,
+    termination:    OMTermination,
+    populationSize: Int                          = 200,
+    genome:         Genome                       = Seq(),
+    stochastic:     OptionalArgument[Stochastic] = None,
+    reject:         OptionalArgument[Condition]  = None,
+    parallelism:    Int                          = EvolutionWorkflow.parallelism,
+    distribution:   EvolutionPattern             = SteadyState(),
+    suggestion:     Suggestion                   = Suggestion.empty,
+    scope:          DefinitionScope              = "ose") =
     EvolutionPattern.build(
       algorithm =
         OSE(
@@ -362,7 +362,7 @@ object OSEEvolution {
           objective = objective,
           outputs = evaluation.outputs,
           stochastic = stochastic,
-          mu = mu,
+          populationSize = populationSize,
           reject = reject
         ),
       evaluation = evaluation,
