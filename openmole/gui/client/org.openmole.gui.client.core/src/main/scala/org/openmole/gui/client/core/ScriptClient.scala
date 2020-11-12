@@ -211,7 +211,6 @@ object ScriptClient {
 
       // Define the option sequence
 
-      println("BEFOR SETTINGS")
       Settings.settings.map { sets ⇒
         dom.document.body.appendChild(
           div(
