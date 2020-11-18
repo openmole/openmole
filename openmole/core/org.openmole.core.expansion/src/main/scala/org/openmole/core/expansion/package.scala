@@ -22,9 +22,9 @@ package expansion {
   import org.openmole.core.fileservice.FileService
   import org.openmole.core.workspace.TmpDirectory
 
-  trait Validate {
+  sealed trait Validate {
     def apply(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable]
-    def ++(v: Validate) = Validate(this, v)
+    def ++(v: Validate) = Validate.++(this, v)
   }
 
   object Validate {
@@ -42,7 +42,17 @@ package expansion {
     def apply(f: Parameters ⇒ Seq[Throwable]): Validate = LeafValidate(f)
     def apply(vs: Validate*): Validate = SeqValidate(vs)
 
-    def success = Validate { _ ⇒ Seq.empty }
+    case object success extends Validate {
+      def apply(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable] = Seq()
+    }
+
+    def ++(v1: Validate, v2: Validate) =
+      (v1, v2) match {
+        case (Validate.success, Validate.success) ⇒ Validate.success
+        case (v, Validate.success)                ⇒ v
+        case (Validate.success, v)                ⇒ v
+        case (v1, v2)                             ⇒ SeqValidate(toIterable(v1).toSeq ++ toIterable(v2))
+      }
 
     implicit def fromSeqValidate(v: Seq[Validate]) = apply(v: _*)
     implicit def fromThrowables(t: Seq[Throwable]) = Validate { _ ⇒ t }
