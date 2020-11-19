@@ -72,7 +72,7 @@ object MoleCapsule {
 /**
  * A capsule containing a task.
  *
- * @param _task task inside this capsule
+ * @param task task inside this capsule
  * @param strain true if this capsule let pass all data through
  */
 class MoleCapsule(val task: Task, val strain: Boolean, val funnel: Boolean) {
