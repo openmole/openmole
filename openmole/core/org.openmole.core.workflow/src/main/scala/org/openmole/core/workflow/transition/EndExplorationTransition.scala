@@ -29,7 +29,7 @@ import org.openmole.tool.lock._
 
 import scala.util.{ Failure, Success, Try }
 
-class EndExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, val trigger: Condition, val filter: BlockList = BlockList.empty) extends IEndExplorationTransition with ValidateTransition {
+class EndExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, val trigger: Condition, val filter: BlockList = BlockList.empty) extends Transition with ValidateTransition {
 
   override def validate(inputs: Seq[Val[_]]) = trigger.validate(inputs)
 
@@ -39,7 +39,7 @@ class EndExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, 
         val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("End exploration transition should take place after an exploration."))
         val subMoleParent = subMoleState.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
         //subMoleParent.transitionLock { ITransition.submitNextJobsIfReady(this)(context.values, parentTicket, subMoleParent) }
-        ITransition.submitNextJobsIfReady(this)(context.values, parentTicket, subMoleParent)
+        Transition.submitNextJobsIfReady(this)(context.values, parentTicket, subMoleParent)
         MoleExecution.cancel(subMoleState) //.cancel
       }
 

@@ -18,18 +18,12 @@
 package org.openmole.core.workflow.transition
 
 import org.openmole.core.context.{ Context, Val, Variable }
-import org.openmole.core.event._
 import org.openmole.core.exception._
-import org.openmole.core.expansion.{ Condition, FromContext }
-import org.openmole.core.fileservice.FileService
-import org.openmole.core.workflow.dsl
-import org.openmole.core.workflow.dsl._
+import org.openmole.core.expansion.Condition
 import org.openmole.core.workflow.mole.MoleExecution.{ AggregationTransitionRegistryRecord, SubMoleExecutionState }
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
-import org.openmole.core.workspace.TmpDirectory
-import org.openmole.tool.lock._
 
 import scala.collection.mutable.{ HashSet, ListBuffer }
 
@@ -48,14 +42,14 @@ object ExplorationTransition {
         alreadySeen += capsule
 
         subMoleExecution.moleExecution.mole.outputTransitions(capsule).foreach {
-          case t: IAggregationTransition ⇒
+          case t: AggregationTransition ⇒
             if (level > 0) toProcess += t.end.capsule → (level - 1)
             else if (level == 0) {
               subMoleExecution.aggregationTransitionRegistry.register(t, ticket, AggregationTransitionRegistryRecord(size))
               subMoleExecution.onFinish += { se ⇒ AggregationTransition.aggregate(t, se, ticket, executionContext) }
             }
-          case t: IExplorationTransition ⇒ toProcess += t.end.capsule → (level + 1)
-          case t                         ⇒ toProcess += t.end.capsule → level
+          case t if Transition.isExploration(t) ⇒ toProcess += t.end.capsule → (level + 1)
+          case t                                ⇒ toProcess += t.end.capsule → level
         }
       }
     }
@@ -97,14 +91,14 @@ object ExplorationTransition {
 
       import executionContext.services._
 
-      if (transition.condition.from(variables)) { ITransition.submitNextJobsIfReady(transition)(ListBuffer() ++ variables, newTicket, subMole) }
+      if (transition.condition.from(variables)) { Transition.submitNextJobsIfReady(transition)(ListBuffer() ++ variables, newTicket, subMole) }
     }
 
   }
 
 }
 
-class ExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty) extends IExplorationTransition with ValidateTransition {
+class ExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty) extends Transition with ValidateTransition {
 
   override def validate(inputs: Seq[Val[_]]) = condition.validate(inputs)
 

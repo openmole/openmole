@@ -31,11 +31,10 @@ object Mole {
 
   def nextTransitions(mole: Mole)(from: MoleCapsule, lvl: Int) =
     mole.outputTransitions(from).map {
-      case t: IAggregationTransition    ⇒ t → (lvl - 1)
-      case t: IEndExplorationTransition ⇒ t → (lvl - 1)
-      case t: ISlaveTransition          ⇒ t → lvl
-      case t: IExplorationTransition    ⇒ t → (lvl + 1)
-      case t: ITransition               ⇒ t → lvl
+      case t if Transition.isAggregation(t)    ⇒ t → (lvl - 1)
+      case t if Transition.isEndExploration(t) ⇒ t → (lvl - 1)
+      case t if Transition.isExploration(t)    ⇒ t → (lvl + 1)
+      case t                                   ⇒ t → lvl
     }
 
   /**
@@ -74,7 +73,7 @@ object Mole {
  */
 case class Mole(
   root:         MoleCapsule,
-  transitions:  Iterable[ITransition] = Iterable.empty,
+  transitions:  Iterable[Transition]  = Iterable.empty,
   dataChannels: Iterable[DataChannel] = Iterable.empty,
   inputs:       PrototypeSet          = PrototypeSet.empty,
   validate:     Validate              = Validate.success

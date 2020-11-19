@@ -39,14 +39,14 @@ object TypeUtil {
 
   def validTypes(mole: Mole, sources: Sources, hooks: Hooks)(
     slot:        TransitionSlot,
-    transition:  ITransition ⇒ Boolean = _ ⇒ true,
+    transition:  Transition ⇒ Boolean = _ ⇒ true,
     dataChannel: DataChannel ⇒ Boolean = _ ⇒ true
   ): Iterable[ValidType] =
     computeTypes(mole, sources, hooks)(slot, transition).collect { case x: ValidType ⇒ x }
 
   def computeTypes(mole: Mole, sources: Sources, hooks: Hooks)(
     slot:        TransitionSlot,
-    transition:  ITransition ⇒ Boolean = _ ⇒ true,
+    transition:  Transition ⇒ Boolean = _ ⇒ true,
     dataChannel: DataChannel ⇒ Boolean = _ ⇒ true
   ): Iterable[ComputedType] = {
     val (varNames, direct, toArray, fromArray) =
@@ -73,7 +73,7 @@ object TypeUtil {
     }
   }
 
-  private def computeTransmissions(mole: Mole, sources: Sources, hooks: Hooks)(transitions: Iterable[ITransition], dataChannels: Iterable[DataChannel]) = {
+  private def computeTransmissions(mole: Mole, sources: Sources, hooks: Hooks)(transitions: Iterable[Transition], dataChannels: Iterable[DataChannel]) = {
     val direct = new HashMap[String, ListBuffer[ValType[_]]] // Direct transmission through transition or data channel
     val toArray = new HashMap[String, ListBuffer[ValType[_]]] // Transmission through exploration transition
     val fromArray = new HashMap[String, ListBuffer[ValType[_]]] // Transmission through aggregation transition
@@ -92,10 +92,10 @@ object TypeUtil {
       transitionVarNames += d.name
 
       t match {
-        case _: IAggregationTransition ⇒ toArray.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
-        case _: IExplorationTransition ⇒ setFromArray
-        case _: ISlaveTransition       ⇒ setFromArray
-        case _                         ⇒ direct.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
+        case t if Transition.isAggregation(t) ⇒ toArray.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
+        case t if Transition.isExploration(t) ⇒ setFromArray
+        case t if Transition.isSlave(t)       ⇒ setFromArray
+        case _                                ⇒ direct.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
       }
     }
 
