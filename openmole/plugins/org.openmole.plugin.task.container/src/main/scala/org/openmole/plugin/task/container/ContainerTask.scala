@@ -282,10 +282,14 @@ import ContainerTask._
     import executionContext.networkService
 
     def createPool =
-      WithInstance { () ⇒
-        val containersDirectory = executionContext.moleExecutionDirectory.newDir("container")
-        _root_.container.ImageBuilder.duplicateFlatImage(image, containersDirectory)
-      }(close = _.file.recursiveDelete, pooled = reuseContainer)
+      executionContext.remote match {
+        case Some(r) if r.threads == 1 ⇒ WithInstance { () ⇒ image }(pooled = false)
+        case _ ⇒
+          WithInstance { () ⇒
+            val containersDirectory = executionContext.moleExecutionDirectory.newDir("container")
+            _root_.container.ImageBuilder.duplicateFlatImage(image, containersDirectory)
+          }(close = _.file.recursiveDelete, pooled = reuseContainer)
+      }
 
     val pool = executionContext.cache.getOrElseUpdate(containerPoolKey, createPool)
 

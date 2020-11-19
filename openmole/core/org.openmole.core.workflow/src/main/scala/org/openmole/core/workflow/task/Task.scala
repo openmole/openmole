@@ -54,6 +54,10 @@ import org.openmole.tool.random
  * @param lockRepository
  * @param moleExecution
  */
+object TaskExecutionContext {
+  case class Remote(threads: Int)
+}
+
 case class TaskExecutionContext(
   moleExecutionDirectory:         File,
   taskExecutionDirectory:         File,
@@ -69,7 +73,8 @@ case class TaskExecutionContext(
   implicit val networkService:    NetworkService,
   cache:                          KeyValueCache,
   lockRepository:                 LockRepository[LockKey],
-  moleExecution:                  Option[MoleExecution]   = None)
+  moleExecution:                  Option[MoleExecution]               = None,
+  remote:                         Option[TaskExecutionContext.Remote] = None)
 
 object Task {
 
