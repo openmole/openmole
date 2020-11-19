@@ -33,6 +33,7 @@ object Mole {
     mole.outputTransitions(from).map {
       case t if Transition.isAggregation(t)    ⇒ t → (lvl - 1)
       case t if Transition.isEndExploration(t) ⇒ t → (lvl - 1)
+      case t if Transition.isSlave(t)          ⇒ t → lvl
       case t if Transition.isExploration(t)    ⇒ t → (lvl + 1)
       case t                                   ⇒ t → lvl
     }
