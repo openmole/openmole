@@ -25,6 +25,8 @@ object TransitionSlot {
     val capsule = c
   }
 
+  def copy(t: TransitionSlot)(c: MoleCapsule = t.capsule) = apply(c)
+
 }
 
 trait TransitionSlot {

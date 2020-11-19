@@ -55,7 +55,7 @@ object MoleTask {
    * @param last the capsule which returns the results
    */
   def apply(mole: Mole, last: MoleCapsule)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): MoleTask = {
-    val mt = new MoleTask(_mole = mole, last = last, Vector.empty, InputOutputConfig(), InfoConfig())
+    val mt = new MoleTask(mole, last, Vector.empty, InputOutputConfig(), InfoConfig())
 
     mt set (
       dsl.inputs += (mole.root.inputs(mole, Sources.empty, Hooks.empty).toSeq: _*),
@@ -69,8 +69,10 @@ object MoleTask {
    * @param moleJob
    * @return
    */
-  def containsMoleTask(moleJob: MoleJob) =
-    moleJob.task match {
+  def containsMoleTask(moleJob: MoleJob) = isMoleTask(moleJob.task.task)
+
+  def isMoleTask(task: Task) =
+    task match {
       case _: MoleTask ⇒ true
       case _           ⇒ false
     }
@@ -80,7 +82,7 @@ object MoleTask {
 /**
  * Task executing a Mole
  *
- * @param _mole the Mole to be executed
+ * @param mole the Mole to be executed
  * @param last the MoleCapsule finishing the Mole
  * @param implicits names of implicits, which values are imported explicitly from the context
  * @param config inputs and outputs prototypes, and defaults

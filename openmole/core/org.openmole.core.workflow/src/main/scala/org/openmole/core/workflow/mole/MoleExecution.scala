@@ -125,7 +125,7 @@ object MoleExecution extends JavaLogger {
 
   case class AggregationTransitionRegistryRecord(ids: StaticArrayBuffer[Long], values: StaticArrayBuffer[Array[Any]])
   type AggregationTransitionRegistry = RegistryWithTicket[AggregationTransition, AggregationTransitionRegistryRecord]
-  type MasterCapsuleRegistry = RegistryWithTicket[MasterCapsule, Context]
+  type MasterCapsuleRegistry = RegistryWithTicket[MoleCapsule, Context]
   type TransitionRegistry = RegistryWithTicket[Transition, Iterable[Variable[_]]]
 
   def cancel(subMoleExecution: SubMoleExecutionState): Unit = {
@@ -183,14 +183,14 @@ object MoleExecution extends JavaLogger {
             a + ctx
         } + Variable(Variable.openMOLESeed, seeder.newSeed)
 
-      capsule match {
-        case c: MasterCapsule ⇒
+      capsule.master match {
+        case Some(master) ⇒
           //          def stateChanged(job: MoleJob, oldState: State, newState: State) =
           //            eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobStatusChanged(job, c, newState, oldState))
 
           subMoleExecutionState.masterCapsuleExecutor.submit {
             try {
-              val savedContext = subMoleExecutionState.masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(Context.empty)
+              val savedContext = subMoleExecutionState.masterCapsuleRegistry.remove(capsule, ticket.parentOrException).getOrElse(Context.empty)
               val moleJob: MoleJob = MoleJob(capsule.runtimeTask, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, (_, _) ⇒ (), () ⇒ subMoleExecutionState.canceled)
 
               eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
@@ -218,7 +218,7 @@ object MoleExecution extends JavaLogger {
               MoleJob.finish(moleJob, result, taskContext) // Does nothing
 
               result match {
-                case Left(newContext) ⇒ subMoleExecutionState.masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(newContext))
+                case Left(newContext) ⇒ subMoleExecutionState.masterCapsuleRegistry.register(capsule, ticket.parentOrException, MasterCapsule.toPersist(master, newContext))
                 case _                ⇒
               }
 

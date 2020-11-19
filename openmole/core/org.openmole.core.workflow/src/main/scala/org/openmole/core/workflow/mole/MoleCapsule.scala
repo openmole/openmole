@@ -29,7 +29,9 @@ import org.openmole.tool.random._
 
 object MoleCapsule {
 
-  def apply(task: Task, strain: Boolean = false, funnel: Boolean = false) = new MoleCapsule(task, strain = strain, funnel = funnel)
+  case class Master(persist: Seq[String])
+
+  def apply(task: Task, strain: Boolean = false, master: Option[Master] = None) = new MoleCapsule(task, strain = strain, master = master)
 
   def isStrainer(c: MoleCapsule) = c.strain
 
@@ -75,7 +77,7 @@ object MoleCapsule {
  * @param task task inside this capsule
  * @param strain true if this capsule let pass all data through
  */
-class MoleCapsule(val task: Task, val strain: Boolean, val funnel: Boolean) {
+class MoleCapsule(val task: Task, val strain: Boolean, val master: Option[MoleCapsule.Master]) {
 
   def runtimeTask = RuntimeTask(task, strain)
 
@@ -106,7 +108,7 @@ class MoleCapsule(val task: Task, val strain: Boolean, val funnel: Boolean) {
     task.outputs -- hooks(this).flatMap(_.outputs) ++ hooks(this).flatMap(_.outputs)
 
   def strainerInputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
-    if (strain || funnel) {
+    if (strain) {
       lazy val capsInputs = capsuleInputs(mole, sources, hooks)
       received(mole, sources, hooks).filterNot(d ⇒ capsInputs.contains(d.name))
     }
@@ -159,10 +161,7 @@ object StrainerCapsule {
 }
 
 object MasterCapsule {
-  def apply(task: Task, persist: Seq[Val[_]], strain: Boolean, funnel: Boolean) = new MasterCapsule(task, persist.map(_.name), strain, funnel)
-  def apply(t: Task, persist: Val[_]*): MasterCapsule = apply(t, persist, false, false)
-}
-
-class MasterCapsule(task: Task, val persist: Seq[String] = Seq.empty, strainer: Boolean, funnel: Boolean) extends MoleCapsule(task, strainer, funnel) {
-  def toPersist(context: Context): Context = persist.map { n ⇒ context.variables.getOrElse(n, throw new UserBadDataError(s"Variable $n has not been found in the context")) }
+  def apply(task: Task, persist: Seq[Val[_]], strain: Boolean) = MoleCapsule(task, strain = strain, master = Some(MoleCapsule.Master(persist.map(_.name))))
+  def apply(t: Task, persist: Val[_]*): MoleCapsule = apply(t, persist, false)
+  def toPersist(master: MoleCapsule.Master, context: Context): Context = master.persist.map { n ⇒ context.variables.getOrElse(n, throw new UserBadDataError(s"Variable $n has not been found in the context")) }
 }
