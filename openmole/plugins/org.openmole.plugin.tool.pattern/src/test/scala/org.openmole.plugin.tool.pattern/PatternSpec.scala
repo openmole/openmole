@@ -127,7 +127,7 @@ class PatternSpec extends FlatSpec with Matchers {
         context
       } set (inputs += i)
 
-    (While(increment, "i < 10") -- test) run ()
+    (While(increment, "i < 10") -- test).run
 
     testExecuted should equal(10)
   }
@@ -154,7 +154,7 @@ class PatternSpec extends FlatSpec with Matchers {
         context
       } set (inputs += i)
 
-    (preceding -- While(increment, "i < 10") -- test) run ()
+    (preceding -- While(increment, "i < 10") -- test).run
 
     testExecuted should equal(10)
   }
