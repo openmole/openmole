@@ -71,9 +71,8 @@ object MoleTask {
    */
   def containsMoleTask(moleJob: MoleJob) =
     moleJob.task match {
-      case _: MoleTask              ⇒ true
-      case t: StrainerTaskDecorator ⇒ classOf[MoleTask].isAssignableFrom(t.task.getClass)
-      case _                        ⇒ false
+      case _: MoleTask ⇒ true
+      case _           ⇒ false
     }
 
 }

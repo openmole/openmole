@@ -20,6 +20,7 @@ package org.openmole.core.workflow.mole
 import org.openmole.core.context._
 import org.openmole.core.exception._
 import org.openmole.core.expansion.FromContext
+import org.openmole.core.workflow.job.RuntimeTask
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.DefaultSet
 import org.openmole.core.workflow.transition._
@@ -74,13 +75,9 @@ object MoleCapsule {
  * @param _task task inside this capsule
  * @param strain true if this capsule let pass all data through
  */
-class MoleCapsule(_task: Task, val strain: Boolean, val funnel: Boolean) {
+class MoleCapsule(val task: Task, val strain: Boolean, val funnel: Boolean) {
 
-  lazy val task =
-    strain match {
-      case false ⇒ _task
-      case true  ⇒ new StrainerTaskDecorator(_task)
-    }
+  def runtimeTask = RuntimeTask(task, strain)
 
   /**
    * Get the inputs data taken by this capsule, generally it is empty if the capsule
@@ -155,13 +152,6 @@ class MoleCapsule(_task: Task, val strain: Boolean, val funnel: Boolean) {
   override def toString =
     (if (!strain) "capsule" else "strainerCapsule") + s"@$hashCode:$task"
 
-}
-
-class StrainerTaskDecorator(val task: Task) extends Task {
-  override def info = task.info
-  override def config = task.config
-  override def perform(context: Context, executionContext: TaskExecutionContext): Context = context + task.perform(context, executionContext)
-  override def process(executionContext: TaskExecutionContext): FromContext[Context] = throw new InternalProcessingError("This method should never be called")
 }
 
 object StrainerCapsule {
