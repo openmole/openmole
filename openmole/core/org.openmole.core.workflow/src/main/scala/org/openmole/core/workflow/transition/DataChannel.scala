@@ -77,6 +77,16 @@ object DataChannel {
     }
   }
 
+  def copy(d: DataChannel)(
+    start:  MoleCapsule    = d.start,
+    end:    TransitionSlot = d.end,
+    filter: BlockList      = d.filter) =
+    new DataChannel(
+      start = start,
+      end = end,
+      filter = filter
+    )
+
 }
 
 /**
