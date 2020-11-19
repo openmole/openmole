@@ -84,7 +84,7 @@ object TypeUtil {
       t ← transitions
       d ← t.data(mole, sources, hooks)
     } {
-      def explored = ExplorationTask.explored(t.start)
+      def explored = ExplorationTask.explored(t.start, mole, sources, hooks)
       def setFromArray =
         if (explored(d)) fromArray.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
         else direct.getOrElseUpdate(d.name, new ListBuffer) += d.`type`

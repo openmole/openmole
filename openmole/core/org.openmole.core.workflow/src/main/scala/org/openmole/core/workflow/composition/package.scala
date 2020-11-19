@@ -178,10 +178,10 @@ package composition {
     def slots: Set[TransitionSlot] = (firstSlot :: transitions.map(_.end).toList).toSet
     def first = firstSlot.capsule
     def inputs = first.inputs(toMole, sources, hooks).toSeq
-    def defaults = first.task.defaults
+    def defaults = first.task(toMole, sources, hooks).defaults
   }
 
-  case class TaskNode(task: Task, strain: Boolean = false, master: Boolean = false, persist: Seq[Val[_]] = Seq.empty, environment: Option[EnvironmentProvider] = None, grouping: Option[Grouping] = None, hooks: Vector[Hook] = Vector.empty, sources: Vector[Source] = Vector.empty) {
+  case class TaskNode(task: Task, strain: Boolean = false, funnel: Boolean = false, master: Boolean = false, persist: Seq[Val[_]] = Seq.empty, environment: Option[EnvironmentProvider] = None, grouping: Option[Grouping] = None, hooks: Vector[Hook] = Vector.empty, sources: Vector[Source] = Vector.empty) {
     def on(environment: EnvironmentProvider) = copy(environment = Some(environment))
     def hook(hooks: Hook*) = copy(hooks = this.hooks ++ hooks)
     def hook[F](
@@ -406,9 +406,10 @@ package composition {
       def taskToSlot(dsl: DSL) = {
         def buildCapsule(task: Task, ns: Vector[TaskNode]) = {
           val strain = ns.exists(_.strain)
+          val funnel = ns.exists(_.funnel)
           val master = ns.exists(_.master)
 
-          if (!master) MoleCapsule(task, strain = strain)
+          if (!master) MoleCapsule(task, strain = strain, funnel = funnel)
           else {
             val persist = ns.find(_.master).get.persist
             MasterCapsule(task, persist = persist, strain = strain)
@@ -646,7 +647,7 @@ package composition {
         val last = EmptyTask()
         val p: Puzzle = if (!explore) dslToPuzzle(t1 -- last) else dslToPuzzle(t1 -< last)
         val mole = p.toMole
-        val slot = p.slots.toSeq.find(_.capsule.task == last).head
+        val slot = p.slots.toSeq.find(_.capsule._task == last).head
         TypeUtil.receivedTypes(mole, p.sources, p.hooks)(slot) toSeq
       }
     }
@@ -679,6 +680,11 @@ package composition {
         p & (first oo last block (receivedFromDSL.toSeq: _*))
       }
 
+    }
+
+    object Funnel {
+      def apply(task: Task) = TaskNode(task, funnel = true)
+      def apply(task: TaskNode) = task.copy(funnel = true)
     }
 
   }

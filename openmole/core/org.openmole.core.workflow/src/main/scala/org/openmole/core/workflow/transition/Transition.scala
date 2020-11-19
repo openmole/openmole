@@ -245,7 +245,7 @@ object ExplorationTransition {
   }
 
   def factors(capsule: MoleCapsule, moleExecution: MoleExecution) = {
-    def explored = ExplorationTask.explored(capsule)
+    def explored = ExplorationTask.explored(capsule, moleExecution.mole, moleExecution.sources, moleExecution.hooks)
     capsule.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).partition(explored)
     val (factors, outputs) = capsule.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).partition(explored)
     val typedFactors = factors.map(_.asInstanceOf[Val[Array[Any]]])

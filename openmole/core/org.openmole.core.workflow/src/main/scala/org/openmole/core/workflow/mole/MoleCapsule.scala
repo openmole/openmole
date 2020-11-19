@@ -31,7 +31,7 @@ object MoleCapsule {
 
   case class Master(persist: Seq[String])
 
-  def apply(task: Task, strain: Boolean = false, master: Option[Master] = None) = new MoleCapsule(task, strain = strain, master = master)
+  def apply(task: Task, strain: Boolean = false, funnel: Boolean = false, master: Option[Master] = None) = new MoleCapsule(task, strain = strain, funnel = funnel, master = master)
 
   def isStrainer(c: MoleCapsule) = c.strain
 
@@ -74,12 +74,21 @@ object MoleCapsule {
 /**
  * A capsule containing a task.
  *
- * @param task task inside this capsule
+ * @param _task task inside this capsule
  * @param strain true if this capsule let pass all data through
  */
-class MoleCapsule(val task: Task, val strain: Boolean, val master: Option[MoleCapsule.Master]) {
+class MoleCapsule(val _task: Task, val strain: Boolean, val funnel: Boolean, val master: Option[MoleCapsule.Master]) {
 
-  def runtimeTask = RuntimeTask(task, strain)
+  def task(mole: Mole, sources: Sources, hooks: Hooks) = runtimeTask(mole, sources, hooks).task
+
+  def runtimeTask(mole: Mole, sources: Sources, hooks: Hooks) = {
+    val withInputs =
+      _task match {
+        case task: MoleTask ⇒ (MoleTask.mole composeLens Mole.inputs) modify (_ ++ inputs(mole, sources, hooks)) apply task
+        case task           ⇒ task
+      }
+    RuntimeTask(withInputs, strain)
+  }
 
   /**
    * Get the inputs data taken by this capsule, generally it is empty if the capsule
@@ -102,13 +111,13 @@ class MoleCapsule(val task: Task, val strain: Boolean, val master: Option[MoleCa
     strainerOutputs(mole, sources, hooks) + capsuleOutputs(mole, sources, hooks)
 
   def capsuleInputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
-    task.inputs -- sources(this).flatMap(_.outputs) -- sources(this).flatMap(_.inputs) ++ sources(this).flatMap(_.inputs)
+    _task.inputs -- sources(this).flatMap(_.outputs) -- sources(this).flatMap(_.inputs) ++ sources(this).flatMap(_.inputs)
 
   def capsuleOutputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
-    task.outputs -- hooks(this).flatMap(_.outputs) ++ hooks(this).flatMap(_.outputs)
+    _task.outputs -- hooks(this).flatMap(_.outputs) ++ hooks(this).flatMap(_.outputs)
 
   def strainerInputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
-    if (strain) {
+    if (strain || funnel) {
       lazy val capsInputs = capsuleInputs(mole, sources, hooks)
       received(mole, sources, hooks).filterNot(d ⇒ capsInputs.contains(d.name))
     }
@@ -152,7 +161,7 @@ class MoleCapsule(val task: Task, val strain: Boolean, val master: Option[MoleCa
     }
 
   override def toString =
-    (if (!strain) "capsule" else "strainerCapsule") + s"@$hashCode:$task"
+    (if (!strain) "capsule" else "strainerCapsule") + s"@$hashCode:${_task}"
 
 }
 

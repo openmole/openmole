@@ -227,7 +227,7 @@ class Execution {
 
         lazy val statuses = moleExecution.capsuleStatuses.toVector.map {
           case (k, v) ⇒
-            CapsuleExecution(name = k.task.simpleName, scope = scopeToString(k.task.info.definitionScope), statuses = convertStatuses(v))
+            CapsuleExecution(name = k._task.simpleName, scope = scopeToString(k._task.info.definitionScope), statuses = convertStatuses(v))
         }
 
         moleExecution.exception match {

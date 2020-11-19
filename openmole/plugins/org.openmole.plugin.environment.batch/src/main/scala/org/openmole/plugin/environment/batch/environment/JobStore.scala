@@ -5,7 +5,7 @@ import java.io.File
 import org.openmole.core.context.Context
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workflow.job.MoleJob.Canceled
-import org.openmole.core.workflow.job.{ Job, MoleJob }
+import org.openmole.core.workflow.job.{ Job, MoleJob, RuntimeTask }
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.task.Task
 import org.openmole.core.workspace._
@@ -51,7 +51,7 @@ object JobStore {
   class StoredJob(val moleExecution: MoleExecution, val storedMoleJobs: Array[StoredMoleJob])
   class StoredMoleJob(
     val context:         File,
-    val task:            Task,
+    val task:            RuntimeTask,
     val id:              Long,
     val jobFinished:     MoleJob.JobFinished,
     val subMoleCanceled: Canceled) {

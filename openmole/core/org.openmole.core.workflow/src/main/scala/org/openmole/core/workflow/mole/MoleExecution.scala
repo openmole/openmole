@@ -191,7 +191,8 @@ object MoleExecution extends JavaLogger {
           subMoleExecutionState.masterCapsuleExecutor.submit {
             try {
               val savedContext = subMoleExecutionState.masterCapsuleRegistry.remove(capsule, ticket.parentOrException).getOrElse(Context.empty)
-              val moleJob: MoleJob = MoleJob(capsule.runtimeTask, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, (_, _) ⇒ (), () ⇒ subMoleExecutionState.canceled)
+              val runtimeTask = capsule.runtimeTask(subMoleExecutionState.moleExecution.mole, subMoleExecutionState.moleExecution.sources, subMoleExecutionState.moleExecution.hooks)
+              val moleJob: MoleJob = MoleJob(runtimeTask, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, (_, _) ⇒ (), () ⇒ subMoleExecutionState.canceled)
 
               eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
 
@@ -233,7 +234,8 @@ object MoleExecution extends JavaLogger {
             MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(job, result, capsule, ticket))
 
           val newContext = subMoleExecutionState.moleExecution.implicits + sourced + context
-          val moleJob: MoleJob = MoleJob(capsule.runtimeTask, newContext, jobId, onJobFinished, () ⇒ subMoleExecutionState.canceled)
+          val runtimeTask = capsule.runtimeTask(subMoleExecutionState.moleExecution.mole, subMoleExecutionState.moleExecution.sources, subMoleExecutionState.moleExecution.hooks)
+          val moleJob: MoleJob = MoleJob(runtimeTask, newContext, jobId, onJobFinished, () ⇒ subMoleExecutionState.canceled)
 
           eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
 
@@ -281,7 +283,6 @@ object MoleExecution extends JavaLogger {
           val event = MoleExecution.HookExceptionRaised(h, capsule, job, e, Log.SEVERE)
           eventDispatcher.trigger(subMoleExecutionState.moleExecution, event)
           cancel(subMoleExecutionState.moleExecution, Some(event))
-          Log.logger.log(Log.FINE, "Error in execution of misc " + h + "at the end of task " + capsule.task, e)
           throw e
       }
 

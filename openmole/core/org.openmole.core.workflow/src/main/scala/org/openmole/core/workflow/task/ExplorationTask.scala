@@ -20,7 +20,7 @@ package org.openmole.core.workflow.task
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.mole.MoleCapsule
+import org.openmole.core.workflow.mole.{ Mole, MoleCapsule, Sources, Hooks }
 import org.openmole.core.workflow.sampling._
 
 import scala.collection.immutable.TreeMap
@@ -84,6 +84,6 @@ object ExplorationTask {
    * @param c
    * @return
    */
-  def explored(c: MoleCapsule) = (p: Val[_]) ⇒ c.task.outputs.explored(p)
+  def explored(c: MoleCapsule, mole: Mole, sources: Sources, hooks: Hooks) = (p: Val[_]) ⇒ c.task(mole, sources, hooks).outputs.explored(p)
 
 }

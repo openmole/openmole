@@ -60,7 +60,7 @@ object MoleTask {
     mt set (
       dsl.inputs += (mole.root.inputs(mole, Sources.empty, Hooks.empty).toSeq: _*),
       dsl.outputs += (last.outputs(mole, Sources.empty, Hooks.empty).toSeq: _*),
-      isTask.defaults.set(mole.root.task.defaults)
+      isTask.defaults.set(mole.root.task(mole, Sources.empty, Hooks.empty).defaults)
     )
   }
 
@@ -89,7 +89,7 @@ object MoleTask {
  * @param info name and definition scope
  */
 @Lenses case class MoleTask(
-  _mole:     Mole,
+  mole:      Mole,
   last:      MoleCapsule,
   implicits: Vector[String],
   config:    InputOutputConfig,
@@ -100,7 +100,7 @@ object MoleTask {
    * mole of the MoleTask, with inputs from the config: InputOutputConfig
    * @return
    */
-  def mole = _mole.copy(inputs = inputs)
+  //def mole = _mole.copy(inputs = inputs)
 
   protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { p ⇒
     import p._
