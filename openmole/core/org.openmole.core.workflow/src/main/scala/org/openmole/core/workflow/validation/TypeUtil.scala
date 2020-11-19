@@ -93,8 +93,8 @@ object TypeUtil {
 
       t match {
         case t if Transition.isAggregation(t) ⇒ toArray.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
-        case t if Transition.isExploration(t) ⇒ setFromArray
         case t if Transition.isSlave(t)       ⇒ setFromArray
+        case t if Transition.isExploration(t) ⇒ setFromArray
         case _                                ⇒ direct.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
       }
     }

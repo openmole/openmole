@@ -87,6 +87,20 @@ object Transition {
       MoleExecution.submit(subMoleState, transition.end.capsule, newContext, newTicket)
     }
   }
+
+  def copy(t: Transition)(
+    start:  MoleCapsule    = t.start,
+    end:    TransitionSlot = t.end,
+    filter: BlockList      = t.filter
+  ) =
+    t match {
+      case t: DirectTransition         ⇒ DirectTransition.copy(t)(start = start, end = end, filter = filter)
+      case t: ExplorationTransition    ⇒ ExplorationTransition.copy(t)(start = start, end = end, filter = filter)
+      case t: AggregationTransition    ⇒ AggregationTransition.copy(t)(start = start, end = end, filter = filter)
+      case t: EndExplorationTransition ⇒ EndExplorationTransition.copy(t)(start = start, end = end, filter = filter)
+      case t: SlaveTransition          ⇒ SlaveTransition.copy(t)(start = start, end = end, filter = filter)
+    }
+
 }
 
 /**
@@ -148,6 +162,22 @@ sealed trait Transition {
 
 }
 
+object DirectTransition {
+
+  def copy(d: DirectTransition)(
+    start:     MoleCapsule    = d.start,
+    end:       TransitionSlot = d.`end`,
+    condition: Condition      = d.condition,
+    filter:    BlockList      = d.filter) =
+    new DirectTransition(
+      start = start,
+      end = end,
+      condition = condition,
+      filter = filter
+    )
+
+}
+
 /**
  * Transition between a mole and a slot
  *
@@ -174,36 +204,19 @@ class DirectTransition(
   override def toString = s"$start -- $end"
 }
 
-class EndExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, val trigger: Condition, val filter: BlockList = BlockList.empty) extends Transition with ValidateTransition {
-
-  override def validate(inputs: Seq[Val[_]]) = trigger.validate(inputs)
-
-  override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
-    MoleExecutionMessage.PerformTransition(subMole) { subMoleState ⇒
-      def perform() {
-        val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("End exploration transition should take place after an exploration."))
-        val subMoleParent = subMoleState.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
-        //subMoleParent.transitionLock { ITransition.submitNextJobsIfReady(this)(context.values, parentTicket, subMoleParent) }
-        Transition.submitNextJobsIfReady(this)(context.values, parentTicket, subMoleParent)
-        MoleExecution.cancel(subMoleState) //.cancel
-      }
-
-      import executionContext.services._
-
-      Try( /*!subMoleState.canceled && */ trigger.from(context)) match {
-        case Success(true)  ⇒ perform()
-        case Success(false) ⇒
-        case Failure(t) ⇒
-          MoleExecution.cancel(subMoleState)
-          throw t
-      }
-    }
-  }
-
-  override def toString = s"$start >| $end"
-}
-
 object ExplorationTransition {
+
+  def copy(t: ExplorationTransition)(
+    start:     MoleCapsule    = t.start,
+    end:       TransitionSlot = t.end,
+    condition: Condition      = t.condition,
+    filter:    BlockList      = t.filter
+  ) = new ExplorationTransition(
+    start,
+    end,
+    condition,
+    filter
+  )
 
   def registerAggregationTransitions(transition: ExplorationTransition, ticket: Ticket, subMoleExecution: SubMoleExecutionState, executionContext: MoleExecutionContext, size: Int) = {
     val alreadySeen = new HashSet[MoleCapsule]
@@ -231,23 +244,23 @@ object ExplorationTransition {
     }
   }
 
-  def factors(transition: ExplorationTransition, moleExecution: MoleExecution) = {
-    def explored = ExplorationTask.explored(transition.start)
-    transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).partition(explored)
-    val (factors, outputs) = transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).partition(explored)
+  def factors(capsule: MoleCapsule, moleExecution: MoleExecution) = {
+    def explored = ExplorationTask.explored(capsule)
+    capsule.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).partition(explored)
+    val (factors, outputs) = capsule.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).partition(explored)
     val typedFactors = factors.map(_.asInstanceOf[Val[Array[Any]]])
     (typedFactors, outputs)
   }
 
-  def exploredSamples(transition: ExplorationTransition, context: Context, moleExecution: MoleExecution) = {
-    def values = factors(transition, moleExecution)._1.toArray.map(context(_).toArray).transpose
+  def exploredSamples(capsule: MoleCapsule, context: Context, moleExecution: MoleExecution) = {
+    def values = factors(capsule, moleExecution)._1.toArray.map(context(_).toArray).transpose
     values
   }
 
-  def submitIn(transition: ExplorationTransition, context: Context, ticket: Ticket, samples: Array[Array[Any]], subMole: SubMoleExecutionState, executionContext: MoleExecutionContext) = {
+  def submitIn(transition: Transition, condition: Condition, context: Context, ticket: Ticket, samples: Array[Array[Any]], subMole: SubMoleExecutionState, executionContext: MoleExecutionContext) = {
     val moleExecution = subMole.moleExecution
     val mole = moleExecution.mole
-    val (typedFactors, outputs) = factors(transition, moleExecution)
+    val (typedFactors, outputs) = factors(transition.start, moleExecution)
 
     for (value ← samples) {
       val newTicket = MoleExecution.nextTicket(moleExecution, ticket)
@@ -267,7 +280,7 @@ object ExplorationTransition {
 
       import executionContext.services._
 
-      if (transition.condition.from(variables)) { Transition.submitNextJobsIfReady(transition)(ListBuffer() ++ variables, newTicket, subMole) }
+      if (condition.from(variables)) { Transition.submitNextJobsIfReady(transition)(ListBuffer() ++ variables, newTicket, subMole) }
     }
 
   }
@@ -281,9 +294,9 @@ class ExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, val
   override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
     MoleExecutionMessage.PerformTransition(subMole) { subMoleState ⇒
       val subSubMole = MoleExecution.newChildSubMoleExecution(subMoleState)
-      val samples = ExplorationTransition.exploredSamples(this, context, moleExecution)
+      val samples = ExplorationTransition.exploredSamples(start, context, moleExecution)
       ExplorationTransition.registerAggregationTransitions(this, ticket, subSubMole, executionContext, samples.size)
-      ExplorationTransition.submitIn(this, filtered(context), ticket, samples, subSubMole, executionContext)
+      ExplorationTransition.submitIn(this, condition, filtered(context), ticket, samples, subSubMole, executionContext)
     }
   }
 
@@ -291,32 +304,21 @@ class ExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, val
 
 }
 
-class SlaveTransition(start: MoleCapsule, end: TransitionSlot, condition: Condition = Condition.True, filter: BlockList = BlockList.empty, slaves: Option[Int] = None) extends ExplorationTransition(start, end, condition, filter) with Transition with ValidateTransition {
-
-  override def validate(inputs: Seq[Val[_]]) = condition.validate(inputs)
-
-  override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
-    MoleExecutionMessage.PerformTransition(subMole) { subMoleState ⇒
-      import executionContext.services._
-
-      if (condition.from(context) && slaves.map(subMoleState.jobs.size < _).getOrElse(true)) {
-        val samples = ExplorationTransition.exploredSamples(this, context, moleExecution)
-
-        ExplorationTransition.submitIn(
-          this,
-          filtered(context),
-          ticket.parent.getOrElse(throw new UserBadDataError("Slave transition should take place within an exploration.")),
-          samples,
-          subMoleState,
-          executionContext)
-      }
-    }
-  }
-  override def toString = s"$start -<- $end"
-
-}
-
 object AggregationTransition {
+
+  def copy(t: AggregationTransition)(
+    start:     MoleCapsule    = t.start,
+    end:       TransitionSlot = t.end,
+    condition: Condition      = t.condition,
+    filter:    BlockList      = t.filter,
+    trigger:   Condition      = t.trigger
+  ) = new AggregationTransition(
+    start,
+    end,
+    condition,
+    filter,
+    trigger
+  )
 
   def aggregatedOutputs(moleExecution: MoleExecution, transition: AggregationTransition) = transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).toVector
 
@@ -426,3 +428,92 @@ class AggregationTransition(val start: MoleCapsule, val end: TransitionSlot, val
 
   override def toString = s"$start >- $end"
 }
+
+object EndExplorationTransition {
+
+  def copy(t: EndExplorationTransition)(
+    start:   MoleCapsule    = t.start,
+    end:     TransitionSlot = t.end,
+    trigger: Condition      = t.trigger,
+    filter:  BlockList      = t.filter) =
+    new EndExplorationTransition(
+      start,
+      end,
+      trigger,
+      filter)
+
+}
+
+class EndExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, val trigger: Condition, val filter: BlockList = BlockList.empty) extends Transition with ValidateTransition {
+
+  override def validate(inputs: Seq[Val[_]]) = trigger.validate(inputs)
+
+  override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
+    MoleExecutionMessage.PerformTransition(subMole) { subMoleState ⇒
+      def perform() {
+        val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("End exploration transition should take place after an exploration."))
+        val subMoleParent = subMoleState.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
+        //subMoleParent.transitionLock { ITransition.submitNextJobsIfReady(this)(context.values, parentTicket, subMoleParent) }
+        Transition.submitNextJobsIfReady(this)(context.values, parentTicket, subMoleParent)
+        MoleExecution.cancel(subMoleState) //.cancel
+      }
+
+      import executionContext.services._
+
+      Try( /*!subMoleState.canceled && */ trigger.from(context)) match {
+        case Success(true)  ⇒ perform()
+        case Success(false) ⇒
+        case Failure(t) ⇒
+          MoleExecution.cancel(subMoleState)
+          throw t
+      }
+    }
+  }
+
+  override def toString = s"$start >| $end"
+}
+
+object SlaveTransition {
+
+  def copy(t: SlaveTransition)(
+    start:     MoleCapsule    = t.start,
+    end:       TransitionSlot = t.end,
+    condition: Condition      = t.condition,
+    filter:    BlockList      = t.filter,
+    slaves:    Option[Int]    = t.slaves
+  ) = new SlaveTransition(
+    start,
+    end,
+    condition,
+    filter,
+    slaves
+  )
+
+}
+
+class SlaveTransition(val start: MoleCapsule, val end: TransitionSlot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty, val slaves: Option[Int] = None) extends Transition with ValidateTransition {
+
+  override def validate(inputs: Seq[Val[_]]) = condition.validate(inputs)
+
+  override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
+    MoleExecutionMessage.PerformTransition(subMole) { subMoleState ⇒
+      import executionContext.services._
+
+      if (condition.from(context) && slaves.map(subMoleState.jobs.size < _).getOrElse(true)) {
+        val samples = ExplorationTransition.exploredSamples(start, context, moleExecution)
+
+        ExplorationTransition.submitIn(
+          this,
+          condition,
+          filtered(context),
+          ticket.parent.getOrElse(throw new UserBadDataError("Slave transition should take place within an exploration.")),
+          samples,
+          subMoleState,
+          executionContext)
+      }
+    }
+  }
+  override def toString = s"$start -<- $end"
+
+}
+
