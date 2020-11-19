@@ -57,12 +57,15 @@ package composition {
       grouping:     Map[MoleCapsule, Grouping]            = Map.empty,
       validate:     Validate                              = Validate.success): Puzzle =
       new Puzzle(
-        firstSlot,
-        lasts,
-        transitions,
-        dataChannels,
-        sources,
-        hooks
+        firstSlot = firstSlot,
+        lasts = lasts,
+        transitions = transitions,
+        dataChannels = dataChannels,
+        sources = sources,
+        hooks = hooks,
+        environments = environments,
+        grouping = grouping,
+        validate = validate
       )
 
     def apply(s: TransitionSlot): Puzzle = Puzzle(s, lasts = Vector(s.capsule))
@@ -149,13 +152,13 @@ package composition {
   class Puzzle(
     val firstSlot:    TransitionSlot,
     val lasts:        Iterable[MoleCapsule],
-    val transitions:  Iterable[Transition]                  = Iterable.empty,
-    val dataChannels: Iterable[DataChannel]                 = Iterable.empty,
-    val sources:      Iterable[(MoleCapsule, Source)]       = Iterable.empty,
-    val hooks:        Iterable[(MoleCapsule, Hook)]         = Iterable.empty,
-    val environments: Map[MoleCapsule, EnvironmentProvider] = Map.empty,
-    val grouping:     Map[MoleCapsule, Grouping]            = Map.empty,
-    val validate:     Validate                              = Validate.success) {
+    val transitions:  Iterable[Transition],
+    val dataChannels: Iterable[DataChannel],
+    val sources:      Iterable[(MoleCapsule, Source)],
+    val hooks:        Iterable[(MoleCapsule, Hook)],
+    val environments: Map[MoleCapsule, EnvironmentProvider],
+    val grouping:     Map[MoleCapsule, Grouping],
+    val validate:     Validate) {
 
     def toMole = new Mole(firstSlot.capsule, transitions, dataChannels, validate = validate)
 
