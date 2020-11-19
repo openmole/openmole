@@ -57,7 +57,7 @@ object ValidationProblem {
     override def toString = s"Errors in validation of hook $hook:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).stackStringWithMargin).mkString("\n")
   }
 
-  case class TransitionValidationProblem(transition: ITransition, errors: Seq[Throwable]) extends ValidationProblem {
+  case class TransitionValidationProblem(transition: Transition, errors: Seq[Throwable]) extends ValidationProblem {
     override def toString = s"Errors in validation of transition $transition:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).stackStringWithMargin).mkString("\n")
   }
 

@@ -28,12 +28,9 @@ import org.openmole.tool.random._
 
 object MoleCapsule {
 
-  implicit def taskToCapsuleConverter(task: Task) = MoleCapsule(task)
-  implicit def slotToCapsuleConverter(slot: TransitionSlot) = slot.capsule
+  def apply(task: Task, strain: Boolean = false, funnel: Boolean = false) = new MoleCapsule(task, strain = strain, funnel = funnel)
 
-  def apply(task: Task, strain: Boolean = false) = new MoleCapsule(task, strain)
-
-  def isStrainer(c: MoleCapsule) = c.strainer
+  def isStrainer(c: MoleCapsule) = c.strain
 
   /* Test wether there is a path from this slot reaching the root of the mole without looping to the capsule it is bounded to */
   def reachRootWithNoLoop(mole: Mole)(slot: TransitionSlot): Boolean = {
@@ -75,12 +72,12 @@ object MoleCapsule {
  * A capsule containing a task.
  *
  * @param _task task inside this capsule
- * @param strainer true if this capsule let pass all data through
+ * @param strain true if this capsule let pass all data through
  */
-class MoleCapsule(_task: Task, val strainer: Boolean) {
+class MoleCapsule(_task: Task, val strain: Boolean, val funnel: Boolean) {
 
   lazy val task =
-    strainer match {
+    strain match {
       case false ⇒ _task
       case true  ⇒ new StrainerTaskDecorator(_task)
     }
@@ -112,14 +109,14 @@ class MoleCapsule(_task: Task, val strainer: Boolean) {
     task.outputs -- hooks(this).flatMap(_.outputs) ++ hooks(this).flatMap(_.outputs)
 
   def strainerInputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
-    if (strainer) {
+    if (strain || funnel) {
       lazy val capsInputs = capsuleInputs(mole, sources, hooks)
       received(mole, sources, hooks).filterNot(d ⇒ capsInputs.contains(d.name))
     }
     else PrototypeSet.empty
 
   def strainerOutputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
-    if (strainer) {
+    if (strain) {
       lazy val capsOutputs = capsuleOutputs(mole, sources, hooks)
       received(mole, sources, hooks).filterNot(d ⇒ capsOutputs.contains(d.name))
     }
@@ -156,7 +153,7 @@ class MoleCapsule(_task: Task, val strainer: Boolean) {
     }
 
   override def toString =
-    (if (!strainer) "capsule" else "strainerCapsule") + s"@$hashCode:$task"
+    (if (!strain) "capsule" else "strainerCapsule") + s"@$hashCode:$task"
 
 }
 
@@ -172,10 +169,10 @@ object StrainerCapsule {
 }
 
 object MasterCapsule {
-  def apply(task: Task, persist: Seq[Val[_]], strain: Boolean) = new MasterCapsule(task, persist.map(_.name), strain)
-  def apply(t: Task, persist: Val[_]*): MasterCapsule = apply(t, persist, false)
+  def apply(task: Task, persist: Seq[Val[_]], strain: Boolean, funnel: Boolean) = new MasterCapsule(task, persist.map(_.name), strain, funnel)
+  def apply(t: Task, persist: Val[_]*): MasterCapsule = apply(t, persist, false, false)
 }
 
-class MasterCapsule(task: Task, val persist: Seq[String] = Seq.empty, strainer: Boolean) extends MoleCapsule(task, strainer) {
+class MasterCapsule(task: Task, val persist: Seq[String] = Seq.empty, strainer: Boolean, funnel: Boolean) extends MoleCapsule(task, strainer, funnel) {
   def toPersist(context: Context): Context = persist.map { n ⇒ context.variables.getOrElse(n, throw new UserBadDataError(s"Variable $n has not been found in the context")) }
 }

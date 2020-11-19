@@ -24,10 +24,6 @@ package task {
   import org.openmole.core.context._
 
   trait TaskPackage {
-    implicit class TaskToCapsuleDecorator(task: Task) {
-      def toCapsule = MoleCapsule(task)
-      def toCapsule(strainer: Boolean) = MoleCapsule(task, true)
-    }
 
     def newRNG(context: Context) = Task.buildRNG(context)
 

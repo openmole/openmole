@@ -35,7 +35,7 @@ import org.openmole.core.workflow.mole
 import org.openmole.core.workflow.mole.MoleExecution.{ Cleaned, MoleExecutionFailed, SubMoleExecutionState }
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workflow.tools.{ OptionalArgument ⇒ _, _ }
-import org.openmole.core.workflow.transition.{ DataChannel, IAggregationTransition, ITransition }
+import org.openmole.core.workflow.transition.{ AggregationTransition, DataChannel, Transition }
 import org.openmole.core.workflow.validation._
 import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.collection.{ PriorityQueue, StaticArrayBuffer }
@@ -124,9 +124,9 @@ object MoleExecution extends JavaLogger {
   }
 
   case class AggregationTransitionRegistryRecord(ids: StaticArrayBuffer[Long], values: StaticArrayBuffer[Array[Any]])
-  type AggregationTransitionRegistry = RegistryWithTicket[IAggregationTransition, AggregationTransitionRegistryRecord]
+  type AggregationTransitionRegistry = RegistryWithTicket[AggregationTransition, AggregationTransitionRegistryRecord]
   type MasterCapsuleRegistry = RegistryWithTicket[MasterCapsule, Context]
-  type TransitionRegistry = RegistryWithTicket[ITransition, Iterable[Variable[_]]]
+  type TransitionRegistry = RegistryWithTicket[Transition, Iterable[Variable[_]]]
 
   def cancel(subMoleExecution: SubMoleExecutionState): Unit = {
     subMoleExecution.canceled = true

@@ -19,14 +19,14 @@ package org.openmole.core.workflow.validation
 
 import org.openmole.core.workflow.mole.MoleCapsule
 import org.openmole.core.workflow.task.MoleTask
-import org.openmole.core.workflow.transition.{ DataChannel, ITransition }
+import org.openmole.core.workflow.transition.{ DataChannel, Transition }
 
 /**
  * Problems with the validation of Puzzle's topology
  */
 object TopologyProblem {
 
-  case class DuplicatedTransition(transitions: Iterable[ITransition]) extends TopologyProblem {
+  case class DuplicatedTransition(transitions: Iterable[Transition]) extends TopologyProblem {
     override def toString = "DuplicatedTransition: from " + transitions.head.start + " to " + transitions.head.end.capsule + " has been found " + transitions.size + " times."
   }
 

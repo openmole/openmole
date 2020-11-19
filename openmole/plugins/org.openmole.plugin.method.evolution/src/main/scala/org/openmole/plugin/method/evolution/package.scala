@@ -242,7 +242,7 @@ package object evolution {
 
     val puzzle =
       (Strain(first) -- masterSlave) &
-        (first oo islandTask block (t.populationPrototype, t.statePrototype))
+        (first oo Funnel(islandTask) block (t.populationPrototype, t.statePrototype))
 
     DSLContainerExtension[EvolutionWorkflow](
       DSLContainer(puzzle),

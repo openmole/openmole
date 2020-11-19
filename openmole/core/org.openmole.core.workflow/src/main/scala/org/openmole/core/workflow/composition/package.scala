@@ -74,7 +74,7 @@ package composition {
 
     def add(
       p:            Puzzle,
-      transitions:  Iterable[ITransition]                 = Iterable.empty,
+      transitions:  Iterable[Transition]                  = Iterable.empty,
       dataChannels: Iterable[DataChannel]                 = Iterable.empty,
       sources:      Iterable[(MoleCapsule, Source)]       = Iterable.empty,
       hooks:        Iterable[(MoleCapsule, Hook)]         = Iterable.empty,
@@ -109,7 +109,7 @@ package composition {
   case class Puzzle(
     firstSlot:    TransitionSlot,
     lasts:        Iterable[MoleCapsule],
-    transitions:  Iterable[ITransition]                 = Iterable.empty,
+    transitions:  Iterable[Transition]                  = Iterable.empty,
     dataChannels: Iterable[DataChannel]                 = Iterable.empty,
     sources:      Iterable[(MoleCapsule, Source)]       = Iterable.empty,
     hooks:        Iterable[(MoleCapsule, Hook)]         = Iterable.empty,
@@ -141,7 +141,7 @@ package composition {
     def defaults = first.task.defaults
   }
 
-  case class TaskNode(task: Task, strain: Boolean = false, master: Boolean = false, persist: Seq[Val[_]] = Seq.empty, environment: Option[EnvironmentProvider] = None, grouping: Option[Grouping] = None, hooks: Vector[Hook] = Vector.empty, sources: Vector[Source] = Vector.empty) {
+  case class TaskNode(task: Task, strain: Boolean = false, funnel: Boolean = false, master: Boolean = false, persist: Seq[Val[_]] = Seq.empty, environment: Option[EnvironmentProvider] = None, grouping: Option[Grouping] = None, hooks: Vector[Hook] = Vector.empty, sources: Vector[Source] = Vector.empty) {
     def on(environment: EnvironmentProvider) = copy(environment = Some(environment))
     def hook(hooks: Hook*) = copy(hooks = this.hooks ++ hooks)
     def hook[F](
@@ -367,11 +367,12 @@ package composition {
         def buildCapsule(task: Task, ns: Vector[TaskNode]) = {
           val strain = ns.exists(_.strain)
           val master = ns.exists(_.master)
+          val funnel = ns.exists(_.funnel)
 
-          if (!master) MoleCapsule(task, strain = strain)
+          if (!master) MoleCapsule(task, strain = strain, funnel = funnel)
           else {
             val persist = ns.find(_.master).get.persist
-            MasterCapsule(task, persist = persist, strain = strain)
+            MasterCapsule(task, persist = persist, strain = strain, funnel = funnel)
           }
         }
 
@@ -454,12 +455,12 @@ package composition {
           )
         }
 
-        def addTransitions(p: Puzzle, transitions: Iterable[ITransition]) = Puzzle.add(p, transitions = transitions)
+        def addTransitions(p: Puzzle, transitions: Iterable[Transition]) = Puzzle.add(p, transitions = transitions)
         def addDataChannel(p: Puzzle, channels: Iterable[DataChannel]) = Puzzle.add(p, dataChannels = channels)
 
         def p =
           t match {
-            case --(o, d, condition, filter)          ⇒ transitionsToPuzzle(o, d, addTransitions) { case (c, s) ⇒ new Transition(c, s, condition, filter) }
+            case --(o, d, condition, filter)          ⇒ transitionsToPuzzle(o, d, addTransitions) { case (c, s) ⇒ new DirectTransition(c, s, condition, filter) }
             case -<(o, d, condition, filter)          ⇒ transitionsToPuzzle(o, d, addTransitions) { case (c, s) ⇒ new ExplorationTransition(c, s, condition, filter) }
             case >-(o, d, condition, filter)          ⇒ transitionsToPuzzle(o, d, addTransitions) { case (c, s) ⇒ new AggregationTransition(c, s, condition, filter) }
             case >|(o, d, condition, filter)          ⇒ transitionsToPuzzle(o, d, addTransitions) { case (c, s) ⇒ new EndExplorationTransition(c, s, condition, filter) }
@@ -639,6 +640,11 @@ package composition {
         p & (first oo last block (receivedFromDSL.toSeq: _*))
       }
 
+    }
+
+    object Funnel {
+      def apply(task: Task) = TaskNode(task, funnel = true)
+      def apply(task: TaskNode) = task.copy(funnel = true)
     }
 
   }

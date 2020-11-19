@@ -17,43 +17,135 @@
 
 package org.openmole.core.workflow.transition
 
-import org.openmole.core.context.{ Context, Val }
-import org.openmole.core.expansion.Condition
-import org.openmole.core.workflow.dsl._
+import org.openmole.core.context._
+import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.expansion.FromContext
+import org.openmole.core.workflow.mole.MoleExecution.SubMoleExecutionState
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.validation._
-import org.openmole.tool.logger.JavaLogger
-import cats.implicits._
-import org.openmole.core.fileservice.FileService
-import org.openmole.core.workflow.dsl
-import org.openmole.core.workflow.mole.MoleExecutionMessage.PerformTransition
-import org.openmole.core.workspace.TmpDirectory
+import org.openmole.core.workflow.tools.ContextAggregator
+import org.openmole.core.workflow.validation.TypeUtil._
 
-object Transition extends JavaLogger
+object Transition {
 
-/**
- * Transition between a mole and a slot
- *
- * @param start
- * @param end
- * @param condition
- * @param filter
- */
-class Transition(
-  val start:     MoleCapsule,
-  val end:       TransitionSlot,
-  val condition: Condition      = Condition.True,
-  val filter:    BlockList      = BlockList.empty
-) extends ITransition with ValidateTransition {
+  def isExploration(t: Transition) =
+    t match {
+      case _: ExplorationTransition ⇒ true
+      case _                        ⇒ false
+    }
 
-  override def validate(inputs: Seq[Val[_]]) = condition.validate(inputs)
+  def isAggregation(t: Transition) =
+    t match {
+      case _: AggregationTransition ⇒ true
+      case _                        ⇒ false
+    }
 
-  override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, moleExecutionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
-    PerformTransition(subMole) { subMoleState ⇒
-      import moleExecutionContext.services._
-      if (condition.from(context)) ITransition.submitNextJobsIfReady(this)(filtered(context).values, ticket, subMoleState)
+  def isSlave(t: Transition) =
+    t match {
+      case _: SlaveTransition ⇒ true
+      case _                  ⇒ false
+    }
+
+  def isEndExploration(t: Transition) =
+    t match {
+      case _: EndExplorationTransition ⇒ true
+      case _                           ⇒ false
+    }
+
+  def nextTaskReady(end: TransitionSlot)(ticket: Ticket, registry: MoleExecution.TransitionRegistry, mole: Mole): Boolean = mole.inputTransitions(end).forall(registry.isRegistred(_, ticket))
+
+  def submitNextJobsIfReady(transition: Transition)(context: Iterable[Variable[_]], ticket: Ticket, subMoleState: SubMoleExecutionState) = {
+    val mole = subMoleState.moleExecution.mole
+    subMoleState.transitionRegistry.register(transition, ticket, context)
+    if (nextTaskReady(transition.end)(ticket, subMoleState.transitionRegistry, mole)) {
+
+      def removeVariables(t: Transition) = subMoleState.transitionRegistry.remove(t, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registered")).toIterable
+
+      val transitionVariables: Iterable[Variable[_]] = mole.inputTransitions(transition.end).toList.flatMap { t ⇒ removeVariables(t) }
+
+      val dataChannelVariables = {
+        lazy val transitionVariableNames = transitionVariables.map(_.prototype.name).toSet
+        val variables = mole.inputDataChannels(transition.end).toList.flatMap { d ⇒ DataChannel.consums(d, ticket, subMoleState.moleExecution) }
+        variables.filter(v ⇒ !transitionVariableNames.contains(v.name))
+      }
+
+      val combinasion = dataChannelVariables ++ transitionVariables
+
+      val newTicket =
+        if (mole.slots(transition.end.capsule).size <= 1) ticket
+        else MoleExecution.nextTicket(subMoleState.moleExecution, ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
+
+      val toArrayManifests =
+        validTypes(mole, subMoleState.moleExecution.sources, subMoleState.moleExecution.hooks)(transition.end).filter(_.toArray).map(ct ⇒ ct.name → ct.`type`).toMap[String, ValType[_]]
+
+      val newContext = ContextAggregator.aggregate(transition.end.capsule.inputs(mole, subMoleState.moleExecution.sources, subMoleState.moleExecution.hooks), toArrayManifests, combinasion.map(ticket.content → _))
+      MoleExecution.submit(subMoleState, transition.end.capsule, newContext, newTicket)
     }
   }
+}
 
-  override def toString = s"$start -- $end"
+/**
+ * The trait representing a transition between a start point which is a [[org.openmole.core.workflow.mole.MoleCapsule]]
+ * and an endpoint which is a [[org.openmole.core.workflow.transition.TransitionSlot]]
+ */
+trait Transition {
+
+  /**
+   *
+   * Get the starting capsule of this transition.
+   *
+   * @return the starting capsule of this transition
+   */
+  def start: MoleCapsule
+
+  /**
+   *
+   * Get the ending capsule of this transition.
+   *
+   * @return the ending capsule of this transition
+   */
+  def end: TransitionSlot
+
+  /**
+   *
+   * Get the condition under which this transition is performed.
+   *
+   * @return the condition under which this transition is performed
+   */
+  //def condition: Condition
+
+  /**
+   *
+   * Get the filter of the variables which are filtered by this transition.
+   *
+   * @return filter on the names of the variables which are filtered by this transition
+   */
+  def filter: BlockList
+
+  /**
+   * Get the unfiltered user output data of the starting capsule going through
+   * this transition
+   *
+   * @return the unfiltred output data of the staring capsule
+   */
+  def data(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
+    start.outputs(mole, sources, hooks).filterNot(d ⇒ filter(d))
+
+  /**
+   *
+   * Perform the transition and submit the jobs for the following capsules in the mole.
+   *
+   * @param ticket    ticket of the previous job
+   * @param subMole   current submole
+   */
+  def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, moleExecutionContext: MoleExecutionContext): Unit
+
+  /**
+   * Filter a given context
+   * @param context
+   * @return
+   */
+  protected def filtered(context: Context): Context = context.values.filterNot { v ⇒ filter(v.prototype) }
+
+  override def toString = this.getClass.getSimpleName + " from " + start + " to " + end
+
 }
