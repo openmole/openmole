@@ -31,6 +31,7 @@ import org.openmole.core.workflow.validation._
 
 import scala.collection.mutable.{ HashSet, ListBuffer }
 import scala.util.{ Failure, Success, Try }
+
 object Transition {
 
   def isExploration(t: Transition) =
@@ -87,19 +88,6 @@ object Transition {
       MoleExecution.submit(subMoleState, transition.end.capsule, newContext, newTicket)
     }
   }
-
-  def copy(t: Transition)(
-    start:  MoleCapsule    = t.start,
-    end:    TransitionSlot = t.end,
-    filter: BlockList      = t.filter
-  ) =
-    t match {
-      case t: DirectTransition         ⇒ DirectTransition.copy(t)(start = start, end = end, filter = filter)
-      case t: ExplorationTransition    ⇒ ExplorationTransition.copy(t)(start = start, end = end, filter = filter)
-      case t: AggregationTransition    ⇒ AggregationTransition.copy(t)(start = start, end = end, filter = filter)
-      case t: EndExplorationTransition ⇒ EndExplorationTransition.copy(t)(start = start, end = end, filter = filter)
-      case t: SlaveTransition          ⇒ SlaveTransition.copy(t)(start = start, end = end, filter = filter)
-    }
 
 }
 
@@ -162,22 +150,6 @@ sealed trait Transition {
 
 }
 
-object DirectTransition {
-
-  def copy(d: DirectTransition)(
-    start:     MoleCapsule    = d.start,
-    end:       TransitionSlot = d.`end`,
-    condition: Condition      = d.condition,
-    filter:    BlockList      = d.filter) =
-    new DirectTransition(
-      start = start,
-      end = end,
-      condition = condition,
-      filter = filter
-    )
-
-}
-
 /**
  * Transition between a mole and a slot
  *
@@ -205,18 +177,6 @@ class DirectTransition(
 }
 
 object ExplorationTransition {
-
-  def copy(t: ExplorationTransition)(
-    start:     MoleCapsule    = t.start,
-    end:       TransitionSlot = t.end,
-    condition: Condition      = t.condition,
-    filter:    BlockList      = t.filter
-  ) = new ExplorationTransition(
-    start,
-    end,
-    condition,
-    filter
-  )
 
   def registerAggregationTransitions(transition: ExplorationTransition, ticket: Ticket, subMoleExecution: SubMoleExecutionState, executionContext: MoleExecutionContext, size: Int) = {
     val alreadySeen = new HashSet[MoleCapsule]
@@ -305,20 +265,6 @@ class ExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, val
 }
 
 object AggregationTransition {
-
-  def copy(t: AggregationTransition)(
-    start:     MoleCapsule    = t.start,
-    end:       TransitionSlot = t.end,
-    condition: Condition      = t.condition,
-    filter:    BlockList      = t.filter,
-    trigger:   Condition      = t.trigger
-  ) = new AggregationTransition(
-    start,
-    end,
-    condition,
-    filter,
-    trigger
-  )
 
   def aggregatedOutputs(moleExecution: MoleExecution, transition: AggregationTransition) = transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).toVector
 
@@ -429,21 +375,6 @@ class AggregationTransition(val start: MoleCapsule, val end: TransitionSlot, val
   override def toString = s"$start >- $end"
 }
 
-object EndExplorationTransition {
-
-  def copy(t: EndExplorationTransition)(
-    start:   MoleCapsule    = t.start,
-    end:     TransitionSlot = t.end,
-    trigger: Condition      = t.trigger,
-    filter:  BlockList      = t.filter) =
-    new EndExplorationTransition(
-      start,
-      end,
-      trigger,
-      filter)
-
-}
-
 class EndExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, val trigger: Condition, val filter: BlockList = BlockList.empty) extends Transition with ValidateTransition {
 
   override def validate(inputs: Seq[Val[_]]) = trigger.validate(inputs)
@@ -471,24 +402,6 @@ class EndExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, 
   }
 
   override def toString = s"$start >| $end"
-}
-
-object SlaveTransition {
-
-  def copy(t: SlaveTransition)(
-    start:     MoleCapsule    = t.start,
-    end:       TransitionSlot = t.end,
-    condition: Condition      = t.condition,
-    filter:    BlockList      = t.filter,
-    slaves:    Option[Int]    = t.slaves
-  ) = new SlaveTransition(
-    start,
-    end,
-    condition,
-    filter,
-    slaves
-  )
-
 }
 
 class SlaveTransition(val start: MoleCapsule, val end: TransitionSlot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty, val slaves: Option[Int] = None) extends Transition with ValidateTransition {
