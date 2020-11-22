@@ -133,7 +133,7 @@ package object container {
   }
 
   sealed trait ContainerSystem
-  case class Proot(noSeccomp: Boolean = false, kernel: String = "3.2.1") extends ContainerSystem
+  case class Proot(proot: File, noSeccomp: Boolean = false, kernel: String = "3.2.1") extends ContainerSystem
   case class Singularity(command: String = "singularity") extends ContainerSystem
 
   type PreparedImage = _root_.container.FlatImage

@@ -80,21 +80,6 @@ object ContainerTask {
 
   def repositoryDirectory(workspace: Workspace) = workspace.persistentDir /> "container" /> "repos"
 
-  def installProot(installDirectory: File) = {
-    val proot = installDirectory / "proot"
-
-    def retrieveResource(candidateFile: File, resourceName: String, executable: Boolean = false) =
-      if (!candidateFile.exists()) {
-        withClosable(this.getClass.getClassLoader.getResourceAsStream(resourceName))(_.copy(candidateFile))
-        if (executable) candidateFile.setExecutable(true)
-        candidateFile
-      }
-
-    retrieveResource(proot, "proot", true)
-
-    proot
-  }
-
   def runCommandInContainer(
     containerSystem:      ContainerSystem,
     image:                _root_.container.FlatImage,
@@ -119,10 +104,8 @@ object ContainerTask {
 
     val retCode =
       containerSystem match {
-        case Proot(noSeccomp, kernel) ⇒
+        case Proot(proot, noSeccomp, kernel) ⇒
           tmpDirectory.withTmpDir { directory ⇒
-            val proot = installProot(directory)
-
             _root_.container.Proot.execute(
               image,
               directory / "tmp",
