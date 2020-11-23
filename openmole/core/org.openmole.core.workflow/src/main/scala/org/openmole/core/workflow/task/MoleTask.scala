@@ -96,12 +96,6 @@ object MoleTask {
   info:      InfoConfig
 ) extends Task {
 
-  /**
-   * mole of the MoleTask, with inputs from the config: InputOutputConfig
-   * @return
-   */
-  //def mole = _mole.copy(inputs = inputs)
-
   protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { p ⇒
     import p._
 
