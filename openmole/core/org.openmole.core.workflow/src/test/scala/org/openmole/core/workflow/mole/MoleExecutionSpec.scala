@@ -32,6 +32,7 @@ import org.scalatest._
 
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.execution.{ Environment, LocalEnvironment }
 import org.openmole.core.workflow.grouping.Grouping
 import org.openmole.core.workflow.test.TestTask
 import org.openmole.tool.random.RandomProvider
@@ -98,5 +99,24 @@ class MoleExecutionSpec extends FlatSpec with Matchers {
     val emptyT = EmptyTask()
     val me = emptyT.start(false)
     me.hangOn()
+  }
+
+  "Delegation on environment" should "work" in {
+    import org.openmole.core.event._
+
+    @volatile var sub = 0
+
+    val emptyT = EmptyTask()
+    val env = LocalEnvironment(1)
+
+    val mole = toMoleExecution(emptyT on env)
+
+    mole.environments.head._2 listen {
+      case (_, _: Environment.JobSubmitted) ⇒ sub += 1
+    }
+
+    mole.run
+
+    assert(sub == 1)
   }
 }

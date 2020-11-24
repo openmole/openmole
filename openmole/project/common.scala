@@ -2,12 +2,12 @@
 package openmole
 
 object common {
-  def scalaVersionValue = "2.13.3"
+  def scalaVersionValue = "2.13.4"
 
   def gridscaleVersion = "2.33"
   def mgoVersion = "3.47"
   def sshjVersion = "0.29.0"
-  def containerVersion = "1.12"
+  def containerVersion = "1.13"
   def bouncyCastleVersion = "1.65"
   def netLogo5Version = "5.3.1"
   def netLogo6Version = "6.1.1"

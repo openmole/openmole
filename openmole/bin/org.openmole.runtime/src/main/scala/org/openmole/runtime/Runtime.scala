@@ -162,7 +162,9 @@ class Runtime {
           cache = KeyValueCache(),
           lockRepository = LockRepository[LockKey](),
           serializerService = serializerService,
-          networkService = networkService)
+          networkService = networkService,
+          remote = Some(TaskExecutionContext.Remote(threads))
+        )
 
         for (toProcess ← allMoleJobs) environment.submit(toProcess, taskExecutionContext)
         saver.waitAllFinished

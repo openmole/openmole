@@ -87,11 +87,13 @@ object SimExplorer extends JavaLogger {
 
             if (config.debug) LoggerConfig.level(Level.FINEST)
 
+            val threads = config.nbThread.getOrElse(1)
+
             implicit val workspace = Workspace(new File(config.workspace.get).getCanonicalFile)
             implicit val newFile = TmpDirectory(workspace)
             implicit val serializerService = SerializerService()
             implicit val preference = Preference.memory()
-            implicit val threadProvider = ThreadProvider(config.nbThread.get + 5)
+            implicit val threadProvider = ThreadProvider(threads + 5)
             implicit val fileService = FileService()
             implicit val eventDispatcher = EventDispatcher()
             implicit val loggerService = if (config.debug) LoggerService(level = Some(finest)) else LoggerService()
@@ -109,7 +111,7 @@ object SimExplorer extends JavaLogger {
                 storage,
                 config.inputMessage.get,
                 config.outputMessage.get,
-                config.nbThread.getOrElse(1),
+                threads,
                 config.debug
               )
             }
