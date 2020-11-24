@@ -126,7 +126,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
             true
           case fileaction.download ⇒
             withSafePath { sp ⇒
-              org.scalajs.dom.document.location.href = s"downloadFile?path=${client.Utils.toURI(sp.path)}"
+              org.scalajs.dom.document.location.href = routes.downloadFile(client.Utils.toURI(sp.path))
               Popover.hide
             }
             true

@@ -553,7 +553,6 @@ package file {
       def accept(entry: Path): Boolean = Files.isDirectory(entry)
     }
 
-
   }
 
 }

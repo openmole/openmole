@@ -209,7 +209,7 @@ package object data {
 
   sealed trait FileContent
 
-  case class AlterableFileContent(path: SafePath, content: String, hash: Option[String]) extends FileContent
+  case class AlterableFileContent(path: SafePath, content: String, hash: String) extends FileContent
 
   case class ReadOnlyFileContent() extends FileContent
 
