@@ -36,7 +36,7 @@ import org.openmole.core.workspace.TmpDirectory
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.server.{ GUIPluginRegistry, utils }
 import org.openmole.gui.ext.server.utils._
-import org.openmole.gui.server.core.GUIServer.ApplicationControl
+import org.openmole.gui.server.core.GUIServer.{ ApplicationControl, lockFile }
 import org.openmole.plugin.hook.omr.OMROutputFormat
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.outputredirection.OutputRedirection
@@ -270,17 +270,21 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   def saveFile(path: SafePath, fileContent: String, hash: Option[String], overwrite: Boolean): Boolean = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
+    val file = safePathToFile(path)
+
     def save = {
-      safePathToFile(path).content = fileContent
+      file.content = fileContent
       true
     }
 
-    if (overwrite) save
-    else hash match {
-      case Some(st: String) ⇒
-        if (utils.hash(path) == st) save
-        else false
-      case _ ⇒ save
+    file.withLock { _ ⇒
+      if (overwrite) save
+      else hash match {
+        case Some(st: String) ⇒
+          if (org.openmole.tool.hash.hashFile(file).toString == st) save
+          else false
+        case _ ⇒ save
+      }
     }
   }
 
@@ -292,11 +296,6 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     safePathToFile(safePath).length
   }
-
-  //  def hash(safePath: SafePath): String = {
-  //    import org.openmole.gui.ext.data.ServerFileSystemContext.project
-  //    utils.hash(safePath)
-  //  }
 
   def sequence(safePath: SafePath, separator: Char = ','): SequenceData = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project

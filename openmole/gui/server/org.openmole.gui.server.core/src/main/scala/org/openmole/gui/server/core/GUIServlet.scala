@@ -49,6 +49,7 @@ import org.openmole.gui.ext.data.routes._
 import org.openmole.gui.ext.server.{ AutowireServer, OMRouter, utils }
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.file._
+import org.openmole.tool.lock.LockRepository
 import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.random.{ RandomProvider, Seeder }
@@ -280,12 +281,14 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
         finally tos.close
       }
       else {
-        response.setHeader("Content-Disposition", s"""attachment; filename="${f.getName}"""")
-        response.setContentLengthLong(f.length)
-        if (hash) response.setHeader(hashHeader, org.openmole.tool.hash.hashFile(f).toString)
-        val os = response.getOutputStream()
-        try f.copy(os)
-        finally os.close
+        f.withLock { _ ⇒
+          response.setHeader("Content-Disposition", s"""attachment; filename="${f.getName}"""")
+          response.setContentLengthLong(f.length)
+          if (hash) response.setHeader(hashHeader, org.openmole.tool.hash.hashFile(f).toString)
+          val os = response.getOutputStream()
+          try f.copy(os)
+          finally os.close
+        }
       }
     }
   }
