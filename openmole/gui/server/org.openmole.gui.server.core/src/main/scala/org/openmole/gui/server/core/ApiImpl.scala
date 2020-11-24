@@ -281,7 +281,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
       if (overwrite) save
       else hash match {
         case Some(st: String) ⇒
-          if (org.openmole.tool.hash.hashFile(file).toString == st) save
+          if (services.fileService.hashNoCache(file).toString == st) save
           else false
         case _ ⇒ save
       }
