@@ -648,11 +648,11 @@ object TreeNodeTab {
     }
 
   def serverConflictAlert(safePath: SafePath, editorPanelUI: EditorPanelUI, afterSave: String ⇒ Unit) = panels.alertPanel.string(
-    s"This file has been modified on the sever. Which version do you to keep ?",
+    s"The file ${safePath.name} has been modified on the sever. Which version do you want to keep?",
     okaction = { () ⇒ save(safePath, editorPanelUI, afterSave, true) },
     cancelaction = { () ⇒ panels.treeNodePanel.downloadFile(safePath, saveFile = false, hash = true, onLoaded = (content: String, hash: Option[String]) ⇒ { editorPanelUI.setCode(content, hash.get) }) },
     transform = CenterPagePosition,
-    okString = "This one",
+    okString = "Yours",
     cancelString = "Server"
   )
 

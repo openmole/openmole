@@ -116,7 +116,16 @@ class AlertPanel {
     buttonGroupClass: ModifierSeq = Seq(floatLeft, marginLeft := 20),
     okString:         String      = "OK",
     cancelString:     String      = "Cancel"
-  ): Unit = alertDiv(tags.div(message), okaction, cancelaction, transform, zone, alertType, buttonGroupClass, okString, cancelString)
+  ): Unit = alertDiv(
+    tags.div(message),
+    okaction,
+    cancelaction,
+    transform,
+    zone,
+    alertType,
+    buttonGroupClass,
+    okString,
+    cancelString)
 
   def detail(
     message:          String,
