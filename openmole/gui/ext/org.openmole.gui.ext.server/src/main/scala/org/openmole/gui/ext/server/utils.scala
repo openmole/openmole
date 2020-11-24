@@ -8,15 +8,15 @@ import scala.collection.JavaConverters._
 import org.openmole.core.fileservice._
 import org.openmole.core.highlight.HighLight
 import org.openmole.core.pluginmanager._
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import org.openmole.tool.file._
 import org.openmole.tool.logger.JavaLogger
 
 import scala.annotation.tailrec
-import scala.io.{ BufferedSource, Codec }
-import scala.util.{ Failure, Success, Try }
+import scala.io.{BufferedSource, Codec}
+import scala.util.{Failure, Success, Try}
 
 import collection.JavaConverters._
 
@@ -63,14 +63,14 @@ object utils {
   def fileToSafePath(f: File)(implicit context: ServerFileSystemContext, workspace: Workspace): SafePath = {
     context match {
       case _: ProjectFileSystem ⇒ SafePath(getPathArray(f, projectsDirectory))
-      case _                    ⇒ SafePath(getPathArray(f, new File("")))
+      case _ ⇒ SafePath(getPathArray(f, new File("")))
     }
   }
 
   def safePathToFile(s: SafePath)(implicit context: ServerFileSystemContext, workspace: Workspace): File = {
     context match {
       case _: ProjectFileSystem ⇒ getFile(webUIDirectory, s.path)
-      case _                    ⇒ getFile(new File(""), s.path)
+      case _ ⇒ getFile(new File(""), s.path)
     }
   }
 
@@ -141,7 +141,7 @@ object utils {
 
     fileFilter.firstLast match {
       case First() ⇒ ListFilesData(sorted.take(threshold), nbFiles)
-      case Last()  ⇒ ListFilesData(sorted.takeRight(threshold).reverse, nbFiles)
+      case Last() ⇒ ListFilesData(sorted.takeRight(threshold).reverse, nbFiles)
     }
   }
 
@@ -325,6 +325,11 @@ object utils {
         }
       }
     }
+  }
+
+  def hash(safePath: SafePath)(implicit workspace: Workspace, context: ServerFileSystemContext) = {
+    val file: File = safePathToFile(safePath)
+    org.openmole.tool.hash.hashString(file.content).toString
   }
 
   def catchAll[T](f: ⇒ T): Try[T] = {

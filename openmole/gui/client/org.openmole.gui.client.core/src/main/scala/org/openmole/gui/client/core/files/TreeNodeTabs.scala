@@ -19,6 +19,7 @@ import org.openmole.gui.ext.client._
 import org.openmole.gui.client.core._
 import DataUtils._
 import net.scalapro.sortable._
+import org.openmole.gui.client.core.alert.AbsolutePositioning.{ CenterPagePosition }
 import org.openmole.gui.client.core.files.TreeNodeTab.{ EditableView, First100, Raw, RowFilter }
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.client.tool.plot.Plot._
@@ -242,13 +243,15 @@ object TreeNodeTab {
     def editor = Some(editableEditor)
 
     def download(afterRefresh: () ⇒ Unit): Unit = editor.synchronized {
+      val safePath = safePathTab.now
+
       FileManager.download(
-        safePathTab.now,
+        safePath,
         (p: ProcessState) ⇒ {},
         (cont: String) ⇒ {
           editableEditor.setCode(cont)
           if (isCSV) {
-            Post()[Api].sequence(safePathTab.now).call().foreach {
+            Post()[Api].sequence(safePath).call().foreach {
               seq ⇒ switchView(seq)
             }
           }
@@ -580,13 +583,22 @@ object TreeNodeTab {
 
   }
 
-  def save(safePath: SafePath, editorPanelUI: EditorPanelUI, afterSave: () ⇒ Unit) =
+  def save(safePath: SafePath, editorPanelUI: EditorPanelUI, afterSave: () ⇒ Unit, overwrite: Boolean = false): Unit =
     editorPanelUI.synchronized {
-      Post()[Api].saveFile(safePath, editorPanelUI.code).call().foreach {
-        _ ⇒
-          afterSave()
+      Post()[Api].saveFile(safePath, HashService.latestHash(safePath), editorPanelUI.code, overwrite).call().foreach { serverConflict ⇒
+        if (serverConflict) afterSave()
+        else serverConflictAlert(safePath, editorPanelUI, afterSave)
       }
     }
+
+  def serverConflictAlert(safePath: SafePath, editorPanelUI: EditorPanelUI, afterSave: () ⇒ Unit) = panels.alertPanel.string(
+    s"This file has been modified on the sever. Which version do you to keep ?",
+    okaction = { () ⇒ save(safePath, editorPanelUI, afterSave, true) },
+    cancelaction = { () ⇒ panels.treeNodePanel.downloadFile(safePath, false, (content: String) ⇒ { editorPanelUI.setCode(content) }) },
+    transform = CenterPagePosition,
+    okString = "This one",
+    cancelString = "Server"
+  )
 
   def rawBlock(htmlContent: String) =
     div(editorContainer +++ container)(
@@ -733,7 +745,7 @@ class TreeNodeTabs {
   }
 
   def alterables: Seq[AlterableFileContent] =
-    tabs.now.flatMap { t ⇒ t.editableContent.map(c ⇒ AlterableFileContent(t.safePathTab.now, c)) }
+    tabs.now.flatMap { t ⇒ t.editableContent.map(c ⇒ AlterableFileContent(t.safePathTab.now, c, HashService.latestHash(t.safePathTab.now))) }
 
   def saveAllTabs(onsave: () ⇒ Unit) = {
     //if(org.scalajs.dom.document.hasFocus())

@@ -15,7 +15,7 @@ import boopickle.Default._
 import autowire._
 import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
-import org.openmole.gui.client.core.files.TreeNodePanel
+import org.openmole.gui.client.core.files.{ HashService, TreeNodePanel }
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._

@@ -62,9 +62,10 @@ class AlertPanel {
     zone:             Zone                     = FullPage,
     alertType:        ModifierSeq              = btn_danger,
     buttonGroupClass: ModifierSeq              = floatLeft,
-    okString:         String                   = "OK"
+    okString:         String                   = "OK",
+    cancelString:     String                   = "Cancel"
   ) = {
-    alertElement() = OMTags.alert(alertType, messageDiv, actions.map { a ⇒ a.copy(action = actionWrapper(a.action)) }, buttonGroupClass, okString)
+    alertElement() = OMTags.alert(alertType, messageDiv, actions.map { a ⇒ a.copy(action = actionWrapper(a.action)) }, buttonGroupClass, okString, cancelString)
     zoneModifier() = zone.modifierClass
     positionModifier() = position.modifierClass
     visible() = true
@@ -83,9 +84,10 @@ class AlertPanel {
     zone:             Zone                     = FullPage,
     alertType:        ModifierSeq              = btn_danger,
     buttonGroupClass: ModifierSeq              = floatRight,
-    okString:         String                   = "OK"
+    okString:         String                   = "OK",
+    cancelString:     String                   = "Cancel"
   ): Unit = {
-    popup(messageDiv, Seq(AlertAction(okaction), AlertAction(cancelaction)), transform, zone, alertType, buttonGroupClass, okString)
+    popup(messageDiv, Seq(AlertAction(okaction), AlertAction(cancelaction)), transform, zone, alertType, buttonGroupClass, okString, cancelString)
   }
 
   def treeNodeErrorDiv(error: TreeNodeError): Unit = alertDiv(
@@ -111,8 +113,10 @@ class AlertPanel {
     transform:        Position    = CenterPagePosition,
     zone:             Zone        = FullPage,
     alertType:        ModifierSeq = btn_danger,
-    buttonGroupClass: ModifierSeq = Seq(floatLeft, marginLeft := 20)
-  ): Unit = alertDiv(tags.div(message), okaction, cancelaction, transform, zone, alertType, buttonGroupClass)
+    buttonGroupClass: ModifierSeq = Seq(floatLeft, marginLeft := 20),
+    okString:         String      = "OK",
+    cancelString:     String      = "Cancel"
+  ): Unit = alertDiv(tags.div(message), okaction, cancelaction, transform, zone, alertType, buttonGroupClass, okString, cancelString)
 
   def detail(
     message:          String,

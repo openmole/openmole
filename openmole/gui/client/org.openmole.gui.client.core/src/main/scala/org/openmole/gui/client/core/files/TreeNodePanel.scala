@@ -150,6 +150,12 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
   def filter: FileFilter = fileToolBar.fileFilter.now
 
   def downloadFile(safePath: SafePath, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {}) = {
+
+    if (FileExtension.isOMS(safePath.name))
+      OMPost()[Api].hash(safePath).call().foreach { h ⇒
+        HashService.set(safePath, h)
+      }
+
     FileManager.download(
       safePath,
       (p: ProcessState) ⇒ {

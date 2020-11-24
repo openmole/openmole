@@ -19,6 +19,7 @@ package org.openmole.gui.ext.api
 import org.openmole.core.buildinfo._
 import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
 import org.openmole.gui.ext.data._
+import org.openmole.tool.hash.Hash
 
 trait Api {
 
@@ -60,9 +61,10 @@ trait Api {
   def copyFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
   def uuid(): String = java.util.UUID.randomUUID.toString
   def renameFile(safePath: SafePath, name: String): SafePath
-  def saveFile(path: SafePath, fileContent: String): Unit
-  def saveFiles(fileContents: Seq[AlterableFileContent]): Unit
+  def saveFile(path: SafePath, hash: Option[String], fileContent: String, overwrite: Boolean): Boolean
+  def saveFiles(fileContents: Seq[AlterableFileContent]): Seq[(SafePath, Boolean)]
   def size(safePath: SafePath): Long
+  def hash(safePath: SafePath): String
   def sequence(safePath: SafePath, separator: Char = ','): SequenceData
 
   //EXECUTIONS

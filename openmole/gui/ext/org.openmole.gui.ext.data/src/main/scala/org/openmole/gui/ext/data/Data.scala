@@ -202,11 +202,14 @@ package object data {
         case _ ⇒ BINARY
       }
     }
+
+    def isOMS(fileName: String) = apply(fileName) == OMS
+
   }
 
   sealed trait FileContent
 
-  case class AlterableFileContent(path: SafePath, content: String) extends FileContent
+  case class AlterableFileContent(path: SafePath, content: String, hash: Option[String]) extends FileContent
 
   case class ReadOnlyFileContent() extends FileContent
 
