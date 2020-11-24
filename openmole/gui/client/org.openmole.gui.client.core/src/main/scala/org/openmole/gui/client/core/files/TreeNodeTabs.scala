@@ -90,14 +90,11 @@ sealed trait TreeNodeTab {
     activity() = UnActive
   }
 
-  //  def extension: FileExtension = FileExtension(safePathTab.now.name)
-
   // Get the file content to be saved
   def editableContent: Option[TreeNodeTab.EditableContent]
-
   def editor: Option[EditorPanelUI]
 
-  def refresh(afterRefresh: () ⇒ Unit = () ⇒ {}): Unit
+  def saveContent(afterRefresh: () ⇒ Unit = () ⇒ {}): Unit
 
   def resizeEditor: Unit
 
@@ -151,7 +148,13 @@ object TreeNodeTab {
       Some(TreeNodeTab.EditableContent(code, hash))
     }
 
-    def refresh(onsaved: () ⇒ Unit) = save(safePathTab.now, omsEditor, onsaved)
+    def saveContent(onsaved: () ⇒ Unit) = {
+      def saved(hash: String) = {
+        omsEditor.initialContentHash = hash
+        onsaved()
+      }
+      save(safePathTab.now, omsEditor, saved)
+    }
 
     def resizeEditor = omsEditor.editor.resize()
 
@@ -180,7 +183,7 @@ object TreeNodeTab {
             button("Test", btn_default, onclick := { () ⇒
               unsetErrors
               compileDisabled.update(true)
-              refresh(() ⇒
+              saveContent(() ⇒
                 Post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].compileScript(ScriptData(safePathTab.now)).call().foreach { errorDataOption ⇒
                   setError(errorDataOption)
                 })
@@ -189,7 +192,7 @@ object TreeNodeTab {
         div(display.flex, flexDirection.row)(
           button("Run", btn_primary, marginLeft := 10, onclick := { () ⇒
             unsetErrors
-            refresh(() ⇒
+            saveContent(() ⇒
               Post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePathTab.now), validateButton.position.now).call().foreach { execInfo ⇒
                 showExecution()
               }
@@ -216,7 +219,7 @@ object TreeNodeTab {
 
     def editor = None
 
-    def refresh(afterRefresh: () ⇒ Unit): Unit = () ⇒ {}
+    def saveContent(afterRefresh: () ⇒ Unit): Unit = () ⇒ {}
 
     def resizeEditor = {}
 
@@ -305,8 +308,14 @@ object TreeNodeTab {
       )
     }
 
-    def refresh(afterRefresh: () ⇒ Unit): Unit = {
-      def saveTab = TreeNodeTab.save(safePathTab.now, editorValue, afterRefresh)
+    def saveContent(afterRefresh: () ⇒ Unit): Unit = {
+      def saveTab = {
+        def saved(hash: String) = {
+          editorValue.initialContentHash = hash
+          afterRefresh()
+        }
+        TreeNodeTab.save(safePathTab.now, editorValue, saved)
+      }
 
       if (isEditing.now) {
         if (isCSV) {
@@ -353,7 +362,7 @@ object TreeNodeTab {
         case Plot  ⇒ toView(ColumnPlot, ScatterMode)
         case _ ⇒
           if (isEditing.now)
-            refresh(() ⇒ {
+            saveContent(() ⇒ {
               download(() ⇒ switch(isEditing.now))
             })
           else switch(isEditing.now)
@@ -628,16 +637,17 @@ object TreeNodeTab {
 
   }
 
-  def save(safePath: SafePath, editorPanelUI: EditorPanelUI, afterSave: () ⇒ Unit, overwrite: Boolean = false): Unit =
+  def save(safePath: SafePath, editorPanelUI: EditorPanelUI, afterSave: String ⇒ Unit, overwrite: Boolean = false): Unit =
     editorPanelUI.synchronized {
       val (content, hash) = editorPanelUI.code
-      Post()[Api].saveFile(safePath, content, Some(hash), overwrite).call().foreach { serverConflict ⇒
-        if (serverConflict) afterSave()
-        else serverConflictAlert(safePath, editorPanelUI, afterSave)
+      Post()[Api].saveFile(safePath, content, Some(hash), overwrite).call().foreach {
+        case (saved, savedHash) ⇒
+          if (saved) afterSave(savedHash)
+          else serverConflictAlert(safePath, editorPanelUI, afterSave)
       }
     }
 
-  def serverConflictAlert(safePath: SafePath, editorPanelUI: EditorPanelUI, afterSave: () ⇒ Unit) = panels.alertPanel.string(
+  def serverConflictAlert(safePath: SafePath, editorPanelUI: EditorPanelUI, afterSave: String ⇒ Unit) = panels.alertPanel.string(
     s"This file has been modified on the sever. Which version do you to keep ?",
     okaction = { () ⇒ save(safePath, editorPanelUI, afterSave, true) },
     cancelaction = { () ⇒ panels.treeNodePanel.downloadFile(safePath, saveFile = false, hash = true, onLoaded = (content: String, hash: Option[String]) ⇒ { editorPanelUI.setCode(content, hash.get) }) },
@@ -728,7 +738,7 @@ class TreeNodeTabs {
       case None ⇒
         timer() = Some(setInterval(15000) {
           tabs.now.foreach {
-            _.refresh()
+            _.saveContent()
           }
         })
       case _ ⇒
@@ -791,13 +801,13 @@ class TreeNodeTabs {
     setActive(to)
   }
 
-  def alterables: Seq[AlterableFileContent] =
-    tabs.now.flatMap { t ⇒ t.editableContent.map(c ⇒ AlterableFileContent(t.safePathTab.now, c.content, c.hash)) }
-
-  def saveAllTabs(onsave: () ⇒ Unit) = {
-    //if(org.scalajs.dom.document.hasFocus())
-    org.openmole.gui.client.core.Post()[Api].saveFiles(alterables).call().foreach { s ⇒ onsave() }
-  }
+  //  def alterables: Seq[AlterableFileContent] =
+  //    tabs.now.flatMap { t ⇒ t.editableContent.map(c ⇒ AlterableFileContent(t.safePathTab.now, c.content, c.hash)) }
+  //
+  //  def saveAllTabs(onsave: () ⇒ Unit) = {
+  //    //if(org.scalajs.dom.document.hasFocus())
+  //    org.openmole.gui.client.core.Post()[Api].saveFiles(alterables).call().foreach { s ⇒ onsave() }
+  //  }
 
   def checkTabs = tabs.now.foreach { t: TreeNodeTab ⇒
     org.openmole.gui.client.core.Post()[Api].exists(t.safePathTab.now).call().foreach { e ⇒
@@ -876,7 +886,7 @@ class TreeNodeTabs {
                     `type` := "button",
                     onclick := {
                       () ⇒
-                        t.refresh(() ⇒ ()) // save
+                        t.saveContent(() ⇒ ()) // save
                         remove(t)
                     }
                   )(raw("&#215")),

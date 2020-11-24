@@ -61,8 +61,8 @@ trait Api {
   def copyFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
   def uuid(): String = java.util.UUID.randomUUID.toString
   def renameFile(safePath: SafePath, name: String): SafePath
-  def saveFile(path: SafePath, fileContent: String, hash: Option[String], overwrite: Boolean): Boolean
-  def saveFiles(fileContents: Seq[AlterableFileContent]): Seq[(SafePath, Boolean)]
+  def saveFile(path: SafePath, fileContent: String, hash: Option[String], overwrite: Boolean): (Boolean, String)
+  //  def saveFiles(fileContents: Seq[AlterableFileContent]): Seq[(SafePath, Boolean)]
   def size(safePath: SafePath): Long
   //  def hash(safePath: SafePath): String
   def sequence(safePath: SafePath, separator: Char = ','): SequenceData

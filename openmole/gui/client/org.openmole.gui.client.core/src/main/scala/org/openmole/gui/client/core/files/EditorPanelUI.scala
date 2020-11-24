@@ -163,6 +163,7 @@ class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: Fi
   }
 
   def aceDoc = editor.getSession().getDocument()
+
   def code = editor.synchronized { (editor.getSession().getValue(), initialContentHash) }
 
   def setCode(content: String, hash: String) = editor.synchronized {

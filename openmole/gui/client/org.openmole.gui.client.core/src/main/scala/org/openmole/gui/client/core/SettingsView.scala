@@ -47,11 +47,7 @@ class SettingsView(fileDisplayer: FileDisplayer) {
 
   private def alertPanel(warnMessage: String, route: String) = panels.alertPanel.string(
     warnMessage,
-    () ⇒ {
-      fileDisplayer.treeNodeTabs.saveAllTabs(() ⇒ {
-        CoreUtils.setRoute(route)
-      })
-    },
+    () ⇒ { /*fileDisplayer.treeNodeTabs.saveAllTabs(() ⇒ {*/ CoreUtils.setRoute(route) /*})*/ },
     transform = CenterPagePosition
   )
 

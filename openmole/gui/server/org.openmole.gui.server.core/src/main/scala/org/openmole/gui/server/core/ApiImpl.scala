@@ -267,30 +267,31 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     targetFile.toSafePath
   }
 
-  def saveFile(path: SafePath, fileContent: String, hash: Option[String], overwrite: Boolean): Boolean = {
+  def saveFile(path: SafePath, fileContent: String, hash: Option[String], overwrite: Boolean): (Boolean, String) = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
     val file = safePathToFile(path)
 
-    def save = {
-      file.content = fileContent
-      true
-    }
-
     file.withLock { _ ⇒
-      if (overwrite) save
+      def save() = {
+        file.content = fileContent
+        def newHash = services.fileService.hashNoCache(file).toString
+        (true, newHash)
+      }
+
+      if (overwrite) save()
       else hash match {
-        case Some(st: String) ⇒
-          if (services.fileService.hashNoCache(file).toString == st) save
-          else false
-        case _ ⇒ save
+        case Some(expectedHash: String) ⇒
+          val hashOnDisk = services.fileService.hashNoCache(file).toString
+          if (hashOnDisk == expectedHash) save() else (false, hashOnDisk)
+        case _ ⇒ save()
       }
     }
   }
 
-  def saveFiles(fileContents: Seq[AlterableFileContent]): Seq[(SafePath, Boolean)] = fileContents.map { fc ⇒
-    fc.path -> saveFile(fc.path, fc.content, Some(fc.hash), false)
-  }
+  //  def saveFiles(fileContents: Seq[AlterableFileContent]): Seq[(SafePath, Boolean)] = fileContents.map { fc ⇒
+  //    fc.path -> saveFile(fc.path, fc.content, Some(fc.hash), false)
+  //  }
 
   def size(safePath: SafePath): Long = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project

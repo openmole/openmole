@@ -262,21 +262,21 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
   def testRename(safePath: SafePath, parent: Node, pivot: Node, cancelNode: Node) = {
     val newTitle = editTitle.value
     val newSafePath = safePath.parent ++ newTitle
-    treeNodeTabs.saveAllTabs(() ⇒ {
-      Post()[Api].existsExcept(newSafePath, false).call().foreach {
-        b ⇒
-          if (b) {
-            overwriting() = true
-            cancelNode.parentNode.replaceChild(editDiv(fileaction.confirmOverwrite, "Overwrite ?"), cancelNode)
-            editTitle.focus()
-          }
-          else {
-            overwriting() = false
-            rename(safePath, () ⇒ replaceTitle(pivot))
-            Popover.hide
-          }
-      }
-    })
+    //treeNodeTabs.saveAllTabs(() ⇒ {
+    Post()[Api].existsExcept(newSafePath, false).call().foreach {
+      b ⇒
+        if (b) {
+          overwriting() = true
+          cancelNode.parentNode.replaceChild(editDiv(fileaction.confirmOverwrite, "Overwrite ?"), cancelNode)
+          editTitle.focus()
+        }
+        else {
+          overwriting() = false
+          rename(safePath, () ⇒ replaceTitle(pivot))
+          Popover.hide
+        }
+    }
+    //})
   }
 
   def rename(safePath: SafePath, replacing: () ⇒ Unit) = {
