@@ -267,7 +267,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     targetFile.toSafePath
   }
 
-  def saveFile(path: SafePath, hash: Option[String], fileContent: String, overwrite: Boolean): Boolean = {
+  def saveFile(path: SafePath, fileContent: String, hash: Option[String], overwrite: Boolean): Boolean = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
     def save = {
@@ -285,7 +285,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   }
 
   def saveFiles(fileContents: Seq[AlterableFileContent]): Seq[(SafePath, Boolean)] = fileContents.map { fc ⇒
-    fc.path -> saveFile(fc.path, fc.hash, fc.content, false)
+    fc.path -> saveFile(fc.path, fc.content, Some(fc.hash), false)
   }
 
   def size(safePath: SafePath): Long = {
@@ -293,10 +293,10 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     safePathToFile(safePath).length
   }
 
-  def hash(safePath: SafePath): String = {
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
-    utils.hash(safePath)
-  }
+  //  def hash(safePath: SafePath): String = {
+  //    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+  //    utils.hash(safePath)
+  //  }
 
   def sequence(safePath: SafePath, separator: Char = ','): SequenceData = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project

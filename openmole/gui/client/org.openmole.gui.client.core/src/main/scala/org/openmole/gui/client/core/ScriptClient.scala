@@ -15,7 +15,7 @@ import boopickle.Default._
 import autowire._
 import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
-import org.openmole.gui.client.core.files.{ HashService, TreeNodePanel }
+import org.openmole.gui.client.core.files.{ TreeNodePanel }
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
@@ -155,9 +155,10 @@ object ScriptClient {
           val toDisplay = panels.treeNodeManager.current.now ++ fileName
           FileManager.download(
             toDisplay,
-            onLoadEnded = (content: String) ⇒ {
+            hash = true,
+            onLoaded = (content, hash) ⇒ {
               panels.treeNodePanel.refreshAndDraw
-              fileDisplayer.display(toDisplay, content, FileExtension.OMS, panels.pluginServices)
+              fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OMS, panels.pluginServices)
             }
           )
         })

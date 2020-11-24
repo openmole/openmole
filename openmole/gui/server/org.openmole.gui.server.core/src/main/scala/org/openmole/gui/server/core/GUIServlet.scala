@@ -264,8 +264,9 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   }
 
   get(downloadFileRoute) {
-
     val path = params("path")
+    val hash = params.get("hash").flatMap(_.toBooleanOption).getOrElse(false)
+
     val f = new File(utils.webUIDirectory, path)
 
     if (!f.exists()) NotFound("The file " + path + " does not exist.")
@@ -273,6 +274,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
       if (f.isDirectory) {
         response.setHeader("Content-Disposition", s"""attachment; filename="${f.getName + ".tgz"}"""")
         val os = response.getOutputStream()
+        if (hash) response.setHeader(hashHeader, org.openmole.tool.hash.hashFile(f).toString)
         val tos = new TarOutputStream(os.toGZ, 64 * 1024)
         try tos.archive(f, includeTopDirectoryName = true)
         finally tos.close
@@ -280,6 +282,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
       else {
         response.setHeader("Content-Disposition", s"""attachment; filename="${f.getName}"""")
         response.setContentLengthLong(f.length)
+        if (hash) response.setHeader(hashHeader, org.openmole.tool.hash.hashFile(f).toString)
         val os = response.getOutputStream()
         try f.copy(os)
         finally os.close

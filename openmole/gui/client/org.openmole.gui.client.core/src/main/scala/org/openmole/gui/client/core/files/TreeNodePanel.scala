@@ -149,19 +149,18 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
   def filter: FileFilter = fileToolBar.fileFilter.now
 
-  def downloadFile(safePath: SafePath, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {}) = {
+  def downloadFile(safePath: SafePath, onLoaded: (String, Option[String]) ⇒ Unit, saveFile: Boolean, hash: Boolean) = {
 
-    if (FileExtension.isOMS(safePath.name))
-      OMPost()[Api].hash(safePath).call().foreach { h ⇒
-        HashService.set(safePath, h)
-      }
+    //    if (FileExtension.isOMS(safePath.name))
+    //      OMPost()[Api].hash(safePath).call().foreach { h ⇒
+    //        HashService.set(safePath, h)
+    //      }
 
     FileManager.download(
       safePath,
-      (p: ProcessState) ⇒ {
-        fileToolBar.transferring() = p
-      },
-      onLoaded
+      (p: ProcessState) ⇒ { fileToolBar.transferring() = p },
+      hash = hash,
+      onLoaded = onLoaded
     )
   }
 
@@ -276,10 +275,15 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
       val ext = FileExtension(tn.name.now)
       val tnSafePath = treeNodeManager.current.now ++ tn.name.now
       if (ext.displayable) {
-        downloadFile(tnSafePath, false, (content: String) ⇒ {
-          fileDisplayer.display(tnSafePath, content, ext, services)
-          invalidCacheAndDraw
-        })
+        val hash = FileExtension.isOMS(tnSafePath.name)
+        downloadFile(
+          tnSafePath,
+          saveFile = false,
+          hash = hash,
+          onLoaded = (content: String, hash: Option[String]) ⇒ {
+            fileDisplayer.display(tnSafePath, content, hash.get, ext, services)
+            invalidCacheAndDraw
+          })
       }
     case _ ⇒
   }
