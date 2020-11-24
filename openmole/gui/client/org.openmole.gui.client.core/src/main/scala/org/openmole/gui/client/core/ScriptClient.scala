@@ -125,7 +125,7 @@ object ScriptClient {
 
       val itemStyle = lineHeight := "35px"
 
-      val execItem = navItem(div(glyph_flash, itemStyle).tooltip("Executions"), () ⇒ executionPanel.dialog.show)
+      val execItem = navItem(div(glyph_flash, itemStyle).tooltip("Executions"), () ⇒ openExecutionPanel)
 
       val authenticationItem = navItem(div(glyph_lock, itemStyle).tooltip("Authentications"), () ⇒ authenticationPanel.dialog.show)
 
