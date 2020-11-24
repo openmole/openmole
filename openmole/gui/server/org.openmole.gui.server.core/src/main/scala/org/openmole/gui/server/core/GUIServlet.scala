@@ -275,7 +275,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
       if (f.isDirectory) {
         response.setHeader("Content-Disposition", s"""attachment; filename="${f.getName + ".tgz"}"""")
         val os = response.getOutputStream()
-        if (hash) response.setHeader(hashHeader, org.openmole.tool.hash.hashFile(f).toString)
+        if (hash) response.setHeader(hashHeader, services.fileService.hashNoCache(f).toString)
         val tos = new TarOutputStream(os.toGZ, 64 * 1024)
         try tos.archive(f, includeTopDirectoryName = true)
         finally tos.close
@@ -284,7 +284,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
         f.withLock { _ ⇒
           response.setHeader("Content-Disposition", s"""attachment; filename="${f.getName}"""")
           response.setContentLengthLong(f.length)
-          if (hash) response.setHeader(hashHeader, org.openmole.tool.hash.hashFile(f).toString)
+          if (hash) response.setHeader(hashHeader, services.fileService.hashNoCache(f).toString)
           val os = response.getOutputStream()
           try f.copy(os)
           finally os.close
