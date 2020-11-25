@@ -32,6 +32,16 @@ class DirectSamplingSpec extends FlatSpec with Matchers {
     mole.run
   }
 
+  "Grouping" should "be accepted on direct sampling" in {
+    val i = Val[Int]
+
+    val dsl: DSL =
+      DirectSampling(
+        EmptyTask(),
+        ExplicitSampling(i, Seq(1))
+      ) hook display by 10
+  }
+
   "Direct sampling" should "transmit explored inputs to repicated model" in {
     val i = Val[Int]
     val seed = Val[Int]

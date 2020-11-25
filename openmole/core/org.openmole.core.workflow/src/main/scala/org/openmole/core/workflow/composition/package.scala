@@ -337,6 +337,7 @@ package composition {
     scope:       DefinitionScope) extends DSL {
     def on(environment: EnvironmentProvider) = copy(environment = Some(environment))
     def by(strategy: Grouping) = copy(grouping = Some(strategy))
+    def by(n: Int) = copy(grouping = Some(ByGrouping(n)))
   }
 
   case class TaskNodeDSL(node: TaskNode) extends DSL
