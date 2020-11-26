@@ -34,10 +34,18 @@ package object buildinfo {
       val format = DateFormat.getDateInstance(DateFormat.LONG, new Locale("EN", "en"))
       format.format(d.getTime)
     }
+    def generationTime: String = {
+      val d = Calendar.getInstance()
+      d.setTimeInMillis(BuildInfo.buildTime)
+      val format = DateFormat.getTimeInstance(DateFormat.LONG, new Locale("EN", "en"))
+      format.format(d.getTime)
+    }
   }
 
   def version = Version(BuildInfo.version, name, BuildInfo.buildTime)
   def development = version.isDevelopment
+
+  def consoleSplash = BuildInfo.splash
 
   def siteURL =
     development match {

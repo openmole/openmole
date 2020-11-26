@@ -302,6 +302,10 @@ lazy val buildinfo = OsgiProject(coreDir, "org.openmole.core.buildinfo", imports
       sbtVersion,
       BuildInfoKey.action("buildTime") {
         System.currentTimeMillis
+      },
+      BuildInfoKey.action("splash") {
+        import sys.process._
+        s"figlet OpenMOLE ${version.value.takeWhile(_ != '.')}" !!
       }
     ),
   buildInfoPackage := s"org.openmole.core.buildinfo"

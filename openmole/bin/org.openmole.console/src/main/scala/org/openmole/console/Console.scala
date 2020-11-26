@@ -35,15 +35,7 @@ import scala.util._
 
 object Console extends JavaLogger {
 
-  lazy val consoleSplash =
-    """
-      |  ___                   __  __  ___  _     _____   _ _
-      | / _ \ _ __   ___ _ __ |  \/  |/ _ \| |   | ____| / / |
-      || | | | '_ \ / _ \ '_ \| |\/| | | | | |   |  _|   | | |
-      || |_| | |_) |  __/ | | | |  | | |_| | |___| |___  | | |
-      | \___/| .__/ \___|_| |_|_|  |_|\___/|_____|_____| |_|_|
-      |      |_|
-      |""".stripMargin
+  def consoleSplash = org.openmole.core.buildinfo.consoleSplash
 
   lazy val consoleUsage = "(Type :q to quit)"
 

@@ -55,6 +55,7 @@ object Application extends JavaLogger {
     object GUIMode extends LaunchMode
     object HelpMode extends LaunchMode
     object RESTMode extends LaunchMode
+    object VersionMode extends LaunchMode
     case class Reset(initialisePassword: Boolean) extends LaunchMode
     case class TestCompile(files: List[File]) extends LaunchMode
 
@@ -122,7 +123,8 @@ object Application extends JavaLogger {
       |[--http-sub-directory] set the subdirectory for openmole app (for non-root path). No '/' is required (Example: "user1")
       |[--debug-no-output-redirection] deactivate system output redirection
       |[--] end of options the remaining arguments are provided to the console in the args array
-      |[-h | --help] print help""".stripMargin
+      |[-h | --help] print help
+      |[--version] print version information""".stripMargin
 
     def parse(args: List[String], c: Config = Config()): Config = {
       def plugins(tail: List[String]) = parse(dropArgs(tail), c.copy(userPlugins = takeArgs(tail)))
@@ -158,6 +160,7 @@ object Application extends JavaLogger {
         case "--" :: tail                            ⇒ parse(Nil, c.copy(args = tail))
         case "-h" :: tail                            ⇒ help(tail)
         case "--help" :: tail                        ⇒ help(tail)
+        case "--version" :: tail                     ⇒ parse(tail, c.copy(launchMode = VersionMode))
         case "--test-compile" :: tail                ⇒ parse(dropArgs(tail), c.copy(launchMode = TestCompile(takeArgs(tail).map(p ⇒ new File(p)))))
         case s :: tail                               ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil                                     ⇒ c
@@ -201,6 +204,11 @@ object Application extends JavaLogger {
     if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.reverse.mkString(" "))
 
     config.launchMode match {
+      case VersionMode ⇒
+        println(
+          s"""OpenMOLE version: ${org.openmole.core.buildinfo.version.value}
+          |Built: ${org.openmole.core.buildinfo.version.generationDate} at ${org.openmole.core.buildinfo.version.generationTime}""".stripMargin)
+        Console.ExitCodes.ok
       case HelpMode ⇒
         println(usage)
         Console.ExitCodes.ok
