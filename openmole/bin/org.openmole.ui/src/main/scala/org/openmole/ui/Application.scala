@@ -59,26 +59,27 @@ object Application extends JavaLogger {
     case class TestCompile(files: List[File]) extends LaunchMode
 
     case class Config(
-      userPlugins:          List[String]    = Nil,
-      loadHomePlugins:      Option[Boolean] = None,
-      scriptFile:           Option[String]  = None,
-      consoleWorkDirectory: Option[File]    = None,
-      password:             Option[String]  = None,
-      passwordFile:         Option[File]    = None,
-      workspace:            Option[File]    = None,
-      hostName:             Option[String]  = None,
-      launchMode:           LaunchMode      = GUIMode,
-      ignored:              List[String]    = Nil,
-      port:                 Option[Int]     = None,
-      loggerLevel:          Option[String]  = None,
-      unoptimizedJS:        Boolean         = false,
-      remote:               Boolean         = false,
-      http:                 Boolean         = false,
-      browse:               Boolean         = true,
-      proxyURI:             Option[String]  = None,
-      httpSubDirectory:     Option[String]  = None,
-      args:                 List[String]    = Nil,
-      extraHeader:          Option[File]    = None
+      userPlugins:              List[String]    = Nil,
+      loadHomePlugins:          Option[Boolean] = None,
+      scriptFile:               Option[String]  = None,
+      consoleWorkDirectory:     Option[File]    = None,
+      password:                 Option[String]  = None,
+      passwordFile:             Option[File]    = None,
+      workspace:                Option[File]    = None,
+      hostName:                 Option[String]  = None,
+      launchMode:               LaunchMode      = GUIMode,
+      ignored:                  List[String]    = Nil,
+      port:                     Option[Int]     = None,
+      loggerLevel:              Option[String]  = None,
+      unoptimizedJS:            Boolean         = false,
+      remote:                   Boolean         = false,
+      http:                     Boolean         = false,
+      browse:                   Boolean         = true,
+      proxyURI:                 Option[String]  = None,
+      httpSubDirectory:         Option[String]  = None,
+      debugNoOutputRedirection: Boolean         = false,
+      args:                     List[String]    = Nil,
+      extraHeader:              Option[File]    = None
     )
 
     def takeArg(args: List[String]) =
@@ -119,6 +120,7 @@ object Application extends JavaLogger {
       |[--logger-level level] set the level of logging (OFF, SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST, ALL)
       |[--proxy hostname] set the proxy to use to install containers or R packages, in the form http://myproxy.org:3128
       |[--http-sub-directory] set the subdirectory for openmole app (for non-root path). No '/' is required (Example: "user1")
+      |[--debug-no-output-redirection] deactivate system output redirection
       |[--] end of options the remaining arguments are provided to the console in the args array
       |[-h | --help] print help""".stripMargin
 
@@ -128,36 +130,37 @@ object Application extends JavaLogger {
       def script(tail: List[String]) = parse(dropArg(tail), c.copy(scriptFile = Some(takeArg(tail)), launchMode = ConsoleMode))
       def console(tail: List[String]) = parse(tail, c.copy(launchMode = ConsoleMode))
       args match {
-        case "-p" :: tail                       ⇒ plugins(tail)
-        case "--plugins" :: tail                ⇒ plugins(tail)
-        case "-c" :: tail                       ⇒ console(tail)
-        case "--console" :: tail                ⇒ console(tail)
-        case "-s" :: tail                       ⇒ script(tail)
-        case "--script" :: tail                 ⇒ script(tail)
-        case "--port" :: tail                   ⇒ parse(tail.tail, c.copy(port = Some(tail.head.toInt)))
-        case "--password" :: tail               ⇒ parse(dropArg(tail), c.copy(password = Some(takeArg(tail))))
-        case "--password-file" :: tail          ⇒ parse(dropArg(tail), c.copy(passwordFile = Some(new File(takeArg(tail)))))
-        case "--workspace" :: tail              ⇒ parse(dropArg(tail), c.copy(workspace = Some(new File(takeArg(tail)))))
-        case "--rest" :: tail                   ⇒ parse(tail, c.copy(launchMode = RESTMode))
-        case "--load-workspace-plugins" :: tail ⇒ parse(tail, c.copy(loadHomePlugins = Some(true)))
-        case "--console-work-directory" :: tail ⇒ parse(dropArg(tail), c.copy(consoleWorkDirectory = Some(new File(takeArg(tail)))))
-        case "--logger-level" :: tail           ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
-        case "--remote" :: tail                 ⇒ parse(tail, c.copy(remote = true))
-        case "--http" :: tail                   ⇒ parse(tail, c.copy(http = true))
-        case "--no-browser" :: tail             ⇒ parse(tail, c.copy(browse = false))
-        case "--unoptimizedJS" :: tail          ⇒ parse(tail, c.copy(unoptimizedJS = true))
-        case "--extra-header" :: tail           ⇒ parse(dropArg(tail), c.copy(extraHeader = Some(new File(takeArg(tail)))))
-        case "--reset" :: tail                  ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = false)))
-        case "--host-name" :: tail              ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
-        case "--reset-password" :: tail         ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = true)))
-        case "--proxy" :: tail                  ⇒ parse(tail.tail, c.copy(proxyURI = Some(tail.head)))
-        case "--http-sub-directory" :: tail     ⇒ parse(tail.tail, c.copy(httpSubDirectory = Some(tail.head)))
-        case "--" :: tail                       ⇒ parse(Nil, c.copy(args = tail))
-        case "-h" :: tail                       ⇒ help(tail)
-        case "--help" :: tail                   ⇒ help(tail)
-        case "--test-compile" :: tail           ⇒ parse(dropArgs(tail), c.copy(launchMode = TestCompile(takeArgs(tail).map(p ⇒ new File(p)))))
-        case s :: tail                          ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
-        case Nil                                ⇒ c
+        case "-p" :: tail                            ⇒ plugins(tail)
+        case "--plugins" :: tail                     ⇒ plugins(tail)
+        case "-c" :: tail                            ⇒ console(tail)
+        case "--console" :: tail                     ⇒ console(tail)
+        case "-s" :: tail                            ⇒ script(tail)
+        case "--script" :: tail                      ⇒ script(tail)
+        case "--port" :: tail                        ⇒ parse(tail.tail, c.copy(port = Some(tail.head.toInt)))
+        case "--password" :: tail                    ⇒ parse(dropArg(tail), c.copy(password = Some(takeArg(tail))))
+        case "--password-file" :: tail               ⇒ parse(dropArg(tail), c.copy(passwordFile = Some(new File(takeArg(tail)))))
+        case "--workspace" :: tail                   ⇒ parse(dropArg(tail), c.copy(workspace = Some(new File(takeArg(tail)))))
+        case "--rest" :: tail                        ⇒ parse(tail, c.copy(launchMode = RESTMode))
+        case "--load-workspace-plugins" :: tail      ⇒ parse(tail, c.copy(loadHomePlugins = Some(true)))
+        case "--console-work-directory" :: tail      ⇒ parse(dropArg(tail), c.copy(consoleWorkDirectory = Some(new File(takeArg(tail)))))
+        case "--logger-level" :: tail                ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
+        case "--remote" :: tail                      ⇒ parse(tail, c.copy(remote = true))
+        case "--http" :: tail                        ⇒ parse(tail, c.copy(http = true))
+        case "--no-browser" :: tail                  ⇒ parse(tail, c.copy(browse = false))
+        case "--unoptimizedJS" :: tail               ⇒ parse(tail, c.copy(unoptimizedJS = true))
+        case "--extra-header" :: tail                ⇒ parse(dropArg(tail), c.copy(extraHeader = Some(new File(takeArg(tail)))))
+        case "--reset" :: tail                       ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = false)))
+        case "--host-name" :: tail                   ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
+        case "--reset-password" :: tail              ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = true)))
+        case "--proxy" :: tail                       ⇒ parse(tail.tail, c.copy(proxyURI = Some(tail.head)))
+        case "--http-sub-directory" :: tail          ⇒ parse(tail.tail, c.copy(httpSubDirectory = Some(tail.head)))
+        case "--debug-no-output-redirection" :: tail ⇒ parse(tail, c.copy(debugNoOutputRedirection = true))
+        case "--" :: tail                            ⇒ parse(Nil, c.copy(args = tail))
+        case "-h" :: tail                            ⇒ help(tail)
+        case "--help" :: tail                        ⇒ help(tail)
+        case "--test-compile" :: tail                ⇒ parse(dropArgs(tail), c.copy(launchMode = TestCompile(takeArgs(tail).map(p ⇒ new File(p)))))
+        case s :: tail                               ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
+        case Nil                                     ⇒ c
       }
     }
 
@@ -167,6 +170,8 @@ object Application extends JavaLogger {
 
     val logLevel = config.loggerLevel.map(l ⇒ Level.parse(l.toUpperCase))
     logLevel.foreach(LoggerConfig.level)
+
+    if (config.debugNoOutputRedirection) OutputManager.uninstall
 
     val workspaceDirectory = config.workspace.getOrElse(org.openmole.core.workspace.defaultOpenMOLEDirectory)
 
