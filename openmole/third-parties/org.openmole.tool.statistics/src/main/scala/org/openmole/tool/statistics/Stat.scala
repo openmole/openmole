@@ -62,7 +62,7 @@ trait Stat {
   def squareDistance(v1: Seq[Double], v2: Seq[Double]): Double =
     (v1 zip v2).map { case (v1v, v2v) ⇒ math.pow(v1v - v2v, 2) }.sum
 
-  def dynamicTimeWarp(v1: Seq[Double], v2: Seq[Double], fast: Boolean = true): Double = {
+  def dynamicTimeWarpingDistance(v1: Seq[Double], v2: Seq[Double], fast: Boolean = true): Double = {
     import org.openmole.tool.dtw.timeseries.TimeSeries
     import org.openmole.tool.dtw.util.DistanceFunctionFactory
 

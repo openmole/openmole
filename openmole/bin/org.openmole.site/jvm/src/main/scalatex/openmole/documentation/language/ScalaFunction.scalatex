@@ -38,14 +38,17 @@ This task takes place after an exploration and compute the average of many value
   @li
     @hl.code("""def rootMeanSquaredError: Double"""), compute the root of the mean square error of the vector.
 
+
 @h2{Data comparison}
 
 OpenMOLE provides a useful functions to compare data series. This function can be called on array and vectors. For instance:
 @ul
   @li
-    @hl.code("""def absoluteDistance(s1: Array[Double], s2: Array[Double]): Double"""), compute the sum of the absolute distance between the respective elements of s1 and s2,
+    @hl.code("""def absoluteDistance(s1: Seq[Double], s2: Seq[Double]): Double"""), compute the sum of the absolute distance between the respective elements of s1 and s2,
   @li
-    @hl.code("""def squareDistance(s1: Array[Double], s2: Array[Double]): Double"""), compute the sum of the squared distance between the respective elements of s1 and s2.
+    @hl.code("""def squareDistance(s1: Seq[Double], s2: Seq[Double]): Double"""), compute the sum of the squared distance between the respective elements of s1 and s2.
+  @li
+    @code("""def dynamicTimeWarpingDistance(s1: Seq[Double], s2: Seq[Double]): Double"""), compute the @a(href := "https://en.wikipedia.org/wiki/Dynamic_time_warping", "dynamic time warping distance") between s1 and s2.
     
 @h2{File creation}
 
