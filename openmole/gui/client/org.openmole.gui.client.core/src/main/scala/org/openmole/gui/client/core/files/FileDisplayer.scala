@@ -34,7 +34,6 @@ class FileDisplayer(val treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) 
     }
 
   def display(safePath: SafePath, content: String, hash: String, fileExtension: FileExtension, pluginServices: PluginServices) = {
-
     alreadyDisplayed(safePath) match {
       case Some(t: TreeNodeTab) ⇒ treeNodeTabs.setActive(t)
       case _ ⇒
@@ -66,22 +65,26 @@ class FileDisplayer(val treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) 
           case editableFile: EditableFile ⇒
             if (DataUtils.isCSV(safePath))
               Post()[Api].sequence(safePath).call().foreach { seq ⇒
-                treeNodeTabs add TreeNodeTab.Editable(
+                val tab = TreeNodeTab.Editable(
                   treeNodeTabs,
                   safePath,
                   content, hash,
                   DataTab.build(seq, view = TreeNodeTab.Table, editing = !editableFile.onDemand),
                   Plotter.default)
+                treeNodeTabs add tab
               }
             else {
-              treeNodeTabs add TreeNodeTab.Editable(
+              val tab = TreeNodeTab.Editable(
                 treeNodeTabs,
                 safePath,
                 content,
                 hash,
                 DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw),
                 Plotter.default)
+
+              treeNodeTabs add tab
             }
+
           case _ ⇒ //FIXME for GUI workflows
         }
     }

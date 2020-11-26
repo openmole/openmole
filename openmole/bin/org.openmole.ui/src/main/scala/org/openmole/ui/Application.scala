@@ -111,7 +111,7 @@ object Application extends JavaLogger {
       |[--remote] enable remote connection to the web interface
       |[--http] force http connection instead of https in remote mode for the web interface
       |[--no-browser] don't automatically launch the browser in GUI mode
-      |[--unoptimizedJS] do not optimize JS (do not use Google Closure Compiler)
+      |[--unoptimized-js] do not optimize JS (do not use Google Closure Compiler)
       |[--extra-header path] specify a file containing a piece of html code to be inserted in the GUI html header file
       |[--load-workspace-plugins] load the plugins of the OpenMOLE workspace (these plugins are always loaded in GUI mode)
       |[--console-work-directory] specify the workDirectory variable in console mode (it is set to the current directory by default)
@@ -150,6 +150,7 @@ object Application extends JavaLogger {
         case "--http" :: tail                        ⇒ parse(tail, c.copy(http = true))
         case "--no-browser" :: tail                  ⇒ parse(tail, c.copy(browse = false))
         case "--unoptimizedJS" :: tail               ⇒ parse(tail, c.copy(unoptimizedJS = true))
+        case "--unoptimized-js" :: tail              ⇒ parse(tail, c.copy(unoptimizedJS = true))
         case "--extra-header" :: tail                ⇒ parse(dropArg(tail), c.copy(extraHeader = Some(new File(takeArg(tail)))))
         case "--reset" :: tail                       ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = false)))
         case "--host-name" :: tail                   ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))

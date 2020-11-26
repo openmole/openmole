@@ -275,15 +275,15 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
       val ext = FileExtension(tn.name.now)
       val tnSafePath = treeNodeManager.current.now ++ tn.name.now
       if (ext.displayable) {
-        val hash = FileExtension.isOMS(tnSafePath.name)
         downloadFile(
           tnSafePath,
           saveFile = false,
-          hash = hash,
+          hash = true,
           onLoaded = (content: String, hash: Option[String]) ⇒ {
             fileDisplayer.display(tnSafePath, content, hash.get, ext, services)
             invalidCacheAndDraw
-          })
+          }
+        )
       }
     case _ ⇒
   }
