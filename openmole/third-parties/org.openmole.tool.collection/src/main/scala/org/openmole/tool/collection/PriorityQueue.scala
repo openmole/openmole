@@ -19,10 +19,7 @@ package org.openmole.tool.collection
 
 import java.util
 import java.util.concurrent.Semaphore
-import java.util.TreeMap
-
-import collection.JavaConverters._
-import java.util.{ Queue, Stack, LinkedList }
+import scala.jdk.CollectionConverters._
 
 object PriorityQueue {
   def apply[T](fifo: Boolean = false) = new PriorityQueue[T](fifo)
@@ -66,9 +63,9 @@ class PriorityQueue[T](fifo: Boolean) {
 
   private val inQueue = new Semaphore(0)
 
-  val queues = (new TreeMap[Int, PriorityQueue.InnerQueue[T]]).asScala
+  val queues = (new java.util.TreeMap[Int, PriorityQueue.InnerQueue[T]]).asScala
 
-  def size: Int = synchronized { queues.map { case (_, q) ⇒ PriorityQueue.size(q) }.sum }
+  def size: Int = inQueue.availablePermits
 
   def enqueue(e: T, priority: Int) = {
     synchronized {
