@@ -49,11 +49,30 @@ trait Stat {
   def rootMeanSquaredError(sequence: Seq[Double]) = standardDeviation(sequence)
   def standardDeviation = (sequence: Seq[Double]) ⇒ sqrt(variance(sequence))
 
+  def normalize(sequence: Seq[Double]) = {
+    val sum = sequence.sum
+    sequence.map(_ / sum)
+  }
+
+  /* ------ Difference on series ----- */
+
   def absoluteDistance(v1: Seq[Double], v2: Seq[Double]): Double =
     (v1 zip v2).map { case (v1v, v2v) ⇒ math.abs(v1v - v2v) }.sum
 
   def squareDistance(v1: Seq[Double], v2: Seq[Double]): Double =
     (v1 zip v2).map { case (v1v, v2v) ⇒ math.pow(v1v - v2v, 2) }.sum
+
+  def dynamicTimeWarp(v1: Seq[Double], v2: Seq[Double], fast: Boolean = true): Double = {
+    import org.openmole.tool.dtw.timeseries.TimeSeries
+    import org.openmole.tool.dtw.util.DistanceFunctionFactory
+
+    val ta = new TimeSeries(v1.toArray)
+    val tb = new TimeSeries(v2.toArray)
+    val df = DistanceFunctionFactory.EUCLIDEAN_DIST_FN
+
+    if (fast) org.openmole.tool.dtw.dtw.FastDTW.getWarpDistBetween(ta, tb, df)
+    else org.openmole.tool.dtw.dtw.DTW.getWarpDistBetween(ta, tb, df)
+  }
 
   /**
    * Compute the confidence interval half-width for the given confidence level.

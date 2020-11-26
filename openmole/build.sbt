@@ -63,6 +63,7 @@ def thirdPartiesSettings = defaultSettings ++ Seq(libraryDependencies += Librari
 def allThirdParties = Seq(
   openmoleCache,
   openmoleTar,
+  openmoleDTW,
   openmoleFile,
   openmoleLock,
   openmoleLogger,
@@ -83,6 +84,7 @@ def allThirdParties = Seq(
 
 lazy val openmoleCache = OsgiProject(thirdPartiesDir, "org.openmole.tool.cache", imports = Seq("*")) dependsOn (openmoleLogger) settings (thirdPartiesSettings: _*) settings(libraryDependencies += Libraries.squants, libraryDependencies += Libraries.cats)
 lazy val openmoleTar = OsgiProject(thirdPartiesDir, "org.openmole.tool.tar", imports = Seq("*")) dependsOn (openmoleFile) settings (thirdPartiesSettings: _*) settings (libraryDependencies += Libraries.xzJava)
+lazy val openmoleDTW = OsgiProject(thirdPartiesDir, "org.openmole.tool.dtw", imports = Seq("*")) settings (thirdPartiesSettings: _*)
 lazy val openmoleFile = OsgiProject(thirdPartiesDir, "org.openmole.tool.file", imports = Seq("*")) dependsOn(openmoleLock, openmoleStream, openmoleLogger) settings (thirdPartiesSettings: _*)
 lazy val openmoleLock = OsgiProject(thirdPartiesDir, "org.openmole.tool.lock", imports = Seq("*")) settings (thirdPartiesSettings: _*)
 lazy val openmoleLogger = OsgiProject(thirdPartiesDir, "org.openmole.tool.logger", imports = Seq("*")) dependsOn (openmoleOutputRedirection) settings (thirdPartiesSettings: _*) settings (libraryDependencies += Libraries.sourceCode)
@@ -91,7 +93,7 @@ lazy val openmoleHash = OsgiProject(thirdPartiesDir, "org.openmole.tool.hash", i
 lazy val openmoleStream = OsgiProject(thirdPartiesDir, "org.openmole.tool.stream", imports = Seq("*")) dependsOn (openmoleThread) settings(libraryDependencies += Libraries.collections, libraryDependencies += Libraries.squants) settings (thirdPartiesSettings: _*)
 lazy val openmoleCollection = OsgiProject(thirdPartiesDir, "org.openmole.tool.collection", imports = Seq("*")) settings (Libraries.addScalaLang(scalaVersionValue)) settings (thirdPartiesSettings: _*)
 lazy val openmoleCrypto = OsgiProject(thirdPartiesDir, "org.openmole.tool.crypto", imports = Seq("*")) settings(libraryDependencies += Libraries.bouncyCastle, libraryDependencies += Libraries.jasypt) settings (thirdPartiesSettings: _*)
-lazy val openmoleStatistics = OsgiProject(thirdPartiesDir, "org.openmole.tool.statistics", imports = Seq("*")) dependsOn(openmoleLogger, openmoleTypes) settings (thirdPartiesSettings: _*)
+lazy val openmoleStatistics = OsgiProject(thirdPartiesDir, "org.openmole.tool.statistics", imports = Seq("*")) dependsOn(openmoleLogger, openmoleTypes, openmoleDTW) settings (thirdPartiesSettings: _*)
 lazy val openmoleTypes = OsgiProject(thirdPartiesDir, "org.openmole.tool.types", imports = Seq("*")) settings(libraryDependencies += Libraries.shapeless, libraryDependencies += Libraries.squants, Libraries.addScalaLang(scalaVersionValue)) settings (thirdPartiesSettings: _*)
 lazy val openmoleByteCode = OsgiProject(thirdPartiesDir, "org.openmole.tool.bytecode", imports = Seq("*")) settings (libraryDependencies += Libraries.asm) settings (thirdPartiesSettings: _*)
 lazy val openmoleOSGi = OsgiProject(thirdPartiesDir, "org.openmole.tool.osgi", imports = Seq("*")) dependsOn (openmoleFile) settings (libraryDependencies += Libraries.equinoxOSGi) settings (thirdPartiesSettings: _*)
