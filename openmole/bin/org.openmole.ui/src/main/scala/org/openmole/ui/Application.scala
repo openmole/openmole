@@ -207,7 +207,7 @@ object Application extends JavaLogger {
     config.launchMode match {
       case VersionMode ⇒
         println(
-          s"""OpenMOLE version: ${org.openmole.core.buildinfo.version.value}
+          s"""OpenMOLE version: ${org.openmole.core.buildinfo.version.value} - ${org.openmole.core.buildinfo.name}
           |Built: ${org.openmole.core.buildinfo.version.generationDate} at ${org.openmole.core.buildinfo.version.generationTime}""".stripMargin)
         Console.ExitCodes.ok
       case HelpMode ⇒
