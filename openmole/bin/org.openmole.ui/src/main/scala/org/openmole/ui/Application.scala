@@ -307,33 +307,43 @@ object Application extends JavaLogger {
         import org.openmole.tool.hash._
 
         def success(f: File) = f.getParentFileSafe / (f.hash().toString + ".success")
-        def toFile(f: File) = if (f.isDirectory) f.listFiles().toList else Seq(f)
+        def toFile(f: File) =
+          if (f.isDirectory) f.listRecursive(_.isFile).toList.map(c ⇒ f -> c)
+          else Seq((f.getParentFile, f))
+
         def isTestable(f: File) = f.getName.endsWith(".omt") || f.getName.endsWith(".oms")
 
         val results = Test.withTmpServices { implicit services ⇒
+
           import services._
-          files.flatMap(toFile).filter(isTestable).map { file ⇒
+          files.flatMap(toFile).filter { case (_, file) ⇒ isTestable(file) }.map {
+            case (root, file) ⇒
 
-            def processResult(c: CompileResult) =
-              c match {
-                case s: ScriptFileDoesNotExists ⇒ util.Failure(new IOException("File doesn't exists"))
-                case s: CompilationError        ⇒ util.Failure(s.error)
-                case s: Compiled                ⇒ util.Success("Compilation succeeded")
-              }
+              def processResult(c: CompileResult) =
+                c match {
+                  case s: ScriptFileDoesNotExists ⇒ util.Failure(new IOException("File doesn't exists"))
+                  case s: CompilationError        ⇒ util.Failure(s.error)
+                  case s: Compiled                ⇒ util.Success("Compilation succeeded")
+                }
 
-            val res = if (!success(file).exists) {
-              println(s"Testing: ${file.getName}")
-              file → processResult(Project.compile(file.getParentFileSafe, file, args))
-            }
-            else {
-              file -> util.Success("Compilation succeeded (from previous test)")
-            }
+              def displayName(file: File) = s"${root.relativize(file).getPath}"
 
-            if (res._2.isSuccess) success(file) < "success"
-            print("\u001b[1A\u001b[2K")
-            println(s"${res._1.getName}: ${res._2}")
+              println(s"Testing: ${displayName(file)}")
 
-            res
+              val res =
+                if (!success(file).exists) {
+                  file → processResult(Project.compile(file.getParentFileSafe, file, args))
+                }
+                else {
+                  file -> util.Success("Compilation succeeded (from previous test)")
+                }
+
+              if (res._2.isSuccess) success(file) < "success"
+
+              print("\u001b[1A\u001b[2K")
+              println(s"${displayName(res._1)}: ${res._2}")
+
+              res
           }
         }
 
