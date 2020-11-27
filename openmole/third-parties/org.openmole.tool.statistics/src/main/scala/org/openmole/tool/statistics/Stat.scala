@@ -40,13 +40,13 @@ trait Stat {
 
   def average = (sequence: Seq[Double]) ⇒ sequence.sum / sequence.size
 
-  def meanSquaredError(sequence: Seq[Double]) = variance(sequence)
+  def meanSquaredError = (sequence: Seq[Double]) ⇒ variance(sequence)
   def variance = (sequence: Seq[Double]) ⇒ {
     val avg = average(sequence)
     average(sequence.map { v ⇒ math.pow(v - avg, 2) })
   }
 
-  def rootMeanSquaredError(sequence: Seq[Double]) = standardDeviation(sequence)
+  def rootMeanSquaredError = (sequence: Seq[Double]) ⇒ standardDeviation(sequence)
   def standardDeviation = (sequence: Seq[Double]) ⇒ sqrt(variance(sequence))
 
   def normalize(sequence: Seq[Double]) = {
