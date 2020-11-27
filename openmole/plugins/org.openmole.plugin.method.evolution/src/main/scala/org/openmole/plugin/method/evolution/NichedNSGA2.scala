@@ -181,7 +181,7 @@ object NichedNSGA2 {
 
   object NichedElement {
     implicit def fromValInt(v: Val[Int]) = Discrete(v)
-
+    
     implicit def fromAggregateString[A](a: Aggregate[Val[A], String]) = Aggregated(a.value, a.aggregate)
 
     implicit def fromAggregate[A, V[_]: FromArray](a: Aggregate[Val[A], V[A] ⇒ Int]) = {
