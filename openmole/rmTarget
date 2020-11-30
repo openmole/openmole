@@ -1,0 +1,4 @@
+#!/bin/bash
+
+find $PWD -type 'd' | grep "target" | xargs rm -rf
+
