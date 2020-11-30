@@ -69,17 +69,17 @@ The arguments of the @code{DirectSampling} task are the following:
 @ul
     @li{@code{evaluation} is the task (or a composition of tasks) that uses your inputs, typically your model task,}
     @li{@code{sampling} is where you define your DoE, @i{i.e.} the inputs you want varied,}
-    @li{@code{aggregation} (@i{optional}) is an aggregation task to be performed on the outputs of your evaluation task.}
+    @li{@code{aggregation} (@i{optional}) is @a(href := aggregationSampling.file, "an aggregation operation") to be performed on the outputs of your evaluation task.}
 
 The @code{l} parameter is a uniform sampling of 10 numbers of the Long type, taken in the [Long.MIN_VALUE; Long.MAX_VALUE] domain of the Long native type.
-More details can be found @aa("here", href := uniformSampling.file).
+More details can be found @a("here", href := uniformSampling.file).
 
 @br
 
 The @code{m} parameter is a sampling over different files that have been uploaded to the @b{workDirectory}.
 The files are explored as items of a list, gathered by the @code{files()} function and applied on the @code{dir} directory/
 Optionally, this list of files can be filtered with any @code{String => Boolean} functions such as @code{contains(), startswith(), endswith()} (see the @aa("Java Class String Documentation", href:= shared.link.javaString) for more details.
-More information on this sampling type @aa("here", href := fileSampling.file).
+More information on this sampling type @a("here", href := fileSampling.file).
 
 
 @h3{Hook}
