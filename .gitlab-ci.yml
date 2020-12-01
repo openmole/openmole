@@ -1,5 +1,6 @@
 stages:
   - assemble
+  - docker
   - publish
 
 image: openmole/build
