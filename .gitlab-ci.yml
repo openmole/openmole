@@ -31,7 +31,7 @@ publish:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    - echo "$SSH_PRIVATE_KEY" >~/.ssh/identity
+    - cat $SSH_PRIVATE_KEY >~/.ssh/identity
     - chmod 400 ~/.ssh/identity
     - ssh-keyscan -p 9000 docker.openmole.org > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
