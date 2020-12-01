@@ -42,6 +42,7 @@ publish:
 publish-docker:
   stage: publish-docker
   script:
+    - echo "test"
     - '(cat $DOCKER_TOKEN | docker login --username romainreuillon --password-stdin)'
     - '(cd ./build-system && sbt --version)'
     - '(cd ./build-system && sbt publishLocal)'
