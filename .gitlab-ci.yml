@@ -1,7 +1,7 @@
 stages:
   - assemble
-  - docker
   - publish
+  - publish-docker
 
 image: openmole/build
 
@@ -39,8 +39,8 @@ publish:
     - echo "put -r ./openmole/site/* next" >./tonext     
     - sftp -i ~/.ssh/identity -b ./tonext -P 9000 user@docker.openmole.org
     
-docker:
-  stage: docker
+publish-docker:
+  stage: publish-docker
   script:
     - '(cat $DOCKER_TOKEN | docker login --username romainreuillon --password-stdin)'
     - '(cd ./build-system && sbt --version)'
