@@ -21,12 +21,12 @@ assemble:
 docker:
   stage: docker
   script:
-    - cat $DOCKER_TOKEN | docker login --username romainreuillon --password-stdin
+    - '(cat $DOCKER_TOKEN | docker login --username romainreuillon --password-stdin)''
     - '(cd ./build-system && sbt --version)'
     - '(cd ./build-system && sbt publishLocal)'
     - '(cd ./libraries && sbt publishLocal)'
     - '(cd ./openmole && sbt "project docker" docker)
-    - version=$(cat version.sbt | grep version | cut -d' ' -f 5 | sed 's\"\\g') && docker push openmole/openmole:$version
+    - '(version=$(cat version.sbt | grep version | cut -d' ' -f 5 | sed 's\"\\g') && docker push openmole/openmole:$version)'
 
 publish:
   stage: publish
