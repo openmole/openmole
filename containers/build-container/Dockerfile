@@ -15,6 +15,7 @@ RUN curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E4
 RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
 
 RUN apt update && apt install -y sbt git git-lfs figlet
+RUN curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
 
 RUN mkdir /sources/ && chmod 777 /sources/
 COPY ./scripts/clone /usr/local/bin
