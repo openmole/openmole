@@ -44,6 +44,7 @@ publish-docker:
   stage: publish-docker
   resource_group: docker
   script:
+    - docker info
     - '(cat $DOCKER_TOKEN | docker login --username romainreuillon --password-stdin)'
     - '(cd ./build-system && sbt --version)'
     - '(cd ./build-system && sbt publishLocal)'
