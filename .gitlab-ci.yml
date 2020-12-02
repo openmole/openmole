@@ -1,6 +1,7 @@
 stages:
   - assemble
   - publish
+  - publish-docker
 
 image: openmole/build
 
@@ -31,10 +32,20 @@ publish:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    - echo "$SSH_PRIVATE_KEY" >~/.ssh/identity
+    - cat $SSH_PRIVATE_KEY >~/.ssh/identity
     - chmod 400 ~/.ssh/identity
     - ssh-keyscan -p 9000 docker.openmole.org > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
     - echo "put -r ./openmole/site/* next" >./tonext     
     - sftp -i ~/.ssh/identity -b ./tonext -P 9000 user@docker.openmole.org
+    
+publish-docker:
+  stage: publish-docker
+  script:
+    - '(cat $DOCKER_TOKEN | docker login --username romainreuillon --password-stdin)'
+    - '(cd ./build-system && sbt --version)'
+    - '(cd ./build-system && sbt publishLocal)'
+    - '(cd ./libraries && sbt publishLocal)'
+    - '(cd ./openmole && sbt "project docker" docker)'
+    - (version=$(cat version.sbt | grep version | cut -d' ' -f 5 | sed 's\"\\g') && docker push openmole/openmole:$version && docker rmi -f openmole/openmole:$version)
     
