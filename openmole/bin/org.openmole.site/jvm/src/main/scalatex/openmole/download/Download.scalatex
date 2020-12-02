@@ -76,7 +76,7 @@ In order to use the latter, follow these steps:
   @li{@i{create a @code{docker-compose.yml} file} in a directory containing the information found @aa("on the Docker Hub", href := org.openmole.site.shared.link.dockerHub),}
   @li{@i{edit the @code{docker-compose.yml} file} as explained below,}
   @li{@i{pull the docker image} by running @code{sudo docker-compose pull},}
-  @li{@i{start the docker image} by running @code{sudo docker-compose up},}
+  @li{@i{start the docker image} by running @code{sudo docker-compose up -d},}
   @li{@i{stop the docker image} by running @code{sudo docker-compose down},}
   @li{@i{monitor the docker image} by running @code{sudo docker-compose top}, @code{sudo docker-compose ps}, or @code{sudo docker-compose logs -t}.}
 
@@ -84,18 +84,35 @@ In general, report to the @code{docker-compose} documentation and your favorite 
 
 @br@br
 
-Here is an example of the configuration of a Docker image of OpenMOLE.
-It runs the version 12 snapshot (unstable) of OpenMOLE, displays the OpenMOLE web user interface on port 55555, runs behind a http proxy, and mounts the local directory @code{./data/openmole} as the directory for OpenMOLE settings and results.
-It also restarts automatically on failure.
+The following docker-compose configuration runs the version ${org.openmole.core.buildinfo.version.value} OpenMOLE. It displays the OpenMOLE web user interface on port 55555, and mounts the local directory @code{./data/openmole} as the directory for OpenMOLE settings and results. It also restarts automatically on failure.
 
-@br@br
+@br
 
-@hl("""
+@hl(s"""
 version: "3"
 
 services:
   openmole:
-    image: openmole/openmole:12.0-SNAPSHOT
+    image: openmole/openmole:${org.openmole.core.buildinfo.version.value}
+    hostname: openmole
+    volumes:
+      - ./data/openmole:/var/openmole/
+    ports:
+      - "55555:8080"
+    privileged: true
+    restart: on-failure:100000
+""", "plain")
+
+To set some OpenMOLE parameters (for instance an http proxy) you can do:
+
+@br
+
+@hl(s"""
+version: "3"
+
+services:
+  openmole:
+    image: openmole/openmole:${org.openmole.core.buildinfo.version.value}
     hostname: mymachinenetworkname.mydomain.org
     command: openmole-docker --proxy http://myproxy.mydomain.org:3128
     volumes:
