@@ -23,6 +23,7 @@ publish:
   stage: publish
   dependencies: 
     - assemble
+  resource_group: next
   only:
     variables:
       - $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH
@@ -41,11 +42,13 @@ publish:
     
 publish-docker:
   stage: publish-docker
+  resource_group: docker
   script:
+    - docker info
     - '(cat $DOCKER_TOKEN | docker login --username romainreuillon --password-stdin)'
     - '(cd ./build-system && sbt --version)'
     - '(cd ./build-system && sbt publishLocal)'
     - '(cd ./libraries && sbt publishLocal)'
     - '(cd ./openmole && sbt "project docker" docker)'
-    - (version=$(cat version.sbt | grep version | cut -d' ' -f 5 | sed 's\"\\g') && docker push openmole/openmole:$version && docker rmi -f openmole/openmole:$version)
+    - (cd ./openmole && version=$(cat version.sbt | grep version | cut -d' ' -f 5 | sed 's\"\\g') && docker push openmole/openmole:$version && docker rmi -f openmole/openmole:$version)
     
