@@ -23,6 +23,8 @@ assemble:
 
 publish-next:
   stage: deploy
+  environment:
+    name: next-site
   dependencies: 
     - assemble
   resource_group: next
@@ -44,6 +46,8 @@ publish-next:
 
 publish-docker:
   stage: deploy
+  environment:
+    name: docker-dev
   only:
     variables:
       - $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH
