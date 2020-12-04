@@ -1,7 +1,7 @@
 [OpenMOLE](http://openmole.org) (Open MOdeL Experiment) has been developed since 2008 as a free and open-source platform. It offers tools to run, explore, diagnose and optimize your numerical model, taking advantage of distributed computing environments. With OpenMOLE you can explore your already developed model, in any language (Java, Binary exe, NetLogo, R, SciLab, Python, C++...). 
 
 * The __stable version__ is available on [openmole.org](http://openmole.org).
-* A __fresh build__ of the developement version is available on [next.openmole.org](http://next.openmole.org): [![build status](https://gitlab.openmole.org/openmole/openmole/badges/13-dev/pipeline.svg)](https://gitlab.openmole.org/openmole/openmole/-/commits/13-dev)
+* A __fresh build__ of the developement version is available on [next.openmole.org](http://next.openmole.org). The status of the continuous build: [![build status](https://gitlab.openmole.org/openmole/openmole/badges/13-dev/pipeline.svg)](https://gitlab.openmole.org/openmole/openmole/-/commits/13-dev)
 
 OpenMOLE is distributed under the [AGPLv3](http://www.gnu.org/licenses/agpl.html) free software license.
 
