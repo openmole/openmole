@@ -43,7 +43,7 @@ publish-docker:
   stage: publish
   image: docker:latest
   before_script:
-    - docker login -u "$DOCKER_USER" -p "$DOCKER_TOKEN" 
+    - '(cat $DOCKER_TOKEN | docker login -u "$DOCKER_USER" --password-stdin)'
   services:
     - docker:dind
   resource_group: docker
