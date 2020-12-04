@@ -1,6 +1,6 @@
 stages:
   - build
-  - publish
+  - deploy
   - test
 
 image: openmole/build
@@ -22,7 +22,7 @@ assemble:
     - '(cd ./openmole && sbt "project tests" assemble)'
 
 publish-next:
-  stage: publish
+  stage: deploy
   dependencies: 
     - assemble
   resource_group: next
@@ -43,7 +43,7 @@ publish-next:
     - sftp -i ~/.ssh/identity -b ./tonext -P 9000 user@docker.openmole.org
 
 publish-docker:
-  stage: publish
+  stage: deploy
   only:
     variables:
       - $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH
