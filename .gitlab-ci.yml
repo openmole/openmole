@@ -1,12 +1,11 @@
 stages:
-  - assemble
+  - build
   - publish
-  - publish-docker
 
 image: openmole/build
 
 assemble:
-  stage: assemble
+  stage: build
   artifacts:
     paths:
       - ./openmole/site/
@@ -41,7 +40,7 @@ publish:
     - sftp -i ~/.ssh/identity -b ./tonext -P 9000 user@docker.openmole.org
     
 publish-docker:
-  stage: publish-docker
+  stage: publish
   resource_group: docker
   script:
     - docker info
