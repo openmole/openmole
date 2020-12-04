@@ -44,6 +44,9 @@ publish-next:
 
 publish-docker:
   stage: publish
+  only:
+    variables:
+      - $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH
   services:
     - docker:dind
   variables:
