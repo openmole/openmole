@@ -1,6 +1,7 @@
 stages:
   - build
   - publish
+  - test
 
 image: openmole/build
 
@@ -44,7 +45,7 @@ publish-next:
 publish-docker:
   stage: publish
   services:
-  - docker:dind
+    - docker:dind
   variables:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375
@@ -58,4 +59,14 @@ publish-docker:
     - '(cd ./libraries && sbt publishLocal)'
     - '(cd ./openmole && sbt "project docker" docker)'
     - (cd ./openmole && version=$(cat version.sbt | grep version | cut -d' ' -f 5 | sed 's\"\\g') && docker push openmole/openmole:$version && docker rmi -f openmole/openmole:$version)
+  
+test-site:
+  stage: test
+  needs: ["assemble"]
+  dependencies: 
+    - assemble
+  script:
+    - (mkdir extracted && cd extracted && tar -xvzf ../openmole/site/openmole.tgz && export OPENMOLE=$PWD/openmole/openmole)
+    - ($OPENMOLE --test-compile openmole/bin/tests/assemble)
+
     
