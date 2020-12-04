@@ -6,7 +6,7 @@ image: openmole/build
 
 publish-docker:
   stage: publish
-  image: docker:latest
+  image: openmole/build
   variables:
     DOCKER_TLS_CERTDIR: ""
   before_script:
