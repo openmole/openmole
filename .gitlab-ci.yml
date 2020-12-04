@@ -1,7 +1,6 @@
 stages:
   - build
   - deploy
-  - test
 
 image: openmole/build
 
@@ -65,7 +64,7 @@ publish-docker:
     - '(cd ./openmole && sbt "project docker" dockerBuildAndPush)'
   
 test-site:
-  stage: test
+  stage: deploy
   needs: ["assemble"]
   dependencies: 
     - assemble
