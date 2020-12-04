@@ -82,7 +82,7 @@ class ABCSpec extends FlatSpec with Matchers {
         generated = 10
       )
 
-    abc run ()
+    abc.run()
   }
 
   "abc island" should "run" in {
@@ -96,7 +96,7 @@ class ABCSpec extends FlatSpec with Matchers {
         parallelism = 10
       )
 
-    abc run ()
+    abc.run()
   }
 
   "abc with a deterministic model" should "terminate" in {
@@ -109,7 +109,7 @@ class ABCSpec extends FlatSpec with Matchers {
         generated = 10
       )
 
-    abc run ()
+    abc.run()
   }
 
   "abc with a stochastic model" should "compile" in {
@@ -123,7 +123,7 @@ class ABCSpec extends FlatSpec with Matchers {
         seed = seed
       )
 
-    abc run ()
+    abc.run()
   }
 
   "abc" should "accept preceding task" in {
@@ -151,7 +151,7 @@ class ABCSpec extends FlatSpec with Matchers {
         seed = seed)
 
     //abc
-    (testTask -- abc) run ()
+    (testTask -- abc).run()
   }
 
 }

@@ -4,7 +4,6 @@ import java.io.PrintStream
 
 import org.openmole.tool.stream.StringOutputStream
 import org.scalatest._
-import org.scalatest.junit._
 import org.openmole.core.context._
 
 class CSVSpec extends FlatSpec with Matchers {
