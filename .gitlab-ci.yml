@@ -6,11 +6,11 @@ image: openmole/build
 
 publish-docker:
   stage: publish
-  image: docker
+  services:
+  - docker:dind
   variables:
     DOCKER_TLS_CERTDIR: ""
-  services:
-    - docker:dind
+    DOCKER_HOST: tcp://docker:2375
   before_script:
     - '(cat $DOCKER_TOKEN | docker login -u "$DOCKER_USER" --password-stdin)'
   resource_group: docker
