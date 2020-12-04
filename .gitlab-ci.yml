@@ -41,6 +41,9 @@ publish:
     
 publish-docker:
   stage: publish
+  image: docker:latest
+  services:
+    - docker:dind
   resource_group: docker
   script:
     - docker info
