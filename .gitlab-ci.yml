@@ -42,12 +42,13 @@ publish:
 publish-docker:
   stage: publish
   image: docker:latest
+  before_script:
+    - docker login -u "$DOCKER_USER" -p "$DOCKER_TOKEN" 
   services:
     - docker:dind
   resource_group: docker
   script:
     - docker info
-    - '(cat $DOCKER_TOKEN | docker login --username romainreuillon --password-stdin)'
     - '(cd ./build-system && sbt --version)'
     - '(cd ./build-system && sbt publishLocal)'
     - '(cd ./libraries && sbt publishLocal)'
