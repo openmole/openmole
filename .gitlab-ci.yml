@@ -62,7 +62,7 @@ publish-docker:
     - '(cd ./build-system && sbt --version)'
     - '(cd ./build-system && sbt publishLocal)'
     - '(cd ./libraries && sbt publishLocal)'
-    - '(cd ./openmole && sbt "project docker" dockerBuildAndPush && docker push openmole/openmole:latest)'
+    - '(cd ./openmole && sbt "project docker" dockerBuildAndPush)'
   
 test-site:
   stage: test
