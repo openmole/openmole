@@ -42,6 +42,9 @@ publish-next:
 publish-docker:
   stage: publish
   image: docker:latest
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
   before_script:
     - '(cat $DOCKER_TOKEN | docker login -u "$DOCKER_USER" --password-stdin)'
   services:
