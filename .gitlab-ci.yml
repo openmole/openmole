@@ -26,11 +26,11 @@ publish-next:
   dependencies: 
     - assemble
   resource_group: next
+  variables:
+    GIT_STRATEGY: fetch
   only:
     variables:
       - $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH
-    #refs:
-    #  - 11-dev
   script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - mkdir -p ~/.ssh
@@ -49,6 +49,7 @@ publish-docker:
   variables:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375
+    GIT_STRATEGY: fetch
   before_script:
     - '(cat $DOCKER_TOKEN | docker login -u "$DOCKER_USER" --password-stdin)'
   resource_group: docker
