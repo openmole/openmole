@@ -28,8 +28,6 @@ publish-next:
   dependencies: 
     - assemble
   resource_group: next
-  variables:
-    GIT_STRATEGY: fetch
   only:
     variables:
       - $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH
@@ -56,7 +54,6 @@ publish-docker:
   variables:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375
-    GIT_STRATEGY: fetch
   before_script:
     - '(cat $DOCKER_TOKEN | docker login -u "$DOCKER_USER" --password-stdin)'
   resource_group: docker
