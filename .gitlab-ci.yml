@@ -1,15 +1,16 @@
 stages:
-  - assemble
+  - build
   - publish
-  - publish-docker
+  - test
 
 image: openmole/build
 
 assemble:
-  stage: assemble
+  stage: build
   artifacts:
     paths:
       - ./openmole/site/
+      - ./openmole/bin/tests/
   script:
     #- bash -x build.sh
     #- '(cd openmole && sbt test)' # Metaspace error to be solved
@@ -18,17 +19,18 @@ assemble:
     - '(cd ./build-system && sbt publishLocal)'
     - '(cd ./libraries && sbt publishLocal)'
     - '(cd ./openmole && ./generateSite $PWD/site)'
+    - '(cd ./openmole && sbt "project tests" assemble)'
 
-publish:
+publish-next:
   stage: publish
   dependencies: 
     - assemble
   resource_group: next
+  variables:
+    GIT_STRATEGY: fetch
   only:
     variables:
       - $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH
-    #refs:
-    #  - 11-dev
   script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - mkdir -p ~/.ssh
@@ -39,16 +41,31 @@ publish:
     - chmod 644 ~/.ssh/known_hosts
     - echo "put -r ./openmole/site/* next" >./tonext     
     - sftp -i ~/.ssh/identity -b ./tonext -P 9000 user@docker.openmole.org
-    
+
 publish-docker:
-  stage: publish-docker
+  stage: publish
+  services:
+    - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://docker:2375
+    GIT_STRATEGY: fetch
+  before_script:
+    - '(cat $DOCKER_TOKEN | docker login -u "$DOCKER_USER" --password-stdin)'
   resource_group: docker
   script:
     - docker info
-    - '(cat $DOCKER_TOKEN | docker login --username romainreuillon --password-stdin)'
     - '(cd ./build-system && sbt --version)'
     - '(cd ./build-system && sbt publishLocal)'
     - '(cd ./libraries && sbt publishLocal)'
-    - '(cd ./openmole && sbt "project docker" docker)'
-    - (cd ./openmole && version=$(cat version.sbt | grep version | cut -d' ' -f 5 | sed 's\"\\g') && docker push openmole/openmole:$version && docker rmi -f openmole/openmole:$version)
+    - '(cd ./openmole && sbt "project docker" dockerBuildAndPush)'
+  
+test-site:
+  stage: test
+  needs: ["assemble"]
+  dependencies: 
+    - assemble
+  script:
+    - (mkdir extracted && (cd extracted && tar -xvzf ../openmole/site/openmole.tar.gz && export OPENMOLE=$PWD/openmole/openmole) && $OPENMOLE --test-compile openmole/bin/tests/assemble)
+
     
