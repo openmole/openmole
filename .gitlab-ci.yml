@@ -65,7 +65,6 @@ test-site:
   dependencies: 
     - assemble
   script:
-    - (mkdir extracted && cd extracted && tar -xvzf ../openmole/site/openmole.tar.gz && export OPENMOLE=$PWD/openmole/openmole)
-    - ($OPENMOLE --test-compile openmole/bin/tests/assemble)
+    - (mkdir extracted && (cd extracted && tar -xvzf ../openmole/site/openmole.tar.gz && export OPENMOLE=$PWD/openmole/openmole) && $OPENMOLE --test-compile openmole/bin/tests/assemble)
 
     
