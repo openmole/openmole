@@ -46,12 +46,12 @@ def defaultSettings = formatSettings ++
     //scalaVersion := "2.12.4-bin-typelevel-4",
     //addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M10" cross CrossVersion.full),
     //scalacOptions += "-Xplugin-require:macroparadise",
-    shellPrompt := { s => Project.extract(s).currentProject.id + " > " }
+    shellPrompt := { s => Project.extract(s).currentProject.id + " > " },
   )
 
-Global / concurrentRestrictions := Seq(Tags.limitAll(4))
+//Global / concurrentRestrictions := Seq(Tags.limitAll(4))
 
-
+fork in Test in ThisBuild := true
 publishTo in ThisBuild :=
   (if (isSnapshot.value) Some("OpenMOLE Nexus" at "https://maven.openmole.org/snapshots") else Some("OpenMOLE Nexus" at "https://maven.openmole.org/releases"))
 
