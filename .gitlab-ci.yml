@@ -18,7 +18,7 @@ assemble:
     - '(cd ./libraries && sbt publishLocal)'
     - '(cd ./openmole && ./generateSite $PWD/site)'
 
-publish:
+publish-next:
   stage: publish
   dependencies: 
     - assemble
