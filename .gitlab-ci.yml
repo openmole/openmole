@@ -9,10 +9,10 @@ publish-docker:
   image: docker
   variables:
     DOCKER_TLS_CERTDIR: ""
-  before_script:
-    - '(cat $DOCKER_TOKEN | docker login -u "$DOCKER_USER" --password-stdin)'
   services:
     - docker:dind
+  before_script:
+    - '(cat $DOCKER_TOKEN | docker login -u "$DOCKER_USER" --password-stdin)'
   resource_group: docker
   script:
     - docker info
