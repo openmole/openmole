@@ -1,7 +1,6 @@
 stages:
   - build
-  - publish
-  - test
+  - deploy
 
 image: openmole/build
 
@@ -22,12 +21,12 @@ assemble:
     - '(cd ./openmole && sbt "project tests" assemble)'
 
 publish-next:
-  stage: publish
+  stage: deploy
+  environment:
+    name: next-site
   dependencies: 
     - assemble
   resource_group: next
-  variables:
-    GIT_STRATEGY: fetch
   only:
     variables:
       - $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH
@@ -43,13 +42,17 @@ publish-next:
     - sftp -i ~/.ssh/identity -b ./tonext -P 9000 user@docker.openmole.org
 
 publish-docker:
-  stage: publish
+  stage: deploy
+  environment:
+    name: docker-dev
+  only:
+    variables:
+      - $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH
   services:
     - docker:dind
   variables:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375
-    GIT_STRATEGY: fetch
   before_script:
     - '(cat $DOCKER_TOKEN | docker login -u "$DOCKER_USER" --password-stdin)'
   resource_group: docker
@@ -61,11 +64,13 @@ publish-docker:
     - '(cd ./openmole && sbt "project docker" dockerBuildAndPush)'
   
 test-site:
-  stage: test
+  stage: deploy
   needs: ["assemble"]
   dependencies: 
     - assemble
   script:
-    - (mkdir extracted && (cd extracted && tar -xvzf ../openmole/site/openmole.tar.gz && export OPENMOLE=$PWD/openmole/openmole) && $OPENMOLE --test-compile openmole/bin/tests/assemble)
+    - mkdir extracted 
+    - (cd extracted && tar -xvzf ../openmole/site/openmole.tar.gz)
+    - ./extracted/openmole/openmole --test-compile openmole/bin/tests/assemble
 
     
