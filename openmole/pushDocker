@@ -1,6 +1,4 @@
 #!/bin/bash
 
-sbt "project org-openmole-core-buildinfo" clean "project docker" docker && \
-  version=$(cat version.sbt | grep version | cut -d' ' -f 5 | sed 's\"\\g') && \
-  docker push openmole/openmole:$version
+sbt "project org-openmole-core-buildinfo" clean "project docker" dockerBuildAndPush
 
