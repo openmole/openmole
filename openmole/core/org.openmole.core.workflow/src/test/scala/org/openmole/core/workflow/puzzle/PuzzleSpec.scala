@@ -106,4 +106,10 @@ class PuzzleSpec extends FlatSpec with Matchers {
     Validation(wf).isEmpty should be(true)
   }
 
+  "By" should "be convertible to DSL" in {
+    val t = EmptyTask()
+
+    val dsl1: DSL = (t by 2)
+  }
+
 }
