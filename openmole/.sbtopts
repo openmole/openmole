@@ -6,4 +6,4 @@
 -J-XX:MinHeapFreeRatio=10
 -J-XX:MaxHeapFreeRatio=20
 #-Dlog4j2.disable.jmx=true 
-#-Dlog4j.shutdownHookEnabled=false
+-Dlog4j.shutdownHookEnabled=false
