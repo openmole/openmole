@@ -575,12 +575,12 @@ package composition {
     }
 
     object ToNode {
-      def apply[T](f: T ⇒ TaskNode) = new ToNode[T] {
+      def apply[T](f: T ⇒ TaskNode): ToNode[T] = new ToNode[T] {
         def apply(t: T) = f(t)
       }
 
-      implicit def taskToTransitionPiece = apply[Task](t ⇒ TaskNode(t))
-      implicit def nodeToNode = apply[TaskNode](identity)
+      implicit def taskToNode[T <: Task]: ToNode[T] = apply[T](t ⇒ TaskNode(t))
+      implicit def nodeToNode: ToNode[TaskNode] = apply[TaskNode](identity)
 
       implicit def byToNode[T: ToNode] = apply[By[T, Grouping]](t ⇒ implicitly[ToNode[T]].apply(t.value).copy(grouping = Some(t.by)))
       implicit def byIntToNode[T: ToNode] = apply[By[T, Int]](t ⇒ implicitly[ToNode[T]].apply(t.value).copy(grouping = Some(ByGrouping(t.by))))
@@ -596,9 +596,8 @@ package composition {
       }
 
       implicit def dslToDSL = ToDSL[DSL](identity)
-      implicit def taskToTransitionDSL = ToDSL[Task](t ⇒ TaskNodeDSL(TaskNode(t)))
-      implicit def taskInNodeToTransitionDSL = ToDSL[TaskNode](t ⇒ TaskNodeDSL(t))
-      implicit def transitionDSLSelectorToTransitionDSL[HL <: HList](implicit dslSelector: DSLSelector[HL]) = ToDSL[HL](t ⇒ dslSelector(t))
+      implicit def toNodeToDSL[T: ToNode] = ToDSL((t: T) ⇒ TaskNodeDSL(implicitly[ToNode[T]].apply(t)))
+      implicit def DSLSelectorToDSL[HL <: HList](implicit dslSelector: DSLSelector[HL]) = ToDSL[HL](t ⇒ dslSelector(t))
     }
 
     trait ToDSL[-T] {

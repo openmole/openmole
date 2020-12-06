@@ -30,7 +30,7 @@ class Ticket(val content: Long, _parent: Ticket) {
 
   def isRoot: Boolean = _parent == null
 
-  override def equals(obj: Any): Boolean = content.equals(obj)
+  override def equals(obj: Any): Boolean = content == obj
   override def hashCode = content.hashCode
 }
 
