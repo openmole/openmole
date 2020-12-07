@@ -1038,6 +1038,8 @@ lazy val consoleBin = OsgiProject(binDir, "org.openmole.console", imports = Seq(
   module
 ) settings (defaultSettings: _*)
 
+val generateDocker = taskKey[Unit]("Prepare the docker build")
+
 lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdocker.DockerPlugin) settings(
   imageNames in docker := Seq(
     ImageName("openmole/openmole:latest"),
@@ -1080,5 +1082,20 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     volume("/var/openmole")
     expose(8443)
     cmdShell("openmole-docker")
+  },
+  generateDocker := {
+    val dockerDir = target.value / "docker"
+    val dockerFile = (docker / dockerfile).value.asInstanceOf[Dockerfile]
+    val stagedDockerfile =  sbtdocker.staging.DefaultDockerfileProcessor(dockerFile, dockerDir)
+    IO.write(dockerDir / "Dockerfile",stagedDockerfile.instructionsString)
+    stagedDockerfile.stageFiles.foreach {
+      case (source, destination) => source.stage(destination)
+    }
   }
 )
+
+
+
+
+
+

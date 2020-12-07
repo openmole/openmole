@@ -9,7 +9,8 @@ assemble:
   artifacts:
     paths:
       - ./openmole/site/
-      - ./openmole/bin/tests/
+      - ./openmole/bin/tests/target/assemble/tests/
+      - ./openmole/bin/docker/target/docker
   script:
     #- bash -x build.sh
     #- '(cd openmole && sbt test)' # Metaspace error to be solved
@@ -18,8 +19,9 @@ assemble:
     - '(cd ./build-system && sbt publishLocal)'
     - '(cd ./libraries && sbt publishLocal)'
     - '(cd ./openmole && ./generateSite $PWD/site)'
+    - '(cd ./openmole && sbt "project docker" generateDocker)'
     - '(cd ./openmole && sbt "project tests" assemble)'
-
+    
 publish-next:
   stage: deploy
   environment:
@@ -43,6 +45,8 @@ publish-next:
 
 publish-docker:
   stage: deploy
+  dependencies: 
+    - assemble
   environment:
     name: docker-dev
   only:
@@ -58,10 +62,7 @@ publish-docker:
   resource_group: docker
   script:
     - docker info
-    - '(cd ./build-system && sbt --version)'
-    - '(cd ./build-system && sbt publishLocal)'
-    - '(cd ./libraries && sbt publishLocal)'
-    - '(cd ./openmole && sbt "project docker" dockerBuildAndPush)'
+    - (cd ./openmole && && version=$(cat version.sbt | grep version | cut -d' ' -f 5 | sed 's\"\\g') && cd ./bin/docker/target/docker && docker build -t openmole/openmole:$version -t openmole/openmole:latest . && docker push openmole/openmole:$version && docker push openmole/openmole:latest)
   
 test-site:
   stage: deploy
@@ -71,6 +72,6 @@ test-site:
   script:
     - mkdir extracted 
     - (cd extracted && tar -xvzf ../openmole/site/openmole.tar.gz)
-    - ./extracted/openmole/openmole --test-compile openmole/bin/tests/assemble
+    - ./extracted/openmole/openmole --test-compile openmole/bin/tests/target/assemble/tests/
 
     
