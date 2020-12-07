@@ -19,8 +19,7 @@ assemble:
     - '(cd ./build-system && sbt publishLocal)'
     - '(cd ./libraries && sbt publishLocal)'
     - '(cd ./openmole && ./generateSite $PWD/site)'
-    - '(cd ./openmole && sbt "project docker" generateDocker)'
-    - '(cd ./openmole && sbt "project tests" assemble)'
+    - '(cd ./openmole && sbt "project docker" generateDocker "project tests" assemble)'
     
 publish-next:
   stage: deploy
@@ -62,7 +61,7 @@ publish-docker:
   resource_group: docker
   script:
     - docker info
-    - (cd ./openmole && && version=$(cat version.sbt | grep version | cut -d' ' -f 5 | sed 's\"\\g') && cd ./bin/docker/target/docker && docker build -t openmole/openmole:$version -t openmole/openmole:latest . && docker push openmole/openmole:$version && docker push openmole/openmole:latest)
+    - (cd ./openmole && version=$(cat version.sbt | grep version | cut -d' ' -f 5 | sed 's\"\\g') && cd ./bin/docker/target/docker && docker build -t openmole/openmole:$version -t openmole/openmole:latest . && docker push openmole/openmole:$version && docker push openmole/openmole:latest)
   
 test-site:
   stage: deploy
