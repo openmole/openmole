@@ -745,19 +745,23 @@ def binDir = file("bin")
 
 
 def bundleFilter(m: ModuleID, artifact: Artifact) = {
-  def excludedLibraryDependencies = Set("slick", "squants", "shapeless", "sourcecode", "eddsa", "sshj")
+  //def excludedLibraryDependencies = Set("slick", "squants", "shapeless", "sourcecode", "eddsa", "sshj")
 
-  def exclude =
-    (m.organization != "org.openmole.library" && excludedLibraryDependencies.exists(m.name.contains)) ||
+  def exclude = false
+/*    (m.organization != "org.openmole.library" && excludedLibraryDependencies.exists(m.name.contains)) ||
       (m.name contains "scala-xml") ||
       (m.name contains "protobuf") ||
-      (m.name contains "jts-core") || (m.name contains "si-quantity") || (m.name contains "systems-common-java8") || (m.name contains "uom-lib-common") || (m.name contains "unit-api") || (m.name contains "uom-se") // geotools bundled dependancies
+      (m.name contains "jts-core") || (m.name contains "si-quantity") || (m.name contains "systems-common-java8") || (m.name contains "uom-lib-common") || (m.name contains "unit-api") || (m.name contains "uom-se") // geotools bundled dependancies */
 
-  def include = (artifact.`type` == "bundle" && m.name != "osgi") ||
-    //(m.name == "sshj") ||
-    m.organization == "org.bouncycastle" ||
-    (m.name == "httpclient-osgi") || (m.name == "httpcore-osgi") ||
-    (m.organization == "org.osgi" && m.name != "osgi")
+  def includeOtherBundles = Set[String]("scala-parser-combinators")
+
+  def include = 
+    (artifact.`type` == "bundle" && m.name != "osgi" && m.organization == "org.openmole.library") ||
+      m.organization == "org.bouncycastle" ||
+      (m.name == "httpclient-osgi") || 
+      (m.name == "httpcore-osgi") ||
+      (m.organization == "org.osgi" && m.name != "osgi") ||
+      includeOtherBundles.exists(m.name.contains)
 
   include && !exclude
 }

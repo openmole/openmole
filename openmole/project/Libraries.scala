@@ -85,6 +85,7 @@ object Libraries {
   lazy val txtmark = "org.openmole.library" %% "com-github-rjeschke-txtmark" % "0.13"
   lazy val spatialsampling = "org.openmole.library" %% "org-openmole-spatialsampling" % spatialsamplingVersion
   lazy val xzJava = "org.openmole.library" %% "xzjava" % "1.8"
+  lazy val guava = "org.openmole.library" %% "com-google-guava" % guavaVersion
   
   def httpClientVersion = "4.5.3"
   lazy val httpClient =
@@ -118,7 +119,6 @@ object Libraries {
   lazy val gridscaleOAR = "org.openmole.library" %% "gridscale-oar" % gridscaleVersion
 
   lazy val scalaz = "org.scalaz" %% "scalaz-core" % scalazVersion
-  lazy val guava = "com.google.guava" % "guava" % "27.1-jre"
   lazy val spray = "io.spray" %% "spray-json" % "1.3.5"
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
   lazy val equinoxOSGi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.13.200"

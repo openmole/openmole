@@ -28,14 +28,14 @@ lazy val scalatra = OsgiProject(dir, "org.scalatra",
   libraryDependencies += "org.scalatra" %% "scalatra-auth" % scalatraVersion,
   libraryDependencies += "org.eclipse.jetty" % "jetty-webapp" % jettyVersion,
   libraryDependencies += "org.eclipse.jetty" % "jetty-server" % jettyVersion,
-  version := scalatraVersion) settings(settings: _*)
+  version := scalatraVersion) settings(settings: _*) dependsOn(slf4j)
 
 lazy val json4s = OsgiProject(dir, "org.json4s",
-  exports = Seq("org.json4s.*"),
-  privatePackages = Seq("!scala.*", "!org.slf4j.*", "!com.thoughtworks.paranamer.*", "*"),
-  imports = Seq("scala.*", "org.slf4j.*", "com.thoughtworks.paranamer.*", "")) settings (
+  exports = Seq("org.json4s.*", "com.fasterxml.jackson.*"),
+  privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"),
+  imports = Seq("scala.*", "org.slf4j.*")) settings (
   libraryDependencies +=  "org.json4s" %% "json4s-jackson" % json4sVersion,
-  version := json4sVersion) settings(settings: _*)
+  version := json4sVersion) settings(settings: _*) dependsOn(slf4j)
 
 lazy val shapeless =  OsgiProject(dir, "com.chuusai.shapeless", exports = Seq("shapeless.*")) settings (
   libraryDependencies += "com.chuusai" %% "shapeless" % shapelessVersion,
@@ -402,3 +402,7 @@ lazy val xzJava = OsgiProject(dir, "xzjava", imports = Seq("*"), exports = Seq("
 ) settings(settings: _*)
 
 
+lazy val guava = OsgiProject(dir, "com.google.guava", imports = Seq("*"), exports = Seq("com.google.guava.*"), privatePackages = Seq("!scala.*", "*")) settings (
+  libraryDependencies += "com.google.guava" % "guava" % guavaVersion,
+  version := guavaVersion
+) settings(settings: _*)

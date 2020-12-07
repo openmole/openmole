@@ -35,6 +35,7 @@ object common {
   def scalazVersion = "7.2.30"
   def mathVersion = "3.6.1"
   def asmVersion = "7.2"
+  def guavaVersion = "30.0-jre"
 
   def scalajsVersion = "1.3.0"
   def scalajsLoggingVersion = "1.1.0"
