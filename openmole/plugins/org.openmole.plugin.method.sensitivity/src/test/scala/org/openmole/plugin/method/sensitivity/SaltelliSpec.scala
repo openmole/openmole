@@ -53,7 +53,7 @@ class Saltelli extends FlatSpec with Matchers {
   )
 
   "Saltelli" should "run" in {
-    sen run ()
+    sen.run()
   }
 
 }

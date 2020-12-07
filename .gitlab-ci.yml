@@ -1,6 +1,7 @@
 stages:
   - build
   - deploy
+  - test
 
 image: openmole/build
 
@@ -64,7 +65,7 @@ publish-docker:
     - (cd ./openmole && version=$(cat version.sbt | grep version | cut -d' ' -f 5 | sed 's\"\\g') && cd ./bin/docker/target/docker && docker build -t openmole/openmole:$version -t openmole/openmole:latest . && docker push openmole/openmole:$version && docker push openmole/openmole:latest)
   
 test-site:
-  stage: deploy
+  stage: test
   needs: ["assemble"]
   dependencies: 
     - assemble
@@ -73,4 +74,11 @@ test-site:
     - (cd extracted && tar -xvzf ../openmole/site/openmole.tar.gz)
     - ./extracted/openmole/openmole --test-compile openmole/bin/tests/target/assemble/tests/
 
-    
+unit-tests:
+  stage: test
+  script:
+    - '(cd ./build-system && sbt --version)'
+    - '(cd ./build-system && sbt publishLocal)'
+    - '(cd ./libraries && sbt publishLocal)'
+    - '(cd ./openmole && sbt -J-Xmx4G test)'
+

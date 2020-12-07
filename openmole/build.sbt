@@ -50,8 +50,8 @@ def defaultSettings = formatSettings ++
   )
 
 //Global / concurrentRestrictions := Seq(Tags.limitAll(4))
+//fork in Test in ThisBuild := true
 
-fork in Test in ThisBuild := true
 publishTo in ThisBuild :=
   (if (isSnapshot.value) Some("OpenMOLE Nexus" at "https://maven.openmole.org/snapshots") else Some("OpenMOLE Nexus" at "https://maven.openmole.org/releases"))
 
