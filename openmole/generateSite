@@ -15,7 +15,7 @@ fi
 mkdir -p "${TARGET}" && \
   sbt "buildSite --target \"${TARGET}\"" && \
   (cd bin/homepage && npm install && npm run build && cp -r dist/* ${TARGET}) && \
-  sbt "project openmole" clean "set (tarPath := new File(\"${TARGET}/openmole.tar.gz\"))" ";project marketindex; cloneMarket; run --target \"${TARGET}/market\" --market \"./bin/org.openmole.marketindex/target/openmole-market/\"" "project org-openmole-modules" assemble && \
+  sbt "project openmole" clean "set (tarPath := new File(\"${TARGET}/openmole.tar.gz\"))" tar "project marketindex" "cloneMarket" "run --target \"${TARGET}/market\" --market \"./bin/org.openmole.marketindex/target/openmole-market/\"" "project org-openmole-modules" assemble && \
   #sbt "project org-openmole-daemon" clean "set (tarPath := new File(\"${TARGET}/daemon.tar.gz\"))" tar && \
   rm -rf "${TARGET}/api" && \
   #sbt "project api" "set (crossTarget in api) := new File(\"${TARGET}\")" unidoc && \
