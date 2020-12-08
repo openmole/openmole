@@ -305,7 +305,10 @@ lazy val buildinfo = OsgiProject(coreDir, "org.openmole.core.buildinfo", imports
       },
       BuildInfoKey.action("splash") {
         import sys.process._
-        s"figlet OpenMOLE ${version.value.takeWhile(_ != '.')}" !!
+        import _root_.scala.util.Try
+
+        val banner = s"OpenMOLE ${version.value.takeWhile(_ != '.')}"
+        Try { s"figlet $banner" !! }.toOption.getOrElse(banner)
       }
     ),
   buildInfoPackage := s"org.openmole.core.buildinfo"
