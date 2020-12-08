@@ -28,12 +28,10 @@ import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
-import org.openmole.core.workspace.TmpDirectory
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
 import org.openmole.plugin.task.jvm._
 import org.openmole.core.dsl._
-import org.openmole.core.workflow.hook.FromContextHook
-import org.openmole.tool.cache._
+import org.openmole.core.dsl.`extension`._
 
 import scala.util._
 

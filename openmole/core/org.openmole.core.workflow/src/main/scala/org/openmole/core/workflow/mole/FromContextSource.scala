@@ -2,7 +2,7 @@ package org.openmole.core.workflow.mole
 
 import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val }
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.expansion.{ FromContext, Validate }
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.workflow.builder.{ DefinitionScope, InfoBuilder, InfoConfig, InputOutputBuilder, InputOutputConfig }
 import org.openmole.core.workflow.validation.ValidateSource
@@ -16,14 +16,13 @@ object FromContextSource {
   implicit def isInfo = InfoBuilder(FromContextSource.info)
 
   case class Parameters(context: Context, executionContext: MoleExecutionContext, implicit val random: RandomProvider, implicit val newFile: TmpDirectory, implicit val fileService: FileService)
-  case class ValidateParameters(inputs: Seq[Val[_]], implicit val newFile: TmpDirectory, implicit val fileService: FileService)
 
   def apply(f: Parameters ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextSource = FromContextSource(name.value)(f)
   def apply(className: String)(f: FromContextSource.Parameters ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new FromContextSource(
       className,
       f,
-      _ ⇒ Seq.empty,
+      _ ⇒ Validate.success,
       config = InputOutputConfig(),
       info = InfoConfig()
     )
@@ -32,19 +31,19 @@ object FromContextSource {
 @Lenses case class FromContextSource(
   override val className: String,
   f:                      FromContextSource.Parameters ⇒ Context,
-  v:                      FromContextSource.ValidateParameters ⇒ Seq[Throwable],
+  v:                      Seq[Val[_]] ⇒ Validate,
   config:                 InputOutputConfig,
   info:                   InfoConfig) extends Source with ValidateSource {
 
-  override def validate(inputs: Seq[Val[_]]) = validation.Validate { p ⇒ v(FromContextSource.ValidateParameters(inputs, p.newFile, p.fileService)) }
+  override def validate(inputs: Seq[Val[_]]) = v(inputs)
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { p ⇒
     val fcp = FromContextSource.Parameters(p.context, executionContext, p.random, p.newFile, p.fileService)
     f(fcp)
   }
 
-  def validate(validate: FromContextSource.ValidateParameters ⇒ Seq[Throwable]) = {
-    def nv(p: FromContextSource.ValidateParameters) = v(p) ++ validate(p)
+  def withValidate(validate: Seq[Val[_]] ⇒ Validate) = {
+    def nv(inputs: Seq[Val[_]]) = v(inputs) ++ validate(inputs)
     copy(v = nv)
   }
 

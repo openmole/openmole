@@ -330,6 +330,11 @@ object utils {
     }
   }
 
+  //  def hash(safePath: SafePath)(implicit workspace: Workspace, context: ServerFileSystemContext) = {
+  //    val file: File = safePathToFile(safePath)
+  //
+  //  }
+
   def catchAll[T](f: ⇒ T): Try[T] = {
     val res =
       try Success(f)

@@ -28,8 +28,8 @@ object LHS {
       val s = samples.from(context)
       val vectorSize = factors.map(_.size(context)).sum
       def values = LHS.lhsValues(vectorSize, s, random())
-      values.map(v ⇒ ScalarOrSequenceOfDouble.unflatten(factors, v).from(context)).toIterator
-    } validate { samples } inputs { factors.flatMap(_.inputs) } prototypes { factors.map(_.prototype) }
+      values.map(v ⇒ ScalarOrSequenceOfDouble.unflatten(factors, v).from(context)).iterator
+    } withValidate { samples.validate } inputs { factors.flatMap(_.inputs) } prototypes { factors.map(_.prototype) }
 
   def lhsValues(dimensions: Int, samples: Int, rng: scala.util.Random) = Array.fill(dimensions) {
     org.openmole.tool.random.shuffled(0 until samples)(rng).map { i ⇒ (i + rng.nextDouble) / samples }.toArray

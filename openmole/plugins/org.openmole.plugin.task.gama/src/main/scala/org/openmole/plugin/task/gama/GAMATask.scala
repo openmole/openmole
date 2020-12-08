@@ -1,9 +1,11 @@
 package org.openmole.plugin.task.gama
 
+import java.io.FileNotFoundException
+
 import monocle.macros._
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import org.openmole.core.exception.{UserBadDataError}
+import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
@@ -45,7 +47,7 @@ object GAMATask {
     install:                Seq[String],
     installContainerSystem: ContainerSystem,
     image:                  ContainerImage,
-    clearCache:             Boolean)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, _workspace: Workspace) = {
+    clearCache:             Boolean)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, _workspace: Workspace, fileService: FileService) = {
 
     val (modelName, volumesValue) = volumes(workspace, model)
 
@@ -225,7 +227,7 @@ object GAMATask {
     import p._
 
     newFile.withTmpFile("inputs", ".xml") { inputFile ⇒
-      val seedValue = seed.map(_.from(context)).getOrElse(random().nextLong)
+      val seedValue = math.abs(seed.map(_.from(context)).getOrElse(random().nextLong))
 
       def inputMap = mapped.inputs.map { m ⇒ m.name -> context(m.v).toString }.toMap
       val inputXML = GAMATask.modifyInputXML(inputMap, finalStep.from(context), seedValue, frameRate.option).transform(XML.loadFile(image.file / _root_.container.FlatImage.rootfsName / GAMATask.inputXML))
@@ -234,7 +236,6 @@ object GAMATask {
 
       inputFile.content =
         s"""<?xml version="1.0" encoding="UTF-8" standalone="no"?>${inputXML.mkString("")}"""
-
 
       val (_, volumes) = GAMATask.volumes(workspace, model)
 
@@ -293,8 +294,18 @@ object GAMATask {
                 case _ => None
               }
 
+            val gamaOutputFile =
+              tmpOutputDirectory.
+                listFilesSafe.
+                filter(f => f.isFile && f.getName.startsWith("simulation-outputs") && f.getName.endsWith(".xml")).
+                sortBy(_.getName).headOption
 
-            val simulationOutput = XML.loadFile(tmpOutputDirectory / "simulation-outputs0.xml") \ "Step"
+            val simulationOutput =
+              gamaOutputFile match {
+                case Some(f) =>  XML.loadFile(f) \ "Step"
+                case None => throw new InternalProcessingError(s"""GAMA result file (simulation-outputsXX.xml) has not been found, the content of the output folder is: [${tmpOutputDirectory.list.mkString(", ")}]""")
+              }
+
             resultContext ++ extractOutputs(simulationOutput.last)
           case (false, Some(f)) =>
             import xml._

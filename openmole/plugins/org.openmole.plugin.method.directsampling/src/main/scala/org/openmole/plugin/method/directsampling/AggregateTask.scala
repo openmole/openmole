@@ -33,9 +33,9 @@ object AggregateTask {
     implicit def fromAsStringAggregateToDouble[A: ToDouble, B: Manifest, V[_]: FromArray](as: As[Aggregate[Val[A], V[Double] ⇒ B], String]) = AggregateVal.applyToDouble(as.value, Val[B](as.as))
     implicit def fromAsStringAggregate[A, B: Manifest, V[_]: FromArray](as: As[Aggregate[Val[A], V[A] ⇒ B], String]) = AggregateVal(as.value, Val[B](as.as))
 
-    implicit def fromVal[A: Manifest](v: Val[A]) = AggregateVal[A, Array[A], Array](v aggregate identity, v.toArray)
-    implicit def fromAsVal[A: Manifest](v: As[Val[A], Val[Array[A]]]) = AggregateVal(Aggregate[Val[A], Array[A] ⇒ Array[A]](v.value, identity), v.as)
-    implicit def fromAsValString[A: Manifest](v: As[Val[A], String]) = AggregateVal(Aggregate[Val[A], Array[A] ⇒ Array[A]](v.value, identity), Val[Array[A]](v.as))
+    implicit def fromVal[A: Manifest](v: Val[A]) = AggregateVal[A, Array[A], Array](v aggregate identity _, v.toArray)
+    implicit def fromAsVal[A: Manifest](v: As[Val[A], Val[Array[A]]]) = AggregateVal[A, Array[A], Array](Aggregate[Val[A], Array[A] ⇒ Array[A]](v.value, identity), v.as)
+    implicit def fromAsValString[A: Manifest](v: As[Val[A], String]) = AggregateVal[A, Array[A], Array](Aggregate[Val[A], Array[A] ⇒ Array[A]](v.value, identity), Val[Array[A]](v.as))
 
     def apply[A, B: Manifest, V[_]: FromArray](a: Aggregate[Val[A], V[A] ⇒ B], _outputVal: Val[B]): AggregateVal[A, B] = new AggregateVal[A, B] {
       def aggregate(context: Context): Variable[B] = {

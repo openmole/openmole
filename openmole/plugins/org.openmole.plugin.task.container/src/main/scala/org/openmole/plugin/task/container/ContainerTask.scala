@@ -80,21 +80,6 @@ object ContainerTask {
 
   def repositoryDirectory(workspace: Workspace) = workspace.persistentDir /> "container" /> "repos"
 
-  def installProot(installDirectory: File) = {
-    val proot = installDirectory / "proot"
-
-    def retrieveResource(candidateFile: File, resourceName: String, executable: Boolean = false) =
-      if (!candidateFile.exists()) {
-        withClosable(this.getClass.getClassLoader.getResourceAsStream(resourceName))(_.copy(candidateFile))
-        if (executable) candidateFile.setExecutable(true)
-        candidateFile
-      }
-
-    retrieveResource(proot, "proot", true)
-
-    proot
-  }
-
   def runCommandInContainer(
     containerSystem:      ContainerSystem,
     image:                _root_.container.FlatImage,
@@ -103,13 +88,24 @@ object ContainerTask {
     environmentVariables: Seq[(String, String)]      = Seq.empty,
     workDirectory:        Option[String]             = None,
     output:               PrintStream,
-    error:                PrintStream)(implicit tmpDirectory: TmpDirectory) = {
+    error:                PrintStream)(implicit tmpDirectory: TmpDirectory, networkService: NetworkService) = {
+
+    def proxyVariables =
+      networkService.httpProxy match {
+        case Some(proxy) ⇒
+          Seq(
+            "http_proxy" -> proxy.hostURI,
+            "HTTP_PROXY" -> proxy.hostURI,
+            "https_proxy" -> proxy.hostURI,
+            "HTTPS_PROXY" -> proxy.hostURI
+          )
+        case None ⇒ Seq()
+      }
+
     val retCode =
       containerSystem match {
-        case Proot(noSeccomp, kernel) ⇒
+        case Proot(proot, noSeccomp, kernel) ⇒
           tmpDirectory.withTmpDir { directory ⇒
-            val proot = installProot(directory)
-
             _root_.container.Proot.execute(
               image,
               directory / "tmp",
@@ -120,7 +116,7 @@ object ContainerTask {
               kernel = Some(kernel),
               noSeccomp = noSeccomp,
               bind = volumes,
-              environmentVariables = environmentVariables,
+              environmentVariables = proxyVariables ++ environmentVariables,
               workDirectory = workDirectory
             )
           }
@@ -133,7 +129,7 @@ object ContainerTask {
               output = output,
               error = error,
               bind = volumes,
-              environmentVariables = environmentVariables,
+              environmentVariables = proxyVariables ++ environmentVariables,
               workDirectory = workDirectory,
               singularityCommand = command
             )
@@ -159,7 +155,7 @@ object ContainerTask {
     stdErr:                 OptionalArgument[Val[String]]                      = None,
     reuseContainer:         Boolean                                            = true,
     clearCache:             Boolean                                            = false,
-    containerPoolKey:       CacheKey[WithInstance[_root_.container.FlatImage]] = CacheKey())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, tmpDirectory: TmpDirectory, networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, outputRedirection: OutputRedirection, serializerService: SerializerService) = {
+    containerPoolKey:       CacheKey[WithInstance[_root_.container.FlatImage]] = CacheKey())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, tmpDirectory: TmpDirectory, networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, outputRedirection: OutputRedirection, serializerService: SerializerService, fileService: FileService) = {
     new ContainerTask(
       containerSystem,
       prepare(installContainerSystem, image, install),
@@ -181,16 +177,17 @@ object ContainerTask {
     )
   }
 
-  def prepare(containerSystem: ContainerSystem, image: ContainerImage, install: Seq[String], volumes: Seq[(String, String)] = Seq.empty, errorDetail: Int ⇒ Option[String] = _ ⇒ None, clearCache: Boolean = false)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace) = {
+  def prepare(containerSystem: ContainerSystem, image: ContainerImage, install: Seq[String], volumes: Seq[(String, String)] = Seq.empty, errorDetail: Int ⇒ Option[String] = _ ⇒ None, clearCache: Boolean = false)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService) = {
+    import org.openmole.tool.hash._
+
     def cacheId(image: ContainerImage): Seq[String] =
       image match {
-        case image: DockerImage ⇒ Seq(image.image, image.tag, image.registry)
-        case image: SavedDockerImage ⇒
-          import org.openmole.tool.hash._
-          Seq(image.file.hash().toString)
+        case image: DockerImage      ⇒ Seq(image.image, image.tag, image.registry)
+        case image: SavedDockerImage ⇒ Seq(image.file.hash().toString)
       }
 
-    val cacheKey: String = hashString((cacheId(image) ++ install).mkString("\n")).toString
+    val volumeCacheKey = volumes.map { case (f, _) ⇒ fileService.hashNoCache(f).toString } ++ volumes.map { case (_, d) ⇒ d }
+    val cacheKey: String = hashString((cacheId(image) ++ install ++ volumeCacheKey).mkString("\n")).toString
     val cacheDirectory = workspace.tmpDirectory /> "container" /> "cached" /> cacheKey
     val serializedFlatImage = cacheDirectory / "flatimage.bin"
 
@@ -212,7 +209,7 @@ object ContainerTask {
     }
   }
 
-  def executeInstall(containerSystem: ContainerSystem, image: _root_.container.FlatImage, install: Seq[String], volumes: Seq[(String, String)], errorDetail: Int ⇒ Option[String])(implicit tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection) =
+  def executeInstall(containerSystem: ContainerSystem, image: _root_.container.FlatImage, install: Seq[String], volumes: Seq[(String, String)], errorDetail: Int ⇒ Option[String])(implicit tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection, networkService: NetworkService) =
     if (install.isEmpty) image
     else {
       val retCode = runCommandInContainer(containerSystem, image, install, output = outputRedirection.output, error = outputRedirection.error, volumes = volumes)
@@ -265,12 +262,17 @@ import ContainerTask._
 
   override def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
     import parameters._
+    import executionContext.networkService
 
     def createPool =
-      WithInstance { () ⇒
-        val containersDirectory = executionContext.moleExecutionDirectory.newDir("container")
-        _root_.container.ImageBuilder.duplicateFlatImage(image, containersDirectory)
-      }(close = _.file.recursiveDelete, pooled = reuseContainer)
+      executionContext.remote match {
+        case Some(r) if r.threads == 1 ⇒ WithInstance { () ⇒ image }(pooled = false)
+        case _ ⇒
+          WithInstance { () ⇒
+            val containersDirectory = executionContext.moleExecutionDirectory.newDir("container")
+            _root_.container.ImageBuilder.duplicateFlatImage(image, containersDirectory)
+          }(close = _.file.recursiveDelete, pooled = reuseContainer)
+      }
 
     val pool = executionContext.cache.getOrElseUpdate(containerPoolKey, createPool)
 
@@ -302,6 +304,7 @@ import ContainerTask._
       def containerPathResolver = inputPathResolver(File("/"), relativePathRootValue) _
 
       val (preparedContext, preparedFilesInfo) = External.deployAndListInputFiles(external, context, inputPathResolver(inputDirectory, relativePathRootValue))
+
       val volumes = prepareVolumes(preparedFilesInfo, containerPathResolver, hostFiles).toVector
 
       val containerEnvironmentVariables =

@@ -30,9 +30,7 @@ object UnrolledDomain {
    */
   implicit def isFinite[D, T: Manifest] =
     new Finite[UnrolledDomain[D, T], Array[T]] with DomainInputs[UnrolledDomain[D, T]] {
-      override def computeValues(domain: UnrolledDomain[D, T]): FromContext[collection.Iterable[Array[T]]] =
-        domain.discrete.iterator(domain.d).map { d ⇒ Seq(d.toArray).toIterable }
-
+      override def computeValues(domain: UnrolledDomain[D, T]): Iterable[Array[T]] = Seq(domain.discrete.iterator(domain.d).toArray)
       override def inputs(domain: UnrolledDomain[D, T]): PrototypeSet = domain.inputs.inputs(domain.d)
     }
 

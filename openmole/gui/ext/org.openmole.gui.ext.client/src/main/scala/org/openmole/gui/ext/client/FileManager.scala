@@ -79,8 +79,9 @@ object FileManager {
 
   def download(
     safePath:          SafePath,
-    fileTransferState: ProcessState ⇒ Unit = (p: ProcessState) ⇒ {},
-    onLoadEnded:       String ⇒ Unit       = (s: String) ⇒ {}
+    fileTransferState: ProcessState ⇒ Unit             = (p: ProcessState) ⇒ {},
+    onLoaded:       (String, Option[String]) ⇒ Unit = (s: String, hash: Option[String]) ⇒ {},
+    hash:              Boolean                         = false,
   ) = {
 
     OMPost()[Api].size(safePath).call().foreach { size ⇒
@@ -92,12 +93,11 @@ object FileManager {
 
       xhr.onloadend = (e: ProgressEvent) ⇒ {
         fileTransferState(Processed())
-        if (FileExtension(safePath.name).displayable) {
-          onLoadEnded(xhr.responseText)
-        }
+        val h = Option(xhr.getResponseHeader(routes.hashHeader))
+        onLoaded(xhr.responseText, h)
       }
 
-      xhr.open("GET", s"downloadFile?path=${Utils.toURI(safePath.path.map { Encoding.encode })}", true)
+      xhr.open("GET", routes.downloadFile(Utils.toURI(safePath.path.map { Encoding.encode }), hash = hash), true)
       xhr.send()
     }
   }

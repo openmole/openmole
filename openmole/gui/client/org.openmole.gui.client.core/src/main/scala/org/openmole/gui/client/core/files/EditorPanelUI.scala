@@ -38,12 +38,23 @@ import rx._
 
 object EditorPanelUI {
 
-  def apply(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: FileExtension, initCode: String, containerModifierSeq: ModifierSeq = emptyMod) =
-    fileType match {
-      case OMS   ⇒ new EditorPanelUI(treeNodeTabs, safePath, initCode, OMS, containerModifierSeq)
-      case SCALA ⇒ new EditorPanelUI(treeNodeTabs, safePath, initCode, SCALA, containerModifierSeq)
-      case _     ⇒ new EditorPanelUI(treeNodeTabs, safePath, initCode, NO_EXTENSION, containerModifierSeq)
+  def apply(
+    treeNodeTabs:         TreeNodeTabs,
+    safePath:             SafePath,
+    fileType:             FileExtension,
+    initCode:             String,
+    initHash:             String,
+    containerModifierSeq: ModifierSeq   = emptyMod) = {
+    val editor = {
+      fileType match {
+        case OMS   ⇒ new EditorPanelUI(treeNodeTabs, safePath, OMS, containerModifierSeq)
+        case SCALA ⇒ new EditorPanelUI(treeNodeTabs, safePath, SCALA, containerModifierSeq)
+        case _     ⇒ new EditorPanelUI(treeNodeTabs, safePath, NO_EXTENSION, containerModifierSeq)
+      }
     }
+    editor.setCode(initCode, initHash)
+    editor
+  }
 
   def highlightedFile(ext: FileExtension): Option[HighlightedFile] =
     ext match {
@@ -55,11 +66,13 @@ object EditorPanelUI {
   case class HighlightedFile(highlighter: String)
 }
 
-class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, initCode: String, fileType: FileExtension, containerModifierSeq: ModifierSeq) {
+class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: FileExtension, containerModifierSeq: ModifierSeq) {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
   lazy val editorDiv = tags.div(id := "editor").render
+
+  var initialContentHash = ""
 
   lazy val editor = {
     val ed = ace.edit(editorDiv)
@@ -68,7 +81,6 @@ class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, initCode: St
       ed.getSession().setMode("ace/mode/" + h.highlighter)
     }
 
-    ed.getSession().setValue(initCode)
     ed.setTheme("ace/theme/github")
     ace.require("ace/ext/language_tools")
     ed.renderer.setShowGutter(true)
@@ -151,9 +163,13 @@ class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, initCode: St
   }
 
   def aceDoc = editor.getSession().getDocument()
-  def code: String = editor.getSession().getValue()
 
-  def setCode(content: String) = editor.getSession().setValue(content)
+  def code = editor.synchronized { (editor.getSession().getValue(), initialContentHash) }
+
+  def setCode(content: String, hash: String) = editor.synchronized {
+    initialContentHash = hash
+    editor.getSession().setValue(content)
+  }
 
   def setReadOnly(b: Boolean) = editor.setReadOnly(b)
 

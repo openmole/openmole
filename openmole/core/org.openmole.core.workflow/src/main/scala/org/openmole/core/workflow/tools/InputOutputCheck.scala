@@ -129,9 +129,8 @@ object InputOutputCheck {
     val outputErrors = verifyOutput(outputs, result)
     if (!outputErrors.isEmpty) throw new InternalProcessingError(s"Output errors in ${obj}: ${outputErrors.mkString(", ")}.")
     filterOutput(outputs, result)
-  } validate { p ⇒
-    import p._
-    process.validate(p.inputs)
+  } withValidate { inputs ⇒
+    process.validate(inputs)
   }
 
 }

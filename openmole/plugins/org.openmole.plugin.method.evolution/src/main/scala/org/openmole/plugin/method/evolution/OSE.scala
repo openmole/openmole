@@ -5,7 +5,6 @@ import org.openmole.core.dsl.extension._
 import cats.implicits._
 import monocle.macros.GenLens
 import org.openmole.core.context.{ Context, Variable }
-import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
@@ -24,6 +23,7 @@ object OSE {
     origin:              (Vector[Double], Vector[Int]) ⇒ Vector[Int],
     limit:               Vector[Double],
     genome:              Genome,
+    phenotypeContent:    PhenotypeContent,
     objectives:          Seq[ExactObjective[_]],
     operatorExploration: Double,
     reject:              Option[Condition])
@@ -34,10 +34,10 @@ object OSE {
     import mgo.evolution.algorithm.OSE._
     import mgo.evolution.algorithm.{ OSE ⇒ MGOOSE, _ }
 
-    implicit def integration = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Array[Any]] { api ⇒
+    implicit def integration = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
       type G = CDGenome.Genome
-      type I = CDGenome.DeterministicIndividual.Individual[Array[Any]]
-      type S = OSEState[Array[Any]]
+      type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
+      type S = OSEState[Phenotype]
 
       def iManifest = implicitly
       def gManifest = implicitly
@@ -50,51 +50,50 @@ object OSE {
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
 
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
-        def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
-        def buildIndividual(genome: G, phenotype: Array[Any], context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
+        def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+        def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
 
         def initialState = EvolutionState(s = (Array.empty, Array.empty))
 
         def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, EvolutionState.generation)(s, population)
         def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, EvolutionState.startTime)(s, population)
 
-        def result(population: Vector[I], state: S) = FromContext { p ⇒
-          import p._
+        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext.value {
+          val res = MGOOSE.result[Phenotype](state, population, Genome.continuous(om.genome), ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives), keepAll = keepAll)
+          val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
+          val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
 
-          val res = MGOOSE.result[Array[Any]](state, Genome.continuous(om.genome).from(context), ExactObjective.toFitnessFunction(om.objectives))
-          val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
-          val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness)).from(context)
+          val outputValues = if (includeOutputs) DeterministicGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotype)) else Seq()
 
-          genomes ++ fitness
+          genomes ++ fitness ++ outputValues
         }
 
         def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
           import p._
-          val continuous = Genome.continuous(om.genome).from(context)
-          val discrete = Genome.discrete(om.genome).from(context)
+          val continuous = Genome.continuous(om.genome)
+          val discrete = Genome.discrete(om.genome)
           val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
           MGOOSE.initialGenomes(n, continuous, discrete, rejectValue, rng)
         }
 
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
           import p._
-          val discrete = Genome.discrete(om.genome).from(context)
+          val discrete = Genome.discrete(om.genome)
           val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          MGOOSE.adaptiveBreeding[Array[Any]](
+          MGOOSE.adaptiveBreeding[Phenotype](
             n,
             om.operatorExploration,
             discrete,
             om.origin,
-            ExactObjective.toFitnessFunction(om.objectives),
+            ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives),
             rejectValue) apply (s, individuals, rng)
         }
 
-        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
-          Genome.continuous(om.genome).map { continuous ⇒
-            val (s2, elited) = MGOOSE.elitism[Array[Any]](om.mu, om.limit, om.origin, continuous, ExactObjective.toFitnessFunction(om.objectives)) apply (s, population, candidates, rng)
-            val s3 = EvolutionState.generation.modify(_ + 1)(s2)
-            (s3, elited)
-          }
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) = {
+          val (s2, elited) = MGOOSE.elitism[Phenotype](om.mu, om.limit, om.origin, Genome.continuous(om.genome), ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives)) apply (s, population, candidates, rng)
+          val s3 = EvolutionState.generation.modify(_ + 1)(s2)
+          (s3, elited)
+        }
 
         def migrateToIsland(population: Vector[I]) = population
         def migrateFromIsland(population: Vector[I], state: S) = population ++ state.s._1
@@ -108,6 +107,7 @@ object OSE {
     origin:              (Vector[Double], Vector[Int]) ⇒ Vector[Int],
     limit:               Vector[Double],
     genome:              Genome,
+    phenotypeContent:    PhenotypeContent,
     objectives:          Seq[NoisyObjective[_]],
     historySize:         Int,
     cloneProbability:    Double,
@@ -119,10 +119,10 @@ object OSE {
     import mgo.evolution.algorithm.NoisyOSE._
     import mgo.evolution.algorithm.{ NoisyOSE ⇒ MGONoisyOSE, _ }
 
-    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Array[Any]] { api ⇒
+    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
       type G = CDGenome.Genome
-      type I = CDGenome.NoisyIndividual.Individual[Array[Any]]
-      type S = OSEState[Array[Any]]
+      type I = CDGenome.NoisyIndividual.Individual[Phenotype]
+      type S = OSEState[Phenotype]
 
       def iManifest = implicitly
       def gManifest = implicitly
@@ -137,64 +137,67 @@ object OSE {
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
-        def buildGenome(vs: Vector[Variable[_]]) = Genome.fromVariables(vs, om.genome).map(buildGenome)
+        def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
 
-        def buildIndividual(genome: G, phenotype: Array[Any], context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
 
         def initialState = EvolutionState(s = (Array.empty, Array.empty))
 
-        def result(population: Vector[I], state: S) = FromContext { p ⇒
-          import org.openmole.core.context._
+        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
           import p._
 
-          val res = MGONoisyOSE.result(state, population, NoisyObjective.aggregate(om.objectives), Genome.continuous(om.genome).from(context), om.limit)
-          val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false).from(context)
-          val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness)).from(context)
+          val res = MGONoisyOSE.result(state, population, NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context), Genome.continuous(om.genome), om.limit, keepAll = keepAll)
+          val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
+          val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
           val samples = Variable(GAIntegration.samples.array, res.map(_.replications).toArray)
 
-          genomes ++ fitness ++ Seq(samples)
+          val outputValues = if (includeOutputs) StochasticGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotypeHistory)) else Seq()
+
+          genomes ++ fitness ++ Seq(samples) ++ outputValues
         }
 
         def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
           import p._
-          val continuous = Genome.continuous(om.genome).from(context)
-          val discrete = Genome.discrete(om.genome).from(context)
+
+          val continuous = Genome.continuous(om.genome)
+          val discrete = Genome.discrete(om.genome)
           val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
           MGONoisyOSE.initialGenomes(n, continuous, discrete, rejectValue, rng)
         }
 
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
           import p._
-          val discrete = Genome.discrete(om.genome).from(context)
+          val discrete = Genome.discrete(om.genome)
           val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
 
-          MGONoisyOSE.adaptiveBreeding[Array[Any]](
+          MGONoisyOSE.adaptiveBreeding[Phenotype](
             n,
             om.operatorExploration,
             om.cloneProbability,
-            NoisyObjective.aggregate(om.objectives),
+            NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context),
             discrete,
             om.origin,
             om.limit,
             rejectValue) apply (s, individuals, rng)
         }
 
-        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
-          Genome.continuous(om.genome).map { continuous ⇒
-            val (s2, elited) =
-              MGONoisyOSE.elitism[Array[Any]](
-                om.mu,
-                om.historySize,
-                NoisyObjective.aggregate(om.objectives),
-                continuous,
-                om.origin,
-                om.limit) apply (s, population, candidates, rng)
-            val s3 = EvolutionState.generation.modify(_ + 1)(s2)
-            (s3, elited)
-          }
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) = FromContext { p ⇒
+          import p._
+
+          val (s2, elited) =
+            MGONoisyOSE.elitism[Phenotype](
+              om.mu,
+              om.historySize,
+              NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context),
+              Genome.continuous(om.genome),
+              om.origin,
+              om.limit) apply (s, population, candidates, rng)
+          val s3 = EvolutionState.generation.modify(_ + 1)(s2)
+          (s3, elited)
+        }
 
         def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland[I](population, CDGenome.NoisyIndividual.Individual.historyAge)
-        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Array[Any]](population ++ state.s._1, CDGenome.NoisyIndividual.Individual.historyAge, CDGenome.NoisyIndividual.Individual.phenotypeHistory[Array[Any]])
+        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Phenotype](population ++ state.s._1, CDGenome.NoisyIndividual.Individual.historyAge, CDGenome.NoisyIndividual.Individual.phenotypeHistory[Phenotype])
       }
 
     }
@@ -212,7 +215,7 @@ object OSE {
     implicit def fromSeqOfDoubleDomainToOriginAxe[D](f: Factor[D, Array[Double]])(implicit fix: Fix[D, Array[Double]]): OriginAxe = {
       val domain = fix(f.domain)
       ContinuousSequenceOriginAxe(
-        GenomeBound.SequenceOfDouble(f.value, FromContext.value(domain.map(_.min).toArray), FromContext.value(domain.map(_.max).toArray), domain.size),
+        GenomeBound.SequenceOfDouble(f.value, domain.map(_.min).toArray, domain.map(_.max).toArray, domain.size),
         domain.toVector.map(_.toVector))
     }
 
@@ -224,7 +227,7 @@ object OSE {
     implicit def fromSeqOfIntDomainToOriginAxe[D](f: Factor[D, Array[Int]])(implicit fix: Fix[D, Array[Int]]): OriginAxe = {
       val domain = fix(f.domain)
       DiscreteSequenceOriginAxe(
-        GenomeBound.SequenceOfInt(f.value, FromContext.value(domain.map(_.min).toArray), FromContext.value(domain.map(_.max).toArray), domain.size),
+        GenomeBound.SequenceOfInt(f.value, domain.map(_.min).toArray, domain.map(_.max).toArray, domain.size),
         domain.toVector.map(_.toVector))
     }
 
@@ -276,54 +279,60 @@ object OSE {
   case class FitnessPattern(objective: Objective[_], limit: Double)
 
   def apply(
-    origin:     Seq[OriginAxe],
-    objective:  Seq[FitnessPattern],
-    genome:     Genome                       = Seq(),
-    mu:         Int                          = 200,
-    stochastic: OptionalArgument[Stochastic] = None,
-    reject:     OptionalArgument[Condition]  = None): EvolutionWorkflow =
-    WorkflowIntegration.stochasticity(objective.map(_.objective), stochastic.option) match {
+    origin:         Seq[OriginAxe],
+    objective:      Seq[FitnessPattern],
+    outputs:        Seq[Val[_]]                  = Seq(),
+    genome:         Genome                       = Seq(),
+    populationSize: Int                          = 200,
+    stochastic:     OptionalArgument[Stochastic] = None,
+    reject:         OptionalArgument[Condition]  = None): EvolutionWorkflow =
+    EvolutionWorkflow.stochasticity(objective.map(_.objective), stochastic.option) match {
       case None ⇒
         val exactObjectives = FitnessPattern.toObjectives(objective).map(o ⇒ Objective.toExact(o))
+        val phenotypeContent = PhenotypeContent(exactObjectives.map(Objective.prototype), outputs)
         val fg = OriginAxe.fullGenome(origin, genome)
 
-        val integration: WorkflowIntegration.DeterministicGA[_] =
-          WorkflowIntegration.DeterministicGA(
-            DeterministicParams(
-              mu = mu,
-              origin = OriginAxe.toOrigin(origin, genome),
-              genome = fg,
-              objectives = exactObjectives,
-              limit = FitnessPattern.toLimit(objective),
-              operatorExploration = operatorExploration,
-              reject = reject.option),
-            fg,
-            exactObjectives
-          )
-
-        WorkflowIntegration.DeterministicGA.toEvolutionWorkflow(integration)
+        EvolutionWorkflow.deterministicGAIntegration(
+          DeterministicParams(
+            mu = populationSize,
+            origin = OriginAxe.toOrigin(origin, genome),
+            genome = fg,
+            phenotypeContent = phenotypeContent,
+            objectives = exactObjectives,
+            limit = FitnessPattern.toLimit(objective),
+            operatorExploration = EvolutionWorkflow.operatorExploration,
+            reject = reject.option),
+          fg,
+          phenotypeContent,
+          validate = Objectives.validate(exactObjectives, outputs)
+        )
       case Some(stochasticValue) ⇒
         val fg = OriginAxe.fullGenome(origin, genome)
         val noisyObjectives = FitnessPattern.toObjectives(objective).map(o ⇒ Objective.toNoisy(o))
+        val phenotypeContent = PhenotypeContent(noisyObjectives.map(Objective.prototype), outputs)
 
-        val integration: WorkflowIntegration.StochasticGA[_] =
-          WorkflowIntegration.StochasticGA(
-            StochasticParams(
-              mu = mu,
-              origin = OriginAxe.toOrigin(origin, genome),
-              genome = fg,
-              objectives = noisyObjectives,
-              limit = FitnessPattern.toLimit(objective),
-              operatorExploration = operatorExploration,
-              historySize = stochasticValue.sample,
-              cloneProbability = stochasticValue.reevaluate,
-              reject = reject.option),
-            fg,
-            noisyObjectives,
-            stochasticValue
-          )(StochasticParams.integration)
+        def validation: Validate = {
+          val aOutputs = outputs.map(_.toArray)
+          Objectives.validate(noisyObjectives, aOutputs)
+        }
 
-        WorkflowIntegration.StochasticGA.toEvolutionWorkflow(integration)
+        EvolutionWorkflow.stochasticGAIntegration(
+          StochasticParams(
+            mu = populationSize,
+            origin = OriginAxe.toOrigin(origin, genome),
+            genome = fg,
+            phenotypeContent = phenotypeContent,
+            objectives = noisyObjectives,
+            limit = FitnessPattern.toLimit(objective),
+            operatorExploration = EvolutionWorkflow.operatorExploration,
+            historySize = stochasticValue.sample,
+            cloneProbability = stochasticValue.reevaluate,
+            reject = reject.option),
+          fg,
+          phenotypeContent,
+          stochasticValue,
+          validate = validation
+        )
     }
 
 }
@@ -333,26 +342,27 @@ object OSEEvolution {
   import org.openmole.core.dsl._
 
   def apply(
-    origin:       Seq[OSE.OriginAxe],
-    objective:    Seq[OSE.FitnessPattern],
-    evaluation:   DSL,
-    termination:  OMTermination,
-    mu:           Int                          = 200,
-    genome:       Genome                       = Seq(),
-    stochastic:   OptionalArgument[Stochastic] = None,
-    reject:       OptionalArgument[Condition]  = None,
-    parallelism:  Int                          = 1,
-    distribution: EvolutionPattern             = SteadyState(),
-    suggestion:   Suggestion                   = Suggestion.empty,
-    scope:        DefinitionScope              = "ose") =
+    origin:         Seq[OSE.OriginAxe],
+    objective:      Seq[OSE.FitnessPattern],
+    evaluation:     DSL,
+    termination:    OMTermination,
+    populationSize: Int                          = 200,
+    genome:         Genome                       = Seq(),
+    stochastic:     OptionalArgument[Stochastic] = None,
+    reject:         OptionalArgument[Condition]  = None,
+    parallelism:    Int                          = EvolutionWorkflow.parallelism,
+    distribution:   EvolutionPattern             = SteadyState(),
+    suggestion:     Suggestion                   = Suggestion.empty,
+    scope:          DefinitionScope              = "ose") =
     EvolutionPattern.build(
       algorithm =
         OSE(
           origin = origin,
           genome = genome,
           objective = objective,
+          outputs = evaluation.outputs,
           stochastic = stochastic,
-          mu = mu,
+          populationSize = populationSize,
           reject = reject
         ),
       evaluation = evaluation,

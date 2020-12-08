@@ -87,7 +87,8 @@ val env =
  @li{@threads,}
  @li{@apiEntryTitle{coreByNodes} An alternative to specifying the number of threads. @hl.openmoleNoTest{coreByNodes} takes the value of the @hl.openmoleNoTest{threads} when not specified, or 1 if none of them is specified.}
  @li{@apiEntryTitle{flavour} Specify the declination of PBS installed on your cluster. You can choose between @hl.openmoleNoTest{Torque} (for the open source PBS/Torque) or @hl.openmoleNoTest{PBSPro}. Defaults to @hl.openmoleNoTest{flavour = Torque}}
- @li{@name}
+ @li{@name,}
+ @li{@localSubmission.}
 
 
 
@@ -117,7 +118,8 @@ val env =
   @li{@memory,}
   @li{@openMOLEMemory,}
   @li{@threads,}
-  @li{@name.}
+  @li{@name,}
+  @li{@localSubmission.}
 
 
 
@@ -155,7 +157,8 @@ val env =
   @li{@apiEntryTitle{qos} Quality of Service (QOS) as defined in the Slurm database}
   @li{@apiEntryTitle{gres} a list of Generic Resource (GRES) requested. A Gres is a pair defined by the name of the resource and the number of resources requested (scalar). For instance @hl.openmoleNoTest{gres = List( Gres("resource", 1) )}}
   @li{@apiEntryTitle{constraints} a list of Slurm defined constraints which selected nodes must match,}
-  @li{@name.}
+  @li{@name,}
+  @li{@localSubmission.}
 
 
 
@@ -183,7 +186,8 @@ val env =
   @li{@memory,}
   @li{@openMOLEMemory,}
   @li{@threads,}
-  @li{@name.}
+  @li{@name,}
+  @li{@localSubmission.}
 
 
 
@@ -215,4 +219,5 @@ val env =
   @li{@apiEntryTitle{core} number of cores allocated for each job,}
   @li{@apiEntryTitle{cpu} number of CPUs allocated for each job,}
   @li{@apiEntryTitle{bestEffort} a boolean for setting the best effort mode (true by default),}
-  @li{@name.}
+  @li{@name,}
+  @li{@localSubmission.}

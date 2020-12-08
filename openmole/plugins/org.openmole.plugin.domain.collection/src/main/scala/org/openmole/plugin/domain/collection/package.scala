@@ -29,7 +29,7 @@ package collection {
 
   // Avoid clash with iterableOfToArrayIsFix when T is of type Array[T]
   trait LowPriorityImplicits {
-    implicit def iterableIsDiscrete[T] = new Finite[Iterable[T], T] {
+    implicit def iterableIsDiscrete[T] = new FiniteFromContext[Iterable[T], T] {
       override def computeValues(domain: Iterable[T]) = domain
     }
 
@@ -45,7 +45,7 @@ package collection {
 
 package object collection extends LowPriorityImplicits {
 
-  implicit def iterableOfToArrayIsFinite[T: ClassTag, A1[_]: ToArray] = new Finite[Iterable[A1[T]], Array[T]] {
+  implicit def iterableOfToArrayIsFinite[T: ClassTag, A1[_]: ToArray] = new FiniteFromContext[Iterable[A1[T]], Array[T]] {
     override def computeValues(domain: Iterable[A1[T]]) = domain.map(implicitly[ToArray[A1]].apply[T])
   }
 
@@ -53,7 +53,7 @@ package object collection extends LowPriorityImplicits {
     override def apply(domain: Iterable[A1[T]]) = domain.map(implicitly[ToArray[A1]].apply[T])
   }
 
-  implicit def arrayIsFinite[T] = new Finite[Array[T], T] {
+  implicit def arrayIsFinite[T] = new FiniteFromContext[Array[T], T] {
     override def computeValues(domain: Array[T]) = domain.toIterable
   }
 
@@ -65,17 +65,17 @@ package object collection extends LowPriorityImplicits {
     override def apply(domain: Array[T]) = domain.size
   }
 
-  implicit def iteratorIsDiscrete[T] = new Discrete[Iterator[T], T] {
+  implicit def iteratorIsDiscrete[T] = new DiscreteFromContext[Iterator[T], T] {
     override def iterator(domain: Iterator[T]) = domain
   }
 
-  implicit def fromContextIteratorIsDiscrete[T] = new Discrete[FromContext[Iterator[T]], T] {
+  implicit def fromContextIteratorIsDiscrete[T] = new DiscreteFromContext[FromContext[Iterator[T]], T] {
     override def iterator(domain: FromContext[Iterator[T]]) = domain
   }
 
   implicit def booleanValIsFactor(p: Val[Boolean]) = Factor(p, Vector(true, false))
 
-  implicit def arrayValIsFinite[T] = new Finite[Val[Array[T]], T] with DomainInputs[Val[Array[T]]] {
+  implicit def arrayValIsFinite[T] = new FiniteFromContext[Val[Array[T]], T] with DomainInputs[Val[Array[T]]] {
     override def inputs(domain: Val[Array[T]]): PrototypeSet = Seq(domain)
     override def computeValues(domain: Val[Array[T]]) = FromContext { p ⇒
       p.context(domain).toIterable

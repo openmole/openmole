@@ -18,6 +18,7 @@
 package org.openmole.core.workflow.validation
 
 import org.openmole.core.context.Val
+import org.openmole.core.expansion.Validate
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.tools.io.Prettifier
 import org.openmole.core.workflow.hook.Hook
@@ -45,20 +46,25 @@ trait ValidateTransition {
 object ValidationProblem {
 
   case class TaskValidationProblem(task: Task, errors: Seq[Throwable]) extends ValidationProblem {
-    override def toString = s"Errors in validation of task $task:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).messageAndStackStringWithMargin).mkString("\n")
+    override def toString = s"Errors in validation of task $task:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).stackStringWithMargin).mkString("\n")
   }
 
   case class SourceValidationProblem(source: Source, errors: Seq[Throwable]) extends ValidationProblem {
-    override def toString = s"Errors in validation of source $source:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).messageAndStackStringWithMargin).mkString("\n")
+    override def toString = s"Errors in validation of source $source:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).stackStringWithMargin).mkString("\n")
   }
 
   case class HookValidationProblem(hook: Hook, errors: Seq[Throwable]) extends ValidationProblem {
-    override def toString = s"Errors in validation of hook $hook:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).messageAndStackStringWithMargin).mkString("\n")
+    override def toString = s"Errors in validation of hook $hook:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).stackStringWithMargin).mkString("\n")
   }
 
-  case class TransitionValidationProblem(transition: ITransition, errors: Seq[Throwable]) extends ValidationProblem {
-    override def toString = s"Errors in validation of transition $transition:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).messageAndStackStringWithMargin).mkString("\n")
+  case class TransitionValidationProblem(transition: Transition, errors: Seq[Throwable]) extends ValidationProblem {
+    override def toString = s"Errors in validation of transition $transition:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).stackStringWithMargin).mkString("\n")
   }
+
+  case class MoleValidationProblem(mole: Mole, errors: Seq[Throwable]) extends ValidationProblem {
+    override def toString = s"Errors in validation of mole:\n" + errors.map(e ⇒ Prettifier.ExceptionPretiffier(e).stackStringWithMargin).mkString("\n")
+  }
+
 }
 
 trait ValidationProblem extends Problem

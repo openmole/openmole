@@ -43,7 +43,7 @@ package object shared {
   }
 
   object rTask {
-    lazy val rVersion = "3.3.3"
+    lazy val rVersion = "4.0.2"
   }
 
   def anchor(title: String) = title.filter(c ⇒ c.isLetterOrDigit)
@@ -87,6 +87,7 @@ package object shared {
     lazy val CAREmailing = "https://groups.google.com/forum/?fromgroups#!forum/reproducible"
     lazy val egi = "http://www.egi.eu/"
     lazy val singularity = "https://sylabs.io/"
+    lazy val rcran = "https://cran.r-project.org/"
 
     // Models
     lazy val simpluDemo = "https://simplu.openmole.org"

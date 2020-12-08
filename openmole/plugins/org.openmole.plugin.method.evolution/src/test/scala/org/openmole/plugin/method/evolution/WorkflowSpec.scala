@@ -17,6 +17,7 @@
 package org.openmole.plugin.method.evolution
 
 import org.openmole.core.dsl._
+import org.openmole.core.workflow.composition.DSL.tasks
 import org.openmole.core.workflow.mole.Mole
 import org.openmole.core.workflow.task.FromContextTask
 import org.openmole.core.workflow.validation._
@@ -45,7 +46,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
     SteadyStateEvolution(
       algorithm =
         NSGA2(
-          genome = Seq(x in (0.0, 1.0), y in ("0.0", "1.0")),
+          genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
           objective = Seq(x, y),
           stochastic = Stochastic()
         ),
@@ -70,7 +71,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
     SteadyStateEvolution(
       algorithm =
         PSE(
-          genome = Seq(population in (0.0, 1.0), state in ("0.0", "1.0")),
+          genome = Seq(population in (0.0, 1.0), state in (0.0, 1.0)),
           objective =
             Seq(
               population in (0.0 to 1.0 by 0.1),
@@ -89,8 +90,8 @@ class WorkflowSpec extends FlatSpec with Matchers {
     val yArray = Val[Array[Int]]
 
     NSGA2(
-      mu = 200,
-      genome = Seq(xArray in Vector.fill(5)((0.0, 1.0)), yArray in Vector.fill(5)(("0", "1"))),
+      populationSize = 200,
+      genome = Seq(xArray in Vector.fill(5)((0.0, 1.0)), yArray in Vector.fill(5)((0, 1))),
       objective = Seq()
     )
   }
@@ -237,6 +238,30 @@ class WorkflowSpec extends FlatSpec with Matchers {
     Validation(wf).isEmpty should equal(true)
   }
 
+  "Passing an input from previous task" should "be valid" in {
+    val a1 = Val[Double]
+    val a2 = Val[Double]
+    val b = Val[Double]
+
+    val preTask =
+      EmptyTask() set (
+        outputs += a2
+      )
+
+    val nsga2 =
+      NSGA2Evolution(
+        evaluation = EmptyTask() set (inputs += (a1, a2), outputs += b),
+        objective = Seq(b),
+        genome = Seq(a1 in (0.0, 1.0)),
+        termination = 100,
+        distribution = Island(1)
+      )
+
+    val wf = preTask -- nsga2
+
+    Validation(wf).isEmpty should equal(true)
+  }
+
   "NSGAEvolution with island" should "be valid" in {
     val a = Val[Double]
     val b = Val[Double]
@@ -245,8 +270,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
       evaluation = EmptyTask() set (inputs += a, outputs += b),
       objective = Seq(b),
       genome = Seq(a in (0.0, 1.0)),
-      termination = 100,
-      distribution = Island(1)
+      termination = 100
     )
 
     Validation(nsga).isEmpty should equal(true)
@@ -289,6 +313,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
       objective = Seq(b),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
+      distribution = Island(1),
       stochastic = Stochastic()
     )
 
@@ -347,7 +372,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
     val nsga = NSGA2Evolution(
       evaluation = EmptyTask() set (inputs += a, outputs += b),
-      objective = Seq(b aggregate f as "aggF"),
+      objective = Seq(b aggregate f _ as "aggF"),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       stochastic = Stochastic()
@@ -363,7 +388,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
     PSEEvolution(
       evaluation = EmptyTask(),
-      objective = Seq(a aggregate f in (0.0 to 1.0 by 0.1), b in (0.2 to 0.5 by 0.1)),
+      objective = Seq(a aggregate f _ in (0.0 to 1.0 by 0.1), b in (0.2 to 0.5 by 0.1)),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       stochastic = Stochastic()
@@ -379,7 +404,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
     OSEEvolution(
       origin = Seq(o in (0.0 to 1.0 by 0.1)),
       evaluation = EmptyTask(),
-      objective = Seq(a aggregate f under 9, b under 3.0),
+      objective = Seq(a aggregate f _ under 9, b under 3.0),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       stochastic = Stochastic()

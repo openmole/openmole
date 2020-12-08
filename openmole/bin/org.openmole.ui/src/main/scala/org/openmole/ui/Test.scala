@@ -3,6 +3,7 @@ package org.openmole.ui
 import java.io.File
 
 import org.openmole.core.services.{ Services, ServicesContainer }
+import org.openmole.core.timeservice.TimeService
 import org.openmole.tool.file._
 import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
@@ -43,6 +44,7 @@ object Test {
       implicit val networkService = NetworkService(None)
       implicit val fileServiceCache = FileServiceCache()
       implicit val loggerService = LoggerService()
+      implicit val timeService = TimeService()
 
       new ServicesContainer()
     }

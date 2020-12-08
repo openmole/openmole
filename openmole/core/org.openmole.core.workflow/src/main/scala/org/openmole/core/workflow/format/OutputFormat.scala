@@ -12,12 +12,12 @@ object OutputFormat {
 
   sealed trait OutputContent
   case class SectionContent(sections: Seq[OutputSection]) extends OutputContent
-  case class PlainContent(variables: Seq[Variable[_]], name: Option[FromContext[String]] = None) extends OutputContent
+  case class PlainContent(variables: Seq[Variable[_]], name: Option[StringFromContext[String]] = None) extends OutputContent
 
   case class OutputSection(name: FromContext[String], variables: Seq[Variable[_]])
 }
 
 trait OutputFormat[T, -M] {
   def write(executionContext: HookExecutionContext)(format: T, output: WritableOutput, content: OutputFormat.OutputContent, method: M): FromContext[Unit]
-  def validate(format: T): FromContextHook.ValidateParameters ⇒ Seq[Throwable]
+  def validate(format: T, inputs: Seq[Val[_]]): Validate
 }

@@ -128,7 +128,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
           onpasted
         }
         else treeNodeManager.setFilesInError(
-          "Some files already exists, overwrite ?",
+          "Some files already exists, overwrite?",
           existing,
           () ⇒ CoreUtils.copyProjectFilesTo(safePaths, to).foreach { b ⇒
             refreshWithNoError
@@ -141,7 +141,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
       }
     }
     else treeNodeManager.setFilesInComment(
-      "Paste a folder in itself is not allowed",
+      "Pasting a folder in itself is not allowed",
       same,
       () ⇒ treeNodeManager.noError
     )
@@ -149,13 +149,18 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
   def filter: FileFilter = fileToolBar.fileFilter.now
 
-  def downloadFile(safePath: SafePath, saveFile: Boolean, onLoaded: String ⇒ Unit = (s: String) ⇒ {}) = {
+  def downloadFile(safePath: SafePath, onLoaded: (String, Option[String]) ⇒ Unit, saveFile: Boolean, hash: Boolean) = {
+
+    //    if (FileExtension.isOMS(safePath.name))
+    //      OMPost()[Api].hash(safePath).call().foreach { h ⇒
+    //        HashService.set(safePath, h)
+    //      }
+
     FileManager.download(
       safePath,
-      (p: ProcessState) ⇒ {
-        fileToolBar.transferring() = p
-      },
-      onLoaded
+      (p: ProcessState) ⇒ { fileToolBar.transferring() = p },
+      hash = hash,
+      onLoaded = onLoaded
     )
   }
 
@@ -222,7 +227,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
                   div(
                     omsheet.moreEntriesText,
                     div(
-                      s"Only 1000 files maximum (${100000 / sons.nbFilesOnServer}%) can be displayed.",
+                      s"Max of 1,000 files (${100000 / sons.nbFilesOnServer}%) displayed simultaneously",
                       div(
                         "Use the ",
                         span(
@@ -270,10 +275,15 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
       val ext = FileExtension(tn.name.now)
       val tnSafePath = treeNodeManager.current.now ++ tn.name.now
       if (ext.displayable) {
-        downloadFile(tnSafePath, false, (content: String) ⇒ {
-          fileDisplayer.display(tnSafePath, content, ext, services)
-          invalidCacheAndDraw
-        })
+        downloadFile(
+          tnSafePath,
+          saveFile = false,
+          hash = true,
+          onLoaded = (content: String, hash: Option[String]) ⇒ {
+            fileDisplayer.display(tnSafePath, content, hash.get, ext, services)
+            invalidCacheAndDraw
+          }
+        )
       }
     case _ ⇒
   }
@@ -487,15 +497,15 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
       dragged ⇒
         if (isDir) {
           if (dragged != to) {
-            treeNodeTabs.saveAllTabs(() ⇒ {
-              Post()[Api].move(dragged, to).call().foreach {
-                b ⇒
-                  treeNodeManager.invalidCache(to)
-                  treeNodeManager.invalidCache(dragged)
-                  refreshAndDraw
-                  treeNodeTabs.checkTabs
-              }
-            })
+            //treeNodeTabs.saveAllTabs(() ⇒ {
+            Post()[Api].move(dragged, to).call().foreach {
+              b ⇒
+                treeNodeManager.invalidCache(to)
+                treeNodeManager.invalidCache(dragged)
+                refreshAndDraw
+                treeNodeTabs.checkTabs
+            }
+            //})
           }
         }
     }

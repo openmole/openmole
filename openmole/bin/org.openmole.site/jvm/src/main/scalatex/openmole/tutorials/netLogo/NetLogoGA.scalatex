@@ -7,7 +7,7 @@
     val gPopulation = Val[Double]
     val gDiffusionRate = Val[Double]
     val gEvaporationRate = Val[Double]
-    val seed = Val[Int]
+    val mySeed = Val[Int]
 
     // Define the output variables
     val food1 = Val[Double]
@@ -16,7 +16,7 @@
 
     // Define the NetlogoTask
     val ants =
-      NetLogo5Task(workDirectory / "Ants.nlogo", go = Seq("run-to-grid"), seed = seed) set (
+      NetLogo5Task(workDirectory / "Ants.nlogo", go = Seq("run-to-grid"), seed = mySeed) set (
         // Map the OpenMOLE variables to NetLogo variables
         inputs += gPopulation mapped "gpopulation",
         inputs += gDiffusionRate mapped "gdiffusion-rate",
@@ -26,7 +26,7 @@
         outputs += food3 mapped "final-ticks-food3",
 
         // Define default values for inputs of the model
-        seed := 42,
+        mySeed := 42,
         gPopulation := 125.0,
         gDiffusionRate := 50.0,
         gEvaporationRate := 50
@@ -143,7 +143,7 @@ NSGA2Evolution(
   // Define the objectives to minimize.
   genome = Seq(gDiffusionRate in (0.0, 99.0), gEvaporationRate in (0.0, 99.0)),
   objective = Seq(food1, food2, food3),
-  stochastic = Stochastic(seed = seed),
+  stochastic = Stochastic(seed = mySeed),
   evaluation = ants,
   parallelism = 10,
   termination = 1000
@@ -166,7 +166,7 @@ val env = EGIEnvironment("vo.complex-systems.eu")
 NSGA2Evolution(
   genome = Seq(gDiffusionRate in (0.0, 99.0), gEvaporationRate in (0.0, 99.0)),
   objective = Seq(food1, food2, food3),
-  stochastic = Stochastic(seed = seed),
+  stochastic = Stochastic(seed = mySeed),
   evaluation = ants,
   termination = 100000,
   parallelism = 1000,

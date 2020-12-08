@@ -34,8 +34,7 @@ trait SizeStep[T] {
       val ma: T = range.max.from(context)
       val (step, size) = stepAndSize(mi, ma).from(context)
       for (i ← 0 to size) yield { mi + (fromInt(i) * step) }
-    } validate { p ⇒
-      import p._
+    } withValidate { inputs ⇒
       range.min.validate(inputs) ++ range.max.validate(inputs)
     }
 

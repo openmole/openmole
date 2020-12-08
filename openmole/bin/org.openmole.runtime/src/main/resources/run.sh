@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 #readlink -f does not work on mac, use alternate script
 TARGET_FILE="$0"
@@ -36,7 +36,7 @@ esac
 
 for a in $@
 do
-  if [[ $a == "--debug" ]]; then FLAG="$FLAG -XX:-OmitStackTraceInFastThrow"; fi
+  if [ $a = "--debug" ]; then FLAG="$FLAG -XX:-OmitStackTraceInFastThrow"; fi
 done
 
 

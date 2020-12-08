@@ -27,7 +27,7 @@ import org.openmole.tool.logger.JavaLogger
 
 object ListFilesDomain extends JavaLogger {
 
-  implicit def isFinite: Finite[ListFilesDomain, File] = new Finite[ListFilesDomain, File] {
+  implicit def isFinite: FiniteFromContext[ListFilesDomain, File] = new FiniteFromContext[ListFilesDomain, File] {
     override def computeValues(domain: ListFilesDomain) = domain.computeValues
   }
 

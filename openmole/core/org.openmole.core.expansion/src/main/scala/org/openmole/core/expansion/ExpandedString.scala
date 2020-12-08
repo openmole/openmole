@@ -35,21 +35,21 @@ import scala.util.Try
 object ExpandedString {
 
   implicit def fromStringToVariableExpansion(s: String) = ExpandedString(s)
-  implicit def fromTraversableOfStringToTraversableOfVariableExpansion[T <: Traversable[String]](t: T) = t.map(ExpandedString(_))
+  implicit def fromTraversableOfStringToTraversableOfVariableExpansion(t: Iterable[String]) = t.map(ExpandedString(_))
   implicit def fromFileToExpandedString(f: java.io.File) = ExpandedString(f.getPath)
 
   def apply(s: String): FromContext[String] = apply(new StringInputStream(s))
 
-  def expandValues(s: String, context: Context) =
-    parse(new StringInputStream(s)).map {
-      case UnexpandedElement(s) ⇒ s
-      case ValueElement(v)      ⇒ v
-      case CodeElement(code) ⇒
-        context.variable[Any](code) match {
-          case Some(v) ⇒ v.value
-          case None    ⇒ throw new UserBadDataError(s"'$code' is not a value, cannot expands string '$s'")
-        }
-    }.mkString
+  //  def expandValues(s: String, context: Context) =
+  //    parse(new StringInputStream(s)).map {
+  //      case UnexpandedElement(s) ⇒ s
+  //      case ValueElement(v)      ⇒ v
+  //      case CodeElement(code) ⇒
+  //        context.variable[Any](code) match {
+  //          case Some(v) ⇒ v.value
+  //          case None    ⇒ throw new UserBadDataError(s"'$code' is not a value, cannot expands string '$s'")
+  //        }
+  //    }.mkString
 
   /**
    * Expand an input stream as an [[FromContext]]
@@ -62,10 +62,7 @@ object ExpandedString {
     FromContext { p ⇒
       import p._
       expandedFC.map(_.from(context)).mkString
-    } validate { p ⇒
-      import p._
-      expandedFC.flatMap(_.validate(inputs))
-    }
+    } withValidate { inputs ⇒ expandedFC.map(_.validate(inputs)) }
   }
 
   def parse(is: InputStream) = {
@@ -148,10 +145,9 @@ object ExpandedString {
               case Some(value) ⇒ value.value.toString
               case None        ⇒ e.proxy().from(context).toString
             }
-          } validate { p ⇒
-            import p._
-            if (inputs.exists(_.name == e.code)) Seq.empty
-            else e.proxy.validate(inputs).toSeq
+          } withValidate { inputs ⇒
+            if (inputs.exists(_.name == e.code)) Validate.success
+            else e.proxy.validate(inputs)
           }
 
       }

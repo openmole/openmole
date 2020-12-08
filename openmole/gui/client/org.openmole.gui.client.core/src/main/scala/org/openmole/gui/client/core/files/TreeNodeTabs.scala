@@ -19,6 +19,7 @@ import org.openmole.gui.ext.client._
 import org.openmole.gui.client.core._
 import DataUtils._
 import net.scalapro.sortable._
+import org.openmole.gui.client.core.alert.AbsolutePositioning.{ CenterPagePosition }
 import org.openmole.gui.client.core.files.TreeNodeTab.{ EditableView, First100, Raw, RowFilter }
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.client.tool.plot.Plot._
@@ -89,14 +90,11 @@ sealed trait TreeNodeTab {
     activity() = UnActive
   }
 
-  def extension: FileExtension = FileExtension(safePathTab.now.name)
-
   // Get the file content to be saved
-  def editableContent: Option[String]
-
+  def editableContent: Option[TreeNodeTab.EditableContent]
   def editor: Option[EditorPanelUI]
 
-  def refresh(afterRefresh: () ⇒ Unit = () ⇒ {}): Unit
+  def saveContent(afterRefresh: () ⇒ Unit = () ⇒ {}): Unit
 
   def resizeEditor: Unit
 
@@ -111,24 +109,52 @@ object TreeNodeTab {
 
   implicit val ctx = Ctx.Owner.safe()
 
-  case class OMS(
-    treeNodeTabs:    TreeNodeTabs,
-    safePath:        SafePath,
-    initialContent:  String,
-    showExecution:   () ⇒ Unit,
-    setEditorErrors: Seq[ErrorWithLocation] ⇒ Unit) extends TreeNodeTab {
+  case class EditableContent(content: String, hash: String)
+
+  object OMS {
+    def apply(
+      treeNodeTabs:    TreeNodeTabs,
+      safePath:        SafePath,
+      initialContent:  String,
+      initialHash:     String,
+      showExecution:   () ⇒ Unit,
+      setEditorErrors: Seq[ErrorWithLocation] ⇒ Unit) = {
+      val omsEditor = EditorPanelUI(treeNodeTabs, safePath, FileExtension.OMS, initialContent, initialHash)
+      new OMS(
+        treeNodeTabs,
+        safePath,
+        omsEditor,
+        showExecution,
+        setEditorErrors
+      )
+    }
+  }
+
+  class OMS(
+    val treeNodeTabs: TreeNodeTabs,
+    val safePath:     SafePath,
+    val omsEditor:    EditorPanelUI,
+    showExecution:    () ⇒ Unit,
+    setEditorErrors:  Seq[ErrorWithLocation] ⇒ Unit) extends TreeNodeTab {
 
     val errors = Var(EditorErrors())
 
     lazy val safePathTab = Var(safePath)
 
-    lazy val omsEditor = EditorPanelUI(treeNodeTabs, safePath, FileExtension.OMS, initialContent)
-
     def editor = Some(omsEditor)
 
-    def editableContent = Some(omsEditor.code)
+    def editableContent = {
+      val (code, hash) = omsEditor.code
+      Some(TreeNodeTab.EditableContent(code, hash))
+    }
 
-    def refresh(onsaved: () ⇒ Unit) = save(safePathTab.now, omsEditor, onsaved)
+    def saveContent(onsaved: () ⇒ Unit) = {
+      def saved(hash: String) = {
+        omsEditor.initialContentHash = hash
+        onsaved()
+      }
+      save(safePathTab.now, omsEditor, saved)
+    }
 
     def resizeEditor = omsEditor.editor.resize()
 
@@ -157,7 +183,7 @@ object TreeNodeTab {
             button("Test", btn_default, onclick := { () ⇒
               unsetErrors
               compileDisabled.update(true)
-              refresh(() ⇒
+              saveContent(() ⇒
                 Post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].compileScript(ScriptData(safePathTab.now)).call().foreach { errorDataOption ⇒
                   setError(errorDataOption)
                 })
@@ -166,7 +192,7 @@ object TreeNodeTab {
         div(display.flex, flexDirection.row)(
           button("Run", btn_primary, marginLeft := 10, onclick := { () ⇒
             unsetErrors
-            refresh(() ⇒
+            saveContent(() ⇒
               Post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePathTab.now), validateButton.position.now).call().foreach { execInfo ⇒
                 showExecution()
               }
@@ -193,7 +219,7 @@ object TreeNodeTab {
 
     def editor = None
 
-    def refresh(afterRefresh: () ⇒ Unit): Unit = () ⇒ {}
+    def saveContent(afterRefresh: () ⇒ Unit): Unit = () ⇒ {}
 
     def resizeEditor = {}
 
@@ -201,22 +227,48 @@ object TreeNodeTab {
     lazy val block: TypedTag[_ <: HTMLElement] = _block
   }
 
-  case class Editable(
-    treeNodeTabs:   TreeNodeTabs,
-    safePath:       SafePath,
-    initialContent: String,
-    dataTab:        DataTab,
-    plotter:        Plotter) extends TreeNodeTab {
+  object Editable {
+    def apply(
+      treeNodeTabs: TreeNodeTabs,
+      safePath:     SafePath,
+      content:      String,
+      hash:         String,
+      dataTab:      DataTab,
+      plotter:      Plotter) = {
+
+      val editor = EditorPanelUI(treeNodeTabs, safePath, FileExtension(safePath.name), content, hash, if (DataUtils.isCSV(safePath)) paddingBottom := 80 else emptyMod)
+
+      new Editable(
+        treeNodeTabs = treeNodeTabs,
+        safePath = safePath,
+        editorValue = editor,
+        dataTab = dataTab,
+        plotter = plotter
+      )
+    }
+  }
+
+  class Editable(
+    val treeNodeTabs: TreeNodeTabs,
+    val safePath:     SafePath,
+    val editorValue:  EditorPanelUI,
+    dataTab:          DataTab,
+    plotter:          Plotter) extends TreeNodeTab {
 
     lazy val safePathTab = Var(safePath)
 
     lazy val isEditing = {
       val ed = Var(dataTab.editing)
-      ed.trigger(e ⇒ editableEditor.setReadOnly(!e))
+      ed.trigger(e ⇒ editorValue.setReadOnly(!e))
       ed
     }
 
-    def editableContent = Some(editableEditor.code)
+    def editor = Some(editorValue)
+
+    def editableContent = {
+      val (code, hash) = editorValue.code
+      Some(TreeNodeTab.EditableContent(code, hash))
+    }
 
     def isCSV = DataUtils.isCSV(safePath)
 
@@ -237,28 +289,33 @@ object TreeNodeTab {
       Seq((ScatterMode, ColumnPlot), (SplomMode, ColumnPlot), (HeatMapMode, LinePlot))
     }*/
 
-    lazy val editableEditor = EditorPanelUI(treeNodeTabs, safePath, extension, initialContent, if (isCSV) paddingBottom := 80 else emptyMod)
-
-    def editor = Some(editableEditor)
-
     def download(afterRefresh: () ⇒ Unit): Unit = editor.synchronized {
+      val safePath = safePathTab.now
+
       FileManager.download(
-        safePathTab.now,
+        safePath,
         (p: ProcessState) ⇒ {},
-        (cont: String) ⇒ {
-          editableEditor.setCode(cont)
+        (cont: String, hash) ⇒ {
+          editorValue.setCode(cont, hash.get)
           if (isCSV) {
-            Post()[Api].sequence(safePathTab.now).call().foreach {
+            Post()[Api].sequence(safePath).call().foreach {
               seq ⇒ switchView(seq)
             }
           }
           else afterRefresh()
-        }
+        },
+        hash = true
       )
     }
 
-    def refresh(afterRefresh: () ⇒ Unit): Unit = {
-      def saveTab = TreeNodeTab.save(safePathTab.now, editableEditor, afterRefresh)
+    def saveContent(afterRefresh: () ⇒ Unit): Unit = {
+      def saveTab = {
+        def saved(hash: String) = {
+          editorValue.initialContentHash = hash
+          afterRefresh()
+        }
+        TreeNodeTab.save(safePathTab.now, editorValue, saved)
+      }
 
       if (isEditing.now) {
         if (isCSV) {
@@ -269,7 +326,7 @@ object TreeNodeTab {
       else afterRefresh()
     }
 
-    def resizeEditor = editableEditor.editor.resize()
+    def resizeEditor = editorValue.editor.resize()
 
     lazy val controlElement: TypedTag[HTMLElement] =
       div(
@@ -287,7 +344,7 @@ object TreeNodeTab {
         }
       )
 
-    lazy val editorView = editableEditor.view
+    lazy val editorView = editorValue.view
 
     val switchString = dataTab.view match {
       case Table ⇒ Raw.toString
@@ -305,7 +362,7 @@ object TreeNodeTab {
         case Plot  ⇒ toView(ColumnPlot, ScatterMode)
         case _ ⇒
           if (isEditing.now)
-            refresh(() ⇒ {
+            saveContent(() ⇒ {
               download(() ⇒ switch(isEditing.now))
             })
           else switch(isEditing.now)
@@ -580,13 +637,24 @@ object TreeNodeTab {
 
   }
 
-  def save(safePath: SafePath, editorPanelUI: EditorPanelUI, afterSave: () ⇒ Unit) =
+  def save(safePath: SafePath, editorPanelUI: EditorPanelUI, afterSave: String ⇒ Unit, overwrite: Boolean = false): Unit =
     editorPanelUI.synchronized {
-      Post()[Api].saveFile(safePath, editorPanelUI.code).call().foreach {
-        _ ⇒
-          afterSave()
+      val (content, hash) = editorPanelUI.code
+      Post()[Api].saveFile(safePath, content, Some(hash), overwrite).call().foreach {
+        case (saved, savedHash) ⇒
+          if (saved) afterSave(savedHash)
+          else serverConflictAlert(safePath, editorPanelUI, afterSave)
       }
     }
+
+  def serverConflictAlert(safePath: SafePath, editorPanelUI: EditorPanelUI, afterSave: String ⇒ Unit) = panels.alertPanel.string(
+    s"The file ${safePath.name} has been modified on the sever. Which version do you want to keep?",
+    okaction = { () ⇒ save(safePath, editorPanelUI, afterSave, true) },
+    cancelaction = { () ⇒ panels.treeNodePanel.downloadFile(safePath, saveFile = false, hash = true, onLoaded = (content: String, hash: Option[String]) ⇒ { editorPanelUI.setCode(content, hash.get) }) },
+    transform = CenterPagePosition,
+    okString = "Yours",
+    cancelString = "Server"
+  )
 
   def rawBlock(htmlContent: String) =
     div(editorContainer +++ container)(
@@ -670,7 +738,7 @@ class TreeNodeTabs {
       case None ⇒
         timer() = Some(setInterval(15000) {
           tabs.now.foreach {
-            _.refresh()
+            _.saveContent()
           }
         })
       case _ ⇒
@@ -714,10 +782,11 @@ class TreeNodeTabs {
     remove
   }
 
-  def switchEditableTo(tab: TreeNodeTab, dataTab: DataTab, plotter: Plotter) = {
-    val newTab = TreeNodeTab.Editable(this, tab.safePathTab.now, tab.editableContent.getOrElse(""), dataTab, plotter)
-    switchTab(tab, newTab)
-  }
+  def switchEditableTo(tab: TreeNodeTab, dataTab: DataTab, plotter: Plotter) =
+    tab.editableContent.foreach { editable ⇒
+      val newTab = TreeNodeTab.Editable(this, tab.safePathTab.now, editable.content, editable.hash, dataTab, plotter)
+      switchTab(tab, newTab)
+    }
 
   def switchTab(tab: TreeNodeTab, to: TreeNodeTab) = {
     val index = {
@@ -732,13 +801,13 @@ class TreeNodeTabs {
     setActive(to)
   }
 
-  def alterables: Seq[AlterableFileContent] =
-    tabs.now.flatMap { t ⇒ t.editableContent.map(c ⇒ AlterableFileContent(t.safePathTab.now, c)) }
-
-  def saveAllTabs(onsave: () ⇒ Unit) = {
-    //if(org.scalajs.dom.document.hasFocus())
-    org.openmole.gui.client.core.Post()[Api].saveFiles(alterables).call().foreach { s ⇒ onsave() }
-  }
+  //  def alterables: Seq[AlterableFileContent] =
+  //    tabs.now.flatMap { t ⇒ t.editableContent.map(c ⇒ AlterableFileContent(t.safePathTab.now, c.content, c.hash)) }
+  //
+  //  def saveAllTabs(onsave: () ⇒ Unit) = {
+  //    //if(org.scalajs.dom.document.hasFocus())
+  //    org.openmole.gui.client.core.Post()[Api].saveFiles(alterables).call().foreach { s ⇒ onsave() }
+  //  }
 
   def checkTabs = tabs.now.foreach { t: TreeNodeTab ⇒
     org.openmole.gui.client.core.Post()[Api].exists(t.safePathTab.now).call().foreach { e ⇒
@@ -812,7 +881,15 @@ class TreeNodeTabs {
                   setActive(t)
                 }
               )(
-                  button(ms("close") +++ tabClose, `type` := "button", onclick := { () ⇒ remove(t) })(raw("&#215")),
+                  button(
+                    ms("close") +++ tabClose,
+                    `type` := "button",
+                    onclick := {
+                      () ⇒
+                        t.saveContent(() ⇒ ()) // save
+                        remove(t)
+                    }
+                  )(raw("&#215")),
                   t.tabName()
                 )
             )

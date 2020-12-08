@@ -58,6 +58,13 @@ package file {
 
     def copyChannel(source: FileChannel, destination: FileChannel): Unit = source.transferTo(0, source.size, destination)
 
+    def retrieveResourceFromClassLoader(file: File, clazz: Class[_], resourceName: String, executable: Boolean = false) =
+      if (!file.exists()) {
+        withClosable(clazz.getClassLoader.getResourceAsStream(resourceName))(_.copy(file))
+        if (executable) file.setExecutable(true)
+        file
+      }
+
     // glad you were there...
     implicit def file2Path(file: File) = file.toPath
 
@@ -545,6 +552,7 @@ package file {
     def acceptDirectory = new Filter[Path] {
       def accept(entry: Path): Boolean = Files.isDirectory(entry)
     }
+
   }
 
 }

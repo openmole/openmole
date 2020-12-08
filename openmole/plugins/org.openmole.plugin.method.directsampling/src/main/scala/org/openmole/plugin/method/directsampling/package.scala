@@ -22,6 +22,7 @@ import org.openmole.core.dsl.extension._
 import org.openmole.core.workflow.format.WritableOutput
 import org.openmole.core.workflow.hook.FormattedFileHook
 import org.openmole.core.workflow.mole
+import org.openmole.plugin.sampling.combine._
 import org.openmole.plugin.domain.distribution._
 import org.openmole.plugin.domain.modifier._
 import org.openmole.plugin.tool.pattern._
@@ -60,14 +61,19 @@ package object directsampling {
     evaluation:       DSL,
     seed:             Val[T],
     sample:           Int,
-    distributionSeed: OptionalArgument[Long] = None,
-    aggregation:      Seq[Aggregation]       = Seq.empty,
-    wrap:             Boolean                = false,
-    scope:            DefinitionScope        = "replication"
+    index:            OptionalArgument[Val[Int]] = None,
+    distributionSeed: OptionalArgument[Long]     = None,
+    aggregation:      Seq[Aggregation]           = Seq.empty,
+    wrap:             Boolean                    = false,
+    scope:            DefinitionScope            = "replication"
   ) = {
     implicit def defScope = scope
 
-    val sampling = seed in (TakeDomain(UniformDistribution[T](distributionSeed), sample))
+    val sampling: Sampling =
+      index.option match {
+        case None        ⇒ seed in TakeDomain(UniformDistribution[T](distributionSeed), sample)
+        case Some(index) ⇒ (seed in TakeDomain(UniformDistribution[T](distributionSeed), sample)) withIndex index
+      }
     val exploration = ExplorationTask(sampling)
 
     val aggregateTask: OptionalArgument[DSL] =

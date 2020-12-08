@@ -22,6 +22,7 @@ import org.openmole.core.context.PrototypeSet
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.dsl._
+import org.openmole.core.dsl.`extension`._
 import org.openmole.plugin.task.external._
 import org.openmole.core.workflow.validation._
 
@@ -34,17 +35,6 @@ package container {
   }
 
   case class HostFile(path: String, destination: String)
-
-  trait HostFiles[T] {
-    def hostFiles: Lens[T, Vector[HostFile]]
-  }
-
-  trait ContainerPackage {
-    lazy val hostFiles = new {
-      def +=[T: HostFiles](path: String, destination: OptionalArgument[String] = None): T ⇒ T =
-        implicitly[HostFiles[T]].hostFiles add HostFile(path, destination.getOrElse(path))
-    }
-  }
 
   object ContainerImage {
     implicit def fileToContainerImage(f: java.io.File) = {
@@ -75,7 +65,7 @@ package container {
 
 }
 
-package object container extends ContainerPackage {
+package object container {
 
   type FileBinding = (String, String)
 
@@ -118,15 +108,14 @@ package object container extends ContainerPackage {
     environmentVariables: Seq[EnvironmentVariable],
     external:             External,
     inputs:               PrototypeSet
-  ) = Validate { p ⇒
-    import p._
-
+  ): Validate = {
     val allInputs = External.PWD :: inputs.toList
     val validateVariables = environmentVariables.flatMap(v ⇒ Seq(v.name, v.value)).flatMap(_.validate(allInputs))
 
     commands.flatMap(_.validate(allInputs)) ++
       validateVariables ++
-      External.validate(external)(allInputs).apply
+      External.validate(external)(allInputs)
+
   }
 
   def ArchiveNotFound(archive: File) = Seq(new UserBadDataError(s"Cannot find specified Archive $archive in your work directory. Did you prefix the path with `workDirectory / `?"))
@@ -144,7 +133,7 @@ package object container extends ContainerPackage {
   }
 
   sealed trait ContainerSystem
-  case class Proot(noSeccomp: Boolean = false, kernel: String = "3.2.1") extends ContainerSystem
+  case class Proot(proot: File, noSeccomp: Boolean = false, kernel: String = "3.2.1") extends ContainerSystem
   case class Singularity(command: String = "singularity") extends ContainerSystem
 
   type PreparedImage = _root_.container.FlatImage

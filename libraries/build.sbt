@@ -169,8 +169,8 @@ lazy val scalajsLinker = OsgiProject(dir, "scalajs-linker", exports = Seq("org.s
 //
 
 lazy val scalajsLogging = OsgiProject(dir, "scalajs-logging", exports = Seq("org.scalajs.logging.*")) settings(
-  libraryDependencies += "org.scala-js" %% "scalajs-logging" % scalajsVersion,
-  version := scalajsVersion) settings(settings: _*)
+  libraryDependencies += "org.scala-js" %% "scalajs-logging" % scalajsLoggingVersion,
+  version := scalajsLoggingVersion) settings(settings: _*)
   
 lazy val scalaJS = OsgiProject(dir, "scalajs", exports = Seq("scala.scalajs.*"), imports = Seq("*")) settings (
   libraryDependencies += "org.scala-js" %% "scalajs-library" % scalajsVersion,

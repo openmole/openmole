@@ -52,7 +52,7 @@ class NativeWizardApiImpl(s: Services) extends NativeWizardAPI {
     val content = data.vals +
       s"""\n\nval $task = CARETask(workDirectory / "$executableName", "$command") set(\n""" +
       WizardUtils.expandWizardData(data) +
-      s""")\n\n$task hook ToStringHook()"""
+      s""")\n\n$task hook display"""
 
     target.toFile.content = content
     WizardToTask(target)

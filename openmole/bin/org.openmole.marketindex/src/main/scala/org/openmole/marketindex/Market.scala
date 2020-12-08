@@ -52,6 +52,7 @@ object Market {
     lazy val python = Tag("Python")
     lazy val calibration = Tag("Calibration")
     lazy val optimisation = Tag("Optimisation")
+    lazy val diversity = Tag("diversity")
     lazy val tutorial = Tag("Tutorial")
     lazy val workflow = Tag("Workflow")
     lazy val sensitivity = Tag("Sensitivity")
@@ -80,7 +81,7 @@ object Market {
       MarketEntry("Hello World in a Container", "hello-container", Seq(native)),
       MarketEntry("Hello with OpenMOLE plugin", "hello-plugin", Seq(scala, java, plugin)),
 
-      MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration, tutorial, sensitivity)),
+      MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration, tutorial, sensitivity, diversity)),
       MarketEntry("Native Application Tutorial", "tutorials/native", Seq(tutorial, native, data, python)),
       MarketEntry("Workflow Tutorial", "tutorials/workflow", Seq(tutorial, scala, workflow)),
 
@@ -95,6 +96,10 @@ object Market {
       MarketEntry("SimpopLocal", "simpoplocal", Seq(stochastic, simulation, ga, scala, calibration)),
       MarketEntry("Metamimetic Networks", "metamimetic-networks", Seq(stochastic, simulation, netlogo)),
       MarketEntry("Segmentation with FSL", "fsl-fast", Seq(fsl, data, native, neuroscience)),
+
+      MarketEntry("NSGA2 Test Functions", "nsga2-test-functions", Seq(calibration, optimisation, scala, ga)),
+      MarketEntry("Generate Visualisation", "genetic-algos-visu", Seq(ga, R)),
+
     )
   )
 

@@ -5,13 +5,17 @@ package org.openmole.core
  */
 package keyword {
 
-  case class In[A, B](value: A, domain: B)
-  case class Under[A, B](value: A, under: B)
-  case class :=[A, B](value: A, equal: B)
-  case class Negative[A](value: A)
-  case class Aggregate[A, B](value: A, aggregate: B)
-  case class Delta[A, B](value: A, delta: B)
-  case class As[A, B](value: A, as: B)
+  case class In[+A, +B](value: A, domain: B)
+  case class Under[+A, +B](value: A, under: B)
+  case class :=[+A, +B](value: A, equal: B)
+  case class Negative[+A](value: A)
+
+  // Covariance on type B causes problem for Some implicit conversion, see: DirectSampling
+  case class Aggregate[+A, B](value: A, aggregate: B)
+
+  case class Delta[+A, +B](value: A, delta: B)
+  case class As[+A, +B](value: A, as: B)
+  case class By[+A, +B](value: A, by: B)
 
   trait KeyWordPackage {
     implicit class InDecorator[A](a: A) {
@@ -31,7 +35,8 @@ package keyword {
     }
 
     implicit class AggregateDecorator[A](a: A) {
-      def aggregate[B, C](b: B ⇒ C) = Aggregate(a, b)
+      def aggregate[B](b: B) = Aggregate(a, b)
+      //def aggregate[B, C](b: B ⇒ C) = Aggregate(a, b)
     }
 
     implicit class DeltaDecorator[A](a: A) {
@@ -40,6 +45,10 @@ package keyword {
 
     implicit class AsDecorator[A](a: A) {
       def as[B](b: B) = As(a, b)
+    }
+
+    implicit class ByDecorator[A](a: A) {
+      def by[B](b: B) = By(a, b)
     }
   }
 

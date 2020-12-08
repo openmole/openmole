@@ -51,10 +51,10 @@ object OMTags {
 
   case class AlertAction(action: () ⇒ Unit)
 
-  def alert(alertType: ModifierSeq, content: TypedTag[HTMLDivElement], actions: Seq[AlertAction], buttonGroupClass: ModifierSeq = floatLeft +++ (marginLeft := 20), okString: String = "OK"): TypedTag[HTMLDivElement] =
+  def alert(alertType: ModifierSeq, content: TypedTag[HTMLDivElement], actions: Seq[AlertAction], buttonGroupClass: ModifierSeq = floatLeft +++ (marginLeft := 20), okString: String = "OK", cancelString: String = "Cancel"): TypedTag[HTMLDivElement] =
     actions.size match {
       case 1 ⇒ alert(alertType, content, actions.head.action, buttonGroupClass, okString)
-      case 2 ⇒ alert(alertType, content, actions.head.action, actions(1).action, buttonGroupClass, okString)
+      case 2 ⇒ alert(alertType, content, actions.head.action, actions(1).action, buttonGroupClass, okString, cancelString)
       case _ ⇒ tags.div()
     }
 
@@ -64,13 +64,13 @@ object OMTags {
       button(okString, alertType +++ (paddingTop := 20), onclick := todook)
     )
 
-  def alert(alertType: ModifierSeq, content: TypedTag[HTMLDivElement], todook: () ⇒ Unit, todocancel: () ⇒ Unit, buttonGroupClass: ModifierSeq, okString: String): TypedTag[HTMLDivElement] =
+  def alert(alertType: ModifierSeq, content: TypedTag[HTMLDivElement], todook: () ⇒ Unit, todocancel: () ⇒ Unit, buttonGroupClass: ModifierSeq, okString: String, cancelString: String): TypedTag[HTMLDivElement] =
     tags.div(role := "alert", overflowY := "scroll", height := 600, padding := 20)(
       content,
       div(paddingTop := 20)(
         buttonGroup(buttonGroupClass)(
           button(okString, alertType, onclick := todook),
-          button("Cancel", btn_default, onclick := todocancel)
+          button(cancelString, btn_default, onclick := todocancel)
         )
       )
     )

@@ -17,22 +17,11 @@
 
 package org.openmole.plugin.task.external
 
-import java.io.File
-
 import monocle.macros.Lenses
-import org.openmole.core.context._
-import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.fileservice.FileService
-import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.tools.service.OS
-import org.openmole.core.workflow.dsl.{ File, _ }
-import org.openmole.core.workflow.task._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.`extension`._
 import org.openmole.core.workflow.tools.InputOutputCheck
-import org.openmole.core.workspace.TmpDirectory
-import org.openmole.tool.random._
-import org.openmole.core.workflow.validation._
-import shapeless.TypeCase
 
 object External {
   val PWD = Val[String]("PWD")
@@ -76,11 +65,11 @@ object External {
   case class DeployedFile(file: File, expandedUserPath: String, link: Boolean, deployedFileType: DeployedFileType)
   type PathResolver = String ⇒ File
 
-  def validate(external: External)(inputs: Seq[Val[_]]) = Validate { p ⇒
-    def resourceExists(resource: External.Resource) =
+  def validate(external: External)(inputs: Seq[Val[_]]): Validate = {
+    def resourceExists(resource: External.Resource) = Validate {
       if (!resource.file.exists()) Seq(new UserBadDataError(s"""File resource "${resource.file} doesn't exist.""")) else Seq.empty
+    }
 
-    import p._
     external.inputFileArrays.flatMap(_.prefix.validate(inputs)) ++
       external.inputFileArrays.flatMap(_.suffix.validate(inputs)) ++
       external.inputFiles.flatMap(_.destination.validate(inputs)) ++

@@ -55,12 +55,12 @@ object MoleTask {
    * @param last the capsule which returns the results
    */
   def apply(mole: Mole, last: MoleCapsule)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): MoleTask = {
-    val mt = new MoleTask(_mole = mole, last = last, Vector.empty, InputOutputConfig(), InfoConfig())
+    val mt = new MoleTask(mole, last, Vector.empty, InputOutputConfig(), InfoConfig())
 
     mt set (
       dsl.inputs += (mole.root.inputs(mole, Sources.empty, Hooks.empty).toSeq: _*),
       dsl.outputs += (last.outputs(mole, Sources.empty, Hooks.empty).toSeq: _*),
-      isTask.defaults.set(mole.root.task.defaults)
+      isTask.defaults.set(mole.root.task(mole, Sources.empty, Hooks.empty).defaults)
     )
   }
 
@@ -69,11 +69,12 @@ object MoleTask {
    * @param moleJob
    * @return
    */
-  def containsMoleTask(moleJob: MoleJob) =
-    moleJob.task match {
-      case _: MoleTask              ⇒ true
-      case t: StrainerTaskDecorator ⇒ classOf[MoleTask].isAssignableFrom(t.task.getClass)
-      case _                        ⇒ false
+  def containsMoleTask(moleJob: MoleJob) = isMoleTask(moleJob.task.task)
+
+  def isMoleTask(task: Task) =
+    task match {
+      case _: MoleTask ⇒ true
+      case _           ⇒ false
     }
 
 }
@@ -81,25 +82,19 @@ object MoleTask {
 /**
  * Task executing a Mole
  *
- * @param _mole the Mole to be executed
+ * @param mole the Mole to be executed
  * @param last the MoleCapsule finishing the Mole
  * @param implicits names of implicits, which values are imported explicitly from the context
  * @param config inputs and outputs prototypes, and defaults
  * @param info name and definition scope
  */
 @Lenses case class MoleTask(
-  _mole:     Mole,
+  mole:      Mole,
   last:      MoleCapsule,
   implicits: Vector[String],
   config:    InputOutputConfig,
   info:      InfoConfig
 ) extends Task {
-
-  /**
-   * mole of the MoleTask, with inputs from the config: InputOutputConfig
-   * @return
-   */
-  def mole = _mole.copy(inputs = inputs)
 
   protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { p ⇒
     import p._
@@ -118,6 +113,7 @@ object MoleTask {
       import executionContext.outputRedirection
       import executionContext.loggerService
       import executionContext.serializerService
+      import executionContext.networkService
 
       val localEnvironment =
         LocalEnvironment(1, executionContext.localEnvironment.deinterleave)

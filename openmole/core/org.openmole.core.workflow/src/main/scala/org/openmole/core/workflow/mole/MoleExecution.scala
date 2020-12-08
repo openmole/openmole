@@ -27,6 +27,7 @@ import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
+import org.openmole.core.workflow.grouping.Grouping
 import org.openmole.core.workflow.hook.{ Hook, HookExecutionContext }
 import org.openmole.core.workflow.job.State._
 import org.openmole.core.workflow.job._
@@ -34,7 +35,7 @@ import org.openmole.core.workflow.mole
 import org.openmole.core.workflow.mole.MoleExecution.{ Cleaned, MoleExecutionFailed, SubMoleExecutionState }
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workflow.tools.{ OptionalArgument ⇒ _, _ }
-import org.openmole.core.workflow.transition.{ DataChannel, IAggregationTransition, ITransition }
+import org.openmole.core.workflow.transition.{ AggregationTransition, DataChannel, Transition }
 import org.openmole.core.workflow.validation._
 import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.collection.{ PriorityQueue, StaticArrayBuffer }
@@ -123,9 +124,9 @@ object MoleExecution extends JavaLogger {
   }
 
   case class AggregationTransitionRegistryRecord(ids: StaticArrayBuffer[Long], values: StaticArrayBuffer[Array[Any]])
-  type AggregationTransitionRegistry = RegistryWithTicket[IAggregationTransition, AggregationTransitionRegistryRecord]
-  type MasterCapsuleRegistry = RegistryWithTicket[MasterCapsule, Context]
-  type TransitionRegistry = RegistryWithTicket[ITransition, Iterable[Variable[_]]]
+  type AggregationTransitionRegistry = RegistryWithTicket[AggregationTransition, AggregationTransitionRegistryRecord]
+  type MasterCapsuleRegistry = RegistryWithTicket[MoleCapsule, Context]
+  type TransitionRegistry = RegistryWithTicket[Transition, Iterable[Variable[_]]]
 
   def cancel(subMoleExecution: SubMoleExecutionState): Unit = {
     subMoleExecution.canceled = true
@@ -182,15 +183,16 @@ object MoleExecution extends JavaLogger {
             a + ctx
         } + Variable(Variable.openMOLESeed, seeder.newSeed)
 
-      capsule match {
-        case c: MasterCapsule ⇒
+      capsule.master match {
+        case Some(master) ⇒
           //          def stateChanged(job: MoleJob, oldState: State, newState: State) =
           //            eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobStatusChanged(job, c, newState, oldState))
 
           subMoleExecutionState.masterCapsuleExecutor.submit {
             try {
-              val savedContext = subMoleExecutionState.masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(Context.empty)
-              val moleJob: MoleJob = MoleJob(capsule.task, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, (_, _) ⇒ (), () ⇒ subMoleExecutionState.canceled)
+              val savedContext = subMoleExecutionState.masterCapsuleRegistry.remove(capsule, ticket.parentOrException).getOrElse(Context.empty)
+              val runtimeTask = capsule.runtimeTask(subMoleExecutionState.moleExecution.mole, subMoleExecutionState.moleExecution.sources, subMoleExecutionState.moleExecution.hooks)
+              val moleJob: MoleJob = MoleJob(runtimeTask, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, (_, _) ⇒ (), () ⇒ subMoleExecutionState.canceled)
 
               eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
 
@@ -206,6 +208,7 @@ object MoleExecution extends JavaLogger {
                   workspace = workspace,
                   outputRedirection = outputRedirection,
                   loggerService = loggerService,
+                  networkService = networkService,
                   cache = subMoleExecutionState.moleExecution.keyValueCache,
                   lockRepository = subMoleExecutionState.moleExecution.lockRepository,
                   moleExecution = Some(subMoleExecutionState.moleExecution),
@@ -216,7 +219,7 @@ object MoleExecution extends JavaLogger {
               MoleJob.finish(moleJob, result, taskContext) // Does nothing
 
               result match {
-                case Left(newContext) ⇒ subMoleExecutionState.masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(newContext))
+                case Left(newContext) ⇒ subMoleExecutionState.masterCapsuleRegistry.register(capsule, ticket.parentOrException, MasterCapsule.toPersist(master, newContext))
                 case _                ⇒
               }
 
@@ -231,7 +234,8 @@ object MoleExecution extends JavaLogger {
             MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(job, result, capsule, ticket))
 
           val newContext = subMoleExecutionState.moleExecution.implicits + sourced + context
-          val moleJob: MoleJob = MoleJob(capsule.task, newContext, jobId, onJobFinished, () ⇒ subMoleExecutionState.canceled)
+          val runtimeTask = capsule.runtimeTask(subMoleExecutionState.moleExecution.mole, subMoleExecutionState.moleExecution.sources, subMoleExecutionState.moleExecution.hooks)
+          val moleJob: MoleJob = MoleJob(runtimeTask, newContext, jobId, onJobFinished, () ⇒ subMoleExecutionState.canceled)
 
           eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
 
@@ -279,7 +283,6 @@ object MoleExecution extends JavaLogger {
           val event = MoleExecution.HookExceptionRaised(h, capsule, job, e, Log.SEVERE)
           eventDispatcher.trigger(subMoleExecutionState.moleExecution, event)
           cancel(subMoleExecutionState.moleExecution, Some(event))
-          Log.logger.log(Log.FINE, "Error in execution of misc " + h + "at the end of task " + capsule.task, e)
           throw e
       }
 
@@ -456,7 +459,8 @@ object MoleExecution extends JavaLogger {
             cache = moleExecution.keyValueCache,
             lockRepository = moleExecution.lockRepository,
             moleExecution = Some(moleExecution),
-            serializerService = serializerService
+            serializerService = serializerService,
+            networkService = networkService
           )
         )
     }

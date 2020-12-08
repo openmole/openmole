@@ -71,10 +71,7 @@ object CopyFileHook {
   info:   InfoConfig
 ) extends Hook with ValidateHook {
 
-  override def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
-    import p._
-    copies.flatMap(_._2.validate(inputs))
-  }
+  override def validate(inputs: Seq[Val[_]]) = copies.flatMap(_._2.validate(inputs))
 
   override protected def process(executionContext: HookExecutionContext) = FromContext { parameters ⇒
     import parameters._

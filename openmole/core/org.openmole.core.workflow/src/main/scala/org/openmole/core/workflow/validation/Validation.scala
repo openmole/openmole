@@ -26,7 +26,7 @@ import org.openmole.core.workflow.tools.{ Default, DefaultSet }
 import org.openmole.core.workflow.validation.DataflowProblem._
 import org.openmole.core.workflow.validation.TopologyProblem._
 import org.openmole.core.workflow.validation.TypeUtil._
-import org.openmole.core.workflow.validation.ValidationProblem.{ HookValidationProblem, SourceValidationProblem, TaskValidationProblem, TransitionValidationProblem }
+import org.openmole.core.workflow.validation.ValidationProblem.{ HookValidationProblem, MoleValidationProblem, SourceValidationProblem, TaskValidationProblem, TransitionValidationProblem }
 import org.openmole.core.workspace.TmpDirectory
 
 import scala.collection.immutable.TreeMap
@@ -36,12 +36,12 @@ import scala.util.{ Failure, Success, Try }
 
 object Validation {
 
-  def allMoles(mole: Mole, in: Option[(MoleTask, MoleCapsule)] = None): List[(Mole, Option[(MoleTask, MoleCapsule)])] =
+  def allMoles(mole: Mole, sources: Sources, hooks: Hooks, in: Option[(MoleTask, MoleCapsule)] = None): List[(Mole, Option[(MoleTask, MoleCapsule)])] =
     (mole, in) ::
       mole.capsules.flatMap(
         c ⇒
-          c.task match {
-            case mt: MoleTask ⇒ allMoles(mt.mole, Some(mt → c))
+          c.task(mole, sources, hooks) match {
+            case mt: MoleTask ⇒ allMoles(mt.mole, sources, hooks, Some(mt → c))
             case _            ⇒ List.empty
           }
       ).toList
@@ -73,8 +73,8 @@ object Validation {
       s ← mole.slots(c)
       computedTypes = TypeUtil.validTypes(mole, sources, hooks)(s)
       receivedInputs = TreeMap(computedTypes.map { p ⇒ p.name → p }.toSeq: _*)
-      (defaultsOverride, defaultsNonOverride) = separateDefaults(c.task.defaults)
-      input ← c.task.inputs
+      (defaultsOverride, defaultsNonOverride) = separateDefaults(c.task(mole, sources, hooks).defaults)
+      input ← c.task(mole, sources, hooks).inputs
     } yield {
       def checkPrototypeMatch(p: Val[_]) =
         if (!input.isAssignableFrom(p)) Some(WrongType(s, input, p))
@@ -105,8 +105,8 @@ object Validation {
     }).flatten
   }
 
-  def taskValidationErrors(mole: Mole)(implicit newFile: TmpDirectory, fileService: FileService) = {
-    def taskValidates = mole.capsules.map(_.task).collect { case v: ValidateTask ⇒ v }
+  def taskValidationErrors(mole: Mole, sources: Sources, hooks: Hooks)(implicit newFile: TmpDirectory, fileService: FileService) = {
+    def taskValidates = mole.capsules.map(_.task(mole, sources, hooks)).collect { case v: ValidateTask ⇒ v }
 
     taskValidates.flatMap { t ⇒
       t.validate.apply.toList match {
@@ -340,14 +340,20 @@ object Validation {
 
     val negativeLevelProblem =
       mole.dataChannels.filter(dc ⇒ !dataChannelWithProblem.contains(dc)).filter {
-        dc ⇒ mole.level(dc.end) < mole.level(dc.start)
+        dc ⇒ mole.level(dc.end.capsule) < mole.level(dc.start)
       }.map(DataChannelNegativeLevelProblem(_))
 
     noTransitionProblems ++ negativeLevelProblem
   }
 
+  def moleValidateErrors(mole: Mole)(implicit newFile: TmpDirectory, fileService: FileService) =
+    mole.validate.apply match {
+      case s if !s.isEmpty ⇒ Seq(MoleValidationProblem(mole, s))
+      case _               ⇒ Seq()
+    }
+
   def apply(mole: Mole, implicits: Context = Context.empty, sources: Sources = Sources.empty, hooks: Hooks = Hooks.empty)(implicit newFile: TmpDirectory, fileService: FileService): List[Problem] =
-    allMoles(mole).flatMap {
+    allMoles(mole, sources, hooks).flatMap {
       case (m, mt) ⇒
         def moleTaskImplicits(moleTask: MoleTask) = {
           val inputs = moleTaskInputMaps(moleTask)
@@ -373,8 +379,9 @@ object Validation {
           dataChannelErrors(m) ++
           incoherentTypeAggregation(m, sources, hooks) ++
           incoherentTypeBetweenSlots(m, sources, hooks) ++
-          taskValidationErrors(m) ++
-          transitionValidationErrors(m, sources, hooks)
+          taskValidationErrors(m, sources, hooks) ++
+          transitionValidationErrors(m, sources, hooks) ++
+          moleValidateErrors(m)
     }
 
 }

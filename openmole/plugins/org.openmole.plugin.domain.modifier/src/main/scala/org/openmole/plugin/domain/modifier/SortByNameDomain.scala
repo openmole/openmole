@@ -27,14 +27,14 @@ import cats._
 import cats.implicits._
 
 object SortByNameDomain {
-  implicit def isFinite[D] = new Finite[SortByNameDomain[D], File] with DomainInputs[SortByNameDomain[D]] {
+  implicit def isFinite[D] = new FiniteFromContext[SortByNameDomain[D], File] with DomainInputs[SortByNameDomain[D]] {
     override def computeValues(domain: SortByNameDomain[D]) = domain.computeValues()
     override def inputs(domain: SortByNameDomain[D]): PrototypeSet = domain.inputs
   }
 
 }
 
-case class SortByNameDomain[D](domain: D)(implicit val finite: Finite[D, File], domainInputs: DomainInputs[D]) {
+case class SortByNameDomain[D](domain: D)(implicit val finite: FiniteFromContext[D, File], domainInputs: DomainInputs[D]) {
 
   def inputs = domainInputs.inputs(domain)
 

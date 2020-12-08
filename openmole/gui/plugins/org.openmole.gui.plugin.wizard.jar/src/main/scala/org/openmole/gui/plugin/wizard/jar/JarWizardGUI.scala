@@ -131,11 +131,11 @@ class JarWizardGUI(safePath: SafePath, onMethodSelected: (LaunchingCommand) ⇒ 
       Rx {
         if (isOSGI()) hForm(
           div(embedAsPluginCheckBox.render)
-            .render.withLabel("Embed jar as plugin ?"),
+            .render.withLabel("Embed jar as plugin?"),
           span(client.modelHelp +++ client.columnCSS, "Your jar is an OSGI bundle. The best way to use it is to embed it as a plugin.").render
         ) else div(client.modelHelp,
-          div("Your jar in not an OSGI bundle. An OSGI bundle is safer and more robust, so that we recomend you to render it as an OSGI bundle."),
-          a(href := "http://www.openmole.org/Plugin+Development.html", target := "_blank")("How to create an OSGI bundle ?"))
+          div("Your jar is not an OSGI bundle. As an OSGI bundle is safer and more robust, we recommend you convert your jar to an OSGI bundle."),
+          a(href := "http://www.openmole.org/Plugin+Development.html", target := "_blank")("How to create an OSGI bundle?"))
       },
       h3("Classes"),
       searchClassInput.tag,

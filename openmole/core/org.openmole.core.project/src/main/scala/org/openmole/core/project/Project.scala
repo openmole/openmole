@@ -122,28 +122,40 @@ object Project {
     def run(): DSL
   }
 
-  def compile(workDirectory: File, script: File, args: Seq[String], newREPL: Option[ConsoleVariables ⇒ ScalaREPL] = None)(implicit services: Services): CompileResult = {
+  trait OMSScriptUnit {
+    def run(): Unit
+  }
+
+  def compile(workDirectory: File, script: File, args: Seq[String], newREPL: Option[ConsoleVariables ⇒ ScalaREPL] = None, returnUnit: Boolean = false)(implicit services: Services): CompileResult = {
     import services._
 
     if (!script.exists) ScriptFileDoesNotExists()
     else {
-      def header =
+      def functionPrototype =
+        if (returnUnit) "def run(): Unit"
+        else s"def run(): ${classOf[DSL].getCanonicalName}"
+
+      def traitName =
+        if (returnUnit) s"${classOf[Project.OMSScriptUnit].getCanonicalName}"
+        else s"${classOf[Project.OMSScript].getCanonicalName}"
+
+      def scriptHeader =
         s"""${scriptsObjects(script)}
            |
-           |new ${classOf[Project.OMSScript].getCanonicalName} {
+           |new $traitName {
            |
-           |def run(): ${classOf[DSL].getCanonicalName} = {
+           |$functionPrototype = {
            |import ${Project.uniqueName(script)}._imports._""".stripMargin
 
-      def footer =
+      def scriptFooter =
         s"""}
            |}
          """.stripMargin
 
       def compileContent =
-        s"""$header
+        s"""$scriptHeader
            |${script.content}
-           |$footer""".stripMargin
+           |$scriptFooter""".stripMargin
 
       def compile(content: String, args: Seq[String]): CompileResult = {
         def consoleVariables = ConsoleVariables(args, workDirectory, experiment = ConsoleVariables.Experiment(ConsoleVariables.experimentName(script)))
@@ -162,12 +174,12 @@ object Project {
                 ScalaREPL.ErrorMessage.position composePrism
                 some
 
-            def headerOffset = header.size + 1
+            def headerOffset = scriptHeader.size + 1
 
             import ScalaREPL.ErrorPosition
 
             def adjusted =
-              (positionLens composeLens ErrorPosition.line modify { _ - header.split("\n").size }) andThen
+              (positionLens composeLens ErrorPosition.line modify { _ - scriptHeader.split("\n").size }) andThen
                 (positionLens composeLens ErrorPosition.start modify { _ - headerOffset }) andThen
                 (positionLens composeLens ErrorPosition.end modify { _ - headerOffset }) andThen
                 (positionLens composeLens ErrorPosition.point modify { _ - headerOffset })

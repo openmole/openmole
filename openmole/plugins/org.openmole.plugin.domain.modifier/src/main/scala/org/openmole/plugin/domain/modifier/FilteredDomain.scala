@@ -23,14 +23,14 @@ import org.openmole.core.workflow.domain._
 
 object FilteredDomain {
 
-  implicit def isDiscrete[D, I] = new Discrete[FilteredDomain[D, I], I] with DomainInputs[FilteredDomain[D, I]] {
+  implicit def isDiscrete[D, I] = new DiscreteFromContext[FilteredDomain[D, I], I] with DomainInputs[FilteredDomain[D, I]] {
     override def iterator(domain: FilteredDomain[D, I]) = domain.iterator
     override def inputs(domain: FilteredDomain[D, I]) = domain.inputs
   }
 
 }
 
-case class FilteredDomain[D, I](domain: D, f: FromContext[I ⇒ Boolean])(implicit discrete: Discrete[D, I], domainInputs: DomainInputs[D]) { d ⇒
+case class FilteredDomain[D, I](domain: D, f: FromContext[I ⇒ Boolean])(implicit discrete: DiscreteFromContext[D, I], domainInputs: DomainInputs[D]) { d ⇒
 
   def inputs = domainInputs.inputs(domain)
 

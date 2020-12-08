@@ -21,7 +21,10 @@ import org.openmole.core.workflow.job.State._
 import org.openmole.core.workflow.task._
 import org.openmole.core.context._
 
+case class RuntimeTask(task: Task, strain: Boolean)
+
 object MoleJob {
+
   implicit val moleJobOrdering = Ordering.by((_: MoleJob).id)
 
   type JobFinished = (MoleJobId, Either[Context, Throwable]) ⇒ Unit
@@ -36,7 +39,7 @@ object MoleJob {
    * @return
    */
   def apply(
-    task:            Task,
+    task:            RuntimeTask,
     context:         Context,
     id:              Long,
     jobFinished:     MoleJob.JobFinished,
@@ -75,7 +78,7 @@ import MoleJob._
  * @param jobFinished what to do when the state is changed
  */
 class MoleJob(
-  val task:            Task,
+  val task:            RuntimeTask,
   prototypes:          Array[Val[Any]],
   values:              Array[Any],
   val id:              MoleJobId,
@@ -86,11 +89,16 @@ class MoleJob(
     Context((prototypes zip values).map { case (p, v) ⇒ Variable(p, v) }: _*)
 
   def perform(executionContext: TaskExecutionContext): Either[Context, Throwable] =
-    if (!subMoleCanceled())
-      try Left(task.perform(context, executionContext))
+    if (!subMoleCanceled()) {
+      val ctx = context
+      try {
+        val performResult = task.task.perform(ctx, executionContext)
+        Left(if (task.strain) ctx + performResult else performResult)
+      }
       catch {
         case t: Throwable ⇒ Right(t)
       }
+    }
     else Right(new SubMoleCanceled)
 
 }

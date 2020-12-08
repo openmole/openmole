@@ -33,6 +33,7 @@ import org.openmole.core.communication.message._
 import org.openmole.core.communication.storage._
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer._
 import org.openmole.core.threadprovider.ThreadProvider
@@ -64,7 +65,7 @@ class Runtime {
     outputMessagePath: String,
     threads:           Int,
     debug:             Boolean
-  )(implicit serializerService: SerializerService, newFile: TmpDirectory, fileService: FileService, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace, loggerService: LoggerService) = {
+  )(implicit serializerService: SerializerService, newFile: TmpDirectory, fileService: FileService, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace, loggerService: LoggerService, networkService: NetworkService) = {
 
     /*--- get execution message and job for runtime---*/
     val usedFiles = new HashMap[String, File]
@@ -160,7 +161,10 @@ class Runtime {
           loggerService = loggerService,
           cache = KeyValueCache(),
           lockRepository = LockRepository[LockKey](),
-          serializerService = serializerService)
+          serializerService = serializerService,
+          networkService = networkService,
+          remote = Some(TaskExecutionContext.Remote(threads))
+        )
 
         for (toProcess ← allMoleJobs) environment.submit(toProcess, taskExecutionContext)
         saver.waitAllFinished

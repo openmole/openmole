@@ -19,6 +19,51 @@ package org.openmole.core
 
 package expansion {
 
+  import org.openmole.core.fileservice.FileService
+  import org.openmole.core.workspace.TmpDirectory
+
+  sealed trait Validate {
+    def apply(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable]
+    def ++(v: Validate) = Validate.++(this, v)
+  }
+
+  object Validate {
+
+    class Parameters(implicit val tmpDirectory: TmpDirectory, implicit val fileService: FileService)
+
+    case class LeafValidate(validate: Parameters ⇒ Seq[Throwable]) extends Validate {
+      def apply(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable] = validate(new Parameters())
+    }
+
+    case class SeqValidate(validate: Seq[Validate]) extends Validate {
+      def apply(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable] = validate.flatMap(_.apply)
+    }
+
+    def apply(f: Parameters ⇒ Seq[Throwable]): Validate = LeafValidate(f)
+    def apply(vs: Validate*): Validate = SeqValidate(vs)
+
+    case object success extends Validate {
+      def apply(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable] = Seq()
+    }
+
+    def ++(v1: Validate, v2: Validate) =
+      (v1, v2) match {
+        case (Validate.success, Validate.success) ⇒ Validate.success
+        case (v, Validate.success)                ⇒ v
+        case (Validate.success, v)                ⇒ v
+        case (v1, v2)                             ⇒ SeqValidate(toIterable(v1).toSeq ++ toIterable(v2))
+      }
+
+    implicit def fromSeqValidate(v: Seq[Validate]) = apply(v: _*)
+    implicit def fromThrowables(t: Seq[Throwable]) = Validate { _ ⇒ t }
+
+    implicit def toIterable(v: Validate) =
+      v match {
+        case s: SeqValidate  ⇒ s.validate
+        case l: LeafValidate ⇒ Iterable(l)
+      }
+  }
+
   trait ExpansionPackage {
     implicit def seqToSeqOfFromContext[T](s: Seq[T])(implicit toFromContext: ToFromContext[T, T]): Seq[FromContext[T]] = s.map(e ⇒ toFromContext(e))
     type Condition = expansion.Condition

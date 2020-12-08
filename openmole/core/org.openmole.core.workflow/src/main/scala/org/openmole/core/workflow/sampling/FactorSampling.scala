@@ -31,7 +31,7 @@ object FactorSampling {
    * @param domainInputs  optional inputs of the domain
    * @return
    */
-  def apply[D, T](f: Factor[D, T])(implicit discrete: Discrete[D, T], domainInputs: DomainInputs[D] = DomainInputs.empty) =
+  def apply[D, T](f: Factor[D, T])(implicit discrete: DiscreteFromContext[D, T], domainInputs: DomainInputs[D] = DomainInputs.empty) =
     new Sampling {
       override def inputs = domainInputs.inputs(f.domain)
       override def prototypes = List(f.value)

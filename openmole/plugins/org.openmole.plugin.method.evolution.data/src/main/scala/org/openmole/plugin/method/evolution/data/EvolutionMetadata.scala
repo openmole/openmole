@@ -1,21 +1,20 @@
 package org.openmole.plugin.method.evolution.data
 
-case class SavedData(
-  generation: Long,
-  frequency:  Option[Long],
-  name:       String,
-  last:       Boolean)
+case class SaveOption(
+  frequency: Option[Long],
+  last:      Boolean)
 
 object EvolutionMetadata {
   def method = "evolution"
   case object none extends EvolutionMetadata
 
   case class StochasticNSGA2(
-    genome:    Seq[GenomeBoundData],
-    objective: Seq[ObjectiveData.NoisyObjective],
-    mu:        Int,
-    sample:    Int,
-    saved:     SavedData) extends EvolutionMetadata
+    genome:         Seq[GenomeBoundData],
+    objective:      Seq[ObjectiveData.NoisyObjective],
+    populationSize: Int,
+    sample:         Int,
+    generation:     Long,
+    saveOption:     SaveOption) extends EvolutionMetadata
 
 }
 

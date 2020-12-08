@@ -57,9 +57,8 @@ object CSVOutputFormat {
       }
     }
 
-    override def validate(format: CSVOutputFormat) = { p ⇒
-      import p._
-      format.header.option.toSeq.flatMap(_.validate(inputs))
+    override def validate(format: CSVOutputFormat, inputs: Seq[Val[_]]) = {
+      format.header.option.toSeq.map(_.validate(inputs))
     }
   }
 

@@ -27,24 +27,70 @@ package composition {
   import java.io.PrintStream
 
   import org.openmole.core.context.{ Context, Val }
-  import org.openmole.core.expansion.{ Condition, FromContext }
+  import org.openmole.core.expansion.{ Condition, FromContext, Validate }
+  import org.openmole.core.keyword.By
   import org.openmole.core.outputmanager.OutputManager
   import org.openmole.core.workflow.builder.DefinitionScope
   import org.openmole.core.workflow.execution.{ EnvironmentProvider, LocalEnvironmentProvider }
-  import org.openmole.core.workflow.format.{ OutputFormat, WritableOutput, CSVOutputFormat }
+  import org.openmole.core.workflow.format.{ CSVOutputFormat, OutputFormat, WritableOutput }
   import org.openmole.core.workflow.hook.{ FormattedFileHook, Hook }
-  import org.openmole.core.workflow.mole.{ Grouping, MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source }
+  import org.openmole.core.workflow.mole.{ MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source }
   import org.openmole.core.workflow.sampling.Sampling
-  import org.openmole.core.workflow.task.{ EmptyTask, ExplorationTask, Task }
+  import org.openmole.core.workflow.task.{ EmptyTask, ExplorationTask, MoleTask, Task }
   import org.openmole.core.workflow.tools.OptionalArgument
   import org.openmole.core.workflow.format.WritableOutput.Display
+  import org.openmole.core.workflow.grouping.{ ByGrouping, Grouping }
   import org.openmole.core.workflow.transition._
   import org.openmole.core.workflow.validation.TypeUtil
   import shapeless.{ ::, HList }
 
   object Puzzle {
 
+    def apply(
+      firstSlot:    TransitionSlot,
+      lasts:        Iterable[MoleCapsule],
+      transitions:  Iterable[Transition]                  = Iterable.empty,
+      dataChannels: Iterable[DataChannel]                 = Iterable.empty,
+      sources:      Iterable[(MoleCapsule, Source)]       = Iterable.empty,
+      hooks:        Iterable[(MoleCapsule, Hook)]         = Iterable.empty,
+      environments: Map[MoleCapsule, EnvironmentProvider] = Map.empty,
+      grouping:     Map[MoleCapsule, Grouping]            = Map.empty,
+      validate:     Validate                              = Validate.success): Puzzle =
+      new Puzzle(
+        firstSlot = firstSlot,
+        lasts = lasts,
+        transitions = transitions,
+        dataChannels = dataChannels,
+        sources = sources,
+        hooks = hooks,
+        environments = environments,
+        grouping = grouping,
+        validate = validate
+      )
+
     def apply(s: TransitionSlot): Puzzle = Puzzle(s, lasts = Vector(s.capsule))
+
+    def copy(puzzle: Puzzle)(
+      firstSlot:    TransitionSlot                        = puzzle.firstSlot,
+      lasts:        Iterable[MoleCapsule]                 = puzzle.lasts,
+      transitions:  Iterable[Transition]                  = puzzle.transitions,
+      dataChannels: Iterable[DataChannel]                 = puzzle.dataChannels,
+      sources:      Iterable[(MoleCapsule, Source)]       = puzzle.sources,
+      hooks:        Iterable[(MoleCapsule, Hook)]         = puzzle.hooks,
+      environments: Map[MoleCapsule, EnvironmentProvider] = puzzle.environments,
+      grouping:     Map[MoleCapsule, Grouping]            = puzzle.grouping,
+      validate:     Validate                              = puzzle.validate
+    ) = apply(
+      firstSlot,
+      lasts,
+      transitions,
+      dataChannels,
+      sources,
+      hooks,
+      environments,
+      grouping,
+      validate
+    )
 
     /**
      * Merge two puzzles. The entry slot is taken as the entry slot of p1.
@@ -56,8 +102,8 @@ package composition {
      * @param mergeLasts
      * @return
      */
-    def merge(p1: Puzzle, p2: Puzzle, mergeLasts: Boolean = false) = {
-      new Puzzle(
+    def merge(p1: Puzzle, p2: Puzzle, mergeLasts: Boolean = false) =
+      Puzzle(
         p1.firstSlot,
         if (!mergeLasts) p1.lasts else p1.lasts ++ p2.lasts,
         p1.transitions.toList ::: p2.transitions.toList,
@@ -65,25 +111,27 @@ package composition {
         (p1.sources.toList ::: p2.sources.toList).distinct,
         (p1.hooks.toList ::: p2.hooks.toList).distinct,
         p1.environments ++ p2.environments,
-        p1.grouping ++ p2.grouping
+        p1.grouping ++ p2.grouping,
+        p1.validate ++ p2.validate
       )
-    }
 
     def add(
       p:            Puzzle,
-      transitions:  Iterable[ITransition]                 = Iterable.empty,
+      transitions:  Iterable[Transition]                  = Iterable.empty,
       dataChannels: Iterable[DataChannel]                 = Iterable.empty,
       sources:      Iterable[(MoleCapsule, Source)]       = Iterable.empty,
       hooks:        Iterable[(MoleCapsule, Hook)]         = Iterable.empty,
       environments: Map[MoleCapsule, EnvironmentProvider] = Map.empty,
-      grouping:     Map[MoleCapsule, Grouping]            = Map.empty) =
-      p.copy(
+      grouping:     Map[MoleCapsule, Grouping]            = Map.empty,
+      validate:     Validate                              = Validate.success) =
+      copy(p)(
         transitions = p.transitions ++ transitions,
         dataChannels = p.dataChannels ++ dataChannels,
         sources = p.sources ++ sources,
         hooks = p.hooks ++ hooks,
         environments = p.environments ++ environments,
-        grouping = p.grouping ++ grouping
+        grouping = p.grouping ++ grouping,
+        validate = p.validate ++ validate
       )
 
   }
@@ -101,17 +149,18 @@ package composition {
    * @param environments
    * @param grouping
    */
-  case class Puzzle(
-    firstSlot:    TransitionSlot,
-    lasts:        Iterable[MoleCapsule],
-    transitions:  Iterable[ITransition]                 = Iterable.empty,
-    dataChannels: Iterable[DataChannel]                 = Iterable.empty,
-    sources:      Iterable[(MoleCapsule, Source)]       = Iterable.empty,
-    hooks:        Iterable[(MoleCapsule, Hook)]         = Iterable.empty,
-    environments: Map[MoleCapsule, EnvironmentProvider] = Map.empty,
-    grouping:     Map[MoleCapsule, Grouping]            = Map.empty) {
+  class Puzzle(
+    val firstSlot:    TransitionSlot,
+    val lasts:        Iterable[MoleCapsule],
+    val transitions:  Iterable[Transition],
+    val dataChannels: Iterable[DataChannel],
+    val sources:      Iterable[(MoleCapsule, Source)],
+    val hooks:        Iterable[(MoleCapsule, Hook)],
+    val environments: Map[MoleCapsule, EnvironmentProvider],
+    val grouping:     Map[MoleCapsule, Grouping],
+    val validate:     Validate) {
 
-    def toMole = new Mole(firstSlot.capsule, transitions, dataChannels)
+    def toMole = new Mole(firstSlot.capsule, transitions, dataChannels, validate = validate)
 
     def toExecution(implicit moleServices: MoleServices): MoleExecution =
       MoleExecution(toMole, sources, hooks, environments, grouping)
@@ -132,12 +181,11 @@ package composition {
     def slots: Set[TransitionSlot] = (firstSlot :: transitions.map(_.end).toList).toSet
     def first = firstSlot.capsule
     def inputs = first.inputs(toMole, sources, hooks).toSeq
-    def defaults = first.task.defaults
+    def defaults = first.task(toMole, sources, hooks).defaults
   }
 
-  case class TaskNode(task: Task, strain: Boolean = false, master: Boolean = false, persist: Seq[Val[_]] = Seq.empty, environment: Option[EnvironmentProvider] = None, grouping: Option[Grouping] = None, hooks: Vector[Hook] = Vector.empty, sources: Vector[Source] = Vector.empty) {
+  case class TaskNode(task: Task, strain: Boolean = false, funnel: Boolean = false, master: Boolean = false, persist: Seq[Val[_]] = Seq.empty, environment: Option[EnvironmentProvider] = None, grouping: Option[Grouping] = None, hooks: Vector[Hook] = Vector.empty, sources: Vector[Source] = Vector.empty) {
     def on(environment: EnvironmentProvider) = copy(environment = Some(environment))
-    def by(strategy: Grouping) = copy(grouping = Some(strategy))
     def hook(hooks: Hook*) = copy(hooks = this.hooks ++ hooks)
     def hook[F](
       output: WritableOutput,
@@ -284,10 +332,12 @@ package composition {
     environment: Option[EnvironmentProvider] = None,
     grouping:    Option[Grouping]            = None,
     hooks:       Vector[Hook]                = Vector.empty,
+    validate:    Validate                    = Validate.success,
     data:        T,
     scope:       DefinitionScope) extends DSL {
     def on(environment: EnvironmentProvider) = copy(environment = Some(environment))
     def by(strategy: Grouping) = copy(grouping = Some(strategy))
+    def by(n: Int) = copy(grouping = Some(ByGrouping(n)))
   }
 
   case class TaskNodeDSL(node: TaskNode) extends DSL
@@ -311,7 +361,8 @@ package composition {
       delegate:      Vector[Task]                = Vector.empty,
       environment:   Option[EnvironmentProvider] = None,
       grouping:      Option[Grouping]            = None,
-      hooks:         Vector[Hook]                = Vector.empty)(implicit definitionScope: DefinitionScope) =
+      hooks:         Vector[Hook]                = Vector.empty,
+      validate:      Validate                    = Validate.success)(implicit definitionScope: DefinitionScope) =
       composition.DSLContainer[Unit](
         transitionDSL,
         output,
@@ -319,6 +370,7 @@ package composition {
         environment,
         grouping,
         hooks,
+        validate,
         (),
         definitionScope
       )
@@ -330,7 +382,8 @@ package composition {
       delegate:    Vector[Task]                = Vector.empty,
       environment: Option[EnvironmentProvider] = None,
       grouping:    Option[Grouping]            = None,
-      hooks:       Vector[Hook]                = Vector.empty)(implicit definitionScope: DefinitionScope) =
+      hooks:       Vector[Hook]                = Vector.empty,
+      validate:    Validate                    = Validate.success)(implicit definitionScope: DefinitionScope) =
       composition.DSLContainer[T](
         dsl,
         output orElse dsl.output,
@@ -338,6 +391,7 @@ package composition {
         environment orElse dsl.environment,
         grouping orElse dsl.grouping,
         hooks ++ dsl.hooks,
+        validate,
         data,
         definitionScope)
 
@@ -356,9 +410,10 @@ package composition {
       def taskToSlot(dsl: DSL) = {
         def buildCapsule(task: Task, ns: Vector[TaskNode]) = {
           val strain = ns.exists(_.strain)
+          val funnel = ns.exists(_.funnel)
           val master = ns.exists(_.master)
 
-          if (!master) MoleCapsule(task, strain = strain)
+          if (!master) MoleCapsule(task, strain = strain, funnel = funnel)
           else {
             val persist = ns.find(_.master).get.persist
             MasterCapsule(task, persist = persist, strain = strain)
@@ -410,7 +465,7 @@ package composition {
             case (a, b) ⇒ Puzzle.merge(a, b)
           }
 
-          val plugged = merged.copy(firstSlot = originPuzzle.firstSlot, lasts = destinationPuzzle.unzip._1.flatMap(_.lasts))
+          val plugged = Puzzle.copy(merged)(firstSlot = originPuzzle.firstSlot, lasts = destinationPuzzle.unzip._1.flatMap(_.lasts))
           add(plugged, transitions)
         }
 
@@ -439,16 +494,17 @@ package composition {
           Puzzle.add(
             puzzle,
             hooks = hooks,
-            environments = environments.toMap
+            environments = environments.toMap,
+            validate = container.validate
           )
         }
 
-        def addTransitions(p: Puzzle, transitions: Iterable[ITransition]) = Puzzle.add(p, transitions = transitions)
+        def addTransitions(p: Puzzle, transitions: Iterable[Transition]) = Puzzle.add(p, transitions = transitions)
         def addDataChannel(p: Puzzle, channels: Iterable[DataChannel]) = Puzzle.add(p, dataChannels = channels)
 
         def p =
           t match {
-            case --(o, d, condition, filter)          ⇒ transitionsToPuzzle(o, d, addTransitions) { case (c, s) ⇒ new Transition(c, s, condition, filter) }
+            case --(o, d, condition, filter)          ⇒ transitionsToPuzzle(o, d, addTransitions) { case (c, s) ⇒ new DirectTransition(c, s, condition, filter) }
             case -<(o, d, condition, filter)          ⇒ transitionsToPuzzle(o, d, addTransitions) { case (c, s) ⇒ new ExplorationTransition(c, s, condition, filter) }
             case >-(o, d, condition, filter)          ⇒ transitionsToPuzzle(o, d, addTransitions) { case (c, s) ⇒ new AggregationTransition(c, s, condition, filter) }
             case >|(o, d, condition, filter)          ⇒ transitionsToPuzzle(o, d, addTransitions) { case (c, s) ⇒ new EndExplorationTransition(c, s, condition, filter) }
@@ -495,7 +551,7 @@ package composition {
 
       implicit def taskToOrigin = ToOrigin[Task] { t ⇒ TaskOrigin(TaskNode(t)) }
       implicit def transitionDSLToOrigin = ToOrigin[DSL] { TransitionDSLOrigin(_) }
-      implicit def taskTransitionPieceToOrigin = ToOrigin[TaskNode] { n ⇒ TaskOrigin(n) }
+      implicit def taskNodeToOrigin[T: ToNode] = ToOrigin[T] { t ⇒ TaskOrigin(implicitly[ToNode[T]].apply(t)) }
       implicit def samplingToOrigin(implicit scope: DefinitionScope) = ToOrigin[Sampling] { s ⇒ taskToOrigin(ExplorationTask(s)) }
     }
 
@@ -509,7 +565,7 @@ package composition {
       }
 
       implicit def taskToDestination = ToDestination[Task] { t ⇒ TaskDestination(TaskNode(t)) }
-      implicit def taskTransitionPieceToDestination = ToDestination[TaskNode] { t ⇒ TaskDestination(t) }
+      implicit def taskNodeToDestination[T: ToNode] = ToDestination[T] { t ⇒ TaskDestination(implicitly[ToNode[T]].apply(t)) }
       implicit def samplingToDestination(implicit scope: DefinitionScope) = ToDestination[Sampling] { s ⇒ taskToDestination(ExplorationTask(s)) }
       implicit def transitionDSLToDestination = ToDestination[DSL] { TransitionDSLDestination(_) }
     }
@@ -519,11 +575,15 @@ package composition {
     }
 
     object ToNode {
-      def apply[T](f: T ⇒ TaskNode) = new ToNode[T] {
+      def apply[T](f: T ⇒ TaskNode): ToNode[T] = new ToNode[T] {
         def apply(t: T) = f(t)
       }
 
-      implicit def taskToTransitionPiece = apply[Task](t ⇒ TaskNode(t))
+      implicit def taskToNode[T <: Task]: ToNode[T] = apply[T](t ⇒ TaskNode(t))
+      implicit def nodeToNode: ToNode[TaskNode] = apply[TaskNode](identity)
+
+      implicit def byToNode[T: ToNode] = apply[By[T, Grouping]](t ⇒ implicitly[ToNode[T]].apply(t.value).copy(grouping = Some(t.by)))
+      implicit def byIntToNode[T: ToNode] = apply[By[T, Int]](t ⇒ implicitly[ToNode[T]].apply(t.value).copy(grouping = Some(ByGrouping(t.by))))
     }
 
     trait ToNode[-T] {
@@ -536,9 +596,8 @@ package composition {
       }
 
       implicit def dslToDSL = ToDSL[DSL](identity)
-      implicit def taskToTransitionDSL = ToDSL[Task](t ⇒ TaskNodeDSL(TaskNode(t)))
-      implicit def taskInNodeToTransitionDSL = ToDSL[TaskNode](t ⇒ TaskNodeDSL(t))
-      implicit def transitionDSLSelectorToTransitionDSL[HL <: HList](implicit dslSelector: DSLSelector[HL]) = ToDSL[HL](t ⇒ dslSelector(t))
+      implicit def toNodeToDSL[T: ToNode] = ToDSL((t: T) ⇒ TaskNodeDSL(implicitly[ToNode[T]].apply(t)))
+      implicit def DSLSelectorToDSL[HL <: HList](implicit dslSelector: DSLSelector[HL]) = ToDSL[HL](t ⇒ dslSelector(t))
     }
 
     trait ToDSL[-T] {
@@ -591,7 +650,7 @@ package composition {
         val last = EmptyTask()
         val p: Puzzle = if (!explore) dslToPuzzle(t1 -- last) else dslToPuzzle(t1 -< last)
         val mole = p.toMole
-        val slot = p.slots.toSeq.find(_.capsule.task == last).head
+        val slot = p.slots.toSeq.find(_.capsule._task == last).head
         TypeUtil.receivedTypes(mole, p.sources, p.hooks)(slot) toSeq
       }
     }
@@ -624,6 +683,11 @@ package composition {
         p & (first oo last block (receivedFromDSL.toSeq: _*))
       }
 
+    }
+
+    object Funnel {
+      def apply(task: Task) = TaskNode(task, funnel = true)
+      def apply(task: TaskNode) = task.copy(funnel = true)
     }
 
   }

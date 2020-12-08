@@ -37,7 +37,7 @@ object ContextAggregator {
               try java.lang.reflect.Array.set(array, e._2, e._1.value)
               catch {
                 case t: Throwable ⇒
-                  def valType = if (e._1.value != null) " of type ${e._1.value.getClass}" else ""
+                  def valType = if (e._1.value != null) s" of type ${e._1.value.getClass}" else ""
 
                   throw new InternalProcessingError(s"Error setting value ${e._1.value}${valType} in an array ${array} of type ${array.getClass} at position ${e._2}", t)
               }

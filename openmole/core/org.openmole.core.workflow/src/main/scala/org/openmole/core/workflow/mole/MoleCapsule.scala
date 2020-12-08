@@ -20,6 +20,7 @@ package org.openmole.core.workflow.mole
 import org.openmole.core.context._
 import org.openmole.core.exception._
 import org.openmole.core.expansion.FromContext
+import org.openmole.core.workflow.job.RuntimeTask
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.tools.DefaultSet
 import org.openmole.core.workflow.transition._
@@ -28,12 +29,11 @@ import org.openmole.tool.random._
 
 object MoleCapsule {
 
-  implicit def taskToCapsuleConverter(task: Task) = MoleCapsule(task)
-  implicit def slotToCapsuleConverter(slot: TransitionSlot) = slot.capsule
+  case class Master(persist: Seq[String])
 
-  def apply(task: Task, strain: Boolean = false) = new MoleCapsule(task, strain)
+  def apply(task: Task, strain: Boolean = false, funnel: Boolean = false, master: Option[Master] = None) = new MoleCapsule(task, strain = strain, funnel = funnel, master = master)
 
-  def isStrainer(c: MoleCapsule) = c.strainer
+  def isStrainer(c: MoleCapsule) = c.strain
 
   /* Test wether there is a path from this slot reaching the root of the mole without looping to the capsule it is bounded to */
   def reachRootWithNoLoop(mole: Mole)(slot: TransitionSlot): Boolean = {
@@ -75,15 +75,20 @@ object MoleCapsule {
  * A capsule containing a task.
  *
  * @param _task task inside this capsule
- * @param strainer true if this capsule let pass all data through
+ * @param strain true if this capsule let pass all data through
  */
-class MoleCapsule(_task: Task, val strainer: Boolean) {
+class MoleCapsule(val _task: Task, val strain: Boolean, val funnel: Boolean, val master: Option[MoleCapsule.Master]) {
 
-  lazy val task =
-    strainer match {
-      case false ⇒ _task
-      case true  ⇒ new StrainerTaskDecorator(_task)
-    }
+  def task(mole: Mole, sources: Sources, hooks: Hooks) = runtimeTask(mole, sources, hooks).task
+
+  def runtimeTask(mole: Mole, sources: Sources, hooks: Hooks) = {
+    val withInputs =
+      _task match {
+        case task: MoleTask ⇒ (MoleTask.mole composeLens Mole.inputs) modify (_ ++ inputs(mole, sources, hooks)) apply task
+        case task           ⇒ task
+      }
+    RuntimeTask(withInputs, strain)
+  }
 
   /**
    * Get the inputs data taken by this capsule, generally it is empty if the capsule
@@ -106,20 +111,20 @@ class MoleCapsule(_task: Task, val strainer: Boolean) {
     strainerOutputs(mole, sources, hooks) + capsuleOutputs(mole, sources, hooks)
 
   def capsuleInputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
-    task.inputs -- sources(this).flatMap(_.outputs) -- sources(this).flatMap(_.inputs) ++ sources(this).flatMap(_.inputs)
+    _task.inputs -- sources(this).flatMap(_.outputs) -- sources(this).flatMap(_.inputs) ++ sources(this).flatMap(_.inputs)
 
   def capsuleOutputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
-    task.outputs -- hooks(this).flatMap(_.outputs) ++ hooks(this).flatMap(_.outputs)
+    _task.outputs -- hooks(this).flatMap(_.outputs) ++ hooks(this).flatMap(_.outputs)
 
   def strainerInputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
-    if (strainer) {
+    if (strain || funnel) {
       lazy val capsInputs = capsuleInputs(mole, sources, hooks)
       received(mole, sources, hooks).filterNot(d ⇒ capsInputs.contains(d.name))
     }
     else PrototypeSet.empty
 
   def strainerOutputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
-    if (strainer) {
+    if (strain) {
       lazy val capsOutputs = capsuleOutputs(mole, sources, hooks)
       received(mole, sources, hooks).filterNot(d ⇒ capsOutputs.contains(d.name))
     }
@@ -156,15 +161,8 @@ class MoleCapsule(_task: Task, val strainer: Boolean) {
     }
 
   override def toString =
-    (if (!strainer) "capsule" else "strainerCapsule") + s"@$hashCode:$task"
+    (if (!strain) "capsule" else "strainerCapsule") + s"@$hashCode:${_task}"
 
-}
-
-class StrainerTaskDecorator(val task: Task) extends Task {
-  override def info = task.info
-  override def config = task.config
-  override def perform(context: Context, executionContext: TaskExecutionContext): Context = context + task.perform(context, executionContext)
-  override def process(executionContext: TaskExecutionContext): FromContext[Context] = throw new InternalProcessingError("This method should never be called")
 }
 
 object StrainerCapsule {
@@ -172,10 +170,7 @@ object StrainerCapsule {
 }
 
 object MasterCapsule {
-  def apply(task: Task, persist: Seq[Val[_]], strain: Boolean) = new MasterCapsule(task, persist.map(_.name), strain)
-  def apply(t: Task, persist: Val[_]*): MasterCapsule = apply(t, persist, false)
-}
-
-class MasterCapsule(task: Task, val persist: Seq[String] = Seq.empty, strainer: Boolean) extends MoleCapsule(task, strainer) {
-  def toPersist(context: Context): Context = persist.map { n ⇒ context.variables.getOrElse(n, throw new UserBadDataError(s"Variable $n has not been found in the context")) }
+  def apply(task: Task, persist: Seq[Val[_]], strain: Boolean) = MoleCapsule(task, strain = strain, master = Some(MoleCapsule.Master(persist.map(_.name))))
+  def apply(t: Task, persist: Val[_]*): MoleCapsule = apply(t, persist, false)
+  def toPersist(master: MoleCapsule.Master, context: Context): Context = master.persist.map { n ⇒ context.variables.getOrElse(n, throw new UserBadDataError(s"Variable $n has not been found in the context")) }
 }

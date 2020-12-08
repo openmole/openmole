@@ -217,15 +217,22 @@ object ScalaCompilation {
           }
         }
 
-      def validate(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService): Option[Throwable] = {
+      def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
+        import p._
+
         compiled(inputs) match {
-          case Success(_) ⇒ None
-          case Failure(e) ⇒ Some(e)
+          case Success(_) ⇒ Seq()
+          case Failure(e) ⇒ Seq(e)
         }
       }
 
-      def apply()(implicit newFile: TmpDirectory, fileService: FileService): FromContext[R] = FromContext { p ⇒ compiled(p.context).get(p.context, p.random, p.newFile) }
-
+      def apply()(implicit newFile: TmpDirectory, fileService: FileService): FromContext[R] = FromContext { p ⇒
+        val closure = compiled(p.context).get
+        try closure.apply(p.context, p.random, p.newFile)
+        catch {
+          case t: Throwable ⇒ throw new UserBadDataError(t, s"Error in execution of compiled closure in context: ${p.context}")
+        }
+      }
     }
 
     new ScalaWrappedCompilation()

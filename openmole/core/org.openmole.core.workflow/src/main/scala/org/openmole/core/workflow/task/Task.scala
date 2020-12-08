@@ -22,6 +22,7 @@ import java.io.File
 import org.openmole.core.context._
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
@@ -53,6 +54,10 @@ import org.openmole.tool.random
  * @param lockRepository
  * @param moleExecution
  */
+object TaskExecutionContext {
+  case class Remote(threads: Int)
+}
+
 case class TaskExecutionContext(
   moleExecutionDirectory:         File,
   taskExecutionDirectory:         File,
@@ -65,9 +70,11 @@ case class TaskExecutionContext(
   implicit val outputRedirection: OutputRedirection,
   implicit val loggerService:     LoggerService,
   implicit val serializerService: SerializerService,
+  implicit val networkService:    NetworkService,
   cache:                          KeyValueCache,
   lockRepository:                 LockRepository[LockKey],
-  moleExecution:                  Option[MoleExecution]   = None)
+  moleExecution:                  Option[MoleExecution]               = None,
+  remote:                         Option[TaskExecutionContext.Remote] = None)
 
 object Task {
 

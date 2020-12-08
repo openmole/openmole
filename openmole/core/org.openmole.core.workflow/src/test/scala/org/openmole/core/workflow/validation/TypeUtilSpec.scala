@@ -38,7 +38,7 @@ class TypeUtilSpec extends FlatSpec with Matchers {
 
     val mole: Mole = (t1 -- t2)
 
-    val types = TypeUtil.computeTypes(mole, Sources.empty, Hooks.empty)(mole.slots(mole.capsules.find(_.task == t2).get).head)
+    val types = TypeUtil.computeTypes(mole, Sources.empty, Hooks.empty)(mole.slots(mole.capsules.find(_._task == t2).get).head)
 
     types.collect { case x: InvalidType ⇒ x }.isEmpty should equal(true)
 
@@ -57,7 +57,7 @@ class TypeUtilSpec extends FlatSpec with Matchers {
 
     val mole: Mole = (t1 -- t3) & (t2 -- t3)
 
-    val types = TypeUtil.computeTypes(mole, Sources.empty, Hooks.empty)(mole.slots(mole.capsules.find(_.task == t3).get).head)
+    val types = TypeUtil.computeTypes(mole, Sources.empty, Hooks.empty)(mole.slots(mole.capsules.find(_._task == t3).get).head)
 
     types.collect { case x: InvalidType ⇒ x }.isEmpty should equal(true)
     val validTypes = types.collect { case x: ValidType ⇒ x }

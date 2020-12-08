@@ -20,52 +20,50 @@ package org.openmole.plugin.method.evolution
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.workflow.format.WritableOutput
-import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SavedData }
+import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SaveOption }
 
 object SavePopulationHook {
 
-  def resultVariables(t: EvolutionWorkflow) = FromContext { p ⇒
+  def resultVariables(t: EvolutionWorkflow, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
     import p._
     context.variable(t.generationPrototype).toSeq ++
-      t.operations.result(context(t.populationPrototype).toVector, context(t.statePrototype)).from(context)
+      t.operations.result(
+        context(t.populationPrototype).toVector,
+        context(t.statePrototype),
+        keepAll = keepAll,
+        includeOutputs = includeOutputs).from(context)
   }
 
   def apply[T, F](
-    algorithm: T,
-    output:    WritableOutput,
-    frequency: OptionalArgument[Long] = None,
-    last:      Boolean                = false, format: F = CSVOutputFormat(unrollArray = true))(implicit wfi: WorkflowIntegration[T], name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, EvolutionMetadata]) = {
-    val t = wfi(algorithm)
-    Hook("SavePopulationHook") { p ⇒
-      import p._
+    evolution:      EvolutionWorkflow,
+    output:         WritableOutput,
+    frequency:      OptionalArgument[Long] = None,
+    last:           Boolean                = false,
+    keepAll:        Boolean                = false,
+    includeOutputs: Boolean                = false,
+    format:         F                      = CSVOutputFormat(unrollArray = true))(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, EvolutionMetadata]) = Hook("SavePopulationHook") { p ⇒
+    import p._
 
-      def fileName =
-        (frequency.option, last) match {
-          case (_, true) ⇒ Some("population")
-          case (None, _) ⇒ Some("population${" + t.generationPrototype.name + "}")
-          case (Some(f), _) if context(t.generationPrototype) % f == 0 ⇒ Some("population${" + t.generationPrototype.name + "}")
-          case _ ⇒ None
-        }
-
-      fileName match {
-        case Some(fileName) ⇒
-          def savedData = SavedData(
-            generation = context(t.generationPrototype),
-            frequency = frequency,
-            name = fileName,
-            last = last
-          )
-
-          def evolutionData = t.operations.metadata(savedData).from(context)
-
-          val content = OutputFormat.PlainContent(resultVariables(t).from(context), Some(ExpandedString(fileName)))
-          outputFormat.write(executionContext)(format, output, content, evolutionData).from(context)
-        case None ⇒
+    def fileName =
+      (frequency.option, last) match {
+        case (_, true) ⇒ Some("population")
+        case (None, _) ⇒ Some("population${" + evolution.generationPrototype.name + "}")
+        case (Some(f), _) if context(evolution.generationPrototype) % f == 0 ⇒ Some("population${" + evolution.generationPrototype.name + "}")
+        case _ ⇒ None
       }
 
-      context
-    } validate { p ⇒ outputFormat.validate(format)(p) } set (inputs += (t.populationPrototype, t.statePrototype))
-  }
+    fileName match {
+      case Some(fileName) ⇒
+        def saveOption = SaveOption(frequency = frequency, last = last)
+        def evolutionData = evolution.operations.metadata(context(evolution.generationPrototype), saveOption)
+
+        val content = OutputFormat.PlainContent(resultVariables(evolution, keepAll = keepAll, includeOutputs = includeOutputs).from(context), Some(fileName))
+        outputFormat.write(executionContext)(format, output, content, evolutionData).from(context)
+      case None ⇒
+    }
+
+    context
+  } withValidate { outputFormat.validate(format, _) } set (inputs += (evolution.populationPrototype, evolution.statePrototype))
 
 }
 

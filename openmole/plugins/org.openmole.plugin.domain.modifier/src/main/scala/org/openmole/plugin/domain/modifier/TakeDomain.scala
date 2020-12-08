@@ -26,14 +26,14 @@ import cats.implicits._
 
 object TakeDomain {
 
-  implicit def isFinite[D, T] = new Finite[TakeDomain[D, T], T] with DomainInputs[TakeDomain[D, T]] {
+  implicit def isFinite[D, T] = new FiniteFromContext[TakeDomain[D, T], T] with DomainInputs[TakeDomain[D, T]] {
     override def computeValues(domain: TakeDomain[D, T]) = domain.computeValues()
     override def inputs(domain: TakeDomain[D, T]): PrototypeSet = domain.inputs
   }
 
 }
 
-case class TakeDomain[D, +T](domain: D, size: FromContext[Int])(implicit discrete: Discrete[D, T], domainInputs: DomainInputs[D]) {
+case class TakeDomain[D, +T](domain: D, size: FromContext[Int])(implicit discrete: DiscreteFromContext[D, T], domainInputs: DomainInputs[D]) {
   def inputs = domainInputs.inputs(domain)
   def computeValues() =
     (discrete.iterator(domain) map2 size)((d, s) ⇒ d.slice(0, s).toIterable)

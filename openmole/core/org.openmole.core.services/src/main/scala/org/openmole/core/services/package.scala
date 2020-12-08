@@ -17,6 +17,7 @@ import org.openmole.tool.random._
 import org.openmole.tool.file._
 import org.openmole.tool.outputredirection._
 import org.openmole.core.networkservice._
+import org.openmole.core.timeservice.TimeService
 import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
 
@@ -72,6 +73,7 @@ package object services {
       implicit val networkService = NetworkService(httpProxy)
       implicit val fileServiceCache = FileServiceCache()
       implicit val loggerService = LoggerService(logLevel)
+      implicit val timeService = TimeService()
 
       new ServicesContainer()
     }
@@ -112,7 +114,8 @@ package object services {
       outputRedirection:   OutputRedirection   = services.outputRedirection,
       networkService:      NetworkService      = services.networkService,
       fileServiceCache:    FileServiceCache    = services.fileServiceCache,
-      loggerService:       LoggerService       = services.loggerService
+      loggerService:       LoggerService       = services.loggerService,
+      timeService:         TimeService         = services.timeService
     ) =
       new ServicesContainer()(
         workspace = workspace,
@@ -130,7 +133,8 @@ package object services {
         eventDispatcher = eventDispatcher,
         outputRedirection = outputRedirection,
         networkService = networkService,
-        loggerService = loggerService
+        loggerService = loggerService,
+        timeService = timeService
       )
 
   }
@@ -155,6 +159,7 @@ package object services {
     implicit def networkService: NetworkService
     implicit def fileServiceCache: FileServiceCache
     implicit def loggerService: LoggerService
+    implicit def timeService: TimeService
   }
 
   /**
@@ -191,6 +196,7 @@ package object services {
                           val outputRedirection:   OutputRedirection,
                           val networkService:      NetworkService,
                           val fileServiceCache:    FileServiceCache,
-                          val loggerService:       LoggerService) extends Services
+                          val loggerService:       LoggerService,
+                          val timeService:         TimeService) extends Services
 
 }

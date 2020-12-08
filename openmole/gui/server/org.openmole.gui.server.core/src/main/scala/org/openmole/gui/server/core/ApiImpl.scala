@@ -36,7 +36,7 @@ import org.openmole.core.workspace.TmpDirectory
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.server.{ GUIPluginRegistry, utils }
 import org.openmole.gui.ext.server.utils._
-import org.openmole.gui.server.core.GUIServer.ApplicationControl
+import org.openmole.gui.server.core.GUIServer.{ ApplicationControl, lockFile }
 import org.openmole.plugin.hook.omr.OMROutputFormat
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.outputredirection.OutputRedirection
@@ -267,14 +267,31 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     targetFile.toSafePath
   }
 
-  def saveFile(path: SafePath, fileContent: String): Unit = {
+  def saveFile(path: SafePath, fileContent: String, hash: Option[String], overwrite: Boolean): (Boolean, String) = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
-    safePathToFile(path).content = fileContent
+
+    val file = safePathToFile(path)
+
+    file.withLock { _ ⇒
+      def save() = {
+        file.content = fileContent
+        def newHash = services.fileService.hashNoCache(file).toString
+        (true, newHash)
+      }
+
+      if (overwrite) save()
+      else hash match {
+        case Some(expectedHash: String) ⇒
+          val hashOnDisk = services.fileService.hashNoCache(file).toString
+          if (hashOnDisk == expectedHash) save() else (false, hashOnDisk)
+        case _ ⇒ save()
+      }
+    }
   }
 
-  def saveFiles(fileContents: Seq[AlterableFileContent]): Unit = fileContents.foreach { fc ⇒
-    saveFile(fc.path, fc.content)
-  }
+  //  def saveFiles(fileContents: Seq[AlterableFileContent]): Seq[(SafePath, Boolean)] = fileContents.map { fc ⇒
+  //    fc.path -> saveFile(fc.path, fc.content, Some(fc.hash), false)
+  //  }
 
   def size(safePath: SafePath): Long = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
@@ -612,7 +629,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   // Method plugins
   override def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS] = {
     val omrFile = safePathToFile(result)(ServerFileSystemContext.project, workspace)
-    val name = OMROutputFormat.methodName(omrFile)
-    GUIPluginRegistry.analysis.find(_._1 == name).map(_._2)
+    val data = OMROutputFormat.omrData(omrFile)
+    GUIPluginRegistry.analysis.find(_._1 == data.method).map(_._2)
   }
 }

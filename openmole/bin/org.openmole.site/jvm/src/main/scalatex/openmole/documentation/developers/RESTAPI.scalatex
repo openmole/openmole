@@ -113,7 +113,7 @@ Prepare the work directory:
 Pi.oms
 [reuillon:/tmp/pi] $$ cat Pi.oms
 // Define the variables that are transmitted between the tasks
-val seed = Val[Long]
+val mySeed = Val[Long]
 val pi = Val[Double]
 
 val piAvg = Val[Double]
@@ -138,7 +138,7 @@ val model =
 
 Replication(
   evaluation = model,
-  seed = seed,
+  seed = mySeed,
   sample = 100,
   aggregation = Seq(pi aggregate average as piAvg, pi aggregate median as piMed)
 ) hook display hook (workDirectory / "result.json", format = JSONOutputFormat())

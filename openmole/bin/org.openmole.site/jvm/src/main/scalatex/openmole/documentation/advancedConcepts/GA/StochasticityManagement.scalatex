@@ -30,17 +30,17 @@ In case you want to explore a stochastic model with a GA you can do:
 @br@br
 
 @hl.openmole("""
-  val seed = Val[Long]
+  val mySeed = Val[Long]
 
   val evolution =
     NSGA2Evolution(
-      mu = 100, // mu is the size of the population
+      populationSize = 100, // populationSize is the size of the population
       genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)), // genome (of individuals) is the inputs prototype and their variation ranges
       objective = Seq(o1, o2), // objective sets the objectives to minimise
       // OpenMOLE provide a seed for your stochastic model to use (it is optional)
       // 20% of the evaluations are used for replicating existing solutions
       // 100 replication are stored at max for each individual
-      stochastic = Stochastic(seed = seed, reevaluate = 0.2, sample = 100),
+      stochastic = Stochastic(seed = mySeed, reevaluate = 0.2, sample = 100),
       evaluation = model,
       termination = 100
     )""", header = model)
@@ -114,7 +114,7 @@ This method adds only two new parameters:
       @li{@hl.code("""sample"""), the maximum number of evaluation values for an individual, to limit the memory used to store an individual.}
     }
 
-See the line @hl.code("""stochastic = Stochastic(seed = seed, reevaluate = 0.2, sample = 100)""") in the example.
+See the line @hl.code("""stochastic = Stochastic(seed = mySeed, reevaluate = 0.2, sample = 100)""") in the example.
 
 @br@br
 

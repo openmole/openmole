@@ -72,7 +72,7 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
     val content = modelData.vals + s"""\n\nval $task = ScalaTask(\n\"\"\"$mainOutputString${command.replace("()", "")}(${inputs.map { _.name }.mkString(",")})\"\"\") set(\n""" +
       jarResourceLine._1 +
       WizardUtils.expandWizardData(modelData) +
-      s""")\n\n$task hook ToStringHook()"""
+      s""")\n\n$task hook display"""
 
     target.toFile.content = content
     WizardToTask(target, jarResourceLine._2)

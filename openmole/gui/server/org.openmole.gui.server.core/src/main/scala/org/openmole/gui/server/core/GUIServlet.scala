@@ -42,12 +42,14 @@ import org.openmole.core.serializer.SerializerService
 import org.openmole.core.services.Services
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.networkservice._
+import org.openmole.core.timeservice.TimeService
 import org.openmole.gui.ext.api.Api
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.gui.ext.data.routes._
 import org.openmole.gui.ext.server.{ AutowireServer, OMRouter, utils }
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.file._
+import org.openmole.tool.lock.LockRepository
 import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.random.{ RandomProvider, Seeder }
@@ -76,6 +78,7 @@ object GUIServerServices {
     implicit def networkService: NetworkService = guiServices.networkService
     implicit def outputRedirection: OutputRedirection = guiServices.outputRedirection
     implicit def loggerService: LoggerService = guiServices.loggerService
+    implicit def timeService: TimeService = guiServices.timeService
   }
 
   def apply(workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level]) = {
@@ -94,6 +97,7 @@ object GUIServerServices {
     implicit val fileServiceCache = FileServiceCache()
     implicit val replicaCatalog = ReplicaCatalog(ws)
     implicit val loggerService = LoggerService(logLevel)
+    implicit val timeService = TimeService()
 
     new GUIServerServices()
   }
@@ -127,7 +131,8 @@ class GUIServerServices(
   val eventDispatcher:     EventDispatcher,
   val outputRedirection:   OutputRedirection,
   val networkService:      NetworkService,
-  val loggerService:       LoggerService
+  val loggerService:       LoggerService,
+  val timeService:         TimeService
 )
 
 object GUIServlet {
@@ -260,8 +265,9 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   }
 
   get(downloadFileRoute) {
-
     val path = params("path")
+    val hash = params.get("hash").flatMap(_.toBooleanOption).getOrElse(false)
+
     val f = new File(utils.webUIDirectory, path)
 
     if (!f.exists()) NotFound("The file " + path + " does not exist.")
@@ -269,16 +275,20 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
       if (f.isDirectory) {
         response.setHeader("Content-Disposition", s"""attachment; filename="${f.getName + ".tgz"}"""")
         val os = response.getOutputStream()
+        if (hash) response.setHeader(hashHeader, services.fileService.hashNoCache(f).toString)
         val tos = new TarOutputStream(os.toGZ, 64 * 1024)
         try tos.archive(f, includeTopDirectoryName = true)
         finally tos.close
       }
       else {
-        response.setHeader("Content-Disposition", s"""attachment; filename="${f.getName}"""")
-        response.setContentLengthLong(f.length)
-        val os = response.getOutputStream()
-        try f.copy(os)
-        finally os.close
+        f.withLock { _ ⇒
+          response.setHeader("Content-Disposition", s"""attachment; filename="${f.getName}"""")
+          response.setContentLengthLong(f.length)
+          if (hash) response.setHeader(hashHeader, services.fileService.hashNoCache(f).toString)
+          val os = response.getOutputStream()
+          try f.copy(os)
+          finally os.close
+        }
       }
     }
   }
