@@ -294,16 +294,8 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     }
   }
 
-  get(s"/${org.openmole.gui.ext.server.utils.openmoleThemeName}") {
-    redirect(s"/js/${org.openmole.gui.ext.server.utils.openmoleThemeName}")
-  }
-
-  get(s"/${org.openmole.gui.ext.server.utils.openmoleGrammarMode}") {
-    redirect(s"/js/${org.openmole.gui.ext.server.utils.openmoleGrammarMode}")
-  }
-
-  get(s"/${org.openmole.gui.ext.server.utils.openmoleGrammarName}") {
-    redirect(s"/js/${org.openmole.gui.ext.server.utils.openmoleGrammarName}")
+  get("/theme-github.js") {
+    redirect("/js/theme-github.js")
   }
 
   get("/") {
