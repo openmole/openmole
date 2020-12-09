@@ -294,6 +294,10 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     }
   }
 
+  get("/theme-github.js") {
+    redirect("/js/theme-github.js")
+  }
+
   get("/") {
     redirect(appRoute)
   }
