@@ -265,11 +265,8 @@ object utils {
 
   val openmoleFileName = "openmole.js"
   val depsFileName = "deps.js"
-
   val openmoleGrammarName = "openmole_grammar_template.js"
   val openmoleGrammarMode = "mode-openmole.js"
-
-  val openmoleThemeName = "theme-openmole.js"
 
   def updateIfChanged(file: File)(update: File ⇒ Unit)(implicit fileService: FileService, newFile: TmpDirectory) = {
     import org.openmole.core.fileservice._
