@@ -173,7 +173,6 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
       tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.openmoleFileName),
       tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.depsFileName),
       tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.openmoleGrammarMode),
-      tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.openmoleThemeName),
       RawFrag(arguments.extraHeader)
     ),
     tags.body(
@@ -294,16 +293,8 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     }
   }
 
-  get(s"/${org.openmole.gui.ext.server.utils.openmoleThemeName}") {
-    redirect(s"/js/${org.openmole.gui.ext.server.utils.openmoleThemeName}")
-  }
-
   get(s"/${org.openmole.gui.ext.server.utils.openmoleGrammarMode}") {
     redirect(s"/js/${org.openmole.gui.ext.server.utils.openmoleGrammarMode}")
-  }
-
-  get(s"/${org.openmole.gui.ext.server.utils.openmoleGrammarName}") {
-    redirect(s"/js/${org.openmole.gui.ext.server.utils.openmoleGrammarName}")
   }
 
   get("/") {
