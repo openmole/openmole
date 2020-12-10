@@ -70,28 +70,32 @@ class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: Fi
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
-  lazy val editorDiv = tags.div(id := "editor").render
+  val editor = {
+    val edDiv = tags.div(id := "editor").render
+    val ed = ace.edit(edDiv)
 
-  var initialContentHash = ""
+    js.Dynamic.global.ace.config.set("basePath", "/js")
+    js.Dynamic.global.ace.config.set("modePath", "/js")
+    js.Dynamic.global.ace.config.set("themePath", "/js")
 
-  lazy val editor = {
-    val ed = ace.edit(editorDiv)
+    ed.setTheme("ace/theme/github")
+    ace.require("ace/ext/language_tools")
 
     EditorPanelUI.highlightedFile(fileType).foreach { h ⇒
       ed.getSession().setMode("ace/mode/" + h.highlighter)
     }
 
-    ed.setTheme("ace/theme/github")
-    ace.require("ace/ext/language_tools")
     ed.renderer.setShowGutter(true)
     ed.setShowPrintMargin(true)
     ed.setAutoScrollEditorIntoView(true)
 
-    ed.setOptions(js.Dynamic.literal(
-      "enableBasicAutocompletion" -> true,
-      "enableSnippets" -> true,
-      "enableLiveAutocompletion" -> true
-    ))
+    ed.setOptions(
+      js.Dynamic.literal(
+        "enableBasicAutocompletion" -> true,
+        "enableSnippets" -> true,
+        "enableLiveAutocompletion" -> true
+      )
+    )
 
     def updateScrollTop = scrollTop.update(ed.renderer.getScrollTop)
 
@@ -101,8 +105,11 @@ class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: Fi
     })
 
     ed.getSession().on("changeScrollTop", x ⇒ { updateScrollTop })
+
     ed
   }
+
+  var initialContentHash = ""
 
   lazy val lineHeight = {
     val h = Var(15)

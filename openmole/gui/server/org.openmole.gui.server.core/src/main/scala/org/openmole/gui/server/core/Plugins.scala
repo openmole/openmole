@@ -71,18 +71,10 @@ object Plugins extends JavaLogger {
       s"""${template.content}""" // ${AceOpenMOLEMode.content}
         .replace(
           "##OMKeywords##",
-          s""" "${
-            rules._1.map {
-              _.name
-            }.mkString("|")
-          }" """)
+          s""" "${rules._1.map { _.name }.mkString("|")}" """)
         .replace(
           "##OMClasses##",
-          s""" "${
-            rules._2.map {
-              _.name
-            }.mkString("|")
-          }" """)
+          s""" "${rules._2.map { _.name }.mkString("|")}" """)
 
   }
 
