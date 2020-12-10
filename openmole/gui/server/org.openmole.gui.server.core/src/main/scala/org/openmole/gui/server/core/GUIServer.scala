@@ -47,6 +47,7 @@ object GUIServer {
     from / "img" copy to / "img"
 
     Plugins.expandDepsFile(from / "js" / utils.openmoleGrammarName, to /> "js" / utils.openmoleGrammarMode)
+    (from / "js" / utils.githubTheme) copy (to /> "js" / utils.githubTheme)
     (from / "js" / utils.depsFileName) copy (to /> "js" / utils.depsFileName)
     Plugins.openmoleFile(optimizedJS) copy (to /> "js" / utils.openmoleFileName)
     to
