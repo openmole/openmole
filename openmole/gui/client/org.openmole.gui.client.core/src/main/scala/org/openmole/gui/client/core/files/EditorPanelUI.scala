@@ -77,21 +77,29 @@ class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: Fi
   lazy val editor = {
     val ed = ace.edit(editorDiv)
 
+    println("highligted file" + EditorPanelUI.highlightedFile(fileType))
+
     EditorPanelUI.highlightedFile(fileType).foreach { h ⇒
+      println("set mode to " + fileType)
       ed.getSession().setMode("ace/mode/" + h.highlighter)
     }
 
     ed.setTheme("ace/theme/github")
+    println("set theme to " + ed.getTheme())
+
     ace.require("ace/ext/language_tools")
+
     ed.renderer.setShowGutter(true)
     ed.setShowPrintMargin(true)
     ed.setAutoScrollEditorIntoView(true)
 
-    ed.setOptions(js.Dynamic.literal(
-      "enableBasicAutocompletion" -> true,
-      "enableSnippets" -> true,
-      "enableLiveAutocompletion" -> true
-    ))
+    ed.setOptions(
+      js.Dynamic.literal(
+        "enableBasicAutocompletion" -> true,
+        "enableSnippets" -> true,
+        "enableLiveAutocompletion" -> true
+      )
+    )
 
     def updateScrollTop = scrollTop.update(ed.renderer.getScrollTop)
 
