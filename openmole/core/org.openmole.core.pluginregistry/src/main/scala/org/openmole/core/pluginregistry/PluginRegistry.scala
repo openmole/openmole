@@ -28,7 +28,7 @@ object PluginRegistry {
 
   def unregister(id: AnyRef): Unit = PluginRegistry.removePlugin(id)
 
-  def highLights = plugins.values.flatMap(_.highLights)
+  def highLights = pluginsInfo.flatMap(_.highLights)
 
 }
 
