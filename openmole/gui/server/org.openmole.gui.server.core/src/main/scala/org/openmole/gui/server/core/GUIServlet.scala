@@ -293,6 +293,10 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     }
   }
 
+  get(s"/${org.openmole.gui.ext.server.utils.openmoleGrammarMode}") {
+    redirect(s"/js/${org.openmole.gui.ext.server.utils.openmoleGrammarMode}")
+  }
+
   get("/") {
     redirect(appRoute)
   }
