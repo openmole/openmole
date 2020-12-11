@@ -82,7 +82,7 @@ class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: Fi
       ed.getSession().setMode("ace/mode/" + h.highlighter)
     }
 
-    ed.setTheme("ace/theme/github")
+    //ed.setTheme("ace/theme/github")
     ace.require("ace/ext/language_tools")
 
     ed.renderer.setShowGutter(true)
