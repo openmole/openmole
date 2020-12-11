@@ -70,23 +70,15 @@ class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: Fi
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
-  lazy val editorDiv = tags.div(id := "editor").render
-
-  var initialContentHash = ""
-
   lazy val editor = {
-    val ed = ace.edit(editorDiv)
-
-    println("highligted file" + EditorPanelUI.highlightedFile(fileType))
+    val edDiv = tags.div(id := "editor").render
+    val ed = ace.edit(edDiv)
 
     EditorPanelUI.highlightedFile(fileType).foreach { h ⇒
-      println("set mode to " + fileType)
       ed.getSession().setMode("ace/mode/" + h.highlighter)
     }
 
     ed.setTheme("ace/theme/github")
-    println("set theme to " + ed.getTheme())
-
     ace.require("ace/ext/language_tools")
 
     ed.renderer.setShowGutter(true)
@@ -109,8 +101,11 @@ class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: Fi
     })
 
     ed.getSession().on("changeScrollTop", x ⇒ { updateScrollTop })
+
     ed
   }
+
+  var initialContentHash = ""
 
   lazy val lineHeight = {
     val h = Var(15)
