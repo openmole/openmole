@@ -74,6 +74,10 @@ class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: Fi
     val edDiv = tags.div(id := "editor").render
     val ed = ace.edit(edDiv)
 
+    js.Dynamic.global.ace.config.set("basePath", "/js")
+    js.Dynamic.global.ace.config.set("modePath", "/js")
+    js.Dynamic.global.ace.config.set("themePath", "/js")
+
     EditorPanelUI.highlightedFile(fileType).foreach { h ⇒
       ed.getSession().setMode("ace/mode/" + h.highlighter)
     }
