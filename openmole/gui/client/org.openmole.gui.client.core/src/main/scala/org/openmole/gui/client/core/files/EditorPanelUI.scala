@@ -70,7 +70,7 @@ class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: Fi
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
-  lazy val editor = {
+  val editor = {
     val edDiv = tags.div(id := "editor").render
     val ed = ace.edit(edDiv)
 
@@ -78,12 +78,12 @@ class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: Fi
     js.Dynamic.global.ace.config.set("modePath", "/js")
     js.Dynamic.global.ace.config.set("themePath", "/js")
 
+    ed.setTheme("ace/theme/github")
+    ace.require("ace/ext/language_tools")
+
     EditorPanelUI.highlightedFile(fileType).foreach { h ⇒
       ed.getSession().setMode("ace/mode/" + h.highlighter)
     }
-
-    //ed.setTheme("ace/theme/github")
-    ace.require("ace/ext/language_tools")
 
     ed.renderer.setShowGutter(true)
     ed.setShowPrintMargin(true)
