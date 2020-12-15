@@ -291,7 +291,10 @@ object Application extends JavaLogger {
               server.start()
               if (config.browse && !config.remote) browse(url)
               server.launchApplication()
-              logger.info(s"Server listening on port $port.")
+              logger.info(
+                "\n" + org.openmole.core.buildinfo.consoleSplash + "\n" +
+                  s"Server listening on port $port."
+              )
               server.join() match {
                 case GUIServer.Ok      ⇒ Console.ExitCodes.ok
                 case GUIServer.Restart ⇒ Console.ExitCodes.restart
