@@ -402,7 +402,7 @@ lazy val xzJava = OsgiProject(dir, "xzjava", imports = Seq("*"), exports = Seq("
 ) settings(settings: _*)
 
 
-lazy val guava = OsgiProject(dir, "com.google.guava", imports = Seq("*"), exports = Seq("com.google.guava.*"), privatePackages = Seq("!scala.*", "*")) settings (
+lazy val guava = OsgiProject(dir, "com.google.guava", imports = Seq("*"), exports = Seq("com.google.guava.*", "com.google.common.*"), privatePackages = Seq("!scala.*", "*")) settings (
   libraryDependencies += "com.google.guava" % "guava" % guavaVersion,
   version := guavaVersion
 ) settings(settings: _*)
