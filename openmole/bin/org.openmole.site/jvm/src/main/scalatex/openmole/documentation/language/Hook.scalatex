@@ -208,7 +208,7 @@ You can use the following notation in the hook function {@code{hook(yourHookHere
   val j = Val[Int]
   val k = Var[Double]
 
-  val task = ATask() set (
+  val task = EmptyTask() set (
   outputs := (i,j,k)
   )
   
