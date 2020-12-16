@@ -64,7 +64,7 @@ object PluginManager extends JavaLogger {
     resolvedPluginDependenciesCache.clear()
   }
 
-  def bundles = Activator.contextOrException.getBundles.filter(!_.isSystem).toSeq
+  def bundles = Activator.contextOrException.getBundles.filter(!_.isSystem).toSeq.sortBy(_.file.getName)
   def bundleFiles = infos.files.keys
 
   def dependencies(file: File): Option[Iterable[File]] =

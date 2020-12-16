@@ -171,9 +171,8 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
       tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset=UTF-8"),
       cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
       tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.openmoleFileName),
+      //tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.openmoleGrammarMode),
       tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.depsFileName),
-      tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.openmoleGrammarMode),
-      tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.openmoleThemeName),
       RawFrag(arguments.extraHeader)
     ),
     tags.body(
@@ -294,9 +293,9 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
     }
   }
 
-  get("/theme-github.js") {
-    redirect("/js/theme-github.js")
-  }
+  //  get(s"/${utils.openmoleGrammarMode}") {
+  //    redirect(s"/js/${utils.openmoleGrammarMode}")
+  //  }
 
   get("/") {
     redirect(appRoute)

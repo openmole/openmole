@@ -10,11 +10,11 @@ import scala.collection.JavaConverters._
 
 object PluginRegistry {
 
-  val plugins = new ConcurrentHashMap[AnyRef, PluginInfo]().asScala
+  private val plugins = new ConcurrentHashMap[AnyRef, PluginInfo]().asScala
 
   def addPlugin(c: AnyRef, info: PluginInfo) = plugins += c → info
   def removePlugin(c: AnyRef) = plugins -= c
-  def pluginsInfo = plugins.values
+  def pluginsInfo = plugins.values.toSeq.sortBy(_.idClassName)
 
   def register(
     id:                 AnyRef,
@@ -22,13 +22,13 @@ object PluginRegistry {
     nameSpaceTraits:    Vector[ExportedNameSpaceTrait] = Vector(),
     highLight:          Vector[HighLight]              = Vector(),
     preferenceLocation: Vector[PreferenceLocation[_]]  = Vector()): Unit = {
-    val info = PluginInfo(nameSpaces, nameSpaceTraits, highLight, preferenceLocation)
+    val info = PluginInfo(nameSpaces, nameSpaceTraits, highLight, preferenceLocation, id.getClass.getCanonicalName)
     PluginRegistry.addPlugin(id, info)
   }
 
   def unregister(id: AnyRef): Unit = PluginRegistry.removePlugin(id)
 
-  def highLights = plugins.values.flatMap(_.highLights)
+  def highLights = pluginsInfo.flatMap(_.highLights)
 
 }
 
@@ -36,4 +36,5 @@ case class PluginInfo(
   namespaces:          Vector[ExportedNameSpace],
   namespaceTraits:     Vector[ExportedNameSpaceTrait],
   highLights:          Vector[HighLight],
-  preferenceLocations: Vector[PreferenceLocation[_]])
+  preferenceLocations: Vector[PreferenceLocation[_]],
+  idClassName:         String)
