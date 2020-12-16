@@ -73,10 +73,10 @@ class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: Fi
   val editor = {
     val edDiv = tags.div(id := "editor").render
     val ed = ace.edit(edDiv)
-
-    js.Dynamic.global.ace.config.set("basePath", "/js")
-    js.Dynamic.global.ace.config.set("modePath", "/js")
-    js.Dynamic.global.ace.config.set("themePath", "/js")
+    
+    js.Dynamic.global.ace.config.set("basePath", "js")
+    js.Dynamic.global.ace.config.set("modePath", "js")
+    js.Dynamic.global.ace.config.set("themePath", "js")
 
     ed.setTheme("ace/theme/github")
     ace.require("ace/ext/language_tools")

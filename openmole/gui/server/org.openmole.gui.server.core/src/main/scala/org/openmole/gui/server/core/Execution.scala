@@ -200,7 +200,7 @@ class Execution {
     errors.map { ex ⇒
       ex.exception match {
         case fje: environment.FailedJobExecution ⇒
-          EnvironmentError(environmentId, fje.message, MessageErrorData(fje.message, Some(fje.cause + s"\nDETAILS:\n${fje.detail}")), ex.creationTime, utils.javaLevelToErrorLevel(ex.level))
+          EnvironmentError(environmentId, fje.message, MessageErrorData(fje.message, Some(ErrorData.toStackTrace(fje.cause) + s"\nDETAILS:\n${fje.detail}")), ex.creationTime, utils.javaLevelToErrorLevel(ex.level))
         case _ ⇒
           EnvironmentError(environmentId, ex.exception.getMessage, ErrorData(ex.exception), ex.creationTime, utils.javaLevelToErrorLevel(ex.level))
       }
