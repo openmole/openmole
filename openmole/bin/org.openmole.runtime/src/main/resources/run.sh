@@ -48,8 +48,18 @@ ulimit -S -s unlimited
 
 export MALLOC_ARENA_MAX=1
 
-export LC_ALL="C.UTF-8"
-export LANG="C.UTF-8"
+if [ `locale -a | grep C.UTF-8` ]; then OM_LOCAL="C.UTF-8"
+elif [ `locale -a | grep en_US.utf8` ]; then OM_LOCAL="en_US.utf8"
+elif [ `locale -a | grep utf8` ]; then OM_LOCAL=`locale -a |  grep utf8 | head -1`
+else
+  echo "No UTF8 locale found among installed locales"
+  locale -a
+fi
+
+if [ -n "$OM_LOCAL" ]; then
+  export LC_ALL=$OM_LOCAL
+  export LANG=$OM_LOCAL
+fi
 
 java -Djava.io.tmpdir="${TMPDIR}" -Dsun.jnu.encoding=UTF-8 -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Xss2M -Xms64m -Xmx${MEMORY} -Dosgi.locking=none -Dosgi.configuration.area="${CONFIGDIR}" $FLAG -XX:ReservedCodeCacheSize=128m -XX:MaxMetaspaceSize=256m -XX:CompressedClassSpaceSize=128m \
   -XX:+UseG1GC -XX:ParallelGCThreads=1 -XX:CICompilerCount=2 -XX:ConcGCThreads=1 -XX:G1ConcRefinementThreads=1 \
