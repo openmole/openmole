@@ -17,6 +17,11 @@
 
 package org.openmole.core.exception
 
+object UserBadDataError {
+  def apply(message: String, exception: Throwable = null) =
+    new UserBadDataError(exception, message)
+}
+
 /**
  * An exception thrown at problems encountered because of the user
  * @param exception

@@ -3,6 +3,7 @@ package org.openmole.plugin.task.r
 import monocle.macros.Lenses
 import org.openmole.core.context.{Namespace, Val}
 import org.openmole.core.dsl._
+import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.expansion._
 import org.openmole.core.fileservice._
 import org.openmole.core.networkservice._
@@ -183,7 +184,12 @@ object RTask {
             Mapped.files(mapped.outputs).map { case m ⇒ outputFiles +=[ContainerTask] (m.name, m.v) }
           )
 
-        val resultContext = containerTask.process(executionContext).from(context)
+        val resultContext =
+          try containerTask.process(executionContext).from(context)
+          catch {
+            case t: UserBadDataError => throw UserBadDataError(s"Error executing script:\n${scriptFile.content}", t)
+            case t: Throwable => throw InternalProcessingError(s"Error executing script:\n${scriptFile.content}", t)
+          }
         resultContext ++ readOutputJSON(resultContext(outputFile))
       }
     }
