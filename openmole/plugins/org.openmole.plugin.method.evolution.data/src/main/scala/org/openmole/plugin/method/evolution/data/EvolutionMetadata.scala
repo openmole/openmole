@@ -5,12 +5,37 @@ case class SaveOption(
   last:      Boolean)
 
 object EvolutionMetadata {
+
+  object GenomeBoundData {
+    case class DoubleBound(name: String, low: Double, high: Double) extends GenomeBoundData
+    case class IntBound(name: String, low: Int, high: Int) extends GenomeBoundData
+    case class DoubleSequenceBound(name: String, low: Array[Double], high: Array[Double]) extends GenomeBoundData
+    case class IntSequenceBound(name: String, low: Array[Int], high: Array[Int]) extends GenomeBoundData
+    case class Enumeration(name: String, values: Seq[String]) extends GenomeBoundData
+
+    def name(data: GenomeBoundData) =
+      data match {
+        case d: DoubleBound         ⇒ d.name
+        case d: IntBound            ⇒ d.name
+        case d: DoubleSequenceBound ⇒ d.name
+        case d: IntSequenceBound    ⇒ d.name
+        case d: Enumeration         ⇒ d.name
+      }
+  }
+
+  sealed trait GenomeBoundData
+
+  case class NoisyObjective(
+    name:     String,
+    delta:    Option[Double],
+    negative: Boolean)
+
   def method = "evolution"
   case object none extends EvolutionMetadata
 
   case class StochasticNSGA2(
     genome:         Seq[GenomeBoundData],
-    objective:      Seq[ObjectiveData.NoisyObjective],
+    objective:      Seq[NoisyObjective],
     populationSize: Int,
     sample:         Int,
     generation:     Long,
@@ -20,28 +45,15 @@ object EvolutionMetadata {
 
 sealed trait EvolutionMetadata
 
-object GenomeBoundData {
-  case class DoubleBound(value: String, low: Double, high: Double) extends GenomeBoundData
-  case class IntBound(value: String, low: Int, high: Int) extends GenomeBoundData
-  case class DoubleSequenceBound(value: String, low: Array[Double], high: Array[Double]) extends GenomeBoundData
-  case class IntSequenceBound(value: String, low: Array[Int], high: Array[Int]) extends GenomeBoundData
-  case class Enumeration(value: String, values: Seq[String]) extends GenomeBoundData
-}
-
-sealed trait GenomeBoundData
-
-object ObjectiveData {
-  case class NoisyObjective(
-    name:     String,
-    delta:    Option[Double],
-    negative: Boolean)
-}
-
 object AnalysisData {
+
+  type GenomeData = String
+  type ObjectiveData = String
 
   sealed trait Convergence
 
   object StochasticNSGA2 {
+    case class Generation(generation: Long, genome: Vector[Vector[GenomeData]], objective: Vector[Vector[ObjectiveData]])
     case class Convergence(nadir: Option[Vector[Double]], generations: Vector[GenerationConvergence]) extends AnalysisData.Convergence
     case class GenerationConvergence(generation: Long, hypervolume: Option[Double], minimums: Option[Vector[Double]])
   }

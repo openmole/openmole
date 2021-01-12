@@ -14,11 +14,11 @@ import org.openmole.plugin.hook.omr.MethodData
 
 object MetadataGeneration {
 
-  import EvolutionMetadata._
-
   def genomeData(g: Genome) = g.map(boundData)
 
-  def boundData(b: GenomeBound) =
+  def boundData(b: GenomeBound) = {
+    import EvolutionMetadata._
+
     b match {
       case b: GenomeBound.ScalarDouble             ⇒ GenomeBoundData.DoubleBound(b.v.name, b.low, b.high)
       case b: GenomeBound.ScalarInt                ⇒ GenomeBoundData.IntBound(b.v.name, b.low, b.high)
@@ -27,8 +27,10 @@ object MetadataGeneration {
       case b: GenomeBound.Enumeration[_]           ⇒ GenomeBoundData.Enumeration(b.v.name, b.values.map(_.prettify()))
       case b: GenomeBound.SequenceOfEnumeration[_] ⇒ GenomeBoundData.Enumeration(b.v.name, b.values.map(_.prettify()))
     }
+  }
 
-  def noisyObjectiveData(o: NoisyObjective[_]) = ObjectiveData.NoisyObjective(o.as.getOrElse(o.prototype.name), o.delta, o.negative)
+  def noisyObjectiveData(o: NoisyObjective[_]) =
+    EvolutionMetadata.NoisyObjective(o.as.getOrElse(o.prototype.name), o.delta, o.negative)
 
   def fromString(s: String): EvolutionMetadata =
     decode[EvolutionMetadata](s) match {
