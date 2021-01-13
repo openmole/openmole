@@ -74,7 +74,7 @@ object GetResultActor {
           if (contextResults.results.isDefinedAt(moleJob.id)) {
             val executionResult = contextResults.results(moleJob.id)
             executionResult match {
-              case Success(context) ⇒ JobStore.finish(moleJob, Left(context))
+              case Success(context) ⇒ JobStore.finish(moleJob, MoleJob.FinishedArgument.Finished(Left(context)))
               case Failure(e)       ⇒ JobManager ! MoleJobError(moleJob.id, batchJob, e)
             }
           }

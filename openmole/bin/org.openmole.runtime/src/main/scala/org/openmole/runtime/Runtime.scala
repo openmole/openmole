@@ -167,7 +167,7 @@ class Runtime {
         )
 
         for (toProcess ← allMoleJobs) environment.submit(toProcess, taskExecutionContext)
-        saver.waitAllFinished
+        saver.waitAllCleaned
       }
       finally environment.stop()
 

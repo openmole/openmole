@@ -27,7 +27,13 @@ object MoleJob {
 
   implicit val moleJobOrdering = Ordering.by((_: MoleJob).id)
 
-  type JobFinished = (MoleJobId, Either[Context, Throwable]) ⇒ Unit
+  object FinishedArgument {
+    case class Finished(result: Either[Context, Throwable]) extends FinishedArgument
+    case object Cleaned extends FinishedArgument
+  }
+  sealed trait FinishedArgument
+
+  type JobFinished = (MoleJobId, FinishedArgument) ⇒ Unit
   type Canceled = () ⇒ Boolean
 
   /**
@@ -59,8 +65,9 @@ object MoleJob {
 
   def finish(moleJob: MoleJob, result: Either[Context, Throwable], taskExecutionContext: TaskExecutionContext) = {
     import org.openmole.tool.file._
-    moleJob.jobFinished(moleJob.id, result)
+    moleJob.jobFinished(moleJob.id, MoleJob.FinishedArgument.Finished(result))
     taskExecutionContext.taskExecutionDirectory.recursiveDelete
+    moleJob.jobFinished(moleJob.id, MoleJob.FinishedArgument.Cleaned)
   }
 
   class SubMoleCanceled extends Exception

@@ -33,29 +33,29 @@ import ContextSaver.Log._
 
 class ContextSaver(val nbJobs: Int) {
 
-  val allFinished = new Semaphore(0)
+  val allCleaned = new Semaphore(0)
 
-  var nbFinished = 0
+  var nbCleaned = 0
   var _results = new TreeMap[MoleJobId, Try[Context]]
   def results = _results
 
-  def save(job: MoleJobId, result: Either[Context, Throwable]) = synchronized {
-    result match {
-      case Left(context) ⇒
+  def save(job: MoleJobId, a: MoleJob.FinishedArgument) = synchronized {
+    a match {
+      case MoleJob.FinishedArgument.Finished(Left(context)) ⇒
         logger.fine(s"Job success ${job} ${context}")
         _results += job → Success(context)
-      case Right(t) ⇒
+      case MoleJob.FinishedArgument.Finished(Right(t)) ⇒
         logger.log(FINE, s"Job failure ${job}", t)
         _results += job → Failure(t)
+      case MoleJob.FinishedArgument.Cleaned ⇒
+        nbCleaned += 1
+        if (nbCleaned >= nbJobs) allCleaned.release
     }
-
-    nbFinished += 1
-    if (nbFinished >= nbJobs) allFinished.release
   }
 
-  def waitAllFinished = {
-    allFinished.acquire
-    allFinished.release
+  def waitAllCleaned = {
+    allCleaned.acquire
+    allCleaned.release
   }
 
 }
