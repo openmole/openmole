@@ -57,7 +57,7 @@ object JobStore {
     val subMoleCanceled: Canceled) {
   }
 
-  def finish(storedMoleJob: StoredMoleJob, a: MoleJob.FinishedArgument) = storedMoleJob.jobFinished(storedMoleJob.id, a)
+  def finish(storedMoleJob: StoredMoleJob, result: Either[Context, Throwable]) = storedMoleJob.jobFinished(storedMoleJob.id, result)
 
 }
 
