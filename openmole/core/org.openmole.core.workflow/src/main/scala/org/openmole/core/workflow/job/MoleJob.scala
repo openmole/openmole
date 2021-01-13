@@ -59,8 +59,8 @@ object MoleJob {
 
   def finish(moleJob: MoleJob, result: Either[Context, Throwable], taskExecutionContext: TaskExecutionContext) = {
     import org.openmole.tool.file._
-    moleJob.jobFinished(moleJob.id, result)
     taskExecutionContext.taskExecutionDirectory.recursiveDelete
+    moleJob.jobFinished(moleJob.id, result)
   }
 
   class SubMoleCanceled extends Exception
