@@ -105,7 +105,9 @@ class StartingPage extends ScalatraServlet with LifeCycle {
 
     def content =
       <html>
-        <meta http-equiv="refresh" content={ "3;url=" + request.pathInfo }/>
+        <head>
+          <script>{ """setTimeout(function(){ window.location.reload(1); }, 3000);""" }</script>
+        </head>
         <link href="/css/style.css" rel="stylesheet"/>
         <body>
           <div>OpenMOLE is launching...<div class="loader" style="float: right"></div><br/></div>
