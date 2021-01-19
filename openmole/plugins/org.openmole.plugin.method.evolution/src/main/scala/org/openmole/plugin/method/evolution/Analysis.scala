@@ -38,26 +38,32 @@ object Analysis {
 
   sealed trait EvolutionAnalysis
 
-  def analyse(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata, directory: File)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) =
+  def analyse(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata, directory: File)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): AnalysisData.Convergence = {
     metaData match {
       case m: EvolutionMetadata.StochasticNSGA2 ⇒ Analysis.StochasticNSGA2.analyse(omrData, m, directory)
       case EvolutionMetadata.none               ⇒ ???
     }
+  }
+
+  def generation(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata, directory: File, generation: Option[Long] = None)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): Seq[AnalysisData.Generation] = {
+    metaData match {
+      case m: EvolutionMetadata.StochasticNSGA2 ⇒ Analysis.StochasticNSGA2.generation(omrData, m, directory, generation)
+      case EvolutionMetadata.none               ⇒ ???
+    }
+  }
 
   object StochasticNSGA2 {
-    case class SavedGeneration(generation: Long, genomes: Vector[Vector[GenomeData]], objectives: Vector[SavedObjective])
-    case class SavedObjective(objectives: Vector[ObjectiveData], samples: Int)
 
     import AnalysisData.StochasticNSGA2._
 
-    def converge(generations: Vector[SavedGeneration], samples: Int) = {
+    def converge(generations: Vector[Generation], samples: Int) = {
       import _root_.mgo.tools.metric.Hypervolume
 
-      def robustObjectives(objectives: Vector[SavedObjective]) =
+      def robustObjectives(objectives: Vector[Objective]) =
         objectives.filter(_.samples >= samples).map(_.objectives.map(_.toDouble))
 
       val nadir = {
-        val allRobustObjectives = generations.flatMap(g ⇒ robustObjectives(g.objectives))
+        val allRobustObjectives = generations.flatMap(g ⇒ robustObjectives(g.objective))
         if (allRobustObjectives.isEmpty) None
         else Some(Hypervolume.nadir(allRobustObjectives))
       }
@@ -66,7 +72,7 @@ object Analysis {
         for {
           generation ← generations.sortBy(_.generation)
         } yield {
-          val rObj = robustObjectives(generation.objectives)
+          val rObj = robustObjectives(generation.objective)
           def hv = nadir.flatMap { nadir ⇒ if (rObj.isEmpty) None else Some(Hypervolume(rObj, nadir)) }
           def mins = if (rObj.isEmpty) None else Some(rObj.transpose.map(_.min))
 
@@ -97,10 +103,10 @@ object Analysis {
         }
 
       def samples = json(GAIntegration.samples.name).get.asArray.get.map(_.asNumber.get.toInt.get)
-      def savedObjectives = (objectives zip samples) map { case (o, s) ⇒ SavedObjective(o, s) }
+      def savedObjectives = (objectives zip samples) map { case (o, s) ⇒ Objective(o, s) }
       def generation = json(GAIntegration.generationPrototype.name).get.asNumber.get.toLong.get
 
-      SavedGeneration(generation, genomes, savedObjectives)
+      Generation(generation, genomes, savedObjectives)
     }
 
     def allGenerations(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata.StochasticNSGA2, directory: File)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) =

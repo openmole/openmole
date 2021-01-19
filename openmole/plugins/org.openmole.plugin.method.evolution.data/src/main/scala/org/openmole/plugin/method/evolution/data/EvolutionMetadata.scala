@@ -51,9 +51,11 @@ object AnalysisData {
   type ObjectiveData = String
 
   sealed trait Convergence
+  sealed trait Generation
 
   object StochasticNSGA2 {
-    case class Generation(generation: Long, genome: Vector[Vector[GenomeData]], objective: Vector[Vector[ObjectiveData]])
+    case class Generation(generation: Long, genome: Vector[Vector[GenomeData]], objective: Vector[Objective]) extends AnalysisData.Generation
+    case class Objective(objectives: Vector[ObjectiveData], samples: Int)
     case class Convergence(nadir: Option[Vector[Double]], generations: Vector[GenerationConvergence]) extends AnalysisData.Convergence
     case class GenerationConvergence(generation: Long, hypervolume: Option[Double], minimums: Option[Vector[Double]])
   }
