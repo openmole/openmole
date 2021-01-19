@@ -24,10 +24,13 @@ object Analysis {
 
   def dataFiles(directory: File, fileName: String, generation: Long, frequency: Option[Long])(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) = {
     (0L to generation by frequency.getOrElse(1L)).drop(1).map { g ⇒
-      val fileNameValue = (fileName: FromContext[String]).from(Context(GAIntegration.generationPrototype -> g))
+      val fileNameValue = dataFile(directory, fileName, g)
       directory / fileNameValue
     }.filter(_.exists)
   }
+
+  def dataFile(directory: File, fileName: String, g: Long)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) =
+    (fileName: FromContext[String]).from(Context(GAIntegration.generationPrototype -> g))
 
   object EvolutionAnalysis {
     object none extends EvolutionAnalysis
@@ -73,33 +76,38 @@ object Analysis {
       Convergence(nadir, generationsConvergence)
     }
 
-    def generation(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata.StochasticNSGA2, directory: File)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) = {
-      savedGenerations(omrData, metaData, directory)
+    def generation(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata.StochasticNSGA2, directory: File, generation: Option[Long] = None)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) = {
+      generation match {
+        case Some(g) ⇒ Seq(loadFile(metaData, dataFile(directory, omrData.fileName, g)))
+        case None    ⇒ allGenerations(omrData, metaData, directory)
+      }
     }
 
-    def savedGenerations(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata.StochasticNSGA2, directory: File)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) =
-      Analysis.dataFiles(directory, omrData.fileName, metaData.generation, metaData.saveOption.frequency).map { f ⇒
-        val json = parse(f.content(gz = true)).right.get.asObject.get
+    def loadFile(metaData: EvolutionMetadata.StochasticNSGA2, f: File) = {
+      val json = parse(f.content(gz = true)).right.get.asObject.get
 
-        def objectives: Vector[Vector[ObjectiveData]] =
-          metaData.objective.toVector.map {
-            o ⇒ json(o.name).get.asArray.get.map(_.asString.get)
-          }.transpose
+      def objectives: Vector[Vector[ObjectiveData]] =
+        metaData.objective.toVector.map {
+          o ⇒ json(o.name).get.asArray.get.map(_.asString.get)
+        }.transpose
 
-        def genomes =
-          metaData.genome.toVector.map {
-            g ⇒ json(EvolutionMetadata.GenomeBoundData.name(g)).get.asArray.get.map(_.asString.get)
-          }
+      def genomes =
+        metaData.genome.toVector.map {
+          g ⇒ json(EvolutionMetadata.GenomeBoundData.name(g)).get.asArray.get.map(_.asString.get)
+        }
 
-        def samples = json(GAIntegration.samples.name).get.asArray.get.map(_.asNumber.get.toInt.get)
-        def savedObjectives = (objectives zip samples) map { case (o, s) ⇒ SavedObjective(o, s) }
-        def generation = json(GAIntegration.generationPrototype.name).get.asNumber.get.toLong.get
+      def samples = json(GAIntegration.samples.name).get.asArray.get.map(_.asNumber.get.toInt.get)
+      def savedObjectives = (objectives zip samples) map { case (o, s) ⇒ SavedObjective(o, s) }
+      def generation = json(GAIntegration.generationPrototype.name).get.asNumber.get.toLong.get
 
-        SavedGeneration(generation, genomes, savedObjectives)
-      }
+      SavedGeneration(generation, genomes, savedObjectives)
+    }
+
+    def allGenerations(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata.StochasticNSGA2, directory: File)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) =
+      Analysis.dataFiles(directory, omrData.fileName, metaData.generation, metaData.saveOption.frequency).map(f ⇒ loadFile(metaData, f))
 
     def analyse(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata.StochasticNSGA2, directory: File)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) = {
-      converge(savedGenerations(omrData, metaData, directory).toVector, metaData.sample)
+      converge(allGenerations(omrData, metaData, directory).toVector, metaData.sample)
     }
 
   }
