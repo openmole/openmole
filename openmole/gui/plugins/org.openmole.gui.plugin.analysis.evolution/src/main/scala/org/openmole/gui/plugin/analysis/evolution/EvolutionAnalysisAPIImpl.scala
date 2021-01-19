@@ -21,13 +21,13 @@ class EvolutionAnalysisAPIImpl(services: Services) extends EvolutionAnalysisAPI 
     }
   }
 
-  def generation(path: SafePath, generation: Option[Long]) = {
+  def generation(path: SafePath, generation: Option[Long], all: Boolean) = {
     import ServerFileSystemContext.project
     import services._
 
     try {
       val (omrData, methodData) = Analysis.loadMetadata(path.toFile)
-      Right(Analysis.generation(omrData, methodData, path.toFile.getParentFile, generation))
+      Right(Analysis.generation(omrData, methodData, path.toFile.getParentFile, generation = generation, all = all))
     }
     catch {
       case e ⇒ Left(ErrorData(e))

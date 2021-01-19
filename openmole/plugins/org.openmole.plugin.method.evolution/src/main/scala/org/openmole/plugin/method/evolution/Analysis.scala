@@ -23,14 +23,11 @@ object Analysis {
   }
 
   def dataFiles(directory: File, fileName: String, generation: Long, frequency: Option[Long])(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) = {
-    (0L to generation by frequency.getOrElse(1L)).drop(1).map { g ⇒
-      val fileNameValue = dataFile(directory, fileName, g)
-      directory / fileNameValue
-    }.filter(_.exists)
+    (0L to generation by frequency.getOrElse(1L)).drop(1).map { g ⇒ dataFile(directory, fileName, g) }.filter(_.exists)
   }
 
   def dataFile(directory: File, fileName: String, g: Long)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) =
-    (fileName: FromContext[String]).from(Context(GAIntegration.generationPrototype -> g))
+    directory / (fileName: FromContext[String]).from(Context(GAIntegration.generationPrototype -> g))
 
   object EvolutionAnalysis {
     object none extends EvolutionAnalysis
@@ -45,9 +42,9 @@ object Analysis {
     }
   }
 
-  def generation(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata, directory: File, generation: Option[Long] = None)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): Seq[AnalysisData.Generation] = {
+  def generation(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata, directory: File, generation: Option[Long] = None, all: Boolean = false)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): Seq[AnalysisData.Generation] = {
     metaData match {
-      case m: EvolutionMetadata.StochasticNSGA2 ⇒ Analysis.StochasticNSGA2.generation(omrData, m, directory, generation)
+      case m: EvolutionMetadata.StochasticNSGA2 ⇒ Analysis.StochasticNSGA2.generation(omrData, m, directory, generation = generation, all = all)
       case EvolutionMetadata.none               ⇒ ???
     }
   }
@@ -82,10 +79,11 @@ object Analysis {
       Convergence(nadir, generationsConvergence)
     }
 
-    def generation(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata.StochasticNSGA2, directory: File, generation: Option[Long] = None)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) = {
-      generation match {
-        case Some(g) ⇒ Seq(loadFile(metaData, dataFile(directory, omrData.fileName, g)))
-        case None    ⇒ allGenerations(omrData, metaData, directory)
+    def generation(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata.StochasticNSGA2, directory: File, generation: Option[Long], all: Boolean)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) = {
+      (all, generation) match {
+        case (_, Some(g)) ⇒ Seq(loadFile(metaData, dataFile(directory, omrData.fileName, g)))
+        case (false, _)   ⇒ Seq(loadFile(metaData, dataFile(directory, omrData.fileName, metaData.generation)))
+        case (true, _)    ⇒ allGenerations(omrData, metaData, directory)
       }
     }
 
