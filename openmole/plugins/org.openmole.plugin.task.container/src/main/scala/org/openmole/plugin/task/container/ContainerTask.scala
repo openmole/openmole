@@ -131,7 +131,8 @@ object ContainerTask {
               bind = volumes,
               environmentVariables = proxyVariables ++ environmentVariables,
               workDirectory = workDirectory,
-              singularityCommand = command
+              singularityCommand = command,
+              singularityWorkdir = Some(directory /> "singularitytmp")
             )
           }
       }
