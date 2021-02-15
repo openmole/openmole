@@ -92,12 +92,15 @@ object Analysis {
 
       def objectives: Vector[Vector[ObjectiveData]] =
         metaData.objective.toVector.map {
-          o ⇒ json(o.name).get.asArray.get.map(_.asString.get)
+          o ⇒ json(o.name).get.asArray.get.map(_.toString)
         }.transpose
 
       def genomes =
         metaData.genome.toVector.map {
-          g ⇒ json(EvolutionMetadata.GenomeBoundData.name(g)).get.asArray.get.map(_.asString.get)
+          g ⇒
+            json(EvolutionMetadata.GenomeBoundData.name(g)).get.
+              asArray.get.
+              map(_.toString)
         }
 
       def samples = json(GAIntegration.samples.name).get.asArray.get.map(_.asNumber.get.toInt.get)
