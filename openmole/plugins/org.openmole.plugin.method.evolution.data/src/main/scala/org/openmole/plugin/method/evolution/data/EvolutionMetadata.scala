@@ -25,6 +25,11 @@ object EvolutionMetadata {
 
   sealed trait GenomeBoundData
 
+  case class ExactObjective(
+    name:     String,
+    delta:    Option[Double],
+    negative: Boolean)
+
   case class NoisyObjective(
     name:     String,
     delta:    Option[Double],
@@ -32,6 +37,13 @@ object EvolutionMetadata {
 
   def method = "evolution"
   case object none extends EvolutionMetadata
+
+  case class NSGA2(
+    genome:         Seq[GenomeBoundData],
+    objective:      Seq[ExactObjective],
+    populationSize: Int,
+    generation:     Long,
+    saveOption:     SaveOption) extends EvolutionMetadata
 
   case class StochasticNSGA2(
     genome:         Seq[GenomeBoundData],
@@ -52,6 +64,13 @@ object AnalysisData {
 
   sealed trait Convergence
   sealed trait Generation
+
+  object NSGA2 {
+    case class Generation(generation: Long, genome: Vector[Vector[GenomeData]], objective: Vector[Objective]) extends AnalysisData.Generation
+    case class Objective(objectives: Vector[ObjectiveData])
+    case class Convergence(nadir: Option[Vector[Double]], generations: Vector[GenerationConvergence]) extends AnalysisData.Convergence
+    case class GenerationConvergence(generation: Long, hypervolume: Option[Double], minimums: Option[Vector[Double]])
+  }
 
   object StochasticNSGA2 {
     case class Generation(generation: Long, genome: Vector[Vector[GenomeData]], objective: Vector[Objective]) extends AnalysisData.Generation

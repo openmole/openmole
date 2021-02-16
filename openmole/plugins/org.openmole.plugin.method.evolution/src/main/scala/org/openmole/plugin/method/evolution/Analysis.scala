@@ -38,6 +38,7 @@ object Analysis {
   def analyse(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata, directory: File)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): AnalysisData.Convergence = {
     metaData match {
       case m: EvolutionMetadata.StochasticNSGA2 ⇒ Analysis.StochasticNSGA2.analyse(omrData, m, directory)
+      case m: EvolutionMetadata.NSGA2           ⇒ Analysis.NSGA2.analyse(omrData, m, directory)
       case EvolutionMetadata.none               ⇒ ???
     }
   }
@@ -45,8 +46,76 @@ object Analysis {
   def generation(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata, directory: File, generation: Option[Long] = None, all: Boolean = false)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): Seq[AnalysisData.Generation] = {
     metaData match {
       case m: EvolutionMetadata.StochasticNSGA2 ⇒ Analysis.StochasticNSGA2.generation(omrData, m, directory, generation = generation, all = all)
+      case m: EvolutionMetadata.NSGA2           ⇒ Analysis.NSGA2.generation(omrData, m, directory, generation = generation, all = all)
       case EvolutionMetadata.none               ⇒ ???
     }
+  }
+
+  object NSGA2 {
+    import AnalysisData.NSGA2._
+
+    def analyse(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata.NSGA2, directory: File)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) = {
+      converge(allGenerations(omrData, metaData, directory).toVector)
+    }
+
+    def allGenerations(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata.NSGA2, directory: File)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) =
+      Analysis.dataFiles(directory, omrData.fileName, metaData.generation, metaData.saveOption.frequency).map(f ⇒ loadFile(metaData, f))
+
+    def generation(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata.NSGA2, directory: File, generation: Option[Long], all: Boolean)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) = {
+      (all, generation) match {
+        case (_, Some(g)) ⇒ Seq(loadFile(metaData, dataFile(directory, omrData.fileName, g)))
+        case (false, _)   ⇒ Seq(loadFile(metaData, dataFile(directory, omrData.fileName, metaData.generation)))
+        case (true, _)    ⇒ allGenerations(omrData, metaData, directory)
+      }
+    }
+
+    def loadFile(metaData: EvolutionMetadata.NSGA2, f: File) = {
+      val json = parse(f.content(gz = true)).right.get.asObject.get
+
+      def objectives: Vector[Vector[ObjectiveData]] =
+        metaData.objective.toVector.map {
+          o ⇒ json(o.name).get.asArray.get.map(_.toString)
+        }.transpose
+
+      def genomes =
+        metaData.genome.toVector.map {
+          g ⇒
+            json(EvolutionMetadata.GenomeBoundData.name(g)).get.
+              asArray.get.
+              map(_.toString)
+        }
+
+      def savedObjectives = objectives map { o ⇒ Objective(o) }
+      def generation = json(GAIntegration.generationPrototype.name).get.asNumber.get.toLong.get
+
+      Generation(generation, genomes, savedObjectives)
+    }
+
+    def converge(generations: Vector[Generation]) = {
+      import _root_.mgo.tools.metric.Hypervolume
+
+      def robustObjectives(objectives: Vector[Objective]) = objectives.map(_.objectives.map(_.toDouble))
+
+      val nadir = {
+        val allRobustObjectives = generations.flatMap(g ⇒ robustObjectives(g.objective))
+        if (allRobustObjectives.isEmpty) None
+        else Some(Hypervolume.nadir(allRobustObjectives))
+      }
+
+      val generationsConvergence =
+        for {
+          generation ← generations.sortBy(_.generation)
+        } yield {
+          val rObj = robustObjectives(generation.objective)
+          def hv = nadir.flatMap { nadir ⇒ if (rObj.isEmpty) None else Some(Hypervolume(rObj, nadir)) }
+          def mins = if (rObj.isEmpty) None else Some(rObj.transpose.map(_.min))
+
+          GenerationConvergence(generation.generation, hv, mins)
+        }
+
+      Convergence(nadir, generationsConvergence)
+    }
+
   }
 
   object StochasticNSGA2 {

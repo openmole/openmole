@@ -29,6 +29,9 @@ object MetadataGeneration {
     }
   }
 
+  def exactObjectiveData(o: ExactObjective[_]) =
+    EvolutionMetadata.ExactObjective(o.as.getOrElse(o.prototype.name), o.delta, o.negative)
+
   def noisyObjectiveData(o: NoisyObjective[_]) =
     EvolutionMetadata.NoisyObjective(o.as.getOrElse(o.prototype.name), o.delta, o.negative)
 

@@ -50,6 +50,15 @@ object NSGA2 {
 
         def initialState = EvolutionState[Unit](s = ())
 
+        override def metadata(generation: Long, saveOption: SaveOption) =
+          EvolutionMetadata.NSGA2(
+            genome = MetadataGeneration.genomeData(om.genome),
+            objective = om.objectives.map(MetadataGeneration.exactObjectiveData),
+            populationSize = om.mu,
+            generation = generation,
+            saveOption = saveOption
+          )
+
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext.value {
           val res = MGONSGA2.result[Phenotype](population, Genome.continuous(om.genome), ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives), keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
