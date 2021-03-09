@@ -53,7 +53,7 @@ Let's consider this simple workflow:
 @br
 
 The @code{hook} is plugged to the end of the @code{hello} task in the @code{DirectSampling}, which means that every time @code{hello} finishes, the hook is executed.
-Here it means that for each @code{i} value, the dataflow will be printed in files named @b{helloTask_1.csv}, @b{helloTask_2.csv}, etc., located in the @b{results} repository (which will be automatically created if it does not exist yet).
+Here it means that for each @code{i} value, the dataflow will be printed in even numbered files named @b{helloTask_0.csv}, @b{helloTask_2.csv}, etc., located in the @b{results} repository (which will be automatically created if it does not exist yet).
 
 
 @h3{Default hooks}
