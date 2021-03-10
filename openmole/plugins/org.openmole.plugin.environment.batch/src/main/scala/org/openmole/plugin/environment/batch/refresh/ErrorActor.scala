@@ -17,7 +17,7 @@ object ErrorActor {
   def processError(job: BatchExecutionJob, exception: Throwable, output: Option[(String, String)])(implicit services: BatchEnvironment.Services) = {
     import services._
 
-    def defaultMessage = """OpenMOLE job execution failed on remote environment"""
+    def defaultMessage = """Failed to get the result for the job"""
 
     val (level, message, cause) = exception match {
       case _: AuthenticationException ⇒ (SEVERE, defaultMessage, exception)
