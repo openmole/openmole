@@ -17,6 +17,8 @@ RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.d
 RUN apt update && apt install -y sbt git git-lfs figlet
 RUN curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
 
+RUN curl https://rclone.org/install.sh | bash
+
 RUN mkdir /sources/ && chmod 777 /sources/
 COPY ./scripts/clone /usr/local/bin
 COPY ./scripts/compile /usr/local/bin
