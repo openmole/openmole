@@ -56,7 +56,7 @@ class SSHJobService[S](s: S, tmpDirectory: String, services: BatchEnvironment.Se
 
   def register(batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob, outputPath: String, jobDirectory: String) = {
 
-    val workDirectory = env.workDirectory getOrElse jobDirectory
+    val workDirectory = env.workDirectory getOrElse "/tmp"
 
     def buildScript(serializedJob: SerializedJob) = {
       import services._

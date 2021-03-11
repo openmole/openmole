@@ -61,7 +61,6 @@ object JobScript {
       script += "mkdir $CUR"
       script += "export HOME=$CUR"
       script += "cd $CUR"
-      script += "export OPENMOLE_HOME=$CUR"
 
       script.mkString(" && ")
     }

@@ -105,8 +105,8 @@ object SharedStorage extends JavaLogger {
     debug:          Boolean             = false)(implicit newFile: TmpDirectory, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
     val runtime = runtimePath(serializedJob.runtime) //preparedRuntime(serializedJob.runtime)
     val result = outputPath
-    val workspace = StorageService.child(storage, workDirectory, UUID.randomUUID.toString)
-    val osgiWorkDir = StorageService.child(storage, workDirectory, UUID.randomUUID.toString)
+    val workspace = StorageService.child(storage, workDirectory, s"openmole_${UUID.randomUUID.toString}")
+    val osgiWorkDir = StorageService.child(storage, workspace, UUID.randomUUID.toString)
 
     val remoteScript =
       newFile.withTmpFile("run", ".sh") { script ⇒
@@ -118,14 +118,11 @@ object SharedStorage extends JavaLogger {
             Seq(
               s"export PATH=$runtime/jre/bin/:$$PATH",
               s"cd $runtime",
-              s"mkdir -p $osgiWorkDir",
-              s"export OPENMOLE_HOME=$workspace",
-              "mkdir -p $OPENMOLE_HOME",
-              s"sh run.sh " + BatchEnvironment.openMOLEMemoryValue(openMOLEMemory).toMegabytes.toInt + "m " + osgiWorkDir + " -s " + serializedJob.remoteStorage.path +
-                " -p envplugins/ -i " + serializedJob.inputPath + " -o " + result + " -t " + BatchEnvironment.threadsValue(threads) + (if (debug) " --debug" else ""),
+              s"mkdir -p $workspace",
+              s"sh run.sh ${BatchEnvironment.openMOLEMemoryValue(openMOLEMemory).toMegabytes.toInt}m $workspace -s ${serializedJob.remoteStorage.path}" +
+                s" -p envplugins/ -i ${serializedJob.inputPath} -o $result -t ${BatchEnvironment.threadsValue(threads)}" + (if (debug) " --debug" else ""),
               "RETURNCODE=$?",
-              "rm -rf $OPENMOLE_HOME",
-              s"rm -rf $osgiWorkDir",
+              s"rm -rf $workspace",
               "exit $RETURNCODE"
             )
 

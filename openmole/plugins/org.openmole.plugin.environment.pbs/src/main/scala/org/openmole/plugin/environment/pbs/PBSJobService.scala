@@ -20,7 +20,7 @@ class PBSJobService[S, H](
   import services._
 
   def submit(serializedJob: SerializedJob, outputPath: String, jobDirectory: String) = {
-    val workDirectory = parameters.workDirectory getOrElse jobDirectory
+    val workDirectory = parameters.workDirectory getOrElse "/tmp"
 
     def buildScript(serializedJob: SerializedJob, outputPath: String) = {
       SharedStorage.buildScript(

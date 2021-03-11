@@ -40,14 +40,19 @@ do
 done
 
 
-CONFIGDIR="${TMPDIR}/config"
-mkdir -p "${CONFIGDIR}"
+OSGI_CONFIGDIR="${TMPDIR}/osgi_config"
+mkdir -p "${OSGI_CONFIGDIR}"
+
+OPENMOLE_WORKSPACE="${TMPDIR}/openmole"
+mkdir -p "${OPENMOLE_WORKSPACE}"
 
 ulimit -S -v unlimited
 ulimit -S -s unlimited
 
+# Constrain JVM memory
 export MALLOC_ARENA_MAX=1
 
+# Set UTF-8 local
 if [ `locale -a | grep C.UTF-8` ]; then OM_LOCAL="C.UTF-8"
 elif [ `locale -a | grep en_US.utf8` ]; then OM_LOCAL="en_US.utf8"
 elif [ `locale -a | grep utf8` ]; then OM_LOCAL=`locale -a |  grep utf8 | head -1`
@@ -61,9 +66,9 @@ if [ -n "$OM_LOCAL" ]; then
   export LANG=$OM_LOCAL
 fi
 
-java -Djava.io.tmpdir="${TMPDIR}" -Dsun.jnu.encoding=UTF-8 -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Xss2M -Xms64m -Xmx${MEMORY} -Dosgi.locking=none -Dosgi.configuration.area="${CONFIGDIR}" $FLAG -XX:ReservedCodeCacheSize=128m -XX:MaxMetaspaceSize=256m -XX:CompressedClassSpaceSize=128m \
+java -Djava.io.tmpdir="${TMPDIR}" -Dsun.jnu.encoding=UTF-8 -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Xss2M -Xms64m -Xmx${MEMORY} -Dosgi.locking=none -Dosgi.configuration.area="${OSGI_CONFIGDIR}" $FLAG -XX:ReservedCodeCacheSize=128m -XX:MaxMetaspaceSize=256m -XX:CompressedClassSpaceSize=128m \
   -XX:+UseG1GC -XX:ParallelGCThreads=1 -XX:CICompilerCount=2 -XX:ConcGCThreads=1 -XX:G1ConcRefinementThreads=1 \
-  -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher --plugins "${LOCATION}/plugins/" --priority "logging" --run org.openmole.runtime.SimExplorer --osgi-directory "${CONFIGDIR}" -- --workspace "${TMPDIR}" $@
+  -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher --plugins "${LOCATION}/plugins/" --priority "logging" --run org.openmole.runtime.SimExplorer --osgi-directory "${OSGI_CONFIGDIR}" -- --workspace "${OPENMOLE_WORKSPACE}" $@
 
 RETURNCODE=$?
 
