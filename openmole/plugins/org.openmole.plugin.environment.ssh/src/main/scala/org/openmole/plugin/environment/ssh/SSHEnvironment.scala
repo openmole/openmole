@@ -55,7 +55,8 @@ object SSHEnvironment extends JavaLogger {
     threads:              OptionalArgument[Int]         = None,
     storageSharedLocally: Boolean                       = false,
     name:                 OptionalArgument[String]      = None,
-    modules:              Seq[String]                   = Vector()
+    modules:              Seq[String]                   = Vector(),
+    debug:                Boolean                       = false
   )(implicit services: BatchEnvironment.Services, cypher: Cypher, authenticationStore: AuthenticationStore, varName: sourcecode.Name) = {
     import services._
 
@@ -73,6 +74,7 @@ object SSHEnvironment extends JavaLogger {
         name = Some(name.getOrElse(varName.value)),
         authentication = SSHAuthentication.find(user, host, port),
         modules = modules,
+        debug = debug,
         services = services.set(ms)
       )
     }
@@ -129,6 +131,7 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   val name:                 Option[String],
   val authentication:       A,
   val modules:              Seq[String],
+  val debug:                Boolean,
   val services:             BatchEnvironment.Services
 ) extends BatchEnvironment { env ⇒
 
