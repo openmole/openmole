@@ -21,8 +21,6 @@ import java.io.File
 
 import org.openmole.core.threadprovider.IUpdatable
 import scala.ref.WeakReference
-import collection.JavaConverters._
-import org.openmole.tool.file._
 
 class FileServiceGC(fileService: WeakReference[FileService]) extends IUpdatable {
 

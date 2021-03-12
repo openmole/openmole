@@ -17,15 +17,18 @@
 
 package org.openmole.core.serializer.file
 
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.serializer.converter.Serialiser
-import java.io.{ InputStream, File }
+
+import java.io.{ File, InputStream }
 
 trait FileInjection <: Serialiser {
-  var injectedFiles: PartialFunction[String, File] = Map.empty
+  var injectedFiles: Map[String, File] = Map.empty
 
   xStream.registerConverter(new FileConverterInjecter(this))
 
-  def getMatchingFile(file: String): File = injectedFiles(file)
+  def getMatchingFile(file: String): File =
+    injectedFiles.getOrElse(file, throw InternalProcessingError(s"Replacement for file $file not found among $injectedFiles"))
 
   def fromXML[T](is: InputStream): T = xStream.fromXML(is).asInstanceOf[T]
 

@@ -18,12 +18,24 @@
 package org.openmole.core.fileservice
 
 import java.io.File
+import java.util.concurrent.LinkedBlockingQueue
+import org.openmole.core.threadprovider.ThreadProvider
+import org.openmole.tool.thread._
+import org.openmole.tool.file._
 
-class DeleteOnFinalize(path: String, fileDeleter: FileDeleter) {
+import scala.ref.{ ReferenceQueue, WeakReference }
 
-  override protected def finalize = {
-    super.finalize
-    fileDeleter.asynchronousRemove(new File(path))
+private class AsynchronousDeleter(fileService: WeakReference[FileService]) { fd ⇒
+
+  def stop = !fileService.get.isDefined
+
+  private val cleanFiles = new LinkedBlockingQueue[File]
+  def asynchronousRemove(file: File) = cleanFiles.add(file)
+
+  private def run: Runnable = {
+    while (!cleanFiles.isEmpty || !stop) cleanFiles.take.recursiveDelete
   }
+
+  def start(implicit threadProvider: ThreadProvider) = threadProvider.pool.submit(run)
 
 }

@@ -18,21 +18,22 @@
 package org.openmole.core.serializer
 
 import com.thoughtworks.xstream.XStream
+
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 import java.io.OutputStream
-
 import com.thoughtworks.xstream.core.{ Caching, ClassLoaderReference, DefaultConverterLookup }
 import com.thoughtworks.xstream.io.binary.BinaryStreamDriver
 import org.openmole.tool.file._
 import org.openmole.core.serializer.converter._
-import java.util.concurrent.locks.{ ReadWriteLock, ReentrantReadWriteLock }
 
+import java.util.concurrent.locks.{ ReadWriteLock, ReentrantReadWriteLock }
 import com.thoughtworks.xstream.converters.{ Converter, ConverterRegistry }
 import com.thoughtworks.xstream.io.json._
 import com.thoughtworks.xstream.mapper.Mapper
 import com.thoughtworks.xstream.security._
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.stream
@@ -40,7 +41,7 @@ import org.openmole.tool.tar._
 import org.openmole.tool.lock._
 
 import collection.mutable.ListBuffer
-import org.openmole.core.serializer.file.{ FileInjection, FileSerialisation }
+import org.openmole.core.serializer.file.{ FileInjection, FileSerialisation, FileWithGCConverter }
 
 object SerializerService {
   def apply() = new SerializerService
@@ -74,6 +75,9 @@ class SerializerService { service ⇒
       override def allows(`type`: Class[_]): Boolean = true
     })
     //xs.registerConverter(new converter.fix.HashMapConverter(xs.getMapper))
+
+    xs.registerConverter(new FileWithGCConverter)
+
     xs
   }
 
@@ -91,18 +95,18 @@ class SerializerService { service ⇒
 
   def deserialize[T](is: InputStream): T = buildXStream().fromXML(is).asInstanceOf[T]
 
-  def deserializeAndExtractFiles[T](file: File)(implicit newFile: TmpDirectory): (T, Iterable[File]) = {
+  def deserializeAndExtractFiles[T](file: File, deleteFilesOnGC: Boolean)(implicit newFile: TmpDirectory, fileService: FileService): T = {
     val tis = new TarInputStream(file.bufferedInputStream)
-    try deserializeAndExtractFiles(tis)
+    try deserializeAndExtractFiles(tis, deleteFilesOnGC = deleteFilesOnGC)
     finally tis.close
   }
 
-  def deserializeAndExtractFiles[T](tis: TarInputStream)(implicit newFile: TmpDirectory): (T, Iterable[File]) = {
+  def deserializeAndExtractFiles[T](tis: TarInputStream, deleteFilesOnGC: Boolean)(implicit newFile: TmpDirectory, fileService: FileService): T = {
     newFile.withTmpDir { archiveExtractDir ⇒
       tis.extract(archiveExtractDir)
-      val fileReplacement = FileSerialisation.deserialiseFileReplacements(archiveExtractDir, fileSerialisation())
+      val fileReplacement = FileSerialisation.deserialiseFileReplacements(archiveExtractDir, fileSerialisation(), deleteOnGC = deleteFilesOnGC)
       val contentFile = new File(archiveExtractDir, content)
-      (deserializeReplaceFiles[T](contentFile, fileReplacement), fileReplacement.values)
+      deserializeReplaceFiles[T](contentFile, fileReplacement)
     }
   }
 
@@ -123,13 +127,13 @@ class SerializerService { service ⇒
 
   def pluginsAndFiles(obj: Any) = pluginAndFileListing().list(obj)
 
-  def deserializeReplaceFiles[T](file: File, files: PartialFunction[String, File]): T = {
+  def deserializeReplaceFiles[T](file: File, files: Map[String, File]): T = {
     val is = file.bufferedInputStream
     try deserializeReplaceFiles[T](is, files)
     finally is.close
   }
 
-  def deserializeReplaceFiles[T](is: InputStream, files: PartialFunction[String, File]): T = {
+  def deserializeReplaceFiles[T](is: InputStream, files: Map[String, File]): T = {
     val serializer = deserializerWithFileInjection()
     serializer.injectedFiles = files
     serializer.fromXML[T](is)

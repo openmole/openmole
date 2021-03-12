@@ -72,10 +72,10 @@ class Runtime {
 
     logger.fine("Downloading input message")
 
-    val (executionMessage, _) =
+    val executionMessage =
       newFile.withTmpFile { executionMessageFileCache ⇒
         retry(storage.download(inputMessagePath, executionMessageFileCache))
-        ExecutionMessage.load(executionMessageFileCache)
+        serializerService.deserializeAndExtractFiles[ExecutionMessage](executionMessageFileCache, deleteFilesOnGC = true)
       }
 
     val oldOut = System.out
@@ -134,7 +134,7 @@ class Runtime {
         }
       }
 
-      val runnableTasks = serializerService.deserializeReplaceFiles[Iterable[RunnableTask]](executionMessage.jobs, usedFiles)
+      val runnableTasks = serializerService.deserializeReplaceFiles[Iterable[RunnableTask]](executionMessage.jobs, Map() ++ usedFiles)
 
       val saver = new ContextSaver(runnableTasks.size)
       val allMoleJobs = runnableTasks.map { t ⇒ MoleJob(t.task, t.context, t.id, saver.save, () ⇒ false) }
@@ -178,16 +178,14 @@ class Runtime {
       val contextResults = ContextResults(saver.results)
 
       def uploadArchive = {
-        val contextResultFile = newFile.newFile("contextResult", "res")
+        val contextResultFile = fileService.wrapRemoveOnGC(newFile.newFile("contextResult", "res"))
         serializerService.serializeAndArchiveFiles(contextResults, contextResultFile)
-        fileService.deleteWhenGarbageCollected(contextResultFile)
         ArchiveContextResults(contextResultFile)
       }
 
       def uploadIndividualFiles = {
-        val contextResultFile = newFile.newFile("contextResult", "res")
+        val contextResultFile = fileService.wrapRemoveOnGC(newFile.newFile("contextResult", "res"))
         serializerService.serialize(contextResults, contextResultFile)
-        fileService.deleteWhenGarbageCollected(contextResultFile)
         val pac = serializerService.pluginsAndFiles(contextResults)
 
         val replicated =

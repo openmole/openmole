@@ -272,7 +272,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
         case class FileInfo(size: Long, hash: String)
 
-        def fileSize(file: File) = (if (file.isDirectory) fileService.archiveForDir(file).file else file).size
+        def fileSize(file: File) = (if (file.isDirectory) fileService.archiveForDir(file) else file).size
 
         val usedFiles = BatchEnvironment.jobFiles(batchExecutionJob)
         val usedFilesInfo = usedFiles.map { f ⇒ f → FileInfo(fileSize(f), fileService.hash(f).toString) }.toMap

@@ -18,11 +18,10 @@
 package org.openmole.core.serializer
 
 import java.io.File
-
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.serializer.converter.Serialiser
-import org.openmole.core.serializer.file.FileConverterNotifier
+import org.openmole.core.serializer.file.{ FileConverterNotifier, FileWithGCConverter }
 import org.openmole.core.serializer.plugin.{ PluginClassConverter, PluginConverter }
 import org.openmole.core.serializer.structure.PluginClassAndFiles
 import org.openmole.tool.file._

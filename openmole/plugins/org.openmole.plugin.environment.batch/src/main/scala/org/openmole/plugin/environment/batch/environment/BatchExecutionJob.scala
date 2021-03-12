@@ -22,7 +22,7 @@ import java.nio.file.Files
 import java.util.UUID
 
 import org.openmole.core.communication.message.RunnableTask
-import org.openmole.core.fileservice.{ FileCache, FileService }
+import org.openmole.core.fileservice.{ FileService }
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.serializer.PluginAndFilesListing
@@ -102,7 +102,7 @@ object BatchExecutionJob {
           bundle.delete()
           throw e
       }
-      FileCache(bundle)(fileService)
+      fileService.wrapRemoveOnGC(bundle)
     }
 
     val (bfs, plugins) =
@@ -112,8 +112,7 @@ object BatchExecutionJob {
           (bundleFile(b), b.plugins)
       }.unzip
 
-    // bfs is kept to avoid garbage collection of file caches
-    (bfs.map(_.file) ++ plugins.flatten.toList.distinct, bfs)
+    bfs ++ plugins.flatten.toList.distinct
   }
 
   def apply(job: Job, environment: BatchEnvironment) = {
@@ -129,7 +128,7 @@ object BatchExecutionJob {
       }
     }
 
-    val plugins = pluginsAndFiles.plugins ++ closureBundleAndPlugins._1
+    val plugins = pluginsAndFiles.plugins ++ closureBundleAndPlugins
     val storedJob = JobStore.store(environment.jobStore, job)
 
     new BatchExecutionJob(storedJob, environment, pluginsAndFiles.files, plugins)

@@ -25,8 +25,8 @@ import org.openmole.tool.tar.TarOutputStream
 import scala.collection.immutable.HashMap
 import java.util.UUID
 import java.io.{ File, FileOutputStream }
-
 import com.thoughtworks.xstream.XStream
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.serializer.converter.Serialiser
 
 object FileSerialisation {
@@ -61,7 +61,7 @@ object FileSerialisation {
     }
   }
 
-  def deserialiseFileReplacements(archiveExtractDir: File, xStream: XStream)(implicit newFile: TmpDirectory) = {
+  def deserialiseFileReplacements(archiveExtractDir: File, xStream: XStream, deleteOnGC: Boolean)(implicit newFile: TmpDirectory, fileService: FileService): Map[String, File] = {
     val fileInfoFile = archiveExtractDir / s"$fileDir/$filesInfo"
     val fi = fileInfoFile.withInputStream(xStream.fromXML).asInstanceOf[FilesInfo]
 
@@ -85,7 +85,7 @@ object FileSerialisation {
             dest
           }
 
-        originalPath → fileContent
+        originalPath → (if (!deleteOnGC) fileContent else fileService.wrapRemoveOnGC(fileContent))
     }
 
   }

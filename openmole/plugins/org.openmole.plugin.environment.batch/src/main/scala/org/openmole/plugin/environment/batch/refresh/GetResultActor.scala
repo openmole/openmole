@@ -64,8 +64,8 @@ object GetResultActor {
 
     runtimeResult.result match {
       case Failure(exception) ⇒ throw new JobRemoteExecutionException("Fatal exception thrown during the execution of the job execution on the execution node", exception)
-      case Success((result, log)) ⇒
-        val contextResults = getContextResults(result, storageId, environment, download)
+      case Success((serializedContextResults, log)) ⇒
+        val contextResults = getContextResults(serializedContextResults, storageId, environment, download)
 
         services.eventDispatcher.trigger(environment: Environment, Environment.JobCompleted(batchJob, log, runtimeResult.info))
 
@@ -87,9 +87,7 @@ object GetResultActor {
     retry(preference(BatchEnvironment.downloadResultRetry)) {
       newFile.withTmpFile { resultFile ⇒
         signalDownload(eventDispatcher.eventId, download(outputFilePath, resultFile, TransferOptions.default), outputFilePath, environment, storageId, resultFile)
-        val (res, files) = RuntimeResult.load(resultFile)
-        files.foreach(fileService.deleteWhenGarbageCollected)
-        res
+        serializerService.deserializeAndExtractFiles[RuntimeResult](resultFile, deleteFilesOnGC = true)
       }
     }
   }
@@ -105,28 +103,22 @@ object GetResultActor {
     import services._
     serializedResults match {
       case serializedResults: IndividualFilesContextResults ⇒
-        newFile.withTmpFile { serializedResultsFile ⇒
-          val fileReplacement =
-            serializedResults.files.map {
-              replicated ⇒
-                replicated.originalPath →
-                  ReplicatedFile.download(replicated) { (p, f) ⇒
-                    retry(preference(BatchEnvironment.downloadResultRetry)) {
-                      signalDownload(eventDispatcher.eventId, download(p, f, TransferOptions(noLink = true, canMove = true)), p, environment, storageId, f)
-                    }
+        val fileReplacement =
+          serializedResults.files.map {
+            replicated ⇒
+              val downloaded =
+                ReplicatedFile.download(replicated) { (p, f) ⇒
+                  retry(preference(BatchEnvironment.downloadResultRetry)) {
+                    signalDownload(eventDispatcher.eventId, download(p, f, TransferOptions(noLink = true, canMove = true)), p, environment, storageId, f)
                   }
-            }.toMap
+                }
 
-          val res = serializerService.deserializeReplaceFiles[ContextResults](serializedResults.contextResults, fileReplacement)
-          fileReplacement.values.foreach(services.fileService.deleteWhenGarbageCollected)
-          serializedResults.contextResults.delete()
-          res
-        }
+              replicated.originalPath → fileService.wrapRemoveOnGC(downloaded)
+          }.toMap
+
+        serializerService.deserializeReplaceFiles[ContextResults](serializedResults.contextResults, fileReplacement)
       case serializedResults: ArchiveContextResults ⇒
-        val (res, files) = serializerService.deserializeAndExtractFiles[ContextResults](serializedResults.contextResults)
-        files.foreach(services.fileService.deleteWhenGarbageCollected)
-        serializedResults.contextResults.delete()
-        res
+        serializerService.deserializeAndExtractFiles[ContextResults](serializedResults.contextResults, deleteFilesOnGC = true)
     }
   }
 

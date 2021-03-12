@@ -20,7 +20,7 @@ import java.io.File
 
 import org.openmole.core.context.Context
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.fileservice.{ FileDeleter, FileService }
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.tools.service._
 import org.openmole.core.workflow.execution.Environment.RuntimeLog
@@ -112,18 +112,7 @@ package object message {
   case class ReplicatedFile(originalPath: String, name: String, directory: Boolean, hash: String, path: String, mode: Int)
   case class RuntimeSettings(archiveResult: Boolean)
 
-  object ExecutionMessage {
-    def load(file: File)(implicit serialiserService: SerializerService, fileService: FileService, newFile: TmpDirectory) = {
-      serialiserService.deserializeAndExtractFiles[ExecutionMessage](file)
-    }
-  }
-
   case class ExecutionMessage(plugins: Iterable[ReplicatedFile], files: Iterable[ReplicatedFile], jobs: File, runtimeSettings: RuntimeSettings)
-
-  object RuntimeResult {
-    def load(file: File)(implicit serialiserService: SerializerService, fileService: FileService, newFile: TmpDirectory) =
-      serialiserService.deserializeAndExtractFiles[RuntimeResult](file)
-  }
 
   case class RuntimeResult(stdOut: Option[File], result: Try[(SerializedContextResults, RuntimeLog)], info: RuntimeInfo)
   sealed trait SerializedContextResults

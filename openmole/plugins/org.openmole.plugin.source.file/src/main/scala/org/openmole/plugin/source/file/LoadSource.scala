@@ -55,8 +55,7 @@ object LoadSource {
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
     import parameters._
     val from = new File(file.from(context))
-    val (loadedContext, fs) = serializerService.deserializeAndExtractFiles[Context](from)
-    fs.foreach(executionContext.services.fileService.deleteWhenGarbageCollected)
+    val loadedContext = serializerService.deserializeAndExtractFiles[Context](from, deleteFilesOnGC = true)
     context ++ prototypes.map(p ⇒ loadedContext.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p has not been found in the loaded context")))
   }
 

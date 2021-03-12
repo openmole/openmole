@@ -213,10 +213,9 @@ object External {
         if (workDirectories.exists(_.isAParentOf(v.value))) {
           val newDir = newFile.newDir("outputFile")
           newDir.mkdirs()
-          val moved = newDir / v.value.getName
+          val moved = fileService.wrapRemoveOnGC(newDir / v.value.getName)
           v.value.move(moved)
           fileService.deleteWhenEmpty(newDir)
-          fileService.deleteWhenGarbageCollected(moved)
           moved
         }
         else v.value

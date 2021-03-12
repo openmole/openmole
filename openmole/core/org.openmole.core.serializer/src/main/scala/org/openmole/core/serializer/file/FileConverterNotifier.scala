@@ -30,5 +30,7 @@ class FileConverterNotifier(serializer: PluginAndFilesListing) extends FileConve
     file.getPath
   }
 
+  override def canConvert(`type`: Class[_]): Boolean = classOf[File].isAssignableFrom(`type`)
+
 }
 

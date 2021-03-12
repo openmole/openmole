@@ -19,9 +19,8 @@ package org.openmole.core.fileservice
 
 import java.io.File
 import java.util.concurrent.TimeUnit
-
 import com.google.common.cache._
-import org.openmole.core.preference.{ PreferenceLocation, Preference }
+import org.openmole.core.preference.{ Preference, PreferenceLocation }
 import org.openmole.core.threadprovider.{ ThreadProvider, Updater }
 import org.openmole.tool.hash._
 import org.openmole.core.workspace._
@@ -34,7 +33,7 @@ import squants._
 import squants.time.TimeConversions._
 
 import scala.collection.mutable.{ ListBuffer, WeakHashMap }
-import scala.ref.WeakReference
+import scala.ref.{ PhantomReference, ReferenceQueue, WeakReference }
 
 object FileService {
   val GCInterval = PreferenceLocation("FileService", "GCInterval", Some(1 minutes))
@@ -52,8 +51,12 @@ object FileService {
   }
 
   def start(fileService: FileService)(implicit preference: Preference, threadProvider: ThreadProvider): Unit = {
-    fileService.fileDeleter.start(threadProvider)
+    fileService.emptyDeleter.start(threadProvider)
     Updater.delay(fileService.gc, preference(FileService.GCInterval))
+  }
+
+  class FileWithGC(path: String, fileService: FileService) extends java.io.File(path) {
+    override protected def finalize = fileService.asynchronousRemove(new java.io.File(getPath))
   }
 }
 
@@ -70,7 +73,7 @@ class FileServiceCache(implicit preference: Preference) {
   private[fileservice] val archiveCache =
     CacheBuilder.newBuilder.maximumSize(preference(FileService.archiveCacheSize)).
       expireAfterAccess(preference(FileService.archiveCacheTime).millis, TimeUnit.MILLISECONDS).
-      build[String, FileCache]()
+      build[String, File]()
 }
 
 class FileService(implicit preference: Preference) {
@@ -86,33 +89,29 @@ class FileService(implicit preference: Preference) {
   }
 
   def hash(file: File)(implicit newFile: TmpDirectory, fileServiceCache: FileServiceCache): Hash = {
-    def hash = hashFile(if (file.isDirectory) archiveForDir(file).file else file)
+    def hash = hashFile(if (file.isDirectory) archiveForDir(file) else file)
     fileServiceCache.hashCache.get(file.getCanonicalPath, hash)
   }
 
-  def archiveForDir(directory: File)(implicit newFile: TmpDirectory, fileServiceCache: FileServiceCache): FileCache = {
+  def archiveForDir(directory: File)(implicit newFile: TmpDirectory, fileServiceCache: FileServiceCache): File = {
     def archive = {
       val ret = newFile.newFile("archive", ".tar")
       directory.archive(ret, time = false)
-      FileCache(ret)(this)
+      wrapRemoveOnGC(ret)
     }
 
     fileServiceCache.archiveCache.get(directory.getAbsolutePath, archive)
   }
 
-  private val fileDeleter = new FileDeleter(WeakReference(this))
+  private val emptyDeleter = new AsynchronousDeleter(WeakReference(this))
   private val gc = new FileServiceGC(WeakReference(this))
-  private val deleters = new WeakHashMap[File, DeleteOnFinalize]
 
-  def deleteWhenGarbageCollected(file: File): File = deleters.synchronized {
-    deleters += file → new DeleteOnFinalize(file.getAbsolutePath, fileDeleter)
-    file
-  }
+  def wrapRemoveOnGC(file: File): File = new FileService.FileWithGC(file.getPath, this)
 
   def deleteWhenEmpty(directory: File) =
     if (directory.exists() && !directory.delete()) deleteEmpty.synchronized { deleteEmpty += directory }
 
-  def asynchronousRemove(file: File): Boolean = fileDeleter.asynchronousRemove(file)
+  def asynchronousRemove(file: File): Boolean = emptyDeleter.asynchronousRemove(file)
 
 }
 

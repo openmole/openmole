@@ -49,8 +49,7 @@ import org.openmole.tool.outputredirection.OutputRedirection
 object ScalaREPL {
 
   def apply(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = {
-    val classDirectory = newFile.newDir("classDirectory")
-    fileService.deleteWhenGarbageCollected(classDirectory)
+    val classDirectory = fileService.wrapRemoveOnGC(newFile.newDir("classDirectory"))
     val settings = OSGiScalaCompiler.createSettings(new Settings, priorityBundles, jars, classDirectory)
     new ScalaREPL(priorityBundles, jars, quiet, classDirectory, settings)
   }
@@ -265,8 +264,7 @@ class ScalaREPL(
 object Interpreter {
 
   def apply(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = {
-    val classDirectory = newFile.newDir("classDirectory")
-    fileService.deleteWhenGarbageCollected(classDirectory)
+    val classDirectory = fileService.wrapRemoveOnGC(newFile.newDir("classDirectory"))
     val settings = OSGiScalaCompiler.createSettings(new Settings, priorityBundles, jars, classDirectory)
     new Interpreter(priorityBundles, jars, quiet, classDirectory, settings)
   }

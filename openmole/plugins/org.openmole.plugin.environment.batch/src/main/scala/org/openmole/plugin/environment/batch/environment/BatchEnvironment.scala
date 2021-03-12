@@ -25,7 +25,7 @@ import org.openmole.core.communication.message._
 import org.openmole.core.communication.storage.{RemoteStorage, TransferOptions}
 import org.openmole.core.event.{Event, EventDispatcher}
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.fileservice.{FileCache, FileService, FileServiceCache}
+import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.location._
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.preference.{PreferenceLocation, Preference}
@@ -249,7 +249,7 @@ object BatchEnvironment {
     val toReplicatePath = file.getCanonicalFile
 
     val (toReplicate, options) =
-      if (isDir) (services.fileService.archiveForDir(file).file, transferOptions.copy(noLink = true))
+      if (isDir) (services.fileService.archiveForDir(file), transferOptions.copy(noLink = true))
       else (file, transferOptions)
 
     val fileMode = file.mode
@@ -407,7 +407,7 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   def jobs = ExecutionJobRegistry.executionJobs(registry)
 
-  lazy val relpClassesCache = new AssociativeCache[Set[String], (Seq[File], Seq[FileCache])]
+  lazy val relpClassesCache = new AssociativeCache[Set[String], Seq[File]]
 
   lazy val plugins = PluginManager.pluginsForClass(this.getClass)
   lazy val jobStore = JobStore(services.newFile.makeNewDir("jobstore"))

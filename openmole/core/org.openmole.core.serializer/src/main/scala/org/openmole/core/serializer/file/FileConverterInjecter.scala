@@ -17,15 +17,9 @@
 
 package org.openmole.core.serializer.file
 
-import com.thoughtworks.xstream.XStreamException
 import com.thoughtworks.xstream.converters.extended.FileConverter
-import java.io.File
 
 class FileConverterInjecter(deserializer: FileInjection) extends FileConverter {
-
-  override def fromString(str: String): Object = {
-    val ret = deserializer.getMatchingFile(str)
-    if (ret == null) throw new XStreamException(s"No matching file for $str")
-    ret
-  }
+  override def fromString(str: String): Object = deserializer.getMatchingFile(str)
 }
+
