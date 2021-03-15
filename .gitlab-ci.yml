@@ -33,7 +33,7 @@ assemble:
     #- bash -x build.sh
     #- '(cd openmole && sbt test)' # Metaspace error to be solved
     - mkdir -p ~/.config/rclone/ 
-    - >
+    - |
       echo "[next]
       type = sftp
       host = docker.openmole.org
