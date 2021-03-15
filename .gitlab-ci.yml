@@ -24,14 +24,6 @@ assemble:
     - chmod 400 ~/.ssh/identity
     - ssh-keyscan -p 9000 docker.openmole.org > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
-    - mkdir -p ~/.config/rclone/ 
-    - echo "[next]
-      type = sftp
-      host = docker.openmole.org
-      user = user
-      port = 9000
-      key_file = ~/.ssh/identity
-      known_hosts_file = ~/.ssh/known_hosts" > ~/.config/rclone/rclone.conf 
   #artifacts:
   #  paths:
   #    - ./openmole/site/
@@ -40,6 +32,14 @@ assemble:
   script:
     #- bash -x build.sh
     #- '(cd openmole && sbt test)' # Metaspace error to be solved
+    - mkdir -p ~/.config/rclone/ 
+    - echo "[next]
+      type = sftp
+      host = docker.openmole.org
+      user = user
+      port = 9000
+      key_file = ~/.ssh/identity
+      known_hosts_file = ~/.ssh/known_hosts" > ~/.config/rclone/rclone.conf 
     - rclone ls next:
     - git lfs fetch
     - '(cd ./build-system && sbt --version)'
