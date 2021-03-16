@@ -39,10 +39,12 @@ val values = Val[Array[Double]]
 
 val my_LHS_sampling =
     LHS(
-      100, // Number of points of the LHS
-      i in (0.0, 10.0),
-      j in (0.0, 5.0),
-      values in Vector((0.0, 1.0), (0.0, 10.0), (5.0, 9.0)) // Generate part of the LHS sampling inside the array of values
+      sample = 100, // Number of points of the LHS
+      factor = Seq(
+        i in (0.0, 10.0),
+        j in (0.0, 5.0),
+        values in Vector((0.0, 1.0), (0.0, 10.0), (5.0, 9.0)) // Generate part of the LHS sampling inside the array of values
+      )
     )
 """, name = "lhs sampling in sensitivity")
 
@@ -79,10 +81,12 @@ val values = Val[Array[Double]]
 
 val my_sobol_sampling =
   SobolSampling(
-    100, // Number of points
-    i in (0.0, 10.0),
-    j in (0.0, 5.0),
-    values in Vector((0.0, 1.0), (0.0, 10.0), (5.0, 9.0)) // Generate part of the Sobol sampling inside the array of values
+    sample = 100, // Number of points
+    factor = Seq(
+      i in (0.0, 10.0),
+      j in (0.0, 5.0),
+      values in Vector((0.0, 1.0), (0.0, 10.0), (5.0, 9.0)) // Generate part of the Sobol sampling inside the array of values
+    )
   )
 """, name = "sobol sampling in sensitivity")
 

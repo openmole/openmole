@@ -22,11 +22,13 @@ import org.openmole.core.dsl.extension._
 
 object SobolSampling {
 
-  def apply(samples: FromContext[Int], factors: ScalarOrSequenceOfDouble[_]*) =
+  def apply(sample: FromContext[Int], factor: Seq[ScalarOrSequenceOfDouble[_]]) =
     Sampling { p ⇒
       import p._
-      SobolSampling.sobolValues(factors.size, samples.from(context)).map { ScalarOrSequenceOfDouble.unflatten(factors, _)(context) }
-    } withValidate { samples.validate } inputs { factors.flatMap(_.inputs) } prototypes { factors.map(_.prototype) }
+      SobolSampling.sobolValues(factor.size, sample.from(context)).map { ScalarOrSequenceOfDouble.unflatten(factor, _)(context) }
+    } withValidate { sample.validate } inputs { factor.flatMap(_.inputs) } prototypes { factor.map(_.prototype) }
+
+  def apply(sample: FromContext[Int], factor: ScalarOrSequenceOfDouble[_]*): Sampling = apply(sample, factor)
 
   def sobolValues(dimension: Int, samples: Int) = {
     val sequence = new SobolSequenceGenerator(dimension)
