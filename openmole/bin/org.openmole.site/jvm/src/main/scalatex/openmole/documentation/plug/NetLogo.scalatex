@@ -171,24 +171,11 @@ We now need to compose this design of experiment in a complete workflow in order
 
 
 @h3{Storing the results}
-OpenMOLE usually delegates the tasks execution to many different computers.
-To gather the results of these remote executions, we use a mechanism called @b{hooks}.
-Hooks can be assimilated to a listener that saves or display results.
-They are more thoroughly described in a @a("specific section of the documentation", href := hook.file).
+OpenMOLE usually delegates the tasks execution to many different computers. To gather the results of these remote executions, we use a mechanism called @b{hooks}. Hooks can be assimilated to a listener that saves or display results. Most of the time it is enough to use the hook keyword provided to either display or store the results of the exploration process.
+
+Hooks are more thoroughly described in a @a("specific section of the documentation", href := hook.file).
 
 @br@br
-
-Here we will create a hook to listen to the model executions and save the results in a CSV file at the end of each of the 70 runs.
-
-@br@br
-
-@hl.openmole(csvHook, header =
-s"""
-$variables
-$exploration
-$netlogo
-""", name = "netlogo hook")
-
 
 @h3{Bringing all the pieces together}
 Now that we have defined each component, we can compose the workflow that brings all the pieces of the simulation together:
@@ -199,12 +186,11 @@ Now that we have defined each component, we can compose the workflow that brings
 $variables
 $exploration
 $netlogo
-$csvHook
 
 DirectSampling(
-  evaluation = fireTask hook csvHook,
+  evaluation = fireTask,
   sampling = sampling
-)""", name = "netlogo full workflow")
+) hook (workDirectory / "result.csv")""", name = "netlogo full workflow")
 
 At the end of the execution, you will find the output values in a file called @i{result.csv}.
 
