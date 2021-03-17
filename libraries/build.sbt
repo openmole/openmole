@@ -10,10 +10,10 @@ def settings = Seq(
   resolvers += Resolver.sonatypeRepo("snapshots"),
   resolvers += Resolver.sonatypeRepo("releases"),
   resolvers += Resolver.sonatypeRepo("staging"),
-  scalaVersion in Global := scalaVersionValue,
+  Global / scalaVersion := scalaVersionValue,
   scalacOptions ++= Seq("-deprecation"),
-  publishArtifact in (packageDoc in publishLocal) := false,
-  publishArtifact in (packageSrc in publishLocal) := false,
+  publishLocal / packageDoc / publishArtifact := false,
+  publishLocal / packageSrc / publishArtifact := false,
   organization := "org.openmole.library",
   isSnapshot := true
 )
