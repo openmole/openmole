@@ -43,7 +43,7 @@ object GetResultActor {
     val GetResult(job, resultPath, batchJob) = msg
 
     JobManager.killOr(job, Kill(job, Some(batchJob))) { () ⇒
-      try getResult(batchJob.storageId, batchJob.environment, batchJob.download, resultPath, job)
+      try getResult(batchJob.storageId(), batchJob.environment, batchJob.download, resultPath, job)
       catch {
         case e: Throwable ⇒
           job.state = ExecutionState.FAILED

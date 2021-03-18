@@ -29,8 +29,8 @@ object BatchJobControl {
 
   def apply(
     environment:    BatchEnvironment,
-    updateInterval: UpdateInterval,
-    storageId:      String,
+    updateInterval: () ⇒ UpdateInterval,
+    storageId:      () ⇒ String,
     updateState:    () ⇒ ExecutionState,
     delete:         () ⇒ Unit,
     stdOutErr:      () ⇒ (String, String),
@@ -51,8 +51,8 @@ object BatchJobControl {
 
 class BatchJobControl(
   val environment:    BatchEnvironment,
-  val updateInterval: UpdateInterval,
-  val storageId:      String,
+  val updateInterval: () ⇒ UpdateInterval,
+  val storageId:      () ⇒ String,
   val updateState:    () ⇒ ExecutionState,
   val delete:         () ⇒ Unit,
   val stdOutErr:      () ⇒ (String, String),

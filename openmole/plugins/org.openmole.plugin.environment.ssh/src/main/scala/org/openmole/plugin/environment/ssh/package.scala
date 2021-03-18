@@ -193,8 +193,8 @@ package object ssh {
 
       BatchJobControl(
         batchExecutionJob.environment,
-        refresh.map(UpdateInterval.fixed) getOrElse BatchEnvironment.defaultUpdateInterval(services.preference),
-        StorageService.id(storage),
+        () => refresh.map(UpdateInterval.fixed) getOrElse BatchEnvironment.defaultUpdateInterval(services.preference),
+        () => StorageService.id(storage),
         () => state(job),
         () ⇒ delete(job),
         () ⇒ stdOutErr(job),

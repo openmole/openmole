@@ -41,9 +41,10 @@ object RefreshActor extends JavaLogger {
             JobManager ! Error(job, exception, stdOutErr)
             JobManager ! Kill(job, Some(bj))
           case SUBMITTED | RUNNING ⇒
+            val updateInterval = bj.updateInterval()
             val newDelay =
-              if (oldState == job.state) (delay + bj.updateInterval.incrementUpdateInterval) min bj.updateInterval.maxUpdateInterval
-              else bj.updateInterval.minUpdateInterval
+              if (oldState == job.state) (delay + updateInterval.incrementUpdateInterval) min updateInterval.maxUpdateInterval
+              else updateInterval.minUpdateInterval
             JobManager ! Delay(Refresh(job, bj, newDelay, 0), newDelay)
           case KILLED ⇒
           case _      ⇒ throw new InternalProcessingError(s"Job ${job} is in state ${job.state} while being refreshed")

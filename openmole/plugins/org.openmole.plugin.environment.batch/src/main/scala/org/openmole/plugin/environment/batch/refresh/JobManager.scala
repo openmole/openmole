@@ -82,7 +82,7 @@ object JobManager extends JavaLogger { self ⇒
         services.threadProvider.scheduler.schedule((self ! msg): Runnable, delay.millis, TimeUnit.MILLISECONDS)
 
       case Submitted(job, bj) ⇒
-        killOr(job.environment, job.storedJob, Kill(job, Some(bj))) { () ⇒ self ! Delay(Refresh(job, bj, bj.updateInterval.minUpdateInterval), bj.updateInterval.minUpdateInterval) }
+        killOr(job.environment, job.storedJob, Kill(job, Some(bj))) { () ⇒ self ! Delay(Refresh(job, bj, bj.updateInterval().minUpdateInterval), bj.updateInterval().minUpdateInterval) }
 
       case MoleJobError(mj, j, e) ⇒
         val er = Environment.MoleJobExceptionRaised(j, e, WARNING, mj)

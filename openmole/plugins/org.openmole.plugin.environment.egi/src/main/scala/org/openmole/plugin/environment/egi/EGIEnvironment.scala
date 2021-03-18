@@ -351,8 +351,8 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
       BatchJobControl(
         env,
-        UpdateInterval.fixed(preference(EGIEnvironment.JobGroupRefreshInterval)),
-        StorageService.id(storage),
+        () ⇒ UpdateInterval.fixed(preference(EGIEnvironment.JobGroupRefreshInterval)),
+        () ⇒ StorageService.id(storage),
         () ⇒ jobService.state(job),
         () ⇒ jobService.delete(job),
         () ⇒ jobService.stdOutErr(job),
