@@ -20,12 +20,11 @@ package org.openmole.plugin.environment.batch.environment
 import java.io.File
 import java.nio.file.Files
 import java.util.UUID
-
 import org.openmole.core.communication.message.RunnableTask
-import org.openmole.core.fileservice.{ FileService }
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.serializer.PluginAndFilesListing
+import org.openmole.core.serializer.{ PluginAndFilesListing, SerializerService }
 import org.openmole.core.workflow.execution.{ Environment, ExecutionJob }
 import org.openmole.core.workflow.execution.ExecutionState.{ DONE, ExecutionState, FAILED, KILLED, READY }
 import org.openmole.core.workflow.job.Job
@@ -115,13 +114,10 @@ object BatchExecutionJob {
     bfs ++ plugins.flatten.toList.distinct
   }
 
-  def apply(job: Job, environment: BatchEnvironment) = {
-    import environment.services._
-
-    val pluginsAndFiles = environment.services.serializerService.pluginsAndFiles(Job.moleJobs(job).map(RunnableTask(_)))
+  def apply(job: Job, environment: BatchEnvironment)(implicit serializerService: SerializerService, tmpDirectory: TmpDirectory, fileService: FileService) = {
+    val pluginsAndFiles = serializerService.pluginsAndFiles(Job.moleJobs(job).map(RunnableTask(_)))
 
     def closureBundleAndPlugins = {
-      import environment.services._
       val replClasses = pluginsAndFiles.replClasses
       environment.relpClassesCache.cache(Job.moleExecution(job), pluginsAndFiles.replClasses.map(_.getName).toSet, preCompute = false) { _ ⇒
         BatchExecutionJob.replClassesToPlugins(replClasses)
@@ -148,7 +144,7 @@ class BatchExecutionJob(val storedJob: StoredJob, val environment: BatchEnvironm
       Seq(environment.runtime, environment.jvmLinuxX64) ++
       environment.plugins ++ plugins).distinct
 
-  def usedFileHashes = usedFiles.map(f ⇒ (f, environment.services.fileService.hash(f)(environment.services.newFile, environment.services.fileServiceCache)))
+  def usedFileHashes = usedFiles.map(f ⇒ (f, fileService.hash(f)))
 
   private var _state: ExecutionState = READY
 

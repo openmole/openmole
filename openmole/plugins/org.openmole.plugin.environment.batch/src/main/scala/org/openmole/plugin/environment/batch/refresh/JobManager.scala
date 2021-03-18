@@ -62,6 +62,8 @@ object JobManager extends JavaLogger { self ⇒
   def dispatch(msg: DispatchedMessage)(implicit services: BatchEnvironment.Services) = services.threadProvider.submit(messagePriority(msg)) { () ⇒ DispatcherActor.receive(msg) }
 
   def !(msg: JobMessage)(implicit services: BatchEnvironment.Services): Unit = {
+    import services._
+
     msg match {
       case msg: Submit      ⇒ killOr(msg.job.environment, msg.job.storedJob, Kill(msg.job, None)) { () ⇒ dispatch(msg) }
       case msg: Refresh     ⇒ killOr(msg.job.environment, msg.job.storedJob, Kill(msg.job, Some(msg.batchJob))) { () ⇒ dispatch(msg) }
