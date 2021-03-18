@@ -21,6 +21,7 @@ import java.io.File
 import java.nio.file.Files
 import java.util.UUID
 import org.openmole.core.communication.message.RunnableTask
+import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
@@ -139,18 +140,11 @@ class BatchExecutionJob(val storedJob: StoredJob, val environment: BatchEnvironm
   private def job = JobStore.load(storedJob)
   def runnableTasks = Job.moleJobs(job).map(RunnableTask(_))
 
-  def usedFiles: Iterable[File] =
-    (files ++
-      Seq(environment.runtime, environment.jvmLinuxX64) ++
-      environment.plugins ++ plugins).distinct
-
-  def usedFileHashes = usedFiles.map(f ⇒ (f, fileService.hash(f)))
-
   private var _state: ExecutionState = READY
 
   def state = _state
 
-  def state_=(newState: ExecutionState) = synchronized {
+  def state_=(newState: ExecutionState)(implicit eventDispatcher: EventDispatcher) = synchronized {
     if (state != KILLED && newState != state) {
       newState match {
         case DONE ⇒ environment._done.incrementAndGet()
@@ -160,7 +154,7 @@ class BatchExecutionJob(val storedJob: StoredJob, val environment: BatchEnvironm
         case _ ⇒
       }
 
-      environment.eventDispatcherService.trigger(environment, new Environment.JobStateChanged(this, newState, this.state))
+      eventDispatcher.trigger(environment, Environment.JobStateChanged(this, newState, this.state))
       _state = newState
     }
   }

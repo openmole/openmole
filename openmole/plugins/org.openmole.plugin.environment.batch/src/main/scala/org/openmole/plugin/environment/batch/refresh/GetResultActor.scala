@@ -38,6 +38,8 @@ object GetResultActor {
   case class JobRemoteExecutionException(message: String, cause: Throwable) extends InternalProcessingError(message, cause)
 
   def receive(msg: GetResult)(implicit services: BatchEnvironment.Services) = {
+    import services._
+
     val GetResult(job, resultPath, batchJob) = msg
 
     JobManager.killOr(job, Kill(job, Some(batchJob))) { () ⇒
