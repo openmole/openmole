@@ -106,8 +106,9 @@ object OAREnvironment {
 
   def nbCores(parameters: Parameters) = parameters.core orElse parameters.threads
 
-  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: OARJobService[_, _])(implicit services: BatchEnvironment.Services) =
+  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: OARJobService[_, _])(implicit services: BatchEnvironment.Services) =
     submitToCluster(
+      environment,
       batchExecutionJob,
       storage,
       space,
@@ -173,8 +174,8 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
 
   def execute(batchExecutionJob: BatchExecutionJob) =
     storageService match {
-      case Left((space, local)) ⇒ OAREnvironment.submit(batchExecutionJob, local, space, pbsJobService)
-      case Right((space, ssh))  ⇒ OAREnvironment.submit(batchExecutionJob, ssh, space, pbsJobService)
+      case Left((space, local)) ⇒ OAREnvironment.submit(env, batchExecutionJob, local, space, pbsJobService)
+      case Right((space, ssh))  ⇒ OAREnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService)
     }
 
   lazy val installRuntime =
@@ -214,7 +215,7 @@ class OARLocalEnvironment(
   lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
   lazy val space = localStorageSpace(storage)
 
-  def execute(batchExecutionJob: BatchExecutionJob) = OAREnvironment.submit(batchExecutionJob, storage, space, jobService)
+  def execute(batchExecutionJob: BatchExecutionJob) = OAREnvironment.submit(env, batchExecutionJob, storage, space, jobService)
 
   lazy val installRuntime = new RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
 

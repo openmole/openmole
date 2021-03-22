@@ -107,8 +107,9 @@ object PBSEnvironment extends JavaLogger {
     flavour:              _root_.gridscale.pbs.PBSFlavour,
     modules:              Seq[String])
 
-  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: PBSJobService[_, _])(implicit services: BatchEnvironment.Services) =
+  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: PBSJobService[_, _])(implicit services: BatchEnvironment.Services) =
     submitToCluster(
+      environment,
       batchExecutionJob,
       storage,
       space,
@@ -175,8 +176,8 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   def execute(batchExecutionJob: BatchExecutionJob) =
     storageService match {
-      case Left((space, local)) ⇒ PBSEnvironment.submit(batchExecutionJob, local, space, pbsJobService)
-      case Right((space, ssh))  ⇒ PBSEnvironment.submit(batchExecutionJob, ssh, space, pbsJobService)
+      case Left((space, local)) ⇒ PBSEnvironment.submit(env, batchExecutionJob, local, space, pbsJobService)
+      case Right((space, ssh))  ⇒ PBSEnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService)
     }
 
   lazy val installRuntime =
@@ -217,7 +218,7 @@ class PBSLocalEnvironment(
   lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
   lazy val space = localStorageSpace(storage)
 
-  def execute(batchExecutionJob: BatchExecutionJob) = PBSEnvironment.submit(batchExecutionJob, storage, space, pbsJobService)
+  def execute(batchExecutionJob: BatchExecutionJob) = PBSEnvironment.submit(env, batchExecutionJob, storage, space, pbsJobService)
 
   lazy val installRuntime = new RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
 

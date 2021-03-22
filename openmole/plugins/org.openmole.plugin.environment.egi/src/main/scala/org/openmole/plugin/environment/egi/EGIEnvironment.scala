@@ -274,7 +274,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
         def fileSize(file: File) = (if (file.isDirectory) fileService.archiveForDir(file) else file).size
 
-        val usedFiles = BatchEnvironment.jobFiles(batchExecutionJob)
+        val usedFiles = BatchEnvironment.jobFiles(batchExecutionJob, env)
         val usedFilesInfo = usedFiles.map { f ⇒ f → FileInfo(fileSize(f), fileService.hash(f).toString) }.toMap
         val totalFileSize = usedFilesInfo.values.toSeq.map(_.size).sum
 
@@ -339,18 +339,17 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
           StorageService.uploadInDirectory(storage, _, space.replicaDirectory, _),
           StorageService.exists(storage, _),
           StorageService.rmFile(storage, _, background = true),
-          batchExecutionJob.environment,
+          env,
           StorageService.id(storage)
         )(f, options)
 
       def upload(f: File, options: TransferOptions) = StorageService.uploadInDirectory(storage, f, jobDirectory, options)
 
-      val sj = BatchEnvironment.serializeJob(batchExecutionJob, remoteStorage, replicate, upload, StorageService.id(storage))
+      val sj = BatchEnvironment.serializeJob(env, batchExecutionJob, remoteStorage, replicate, upload, StorageService.id(storage))
       val outputPath = StorageService.child(storage, jobDirectory, uniqName("job", ".out"))
       val job = jobService.submit(sj, outputPath, storage.url)
 
       BatchJobControl(
-        env,
         () ⇒ UpdateInterval.fixed(preference(EGIEnvironment.JobGroupRefreshInterval)),
         () ⇒ StorageService.id(storage),
         () ⇒ jobService.state(job),

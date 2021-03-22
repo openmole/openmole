@@ -95,8 +95,9 @@ object SGEEnvironment {
     storageSharedLocally: Boolean,
     modules:              Seq[String])
 
-  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SGEJobService[_, _])(implicit services: BatchEnvironment.Services) =
+  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SGEJobService[_, _])(implicit services: BatchEnvironment.Services) =
     submitToCluster(
+      environment,
       batchExecutionJob,
       storage,
       space,
@@ -160,8 +161,8 @@ class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   def execute(batchExecutionJob: BatchExecutionJob) =
     storageService match {
-      case Left((space, local)) ⇒ SGEEnvironment.submit(batchExecutionJob, local, space, pbsJobService)
-      case Right((space, ssh))  ⇒ SGEEnvironment.submit(batchExecutionJob, ssh, space, pbsJobService)
+      case Left((space, local)) ⇒ SGEEnvironment.submit(env, batchExecutionJob, local, space, pbsJobService)
+      case Right((space, ssh))  ⇒ SGEEnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService)
     }
 
   lazy val installRuntime =
@@ -201,7 +202,7 @@ class SGELocalEnvironment(
   lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
   lazy val space = localStorageSpace(storage)
 
-  def execute(batchExecutionJob: BatchExecutionJob) = SGEEnvironment.submit(batchExecutionJob, storage, space, jobService)
+  def execute(batchExecutionJob: BatchExecutionJob) = SGEEnvironment.submit(env, batchExecutionJob, storage, space, jobService)
 
   lazy val installRuntime = new RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
 

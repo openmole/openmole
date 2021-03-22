@@ -159,6 +159,7 @@ package object ssh {
   }
 
   def submitToCluster[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage, J](
+    environment: BatchEnvironment,
     batchExecutionJob: BatchExecutionJob,
     storage: S,
     space: StorageSpace,
@@ -180,19 +181,18 @@ package object ssh {
           StorageService.uploadInDirectory(storage, _, space.replicaDirectory, _),
           StorageService.exists(storage, _),
           StorageService.rmFile(storage, _, background = true),
-          batchExecutionJob.environment,
+          environment,
           StorageService.id(storage)
         )(f, options)
 
       def upload(f: File, options: TransferOptions) = StorageService.uploadInDirectory(storage, f, jobDirectory, options)
 
-      val sj = BatchEnvironment.serializeJob(batchExecutionJob, remoteStorage, replicate, upload, StorageService.id(storage))
+      val sj = BatchEnvironment.serializeJob(environment, batchExecutionJob, remoteStorage, replicate, upload, StorageService.id(storage))
       val outputPath = StorageService.child(storage, jobDirectory, uniqName("job", ".out"))
 
       val job = submit(sj, outputPath, jobDirectory)
 
       BatchJobControl(
-        batchExecutionJob.environment,
         () => refresh.map(UpdateInterval.fixed) getOrElse BatchEnvironment.defaultUpdateInterval(services.preference),
         () => StorageService.id(storage),
         () => state(job),

@@ -27,31 +27,31 @@ object KillActor {
     import services._
     import msg._
 
-    job.state = ExecutionState.KILLED
+    BatchEnvironment.setExecutionJobSate(environment, job, ExecutionState.KILLED)
 
-    if (!JobManager.canceled(job.storedJob) && !job.environment.stopped) {
+    if (!JobManager.canceled(job.storedJob) && !environment.stopped) {
       val loadedJob = JobStore.load(job.storedJob)
       JobManager.sendToMoleExecution(job.storedJob) { state ⇒
-        if (!JobManager.jobIsFinished(state, job.storedJob)) job.environment.submit(loadedJob)
+        if (!JobManager.jobIsFinished(state, job.storedJob)) environment.submit(loadedJob)
       }
     }
 
-    try BatchEnvironment.finishedExecutionJob(job.environment, job)
-    finally tryKillAndClean(job, batchJob)
+    try BatchEnvironment.finishedExecutionJob(environment, job)
+    finally tryKillAndClean(job, environment, batchJob)
   }
 
-  def tryKillAndClean(job: BatchExecutionJob, bj: Option[BatchJobControl])(implicit services: BatchEnvironment.Services) = {
+  def tryKillAndClean(job: BatchExecutionJob, environment: BatchEnvironment, bj: Option[BatchJobControl])(implicit services: BatchEnvironment.Services) = {
     JobStore.clean(job.storedJob)
 
     def kill(bj: BatchJobControl)(implicit services: BatchEnvironment.Services) = retry(services.preference(BatchEnvironment.killJobRetry))(bj.delete())
     def clean(bj: BatchJobControl)(implicit services: BatchEnvironment.Services) = retry(services.preference(BatchEnvironment.cleanJobRetry))(bj.clean())
 
     try bj.foreach(kill) catch {
-      case e: Throwable ⇒ JobManager ! Error(job, e, None)
+      case e: Throwable ⇒ JobManager ! Error(job, environment, e, None)
     }
 
     try bj.foreach(clean) catch {
-      case e: Throwable ⇒ JobManager ! Error(job, e, None)
+      case e: Throwable ⇒ JobManager ! Error(job, environment, e, None)
     }
   }
 }

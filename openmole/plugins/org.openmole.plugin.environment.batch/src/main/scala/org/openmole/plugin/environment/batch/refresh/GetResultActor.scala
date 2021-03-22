@@ -40,18 +40,18 @@ object GetResultActor {
   def receive(msg: GetResult)(implicit services: BatchEnvironment.Services) = {
     import services._
 
-    val GetResult(job, resultPath, batchJob) = msg
+    val GetResult(job, environment, resultPath, batchJob) = msg
 
-    JobManager.killOr(job, Kill(job, Some(batchJob))) { () ⇒
-      try getResult(batchJob.storageId(), batchJob.environment, batchJob.download, resultPath, job)
+    JobManager.killOr(job, Kill(job, environment, Some(batchJob))) { () ⇒
+      try getResult(batchJob.storageId(), environment, batchJob.download, resultPath, job)
       catch {
         case e: Throwable ⇒
-          job.state = ExecutionState.FAILED
+          BatchEnvironment.setExecutionJobSate(environment, job, ExecutionState.FAILED)
           val stdOutErr = BatchJobControl.tryStdOutErr(batchJob).toOption
-          JobManager ! Error(job, e, stdOutErr)
+          JobManager ! Error(job, environment, e, stdOutErr)
       }
       finally {
-        JobManager ! Kill(job, Some(batchJob))
+        JobManager ! Kill(job, environment, Some(batchJob))
       }
     }
   }
@@ -77,7 +77,7 @@ object GetResultActor {
             val executionResult = contextResults.results(moleJob.id)
             executionResult match {
               case Success(context) ⇒ JobStore.finish(moleJob, Left(context))
-              case Failure(e)       ⇒ JobManager ! MoleJobError(moleJob.id, batchJob, e)
+              case Failure(e)       ⇒ JobManager ! MoleJobError(moleJob.id, batchJob, environment, e)
             }
           }
         }

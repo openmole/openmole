@@ -105,8 +105,9 @@ object SSHEnvironment extends JavaLogger {
     def queued = queuesLock { jobsStates.collect { case (job, Queued(desc, bj)) ⇒ (job, desc, bj) } }
   }
 
-  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SSHJobService[_])(implicit services: BatchEnvironment.Services) =
+  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SSHJobService[_])(implicit services: BatchEnvironment.Services) =
     submitToCluster(
+      environment,
       batchExecutionJob,
       storage,
       space,
@@ -194,8 +195,8 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   def execute(batchExecutionJob: BatchExecutionJob) =
     storageService match {
-      case Left((space, local)) ⇒ SSHEnvironment.submit(batchExecutionJob, local, space, sshJobService)
-      case Right((space, ssh))  ⇒ SSHEnvironment.submit(batchExecutionJob, ssh, space, sshJobService)
+      case Left((space, local)) ⇒ SSHEnvironment.submit(env, batchExecutionJob, local, space, sshJobService)
+      case Right((space, ssh))  ⇒ SSHEnvironment.submit(env, batchExecutionJob, ssh, space, sshJobService)
     }
 
   lazy val installRuntime =

@@ -27,25 +27,25 @@ object RefreshActor extends JavaLogger {
   def receive(refresh: Refresh)(implicit services: BatchEnvironment.Services) = {
     import services._
 
-    val Refresh(job, bj, delay, updateErrorsInARow) = refresh
+    val Refresh(job, environment, bj, delay, updateErrorsInARow) = refresh
 
-    JobManager.killOr(job, Kill(job, Some(bj))) { () ⇒
+    JobManager.killOr(job, Kill(job, environment, Some(bj))) { () ⇒
       try {
         val oldState = job.state
-        job.state = bj.updateState()
+        BatchEnvironment.setExecutionJobSate(environment, job, bj.updateState())
         job.state match {
-          case DONE ⇒ JobManager ! GetResult(job, bj.resultPath(), bj)
+          case DONE ⇒ JobManager ! GetResult(job, environment, bj.resultPath(), bj)
           case FAILED ⇒
             val exception = new InternalProcessingError(s"""Job status is FAILED""".stripMargin)
             val stdOutErr = BatchJobControl.tryStdOutErr(bj).toOption
-            JobManager ! Error(job, exception, stdOutErr)
-            JobManager ! Kill(job, Some(bj))
+            JobManager ! Error(job, environment, exception, stdOutErr)
+            JobManager ! Kill(job, environment, Some(bj))
           case SUBMITTED | RUNNING ⇒
             val updateInterval = bj.updateInterval()
             val newDelay =
               if (oldState == job.state) (delay + updateInterval.incrementUpdateInterval) min updateInterval.maxUpdateInterval
               else updateInterval.minUpdateInterval
-            JobManager ! Delay(Refresh(job, bj, newDelay, 0), newDelay)
+            JobManager ! Delay(Refresh(job, environment, bj, newDelay, 0), newDelay)
           case KILLED ⇒
           case _      ⇒ throw new InternalProcessingError(s"Job ${job} is in state ${job.state} while being refreshed")
         }
@@ -53,12 +53,12 @@ object RefreshActor extends JavaLogger {
       catch {
         case e: Throwable ⇒
           if (updateErrorsInARow >= preference(BatchEnvironment.MaxUpdateErrorsInARow)) {
-            JobManager ! Error(job, e, BatchJobControl.tryStdOutErr(bj).toOption)
-            JobManager ! Kill(job, Some(bj))
+            JobManager ! Error(job, environment, e, BatchJobControl.tryStdOutErr(bj).toOption)
+            JobManager ! Kill(job, environment, Some(bj))
           }
           else {
             Log.logger.log(Log.FINE, s"${updateErrorsInARow + 1} errors in a row during job refresh", e)
-            JobManager ! Delay(Refresh(job, bj, delay, updateErrorsInARow + 1), delay)
+            JobManager ! Delay(Refresh(job, environment, bj, delay, updateErrorsInARow + 1), delay)
           }
       }
     }

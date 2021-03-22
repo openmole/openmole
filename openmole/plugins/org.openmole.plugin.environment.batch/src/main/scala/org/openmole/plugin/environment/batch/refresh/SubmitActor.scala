@@ -25,18 +25,18 @@ object SubmitActor {
   def receive(submit: Submit)(implicit services: BatchEnvironment.Services) = {
     import services._
 
-    val Submit(job) = submit
+    val Submit(job, environment) = submit
 
-    JobManager.killOr(job, Kill(job, None)) { () ⇒
+    JobManager.killOr(job, Kill(job, environment, None)) { () ⇒
       try {
-        val bj = job.environment.execute(job)
-        job.state = SUBMITTED
-        JobManager ! Submitted(job, bj)
+        val bj = environment.execute(job)
+        BatchEnvironment.setExecutionJobSate(environment, job, SUBMITTED)
+        JobManager ! Submitted(job, environment, bj)
       }
       catch {
         case e: Throwable ⇒
-          JobManager ! Error(job, e, None)
-          JobManager ! Delay(Submit(job), preference(BatchEnvironment.SubmitRetryInterval))
+          JobManager ! Error(job, environment, e, None)
+          JobManager ! Delay(Submit(job, environment), preference(BatchEnvironment.SubmitRetryInterval))
       }
     }
   }

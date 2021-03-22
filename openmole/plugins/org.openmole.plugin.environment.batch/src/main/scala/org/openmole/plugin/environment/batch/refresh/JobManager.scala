@@ -65,29 +65,29 @@ object JobManager extends JavaLogger { self ⇒
     import services._
 
     msg match {
-      case msg: Submit      ⇒ killOr(msg.job.environment, msg.job.storedJob, Kill(msg.job, None)) { () ⇒ dispatch(msg) }
-      case msg: Refresh     ⇒ killOr(msg.job.environment, msg.job.storedJob, Kill(msg.job, Some(msg.batchJob))) { () ⇒ dispatch(msg) }
-      case msg: GetResult   ⇒ killOr(msg.job.environment, msg.job.storedJob, Kill(msg.job, Some(msg.batchJob))) { () ⇒ dispatch(msg) }
+      case msg: Submit      ⇒ killOr(msg.environment, msg.job.storedJob, Kill(msg.job, msg.environment, None)) { () ⇒ dispatch(msg) }
+      case msg: Refresh     ⇒ killOr(msg.environment, msg.job.storedJob, Kill(msg.job, msg.environment, Some(msg.batchJob))) { () ⇒ dispatch(msg) }
+      case msg: GetResult   ⇒ killOr(msg.environment, msg.job.storedJob, Kill(msg.job, msg.environment, Some(msg.batchJob))) { () ⇒ dispatch(msg) }
       case msg: RetryAction ⇒ dispatch(msg)
       case msg: Error       ⇒ dispatch(msg)
       case msg: Kill        ⇒ dispatch(msg)
 
       case Manage(job, environment) ⇒
-        val bej = BatchExecutionJob(job, environment)
+        val bej = BatchExecutionJob(job, environment.relpClassesCache, environment.jobStore)
         ExecutionJobRegistry.register(environment.registry, bej)
         services.eventDispatcher.trigger(environment, Environment.JobSubmitted(bej))
-        self ! Submit(bej)
+        self ! Submit(bej, environment)
 
       case Delay(msg, delay) ⇒
         services.threadProvider.scheduler.schedule((self ! msg): Runnable, delay.millis, TimeUnit.MILLISECONDS)
 
-      case Submitted(job, bj) ⇒
-        killOr(job.environment, job.storedJob, Kill(job, Some(bj))) { () ⇒ self ! Delay(Refresh(job, bj, bj.updateInterval().minUpdateInterval), bj.updateInterval().minUpdateInterval) }
+      case Submitted(job, environment, bj) ⇒
+        killOr(environment, job.storedJob, Kill(job, environment, Some(bj))) { () ⇒ self ! Delay(Refresh(job, environment, bj, bj.updateInterval().minUpdateInterval), bj.updateInterval().minUpdateInterval) }
 
-      case MoleJobError(mj, j, e) ⇒
+      case MoleJobError(mj, j, environment, e) ⇒
         val er = Environment.MoleJobExceptionRaised(j, e, WARNING, mj)
-        j.environment.error(er)
-        services.eventDispatcher.trigger(j.environment: Environment, er)
+        environment.error(er)
+        services.eventDispatcher.trigger(environment: Environment, er)
         logger.log(FINE, "Error during job execution, it will be resubmitted.", e)
 
     }

@@ -229,11 +229,11 @@ object BatchEnvironment {
         loggerService = loggerService)
   }
 
-  def jobFiles(job: BatchExecutionJob) =
+  def jobFiles(job: BatchExecutionJob, environment: BatchEnvironment) =
     job.files.toVector ++
       job.plugins ++
-      job.environment.plugins ++
-      Seq(job.environment.jvmLinuxX64, job.environment.runtime)
+      environment.plugins ++
+      Seq(environment.jvmLinuxX64, environment.runtime)
 
   def toReplicatedFile(
     upload: (File, TransferOptions) => String,
@@ -262,6 +262,7 @@ object BatchEnvironment {
   }
   
   def serializeJob(
+    environment: BatchEnvironment,
     job: BatchExecutionJob,
     remoteStorage: RemoteStorage,
     replicate: (File, TransferOptions) => ReplicatedFile,
@@ -272,24 +273,24 @@ object BatchEnvironment {
 
     serializerService.serialize(job.runnableTasks, jobFile)
 
-    val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins -- job.environment.plugins ++ (job.files.toSet & job.environment.plugins.toSet)
+    val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins -- environment.plugins ++ (job.files.toSet & environment.plugins.toSet)
     val files = (new TreeSet[File]()(fileOrdering) ++ job.files) -- plugins
 
-    val runtime = replicateTheRuntime(job.environment, replicate)
+    val runtime = replicateTheRuntime(environment, replicate)
 
     val executionMessage = createExecutionMessage(
       jobFile,
       files,
       plugins,
       replicate,
-      job.environment
+      environment
     )
 
     /* ---- upload the execution message ----*/
     val inputPath =
       newFile.withTmpFile("job", ".tar") { executionMessageFile ⇒
         serializerService.serializeAndArchiveFiles(executionMessage, executionMessageFile)
-        signalUpload(eventDispatcher.eventId, upload(executionMessageFile, TransferOptions(noLink = true, canMove = true)), executionMessageFile, job.environment, storageId)
+        signalUpload(eventDispatcher.eventId, upload(executionMessageFile, TransferOptions(noLink = true, canMove = true)), executionMessageFile, environment, storageId)
       }
 
     val serializedStorage =
@@ -298,7 +299,7 @@ object BatchEnvironment {
         import services._
         services.serializerService.serializeAndArchiveFiles(remoteStorage, storageFile)
         val hash = storageFile.hash().toString()
-        val path = signalUpload(eventDispatcher.eventId, upload(storageFile, TransferOptions(noLink = true, canMove = true, raw = true)), storageFile, job.environment, storageId)
+        val path = signalUpload(eventDispatcher.eventId, upload(storageFile, TransferOptions(noLink = true, canMove = true, raw = true)), storageFile, environment, storageId)
         FileMessage(path, hash)
       }
 
@@ -351,6 +352,23 @@ object BatchEnvironment {
     environment.finishedJob(job)
   }
 
+  def setExecutionJobSate(environment: BatchEnvironment, job: BatchExecutionJob, newState: ExecutionState.ExecutionState)(implicit eventDispatcher: EventDispatcher) = job.synchronized {
+    import ExecutionState._
+
+    if (job.state != KILLED && newState != job.state) {
+      newState match {
+        case DONE ⇒ environment._done.incrementAndGet()
+        case FAILED ⇒
+          if (job.state == DONE) environment._done.decrementAndGet()
+          environment._failed.incrementAndGet()
+        case _ ⇒
+      }
+
+      eventDispatcher.trigger(environment, Environment.JobStateChanged(job, newState, job.state))
+      job._state = newState
+    }
+  }
+
   object ExecutionJobRegistry {
 
     def register(registry: ExecutionJobRegistry, ejob: BatchExecutionJob) = registry.synchronized {
@@ -386,6 +404,8 @@ object BatchEnvironment {
       maxUpdateInterval = preference(BatchEnvironment.MaxUpdateInterval),
       incrementUpdateInterval = preference(BatchEnvironment.IncrementUpdateInterval)
     )
+
+  type REPLClassCache = AssociativeCache[Set[String], Seq[File]]
 }
 
 abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
@@ -407,11 +427,10 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   def jobs = ExecutionJobRegistry.executionJobs(registry)
 
-  lazy val relpClassesCache = new AssociativeCache[Set[String], Seq[File]]
+  lazy val relpClassesCache: BatchEnvironment.REPLClassCache = new AssociativeCache[Set[String], Seq[File]]
 
   lazy val plugins = PluginManager.pluginsForClass(this.getClass)
   lazy val jobStore = JobStore(services.newFile.makeNewDir("jobstore"))
-
 
   override def submit(job: Job) = JobManager ! Manage(job, this)
 

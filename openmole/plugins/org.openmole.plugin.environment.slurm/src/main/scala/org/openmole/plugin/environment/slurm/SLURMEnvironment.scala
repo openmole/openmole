@@ -132,8 +132,9 @@ object SLURMEnvironment {
     modules:              Seq[String],
     debug:                Boolean)
 
-  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SLURMJobService[_, _], refresh: Option[Time])(implicit services: BatchEnvironment.Services) =
+  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SLURMJobService[_, _], refresh: Option[Time])(implicit services: BatchEnvironment.Services) =
     submitToCluster(
+      environment,
       batchExecutionJob,
       storage,
       space,
@@ -200,8 +201,8 @@ class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   def execute(batchExecutionJob: BatchExecutionJob) =
     storageService match {
-      case Left((space, local)) ⇒ SLURMEnvironment.submit(batchExecutionJob, local, space, pbsJobService, parameters.refresh)
-      case Right((space, ssh))  ⇒ SLURMEnvironment.submit(batchExecutionJob, ssh, space, pbsJobService, parameters.refresh)
+      case Left((space, local)) ⇒ SLURMEnvironment.submit(env, batchExecutionJob, local, space, pbsJobService, parameters.refresh)
+      case Right((space, ssh))  ⇒ SLURMEnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService, parameters.refresh)
     }
 
   lazy val installRuntime =
@@ -241,7 +242,7 @@ class SLURMLocalEnvironment(
   lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
   lazy val space = localStorageSpace(storage)
 
-  def execute(batchExecutionJob: BatchExecutionJob) = SLURMEnvironment.submit(batchExecutionJob, storage, space, jobService, parameters.refresh)
+  def execute(batchExecutionJob: BatchExecutionJob) = SLURMEnvironment.submit(env, batchExecutionJob, storage, space, jobService, parameters.refresh)
 
   lazy val installRuntime = new RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
 

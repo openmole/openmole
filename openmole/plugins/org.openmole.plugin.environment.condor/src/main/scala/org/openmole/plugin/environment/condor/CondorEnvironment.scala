@@ -108,8 +108,9 @@ object CondorEnvironment {
     storageSharedLocally: Boolean,
     modules:              Seq[String])
 
-  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: CondorJobService[_, _])(implicit services: BatchEnvironment.Services) =
+  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: CondorJobService[_, _])(implicit services: BatchEnvironment.Services) =
     submitToCluster(
+      environment,
       batchExecutionJob,
       storage,
       space,
@@ -175,8 +176,8 @@ class CondorEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   def execute(batchExecutionJob: BatchExecutionJob) =
     storageService match {
-      case Left((space, local)) ⇒ CondorEnvironment.submit(batchExecutionJob, local, space, pbsJobService)
-      case Right((space, ssh))  ⇒ CondorEnvironment.submit(batchExecutionJob, ssh, space, pbsJobService)
+      case Left((space, local)) ⇒ CondorEnvironment.submit(env, batchExecutionJob, local, space, pbsJobService)
+      case Right((space, ssh))  ⇒ CondorEnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService)
     }
 
   lazy val installRuntime =
@@ -216,7 +217,7 @@ class CondorLocalEnvironment(
   lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
   lazy val space = localStorageSpace(storage)
 
-  def execute(batchExecutionJob: BatchExecutionJob) = CondorEnvironment.submit(batchExecutionJob, storage, space, jobService)
+  def execute(batchExecutionJob: BatchExecutionJob) = CondorEnvironment.submit(env, batchExecutionJob, storage, space, jobService)
 
   lazy val installRuntime = new RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
 

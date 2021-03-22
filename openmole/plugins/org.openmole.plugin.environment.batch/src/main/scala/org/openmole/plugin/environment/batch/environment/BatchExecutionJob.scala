@@ -30,6 +30,7 @@ import org.openmole.core.workflow.execution.{ Environment, ExecutionJob }
 import org.openmole.core.workflow.execution.ExecutionState.{ DONE, ExecutionState, FAILED, KILLED, READY }
 import org.openmole.core.workflow.job.Job
 import org.openmole.core.workspace.TmpDirectory
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment.REPLClassCache
 import org.openmole.plugin.environment.batch.environment.JobStore.StoredJob
 import org.openmole.tool.bytecode.listAllClasses
 import org.openmole.tool.osgi.{ ClassFile, VersionedPackage, createBundle }
@@ -115,48 +116,31 @@ object BatchExecutionJob {
     bfs ++ plugins.flatten.toList.distinct
   }
 
-  def apply(job: Job, environment: BatchEnvironment)(implicit serializerService: SerializerService, tmpDirectory: TmpDirectory, fileService: FileService) = {
+  def apply(job: Job, relpClassesCache: REPLClassCache, jobStore: JobStore)(implicit serializerService: SerializerService, tmpDirectory: TmpDirectory, fileService: FileService) = {
     val pluginsAndFiles = serializerService.pluginsAndFiles(Job.moleJobs(job).map(RunnableTask(_)))
 
     def closureBundleAndPlugins = {
       val replClasses = pluginsAndFiles.replClasses
-      environment.relpClassesCache.cache(Job.moleExecution(job), pluginsAndFiles.replClasses.map(_.getName).toSet, preCompute = false) { _ ⇒
+      relpClassesCache.cache(Job.moleExecution(job), pluginsAndFiles.replClasses.map(_.getName).toSet, preCompute = false) { _ ⇒
         BatchExecutionJob.replClassesToPlugins(replClasses)
       }
     }
 
     val plugins = pluginsAndFiles.plugins ++ closureBundleAndPlugins
-    val storedJob = JobStore.store(environment.jobStore, job)
+    val storedJob = JobStore.store(jobStore, job)
 
-    new BatchExecutionJob(storedJob, environment, pluginsAndFiles.files, plugins)
+    new BatchExecutionJob(storedJob, pluginsAndFiles.files, plugins)
   }
 }
 
-class BatchExecutionJob(val storedJob: StoredJob, val environment: BatchEnvironment, val files: Seq[File], val plugins: Seq[File]) extends ExecutionJob { bej ⇒
-
-  import environment.services._
+class BatchExecutionJob(val storedJob: StoredJob, val files: Seq[File], val plugins: Seq[File]) extends ExecutionJob { bej ⇒
 
   def moleJobIds = storedJob.storedMoleJobs.map(_.id)
-  private def job = JobStore.load(storedJob)
-  def runnableTasks = Job.moleJobs(job).map(RunnableTask(_))
+  private def job(implicit serializerService: SerializerService) = JobStore.load(storedJob)
+  def runnableTasks(implicit serializerService: SerializerService) = Job.moleJobs(job).map(RunnableTask(_))
 
-  private var _state: ExecutionState = READY
+  private[environment] var _state: ExecutionState = READY
 
   def state = _state
-
-  def state_=(newState: ExecutionState)(implicit eventDispatcher: EventDispatcher) = synchronized {
-    if (state != KILLED && newState != state) {
-      newState match {
-        case DONE ⇒ environment._done.incrementAndGet()
-        case FAILED ⇒
-          if (state == DONE) environment._done.decrementAndGet()
-          environment._failed.incrementAndGet()
-        case _ ⇒
-      }
-
-      eventDispatcher.trigger(environment, Environment.JobStateChanged(this, newState, this.state))
-      _state = newState
-    }
-  }
 
 }

@@ -10,11 +10,11 @@ import org.openmole.tool.logger._
 
 object ErrorActor {
   def receive(msg: Error)(implicit services: BatchEnvironment.Services) = {
-    val Error(job, exception, output) = msg
-    processError(job, exception, output)
+    val Error(job, environement, exception, output) = msg
+    processError(job, environement, exception, output)
   }
 
-  def processError(job: BatchExecutionJob, exception: Throwable, output: Option[(String, String)])(implicit services: BatchEnvironment.Services) = {
+  def processError(job: BatchExecutionJob, environment: BatchEnvironment, exception: Throwable, output: Option[(String, String)])(implicit services: BatchEnvironment.Services) = {
     import services._
 
     def defaultMessage = """Failed to get the result for the job"""
@@ -44,9 +44,9 @@ object ErrorActor {
       }
 
     val er = Environment.ExecutionJobExceptionRaised(job, detailedException, level)
-    job.environment.error(er)
+    environment.error(er)
 
-    services.eventDispatcher.trigger(job.environment: Environment, er)
+    services.eventDispatcher.trigger(environment: Environment, er)
     LoggerService.log(FINE, "Error in job refresh", Some(detailedException))
   }
 }
