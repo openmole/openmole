@@ -30,6 +30,9 @@ package object extension {
   type FromContextSampling = org.openmole.core.workflow.sampling.FromContextSampling
   def Sampling = org.openmole.core.workflow.sampling.Sampling
 
+  type Environment = org.openmole.core.workflow.execution.Environment
+  def Environment = org.openmole.core.workflow.execution.Environment
+
   type Namespace = org.openmole.core.context.Namespace
   def Namespace = org.openmole.core.context.Namespace
 

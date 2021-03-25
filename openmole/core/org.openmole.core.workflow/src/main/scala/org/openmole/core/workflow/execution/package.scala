@@ -36,15 +36,20 @@ package object execution {
     }
 
   object EnvironmentProvider {
-    def apply[T <: Environment](build: MoleServices ⇒ T): EnvironmentProvider = build
+    def apply(build: MoleServices ⇒ LocalEnvironment): LocalEnvironmentProvider = LocalEnvironmentProvider(build)
+    def apply[T <: Environment](build: MoleServices ⇒ T): EnvironmentProvider = GenericEnvironmentProvider(build)
+
+    def build(p: EnvironmentProvider, services: MoleServices) =
+      p match {
+        case GenericEnvironmentProvider(build) ⇒ Seq(p -> build(services))
+        case LocalEnvironmentProvider(build)   ⇒ Seq(p -> build(services))
+      }
+
+    def buildLocal(p: LocalEnvironmentProvider, services: MoleServices) = p.build(services)
   }
 
-  type EnvironmentProvider = MoleServices ⇒ Environment
-
-  object LocalEnvironmentProvider {
-    def apply(build: MoleServices ⇒ LocalEnvironment) = build
-  }
-
-  type LocalEnvironmentProvider = MoleServices ⇒ LocalEnvironment
+  sealed trait EnvironmentProvider
+  case class GenericEnvironmentProvider(build: MoleServices ⇒ Environment) extends EnvironmentProvider
+  case class LocalEnvironmentProvider(build: MoleServices ⇒ LocalEnvironment) extends EnvironmentProvider
 
 }

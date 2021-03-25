@@ -92,13 +92,13 @@ object LocalEnvironment {
     deinterleave: Boolean                  = false,
     name:         OptionalArgument[String] = OptionalArgument()
   )(implicit varName: sourcecode.Name) =
-    LocalEnvironmentProvider { ms ⇒
+    EnvironmentProvider { ms ⇒
       import ms._
       new LocalEnvironment(nbThreads.getOrElse(1), deinterleave, Some(name.getOrElse(varName.value)))
     }
 
   def apply(threads: Int, deinterleave: Boolean) =
-    LocalEnvironmentProvider { ms ⇒
+    EnvironmentProvider { ms ⇒
       import ms._
       new LocalEnvironment(threads, deinterleave, None)
     }
