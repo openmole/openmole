@@ -438,34 +438,8 @@ object MoleExecution extends JavaLogger {
 
   def submit(moleExecution: MoleExecution, job: Job, capsule: MoleCapsule) = {
     val env = moleExecution.environments.getOrElse(capsule, moleExecution.defaultEnvironment)
-    import moleExecution.executionContext.services._
-
-    env match {
-      case env: SubmissionEnvironment ⇒ env.submit(job)
-      case env: LocalEnvironment ⇒
-        env.submit(
-          job,
-          TaskExecutionContext(
-            moleExecutionDirectory = moleExecutionDirectory,
-            taskExecutionDirectory = moleExecutionDirectory.newDir("taskExecution"),
-            applicationExecutionDirectory = applicationExecutionDirectory,
-            localEnvironment = env,
-            preference = preference,
-            threadProvider = threadProvider,
-            fileService = fileService,
-            workspace = workspace,
-            outputRedirection = outputRedirection,
-            loggerService = loggerService,
-            cache = moleExecution.keyValueCache,
-            lockRepository = moleExecution.lockRepository,
-            moleExecution = Some(moleExecution),
-            serializerService = serializerService,
-            networkService = networkService
-          )
-        )
-    }
-
-    eventDispatcher.trigger(moleExecution, MoleExecution.JobSubmitted(job, capsule, env))
+    Environment.submit(env, job)
+    moleExecution.executionContext.services.eventDispatcher.trigger(moleExecution, MoleExecution.JobSubmitted(job, capsule, env))
   }
 
   def submitAll(moleExecution: MoleExecution) = {

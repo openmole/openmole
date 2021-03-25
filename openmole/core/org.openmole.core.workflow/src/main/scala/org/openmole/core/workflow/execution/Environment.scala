@@ -58,6 +58,36 @@ object Environment {
       case _                        ⇒ Seq()
     }
 
+  def submit(environment: Environment, job: Job) = {
+    val moleExecution = Job.moleExecution(job)
+    import moleExecution.executionContext.services._
+
+    environment match {
+      case env: SubmissionEnvironment ⇒ env.submit(job)
+      case env: LocalEnvironment ⇒
+        env.submit(
+          job,
+          TaskExecutionContext(
+            moleExecutionDirectory = moleExecutionDirectory,
+            taskExecutionDirectory = moleExecutionDirectory.newDir("taskExecution"),
+            applicationExecutionDirectory = applicationExecutionDirectory,
+            localEnvironment = env,
+            preference = preference,
+            threadProvider = threadProvider,
+            fileService = fileService,
+            workspace = workspace,
+            outputRedirection = outputRedirection,
+            loggerService = loggerService,
+            cache = moleExecution.keyValueCache,
+            lockRepository = moleExecution.lockRepository,
+            moleExecution = Some(moleExecution),
+            serializerService = serializerService,
+            networkService = networkService
+          )
+        )
+    }
+  }
+
 }
 
 sealed trait Environment <: Name {
