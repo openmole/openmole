@@ -148,11 +148,9 @@ class Runtime {
 
       try {
 
-        val taskExecutionContext = TaskExecutionContext(
+        val taskExecutionContext = TaskExecutionContext.partial(
           applicationExecutionDirectory = newFile.makeNewDir("application"),
           moleExecutionDirectory = newFile.makeNewDir("runtime"),
-          taskExecutionDirectory = newFile.makeNewDir("task"),
-          localEnvironment = environment,
           preference = preference,
           threadProvider = threadProvider,
           fileService = fileService,
@@ -166,7 +164,15 @@ class Runtime {
           remote = Some(TaskExecutionContext.Remote(threads))
         )
 
-        for (toProcess ← allMoleJobs) environment.submit(toProcess, taskExecutionContext)
+        for (toProcess ← allMoleJobs)
+          environment.submit(
+            toProcess,
+            TaskExecutionContext.complete(
+              taskExecutionContext,
+              taskExecutionDirectory = newFile.makeNewDir("task"),
+              localEnvironment = environment)
+          )
+
         saver.waitAllFinished
       }
       finally environment.stop()

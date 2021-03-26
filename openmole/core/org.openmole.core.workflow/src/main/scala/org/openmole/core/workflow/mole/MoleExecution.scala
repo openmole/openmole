@@ -649,7 +649,7 @@ class MoleExecution(
   val id:                          String,
   val keyValueCache:               KeyValueCache,
   val lockRepository:              LockRepository[LockKey]
-) {
+) { moleExecution ⇒
 
   val messageQueue = PriorityQueue[MoleExecutionMessage](fifo = true)
 
@@ -689,6 +689,26 @@ class MoleExecution(
     val map = collection.mutable.Map[MoleCapsule, Long]()
     map ++= mole.capsules.map(_ -> 0L)
     map
+  }
+
+  lazy val partialTaskExecutionContext = {
+    import executionContext.services._
+
+    TaskExecutionContext.partial(
+      moleExecutionDirectory = moleExecutionDirectory,
+      applicationExecutionDirectory = applicationExecutionDirectory,
+      preference = preference,
+      threadProvider = threadProvider,
+      fileService = fileService,
+      workspace = workspace,
+      outputRedirection = outputRedirection,
+      loggerService = loggerService,
+      cache = keyValueCache,
+      lockRepository = lockRepository,
+      moleExecution = Some(moleExecution),
+      serializerService = serializerService,
+      networkService = networkService
+    )
   }
 
   lazy val environments = environmentProviders.values.toVector.distinct.flatMap { v ⇒ EnvironmentProvider.build(v, executionContext.services) }.toMap

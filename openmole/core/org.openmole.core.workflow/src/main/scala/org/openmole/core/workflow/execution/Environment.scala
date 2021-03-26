@@ -67,22 +67,10 @@ object Environment {
       case env: LocalEnvironment ⇒
         env.submit(
           job,
-          TaskExecutionContext(
-            moleExecutionDirectory = moleExecutionDirectory,
-            taskExecutionDirectory = moleExecutionDirectory.newDir("taskExecution"),
-            applicationExecutionDirectory = applicationExecutionDirectory,
+          TaskExecutionContext.complete(
+            moleExecution.partialTaskExecutionContext,
             localEnvironment = env,
-            preference = preference,
-            threadProvider = threadProvider,
-            fileService = fileService,
-            workspace = workspace,
-            outputRedirection = outputRedirection,
-            loggerService = loggerService,
-            cache = moleExecution.keyValueCache,
-            lockRepository = moleExecution.lockRepository,
-            moleExecution = Some(moleExecution),
-            serializerService = serializerService,
-            networkService = networkService
+            taskExecutionDirectory = moleExecutionDirectory.newDir("taskExecution")
           )
         )
     }
