@@ -196,27 +196,20 @@ object MoleExecution extends JavaLogger {
 
               eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
 
-              val taskContext =
-                TaskExecutionContext(
-                  applicationExecutionDirectory = applicationExecutionDirectory,
-                  moleExecutionDirectory = moleExecutionDirectory,
-                  taskExecutionDirectory = moleExecutionDirectory.newDir("taskExecution"),
-                  localEnvironment = subMoleExecutionState.moleExecution.defaultEnvironment,
-                  preference = preference,
-                  threadProvider = threadProvider,
-                  fileService = fileService,
-                  workspace = workspace,
-                  outputRedirection = outputRedirection,
-                  loggerService = loggerService,
-                  networkService = networkService,
-                  cache = subMoleExecutionState.moleExecution.keyValueCache,
-                  lockRepository = subMoleExecutionState.moleExecution.lockRepository,
-                  moleExecution = Some(subMoleExecutionState.moleExecution),
-                  serializerService = serializerService
-                )
+              val taskExecutionDirectory = moleExecutionDirectory.newDir("taskExecution")
+              val result =
+                try {
+                  val taskContext =
+                    TaskExecutionContext.complete(
+                      subMoleExecutionState.moleExecution.partialTaskExecutionContext,
+                      taskExecutionDirectory = taskExecutionDirectory,
+                      localEnvironment = subMoleExecutionState.moleExecution.defaultEnvironment)
 
-              val result = moleJob.perform(taskContext)
-              MoleJob.finish(moleJob, result, taskContext) // Does nothing
+                  moleJob.perform(taskContext)
+                }
+                finally taskExecutionDirectory.recursiveDelete
+
+              MoleJob.finish(moleJob, result) // Does nothing
 
               result match {
                 case Left(newContext) ⇒ subMoleExecutionState.masterCapsuleRegistry.register(capsule, ticket.parentOrException, MasterCapsule.toPersist(master, newContext))

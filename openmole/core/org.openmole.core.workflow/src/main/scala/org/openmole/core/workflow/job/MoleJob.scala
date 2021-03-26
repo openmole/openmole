@@ -57,11 +57,7 @@ object MoleJob {
   case object Unchanged extends StateChange
   case class Changed(old: State, state: State, context: Context) extends StateChange
 
-  def finish(moleJob: MoleJob, result: Either[Context, Throwable], taskExecutionContext: TaskExecutionContext) = {
-    import org.openmole.tool.file._
-    taskExecutionContext.taskExecutionDirectory.recursiveDelete
-    moleJob.jobFinished(moleJob.id, result)
-  }
+  def finish(moleJob: MoleJob, result: Either[Context, Throwable]) = moleJob.jobFinished(moleJob.id, result)
 
   class SubMoleCanceled extends Exception
 

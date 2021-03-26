@@ -67,11 +67,7 @@ object Environment {
       case env: LocalEnvironment ⇒
         env.submit(
           job,
-          TaskExecutionContext.complete(
-            moleExecution.partialTaskExecutionContext,
-            localEnvironment = env,
-            taskExecutionDirectory = moleExecutionDirectory.newDir("taskExecution")
-          )
+          moleExecution.partialTaskExecutionContext
         )
     }
   }
@@ -140,10 +136,10 @@ class LocalEnvironment(
 
   def nbJobInQueue = pool().waiting
 
-  def submit(job: Job, executionContext: TaskExecutionContext): Unit =
+  def submit(job: Job, executionContext: TaskExecutionContext.Partial): Unit =
     submit(LocalExecutionJob(executionContext, Job.moleJobs(job), Some(Job.moleExecution(job))))
 
-  def submit(moleJob: MoleJob, executionContext: TaskExecutionContext): Unit =
+  def submit(moleJob: MoleJob, executionContext: TaskExecutionContext.Partial): Unit =
     submit(LocalExecutionJob(executionContext, List(moleJob), None))
 
   private def submit(ejob: LocalExecutionJob): Unit = {

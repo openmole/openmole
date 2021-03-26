@@ -108,7 +108,7 @@ object TaskExecutionContext {
     lockRepository:                LockRepository[LockKey],
     moleExecution:                 Option[MoleExecution]               = None,
     remote:                        Option[TaskExecutionContext.Remote] = None) =
-    PartialTaskExecutionContext(
+    Partial(
       moleExecutionDirectory = moleExecutionDirectory,
       applicationExecutionDirectory = applicationExecutionDirectory,
       preference = preference,
@@ -125,13 +125,13 @@ object TaskExecutionContext {
       remote = remote
     )
 
-  def complete(partialTaskExecutionContext: PartialTaskExecutionContext, taskExecutionDirectory: File, localEnvironment: LocalEnvironment) =
+  def complete(partialTaskExecutionContext: Partial, taskExecutionDirectory: File, localEnvironment: LocalEnvironment) =
     CompletedTaskExecutionContext(
       partialTaskExecutionContext,
       taskExecutionDirectory = taskExecutionDirectory,
       localEnvironment = localEnvironment)
 
-  case class PartialTaskExecutionContext(
+  case class Partial(
     moleExecutionDirectory:         File,
     applicationExecutionDirectory:  File,
     implicit val preference:        Preference,
@@ -148,7 +148,7 @@ object TaskExecutionContext {
     remote:                         Option[TaskExecutionContext.Remote] = None)
 
   case class CompletedTaskExecutionContext(
-    partialTaskExecutionContext: PartialTaskExecutionContext,
+    partialTaskExecutionContext: Partial,
     taskExecutionDirectory:      File,
     localEnvironment:            LocalEnvironment) extends TaskExecutionContext {
     def moleExecutionDirectory = partialTaskExecutionContext.moleExecutionDirectory

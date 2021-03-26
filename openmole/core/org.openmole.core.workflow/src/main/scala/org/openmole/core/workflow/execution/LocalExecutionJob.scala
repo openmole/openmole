@@ -12,7 +12,7 @@ import org.openmole.core.workflow.task.TaskExecutionContext
  */
 object LocalExecutionJob {
   def apply(
-    executionContext: TaskExecutionContext,
+    executionContext: TaskExecutionContext.Partial,
     jobs:             Iterable[MoleJob],
     moleExecution:    Option[MoleExecution]) =
     new LocalExecutionJob(
@@ -21,8 +21,7 @@ object LocalExecutionJob {
       _moleExecution = moleExecution.getOrElse(null))
 }
 
-case class LocalExecutionJob(executionContext: TaskExecutionContext, jobs: Array[MoleJob], _moleExecution: MoleExecution) extends ExecutionJob {
+case class LocalExecutionJob(executionContext: TaskExecutionContext.Partial, jobs: Array[MoleJob], _moleExecution: MoleExecution) extends ExecutionJob {
   def moleJobIds = jobs.map(_.id)
-  def environment = executionContext.localEnvironment
   def moleExecution: Option[MoleExecution] = Option(_moleExecution)
 }

@@ -18,13 +18,14 @@
 package org.openmole.core.workflow.execution
 
 import java.io.PrintStream
-
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.tools.service
 import org.openmole.core.workflow.execution.Environment._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole.MoleExecutionMessage
+import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.tool.logger.JavaLogger
+import org.openmole.tool.file._
 
 import scala.ref.WeakReference
 
@@ -58,11 +59,22 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                   moleJob ← executionJob.jobs
                 } {
                   runningJob = Some(moleJob)
-                  val result =
-                    try moleJob.perform(executionJob.executionContext)
-                    finally runningJob = None
 
-                  MoleJob.finish(moleJob, result, executionJob.executionContext)
+                  val taskExecutionDirectory = executionJob.executionContext.moleExecutionDirectory.newDir("taskExecution")
+                  val result =
+                    try {
+                      val executionContext = TaskExecutionContext.complete(
+                        partialTaskExecutionContext = executionJob.executionContext,
+                        taskExecutionDirectory = taskExecutionDirectory,
+                        localEnvironment = environment
+                      )
+
+                      try moleJob.perform(executionContext)
+                      finally runningJob = None
+                    }
+                    finally taskExecutionDirectory.recursiveDelete
+
+                  MoleJob.finish(moleJob, result)
 
                   result match {
                     case Right(_: MoleJob.SubMoleCanceled) ⇒

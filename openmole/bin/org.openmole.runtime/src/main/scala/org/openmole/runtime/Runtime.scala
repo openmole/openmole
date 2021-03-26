@@ -147,7 +147,6 @@ class Runtime {
       environment.start()
 
       try {
-
         val taskExecutionContext = TaskExecutionContext.partial(
           applicationExecutionDirectory = newFile.makeNewDir("application"),
           moleExecutionDirectory = newFile.makeNewDir("runtime"),
@@ -167,15 +166,11 @@ class Runtime {
         for (toProcess ← allMoleJobs)
           environment.submit(
             toProcess,
-            TaskExecutionContext.complete(
-              taskExecutionContext,
-              taskExecutionDirectory = newFile.makeNewDir("task"),
-              localEnvironment = environment)
+            taskExecutionContext
           )
 
         saver.waitAllFinished
-      }
-      finally environment.stop()
+      } finally environment.stop()
 
       val endExecutionTime = System.currentTimeMillis
 
