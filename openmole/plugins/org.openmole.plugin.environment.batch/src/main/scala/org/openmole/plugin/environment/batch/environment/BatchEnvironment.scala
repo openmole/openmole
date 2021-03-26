@@ -432,7 +432,7 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
   lazy val plugins = PluginManager.pluginsForClass(this.getClass)
   lazy val jobStore = JobStore(services.newFile.makeNewDir("jobstore"))
 
-  override def submit(job: Job) = JobManager ! Manage(job, this)
+  override def submit(job: JobGroup) = JobManager ! Manage(job, this)
 
   def execute(batchExecutionJob: BatchExecutionJob): BatchJobControl
 

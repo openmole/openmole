@@ -43,7 +43,7 @@ import scala.jdk.CollectionConverters._
 import scala.collection.mutable.HashMap
 import util.{ Failure, Success }
 import org.openmole.core.workflow.execution.Environment.RuntimeLog
-import org.openmole.core.workflow.job.MoleJob
+import org.openmole.core.workflow.job.Job
 import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.lock._
 import org.openmole.tool.outputredirection.OutputRedirection
@@ -137,7 +137,7 @@ class Runtime {
       val runnableTasks = serializerService.deserializeReplaceFiles[Iterable[RunnableTask]](executionMessage.jobs, Map() ++ usedFiles)
 
       val saver = new ContextSaver(runnableTasks.size)
-      val allMoleJobs = runnableTasks.map { t ⇒ MoleJob(t.task, t.context, t.id, saver.save, () ⇒ false) }
+      val allMoleJobs = runnableTasks.map { t ⇒ Job(t.task, t.context, t.id, saver.save, () ⇒ false) }
 
       val beginExecutionTime = System.currentTimeMillis
 
@@ -170,7 +170,8 @@ class Runtime {
           )
 
         saver.waitAllFinished
-      } finally environment.stop()
+      }
+      finally environment.stop()
 
       val endExecutionTime = System.currentTimeMillis
 

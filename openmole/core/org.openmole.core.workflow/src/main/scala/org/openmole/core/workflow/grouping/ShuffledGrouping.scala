@@ -36,7 +36,7 @@ object ShuffledGrouping {
  */
 class ShuffledGrouping(numberOfBatch: Int) extends Grouping {
 
-  override def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])])(implicit newGroup: NewGroup, randomProvider: RandomProvider): MoleJobGroup =
+  override def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[Job])])(implicit newGroup: NewGroup, randomProvider: RandomProvider): MoleJobGroup =
     new MoleJobGroup(randomProvider().nextInt(numberOfBatch))
 
 }

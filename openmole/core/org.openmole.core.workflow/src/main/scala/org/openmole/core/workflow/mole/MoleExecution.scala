@@ -50,8 +50,8 @@ object MoleExecution extends JavaLogger {
 
   class Started extends Event[MoleExecution]
   case class Finished(canceled: Boolean) extends Event[MoleExecution]
-  case class JobCreated(moleJob: MoleJob, capsule: MoleCapsule) extends Event[MoleExecution]
-  case class JobSubmitted(moleJob: Job, capsule: MoleCapsule, environment: Environment) extends Event[MoleExecution]
+  case class JobCreated(moleJob: Job, capsule: MoleCapsule) extends Event[MoleExecution]
+  case class JobSubmitted(moleJob: JobGroup, capsule: MoleCapsule, environment: Environment) extends Event[MoleExecution]
   case class JobFinished(moleJob: MoleJobId, context: Context, capsule: MoleCapsule) extends Event[MoleExecution]
   case class Cleaned() extends Event[MoleExecution]
 
@@ -192,7 +192,7 @@ object MoleExecution extends JavaLogger {
             try {
               val savedContext = subMoleExecutionState.masterCapsuleRegistry.remove(capsule, ticket.parentOrException).getOrElse(Context.empty)
               val runtimeTask = capsule.runtimeTask(subMoleExecutionState.moleExecution.mole, subMoleExecutionState.moleExecution.sources, subMoleExecutionState.moleExecution.hooks)
-              val moleJob: MoleJob = MoleJob(runtimeTask, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, (_, _) ⇒ (), () ⇒ subMoleExecutionState.canceled)
+              val moleJob: Job = Job(runtimeTask, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, (_, _) ⇒ (), () ⇒ subMoleExecutionState.canceled)
 
               eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
 
@@ -209,7 +209,7 @@ object MoleExecution extends JavaLogger {
                 }
                 finally taskExecutionDirectory.recursiveDelete
 
-              MoleJob.finish(moleJob, result) // Does nothing
+              Job.finish(moleJob, result) // Does nothing
 
               result match {
                 case Left(newContext) ⇒ subMoleExecutionState.masterCapsuleRegistry.register(capsule, ticket.parentOrException, MasterCapsule.toPersist(master, newContext))
@@ -228,7 +228,7 @@ object MoleExecution extends JavaLogger {
 
           val newContext = subMoleExecutionState.moleExecution.implicits + sourced + context
           val runtimeTask = capsule.runtimeTask(subMoleExecutionState.moleExecution.mole, subMoleExecutionState.moleExecution.sources, subMoleExecutionState.moleExecution.hooks)
-          val moleJob: MoleJob = MoleJob(runtimeTask, newContext, jobId, onJobFinished, () ⇒ subMoleExecutionState.canceled)
+          val moleJob: Job = Job(runtimeTask, newContext, jobId, onJobFinished, () ⇒ subMoleExecutionState.canceled)
 
           eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
 
@@ -408,7 +408,7 @@ object MoleExecution extends JavaLogger {
     id
   }
 
-  def group(moleExecution: MoleExecution, moleJob: MoleJob, context: Context, capsule: MoleCapsule) = {
+  def group(moleExecution: MoleExecution, moleJob: Job, context: Context, capsule: MoleCapsule) = {
     moleExecution.grouping.get(capsule) match {
       case Some(strategy) ⇒
         val groups = moleExecution.waitingJobs.getOrElseUpdate(capsule, collection.mutable.Map())
@@ -420,16 +420,16 @@ object MoleExecution extends JavaLogger {
         if (strategy.complete(jobs)) {
           groups -= category
           moleExecution.nbWaiting -= jobs.size
-          Some(Job(moleExecution, jobs.toVector) → capsule)
+          Some(JobGroup(moleExecution, jobs.toVector) → capsule)
         }
         else None
       case None ⇒
-        val job = Job(moleExecution, Vector(moleJob))
+        val job = JobGroup(moleExecution, Vector(moleJob))
         Some(job → capsule)
     }
   }.foreach { case (j, c) ⇒ submit(moleExecution, j, c) }
 
-  def submit(moleExecution: MoleExecution, job: Job, capsule: MoleCapsule) = {
+  def submit(moleExecution: MoleExecution, job: JobGroup, capsule: MoleCapsule) = {
     val env = moleExecution.environmentForCapsule.getOrElse(capsule, moleExecution.defaultEnvironment)
     Environment.submit(env, job)
     moleExecution.executionContext.services.eventDispatcher.trigger(moleExecution, MoleExecution.JobSubmitted(job, capsule, env))
@@ -439,7 +439,7 @@ object MoleExecution extends JavaLogger {
     for {
       (capsule, groups) ← moleExecution.waitingJobs
       (_, jobs) ← groups.toList
-    } submit(moleExecution, Job(moleExecution, jobs), capsule)
+    } submit(moleExecution, JobGroup(moleExecution, jobs), capsule)
     moleExecution.nbWaiting = 0
     moleExecution.waitingJobs.clear
   }
@@ -675,7 +675,7 @@ class MoleExecution(
 
   private[mole] val newGroup = NewGroup()
 
-  private[mole] val waitingJobs = collection.mutable.Map[MoleCapsule, collection.mutable.Map[MoleJobGroup, ListBuffer[MoleJob]]]()
+  private[mole] val waitingJobs = collection.mutable.Map[MoleCapsule, collection.mutable.Map[MoleJobGroup, ListBuffer[Job]]]()
   private[mole] var nbWaiting = 0
 
   private[mole] val completed = {

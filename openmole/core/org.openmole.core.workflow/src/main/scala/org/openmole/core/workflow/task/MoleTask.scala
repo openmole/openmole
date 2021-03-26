@@ -28,7 +28,7 @@ import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
-import org.openmole.core.workflow.job.MoleJob
+import org.openmole.core.workflow.job.Job
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.lock._
@@ -65,11 +65,12 @@ object MoleTask {
   }
 
   /**
-   * Check if a given [[MoleJob]] contains a [[MoleTask]] (a mole job wraps a task which is not necessarily a Mole Task).
+   * Check if a given [[Job]] contains a [[MoleTask]] (a mole job wraps a task which is not necessarily a Mole Task).
+   *
    * @param moleJob
    * @return
    */
-  def containsMoleTask(moleJob: MoleJob) = isMoleTask(moleJob.task.task)
+  def containsMoleTask(moleJob: Job) = isMoleTask(moleJob.task.task)
 
   def isMoleTask(task: Task) =
     task match {

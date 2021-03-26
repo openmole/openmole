@@ -28,7 +28,7 @@ import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.serializer.{ PluginAndFilesListing, SerializerService }
 import org.openmole.core.workflow.execution.{ Environment, ExecutionJob }
 import org.openmole.core.workflow.execution.ExecutionState.{ DONE, ExecutionState, FAILED, KILLED, READY }
-import org.openmole.core.workflow.job.Job
+import org.openmole.core.workflow.job.JobGroup
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment.REPLClassCache
 import org.openmole.plugin.environment.batch.environment.JobStore.StoredJob
@@ -116,12 +116,12 @@ object BatchExecutionJob {
     bfs ++ plugins.flatten.toList.distinct
   }
 
-  def apply(job: Job, relpClassesCache: REPLClassCache, jobStore: JobStore)(implicit serializerService: SerializerService, tmpDirectory: TmpDirectory, fileService: FileService) = {
-    val pluginsAndFiles = serializerService.pluginsAndFiles(Job.moleJobs(job).map(RunnableTask(_)))
+  def apply(job: JobGroup, relpClassesCache: REPLClassCache, jobStore: JobStore)(implicit serializerService: SerializerService, tmpDirectory: TmpDirectory, fileService: FileService) = {
+    val pluginsAndFiles = serializerService.pluginsAndFiles(JobGroup.moleJobs(job).map(RunnableTask(_)))
 
     def closureBundleAndPlugins = {
       val replClasses = pluginsAndFiles.replClasses
-      relpClassesCache.cache(Job.moleExecution(job), pluginsAndFiles.replClasses.map(_.getName).toSet, preCompute = false) { _ ⇒
+      relpClassesCache.cache(JobGroup.moleExecution(job), pluginsAndFiles.replClasses.map(_.getName).toSet, preCompute = false) { _ ⇒
         BatchExecutionJob.replClassesToPlugins(replClasses)
       }
     }
@@ -137,7 +137,7 @@ class BatchExecutionJob(val storedJob: StoredJob, val files: Seq[File], val plug
 
   def moleJobIds = storedJob.storedMoleJobs.map(_.id)
   private def job(implicit serializerService: SerializerService) = JobStore.load(storedJob)
-  def runnableTasks(implicit serializerService: SerializerService) = Job.moleJobs(job).map(RunnableTask(_))
+  def runnableTasks(implicit serializerService: SerializerService) = JobGroup.moleJobs(job).map(RunnableTask(_))
 
   private[environment] var _state: ExecutionState = READY
 

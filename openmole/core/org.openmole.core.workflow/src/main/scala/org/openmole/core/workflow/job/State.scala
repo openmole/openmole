@@ -22,8 +22,8 @@ object State extends Enumeration {
   /**
    * Enumeration of possible job states
    *
-   * @param name name of the state
-   * @param isFinal Get if the state is a final state. Meaning there is for the [[MoleJob]] to change state again.
+   * @param name    name of the state
+   * @param isFinal Get if the state is a final state. Meaning there is for the [[Job]] to change state again.
    */
   case class State(name: String, isFinal: Boolean = false) extends Val(name)
 

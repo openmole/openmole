@@ -19,14 +19,14 @@ package org.openmole.core.workflow.execution
 
 import java.util.concurrent.atomic.AtomicLong
 import java.util.logging.Level
-
 import org.openmole.core.event.{ Event, EventDispatcher }
-import org.openmole.core.preference.{ PreferenceLocation, Preference }
+import org.openmole.core.preference.{ Preference, PreferenceLocation }
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.tools.service._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.core.workflow.job.{ Job, MoleJob, MoleJobId }
+import org.openmole.core.workflow.job.{ JobGroup, Job, MoleJobId }
+import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workflow.tools.{ ExceptionEvent, Name }
 import org.openmole.tool.cache._
@@ -58,9 +58,8 @@ object Environment {
       case _                        ⇒ Seq()
     }
 
-  def submit(environment: Environment, job: Job) = {
-    val moleExecution = Job.moleExecution(job)
-    import moleExecution.executionContext.services._
+  def submit(environment: Environment, job: JobGroup) = {
+    val moleExecution = JobGroup.moleExecution(job)
 
     environment match {
       case env: SubmissionEnvironment ⇒ env.submit(job)
@@ -90,7 +89,7 @@ sealed trait Environment <: Name {
  * This trait is implemented by environment plugins, and not the more generic [[Environment]]
  */
 trait SubmissionEnvironment <: Environment {
-  def submit(job: Job)
+  def submit(job: JobGroup)
   def jobs: Iterable[ExecutionJob]
   def runningJobs: Seq[ExecutionJob]
 
@@ -136,10 +135,10 @@ class LocalEnvironment(
 
   def nbJobInQueue = pool().waiting
 
-  def submit(job: Job, executionContext: TaskExecutionContext.Partial): Unit =
-    submit(LocalExecutionJob(executionContext, Job.moleJobs(job), Some(Job.moleExecution(job))))
+  def submit(job: JobGroup, executionContext: TaskExecutionContext.Partial): Unit =
+    submit(LocalExecutionJob(executionContext, JobGroup.moleJobs(job), Some(JobGroup.moleExecution(job))))
 
-  def submit(moleJob: MoleJob, executionContext: TaskExecutionContext.Partial): Unit =
+  def submit(moleJob: Job, executionContext: TaskExecutionContext.Partial): Unit =
     submit(LocalExecutionJob(executionContext, List(moleJob), None))
 
   private def submit(ejob: LocalExecutionJob): Unit = {

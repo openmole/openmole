@@ -31,9 +31,9 @@ object OnVariableGrouping {
 
 class OnVariableGrouping(numberOfMoleJobs: Option[Int], prototypes: Val[_]*) extends Grouping {
 
-  def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])])(implicit newGroup: NewGroup, randomProvider: RandomProvider): MoleJobGroup =
+  def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[Job])])(implicit newGroup: NewGroup, randomProvider: RandomProvider): MoleJobGroup =
     new MoleJobGroup(prototypes.flatMap { context.option(_) }.toSeq: _*)
 
-  override def complete(jobs: Iterable[MoleJob]) =
+  override def complete(jobs: Iterable[Job]) =
     numberOfMoleJobs map { jobs.size >= _ } getOrElse (false)
 }

@@ -24,7 +24,7 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.tools.service._
 import org.openmole.core.workflow.execution.Environment.RuntimeLog
-import org.openmole.core.workflow.job.MoleJob._
+import org.openmole.core.workflow.job.Job._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.task.Task
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
@@ -42,7 +42,7 @@ package object message {
   }
 
   object RunnableTask {
-    def apply(moleJob: MoleJob) = new RunnableTask(moleJob.task, moleJob.context, moleJob.id)
+    def apply(moleJob: Job) = new RunnableTask(moleJob.task, moleJob.context, moleJob.id)
   }
 
   class RunnableTask(val task: RuntimeTask, val context: Context, val id: MoleJobId)

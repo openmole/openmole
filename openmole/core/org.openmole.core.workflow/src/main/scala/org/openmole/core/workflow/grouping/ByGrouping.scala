@@ -35,12 +35,12 @@ object ByGrouping {
  */
 class ByGrouping(numberOfMoleJobs: Int) extends Grouping {
 
-  override def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[MoleJob])])(implicit newGroup: NewGroup, randomProvider: RandomProvider): MoleJobGroup = {
+  override def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[Job])])(implicit newGroup: NewGroup, randomProvider: RandomProvider): MoleJobGroup = {
     groups.find { case (_, g) ⇒ g.size < numberOfMoleJobs } match {
       case Some((mg, _)) ⇒ mg
       case None          ⇒ newGroup()
     }
   }
 
-  override def complete(jobs: Iterable[MoleJob]) = jobs.size >= numberOfMoleJobs
+  override def complete(jobs: Iterable[Job]) = jobs.size >= numberOfMoleJobs
 }

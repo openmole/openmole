@@ -4,8 +4,8 @@ import java.io.File
 
 import org.openmole.core.context.Context
 import org.openmole.core.serializer.SerializerService
-import org.openmole.core.workflow.job.MoleJob.Canceled
-import org.openmole.core.workflow.job.{ Job, MoleJob, RuntimeTask }
+import org.openmole.core.workflow.job.Job.Canceled
+import org.openmole.core.workflow.job.{ JobGroup, Job, RuntimeTask }
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.task.Task
 import org.openmole.core.workspace._
@@ -13,12 +13,12 @@ import org.openmole.tool.file._
 
 object JobStore {
 
-  def store(jobStore: JobStore, job: Job)(implicit serializer: SerializerService): StoredJob = {
-    val moleJobs = Job.moleJobs(job)
-    new StoredJob(Job.moleExecution(job), moleJobs.toArray.map(mj ⇒ store(jobStore, mj)))
+  def store(jobStore: JobStore, job: JobGroup)(implicit serializer: SerializerService): StoredJob = {
+    val moleJobs = JobGroup.moleJobs(job)
+    new StoredJob(JobGroup.moleExecution(job), moleJobs.toArray.map(mj ⇒ store(jobStore, mj)))
   }
 
-  def store(jobStore: JobStore, moleJob: MoleJob)(implicit serializer: SerializerService): StoredMoleJob = {
+  def store(jobStore: JobStore, moleJob: Job)(implicit serializer: SerializerService): StoredMoleJob = {
     val f = TmpDirectory(jobStore.store).newFile("storedjob", ".bin.gz")
     f.withGzippedOutputStream { os ⇒ serializer.serialize(moleJob.context, os) }
     new StoredMoleJob(
@@ -29,14 +29,14 @@ object JobStore {
       moleJob.subMoleCanceled)
   }
 
-  def load(storedJob: StoredJob)(implicit serializerService: SerializerService): Job = {
+  def load(storedJob: StoredJob)(implicit serializerService: SerializerService): JobGroup = {
     val moleJobs = storedJob.storedMoleJobs.map(load)
-    Job(storedJob.moleExecution, moleJobs)
+    JobGroup(storedJob.moleExecution, moleJobs)
   }
 
-  def load(storedMoleJob: StoredMoleJob)(implicit serializerService: SerializerService): MoleJob = {
+  def load(storedMoleJob: StoredMoleJob)(implicit serializerService: SerializerService): Job = {
     val context = storedMoleJob.context.withGzippedInputStream { is ⇒ serializerService.deserialize[Context](is) }
-    MoleJob(
+    Job(
       task = storedMoleJob.task,
       context = context,
       id = storedMoleJob.id,
@@ -53,7 +53,7 @@ object JobStore {
     val context:         File,
     val task:            RuntimeTask,
     val id:              Long,
-    val jobFinished:     MoleJob.JobFinished,
+    val jobFinished:     Job.JobFinished,
     val subMoleCanceled: Canceled) {
   }
 

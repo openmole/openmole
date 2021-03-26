@@ -41,7 +41,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
   import LocalExecutor.Log._
 
   var stop: Boolean = false
-  @volatile var runningJob: Option[MoleJob] = None
+  @volatile var runningJob: Option[Job] = None
 
   override def run = try {
     while (!stop) {
@@ -74,10 +74,10 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                     }
                     finally taskExecutionDirectory.recursiveDelete
 
-                  MoleJob.finish(moleJob, result)
+                  Job.finish(moleJob, result)
 
                   result match {
-                    case Right(_: MoleJob.SubMoleCanceled) ⇒
+                    case Right(_: Job.SubMoleCanceled) ⇒
                       environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob, ExecutionState.KILLED, ExecutionState.RUNNING))
                     case Right(e) ⇒
                       environment._failed.incrementAndGet()

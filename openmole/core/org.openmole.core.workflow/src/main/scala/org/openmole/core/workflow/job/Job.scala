@@ -17,46 +17,84 @@
 
 package org.openmole.core.workflow.job
 
-import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.job.State._
+import org.openmole.core.workflow.task._
+import org.openmole.core.context._
 
-/**
- * A computation job to be executed
- */
-sealed trait Job
+case class RuntimeTask(task: Task, strain: Boolean)
 
 object Job {
 
-  def apply(moleExecution: MoleExecution, moleJobs: Iterable[MoleJob]): Job =
-    (moleJobs.size == 1) match {
-      case true  ⇒ Job(moleExecution, moleJobs.head)
-      case false ⇒ MultiJob(moleExecution, moleJobs.toArray)
-    }
+  implicit val moleJobOrdering = Ordering.by((_: Job).id)
 
-  def apply(moleExecution: MoleExecution, moleJob: MoleJob): Job = SingleJob(moleExecution, moleJob)
-
-  case class SingleJob(moleExecution: MoleExecution, moleJob: MoleJob) extends Job
-  case class MultiJob(moleExecution: MoleExecution, moleJobs: Array[MoleJob]) extends Job
+  type JobFinished = (MoleJobId, Either[Context, Throwable]) ⇒ Unit
+  type Canceled = () ⇒ Boolean
 
   /**
-   * the [[MoleJob]] in this job
+   * Construct from context and UUID
+   * @param task
+   * @param context context for prototypes and values
+   * @param id UUID
+   * @param jobFinished
    * @return
    */
-  def moleJobs(job: Job) =
-    job match {
-      case sj: SingleJob ⇒ Vector(sj.moleJob)
-      case mj: MultiJob  ⇒ mj.moleJobs.toIterable
-    }
+  def apply(
+    task:            RuntimeTask,
+    context:         Context,
+    id:              Long,
+    jobFinished:     Job.JobFinished,
+    subMoleCanceled: Canceled) = {
+    val (prototypes, values) = compressContext(context)
+    new Job(task, prototypes.toArray, values.toArray, id, jobFinished, subMoleCanceled)
+  }
 
-  /**
-   * Execution of the job
-   * @return
-   */
-  def moleExecution(job: Job): MoleExecution =
-    job match {
-      case sj: SingleJob ⇒ sj.moleExecution
-      case mj: MultiJob  ⇒ mj.moleExecution
-    }
+  def compressContext(context: Context) =
+    context.variables.toSeq.map {
+      case (_, v) ⇒ (v.asInstanceOf[Variable[Any]].prototype, v.value)
+    }.unzip
 
-  implicit def ordering = Ordering.by[Job, Iterable[MoleJob]](moleJobs)
+  sealed trait StateChange
+  case object Unchanged extends StateChange
+  case class Changed(old: State, state: State, context: Context) extends StateChange
+
+  def finish(moleJob: Job, result: Either[Context, Throwable]) = moleJob.jobFinished(moleJob.id, result)
+
+  class SubMoleCanceled extends Exception
+
+}
+
+import Job._
+
+/**
+ * Atomic executable job, wrapping a [[Task]]
+ *
+ * @param task task to be executed
+ * @param prototypes prototypes for the task
+ * @param values values of prototypes
+ * @param jobFinished what to do when the state is changed
+ */
+class Job(
+  val task:            RuntimeTask,
+  prototypes:          Array[Val[Any]],
+  values:              Array[Any],
+  val id:              MoleJobId,
+  val jobFinished:     Job.JobFinished,
+  val subMoleCanceled: Canceled) {
+
+  def context: Context =
+    Context((prototypes zip values).map { case (p, v) ⇒ Variable(p, v) }: _*)
+
+  def perform(executionContext: TaskExecutionContext): Either[Context, Throwable] =
+    if (!subMoleCanceled()) {
+      val ctx = context
+      try {
+        val performResult = task.task.perform(ctx, executionContext)
+        Left(if (task.strain) ctx + performResult else performResult)
+      }
+      catch {
+        case t: Throwable ⇒ Right(t)
+      }
+    }
+    else Right(new SubMoleCanceled)
 
 }
