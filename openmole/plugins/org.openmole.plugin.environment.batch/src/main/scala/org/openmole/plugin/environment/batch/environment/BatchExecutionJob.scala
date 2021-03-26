@@ -116,7 +116,7 @@ object BatchExecutionJob {
     bfs ++ plugins.flatten.toList.distinct
   }
 
-  def apply(job: JobGroup, relpClassesCache: REPLClassCache, jobStore: JobStore)(implicit serializerService: SerializerService, tmpDirectory: TmpDirectory, fileService: FileService) = {
+  def apply(id: Long, job: JobGroup, relpClassesCache: REPLClassCache, jobStore: JobStore)(implicit serializerService: SerializerService, tmpDirectory: TmpDirectory, fileService: FileService) = {
     val pluginsAndFiles = serializerService.pluginsAndFiles(JobGroup.moleJobs(job).map(RunnableTask(_)))
 
     def closureBundleAndPlugins = {
@@ -129,11 +129,11 @@ object BatchExecutionJob {
     val plugins = pluginsAndFiles.plugins ++ closureBundleAndPlugins
     val storedJob = JobStore.store(jobStore, job)
 
-    new BatchExecutionJob(storedJob, pluginsAndFiles.files, plugins)
+    new BatchExecutionJob(id, storedJob, pluginsAndFiles.files, plugins)
   }
 }
 
-class BatchExecutionJob(val storedJob: StoredJob, val files: Seq[File], val plugins: Seq[File]) extends ExecutionJob { bej ⇒
+class BatchExecutionJob(val id: Long, val storedJob: StoredJob, val files: Seq[File], val plugins: Seq[File]) extends ExecutionJob { bej ⇒
 
   def moleJobIds = storedJob.storedMoleJobs.map(_.id)
   private def job(implicit serializerService: SerializerService) = JobStore.load(storedJob)

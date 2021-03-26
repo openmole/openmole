@@ -53,7 +53,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
           try {
             val (log, output) =
               withRedirectedOutput(executionJob, environment.deinterleave) {
-                environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob, ExecutionState.RUNNING, ExecutionState.SUBMITTED))
+                environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob.id, executionJob, ExecutionState.RUNNING, ExecutionState.SUBMITTED))
 
                 for {
                   moleJob ← executionJob.jobs
@@ -78,13 +78,13 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
 
                   result match {
                     case Right(_: Job.SubMoleCanceled) ⇒
-                      environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob, ExecutionState.KILLED, ExecutionState.RUNNING))
+                      environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob.id, executionJob, ExecutionState.KILLED, ExecutionState.RUNNING))
                     case Right(e) ⇒
                       environment._failed.incrementAndGet()
-                      environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob, ExecutionState.FAILED, ExecutionState.RUNNING))
+                      environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob.id, executionJob, ExecutionState.FAILED, ExecutionState.RUNNING))
                       environment.eventDispatcherService.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob.id))
                     case _ ⇒
-                      environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob, ExecutionState.DONE, ExecutionState.RUNNING))
+                      environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob.id, executionJob, ExecutionState.DONE, ExecutionState.RUNNING))
                       environment._done.incrementAndGet()
 
                   }

@@ -72,10 +72,10 @@ object JobManager extends JavaLogger { self ⇒
       case msg: Error       ⇒ dispatch(msg)
       case msg: Kill        ⇒ dispatch(msg)
 
-      case Manage(job, environment) ⇒
-        val bej = BatchExecutionJob(job, environment.relpClassesCache, environment.jobStore)
+      case Manage(id, job, environment) ⇒
+        val bej = BatchExecutionJob(id, job, environment.relpClassesCache, environment.jobStore)
         ExecutionJobRegistry.register(environment.registry, bej)
-        services.eventDispatcher.trigger(environment, Environment.JobSubmitted(bej))
+        services.eventDispatcher.trigger(environment, Environment.JobSubmitted(id, bej))
         self ! Submit(bej, environment)
 
       case Delay(msg, delay) ⇒

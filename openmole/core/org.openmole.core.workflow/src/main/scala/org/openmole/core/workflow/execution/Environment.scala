@@ -36,8 +36,8 @@ import scala.ref.WeakReference
 object Environment {
   val maxExceptionsLog = PreferenceLocation("Environment", "MaxExceptionsLog", Some(200))
 
-  case class JobSubmitted(job: ExecutionJob) extends Event[Environment]
-  case class JobStateChanged(job: ExecutionJob, newState: ExecutionState, oldState: ExecutionState) extends Event[Environment]
+  case class JobSubmitted(id: Long, job: ExecutionJob) extends Event[Environment]
+  case class JobStateChanged(id: Long, job: ExecutionJob, newState: ExecutionState, oldState: ExecutionState) extends Event[Environment]
   case class ExceptionRaised(exception: Throwable, level: Level) extends Event[Environment] with ExceptionEvent
   case class ExecutionJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level) extends Event[Environment] with ExceptionEvent
   case class MoleJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level, moleJob: MoleJobId) extends Event[Environment] with ExceptionEvent
@@ -58,7 +58,7 @@ object Environment {
       case _                        ⇒ Seq()
     }
 
-  def submit(environment: Environment, job: JobGroup) = {
+  def submit(environment: Environment, job: JobGroup): Long = {
     val moleExecution = JobGroup.moleExecution(job)
 
     environment match {
@@ -89,7 +89,7 @@ sealed trait Environment <: Name {
  * This trait is implemented by environment plugins, and not the more generic [[Environment]]
  */
 trait SubmissionEnvironment <: Environment {
-  def submit(job: JobGroup)
+  def submit(job: JobGroup): Long
   def jobs: Iterable[ExecutionJob]
   def runningJobs: Seq[ExecutionJob]
 
@@ -132,19 +132,24 @@ class LocalEnvironment(
   val pool = Cache(new ExecutorPool(nbThreads, WeakReference(this), threadProvider))
 
   def runningJobs = pool().runningJobs
-
   def nbJobInQueue = pool().waiting
 
-  def submit(job: JobGroup, executionContext: TaskExecutionContext.Partial): Unit =
-    submit(LocalExecutionJob(executionContext, JobGroup.moleJobs(job), Some(JobGroup.moleExecution(job))))
+  def submit(job: JobGroup, executionContext: TaskExecutionContext.Partial): Long = {
+    val id = jobId.getAndIncrement()
+    submit(LocalExecutionJob(id, executionContext, JobGroup.moleJobs(job), Some(JobGroup.moleExecution(job))))
+    id
+  }
 
-  def submit(moleJob: Job, executionContext: TaskExecutionContext.Partial): Unit =
-    submit(LocalExecutionJob(executionContext, List(moleJob), None))
+  def submit(moleJob: Job, executionContext: TaskExecutionContext.Partial): Long = {
+    val id = jobId.getAndIncrement()
+    submit(LocalExecutionJob(id, executionContext, List(moleJob), None))
+    id
+  }
 
   private def submit(ejob: LocalExecutionJob): Unit = {
     pool().enqueue(ejob)
-    eventDispatcherService.trigger(this, Environment.JobSubmitted(ejob))
-    eventDispatcherService.trigger(this, Environment.JobStateChanged(ejob, SUBMITTED, READY))
+    eventDispatcherService.trigger(this, Environment.JobSubmitted(ejob.id, ejob))
+    eventDispatcherService.trigger(this, Environment.JobStateChanged(ejob.id, ejob, SUBMITTED, READY))
   }
 
   def submitted: Long = pool().waiting
@@ -153,6 +158,7 @@ class LocalEnvironment(
   override def start() = {}
   override def stop() = pool().stop()
 
+  private val jobId = new AtomicLong(0L)
   private[execution] val _done = new AtomicLong(0L)
   private[execution] val _failed = new AtomicLong(0L)
 

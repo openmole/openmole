@@ -364,7 +364,7 @@ object BatchEnvironment {
         case _ ⇒
       }
 
-      eventDispatcher.trigger(environment, Environment.JobStateChanged(job, newState, job.state))
+      eventDispatcher.trigger(environment, Environment.JobStateChanged(job.id, job, newState, job.state))
       job._state = newState
     }
   }
@@ -432,7 +432,11 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
   lazy val plugins = PluginManager.pluginsForClass(this.getClass)
   lazy val jobStore = JobStore(services.newFile.makeNewDir("jobstore"))
 
-  override def submit(job: JobGroup) = JobManager ! Manage(job, this)
+  override def submit(job: JobGroup) = {
+    val id = jobId.getAndIncrement()
+    JobManager ! Manage(id, job, this)
+    id
+  }
 
   def execute(batchExecutionJob: BatchExecutionJob): BatchJobControl
 
@@ -443,6 +447,7 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
   def running: Long = jobs.count { _.state == ExecutionState.RUNNING }
   def runningJobs = jobs.filter(_.state == ExecutionState.RUNNING)
 
+  private val jobId = new AtomicLong(0L)
   private[environment] val _done = new AtomicLong(0L)
   private[environment] val _failed = new AtomicLong(0L)
 

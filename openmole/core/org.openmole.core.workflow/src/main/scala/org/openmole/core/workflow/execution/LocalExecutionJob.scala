@@ -11,17 +11,21 @@ import org.openmole.core.workflow.task.TaskExecutionContext
  * @param moleExecution
  */
 object LocalExecutionJob {
+
   def apply(
+    id:               Long,
     executionContext: TaskExecutionContext.Partial,
     jobs:             Iterable[Job],
     moleExecution:    Option[MoleExecution]) =
     new LocalExecutionJob(
+      id = id,
       executionContext = executionContext,
       jobs = jobs.toArray,
       _moleExecution = moleExecution.getOrElse(null))
+
 }
 
-case class LocalExecutionJob(executionContext: TaskExecutionContext.Partial, jobs: Array[Job], _moleExecution: MoleExecution) extends ExecutionJob {
+case class LocalExecutionJob(id: Long, executionContext: TaskExecutionContext.Partial, jobs: Array[Job], _moleExecution: MoleExecution) extends ExecutionJob {
   def moleJobIds = jobs.map(_.id)
   def moleExecution: Option[MoleExecution] = Option(_moleExecution)
 }
