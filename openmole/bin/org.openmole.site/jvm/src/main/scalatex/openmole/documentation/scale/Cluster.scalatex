@@ -135,8 +135,8 @@ val env =
     "login",
     "machine.domain",
     // optional parameters
-    gres = List( Gres("resource", 1) ),
-    constraints = List("constraint1", "constraint2")
+    queue = "short-jobs",
+    wallTime = 1 hour
   )""")
 
 @br

@@ -253,13 +253,14 @@ object DocumentationPages {
   lazy val abc = DocumentationPage.fromScalatex(name = "ABC", content = scalatex.documentation.explore.ABC, title = Some("Approximate Bayesian computation"))
 
   // Scale
-  def scalePages = pageNode(scale, Vector(multithread, ssh, cluster, egi))
+  def scalePages = pageNode(scale, Vector(multithread, ssh, cluster, egi, dispatch))
 
   lazy val scale = DocumentationPage.fromScalatex(name = "Scale Up", content = scalatex.documentation.scale.Scale, title = Some("Scale Up Your Experiments"))
   lazy val multithread = DocumentationPage.fromScalatex(name = "Multithread", content = scalatex.documentation.scale.Multithread)
   lazy val ssh = DocumentationPage.fromScalatex(name = "SSH", content = scalatex.documentation.scale.SSH)
   lazy val cluster = DocumentationPage.fromScalatex(name = "Cluster", content = scalatex.documentation.scale.Cluster)
   lazy val egi = DocumentationPage.fromScalatex(name = "EGI", content = scalatex.documentation.scale.EGI, title = Some("European Grid Infrastructure"))
+  lazy val dispatch = DocumentationPage.fromScalatex(name = "Dispatch", content = scalatex.documentation.scale.Dispatch, title = Some("Dispatch Environment"))
 
   // Language
   def languagePages = pageNode(language, Vector(fileManagement, scalaFunction, hook, transition, source, capsule, moleTask))

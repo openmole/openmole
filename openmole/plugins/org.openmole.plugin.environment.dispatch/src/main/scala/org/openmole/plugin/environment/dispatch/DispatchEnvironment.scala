@@ -3,15 +3,12 @@ package org.openmole.plugin.environment.dispatch
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.preference.{ Preference, PreferenceLocation }
-import org.openmole.core.threadprovider.{ IUpdatable, Updater }
 import org.openmole.core.workflow.execution.ExecutionState.{ DONE, ExecutionState, FAILED, KILLED, READY, RUNNING, SUBMITTED }
 import org.openmole.core.workflow.execution.{ Environment, EnvironmentProvider, ExecutionJob, SubmissionEnvironment }
 import org.openmole.core.workflow.job.{ JobGroup, MoleJobId }
 import org.openmole.core.workflow.tools.ExceptionEvent
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.core.event._
-
-import squants.time.Time
 
 import java.util.concurrent.atomic.AtomicLong
 import scala.collection.mutable
@@ -98,20 +95,18 @@ object DispatchEnvironment {
   }
 
   def apply(
-    destination: Seq[DestinationProvider],
-    refresh:     OptionalArgument[Time]   = None,
+    slot:        Seq[DestinationProvider],
     name:        OptionalArgument[String] = None)(implicit services: BatchEnvironment.Services, varName: sourcecode.Name) = {
     import services.eventDispatcher
 
     EnvironmentProvider.multiple { ms ⇒
-      val environmentInstances = destination.flatMap(e ⇒ EnvironmentProvider.build(e.environment, ms))
+      val environmentInstances = slot.flatMap(e ⇒ EnvironmentProvider.build(e.environment, ms))
       val environmentInstancesMap = environmentInstances.toMap
 
       val dispatchEnvironment =
         new DispatchEnvironment(
-          destination = destination.map(e ⇒ Destination(environmentInstancesMap(e.environment), e.slot)),
+          destination = slot.map(e ⇒ Destination(environmentInstancesMap(e.environment), e.slot)),
           name = Some(name.getOrElse(varName.value)),
-          refresh = refresh,
           services = services.set(ms)
         )
 
@@ -128,7 +123,6 @@ object DispatchEnvironment {
 class DispatchEnvironment(
   val destination: Seq[DispatchEnvironment.Destination],
   val name:        Option[String],
-  val refresh:     Option[Time],
   val services:    BatchEnvironment.Services) extends SubmissionEnvironment { env ⇒
 
   val state = new DispatchEnvironment.State
