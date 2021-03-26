@@ -16,7 +16,7 @@ Please note that the service is reset every 6 hours, so don't be surprised if yo
 @h3{Prerequisites}
 
 @ul
-  @li{@i{Java >= 9}: to run on your own computer, OpenMOLE requires Java version 9 or above. Check our @aa("FAQ", href := faq.file) to access your Java version information.}
+  @li{@i{Java >= 11}: to run on your own computer, OpenMOLE requires Java version 11 or above. Check our @aa("FAQ", href := faq.file) to access your Java version information.}
   @li{@i{Singularity}: some OpenMOLE tasks require @org.openmole.site.content.Native.singularity. You must install it on your system if you want to use some tasks such as Python, R, Scilab, Container.}
 
 
