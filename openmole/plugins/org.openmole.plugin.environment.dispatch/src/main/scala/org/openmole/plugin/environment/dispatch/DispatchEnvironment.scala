@@ -4,15 +4,18 @@ import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.preference.{ Preference, PreferenceLocation }
 import org.openmole.core.threadprovider.{ IUpdatable, Updater }
-import org.openmole.core.workflow.execution.ExecutionState.{ ExecutionState, FAILED, KILLED, READY, RUNNING, SUBMITTED, DONE }
+import org.openmole.core.workflow.execution.ExecutionState.{ DONE, ExecutionState, FAILED, KILLED, READY, RUNNING, SUBMITTED }
 import org.openmole.core.workflow.execution.{ Environment, EnvironmentProvider, ExecutionJob, SubmissionEnvironment }
 import org.openmole.core.workflow.job.{ JobGroup, MoleJobId }
 import org.openmole.core.workflow.tools.ExceptionEvent
 import org.openmole.plugin.environment.batch.environment._
+import org.openmole.core.event._
+
 import squants.time.Time
 
 import java.util.concurrent.atomic.AtomicLong
 import scala.collection.mutable
+import scala.ref.WeakReference
 
 object DispatchEnvironment {
   val updateInterval = PreferenceLocation("DispatchEnvironment", "UpdateInterval", Some(10 seconds))
@@ -22,14 +25,22 @@ object DispatchEnvironment {
   }
 
   case class DestinationProvider(environment: EnvironmentProvider, slot: Int)
+
   case class Destination(environment: Environment, slot: Int)
 
   object State {
+
     case class Queued(group: JobGroup, id: Long)
 
     def enqueue(state: State, job: JobGroup, id: Long) = state.synchronized(state.jobQueue.enqueue(Queued(job, id)))
-    def dequeue(state: State, n: Int) = state.synchronized { Vector.fill(n)(state.jobQueue.dequeueFirst(_ ⇒ true)).flatten }
-    def queueSize(state: State) = state.synchronized { state.jobQueue.size }
+
+    def dequeue(state: State, n: Int) = state.synchronized {
+      Vector.fill(n)(state.jobQueue.dequeueFirst(_ ⇒ true)).flatten
+    }
+
+    def queueSize(state: State) = state.synchronized {
+      state.jobQueue.size
+    }
 
     def register(state: State, environment: Environment, id: Long, dispatchedId: Long) = state.synchronized {
       val idMap = state.submitted.getOrElseUpdate(environment, mutable.Map())
@@ -75,11 +86,21 @@ object DispatchEnvironment {
       submitToEnvironment(dispatchEnvironment, environment)
     }
 
+  def stateChangedListener(dispatchEnvironment: WeakReference[DispatchEnvironment]): PartialFunction[(Environment, Event[Environment]), Unit] = {
+    case (env: Environment, e: Environment.JobStateChanged) ⇒
+      def isActive(s: ExecutionState) = s match {
+        case READY | SUBMITTED | RUNNING ⇒ true
+        case _                           ⇒ false
+      }
+
+      if (!isActive(e.newState))
+        dispatchEnvironment.get.foreach(dispatch ⇒ jobFinished(dispatch, env, e.id, e.job))
+  }
+
   def apply(
     destination: Seq[DestinationProvider],
     refresh:     OptionalArgument[Time]   = None,
     name:        OptionalArgument[String] = None)(implicit services: BatchEnvironment.Services, varName: sourcecode.Name) = {
-    import org.openmole.core.event._
     import services.eventDispatcher
 
     EnvironmentProvider.multiple { ms ⇒
@@ -96,17 +117,7 @@ object DispatchEnvironment {
 
       for {
         env ← environmentInstances
-      } {
-        env._2 listen {
-          case (env, e: Environment.JobStateChanged) ⇒
-            def isActive(s: ExecutionState) = s match {
-              case READY | SUBMITTED | RUNNING ⇒ true
-              case _                           ⇒ false
-            }
-
-            if (!isActive(e.newState)) jobFinished(dispatchEnvironment, env, e.id, e.job)
-        }
-      }
+      } env._2 listen stateChangedListener(WeakReference(dispatchEnvironment))
 
       (dispatchEnvironment, environmentInstances)
     }
@@ -132,7 +143,7 @@ class DispatchEnvironment(
     DispatchEnvironment.fillFreeSlots(env)
     id
   }
-  
+
   override def submitted: Long = DispatchEnvironment.State.queueSize(state)
 
   override def jobs: Iterable[ExecutionJob] = Seq()
