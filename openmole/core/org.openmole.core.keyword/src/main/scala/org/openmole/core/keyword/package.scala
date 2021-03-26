@@ -16,6 +16,7 @@ package keyword {
   case class Delta[+A, +B](value: A, delta: B)
   case class As[+A, +B](value: A, as: B)
   case class By[+A, +B](value: A, by: B)
+  case class On[+A, +B](value: A, on: B)
 
   trait KeyWordPackage {
     implicit class InDecorator[A](a: A) {
@@ -49,6 +50,10 @@ package keyword {
 
     implicit class ByDecorator[A](a: A) {
       def by[B](b: B) = By(a, b)
+    }
+
+    implicit class OnDecorator[A](a: A) {
+      def on[B](b: B) = On(a, b)
     }
   }
 

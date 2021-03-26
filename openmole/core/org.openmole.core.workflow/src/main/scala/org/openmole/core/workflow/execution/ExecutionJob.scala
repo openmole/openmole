@@ -20,6 +20,5 @@ package org.openmole.core.workflow.execution
 import org.openmole.core.workflow.job._
 
 trait ExecutionJob {
-  //def environment: Environment
   def moleJobIds: Iterable[MoleJobId]
 }

@@ -437,7 +437,7 @@ object MoleExecution extends JavaLogger {
   }.foreach { case (j, c) ⇒ submit(moleExecution, j, c) }
 
   def submit(moleExecution: MoleExecution, job: Job, capsule: MoleCapsule) = {
-    val env = moleExecution.environments.getOrElse(capsule, moleExecution.defaultEnvironment)
+    val env = moleExecution.environmentForCapsule.getOrElse(capsule, moleExecution.defaultEnvironment)
     Environment.submit(env, job)
     moleExecution.executionContext.services.eventDispatcher.trigger(moleExecution, MoleExecution.JobSubmitted(job, capsule, env))
   }
@@ -691,11 +691,11 @@ class MoleExecution(
     map
   }
 
-  lazy val environmentInstances = environmentProviders.values.toVector.distinct.flatMap { v ⇒ EnvironmentProvider.build(v, executionContext.services) }.toMap
-  lazy val environments = environmentProviders.toVector.map { case (k, v) ⇒ k → environmentInstances(v) }.toMap
+  lazy val environments = environmentProviders.values.toVector.distinct.flatMap { v ⇒ EnvironmentProvider.build(v, executionContext.services) }.toMap
+  lazy val environmentForCapsule = environmentProviders.toVector.map { case (k, v) ⇒ k → environments(v) }.toMap
   lazy val defaultEnvironment = EnvironmentProvider.buildLocal(defaultEnvironmentProvider, executionContext.services)
 
-  def allEnvironments = (environmentInstances.values ++ Seq(defaultEnvironment)).toVector.distinct
+  def allEnvironments = (environments.values ++ Seq(defaultEnvironment)).toVector.distinct
 
   lazy val rootSubMoleExecution = MoleExecution.newSubMoleExecution(None, this)
   lazy val subMoleExecutions = collection.mutable.TreeMap[SubMoleExecution, SubMoleExecutionState]()

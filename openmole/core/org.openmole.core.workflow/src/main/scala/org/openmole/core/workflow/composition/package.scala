@@ -28,7 +28,7 @@ package composition {
 
   import org.openmole.core.context.{ Context, Val }
   import org.openmole.core.expansion.{ Condition, FromContext, Validate }
-  import org.openmole.core.keyword.By
+  import org.openmole.core.keyword.{ By, On }
   import org.openmole.core.outputmanager.OutputManager
   import org.openmole.core.workflow.builder.DefinitionScope
   import org.openmole.core.workflow.execution.{ EnvironmentProvider, LocalEnvironmentProvider }
@@ -185,7 +185,6 @@ package composition {
   }
 
   case class TaskNode(task: Task, strain: Boolean = false, funnel: Boolean = false, master: Boolean = false, persist: Seq[Val[_]] = Seq.empty, environment: Option[EnvironmentProvider] = None, grouping: Option[Grouping] = None, hooks: Vector[Hook] = Vector.empty, sources: Vector[Source] = Vector.empty) {
-    def on(environment: EnvironmentProvider) = copy(environment = Some(environment))
     def hook(hooks: Hook*) = copy(hooks = this.hooks ++ hooks)
     def hook[F](
       output: WritableOutput,
@@ -584,6 +583,9 @@ package composition {
 
       implicit def byToNode[T: ToNode] = apply[By[T, Grouping]](t ⇒ implicitly[ToNode[T]].apply(t.value).copy(grouping = Some(t.by)))
       implicit def byIntToNode[T: ToNode] = apply[By[T, Int]](t ⇒ implicitly[ToNode[T]].apply(t.value).copy(grouping = Some(ByGrouping(t.by))))
+
+      implicit def onToNode[T: ToNode] = apply[On[T, EnvironmentProvider]](t ⇒ implicitly[ToNode[T]].apply(t.value).copy(environment = Some(t.on)))
+
     }
 
     trait ToNode[-T] {

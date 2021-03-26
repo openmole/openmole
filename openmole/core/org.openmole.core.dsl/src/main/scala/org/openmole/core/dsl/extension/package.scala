@@ -62,6 +62,7 @@ package object extension {
   type Aggregate[A, B] = org.openmole.core.keyword.Aggregate[A, B]
   type Delta[A, B] = org.openmole.core.keyword.Delta[A, B]
   type As[A, B] = org.openmole.core.keyword.As[A, B]
+  type On[A, B] = org.openmole.core.keyword.On[A, B]
 
   def Aggregate = org.openmole.core.keyword.Aggregate
 
