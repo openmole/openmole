@@ -260,7 +260,7 @@ object DocumentationPages {
   lazy val ssh = DocumentationPage.fromScalatex(name = "SSH", content = scalatex.documentation.scale.SSH)
   lazy val cluster = DocumentationPage.fromScalatex(name = "Cluster", content = scalatex.documentation.scale.Cluster)
   lazy val egi = DocumentationPage.fromScalatex(name = "EGI", content = scalatex.documentation.scale.EGI, title = Some("European Grid Infrastructure"))
-  lazy val dispatch = DocumentationPage.fromScalatex(name = "Dispatch", content = scalatex.documentation.scale.Dispatch, title = Some("Dispatch Jobs en Multiple Environments"))
+  lazy val dispatch = DocumentationPage.fromScalatex(name = "Dispatch", content = scalatex.documentation.scale.Dispatch, title = Some("Dispatch Jobs on Multiple Environments"))
 
   // Language
   def languagePages = pageNode(language, Vector(fileManagement, scalaFunction, hook, transition, source, capsule, moleTask))
