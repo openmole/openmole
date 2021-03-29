@@ -96,7 +96,7 @@ object JobManager extends JavaLogger { self ⇒
   def sendToMoleExecution(job: StoredJob)(f: MoleExecution ⇒ Unit) =
     MoleExecutionMessage.send(job.moleExecution) { MoleExecutionMessage.WithMoleExecutionSate(f) }
 
-  def canceled(storedJob: StoredJob) = storedJob.storedMoleJobs.forall(_.subMoleCanceled())
+  def canceled(storedJob: StoredJob) = storedJob.storedMoleJobs.forall(JobStore.subMoleCanceled)
 
   def killOr(batchJob: BatchExecutionJob, kill: Kill)(op: () ⇒ Any)(implicit services: BatchEnvironment.Services) = {
     if (batchJob.state == ExecutionState.KILLED) ()

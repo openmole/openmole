@@ -25,8 +25,7 @@ object JobStore {
       f,
       moleJob.task,
       moleJob.id,
-      moleJob.jobFinished,
-      moleJob.subMoleCanceled)
+      moleJob.callBack)
   }
 
   def load(storedJob: StoredJob)(implicit serializerService: SerializerService): JobGroup = {
@@ -40,8 +39,7 @@ object JobStore {
       task = storedMoleJob.task,
       context = context,
       id = storedMoleJob.id,
-      jobFinished = storedMoleJob.jobFinished,
-      subMoleCanceled = storedMoleJob.subMoleCanceled
+      callBack = storedMoleJob.callBack
     )
   }
 
@@ -50,14 +48,14 @@ object JobStore {
 
   class StoredJob(val moleExecution: MoleExecution, val storedMoleJobs: Array[StoredMoleJob])
   class StoredMoleJob(
-    val context:         File,
-    val task:            RuntimeTask,
-    val id:              Long,
-    val jobFinished:     Job.JobFinished,
-    val subMoleCanceled: Canceled) {
+    val context:  File,
+    val task:     RuntimeTask,
+    val id:       Long,
+    val callBack: Job.CallBack) {
   }
 
-  def finish(storedMoleJob: StoredMoleJob, result: Either[Context, Throwable]) = storedMoleJob.jobFinished(storedMoleJob.id, result)
+  def subMoleCanceled(storedMoleJob: StoredMoleJob) = storedMoleJob.callBack.subMoleCanceled()
+  def finish(storedMoleJob: StoredMoleJob, result: Either[Context, Throwable]) = storedMoleJob.callBack.jobFinished(storedMoleJob.id, result)
 
 }
 

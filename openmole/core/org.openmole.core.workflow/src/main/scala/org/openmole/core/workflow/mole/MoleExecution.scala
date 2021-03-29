@@ -223,12 +223,15 @@ object MoleExecution extends JavaLogger {
             }
           }
         case _ ⇒
-          def onJobFinished(job: MoleJobId, result: Either[Context, Throwable]) =
-            MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(job, result, capsule, ticket))
+          case class JobCallBackClosure(subMoleExecutionState: SubMoleExecutionState, capsule: MoleCapsule, ticket: Ticket) extends Job.CallBack {
+            def subMoleCanceled() = subMoleExecutionState.canceled
+            def jobFinished(job: MoleJobId, result: Either[Context, Throwable]) =
+              MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(job, result, capsule, ticket))
+          }
 
           val newContext = subMoleExecutionState.moleExecution.implicits + sourced + context
           val runtimeTask = capsule.runtimeTask(subMoleExecutionState.moleExecution.mole, subMoleExecutionState.moleExecution.sources, subMoleExecutionState.moleExecution.hooks)
-          val moleJob: Job = Job(runtimeTask, newContext, jobId, onJobFinished, () ⇒ subMoleExecutionState.canceled)
+          val moleJob: Job = Job(runtimeTask, newContext, jobId, JobCallBackClosure(subMoleExecutionState, capsule, ticket))
 
           eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
 
@@ -303,7 +306,7 @@ object MoleExecution extends JavaLogger {
   def newSubMoleExecution(
     parent:        Option[SubMoleExecutionState],
     moleExecution: MoleExecution) = {
-    val id = SubMoleExecution(moleExecution.currentSubMoleExecutionId)
+    val id: SubMoleExecution = moleExecution.currentSubMoleExecutionId
     moleExecution.currentSubMoleExecutionId += 1
     val sm = new SubMoleExecutionState(id, parent, moleExecution)
     parent.foreach(_.children.put(id, sm))
@@ -531,8 +534,8 @@ object MoleExecution extends JavaLogger {
     import moleExecution.executionContext.services._
 
     var nbJobs = 0L
-    var children = collection.mutable.TreeMap[SubMoleExecution, SubMoleExecutionState]()
-    var jobs = collection.mutable.TreeSet[MoleJobId]()
+    var children = collection.mutable.LongMap[SubMoleExecutionState]()
+    var jobs = collection.mutable.HashSet[MoleJobId]()
 
     @volatile var canceled = false
 
@@ -556,14 +559,7 @@ object MoleExecution extends JavaLogger {
   sealed trait SynchronisationContext
   case object Synchronized extends SynchronisationContext
   case object UnsafeAccess extends SynchronisationContext
-
 }
-
-object SubMoleExecution {
-  implicit def ordering: Ordering[SubMoleExecution] = Ordering.by[SubMoleExecution, Long](_.id)
-}
-
-case class SubMoleExecution(id: Long) extends AnyVal
 
 sealed trait MoleExecutionMessage
 

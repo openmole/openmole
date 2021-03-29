@@ -34,7 +34,7 @@ import org.openmole.core.workflow.dsl._
  */
 class RegistryWithTicket[K, V] {
 
-  class Registry extends mutable.HashMap[K, V]
+  type Registry = mutable.HashMap[K, V]
   val registries = new mutable.WeakHashMap[Ticket, Registry]
 
   def registry(ticket: Ticket): Registry = synchronized {

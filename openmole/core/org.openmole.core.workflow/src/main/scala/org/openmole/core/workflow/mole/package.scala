@@ -30,6 +30,8 @@ package mole {
 
 package object mole {
 
+  type SubMoleExecution = Long
+
   def Source = FromContextSource
 
   case class Hooks(map: Map[MoleCapsule, Iterable[Hook]])
