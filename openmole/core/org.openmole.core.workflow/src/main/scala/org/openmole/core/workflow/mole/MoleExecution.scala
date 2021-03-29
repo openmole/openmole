@@ -216,7 +216,7 @@ object MoleExecution extends JavaLogger {
                 case _                ⇒
               }
 
-              MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(jobId, result, capsule, ticket))
+              MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(jobId, result /*.swap.map(Context.compress).swap*/ , capsule, ticket))
             }
             catch {
               case t: Throwable ⇒ MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.MoleExecutionError(t))
@@ -226,7 +226,7 @@ object MoleExecution extends JavaLogger {
           case class JobCallBackClosure(subMoleExecutionState: SubMoleExecutionState, capsule: MoleCapsule, ticket: Ticket) extends Job.CallBack {
             def subMoleCanceled() = subMoleExecutionState.canceled
             def jobFinished(job: MoleJobId, result: Either[Context, Throwable]) =
-              MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(job, result, capsule, ticket))
+              MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(job, result /*.swap.map(Context.compress).swap*/ , capsule, ticket))
           }
 
           val newContext = subMoleExecutionState.moleExecution.implicits + sourced + context
@@ -244,7 +244,7 @@ object MoleExecution extends JavaLogger {
   def processJobFinished(moleExecution: MoleExecution, msg: mole.MoleExecutionMessage.JobFinished) =
     if (!MoleExecution.moleJobIsFinished(moleExecution, msg.job)) {
       val state = moleExecution.subMoleExecutions(msg.subMoleExecution)
-      if (!state.canceled) MoleExecution.processFinalState(state, msg.job, msg.result, msg.capsule, msg.ticket)
+      if (!state.canceled) MoleExecution.processFinalState(state, msg.job, msg.result /*.swap.map(Context.expand).swap*/ , msg.capsule, msg.ticket)
       removeJob(state, msg.job)
       MoleExecution.checkIfSubMoleIsFinished(state)
     }

@@ -47,14 +47,9 @@ object Job {
     context:  Context,
     id:       Long,
     callBack: CallBack) = {
-    val (prototypes, values) = compressContext(context)
-    new Job(task, prototypes.toArray, values.toArray, id, callBack)
+    val (prototypes, values) = Context.compress(context)
+    new Job(task, prototypes, values, id, callBack)
   }
-
-  def compressContext(context: Context) =
-    context.variables.toSeq.map {
-      case (_, v) ⇒ (v.asInstanceOf[Variable[Any]].prototype, v.value)
-    }.unzip
 
   sealed trait StateChange
   case object Unchanged extends StateChange
@@ -100,8 +95,7 @@ class Job(
   val id:       MoleJobId,
   val callBack: CallBack) {
 
-  def context: Context =
-    Context((prototypes zip values).map { case (p, v) ⇒ Variable(p, v) }: _*)
+  def context: Context = Context.expand(prototypes, values)
 
   def perform(executionContext: TaskExecutionContext): Either[Context, Throwable] =
     if (!callBack.subMoleCanceled()) {
