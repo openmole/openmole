@@ -27,7 +27,7 @@ import scala.reflect.ClassTag
 import scala.util.Random
 
 object Variable {
-  def openMOLENameSpace = Namespace("openmole")
+  val openMOLENameSpace = Namespace("openmole")
 
   /**
    * implicit conversion of a tuple (prototype,value) to a Variable
