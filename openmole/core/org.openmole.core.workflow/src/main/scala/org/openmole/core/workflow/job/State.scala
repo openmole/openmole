@@ -25,7 +25,7 @@ object State extends Enumeration {
    * @param name    name of the state
    * @param isFinal Get if the state is a final state. Meaning there is for the [[Job]] to change state again.
    */
-  case class State(name: String, isFinal: Boolean = false) extends Val(name)
+  case class State(name: String) extends Val(name)
 
   /**
    *
@@ -46,7 +46,7 @@ object State extends Enumeration {
    * The job has successfully ended.
    *
    */
-  val COMPLETED = new State("Completed", true)
+  val COMPLETED = new State("Completed")
 
   /**
    *
@@ -54,6 +54,6 @@ object State extends Enumeration {
    * to the workflow engine.
    *
    */
-  val FAILED = new State("Failed", true)
+  val FAILED = new State("Failed")
 
 }
