@@ -3,7 +3,7 @@ package org.openmole.plugin.environment.dispatch
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.preference.{ Preference, PreferenceLocation }
-import org.openmole.core.workflow.execution.ExecutionState.{ DONE, ExecutionState, FAILED, KILLED, READY, RUNNING, SUBMITTED }
+import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.workflow.execution.{ Environment, EnvironmentProvider, ExecutionJob, SubmissionEnvironment }
 import org.openmole.core.workflow.job.{ JobGroup, MoleJobId }
 import org.openmole.core.workflow.tools.ExceptionEvent
@@ -77,21 +77,21 @@ object DispatchEnvironment {
     }
   }
 
-  def jobFinished(dispatchEnvironment: DispatchEnvironment, environment: Environment, id: Long, executionJob: ExecutionJob) =
+  def jobFinished(dispatchEnvironment: DispatchEnvironment, environment: Environment, id: Long, executionJob: ExecutionJob, state: ExecutionState) =
     State.remove(dispatchEnvironment.state, environment, id) foreach { dispatchId ⇒
-      dispatchEnvironment.services.eventDispatcher.trigger(dispatchEnvironment, Environment.JobStateChanged(dispatchId, DispatchJob(executionJob.moleJobIds), SUBMITTED, DONE))
+      dispatchEnvironment.services.eventDispatcher.trigger(dispatchEnvironment, Environment.JobStateChanged(dispatchId, DispatchJob(executionJob.moleJobIds), ExecutionState.SUBMITTED, state))
       submitToEnvironment(dispatchEnvironment, environment)
     }
 
   def stateChangedListener(dispatchEnvironment: WeakReference[DispatchEnvironment]): PartialFunction[(Environment, Event[Environment]), Unit] = {
     case (env: Environment, e: Environment.JobStateChanged) ⇒
       def isActive(s: ExecutionState) = s match {
-        case READY | SUBMITTED | RUNNING ⇒ true
-        case _                           ⇒ false
+        case ExecutionState.READY | ExecutionState.SUBMITTED | ExecutionState.RUNNING ⇒ true
+        case _ ⇒ false
       }
 
       if (!isActive(e.newState))
-        dispatchEnvironment.get.foreach(dispatch ⇒ jobFinished(dispatch, env, e.id, e.job))
+        dispatchEnvironment.get.foreach(dispatch ⇒ jobFinished(dispatch, env, e.id, e.job, e.newState))
   }
 
   def apply(

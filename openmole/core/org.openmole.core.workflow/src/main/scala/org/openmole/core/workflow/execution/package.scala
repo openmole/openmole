@@ -58,4 +58,6 @@ package object execution {
   case class LocalEnvironmentProvider(build: MoleServices ⇒ LocalEnvironment) extends EnvironmentProvider
   case class MultipleEnvironmentProvider(build: MoleServices ⇒ (Environment, Seq[(EnvironmentProvider, Environment)])) extends EnvironmentProvider
 
+  type ExecutionState = Byte
+
 }

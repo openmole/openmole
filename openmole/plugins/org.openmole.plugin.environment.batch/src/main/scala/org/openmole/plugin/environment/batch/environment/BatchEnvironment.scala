@@ -352,7 +352,7 @@ object BatchEnvironment {
     environment.finishedJob(job)
   }
 
-  def setExecutionJobSate(environment: BatchEnvironment, job: BatchExecutionJob, newState: ExecutionState.ExecutionState)(implicit eventDispatcher: EventDispatcher) = job.synchronized {
+  def setExecutionJobSate(environment: BatchEnvironment, job: BatchExecutionJob, newState: ExecutionState)(implicit eventDispatcher: EventDispatcher) = job.synchronized {
     import ExecutionState._
 
     if (job.state != KILLED && newState != job.state) {

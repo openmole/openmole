@@ -17,12 +17,11 @@
 package org.openmole.plugin.environment
 
 import java.net.URI
-
 import _root_.gridscale.effectaside._
 import org.openmole.core.communication.storage.TransferOptions
 import org.openmole.core.preference.Preference
 import org.openmole.core.workflow.dsl.{File, uniqName}
-import org.openmole.core.workflow.execution.ExecutionState.ExecutionState
+import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.plugin.environment.batch.environment.{AccessControl, BatchEnvironment, BatchExecutionJob, BatchJobControl, Runtime, SerializedJob, UpdateInterval}
 import org.openmole.plugin.environment.batch.storage._

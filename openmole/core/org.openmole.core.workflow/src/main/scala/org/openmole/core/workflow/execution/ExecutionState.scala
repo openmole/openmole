@@ -18,14 +18,11 @@
 package org.openmole.core.workflow.execution
 
 object ExecutionState {
-
-  case class ExecutionState(name: String) extends AnyVal
-
-  val READY = ExecutionState("Ready")
-  val SUBMITTED = ExecutionState("Submitted")
-  val RUNNING = ExecutionState("Running")
-  val DONE = ExecutionState("Done")
-  val FAILED = ExecutionState("Failed")
-  val KILLED = ExecutionState("Killed")
+  final val READY: ExecutionState = 0.toByte
+  final val SUBMITTED: ExecutionState = 1.toByte
+  final val RUNNING: ExecutionState = 2.toByte
+  final val DONE: ExecutionState = 3.toByte
+  final val FAILED: ExecutionState = 4.toByte
+  final val KILLED: ExecutionState = 5.toByte
 }
 

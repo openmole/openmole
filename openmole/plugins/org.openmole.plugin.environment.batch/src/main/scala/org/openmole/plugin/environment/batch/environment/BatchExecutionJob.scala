@@ -17,25 +17,22 @@ package org.openmole.plugin.environment.batch.environment
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.io.File
-import java.nio.file.Files
-import java.util.UUID
 import org.openmole.core.communication.message.RunnableTask
-import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.serializer.{ PluginAndFilesListing, SerializerService }
-import org.openmole.core.workflow.execution.{ Environment, ExecutionJob }
-import org.openmole.core.workflow.execution.ExecutionState.{ DONE, ExecutionState, FAILED, KILLED, READY }
+import org.openmole.core.workflow.execution.{ ExecutionJob, ExecutionState }
 import org.openmole.core.workflow.job.JobGroup
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment.REPLClassCache
 import org.openmole.plugin.environment.batch.environment.JobStore.StoredJob
 import org.openmole.tool.bytecode.listAllClasses
-import org.openmole.tool.osgi.{ ClassFile, VersionedPackage, createBundle }
 import org.openmole.tool.file._
+import org.openmole.tool.osgi.{ ClassFile, VersionedPackage, createBundle }
 
+import java.io.File
+import java.nio.file.Files
+import java.util.UUID
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 object BatchExecutionJob {
@@ -52,7 +49,6 @@ object BatchExecutionJob {
 
   def allClasses(directory: File): Seq[ClassFile] = {
     import java.nio.file._
-
     import collection.JavaConverters._
     Files.walk(directory.toPath).
       filter(p ⇒ Files.isRegularFile(p) && p.toFile.getName.endsWith(".class")).iterator().asScala.
@@ -139,7 +135,7 @@ class BatchExecutionJob(val id: Long, val storedJob: StoredJob, val files: Seq[F
   private def job(implicit serializerService: SerializerService) = JobStore.load(storedJob)
   def runnableTasks(implicit serializerService: SerializerService) = JobGroup.moleJobs(job).map(RunnableTask(_))
 
-  private[environment] var _state: ExecutionState = READY
+  private[environment] var _state: ExecutionState = ExecutionState.READY
 
   def state = _state
 

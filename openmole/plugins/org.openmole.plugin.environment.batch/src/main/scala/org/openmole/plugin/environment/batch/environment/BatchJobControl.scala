@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.batch.environment
 
 import java.io.File
 
-import org.openmole.core.workflow.execution.ExecutionState._
+import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.communication.storage._
 
 object BatchJobControl {
