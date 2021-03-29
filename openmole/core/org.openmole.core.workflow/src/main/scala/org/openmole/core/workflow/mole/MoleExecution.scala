@@ -223,12 +223,15 @@ object MoleExecution extends JavaLogger {
             }
           }
         case _ ⇒
-          def onJobFinished(job: MoleJobId, result: Either[Context, Throwable]) =
-            MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(job, result, capsule, ticket))
+          case class JobCallBackClosure(subMoleExecutionState: SubMoleExecutionState, capsule: MoleCapsule, ticket: Ticket) extends Job.CallBack {
+            def subMoleCanceled() = subMoleExecutionState.canceled
+            def jobFinished(job: MoleJobId, result: Either[Context, Throwable]) =
+              MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(job, result, capsule, ticket))
+          }
 
           val newContext = subMoleExecutionState.moleExecution.implicits + sourced + context
           val runtimeTask = capsule.runtimeTask(subMoleExecutionState.moleExecution.mole, subMoleExecutionState.moleExecution.sources, subMoleExecutionState.moleExecution.hooks)
-          val moleJob: Job = Job(runtimeTask, newContext, jobId, onJobFinished, () ⇒ subMoleExecutionState.canceled)
+          val moleJob: Job = Job(runtimeTask, newContext, jobId, JobCallBackClosure(subMoleExecutionState, capsule, ticket))
 
           eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
 

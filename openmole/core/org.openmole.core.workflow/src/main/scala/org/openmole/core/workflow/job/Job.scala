@@ -27,9 +27,6 @@ object Job {
 
   implicit val moleJobOrdering = Ordering.by((_: Job).id)
 
-  type JobFinished = (MoleJobId, Either[Context, Throwable]) ⇒ Unit
-  type Canceled = () ⇒ Boolean
-
   /**
    * Construct from context and UUID
    * @param task
@@ -43,9 +40,15 @@ object Job {
     context:         Context,
     id:              Long,
     jobFinished:     Job.JobFinished,
-    subMoleCanceled: Canceled) = {
+    subMoleCanceled: Canceled): Job = apply(task, context, id, CallBack(jobFinished, subMoleCanceled))
+
+  def apply(
+    task:     RuntimeTask,
+    context:  Context,
+    id:       Long,
+    callBack: CallBack) = {
     val (prototypes, values) = compressContext(context)
-    new Job(task, prototypes.toArray, values.toArray, id, jobFinished, subMoleCanceled)
+    new Job(task, prototypes.toArray, values.toArray, id, callBack)
   }
 
   def compressContext(context: Context) =
@@ -57,9 +60,24 @@ object Job {
   case object Unchanged extends StateChange
   case class Changed(old: State, state: State, context: Context) extends StateChange
 
-  def finish(moleJob: Job, result: Either[Context, Throwable]) = moleJob.jobFinished(moleJob.id, result)
+  def finish(moleJob: Job, result: Either[Context, Throwable]) = moleJob.callBack.jobFinished(moleJob.id, result)
 
   class SubMoleCanceled extends Exception
+
+  object CallBack {
+    def apply(jobFinished: JobFinished, canceled: Canceled) = new CallBack {
+      override def jobFinished(id: MoleJobId, result: Either[Context, Throwable]): Unit = jobFinished(id, result)
+      override def subMoleCanceled(): Boolean = canceled()
+    }
+  }
+
+  trait CallBack {
+    def jobFinished(id: MoleJobId, result: Either[Context, Throwable]): Unit
+    def subMoleCanceled(): Boolean
+  }
+
+  type JobFinished = (MoleJobId, Either[Context, Throwable]) ⇒ Unit
+  type Canceled = () ⇒ Boolean
 
 }
 
@@ -74,18 +92,17 @@ import Job._
  * @param jobFinished what to do when the state is changed
  */
 class Job(
-  val task:            RuntimeTask,
-  prototypes:          Array[Val[Any]],
-  values:              Array[Any],
-  val id:              MoleJobId,
-  val jobFinished:     Job.JobFinished,
-  val subMoleCanceled: Canceled) {
+  val task:     RuntimeTask,
+  prototypes:   Array[Val[Any]],
+  values:       Array[Any],
+  val id:       MoleJobId,
+  val callBack: CallBack) {
 
   def context: Context =
     Context((prototypes zip values).map { case (p, v) ⇒ Variable(p, v) }: _*)
 
   def perform(executionContext: TaskExecutionContext): Either[Context, Throwable] =
-    if (!subMoleCanceled()) {
+    if (!callBack.subMoleCanceled()) {
       val ctx = context
       try {
         val performResult = task.task.perform(ctx, executionContext)
