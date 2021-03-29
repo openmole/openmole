@@ -95,8 +95,8 @@ object DispatchEnvironment {
   }
 
   def apply(
-    slot:        Seq[DestinationProvider],
-    name:        OptionalArgument[String] = None)(implicit services: BatchEnvironment.Services, varName: sourcecode.Name) = {
+    slot: Seq[DestinationProvider],
+    name: OptionalArgument[String] = None)(implicit services: BatchEnvironment.Services, varName: sourcecode.Name) = {
     import services.eventDispatcher
 
     EnvironmentProvider.multiple { ms ⇒
