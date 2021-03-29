@@ -19,4 +19,7 @@ package org.openmole.core.workflow
 
 package object job {
   type MoleJobId = Long
+
+  type State = Byte
+
 }

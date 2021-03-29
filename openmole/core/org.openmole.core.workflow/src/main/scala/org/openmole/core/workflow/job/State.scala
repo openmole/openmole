@@ -17,36 +17,28 @@
 
 package org.openmole.core.workflow.job
 
-object State extends Enumeration {
-
-  /**
-   * Enumeration of possible job states
-   *
-   * @param name    name of the state
-   * @param isFinal Get if the state is a final state. Meaning there is for the [[Job]] to change state again.
-   */
-  case class State(name: String) extends Val(name)
+object State {
 
   /**
    *
    * The job as been created and is ready to be executed.
    *
    */
-  val READY = new State("Ready")
+  final val READY: State = 0.toByte
 
   /**
    *
    * The job is being executed.
    *
    */
-  val RUNNING = new State("Running")
+  final val RUNNING: State = 1.toByte
 
   /**
    *
    * The job has successfully ended.
    *
    */
-  val COMPLETED = new State("Completed")
+  final val COMPLETED: State = 2.toByte
 
   /**
    *
@@ -54,6 +46,6 @@ object State extends Enumeration {
    * to the workflow engine.
    *
    */
-  val FAILED = new State("Failed")
+  final val FAILED: State = 3.toByte
 
 }
