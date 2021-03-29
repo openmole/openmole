@@ -39,7 +39,7 @@ object Job {
     task:            RuntimeTask,
     context:         Context,
     id:              Long,
-    jobFinished:     Job.JobFinished,
+    jobFinished:     JobFinished,
     subMoleCanceled: Canceled): Job = apply(task, context, id, CallBack(jobFinished, subMoleCanceled))
 
   def apply(
@@ -65,9 +65,11 @@ object Job {
   class SubMoleCanceled extends Exception
 
   object CallBack {
-    def apply(jobFinished: JobFinished, canceled: Canceled) = new CallBack {
-      override def jobFinished(id: MoleJobId, result: Either[Context, Throwable]): Unit = jobFinished(id, result)
-      override def subMoleCanceled(): Boolean = canceled()
+    def apply(jobFinished: JobFinished, canceled: Canceled) = Instance(jobFinished, canceled)
+
+    case class Instance(_jobFinished: JobFinished, _canceled: Canceled) extends CallBack {
+      def subMoleCanceled() = _canceled()
+      def jobFinished(job: MoleJobId, result: Either[Context, Throwable]) = _jobFinished(job, result)
     }
   }
 
