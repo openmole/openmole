@@ -32,5 +32,5 @@ case class Error(job: BatchExecutionJob, environment: BatchEnvironment, exceptio
 case class Kill(job: BatchExecutionJob, environment: BatchEnvironment, batchJob: Option[BatchJobControl]) extends JobMessage with DispatchedMessage
 case class GetResult(job: BatchExecutionJob, environment: BatchEnvironment, outputFilePath: String, batchJob: BatchJobControl) extends JobMessage with DispatchedMessage
 case class Manage(jobId: Long, job: JobGroup, environment: BatchEnvironment) extends JobMessage
-case class MoleJobError(moleJob: MoleJobId, job: BatchExecutionJob, environment: BatchEnvironment, exception: Throwable) extends JobMessage
+case class MoleJobError(moleJob: JobId, job: BatchExecutionJob, environment: BatchEnvironment, exception: Throwable) extends JobMessage
 case class RetryAction(action: () ⇒ Boolean) extends JobMessage with DispatchedMessage

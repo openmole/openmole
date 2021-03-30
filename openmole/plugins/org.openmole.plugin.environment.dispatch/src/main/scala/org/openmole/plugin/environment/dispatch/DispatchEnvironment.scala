@@ -5,7 +5,7 @@ import org.openmole.core.dsl.extension._
 import org.openmole.core.preference.{ Preference, PreferenceLocation }
 import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.workflow.execution.{ Environment, EnvironmentProvider, ExecutionJob, SubmissionEnvironment }
-import org.openmole.core.workflow.job.{ JobGroup, MoleJobId }
+import org.openmole.core.workflow.job.{ JobGroup, JobId }
 import org.openmole.core.workflow.tools.ExceptionEvent
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.core.event._
@@ -55,7 +55,7 @@ object DispatchEnvironment {
     val submitted = mutable.Map[Environment, mutable.Map[Long, Long]]()
   }
 
-  case class DispatchJob(moleJobIds: Iterable[MoleJobId]) extends ExecutionJob
+  case class DispatchJob(moleJobIds: Iterable[JobId]) extends ExecutionJob
 
   def fillFreeSlots(dispatchEnvironment: DispatchEnvironment) = dispatchEnvironment.state.synchronized {
     def availableSlots(state: State, environments: Seq[DispatchEnvironment.Destination]) =

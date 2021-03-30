@@ -64,16 +64,16 @@ object Job {
 
     case class Instance(_jobFinished: JobFinished, _canceled: Canceled) extends CallBack {
       def subMoleCanceled() = _canceled()
-      def jobFinished(job: MoleJobId, result: Either[Context, Throwable]) = _jobFinished(job, result)
+      def jobFinished(job: JobId, result: Either[Context, Throwable]) = _jobFinished(job, result)
     }
   }
 
   trait CallBack {
-    def jobFinished(id: MoleJobId, result: Either[Context, Throwable]): Unit
+    def jobFinished(id: JobId, result: Either[Context, Throwable]): Unit
     def subMoleCanceled(): Boolean
   }
 
-  type JobFinished = (MoleJobId, Either[Context, Throwable]) ⇒ Unit
+  type JobFinished = (JobId, Either[Context, Throwable]) ⇒ Unit
   type Canceled = () ⇒ Boolean
 
 }
@@ -92,7 +92,7 @@ class Job(
   val task:     RuntimeTask,
   prototypes:   Array[Val[Any]],
   values:       Array[Any],
-  val id:       MoleJobId,
+  val id:       JobId,
   val callBack: CallBack) {
 
   def context: Context = Context.expand(prototypes, values)

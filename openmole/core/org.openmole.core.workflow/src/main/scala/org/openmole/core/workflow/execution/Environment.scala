@@ -25,7 +25,7 @@ import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.tools.service._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.core.workflow.job.{ JobGroup, Job, MoleJobId }
+import org.openmole.core.workflow.job.{ JobGroup, Job, JobId }
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workflow.tools.{ ExceptionEvent, Name }
@@ -40,7 +40,7 @@ object Environment {
   case class JobStateChanged(id: Long, job: ExecutionJob, newState: ExecutionState, oldState: ExecutionState) extends Event[Environment]
   case class ExceptionRaised(exception: Throwable, level: Level) extends Event[Environment] with ExceptionEvent
   case class ExecutionJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level) extends Event[Environment] with ExceptionEvent
-  case class MoleJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level, moleJob: MoleJobId) extends Event[Environment] with ExceptionEvent
+  case class MoleJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level, moleJob: JobId) extends Event[Environment] with ExceptionEvent
 
   case class JobCompleted(job: ExecutionJob, log: RuntimeLog, info: RuntimeInfo) extends Event[Environment]
 

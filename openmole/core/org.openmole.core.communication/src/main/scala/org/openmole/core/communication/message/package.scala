@@ -45,7 +45,7 @@ package object message {
     def apply(moleJob: Job) = new RunnableTask(moleJob.task, moleJob.context, moleJob.id)
   }
 
-  class RunnableTask(val task: RuntimeTask, val context: Context, val id: MoleJobId)
+  class RunnableTask(val task: RuntimeTask, val context: Context, val id: JobId)
 
   case class FileMessage(path: String, hash: String)
 
@@ -118,6 +118,6 @@ package object message {
   sealed trait SerializedContextResults
   case class ArchiveContextResults(contextResults: File) extends SerializedContextResults
   case class IndividualFilesContextResults(contextResults: File, files: Iterable[ReplicatedFile]) extends SerializedContextResults
-  case class ContextResults(results: PartialFunction[MoleJobId, Try[Context]])
+  case class ContextResults(results: PartialFunction[JobId, Try[Context]])
 
 }
