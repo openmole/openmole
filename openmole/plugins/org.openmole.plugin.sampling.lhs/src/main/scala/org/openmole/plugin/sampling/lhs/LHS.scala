@@ -31,8 +31,6 @@ object LHS {
       values.map(v ⇒ ScalarOrSequenceOfDouble.unflatten(factor, v).from(context)).iterator
     } withValidate { sample.validate } inputs { factor.flatMap(_.inputs) } prototypes { factor.map(_.prototype) }
 
-  def apply(sample: FromContext[Int], factor: ScalarOrSequenceOfDouble[_]*): Sampling = apply(sample, factor)
-
   def lhsValues(dimensions: Int, samples: Int, rng: scala.util.Random) = Array.fill(dimensions) {
     org.openmole.tool.random.shuffled(0 until samples)(rng).map { i ⇒ (i + rng.nextDouble) / samples }.toArray
   }.transpose
