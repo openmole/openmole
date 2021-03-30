@@ -28,8 +28,6 @@ object SobolSampling {
       SobolSampling.sobolValues(factor.size, sample.from(context)).map { ScalarOrSequenceOfDouble.unflatten(factor, _)(context) }
     } withValidate { sample.validate } inputs { factor.flatMap(_.inputs) } prototypes { factor.map(_.prototype) }
 
-  def apply(sample: FromContext[Int], factor: ScalarOrSequenceOfDouble[_]*): Sampling = apply(sample, factor)
-
   def sobolValues(dimension: Int, samples: Int) = {
     val sequence = new SobolSequenceGenerator(dimension)
     for {
