@@ -565,7 +565,7 @@ sealed trait MoleExecutionMessage
 
 object MoleExecutionMessage {
   case class PerformTransition(subMoleExecution: SubMoleExecution)(val operation: SubMoleExecutionState ⇒ Unit) extends MoleExecutionMessage
-  case class JobFinished(subMoleExecution: SubMoleExecution)(val job: JobId, val result: Either[Context.Compressed, Throwable], val capsule: MoleCapsule, val ticket: Ticket) extends MoleExecutionMessage //, val state: State, val capsule: MoleCapsule, val ticket: Ticket) extends MoleExecutionMessage
+  case class JobFinished(subMoleExecution: SubMoleExecution)(val job: JobId, val result: Either[Context.Compressed, Throwable], val capsule: MoleCapsule, val ticket: Ticket) extends MoleExecutionMessage
   case class WithMoleExecutionSate(operation: MoleExecution ⇒ Unit) extends MoleExecutionMessage
   case class StartMoleExecution(context: Option[Context]) extends MoleExecutionMessage
   case class CancelMoleExecution() extends MoleExecutionMessage
