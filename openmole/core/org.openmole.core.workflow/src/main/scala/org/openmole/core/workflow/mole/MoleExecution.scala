@@ -477,7 +477,11 @@ object MoleExecution extends JavaLogger {
 
   def allJobIds(moleExecution: MoleExecution) = moleExecution.jobs.toVector
 
-  def capsuleStatuses(moleExecution: MoleExecution, jobs: Seq[(JobId, MoleCapsule)], completed: Map[MoleCapsule, Long]): CapsuleStatuses = {
+  def capsuleStatuses(
+    moleExecution: MoleExecution,
+    jobs:          Array[JobId],
+    capsules:      Array[MoleCapsule],
+    completed:     Map[MoleCapsule, Long]): CapsuleStatuses = {
 
     val runningSet: java.util.HashSet[Long] = {
       def submissionEnvironments = moleExecution.environments.values.toSeq.collect { case e: SubmissionEnvironment ⇒ e }
@@ -510,8 +514,10 @@ object MoleExecution extends JavaLogger {
     }
 
     for {
-      (moleJob, capsule) ← jobs
+      i ← 0 until jobs.size
     } {
+      val moleJob = jobs(i)
+      val capsule = capsules(i)
       if (isRunning(moleJob)) increment(running, capsule)
       else increment(ready, capsule)
     }
@@ -762,8 +768,11 @@ class MoleExecution(
   def cancel = MoleExecutionMessage.send(this)(MoleExecutionMessage.CancelMoleExecution())
 
   def capsuleStatuses(implicit s: MoleExecution.SynchronisationContext): MoleExecution.CapsuleStatuses = {
-    val (jobs, cmp) = sync { (MoleExecution.allJobIds(this).toVector, completed.toMap) }
-    MoleExecution.capsuleStatuses(this, jobs, cmp)
+    val (jobs, capsules, cmp) =
+      sync {
+        (moleExecution.jobs.keys.toArray, moleExecution.jobs.values.toArray, completed.toMap)
+      }
+    MoleExecution.capsuleStatuses(this, jobs, capsules, cmp)
   }
 
 }
