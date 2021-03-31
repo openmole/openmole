@@ -87,10 +87,10 @@ import Job._
  * @param jobFinished what to do when the state is changed
  */
 class Job(
-           val task:          RuntimeTask,
-           compressedContext: Context.Compacted,
-           val id:            JobId,
-           val callBack:      CallBack) {
+  val task:          RuntimeTask,
+  compressedContext: Context.Compacted,
+  val id:            JobId,
+  val callBack:      CallBack) {
 
   def context: Context = Context.expand(compressedContext)
 

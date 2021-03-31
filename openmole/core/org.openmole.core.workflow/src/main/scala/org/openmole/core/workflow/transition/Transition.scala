@@ -29,7 +29,8 @@ import org.openmole.core.workflow.tools.ContextAggregator
 import org.openmole.core.workflow.validation.TypeUtil._
 import org.openmole.core.workflow.validation._
 
-import scala.collection.mutable.{ HashSet, ListBuffer }
+import scala.collection.mutable
+import scala.collection.mutable.{ ArrayBuffer, HashSet, ListBuffer }
 import scala.util.{ Failure, Success, Try }
 
 object Transition {
@@ -212,17 +213,69 @@ object ExplorationTransition {
     (typedFactors, outputs)
   }
 
-  def exploredSamples(capsule: MoleCapsule, context: Context, moleExecution: MoleExecution) = {
-    def values = factors(capsule, moleExecution)._1.toArray.map(context(_).toArray).transpose
-    values
+  object CompactedSampleList {
+    type ArrayType = Byte
+    val int: ArrayType = 0.toByte
+    val long: ArrayType = 1.toByte
+    val double: ArrayType = 2.toByte
+    val any: ArrayType = 64.toByte
+
+    def apply(vs: Iterable[Val[Array[Any]]], context: Context) = {
+      val intArrays = new ArrayBuffer[Array[Int]]()
+      val longArrays = new ArrayBuffer[Array[Long]]()
+      val doubleArrays = new ArrayBuffer[Array[Double]]()
+      val anyArrays = new ArrayBuffer[Array[Any]]()
+
+      val order = new ListBuffer[(CompactedSampleList.ArrayType, Int)]()
+
+      vs.map {
+        case Val.caseArrayInt(v) ⇒
+          intArrays += context(v)
+          order += (CompactedSampleList.int -> (intArrays.size - 1))
+        case Val.caseArrayLong(v) ⇒
+          longArrays += context(v)
+          order += (CompactedSampleList.long -> (intArrays.size - 1))
+        case Val.caseArrayDouble(v) ⇒
+          doubleArrays += context(v)
+          order += (CompactedSampleList.double -> (doubleArrays.size - 1))
+        case v ⇒
+          anyArrays += context(v)
+          order += (CompactedSampleList.any -> (anyArrays.size - 1))
+      }
+
+      new CompactedSampleList(intArrays.toArray, longArrays.toArray, doubleArrays.toArray, anyArrays.toArray, order.toList)
+    }
+
+    type OrderIndex = (CompactedSampleList.ArrayType, Int)
   }
 
-  def submitIn(transition: Transition, condition: Condition, context: Context, ticket: Ticket, samples: Array[Array[Any]], subMole: SubMoleExecutionState, executionContext: MoleExecutionContext) = {
+  class CompactedSampleList(intArrays: Array[Array[Int]], longArrays: Array[Array[Long]], doubleArrays: Array[Array[Double]], anyArray: Array[Array[Any]], order: List[CompactedSampleList.OrderIndex]) {
+    def apply(index: Int) = order.map { o ⇒ arrayAt(o)(index) }
+
+    def arrayAt(order: CompactedSampleList.OrderIndex) =
+      order match {
+        case (CompactedSampleList.int, i)    ⇒ intArrays(i)
+        case (CompactedSampleList.long, i)   ⇒ longArrays(i)
+        case (CompactedSampleList.double, i) ⇒ doubleArrays(i)
+        case (_, i)                          ⇒ anyArray(i)
+      }
+
+    def size =
+      order.headOption match {
+        case None    ⇒ 0
+        case Some(o) ⇒ arrayAt(o).size
+      }
+  }
+
+  def exploredSamples(capsule: MoleCapsule, context: Context, moleExecution: MoleExecution) = CompactedSampleList(factors(capsule, moleExecution)._1, context)
+
+  def submitIn(transition: Transition, condition: Condition, context: Context, ticket: Ticket, samples: CompactedSampleList, subMole: SubMoleExecutionState, executionContext: MoleExecutionContext) = {
     val moleExecution = subMole.moleExecution
     val mole = moleExecution.mole
     val (typedFactors, outputs) = factors(transition.start, moleExecution)
 
-    for (value ← samples) {
+    for (i ← 0 until samples.size) {
+      val value = samples(i)
       val newTicket = MoleExecution.nextTicket(moleExecution, ticket)
       val variables = new ListBuffer[Variable[_]]
 
