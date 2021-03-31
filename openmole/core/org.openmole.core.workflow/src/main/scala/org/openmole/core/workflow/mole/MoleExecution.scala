@@ -770,7 +770,8 @@ class MoleExecution(
   def capsuleStatuses(implicit s: MoleExecution.SynchronisationContext): MoleExecution.CapsuleStatuses = {
     val (jobs, capsules, cmp) =
       sync {
-        (moleExecution.jobs.keys.toArray, moleExecution.jobs.values.toArray, completed.toMap)
+        val (jobs, capsules) = moleExecution.jobs.toSeq.unzip
+        (jobs.toArray, capsules.toArray, completed.toMap)
       }
     MoleExecution.capsuleStatuses(this, jobs, capsules, cmp)
   }
