@@ -216,7 +216,7 @@ object MoleExecution extends JavaLogger {
                 case _                ⇒
               }
 
-              MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(jobId, result.swap.map(Context.compress).swap, capsule, ticket))
+              MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(jobId, result.swap.map(Context.compact).swap, capsule, ticket))
             }
             catch {
               case t: Throwable ⇒ MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.MoleExecutionError(t))
@@ -226,7 +226,7 @@ object MoleExecution extends JavaLogger {
           case class JobCallBackClosure(subMoleExecutionState: SubMoleExecutionState, capsule: MoleCapsule, ticket: Ticket) extends Job.CallBack {
             def subMoleCanceled() = subMoleExecutionState.canceled
             def jobFinished(job: JobId, result: Either[Context, Throwable]) =
-              MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(job, result.swap.map(Context.compress).swap, capsule, ticket))
+              MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(job, result.swap.map(Context.compact).swap, capsule, ticket))
           }
 
           val newContext = subMoleExecutionState.moleExecution.implicits + sourced + context
@@ -565,7 +565,7 @@ sealed trait MoleExecutionMessage
 
 object MoleExecutionMessage {
   case class PerformTransition(subMoleExecution: SubMoleExecution)(val operation: SubMoleExecutionState ⇒ Unit) extends MoleExecutionMessage
-  case class JobFinished(subMoleExecution: SubMoleExecution)(val job: JobId, val result: Either[Context.Compressed, Throwable], val capsule: MoleCapsule, val ticket: Ticket) extends MoleExecutionMessage
+  case class JobFinished(subMoleExecution: SubMoleExecution)(val job: JobId, val result: Either[Context.Compacted, Throwable], val capsule: MoleCapsule, val ticket: Ticket) extends MoleExecutionMessage
   case class WithMoleExecutionSate(operation: MoleExecution ⇒ Unit) extends MoleExecutionMessage
   case class StartMoleExecution(context: Option[Context]) extends MoleExecutionMessage
   case class CancelMoleExecution() extends MoleExecutionMessage

@@ -38,20 +38,20 @@ object Context {
 
   val empty = apply()
 
-  type Compressed = (Array[Val[Any]], Array[Any])
+  type Compacted = Array[Any]
 
-  def compress(context: Context): Compressed = {
+  def compact(context: Context): Compacted = {
     val (p, v) =
       context.variables.toSeq.map {
         case (_, v) ⇒ (v.asInstanceOf[Variable[Any]].prototype, v.value)
       }.unzip
 
-    (p.toArray, v.toArray)
+    p.toArray ++ v.toArray
   }
 
-  def expand(compressed: Compressed) = {
-    val (prototypes, values) = compressed
-    Context((prototypes zip values).map { case (p, v) ⇒ Variable(p, v) }: _*)
+  def expand(compressed: Compacted) = {
+    val (prototypes, values) = compressed.splitAt(compressed.size / 2)
+    Context((prototypes zip values).map { case (p, v) ⇒ Variable(p.asInstanceOf[Val[Any]], v) }: _*)
   }
 
 }
