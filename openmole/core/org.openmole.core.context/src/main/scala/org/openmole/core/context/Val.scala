@@ -204,7 +204,8 @@ object Val {
   val caseArrayArrayString = TypeCase[Val[Array[Array[String]]]]
 
   def name(namespace: Namespace, simpleName: String) =
-    (if (namespace.isEmpty) "" else namespace.toString + "$") + simpleName
+    if (namespace.isEmpty) simpleName
+    else s"${namespace.toString}$$$simpleName"
 
   def copy(v: Val[_])(
     name:      String     = v.name,

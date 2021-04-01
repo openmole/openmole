@@ -49,7 +49,7 @@ object Context {
     p.toArray ++ v.toArray
   }
 
-  def expand(compressed: Compacted) = {
+  def expand(compressed: Compacted): Context = {
     val (prototypes, values) = compressed.splitAt(compressed.size / 2)
     Context((prototypes zip values).map { case (p, v) ⇒ Variable(p.asInstanceOf[Val[Any]], v) }: _*)
   }
