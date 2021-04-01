@@ -234,7 +234,7 @@ object ExplorationTransition {
           order += (CompactedSampleList.int -> (intArrays.size - 1))
         case Val.caseArrayLong(v) ⇒
           longArrays += context(v)
-          order += (CompactedSampleList.long -> (intArrays.size - 1))
+          order += (CompactedSampleList.long -> (longArrays.size - 1))
         case Val.caseArrayDouble(v) ⇒
           doubleArrays += context(v)
           order += (CompactedSampleList.double -> (doubleArrays.size - 1))
