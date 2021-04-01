@@ -160,27 +160,21 @@ package file {
       }
 
       def recursiveDelete: Unit = wrapError {
-        def setAllPermissions(f: File) = {
-          f.setReadable(true)
-          f.setWritable(true)
-          f.setExecutable(true)
-        }
-
-        if (file.exists()) {
-          setAllPermissions(file)
-
-          if (!file.isSymbolicLink && file.isDirectory) {
-            for (s ← file.listFilesSafe) {
-              setAllPermissions(s)
-              s.isDirectory match {
-                case true ⇒
-                  s.recursiveDelete
-                  s.delete()
-                case false ⇒ s.delete
-              }
-            }
-          }
-          file.delete()
+        if (file.exists) {
+          val walk = Files.walk(file)
+          try
+            walk.
+              map { p ⇒
+                if (Files.isDirectory(p)) {
+                  p.setReadable(true)
+                  p.setWritable(true)
+                  p
+                }
+                else p
+              }.
+              sorted(java.util.Comparator.reverseOrder()).
+              forEach(Files.delete)
+          finally walk.close()
         }
       }
 
