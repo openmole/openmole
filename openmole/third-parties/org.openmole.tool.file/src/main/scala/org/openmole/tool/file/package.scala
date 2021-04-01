@@ -165,7 +165,7 @@ package file {
           try
             walk.
               map { p ⇒
-                if (Files.isDirectory(p)) {
+                if (Try(Files.isDirectory(p)).getOrElse(false)) {
                   p.setReadable(true)
                   p.setWritable(true)
                   p
