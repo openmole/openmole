@@ -20,7 +20,7 @@ package org.openmole.core.workflow.mole
 import java.util.UUID
 import java.util.concurrent.{ Executors, Semaphore }
 import java.util.logging.Level
-import org.openmole.core.context.{ Context, PrototypeSet, Variable }
+import org.openmole.core.context.{ CompactedContext, Context, PrototypeSet, Variable }
 import org.openmole.core.event._
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.threadprovider.ThreadProvider
@@ -215,7 +215,7 @@ object MoleExecution extends JavaLogger {
                 case _                ⇒
               }
 
-              MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(jobId, result.swap.map(Context.compact).swap, capsule, ticket))
+              MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(jobId, result.swap.map(CompactedContext.compact).swap, capsule, ticket))
             }
             catch {
               case t: Throwable ⇒ MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.MoleExecutionError(t))
@@ -225,7 +225,7 @@ object MoleExecution extends JavaLogger {
           case class JobCallBackClosure(subMoleExecutionState: SubMoleExecutionState, capsule: MoleCapsule, ticket: Ticket) extends Job.CallBack {
             def subMoleCanceled() = subMoleExecutionState.canceled
             def jobFinished(job: JobId, result: Either[Context, Throwable]) =
-              MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(job, result.swap.map(Context.compact).swap, capsule, ticket))
+              MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(job, result.swap.map(CompactedContext.compact).swap, capsule, ticket))
           }
 
           val newContext = subMoleExecutionState.moleExecution.implicits + sourced + context
@@ -243,7 +243,7 @@ object MoleExecution extends JavaLogger {
   def processJobFinished(moleExecution: MoleExecution, msg: mole.MoleExecutionMessage.JobFinished) =
     if (!MoleExecution.moleJobIsFinished(moleExecution, msg.job)) {
       val state = moleExecution.subMoleExecutions(msg.subMoleExecution)
-      if (!state.canceled) MoleExecution.processFinalState(state, msg.job, msg.result.swap.map(Context.expand).swap, msg.capsule, msg.ticket)
+      if (!state.canceled) MoleExecution.processFinalState(state, msg.job, msg.result.swap.map(CompactedContext.expand).swap, msg.capsule, msg.ticket)
       removeJob(state, msg.job)
       MoleExecution.checkIfSubMoleIsFinished(state)
     }
@@ -581,7 +581,7 @@ sealed trait MoleExecutionMessage
 
 object MoleExecutionMessage {
   case class PerformTransition(subMoleExecution: SubMoleExecution)(val operation: SubMoleExecutionState ⇒ Unit) extends MoleExecutionMessage
-  case class JobFinished(subMoleExecution: SubMoleExecution)(val job: JobId, val result: Either[Context.Compacted, Throwable], val capsule: MoleCapsule, val ticket: Ticket) extends MoleExecutionMessage
+  case class JobFinished(subMoleExecution: SubMoleExecution)(val job: JobId, val result: Either[CompactedContext, Throwable], val capsule: MoleCapsule, val ticket: Ticket) extends MoleExecutionMessage
   case class WithMoleExecutionSate(operation: MoleExecution ⇒ Unit) extends MoleExecutionMessage
   case class StartMoleExecution(context: Option[Context]) extends MoleExecutionMessage
   case class CancelMoleExecution() extends MoleExecutionMessage
@@ -733,7 +733,7 @@ class MoleExecution(
 
   private[mole] val jobs = collection.mutable.LongMap[MoleCapsule]()
 
-  private[workflow] val dataChannelRegistry = new RegistryWithTicket[DataChannel, Buffer[Variable[_]]]
+  private[workflow] val dataChannelRegistry = new RegistryWithTicket[DataChannel, CompactedContext]
   private[mole] var _exception = Option.empty[MoleExecutionFailed]
 
   def exception(implicit s: MoleExecution.SynchronisationContext) = sync(_exception)

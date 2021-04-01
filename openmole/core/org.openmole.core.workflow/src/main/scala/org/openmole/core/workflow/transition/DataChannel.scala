@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.transition
 
-import org.openmole.core.context.{ Context, Variable }
+import org.openmole.core.context.{ CompactedContext, Context, Variable }
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.mole._
 
@@ -41,15 +41,15 @@ object DataChannel {
     val dataChannelRegistry = moleExecution.dataChannelRegistry
 
     val vars =
-      if (delta <= 0) dataChannelRegistry.remove(dataChannel, ticket).getOrElse(new ListBuffer[Variable[_]])
+      if (delta <= 0) dataChannelRegistry.remove(dataChannel, ticket).getOrElse(CompactedContext.empty)
       else {
         val workingOnTicket = (0 until delta).foldLeft(ticket) {
           (c, e) ⇒ c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
         }
-        dataChannelRegistry.consult(dataChannel, workingOnTicket) getOrElse (new ListBuffer[Variable[_]])
+        dataChannelRegistry.consult(dataChannel, workingOnTicket) getOrElse (CompactedContext.empty)
       }
 
-    vars.toVector
+    CompactedContext.expandVariables(vars).toVector
   }
 
   /**
@@ -65,15 +65,17 @@ object DataChannel {
     val dataChannelRegistry = moleExecution.dataChannelRegistry
 
     if (delta >= 0) {
-      val toContext = ListBuffer() ++ fromContext.values.filterNot(v ⇒ dataChannel.filter(v.prototype))
+      val toContext = CompactedContext.compact(fromContext.values.filterNot(v ⇒ dataChannel.filter(v.prototype)))
       dataChannelRegistry.register(dataChannel, ticket, toContext)
     }
     else {
       val workingOnTicket = (delta until 0).foldLeft(ticket) {
         (c, e) ⇒ c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
       }
-      val toContext = dataChannelRegistry.getOrElseUpdate(dataChannel, workingOnTicket, new ListBuffer[Variable[_]])
-      toContext ++= fromContext.values.filterNot(v ⇒ dataChannel.filter(v.prototype))
+      val context = dataChannelRegistry.getOrElseUpdate(dataChannel, workingOnTicket, CompactedContext.empty)
+      val compactedVariables = CompactedContext.compact(fromContext.values.filterNot(v ⇒ dataChannel.filter(v.prototype)))
+      val toContext = CompactedContext.merge(context, compactedVariables)
+      dataChannelRegistry.register(dataChannel, ticket, toContext)
     }
   }
 

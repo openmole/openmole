@@ -47,7 +47,7 @@ object Job {
     context:  Context,
     id:       Long,
     callBack: CallBack) =
-    new Job(task, Context.compact(context), id, callBack)
+    new Job(task, CompactedContext.compact(context), id, callBack)
 
   sealed trait StateChange
   case object Unchanged extends StateChange
@@ -88,11 +88,11 @@ import Job._
  */
 class Job(
   val task:          RuntimeTask,
-  compressedContext: Context.Compacted,
+  compressedContext: CompactedContext,
   val id:            JobId,
   val callBack:      CallBack) {
 
-  def context: Context = Context.expand(compressedContext)
+  def context: Context = CompactedContext.expand(compressedContext)
 
   def perform(executionContext: TaskExecutionContext): Either[Context, Throwable] =
     if (!callBack.subMoleCanceled()) {

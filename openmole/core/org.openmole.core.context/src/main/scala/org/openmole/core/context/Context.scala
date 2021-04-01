@@ -37,23 +37,6 @@ object Context {
   def apply(v: Variable[_]*): Context = Context.fromMap(v.map { v ⇒ v.prototype.name → v })
 
   val empty = apply()
-
-  type Compacted = Array[Any]
-
-  def compact(context: Context): Compacted = {
-    val (p, v) =
-      context.variables.toSeq.map {
-        case (_, v) ⇒ (v.asInstanceOf[Variable[Any]].prototype, v.value)
-      }.unzip
-
-    p.toArray ++ v.toArray
-  }
-
-  def expand(compressed: Compacted): Context = {
-    val (prototypes, values) = compressed.splitAt(compressed.size / 2)
-    Context((prototypes zip values).map { case (p, v) ⇒ Variable(p.asInstanceOf[Val[Any]], v) }: _*)
-  }
-
 }
 
 /**
