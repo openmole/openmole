@@ -35,6 +35,8 @@ object ClassUtils {
     def asArray = m.asInstanceOf[Manifest[Array[T]]]
   }
 
+  def manifestFromArrayUnsecure(m: Manifest[Array[_]]) = m.typeArguments.head.asInstanceOf[Manifest[Any]]
+
   implicit class ManifestArrayDecoration[T](m: Manifest[Array[T]]) {
     def fromArray: Manifest[T] = m.typeArguments.head.asInstanceOf[Manifest[T]]
   }

@@ -208,74 +208,23 @@ object ExplorationTransition {
     def explored = ExplorationTask.explored(capsule, moleExecution.mole, moleExecution.sources, moleExecution.hooks)
     capsule.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).partition(explored)
     val (factors, outputs) = capsule.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).partition(explored)
-    val typedFactors = factors.map(_.asInstanceOf[Val[Array[Any]]])
+    val typedFactors = factors.map(_.asInstanceOf[Val[Array[_]]])
     (typedFactors, outputs)
   }
 
-  /* Sample list memory optimize for some common native types
-  *  this is useful since the sample list stays in memory during the job submission
-  *  for large sampling of long, double... this reduce the consumed memory substantially */
   object CompactedSampleList {
-    type ArrayType = Byte
-    val int: ArrayType = 0.toByte
-    val long: ArrayType = 1.toByte
-    val double: ArrayType = 2.toByte
-    val any: ArrayType = 64.toByte
-
-    def apply(vs: Iterable[Val[Array[Any]]], context: Context) = {
-      val intArrays = new ListBuffer[Array[Int]]()
-      val longArrays = new ListBuffer[Array[Long]]()
-      val doubleArrays = new ListBuffer[Array[Double]]()
-      val anyArrays = new ListBuffer[Array[Any]]()
-
-      val order = new ListBuffer[(CompactedSampleList.ArrayType, Int)]()
-
-      vs.map {
-        case Val.caseArrayInt(v) ⇒
-          intArrays += context(v)
-          order += (CompactedSampleList.int -> (intArrays.size - 1))
-        case Val.caseArrayLong(v) ⇒
-          longArrays += context(v)
-          order += (CompactedSampleList.long -> (longArrays.size - 1))
-        case Val.caseArrayDouble(v) ⇒
-          doubleArrays += context(v)
-          order += (CompactedSampleList.double -> (doubleArrays.size - 1))
-        case v ⇒
-          anyArrays += context(v)
-          order += (CompactedSampleList.any -> (anyArrays.size - 1))
-      }
-
-      new CompactedSampleList(
-        intArrays = intArrays.toVector,
-        longArrays = longArrays.toVector,
-        doubleArrays = doubleArrays.toVector,
-        anyArray = anyArrays.toVector, order.toVector
-      )
-    }
-
-    type OrderIndex = (CompactedSampleList.ArrayType, Int)
+    def apply(vs: Iterable[Val[Array[_]]], context: Context) =
+      new CompactedSampleList(vs.map(v ⇒ context(v)).toVector)
   }
 
-  class CompactedSampleList(
-    intArrays:    Vector[Array[Int]],
-    longArrays:   Vector[Array[Long]],
-    doubleArrays: Vector[Array[Double]],
-    anyArray:     Vector[Array[Any]], order: Vector[CompactedSampleList.OrderIndex]) {
+  class CompactedSampleList(arrays: Vector[Array[_]]) {
 
-    def apply(index: Int) = order.map { o ⇒ arrayAt(o)(index) }
-
-    def arrayAt(order: CompactedSampleList.OrderIndex) =
-      order match {
-        case (CompactedSampleList.int, i)    ⇒ intArrays(i)
-        case (CompactedSampleList.long, i)   ⇒ longArrays(i)
-        case (CompactedSampleList.double, i) ⇒ doubleArrays(i)
-        case (_, i)                          ⇒ anyArray(i)
-      }
+    def apply(index: Int) = arrays.map { a ⇒ a(index) }
 
     def size =
-      order.headOption match {
+      arrays.headOption match {
         case None    ⇒ 0
-        case Some(o) ⇒ arrayAt(o).size
+        case Some(a) ⇒ a.size
       }
 
   }
@@ -286,6 +235,7 @@ object ExplorationTransition {
     val moleExecution = subMole.moleExecution
     val mole = moleExecution.mole
     val (typedFactors, outputs) = factors(transition.start, moleExecution)
+    val factorVals = typedFactors.map { f ⇒ Val.copyWithType(f, ValType.fromArrayUnsecure(f.`type`)) }
 
     for (i ← 0 until samples.size) {
       val value = samples(i)
@@ -298,10 +248,9 @@ object ExplorationTransition {
           case None    ⇒
         }
 
-      for ((p, v) ← typedFactors zip value) {
-        val fp = p.fromArray
-        if (fp.accepts(v)) variables += Variable(fp, v)
-        else throw new UserBadDataError("Found value of type " + v.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + fp)
+      for ((fv, v) ← factorVals zip value) {
+        if (fv.accepts(v)) variables += Variable(fv, v)
+        else throw new UserBadDataError("Found value of type " + v.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + fv)
       }
 
       import executionContext.services._

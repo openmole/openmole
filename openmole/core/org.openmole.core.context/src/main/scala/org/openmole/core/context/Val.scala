@@ -79,13 +79,15 @@ object ValType {
     def asArray = p.asInstanceOf[ValType[Array[T]]]
   }
 
+  def fromArrayUnsecure(t: ValType[Array[_]]) = ValType[Any](manifestFromArrayUnsecure(t.manifest))
+
   /**
    * Decorate for conversion from array type
    * @param p
    * @tparam T
    */
-  implicit class ValTypeArrayDecorator[T](p: ValType[Array[T]]) {
-    def fromArray = ValType[T](p.manifest.fromArray)
+  implicit class ValTypeArrayDecorator[T](t: ValType[Array[T]]) {
+    def fromArray = ValType[T](t.manifest.fromArray)
   }
 
   implicit def buildValType[T: Manifest]: ValType[T] = ValType[T]
@@ -135,7 +137,7 @@ object Val {
       def toArrayRecursive[A](prototype: Val[A], level: Int): Val[_] = {
         if (level <= 0) prototype
         else {
-          val arrayProto = Val(prototype.name)(prototype.`type`.toArray).asInstanceOf[Val[Array[_]]]
+          val arrayProto = Val.copyWithType(prototype, prototype.`type`.toArray)
           if (level <= 1) arrayProto
           else toArrayRecursive(arrayProto, level - 1)
         }
@@ -144,7 +146,7 @@ object Val {
       toArrayRecursive(prototype, level)
     }
 
-    def toArray: Val[Array[T]] = Val(prototype.name)(prototype.`type`.toArray)
+    def toArray: Val[Array[T]] = Val.copyWithType(prototype, prototype.`type`.toArray)
 
     def array(level: Int) = toArray(level)
     def array = toArray
@@ -152,11 +154,13 @@ object Val {
     def unsecureType = prototype.`type`.asInstanceOf[Manifest[Any]]
   }
 
-  implicit class ValFromArrayDecorator[T](prototype: Val[Array[T]]) {
-    def fromArray: Val[T] = Val(prototype.name)(prototype.`type`.fromArray)
+  def fromArray[T](v: Val[Array[T]]) = copyWithType(v, `type` = v.`type`.fromArray)
+
+  implicit class ValFromArrayDecorator[T](v: Val[Array[T]]) {
+    def fromArray: Val[T] = Val.fromArray(v)
   }
 
-  implicit def valDecorator[T](v: Val[T]) = new {
+  implicit class valDecorator[T](v: Val[T]) {
     def withName(name: String) = Val[T](name)(v.`type`)
   }
 
@@ -207,11 +211,13 @@ object Val {
     if (namespace.isEmpty) simpleName
     else s"${namespace.toString}$$$simpleName"
 
-  def copy(v: Val[_])(
-    name:      String     = v.name,
-    `type`:    ValType[_] = v.`type`,
-    namespace: Namespace  = v.namespace
-  ) = new Val(name, `type`, namespace)
+  def copy[T](v: Val[T])(
+    name:      String    = v.name,
+    namespace: Namespace = v.namespace
+  ) = new Val(name, v.`type`, namespace)
+
+  def copyWithType[T](v: Val[_], `type`: ValType[T]) = new Val(v.name, `type`, v.namespace)
+
 }
 
 object Namespace {
