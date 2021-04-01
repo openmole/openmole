@@ -173,7 +173,7 @@ package file {
                 else p
               }.
               sorted(java.util.Comparator.reverseOrder()).
-              forEach(Files.delete)
+              forEach(Files.deleteIfExists)
           finally walk.close()
         }
       }
