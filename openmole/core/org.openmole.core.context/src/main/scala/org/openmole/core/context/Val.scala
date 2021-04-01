@@ -212,11 +212,11 @@ object Val {
     else s"${namespace.toString}$$$simpleName"
 
   def copy[T](v: Val[T])(
-    name:      String    = v.name,
+    name:      String    = v.simpleName,
     namespace: Namespace = v.namespace
   ) = new Val(name, v.`type`, namespace)
 
-  def copyWithType[T](v: Val[_], `type`: ValType[T]) = new Val(v.name, `type`, v.namespace)
+  def copyWithType[T](v: Val[_], `type`: ValType[T]) = new Val(v.simpleName, `type`, v.namespace)
 
 }
 
