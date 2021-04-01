@@ -597,7 +597,7 @@ object MoleExecutionMessage {
   def messagePriority(moleExecutionMessage: MoleExecutionMessage) =
     moleExecutionMessage match {
       case _: CancelMoleExecution ⇒ 100
-      case _: PerformTransition   ⇒ 10
+      case _: PerformTransition   ⇒ 20
       case _                      ⇒ 1
     }
 
@@ -611,11 +611,11 @@ object MoleExecutionMessage {
     try {
       msg match {
         case msg: PerformTransition ⇒
-          if (!moleExecution._canceled) {
-            val state = moleExecution.subMoleExecutions(msg.subMoleExecution)
-            if (!state.canceled) msg.operation(state)
-            MoleExecution.checkIfSubMoleIsFinished(state)
-          }
+          if (!moleExecution._canceled)
+            moleExecution.subMoleExecutions.get(msg.subMoleExecution) foreach { state ⇒
+              if (!state.canceled) msg.operation(state)
+              MoleExecution.checkIfSubMoleIsFinished(state)
+            }
         case msg: JobFinished           ⇒ MoleExecution.processJobFinished(moleExecution, msg)
         case msg: StartMoleExecution    ⇒ MoleExecution.start(moleExecution, msg.context)
         case msg: CancelMoleExecution   ⇒ MoleExecution.cancel(moleExecution, None)
@@ -656,7 +656,7 @@ class MoleExecution(
   val lockRepository:              LockRepository[LockKey]
 ) { moleExecution ⇒
 
-  val messageQueue = PriorityQueue[MoleExecutionMessage](fifo = true)
+  val messageQueue = PriorityQueue[MoleExecutionMessage](fifo = false)
 
   private[mole] var _started = false
   private[mole] var _canceled = false

@@ -108,7 +108,7 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
         select -- Slot(model) &
         (select >| finalTask when "archive.size >= 10")
 
-    (noException shouldBe thrownBy(ex.run))
+    ex.run
     endCapsExecuted should equal(1)
   }
 
