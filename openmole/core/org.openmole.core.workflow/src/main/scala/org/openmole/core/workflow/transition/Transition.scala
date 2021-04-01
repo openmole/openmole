@@ -82,10 +82,9 @@ object Transition {
         if (mole.slots(transition.end.capsule).size <= 1) ticket
         else MoleExecution.nextTicket(subMoleState.moleExecution, ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
 
-      val toArrayManifests =
-        validTypes(mole, subMoleState.moleExecution.sources, subMoleState.moleExecution.hooks)(transition.end).filter(_.toArray).map(ct ⇒ ct.name → ct.`type`).toMap[String, ValType[_]]
+      val toArrayManifests = MoleExecution.cachedValidTypes(subMoleState.moleExecution, transition.end).filter(_.toArray).map(ct ⇒ ct.name → ct.`type`).toMap[String, ValType[_]]
 
-      val newContext = ContextAggregator.aggregate(transition.end.capsule.inputs(mole, subMoleState.moleExecution.sources, subMoleState.moleExecution.hooks), toArrayManifests, combinasion.map(ticket.content → _))
+      val newContext = ContextAggregator.aggregate(MoleExecution.cachedCapsuleInputs(subMoleState.moleExecution, transition.end.capsule), toArrayManifests, combinasion.map(ticket.content → _))
       MoleExecution.submit(subMoleState, transition.end.capsule, newContext, newTicket)
     }
   }

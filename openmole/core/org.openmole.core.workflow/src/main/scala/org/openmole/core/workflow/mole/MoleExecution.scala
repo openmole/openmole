@@ -20,8 +20,7 @@ package org.openmole.core.workflow.mole
 import java.util.UUID
 import java.util.concurrent.{ Executors, Semaphore }
 import java.util.logging.Level
-
-import org.openmole.core.context.{ Context, Variable }
+import org.openmole.core.context.{ Context, PrototypeSet, Variable }
 import org.openmole.core.event._
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.threadprovider.ThreadProvider
@@ -35,7 +34,7 @@ import org.openmole.core.workflow.mole
 import org.openmole.core.workflow.mole.MoleExecution.{ Cleaned, MoleExecutionFailed, SubMoleExecutionState }
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workflow.tools.{ OptionalArgument ⇒ _, _ }
-import org.openmole.core.workflow.transition.{ AggregationTransition, DataChannel, Transition }
+import org.openmole.core.workflow.transition.{ AggregationTransition, DataChannel, Transition, TransitionSlot }
 import org.openmole.core.workflow.validation._
 import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.collection.{ PriorityQueue, StaticArrayBuffer }
@@ -552,6 +551,16 @@ object MoleExecution extends JavaLogger {
     lazy val masterCapsuleExecutor = Executors.newSingleThreadExecutor(threadProvider.threadFactory)
   }
 
+  def cachedValidTypes(moleExecution: MoleExecution, transitionSlot: TransitionSlot) = {
+    def f = TypeUtil.validTypes(moleExecution.mole, moleExecution.sources, moleExecution.hooks)(transitionSlot)
+    moleExecution.validTypeCache.synchronized { moleExecution.validTypeCache.getOrElseUpdate(transitionSlot, f) }
+  }
+
+  def cachedCapsuleInputs(moleExecution: MoleExecution, capsule: MoleCapsule) = {
+    def f = capsule.inputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks)
+    moleExecution.capsuleInputCache.synchronized { moleExecution.capsuleInputCache.getOrElseUpdate(capsule, f) }
+  }
+
   object SynchronisationContext {
     implicit def default = Synchronized
     def apply[T](th: Any, op: ⇒ T)(implicit s: SynchronisationContext) =
@@ -565,6 +574,7 @@ object MoleExecution extends JavaLogger {
   sealed trait SynchronisationContext
   case object Synchronized extends SynchronisationContext
   case object UnsafeAccess extends SynchronisationContext
+
 }
 
 sealed trait MoleExecutionMessage
@@ -685,6 +695,10 @@ class MoleExecution(
     map ++= mole.capsules.map(_ -> 0L)
     map
   }
+
+  /* Caches to speedup workflow execution */
+  private val validTypeCache = collection.mutable.HashMap[TransitionSlot, Iterable[TypeUtil.ValidType]]()
+  private val capsuleInputCache = collection.mutable.HashMap[MoleCapsule, PrototypeSet]()
 
   lazy val partialTaskExecutionContext = {
     import executionContext.services._
