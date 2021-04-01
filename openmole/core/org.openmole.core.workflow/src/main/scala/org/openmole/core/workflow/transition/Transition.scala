@@ -213,6 +213,9 @@ object ExplorationTransition {
     (typedFactors, outputs)
   }
 
+  /* Sample list memory optimize for some common native types
+  *  this is useful since the sample list stays in memory during the job submission
+  *  for large sampling of long, double... this reduce the consumed memory substantially */
   object CompactedSampleList {
     type ArrayType = Byte
     val int: ArrayType = 0.toByte
@@ -221,10 +224,10 @@ object ExplorationTransition {
     val any: ArrayType = 64.toByte
 
     def apply(vs: Iterable[Val[Array[Any]]], context: Context) = {
-      val intArrays = new ArrayBuffer[Array[Int]]()
-      val longArrays = new ArrayBuffer[Array[Long]]()
-      val doubleArrays = new ArrayBuffer[Array[Double]]()
-      val anyArrays = new ArrayBuffer[Array[Any]]()
+      val intArrays = new ListBuffer[Array[Int]]()
+      val longArrays = new ListBuffer[Array[Long]]()
+      val doubleArrays = new ListBuffer[Array[Double]]()
+      val anyArrays = new ListBuffer[Array[Any]]()
 
       val order = new ListBuffer[(CompactedSampleList.ArrayType, Int)]()
 
@@ -243,13 +246,23 @@ object ExplorationTransition {
           order += (CompactedSampleList.any -> (anyArrays.size - 1))
       }
 
-      new CompactedSampleList(intArrays.toArray, longArrays.toArray, doubleArrays.toArray, anyArrays.toArray, order.toList)
+      new CompactedSampleList(
+        intArrays = intArrays.toVector,
+        longArrays = longArrays.toVector,
+        doubleArrays = doubleArrays.toVector,
+        anyArray = anyArrays.toVector, order.toVector
+      )
     }
 
     type OrderIndex = (CompactedSampleList.ArrayType, Int)
   }
 
-  class CompactedSampleList(intArrays: Array[Array[Int]], longArrays: Array[Array[Long]], doubleArrays: Array[Array[Double]], anyArray: Array[Array[Any]], order: List[CompactedSampleList.OrderIndex]) {
+  class CompactedSampleList(
+    intArrays:    Vector[Array[Int]],
+    longArrays:   Vector[Array[Long]],
+    doubleArrays: Vector[Array[Double]],
+    anyArray:     Vector[Array[Any]], order: Vector[CompactedSampleList.OrderIndex]) {
+
     def apply(index: Int) = order.map { o ⇒ arrayAt(o)(index) }
 
     def arrayAt(order: CompactedSampleList.OrderIndex) =
@@ -265,6 +278,7 @@ object ExplorationTransition {
         case None    ⇒ 0
         case Some(o) ⇒ arrayAt(o).size
       }
+
   }
 
   def exploredSamples(capsule: MoleCapsule, context: Context, moleExecution: MoleExecution) = CompactedSampleList(factors(capsule, moleExecution)._1, context)
