@@ -99,22 +99,21 @@ object DispatchEnvironment {
     name: OptionalArgument[String] = None)(implicit services: BatchEnvironment.Services, varName: sourcecode.Name) = {
     import services.eventDispatcher
 
-    EnvironmentProvider.multiple { ms ⇒
-      val environmentInstances = slot.flatMap(e ⇒ EnvironmentProvider.build(e.environment, ms))
-      val environmentInstancesMap = environmentInstances.toMap
+    EnvironmentProvider.multiple { (ms, c1) ⇒
+      val c2 = EnvironmentProvider.build(slot.map(_.environment), ms, c1)
 
       val dispatchEnvironment =
         new DispatchEnvironment(
-          destination = slot.map(e ⇒ Destination(environmentInstancesMap(e.environment), e.slot)),
+          destination = slot.map(e ⇒ Destination(c2(e.environment), e.slot)),
           name = Some(name.getOrElse(varName.value)),
           services = services.set(ms)
         )
 
       for {
-        env ← environmentInstances
-      } env._2 listen stateChangedListener(WeakReference(dispatchEnvironment))
+        env ← slot.map(_.environment)
+      } c2(env) listen stateChangedListener(WeakReference(dispatchEnvironment))
 
-      (dispatchEnvironment, environmentInstances)
+      (dispatchEnvironment, c2)
     }
   }
 

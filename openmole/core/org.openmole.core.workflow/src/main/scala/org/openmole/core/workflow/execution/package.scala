@@ -16,8 +16,9 @@
  */
 package org.openmole.core.workflow
 
-import java.io.PrintStream
+import org.jasypt.encryption.pbe.config.EnvironmentPBEConfig
 
+import java.io.PrintStream
 import org.openmole.core.workflow.mole.MoleServices
 
 package object execution {
@@ -36,27 +37,44 @@ package object execution {
     }
 
   object EnvironmentProvider {
+
+    type Cache = Map[EnvironmentProvider, Environment]
+
     def apply(build: MoleServices ⇒ LocalEnvironment): LocalEnvironmentProvider = LocalEnvironmentProvider(build)
+
     def apply[T <: Environment](build: MoleServices ⇒ T): EnvironmentProvider = GenericEnvironmentProvider(build)
 
-    def multiple(build: MoleServices ⇒ (Environment, Seq[(EnvironmentProvider, Environment)])) = MultipleEnvironmentProvider(build)
+    def multiple(build: (MoleServices, Cache) ⇒ (Environment, Cache)) = MultipleEnvironmentProvider(build)
 
-    def build(p: EnvironmentProvider, services: MoleServices) =
-      p match {
-        case GenericEnvironmentProvider(build) ⇒ Seq(p -> build(services))
-        case LocalEnvironmentProvider(build)   ⇒ Seq(p -> build(services))
-        case MultipleEnvironmentProvider(build) ⇒
-          val (e1, environments) = build(services)
-          Seq(p -> e1) ++ environments
-      }
+    def build(p: Seq[EnvironmentProvider], services: MoleServices, cache: Cache = Map()): Cache = {
+
+      def build0(lp: List[EnvironmentProvider], cache: Cache): Cache =
+        lp match {
+          case Nil ⇒ cache
+          case h :: t ⇒
+            cache.get(h) match {
+              case Some(e) ⇒ build0(t, cache)
+              case None ⇒
+                h match {
+                  case GenericEnvironmentProvider(bp) ⇒ build0(t, cache + (h -> bp(services)))
+                  case LocalEnvironmentProvider(bp)   ⇒ build0(t, cache + (h -> bp(services)))
+                  case MultipleEnvironmentProvider(bp) ⇒
+                    val (e1, cache2) = bp(services, cache)
+                    build0(t, cache ++ cache2 + (h -> e1))
+                }
+            }
+        }
+
+      build0(p.toList, cache)
+    }
 
     def buildLocal(p: LocalEnvironmentProvider, services: MoleServices) = p.build(services)
-  }
 
+  }
   sealed trait EnvironmentProvider
   case class GenericEnvironmentProvider(build: MoleServices ⇒ Environment) extends EnvironmentProvider
   case class LocalEnvironmentProvider(build: MoleServices ⇒ LocalEnvironment) extends EnvironmentProvider
-  case class MultipleEnvironmentProvider(build: MoleServices ⇒ (Environment, Seq[(EnvironmentProvider, Environment)])) extends EnvironmentProvider
+  case class MultipleEnvironmentProvider(build: (MoleServices, EnvironmentProvider.Cache) ⇒ (Environment, EnvironmentProvider.Cache)) extends EnvironmentProvider
 
   type ExecutionState = Byte
 

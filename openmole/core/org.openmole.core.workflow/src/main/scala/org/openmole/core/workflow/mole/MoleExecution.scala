@@ -720,7 +720,7 @@ class MoleExecution(
     )
   }
 
-  lazy val environments = environmentProviders.values.toVector.distinct.flatMap { v ⇒ EnvironmentProvider.build(v, executionContext.services) }.toMap
+  lazy val environments = EnvironmentProvider.build(environmentProviders.values.toVector, executionContext.services)
   lazy val environmentForCapsule = environmentProviders.toVector.map { case (k, v) ⇒ k → environments(v) }.toMap
   lazy val defaultEnvironment = EnvironmentProvider.buildLocal(defaultEnvironmentProvider, executionContext.services)
 
