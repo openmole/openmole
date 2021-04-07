@@ -186,10 +186,12 @@ object GAMATask {
       val parameters = (inputXML \ "Simulation" \ "Parameters" \ "Parameter").collect { case x: Elem => x }
       val outputs = (inputXML \ "Simulation" \ "Outputs" \ "Output").collect { case x: Elem => x }
 
-      def parameter(name: String) =
+      def gamaParameters = parameters.flatMap(e => e.attribute("var").flatMap(_.headOption).map(_.text)) ++ parameters.flatMap(e => e.attribute("name").flatMap(_.headOption).map(_.text))
+      def gamaParameterByName(name: String) =
         parameters.filter(e => e.attribute("var").flatMap(_.headOption).map(_.text) == Some(name) || e.attribute("name").flatMap(_.headOption).map(_.text) == Some(name)).headOption
 
-      def output(name: String) =
+      def gamaOutputs = outputs.flatMap(e => e.attribute("name").flatMap(_.headOption).map(_.text))
+      def gamaOutputByName(name: String) =
         outputs.filter(e => e.attribute("name").flatMap(_.headOption).map(_.text) == Some(name)).headOption
 
       def typeMatch(v: Val[_], t: String) =
@@ -203,19 +205,19 @@ object GAMATask {
 
       def validateInputs =
         mapped.inputs.flatMap { m =>
-          parameter(m.name) match {
+          gamaParameterByName(m.name) match {
             case Some(p) =>
               val gamaType = p.attribute("type").get.head.text
               if(!typeMatch(m.v, gamaType)) Some(new UserBadDataError(s"""Type mismatch between mapped input ${m.v} and input "${m.name}" of type ${gamaType}.""")) else None
-            case None => Some(new UserBadDataError(s"""Mapped input "${m.name}" has not been found in the simulation, make sure it is defined in your gaml file"""))
+            case None => Some(new UserBadDataError(s"""Mapped input "${m.name}" has not been found in the simulation among: ${gamaParameters.mkString(", ")}. Make sure it is defined in your gaml file"""))
           }
         }
 
       def validateOutputs =
         mapped.outputs.flatMap { m =>
-          output(m.name) match {
+          gamaOutputByName(m.name) match {
             case Some(_) => None
-            case None => Some(new UserBadDataError(s"""Mapped output "${m.name}" has not been found in the simulation, make sure it is defined in your gaml file"""))
+            case None => Some(new UserBadDataError(s"""Mapped output "${m.name}" has not been found in the simulation among: ${gamaOutputs.mkString(", ")}. Make sure it is defined in your gaml file."""))
           }
         }
 
