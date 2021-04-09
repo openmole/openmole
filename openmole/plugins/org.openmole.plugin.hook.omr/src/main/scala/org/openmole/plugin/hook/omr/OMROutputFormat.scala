@@ -17,8 +17,9 @@ object OMROutputFormat {
   def fileNameField = "data"
   def omrVersionField = "version"
   def omrVersion = "0.1"
+  def scriptField = "script"
 
-  implicit def outputFormat[MD](implicit encoder: Encoder[MD], methodData: MethodData[MD]): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD] {
+  implicit def outputFormat[MD](implicit encoder: Encoder[MD], methodData: MethodData[MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD] {
     override def write(executionContext: HookExecutionContext)(format: OMROutputFormat, output: WritableOutput, content: OutputContent, method: MD): FromContext[Unit] = FromContext { p ⇒
       import p._
       import org.json4s._
@@ -32,11 +33,14 @@ object OMROutputFormat {
           val directory = file.from(context)
 
           def methodFormat(json: Json, fileName: String) = {
-            json.deepDropNullValues.mapObject(_
-              .add(methodNameField, Json.fromString(methodData.name(method)))
-              .add(fileNameField, Json.fromString(fileName))
-              .add(omrVersionField, Json.fromString(omrVersion))
-            )
+            json.deepDropNullValues.mapObject { o ⇒
+              val o2 =
+                o.add(methodNameField, Json.fromString(methodData.name(method)))
+                  .add(fileNameField, Json.fromString(fileName))
+                  .add(omrVersionField, Json.fromString(omrVersion))
+
+              if (format.script) o2.add(scriptField, Json.fromString(ScriptSourceData.scriptContent(scriptData))) else o2
+            }
           }
 
           directory.withLockInDirectory {
@@ -106,4 +110,4 @@ object OMROutputFormat {
 
 }
 
-case class OMROutputFormat()
+case class OMROutputFormat(script: Boolean = true)

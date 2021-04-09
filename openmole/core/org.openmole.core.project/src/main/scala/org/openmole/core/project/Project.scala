@@ -28,6 +28,7 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.project
 import org.openmole.core.services._
 import org.openmole.core.workflow.composition.DSL
+import org.openmole.core.workflow.tools.ScriptSourceData
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.hash._
 
@@ -145,6 +146,7 @@ object Project {
            |new $traitName {
            |
            |$functionPrototype = {
+           |implicit def _scriptSourceData = ${classOf[ScriptSourceData.ScriptData].getCanonicalName}(File(\"\"\"$workDirectory\"\"\"), File(\"\"\"$script\"\"\"))
            |import ${Project.uniqueName(script)}._imports._""".stripMargin
 
       def scriptFooter =

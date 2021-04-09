@@ -78,4 +78,7 @@ package object extension {
   type RandomProvider = org.openmole.tool.random.RandomProvider
   type PrototypeSet = org.openmole.core.context.PrototypeSet
 
+  type ScriptSourceData = org.openmole.core.workflow.tools.ScriptSourceData
+  val ScriptSourceData = org.openmole.core.workflow.tools.ScriptSourceData
+
 }
