@@ -64,14 +64,14 @@ object GAMATask {
   }
 
   def apply(
-    gamlOrWorkspace:        File,
+    workspace:              File,
     experiment:             String,
     finalStep:              FromContext[Int],
     model:                  OptionalArgument[String]         = None,
     seed:                   OptionalArgument[Val[Long]]      = None,
     frameRate:              OptionalArgument[Int]            = None,
     install:                Seq[String]                      = Seq.empty,
-    containerImage:            ContainerImage                = "gamaplatform/gama:1.8.1",
+    containerImage:          ContainerImage                  = "gamaplatform/gama:1.8.1",
     version:                OptionalArgument[String]         = None,
     errorOnReturnValue:     Boolean                          = true,
     returnValue:            OptionalArgument[Val[Int]]       = None,
@@ -84,10 +84,10 @@ object GAMATask {
     containerSystem:        ContainerSystem                  = ContainerSystem.default,
     installContainerSystem: ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): GAMATask = {
 
-    (model.option.isDefined, gamlOrWorkspace.isDirectory) match {
-      case (false, true) ⇒ throw new UserBadDataError(s"""$gamlOrWorkspace is a directory, in this case you must specify you model path, model = "model.gaml"""")
-      case (true, false) ⇒ throw new UserBadDataError(s"""$gamlOrWorkspace is a file in this case you cannot provide a model path (model = "$model")""")
-      case (true, true) if !(gamlOrWorkspace / model.get).exists() ⇒ throw new UserBadDataError(s"The model file you specify does not exist: ${gamlOrWorkspace / model.get}")
+    (model.option.isDefined, workspace.isDirectory) match {
+      case (false, true) ⇒ throw new UserBadDataError(s"""$workspace is a directory, in this case you must specify you model path, model = "model.gaml"""")
+      case (true, false) ⇒ throw new UserBadDataError(s"""$workspace is a file in this case you cannot provide a model path (model = "$model")""")
+      case (true, true) if !(workspace / model.get).exists() ⇒ throw new UserBadDataError(s"The model file you specify does not exist: ${workspace / model.get}")
       case _ ⇒
     }
 
@@ -98,10 +98,10 @@ object GAMATask {
         case (Some(_), _: SavedDockerImage) => throw new UserBadDataError(s"Can not set both, a saved docker image, and, set the version of the container.")
       }
 
-    val preparedImage = prepare(gamlOrWorkspace, model, experiment, install, installContainerSystem, gamaContainerImage, clearCache = clearContainerCache)
+    val preparedImage = prepare(workspace, model, experiment, install, installContainerSystem, gamaContainerImage, clearCache = clearContainerCache)
 
     GAMATask(
-      workspace = gamlOrWorkspace,
+      workspace = workspace,
       model = model,
       experiment = experiment,
       finalStep = finalStep,
