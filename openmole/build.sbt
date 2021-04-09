@@ -136,7 +136,7 @@ def allCore = Seq(
   outputManager,
   console,
   project,
-  buildinfo,
+  openmoleBuildInfo,
   module,
   market,
   context,
@@ -253,12 +253,12 @@ lazy val timeService = OsgiProject(coreDir, "org.openmole.core.timeservice", imp
 
 lazy val threadProvider = OsgiProject(coreDir, "org.openmole.core.threadprovider", imports = Seq("*")) dependsOn(tools, preference, pluginRegistry) settings (coreSettings: _*) settings (defaultActivator)
 
-lazy val module = OsgiProject(coreDir, "org.openmole.core.module", imports = Seq("*")) dependsOn(buildinfo, expansion, openmoleHash, openmoleFile, pluginManager) settings (coreSettings: _*) settings(
+lazy val module = OsgiProject(coreDir, "org.openmole.core.module", imports = Seq("*")) dependsOn(openmoleBuildInfo, expansion, openmoleHash, openmoleFile, pluginManager) settings (coreSettings: _*) settings(
   libraryDependencies ++= Libraries.gridscaleHTTP,
   libraryDependencies += Libraries.json4s,
   defaultActivator)
 
-lazy val market = OsgiProject(coreDir, "org.openmole.core.market", imports = Seq("*")) enablePlugins (ScalaJSPlugin) dependsOn(buildinfo, expansion, openmoleHash, openmoleFile, pluginManager) settings (coreSettings: _*) settings(
+lazy val market = OsgiProject(coreDir, "org.openmole.core.market", imports = Seq("*")) enablePlugins (ScalaJSPlugin) dependsOn(openmoleBuildInfo, expansion, openmoleHash, openmoleFile, pluginManager) settings (coreSettings: _*) settings(
   libraryDependencies ++= Libraries.gridscaleHTTP,
   libraryDependencies += Libraries.json4s,
   defaultActivator)
@@ -282,7 +282,7 @@ lazy val project = OsgiProject(coreDir, "org.openmole.core.project", imports = S
   Libraries.addScalaLang(scalaVersionValue)
   )
 
-lazy val buildinfo = OsgiProject(coreDir, "org.openmole.core.buildinfo", imports = Seq("*")) enablePlugins (BuildInfoPlugin) settings(
+lazy val openmoleBuildInfo = OsgiProject(coreDir, "org.openmole.core.buildinfo", imports = Seq("*")) enablePlugins (BuildInfoPlugin) settings(
   //sourceGenerators in Compile += buildInfo.taskValue,
   (Compile / sourceGenerators) := Seq(
     Def.taskDyn {
@@ -458,7 +458,7 @@ lazy val modifierHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.modifie
 lazy val jsonHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.json", imports = Seq("*")) dependsOn(openmoleDSL, json, replication % "test") settings (
   libraryDependencies += Libraries.scalatest) settings (pluginSettings: _*)
 
-lazy val omrHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.omr", imports = Seq("*")) dependsOn(openmoleDSL, jsonHook, replication % "test") settings(
+lazy val omrHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.omr", imports = Seq("*")) dependsOn(openmoleDSL, jsonHook, openmoleBuildInfo, replication % "test") settings(
   libraryDependencies += Libraries.scalatest, libraryDependencies += Libraries.circe) settings (pluginSettings: _*)
 
 
@@ -661,7 +661,7 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", d
   sharedGUI,
   dataGUI,
   workflow,
-  buildinfo,
+  openmoleBuildInfo,
   openmoleFile,
   openmoleTar,
   openmoleHash,
@@ -901,7 +901,7 @@ lazy val site = crossProject(JSPlatform, JVMPlatform).in(binDir / "org.openmole.
 )
 
 lazy val siteJS = site.js enablePlugins (ExecNpmPlugin) settings (test := {})
-lazy val siteJVM = site.jvm dependsOn(tools, project, serializer, buildinfo, marketIndex) settings (
+lazy val siteJVM = site.jvm dependsOn(tools, project, serializer, openmoleBuildInfo, marketIndex) settings (
   libraryDependencies += Libraries.sourceCode)
 
 lazy val cloneMarket = taskKey[Unit]("cloning market place")
@@ -921,7 +921,7 @@ lazy val marketIndex = Project("marketindex", binDir / "org.openmole.marketindex
     val marketBranch = defineMarketBranch.value
     runner.updated("https://gitlab.openmole.org/openmole/market.git", marketBranch, dir, ConsoleLogger())
   }
-) dependsOn(buildinfo, openmoleFile, openmoleTar, market)
+) dependsOn(openmoleBuildInfo, openmoleFile, openmoleTar, market)
 
 def parse(key: String, default: sbt.File, parsed: Seq[String]) = parsed.indexOf(key) match {
   case -1 => (default, parsed ++ Seq(key, default.getAbsolutePath))
@@ -1042,7 +1042,7 @@ lazy val consoleBin = OsgiProject(binDir, "org.openmole.console", imports = Seq(
   console,
   project,
   openmoleDSL,
-  buildinfo,
+  openmoleBuildInfo,
   module
 ) settings (defaultSettings: _*)
 

@@ -18,6 +18,7 @@ object OMROutputFormat {
   def omrVersionField = "version"
   def omrVersion = "0.1"
   def scriptField = "script"
+  def openMOLEVersionField = "openmole-version"
 
   implicit def outputFormat[MD](implicit encoder: Encoder[MD], methodData: MethodData[MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD] {
     override def write(executionContext: HookExecutionContext)(format: OMROutputFormat, output: WritableOutput, content: OutputContent, method: MD): FromContext[Unit] = FromContext { p ⇒
@@ -38,6 +39,7 @@ object OMROutputFormat {
                 o.add(methodNameField, Json.fromString(methodData.name(method)))
                   .add(fileNameField, Json.fromString(fileName))
                   .add(omrVersionField, Json.fromString(omrVersion))
+                  .add(openMOLEVersionField, Json.fromString(org.openmole.core.buildinfo.version.value))
 
               if (format.script) o2.add(scriptField, Json.fromString(ScriptSourceData.scriptContent(scriptData))) else o2
             }
