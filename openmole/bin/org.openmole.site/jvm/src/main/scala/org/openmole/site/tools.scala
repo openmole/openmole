@@ -84,6 +84,7 @@ package object tools {
     def plain(code: String) = apply(code, "plain")
     def openmoleNoTest(code: String) = apply(code, "scala")
     def python(code: String) = apply(code, "python")
+    def json(code: String) = apply(code, "json")
   }
 
   def openmole(code: String, header: String = "", name: hl.OptionalName = hl.OptionalName(None)) = hl.openmole(code, header, name)
