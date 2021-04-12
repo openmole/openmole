@@ -73,7 +73,7 @@ object Assembly {
     assemblyPath := target.value / "assemble",
     assemblyDependenciesPath := assemblyPath.value,
     assemble := {
-      (copyResources in assemble).value
+      (assemble / copyResources).value
       urlDownloader(downloads.value, assemblyPath.value, ivyPaths.value, streams.value)
       setExecutable.value.foreach(f ⇒ new File(assemblyPath.value, f).setExecutable(true))
       assemblyPath.value
@@ -81,10 +81,10 @@ object Assembly {
     TarPlugin.autoImport.tarFolder := assemble.value,
     dependencyName := { (_: ModuleID).name + ".jar" },
     dependencyFilter := { (_, _) ⇒ true },
-    (copyResources in assemble) := resourcesAssemble.value.map { case (from, to) ⇒ copyFileTask(from, to, streams.value) },
-    (copyResources in assemble) ++=
+    (assemble / copyResources) := resourcesAssemble.value.map { case (from, to) ⇒ copyFileTask(from, to, streams.value) },
+    (assemble / copyResources) ++=
       copyLibraryDependencies(
-        (externalDependencyClasspath in Compile).value,
+        (Compile / externalDependencyClasspath).value,
         assemblyDependenciesPath.value,
         dependencyName.value,
         dependencyFilter.value,

@@ -13,15 +13,15 @@ object OsgiProject {
     OsgiKeys.bundleSymbolicName := (name.value + ";singleton:=" + Osgi.singleton.value),
     autoAPIMappings := true,
 
-    Osgi.bundleDependencies in Compile := OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject))).value,
+    Compile / Osgi.bundleDependencies := OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject))).value,
 
     Osgi.openMOLEScope := Seq.empty,
     OsgiKeys.bundleVersion := version.value,
     OsgiKeys.exportPackage := (name { n ⇒ Seq(n + ".*") }).value,
     OsgiKeys.bundleActivator := None,
 
-    install in Compile := (publishLocal in Compile).value,
-    installRemote in Compile := (publish in Compile).value,
+    Compile / install := (Compile / publishLocal).value,
+    Compile / installRemote := (Compile / publish).value,
     bundleType := Set("default"))
 
   def apply(
