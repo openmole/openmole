@@ -11,7 +11,7 @@ The @code("TemplateTask") and the @code("TemplateFileTask") are designed to gene
 @br
 
 A @code("TemplateTask") usage looks as follow:
-@hl.openmole("""
+@hl.openmole(s"""
 val x = Val[Int]
 val parameterFile = Val[File]
 
@@ -19,7 +19,7 @@ val template =
   TemplateTask(
     $tq
     |param1 = 9
-    |param2 = ${x}
+    |param2 = $${x}
     |$tq.stripMargin,
     parameterFile
   ) set (
