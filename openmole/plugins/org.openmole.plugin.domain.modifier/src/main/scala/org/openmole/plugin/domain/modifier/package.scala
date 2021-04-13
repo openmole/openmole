@@ -50,6 +50,7 @@ package object modifier {
     def sort(implicit o: Ordering[T]) = SortedByDomain(domain, identity[T])
     def sortBy[S: Ordering](s: T ⇒ S) = SortedByDomain(domain, s)
     def shuffle = ShuffleDomain(domain)
+    def distinct = DistinctDomain(domain)
   }
 
   implicit def discreteFactorModifierDecorator[D, T: TypeTag](factor: Factor[D, T])(implicit discrete: DiscreteFromContext[D, T]) = new {
@@ -67,6 +68,7 @@ package object modifier {
     def sort(implicit o: Ordering[T]) = factor.copy(domain = factor.domain.sort)
     def sortBy[S: Ordering](s: T ⇒ S) = factor.copy(domain = factor.domain.sortBy(s))
     def shuffle = factor.copy(domain = factor.copy(domain = factor.domain.shuffle))
+    def distinct = factor.copy(domain = factor.domain.distinct)
   }
 
 }
