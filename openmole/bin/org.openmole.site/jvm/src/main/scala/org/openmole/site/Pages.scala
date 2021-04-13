@@ -223,7 +223,7 @@ object DocumentationPages {
   lazy val scilab = DocumentationPage.fromScalatex(name = "Scilab", content = scalatex.documentation.plug.Scilab)
   lazy val gama = DocumentationPage.fromScalatex(name = "GAMA", content = scalatex.documentation.plug.GAMA)
   lazy val container = DocumentationPage.fromScalatex(name = "Executable", content = scalatex.documentation.plug.Container)
-  lazy val tool = DocumentationPage.fromScalatex(name = "Tool Tasks", content = scalatex.documentation.plug.Tool)
+  lazy val tool = DocumentationPage.fromScalatex(name = "Tool", content = scalatex.documentation.plug.Tool)
 
   // Explore
   def explorePages = pageNode(explore, Vector(samplings, calibration, sensitivity, profile, pse, ose, abc))
