@@ -80,7 +80,7 @@ object SSHEnvironment extends JavaLogger {
     }
   }
 
-  case class SSHJob(id: Long) extends AnyVal
+  case class SSHJob(id: Long, workDirectory: String)
 
   sealed trait SSHRunState
   case class Queued(description: gridscale.ssh.SSHJobDescription, batchExecutionJob: BatchExecutionJob) extends SSHRunState
@@ -92,8 +92,8 @@ object SSHEnvironment extends JavaLogger {
     val queuesLock = new ReentrantLock()
     val jobId = new AtomicLong()
 
-    def registerJob(description: gridscale.ssh.SSHJobDescription, batchExecutionJob: BatchExecutionJob) = queuesLock {
-      val job = SSHEnvironment.SSHJob(jobId.getAndIncrement())
+    def registerJob(description: gridscale.ssh.SSHJobDescription, batchExecutionJob: BatchExecutionJob, jobWorkDirectory: String) = queuesLock {
+      val job = SSHEnvironment.SSHJob(jobId.getAndIncrement(), jobWorkDirectory)
       jobsStates.put(job, SSHEnvironment.Queued(description, batchExecutionJob))
       job
     }

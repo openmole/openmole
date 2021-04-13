@@ -38,7 +38,7 @@ class SLURMJobService[S, H](
     val remoteScript = buildScript(serializedJob, outputPath)
 
     val description = _root_.gridscale.slurm.SLURMJobDescription(
-      command = s"/bin/bash $remoteScript",
+      command = s"/bin/bash ${remoteScript.content}",
       queue = parameters.queue,
       workDirectory = jobDirectory,
       wallTime = parameters.wallTime,

@@ -77,11 +77,11 @@ class SSHJobService[S](s: S, tmpDirectory: String, services: BatchEnvironment.Se
 
     val remoteScript = buildScript(serializedJob)
     val jobDescription = gridscale.ssh.SSHJobDescription(
-      command = s"/bin/bash $remoteScript",
+      command = s"/bin/bash ${remoteScript.content}",
       workDirectory = jobDirectory
     )
 
-    env.stateRegistry.registerJob(jobDescription, batchExecutionJob)
+    env.stateRegistry.registerJob(jobDescription, batchExecutionJob, remoteScript.jobWorkDirectory)
   }
 
   def submit(job: SSHEnvironment.SSHJob, description: gridscale.ssh.SSHJobDescription, batchExecutionJob: BatchExecutionJob) =
@@ -106,8 +106,11 @@ class SSHJobService[S](s: S, tmpDirectory: String, services: BatchEnvironment.Se
   def delete(job: SSHEnvironment.SSHJob): Unit = {
     val jobState = env.stateRegistry.remove(job)
     jobState match {
-      case Some(SSHEnvironment.Submitted(id)) ⇒ accessControl { gridscale.ssh.clean(env.sshServer, id) }
-      case _                                  ⇒
+      case Some(SSHEnvironment.Submitted(id)) ⇒ accessControl {
+        gridscale.ssh.clean(env.sshServer, id)
+        gridscale.ssh.run(env.sshServer, s"rm -rf ${job.workDirectory}")
+      }
+      case _ ⇒
     }
   }
 

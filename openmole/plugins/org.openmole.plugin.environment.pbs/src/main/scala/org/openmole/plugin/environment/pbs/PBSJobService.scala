@@ -39,7 +39,7 @@ class PBSJobService[S, H](
     val remoteScript = buildScript(serializedJob, outputPath)
 
     val description = gridscale.pbs.PBSJobDescription(
-      command = s"/bin/bash $remoteScript",
+      command = s"/bin/bash ${remoteScript.content}",
       workDirectory = jobDirectory,
       queue = parameters.queue,
       wallTime = parameters.wallTime,

@@ -92,6 +92,10 @@ object SharedStorage extends JavaLogger {
     path
   }
 
+  case class JobScript(content: String, jobWorkDirectory: String) {
+    override def toString = content
+  }
+
   def buildScript[S](
     runtimePath:    Runtime ⇒ String,
     jobDirectory:   String,
@@ -106,7 +110,6 @@ object SharedStorage extends JavaLogger {
     val runtime = runtimePath(serializedJob.runtime) //preparedRuntime(serializedJob.runtime)
     val result = outputPath
     val workspace = StorageService.child(storage, workDirectory, s"openmole_${UUID.randomUUID.toString}")
-    val osgiWorkDir = StorageService.child(storage, workspace, UUID.randomUUID.toString)
 
     val remoteScript =
       newFile.withTmpFile("run", ".sh") { script ⇒
@@ -136,7 +139,7 @@ object SharedStorage extends JavaLogger {
         remoteScript
       }
 
-    remoteScript
+    JobScript(remoteScript, workspace)
   }
 
 }
