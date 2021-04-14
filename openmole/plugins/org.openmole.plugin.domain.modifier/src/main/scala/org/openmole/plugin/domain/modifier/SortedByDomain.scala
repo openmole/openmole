@@ -17,25 +17,23 @@
 
 package org.openmole.plugin.domain.modifier
 
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 import org.openmole.core.context.PrototypeSet
 import org.openmole.core.workflow.domain._
 
-import cats.implicits._
-
 object SortedByDomain {
 
-  implicit def isFinite[D, T, S] = new FiniteFromContext[SortedByDomain[D, T, S], T] with DomainInputs[SortedByDomain[D, T, S]] {
-    override def computeValues(domain: SortedByDomain[D, T, S]) = domain.computeValues()
-    override def inputs(domain: SortedByDomain[D, T, S]): PrototypeSet = domain.inputs
+  implicit def isDiscrete[D, T, S] = new DiscreteFromContext[SortedByDomain[D, T, S], T] with DomainInputs[SortedByDomain[D, T, S]] {
+    def inputs(domain: SortedByDomain[D, T, S]) = domain.domainInputs.inputs(domain.domain)
+    def iterator(domain: SortedByDomain[D, T, S]) = FromContext { p ⇒
+      import p._
+      import domain.sOrdering
+      domain.discrete.iterator(domain.domain).from(context).toSeq.sortBy(domain.s.from(context)).iterator
+    }
   }
 
 }
 
-case class SortedByDomain[D, T, S: scala.Ordering](domain: D, s: T ⇒ S)(implicit finite: FiniteFromContext[D, T], domainInputs: DomainInputs[D]) {
-  def inputs = domainInputs.inputs(domain)
-  def computeValues() =
-    for {
-      f ← finite.computeValues(domain)
-    } yield f.toList.sortBy(s)
-}
+case class SortedByDomain[D, T, S](domain: D, s: FromContext[T ⇒ S])(implicit val discrete: DiscreteFromContext[D, T], val domainInputs: DomainInputs[D], val sOrdering: scala.Ordering[S])
 

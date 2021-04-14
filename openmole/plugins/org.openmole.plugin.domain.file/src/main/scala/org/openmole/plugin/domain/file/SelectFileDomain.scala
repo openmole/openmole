@@ -26,8 +26,8 @@ import cats.implicits._
 
 object SelectFileDomain {
 
-  implicit def isFinite = new FiniteFromContext[SelectFileDomain, File] {
-    override def computeValues(domain: SelectFileDomain) = domain.computeValues
+  implicit def isDiscrete = new DiscreteFromContext[SelectFileDomain, File] {
+    override def iterator(domain: SelectFileDomain) = domain.iterator
 
   }
 
@@ -35,5 +35,5 @@ object SelectFileDomain {
 }
 
 class SelectFileDomain(val provider: FromContext[File]) {
-  def computeValues = provider.map(p ⇒ List(p))
+  def iterator = provider.map(p ⇒ Iterator(p))
 }

@@ -35,7 +35,7 @@ sealed class ShuffleSampling(val sampling: Sampling) extends Sampling {
 
   override def apply() = FromContext { p ⇒
     import p._
-    shuffled(sampling().from(context).toList)(random()).toIterator
+    shuffled(sampling().from(context).toList)(random()).iterator
   }
 
 }

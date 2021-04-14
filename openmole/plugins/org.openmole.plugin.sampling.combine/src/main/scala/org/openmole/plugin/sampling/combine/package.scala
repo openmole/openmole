@@ -29,8 +29,13 @@ import cats.implicits._
 
 package object combine {
 
-  trait AbstractSamplingCombineDecorator {
-    def s: Sampling
+  implicit class SamplingCombineDecorator[T](s: T)(implicit toSampling: ToSampling[T]) {
+    def shuffle = ShuffleSampling(s)
+    def filter(keep: Condition) = FilteredSampling(s, keep)
+    def take(n: FromContext[Int]) = TakeSampling(s, n)
+    def subset(n: Int, size: FromContext[Int] = 100) = SubsetSampling(s, n, size = size)
+    def drop(n: Int) = DropSampling(s, n)
+
     @deprecated("Use x instead", "5")
     def +(s2: Sampling) = x(s2)
     def x(s2: Sampling) = new CompleteSampling(s, s2)
@@ -44,17 +49,9 @@ package object combine {
     def bootstrap(samples: FromContext[Int], number: FromContext[Int]) = s sample samples repeat number
   }
 
-  implicit class SamplingCombineDecorator(val s: Sampling) extends AbstractSamplingCombineDecorator {
-    def shuffle = ShuffleSampling(s)
-    def filter(keep: Condition) = FilteredSampling(s, keep)
-    def take(n: FromContext[Int]) = TakeSampling(s, n)
-    def subset(n: Int, size: FromContext[Int] = 100) = SubsetSampling(s, n, size = size)
-    def drop(n: Int) = DropSampling(s, n)
-  }
-
-  implicit class DiscreteFactorDecorator[D, T](factor: Factor[D, T])(implicit discrete: DiscreteFromContext[D, T]) extends AbstractSamplingCombineDecorator {
-    def s: Sampling = FactorSampling(factor)
-  }
+  //  implicit class DiscreteFactorDecorator[D, T](factor: Factor[D, T])(implicit discrete: DiscreteFromContext[D, T]) extends AbstractSamplingCombineDecorator {
+  //    def s: Sampling = FactorSampling(factor)
+  //  }
 
   implicit def withNameFactorDecorator[D, T: CanGetName](factor: Factor[D, T])(implicit discrete: DiscreteFromContext[D, T]) = new {
     @deprecated("Use withName", "5")

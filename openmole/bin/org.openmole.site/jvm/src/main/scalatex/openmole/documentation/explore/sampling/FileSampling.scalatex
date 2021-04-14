@@ -38,7 +38,7 @@ Some predicate functions available out of the box are @code{startsWith()}, @code
 
   DirectSampling(
     evaluation = myModel,
-    sampling = (f in (workDirectory / "dir") filter(_.getName.endsWith(".nii.gz")) )
+    sampling = (f in (workDirectory / "dir").filter(_.getName.endsWith(".nii.gz")) )
   )
 """, header = "val myModel = EmptyTask()")
 

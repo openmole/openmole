@@ -18,7 +18,7 @@
 package org.openmole.plugin.domain.range
 
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.domain.{ BoundsFromContext, CenterFromContext, FiniteFromContext }
+import org.openmole.core.workflow.domain.{ BoundsFromContext, CenterFromContext, DiscreteFromContext }
 import cats.implicits._
 
 object Range {
@@ -29,8 +29,8 @@ object Range {
     override def center(domain: Range[T]) = Range.rangeCenter(domain)
   }
 
-  implicit def rangeWithDefaultStepIsFinite[T](implicit step: DefaultStep[T]) = new FiniteFromContext[Range[T], T] {
-    override def computeValues(domain: Range[T]) = StepRange[T](domain, step.step).computeValues
+  implicit def rangeWithDefaultStepIsDiscrete[T](implicit step: DefaultStep[T]) = new DiscreteFromContext[Range[T], T] {
+    override def iterator(domain: Range[T]) = StepRange[T](domain, step.step).iterator
   }
 
   def apply[T: RangeValue](

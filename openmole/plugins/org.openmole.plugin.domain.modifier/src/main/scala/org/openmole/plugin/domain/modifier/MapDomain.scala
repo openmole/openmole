@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.domain.modifier
 
-import org.openmole.core.context.Context
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 import org.openmole.core.workflow.domain._
 
 object MapDomain {

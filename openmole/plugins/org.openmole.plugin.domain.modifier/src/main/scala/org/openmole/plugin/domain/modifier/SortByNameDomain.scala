@@ -18,36 +18,30 @@
 package org.openmole.plugin.domain.modifier
 
 import java.io.File
-
-import org.openmole.core.context.PrototypeSet
-import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workflow.domain._
-
-import cats._
-import cats.implicits._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
+import org.openmole.core.workflow.domain.{ DiscreteFromContext, DomainInputs }
 
 object SortByNameDomain {
-  implicit def isFinite[D] = new FiniteFromContext[SortByNameDomain[D], File] with DomainInputs[SortByNameDomain[D]] {
-    override def computeValues(domain: SortByNameDomain[D]) = domain.computeValues()
-    override def inputs(domain: SortByNameDomain[D]): PrototypeSet = domain.inputs
+
+  implicit def isDiscrete[D] = new DiscreteFromContext[SortByNameDomain[D], File] with DomainInputs[SortByNameDomain[D]] {
+
+    override def inputs(domain: SortByNameDomain[D]): PrototypeSet = domain.domainInputs.inputs(domain.domain)
+
+    override def iterator(domain: SortByNameDomain[D]) = FromContext { p ⇒
+      import p._
+      def extractNumber(name: String) = {
+        val n = name.reverse.dropWhile(!_.isDigit).takeWhile(_.isDigit).reverse
+        if (n.isEmpty) throw new UserBadDataError("File name " + name + " doesn't contains a number")
+        else n.toInt
+      }
+
+      domain.discrete.iterator(domain.domain).from(context).toSeq.sortBy(f ⇒ extractNumber(f.getName)).iterator
+    }
   }
 
 }
 
-case class SortByNameDomain[D](domain: D)(implicit val finite: FiniteFromContext[D, File], domainInputs: DomainInputs[D]) {
-
-  def inputs = domainInputs.inputs(domain)
-
-  def computeValues() = {
-    def extractNumber(name: String) = {
-      val n = name.reverse.dropWhile(!_.isDigit).takeWhile(_.isDigit).reverse
-      if (n.isEmpty) throw new UserBadDataError("File name " + name + " doesn't contains a number")
-      else n.toInt
-    }
-
-    for {
-      f ← finite.computeValues(domain)
-    } yield f.toList.sortBy(f ⇒ extractNumber(f.getName))
-  }
+case class SortByNameDomain[D](domain: D)(implicit val discrete: DiscreteFromContext[D, File], val domainInputs: DomainInputs[D]) {
 
 }

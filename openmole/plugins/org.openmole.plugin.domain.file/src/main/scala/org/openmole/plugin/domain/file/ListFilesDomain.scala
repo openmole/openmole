@@ -27,8 +27,8 @@ import org.openmole.tool.logger.JavaLogger
 
 object ListFilesDomain extends JavaLogger {
 
-  implicit def isFinite: FiniteFromContext[ListFilesDomain, File] = new FiniteFromContext[ListFilesDomain, File] {
-    override def computeValues(domain: ListFilesDomain) = domain.computeValues
+  implicit def isDiscrete: DiscreteFromContext[ListFilesDomain, File] = new DiscreteFromContext[ListFilesDomain, File] {
+    override def iterator(domain: ListFilesDomain) = domain.iterator
   }
 
   def apply(
@@ -49,7 +49,7 @@ class ListFilesDomain(
   filter:    Option[FromContext[String]] = None
 ) {
 
-  def computeValues = FromContext[Iterable[File]] { p ⇒
+  def iterator = FromContext { p ⇒
     import p._
     def toFilter(f: File) =
       filter.map(e ⇒ f.getName.matches(e.from(context))).getOrElse(true)
@@ -58,10 +58,10 @@ class ListFilesDomain(
 
     if (!dir.exists) {
       logger.warning("Directory " + dir + " in ListFilesDomain doesn't exists, returning an empty list of values.")
-      Iterable.empty
+      Iterator.empty
     }
-    else if (recursive) dir.listRecursive(toFilter _)
-    else dir.listFilesSafe(toFilter _)
+    else if (recursive) dir.listRecursive(toFilter _).iterator
+    else dir.listFilesSafe(toFilter _).iterator
   }
 
 }

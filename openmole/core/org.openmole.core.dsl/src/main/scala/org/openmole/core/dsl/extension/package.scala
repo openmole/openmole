@@ -2,7 +2,7 @@ package org.openmole.core.dsl
 
 package object extension {
 
-  type FromContext[T] = org.openmole.core.expansion.FromContext[T]
+  type FromContext[+T] = org.openmole.core.expansion.FromContext[T]
   lazy val FromContext = org.openmole.core.expansion.FromContext
 
   type DefinitionScope = org.openmole.core.workflow.builder.DefinitionScope

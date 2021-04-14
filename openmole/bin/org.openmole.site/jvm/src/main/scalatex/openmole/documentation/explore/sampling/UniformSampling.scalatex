@@ -23,7 +23,7 @@ val my_model = EmptyTask() set( (inputs, outputs) += my_input)
 val exploration =
   DirectSampling(
     evaluation = my_model hook display,
-    sampling= (my_input in (UniformDistribution[Double](max=20) take 100))
+    sampling= my_input in UniformDistribution[Double](max=20).take(100)
   )
 
 exploration""", name = "uniform sampling example")
@@ -45,7 +45,7 @@ val my_model = EmptyTask() set( (inputs, outputs) += my_input)
 val exploration =
   DirectSampling(
     evaluation = my_model hook display,
-    sampling= (my_input in (UniformDistribution[Double](max=20) take 100)).map(x => x -10)
+    sampling= my_input in UniformDistribution[Double](max=20).take(100).map(x => x -10)
   )
 
 exploration""", name = "uniform sampling custom example")

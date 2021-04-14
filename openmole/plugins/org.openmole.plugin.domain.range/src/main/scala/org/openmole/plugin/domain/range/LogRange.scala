@@ -27,9 +27,9 @@ import cats.syntax._
 
 object LogRange {
 
-  implicit def isFinite[T] =
-    new FiniteFromContext[LogRange[T], T] with CenterFromContext[LogRange[T], T] with BoundsFromContext[LogRange[T], T] {
-      override def computeValues(domain: LogRange[T]) = domain.computeValues
+  implicit def isDiscrete[T] =
+    new DiscreteFromContext[LogRange[T], T] with CenterFromContext[LogRange[T], T] with BoundsFromContext[LogRange[T], T] {
+      override def iterator(domain: LogRange[T]) = domain.iterator
       override def center(domain: LogRange[T]) = Range.rangeCenter(domain.range)
       override def max(domain: LogRange[T]) = domain.max
       override def min(domain: LogRange[T]) = domain.min
@@ -51,14 +51,14 @@ sealed class LogRange[T](val range: Range[T], val steps: FromContext[Int])(impli
 
   import range._
 
-  def computeValues = (min, max, steps) mapN { (min, max, steps) ⇒
+  def iterator = (min, max, steps) mapN { (min, max, steps) ⇒
     val logMin: T = lg.log(min)
     val logMax: T = lg.log(max)
 
     import ops._
 
     val logStep = (logMax - logMin) / (fromInt(steps - 1))
-    Iterator.iterate(logMin)(_ + logStep).map(lg.exp).take(steps).toVector
+    Iterator.iterate(logMin)(_ + logStep).map(lg.exp).take(steps)
   }
 
   def max = range.max

@@ -45,12 +45,12 @@ package object file {
     def select(path: FromContext[String]) = SelectFileDomain(f, path)
   }
 
-  implicit def prototypeOfFileIsFinite = new FiniteFromContext[Val[File], File] {
-    override def computeValues(prototype: Val[File]) = FromContext.prototype(prototype).map { _.listFilesSafe }
+  implicit def prototypeOfFileIsFinite = new DiscreteFromContext[Val[File], File] {
+    override def iterator(prototype: Val[File]) = FromContext.prototype(prototype).map { _.listFilesSafe.iterator }
   }
 
-  implicit def fileIsFinite = new FiniteFromContext[File, File] {
-    override def computeValues(f: File) = FromContext.value(f.listFilesSafe)
+  implicit def fileIsDiscrete = new DiscreteFromContext[File, File] {
+    override def iterator(f: File) = FromContext.value(f.listFilesSafe.iterator)
   }
 
 }

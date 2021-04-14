@@ -23,16 +23,16 @@ import org.openmole.core.workflow.domain._
 
 object DistinctDomain {
 
-  implicit def isFinite[D, T] =
-    new FiniteFromContext[ShuffleDomain[D, T], T] with DomainInputs[ShuffleDomain[D, T]] {
-      override def computeValues(domain: ShuffleDomain[D, T]) = FromContext { p ⇒
+  implicit def isDiscrete[D, T] =
+    new DiscreteFromContext[DistinctDomain[D, T], T] with DomainInputs[DistinctDomain[D, T]] {
+      override def iterator(domain: DistinctDomain[D, T]) = FromContext { p ⇒
         import p._
-        domain.finite.iterator(domain.domain).from(context).toSeq.distinct
+        domain.discrete.iterator(domain.domain).from(context).toSeq.distinct.iterator
       }
 
-      override def inputs(domain: ShuffleDomain[D, T]) = domain.inputs.inputs(domain.domain)
+      override def inputs(domain: DistinctDomain[D, T]) = domain.inputs.inputs(domain.domain)
     }
 
 }
 
-case class DistinctDomain[D, +T](domain: D)(implicit val finite: FiniteFromContext[D, T], val inputs: DomainInputs[D])
+case class DistinctDomain[D, +T](domain: D)(implicit val discrete: DiscreteFromContext[D, T], val inputs: DomainInputs[D])

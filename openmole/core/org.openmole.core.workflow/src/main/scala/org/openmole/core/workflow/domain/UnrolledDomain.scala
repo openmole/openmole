@@ -22,15 +22,9 @@ import cats.implicits._
 
 object UnrolledDomain {
 
-  /**
-   * Transform the unrolled domain into a finite domain by iterating
-   * @tparam D
-   * @tparam T
-   * @return
-   */
-  implicit def isFinite[D, T: Manifest] =
-    new Finite[UnrolledDomain[D, T], Array[T]] with DomainInputs[UnrolledDomain[D, T]] {
-      override def computeValues(domain: UnrolledDomain[D, T]): Iterable[Array[T]] = Seq(domain.discrete.iterator(domain.d).toArray)
+  implicit def isDiscrete[D, T: Manifest] =
+    new Discrete[UnrolledDomain[D, T], Array[T]] with DomainInputs[UnrolledDomain[D, T]] {
+      override def iterator(domain: UnrolledDomain[D, T]): Iterator[Array[T]] = Seq(domain.discrete.iterator(domain.d).toArray).iterator
       override def inputs(domain: UnrolledDomain[D, T]): PrototypeSet = domain.inputs.inputs(domain.d)
     }
 
@@ -39,8 +33,4 @@ object UnrolledDomain {
 
 }
 
-/**
- * Discrete domain
- * @param d domain
- */
 class UnrolledDomain[D, T: Manifest](val d: D)(implicit val discrete: Discrete[D, T], val inputs: DomainInputs[D])

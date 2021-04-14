@@ -1,5 +1,7 @@
+package org.openmole.plugin.domain.modifier
+
 /*
- * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 2021 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,8 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.domain.modifier
-
 import org.openmole.core.context.PrototypeSet
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
@@ -24,13 +24,17 @@ import org.openmole.core.workflow.domain._
 import cats._
 import cats.implicits._
 
-object TakeDomain {
+object TakeWhileDomain {
 
-  implicit def isDiscrete[D, T] = new DiscreteFromContext[TakeDomain[D, T], T] with DomainInputs[TakeDomain[D, T]] {
-    def inputs(domain: TakeDomain[D, T]) = domain.domainInputs.inputs(domain.domain)
-    def iterator(domain: TakeDomain[D, T]) = (domain.discrete.iterator(domain.domain) map2 domain.size)((d, s) ⇒ d.slice(0, s).toIterator)
+  implicit def isFinite[D, T] = new DiscreteFromContext[TakeWhileDomain[D, T], T] with DomainInputs[TakeWhileDomain[D, T]] {
+    override def iterator(domain: TakeWhileDomain[D, T]) = domain.iterator
+    override def inputs(domain: TakeWhileDomain[D, T]): PrototypeSet = domain.inputs
   }
 
 }
 
-case class TakeDomain[D, +T](domain: D, size: FromContext[Int])(implicit val discrete: DiscreteFromContext[D, T], val domainInputs: DomainInputs[D])
+case class TakeWhileDomain[D, T](domain: D, predicate: FromContext[T ⇒ Boolean])(implicit discrete: DiscreteFromContext[D, T], domainInputs: DomainInputs[D]) {
+  def inputs = domainInputs.inputs(domain)
+  def iterator =
+    (discrete.iterator(domain) map2 predicate)((d, p) ⇒ d.takeWhile(p))
+}

@@ -19,17 +19,16 @@ package org.openmole.plugin.domain.file
 
 import java.io.File
 import java.nio.file.Path
-
 import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.domain.FiniteFromContext
+import org.openmole.core.workflow.domain.{ DiscreteFromContext }
 import org.openmole.core.workflow.dsl._
 import cats.implicits._
 
 object ListPathsDomain {
 
-  implicit def isFinite = new FiniteFromContext[ListPathsDomain, Path] {
-    override def computeValues(domain: ListPathsDomain) = domain.computeValues
+  implicit def isDiscrete = new DiscreteFromContext[ListPathsDomain, Path] {
+    override def iterator(domain: ListPathsDomain) = domain.iterator
   }
 
   def apply(
@@ -48,7 +47,7 @@ class ListPathsDomain(
   filter:    Option[FromContext[String]] = None
 ) {
 
-  def computeValues: FromContext[Iterable[Path]] =
-    new ListFilesDomain(base, directory, recursive, filter).computeValues.map(_.map(_.toPath))
+  def iterator =
+    new ListFilesDomain(base, directory, recursive, filter).iterator.map(_.map(_.toPath))
 
 }

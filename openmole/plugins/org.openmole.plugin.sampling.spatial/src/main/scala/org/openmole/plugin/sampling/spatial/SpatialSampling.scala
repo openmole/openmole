@@ -5,7 +5,7 @@ package org.openmole.plugin.sampling.spatial
 import com.google.common.collect.DiscreteDomain
 import org.openmole.core.context.{ Val, Variable }
 import org.openmole.core.expansion._
-import org.openmole.core.workflow.domain.{ DiscreteFromContext, FiniteFromContext }
+import org.openmole.core.workflow.domain.{ DiscreteFromContext }
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.tools.{ OptionalArgument, ScalarOrSequenceOfDouble }
 import org.openmole.spatialsampling._
