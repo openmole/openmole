@@ -109,7 +109,7 @@ object Validation {
     def taskValidates = mole.capsules.map(_.task(mole, sources, hooks)).collect { case v: ValidateTask ⇒ v }
 
     taskValidates.flatMap { t ⇒
-      t.validate.apply.toList match {
+      t.validate(t.inputs.toSeq).apply.toList match {
         case Nil ⇒ None
         case e   ⇒ Some(TaskValidationProblem(t, e))
       }

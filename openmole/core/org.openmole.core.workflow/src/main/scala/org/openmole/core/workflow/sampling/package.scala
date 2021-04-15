@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow
 
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.expansion.{ FromContext, Validate }
 
 /**
  * Sampling aims at associating prototypes with values.
@@ -42,12 +42,15 @@ package sampling {
 
     implicit def fromIsSampling[T](t: T)(implicit isSampling: IsSampling[T]) =
       new Sampling {
+        override def validate(inputs: Seq[Val[_]]) = isSampling.validate(t, inputs)
         override def inputs = isSampling.inputs(t)
         override def prototypes: Iterable[Val[_]] = isSampling.prototypes(t)
         override def apply(): FromContext[Iterator[Iterable[Variable[_]]]] = isSampling.apply(t)
       }
 
     implicit def factorIsSampling[D, T](implicit domain: DiscreteFromContext[D, T], domainInputs: DomainInputs[D]) = new IsSampling[Factor[D, T]] {
+      def validate(f: Factor[D, T], inputs: Seq[Val[_]]): Validate = domain.iterator(f.domain).validate(inputs)
+
       def inputs(f: Factor[D, T]) = domainInputs.inputs(f.domain)
       def prototypes(f: Factor[D, T]) = List(f.value)
       override def apply(f: Factor[D, T]): FromContext[Iterator[collection.Iterable[Variable[T]]]] =
@@ -81,6 +84,7 @@ package object sampling {
 
   object IsSampling {
     implicit def samplingIsSampling = new IsSampling[Sampling] {
+      override def validate(s: Sampling, inputs: Seq[Val[_]]) = s.validate(inputs)
       override def inputs(s: Sampling): PrototypeSet = s.inputs
       override def prototypes(s: Sampling): Iterable[Val[_]] = s.prototypes
       override def apply(s: Sampling): FromContext[Iterator[Iterable[Variable[_]]]] = s()
@@ -88,6 +92,9 @@ package object sampling {
   }
 
   trait IsSampling[-S] {
+
+    def validate(s: S, inputs: Seq[Val[_]]): Validate
+
     /**
      * Prototypes of the variables required by this sampling.
      *

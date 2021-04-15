@@ -178,7 +178,7 @@ object GAMATask {
 
   lazy val containerPoolKey = ContainerTask.newCacheKey
 
-  override def validate =
+  override def validate(inputs: Seq[Val[_]]) =
     container.validateContainer(Vector(), environmentVariables, external, inputs) ++ {
       import xml._
 

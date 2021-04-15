@@ -76,18 +76,18 @@ object ScalaTask {
 
   lazy val compilation = CacheKey[ScalaCompilation.ContextClosure[java.util.Map[String, Any]]]()
 
-  def compile(implicit newFile: TmpDirectory, fileService: FileService) = {
+  def compile(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService) = {
     implicit def m = manifest[java.util.Map[String, Any]]
     ScalaCompilation.static(
       sourceCode,
-      inputs.toSeq ++ Seq(JVMLanguageTask.workDirectory),
+      inputs ++ Seq(JVMLanguageTask.workDirectory),
       ScalaCompilation.WrappedOutput(outputs),
       libraries = libraries,
       plugins = plugins
     )
   }
 
-  override def validate = {
+  override def validate(inputs: Seq[Val[_]]) = {
     def libraryErrors = libraries.flatMap { l ⇒
       l.exists() match {
         case false ⇒ Some(new UserBadDataError(s"Library file $l does not exist"))
@@ -99,7 +99,7 @@ object ScalaTask {
       import p._
 
       def compilationError =
-        Try(compile) match {
+        Try(compile(inputs)) match {
           case Success(_) ⇒ Seq.empty
           case Failure(e) ⇒ Seq(e)
         }
@@ -113,7 +113,7 @@ object ScalaTask {
       FromContext { p ⇒
         import p._
 
-        val scalaCompilation = taskExecutionContext.cache.getOrElseUpdate(compilation, compile)
+        val scalaCompilation = taskExecutionContext.cache.getOrElseUpdate(compilation, compile(inputs.toSeq))
 
         val map = scalaCompilation(context, p.random, p.newFile)
         outputs.toSeq.map {

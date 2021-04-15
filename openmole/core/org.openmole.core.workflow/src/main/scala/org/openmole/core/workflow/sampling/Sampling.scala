@@ -33,6 +33,8 @@ object Sampling {
 
 trait Sampling {
 
+  def validate(inputs: Seq[Val[_]]): Validate = Validate.success
+
   /**
    * Prototypes of the variables required by this sampling.
    *

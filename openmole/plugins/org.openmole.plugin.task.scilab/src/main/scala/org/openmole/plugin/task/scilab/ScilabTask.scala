@@ -183,7 +183,7 @@ object ScilabTask {
 
   lazy val containerPoolKey = ContainerTask.newCacheKey
 
-  override def validate = container.validateContainer(Vector(), environmentVariables, external, inputs)
+  override def validate(inputs: Seq[Val[_]]) = container.validateContainer(Vector(), environmentVariables, external, inputs)
 
   override def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
     import p._

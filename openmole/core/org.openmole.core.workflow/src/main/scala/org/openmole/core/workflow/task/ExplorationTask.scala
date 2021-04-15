@@ -74,7 +74,7 @@ object ExplorationTask {
             case e: ArrayStoreException ⇒ throw new UserBadDataError("Cannot fill factor values in " + k.toArray + ", values " + v)
           }
       }: Context
-    } set (
+    } withValidate { inputs ⇒ sampling.validate(inputs) } set (
       inputs += (sampling.inputs.toSeq: _*),
       exploredOutputs += (sampling.prototypes.toSeq.map(_.toArray): _*)
     )

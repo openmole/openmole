@@ -56,22 +56,22 @@ object FromContextTask {
  */
 @Lenses case class FromContextTask(
   f:                      FromContextTask.Parameters ⇒ Context,
-  v:                      Validate                             = Validate.success,
+  v:                      Seq[Val[_]] ⇒ Validate = _ ⇒ Validate.success,
   override val className: String,
   config:                 InputOutputConfig,
   mapped:                 MappedInputOutputConfig,
   info:                   InfoConfig
 ) extends Task with ValidateTask {
 
-  override def validate = v
+  override def validate(inputs: Seq[Val[_]]) = v(inputs)
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { p ⇒
     val tp = FromContextTask.Parameters(p.context, executionContext, config, mapped, executionContext.preference, p.random, p.newFile, p.fileService)
     f(tp)
   }
 
-  def withValidate(validate: Validate) = {
-    def nv = v ++ validate
+  def withValidate(validate: Seq[Val[_]] ⇒ Validate) = {
+    def nv(inputs: Seq[Val[_]]) = v(inputs) ++ validate(inputs)
     copy(v = nv)
   }
 

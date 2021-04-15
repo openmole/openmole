@@ -2,7 +2,6 @@
 package org.openmole.plugin.task.python
 
 import monocle.macros._
-import org.openmole.core.context.{Context, Val}
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.fileservice.FileService
@@ -92,8 +91,7 @@ object PythonTask {
 
   lazy val containerPoolKey = ContainerTask.newCacheKey
 
-  override def validate = container.validateContainer(Vector(), environmentVariables, external, inputs)
-
+  override def validate(inputs: Seq[Val[_]]) = container.validateContainer(Vector(), environmentVariables, external, inputs)
 
   override def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
     import org.json4s.jackson.JsonMethods._

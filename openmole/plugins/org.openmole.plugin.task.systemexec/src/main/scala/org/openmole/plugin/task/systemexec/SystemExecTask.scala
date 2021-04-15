@@ -93,8 +93,8 @@ object SystemExecTask {
   info:                 InfoConfig
 ) extends Task with ValidateTask {
 
-  override def validate = {
-    val allInputs = External.PWD :: inputs.toList
+  override def validate(inputs: Seq[Val[_]]) = {
+    val allInputs = Seq(External.PWD) ++ inputs
 
     val commandsError =
       for {

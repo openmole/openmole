@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.context.{ Context, Val, PrototypeSet, Variable }
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.context.{ Context, PrototypeSet, Val, Variable }
+import org.openmole.core.expansion.{ FromContext, Validate }
 import org.openmole.core.workflow.sampling._
 
 object CompleteSampling {
@@ -49,6 +49,9 @@ class CompleteSampling(val samplings: Sampling*) extends Sampling {
 object XSampling {
 
   implicit def isSampling[S1, S2]: IsSampling[XSampling[S1, S2]] = new IsSampling[XSampling[S1, S2]] {
+    override def validate(s: XSampling[S1, S2], inputs: Seq[Val[_]]): Validate =
+      s.sampling1.validate(s.s1, inputs) ++ s.sampling2.validate(s.s2, inputs ++ s.sampling1.prototypes(s.s1))
+
     override def inputs(s: XSampling[S1, S2]): PrototypeSet = s.sampling1.inputs(s.s1) ++ s.sampling2.inputs(s.s2)
     override def prototypes(s: XSampling[S1, S2]): Iterable[Val[_]] = s.sampling1.prototypes(s.s1) ++ s.sampling2.prototypes(s.s2)
     override def apply(s: XSampling[S1, S2]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒

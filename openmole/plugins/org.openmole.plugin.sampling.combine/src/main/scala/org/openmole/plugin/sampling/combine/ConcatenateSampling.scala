@@ -22,6 +22,7 @@ import org.openmole.core.dsl.extension._
 object ConcatenateSampling {
 
   implicit def isSampling[S1, S2]: IsSampling[ConcatenateSampling[S1, S2]] = new IsSampling[ConcatenateSampling[S1, S2]] {
+    override def validate(s: ConcatenateSampling[S1, S2], inputs: Seq[Val[_]]): Validate = s.sampling1.validate(s.s1, inputs) ++ s.sampling2.validate(s.s2, inputs)
     override def inputs(s: ConcatenateSampling[S1, S2]): PrototypeSet = s.sampling1.inputs(s.s1) ++ s.sampling2.inputs(s.s2)
     override def prototypes(s: ConcatenateSampling[S1, S2]): Iterable[Val[_]] = {
       val p1 = s.sampling1.prototypes(s.s1).toSet

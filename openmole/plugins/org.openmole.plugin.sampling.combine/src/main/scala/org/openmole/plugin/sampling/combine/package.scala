@@ -34,7 +34,7 @@ package object combine {
     def filter(keep: Condition) = FilteredSampling(s, keep)
     def take(n: FromContext[Int]) = TakeSampling(s, n)
     def subset(n: Int, size: FromContext[Int] = 100) = SubsetSampling(s, n, size = size)
-    def drop(n: Int) = DropSampling(s, n)
+    def drop(n: FromContext[Int]) = DropSampling(s, n)
 
     def x[S2: IsSampling](s2: S2) = XSampling(s, s2)
     def ::[S2: IsSampling](s2: S2) = ConcatenateSampling(s, s2)

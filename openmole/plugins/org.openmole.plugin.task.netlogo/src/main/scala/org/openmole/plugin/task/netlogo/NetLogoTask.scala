@@ -261,7 +261,7 @@ trait NetLogoTask extends Task with ValidateTask {
 
   def switch3d: Boolean
 
-  override def validate = Validate {
+  override def validate(inputs: Seq[Val[_]]) = Validate {
     val allInputs = External.PWD :: inputs.toList
     go.flatMap(_.validate(allInputs)) ++
       External.validate(external)(allInputs) ++
