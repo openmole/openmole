@@ -16,23 +16,28 @@
  */
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.context.{ Val, PrototypeSet }
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.sampling._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 
 object ConcatenateSampling {
-  def apply(samplings: Sampling*) = new ConcatenateSampling(samplings: _*)
-}
 
-class ConcatenateSampling(val samplings: Sampling*) extends Sampling {
+  implicit def isSampling[S1, S2]: IsSampling[ConcatenateSampling[S1, S2]] = new IsSampling[ConcatenateSampling[S1, S2]] {
+    override def inputs(s: ConcatenateSampling[S1, S2]): PrototypeSet = s.sampling1.inputs(s.s1) ++ s.sampling2.inputs(s.s2)
+    override def prototypes(s: ConcatenateSampling[S1, S2]): Iterable[Val[_]] = {
+      val p1 = s.sampling1.prototypes(s.s1).toSet
+      val p2 = s.sampling2.prototypes(s.s2).toSet
+      p1 intersect p2
+    }
+    override def apply(s: ConcatenateSampling[S1, S2]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+      import p._
+      val ps = prototypes(s).toSet
 
-  override lazy val inputs = PrototypeSet.empty ++ samplings.flatMap { _.inputs }
-
-  override def prototypes: Iterable[Val[_]] = samplings.head.prototypes
-
-  override def apply() = FromContext { p ⇒
-    import p._
-    samplings.toIterator.flatMap(_().from(context))
+      s.sampling1.apply(s.s1).apply(context).map(_.filter(v ⇒ ps.contains(v.prototype))) ++
+        s.sampling2.apply(s.s2).apply(context).map(_.filter(v ⇒ ps.contains(v.prototype)))
+    }
   }
 
 }
+
+case class ConcatenateSampling[S1, S2](s1: S1, s2: S2)(implicit val sampling1: IsSampling[S1], val sampling2: IsSampling[S2])
+

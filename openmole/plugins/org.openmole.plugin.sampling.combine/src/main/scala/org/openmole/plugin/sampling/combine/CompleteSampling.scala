@@ -45,3 +45,21 @@ class CompleteSampling(val samplings: Sampling*) extends Sampling {
   }
 
 }
+
+object XSampling {
+
+  implicit def isSampling[S1, S2]: IsSampling[XSampling[S1, S2]] = new IsSampling[XSampling[S1, S2]] {
+    override def inputs(s: XSampling[S1, S2]): PrototypeSet = s.sampling1.inputs(s.s1) ++ s.sampling2.inputs(s.s2)
+    override def prototypes(s: XSampling[S1, S2]): Iterable[Val[_]] = s.sampling1.prototypes(s.s1) ++ s.sampling2.prototypes(s.s2)
+    override def apply(s: XSampling[S1, S2]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+      import p._
+      for {
+        x ← s.sampling1.apply(s.s1).apply(context)
+        y ← s.sampling2.apply(s.s2).apply(context ++ x)
+      } yield x ++ y
+    }
+  }
+
+}
+
+case class XSampling[S1, S2](s1: S1, s2: S2)(implicit val sampling1: IsSampling[S1], val sampling2: IsSampling[S2])

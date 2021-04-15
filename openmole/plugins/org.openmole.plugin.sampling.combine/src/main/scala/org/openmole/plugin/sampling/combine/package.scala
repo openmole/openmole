@@ -29,18 +29,18 @@ import cats.implicits._
 
 package object combine {
 
-  implicit class SamplingCombineDecorator[T](s: T)(implicit toSampling: ToSampling[T]) {
+  implicit class SamplingCombineDecorator[T](s: T)(implicit isSampling: IsSampling[T]) {
     def shuffle = ShuffleSampling(s)
     def filter(keep: Condition) = FilteredSampling(s, keep)
     def take(n: FromContext[Int]) = TakeSampling(s, n)
     def subset(n: Int, size: FromContext[Int] = 100) = SubsetSampling(s, n, size = size)
     def drop(n: Int) = DropSampling(s, n)
 
-    @deprecated("Use x instead", "5")
-    def +(s2: Sampling) = x(s2)
-    def x(s2: Sampling) = new CompleteSampling(s, s2)
-    def ::(s2: Sampling) = new ConcatenateSampling(s, s2)
+    def x[S2: IsSampling](s2: S2) = XSampling(s, s2)
+    def ::[S2: IsSampling](s2: S2) = ConcatenateSampling(s, s2)
+
     def zip(s2: Sampling) = ZipSampling(s, s2)
+
     @deprecated("Use withIndex", "5")
     def zipWithIndex(index: Val[Int]) = withIndex(index)
     def withIndex(index: Val[Int]) = ZipWithIndexSampling(s, index)

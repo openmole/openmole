@@ -29,6 +29,7 @@ package object extension {
   type Sampling = org.openmole.core.workflow.sampling.Sampling
   type FromContextSampling = org.openmole.core.workflow.sampling.FromContextSampling
   def Sampling = org.openmole.core.workflow.sampling.Sampling
+  type IsSampling[-T] = org.openmole.core.workflow.sampling.IsSampling[T]
 
   type Environment = org.openmole.core.workflow.execution.Environment
   def Environment = org.openmole.core.workflow.execution.Environment

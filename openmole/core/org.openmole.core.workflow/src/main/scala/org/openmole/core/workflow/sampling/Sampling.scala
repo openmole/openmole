@@ -29,7 +29,6 @@ object Sampling {
    */
   def apply(samples: FromContext.Parameters ⇒ Iterator[Iterable[Variable[_]]]) = FromContextSampling(samples)
 
-  implicit def fromToSampling[T](t: T)(implicit toSampling: ToSampling[T]) = toSampling.apply(t)
 }
 
 trait Sampling {

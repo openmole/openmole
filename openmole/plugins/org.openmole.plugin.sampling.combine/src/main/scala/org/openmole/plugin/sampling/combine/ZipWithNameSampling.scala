@@ -32,7 +32,7 @@ object ZipWithNameSampling {
 
 class ZipWithNameSampling[D, T: CanGetName](val factor: Factor[D, T], val name: Val[String])(implicit discrete: DiscreteFromContext[D, T]) extends Sampling {
 
-  override def inputs = FactorSampling(factor).inputs
+  override def inputs = Seq(factor.value)
   override def prototypes = List(factor.value, name)
 
   override def apply() =

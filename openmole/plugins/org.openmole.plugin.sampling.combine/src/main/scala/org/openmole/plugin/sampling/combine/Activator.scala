@@ -31,7 +31,6 @@ class Activator extends BundleActivator {
     val keyWords: Vector[HighLight] =
       Vector(
         SamplingHighLight(classOf[CompleteSampling]),
-        SamplingHighLight(classOf[ConcatenateSampling]),
         SamplingHighLight(classOf[FilteredSampling]),
         SamplingHighLight(classOf[RepeatSampling]),
         SamplingHighLight(classOf[SampleSampling]),
