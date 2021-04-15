@@ -61,6 +61,8 @@ package object modifier {
 
     def takeWhile(predicate: T ⇒ Boolean) = TakeWhileDomain(domain, predicate)
     def takeWhile(predicate: String)(implicit m: Manifest[T]) = TakeWhileDomain(domain, FromContext.codeToFromContext[T ⇒ Boolean](predicate))
+
+    def ++[D2](d2: D2)(implicit discrete2: DiscreteFromContext[D2, T], inputs2: DomainInputs[D2]) = AppendDomain(domain, d2)
   }
 
   //  implicit def discreteFactorModifierDecorator[D, T: TypeTag](factor: Factor[D, T])(implicit discrete: DiscreteFromContext[D, T]) = new {
