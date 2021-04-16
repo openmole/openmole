@@ -215,7 +215,7 @@ val s2 = p2 in (0 to 100) // Code to build sampling 2
 val s3 = (s1 x s2).shuffle
 
 // Create a sampling containing 10 values drawn at random in (s1 x s2)
-val s3 = (s1 x s2).sample(10)
+val s4 = (s1 x s2).sample(10)
 
 // Replicate 100 times the sampling s1 and provide seed for each experiment
 val seed = Val[Int]
