@@ -5,6 +5,19 @@ import org.openmole.core.expansion.{ FromContext, Validate }
 
 object FromContextSampling {
   def apply(samples: FromContext.Parameters ⇒ Iterator[Iterable[Variable[_]]]) = new FromContextSampling(samples, PrototypeSet.empty, Iterable.empty, _ ⇒ Validate.success)
+
+  implicit def isSampling: IsSampling[FromContextSampling] = new IsSampling[FromContextSampling] {
+    override def validate(s: FromContextSampling, inputs: Seq[Val[_]]): Validate = s.v(inputs)
+    override def inputs(s: FromContextSampling): PrototypeSet = s.i
+    override def prototypes(s: FromContextSampling): Iterable[Val[_]] = s.o
+    override def apply(s: FromContextSampling) = FromContext(s.samples)
+
+    def combine(s1: Iterator[Iterable[Variable[_]]], s2: Sampling) = FromContext { p ⇒
+      import p._
+      for (x ← s1; y ← s2().from(context ++ x)) yield x ++ y
+    }
+  }
+
 }
 
 /**
@@ -15,15 +28,13 @@ object FromContextSampling {
  * @param f sampled prototypes
  * @param v function to validate parameters
  */
-case class FromContextSampling(samples: FromContext.Parameters ⇒ Iterator[Iterable[Variable[_]]], i: PrototypeSet, f: Iterable[Val[_]], v: Seq[Val[_]] ⇒ Validate) extends Sampling {
-  override def prototypes: Iterable[Val[_]] = f
-  override def inputs: PrototypeSet = i
-  override def apply(): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext(samples) withValidate (v)
+case class FromContextSampling(samples: FromContext.Parameters ⇒ Iterator[Iterable[Variable[_]]], i: PrototypeSet, o: Iterable[Val[_]], v: Seq[Val[_]] ⇒ Validate) {
 
-  def prototypes(f2: Iterable[Val[_]]) = new FromContextSampling(samples, i, f2, v)
-  def inputs(i2: Iterable[Val[_]]) = new FromContextSampling(samples, i2, f, v)
+  def prototypes(f: Iterable[Val[_]]) = outputs(f)
+  def outputs(f: Iterable[Val[_]]) = copy(o = o)
+  def inputs(i: Iterable[Val[_]]) = copy(i = i)
 
-  def withValidate(validate: Seq[Val[_]] ⇒ Validate) = {
+  def validate(validate: Seq[Val[_]] ⇒ Validate) = {
     def nv(inputs: Seq[Val[_]]) = v(inputs) ++ validate(inputs)
     copy(v = nv)
   }

@@ -31,6 +31,9 @@ package object extension {
   def Sampling = org.openmole.core.workflow.sampling.Sampling
   type IsSampling[-T] = org.openmole.core.workflow.sampling.IsSampling[T]
 
+  type Factor[D, T] = org.openmole.core.workflow.sampling.Factor[D, T]
+  def Factor[D, T](p: Val[T], d: D) = org.openmole.core.workflow.sampling.Factor(p, d)
+
   type Environment = org.openmole.core.workflow.execution.Environment
   def Environment = org.openmole.core.workflow.execution.Environment
 

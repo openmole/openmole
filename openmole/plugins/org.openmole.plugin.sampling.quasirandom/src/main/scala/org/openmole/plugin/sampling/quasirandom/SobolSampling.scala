@@ -26,7 +26,7 @@ object SobolSampling {
     Sampling { p ⇒
       import p._
       SobolSampling.sobolValues(factor.size, sample.from(context)).map { ScalarOrSequenceOfDouble.unflatten(factor, _)(context) }
-    } withValidate { sample.validate } inputs { factor.flatMap(_.inputs) } prototypes { factor.map(_.prototype) }
+    } validate { sample.validate } inputs { factor.flatMap(_.inputs) } prototypes { factor.map(_.prototype) }
 
   def sobolValues(dimension: Int, samples: Int) = {
     val sequence = new SobolSequenceGenerator(dimension)

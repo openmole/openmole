@@ -44,15 +44,15 @@ object ExplorationTask {
    * @param sampling
    * @return
    */
-  def apply(sampling: Sampling)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply[S](s: S)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, sampling: IsSampling[S]) =
     FromContextTask("ExplorationTask") { p ⇒
       import p._
 
       val variablesValues = {
-        val samplingValue = sampling().from(context).toVector
+        val samplingValue = sampling(s).from(context).toVector
 
         val values =
-          TreeMap.empty[Val[_], Array[_]] ++ sampling.prototypes.map { p ⇒
+          TreeMap.empty[Val[_], Array[_]] ++ sampling.prototypes(s).map { p ⇒
             p → p.`type`.manifest.newArray(samplingValue.size)
           }
 
@@ -74,9 +74,9 @@ object ExplorationTask {
             case e: ArrayStoreException ⇒ throw new UserBadDataError("Cannot fill factor values in " + k.toArray + ", values " + v)
           }
       }: Context
-    } withValidate { inputs ⇒ sampling.validate(inputs) } set (
-      inputs += (sampling.inputs.toSeq: _*),
-      exploredOutputs += (sampling.prototypes.toSeq.map(_.toArray): _*)
+    } withValidate { inputs ⇒ sampling.validate(s, inputs) } set (
+      inputs += (sampling.inputs(s).toSeq: _*),
+      exploredOutputs += (sampling.prototypes(s).toSeq.map(_.toArray): _*)
     )
 
   /**

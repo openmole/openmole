@@ -93,9 +93,9 @@ package object directsampling {
     DSLContainerExtension[Replication](s, new Replication(seed))
   }
 
-  def DirectSampling(
+  def DirectSampling[S: IsSampling](
     evaluation:  DSL,
-    sampling:    Sampling,
+    sampling:    S,
     aggregation: Seq[Aggregation] = Seq(),
     condition:   Condition        = Condition.True,
     wrap:        Boolean          = false,

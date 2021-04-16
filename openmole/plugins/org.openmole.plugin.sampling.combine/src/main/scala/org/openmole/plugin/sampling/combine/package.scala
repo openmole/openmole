@@ -42,7 +42,7 @@ package object combine {
     @deprecated("Use ++", "13")
     def ::[S2: IsSampling](s2: S2) = ConcatenateSampling(s, s2)
 
-    def zip(s2: Sampling) = ZipSampling(s, s2)
+    def zip[S2: IsSampling](s2: S2) = ZipSampling(s, s2)
 
     @deprecated("Use withIndex", "5")
     def zipWithIndex(index: Val[Int]) = withIndex(index)

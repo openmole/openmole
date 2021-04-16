@@ -29,11 +29,11 @@ import scala.reflect.runtime.universe._
 package object modifier {
 
   trait CanGetName[A] {
-    def getName(a: A): String
+    def apply(a: A): String
   }
 
-  implicit val fileGetName = new CanGetName[File] { def getName(f: File) = f.getName }
-  implicit val pathGetName = new CanGetName[Path] { def getName(p: Path) = p.toFile.getName }
+  implicit val fileGetName = new CanGetName[File] { def apply(f: File) = f.getName }
+  implicit val pathGetName = new CanGetName[Path] { def apply(p: Path) = p.toFile.getName }
 
   implicit def domainModifierDecorator[D, T: TypeTag](domain: D)(implicit discrete: DiscreteFromContext[D, T], inputs: DomainInputs[D]) = new {
     def take(n: FromContext[Int]) = TakeDomain(domain, n)
@@ -49,7 +49,7 @@ package object modifier {
     def zipWith[O: Manifest](f: String)(implicit m: Manifest[T]) = ZipWithDomain[D, T, O](domain, FromContext.codeToFromContext[T ⇒ O](f))
 
     def zipWithIndex = ZipWithIndexDomain[D, T](domain)
-    def zipWithName(implicit cgn: CanGetName[T]) = zipWith(cgn.getName _)
+    def zipWithName(implicit cgn: CanGetName[T]) = zipWith(cgn.apply _)
 
     def sort(implicit o: Ordering[T]) = SortedByDomain(domain, identity[T] _)
 

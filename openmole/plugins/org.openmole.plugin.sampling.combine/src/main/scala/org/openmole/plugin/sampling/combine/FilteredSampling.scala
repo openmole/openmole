@@ -17,26 +17,22 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.sampling._
-import org.openmole.core.expansion._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 
 object FilteredSampling {
 
-  def apply(sampling: Sampling, keep: Condition) =
-    new FilteredSampling(sampling, keep)
-
-}
-
-sealed class FilteredSampling(sampling: Sampling, keep: Condition) extends Sampling {
-
-  override def inputs = sampling.inputs
-  override def prototypes = sampling.prototypes
-
-  override def apply() = FromContext { p ⇒
-    import p._
-    sampling().from(context).filter(sample ⇒ keep.from(context ++ sample))
+  implicit def isSampling[S]: IsSampling[FilteredSampling[S]] = new IsSampling[FilteredSampling[S]] {
+    override def validate(s: FilteredSampling[S], inputs: Seq[Val[_]]): Validate = s.sampling.validate(s.s, inputs) ++ s.keep.validate(inputs)
+    override def inputs(s: FilteredSampling[S]): PrototypeSet = s.sampling.inputs(s.s)
+    override def prototypes(s: FilteredSampling[S]): Iterable[Val[_]] = s.sampling.prototypes(s.s)
+    override def apply(s: FilteredSampling[S]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+      import p._
+      s.sampling(s.s).from(context).filter(sample ⇒ s.keep.from(context ++ sample))
+    }
   }
 
 }
+
+case class FilteredSampling[S](s: S, keep: Condition)(implicit val sampling: IsSampling[S])
 

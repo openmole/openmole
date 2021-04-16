@@ -17,23 +17,21 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.sampling._
-
-import cats.implicits._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 
 object TakeSampling {
 
-  def apply(sampling: Sampling, n: FromContext[Int]) =
-    new TakeSampling(sampling, n)
+  implicit def isSampling[S]: IsSampling[TakeSampling[S]] = new IsSampling[TakeSampling[S]] {
+    override def validate(s: TakeSampling[S], inputs: Seq[Val[_]]): Validate = s.sampling.validate(s.s, inputs) ++ s.n.validate(inputs)
+    override def inputs(s: TakeSampling[S]): PrototypeSet = s.sampling.inputs(s.s)
+    override def prototypes(s: TakeSampling[S]): Iterable[Val[_]] = s.sampling.prototypes(s.s)
+    override def apply(s: TakeSampling[S]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+      import p._
+      s.sampling(s.s).from(context).take(s.n.from(context))
+    }
+  }
 
 }
 
-sealed class TakeSampling(val sampling: Sampling, val n: FromContext[Int]) extends Sampling {
-
-  override def inputs = sampling.inputs
-  override def prototypes = sampling.prototypes
-
-  override def apply() = (sampling() map2 n)((s, t) ⇒ s.take(t))
-
-}
+case class TakeSampling[S](s: S, n: FromContext[Int])(implicit val sampling: IsSampling[S])

@@ -17,27 +17,24 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.sampling._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 
 object SampleSampling {
 
-  def apply(sampling: Sampling, size: FromContext[Int]) =
-    new SampleSampling(sampling, size)
-
-}
-
-sealed class SampleSampling(val sampling: Sampling, val size: FromContext[Int]) extends Sampling {
-
-  override def inputs = sampling.inputs
-  override def prototypes = sampling.prototypes
-
-  override def apply() = FromContext { p ⇒
-    import p._
-    val sampled = sampling().from(context).toVector
-    val sampledSize = sampled.size
-    val s = size.from(context)
-    Iterator.continually(random().nextInt(sampledSize)).take(s).map(i ⇒ sampled(i))
+  implicit def isSampling[S]: IsSampling[SampleSampling[S]] = new IsSampling[SampleSampling[S]] {
+    override def validate(s: SampleSampling[S], inputs: Seq[Val[_]]): Validate = s.sampling.validate(s.s, inputs) ++ s.size.validate(inputs)
+    override def inputs(s: SampleSampling[S]): PrototypeSet = s.sampling.inputs(s.s)
+    override def prototypes(s: SampleSampling[S]): Iterable[Val[_]] = s.sampling.prototypes(s.s)
+    override def apply(s: SampleSampling[S]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+      import p._
+      val sampled = s.sampling(s.s).from(context).toVector
+      val sampledSize = sampled.size
+      val sizeValue = s.size.from(context)
+      Iterator.continually(random().nextInt(sampledSize)).take(sizeValue).map(i ⇒ sampled(i))
+    }
   }
 
 }
+
+case class SampleSampling[S](s: S, size: FromContext[Int])(implicit val sampling: IsSampling[S])

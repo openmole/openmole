@@ -17,58 +17,22 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.context.{ PrototypeSet, Variable }
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.sampling._
-
-import scala.collection.mutable.ListBuffer
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 
 object ZipSampling {
 
-  def apply(samplings: Sampling*) =
-    new ZipSampling(samplings: _*)
-
-}
-
-sealed class ZipSampling(val samplings: Sampling*) extends Sampling {
-
-  override def inputs = PrototypeSet(samplings.flatMap(_.inputs))
-  override def prototypes = samplings.flatMap(_.prototypes)
-
-  override def apply() = FromContext { p ⇒
-    import p._
-
-    samplings.headOption match {
-      case Some(reference) ⇒
-        /* Compute plans */
-        val cachedSample = samplings.tail.map {
-          _().from(context)
-        }.toArray
-
-        /* Compose plans */
-        val factorValuesCollection = new ListBuffer[Iterable[Variable[_]]]
-
-        val valuesIterator = reference().from(context)
-        var oneFinished = false
-
-        while (valuesIterator.hasNext && !oneFinished) {
-          val values = new ListBuffer[Variable[_]]
-
-          for (it ← cachedSample) {
-            if (!it.hasNext) oneFinished = true
-            else values ++= (it.next)
-          }
-
-          if (!oneFinished) {
-            values ++= (valuesIterator.next)
-            factorValuesCollection += values
-          }
-        }
-
-        factorValuesCollection.iterator
-
-      case None ⇒ Iterator.empty
+  implicit def isSampling[S1, S2]: IsSampling[ZipSampling[S1, S2]] = new IsSampling[ZipSampling[S1, S2]] {
+    override def validate(s: ZipSampling[S1, S2], inputs: Seq[Val[_]]): Validate = s.sampling1.validate(s.s1, inputs) ++ s.sampling2.validate(s.s2, inputs)
+    override def inputs(s: ZipSampling[S1, S2]): PrototypeSet = s.sampling1.inputs(s.s1) ++ s.sampling2.inputs(s.s2)
+    override def prototypes(s: ZipSampling[S1, S2]): Iterable[Val[_]] = s.sampling1.prototypes(s.s1) ++ s.sampling2.prototypes(s.s2)
+    override def apply(s: ZipSampling[S1, S2]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+      import p._
+      (s.sampling1.apply(s.s1).apply(context) zip s.sampling2.apply(s.s2).apply(context)).map { case (v1, v2) ⇒ v1 ++ v2 }
     }
   }
 
 }
+
+case class ZipSampling[S1, S2](s1: S1, s2: S2)(implicit val sampling1: IsSampling[S1], val sampling2: IsSampling[S2])
+

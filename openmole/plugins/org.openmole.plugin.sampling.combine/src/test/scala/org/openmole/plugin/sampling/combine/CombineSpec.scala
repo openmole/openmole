@@ -39,15 +39,25 @@ class CombineSpec extends FlatSpec with Matchers {
     s().from(Context.empty).size should equal(40)
   }
 
-  ":: keyword" should "concatenate samplings" in {
+  "++ keyword" should "concatenate samplings" in {
+    val x1 = Val[Int]
+    val x2 = Val[Double]
+
+    val s = (x1 in (0 until 2)) ++ (x1 in (8 until 10)) ++ ((x1 in List(100, 101)) x (x2 in List(8.9, 9.0)))
+
+    s.prototypes.toSet should equal(Set(x1))
+    s().from(Context.empty).size should equal(8)
+  }
+
+  "zip keyword" should "zip samplings" in {
     val x1 = Val[Int]
     val x2 = Val[Double]
     val x3 = Val[String]
 
-    val s = (x1 in (0 until 2)) :: (x1 in (8 until 10)) :: ((x1 in List(100, 101)) x (x2 in List(8.9, 9.0)))
+    val s = (x1 in (0 until 2)) zip (x2 in (8.0 until 9.0 by 0.5)) zip (x3 in List("a", "b"))
 
-    s.prototypes.toSet should equal(Set(x1))
-    s().from(Context.empty).size should equal(8)
+    s.prototypes.toSet should equal(Set(x1, x2, x3))
+    s().from(Context.empty).size should equal(2)
   }
 
 }

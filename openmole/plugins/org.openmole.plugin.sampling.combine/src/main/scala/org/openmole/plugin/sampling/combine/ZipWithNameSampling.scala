@@ -17,27 +17,26 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.context.{ Val, Variable }
-import org.openmole.core.workflow.domain._
-import org.openmole.core.workflow.sampling._
-import org.openmole.plugin.domain.modifier._
-
-import cats.implicits._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
+import org.openmole.core.workflow.domain.DiscreteFromContext
+import org.openmole.plugin.domain.modifier.CanGetName
 
 object ZipWithNameSampling {
 
-  def apply[D, T: CanGetName](factor: Factor[D, T], name: Val[String])(implicit discrete: DiscreteFromContext[D, T]) =
-    new ZipWithNameSampling(factor, name)
+  implicit def isSampling[D, T]: IsSampling[ZipWithNameSampling[D, T]] = new IsSampling[ZipWithNameSampling[D, T]] {
+    override def validate(s: ZipWithNameSampling[D, T], inputs: Seq[Val[_]]): Validate = Validate.success
+    override def inputs(s: ZipWithNameSampling[D, T]): PrototypeSet = Seq(s.factor.value)
+    override def prototypes(s: ZipWithNameSampling[D, T]): Iterable[Val[_]] = List(s.factor.value, s.name)
+    override def apply(s: ZipWithNameSampling[D, T]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+      import p._
+
+      for {
+        v ← s.discrete.iterator(s.factor.domain).from(context)
+      } yield List(Variable(s.factor.value, v), Variable(s.name, s.getName(v)))
+    }
+  }
+
 }
 
-class ZipWithNameSampling[D, T: CanGetName](val factor: Factor[D, T], val name: Val[String])(implicit discrete: DiscreteFromContext[D, T]) extends Sampling {
-
-  override def inputs = Seq(factor.value)
-  override def prototypes = List(factor.value, name)
-
-  override def apply() =
-    for {
-      d ← discrete.iterator(factor.domain)
-    } yield d.map { v ⇒ List(Variable(factor.value, v), Variable(name, implicitly[CanGetName[T]].getName(v))) }
-
-}
+case class ZipWithNameSampling[D, T](factor: Factor[D, T], name: Val[String])(implicit val discrete: DiscreteFromContext[D, T], val getName: CanGetName[T])
