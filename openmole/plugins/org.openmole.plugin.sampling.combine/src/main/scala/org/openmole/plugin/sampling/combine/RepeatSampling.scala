@@ -23,7 +23,7 @@ import org.openmole.core.dsl.extension._
 object RepeatSampling {
 
   implicit def isSampling[S]: IsSampling[RepeatSampling[S]] = new IsSampling[RepeatSampling[S]] {
-    override def validate(s: RepeatSampling[S], inputs: Seq[Val[_]]): Validate = s.sampling.validate(s.s, inputs) ++ s.times.validate(inputs)
+    override def validate(s: RepeatSampling[S]): Validate = s.sampling.validate(s.s) ++ s.times.validate
     override def inputs(s: RepeatSampling[S]): PrototypeSet = s.sampling.inputs(s.s)
     override def outputs(s: RepeatSampling[S]): Iterable[Val[_]] = s.sampling.outputs(s.s).map(_.toArray)
     override def apply(s: RepeatSampling[S]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒

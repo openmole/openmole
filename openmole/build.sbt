@@ -496,7 +496,7 @@ lazy val csvSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.csv"
   libraryDependencies += Libraries.scalatest
   ) settings (pluginSettings: _*)
 
-lazy val oneFactorSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.onefactor", imports = Seq("*")) dependsOn(exception, workflow, openmoleDSL) settings (pluginSettings: _*)
+lazy val oneFactorSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.onefactor", imports = Seq("*")) dependsOn(exception, workflow, openmoleDSL, combineSampling, collectionDomain) settings (pluginSettings: _*)
 
 lazy val lhsSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.lhs", imports = Seq("*")) dependsOn(exception, workflow, workspace, openmoleDSL) settings (pluginSettings: _*)
 

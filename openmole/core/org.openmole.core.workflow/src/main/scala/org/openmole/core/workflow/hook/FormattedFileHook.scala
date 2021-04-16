@@ -27,9 +27,6 @@ object FormattedFileHook {
       fileFormat.write(executionContext)(format, output, variables, method).from(context)
 
       context
-    } withValidate { inputs ⇒
-      WritableOutput.file(output).toSeq.flatMap(_.validate(inputs)) ++
-        fileFormat.validate(format, inputs)
-    } set (inputs += (values: _*))
+    } withValidate { WritableOutput.file(output).toSeq.flatMap(_.validate) ++ fileFormat.validate(format) } set (inputs += (values: _*))
 
 }

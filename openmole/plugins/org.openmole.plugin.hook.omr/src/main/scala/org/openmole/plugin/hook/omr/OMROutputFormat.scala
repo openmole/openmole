@@ -84,7 +84,7 @@ object OMROutputFormat {
       }
     }
 
-    override def validate(format: OMROutputFormat, inputs: Seq[Val[_]]) = Validate.success
+    override def validate(format: OMROutputFormat) = Validate.success
   }
 
   case class OMRData(method: String, fileName: String, version: String)

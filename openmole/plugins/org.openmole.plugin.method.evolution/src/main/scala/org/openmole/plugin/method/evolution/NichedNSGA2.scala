@@ -203,10 +203,13 @@ object NichedNSGA2 {
         case a: Aggregated ⇒ a.v
       }
 
-    def validate(n: NichedElement, inputs: Seq[Val[_]]): Validate =
+    def validate(n: NichedElement, values: Seq[Val[_]]): Validate =
       n match {
-        case d: Discrete   ⇒ Validate.success
-        case a: Aggregated ⇒ a.a.validate(inputs)
+        case d: Discrete ⇒ Validate.success
+        case a: Aggregated ⇒ Validate { p ⇒
+          import p._
+          a.a.validate(inputs ++ values)
+        }
       }
 
     type Exact = Val[Int]

@@ -19,31 +19,32 @@ package org.openmole.core
 
 package expansion {
 
+  import org.openmole.core.context.Val
   import org.openmole.core.fileservice.FileService
   import org.openmole.core.workspace.TmpDirectory
 
   sealed trait Validate {
-    def apply(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable]
+    def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable]
     def ++(v: Validate) = Validate.++(this, v)
   }
 
   object Validate {
 
-    class Parameters(implicit val tmpDirectory: TmpDirectory, implicit val fileService: FileService)
+    class Parameters(val inputs: Seq[Val[_]])(implicit val tmpDirectory: TmpDirectory, implicit val fileService: FileService)
 
     case class LeafValidate(validate: Parameters ⇒ Seq[Throwable]) extends Validate {
-      def apply(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable] = validate(new Parameters())
+      def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable] = validate(new Parameters(inputs))
     }
 
     case class SeqValidate(validate: Seq[Validate]) extends Validate {
-      def apply(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable] = validate.flatMap(_.apply)
+      def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable] = validate.flatMap(_.apply(inputs))
     }
 
     def apply(f: Parameters ⇒ Seq[Throwable]): Validate = LeafValidate(f)
     def apply(vs: Validate*): Validate = SeqValidate(vs)
 
     case object success extends Validate {
-      def apply(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable] = Seq()
+      def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable] = Seq()
     }
 
     def ++(v1: Validate, v2: Validate) =
@@ -61,6 +62,7 @@ package expansion {
       v match {
         case s: SeqValidate  ⇒ s.validate
         case l: LeafValidate ⇒ Iterable(l)
+        case success         ⇒ Iterable.empty
       }
   }
 

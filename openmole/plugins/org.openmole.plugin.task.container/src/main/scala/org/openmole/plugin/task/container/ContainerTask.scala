@@ -259,7 +259,7 @@ import ContainerTask._
   info:                 InfoConfig,
   containerPoolKey:     CacheKey[WithInstance[PreparedImage]]) extends Task with ValidateTask { self ⇒
 
-  def validate(inputs: Seq[Val[_]]) = validateContainer(command.value, environmentVariables, external, inputs)
+  def validate = validateContainer(command.value, environmentVariables, external)
 
   override def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
     import parameters._

@@ -23,7 +23,7 @@ import org.openmole.core.dsl.extension._
 object SubsetSampling {
 
   implicit def isSampling[S]: IsSampling[SubsetSampling[S]] = new IsSampling[SubsetSampling[S]] {
-    override def validate(s: SubsetSampling[S], inputs: Seq[Val[_]]): Validate = s.sampling.validate(s.s, inputs)
+    override def validate(s: SubsetSampling[S]): Validate = s.sampling.validate(s.s)
     override def inputs(s: SubsetSampling[S]): PrototypeSet = s.sampling.inputs(s.s)
     override def outputs(s: SubsetSampling[S]): Iterable[Val[_]] = s.sampling.outputs(s.s)
     override def apply(s: SubsetSampling[S]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒

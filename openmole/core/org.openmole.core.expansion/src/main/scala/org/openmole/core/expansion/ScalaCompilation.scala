@@ -217,7 +217,7 @@ object ScalaCompilation {
           }
         }
 
-      def validate(inputs: Seq[Val[_]]) = Validate { p ⇒
+      def validate = Validate { p ⇒
         import p._
 
         compiled(inputs) match {

@@ -28,19 +28,19 @@ import org.openmole.core.workflow.transition._
 import org.openmole.core.workspace.TmpDirectory
 
 trait ValidateTask {
-  def validate(inputs: Seq[Val[_]]): Validate
+  def validate: Validate
 }
 
 trait ValidateSource {
-  def validate(inputs: Seq[Val[_]]): Validate
+  def validate: Validate
 }
 
 trait ValidateHook {
-  def validate(inputs: Seq[Val[_]]): Validate
+  def validate: Validate
 }
 
 trait ValidateTransition {
-  def validate(inputs: Seq[Val[_]]): Validate
+  def validate: Validate
 }
 
 object ValidationProblem {

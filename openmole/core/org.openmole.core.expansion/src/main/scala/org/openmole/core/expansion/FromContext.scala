@@ -118,7 +118,7 @@ object FromContext extends LowPriorityFromContext {
         import p._
         val res = fa.from(context)
         ff.from(context).apply(res)
-      } withValidate { inputs ⇒ fa.validate(inputs) ++ ff.validate(inputs) }
+      } withValidate { fa.validate ++ ff.validate }
   }
 
   /**
@@ -161,15 +161,18 @@ object FromContext extends LowPriorityFromContext {
    * @tparam T
    * @return
    */
-  def prototype[T](p: Val[T]) =
+  def prototype[T](v: Val[T]) =
     FromContext[T] { param ⇒
       import param._
-      context(p)
-    } withValidate { inputs ⇒
-      inputs.find(_.name == p.name) match {
-        case Some(i) if p == i ⇒ Validate.success
-        case None              ⇒ Seq(new UserBadDataError(s"FromContext validation failed, $p not found among inputs $inputs"))
-        case Some(i)           ⇒ Seq(new UserBadDataError(s"FromContext validation failed, $p has incorrect type, should be $i, among inputs $inputs"))
+      context(v)
+    } withValidate {
+      Validate { p ⇒
+        import p._
+        inputs.find(_.name == v.name) match {
+          case Some(i) if v == i ⇒ Seq()
+          case None              ⇒ Seq(new UserBadDataError(s"FromContext validation failed, $v not found among inputs $inputs"))
+          case Some(i)           ⇒ Seq(new UserBadDataError(s"FromContext validation failed, $v has incorrect type, should be $i, among inputs $inputs"))
+        }
       }
     }
 
@@ -197,7 +200,7 @@ object FromContext extends LowPriorityFromContext {
    * @tparam T
    * @return
    */
-  def apply[T](f: Parameters ⇒ T): FromContext[T] = new FromContext[T](f, _ ⇒ Validate.success)
+  def apply[T](f: Parameters ⇒ T): FromContext[T] = new FromContext[T](f, Validate.success)
 
   /**
    * Operators for boolean FromContext ([[Condition]] ~ FromContext[Boolean])
@@ -210,17 +213,13 @@ object FromContext extends LowPriorityFromContext {
       FromContext[Boolean] { p ⇒
         import p._
         f.from(context) && d.from(context)
-      } withValidate { inputs ⇒
-        f.validate(inputs) ++ d.validate(inputs)
-      }
+      } withValidate { f.validate ++ d.validate }
 
     def ||(d: Condition): Condition =
       FromContext[Boolean] { p ⇒
         import p._
         f.from(context) || d.from(context)
-      } withValidate { inputs ⇒
-        f.validate(inputs) ++ d.validate(inputs)
-      }
+      } withValidate { f.validate ++ d.validate }
   }
 
   implicit class ExpandedStringOperations(s1: FromContext[String]) {
@@ -235,16 +234,13 @@ object FromContext extends LowPriorityFromContext {
 
 }
 
-class FromContext[+T](val c: FromContext.Parameters ⇒ T, val v: Seq[Val[_]] ⇒ Validate) {
+class FromContext[+T](val c: FromContext.Parameters ⇒ T, val v: Validate) {
   def apply(context: ⇒ Context)(implicit rng: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): T = c(FromContext.Parameters(context, rng, tmpDirectory, fileService))
   def from(context: ⇒ Context)(implicit rng: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): T = apply(context)
 
-  def validate(inputs: Seq[Val[_]]) = v(inputs)
+  def validate = v
 
-  def withValidate(validate: Seq[Val[_]] ⇒ Validate): FromContext[T] = {
-    def newValid = (inputs: Seq[Val[_]]) ⇒ v(inputs) ++ validate(inputs)
-    new FromContext(c, v = newValid)
-  }
+  def withValidate(validate: Validate): FromContext[T] = new FromContext(c, v = v ++ validate)
 }
 
 object StringFromContext {
@@ -261,7 +257,7 @@ object StringFromContext {
 
 }
 
-class StringFromContext[+T](c: FromContext.Parameters ⇒ T, v: Seq[Val[_]] ⇒ Validate, val string: String) extends FromContext(c, v) {
+class StringFromContext[+T](c: FromContext.Parameters ⇒ T, v: Validate, val string: String) extends FromContext(c, v) {
   override def toString = s"FromContext($string)"
 }
 

@@ -1,31 +1,30 @@
 
 package org.openmole.plugin.sampling.onefactor
 
-import org.openmole.core.context.{ PrototypeSet, Val, Variable }
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.domain.{ DiscreteFromContext }
-import org.openmole.core.workflow.sampling.{ ExplicitSampling, Factor, Sampling }
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
+import org.openmole.core.workflow.domain.DiscreteFromContext
+import org.openmole.plugin.domain.collection._
+import org.openmole.plugin.sampling.combine._
 
 case class NominalFactor[D, T](factor: Factor[D, T], nominalValue: T, values: DiscreteFromContext[D, T]) {
-  def prototype: Val[T] = factor.value
-  def nominalVal: Sampling = ExplicitSampling(prototype, Seq(nominalValue))
+  def nominalSampling: Sampling = factor.value in Seq(nominalValue)
+  def prototype = factor.value
 }
 
 object OneFactorSampling {
   def apply(factors: NominalFactor[_, _]*) = new OneFactorSampling(factors: _*)
-}
 
-case class OneFactorSampling(factors: NominalFactor[_, _]*) extends Sampling {
-
-  override def inputs: PrototypeSet = PrototypeSet.empty
-
-  override def outputs: Iterable[Val[_]] = factors.map { _.prototype }
-
-  override def apply() = FromContext {
-    p ⇒
-      import p._
-      if (factors.isEmpty) Iterator.empty
-      else factors.toIterator.flatMap { n: NominalFactor[_, _] ⇒ oneFactorSampling(n).from(context) }
+  implicit def isSampling = new IsSampling[OneFactorSampling] {
+    override def validate(s: OneFactorSampling): Validate = Validate.success
+    override def inputs(s: OneFactorSampling): PrototypeSet = Seq()
+    override def outputs(s: OneFactorSampling): Iterable[Val[_]] = s.factors.map { _.prototype }
+    override def apply(s: OneFactorSampling): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext {
+      p ⇒
+        import p._
+        if (s.factors.isEmpty) Iterator.empty
+        else s.factors.iterator.flatMap { n ⇒ oneFactorSampling(n, s.factors).from(context) }
+    }
   }
 
   /**
@@ -33,34 +32,14 @@ case class OneFactorSampling(factors: NominalFactor[_, _]*) extends Sampling {
    * @param n
    * @return
    */
-  def oneFactorSampling[D, T](n: NominalFactor[D, T]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext {
-    p ⇒
-      import p._
-      val fullsampling: Sampling = ExplicitSampling(n.prototype, n.values.iterator(n.factor.domain).from(context).toSeq)
-      complete(Seq(fullsampling) ++ factors.filter(!_.equals(n)).map { n ⇒ n.nominalVal }).from(context)
-  }
-
-  /**
-   * complete sampling
-   * @param samplings
-   * @return
-   */
-  def complete(samplings: Seq[Sampling]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+  def oneFactorSampling[D, T](n: NominalFactor[D, T], factors: Seq[NominalFactor[_, _]]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
     import p._
-    samplings.tail.foldLeft(samplings.head().from(context)) {
-      (a, b) ⇒ combine(a, b).from(context)
-    }
-  }
+    val exploreSampling: Sampling = n.prototype in n.values.iterator(n.factor.domain).from(context).toSeq
+    val nominalSampling: Seq[Sampling] = factors.filter(!_.equals(n)).map { n ⇒ n.nominalSampling }
 
-  /**
-   * combination for the complete sampling
-   * @param s1
-   * @param s2
-   * @return
-   */
-  def combine(s1: Iterator[Iterable[Variable[_]]], s2: Sampling): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
-    import p._
-    for (x ← s1; y ← s2().from(context ++ x)) yield x ++ y
+    CompleteSampling(Seq(exploreSampling) ++ nominalSampling: _*)().from(context)
   }
 
 }
+
+case class OneFactorSampling(factors: NominalFactor[_, _]*)

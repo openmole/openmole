@@ -109,7 +109,7 @@ object Validation {
     def taskValidates = mole.capsules.map(_.task(mole, sources, hooks)).collect { case v: ValidateTask ⇒ v }
 
     taskValidates.flatMap { t ⇒
-      t.validate(t.inputs.toSeq).apply.toList match {
+      t.validate(t.inputs.toSeq).toList match {
         case Nil ⇒ None
         case e   ⇒ Some(TaskValidationProblem(t, e))
       }
@@ -158,7 +158,7 @@ object Validation {
       } yield {
         val inputs = (defaultsNonOverride ++ implicitMap ++ receivedInputs ++ defaultsOverride).toSeq.map(_._2)
 
-        source.validate(inputs).apply.toList match {
+        source.validate(inputs).toList match {
           case Nil ⇒ None
           case e   ⇒ Some(SourceValidationProblem(source, e))
         }
@@ -231,7 +231,7 @@ object Validation {
         transition ← mole.transitions.collect { case x: ValidateTransition ⇒ x }
       } yield {
         val inputs = TypeUtil.validTypes(mole, sources, hooks)(transition.end, _ == transition)
-        transition.validate(inputs.toSeq.map(_.toPrototype)).apply match {
+        transition.validate(inputs.toSeq.map(_.toPrototype)) match {
           case ts if !ts.isEmpty ⇒ Some(TransitionValidationProblem(transition, ts))
           case _                 ⇒ None
         }
@@ -317,7 +317,7 @@ object Validation {
         (defaultsOverride, defaultsNonOverride) = separateDefaults(h.defaults)
       } yield {
         val inputs = (defaultsNonOverride ++ implicitMap ++ outputs ++ defaultsOverride).toSeq.map(_._2)
-        h.validate(inputs).apply.toList match {
+        h.validate(inputs).toList match {
           case Nil ⇒ None
           case e   ⇒ Some(HookValidationProblem(h, e))
         }
@@ -347,7 +347,7 @@ object Validation {
   }
 
   def moleValidateErrors(mole: Mole)(implicit newFile: TmpDirectory, fileService: FileService) =
-    mole.validate.apply match {
+    mole.validate(Seq.empty) match {
       case s if !s.isEmpty ⇒ Seq(MoleValidationProblem(mole, s))
       case _               ⇒ Seq()
     }

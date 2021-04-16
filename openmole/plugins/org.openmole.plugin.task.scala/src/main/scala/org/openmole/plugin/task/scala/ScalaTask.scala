@@ -87,7 +87,7 @@ object ScalaTask {
     )
   }
 
-  override def validate(inputs: Seq[Val[_]]) = {
+  override def validate = {
     def libraryErrors = libraries.flatMap { l ⇒
       l.exists() match {
         case false ⇒ Some(new UserBadDataError(s"Library file $l does not exist"))
@@ -99,7 +99,7 @@ object ScalaTask {
       import p._
 
       def compilationError =
-        Try(compile(inputs)) match {
+        Try(compile(p.inputs)) match {
           case Success(_) ⇒ Seq.empty
           case Failure(e) ⇒ Seq(e)
         }

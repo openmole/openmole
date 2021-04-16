@@ -167,11 +167,11 @@ object Objectives {
   def toExact(o: Objectives) = Objectives.value(o).map(o ⇒ Objective.toExact(o))
   def toNoisy(o: Objectives) = Objectives.value(o).map(o ⇒ Objective.toNoisy(o))
 
-  def validate(o: Objectives, inputs: Seq[Val[_]]) = Validate { p ⇒
+  def validate(o: Objectives, outputs: Seq[Val[_]]) = Validate { p ⇒
     import p._
     o flatMap {
-      case e: ExactObjective[_] ⇒ e.validate(inputs).apply
-      case n: NoisyObjective[_] ⇒ n.validate(inputs).apply
+      case e: ExactObjective[_] ⇒ e.validate(inputs ++ outputs)
+      case n: NoisyObjective[_] ⇒ n.validate(inputs ++ outputs)
     }
   }
 
@@ -199,7 +199,7 @@ case class ExactObjective[P](
   negative:  Boolean,
   delta:     Option[Double],
   as:        Option[String],
-  validate:  Seq[Val[_]] ⇒ Validate = _ ⇒ Validate.success) extends Objective[P] {
+  validate:  Validate       = Validate.success) extends Objective[P] {
 
   private def fromAny(v: Any) = {
     val value = toDouble(v.asInstanceOf[P])
@@ -235,7 +235,7 @@ case class NoisyObjective[P: ClassTag] private (
   negative:  Boolean,
   delta:     Option[Double],
   as:        Option[String],
-  validate:  Seq[Val[_]] ⇒ Validate = _ ⇒ Validate.success) extends Objective[P] {
+  validate:  Validate                       = Validate.success) extends Objective[P] {
 
   private def aggregateAny(values: Vector[Any]) = FromContext { p ⇒
     import p._

@@ -4,10 +4,10 @@ import org.openmole.core.context.{ PrototypeSet, Val, Variable }
 import org.openmole.core.expansion.{ FromContext, Validate }
 
 object FromContextSampling {
-  def apply(samples: FromContext.Parameters ⇒ Iterator[Iterable[Variable[_]]]) = new FromContextSampling(samples, PrototypeSet.empty, Iterable.empty, _ ⇒ Validate.success)
+  def apply(samples: FromContext.Parameters ⇒ Iterator[Iterable[Variable[_]]]) = new FromContextSampling(samples, PrototypeSet.empty, Iterable.empty, Validate.success)
 
   implicit def isSampling: IsSampling[FromContextSampling] = new IsSampling[FromContextSampling] {
-    override def validate(s: FromContextSampling, inputs: Seq[Val[_]]): Validate = s.v(inputs)
+    override def validate(s: FromContextSampling): Validate = s.v
     override def inputs(s: FromContextSampling): PrototypeSet = s.i
     override def outputs(s: FromContextSampling): Iterable[Val[_]] = s.o
     override def apply(s: FromContextSampling) = FromContext(s.samples)
@@ -28,15 +28,12 @@ object FromContextSampling {
  * @param f sampled prototypes
  * @param v function to validate parameters
  */
-case class FromContextSampling(samples: FromContext.Parameters ⇒ Iterator[Iterable[Variable[_]]], i: PrototypeSet, o: Iterable[Val[_]], v: Seq[Val[_]] ⇒ Validate) {
+case class FromContextSampling(samples: FromContext.Parameters ⇒ Iterator[Iterable[Variable[_]]], i: PrototypeSet, o: Iterable[Val[_]], v: Validate) {
 
   def prototypes(f: Iterable[Val[_]]) = outputs(f)
   def outputs(f: Iterable[Val[_]]) = copy(o = o)
   def inputs(i: Iterable[Val[_]]) = copy(i = i)
 
-  def validate(validate: Seq[Val[_]] ⇒ Validate) = {
-    def nv(inputs: Seq[Val[_]]) = v(inputs) ++ validate(inputs)
-    copy(v = nv)
-  }
+  def validate(validate: Validate) = copy(v = v ++ validate)
 
 }

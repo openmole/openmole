@@ -18,20 +18,15 @@
 package org.openmole.plugin.task.systemexec
 
 import java.io.File
-
 import monocle.macros.Lenses
-import org.openmole.core.context.{ Context, Val, Variable }
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.tools.service.OS
-import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.validation._
-import org.openmole.plugin.task.external._
-import org.openmole.tool.random._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 import cats.syntax.traverse._
-import org.openmole.core.dsl.outputs
+import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.task.TaskExecutionContext
+import org.openmole.core.workflow.validation.ValidateTask
+import org.openmole.plugin.task.external._
+import org.openmole.core.tools.service.OS
 
 object SystemExecTask {
 
@@ -93,8 +88,9 @@ object SystemExecTask {
   info:                 InfoConfig
 ) extends Task with ValidateTask {
 
-  override def validate(inputs: Seq[Val[_]]) = {
-    val allInputs = Seq(External.PWD) ++ inputs
+  override def validate = Validate { p ⇒
+    import p._
+    val allInputs = Seq(External.PWD) ++ p.inputs
 
     val commandsError =
       for {

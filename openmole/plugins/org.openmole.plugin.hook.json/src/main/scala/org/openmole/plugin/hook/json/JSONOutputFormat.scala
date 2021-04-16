@@ -53,7 +53,7 @@ object JSONOutputFormat {
 
     }
 
-    override def validate(format: JSONOutputFormat, inputs: Seq[Val[_]]) = Validate.success
+    override def validate(format: JSONOutputFormat) = Validate.success
   }
 
 }

@@ -24,23 +24,29 @@ import org.openmole.core.workflow.sampling._
 object CompleteSampling {
 
   implicit def isSampling: IsSampling[CompleteSampling] = new IsSampling[CompleteSampling] {
-    override def validate(s: CompleteSampling, inputs: Seq[Val[_]]): Validate = s.samplings.flatMap(_.validate(inputs))
+    override def validate(s: CompleteSampling): Validate = s.samplings.flatMap(_.validate)
     override def inputs(s: CompleteSampling): PrototypeSet = s.samplings.flatMap { _.inputs }
     override def outputs(s: CompleteSampling): Iterable[Val[_]] = s.samplings.flatMap { _.outputs }
 
     override def apply(s: CompleteSampling) = FromContext { p ⇒
       import p._
-      if (s.samplings.isEmpty) Iterator.empty
-      else
-        s.samplings.tail.foldLeft(s.samplings.head().from(context)) {
-          (a, b) ⇒ combine(a, b).from(context)
-        }
+      combine(s.samplings.map(_.apply())).from(context)
     }
+  }
 
-    def combine(s1: Iterator[Iterable[Variable[_]]], s2: Sampling) = FromContext { p ⇒
-      import p._
-      for (x ← s1; y ← s2().from(context ++ x)) yield x ++ y
-    }
+  private def combine1(s1: Iterator[Iterable[Variable[_]]], s2: FromContext[Iterator[Iterable[Variable[_]]]]) = FromContext { p ⇒
+    import p._
+    for (x ← s1; y ← s2.from(context ++ x)) yield x ++ y
+  }
+
+  def combine(samplings: Seq[FromContext[Iterator[Iterable[Variable[_]]]]]) = FromContext { p ⇒
+    import p._
+
+    if (samplings.isEmpty) Iterator.empty
+    else
+      samplings.tail.foldLeft(samplings.head.from(context)) {
+        (a, b) ⇒ combine1(a, b).from(context)
+      }
   }
 
 }
@@ -50,8 +56,11 @@ case class CompleteSampling(samplings: Sampling*)
 object XSampling {
 
   implicit def isSampling[S1, S2]: IsSampling[XSampling[S1, S2]] = new IsSampling[XSampling[S1, S2]] {
-    override def validate(s: XSampling[S1, S2], inputs: Seq[Val[_]]): Validate =
-      s.sampling1.validate(s.s1, inputs) ++ s.sampling2.validate(s.s2, inputs ++ s.sampling1.outputs(s.s1))
+    override def validate(s: XSampling[S1, S2]): Validate =
+      s.sampling1.validate(s.s1) ++ Validate { p ⇒
+        import p._
+        s.sampling2.validate(s.s2).apply(p.inputs ++ s.sampling1.outputs(s.s1))
+      }
 
     override def inputs(s: XSampling[S1, S2]): PrototypeSet = s.sampling1.inputs(s.s1) ++ s.sampling2.inputs(s.s2)
     override def outputs(s: XSampling[S1, S2]): Iterable[Val[_]] = s.sampling1.outputs(s.s1) ++ s.sampling2.outputs(s.s2)

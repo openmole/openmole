@@ -65,16 +65,16 @@ object External {
   case class DeployedFile(file: File, expandedUserPath: String, link: Boolean, deployedFileType: DeployedFileType)
   type PathResolver = String ⇒ File
 
-  def validate(external: External)(inputs: Seq[Val[_]]): Validate = {
+  def validate(external: External): Validate = {
     def resourceExists(resource: External.Resource) = Validate {
       if (!resource.file.exists()) Seq(new UserBadDataError(s"""File resource "${resource.file} doesn't exist.""")) else Seq.empty
     }
 
-    external.inputFileArrays.flatMap(_.prefix.validate(inputs)) ++
-      external.inputFileArrays.flatMap(_.suffix.validate(inputs)) ++
-      external.inputFiles.flatMap(_.destination.validate(inputs)) ++
-      external.outputFiles.flatMap(_.origin.validate(inputs)) ++
-      external.resources.flatMap(_.destination.validate(inputs)) ++
+    external.inputFileArrays.flatMap(_.prefix.validate) ++
+      external.inputFileArrays.flatMap(_.suffix.validate) ++
+      external.inputFiles.flatMap(_.destination.validate) ++
+      external.outputFiles.flatMap(_.origin.validate) ++
+      external.resources.flatMap(_.destination.validate) ++
       external.resources.flatMap(resourceExists)
   }
 

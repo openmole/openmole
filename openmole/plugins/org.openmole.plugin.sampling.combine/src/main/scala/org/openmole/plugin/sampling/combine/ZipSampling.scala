@@ -23,7 +23,7 @@ import org.openmole.core.dsl.extension._
 object ZipSampling {
 
   implicit def isSampling[S1, S2]: IsSampling[ZipSampling[S1, S2]] = new IsSampling[ZipSampling[S1, S2]] {
-    override def validate(s: ZipSampling[S1, S2], inputs: Seq[Val[_]]): Validate = s.sampling1.validate(s.s1, inputs) ++ s.sampling2.validate(s.s2, inputs)
+    override def validate(s: ZipSampling[S1, S2]): Validate = s.sampling1.validate(s.s1) ++ s.sampling2.validate(s.s2)
     override def inputs(s: ZipSampling[S1, S2]): PrototypeSet = s.sampling1.inputs(s.s1) ++ s.sampling2.inputs(s.s2)
     override def outputs(s: ZipSampling[S1, S2]): Iterable[Val[_]] = s.sampling1.outputs(s.s1) ++ s.sampling2.outputs(s.s2)
     override def apply(s: ZipSampling[S1, S2]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒

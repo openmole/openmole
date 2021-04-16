@@ -22,7 +22,7 @@ object FromContextSource {
     new FromContextSource(
       className,
       f,
-      _ ⇒ Validate.success,
+      Validate.success,
       config = InputOutputConfig(),
       info = InfoConfig()
     )
@@ -31,21 +31,18 @@ object FromContextSource {
 @Lenses case class FromContextSource(
   override val className: String,
   f:                      FromContextSource.Parameters ⇒ Context,
-  v:                      Seq[Val[_]] ⇒ Validate,
+  v:                      Validate,
   config:                 InputOutputConfig,
   info:                   InfoConfig) extends Source with ValidateSource {
 
-  override def validate(inputs: Seq[Val[_]]) = v(inputs)
+  override def validate = v
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { p ⇒
     val fcp = FromContextSource.Parameters(p.context, executionContext, p.random, p.newFile, p.fileService)
     f(fcp)
   }
 
-  def withValidate(validate: Seq[Val[_]] ⇒ Validate) = {
-    def nv(inputs: Seq[Val[_]]) = v(inputs) ++ validate(inputs)
-    copy(v = nv)
-  }
+  def withValidate(validate: Validate) = copy(v = v ++ validate)
 
 }
 

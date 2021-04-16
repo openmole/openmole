@@ -106,10 +106,11 @@ package object container {
   def validateContainer(
     commands:             Seq[FromContext[String]],
     environmentVariables: Seq[EnvironmentVariable],
-    external:             External,
-    inputs:               PrototypeSet
-  ): Validate = {
-    val allInputs = External.PWD :: inputs.toList
+    external:             External
+  ): Validate = Validate { p ⇒
+    import p._
+
+    val allInputs = External.PWD :: p.inputs.toList
     val validateVariables = environmentVariables.flatMap(v ⇒ Seq(v.name, v.value)).flatMap(_.validate(allInputs))
 
     commands.flatMap(_.validate(allInputs)) ++

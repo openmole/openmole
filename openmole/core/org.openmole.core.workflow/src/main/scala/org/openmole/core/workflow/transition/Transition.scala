@@ -164,7 +164,7 @@ class DirectTransition(
   val condition: Condition      = Condition.True,
   val filter:    BlockList      = BlockList.empty) extends Transition with ValidateTransition {
 
-  override def validate(inputs: Seq[Val[_]]) = condition.validate(inputs)
+  override def validate = condition.validate
 
   override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, moleExecutionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
     PerformTransition(subMole) { subMoleState ⇒
@@ -264,7 +264,7 @@ object ExplorationTransition {
 
 class ExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty) extends Transition with ValidateTransition {
 
-  override def validate(inputs: Seq[Val[_]]) = condition.validate(inputs)
+  override def validate = condition.validate
 
   override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
     MoleExecutionMessage.PerformTransition(subMole) { subMoleState ⇒
@@ -356,7 +356,7 @@ object AggregationTransition {
 
 class AggregationTransition(val start: MoleCapsule, val end: TransitionSlot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty, val trigger: Condition = Condition.False) extends Transition with ValidateTransition {
 
-  override def validate(inputs: Seq[Val[_]]) = condition.validate(inputs) ++ trigger.validate(inputs)
+  override def validate = condition.validate ++ trigger.validate
 
   override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
     MoleExecutionMessage.PerformTransition(subMole) { subMoleState ⇒
@@ -392,7 +392,7 @@ class AggregationTransition(val start: MoleCapsule, val end: TransitionSlot, val
 
 class EndExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, val trigger: Condition, val filter: BlockList = BlockList.empty) extends Transition with ValidateTransition {
 
-  override def validate(inputs: Seq[Val[_]]) = trigger.validate(inputs)
+  override def validate = trigger.validate
 
   override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
     MoleExecutionMessage.PerformTransition(subMole) { subMoleState ⇒
@@ -421,7 +421,7 @@ class EndExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, 
 
 class SlaveTransition(val start: MoleCapsule, val end: TransitionSlot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty, val slaves: Option[Int] = None) extends Transition with ValidateTransition {
 
-  override def validate(inputs: Seq[Val[_]]) = condition.validate(inputs)
+  override def validate = condition.validate
 
   override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
     MoleExecutionMessage.PerformTransition(subMole) { subMoleState ⇒

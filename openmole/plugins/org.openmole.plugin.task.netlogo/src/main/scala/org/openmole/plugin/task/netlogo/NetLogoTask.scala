@@ -211,7 +211,8 @@ object NetLogoTask {
    * @param inputs
    * @return
    */
-  def validateNetLogoInputTypes(inputs: Seq[Val[_]]): Validate = {
+  def validateNetLogoInputTypes = Validate { p ⇒
+    import p._
     def acceptedType(c: Class[_]): Boolean =
       if (c.isArray()) acceptedType(c.getComponentType)
       else Seq(classOf[String], classOf[Int], classOf[Double], classOf[Long], classOf[Float], classOf[File], classOf[Boolean]).contains(c)
@@ -261,8 +262,9 @@ trait NetLogoTask extends Task with ValidateTask {
 
   def switch3d: Boolean
 
-  override def validate(inputs: Seq[Val[_]]) = Validate {
-    val allInputs = External.PWD :: inputs.toList
+  override def validate = Validate { p ⇒
+    import p._
+    val allInputs = External.PWD :: p.inputs.toList
     go.flatMap(_.validate(allInputs)) ++
       External.validate(external)(allInputs) ++
       NetLogoTask.validateNetLogoInputTypes(mapped.inputs.map(_.v))

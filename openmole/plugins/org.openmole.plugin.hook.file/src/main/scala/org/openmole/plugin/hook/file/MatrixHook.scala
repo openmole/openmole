@@ -57,7 +57,7 @@ object MatrixHook {
   config: InputOutputConfig,
   info:   InfoConfig) extends Hook with ValidateHook {
 
-  override def validate(inputs: Seq[Val[_]]) = file.validate(inputs)
+  override def validate = file.validate
 
   override protected def process(executionContext: HookExecutionContext) = FromContext { parameters ⇒
     import parameters._

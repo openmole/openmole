@@ -42,14 +42,14 @@ package sampling {
 
     implicit def fromIsSampling[T](t: T)(implicit isSampling: IsSampling[T]) =
       new Sampling {
-        override def validate(inputs: Seq[Val[_]]) = isSampling.validate(t, inputs)
+        override def validate = isSampling.validate(t)
         override def inputs = isSampling.inputs(t)
         override def outputs: Iterable[Val[_]] = isSampling.outputs(t)
         override def apply(): FromContext[Iterator[Iterable[Variable[_]]]] = isSampling.apply(t)
       }
 
     implicit def factorIsSampling[D, T](implicit domain: DiscreteFromContext[D, T], domainInputs: DomainInputs[D]) = new IsSampling[Factor[D, T]] {
-      def validate(f: Factor[D, T], inputs: Seq[Val[_]]): Validate = domain.iterator(f.domain).validate(inputs)
+      def validate(f: Factor[D, T]): Validate = domain.iterator(f.domain).validate
 
       def inputs(f: Factor[D, T]) = domainInputs.inputs(f.domain)
       def outputs(f: Factor[D, T]) = List(f.value)
@@ -59,7 +59,7 @@ package sampling {
 
     type Sampling = sampling.Sampling
 
-    def EmptySampling() = sampling.EmptySampling()
+    def EmptySampling() = Sampling { _ ⇒ Iterator.empty }
   }
 }
 
@@ -84,7 +84,7 @@ package object sampling {
 
   object IsSampling {
     implicit def samplingIsSampling = new IsSampling[Sampling] {
-      override def validate(s: Sampling, inputs: Seq[Val[_]]) = s.validate(inputs)
+      override def validate(s: Sampling) = s.validate
       override def inputs(s: Sampling): PrototypeSet = s.inputs
       override def outputs(s: Sampling): Iterable[Val[_]] = s.outputs
       override def apply(s: Sampling): FromContext[Iterator[Iterable[Variable[_]]]] = s()
@@ -93,7 +93,7 @@ package object sampling {
 
   trait IsSampling[-S] {
 
-    def validate(s: S, inputs: Seq[Val[_]]): Validate
+    def validate(s: S): Validate
 
     /**
      * Prototypes of the variables required by this sampling.

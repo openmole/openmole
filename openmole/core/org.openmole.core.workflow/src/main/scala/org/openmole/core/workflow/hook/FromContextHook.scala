@@ -40,7 +40,7 @@ object FromContextHook {
 
   def apply(f: Parameters ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook = FromContextHook(name.value)(f)
   def apply(className: String)(f: Parameters ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook =
-    FromContextHook(className, f, _ ⇒ Validate.success, InputOutputConfig(), InfoConfig())
+    FromContextHook(className, f, Validate.success, InputOutputConfig(), InfoConfig())
 
 }
 
@@ -56,11 +56,11 @@ object FromContextHook {
 @Lenses case class FromContextHook(
   override val className: String,
   f:                      FromContextHook.Parameters ⇒ Context,
-  v:                      Seq[Val[_]] ⇒ Validate,
+  v:                      Validate,
   config:                 InputOutputConfig,
   info:                   InfoConfig) extends Hook with ValidateHook {
 
-  override def validate(inputs: Seq[Val[_]]) = v(inputs)
+  override def validate = v
 
   override protected def process(executionContext: HookExecutionContext) = FromContext { p ⇒
     import p._
@@ -71,9 +71,5 @@ object FromContextHook {
     f(fcp)
   }
 
-  def withValidate(validate: Seq[Val[_]] ⇒ Validate) = {
-    def nv(inputs: Seq[Val[_]]) = v(inputs) ++ validate(inputs)
-    copy(v = nv)
-  }
-
+  def withValidate(validate: Validate) = copy(v = v ++ validate)
 }
