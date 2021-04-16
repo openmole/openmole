@@ -52,7 +52,7 @@ object ExplorationTask {
         val samplingValue = sampling(s).from(context).toVector
 
         val values =
-          TreeMap.empty[Val[_], Array[_]] ++ sampling.prototypes(s).map { p ⇒
+          TreeMap.empty[Val[_], Array[_]] ++ sampling.outputs(s).map { p ⇒
             p → p.`type`.manifest.newArray(samplingValue.size)
           }
 
@@ -76,7 +76,7 @@ object ExplorationTask {
       }: Context
     } withValidate { inputs ⇒ sampling.validate(s, inputs) } set (
       inputs += (sampling.inputs(s).toSeq: _*),
-      exploredOutputs += (sampling.prototypes(s).toSeq.map(_.toArray): _*)
+      exploredOutputs += (sampling.outputs(s).toSeq.map(_.toArray): _*)
     )
 
   /**

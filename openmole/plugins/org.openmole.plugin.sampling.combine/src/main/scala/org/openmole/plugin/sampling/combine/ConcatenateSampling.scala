@@ -24,14 +24,14 @@ object ConcatenateSampling {
   implicit def isSampling[S1, S2]: IsSampling[ConcatenateSampling[S1, S2]] = new IsSampling[ConcatenateSampling[S1, S2]] {
     override def validate(s: ConcatenateSampling[S1, S2], inputs: Seq[Val[_]]): Validate = s.sampling1.validate(s.s1, inputs) ++ s.sampling2.validate(s.s2, inputs)
     override def inputs(s: ConcatenateSampling[S1, S2]): PrototypeSet = s.sampling1.inputs(s.s1) ++ s.sampling2.inputs(s.s2)
-    override def prototypes(s: ConcatenateSampling[S1, S2]): Iterable[Val[_]] = {
-      val p1 = s.sampling1.prototypes(s.s1).toSet
-      val p2 = s.sampling2.prototypes(s.s2).toSet
+    override def outputs(s: ConcatenateSampling[S1, S2]): Iterable[Val[_]] = {
+      val p1 = s.sampling1.outputs(s.s1).toSet
+      val p2 = s.sampling2.outputs(s.s2).toSet
       p1 intersect p2
     }
     override def apply(s: ConcatenateSampling[S1, S2]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
       import p._
-      val ps = prototypes(s).toSet
+      val ps = outputs(s).toSet
 
       s.sampling1.apply(s.s1).apply(context).map(_.filter(v ⇒ ps.contains(v.prototype))) ++
         s.sampling2.apply(s.s2).apply(context).map(_.filter(v ⇒ ps.contains(v.prototype)))

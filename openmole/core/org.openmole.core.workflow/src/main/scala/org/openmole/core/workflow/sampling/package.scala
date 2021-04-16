@@ -44,7 +44,7 @@ package sampling {
       new Sampling {
         override def validate(inputs: Seq[Val[_]]) = isSampling.validate(t, inputs)
         override def inputs = isSampling.inputs(t)
-        override def prototypes: Iterable[Val[_]] = isSampling.prototypes(t)
+        override def outputs: Iterable[Val[_]] = isSampling.outputs(t)
         override def apply(): FromContext[Iterator[Iterable[Variable[_]]]] = isSampling.apply(t)
       }
 
@@ -52,7 +52,7 @@ package sampling {
       def validate(f: Factor[D, T], inputs: Seq[Val[_]]): Validate = domain.iterator(f.domain).validate(inputs)
 
       def inputs(f: Factor[D, T]) = domainInputs.inputs(f.domain)
-      def prototypes(f: Factor[D, T]) = List(f.value)
+      def outputs(f: Factor[D, T]) = List(f.value)
       override def apply(f: Factor[D, T]): FromContext[Iterator[collection.Iterable[Variable[T]]]] =
         domain.iterator(f.domain).map(_.map { v ⇒ List(Variable(f.value, v)) })
     }
@@ -86,7 +86,7 @@ package object sampling {
     implicit def samplingIsSampling = new IsSampling[Sampling] {
       override def validate(s: Sampling, inputs: Seq[Val[_]]) = s.validate(inputs)
       override def inputs(s: Sampling): PrototypeSet = s.inputs
-      override def prototypes(s: Sampling): Iterable[Val[_]] = s.prototypes
+      override def outputs(s: Sampling): Iterable[Val[_]] = s.outputs
       override def apply(s: Sampling): FromContext[Iterator[Iterable[Variable[_]]]] = s()
     }
   }
@@ -107,7 +107,7 @@ package object sampling {
      *
      * @return the factors prototypes
      */
-    def prototypes(s: S): Iterable[Val[_]]
+    def outputs(s: S): Iterable[Val[_]]
 
     /**
      * This method builds the explored plan in the given {@code context}.

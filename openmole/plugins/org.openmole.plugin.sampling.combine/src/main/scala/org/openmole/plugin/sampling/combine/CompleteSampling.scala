@@ -26,7 +26,7 @@ object CompleteSampling {
   implicit def isSampling: IsSampling[CompleteSampling] = new IsSampling[CompleteSampling] {
     override def validate(s: CompleteSampling, inputs: Seq[Val[_]]): Validate = s.samplings.flatMap(_.validate(inputs))
     override def inputs(s: CompleteSampling): PrototypeSet = s.samplings.flatMap { _.inputs }
-    override def prototypes(s: CompleteSampling): Iterable[Val[_]] = s.samplings.flatMap { _.prototypes }
+    override def outputs(s: CompleteSampling): Iterable[Val[_]] = s.samplings.flatMap { _.outputs }
 
     override def apply(s: CompleteSampling) = FromContext { p ⇒
       import p._
@@ -51,10 +51,10 @@ object XSampling {
 
   implicit def isSampling[S1, S2]: IsSampling[XSampling[S1, S2]] = new IsSampling[XSampling[S1, S2]] {
     override def validate(s: XSampling[S1, S2], inputs: Seq[Val[_]]): Validate =
-      s.sampling1.validate(s.s1, inputs) ++ s.sampling2.validate(s.s2, inputs ++ s.sampling1.prototypes(s.s1))
+      s.sampling1.validate(s.s1, inputs) ++ s.sampling2.validate(s.s2, inputs ++ s.sampling1.outputs(s.s1))
 
     override def inputs(s: XSampling[S1, S2]): PrototypeSet = s.sampling1.inputs(s.s1) ++ s.sampling2.inputs(s.s2)
-    override def prototypes(s: XSampling[S1, S2]): Iterable[Val[_]] = s.sampling1.prototypes(s.s1) ++ s.sampling2.prototypes(s.s2)
+    override def outputs(s: XSampling[S1, S2]): Iterable[Val[_]] = s.sampling1.outputs(s.s1) ++ s.sampling2.outputs(s.s2)
     override def apply(s: XSampling[S1, S2]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
       import p._
       for {

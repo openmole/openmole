@@ -19,7 +19,7 @@ case class OneFactorSampling(factors: NominalFactor[_, _]*) extends Sampling {
 
   override def inputs: PrototypeSet = PrototypeSet.empty
 
-  override def prototypes: Iterable[Val[_]] = factors.map { _.prototype }
+  override def outputs: Iterable[Val[_]] = factors.map { _.prototype }
 
   override def apply() = FromContext {
     p ⇒

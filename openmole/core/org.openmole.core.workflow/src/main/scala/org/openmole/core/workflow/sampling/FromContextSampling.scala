@@ -9,7 +9,7 @@ object FromContextSampling {
   implicit def isSampling: IsSampling[FromContextSampling] = new IsSampling[FromContextSampling] {
     override def validate(s: FromContextSampling, inputs: Seq[Val[_]]): Validate = s.v(inputs)
     override def inputs(s: FromContextSampling): PrototypeSet = s.i
-    override def prototypes(s: FromContextSampling): Iterable[Val[_]] = s.o
+    override def outputs(s: FromContextSampling): Iterable[Val[_]] = s.o
     override def apply(s: FromContextSampling) = FromContext(s.samples)
 
     def combine(s1: Iterator[Iterable[Variable[_]]], s2: Sampling) = FromContext { p ⇒

@@ -25,7 +25,7 @@ object DropSampling {
   implicit def isSampling[S]: IsSampling[DropSampling[S]] = new IsSampling[DropSampling[S]] {
     override def validate(s: DropSampling[S], inputs: Seq[Val[_]]): Validate = s.sampling.validate(s.s, inputs) ++ s.n.validate(inputs)
     override def inputs(s: DropSampling[S]): PrototypeSet = s.sampling.inputs(s.s)
-    override def prototypes(s: DropSampling[S]): Iterable[Val[_]] = s.sampling.prototypes(s.s)
+    override def outputs(s: DropSampling[S]): Iterable[Val[_]] = s.sampling.outputs(s.s)
     override def apply(s: DropSampling[S]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
       import p._
       s.sampling(s.s).from(context).drop(s.n.from(context))

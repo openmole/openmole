@@ -55,7 +55,7 @@ object CSVSampling {
 ) extends Sampling {
 
   override def inputs = InputOutputConfig.inputs.get(config)
-  override def prototypes = InputOutputConfig.outputs.get(config)
+  override def outputs = InputOutputConfig.outputs.get(config)
   override def apply() = FromContext { p ⇒
     import p._
     import org.openmole.core.csv

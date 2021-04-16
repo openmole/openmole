@@ -20,6 +20,6 @@ package org.openmole.core.workflow.sampling
 import org.openmole.core.expansion.FromContext
 
 case class EmptySampling() extends Sampling {
-  override def prototypes = List.empty
+  override def outputs = List.empty
   override def apply() = FromContext { _ ⇒ Iterator.empty }
 }

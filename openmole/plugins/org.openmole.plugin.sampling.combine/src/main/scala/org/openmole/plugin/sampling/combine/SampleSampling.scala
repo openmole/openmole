@@ -25,7 +25,7 @@ object SampleSampling {
   implicit def isSampling[S]: IsSampling[SampleSampling[S]] = new IsSampling[SampleSampling[S]] {
     override def validate(s: SampleSampling[S], inputs: Seq[Val[_]]): Validate = s.sampling.validate(s.s, inputs) ++ s.size.validate(inputs)
     override def inputs(s: SampleSampling[S]): PrototypeSet = s.sampling.inputs(s.s)
-    override def prototypes(s: SampleSampling[S]): Iterable[Val[_]] = s.sampling.prototypes(s.s)
+    override def outputs(s: SampleSampling[S]): Iterable[Val[_]] = s.sampling.outputs(s.s)
     override def apply(s: SampleSampling[S]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
       import p._
       val sampled = s.sampling(s.s).from(context).toVector

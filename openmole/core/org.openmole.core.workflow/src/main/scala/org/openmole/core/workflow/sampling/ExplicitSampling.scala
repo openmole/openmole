@@ -26,6 +26,6 @@ import org.openmole.core.context.{ Val, Variable }
  * @tparam T type of the Val
  */
 case class ExplicitSampling[T](prototype: Val[T], data: Iterable[T]) extends Sampling {
-  override def prototypes = List(prototype)
+  override def outputs = List(prototype)
   override def apply() = data.map { v ⇒ List(Variable(prototype, v)) }.iterator
 }

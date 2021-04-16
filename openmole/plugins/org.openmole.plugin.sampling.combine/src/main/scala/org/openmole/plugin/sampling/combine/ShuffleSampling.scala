@@ -26,7 +26,7 @@ object ShuffleSampling {
   implicit def isSampling[S]: IsSampling[ShuffleSampling[S]] = new IsSampling[ShuffleSampling[S]] {
     override def validate(s: ShuffleSampling[S], inputs: Seq[Val[_]]): Validate = s.sampling.validate(s.s, inputs)
     override def inputs(s: ShuffleSampling[S]): PrototypeSet = s.sampling.inputs(s.s)
-    override def prototypes(s: ShuffleSampling[S]): Iterable[Val[_]] = s.sampling.prototypes(s.s)
+    override def outputs(s: ShuffleSampling[S]): Iterable[Val[_]] = s.sampling.outputs(s.s)
     override def apply(s: ShuffleSampling[S]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
       import p._
       val array = s.sampling(s.s).from(context).toArray

@@ -25,7 +25,7 @@ object ZipWithIndexSampling {
   implicit def isSampling[S]: IsSampling[ZipWithIndexSampling[S]] = new IsSampling[ZipWithIndexSampling[S]] {
     override def validate(s: ZipWithIndexSampling[S], inputs: Seq[Val[_]]): Validate = s.sampling.validate(s.s, inputs)
     override def inputs(s: ZipWithIndexSampling[S]): PrototypeSet = s.sampling.inputs(s.s)
-    override def prototypes(s: ZipWithIndexSampling[S]): Iterable[Val[_]] = s.sampling.prototypes(s.s) ++ Seq(s.index)
+    override def outputs(s: ZipWithIndexSampling[S]): Iterable[Val[_]] = s.sampling.outputs(s.s) ++ Seq(s.index)
     override def apply(s: ZipWithIndexSampling[S]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
       import p._
       s.sampling(s.s).from(context).zipWithIndex.map {

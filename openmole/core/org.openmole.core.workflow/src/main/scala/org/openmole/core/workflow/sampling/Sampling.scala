@@ -47,7 +47,7 @@ trait Sampling {
    *
    * @return the factors prototypes
    */
-  def prototypes: Iterable[Val[_]]
+  def outputs: Iterable[Val[_]]
 
   /**
    * This method builds the explored plan in the given {@code context}.

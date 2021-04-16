@@ -168,7 +168,7 @@ sealed class MorrisSampling(
   val factors:     Seq[ScalarOrSequenceOfDouble[_]]) extends Sampling {
 
   override def inputs = factors.flatMap(_.inputs)
-  override def prototypes = factors.map { _.prototype } ++ Seq(
+  override def outputs = factors.map { _.prototype } ++ Seq(
     MorrisSampling.varDelta,
     MorrisSampling.varFactorName)
 
