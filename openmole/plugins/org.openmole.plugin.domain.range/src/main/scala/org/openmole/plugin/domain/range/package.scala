@@ -45,11 +45,11 @@ package object range {
       def exp(t: BigDecimal) = BigDecimalOperations.exp(t, scale).setScale(scale, RoundingMode.HALF_UP).round(mc)
     }
 
-  implicit class RangeDomainDecorator[T](r: Range[T]) {
-    def step(s: FromContext[T]) = StepRange[T](r, s)
+  implicit class RangeDomainDecorator[T](r: RangeDomain[T]) {
+    def step(s: FromContext[T]) = StepRangeDomain[T](r, s)
     def by(s: FromContext[T]) = step(s)
-    def size(s: FromContext[Int]) = SizeRange[T](r, s)
-    def logSteps(s: FromContext[Int])(implicit l: Log[T]) = LogRange[T](r, s)
+    def size(s: FromContext[Int]) = SizeRangeDomain[T](r, s)
+    def logSteps(s: FromContext[Int])(implicit l: Log[T]) = LogRangeDomain[T](r, s)
   }
 
   trait DefaultStep[T] {
@@ -97,5 +97,17 @@ package object range {
       def toInt = v.toInt(lhs)
     }
   }
+
+  @deprecated("Use RangeDomain", "13")
+  def Range = RangeDomain
+
+  @deprecated("Use LogRangeDomain", "13")
+  def LogRange = LogRangeDomain
+
+  @deprecated("Use SizeRangeDomain", "13")
+  def SizeRange = SizeRangeDomain
+
+  @deprecated("Use StepRangeDomain", "13")
+  def StepRange = StepRangeDomain
 
 }

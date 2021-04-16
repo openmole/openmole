@@ -21,19 +21,19 @@ import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
 import cats.implicits._
 
-object StepRange {
+object StepRangeDomain {
 
-  implicit def isDiscrete[T] = new DiscreteFromContext[StepRange[T], T] with BoundsFromContext[StepRange[T], T] with CenterFromContext[StepRange[T], T] {
-    override def iterator(domain: StepRange[T]) = domain.iterator
-    override def max(domain: StepRange[T]) = domain.max
-    override def min(domain: StepRange[T]) = domain.min
-    override def center(domain: StepRange[T]) = Range.rangeCenter(domain.range)
+  implicit def isDiscrete[T] = new DiscreteFromContext[StepRangeDomain[T], T] with BoundsFromContext[StepRangeDomain[T], T] with CenterFromContext[StepRangeDomain[T], T] {
+    override def iterator(domain: StepRangeDomain[T]) = domain.iterator
+    override def max(domain: StepRangeDomain[T]) = domain.max
+    override def min(domain: StepRangeDomain[T]) = domain.min
+    override def center(domain: StepRangeDomain[T]) = RangeDomain.rangeCenter(domain.range)
   }
 
-  def apply[T](range: Range[T], step: FromContext[T]) = new StepRange[T](range, step)
+  def apply[T](range: RangeDomain[T], step: FromContext[T]) = new StepRangeDomain[T](range, step)
 }
 
-class StepRange[T](val range: Range[T], steps: FromContext[T]) extends SizeStep[T] {
+class StepRangeDomain[T](val range: RangeDomain[T], steps: FromContext[T]) extends SizeStep[T] {
   import range._
 
   def stepAndSize(minValue: T, maxValue: T) = steps.map { step ⇒

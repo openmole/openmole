@@ -21,7 +21,7 @@ import org.openmole.core.expansion._
 
 trait SizeStep[T] {
 
-  val range: Range[T]
+  val range: RangeDomain[T]
 
   import range.ops._
 

@@ -37,6 +37,9 @@ package object combine {
     def drop(n: FromContext[Int]) = DropSampling(s, n)
 
     def x[S2: IsSampling](s2: S2) = XSampling(s, s2)
+    def ++[S2: IsSampling](s2: S2) = ConcatenateSampling(s, s2)
+
+    @deprecated("Use ++", "13")
     def ::[S2: IsSampling](s2: S2) = ConcatenateSampling(s, s2)
 
     def zip(s2: Sampling) = ZipSampling(s, s2)

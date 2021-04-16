@@ -22,23 +22,23 @@ import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
 import cats.implicits._
 
-object SizeRange {
-  implicit def isFinite[T] = new DiscreteFromContext[SizeRange[T], T] with BoundsFromContext[SizeRange[T], T] with CenterFromContext[SizeRange[T], T] {
-    override def iterator(domain: SizeRange[T]) = domain.iterator
-    override def max(domain: SizeRange[T]) = domain.max
-    override def min(domain: SizeRange[T]) = domain.min
-    override def center(domain: SizeRange[T]) = Range.rangeCenter(domain.range)
+object SizeRangeDomain {
+  implicit def isFinite[T] = new DiscreteFromContext[SizeRangeDomain[T], T] with BoundsFromContext[SizeRangeDomain[T], T] with CenterFromContext[SizeRangeDomain[T], T] {
+    override def iterator(domain: SizeRangeDomain[T]) = domain.iterator
+    override def max(domain: SizeRangeDomain[T]) = domain.max
+    override def min(domain: SizeRangeDomain[T]) = domain.min
+    override def center(domain: SizeRangeDomain[T]) = RangeDomain.rangeCenter(domain.range)
   }
 
-  def apply[T: RangeValue](min: FromContext[T], max: FromContext[T], size: FromContext[Int]): SizeRange[T] =
-    apply(Range(min, max), size)
+  def apply[T: RangeValue](min: FromContext[T], max: FromContext[T], size: FromContext[Int]): SizeRangeDomain[T] =
+    apply(RangeDomain(min, max), size)
 
-  def apply[T](range: Range[T], size: FromContext[Int]): SizeRange[T] =
-    new SizeRange[T](range, size)
+  def apply[T](range: RangeDomain[T], size: FromContext[Int]): SizeRangeDomain[T] =
+    new SizeRangeDomain[T](range, size)
 
 }
 
-class SizeRange[T](val range: Range[T], size: FromContext[Int]) extends SizeStep[T] {
+class SizeRangeDomain[T](val range: RangeDomain[T], size: FromContext[Int]) extends SizeStep[T] {
   import range._
 
   def stepAndSize(minValue: T, maxValue: T) = size.map { size ⇒

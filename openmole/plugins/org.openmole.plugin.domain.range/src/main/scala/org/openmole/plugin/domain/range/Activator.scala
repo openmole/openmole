@@ -32,7 +32,11 @@ class Activator extends BundleActivator {
       Vector(
         "step",
         "size",
-        "logSteps"
+        "logSteps",
+        DomainHighLight(classOf[LogRangeDomain[_]]),
+        DomainHighLight(classOf[RangeDomain[_]]),
+        DomainHighLight(classOf[SizeRangeDomain[_]]),
+        DomainHighLight(classOf[StepRangeDomain[_]])
       )
 
     PluginRegistry.register(this, nameSpaces = Vector(this.getClass.getPackage), highLight = keyWords)

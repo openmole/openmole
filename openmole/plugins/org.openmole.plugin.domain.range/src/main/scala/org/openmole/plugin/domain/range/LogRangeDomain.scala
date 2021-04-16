@@ -25,29 +25,29 @@ import cats._
 import cats.implicits._
 import cats.syntax._
 
-object LogRange {
+object LogRangeDomain {
 
   implicit def isDiscrete[T] =
-    new DiscreteFromContext[LogRange[T], T] with CenterFromContext[LogRange[T], T] with BoundsFromContext[LogRange[T], T] {
-      override def iterator(domain: LogRange[T]) = domain.iterator
-      override def center(domain: LogRange[T]) = Range.rangeCenter(domain.range)
-      override def max(domain: LogRange[T]) = domain.max
-      override def min(domain: LogRange[T]) = domain.min
+    new DiscreteFromContext[LogRangeDomain[T], T] with CenterFromContext[LogRangeDomain[T], T] with BoundsFromContext[LogRangeDomain[T], T] {
+      override def iterator(domain: LogRangeDomain[T]) = domain.iterator
+      override def center(domain: LogRangeDomain[T]) = RangeDomain.rangeCenter(domain.range)
+      override def max(domain: LogRangeDomain[T]) = domain.max
+      override def min(domain: LogRangeDomain[T]) = domain.min
     }
 
-  def apply[T: Log](range: Range[T], steps: FromContext[Int]) =
-    new LogRange[T](range, steps)
+  def apply[T: Log](range: RangeDomain[T], steps: FromContext[Int]) =
+    new LogRangeDomain[T](range, steps)
 
   def apply[T: RangeValue: Log](
     min:   FromContext[T],
     max:   FromContext[T],
     steps: FromContext[Int]
-  ): LogRange[T] =
-    LogRange[T](Range[T](min, max), steps)
+  ): LogRangeDomain[T] =
+    LogRangeDomain[T](RangeDomain[T](min, max), steps)
 
 }
 
-sealed class LogRange[T](val range: Range[T], val steps: FromContext[Int])(implicit lg: Log[T]) {
+sealed class LogRangeDomain[T](val range: RangeDomain[T], val steps: FromContext[Int])(implicit lg: Log[T]) {
 
   import range._
 

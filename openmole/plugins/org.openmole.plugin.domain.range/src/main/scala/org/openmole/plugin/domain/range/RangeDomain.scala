@@ -21,42 +21,42 @@ import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain.{ BoundsFromContext, CenterFromContext, DiscreteFromContext }
 import cats.implicits._
 
-object Range {
+object RangeDomain {
 
-  implicit def isBounded[T] = new BoundsFromContext[Range[T], T] with CenterFromContext[Range[T], T] {
-    override def min(domain: Range[T]) = domain.min
-    override def max(domain: Range[T]) = domain.max
-    override def center(domain: Range[T]) = Range.rangeCenter(domain)
+  implicit def isBounded[T] = new BoundsFromContext[RangeDomain[T], T] with CenterFromContext[RangeDomain[T], T] {
+    override def min(domain: RangeDomain[T]) = domain.min
+    override def max(domain: RangeDomain[T]) = domain.max
+    override def center(domain: RangeDomain[T]) = RangeDomain.rangeCenter(domain)
   }
 
-  implicit def rangeWithDefaultStepIsDiscrete[T](implicit step: DefaultStep[T]) = new DiscreteFromContext[Range[T], T] {
-    override def iterator(domain: Range[T]) = StepRange[T](domain, step.step).iterator
+  implicit def rangeWithDefaultStepIsDiscrete[T](implicit step: DefaultStep[T]) = new DiscreteFromContext[RangeDomain[T], T] {
+    override def iterator(domain: RangeDomain[T]) = StepRangeDomain[T](domain, step.step).iterator
   }
 
   def apply[T: RangeValue](
     min: FromContext[T],
     max: FromContext[T]
-  ): Range[T] = new Range[T](min, max)
+  ): RangeDomain[T] = new RangeDomain[T](min, max)
 
   def apply[T: RangeValue](
     min:  FromContext[T],
     max:  FromContext[T],
     step: FromContext[T]
-  ): StepRange[T] =
-    StepRange[T](Range[T](min, max), step)
+  ): StepRangeDomain[T] =
+    StepRangeDomain[T](RangeDomain[T](min, max), step)
 
   def size[T: RangeValue](
     min:  FromContext[T],
     max:  FromContext[T],
     size: FromContext[Int]
-  ): SizeRange[T] =
-    SizeRange[T](Range[T](min, max), size)
+  ): SizeRangeDomain[T] =
+    SizeRangeDomain[T](RangeDomain[T](min, max), size)
 
-  def rangeCenter[T](r: Range[T]): FromContext[T] = (r.min, r.max) mapN { (min, max) ⇒
+  def rangeCenter[T](r: RangeDomain[T]): FromContext[T] = (r.min, r.max) mapN { (min, max) ⇒
     import r.ops._
     min + ((max - min) / fromInt(2))
   }
 
 }
 
-class Range[T](val min: FromContext[T], val max: FromContext[T])(implicit val ops: RangeValue[T])
+class RangeDomain[T](val min: FromContext[T], val max: FromContext[T])(implicit val ops: RangeValue[T])

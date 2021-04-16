@@ -21,12 +21,12 @@ import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
 import cats.implicits._
 
-object ListDomain {
-  implicit def isFinite[T] = new DiscreteFromContext[ListDomain[T], T] {
-    override def iterator(domain: ListDomain[T]) = domain.values.toList.sequence.map(_.iterator)
+object SeqDomain {
+  implicit def isFinite[T] = new DiscreteFromContext[SeqDomain[T], T] {
+    override def iterator(domain: SeqDomain[T]) = domain.values.toList.sequence.map(_.iterator)
   }
 
-  def apply[T](values: FromContext[T]*) = new ListDomain[T](values: _*)
+  def apply[T](values: FromContext[T]*) = new SeqDomain[T](values: _*)
 }
 
-sealed class ListDomain[T](val values: FromContext[T]*)
+sealed class SeqDomain[T](val values: FromContext[T]*)

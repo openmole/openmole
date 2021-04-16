@@ -17,6 +17,17 @@
 
 package org.openmole.plugin.domain.collection
 
+import org.openmole.core.highlight._
 import org.openmole.core.pluginregistry._
+import org.osgi.framework._
 
-class Activator extends PluginRegistryActivator
+class Activator extends PluginRegistryActivator {
+  override def stop(context: BundleContext): Unit =
+    PluginRegistry.unregister(this)
+
+  override def start(context: BundleContext): Unit = {
+    import org.openmole.core.highlight.HighLight._
+    val keyWords: Vector[HighLight] = Vector(DomainHighLight(classOf[SeqDomain[_]]))
+    PluginRegistry.register(this, nameSpaces = Vector(this.getClass.getPackage), highLight = keyWords)
+  }
+}

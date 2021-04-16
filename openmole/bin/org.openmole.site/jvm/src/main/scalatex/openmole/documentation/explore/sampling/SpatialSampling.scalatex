@@ -69,7 +69,7 @@ DirectSampling(
   sampling =
     (myBlocksNumber in (10 to 15)) x
       (myBlocksMinSize in (1 to 3)) x
-      (myBlocksMaxSize in Range[Int]("myBlocksMinSize + 3", "myBlocksMinSize + 5")) x
+      (myBlocksMaxSize in RangeDomain[Int]("myBlocksMinSize + 3", "myBlocksMinSize + 5")) x
       (myGrid is BlocksGridSpatialSampling(gridSize = 10, number = myBlocksNumber, minSize = myBlocksMinSize, maxSize = myBlocksMaxSize)),
   evaluation = myModel
 )""", name="block grid sampling")
