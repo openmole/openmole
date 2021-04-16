@@ -186,7 +186,7 @@ See the following for a use example of these samplings:
   // Create a sampling dropping 2 values in s5 and then taking the next 10 values
   val s6 = s5 drop 2 take 10
 
-  // Create a sampling containing the 4th subset of size 10 in s5, i.e. the values with indexes 40 to 49
+  // Create a sampling containing the subset 4 of size 10 in s5, i.e. the values with indexes 40 to 49
   val s7 = s5 subset (4, size = 10)
 """, name = "sampling modifiers")
 

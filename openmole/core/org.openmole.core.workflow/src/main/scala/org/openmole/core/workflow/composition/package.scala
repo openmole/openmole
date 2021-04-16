@@ -544,6 +544,8 @@ package composition {
     /* ----------- implicit conversions ----------------- */
 
     object ToOrigin {
+      import org.openmole.core.workflow.sampling.IsSampling
+
       def apply[T](f: T ⇒ TransitionOrigin) = new ToOrigin[T] {
         def apply(t: T) = f(t)
       }
@@ -551,7 +553,7 @@ package composition {
       implicit def taskToOrigin = ToOrigin[Task] { t ⇒ TaskOrigin(TaskNode(t)) }
       implicit def transitionDSLToOrigin = ToOrigin[DSL] { TransitionDSLOrigin(_) }
       implicit def taskNodeToOrigin[T: ToNode] = ToOrigin[T] { t ⇒ TaskOrigin(implicitly[ToNode[T]].apply(t)) }
-      implicit def samplingToOrigin(implicit scope: DefinitionScope) = ToOrigin[Sampling] { s ⇒ taskToOrigin(ExplorationTask(s)) }
+      implicit def samplingToOrigin[T: IsSampling](implicit scope: DefinitionScope) = ToOrigin[T] { s ⇒ taskToOrigin(ExplorationTask(s)) }
     }
 
     trait ToOrigin[-T] {
@@ -559,13 +561,15 @@ package composition {
     }
 
     object ToDestination {
+      import org.openmole.core.workflow.sampling.IsSampling
+
       def apply[T](f: T ⇒ TransitionDestination) = new ToDestination[T] {
         def apply(t: T) = f(t)
       }
 
       implicit def taskToDestination = ToDestination[Task] { t ⇒ TaskDestination(TaskNode(t)) }
       implicit def taskNodeToDestination[T: ToNode] = ToDestination[T] { t ⇒ TaskDestination(implicitly[ToNode[T]].apply(t)) }
-      implicit def samplingToDestination(implicit scope: DefinitionScope) = ToDestination[Sampling] { s ⇒ taskToDestination(ExplorationTask(s)) }
+      implicit def samplingToDestination[T: IsSampling](implicit scope: DefinitionScope) = ToDestination[T] { s ⇒ taskToDestination(ExplorationTask(s)) }
       implicit def transitionDSLToDestination = ToDestination[DSL] { TransitionDSLDestination(_) }
     }
 

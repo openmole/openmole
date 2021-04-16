@@ -31,7 +31,7 @@ object FromContextSampling {
 case class FromContextSampling(samples: FromContext.Parameters ⇒ Iterator[Iterable[Variable[_]]], i: PrototypeSet, o: Iterable[Val[_]], v: Validate) {
 
   def prototypes(f: Iterable[Val[_]]) = outputs(f)
-  def outputs(f: Iterable[Val[_]]) = copy(o = o)
+  def outputs(f: Iterable[Val[_]]) = copy(o = o ++ f)
   def inputs(i: Iterable[Val[_]]) = copy(i = i)
 
   def validate(validate: Validate) = copy(v = v ++ validate)

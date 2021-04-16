@@ -75,7 +75,7 @@ class MasterCapsuleSpec extends FlatSpec with Matchers {
     val i = Val[Int]("i")
     val archive = Val[Array[Int]]("archive")
 
-    val sampling = new ExplicitSampling(i, 0 until 10)
+    val sampling = ExplicitSampling(i, 0 until 10)
 
     val exploration = ExplorationTask(sampling)
 

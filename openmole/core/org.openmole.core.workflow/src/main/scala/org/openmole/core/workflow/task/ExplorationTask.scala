@@ -74,10 +74,10 @@ object ExplorationTask {
             case e: ArrayStoreException ⇒ throw new UserBadDataError("Cannot fill factor values in " + k.toArray + ", values " + v)
           }
       }: Context
-    } withValidate { sampling.validate(s) } set (
+    } set (
       inputs += (sampling.inputs(s).toSeq: _*),
       exploredOutputs += (sampling.outputs(s).toSeq.map(_.toArray): _*)
-    )
+    ) withValidate { sampling.validate(s) }
 
   /**
    * Given a [[MoleCapsule]], function to test if a given prototype is explored by it

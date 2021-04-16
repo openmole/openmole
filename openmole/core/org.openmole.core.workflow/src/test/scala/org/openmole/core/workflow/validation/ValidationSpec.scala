@@ -220,7 +220,7 @@ class ValidationSpec extends FlatSpec with Matchers {
   "Validation" should "detect a data channel error when a data channel is going from a level to a lower level" in {
     val i = Val[String]
 
-    val exc = ExplorationTask(new EmptySampling)
+    val exc = ExplorationTask(EmptySampling())
 
     val testT = EmptyTask() set (outputs += i)
     val noOP = EmptyTask()
@@ -239,7 +239,7 @@ class ValidationSpec extends FlatSpec with Matchers {
     val t1 = EmptyTask() set (outputs += j)
 
     val exploration =
-      ExplorationTask(new EmptySampling) set (
+      ExplorationTask(EmptySampling()) set (
         (inputs, outputs) += j.toArray,
         j.toArray := Array.empty[Int]
       )
