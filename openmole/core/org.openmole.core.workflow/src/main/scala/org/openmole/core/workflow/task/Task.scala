@@ -263,7 +263,7 @@ trait Task <: Name with Id {
   def name = info.name
 
   /**
-   * Make sure 2 tasks with the same content are not equal in the java sense:
+   * Make sure tasks with the same content are not equal in the java sense:
    * as Task inherits of the trait Id, hashconsing is done through this id, and creating a unique object here will ensure unicity of tasks
    * (this trick allows to still benefit of the power of case classes while staying in a standard object oriented scheme)
    */

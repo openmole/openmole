@@ -69,12 +69,11 @@ package object directsampling {
   ) = {
     implicit def defScope = scope
 
-    val sampling: Sampling =
+    val exploration =
       index.option match {
-        case None        ⇒ seed in TakeDomain(UniformDistribution[T](distributionSeed), sample)
-        case Some(index) ⇒ (seed in TakeDomain(UniformDistribution[T](distributionSeed), sample)) withIndex index
+        case None        ⇒ ExplorationTask(seed in TakeDomain(UniformDistribution[T](distributionSeed), sample))
+        case Some(index) ⇒ ExplorationTask((seed in TakeDomain(UniformDistribution[T](distributionSeed), sample)) withIndex index)
       }
-    val exploration = ExplorationTask(sampling)
 
     val aggregateTask: OptionalArgument[DSL] =
       aggregation match {

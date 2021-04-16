@@ -182,6 +182,12 @@ See the following for a use example of these samplings:
 
   // Create a new sampling containing only the lines of s1 for which the given predicate is true
   val s5 = (s1 x s2) filter ("p1 + p2 < 100")
+
+  // Create a sampling dropping 2 values in s5 and then taking the next 10 values
+  val s6 = s5 drop 2 take 10
+
+  // Create a sampling containing the 4th subset of size 10 in s5, i.e. the values with indexes 40 to 49
+  val s7 = s5 subset (4, size = 10)
 """, name = "sampling modifiers")
 
 
@@ -205,15 +211,16 @@ val p2 = Val[Int]
 val s1 = p1 in (0 to 100) // Code to build sampling 1
 val s2 = p2 in (0 to 100) // Code to build sampling 2
 
-// Create a sampling containing the values of s1 in a random order
-val s6 = s1.shuffle
+// Create a sampling containing the values of (s1 x s2) in a random order
+val s3 = (s1 x s2).shuffle
+
+// Create a sampling containing 10 values drawn at random in (s1 x s2)
+val s3 = (s1 x s2).sample(10)
 
 // Replicate 100 times the sampling s1 and provide seed for each experiment
 val seed = Val[Int]
-val s7 = s1 x (seed in (UniformDistribution[Int]() take 100))
+val s5 = s1 x (seed in (UniformDistribution[Int]() take 100))
 """, name = "random sampling")
-
-
 
 @h2{Higher level samplings}
 
