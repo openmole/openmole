@@ -38,6 +38,7 @@ import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.tools.OptionalArgument
 import org.openmole.plugin.method.evolution.Genome.{ GenomeBound, Suggestion }
 import org.openmole.plugin.method.evolution.Objective.{ ToExactObjective, ToNoisyObjective }
+import org.openmole.plugin.method.evolution.data._
 import org.openmole.tool.types.ToDouble
 import squants.time.Time
 
@@ -210,7 +211,8 @@ object PSE {
     phenotypeContent:    PhenotypeContent,
     objectives:          Seq[ExactObjective[_]],
     operatorExploration: Double,
-    reject:              Option[Condition]
+    reject:              Option[Condition],
+    grid:                Seq[PatternAxe]
   )
 
   object DeterministicParams {
@@ -228,6 +230,15 @@ object PSE {
       def sManifest = implicitly
 
       def operations(om: DeterministicParams) = new Ops {
+        override def metadata(generation: Long, saveOption: SaveOption): EvolutionMetadata =
+          EvolutionMetadata.PSE(
+            genome = MetadataGeneration.genomeData(om.genome),
+            objective = om.objectives.map(MetadataGeneration.exactObjectiveData),
+            grid = om.grid.map(MetadataGeneration.gridAxe),
+            generation = generation,
+            saveOption = saveOption
+          )
+
         def startTimeLens = GenLens[S](_.startTime)
         def generationLens = GenLens[S](_.generation)
 
@@ -300,7 +311,8 @@ object PSE {
     historySize:         Int,
     cloneProbability:    Double,
     operatorExploration: Double,
-    reject:              Option[Condition])
+    reject:              Option[Condition],
+    grid:                Seq[PatternAxe])
 
   object StochasticParams {
 
@@ -317,6 +329,16 @@ object PSE {
       def sManifest = implicitly
 
       def operations(om: StochasticParams) = new Ops {
+        override def metadata(generation: Long, saveOption: SaveOption) =
+          EvolutionMetadata.StochasticPSE(
+            genome = MetadataGeneration.genomeData(om.genome),
+            objective = om.objectives.map(MetadataGeneration.noisyObjectiveData),
+            sample = om.historySize,
+            grid = om.grid.map(MetadataGeneration.gridAxe),
+            generation = generation,
+            saveOption = saveOption
+          )
+
         def startTimeLens = GenLens[S](_.startTime)
         def generationLens = GenLens[S](_.generation)
 
@@ -427,7 +449,8 @@ object PSE {
             phenotypeContent,
             exactObjectives,
             EvolutionWorkflow.operatorExploration,
-            reject = reject.option),
+            reject = reject.option,
+            grid = objective),
           genome,
           phenotypeContent,
           validate = Objectives.validate(exactObjectives, outputs)
@@ -450,7 +473,8 @@ object PSE {
             historySize = stochasticValue.sample,
             cloneProbability = stochasticValue.reevaluate,
             operatorExploration = EvolutionWorkflow.operatorExploration,
-            reject = reject.option),
+            reject = reject.option,
+            grid = objective),
           genome,
           phenotypeContent,
           stochasticValue,

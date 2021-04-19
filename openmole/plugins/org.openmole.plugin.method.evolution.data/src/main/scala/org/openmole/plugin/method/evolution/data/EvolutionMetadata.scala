@@ -38,6 +38,26 @@ object EvolutionMetadata {
   def method = "evolution"
   case object none extends EvolutionMetadata
 
+  object PSE {
+    type Grid = Seq[PSE.GridAxe]
+    case class GridAxe(objective: String, grid: Seq[Double])
+  }
+
+  case class PSE(
+    genome:     Seq[GenomeBoundData],
+    objective:  Seq[ExactObjective],
+    grid:       PSE.Grid,
+    generation: Long,
+    saveOption: SaveOption) extends EvolutionMetadata
+
+  case class StochasticPSE(
+    genome:     Seq[GenomeBoundData],
+    objective:  Seq[NoisyObjective],
+    grid:       PSE.Grid,
+    sample:     Int,
+    generation: Long,
+    saveOption: SaveOption) extends EvolutionMetadata
+
   case class NSGA2(
     genome:         Seq[GenomeBoundData],
     objective:      Seq[ExactObjective],
