@@ -27,33 +27,59 @@ import org.openmole.plugin.domain.distribution._
 import org.openmole.plugin.domain.modifier._
 import org.openmole.plugin.tool.pattern._
 import org.openmole.plugin.hook.file._
+import org.openmole.plugin.hook.omr._
 
 package object directsampling {
 
-  class DirectSampling
-  case class Replication(seed: Val[_])
+  object DirectSamplingMetadata {
+    def method = "direct sampling"
+
+    import io.circe._
+    import io.circe.generic.extras.auto._
+    import io.circe.parser._
+    import io.circe.generic.extras.semiauto._
+    import org.openmole.plugin.hook.omr._
+
+    implicit def methodData = MethodData[DirectSamplingMetadata](_ ⇒ DirectSamplingMetadata.method)
+    implicit def metadataEncoder: Encoder[DirectSamplingMetadata] = deriveConfiguredEncoder[DirectSamplingMetadata]
+    implicit def metadataDecoder: Decoder[DirectSamplingMetadata] = deriveConfiguredDecoder[DirectSamplingMetadata]
+
+    case class DirectSampling(sampled: Seq[String], aggregation: Seq[Aggregation]) extends DirectSamplingMetadata
+    case class Replication(seed: String, sample: Int, aggregation: Seq[Aggregation]) extends DirectSamplingMetadata
+
+    def aggregation(ag: directsampling.Aggregation) = Aggregation(ag.value.name, ag.outputVal.name)
+
+    case class Aggregation(output: String, aggregated: String)
+  }
+
+  sealed trait DirectSamplingMetadata
+
+  case class DirectSamplingMethod(sampled: Seq[Val[_]], aggregation: Seq[Aggregation])
+  case class ReplicationMethod(seed: Val[_], sample: Int, aggregation: Seq[Aggregation])
 
   type Aggregation = AggregateTask.AggregateVal[_, _]
 
-  implicit class DirectSamplingDSL(dsl: DSLContainer[DirectSampling]) extends DSLContainerHook(dsl) {
+  implicit class DirectSamplingDSL(dsl: DSLContainer[DirectSamplingMethod]) extends DSLContainerHook(dsl) {
     def hook[T](
       output: WritableOutput,
       values: Seq[Val[_]]    = Vector.empty,
-      format: T              = CSVOutputFormat(append = true))(implicit outputFormat: OutputFormat[T, DirectSampling]): DSLContainer[DirectSampling] = {
+      format: T              = CSVOutputFormat(append = true))(implicit outputFormat: OutputFormat[T, DirectSamplingMetadata]): DSLContainer[DirectSamplingMethod] = {
       implicit val defScope = dsl.scope
-      dsl hook FormattedFileHook(output = output, values = values, format = format, method = dsl.data)
+      val metadata = DirectSamplingMetadata.DirectSampling(dsl.method.sampled.map(_.name), dsl.method.aggregation.map(DirectSamplingMetadata.aggregation))
+      dsl hook FormattedFileHook(output = output, values = values, format = format, metadata = metadata)
     }
   }
 
-  implicit class ReplicationDSL(dsl: DSLContainer[Replication]) extends DSLContainerHook(dsl) {
+  implicit class ReplicationDSL(dsl: DSLContainer[ReplicationMethod]) extends DSLContainerHook(dsl) {
     def hook[T](
       output:      WritableOutput,
       values:      Seq[Val[_]]    = Vector.empty,
       includeSeed: Boolean        = false,
-      format:      T              = CSVOutputFormat(append = true))(implicit outputFormat: OutputFormat[T, Replication]): DSLContainer[Replication] = {
+      format:      T              = CSVOutputFormat(append = true))(implicit outputFormat: OutputFormat[T, DirectSamplingMetadata]): DSLContainer[ReplicationMethod] = {
       implicit val defScope = dsl.scope
-      val exclude = if (!includeSeed) Seq(dsl.data.seed) else Seq()
-      dsl hook FormattedFileHook(output = output, values = values, exclude = exclude, format = format, method = dsl.data)
+      val exclude = if (!includeSeed) Seq(dsl.method.seed) else Seq()
+      val metadata = DirectSamplingMetadata.Replication(seed = dsl.method.seed.name, dsl.method.sample, dsl.method.aggregation.map(DirectSamplingMetadata.aggregation))
+      dsl hook FormattedFileHook(output = output, values = values, exclude = exclude, format = format, metadata = metadata)
     }
   }
 
@@ -89,17 +115,25 @@ package object directsampling {
         wrap = wrap
       )
 
-    DSLContainerExtension[Replication](s, new Replication(seed))
+    DSLContainerExtension(
+      s,
+      method =
+        ReplicationMethod(
+          seed = seed,
+          sample = sample,
+          aggregation = aggregation
+        )
+    )
   }
 
-  def DirectSampling[S: IsSampling](
+  def DirectSampling[S](
     evaluation:  DSL,
     sampling:    S,
     aggregation: Seq[Aggregation] = Seq(),
     condition:   Condition        = Condition.True,
     wrap:        Boolean          = false,
     scope:       DefinitionScope  = "direct sampling"
-  ) = {
+  )(implicit isSampling: IsSampling[S]) = {
     implicit def defScope = scope
 
     val exploration = ExplorationTask(sampling)
@@ -119,7 +153,15 @@ package object directsampling {
         wrap = wrap
       )
 
-    DSLContainerExtension[DirectSampling](s, new DirectSampling)
+    DSLContainerExtension(
+      s,
+      method =
+        DirectSamplingMethod(
+          sampled = isSampling.outputs(sampling).toSeq,
+          aggregation = aggregation
+        )
+    )
+
   }
 
 }

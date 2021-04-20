@@ -332,7 +332,7 @@ package composition {
     grouping:    Option[Grouping]            = None,
     hooks:       Vector[Hook]                = Vector.empty,
     validate:    Validate                    = Validate.success,
-    data:        T,
+    method:      T,
     scope:       DefinitionScope) extends DSL {
     def on(environment: EnvironmentProvider) = copy(environment = Some(environment))
     def by(strategy: Grouping) = copy(grouping = Some(strategy))
@@ -376,7 +376,7 @@ package composition {
 
     def DSLContainerExtension[T](
       dsl:         DSLContainer[_],
-      data:        T,
+      method:      T,
       output:      Option[Task]                = None,
       delegate:    Vector[Task]                = Vector.empty,
       environment: Option[EnvironmentProvider] = None,
@@ -391,7 +391,7 @@ package composition {
         grouping orElse dsl.grouping,
         hooks ++ dsl.hooks,
         validate,
-        data,
+        method,
         definitionScope)
 
     type DSLContainer[T] = composition.DSLContainer[T]

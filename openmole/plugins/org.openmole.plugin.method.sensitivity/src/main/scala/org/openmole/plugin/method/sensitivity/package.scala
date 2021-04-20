@@ -131,7 +131,7 @@ package object sensitivity {
         aggregation = aggregation
       )
 
-    DSLContainerExtension(w, data = Sensitivity.MorrisParams(inputs, outputs))
+    DSLContainerExtension(w, method = Sensitivity.MorrisParams(inputs, outputs))
   }
 
   /**
@@ -170,7 +170,7 @@ package object sensitivity {
         aggregation = aggregation
       )
 
-    DSLContainerExtension(w, data = Sensitivity.SaltelliParams(inputs, outputs))
+    DSLContainerExtension(w, method = Sensitivity.SaltelliParams(inputs, outputs))
   }
 
 }

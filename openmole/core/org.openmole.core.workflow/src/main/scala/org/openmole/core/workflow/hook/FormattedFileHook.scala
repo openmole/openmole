@@ -10,12 +10,12 @@ import org.openmole.core.workflow.format._
 object FormattedFileHook {
 
   def apply[T, M](
-    format:  T,
-    output:  WritableOutput,
-    values:  Seq[Val[_]]    = Vector.empty,
-    exclude: Seq[Val[_]]    = Vector.empty,
-    method:  M              = None,
-    name:    Option[String] = None)(implicit valName: sourcecode.Name, definitionScope: DefinitionScope, fileFormat: OutputFormat[T, M]): FromContextHook =
+    format:   T,
+    output:   WritableOutput,
+    values:   Seq[Val[_]]    = Vector.empty,
+    exclude:  Seq[Val[_]]    = Vector.empty,
+    metadata: M              = None,
+    name:     Option[String] = None)(implicit valName: sourcecode.Name, definitionScope: DefinitionScope, fileFormat: OutputFormat[T, M]): FromContextHook =
 
     Hook(name getOrElse "FileFormatHook") { parameters ⇒
       import parameters._
@@ -24,7 +24,7 @@ object FormattedFileHook {
       val ps = { if (values.isEmpty) context.variables.values.map { _.prototype }.toVector else values }.filter { v ⇒ !excludeSet.contains(v.name) }
       val variables = ps.map(p ⇒ context.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p not found in hook $this")))
 
-      fileFormat.write(executionContext)(format, output, variables, method).from(context)
+      fileFormat.write(executionContext)(format, output, variables, metadata).from(context)
 
       context
     } withValidate { WritableOutput.file(output).toSeq.flatMap(_.validate) ++ fileFormat.validate(format) } set (inputs += (values: _*))

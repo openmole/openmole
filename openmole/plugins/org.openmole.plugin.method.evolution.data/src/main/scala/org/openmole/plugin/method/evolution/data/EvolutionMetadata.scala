@@ -6,6 +6,16 @@ case class SaveOption(
 
 object EvolutionMetadata {
 
+  import io.circe._
+  import io.circe.generic.extras.auto._
+  import io.circe.parser._
+  import io.circe.generic.extras.semiauto._
+  import org.openmole.plugin.hook.omr._
+
+  implicit def methodData = MethodData[EvolutionMetadata](_ ⇒ EvolutionMetadata.method)
+  implicit def evolutionMetadataEncoder: Encoder[EvolutionMetadata] = deriveConfiguredEncoder[EvolutionMetadata]
+  implicit def evolutionMetadataDecoder: Decoder[EvolutionMetadata] = deriveConfiguredDecoder[EvolutionMetadata]
+
   object GenomeBoundData {
     case class DoubleBound(name: String, low: Double, high: Double) extends GenomeBoundData
     case class IntBound(name: String, low: Int, high: Int) extends GenomeBoundData

@@ -11,17 +11,17 @@ object SaltelliHook {
       import p._
       import WritableOutput._
 
-      val inputs = ScalarOrSequenceOfDouble.prototypes(dsl.data.inputs)
+      val inputs = ScalarOrSequenceOfDouble.prototypes(dsl.method.inputs)
 
       import OutputFormat._
 
       def sections =
         Seq(
-          OutputSection("firstOrderIndices", Sensitivity.variableResults(inputs, dsl.data.outputs, Saltelli.firstOrder(_, _)).from(context)),
-          OutputSection("totalOrderIndices", Sensitivity.variableResults(inputs, dsl.data.outputs, Saltelli.totalOrder(_, _)).from(context))
+          OutputSection("firstOrderIndices", Sensitivity.variableResults(inputs, dsl.method.outputs, Saltelli.firstOrder(_, _)).from(context)),
+          OutputSection("totalOrderIndices", Sensitivity.variableResults(inputs, dsl.method.outputs, Saltelli.totalOrder(_, _)).from(context))
         )
 
-      outputFormat.write(executionContext)(format, output, sections, dsl.data).from(context)
+      outputFormat.write(executionContext)(format, output, sections, dsl.method).from(context)
 
       context
     }

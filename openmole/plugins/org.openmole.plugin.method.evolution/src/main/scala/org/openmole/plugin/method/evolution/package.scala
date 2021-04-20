@@ -23,7 +23,6 @@ import org.openmole.core.workflow.builder._
 import monocle.macros._
 import org.openmole.core.workflow.format.WritableOutput
 import org.openmole.plugin.hook.omr.MethodData
-import org.openmole.plugin.method.evolution.Objective.ToObjective
 import org.openmole.plugin.method.evolution.data.EvolutionMetadata
 import org.openmole.plugin.task.tools._
 import org.openmole.plugin.tool.pattern
@@ -37,11 +36,6 @@ package object evolution {
   import io.circe.parser._
   import io.circe.generic.extras.semiauto._
   import io.circe.generic.extras.Configuration
-
-  implicit def methodData = MethodData[EvolutionMetadata](_ ⇒ EvolutionMetadata.method)
-  implicit def genDevConfig: Configuration = Configuration.default.withDiscriminator("implementation").withKebabCaseMemberNames
-  implicit def evolutionMetadataEncoder: Encoder[EvolutionMetadata] = deriveConfiguredEncoder[EvolutionMetadata]
-  implicit def evolutionMetadataDecoder: Decoder[EvolutionMetadata] = deriveConfiguredDecoder[EvolutionMetadata]
 
   type Objectives = Seq[Objective[_]]
   type Genome = Seq[Genome.GenomeBound]
@@ -111,7 +105,7 @@ package object evolution {
   implicit class EvolutionMethodContainer(dsl: DSLContainer[EvolutionWorkflow]) extends DSLContainerHook(dsl) {
     def hook[F](output: WritableOutput, frequency: OptionalArgument[Long] = None, last: Boolean = false, keepAll: Boolean = false, includeOutputs: Boolean = false, format: F = CSVOutputFormat(unrollArray = true))(implicit outputFormat: OutputFormat[F, EvolutionMetadata]): DSLContainer[EvolutionWorkflow] = {
       implicit val defScope = dsl.scope
-      dsl.hook(SavePopulationHook(dsl.data, output, frequency = frequency, last = last, keepAll = keepAll, includeOutputs = includeOutputs, format = format))
+      dsl.hook(SavePopulationHook(dsl.method, output, frequency = frequency, last = last, keepAll = keepAll, includeOutputs = includeOutputs, format = format))
     }
   }
 
@@ -173,7 +167,7 @@ package object evolution {
       DSLContainer(puzzle),
       output = Some(masterTask),
       delegate = wrapped.delegate,
-      data = evolution,
+      method = evolution,
       validate = evolution.validate)
   }
 
@@ -187,7 +181,7 @@ package object evolution {
 
     implicit def defScope = scope
 
-    val t = island.data
+    val t = island.method
 
     val islandPopulationPrototype = t.populationPrototype.withName("islandPopulation")
 
@@ -248,7 +242,7 @@ package object evolution {
       DSLContainer(puzzle),
       output = Some(masterTask),
       delegate = Vector(islandTask),
-      data = t)
+      method = t)
   }
 
 }

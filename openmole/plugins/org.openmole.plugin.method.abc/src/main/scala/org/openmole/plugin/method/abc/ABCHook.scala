@@ -10,11 +10,11 @@ object ABCHook {
     Hook("ABCHook") { p ⇒
       import p._
 
-      if (context(abc.data.step) % frequency == 0) {
-        context(abc.data.state) match {
+      if (context(abc.method.step) % frequency == 0) {
+        context(abc.method.state) match {
           case MonAPMC.Empty() ⇒ ()
           case MonAPMC.State(_, s) ⇒
-            val step = context(abc.data.step)
+            val step = context(abc.method.step)
 
             val filePath = dir / s"step${step}.csv"
             val file = filePath.from(context)
@@ -22,7 +22,7 @@ object ABCHook {
             val size = s.thetas.size
             val dim = s.thetas(0).size
 
-            val paramNames = abc.data.prior.v.map { _.name }
+            val paramNames = abc.method.prior.v.map { _.name }
 
             val header =
               (Vector("epsilon,pAcc,t,ts,rhos,weight") ++
