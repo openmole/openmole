@@ -2,10 +2,10 @@
 package org.openmole.plugin.method.directsampling
 
 import java.util.concurrent.atomic.AtomicInteger
-
 import org.openmole.core.dsl._
 import org.openmole.core.workflow.sampling.ExplicitSampling
 import org.openmole.core.context.Variable
+import org.openmole.core.workflow.mole.MoleCapsule
 import org.openmole.core.workflow.test.TestHook
 import org.openmole.plugin.tool.pattern._
 import org.scalatest._
@@ -42,7 +42,7 @@ class DirectSamplingSpec extends FlatSpec with Matchers {
       ) hook display by 10
   }
 
-  "Direct sampling" should "transmit explored inputs to repicated model" in {
+  "Direct sampling" should "transmit explored inputs to replicated model" in {
     val i = Val[Int]
     val seed = Val[Int]
 
@@ -64,6 +64,39 @@ class DirectSamplingSpec extends FlatSpec with Matchers {
         replication,
         ExplicitSampling(i, Seq(1))
       )
+
+    mole.run
+  }
+
+  "Direct sampling" should "transmit explored inputs to replicated model even wrapped in a task" in {
+    val i = Val[Int]
+    val j = Val[Int]
+    val seed = Val[Int]
+
+    val model =
+      TestTask { context ⇒
+        context(i) should equal(1)
+        context + (j -> 9)
+      } set (inputs += (i, seed), outputs += j)
+
+    val replication =
+      MoleTask(
+        Replication(
+          model,
+          seed,
+          1,
+          aggregation = Seq(j)
+        )
+      )
+
+    val mole =
+      DirectSampling(
+        replication,
+        ExplicitSampling(i, Seq(1))
+      )
+
+    val m: org.openmole.core.workflow.mole.MoleExecution = mole
+    println(m.mole.capsules.map(c ⇒ c -> MoleCapsule.received(c, m.mole, m.sources, m.hooks)))
 
     mole.run
   }

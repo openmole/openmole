@@ -669,9 +669,7 @@ package composition {
     }
 
     object Strain {
-
       def apply(task: Task) = TaskNode(task, strain = true)
-
       def apply(task: TaskNode) = task.copy(strain = true)
 
       def apply(dsl: DSL)(implicit scope: DefinitionScope = "strain"): DSL = {

@@ -31,7 +31,8 @@ object MoleCapsule {
 
   case class Master(persist: Seq[String])
 
-  def apply(task: Task, strain: Boolean = false, funnel: Boolean = false, master: Option[Master] = None) = new MoleCapsule(task, strain = strain, funnel = funnel, master = master)
+  def apply(task: Task, strain: Boolean = false, funnel: Boolean = false, master: Option[Master] = None) =
+    new MoleCapsule(task, strain = strain, funnel = funnel || MoleTask.isMoleTask(task), master = master)
 
   def isStrainer(c: MoleCapsule) = c.strain
 
@@ -69,6 +70,36 @@ object MoleCapsule {
     reachRoot
   }
 
+  def received(capsule: MoleCapsule, mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
+    if (capsule == mole.root) mole.inputs
+    else {
+      val slots = mole.slots(capsule)
+      val noStrainer = slots.toSeq.filter(s ⇒ MoleCapsule.reachRootWithNoLoop(mole)(s))
+
+      val bySlot =
+        for {
+          slot ← noStrainer
+          received = TypeUtil.validTypes(mole, sources, hooks)(slot)
+        } yield received.map(_.toPrototype)
+
+      val allNames = bySlot.toSeq.flatMap(_.map(_.name)).distinct
+      val byName = bySlot.map(_.toSeq.groupBy(_.name).withDefaultValue(Seq.empty))
+
+      def haveAllTheSameType(ps: Seq[Val[_]]) = ps.map(_.`type`).distinct.size == 1
+      def inAllSlots(ps: Seq[Val[_]]) = ps.size == noStrainer.size
+
+      val prototypes =
+        for {
+          name ← allNames
+          inSlots = byName.map(_(name).toSeq).toSeq
+          if inSlots.forall(haveAllTheSameType)
+          oneBySlot = inSlots.map(_.head)
+          if inAllSlots(oneBySlot) && haveAllTheSameType(oneBySlot)
+        } yield oneBySlot.head
+
+      prototypes
+    }
+
 }
 
 /**
@@ -97,8 +128,10 @@ class MoleCapsule(val _task: Task, val strain: Boolean, val funnel: Boolean, val
    *
    * @return the input of the capsule
    */
-  def inputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
-    strainerInputs(mole, sources, hooks) ++ capsuleInputs(mole, sources, hooks)
+  def inputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet = {
+    if (strain || funnel) receivedInputs(mole, sources, hooks) ++ capsuleInputs(mole, sources, hooks)
+    else capsuleInputs(mole, sources, hooks)
+  }
 
   /**
    * Get the outputs data taken by this capsule, generally it is empty if the capsule
@@ -108,7 +141,8 @@ class MoleCapsule(val _task: Task, val strain: Boolean, val funnel: Boolean, val
    * @return the output of the capsule
    */
   def outputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
-    strainerOutputs(mole, sources, hooks) + capsuleOutputs(mole, sources, hooks)
+    if (strain) strainedOutputs(mole, sources, hooks) ++ capsuleOutputs(mole, sources, hooks)
+    else capsuleOutputs(mole, sources, hooks)
 
   def capsuleInputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
     _task.inputs -- sources(this).flatMap(_.outputs) -- sources(this).flatMap(_.inputs) ++ sources(this).flatMap(_.inputs)
@@ -116,49 +150,15 @@ class MoleCapsule(val _task: Task, val strain: Boolean, val funnel: Boolean, val
   def capsuleOutputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
     _task.outputs -- hooks(this).flatMap(_.outputs) ++ hooks(this).flatMap(_.outputs)
 
-  def strainerInputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
-    if (strain || funnel) {
-      lazy val capsInputs = capsuleInputs(mole, sources, hooks)
-      received(mole, sources, hooks).filterNot(d ⇒ capsInputs.contains(d.name))
-    }
-    else PrototypeSet.empty
+  private def receivedInputs(mole: Mole, sources: Sources, hooks: Hooks) = {
+    lazy val capsInputs = capsuleInputs(mole, sources, hooks)
+    MoleCapsule.received(this, mole, sources, hooks).filterNot(d ⇒ capsInputs.contains(d.name))
+  }
 
-  def strainerOutputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
-    if (strain) {
-      lazy val capsOutputs = capsuleOutputs(mole, sources, hooks)
-      received(mole, sources, hooks).filterNot(d ⇒ capsOutputs.contains(d.name))
-    }
-    else PrototypeSet.empty
-
-  private def received(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
-    if (this == mole.root) mole.inputs
-    else {
-      val slots = mole.slots(this)
-      val noStrainer = slots.toSeq.filter(s ⇒ MoleCapsule.reachRootWithNoLoop(mole)(s))
-
-      val bySlot =
-        for {
-          slot ← noStrainer
-          received = TypeUtil.validTypes(mole, sources, hooks)(slot)
-        } yield received.map(_.toPrototype)
-
-      val allNames = bySlot.toSeq.flatMap(_.map(_.name)).distinct
-      val byName = bySlot.map(_.toSeq.groupBy(_.name).withDefaultValue(Seq.empty))
-
-      def haveAllTheSameType(ps: Seq[Val[_]]) = ps.map(_.`type`).distinct.size == 1
-      def inAllSlots(ps: Seq[Val[_]]) = ps.size == noStrainer.size
-
-      val prototypes =
-        for {
-          name ← allNames
-          inSlots = byName.map(_(name).toSeq).toSeq
-          if inSlots.forall(haveAllTheSameType)
-          oneBySlot = inSlots.map(_.head)
-          if inAllSlots(oneBySlot) && haveAllTheSameType(oneBySlot)
-        } yield oneBySlot.head
-
-      prototypes
-    }
+  private def strainedOutputs(mole: Mole, sources: Sources, hooks: Hooks) = {
+    lazy val capsOutputs = capsuleOutputs(mole, sources, hooks)
+    MoleCapsule.received(this, mole, sources, hooks).filterNot(d ⇒ capsOutputs.contains(d.name))
+  }
 
   override def toString =
     (if (!strain) "capsule" else "strainerCapsule") + s"@$hashCode:${_task}"

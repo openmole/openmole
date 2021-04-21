@@ -20,8 +20,8 @@ package org.openmole.core.context
 import scala.collection.immutable.TreeMap
 
 object PrototypeSet {
-  implicit def traversableToProtoypeSet(ps: Traversable[Val[_]]) = PrototypeSet(ps.toSeq)
-  val empty = PrototypeSet(Seq.empty)
+  implicit def traversableToProtoypeSet(ps: Iterable[Val[_]]) = PrototypeSet(ps.toSeq)
+  val empty = PrototypeSet(Vector.empty)
 
   def apply(prototypes: Seq[Val[_]], explore: Set[String] = Set.empty) = new PrototypeSet(prototypes.distinct, explore)
   def copy(prototypeSet: PrototypeSet)(prototypes: Seq[Val[_]] = prototypeSet.prototypes, explore: Set[String] = prototypeSet.explore) = apply(prototypes, explore)
@@ -81,21 +81,21 @@ class PrototypeSet(val prototypes: Seq[Val[_]], val explore: Set[String] = Set.e
    * @param d
    * @return
    */
-  def ++(d: Traversable[Val[_]]) = PrototypeSet.copy(this)(prototypes = d.toList ::: prototypes.toList)
+  def ++(d: Iterable[Val[_]]) = PrototypeSet.copy(this)(prototypes = prototypes ++ d)
 
   /**
    * Prepend a PrototypeSet
    * @param set
    * @return
    */
-  def +(set: PrototypeSet): PrototypeSet = PrototypeSet.copy(this)(prototypes = set.prototypes.toList ::: prototypes.toList)
+  def +(set: PrototypeSet): PrototypeSet = PrototypeSet.copy(this)(prototypes = prototypes ++ set.prototypes)
 
   /**
    * Prepend a prototype
    * @param d
    * @return
    */
-  def +(d: Val[_]) = PrototypeSet.copy(this)(prototypes = d :: prototypes.toList)
+  def +(d: Val[_]) = PrototypeSet.copy(this)(prototypes = prototypes ++ Seq(d))
 
   /**
    * Remove a prototype
@@ -109,7 +109,7 @@ class PrototypeSet(val prototypes: Seq[Val[_]], val explore: Set[String] = Set.e
    * @param d
    * @return
    */
-  def --(d: Traversable[Val[_]]) = {
+  def --(d: Iterable[Val[_]]) = {
     val dset = d.map(_.name).toSet
     PrototypeSet.copy(this)(prototypes = prototypes.filter(p ⇒ !dset.contains(p.name)).toList)
   }
