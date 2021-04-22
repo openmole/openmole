@@ -157,9 +157,6 @@ object NoisyObjective {
     import p._
 
     (v: Vector[Phenotype]) ⇒
-
-      Phenotype.toContext(phenotypeContent, p)
-
       for {
         (vs, obj) ← v.map(p ⇒ Phenotype.objectives(phenotypeContent, p)).transpose zip objectives
       } yield obj.aggregateAny(vs).from(context)
