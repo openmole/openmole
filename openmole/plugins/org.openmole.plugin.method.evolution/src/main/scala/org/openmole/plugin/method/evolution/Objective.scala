@@ -11,31 +11,11 @@ import scala.reflect.ClassTag
 object Objective {
 
   object ToExactObjective {
-    implicit def valIsToExact[T](implicit td: ToDouble[T]) =
-      new ToExactObjective[Val[T]] {
-        override def apply(v: Val[T]) = ExactObjective[T](v, _(v), td.apply, negative = false, delta = None, as = None)
-      }
-
-    implicit def negativeToExact[T](implicit exact: ToExactObjective[T]) =
-      new ToExactObjective[Negative[T]] {
-        override def apply(t: Negative[T]): ExactObjective[_] = exact.apply(t.value).copy(negative = true)
-      }
-
-    implicit def deltaIsToExact[T, V](implicit exact: ToExactObjective[T], td: ToDouble[V]) =
-      new ToExactObjective[Delta[T, V]] {
-        override def apply(t: Delta[T, V]): ExactObjective[_] = exact.apply(t.value).copy(delta = Some(td.apply(t.delta)))
-      }
-
-    implicit def asIsToExact[T](implicit exact: ToExactObjective[T]) =
-      new ToExactObjective[As[T, String]] {
-        override def apply(t: As[T, String]): ExactObjective[_] = exact.apply(t.value).copy(as = Some(t.as))
-      }
-
-    implicit def asValIsToExact[T, P](implicit exact: ToExactObjective[T]) =
-      new ToExactObjective[As[T, Val[P]]] {
-        override def apply(t: As[T, Val[P]]): ExactObjective[_] = exact.apply(t.value).copy(as = Some(t.as.name))
-      }
-
+    implicit def valIsToExact[T](implicit td: ToDouble[T]): ToExactObjective[Val[T]] = (v: Val[T]) ⇒ ExactObjective[T](v, _(v), td.apply, negative = false, delta = None, as = None)
+    implicit def negativeToExact[T](implicit exact: ToExactObjective[T]): ToExactObjective[Negative[T]] = (t: Negative[T]) ⇒ exact.apply(t.value).copy(negative = true)
+    implicit def deltaIsToExact[T, V](implicit exact: ToExactObjective[T], td: ToDouble[V]): ToExactObjective[Delta[T, V]] = (t: Delta[T, V]) ⇒ exact.apply(t.value).copy(delta = Some(td.apply(t.delta)))
+    implicit def asIsToExact[T](implicit exact: ToExactObjective[T]): ToExactObjective[As[T, String]] = (t: As[T, String]) ⇒ exact.apply(t.value).copy(as = Some(t.as))
+    implicit def asValIsToExact[T, P](implicit exact: ToExactObjective[T]): ToExactObjective[As[T, Val[P]]] = (t: As[T, Val[P]]) ⇒ exact.apply(t.value).copy(as = Some(t.as.name))
   }
 
   trait ToExactObjective[T] {
@@ -43,56 +23,25 @@ object Objective {
   }
 
   object ToNoisyObjective {
+    implicit def aggregateStringIsNoisy[T: ClassTag]: ToNoisyObjective[Aggregate[Val[T], String]] =
+      (t: Aggregate[Val[T], String]) ⇒ {
+        val fromContext: FromContext[Double] = t.aggregate
 
-    implicit def aggregateStringIsNoisy[T: ClassTag] =
-      new ToNoisyObjective[Aggregate[Val[T], String]] {
-        override def apply(t: Aggregate[Val[T], String]) = {
-          val fromContext: FromContext[Double] = t.aggregate
-
-          def aggregate = FromContext { p ⇒
-            import p._
-            (v: Array[T]) ⇒ fromContext.from(Context(t.value.toArray -> v))
-          }
-
-          NoisyObjective(t.value, _(t.value), aggregate, negative = false, delta = None, as = None, fromContext.validate)
+        def aggregate = FromContext { p ⇒
+          import p._
+          (v: Array[T]) ⇒ fromContext.from(Context(t.value.toArray -> v))
         }
+
+        NoisyObjective(t.value, _(t.value), aggregate, negative = false, delta = None, as = None, fromContext.validate)
       }
 
-    implicit def aggregateArrayIsToNoisy[T: ClassTag] =
-      new ToNoisyObjective[Aggregate[Val[T], Array[T] ⇒ Double]] {
-        override def apply(a: Aggregate[Val[T], Array[T] ⇒ Double]) = NoisyObjective(a.value, _(a.value), a.aggregate, negative = false, delta = None, as = None)
-      }
-
-    implicit def aggregateSeqIsToNoisy[T: ClassTag] =
-      new ToNoisyObjective[Aggregate[Val[T], Seq[T] ⇒ Double]] {
-        override def apply(a: Aggregate[Val[T], Seq[T] ⇒ Double]) = NoisyObjective(a.value, _(a.value), (v: Array[T]) ⇒ a.aggregate(v.toVector), negative = false, delta = None, as = None)
-      }
-
-    implicit def aggregateVectorIsToNoisy[T: ClassTag] =
-      new ToNoisyObjective[Aggregate[Val[T], Vector[T] ⇒ Double]] {
-        override def apply(a: Aggregate[Val[T], Vector[T] ⇒ Double]) = NoisyObjective(a.value, _(a.value), (v: Array[T]) ⇒ a.aggregate(v.toVector), negative = false, delta = None, as = None)
-      }
-
-    implicit def negativeIsToNoisy[T](implicit noisy: ToNoisyObjective[T]) =
-      new ToNoisyObjective[Negative[T]] {
-        override def apply(t: Negative[T]): NoisyObjective[_] = noisy.apply(t.value).copy(negative = true)
-      }
-
-    implicit def deltaIsToNoisy[T, V](implicit noisy: ToNoisyObjective[T], td: ToDouble[V]) =
-      new ToNoisyObjective[Delta[T, V]] {
-        override def apply(t: Delta[T, V]): NoisyObjective[_] = noisy.apply(t.value).copy(delta = Some(td.apply(t.delta)))
-      }
-
-    implicit def asStringIsToNoisy[T](implicit noisy: ToNoisyObjective[T]) =
-      new ToNoisyObjective[As[T, String]] {
-        override def apply(t: As[T, String]): NoisyObjective[_] = noisy.apply(t.value).copy(as = Some(t.as))
-      }
-
-    implicit def asValIsToNoisy[T, P](implicit noisy: ToNoisyObjective[T]) =
-      new ToNoisyObjective[As[T, Val[P]]] {
-        override def apply(t: As[T, Val[P]]): NoisyObjective[_] = noisy.apply(t.value).copy(as = Some(t.as.name))
-      }
-
+    implicit def aggregateArrayIsToNoisy[T: ClassTag]: ToNoisyObjective[Aggregate[Val[T], Array[T] ⇒ Double]] = (a: Aggregate[Val[T], Array[T] ⇒ Double]) ⇒ NoisyObjective(a.value, _(a.value), a.aggregate, negative = false, delta = None, as = None)
+    implicit def aggregateSeqIsToNoisy[T: ClassTag]: ToNoisyObjective[Aggregate[Val[T], Seq[T] ⇒ Double]] = (a: Aggregate[Val[T], Seq[T] ⇒ Double]) ⇒ NoisyObjective(a.value, _(a.value), (v: Array[T]) ⇒ a.aggregate(v.toVector), negative = false, delta = None, as = None)
+    implicit def aggregateVectorIsToNoisy[T: ClassTag]: ToNoisyObjective[Aggregate[Val[T], Vector[T] ⇒ Double]] = (a: Aggregate[Val[T], Vector[T] ⇒ Double]) ⇒ NoisyObjective(a.value, _(a.value), (v: Array[T]) ⇒ a.aggregate(v.toVector), negative = false, delta = None, as = None)
+    implicit def negativeIsToNoisy[T](implicit noisy: ToNoisyObjective[T]): ToNoisyObjective[Negative[T]] = (t: Negative[T]) ⇒ noisy.apply(t.value).copy(negative = true)
+    implicit def deltaIsToNoisy[T, V](implicit noisy: ToNoisyObjective[T], td: ToDouble[V]): ToNoisyObjective[Delta[T, V]] = (t: Delta[T, V]) ⇒ noisy.apply(t.value).copy(delta = Some(td.apply(t.delta)))
+    implicit def asStringIsToNoisy[T](implicit noisy: ToNoisyObjective[T]): ToNoisyObjective[As[T, String]] = (t: As[T, String]) ⇒ noisy.apply(t.value).copy(as = Some(t.as))
+    implicit def asValIsToNoisy[T, P](implicit noisy: ToNoisyObjective[T]): ToNoisyObjective[As[T, Val[P]]] = (t: As[T, Val[P]]) ⇒ noisy.apply(t.value).copy(as = Some(t.as.name))
   }
 
   trait ToNoisyObjective[T] {
@@ -100,18 +49,9 @@ object Objective {
   }
 
   object ToObjective {
-    implicit def toNoisyObjective[T: ToNoisyObjective]: ToObjective[T] = new ToObjective[T] {
-      def apply(t: T) = implicitly[ToNoisyObjective[T]].apply(t)
-    }
-
-    implicit def toExactObjective[T: ToExactObjective]: ToObjective[T] = new ToObjective[T] {
-      def apply(t: T) = implicitly[ToExactObjective[T]].apply(t)
-    }
-
-    implicit def objectiveToObjective: ToObjective[Objective[_]] = new ToObjective[Objective[_]] {
-      def apply(t: Objective[_]) = t
-    }
-
+    implicit def toNoisyObjective[T: ToNoisyObjective]: ToObjective[T] = (t: T) ⇒ implicitly[ToNoisyObjective[T]].apply(t)
+    implicit def toExactObjective[T: ToExactObjective]: ToObjective[T] = (t: T) ⇒ implicitly[ToExactObjective[T]].apply(t)
+    implicit def objectiveToObjective: ToObjective[Objective[_]] = (t: Objective[_]) ⇒ t
   }
 
   trait ToObjective[-T] {
