@@ -186,4 +186,20 @@ trait Stat {
       t * rootMeanSquaredError(sequence) / sqrt(n.toDouble)
     }
   } // interval
+
+  def ksTest(d1: Seq[Double], d2: Seq[Double]) = {
+    import org.apache.commons.math3.stat.inference._
+
+    val test = new KolmogorovSmirnovTest()
+    test.kolmogorovSmirnovTest(d1.toArray, d2.toArray)
+  }
+
+  def ksTestGaussian(data: Seq[Double], mu: Double, sigma: Double) = {
+    import org.apache.commons.math3.stat.inference._
+    import org.apache.commons.math3.distribution._
+
+    val test = new KolmogorovSmirnovTest()
+    test.kolmogorovSmirnovTest(new NormalDistribution(null, mu, sigma), data.toArray)
+  }
+
 }
