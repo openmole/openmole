@@ -3,6 +3,7 @@ package org.openmole.plugin.method.evolution
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.workflow.tools.ContextAggregator
 import org.openmole.plugin.method.evolution.Objective.ToObjective
 import org.openmole.tool.types.ToDouble
 
@@ -11,7 +12,7 @@ import scala.reflect.ClassTag
 object Objective {
 
   object ToExactObjective {
-    implicit def valIsToExact[T](implicit td: ToDouble[T]): ToExactObjective[Val[T]] = (v: Val[T]) ⇒ ExactObjective[T](v, _(v), td.apply, negative = false, delta = None, as = None)
+    implicit def valIsToExact[T](implicit td: ToDouble[T]): ToExactObjective[Val[T]] = (v: Val[T]) ⇒ ExactObjective[T](v, td.apply, negative = false, delta = None, as = None)
     implicit def negativeToExact[T](implicit exact: ToExactObjective[T]): ToExactObjective[Negative[T]] = (t: Negative[T]) ⇒ exact.apply(t.value).copy(negative = true)
     implicit def deltaIsToExact[T, V](implicit exact: ToExactObjective[T], td: ToDouble[V]): ToExactObjective[Delta[T, V]] = (t: Delta[T, V]) ⇒ exact.apply(t.value).copy(delta = Some(td.apply(t.delta)))
     implicit def asIsToExact[T](implicit exact: ToExactObjective[T]): ToExactObjective[As[T, String]] = (t: As[T, String]) ⇒ exact.apply(t.value).copy(as = Some(t.as))
@@ -32,12 +33,12 @@ object Objective {
           (v: Array[T]) ⇒ fromContext.from(Context(t.value.toArray -> v))
         }
 
-        NoisyObjective(t.value, _(t.value), aggregate, negative = false, delta = None, as = None, fromContext.validate)
+        NoisyObjective(t.value, aggregate, negative = false, delta = None, as = None, fromContext.validate)
       }
 
-    implicit def aggregateArrayIsToNoisy[T: ClassTag]: ToNoisyObjective[Aggregate[Val[T], Array[T] ⇒ Double]] = (a: Aggregate[Val[T], Array[T] ⇒ Double]) ⇒ NoisyObjective(a.value, _(a.value), a.aggregate, negative = false, delta = None, as = None)
-    implicit def aggregateSeqIsToNoisy[T: ClassTag]: ToNoisyObjective[Aggregate[Val[T], Seq[T] ⇒ Double]] = (a: Aggregate[Val[T], Seq[T] ⇒ Double]) ⇒ NoisyObjective(a.value, _(a.value), (v: Array[T]) ⇒ a.aggregate(v.toVector), negative = false, delta = None, as = None)
-    implicit def aggregateVectorIsToNoisy[T: ClassTag]: ToNoisyObjective[Aggregate[Val[T], Vector[T] ⇒ Double]] = (a: Aggregate[Val[T], Vector[T] ⇒ Double]) ⇒ NoisyObjective(a.value, _(a.value), (v: Array[T]) ⇒ a.aggregate(v.toVector), negative = false, delta = None, as = None)
+    implicit def aggregateArrayIsToNoisy[T: ClassTag]: ToNoisyObjective[Aggregate[Val[T], Array[T] ⇒ Double]] = (a: Aggregate[Val[T], Array[T] ⇒ Double]) ⇒ NoisyObjective(a.value, a.aggregate, negative = false, delta = None, as = None)
+    implicit def aggregateSeqIsToNoisy[T: ClassTag]: ToNoisyObjective[Aggregate[Val[T], Seq[T] ⇒ Double]] = (a: Aggregate[Val[T], Seq[T] ⇒ Double]) ⇒ NoisyObjective(a.value, (v: Array[T]) ⇒ a.aggregate(v.toVector), negative = false, delta = None, as = None)
+    implicit def aggregateVectorIsToNoisy[T: ClassTag]: ToNoisyObjective[Aggregate[Val[T], Vector[T] ⇒ Double]] = (a: Aggregate[Val[T], Vector[T] ⇒ Double]) ⇒ NoisyObjective(a.value, (v: Array[T]) ⇒ a.aggregate(v.toVector), negative = false, delta = None, as = None)
     implicit def negativeIsToNoisy[T](implicit noisy: ToNoisyObjective[T]): ToNoisyObjective[Negative[T]] = (t: Negative[T]) ⇒ noisy.apply(t.value).copy(negative = true)
     implicit def deltaIsToNoisy[T, V](implicit noisy: ToNoisyObjective[T], td: ToDouble[V]): ToNoisyObjective[Delta[T, V]] = (t: Delta[T, V]) ⇒ noisy.apply(t.value).copy(delta = Some(td.apply(t.delta)))
     implicit def asStringIsToNoisy[T](implicit noisy: ToNoisyObjective[T]): ToNoisyObjective[As[T, String]] = (t: As[T, String]) ⇒ noisy.apply(t.value).copy(as = Some(t.as))
@@ -96,7 +97,7 @@ object Objective {
       case e: ExactObjective[P] ⇒
         import org.openmole.tool.statistics._
         def pMedian = (p: Array[P]) ⇒ p.map(e.toDouble).median
-        NoisyObjective(e.prototype, e.get, pMedian, e.negative, e.delta, e.as)
+        NoisyObjective(e.prototype, pMedian, e.negative, e.delta, e.as)
     }
 
 }
@@ -123,22 +124,23 @@ object Objectives {
 
 object ExactObjective {
 
-  def toFitnessFunction(phenotypeContent: PhenotypeContent, objectives: Seq[ExactObjective[_]])(phenotype: Phenotype) =
-    for { (o, p) ← (objectives zip Phenotype.objectives(phenotypeContent, phenotype)).toVector } yield o.fromAny(p)
+  def toFitnessFunction(phenotypeContent: PhenotypeContent, objectives: Seq[ExactObjective[_]])(phenotype: Phenotype) = {
+    val context = Phenotype.toContext(phenotypeContent, phenotype)
+    objectives.toVector.map(_.value(context))
+  }
 
 }
 
 case class ExactObjective[P](
   prototype: Val[P],
-  get:       Context ⇒ P,
   toDouble:  P ⇒ Double,
   negative:  Boolean,
   delta:     Option[Double],
   as:        Option[String],
   validate:  Validate       = Validate.success) extends Objective[P] {
 
-  private def fromAny(v: Any) = {
-    val value = toDouble(v.asInstanceOf[P])
+  private def value(context: Context) = {
+    val value = toDouble(context(prototype))
 
     def deltaValue =
       delta match {
@@ -157,26 +159,24 @@ object NoisyObjective {
     import p._
 
     (v: Vector[Phenotype]) ⇒
-      for {
-        (vs, obj) ← v.map(p ⇒ Phenotype.objectives(phenotypeContent, p)).transpose zip objectives
-      } yield obj.aggregateAny(vs).from(context)
+      val aggregatedContext = ContextAggregator.aggregateSimilar(v.map(p ⇒ Phenotype.toContext(phenotypeContent, p)))
+      objectives.toVector.map { _.value.from(context ++ aggregatedContext.values) }
   }
 
 }
 
 case class NoisyObjective[P: ClassTag] private (
   prototype: Val[P],
-  get:       Context ⇒ P,
   aggregate: FromContext[Array[P] ⇒ Double],
   negative:  Boolean,
   delta:     Option[Double],
   as:        Option[String],
   validate:  Validate                       = Validate.success) extends Objective[P] {
 
-  private def aggregateAny(values: Vector[Any]) = FromContext { p ⇒
+  private def value = FromContext { p ⇒
     import p._
 
-    def value = aggregate.from(context).apply(values.map(_.asInstanceOf[P]).toArray)
+    def value = aggregate.from(context).apply(context(prototype.toArray))
     def deltaValue = delta.map(d ⇒ math.abs(value - d)).getOrElse(value)
     if (!negative) deltaValue else -deltaValue
   }

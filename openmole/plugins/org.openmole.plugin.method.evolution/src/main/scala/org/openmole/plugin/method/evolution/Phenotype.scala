@@ -6,7 +6,7 @@ import mgo.tools.CanBeNaN
 
 object Phenotype {
 
-  implicit def phenotypeCanBeNaN: CanBeNaN[Phenotype] = (t: Phenotype) => {
+  implicit def phenotypeCanBeNaN: CanBeNaN[Phenotype] = (t: Phenotype) ⇒ {
     def anyIsNaN(t: Any): Boolean = t match {
       case x: Double ⇒ x.isNaN
       case x: Float  ⇒ x.isNaN
