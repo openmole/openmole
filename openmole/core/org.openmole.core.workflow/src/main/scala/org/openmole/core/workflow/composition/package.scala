@@ -525,16 +525,8 @@ package composition {
 
     object DSLSelector {
       def apply[L <: HList](implicit selector: DSLSelector[L]): DSLSelector[L] = selector
-
-      implicit def select[T <: HList]: DSLSelector[DSL :: T] =
-        new DSLSelector[DSL :: T] {
-          def apply(l: DSL :: T) = l.head
-        }
-
-      implicit def recurse[H, T <: HList](implicit st: DSLSelector[T]): DSLSelector[H :: T] =
-        new DSLSelector[H :: T] {
-          def apply(l: H :: T) = st(l.tail)
-        }
+      implicit def select[T <: HList]: DSLSelector[DSL :: T] = (l: DSL :: T) ⇒ l.head
+      implicit def recurse[H, T <: HList](implicit st: DSLSelector[T]): DSLSelector[H :: T] = (l: H :: T) ⇒ st(l.tail)
     }
 
     trait DSLSelector[-L <: HList] {
@@ -545,15 +537,10 @@ package composition {
 
     object ToOrigin {
       import org.openmole.core.workflow.sampling.IsSampling
-
-      def apply[T](f: T ⇒ TransitionOrigin) = new ToOrigin[T] {
-        def apply(t: T) = f(t)
-      }
-
-      implicit def taskToOrigin = ToOrigin[Task] { t ⇒ TaskOrigin(TaskNode(t)) }
-      implicit def transitionDSLToOrigin = ToOrigin[DSL] { TransitionDSLOrigin(_) }
-      implicit def taskNodeToOrigin[T: ToNode] = ToOrigin[T] { t ⇒ TaskOrigin(implicitly[ToNode[T]].apply(t)) }
-      implicit def samplingToOrigin[T: IsSampling](implicit scope: DefinitionScope) = ToOrigin[T] { s ⇒ taskToOrigin(ExplorationTask(s)) }
+      implicit def taskToOrigin: ToOrigin[Task] = t ⇒ TaskOrigin(TaskNode(t))
+      implicit def transitionDSLToOrigin: ToOrigin[DSL] = TransitionDSLOrigin(_)
+      implicit def taskNodeToOrigin[T: ToNode]: ToOrigin[T] = t ⇒ TaskOrigin(implicitly[ToNode[T]].apply(t))
+      implicit def samplingToOrigin[T: IsSampling](implicit scope: DefinitionScope): ToOrigin[T] = s ⇒ taskToOrigin(ExplorationTask(s))
     }
 
     trait ToOrigin[-T] {
@@ -562,15 +549,10 @@ package composition {
 
     object ToDestination {
       import org.openmole.core.workflow.sampling.IsSampling
-
-      def apply[T](f: T ⇒ TransitionDestination) = new ToDestination[T] {
-        def apply(t: T) = f(t)
-      }
-
-      implicit def taskToDestination = ToDestination[Task] { t ⇒ TaskDestination(TaskNode(t)) }
-      implicit def taskNodeToDestination[T: ToNode] = ToDestination[T] { t ⇒ TaskDestination(implicitly[ToNode[T]].apply(t)) }
-      implicit def samplingToDestination[T: IsSampling](implicit scope: DefinitionScope) = ToDestination[T] { s ⇒ taskToDestination(ExplorationTask(s)) }
-      implicit def transitionDSLToDestination = ToDestination[DSL] { TransitionDSLDestination(_) }
+      implicit def taskToDestination: ToDestination[Task] = t ⇒ TaskDestination(TaskNode(t))
+      implicit def taskNodeToDestination[T: ToNode]: ToDestination[T] = t ⇒ TaskDestination(implicitly[ToNode[T]].apply(t))
+      implicit def samplingToDestination[T: IsSampling](implicit scope: DefinitionScope): ToDestination[T] = s ⇒ taskToDestination(ExplorationTask(s))
+      implicit def transitionDSLToDestination: ToDestination[DSL] = TransitionDSLDestination(_)
     }
 
     trait ToDestination[-T] {
@@ -578,18 +560,11 @@ package composition {
     }
 
     object ToNode {
-      def apply[T](f: T ⇒ TaskNode): ToNode[T] = new ToNode[T] {
-        def apply(t: T) = f(t)
-      }
-
-      implicit def taskToNode[T <: Task]: ToNode[T] = apply[T](t ⇒ TaskNode(t))
-      implicit def nodeToNode: ToNode[TaskNode] = apply[TaskNode](identity)
-
-      implicit def byToNode[T: ToNode] = apply[By[T, Grouping]](t ⇒ implicitly[ToNode[T]].apply(t.value).copy(grouping = Some(t.by)))
-      implicit def byIntToNode[T: ToNode] = apply[By[T, Int]](t ⇒ implicitly[ToNode[T]].apply(t.value).copy(grouping = Some(ByGrouping(t.by))))
-
-      implicit def onToNode[T: ToNode] = apply[On[T, EnvironmentProvider]](t ⇒ implicitly[ToNode[T]].apply(t.value).copy(environment = Some(t.on)))
-
+      implicit def taskToNode[T <: Task]: ToNode[T] = t ⇒ TaskNode(t)
+      implicit def nodeToNode: ToNode[TaskNode] = identity
+      implicit def byToNode[T: ToNode]: ToNode[By[T, Grouping]] = t ⇒ implicitly[ToNode[T]].apply(t.value).copy(grouping = Some(t.by))
+      implicit def byIntToNode[T: ToNode]: ToNode[By[T, Int]] = t ⇒ implicitly[ToNode[T]].apply(t.value).copy(grouping = Some(ByGrouping(t.by)))
+      implicit def onToNode[T: ToNode]: ToNode[On[T, EnvironmentProvider]] = t ⇒ implicitly[ToNode[T]].apply(t.value).copy(environment = Some(t.on))
     }
 
     trait ToNode[-T] {
@@ -597,13 +572,9 @@ package composition {
     }
 
     object ToDSL {
-      def apply[T](f: T ⇒ DSL) = new ToDSL[T] {
-        def apply(t: T) = f(t)
-      }
-
-      implicit def dslToDSL = ToDSL[DSL](identity)
-      implicit def toNodeToDSL[T: ToNode] = ToDSL((t: T) ⇒ TaskNodeDSL(implicitly[ToNode[T]].apply(t)))
-      implicit def DSLSelectorToDSL[HL <: HList](implicit dslSelector: DSLSelector[HL]) = ToDSL[HL](t ⇒ dslSelector(t))
+      implicit def dslToDSL: ToDSL[DSL] = identity
+      implicit def toNodeToDSL[T: ToNode]: ToDSL[T] = t ⇒ TaskNodeDSL(implicitly[ToNode[T]].apply(t))
+      implicit def DSLSelectorToDSL[HL <: HList](implicit dslSelector: DSLSelector[HL]): ToDSL[HL] = t ⇒ dslSelector(t)
     }
 
     trait ToDSL[-T] {
@@ -611,12 +582,8 @@ package composition {
     }
 
     object ToMole {
-      def apply[T](f: T ⇒ Mole) = new ToMole[T] {
-        def apply(t: T) = f(t)
-      }
-
-      implicit def transitionDSLToMole = ToMole[DSL](t ⇒ dslToPuzzle(t).toMole)
-      implicit def toTransitionDSLToMoleExecution[T: ToDSL] = ToMole[T] { t ⇒ transitionDSLToMole.apply(implicitly[ToDSL[T]].apply(t)) }
+      implicit def transitionDSLToMole: ToMole[DSL] = t ⇒ dslToPuzzle(t).toMole
+      implicit def toTransitionDSLToMoleExecution[T: ToDSL]: ToMole[T] = t ⇒ transitionDSLToMole.apply(implicitly[ToDSL[T]].apply(t))
     }
 
     trait ToMole[-T] {
@@ -624,11 +591,7 @@ package composition {
     }
 
     object ToMoleExecution {
-      def apply[T](f: T ⇒ MoleExecution) = new ToMoleExecution[T] {
-        def apply(t: T) = f(t)
-      }
-
-      implicit def toDSLToMoleExecution[T: ToDSL](implicit moleServices: MoleServices) = ToMoleExecution[T] { t ⇒ dslToPuzzle(implicitly[ToDSL[T]].apply(t)).toExecution }
+      implicit def toDSLToMoleExecution[T: ToDSL](implicit moleServices: MoleServices): ToMoleExecution[T] = t ⇒ dslToPuzzle(implicitly[ToDSL[T]].apply(t)).toExecution
     }
 
     trait ToMoleExecution[-T] {
