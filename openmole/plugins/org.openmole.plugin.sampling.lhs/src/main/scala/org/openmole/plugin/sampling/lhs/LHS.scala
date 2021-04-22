@@ -22,7 +22,7 @@ import org.openmole.core.dsl.extension._
 
 object LHS {
 
-  def apply(sample: FromContext[Int], factor: Seq[ScalarOrSequenceOfDouble[_]]) =
+  def apply(sample: FromContext[Int], factor: Seq[ScalarOrSequenceOfDouble]) =
     Sampling { p ⇒
       import p._
       val s = sample.from(context)

@@ -20,7 +20,7 @@ package org.openmole.plugin.domain
 import java.math.{ BigDecimal, MathContext, RoundingMode }
 
 import org.openmole.core.dsl._
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.dsl.extension._
 import org.openmole.core.tools.math.BigDecimalOperations
 
 package object range {
@@ -95,6 +95,23 @@ package object range {
       def *(rhs: T) = mult(lhs, rhs)
       def toInt = v.toInt(lhs)
     }
+  }
+
+  object IsRangeDomain {
+    import org.openmole.tool.collection.DoubleRange
+    implicit def doubleRangeIsRange: IsRangeDomain[DoubleRange, Double] = (range: DoubleRange) ⇒ RangeDomain(range.low, range.high)
+    implicit def intRangeIsRange: IsRangeDomain[scala.Range, Int] = (range: scala.Range) ⇒ RangeDomain(range.min, range.max)
+    implicit def intRangeIsRangeDouble: IsRangeDomain[scala.Range, Double] = (range: scala.Range) ⇒ RangeDomain(range.min.toDouble, range.max.toDouble)
+  }
+
+  trait IsRangeDomain[-D, T] {
+    def apply(t: D): RangeDomain[T]
+  }
+
+  implicit def isRangeDomainIsBounded[D, T](implicit isRangeDomain: IsRangeDomain[D, T]) = new BoundedFromContextDomain[D, T] with CenterFromContextDomain[D, T] {
+    override def min(domain: D) = isRangeDomain(domain).min
+    override def max(domain: D) = isRangeDomain(domain).max
+    override def center(domain: D) = RangeDomain.rangeCenter(isRangeDomain(domain))
   }
 
   @deprecated("Use RangeDomain", "13")

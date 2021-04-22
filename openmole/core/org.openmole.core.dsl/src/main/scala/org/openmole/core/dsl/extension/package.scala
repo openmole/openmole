@@ -11,7 +11,7 @@ package object extension {
   type CacheKey[T] = org.openmole.tool.cache.CacheKey[T]
   def CacheKey = org.openmole.tool.cache.CacheKey
 
-  type ScalarOrSequenceOfDouble[T] = org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble[T]
+  type ScalarOrSequenceOfDouble = org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
   def ScalarOrSequenceOfDouble = org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
 
   type Hook = org.openmole.core.workflow.hook.FromContextHook
@@ -30,6 +30,16 @@ package object extension {
   type FromContextSampling = org.openmole.core.workflow.sampling.FromContextSampling
   def Sampling = org.openmole.core.workflow.sampling.Sampling
   type IsSampling[-T] = org.openmole.core.workflow.sampling.IsSampling[T]
+
+  type BoundedFromContextDomain[-D, +T] = org.openmole.core.workflow.domain.BoundedFromContextDomain[D, T]
+  type BoundedDomain[-D, +T] = org.openmole.core.workflow.domain.BoundedDomain[D, T]
+  type FixDomain[-D, +T] = org.openmole.core.workflow.domain.FixDomain[D, T]
+  type SizedDomain[-D] = org.openmole.core.workflow.domain.SizedDomain[D]
+  type DiscreteDomain[-D, +T] = org.openmole.core.workflow.domain.DiscreteDomain[D, T]
+  type DiscreteFromContextDomain[-D, +T] = org.openmole.core.workflow.domain.DiscreteFromContextDomain[D, T]
+  type CenterDomain[-D, +T] = org.openmole.core.workflow.domain.CenterDomain[D, T]
+  type CenterFromContextDomain[-D, +T] = org.openmole.core.workflow.domain.CenterFromContextDomain[D, T]
+  type DomainInputs[-D] = org.openmole.core.workflow.domain.DomainInputs[D]
 
   type Factor[D, T] = org.openmole.core.workflow.sampling.Factor[D, T]
   def Factor[D, T](p: Val[T], d: D) = org.openmole.core.workflow.sampling.Factor(p, d)

@@ -23,14 +23,14 @@ import cats.implicits._
 object UnrolledDomain {
 
   implicit def isDiscrete[D, T: Manifest] =
-    new Discrete[UnrolledDomain[D, T], Array[T]] with DomainInputs[UnrolledDomain[D, T]] {
+    new DiscreteDomain[UnrolledDomain[D, T], Array[T]] with DomainInputs[UnrolledDomain[D, T]] {
       override def iterator(domain: UnrolledDomain[D, T]): Iterator[Array[T]] = Seq(domain.discrete.iterator(domain.d).toArray).iterator
       override def inputs(domain: UnrolledDomain[D, T]): PrototypeSet = domain.inputs.inputs(domain.d)
     }
 
-  def apply[D[_], T: Manifest](domain: D[T])(implicit discrete: Discrete[D[T], T], inputs: DomainInputs[D[T]] = DomainInputs.empty) =
+  def apply[D[_], T: Manifest](domain: D[T])(implicit discrete: DiscreteDomain[D[T], T], inputs: DomainInputs[D[T]] = DomainInputs.empty) =
     new UnrolledDomain[D[T], T](domain)
 
 }
 
-class UnrolledDomain[D, T: Manifest](val d: D)(implicit val discrete: Discrete[D, T], val inputs: DomainInputs[D])
+class UnrolledDomain[D, T: Manifest](val d: D)(implicit val discrete: DiscreteDomain[D, T], val inputs: DomainInputs[D])

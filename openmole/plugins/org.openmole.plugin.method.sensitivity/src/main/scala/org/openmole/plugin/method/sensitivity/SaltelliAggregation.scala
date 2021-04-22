@@ -60,13 +60,13 @@ object SaltelliAggregation {
   }
 
   def apply(
-    modelInputs:  Seq[ScalarOrSequenceOfDouble[_]],
+    modelInputs:  Seq[ScalarOrSequenceOfDouble],
     modelOutputs: Seq[Val[Double]],
-    firstOrderSI: Val[Array[Array[Double]]]        = Val[Array[Array[Double]]]("firstOrderSI"),
-    totalOrderSI: Val[Array[Array[Double]]]        = Val[Array[Array[Double]]]("totalOrderSI"))(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
+    firstOrderSI: Val[Array[Array[Double]]]     = Val[Array[Array[Double]]]("firstOrderSI"),
+    totalOrderSI: Val[Array[Array[Double]]]     = Val[Array[Array[Double]]]("totalOrderSI"))(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
 
     def saltelliOutputs(
-      modelInputs:  Seq[ScalarOrSequenceOfDouble[_]],
+      modelInputs:  Seq[ScalarOrSequenceOfDouble],
       modelOutputs: Seq[Val[Double]]) =
       for {
         o ← modelOutputs

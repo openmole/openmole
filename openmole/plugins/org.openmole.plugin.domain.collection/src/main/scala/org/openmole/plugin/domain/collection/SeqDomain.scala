@@ -22,7 +22,7 @@ import org.openmole.core.workflow.domain._
 import cats.implicits._
 
 object SeqDomain {
-  implicit def isFinite[T] = new DiscreteFromContext[SeqDomain[T], T] {
+  implicit def isFinite[T] = new DiscreteFromContextDomain[SeqDomain[T], T] {
     override def iterator(domain: SeqDomain[T]) = domain.values.toList.sequence.map(_.iterator)
   }
 

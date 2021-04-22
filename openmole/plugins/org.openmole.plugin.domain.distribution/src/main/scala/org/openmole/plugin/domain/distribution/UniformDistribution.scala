@@ -23,7 +23,7 @@ import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.dsl._
 
 object UniformDistribution {
-  implicit def isDiscrete[T]: DiscreteFromContext[UniformDistribution[T], T] = new DiscreteFromContext[UniformDistribution[T], T] {
+  implicit def isDiscrete[T]: DiscreteFromContextDomain[UniformDistribution[T], T] = new DiscreteFromContextDomain[UniformDistribution[T], T] {
     override def iterator(domain: UniformDistribution[T]) = domain.iterator
   }
 

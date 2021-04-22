@@ -28,7 +28,7 @@ import cats.syntax._
 object LogRangeDomain {
 
   implicit def isDiscrete[T] =
-    new DiscreteFromContext[LogRangeDomain[T], T] with CenterFromContext[LogRangeDomain[T], T] with BoundsFromContext[LogRangeDomain[T], T] {
+    new DiscreteFromContextDomain[LogRangeDomain[T], T] with CenterFromContextDomain[LogRangeDomain[T], T] with BoundedFromContextDomain[LogRangeDomain[T], T] {
       override def iterator(domain: LogRangeDomain[T]) = domain.iterator
       override def center(domain: LogRangeDomain[T]) = RangeDomain.rangeCenter(domain.range)
       override def max(domain: LogRangeDomain[T]) = domain.max

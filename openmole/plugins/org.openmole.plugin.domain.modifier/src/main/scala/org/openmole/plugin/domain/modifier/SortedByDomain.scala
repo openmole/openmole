@@ -19,12 +19,10 @@ package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import org.openmole.core.context.PrototypeSet
-import org.openmole.core.workflow.domain._
 
 object SortedByDomain {
 
-  implicit def isDiscrete[D, T, S] = new DiscreteFromContext[SortedByDomain[D, T, S], T] with DomainInputs[SortedByDomain[D, T, S]] {
+  implicit def isDiscrete[D, T, S] = new DiscreteFromContextDomain[SortedByDomain[D, T, S], T] with DomainInputs[SortedByDomain[D, T, S]] {
     def inputs(domain: SortedByDomain[D, T, S]) = domain.domainInputs.inputs(domain.domain)
     def iterator(domain: SortedByDomain[D, T, S]) = FromContext { p ⇒
       import p._
@@ -35,5 +33,5 @@ object SortedByDomain {
 
 }
 
-case class SortedByDomain[D, T, S](domain: D, s: FromContext[T ⇒ S])(implicit val discrete: DiscreteFromContext[D, T], val domainInputs: DomainInputs[D], val sOrdering: scala.Ordering[S])
+case class SortedByDomain[D, T, S](domain: D, s: FromContext[T ⇒ S])(implicit val discrete: DiscreteFromContextDomain[D, T], val domainInputs: DomainInputs[D], val sOrdering: scala.Ordering[S])
 

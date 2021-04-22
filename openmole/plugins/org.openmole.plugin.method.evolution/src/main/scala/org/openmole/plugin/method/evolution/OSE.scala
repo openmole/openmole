@@ -6,7 +6,6 @@ import cats.implicits._
 import monocle.macros.GenLens
 import org.openmole.core.context.{ Context, Variable }
 import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
-import org.openmole.core.workflow.domain._
 import org.openmole.plugin.method.evolution.Genome.{ GenomeBound, Suggestion }
 import org.openmole.plugin.method.evolution.Objective.{ ToExactObjective, ToNoisyObjective }
 import org.openmole.tool.types.ToDouble
@@ -206,24 +205,24 @@ object OSE {
 
   object OriginAxe {
 
-    implicit def fromDoubleDomainToOriginAxe[D](f: Factor[D, Double])(implicit fix: Fix[D, Double]): OriginAxe = {
+    implicit def fromDoubleDomainToOriginAxe[D](f: Factor[D, Double])(implicit fix: FixDomain[D, Double]): OriginAxe = {
       val domain = fix(f.domain).toVector
       ContinuousOriginAxe(GenomeBound.ScalarDouble(f.value, domain.min, domain.max), domain)
     }
 
-    implicit def fromSeqOfDoubleDomainToOriginAxe[D](f: Factor[D, Array[Double]])(implicit fix: Fix[D, Array[Double]]): OriginAxe = {
+    implicit def fromSeqOfDoubleDomainToOriginAxe[D](f: Factor[D, Array[Double]])(implicit fix: FixDomain[D, Array[Double]]): OriginAxe = {
       val domain = fix(f.domain)
       ContinuousSequenceOriginAxe(
         GenomeBound.SequenceOfDouble(f.value, domain.map(_.min).toArray, domain.map(_.max).toArray, domain.size),
         domain.toVector.map(_.toVector))
     }
 
-    implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit fix: Fix[D, Int]): OriginAxe = {
+    implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit fix: FixDomain[D, Int]): OriginAxe = {
       val domain = fix(f.domain).toVector
       DiscreteOriginAxe(GenomeBound.ScalarInt(f.value, domain.min, domain.max), domain)
     }
 
-    implicit def fromSeqOfIntDomainToOriginAxe[D](f: Factor[D, Array[Int]])(implicit fix: Fix[D, Array[Int]]): OriginAxe = {
+    implicit def fromSeqOfIntDomainToOriginAxe[D](f: Factor[D, Array[Int]])(implicit fix: FixDomain[D, Array[Int]]): OriginAxe = {
       val domain = fix(f.domain)
       DiscreteSequenceOriginAxe(
         GenomeBound.SequenceOfInt(f.value, domain.map(_.min).toArray, domain.map(_.max).toArray, domain.size),

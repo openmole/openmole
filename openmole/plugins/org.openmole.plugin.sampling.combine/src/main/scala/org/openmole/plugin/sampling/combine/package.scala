@@ -52,14 +52,14 @@ package object combine {
     def bootstrap(samples: FromContext[Int], number: FromContext[Int]) = s sample samples repeat number
   }
 
-  implicit def withNameFactorDecorator[D, T: CanGetName](factor: Factor[D, T])(implicit discrete: DiscreteFromContext[D, T]) = new {
+  implicit def withNameFactorDecorator[D, T: CanGetName](factor: Factor[D, T])(implicit discrete: DiscreteFromContextDomain[D, T]) = new {
     @deprecated("Use withName", "5")
     def zipWithName(name: Val[String]): ZipWithNameSampling[D, T] = withName(name)
     def withName(name: Val[String]): ZipWithNameSampling[D, T] = new ZipWithNameSampling(factor, name)
   }
 
   implicit class TupleToZipSampling[T1, T2](ps: (Val[T1], Val[T2])) {
-    def in[D](d: D)(implicit discrete: DiscreteFromContext[D, (T1, T2)]) = {
+    def in[D](d: D)(implicit discrete: DiscreteFromContextDomain[D, (T1, T2)]) = {
       val d1 = discrete.iterator(d).map(_.map(_._1))
       val d2 = discrete.iterator(d).map(_.map(_._2))
       ZipSampling(ps._1 in d1, ps._2 in d2)

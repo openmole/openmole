@@ -34,7 +34,6 @@ import monocle.macros.GenLens
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.keyword.{ In, Under }
 import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
-import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.tools.OptionalArgument
 import org.openmole.plugin.method.evolution.Genome.{ GenomeBound, Suggestion }
 import org.openmole.plugin.method.evolution.Objective.{ ToExactObjective, ToNoisyObjective }
@@ -414,16 +413,16 @@ object PSE {
   }
 
   object PatternAxe {
-    implicit def fromInExactToPatternAxe[T, D](v: In[T, D])(implicit fix: Fix[D, Double], te: ToExactObjective[T]) = PatternAxe(te.apply(v.value), fix(v.domain).toVector)
-    implicit def fromInNoisyToPatternAxe[T, D](v: In[T, D])(implicit fix: Fix[D, Double], te: ToNoisyObjective[T]) = PatternAxe(te.apply(v.value), fix(v.domain).toVector)
+    implicit def fromInExactToPatternAxe[T, D](v: In[T, D])(implicit fix: FixDomain[D, Double], te: ToExactObjective[T]) = PatternAxe(te.apply(v.value), fix(v.domain).toVector)
+    implicit def fromInNoisyToPatternAxe[T, D](v: In[T, D])(implicit fix: FixDomain[D, Double], te: ToNoisyObjective[T]) = PatternAxe(te.apply(v.value), fix(v.domain).toVector)
 
-    implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit fix: Fix[D, Double]): PatternAxe =
+    implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit fix: FixDomain[D, Double]): PatternAxe =
       PatternAxe(f.value, fix(f.domain).toVector)
 
-    implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit fix: Fix[D, Int]): PatternAxe =
+    implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit fix: FixDomain[D, Int]): PatternAxe =
       PatternAxe(f.value, fix(f.domain).toVector.map(_.toDouble))
 
-    implicit def fromLongDomainToPatternAxe[D](f: Factor[D, Long])(implicit fix: Fix[D, Long]): PatternAxe =
+    implicit def fromLongDomainToPatternAxe[D](f: Factor[D, Long])(implicit fix: FixDomain[D, Long]): PatternAxe =
       PatternAxe(f.value, fix(f.domain).toVector.map(_.toDouble))
 
   }

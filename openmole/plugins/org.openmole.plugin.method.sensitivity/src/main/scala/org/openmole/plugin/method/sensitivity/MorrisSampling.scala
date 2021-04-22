@@ -48,7 +48,6 @@ package org.openmole.plugin.method.sensitivity
 import org.openmole.core.context._
 import org.openmole.core.expansion._
 import org.openmole.core.tools.math._
-import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.tools._
 import cats.implicits._
@@ -75,7 +74,7 @@ object MorrisSampling extends JavaLogger {
   def apply(
     repetitions: FromContext[Int],
     levels:      FromContext[Int],
-    factors:     Seq[ScalarOrSequenceOfDouble[_]]) =
+    factors:     Seq[ScalarOrSequenceOfDouble]) =
     new MorrisSampling(repetitions, levels, factors)
 
   /**
@@ -165,7 +164,7 @@ import MorrisSampling.Log._
 sealed class MorrisSampling(
   val repetitions: FromContext[Int],
   val levels:      FromContext[Int],
-  val factors:     Seq[ScalarOrSequenceOfDouble[_]]) extends Sampling {
+  val factors:     Seq[ScalarOrSequenceOfDouble]) extends Sampling {
 
   override def inputs = factors.flatMap(_.inputs)
   override def outputs = factors.map { _.prototype } ++ Seq(

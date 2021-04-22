@@ -23,7 +23,7 @@ import cats.implicits._
 
 object StepRangeDomain {
 
-  implicit def isDiscrete[T] = new DiscreteFromContext[StepRangeDomain[T], T] with BoundsFromContext[StepRangeDomain[T], T] with CenterFromContext[StepRangeDomain[T], T] {
+  implicit def isDiscrete[T] = new DiscreteFromContextDomain[StepRangeDomain[T], T] with BoundedFromContextDomain[StepRangeDomain[T], T] with CenterFromContextDomain[StepRangeDomain[T], T] {
     override def iterator(domain: StepRangeDomain[T]) = domain.iterator
     override def max(domain: StepRangeDomain[T]) = domain.max
     override def min(domain: StepRangeDomain[T]) = domain.min

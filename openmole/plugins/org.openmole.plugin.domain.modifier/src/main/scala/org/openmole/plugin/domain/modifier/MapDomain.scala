@@ -19,18 +19,17 @@ package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import org.openmole.core.workflow.domain._
 
 object MapDomain {
 
-  implicit def isDiscrete[D, I, O] = new DiscreteFromContext[MapDomain[D, I, O], O] with DomainInputs[MapDomain[D, I, O]] {
+  implicit def isDiscrete[D, I, O] = new DiscreteFromContextDomain[MapDomain[D, I, O], O] with DomainInputs[MapDomain[D, I, O]] {
     override def iterator(domain: MapDomain[D, I, O]) = domain.iterator
     override def inputs(domain: MapDomain[D, I, O]) = domain.inputs
   }
 
 }
 
-case class MapDomain[D, -I, +O](domain: D, f: FromContext[I ⇒ O])(implicit discrete: DiscreteFromContext[D, I], domainInputs: DomainInputs[D]) { d ⇒
+case class MapDomain[D, -I, +O](domain: D, f: FromContext[I ⇒ O])(implicit discrete: DiscreteFromContextDomain[D, I], domainInputs: DomainInputs[D]) { d ⇒
 
   def inputs = domainInputs.inputs(domain)
 

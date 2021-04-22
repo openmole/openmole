@@ -29,15 +29,15 @@ package collection {
 
   // Avoid clash with iterableOfToArrayIsFix when T is of type Array[T]
   trait LowPriorityImplicits {
-    implicit def iterableIsDiscrete[T] = new DiscreteFromContext[Iterable[T], T] {
+    implicit def iterableIsDiscrete[T] = new DiscreteFromContextDomain[Iterable[T], T] {
       override def iterator(domain: Iterable[T]) = domain.iterator
     }
 
-    implicit def iterableIsFix[T] = new Fix[Iterable[T], T] {
+    implicit def iterableIsFix[T] = new FixDomain[Iterable[T], T] {
       override def apply(domain: Iterable[T]): Iterable[T] = domain
     }
 
-    implicit def iterableIsSized[T] = new Sized[Iterable[T]] {
+    implicit def iterableIsSized[T] = new SizedDomain[Iterable[T]] {
       override def apply(domain: Iterable[T]) = domain.size
     }
   }
@@ -45,37 +45,37 @@ package collection {
 
 package object collection extends LowPriorityImplicits {
 
-  implicit def iterableOfToArrayIsFinite[T: ClassTag, A1[_]: ToArray] = new DiscreteFromContext[Iterable[A1[T]], Array[T]] {
+  implicit def iterableOfToArrayIsFinite[T: ClassTag, A1[_]: ToArray] = new DiscreteFromContextDomain[Iterable[A1[T]], Array[T]] {
     override def iterator(domain: Iterable[A1[T]]) = domain.map(implicitly[ToArray[A1]].apply[T]).iterator
   }
 
-  implicit def iterableOfToArrayIsFix[T: ClassTag, A1[_]: ToArray] = new Fix[Iterable[A1[T]], Array[T]] {
+  implicit def iterableOfToArrayIsFix[T: ClassTag, A1[_]: ToArray] = new FixDomain[Iterable[A1[T]], Array[T]] {
     override def apply(domain: Iterable[A1[T]]) = domain.map(implicitly[ToArray[A1]].apply[T])
   }
 
-  implicit def arrayIsDiscrete[T] = new DiscreteFromContext[Array[T], T] {
+  implicit def arrayIsDiscrete[T] = new DiscreteFromContextDomain[Array[T], T] {
     override def iterator(domain: Array[T]) = domain.iterator
   }
 
-  implicit def arrayIsFix[T] = new Fix[Array[T], T] {
+  implicit def arrayIsFix[T] = new FixDomain[Array[T], T] {
     override def apply(domain: Array[T]): Iterable[T] = domain.toIterable
   }
 
-  implicit def arrayIsSized[T] = new Sized[Array[T]] {
+  implicit def arrayIsSized[T] = new SizedDomain[Array[T]] {
     override def apply(domain: Array[T]) = domain.size
   }
 
-  implicit def iteratorIsDiscrete[T] = new DiscreteFromContext[Iterator[T], T] {
+  implicit def iteratorIsDiscrete[T] = new DiscreteFromContextDomain[Iterator[T], T] {
     override def iterator(domain: Iterator[T]) = domain
   }
 
-  implicit def fromContextIteratorIsDiscrete[T] = new DiscreteFromContext[FromContext[Iterator[T]], T] {
+  implicit def fromContextIteratorIsDiscrete[T] = new DiscreteFromContextDomain[FromContext[Iterator[T]], T] {
     override def iterator(domain: FromContext[Iterator[T]]) = domain
   }
 
   implicit def booleanValIsFactor(p: Val[Boolean]) = Factor(p, Vector(true, false))
 
-  implicit def arrayValIsFinite[T] = new DiscreteFromContext[Val[Array[T]], T] with DomainInputs[Val[Array[T]]] {
+  implicit def arrayValIsFinite[T] = new DiscreteFromContextDomain[Val[Array[T]], T] with DomainInputs[Val[Array[T]]] {
     override def inputs(domain: Val[Array[T]]): PrototypeSet = Seq(domain)
     override def iterator(domain: Val[Array[T]]) = FromContext { p ⇒
       p.context(domain).iterator

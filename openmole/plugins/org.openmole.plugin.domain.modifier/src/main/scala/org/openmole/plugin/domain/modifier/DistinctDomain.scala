@@ -19,12 +19,11 @@ package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import org.openmole.core.workflow.domain._
 
 object DistinctDomain {
 
   implicit def isDiscrete[D, T] =
-    new DiscreteFromContext[DistinctDomain[D, T], T] with DomainInputs[DistinctDomain[D, T]] {
+    new DiscreteFromContextDomain[DistinctDomain[D, T], T] with DomainInputs[DistinctDomain[D, T]] {
       override def iterator(domain: DistinctDomain[D, T]) = FromContext { p ⇒
         import p._
         domain.discrete.iterator(domain.domain).from(context).toSeq.distinct.iterator
@@ -35,4 +34,4 @@ object DistinctDomain {
 
 }
 
-case class DistinctDomain[D, +T](domain: D)(implicit val discrete: DiscreteFromContext[D, T], val inputs: DomainInputs[D])
+case class DistinctDomain[D, +T](domain: D)(implicit val discrete: DiscreteFromContextDomain[D, T], val inputs: DomainInputs[D])

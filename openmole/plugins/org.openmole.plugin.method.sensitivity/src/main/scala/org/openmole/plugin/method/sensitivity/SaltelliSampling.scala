@@ -12,7 +12,7 @@ object SaltelliSampling {
 
   def matrix = Seq(matrixName, matrixIndex)
 
-  def apply(samples: FromContext[Int], sobolSampling: FromContext[Boolean], factors: ScalarOrSequenceOfDouble[_]*) =
+  def apply(samples: FromContext[Int], sobolSampling: FromContext[Boolean], factors: ScalarOrSequenceOfDouble*) =
     Sampling { p ⇒
       import p._
       val s = samples.from(context)
@@ -61,7 +61,7 @@ object SaltelliSampling {
       (aVariables ++ bVariables ++ cVariables).iterator
     } validate { samples.validate } inputs { factors.flatMap(_.inputs) } prototypes { factors.map(_.prototype) ++ matrix }
 
-  def apply(samples: FromContext[Int], factors: ScalarOrSequenceOfDouble[_]*): FromContextSampling = SaltelliSampling(samples, true, factors: _*)
+  def apply(samples: FromContext[Int], factors: ScalarOrSequenceOfDouble*): FromContextSampling = SaltelliSampling(samples, true, factors: _*)
 
   def buildC(
     i: Int,

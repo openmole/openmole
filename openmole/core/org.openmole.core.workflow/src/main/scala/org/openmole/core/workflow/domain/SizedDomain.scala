@@ -7,6 +7,6 @@ import scala.annotation.implicitNotFound
  * @tparam D
  */
 @implicitNotFound("${D} is not a sized variation domain")
-trait Sized[-D] {
+trait SizedDomain[-D] {
   def apply(domain: D): Int
 }

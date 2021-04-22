@@ -27,7 +27,7 @@ import org.openmole.tool.logger.JavaLogger
 
 object ListFilesDomain extends JavaLogger {
 
-  implicit def isDiscrete: DiscreteFromContext[ListFilesDomain, File] = new DiscreteFromContext[ListFilesDomain, File] {
+  implicit def isDiscrete: DiscreteFromContextDomain[ListFilesDomain, File] = new DiscreteFromContextDomain[ListFilesDomain, File] {
     override def iterator(domain: ListFilesDomain) = domain.iterator
   }
 

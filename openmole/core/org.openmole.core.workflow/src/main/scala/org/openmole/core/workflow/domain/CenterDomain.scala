@@ -26,20 +26,20 @@ import scala.annotation.implicitNotFound
  * @tparam T
  */
 @implicitNotFound("${D} is not a variation domain with a center of type ${T}")
-trait Center[-D, +T] {
+trait CenterDomain[-D, +T] {
   def center(domain: D): T
 }
 
-object CenterFromContext {
+object CenterFromContextDomain {
 
-  implicit def centerIsContextCenter[D, T](implicit c: Center[D, T]): CenterFromContext[D, T] =
-    new CenterFromContext[D, T] {
+  implicit def centerIsContextCenter[D, T](implicit c: CenterDomain[D, T]): CenterFromContextDomain[D, T] =
+    new CenterFromContextDomain[D, T] {
       def center(domain: D) = FromContext.value(c.center(domain))
     }
 
 }
 
 @implicitNotFound("${D} is not a variation domain with a center of type T | FromContext[${T}]")
-trait CenterFromContext[-D, +T] {
+trait CenterFromContextDomain[-D, +T] {
   def center(domain: D): FromContext[T]
 }

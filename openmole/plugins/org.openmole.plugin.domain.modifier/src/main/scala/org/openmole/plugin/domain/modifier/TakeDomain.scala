@@ -17,20 +17,19 @@
 
 package org.openmole.plugin.domain.modifier
 
-import org.openmole.core.context.PrototypeSet
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.domain._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 
 import cats._
 import cats.implicits._
 
 object TakeDomain {
 
-  implicit def isDiscrete[D, T] = new DiscreteFromContext[TakeDomain[D, T], T] with DomainInputs[TakeDomain[D, T]] {
+  implicit def isDiscrete[D, T] = new DiscreteFromContextDomain[TakeDomain[D, T], T] with DomainInputs[TakeDomain[D, T]] {
     def inputs(domain: TakeDomain[D, T]) = domain.domainInputs.inputs(domain.domain)
     def iterator(domain: TakeDomain[D, T]) = (domain.discrete.iterator(domain.domain) map2 domain.size)((d, s) ⇒ d.slice(0, s).toIterator)
   }
 
 }
 
-case class TakeDomain[D, +T](domain: D, size: FromContext[Int])(implicit val discrete: DiscreteFromContext[D, T], val domainInputs: DomainInputs[D])
+case class TakeDomain[D, +T](domain: D, size: FromContext[Int])(implicit val discrete: DiscreteFromContextDomain[D, T], val domainInputs: DomainInputs[D])

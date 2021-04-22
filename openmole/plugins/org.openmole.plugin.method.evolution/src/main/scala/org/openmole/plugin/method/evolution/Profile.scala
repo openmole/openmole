@@ -26,7 +26,6 @@ import mgo.evolution.elitism._
 import mgo.evolution.niche._
 import monocle.macros.GenLens
 import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
-import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
 import org.openmole.plugin.method.evolution.Genome.Suggestion
 import org.openmole.plugin.method.evolution.NichedNSGA2.NichedElement
@@ -54,7 +53,7 @@ object Profile {
         override def apply(t: In[Val[Double], Int]): ProfileElement = IntervalDoubleProfileElement(t.value, t.domain)
       }
 
-    implicit def fromDoubleDomainToPatternAxe[D](implicit fix: Fix[D, Double]) = {
+    implicit def fromDoubleDomainToPatternAxe[D](implicit fix: FixDomain[D, Double]) = {
       new ToProfileElement[In[Val[Double], D]] {
         override def apply(t: In[Val[Double], D]): ProfileElement =
           FixDomainProfileElement(t.value, fix(t.domain).toVector)

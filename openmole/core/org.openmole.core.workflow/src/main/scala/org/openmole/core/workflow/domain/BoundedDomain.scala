@@ -27,15 +27,15 @@ import scala.annotation.implicitNotFound
  * @tparam T variable type
  */
 @implicitNotFound("${D} is not a bounded variation domain of type ${T}")
-trait Bounds[-D, +T] {
+trait BoundedDomain[-D, +T] {
   def min(domain: D): T
   def max(domain: D): T
 }
 
-object BoundsFromContext {
+object BoundedFromContextDomain {
 
-  implicit def boundsIsContextBounds[D, T](implicit bounds: Bounds[D, T]): BoundsFromContext[D, T] =
-    new BoundsFromContext[D, T] {
+  implicit def boundsIsContextBounds[D, T](implicit bounds: BoundedDomain[D, T]): BoundedFromContextDomain[D, T] =
+    new BoundedFromContextDomain[D, T] {
       def min(d: D) = FromContext.value(bounds.min(d))
       def max(d: D) = FromContext.value(bounds.max(d))
     }
@@ -43,7 +43,7 @@ object BoundsFromContext {
 }
 
 @implicitNotFound("${D} is not a bounded variation domain of type T | FromContext[${T}]")
-trait BoundsFromContext[-D, +T] {
+trait BoundedFromContextDomain[-D, +T] {
   def min(domain: D): FromContext[T]
   def max(domain: D): FromContext[T]
 }

@@ -26,7 +26,7 @@ import cats.implicits._
 
 object SelectFileDomain {
 
-  implicit def isDiscrete = new DiscreteFromContext[SelectFileDomain, File] {
+  implicit def isDiscrete = new DiscreteFromContextDomain[SelectFileDomain, File] {
     override def iterator(domain: SelectFileDomain) = domain.iterator
 
   }

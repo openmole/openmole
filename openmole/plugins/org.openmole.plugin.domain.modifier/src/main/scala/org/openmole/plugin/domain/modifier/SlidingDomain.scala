@@ -17,22 +17,22 @@
 
 package org.openmole.plugin.domain.modifier
 
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.domain._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 
 import cats._
 import cats.implicits._
 
 object SlidingDomain {
 
-  implicit def isDiscrete[D, T] = new DiscreteFromContext[SlidingDomain[D, T], Array[T]] with DomainInputs[SlidingDomain[D, T]] {
+  implicit def isDiscrete[D, T] = new DiscreteFromContextDomain[SlidingDomain[D, T], Array[T]] with DomainInputs[SlidingDomain[D, T]] {
     override def iterator(domain: SlidingDomain[D, T]) = domain.iterator()
     override def inputs(domain: SlidingDomain[D, T]) = domain.inputs
   }
 
 }
 
-case class SlidingDomain[D, T: Manifest](domain: D, size: FromContext[Int], step: FromContext[Int] = 1)(implicit discrete: DiscreteFromContext[D, T], domainInputs: DomainInputs[D]) {
+case class SlidingDomain[D, T: Manifest](domain: D, size: FromContext[Int], step: FromContext[Int] = 1)(implicit discrete: DiscreteFromContextDomain[D, T], domainInputs: DomainInputs[D]) {
 
   def inputs = domainInputs.inputs(domain)
 

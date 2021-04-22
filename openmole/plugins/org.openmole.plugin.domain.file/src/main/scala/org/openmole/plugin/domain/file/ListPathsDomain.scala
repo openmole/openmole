@@ -21,13 +21,13 @@ import java.io.File
 import java.nio.file.Path
 import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.domain.{ DiscreteFromContext }
+import org.openmole.core.workflow.domain.{ DiscreteFromContextDomain }
 import org.openmole.core.workflow.dsl._
 import cats.implicits._
 
 object ListPathsDomain {
 
-  implicit def isDiscrete = new DiscreteFromContext[ListPathsDomain, Path] {
+  implicit def isDiscrete = new DiscreteFromContextDomain[ListPathsDomain, Path] {
     override def iterator(domain: ListPathsDomain) = domain.iterator
   }
 

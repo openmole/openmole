@@ -19,6 +19,7 @@ package org.openmole.plugin.domain.range
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
+import org.openmole.tool.collection.DoubleRange
 import org.scalatest._
 
 class RangeTest extends FlatSpec with Matchers {
@@ -35,6 +36,9 @@ class RangeTest extends FlatSpec with Matchers {
     val r1: RangeDomain[Double] = 0.0 to 1.0
     val r2: RangeDomain[Int] = 0 to 10
     val r3: RangeDomain[Double] = 0 to 10
+
+    val i = Val[Double]
+    val scalar: ScalarOrSequenceOfDouble = i in (0.0 to 1.0)
   }
 
 }

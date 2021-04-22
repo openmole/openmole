@@ -8,6 +8,6 @@ import scala.annotation.implicitNotFound
  * @tparam T
  */
 @implicitNotFound("${D} is not a fix variation domain of type ${T}")
-trait Fix[-D, +T] {
+trait FixDomain[-D, +T] {
   def apply(domain: D): Iterable[T]
 }

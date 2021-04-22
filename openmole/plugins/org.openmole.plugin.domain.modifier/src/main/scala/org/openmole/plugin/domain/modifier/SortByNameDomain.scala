@@ -17,14 +17,12 @@
 
 package org.openmole.plugin.domain.modifier
 
-import java.io.File
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import org.openmole.core.workflow.domain.{ DiscreteFromContext, DomainInputs }
 
 object SortByNameDomain {
 
-  implicit def isDiscrete[D] = new DiscreteFromContext[SortByNameDomain[D], File] with DomainInputs[SortByNameDomain[D]] {
+  implicit def isDiscrete[D] = new DiscreteFromContextDomain[SortByNameDomain[D], File] with DomainInputs[SortByNameDomain[D]] {
 
     override def inputs(domain: SortByNameDomain[D]): PrototypeSet = domain.domainInputs.inputs(domain.domain)
 
@@ -42,6 +40,6 @@ object SortByNameDomain {
 
 }
 
-case class SortByNameDomain[D](domain: D)(implicit val discrete: DiscreteFromContext[D, File], val domainInputs: DomainInputs[D]) {
+case class SortByNameDomain[D](domain: D)(implicit val discrete: DiscreteFromContextDomain[D, File], val domainInputs: DomainInputs[D]) {
 
 }

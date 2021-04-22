@@ -109,11 +109,11 @@ object MorrisAggregation {
    */
 
   def apply[T](
-    modelInputs:  Seq[ScalarOrSequenceOfDouble[_]],
+    modelInputs:  Seq[ScalarOrSequenceOfDouble],
     modelOutputs: Seq[Val[Double]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
 
     def morrisOutputs(
-      modelInputs:  Seq[ScalarOrSequenceOfDouble[_]],
+      modelInputs:  Seq[ScalarOrSequenceOfDouble],
       modelOutputs: Seq[Val[Double]]) =
       for {
         i ← ScalarOrSequenceOfDouble.prototypes(modelInputs)

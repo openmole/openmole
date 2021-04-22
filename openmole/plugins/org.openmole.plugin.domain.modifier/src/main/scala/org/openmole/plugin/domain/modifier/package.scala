@@ -35,7 +35,7 @@ package object modifier {
   implicit val fileGetName = new CanGetName[File] { def apply(f: File) = f.getName }
   implicit val pathGetName = new CanGetName[Path] { def apply(p: Path) = p.toFile.getName }
 
-  implicit def domainModifierDecorator[D, T: TypeTag](domain: D)(implicit discrete: DiscreteFromContext[D, T], inputs: DomainInputs[D]) = new {
+  implicit def domainModifierDecorator[D, T: TypeTag](domain: D)(implicit discrete: DiscreteFromContextDomain[D, T], inputs: DomainInputs[D]) = new {
     def take(n: FromContext[Int]) = TakeDomain(domain, n)
     def group(n: FromContext[Int])(implicit m: Manifest[T]) = GroupDomain(domain, n)
     def sliding(n: FromContext[Int], s: FromContext[Int] = 1)(implicit m: Manifest[T]) = SlidingDomain(domain, n, s)
@@ -62,7 +62,7 @@ package object modifier {
     def takeWhile(predicate: T ⇒ Boolean) = TakeWhileDomain(domain, predicate)
     def takeWhile(predicate: String)(implicit m: Manifest[T]) = TakeWhileDomain(domain, FromContext.codeToFromContext[T ⇒ Boolean](predicate))
 
-    def ++[D2](d2: D2)(implicit discrete2: DiscreteFromContext[D2, T], inputs2: DomainInputs[D2]) = AppendDomain(domain, d2)
+    def ++[D2](d2: D2)(implicit discrete2: DiscreteFromContextDomain[D2, T], inputs2: DomainInputs[D2]) = AppendDomain(domain, d2)
   }
 
   //  implicit def discreteFactorModifierDecorator[D, T: TypeTag](factor: Factor[D, T])(implicit discrete: DiscreteFromContext[D, T]) = new {

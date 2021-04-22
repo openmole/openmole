@@ -17,13 +17,12 @@
  */
 package org.openmole.plugin.domain.modifier
 
-import org.openmole.core.context.Context
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.domain._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 
 object ZipWithDomain {
 
-  implicit def isDiscrete[D, I, O] = new DiscreteFromContext[ZipWithDomain[D, I, O], (I, O)] with DomainInputs[ZipWithDomain[D, I, O]] {
+  implicit def isDiscrete[D, I, O] = new DiscreteFromContextDomain[ZipWithDomain[D, I, O], (I, O)] with DomainInputs[ZipWithDomain[D, I, O]] {
     override def inputs(domain: ZipWithDomain[D, I, O]) = domain.domainInputs.inputs(domain.domain)
     override def iterator(domain: ZipWithDomain[D, I, O]) = FromContext { p ⇒
       import p._
@@ -33,5 +32,5 @@ object ZipWithDomain {
 
 }
 
-case class ZipWithDomain[D, I, O](domain: D, f: FromContext[I ⇒ O])(implicit val discrete: DiscreteFromContext[D, I], val domainInputs: DomainInputs[D])
+case class ZipWithDomain[D, I, O](domain: D, f: FromContext[I ⇒ O])(implicit val discrete: DiscreteFromContextDomain[D, I], val domainInputs: DomainInputs[D])
 

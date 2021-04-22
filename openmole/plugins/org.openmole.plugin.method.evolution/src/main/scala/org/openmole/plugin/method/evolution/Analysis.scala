@@ -39,7 +39,7 @@ object Analysis {
     metaData match {
       case m: EvolutionMetadata.StochasticNSGA2 ⇒ Analysis.StochasticNSGA2.analyse(omrData, m, directory)
       case m: EvolutionMetadata.NSGA2           ⇒ Analysis.NSGA2.analyse(omrData, m, directory)
-      case EvolutionMetadata.none               ⇒ ???
+      case _                                    ⇒ ???
     }
   }
 
@@ -47,7 +47,7 @@ object Analysis {
     metaData match {
       case m: EvolutionMetadata.StochasticNSGA2 ⇒ Analysis.StochasticNSGA2.generation(omrData, m, directory, generation = generation, all = all)
       case m: EvolutionMetadata.NSGA2           ⇒ Analysis.NSGA2.generation(omrData, m, directory, generation = generation, all = all)
-      case EvolutionMetadata.none               ⇒ ???
+      case _                                    ⇒ ???
     }
   }
 

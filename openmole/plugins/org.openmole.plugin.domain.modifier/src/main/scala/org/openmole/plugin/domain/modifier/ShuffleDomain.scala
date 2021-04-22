@@ -16,13 +16,13 @@
  */
 package org.openmole.plugin.domain.modifier
 
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.domain._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 import org.openmole.tool.random._
 
 object ShuffleDomain {
 
-  implicit def isDiscrete[D, T] = new DiscreteFromContext[ShuffleDomain[D, T], T] with DomainInputs[ShuffleDomain[D, T]] {
+  implicit def isDiscrete[D, T] = new DiscreteFromContextDomain[ShuffleDomain[D, T], T] with DomainInputs[ShuffleDomain[D, T]] {
     override def iterator(domain: ShuffleDomain[D, T]) = FromContext { p ⇒
       import p._
       domain.discrete.iterator(domain.domain).from(context).toSeq.shuffled(random()).iterator
@@ -32,4 +32,4 @@ object ShuffleDomain {
 
 }
 
-case class ShuffleDomain[D, +T](domain: D)(implicit val discrete: DiscreteFromContext[D, T], val inputs: DomainInputs[D])
+case class ShuffleDomain[D, +T](domain: D)(implicit val discrete: DiscreteFromContextDomain[D, T], val inputs: DomainInputs[D])

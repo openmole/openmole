@@ -36,7 +36,7 @@ package sampling {
       def is(d: FromContext[T]) = Factor(p, d)
     }
 
-    implicit def fromContextIsDiscrete[T] = new DiscreteFromContext[FromContext[T], T] {
+    implicit def fromContextIsDiscrete[T] = new DiscreteFromContextDomain[FromContext[T], T] {
       override def iterator(domain: FromContext[T]): FromContext[Iterator[T]] = domain.map(v ⇒ Vector(v).iterator)
     }
 
@@ -48,7 +48,7 @@ package sampling {
         override def apply(): FromContext[Iterator[Iterable[Variable[_]]]] = isSampling.apply(t)
       }
 
-    implicit def factorIsSampling[D, T](implicit domain: DiscreteFromContext[D, T], domainInputs: DomainInputs[D]) = new IsSampling[Factor[D, T]] {
+    implicit def factorIsSampling[D, T](implicit domain: DiscreteFromContextDomain[D, T], domainInputs: DomainInputs[D]) = new IsSampling[Factor[D, T]] {
       def validate(f: Factor[D, T]): Validate = domain.iterator(f.domain).validate
 
       def inputs(f: Factor[D, T]) = domainInputs.inputs(f.domain)

@@ -26,22 +26,22 @@ object Genome {
     import org.openmole.core.workflow.domain._
     import org.openmole.core.workflow.sampling._
 
-    implicit def factorIsScalaDouble[D](f: Factor[D, Double])(implicit bounded: Bounds[D, Double]) =
+    implicit def factorIsScalaDouble[D](f: Factor[D, Double])(implicit bounded: BoundedDomain[D, Double]) =
       ScalarDouble(f.value, bounded.min(f.domain), bounded.max(f.domain))
 
-    implicit def factorIsScalarInt[D](f: Factor[D, Int])(implicit bounded: Bounds[D, Int]) =
+    implicit def factorIsScalarInt[D](f: Factor[D, Int])(implicit bounded: BoundedDomain[D, Int]) =
       ScalarInt(f.value, bounded.min(f.domain), bounded.max(f.domain))
 
-    implicit def factorIsSequenceOfDouble[D](f: Factor[D, Array[Double]])(implicit bounded: Bounds[D, Array[Double]], sized: Sized[D]) =
+    implicit def factorIsSequenceOfDouble[D](f: Factor[D, Array[Double]])(implicit bounded: BoundedDomain[D, Array[Double]], sized: SizedDomain[D]) =
       SequenceOfDouble(f.value, bounded.min(f.domain), bounded.max(f.domain), sized(f.domain))
 
-    implicit def factorIsSequenceOfInt[D](f: Factor[D, Array[Int]])(implicit bounded: Bounds[D, Array[Int]], sized: Sized[D]) =
+    implicit def factorIsSequenceOfInt[D](f: Factor[D, Array[Int]])(implicit bounded: BoundedDomain[D, Array[Int]], sized: SizedDomain[D]) =
       SequenceOfInt(f.value, bounded.min(f.domain), bounded.max(f.domain), sized(f.domain))
 
-    implicit def factorIsIsEnumeration[D, T](f: Factor[D, T])(implicit fix: Fix[D, T]) =
+    implicit def factorIsIsEnumeration[D, T](f: Factor[D, T])(implicit fix: FixDomain[D, T]) =
       Enumeration(f.value, fix.apply(f.domain).toVector)
 
-    implicit def factorIsSequenceOfEnumeration[D, T](f: Factor[D, Array[T]])(implicit fix: Fix[D, Array[T]]) =
+    implicit def factorIsSequenceOfEnumeration[D, T](f: Factor[D, Array[T]])(implicit fix: FixDomain[D, Array[T]]) =
       SequenceOfEnumeration(f.value, fix.apply(f.domain).toVector)
 
     implicit def factorOfBooleanIsSequenceOfEnumeration(f: Factor[Int, Array[Boolean]]) =

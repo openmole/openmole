@@ -19,7 +19,7 @@ package org.openmole.plugin.sampling.combine
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import org.openmole.core.workflow.domain.DiscreteFromContext
+import org.openmole.core.workflow.domain.DiscreteFromContextDomain
 import org.openmole.plugin.domain.modifier.CanGetName
 
 object ZipWithNameSampling {
@@ -39,4 +39,4 @@ object ZipWithNameSampling {
 
 }
 
-case class ZipWithNameSampling[D, T](factor: Factor[D, T], name: Val[String])(implicit val discrete: DiscreteFromContext[D, T], val getName: CanGetName[T])
+case class ZipWithNameSampling[D, T](factor: Factor[D, T], name: Val[String])(implicit val discrete: DiscreteFromContextDomain[D, T], val getName: CanGetName[T])

@@ -4,10 +4,10 @@ import org.openmole.core.workflow.sampling.Factor
 
 package onefactor {
 
-  import org.openmole.core.workflow.domain.DiscreteFromContext
+  import org.openmole.core.workflow.domain.DiscreteFromContextDomain
 
   trait OneFactorDSL {
-    implicit class SamplingIsNominalFactor[D, T](f: Factor[D, T])(implicit domain: DiscreteFromContext[D, T]) {
+    implicit class SamplingIsNominalFactor[D, T](f: Factor[D, T])(implicit domain: DiscreteFromContextDomain[D, T]) {
       def nominal(t: T) = NominalFactor(f, t, domain)
     }
   }

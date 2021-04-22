@@ -67,8 +67,8 @@ package object sensitivity {
     }
 
 
-    case class SaltelliParams(inputs: Seq[ScalarOrSequenceOfDouble[_]], outputs: Seq[Val[_]])
-    case class MorrisParams(inputs: Seq[ScalarOrSequenceOfDouble[_]], outputs: Seq[Val[_]])
+    case class SaltelliParams(inputs: Seq[ScalarOrSequenceOfDouble], outputs: Seq[Val[_]])
+    case class MorrisParams(inputs: Seq[ScalarOrSequenceOfDouble], outputs: Seq[Val[_]])
   }
 
   /**
@@ -106,7 +106,7 @@ package object sensitivity {
    */
   def SensitivityMorris(
     evaluation:  DSL,
-    inputs:      Seq[ScalarOrSequenceOfDouble[_]],
+    inputs:      Seq[ScalarOrSequenceOfDouble],
     outputs:     Seq[Val[Double]],
     sample:      Int,
     level:       Int,
@@ -147,7 +147,7 @@ package object sensitivity {
     */
   def SensitivitySaltelli(
     evaluation:   DSL,
-    inputs:  Seq[ScalarOrSequenceOfDouble[_]],
+    inputs:  Seq[ScalarOrSequenceOfDouble],
     outputs: Seq[Val[Double]],
     sample:      FromContext[Int],
     scope: DefinitionScope = "sensitivity saltelli") = {

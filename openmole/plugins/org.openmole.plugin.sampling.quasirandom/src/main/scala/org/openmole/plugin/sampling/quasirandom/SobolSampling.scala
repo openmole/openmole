@@ -22,7 +22,7 @@ import org.openmole.core.dsl.extension._
 
 object SobolSampling {
 
-  def apply(sample: FromContext[Int], factor: Seq[ScalarOrSequenceOfDouble[_]]) =
+  def apply(sample: FromContext[Int], factor: Seq[ScalarOrSequenceOfDouble]) =
     Sampling { p ⇒
       import p._
       SobolSampling.sobolValues(factor.size, sample.from(context)).map { ScalarOrSequenceOfDouble.unflatten(factor, _)(context) }
