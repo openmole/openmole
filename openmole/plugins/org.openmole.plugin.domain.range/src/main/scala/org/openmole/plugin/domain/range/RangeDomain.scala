@@ -29,8 +29,8 @@ object RangeDomain {
     override def center(domain: RangeDomain[T]) = RangeDomain.rangeCenter(domain)
   }
 
-  implicit def rangeWithDefaultStepIsDiscrete[D, T](implicit toRangeDomain: IsRangeDomain[D, T], step: DefaultStep[T]) = new DiscreteFromContextDomain[D, T] {
-    override def iterator(domain: D) = StepRangeDomain[T](toRangeDomain(domain), step.step).iterator
+  implicit def rangeWithDefaultStepIsDiscrete[T](implicit step: DefaultStep[T]) = new DiscreteFromContextDomain[RangeDomain[T], T] {
+    override def iterator(domain: RangeDomain[T]) = StepRangeDomain[T](domain, step.step).iterator
   }
 
   implicit def toDomain[D, T](d: D)(implicit toRangeDomain: IsRangeDomain[D, T]) = toRangeDomain(d)

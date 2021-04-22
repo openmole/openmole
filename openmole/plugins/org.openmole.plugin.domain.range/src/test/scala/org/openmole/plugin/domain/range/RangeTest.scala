@@ -19,7 +19,7 @@ package org.openmole.plugin.domain.range
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import org.openmole.tool.collection.DoubleRange
+import org.openmole.plugin.domain.modifier._
 import org.scalatest._
 
 class RangeTest extends FlatSpec with Matchers {
@@ -39,6 +39,12 @@ class RangeTest extends FlatSpec with Matchers {
 
     val i = Val[Double]
     val scalar: ScalarOrSequenceOfDouble = i in (0.0 to 1.0)
+  }
+
+  "range" should "work with modifiers" in {
+    RangeDomain[Double](0.0, 10.0, 0.1).map(x ⇒ x * x)
+    RangeDomain[Int](0, 10).map(x ⇒ x * x)
+
   }
 
 }
