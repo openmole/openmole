@@ -6,15 +6,13 @@ import mgo.tools.CanBeNaN
 
 object Phenotype {
 
-  implicit def phenotypeCanBeNaN: CanBeNaN[Phenotype] = new CanBeNaN[Phenotype] {
-    override def isNaN(t: Phenotype): Boolean = {
-      def anyIsNaN(t: Any): Boolean = t match {
-        case x: Double ⇒ x.isNaN
-        case x: Float  ⇒ x.isNaN
-        case _         ⇒ false
-      }
-      t.value.exists(anyIsNaN)
+  implicit def phenotypeCanBeNaN: CanBeNaN[Phenotype] = (t: Phenotype) => {
+    def anyIsNaN(t: Any): Boolean = t match {
+      case x: Double ⇒ x.isNaN
+      case x: Float  ⇒ x.isNaN
+      case _         ⇒ false
     }
+    t.value.exists(anyIsNaN)
   }
 
   def toContext(content: PhenotypeContent, phenotype: Phenotype) =
@@ -46,4 +44,4 @@ object PhenotypeContent {
 
 }
 
-case class PhenotypeContent(val objectives: Seq[Val[_]], val outputs: Seq[Val[_]] = Seq())
+case class PhenotypeContent(objectives: Seq[Val[_]], outputs: Seq[Val[_]] = Seq())

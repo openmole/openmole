@@ -80,7 +80,7 @@ object MoleCapsule {
         for {
           slot ← noStrainer
           received = TypeUtil.validTypes(mole, sources, hooks)(slot)
-        } yield received.map(_.toPrototype)
+        } yield received.map(_.toVal)
 
       val allNames = bySlot.toSeq.flatMap(_.map(_.name)).distinct
       val byName = bySlot.map(_.toSeq.groupBy(_.name).withDefaultValue(Seq.empty))

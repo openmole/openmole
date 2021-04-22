@@ -76,15 +76,15 @@ object Transition {
         variables.filter(v ⇒ !transitionVariableNames.contains(v.name))
       }
 
-      val combinasion = dataChannelVariables ++ transitionVariables
-
       val newTicket =
         if (mole.slots(transition.end.capsule).size <= 1) ticket
         else MoleExecution.nextTicket(subMoleState.moleExecution, ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
 
-      val toArrayManifests = MoleExecution.cachedValidTypes(subMoleState.moleExecution, transition.end).filter(_.toArray).map(ct ⇒ ct.name → ct.`type`).toMap[String, ValType[_]]
+      val toArrayManifests = MoleExecution.cachedValidTypes(subMoleState.moleExecution, transition.end).filter(_.toArray).map(ct ⇒ Val(ct.name)(ct.`type`)).toSeq
 
-      val newContext = ContextAggregator.aggregate(MoleExecution.cachedCapsuleInputs(subMoleState.moleExecution, transition.end.capsule), toArrayManifests, combinasion.map(ticket.content → _))
+      val combinasion = (dataChannelVariables ++ transitionVariables)
+
+      val newContext = ContextAggregator.aggregate(MoleExecution.cachedCapsuleInputs(subMoleState.moleExecution, transition.end.capsule), toArrayManifests, combinasion)
       MoleExecution.submit(subMoleState, transition.end.capsule, newContext, newTicket)
     }
   }

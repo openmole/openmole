@@ -90,7 +90,7 @@ object Validation {
 
       (defaultOverride, receivedInput, receivedSource, receivedImplicit, defaultNonOverride) match {
         case (Some(parameter), _, _, _, _)               ⇒ checkPrototypeMatch(parameter)
-        case (None, Some(received), impl, source, param) ⇒ checkPrototypeMatch(received.toPrototype)
+        case (None, Some(received), impl, source, param) ⇒ checkPrototypeMatch(received.toVal)
         case (None, None, Some(source), impl, param)     ⇒ checkPrototypeMatch(source)
         case (None, None, None, Some(impl), _)           ⇒ checkPrototypeMatch(impl)
         case (None, None, None, None, Some(parameter))   ⇒ checkPrototypeMatch(parameter)
@@ -98,7 +98,7 @@ object Validation {
           val inputs = mutable.TreeSet[Val[_]]()
           inputs ++= defaultNonOverride
           inputs ++= receivedImplicit
-          inputs ++= receivedInputs.map(_._2.toPrototype)
+          inputs ++= receivedInputs.map(_._2.toVal)
           inputs ++= defaultOverride
           Some(MissingInput(s, input, inputs.toSeq))
       }
@@ -141,7 +141,7 @@ object Validation {
 
         (defaultOverride, receivedInput, receivedImplicit, defaultNonOverride) match {
           case (Some(parameter), _, _, _)          ⇒ checkPrototypeMatch(parameter)
-          case (None, Some(received), impl, param) ⇒ checkPrototypeMatch(received.toPrototype)
+          case (None, Some(received), impl, param) ⇒ checkPrototypeMatch(received.toVal)
           case (None, None, Some(impl), _)         ⇒ checkPrototypeMatch(impl)
           case (None, None, None, Some(param))     ⇒ checkPrototypeMatch(param)
           case (None, None, None, None)            ⇒ Some(MissingSourceInput(sl, so, i))
@@ -154,7 +154,7 @@ object Validation {
         source ← sources.getOrElse(c, List.empty).collect { case s: ValidateSource ⇒ s }
         (defaultsOverride, defaultsNonOverride) = separateDefaults(source.defaults)
         sl ← mole.slots(c)
-        receivedInputs = TreeMap(TypeUtil.validTypes(mole, sources, hooks)(sl).map { p ⇒ p.name → p }.toSeq: _*).mapValues(_.toPrototype)
+        receivedInputs = TreeMap(TypeUtil.validTypes(mole, sources, hooks)(sl).map { p ⇒ p.name → p }.toSeq: _*).mapValues(_.toVal)
       } yield {
         val inputs = (defaultsNonOverride ++ implicitMap ++ receivedInputs ++ defaultsOverride).toSeq.map(_._2)
 
@@ -231,7 +231,7 @@ object Validation {
         transition ← mole.transitions.collect { case x: ValidateTransition ⇒ x }
       } yield {
         val inputs = TypeUtil.validTypes(mole, sources, hooks)(transition.end, _ == transition)
-        transition.validate(inputs.toSeq.map(_.toPrototype)) match {
+        transition.validate(inputs.toSeq.map(_.toVal)) match {
           case ts if !ts.isEmpty ⇒ Some(TransitionValidationProblem(transition, ts))
           case _                 ⇒ None
         }

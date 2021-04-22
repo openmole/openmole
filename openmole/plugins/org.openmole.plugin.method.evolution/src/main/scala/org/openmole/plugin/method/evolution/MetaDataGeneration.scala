@@ -42,5 +42,5 @@ object MetadataGeneration {
       case Right(m) ⇒ m
     }
 
-  def gridAxe(p: PSE.PatternAxe) = EvolutionMetadata.PSE.GridAxe(Objective.prototype(p.p).name, p.scale)
+  def gridAxe(p: PSE.PatternAxe) = EvolutionMetadata.PSE.GridAxe(Objective.name(p.p), p.scale)
 }

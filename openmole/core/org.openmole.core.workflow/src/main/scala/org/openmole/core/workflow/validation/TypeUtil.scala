@@ -27,12 +27,12 @@ import scala.collection.mutable.{ HashMap, HashSet, ListBuffer }
 object TypeUtil {
 
   def receivedTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: TransitionSlot): Iterable[Val[_]] =
-    validTypes(mole, sources, hooks)(slot).map { _.toPrototype }
+    validTypes(mole, sources, hooks)(slot).map { _.toVal }
 
   sealed trait ComputedType
   case class InvalidType(name: String, direct: Seq[ValType[_]], toArray: Seq[ValType[_]], fromArray: Seq[ValType[_]]) extends ComputedType
   case class ValidType(name: String, `type`: ValType[_], toArray: Boolean) extends ComputedType {
-    def toPrototype =
+    def toVal =
       if (toArray) Val(name)(`type`.toArray)
       else Val(name)(`type`)
   }

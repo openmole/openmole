@@ -60,6 +60,8 @@ object Objective {
 
   implicit def toObjective[T: ToObjective](t: T): Objective[_] = implicitly[ToObjective[T]].apply(t)
 
+  def name(o: Objective[_]) = prototype(o).name
+
   def prototype(o: Objective[_]) =
     o match {
       case e: ExactObjective[_] ⇒ e.prototype
@@ -115,12 +117,6 @@ object Objectives {
     }
   }
 
-  def index(obj: Objectives, v: Val[_]): Option[Int] =
-    obj.indexWhere(o ⇒ Objective.prototype(o) == v) match {
-      case -1 ⇒ None
-      case x  ⇒ Some(x)
-    }
-
   def value(o: Objectives) = o
 
 }
@@ -161,6 +157,9 @@ object NoisyObjective {
     import p._
 
     (v: Vector[Phenotype]) ⇒
+
+      Phenotype.toContext(phenotypeContent, p)
+
       for {
         (vs, obj) ← v.map(p ⇒ Phenotype.objectives(phenotypeContent, p)).transpose zip objectives
       } yield obj.aggregateAny(vs).from(context)
