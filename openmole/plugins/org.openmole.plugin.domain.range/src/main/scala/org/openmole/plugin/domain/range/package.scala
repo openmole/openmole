@@ -61,7 +61,6 @@ package object range {
 
   object RangeValue {
     implicit def fractionalIsRangeValue[T](implicit fractional: Fractional[T]) = new RangeValue[T] {
-
       override def div(t1: T, t2: T): T = fractional.div(t1, t2)
       override def plus(t1: T, t2: T): T = fractional.plus(t1, t2)
       override def toInt(t: T): Int = fractional.toInt(t)

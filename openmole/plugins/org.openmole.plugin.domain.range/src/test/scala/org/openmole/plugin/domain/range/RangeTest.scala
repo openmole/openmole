@@ -17,7 +17,8 @@
  */
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.context.Context
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 import org.scalatest._
 
 class RangeTest extends FlatSpec with Matchers {
@@ -28,6 +29,12 @@ class RangeTest extends FlatSpec with Matchers {
     RangeDomain[Double](0.0, 10.0, 0.1).iterator(Context()).size shouldBe 101
     RangeDomain[Int](0, 10, 1).iterator(Context()).size shouldBe 11
     LogRangeDomain[Double](0.0, 10.0, 10).iterator(Context()).size shouldBe 10
+  }
+
+  "ranges using to in scala" should "be range domains" in {
+    val r1: RangeDomain[Double] = 0.0 to 1.0
+    val r2: RangeDomain[Int] = 0 to 10
+    val r3: RangeDomain[Double] = 0 to 10
   }
 
 }

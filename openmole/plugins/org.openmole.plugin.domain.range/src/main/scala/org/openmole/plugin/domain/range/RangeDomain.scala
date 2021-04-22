@@ -23,15 +23,29 @@ import cats.implicits._
 
 object RangeDomain {
 
-  implicit def isBounded[T] = new BoundsFromContext[RangeDomain[T], T] with CenterFromContext[RangeDomain[T], T] {
-    override def min(domain: RangeDomain[T]) = domain.min
-    override def max(domain: RangeDomain[T]) = domain.max
-    override def center(domain: RangeDomain[T]) = RangeDomain.rangeCenter(domain)
+  object ToRangeDomain {
+    import org.openmole.tool.collection.DoubleRange
+    implicit def doubleRangeIsRange: ToRangeDomain[DoubleRange, Double] = (range: DoubleRange) ⇒ RangeDomain(range.low, range.high)
+    implicit def intRangeIsRange: ToRangeDomain[scala.Range, Int] = (range: scala.Range) ⇒ RangeDomain(range.min, range.max)
+    implicit def intRangeIsRangeDouble: ToRangeDomain[scala.Range, Double] = (range: scala.Range) ⇒ RangeDomain(range.min.toDouble, range.max.toDouble)
+    implicit def rangeDomainIsRange[T]: ToRangeDomain[RangeDomain[T], T] = (r: RangeDomain[T]) ⇒ r
   }
 
-  implicit def rangeWithDefaultStepIsDiscrete[T](implicit step: DefaultStep[T]) = new DiscreteFromContext[RangeDomain[T], T] {
-    override def iterator(domain: RangeDomain[T]) = StepRangeDomain[T](domain, step.step).iterator
+  trait ToRangeDomain[-D, T] {
+    def apply(t: D): RangeDomain[T]
   }
+
+  implicit def isBounded[D, T](implicit toRangeDomain: ToRangeDomain[D, T]) = new BoundsFromContext[D, T] with CenterFromContext[D, T] {
+    override def min(domain: D) = toRangeDomain(domain).min
+    override def max(domain: D) = toRangeDomain(domain).max
+    override def center(domain: D) = RangeDomain.rangeCenter(toRangeDomain(domain))
+  }
+
+  implicit def rangeWithDefaultStepIsDiscrete[D, T](implicit toRangeDomain: ToRangeDomain[D, T], step: DefaultStep[T]) = new DiscreteFromContext[D, T] {
+    override def iterator(domain: D) = StepRangeDomain[T](toRangeDomain(domain), step.step).iterator
+  }
+
+  implicit def toDomain[D, T](d: D)(implicit toRangeDomain: ToRangeDomain[D, T]) = toRangeDomain(d)
 
   def apply[T: RangeValue](
     min: FromContext[T],
