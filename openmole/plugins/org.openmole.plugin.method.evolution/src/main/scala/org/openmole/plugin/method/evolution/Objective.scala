@@ -52,24 +52,24 @@ object Objective {
   object ToObjective {
     implicit def toNoisyObjective[T: ToNoisyObjective]: ToObjective[T] = (t: T) ⇒ implicitly[ToNoisyObjective[T]].apply(t)
     implicit def toExactObjective[T: ToExactObjective]: ToObjective[T] = (t: T) ⇒ implicitly[ToExactObjective[T]].apply(t)
-    implicit def objectiveToObjective: ToObjective[Objective[_]] = (t: Objective[_]) ⇒ t
+    implicit def objectiveToObjective: ToObjective[Objective] = (t: Objective) ⇒ t
   }
 
   trait ToObjective[-T] {
-    def apply(t: T): Objective[_]
+    def apply(t: T): Objective
   }
 
-  implicit def toObjective[T: ToObjective](t: T): Objective[_] = implicitly[ToObjective[T]].apply(t)
+  implicit def toObjective[T: ToObjective](t: T): Objective = implicitly[ToObjective[T]].apply(t)
 
-  def name(o: Objective[_]) = prototype(o).name
+  def name(o: Objective) = resultPrototype(o).name
 
-  def prototype(o: Objective[_]) =
+  def prototype(o: Objective) =
     o match {
       case e: ExactObjective[_] ⇒ e.prototype
       case n: NoisyObjective[_] ⇒ n.prototype
     }
 
-  def resultPrototype(o: Objective[_]) =
+  def resultPrototype(o: Objective) =
     o match {
       case e: ExactObjective[_] ⇒
         e.delta match {
@@ -85,24 +85,27 @@ object Objective {
 
     }
 
-  def toExact[P](o: Objective[P]) =
+  def toExact(o: Objective) =
     o match {
-      case e: ExactObjective[P] ⇒ e
-      case n: NoisyObjective[P] ⇒ throw new UserBadDataError(s"Objective $n cannot be aggregated it should be exact.")
+      case e: ExactObjective[_] ⇒ e
+      case n: NoisyObjective[_] ⇒ throw new UserBadDataError(s"Objective $n cannot be aggregated it should be exact.")
     }
 
-  def toNoisy[P: ClassTag](o: Objective[P]) =
+  def toNoisy(o: Objective) = {
     o match {
-      case n: NoisyObjective[P] ⇒ n
-      case e: ExactObjective[P] ⇒
-        import org.openmole.tool.statistics._
-        def pMedian = (p: Array[P]) ⇒ p.map(e.toDouble).median
-        NoisyObjective(e.prototype, pMedian, e.negative, e.delta, e.as)
+      case n: NoisyObjective[_] ⇒ n
+      case e: ExactObjective[_] ⇒
+        def medianAggregation[T](e: ExactObjective[T]) = {
+          import org.openmole.tool.statistics._
+          (p: Array[T]) ⇒ p.map(e.toDouble).median
+        }
+        NoisyObjective(e.prototype, medianAggregation(e), e.negative, e.delta, e.as)
     }
+  }
 
 }
 
-sealed trait Objective[P]
+sealed trait Objective
 
 object Objectives {
 
@@ -137,7 +140,7 @@ case class ExactObjective[P](
   negative:  Boolean,
   delta:     Option[Double],
   as:        Option[String],
-  validate:  Validate       = Validate.success) extends Objective[P] {
+  validate:  Validate       = Validate.success) extends Objective {
 
   private def value(context: Context) = {
     val value = toDouble(context(prototype))
@@ -165,20 +168,36 @@ object NoisyObjective {
 
 }
 
-case class NoisyObjective[P: ClassTag] private (
+case class NoisyObjective[P] private (
   prototype: Val[P],
   aggregate: FromContext[Array[P] ⇒ Double],
   negative:  Boolean,
   delta:     Option[Double],
   as:        Option[String],
-  validate:  Validate                       = Validate.success) extends Objective[P] {
+  validate:  Validate                       = Validate.success) extends Objective {
 
   private def value = FromContext { p ⇒
     import p._
-
     def value = aggregate.from(context).apply(context(prototype.toArray))
     def deltaValue = delta.map(d ⇒ math.abs(value - d)).getOrElse(value)
     if (!negative) deltaValue else -deltaValue
   }
 
 }
+
+//case class NoisyContextObjective private (
+//  aggregate: FromContext[Context ⇒ Double],
+//  negative:  Boolean,
+//  delta:     Option[Double],
+//  as:        String,
+//  validate:  Validate                       = Validate.success) extends Objective[P] {
+//
+//  private def value = FromContext { p ⇒
+//    import p._
+//
+//    def value = aggregate.from(context).apply(context)
+//    def deltaValue = delta.map(d ⇒ math.abs(value - d)).getOrElse(value)
+//    if (!negative) deltaValue else -deltaValue
+//  }
+//
+//}

@@ -427,7 +427,7 @@ object PSE {
 
   }
 
-  case class PatternAxe(p: Objective[_], scale: Vector[Double])
+  case class PatternAxe(p: Objective, scale: Vector[Double])
 
   def apply(
     genome:     Genome,

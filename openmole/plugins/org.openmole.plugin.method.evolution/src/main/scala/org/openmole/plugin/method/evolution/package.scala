@@ -37,7 +37,7 @@ package object evolution {
   import io.circe.generic.extras.semiauto._
   import io.circe.generic.extras.Configuration
 
-  type Objectives = Seq[Objective[_]]
+  type Objectives = Seq[Objective]
   type Genome = Seq[Genome.GenomeBound]
 
   implicit def intToCounterTerminationConverter(n: Long): AfterGeneration = AfterGeneration(n)

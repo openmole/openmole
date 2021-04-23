@@ -274,7 +274,7 @@ object OSE {
     def toObjectives(f: Seq[FitnessPattern]) = f.map(_.objective)
   }
 
-  case class FitnessPattern(objective: Objective[_], limit: Double)
+  case class FitnessPattern(objective: Objective, limit: Double)
 
   def apply(
     origin:         Seq[OriginAxe],
