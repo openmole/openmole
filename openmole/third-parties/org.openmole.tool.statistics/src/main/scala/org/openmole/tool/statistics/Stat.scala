@@ -187,19 +187,23 @@ trait Stat {
     }
   } // interval
 
-  def ksTest(d1: Seq[Double], d2: Seq[Double]) = {
-    import org.apache.commons.math3.stat.inference._
+  def ksTest(d1: Seq[Double], d2: Seq[Double]): Option[Double] =
+    if (d1.size < 2 || d2.size < 2) None
+    else {
+      import org.apache.commons.math3.stat.inference._
 
-    val test = new KolmogorovSmirnovTest()
-    test.kolmogorovSmirnovTest(d1.toArray, d2.toArray)
-  }
+      val test = new KolmogorovSmirnovTest()
+      Some(test.kolmogorovSmirnovTest(d1.toArray, d2.toArray))
+    }
 
-  def ksTestGaussian(data: Seq[Double], mu: Double, sigma: Double) = {
-    import org.apache.commons.math3.stat.inference._
-    import org.apache.commons.math3.distribution._
+  def ksTestGaussian(data: Seq[Double], mu: Double, sigma: Double, unsound: Double = 1.0): Option[Double] =
+    if (data.size < 2) None
+    else {
+      import org.apache.commons.math3.stat.inference._
+      import org.apache.commons.math3.distribution._
 
-    val test = new KolmogorovSmirnovTest()
-    test.kolmogorovSmirnovTest(new NormalDistribution(null, mu, sigma), data.toArray)
-  }
+      val test = new KolmogorovSmirnovTest()
+      Some(test.kolmogorovSmirnovTest(new NormalDistribution(null, mu, sigma), data.toArray))
+    }
 
 }
