@@ -24,14 +24,18 @@ import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SaveOption
 
 object SavePopulationHook {
 
-  def resultVariables(t: EvolutionWorkflow, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
+  def resultVariables(t: EvolutionWorkflow, keepAll: Boolean, includeOutputs: Boolean, filter: Seq[String]) = FromContext { p ⇒
     import p._
-    context.variable(t.generationPrototype).toSeq ++
-      t.operations.result(
-        context(t.populationPrototype).toVector,
-        context(t.statePrototype),
-        keepAll = keepAll,
-        includeOutputs = includeOutputs).from(context)
+    def all =
+      context.variable(t.generationPrototype).toSeq ++
+        t.operations.result(
+          context(t.populationPrototype).toVector,
+          context(t.statePrototype),
+          keepAll = keepAll,
+          includeOutputs = includeOutputs).from(context)
+
+    val filterSet = filter.toSet
+    all.filter(v ⇒ !filterSet.contains(v.name))
   }
 
   def apply[T, F](
@@ -40,7 +44,8 @@ object SavePopulationHook {
     frequency:      OptionalArgument[Long] = None,
     last:           Boolean                = false,
     keepAll:        Boolean                = false,
-    includeOutputs: Boolean                = false,
+    includeOutputs: Boolean                = true,
+    filter:         Seq[Val[_]]            = Vector.empty,
     format:         F                      = CSVOutputFormat(unrollArray = true))(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, EvolutionMetadata]) = Hook("SavePopulationHook") { p ⇒
     import p._
 
@@ -57,7 +62,7 @@ object SavePopulationHook {
         def saveOption = SaveOption(frequency = frequency, last = last)
         def evolutionData = evolution.operations.metadata(context(evolution.generationPrototype), saveOption)
 
-        val content = OutputFormat.PlainContent(resultVariables(evolution, keepAll = keepAll, includeOutputs = includeOutputs).from(context), Some(fileName))
+        val content = OutputFormat.PlainContent(resultVariables(evolution, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter.map(_.name)).from(context), Some(fileName))
         outputFormat.write(executionContext)(format, output, content, evolutionData).from(context)
       case None ⇒
     }
