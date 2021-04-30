@@ -185,10 +185,10 @@ object GAIntegration {
   }
 
   def objectivesOfPopulationToVariables[I](objectives: Seq[Objective], phenotypeValues: Vector[Vector[Double]]): Vector[Variable[_]] =
-    objectives.toVector.zipWithIndex.map {
+    Objective.resultPrototypes(objectives).toVector.zipWithIndex.map {
       case (objective, i) ⇒
         Variable(
-          Objective.resultPrototype(objective).withType[Array[Double]],
+          objective.withType[Array[Double]],
           phenotypeValues.map(_(i)).toArray
         )
     }

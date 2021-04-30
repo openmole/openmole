@@ -61,29 +61,35 @@ object Objective {
 
   implicit def toObjective[T: ToObjective](t: T): Objective = implicitly[ToObjective[T]].apply(t)
 
-  def name(o: Objective) = resultPrototype(o).name
+  def prototypes(o: Objectives) = {
+    def prototype(o: Objective) =
+      o match {
+        case e: ExactObjective[_] ⇒ e.prototype
+        case n: NoisyObjective[_] ⇒ n.prototype
+      }
 
-  def prototype(o: Objective) =
-    o match {
-      case e: ExactObjective[_] ⇒ e.prototype
-      case n: NoisyObjective[_] ⇒ n.prototype
-    }
+    o.map(prototype)
+  }
 
-  def resultPrototype(o: Objective) =
-    o match {
-      case e: ExactObjective[_] ⇒
-        e.delta match {
-          case Some(_) ⇒ e.prototype.withNamespace(e.prototype.namespace.names ++ Seq("delta"))
-          case _       ⇒ e.prototype
-        }
-      case n: NoisyObjective[_] ⇒
-        (n.delta, n.as) match {
-          case (_, Some(s))    ⇒ n.prototype.withName(s)
-          case (Some(_), None) ⇒ n.prototype.withNamespace(n.prototype.namespace.names ++ Seq("delta"))
-          case (None, None)    ⇒ n.prototype
-        }
+  def resultPrototypes(o: Objectives) = {
+    def resultPrototype(o: Objective) =
+      o match {
+        case e: ExactObjective[_] ⇒
+          e.delta match {
+            case Some(_) ⇒ e.prototype.withNamespace(e.prototype.namespace.names ++ Seq("delta"))
+            case _       ⇒ e.prototype
+          }
+        case n: NoisyObjective[_] ⇒
+          (n.delta, n.as) match {
+            case (_, Some(s))    ⇒ n.prototype.withName(s)
+            case (Some(_), None) ⇒ n.prototype.withNamespace(n.prototype.namespace.names ++ Seq("delta"))
+            case (None, None)    ⇒ n.prototype
+          }
 
-    }
+      }
+
+    o.map(resultPrototype)
+  }
 
   def toExact(o: Objective) =
     o match {

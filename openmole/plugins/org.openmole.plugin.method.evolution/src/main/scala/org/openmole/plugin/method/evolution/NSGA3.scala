@@ -199,7 +199,7 @@ object NSGA3 {
     EvolutionWorkflow.stochasticity(objective, stochastic.option) match {
       case None ⇒
         val exactObjectives = Objectives.toExact(objective)
-        val phenotypeContent = PhenotypeContent(exactObjectives.map(Objective.prototype), outputs)
+        val phenotypeContent = PhenotypeContent(Objective.prototypes(exactObjectives), outputs)
 
         EvolutionWorkflow.deterministicGAIntegration(
           DeterministicParams(populationSize, references, genome, phenotypeContent, exactObjectives, EvolutionWorkflow.operatorExploration, reject),
@@ -209,7 +209,7 @@ object NSGA3 {
         )
       case Some(stochasticValue) ⇒
         val noisyObjectives = Objectives.toNoisy(objective)
-        val phenotypeContent = PhenotypeContent(noisyObjectives.map(Objective.prototype), outputs)
+        val phenotypeContent = PhenotypeContent(Objective.prototypes(noisyObjectives), outputs)
 
         def validation: Validate = {
           val aOutputs = outputs.map(_.toArray)

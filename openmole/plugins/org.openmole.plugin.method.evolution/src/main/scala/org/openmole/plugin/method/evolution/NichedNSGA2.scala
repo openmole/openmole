@@ -433,7 +433,7 @@ object NichedNSGA2 {
       case None ⇒
         val exactObjectives = Objectives.toExact(objective)
         val nicheVals = niche.map(NichedElement.valContent)
-        val phenotypeContent = PhenotypeContent(exactObjectives.map(Objective.prototype) ++ nicheVals, outputs)
+        val phenotypeContent = PhenotypeContent(Objective.prototypes(exactObjectives) ++ nicheVals, outputs)
 
         def validation: Validate =
           niche.map(n ⇒ NichedElement.validate(n, outputs)) ++
@@ -456,7 +456,7 @@ object NichedNSGA2 {
       case Some(stochasticValue) ⇒
         val noisyObjectives = Objectives.toNoisy(objective)
         val nicheVals = niche.map(NichedElement.valContent)
-        val phenotypeContent = PhenotypeContent(noisyObjectives.map(Objective.prototype) ++ nicheVals, outputs)
+        val phenotypeContent = PhenotypeContent(Objective.prototypes(noisyObjectives) ++ nicheVals, outputs)
 
         def validation: Validate = {
           val aOutputs = outputs.map(_.toArray)

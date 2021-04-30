@@ -233,7 +233,7 @@ object PSE {
           EvolutionMetadata.PSE(
             genome = MetadataGeneration.genomeData(om.genome),
             objective = om.objectives.map(MetadataGeneration.exactObjectiveData),
-            grid = om.grid.map(MetadataGeneration.gridAxe),
+            grid = MetadataGeneration.grid(om.grid),
             generation = generation,
             saveOption = saveOption
           )
@@ -333,7 +333,7 @@ object PSE {
             genome = MetadataGeneration.genomeData(om.genome),
             objective = om.objectives.map(MetadataGeneration.noisyObjectiveData),
             sample = om.historySize,
-            grid = om.grid.map(MetadataGeneration.gridAxe),
+            grid = MetadataGeneration.grid(om.grid),
             generation = generation,
             saveOption = saveOption
           )
@@ -439,7 +439,7 @@ object PSE {
     EvolutionWorkflow.stochasticity(objective.map(_.p), stochastic.option) match {
       case None ⇒
         val exactObjectives = Objectives.toExact(objective.map(_.p))
-        val phenotypeContent = PhenotypeContent(exactObjectives.map(Objective.prototype), outputs)
+        val phenotypeContent = PhenotypeContent(Objective.prototypes(exactObjectives), outputs)
 
         EvolutionWorkflow.deterministicGAIntegration(
           DeterministicParams(
@@ -456,7 +456,7 @@ object PSE {
         )
       case Some(stochasticValue) ⇒
         val noisyObjectives = Objectives.toNoisy(objective.map(_.p))
-        val phenotypeContent = PhenotypeContent(noisyObjectives.map(Objective.prototype), outputs)
+        val phenotypeContent = PhenotypeContent(Objective.prototypes(noisyObjectives), outputs)
 
         def validation: Validate = {
           val aOutputs = outputs.map(_.toArray)

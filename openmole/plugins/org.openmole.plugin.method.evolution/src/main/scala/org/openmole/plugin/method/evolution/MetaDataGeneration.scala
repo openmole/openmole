@@ -11,7 +11,6 @@ import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.tools.io.Prettifier._
 import Genome.GenomeBound
 import org.openmole.plugin.hook.omr.MethodData
-import org.openmole.plugin.method.evolution.MetadataGeneration.gridAxe
 
 object MetadataGeneration {
 
@@ -42,5 +41,7 @@ object MetadataGeneration {
       case Right(m) ⇒ m
     }
 
-  def gridAxe(p: PSE.PatternAxe) = EvolutionMetadata.PSE.GridAxe(Objective.name(p.p), p.scale)
+  def grid(p: Seq[PSE.PatternAxe]) =
+    (Objective.resultPrototypes(p.map(_.p)) zip p) map { case (p, pa) ⇒ EvolutionMetadata.PSE.GridAxe(p.name, pa.scale) }
+
 }
