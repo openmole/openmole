@@ -1,8 +1,25 @@
 package org.openmole.tool.file
 
 import java.io.IOException
-import java.nio.file._
-import java.util.{ EnumSet, Set, Objects }
+import java.nio.file.{ CopyOption, FileVisitOption, Files, Path }
+import java.util.{ EnumSet, Objects, Set }
+
+/*
+ * Copyright (C) 2021 Romain Reuillon
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 object DirUtils {
   /**
@@ -62,15 +79,29 @@ object DirUtils {
    * @throws IOException
    */
   @throws[IOException]
-  def delete(path: Path) = {
-    validate(path)
-    //  TODO Shall we introduce a force option, which would force removal of hierarchy
-    //  without any consideration for file permissions only when set to true?
-    // make sure directory is traversable before deletion
-    path.toFile.setReadable(true)
-    path.toFile.setWritable(true)
-    path.toFile.setExecutable(true)
-    Files.walkFileTree(path, new DeleteDirVisitor)
+  def delete(p: Path) = {
+    val file = p.toFile
+    if (file.exists()) {
+      if (!file.toFile.isSymbolicLink && file.isDirectory) {
+        val list =
+          try file.listFilesSafe
+          catch {
+            case t: IOException ⇒
+              FileTools.setAllPermissions(file)
+              file.listFilesSafe
+          }
+
+        for (s ← list) {
+          s.isDirectory match {
+            case true ⇒
+              s.recursiveDelete
+              s.forceFileDelete
+            case false ⇒ s.forceFileDelete
+          }
+        }
+      }
+      file.forceFileDelete
+    }
   }
 
   @throws[IOException]

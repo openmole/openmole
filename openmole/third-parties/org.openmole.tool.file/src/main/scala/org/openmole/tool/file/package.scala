@@ -39,9 +39,10 @@ package file {
   import java.nio.file.attribute.PosixFilePermissions
   import java.util.concurrent.ThreadPoolExecutor
   import java.util.concurrent.atomic.AtomicLong
-
   import org.openmole.tool.file
   import squants.time.Time
+
+  import java.util
 
   trait FilePackage {
     p ⇒
@@ -159,24 +160,16 @@ package file {
         }
       }
 
-      def recursiveDelete: Unit = wrapError {
-        if (file.exists) {
-          val walk = Files.walk(file)
-          try
-            walk.
-              map { p ⇒
-                if (Try(Files.isDirectory(p)).getOrElse(false)) {
-                  p.setReadable(true)
-                  p.setWritable(true)
-                  p
-                }
-                else p
-              }.
-              sorted(java.util.Comparator.reverseOrder()).
-              forEach(Files.deleteIfExists)
-          finally walk.close()
+      def forceFileDelete = wrapError {
+        try Files.deleteIfExists(file)
+        catch {
+          case t: Throwable ⇒
+            FileTools.setAllPermissions(file)
+            Files.deleteIfExists(file)
         }
       }
+
+      def recursiveDelete: Unit = wrapError { DirUtils.delete(file) }
 
       def isJar = Try {
         val zip = new ZipFile(file)
@@ -546,6 +539,41 @@ package file {
     def acceptDirectory = new Filter[Path] {
       def accept(entry: Path): Boolean = Files.isDirectory(entry)
     }
+
+  }
+
+  object FileTools {
+    private val allPerms = {
+      import java.nio.file.attribute.PosixFilePermission
+      val perms = new util.HashSet[PosixFilePermission]()
+      //add owners permission
+      perms.add(PosixFilePermission.OWNER_READ)
+      perms.add(PosixFilePermission.OWNER_WRITE)
+      perms.add(PosixFilePermission.OWNER_EXECUTE)
+      //add group permissions
+      perms.add(PosixFilePermission.GROUP_READ)
+      perms.add(PosixFilePermission.GROUP_WRITE)
+      perms.add(PosixFilePermission.GROUP_EXECUTE)
+      //add others permissions
+      perms.add(PosixFilePermission.OTHERS_READ)
+      perms.add(PosixFilePermission.OTHERS_WRITE)
+      perms.add(PosixFilePermission.OTHERS_EXECUTE)
+      perms
+    }
+
+    private val isPosix = {
+      import java.nio.file.FileSystems
+      FileSystems.getDefault.supportedFileAttributeViews.contains("posix")
+    }
+
+    def setAllPermissions(path: Path) =
+      if (isPosix) Files.setPosixFilePermissions(path, allPerms)
+      else {
+        val f = path.toFile
+        f.setReadable(true)
+        f.setWritable(true)
+        f.setExecutable(true)
+      }
 
   }
 
