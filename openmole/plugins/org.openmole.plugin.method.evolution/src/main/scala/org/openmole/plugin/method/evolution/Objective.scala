@@ -61,36 +61,6 @@ object Objective {
 
   implicit def toObjective[T: ToObjective](t: T): Objective = implicitly[ToObjective[T]].apply(t)
 
-  def prototypes(o: Objectives) = {
-    def prototype(o: Objective) =
-      o match {
-        case e: ExactObjective[_] ⇒ e.prototype
-        case n: NoisyObjective[_] ⇒ n.prototype
-      }
-
-    o.map(prototype)
-  }
-
-  def resultPrototypes(o: Objectives) = {
-    def resultPrototype(o: Objective) =
-      o match {
-        case e: ExactObjective[_] ⇒
-          e.delta match {
-            case Some(_) ⇒ e.prototype.withNamespace(e.prototype.namespace.names ++ Seq("delta"))
-            case _       ⇒ e.prototype
-          }
-        case n: NoisyObjective[_] ⇒
-          (n.delta, n.as) match {
-            case (_, Some(s))    ⇒ n.prototype.withName(s)
-            case (Some(_), None) ⇒ n.prototype.withNamespace(n.prototype.namespace.names ++ Seq("delta"))
-            case (None, None)    ⇒ n.prototype
-          }
-
-      }
-
-    o.map(resultPrototype)
-  }
-
   def toExact(o: Objective) =
     o match {
       case e: ExactObjective[_] ⇒ e
@@ -118,6 +88,35 @@ object Objectives {
   def onlyExact(o: Objectives) = Objectives.value(o).collect { case x: ExactObjective[_] ⇒ x }.size == Objectives.value(o).size
   def toExact(o: Objectives) = Objectives.value(o).map(o ⇒ Objective.toExact(o))
   def toNoisy(o: Objectives) = Objectives.value(o).map(o ⇒ Objective.toNoisy(o))
+
+  def prototypes(o: Objectives) = {
+    def prototype(o: Objective) =
+      o match {
+        case e: ExactObjective[_] ⇒ e.prototype
+        case n: NoisyObjective[_] ⇒ n.prototype
+      }
+
+    o.map(prototype)
+  }
+
+  def resultPrototypes(o: Objectives) = {
+    def resultPrototype(o: Objective) =
+      o match {
+        case e: ExactObjective[_] ⇒
+          e.delta match {
+            case Some(_) ⇒ e.prototype.withNamespace(e.prototype.namespace.names ++ Seq("delta"))
+            case _       ⇒ e.prototype
+          }
+        case n: NoisyObjective[_] ⇒
+          (n.delta, n.as) match {
+            case (_, Some(s))    ⇒ n.prototype.withName(s)
+            case (Some(_), None) ⇒ n.prototype.withNamespace(n.prototype.namespace.names ++ Seq("delta"))
+            case (None, None)    ⇒ n.prototype
+          }
+      }
+
+    o.map(resultPrototype)
+  }
 
   def validate(o: Objectives, outputs: Seq[Val[_]]) = Validate { p ⇒
     import p._

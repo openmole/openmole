@@ -42,6 +42,6 @@ object MetadataGeneration {
     }
 
   def grid(p: Seq[PSE.PatternAxe]) =
-    (Objective.resultPrototypes(p.map(_.p)) zip p) map { case (p, pa) ⇒ EvolutionMetadata.PSE.GridAxe(p.name, pa.scale) }
+    (Objectives.resultPrototypes(p.map(_.p)) zip p) map { case (p, pa) ⇒ EvolutionMetadata.PSE.GridAxe(p.name, pa.scale) }
 
 }

@@ -286,8 +286,8 @@ object OSE {
     reject:         OptionalArgument[Condition]  = None): EvolutionWorkflow =
     EvolutionWorkflow.stochasticity(objective.map(_.objective), stochastic.option) match {
       case None ⇒
-        val exactObjectives = FitnessPattern.toObjectives(objective).map(o ⇒ Objective.toExact(o))
-        val phenotypeContent = PhenotypeContent(Objective.prototypes(exactObjectives), outputs)
+        val exactObjectives = Objectives.toExact(FitnessPattern.toObjectives(objective))
+        val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
         val fg = OriginAxe.fullGenome(origin, genome)
 
         EvolutionWorkflow.deterministicGAIntegration(
@@ -306,8 +306,8 @@ object OSE {
         )
       case Some(stochasticValue) ⇒
         val fg = OriginAxe.fullGenome(origin, genome)
-        val noisyObjectives = FitnessPattern.toObjectives(objective).map(o ⇒ Objective.toNoisy(o))
-        val phenotypeContent = PhenotypeContent(Objective.prototypes(noisyObjectives), outputs)
+        val noisyObjectives = Objectives.toNoisy(FitnessPattern.toObjectives(objective))
+        val phenotypeContent = PhenotypeContent(Objectives.prototypes(noisyObjectives), outputs)
 
         def validation: Validate = {
           val aOutputs = outputs.map(_.toArray)

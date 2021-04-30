@@ -439,7 +439,7 @@ object PSE {
     EvolutionWorkflow.stochasticity(objective.map(_.p), stochastic.option) match {
       case None ⇒
         val exactObjectives = Objectives.toExact(objective.map(_.p))
-        val phenotypeContent = PhenotypeContent(Objective.prototypes(exactObjectives), outputs)
+        val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
 
         EvolutionWorkflow.deterministicGAIntegration(
           DeterministicParams(
@@ -456,7 +456,7 @@ object PSE {
         )
       case Some(stochasticValue) ⇒
         val noisyObjectives = Objectives.toNoisy(objective.map(_.p))
-        val phenotypeContent = PhenotypeContent(Objective.prototypes(noisyObjectives), outputs)
+        val phenotypeContent = PhenotypeContent(Objectives.prototypes(noisyObjectives), outputs)
 
         def validation: Validate = {
           val aOutputs = outputs.map(_.toArray)
