@@ -5,9 +5,9 @@ import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.tools.math._
 import org.openmole.core.workflow.builder.ValueAssignment
+import org.openmole.tool.collection.DoubleRange
 
 import java.io.File
-
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
 
@@ -29,8 +29,14 @@ object Genome {
     implicit def factorIsScalaDouble[D](f: Factor[D, Double])(implicit bounded: BoundedDomain[D, Double]) =
       ScalarDouble(f.value, bounded.min(f.domain), bounded.max(f.domain))
 
+    implicit def factorOfDoubleRangeIsScalaDouble(f: Factor[DoubleRange, Double]) =
+      ScalarDouble(f.value, f.domain.min, f.domain.max)
+
     implicit def factorIsScalarInt[D](f: Factor[D, Int])(implicit bounded: BoundedDomain[D, Int]) =
       ScalarInt(f.value, bounded.min(f.domain), bounded.max(f.domain))
+
+    implicit def factorOfScalaRangeIsScalarInt(f: Factor[scala.Range, Int]) =
+      ScalarInt(f.value, f.domain.min, f.domain.max)
 
     implicit def factorIsSequenceOfDouble[D](f: Factor[D, Array[Double]])(implicit bounded: BoundedDomain[D, Array[Double]], sized: SizedDomain[D]) =
       SequenceOfDouble(f.value, bounded.min(f.domain), bounded.max(f.domain), sized(f.domain))
