@@ -10,6 +10,7 @@ def settings = Seq(
   resolvers += Resolver.sonatypeRepo("snapshots"),
   resolvers += Resolver.sonatypeRepo("releases"),
   resolvers += Resolver.sonatypeRepo("staging"),
+  resolvers += "netlogo" at "https://dl.cloudsmith.io/public/netlogo/netlogo/maven/", // netlogo 6.2
   Global / scalaVersion := scalaVersionValue,
   scalacOptions ++= Seq("-deprecation"),
   publishLocal / packageDoc / publishArtifact := false,
