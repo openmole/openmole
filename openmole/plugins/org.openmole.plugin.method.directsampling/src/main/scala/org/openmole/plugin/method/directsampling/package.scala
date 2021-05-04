@@ -87,11 +87,11 @@ package object directsampling {
     evaluation:       DSL,
     seed:             Val[T],
     sample:           Int,
-    index:            OptionalArgument[Val[Int]] = None,
-    distributionSeed: OptionalArgument[Long]     = None,
-    aggregation:      Seq[Aggregation]           = Seq.empty,
-    wrap:             Boolean                    = false,
-    scope:            DefinitionScope            = "replication"
+    index:            OptionalArgument[Val[Int]]          = None,
+    distributionSeed: OptionalArgument[FromContext[Long]] = None,
+    aggregation:      Seq[Aggregation]                    = Seq.empty,
+    wrap:             Boolean                             = false,
+    scope:            DefinitionScope                     = "replication"
   ) = {
     implicit def defScope = scope
 
