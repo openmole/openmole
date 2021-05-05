@@ -18,6 +18,7 @@ package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
+import org.openmole.core.workflow.domain
 import org.openmole.tool.random._
 
 object ShuffleDomain {
@@ -29,8 +30,8 @@ object ShuffleDomain {
         domain.discrete.iterator(domain.domain).from(context).toSeq.shuffled(random()).iterator
       }
 
-  implicit def inputs[D, T](implicit inputs: RequiredInput[D]): RequiredInput[ShuffleDomain[D, T]] = domain ⇒ inputs(domain.domain)
-  implicit def validate[D, T](implicit validate: ExpectedValidation[D]): ExpectedValidation[ShuffleDomain[D, T]] = domain ⇒ validate(domain.domain)
+  implicit def inputs[D, T](implicit inputs: DomainInput[D]): DomainInput[ShuffleDomain[D, T]] = domain ⇒ inputs(domain.domain)
+  implicit def validate[D, T](implicit validate: DomainValidation[D]): DomainValidation[ShuffleDomain[D, T]] = domain ⇒ validate(domain.domain)
 
 }
 

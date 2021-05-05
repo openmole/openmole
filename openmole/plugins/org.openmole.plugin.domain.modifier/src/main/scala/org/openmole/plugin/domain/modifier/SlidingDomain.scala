@@ -19,15 +19,14 @@ package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-
 import cats._
 import cats.implicits._
 
 object SlidingDomain {
 
   implicit def isDiscrete[D, T]: DiscreteFromContextDomain[SlidingDomain[D, T], Array[T]] = domain ⇒ domain.iterator
-  implicit def inputs[D, T](implicit domainInputs: RequiredInput[D]): RequiredInput[SlidingDomain[D, T]] = domain ⇒ domainInputs(domain.domain) ++ domain.size.inputs ++ domain.step.inputs
-  implicit def validate[D, T](implicit validate: ExpectedValidation[D]): ExpectedValidation[SlidingDomain[D, T]] = domain ⇒ validate(domain.domain) ++ domain.size.validate ++ domain.size.validate
+  implicit def inputs[D, T](implicit domainInputs: DomainInput[D]): DomainInput[SlidingDomain[D, T]] = domain ⇒ domainInputs(domain.domain) ++ domain.size.inputs ++ domain.step.inputs
+  implicit def validate[D, T](implicit validate: DomainValidation[D]): DomainValidation[SlidingDomain[D, T]] = domain ⇒ validate(domain.domain) ++ domain.size.validate ++ domain.size.validate
 
 }
 

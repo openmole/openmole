@@ -30,8 +30,8 @@ object SortedByDomain {
         domain.discrete.iterator(domain.domain).from(context).toSeq.sortBy(domain.s.from(context)).iterator
       }
 
-  implicit def inputs[D, T, S](implicit domainInputs: RequiredInput[D]): RequiredInput[SortedByDomain[D, T, S]] = domain ⇒ domainInputs(domain.domain) ++ domain.s.inputs
-  implicit def validate[D, T, S](implicit validate: ExpectedValidation[D]): ExpectedValidation[SortedByDomain[D, T, S]] = domain ⇒ validate(domain.domain) ++ domain.s.validate
+  implicit def inputs[D, T, S](implicit domainInputs: DomainInput[D]): DomainInput[SortedByDomain[D, T, S]] = domain ⇒ domainInputs(domain.domain) ++ domain.s.inputs
+  implicit def validate[D, T, S](implicit validate: DomainValidation[D]): DomainValidation[SortedByDomain[D, T, S]] = domain ⇒ validate(domain.domain) ++ domain.s.validate
 
 }
 

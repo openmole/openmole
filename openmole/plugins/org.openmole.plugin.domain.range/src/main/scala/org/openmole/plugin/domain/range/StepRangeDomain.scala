@@ -19,8 +19,8 @@ package org.openmole.plugin.domain.range
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-
 import cats.implicits._
+import org.openmole.core.workflow.domain
 
 object StepRangeDomain {
 
@@ -31,8 +31,8 @@ object StepRangeDomain {
     override def center(domain: StepRangeDomain[T]) = RangeDomain.rangeCenter(domain.range)
   }
 
-  implicit def inputs[T]: RequiredInput[StepRangeDomain[T]] = domain ⇒ RangeDomain.inputs.apply(domain.range) ++ domain.steps.inputs
-  implicit def validate[T]: ExpectedValidation[StepRangeDomain[T]] = domain ⇒ RangeDomain.validate.apply(domain.range) ++ domain.steps.validate
+  implicit def inputs[T]: domain.DomainInput[StepRangeDomain[T]] = domain ⇒ RangeDomain.inputs.apply(domain.range) ++ domain.steps.inputs
+  implicit def validate[T]: domain.DomainValidation[StepRangeDomain[T]] = domain ⇒ RangeDomain.validate.apply(domain.range) ++ domain.steps.validate
 
   def apply[T](range: RangeDomain[T], step: FromContext[T]) = new StepRangeDomain[T](range, step)
 }

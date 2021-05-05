@@ -19,8 +19,8 @@ package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
+import org.openmole.core.workflow.domain
 import org.openmole.plugin.domain.range._
-
 import org.scalatest._
 
 class ModifierDomainSpec extends FlatSpec with Matchers {
@@ -29,7 +29,7 @@ class ModifierDomainSpec extends FlatSpec with Matchers {
     val size = Val[Int]
     val range = RangeDomain[Int](0, 10)
     val take = range.take(size)
-    implicitly[RequiredInput[take.type]].apply(take) should contain(size)
+    implicitly[domain.DomainInput[take.type]].apply(take) should contain(size)
   }
 
   "range" should "work with modifiers" in {

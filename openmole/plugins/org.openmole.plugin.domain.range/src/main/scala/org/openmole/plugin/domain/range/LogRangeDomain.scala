@@ -19,10 +19,10 @@ package org.openmole.plugin.domain.range
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-
 import cats._
 import cats.implicits._
 import cats.syntax._
+import org.openmole.core.workflow.domain
 
 object LogRangeDomain {
 
@@ -34,8 +34,8 @@ object LogRangeDomain {
       override def min(domain: LogRangeDomain[T]) = domain.min
     }
 
-  implicit def inputs[T]: RequiredInput[LogRangeDomain[T]] = domain ⇒ RangeDomain.inputs.apply(domain.range) ++ domain.steps.inputs
-  implicit def validate[T]: ExpectedValidation[LogRangeDomain[T]] = domain ⇒ RangeDomain.validate.apply(domain.range) ++ domain.steps.validate
+  implicit def inputs[T]: domain.DomainInput[LogRangeDomain[T]] = domain ⇒ RangeDomain.inputs.apply(domain.range) ++ domain.steps.inputs
+  implicit def validate[T]: domain.DomainValidation[LogRangeDomain[T]] = domain ⇒ RangeDomain.validate.apply(domain.range) ++ domain.steps.validate
 
   def apply[T: Log](range: RangeDomain[T], steps: FromContext[Int]) =
     new LogRangeDomain[T](range, steps)

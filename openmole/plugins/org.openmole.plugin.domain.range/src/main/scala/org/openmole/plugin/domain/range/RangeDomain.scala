@@ -19,8 +19,8 @@ package org.openmole.plugin.domain.range
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-
 import cats.implicits._
+import org.openmole.core.workflow.domain
 
 object RangeDomain {
 
@@ -34,8 +34,8 @@ object RangeDomain {
     override def iterator(domain: RangeDomain[T]) = StepRangeDomain[T](domain, step.step).iterator
   }
 
-  implicit def inputs[T]: RequiredInput[RangeDomain[T]] = domain ⇒ domain.min.inputs ++ domain.max.inputs
-  implicit def validate[T]: ExpectedValidation[RangeDomain[T]] = domain ⇒ domain.min.validate ++ domain.max.validate
+  implicit def inputs[T]: domain.DomainInput[RangeDomain[T]] = domain ⇒ domain.min.inputs ++ domain.max.inputs
+  implicit def validate[T]: domain.DomainValidation[RangeDomain[T]] = domain ⇒ domain.min.validate ++ domain.max.validate
 
   implicit def toDomain[D, T](d: D)(implicit toRangeDomain: IsRangeDomain[D, T]) = toRangeDomain(d)
 

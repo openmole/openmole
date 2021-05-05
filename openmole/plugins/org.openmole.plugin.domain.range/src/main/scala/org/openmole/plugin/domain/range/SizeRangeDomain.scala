@@ -20,6 +20,7 @@ package org.openmole.plugin.domain.range
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import cats.implicits._
+import org.openmole.core.workflow.domain
 
 object SizeRangeDomain {
   implicit def isFinite[T] = new DiscreteFromContextDomain[SizeRangeDomain[T], T] with BoundedFromContextDomain[SizeRangeDomain[T], T] with CenterFromContextDomain[SizeRangeDomain[T], T] {
@@ -29,8 +30,8 @@ object SizeRangeDomain {
     override def center(domain: SizeRangeDomain[T]) = RangeDomain.rangeCenter(domain.range)
   }
 
-  implicit def inputs[T]: RequiredInput[SizeRangeDomain[T]] = domain ⇒ RangeDomain.inputs.apply(domain.range) ++ domain.size.inputs
-  implicit def validate[T]: ExpectedValidation[SizeRangeDomain[T]] = domain ⇒ RangeDomain.validate.apply(domain.range) ++ domain.size.validate
+  implicit def inputs[T]: domain.DomainInput[SizeRangeDomain[T]] = domain ⇒ RangeDomain.inputs.apply(domain.range) ++ domain.size.inputs
+  implicit def validate[T]: domain.DomainValidation[SizeRangeDomain[T]] = domain ⇒ RangeDomain.validate.apply(domain.range) ++ domain.size.validate
 
   def apply[T: RangeValue](min: FromContext[T], max: FromContext[T], size: FromContext[Int]): SizeRangeDomain[T] =
     apply(RangeDomain(min, max), size)

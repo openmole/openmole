@@ -28,8 +28,8 @@ object ZipWithDomain {
       domain.discrete.iterator(domain.domain).from(context).map { e ⇒ e → domain.f.from(context).apply(e) }
     }
 
-  implicit def inputs[D, I, O](implicit domainInputs: RequiredInput[D]): RequiredInput[ZipWithDomain[D, I, O]] = domain ⇒ domainInputs(domain.domain) ++ domain.f.inputs
-  implicit def validate[D, I, O](implicit validate: ExpectedValidation[D]): ExpectedValidation[ZipWithDomain[D, I, O]] = domain ⇒ validate(domain.domain) ++ domain.f.validate
+  implicit def inputs[D, I, O](implicit domainInputs: DomainInput[D]): DomainInput[ZipWithDomain[D, I, O]] = domain ⇒ domainInputs(domain.domain) ++ domain.f.inputs
+  implicit def validate[D, I, O](implicit validate: DomainValidation[D]): DomainValidation[ZipWithDomain[D, I, O]] = domain ⇒ validate(domain.domain) ++ domain.f.validate
 
 }
 

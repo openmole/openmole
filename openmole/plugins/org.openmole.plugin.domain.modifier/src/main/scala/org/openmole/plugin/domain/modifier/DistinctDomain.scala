@@ -29,8 +29,8 @@ object DistinctDomain {
         domain.discrete.iterator(domain.domain).from(context).toSeq.distinct.iterator
       }
 
-  implicit def inputs[D, T](implicit inputs: RequiredInput[D]): RequiredInput[DistinctDomain[D, T]] = domain ⇒ inputs(domain.domain)
-  implicit def validate[D, T](implicit validate: ExpectedValidation[D]): ExpectedValidation[DistinctDomain[D, T]] = domain ⇒ validate(domain.domain)
+  implicit def inputs[D, T](implicit inputs: DomainInput[D]): DomainInput[DistinctDomain[D, T]] = domain ⇒ inputs(domain.domain)
+  implicit def validate[D, T](implicit validate: DomainValidation[D]): DomainValidation[DistinctDomain[D, T]] = domain ⇒ validate(domain.domain)
 
 }
 

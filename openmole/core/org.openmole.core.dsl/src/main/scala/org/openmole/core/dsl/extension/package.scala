@@ -1,6 +1,6 @@
 package org.openmole.core.dsl
 
-import org.openmole.core.workflow.validation.RequiredInput
+import org.openmole.core.workflow.domain.{ DomainValidation, DomainInput }
 
 package object extension {
 
@@ -41,6 +41,9 @@ package object extension {
   type DiscreteFromContextDomain[-D, +T] = org.openmole.core.workflow.domain.DiscreteFromContextDomain[D, T]
   type CenterDomain[-D, +T] = org.openmole.core.workflow.domain.CenterDomain[D, T]
   type CenterFromContextDomain[-D, +T] = org.openmole.core.workflow.domain.CenterFromContextDomain[D, T]
+
+  type DomainInput[-D] = org.openmole.core.workflow.domain.DomainInput[D]
+  type DomainValidation[-D] = org.openmole.core.workflow.domain.DomainValidation[D]
 
   type Factor[D, T] = org.openmole.core.workflow.sampling.Factor[D, T]
   def Factor[D, T](p: Val[T], d: D) = org.openmole.core.workflow.sampling.Factor(p, d)
@@ -89,9 +92,6 @@ package object extension {
   type Validate = org.openmole.core.expansion.Validate
   def Validate = org.openmole.core.expansion.Validate
 
-  type RequiredInput[-D] = org.openmole.core.workflow.validation.RequiredInput[D]
-  type ExpectedValidation[-D] = org.openmole.core.workflow.validation.ExpectedValidation[D]
-
   type UserBadDataError = org.openmole.core.exception.UserBadDataError
   type RandomProvider = org.openmole.tool.random.RandomProvider
   type PrototypeSet = org.openmole.core.context.PrototypeSet
@@ -99,4 +99,5 @@ package object extension {
   type ScriptSourceData = org.openmole.core.workflow.tools.ScriptSourceData
   val ScriptSourceData = org.openmole.core.workflow.tools.ScriptSourceData
 
+  type JavaLogger = org.openmole.tool.logger.JavaLogger
 }

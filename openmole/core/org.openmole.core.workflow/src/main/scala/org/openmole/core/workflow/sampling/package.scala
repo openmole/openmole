@@ -29,7 +29,6 @@ package sampling {
   import org.openmole.tool.types._
   import org.openmole.core.workflow.domain._
   import cats.implicits._
-  import org.openmole.core.workflow.validation.{ ExpectedValidation, RequiredInput }
 
   trait SamplingPackage {
 
@@ -41,7 +40,7 @@ package sampling {
       override def iterator(domain: FromContext[T]): FromContext[Iterator[T]] = domain.map(v ⇒ Vector(v).iterator)
     }
 
-    implicit def fromIsSampling[T](t: T)(implicit isSampling: IsSampling[T], samplingInputs: RequiredInput[T], samplingValidate: ExpectedValidation[T]) =
+    implicit def fromIsSampling[T](t: T)(implicit isSampling: IsSampling[T], samplingInputs: DomainInput[T], samplingValidate: DomainValidation[T]) =
       new Sampling {
         override def validate = isSampling.validate(t) ++ samplingValidate(t)
         override def inputs = isSampling.inputs(t) ++ samplingInputs(t)
@@ -49,7 +48,7 @@ package sampling {
         override def apply(): FromContext[Iterator[Iterable[Variable[_]]]] = isSampling.apply(t)
       }
 
-    implicit def factorIsSampling[D, T](implicit domain: DiscreteFromContextDomain[D, T], domainInputs: RequiredInput[D], domainValidate: ExpectedValidation[D]) = new IsSampling[Factor[D, T]] {
+    implicit def factorIsSampling[D, T](implicit domain: DiscreteFromContextDomain[D, T], domainInputs: DomainInput[D], domainValidate: DomainValidation[D]) = new IsSampling[Factor[D, T]] {
       def validate(f: Factor[D, T]): Validate = domain.iterator(f.domain).validate ++ domainValidate(f.domain)
       def inputs(f: Factor[D, T]) = domain.iterator(f.domain).inputs ++ domainInputs.apply(f.domain)
 

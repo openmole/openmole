@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Romain Reuillon
+ * Copyright (C) 2010 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,15 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.validation
+package org.openmole.core.workflow.domain
 
-import org.openmole.core.expansion.Validate
+import org.openmole.core.context._
 
-object ExpectedValidation {
-  implicit def empty[T]: ExpectedValidation[T] = _ ⇒ Validate.success
+object DomainInput {
+
+  /**
+   * By default implicitly no inputs
+   * @tparam T
+   * @return
+   */
+  implicit def empty[T]: DomainInput[T] = _ ⇒ PrototypeSet.empty
 }
 
-trait ExpectedValidation[-T] {
-  def apply(t: T): Validate
+/**
+ * Property of having inputs
+ * @tparam D
+ */
+trait DomainInput[-T] {
+  def apply(t: T): PrototypeSet
 }
-

@@ -18,19 +18,14 @@
 package org.openmole.plugin.domain.file
 
 import java.io.File
-import org.openmole.core.context.Context
-import org.openmole.core.dsl.extension.RequiredInput
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.domain._
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.validation.ExpectedValidation
-import org.openmole.tool.logger.JavaLogger
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 
 object ListFilesDomain extends JavaLogger {
 
   implicit def isDiscrete: DiscreteFromContextDomain[ListFilesDomain, File] = domain ⇒ domain.iterator
-  implicit def inputs: RequiredInput[ListFilesDomain] = domain ⇒ domain.directory.toSeq.flatMap(_.inputs) ++ domain.filter.toSeq.flatMap(_.inputs)
-  implicit def validate: ExpectedValidation[ListFilesDomain] = domain ⇒ domain.directory.toSeq.map(_.validate) ++ domain.filter.toSeq.map(_.validate)
+  implicit def inputs: DomainInput[ListFilesDomain] = domain ⇒ domain.directory.toSeq.flatMap(_.inputs) ++ domain.filter.toSeq.flatMap(_.inputs)
+  implicit def validate: DomainValidation[ListFilesDomain] = domain ⇒ domain.directory.toSeq.map(_.validate) ++ domain.filter.toSeq.map(_.validate)
 
   def apply(
     base:      File,
@@ -41,7 +36,7 @@ object ListFilesDomain extends JavaLogger {
 
 }
 
-import org.openmole.plugin.domain.file.ListFilesDomain.Log._
+import org.openmole.plugin.domain.file.ListFilesDomain.Log
 
 class ListFilesDomain(
   base:          File,
@@ -58,7 +53,7 @@ class ListFilesDomain(
     val dir = directory.map(s ⇒ new File(base, s.from(context))).getOrElse(base)
 
     if (!dir.exists) {
-      logger.warning("Directory " + dir + " in ListFilesDomain doesn't exists, returning an empty list of values.")
+      Log.logger.warning("Directory " + dir + " in ListFilesDomain doesn't exists, returning an empty list of values.")
       Iterator.empty
     }
     else if (recursive) dir.listRecursive(toFilter _).iterator

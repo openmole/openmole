@@ -17,15 +17,17 @@
 
 package org.openmole.plugin.domain.collection
 
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.domain._
-import cats.implicits._
-import org.openmole.core.workflow.validation.{ ExpectedValidation, RequiredInput }
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 
 object SeqDomain {
-  implicit def isFinite[T]: DiscreteFromContextDomain[SeqDomain[T], T] = domain ⇒ domain.values.toList.sequence.map(_.iterator)
-  implicit def inputs[T]: RequiredInput[SeqDomain[T]] = domain ⇒ domain.values.flatMap(_.inputs)
-  implicit def validate[T]: ExpectedValidation[SeqDomain[T]] = domain ⇒ domain.values.map(_.validate)
+  implicit def isFinite[T]: DiscreteFromContextDomain[SeqDomain[T], T] = domain ⇒ FromContext { p ⇒
+    import p._
+    domain.values.iterator.map(_.from(context))
+  }
+
+  implicit def inputs[T]: DomainInput[SeqDomain[T]] = domain ⇒ domain.values.flatMap(_.inputs)
+  implicit def validate[T]: DomainValidation[SeqDomain[T]] = domain ⇒ domain.values.map(_.validate)
 
   def apply[T](values: FromContext[T]*) = new SeqDomain[T](values: _*)
 }

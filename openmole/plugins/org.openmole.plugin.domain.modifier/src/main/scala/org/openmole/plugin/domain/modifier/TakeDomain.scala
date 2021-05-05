@@ -30,8 +30,8 @@ object TakeDomain {
       slice(0, s)
   }
 
-  implicit def inputs[D, T](implicit domainInputs: RequiredInput[D]): RequiredInput[TakeDomain[D, T]] = domain ⇒ domain.size.inputs ++ domainInputs.apply(domain.domain)
-  implicit def validate[D, T](implicit validate: ExpectedValidation[D]): ExpectedValidation[TakeDomain[D, T]] = domain ⇒ domain.size.validate ++ validate(domain.domain)
+  implicit def inputs[D, T](implicit domainInputs: DomainInput[D]): DomainInput[TakeDomain[D, T]] = domain ⇒ domain.size.inputs ++ domainInputs.apply(domain.domain)
+  implicit def validate[D, T](implicit validate: DomainValidation[D]): DomainValidation[TakeDomain[D, T]] = domain ⇒ domain.size.validate ++ validate(domain.domain)
 }
 
 case class TakeDomain[D, +T](domain: D, size: FromContext[Int])(implicit val discrete: DiscreteFromContextDomain[D, T])

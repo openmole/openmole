@@ -19,15 +19,14 @@ package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-
 import cats._
 import cats.implicits._
 
 object TakeWhileDomain {
 
   implicit def isFinite[D, T]: DiscreteFromContextDomain[TakeWhileDomain[D, T], T] = domain ⇒ domain.iterator
-  implicit def inputs[D, T](implicit domainInputs: RequiredInput[D]): RequiredInput[TakeWhileDomain[D, T]] = domain ⇒ domainInputs(domain.domain) ++ domain.predicate.inputs
-  implicit def validate[D, T](implicit validate: ExpectedValidation[D]): ExpectedValidation[TakeWhileDomain[D, T]] = domain ⇒ validate(domain.domain) ++ domain.predicate.validate
+  implicit def inputs[D, T](implicit domainInputs: DomainInput[D]): DomainInput[TakeWhileDomain[D, T]] = domain ⇒ domainInputs(domain.domain) ++ domain.predicate.inputs
+  implicit def validate[D, T](implicit validate: DomainValidation[D]): DomainValidation[TakeWhileDomain[D, T]] = domain ⇒ validate(domain.domain) ++ domain.predicate.validate
 
 }
 

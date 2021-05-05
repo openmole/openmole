@@ -20,9 +20,8 @@ package org.openmole.plugin.domain
 import java.io.File
 import java.nio.file.Path
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.domain._
+import org.openmole.core.workflow.domain.{ DomainInput, _ }
 import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.validation.RequiredInput
 
 import scala.reflect.runtime.universe._
 
@@ -62,7 +61,7 @@ package object modifier {
     def takeWhile(predicate: T ⇒ Boolean) = TakeWhileDomain(domain, predicate)
     def takeWhile(predicate: String)(implicit m: Manifest[T]) = TakeWhileDomain(domain, FromContext.codeToFromContext[T ⇒ Boolean](predicate))
 
-    def ++[D2](d2: D2)(implicit discrete2: DiscreteFromContextDomain[D2, T], inputs2: RequiredInput[D2]) = AppendDomain(domain, d2)
+    def ++[D2](d2: D2)(implicit discrete2: DiscreteFromContextDomain[D2, T], inputs2: DomainInput[D2]) = AppendDomain(domain, d2)
   }
 
   //  implicit def discreteFactorModifierDecorator[D, T: TypeTag](factor: Factor[D, T])(implicit discrete: DiscreteFromContext[D, T]) = new {

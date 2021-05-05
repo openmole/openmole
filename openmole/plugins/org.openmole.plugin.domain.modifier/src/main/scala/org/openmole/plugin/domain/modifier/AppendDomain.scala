@@ -30,8 +30,8 @@ object AppendDomain {
           domain.domain2.iterator(domain.d2).from(context).iterator
       }
 
-  implicit def inputs[D1, D2, T](implicit d1Inputs: RequiredInput[D1], d2Inputs: RequiredInput[D2]): RequiredInput[AppendDomain[D1, D2, T]] = domain ⇒ d1Inputs(domain.d1) ++ d2Inputs(domain.d2)
-  implicit def validate[D1, D2, T](implicit d1Validate: ExpectedValidation[D1], d2Validate: ExpectedValidation[D2]): ExpectedValidation[AppendDomain[D1, D2, T]] = domain ⇒ d1Validate(domain.d1) ++ d2Validate(domain.d2)
+  implicit def inputs[D1, D2, T](implicit d1Inputs: DomainInput[D1], d2Inputs: DomainInput[D2]): DomainInput[AppendDomain[D1, D2, T]] = domain ⇒ d1Inputs(domain.d1) ++ d2Inputs(domain.d2)
+  implicit def validate[D1, D2, T](implicit d1Validate: DomainValidation[D1], d2Validate: DomainValidation[D2]): DomainValidation[AppendDomain[D1, D2, T]] = domain ⇒ d1Validate(domain.d1) ++ d2Validate(domain.d2)
 
 }
 

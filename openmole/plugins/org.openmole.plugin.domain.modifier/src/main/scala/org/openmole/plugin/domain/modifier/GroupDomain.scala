@@ -19,7 +19,6 @@ package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-
 import cats._
 import cats.implicits._
 
@@ -31,8 +30,8 @@ object GroupDomain {
       (discrete.iterator(d) map2 size)((it, s) ⇒ it.grouped(s) map (_.toArray))
     }
 
-  implicit def inputs[D, T](implicit inputs: RequiredInput[D]): RequiredInput[GroupDomain[D, T]] = domain ⇒ inputs(domain.d) ++ domain.size.inputs
-  implicit def validate[D, T](implicit validate: ExpectedValidation[D]): ExpectedValidation[GroupDomain[D, T]] = domain ⇒ validate(domain.d) ++ domain.size.validate
+  implicit def inputs[D, T](implicit inputs: DomainInput[D]): DomainInput[GroupDomain[D, T]] = domain ⇒ inputs(domain.d) ++ domain.size.inputs
+  implicit def validate[D, T](implicit validate: DomainValidation[D]): DomainValidation[GroupDomain[D, T]] = domain ⇒ validate(domain.d) ++ domain.size.validate
 
 }
 

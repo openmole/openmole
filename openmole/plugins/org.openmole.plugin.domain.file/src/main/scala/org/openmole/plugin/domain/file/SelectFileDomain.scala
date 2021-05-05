@@ -19,14 +19,15 @@ package org.openmole.plugin.domain.file
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
+
 import cats.implicits._
 import org.openmole.core.workflow.tools.FileList
 
 object SelectFileDomain {
 
   implicit def isDiscrete: DiscreteFromContextDomain[SelectFileDomain, File] = domain ⇒ domain.iterator
-  implicit def inputs: RequiredInput[SelectFileDomain] = domain ⇒ domain.provider.inputs
-  implicit def validate: ExpectedValidation[SelectFileDomain] = domain ⇒ domain.provider.validate
+  implicit def inputs: DomainInput[SelectFileDomain] = domain ⇒ domain.provider.inputs
+  implicit def validate: DomainValidation[SelectFileDomain] = domain ⇒ domain.provider.validate
 
   def apply(base: File, path: FromContext[String]) = new SelectFileDomain(FileList(base, path))
 }

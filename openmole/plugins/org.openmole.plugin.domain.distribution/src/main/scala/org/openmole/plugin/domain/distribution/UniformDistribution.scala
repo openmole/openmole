@@ -22,8 +22,8 @@ import org.openmole.core.dsl.extension._
 
 object UniformDistribution {
   implicit def isDiscrete[T]: DiscreteFromContextDomain[UniformDistribution[T], T] = domain ⇒ domain.iterator
-  implicit def domainInputs[T]: RequiredInput[UniformDistribution[T]] = domain ⇒ domain.seed.toSeq.flatMap(_.inputs)
-  implicit def validate[T]: ExpectedValidation[UniformDistribution[T]] = domain ⇒ domain.seed.map(_.validate).toSeq
+  implicit def domainInputs[T]: DomainInput[UniformDistribution[T]] = domain ⇒ domain.seed.toSeq.flatMap(_.inputs)
+  implicit def validate[T]: DomainValidation[UniformDistribution[T]] = domain ⇒ domain.seed.map(_.validate).toSeq
 }
 
 case class UniformDistribution[T](seed: Option[FromContext[Long]] = None, max: Option[T] = None)(implicit distribution: Distribution[T]) {
