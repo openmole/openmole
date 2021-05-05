@@ -22,16 +22,13 @@ import org.openmole.core.dsl.extension._
 
 object MapDomain {
 
-  implicit def isDiscrete[D, I, O] = new DiscreteFromContextDomain[MapDomain[D, I, O], O] with DomainInputs[MapDomain[D, I, O]] {
-    override def iterator(domain: MapDomain[D, I, O]) = domain.iterator
-    override def inputs(domain: MapDomain[D, I, O]) = domain.inputs
-  }
+  implicit def isDiscrete[D, I, O]: DiscreteFromContextDomain[MapDomain[D, I, O], O] = domain ⇒ domain.iterator
+  implicit def inputs[D, I, O](implicit domainInputs: RequiredInput[D]): RequiredInput[MapDomain[D, I, O]] = domain ⇒ domainInputs(domain.domain) ++ domain.f.inputs
+  implicit def validate[D, I, O](implicit validate: ExpectedValidation[D]): ExpectedValidation[MapDomain[D, I, O]] = domain ⇒ validate(domain.domain) ++ domain.f.validate
 
 }
 
-case class MapDomain[D, -I, +O](domain: D, f: FromContext[I ⇒ O])(implicit discrete: DiscreteFromContextDomain[D, I], domainInputs: DomainInputs[D]) { d ⇒
-
-  def inputs = domainInputs.inputs(domain)
+case class MapDomain[D, -I, +O](domain: D, f: FromContext[I ⇒ O])(implicit discrete: DiscreteFromContextDomain[D, I]) { d ⇒
 
   def iterator = FromContext { p ⇒
     import p._

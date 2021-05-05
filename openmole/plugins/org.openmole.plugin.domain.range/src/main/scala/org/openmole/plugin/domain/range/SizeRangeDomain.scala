@@ -17,9 +17,8 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.context.Context
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.domain._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 import cats.implicits._
 
 object SizeRangeDomain {
@@ -30,6 +29,9 @@ object SizeRangeDomain {
     override def center(domain: SizeRangeDomain[T]) = RangeDomain.rangeCenter(domain.range)
   }
 
+  implicit def inputs[T]: RequiredInput[SizeRangeDomain[T]] = domain ⇒ RangeDomain.inputs.apply(domain.range) ++ domain.size.inputs
+  implicit def validate[T]: ExpectedValidation[SizeRangeDomain[T]] = domain ⇒ RangeDomain.validate.apply(domain.range) ++ domain.size.validate
+
   def apply[T: RangeValue](min: FromContext[T], max: FromContext[T], size: FromContext[Int]): SizeRangeDomain[T] =
     apply(RangeDomain(min, max), size)
 
@@ -38,7 +40,7 @@ object SizeRangeDomain {
 
 }
 
-class SizeRangeDomain[T](val range: RangeDomain[T], size: FromContext[Int]) extends SizeStep[T] {
+class SizeRangeDomain[T](val range: RangeDomain[T], val size: FromContext[Int]) extends SizeStep[T] {
   import range._
 
   def stepAndSize(minValue: T, maxValue: T) = size.map { size ⇒

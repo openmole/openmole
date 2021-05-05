@@ -29,6 +29,7 @@ package sampling {
   import org.openmole.tool.types._
   import org.openmole.core.workflow.domain._
   import cats.implicits._
+  import org.openmole.core.workflow.validation.{ ExpectedValidation, RequiredInput }
 
   trait SamplingPackage {
 
@@ -40,18 +41,18 @@ package sampling {
       override def iterator(domain: FromContext[T]): FromContext[Iterator[T]] = domain.map(v ⇒ Vector(v).iterator)
     }
 
-    implicit def fromIsSampling[T](t: T)(implicit isSampling: IsSampling[T]) =
+    implicit def fromIsSampling[T](t: T)(implicit isSampling: IsSampling[T], samplingInputs: RequiredInput[T], samplingValidate: ExpectedValidation[T]) =
       new Sampling {
-        override def validate = isSampling.validate(t)
-        override def inputs = isSampling.inputs(t)
+        override def validate = isSampling.validate(t) ++ samplingValidate(t)
+        override def inputs = isSampling.inputs(t) ++ samplingInputs(t)
         override def outputs: Iterable[Val[_]] = isSampling.outputs(t)
         override def apply(): FromContext[Iterator[Iterable[Variable[_]]]] = isSampling.apply(t)
       }
 
-    implicit def factorIsSampling[D, T](implicit domain: DiscreteFromContextDomain[D, T], domainInputs: DomainInputs[D]) = new IsSampling[Factor[D, T]] {
-      def validate(f: Factor[D, T]): Validate = domain.iterator(f.domain).validate
+    implicit def factorIsSampling[D, T](implicit domain: DiscreteFromContextDomain[D, T], domainInputs: RequiredInput[D], domainValidate: ExpectedValidation[D]) = new IsSampling[Factor[D, T]] {
+      def validate(f: Factor[D, T]): Validate = domain.iterator(f.domain).validate ++ domainValidate(f.domain)
+      def inputs(f: Factor[D, T]) = domain.iterator(f.domain).inputs ++ domainInputs.apply(f.domain)
 
-      def inputs(f: Factor[D, T]) = domainInputs.inputs(f.domain)
       def outputs(f: Factor[D, T]) = List(f.value)
       override def apply(f: Factor[D, T]): FromContext[Iterator[collection.Iterable[Variable[T]]]] =
         domain.iterator(f.domain).map(_.map { v ⇒ List(Variable(f.value, v)) })

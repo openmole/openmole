@@ -22,24 +22,22 @@ import org.openmole.core.dsl.extension._
 
 object SortByNameDomain {
 
-  implicit def isDiscrete[D] = new DiscreteFromContextDomain[SortByNameDomain[D], File] with DomainInputs[SortByNameDomain[D]] {
+  implicit def isDiscrete[D]: DiscreteFromContextDomain[SortByNameDomain[D], File] =
+    domain ⇒
+      FromContext { p ⇒
+        import p._
+        def extractNumber(name: String) = {
+          val n = name.reverse.dropWhile(!_.isDigit).takeWhile(_.isDigit).reverse
+          if (n.isEmpty) throw new UserBadDataError("File name " + name + " doesn't contains a number")
+          else n.toInt
+        }
 
-    override def inputs(domain: SortByNameDomain[D]): PrototypeSet = domain.domainInputs.inputs(domain.domain)
-
-    override def iterator(domain: SortByNameDomain[D]) = FromContext { p ⇒
-      import p._
-      def extractNumber(name: String) = {
-        val n = name.reverse.dropWhile(!_.isDigit).takeWhile(_.isDigit).reverse
-        if (n.isEmpty) throw new UserBadDataError("File name " + name + " doesn't contains a number")
-        else n.toInt
+        domain.discrete.iterator(domain.domain).from(context).toSeq.sortBy(f ⇒ extractNumber(f.getName)).iterator
       }
 
-      domain.discrete.iterator(domain.domain).from(context).toSeq.sortBy(f ⇒ extractNumber(f.getName)).iterator
-    }
-  }
+  implicit def inputs[D](implicit domainInputs: RequiredInput[D]): RequiredInput[SortByNameDomain[D]] = domain ⇒ domainInputs(domain.domain)
+  implicit def validate[D](implicit validate: ExpectedValidation[D]): ExpectedValidation[SortByNameDomain[D]] = domain ⇒ validate(domain.domain)
 
 }
 
-case class SortByNameDomain[D](domain: D)(implicit val discrete: DiscreteFromContextDomain[D, File], val domainInputs: DomainInputs[D]) {
-
-}
+case class SortByNameDomain[D](domain: D)(implicit val discrete: DiscreteFromContextDomain[D, File])

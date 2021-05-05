@@ -25,19 +25,16 @@ import cats.implicits._
 
 object SlidingDomain {
 
-  implicit def isDiscrete[D, T] = new DiscreteFromContextDomain[SlidingDomain[D, T], Array[T]] with DomainInputs[SlidingDomain[D, T]] {
-    override def iterator(domain: SlidingDomain[D, T]) = domain.iterator()
-    override def inputs(domain: SlidingDomain[D, T]) = domain.inputs
-  }
+  implicit def isDiscrete[D, T]: DiscreteFromContextDomain[SlidingDomain[D, T], Array[T]] = domain ⇒ domain.iterator
+  implicit def inputs[D, T](implicit domainInputs: RequiredInput[D]): RequiredInput[SlidingDomain[D, T]] = domain ⇒ domainInputs(domain.domain) ++ domain.size.inputs ++ domain.step.inputs
+  implicit def validate[D, T](implicit validate: ExpectedValidation[D]): ExpectedValidation[SlidingDomain[D, T]] = domain ⇒ validate(domain.domain) ++ domain.size.validate ++ domain.size.validate
 
 }
 
-case class SlidingDomain[D, T: Manifest](domain: D, size: FromContext[Int], step: FromContext[Int] = 1)(implicit discrete: DiscreteFromContextDomain[D, T], domainInputs: DomainInputs[D]) {
+case class SlidingDomain[D, T: Manifest](domain: D, size: FromContext[Int], step: FromContext[Int] = 1)(implicit discrete: DiscreteFromContextDomain[D, T]) {
 
-  def inputs = domainInputs.inputs(domain)
-
-  // FIXME convoluted expression, might be simplified
-  def iterator() =
+  // FIXME convoluted expression, might be simplified
+  def iterator =
     ((discrete.iterator(domain) map2 size)((a, b) ⇒ (a, b)) map2 step) {
       case ((it, si), st) ⇒ it.sliding(si, st).map(_.toArray)
     }

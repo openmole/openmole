@@ -15,26 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.domain
+package org.openmole.core.workflow.validation
 
 import org.openmole.core.context._
 
-object DomainInputs {
+object RequiredInput {
 
   /**
-   * By default implicitly no domain inputs
+   * By default implicitly no inputs
    * @tparam T
    * @return
    */
-  implicit def empty[T] = new DomainInputs[T] {
-    def inputs(domain: T): PrototypeSet = PrototypeSet.empty
-  }
+  implicit def empty[T]: RequiredInput[T] = _ ⇒ PrototypeSet.empty
 }
 
 /**
- * Property of having inputs for a domain
+ * Property of having inputs
  * @tparam D
  */
-trait DomainInputs[-D] {
-  def inputs(domain: D): PrototypeSet
+trait RequiredInput[-T] {
+  def apply(t: T): PrototypeSet
 }

@@ -19,19 +19,22 @@ package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
+import org.openmole.plugin.domain.range._
 
-import cats._
-import cats.implicits._
+import org.scalatest._
 
-object TakeWhileDomain {
+class ModifierDomainSpec extends FlatSpec with Matchers {
 
-  implicit def isFinite[D, T]: DiscreteFromContextDomain[TakeWhileDomain[D, T], T] = domain ⇒ domain.iterator
-  implicit def inputs[D, T](implicit domainInputs: RequiredInput[D]): RequiredInput[TakeWhileDomain[D, T]] = domain ⇒ domainInputs(domain.domain) ++ domain.predicate.inputs
-  implicit def validate[D, T](implicit validate: ExpectedValidation[D]): ExpectedValidation[TakeWhileDomain[D, T]] = domain ⇒ validate(domain.domain) ++ domain.predicate.validate
+  "inputs of modified domain" should "be as expected" in {
+    val size = Val[Int]
+    val range = RangeDomain[Int](0, 10)
+    val take = range.take(size)
+    implicitly[RequiredInput[take.type]].apply(take) should contain(size)
+  }
 
-}
+  "range" should "work with modifiers" in {
+    RangeDomain[Double](0.0, 10.0, 0.1).map(x ⇒ x * x)
+    RangeDomain[Int](0, 10).map(x ⇒ x * x)
+  }
 
-case class TakeWhileDomain[D, T](domain: D, predicate: FromContext[T ⇒ Boolean])(implicit discrete: DiscreteFromContextDomain[D, T]) {
-  def iterator =
-    (discrete.iterator(domain) map2 predicate)((d, p) ⇒ d.takeWhile(p))
 }

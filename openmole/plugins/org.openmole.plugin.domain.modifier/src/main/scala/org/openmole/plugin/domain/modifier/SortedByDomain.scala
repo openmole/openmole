@@ -22,16 +22,18 @@ import org.openmole.core.dsl.extension._
 
 object SortedByDomain {
 
-  implicit def isDiscrete[D, T, S] = new DiscreteFromContextDomain[SortedByDomain[D, T, S], T] with DomainInputs[SortedByDomain[D, T, S]] {
-    def inputs(domain: SortedByDomain[D, T, S]) = domain.domainInputs.inputs(domain.domain)
-    def iterator(domain: SortedByDomain[D, T, S]) = FromContext { p ⇒
-      import p._
-      import domain.sOrdering
-      domain.discrete.iterator(domain.domain).from(context).toSeq.sortBy(domain.s.from(context)).iterator
-    }
-  }
+  implicit def isDiscrete[D, T, S]: DiscreteFromContextDomain[SortedByDomain[D, T, S], T] =
+    domain ⇒
+      FromContext { p ⇒
+        import p._
+        import domain.sOrdering
+        domain.discrete.iterator(domain.domain).from(context).toSeq.sortBy(domain.s.from(context)).iterator
+      }
+
+  implicit def inputs[D, T, S](implicit domainInputs: RequiredInput[D]): RequiredInput[SortedByDomain[D, T, S]] = domain ⇒ domainInputs(domain.domain) ++ domain.s.inputs
+  implicit def validate[D, T, S](implicit validate: ExpectedValidation[D]): ExpectedValidation[SortedByDomain[D, T, S]] = domain ⇒ validate(domain.domain) ++ domain.s.validate
 
 }
 
-case class SortedByDomain[D, T, S](domain: D, s: FromContext[T ⇒ S])(implicit val discrete: DiscreteFromContextDomain[D, T], val domainInputs: DomainInputs[D], val sOrdering: scala.Ordering[S])
+case class SortedByDomain[D, T, S](domain: D, s: FromContext[T ⇒ S])(implicit val discrete: DiscreteFromContextDomain[D, T], val sOrdering: scala.Ordering[S])
 

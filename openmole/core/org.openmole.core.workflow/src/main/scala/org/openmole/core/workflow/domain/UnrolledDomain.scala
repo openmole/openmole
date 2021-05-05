@@ -19,18 +19,17 @@ package org.openmole.core.workflow.domain
 import org.openmole.core.context._
 import org.openmole.core.expansion._
 import cats.implicits._
+import org.openmole.core.workflow.validation.{ ExpectedValidation, RequiredInput }
 
 object UnrolledDomain {
 
-  implicit def isDiscrete[D, T: Manifest] =
-    new DiscreteDomain[UnrolledDomain[D, T], Array[T]] with DomainInputs[UnrolledDomain[D, T]] {
-      override def iterator(domain: UnrolledDomain[D, T]): Iterator[Array[T]] = Seq(domain.discrete.iterator(domain.d).toArray).iterator
-      override def inputs(domain: UnrolledDomain[D, T]): PrototypeSet = domain.inputs.inputs(domain.d)
-    }
+  implicit def isDiscrete[D, T: Manifest]: DiscreteDomain[UnrolledDomain[D, T], Array[T]] = domain ⇒ Seq(domain.discrete.iterator(domain.d).toArray).iterator
+  implicit def inputs[D, T: Manifest]: RequiredInput[UnrolledDomain[D, T]] = domain ⇒ domain.inputs(domain.d)
+  implicit def validate[D, T: Manifest]: ExpectedValidation[UnrolledDomain[D, T]] = domain ⇒ domain.validate(domain.d)
 
-  def apply[D[_], T: Manifest](domain: D[T])(implicit discrete: DiscreteDomain[D[T], T], inputs: DomainInputs[D[T]] = DomainInputs.empty) =
+  def apply[D[_], T: Manifest](domain: D[T])(implicit discrete: DiscreteDomain[D[T], T], inputs: RequiredInput[D[T]], validate: ExpectedValidation[D[T]]) =
     new UnrolledDomain[D[T], T](domain)
 
 }
 
-class UnrolledDomain[D, T: Manifest](val d: D)(implicit val discrete: DiscreteDomain[D, T], val inputs: DomainInputs[D])
+class UnrolledDomain[D, T: Manifest](val d: D)(implicit val discrete: DiscreteDomain[D, T], val inputs: RequiredInput[D], val validate: ExpectedValidation[D])

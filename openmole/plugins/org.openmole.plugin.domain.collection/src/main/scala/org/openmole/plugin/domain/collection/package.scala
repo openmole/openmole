@@ -21,6 +21,7 @@ import org.openmole.core.context.{ PrototypeSet, Val }
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
+import org.openmole.core.workflow.validation.RequiredInput
 import org.openmole.tool.types._
 
 import scala.reflect.ClassTag
@@ -75,8 +76,8 @@ package object collection extends LowPriorityImplicits {
 
   implicit def booleanValIsFactor(p: Val[Boolean]) = Factor(p, Vector(true, false))
 
-  implicit def arrayValIsFinite[T] = new DiscreteFromContextDomain[Val[Array[T]], T] with DomainInputs[Val[Array[T]]] {
-    override def inputs(domain: Val[Array[T]]): PrototypeSet = Seq(domain)
+  implicit def arrayValIsFinite[T] = new DiscreteFromContextDomain[Val[Array[T]], T] with RequiredInput[Val[Array[T]]] {
+    override def apply(domain: Val[Array[T]]): PrototypeSet = Seq(domain)
     override def iterator(domain: Val[Array[T]]) = FromContext { p ⇒
       p.context(domain).iterator
     }

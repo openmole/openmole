@@ -17,8 +17,9 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.domain.{ BoundedFromContextDomain, CenterFromContextDomain, DiscreteFromContextDomain }
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
+
 import cats.implicits._
 
 object RangeDomain {
@@ -32,6 +33,9 @@ object RangeDomain {
   implicit def rangeWithDefaultStepIsDiscrete[T](implicit step: DefaultStep[T]) = new DiscreteFromContextDomain[RangeDomain[T], T] {
     override def iterator(domain: RangeDomain[T]) = StepRangeDomain[T](domain, step.step).iterator
   }
+
+  implicit def inputs[T]: RequiredInput[RangeDomain[T]] = domain ⇒ domain.min.inputs ++ domain.max.inputs
+  implicit def validate[T]: ExpectedValidation[RangeDomain[T]] = domain ⇒ domain.min.validate ++ domain.max.validate
 
   implicit def toDomain[D, T](d: D)(implicit toRangeDomain: IsRangeDomain[D, T]) = toRangeDomain(d)
 

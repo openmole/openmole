@@ -17,19 +17,18 @@
 
 package org.openmole.plugin.domain.file
 
-import java.io.File
 import java.nio.file.Path
-import org.openmole.core.context.Context
-import org.openmole.core.expansion.FromContext
+
 import org.openmole.core.workflow.domain.{ DiscreteFromContextDomain }
-import org.openmole.core.workflow.dsl._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 import cats.implicits._
 
 object ListPathsDomain {
 
-  implicit def isDiscrete = new DiscreteFromContextDomain[ListPathsDomain, Path] {
-    override def iterator(domain: ListPathsDomain) = domain.iterator
-  }
+  implicit def isDiscrete: DiscreteFromContextDomain[ListPathsDomain, Path] = domain ⇒ domain.iterator
+  implicit def inputs: RequiredInput[ListPathsDomain] = domain ⇒ domain.directory.toSeq.flatMap(_.inputs) ++ domain.filter.toSeq.flatMap(_.inputs)
+  implicit def validate: ExpectedValidation[ListPathsDomain] = domain ⇒ domain.directory.toSeq.map(_.validate) ++ domain.filter.toSeq.map(_.validate)
 
   def apply(
     base:      File,
@@ -41,10 +40,10 @@ object ListPathsDomain {
 }
 
 class ListPathsDomain(
-  base:      File,
-  directory: Option[FromContext[String]] = None,
-  recursive: Boolean                     = false,
-  filter:    Option[FromContext[String]] = None
+  base:          File,
+  val directory: Option[FromContext[String]] = None,
+  recursive:     Boolean                     = false,
+  val filter:    Option[FromContext[String]] = None
 ) {
 
   def iterator =

@@ -174,7 +174,7 @@ object FromContext extends LowPriorityFromContext {
           case Some(i)           ⇒ Seq(new UserBadDataError(s"FromContext validation failed, $v has incorrect type, should be $i, among inputs $inputs"))
         }
       }
-    }
+    } withInputs (Seq(v))
 
   /**
    * From context for a given value
@@ -232,15 +232,21 @@ object FromContext extends LowPriorityFromContext {
     def /(path: FromContext[String]) = (f map2 path)(_ / _)
   }
 
+  def copy[T](f: FromContext[T])(validate: Validate = f.v, inputs: Seq[Val[_]] = f.inputs) =
+    new FromContext(c = f.c, v = validate, inputs = inputs)
+
 }
 
-class FromContext[+T](val c: FromContext.Parameters ⇒ T, val v: Validate) {
+class FromContext[+T](val c: FromContext.Parameters ⇒ T, val v: Validate, val inputs: Seq[Val[_]] = Seq()) {
   def apply(context: ⇒ Context)(implicit rng: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): T = c(FromContext.Parameters(context, rng, tmpDirectory, fileService))
   def from(context: ⇒ Context)(implicit rng: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): T = apply(context)
 
   def validate = v
 
-  def withValidate(validate: Validate): FromContext[T] = new FromContext(c, v = v ++ validate)
+  def withValidate(validate: Validate): FromContext[T] = FromContext.copy(this)(validate = v ++ validate)
+  def withInputs(v: Seq[Val[_]]): FromContext[T] = FromContext.copy(this)(inputs = inputs ++ v)
+  def using(fs: FromContext[_]*): FromContext[T] =
+    this.withValidate(fs.map(_.validate)).withInputs(fs.flatMap(_.inputs))
 }
 
 object StringFromContext {

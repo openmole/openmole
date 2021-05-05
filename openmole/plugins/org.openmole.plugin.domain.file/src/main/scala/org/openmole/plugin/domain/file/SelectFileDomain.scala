@@ -17,19 +17,16 @@
 
 package org.openmole.plugin.domain.file
 
-import java.io.File
-
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.domain._
-import org.openmole.core.workflow.tools._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 import cats.implicits._
+import org.openmole.core.workflow.tools.FileList
 
 object SelectFileDomain {
 
-  implicit def isDiscrete = new DiscreteFromContextDomain[SelectFileDomain, File] {
-    override def iterator(domain: SelectFileDomain) = domain.iterator
-
-  }
+  implicit def isDiscrete: DiscreteFromContextDomain[SelectFileDomain, File] = domain ⇒ domain.iterator
+  implicit def inputs: RequiredInput[SelectFileDomain] = domain ⇒ domain.provider.inputs
+  implicit def validate: ExpectedValidation[SelectFileDomain] = domain ⇒ domain.provider.validate
 
   def apply(base: File, path: FromContext[String]) = new SelectFileDomain(FileList(base, path))
 }

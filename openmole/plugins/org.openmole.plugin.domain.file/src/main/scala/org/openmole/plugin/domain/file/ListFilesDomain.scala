@@ -18,18 +18,19 @@
 package org.openmole.plugin.domain.file
 
 import java.io.File
-
 import org.openmole.core.context.Context
+import org.openmole.core.dsl.extension.RequiredInput
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.validation.ExpectedValidation
 import org.openmole.tool.logger.JavaLogger
 
 object ListFilesDomain extends JavaLogger {
 
-  implicit def isDiscrete: DiscreteFromContextDomain[ListFilesDomain, File] = new DiscreteFromContextDomain[ListFilesDomain, File] {
-    override def iterator(domain: ListFilesDomain) = domain.iterator
-  }
+  implicit def isDiscrete: DiscreteFromContextDomain[ListFilesDomain, File] = domain ⇒ domain.iterator
+  implicit def inputs: RequiredInput[ListFilesDomain] = domain ⇒ domain.directory.toSeq.flatMap(_.inputs) ++ domain.filter.toSeq.flatMap(_.inputs)
+  implicit def validate: ExpectedValidation[ListFilesDomain] = domain ⇒ domain.directory.toSeq.map(_.validate) ++ domain.filter.toSeq.map(_.validate)
 
   def apply(
     base:      File,
@@ -43,10 +44,10 @@ object ListFilesDomain extends JavaLogger {
 import org.openmole.plugin.domain.file.ListFilesDomain.Log._
 
 class ListFilesDomain(
-  base:      File,
-  directory: Option[FromContext[String]] = None,
-  recursive: Boolean                     = false,
-  filter:    Option[FromContext[String]] = None
+  base:          File,
+  val directory: Option[FromContext[String]] = None,
+  recursive:     Boolean                     = false,
+  val filter:    Option[FromContext[String]] = None
 ) {
 
   def iterator = FromContext { p ⇒

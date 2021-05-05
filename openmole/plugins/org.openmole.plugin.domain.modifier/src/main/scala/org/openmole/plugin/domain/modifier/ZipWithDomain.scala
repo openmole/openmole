@@ -22,15 +22,16 @@ import org.openmole.core.dsl.extension._
 
 object ZipWithDomain {
 
-  implicit def isDiscrete[D, I, O] = new DiscreteFromContextDomain[ZipWithDomain[D, I, O], (I, O)] with DomainInputs[ZipWithDomain[D, I, O]] {
-    override def inputs(domain: ZipWithDomain[D, I, O]) = domain.domainInputs.inputs(domain.domain)
-    override def iterator(domain: ZipWithDomain[D, I, O]) = FromContext { p ⇒
+  implicit def isDiscrete[D, I, O]: DiscreteFromContextDomain[ZipWithDomain[D, I, O], (I, O)] =
+    domain ⇒ FromContext { p ⇒
       import p._
       domain.discrete.iterator(domain.domain).from(context).map { e ⇒ e → domain.f.from(context).apply(e) }
     }
-  }
+
+  implicit def inputs[D, I, O](implicit domainInputs: RequiredInput[D]): RequiredInput[ZipWithDomain[D, I, O]] = domain ⇒ domainInputs(domain.domain) ++ domain.f.inputs
+  implicit def validate[D, I, O](implicit validate: ExpectedValidation[D]): ExpectedValidation[ZipWithDomain[D, I, O]] = domain ⇒ validate(domain.domain) ++ domain.f.validate
 
 }
 
-case class ZipWithDomain[D, I, O](domain: D, f: FromContext[I ⇒ O])(implicit val discrete: DiscreteFromContextDomain[D, I], val domainInputs: DomainInputs[D])
+case class ZipWithDomain[D, I, O](domain: D, f: FromContext[I ⇒ O])(implicit val discrete: DiscreteFromContextDomain[D, I])
 

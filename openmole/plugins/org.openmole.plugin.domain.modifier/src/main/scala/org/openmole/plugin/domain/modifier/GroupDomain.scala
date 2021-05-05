@@ -25,15 +25,15 @@ import cats.implicits._
 
 object GroupDomain {
 
-  implicit def isDiscrete[D, T: Manifest] = new DiscreteFromContextDomain[GroupDomain[D, T], Array[T]] with DomainInputs[GroupDomain[D, T]] {
-    override def iterator(domain: GroupDomain[D, T]) = {
+  implicit def isDiscrete[D, T: Manifest]: DiscreteFromContextDomain[GroupDomain[D, T], Array[T]] =
+    domain ⇒ {
       import domain._
       (discrete.iterator(d) map2 size)((it, s) ⇒ it.grouped(s) map (_.toArray))
     }
 
-    override def inputs(domain: GroupDomain[D, T]) = domain.inputs.inputs(domain.d)
-  }
+  implicit def inputs[D, T](implicit inputs: RequiredInput[D]): RequiredInput[GroupDomain[D, T]] = domain ⇒ inputs(domain.d) ++ domain.size.inputs
+  implicit def validate[D, T](implicit validate: ExpectedValidation[D]): ExpectedValidation[GroupDomain[D, T]] = domain ⇒ validate(domain.d) ++ domain.size.validate
 
 }
 
-case class GroupDomain[D, T: Manifest](d: D, size: FromContext[Int])(implicit val discrete: DiscreteFromContextDomain[D, T], val inputs: DomainInputs[D])
+case class GroupDomain[D, T: Manifest](d: D, size: FromContext[Int])(implicit val discrete: DiscreteFromContextDomain[D, T])

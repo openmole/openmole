@@ -1,5 +1,7 @@
 package org.openmole.core.dsl
 
+import org.openmole.core.workflow.validation.RequiredInput
+
 package object extension {
 
   type FromContext[+T] = org.openmole.core.expansion.FromContext[T]
@@ -39,7 +41,6 @@ package object extension {
   type DiscreteFromContextDomain[-D, +T] = org.openmole.core.workflow.domain.DiscreteFromContextDomain[D, T]
   type CenterDomain[-D, +T] = org.openmole.core.workflow.domain.CenterDomain[D, T]
   type CenterFromContextDomain[-D, +T] = org.openmole.core.workflow.domain.CenterFromContextDomain[D, T]
-  type DomainInputs[-D] = org.openmole.core.workflow.domain.DomainInputs[D]
 
   type Factor[D, T] = org.openmole.core.workflow.sampling.Factor[D, T]
   def Factor[D, T](p: Val[T], d: D) = org.openmole.core.workflow.sampling.Factor(p, d)
@@ -87,6 +88,9 @@ package object extension {
 
   type Validate = org.openmole.core.expansion.Validate
   def Validate = org.openmole.core.expansion.Validate
+
+  type RequiredInput[-D] = org.openmole.core.workflow.validation.RequiredInput[D]
+  type ExpectedValidation[-D] = org.openmole.core.workflow.validation.ExpectedValidation[D]
 
   type UserBadDataError = org.openmole.core.exception.UserBadDataError
   type RandomProvider = org.openmole.tool.random.RandomProvider

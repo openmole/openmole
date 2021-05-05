@@ -20,16 +20,18 @@ package org.openmole.plugin.domain.modifier
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
-import cats._
-import cats.implicits._
-
 object TakeDomain {
-
-  implicit def isDiscrete[D, T] = new DiscreteFromContextDomain[TakeDomain[D, T], T] with DomainInputs[TakeDomain[D, T]] {
-    def inputs(domain: TakeDomain[D, T]) = domain.domainInputs.inputs(domain.domain)
-    def iterator(domain: TakeDomain[D, T]) = (domain.discrete.iterator(domain.domain) map2 domain.size)((d, s) ⇒ d.slice(0, s).toIterator)
+  implicit def isDiscrete[D, T]: DiscreteFromContextDomain[TakeDomain[D, T], T] = domain ⇒ FromContext { p ⇒
+    import p._
+    val s = domain.size.from(context)
+    domain.discrete.
+      iterator(domain.domain).
+      from(context).
+      slice(0, s)
   }
 
+  implicit def inputs[D, T](implicit domainInputs: RequiredInput[D]): RequiredInput[TakeDomain[D, T]] = domain ⇒ domain.size.inputs ++ domainInputs.apply(domain.domain)
+  implicit def validate[D, T](implicit validate: ExpectedValidation[D]): ExpectedValidation[TakeDomain[D, T]] = domain ⇒ domain.size.validate ++ validate(domain.domain)
 }
 
-case class TakeDomain[D, +T](domain: D, size: FromContext[Int])(implicit val discrete: DiscreteFromContextDomain[D, T], val domainInputs: DomainInputs[D])
+case class TakeDomain[D, +T](domain: D, size: FromContext[Int])(implicit val discrete: DiscreteFromContextDomain[D, T])
