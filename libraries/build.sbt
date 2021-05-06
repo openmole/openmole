@@ -88,6 +88,7 @@ lazy val xstream = OsgiProject(
     "!org.joda.time.*",
     "!com.sun.xml.*",
     "!com.ibm.xml.*",
+    "!org.xmlpull.*",
     "!javax.*",
     "*"),
   privatePackages = Seq("!scala.*", "META-INF.services.*", "*")) settings(
