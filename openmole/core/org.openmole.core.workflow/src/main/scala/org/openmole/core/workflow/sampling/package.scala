@@ -54,7 +54,13 @@ package sampling {
 
       def outputs(f: Factor[D, T]) = List(f.value)
       override def apply(f: Factor[D, T]): FromContext[Iterator[collection.Iterable[Variable[T]]]] =
-        domain.iterator(f.domain).map(_.map { v ⇒ List(Variable(f.value, v)) })
+        domain.
+          iterator(f.domain).
+          map { values =>
+            values.map {
+              v ⇒ List(Variable(f.value, v))
+            }
+          }
     }
 
     type Sampling = sampling.Sampling
