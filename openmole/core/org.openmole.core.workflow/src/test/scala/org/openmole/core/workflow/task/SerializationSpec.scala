@@ -18,12 +18,14 @@
 package org.openmole.core.workflow.task
 
 import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
-
 import org.openmole.core.context.Val
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.domain.DiscreteFromContextDomain
 import org.scalatest._
 import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.sampling.ExplicitSampling
+import org.openmole.core.workflow.test.TestTask
 import org.openmole.core.workflow.tools.DefaultSet
 
 class SerializationSpec extends FlatSpec with Matchers {
@@ -54,6 +56,19 @@ class SerializationSpec extends FlatSpec with Matchers {
     defaults.defaultMap.get("test")
     val d2 = serializeDeserialize(defaults)
     defaults.defaultMap should equal(d2.defaultMap)
+  }
+
+  // -Ydelambdafy:inline makes it work on scala 2.13
+  "Exploration " should "run after serialization and deserialization" in {
+    val data = List("A", "B", "C")
+    val i = Val[String]("i")
+
+    implicit def listFactor: DiscreteFromContextDomain[List[String], String] = domain ⇒ domain.iterator
+
+    val exp = ExplorationTask(i in data)
+    val t = EmptyTask() set (inputs += i)
+    val t2 = serializeDeserialize(exp -< t)
+    t2.run().hangOn()
   }
 
 }

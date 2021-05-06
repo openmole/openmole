@@ -41,7 +41,7 @@ def defaultSettings = formatSettings ++
     javacOptions ++= Seq("-source", "11", "-target", "11"),
     install / packageDoc / publishArtifact := false,
     install / packageSrc / publishArtifact := false,
-    scalacOptions ++= Seq("-Ymacro-annotations", "-language:postfixOps"),
+    scalacOptions ++= Seq("-Ymacro-annotations", "-language:postfixOps", "-Ydelambdafy:inline"),
     //scalaOrganization := "org.typelevel",
     //scalaVersion := "2.12.4-bin-typelevel-4",
     //addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M10" cross CrossVersion.full),

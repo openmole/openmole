@@ -31,12 +31,8 @@ trait DiscreteDomain[-D, +T] {
 }
 
 object DiscreteFromContextDomain {
-
   implicit def discreteIsContextDiscrete[D, T](implicit d: DiscreteDomain[D, T]): DiscreteFromContextDomain[D, T] =
-    new DiscreteFromContextDomain[D, T] {
-      def iterator(domain: D) = FromContext.value(d.iterator(domain))
-    }
-
+    domain ⇒ FromContext.value(d.iterator(domain))
 }
 
 @implicitNotFound("${D} is not a discrete variation domain of type T | FromContext[${T}]")

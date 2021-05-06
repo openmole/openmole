@@ -29,6 +29,7 @@ package sampling {
   import org.openmole.tool.types._
   import org.openmole.core.workflow.domain._
   import cats.implicits._
+  import org.openmole.core.tools.io.Prettifier
 
   trait SamplingPackage {
 
@@ -51,16 +52,10 @@ package sampling {
     implicit def factorIsSampling[D, T](implicit domain: DiscreteFromContextDomain[D, T], domainInputs: DomainInput[D], domainValidate: DomainValidation[D]) = new IsSampling[Factor[D, T]] {
       def validate(f: Factor[D, T]): Validate = domain.iterator(f.domain).validate ++ domainValidate(f.domain)
       def inputs(f: Factor[D, T]) = domain.iterator(f.domain).inputs ++ domainInputs.apply(f.domain)
-
       def outputs(f: Factor[D, T]) = List(f.value)
+
       override def apply(f: Factor[D, T]): FromContext[Iterator[collection.Iterable[Variable[T]]]] =
-        domain.
-          iterator(f.domain).
-          map { values ⇒
-            values.map {
-              v ⇒ List(Variable(f.value, v))
-            }
-          }
+        domain.iterator(f.domain).map { values ⇒ values.map { v ⇒ List(Variable(f.value, v)) } }
     }
 
     type Sampling = sampling.Sampling

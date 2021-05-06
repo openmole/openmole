@@ -22,32 +22,32 @@ import org.openmole.core.dsl.extension._
 
 object UniformDistribution {
 
-  implicit def isDiscrete[T]: DiscreteFromContextDomain[UniformDistribution[T], T] = domain ⇒ domain.iterator
+  implicit def isDiscrete[T]: DiscreteFromContextDomain[UniformDistribution[T], T] = domain ⇒
+    FromContext { p ⇒
+      import p._
+      import domain._
+
+      val distRandom: scala.util.Random = seed match {
+        case Some(s) ⇒ Random(s.from(context))
+        case None    ⇒ p.random()
+      }
+
+      Iterator.continually {
+        max match {
+          case Some(i) ⇒ distribution.next(distRandom, i)
+          case None    ⇒ distribution.next(distRandom)
+        }
+      }
+    }
+
   implicit def domainInputs[T]: DomainInput[UniformDistribution[T]] = domain ⇒ domain.seed.toSeq.flatMap(_.inputs)
   implicit def validate[T]: DomainValidation[UniformDistribution[T]] = domain ⇒ domain.seed.map(_.validate).toSeq
 
   def apply[T](
     seed: OptionalArgument[FromContext[Long]] = None,
     max:  OptionalArgument[T]                 = None
-  )(implicit distribution: Distribution[T]) = new UniformDistribution(seed, max)
+  )(implicit distribution: Distribution[T]) = new UniformDistribution(seed, max, distribution)
 
 }
 
-case class UniformDistribution[T] private (seed: Option[FromContext[Long]], max: Option[T])(implicit distribution: Distribution[T]) {
-
-  def iterator = FromContext { p ⇒
-    import p._
-
-    val distRandom: scala.util.Random = seed match {
-      case Some(s) ⇒ Random(s.from(context))
-      case None    ⇒ p.random()
-    }
-
-    Iterator.continually {
-      max match {
-        case Some(i) ⇒ distribution.next(distRandom, i)
-        case None    ⇒ distribution.next(distRandom)
-      }
-    }
-  } using (seed.toSeq: _*)
-}
+case class UniformDistribution[T] private (seed: Option[FromContext[Long]], max: Option[T], distribution: Distribution[T])
