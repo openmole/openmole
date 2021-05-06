@@ -30,3 +30,4 @@ metals.sbt
 .DS_Store
 *.history
 **/openmole/bin/org.openmole.marketindex/src/main/resources/openmole-market
+.vscode/

@@ -387,7 +387,7 @@ lazy val distributionDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain
 
 lazy val fileDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.file", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings: _*)
 
-lazy val modifierDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.modifier", imports = Seq("*")) dependsOn (openmoleDSL, rangeDomain % "test") settings (
+lazy val modifierDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.modifier", imports = Seq("*")) dependsOn (openmoleDSL, rangeDomain % "test", fileDomain % "test") settings (
   libraryDependencies += Libraries.scalatest) settings (pluginSettings: _*)
 
 lazy val rangeDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.range", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings: _*)

@@ -39,10 +39,10 @@ object ListFilesDomain extends JavaLogger {
 import org.openmole.plugin.domain.file.ListFilesDomain.Log
 
 class ListFilesDomain(
-  base:          File,
-  val directory: Option[FromContext[String]] = None,
-  recursive:     Boolean                     = false,
-  val filter:    Option[FromContext[String]] = None
+  base:                  File,
+  private val directory: Option[FromContext[String]] = None,
+  recursive:             Boolean                     = false,
+  private val filter:    Option[FromContext[String]] = None
 ) {
 
   def iterator = FromContext { p ⇒

@@ -38,10 +38,10 @@ object ListPathsDomain {
 }
 
 class ListPathsDomain(
-  base:          File,
-  val directory: Option[FromContext[String]] = None,
-  recursive:     Boolean                     = false,
-  val filter:    Option[FromContext[String]] = None
+  base:                  File,
+  private val directory: Option[FromContext[String]] = None,
+  recursive:             Boolean                     = false,
+  private val filter:    Option[FromContext[String]] = None
 ) {
 
   def iterator =

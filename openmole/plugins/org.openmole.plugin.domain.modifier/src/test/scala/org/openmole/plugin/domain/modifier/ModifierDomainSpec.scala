@@ -21,6 +21,7 @@ import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.workflow.domain
 import org.openmole.plugin.domain.range._
+import org.openmole.plugin.domain.file._
 import org.scalatest._
 
 class ModifierDomainSpec extends FlatSpec with Matchers {
@@ -35,6 +36,12 @@ class ModifierDomainSpec extends FlatSpec with Matchers {
   "range" should "work with modifiers" in {
     RangeDomain[Double](0.0, 10.0, 0.1).map(x ⇒ x * x)
     RangeDomain[Int](0, 10).map(x ⇒ x * x)
+  }
+
+  "files" should "work with modifiers" in {
+    val f = Val[File]
+
+    f in (File("/tmp").files().filter(f ⇒ f.getName.startsWith("exp") && f.getName.endsWith(".csv")))
   }
 
 }
