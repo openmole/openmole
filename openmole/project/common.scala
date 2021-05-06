@@ -22,7 +22,7 @@ object common {
   def circeVersion = "0.13.0"
   def catsVersion = "2.1.0"
   def squantsVersion = "1.6.0"
-  def xstreamVersion = "1.4.12"
+  def xstreamVersion = "1.4.16"
   def scalaURIVersion = "1.1.1"
   def scoptVersion = "3.7.1"
   def spatialsamplingVersion = "0.3"
