@@ -30,7 +30,7 @@ object Genome {
       ScalarDouble(f.value, bounded.min(f.domain), bounded.max(f.domain))
 
     implicit def factorOfDoubleRangeIsScalaDouble(f: Factor[DoubleRange, Double]) =
-      ScalarDouble(f.value, f.domain.min, f.domain.max)
+      ScalarDouble(f.value, f.domain.low, f.domain.high)
 
     implicit def factorIsScalarInt[D](f: Factor[D, Int])(implicit bounded: BoundedDomain[D, Int]) =
       ScalarInt(f.value, bounded.min(f.domain), bounded.max(f.domain))

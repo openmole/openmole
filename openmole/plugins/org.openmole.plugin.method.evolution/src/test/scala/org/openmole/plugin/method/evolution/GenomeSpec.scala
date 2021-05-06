@@ -34,6 +34,12 @@ class GenomeSpec extends FlatSpec with Matchers {
     val y = Val[Int]
     val g2: Genome = Seq(y in (1 to 20))
     g2.head.isInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.ScalarInt] should equal(true)
+
+    val g3: Genome = Seq(x in (0.5 to 1.0))
+    val g3part = g3.head.asInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.ScalarDouble]
+    g3part.low should equal(0.5)
+    g3part.high should equal(1.0)
+
   }
 
 }
