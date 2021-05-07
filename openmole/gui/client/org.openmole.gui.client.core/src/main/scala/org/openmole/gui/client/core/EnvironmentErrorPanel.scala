@@ -47,16 +47,16 @@ class EnvironmentErrorPanel(environmentErrorData: EnvironmentErrorData, environm
     case _            ⇒ label_warning
   })
 
-  lazy val autoErrorToggle: ToggleButton = toggle(jobTable.autoUpdateErrors.now)
-
-  autoErrorToggle.position.trigger {
-    jobTable.autoUpdateErrors.update(autoErrorToggle.position.now)
-  }
+  //  lazy val autoErrorToggle: ToggleButton = toggle(jobTable.autoUpdateErrors.now)
+  //
+  //  autoErrorToggle.position.trigger {
+  //    jobTable.autoUpdateErrors.update(autoErrorToggle.position.now)
+  //  }
 
   val view = div(
     div(marginTop := 30, fontWeight := "bold")(
-      span("Auto update "),
-      autoErrorToggle.render,
+      //      span("Auto update "),
+      //      autoErrorToggle.render,
       button(btn_default, "Reset", marginLeft := 20, fontWeight := "bold", onclick := { () ⇒ jobTable.clearEnvErrors(environmentId) })
     ),
     scaladget.bootstrapnative.Table(
