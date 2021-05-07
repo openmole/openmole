@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.console
+package org.openmole.core.compiler
 
 import org.openmole.core.pluginmanager.{ BundleDecorator, PluginManager }
 import org.osgi.framework.Bundle
@@ -72,6 +72,8 @@ object OSGiScalaCompiler {
       }
 
     newSettings.language.add(newSettings.languageFeatures.postfixOps.name)
+    newSettings.Ydelambdafy.value = "inline"
+
     //newSettings.maxClassfileName.value = 100
     newSettings
   }

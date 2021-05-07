@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.console
+package org.openmole.core.compiler
 
 import java.net.URLClassLoader
 import java.util
@@ -273,7 +273,7 @@ object Interpreter {
 class Interpreter(priorityBundles: ⇒ Seq[Bundle], jars: Seq[JFile], quiet: Boolean, classDirectory: java.io.File, settings: Settings) {
   def eval(code: String) = compile(code).apply()
   def compile(code: String): ScalaREPL.Compiled = synchronized {
-    if (org.openmole.core.console.Activator.osgi) {
+    if (org.openmole.core.compiler.Activator.osgi) {
       val s = new ScalaREPL(priorityBundles, jars, quiet, classDirectory, settings, 1)
       s.compile(code)
     }

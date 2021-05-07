@@ -18,7 +18,7 @@
 package org.openmole.console
 
 import jline.console.ConsoleReader
-import org.openmole.core.console.ScalaREPL
+import org.openmole.core.compiler.ScalaREPL
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.project._

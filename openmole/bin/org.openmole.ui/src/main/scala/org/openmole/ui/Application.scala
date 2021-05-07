@@ -24,7 +24,7 @@ import java.net.URI
 
 import org.openmole.console.Console.ExitCodes
 import org.openmole.core.project._
-import org.openmole.core.console.ScalaREPL
+import org.openmole.core.compiler.ScalaREPL
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.logconfig.LoggerConfig
 import org.openmole.core.pluginmanager.PluginManager

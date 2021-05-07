@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.console
+package org.openmole.core.compiler
 
 import java.io.{ InputStream, IOException, File }
 

@@ -1,4 +1,4 @@
-package org.openmole.core.console
+package org.openmole.core.compiler
 
 import scala.language.dynamics
 import scala.beans.BeanProperty
@@ -10,7 +10,7 @@ import javax.script._
 import ScriptContext.{ ENGINE_SCOPE, GLOBAL_SCOPE }
 import java.io.{ Closeable, Reader }
 
-import org.openmole.core.console.ScalaREPL.OMIMain
+import org.openmole.core.compiler.ScalaREPL.OMIMain
 import org.openmole.tool.types.ClassUtils
 
 import scala.tools.nsc.Settings

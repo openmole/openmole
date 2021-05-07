@@ -21,7 +21,7 @@ import java.io.{ File, IOException, StringReader }
 import java.util.logging.Level
 
 import org.openmole.core.buildinfo
-import org.openmole.core.console.ScalaREPL
+import org.openmole.core.compiler.ScalaREPL
 import org.openmole.core.dsl._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice.FileService

@@ -14,7 +14,7 @@ import java.nio.file._
 import java.util.zip.GZIPInputStream
 
 import au.com.bytecode.opencsv.CSVReader
-import org.openmole.core.console.ScalaREPL
+import org.openmole.core.compiler.ScalaREPL
 import org.openmole.core.expansion.ScalaCompilation
 import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
 

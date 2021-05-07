@@ -25,7 +25,7 @@ import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
 import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.console._
+import org.openmole.core.compiler._
 
 import org.openmole.core.serializer.PluginAndFilesListing
 import org.openmole.tool.logger.JavaLogger

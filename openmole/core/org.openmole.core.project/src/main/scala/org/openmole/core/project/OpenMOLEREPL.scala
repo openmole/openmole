@@ -17,7 +17,7 @@
  */
 package org.openmole.core.project
 
-import org.openmole.core.console.ScalaREPL
+import org.openmole.core.compiler.ScalaREPL
 import org.openmole.core.dsl._
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.fileservice.FileService

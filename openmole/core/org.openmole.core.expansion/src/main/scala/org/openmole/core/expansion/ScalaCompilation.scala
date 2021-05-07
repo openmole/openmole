@@ -18,8 +18,8 @@ package org.openmole.core.expansion
 
 import java.io.File
 
-import org.openmole.core.console.ScalaREPL.CompilationError
-import org.openmole.core.console._
+import org.openmole.core.compiler.ScalaREPL.CompilationError
+import org.openmole.core.compiler._
 import org.openmole.core.context._
 import org.openmole.core.exception._
 import org.openmole.core.fileservice.FileService
@@ -68,7 +68,7 @@ object ScalaCompilation {
   }
 
   /**
-   * Compile scala code using a [[org.openmole.core.console.Interpreter]]
+   * Compile scala code using a [[org.openmole.core.compiler.Interpreter]]
    *
    * @param script
    * @param plugins
@@ -79,7 +79,7 @@ object ScalaCompilation {
    * @return
    */
   private def compile[RETURN](script: Script, plugins: Seq[File] = Seq.empty, libraries: Seq[File] = Seq.empty)(implicit newFile: TmpDirectory, fileService: FileService) = {
-    val osgiMode = org.openmole.core.console.Activator.osgi
+    val osgiMode = org.openmole.core.compiler.Activator.osgi
     val interpreter =
       if (osgiMode) Interpreter(priorityBundles(plugins), libraries)
       else Interpreter(jars = libraries)
