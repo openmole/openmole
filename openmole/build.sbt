@@ -1,9 +1,9 @@
 import org.openmole.buildsystem._
 import OMKeys._
-import sbt.{io, _}
+import sbt.{addSbtPlugin, io, _}
 import Keys.{libraryDependencies, _}
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
-import execnpm.NpmDeps.Dep
+//import execnpm.NpmDeps.Dep
 
 import _root_.openmole.common._
 
@@ -631,11 +631,11 @@ lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompil
   })
 
 def guiClientDir = guiDir / "client"
-lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins (ExecNpmPlugin) dependsOn
+lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core")  dependsOn
   (sharedGUI, clientToolGUI, market, dataGUI, extClient) settings(
   libraryDependencies += Libraries.async,
-  Compile / npmDeps += Dep("ace-builds/src-min", "1.4.3", List("mode-scala.js", "theme-github.js", "ext-language_tools.js"), true),
-  Compile / npmDeps += Dep("sortablejs", "1.10.2", List("Sortable.min.js"))
+ // Compile / npmDeps += Dep("ace-builds/src-min", "1.4.3", List("mode-scala.js", "theme-github.js", "ext-language_tools.js"), true),
+ // Compile / npmDeps += Dep("sortablejs", "1.10.2", List("Sortable.min.js"))
 ) settings (defaultSettings: _*)
 
 
@@ -825,13 +825,13 @@ def openmoleDependencies = openmoleNakedDependencies ++ corePlugins ++ guiPlugin
 def requieredRuntimeLibraries = Seq(Libraries.osgiCompendium, Libraries.logging)
 
 lazy val openmoleNaked =
-  Project("openmole-naked", binDir / "openmole-naked") settings (assemblySettings: _*) enablePlugins (ExecNpmPlugin) settings(
+  Project("openmole-naked", binDir / "openmole-naked") settings (assemblySettings: _*) enablePlugins (ScalaJSPlugin) settings(
     setExecutable ++= Seq("openmole", "openmole.bat"),
     Compile / Osgi.bundleDependencies := OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject, includeRoot = false))).value,
     resourcesAssemble += (Compile / resourceDirectory).value -> assemblyPath.value,
     resourcesAssemble += ((serverGUI / Compile / resourceDirectory).value / "webapp") → (assemblyPath.value / "webapp"),
-    resourcesAssemble += (clientGUI / Compile / dependencyFile).value -> (assemblyPath.value / "webapp/js/deps.js"),
-    resourcesAssemble += (clientGUI / Compile / cssFile).value -> (assemblyPath.value / "webapp/css/"),
+ //   resourcesAssemble += (clientGUI / Compile / dependencyFile).value -> (assemblyPath.value / "webapp/js/deps.js"),
+   // resourcesAssemble += (clientGUI / Compile / cssFile).value -> (assemblyPath.value / "webapp/css/"),
     resourcesAssemble += {
       val tarFile = (openmoleRuntime / tar).value
       tarFile -> (assemblyPath.value / "runtime" / tarFile.getName)
@@ -901,7 +901,8 @@ lazy val site = crossProject(JSPlatform, JVMPlatform).in(binDir / "org.openmole.
   Libraries.highlightJS
 )
 
-lazy val siteJS = site.js enablePlugins (ExecNpmPlugin) settings (test := {}, scalacOptions := Seq())
+
+lazy val siteJS = site.js enablePlugins (ScalaJSPlugin) settings (test := {})
 lazy val siteJVM = site.jvm dependsOn(tools, project, serializer, openmoleBuildInfo, marketIndex) settings (
   libraryDependencies += Libraries.sourceCode)
 
@@ -958,10 +959,12 @@ buildSite := {
   }
 
   copySiteResources((siteJS / Compile / fullOptJS).value.data,
-    (siteJS / Compile / dependencyFile).value,
+    new java.io.File("/tmp/stub"),
+    //(siteJS / Compile / dependencyFile).value,
     (siteJVM / Compile / resourceDirectory).value,
     siteTarget,
-    (siteJS / Compile / cssFile).value)
+    new java.io.File("/tmp/stub"))
+   // (siteJS / Compile / cssFile).value)
 
   siteTarget
 }

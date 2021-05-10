@@ -171,7 +171,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
       tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset=UTF-8"),
       cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
       tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.openmoleFileName),
-      //tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.openmoleGrammarMode),
+      tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.openmoleGrammarMode),
       tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.depsFileName),
       RawFrag(arguments.extraHeader)
     ),

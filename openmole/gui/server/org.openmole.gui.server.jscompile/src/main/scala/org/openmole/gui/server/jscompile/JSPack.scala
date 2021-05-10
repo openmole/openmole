@@ -45,9 +45,10 @@ object JSPack {
         (containers, _) ← PathIRContainer.fromClasspath(Seq(jar.toPath, inputDirectory.toPath))
         sjsirFiles ← irCache.cached(containers)
         config = StandardConfig()
-          .withOptimizer(true)
+          //.withOptimizer(true)
           .withSourceMap(true)
           .withClosureCompilerIfAvailable(optimizedJS)
+          .withModuleKind(ModuleKind.CommonJSModule)
 
         linker = StandardImpl.linker(config)
         _ ← linker.link(sjsirFiles, Nil, LinkerOutput(PathOutputFile(outputJSFile.toPath)), NullLogger)

@@ -18,7 +18,6 @@ package org.openmole.gui.server.core
  */
 
 import java.util.concurrent.Semaphore
-
 import javax.servlet.ServletContext
 import org.eclipse.jetty.server.{ Server, ServerConnector }
 import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
@@ -28,6 +27,7 @@ import org.openmole.core.location._
 import org.openmole.core.preference.{ Preference, PreferenceLocation }
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.gui.ext.server.utils
+import org.openmole.gui.server.jscompile.{ JSPack, Webpack }
 import org.openmole.tool.crypto.KeyStore
 import org.openmole.tool.file._
 import org.openmole.tool.network.Network
@@ -48,8 +48,19 @@ object GUIServer {
 
     Plugins.expandDepsFile(from / "js" / utils.openmoleGrammarName, to /> "js" / utils.openmoleGrammarMode)
     (from / "js" / utils.githubTheme) copy (to /> "js" / utils.githubTheme)
-    (from / "js" / utils.depsFileName) copy (to /> "js" / utils.depsFileName)
+    //(from / "js" / utils.depsFileName) copy (to /> "js" / utils.depsFileName)
+
+    val openmoleJSFile = Plugins.openmoleFile(optimizedJS)
     Plugins.openmoleFile(optimizedJS) copy (to /> "js" / utils.openmoleFileName)
+
+    println("JS File " + openmoleJSFile.getAbsolutePath)
+    //    val webpackTemplateConfig = newFile.newFile(utils.webpackConfigTemplateName, "")
+    //    Webpack.run(
+    //      openmoleJSFile,
+    //      to /> "js" / utils.depsFileName,
+    //      from / "js" / utils.webpackConfigTemplateName
+    //    )
+
     to
   }
 
