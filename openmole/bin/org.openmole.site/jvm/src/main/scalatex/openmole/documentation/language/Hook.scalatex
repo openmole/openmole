@@ -206,7 +206,7 @@ You can use the following notation in the hook function {@code{hook(yourHookHere
 @hl.openmole("""
   val i = Val[Int]
   val j = Val[Int]
-  val k = Var[Double]
+  val k = Val[Double]
 
   val task = EmptyTask() set (
   outputs := (i,j,k)
