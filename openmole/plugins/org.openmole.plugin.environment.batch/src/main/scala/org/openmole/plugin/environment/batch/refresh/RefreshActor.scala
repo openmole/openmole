@@ -38,7 +38,7 @@ object RefreshActor extends JavaLogger {
           case FAILED ⇒
             val exception = new InternalProcessingError(s"""Job status is FAILED""".stripMargin)
             val stdOutErr = BatchJobControl.tryStdOutErr(bj).toOption
-            JobManager ! Error(job, environment, exception, stdOutErr)
+            JobManager ! Error(job, environment, exception, stdOutErr, None)
             JobManager ! Kill(job, environment, Some(bj))
           case SUBMITTED | RUNNING ⇒
             val updateInterval = bj.updateInterval()
@@ -53,7 +53,7 @@ object RefreshActor extends JavaLogger {
       catch {
         case e: Throwable ⇒
           if (updateErrorsInARow >= preference(BatchEnvironment.MaxUpdateErrorsInARow)) {
-            JobManager ! Error(job, environment, e, BatchJobControl.tryStdOutErr(bj).toOption)
+            JobManager ! Error(job, environment, e, BatchJobControl.tryStdOutErr(bj).toOption, None)
             JobManager ! Kill(job, environment, Some(bj))
           }
           else {

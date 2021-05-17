@@ -30,12 +30,13 @@ import org.openmole.plugin.environment.batch.environment._
 import org.openmole.tool.file._
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.core.workflow.job._
+import org.openmole.tool.stream.StringPrintStream
 
 import scala.util.{ Failure, Success }
 
 object GetResultActor {
 
-  case class JobRemoteExecutionException(message: String, cause: Throwable) extends InternalProcessingError(message, cause)
+  case class JobRemoteExecutionException(message: String, cause: Throwable, output: Option[String]) extends InternalProcessingError(message, cause)
 
   def receive(msg: GetResult)(implicit services: BatchEnvironment.Services) = {
     import services._
@@ -43,44 +44,57 @@ object GetResultActor {
     val GetResult(job, environment, resultPath, batchJob) = msg
 
     JobManager.killOr(job, Kill(job, environment, Some(batchJob))) { () ⇒
-      try getResult(batchJob.storageId(), environment, batchJob.download, resultPath, job)
+      try getResult(environment, resultPath, job, batchJob)
       catch {
         case e: Throwable ⇒
           BatchEnvironment.setExecutionJobSate(environment, job, ExecutionState.FAILED)
-          val stdOutErr = BatchJobControl.tryStdOutErr(batchJob).toOption
-          JobManager ! Error(job, environment, e, stdOutErr)
+          def stdOutErr = BatchJobControl.tryStdOutErr(batchJob).toOption
+
+          e match {
+            case e: JobRemoteExecutionException ⇒ JobManager ! Error(job, environment, e, stdOutErr, e.output)
+            case _                              ⇒ JobManager ! Error(job, environment, e, stdOutErr, None)
+          }
       }
-      finally {
-        JobManager ! Kill(job, environment, Some(batchJob))
-      }
+      finally JobManager ! Kill(job, environment, Some(batchJob))
     }
   }
 
-  def getResult(storageId: String, environment: BatchEnvironment, download: (String, File, TransferOptions) ⇒ Unit, outputFilePath: String, batchJob: BatchExecutionJob)(implicit services: BatchEnvironment.Services): Unit = {
-    import batchJob.job
+  def getResult(environment: BatchEnvironment, outputFilePath: String, batchJob: BatchExecutionJob, batchJobControl: BatchJobControl)(implicit services: BatchEnvironment.Services): Unit = {
+
+    val storageId = batchJobControl.storageId()
+    val download = batchJobControl.download
 
     val runtimeResult = getRuntimeResult(outputFilePath, storageId, environment, download)
 
-    val stream = batchJob.storedJob.moleExecution.executionContext.services.outputRedirection.output
-    display(runtimeResult.stdOut, s"Output on ${runtimeResult.info.hostName}", stream)
+    try {
+      def displayOutput(stream: PrintStream) = display(runtimeResult.stdOut, s"Output on ${runtimeResult.info.hostName}", stream)
+      displayOutput(batchJob.storedJob.moleExecution.executionContext.services.outputRedirection.output)
 
-    runtimeResult.result match {
-      case Failure(exception) ⇒ throw new JobRemoteExecutionException("Fatal exception thrown during the execution of the job execution on the execution node", exception)
-      case Success((serializedContextResults, log)) ⇒
-        val contextResults = getContextResults(serializedContextResults, storageId, environment, download)
+      def stringOutput = runtimeResult.stdOut.map { file ⇒ file.content }
 
-        services.eventDispatcher.trigger(environment: Environment, Environment.JobCompleted(batchJob, log, runtimeResult.info))
+      runtimeResult.result match {
+        case Failure(exception) ⇒ throw JobRemoteExecutionException("Fatal exception thrown during the execution of the job execution on the execution node", exception, stringOutput)
+        case Success((serializedContextResults, log)) ⇒
+          val contextResults = getContextResults(serializedContextResults, storageId, environment, download)
 
-        //Try to download the results for all the jobs of the group
-        for (moleJob ← batchJob.storedJob.storedMoleJobs) {
-          if (contextResults.results.isDefinedAt(moleJob.id)) {
-            val executionResult = contextResults.results(moleJob.id)
-            executionResult match {
-              case Success(context) ⇒ JobStore.finish(moleJob, Left(context))
-              case Failure(e)       ⇒ JobManager ! MoleJobError(moleJob.id, batchJob, environment, e)
+          services.eventDispatcher.trigger(environment: Environment, Environment.JobCompleted(batchJob, log, runtimeResult.info))
+
+          //Try to download the results for all the jobs of the group
+          for (moleJob ← batchJob.storedJob.storedMoleJobs) {
+            if (contextResults.results.isDefinedAt(moleJob.id)) {
+              val executionResult = contextResults.results(moleJob.id)
+              executionResult match {
+                case Success(context) ⇒ JobStore.finish(moleJob, Left(context))
+                case Failure(e) ⇒
+                  val error = JobRemoteExecutionException("A workflow job execution failed during the a job execution on the execution node", e, stringOutput)
+                  JobManager ! MoleJobError(moleJob.id, batchJob, environment, error, output = stringOutput, host = runtimeResult.info.hostName)
+              }
             }
           }
-        }
+      }
+    }
+    finally {
+      runtimeResult.stdOut.foreach(_.delete)
     }
   }
 
@@ -95,10 +109,7 @@ object GetResultActor {
   }
 
   private def display(output: Option[File], description: String, stream: PrintStream) = {
-    output.foreach { file ⇒
-      execution.display(stream, description, file.content)
-      file.delete()
-    }
+    output.foreach { file ⇒ execution.display(stream, description, file.content) }
   }
 
   private def getContextResults(serializedResults: SerializedContextResults, storageId: String, environment: BatchEnvironment, download: (String, File, TransferOptions) ⇒ Unit)(implicit services: BatchEnvironment.Services): ContextResults = {

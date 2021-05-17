@@ -35,7 +35,7 @@ object SubmitActor {
       }
       catch {
         case e: Throwable ⇒
-          JobManager ! Error(job, environment, e, None)
+          JobManager ! Error(job, environment, e, None, None)
           JobManager ! Delay(Submit(job, environment), preference(BatchEnvironment.SubmitRetryInterval))
       }
     }
