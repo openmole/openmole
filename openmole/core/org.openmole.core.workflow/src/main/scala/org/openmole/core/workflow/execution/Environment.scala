@@ -38,9 +38,9 @@ object Environment {
 
   case class JobSubmitted(id: Long, job: ExecutionJob) extends Event[Environment]
   case class JobStateChanged(id: Long, job: ExecutionJob, newState: ExecutionState, oldState: ExecutionState) extends Event[Environment]
-  case class ExceptionRaised(exception: Throwable, level: Level) extends Event[Environment] with ExceptionEvent
-  case class ExecutionJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level) extends Event[Environment] with ExceptionEvent
-  case class MoleJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level, moleJob: JobId) extends Event[Environment] with ExceptionEvent
+  case class ExceptionRaised(exception: Throwable, level: Level, detail: Option[String] = None) extends Event[Environment] with ExceptionEvent
+  case class ExecutionJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level, detail: Option[String] = None) extends Event[Environment] with ExceptionEvent
+  case class MoleJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level, moleJob: JobId, detail: Option[String] = None) extends Event[Environment] with ExceptionEvent
 
   case class JobCompleted(job: ExecutionJob, log: RuntimeLog, info: RuntimeInfo) extends Event[Environment]
 

@@ -7,7 +7,7 @@ object common {
   def gridscaleVersion = "2.36"
   def mgoVersion = "3.47"
   def sshjVersion = "0.31.0"
-  def containerVersion = "1.15"
+  def containerVersion = "1.16"
   def bouncyCastleVersion = "1.68"
   def netLogo5Version = "5.3.1"
   def netLogo6Version = "6.2.0"

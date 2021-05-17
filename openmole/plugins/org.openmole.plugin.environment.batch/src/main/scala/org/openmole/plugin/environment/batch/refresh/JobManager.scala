@@ -84,8 +84,13 @@ object JobManager extends JavaLogger { self ⇒
       case Submitted(job, environment, bj) ⇒
         killOr(environment, job.storedJob, Kill(job, environment, Some(bj))) { () ⇒ self ! Delay(Refresh(job, environment, bj, bj.updateInterval().minUpdateInterval), bj.updateInterval().minUpdateInterval) }
 
-      case MoleJobError(mj, j, environment, e) ⇒
-        val er = Environment.MoleJobExceptionRaised(j, e, WARNING, mj)
+      case MoleJobError(mj, j, environment, e, output, host) ⇒
+        def detail = output.map { output ⇒
+          s"""OpenMOLE output on remote node ${host} was:
+             |$output""".stripMargin
+        }.getOrElse(s"OpenMOLE output on remote node ${host} was empty")
+
+        val er = Environment.MoleJobExceptionRaised(j, e, WARNING, mj, detail = Some(detail))
         environment.error(er)
         services.eventDispatcher.trigger(environment: Environment, er)
         logger.log(FINE, "Error during job execution, it will be resubmitted.", e)

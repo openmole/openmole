@@ -96,7 +96,18 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
 
     for {
       error ← filtered
-    } println(s"${error.level.toString}: ${exceptionToString(error.exception)}")
+    } {
+      def detail =
+        error.detail match {
+          case None    ⇒ ""
+          case Some(m) ⇒ s"\n$m\n"
+        }
+
+      println(
+        s"""${error.level.toString}: ${error.exception.getMessage}$detail
+        |${exceptionToString(error.exception)}""".stripMargin
+      )
+    }
   }
 
   def verify(mole: Mole)(implicit newFile: TmpDirectory, fileService: FileService): Unit = Validation(mole).foreach(println)

@@ -10,11 +10,11 @@ import org.openmole.tool.logger._
 
 object ErrorActor {
   def receive(msg: Error)(implicit services: BatchEnvironment.Services) = {
-    val Error(job, environement, exception, output) = msg
-    processError(job, environement, exception, output)
+    val Error(job, environment, exception, output, openMOLEOutput) = msg
+    processError(job, environment, exception, output, openMOLEOutput)
   }
 
-  def processError(job: BatchExecutionJob, environment: BatchEnvironment, exception: Throwable, output: Option[(String, String)])(implicit services: BatchEnvironment.Services) = {
+  def processError(job: BatchExecutionJob, environment: BatchEnvironment, exception: Throwable, output: Option[(String, String)], openMOLEOutput: Option[String])(implicit services: BatchEnvironment.Services) = {
     import services._
 
     def defaultMessage = """Failed to get the result for the job"""
@@ -31,10 +31,20 @@ object ErrorActor {
       output match {
         case None ⇒ exception
         case Some((stdOut, stdErr)) ⇒
-          new FailedJobExecution(
+
+          def openMOLEOutputMessage =
+            openMOLEOutput match {
+              case Some(o) ⇒
+                s"""OpenMOLE output was:
+                   |$o
+                   |""".stripMargin
+              case None ⇒ ""
+            }
+
+          FailedJobExecution(
             message = message,
             cause = cause,
-            detail =
+            detail = openMOLEOutputMessage +
               s"""Stdout was:
                |$stdOut
                |stderr was:
@@ -43,7 +53,29 @@ object ErrorActor {
           )
       }
 
-    val er = Environment.ExecutionJobExceptionRaised(job, detailedException, level)
+    def details =
+      (output, openMOLEOutput) match {
+        case (None, None) ⇒ None
+        case _ ⇒
+          def openMOLEOutputMessage =
+            openMOLEOutput map { o ⇒
+              s"""OpenMOLE output was:
+                 |$o""".stripMargin
+            }
+
+          def outputMessage =
+            output map {
+              case (stdOut, stdErr) ⇒
+                s"""Stdout of the job was:
+                |$stdOut
+                |Stderr of the job was:
+                |$stdErr """.stripMargin
+            }
+
+          Some(Seq(openMOLEOutputMessage, outputMessage).flatten.mkString("\n"))
+      }
+
+    val er = Environment.ExecutionJobExceptionRaised(job, detailedException, level, details)
     environment.error(er)
 
     services.eventDispatcher.trigger(environment: Environment, er)

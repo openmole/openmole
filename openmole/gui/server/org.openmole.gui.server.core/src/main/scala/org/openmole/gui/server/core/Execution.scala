@@ -198,10 +198,14 @@ class Execution {
     val errors = Environment.errors(info.environment)
 
     errors.map { ex ⇒
-      ex.exception match {
-        case fje: environment.FailedJobExecution ⇒
-          EnvironmentError(environmentId, fje.message, MessageErrorData(fje.message, Some(ErrorData.toStackTrace(fje.cause) + s"\nDETAILS:\n${fje.detail}")), ex.creationTime, utils.javaLevelToErrorLevel(ex.level))
-        case _ ⇒
+      ex.detail match {
+        case Some(detail) ⇒
+          def completeMessage =
+            s"""${ex.exception.getMessage}
+               |$detail""".stripMargin
+
+          EnvironmentError(environmentId, ex.exception.getMessage, MessageErrorData(completeMessage, Some(ErrorData.toStackTrace(ex.exception))), ex.creationTime, utils.javaLevelToErrorLevel(ex.level))
+        case None ⇒
           EnvironmentError(environmentId, ex.exception.getMessage, ErrorData(ex.exception), ex.creationTime, utils.javaLevelToErrorLevel(ex.level))
       }
     }
