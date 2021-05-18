@@ -209,7 +209,7 @@ You can use the following notation in the hook function {@code{hook(yourHookHere
   val k = Val[Double]
 
   val task = EmptyTask() set (
-  outputs := (i,j,k)
+    outputs += (i, j, k)
   )
   
   task hook(display, values = Seq(i, j)) // only i and j are hooked
