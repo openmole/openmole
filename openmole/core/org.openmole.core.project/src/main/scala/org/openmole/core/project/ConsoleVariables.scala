@@ -54,4 +54,7 @@ case class ConsoleVariables(
   args:          Seq[String],
   workDirectory: File,
   experiment:    ConsoleVariables.Experiment
-)(@transient implicit val services: Services)
+)(
+  implicit
+  val services: Services
+)
