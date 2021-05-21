@@ -88,13 +88,14 @@ object EGIAuthentication extends JavaLogger {
     }
   }
 
-  def voCards(implicit workspace: Workspace, preference: Preference) =
-    (workspace.persistentDir / "voCards.xml").updateIfTooOld(preference(EGIEnvironment.VOCardCacheTime)) {
-      voCards ⇒
-        gridscale.http.getStream(preference(EGIEnvironment.VOInformationSite)) { _.copy(voCards) }
-    }
+  def getVOMS(vo: String)(implicit workspace: Workspace, preference: Preference): Option[Seq[String]] = {
+    def openVOCards(implicit workspace: Workspace, preference: Preference) =
+      EGIAuthentication.getClass.getClassLoader.getResourceAsStream("/voCards.xml")
 
-  def getVOMS(vo: String)(implicit workspace: Workspace, preference: Preference): Option[Seq[String]] = getVOMS(vo, xml.XML.loadFile(voCards))
+    val is = openVOCards
+    try getVOMS(vo, xml.XML.load(is))
+    finally is.close()
+  }
   def getVMOSOrError(vo: String)(implicit workspace: Workspace, preference: Preference) = getVOMS(vo).getOrElse(throw new UserBadDataError(s"ID card for VO $vo not found."))
 
   def getVOMS(vo: String, x: xml.Node) = {

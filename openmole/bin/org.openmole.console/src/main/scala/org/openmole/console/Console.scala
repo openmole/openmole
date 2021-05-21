@@ -136,7 +136,7 @@ class Console(script: Option[String] = None) {
           case compiled: Compiled ⇒
             Try(compiled.eval) match {
               case Success(res) ⇒
-                val moleServices = MoleServices.create(applicationExecutionDirectory = services.workspace.tmpDirectory)
+                val moleServices = MoleServices.create(applicationExecutionDirectory = services.workspace.tmpDirectory, compilationContext = Some(compiled.compilationContext))
                 val ex = dslToPuzzle(res).toExecution()(moleServices)
                 Try(ex.run) match {
                   case Failure(e) ⇒

@@ -9,6 +9,7 @@ import org.openmole.core.workflow.job.{ JobGroup, JobId }
 import org.openmole.core.workflow.tools.ExceptionEvent
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.core.event._
+import org.openmole.core.replication.ReplicaCatalog
 
 import java.util.concurrent.atomic.AtomicLong
 import scala.collection.mutable
@@ -96,17 +97,18 @@ object DispatchEnvironment {
 
   def apply(
     slot: Seq[DestinationProvider],
-    name: OptionalArgument[String] = None)(implicit services: BatchEnvironment.Services, varName: sourcecode.Name) = {
-    import services.eventDispatcher
+    name: OptionalArgument[String] = None)(implicit replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) = {
 
     EnvironmentProvider.multiple { (ms, c1) ⇒
+      import ms._
+
       val c2 = EnvironmentProvider.build(slot.map(_.environment), ms, c1)
 
       val dispatchEnvironment =
         new DispatchEnvironment(
           destination = slot.map(e ⇒ Destination(c2(e.environment), e.slot)),
           name = Some(name.getOrElse(varName.value)),
-          services = services.set(ms)
+          services = BatchEnvironment.Services(ms)
         )
 
       for {

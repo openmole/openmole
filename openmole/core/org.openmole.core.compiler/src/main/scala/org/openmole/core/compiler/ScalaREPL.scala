@@ -189,7 +189,7 @@ class ScalaREPL(
   priorityBundles:        ⇒ Seq[Bundle],
   jars:                   Seq[JFile],
   quiet:                  Boolean,
-  classDirectory:         java.io.File,
+  val classDirectory:     java.io.File,
   settings:               Settings,
   firstPackageLineNumber: Int           = 100000000)
   extends ILoop(
@@ -255,6 +255,8 @@ class ScalaREPL(
 
   lazy val reporter = new OMReporter(settings, quiet)
   lazy val omIMain = OMIMain(settings, reporter, priorityBundles, jars, classDirectory, firstPackageLineNumber)
+
+  def classLoader = omIMain.classLoader
 
   intp = omIMain
   override def Repl(config: ShellConfig, interpreterSettings: Settings, out: java.io.PrintWriter) = omIMain

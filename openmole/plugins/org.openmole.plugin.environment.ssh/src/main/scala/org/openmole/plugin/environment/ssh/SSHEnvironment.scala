@@ -19,10 +19,11 @@ package org.openmole.plugin.environment.ssh
 
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.locks.ReentrantLock
-
 import gridscale.effectaside._
 import org.openmole.core.authentication.AuthenticationStore
-import org.openmole.core.preference.PreferenceLocation
+import org.openmole.core.preference.{ Preference, PreferenceLocation }
+import org.openmole.core.replication.ReplicaCatalog
+import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.Updater
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
@@ -57,8 +58,7 @@ object SSHEnvironment extends JavaLogger {
     name:                 OptionalArgument[String]      = None,
     modules:              Seq[String]                   = Vector(),
     debug:                Boolean                       = false
-  )(implicit services: BatchEnvironment.Services, cypher: Cypher, authenticationStore: AuthenticationStore, varName: sourcecode.Name) = {
-    import services._
+  )(implicit cypher: Cypher, authenticationStore: AuthenticationStore, preference: Preference, serializerService: SerializerService, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) = {
 
     EnvironmentProvider { ms ⇒
       new SSHEnvironment(
@@ -75,7 +75,7 @@ object SSHEnvironment extends JavaLogger {
         authentication = SSHAuthentication.find(user, host, port),
         modules = modules,
         debug = debug,
-        services = services.set(ms)
+        services = BatchEnvironment.Services(ms)
       )
     }
   }
