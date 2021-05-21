@@ -19,6 +19,7 @@ package org.openmole.plugin.environment.pbs
 
 import _root_.gridscale.effectaside
 import org.openmole.core.authentication._
+import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
 import org.openmole.plugin.environment.batch.environment._
@@ -50,8 +51,7 @@ object PBSEnvironment extends JavaLogger {
     name:                 OptionalArgument[String]      = None,
     localSubmission:      Boolean                       = false,
     modules: Seq[String] = Vector(),
-  )(implicit services: BatchEnvironment.Services, authenticationStore: AuthenticationStore, cypher: Cypher, varName: sourcecode.Name) = {
-    import services._
+  )(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) = {
 
     val parameters = Parameters(
       queue = queue,
@@ -69,6 +69,8 @@ object PBSEnvironment extends JavaLogger {
     )
 
     EnvironmentProvider { ms ⇒
+      import ms._
+
       if (!localSubmission) {
         val userValue = user.mustBeDefined("user")
         val hostValue = host.mustBeDefined("host")
@@ -78,17 +80,17 @@ object PBSEnvironment extends JavaLogger {
           user = userValue,
           host = hostValue,
           port = portValue,
-          timeout = timeout.getOrElse(services.preference(SSHEnvironment.timeOut)),
+          timeout = timeout.getOrElse(preference(SSHEnvironment.timeOut)),
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue),
-          services = services.set(ms)
+          services = BatchEnvironment.Services(ms)
         )
       }
       else new PBSLocalEnvironment(
         parameters = parameters,
         name = Some(name.getOrElse(varName.value)),
-        services = services.set(ms)
+        services = BatchEnvironment.Services(ms)
       )
     }
   }

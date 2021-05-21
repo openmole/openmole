@@ -29,6 +29,7 @@ import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.random.Seeder
 import org.openmole.tool.file._
+import org.openmole.core.compiler.CompilationContext
 
 object MoleExecutionContext {
   def apply()(implicit moleServices: MoleServices) = new MoleExecutionContext()
@@ -56,11 +57,13 @@ object MoleServices {
    */
   def create(
     applicationExecutionDirectory: File,
-    moleExecutionDirectory:        Option[File]              = None,
-    outputRedirection:             Option[OutputRedirection] = None,
-    seed:                          Option[Long]              = None)(implicit preference: Preference, seeder: Seeder, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, _newFile: TmpDirectory, fileService: FileService, workspace: Workspace, _outputRedirection: OutputRedirection, loggerService: LoggerService, serializerService: SerializerService, networkService: NetworkService) = {
+    moleExecutionDirectory:        Option[File]               = None,
+    outputRedirection:             Option[OutputRedirection]  = None,
+    seed:                          Option[Long]               = None,
+    compilationContext:            Option[CompilationContext] = None)(implicit preference: Preference, seeder: Seeder, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, _newFile: TmpDirectory, fileService: FileService, workspace: Workspace, _outputRedirection: OutputRedirection, loggerService: LoggerService, serializerService: SerializerService, networkService: NetworkService) = {
     val executionDirectory = moleExecutionDirectory.getOrElse(applicationExecutionDirectory.newDir("execution"))
-    new MoleServices(applicationExecutionDirectory, executionDirectory)(
+
+    new MoleServices(applicationExecutionDirectory, executionDirectory, compilationContext = compilationContext)(
       preference = preference,
       seeder = Seeder(seed.getOrElse(seeder.newSeed)),
       threadProvider = threadProvider,
@@ -93,7 +96,7 @@ object MoleServices {
     loggerService:     LoggerService     = moleServices.loggerService,
     serializerService: SerializerService = moleServices.serializerService,
     networkService:    NetworkService    = moleServices.networkService) =
-    new MoleServices(moleServices.applicationExecutionDirectory, moleServices.moleExecutionDirectory)(
+    new MoleServices(moleServices.applicationExecutionDirectory, moleServices.moleExecutionDirectory, moleServices.compilationContext)(
       preference = preference,
       seeder = seeder,
       threadProvider = threadProvider,
@@ -122,7 +125,7 @@ object MoleServices {
  * @param fileServiceCache
  * @param outputRedirection
  */
-class MoleServices(val applicationExecutionDirectory: File, val moleExecutionDirectory: File)(
+class MoleServices(val applicationExecutionDirectory: File, val moleExecutionDirectory: File, val compilationContext: Option[CompilationContext])(
   implicit
   val preference:        Preference,
   val seeder:            Seeder,

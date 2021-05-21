@@ -164,7 +164,7 @@ object Project {
         val loop = newREPL.getOrElse { (v: project.ConsoleVariables) ⇒ Project.newREPL(v) }.apply(consoleVariables)
         try {
           Option(loop.compile(content)) match {
-            case Some(compiled) ⇒ Compiled(compiled)
+            case Some(compiled) ⇒ Compiled(compiled, CompilationContext(loop.classDirectory, loop.classLoader))
             case None           ⇒ throw new InternalProcessingError("The compiler returned null instead of a compiled script, it may append if your script contains an unclosed comment block ('/*' without '*/').")
           }
         }
@@ -206,7 +206,7 @@ sealed trait CompilationError extends CompileResult {
 case class ErrorInCode(error: ScalaREPL.CompilationError) extends CompilationError
 case class ErrorInCompiler(error: Throwable) extends CompilationError
 
-case class Compiled(result: ScalaREPL.Compiled) extends CompileResult {
+case class Compiled(result: ScalaREPL.Compiled, compilationContext: CompilationContext) extends CompileResult {
 
   def eval =
     result.apply() match {
