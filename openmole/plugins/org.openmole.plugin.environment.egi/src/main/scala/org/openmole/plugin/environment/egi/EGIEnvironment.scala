@@ -21,7 +21,8 @@ import gridscale.egi._
 import org.openmole.core.communication.storage.TransferOptions
 import org.openmole.core.exception.{ InternalProcessingError, MultipleException }
 import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.preference.{ PreferenceLocation, Preference }
+import org.openmole.core.preference.{ Preference, PreferenceLocation }
+import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
@@ -166,7 +167,7 @@ object EGIEnvironment extends JavaLogger {
     openMOLEMemory: OptionalArgument[Information] = None,
     debug:          Boolean                       = false,
     name:           OptionalArgument[String]      = None
-  )(implicit authentication: EGIAuthentication, services: BatchEnvironment.Services, cypher: Cypher, workspace: Workspace, varName: sourcecode.Name) = {
+  )(implicit authentication: EGIAuthentication, cypher: Cypher, workspace: Workspace, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) = {
 
     EnvironmentProvider { ms ⇒
       new EGIEnvironment(
@@ -181,7 +182,7 @@ object EGIEnvironment extends JavaLogger {
         debug = debug,
         name = name,
         authentication = authentication,
-        services = services.set(ms)
+        services = BatchEnvironment.Services(ms)
       )
     }
   }

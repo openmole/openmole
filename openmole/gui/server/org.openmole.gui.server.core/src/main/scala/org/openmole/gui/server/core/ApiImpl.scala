@@ -376,7 +376,8 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
             MoleServices.create(
               applicationExecutionDirectory = s.workspace.tmpDirectory,
               moleExecutionDirectory = Some(executionTmpDirectory),
-              outputRedirection = Some(executionOutputRedirection))
+              outputRedirection = Some(executionOutputRedirection),
+              compilationContext = Some(compiled.compilationContext))
           onCompiled.foreach {
             _(execId)
           }

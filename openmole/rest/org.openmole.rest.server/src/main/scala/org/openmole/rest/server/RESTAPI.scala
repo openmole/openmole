@@ -120,7 +120,8 @@ trait RESTAPI extends ScalatraServlet
                   MoleServices.create(
                     applicationExecutionDirectory = baseDirectory,
                     moleExecutionDirectory = Some(directory.tmpDirectory),
-                    outputRedirection = Some(OutputRedirection(directory.outputStream))
+                    outputRedirection = Some(OutputRedirection(directory.outputStream)),
+                    compilationContext = Some(compiled.compilationContext)
                   )
                 Try {
                   dslToPuzzle(res).toExecution()(moleServices)

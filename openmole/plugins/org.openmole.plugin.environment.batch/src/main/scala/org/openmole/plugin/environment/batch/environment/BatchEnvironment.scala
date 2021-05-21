@@ -49,6 +49,8 @@ import squants.information.InformationConversions._
 import squants.time.TimeConversions._
 import org.openmole.tool.lock._
 import org.openmole.tool.outputredirection.OutputRedirection
+import org.openmole.core.compiler.CompilationContext
+
 
 import scala.collection.immutable.TreeSet
 
@@ -133,10 +135,21 @@ object BatchEnvironment {
 
   object Services {
 
-    implicit def fromServices(implicit services: org.openmole.core.services.Services): Services = {
-      import services._
-      new Services()
-    }
+    def apply(ms: MoleServices)(implicit replicaCatalog: ReplicaCatalog) =
+      new Services(ms.compilationContext) (
+        threadProvider = ms.threadProvider,
+        preference = ms.preference,
+        newFile = ms.tmpDirectory,
+        serializerService = ms.serializerService,
+        fileService = ms.fileService,
+        seeder = ms.seeder,
+        randomProvider = ms.newRandom,
+        replicaCatalog = replicaCatalog,
+        eventDispatcher = ms.eventDispatcher,
+        fileServiceCache = ms.fileServiceCache,
+        outputRedirection = ms.outputRedirection,
+        loggerService = ms.loggerService
+      )
 
     def copy(services: Services)(
       threadProvider:             ThreadProvider = services.threadProvider,
@@ -151,7 +164,7 @@ object BatchEnvironment {
       fileServiceCache:  FileServiceCache = services.fileServiceCache,
       outputRedirection: OutputRedirection = services.outputRedirection,
       loggerService: LoggerService) =
-      new Services()(
+      new Services(services.compilationContext)(
         threadProvider = threadProvider,
         preference = preference,
         newFile = newFile,
@@ -165,41 +178,41 @@ object BatchEnvironment {
         outputRedirection = outputRedirection,
         loggerService = loggerService)
 
-    def set(services: Services)(ms: MoleServices) =
-      new Services() (
-        threadProvider = ms.threadProvider,
-        preference = ms.preference,
-        newFile = ms.tmpDirectory,
-        serializerService = services.serializerService,
-        fileService = ms.fileService,
-        seeder = ms.seeder,
-        randomProvider = services.randomProvider,
-        replicaCatalog = services.replicaCatalog,
-        eventDispatcher = ms.eventDispatcher,
-        fileServiceCache = ms.fileServiceCache,
-        outputRedirection = ms.outputRedirection,
-        loggerService = ms.loggerService
-      )
+//    def set(services: Services)(ms: MoleServices) =
+//      new Services(ms.compilationContext) (
+//        threadProvider = ms.threadProvider,
+//        preference = ms.preference,
+//        newFile = ms.tmpDirectory,
+//        serializerService = services.serializerService,
+//        fileService = ms.fileService,
+//        seeder = ms.seeder,
+//        randomProvider = services.randomProvider,
+//        replicaCatalog = services.replicaCatalog,
+//        eventDispatcher = ms.eventDispatcher,
+//        fileServiceCache = ms.fileServiceCache,
+//        outputRedirection = ms.outputRedirection,
+//        loggerService = ms.loggerService
+//      )
 
   }
 
-  class Services(
-                  implicit
-                  val threadProvider:             ThreadProvider,
-                  implicit val preference:        Preference,
-                  implicit val newFile:           TmpDirectory,
-                  implicit val serializerService: SerializerService,
-                  implicit val fileService:       FileService,
-                  implicit val seeder:            Seeder,
-                  implicit val randomProvider:    RandomProvider,
-                  implicit val replicaCatalog:    ReplicaCatalog,
-                  implicit val eventDispatcher:   EventDispatcher,
-                  implicit val fileServiceCache:  FileServiceCache,
-                  implicit val outputRedirection: OutputRedirection,
-                  implicit val loggerService: LoggerService
+  class Services(val compilationContext: Option[CompilationContext])(
+    implicit
+    val threadProvider:             ThreadProvider,
+    implicit val preference:        Preference,
+    implicit val newFile:           TmpDirectory,
+    implicit val serializerService: SerializerService,
+    implicit val fileService:       FileService,
+    implicit val seeder:            Seeder,
+    implicit val randomProvider:    RandomProvider,
+    implicit val replicaCatalog:    ReplicaCatalog,
+    implicit val eventDispatcher:   EventDispatcher,
+    implicit val fileServiceCache:  FileServiceCache,
+    implicit val outputRedirection: OutputRedirection,
+    implicit val loggerService: LoggerService,
   ) { services =>
 
-    def set(ms: MoleServices) = Services.set(services)(ms)
+//    def set(ms: MoleServices) = Services.set(services)(ms)
 
     def copy (
                threadProvider:    ThreadProvider = services.threadProvider,
@@ -427,9 +440,16 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   def jobs = ExecutionJobRegistry.executionJobs(registry)
 
-  lazy val relpClassesCache: BatchEnvironment.REPLClassCache = new AssociativeCache[Set[String], Seq[File]]
+  lazy val plugins = {
+    def closureBundleAndPlugins = services.compilationContext.toSeq.flatMap { c =>
+      import services._
+      val (cb, file) = BatchExecutionJob.replClassesToPlugins(c.classDirectory, c.classLoader)
+      cb.plugins ++ Seq(file)
+    }
 
-  lazy val plugins = PluginManager.pluginsForClass(this.getClass)
+    (PluginManager.pluginsForClass(this.getClass).toSeq ++ closureBundleAndPlugins).distinctBy(_.getCanonicalPath)
+  }
+
   lazy val jobStore = JobStore(services.newFile.makeNewDir("jobstore"))
 
   override def submit(job: JobGroup) = {
