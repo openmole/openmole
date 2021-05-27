@@ -83,6 +83,7 @@ package object evolution {
               algorithm = algorithm,
               evaluation = evaluation,
               termination = i.termination,
+              parallelism = i.parallelism,
               wrap = false,
               suggestion = suggestion,
               scope = scope
@@ -100,7 +101,7 @@ package object evolution {
   }
 
   case class SteadyState(wrap: Boolean = false) extends EvolutionPattern
-  case class Island(termination: OMTermination, sample: OptionalArgument[Int] = None) extends EvolutionPattern
+  case class Island(termination: OMTermination, sample: OptionalArgument[Int] = None, parallelism: Int = 1) extends EvolutionPattern
 
   implicit class EvolutionMethodContainer(dsl: DSLContainer[EvolutionWorkflow]) extends DSLContainerHook(dsl) {
     def hook[F](
