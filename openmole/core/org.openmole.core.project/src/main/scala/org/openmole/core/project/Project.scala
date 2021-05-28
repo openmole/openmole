@@ -48,12 +48,12 @@ object Project {
     def makePackage(name: String, tree: Tree): String =
       if (!tree.files.isEmpty) tree.files.distinct.map(f ⇒ makeVal(name, f)).mkString("\n")
       else
-        s"""lazy val $name = new {
+        s"""@transient lazy val $name = new {
             |${makeImportTree(tree)}
             |}""".stripMargin
 
     def makeVal(identifier: String, file: File) =
-      s"""lazy val ${identifier} = ${uniqueName(file)}"""
+      s"""@transient lazy val ${identifier} = ${uniqueName(file)}"""
 
     def makeScriptWithImports(sourceFile: SourceFile) = {
       def imports = makeImportTree(Tree.insertAll(sourceFile.importedFiles))
@@ -61,11 +61,11 @@ object Project {
       val name = uniqueName(sourceFile.file)
 
       s"""class ${name}Class {
-           |lazy val _imports = new {
+           |@transient lazy val _imports = new {
            |$imports
            |}
            |}
-           |lazy val ${name} = new ${name}Class
+           |@transient lazy val ${name} = new ${name}Class
            """
     }
 
@@ -94,13 +94,13 @@ object Project {
 
       val classContent =
         s"""object ${name} {
-           |lazy val _imports = new {
+           |@transient lazy val _imports = new {
            |$imports
            |}
            |
            |import _imports._
            |
-           |private lazy val ${ConsoleVariables.workDirectory} = File(new java.net.URI("${sourceFile.file.getParentFileSafe.toURI}").getPath)
+           |@transient private lazy val ${ConsoleVariables.workDirectory} = File(new java.net.URI("${sourceFile.file.getParentFileSafe.toURI}").getPath)
            |
            |${sourceFile.file.content}
            |}
