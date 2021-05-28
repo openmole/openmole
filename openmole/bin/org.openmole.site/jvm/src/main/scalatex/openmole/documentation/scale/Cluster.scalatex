@@ -79,8 +79,8 @@ val env =
  @li{@sharedDirectory,}
  @li{@storageSharedLocally,}
  @li{@workDirectory,}
- @li{@queue,}
- @li{@wallTime,}
+ @li{@queue(),}
+ @li{@wallTime(),}
  @li{@memory,}
  @li{@openMOLEMemory,}
  @li{@apiEntryTitle{nodes} Number of nodes requested,}
@@ -113,8 +113,8 @@ val env =
   @li{@sharedDirectory,}
   @li{@storageSharedLocally}
   @li{@workDirectory,}
-  @li{@queue,}
-  @li{@wallTime,}
+  @li{@queue(),}
+  @li{@wallTime(),}
   @li{@memory,}
   @li{@openMOLEMemory,}
   @li{@threads,}
@@ -135,8 +135,8 @@ val env =
     "login",
     "machine.domain",
     // optional parameters
-    queue = "short-jobs",
-    wallTime = 1 hour
+    partition = "short-jobs",
+    time = 1 hour
   )""")
 
 @br
@@ -147,16 +147,17 @@ val env =
   @li{@sharedDirectory,}
   @li{@storageSharedLocally}
   @li{@workDirectory,}
-  @li{@queue,}
-  @li{@wallTime,}
+  @li{@queue{partition},}
+  @li{@wallTime{time},}
   @li{@memory,}
   @li{@openMOLEMemory,}
   @li{@apiEntryTitle{nodes} Number of nodes requested,}
-  @li{@threads,}
-  @li{@apiEntryTitle{coresByNodes} An alternative to specifying the number of threads. @i{coresByNodes} takes the value of the @{threads} when not specified, or 1 if none of them is specified.}
+  @li{@threads, it automatically sets the @i{cpuPerTask} entry,}
+  @li{@apiEntryTitle{cpuPerTask} An alternative to specifying the number of threads. @i{cpuPerTask} takes the value of the @{threads} when not specified, or 1 if none of them is specified.}
+  @li{@apiEntryTitle{reservation} name of a SLURM reservation,}
   @li{@apiEntryTitle{qos} Quality of Service (QOS) as defined in the Slurm database}
   @li{@apiEntryTitle{gres} a list of Generic Resource (GRES) requested. A Gres is a pair defined by the name of the resource and the number of resources requested (scalar). For instance @hl.openmoleNoTest{gres = List( Gres("resource", 1) )}}
-  @li{@apiEntryTitle{constraints} a list of Slurm defined constraints which selected nodes must match,}
+  @li{@apiEntryTitle{constraints} a list of SLURM defined constraints which selected nodes must match,}
   @li{@name,}
   @li{@localSubmission.}
 
@@ -212,8 +213,8 @@ val env =
   @li{@sharedDirectory,}
   @li{@storageSharedLocally}
   @li{@workDirectory,}
-  @li{@queue,}
-  @li{@wallTime,}
+  @li{@queue(),}
+  @li{@wallTime(),}
   @li{@openMOLEMemory,}
   @li{@threads,}
   @li{@apiEntryTitle{core} number of cores allocated for each job,}

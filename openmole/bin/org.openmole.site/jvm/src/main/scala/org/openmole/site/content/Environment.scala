@@ -25,11 +25,11 @@ import scalatags.Text.all._
 object Environment {
 
   def provideOptions = """You also can set options by providing additional parameters to the environment (..., option = value, ...)"""
-  def wallTime = newEntry("walltime", " the maximum time a job is permitted to run before being killed, for instance ", hl.openmoleNoTest("wallTime = 1 hour"))
+  def wallTime(name: String = "wallTime") = newEntry(name = name, " the maximum time a job is permitted to run before being killed, for instance ", hl.openmoleNoTest(s"$name = 1 hour"))
   def memory = newEntry("memory", " the memory for the job, for instance ", hl.openmoleNoTest("memory = 2 gigabytes"))
   def openMOLEMemory = newEntry("openMOLEMemory", " the memory of attributed to the OpenMOLE runtime on the execution node, if you run external tasks you can reduce the memory for the OpenMOLE runtime to 256MB in order to have more memory for you program on the execution node, for instance ", hl.openmoleNoTest("openMOLEMemory = 256 megabytes"))
   def threads = newEntry("threads", " the number of threads for concurrent execution of tasks on the worker node, for instance ", hl.openmoleNoTest("threads = 4"))
-  def queue = newEntry("queue", " the name of the queue on which jobs will be submitted, for instance ", hl.openmoleNoTest("queue = \"longjobs\""))
+  def queue(name: String = "queue") = newEntry(name, " the name of the queue on which jobs will be submitted, for instance ", hl.openmoleNoTest(s"""$name = \"longjobs\""""))
   def port = newEntry("port", " the port number used by the ssh server, by ", b("default it is set to 22"))
   def sharedDirectory = newEntry("sharedDirectory", " OpenMOLE uses this directory to communicate from the head node of the cluster to the worker nodes (defaults to ", hl.openmoleNoTest("sharedDirectory = \"/home/user/.openmole/.tmp/ssh\""))
   def storageSharedLocally = newEntry("storageSharedLocally", " When set to ", hl.openmoleNoTest("true"), ", OpenMOLE will use symbolic links instead of physically copying files to the remote environment. This ", b("assumes that the OpenMOLE instance has access to the same storage space as the remote environment"), " (think same NFS filesystem on desktop machine and cluster). Defaults to ", hl.openmoleNoTest("false"), " and shouldn't be used unless you're 100% sure of what you're doing!")

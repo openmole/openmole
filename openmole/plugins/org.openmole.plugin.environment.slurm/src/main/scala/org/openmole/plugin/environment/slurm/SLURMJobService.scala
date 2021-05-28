@@ -39,13 +39,13 @@ class SLURMJobService[S, H](
 
     val description = _root_.gridscale.slurm.SLURMJobDescription(
       command = s"/bin/bash ${remoteScript.content}",
-      queue = parameters.queue,
+      partition = parameters.partition,
       workDirectory = jobDirectory,
-      wallTime = parameters.wallTime,
+      time = parameters.time,
       memory = parameters.memory,
       nodes = parameters.nodes,
       ntasks = parameters.nTasks,
-      coresByNode = parameters.coresByNode orElse parameters.threads,
+      cpuPerTask = parameters.cpuPerTask orElse parameters.threads,
       qos = parameters.qos,
       gres = parameters.gres.toList,
       constraints = parameters.constraints.toList,
