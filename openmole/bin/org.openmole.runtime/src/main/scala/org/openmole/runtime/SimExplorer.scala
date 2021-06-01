@@ -100,10 +100,10 @@ object SimExplorer extends JavaLogger {
             implicit val networkService = NetworkService(None)
 
             try {
-
               PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error starting bundle $b", e) }
-              logger.fine("plugins: " + config.pluginPath.get + " " + new File(config.pluginPath.get).listFilesSafe.mkString(","))
               PluginManager.tryLoad(new File(config.pluginPath.get).listFilesSafe).foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
+
+              logger.fine("plugins: " + config.pluginPath.get + " " + new File(config.pluginPath.get).listFilesSafe.mkString(","))
 
               val storage = serializerService.deserializeAndExtractFiles[RemoteStorage](new File(config.storage.get), deleteFilesOnGC = true)
 
