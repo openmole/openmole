@@ -22,36 +22,30 @@ import org.openmole.core.expansion.{ FromContext, Validate }
 import org.openmole.core.workflow.sampling._
 
 object CompleteSampling {
+  def apply(samplings: Sampling*) = new CompleteSampling(samplings: _*)
+}
 
-  implicit def isSampling: IsSampling[CompleteSampling] = new IsSampling[CompleteSampling] {
-    override def validate(s: CompleteSampling): Validate = s.samplings.flatMap(_.validate)
-    override def inputs(s: CompleteSampling): PrototypeSet = s.samplings.flatMap { _.inputs }
-    override def outputs(s: CompleteSampling): Iterable[Val[_]] = s.samplings.flatMap { _.outputs }
+class CompleteSampling(val samplings: Sampling*) extends Sampling {
 
-    override def apply(s: CompleteSampling) = FromContext { p ⇒
-      import p._
-      combine(s.samplings.map(_.apply())).from(context)
-    }
-  }
+  override def validate: Validate = samplings.flatMap(_.validate)
+  override def inputs = PrototypeSet.empty ++ samplings.flatMap { _.inputs }
+  override def outputs: Iterable[Val[_]] = samplings.flatMap { _.outputs }
 
-  private def combine1(s1: Iterator[Iterable[Variable[_]]], s2: FromContext[Iterator[Iterable[Variable[_]]]]) = FromContext { p ⇒
+  override def apply() = FromContext { p ⇒
     import p._
-    for (x ← s1; y ← s2.from(context ++ x)) yield x ++ y
-  }
-
-  def combine(samplings: Seq[FromContext[Iterator[Iterable[Variable[_]]]]]) = FromContext { p ⇒
-    import p._
-
     if (samplings.isEmpty) Iterator.empty
     else
-      samplings.tail.foldLeft(samplings.head.from(context)) {
-        (a, b) ⇒ combine1(a, b).from(context)
+      samplings.tail.foldLeft(samplings.head().from(context)) {
+        (a, b) ⇒ combine(a, b).from(context)
       }
   }
 
-}
+  def combine(s1: Iterator[Iterable[Variable[_]]], s2: Sampling) = FromContext { p ⇒
+    import p._
+    for (x ← s1; y ← s2().from(context ++ x)) yield x ++ y
+  }
 
-case class CompleteSampling(samplings: Sampling*)
+}
 
 object XSampling {
 
