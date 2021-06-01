@@ -286,7 +286,7 @@ object BatchEnvironment {
 
     serializerService.serialize(job.runnableTasks, jobFile)
 
-    val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins -- environment.plugins ++ (job.files.toSet & environment.plugins.toSet)
+    val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins ++ (job.files.toSet & environment.plugins.toSet) // Exclude env plugins maybe
     val files = (new TreeSet[File]()(fileOrdering) ++ job.files) -- plugins
 
     val runtime = replicateTheRuntime(environment, replicate)
@@ -348,8 +348,8 @@ object BatchEnvironment {
     val files = shuffled(serializationFile)(services.randomProvider()).map { replicate(_, TransferOptions()) }
 
     ExecutionMessage(
-      pluginReplicas,
-      files,
+      pluginReplicas.sortBy(_.originalPath),
+      files.sortBy(_.originalPath),
       jobFile,
       environment.runtimeSettings
     )
