@@ -101,13 +101,13 @@ trait SubmissionEnvironment <: Environment {
 object LocalEnvironment {
 
   def apply(
-    nbThreads:    OptionalArgument[Int]    = None,
+    threads:    OptionalArgument[Int]    = None,
     deinterleave: Boolean                  = false,
     name:         OptionalArgument[String] = OptionalArgument()
   )(implicit varName: sourcecode.Name) =
     EnvironmentProvider { ms ⇒
       import ms._
-      new LocalEnvironment(nbThreads.getOrElse(1), deinterleave, Some(name.getOrElse(varName.value)))
+      new LocalEnvironment(threads.getOrElse(1), deinterleave, Some(name.getOrElse(varName.value)))
     }
 
   def apply(threads: Int, deinterleave: Boolean) =
@@ -120,16 +120,16 @@ object LocalEnvironment {
 
 /**
  * Local environment
- * @param nbThreads number of parallel threads
+ * @param threads number of parallel threads
  * @param deinterleave get the outputs of executions as strings
  */
 class LocalEnvironment(
-  val nbThreads:     Int,
+  val threads:     Int,
   val deinterleave:  Boolean,
   override val name: Option[String]
 )(implicit val threadProvider: ThreadProvider, val eventDispatcherService: EventDispatcher) extends Environment {
 
-  val pool = Cache(new ExecutorPool(nbThreads, WeakReference(this), threadProvider))
+  val pool = Cache(new ExecutorPool(threads, WeakReference(this), threadProvider))
 
   def runningJobs = pool().runningJobs
   def nbJobInQueue = pool().waiting
