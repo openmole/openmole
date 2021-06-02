@@ -261,6 +261,12 @@ object GAMATask {
 
         val resultContext = containerTask.process(executionContext).from(context)
 
+        def gamaOutputFile =
+          tmpOutputDirectory.
+            listFilesSafe.
+            filter(f => f.isFile && f.getName.startsWith("simulation-outputs") && f.getName.endsWith(".xml")).
+            sortBy(_.getName).headOption.getOrElse(throw new InternalProcessingError(s"""GAMA result file (simulation-outputsXX.xml) has not been found, the content of the output folder is: [${tmpOutputDirectory.list.mkString(", ")}]"""))
+
         (mapped.outputs.isEmpty, frameRate.option) match {
           case (true, _) => resultContext
           case (false, None) =>
@@ -288,17 +294,7 @@ object GAMATask {
                 case _ => None
               }
 
-            val gamaOutputFile =
-              tmpOutputDirectory.
-                listFilesSafe.
-                filter(f => f.isFile && f.getName.startsWith("simulation-outputs") && f.getName.endsWith(".xml")).
-                sortBy(_.getName).headOption
-
-            val simulationOutput =
-              gamaOutputFile match {
-                case Some(f) =>  XML.loadFile(f) \ "Step"
-                case None => throw new InternalProcessingError(s"""GAMA result file (simulation-outputsXX.xml) has not been found, the content of the output folder is: [${tmpOutputDirectory.list.mkString(", ")}]""")
-              }
+            val simulationOutput = XML.loadFile(gamaOutputFile) \ "Step"
 
             resultContext ++ extractOutputs(simulationOutput.last)
           case (false, Some(f)) =>
@@ -319,7 +315,7 @@ object GAMATask {
                 if a.text == name
               } yield e.child.text
 
-            val simulationOutput = XML.loadFile(tmpOutputDirectory / "simulation-outputs0.xml") \ "Step"
+            val simulationOutput = XML.loadFile(gamaOutputFile) \ "Step"
 
             resultContext ++ mapped.outputs.map { m =>
               val values =
