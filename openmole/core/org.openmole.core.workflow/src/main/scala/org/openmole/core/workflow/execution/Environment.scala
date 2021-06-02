@@ -101,7 +101,7 @@ trait SubmissionEnvironment <: Environment {
 object LocalEnvironment {
 
   def apply(
-    threads:    OptionalArgument[Int]    = None,
+    threads:      OptionalArgument[Int]    = None,
     deinterleave: Boolean                  = false,
     name:         OptionalArgument[String] = OptionalArgument()
   )(implicit varName: sourcecode.Name) =
@@ -124,7 +124,7 @@ object LocalEnvironment {
  * @param deinterleave get the outputs of executions as strings
  */
 class LocalEnvironment(
-  val threads:     Int,
+  val threads:       Int,
   val deinterleave:  Boolean,
   override val name: Option[String]
 )(implicit val threadProvider: ThreadProvider, val eventDispatcherService: EventDispatcher) extends Environment {

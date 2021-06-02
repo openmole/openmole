@@ -47,7 +47,7 @@ object SimExplorer extends JavaLogger {
         inputMessage:  Option[String] = None,
         outputMessage: Option[String] = None,
         pluginPath:    Option[String] = None,
-        thread:      Option[Int]    = None,
+        thread:        Option[Int]    = None,
         workspace:     Option[String] = None,
         test:          Boolean        = false,
         debug:         Boolean        = false
@@ -89,7 +89,6 @@ object SimExplorer extends JavaLogger {
 
             val threads = config.thread.getOrElse(1)
             logger.fine(s"running with: $threads threads")
-
 
             implicit val workspace = Workspace(new File(config.workspace.get).getCanonicalFile)
             implicit val newFile = TmpDirectory(workspace)
