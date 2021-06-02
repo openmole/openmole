@@ -28,11 +28,12 @@ val nbPreysInit = Val[Int]
 val mySeed = Val[Long]
 
 // Gama task
-// The first argument is the gaml file
+// The first argument is the project directory
+// The second argument is the relative path of the gaml file in the project directory
 // The second argument is the Gama experiment name
 // The third argument is the number of steps
 val gama =
-  GAMATask(workDirectory / "predatorPrey.gaml", experiment = "prey_predatorExp", finalStep = 100, seed = mySeed) set (
+  GAMATask(project = workDirectory / "predator", gaml = "predatorPrey.gaml", experiment = "prey_predatorExp", finalStep = 100, seed = mySeed) set (
     inputs += (nbPreysInit mapped "nb_preys_init"),
     outputs += (numberOfPreys mapped "Number of preys")
   )
@@ -54,8 +55,8 @@ DirectSampling(
 
 The GAMA task uses the following arguments:
   @ul
-    @li{@code{gamlOrWorkspace} the location of your @i{.gaml} file or the location of your GAMA workspace directory (in this case the model argument must be set), @b{mandatory}}
-    @li{@code{model} the relative path of your @i{.gaml} file in your work directory, @b{optional} this parameter must bet set only when @code{gamlOrWorkspace} is a directory}
+    @li{@code{project} the location of your GAMA project directory, @b{mandatory}}
+    @li{@code{model} the relative path of your @i{.gaml} file in your work directory, @b{mandatory}}
     @li{@code{experiment} the name of your experiment as implemented in the @i{.gaml} file, @b{mandatory}}
     @li{@code{finalStep} the last simulation step of you simulation, @b{mandatory}}
     @li{@code{frameRate} the frame rate to sample you simulation dynamics, @b{optional}}

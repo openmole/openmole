@@ -34,15 +34,11 @@ object GAMATask {
 
   def volumes(
     workspace: File,
-    model:     OptionalArgument[String]) =
-    model.option match {
-      case Some(model) ⇒ (model, Seq(workspace -> workspaceDirectory))
-      case None        ⇒ (workspace.getName, Seq(workspace -> s"$workspaceDirectory/${workspace.getName}"))
-    }
+    model:     String) = (model, Seq(workspace -> workspaceDirectory))
 
   def prepare(
     workspace:              File,
-    model:                  OptionalArgument[String],
+    model:                  String,
     experiment:             String,
     install:                Seq[String],
     installContainerSystem: ContainerSystem,
@@ -64,10 +60,10 @@ object GAMATask {
   }
 
   def apply(
-    workspace:              File,
+    project:              File,
+    gaml:                  String,
     experiment:             String,
     finalStep:              FromContext[Int],
-    model:                  OptionalArgument[String]         = None,
     seed:                   OptionalArgument[Val[Long]]      = None,
     frameRate:              OptionalArgument[Int]            = None,
     install:                Seq[String]                      = Seq.empty,
@@ -84,12 +80,8 @@ object GAMATask {
     containerSystem:        ContainerSystem                  = ContainerSystem.default,
     installContainerSystem: ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): GAMATask = {
 
-    (model.option.isDefined, workspace.isDirectory) match {
-      case (false, true) ⇒ throw new UserBadDataError(s"""$workspace is a directory, in this case you must specify you model path, model = "model.gaml"""")
-      case (true, false) ⇒ throw new UserBadDataError(s"""$workspace is a file in this case you cannot provide a model path (model = "$model")""")
-      case (true, true) if !(workspace / model.get).exists() ⇒ throw new UserBadDataError(s"The model file you specify does not exist: ${workspace / model.get}")
-      case _ ⇒
-    }
+    if (!project.exists()) throw new UserBadDataError(s"The project directory you specify does not exist: ${project}")
+    if (!(project / gaml).exists()) throw new UserBadDataError(s"The model file you specify does not exist: ${project / gaml}")
 
     val gamaContainerImage: ContainerImage =
       (version.option, containerImage) match {
@@ -98,11 +90,11 @@ object GAMATask {
         case (Some(_), _: SavedDockerImage) => throw new UserBadDataError(s"Can not set both, a saved docker image, and, set the version of the container.")
       }
 
-    val preparedImage = prepare(workspace, model, experiment, install, installContainerSystem, gamaContainerImage, clearCache = clearContainerCache)
+    val preparedImage = prepare(project, gaml, experiment, install, installContainerSystem, gamaContainerImage, clearCache = clearContainerCache)
 
     GAMATask(
-      workspace = workspace,
-      model = model,
+      project = project,
+      gaml = gaml,
       experiment = experiment,
       finalStep = finalStep,
       seed = seed,
@@ -157,8 +149,8 @@ object GAMATask {
 }
 
 @Lenses case class GAMATask(
-  workspace:            File,
-  model:                OptionalArgument[String],
+  project:              File,
+  gaml:                 String,
   experiment:           String,
   finalStep:            FromContext[Int],
   seed:                 OptionalArgument[Val[Long]],
@@ -239,7 +231,7 @@ object GAMATask {
       inputFile.content =
         s"""<?xml version="1.0" encoding="UTF-8" standalone="no"?>${inputXML.mkString("")}"""
 
-      val (_, volumes) = GAMATask.volumes(workspace, model)
+      val (_, volumes) = GAMATask.volumes(project, gaml)
 
       def launchCommand = s"gama-headless -hpc 1 $inputFileName $outputDirectory"
 
