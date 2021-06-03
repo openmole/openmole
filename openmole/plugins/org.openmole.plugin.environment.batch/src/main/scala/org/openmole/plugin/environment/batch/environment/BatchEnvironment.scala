@@ -151,49 +151,6 @@ object BatchEnvironment {
         loggerService = ms.loggerService
       )
 
-    def copy(services: Services)(
-      threadProvider:             ThreadProvider = services.threadProvider,
-      preference:        Preference = services.preference,
-      newFile:           TmpDirectory = services.newFile,
-      serializerService: SerializerService = services.serializerService,
-      fileService:       FileService = services.fileService,
-      seeder:            Seeder = services.seeder,
-      randomProvider:    RandomProvider = services.randomProvider,
-      replicaCatalog:    ReplicaCatalog = services.replicaCatalog,
-      eventDispatcher:   EventDispatcher = services.eventDispatcher,
-      fileServiceCache:  FileServiceCache = services.fileServiceCache,
-      outputRedirection: OutputRedirection = services.outputRedirection,
-      loggerService: LoggerService) =
-      new Services(services.compilationContext)(
-        threadProvider = threadProvider,
-        preference = preference,
-        newFile = newFile,
-        serializerService = serializerService,
-        fileService = fileService,
-        seeder = seeder,
-        randomProvider = randomProvider,
-        replicaCatalog = replicaCatalog,
-        eventDispatcher = eventDispatcher,
-        fileServiceCache = fileServiceCache,
-        outputRedirection = outputRedirection,
-        loggerService = loggerService)
-
-//    def set(services: Services)(ms: MoleServices) =
-//      new Services(ms.compilationContext) (
-//        threadProvider = ms.threadProvider,
-//        preference = ms.preference,
-//        newFile = ms.tmpDirectory,
-//        serializerService = services.serializerService,
-//        fileService = ms.fileService,
-//        seeder = ms.seeder,
-//        randomProvider = services.randomProvider,
-//        replicaCatalog = services.replicaCatalog,
-//        eventDispatcher = ms.eventDispatcher,
-//        fileServiceCache = ms.fileServiceCache,
-//        outputRedirection = ms.outputRedirection,
-//        loggerService = ms.loggerService
-//      )
-
   }
 
   class Services(val compilationContext: Option[CompilationContext])(
@@ -210,37 +167,7 @@ object BatchEnvironment {
     implicit val fileServiceCache:  FileServiceCache,
     implicit val outputRedirection: OutputRedirection,
     implicit val loggerService: LoggerService,
-  ) { services =>
-
-//    def set(ms: MoleServices) = Services.set(services)(ms)
-
-    def copy (
-               threadProvider:    ThreadProvider = services.threadProvider,
-               preference:        Preference = services.preference,
-               newFile:           TmpDirectory = services.newFile,
-               serializerService: SerializerService = services.serializerService,
-               fileService:       FileService = services.fileService,
-               seeder:            Seeder = services.seeder,
-               randomProvider:    RandomProvider = services.randomProvider,
-               replicaCatalog:    ReplicaCatalog = services.replicaCatalog,
-               eventDispatcher:   EventDispatcher = services.eventDispatcher,
-               fileServiceCache:  FileServiceCache = services.fileServiceCache,
-               outputRedirection: OutputRedirection = services.outputRedirection,
-               loggerService: LoggerService = services.loggerService) =
-      Services.copy(services)(
-        threadProvider = threadProvider,
-        preference = preference,
-        newFile = newFile,
-        serializerService = serializerService,
-        fileService = fileService,
-        seeder = seeder,
-        randomProvider = randomProvider,
-        replicaCatalog = replicaCatalog,
-        eventDispatcher = eventDispatcher,
-        fileServiceCache = fileServiceCache,
-        outputRedirection = outputRedirection,
-        loggerService = loggerService)
-  }
+  )
 
   def jobFiles(job: BatchExecutionJob, environment: BatchEnvironment) =
     job.files.toVector ++
