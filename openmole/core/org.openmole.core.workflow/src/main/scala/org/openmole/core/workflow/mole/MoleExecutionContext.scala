@@ -83,33 +83,33 @@ object MoleServices {
     TmpDirectory.dispose(moleServices.tmpDirectory)
   }
 
-  def copy(moleServices: MoleServices)(
-    preference:        Preference        = moleServices.preference,
-    seeder:            Seeder            = moleServices.seeder,
-    threadProvider:    ThreadProvider    = moleServices.threadProvider,
-    eventDispatcher:   EventDispatcher   = moleServices.eventDispatcher,
-    newFile:           TmpDirectory      = moleServices.tmpDirectory,
-    fileService:       FileService       = moleServices.fileService,
-    fileServiceCache:  FileServiceCache  = moleServices.fileServiceCache,
-    workspace:         Workspace         = moleServices.workspace,
-    outputRedirection: OutputRedirection = moleServices.outputRedirection,
-    loggerService:     LoggerService     = moleServices.loggerService,
-    serializerService: SerializerService = moleServices.serializerService,
-    networkService:    NetworkService    = moleServices.networkService) =
-    new MoleServices(moleServices.applicationExecutionDirectory, moleServices.moleExecutionDirectory, moleServices.compilationContext)(
-      preference = preference,
-      seeder = seeder,
-      threadProvider = threadProvider,
-      eventDispatcher = eventDispatcher,
-      tmpDirectory = newFile,
-      workspace = workspace,
-      fileService = fileService,
-      fileServiceCache = fileServiceCache,
-      outputRedirection = outputRedirection,
-      loggerService = loggerService,
-      serializerService = serializerService,
-      networkService = networkService
-    )
+  //  def copy(moleServices: MoleServices)(
+  //    preference:        Preference        = moleServices.preference,
+  //    seeder:            Seeder            = moleServices.seeder,
+  //    threadProvider:    ThreadProvider    = moleServices.threadProvider,
+  //    eventDispatcher:   EventDispatcher   = moleServices.eventDispatcher,
+  //    newFile:           TmpDirectory      = moleServices.tmpDirectory,
+  //    fileService:       FileService       = moleServices.fileService,
+  //    fileServiceCache:  FileServiceCache  = moleServices.fileServiceCache,
+  //    workspace:         Workspace         = moleServices.workspace,
+  //    outputRedirection: OutputRedirection = moleServices.outputRedirection,
+  //    loggerService:     LoggerService     = moleServices.loggerService,
+  //    serializerService: SerializerService = moleServices.serializerService,
+  //    networkService:    NetworkService    = moleServices.networkService) =
+  //    new MoleServices(moleServices.applicationExecutionDirectory, moleServices.moleExecutionDirectory, moleServices.compilationContext)(
+  //      preference = preference,
+  //      seeder = seeder,
+  //      threadProvider = threadProvider,
+  //      eventDispatcher = eventDispatcher,
+  //      tmpDirectory = newFile,
+  //      workspace = workspace,
+  //      fileService = fileService,
+  //      fileServiceCache = fileServiceCache,
+  //      outputRedirection = outputRedirection,
+  //      loggerService = loggerService,
+  //      serializerService = serializerService,
+  //      networkService = networkService
+  //    )
 }
 
 /**
@@ -125,7 +125,7 @@ object MoleServices {
  * @param fileServiceCache
  * @param outputRedirection
  */
-class MoleServices(val applicationExecutionDirectory: File, val moleExecutionDirectory: File, val compilationContext: Option[CompilationContext])(
+class MoleServices private (val applicationExecutionDirectory: File, val moleExecutionDirectory: File, val compilationContext: Option[CompilationContext])(
   implicit
   val preference:        Preference,
   val seeder:            Seeder,
