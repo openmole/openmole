@@ -32,7 +32,6 @@ import scala.collection.immutable.{ HashMap, HashSet }
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
-import scala.concurrent.stm._
 import scala.util.{ Failure, Success, Try }
 
 case class BundlesInfo(
@@ -46,22 +45,49 @@ object PluginManager extends JavaLogger {
 
   import Log._
 
-  private val bundlesInfo = Ref(None: Option[BundlesInfo])
-  private val resolvedPluginDependenciesCache = TMap[Long, Iterable[Long]]()
+  private var bundlesInfo: Option[BundlesInfo] = None
+  private val resolvedPluginDependenciesCache = mutable.Map[Long, Iterable[Long]]()
 
   Activator.contextOrException.addBundleListener(
-    new BundleListener {
-      override def bundleChanged(event: BundleEvent) = {
-        if (event.getType == BundleEvent.RESOLVED ||
-          event.getType == BundleEvent.UNRESOLVED ||
-          event.getType == BundleEvent.UPDATED) clearCaches()
-      }
-    }
+    (event: BundleEvent) ⇒
+      if (event.getType == BundleEvent.RESOLVED ||
+        event.getType == BundleEvent.UNRESOLVED ||
+        event.getType == BundleEvent.UPDATED) clearCaches()
   )
 
-  private def clearCaches() = atomic { implicit ctx ⇒
-    bundlesInfo() = None
+  private def clearCaches() = PluginManager.synchronized {
+    bundlesInfo = None
     resolvedPluginDependenciesCache.clear()
+  }
+
+  def allPluginDependencies(b: Bundle) = PluginManager.synchronized {
+    resolvedPluginDependenciesCache.
+      getOrElseUpdate(b.getBundleId, dependencies(List(b)).map(_.getBundleId)).
+      filter(isPlugin).map(l ⇒ Activator.contextOrException.getBundle(l))
+  }
+
+  private def installBundle(f: File) = PluginManager.synchronized {
+    try {
+      val bundle = Activator.contextOrException.installBundle(f.toURI.toString)
+      bundlesInfo = None
+      bundle
+    }
+    catch {
+      case t: Throwable ⇒ throw new InternalProcessingError(t, "Installing bundle " + f)
+    }
+  }
+
+  private def infos: BundlesInfo = PluginManager.synchronized {
+    bundlesInfo match {
+      case None ⇒
+        val bs = bundles
+        val providedDependencies = dependencies(bs.filter(b ⇒ b.isProvided)).map(_.getBundleId).toSet
+        val files = bs.map(b ⇒ b.file.getCanonicalFile → ((b.getBundleId, b.file.lastModification))).toMap
+        val info = BundlesInfo(files, providedDependencies)
+        bundlesInfo = Some(info)
+        info
+      case Some(bundlesInfo) ⇒ bundlesInfo
+    }
   }
 
   def bundles = Activator.contextOrException.getBundles.filter(!_.isSystem).toSeq.sortBy(_.file.getName)
@@ -168,12 +194,6 @@ object PluginManager extends JavaLogger {
     }.getOrElse(false)
   }
 
-  def allPluginDependencies(b: Bundle) = atomic { implicit ctx ⇒
-    resolvedPluginDependenciesCache.
-      getOrElseUpdate(b.getBundleId, dependencies(List(b)).map(_.getBundleId)).
-      filter(isPlugin).map(l ⇒ Activator.contextOrException.getBundle(l))
-  }
-
   def remove(b: Bundle) = synchronized {
     val additionalBundles = Seq(b) ++ allDependingBundles(b, b ⇒ !b.isProvided)
     additionalBundles.foreach(b ⇒ if (b.getState == Bundle.ACTIVE) b.uninstall())
@@ -182,16 +202,6 @@ object PluginManager extends JavaLogger {
 
   private def getBundle(f: File) =
     Option(Activator.contextOrException.getBundle(f.toURI.toString))
-
-  private def installBundle(f: File) =
-    try {
-      val bundle = Activator.contextOrException.installBundle(f.toURI.toString)
-      bundlesInfo.single() = None
-      bundle
-    }
-    catch {
-      case t: Throwable ⇒ throw new InternalProcessingError(t, "Installing bundle " + f)
-    }
 
   private def dependencies(bundles: Iterable[Bundle]): Iterable[Bundle] = {
     val seen = mutable.Set[Bundle]() ++ bundles
@@ -207,19 +217,6 @@ object PluginManager extends JavaLogger {
       }
     }
     seen.toList
-  }
-
-  private def infos: BundlesInfo = atomic { implicit ctx ⇒
-    bundlesInfo() match {
-      case None ⇒
-        val bs = bundles
-        val providedDependencies = dependencies(bs.filter(b ⇒ b.isProvided)).map(_.getBundleId).toSet
-        val files = bs.map(b ⇒ b.file.getCanonicalFile → ((b.getBundleId, b.file.lastModification))).toMap
-        val info = BundlesInfo(files, providedDependencies)
-        bundlesInfo() = Some(info)
-        info
-      case Some(bundlesInfo) ⇒ bundlesInfo
-    }
   }
 
   def allDependingBundles(b: Bundle, filter: Bundle ⇒ Boolean): Iterable[Bundle] = {
