@@ -26,6 +26,9 @@ package object routes {
   val uploadFilesRoute = "/uploadFiles"
   val resetPasswordRoute = "/resetPassword"
 
+  val restRoute = "/rest"
+  val restRouteExecution = "/rest/execution/*"
+
   def downloadFile(uri: String, hash: Boolean = false) = s"downloadFile?path=$uri&hash=$hash"
   def hashHeader = "Content-Hash"
 }

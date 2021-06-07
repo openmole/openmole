@@ -33,7 +33,10 @@ import scalatags.Text.{ all ⇒ tags }
 import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.Level
 
+import org.json4s.{ DefaultFormats, Extraction, Formats }
+import org.json4s.jackson.JsonMethods.pretty
 import org.openmole.core.authentication.AuthenticationStore
+import org.openmole.core.buildinfo.BuildInfo
 import org.openmole.core.event.EventDispatcher
 import org.openmole.core.fileservice.{ FileService, FileServiceCache }
 import org.openmole.core.preference.Preference
@@ -374,6 +377,54 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
       Ok(data)
     }
   }
+
+  protected implicit val jsonFormats: Formats = DefaultFormats.withBigDecimal
+  implicit class ToJsonDecorator(x: Any) {
+    def toJson = pretty(Extraction.decompose(x))
+  }
+
+  get(restRoute) {
+    RestStatus(BuildInfo.version, apiImpl.execution.allStates(10)._1.map(x ⇒ RestExecutionLight(x._1.id, x._2.state, createStatic(x._1.id)))).toJson
+  }
+  def createStatic(id: String): RestStatic = {
+    val staticInfo = apiImpl.execution.staticInfos().find(x ⇒ x._1.id == id).head._2
+    RestStatic(staticInfo.path.path.last, staticInfo.startDate)
+  }
+  case class RestStatus(version: String, executions: Seq[RestExecutionLight])
+  case class RestExecutionLight(id: String, status: String, static: RestStatic)
+  case class RestStatic(path: String, startDate: Long)
+
+  get(restRouteExecution) {
+    val states = apiImpl.execution.allStates(10)
+    val resultIndex = states._1.indexWhere(x ⇒ x._1.id == request.getPathInfo.substring(restRouteExecution.length - 1))
+    if (resultIndex != -1) {
+      val result_1 = states._1(resultIndex)
+      val result_2 = states._2(resultIndex)
+      val static = apiImpl.execution.staticInfos().find(x ⇒ x._1.id == request.getPathInfo.substring(restRouteExecution.length - 1))
+      RestExecution(
+        request.getPathInfo.substring(restRouteExecution.length - 1),
+        result_1._2.state,
+        if (static.nonEmpty) static.head._2.path.path.last else "",
+        if (static.nonEmpty) static.head._2.startDate else 0,
+        result_1._2.capsules.map(x ⇒ RestCapsule(
+          x.name, x.scope, RestJobStatus(x.statuses.ready, x.statuses.running, x.statuses.completed))
+        ),
+        result_1._2.environmentStates.map(x ⇒ RestEnvironment(
+          x.envId.id, x.taskName, x.executionActivity.executionTime,
+          RestNetworkActivity(x.networkActivity.downloadingFiles, x.networkActivity.uploadingFiles, x.networkActivity.readableDownloadedSize, x.networkActivity.readableUploadedSize),
+          x.submitted, x.running, x.done, x.failed, x.numberOfErrors)
+        ),
+        result_2.output
+      ).toJson
+    }
+    else "Execution not found".toJson
+  }
+  case class RestExecution(id: String, status: String, path: String, startDate: Long, capsules: Vector[RestCapsule], environment: Seq[RestEnvironment], console: String)
+  case class RestCapsule(name: String, scope: String, status: RestJobStatus)
+  case class RestEnvironment(id: String, name: String, executionTime: Long, networkActivity: RestNetworkActivity, submitted: Long, running: Long, done: Long, failed: Long, numberOfErrors: Int)
+  case class RestNetworkActivity(downloadingFiles: Int, uploadingFiles: Int, downloadedSize: String, uploadedSize: String)
+  case class RestJobStatus(ready: Long, running: Long, completed: Long)
+
 }
 
 case class UserID(id: String)
