@@ -22,13 +22,13 @@ import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.tool.file._
 import org.openmole.tool.logger.{ JavaLogger, LoggerService }
 import scopt._
+
 import java.io.File
 import java.util.logging.Level
-
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.communication.storage.RemoteStorage
 import org.openmole.core.event.EventDispatcher
-import org.openmole.core.fileservice.FileService
+import org.openmole.core.fileservice.{ FileService, FileServiceCache }
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
@@ -95,6 +95,7 @@ object SimExplorer extends JavaLogger {
             implicit val preference = Preference.memory()
             implicit val threadProvider = ThreadProvider(threads + 5)
             implicit val fileService = FileService()
+            implicit val fileServiceCache = FileServiceCache()
             implicit val eventDispatcher = EventDispatcher()
             implicit val loggerService = if (config.debug) LoggerService(level = Some(finest)) else LoggerService()
             implicit val networkService = NetworkService(None)

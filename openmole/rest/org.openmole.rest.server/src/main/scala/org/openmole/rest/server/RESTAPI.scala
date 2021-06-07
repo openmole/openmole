@@ -13,6 +13,7 @@ import org.openmole.core.project._
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.mole.{ MoleExecution, MoleExecutionContext, MoleServices }
 import org.openmole.core.dsl._
+import org.openmole.core.fileservice.FileServiceCache
 import org.openmole.core.services.Services
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.rest.message._
@@ -71,11 +72,9 @@ trait RESTAPI extends ScalatraServlet
   }
 
   val arguments: RESTLifeCycle.Arguments
+  val services = arguments.services
 
-  implicit def services = arguments.services
-  import arguments.services._
-
-  lazy val baseDirectory = workspace.tmpDirectory.newDir("rest")
+  lazy val baseDirectory = services.workspace.tmpDirectory.newDir("rest")
   def exceptionToHttpError(e: Throwable) = InternalServerError(Error(e).toJson)
 
   post("/job") {
@@ -104,11 +103,15 @@ trait RESTAPI extends ScalatraServlet
               Ok(id.toJson)
           }
 
-        val jobServices =
+        val jobServices = {
+          import services._
+
           Services.copy(services)(
             outputRedirection = OutputRedirection(directory.outputStream),
-            newFile = TmpDirectory(directory.tmpDirectory)
+            newFile = TmpDirectory(directory.tmpDirectory),
+            fileServiceCache = FileServiceCache()
           )
+        }
 
         Project.compile(directory.workDirectory, directory.workDirectory / script, Seq.empty)(jobServices) match {
           case ScriptFileDoesNotExists() ⇒ ExpectationFailed(Error("The script doesn't exist").toJson)
@@ -116,6 +119,8 @@ trait RESTAPI extends ScalatraServlet
           case compiled: Compiled ⇒
             Try(compiled.eval) match {
               case Success(res) ⇒
+                import jobServices._
+
                 val moleServices =
                   MoleServices.create(
                     applicationExecutionDirectory = baseDirectory,
@@ -248,6 +253,7 @@ trait RESTAPI extends ScalatraServlet
   /* --------------- Plugin API ----------- */
 
   get("/plugin/") {
+    import services._
     val plugins =
       org.openmole.core.module.pluginDirectory.listFilesSafe.map { p ⇒
         Plugin(
@@ -260,6 +266,7 @@ trait RESTAPI extends ScalatraServlet
   }
 
   post("/plugin") {
+    import services._
     (fileMultiParams get "file") match {
       case None ⇒ ExpectationFailed(Error("Missing mandatory file parameter.").toJson)
       case Some(files) ⇒
@@ -287,6 +294,7 @@ trait RESTAPI extends ScalatraServlet
   }
 
   delete("/plugin") {
+    import services._
     (multiParams get "name") match {
       case None ⇒ ExpectationFailed(Error("Missing mandatory name parameter.").toJson)
       case Some(names) ⇒

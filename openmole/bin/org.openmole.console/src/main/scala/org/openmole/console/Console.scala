@@ -19,7 +19,7 @@ package org.openmole.console
 
 import jline.console.ConsoleReader
 import org.openmole.core.compiler.ScalaREPL
-import org.openmole.core.fileservice.FileService
+import org.openmole.core.fileservice.{ FileService, FileServiceCache }
 import org.openmole.core.preference.Preference
 import org.openmole.core.project._
 import org.openmole.core.tools.io.Prettifier._
@@ -108,8 +108,6 @@ class Console(script: Option[String] = None) {
   def commandsName = "_commands_"
 
   def run(args: Seq[String], workDirectory: Option[File], splash: Boolean = true)(implicit services: Services): Int = {
-    import services._
-
     if (splash) {
       println(consoleSplash)
       println(consoleUsage)
@@ -117,6 +115,7 @@ class Console(script: Option[String] = None) {
 
     script match {
       case None ⇒
+        import services._
         val variables = ConsoleVariables(args = args, workDirectory = workDirectory.getOrElse(currentDirectory), experiment = ConsoleVariables.Experiment("console"))
         withREPL(variables) { loop ⇒
           loop.storeErrors = false
@@ -124,18 +123,23 @@ class Console(script: Option[String] = None) {
         }
       case Some(script) ⇒
         val scriptFile = new File(script)
+        val runServices = {
+          import services._
+          Services.copy(services)(fileServiceCache = FileServiceCache())
+        }
 
-        Project.compile(workDirectory.getOrElse(scriptFile.getParentFileSafe), scriptFile, args) match {
+        Project.compile(workDirectory.getOrElse(scriptFile.getParentFileSafe), scriptFile, args)(runServices) match {
           case ScriptFileDoesNotExists() ⇒
             println("File " + scriptFile + " doesn't exist.")
             ExitCodes.scriptDoesNotExist
           case e: CompilationError ⇒
-            tmpDirectory.directory.recursiveDelete
+            services.tmpDirectory.directory.recursiveDelete
             println(e.error.stackString)
             ExitCodes.compilationError
           case compiled: Compiled ⇒
             Try(compiled.eval) match {
               case Success(res) ⇒
+                import runServices._
                 val moleServices = MoleServices.create(applicationExecutionDirectory = services.workspace.tmpDirectory, compilationContext = Some(compiled.compilationContext))
                 val ex = dslToPuzzle(res).toExecution()(moleServices)
                 Try(ex.run) match {
@@ -146,7 +150,7 @@ class Console(script: Option[String] = None) {
                     ExitCodes.ok
                 }
               case Failure(e) ⇒
-                tmpDirectory.directory.recursiveDelete
+                services.tmpDirectory.directory.recursiveDelete
                 println(s"Error during script evaluation: ")
                 print(e.stackString)
                 ExitCodes.compilationError

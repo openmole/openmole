@@ -709,6 +709,7 @@ class MoleExecution(
       preference = preference,
       threadProvider = threadProvider,
       fileService = fileService,
+      fileServiceCache = fileServiceCache,
       workspace = workspace,
       outputRedirection = outputRedirection,
       loggerService = loggerService,
