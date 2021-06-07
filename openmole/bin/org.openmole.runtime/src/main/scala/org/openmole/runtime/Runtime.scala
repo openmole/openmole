@@ -19,7 +19,6 @@ package org.openmole.runtime
 
 import java.io.File
 import java.io.PrintStream
-
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
@@ -32,7 +31,7 @@ import org.openmole.core.workflow.execution._
 import org.openmole.core.communication.message._
 import org.openmole.core.communication.storage._
 import org.openmole.core.event.EventDispatcher
-import org.openmole.core.fileservice.FileService
+import org.openmole.core.fileservice.{ FileService, FileServiceCache }
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer._
@@ -65,7 +64,7 @@ class Runtime {
     outputMessagePath: String,
     threads:           Int,
     debug:             Boolean
-  )(implicit serializerService: SerializerService, newFile: TmpDirectory, fileService: FileService, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace, loggerService: LoggerService, networkService: NetworkService) = {
+  )(implicit serializerService: SerializerService, newFile: TmpDirectory, fileService: FileService, fileServiceCache: FileServiceCache, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace, loggerService: LoggerService, networkService: NetworkService) = {
 
     /*--- get execution message and job for runtime---*/
     val usedFiles = new HashMap[String, File]
@@ -153,6 +152,7 @@ class Runtime {
           preference = preference,
           threadProvider = threadProvider,
           fileService = fileService,
+          fileServiceCache = fileServiceCache,
           workspace = workspace,
           outputRedirection = outputRedirection,
           loggerService = loggerService,
