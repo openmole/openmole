@@ -150,13 +150,13 @@ object GAMATask {
   def acceptedOutputType(frame: Boolean) = {
     def scalar =
       Seq(
-        classOf[Double],
-        classOf[Int],
-        classOf[String],
-        classOf[Boolean]
+        manifest[Double],
+        manifest[Int],
+        manifest[String],
+        manifest[Boolean]
       )
 
-    if(!frame) scalar else scalar.map(_.arrayType())
+    if(!frame) scalar.map(_.runtimeClass) else scalar.map(_.arrayManifest.runtimeClass)
   }
 
 }
