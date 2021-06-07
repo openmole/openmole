@@ -18,10 +18,9 @@
 package org.openmole.core.workflow.task
 
 import java.io.File
-
 import org.openmole.core.context._
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.fileservice.FileService
+import org.openmole.core.fileservice.{ FileService, FileServiceCache }
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
@@ -65,6 +64,7 @@ object TaskExecutionContext {
     preference:                    Preference,
     threadProvider:                ThreadProvider,
     fileService:                   FileService,
+    fileServiceCache:              FileServiceCache,
     workspace:                     Workspace,
     outputRedirection:             OutputRedirection,
     loggerService:                 LoggerService,
@@ -82,6 +82,7 @@ object TaskExecutionContext {
       preference = preference,
       threadProvider = threadProvider,
       fileService = fileService,
+      fileServiceCache = fileServiceCache,
       workspace = workspace,
       outputRedirection = outputRedirection,
       loggerService = loggerService,
@@ -99,6 +100,7 @@ object TaskExecutionContext {
     preference:                    Preference,
     threadProvider:                ThreadProvider,
     fileService:                   FileService,
+    fileServiceCache:              FileServiceCache,
     workspace:                     Workspace,
     outputRedirection:             OutputRedirection,
     loggerService:                 LoggerService,
@@ -114,6 +116,7 @@ object TaskExecutionContext {
       preference = preference,
       threadProvider = threadProvider,
       fileService = fileService,
+      fileServiceCache = fileServiceCache,
       workspace = workspace,
       outputRedirection = outputRedirection,
       loggerService = loggerService,
@@ -137,6 +140,7 @@ object TaskExecutionContext {
     implicit val preference:        Preference,
     implicit val threadProvider:    ThreadProvider,
     fileService:                    FileService,
+    fileServiceCache:               FileServiceCache,
     implicit val workspace:         Workspace,
     implicit val outputRedirection: OutputRedirection,
     implicit val loggerService:     LoggerService,
@@ -156,6 +160,7 @@ object TaskExecutionContext {
     implicit def preference = partialTaskExecutionContext.preference
     implicit def threadProvider = partialTaskExecutionContext.threadProvider
     def fileService = partialTaskExecutionContext.fileService
+    def fileServiceCache = partialTaskExecutionContext.fileServiceCache
     implicit def workspace = partialTaskExecutionContext.workspace
     implicit def outputRedirection = partialTaskExecutionContext.outputRedirection
     implicit def loggerService = partialTaskExecutionContext.loggerService
@@ -175,6 +180,7 @@ object TaskExecutionContext {
     implicit val preference:        Preference,
     implicit val threadProvider:    ThreadProvider,
     fileService:                    FileService,
+    fileServiceCache:               FileServiceCache,
     implicit val workspace:         Workspace,
     implicit val outputRedirection: OutputRedirection,
     implicit val loggerService:     LoggerService,
@@ -194,6 +200,7 @@ trait TaskExecutionContext {
   implicit def preference: Preference
   implicit def threadProvider: ThreadProvider
   def fileService: FileService
+  def fileServiceCache: FileServiceCache
   implicit def workspace: Workspace
   implicit def outputRedirection: OutputRedirection
   implicit def loggerService: LoggerService
