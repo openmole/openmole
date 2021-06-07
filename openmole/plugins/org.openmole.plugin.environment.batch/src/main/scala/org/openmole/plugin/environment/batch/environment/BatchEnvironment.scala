@@ -172,7 +172,8 @@ object BatchEnvironment {
   def jobFiles(job: BatchExecutionJob, environment: BatchEnvironment) =
     job.files.toVector ++
       job.plugins ++
-      environment.plugins ++
+      environment.environmentPlugins ++
+      environment.scriptPlugins ++
       Seq(environment.jvmLinuxX64, environment.runtime)
 
   def toReplicatedFile(
@@ -200,7 +201,7 @@ object BatchEnvironment {
     val replica = services.replicaCatalog.uploadAndGet(uploadReplica, exist, remove, toReplicatePath, hash, storageId)
     ReplicatedFile(file.getPath, file.getName, isDir, hash, replica.path, fileMode)
   }
-  
+
   def serializeJob(
     environment: BatchEnvironment,
     job: BatchExecutionJob,
@@ -213,7 +214,13 @@ object BatchEnvironment {
 
     serializerService.serialize(job.runnableTasks, jobFile)
 
-    val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins ++ (job.files.toSet & environment.plugins.toSet) // Exclude env plugins maybe
+    val plugins =
+      new TreeSet[File]()(fileOrdering) ++
+        job.plugins ++
+        environment.scriptPlugins --
+        environment.environmentPlugins ++
+        (job.files.toSet & environment.environmentPlugins.toSet)
+
     val files = (new TreeSet[File]()(fileOrdering) ++ job.files) -- plugins
 
     val runtime = replicateTheRuntime(environment, replicate)
@@ -252,13 +259,13 @@ object BatchEnvironment {
     environment:      BatchEnvironment,
     replicate: (File, TransferOptions) => ReplicatedFile,
   )(implicit services: BatchEnvironment.Services) = {
-    val environmentPluginPath = shuffled(environment.plugins)(services.randomProvider()).map { p ⇒ replicate(p, TransferOptions(raw = true)) }.map { FileMessage(_) }
+    val environmentPluginPath = shuffled(environment.environmentPlugins)(services.randomProvider()).map { p ⇒ replicate(p, TransferOptions(raw = true)) }.map { FileMessage(_) }.sortBy(_.path)
     val runtimeFileMessage = FileMessage(replicate(environment.runtime, TransferOptions(raw = true)))
     val jvmLinuxX64FileMessage = FileMessage(replicate(environment.jvmLinuxX64, TransferOptions(raw = true)))
 
     Runtime(
       runtimeFileMessage,
-      environmentPluginPath.toSet,
+      environmentPluginPath,
       jvmLinuxX64FileMessage
     )
   }
@@ -367,14 +374,16 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   def jobs = ExecutionJobRegistry.executionJobs(registry)
 
-  lazy val plugins = {
+  lazy val environmentPlugins = PluginManager.pluginsForClass(this.getClass).toSeq.distinctBy(_.getCanonicalPath)
+
+  lazy val scriptPlugins = {
     def closureBundleAndPlugins = services.compilationContext.toSeq.flatMap { c =>
       import services._
       val (cb, file) = BatchExecutionJob.replClassesToPlugins(c.classDirectory, c.classLoader)
       cb.plugins ++ Seq(file)
     }
 
-    (PluginManager.pluginsForClass(this.getClass).toSeq ++ closureBundleAndPlugins).distinctBy(_.getCanonicalPath)
+    closureBundleAndPlugins.distinctBy(_.getCanonicalPath)
   }
 
   lazy val jobStore = JobStore(services.newFile.makeNewDir("jobstore"))

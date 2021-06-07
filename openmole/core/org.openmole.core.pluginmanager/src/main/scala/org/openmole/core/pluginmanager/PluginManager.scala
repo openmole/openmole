@@ -90,6 +90,26 @@ object PluginManager extends JavaLogger {
     }
   }
 
+  def updateBundles(bundles: Option[Seq[Bundle]] = None) {
+    val listener = new FrameworkListener {
+      val lock = new Semaphore(0)
+
+      override def frameworkEvent(event: FrameworkEvent): Unit = {
+        if (event.getType == FrameworkEvent.PACKAGES_REFRESHED) lock.release()
+      }
+    }
+
+    val wiring = Activator.contextOrException.getBundle(0).adapt(classOf[FrameworkWiring])
+
+    bundles match {
+      case Some(s) ⇒ wiring.refreshBundles(s.asJava, listener)
+      case None    ⇒ wiring.refreshBundles(null, listener)
+    }
+
+    // FIX: The listener is not called by the framework, enable at some point
+    // listener.lock.acquire()
+  }
+
   def bundles = Activator.contextOrException.getBundles.filter(!_.isSystem).toSeq.sortBy(_.file.getName)
   def bundleFiles = infos.files.keys
 
@@ -268,24 +288,6 @@ object PluginManager extends JavaLogger {
     }.map {
       b ⇒ b → Try(b.start)
     }.collect { case (b: Bundle, Failure(e)) ⇒ b → e }
-
-  def updateBundles(bundles: Option[Seq[Bundle]] = None) {
-    val listener = new FrameworkListener {
-      val lock = new Semaphore(0)
-
-      override def frameworkEvent(event: FrameworkEvent): Unit =
-        if (event.getType == FrameworkEvent.PACKAGES_REFRESHED) lock.release()
-    }
-
-    val wiring = Activator.contextOrException.getBundle(0).adapt(classOf[FrameworkWiring])
-
-    bundles match {
-      case Some(s) ⇒ wiring.refreshBundles(s.asJava, listener)
-      case None    ⇒ wiring.refreshBundles(null, listener)
-    }
-
-    listener.lock.acquire()
-  }
 
   def bundleHashes = infos.hashes.values
 
