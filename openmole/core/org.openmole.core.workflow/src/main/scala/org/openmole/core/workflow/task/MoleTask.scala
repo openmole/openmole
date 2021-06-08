@@ -115,12 +115,15 @@ object MoleTask {
       import executionContext.loggerService
       import executionContext.serializerService
       import executionContext.networkService
+      implicit val fileServiceCache = executionContext.fileServiceCache
 
       val localEnvironment =
         LocalEnvironment(1, executionContext.localEnvironment.deinterleave)
 
       val moleServices =
-        MoleServices.create(executionContext.applicationExecutionDirectory, Some(executionContext.moleExecutionDirectory))
+        MoleServices.create(
+          executionContext.applicationExecutionDirectory,
+          moleExecutionDirectory = Some(executionContext.moleExecutionDirectory))
 
       val execution = MoleExecution(
         mole,

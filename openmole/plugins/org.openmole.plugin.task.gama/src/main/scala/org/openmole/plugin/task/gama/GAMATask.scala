@@ -146,6 +146,19 @@ object GAMATask {
     new RuleTransformer(rewrite)
   }
 
+
+  def acceptedOutputType(frame: Boolean) = {
+    def scalar =
+      Seq(
+        manifest[Double],
+        manifest[Int],
+        manifest[String],
+        manifest[Boolean]
+      )
+
+    if(!frame) scalar.map(_.runtimeClass) else scalar.map(_.arrayManifest.runtimeClass)
+  }
+
 }
 
 @Lenses case class GAMATask(
@@ -186,16 +199,17 @@ object GAMATask {
       def gamaOutputByName(name: String) =
         outputs.filter(e => e.attribute("name").flatMap(_.headOption).map(_.text) == Some(name)).headOption
 
-      def typeMatch(v: Val[_], t: String) =
-        v match {
-          case Val.caseInt(v) => t == "INT" | t == "FLOAT"
-          case Val.caseDouble(v) => t == "INT" | t == "FLOAT"
-          case Val.caseString(v) => t == "STRING"
-          case Val.caseBoolean(v) => t == "BOOLEAN"
-          case _ => false
-        }
 
-      def validateInputs =
+      def validateInputs = {
+        def typeMatch(v: Val[_], t: String) =
+          v match {
+            case Val.caseInt(v) => t == "INT" | t == "FLOAT"
+            case Val.caseDouble(v) => t == "INT" | t == "FLOAT"
+            case Val.caseString(v) => t == "STRING"
+            case Val.caseBoolean(v) => t == "BOOLEAN"
+            case _ => false
+          }
+
         mapped.inputs.flatMap { m =>
           gamaParameterByName(m.name) match {
             case Some(p) =>
@@ -204,14 +218,19 @@ object GAMATask {
             case None => Some(new UserBadDataError(s"""Mapped input "${m.name}" has not been found in the simulation among: ${gamaParameters.mkString(", ")}. Make sure it is defined in your gaml file"""))
           }
         }
+      }
 
-      def validateOutputs =
+      def validateOutputs = {
+        val acceptedOutputsTypes = GAMATask.acceptedOutputType(frameRate.option.isDefined)
+        def accepted(c: Class[_]) = acceptedOutputsTypes.exists(t => t == c)
+
         mapped.outputs.flatMap { m =>
           gamaOutputByName(m.name) match {
-            case Some(_) => None
+            case Some(_) => if(!accepted(m.v.`type`.manifest.getClass)) Some(new UserBadDataError(s"""Mapped output ${m} type is not supported (frameRate is ${frameRate.option.isDefined}, it implies that supported types are ${acceptedOutputsTypes})""")) else None
             case None => Some(new UserBadDataError(s"""Mapped output "${m.name}" has not been found in the simulation among: ${gamaOutputs.mkString(", ")}. Make sure it is defined in your gaml file."""))
           }
         }
+      }
 
       if ((inputXML \ "Simulation").isEmpty) Seq(new UserBadDataError(s"Experiment ${experiment} has not been found, make sure it is defined in your gaml file"))
       else validateInputs ++ validateOutputs
@@ -278,7 +297,7 @@ object GAMATask {
                 case Val.caseDouble(v) => Variable(v, value.toDouble)
                 case Val.caseString(v) => Variable(v, value)
                 case Val.caseBoolean(v) => Variable(v, value.toBoolean)
-                case _ => throw new UserBadDataError(s"Unsupported type of output variable $v")
+                case _ => throw new UserBadDataError(s"Unsupported type of output variable $v (supported types are Int, Double, String, Boolean)")
               }
 
             val outputs = Map[String, Val[_]]() ++ mapped.outputs.map { m => (m.name, m.v) }
@@ -306,7 +325,7 @@ object GAMATask {
                 case Val.caseArrayDouble(v) => Variable(v, value.map(_.toDouble))
                 case Val.caseArrayString(v) => Variable(v, value)
                 case Val.caseArrayBoolean(v) => Variable(v, value.map(_.toBoolean))
-                case _ => throw new UserBadDataError(s"Unsupported type of output variable $v")
+                case _ => throw new UserBadDataError(s"Unsupported type of output variable $v (supported types are Array[Int], Array[Double], Array[String], Array[Boolean])")
               }
 
             def outputValue(e: Elem, name: String) =
