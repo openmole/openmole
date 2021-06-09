@@ -322,6 +322,17 @@ package composition {
       val delegate = container.delegate.map { t ⇒ TaskNode(t, environment = container.environment, grouping = container.grouping) }
       delegate ++ output
     }
+
+    object ToDSLContainer {
+      implicit def id[T]: ToDSLContainer[DSLContainer[T]] = identity
+      implicit def byGrouping[T](implicit toDSLContainer: ToDSLContainer[T]): ToDSLContainer[By[T, Grouping]] = t ⇒ toDSLContainer(t.value).copy(grouping = Some(t.by))
+      implicit def byInt[T](implicit toDSLContainer: ToDSLContainer[T]): ToDSLContainer[By[T, Int]] = t ⇒ toDSLContainer(t.value).copy(grouping = Some(ByGrouping(t.by)))
+      implicit def on[T](implicit toDSLContainer: ToDSLContainer[T]): ToDSLContainer[On[T, EnvironmentProvider]] = t ⇒ toDSLContainer(t.value).copy(environment = Some(t.on))
+    }
+
+    trait ToDSLContainer[-T] {
+      def apply(t: T): DSLContainer[_]
+    }
   }
 
   case class DSLContainer[+T](
@@ -333,11 +344,7 @@ package composition {
     hooks:       Vector[Hook]                = Vector.empty,
     validate:    Validate                    = Validate.success,
     method:      T,
-    scope:       DefinitionScope) extends DSL {
-    def on(environment: EnvironmentProvider) = copy(environment = Some(environment))
-    def by(strategy: Grouping) = copy(grouping = Some(strategy))
-    def by(n: Int) = copy(grouping = Some(ByGrouping(n)))
-  }
+    scope:       DefinitionScope) extends DSL
 
   case class TaskNodeDSL(node: TaskNode) extends DSL
   case class Slot(dsl: DSL) extends DSL
@@ -573,6 +580,7 @@ package composition {
 
     object ToDSL {
       implicit def dslToDSL: ToDSL[DSL] = identity
+      implicit def toDSLContainerToDSL[T](implicit tc: composition.DSLContainer.ToDSLContainer[T]): ToDSL[T] = t ⇒ tc(t)
       implicit def toNodeToDSL[T: ToNode]: ToDSL[T] = t ⇒ TaskNodeDSL(implicitly[ToNode[T]].apply(t))
       implicit def DSLSelectorToDSL[HL <: HList](implicit dslSelector: DSLSelector[HL]): ToDSL[HL] = t ⇒ dslSelector(t)
     }

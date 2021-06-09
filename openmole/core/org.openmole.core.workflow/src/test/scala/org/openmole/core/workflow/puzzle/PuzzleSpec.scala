@@ -108,12 +108,20 @@ class PuzzleSpec extends FlatSpec with Matchers {
 
   "By" should "be convertible to DSL" in {
     val t = EmptyTask()
+    val m = DSLContainer(t)
     val e = LocalEnvironment(1)
 
     val dsl1: DSL = (t by 2)
     val dsl2: DSL = (t on e by 2)
     val dsl3: DSL = (t by 2 on e)
     val dsl4: DSL = (t by 2 on e by 2)
+
+    val dsl5: DSL = (m by 2)
+    val dsl6: DSL = (m on e)
+
+    val dsl7: DSL = (m on e by 2)
+    val dsl8: DSL = (m by 2 on e)
+    val dsl9: DSL = (m by 2 on e by 2)
   }
 
 }
