@@ -2,7 +2,7 @@
 package openmole
 
 object common {
-  def scalaVersionValue = "2.13.5"
+  def scalaVersionValue = "2.13.6"
 
   def gridscaleVersion = "2.37"
   def mgoVersion = "3.47"
