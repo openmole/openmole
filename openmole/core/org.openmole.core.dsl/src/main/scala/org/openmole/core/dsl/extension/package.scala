@@ -28,6 +28,8 @@ package object extension {
   type FromContextTask = org.openmole.core.workflow.task.FromContextTask
   def Task = org.openmole.core.workflow.task.FromContextTask
 
+  type Grouping = org.openmole.core.workflow.grouping.Grouping
+
   type Sampling = org.openmole.core.workflow.sampling.Sampling
   type FromContextSampling = org.openmole.core.workflow.sampling.FromContextSampling
   def Sampling = org.openmole.core.workflow.sampling.Sampling
@@ -73,15 +75,20 @@ package object extension {
 
   def ExpandedString = org.openmole.core.expansion.ExpandedString
 
-  type Negative[A] = org.openmole.core.keyword.Negative[A]
-  type Under[A, B] = org.openmole.core.keyword.Under[A, B]
-  type In[A, B] = org.openmole.core.keyword.In[A, B]
-  type :=[A, B] = org.openmole.core.keyword.:=[A, B]
-  type Aggregate[A, B] = org.openmole.core.keyword.Aggregate[A, B]
-  type Delta[A, B] = org.openmole.core.keyword.Delta[A, B]
-  type As[A, B] = org.openmole.core.keyword.As[A, B]
-  type On[A, B] = org.openmole.core.keyword.On[A, B]
+  type Negative[+A] = org.openmole.core.keyword.Negative[A]
+  type Under[+A, +B] = org.openmole.core.keyword.Under[A, B]
+  type In[+A, +B] = org.openmole.core.keyword.In[A, B]
+  type :=[+A, +B] = org.openmole.core.keyword.:=[A, B]
+  type Aggregate[+A, B] = org.openmole.core.keyword.Aggregate[A, B]
+  type Delta[+A, +B] = org.openmole.core.keyword.Delta[A, B]
+  type As[+A, +B] = org.openmole.core.keyword.As[A, B]
+  type On[+A, +B] = org.openmole.core.keyword.On[A, B]
+  type By[+A, +B] = org.openmole.core.keyword.By[A, B]
 
+  type ValueAssignment[T] = org.openmole.core.workflow.builder.ValueAssignment[T]
+
+  def On = org.openmole.core.keyword.On
+  def By = org.openmole.core.keyword.By
   def Aggregate = org.openmole.core.keyword.Aggregate
 
   type TmpDirectory = org.openmole.core.workspace.TmpDirectory

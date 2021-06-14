@@ -335,40 +335,54 @@ object OSE {
 
 }
 
+import EvolutionDSL._
+
 object OSEEvolution {
 
   import org.openmole.core.dsl._
 
-  def apply(
-    origin:         Seq[OSE.OriginAxe],
-    objective:      Seq[OSE.FitnessPattern],
-    evaluation:     DSL,
-    termination:    OMTermination,
-    populationSize: Int                          = 200,
-    genome:         Genome                       = Seq(),
-    stochastic:     OptionalArgument[Stochastic] = None,
-    reject:         OptionalArgument[Condition]  = None,
-    parallelism:    Int                          = EvolutionWorkflow.parallelism,
-    distribution:   EvolutionPattern             = SteadyState(),
-    suggestion:     Suggestion                   = Suggestion.empty,
-    scope:          DefinitionScope              = "ose") =
-    EvolutionPattern.build(
-      algorithm =
-        OSE(
-          origin = origin,
-          genome = genome,
-          objective = objective,
-          outputs = evaluation.outputs,
-          stochastic = stochastic,
-          populationSize = populationSize,
-          reject = reject
-        ),
-      evaluation = evaluation,
-      termination = termination,
-      parallelism = parallelism,
-      distribution = distribution,
-      suggestion = suggestion(OSE.OriginAxe.fullGenome(origin, genome)),
-      scope = scope
-    )
+  implicit def dslContainer: ExplorationMethod[OSEEvolution, EvolutionWorkflow] =
+    p ⇒ {
+      val container =
+        EvolutionPattern.build(
+          algorithm =
+            OSE(
+              origin = p.origin,
+              genome = p.genome,
+              objective = p.objective,
+              outputs = p.evaluation.outputs,
+              stochastic = p.stochastic,
+              populationSize = p.populationSize,
+              reject = p.reject
+            ),
+          evaluation = p.evaluation,
+          termination = p.termination,
+          parallelism = p.parallelism,
+          distribution = p.distribution,
+          suggestion = p.suggestion(OSE.OriginAxe.fullGenome(p.origin, p.genome)),
+          scope = p.scope
+        )
 
+      container hook (p.hooks.map(_(container.method, p.scope)): _*)
+    }
+
+  implicit def evolutionPatternContainer: EvolutionDSL.EvolutionPatternContainer[OSEEvolution] = () ⇒ OSEEvolution.distribution
+  implicit def hookContainer: EvolutionDSL.HookContainer[OSEEvolution] = () ⇒ OSEEvolution.hooks
 }
+
+import monocle.macros._
+
+@Lenses case class OSEEvolution(
+  origin:         Seq[OSE.OriginAxe],
+  objective:      Seq[OSE.FitnessPattern],
+  evaluation:     DSL,
+  termination:    OMTermination,
+  populationSize: Int                                   = 200,
+  genome:         Genome                                = Seq(),
+  stochastic:     OptionalArgument[Stochastic]          = None,
+  reject:         OptionalArgument[Condition]           = None,
+  parallelism:    Int                                   = EvolutionWorkflow.parallelism,
+  distribution:   EvolutionPattern                      = SteadyState(),
+  suggestion:     Suggestion                            = Suggestion.empty,
+  scope:          DefinitionScope                       = "ose",
+  hooks:          Seq[SavePopulationHook.Parameters[_]] = Seq())

@@ -488,6 +488,8 @@ object NichedNSGA2 {
 
 object NichedNSGA2Evolution {
 
+  import EvolutionDSL._
+
   def apply(
     evaluation:   DSL,
     termination:  OMTermination,

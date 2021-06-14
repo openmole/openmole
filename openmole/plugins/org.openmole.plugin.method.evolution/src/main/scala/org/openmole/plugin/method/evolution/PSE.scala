@@ -483,36 +483,50 @@ object PSE {
 
 }
 
+import EvolutionDSL._
+
 object PSEEvolution {
 
   import org.openmole.core.dsl.DSL
 
-  def apply(
-    genome:       Genome,
-    objective:    Seq[PSE.PatternAxe],
-    evaluation:   DSL,
-    termination:  OMTermination,
-    stochastic:   OptionalArgument[Stochastic] = None,
-    reject:       OptionalArgument[Condition]  = None,
-    parallelism:  Int                          = EvolutionWorkflow.parallelism,
-    distribution: EvolutionPattern             = SteadyState(),
-    suggestion:   Suggestion                   = Suggestion.empty,
-    scope:        DefinitionScope              = "pse") =
-    EvolutionPattern.build(
-      algorithm =
-        PSE(
-          genome = genome,
-          objective = objective,
-          outputs = evaluation.outputs,
-          stochastic = stochastic,
-          reject = reject
-        ),
-      evaluation = evaluation,
-      termination = termination,
-      parallelism = parallelism,
-      distribution = distribution,
-      suggestion = suggestion(genome),
-      scope = scope
-    )
+  implicit def method: ExplorationMethod[PSEEvolution, EvolutionWorkflow] =
+    p ⇒ {
+      val container =
+        EvolutionPattern.build(
+          algorithm =
+            PSE(
+              genome = p.genome,
+              objective = p.objective,
+              outputs = p.evaluation.outputs,
+              stochastic = p.stochastic,
+              reject = p.reject
+            ),
+          evaluation = p.evaluation,
+          termination = p.termination,
+          parallelism = p.parallelism,
+          distribution = p.distribution,
+          suggestion = p.suggestion(p.genome),
+          scope = p.scope
+        )
 
+      container hook (p.hooks.map(_(container.method, p.scope)): _*)
+    }
+
+  implicit def evolutionPatternContainer: EvolutionDSL.EvolutionPatternContainer[PSEEvolution] = () ⇒ PSEEvolution.distribution
+  implicit def hookContainer: EvolutionDSL.HookContainer[PSEEvolution] = () ⇒ PSEEvolution.hooks
 }
+
+import monocle.macros._
+
+@Lenses case class PSEEvolution(
+  genome:       Genome,
+  objective:    Seq[PSE.PatternAxe],
+  evaluation:   DSL,
+  termination:  OMTermination,
+  stochastic:   OptionalArgument[Stochastic]          = None,
+  reject:       OptionalArgument[Condition]           = None,
+  parallelism:  Int                                   = EvolutionWorkflow.parallelism,
+  distribution: EvolutionPattern                      = SteadyState(),
+  suggestion:   Suggestion                            = Suggestion.empty,
+  scope:        DefinitionScope                       = "pse",
+  hooks:        Seq[SavePopulationHook.Parameters[_]] = Seq())

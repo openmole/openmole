@@ -227,49 +227,61 @@ object NSGA3 {
 
 }
 
+import EvolutionDSL._
+import monocle.macros._
+
 object NSGA3Evolution {
 
   import org.openmole.core.dsl.DSL
 
-  def apply(
-    genome:         Genome,
-    objective:      Objectives,
-    evaluation:     DSL,
-    termination:    OMTermination,
-    populationSize: Int                          = 200,
-    references:     NSGA3.References             = NSGA3.References.None,
-    stochastic:     OptionalArgument[Stochastic] = None,
-    reject:         OptionalArgument[Condition]  = None,
-    parallelism:    Int                          = EvolutionWorkflow.parallelism,
-    distribution:   EvolutionPattern             = SteadyState(),
-    suggestion:     Suggestion                   = Suggestion.empty,
-    scope:          DefinitionScope              = "nsga3") = {
+  implicit def dslContainer: ExplorationMethod[NSGA3Evolution, EvolutionWorkflow] =
+    p ⇒ {
+      val refPoints =
+        p.references match {
+          case NSGA3.References.None        ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(50, Objectives.value(p.objective).size)
+          case NSGA3.References.Division(i) ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(i, Objectives.value(p.objective).size)
+          case NSGA3.References.List(p)     ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(p)
+        }
 
-    val refPoints =
-      references match {
-        case NSGA3.References.None        ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(50, Objectives.value(objective).size)
-        case NSGA3.References.Division(i) ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(i, Objectives.value(objective).size)
-        case NSGA3.References.List(p)     ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(p)
-      }
-    EvolutionPattern.build(
-      algorithm =
-        NSGA3(
-          populationSize = populationSize,
-          references = refPoints,
-          genome = genome,
-          outputs = evaluation.outputs,
-          objective = objective,
-          stochastic = stochastic,
-          reject = reject
-        ),
-      evaluation = evaluation,
-      termination = termination,
-      parallelism = parallelism,
-      distribution = distribution,
-      suggestion = suggestion(genome),
-      scope = scope
-    )
-  }
+      val container =
+        EvolutionPattern.build(
+          algorithm =
+            NSGA3(
+              populationSize = p.populationSize,
+              references = refPoints,
+              genome = p.genome,
+              outputs = p.evaluation.outputs,
+              objective = p.objective,
+              stochastic = p.stochastic,
+              reject = p.reject
+            ),
+          evaluation = p.evaluation,
+          termination = p.termination,
+          parallelism = p.parallelism,
+          distribution = p.distribution,
+          suggestion = p.suggestion(p.genome),
+          scope = p.scope
+        )
+
+      container hook (p.hooks.map(_(container.method, p.scope)): _*)
+    }
+
+  implicit def evolutionPatternContainer: EvolutionDSL.EvolutionPatternContainer[NSGA3Evolution] = () ⇒ NSGA3Evolution.distribution
+  implicit def hookContainer: EvolutionDSL.HookContainer[NSGA3Evolution] = () ⇒ NSGA3Evolution.hooks
 
 }
 
+@Lenses case class NSGA3Evolution(
+  genome:         Genome,
+  objective:      Objectives,
+  evaluation:     DSL,
+  termination:    OMTermination,
+  populationSize: Int                                   = 200,
+  references:     NSGA3.References                      = NSGA3.References.None,
+  stochastic:     OptionalArgument[Stochastic]          = None,
+  reject:         OptionalArgument[Condition]           = None,
+  parallelism:    Int                                   = EvolutionWorkflow.parallelism,
+  distribution:   EvolutionPattern                      = SteadyState(),
+  suggestion:     Suggestion                            = Suggestion.empty,
+  scope:          DefinitionScope                       = "nsga3",
+  hooks:          Seq[SavePopulationHook.Parameters[_]] = Seq())

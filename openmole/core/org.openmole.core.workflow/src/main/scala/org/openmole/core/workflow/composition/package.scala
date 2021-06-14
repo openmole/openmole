@@ -24,8 +24,9 @@ package org.openmole.core.workflow
  */
 package composition {
 
-  import java.io.PrintStream
+  import monocle.macros.Lenses
 
+  import java.io.PrintStream
   import org.openmole.core.context.{ Context, Val }
   import org.openmole.core.expansion.{ Condition, FromContext, Validate }
   import org.openmole.core.keyword.{ By, On }
@@ -324,15 +325,17 @@ package composition {
     }
 
     object ToDSLContainer {
-      implicit def id[T]: ToDSLContainer[DSLContainer[T]] = identity
-      implicit def byGrouping[T](implicit toDSLContainer: ToDSLContainer[T]): ToDSLContainer[By[T, Grouping]] = t ⇒ toDSLContainer(t.value).copy(grouping = Some(t.by))
-      implicit def byInt[T](implicit toDSLContainer: ToDSLContainer[T]): ToDSLContainer[By[T, Int]] = t ⇒ toDSLContainer(t.value).copy(grouping = Some(ByGrouping(t.by)))
-      implicit def on[T](implicit toDSLContainer: ToDSLContainer[T]): ToDSLContainer[On[T, EnvironmentProvider]] = t ⇒ toDSLContainer(t.value).copy(environment = Some(t.on))
+      implicit def id[T]: ToDSLContainer[DSLContainer[T], T] = t ⇒ t
+      implicit def byGrouping[T, C](implicit toDSLContainer: ToDSLContainer[T, C]): ToDSLContainer[By[T, Grouping], C] = t ⇒ toDSLContainer(t.value).copy(grouping = Some(t.by))
+      implicit def byInt[T, C](implicit toDSLContainer: ToDSLContainer[T, C]): ToDSLContainer[By[T, Int], C] = t ⇒ toDSLContainer(t.value).copy(grouping = Some(ByGrouping(t.by)))
+      implicit def on[T, C](implicit toDSLContainer: ToDSLContainer[T, C]): ToDSLContainer[On[T, EnvironmentProvider], C] = t ⇒ toDSLContainer(t.value).copy(environment = Some(t.on))
     }
 
-    trait ToDSLContainer[-T] {
-      def apply(t: T): DSLContainer[_]
+    trait ToDSLContainer[-T, C] {
+      def apply(t: T): DSLContainer[C]
     }
+
+    implicit def convert[T, C](t: T)(implicit toDSLContainer: ToDSLContainer[T, C]): DSLContainer[C] = toDSLContainer(t)
   }
 
   case class DSLContainer[+T](
@@ -401,7 +404,8 @@ package composition {
         method,
         definitionScope)
 
-    type DSLContainer[T] = composition.DSLContainer[T]
+    type DSLContainer[+T] = composition.DSLContainer[T]
+    type ExplorationMethod[-T, C] = composition.DSLContainer.ToDSLContainer[T, C]
 
     def Slot(dsl: DSL) = composition.Slot(dsl)
     def Capsule(node: DSL) = composition.Capsule(node)
@@ -546,6 +550,7 @@ package composition {
       import org.openmole.core.workflow.sampling.IsSampling
       implicit def taskToOrigin: ToOrigin[Task] = t ⇒ TaskOrigin(TaskNode(t))
       implicit def transitionDSLToOrigin: ToOrigin[DSL] = TransitionDSLOrigin(_)
+      implicit def toDSLContainerToOrigin[T](implicit tc: composition.DSLContainer.ToDSLContainer[T, _]): ToOrigin[T] = t ⇒ TransitionDSLOrigin(tc(t))
       implicit def taskNodeToOrigin[T: ToNode]: ToOrigin[T] = t ⇒ TaskOrigin(implicitly[ToNode[T]].apply(t))
       implicit def samplingToOrigin[T: IsSampling](implicit scope: DefinitionScope): ToOrigin[T] = s ⇒ taskToOrigin(ExplorationTask(s))
     }
@@ -560,6 +565,7 @@ package composition {
       implicit def taskNodeToDestination[T: ToNode]: ToDestination[T] = t ⇒ TaskDestination(implicitly[ToNode[T]].apply(t))
       implicit def samplingToDestination[T: IsSampling](implicit scope: DefinitionScope): ToDestination[T] = s ⇒ taskToDestination(ExplorationTask(s))
       implicit def transitionDSLToDestination: ToDestination[DSL] = TransitionDSLDestination(_)
+      implicit def toDSLContainerToDestination[T](implicit tc: composition.DSLContainer.ToDSLContainer[T, _]): ToDestination[T] = t ⇒ TransitionDSLDestination(tc(t))
     }
 
     trait ToDestination[-T] {
@@ -580,7 +586,7 @@ package composition {
 
     object ToDSL {
       implicit def dslToDSL: ToDSL[DSL] = identity
-      implicit def toDSLContainerToDSL[T](implicit tc: composition.DSLContainer.ToDSLContainer[T]): ToDSL[T] = t ⇒ tc(t)
+      implicit def toDSLContainerToDSL[T](implicit tc: composition.DSLContainer.ToDSLContainer[T, _]): ToDSL[T] = t ⇒ tc(t)
       implicit def toNodeToDSL[T: ToNode]: ToDSL[T] = t ⇒ TaskNodeDSL(implicitly[ToNode[T]].apply(t))
       implicit def DSLSelectorToDSL[HL <: HList](implicit dslSelector: DSLSelector[HL]): ToDSL[HL] = t ⇒ dslSelector(t)
     }

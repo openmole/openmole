@@ -363,40 +363,51 @@ object Profile {
 
 }
 
+import EvolutionDSL._
+
 object ProfileEvolution {
 
-  def apply(
-    profile:      Profile.ProfileElements,
-    genome:       Genome,
-    objective:    Objectives,
-    evaluation:   DSL,
-    termination:  OMTermination,
-    nicheSize:    Int                          = 10,
-    stochastic:   OptionalArgument[Stochastic] = None,
-    reject:       OptionalArgument[Condition]  = None,
-    parallelism:  Int                          = EvolutionWorkflow.parallelism,
-    distribution: EvolutionPattern             = SteadyState(),
-    suggestion:   Suggestion                   = Suggestion.empty,
-    scope:        DefinitionScope              = "profile") = {
+  implicit def method: ExplorationMethod[ProfileEvolution, EvolutionWorkflow] =
+    p ⇒ {
+      val container = EvolutionPattern.build(
+        algorithm =
+          Profile(
+            niche = p.profile,
+            genome = p.genome,
+            objective = p.objective,
+            outputs = p.evaluation.outputs,
+            stochastic = p.stochastic,
+            nicheSize = p.nicheSize,
+            reject = p.reject
+          ),
+        evaluation = p.evaluation,
+        termination = p.termination,
+        parallelism = p.parallelism,
+        distribution = p.distribution,
+        suggestion = p.suggestion(p.genome),
+        scope = p.scope
+      )
 
-    EvolutionPattern.build(
-      algorithm =
-        Profile(
-          niche = profile,
-          genome = genome,
-          objective = objective,
-          outputs = evaluation.outputs,
-          stochastic = stochastic,
-          nicheSize = nicheSize,
-          reject = reject
-        ),
-      evaluation = evaluation,
-      termination = termination,
-      parallelism = parallelism,
-      distribution = distribution,
-      suggestion = suggestion(genome),
-      scope = scope
-    )
-  }
+      container hook (p.hooks.map(_(container.method, p.scope)): _*)
+    }
 
+  implicit def evolutionPatternContainer: EvolutionDSL.EvolutionPatternContainer[ProfileEvolution] = () ⇒ ProfileEvolution.distribution
+  implicit def hookContainer: EvolutionDSL.HookContainer[ProfileEvolution] = () ⇒ ProfileEvolution.hooks
 }
+
+import monocle.macros._
+
+@Lenses case class ProfileEvolution(
+  profile:      Profile.ProfileElements,
+  genome:       Genome,
+  objective:    Objectives,
+  evaluation:   DSL,
+  termination:  OMTermination,
+  nicheSize:    Int                                   = 10,
+  stochastic:   OptionalArgument[Stochastic]          = None,
+  reject:       OptionalArgument[Condition]           = None,
+  parallelism:  Int                                   = EvolutionWorkflow.parallelism,
+  distribution: EvolutionPattern                      = SteadyState(),
+  suggestion:   Suggestion                            = Suggestion.empty,
+  scope:        DefinitionScope                       = "profile",
+  hooks:        Seq[SavePopulationHook.Parameters[_]] = Seq())

@@ -18,7 +18,7 @@
 package org.openmole.plugin.method.evolution
 
 import cats.implicits._
-import monocle.macros.GenLens
+import monocle.macros.{ GenLens, Lenses }
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.plugin.method.evolution.Genome.Suggestion
@@ -240,39 +240,51 @@ object NSGA2 {
 
 }
 
+import EvolutionDSL._
+
 object NSGA2Evolution {
 
   import org.openmole.core.dsl.DSL
 
-  def apply(
-    genome:         Genome,
-    objective:      Objectives,
-    evaluation:     DSL,
-    termination:    OMTermination,
-    populationSize: Int                          = 200,
-    stochastic:     OptionalArgument[Stochastic] = None,
-    reject:         OptionalArgument[Condition]  = None,
-    parallelism:    Int                          = EvolutionWorkflow.parallelism,
-    distribution:   EvolutionPattern             = SteadyState(),
-    suggestion:     Suggestion                   = Suggestion.empty,
-    scope:          DefinitionScope              = "nsga2") =
-    EvolutionPattern.build(
-      algorithm =
-        NSGA2(
-          populationSize = populationSize,
-          genome = genome,
-          objective = objective,
-          outputs = evaluation.outputs,
-          stochastic = stochastic,
-          reject = reject
-        ),
-      evaluation = evaluation,
-      termination = termination,
-      parallelism = parallelism,
-      distribution = distribution,
-      suggestion = suggestion(genome),
-      scope = scope
-    )
+  implicit def method: ExplorationMethod[NSGA2Evolution, EvolutionWorkflow] =
+    p ⇒ {
+      val container =
+        EvolutionPattern.build(
+          algorithm =
+            NSGA2(
+              populationSize = p.populationSize,
+              genome = p.genome,
+              objective = p.objective,
+              outputs = p.evaluation.outputs,
+              stochastic = p.stochastic,
+              reject = p.reject
+            ),
+          evaluation = p.evaluation,
+          termination = p.termination,
+          parallelism = p.parallelism,
+          distribution = p.distribution,
+          suggestion = p.suggestion(p.genome),
+          scope = p.scope
+        )
+
+      container hook (p.hooks.map(_(container.method, p.scope)): _*)
+    }
+
+  implicit def evolutionPatternContainer: EvolutionDSL.EvolutionPatternContainer[NSGA2Evolution] = () ⇒ NSGA2Evolution.distribution
+  implicit def hookContainer: EvolutionDSL.HookContainer[NSGA2Evolution] = () ⇒ NSGA2Evolution.hooks
 
 }
 
+@Lenses case class NSGA2Evolution(
+  genome:         Genome,
+  objective:      Objectives,
+  evaluation:     DSL,
+  termination:    OMTermination,
+  populationSize: Int                                   = 200,
+  stochastic:     OptionalArgument[Stochastic]          = None,
+  reject:         OptionalArgument[Condition]           = None,
+  parallelism:    Int                                   = EvolutionWorkflow.parallelism,
+  distribution:   EvolutionPattern                      = SteadyState(),
+  suggestion:     Suggestion                            = Suggestion.empty,
+  scope:          DefinitionScope                       = "nsga2",
+  hooks:          Seq[SavePopulationHook.Parameters[_]] = Seq())

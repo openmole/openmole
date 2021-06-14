@@ -169,6 +169,5 @@ NSGA2Evolution(
   stochastic = Stochastic(seed = mySeed),
   evaluation = ants,
   termination = 100000,
-  parallelism = 1000,
-  distribution = Island(1 hour)
-) on env hook (workDirectory / "results")""", header = model, name = "ga netlogo islands")
+  parallelism = 1000
+) by Island(50) on env hook (workDirectory / "results")""", header = model, name = "ga netlogo islands")

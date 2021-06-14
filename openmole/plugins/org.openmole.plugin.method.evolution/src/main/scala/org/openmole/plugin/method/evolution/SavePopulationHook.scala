@@ -24,6 +24,51 @@ import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SaveOption
 
 object SavePopulationHook {
 
+  case class Parameters[F](
+    output:         WritableOutput,
+    frequency:      OptionalArgument[Long],
+    last:           Boolean,
+    keepAll:        Boolean,
+    includeOutputs: Boolean,
+    filter:         Seq[Val[_]],
+    format:         F,
+    outputFormat:   OutputFormat[F, EvolutionMetadata]) {
+    def apply(method: EvolutionWorkflow, scope: DefinitionScope) = {
+      implicit def of = outputFormat
+      implicit def sc = scope
+      SavePopulationHook(method, output, frequency = frequency, last = last, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter, format = format)
+    }
+  }
+
+  trait Hookable[T] {
+    def apply(t: T, p: Parameters[_]): T
+  }
+
+  class HookFunction[H](h: H)(implicit hookable: Hookable[H]) {
+    def hook[F](
+      output:         WritableOutput,
+      frequency:      OptionalArgument[Long] = None,
+      last:           Boolean                = false,
+      keepAll:        Boolean                = false,
+      includeOutputs: Boolean                = true,
+      filter:         Seq[Val[_]]            = Vector.empty,
+      format:         F                      = CSVOutputFormat(unrollArray = true))(implicit outputFormat: OutputFormat[F, EvolutionMetadata]) = {
+      hookable(
+        h,
+        SavePopulationHook.Parameters(
+          output = output,
+          frequency = frequency,
+          last = last,
+          keepAll = keepAll,
+          includeOutputs = includeOutputs,
+          filter = filter,
+          format = format,
+          outputFormat = outputFormat
+        )
+      )
+    }
+  }
+
   def resultVariables(t: EvolutionWorkflow, keepAll: Boolean, includeOutputs: Boolean, filter: Seq[String]) = FromContext { p ⇒
     import p._
     def all =

@@ -24,6 +24,8 @@ import org.openmole.core.workflow.task._
 
 object TerminationTask {
 
+  import EvolutionDSL._
+
   def apply[T](evolution: EvolutionWorkflow, termination: OMTermination)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     ClosureTask("TerminationTask") { (context, _, _) ⇒
       val term = OMTermination.toTermination(termination, evolution)
