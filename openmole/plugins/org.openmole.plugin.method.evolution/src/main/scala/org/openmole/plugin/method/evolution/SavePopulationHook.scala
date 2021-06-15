@@ -71,11 +71,16 @@ object SavePopulationHook {
 
   def resultVariables(t: EvolutionWorkflow, keepAll: Boolean, includeOutputs: Boolean, filter: Seq[String]) = FromContext { p ⇒
     import p._
+    val state = context(t.stateVal)
+
     def all =
-      context.variable(t.generationPrototype).toSeq ++
+      Seq[Variable[_]](
+        t.generationVal -> t.operations.generationLens.get(state),
+        t.evaluatedVal -> t.operations.evaluatedLens.get(state)
+      ) ++
         t.operations.result(
-          context(t.populationPrototype).toVector,
-          context(t.statePrototype),
+          context(t.populationVal).toVector,
+          state,
           keepAll = keepAll,
           includeOutputs = includeOutputs).from(context)
 
@@ -94,26 +99,31 @@ object SavePopulationHook {
     format:         F                      = CSVOutputFormat(unrollArray = true))(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, EvolutionMetadata]) = Hook("SavePopulationHook") { p ⇒
     import p._
 
+    val generation = evolution.operations.generationLens.get(context(evolution.stateVal))
+
     def fileName =
       (frequency.option, last) match {
-        case (_, true) ⇒ Some("population")
-        case (None, _) ⇒ Some("population${" + evolution.generationPrototype.name + "}")
-        case (Some(f), _) if context(evolution.generationPrototype) % f == 0 ⇒ Some("population${" + evolution.generationPrototype.name + "}")
-        case _ ⇒ None
+        case (_, true)                           ⇒ Some("population")
+        case (None, _)                           ⇒ Some("population${" + evolution.generationVal.name + "}")
+        case (Some(f), _) if generation % f == 0 ⇒ Some("population${" + evolution.generationVal.name + "}")
+        case _                                   ⇒ None
       }
 
     fileName match {
       case Some(fileName) ⇒
         def saveOption = SaveOption(frequency = frequency, last = last)
-        def evolutionData = evolution.operations.metadata(context(evolution.generationPrototype), saveOption)
+        def evolutionData = evolution.operations.metadata(generation, saveOption)
 
-        val content = OutputFormat.PlainContent(resultVariables(evolution, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter.map(_.name)).from(context), Some(fileName))
-        outputFormat.write(executionContext)(format, output, content, evolutionData).from(context)
+        val augmentedContext =
+          context + (evolution.generationVal -> generation)
+
+        val content = OutputFormat.PlainContent(resultVariables(evolution, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter.map(_.name)).from(augmentedContext), Some(fileName))
+        outputFormat.write(executionContext)(format, output, content, evolutionData).from(augmentedContext)
       case None ⇒
     }
 
     context
-  } withValidate { outputFormat.validate(format) } set (inputs += (evolution.populationPrototype, evolution.statePrototype))
+  } withValidate { outputFormat.validate(format) } set (inputs += (evolution.populationVal, evolution.stateVal))
 
 }
 

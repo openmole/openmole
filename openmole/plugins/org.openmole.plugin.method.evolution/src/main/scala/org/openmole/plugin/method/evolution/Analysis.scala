@@ -27,7 +27,7 @@ object Analysis {
   }
 
   def dataFile(directory: File, fileName: String, g: Long)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) =
-    directory / (fileName: FromContext[String]).from(Context(GAIntegration.generationPrototype -> g))
+    directory / (fileName: FromContext[String]).from(Context(GAIntegration.generationVal -> g))
 
   object EvolutionAnalysis {
     object none extends EvolutionAnalysis
@@ -86,7 +86,7 @@ object Analysis {
         }
 
       def savedObjectives = objectives map { o ⇒ Objective(o) }
-      def generation = json(GAIntegration.generationPrototype.name).get.asNumber.get.toLong.get
+      def generation = json(GAIntegration.generationVal.name).get.asNumber.get.toLong.get
 
       Generation(generation, genomes, savedObjectives)
     }
@@ -172,9 +172,9 @@ object Analysis {
               map(_.toString)
         }
 
-      def samples = json(GAIntegration.samples.name).get.asArray.get.map(_.asNumber.get.toInt.get)
+      def samples = json(GAIntegration.samplesVal.name).get.asArray.get.map(_.asNumber.get.toInt.get)
       def savedObjectives = (objectives zip samples) map { case (o, s) ⇒ Objective(o, s) }
-      def generation = json(GAIntegration.generationPrototype.name).get.asNumber.get.toLong.get
+      def generation = json(GAIntegration.generationVal.name).get.asNumber.get.toLong.get
 
       Generation(generation, genomes, savedObjectives)
     }

@@ -29,7 +29,7 @@ object GenerateIslandTask {
     val outputPopulation = untypedOutputPopulation.asInstanceOf[Val[evolution.Pop]]
 
     ClosureTask("GenerateIslandTask") { (context, rng, _) ⇒
-      val p = context(evolution.populationPrototype)
+      val p = context(evolution.populationVal)
 
       import evolution.integration.iManifest
 
@@ -43,7 +43,7 @@ object GenerateIslandTask {
       def populations = Array.fill(size)(evolution.operations.migrateToIsland(samples).toArray)
       Variable(outputPopulation.toArray, populations)
     } set (
-      inputs += evolution.populationPrototype,
+      inputs += evolution.populationVal,
       exploredOutputs += outputPopulation.toArray
     )
   }

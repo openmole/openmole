@@ -60,8 +60,8 @@ object EvolutionWorkflow {
       def buildIndividual(g: G, context: Context): I =
         operations.buildIndividual(g, variablesToPhenotype(context), context)
 
-      def inputPrototypes = Genome.toVals(genome)
-      def outputPrototypes = PhenotypeContent.toVals(phenotypeContent)
+      def inputVals = Genome.toVals(genome)
+      def outputVals = PhenotypeContent.toVals(phenotypeContent)
 
       def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
         val (cs, is) = operations.genomeValues(g)
@@ -93,8 +93,8 @@ object EvolutionWorkflow {
       def buildIndividual(genome: G, context: Context): I =
         operations.buildIndividual(genome, variablesToPhenotype(context), context)
 
-      def inputPrototypes = Genome.toVals(genome) ++ replication.seed.prototype
-      def outputPrototypes = PhenotypeContent.toVals(phenotypeContent)
+      def inputVals = Genome.toVals(genome) ++ replication.seed.prototype
+      def outputVals = PhenotypeContent.toVals(phenotypeContent)
 
       def genomeToVariables(g: G): FromContext[Seq[Variable[_]]] = FromContext { p ⇒
         import p._
@@ -138,21 +138,23 @@ trait EvolutionWorkflow {
 
   def buildIndividual(genome: G, context: Context): I
 
-  def inputPrototypes: Seq[Val[_]]
-  def outputPrototypes: Seq[Val[_]]
+  def inputVals: Seq[Val[_]]
+  def outputVals: Seq[Val[_]]
 
   def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]]
 
   // Variables
   import GAIntegration.namespace
 
-  def genomePrototype = Val[G]("genome", namespace)(genomeType)
-  def individualPrototype = Val[I]("individual", namespace)(individualType)
-  def populationPrototype = Val[Pop]("population", namespace)(populationType)
-  def offspringPrototype = Val[Pop]("offspring", namespace)(populationType)
-  def statePrototype = Val[S]("state", namespace)(stateType)
-  def generationPrototype = GAIntegration.generationPrototype
-  def terminatedPrototype = Val[Boolean]("terminated", namespace)
+  def genomeVal = Val[G]("genome", namespace)(genomeType)
+
+  def individualVal = Val[I]("individual", namespace)(individualType)
+  def populationVal = Val[Pop]("population", namespace)(populationType)
+  def offspringPopulationVal = Val[Pop]("offspring", namespace)(populationType)
+  def stateVal = Val[S]("state", namespace)(stateType)
+  def generationVal = GAIntegration.generationVal
+  def evaluatedVal = GAIntegration.evaluatedVal
+  def terminatedVal = Val[Boolean]("terminated", namespace)
 }
 
 case class Stochastic(
@@ -164,8 +166,10 @@ case class Stochastic(
 object GAIntegration {
 
   def namespace = Namespace("evolution")
-  def samples = Val[Int]("samples", namespace)
-  def generationPrototype = Val[Long]("generation", namespace)
+
+  def samplesVal = Val[Int]("samples", namespace)
+  def generationVal = Val[Long]("generation", namespace)
+  def evaluatedVal = Val[Long]("evaluated", namespace)
 
   def genomeToVariable(
     genome: Genome,
@@ -253,15 +257,17 @@ object MGOAPI {
 
       def startTimeLens: monocle.Lens[S, Long]
       def generationLens: monocle.Lens[S, Long]
+      def evaluatedLens: monocle.Lens[S, Long]
 
       def initialState: S
       def initialGenomes(n: Int, rng: scala.util.Random): FromContext[Vector[G]]
       def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random): FromContext[Vector[G]]
-      def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random): FromContext[(S, Vector[I])]
+      def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random): FromContext[(S, Vector[I])]
 
       def migrateToIsland(i: Vector[I]): Vector[I]
       def migrateFromIsland(population: Vector[I], state: S): Vector[I]
 
+      def afterEvaluated(e: Long, s: S, population: Vector[I]): Boolean
       def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean
       def afterDuration(d: squants.Time, s: S, population: Vector[I]): Boolean
 

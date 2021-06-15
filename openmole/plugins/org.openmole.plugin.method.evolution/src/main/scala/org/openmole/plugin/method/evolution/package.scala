@@ -41,8 +41,8 @@ package object evolution {
   type Objectives = Seq[Objective]
   type Genome = Seq[Genome.GenomeBound]
 
-  implicit def intToCounterTerminationConverter(n: Long): AfterGeneration = AfterGeneration(n)
-  implicit def durationToDurationTerminationConverter(d: Time): AfterDuration = AfterDuration(d)
+  implicit def intToCounterTerminationConverter(n: Long) = AfterEvaluated(n)
+  implicit def durationToDurationTerminationConverter(d: Time) = AfterDuration(d)
 
   implicit def byEvolutionPattern[T](implicit patternContainer: EvolutionDSL.EvolutionPatternContainer[T], method: ExplorationMethod[T, EvolutionWorkflow]): ExplorationMethod[By[T, EvolutionPattern], EvolutionWorkflow] = p ⇒ method(patternContainer().set(p.by)(p.value))
   implicit def isEvolutionHookable[T](implicit hookContainer: EvolutionDSL.HookContainer[T]): SavePopulationHook.Hookable[T] = (t, h) ⇒ hookContainer().modify(_ ++ Seq(h))(t)

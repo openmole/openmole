@@ -17,20 +17,23 @@
  */
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.context.Variable
-import org.openmole.core.workflow.builder.DefinitionScope
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.task._
-
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 object FromIslandTask {
 
   def apply[T](evolution: EvolutionWorkflow)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    ClosureTask("FromIslandTask") { (context, _, _) ⇒
-      val population = evolution.operations.migrateFromIsland(context(evolution.populationPrototype).toVector, context(evolution.statePrototype))
-      Variable(evolution.populationPrototype, population.toArray(evolution.individualPrototype.`type`.manifest))
+    Task("FromIslandTask") { p ⇒
+      import p._
+      val state = context(evolution.stateVal)
+      val population = evolution.operations.migrateFromIsland(context(evolution.populationVal).toVector, state)
+      val evaluated = evolution.operations.evaluatedLens.get(state)
+      Context(
+        evolution.populationVal -> population.toArray(evolution.individualVal.`type`.manifest),
+        evolution.evaluatedVal -> evaluated
+      )
     } set (
-      inputs += (evolution.populationPrototype, evolution.statePrototype),
-      outputs += evolution.populationPrototype
+      inputs += (evolution.populationVal, evolution.stateVal),
+      outputs += (evolution.populationVal, evolution.evaluatedVal)
     )
 
 }

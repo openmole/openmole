@@ -19,17 +19,17 @@
 
 
 
-@h2{A custom distribution method}
+@h2{Distribution scheme}
 
-For distributed environments, the island distribution scheme is well adapted. Islands of population evolve for a while on a remote node. When an island is finished, its final population is merged back into a global archive. A new island is then generated until the termination criterion, @i{i.e.} the total number of islands to generate, is met.
+For distributed environments, the island distribution scheme of evolutionary algorithms is especially well adapted. Islands of population evolve for a while on a remote node. When an island is finished, its final population is merged back into a global archive. A new island is then generated until the termination criterion, @i{i.e.} the max total number of individual evaluation has been reached.
 
 @br@br
 
-The island scheme is enabled using the by @code{Island} syntax. Island takes a termination criterion. For instance:
+The island scheme is enabled using the by @code{Island} syntax. For instance:
 
 @hl.openmole("""
   // Generate a workflow that orchestrates 100 concurrent islands.
-  // The workflow stops when 10,000 islands of 5 minutes have completed.
+  // The workflow stops when 10,000 individuals have been evaluated.
   val evolution =
     NSGA2Evolution(
       genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),

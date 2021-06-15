@@ -152,22 +152,20 @@ NSGA2Evolution(
 
 @h2{Scale up}
 
-If you use distributed computing, it might be a good idea to opt for an Island model. Islands are better suited to
-exploit distributed computing resources than classical generational genetic algorithms. See how the end of the
-script changes to implement islands in the workflow. Here we compute 2,000 islands in parallel, each running during
-1 hour on the European grid:
+If you use distributed computing, it might be a good idea to opt for an Island model. Islands are better suited to exploit distributed computing resources than classical generational genetic algorithms. See how the end of the script changes to implement islands in the workflow. Here we compute 2,000 islands in parallel, each running during 10 minutes on the European grid:
 
 @br @hl.openmole("""
 // Define the execution environment
 val env = EGIEnvironment("vo.complex-systems.eu")
 
-// Define the island model with 1,000 concurrent islands. Each island gets 50 individuals sampled from the global
-// population. The algorithm stops after 100,000 islands evaluations.
+// Define the island model with 1,000 concurrent islands.
+// Each island start from the current state of the algorithm and evolve from there during 10 minutes
+// The algorithm stops after 10,000,000 individuals have been evaluated.
 NSGA2Evolution(
   genome = Seq(gDiffusionRate in (0.0, 99.0), gEvaporationRate in (0.0, 99.0)),
   objective = Seq(food1, food2, food3),
   stochastic = Stochastic(seed = mySeed),
   evaluation = ants,
-  termination = 100000,
+  termination = 10000000,
   parallelism = 1000
-) by Island(50) on env hook (workDirectory / "results")""", header = model, name = "ga netlogo islands")
+) by Island(10 minutes) on env hook (workDirectory / "results")""", header = model, name = "ga netlogo islands")

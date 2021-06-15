@@ -113,7 +113,7 @@ Here is an example :
         param1 in (0.0, 99.0),
         param2 in (0.0, 99.0)
     ),
-    termination = 200000,
+    termination = 2000000,
     parallelism = 500,
     stochastic = Stochastic(seed = mySeed, sample = 100)
   ) by Island(10 minutes) hook(workDirectory / "path/to/a/directory")

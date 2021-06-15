@@ -143,13 +143,43 @@ class WorkflowSpec extends FlatSpec with Matchers {
       evaluation = testTask,
       objective = Seq(a),
       genome = Seq(a in (0.0, 1.0)),
-      termination = 100,
-      distribution = Island(5)
-    )
+      termination = 100
+    ) by Island(5)
 
     nsga run
 
-    executed should be >= 500
+    executed should be >= 100
+  }
+
+  "Hook" should "be valid" in {
+    @volatile var executed = 0
+
+    val a = Val[Double]
+
+    val testTask =
+      FromContextTask("test") { p ⇒
+        import p._
+        executed += 1
+        context
+      } set ((inputs, outputs) += a)
+
+    val nsga =
+      NSGA2Evolution(
+        evaluation = testTask,
+        objective = Seq(a),
+        genome = Seq(a in (0.0, 1.0)),
+        termination = 100
+      ) hook ("/tmp/test.txt")
+
+    Validation(nsga) match {
+      case Nil ⇒
+      case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
+    }
+
+    Validation(nsga by Island(10)) match {
+      case Nil ⇒
+      case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
+    }
   }
 
   "Steady state workflow" should "have no validation error" in {
