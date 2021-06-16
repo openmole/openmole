@@ -147,7 +147,7 @@ object GAMATask {
   }
 
 
-  def acceptedOutputType(frame: Boolean) = {
+  def acceptedOutputType(frame: Boolean): Seq[Manifest[_]] = {
     def scalar =
       Seq(
         manifest[Double],
@@ -156,7 +156,7 @@ object GAMATask {
         manifest[Boolean]
       )
 
-    if(!frame) scalar.map(_.runtimeClass) else scalar.map(_.arrayManifest.runtimeClass)
+    if(!frame) scalar else scalar.map(_.arrayManifest)
   }
 
 }
@@ -222,11 +222,11 @@ object GAMATask {
 
       def validateOutputs = {
         val acceptedOutputsTypes = GAMATask.acceptedOutputType(frameRate.option.isDefined)
-        def accepted(c: Class[_]) = acceptedOutputsTypes.exists(t => t == c)
+        def accepted(c: Manifest[_]) = acceptedOutputsTypes.exists(t => t == c)
 
         mapped.outputs.flatMap { m =>
           gamaOutputByName(m.name) match {
-            case Some(_) => if(!accepted(m.v.`type`.manifest.getClass)) Some(new UserBadDataError(s"""Mapped output ${m} type is not supported (frameRate is ${frameRate.option.isDefined}, it implies that supported types are ${acceptedOutputsTypes})""")) else None
+            case Some(_) => if(!accepted(m.v.`type`.manifest)) Some(new UserBadDataError(s"""Mapped output ${m} type is not supported (frameRate is ${frameRate.option.isDefined}, it implies that supported types are: ${acceptedOutputsTypes.mkString(", ")})""")) else None
             case None => Some(new UserBadDataError(s"""Mapped output "${m.name}" has not been found in the simulation among: ${gamaOutputs.mkString(", ")}. Make sure it is defined in your gaml file."""))
           }
         }
