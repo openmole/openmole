@@ -468,28 +468,28 @@ class WorkflowSpec extends FlatSpec with Matchers {
     val a = Val[Double]
     val b = Val[Double]
 
-    NSGA2Evolution(
+    val p1: DSL = NSGA2Evolution(
       evaluation = EmptyTask() set (inputs += a, outputs += b),
       objective = Seq(b),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100
     ) by Island(10) hook ("/tmp/test")
 
-    NSGA3Evolution(
+    val p2: DSL = NSGA3Evolution(
       evaluation = EmptyTask() set (inputs += a, outputs += b),
       objective = Seq(b),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100
     ) by Island(10) hook ("/tmp/test")
 
-    OSEEvolution(
+    val p3: DSL = OSEEvolution(
       evaluation = EmptyTask() set (inputs += a, outputs += b),
       objective = Seq(b under 1.0),
       origin = Seq(a in (0.0 to 1.0 by 0.1)),
       termination = 100
     ) by Island(10) hook ("/tmp/test")
 
-    ProfileEvolution(
+    val p4: DSL = ProfileEvolution(
       evaluation = EmptyTask() set (inputs += a, outputs += b),
       objective = Seq(b),
       genome = Seq(a in (0.0, 1.0)),
@@ -497,12 +497,24 @@ class WorkflowSpec extends FlatSpec with Matchers {
       termination = 100
     ) by Island(10) hook ("/tmp/test")
 
-    PSEEvolution(
+    val p5: DSL = PSEEvolution(
       evaluation = EmptyTask() set (inputs += a, outputs += b),
       objective = Seq(b in (0.0 to 1.0 by 0.1)),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100
     ) by Island(10) hook ("/tmp/test")
+  }
+  "by Island" should "be usable with by" in {
+    val a = Val[Double]
+    val b = Val[Double]
+
+    val p: DSL =
+      NSGA2Evolution(
+        evaluation = EmptyTask() set (inputs += a, outputs += b),
+        objective = Seq(b),
+        genome = Seq(a in (0.0, 1.0)),
+        termination = 100
+      ) on LocalEnvironment(1) by Island(10) by 10
   }
 
 }
