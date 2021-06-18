@@ -18,7 +18,7 @@ object EvolutionMetadata {
 
   object GenomeBoundData {
     case class DoubleBound(name: String, low: Double, high: Double) extends GenomeBoundData
-    case class IntBound(name: String, low: Int, high: Int) extends GenomeBoundData
+    case class IntBound(name: String, low: Int, high: Int, continuous: Boolean = false) extends GenomeBoundData
     case class DoubleSequenceBound(name: String, low: Array[Double], high: Array[Double]) extends GenomeBoundData
     case class IntSequenceBound(name: String, low: Array[Int], high: Array[Int]) extends GenomeBoundData
     case class Enumeration(name: String, values: Seq[String]) extends GenomeBoundData

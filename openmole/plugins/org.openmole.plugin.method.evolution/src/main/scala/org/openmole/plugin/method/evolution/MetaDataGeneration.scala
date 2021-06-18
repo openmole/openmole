@@ -22,6 +22,7 @@ object MetadataGeneration {
     b match {
       case b: GenomeBound.ScalarDouble             ⇒ GenomeBoundData.DoubleBound(b.v.name, b.low, b.high)
       case b: GenomeBound.ScalarInt                ⇒ GenomeBoundData.IntBound(b.v.name, b.low, b.high)
+      case b: GenomeBound.ContinuousInt            ⇒ GenomeBoundData.IntBound(b.v.name, b.low, b.high, continuous = true)
       case b: GenomeBound.SequenceOfDouble         ⇒ GenomeBoundData.DoubleSequenceBound(b.v.name, b.low, b.high)
       case b: GenomeBound.SequenceOfInt            ⇒ GenomeBoundData.IntSequenceBound(b.v.name, b.low, b.high)
       case b: GenomeBound.Enumeration[_]           ⇒ GenomeBoundData.Enumeration(b.v.name, b.values.map(_.prettify()))
