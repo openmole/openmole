@@ -30,18 +30,21 @@ object RTask {
 
   sealed trait InstallCommand
   object InstallCommand {
-    case class RLibrary(name: String, version: Option[String]) extends InstallCommand
+    case class RLibrary(name: String, version: Option[String] = None, dependencies: Boolean = false) extends InstallCommand
 
-    def toCommand(installCommands: InstallCommand) =
+    def toCommand(installCommands: InstallCommand) = {
+      def dependencies(d: Boolean) = if(d) "T" else "NA"
+
       installCommands match {
-        case RLibrary(name, None) ⇒
+        case RLibrary(name, None, d) ⇒
           //Vector(s"""R -e 'install.packages(c(${names.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'""")
-          s"""R --slave -e 'install.packages(c("$name"), dependencies = T); library("$name")'"""
-        case RLibrary(name, Some(version)) ⇒
+          s"""R --slave -e 'install.packages(c("$name"), dependencies = ${dependencies(d)}); library("$name")'"""
+        case RLibrary(name, Some(version), d) ⇒
           // need to install devtools to get older packages versions
           //apt update; apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev;
-          s"""R --slave -e 'library(devtools); install_version("$name",version = "$version", dependencies = T); library("$name")'"""
+          s"""R --slave -e 'library(devtools); install_version("$name",version = "$version", dependencies = ${dependencies(d)}); library("$name")'"""
       }
+    }
 
     implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name, None)
     implicit def stringCoupleToRLibrary(couple: (String, String)): InstallCommand = RLibrary(couple._1, Some(couple._2))
