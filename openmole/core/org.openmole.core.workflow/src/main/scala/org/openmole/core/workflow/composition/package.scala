@@ -284,7 +284,7 @@ package composition {
       import org.openmole.core.workflow.sampling.IsSampling
       implicit def taskToOrigin: ToOrigin[Task] = t ⇒ TaskOrigin(TaskNode(t))
       implicit def transitionDSLToOrigin: ToOrigin[DSL] = TransitionDSLOrigin(_)
-      implicit def toDSLContainerToOrigin[T](implicit tc: composition.DSLContainer.ToDSLContainer[T, _]): ToOrigin[T] = t ⇒ TransitionDSLOrigin(tc(t))
+      implicit def toDSLContainerToOrigin[T](implicit tc: composition.DSLContainer.ExplorationMethod[T, _]): ToOrigin[T] = t ⇒ TransitionDSLOrigin(tc(t))
       implicit def taskNodeToOrigin[T: ToNode]: ToOrigin[T] = t ⇒ TaskOrigin(implicitly[ToNode[T]].apply(t))
       implicit def samplingToOrigin[T: IsSampling](implicit scope: DefinitionScope): ToOrigin[T] = s ⇒ taskToOrigin(ExplorationTask(s))
     }
@@ -299,7 +299,7 @@ package composition {
       implicit def taskNodeToDestination[T: ToNode]: ToDestination[T] = t ⇒ TaskDestination(implicitly[ToNode[T]].apply(t))
       implicit def samplingToDestination[T: IsSampling](implicit scope: DefinitionScope): ToDestination[T] = s ⇒ taskToDestination(ExplorationTask(s))
       implicit def transitionDSLToDestination: ToDestination[DSL] = TransitionDSLDestination(_)
-      implicit def toDSLContainerToDestination[T](implicit tc: composition.DSLContainer.ToDSLContainer[T, _]): ToDestination[T] = t ⇒ TransitionDSLDestination(tc(t))
+      implicit def toDSLContainerToDestination[T](implicit tc: composition.DSLContainer.ExplorationMethod[T, _]): ToDestination[T] = t ⇒ TransitionDSLDestination(tc(t))
     }
 
     trait ToDestination[-T] {
@@ -320,7 +320,7 @@ package composition {
 
     object ToDSL {
       implicit def dslToDSL: ToDSL[DSL] = identity
-      implicit def toDSLContainerToDSL[T](implicit tc: composition.DSLContainer.ToDSLContainer[T, _]): ToDSL[T] = t ⇒ tc(t)
+      implicit def toDSLContainerToDSL[T](implicit tc: composition.DSLContainer.ExplorationMethod[T, _]): ToDSL[T] = t ⇒ tc(t)
       implicit def toNodeToDSL[T: ToNode]: ToDSL[T] = t ⇒ TaskNodeDSL(implicitly[ToNode[T]].apply(t))
       implicit def DSLSelectorToDSL[HL <: HList](implicit dslSelector: DSLSelector[HL]): ToDSL[HL] = t ⇒ dslSelector(t)
     }
@@ -524,18 +524,18 @@ package composition {
       delegate ++ output
     }
 
-    object ToDSLContainer {
-      implicit def id[T]: ToDSLContainer[DSLContainer[T], T] = t ⇒ t
-      implicit def byGrouping[T, C](implicit toDSLContainer: ToDSLContainer[T, C]): ToDSLContainer[By[T, Grouping], C] = t ⇒ toDSLContainer(t.value).copy(grouping = Some(t.by))
-      implicit def byInt[T, C](implicit toDSLContainer: ToDSLContainer[T, C]): ToDSLContainer[By[T, Int], C] = t ⇒ toDSLContainer(t.value).copy(grouping = Some(ByGrouping(t.by)))
-      implicit def on[T, C](implicit toDSLContainer: ToDSLContainer[T, C]): ToDSLContainer[On[T, EnvironmentProvider], C] = t ⇒ toDSLContainer(t.value).copy(environment = Some(t.on))
+    object ExplorationMethod {
+      implicit def id[T]: ExplorationMethod[DSLContainer[T], T] = t ⇒ t
+      implicit def byGrouping[T, C](implicit toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[By[T, Grouping], C] = t ⇒ toDSLContainer(t.value).copy(grouping = Some(t.by))
+      implicit def byInt[T, C](implicit toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[By[T, Int], C] = t ⇒ toDSLContainer(t.value).copy(grouping = Some(ByGrouping(t.by)))
+      implicit def on[T, C](implicit toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[On[T, EnvironmentProvider], C] = t ⇒ toDSLContainer(t.value).copy(environment = Some(t.on))
     }
 
-    trait ToDSLContainer[-T, C] {
-      def apply(t: T): DSLContainer[C]
+    trait ExplorationMethod[-T, D] {
+      def apply(t: T): DSLContainer[D]
     }
 
-    implicit def convert[T, C](t: T)(implicit toDSLContainer: ToDSLContainer[T, C]): DSLContainer[C] = toDSLContainer(t)
+    implicit def convert[T, C](t: T)(implicit toDSLContainer: ExplorationMethod[T, C]): DSLContainer[C] = toDSLContainer(t)
   }
 
   case class DSLContainer[+T](
@@ -564,48 +564,42 @@ package composition {
 
     implicit def hookDecorator[T](container: DSLContainer[T]) = new DSLContainerHook(container)
 
-    def DSLContainer(
-      transitionDSL: DSL,
-      output:        Option[Task]                = None,
-      delegate:      Vector[Task]                = Vector.empty,
-      environment:   Option[EnvironmentProvider] = None,
-      grouping:      Option[Grouping]            = None,
-      hooks:         Vector[Hook]                = Vector.empty,
-      validate:      Validate                    = Validate.success)(implicit definitionScope: DefinitionScope) =
-      composition.DSLContainer[Unit](
-        transitionDSL,
-        output,
-        delegate,
-        environment,
-        grouping,
-        hooks,
-        validate,
-        (),
-        definitionScope
-      )
-
-    def DSLContainerExtension[T](
-      dsl:         DSLContainer[_],
+    def DSLContainer[T](
+      dsl:         DSL,
       method:      T,
       output:      Option[Task]                = None,
       delegate:    Vector[Task]                = Vector.empty,
       environment: Option[EnvironmentProvider] = None,
       grouping:    Option[Grouping]            = None,
       hooks:       Vector[Hook]                = Vector.empty,
-      validate:    Validate                    = Validate.success)(implicit definitionScope: DefinitionScope) =
-      composition.DSLContainer[T](
-        dsl,
-        output orElse dsl.output,
-        delegate ++ dsl.delegate,
-        environment orElse dsl.environment,
-        grouping orElse dsl.grouping,
-        hooks ++ dsl.hooks,
-        validate,
-        method,
-        definitionScope)
+      validate:    Validate                    = Validate.success)(implicit definitionScope: DefinitionScope): DSLContainer[T] =
+      dsl match {
+        case dsl: DSLContainer[_] ⇒
+          composition.DSLContainer[T](
+            dsl,
+            output orElse dsl.output,
+            delegate ++ dsl.delegate,
+            environment orElse dsl.environment,
+            grouping orElse dsl.grouping,
+            hooks ++ dsl.hooks,
+            validate,
+            method,
+            definitionScope)
+        case dsl ⇒
+          composition.DSLContainer[T](
+            dsl,
+            output,
+            delegate,
+            environment,
+            grouping,
+            hooks,
+            validate,
+            method,
+            definitionScope)
+      }
 
     type DSLContainer[+T] = composition.DSLContainer[T]
-    type ExplorationMethod[-T, C] = composition.DSLContainer.ToDSLContainer[T, C]
+    type ExplorationMethod[-T, C] = composition.DSLContainer.ExplorationMethod[T, C]
 
     def Slot(dsl: DSL) = composition.Slot(dsl)
     def Capsule(node: DSL) = composition.Capsule(node)

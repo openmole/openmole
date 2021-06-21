@@ -115,7 +115,7 @@ package object directsampling {
         wrap = wrap
       )
 
-    DSLContainerExtension(
+    DSLContainer(
       s,
       method =
         ReplicationMethod(
@@ -153,7 +153,7 @@ package object directsampling {
         wrap = wrap
       )
 
-    DSLContainerExtension(
+    DSLContainer(
       s,
       method =
         DirectSamplingMethod(

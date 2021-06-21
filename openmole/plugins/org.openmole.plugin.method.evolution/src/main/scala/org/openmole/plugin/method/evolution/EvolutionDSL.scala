@@ -179,8 +179,8 @@ object EvolutionDSL {
       (Strain(firstTask) -- masterSlave) &
         (firstTask oo wrapped block (evolution.populationVal, evolution.stateVal))
 
-    DSLContainerExtension[EvolutionWorkflow](
-      DSLContainer(puzzle),
+    DSLContainer(
+      puzzle,
       output = Some(masterTask),
       delegate = wrapped.delegate,
       method = evolution,
@@ -257,8 +257,8 @@ object EvolutionDSL {
       (Strain(first) -- masterSlave) &
         (first oo Funnel(islandTask) block (t.populationVal, t.stateVal))
 
-    DSLContainerExtension[EvolutionWorkflow](
-      DSLContainer(puzzle),
+    DSLContainer(
+      puzzle,
       output = Some(masterTask),
       delegate = Vector(islandTask),
       method = t)
