@@ -129,7 +129,7 @@ trait RESTAPI extends ScalatraServlet
                     compilationContext = Some(compiled.compilationContext)
                   )
                 Try {
-                  dslToPuzzle(res).toExecution()(moleServices)
+                  DSL.toPuzzle(res).toExecution()(moleServices)
                 } match {
                   case Success(ex) ⇒ start(ex)
                   case Failure(e) ⇒

@@ -354,7 +354,7 @@ object Validation {
 
   def apply(dsl: org.openmole.core.workflow.composition.DSL)(implicit tmpDirectory: TmpDirectory, fileService: FileService): List[Problem] = {
     import org.openmole.core.workflow.dsl._
-    val puzzle = dslToPuzzle(dsl)
+    val puzzle = DSL.toPuzzle(dsl)
     apply(
       mole = puzzle.toMole,
       sources = puzzle.sources,

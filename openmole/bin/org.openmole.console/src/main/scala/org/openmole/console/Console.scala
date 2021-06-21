@@ -141,7 +141,7 @@ class Console(script: Option[String] = None) {
               case Success(res) ⇒
                 import runServices._
                 val moleServices = MoleServices.create(applicationExecutionDirectory = services.workspace.tmpDirectory, compilationContext = Some(compiled.compilationContext))
-                val ex = dslToPuzzle(res).toExecution()(moleServices)
+                val ex = DSL.toPuzzle(res).toExecution()(moleServices)
                 Try(ex.run) match {
                   case Failure(e) ⇒
                     println(e.stackString)

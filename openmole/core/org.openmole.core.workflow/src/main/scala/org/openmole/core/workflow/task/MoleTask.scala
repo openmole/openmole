@@ -46,7 +46,7 @@ object MoleTask {
    * @return
    */
   def apply(dsl: DSL)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): MoleTask = {
-    val puzzle = dslToPuzzle(dsl)
+    val puzzle = DSL.toPuzzle(dsl)
     apply(puzzle.toMole, puzzle.lasts.head)
   }
 

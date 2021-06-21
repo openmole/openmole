@@ -267,6 +267,206 @@ package composition {
         case c: DSLContainer[_] ⇒ c.delegate
         case t                  ⇒ tasks(t).map(_.task)
       }
+
+    object DSLSelector {
+      def apply[L <: HList](implicit selector: DSLSelector[L]): DSLSelector[L] = selector
+      implicit def select[T <: HList]: DSLSelector[DSL :: T] = (l: DSL :: T) ⇒ l.head
+      implicit def recurse[H, T <: HList](implicit st: DSLSelector[T]): DSLSelector[H :: T] = (l: H :: T) ⇒ st(l.tail)
+    }
+
+    trait DSLSelector[-L <: HList] {
+      def apply(l: L): DSL
+    }
+
+    /* ----------- implicit conversions ----------------- */
+
+    object ToOrigin {
+      import org.openmole.core.workflow.sampling.IsSampling
+      implicit def taskToOrigin: ToOrigin[Task] = t ⇒ TaskOrigin(TaskNode(t))
+      implicit def transitionDSLToOrigin: ToOrigin[DSL] = TransitionDSLOrigin(_)
+      implicit def toDSLContainerToOrigin[T](implicit tc: composition.DSLContainer.ToDSLContainer[T, _]): ToOrigin[T] = t ⇒ TransitionDSLOrigin(tc(t))
+      implicit def taskNodeToOrigin[T: ToNode]: ToOrigin[T] = t ⇒ TaskOrigin(implicitly[ToNode[T]].apply(t))
+      implicit def samplingToOrigin[T: IsSampling](implicit scope: DefinitionScope): ToOrigin[T] = s ⇒ taskToOrigin(ExplorationTask(s))
+    }
+
+    trait ToOrigin[-T] {
+      def apply(t: T): TransitionOrigin
+    }
+
+    object ToDestination {
+      import org.openmole.core.workflow.sampling.IsSampling
+      implicit def taskToDestination: ToDestination[Task] = t ⇒ TaskDestination(TaskNode(t))
+      implicit def taskNodeToDestination[T: ToNode]: ToDestination[T] = t ⇒ TaskDestination(implicitly[ToNode[T]].apply(t))
+      implicit def samplingToDestination[T: IsSampling](implicit scope: DefinitionScope): ToDestination[T] = s ⇒ taskToDestination(ExplorationTask(s))
+      implicit def transitionDSLToDestination: ToDestination[DSL] = TransitionDSLDestination(_)
+      implicit def toDSLContainerToDestination[T](implicit tc: composition.DSLContainer.ToDSLContainer[T, _]): ToDestination[T] = t ⇒ TransitionDSLDestination(tc(t))
+    }
+
+    trait ToDestination[-T] {
+      def apply(t: T): TransitionDestination
+    }
+
+    object ToNode {
+      implicit def taskToNode[T <: Task]: ToNode[T] = t ⇒ TaskNode(t)
+      implicit def nodeToNode: ToNode[TaskNode] = identity
+      implicit def byToNode[T: ToNode]: ToNode[By[T, Grouping]] = t ⇒ implicitly[ToNode[T]].apply(t.value).copy(grouping = Some(t.by))
+      implicit def byIntToNode[T: ToNode]: ToNode[By[T, Int]] = t ⇒ implicitly[ToNode[T]].apply(t.value).copy(grouping = Some(ByGrouping(t.by)))
+      implicit def onToNode[T: ToNode]: ToNode[On[T, EnvironmentProvider]] = t ⇒ implicitly[ToNode[T]].apply(t.value).copy(environment = Some(t.on))
+    }
+
+    trait ToNode[-T] {
+      def apply(t: T): TaskNode
+    }
+
+    object ToDSL {
+      implicit def dslToDSL: ToDSL[DSL] = identity
+      implicit def toDSLContainerToDSL[T](implicit tc: composition.DSLContainer.ToDSLContainer[T, _]): ToDSL[T] = t ⇒ tc(t)
+      implicit def toNodeToDSL[T: ToNode]: ToDSL[T] = t ⇒ TaskNodeDSL(implicitly[ToNode[T]].apply(t))
+      implicit def DSLSelectorToDSL[HL <: HList](implicit dslSelector: DSLSelector[HL]): ToDSL[HL] = t ⇒ dslSelector(t)
+    }
+
+    trait ToDSL[-T] {
+      def apply(t: T): DSL
+    }
+
+    object ToMole {
+      implicit def transitionDSLToMole: ToMole[DSL] = t ⇒ DSL.toPuzzle(t).toMole
+      implicit def toTransitionDSLToMoleExecution[T: ToDSL]: ToMole[T] = t ⇒ transitionDSLToMole.apply(implicitly[ToDSL[T]].apply(t))
+    }
+
+    trait ToMole[-T] {
+      def apply(t: T): Mole
+    }
+
+    object ToMoleExecution {
+      implicit def toDSLToMoleExecution[T: ToDSL](implicit moleServices: MoleServices): ToMoleExecution[T] = t ⇒ DSL.toPuzzle(implicitly[ToDSL[T]].apply(t)).toExecution
+    }
+
+    trait ToMoleExecution[-T] {
+      def apply(t: T): MoleExecution
+    }
+
+    def toPuzzle(t: DSL): Puzzle = {
+      val taskNodeList = DSL.tasks(t)
+      val taskEnvironment = taskNodeList.groupBy(n ⇒ n.task).mapValues(_.flatMap(_.environment).headOption)
+      val taskGrouping = taskNodeList.groupBy(n ⇒ n.task).mapValues(_.flatMap(_.grouping).headOption)
+
+      def taskToSlot(dsl: DSL) = {
+        def buildCapsule(task: Task, ns: Vector[TaskNode]) = {
+          val strain = ns.exists(_.strain)
+          val funnel = ns.exists(_.funnel)
+          val master = ns.exists(_.master)
+
+          if (!master) MoleCapsule(task, strain = strain, funnel = funnel)
+          else {
+            val persist = ns.find(_.master).get.persist
+            MasterCapsule(task, persist = persist, strain = strain)
+          }
+        }
+
+        DSL.tasks(dsl).groupBy(_.task).map { case (t, ns) ⇒ t -> TransitionSlot(buildCapsule(t, ns)) }
+      }
+
+      def taskNodeToPuzzle(n: TaskNode, slots: Map[Task, TransitionSlot]) = {
+        val task = n.task
+        val slot = slots(task)
+        val puzzle = Puzzle(slot)
+
+        Puzzle.add(
+          puzzle,
+          environments = taskEnvironment(n.task).map(slot.capsule -> _).toMap,
+          grouping = taskGrouping(n.task).map(slot.capsule -> _).toMap,
+          hooks = n.hooks.map(slot.capsule -> _),
+          sources = n.sources.map(slot.capsule -> _)
+        )
+      }
+
+      def transitionDSLToPuzzle0(t: DSL, slots: Map[Task, TransitionSlot], converted: collection.mutable.Map[DSL, Puzzle]): Puzzle = {
+        def transitionOriginToPuzzle(d: TransitionOrigin): Puzzle =
+          d match {
+            case TaskOrigin(n)          ⇒ taskNodeToPuzzle(n, slots)
+            case TransitionDSLOrigin(o) ⇒ transitionDSLToPuzzle0(o, slots, converted)
+          }
+
+        def transitionDestinationToPuzzle(d: TransitionDestination): (Puzzle, Boolean) =
+          d match {
+            case TaskDestination(n)                ⇒ taskNodeToPuzzle(n, slots) -> false
+            case TransitionDSLDestination(t: Slot) ⇒ transitionDSLToPuzzle0(t, slots, converted) -> true
+            case TransitionDSLDestination(t)       ⇒ transitionDSLToPuzzle0(t, slots, converted) -> false
+          }
+
+        def transitionsToPuzzle[T](o: TransitionOrigin, d: Vector[TransitionDestination], add: (Puzzle, Iterable[T]) ⇒ Puzzle)(transition: (MoleCapsule, TransitionSlot) ⇒ T) = {
+          val originPuzzle = transitionOriginToPuzzle(o)
+          val destinationPuzzle = d.map(transitionDestinationToPuzzle)
+
+          val transitions =
+            for {
+              l ← originPuzzle.lasts
+              (f, newSlot) ← destinationPuzzle
+            } yield transition(l, if (!newSlot) f.firstSlot else TransitionSlot(f.first))
+
+          val merged = destinationPuzzle.unzip._1.foldLeft(originPuzzle) {
+            case (a, b) ⇒ Puzzle.merge(a, b)
+          }
+
+          val plugged = Puzzle.copy(merged)(firstSlot = originPuzzle.firstSlot, lasts = destinationPuzzle.unzip._1.flatMap(_.lasts))
+          add(plugged, transitions)
+        }
+
+        def dslContainerToPuzzle(container: DSLContainer[_]) = {
+          val puzzle = transitionDSLToPuzzle0(container.dsl, slots, converted)
+
+          def outputs(dsl: DSL): Iterable[MoleCapsule] =
+            dsl match {
+              case c: DSLContainer[_] if c.output.isDefined ⇒ Vector(slots(c.output.get).capsule)
+              case c: DSLContainer[_]                       ⇒ outputs(c.dsl)
+              case dsl                                      ⇒ transitionDSLToPuzzle0(dsl, slots, converted).lasts
+            }
+
+          val hooks =
+            for {
+              o ← outputs(container)
+              h ← container.hooks
+            } yield o -> h
+
+          val environments =
+            for {
+              c ← container.delegate.map(d ⇒ slots(d).capsule)
+              e ← container.environment
+            } yield c -> e
+
+          Puzzle.add(
+            puzzle,
+            hooks = hooks,
+            environments = environments.toMap,
+            validate = container.validate
+          )
+        }
+
+        def addTransitions(p: Puzzle, transitions: Iterable[Transition]) = Puzzle.add(p, transitions = transitions)
+        def addDataChannel(p: Puzzle, channels: Iterable[DataChannel]) = Puzzle.add(p, dataChannels = channels)
+
+        def p =
+          t match {
+            case --(o, d, condition, filter)          ⇒ transitionsToPuzzle(o, d, addTransitions) { case (c, s) ⇒ new DirectTransition(c, s, condition, filter) }
+            case -<(o, d, condition, filter)          ⇒ transitionsToPuzzle(o, d, addTransitions) { case (c, s) ⇒ new ExplorationTransition(c, s, condition, filter) }
+            case >-(o, d, condition, filter)          ⇒ transitionsToPuzzle(o, d, addTransitions) { case (c, s) ⇒ new AggregationTransition(c, s, condition, filter) }
+            case >|(o, d, condition, filter)          ⇒ transitionsToPuzzle(o, d, addTransitions) { case (c, s) ⇒ new EndExplorationTransition(c, s, condition, filter) }
+            case -<-(o, d, condition, filter, slaves) ⇒ transitionsToPuzzle(o, d, addTransitions) { case (c, s) ⇒ new SlaveTransition(c, s, condition, filter, slaves = slaves) }
+            case oo(o, d, filter)                     ⇒ transitionsToPuzzle(o, d, addDataChannel) { case (c, s) ⇒ DataChannel(c, s, filter) }
+            case &(a, b)                              ⇒ Puzzle.merge(transitionDSLToPuzzle0(a, slots, converted), transitionDSLToPuzzle0(b, slots, converted))
+            case c: DSLContainer[_]                   ⇒ dslContainerToPuzzle(c)
+            case TaskNodeDSL(n)                       ⇒ taskNodeToPuzzle(n, slots)
+            case Capsule(d, _)                        ⇒ transitionDSLToPuzzle0(d, taskToSlot(d), collection.mutable.Map.empty) //taskNodeToPuzzle(n, taskToSlot(c))
+            case Slot(d)                              ⇒ transitionDSLToPuzzle0(d, slots, converted)
+          }
+
+        converted.getOrElseUpdate(t, p)
+
+      }
+
+      transitionDSLToPuzzle0(t, taskToSlot(t), collection.mutable.Map())
+    }
   }
 
   /* -------------------- Transition DSL ---------------------- */
@@ -410,217 +610,15 @@ package composition {
     def Slot(dsl: DSL) = composition.Slot(dsl)
     def Capsule(node: DSL) = composition.Capsule(node)
 
-    /* ---------- Transition DSL to Puzzle -----------------*/
+    implicit def toOrigin[T: DSL.ToOrigin](t: T) = implicitly[DSL.ToOrigin[T]].apply(t)
+    implicit def toDestination[T: DSL.ToDestination](t: T) = implicitly[DSL.ToDestination[T]].apply(t)
+    implicit def toDestinationSeq[T: DSL.ToDestination](s: Seq[T]) = s.map(t ⇒ implicitly[DSL.ToDestination[T]].apply(t))
 
-    def dslToPuzzle(t: DSL): Puzzle = {
-      val taskNodeList = DSL.tasks(t)
-      val taskEnvironment = taskNodeList.groupBy(n ⇒ n.task).mapValues(_.flatMap(_.environment).headOption)
-      val taskGrouping = taskNodeList.groupBy(n ⇒ n.task).mapValues(_.flatMap(_.grouping).headOption)
-
-      def taskToSlot(dsl: DSL) = {
-        def buildCapsule(task: Task, ns: Vector[TaskNode]) = {
-          val strain = ns.exists(_.strain)
-          val funnel = ns.exists(_.funnel)
-          val master = ns.exists(_.master)
-
-          if (!master) MoleCapsule(task, strain = strain, funnel = funnel)
-          else {
-            val persist = ns.find(_.master).get.persist
-            MasterCapsule(task, persist = persist, strain = strain)
-          }
-        }
-
-        DSL.tasks(dsl).groupBy(_.task).map { case (t, ns) ⇒ t -> TransitionSlot(buildCapsule(t, ns)) }
-      }
-
-      def taskNodeToPuzzle(n: TaskNode, slots: Map[Task, TransitionSlot]) = {
-        val task = n.task
-        val slot = slots(task)
-        val puzzle = Puzzle(slot)
-
-        Puzzle.add(
-          puzzle,
-          environments = taskEnvironment(n.task).map(slot.capsule -> _).toMap,
-          grouping = taskGrouping(n.task).map(slot.capsule -> _).toMap,
-          hooks = n.hooks.map(slot.capsule -> _),
-          sources = n.sources.map(slot.capsule -> _)
-        )
-      }
-
-      def transitionDSLToPuzzle0(t: DSL, slots: Map[Task, TransitionSlot], converted: collection.mutable.Map[DSL, Puzzle]): Puzzle = {
-        def transitionOriginToPuzzle(d: TransitionOrigin): Puzzle =
-          d match {
-            case TaskOrigin(n)          ⇒ taskNodeToPuzzle(n, slots)
-            case TransitionDSLOrigin(o) ⇒ transitionDSLToPuzzle0(o, slots, converted)
-          }
-
-        def transitionDestinationToPuzzle(d: TransitionDestination): (Puzzle, Boolean) =
-          d match {
-            case TaskDestination(n)                ⇒ taskNodeToPuzzle(n, slots) -> false
-            case TransitionDSLDestination(t: Slot) ⇒ transitionDSLToPuzzle0(t, slots, converted) -> true
-            case TransitionDSLDestination(t)       ⇒ transitionDSLToPuzzle0(t, slots, converted) -> false
-          }
-
-        def transitionsToPuzzle[T](o: TransitionOrigin, d: Vector[TransitionDestination], add: (Puzzle, Iterable[T]) ⇒ Puzzle)(transition: (MoleCapsule, TransitionSlot) ⇒ T) = {
-          val originPuzzle = transitionOriginToPuzzle(o)
-          val destinationPuzzle = d.map(transitionDestinationToPuzzle)
-
-          val transitions =
-            for {
-              l ← originPuzzle.lasts
-              (f, newSlot) ← destinationPuzzle
-            } yield transition(l, if (!newSlot) f.firstSlot else TransitionSlot(f.first))
-
-          val merged = destinationPuzzle.unzip._1.foldLeft(originPuzzle) {
-            case (a, b) ⇒ Puzzle.merge(a, b)
-          }
-
-          val plugged = Puzzle.copy(merged)(firstSlot = originPuzzle.firstSlot, lasts = destinationPuzzle.unzip._1.flatMap(_.lasts))
-          add(plugged, transitions)
-        }
-
-        def dslContainerToPuzzle(container: DSLContainer[_]) = {
-          val puzzle = transitionDSLToPuzzle0(container.dsl, slots, converted)
-
-          def outputs(dsl: DSL): Iterable[MoleCapsule] =
-            dsl match {
-              case c: DSLContainer[_] if c.output.isDefined ⇒ Vector(slots(c.output.get).capsule)
-              case c: DSLContainer[_]                       ⇒ outputs(c.dsl)
-              case dsl                                      ⇒ transitionDSLToPuzzle0(dsl, slots, converted).lasts
-            }
-
-          val hooks =
-            for {
-              o ← outputs(container)
-              h ← container.hooks
-            } yield o -> h
-
-          val environments =
-            for {
-              c ← container.delegate.map(d ⇒ slots(d).capsule)
-              e ← container.environment
-            } yield c -> e
-
-          Puzzle.add(
-            puzzle,
-            hooks = hooks,
-            environments = environments.toMap,
-            validate = container.validate
-          )
-        }
-
-        def addTransitions(p: Puzzle, transitions: Iterable[Transition]) = Puzzle.add(p, transitions = transitions)
-        def addDataChannel(p: Puzzle, channels: Iterable[DataChannel]) = Puzzle.add(p, dataChannels = channels)
-
-        def p =
-          t match {
-            case --(o, d, condition, filter)          ⇒ transitionsToPuzzle(o, d, addTransitions) { case (c, s) ⇒ new DirectTransition(c, s, condition, filter) }
-            case -<(o, d, condition, filter)          ⇒ transitionsToPuzzle(o, d, addTransitions) { case (c, s) ⇒ new ExplorationTransition(c, s, condition, filter) }
-            case >-(o, d, condition, filter)          ⇒ transitionsToPuzzle(o, d, addTransitions) { case (c, s) ⇒ new AggregationTransition(c, s, condition, filter) }
-            case >|(o, d, condition, filter)          ⇒ transitionsToPuzzle(o, d, addTransitions) { case (c, s) ⇒ new EndExplorationTransition(c, s, condition, filter) }
-            case -<-(o, d, condition, filter, slaves) ⇒ transitionsToPuzzle(o, d, addTransitions) { case (c, s) ⇒ new SlaveTransition(c, s, condition, filter, slaves = slaves) }
-            case oo(o, d, filter)                     ⇒ transitionsToPuzzle(o, d, addDataChannel) { case (c, s) ⇒ DataChannel(c, s, filter) }
-            case &(a, b)                              ⇒ Puzzle.merge(transitionDSLToPuzzle0(a, slots, converted), transitionDSLToPuzzle0(b, slots, converted))
-            case c: DSLContainer[_]                   ⇒ dslContainerToPuzzle(c)
-            case TaskNodeDSL(n)                       ⇒ taskNodeToPuzzle(n, slots)
-            case Capsule(d, _)                        ⇒ transitionDSLToPuzzle0(d, taskToSlot(d), collection.mutable.Map.empty) //taskNodeToPuzzle(n, taskToSlot(c))
-            case Slot(d)                              ⇒ transitionDSLToPuzzle0(d, slots, converted)
-          }
-
-        converted.getOrElseUpdate(t, p)
-
-      }
-
-      transitionDSLToPuzzle0(t, taskToSlot(t), collection.mutable.Map())
-    }
-
-    object DSLSelector {
-      def apply[L <: HList](implicit selector: DSLSelector[L]): DSLSelector[L] = selector
-      implicit def select[T <: HList]: DSLSelector[DSL :: T] = (l: DSL :: T) ⇒ l.head
-      implicit def recurse[H, T <: HList](implicit st: DSLSelector[T]): DSLSelector[H :: T] = (l: H :: T) ⇒ st(l.tail)
-    }
-
-    trait DSLSelector[-L <: HList] {
-      def apply(l: L): DSL
-    }
-
-    /* ----------- implicit conversions ----------------- */
-
-    object ToOrigin {
-      import org.openmole.core.workflow.sampling.IsSampling
-      implicit def taskToOrigin: ToOrigin[Task] = t ⇒ TaskOrigin(TaskNode(t))
-      implicit def transitionDSLToOrigin: ToOrigin[DSL] = TransitionDSLOrigin(_)
-      implicit def toDSLContainerToOrigin[T](implicit tc: composition.DSLContainer.ToDSLContainer[T, _]): ToOrigin[T] = t ⇒ TransitionDSLOrigin(tc(t))
-      implicit def taskNodeToOrigin[T: ToNode]: ToOrigin[T] = t ⇒ TaskOrigin(implicitly[ToNode[T]].apply(t))
-      implicit def samplingToOrigin[T: IsSampling](implicit scope: DefinitionScope): ToOrigin[T] = s ⇒ taskToOrigin(ExplorationTask(s))
-    }
-
-    trait ToOrigin[-T] {
-      def apply(t: T): TransitionOrigin
-    }
-
-    object ToDestination {
-      import org.openmole.core.workflow.sampling.IsSampling
-      implicit def taskToDestination: ToDestination[Task] = t ⇒ TaskDestination(TaskNode(t))
-      implicit def taskNodeToDestination[T: ToNode]: ToDestination[T] = t ⇒ TaskDestination(implicitly[ToNode[T]].apply(t))
-      implicit def samplingToDestination[T: IsSampling](implicit scope: DefinitionScope): ToDestination[T] = s ⇒ taskToDestination(ExplorationTask(s))
-      implicit def transitionDSLToDestination: ToDestination[DSL] = TransitionDSLDestination(_)
-      implicit def toDSLContainerToDestination[T](implicit tc: composition.DSLContainer.ToDSLContainer[T, _]): ToDestination[T] = t ⇒ TransitionDSLDestination(tc(t))
-    }
-
-    trait ToDestination[-T] {
-      def apply(t: T): TransitionDestination
-    }
-
-    object ToNode {
-      implicit def taskToNode[T <: Task]: ToNode[T] = t ⇒ TaskNode(t)
-      implicit def nodeToNode: ToNode[TaskNode] = identity
-      implicit def byToNode[T: ToNode]: ToNode[By[T, Grouping]] = t ⇒ implicitly[ToNode[T]].apply(t.value).copy(grouping = Some(t.by))
-      implicit def byIntToNode[T: ToNode]: ToNode[By[T, Int]] = t ⇒ implicitly[ToNode[T]].apply(t.value).copy(grouping = Some(ByGrouping(t.by)))
-      implicit def onToNode[T: ToNode]: ToNode[On[T, EnvironmentProvider]] = t ⇒ implicitly[ToNode[T]].apply(t.value).copy(environment = Some(t.on))
-    }
-
-    trait ToNode[-T] {
-      def apply(t: T): TaskNode
-    }
-
-    object ToDSL {
-      implicit def dslToDSL: ToDSL[DSL] = identity
-      implicit def toDSLContainerToDSL[T](implicit tc: composition.DSLContainer.ToDSLContainer[T, _]): ToDSL[T] = t ⇒ tc(t)
-      implicit def toNodeToDSL[T: ToNode]: ToDSL[T] = t ⇒ TaskNodeDSL(implicitly[ToNode[T]].apply(t))
-      implicit def DSLSelectorToDSL[HL <: HList](implicit dslSelector: DSLSelector[HL]): ToDSL[HL] = t ⇒ dslSelector(t)
-    }
-
-    trait ToDSL[-T] {
-      def apply(t: T): DSL
-    }
-
-    object ToMole {
-      implicit def transitionDSLToMole: ToMole[DSL] = t ⇒ dslToPuzzle(t).toMole
-      implicit def toTransitionDSLToMoleExecution[T: ToDSL]: ToMole[T] = t ⇒ transitionDSLToMole.apply(implicitly[ToDSL[T]].apply(t))
-    }
-
-    trait ToMole[-T] {
-      def apply(t: T): Mole
-    }
-
-    object ToMoleExecution {
-      implicit def toDSLToMoleExecution[T: ToDSL](implicit moleServices: MoleServices): ToMoleExecution[T] = t ⇒ dslToPuzzle(implicitly[ToDSL[T]].apply(t)).toExecution
-    }
-
-    trait ToMoleExecution[-T] {
-      def apply(t: T): MoleExecution
-    }
-
-    implicit def toOrigin[T: ToOrigin](t: T) = implicitly[ToOrigin[T]].apply(t)
-    implicit def toDestination[T: ToDestination](t: T) = implicitly[ToDestination[T]].apply(t)
-    implicit def toDestinationSeq[T: ToDestination](s: Seq[T]) = s.map(t ⇒ implicitly[ToDestination[T]].apply(t))
-
-    implicit def toNode[T](t: T)(implicit toNode: ToNode[T]) = toNode.apply(t)
-    implicit def toDSL[T: ToDSL](t: T) = implicitly[ToDSL[T]].apply(t)
-    implicit def toOptionalDSL[T: ToDSL](t: T) = OptionalArgument(Some(toDSL(t)))
-    implicit def toMole[T: ToMole](t: T) = implicitly[ToMole[T]].apply(t)
-    implicit def toMoleExecution[T: ToMoleExecution](t: T) = implicitly[ToMoleExecution[T]].apply(t)
+    implicit def toNode[T](t: T)(implicit toNode: DSL.ToNode[T]) = toNode.apply(t)
+    implicit def toDSL[T: DSL.ToDSL](t: T) = implicitly[DSL.ToDSL[T]].apply(t)
+    implicit def toOptionalDSL[T: DSL.ToDSL](t: T) = OptionalArgument(Some(toDSL(t)))
+    implicit def toMole[T: DSL.ToMole](t: T) = implicitly[DSL.ToMole[T]].apply(t)
+    implicit def toMoleExecution[T: DSL.ToMoleExecution](t: T) = implicitly[DSL.ToMoleExecution[T]].apply(t)
 
     implicit class DSLDecorator(t1: DSL) {
       def &(t2: DSL) = new &(t1, t2)
@@ -631,7 +629,7 @@ package composition {
       def outputs(explore: Boolean): Seq[Val[_]] = {
         implicit def scope = DefinitionScope.Internal("outputs")
         val last = EmptyTask()
-        val p: Puzzle = if (!explore) dslToPuzzle(t1 -- last) else dslToPuzzle(t1 -< last)
+        val p: Puzzle = if (!explore) DSL.toPuzzle(t1 -- last) else DSL.toPuzzle(t1 -< last)
         val mole = p.toMole
         val slot = p.slots.toSeq.find(_.capsule._task == last).head
         TypeUtil.receivedTypes(mole, p.sources, p.hooks)(slot) toSeq
@@ -656,7 +654,7 @@ package composition {
         val p = first -- dsl -- last
 
         val receivedFromDSL = {
-          val puzzle: Puzzle = dslToPuzzle(p)
+          val puzzle: Puzzle = DSL.toPuzzle(p)
           val mole = puzzle.toMole
           TypeUtil.receivedTypes(mole, puzzle.sources, puzzle.hooks)(mole.slots(puzzle.lasts.head).head)
         }

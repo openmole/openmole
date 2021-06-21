@@ -437,7 +437,7 @@ class ApiImpl(services: Services, applicationControl: ApplicationControl) extend
           catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
             case Failure(e) ⇒ Some(error(e))
             case Success(dsl) ⇒
-              Try(dslToPuzzle(dsl).toExecution()(executionServices)) match {
+              Try(DSL.toPuzzle(dsl).toExecution()(executionServices)) match {
                 case Success(ex) ⇒
                   onEvaluated.foreach {
                     _(ex, execId)
