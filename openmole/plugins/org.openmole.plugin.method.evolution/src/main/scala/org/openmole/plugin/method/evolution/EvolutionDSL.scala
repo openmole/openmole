@@ -1,7 +1,5 @@
-package org.openmole.plugin.method.evolution
-
 /*
- * Copyright (C) 2021 Romain Reuillon
+ * Copyright (C) 2014 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -11,21 +9,106 @@ package org.openmole.plugin.method.evolution
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+package org.openmole.plugin.method.evolution
+
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import squants.time._
+
+import scala.language.higherKinds
+import cats._
+import cats.implicits._
+import org.openmole.core.exception.UserBadDataError
+import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SaveOption }
+import org.openmole.plugin.task.tools.AssignTask
 import org.openmole.plugin.tool.pattern
 import org.openmole.plugin.tool.pattern._
-import org.openmole.plugin.method.evolution.data._
-import org.openmole.plugin.task.tools.AssignTask
 
-object EvolutionDSL {
+object EvolutionWorkflow {
+
+  val operatorExploration = 0.1
+  val parallelism = 100
+
+  def stochasticity(objectives: Objectives, stochastic: Option[Stochastic]) =
+    (Objectives.onlyExact(objectives), stochastic) match {
+      case (true, None)     ⇒ None
+      case (true, Some(s))  ⇒ Some(s)
+      case (false, Some(s)) ⇒ Some(s)
+      case (false, None)    ⇒ throw new UserBadDataError("Aggregation have been specified for some objective, but no stochastic parameter is provided.")
+    }
+
+  def deterministicGAIntegration[AG](
+    ag:               AG,
+    genome:           Genome,
+    phenotypeContent: PhenotypeContent,
+    validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype]): EvolutionWorkflow = {
+    val _validate = validate
+    new EvolutionWorkflow {
+      type MGOAG = AG
+
+      def mgoAG = ag
+
+      type V = (Vector[Double], Vector[Int])
+      type P = Phenotype
+
+      lazy val integration = algorithm
+
+      def validate = _validate
+
+      def buildIndividual(g: G, context: Context): I =
+        operations.buildIndividual(g, variablesToPhenotype(context), context)
+
+      def inputVals = Genome.toVals(genome)
+      def outputVals = PhenotypeContent.toVals(phenotypeContent)
+
+      def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+        val (cs, is) = operations.genomeValues(g)
+        Genome.toVariables(genome, cs, is, scale = true)
+      }
+
+      def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, phenotypeContent)
+    }
+  }
+
+  def stochasticGAIntegration[AG](
+    ag:               AG,
+    genome:           Genome,
+    phenotypeContent: PhenotypeContent,
+    replication:      Stochastic,
+    validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype]): EvolutionWorkflow = {
+    val _validate = validate
+    new EvolutionWorkflow {
+      type MGOAG = AG
+      def mgoAG = ag
+
+      type V = (Vector[Double], Vector[Int])
+      type P = Phenotype
+
+      lazy val integration = algorithm
+
+      def validate = _validate
+
+      def buildIndividual(genome: G, context: Context): I =
+        operations.buildIndividual(genome, variablesToPhenotype(context), context)
+
+      def inputVals = Genome.toVals(genome) ++ replication.seed.prototype
+      def outputVals = PhenotypeContent.toVals(phenotypeContent)
+
+      def genomeToVariables(g: G): FromContext[Seq[Variable[_]]] = FromContext { p ⇒
+        import p._
+        val (continuous, discrete) = operations.genomeValues(g)
+        val seeder = replication.seed
+        Genome.toVariables(genome, continuous, discrete, scale = true) ++ seeder(p.random())
+      }
+
+      def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, phenotypeContent)
+    }
+  }
 
   object EvolutionPatternContainer {
     implicit def by[T, B](implicit isContainer: EvolutionPatternContainer[T]): EvolutionPatternContainer[By[T, B]] = () ⇒ By.value[T, B] composeLens isContainer()
@@ -263,4 +346,179 @@ object EvolutionDSL {
       delegate = Vector(islandTask),
       method = t)
   }
+
 }
+
+trait EvolutionWorkflow {
+
+  type MGOAG
+  def mgoAG: MGOAG
+
+  val integration: MGOAPI.Integration[MGOAG, V, P]
+  import integration._
+
+  def operations = integration.operations(mgoAG)
+
+  type G = integration.G
+  type I = integration.I
+  type S = integration.S
+
+  type V
+  type P
+
+  type Pop = Array[I]
+
+  def validate: Validate
+
+  def genomeType = ValType[G]
+  def stateType = ValType[S]
+  def individualType = ValType[I]
+
+  def populationType: ValType[Pop] = ValType[Pop]
+
+  def buildIndividual(genome: G, context: Context): I
+
+  def inputVals: Seq[Val[_]]
+  def outputVals: Seq[Val[_]]
+
+  def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]]
+
+  // Variables
+  import GAIntegration.namespace
+
+  def genomeVal = Val[G]("genome", namespace)(genomeType)
+
+  def individualVal = Val[I]("individual", namespace)(individualType)
+  def populationVal = Val[Pop]("population", namespace)(populationType)
+  def offspringPopulationVal = Val[Pop]("offspring", namespace)(populationType)
+  def stateVal = Val[S]("state", namespace)(stateType)
+  def generationVal = GAIntegration.generationVal
+  def evaluatedVal = GAIntegration.evaluatedVal
+  def terminatedVal = Val[Boolean]("terminated", namespace)
+}
+
+case class Stochastic(
+  seed:       SeedVariable = SeedVariable.empty,
+  sample:     Int          = 100,
+  reevaluate: Double       = 0.2
+)
+
+object GAIntegration {
+
+  def namespace = Namespace("evolution")
+
+  def samplesVal = Val[Int]("samples", namespace)
+  def generationVal = Val[Long]("generation", namespace)
+  def evaluatedVal = Val[Long]("evaluated", namespace)
+
+  def genomeToVariable(
+    genome: Genome,
+    values: (Vector[Double], Vector[Int]),
+    scale:  Boolean) = {
+    val (continuous, discrete) = values
+    Genome.toVariables(genome, continuous, discrete, scale)
+  }
+
+  def genomesOfPopulationToVariables[I](
+    genome: Genome,
+    values: Vector[(Vector[Double], Vector[Int])],
+    scale:  Boolean): Vector[Variable[_]] = {
+
+    val variables = values.map { case (continuous, discrete) ⇒ Genome.toVariables(genome, continuous, discrete, scale) }
+    genome.zipWithIndex.map { case (g, i) ⇒ Genome.toArrayVariable(g, variables.map(_(i).value)) }.toVector
+  }
+
+  def objectivesOfPopulationToVariables[I](objectives: Seq[Objective], phenotypeValues: Vector[Vector[Double]]): Vector[Variable[_]] =
+    Objectives.resultPrototypes(objectives).toVector.zipWithIndex.map {
+      case (objective, i) ⇒
+        Variable(
+          objective.withType[Array[Double]],
+          phenotypeValues.map(_(i)).toArray
+        )
+    }
+
+  def rejectValue[G](reject: Condition, genome: Genome, continuous: G ⇒ Vector[Double], discrete: G ⇒ Vector[Int]) = FromContext { p ⇒
+    import p._
+    (g: G) ⇒ {
+      val genomeVariables = GAIntegration.genomeToVariable(genome, (continuous(g), discrete(g)), scale = true)
+      reject.from(genomeVariables)
+    }
+  }
+
+}
+
+object DeterministicGAIntegration {
+
+  def migrateToIsland[P](population: Vector[mgo.evolution.algorithm.CDGenome.DeterministicIndividual.Individual[P]]) = population
+  def migrateFromIsland[P](population: Vector[mgo.evolution.algorithm.CDGenome.DeterministicIndividual.Individual[P]]) = population
+
+  def outputValues(phenotypeContent: PhenotypeContent, phenotypes: Seq[Phenotype]) = {
+    val outputs = phenotypes.map { p ⇒ Phenotype.outputs(phenotypeContent, p) }
+    (phenotypeContent.outputs zip outputs.transpose).map { case (v, va) ⇒ Variable.unsecure(v.toArray, va) }
+  }
+
+}
+
+object StochasticGAIntegration {
+
+  def migrateToIsland[I](population: Vector[I], historyAge: monocle.Lens[I, Long]) = population.map(historyAge.set(0))
+  def migrateFromIsland[I, P](population: Vector[I], historyAge: monocle.Lens[I, Long], history: monocle.Lens[I, Array[P]]) = {
+    def keepIslandHistoryPart(i: I) = history.modify(h ⇒ h.takeRight(historyAge.get(i).toInt))(i)
+    population.filter(i ⇒ historyAge.get(i) > 0).map(keepIslandHistoryPart)
+  }
+
+  def outputValues(phenotypeContent: PhenotypeContent, phenotypeHistories: Seq[Array[Phenotype]]) = {
+    val outputs = phenotypeHistories.map { _.map { p ⇒ Phenotype.outputs(phenotypeContent, p) }.transpose }
+    (phenotypeContent.outputs zip outputs.transpose).map { case (v, va) ⇒ Variable.unsecure(v.toArray.toArray, va) }
+  }
+
+}
+
+object MGOAPI {
+
+  trait Integration[A, V, P] {
+    type I
+    type G
+    type S
+
+    implicit def iManifest: Manifest[I]
+    implicit def gManifest: Manifest[G]
+    implicit def sManifest: Manifest[S]
+
+    def operations(a: A): Ops
+
+    trait Ops {
+      def metadata(generation: Long, data: SaveOption): EvolutionMetadata = EvolutionMetadata.none
+
+      def genomeValues(genome: G): V
+      def buildGenome(values: V): G
+      def buildGenome(context: Vector[Variable[_]]): G
+      def buildIndividual(genome: G, phenotype: P, context: Context): I
+
+      def startTimeLens: monocle.Lens[S, Long]
+      def generationLens: monocle.Lens[S, Long]
+      def evaluatedLens: monocle.Lens[S, Long]
+
+      def initialState: S
+      def initialGenomes(n: Int, rng: scala.util.Random): FromContext[Vector[G]]
+      def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random): FromContext[Vector[G]]
+      def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random): FromContext[(S, Vector[I])]
+
+      def migrateToIsland(i: Vector[I]): Vector[I]
+      def migrateFromIsland(population: Vector[I], state: S): Vector[I]
+
+      def afterEvaluated(e: Long, s: S, population: Vector[I]): Boolean
+      def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean
+      def afterDuration(d: squants.Time, s: S, population: Vector[I]): Boolean
+
+      def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean): FromContext[Seq[Variable[_]]]
+    }
+
+  }
+
+  import mgo.evolution.algorithm._
+
+  def paired[G, C, D](continuous: G ⇒ C, discrete: G ⇒ D) = (g: G) ⇒ (continuous(g), discrete(g))
+
+}
+

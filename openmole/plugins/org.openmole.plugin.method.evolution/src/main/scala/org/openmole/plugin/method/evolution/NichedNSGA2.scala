@@ -492,43 +492,53 @@ object NichedNSGA2 {
 
 }
 
+import EvolutionWorkflow._
+import monocle.macros._
+
 object NichedNSGA2Evolution {
 
-  import EvolutionDSL._
+  implicit def method: ExplorationMethod[NichedNSGA2Evolution, EvolutionWorkflow] =
+    p ⇒ {
+      val container =
+        EvolutionPattern.build(
+          algorithm =
+            NichedNSGA2(
+              niche = p.niche,
+              genome = p.genome,
+              outputs = p.evaluation.outputs,
+              nicheSize = p.nicheSize,
+              objective = p.objective,
+              stochastic = p.stochastic,
+              reject = p.reject
+            ),
+          evaluation = p.evaluation,
+          termination = p.termination,
+          parallelism = p.parallelism,
+          distribution = p.distribution,
+          suggestion = p.suggestion(p.genome),
+          scope = p.scope
+        )
 
-  def apply(
-    evaluation:   DSL,
-    termination:  OMTermination,
-    niche:        Seq[NichedElement],
-    genome:       Genome,
-    objective:    Objectives,
-    nicheSize:    Int,
-    stochastic:   OptionalArgument[Stochastic] = None,
-    parallelism:  Int                          = EvolutionWorkflow.parallelism,
-    reject:       OptionalArgument[Condition]  = None,
-    distribution: EvolutionPattern             = SteadyState(),
-    suggestion:   Suggestion                   = Suggestion.empty,
-    scope:        DefinitionScope              = "niched nsga2") = {
+      container hook (p.hooks.map(_(container.method, p.scope)): _*)
+    }
 
-    EvolutionPattern.build(
-      algorithm =
-        NichedNSGA2(
-          niche = niche,
-          genome = genome,
-          outputs = evaluation.outputs,
-          nicheSize = nicheSize,
-          objective = objective,
-          stochastic = stochastic,
-          reject = reject
-        ),
-      evaluation = evaluation,
-      termination = termination,
-      parallelism = parallelism,
-      distribution = distribution,
-      suggestion = suggestion(genome),
-      scope = scope
-    )
-  }
+  implicit def evolutionPatternContainer: EvolutionWorkflow.EvolutionPatternContainer[NichedNSGA2Evolution] = () ⇒ NichedNSGA2Evolution.distribution
+  implicit def hookContainer: EvolutionWorkflow.HookContainer[NichedNSGA2Evolution] = () ⇒ NichedNSGA2Evolution.hooks
 
 }
+
+@Lenses case class NichedNSGA2Evolution(
+  evaluation:   DSL,
+  termination:  OMTermination,
+  niche:        Seq[NichedElement],
+  genome:       Genome,
+  objective:    Objectives,
+  nicheSize:    Int,
+  stochastic:   OptionalArgument[Stochastic]          = None,
+  parallelism:  Int                                   = EvolutionWorkflow.parallelism,
+  reject:       OptionalArgument[Condition]           = None,
+  distribution: EvolutionPattern                      = SteadyState(),
+  suggestion:   Suggestion                            = Suggestion.empty,
+  scope:        DefinitionScope                       = "niched nsga2",
+  hooks:        Seq[SavePopulationHook.Parameters[_]] = Seq())
 

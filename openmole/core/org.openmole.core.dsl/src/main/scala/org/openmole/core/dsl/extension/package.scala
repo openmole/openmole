@@ -106,5 +106,7 @@ package object extension {
   type ScriptSourceData = org.openmole.core.workflow.tools.ScriptSourceData
   val ScriptSourceData = org.openmole.core.workflow.tools.ScriptSourceData
 
+  type Time = squants.Time
+
   type JavaLogger = org.openmole.tool.logger.JavaLogger
 }

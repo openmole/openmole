@@ -31,7 +31,6 @@ class WorkflowSpec extends FlatSpec with Matchers {
   import org.openmole.core.workflow.test.Stubs._
 
   def nsga2(wrap: Boolean = true) = {
-    import EvolutionDSL._
 
     val x = Val[Double]
     val y = Val[Double]
@@ -60,7 +59,6 @@ class WorkflowSpec extends FlatSpec with Matchers {
   }
 
   def conflict = {
-    import EvolutionDSL._
 
     val population = Val[Double]
     val state = Val[Double]
@@ -196,7 +194,6 @@ class WorkflowSpec extends FlatSpec with Matchers {
   }
 
   "Island workflow" should "have no validation error" in {
-    import EvolutionDSL._
     val islandEvolutionNSGA2 = IslandEvolution(nsga2(), 10, 50, 100)
 
     Validation(islandEvolutionNSGA2).toList match {

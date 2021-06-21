@@ -245,8 +245,7 @@ object NSGA2 {
     }
 
 }
-
-import EvolutionDSL._
+import EvolutionWorkflow._
 
 object NSGA2Evolution {
 
@@ -276,8 +275,8 @@ object NSGA2Evolution {
       container hook (p.hooks.map(_(container.method, p.scope)): _*)
     }
 
-  implicit def evolutionPatternContainer: EvolutionDSL.EvolutionPatternContainer[NSGA2Evolution] = () ⇒ NSGA2Evolution.distribution
-  implicit def hookContainer: EvolutionDSL.HookContainer[NSGA2Evolution] = () ⇒ NSGA2Evolution.hooks
+  implicit def evolutionPatternContainer: EvolutionWorkflow.EvolutionPatternContainer[NSGA2Evolution] = () ⇒ NSGA2Evolution.distribution
+  implicit def hookContainer: EvolutionWorkflow.HookContainer[NSGA2Evolution] = () ⇒ NSGA2Evolution.hooks
 
 }
 

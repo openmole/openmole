@@ -232,8 +232,8 @@ object NSGA3 {
 
 }
 
-import EvolutionDSL._
 import monocle.macros._
+import EvolutionWorkflow._
 
 object NSGA3Evolution {
 
@@ -271,8 +271,8 @@ object NSGA3Evolution {
       container hook (p.hooks.map(_(container.method, p.scope)): _*)
     }
 
-  implicit def evolutionPatternContainer: EvolutionDSL.EvolutionPatternContainer[NSGA3Evolution] = () ⇒ NSGA3Evolution.distribution
-  implicit def hookContainer: EvolutionDSL.HookContainer[NSGA3Evolution] = () ⇒ NSGA3Evolution.hooks
+  implicit def evolutionPatternContainer: EvolutionWorkflow.EvolutionPatternContainer[NSGA3Evolution] = () ⇒ NSGA3Evolution.distribution
+  implicit def hookContainer: EvolutionWorkflow.HookContainer[NSGA3Evolution] = () ⇒ NSGA3Evolution.hooks
 
 }
 

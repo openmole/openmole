@@ -369,7 +369,7 @@ object Profile {
 
 }
 
-import EvolutionDSL._
+import EvolutionWorkflow._
 
 object ProfileEvolution {
 
@@ -397,8 +397,8 @@ object ProfileEvolution {
       container hook (p.hooks.map(_(container.method, p.scope)): _*)
     }
 
-  implicit def evolutionPatternContainer: EvolutionDSL.EvolutionPatternContainer[ProfileEvolution] = () ⇒ ProfileEvolution.distribution
-  implicit def hookContainer: EvolutionDSL.HookContainer[ProfileEvolution] = () ⇒ ProfileEvolution.hooks
+  implicit def evolutionPatternContainer: EvolutionWorkflow.EvolutionPatternContainer[ProfileEvolution] = () ⇒ ProfileEvolution.distribution
+  implicit def hookContainer: EvolutionWorkflow.HookContainer[ProfileEvolution] = () ⇒ ProfileEvolution.hooks
 }
 
 import monocle.macros._

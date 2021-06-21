@@ -31,23 +31,16 @@ import squants.time.Time
 
 package object evolution {
 
-  import io.circe._
-  import io.circe.generic.extras.auto._
-  import io.circe.parser._
-  import io.circe.generic.extras.semiauto._
-  import io.circe.generic.extras.Configuration
-  import EvolutionDSL._
-
   type Objectives = Seq[Objective]
   type Genome = Seq[Genome.GenomeBound]
 
-  implicit def intToCounterTerminationConverter(n: Long) = AfterEvaluated(n)
-  implicit def durationToDurationTerminationConverter(d: Time) = AfterDuration(d)
+  implicit def intToCounterTerminationConverter(n: Long) = EvolutionWorkflow.AfterEvaluated(n)
+  implicit def durationToDurationTerminationConverter(d: Time) = EvolutionWorkflow.AfterDuration(d)
 
-  implicit def byEvolutionPattern[T](implicit patternContainer: EvolutionDSL.EvolutionPatternContainer[T], method: ExplorationMethod[T, EvolutionWorkflow]): ExplorationMethod[By[T, EvolutionPattern], EvolutionWorkflow] = p ⇒ method(patternContainer().set(p.by)(p.value))
-  implicit def isEvolutionHookable[T](implicit hookContainer: EvolutionDSL.HookContainer[T]): SavePopulationHook.Hookable[T] = (t, h) ⇒ hookContainer().modify(_ ++ Seq(h))(t)
+  implicit def byEvolutionPattern[T](implicit patternContainer: EvolutionWorkflow.EvolutionPatternContainer[T], method: ExplorationMethod[T, EvolutionWorkflow]): ExplorationMethod[By[T, EvolutionWorkflow.EvolutionPattern], EvolutionWorkflow] = p ⇒ method(patternContainer().set(p.by)(p.value))
+  implicit def isEvolutionHookable[T](implicit hookContainer: EvolutionWorkflow.HookContainer[T]): SavePopulationHook.Hookable[T] = (t, h) ⇒ hookContainer().modify(_ ++ Seq(h))(t)
   implicit class SavePopulationHookDecorator[T](p: T)(implicit hookable: SavePopulationHook.Hookable[T]) extends SavePopulationHook.HookFunction[T](p)
 
-  def Island = EvolutionDSL.Island
+  def Island = EvolutionWorkflow.Island
 
 }

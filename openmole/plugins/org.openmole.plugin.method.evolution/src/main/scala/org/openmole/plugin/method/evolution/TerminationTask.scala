@@ -21,8 +21,7 @@ import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
 object TerminationTask {
-
-  import EvolutionDSL._
+  import EvolutionWorkflow._
 
   def apply[T](evolution: EvolutionWorkflow, termination: OMTermination)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     Task("TerminationTask") { p ⇒

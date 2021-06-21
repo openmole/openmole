@@ -489,7 +489,8 @@ object PSE {
 
 }
 
-import EvolutionDSL._
+import monocle.macros._
+import EvolutionWorkflow._
 
 object PSEEvolution {
 
@@ -518,11 +519,9 @@ object PSEEvolution {
       container hook (p.hooks.map(_(container.method, p.scope)): _*)
     }
 
-  implicit def evolutionPatternContainer: EvolutionDSL.EvolutionPatternContainer[PSEEvolution] = () ⇒ PSEEvolution.distribution
-  implicit def hookContainer: EvolutionDSL.HookContainer[PSEEvolution] = () ⇒ PSEEvolution.hooks
+  implicit def evolutionPatternContainer: EvolutionWorkflow.EvolutionPatternContainer[PSEEvolution] = () ⇒ PSEEvolution.distribution
+  implicit def hookContainer: EvolutionWorkflow.HookContainer[PSEEvolution] = () ⇒ PSEEvolution.hooks
 }
-
-import monocle.macros._
 
 @Lenses case class PSEEvolution(
   genome:       Genome,

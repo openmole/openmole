@@ -341,7 +341,7 @@ object OSE {
 
 }
 
-import EvolutionDSL._
+import EvolutionWorkflow._
 
 object OSEEvolution {
 
@@ -372,8 +372,8 @@ object OSEEvolution {
       container hook (p.hooks.map(_(container.method, p.scope)): _*)
     }
 
-  implicit def evolutionPatternContainer: EvolutionDSL.EvolutionPatternContainer[OSEEvolution] = () ⇒ OSEEvolution.distribution
-  implicit def hookContainer: EvolutionDSL.HookContainer[OSEEvolution] = () ⇒ OSEEvolution.hooks
+  implicit def evolutionPatternContainer: EvolutionWorkflow.EvolutionPatternContainer[OSEEvolution] = () ⇒ OSEEvolution.distribution
+  implicit def hookContainer: EvolutionWorkflow.HookContainer[OSEEvolution] = () ⇒ OSEEvolution.hooks
 }
 
 import monocle.macros._
