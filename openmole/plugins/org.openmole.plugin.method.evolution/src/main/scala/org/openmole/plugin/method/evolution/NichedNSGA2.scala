@@ -522,8 +522,8 @@ object NichedNSGA2Evolution {
       container hook (p.hooks.map(_(container.method, p.scope)): _*)
     }
 
-  implicit def evolutionPatternContainer: EvolutionWorkflow.EvolutionPatternContainer[NichedNSGA2Evolution] = () ⇒ NichedNSGA2Evolution.distribution
-  implicit def hookContainer: ExplorationMethodHook[NichedNSGA2Evolution, SavePopulationHook.Parameter[_]] = (e, p) ⇒ e.copy(hooks = e.hooks ++ Seq(p))
+  implicit def patternContainer: ExplorationMethodSetter[NichedNSGA2Evolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
+  implicit def hookContainer: ExplorationMethodSetter[NichedNSGA2Evolution, SavePopulationHook.Parameter[_]] = (e, p) ⇒ e.copy(hooks = e.hooks ++ Seq(p))
 
 }
 

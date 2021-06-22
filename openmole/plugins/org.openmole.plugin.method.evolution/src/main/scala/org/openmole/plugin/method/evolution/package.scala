@@ -37,8 +37,8 @@ package object evolution {
   implicit def intToCounterTerminationConverter(n: Long) = EvolutionWorkflow.AfterEvaluated(n)
   implicit def durationToDurationTerminationConverter(d: Time) = EvolutionWorkflow.AfterDuration(d)
 
-  implicit def byEvolutionPattern[T](implicit patternContainer: EvolutionWorkflow.EvolutionPatternContainer[T], method: ExplorationMethod[T, EvolutionWorkflow]): ExplorationMethod[By[T, EvolutionWorkflow.EvolutionPattern], EvolutionWorkflow] = p ⇒ method(patternContainer().set(p.by)(p.value))
-  implicit class EvolutionHookDecorator[T](p: T)(implicit h: ExplorationMethodHook[T, SavePopulationHook.Parameter[_]]) extends SavePopulationHook.HookFunction[T](p)
+  implicit def byEvolutionPattern[T](implicit patternContainer: ExplorationMethodSetter[T, EvolutionWorkflow.EvolutionPattern], method: ExplorationMethod[T, EvolutionWorkflow]): ExplorationMethod[By[T, EvolutionWorkflow.EvolutionPattern], EvolutionWorkflow] = v ⇒ method(patternContainer(v.value, v.by))
+  implicit class EvolutionHookDecorator[T](p: T)(implicit h: ExplorationMethodSetter[T, SavePopulationHook.Parameter[_]]) extends SavePopulationHook.HookFunction[T](p)
 
   def Island = EvolutionWorkflow.Island
 

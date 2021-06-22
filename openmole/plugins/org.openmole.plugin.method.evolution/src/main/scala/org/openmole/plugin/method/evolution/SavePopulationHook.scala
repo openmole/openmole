@@ -40,7 +40,7 @@ object SavePopulationHook {
     }
   }
 
-  class HookFunction[H](h: H)(implicit container: ExplorationMethodHook[H, SavePopulationHook.Parameter[_]]) {
+  class HookFunction[H](h: H)(implicit container: ExplorationMethodSetter[H, SavePopulationHook.Parameter[_]]) {
     def hook[F](
       output:         WritableOutput,
       frequency:      OptionalArgument[Long] = None,

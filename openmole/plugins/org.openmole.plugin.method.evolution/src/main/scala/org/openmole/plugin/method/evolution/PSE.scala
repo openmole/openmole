@@ -519,8 +519,8 @@ object PSEEvolution {
       container hook (p.hooks.map(_(container.method, p.scope)): _*)
     }
 
-  implicit def evolutionPatternContainer: EvolutionWorkflow.EvolutionPatternContainer[PSEEvolution] = () ⇒ PSEEvolution.distribution
-  implicit def hookContainer: ExplorationMethodHook[PSEEvolution, SavePopulationHook.Parameter[_]] = (e, p) ⇒ e.copy(hooks = e.hooks ++ Seq(p))
+  implicit def patternContainer: ExplorationMethodSetter[PSEEvolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
+  implicit def hookContainer: ExplorationMethodSetter[PSEEvolution, SavePopulationHook.Parameter[_]] = (e, p) ⇒ e.copy(hooks = e.hooks ++ Seq(p))
 
 }
 

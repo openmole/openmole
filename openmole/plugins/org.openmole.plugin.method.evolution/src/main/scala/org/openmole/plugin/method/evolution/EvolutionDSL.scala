@@ -110,15 +110,6 @@ object EvolutionWorkflow {
     }
   }
 
-  object EvolutionPatternContainer {
-    implicit def by[T, B](implicit isContainer: EvolutionPatternContainer[T]): EvolutionPatternContainer[By[T, B]] = () ⇒ By.value[T, B] composeLens isContainer()
-    implicit def on[T, B](implicit isContainer: EvolutionPatternContainer[T]): EvolutionPatternContainer[On[T, B]] = () ⇒ On.value[T, B] composeLens isContainer()
-  }
-
-  trait EvolutionPatternContainer[T] {
-    def apply(): monocle.Lens[T, EvolutionPattern]
-  }
-
   object OMTermination {
     def toTermination(oMTermination: OMTermination, integration: EvolutionWorkflow) =
       oMTermination match {

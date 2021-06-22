@@ -275,8 +275,8 @@ object NSGA2Evolution {
       container hook (p.hooks.map(_(container.method, p.scope)): _*)
     }
 
-  implicit def evolutionPatternContainer: EvolutionWorkflow.EvolutionPatternContainer[NSGA2Evolution] = () ⇒ NSGA2Evolution.distribution
-  implicit def hookContainer: ExplorationMethodHook[NSGA2Evolution, SavePopulationHook.Parameter[_]] = (e, p) ⇒ e.copy(hooks = e.hooks ++ Seq(p))
+  implicit def patternContainer: ExplorationMethodSetter[NSGA2Evolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
+  implicit def hookContainer: ExplorationMethodSetter[NSGA2Evolution, SavePopulationHook.Parameter[_]] = (e, p) ⇒ e.copy(hooks = e.hooks ++ Seq(p))
 
 }
 
