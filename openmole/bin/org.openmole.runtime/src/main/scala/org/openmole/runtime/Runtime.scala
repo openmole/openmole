@@ -46,6 +46,7 @@ import org.openmole.core.workflow.job.Job
 import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.lock._
 import org.openmole.tool.outputredirection.OutputRedirection
+import org.openmole.tool.stream.MultiplexedOutputStream
 import squants._
 
 object Runtime extends JavaLogger {
@@ -77,16 +78,17 @@ class Runtime {
         serializerService.deserializeAndExtractFiles[ExecutionMessage](executionMessageFileCache, deleteFilesOnGC = true)
       }
 
-    val oldOut = System.out
-    val oldErr = System.err
+    val systemOut = System.out
+    val systemErr = System.err
 
     val out = newFile.newFile("openmole", ".out")
     val outSt = new PrintStream(out)
 
-    if (!debug) {
-      OutputManager.redirectSystemOutput(outSt)
-      OutputManager.redirectSystemError(outSt)
-    }
+    val multiplexedOut = new PrintStream(MultiplexedOutputStream(outSt, systemOut), true)
+    val multiplexedErr = new PrintStream(MultiplexedOutputStream(outSt, systemErr), true)
+
+    OutputManager.redirectSystemOutput(multiplexedOut)
+    OutputManager.redirectSystemError(multiplexedErr)
 
     val outputRedirection = if (!debug) OutputRedirection(outSt) else OutputRedirection(System.out, System.err)
 
@@ -212,9 +214,11 @@ class Runtime {
         Failure(t)
     }
     finally {
-      outSt.close
-      System.setOut(oldOut)
-      System.setErr(oldErr)
+      multiplexedOut.close()
+      multiplexedErr.close()
+      outSt.close()
+      System.setOut(systemOut)
+      System.setErr(systemErr)
     }
 
     val outputMessage = if (out.length != 0) Some(out) else None
