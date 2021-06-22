@@ -119,7 +119,7 @@ object JobScript {
 
       script += "export PATH=$PWD/jre/bin:$PATH"
       script += "export HOME=$PWD"
-      script += "/bin/sh run.sh " + memory + "m " + UUID.randomUUID + " -s $CUR/storage.bin -p $CUR/envplugins/ -i " + inputPath + " -o " + resultPath + " -t " + threads + (if (debug) " -d 2>&1" else "")
+      script += s"""/bin/sh run.sh ${memory}m ${UUID.randomUUID} -s $$CUR/storage.bin -p $$CUR/envplugins/ -i $inputPath -o $resultPath -t $threads --transfer-retry $retry""" + (if (debug) " -d 2>&1" else "")
       script.mkString(" && ")
     }
 

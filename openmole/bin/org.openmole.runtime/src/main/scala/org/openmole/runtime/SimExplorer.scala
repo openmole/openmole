@@ -49,6 +49,7 @@ object SimExplorer extends JavaLogger {
         pluginPath:    Option[String] = None,
         thread:        Option[Int]    = None,
         workspace:     Option[String] = None,
+        transferRetry: Option[Int]    = None,
         test:          Boolean        = false,
         debug:         Boolean        = false
       )
@@ -72,6 +73,9 @@ object SimExplorer extends JavaLogger {
         }
         opt[String]('w', "workspace") text ("Workspace location") action {
           (v, c) ⇒ c.copy(workspace = Some(v))
+        }
+        opt[Int]("transfer-retry") text ("Retry fail transfer on failure") action {
+          (v, c) ⇒ c.copy(transferRetry = Some(v))
         }
         opt[Unit]('d', "debug") text ("Switch on the debug mode") action {
           (_, c) ⇒ c.copy(debug = true)
@@ -114,7 +118,8 @@ object SimExplorer extends JavaLogger {
                 config.inputMessage.get,
                 config.outputMessage.get,
                 threads,
-                config.debug
+                config.debug,
+                config.transferRetry
               )
             }
             finally {

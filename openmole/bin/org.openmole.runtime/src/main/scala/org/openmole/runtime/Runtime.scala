@@ -50,8 +50,16 @@ import org.openmole.tool.stream.MultiplexedOutputStream
 import squants._
 
 object Runtime extends JavaLogger {
-  val NbRetry = 3
-  def retry[T](f: ⇒ T, coolDown: Option[Time] = None) = Retry.retry(f, NbRetry, coolDown)
+
+  import squants.time.TimeConversions._
+
+  def retry[T](f: ⇒ T, retry: Option[Int]) = {
+    retry match {
+      case None    ⇒ f
+      case Some(r) ⇒ Retry.retry(f, r, Some(1 seconds))
+    }
+
+  }
 }
 
 class Runtime {
@@ -64,7 +72,8 @@ class Runtime {
     inputMessagePath:  String,
     outputMessagePath: String,
     threads:           Int,
-    debug:             Boolean
+    debug:             Boolean,
+    transferRetry:     Option[Int]
   )(implicit serializerService: SerializerService, newFile: TmpDirectory, fileService: FileService, fileServiceCache: FileServiceCache, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace, loggerService: LoggerService, networkService: NetworkService) = {
 
     /*--- get execution message and job for runtime---*/
@@ -74,7 +83,7 @@ class Runtime {
 
     val executionMessage =
       newFile.withTmpFile { executionMessageFileCache ⇒
-        retry(storage.download(inputMessagePath, executionMessageFileCache))
+        retry(storage.download(inputMessagePath, executionMessageFileCache), transferRetry)
         serializerService.deserializeAndExtractFiles[ExecutionMessage](executionMessageFileCache, deleteFilesOnGC = true)
       }
 
@@ -95,7 +104,7 @@ class Runtime {
     def getReplicatedFile(replicatedFile: ReplicatedFile, transferOptions: TransferOptions) =
       ReplicatedFile.download(replicatedFile) {
         (path, file) ⇒
-          try retry(storage.download(path, file, transferOptions))
+          try retry(storage.download(path, file, transferOptions), transferRetry)
           catch {
             case e: Exception ⇒ throw new InternalProcessingError(s"Error downloading $replicatedFile", e)
           }
@@ -194,7 +203,7 @@ class Runtime {
 
         val replicated =
           pac.files.map { file ⇒
-            def uploadOnStorage(f: File) = retry(storage.upload(f, None, TransferOptions(noLink = true, canMove = true)))
+            def uploadOnStorage(f: File) = retry(storage.upload(f, None, TransferOptions(noLink = true, canMove = true)), transferRetry)
             ReplicatedFile.upload(file, uploadOnStorage)
           }
 
@@ -228,7 +237,7 @@ class Runtime {
       logger.fine(s"Serializing result to $outputLocal")
       serializerService.serializeAndArchiveFiles(runtimeResult, outputLocal)
       logger.fine(s"Upload the serialized result to $outputMessagePath on $storage")
-      retry(storage.upload(outputLocal, Some(outputMessagePath), TransferOptions(noLink = true, canMove = true)))
+      retry(storage.upload(outputLocal, Some(outputMessagePath), TransferOptions(noLink = true, canMove = true)), transferRetry)
     }
 
     result
