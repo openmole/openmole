@@ -90,8 +90,8 @@ class Runtime {
     OutputManager.redirectSystemOutput(multiplexedOut)
     OutputManager.redirectSystemError(multiplexedErr)
 
-    val outputRedirection = if (!debug) OutputRedirection(outSt) else OutputRedirection(System.out, System.err)
-
+    val outputRedirection = OutputRedirection(multiplexedOut)
+    
     def getReplicatedFile(replicatedFile: ReplicatedFile, transferOptions: TransferOptions) =
       ReplicatedFile.download(replicatedFile) {
         (path, file) ⇒
