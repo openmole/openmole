@@ -520,7 +520,8 @@ object PSEEvolution {
     }
 
   implicit def evolutionPatternContainer: EvolutionWorkflow.EvolutionPatternContainer[PSEEvolution] = () ⇒ PSEEvolution.distribution
-  implicit def hookContainer: EvolutionWorkflow.HookContainer[PSEEvolution] = () ⇒ PSEEvolution.hooks
+  implicit def hookContainer: ExplorationMethodHook[PSEEvolution, SavePopulationHook.Parameter[_]] = (e, p) ⇒ e.copy(hooks = e.hooks ++ Seq(p))
+
 }
 
 @Lenses case class PSEEvolution(
@@ -528,10 +529,10 @@ object PSEEvolution {
   objective:    Seq[PSE.PatternAxe],
   evaluation:   DSL,
   termination:  OMTermination,
-  stochastic:   OptionalArgument[Stochastic]          = None,
-  reject:       OptionalArgument[Condition]           = None,
-  parallelism:  Int                                   = EvolutionWorkflow.parallelism,
-  distribution: EvolutionPattern                      = SteadyState(),
-  suggestion:   Suggestion                            = Suggestion.empty,
-  scope:        DefinitionScope                       = "pse",
-  hooks:        Seq[SavePopulationHook.Parameters[_]] = Seq())
+  stochastic:   OptionalArgument[Stochastic]         = None,
+  reject:       OptionalArgument[Condition]          = None,
+  parallelism:  Int                                  = EvolutionWorkflow.parallelism,
+  distribution: EvolutionPattern                     = SteadyState(),
+  suggestion:   Suggestion                           = Suggestion.empty,
+  scope:        DefinitionScope                      = "pse",
+  hooks:        Seq[SavePopulationHook.Parameter[_]] = Seq())

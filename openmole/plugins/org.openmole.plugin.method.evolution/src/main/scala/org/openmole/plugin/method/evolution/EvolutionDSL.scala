@@ -119,15 +119,6 @@ object EvolutionWorkflow {
     def apply(): monocle.Lens[T, EvolutionPattern]
   }
 
-  object HookContainer {
-    implicit def by[T, B](implicit isContainer: HookContainer[T]): HookContainer[By[T, B]] = () ⇒ By.value[T, B] composeLens isContainer()
-    implicit def on[T, B](implicit isContainer: HookContainer[T]): HookContainer[On[T, B]] = () ⇒ On.value[T, B] composeLens isContainer()
-  }
-
-  trait HookContainer[T] {
-    def apply(): monocle.Lens[T, Seq[SavePopulationHook.Parameters[_]]]
-  }
-
   object OMTermination {
     def toTermination(oMTermination: OMTermination, integration: EvolutionWorkflow) =
       oMTermination match {

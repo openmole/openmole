@@ -373,7 +373,8 @@ object OSEEvolution {
     }
 
   implicit def evolutionPatternContainer: EvolutionWorkflow.EvolutionPatternContainer[OSEEvolution] = () ⇒ OSEEvolution.distribution
-  implicit def hookContainer: EvolutionWorkflow.HookContainer[OSEEvolution] = () ⇒ OSEEvolution.hooks
+  implicit def hookContainer: ExplorationMethodHook[OSEEvolution, SavePopulationHook.Parameter[_]] = (e, p) ⇒ e.copy(hooks = e.hooks ++ Seq(p))
+
 }
 
 import monocle.macros._
@@ -383,12 +384,12 @@ import monocle.macros._
   objective:      Seq[OSE.FitnessPattern],
   evaluation:     DSL,
   termination:    OMTermination,
-  populationSize: Int                                   = 200,
-  genome:         Genome                                = Seq(),
-  stochastic:     OptionalArgument[Stochastic]          = None,
-  reject:         OptionalArgument[Condition]           = None,
-  parallelism:    Int                                   = EvolutionWorkflow.parallelism,
-  distribution:   EvolutionPattern                      = SteadyState(),
-  suggestion:     Suggestion                            = Suggestion.empty,
-  scope:          DefinitionScope                       = "ose",
-  hooks:          Seq[SavePopulationHook.Parameters[_]] = Seq())
+  populationSize: Int                                  = 200,
+  genome:         Genome                               = Seq(),
+  stochastic:     OptionalArgument[Stochastic]         = None,
+  reject:         OptionalArgument[Condition]          = None,
+  parallelism:    Int                                  = EvolutionWorkflow.parallelism,
+  distribution:   EvolutionPattern                     = SteadyState(),
+  suggestion:     Suggestion                           = Suggestion.empty,
+  scope:          DefinitionScope                      = "ose",
+  hooks:          Seq[SavePopulationHook.Parameter[_]] = Seq())

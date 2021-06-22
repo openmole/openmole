@@ -553,6 +553,15 @@ package composition {
   case class Slot(dsl: DSL) extends DSL
   case class Capsule(dsl: DSL, id: Any = new Object) extends DSL
 
+  object ExplorationMethodHook {
+    implicit def by[T, B, P](implicit isContainer: ExplorationMethodHook[T, P]): ExplorationMethodHook[By[T, B], P] = (t, h) ⇒ t.copy(value = isContainer(t.value, h))
+    implicit def on[T, B, P](implicit isContainer: ExplorationMethodHook[T, P]): ExplorationMethodHook[On[T, B], P] = (t, h) ⇒ t.copy(value = isContainer(t.value, h))
+  }
+
+  trait ExplorationMethodHook[T, P] {
+    def apply(t: T, h: P): T
+  }
+
   trait CompositionPackage {
 
     type DSL = composition.DSL
@@ -563,6 +572,8 @@ package composition {
     }
 
     implicit def hookDecorator[T](container: DSLContainer[T]) = new DSLContainerHook(container)
+
+    type ExplorationMethodHook[T, P] = composition.ExplorationMethodHook[T, P]
 
     def DSLContainer[T](
       dsl:         DSL,

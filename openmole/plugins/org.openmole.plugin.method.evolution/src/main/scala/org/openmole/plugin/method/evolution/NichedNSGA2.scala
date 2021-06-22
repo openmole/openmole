@@ -523,7 +523,7 @@ object NichedNSGA2Evolution {
     }
 
   implicit def evolutionPatternContainer: EvolutionWorkflow.EvolutionPatternContainer[NichedNSGA2Evolution] = () ⇒ NichedNSGA2Evolution.distribution
-  implicit def hookContainer: EvolutionWorkflow.HookContainer[NichedNSGA2Evolution] = () ⇒ NichedNSGA2Evolution.hooks
+  implicit def hookContainer: ExplorationMethodHook[NichedNSGA2Evolution, SavePopulationHook.Parameter[_]] = (e, p) ⇒ e.copy(hooks = e.hooks ++ Seq(p))
 
 }
 
@@ -534,11 +534,11 @@ object NichedNSGA2Evolution {
   genome:       Genome,
   objective:    Objectives,
   nicheSize:    Int,
-  stochastic:   OptionalArgument[Stochastic]          = None,
-  parallelism:  Int                                   = EvolutionWorkflow.parallelism,
-  reject:       OptionalArgument[Condition]           = None,
-  distribution: EvolutionPattern                      = SteadyState(),
-  suggestion:   Suggestion                            = Suggestion.empty,
-  scope:        DefinitionScope                       = "niched nsga2",
-  hooks:        Seq[SavePopulationHook.Parameters[_]] = Seq())
+  stochastic:   OptionalArgument[Stochastic]         = None,
+  parallelism:  Int                                  = EvolutionWorkflow.parallelism,
+  reject:       OptionalArgument[Condition]          = None,
+  distribution: EvolutionPattern                     = SteadyState(),
+  suggestion:   Suggestion                           = Suggestion.empty,
+  scope:        DefinitionScope                      = "niched nsga2",
+  hooks:        Seq[SavePopulationHook.Parameter[_]] = Seq())
 

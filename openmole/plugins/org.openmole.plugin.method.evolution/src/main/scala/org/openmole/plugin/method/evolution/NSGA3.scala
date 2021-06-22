@@ -272,7 +272,7 @@ object NSGA3Evolution {
     }
 
   implicit def evolutionPatternContainer: EvolutionWorkflow.EvolutionPatternContainer[NSGA3Evolution] = () ⇒ NSGA3Evolution.distribution
-  implicit def hookContainer: EvolutionWorkflow.HookContainer[NSGA3Evolution] = () ⇒ NSGA3Evolution.hooks
+  implicit def hookContainer: ExplorationMethodHook[NSGA3Evolution, SavePopulationHook.Parameter[_]] = (e, p) ⇒ e.copy(hooks = e.hooks ++ Seq(p))
 
 }
 
@@ -281,12 +281,12 @@ object NSGA3Evolution {
   objective:      Objectives,
   evaluation:     DSL,
   termination:    OMTermination,
-  populationSize: Int                                   = 200,
-  references:     NSGA3.References                      = NSGA3.References.None,
-  stochastic:     OptionalArgument[Stochastic]          = None,
-  reject:         OptionalArgument[Condition]           = None,
-  parallelism:    Int                                   = EvolutionWorkflow.parallelism,
-  distribution:   EvolutionPattern                      = SteadyState(),
-  suggestion:     Suggestion                            = Suggestion.empty,
-  scope:          DefinitionScope                       = "nsga3",
-  hooks:          Seq[SavePopulationHook.Parameters[_]] = Seq())
+  populationSize: Int                                  = 200,
+  references:     NSGA3.References                     = NSGA3.References.None,
+  stochastic:     OptionalArgument[Stochastic]         = None,
+  reject:         OptionalArgument[Condition]          = None,
+  parallelism:    Int                                  = EvolutionWorkflow.parallelism,
+  distribution:   EvolutionPattern                     = SteadyState(),
+  suggestion:     Suggestion                           = Suggestion.empty,
+  scope:          DefinitionScope                      = "nsga3",
+  hooks:          Seq[SavePopulationHook.Parameter[_]] = Seq())

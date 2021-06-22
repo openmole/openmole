@@ -398,7 +398,8 @@ object ProfileEvolution {
     }
 
   implicit def evolutionPatternContainer: EvolutionWorkflow.EvolutionPatternContainer[ProfileEvolution] = () ⇒ ProfileEvolution.distribution
-  implicit def hookContainer: EvolutionWorkflow.HookContainer[ProfileEvolution] = () ⇒ ProfileEvolution.hooks
+  implicit def hookContainer: ExplorationMethodHook[ProfileEvolution, SavePopulationHook.Parameter[_]] = (e, p) ⇒ e.copy(hooks = e.hooks ++ Seq(p))
+
 }
 
 import monocle.macros._
@@ -409,11 +410,11 @@ import monocle.macros._
   objective:    Objectives,
   evaluation:   DSL,
   termination:  OMTermination,
-  nicheSize:    Int                                   = 10,
-  stochastic:   OptionalArgument[Stochastic]          = None,
-  reject:       OptionalArgument[Condition]           = None,
-  parallelism:  Int                                   = EvolutionWorkflow.parallelism,
-  distribution: EvolutionPattern                      = SteadyState(),
-  suggestion:   Suggestion                            = Suggestion.empty,
-  scope:        DefinitionScope                       = "profile",
-  hooks:        Seq[SavePopulationHook.Parameters[_]] = Seq())
+  nicheSize:    Int                                  = 10,
+  stochastic:   OptionalArgument[Stochastic]         = None,
+  reject:       OptionalArgument[Condition]          = None,
+  parallelism:  Int                                  = EvolutionWorkflow.parallelism,
+  distribution: EvolutionPattern                     = SteadyState(),
+  suggestion:   Suggestion                           = Suggestion.empty,
+  scope:        DefinitionScope                      = "profile",
+  hooks:        Seq[SavePopulationHook.Parameter[_]] = Seq())

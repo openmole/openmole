@@ -24,7 +24,7 @@ import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SaveOption
 
 object SavePopulationHook {
 
-  case class Parameters[F](
+  case class Parameter[F](
     output:         WritableOutput,
     frequency:      OptionalArgument[Long],
     last:           Boolean,
@@ -40,11 +40,7 @@ object SavePopulationHook {
     }
   }
 
-  trait Hookable[T] {
-    def apply(t: T, p: Parameters[_]): T
-  }
-
-  class HookFunction[H](h: H)(implicit hookable: Hookable[H]) {
+  class HookFunction[H](h: H)(implicit container: ExplorationMethodHook[H, SavePopulationHook.Parameter[_]]) {
     def hook[F](
       output:         WritableOutput,
       frequency:      OptionalArgument[Long] = None,
@@ -53,9 +49,9 @@ object SavePopulationHook {
       includeOutputs: Boolean                = true,
       filter:         Seq[Val[_]]            = Vector.empty,
       format:         F                      = CSVOutputFormat(unrollArray = true))(implicit outputFormat: OutputFormat[F, EvolutionMetadata]) = {
-      hookable(
+      container(
         h,
-        SavePopulationHook.Parameters(
+        SavePopulationHook.Parameter(
           output = output,
           frequency = frequency,
           last = last,
