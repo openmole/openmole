@@ -30,7 +30,8 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 
-  def nsga2(wrap: Boolean = true) = {
+  def nsga2 = {
+    import EvolutionWorkflow._
 
     val x = Val[Double]
     val y = Val[Double]
@@ -41,24 +42,18 @@ class WorkflowSpec extends FlatSpec with Matchers {
       z := 9
     )
 
-    // Define a builder to use NSGA2 generational EA algorithm.
-    // replicateModel is the fitness function to optimise.
-    // lambda is the size of the offspring (and the parallelism level).
-    SteadyStateEvolution(
-      algorithm =
-        NSGA2(
-          genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
-          objective = Seq(x, y),
-          stochastic = Stochastic()
-        ),
+    NSGA2Evolution(
+      genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
+      objective = Seq(x, y),
+      stochastic = Stochastic(),
       evaluation = puzzle,
       parallelism = 10,
-      termination = 10,
-      wrap = wrap
+      termination = 10
     )
   }
 
   def conflict = {
+    import EvolutionWorkflow._
 
     val population = Val[Double]
     val state = Val[Double]
@@ -67,34 +62,30 @@ class WorkflowSpec extends FlatSpec with Matchers {
       (inputs, outputs) += (population, state)
     )
 
-    // Define a builder to use NSGA2 generational EA algorithm.
-    // replicateModel is the fitness function to optimise.
-    // lambda is the size of the offspring (and the parallelism level).
-    SteadyStateEvolution(
-      algorithm =
-        PSE(
-          genome = Seq(population in (0.0, 1.0), state in (0.0, 1.0)),
-          objective =
-            Seq(
-              population in (0.0 to 1.0 by 0.1),
-              state in (0.0 to 1.0 by 0.1)
-            ),
-          stochastic = Stochastic()
+    PSEEvolution(
+      genome = Seq(population in (0.0, 1.0), state in (0.0, 1.0)),
+      objective =
+        Seq(
+          population in (0.0 to 1.0 by 0.1),
+          state in (0.0 to 1.0 by 0.1)
         ),
+      stochastic = Stochastic(),
       evaluation = puzzle,
       parallelism = 10,
       termination = 10
     )
   }
 
-  def boundArray = {
+  "Bounds" should "be accepted for arrays" in {
     val xArray = Val[Array[Double]]
     val yArray = Val[Array[Int]]
 
-    NSGA2(
-      populationSize = 200,
+    NSGA2Evolution(
       genome = Seq(xArray in Vector.fill(5)((0.0, 1.0)), yArray in Vector.fill(5)((0, 1))),
-      objective = Seq()
+      objective = Seq(),
+      parallelism = 10,
+      termination = 10,
+      evaluation = EmptyTask()
     )
   }
 
@@ -181,7 +172,8 @@ class WorkflowSpec extends FlatSpec with Matchers {
   }
 
   "Steady state workflow" should "have no validation error" in {
-    val mole: Mole = nsga2()
+    val mole: Mole = nsga2
+
     Validation(mole).toList match {
       case Nil ⇒
       case l   ⇒ sys.error(s"Several validation errors have been found in ${mole}: " + l.mkString("\n"))
@@ -194,21 +186,14 @@ class WorkflowSpec extends FlatSpec with Matchers {
   }
 
   "Island workflow" should "have no validation error" in {
-    val islandEvolutionNSGA2 = IslandEvolution(nsga2(), 10, 50, 100)
+    import EvolutionWorkflow._
 
-    Validation(islandEvolutionNSGA2).toList match {
+    Validation(nsga2 by Island(10)).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
 
-    Validation(IslandEvolution(conflict, 10, 50, 100)).toList match {
-      case Nil ⇒
-      case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
-    }
-  }
-
-  "Steady state workflow with wrapping" should "have no validation error" in {
-    Validation(nsga2(wrap = false)).toList match {
+    Validation(conflict by Island(10)).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
@@ -453,8 +438,8 @@ class WorkflowSpec extends FlatSpec with Matchers {
         termination = 100
       )
 
-    val wf: DSLContainer[EvolutionWorkflow] = nsga hook ("/tmp/test")
-    val wf2: DSLContainer[EvolutionWorkflow] = nsga hook ("/tmp/test") by Island(100)
+    val wf: DSLContainer = nsga hook ("/tmp/test")
+    val wf2: DSLContainer = nsga hook ("/tmp/test") by Island(100)
 
     // FIXME improve this test when more metadata are added to EvolutioWorkflow
     tasks(wf.dsl).flatMap(_.task.name).exists(_.contains("island")) should equal(false)
