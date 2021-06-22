@@ -438,8 +438,8 @@ class WorkflowSpec extends FlatSpec with Matchers {
         termination = 100
       )
 
-    val wf: DSLContainer = nsga hook ("/tmp/test")
-    val wf2: DSLContainer = nsga hook ("/tmp/test") by Island(100)
+    val wf: DSLContainer[_] = nsga hook ("/tmp/test")
+    val wf2: DSLContainer[_] = nsga hook ("/tmp/test") by Island(100)
 
     // FIXME improve this test when more metadata are added to EvolutioWorkflow
     tasks(wf.dsl).flatMap(_.task.name).exists(_.contains("island")) should equal(false)
