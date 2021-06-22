@@ -78,8 +78,8 @@ class Runtime {
         serializerService.deserializeAndExtractFiles[ExecutionMessage](executionMessageFileCache, deleteFilesOnGC = true)
       }
 
-    val systemOut = System.out
-    val systemErr = System.err
+    val systemOut = OutputManager.systemOutput
+    val systemErr = OutputManager.systemError
 
     val out = newFile.newFile("openmole", ".out")
     val outSt = new PrintStream(out)
@@ -217,8 +217,7 @@ class Runtime {
       multiplexedOut.close()
       multiplexedErr.close()
       outSt.close()
-      System.setOut(systemOut)
-      System.setErr(systemErr)
+      OutputManager.uninstall
     }
 
     val outputMessage = if (out.length != 0) Some(out) else None
