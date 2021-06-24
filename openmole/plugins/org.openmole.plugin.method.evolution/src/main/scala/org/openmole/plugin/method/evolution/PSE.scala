@@ -44,6 +44,9 @@ import squants.time.Time
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 
+import monocle._
+import monocle.syntax.all._
+
 object PSEAlgorithm {
 
   import mgo.tools._
@@ -67,7 +70,7 @@ object PSEAlgorithm {
     population.map { i ⇒
       Result(
         scaleContinuousValues(continuousValues.get(i.genome), continuous),
-        Individual.genome composeLens discreteValues get i,
+        Focus[Individual[P]](_.genome) andThen discreteValues get i,
         pattern(phenotype(i.phenotype)),
         phenotype(i.phenotype),
         i
@@ -88,7 +91,7 @@ object PSEAlgorithm {
     pattern:             P ⇒ Vector[Int],
     hitmap:              monocle.Lens[S, HitMap]) =
     PSEOperations.adaptiveBreeding[S, Individual[P], CDGenome.Genome](
-      Individual.genome.get,
+      Focus[Individual[P]](_.genome).get,
       continuousValues.get,
       continuousOperator.get,
       discreteValues.get,
@@ -103,7 +106,7 @@ object PSEAlgorithm {
 
   def elitism[S, P: CanBeNaN](pattern: P ⇒ Vector[Int], continuous: Vector[C], hitmap: monocle.Lens[S, HitMap]) =
     PSEOperations.elitism[S, Individual[P], P](
-      i ⇒ values(Individual.genome.get(i), continuous),
+      i ⇒ values(i.genome, continuous),
       Individual.phenotype[P].get,
       pattern,
       hitmap)
@@ -130,7 +133,7 @@ object NoisyPSEAlgorithm {
     phenotypeHistory: Array[P])
 
   def buildIndividual[P: Manifest](genome: CDGenome.Genome, phenotype: P) = Individual(genome, 1, Array(phenotype))
-  def vectorPhenotype[P: Manifest] = Individual.phenotypeHistory[P] composeLens arrayToVectorLens
+  def vectorPhenotype[P: Manifest] = Focus[Individual[P]](_.phenotypeHistory) andThen arrayToVectorIso
 
   def initialGenomes(lambda: Int, continuous: Vector[C], discrete: Vector[D], reject: Option[Genome ⇒ Boolean], rng: scala.util.Random) =
     CDGenome.initialGenomes(lambda, continuous, discrete, reject, rng)
@@ -145,7 +148,7 @@ object NoisyPSEAlgorithm {
     pattern:             Vector[Double] ⇒ Vector[Int],
     hitmap:              monocle.Lens[S, HitMap]) =
     NoisyPSEOperations.adaptiveBreeding[S, Individual[P], Genome](
-      Individual.genome.get,
+      Focus[Individual[P]](_.genome).get,
       continuousValues.get,
       continuousOperator.get,
       discreteValues.get,
@@ -166,7 +169,7 @@ object NoisyPSEAlgorithm {
     continuous:  Vector[C],
     hitmap:      monocle.Lens[S, HitMap]) =
     NoisyPSEOperations.elitism[S, Individual[P], P](
-      i ⇒ values(Individual.genome.get(i), continuous),
+      i ⇒ values(i.genome, continuous),
       vectorPhenotype[P],
       aggregation,
       pattern,
@@ -182,7 +185,7 @@ object NoisyPSEAlgorithm {
   def aggregate[P: Manifest](i: Individual[P], aggregation: Vector[P] ⇒ Vector[Double], pattern: Vector[Double] ⇒ Vector[Int], continuous: Vector[C]) =
     (
       scaleContinuousValues(continuousValues.get(i.genome), continuous),
-      Individual.genome composeLens discreteValues get i,
+      i.focus(_.genome) andThen discreteValues get,
       aggregation(vectorPhenotype.get(i)),
       (vectorPhenotype.get _ andThen aggregation andThen pattern)(i),
       Individual.phenotypeHistory.get(i).size)
@@ -251,9 +254,9 @@ object PSE {
 
         def initialState = EvolutionState[HitMapState](s = Map())
 
-        def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, EvolutionState.evaluated)(s, population)
-        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, EvolutionState.generation)(s, population)
-        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, EvolutionState.startTime)(s, population)
+        def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
+        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
+        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext.value {
           val res = PSEAlgorithm.result[Phenotype](population, Genome.continuous(om.genome), om.pattern, ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives))
@@ -285,13 +288,13 @@ object PSE {
             om.operatorExploration,
             discrete,
             pattern,
-            EvolutionState.s)(s, individuals, rng)
+            Focus[S](_.s))(s, individuals, rng)
         }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) = FromContext { p ⇒
-          val (s2, elited) = PSEAlgorithm.elitism[S, Phenotype](pattern, Genome.continuous(om.genome), EvolutionState.s) apply (s, population, candidates, rng)
-          val s3 = EvolutionState.generation.modify(_ + 1)(s2)
-          val s4 = EvolutionState.evaluated.modify(_ + evaluated)(s3)
+          val (s2, elited) = PSEAlgorithm.elitism[S, Phenotype](pattern, Genome.continuous(om.genome), Focus[S](_.s)) apply (s, population, candidates, rng)
+          val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
+          val s4 = Focus[S](_.evaluated).modify(_ + evaluated)(s3)
           (s4, elited)
         }
 
@@ -345,9 +348,9 @@ object PSE {
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
 
-        def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, EvolutionState.evaluated)(s, population)
-        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, EvolutionState.generation)(s, population)
-        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, EvolutionState.startTime)(s, population)
+        def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
+        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
+        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
@@ -389,7 +392,7 @@ object PSE {
             NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context),
             discrete,
             om.pattern,
-            EvolutionState.s) apply (s, individuals, rng)
+            Focus[S](_.s)) apply (s, individuals, rng)
         }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) = FromContext { p ⇒
@@ -401,17 +404,17 @@ object PSE {
               NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context),
               om.historySize,
               Genome.continuous(om.genome),
-              EvolutionState.s) apply (s, population, candidates, rng)
-          val s3 = EvolutionState.generation.modify(_ + 1)(s2)
-          val s4 = EvolutionState.evaluated.modify(_ + evaluated)(s3)
+              Focus[S](_.s)) apply (s, population, candidates, rng)
+          val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
+          val s4 = Focus[S](_.evaluated).modify(_ + evaluated)(s3)
           (s4, elited)
         }
 
         def migrateToIsland(population: Vector[I]) =
-          StochasticGAIntegration.migrateToIsland[I](population, NoisyPSEAlgorithm.Individual.historyAge)
+          StochasticGAIntegration.migrateToIsland[I](population, Focus[I](_.historyAge))
 
         def migrateFromIsland(population: Vector[I], state: S) =
-          StochasticGAIntegration.migrateFromIsland[I, Phenotype](population, NoisyPSEAlgorithm.Individual.historyAge, NoisyPSEAlgorithm.Individual.phenotypeHistory)
+          StochasticGAIntegration.migrateFromIsland[I, Phenotype](population, Focus[I](_.historyAge), Focus[I](_.phenotypeHistory))
 
       }
 

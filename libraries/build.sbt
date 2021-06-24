@@ -300,14 +300,14 @@ lazy val scalaz = OsgiProject(dir, "org.scalaz", exports = Seq("!scala.*","*")) 
   libraryDependencies += "org.scalaz" %% "scalaz-core" % scalazVersion, version := scalazVersion) settings(settings: _*)
 
 lazy val monocle = OsgiProject(dir, "monocle",
-  privatePackages = Seq("!scala.*", "!scalaz.*", "!shapeless.*", "!cats.*", "*"),
-  imports = Seq("scala.*", "shapeless.*", "scalaz.*", "cats.*")) settings(
+  privatePackages = Seq("!scala.*", "!cats.*", "*"),
+  imports = Seq("scala.*", "cats.*")) settings(
   libraryDependencies ++= Seq (
-    "com.github.julien-truffaut" %% "monocle-core",
-    "com.github.julien-truffaut" %% "monocle-generic",
-    "com.github.julien-truffaut" %% "monocle-macro"
+    "dev.optics" %% "monocle-core",
+    //"dev.optics" %% "monocle-generic",
+    "dev.optics" %% "monocle-macro"
   ).map(_ % monocleVersion),
-  version := monocleVersion) settings(settings: _*) dependsOn(shapeless, scalaz, cats)
+  version := monocleVersion) settings(settings: _*) dependsOn(cats)
 
 lazy val asm = OsgiProject(dir, "org.objectweb.asm") settings (
   libraryDependencies += "org.ow2.asm" % "asm" % asmVersion,

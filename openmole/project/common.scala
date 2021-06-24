@@ -5,7 +5,7 @@ object common {
   def scalaVersionValue = "2.13.6"
 
   def gridscaleVersion = "2.37"
-  def mgoVersion = "3.48"
+  def mgoVersion = "3.49"
   def sshjVersion = "0.31.0"
   def containerVersion = "1.16"
   def bouncyCastleVersion = "1.68"
@@ -31,7 +31,7 @@ object common {
   def shapelessVersion = "2.3.3"
   def slickVersion = "3.3.2"
   def jasyptVersion = "1.9.3"
-  def monocleVersion = "2.0.0"
+  def monocleVersion = "3.0.0-RC2"
   def scalazVersion = "7.2.30"
   def mathVersion = "3.6.1"
   def asmVersion = "7.2"

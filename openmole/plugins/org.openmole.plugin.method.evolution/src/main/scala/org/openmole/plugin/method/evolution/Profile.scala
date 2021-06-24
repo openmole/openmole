@@ -33,6 +33,9 @@ import squants.time.Time
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.`extension`._
 
+import monocle._
+import monocle.syntax.all._
+
 object Profile {
 
   import org.openmole.core.keyword._
@@ -85,10 +88,10 @@ object Profile {
       def notFoundInGenome(v: Val[_]) = throw new UserBadDataError(s"Variable $v not found in the genome")
 
       def continuousProfile(x: Int, nX: Int): Niche[Individual[Phenotype], Int] =
-        mgo.evolution.niche.continuousProfile((Individual.genome composeLens CDGenome.continuousValues).get _, x, nX)
+        mgo.evolution.niche.continuousProfile(Focus[Individual[Phenotype]](_.genome) andThen CDGenome.continuousValues get, x, nX)
 
       def discreteProfile(x: Int): Niche[Individual[Phenotype], Int] =
-        mgo.evolution.niche.discreteProfile((Individual.genome composeLens CDGenome.discreteValues).get _, x)
+        mgo.evolution.niche.discreteProfile(Focus[Individual[Phenotype]](_.genome) andThen CDGenome.discreteValues get, x)
 
       def gridContinuousProfile(continuous: Vector[C], x: Int, intervals: Vector[Double]): Niche[Individual[Phenotype], Int] =
         mgo.evolution.niche.gridContinuousProfile(i ⇒ scaleContinuousValues(CDGenome.continuousValues.get(i.genome), continuous), x, intervals)
@@ -164,14 +167,14 @@ object Profile {
 
           val niche = DeterministicParams.niche(om.genome, om.niche).from(context)
           val (s2, elited) = NichedNSGA2Algorithm.elitism[S, Vector[Int], Phenotype](niche, om.nicheSize, Genome.continuous(om.genome), ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives)) apply (s, population, candidates, rng)
-          val s3 = EvolutionState.generation.modify(_ + 1)(s2)
-          val s4 = EvolutionState.evaluated.modify(_ + evaluated)(s3)
+          val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
+          val s4 = Focus[S](_.evaluated).modify(_ + evaluated)(s3)
           (s4, elited)
         }
 
-        def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, EvolutionState.evaluated)(s, population)
-        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, EvolutionState.generation)(s, population)
-        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, EvolutionState.startTime)(s, population)
+        def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
+        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
+        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
 
         def migrateToIsland(population: Vector[I]) = DeterministicGAIntegration.migrateToIsland(population)
         def migrateFromIsland(population: Vector[I], state: S) = DeterministicGAIntegration.migrateFromIsland(population)
@@ -198,10 +201,10 @@ object Profile {
       import CDGenome.NoisyIndividual.Individual
 
       def continuousProfile(x: Int, nX: Int): Niche[Individual[Phenotype], Int] =
-        mgo.evolution.niche.continuousProfile((Individual.genome composeLens CDGenome.continuousValues).get _, x, nX)
+        mgo.evolution.niche.continuousProfile((Focus[Individual[Phenotype]](_.genome) composeLens CDGenome.continuousValues).get _, x, nX)
 
       def discreteProfile(x: Int): Niche[Individual[Phenotype], Int] =
-        mgo.evolution.niche.discreteProfile((Individual.genome composeLens CDGenome.discreteValues).get _, x)
+        mgo.evolution.niche.discreteProfile((Focus[Individual[Phenotype]](_.genome) composeLens CDGenome.discreteValues).get _, x)
 
       def gridContinuousProfile(continuous: Vector[C], x: Int, intervals: Vector[Double]): Niche[Individual[Phenotype], Int] =
         mgo.evolution.niche.gridContinuousProfile(i ⇒ scaleContinuousValues(CDGenome.continuousValues.get(i.genome), continuous), x, intervals)
@@ -286,17 +289,17 @@ object Profile {
               NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context),
               Genome.continuous(om.genome)) apply (s, population, candidates, rng)
 
-            val s3 = EvolutionState.generation.modify(_ + 1)(s2)
-            val s4 = EvolutionState.evaluated.modify(_ + evaluated)(s3)
+            val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
+            val s4 = Focus[S](_.evaluated).modify(_ + evaluated)(s3)
             (s4, elited)
           }
 
-        def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, EvolutionState.evaluated)(s, population)
-        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, EvolutionState.generation)(s, population)
-        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, EvolutionState.startTime)(s, population)
+        def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
+        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
+        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
 
-        def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland[I](population, CDGenome.NoisyIndividual.Individual.historyAge)
-        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Phenotype](population, CDGenome.NoisyIndividual.Individual.historyAge, CDGenome.NoisyIndividual.Individual.phenotypeHistory)
+        def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland[I](population, Focus[I](_.historyAge))
+        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Phenotype](population, Focus[I](_.historyAge), Focus[I](_.phenotypeHistory))
       }
 
     }

@@ -21,7 +21,7 @@ class PuzzleSpec extends FlatSpec with Matchers {
     import shapeless._
 
     val task = EmptyTask()
-    val test = DSLContainer(task) :: 9 :: HNil
+    val test = DSLContainer(task, ()) :: 9 :: HNil
 
     (test: DSLContainer[_]).run()
     (test: MoleExecution).run()
@@ -89,7 +89,7 @@ class PuzzleSpec extends FlatSpec with Matchers {
     val first = EmptyTask() set (outputs += i, i := 1)
     val last = EmptyTask()
 
-    val container = DSLContainer(first, output = Some(first))
+    val container = DSLContainer(first, (), output = Some(first))
 
     val h = TestHook { context ⇒ hookExecuted = true }
 
@@ -108,7 +108,7 @@ class PuzzleSpec extends FlatSpec with Matchers {
 
   "By" should "be convertible to DSL" in {
     val t = EmptyTask()
-    val m = DSLContainer(t)
+    val m = DSLContainer(t, ())
     val e = LocalEnvironment(1)
 
     val dsl1: DSL = (t by 2)

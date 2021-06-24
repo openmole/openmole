@@ -5,7 +5,7 @@ package org.openmole.core
  */
 package keyword {
 
-  import monocle.macros._
+  import monocle._
 
   case class In[+A, +B](value: A, domain: B)
   case class Under[+A, +B](value: A, under: B)
@@ -19,13 +19,13 @@ package keyword {
   case class As[+A, +B](value: A, as: B)
 
   object By {
-    def value[A, B] = GenLens[By[A, B]](_.value)
+    def value[A, B] = Focus[By[A, B]](_.value)
   }
 
   case class By[+A, +B](value: A, by: B)
 
   object On {
-    def value[A, B] = GenLens[On[A, B]](_.value)
+    def value[A, B] = Focus[On[A, B]](_.value)
   }
 
   case class On[+A, +B](value: A, on: B)
