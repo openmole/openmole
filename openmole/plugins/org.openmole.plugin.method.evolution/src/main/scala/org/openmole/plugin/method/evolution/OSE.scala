@@ -351,32 +351,27 @@ object OSEEvolution {
   import org.openmole.core.dsl._
 
   implicit def dslContainer: ExplorationMethod[OSEEvolution, EvolutionWorkflow] =
-    p ⇒ {
-      val container =
-        EvolutionPattern.build(
-          algorithm =
-            OSE(
-              origin = p.origin,
-              genome = p.genome,
-              objective = p.objective,
-              outputs = p.evaluation.outputs,
-              stochastic = p.stochastic,
-              populationSize = p.populationSize,
-              reject = p.reject
-            ),
-          evaluation = p.evaluation,
-          termination = p.termination,
-          parallelism = p.parallelism,
-          distribution = p.distribution,
-          suggestion = p.suggestion(OSE.OriginAxe.fullGenome(p.origin, p.genome)),
-          scope = p.scope
-        )
-
-      container hook (p.hooks.map(_(container.method, p.scope)): _*)
-    }
+    p ⇒
+      EvolutionPattern.build(
+        algorithm =
+          OSE(
+            origin = p.origin,
+            genome = p.genome,
+            objective = p.objective,
+            outputs = p.evaluation.outputs,
+            stochastic = p.stochastic,
+            populationSize = p.populationSize,
+            reject = p.reject
+          ),
+        evaluation = p.evaluation,
+        termination = p.termination,
+        parallelism = p.parallelism,
+        distribution = p.distribution,
+        suggestion = p.suggestion(OSE.OriginAxe.fullGenome(p.origin, p.genome)),
+        scope = p.scope
+      )
 
   implicit def patternContainer: ExplorationMethodSetter[OSEEvolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
-  implicit def hookContainer: ExplorationMethodSetter[OSEEvolution, SavePopulationHook.Parameter[_]] = (e, p) ⇒ e.copy(hooks = e.hooks ++ Seq(p))
 
 }
 
@@ -387,12 +382,11 @@ import monocle.macros._
   objective:      Seq[OSE.FitnessPattern],
   evaluation:     DSL,
   termination:    OMTermination,
-  populationSize: Int                                  = 200,
-  genome:         Genome                               = Seq(),
-  stochastic:     OptionalArgument[Stochastic]         = None,
-  reject:         OptionalArgument[Condition]          = None,
-  parallelism:    Int                                  = EvolutionWorkflow.parallelism,
-  distribution:   EvolutionPattern                     = SteadyState(),
-  suggestion:     Suggestion                           = Suggestion.empty,
-  scope:          DefinitionScope                      = "ose",
-  hooks:          Seq[SavePopulationHook.Parameter[_]] = Seq())
+  populationSize: Int                          = 200,
+  genome:         Genome                       = Seq(),
+  stochastic:     OptionalArgument[Stochastic] = None,
+  reject:         OptionalArgument[Condition]  = None,
+  parallelism:    Int                          = EvolutionWorkflow.parallelism,
+  distribution:   EvolutionPattern             = SteadyState(),
+  suggestion:     Suggestion                   = Suggestion.empty,
+  scope:          DefinitionScope              = "ose")

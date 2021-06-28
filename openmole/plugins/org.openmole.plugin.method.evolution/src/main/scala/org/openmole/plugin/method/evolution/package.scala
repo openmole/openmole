@@ -38,7 +38,32 @@ package object evolution {
   implicit def durationToDurationTerminationConverter(d: Time) = EvolutionWorkflow.AfterDuration(d)
 
   implicit def byEvolutionPattern[T](implicit patternContainer: ExplorationMethodSetter[T, EvolutionWorkflow.EvolutionPattern], method: ExplorationMethod[T, EvolutionWorkflow]): ExplorationMethod[By[T, EvolutionWorkflow.EvolutionPattern], EvolutionWorkflow] = v ⇒ method(patternContainer(v.value, v.by))
-  implicit class EvolutionHookDecorator[T](p: T)(implicit h: ExplorationMethodSetter[T, SavePopulationHook.Parameter[_]]) extends SavePopulationHook.HookFunction[T](p)
+  implicit class EvolutionHookDecorator[T](t: T)(implicit method: ExplorationMethod[T, EvolutionWorkflow]) {
+    def hook[F](
+      output:         WritableOutput,
+      frequency:      OptionalArgument[Long] = None,
+      last:           Boolean                = false,
+      keepAll:        Boolean                = false,
+      includeOutputs: Boolean                = true,
+      filter:         Seq[Val[_]]            = Vector.empty,
+      format:         F                      = CSVOutputFormat(unrollArray = true))(implicit outputFormat: OutputFormat[F, EvolutionMetadata]) = {
+      val m = method(t)
+      implicit def scope = m.scope
+
+      Hooked(
+        t,
+        SavePopulationHook(
+          evolution = m.method,
+          output = output,
+          frequency = frequency,
+          last = last,
+          keepAll = keepAll,
+          includeOutputs = includeOutputs,
+          filter = filter,
+          format = format)
+      )
+    }
+  }
 
   def Island = EvolutionWorkflow.Island
 

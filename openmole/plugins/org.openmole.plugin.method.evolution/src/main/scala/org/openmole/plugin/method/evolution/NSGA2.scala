@@ -255,31 +255,26 @@ object NSGA2Evolution {
   import org.openmole.core.dsl.DSL
 
   implicit def method: ExplorationMethod[NSGA2Evolution, EvolutionWorkflow] =
-    p ⇒ {
-      val container =
-        EvolutionPattern.build(
-          algorithm =
-            NSGA2(
-              populationSize = p.populationSize,
-              genome = p.genome,
-              objective = p.objective,
-              outputs = p.evaluation.outputs,
-              stochastic = p.stochastic,
-              reject = p.reject
-            ),
-          evaluation = p.evaluation,
-          termination = p.termination,
-          parallelism = p.parallelism,
-          distribution = p.distribution,
-          suggestion = p.suggestion(p.genome),
-          scope = p.scope
-        )
-
-      container hook (p.hooks.map(_(container.method, p.scope)): _*)
-    }
+    p ⇒
+      EvolutionPattern.build(
+        algorithm =
+          NSGA2(
+            populationSize = p.populationSize,
+            genome = p.genome,
+            objective = p.objective,
+            outputs = p.evaluation.outputs,
+            stochastic = p.stochastic,
+            reject = p.reject
+          ),
+        evaluation = p.evaluation,
+        termination = p.termination,
+        parallelism = p.parallelism,
+        distribution = p.distribution,
+        suggestion = p.suggestion(p.genome),
+        scope = p.scope
+      )
 
   implicit def patternContainer: ExplorationMethodSetter[NSGA2Evolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
-  implicit def hookContainer: ExplorationMethodSetter[NSGA2Evolution, SavePopulationHook.Parameter[_]] = (e, p) ⇒ e.copy(hooks = e.hooks ++ Seq(p))
 
 }
 
@@ -288,11 +283,10 @@ object NSGA2Evolution {
   objective:      Objectives,
   evaluation:     DSL,
   termination:    OMTermination,
-  populationSize: Int                                  = 200,
-  stochastic:     OptionalArgument[Stochastic]         = None,
-  reject:         OptionalArgument[Condition]          = None,
-  parallelism:    Int                                  = EvolutionWorkflow.parallelism,
-  distribution:   EvolutionPattern                     = SteadyState(),
-  suggestion:     Suggestion                           = Suggestion.empty,
-  scope:          DefinitionScope                      = "nsga2",
-  hooks:          Seq[SavePopulationHook.Parameter[_]] = Seq())
+  populationSize: Int                          = 200,
+  stochastic:     OptionalArgument[Stochastic] = None,
+  reject:         OptionalArgument[Condition]  = None,
+  parallelism:    Int                          = EvolutionWorkflow.parallelism,
+  distribution:   EvolutionPattern             = SteadyState(),
+  suggestion:     Suggestion                   = Suggestion.empty,
+  scope:          DefinitionScope              = "nsga2")

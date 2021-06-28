@@ -251,31 +251,27 @@ object NSGA3Evolution {
           case NSGA3.References.List(p)     ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(p)
         }
 
-      val container =
-        EvolutionPattern.build(
-          algorithm =
-            NSGA3(
-              populationSize = p.populationSize,
-              references = refPoints,
-              genome = p.genome,
-              outputs = p.evaluation.outputs,
-              objective = p.objective,
-              stochastic = p.stochastic,
-              reject = p.reject
-            ),
-          evaluation = p.evaluation,
-          termination = p.termination,
-          parallelism = p.parallelism,
-          distribution = p.distribution,
-          suggestion = p.suggestion(p.genome),
-          scope = p.scope
-        )
-
-      container hook (p.hooks.map(_(container.method, p.scope)): _*)
+      EvolutionPattern.build(
+        algorithm =
+          NSGA3(
+            populationSize = p.populationSize,
+            references = refPoints,
+            genome = p.genome,
+            outputs = p.evaluation.outputs,
+            objective = p.objective,
+            stochastic = p.stochastic,
+            reject = p.reject
+          ),
+        evaluation = p.evaluation,
+        termination = p.termination,
+        parallelism = p.parallelism,
+        distribution = p.distribution,
+        suggestion = p.suggestion(p.genome),
+        scope = p.scope
+      )
     }
 
   implicit def patternContainer: ExplorationMethodSetter[NSGA3Evolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
-  implicit def hookContainer: ExplorationMethodSetter[NSGA3Evolution, SavePopulationHook.Parameter[_]] = (e, p) ⇒ e.copy(hooks = e.hooks ++ Seq(p))
 
 }
 
@@ -284,12 +280,11 @@ object NSGA3Evolution {
   objective:      Objectives,
   evaluation:     DSL,
   termination:    OMTermination,
-  populationSize: Int                                  = 200,
-  references:     NSGA3.References                     = NSGA3.References.None,
-  stochastic:     OptionalArgument[Stochastic]         = None,
-  reject:         OptionalArgument[Condition]          = None,
-  parallelism:    Int                                  = EvolutionWorkflow.parallelism,
-  distribution:   EvolutionPattern                     = SteadyState(),
-  suggestion:     Suggestion                           = Suggestion.empty,
-  scope:          DefinitionScope                      = "nsga3",
-  hooks:          Seq[SavePopulationHook.Parameter[_]] = Seq())
+  populationSize: Int                          = 200,
+  references:     NSGA3.References             = NSGA3.References.None,
+  stochastic:     OptionalArgument[Stochastic] = None,
+  reject:         OptionalArgument[Condition]  = None,
+  parallelism:    Int                          = EvolutionWorkflow.parallelism,
+  distribution:   EvolutionPattern             = SteadyState(),
+  suggestion:     Suggestion                   = Suggestion.empty,
+  scope:          DefinitionScope              = "nsga3")

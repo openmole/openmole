@@ -501,32 +501,27 @@ import monocle.macros._
 object NichedNSGA2Evolution {
 
   implicit def method: ExplorationMethod[NichedNSGA2Evolution, EvolutionWorkflow] =
-    p ⇒ {
-      val container =
-        EvolutionPattern.build(
-          algorithm =
-            NichedNSGA2(
-              niche = p.niche,
-              genome = p.genome,
-              outputs = p.evaluation.outputs,
-              nicheSize = p.nicheSize,
-              objective = p.objective,
-              stochastic = p.stochastic,
-              reject = p.reject
-            ),
-          evaluation = p.evaluation,
-          termination = p.termination,
-          parallelism = p.parallelism,
-          distribution = p.distribution,
-          suggestion = p.suggestion(p.genome),
-          scope = p.scope
-        )
-
-      container hook (p.hooks.map(_(container.method, p.scope)): _*)
-    }
+    p ⇒
+      EvolutionPattern.build(
+        algorithm =
+          NichedNSGA2(
+            niche = p.niche,
+            genome = p.genome,
+            outputs = p.evaluation.outputs,
+            nicheSize = p.nicheSize,
+            objective = p.objective,
+            stochastic = p.stochastic,
+            reject = p.reject
+          ),
+        evaluation = p.evaluation,
+        termination = p.termination,
+        parallelism = p.parallelism,
+        distribution = p.distribution,
+        suggestion = p.suggestion(p.genome),
+        scope = p.scope
+      )
 
   implicit def patternContainer: ExplorationMethodSetter[NichedNSGA2Evolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
-  implicit def hookContainer: ExplorationMethodSetter[NichedNSGA2Evolution, SavePopulationHook.Parameter[_]] = (e, p) ⇒ e.copy(hooks = e.hooks ++ Seq(p))
 
 }
 
@@ -537,11 +532,10 @@ object NichedNSGA2Evolution {
   genome:       Genome,
   objective:    Objectives,
   nicheSize:    Int,
-  stochastic:   OptionalArgument[Stochastic]         = None,
-  parallelism:  Int                                  = EvolutionWorkflow.parallelism,
-  reject:       OptionalArgument[Condition]          = None,
-  distribution: EvolutionPattern                     = SteadyState(),
-  suggestion:   Suggestion                           = Suggestion.empty,
-  scope:        DefinitionScope                      = "niched nsga2",
-  hooks:        Seq[SavePopulationHook.Parameter[_]] = Seq())
+  stochastic:   OptionalArgument[Stochastic] = None,
+  parallelism:  Int                          = EvolutionWorkflow.parallelism,
+  reject:       OptionalArgument[Condition]  = None,
+  distribution: EvolutionPattern             = SteadyState(),
+  suggestion:   Suggestion                   = Suggestion.empty,
+  scope:        DefinitionScope              = "niched nsga2")
 

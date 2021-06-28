@@ -500,30 +500,25 @@ object PSEEvolution {
   import org.openmole.core.dsl.DSL
 
   implicit def method: ExplorationMethod[PSEEvolution, EvolutionWorkflow] =
-    p ⇒ {
-      val container =
-        EvolutionPattern.build(
-          algorithm =
-            PSE(
-              genome = p.genome,
-              objective = p.objective,
-              outputs = p.evaluation.outputs,
-              stochastic = p.stochastic,
-              reject = p.reject
-            ),
-          evaluation = p.evaluation,
-          termination = p.termination,
-          parallelism = p.parallelism,
-          distribution = p.distribution,
-          suggestion = p.suggestion(p.genome),
-          scope = p.scope
-        )
-
-      container hook (p.hooks.map(_(container.method, p.scope)): _*)
-    }
+    p ⇒
+      EvolutionPattern.build(
+        algorithm =
+          PSE(
+            genome = p.genome,
+            objective = p.objective,
+            outputs = p.evaluation.outputs,
+            stochastic = p.stochastic,
+            reject = p.reject
+          ),
+        evaluation = p.evaluation,
+        termination = p.termination,
+        parallelism = p.parallelism,
+        distribution = p.distribution,
+        suggestion = p.suggestion(p.genome),
+        scope = p.scope
+      )
 
   implicit def patternContainer: ExplorationMethodSetter[PSEEvolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
-  implicit def hookContainer: ExplorationMethodSetter[PSEEvolution, SavePopulationHook.Parameter[_]] = (e, p) ⇒ e.copy(hooks = e.hooks ++ Seq(p))
 
 }
 
@@ -532,10 +527,9 @@ object PSEEvolution {
   objective:    Seq[PSE.PatternAxe],
   evaluation:   DSL,
   termination:  OMTermination,
-  stochastic:   OptionalArgument[Stochastic]         = None,
-  reject:       OptionalArgument[Condition]          = None,
-  parallelism:  Int                                  = EvolutionWorkflow.parallelism,
-  distribution: EvolutionPattern                     = SteadyState(),
-  suggestion:   Suggestion                           = Suggestion.empty,
-  scope:        DefinitionScope                      = "pse",
-  hooks:        Seq[SavePopulationHook.Parameter[_]] = Seq())
+  stochastic:   OptionalArgument[Stochastic] = None,
+  reject:       OptionalArgument[Condition]  = None,
+  parallelism:  Int                          = EvolutionWorkflow.parallelism,
+  distribution: EvolutionPattern             = SteadyState(),
+  suggestion:   Suggestion                   = Suggestion.empty,
+  scope:        DefinitionScope              = "pse")

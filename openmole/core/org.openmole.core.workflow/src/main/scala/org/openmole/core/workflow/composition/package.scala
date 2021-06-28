@@ -529,6 +529,10 @@ package composition {
       implicit def byGrouping[T, C](implicit toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[By[T, Grouping], C] = t ⇒ toDSLContainer(t.value).copy(grouping = Some(t.by))
       implicit def byInt[T, C](implicit toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[By[T, Int], C] = t ⇒ toDSLContainer(t.value).copy(grouping = Some(ByGrouping(t.by)))
       implicit def on[T, C](implicit toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[On[T, EnvironmentProvider], C] = t ⇒ toDSLContainer(t.value).copy(environment = Some(t.on))
+      implicit def hooked[T, C](implicit toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[Hooked[T], C] = t ⇒ {
+        val container = toDSLContainer(t.value)
+        container.copy(hooks = container.hooks ++ Seq(t.hook))
+      }
     }
 
     trait ExplorationMethod[-T, D] {
@@ -556,11 +560,15 @@ package composition {
   object ExplorationMethodSetter {
     implicit def by[T, B, P](implicit isContainer: ExplorationMethodSetter[T, P]): ExplorationMethodSetter[By[T, B], P] = (t, h) ⇒ t.copy(value = isContainer(t.value, h))
     implicit def on[T, B, P](implicit isContainer: ExplorationMethodSetter[T, P]): ExplorationMethodSetter[On[T, B], P] = (t, h) ⇒ t.copy(value = isContainer(t.value, h))
+    implicit def hooked[T, P](implicit isContainer: ExplorationMethodSetter[T, P]): ExplorationMethodSetter[Hooked[T], P] = (t, h) ⇒ t.copy(value = isContainer(t.value, h))
+
   }
 
   trait ExplorationMethodSetter[T, P] {
     def apply(t: T, h: P): T
   }
+
+  case class Hooked[+T](value: T, hook: Hook)
 
   trait CompositionPackage {
 
@@ -568,7 +576,7 @@ package composition {
     val DSL = composition.DSL
 
     class DSLContainerHook[T](dsl: DSLContainer[T]) {
-      def hook(hooks: Hook*) = dsl.copy(hooks = dsl.hooks ++ hooks)
+      def hook(hook: Hook) = Hooked(dsl, hook)
     }
 
     implicit def hookDecorator[T](container: DSLContainer[T]) = new DSLContainerHook(container)
@@ -611,6 +619,8 @@ package composition {
 
     type DSLContainer[+T] = composition.DSLContainer[T]
     type ExplorationMethod[-T, C] = composition.DSLContainer.ExplorationMethod[T, C]
+
+    def Hooked = composition.Hooked
 
     def Slot(dsl: DSL) = composition.Slot(dsl)
     def Capsule(node: DSL) = composition.Capsule(node)

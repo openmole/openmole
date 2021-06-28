@@ -377,8 +377,8 @@ import EvolutionWorkflow._
 object ProfileEvolution {
 
   implicit def method: ExplorationMethod[ProfileEvolution, EvolutionWorkflow] =
-    p ⇒ {
-      val container = EvolutionPattern.build(
+    p ⇒
+      EvolutionPattern.build(
         algorithm =
           Profile(
             niche = p.profile,
@@ -397,11 +397,7 @@ object ProfileEvolution {
         scope = p.scope
       )
 
-      container hook (p.hooks.map(_(container.method, p.scope)): _*)
-    }
-
   implicit def patternContainer: ExplorationMethodSetter[ProfileEvolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
-  implicit def hookContainer: ExplorationMethodSetter[ProfileEvolution, SavePopulationHook.Parameter[_]] = (e, p) ⇒ e.copy(hooks = e.hooks ++ Seq(p))
 
 }
 
@@ -413,11 +409,10 @@ import monocle.macros._
   objective:    Objectives,
   evaluation:   DSL,
   termination:  OMTermination,
-  nicheSize:    Int                                  = 10,
-  stochastic:   OptionalArgument[Stochastic]         = None,
-  reject:       OptionalArgument[Condition]          = None,
-  parallelism:  Int                                  = EvolutionWorkflow.parallelism,
-  distribution: EvolutionPattern                     = SteadyState(),
-  suggestion:   Suggestion                           = Suggestion.empty,
-  scope:        DefinitionScope                      = "profile",
-  hooks:        Seq[SavePopulationHook.Parameter[_]] = Seq())
+  nicheSize:    Int                          = 10,
+  stochastic:   OptionalArgument[Stochastic] = None,
+  reject:       OptionalArgument[Condition]  = None,
+  parallelism:  Int                          = EvolutionWorkflow.parallelism,
+  distribution: EvolutionPattern             = SteadyState(),
+  suggestion:   Suggestion                   = Suggestion.empty,
+  scope:        DefinitionScope              = "profile")
