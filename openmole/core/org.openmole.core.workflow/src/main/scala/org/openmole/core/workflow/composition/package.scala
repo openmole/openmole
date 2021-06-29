@@ -535,7 +535,7 @@ package composition {
       }
     }
 
-    trait ExplorationMethod[-T, D] {
+    trait ExplorationMethod[-T, +D] {
       def apply(t: T): DSLContainer[D]
     }
 
@@ -575,11 +575,11 @@ package composition {
     type DSL = composition.DSL
     val DSL = composition.DSL
 
-    class DSLContainerHook[T](dsl: DSLContainer[T]) {
-      def hook(hook: Hook) = Hooked(dsl, hook)
+    class MethodHookDecorator[T, C](dsl: T)(implicit method: ExplorationMethod[T, C]) {
+      def hook(hook: Hook): Hooked[T] = Hooked(dsl, hook)
     }
 
-    implicit def hookDecorator[T](container: DSLContainer[T]) = new DSLContainerHook(container)
+    implicit def hookDecorator[T](container: T)(implicit method: ExplorationMethod[T, Unit]) = new MethodHookDecorator[T, Unit](container)
 
     type ExplorationMethodSetter[T, P] = composition.ExplorationMethodSetter[T, P]
 
@@ -618,8 +618,9 @@ package composition {
       }
 
     type DSLContainer[+T] = composition.DSLContainer[T]
-    type ExplorationMethod[-T, C] = composition.DSLContainer.ExplorationMethod[T, C]
+    type ExplorationMethod[-T, +C] = composition.DSLContainer.ExplorationMethod[T, C]
 
+    type Hooked[T] = composition.Hooked[T]
     def Hooked = composition.Hooked
 
     def Slot(dsl: DSL) = composition.Slot(dsl)

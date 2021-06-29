@@ -161,7 +161,7 @@ package object abc {
     DSLContainer(masterSlave, output = Some(master), delegate = Vector(slave), method = ABCParameters(masterState, step, priorValue))
   }
 
-  implicit class ABCContainer(dsl: DSLContainer[ABCParameters]) extends DSLContainerHook(dsl) {
+  implicit class ABCContainer(dsl: DSLContainer[ABCParameters]) extends MethodHookDecorator(dsl) {
     def hook(directory: FromContext[File], frequency: Long = 1): DSLContainer[ABC.ABCParameters] = {
       implicit val defScope = dsl.scope
       dsl hook ABCHook(dsl, directory, frequency)

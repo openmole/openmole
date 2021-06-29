@@ -35,11 +35,24 @@ class DirectSamplingSpec extends FlatSpec with Matchers {
   "Grouping" should "be accepted on direct sampling" in {
     val i = Val[Int]
 
-    val dsl: DSL =
-      DirectSampling(
-        EmptyTask(),
-        ExplicitSampling(i, Seq(1))
-      ) hook display by 10
+    val d = DirectSampling(
+      EmptyTask(),
+      ExplicitSampling(i, Seq(1))
+    )
+
+    val dsl: DSL = d hook display by 10
+  }
+
+  "Direct Sampling" should "be hookable" in {
+    val i = Val[Int]
+
+    val d = DirectSampling(
+      EmptyTask(),
+      ExplicitSampling(i, Seq(1))
+    )
+
+    (d hook TestHook()): DSL
+    (d hook display by 10): DSL
   }
 
   "Direct sampling" should "transmit explored inputs to replicated model" in {
@@ -96,7 +109,6 @@ class DirectSamplingSpec extends FlatSpec with Matchers {
       )
 
     val m: org.openmole.core.workflow.mole.MoleExecution = mole
-    println(m.mole.capsules.map(c ⇒ c -> MoleCapsule.received(c, m.mole, m.sources, m.hooks)))
 
     mole.run
   }

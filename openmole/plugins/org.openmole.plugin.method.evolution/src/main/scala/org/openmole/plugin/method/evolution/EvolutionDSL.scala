@@ -170,7 +170,7 @@ object EvolutionWorkflow {
   case class SteadyState(wrap: Boolean = false) extends EvolutionPattern
   case class Island(termination: OMTermination, sample: OptionalArgument[Int] = None, parallelism: Int = 1) extends EvolutionPattern
 
-  implicit class EvolutionMethodContainer(dsl: DSLContainer[EvolutionWorkflow]) extends DSLContainerHook(dsl) {
+  implicit class EvolutionMethodContainer(dsl: DSLContainer[EvolutionWorkflow]) extends MethodHookDecorator(dsl) {
     def hook[F](
       output:         WritableOutput,
       frequency:      OptionalArgument[Long] = None,

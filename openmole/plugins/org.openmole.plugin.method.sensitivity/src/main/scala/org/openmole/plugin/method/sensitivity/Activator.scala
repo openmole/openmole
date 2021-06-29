@@ -31,11 +31,8 @@ class Activator extends BundleActivator {
 
     val keyWords: Vector[HighLight] =
       Vector(
-        SamplingHighLight(objectName(MorrisSampling)),
-        TaskHighLight(objectName(MorrisAggregation)),
-        SamplingHighLight(objectName(SaltelliSampling)),
-        PatternHighLight("SensitivityMorris"),
-        PatternHighLight("SensitivitySaltelli"),
+        PatternHighLight(objectName(SensitivityMorris)),
+        PatternHighLight(objectName(SensitivitySaltelli)),
       )
 
     PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords)

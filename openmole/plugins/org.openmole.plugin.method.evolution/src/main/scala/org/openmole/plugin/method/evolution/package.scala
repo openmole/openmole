@@ -38,7 +38,8 @@ package object evolution {
   implicit def durationToDurationTerminationConverter(d: Time) = EvolutionWorkflow.AfterDuration(d)
 
   implicit def byEvolutionPattern[T](implicit patternContainer: ExplorationMethodSetter[T, EvolutionWorkflow.EvolutionPattern], method: ExplorationMethod[T, EvolutionWorkflow]): ExplorationMethod[By[T, EvolutionWorkflow.EvolutionPattern], EvolutionWorkflow] = v ⇒ method(patternContainer(v.value, v.by))
-  implicit class EvolutionHookDecorator[T](t: T)(implicit method: ExplorationMethod[T, EvolutionWorkflow]) {
+
+  implicit class EvolutionHookDecorator[T](t: T)(implicit method: ExplorationMethod[T, EvolutionWorkflow]) extends MethodHookDecorator(t) {
     def hook[F](
       output:         WritableOutput,
       frequency:      OptionalArgument[Long] = None,
@@ -46,7 +47,7 @@ package object evolution {
       keepAll:        Boolean                = false,
       includeOutputs: Boolean                = true,
       filter:         Seq[Val[_]]            = Vector.empty,
-      format:         F                      = CSVOutputFormat(unrollArray = true))(implicit outputFormat: OutputFormat[F, EvolutionMetadata]) = {
+      format:         F                      = CSVOutputFormat(unrollArray = true))(implicit outputFormat: OutputFormat[F, EvolutionMetadata]): Hooked[T] = {
       val m = method(t)
       implicit def scope = m.scope
 
