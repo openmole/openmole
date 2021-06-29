@@ -50,34 +50,24 @@ package object abc {
 
     case class ABCParameters(state: Val[MonAPMC.MonState], step: Val[Int], prior: IndependentPriors)
 
-    def apply(
-      evaluation:           DSL,
-      prior:                Seq[UnivariatePrior],
-      observed:             Seq[Observed[_]],
-      sample:               Int,
-      generated:            Int,
-      minAcceptedRatio:     OptionalArgument[Double] = 0.01,
-      stopSampleSizeFactor: Int                      = 1,
-      maxStep:              OptionalArgument[Int]    = None,
-      seed:                 SeedVariable             = None,
-      scope:                DefinitionScope          = "abc") = {
-      implicit def defScope = scope
+    implicit def method: ExplorationMethod[ABC, ABCParameters] = m ⇒ {
+      implicit def defScope = m.scope
       val stepState = Val[MonAPMC.StepState]("stepState", abcNamespace)
       val step = Val[Int]("step", abcNamespace)
 
       val stop = Val[Boolean]
 
-      val n = sample + generated
-      val nAlpha = sample
-      val priorValue = IndependentPriors(prior)
+      val n = m.sample + m.generated
+      val nAlpha = m.sample
+      val priorValue = IndependentPriors(m.prior)
 
-      val preStepTask = PreStepTask(n, nAlpha, priorValue, state, stepState, step, seed)
-      val postStepTask = PostStepTask(n, nAlpha, stopSampleSizeFactor, priorValue, observed, state, stepState, minAcceptedRatio, maxStep, stop, step)
+      val preStepTask = PreStepTask(n, nAlpha, priorValue, state, stepState, step, m.seed)
+      val postStepTask = PostStepTask(n, nAlpha, m.stopSampleSizeFactor, priorValue, m.observed, state, stepState, m.minAcceptedRatio, m.maxStep, stop, step)
 
       val mapReduce =
         MapReduce(
           sampler = preStepTask,
-          evaluation = evaluation,
+          evaluation = m.evaluation,
           aggregation = postStepTask
         )
 
@@ -92,12 +82,78 @@ package object abc {
 
   }
 
-  import ABC._
-
-  def IslandABC(
+  case class ABC(
     evaluation:           DSL,
     prior:                Seq[UnivariatePrior],
-    observed:             Seq[Observed[_]],
+    observed:             Seq[ABC.Observed[_]],
+    sample:               Int,
+    generated:            Int,
+    minAcceptedRatio:     OptionalArgument[Double] = 0.01,
+    stopSampleSizeFactor: Int                      = 1,
+    maxStep:              OptionalArgument[Int]    = None,
+    seed:                 SeedVariable             = None,
+    scope:                DefinitionScope          = "abc")
+
+  object IslandABC {
+    implicit def method: ExplorationMethod[IslandABC, ABC.ABCParameters] = m ⇒ {
+      implicit def defScope = m.scope
+
+      val masterState = Val[MonAPMC.MonState]("masterState", ABC.abcNamespace)
+      val islandState = ABC.state
+
+      val step = Val[Int]("masterStep", ABC.abcNamespace)
+      val stop = Val[Boolean]
+
+      val n = m.sample + m.generated
+      val nAlpha = m.sample
+
+      val priorValue = IndependentPriors(m.prior)
+
+      val appendSplit = AppendSplitTask(n, nAlpha, masterState, islandState, step)
+      val terminationTask =
+        IslandTerminationTask(n, nAlpha, m.minAcceptedRatio, m.stopSampleSizeFactor, masterState, step, m.maxStep, stop) set (
+          (inputs, outputs) += islandState.array
+        )
+
+      val master =
+        MoleTask(appendSplit -- terminationTask) set (
+          exploredOutputs += islandState.array,
+          step := 0
+        )
+
+      val slave =
+        MoleTask(
+          ABC(
+            evaluation = m.evaluation,
+            prior = m.prior,
+            observed = m.observed,
+            sample = m.sample,
+            generated = m.generated,
+            minAcceptedRatio = m.minAcceptedRatio,
+            maxStep = m.islandSteps,
+            stopSampleSizeFactor = m.stopSampleSizeFactor,
+            seed = m.seed
+          )
+        )
+
+      val masterSlave =
+        MasterSlave(
+          SplitTask(masterState, islandState, m.parallelism),
+          master = master,
+          slave = slave,
+          state = Seq(masterState, step),
+          slaves = m.parallelism,
+          stop = stop
+        )
+
+      DSLContainer(masterSlave, output = Some(master), delegate = Vector(slave), method = ABC.ABCParameters(masterState, step, priorValue))
+    }
+  }
+
+  case class IslandABC(
+    evaluation:           DSL,
+    prior:                Seq[UnivariatePrior],
+    observed:             Seq[ABC.Observed[_]],
     sample:               Int,
     generated:            Int,
     parallelism:          Int,
@@ -107,64 +163,13 @@ package object abc {
     islandSteps:          Int                   = 1,
     seed:                 SeedVariable          = None,
     scope:                DefinitionScope       = "abc island"
-  ) = {
-    implicit def defScope = scope
+  )
 
-    val masterState = Val[MonAPMC.MonState]("masterState", abcNamespace)
-    val islandState = state
-
-    val step = Val[Int]("masterStep", abcNamespace)
-    val stop = Val[Boolean]
-
-    val n = sample + generated
-    val nAlpha = sample
-
-    val priorValue = IndependentPriors(prior)
-
-    val appendSplit = AppendSplitTask(n, nAlpha, masterState, islandState, step)
-    val terminationTask =
-      IslandTerminationTask(n, nAlpha, minAcceptedRatio, stopSampleSizeFactor, masterState, step, maxStep, stop) set (
-        (inputs, outputs) += islandState.array
-      )
-
-    val master =
-      MoleTask(appendSplit -- terminationTask) set (
-        exploredOutputs += islandState.array,
-        step := 0
-      )
-
-    val slave =
-      MoleTask(
-        ABC.apply(
-          evaluation = evaluation,
-          prior = prior,
-          observed = observed,
-          sample = sample,
-          generated = generated,
-          minAcceptedRatio = minAcceptedRatio,
-          maxStep = islandSteps,
-          stopSampleSizeFactor = stopSampleSizeFactor,
-          seed = seed
-        )
-      )
-
-    val masterSlave =
-      MasterSlave(
-        SplitTask(masterState, islandState, parallelism),
-        master = master,
-        slave = slave,
-        state = Seq(masterState, step),
-        slaves = parallelism,
-        stop = stop
-      )
-
-    DSLContainer(masterSlave, output = Some(master), delegate = Vector(slave), method = ABCParameters(masterState, step, priorValue))
-  }
-
-  implicit class ABCContainer(dsl: DSLContainer[ABCParameters]) extends MethodHookDecorator(dsl) {
-    def hook(directory: FromContext[File], frequency: Long = 1): DSLContainer[ABC.ABCParameters] = {
+  implicit class ABCContainer[M](m: M)(implicit method: ExplorationMethod[M, ABC.ABCParameters]) extends MethodHookDecorator(m) {
+    def hook(directory: FromContext[File], frequency: Long = 1): Hooked[M] = {
+      val dsl = method(m)
       implicit val defScope = dsl.scope
-      dsl hook ABCHook(dsl, directory, frequency)
+      Hooked(m, ABCHook(dsl.method, directory, frequency))
     }
   }
 

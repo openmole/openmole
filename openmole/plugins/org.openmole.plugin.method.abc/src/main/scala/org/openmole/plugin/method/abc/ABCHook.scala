@@ -6,15 +6,15 @@ import org.openmole.core.dsl.extension._
 
 object ABCHook {
 
-  def apply(abc: DSLContainer[ABC.ABCParameters], dir: FromContext[File], frequency: Long = 1)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(method: ABC.ABCParameters, dir: FromContext[File], frequency: Long = 1)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     Hook("ABCHook") { p ⇒
       import p._
 
-      if (context(abc.method.step) % frequency == 0) {
-        context(abc.method.state) match {
+      if (context(method.step) % frequency == 0) {
+        context(method.state) match {
           case MonAPMC.Empty() ⇒ ()
           case MonAPMC.State(_, s) ⇒
-            val step = context(abc.method.step)
+            val step = context(method.step)
 
             val filePath = dir / s"step${step}.csv"
             val file = filePath.from(context)
@@ -22,7 +22,7 @@ object ABCHook {
             val size = s.thetas.size
             val dim = s.thetas(0).size
 
-            val paramNames = abc.method.prior.v.map { _.name }
+            val paramNames = method.prior.v.map { _.name }
 
             val header =
               (Vector("epsilon,pAcc,t,ts,rhos,weight") ++
