@@ -60,14 +60,15 @@ object GAMATask {
   }
 
   def apply(
-    project:              File,
-    gaml:                  String,
+    project:                File,
+    gaml:                   String,
     experiment:             String,
     finalStep:              FromContext[Int],
     seed:                   OptionalArgument[Val[Long]]      = None,
     frameRate:              OptionalArgument[Int]            = None,
     install:                Seq[String]                      = Seq.empty,
-    containerImage:          ContainerImage                  = "gamaplatform/gama:1.8.1",
+    containerImage:         ContainerImage                   = "gamaplatform/gama:1.8.1",
+    memory:                 OptionalArgument[Information]    = None,
     version:                OptionalArgument[String]         = None,
     errorOnReturnValue:     Boolean                          = true,
     returnValue:            OptionalArgument[Val[Int]]       = None,
@@ -100,6 +101,7 @@ object GAMATask {
       seed = seed,
       frameRate = frameRate,
       image = preparedImage,
+      memory = memory,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
@@ -169,6 +171,7 @@ object GAMATask {
   seed:                 OptionalArgument[Val[Long]],
   frameRate:            OptionalArgument[Int],
   image:                PreparedImage,
+  memory:               OptionalArgument[Information],
   errorOnReturnValue:   Boolean,
   returnValue:          Option[Val[Int]],
   stdOut:               Option[Val[String]],
@@ -252,7 +255,11 @@ object GAMATask {
 
       val (_, volumes) = GAMATask.volumes(project, gaml)
 
-      def launchCommand = s"gama-headless -hpc 1 $inputFileName $outputDirectory"
+      def launchCommand =
+        memory.option match {
+          case None => s"gama-headless -hpc 1 $inputFileName $outputDirectory"
+          case Some(m) => s"gama-headless -m ${m.toMegabytes.toLong}m -hpc 1 $inputFileName $outputDirectory"
+      }
 
       newFile.withTmpDir { tmpOutputDirectory =>
         def containerTask =
