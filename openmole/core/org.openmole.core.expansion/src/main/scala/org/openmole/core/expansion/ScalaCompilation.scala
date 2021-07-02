@@ -258,7 +258,7 @@ object ScalaCompilation {
 
     def wrapOutput =
       s"""
-         |scala.jdk.CollectionConverters.MapHasAsJava(Map[String, Any]( ${outputs.toSeq.map(p ⇒ s""" "${p.name}" -> ${p.name}""").mkString(",")} )).asJava
+         |scala.jdk.CollectionConverters.MapHasAsJava(Map[String, Any]( ${outputs.toSeq.map(p ⇒ s""" "${p.name}" -> (${p.name}: ${toTypeString(p.`type`)})""").mkString(",")} )).asJava
          |""".stripMargin
 
   }
