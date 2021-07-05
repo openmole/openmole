@@ -38,7 +38,7 @@ It will bring up you web browser and you should see something like this:
 
 @br@br
 
-@img(src := Resource.img.mole.uiScreenshot.file, `class` := "uiScreenshot", center(100))
+@img(src := Resource.img.mole.uiScreenshot.file, `class` := "uiScreenshot", width := "100%")
 
 @br@br
 

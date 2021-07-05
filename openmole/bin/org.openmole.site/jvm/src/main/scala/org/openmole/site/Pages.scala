@@ -30,11 +30,7 @@ import scalatags.Text
 import PageTree._
 object Pages {
 
-  // Toutes les pages à la racine du site
-  val indexPage = Page("index", scalatex.Index(), title = Some("OpenMOLE: the Model Exploration Software"))
-  val index = pageNode(indexPage)
-
-  val all: Vector[PageTree] = (DocumentationPages.allPages :+ index).toVector
+  val all: Vector[PageTree] = DocumentationPages.allPages.toVector
 
   //def rawFile(page: Page) = page.location.mkString("_") + ".html"
   def file(page: Page) = java.net.URLEncoder.encode(page.location, "UTF-8") + ".html"

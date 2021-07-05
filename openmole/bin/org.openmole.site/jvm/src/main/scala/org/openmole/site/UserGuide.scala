@@ -21,14 +21,12 @@ import stylesheet._
 
 import scalatags.Text.all._
 import SideMenu._
-import org.openmole.site.tools.classIs
-import tools._
 
 import scalatags.Text.TypedTag
 
 object UserGuide {
 
-  val line = hr(classIs("line"), width := "90%", marginTop := 10)
+  val line = hr(tools.classIs("line"), width := "90%", marginTop := 10)
 
   implicit def fromPageTreeToLinks(pageTree: PageTree): Seq[Link] = pageTree.sons.map { s ⇒ Link(s.page.name, s.page.file) }
 
@@ -41,32 +39,32 @@ object UserGuide {
   def headerModel(model: String) = model match {
     case "Plug" ⇒ header(span(
       tools.to(DocumentationPages.plug)(img(src := Resource.img.model.codeAnimated.file, headerImg)),
-      span(s"Plug your model", classIs("h1"))
+      span(s"Plug your model", tools.classIs("h1"))
     ))
     case _ ⇒ header(span(
       tools.to(DocumentationPages.plug)(img(src := Resource.img.model.codeAnimated.file, headerImg)),
-      span(s"Plug your $model model", classIs("h1"))
+      span(s"Plug your $model model", tools.classIs("h1"))
     ))
   }
 
   def headerMethod(method: String) = method match {
     case "Explore" ⇒ header(span(
       tools.to(DocumentationPages.explore)(img(src := Resource.img.method.exploreMapAnimated.file, headerImg)),
-      span(s"Explore your model", classIs("h1"))
+      span(s"Explore your model", tools.classIs("h1"))
     ))
     case _ ⇒ header(span(
       tools.to(DocumentationPages.explore)(img(src := Resource.img.method.exploreMapAnimated.file, headerImg)),
-      span(s"Explore with $method", classIs("h1"))
+      span(s"Explore with $method", tools.classIs("h1"))
     ))
   }
 
   def headerEnvironment(env: String) = env match {
     case "Scale Up" ⇒ header(span(
       tools.to(DocumentationPages.scale)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
-      span(s"Scale up your experiments"), classIs("h1")))
+      span(s"Scale up your experiments"), tools.classIs("h1")))
     case _ ⇒ header(span(
       tools.to(DocumentationPages.scale)(img(src := Resource.img.environment.scaleAnimated.file, headerImg)),
-      span(s"Scale up on $env"), classIs("h1")
+      span(s"Scale up on $env"), tools.classIs("h1")
     ))
   }
 
@@ -113,7 +111,7 @@ object UserGuide {
       case p if (parents.contains(DocumentationPages.tutorials.name) || current.name == DocumentationPages.tutorials.name) ⇒ integratedPage(SideMenu.tutorials)
       case p if (parents.contains(DocumentationPages.OMcommunity.name) || current.name == DocumentationPages.OMcommunity.name) ⇒ integratedPage(SideMenu.community)
       case p if (parents.contains(DocumentationPages.download.name) || current.name == DocumentationPages.download.name) ⇒ integratedPage(SideMenu.download)
-      case _ ⇒ integratedPage(SideMenu(Seq.empty, classIs(btn, btn_primary)))
+      case _ ⇒ integratedPage(SideMenu(Seq.empty, tools.classIs(tools.btn, tools.btn_primary)))
     }
   }
 

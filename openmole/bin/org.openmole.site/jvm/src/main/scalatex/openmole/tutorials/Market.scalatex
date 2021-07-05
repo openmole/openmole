@@ -49,8 +49,7 @@ Not all examples are listed here, for a full list look at the GitHub @aa("reposi
 
 @br@br
 
-@img(src := Resource.img.guiGuide.market.file, center(95))
-
+@img(src := Resource.img.guiGuide.market.file, width := "95%")
 
 
 @h2{Contribute your example/tutorial!}

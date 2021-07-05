@@ -33,7 +33,7 @@ Once OpenMOLE is up and running in your browser, you should see the GUI:
 
 @br@br
 
-@img(src := Resource.img.guiGuide.emptyGUI.file, `class` := "uiScreenshot", center(100))
+@img(src := Resource.img.guiGuide.emptyGUI.file, `class` := "uiScreenshot", width := "100%")
 
 
 
@@ -48,7 +48,7 @@ The model wizard will automatically detect the language in which the file is wri
 
 @br@br
 
-@img(src := Resource.img.tutorial.modelImport.file, center(100))
+@img(src := Resource.img.tutorial.modelImport.file, width := "100%")
 
 
 
@@ -114,7 +114,7 @@ The execution panel will then open for you to monitor the execution, as shown be
 
 @br@br
 
-@img(src := Resource.img.tutorial.modelExecution.file, center(100))
+@img(src := Resource.img.tutorial.modelExecution.file, width := "100%")
 
 
 @h3{Model outputs}
@@ -123,7 +123,7 @@ Once the model execution is over, and since we asked in the workflow to @code{di
 
 @br@br
 
-@img(src := Resource.img.tutorial.modelOutput.file, center(100))
+@img(src := Resource.img.tutorial.modelOutput.file, width := "100%")
 
 
 

@@ -17,7 +17,7 @@ The files in OpenMOLE tasks have two main use cases:
   @li{they can be produced by a task @a("output files", href := fileManagement.file + "#Outputfiles").}
 
 @br
-@img(src := Resource.img.model.fileMapping.file, center(100))
+@img(src := Resource.img.model.fileMapping.file, width := "100%")
 
 
 
@@ -30,7 +30,7 @@ In OpenMOLE, there are two behaviors when it comes to manipulating input files a
 
 
 @h3{External Tasks}
-In order to provide files to that kind of tasks (Python, R, NetLogo, ...), OpenMOLE needs to copy the file to a known path on the local hard drive and feed it to the task during execution.
+In order to provide files to that kind of tasks (Python, R, NetLogo, ...), OpenMOLE needs to copy the file to a known path on the local hard drive and feed it to the task during execution.
 
 @h6{Resources}
 To provide a file as a resource to a task, it first needs to be uploaded to your working directory in the GUI (see @a("here", href := gui.file + "#FileManagement") for more info on how to do this).

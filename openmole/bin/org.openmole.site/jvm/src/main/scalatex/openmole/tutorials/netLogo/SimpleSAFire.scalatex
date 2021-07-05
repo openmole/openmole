@@ -17,7 +17,7 @@ val burned = Val[Double]
 Typical Sensitivity analysis (in a simulation experiment  context) is the study of how the variation of an input
 affect the output(s) of a model. Basically it
 
-@img(src := Resource.img.method.sensitivityAnim.file, stylesheet.center(80))
+@img(src := Resource.img.method.sensitivityAnim.file, width := "80%")
 
 @basicButton("Run", classIs(btn, btn_danger))(id := shared.sensitivity.button, stylesheet.svgRunButton(10))
 
@@ -72,7 +72,7 @@ val exploration =
 @break
 This is the resulting scatterplot of Number of burned trees according to density varying from 20% to 80% by 1% steps.
 @br@br
-@img(src := Resource.img.method.densityBurned.file, stylesheet.center(80))
+@img(src := Resource.img.method.densityBurned.file, width := "80%")
 
 @br
 The change of regime clearly appears between 50% and 75% percent density, so we are going to take a closer look at this domain: we change the exploration task to have the density taken from 50% to 75% by step of 0.1%, still with 10 replications:
@@ -90,7 +90,7 @@ The change of regime clearly appears between 50% and 75% percent density, so we 
 This gives us the following scatter plot, where we added a summary curve (using the geom_smooth() function from @a("ggplot2 R library", href:=shared.link.ggplot2)) which acts like a smoother, giving the statistical trend of the Y-Axis values of points along the X-axis.
 
 @br@br
-@img(src := org.openmole.site.Resource.img.method.densityBurnedZoom.file, stylesheet.center(80))
+@img(src := org.openmole.site.Resource.img.method.densityBurnedZoom.file, width := "80%")
 
 @br
 
@@ -119,7 +119,7 @@ We obtain the following results, displayed as boxplots every percent (but result
 
 @br@br
 
-@img(src := Resource.img.method.densitySeedBox.file, stylesheet.center(80))
+@img(src := Resource.img.method.densitySeedBox.file, width := "80%")
 
 
 @br

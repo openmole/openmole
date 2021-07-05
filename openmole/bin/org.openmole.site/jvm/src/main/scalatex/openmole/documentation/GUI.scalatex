@@ -22,7 +22,7 @@ This should change in version 8 or 9.
 
 @br@br
 
-@img(src := Resource.img.guiGuide.overview.file, center(100))
+@img(src := Resource.img.guiGuide.overview.file, width := "100%")
 
 
 
@@ -56,7 +56,7 @@ However, you may sometimes want to make some modifications if you observe the sy
 
 @br@br
 
-@img(src := Resource.img.guiGuide.modelImport.file, center(100))
+@img(src := Resource.img.guiGuide.modelImport.file, width := "100%")
 
 @br@br
 
@@ -104,7 +104,7 @@ These files are managed in a file system located in the left sidebar. This side 
 
 @br@br
 
-@img(src := Resource.img.guiGuide.files.file, center(90))
+@img(src := Resource.img.guiGuide.files.file, width := "90%")
 
 @br@br
 
@@ -155,7 +155,7 @@ At any time this execution panel can be closed (without aborting the current run
 
 @br@br
 
-@img(src := Resource.img.guiGuide.running.file, center(100))
+@img(src := Resource.img.guiGuide.running.file, width := "100%")
 
 @br@br
 
@@ -193,7 +193,7 @@ The currently supported authentications are:
 
 @br
 
-@img(src := Resource.img.guiGuide.authentication.file, center(100))
+@img(src := Resource.img.guiGuide.authentication.file, width := "100%")
 
 @br@br
 
@@ -221,4 +221,4 @@ Once uploaded, the plugin appears in the list.
 
 @br@br
 
-@img(src := Resource.img.guiGuide.plugin.file, center(100))
+@img(src := Resource.img.guiGuide.plugin.file, width := "100%")
