@@ -134,7 +134,7 @@ The computed calibration profiles may take very diverse shapes depending on the 
 The most typical shapes are shown on the figure bellow.
 
 @br@br
-@img(src := Resource.img.method.profileInterpretation.file, center(70))
+@img(src := Resource.img.method.profileInterpretation.file, width := "70%")
 @br
 
 @ul

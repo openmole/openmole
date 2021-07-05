@@ -19,14 +19,10 @@ A new sentence for a new line.
 
 A new paragraph opening for a code example:
 
-@br@br
-
 @hl.openmole("""
   // Define variables i and j of type Int
   val i = Val[Int]
   val j = Val[Int]""")
-
-@br
 
 Some text after the code bit.
 

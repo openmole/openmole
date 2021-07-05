@@ -35,7 +35,7 @@ However, the number of objectives (output dimensionality) should be limited to a
 
 @br@br
 @figure
- @img(src := Resource.img.method.calibrationMono.file, center(70))
+ @img(src := Resource.img.method.calibrationMono.file, width := "70%")
 @br
 
 Single criterion calibration answers the following question: for a given target value of the output @b{o1}, what is(are) the parameter set(s) @b{(i, j , k)} producing the output value(s) closest to the target?
@@ -55,7 +55,7 @@ This is not genuine sensitivity as in sensitivity analysis, but still, it outlin
 
 @br@br
 @figure
-  @img(src := Resource.img.method.calibrationMulti.file, center(70))
+  @img(src := Resource.img.method.calibrationMulti.file, width := "70%")
 @br
 
 Multi criteria calibration answers the following question: for a given target pattern @b{(o1,o2)}, what are the parameter sets @b{(i,j)} that produce the closest output values to the target pattern ?

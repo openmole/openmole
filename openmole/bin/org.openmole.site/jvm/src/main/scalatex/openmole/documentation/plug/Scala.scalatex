@@ -8,8 +8,6 @@
 
 You can write Scala code to be executed in the workflow using the @code("ScalaTask"). For instance, the following workflow sums all the elements of an array using a @code("ScalaTask"), and displays the result. Similarly, you could use such a task to generate some model parameter values or perform some data analysis. To get more details on the hook part you can check the doc on @aa("hooks", href := hook.file).
 
-@br@br
-
 @hl.openmole("""
     // Define variables
     val array = Val[Array[Double]]
@@ -28,14 +26,12 @@ You can write Scala code to be executed in the workflow using the @code("ScalaTa
     sum hook display
 """)
 
-@br
-
 You can also plug you own Scala/Java code and libraries in OpenMOLE using an OpenMOLE @a("Plugin", href := pluginDevelopment.file).
 
 
 @h3("Useful functions")
 
-In addition to Scala code, OpenMOLE provides @aa("a few useful functions", href := scalaFunction.file) to aggregate data, create files, create random number generators, etc.
+In addition to Scala code, OpenMOLE provides @aa("a few useful functions", href := scalaFunction.file) to aggregate data, create files, create random number generators, etc.
 
 
 @h3("File Management")

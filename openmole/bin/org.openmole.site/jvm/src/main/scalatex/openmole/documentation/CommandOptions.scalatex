@@ -10,7 +10,7 @@
 
 The default way to run the OpenMOLE application is with a graphical user interface (GUI).
 To do so, just execute the @code{openmole} file in the folder you @aa("downloaded", href := download.file), it will bring up the application in your web browser.
-OpenMOLE supports Chrome and Firefox, so if you are using another default web browser please copy paste the OpenMOLE url @b{http://localhost:[port]} in one of these browsers.
+OpenMOLE supports Chrome and Firefox, so if you are using another default web browser please copy paste the OpenMOLE url @b{http://localhost:[port]} in one of these browsers.
 
 @br
 
@@ -19,7 +19,7 @@ The documentation concerning the GUI is provided within the GUI, some basic info
 
 @br@br
 
-@img(src := Resource.img.mole.uiScreenshot.file, center(100))
+@img(src := Resource.img.mole.uiScreenshot.file, width := "100%")
 
 
 

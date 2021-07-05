@@ -1,7 +1,6 @@
 package org.openmole.site
 
 import scalatags.Text.all._
-import org.openmole.site.tools._
 import stylesheet._
 
 /*
@@ -23,7 +22,7 @@ import stylesheet._
 
 object Main {
 
-  private def readMore(page: Page) = pageLinkButton("Read more", page, false, Seq(classIs(btn, btn_default), marginTop := 20))
+  private def readMore(page: Page) = tools.pageLinkButton("Read more", page, false, Seq(tools.classIs(tools.btn, tools.btn_default), marginTop := 20))
 
   def build = {
 
@@ -32,11 +31,11 @@ object Main {
     def scaleText = "Scale up your experiments easily on servers, clusters, grids, clouds..."
 
     def desktop = {
-      def colTag: Seq[Modifier] = Seq(classIs("col-md-4"), attr("align") := "center")
-      def rowTag: Seq[Modifier] = Seq(classIs(row))
+      def colTag: Seq[Modifier] = Seq(cls := "col-md-4", attr("align") := "center")
+      def rowTag: Seq[Modifier] = Seq(cls := tools.row)
 
-      div(classIs(container_fluid), paddingTop := 80, paddingBottom := 80)(
-        div(classIs(row + " centered-form center-block"))(
+      div(cls := tools.container_fluid, paddingTop := 80, paddingBottom := 80)(
+        div(cls := tools.row + " centered-form center-block")(
           div(rowTag, paddingBottom := 5)(
             div(colTag)(img(src := Resource.img.model.code.file, width := 120)),
             div(colTag)(img(src := Resource.img.method.exploreMap.file, width := 120)),
@@ -63,11 +62,11 @@ object Main {
     }
 
     def mobile = {
-      def colTag: Seq[Modifier] = Seq(classIs("col"), attr("align") := "center")
-      def rowTag: Seq[Modifier] = Seq(classIs(row))
+      def colTag: Seq[Modifier] = Seq(cls := "col", attr("align") := "center")
+      def rowTag: Seq[Modifier] = Seq(cls := tools.row)
 
-      div(classIs(container_fluid), paddingTop := 50, paddingBottom := 20)(
-        div(classIs(row + " centered-form center-block"))(
+      div(cls := tools.container_fluid, paddingTop := 50, paddingBottom := 20)(
+        div(cls := tools.row + " centered-form center-block")(
           div(rowTag)(
             div(colTag, paddingBottom := 30)(
               div(rowTag)(img(src := Resource.img.model.code.file, width := 120)),
@@ -93,8 +92,8 @@ object Main {
     }
 
     div(
-      div(classIs("visible-lg visible-md"))(desktop),
-      div(classIs("hidden-lg hidden-md"))(mobile)
+      div(cls := "visible-lg visible-md")(desktop),
+      div(cls := "hidden-lg hidden-md")(mobile)
     )
 
   }

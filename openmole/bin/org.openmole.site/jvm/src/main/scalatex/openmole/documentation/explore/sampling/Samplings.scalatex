@@ -29,7 +29,7 @@ You may recognize the @i{map reduce} design pattern, provided that an aggregatio
 
 @br@br
 
-@img(src := Resource.img.method.directSampling.file, center(50))
+@img(src := Resource.img.method.directSampling.file, width := "50%")
 
 
 @h3{Sampling over several inputs}

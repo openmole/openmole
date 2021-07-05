@@ -104,7 +104,7 @@ You can click on it.
 
 @br@br
 
-@img(src := Resource.img.tutorial.repliOutput.file, center(50))
+@img(src := Resource.img.tutorial.repliOutput.file, width := "50%")
 
 @br
 
@@ -201,7 +201,7 @@ You can then use the results to better understand how your model behaves.
 
 @br@br
 
-@img(src := Resource.img.tutorial.gridOutput.file, center(75))
+@img(src := Resource.img.tutorial.gridOutput.file, width := "75%")
 
 
 

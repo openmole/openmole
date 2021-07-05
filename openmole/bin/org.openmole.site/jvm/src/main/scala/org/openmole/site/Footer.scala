@@ -2,7 +2,6 @@ package org.openmole.site
 
 import scalatags.Text.{ TypedTag, tags2 }
 import scalatags.Text.all._
-import org.openmole.site.tools._
 
 /*
  * Copyright (C) 28/06/17 // mathieu.leclaire@openmole.org
@@ -57,27 +56,27 @@ object Footer {
       div(stylesheet.footer)(
         div(
           div(id := "footer")(
-            div(classIs("inner-footer"))(
-              div(classIs(s"$row"))(
-                div(classIs(colMD(3)), footerColStyle)(
+            div(cls := "inner-footer")(
+              div(cls := s"${tools.row}")(
+                div(cls := tools.colMD(3), footerColStyle)(
                   span("Community", textAlign := "center", fontWeight := 700),
                   imgSubItem(Resource.img.footer.email, "Forum", shared.link.mailingList),
                   imgSubItem(Resource.img.footer.chat, "Chat", shared.link.chat),
                   imgSubItem(Resource.img.footer.faq, "FAQ", DocumentationPages.faq.file, false)
                 ),
-                div(classIs(colMD(3)), footerColStyle)(
+                div(cls := tools.colMD(3), footerColStyle)(
                   span("Development", textAlign := "center", fontWeight := 700),
                   imgSubItem(Resource.img.footer.previousVersion, "Changes", DocumentationPages.releaseNotes.file, false),
                   imgSubItem(Resource.img.footer.github, "Sources", shared.link.repo.openmole),
                   imgSubItem(Resource.img.footer.contribute, "Join us!", DocumentationPages.howToContribute.file, false)
                 ),
-                div(classIs(colMD(3)), footerColStyle)(
+                div(cls := tools.colMD(3), footerColStyle)(
                   span("About us", textAlign := "center", fontWeight := 700),
                   imgSubItem(Resource.img.footer.paper, "Papers", DocumentationPages.communications.file, false),
                   imgSubItem(Resource.img.footer.whoarwe, "Team", DocumentationPages.whoWeAre.file, false),
                   imgSubItem(Resource.img.footer.partner, "Partners", DocumentationPages.partner.file, false)
                 ),
-                div(classIs(colMD(3)), footerColStyle)(
+                div(cls := tools.colMD(3), footerColStyle)(
                   span("Communication", textAlign := "center", fontWeight := 700),
                   imgSubItem(Resource.img.footer.blog, "School", shared.link.exmodelo),
                   imgSubItem(Resource.img.footer.twitter, "Twitter", shared.link.twitter),
