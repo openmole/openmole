@@ -287,13 +287,15 @@ object DocumentationPages {
   lazy val stochasticityManagement = DocumentationPage.fromScalatex(name = "Stochasticity Management", content = scalatex.documentation.advancedConcepts.GA.StochasticityManagement)
 
   // Developers
-  def developersPages = pageNode(developers, Vector(console, pluginDevelopment, extensionAPI, restAPI))
+  def developersPages = pageNode(developers, Vector(console, pluginDevelopment, extensionAPI, restAPI, documentationGen))
 
   lazy val developers = DocumentationPage.fromScalatex(name = "Developers", content = scalatex.documentation.developers.Developers, title = Some("Advanced Concepts for Developers"))
   lazy val console = DocumentationPage.fromScalatex(name = "Console Mode", content = scalatex.documentation.developers.Console)
   lazy val pluginDevelopment = DocumentationPage.fromScalatex(name = "Plugin Development", content = scalatex.documentation.developers.PluginDevelopment)
   lazy val restAPI = DocumentationPage.fromScalatex(name = "Rest API", content = scalatex.documentation.developers.RESTAPI)
   lazy val extensionAPI = DocumentationPage.fromScalatex(name = "Extension API", content = scalatex.documentation.developers.ExtensionAPI)
+
+  lazy val documentationGen = DocumentationPage.fromScalatex(name = "Documentation generation", content = scalatex.documentation.developers.DocumentationGen)
 
   // Tutorials
   def tutoPages = pageNode(tutorials, Vector(stepByStepIntro, exploreTuto, simpleSAFire, netLogoGA, market))

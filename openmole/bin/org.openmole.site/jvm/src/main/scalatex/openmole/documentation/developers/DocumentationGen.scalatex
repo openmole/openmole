@@ -1,0 +1,40 @@
+
+@import org.openmole.site.tools._
+@import org.openmole.site._
+
+@h2{Get ready}
+
+You will need the following tools to design your plugin:
+@ul
+    @li
+        The @aa("git", href := shared.link.git) software.
+    @li
+        @aa("SBT", href := shared.link.sbt), the Scala Building Tool.
+
+The first step is to clone the github repository for OpenMOLE :
+
+@br@br
+
+@hl.code("""
+git clone https://gitlab.openmole.org/openmole/openmole.git
+""")
+
+In order to generate documentation with scalaTex, openMole need some libraries.
+Into your recent openmole cloned folder, call these three commands to compile libraries :
+
+@hl.code("""
+git lfs fetch
+(cd build-system && sbt publishLocal)
+(cd libraries && sbt publishLocal)
+""")
+
+@h2{Compiling documentation}
+
+You're ready to compile the actual documentation.
+Using @code{cd} command, move to @code{/openmole/openmole} and run sbt using @code{sbt buildSite}
+
+@br
+
+The generated site is visible by opening @code{openmole/openmole/bin/org.openmole.site/jvm/target/site/index.html} in your browser !
+
+
