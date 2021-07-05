@@ -13,7 +13,7 @@ You will need the following tools to design your plugin:
 
 The first step is to clone the github repository for OpenMOLE :
 
-@br@br
+@br
 
 @hl.code("""
 git clone https://gitlab.openmole.org/openmole/openmole.git
@@ -30,10 +30,11 @@ git lfs fetch
 
 @h2{Compiling documentation}
 
-You're ready to compile the actual documentation.
-Using @code{cd} command, move to @code{/openmole/openmole} and run sbt using @code{sbt buildSite}
-
-@br
+You're now ready to compile the actual documentation. Move into openmole (nested) folder and run sbt to generate website :
+@hl.code("""
+cd openmole
+sbt buildSite
+""")
 
 The generated site is visible by opening @code{openmole/openmole/bin/org.openmole.site/jvm/target/site/index.html} in your browser !
 
