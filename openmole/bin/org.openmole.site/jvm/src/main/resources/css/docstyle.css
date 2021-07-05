@@ -460,3 +460,7 @@ code,
     margin-right: auto;
     display := "block";
 }
+
+.doc-br {
+    margin-bottom: 20px;
+}

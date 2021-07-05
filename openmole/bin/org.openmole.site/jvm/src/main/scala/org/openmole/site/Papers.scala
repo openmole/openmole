@@ -20,9 +20,8 @@ package org.openmole.site
 package object Papers {
 
   import scalatags.Text.all._
-  import org.openmole.site.tools._
 
-  lazy val frontiers2017 = paragraph(
+  lazy val frontiers2017 = tools.paragraph(
     "Jonathan Passerat-Palmbach, Romain Reuillon, Mathieu Leclaire, Antonios Makropoulos, Emma C. Robinson, Sarah Parisot and Daniel Rueckert, ",
     b("Reproducible Large-Scale Neuroimaging Studies with the OpenMOLE Workflow Management System"),
     ", published in ", i("Frontiers in Neuroinformatics"), " Vol 11, 2017.",
