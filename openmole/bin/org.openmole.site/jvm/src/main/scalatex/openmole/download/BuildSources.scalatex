@@ -11,7 +11,7 @@
 You will need the following tools to get a local copy of OpenMOLE running:
 @ul
     @li
-        A java 8 (or higher) @b{JDK} (N.B. not only the JRE!). Check your version by typing @code{javac -version} in a terminal.
+        A Java 11 (or higher) @b{JDK} (N.B. not only the JRE!). Check your version by typing @code{javac -version} in a terminal.
     @li
         The @aa("git", href := shared.link.git) software and the @aa("LFS", href := shared.link.gitlfs) extension.
     @li
@@ -26,8 +26,6 @@ As a suggestion, we recommend the @aa("IntelliJ IDE", href := shared.link.intell
 
 Clone the OpenMOLE repository by typing the following in your command shell (prompt $>):
 
-@br@br
-
 @hl("""
 $> git lfs install
 $> git lfs clone git@github.com:openmole/openmole.git
@@ -39,25 +37,19 @@ $> git lfs clone git@github.com:openmole/openmole.git
 
 @h3{Build from sources}
 @h6{For the first time}
-To build the OpenMOLE application for the first time after cloning it, execute the @code{build.sh} script inside the openmole directory that you just cloned.
-
-@br@br
+To build the OpenMOLE application for the first time after cloning it, execute the @code{build.sh} script inside the OpenMOLE directory that you just cloned.
 
 @hl("""
 $> cd openmole
 $> ./build.sh
 """, "plain")
 
-@br
-
-Upon successful completion, the executable is placed under @code{openmole/bin/openmole/target/assemble} and is launched as any executable via the @code{./openmole} command.
+Upon successful completion, the executable is placed under @i{openmole/bin/openmole/target/assemble} and is launched as any executable via the @code{./openmole} command.
 The app should then pop up in your default web browser, the URL should be something like @code{http://localhost:44961/app}.
 
 
 @h6{Re-build the project after an update}
-In order to apply the changes after you updated your openmole version (by doing a @code{git pull} of the project for instance), you need to run successively the @code{clean.sh} and @code{build.sh} scripts.
-
-@br@br
+In order to apply the changes after you updated your OpenMOLE version (by doing a @code{git pull} of the project for instance), you need to run successively the @code{clean.sh} and @code{build.sh} scripts.
 
 @hl("""
 $> ./clean.sh
@@ -68,13 +60,11 @@ $> ./build.sh
 @h3{Create a standalone archive}
 
 You can create a standalone archive of your fresh OpenMOLE build and ship it around by using @code{sbt openmole:tar}.
-You will find the resulting archive in @code{bin/openmole/target/openmole.tar.gz}.
+You will find the resulting archive in @i{bin/openmole/target/openmole.tar.gz}.
 
-@br@br
+@br
 
 Publish the bundles:
-
-@br@br
 
 @hl("""
 $> cd build-system
@@ -87,10 +77,8 @@ $> sbt publish""", "plain")
 
 @h3{Compile within Docker}
 
-An easy way to get an OpenMOLE compilation environment up and running is to use docker.
-Once docker is installed on your machine you can do:
-
-@br@br
+An easy way to get an OpenMOLE compilation environment up and running is to use Docker.
+Once Docker is installed on your machine you can do:
 
 @hl("""
 $> git clone """ + shared.link.repo.openMOLEDockerBuild +
@@ -102,6 +90,4 @@ clone
 compile
 """, "plain")
 
-@br
-
-You can now find the compiled OpenMOLE app in @code{/a/local/path/on/your/system/openmole/openmole/bin/openmole/target/assemble/}.
+You can now find the compiled OpenMOLE app in @i{/a/local/path/on/your/system/openmole/openmole/bin/openmole/target/assemble/}.

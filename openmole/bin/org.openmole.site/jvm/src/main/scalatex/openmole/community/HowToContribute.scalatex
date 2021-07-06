@@ -12,10 +12,7 @@ This page is dedicated to explaining the organization of the project, the tools 
 @h2{Contribution procedure}
 
 When you want to contribute to the project (code or documentation) or if you've identified a bug in OpenMOLE, we recommend that you to start by submitting an @aa("issue", href := shared.link.issue), so that the community can identify the nature of the potential caveat.
-
-@br
-
-After that, send a @aa("pull request", href := shared.link.pullRequests) so that your potential changes can be discussed.
+After that, you can send a @aa("pull request", href := shared.link.pullRequests) so that your potential changes can be discussed.
 
 
 @h3{Create a pull request}
@@ -23,7 +20,7 @@ After that, send a @aa("pull request", href := shared.link.pullRequests) so that
 To create a pull request, you would have to:
 @ul
   @li
-    apply the @a("first time setup", href := buildSources.file) of the OpenMOLE development environment,
+    apply the @aa("first time setup", href := buildSources.file) of the OpenMOLE development environment,
   @li
     fork the repository of interest in GitHub: use the fork button in the original repository and fork it into your own GitHub account,
   @li
@@ -42,8 +39,6 @@ Everything about pull requests is explained on the @aa("help pages", href := sha
 The source code of the website is hosted along the documentation in the OpenMOLE repository.
 Here's how to build a local copy of the website/documentation.
 
-@br@br
-
 @hl("""
 $> cd openmole/openmole
 $> sbt
@@ -51,8 +46,6 @@ $> sbt
 
 Once sbt is launched, use the @code{buildSite} command inside sbt to build the webpages.
 Location of the generated pages can be set via the @code{--target} option, e.g.
-
-@br@br
 
 @hl("""
 buildSite --target /tmp/
@@ -67,15 +60,12 @@ If so, you're more than welcomed to correct our mistakes and improve the documen
 @br
 
 First, make your changes locally on your clone of the OpenMOLE repo, then check your changes by building the website as explained above.
-If everything works as it should and you're happy with your changes, send us a @aa("Pull Request", href := shared.link.pullRequests) on github (all about pull requests @aa("here", href := shared.link.howToPR)).
-
-@br@br
-
-By default, @b{website pages} are located in @code{openmole/openmole/bin/org.openmole.site/jvm/target/site/}.
+If everything works as it should and you're happy with your changes, send us a @aa("Pull Request", href := shared.link.pullRequests) on GitHub (all about pull requests @aa("here", href := shared.link.howToPR)).
 
 @br
 
-Sources for the @b{documentation pages} are located in @code{openmole/openmole/bin/org.openmole.site/jvm/src/main/scalatex/openmole}.
+By default, @b{website pages} are located in @i{openmole/openmole/bin/org.openmole.site/jvm/target/site/}.
+Sources for the @b{documentation pages} are located in @i{openmole/openmole/bin/org.openmole.site/jvm/src/main/scalatex/openmole}.
 They are written using @aa("scalatex", href:=shared.link.scalatex), a DSL to generate html content.
 
 
@@ -108,14 +98,11 @@ OpenMOLE is made of three different projects:
 
 The development version of the OpenMOLE website and software is compiled and distributed several times an hour at @aa(shared.link.next, href := shared.link.next).
 
-@br@br
+@br
 
 OpenMOLE applies a branching model derived from @aa("Vincent Driessen's", href := shared.link.branchingModel).
 The advantage of this model is that new features are tested early in interaction with each other.
 This scheme serves an hybrid, date-based/feature-based release schedule.
-
-@br
-
 At the beginning of a development cycle, an approximate date is given for the next release.
 This date depends on the new features planned for this milestone, and it is flexible and can be modulated given the progress of the new developments.
 
@@ -126,13 +113,11 @@ This date depends on the new features planned for this milestone, and it is flex
 @h3{Error: You are not allowed to push code to this project}
 
 First ensure you respect the @a("contribution procedure", href := anchor("Contribution procedure")) and the @a("branching model", href := anchor("Branching model")).
-You should not try to push directly to the openmole repository, but to your github fork of the repository instead.
+You should not try to push directly to the OpenMOLE repository, but to your GitHub fork of the repository instead.
 
 @br
 
 You can identify more precisely the git error by activating debug in the git command:
-
-@br@br
 
 @hl("""$> GIT_TRACE=1 GIT_CURL_VERBOSE=1 git push <remote_repo> <branch_name>""", "plain")
 
@@ -140,8 +125,6 @@ You can identify more precisely the git error by activating debug in the git com
 @h3{Error: git-lfs [...] You are not allowed to push code to this project}
 
 When pushing your updates to the fork, you might encounter this error:
-
-@br@br
 
 @hl("""
 $> GIT_TRACE=1 GIT_CURL_VERBOSE=1 git push <remote_repo> <branch_name>
@@ -151,21 +134,15 @@ batch request: GitLab: You are not allowed to push code to this project.: exit s
 error: impossible de pousser des références vers 'https://github.com/<your_username>/openmole.git'
 """, "plain")
 
-@br
-
 In this case, the push is failing when git lfs attempts to update the binaries referenced in the git repository into the ISCPIF gitlab.
 If you did not change the binaries, you might just skip that step by using the following on the command line:
-
-@br@br
 
 @hl("""$> git push --no-verify <remote_repo> <branch_name>""", "plain")
 
 
-@h3{Error: openmole compiles but fails at runtime because of a package not found}
+@h3{Error: OpenMOLE compiles but fails at runtime because of a package not found}
 
 Try a clean and complete rebuild:
-
-@br@br
 
 @hl("""
 $> ./clean.sh
@@ -177,5 +154,5 @@ $> ./build.sh""", "plain")
 
 For developers support, remember you can get in touch with the community via:
 @ul
-  @li{ the @a("chat", href := shared.link.chat) in channel "openmole-dev" }
-  @li{ the @a("OpenMOLE user forum", href := shared.link.mailingList) }
+  @li{ the @a("chat", href := shared.link.chat) in channel "dev" }
+  @li{ the @a("OpenMOLE user forum", href := shared.link.forum) }

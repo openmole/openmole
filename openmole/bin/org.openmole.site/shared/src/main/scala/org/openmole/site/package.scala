@@ -61,7 +61,7 @@ package object shared {
 
     // Community
     lazy val contact = "contact@openmole.org"
-    lazy val mailingList = "http://ask.openmole.org"
+    lazy val forum = "http://ask.openmole.org"
     lazy val chat = "https://chat.openmole.org/channel/general"
     lazy val blog = "https://blog.openmole.org"
     lazy val openMOLEWiki = "https://github.com/openmole/openmole/wiki"
@@ -208,7 +208,7 @@ package object shared {
     blog,
     chat,
     simpluDemo,
-    mailingList,
+    forum,
     shortTrainings,
     longTrainings,
     egi,
