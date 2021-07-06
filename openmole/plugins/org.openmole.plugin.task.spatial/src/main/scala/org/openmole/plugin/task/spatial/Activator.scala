@@ -1,5 +1,5 @@
 
-package org.openmole.plugin.sampling.spatial
+package org.openmole.plugin.task.spatial
 
 import org.openmole.core.pluginregistry.PluginRegistry
 import org.osgi.framework.{ BundleActivator, BundleContext }
@@ -14,12 +14,12 @@ class Activator extends BundleActivator {
 
     val keyWords: Vector[HighLight] =
       Vector(
-        SamplingHighLight(objectName(RandomSpatialSampling)),
+        SamplingHighLight(objectName(RandomSpatialSamplingTask)),
         SamplingHighLight(objectName(ExponentialMixtureSpatialSampling)),
-        SamplingHighLight(objectName(ReactionDiffusionSpatialSampling)),
-        SamplingHighLight(objectName(BlocksGridSpatialSampling)),
-        SamplingHighLight(objectName(PercolationGridSpatialSampling)),
-        SamplingHighLight(objectName(ExpMixtureThresholdSpatialSampling))
+        SamplingHighLight(objectName(ReactionDiffusionSpatialTask)),
+        SamplingHighLight(objectName(BlocksGridSpatialSamplingTask)),
+        SamplingHighLight(objectName(PercolationGridSpatialSamplingTask)),
+        SamplingHighLight(objectName(ExpMixtureThresholdSpatialSamplingTask))
       )
 
     PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords)

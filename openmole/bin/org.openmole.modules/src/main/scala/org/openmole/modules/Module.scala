@@ -18,6 +18,7 @@
 package org.openmole.modules
 
 import org.openmole.core.module._
+import org.openmole.plugin.task.spatial.SpatialSampling
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
 
@@ -52,7 +53,7 @@ object module {
       ModuleEntry("CSVSampling", "Generate sampling using CSV files", components(org.openmole.plugin.sampling.csv.CSVSampling), sampling),
       ModuleEntry("LHS", "Generate Latin Hypercube Sampling", components(org.openmole.plugin.sampling.lhs.LHS), sampling),
       ModuleEntry("QuasiRandom", "Generate sampling using low-discrepency sequences", components(org.openmole.plugin.sampling.quasirandom.SobolSampling), sampling),
-      ModuleEntry("QuasiRandom", "Generate spatial samplings", components(org.openmole.plugin.sampling.spatial.SpatialSampling), sampling),
+      ModuleEntry("QuasiRandom", "Generate spatial samplings", components(SpatialSampling), sampling),
       ModuleEntry("Evolution", "Explore/calibrate models using evolutionary algorithms", components(org.openmole.plugin.method.evolution.NSGA2), method),
       ModuleEntry("ABC", "Calibrate models using bayesian algorithms", components(org.openmole.plugin.method.abc.ABC), method),
       ModuleEntry("Sensitivity", "Statistical sensitivity analisys", components(org.openmole.plugin.method.sensitivity.SensitivityMorris), method)

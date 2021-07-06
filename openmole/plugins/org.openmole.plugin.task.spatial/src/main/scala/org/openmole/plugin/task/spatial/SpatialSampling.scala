@@ -1,13 +1,9 @@
 
 
-package org.openmole.plugin.sampling.spatial
+package org.openmole.plugin.task.spatial
 
-import com.google.common.collect.DiscreteDomain
-import org.openmole.core.context.{ Val, Variable }
-import org.openmole.core.expansion._
-import org.openmole.core.workflow.domain.{ DiscreteFromContextDomain }
-import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.tools.{ OptionalArgument, ScalarOrSequenceOfDouble }
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 import org.openmole.spatialsampling._
 
 object SpatialSampling {
@@ -50,7 +46,7 @@ object SpatialSampling {
 
 }
 
-object ExpMixtureThresholdSpatialSampling {
+object ExpMixtureThresholdSpatialSamplingTask {
 
   /**
    * Sampling of binary density grids with a thresholded exponential mixture. Parameters are randomly sampled.
@@ -61,10 +57,11 @@ object ExpMixtureThresholdSpatialSampling {
    * @param threshold threshold for the binary grid (max of kernels is at 1)
    */
   def apply(
+    grid:      Val[Array[Array[Double]]],
     gridSize:  FromContext[Int],
     center:    FromContext[Int],
     radius:    FromContext[Double],
-    threshold: FromContext[Double]) = FromContext { p ⇒
+    threshold: FromContext[Double])(implicit scope: DefinitionScope) = Task("ExpMixtureThresholdSpatialSamplingTask") { p ⇒
     import p._
 
     val size = gridSize.from(context)
@@ -73,12 +70,17 @@ object ExpMixtureThresholdSpatialSampling {
     val r = radius.from(context)
     val t = threshold.from(context)
 
-    Generation.expMixtureGrid(Left(size), nc, 1.0, r)(random()).map { _.map { d ⇒ if (d > t) 1.0 else 0.0 } }
-  }
+    Context(
+      grid -> Generation.expMixtureGrid(Left(size), nc, 1.0, r)(random()).map { _.map { d ⇒ if (d > t) 1.0 else 0.0 } }
+    )
+  } set (
+    inputs ++= gridSize.inputs ++ center.inputs ++ radius.inputs ++ threshold.inputs,
+    outputs += grid
+  ) withValidate (gridSize.validate ++ center.validate ++ radius.validate ++ threshold.validate)
 
 }
 
-object PercolationGridSpatialSampling {
+object PercolationGridSpatialSamplingTask {
 
   /**
    * Binary density grids through network percolation
@@ -89,12 +91,13 @@ object PercolationGridSpatialSampling {
    * @param linkWidth size of links
    */
   def apply(
+    grid:         Val[Array[Array[Double]]],
     gridSize:     FromContext[Int],
     percolation:  FromContext[Double],
     bordPoint:    FromContext[Int],
     linkWidth:    FromContext[Double],
-    maxIteration: Int                 = 10000
-  ) = FromContext { p ⇒
+    maxIteration: Int                       = 10000
+  )(implicit scope: DefinitionScope) = Task("PercolationGridSpatialSamplingTask") { p ⇒
     import p._
 
     val size = gridSize.from(context)
@@ -103,11 +106,16 @@ object PercolationGridSpatialSampling {
     val b = bordPoint.from(context)
     val w = linkWidth.from(context)
 
-    Generation.percolationGrid(size, pp, b, w, maxIteration)(random()).map { _.map { d ⇒ if (d > 0.0) 1.0 else 0.0 } }
-  }
+    Context(
+      grid -> Generation.percolationGrid(size, pp, b, w, maxIteration)(random()).map { _.map { d ⇒ if (d > 0.0) 1.0 else 0.0 } }
+    )
+  } set (
+    inputs ++= gridSize.inputs ++ percolation.inputs ++ bordPoint.inputs ++ linkWidth.inputs,
+    outputs += grid
+  ) withValidate (gridSize.validate ++ percolation.validate ++ bordPoint.validate ++ linkWidth.validate)
 }
 
-object BlocksGridSpatialSampling {
+object BlocksGridSpatialSamplingTask {
 
   /**
    * Binary density grid filled with blocks
@@ -118,11 +126,12 @@ object BlocksGridSpatialSampling {
    * @param gridSize size
    */
   def apply(
+    grid:     Val[Array[Array[Double]]],
     gridSize: FromContext[Int],
     number:   FromContext[Int],
     minSize:  FromContext[Int],
     maxSize:  FromContext[Int]
-  ) = FromContext { p ⇒
+  )(implicit scope: DefinitionScope) = Task("BlocksGridSpatialSamplingTask") { p ⇒
     import p._
 
     val size = gridSize.from(context)
@@ -131,28 +140,39 @@ object BlocksGridSpatialSampling {
     val bma = maxSize.from(context)
     val bmi = minSize.from(context)
 
-    Generation.blocksGrid(Left(size), bn, bma, bmi)(random()).map { _.map { case d ⇒ if (d > 0.0) 1.0 else 0.0 } }
-  }
+    Context(
+      grid -> Generation.blocksGrid(Left(size), bn, bma, bmi)(random()).map { _.map { case d ⇒ if (d > 0.0) 1.0 else 0.0 } }
+    )
+  } set (
+    inputs ++= gridSize.inputs ++ number.inputs ++ minSize.inputs ++ maxSize.inputs,
+    outputs += grid
+  ) withValidate (gridSize.validate ++ number.validate ++ minSize.validate ++ maxSize.validate)
 }
 
-object RandomSpatialSampling {
+object RandomSpatialSamplingTask {
 
   /**
    * Random raster
    * @param gridSize size
    */
   def apply(
+    grid:     Val[Array[Array[Double]]],
     gridSize: FromContext[Int],
-    density:  FromContext[Double] = 0.5
-  ) = FromContext { p ⇒
+    density:  FromContext[Double]       = 0.5
+  )(implicit scope: DefinitionScope) = Task("RandomSpatialSamplingTask") { p ⇒
     import p._
 
     val size = gridSize.from(context)
     val densityValue = density.from(context)
 
     val values: RasterLayerData[Double] = Generation.randomGrid(Left(size))(random()).map { _.map { dd ⇒ if (dd < densityValue) 1.0 else 0.0 } }
-    values
-  }
+    Context(
+      grid -> values
+    )
+  } set (
+    inputs ++= gridSize.inputs ++ density.inputs,
+    outputs += grid
+  ) withValidate (gridSize.validate ++ density.validate)
 
 }
 
@@ -289,19 +309,25 @@ where
 /**
  *  Reaction diffusion to generate population grids
  */
-object ReactionDiffusionSpatialSampling {
+object ReactionDiffusionSpatialTask {
 
   def apply(
+    grid:            Val[Array[Array[Double]]],
     gridSize:        FromContext[Int],
-    alpha:           FromContext[Double] = 1.0,
-    beta:            FromContext[Double] = 1.0,
-    nBeta:           FromContext[Int]    = 1,
-    growthRate:      FromContext[Double] = 100.0,
-    totalPopulation: FromContext[Double] = 1000.0
-  ) = FromContext { p ⇒
+    alpha:           FromContext[Double]       = 1.0,
+    beta:            FromContext[Double]       = 1.0,
+    nBeta:           FromContext[Int]          = 1,
+    growthRate:      FromContext[Double]       = 100.0,
+    totalPopulation: FromContext[Double]       = 1000.0
+  )(implicit scope: DefinitionScope) = Task("ReactionDiffusionSpatialTask") { p ⇒
     import p._
-    Generation.reactionDiffusionGrid(Left(gridSize.from(context)), growthRate.from(context), totalPopulation.from(context).toInt, alpha.from(context), beta.from(context), nBeta.from(context))(random())
-  }
+    Context(
+      grid -> Generation.reactionDiffusionGrid(Left(gridSize.from(context)), growthRate.from(context), totalPopulation.from(context).toInt, alpha.from(context), beta.from(context), nBeta.from(context))(random())
+    )
+  } set (
+    inputs ++= gridSize.inputs ++ alpha.inputs ++ beta.inputs ++ nBeta.inputs ++ growthRate.inputs ++ totalPopulation.inputs,
+    outputs += grid
+  ) withValidate (gridSize.validate ++ alpha.validate ++ beta.validate ++ nBeta.validate ++ growthRate.validate ++ totalPopulation.validate)
 
 }
 
