@@ -54,7 +54,7 @@ Not all examples are listed here, for a full list look at the GitHub @aa("reposi
 
 @h2{Contribute your example/tutorial!}
 
-You can contribute to the market place either by making a pull request on the @aa("central OpenMOLE market place", href := shared.link.repo.market), or by pushing your example workflow on your own git repository and post it to the @aa("user mailing list", href:=shared.link.mailingList).
+You can contribute to the market place either by making a pull request on the @aa("central OpenMOLE market place", href := shared.link.repo.market), or by pushing your example workflow on your own git repository and post it to the @aa("user mailing list", href:=shared.link.forum).
 
 @br
 

@@ -52,7 +52,7 @@ If you are using another web browser, you will need to copy paste the OpenMOLE U
 To get started with OpenMOLE and see a few simple use cases, you can follow our @a("Step by Step Introduction to OpenMOLE", href := stepByStepIntro.file).
 Other @a("Tutorials", href := tutorials.file) are also available, and you should find all the info you need in our @a("Documentation", href := documentation.file) section.
 @br
-If you have questions or problems, don't hesitate to contact our great @a("Community", href := OMcommunity.file) through the @aa("forum", href := shared.link.mailingList) or the @aa("chat", href := shared.link.chat)!
+If you have questions or problems, don't hesitate to contact our great @a("Community", href := OMcommunity.file) through the @aa("forum", href := shared.link.forum) or the @aa("chat", href := shared.link.chat)!
 
 
 

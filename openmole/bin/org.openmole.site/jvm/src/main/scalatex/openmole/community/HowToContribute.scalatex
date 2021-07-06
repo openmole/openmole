@@ -178,4 +178,4 @@ $> ./build.sh""", "plain")
 For developers support, remember you can get in touch with the community via:
 @ul
   @li{ the @a("chat", href := shared.link.chat) in channel "openmole-dev" }
-  @li{ the @a("OpenMOLE user forum", href := shared.link.mailingList) }
+  @li{ the @a("OpenMOLE user forum", href := shared.link.forum) }

@@ -60,7 +60,7 @@ object Footer {
               div(cls := s"${tools.row}")(
                 div(cls := tools.colMD(3), footerColStyle)(
                   span("Community", textAlign := "center", fontWeight := 700),
-                  imgSubItem(Resource.img.footer.email, "Forum", shared.link.mailingList),
+                  imgSubItem(Resource.img.footer.email, "Forum", shared.link.forum),
                   imgSubItem(Resource.img.footer.chat, "Chat", shared.link.chat),
                   imgSubItem(Resource.img.footer.faq, "FAQ", DocumentationPages.faq.file, false)
                 ),

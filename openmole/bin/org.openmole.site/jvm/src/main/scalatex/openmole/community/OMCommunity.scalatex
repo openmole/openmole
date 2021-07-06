@@ -10,7 +10,7 @@ The OpenMOLE community has been steadily growing these past years, and we are al
 Several tools are available to keep the community alive:
 @ul
   @li
-    Ask questions and get help on the @aa("forum", href := shared.link.mailingList)
+    Ask questions and get help on the @aa("forum", href := shared.link.forum)
   @li
     Get more help on the @aa("chat", href := shared.link.chat)
   @li
