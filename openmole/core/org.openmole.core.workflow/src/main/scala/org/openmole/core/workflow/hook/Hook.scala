@@ -24,6 +24,7 @@ import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder.{ InfoConfig, InputOutputConfig }
+import org.openmole.core.workflow.mole.Ticket
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.tool.cache.KeyValueCache
@@ -33,6 +34,7 @@ import org.openmole.tool.random.RandomProvider
 
 case class HookExecutionContext(
   cache:                          KeyValueCache,
+  ticket:                         Ticket,
   implicit val preference:        Preference,
   implicit val threadProvider:    ThreadProvider,
   implicit val fileService:       FileService,

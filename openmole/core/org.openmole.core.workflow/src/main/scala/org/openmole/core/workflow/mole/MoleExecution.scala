@@ -259,6 +259,7 @@ object MoleExecution extends JavaLogger {
           val services = executionContext.services
           HookExecutionContext(
             cache = cache,
+            ticket = ticket,
             preference = services.preference,
             threadProvider = services.threadProvider,
             fileService = services.fileService,
@@ -681,7 +682,7 @@ class MoleExecution(
   def endTime(implicit s: MoleExecution.SynchronisationContext) = sync(_endTime)
 
   private[mole] var ticketNumber = 1L
-  private[mole] val rootTicket = Ticket(id, 0)
+  private[mole] val rootTicket = Ticket.root(0L)
 
   private[mole] var moleId = 0L
 
