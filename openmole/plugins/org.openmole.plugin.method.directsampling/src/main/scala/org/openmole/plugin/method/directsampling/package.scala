@@ -176,7 +176,8 @@ package object directsampling {
       val dsl = method(t)
       implicit val defScope = dsl.scope
       val metadata = DirectSamplingMetadata.DirectSampling(dsl.method.sampled.map(_.name), dsl.method.aggregation.map(DirectSamplingMetadata.aggregation))
-      Hooked(t, FormattedFileHook(output = output, values = values, format = format, metadata = metadata))
+      def fileName = if (outputFormat.appendable(format)) None else Some("experiment${" + FormattedFileHook.experiment.name + "}")
+      Hooked(t, FormattedFileHook(output = output, values = values, format = format, metadata = metadata, fileName = fileName))
     }
   }
 

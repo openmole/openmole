@@ -561,7 +561,6 @@ package composition {
     implicit def by[T, B, P](implicit isContainer: ExplorationMethodSetter[T, P]): ExplorationMethodSetter[By[T, B], P] = (t, h) ⇒ t.copy(value = isContainer(t.value, h))
     implicit def on[T, B, P](implicit isContainer: ExplorationMethodSetter[T, P]): ExplorationMethodSetter[On[T, B], P] = (t, h) ⇒ t.copy(value = isContainer(t.value, h))
     implicit def hooked[T, P](implicit isContainer: ExplorationMethodSetter[T, P]): ExplorationMethodSetter[Hooked[T], P] = (t, h) ⇒ t.copy(value = isContainer(t.value, h))
-
   }
 
   trait ExplorationMethodSetter[T, P] {
