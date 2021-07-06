@@ -115,7 +115,7 @@ DirectSampling(
   sampling =
     (myCenter in (1 to 20)) x
       (myRadius in (1.0 to 20.0)) x
-      (myThreshold in (2.0 to 30.0))
+      (myThreshold in (2.0 to 30.0)),
   evaluation = myGenerator -- myModel
 )""", name="block grid sampling")
 
