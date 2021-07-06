@@ -46,7 +46,7 @@ object SpatialSampling {
 
 }
 
-object ExpMixtureThresholdSpatialTask {
+object ExpMixtureThresholdSpatialSamplingTask {
 
   /**
    * Sampling of binary density grids with a thresholded exponential mixture. Parameters are randomly sampled.
@@ -61,7 +61,7 @@ object ExpMixtureThresholdSpatialTask {
     gridSize:  FromContext[Int],
     center:    FromContext[Int],
     radius:    FromContext[Double],
-    threshold: FromContext[Double])(implicit scope: DefinitionScope) = Task("ExpMixtureThresholdSpatialTask") { p ⇒
+    threshold: FromContext[Double])(implicit scope: DefinitionScope) = Task("ExpMixtureThresholdSpatialSamplingTask") { p ⇒
     import p._
 
     val size = gridSize.from(context)
@@ -80,7 +80,7 @@ object ExpMixtureThresholdSpatialTask {
 
 }
 
-object PercolationGridSpatialTask {
+object PercolationGridSpatialSamplingTask {
 
   /**
    * Binary density grids through network percolation
@@ -97,7 +97,7 @@ object PercolationGridSpatialTask {
     bordPoint:    FromContext[Int],
     linkWidth:    FromContext[Double],
     maxIteration: Int                       = 10000
-  )(implicit scope: DefinitionScope) = Task("PercolationGridSpatialTask") { p ⇒
+  )(implicit scope: DefinitionScope) = Task("PercolationGridSpatialSamplingTask") { p ⇒
     import p._
 
     val size = gridSize.from(context)
@@ -115,7 +115,7 @@ object PercolationGridSpatialTask {
   ) withValidate (gridSize.validate ++ percolation.validate ++ bordPoint.validate ++ linkWidth.validate)
 }
 
-object BlocksGridSpatialTask {
+object BlocksGridSpatialSamplingTask {
 
   /**
    * Binary density grid filled with blocks
@@ -131,7 +131,7 @@ object BlocksGridSpatialTask {
     number:   FromContext[Int],
     minSize:  FromContext[Int],
     maxSize:  FromContext[Int]
-  )(implicit scope: DefinitionScope) = Task("BlocksGridSpatialTask") { p ⇒
+  )(implicit scope: DefinitionScope) = Task("BlocksGridSpatialSamplingTask") { p ⇒
     import p._
 
     val size = gridSize.from(context)
@@ -149,7 +149,7 @@ object BlocksGridSpatialTask {
   ) withValidate (gridSize.validate ++ number.validate ++ minSize.validate ++ maxSize.validate)
 }
 
-object RandomSpatialTask {
+object RandomSpatialSamplingTask {
 
   /**
    * Random raster
@@ -159,7 +159,7 @@ object RandomSpatialTask {
     grid:     Val[Array[Array[Double]]],
     gridSize: FromContext[Int],
     density:  FromContext[Double]       = 0.5
-  )(implicit scope: DefinitionScope) = Task("RandomSpatialTask") { p ⇒
+  )(implicit scope: DefinitionScope) = Task("RandomSpatialSamplingTask") { p ⇒
     import p._
 
     val size = gridSize.from(context)

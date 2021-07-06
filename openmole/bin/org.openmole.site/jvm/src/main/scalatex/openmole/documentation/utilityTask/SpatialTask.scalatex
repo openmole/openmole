@@ -29,7 +29,7 @@ A raster with random values:
 val myDensity = Val[Double]
 
 val myGenerator =
-  RandomSpatialTask(
+  RandomSpatialSamplingTask(
     grid = myGrid,
     gridSize = 10,
     density = myDensity
@@ -98,7 +98,7 @@ val myRadius = Val[Double]
 val myThreshold = Val[Double]
 
 val myGenerator =
-  ExpMixtureThresholdSpatialTask(
+  ExpMixtureThresholdSpatialSamplingTask(
     grid = myGrid,
     gridSize = 10,
     center = myCenter,
@@ -145,7 +145,7 @@ val myBordPoint = Val[Int]
 val myLinkWidth = Val[Double]
 
 val myGenerator =
-  PercolationGridSpatialTask(
+  PercolationGridSpatialSamplingTask(
     grid = myGrid,
     gridSize = 10,
     percolation = myPercolation,

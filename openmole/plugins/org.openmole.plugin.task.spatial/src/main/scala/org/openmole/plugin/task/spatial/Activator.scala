@@ -14,12 +14,12 @@ class Activator extends BundleActivator {
 
     val keyWords: Vector[HighLight] =
       Vector(
-        SamplingHighLight(objectName(RandomSpatialTask)),
+        SamplingHighLight(objectName(RandomSpatialSamplingTask)),
         SamplingHighLight(objectName(ExponentialMixtureSpatialSampling)),
         SamplingHighLight(objectName(ReactionDiffusionSpatialTask)),
-        SamplingHighLight(objectName(BlocksGridSpatialTask)),
-        SamplingHighLight(objectName(PercolationGridSpatialTask)),
-        SamplingHighLight(objectName(ExpMixtureThresholdSpatialTask))
+        SamplingHighLight(objectName(BlocksGridSpatialSamplingTask)),
+        SamplingHighLight(objectName(PercolationGridSpatialSamplingTask)),
+        SamplingHighLight(objectName(ExpMixtureThresholdSpatialSamplingTask))
       )
 
     PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords)
