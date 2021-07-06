@@ -29,7 +29,7 @@ A raster with random values:
 val myDensity = Val[Double]
 
 val myGenerator =
-  RandomSpatialSamplingTask(
+  RandomSpatialTask(
     grid = myGrid,
     gridSize = 10,
     density = myDensity
@@ -161,7 +161,7 @@ DirectSampling(
   sampling =
     (myPercolation in (0.1 to 1.0 by 0.1)) x
       (myBordPoint in (1 to 30)) x
-      (myLinkWidth in (1.0 to 5.0))
+      (myLinkWidth in (1.0 to 5.0)),
   evaluation = myGenerator -- myModel
 )""", name="percolation grid sampling")
 
