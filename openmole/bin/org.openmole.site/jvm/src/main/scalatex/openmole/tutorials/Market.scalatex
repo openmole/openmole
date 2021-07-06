@@ -43,11 +43,9 @@ Some of these tutorials are also detailed in the @aa("Tutorials", href := tutori
 There are a number of NetLogo examples, to illustrate various OpenMOLE methods.
 Two classic NetLogo models are used in these examples: the Fire model and the Ants model.
 
-@br@br
+@br
 
 Not all examples are listed here, for a full list look at the GitHub @aa("repository", href := shared.link.repo.market) or in the GUI.
-
-@br@br
 
 @img(src := Resource.img.guiGuide.market.file, width := "95%")
 

@@ -32,49 +32,60 @@
         gEvaporationRate := 50
       )"""
 
-@p
-  This example presents how to explore a NetLogo model step by step with an Evolutionary/Genetic Algorithm (EA/GA) in
-  OpenMOLE.
-@br
-    For more generic details regarding the exploitation of Genetic Algorithms using OpenMOLE, you can check the
-    @a("GA section of the methods documentation", href := DocumentationPages.explore.file + "#Geneticalgorithms")
+
+
+This example presents how to explore a NetLogo model step by step with an Evolutionary/Genetic Algorithm (EA/GA) in OpenMOLE.
+For more generic details regarding the use of Genetic Algorithms within OpenMOLE, you can check the @aa("GA section of the methods documentation", href := explore.file + "#Geneticalgorithms")
+
+
 
 @h2{The ant model}
 
-We demonstrate this tutorial using the ants foraging model present in the Netlogo library. This model was created by
-Ury Wilensky. According to @a("NetLogo's website", href := shared.link.netlogoAnts),
-this model is described as:
-@br @i{In this project, a colony of ants forages for food. Though each ant follows a set of simple rules, the colony
+In this tutorial we will be using the Ants foraging model, present in the Netlogo library.
+This model was created by Ury Wilensky.
+According to @aa("NetLogo's website", href := shared.link.netlogoAnts), this model is described as:
+
+@br
+
+@i{In this project, a colony of ants forages for food. Though each ant follows a set of simple rules, the colony
 as a whole acts in a sophisticated way. When an ant finds a piece of food, it carries the food back to the nest,
 dropping a chemical as it moves. When other ants “sniff” the chemical, they follow the chemical toward the food. As
 more ants carry food to the nest, they reinforce the chemical trail.}
 
-@p A visual representation of this model looks like that:
-@br @img(src := Resource.img.example.ants.file)
+@br
 
-@p In this tutorial we use a headless version (@a("see NetLogo task documentation", href := DocumentationPages.netLogo.file)) of the
-model. This modified version is available @aa("here", href := Resource.script.antsNLogo.file).
+A visual representation of this model looks like:
+
+@img(src := Resource.img.example.ants.file)
+
+@br
+
+In this tutorial we use a headless version (@aa("see NetLogo task documentation", href := DocumentationPages.netLogo.file)) of the model.
+This modified version is available @aa("here", href := Resource.script.antsNLogo.file).
+
+
 
 @h2{An optimisation problem}
 
 This model manipulates three parameters:
 @ul
-  @li{Population: number of Ants in the model,}
-  @li{Evaporation-rate: controls the evaporation rate of the chemical,}
-  @li{Diffusion-rate: controls the diffusion rate of the chemical.}
+  @li{population: number of Ants in the model,}
+  @li{evaporation-rate: controls the evaporation rate of the chemical,}
+  @li{diffusion-rate: controls the diffusion rate of the chemical.}
 
-@p Ants forage from three sources of food (see the number in the picture below). Each source is positioned at
-different distances from the Ant colony.
-@br @img(src := Resource.img.example.antNumbers.file)
+@br
 
-@p It can be interesting to search the @b{best combination of the two parameters}
-@hl("evaporation-rate", "plain") and @hl("diffusion-rate", "plain")
-which minimises the eating time of each food source.
+Ants forage from three sources of food (see the number in the picture below).
+Each source is positioned at different distances from the Ant colony.
 
-@p To build our fitness function, we modify the NetLogo Ants source code to store for each food source the first ticks
-indicating that this food source is empty.
+@img(src := Resource.img.example.antNumbers.file)
 
-@p @hl("""
+@br
+
+It can be interesting to search for the @b{best combination of the two parameters} @code{evaporation-rate} and @code{diffusion-rate} which minimises the eating time of each food source.
+To build our fitness function, we modify the NetLogo Ants source code to store, for each food source, the first ticks indicating that this food source is empty.
+
+@hl("""
 to compute-fitness
   if ((sum [food] of patches with [food-source-number = 1] = 0) and (final-ticks-food1 = 0)) [
     set final-ticks-food1 ticks ]
@@ -84,26 +95,24 @@ to compute-fitness
     set final-ticks-food3 ticks ]
 end""", "plain")
 
-@p At the end of each simulation we return the values for the three objectives (or criteria) :
+At the end of each simulation we get the values of the three objectives (or criteria):
 @ul
   @li{The simulation ticks indicating that source 1 is empty,}
   @li{The simulation ticks indicating that source 2 is empty,}
   @li{The simulation ticks indicating that source 3 is empty.}
 
-@p The combination of the three objectives indicates the quality of the parameters used to run the simulation.
-This situation is a
-@a("multi-objective optimisation", href := shared.link.multiobjectiveOptimization) problem. In
-case there is a compromise between these 3 objectives, we will obtain a
-@a("Pareto frontier", href := shared.link.paretoEfficency) at the end of the optimisation
+The combination of the three objectives indicates the quality of the parameters used to run the simulation.
+This situation is a @aa("multi-objective optimisation", href := shared.link.multiobjectiveOptimization) problem.
+In case there is a compromise between these 3 objectives, we will get a @a("Pareto front", href := shared.link.paretoEfficency) at the end of the optimisation
 process.
+
 
 
 @h2{Run it in OpenMOLE}
 
-When building a calibration or optimisation workflow, the first step is to make the model run in
-OpenMOLE. This script simply plugs the NetLogo model and runs one single execution of the model with arbitrary
-parameters. More details about the NetLogo5 task used in this script can be found in
-@a("this section of the documentation", href := DocumentationPages.netLogo.file).
+When building a calibration or optimisation workflow, the first step is to make the model run in OpenMOLE.
+This script simply plugs the NetLogo model, and runs one single execution of the model with arbitrary parameters.
+More details about the NetLogo5 task used in this script can be found in @aa("this section of the documentation", href := DocumentationPages.netLogo.file).
 
 @hl.openmole(s"""
 $model
@@ -118,19 +127,23 @@ val model_execution = (ants on env hook displayHook)
 model_execution
 """, name = "ga netlogo model")
 
-@p The result of this execution should look like:
-@br @hl("{food1=746.0, food2=1000.0, food3=2109.0}", "plain")
+The result of this execution should look like:
+
+@hl("{food1=746.0, food2=1000.0, food3=2109.0}", "plain")
+
+
 
 @h2{The optimisation algorithm}
 
 We will try to find the parameter settings minimising these estimators.
 This script describes how to use the NSGA2 multi-objective optimisation algorithm in OpenMOLE.
-The result files are written to @hl("/tmp/ants", "plain").
-Notice how the @hl("evaluation", "plain") parameter of the @hl("SteadyStateEvolution", "plain")
-method, is the netlogo task i.e. running the model, which indeed provides an @b{evaluation} of the genome
-(parameter settings) efficiency regarding the @hl("objective","plain").
+The result files are written to @i{/tmp/ants}.
 
-@br @hl.openmole("""
+@br
+
+Notice how the @code{evaluation} parameter of the @code{SteadyStateEvolution} method is the NetLogo task i.e. running the model, which indeed provides an @b{evaluation} of the genome (parameter settings) efficiency regarding the @hl("objective","plain").
+
+@hl.openmole("""
 // Define the inputs and their respective variation bounds.
 // Define the objectives to minimize.
 // Tell OpenMOLE that this model is stochastic and that it should generate a seed for each execution
@@ -150,11 +163,16 @@ NSGA2Evolution(
 ) hook (workDirectory / "results")
 """, header = model, name = "ga netlogo evolution")
 
+
+
 @h2{Scale up}
 
-If you use distributed computing, it might be a good idea to opt for an Island model. Islands are better suited to exploit distributed computing resources than classical generational genetic algorithms. See how the end of the script changes to implement islands in the workflow. Here we compute 2,000 islands in parallel, each running during 10 minutes on the European grid:
+If you use distributed computing, it might be a good idea to opt for an Island model.
+Islands are better suited to exploit distributed computing resources than classical generational genetic algorithms.
+See how the end of the script changes to implement islands in the workflow.
+Here we compute 2,000 islands in parallel, each running during 10 minutes on the European grid:
 
-@br @hl.openmole("""
+@hl.openmole("""
 // Define the execution environment
 val env = EGIEnvironment("vo.complex-systems.eu")
 
@@ -168,4 +186,5 @@ NSGA2Evolution(
   evaluation = ants,
   termination = 10000000,
   parallelism = 1000
-) by Island(10 minutes) on env hook (workDirectory / "results")""", header = model, name = "ga netlogo islands")
+) by Island(10 minutes) on env hook (workDirectory / "results")
+""", header = model, name = "ga netlogo islands")
