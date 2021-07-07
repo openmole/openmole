@@ -27,13 +27,13 @@ import org.openmole.plugin.task.container
  */
 object JuliaTask {
 
-  implicit def isTask: InputOutputBuilder[PythonTask] = InputOutputBuilder(PythonTask.config)
-  implicit def isExternal: ExternalBuilder[PythonTask] = ExternalBuilder(PythonTask.external)
+  implicit def isTask: InputOutputBuilder[JuliaTask] = InputOutputBuilder(JuliaTask.config)
+  implicit def isExternal: ExternalBuilder[JuliaTask] = ExternalBuilder(JuliaTask.external)
   implicit def isInfo = InfoBuilder(info)
-  implicit def isMapped = MappedInputOutputBuilder(PythonTask.mapped)
+  implicit def isMapped = MappedInputOutputBuilder(JuliaTask.mapped)
 
     def installCommands(install: Seq[String], libraries: Seq[String]): Vector[String] = {
-       (install ++ "julia -e 'using Pkg; Pkg.add.([ " + libraries.dropRight(1).map { l ⇒ "\""+l+"\", " }.reduce(+)+"\""+libraries.last+"\"" +"])'" ).toVector
+       (install ++ Seq("julia -e 'using Pkg; Pkg.add.([ " + libraries.map { l ⇒ "\""+l+"\"" }.mkString(",")+"])'" )).toVector
     }
 
     def apply(
@@ -54,7 +54,7 @@ object JuliaTask {
      new JuliaTask(
         script = script,
         arguments = arguments.option,
-        image = ContainerTask.prepare(installContainerSystem, DockerImage("julia"), installCommands(install, libraries)),
+        image = ContainerTask.prepare(installContainerSystem, DockerImage("julia"), installCommands(install, Seq("JSON")++libraries)),
         errorOnReturnValue = errorOnReturnValue,
         returnValue = returnValue,
         stdOut = stdOut,
@@ -65,8 +65,7 @@ object JuliaTask {
         config = InputOutputConfig(),
         external = External(),
         info = InfoConfig(),
-        mapped = MappedInputOutputConfig(),
-        major = major
+        mapped = MappedInputOutputConfig()
       ) set (outputs += (Seq(returnValue.option, stdOut.option, stdErr.option).flatten: _*))
     }
 }
