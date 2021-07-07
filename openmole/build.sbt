@@ -520,7 +520,7 @@ lazy val fileSource = OsgiProject(pluginDir, "org.openmole.plugin.source.file", 
 
 /* Task */
 
-def allTask = Seq(toolsTask, external, netLogo, netLogo5, netLogo6, jvm, scala, template, systemexec, container, r, scilab, python, gama, cormas, timing)
+def allTask = Seq(toolsTask, external, netLogo, netLogo5, netLogo6, jvm, scala, template, systemexec, container, r, scilab, python, julia, gama, cormas, timing)
 
 lazy val toolsTask = OsgiProject(pluginDir, "org.openmole.plugin.task.tools", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings: _*)
 
@@ -550,6 +550,8 @@ lazy val r = OsgiProject(pluginDir, "org.openmole.plugin.task.r", imports = Seq(
 lazy val scilab = OsgiProject(pluginDir, "org.openmole.plugin.task.scilab", imports = Seq("*")) dependsOn (container) settings (pluginSettings: _*)
 
 lazy val python = OsgiProject(pluginDir, "org.openmole.plugin.task.python", imports = Seq("*")) dependsOn(container, json) settings (pluginSettings: _*)
+
+lazy val julia = OsgiProject(pluginDir, "org.openmole.plugin.task.julia", imports = Seq("*")) dependsOn(container, json) settings (pluginSettings: _*)
 
 lazy val gama = OsgiProject(pluginDir, "org.openmole.plugin.task.gama", imports = Seq("*")) dependsOn (container) settings (pluginSettings: _*)
 
