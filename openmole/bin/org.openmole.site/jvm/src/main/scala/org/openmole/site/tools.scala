@@ -137,7 +137,7 @@ package object tools {
 
   def anchor(title: String) = s"#${shared.anchor(title)}"
 
-  def img = scalatags.Text.all.img(cls := "doc-img")
+  def img(xs: Modifier*) = scalatags.Text.all.img(Seq(cls := "doc-img") ++ xs: _*)
   def br = scalatags.Text.all.br(cls := "doc-br")
 
   case class Parameter(name: String, `type`: String, description: String)
