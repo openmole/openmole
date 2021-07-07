@@ -16,8 +16,6 @@ val burned = Val[Double]
 
 Typical sensitivity analysis (in a simulation experiment context) is the study of how the variations of an input affects the output(s) of a model.
 
-@br
-
 @img(src := Resource.img.method.sensitivityAnim.file, width := "80%")
 
 @basicButton("Run", classIs(btn, btn_danger))(id := shared.sensitivity.button, stylesheet.svgRunButton(10))
@@ -52,9 +50,7 @@ We will perform sensitivity analysis to make this change of regime appear.
 @br
 
 The Fire model integration has been covered in the @aa("NetLogo page of the Model section", href:= DocumentationPages.netLogo.file), so we take it from here.
-
 The former script was already performing a sensitivity analysis, by varying @code{density} from 20 to 80 by step of 10, with 10 replications for each (@code{mySeed} has 10 different values for each value of @code{density}).
-@br
 In our case, the quantum of 10 percent is quite coarsed, so we make it 1 percent:
 
 @hl.openmole("""
