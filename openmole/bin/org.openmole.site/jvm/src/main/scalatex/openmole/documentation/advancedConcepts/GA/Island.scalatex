@@ -3,29 +3,32 @@
 
 
 @def model = """
-  //model inputs
+  // model inputs
   val x = Val[Double]
   val y = Val[Double]
-  //model outputs
+
+  // model outputs
   val o1 = Val[Double]
   val o2 = Val[Double]
 
-  val model =
-    ScalaTask("val o1 = x; val o2 = y") set (
-      inputs += (x, y),
-      outputs += (o1, o2)
-    )
+  val model = ScalaTask("val o1 = x; val o2 = y") set (
+    inputs += (x, y),
+    outputs += (o1, o2)
+  )
 """
 
 
 
 @h2{Distribution scheme}
 
-For distributed environments, the island distribution scheme of evolutionary algorithms is especially well adapted. Islands of population evolve for a while on a remote node. When an island is finished, its final population is merged back into a global archive. A new island is then generated until the termination criterion, @i{i.e.} the max total number of individual evaluation has been reached.
+For distributed environments, the island distribution scheme of evolutionary algorithms is especially well adapted.
+Islands of population evolve for a while on a remote node before being merged back into the global population.
+A new island is then generated until the termination criterion, @i{i.e.} the max total number of individual evaluation, has been reached.
 
-@br@br
+@br
 
-The island scheme is enabled using the by @code{Island} syntax. For instance:
+The island scheme is enabled using the @code{by Island} syntax.
+For instance:
 
 @hl.openmole("""
   // Generate a workflow that orchestrates 100 concurrent islands.
@@ -41,5 +44,5 @@ The island scheme is enabled using the by @code{Island} syntax. For instance:
 
   // Construction of the complete mole with the execution environment, and the hook.
   // Here the generated workflow will run using 4 threads of the local machine.
-  (evolution on LocalEnvironment(4))""", header = model)
-
+  (evolution on LocalEnvironment(4))
+""", header = model)
