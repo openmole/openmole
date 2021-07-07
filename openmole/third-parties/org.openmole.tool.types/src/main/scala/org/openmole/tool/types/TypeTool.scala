@@ -27,7 +27,7 @@ import scala.reflect.ClassTag
 import scala.reflect.Manifest.{ classType, intersectionType, arrayType, wildcardType }
 import scala.reflect.runtime.universe._
 
-object ClassUtils {
+object TypeTool {
 
   implicit class ManifestDecoration[T](m: Manifest[T]) {
     def isArray = m.runtimeClass.isArray
@@ -98,7 +98,7 @@ object ClassUtils {
       case "BigInteger" ⇒ classOf[java.math.BigInteger]
       case "BigDecimal" ⇒ classOf[java.math.BigDecimal]
       case _ ⇒ try {
-        ClassUtils.getClass.getClassLoader.loadClass(s)
+        TypeTool.getClass.getClassLoader.loadClass(s)
       }
       catch {
         case e: ClassNotFoundException ⇒ throw new ClassNotFoundException("The class " + s + " has not been found", e)
@@ -149,6 +149,11 @@ object ClassUtils {
     s.zipWithIndex.foreach { case (v, i) ⇒ java.lang.reflect.Array.set(values, i, v) }
     values
   }
+
+  def toString[T](implicit manifest: Manifest[T]) =
+    manifest.toString.
+      replace(".package$", ".").
+      replace("$", ".")
 
 }
 

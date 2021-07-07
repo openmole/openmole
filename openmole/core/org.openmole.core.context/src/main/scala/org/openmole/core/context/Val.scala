@@ -18,8 +18,8 @@
 package org.openmole.core.context
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.tool.types.ClassUtils._
-import org.openmole.tool.types.{ ClassUtils, Id }
+import org.openmole.tool.types.TypeTool._
+import org.openmole.tool.types.{ TypeTool, Id }
 import shapeless.{ TypeCase, Typeable }
 
 import scala.annotation.tailrec
@@ -110,6 +110,19 @@ object ValType {
    */
   def unsecure(c: Manifest[_]): ValType[Any] = apply(c.asInstanceOf[Manifest[Any]])
 
+  def toNativeType(t: ValType[_]): ValType[_] = {
+    def native = {
+      val (contentType, level) = ValType.unArrayify(t)
+      for {
+        m ← classEquivalence(contentType.runtimeClass).map(_.manifest)
+      } yield (0 until level).foldLeft(ValType.unsecure(m)) {
+        (c, _) ⇒ c.toArray.asInstanceOf[ValType[Any]]
+      }
+    }
+    native getOrElse t
+  }
+
+  def toTypeString(t: ValType[_]): String = TypeTool.toString(toNativeType(t).manifest)
 }
 
 /**
@@ -261,11 +274,11 @@ class Val[T](val simpleName: String, val `type`: ValType[T], val namespace: Name
    * @param p the prototype to test
    * @return true if the prototype is assignable from the given prototype
    */
-  def isAssignableFrom(p: Val[_]): Boolean = ClassUtils.assignable(p.`type`.manifest, `type`.manifest)
+  def isAssignableFrom(p: Val[_]): Boolean = TypeTool.assignable(p.`type`.manifest, `type`.manifest)
 
   /**
    * Test if a given object can be accepted by the prototype
-   * (compares runtime classes using [[ClassUtils.classAssignable]])
+   * (compares runtime classes using [[TypeTool.classAssignable]])
    *
    * @param obj
    * @return

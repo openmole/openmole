@@ -24,7 +24,7 @@ import org.openmole.core.context._
 import org.openmole.core.exception._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.pluginmanager._
-import org.openmole.tool.types.ClassUtils._
+import org.openmole.tool.types.TypeTool._
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.cache._
 import org.openmole.tool.random._
@@ -112,24 +112,6 @@ object ScalaCompilation {
     }
   }
 
-  def toScalaNativeType(t: ValType[_]): ValType[_] = {
-    def native = {
-      val (contentType, level) = ValType.unArrayify(t)
-      for {
-        m ← classEquivalence(contentType.runtimeClass).map(_.manifest)
-      } yield (0 until level).foldLeft(ValType.unsecure(m)) {
-        (c, _) ⇒ c.toArray.asInstanceOf[ValType[Any]]
-      }
-    }
-    native getOrElse t
-  }
-
-  def toTypeString(t: ValType[_]): String = {
-    toScalaNativeType(t).manifest.toString.
-      replace(".package$", ".").
-      replace("$", ".")
-  }
-
   def function[RETURN](inputs: Seq[Val[_]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: TmpDirectory, fileService: FileService) = {
     val s = script(inputs, source, wrapping, returnType)
     compile[CompilationClosure[RETURN]](s, plugins, libraries)
@@ -162,10 +144,10 @@ object ScalaCompilation {
    */
   def script[RETURN](inputs: Seq[Val[_]], source: String, wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN]) = {
     val header =
-      s"""new ${classOf[CompilationClosure[_]].getName}[${toTypeString(returnType)}] {
+      s"""new ${classOf[CompilationClosure[_]].getName}[${ValType.toTypeString(returnType)}] {
          |  def apply(${prefix}context: ${manifest[Context].toString}, ${prefix}RNG: ${manifest[RandomProvider].toString}, ${prefix}NewFile: ${manifest[TmpDirectory].toString}) = {
          |    object $inputObject {
-         |      ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${toTypeString(i.`type`)}]""").mkString("; ")}
+         |      ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${ValType.toTypeString(i.`type`)}]""").mkString("; ")}
          |    }
          |    import ${inputObject}._
          |    implicit def ${Val.name(Variable.openMOLENameSpace, "RNGProvider")} = ${prefix}RNG
@@ -176,7 +158,7 @@ object ScalaCompilation {
       s"""$header
        |    $source
        |    ${wrapping.wrapOutput}
-       |  }: ${toTypeString(returnType)}
+       |  }: ${ValType.toTypeString(returnType)}
        |}""".stripMargin
 
     Script(code, source, header.split("\n").size + 1)
@@ -258,7 +240,7 @@ object ScalaCompilation {
 
     def wrapOutput =
       s"""
-         |scala.jdk.CollectionConverters.MapHasAsJava(Map[String, Any]( ${outputs.toSeq.map(p ⇒ s""" "${p.name}" -> (${p.name}: ${toTypeString(p.`type`)})""").mkString(",")} )).asJava
+         |scala.jdk.CollectionConverters.MapHasAsJava(Map[String, Any]( ${outputs.toSeq.map(p ⇒ s""" "${p.name}" -> (${p.name}: ${ValType.toTypeString(p.`type`)})""").mkString(",")} )).asJava
          |""".stripMargin
 
   }
