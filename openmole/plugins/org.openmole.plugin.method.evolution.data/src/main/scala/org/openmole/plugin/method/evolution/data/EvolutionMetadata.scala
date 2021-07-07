@@ -17,19 +17,25 @@ object EvolutionMetadata {
   implicit def evolutionMetadataDecoder: Decoder[EvolutionMetadata] = deriveConfiguredDecoder[EvolutionMetadata]
 
   object GenomeBoundData {
-    case class DoubleBound(name: String, low: Double, high: Double) extends GenomeBoundData
-    case class IntBound(name: String, low: Int, high: Int, continuous: Boolean = false) extends GenomeBoundData
-    case class DoubleSequenceBound(name: String, low: Array[Double], high: Array[Double]) extends GenomeBoundData
-    case class IntSequenceBound(name: String, low: Array[Int], high: Array[Int]) extends GenomeBoundData
-    case class Enumeration(name: String, values: Seq[String]) extends GenomeBoundData
+    import org.openmole.plugin.tool.methoddata._
+
+    sealed trait IntervalType
+    object Discrete extends IntervalType
+    object Continuous extends IntervalType
+
+    case class IntBound(value: ValData, low: Int, high: Int, intervalType: IntervalType) extends GenomeBoundData
+    case class DoubleBound(value: ValData, low: Double, high: Double, intervalType: IntervalType) extends GenomeBoundData
+    case class IntSequenceBound(value: ValData, low: Seq[Int], high: Seq[Int], intervalType: IntervalType) extends GenomeBoundData
+    case class DoubleSequenceBound(value: ValData, low: Seq[Double], high: Seq[Double], intervalType: IntervalType) extends GenomeBoundData
+    case class Enumeration(value: ValData, values: Seq[String]) extends GenomeBoundData
 
     def name(data: GenomeBoundData) =
       data match {
-        case d: DoubleBound         ⇒ d.name
-        case d: IntBound            ⇒ d.name
-        case d: DoubleSequenceBound ⇒ d.name
-        case d: IntSequenceBound    ⇒ d.name
-        case d: Enumeration         ⇒ d.name
+        case d: DoubleBound         ⇒ d.value.name
+        case d: IntBound            ⇒ d.value.name
+        case d: DoubleSequenceBound ⇒ d.value.name
+        case d: IntSequenceBound    ⇒ d.value.name
+        case d: Enumeration         ⇒ d.value.name
       }
   }
 

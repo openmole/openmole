@@ -9,7 +9,9 @@
 
 OpenMOLE is a model exploration tool.
 It offers several methods to perform experiments on a model, in order to better understand its behavior and capabilities.
+
 @br
+
 The composition of a full exploration experiment is achieved by writing a script in the @a("OpenMOLE language", href := language.file), which is an extension of the Scala language.
 Such a script is called a @i{workflow} and should contain:
   @ul
@@ -119,12 +121,11 @@ Once the model execution is over, and since we asked in the workflow to @code{di
 
 
 @h2{To go further}
-
-In the @a("next tutorial", href := exploreTuto.file), you will learn how to prepare and run a more complex experiment, in order to explore your model with OpenMOLE.
-
-
-
-@h2{Get help}
+@h3{Get help}
 
 To get help you are more than welcomed to contact the OpenMOLE community on our @aa("forum", href := shared.link.forum) and post your questions.
 You can also reach us via our @aa("RocketChat", href := shared.link.chat).
+
+
+@h3{Next tutorial}
+In the @a("next tutorial", href := exploreTuto.file), you will learn how to prepare and run a more complex experiment, in order to explore your model with OpenMOLE.

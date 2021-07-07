@@ -58,8 +58,6 @@ A visual representation of this model looks like:
 
 @img(src := Resource.img.example.ants.file)
 
-@br
-
 In this tutorial we use a headless version (@aa("see NetLogo task documentation", href := DocumentationPages.netLogo.file)) of the model.
 This modified version is available @aa("here", href := Resource.script.antsNLogo.file).
 
@@ -79,8 +77,6 @@ Ants forage from three sources of food (see the number in the picture below).
 Each source is positioned at different distances from the Ant colony.
 
 @img(src := Resource.img.example.antNumbers.file)
-
-@br
 
 It can be interesting to search for the @b{best combination of the two parameters} @code{evaporation-rate} and @code{diffusion-rate} which minimises the eating time of each food source.
 To build our fitness function, we modify the NetLogo Ants source code to store, for each food source, the first ticks indicating that this food source is empty.
@@ -119,7 +115,7 @@ $model
 // Define the hooks to collect the results
 val displayHook = DisplayHook(food1, food2, food3)
 
-//Definie the environment
+//Define the environment
 val env = LocalEnvironment(5)
 
 // Start a workflow with 1 task
@@ -150,7 +146,7 @@ Notice how the @code{evaluation} parameter of the @code{SteadyStateEvolution} me
 // Define the fitness evaluation
 // Define the parallelism level
 // Terminate after 10000 evaluations
-// Define a hook to save the Pareto frontier
+// Define a hook to save the Pareto front
 NSGA2Evolution(
   // Define the inputs and their respective variation bounds.
   // Define the objectives to minimize.
@@ -167,7 +163,7 @@ NSGA2Evolution(
 
 @h2{Scale up}
 
-If you use distributed computing, it might be a good idea to opt for an Island model.
+If you use distributed computing, it might be a good idea to opt for an island model (see @aa("this page", href := island.file)) for more details on the island distribution scheme.
 Islands are better suited to exploit distributed computing resources than classical generational genetic algorithms.
 See how the end of the script changes to implement islands in the workflow.
 Here we compute 2,000 islands in parallel, each running during 10 minutes on the European grid:

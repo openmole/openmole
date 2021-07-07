@@ -25,6 +25,7 @@ import org.openmole.plugin.domain.modifier._
 import org.openmole.plugin.tool.pattern._
 import org.openmole.plugin.hook.file._
 import org.openmole.plugin.hook.omr._
+import org.openmole.plugin.tool.methoddata._
 
 package object directsampling {
 
@@ -41,12 +42,12 @@ package object directsampling {
     implicit def metadataEncoder: Encoder[DirectSamplingMetadata] = deriveConfiguredEncoder[DirectSamplingMetadata]
     implicit def metadataDecoder: Decoder[DirectSamplingMetadata] = deriveConfiguredDecoder[DirectSamplingMetadata]
 
-    case class DirectSampling(sampled: Seq[String], aggregation: Seq[Aggregation]) extends DirectSamplingMetadata
-    case class Replication(seed: String, sample: Int, aggregation: Seq[Aggregation]) extends DirectSamplingMetadata
+    case class DirectSampling(sampled: Seq[ValData], aggregation: Option[Seq[Aggregation]], output: Seq[ValData]) extends DirectSamplingMetadata
+    case class Replication(seed: ValData, sample: Int, aggregation: Option[Seq[Aggregation]]) extends DirectSamplingMetadata
 
-    def aggregation(ag: directsampling.Aggregation) = Aggregation(ag.value.name, ag.outputVal.name)
+    def aggregation(ag: directsampling.Aggregation) = Aggregation(ValData(ag.value), ValData(ag.outputVal))
 
-    case class Aggregation(output: String, aggregated: String)
+    case class Aggregation(output: ValData, aggregated: ValData)
   }
 
   sealed trait DirectSamplingMetadata
@@ -114,13 +115,14 @@ package object directsampling {
       val dsl = method(t)
       implicit val defScope = dsl.scope
       val exclude = if (!includeSeed) Seq(dsl.method.seed) else Seq()
-      val metadata = DirectSamplingMetadata.Replication(seed = dsl.method.seed.name, dsl.method.sample, dsl.method.aggregation.map(DirectSamplingMetadata.aggregation))
+      val aggregation = if (dsl.method.aggregation.isEmpty) None else Some(dsl.method.aggregation.map(DirectSamplingMetadata.aggregation))
+      val metadata = DirectSamplingMetadata.Replication(seed = ValData(dsl.method.seed), dsl.method.sample, aggregation)
       Hooked(t, FormattedFileHook(output = output, values = values, exclude = exclude, format = format, metadata = metadata))
     }
   }
 
   object DirectSampling {
-    case class Method(sampled: Seq[Val[_]], aggregation: Seq[Aggregation])
+    case class Method(sampled: Seq[Val[_]], aggregation: Seq[Aggregation], output: Seq[Val[_]])
 
     implicit def method[S]: ExplorationMethod[DirectSampling[S], Method] = m ⇒ {
       implicit def defScope = m.scope
@@ -145,7 +147,8 @@ package object directsampling {
         method =
           Method(
             sampled = m.sampled,
-            aggregation = m.aggregation
+            aggregation = m.aggregation,
+            output = s.outputs
           )
       )
 
@@ -175,7 +178,9 @@ package object directsampling {
       format: F              = CSVOutputFormat(append = true))(implicit outputFormat: OutputFormat[F, DirectSamplingMetadata]): Hooked[M] = {
       val dsl = method(t)
       implicit val defScope = dsl.scope
-      val metadata = DirectSamplingMetadata.DirectSampling(dsl.method.sampled.map(_.name), dsl.method.aggregation.map(DirectSamplingMetadata.aggregation))
+
+      val aggregation = if (dsl.method.aggregation.isEmpty) None else Some(dsl.method.aggregation.map(DirectSamplingMetadata.aggregation))
+      val metadata = DirectSamplingMetadata.DirectSampling(dsl.method.sampled.map(v ⇒ ValData(v)), aggregation, dsl.method.output.map(v ⇒ ValData(v)))
       def fileName = if (outputFormat.appendable(format)) None else Some("experiment${" + FormattedFileHook.experiment.name + "}")
       Hooked(t, FormattedFileHook(output = output, values = values, format = format, metadata = metadata, fileName = fileName))
     }

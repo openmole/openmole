@@ -331,7 +331,7 @@ object NichedNSGA2 {
       import p._
 
       (i: CDGenome.NoisyIndividual.Individual[Phenotype]) ⇒ {
-        import org.openmole.tool.types.ClassUtils._
+        import org.openmole.tool.types.TypeTool._
         val values = i.phenotypeHistory.map(Phenotype.outputs(phenotypeContent, _)).transpose
         val context =
           (phenotypeContent.outputs zip values).map {
