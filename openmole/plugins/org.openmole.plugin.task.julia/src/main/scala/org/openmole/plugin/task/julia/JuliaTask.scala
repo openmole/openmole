@@ -131,7 +131,7 @@ object JuliaTask {
              |$inputArrayName = "/$inputJSONName" |> open |> JSON.parse
              |${inputMapping(inputArrayName)}
              |${RunnableScript.content(script)}
-             |write(open('/$outputJSONName','w'),JSON.json($outputMapping))
+             |write(open("/$outputJSONName","w"),JSON.json($outputMapping))
       """.stripMargin
 
         val outputFile = Val[File]("outputFile", Namespace("JuliaTask"))
