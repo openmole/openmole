@@ -253,10 +253,14 @@ class DirectSamplingSpec extends FlatSpec with Matchers {
 
     val model = EmptyTask() set (inputs += l)
 
-    DirectSampling(
-      model,
-      ExplicitSampling(l, Seq(1.0, 2.0))
-    ) hook display
+    val ds =
+      DirectSampling(
+        model,
+        ExplicitSampling(l, Seq(1.0, 2.0))
+      )
+
+    (ds hook display): DSL
+    (ds hook display hook "/tmp/test.csv"): DSL
   }
 
 }
