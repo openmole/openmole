@@ -33,7 +33,7 @@ object JuliaTask {
   implicit def isMapped = MappedInputOutputBuilder(JuliaTask.mapped)
 
     def installCommands(install: Seq[String], libraries: Seq[String]): Vector[String] = {
-       (install ++ Seq("""sh -c "julia -e 'using Pkg; Pkg.add.([ """ + libraries.map { l ⇒ "\\\""+l+"\\\"" }.mkString(",")+"""])'"""" )).toVector
+       (install ++ Seq("""pwd;julia -e 'using Pkg; Pkg.add.([ """ + libraries.map { l ⇒ "\""+l+"\"" }.mkString(",")+"""])'""" )).toVector
     }
 
     def apply(
@@ -96,8 +96,8 @@ object JuliaTask {
     import Mapped.noFile
 
     def writeInputsJSON(file: File): Unit = {
-      def values = noFile(mapped.inputs).map { m => p.context(m.v) }
-      file.content = compact(render(toJSONValue(values.toArray)))
+      def values = noFile(mapped.inputs).map { m => (m.name,p.context(m.v)) }
+      file.content = "{"+values.map{case (name,value) => "\""+name+"\": "+compact(render(toJSONValue(value)))}.mkString(",")+"}"
     }
 
     def readOutputJSON(file: File) = {
@@ -108,12 +108,12 @@ object JuliaTask {
     }
 
     def inputMapping(dicoName: String): String =
-      noFile(mapped.inputs).map {
-        case m ⇒ s"${m.name} = $dicoName[\"${m.name}\"]"
+      noFile(mapped.inputs).zipWithIndex.map {
+        case (m,i) ⇒ s"${m.name} = $dicoName[\"${m.name}\"]\n println(${m.name})"
       }.mkString("\n")
 
     def outputMapping: String =
-      s"""Dict(${noFile(mapped.outputs).map { m ⇒ "\""+m.name+"\" => "+m.v }.mkString(",")})"""
+      s"""Dict(${noFile(mapped.outputs).map { m ⇒ "\""+m.name+"\" => "+m.name }.mkString(",")})"""
 
     val resultContext: Context = p.newFile.withTmpFile("script", ".jl") { scriptFile ⇒
       p.newFile.withTmpFile("inputs", ".json") { jsonInputs ⇒
@@ -141,7 +141,7 @@ object JuliaTask {
           ContainerTask(
             containerSystem = containerSystem,
             image = image,
-            command = s"sh -c \"julia $scriptName" + argumentsValue+"\"",
+            command = s"cat $scriptName; julia $scriptName" + argumentsValue,
             workDirectory = None,
             relativePathRoot = None,
             errorOnReturnValue = errorOnReturnValue,
