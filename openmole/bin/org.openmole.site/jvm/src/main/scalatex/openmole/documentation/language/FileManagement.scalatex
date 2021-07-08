@@ -5,18 +5,19 @@
 
 
 OpenMOLE implements mechanisms to conveniently make use of data stored as files in your experiments.
+
 @br
+
 @i{Nota Bene:} OpenMOLE makes very few distinctions between files and directories.
 In this part, most mentions of a "file" are also valid for a "directory".
 
-@br@br
+@br
 
 The files in OpenMOLE tasks have two main use cases:
 @ul
   @li{they can be provided to a task as @a("input files or resources", href := fileManagement.file + "#Inputfilesandresources"),}
   @li{they can be produced by a task @a("output files", href := fileManagement.file + "#Outputfiles").}
 
-@br
 @img(src := Resource.img.model.fileMapping.file, width := "100%")
 
 
@@ -25,7 +26,9 @@ The files in OpenMOLE tasks have two main use cases:
 
 A task can be provided with input files and resources prior to its execution, in order to use theses files during execution.
 The difference between input files and resources is that @b{input files are generally produced dynamically by another task} in the workflow, whereas @b{resources are preexisting files}.
+
 @br
+
 In OpenMOLE, there are two behaviors when it comes to manipulating input files and resources: one for the ScalaTask, and one for the other "external" tasks that are mainly used to embed code from other languages.
 
 
@@ -35,10 +38,10 @@ In order to provide files to that kind of tasks (Python, R, NetLogo, ...), OpenM
 @h6{Resources}
 To provide a file as a resource to a task, it first needs to be uploaded to your working directory in the GUI (see @a("here", href := gui.file + "#FileManagement") for more info on how to do this).
 It can then be fed to the task through the @code{resources} keyword inside the task: @code{resources += path/to/the/file}.
-@br
-Let's first consider a simple case in which an external task requires a file named @code{file.txt} to be executed:
 
-@br@br
+@br
+
+Let's first consider a simple case in which an external task requires a file named @code{file.txt} to be executed:
 
 @openmole("""
     // Define the task
@@ -50,11 +53,7 @@ Let's first consider a simple case in which an external task requires a file nam
     task
 """)
 
-@br
-
 We can do the same with a directory present in your OpenMOLE working directory:
-
-@br@br
 
 @openmole("""
     // Define the task
@@ -66,13 +65,9 @@ We can do the same with a directory present in your OpenMOLE working directory:
     task
 """)
 
-@br
-
 It is also possible to provide a second argument to rename the file: @code{resources += (path/to/the/file, "new_name.txt")}.
 In this case the directory in which the task is executed contains a file with the same content but a different name.
 For instance:
-
-@br@br
 
 @openmole("""
     // Define the task
@@ -84,16 +79,12 @@ For instance:
    task
 """)
 
-@br
-
 The @code{resources} keyword is useful for files existing before the workflow execution.
 In other cases, you might want to produce a file in a task and provide it to a subsequent task.
 
 @h6{Input files}
 Input files are files that the workflow will interact with dynamically, mainly by creating them, or writing in them.
 The @code{inputFiles} keyword is used for these files, assigning a file variable from the workflow to a name and linking it to the file object created: @code{inputFiles += (fileVariable, "filename.txt")}.
-
-@br@br
 
 @openmole(s"""
     // Define a File variable
@@ -121,8 +112,6 @@ The @code{inputFiles} keyword is used for these files, assigning a file variable
 Since the @code{ScalaTask} is able to directly access the file variables @code{Val[File]}, it is easier to provide it with files.
 Files are just plain simple inputs, in the same manner as any other numerical inputs for instance.
 
-@br@br
-
 @openmole(s"""
     // Define a File variable
     val f = Val[File]
@@ -141,12 +130,8 @@ Files are just plain simple inputs, in the same manner as any other numerical in
     task
 """)
 
-@br
-
 In the example above, the file is provided using a default argument.
 You can of course produce it in another task.
-
-@br@br
 
 @openmole(s"""
     // Define a File variable
@@ -171,8 +156,6 @@ You can of course produce it in another task.
     producer -- task
 """)
 
-@br
-
 Note that the type of variable @code{f} is @code{java.io.File}.
 It can be provided as an argument to Java or Scala function calls as it is.
 
@@ -189,8 +172,6 @@ The case of the @code{ScalaTask} is explained in a separate section.
 @h3{External Tasks}
 The general mechanism to save a file for subsequent execution or in the work directory is to link the path of the produced file to a variable of type @code{Val[File]} using the @code{outputFiles} keyword.
 @code{outputFiles} gets a file with a given name and assign it to an OpenMOLE variable once the execution of the task is completed: @code{outputFiles += ("filename.txt", fileVariable)}.
-
-@br@br
 
 @openmole("""
     // Define a file variable
@@ -209,8 +190,6 @@ The general mechanism to save a file for subsequent execution or in the work dir
 @h3{Scala Task}
 When using the @code{ScalaTask}, files are simple variables and are manipulated like any variable.
 To output a file variable you can just set it as any usual output:
-
-@br@br
 
 @openmole(s"""
     // Define a file variable

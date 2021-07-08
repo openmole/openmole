@@ -2,19 +2,25 @@
 @import org.openmole.site.Resource._
 @import org.openmole.site._
 @import org.openmole.site.tools._
+@import DocumentationPages._
 
-Sources have been designed as a possible way to inject data in the dataflow from diverse sources: CSV files,
-databases, sensors...
 
-@p At the moment, only file-based Sources are available in OpenMOLE. If you need to interface OpenMOLE with an
-external datasource, check the @a("contact information page", href := DocumentationPages.whoWeAre.file) to see how to reach the
-OpenMOLE development team.
+
+Sources have been designed as a possible way to inject data in the dataflow from diverse sources: CSV files, databases, sensors...
+
+@br
+
+At the moment, only file-based Sources are available in OpenMOLE.
+If you need to interface OpenMOLE with an external datasource, check the @aa("contact information page", href := whoWeAre.file) to see how to reach the OpenMOLE development team.
+
+
 
 @h2{Plug a source}
 
-Sources are plugged in the data flow in a similar fashion to @a("hooks", href := DocumentationPages.hook.file ). Let's
-consider this simple workflow:
-@br @hl.openmole("""
+Sources are plugged in the dataflow in a similar fashion to @aa("hooks", href := DocumentationPages.hook.file ).
+Let's consider this simple workflow:
+
+@hl.openmole("""
 val files = Val[Array[File]]
 val result = Val[Double]
 
@@ -26,17 +32,21 @@ val hello =
 
 val s = ListFilesSource(workDirectory / "directory", files)
 
-(hello source s)""", name = "plug a source")
+(hello source s)
+""", name = "plug a source")
 
-@p The source @i{s} is plugged at the beginning of the task @i{hello}. The source is executed prior to
-@b{each execution} of @i{hello}. You can also plug multiple sources on the same task using the syntax:
-@hl.code("hello source (s1, s2, s3)").
+The source @code{s} is plugged at the beginning of the task @code{hello}.
+The source is executed prior to each execution of @code{hello}.
+You can also plug multiple sources on the same task using the syntax: @code{hello source (s1, s2, s3)}.
+
+
 
 @h2{List files in a directory}
 
-This source lists directories and injects an array of @i{File} objects into the dataflow. See how the range of files
-selected can be filtered using a regular expression as a last parameter to the source builder.
-@br @hl.openmole("""
+This source lists directories and injects an array of @code{File} objects into the dataflow.
+See how the range of files selected can be filtered using a regular expression as a last parameter to the source builder.
+
+@hl.openmole("""
   val someVariable = Val[String]
   val txtFiles = Val[Array[File]]
   val files = Val[Array[File]]
@@ -46,15 +56,18 @@ selected can be filtered using a regular expression as a last parameter to the s
   val s2 =
     ListFilesSource(workDirectory / "/${someVariable}/", txtFiles, ".*\\.txt") set (
       inputs += someVariable
-  )""", name = "list file source")
+  )
+""", name = "list file source")
+
+
 
 @h2{List directories in a directory}
 
-Likewise, you can inject an array of directories in the dataflow. Directories are also represented as @i{File}
-objects. Again, the selection can be done either by passing a complete directory name, or a glob pattern that will
-be matched against the names of the directories found.
+Likewise, you can inject an array of directories in the dataflow.
+Directories are also represented as @code{File} objects.
+Again, the selection can be done either by passing a complete directory name, or a global pattern that will be matched against the names of the directories found.
 
-@br @hl.openmole("""
+@hl.openmole("""
 val someVariable = Val[String]
 val dirs = Val[Array[File]]
 val aaaDirs = Val[Array[File]]
@@ -66,20 +79,22 @@ val s2 =
   // will fill aaaDirs with all the subdirectories of "directory" starting with aaa
   ListDirectoriesSource(workDirectory / "${someVariable}", aaaDirs, "^aaa.*") set (
     inputs += someVariable
-  )""", name = "list directories source")
+  )
+""", name = "list directories source")
 
-@p Sources store each entry found in an Array. In most cases, you will want each of the entries to feed a different
-task. Let's now see how this can be done by reusing what we've discovered with the
-@aa("data processing sampling", href := DocumentationPages.fileSampling.file).
+Sources store each entry found in an Array.
+In most cases, you will want each of the entries to feed a different task.
+Let's now see how this can be done by reusing what we've discovered with the @aa("data processing sampling", href := DocumentationPages.fileSampling.file).
+
+
 
 @h2{A complete example}
 
-Here, we are collecting all the directories which named "care_archive". See how they are gathered in an
-@i{Array[File]} container and can be explored by an @aa("ExplorationTask", href := DocumentationPages.fileSampling.file) using
-the keyword @hl.openmoleNoTest("in"). This exploration generates one @i{analysisTask} per directory collected by the
-source.
+Here, we are collecting all the directories named @i{care_archive}.
+See how they are gathered in an @i{Array[File]} container and can be explored by an @aa("ExplorationTask", href := fileSampling.file) using the keyword @code{in}.
+This exploration generates one @code{analysisTask} per directory collected by the source.
 
-@br @hl.openmole("""
+@hl.openmole("""
 val directoriesToAnalyze  = Val[Array[File]]
 
 val s = ListDirectoriesSource(workDirectory / "data/care_DoE", directoriesToAnalyze, "care_archive")
@@ -94,4 +109,5 @@ SystemExecTask(s"${myWorkDirectory}/re-execute.sh") set (
 
 val exploration = ExplorationTask(inDir in directoriesToAnalyze)
 
-(exploration source s) -< analysisTask""", name = "complete example with source")
+(exploration source s) -< analysisTask"
+"", name = "complete example with source")
