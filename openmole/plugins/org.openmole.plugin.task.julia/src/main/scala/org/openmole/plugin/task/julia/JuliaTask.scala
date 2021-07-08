@@ -21,9 +21,7 @@ import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.plugin.task.container
 
 /**
- * https://docs.julialang.org/en/v1/base/numbers/#Base.isone
- *
- * https://gist.github.com/silgon/0ba43e00e0749cdf4f8d244e67cd9d6a
+ * https://docs.julialang.org/en/v1/
  */
 object JuliaTask {
 
@@ -33,7 +31,7 @@ object JuliaTask {
   implicit def isMapped = MappedInputOutputBuilder(JuliaTask.mapped)
 
     def installCommands(install: Seq[String], libraries: Seq[String]): Vector[String] = {
-       (install ++ Seq("""pwd;julia -e 'using Pkg; Pkg.add.([ """ + libraries.map { l ⇒ "\""+l+"\"" }.mkString(",")+"""])'""" )).toVector
+       (install ++ Seq("""julia -e 'using Pkg; Pkg.add.([ """ + libraries.map { l ⇒ "\""+l+"\"" }.mkString(",")+"""])'""" )).toVector
     }
 
     def apply(
@@ -109,11 +107,11 @@ object JuliaTask {
 
     def inputMapping(dicoName: String): String =
       noFile(mapped.inputs).zipWithIndex.map {
-        case (m,i) ⇒ s"${m.name} = $dicoName[\"${m.name}\"]\n println(${m.name})"
+        case (m,i) ⇒ s"${m.name} = $dicoName[\"${m.name}\"]"
       }.mkString("\n")
 
     def outputMapping: String =
-      s"""Dict(${noFile(mapped.outputs).map { m ⇒ "\""+m.name+"\" => "+m.name }.mkString(",")})"""
+      s"""[${noFile(mapped.outputs).map { m ⇒ m.name }.mkString(",")}]"""
 
     val resultContext: Context = p.newFile.withTmpFile("script", ".jl") { scriptFile ⇒
       p.newFile.withTmpFile("inputs", ".json") { jsonInputs ⇒
@@ -141,7 +139,7 @@ object JuliaTask {
           ContainerTask(
             containerSystem = containerSystem,
             image = image,
-            command = s"cat $scriptName; julia $scriptName" + argumentsValue,
+            command = s"julia $scriptName" + argumentsValue,
             workDirectory = None,
             relativePathRoot = None,
             errorOnReturnValue = errorOnReturnValue,
