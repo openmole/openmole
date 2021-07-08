@@ -5,7 +5,7 @@
 
 
 
-OpenMOLE is a plugable platform.
+OpenMOLE is a pluggable platform.
 It means that you can easily write your own extension and plug it into OpenMOLE.
 This tutorial explains how to write an OpenMOLE plugin using Scala and SBT.
 OpenMOLE is based on the JVM so you can create OpenMOLE plugins using Scala or any other JVM based languages such as Java, Groovy, Clojure, Jython, etc.
@@ -21,20 +21,13 @@ You will need the following tools to design your plugin:
     @li
         @aa("SBT", href := shared.link.sbt), the Scala Building Tool.
 
-The first step is to clone the github repository for OpenMOLE plugins:
-
-@br@br
 
 @hl.code("""
 git clone git://github.com/openmole/myopenmoleplugin.git
 """)
 
-@br
-
 This repository contains a template to help you create OpenMOLE plugins easily.
-The hello directory contains the source code of the plugin and the materials to build it:
-
-@br@br
+The @i{hello} directory contains the source code of the plugin and the materials to build it:
 
 @hl.code("""
 package myopenmoleplugin
@@ -51,8 +44,6 @@ object Hello {
 The file @b{build.sbt} contains the building instructions for SBT.
 The most important part are the OSGi instructions:
 
-@br@br
-
 @hl.plain(s"""
 enablePlugins(SbtOsgi)
 
@@ -65,8 +56,6 @@ OsgiKeys.privatePackage := Seq("*")
 OsgiKeys.requireCapability := ${tq}osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"${tq}
 """)
 
-@br
-
 @ul
   @li
     @code{exportPackage} instruction makes the @code{myopenmoleplugin} package visible to OpenMOLE.
@@ -75,14 +64,9 @@ OsgiKeys.requireCapability := ${tq}osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1
   @li
     @code{privatePackage} means that every package in the project, or in the dependencies, should be embedded except for the package starting by the "scala" word. The scala packages provided by OpenMOLE will be used by the plugin instead.
 
-To build the plugin execute @hl.plain("sbt osgiBundle").
+To build the plugin, execute @code{sbt osgiBundle}.
 SBT will then construct the plugin in @code{target/scala-2.12/myopenmoleplugin_2.12-1.0.jar}.
-
-@br
-
 This JAR file contains the classes you have developed (*.class) along with the metadata relative to imports and exports in the @code{MANIFEST.INF} file:
-
-@br@br
 
 @hl.plain("""
 META-INF/MANIFEST.MF
@@ -91,9 +75,7 @@ myopenmoleplugin/Hello$.class
 myopenmoleplugin/Hello.class
 """)
 
-@br
-
-You can check in the MANIFEST.MF that you namespace is exported.
+You can check in the @i{MANIFEST.MF} that your namespace is exported.
 
 
 
@@ -101,17 +83,11 @@ You can check in the MANIFEST.MF that you namespace is exported.
 
 To enable your plugin in OpenMOLE, either use the plugin panel in the GUI, or use the option -p:
 
-@br@br
-
 @hl.plain("""
 openmole -p target/scala-2.12/myopenmoleplugin_2.12-1.0.jar
 """)
 
-@br
-
 You can now use the @code{Hello} object in your workflows:
-
-@br@br
 
 @hl.openmole("""
 // Declare the variable
