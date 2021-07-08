@@ -33,7 +33,7 @@ object JuliaTask {
   implicit def isMapped = MappedInputOutputBuilder(JuliaTask.mapped)
 
     def installCommands(install: Seq[String], libraries: Seq[String]): Vector[String] = {
-       (install ++ Seq("""sh -c "julia -e 'using Pkg; Pkg.add.([ """ + libraries.map { l ⇒ "\\\""+l+"\\\"" }.mkString(",")+"""])'"""" )).toVector
+       (install ++ Seq("""julia -e 'using Pkg; Pkg.add.([ """ + libraries.map { l ⇒ "\\\""+l+"\\\"" }.mkString(",")+"""])'""" )).toVector
     }
 
     def apply(
@@ -141,7 +141,7 @@ object JuliaTask {
           ContainerTask(
             containerSystem = containerSystem,
             image = image,
-            command = s"sh -c \"julia $scriptName" + argumentsValue+"\"",
+            command = s"julia $scriptName" + argumentsValue,
             workDirectory = None,
             relativePathRoot = None,
             errorOnReturnValue = errorOnReturnValue,
