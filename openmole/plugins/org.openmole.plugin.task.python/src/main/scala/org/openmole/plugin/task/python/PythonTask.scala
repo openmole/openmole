@@ -27,49 +27,52 @@ object PythonTask {
   implicit def isInfo = InfoBuilder(info)
   implicit def isMapped = MappedInputOutputBuilder(PythonTask.mapped)
 
-    // could to make distinct image for python 2 and 3
-    def dockerImage(major: Int) = DockerImage("python")
+  def dockerImage(version: String) = DockerImage("python", version)
 
-    def installCommands(install: Seq[String], libraries: Seq[String], major: Int): Vector[String] = {
-      // need to install pip2 in case of python 2
-      val effintsall = install ++ (if (major==2) Seq("curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py","python2 get-pip.py") else Seq.empty)
-      (effintsall ++ libraries.map { l ⇒ "pip"+major+" install " + l }).toVector
-    }
+  def installCommands(install: Seq[String], libraries: Seq[String], major: Int): Vector[String] = {
+    // need to install pip2 in case of python 2
+    val effintsall = install ++
+      (if (major == 2) Seq("curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py","python2 get-pip.py") else Seq.empty)
 
-    def apply(
-      script:               RunnableScript,
-      arguments: OptionalArgument[String] = None,
-      major:                Int = 3,
-      libraries:            Seq[String]                        = Seq.empty,
-      install:              Seq[String]                        = Seq.empty,
-      workDirectory:        OptionalArgument[String]           = None,
-      hostFiles:            Seq[HostFile]                      = Vector.empty,
-      environmentVariables: Seq[EnvironmentVariable] = Vector.empty,
-      errorOnReturnValue:   Boolean                            = true,
-      returnValue:          OptionalArgument[Val[Int]]         = None,
-      stdOut:               OptionalArgument[Val[String]]      = None,
-      stdErr:               OptionalArgument[Val[String]]      = None,
-      containerSystem:        ContainerSystem                  = ContainerSystem.default,
-      installContainerSystem: ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) = {
+    (effintsall ++ libraries.map { l ⇒ "pip"+major+" install " + l }).toVector
+  }
 
-     new PythonTask(
-        script = script,
-        arguments = arguments.option,
-        image = ContainerTask.prepare(installContainerSystem, dockerImage(major), installCommands(install, libraries,major)),
-        errorOnReturnValue = errorOnReturnValue,
-        returnValue = returnValue,
-        stdOut = stdOut,
-        stdErr = stdErr,
-        hostFiles = hostFiles,
-        environmentVariables = environmentVariables,
-        containerSystem = containerSystem,
-        config = InputOutputConfig(),
-        external = External(),
-        info = InfoConfig(),
-        mapped = MappedInputOutputConfig(),
-        major = major
-      ) set (outputs += (Seq(returnValue.option, stdOut.option, stdErr.option).flatten: _*))
-    }
+  def apply(
+    script:                 RunnableScript,
+    arguments:              OptionalArgument[String] = None,
+    version:                String                             = "3.9.6",
+    libraries:              Seq[String]                        = Seq.empty,
+    install:                Seq[String]                        = Seq.empty,
+    workDirectory:          OptionalArgument[String]           = None,
+    hostFiles:              Seq[HostFile]                      = Vector.empty,
+    environmentVariables:   Seq[EnvironmentVariable] = Vector.empty,
+    errorOnReturnValue:     Boolean                            = true,
+    returnValue:            OptionalArgument[Val[Int]]         = None,
+    stdOut:                 OptionalArgument[Val[String]]      = None,
+    stdErr:                 OptionalArgument[Val[String]]      = None,
+    containerSystem:        ContainerSystem                  = ContainerSystem.default,
+    installContainerSystem: ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) = {
+
+    val major = if(version.startsWith("2")) 2 else 3
+
+    new PythonTask(
+      script = script,
+      arguments = arguments.option,
+      image = ContainerTask.prepare(installContainerSystem, dockerImage(version), installCommands(install, libraries, major)),
+      errorOnReturnValue = errorOnReturnValue,
+      returnValue = returnValue,
+      stdOut = stdOut,
+      stdErr = stdErr,
+      hostFiles = hostFiles,
+      environmentVariables = environmentVariables,
+      containerSystem = containerSystem,
+      config = InputOutputConfig(),
+      external = External(),
+      info = InfoConfig(),
+      mapped = MappedInputOutputConfig(),
+      major = major
+    ) set (outputs += (Seq(returnValue.option, stdOut.option, stdErr.option).flatten: _*))
+  }
 }
 
 @Lenses case class PythonTask(

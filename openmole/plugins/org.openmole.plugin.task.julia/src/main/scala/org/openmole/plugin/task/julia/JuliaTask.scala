@@ -30,42 +30,43 @@ object JuliaTask {
   implicit def isInfo = InfoBuilder(info)
   implicit def isMapped = MappedInputOutputBuilder(JuliaTask.mapped)
 
-    def installCommands(install: Seq[String], libraries: Seq[String]): Vector[String] = {
-       (install ++ Seq("""julia -e 'using Pkg; Pkg.add.([ """ + libraries.map { l ⇒ "\""+l+"\"" }.mkString(",")+"""])'""" )).toVector
-    }
+  def installCommands(install: Seq[String], libraries: Seq[String]): Vector[String] = {
+     (install ++ Seq("""julia -e 'using Pkg; Pkg.add.([ """ + libraries.map { l ⇒ "\""+l+"\"" }.mkString(",")+"""])'""" )).toVector
+  }
 
-    def apply(
-      script:               RunnableScript,
-      arguments: OptionalArgument[String] = None,
-      libraries:            Seq[String]                        = Seq.empty,
-      install:              Seq[String]                        = Seq.empty,
-      workDirectory:        OptionalArgument[String]           = None,
-      hostFiles:            Seq[HostFile]                      = Vector.empty,
-      environmentVariables: Seq[EnvironmentVariable] = Vector.empty,
-      errorOnReturnValue:   Boolean                            = true,
-      returnValue:          OptionalArgument[Val[Int]]         = None,
-      stdOut:               OptionalArgument[Val[String]]      = None,
-      stdErr:               OptionalArgument[Val[String]]      = None,
-      containerSystem:        ContainerSystem                  = ContainerSystem.default,
-      installContainerSystem: ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) = {
+  def apply(
+    script:                 RunnableScript,
+    arguments:              OptionalArgument[String] = None,
+    libraries:              Seq[String]                        = Seq.empty,
+    install:                Seq[String]                        = Seq.empty,
+    version:                String                             = "1.6.1",
+    workDirectory:          OptionalArgument[String]           = None,
+    hostFiles:              Seq[HostFile]                      = Vector.empty,
+    environmentVariables:   Seq[EnvironmentVariable]           = Vector.empty,
+    errorOnReturnValue:     Boolean                            = true,
+    returnValue:            OptionalArgument[Val[Int]]         = None,
+    stdOut:                 OptionalArgument[Val[String]]      = None,
+    stdErr:                 OptionalArgument[Val[String]]      = None,
+    containerSystem:        ContainerSystem                    = ContainerSystem.default,
+    installContainerSystem: ContainerSystem                    = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) = {
 
-     new JuliaTask(
-        script = script,
-        arguments = arguments.option,
-        image = ContainerTask.prepare(installContainerSystem, DockerImage("julia"), installCommands(install, Seq("JSON")++libraries)),
-        errorOnReturnValue = errorOnReturnValue,
-        returnValue = returnValue,
-        stdOut = stdOut,
-        stdErr = stdErr,
-        hostFiles = hostFiles,
-        environmentVariables = environmentVariables,
-        containerSystem = containerSystem,
-        config = InputOutputConfig(),
-        external = External(),
-        info = InfoConfig(),
-        mapped = MappedInputOutputConfig()
-      ) set (outputs += (Seq(returnValue.option, stdOut.option, stdErr.option).flatten: _*))
-    }
+   new JuliaTask(
+      script = script,
+      arguments = arguments.option,
+      image = ContainerTask.prepare(installContainerSystem, DockerImage("julia", version), installCommands(install, Seq("JSON")++libraries)),
+      errorOnReturnValue = errorOnReturnValue,
+      returnValue = returnValue,
+      stdOut = stdOut,
+      stdErr = stdErr,
+      hostFiles = hostFiles,
+      environmentVariables = environmentVariables,
+      containerSystem = containerSystem,
+      config = InputOutputConfig(),
+      external = External(),
+      info = InfoConfig(),
+      mapped = MappedInputOutputConfig()
+    ) set (outputs += (Seq(returnValue.option, stdOut.option, stdErr.option).flatten: _*))
+  }
 }
 
 @Lenses case class JuliaTask(

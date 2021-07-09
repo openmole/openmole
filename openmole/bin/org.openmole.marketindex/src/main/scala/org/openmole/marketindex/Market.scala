@@ -38,6 +38,7 @@ object Market {
     lazy val simulation = Tag("Simulation")
     lazy val machineLearning = Tag("Machine Learning")
     lazy val R = Tag("R")
+    lazy val julia = Tag("Julia")
     lazy val scilab = Tag("Scilab")
     lazy val fsl = Tag("FSL")
     lazy val neuroscience = Tag("Neuro Science")
@@ -77,6 +78,7 @@ object Market {
       MarketEntry("Hello World in Scilab", "scilab-hello", Seq(scilab)),
       MarketEntry("Hello World in Java", "java-hello", Seq(java)),
       MarketEntry("Hello World in NetLogo", "fire", Seq(netlogo, stochastic, simulation)),
+      MarketEntry("Hello World in Julia", "julia-helo", Seq(julia)),
       MarketEntry("Hello World in GAMA", "gama", Seq(gama, stochastic, simulation)),
       MarketEntry("Hello World in a Container", "hello-container", Seq(native)),
       MarketEntry("Hello with OpenMOLE plugin", "hello-plugin", Seq(scala, java, plugin)),
