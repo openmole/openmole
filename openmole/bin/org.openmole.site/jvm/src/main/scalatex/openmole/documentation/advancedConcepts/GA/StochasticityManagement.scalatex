@@ -47,7 +47,7 @@ In case you want to explore a stochastic model with a GA you can do:
       evaluation = model,
       termination = 100
     )
-""", header = model)
+""")
 
 
 

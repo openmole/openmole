@@ -64,7 +64,7 @@ val myBlocksMinSize = Val[Int]
 val myBlocksMaxSize = Val[Int]
 
 val myGenerator =
-  RandomSpatialSamplingTask(
+  BlocksGridSpatialSamplingTask(
     grid = myGrid,
     gridSize = 10,
     number = myBlocksNumber,
