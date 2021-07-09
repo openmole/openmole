@@ -1,5 +1,7 @@
+package org.openmole.plugin.tool
+
 /*
- * Copyright (C) 2015 Romain Reuillon
+ * Copyright (C) 2021 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -9,11 +11,21 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.tool
 
-package object statistics extends StatisticsPackage
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
+
+package object methoddata {
+
+  object ValData {
+    def apply[T](v: Val[T]) = new ValData(v.name, ValType.toTypeString(v.`type`))
+  }
+
+  case class ValData(name: String, `type`: String)
+
+}

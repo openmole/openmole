@@ -531,7 +531,7 @@ package composition {
       implicit def on[T, C](implicit toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[On[T, EnvironmentProvider], C] = t ⇒ toDSLContainer(t.value).copy(environment = Some(t.on))
       implicit def hooked[T, C](implicit toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[Hooked[T], C] = t ⇒ {
         val container = toDSLContainer(t.value)
-        container.copy(hooks = container.hooks ++ Seq(t.hook))
+        container.copy(hooks = container.hooks ++ Seq(t.h))
       }
     }
 
@@ -567,7 +567,7 @@ package composition {
     def apply(t: T, h: P): T
   }
 
-  case class Hooked[+T](value: T, hook: Hook)
+  case class Hooked[+T](value: T, h: Hook)
 
   trait CompositionPackage {
 

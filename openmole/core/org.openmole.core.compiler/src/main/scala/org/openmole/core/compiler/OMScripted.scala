@@ -11,7 +11,7 @@ import ScriptContext.{ ENGINE_SCOPE, GLOBAL_SCOPE }
 import java.io.{ Closeable, Reader }
 
 import org.openmole.core.compiler.ScalaREPL.OMIMain
-import org.openmole.tool.types.ClassUtils
+import org.openmole.tool.types.TypeTool
 
 import scala.tools.nsc.Settings
 
@@ -168,7 +168,7 @@ class OMScripted(val factory: ScriptEngineFactory, val omIMain: IMain)
           val newline = (defines map (s ⇒ s"val ${s.name} = $$INSTANCE${req.accessPath}.${s.name}")).mkString(instance, ";", ";")
           //val newreq = intp.requestFromLine(newline).right.get
 
-          val newreq = ClassUtils.callByName[IMain, Either[Result, intp.Request]](intp, "requestFromLine", Vector(newline)).right.get
+          val newreq = TypeTool.callByName[IMain, Either[Result, intp.Request]](intp, "requestFromLine", Vector(newline)).right.get
 
           val ok = newreq.compile
 

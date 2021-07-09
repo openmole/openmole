@@ -18,7 +18,7 @@ package org.openmole.core.outputmanager
 
 import java.io.{ OutputStream, PrintStream }
 
-import org.openmole.tool.types.ClassUtils
+import org.openmole.tool.types.TypeTool
 
 import scala.collection.mutable
 import org.openmole.tool.stream._
@@ -82,12 +82,12 @@ object OutputManager {
 
   def redirectSystemOutput(ps: PrintStream) = {
     System.setOut(ps)
-    ClassUtils.call(Console, "setOutDirect", Seq(classOf[PrintStream]), Seq(ps))
+    TypeTool.call(Console, "setOutDirect", Seq(classOf[PrintStream]), Seq(ps))
   }
 
   def redirectSystemError(ps: PrintStream) = {
     System.setErr(ps)
-    ClassUtils.call(Console, "setErrDirect", Seq(classOf[PrintStream]), Seq(ps))
+    TypeTool.call(Console, "setErrDirect", Seq(classOf[PrintStream]), Seq(ps))
   }
 
   private def unregister(thread: ThreadGroup) = {
