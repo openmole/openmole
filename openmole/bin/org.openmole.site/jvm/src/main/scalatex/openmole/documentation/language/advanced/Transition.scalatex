@@ -2,7 +2,7 @@
 @import org.openmole.site.Resource._
 @import org.openmole.site._
 @import org.openmole.site.tools._
-
+@import DocumentationPages._
 
 In OpenMOLE, transitions represent the links between tasks.
 The following examples illustrate several kinds of transitions available in OpenMOLE.

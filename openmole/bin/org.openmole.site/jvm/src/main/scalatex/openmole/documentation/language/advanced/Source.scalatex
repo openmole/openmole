@@ -109,5 +109,4 @@ SystemExecTask(s"${myWorkDirectory}/re-execute.sh") set (
 
 val exploration = ExplorationTask(inDir in directoriesToAnalyze)
 
-(exploration source s) -< analysisTask"
-"", name = "complete example with source")
+(exploration source s) -< analysisTask""", name = "complete example with source")

@@ -60,7 +60,7 @@ For instance:
   @li
     @code{def squareDistance(s1: Seq[Double], s2: Seq[Double]): Double}, compute the sum of the squared distance between the respective elements of s1 and s2.
   @li
-    @code("""def dynamicTimeWarpingDistance(s1: Seq[Double], s2: Seq[Double]): Double}, compute the @a(href := "https://en.wikipedia.org/wiki/Dynamic_time_warping", "dynamic time warping distance} between s1 and s2.
+    @code{def dynamicTimeWarpingDistance(s1: Seq[Double], s2: Seq[Double]): Double}, compute the @a(href := "https://en.wikipedia.org/wiki/Dynamic_time_warping", "dynamic time warping distance") between s1 and s2.
 
 
 

@@ -174,7 +174,7 @@ You can think of the @code{DisplayHook} as an OpenMOLE equivalent to Scala's @co
 @h2{Variable restriction}
 You may want to restrict the hooked variables to a subset, like a variable filter.
 You can use the following notation in the hook function {@code{hook(yourHookHere, values = Seq(i,j))}}
- 
+
 @hl.openmole("""
   val i = Val[Int]
   val j = Val[Int]
@@ -183,7 +183,7 @@ You can use the following notation in the hook function {@code{hook(yourHookHere
   val task = EmptyTask() set (
     outputs += (i, j, k)
   )
-  
+
   task hook(display, values = Seq(i, j)) // only i and j are hooked
   task hook(workDirectory / "results/res.csv", values = Seq(j,k)) // only j and k are appended to the file
 """, name = "variable restriction")
