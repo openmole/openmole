@@ -75,12 +75,13 @@ object UserGuide {
 
   def h2Contents(content: String) = {
     val parsing = scala.xml.XML.loadString(s"<html>$content</html>")
-    val h2s = (parsing \\ "h2").map { h ⇒
-      val text = h.text.replaceAll("\uD83D\uDD17", "")
-      div(paddingTop := 5, paddingLeft := 10)(a(href := "#" + shared.anchor(text))(text))
+    val h2s = (parsing \\ "h2").zipWithIndex.map {
+      case (h, i) ⇒
+        val text = h.text.replaceAll("\uD83D\uDD17", "")
+        div(paddingTop := 5, paddingLeft := 10)(a(href := "#" + shared.anchor(text))(s"${i + 1} - $text"))
     }
 
-    if (h2s.isEmpty) span(marginTop := 40) else div(marginBottom := 30, scalatags.Text.all.h2("Contents"), h2s)
+    if (h2s.size <= 1) span(marginTop := 40) else div(marginBottom := 30, scalatags.Text.all.h2("Content:"), h2s, br, hr)
   }
 
   def integrate(current: PageTree): SitePage = {
