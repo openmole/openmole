@@ -145,7 +145,7 @@ object Project {
            |new $traitName {
            |
            |$functionPrototype = {
-           |implicit def _scriptSourceData = ${ScriptSourceData.applySource(workDirectory, script, Imports.importedFiles(script).flatMap(_.importedFiles))}
+           |implicit def _scriptSourceData = ${ScriptSourceData.applySource(workDirectory, script)}
            |import ${Project.uniqueName(script)}._imports._""".stripMargin
 
       def scriptFooter =

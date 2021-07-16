@@ -126,11 +126,13 @@ object Imports {
     }
   }
 
+  def directImportedFiles(source: File): Seq[ImportedFile] = level1ImportedFiles(parseImports(source.content), source.getParentFileSafe)
+
   def importedFiles(script: File): Seq[SourceFile] = {
     val alreadyImported = collection.mutable.Set[File](script.getCanonicalFile)
 
     def importedFiles0(source: File): List[SourceFile] = {
-      val imported = level1ImportedFiles(parseImports(source.content), source.getParentFileSafe)
+      val imported = directImportedFiles(source)
 
       val newlyImported = imported.map(_.file.getCanonicalFile).distinct.filter(i ⇒ !alreadyImported.contains(i))
       newlyImported.foreach(f ⇒ alreadyImported.add(f))

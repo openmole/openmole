@@ -8,7 +8,10 @@ import org.openmole.plugin.tool.json._
 import io.circe._
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.format.OutputFormat.{ PlainContent, SectionContent }
-import io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
+import io.circe.generic.auto._
+import io.circe.parser._
+import io.circe.syntax._
+import org.openmole.core.project.Imports.ImportedFile
 
 object OMROutputFormat {
 
@@ -43,14 +46,17 @@ object OMROutputFormat {
                   .add(omrVersionField, Json.fromString(omrVersion))
                   .add(openMOLEVersionField, Json.fromString(org.openmole.core.buildinfo.version.value))
 
-              if (format.script) {
-                case class OMRImport(`import`: String, content: String)
+              scriptData match {
+                case data: ScriptSourceData.ScriptData if format.script ⇒
+                  case class OMRImport(`import`: String, content: String)
 
-                o2.add(scriptField, Json.fromString(ScriptSourceData.scriptContent(scriptData)))
-                  .add(importsField, Json.fromValues(ScriptSourceData.importsContent(scriptData).map(i ⇒ OMRImport(i.`import`, i.script.content).asJson)))
+                  val scriptContent = ScriptSourceData.scriptContent(scriptData)
+                  val imports = Imports.directImportedFiles(data.script)
+
+                  o2.add(scriptField, Json.fromString(scriptContent))
+                    .add(importsField, Json.fromValues(imports.map(i ⇒ OMRImport(ImportedFile.identifier(i), i.file.content).asJson)))
+                case _ ⇒ o2
               }
-              else o2
-
             }
           }
 
