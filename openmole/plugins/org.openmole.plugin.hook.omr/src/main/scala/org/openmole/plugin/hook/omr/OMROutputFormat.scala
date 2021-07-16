@@ -3,11 +3,12 @@ package org.openmole.plugin.hook.omr
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.workflow.format.CSVOutputFormat
-import org.openmole.core.workflow.hook.FromContextHook
+import org.openmole.core.project._
 import org.openmole.plugin.tool.json._
 import io.circe._
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.format.OutputFormat.{ PlainContent, SectionContent }
+import io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
 
 object OMROutputFormat {
 
@@ -18,6 +19,7 @@ object OMROutputFormat {
   def omrVersionField = "version"
   def omrVersion = "0.1"
   def scriptField = "script"
+  def importsField = "imports"
   def openMOLEVersionField = "openmole-version"
 
   implicit def outputFormat[MD](implicit encoder: Encoder[MD], methodData: MethodData[MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD] {
@@ -41,12 +43,18 @@ object OMROutputFormat {
                   .add(omrVersionField, Json.fromString(omrVersion))
                   .add(openMOLEVersionField, Json.fromString(org.openmole.core.buildinfo.version.value))
 
-              if (format.script) o2.add(scriptField, Json.fromString(ScriptSourceData.scriptContent(scriptData))) else o2
+              if (format.script) {
+                case class OMRImport(`import`: String, content: String)
+
+                o2.add(scriptField, Json.fromString(ScriptSourceData.scriptContent(scriptData)))
+                  .add(importsField, Json.fromValues(ScriptSourceData.importsContent(scriptData).map(i ⇒ OMRImport(i.`import`, i.script.content).asJson)))
+              }
+              else o2
+
             }
           }
 
           directory.withLockInDirectory {
-            import io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
 
             content match {
               case PlainContent(variables, name) ⇒
