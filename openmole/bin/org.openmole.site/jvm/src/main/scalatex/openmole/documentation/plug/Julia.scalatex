@@ -32,12 +32,8 @@ numericaloutput = arg * 2
 write(open("output.txt","w"),string("Hello world from Julia #",arg))
 """)
 
-@br
-
 We save this to @i{hello.jl} and upload it in your OpenMOLE workspace.
 You can then use the following script:
-
-@br@br
 
 @hl.openmole("""
    // Declare the variable
@@ -64,8 +60,6 @@ You can then use the following script:
      sampling = (arg in (0 to 10)) x (arg2 is 2.0)
    ) hook copy on env
 """)
-
-@br
 
 Notions from OpenMOLE are reused in this example.
 If you're not too familiar with @a("Environments", href := scale.file), @a("Groupings", href := scale.file + "#Grouping"), @a("Hooks", href := hook.file) or @a("Samplings", href := samplings.file), check the relevant sections of the documentation.
