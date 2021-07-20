@@ -12,7 +12,7 @@ def settings = Seq(
   resolvers += Resolver.sonatypeRepo("staging"),
   resolvers += "netlogo" at "https://dl.cloudsmith.io/public/netlogo/netlogo/maven/", // netlogo 6.2
   Global / scalaVersion := scalaVersionValue,
-  scalacOptions ++= Seq("-deprecation"),
+  scalacOptions ++= Seq("-deprecation", "-Ytasty-reader"),
   publishLocal / packageDoc / publishArtifact := false,
   publishLocal / packageSrc / publishArtifact := false,
   organization := "org.openmole.library",
@@ -22,7 +22,7 @@ def settings = Seq(
 
 lazy val scalatra = OsgiProject(dir, "org.scalatra",
   exports = Seq("org.scalatra.*, org.fusesource.*", "grizzled.*", "org.eclipse.jetty.*", "javax.*"),
-  privatePackages = Seq("!scala.*", "!org.slf4j.*", "**"),
+  privatePackages = Seq("scala.xml.*", "!scala.*", "!org.slf4j.*", "**"),
   imports = Seq("scala.*", "org.slf4j.*"),
   global = true) settings(
   libraryDependencies += "org.scalatra" %% "scalatra" % scalatraVersion,
@@ -103,8 +103,8 @@ lazy val scalaLang = OsgiProject(
   privatePackages = Seq("*", "META-INF.native.**"), imports = Seq("!org.apache.sshd.*", "!org.mozilla.*", "!org.apache.tools.ant.*", "!sun.misc.*", "!javax.annotation.*", "*")) settings
   (libraryDependencies ++= {
     Seq(
-      "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
-      "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.6",
+      //"org.scala-lang.modules" %% "scala-xml" % "2.0.0",
+      //"org.scala-lang.modules" %% "scala-collection-compat" % "2.1.6",
       "org.scala-lang.modules" %% "scala-parallel-collections" % "0.2.0",
       "org.scala-lang" % "scala-library" % scalaVersion.value,
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
@@ -116,6 +116,16 @@ lazy val scalaLang = OsgiProject(
       "org.scala-lang" % "scala-compiler" % scalaVersion.value
     )
   }, version := scalaVersion.value) settings(settings: _*)
+
+lazy val scalaXML = OsgiProject(
+  dir,
+  "org.scala-lang.modules.xml",
+  exports = Seq("scala.xml.*"),
+  privatePackages = Seq("scala.xml.*", "!scala.*", "*")
+) settings(
+  libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % scalaXMLVersion,
+  version := scalaXMLVersion
+) settings(settings: _*)
 
 lazy val jasypt = OsgiProject(dir, "org.jasypt.encryption", exports = Seq("org.jasypt.*")) settings(
   libraryDependencies += "org.jasypt" % "jasypt" % jasyptVersion,
@@ -217,15 +227,25 @@ lazy val squants =
   ) settings(settings: _*)
 
 
-lazy val mgo = OsgiProject(dir, "mgo", exports = Seq("mgo.*", "freestyle.*"), imports = Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "*"), privatePackages = Seq("!scala.*", "!monocle.*", "!org.apache.commons.math3.*", "!cats.*", "!squants.*", "!scalaz.*", "*")) settings(
+lazy val mgo = OsgiProject(
+  dir,
+  "mgo",
+  exports = Seq("mgo.*"),
+  imports = Seq("scala.*", "monocle.*", "cats.*", "squants.*", "!com.oracle.svm.*", "!*"), //Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "*"),
+  privatePackages = Seq("!scala.*", "!monocle.*", "!squants.*", "!cats.*", "*") /*Seq("!scala.*", "!monocle.*", "!org.apache.commons.math3.*", "!cats.*", "!squants.*", "!scalaz.*", "*")*/) settings(
   libraryDependencies += "org.openmole" %% "mgo" % mgoVersion,
-  version := mgoVersion) dependsOn(monocle, math, cats, squants) settings(settings: _*)
+  version := mgoVersion) dependsOn(monocle, cats, squants) settings(settings: _*)
 
 
-lazy val container = OsgiProject(dir, "container", exports = Seq("container.*"), imports = Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "!com.github.luben.*", "!org.apache.avalon.*", "!org.apache.log.*", "!org.brotli.dec.*", "!javax.*","*"), privatePackages = Seq("!scala.*", "!monocle.*", "!org.apache.commons.math3.*", "!cats.*", "!squants.*", "!scalaz.*", "!io.circe.*", "!shapeless.*", "*")) settings(
+lazy val container = OsgiProject(
+  dir,
+  "container",
+  exports = Seq("container.*"),
+  imports = Seq("scala.*", "squants.*", "monocle.*", "cats.*", "!com.oracle.svm.*", "!org.graalvm.*", "!*"),
+  privatePackages = Seq("!scala.*", "!monocle.*", "!squants.*", "*")) settings(
   libraryDependencies += "org.openmole" %% "container" % containerVersion,
   //libraryDependencies += "com.github.luben" % "zstd-jni" % "1.4.3-1",
-  version := containerVersion) dependsOn(cats, squants, circe, shapeless) settings(settings: _*)
+  version := containerVersion) dependsOn(cats, squants) settings(settings: _*)
 
 lazy val spatialdata = OsgiProject(dir, "org.openmole.spatialsampling",
   exports = Seq("org.openmole.spatialsampling.*"),
