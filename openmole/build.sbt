@@ -902,6 +902,7 @@ lazy val site = crossProject(JSPlatform, JVMPlatform).in(binDir / "org.openmole.
   libraryDependencies += Libraries.txtmark,
   libraryDependencies += Libraries.scalaTags,
   libraryDependencies += Libraries.scalajHttp,
+  libraryDependencies += Libraries.scalaXML
 ) jsSettings(
   Libraries.rxJS,
   Libraries.bootstrapnative,
