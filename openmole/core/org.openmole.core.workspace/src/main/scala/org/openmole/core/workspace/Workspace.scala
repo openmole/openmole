@@ -21,7 +21,6 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
 import java.util.logging.Level
 import java.util.logging.Logger
-
 import org.jasypt.util.text._
 import org.openmole.core.event.{ Event, EventDispatcher }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
@@ -36,21 +35,21 @@ import org.openmole.tool.random.Random
 import org.openmole.tool.random.Random._
 
 import scala.concurrent.stm.{ Ref, atomic }
+import squants.information._
 
 object Workspace {
 
   case object PasswordRequired extends Event[Workspace]
 
-  def tmpLocation = ".tmp"
+  def tmpLocation = "tmp"
   def persistentLocation = "persistent"
+  def logLocation = "openmole.log.gz"
 
   def fixedPrefix = "file"
   def fixedPostfix = ".bin"
   def fixedDir = "dir"
 
-  lazy val defaultLocation = new File(System.getProperty("user.home"), s".openmole/${fixHostName}/")
-
-  // Workspace should be cleaned manualy
+  // Workspace should be cleaned after use
   def apply(location: File): Workspace = {
     val tmpDir = location / tmpLocation /> UUID.randomUUID.toString
     val persistentDir = location /> persistentLocation

@@ -17,10 +17,10 @@
 
 package org.openmole.plugin.environment.batch.refresh
 
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, AccessControl }
-import org.openmole.tool.logger.JavaLogger
+import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment }
+import org.openmole.tool.logger.{ JavaLogger, LoggerService }
 
-object RetryActionActor extends JavaLogger {
+object RetryActionActor {
 
   def receive(msg: RetryAction)(implicit services: BatchEnvironment.Services) = {
     import services._
@@ -32,7 +32,7 @@ object RetryActionActor extends JavaLogger {
     }
     catch {
       case t: Throwable ⇒
-        Log.logger.log(Log.FINE, "Error when deleting a file", t)
+        LoggerService.fine("Error when deleting a file", t)
     }
   }
 

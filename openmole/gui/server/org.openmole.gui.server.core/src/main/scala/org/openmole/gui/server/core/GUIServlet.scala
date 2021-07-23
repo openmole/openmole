@@ -81,7 +81,7 @@ object GUIServerServices {
     implicit def timeService: TimeService = guiServices.timeService
   }
 
-  def apply(workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level]) = {
+  def apply(workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level], logFileLevel: Option[Level]) = {
     implicit val ws = workspace
     implicit val preference = Preference(ws.persistentDir)
     implicit val newFile = TmpDirectory(workspace)
@@ -96,7 +96,7 @@ object GUIServerServices {
     implicit val networkService = NetworkService(httpProxy)
     implicit val fileServiceCache = FileServiceCache()
     implicit val replicaCatalog = ReplicaCatalog(ws)
-    implicit val loggerService = LoggerService(logLevel)
+    implicit val loggerService = LoggerService(logLevel, file = Some(workspace.location / Workspace.logLocation), fileLevel = logFileLevel)
     implicit val timeService = TimeService()
 
     new GUIServerServices()
@@ -107,8 +107,8 @@ object GUIServerServices {
     scala.util.Try(services.threadProvider.stop())
   }
 
-  def withServices[T](workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level])(f: GUIServerServices ⇒ T) = {
-    val services = GUIServerServices(workspace, httpProxy, logLevel)
+  def withServices[T](workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level], logFileLevel: Option[Level])(f: GUIServerServices ⇒ T) = {
+    val services = GUIServerServices(workspace, httpProxy, logLevel, logFileLevel)
     try f(services)
     finally dispose(services)
   }

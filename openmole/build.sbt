@@ -409,7 +409,7 @@ def allEnvironment = Seq(batch, gridscale, ssh, egi, pbs, oar, sge, condor, slur
 lazy val batch = OsgiProject(pluginDir, "org.openmole.plugin.environment.batch", imports = Seq("*")) dependsOn(
   workflow, workspace, tools, event, replication, exception,
   serializer, fileService, pluginManager, openmoleTar, communication, authentication, location, services,
-  openmoleByteCode
+  openmoleByteCode, openmoleDSL
 ) settings (
   libraryDependencies ++= Seq(
     Libraries.gridscale,

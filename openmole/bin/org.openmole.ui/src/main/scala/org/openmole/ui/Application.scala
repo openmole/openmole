@@ -21,7 +21,6 @@ import java.awt.Desktop
 import java.io.{ File, FileOutputStream, IOException }
 import java.util.logging.Level
 import java.net.URI
-
 import org.openmole.console.Console.ExitCodes
 import org.openmole.core.project._
 import org.openmole.core.compiler.ScalaREPL
@@ -72,6 +71,7 @@ object Application extends JavaLogger {
       ignored:                  List[String]    = Nil,
       port:                     Option[Int]     = None,
       loggerLevel:              Option[String]  = None,
+      loggerFileLevel:          Option[String]  = None,
       unoptimizedJS:            Boolean         = false,
       remote:                   Boolean         = false,
       http:                     Boolean         = false,
@@ -119,6 +119,7 @@ object Application extends JavaLogger {
       |[--reset-password] reset all preferences and ask for the a password
       |[--mem memory] allocate more memory to the JVM (not supported on windows yes), for instance --mem 2G
       |[--logger-level level] set the level of logging (OFF, SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST, ALL)
+      |[--logger-file-level level] set the level of logging if log file (OFF, SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST, ALL)
       |[--proxy hostname] set the proxy to use to install containers or R packages, in the form http://myproxy.org:3128
       |[--http-sub-directory] set the subdirectory for openmole app (for non-root path). No '/' is required (Example: "user1")
       |[--debug-no-output-redirection] deactivate system output redirection
@@ -146,6 +147,7 @@ object Application extends JavaLogger {
         case "--load-workspace-plugins" :: tail      ⇒ parse(tail, c.copy(loadHomePlugins = Some(true)))
         case "--console-work-directory" :: tail      ⇒ parse(dropArg(tail), c.copy(consoleWorkDirectory = Some(new File(takeArg(tail)))))
         case "--logger-level" :: tail                ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
+        case "--logger-file-level" :: tail           ⇒ parse(tail.tail, c.copy(loggerFileLevel = Some(tail.head)))
         case "--remote" :: tail                      ⇒ parse(tail, c.copy(remote = true))
         case "--http" :: tail                        ⇒ parse(tail, c.copy(http = true))
         case "--no-browser" :: tail                  ⇒ parse(tail, c.copy(browse = false))
@@ -174,6 +176,7 @@ object Application extends JavaLogger {
 
     val logLevel = config.loggerLevel.map(l ⇒ Level.parse(l.toUpperCase))
     logLevel.foreach(LoggerConfig.level)
+    val logFileLevel = config.loggerFileLevel.map(l ⇒ Level.parse(l.toUpperCase))
 
     if (config.debugNoOutputRedirection) OutputManager.uninstall
 
@@ -233,7 +236,7 @@ object Application extends JavaLogger {
           Console.ExitCodes.incorrectPassword
         }
         else {
-          Services.withServices(workspaceDirectory, passwordString, config.proxyURI, logLevel) { services ⇒
+          Services.withServices(workspaceDirectory, passwordString, config.proxyURI, logLevel, logFileLevel) { services ⇒
             Runtime.getRuntime.addShutdownHook(thread(Services.dispose(services)))
             val server = new RESTServer(config.port, config.hostName, services, config.httpSubDirectory)
             server.run()
@@ -254,7 +257,7 @@ object Application extends JavaLogger {
         }
         else {
           Console.dealWithLoadError(loadPlugins, !config.scriptFile.isDefined)
-          Services.withServices(workspaceDirectory, passwordString, config.proxyURI, logLevel) { implicit services ⇒
+          Services.withServices(workspaceDirectory, passwordString, config.proxyURI, logLevel, logFileLevel) { implicit services ⇒
             Runtime.getRuntime.addShutdownHook(thread(Services.dispose(services)))
             val console = new Console(config.scriptFile)
             console.run(config.args, config.consoleWorkDirectory)
@@ -285,7 +288,7 @@ object Application extends JavaLogger {
 
             GUIServer.urlFile.content = url
 
-            GUIServerServices.withServices(workspace, config.proxyURI, logLevel) { services ⇒
+            GUIServerServices.withServices(workspace, config.proxyURI, logLevel, logFileLevel) { services ⇒
               Runtime.getRuntime.addShutdownHook(thread(GUIServerServices.dispose(services)))
               val server = new GUIServer(port, config.remote, useHTTP, services, config.password, extraHeader, !config.unoptimizedJS, config.httpSubDirectory)
               server.start()

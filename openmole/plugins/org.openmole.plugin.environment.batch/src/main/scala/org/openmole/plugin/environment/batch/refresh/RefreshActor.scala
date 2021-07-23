@@ -20,9 +20,10 @@ package org.openmole.plugin.environment.batch.refresh
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchJobControl }
-import org.openmole.tool.logger.JavaLogger
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 
-object RefreshActor extends JavaLogger {
+object RefreshActor {
 
   def receive(refresh: Refresh)(implicit services: BatchEnvironment.Services) = {
     import services._
@@ -57,7 +58,7 @@ object RefreshActor extends JavaLogger {
             JobManager ! Kill(job, environment, Some(bj))
           }
           else {
-            Log.logger.log(Log.FINE, s"${updateErrorsInARow + 1} errors in a row during job refresh", e)
+            Logger.fine(s"${updateErrorsInARow + 1} errors in a row during job refresh", e)
             JobManager ! Delay(Refresh(job, environment, bj, delay, updateErrorsInARow + 1), delay)
           }
       }

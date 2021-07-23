@@ -1,6 +1,7 @@
 package org.openmole.core.dsl
 
-import org.openmole.core.workflow.domain.{ DomainValidation, DomainInput }
+import org.openmole.core.workflow.domain.{ DomainInput, DomainValidation }
+import org.openmole.tool.logger.LoggerService
 
 package object extension {
 
@@ -107,4 +108,5 @@ package object extension {
   type Information = squants.information.Information
 
   type JavaLogger = org.openmole.tool.logger.JavaLogger
+  def Logger = LoggerService
 }

@@ -18,7 +18,6 @@
 package org.openmole.plugin.environment.batch.refresh
 
 import java.util.concurrent.TimeUnit
-
 import org.openmole.core.workflow.execution._
 import org.openmole.core.workflow.mole.MoleExecution.moleJobIsFinished
 import org.openmole.core.workflow.mole.{ MoleExecution, MoleExecutionMessage }
@@ -27,9 +26,11 @@ import org.openmole.plugin.environment.batch.environment.JobStore.StoredJob
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.thread._
+import org.openmole.core.dsl.extension.Logger
 
-object JobManager extends JavaLogger { self ⇒
-  import Log._
+import java.util.logging.Level
+
+object JobManager { self ⇒
 
   def killPriority = 10
 
@@ -90,11 +91,10 @@ object JobManager extends JavaLogger { self ⇒
              |$output""".stripMargin
         }.getOrElse(s"OpenMOLE output on remote node ${host} was empty")
 
-        val er = Environment.MoleJobExceptionRaised(j, e, WARNING, mj, detail = Some(detail))
+        val er = Environment.MoleJobExceptionRaised(j, e, Level.WARNING, mj, detail = Some(detail))
         environment.error(er)
         services.eventDispatcher.trigger(environment: Environment, er)
-        logger.log(FINE, "Error during job execution, it will be resubmitted.", e)
-
+        Logger.fine("Error during job execution, it will be resubmitted.", e)
     }
   }
 

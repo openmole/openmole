@@ -87,7 +87,7 @@ object Libraries {
   lazy val spatialsampling = "org.openmole.library" %% "org-openmole-spatialsampling" % spatialsamplingVersion
   lazy val xzJava = "org.openmole.library" %% "xzjava" % "1.8"
   lazy val guava = "org.openmole.library" %% "com-google-guava" % guavaVersion
-  
+
   def httpClientVersion = "4.5.3"
   lazy val httpClient =
     Seq(
