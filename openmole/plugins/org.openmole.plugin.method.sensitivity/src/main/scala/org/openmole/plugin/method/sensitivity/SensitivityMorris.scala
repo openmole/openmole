@@ -29,28 +29,6 @@ object SensitivityMorris {
 
   case class Method(inputs: Seq[ScalarOrSequenceOfDouble], outputs: Seq[Val[_]])
 
-  implicit def method: ExplorationMethod[SensitivityMorris, Method] = m ⇒ {
-    implicit def defScope = m.scope
-
-    // the sampling for Morris is a One At a Time one,
-    // with respect to the user settings for repetitions, levels and inputs
-    val sampling = MorrisSampling(m.sample, m.level, m.inputs)
-
-    // the aggregation obviously is a Morris aggregation!
-    // it collects all the specific inputs added from the sampling
-    // to interpret the results
-    val aggregation = MorrisAggregation(m.inputs, m.outputs)
-
-    val w =
-      MapReduce(
-        evaluation = m.evaluation,
-        sampler = ExplorationTask(sampling),
-        aggregation = aggregation
-      )
-
-    DSLContainer(w, method = Method(m.inputs, m.outputs))
-  }
-
   object MorrisHook {
 
     def apply[F](method: Method, output: WritableOutput, format: F = CSVOutputFormat())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, Method]) =
@@ -233,6 +211,14 @@ object SensitivityMorris {
 
   object MorrisSampling extends JavaLogger {
 
+    implicit def isSampling: IsSampling[MorrisSampling] = s ⇒
+      Sampling(
+        s.apply(),
+        s.outputs,
+        s.inputs,
+        s.validate
+      )
+
     def apply(
       repetitions: FromContext[Int],
       levels:      FromContext[Int],
@@ -248,8 +234,8 @@ object SensitivityMorris {
      * The variable named like this contains the name of the factor which was changed
      * in a given point.
      */
-    val varFactorName = Val[String]("factorname", namespace = namespace)
-    val varDelta = Val[Double]("delta", namespace = namespace)
+    val varFactorName: Val[String] = Val[String]("factorname", namespace = namespace)
+    val varDelta: Val[Double] = Val[Double]("delta", namespace = namespace)
 
     /**
      * For a given count of factors k, a number of levels p,
@@ -326,10 +312,12 @@ object SensitivityMorris {
   sealed class MorrisSampling(
     val repetitions: FromContext[Int],
     val levels:      FromContext[Int],
-    val factors:     Seq[ScalarOrSequenceOfDouble]) extends Sampling {
+    val factors:     Seq[ScalarOrSequenceOfDouble]) {
 
-    override def inputs = factors.flatMap(_.inputs)
-    override def outputs = factors.map { _.prototype } ++ Seq(
+    def validate = repetitions.validate ++ levels.validate
+
+    def inputs = factors.flatMap(_.inputs)
+    def outputs = factors.map { _.prototype } ++ Seq(
       MorrisSampling.varDelta,
       MorrisSampling.varFactorName)
 
@@ -362,7 +350,7 @@ object SensitivityMorris {
 
     }
 
-    override def apply(): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { ctxt ⇒
+    def apply(): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { ctxt ⇒
       import ctxt._
       val r: Int = repetitions.from(context)
       val p: Int = levels.from(context)
@@ -381,6 +369,28 @@ object SensitivityMorris {
       }.iterator
     }
 
+  }
+
+  implicit def method: ExplorationMethod[SensitivityMorris, Method] = m ⇒ {
+    implicit def defScope = m.scope
+
+    // the sampling for Morris is a One At a Time one,
+    // with respect to the user settings for repetitions, levels and inputs
+    val sampling = MorrisSampling(m.sample, m.level, m.inputs)
+
+    // the aggregation obviously is a Morris aggregation!
+    // it collects all the specific inputs added from the sampling
+    // to interpret the results
+    val aggregation = MorrisAggregation(m.inputs, m.outputs)
+
+    val w =
+      MapReduce(
+        evaluation = m.evaluation,
+        sampler = ExplorationTask(sampling),
+        aggregation = aggregation
+      )
+
+    DSLContainer(w, method = Method(m.inputs, m.outputs))
   }
 
 }

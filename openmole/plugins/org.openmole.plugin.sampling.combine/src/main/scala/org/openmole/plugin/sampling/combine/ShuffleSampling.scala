@@ -23,16 +23,23 @@ import org.openmole.tool.random._
 
 object ShuffleSampling {
 
-  implicit def isSampling[S]: IsSampling[ShuffleSampling[S]] = new IsSampling[ShuffleSampling[S]] {
-    override def validate(s: ShuffleSampling[S]): Validate = s.sampling.validate(s.s)
-    override def inputs(s: ShuffleSampling[S]): PrototypeSet = s.sampling.inputs(s.s)
-    override def outputs(s: ShuffleSampling[S]): Iterable[Val[_]] = s.sampling.outputs(s.s)
-    override def apply(s: ShuffleSampling[S]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+  implicit def isSampling[S]: IsSampling[ShuffleSampling[S]] = s ⇒ {
+    def validate: Validate = s.sampling(s.s).validate
+    def inputs: PrototypeSet = s.sampling(s.s).inputs
+    def outputs: Iterable[Val[_]] = s.sampling(s.s).outputs
+    def apply: FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
       import p._
-      val array = s.sampling(s.s).from(context).toArray
+      val array = s.sampling(s.s).sampling.from(context).toArray
       shuffle(array)(random())
       array.iterator
     }
+
+    Sampling(
+      apply,
+      outputs,
+      inputs = inputs,
+      validate = validate
+    )
   }
 
 }

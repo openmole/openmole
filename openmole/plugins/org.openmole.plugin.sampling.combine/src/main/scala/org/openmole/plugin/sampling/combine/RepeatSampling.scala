@@ -22,16 +22,16 @@ import org.openmole.core.dsl.extension._
 
 object RepeatSampling {
 
-  implicit def isSampling[S]: IsSampling[RepeatSampling[S]] = new IsSampling[RepeatSampling[S]] {
-    override def validate(s: RepeatSampling[S]): Validate = s.sampling.validate(s.s) ++ s.times.validate
-    override def inputs(s: RepeatSampling[S]): PrototypeSet = s.sampling.inputs(s.s)
-    override def outputs(s: RepeatSampling[S]): Iterable[Val[_]] = s.sampling.outputs(s.s).map(_.toArray)
-    override def apply(s: RepeatSampling[S]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+  implicit def isSampling[S]: IsSampling[RepeatSampling[S]] = s ⇒ {
+    def validate: Validate = s.sampling(s.s).validate ++ s.times.validate
+    def inputs: PrototypeSet = s.sampling(s.s).inputs
+    def outputs: Iterable[Val[_]] = s.sampling(s.s).outputs.map(_.toArray)
+    def apply: FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
       import p._
 
       def sampled =
         for {
-          vs ← s.sampling.apply(s.s).from(context).map(_.toSeq).toSeq.transpose
+          vs ← s.sampling(s.s).sampling.from(context).map(_.toSeq).toSeq.transpose
         } yield {
           val p = vs.head.prototype
           Variable.unsecure(p.toArray, vs.map(_.value).toArray(p.`type`.manifest.asInstanceOf[Manifest[Any]]))
@@ -39,6 +39,13 @@ object RepeatSampling {
 
       Iterator.continually(sampled).take(s.times.from(context))
     }
+
+    Sampling(
+      apply,
+      outputs,
+      inputs = inputs,
+      validate = validate
+    )
   }
 
 }

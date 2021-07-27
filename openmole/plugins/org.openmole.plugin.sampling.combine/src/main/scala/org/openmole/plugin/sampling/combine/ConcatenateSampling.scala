@@ -21,21 +21,28 @@ import org.openmole.core.dsl.extension._
 
 object ConcatenateSampling {
 
-  implicit def isSampling[S1, S2]: IsSampling[ConcatenateSampling[S1, S2]] = new IsSampling[ConcatenateSampling[S1, S2]] {
-    override def validate(s: ConcatenateSampling[S1, S2]): Validate = s.sampling1.validate(s.s1) ++ s.sampling2.validate(s.s2)
-    override def inputs(s: ConcatenateSampling[S1, S2]): PrototypeSet = s.sampling1.inputs(s.s1) ++ s.sampling2.inputs(s.s2)
-    override def outputs(s: ConcatenateSampling[S1, S2]): Iterable[Val[_]] = {
-      val p1 = s.sampling1.outputs(s.s1).toSet
-      val p2 = s.sampling2.outputs(s.s2).toSet
+  implicit def isSampling[S1, S2]: IsSampling[ConcatenateSampling[S1, S2]] = s ⇒ {
+    def validate: Validate = s.sampling1(s.s1).validate ++ s.sampling2(s.s2).validate
+    def inputs = s.sampling1(s.s1).inputs ++ s.sampling2(s.s2).inputs
+    val outputs = {
+      val p1 = s.sampling1(s.s1).outputs.toSet
+      val p2 = s.sampling2(s.s2).outputs.toSet
       p1 intersect p2
     }
-    override def apply(s: ConcatenateSampling[S1, S2]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+    def apply = FromContext { p ⇒
       import p._
-      val ps = outputs(s).toSet
+      val ps = outputs.toSet
 
-      s.sampling1.apply(s.s1).apply(context).map(_.filter(v ⇒ ps.contains(v.prototype))) ++
-        s.sampling2.apply(s.s2).apply(context).map(_.filter(v ⇒ ps.contains(v.prototype)))
+      s.sampling1(s.s1).sampling.from(context).map(_.filter(v ⇒ ps.contains(v.prototype))) ++
+        s.sampling2(s.s2).sampling.from(context).map(_.filter(v ⇒ ps.contains(v.prototype)))
     }
+
+    Sampling(
+      apply,
+      outputs,
+      inputs = inputs,
+      validate = validate
+    )
   }
 
 }

@@ -217,12 +217,13 @@ object SensitivitySaltelli {
 
     def matrix = Seq(matrixName, matrixIndex)
 
-    def apply(samples: FromContext[Int], sobolSampling: FromContext[Boolean], factors: ScalarOrSequenceOfDouble*) =
-      Sampling { p ⇒
+    implicit def isSampling: IsSampling[SaltelliSampling] = saltelli => {
+      def apply = FromContext { p =>
         import p._
-        val s = samples.from(context)
-        val vectorSize = factors.map(_.size(context)).sum
-        val isSobol = sobolSampling.from(context)
+
+        val s = saltelli.samples.from(context)
+        val vectorSize = saltelli.factors.map(_.size(context)).sum
+        val isSobol = saltelli.sobolSampling.from(context)
 
         val (a, b) =
           if (isSobol) {
@@ -233,7 +234,7 @@ object SensitivitySaltelli {
 
         val cIndices =
           for {
-            f ← factors
+            f ← saltelli.factors
             j ← (0 until f.size(context))
           } yield (f, j, f.isScalar)
 
@@ -242,7 +243,7 @@ object SensitivitySaltelli {
           m:      Namespace): List[Iterable[Variable[_]]] =
           matrix.zipWithIndex.map {
             case (l, index) ⇒
-              def line = ScalarOrSequenceOfDouble.unflatten(factors, l).from(context)
+              def line = ScalarOrSequenceOfDouble.unflatten(saltelli.factors, l).from(context)
               Variable(SaltelliSampling.matrixName, m.toString) :: Variable(SaltelliSampling.matrixIndex, index) :: line
           }.toList
 
@@ -263,15 +264,24 @@ object SensitivitySaltelli {
           }
 
         (aVariables ++ bVariables ++ cVariables).iterator
-      } validate { samples.validate } inputs { factors.flatMap(_.inputs) } prototypes { factors.map(_.prototype) ++ matrix }
 
-    def apply(samples: FromContext[Int], factors: ScalarOrSequenceOfDouble*): FromContextSampling = SaltelliSampling(samples, true, factors: _*)
+      }
+
+      Sampling(
+        apply,
+        saltelli.factors.map(_.prototype) ++ matrix,
+        saltelli.factors.flatMap(_.inputs),
+        saltelli.samples.validate
+      )
+    }
+
+    def apply(samples: FromContext[Int], factors: ScalarOrSequenceOfDouble*): SaltelliSampling =
+      new SaltelliSampling(samples, true, factors: _*)
 
     def buildC(
-                i: Int,
-                a: Array[Array[Double]],
-                b: Array[Array[Double]]
-              ) =
+      i: Int,
+      a: Array[Array[Double]],
+      b: Array[Array[Double]]) =
       a zip b map {
         case (lineOfA, lineOfB) ⇒ buildLineOfC(i, lineOfA, lineOfB)
       }
@@ -282,6 +292,8 @@ object SensitivitySaltelli {
       }
 
   }
+
+  case class SaltelliSampling(samples: FromContext[Int], sobolSampling: FromContext[Boolean], factors: ScalarOrSequenceOfDouble*)
 
 
 }

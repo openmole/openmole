@@ -22,14 +22,21 @@ import org.openmole.core.dsl.extension._
 
 object ZipSampling {
 
-  implicit def isSampling[S1, S2]: IsSampling[ZipSampling[S1, S2]] = new IsSampling[ZipSampling[S1, S2]] {
-    override def validate(s: ZipSampling[S1, S2]): Validate = s.sampling1.validate(s.s1) ++ s.sampling2.validate(s.s2)
-    override def inputs(s: ZipSampling[S1, S2]): PrototypeSet = s.sampling1.inputs(s.s1) ++ s.sampling2.inputs(s.s2)
-    override def outputs(s: ZipSampling[S1, S2]): Iterable[Val[_]] = s.sampling1.outputs(s.s1) ++ s.sampling2.outputs(s.s2)
-    override def apply(s: ZipSampling[S1, S2]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+  implicit def isSampling[S1, S2]: IsSampling[ZipSampling[S1, S2]] = s ⇒ {
+    def validate: Validate = s.sampling1(s.s1).validate ++ s.sampling2(s.s2).validate
+    def inputs: PrototypeSet = s.sampling1(s.s1).inputs ++ s.sampling2(s.s2).inputs
+    def outputs: Iterable[Val[_]] = s.sampling1(s.s1).outputs ++ s.sampling2(s.s2).outputs
+    def apply: FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
       import p._
-      (s.sampling1.apply(s.s1).apply(context) zip s.sampling2.apply(s.s2).apply(context)).map { case (v1, v2) ⇒ v1 ++ v2 }
+      (s.sampling1(s.s1).sampling.from(context) zip s.sampling2(s.s2).sampling.from(context)).map { case (v1, v2) ⇒ v1 ++ v2 }
     }
+
+    Sampling(
+      apply,
+      outputs,
+      inputs = inputs,
+      validate = validate
+    )
   }
 
 }

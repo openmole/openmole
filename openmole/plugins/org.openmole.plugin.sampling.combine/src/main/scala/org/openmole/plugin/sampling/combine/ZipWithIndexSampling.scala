@@ -22,17 +22,23 @@ import org.openmole.core.dsl.extension._
 
 object ZipWithIndexSampling {
 
-  implicit def isSampling[S]: IsSampling[ZipWithIndexSampling[S]] = new IsSampling[ZipWithIndexSampling[S]] {
-    override def validate(s: ZipWithIndexSampling[S]): Validate = s.sampling.validate(s.s)
-    override def inputs(s: ZipWithIndexSampling[S]): PrototypeSet = s.sampling.inputs(s.s)
-    override def outputs(s: ZipWithIndexSampling[S]): Iterable[Val[_]] = s.sampling.outputs(s.s) ++ Seq(s.index)
-    override def apply(s: ZipWithIndexSampling[S]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+  implicit def isSampling[S]: IsSampling[ZipWithIndexSampling[S]] = s ⇒ {
+    def validate: Validate = s.sampling(s.s).validate
+    def inputs: PrototypeSet = s.sampling(s.s).inputs
+    def outputs: Iterable[Val[_]] = s.sampling(s.s).outputs ++ Seq(s.index)
+    def apply: FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
       import p._
-      s.sampling(s.s).from(context).zipWithIndex.map {
+      s.sampling(s.s).sampling.from(context).zipWithIndex.map {
         case (line, i) ⇒ line ++ List(Variable(s.index, i))
       }
-
     }
+
+    Sampling(
+      apply,
+      outputs,
+      inputs = inputs,
+      validate = validate
+    )
   }
 
 }

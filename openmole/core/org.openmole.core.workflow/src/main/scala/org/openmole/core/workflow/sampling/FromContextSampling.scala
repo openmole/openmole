@@ -6,18 +6,13 @@ import org.openmole.core.expansion.{ FromContext, Validate }
 object FromContextSampling {
   def apply(samples: FromContext.Parameters ⇒ Iterator[Iterable[Variable[_]]]) = new FromContextSampling(samples, PrototypeSet.empty, Iterable.empty, Validate.success)
 
-  implicit def isSampling: IsSampling[FromContextSampling] = new IsSampling[FromContextSampling] {
-    override def validate(s: FromContextSampling): Validate = s.v
-    override def inputs(s: FromContextSampling): PrototypeSet = s.i
-    override def outputs(s: FromContextSampling): Iterable[Val[_]] = s.o
-    override def apply(s: FromContextSampling) = FromContext(s.samples)
-
-    def combine(s1: Iterator[Iterable[Variable[_]]], s2: Sampling) = FromContext { p ⇒
-      import p._
-      for (x ← s1; y ← s2().from(context ++ x)) yield x ++ y
-    }
-  }
-
+  implicit def isSampling: IsSampling[FromContextSampling] = s ⇒
+    Sampling(
+      FromContext(s.samples),
+      s.o,
+      s.i,
+      s.v
+    )
 }
 
 /**

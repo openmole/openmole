@@ -168,7 +168,7 @@ package object directsampling {
       ExplorationTask(sampling)
     }
 
-    def sampled = implicitly[IsSampling[S]].outputs(sampling).toSeq
+    def sampled = implicitly[IsSampling[S]].apply(sampling).outputs.toSeq
   }
 
   implicit class DirectSamplingHookDecorator[M](t: M)(implicit method: ExplorationMethod[M, DirectSampling.Method]) extends MethodHookDecorator[M, DirectSampling.Method](t) {

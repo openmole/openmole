@@ -17,7 +17,8 @@
 
 package org.openmole.core.workflow.sampling
 
-import org.openmole.core.context.{ Val, Variable }
+import org.openmole.core.context.{ PrototypeSet, Val, Variable }
+import org.openmole.core.expansion.{ FromContext, Validate }
 
 /**
  * An explicit sampling associates a prototype to an explicit set of values given through an iterable.
@@ -27,9 +28,12 @@ import org.openmole.core.context.{ Val, Variable }
  */
 object ExplicitSampling {
 
-  def apply[T](prototype: Val[T], data: Iterable[T]) = Sampling { _ ⇒
-    data.map { v ⇒ List(Variable(prototype, v)) }.iterator
-  } outputs (Seq(prototype))
+  implicit def isSampling[T]: IsSampling[ExplicitSampling[T]] = s ⇒
+    Sampling(
+      s.data.map { v ⇒ List(Variable(s.prototype, v)) }.iterator,
+      Seq(s.prototype)
+    )
 
 }
 
+case class ExplicitSampling[T](prototype: Val[T], data: Iterable[T])

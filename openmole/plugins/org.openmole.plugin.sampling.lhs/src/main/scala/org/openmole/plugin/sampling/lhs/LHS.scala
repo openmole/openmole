@@ -22,18 +22,28 @@ import org.openmole.core.dsl.extension._
 
 object LHS {
 
-  def apply(sample: FromContext[Int], factor: Seq[ScalarOrSequenceOfDouble]) =
-    Sampling { p ⇒
+  implicit def isSampling: IsSampling[LHS] = lhs ⇒ {
+    def apply = FromContext { p ⇒
       import p._
-      val s = sample.from(context)
-      val vectorSize = factor.map(_.size(context)).sum
+      val s = lhs.sample.from(context)
+      val vectorSize = lhs.factor.map(_.size(context)).sum
       def values = LHS.lhsValues(vectorSize, s, random())
-      values.map(v ⇒ ScalarOrSequenceOfDouble.unflatten(factor, v).from(context)).iterator
-    } validate { sample.validate } inputs { factor.flatMap(_.inputs) } prototypes { factor.map(_.prototype) }
+      values.map(v ⇒ ScalarOrSequenceOfDouble.unflatten(lhs.factor, v).from(context)).iterator
+    }
+
+    Sampling(
+      apply,
+      lhs.factor.map(_.prototype),
+      lhs.factor.flatMap(_.inputs),
+      lhs.sample.validate
+    )
+  }
 
   def lhsValues(dimensions: Int, samples: Int, rng: scala.util.Random) = Array.fill(dimensions) {
     org.openmole.tool.random.shuffled(0 until samples)(rng).map { i ⇒ (i + rng.nextDouble) / samples }.toArray
   }.transpose
 
 }
+
+case class LHS(sample: FromContext[Int], factor: Seq[ScalarOrSequenceOfDouble])
 

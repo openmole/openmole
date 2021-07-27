@@ -49,10 +49,10 @@ object ExplorationTask {
       import p._
 
       val variablesValues = {
-        val samplingValue = sampling(s).from(context).toVector
+        val samplingValue = sampling(s).sampling.from(context).toVector
 
         val values =
-          TreeMap.empty[Val[_], Array[_]] ++ sampling.outputs(s).map { p ⇒
+          TreeMap.empty[Val[_], Array[_]] ++ sampling(s).outputs.map { p ⇒
             p → p.`type`.manifest.newArray(samplingValue.size)
           }
 
@@ -75,9 +75,9 @@ object ExplorationTask {
           }
       }: Context
     } set (
-      inputs += (sampling.inputs(s).toSeq: _*),
-      exploredOutputs += (sampling.outputs(s).toSeq.map(_.toArray): _*)
-    ) withValidate { sampling.validate(s) }
+      inputs += (sampling(s).inputs.toSeq: _*),
+      exploredOutputs += (sampling(s).outputs.toSeq.map(_.toArray): _*)
+    ) withValidate { sampling(s).validate }
 
   /**
    * Given a [[MoleCapsule]], function to test if a given prototype is explored by it

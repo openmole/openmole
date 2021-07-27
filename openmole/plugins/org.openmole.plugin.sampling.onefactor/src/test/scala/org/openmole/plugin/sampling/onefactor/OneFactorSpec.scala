@@ -39,6 +39,6 @@ class OneFactorSpec extends FlatSpec with Matchers {
 
     s.outputs.toSet should equal(Set(x1, x2, x3))
 
-    s().from(Context.empty).size should equal(30)
+    s.sampling.from(Context.empty).size should equal(30)
   }
 }
