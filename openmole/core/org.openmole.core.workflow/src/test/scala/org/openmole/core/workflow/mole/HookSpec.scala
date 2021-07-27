@@ -83,7 +83,7 @@ class HookSpec extends FlatSpec with Matchers {
   "Display hook" should "be accepted" in {
     val t1 = EmptyTask()
     val ex = t1 hook display
-    ex.run
+    (ex: DSL)
   }
 
 }

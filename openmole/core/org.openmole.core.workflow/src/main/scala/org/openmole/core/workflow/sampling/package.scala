@@ -37,25 +37,31 @@ package sampling {
       def is(d: FromContext[T]) = Factor(p, d)
     }
 
-    implicit def fromContextIsDiscrete[T] = new DiscreteFromContextDomain[FromContext[T], T] {
-      override def iterator(domain: FromContext[T]): FromContext[Iterator[T]] = domain.map(v ⇒ Vector(v).iterator)
-    }
+    implicit def fromContextIsDiscrete[T]: DiscreteFromContextDomain[FromContext[T], T] = domain ⇒ Domain(domain.map(v ⇒ Vector(v).iterator))
 
-    implicit def fromIsSampling[T](t: T)(implicit isSampling: IsSampling[T], samplingInputs: DomainInput[T], samplingValidate: DomainValidation[T]) =
+    implicit def fromIsSampling[T](t: T)(implicit isSampling: IsSampling[T]) =
       new Sampling {
-        override def validate = isSampling.validate(t) ++ samplingValidate(t)
-        override def inputs = isSampling.inputs(t) ++ samplingInputs(t)
+        override def validate = isSampling.validate(t)
+        override def inputs = isSampling.inputs(t)
         override def outputs: Iterable[Val[_]] = isSampling.outputs(t)
         override def apply(): FromContext[Iterator[Iterable[Variable[_]]]] = isSampling.apply(t)
       }
 
-    implicit def factorIsSampling[D, T](implicit domain: DiscreteFromContextDomain[D, T], domainInputs: DomainInput[D], domainValidate: DomainValidation[D]) = new IsSampling[Factor[D, T]] {
-      def validate(f: Factor[D, T]): Validate = domain.iterator(f.domain).validate ++ domainValidate(f.domain)
-      def inputs(f: Factor[D, T]) = domain.iterator(f.domain).inputs ++ domainInputs.apply(f.domain)
+    implicit def factorIsSampling[D, T](implicit domain: DiscreteFromContextDomain[D, T]) = new IsSampling[Factor[D, T]] {
+      def validate(f: Factor[D, T]): Validate = {
+        val domainValue = domain(f.domain)
+        domainValue.domain.validate ++ domainValue.validation
+      }
+
+      def inputs(f: Factor[D, T]) = {
+        val domainValue = domain(f.domain)
+        domain(f.domain).inputs ++ domainValue.inputs
+      }
+
       def outputs(f: Factor[D, T]) = List(f.value)
 
       override def apply(f: Factor[D, T]): FromContext[Iterator[collection.Iterable[Variable[T]]]] =
-        domain.iterator(f.domain).map { values ⇒ values.map { v ⇒ List(Variable(f.value, v)) } }
+        domain(f.domain).domain.map { values ⇒ values.map { v ⇒ List(Variable(f.value, v)) } }
     }
 
     type Sampling = sampling.Sampling

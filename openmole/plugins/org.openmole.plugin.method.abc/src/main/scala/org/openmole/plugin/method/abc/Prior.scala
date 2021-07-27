@@ -65,7 +65,10 @@ object UnivariatePrior {
       }
 
     implicit def factorIsPrior[D](implicit bounded: BoundedFromContextDomain[D, Double]) =
-      ToUnivariatePrior[Factor[D, Double]](f ⇒ UniformPrior(f.value, bounded.min(f.domain), bounded.max(f.domain)))
+      ToUnivariatePrior[Factor[D, Double]] { f ⇒
+        val (min, max) = bounded(f.domain).domain
+        UniformPrior(f.value, min, max)
+      }
 
   }
 

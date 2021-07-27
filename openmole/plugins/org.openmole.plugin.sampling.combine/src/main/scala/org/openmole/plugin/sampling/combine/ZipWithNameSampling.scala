@@ -32,7 +32,7 @@ object ZipWithNameSampling {
       import p._
 
       for {
-        v ← s.discrete.iterator(s.factor.domain).from(context)
+        v ← s.discrete(s.factor.domain).domain.from(context)
       } yield List(Variable(s.factor.value, v), Variable(s.name, s.getName(v)))
     }
   }

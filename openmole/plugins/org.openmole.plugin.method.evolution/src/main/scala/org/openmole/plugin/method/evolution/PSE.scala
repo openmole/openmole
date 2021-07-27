@@ -422,17 +422,17 @@ object PSE {
   }
 
   object PatternAxe {
-    implicit def fromInExactToPatternAxe[T, D](v: In[T, D])(implicit fix: FixDomain[D, Double], te: ToExactObjective[T]) = PatternAxe(te.apply(v.value), fix(v.domain).toVector)
-    implicit def fromInNoisyToPatternAxe[T, D](v: In[T, D])(implicit fix: FixDomain[D, Double], te: ToNoisyObjective[T]) = PatternAxe(te.apply(v.value), fix(v.domain).toVector)
+    implicit def fromInExactToPatternAxe[T, D](v: In[T, D])(implicit fix: FixDomain[D, Double], te: ToExactObjective[T]) = PatternAxe(te.apply(v.value), fix(v.domain).domain.toVector)
+    implicit def fromInNoisyToPatternAxe[T, D](v: In[T, D])(implicit fix: FixDomain[D, Double], te: ToNoisyObjective[T]) = PatternAxe(te.apply(v.value), fix(v.domain).domain.toVector)
 
     implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit fix: FixDomain[D, Double]): PatternAxe =
-      PatternAxe(f.value, fix(f.domain).toVector)
+      PatternAxe(f.value, fix(f.domain).domain.toVector)
 
     implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit fix: FixDomain[D, Int]): PatternAxe =
-      PatternAxe(f.value, fix(f.domain).toVector.map(_.toDouble))
+      PatternAxe(f.value, fix(f.domain).domain.toVector.map(_.toDouble))
 
     implicit def fromLongDomainToPatternAxe[D](f: Factor[D, Long])(implicit fix: FixDomain[D, Long]): PatternAxe =
-      PatternAxe(f.value, fix(f.domain).toVector.map(_.toDouble))
+      PatternAxe(f.value, fix(f.domain).domain.toVector.map(_.toDouble))
 
   }
 

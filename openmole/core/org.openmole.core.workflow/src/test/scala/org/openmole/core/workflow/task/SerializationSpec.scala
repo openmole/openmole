@@ -21,7 +21,7 @@ import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
 import org.openmole.core.context.Val
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.domain.DiscreteFromContextDomain
+import org.openmole.core.workflow.domain._
 import org.scalatest._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.sampling.ExplicitSampling
@@ -63,7 +63,7 @@ class SerializationSpec extends FlatSpec with Matchers {
     val data = List("A", "B", "C")
     val i = Val[String]("i")
 
-    implicit def listFactor: DiscreteFromContextDomain[List[String], String] = domain ⇒ domain.iterator
+    implicit def listFactor: DiscreteFromContextDomain[List[String], String] = domain ⇒ Domain(domain.iterator)
 
     val exp = ExplorationTask(i in data)
     val t = EmptyTask() set (inputs += i)

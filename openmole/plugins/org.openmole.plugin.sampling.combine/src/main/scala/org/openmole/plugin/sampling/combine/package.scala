@@ -60,8 +60,8 @@ package object combine {
 
   implicit class TupleToZipSampling[T1, T2](ps: (Val[T1], Val[T2])) {
     def in[D](d: D)(implicit discrete: DiscreteFromContextDomain[D, (T1, T2)]) = {
-      val d1 = discrete.iterator(d).map(_.map(_._1))
-      val d2 = discrete.iterator(d).map(_.map(_._2))
+      val d1 = discrete(d).domain.map(_.map(_._1))
+      val d2 = discrete(d).domain.map(_.map(_._2))
       ZipSampling(ps._1 in d1, ps._2 in d2)
     }
   }

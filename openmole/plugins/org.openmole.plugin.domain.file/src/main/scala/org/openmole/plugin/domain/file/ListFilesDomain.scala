@@ -23,9 +23,12 @@ import org.openmole.core.dsl.extension._
 
 object ListFilesDomain extends JavaLogger {
 
-  implicit def isDiscrete: DiscreteFromContextDomain[ListFilesDomain, File] = domain ⇒ domain.iterator
-  implicit def inputs: DomainInput[ListFilesDomain] = domain ⇒ domain.directory.toSeq.flatMap(_.inputs) ++ domain.filter.toSeq.flatMap(_.inputs)
-  implicit def validate: DomainValidation[ListFilesDomain] = domain ⇒ domain.directory.toSeq.map(_.validate) ++ domain.filter.toSeq.map(_.validate)
+  implicit def isDiscrete: DiscreteFromContextDomain[ListFilesDomain, File] = domain ⇒
+    Domain(
+      domain.iterator,
+      domain.directory.toSeq.flatMap(_.inputs) ++ domain.filter.toSeq.flatMap(_.inputs),
+      domain.directory.toSeq.map(_.validate) ++ domain.filter.toSeq.map(_.validate)
+    )
 
   def apply(
     base:      File,

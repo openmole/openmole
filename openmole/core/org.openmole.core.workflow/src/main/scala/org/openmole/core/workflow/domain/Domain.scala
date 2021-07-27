@@ -1,5 +1,7 @@
+package org.openmole.core.workflow.domain
+
 /*
- * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 2021 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,24 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.domain
-
 import org.openmole.core.context._
+import org.openmole.core.expansion.Validate
 
-object DomainInput {
-
-  /**
-   * By default implicitly no inputs
-   * @tparam T
-   * @return
-   */
-  implicit def empty[T]: DomainInput[T] = _ ⇒ PrototypeSet.empty
-}
-
-/**
- * Property of having inputs
- * @tparam D
- */
-trait DomainInput[-T] {
-  def apply(t: T): PrototypeSet
-}
+case class Domain[+D](domain: D, inputs: PrototypeSet = PrototypeSet.empty, validation: Validate = Validate.success)

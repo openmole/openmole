@@ -25,9 +25,12 @@ import org.openmole.core.workflow.tools.FileList
 
 object SelectFileDomain {
 
-  implicit def isDiscrete: DiscreteFromContextDomain[SelectFileDomain, File] = domain ⇒ domain.iterator
-  implicit def inputs: DomainInput[SelectFileDomain] = domain ⇒ domain.provider.inputs
-  implicit def validate: DomainValidation[SelectFileDomain] = domain ⇒ domain.provider.validate
+  implicit def isDiscrete: DiscreteFromContextDomain[SelectFileDomain, File] = domain ⇒
+    Domain(
+      domain.iterator,
+      domain.provider.inputs,
+      domain.provider.validate
+    )
 
   def apply(base: File, path: FromContext[String]) = new SelectFileDomain(FileList(base, path))
 }

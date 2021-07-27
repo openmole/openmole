@@ -34,7 +34,7 @@ object OneFactorSampling {
    */
   def oneFactorSampling[D, T](n: NominalFactor[D, T], factors: Seq[NominalFactor[_, _]]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
     import p._
-    val exploreSampling: Sampling = n.prototype in n.values.iterator(n.factor.domain).from(context).toSeq
+    val exploreSampling: Sampling = n.prototype in n.values(n.factor.domain).domain.from(context).toSeq
     val nominalSampling: Seq[Sampling] = factors.filter(!_.equals(n)).map { n ⇒ n.nominalSampling }
 
     CompleteSampling(Seq(exploreSampling) ++ nominalSampling: _*)().from(context)

@@ -41,28 +41,10 @@ object Profile {
   import org.openmole.core.keyword._
 
   object ToProfileElement {
-    implicit def valDoubleToProfileElement: ToProfileElement[Val[Double]] =
-      new ToProfileElement[Val[Double]] {
-        def apply(v: Val[Double]) = IntervalDoubleProfileElement(v, 100)
-      }
-
-    implicit def valIntToProfileElement: ToProfileElement[Val[Int]] =
-      new ToProfileElement[Val[Int]] {
-        def apply(v: Val[Int]) = IntervalIntProfileElement(v)
-      }
-
-    implicit def inToProfileElement: ToProfileElement[In[Val[Double], Int]] =
-      new ToProfileElement[In[Val[Double], Int]] {
-        override def apply(t: In[Val[Double], Int]): ProfileElement = IntervalDoubleProfileElement(t.value, t.domain)
-      }
-
-    implicit def fromDoubleDomainToPatternAxe[D](implicit fix: FixDomain[D, Double]) = {
-      new ToProfileElement[In[Val[Double], D]] {
-        override def apply(t: In[Val[Double], D]): ProfileElement =
-          FixDomainProfileElement(t.value, fix(t.domain).toVector)
-      }
-    }
-
+    implicit def valDoubleToProfileElement: ToProfileElement[Val[Double]] = v ⇒ IntervalDoubleProfileElement(v, 100)
+    implicit def valIntToProfileElement: ToProfileElement[Val[Int]] = v ⇒ IntervalIntProfileElement(v)
+    implicit def inToProfileElement: ToProfileElement[In[Val[Double], Int]] = t ⇒ IntervalDoubleProfileElement(t.value, t.domain)
+    implicit def fromDoubleDomainToPatternAxe[D](implicit fix: FixDomain[D, Double]): ToProfileElement[In[Val[Double], D]] = t ⇒ FixDomainProfileElement(t.value, fix(t.domain).domain.toVector)
   }
 
   trait ToProfileElement[-T] {

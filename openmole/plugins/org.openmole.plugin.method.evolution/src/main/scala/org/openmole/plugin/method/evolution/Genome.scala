@@ -27,35 +27,45 @@ object Genome {
     import org.openmole.core.workflow.domain._
     import org.openmole.core.workflow.sampling._
 
-    implicit def factorIsScalarDouble[D](f: Factor[D, Double])(implicit bounded: BoundedDomain[D, Double]) =
-      ScalarDouble(f.value, bounded.min(f.domain), bounded.max(f.domain))
+    implicit def factorIsScalarDouble[D](f: Factor[D, Double])(implicit bounded: BoundedDomain[D, Double]) = {
+      val (min, max) = bounded(f.domain).domain
+      ScalarDouble(f.value, min, max)
+    }
 
     implicit def factorOfDoubleRangeIsScalaDouble(f: Factor[DoubleRange, Double]) =
       ScalarDouble(f.value, f.domain.low, f.domain.high)
 
-    implicit def factorIsScalarInt[D](f: Factor[D, Int])(implicit bounded: BoundedDomain[D, Int]) =
-      ScalarInt(f.value, bounded.min(f.domain), bounded.max(f.domain))
+    implicit def factorIsScalarInt[D](f: Factor[D, Int])(implicit bounded: BoundedDomain[D, Int]) = {
+      val (min, max) = bounded(f.domain).domain
+      ScalarInt(f.value, min, max)
+    }
 
     implicit def factorOfScalaRangeIsScalarInt(f: Factor[scala.Range, Int]) =
       ScalarInt(f.value, f.domain.min, f.domain.max)
 
-    implicit def factorIntIsContinuousInt[D](f: Factor[D, Int])(implicit bounded: BoundedDomain[D, Double]) =
-      ContinuousInt(f.value, bounded.min(f.domain).toInt, bounded.max(f.domain).toInt)
+    implicit def factorIntIsContinuousInt[D](f: Factor[D, Int])(implicit bounded: BoundedDomain[D, Double]) = {
+      val (min, max) = bounded(f.domain).domain
+      ContinuousInt(f.value, min.toInt, max.toInt)
+    }
 
     implicit def factorOfIntRangeIsContinuousInt(f: Factor[DoubleRange, Int]) =
       ContinuousInt(f.value, f.domain.low.toInt, f.domain.high.toInt)
 
-    implicit def factorIsSequenceOfDouble[D](f: Factor[D, Array[Double]])(implicit bounded: BoundedDomain[D, Array[Double]], sized: SizedDomain[D]) =
-      SequenceOfDouble(f.value, bounded.min(f.domain), bounded.max(f.domain), sized(f.domain))
+    implicit def factorIsSequenceOfDouble[D](f: Factor[D, Array[Double]])(implicit bounded: BoundedDomain[D, Array[Double]], sized: DomainSize[D]) = {
+      val (min, max) = bounded(f.domain).domain
+      SequenceOfDouble(f.value, min, max, sized(f.domain))
+    }
 
-    implicit def factorIsSequenceOfInt[D](f: Factor[D, Array[Int]])(implicit bounded: BoundedDomain[D, Array[Int]], sized: SizedDomain[D]) =
-      SequenceOfInt(f.value, bounded.min(f.domain), bounded.max(f.domain), sized(f.domain))
+    implicit def factorIsSequenceOfInt[D](f: Factor[D, Array[Int]])(implicit bounded: BoundedDomain[D, Array[Int]], sized: DomainSize[D]) = {
+      val (min, max) = bounded(f.domain).domain
+      SequenceOfInt(f.value, min, max, sized(f.domain))
+    }
 
     implicit def factorIsIsEnumeration[D, T](f: Factor[D, T])(implicit fix: FixDomain[D, T]) =
-      Enumeration(f.value, fix.apply(f.domain).toVector)
+      Enumeration(f.value, fix(f.domain).domain.toVector)
 
     implicit def factorIsSequenceOfEnumeration[D, T](f: Factor[D, Array[T]])(implicit fix: FixDomain[D, Array[T]]) =
-      SequenceOfEnumeration(f.value, fix.apply(f.domain).toVector)
+      SequenceOfEnumeration(f.value, fix(f.domain).domain.toVector)
 
     implicit def factorOfBooleanIsSequenceOfEnumeration(f: Factor[Int, Array[Boolean]]) =
       SequenceOfEnumeration(f.value, Vector.fill(f.domain)(Array(true, false)))

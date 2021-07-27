@@ -24,9 +24,12 @@ import cats.implicits._
 
 object ListPathsDomain {
 
-  implicit def isDiscrete: DiscreteFromContextDomain[ListPathsDomain, Path] = domain ⇒ domain.iterator
-  implicit def inputs: DomainInput[ListPathsDomain] = domain ⇒ domain.directory.toSeq.flatMap(_.inputs) ++ domain.filter.toSeq.flatMap(_.inputs)
-  implicit def validate: DomainValidation[ListPathsDomain] = domain ⇒ domain.directory.toSeq.map(_.validate) ++ domain.filter.toSeq.map(_.validate)
+  implicit def isDiscrete: DiscreteFromContextDomain[ListPathsDomain, Path] = domain ⇒
+    Domain(
+      domain.iterator,
+      domain.directory.toSeq.flatMap(_.inputs) ++ domain.filter.toSeq.flatMap(_.inputs),
+      domain.directory.toSeq.map(_.validate) ++ domain.filter.toSeq.map(_.validate)
+    )
 
   def apply(
     base:      File,

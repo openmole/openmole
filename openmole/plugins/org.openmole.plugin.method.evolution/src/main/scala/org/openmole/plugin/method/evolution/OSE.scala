@@ -215,24 +215,24 @@ object OSE {
   object OriginAxe {
 
     implicit def fromDoubleDomainToOriginAxe[D](f: Factor[D, Double])(implicit fix: FixDomain[D, Double]): OriginAxe = {
-      val domain = fix(f.domain).toVector
+      val domain = fix(f.domain).domain.toVector
       ContinuousOriginAxe(GenomeBound.ScalarDouble(f.value, domain.min, domain.max), domain)
     }
 
     implicit def fromSeqOfDoubleDomainToOriginAxe[D](f: Factor[D, Array[Double]])(implicit fix: FixDomain[D, Array[Double]]): OriginAxe = {
-      val domain = fix(f.domain)
+      val domain = fix(f.domain).domain
       ContinuousSequenceOriginAxe(
         GenomeBound.SequenceOfDouble(f.value, domain.map(_.min).toArray, domain.map(_.max).toArray, domain.size),
         domain.toVector.map(_.toVector))
     }
 
     implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit fix: FixDomain[D, Int]): OriginAxe = {
-      val domain = fix(f.domain).toVector
+      val domain = fix(f.domain).domain.toVector
       DiscreteOriginAxe(GenomeBound.ScalarInt(f.value, domain.min, domain.max), domain)
     }
 
     implicit def fromSeqOfIntDomainToOriginAxe[D](f: Factor[D, Array[Int]])(implicit fix: FixDomain[D, Array[Int]]): OriginAxe = {
-      val domain = fix(f.domain)
+      val domain = fix(f.domain).domain
       DiscreteSequenceOriginAxe(
         GenomeBound.SequenceOfInt(f.value, domain.map(_.min).toArray, domain.map(_.max).toArray, domain.size),
         domain.toVector.map(_.toVector))

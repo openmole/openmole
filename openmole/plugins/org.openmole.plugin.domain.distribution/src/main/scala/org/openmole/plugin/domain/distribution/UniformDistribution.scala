@@ -23,25 +23,26 @@ import org.openmole.core.dsl.extension._
 object UniformDistribution {
 
   implicit def isDiscrete[T]: DiscreteFromContextDomain[UniformDistribution[T], T] = domain ⇒
-    FromContext { p ⇒
-      import p._
-      import domain._
+    Domain(
+      FromContext { p ⇒
+        import p._
+        import domain._
 
-      val distRandom: scala.util.Random = seed match {
-        case Some(s) ⇒ Random(s.from(context))
-        case None    ⇒ p.random()
-      }
-
-      Iterator.continually {
-        max match {
-          case Some(i) ⇒ distribution.next(distRandom, i)
-          case None    ⇒ distribution.next(distRandom)
+        val distRandom: scala.util.Random = seed match {
+          case Some(s) ⇒ Random(s.from(context))
+          case None    ⇒ p.random()
         }
-      }
-    }
 
-  implicit def domainInputs[T]: DomainInput[UniformDistribution[T]] = domain ⇒ domain.seed.toSeq.flatMap(_.inputs)
-  implicit def validate[T]: DomainValidation[UniformDistribution[T]] = domain ⇒ domain.seed.map(_.validate).toSeq
+        Iterator.continually {
+          max match {
+            case Some(i) ⇒ distribution.next(distRandom, i)
+            case None    ⇒ distribution.next(distRandom)
+          }
+        }
+      },
+      domain.seed.toSeq.flatMap(_.inputs),
+      domain.seed.map(_.validate).toSeq
+    )
 
   def apply[T](
     seed: OptionalArgument[FromContext[Long]] = None,

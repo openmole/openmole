@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Romain Reuillon
+ * Copyright (C) 2010 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,13 +17,24 @@
 
 package org.openmole.core.workflow.domain
 
-import org.openmole.core.expansion.Validate
+import org.openmole.core.expansion._
+import scala.annotation.implicitNotFound
 
-object DomainValidation {
-  implicit def empty[T]: DomainValidation[T] = _ ⇒ Validate.success
+/**
+ * Property of being centered for a domain
+ * @tparam D
+ * @tparam T
+ */
+@implicitNotFound("${D} is not a variation domain with a center of type ${T}")
+trait DomainCenter[-D, +T] {
+  def apply(domain: D): T
 }
 
-trait DomainValidation[-T] {
-  def apply(t: T): Validate
+object DomainCenterFromContext {
+  implicit def centerIsContextCenter[D, T](implicit c: DomainCenter[D, T]): DomainCenterFromContext[D, T] = d ⇒ FromContext.value(c(d))
 }
 
+@implicitNotFound("${D} is not a variation domain with a center of type T | FromContext[${T}]")
+trait DomainCenterFromContext[-D, +T] {
+  def apply(domain: D): FromContext[T]
+}
