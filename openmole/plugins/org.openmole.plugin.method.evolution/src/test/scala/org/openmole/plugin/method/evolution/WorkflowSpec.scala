@@ -365,6 +365,23 @@ class WorkflowSpec extends FlatSpec with Matchers {
     val a = Val[Double]
     val b = Val[Double]
 
+    def f(v: Double) = v / 2
+
+    val nsga = NSGA2Evolution(
+      evaluation = EmptyTask() set (inputs += a, outputs += (a, b)),
+      objective = Seq(b aggregate f _ as "aggF", a aggregate "a / 2"),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100
+    )
+
+    Validation(nsga).isEmpty should equal(true)
+  }
+
+  "Aggregation" should "be possible in stochastic NSGA" in {
+
+    val a = Val[Double]
+    val b = Val[Double]
+
     def f(v: Vector[Double]) = v.head
 
     val nsga = NSGA2Evolution(

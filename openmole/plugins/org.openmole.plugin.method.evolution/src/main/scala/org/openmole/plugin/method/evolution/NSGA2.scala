@@ -113,7 +113,7 @@ object NSGA2 {
     mu:                  Int,
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[Objective[_]],
+    objectives:          Seq[Objective],
     operatorExploration: Double,
     reject:              Option[Condition])
 
@@ -206,7 +206,7 @@ object NSGA2 {
     operatorExploration: Double,
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[Objective[_]],
+    objectives:          Seq[Objective],
     historySize:         Int,
     cloneProbability:    Double,
     reject:              Option[Condition]

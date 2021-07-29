@@ -211,7 +211,7 @@ object PSE {
     pattern:             Vector[Double] ⇒ Vector[Int],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[Objective[_]],
+    objectives:          Seq[Objective],
     operatorExploration: Double,
     reject:              Option[Condition],
     grid:                Seq[PatternAxe]
@@ -317,7 +317,7 @@ object PSE {
     pattern:             Vector[Double] ⇒ Vector[Int],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[Objective[_]],
+    objectives:          Seq[Objective],
     historySize:         Int,
     cloneProbability:    Double,
     operatorExploration: Double,
@@ -441,7 +441,7 @@ object PSE {
 
   }
 
-  case class PatternAxe(p: Objective[_], scale: Vector[Double])
+  case class PatternAxe(p: Objective, scale: Vector[Double])
 
   def apply(
     genome:     Genome,

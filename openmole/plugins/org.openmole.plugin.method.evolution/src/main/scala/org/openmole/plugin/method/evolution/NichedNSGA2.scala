@@ -321,7 +321,7 @@ object NichedNSGA2 {
     niche:               FromContext[Niche[CDGenome.DeterministicIndividual.Individual[Phenotype], Vector[Int]]],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[Objective[_]],
+    objectives:          Seq[Objective],
     operatorExploration: Double,
     reject:              Option[Condition])
 
@@ -425,7 +425,7 @@ object NichedNSGA2 {
     operatorExploration: Double,
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[Objective[_]],
+    objectives:          Seq[Objective],
     historySize:         Int,
     cloneProbability:    Double,
     reject:              Option[Condition])

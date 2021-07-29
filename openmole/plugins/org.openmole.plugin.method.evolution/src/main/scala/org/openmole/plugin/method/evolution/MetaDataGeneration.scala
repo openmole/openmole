@@ -32,8 +32,8 @@ object MetadataGeneration {
     }
   }
 
-  def objectiveData(o: Objective[_]) =
-    EvolutionMetadata.Objective(o.as.getOrElse(o.prototype.name), o.delta, o.negative, o.noisy)
+  def objectiveData(o: Objective) =
+    EvolutionMetadata.Objective(o.as.getOrElse(Objective.prototype(o).name), o.delta, o.negative, o.noisy)
 
   def fromString(s: String): EvolutionMetadata =
     decode[EvolutionMetadata](s) match {

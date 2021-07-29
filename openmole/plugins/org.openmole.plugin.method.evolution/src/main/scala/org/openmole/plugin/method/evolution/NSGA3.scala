@@ -103,7 +103,7 @@ object NSGA3 {
     references:          ReferencePoints,
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[Objective[_]],
+    objectives:          Seq[Objective],
     operatorExploration: Double,
     reject:              Option[Condition])
 
@@ -190,7 +190,7 @@ object NSGA3 {
     operatorExploration: Double,
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[Objective[_]],
+    objectives:          Seq[Objective],
     historySize:         Int,
     cloneProbability:    Double,
     reject:              Option[Condition]

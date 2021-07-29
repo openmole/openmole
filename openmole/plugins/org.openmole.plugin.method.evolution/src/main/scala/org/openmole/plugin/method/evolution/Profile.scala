@@ -170,7 +170,7 @@ object Profile {
     niche:               Seq[ProfileElement],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[Objective[_]],
+    objectives:          Seq[Objective],
     operatorExploration: Double,
     reject:              Option[Condition])
 
@@ -293,7 +293,7 @@ object Profile {
     operatorExploration: Double,
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[Objective[_]],
+    objectives:          Seq[Objective],
     historySize:         Int,
     cloneProbability:    Double,
     reject:              Option[Condition])

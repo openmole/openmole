@@ -410,7 +410,7 @@ object GAIntegration {
     genome.zipWithIndex.map { case (g, i) ⇒ Genome.toArrayVariable(g, variables.map(_(i).value)) }.toVector
   }
 
-  def objectivesOfPopulationToVariables[I](objectives: Seq[Objective[_]], phenotypeValues: Vector[Vector[Double]]): Vector[Variable[_]] =
+  def objectivesOfPopulationToVariables[I](objectives: Seq[Objective], phenotypeValues: Vector[Vector[Double]]): Vector[Variable[_]] =
     Objectives.resultPrototypes(objectives).toVector.zipWithIndex.map {
       case (objective, i) ⇒
         Variable(

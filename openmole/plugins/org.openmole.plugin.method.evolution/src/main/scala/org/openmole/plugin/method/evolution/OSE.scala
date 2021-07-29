@@ -25,7 +25,7 @@ object OSE {
     limit:               Vector[Double],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[Objective[_]],
+    objectives:          Seq[Objective],
     operatorExploration: Double,
     reject:              Option[Condition])
 
@@ -114,7 +114,7 @@ object OSE {
     limit:               Vector[Double],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[Objective[_]],
+    objectives:          Seq[Objective],
     historySize:         Int,
     cloneProbability:    Double,
     operatorExploration: Double,
@@ -285,7 +285,7 @@ object OSE {
     def toObjectives(f: Seq[FitnessPattern]) = f.map(_.objective)
   }
 
-  case class FitnessPattern(objective: Objective[_], limit: Double)
+  case class FitnessPattern(objective: Objective, limit: Double)
 
   def apply(
     origin:         Seq[OriginAxe],
