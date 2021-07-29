@@ -164,6 +164,7 @@ object Val {
     def array(level: Int) = toArray(level)
     def array = toArray
 
+    def unsecureFromArray = fromArray(prototype.asInstanceOf[Val[Array[T]]])
     def unsecureType = prototype.`type`.asInstanceOf[Manifest[Any]]
   }
 

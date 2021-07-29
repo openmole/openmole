@@ -36,7 +36,7 @@ import org.openmole.core.keyword.{ In, Under }
 import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
 import org.openmole.core.workflow.tools.OptionalArgument
 import org.openmole.plugin.method.evolution.Genome.{ GenomeBound, Suggestion }
-import org.openmole.plugin.method.evolution.Objective.{ ToExactObjective, ToNoisyObjective }
+import org.openmole.plugin.method.evolution.Objective._
 import org.openmole.plugin.method.evolution.data._
 import org.openmole.tool.types.ToDouble
 import squants.time.Time
@@ -211,7 +211,7 @@ object PSE {
     pattern:             Vector[Double] ⇒ Vector[Int],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[ExactObjective[_]],
+    objectives:          Seq[Objective[_]],
     operatorExploration: Double,
     reject:              Option[Condition],
     grid:                Seq[PatternAxe]
@@ -235,7 +235,7 @@ object PSE {
         override def metadata(generation: Long, saveOption: SaveOption): EvolutionMetadata =
           EvolutionMetadata.PSE(
             genome = MetadataGeneration.genomeData(om.genome),
-            objective = om.objectives.map(MetadataGeneration.exactObjectiveData),
+            objective = om.objectives.map(MetadataGeneration.objectiveData),
             grid = MetadataGeneration.grid(om.grid),
             generation = generation,
             saveOption = saveOption
@@ -258,8 +258,9 @@ object PSE {
         def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
         def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
 
-        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext.value {
-          val res = PSEAlgorithm.result[Phenotype](population, Genome.continuous(om.genome), om.pattern, ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives))
+        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
+          import p._
+          val res = PSEAlgorithm.result[Phenotype](population, Genome.continuous(om.genome), om.pattern, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context))
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype))
 
@@ -276,7 +277,10 @@ object PSE {
           PSEAlgorithm.initialGenomes(n, continuous, discrete, rejectValue, rng)
         }
 
-        private def pattern(p: Phenotype) = om.pattern(ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives)(p))
+        private def pattern(phenotype: Phenotype) = FromContext { p ⇒
+          import p._
+          om.pattern(Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context).apply(phenotype))
+        }
 
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
           import p._
@@ -287,12 +291,13 @@ object PSE {
             rejectValue,
             om.operatorExploration,
             discrete,
-            pattern,
+            pattern(_).from(context),
             Focus[S](_.s))(s, individuals, rng)
         }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) = FromContext { p ⇒
-          val (s2, elited) = PSEAlgorithm.elitism[S, Phenotype](pattern, Genome.continuous(om.genome), Focus[S](_.s)) apply (s, population, candidates, rng)
+          import p._
+          val (s2, elited) = PSEAlgorithm.elitism[S, Phenotype](pattern(_).from(context), Genome.continuous(om.genome), Focus[S](_.s)) apply (s, population, candidates, rng)
           val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
           val s4 = Focus[S](_.evaluated).modify(_ + evaluated)(s3)
           (s4, elited)
@@ -312,7 +317,7 @@ object PSE {
     pattern:             Vector[Double] ⇒ Vector[Int],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[NoisyObjective[_]],
+    objectives:          Seq[Objective[_]],
     historySize:         Int,
     cloneProbability:    Double,
     operatorExploration: Double,
@@ -337,7 +342,7 @@ object PSE {
         override def metadata(generation: Long, saveOption: SaveOption) =
           EvolutionMetadata.StochasticPSE(
             genome = MetadataGeneration.genomeData(om.genome),
-            objective = om.objectives.map(MetadataGeneration.noisyObjectiveData),
+            objective = om.objectives.map(MetadataGeneration.objectiveData),
             sample = om.historySize,
             grid = MetadataGeneration.grid(om.grid),
             generation = generation,
@@ -362,7 +367,7 @@ object PSE {
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
           import p._
 
-          val res = NoisyPSEAlgorithm.result(population, NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context), om.pattern, Genome.continuous(om.genome))
+          val res = NoisyPSEAlgorithm.result(population, Objective.aggregate(om.phenotypeContent, om.objectives).from(context), om.pattern, Genome.continuous(om.genome))
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype))
           val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
@@ -389,7 +394,7 @@ object PSE {
             rejectValue,
             om.operatorExploration,
             om.cloneProbability,
-            NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context),
+            Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
             discrete,
             om.pattern,
             Focus[S](_.s)) apply (s, individuals, rng)
@@ -401,7 +406,7 @@ object PSE {
           val (s2, elited) =
             NoisyPSEAlgorithm.elitism[S, Phenotype](
               om.pattern,
-              NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context),
+              Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
               om.historySize,
               Genome.continuous(om.genome),
               Focus[S](_.s)) apply (s, population, candidates, rng)
@@ -422,8 +427,8 @@ object PSE {
   }
 
   object PatternAxe {
-    implicit def fromInExactToPatternAxe[T, D](v: In[T, D])(implicit fix: FixDomain[D, Double], te: ToExactObjective[T]) = PatternAxe(te.apply(v.value), fix(v.domain).domain.toVector)
-    implicit def fromInNoisyToPatternAxe[T, D](v: In[T, D])(implicit fix: FixDomain[D, Double], te: ToNoisyObjective[T]) = PatternAxe(te.apply(v.value), fix(v.domain).domain.toVector)
+    implicit def fromInExactToPatternAxe[T, D](v: In[T, D])(implicit fix: FixDomain[D, Double], te: ToObjective[T]) = PatternAxe(te.apply(v.value), fix(v.domain).domain.toVector)
+    //    implicit def fromInNoisyToPatternAxe[T, D](v: In[T, D])(implicit fix: FixDomain[D, Double], te: ToNoisyObjective[T]) = PatternAxe(te.apply(v.value), fix(v.domain).domain.toVector)
 
     implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit fix: FixDomain[D, Double]): PatternAxe =
       PatternAxe(f.value, fix(f.domain).domain.toVector)
@@ -436,7 +441,7 @@ object PSE {
 
   }
 
-  case class PatternAxe(p: Objective, scale: Vector[Double])
+  case class PatternAxe(p: Objective[_], scale: Vector[Double])
 
   def apply(
     genome:     Genome,

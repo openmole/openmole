@@ -41,15 +41,11 @@ object EvolutionMetadata {
 
   sealed trait GenomeBoundData
 
-  case class ExactObjective(
+  case class Objective(
     name:     String,
     delta:    Option[Double],
-    negative: Boolean)
-
-  case class NoisyObjective(
-    name:     String,
-    delta:    Option[Double],
-    negative: Boolean)
+    negative: Boolean,
+    noisy:    Boolean)
 
   def method = "evolution"
   case object none extends EvolutionMetadata
@@ -61,14 +57,14 @@ object EvolutionMetadata {
 
   case class PSE(
     genome:     Seq[GenomeBoundData],
-    objective:  Seq[ExactObjective],
+    objective:  Seq[Objective],
     grid:       PSE.Grid,
     generation: Long,
     saveOption: SaveOption) extends EvolutionMetadata
 
   case class StochasticPSE(
     genome:     Seq[GenomeBoundData],
-    objective:  Seq[NoisyObjective],
+    objective:  Seq[Objective],
     grid:       PSE.Grid,
     sample:     Int,
     generation: Long,
@@ -76,14 +72,14 @@ object EvolutionMetadata {
 
   case class NSGA2(
     genome:         Seq[GenomeBoundData],
-    objective:      Seq[ExactObjective],
+    objective:      Seq[Objective],
     populationSize: Int,
     generation:     Long,
     saveOption:     SaveOption) extends EvolutionMetadata
 
   case class StochasticNSGA2(
     genome:         Seq[GenomeBoundData],
-    objective:      Seq[NoisyObjective],
+    objective:      Seq[Objective],
     populationSize: Int,
     sample:         Int,
     generation:     Long,

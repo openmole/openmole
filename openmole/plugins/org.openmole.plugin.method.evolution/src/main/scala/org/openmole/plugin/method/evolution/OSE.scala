@@ -7,7 +7,7 @@ import monocle.macros.GenLens
 import org.openmole.core.context.{ Context, Variable }
 import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
 import org.openmole.plugin.method.evolution.Genome.{ GenomeBound, Suggestion }
-import org.openmole.plugin.method.evolution.Objective.{ ToExactObjective, ToNoisyObjective }
+import org.openmole.plugin.method.evolution.Objective.{ ToObjective }
 import org.openmole.tool.types.ToDouble
 import squants.time.Time
 
@@ -25,7 +25,7 @@ object OSE {
     limit:               Vector[Double],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[ExactObjective[_]],
+    objectives:          Seq[Objective[_]],
     operatorExploration: Double,
     reject:              Option[Condition])
 
@@ -61,8 +61,9 @@ object OSE {
         def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
         def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
 
-        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext.value {
-          val res = MGOOSE.result[Phenotype](state, population, Genome.continuous(om.genome), ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives), keepAll = keepAll)
+        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
+          import p._
+          val res = MGOOSE.result[Phenotype](state, population, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
 
@@ -88,12 +89,13 @@ object OSE {
             om.operatorExploration,
             discrete,
             om.origin,
-            ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives),
+            Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context),
             rejectValue) apply (s, individuals, rng)
         }
 
-        def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) = {
-          val (s2, elited) = MGOOSE.elitism[Phenotype](om.mu, om.limit, om.origin, Genome.continuous(om.genome), ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives)) apply (s, population, candidates, rng)
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) = FromContext { p ⇒
+          import p._
+          val (s2, elited) = MGOOSE.elitism[Phenotype](om.mu, om.limit, om.origin, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)) apply (s, population, candidates, rng)
           val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
           val s4 = Focus[S](_.evaluated).modify(_ + evaluated)(s3)
           (s4, elited)
@@ -112,7 +114,7 @@ object OSE {
     limit:               Vector[Double],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[NoisyObjective[_]],
+    objectives:          Seq[Objective[_]],
     historySize:         Int,
     cloneProbability:    Double,
     operatorExploration: Double,
@@ -151,7 +153,7 @@ object OSE {
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
           import p._
 
-          val res = MGONoisyOSE.result(state, population, NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context), Genome.continuous(om.genome), om.limit, keepAll = keepAll)
+          val res = MGONoisyOSE.result(state, population, Objective.aggregate(om.phenotypeContent, om.objectives).from(context), Genome.continuous(om.genome), om.limit, keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
           val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
@@ -179,7 +181,7 @@ object OSE {
             n,
             om.operatorExploration,
             om.cloneProbability,
-            NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context),
+            Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
             discrete,
             om.origin,
             om.limit,
@@ -193,7 +195,7 @@ object OSE {
             MGONoisyOSE.elitism[Phenotype](
               om.mu,
               om.historySize,
-              NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context),
+              Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
               Genome.continuous(om.genome),
               om.origin,
               om.limit) apply (s, population, candidates, rng)
@@ -270,8 +272,8 @@ object OSE {
   case class DiscreteSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfInt, scale: Vector[Vector[Int]]) extends OriginAxe
 
   object FitnessPattern {
-    implicit def fromUnderExactToPattern[T, V](v: Under[T, V])(implicit td: ToDouble[V], te: ToExactObjective[T]) = FitnessPattern(te.apply(v.value), td(v.under))
-    implicit def fromUnderNoisyToPattern[T, V](v: Under[T, V])(implicit td: ToDouble[V], te: ToNoisyObjective[T]) = FitnessPattern(te.apply(v.value), td(v.under))
+    implicit def fromUnderExactToPattern[T, V](v: Under[T, V])(implicit td: ToDouble[V], te: ToObjective[T]) = FitnessPattern(te.apply(v.value), td(v.under))
+    //    implicit def fromUnderNoisyToPattern[T, V](v: Under[T, V])(implicit td: ToDouble[V], te: ToNoisyObjective[T]) = FitnessPattern(te.apply(v.value), td(v.under))
 
     //    implicit def fromUnderToObjective[T](v: Under[Val[T], T])(implicit td: ToDouble[T]) = FitnessPattern(v.value, td(v.under))
     //    implicit def fromNegativeUnderToObjective[T](v: Under[Negative[Val[T]], T])(implicit td: ToDouble[T]) = FitnessPattern(v.value, td(v.under))
@@ -283,7 +285,7 @@ object OSE {
     def toObjectives(f: Seq[FitnessPattern]) = f.map(_.objective)
   }
 
-  case class FitnessPattern(objective: Objective, limit: Double)
+  case class FitnessPattern(objective: Objective[_], limit: Double)
 
   def apply(
     origin:         Seq[OriginAxe],

@@ -273,7 +273,7 @@ object NichedNSGA2 {
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
           import p._
-          val res = NichedNSGA2Algorithm.result(population, om.niche.from(context), Genome.continuous(om.genome), ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives), keepAll = keepAll)
+          val res = NichedNSGA2Algorithm.result(population, om.niche.from(context), Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
 
@@ -294,12 +294,12 @@ object NichedNSGA2 {
           import p._
           val discrete = Genome.discrete(om.genome)
           val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          mgo.evolution.algorithm.Profile.adaptiveBreeding[Phenotype](n, om.operatorExploration, discrete, ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives), rejectValue) apply (s, population, rng)
+          mgo.evolution.algorithm.Profile.adaptiveBreeding[Phenotype](n, om.operatorExploration, discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), rejectValue) apply (s, population, rng)
         }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) = FromContext { p ⇒
           import p._
-          val (s2, elited) = NichedNSGA2Algorithm.elitism[S, Vector[Int], Phenotype](om.niche.from(context), om.nicheSize, Genome.continuous(om.genome), ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives)) apply (s, population, candidates, rng)
+          val (s2, elited) = NichedNSGA2Algorithm.elitism[S, Vector[Int], Phenotype](om.niche.from(context), om.nicheSize, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)) apply (s, population, candidates, rng)
           val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
           val s4 = Focus[S](_.evaluated).modify(_ + evaluated)(s3)
           (s4, elited)
@@ -321,7 +321,7 @@ object NichedNSGA2 {
     niche:               FromContext[Niche[CDGenome.DeterministicIndividual.Individual[Phenotype], Vector[Int]]],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[ExactObjective[_]],
+    objectives:          Seq[Objective[_]],
     operatorExploration: Double,
     reject:              Option[Condition])
 
@@ -368,7 +368,7 @@ object NichedNSGA2 {
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
           import p._
 
-          val res = NoisyNichedNSGA2Algorithm.result(population, NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context), om.niche.from(context), Genome.continuous(om.genome), onlyOldest = true, keepAll = keepAll)
+          val res = NoisyNichedNSGA2Algorithm.result(population, Objective.aggregate(om.phenotypeContent, om.objectives).from(context), om.niche.from(context), Genome.continuous(om.genome), onlyOldest = true, keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
           val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
@@ -390,7 +390,7 @@ object NichedNSGA2 {
           import p._
           val discrete = Genome.discrete(om.genome)
           val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          NoisyNichedNSGA2Algorithm.adaptiveBreeding[S, Phenotype](n, rejectValue, om.operatorExploration, om.cloneProbability, NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context), discrete) apply (s, individuals, rng)
+          NoisyNichedNSGA2Algorithm.adaptiveBreeding[S, Phenotype](n, rejectValue, om.operatorExploration, om.cloneProbability, Objective.aggregate(om.phenotypeContent, om.objectives).from(context), discrete) apply (s, individuals, rng)
         }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) =
@@ -400,7 +400,7 @@ object NichedNSGA2 {
               om.niche.from(context),
               om.nicheSize,
               om.historySize,
-              NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context),
+              Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
               Genome.continuous(om.genome)) apply (s, population, candidates, rng)
 
             val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
@@ -425,7 +425,7 @@ object NichedNSGA2 {
     operatorExploration: Double,
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[NoisyObjective[_]],
+    objectives:          Seq[Objective[_]],
     historySize:         Int,
     cloneProbability:    Double,
     reject:              Option[Condition])

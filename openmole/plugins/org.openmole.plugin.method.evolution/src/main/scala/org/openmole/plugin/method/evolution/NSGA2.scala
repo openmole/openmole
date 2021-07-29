@@ -57,14 +57,15 @@ object NSGA2 {
         override def metadata(generation: Long, saveOption: SaveOption) =
           EvolutionMetadata.NSGA2(
             genome = MetadataGeneration.genomeData(om.genome),
-            objective = om.objectives.map(MetadataGeneration.exactObjectiveData),
+            objective = om.objectives.map(MetadataGeneration.objectiveData),
             populationSize = om.mu,
             generation = generation,
             saveOption = saveOption
           )
 
-        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext.value {
-          val res = MGONSGA2.result[Phenotype](population, Genome.continuous(om.genome), ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives), keepAll = keepAll)
+        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
+          import p._
+          val res = MGONSGA2.result[Phenotype](population, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
 
@@ -85,11 +86,12 @@ object NSGA2 {
           import p._
           val discrete = Genome.discrete(om.genome)
           val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          MGONSGA2.adaptiveBreeding[S, Phenotype](n, om.operatorExploration, discrete, ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives), rejectValue)(s, individuals, rng)
+          MGONSGA2.adaptiveBreeding[S, Phenotype](n, om.operatorExploration, discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), rejectValue)(s, individuals, rng)
         }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) = FromContext { p ⇒
-          val (s2, elited) = MGONSGA2.elitism[S, Phenotype](om.mu, Genome.continuous(om.genome), ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives))(s, population, candidates, rng)
+          import p._
+          val (s2, elited) = MGONSGA2.elitism[S, Phenotype](om.mu, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context))(s, population, candidates, rng)
           val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
           val s4 = Focus[S](_.evaluated).modify(_ + evaluated)(s3)
           (s4, elited)
@@ -111,7 +113,7 @@ object NSGA2 {
     mu:                  Int,
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[ExactObjective[_]],
+    objectives:          Seq[Objective[_]],
     operatorExploration: Double,
     reject:              Option[Condition])
 
@@ -132,7 +134,7 @@ object NSGA2 {
         override def metadata(generation: Long, saveOption: SaveOption) =
           EvolutionMetadata.StochasticNSGA2(
             genome = MetadataGeneration.genomeData(om.genome),
-            objective = om.objectives.map(MetadataGeneration.noisyObjectiveData),
+            objective = om.objectives.map(MetadataGeneration.objectiveData),
             sample = om.historySize,
             populationSize = om.mu,
             generation = generation,
@@ -150,7 +152,7 @@ object NSGA2 {
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
         def initialState = EvolutionState[Unit](s = ())
 
-        def aggregate = NoisyObjective.aggregate(om.phenotypeContent, om.objectives)
+        def aggregate = Objective.aggregate(om.phenotypeContent, om.objectives)
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
           import p._
@@ -204,7 +206,7 @@ object NSGA2 {
     operatorExploration: Double,
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[NoisyObjective[_]],
+    objectives:          Seq[Objective[_]],
     historySize:         Int,
     cloneProbability:    Double,
     reject:              Option[Condition]

@@ -52,8 +52,9 @@ object NSGA3 {
 
         def initialState = EvolutionState[Unit](s = ())
 
-        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext.value {
-          val res = MGONSGA3.result[Phenotype](population, Genome.continuous(om.genome), ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives), keepAll = keepAll)
+        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
+          import p._
+          val res = MGONSGA3.result[Phenotype](population, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
 
@@ -74,12 +75,12 @@ object NSGA3 {
           import p._
           val discrete = Genome.discrete(om.genome)
           val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          MGONSGA3.adaptiveBreeding[S, Phenotype](om.operatorExploration, discrete, ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives), rejectValue, lambda = n)(s, individuals, rng)
+          MGONSGA3.adaptiveBreeding[S, Phenotype](om.operatorExploration, discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), rejectValue, lambda = n)(s, individuals, rng)
         }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) = FromContext { p ⇒
           import p._
-          val (s2, elited) = MGONSGA3.elitism[S, Phenotype](om.mu, om.references, Genome.continuous(om.genome), ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives))(s, population, candidates, rng)
+          val (s2, elited) = MGONSGA3.elitism[S, Phenotype](om.mu, om.references, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context))(s, population, candidates, rng)
           val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
           val s4 = Focus[S](_.evaluated).modify(_ + evaluated)(s3)
           (s4, elited)
@@ -102,7 +103,7 @@ object NSGA3 {
     references:          ReferencePoints,
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[ExactObjective[_]],
+    objectives:          Seq[Objective[_]],
     operatorExploration: Double,
     reject:              Option[Condition])
 
@@ -130,7 +131,7 @@ object NSGA3 {
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
         def initialState = EvolutionState[Unit](s = ())
 
-        def aggregate = NoisyObjective.aggregate(om.phenotypeContent, om.objectives)
+        def aggregate = Objective.aggregate(om.phenotypeContent, om.objectives)
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
           import p._
@@ -189,7 +190,7 @@ object NSGA3 {
     operatorExploration: Double,
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[NoisyObjective[_]],
+    objectives:          Seq[Objective[_]],
     historySize:         Int,
     cloneProbability:    Double,
     reject:              Option[Condition]
@@ -246,8 +247,8 @@ object NSGA3Evolution {
     p ⇒ {
       val refPoints =
         p.references match {
-          case NSGA3.References.None        ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(50, Objectives.value(p.objective).size)
-          case NSGA3.References.Division(i) ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(i, Objectives.value(p.objective).size)
+          case NSGA3.References.None        ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(50, p.objective.size)
+          case NSGA3.References.Division(i) ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(i, p.objective.size)
           case NSGA3.References.List(p)     ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(p)
         }
 

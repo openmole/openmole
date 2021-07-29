@@ -31,7 +31,7 @@ import squants.time.Time
 
 package object evolution {
 
-  type Objectives = Seq[Objective]
+  type Objectives = Seq[Objective[_]]
   type Genome = Seq[Genome.GenomeBound]
 
   implicit def intToCounterTerminationConverter(n: Long) = EvolutionWorkflow.AfterEvaluated(n)
