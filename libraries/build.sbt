@@ -113,7 +113,8 @@ lazy val scalaLang = OsgiProject(
       "org.scala-stm" %% "scala-stm" % "0.9.1",
       "com.typesafe" % "config" % "1.2.1",
       "org.scalameta" %% "scalameta" % "4.3.0",
-      "org.scala-lang" % "scala-compiler" % scalaVersion.value
+      "org.scala-lang" % "scala-compiler" % scalaVersion.value,
+      "org.scala-lang" % "scala3-library_3" % "3.0.1"
     )
   }, version := scalaVersion.value) settings(settings: _*)
 
