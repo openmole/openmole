@@ -73,6 +73,7 @@ object OSGiScalaCompiler {
 
     newSettings.language.add(newSettings.languageFeatures.postfixOps.name)
     newSettings.Ydelambdafy.value = "inline"
+    newSettings.YtastyReader.value = true
 
     //newSettings.maxClassfileName.value = 100
     newSettings
