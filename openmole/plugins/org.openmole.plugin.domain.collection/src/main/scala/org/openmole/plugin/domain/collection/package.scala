@@ -27,7 +27,7 @@ package collection {
 
   // Avoid clash with iterableOfToArrayIsFix when T is of type Array[T]
   trait LowPriorityImplicits {
-    implicit def iterableIsDiscrete[T]: DiscreteFromContextDomain[Iterable[T], T] = domain ⇒ Domain(domain.iterator)
+    implicit def iterableIsDiscrete[T]: DiscreteFromContextDomain[Iterable[T], T] = domain ⇒ Domain(FromContext { _ ⇒ domain.iterator })
     implicit def iterableIsFix[T]: FixDomain[Iterable[T], T] = domain ⇒ Domain(domain)
     implicit def iterableIsSized[T]: DomainSize[Iterable[T]] = domain ⇒ domain.size
   }
@@ -35,12 +35,12 @@ package collection {
 
 package object collection extends LowPriorityImplicits {
 
-  implicit def iterableOfToArrayIsFinite[T: ClassTag, A1[_]: ToArray]: DiscreteFromContextDomain[Iterable[A1[T]], Array[T]] = domain ⇒ Domain(domain.map(implicitly[ToArray[A1]].apply[T]).iterator)
+  implicit def iterableOfToArrayIsFinite[T: ClassTag, A1[_]: ToArray]: DiscreteFromContextDomain[Iterable[A1[T]], Array[T]] = domain ⇒ Domain(FromContext { _ ⇒ (domain.map(implicitly[ToArray[A1]].apply[T])).iterator })
   implicit def iterableOfToArrayIsFix[T: ClassTag, A1[_]: ToArray]: FixDomain[Iterable[A1[T]], Array[T]] = domain ⇒ Domain(domain.map(implicitly[ToArray[A1]].apply[T]))
-  implicit def arrayIsDiscrete[T]: DiscreteFromContextDomain[Array[T], T] = domain ⇒ Domain(domain.iterator)
+  implicit def arrayIsDiscrete[T]: DiscreteFromContextDomain[Array[T], T] = domain ⇒ Domain(FromContext { _ ⇒ domain.iterator })
   implicit def arrayIsFix[T]: FixDomain[Array[T], T] = domain ⇒ Domain(domain.toIterable)
   implicit def arrayIsSized[T]: DomainSize[Array[T]] = domain ⇒ domain.size
-  implicit def iteratorIsDiscrete[T]: DiscreteFromContextDomain[Iterator[T], T] = domain ⇒ Domain(domain)
+  //implicit def iteratorIsDiscrete[T]: DiscreteFromContextDomain[Iterator[T], T] = domain ⇒ Domain(domain)
   implicit def fromContextIteratorIsDiscrete[T]: DiscreteFromContextDomain[FromContext[Iterator[T]], T] = domain ⇒ Domain(domain)
 
   implicit def booleanValIsFactor(p: Val[Boolean]) = Factor(p, Vector(true, false))
