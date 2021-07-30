@@ -28,14 +28,19 @@ class ModifierDomainSpec extends FlatSpec with Matchers {
 
   "inputs of modified domain" should "be as expected" in {
     val size = Val[Int]
-    val range = RangeDomain[Int](0, 10)
+    val range = RangeDomain[Int](0, 10).step(1)
     val take = range.take(size)
-    implicitly[domain.DomainInput[take.type]].apply(take) should contain(size)
+    TakeDomain.isDiscrete(take).inputs should contain(size)
   }
 
   "range" should "work with modifiers" in {
     RangeDomain[Double](0.0, 10.0, 0.1).map(x ⇒ x * x)
     RangeDomain[Int](0, 10).map(x ⇒ x * x)
+
+    val range = RangeDomain[Int](0, 10).step(1)
+    val take = range.take(10)
+    val t = Val[Int]
+    val sampling: Sampling = t in take
   }
 
   "files" should "work with modifiers" in {

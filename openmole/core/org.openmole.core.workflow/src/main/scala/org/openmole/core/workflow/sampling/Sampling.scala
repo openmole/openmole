@@ -20,6 +20,10 @@ package org.openmole.core.workflow.sampling
 import org.openmole.core.context._
 import org.openmole.core.expansion._
 
+object Sampling {
+  implicit def fromIsSampling[T](t: T)(implicit isSampling: IsSampling[T]) = isSampling(t)
+}
+
 case class Sampling(
   sampling: FromContext[Iterator[Iterable[Variable[_]]]],
   outputs:  Iterable[Val[_]],

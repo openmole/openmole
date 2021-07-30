@@ -38,8 +38,6 @@ package sampling {
 
     implicit def fromContextIsDiscrete[T]: DiscreteFromContextDomain[FromContext[T], T] = domain ⇒ Domain(domain.map(v ⇒ Vector(v).iterator))
 
-    implicit def fromIsSampling[T](t: T)(implicit isSampling: IsSampling[T]) = isSampling(t)
-
     implicit def factorIsSampling[D, T](implicit domain: DiscreteFromContextDomain[D, T]): IsSampling[Factor[D, T]] = f => {
       def inputs = {
         val domainValue = domain(f.domain)
