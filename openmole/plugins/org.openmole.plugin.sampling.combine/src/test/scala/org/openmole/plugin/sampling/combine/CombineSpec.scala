@@ -34,9 +34,9 @@ class CombineSpec extends FlatSpec with Matchers {
 
     val s = (x1 in (0 until 2)) x (x2 in (0.0 until 1.0 by 0.1)) x (x3 in List("a", "b"))
 
-    s.outputs.toSet should equal(Set(x1, x2, x3))
+    (s: Sampling).outputs.toSet should equal(Set(x1, x2, x3))
 
-    s.sampling.from(Context.empty).size should equal(40)
+    (s: Sampling).sampling.from(Context.empty).size should equal(40)
   }
 
   "++ keyword" should "concatenate samplings" in {
@@ -45,8 +45,8 @@ class CombineSpec extends FlatSpec with Matchers {
 
     val s = (x1 in (0 until 2)) ++ (x1 in (8 until 10)) ++ ((x1 in List(100, 101)) x (x2 in List(8.9, 9.0)))
 
-    s.outputs.toSet should equal(Set(x1))
-    s.sampling.from(Context.empty).size should equal(8)
+    (s: Sampling).outputs.toSet should equal(Set(x1))
+    (s: Sampling).sampling.from(Context.empty).size should equal(8)
   }
 
   "zip keyword" should "zip samplings" in {
@@ -56,8 +56,8 @@ class CombineSpec extends FlatSpec with Matchers {
 
     val s = (x1 in (0 until 2)) zip (x2 in (8.0 until 9.0 by 0.5)) zip (x3 in List("a", "b"))
 
-    s.outputs.toSet should equal(Set(x1, x2, x3))
-    s.sampling.from(Context.empty).size should equal(2)
+    (s: Sampling).outputs.toSet should equal(Set(x1, x2, x3))
+    (s: Sampling).sampling.from(Context.empty).size should equal(2)
   }
 
 }
