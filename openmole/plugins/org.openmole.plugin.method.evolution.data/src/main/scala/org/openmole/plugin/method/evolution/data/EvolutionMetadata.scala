@@ -20,8 +20,8 @@ object EvolutionMetadata {
     import org.openmole.plugin.tool.methoddata._
 
     sealed trait IntervalType
-    object Discrete extends IntervalType
-    object Continuous extends IntervalType
+    case object Discrete extends IntervalType
+    case object Continuous extends IntervalType
 
     case class IntBound(value: ValData, low: Int, high: Int, intervalType: IntervalType) extends GenomeBoundData
     case class DoubleBound(value: ValData, low: Double, high: Double, intervalType: IntervalType) extends GenomeBoundData
