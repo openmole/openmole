@@ -466,7 +466,7 @@ lazy val jsonHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.json", impo
   libraryDependencies += Libraries.scalatest) settings (pluginSettings: _*)
 
 lazy val omrHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.omr", imports = Seq("*")) dependsOn(openmoleDSL, jsonHook, openmoleBuildInfo, project, replication % "test") settings(
-  libraryDependencies += Libraries.scalatest, libraryDependencies += Libraries.circe) settings (pluginSettings: _*)
+  libraryDependencies += Libraries.scalatest, libraryDependencies += Libraries.circe) settings (pluginSettings: _*) enablePlugins(ScalaJSPlugin)
 
 
 /* Method */
