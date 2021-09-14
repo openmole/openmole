@@ -473,7 +473,7 @@ lazy val omrHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.omr", import
 
 def allMethod = Seq(evolution, directSampling, sensitivity, abc)
 
-lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolution", imports = Seq("*")) dependsOn(
+lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolution", imports = Seq("*"), excludeSubPackage = Seq("data")) dependsOn(
   openmoleDSL, toolsTask, pattern, evolutionData, collectionDomain % "test", boundsDomain % "test"
 ) settings(
   libraryDependencies += Libraries.mgo,

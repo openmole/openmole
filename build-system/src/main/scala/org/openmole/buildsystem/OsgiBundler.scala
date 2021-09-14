@@ -29,6 +29,7 @@ object OsgiProject {
     artifactId: String,
     exports: Seq[String] = Seq(),
     privatePackages: Seq[String] = Seq(),
+    excludeSubPackage: Seq[String] = Seq(),
     singleton: Boolean = false,
     settings: Seq[Setting[_]] = Nil,
     bundleActivator: Option[String] = None,
@@ -38,6 +39,8 @@ object OsgiProject {
 
     val base = directory / artifactId
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
+
+    val privatePackageValue = excludeSubPackage.map(p => s"!$artifactId.$p.*") ++ privatePackages
 
     Project(artifactId.replace('.', '-'), base).settings(settings: _*).enablePlugins(SbtOsgi).settings(osgiSettings: _*).settings(
       name := artifactId,
@@ -53,7 +56,7 @@ object OsgiProject {
         }).value,
       OsgiKeys.requireCapability := """osgi.ee; osgi.ee="JavaSE";version:List="1.8,1.9""""",
       //OsgiKeys.bundleRequiredExecutionEnvironment := Seq("JavaSE-1.8", "JavaSE-1.9"),
-      OsgiKeys.privatePackage := privatePackages,
+      OsgiKeys.privatePackage := privatePackageValue,
       OsgiKeys.dynamicImportPackage := dynamicImports,
       OsgiKeys.importPackage := imports,
       OsgiKeys.bundleActivator := (OsgiKeys.bundleActivator { bA ⇒ bundleActivator.orElse(bA) }).value)
