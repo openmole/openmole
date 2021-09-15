@@ -245,6 +245,8 @@ case class Namespace(names: String*) {
     if (names.isEmpty) ""
     else names.mkString("$")
   def isEmpty = names.isEmpty
+  def prefix(s: String*) = Namespace(s ++ names: _*)
+  def postfix(s: String*) = Namespace(names ++ s: _*)
 }
 
 /**

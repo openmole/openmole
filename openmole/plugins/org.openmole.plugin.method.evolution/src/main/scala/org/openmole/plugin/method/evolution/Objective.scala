@@ -110,6 +110,18 @@ object Objective {
 
   def prototype(o: Objective) = if (!o.noisy) o.prototype else o.prototype.unsecureFromArray
 
+  def resultPrototype(o: Objective) = {
+    def objectiveNamespace(p: Val[_]) = p.withNamespace(p.namespace.prefix("objective"))
+
+    def p = (o.delta, o.as) match {
+      case (_, Some(s))    ⇒ Objective.prototype(o).withName(s)
+      case (Some(_), None) ⇒ Objective.prototype(o).withNamespace(Objective.prototype(o).namespace.postfix("delta"))
+      case _               ⇒ Objective.prototype(o)
+    }
+
+    objectiveNamespace(p)
+  }
+
   case class ComputeValue[P](
     prototype:       Val[P],
     toDouble:        FromContext[P ⇒ Double],
@@ -152,16 +164,7 @@ object Objectives {
   def toExact(o: Objectives) = o.map(o ⇒ Objective.toExact(o))
   def toNoisy(o: Objectives) = o.map(o ⇒ Objective.toNoisy(o))
 
-  def resultPrototypes(o: Objectives) = {
-    def resultPrototype(o: Objective) =
-      (o.delta, o.as) match {
-        case (_, Some(s))    ⇒ Objective.prototype(o).withName(s)
-        case (Some(_), None) ⇒ Objective.prototype(o).withNamespace(Objective.prototype(o).namespace.names ++ Seq("delta"))
-        case _               ⇒ Objective.prototype(o)
-      }
-
-    o.map(resultPrototype)
-  }
+  def resultPrototypes(o: Objectives) = o.map(Objective.resultPrototype)
 
   def validate(o: Objectives, outputs: Seq[Val[_]]) = Validate { p ⇒
     import p._
