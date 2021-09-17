@@ -34,7 +34,7 @@ import org.openmole.tool.lock._
 import org.openmole.tool.logger.JavaLogger
 import squants.information._
 import squants.time.TimeConversions._
-
+import squants.time.Time
 import scala.ref.WeakReference
 
 object SSHEnvironment extends JavaLogger {
@@ -54,6 +54,7 @@ object SSHEnvironment extends JavaLogger {
     workDirectory:        OptionalArgument[String]      = None,
     openMOLEMemory:       OptionalArgument[Information] = None,
     threads:              OptionalArgument[Int]         = None,
+    killAfter:            OptionalArgument[Time]        = None,
     storageSharedLocally: Boolean                       = false,
     name:                 OptionalArgument[String]      = None,
     modules:              Seq[String]                   = Vector(),
@@ -70,6 +71,7 @@ object SSHEnvironment extends JavaLogger {
         workDirectory = workDirectory,
         openMOLEMemory = openMOLEMemory,
         threads = threads,
+        killAfter = killAfter,
         storageSharedLocally = storageSharedLocally,
         name = Some(name.getOrElse(varName.value)),
         authentication = SSHAuthentication.find(user, host, port),
@@ -128,6 +130,7 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   val workDirectory:        Option[String],
   val openMOLEMemory:       Option[Information],
   val threads:              Option[Int],
+  val killAfter:            Option[Time],
   val storageSharedLocally: Boolean,
   val name:                 Option[String],
   val authentication:       A,
