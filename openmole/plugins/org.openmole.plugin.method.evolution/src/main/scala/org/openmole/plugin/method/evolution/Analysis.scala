@@ -72,9 +72,9 @@ object Analysis {
     def loadFile(metaData: EvolutionMetadata.NSGA2, f: File) = {
       val json = parse(f.content(gz = true)).right.get.asObject.get
 
-      def objectives: Vector[Vector[ObjectiveData]] =
+      def objectives: Vector[Vector[Double]] =
         metaData.objective.toVector.map {
-          o ⇒ json(o.name).get.asArray.get.map(_.toString)
+          o ⇒ json(o.name).get.asArray.get.map(_.as[Double].toOption.get)
         }.transpose
 
       def genomes =
@@ -159,9 +159,9 @@ object Analysis {
     def loadFile(metaData: EvolutionMetadata.StochasticNSGA2, f: File) = {
       val json = parse(f.content(gz = true)).right.get.asObject.get
 
-      def objectives: Vector[Vector[ObjectiveData]] =
+      def objectives: Vector[Vector[Double]] =
         metaData.objective.toVector.map {
-          o ⇒ json(o.name).get.asArray.get.map(_.toString)
+          o ⇒ json(o.name).get.asArray.get.map(_.as[Double].toOption.get)
         }.transpose
 
       def genomes =

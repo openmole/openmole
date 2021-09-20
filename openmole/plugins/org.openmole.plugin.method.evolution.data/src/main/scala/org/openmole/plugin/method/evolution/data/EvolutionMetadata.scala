@@ -99,14 +99,14 @@ object AnalysisData {
 
   object NSGA2 {
     case class Generation(generation: Long, genome: Vector[Vector[GenomeData]], objective: Vector[Objective]) extends AnalysisData.Generation
-    case class Objective(objectives: Vector[ObjectiveData])
+    case class Objective(objectives: Vector[Double])
     case class Convergence(nadir: Option[Vector[Double]], generations: Vector[GenerationConvergence]) extends AnalysisData.Convergence
     case class GenerationConvergence(generation: Long, hypervolume: Option[Double], minimums: Option[Vector[Double]])
   }
 
   object StochasticNSGA2 {
     case class Generation(generation: Long, genome: Vector[Vector[GenomeData]], objective: Vector[Objective]) extends AnalysisData.Generation
-    case class Objective(objectives: Vector[ObjectiveData], samples: Int)
+    case class Objective(objectives: Vector[Double], samples: Int)
     case class Convergence(nadir: Option[Vector[Double]], generations: Vector[GenerationConvergence]) extends AnalysisData.Convergence
     case class GenerationConvergence(generation: Long, hypervolume: Option[Double], minimums: Option[Vector[Double]])
   }
