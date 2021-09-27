@@ -231,6 +231,8 @@ object Application extends JavaLogger {
           case None    ⇒ Console.initPassword
         }
 
+        Console.chosePassword(passwordString)
+
         if (!Console.testPassword(passwordString)) {
           println("Password is incorrect")
           Console.ExitCodes.incorrectPassword
@@ -250,6 +252,8 @@ object Application extends JavaLogger {
           case Some(p) ⇒ p
           case None    ⇒ Console.initPassword
         }
+
+        Console.chosePassword(passwordString)
 
         if (!Console.testPassword(passwordString)) {
           println("Password is incorrect")

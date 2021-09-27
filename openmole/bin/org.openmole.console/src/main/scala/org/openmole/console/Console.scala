@@ -60,6 +60,12 @@ object Console extends JavaLogger {
     Preference.passwordIsCorrect(cypher, preference)
   }
 
+  def chosePassword(password: String)(implicit preference: Preference) =
+    if (!Preference.passwordChosen(preference)) {
+      val cypher = Cypher(password)
+      Preference.setPasswordTest(preference, cypher)
+    }
+
   @tailrec def initPassword(implicit preference: Preference): String =
     if (Preference.passwordChosen(preference) && Preference.passwordIsCorrect(Cypher(""), preference)) ""
     else if (Preference.passwordChosen(preference)) {
