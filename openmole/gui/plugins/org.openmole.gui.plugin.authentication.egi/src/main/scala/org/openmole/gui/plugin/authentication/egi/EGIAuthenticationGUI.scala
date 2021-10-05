@@ -27,7 +27,7 @@ import autowire._
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
-import scalatags.JsDom.all._
+import com.raquo.laminar.api.L._
 
 import scala.scalajs.js
 
@@ -53,23 +53,23 @@ class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory {
 class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationData()) extends AuthenticationPlugin {
   type AuthType = EGIAuthenticationData
 
-  val passwordStyle: scaladget.tools.ModifierSeq = Seq(
-    width := 130,
-    scaladget.tools.passwordType
+  val passwordStyle: HESetters = Seq(
+    width := "130",
+    `type` := "password"
   )
 
-  val password = inputTag(data.cypheredPassword)(placeholder := "Password", passwordStyle).render
+  val password = inputTag(data.cypheredPassword).amend(placeholder := "Password", passwordStyle)
 
   def shorten(path: String): String = if (path.length > 10) s"...${path.takeRight(10)}" else path
 
   val privateKey =
     FileUploaderUI(data.privateKey.map(shorten).getOrElse(""), data.privateKey.isDefined, Some("egi.p12"))
 
-  val voInput = inputTag("")(placeholder := "vo1,vo2").render
+  val voInput = inputTag("").amend(placeholder := "vo1,vo2")
 
   OMPost()[EGIAuthenticationAPI].geVOTest().call().foreach {
     _.foreach { c ⇒
-      voInput.value = c
+      voInput.ref.value = c
     }
   }
 
@@ -83,8 +83,8 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
     import scaladget.tools._
     vForm(
       password.withLabel("Password"),
-      privateKey.view(marginTop := 10).render.withLabel("Certificate"),
-      voInput.withLabel("Test EGI credential on", paddingTop := 40)
+      privateKey.view.amend(marginTop := "10").withLabel("Certificate"),
+      voInput.withLabel("Test EGI credential on", paddingTop := "40")
     )
   }
 
@@ -92,7 +92,7 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
     OMPost()[EGIAuthenticationAPI].removeAuthentication().call().foreach {
       d ⇒
         OMPost()[EGIAuthenticationAPI].addAuthentication(EGIAuthenticationData(
-          cypheredPassword = password.value,
+          cypheredPassword = password.ref.value,
           privateKey = if (privateKey.pathSet.now) Some(EGIAuthenticationData.authenticationDirectory + "/egi.p12") else None
         )).call().foreach {
           b ⇒
@@ -100,7 +100,7 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
         }
     }
 
-    OMPost()[EGIAuthenticationAPI].setVOTest(voInput.value.split(",").map(_.trim).toSeq).call()
+    OMPost()[EGIAuthenticationAPI].setVOTest(voInput.ref.value.split(",").map(_.trim).toSeq).call()
   }
 
   def test = OMPost()[EGIAuthenticationAPI].testAuthentication(data).call()

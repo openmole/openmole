@@ -29,9 +29,7 @@ import org.scalajs.dom.raw.HTMLElement
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
-import scalatags.JsDom.TypedTag
-import scalatags.JsDom.all._
-
+import com.raquo.laminar.api.L._
 import scala.scalajs.js
 
 object TopLevelExports {
@@ -57,7 +55,7 @@ class RWizardGUI extends WizardGUIPlugin {
 
   def factory = new RWizardFactory
 
-  lazy val panel: TypedTag[HTMLElement] = div(client.modelHelp, "If your R sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace.")
+  lazy val panel = div(client.modelHelp, "If your R sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace.")
 
   def save(
     target:         SafePath,

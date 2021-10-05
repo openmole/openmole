@@ -4,7 +4,7 @@ import org.openmole.plotlyjs._
 import org.openmole.plotlyjs.all._
 import org.openmole.plotlyjs.PlotlyImplicits._
 import scala.scalajs.js.JSConverters._
-import scalatags.JsDom.all._
+import com.raquo.laminar.api.L._
 import scala.scalajs.js
 
 object HeatMapPlot {
@@ -27,12 +27,12 @@ object HeatMapPlot {
       .width(700)
 
     Plotly.newPlot(
-      plotDiv,
+      plotDiv.ref,
       scalajs.js.Array(data),
       layout,
       Plot.baseConfig
     )
 
-    div(plotDiv.render).render
+    plotDiv
   }
 }

@@ -1,10 +1,8 @@
 package org.openmole.gui.client.core
 
-import scalatags.JsDom.tags
-import scalatags.JsDom.all._
 import scaladget.bootstrapnative.bsn._
 
-import rx._
+import com.raquo.laminar.api.L._
 import org.openmole.gui.ext.client._
 
 /*
@@ -26,28 +24,19 @@ import org.openmole.gui.ext.client._
 
 class TextPanel(title: String) {
 
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-
   val content: Var[String] = Var("")
 
   def open = dialog.show
 
-  val dialog = ModalDialog(omsheet.panelWidth(65))
+  def close = dialog.hide
 
-  dialog.header(
-    tags.span(tags.b(title))
+  lazy val dialog: ModalDialog = ModalDialog(
+    span(b(title)),
+    textArea(child.text <-- content.signal),
+    closeButton("Close", () ⇒ close),
+    omsheet.panelWidth(65),
+    () ⇒ {},
+    () ⇒ {}
   )
-
-  val textArea = scrollableText("")
-
-  content.trigger {
-    textArea.setContent(content.now)
-  }
-
-  dialog.body(div(
-    textArea.sRender
-  ))
-
-  dialog.footer(ModalDialog.closeButton(dialog, btn_default, "Close"))
 
 }

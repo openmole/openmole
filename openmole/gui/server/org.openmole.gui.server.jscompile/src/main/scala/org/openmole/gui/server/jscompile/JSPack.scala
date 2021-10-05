@@ -51,9 +51,29 @@ object JSPack {
           .withModuleKind(ModuleKind.CommonJSModule)
 
         linker = StandardImpl.linker(config)
-        _ ← linker.link(sjsirFiles, Nil, LinkerOutput(PathOutputFile(outputJSFile.toPath)), NullLogger)
+        _ ← {
+          linker.link(sjsirFiles, Nil, PathOutputDirectory(outputJSFile.getParentFile), new ScalaConsoleLogger)
+        }
+
       } yield ())
 
       Await.result(result, Duration.Inf)
     }
+
+  def webpack(entryJSFile: File, webpackJsonPackage: File, webpackConfigTemplateLocation: File, webpackOutputFile: File)(implicit newFile: TmpDirectory) = {
+    newFile.withTmpDir { targetDir ⇒
+
+      webpackJsonPackage copy targetDir / webpackJsonPackage.getName
+
+      Npm.install(targetDir)
+
+      //3- build the js deps with webpack
+      Webpack.run(
+        entryJSFile,
+        webpackConfigTemplateLocation,
+        targetDir,
+        webpackOutputFile
+      )
+    }
+  }
 }

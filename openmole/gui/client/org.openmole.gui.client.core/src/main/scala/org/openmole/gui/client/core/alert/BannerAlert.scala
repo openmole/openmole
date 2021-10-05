@@ -17,18 +17,11 @@ package org.openmole.gui.client.core.alert
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.files.TreeNodeTabs
 import org.openmole.gui.client.core.panels.stackPanel
-import rx._
-import scalatags.JsDom.all._
-import scaladget.tools._
-import scalatags.JsDom.all.{ onclick, raw, span }
+import com.raquo.laminar.api.L._
 import org.openmole.gui.ext.client._
 import org.openmole.gui.ext.client.Utils._
-import org.scalajs.dom.raw.HTMLDivElement
-import scaladget.bootstrapnative.bsn.btn_default
-import scalatags.JsDom.{ TypedTag, tags }
-import org.openmole.gui.ext.data._
+import scaladget.bootstrapnative.bsn
 
 object BannerLevel {
   object Regular extends BannerLevel
@@ -37,43 +30,43 @@ object BannerLevel {
 
 sealed trait BannerLevel
 
-case class BannerMessage(messageDiv: TypedTag[HTMLDivElement], bannerLevel: BannerLevel)
+case class BannerMessage(messageDiv: HtmlElement, bannerLevel: BannerLevel)
 
 class BannerAlert(resizeTabs: () ⇒ Unit) {
 
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-
   private val bannerMessages: Var[Seq[BannerMessage]] = Var(Seq())
-  val isOpen = bannerMessages.map { bm ⇒ !bm.isEmpty }
+  val isOpen = bannerMessages.signal.map { bm ⇒ !bm.isEmpty }
 
-  private val bannerDiv = tags.div(
-    Rx {
-      tags.div(omsheet.bannerAlert +++ (backgroundColor := color))(
-        tags.div(omsheet.bannerAlertInner)(
+  private val bannerDiv = div(
+    child <-- bannerMessages.signal.map { bMessages ⇒
+      div(omsheet.bannerAlert, backgroundColor := color,
+        div(
+          omsheet.bannerAlertInner,
           for {
-            bm ← bannerMessages()
+            bm ← bMessages
           } yield bm.messageDiv
         )
       )
-    }, span(omsheet.closeBanner, onclick := { () ⇒ clear })(
-      raw("&#215")
-    )
-  )(height := 70)
+    },
+    span(omsheet.closeBanner, onClick --> { _ ⇒ clear },
+      "x" //raw("&#215")
+    ),
+    height := "70")
 
   lazy val banner = isOpen.expandDiv(bannerDiv, () ⇒ {
     resizeTabs()
   })
 
-  def clear = bannerMessages() = Seq()
+  def clear = bannerMessages.set(Seq())
 
   private def registerMessage(bannerMessage: BannerMessage) =
-    bannerMessages() = (bannerMessages.now :+ bannerMessage).distinct.takeRight(2)
+    bannerMessages.update(bm ⇒ (bm :+ bannerMessage).distinct.takeRight(2))
 
   def registerWithDetails(message: String, details: String, bannerLevel: BannerLevel = BannerLevel.Regular) =
     registerMessage(
       BannerMessage(
-        tags.div(tags.span(message), tags.button(btn_default +++ (marginLeft := 10), "Details", onclick := { () ⇒
-          stackPanel.content() = details
+        div(span(message), button(bsn.btn_secondary, marginLeft := "10", "Details", onClick --> { _ ⇒
+          stackPanel.content.set(details)
           stackPanel.dialog.show
         })),
         BannerLevel.Critical
@@ -81,9 +74,9 @@ class BannerAlert(resizeTabs: () ⇒ Unit) {
     )
 
   def register(message: String, bannerLevel: BannerLevel = BannerLevel.Regular): Unit =
-    registerMessage(BannerMessage(tags.div(tags.span(message)), bannerLevel))
+    registerMessage(BannerMessage(div(span(message)), bannerLevel))
 
-  def registerDiv(messageDiv: TypedTag[HTMLDivElement], level: BannerLevel = BannerLevel.Regular) =
+  def registerDiv(messageDiv: HtmlElement, level: BannerLevel = BannerLevel.Regular) =
     registerMessage(BannerMessage(messageDiv, level))
 
   def registerWithStack(message: String, stack: Option[String], bannerLevel: BannerLevel = BannerLevel.Regular) =

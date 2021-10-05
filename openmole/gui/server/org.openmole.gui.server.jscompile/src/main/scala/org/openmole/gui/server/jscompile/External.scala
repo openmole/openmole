@@ -12,7 +12,6 @@ object External {
       case _                        ⇒ Seq(name)
     }
 
-    println("RUNNING " + { cmd ++: args }.mkString(" ") + "in " + workingDir)
     runProcess(cmd ++: args, workingDir)
   }
 
@@ -32,7 +31,7 @@ object External {
 
     println(s"INFO Command: ${cmd.mkString(" ")}")
     val process = Process(cmd, cwd)
-    val processIO = BasicIO.standard(false).withError(toErrorLog)
+    val processIO = BasicIO.standard(false) //.withError(toErrorLog)
     val code: Int = process.run(processIO).exitValue()
 
     //    if (code != 0) {
@@ -41,24 +40,4 @@ object External {
     //      Right(Some("Rigt result"))
     //    }
   }
-
-  //  def syncLockfile(lockFileName: String,
-  //                   baseDir: File,
-  //                   installDir: File
-  //                  )(command: => Unit): Unit = {
-  //    val sourceLockFile = baseDir / lockFileName
-  //    val targetLockFile = installDir / lockFileName
-  //
-  //    if (sourceLockFile.exists()) {
-  //      // logger.info("Using lockfile " + sourceLockFile)
-  //      sourceLockFile copy targetLockFile
-  //    }
-  //
-  //    command
-  //
-  //    if (targetLockFile.exists()) {
-  //      //  logger.debug("Wrote lockfile to " + sourceLockFile)
-  //      targetLockFile copy sourceLockFile
-  //    }
-  //  }
 }

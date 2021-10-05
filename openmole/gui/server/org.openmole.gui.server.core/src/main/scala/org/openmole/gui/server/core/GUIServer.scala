@@ -38,6 +38,8 @@ object GUIServer {
 
   def fromWebAppLocation = openMOLELocation / "webapp"
 
+  def webpackLocation = openMOLELocation / "webpack"
+
   def webapp(optimizedJS: Boolean)(implicit newFile: TmpDirectory, workspace: Workspace, fileService: FileService) = {
     val from = fromWebAppLocation
     val to = newFile.newDir("webapp")
@@ -46,20 +48,15 @@ object GUIServer {
     from / "fonts" copy to / "fonts"
     from / "img" copy to / "img"
 
-    Plugins.expandDepsFile(from / "js" / utils.openmoleGrammarName, to /> "js" / utils.openmoleGrammarMode)
-    (from / "js" / utils.githubTheme) copy (to /> "js" / utils.githubTheme)
-    //(from / "js" / utils.depsFileName) copy (to /> "js" / utils.depsFileName)
+    val grammarFile = to /> "js" / utils.openmoleGrammarMode
+    val editorThemeFile = to /> "js" / utils.githubTheme
 
-    val openmoleJSFile = Plugins.openmoleFile(optimizedJS)
-    Plugins.openmoleFile(optimizedJS) copy (to /> "js" / utils.openmoleFileName)
+    Plugins.expandDepsFile(from / "js" / utils.openmoleGrammarName, grammarFile)
+    (from / "js" / utils.githubTheme) copy editorThemeFile
 
-    println("JS File " + openmoleJSFile.getAbsolutePath)
-    //    val webpackTemplateConfig = newFile.newFile(utils.webpackConfigTemplateName, "")
-    //    Webpack.run(
-    //      openmoleJSFile,
-    //      to /> "js" / utils.depsFileName,
-    //      from / "js" / utils.webpackConfigTemplateName
-    //    )
+    val (openmoleJSFile, webpacked) = Plugins.openmoleFile(optimizedJS)
+    openmoleJSFile copy (to /> "js" / utils.openmoleFileName)
+    webpacked copy (to /> "js" / utils.webpakedOpenmoleFileName)
 
     to
   }
@@ -117,11 +114,16 @@ class StartingPage extends ScalatraServlet with LifeCycle {
     def content =
       <html>
         <head>
-          <script>{ """setTimeout(function(){ window.location.reload(1); }, 3000);""" }</script>
+          <script>
+            { """setTimeout(function(){ window.location.reload(1); }, 3000);""" }
+          </script>
         </head>
         <link href="/css/style.css" rel="stylesheet"/>
         <body>
-          <div>OpenMOLE is launching...<div class="loader" style="float: right"></div><br/></div>
+          <div>
+            OpenMOLE is launching...
+            <div class="loader" style="float: right"></div><br/>
+          </div>
           (for the first launch, and after an update, it may take several minutes)
         </body>
       </html>

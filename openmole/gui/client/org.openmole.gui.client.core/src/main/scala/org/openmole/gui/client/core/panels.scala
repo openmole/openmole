@@ -34,7 +34,7 @@ object panels {
 
   lazy val executionPanel =
     new ExecutionPanel(
-      setEditorErrors = TreeNodeTabs.setErrors(treeNodeTabs, _, _),
+      // setEditorErrors = TreeNodeTabs.setErrors(treeNodeTabs, _, _),
       bannerAlert = bannerAlert)
 
   def openExecutionPanel = {
@@ -79,7 +79,7 @@ object panels {
 
   lazy val bannerAlert =
     new BannerAlert(
-      resizeTabs = () ⇒ treeNodeTabs.tabs.now.foreach { t ⇒ t.resizeEditor }
+      resizeTabs = () ⇒ treeNodeTabs.tabsElement.tabs.now.foreach { t ⇒ t.t.resizeEditor }
     )
 
   lazy val alertPanel = new AlertPanel

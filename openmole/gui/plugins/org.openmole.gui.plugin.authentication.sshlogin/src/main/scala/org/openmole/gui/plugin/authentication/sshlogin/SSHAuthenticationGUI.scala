@@ -29,8 +29,7 @@ import org.openmole.gui.ext.data._
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
-import scalatags.JsDom.TypedTag
-import scalatags.JsDom.all._
+import com.raquo.laminar.api.L._
 import scalajs.js
 
 object TopLevelExports {
@@ -61,15 +60,15 @@ class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthentica
     onremove()
   }
 
-  val loginInput = inputTag(data.login)(placeholder := "Login").render
+  val loginInput = inputTag(data.login).amend(placeholder := "Login")
 
-  val passwordInput = inputTag(data.password)(placeholder := "Password", passwordType).render
+  val passwordInput = inputTag(data.password).amend(placeholder := "Password", `type` := "password")
 
-  val targetInput = inputTag(data.target)(placeholder := "Host").render
+  val targetInput = inputTag(data.target).amend(placeholder := "Host")
 
-  val portInput = inputTag(data.port)(placeholder := "Port").render
+  val portInput = inputTag(data.port).amend(placeholder := "Port")
 
-  def panel: TypedTag[HTMLElement] = hForm(
+  def panel: HtmlElement = hForm(
     loginInput.withLabel("Login"),
     passwordInput.withLabel("Password"),
     targetInput.withLabel("Target"),
@@ -78,7 +77,7 @@ class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthentica
 
   def save(onsave: () ⇒ Unit): Unit = {
     OMPost()[LoginAuthenticationAPI].removeAuthentication(data).call().foreach { d ⇒
-      OMPost()[LoginAuthenticationAPI].addAuthentication(LoginAuthenticationData(loginInput.value, passwordInput.value, targetInput.value, portInput.value)).call().foreach { b ⇒
+      OMPost()[LoginAuthenticationAPI].addAuthentication(LoginAuthenticationData(loginInput.ref.value, passwordInput.ref.value, targetInput.ref.value, portInput.ref.value)).call().foreach { b ⇒
         onsave()
       }
     }

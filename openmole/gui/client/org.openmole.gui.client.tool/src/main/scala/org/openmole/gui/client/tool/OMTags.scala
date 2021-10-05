@@ -2,11 +2,7 @@ package org.openmole.gui.client.tool
 
 import org.scalajs.dom.raw._
 import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
-
-import scalatags.JsDom.{ tags ⇒ tags }
-import scalatags.JsDom.TypedTag
-import scalatags.JsDom.all._
+import com.raquo.laminar.api.L._
 
 /*
  * Copyright (C) 02/09/15 // mathieu.leclaire@openmole.org
@@ -27,63 +23,72 @@ import scalatags.JsDom.all._
 
 object OMTags {
 
-  def waitingSpan(text: String, button: ModifierSeq): TypedTag[HTMLSpanElement] =
-    span(button)(
-      span("loading")(text)
+  def waitingSpan(text: String, button: HESetters): HtmlElement =
+    span(
+      button,
+      span(s"loading $text")
     )
 
   def glyphBorderButton(
     text:     String,
-    buttonCB: ModifierSeq,
-    glyCA:    ModifierSeq, todo: () ⇒ Unit
-  ): TypedTag[HTMLButtonElement] = {
-    tags.button(`type` := "button", buttonCB, onclick := { () ⇒ todo() })(
-      tags.span(aria.hidden := true)(glyCA)
+    buttonCB: HESetters,
+    glyCA:    HESetters,
+    todo:     () ⇒ Unit
+  ): HtmlElement = {
+    button(
+      `type` := "button",
+      buttonCB,
+      onClick --> { _ ⇒ todo() },
+      span(aria.hidden := true, glyCA)
     )
   }
 
-  val glyph_plug = toClass("glyphicon icon-power-cord")
-  val glyph_book = toClass("glyphicon icon-book")
-  val glyph_data = toClass("glyphicon icon-database")
-  val glyph_share = toClass("glyphicon glyphicon-share-alt")
-  val options = toClass("glyphicon glyphicon-option-horizontal")
-  val glyph_eye_open = toClass("glyphicon glyphicon-eye-open")
+  val glyph_plug = cls("bi-plug-fill")
+  val glyph_data = cls("bi-server")
+  val glyph_share = cls("bi-forward-fill")
+  //val options = cls("glyphicon glyphicon-option-horizontal")
+  val glyph_eye_open = cls("bi-eye-fill")
+  val glyph_flash = cls("lightning-charge")
 
   case class AlertAction(action: () ⇒ Unit)
 
-  def alert(alertType: ModifierSeq, content: TypedTag[HTMLDivElement], actions: Seq[AlertAction], buttonGroupClass: ModifierSeq = floatLeft +++ (marginLeft := 20), okString: String = "OK", cancelString: String = "Cancel"): TypedTag[HTMLDivElement] =
+  def alert(alertType: HESetters, content: HtmlElement, actions: Seq[AlertAction], buttonGroupClass: HESetters = Seq(float := "left", marginLeft := "20"), okString: String = "OK", cancelString: String = "Cancel"): HtmlElement =
     actions.size match {
       case 1 ⇒ alert(alertType, content, actions.head.action, buttonGroupClass, okString)
       case 2 ⇒ alert(alertType, content, actions.head.action, actions(1).action, buttonGroupClass, okString, cancelString)
-      case _ ⇒ tags.div()
+      case _ ⇒ div()
     }
 
-  def alert(alertType: ModifierSeq, content: TypedTag[HTMLDivElement], todook: () ⇒ Unit, buttonGroupClass: ModifierSeq, okString: String): TypedTag[HTMLDivElement] =
-    tags.div(role := "alert")(
+  def alert(alertType: HESetters, content: HtmlElement, todook: () ⇒ Unit, buttonGroupClass: HESetters, okString: String): HtmlElement =
+    div(
+      role := "alert",
       content,
-      button(okString, alertType +++ (paddingTop := 20), onclick := todook)
+      button(okString, alertType, paddingTop := "20", onClick --> (_ ⇒ todook()))
     )
 
-  def alert(alertType: ModifierSeq, content: TypedTag[HTMLDivElement], todook: () ⇒ Unit, todocancel: () ⇒ Unit, buttonGroupClass: ModifierSeq, okString: String, cancelString: String): TypedTag[HTMLDivElement] =
-    tags.div(role := "alert", overflowY := "scroll", height := 600, padding := 20)(
+  def alert(alertType: HESetters, content: HtmlElement, todook: () ⇒ Unit, todocancel: () ⇒ Unit, buttonGroupClass: HESetters, okString: String, cancelString: String): HtmlElement =
+    div(role := "alert", overflowY := "scroll", height := "600", padding := "20",
       content,
-      div(paddingTop := 20)(
-        buttonGroup(buttonGroupClass)(
-          button(okString, alertType, onclick := todook),
-          button(cancelString, btn_default, onclick := todocancel)
+      div(
+        paddingTop := "20",
+        buttonGroup.amend(
+          buttonGroupClass,
+          button(okString, alertType, onClick --> (_ ⇒ todook())),
+          button(cancelString, btn_secondary, onClick --> (_ ⇒ todocancel()))
         )
       )
     )
 
-  def glyphSpan(glyCA: ModifierSeq, linkName: String = "", todo: ⇒ Unit = () ⇒ {}): TypedTag[HTMLSpanElement] =
-    tags.span(cursor := "pointer", glyCA)(linkName)(onclick := { () ⇒
-      todo
-    })
+  def glyphSpan(glyCA: HESetters, linkName: String = "", todo: ⇒ Unit = () ⇒ {}): HtmlElement =
+    span(cursor := "pointer", glyCA, linkName, onClick --> (_ ⇒ todo))
 
-  def uploadButton(todo: HTMLInputElement ⇒ Unit): TypedTag[HTMLSpanElement] = {
-    span(ms("btn-file"), cursor := "pointer", id := "success-like")(
+  def uploadButton(todo: Input ⇒ Unit): HtmlElement = {
+    span(
+      cls := "btn-file",
+      cursor.pointer,
+      idAttr := "success-like",
       glyphSpan(glyph_upload),
-      fileInputMultiple(todo)
+      fileInput(todo).amend(multiple := true)
     )
   }
 }

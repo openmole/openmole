@@ -20,7 +20,6 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.ext.data._
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.ext.client.Utils._
-import rx._
 
 import scala.concurrent.Future
 
@@ -50,7 +49,7 @@ case class TreeNodeComment(message: String, filesInError: Seq[SafePath], okactio
 sealed trait TreeNode {
   val id = getUUID
 
-  def name: Var[String]
+  def name: String
 
   val size: Long
 
@@ -61,11 +60,11 @@ sealed trait TreeNode {
 object TreeNode {
 
   implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode = tnd.dirData match {
-    case Some(dd: DirData) ⇒ DirNode(Var(tnd.name), tnd.size, tnd.time, dd.isEmpty)
-    case _                 ⇒ FileNode(Var(tnd.name), tnd.size, tnd.time)
+    case Some(dd: DirData) ⇒ DirNode(tnd.name, tnd.size, tnd.time, dd.isEmpty)
+    case _                 ⇒ FileNode(tnd.name, tnd.size, tnd.time)
   }
 
-  implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name.now, tn match {
+  implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name, tn match {
     case DirNode(_, _, _, isEmpty) ⇒ Some(DirData(isEmpty))
     case _                         ⇒ None
   }, tn.size, tn.time)
@@ -85,14 +84,14 @@ object TreeNode {
 }
 
 case class DirNode(
-  name:    Var[String],
+  name:    String,
   size:    Long,
   time:    Long,
   isEmpty: Boolean
 ) extends TreeNode
 
 case class FileNode(
-  name: Var[String],
+  name: String,
   size: Long,
   time: Long
 ) extends TreeNode

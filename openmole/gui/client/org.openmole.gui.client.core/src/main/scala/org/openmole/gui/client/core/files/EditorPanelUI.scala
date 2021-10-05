@@ -4,9 +4,6 @@ import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.FileExtension._
 
 import scala.scalajs.js
-import scalatags.JsDom.all._
-import scalatags.JsDom.tags
-
 import scaladget.ace._
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
@@ -17,7 +14,9 @@ import org.openmole.gui.ext.client._
 import org.scalajs.dom.raw.Event
 import scaladget.bootstrapnative.Popup
 import scaladget.bootstrapnative.Popup.{ Manual, PopupPosition }
-import rx._
+import com.raquo.laminar.api.L._
+import com.raquo.laminar.builders.DomEventStreamPropBuilder
+import org.openmole.gui.client.core.panels
 
 /*
  * Copyright (C) 07/04/15 // mathieu.leclaire@openmole.org
@@ -39,17 +38,17 @@ import rx._
 object EditorPanelUI {
 
   def apply(
-    treeNodeTabs:         TreeNodeTabs,
-    safePath:             SafePath,
-    fileType:             FileExtension,
-    initCode:             String,
-    initHash:             String,
-    containerModifierSeq: ModifierSeq   = emptyMod) = {
+    treeNodeTabs:       TreeNodeTabs,
+    safePath:           SafePath,
+    fileType:           FileExtension,
+    initCode:           String,
+    initHash:           String,
+    containerHESetters: HESetters     = emptySetters) = {
     val editor = {
       fileType match {
-        case OMS   ⇒ new EditorPanelUI(treeNodeTabs, safePath, OMS, containerModifierSeq)
-        case SCALA ⇒ new EditorPanelUI(treeNodeTabs, safePath, SCALA, containerModifierSeq)
-        case _     ⇒ new EditorPanelUI(treeNodeTabs, safePath, NO_EXTENSION, containerModifierSeq)
+        case OMS   ⇒ new EditorPanelUI(treeNodeTabs, safePath, OMS, containerHESetters)
+        case SCALA ⇒ new EditorPanelUI(treeNodeTabs, safePath, SCALA, containerHESetters)
+        case _     ⇒ new EditorPanelUI(treeNodeTabs, safePath, NO_EXTENSION, containerHESetters)
       }
     }
     editor.setCode(initCode, initHash)
@@ -66,13 +65,11 @@ object EditorPanelUI {
   case class HighlightedFile(highlighter: String)
 }
 
-class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: FileExtension, containerModifierSeq: ModifierSeq) {
+class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: FileExtension, containerHESetters: HESetters) {
 
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-
+  val edDiv = div(idAttr := "editor")
   val editor = {
-    val edDiv = tags.div(id := "editor").render
-    val ed = ace.edit(edDiv)
+    val ed = ace.edit(edDiv.ref)
 
     js.Dynamic.global.ace.config.set("basePath", "js")
     js.Dynamic.global.ace.config.set("modePath", "js")
@@ -97,73 +94,78 @@ class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: Fi
       )
     )
 
-    def updateScrollTop = scrollTop.update(ed.renderer.getScrollTop)
+    def updateScrollTop = scrollTop.set(ed.renderer.getScrollTop)
 
     ed.getSession().on("change", (x) ⇒ {
-      changed.update(true)
+      changed.set(true)
       updateScrollTop
     })
 
-    ed.getSession().on("changeScrollTop", x ⇒ { updateScrollTop })
+    ed.getSession().on("changeScrollTop", x ⇒ {
+      updateScrollTop
+    })
 
     ed
   }
 
   var initialContentHash = ""
 
-  lazy val lineHeight = {
-    val h = Var(15)
-    h.trigger { v ⇒
-      editor.container.style.lineHeight = s"${v}px"
-      editor.container.style.fontSize = s"${v - 3}px"
-      editor.renderer.updateFontSize
-      ()
-    }
-    h
-  }
+  lazy val lineHeight = Var(15)
 
-  def fontDimension = lineHeight.now - 3
+  val lineHeightObserver = Observer[Int] { (i: Int) ⇒
+    editor.container.style.lineHeight = s"${i}px"
+    editor.container.style.fontSize = s"${i - 3}px"
+    editor.renderer.updateFontSize
+  }
 
   lazy val scrollTop = Var(0.0)
   lazy val changed = Var(false)
 
   def updateFont(lHeight: Int) = {
-    lineHeight.update(lHeight)
+    lineHeight.set(lHeight)
   }
 
-  val extension: FileExtension = FileExtension(safePath.name)
+  //val extension: FileExtension = FileExtension(treeNodeTab.safePathTab.now.name)
 
   lazy val view = {
-    div(editorContainer +++ container +++ containerModifierSeq)(
-      div(panelClass +++ panelDefault)(
-        div(panelBody)(
-          editor.container,
-          div(`class` := "gutterDecoration")(
-            Rx {
-              val scrollAsLines = scrollTop() / lineHeight()
-              val max = editor.renderer.getLastVisibleRow
+    div(editorContainer, container, containerHESetters,
+      div(panelClass, panelDefault,
+        div(
+          panelBody,
+          edDiv,
+          div(
+            cls := "gutterDecoration",
+            child <-- scrollTop.signal.combineWith(lineHeight.signal).map {
+              case (sTop, lHeight) ⇒
+                val scrollAsLines = sTop / lHeight
+                val max = editor.renderer.getLastVisibleRow
 
-              def isActive =
-                treeNodeTabs.isActive(safePath)() == TreeNodeTabs.Active
+                //                def isActive = {
+                //                  treeNodeTabs.isActive(safePath) == TreeNodeTabs.Active
+                //                }
 
-              if (extension == OMS && isActive) {
-                val errors = TreeNodeTabs.errors(treeNodeTabs, safePath)()
-
-                div(
-                  for {
-                    i ← errors.errorsInEditor.filter { e ⇒ e > scrollAsLines && e < max }
-                  } yield {
-                    errors.errorsFromCompiler.find(_.errorWithLocation.line == Some(i)).map { e ⇒
-                      e.errorWithLocation.line.map { l ⇒
-                        buildManualPopover(l, (i - scrollAsLines) * lineHeight() - (lineHeight() - 15), span(e.errorWithLocation.stackTrace), Popup.Right)
-                      }.getOrElse(div.render)
-                    }.getOrElse(div.render)
-                  }
-                )
-              }
-              else div("")
-
-            }).render
+                treeNodeTabs.tab(safePath).map { _.t } match {
+                  case Some(oms: TreeNodeTab.OMS) ⇒
+                    if (treeNodeTabs.isActive(safePath)) {
+                      div(
+                        children <--
+                          oms.errors.signal.map { es ⇒
+                            es.errorsInEditor.filter { e ⇒ e > scrollAsLines && e < max }.map { i ⇒
+                              es.errorsFromCompiler.find(_.errorWithLocation.line == Some(i)).map { e ⇒
+                                e.errorWithLocation.line.map { l ⇒
+                                  buildManualPopover(l, (i - scrollAsLines) * lHeight - (lHeight - 15), e.errorWithLocation.stackTrace, Popup.Right)
+                                }.getOrElse(div())
+                              }.getOrElse(div())
+                            }
+                          }
+                      )
+                    }
+                    else div()
+                  case _ ⇒ div()
+                }
+            },
+            lineHeight --> lineHeightObserver
+          )
         )
       )
     )
@@ -171,7 +173,9 @@ class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: Fi
 
   def aceDoc = editor.getSession().getDocument()
 
-  def code = editor.synchronized { (editor.getSession().getValue(), initialContentHash) }
+  def code = editor.synchronized {
+    (editor.getSession().getValue(), initialContentHash)
+  }
 
   def setCode(content: String, hash: String) = editor.synchronized {
     initialContentHash = hash
@@ -181,26 +185,25 @@ class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: Fi
   def setReadOnly(b: Boolean) = editor.setReadOnly(b)
 
   def buildManualPopover(line: Int, topPosition: Double, title: String, position: PopupPosition) = {
-    lazy val pop1 =
-      div(line)(`class` := "gutterError", fontSize := s"${fontDimension}px", top := topPosition, height := s"${lineHeight.now + 3}px", width := s"${lineHeight.now + 5}px",
-        backgroundColor := Rx {
-          if (changed()) "rgba(255,204,0)"
-          else "rgba(255,128,128)"
-        }
-      ).popover(
-          title,
-          position,
-          Manual
-        )
+    lazy val manualPopover: PopoverBuilder = div(line, cls := "gutterError",
+      fontSize <-- lineHeight.signal.map { lh ⇒ s"${lh - 3}px" },
+      top := topPosition.toString, height := s"${lineHeight.now + 3}px", width := s"${lineHeight.now + 5}px",
+      backgroundColor <-- changed.signal.map { c ⇒
+        if (c) "rgba(255,204,0)"
+        else "rgba(255,128,128)"
+      },
+      onClick --> { e ⇒
+        manualPopover.hide
+        manualPopover.toggle
+        e.stopPropagation
+      }
+    ).popover(
+        span(title),
+        position,
+        Manual
+      )
 
-    lazy val pop1Render = pop1.render
-
-    pop1Render.onclick = { (e: Event) ⇒
-      Popover.hide
-      Popover.toggle(pop1)
-      e.stopPropagation
-    }
-    pop1Render
+    div(manualPopover.render)
   }
 
 }

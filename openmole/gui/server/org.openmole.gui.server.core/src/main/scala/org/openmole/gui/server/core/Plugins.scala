@@ -44,19 +44,29 @@ object Plugins extends JavaLogger {
     val jsPluginDirectory = utils.webUIDirectory / "jsplugin"
     updateJsPluginDirectory(jsPluginDirectory)
 
-    val jsFile = workspace.persistentDir /> "webui" / utils.openmoleFileName
+    val webui = workspace.persistentDir /> "webui"
+    val jsFile = webui / utils.openmoleFileName
 
     def update = {
       Log.logger.info("Building GUI plugins ...")
       jsFile.delete
       JSPack.link(jsPluginDirectory, jsFile, optimizedJS)
+
+      Log.logger.info("Webpacking ...")
+      val webpackConfigTemplateLocation = GUIServer.webpackLocation / utils.webpackConfigTemplateName
+      val webpackJsonPackage = GUIServer.webpackLocation / utils.webpackJsonPackage
+      val webpackOutput = webui / utils.webpakedOpenmoleFileName
+
+      JSPack.webpack(jsFile, webpackJsonPackage, webpackConfigTemplateLocation, webpackOutput)
+
     }
 
     (jsPluginDirectory / "optimized_mode").content = optimizedJS.toString
 
     if (!jsFile.exists) update
     else utils.updateIfChanged(jsPluginDirectory) { _ ⇒ update }
-    jsFile
+
+    (jsFile, webui / utils.webpakedOpenmoleFileName)
   }
 
   def expandDepsFile(template: File, to: File) = {

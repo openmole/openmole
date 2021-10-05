@@ -2,7 +2,7 @@ package org.openmole.gui.client.tool.plot
 
 import org.openmole.plotlyjs._
 import org.openmole.plotlyjs.PlotlyImplicits._
-import scalatags.JsDom.all._
+import com.raquo.laminar.api.L._
 
 case class BasePlot(
   title:   String        = "",
@@ -58,7 +58,7 @@ object Plot {
     def name = "Heat map"
   }
 
-  def baseDiv = div.render
+  def baseDiv = div()
 
   val baseConfig = Config
     .displayModeBar(false)

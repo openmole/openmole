@@ -156,10 +156,6 @@ lazy val netlogo6 = OsgiProject(
     "net.lingala.zip4j" % "zip4j" % "1.3.2" % "provided"
   ), version := netLogo6Version, scalaVersion := "2.12.8", crossPaths := false) settings(settings: _*) 
 
-lazy val rx = OsgiProject(dir, "rx", exports = Seq("rx.*")) settings(
-  libraryDependencies ++= Seq("com.lihaoyi" %% "scalarx" % rxVersion),
-  version := rxVersion) settings(settings: _*)
-
 /*lazy val scalajsTools = OsgiProject(dir, "scalajs-tools", exports = Seq("scala.scalajs.*", "org.scalajs.core.tools.*", "org.scalajs.core.ir.*", "com.google.javascript.*", "com.google.common.*", "rhino_ast.java.com.google.javascript.rhino.*", "com.google.gson.*", "com.google.debugging.sourcemap.*", "org.json.*", "java7compat.nio.charset.*", "com.google.protobuf.*")) settings(
   libraryDependencies += "org.scala-js" %% "scalajs-tools" % scalajsVersion, version := scalajsVersion) settings(settings: _*)*/
 

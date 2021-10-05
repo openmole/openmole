@@ -17,10 +17,8 @@
  */
 package org.openmole.gui.ext.data
 
-import org.scalajs.dom.raw.HTMLElement
-
+import com.raquo.laminar.api.L._
 import scala.concurrent.Future
-import scalatags.JsDom.TypedTag
 
 sealed trait GUIPlugin
 
@@ -28,7 +26,7 @@ trait AuthenticationPlugin extends GUIPlugin {
   type AuthType <: AuthenticationData
   def data: AuthType
   def factory: AuthenticationPluginFactory
-  def panel: TypedTag[HTMLElement]
+  def panel: HtmlElement
   def save(onsave: () ⇒ Unit): Unit
   def remove(onremoved: () ⇒ Unit): Unit
   def test: Future[Seq[Test]]
@@ -47,7 +45,7 @@ trait AuthenticationPluginFactory extends GUIPluginFactory {
 
 trait WizardGUIPlugin extends GUIPlugin {
   def factory: WizardPluginFactory
-  val panel: TypedTag[HTMLElement]
+  val panel: HtmlElement
 
   def save(
     target:         SafePath,
@@ -67,7 +65,7 @@ trait WizardPluginFactory extends GUIPluginFactory {
 }
 
 trait MethodAnalysisPlugin extends GUIPlugin {
-  def panel(safePath: SafePath, services: PluginServices): TypedTag[HTMLElement]
+  def panel(safePath: SafePath, services: PluginServices): HtmlElement
 }
 
 case class PluginServices(errorManager: ErrorManager)

@@ -22,40 +22,39 @@ import scaladget.tools._
 
 import org.scalajs.dom.raw.HTMLFormElement
 import org.openmole.gui.ext.client._
-import scalatags.JsDom.all._
-import scalatags.JsDom.tags
+import com.raquo.laminar.api.L._
+
 class ResetPassword {
 
-  val passwordInput = inputTag("")(
+  val passwordInput = inputTag("").amend(
     placeholder := "Password",
     `type` := "password",
     width := "130px",
-    marginBottom := 15,
+    marginBottom := "15",
     name := "password",
-    autofocus := true
-  ).render
+    onMountFocus
+  )
 
   val passwordAgainInput =
-    inputTag("")(
+    inputTag("").amend(
       placeholder := "Password again",
       `type` := "password",
       width := "130px",
       name := "passwordagain",
-      autofocus
-    ).render
+    )
 
-  lazy val resetButton = tags.button("Set password", btn_primary +++ (marginTop := 15), `type` := "submit").render
+  lazy val resetButton = button("Set password", btn_primary, marginTop := "15", `type` := "submit")
 
-  def setPasswordForm: HTMLFormElement =
-    tags.form(
+  def setPasswordForm =
+    form(
       method := "post",
       passwordInput,
       passwordAgainInput,
       resetButton
-    ).render
+    )
 
   val resetPassDiv =
-    div(omsheet.connectionTabOverlay)(
+    div(omsheet.connectionTabOverlay,
       div(
         img(src := "img/openmole.png", omsheet.openmoleLogo),
         div(

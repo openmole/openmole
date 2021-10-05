@@ -26,21 +26,17 @@ import org.openmole.gui.ext.client._
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
 import org.openmole.gui.client.core.CoreUtils._
 import org.openmole.gui.ext.data._
 import Waiter._
 import autowire._
 import org.openmole.gui.client.core.files.TreeNodeManager
-import rx._
-import scalatags.JsDom.tags
-import scalatags.JsDom.all._
+
+import com.raquo.laminar.api.L._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.client.InputFilter
 
 class MarketPanel(manager: TreeNodeManager) {
-
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
   private val marketIndex: Var[Option[MarketIndex]] = Var(None)
   val tagFilter = InputFilter(pHolder = "Filter")
@@ -52,118 +48,124 @@ class MarketPanel(manager: TreeNodeManager) {
   }.getOrElse(Seq()))
   val overwriteAlert: Var[Option[MarketIndexEntry]] = Var(None)
 
+  overwriteAlert.signal.combineWith(manager.current.signal).map {
+    case (oAlert, current) ⇒
+      oAlert match {
+        case Some(e: MarketIndexEntry) ⇒
+          panels.alertPanel.string(
+            e.name + " already exists. Overwrite ? ",
+            () ⇒ {
+              overwriteAlert.set(None)
+              deleteFile(current ++ e.name, e)
+            }, () ⇒ {
+              overwriteAlert.set(None)
+            }, CenterPagePosition
+          )
+          div
+        case _ ⇒
+      }
+  }
+
   lazy val marketTable = div(
-    paddingTop := 20,
-    Rx {
-      tagFilter.nameFilter()
-      marketIndex().map { mindex ⇒
-        for {
-          entry ← mindex.entries if tagFilter.exists(entry.tags :+ entry.name)
-        } yield {
-          val isSelected = Some(entry) == selectedEntry()
-          Seq(
-            div(omsheet.docEntry)(
-              div(colMD(3) +++ (paddingTop := 7))(
-                tags.a(entry.name, cursor := "pointer", omsheet.color(omsheet.WHITE), onclick := { () ⇒
-                  selectedEntry() = {
-                    if (isSelected) None
-                    else Some(entry)
-                  }
-                })
-              ),
-              div(colMD(2))(downloadButton(entry, () ⇒ {
-                exists(manager.current.now ++ entry.name, entry)
-              })),
-              div(colMD(7) +++ (paddingTop := 7))(
-                entry.tags.map { e ⇒ tags.label(e)(label_primary +++ omsheet.tableTag) }
-              ), tags.div(
-                if (isSelected) omsheet.docEntry else emptyMod,
-                selectedEntry().map { se ⇒
-                  if (isSelected) div(ms("mdRendering"))(paddingTop := 40)(
-                    RawFrag(entry.readme.getOrElse(""))
-                  )(colspan := 12)
-                  else tags.div()
-                }
+    paddingTop := "20",
+    children <-- tagFilter.nameFilter.signal.combineWith(marketIndex.signal).combineWith(selectedEntry.signal).map {
+      case (_, marketIndex, sEntry) ⇒
+        marketIndex.map { mindex ⇒
+          mindex.entries.filter { e ⇒ tagFilter.exists(e.tags :+ e.name) }.flatMap { entry ⇒
+            val isSelected = Some(entry) == sEntry
+            Seq(
+              div(
+                omsheet.docEntry,
+                div(colBS(3), (paddingTop := "7"),
+                  a(entry.name, cursor := "pointer", color := omsheet.WHITE,
+                    onClick --> { _ ⇒
+                      selectedEntry.set(
+                        if (isSelected) None
+                        else Some(entry)
+                      )
+                    })
+                ),
+                div(
+                  colBS(2),
+                  downloadButton(entry, () ⇒ {
+                    exists(manager.current.now ++ entry.name, entry)
+                  })),
+                div(colBS(7), (paddingTop := "7"),
+                  label(entry.name, badge_primary, omsheet.tableTag)
+                ),
+                div(
+                  if (isSelected)
+                    omsheet.docEntry else emptyMod,
+                  sEntry.map { se ⇒
+                    if (isSelected) div(cls := "mdRendering", paddingTop := "40", se.readme, colSpan := 12)
+                    else div()
+                  }.getOrElse(div())
+                )
               )
             )
-          )
-        }.render
-      }
+          }
+        }.getOrElse(Seq())
     }
   )
 
   def exists(sp: SafePath, entry: MarketIndexEntry) =
     Post()[Api].exists(sp).call().foreach { b ⇒
-      if (b) overwriteAlert() = Some(entry)
+      if (b) overwriteAlert.set(Some(entry))
       else download(entry)
     }
 
   def download(entry: MarketIndexEntry) = {
     val path = manager.current.now ++ entry.name
-    downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processing())))
+    downloading.set(downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processing()))))
     Post()[Api].getMarketEntry(entry, path).call().foreach { d ⇒
-      downloading() = downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processed())))
-      downloading.now.headOption.foreach(_ ⇒ dialog.hide)
+      downloading.update(d ⇒ d.updatedFirst(_._1 == entry, (entry, Var(Processed()))))
+      downloading.now.headOption.foreach(_ ⇒ modalDialog.hide)
       panels.treeNodePanel.refreshAndDraw
     }
   }
 
-  def downloadButton(entry: MarketIndexEntry, todo: () ⇒ Unit = () ⇒ {}) = downloading.map {
-    _.find {
-      _._1 == entry
-    }.map {
-      case (e, state: Var[ProcessState]) ⇒
-        state.withTransferWaiter { _ ⇒
-          if (selectedEntry.now == Some(e)) buttonIcon(" Download", btn_danger, glyph_download_alt, todo) else tags.div()
-        }
-      case _ ⇒ tags.div()
-    }.getOrElse(tags.div())
-  }
+  def downloadButton(entry: MarketIndexEntry, todo: () ⇒ Unit = () ⇒ {}) = div()
+
+  //    downloading.signal.map {
+  //    _.find {
+  //      _._1 == entry
+  //    }.map {
+  //      case (e, state: Var[ProcessState]) ⇒
+  //        state.withTransferWaiter { _ ⇒
+  //          if (selectedEntry.now == Some(e)) glyphSpan(Seq(btn_danger, glyph_download_alt), onClick --> { _ ⇒ todo() }).amend("Download") else div()
+  //        }
+  //      case _ ⇒ div()
+  //    }.getOrElse(div())
+  //}
 
   def deleteFile(sp: SafePath, marketIndexEntry: MarketIndexEntry) =
     Post()[Api].deleteFile(sp, ServerFileSystemContext.project).call().foreach { d ⇒
       download(marketIndexEntry)
     }
 
-  val dialog = ModalDialog(
+  val marketHeader = span(b("Market place"))
+
+  val marketBody = div(
+    tagFilter.tag,
+    marketTable
+  )
+
+  val marketFooter = closeButton("Close", () ⇒ modalDialog.hide).amend(btn_secondary)
+
+  lazy val modalDialog: ModalDialog = ModalDialog(
+    marketHeader,
+    marketBody,
+    marketFooter,
     omsheet.panelWidth(92),
     onopen = () ⇒ {
       marketIndex.now match {
         case None ⇒ Post()[Api].marketIndex.call().foreach { m ⇒
-          marketIndex() = Some(m)
+          marketIndex.set(Some(m))
         }
         case _ ⇒
       }
-    }
+    },
+    onclose = () ⇒ {}
   )
-
-  dialog.header(
-    tags.span(tags.b("Market place"))
-  )
-
-  dialog.body({
-    Rx {
-      overwriteAlert() match {
-        case Some(e: MarketIndexEntry) ⇒
-          panels.alertPanel.string(
-            e.name + " already exists. Overwrite ? ",
-            () ⇒ {
-              overwriteAlert() = None
-              deleteFile(manager.current() ++ e.name, e)
-            }, () ⇒ {
-              overwriteAlert() = None
-            }, CenterPagePosition
-          )
-          tags.div
-        case _ ⇒
-      }
-    }
-    tags.div(
-      tagFilter.tag,
-      marketTable
-    )
-  })
-
-  dialog.footer(ModalDialog.closeButton(dialog, btn_default, "Close"))
 
 }

@@ -18,19 +18,18 @@ package org.openmole.gui.ext.data
  */
 
 import org.scalajs.dom.raw._
-import scalatags.JsDom._
-import scalatags.JsDom.tags
+import com.raquo.laminar.api.L._
 
 object PanelUI {
   def empty = new PanelUI {
-    val view = tags.div
+    val view = div()
 
     def save(onsave: () ⇒ Unit) = {}
   }
 }
 
 trait PanelUI {
-  def view: TypedTag[HTMLElement]
+  def view: HtmlElement
 
   def save(onsave: () ⇒ Unit = () ⇒ {}): Unit
 }

@@ -1,9 +1,6 @@
 package org.openmole.gui.client.core
 
-import org.scalajs.dom.raw.HTMLDivElement
-
-import scalatags.JsDom.{ TypedTag, tags }
-import scalatags.JsDom.all._
+import com.raquo.laminar.api.L._
 import scaladget.bootstrapnative.bsn._
 
 /*
@@ -23,18 +20,17 @@ import scaladget.bootstrapnative.bsn._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class DivPanel(title: String, div: TypedTag[HTMLDivElement]) {
+class DivPanel(title: String, div: HtmlElement) {
 
   def open = dialog.show
 
-  val dialog = ModalDialog()
-
-  dialog.header(
-    tags.span(tags.b(title))
+  val dialog: ModalDialog = ModalDialog(
+    span(b(title)),
+    div,
+    closeButton("Close", () ⇒ {}),
+    emptySetters,
+    () ⇒ {},
+    () ⇒ {}
   )
-
-  dialog.body(div)
-
-  dialog.footer(ModalDialog.closeButton(dialog, btn_default, "Close"))
 
 }

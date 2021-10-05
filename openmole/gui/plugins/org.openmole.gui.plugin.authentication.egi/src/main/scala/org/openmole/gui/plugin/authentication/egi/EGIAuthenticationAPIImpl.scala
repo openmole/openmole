@@ -61,7 +61,7 @@ class EGIAuthenticationAPIImpl(s: Services) extends EGIAuthenticationAPI {
       EGIAuthentication.update(a, test = false)
     }
 
-  def removeAuthentication = EGIAuthentication.clear
+  def removeAuthentication() = EGIAuthentication.clear
 
   // To be used for ssh private key
   def deleteAuthenticationKey(keyName: String): Unit = authenticationFile(keyName).delete

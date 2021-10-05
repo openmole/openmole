@@ -26,12 +26,10 @@ import scaladget.tools._
 import autowire._
 import org.openmole.gui.ext.client
 import org.scalajs.dom.raw.HTMLElement
-import scaladget.bootstrapnative.{ ToggleButton }
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
-import scalatags.JsDom.TypedTag
-import scalatags.JsDom.all._
+import com.raquo.laminar.api.L._
 import scala.scalajs.js
 
 object TopLevelExports {
@@ -60,15 +58,16 @@ class NetlogoWizardGUI extends WizardGUIPlugin {
 
   def factory = new NetlogoWizardFactory
 
-  lazy val embedWorkspaceToggle: ToggleButton = toggle(false, "Yes", "No")
+  val yes = ToggleState("Yes", btn_primary_string, () ⇒ {})
+  val no = ToggleState("No", btn_secondary_string, () ⇒ {})
 
-  lazy val panel: TypedTag[HTMLElement] = div(
+  lazy val embedWorkspaceToggle = toggle(yes, true, no, () ⇒ {})
+
+  lazy val panel =
     hForm(
-      div(embedWorkspaceToggle.render)
-        .render.withLabel("embedWorkspace")
-    ),
-    div(client.modelHelp +++ client.columnCSS, "If your NetLogo script contains several files (.nls files) or depends on plugins, you should upload an archive (tar.gz or tgz) containing the entire root workspace. Then, set the embedWorkspace option to true.")
-  )
+      embedWorkspaceToggle.element.withLabel("embedWorkspace"),
+      div(client.modelHelp, client.columnCSS, "If your NetLogo script contains several files (.nls files) or depends on plugins, you should upload an archive (tar.gz or tgz) containing the entire root workspace. Then, set the embedWorkspace option to true.")
+    )
 
   def save(
     target:         SafePath,
@@ -86,5 +85,5 @@ class NetlogoWizardGUI extends WizardGUIPlugin {
       outputs,
       libraries,
       resources,
-      NetlogoWizardData(embedWorkspaceToggle.position.now)).call()
+      NetlogoWizardData(embedWorkspaceToggle.toggled.now)).call()
 }

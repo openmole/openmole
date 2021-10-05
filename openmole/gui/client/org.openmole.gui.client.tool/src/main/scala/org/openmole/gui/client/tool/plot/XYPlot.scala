@@ -1,11 +1,10 @@
 package org.openmole.gui.client.tool.plot
 
 import org.openmole.plotlyjs._
-import org.openmole.plotlyjs.all._
 import org.openmole.plotlyjs.PlotlyImplicits._
 import scala.scalajs.js.JSConverters._
-import scala.scalajs._
-import scalatags.JsDom.all._
+
+import com.raquo.laminar.api.L._
 
 object XYPlot {
 
@@ -23,7 +22,7 @@ object XYPlot {
     val nbDims = plotter.toBePlotted.indexes.length
 
     nbDims match {
-      case _ if nbDims < 1 ⇒ div.render
+      case _ if nbDims < 1 ⇒ div()
       case _ ⇒
 
         val data = serie.yValues.map { y ⇒
@@ -33,13 +32,13 @@ object XYPlot {
         }.toJSArray
 
         Plotly.newPlot(
-          plotDiv,
+          plotDiv.ref,
           data,
           Plot.baseLayout(title).width(800),
           Plot.baseConfig
         )
 
-        div(plotDiv.render).render
+        plotDiv
     }
 
   }

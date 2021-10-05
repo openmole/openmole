@@ -18,9 +18,8 @@ package org.openmole.gui.ext.client
  */
 
 import org.scalajs.dom.Event
-import rx._
 import scaladget.bootstrapnative.bsn._
-import scalatags.JsDom.all._
+import com.raquo.laminar.api.L._
 
 object InputFilter {
   def apply(initValue: String = "", pHolder: String = "Filter", size: String = "100%") = new InputFilter(initValue, pHolder, size)
@@ -29,23 +28,19 @@ object InputFilter {
 class InputFilter(initValue: String, pHolder: String, size: String = "100%") {
   val nameFilter: Var[String] = Var("")
 
-  val tag = inputTag(
-    initValue
-  )(
-    value := initValue,
+  val tag = inputTag(initValue).amend(
     placeholder := pHolder,
     width := size,
-    autofocus
-  ).render
-
-  tag.oninput = (e: Event) ⇒ nameFilter() = tag.value
+    onMountFocus,
+    inContext { node ⇒ onInput --> { _ ⇒ nameFilter.set(node.ref.value) } }
+  )
 
   def contains(st: String) = st.toUpperCase.contains(nameFilter.now.toUpperCase)
 
   def exists(seqString: Seq[String]) = seqString.exists(contains)
 
   def clear = {
-    tag.value = ""
-    nameFilter() = ""
+    tag.ref.value = ""
+    nameFilter.set("")
   }
 }

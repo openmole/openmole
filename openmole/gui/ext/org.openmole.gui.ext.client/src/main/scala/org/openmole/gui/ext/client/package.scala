@@ -23,16 +23,15 @@ import org.openmole.gui.ext.data.ExecutionInfo
 
 import org.scalajs.dom
 
-import scalatags.JsDom.all._
-import scalatags.JsDom.{ styles, svgAttrs }
+import com.raquo.laminar.api.L._
 
 package object client {
 
   lazy val omsheet = this
 
   //GENERAL
-  lazy val grey: ModifierSeq = Seq(
-    color("grey")
+  lazy val grey = Seq(
+    color := "grey"
   )
 
   lazy val BLUE = "#3086b5"
@@ -51,336 +50,332 @@ package object client {
 
   lazy val WHITE = "white"
 
-  lazy val textCenter = ms("text-center")
-  lazy val textLeft = ms("text-left")
-  lazy val textRight = ms("text-right")
-  lazy val textJustify = ms("text-justify")
-  lazy val textNoWrap = ms("text-nowrap")
+  lazy val textCenter = cls("text-center")
+  lazy val textLeft = cls("text-left")
+  lazy val textRight = cls("text-right")
+  lazy val textJustify = cls("text-justify")
+  lazy val textNoWrap = cls("text-nowrap")
 
-  lazy val tableTag: ModifierSeq = Seq(
-    marginLeft := 3,
-    fontSize := 14,
+  lazy val tableTag = Seq(
+    marginLeft := "3",
+    fontSize := "14",
     relativePosition,
-    top := 4
+    top := "4"
   )
 
-  def color(col: String): ModifierSeq = styles.color := col
-
-  def bold(col: String): ModifierSeq = bold +++ (color(col))
-
-  val bold: ModifierSeq = Seq(
+  val bold = Seq(
     fontWeight := "bold"
   )
 
   val giFontFamily = fontFamily := "gi"
 
-  lazy val relativePosition: ModifierSeq = position := "relative"
+  lazy val relativePosition = position := "relative"
 
-  lazy val absolutePosition: ModifierSeq = position := "absolute"
+  lazy val absolutePosition = position := "absolute"
 
-  lazy val fixedPosition: ModifierSeq = position := "fixed"
+  lazy val fixedPosition = position := "fixed"
 
-  lazy val centerElement: ModifierSeq = Seq(
+  lazy val centerElement = Seq(
     display := "flex",
     justifyContent := "center",
     //margin := "0 auto",
-    color(LIGHT_GREY)
+    color := LIGHT_GREY
   )
 
-  lazy val centerFileToolBar: ModifierSeq = Seq(
+  lazy val centerFileToolBar = Seq(
     display := "table",
     margin := "0 auto",
-    color(LIGHT_GREY)
+    color := LIGHT_GREY
   )
 
-  lazy val shutdown: ModifierSeq = Seq(
-    color(DARK_GREY),
+  lazy val shutdown = Seq(
+    color := DARK_GREY,
     fontStyle := "italic",
-    paddingTop := 40,
-    marginLeft := -25
+    paddingTop := "40",
+    marginLeft := "-25"
   )
   // SCRIPT CLIENT
-  lazy val mainNav0: ModifierSeq = Seq(
-    paddingLeft := 0,
+  lazy val mainNav0 = Seq(
+    paddingLeft := "0",
     borderColor := DARK_GREY,
-    zIndex := 10,
-    paddingRight := 40
+    zIndex := "10",
+    paddingRight := "40"
   )
 
-  lazy val mainNav370: ModifierSeq = Seq(
-    paddingLeft := 370,
+  lazy val mainNav370 = Seq(
+    paddingLeft := "370",
     borderColor := DARK_GREY,
-    zIndex := 10,
-    paddingRight := 40
+    zIndex := "10",
+    paddingRight := "40"
   )
 
-  lazy val mainNav: ModifierSeq = Seq(
-    left := 370,
-    fontSize := 20
+  lazy val mainNav = Seq(
+    left := "370",
+    fontSize := "20"
   )
-  lazy val connectionTabOverlay: ModifierSeq = Seq(
+  lazy val connectionTabOverlay = Seq(
     background := "white none repeat scroll 0 0",
-    color(WHITE),
+    color := WHITE,
     height := "100%",
-    styles.left := 0,
+    left := "0",
     absolutePosition,
     width := "100%",
     zIndex := 1100,
-    top := 0
+    top := "0"
   )
 
-  lazy val openmoleLogo: ModifierSeq = Seq(
+  lazy val openmoleLogo = Seq(
     fixedPosition,
-    width := 600,
-    top := -30,
+    width := "600",
+    top := "-30",
     zIndex := "-1",
-    styles.right := "calc(50% - 250px)"
+    right := "calc(50% - 250px)"
   )
 
-  lazy val displayOff: ModifierSeq = Seq(
+  lazy val displayOff = Seq(
     display := "none"
   )
 
-  lazy val fullpanel: ModifierSeq = Seq(
+  lazy val fullpanel = Seq(
     height := "100%",
     width := "100%"
   )
 
-  lazy val panelReduce: ModifierSeq = Seq(
-    styles.left := 330,
-    paddingRight := 340,
+  lazy val panelReduce = Seq(
+    left := "330",
+    paddingRight := "340",
     fixedPosition,
-    top := 70,
+    top := "70",
     transition := "all 0.1 s ease - out 0 s",
     width := "99%",
     height := "calc (100 % -140 px)"
   )
 
-  lazy val panelOpen: ModifierSeq = Seq(
-    styles.left := 0
+  lazy val panelOpen = Seq(
+    left := "0"
   )
 
-  lazy val centerpanel: ModifierSeq = Seq(
+  lazy val centerpanel = Seq(
     height := "89%",
-    paddingLeft := 15,
-    paddingRight := 15,
+    paddingLeft := "15",
+    paddingRight := "15",
     relativePosition,
-    top := 30,
+    top := "30",
     width := "100%"
   )
 
-  lazy val leftpanel: ModifierSeq = Seq(
+  lazy val leftpanel = Seq(
     background := s"$DARK_GREY none repeat scroll 0 0",
     height := "100%",
-    styles.left := -320,
+    left := "-320",
     opacity := 1,
     overflowY := "auto",
-    paddingLeft := 7,
+    paddingLeft := "7",
     absolutePosition,
-    top := 37,
+    top := "37",
     transition := "all 0.1 s ease - out 0 s",
-    width := 320
+    width := "320"
   )
 
-  lazy val logoVersion: ModifierSeq = Seq(
-    width := 200,
+  lazy val logoVersion = Seq(
+    width := "200",
     position := "fixed",
-    bottom := 0,
-    styles.right := 50,
-    zIndex := -2
+    bottom := "0",
+    right := "50",
+    zIndex := "-2"
   )
 
-  lazy val resetBlock: ModifierSeq = Seq(
-    pointer,
+  lazy val resetBlock = Seq(
+    cursor.pointer,
     relativePosition,
-    floatRight,
-    right := -30,
-    top := 20,
+    float.right,
+    right := "-30",
+    top := "20",
     zIndex := 1101,
-    fontSize := 22,
-    color(BLUE)
+    fontSize := "22",
+    color := BLUE
   )
 
-  lazy val settingsBlock: ModifierSeq = Seq(
-    paddingTop := 8,
-    color(BLUE)
+  lazy val settingsBlock = Seq(
+    paddingTop := "8",
+    color := BLUE
   )
 
-  lazy val closeBanner: ModifierSeq = Seq(
-    floatRight,
-    pointer,
+  lazy val closeBanner = Seq(
+    float.right,
+    cursor.pointer,
     relativePosition,
-    top := 18,
-    zIndex := 10,
-    paddingRight := 15,
-    fontSize := 20
+    top := "18",
+    zIndex := "10",
+    paddingRight := "15",
+    fontSize := "20"
   )
 
-  lazy val fixed: ModifierSeq = Seq(
+  lazy val fixed = Seq(
     fixedPosition,
     width := "100%"
   )
 
-  lazy val absoluteFullWidth: ModifierSeq = Seq(
+  lazy val absoluteFullWidth = Seq(
     absolutePosition,
     width := "100%"
   )
 
-  lazy val shutdownButton: ModifierSeq = Seq(
-    fontSize := 12,
+  lazy val shutdownButton = Seq(
+    fontSize := "12",
     verticalAlign := "middle",
-    marginLeft := 10,
+    marginLeft := "10",
     zIndex := 1101
   )
 
-  lazy val settingsItemStyle: ModifierSeq = Seq(
-    fontSize := 12,
-    color(DARK_GREY),
-    pointer
+  lazy val settingsItemStyle = Seq(
+    fontSize := "12",
+    color := DARK_GREY,
+    cursor.pointer
   )
 
-  lazy val connectionBlock: ModifierSeq = Seq(
+  lazy val connectionBlock = Seq(
     display := "inline-block",
     textAlign := "right",
     float := "right",
-    marginRight := 15
+    marginRight := "15"
   )
 
-  lazy val textVersion: ModifierSeq = Seq(
-    color("grey"),
+  lazy val textVersion = Seq(
+    color := "grey",
     position := "fixed",
     textAlign := "center",
-    right := 27,
+    right := "27",
     zIndex := -1,
-    bottom := 5
+    bottom := "5"
   )
 
   //TREENODE PANEL
-  lazy val fileInfo: ModifierSeq = Seq(
+  lazy val fileInfo = Seq(
     absolutePosition,
-    width := 120,
-    right := 2,
-    marginTop := 6,
+    width := "120",
+    right := "2",
+    marginTop := "6",
     textAlign := "right"
   )
 
-  lazy val fileSize: ModifierSeq = Seq(
-    color("lightgray"),
-    fontSize := 10
+  lazy val fileSize = Seq(
+    color := "lightgray",
+    fontSize := "10"
   )
 
-  lazy val file: ModifierSeq = Seq(
-    color(WHITE),
+  lazy val file = Seq(
+    color := WHITE,
     display := "inline-block",
-    height := 20,
+    height := "20",
     textDecoration := "none"
   )
 
-  lazy val dir: ModifierSeq = Seq(
+  lazy val dir = Seq(
     backgroundColor := BLUE,
-    color(WHITE),
+    color := WHITE,
     display := "inline-block",
-    height := 20,
-    marginBottom := 3,
-    marginTop := 2,
-    marginLeft := 1,
-    padding := 2,
-    width := 20,
+    height := "20",
+    marginBottom := "3",
+    marginTop := "2",
+    marginLeft := "1",
+    padding := "2",
+    width := "20",
     borderRadius := "4px"
   )
 
-  lazy val fileNameOverflow: ModifierSeq = Seq(
-    color(WHITE),
+  lazy val fileNameOverflow = Seq(
+    color := WHITE,
     whiteSpace := "nowrap",
     overflow := "hidden",
-    pointer,
-    width := 245,
+    cursor.pointer,
+    width := "245",
     textOverflow := "ellipsis"
   )
 
-  lazy val fileIcon: ModifierSeq = Seq(
-    paddingLeft := 5,
-    paddingTop := 3,
-    fontSize := 8,
-    marginBottom := -16,
+  lazy val fileIcon = Seq(
+    paddingLeft := "5",
+    paddingTop := "3",
+    fontSize := "8",
+    marginBottom := "-16",
     zIndex := 2
   )
 
-  lazy val divAlertPosition: ModifierSeq = Seq(
-    floatRight,
-    marginRight := 70,
-    marginTop := 20
+  lazy val divAlertPosition = Seq(
+    float.right,
+    marginRight := "70",
+    marginTop := "20"
   )
 
-  lazy val treeprogress: ModifierSeq = Seq(
-    marginTop := 20,
+  lazy val treeprogress = Seq(
+    marginTop := "20",
     width := "100%"
   )
 
-  lazy val message: ModifierSeq = Seq(
-    color("#999"),
+  lazy val message = Seq(
+    color := "#999",
     fontStyle := "italic",
-    marginLeft := 25,
-    marginTop := 38
+    marginLeft := "25",
+    marginTop := "38"
   )
 
-  lazy val fileSelectionOverlay: ModifierSeq = Seq(
-    right := 0,
-    pointer,
-    width := 360,
-    height := 24,
-    marginLeft := -5,
-    marginBottom := 1,
+  lazy val fileSelectionOverlay = Seq(
+    right := "0",
+    cursor.pointer,
+    width := "360",
+    height := "24",
+    marginLeft := "-5",
+    marginBottom := "1",
     borderRadius := "2px"
   )
 
-  lazy val fileSelected: ModifierSeq = Seq(
+  lazy val fileSelected = Seq(
     backgroundColor := "#a6bf26"
-  ) +++ fileSelectionOverlay
+  ) ++ fileSelectionOverlay
 
-  lazy val fileSelectedForDeletion: ModifierSeq = Seq(
+  lazy val fileSelectedForDeletion = Seq(
     backgroundColor := "#d9534f"
-  ) +++ fileSelectionOverlay
+  ) ++ fileSelectionOverlay
 
-  lazy val fileSelectionMessage: ModifierSeq = Seq(
-    floatRight,
-    padding := 4,
-    fontSize := 13,
-    right := 6,
-    color(WHITE)
+  lazy val fileSelectionMessage = Seq(
+    float.right,
+    padding := "4",
+    fontSize := "13",
+    right := "6",
+    color := WHITE
   )
 
-  lazy val pasteLabel: ModifierSeq = Seq(
+  lazy val pasteLabel = Seq(
     relativePosition,
-    top := 30,
-    pointer,
-    paddingBottom := 7
+    top := "30",
+    cursor.pointer,
+    paddingBottom := "7"
   )
 
-  lazy val moreEntries: ModifierSeq = Seq(
+  lazy val moreEntries = Seq(
     backgroundColor := WHITE,
-    margin := 10,
+    margin := "10",
     borderRadius := "3px",
     textAlign := "center"
   )
 
-  lazy val moreEntriesText: ModifierSeq = Seq(
-    color("#444"),
-    fontSize := 12,
+  lazy val moreEntriesText = Seq(
+    color := "#444",
+    fontSize := "12",
     fontStyle := "italic",
-    padding := 7
+    padding := "7"
   )
 
   //TREENODE TABS
 
-  lazy val tabContent: ModifierSeq = Seq(
-    marginTop := -1,
+  lazy val tabContent = Seq(
+    marginTop := "-1",
     relativePosition,
     width := "100%"
   )
 
-  lazy val playTabOverlay: ModifierSeq = Seq(
-    color(WHITE),
+  lazy val playTabOverlay = Seq(
+    color := WHITE,
     height := "100%",
     absolutePosition,
     width := "100%",
@@ -388,474 +383,474 @@ package object client {
     opacity := 0.9,
     width := "100%",
     zIndex := 10,
-    bottom := 3,
+    bottom := "3",
     borderBottomLeftRadius := "5px",
     borderBottomRightRadius := "5px",
     borderTopRightRadius := "5px"
   )
 
-  lazy val overlayElement: ModifierSeq = Seq(
+  lazy val overlayElement = Seq(
     absolutePosition,
     width := "100%",
-    color(WHITE),
-    paddingTop := 100,
-    fontSize := 25,
+    color := WHITE,
+    paddingTop := "100",
+    fontSize := "25",
     zIndex := 25,
     textAlign := "center"
   )
 
-  lazy val executionTable: ModifierSeq = Seq(
+  lazy val executionTable = Seq(
     backgroundColor := DARK_GREY,
-    color(WHITE)
+    color := WHITE
   )
 
-  lazy val monospace: ModifierSeq = fontFamily := "monospace"
+  lazy val monospace = fontFamily := "monospace"
 
-  def fileList: ModifierSeq = {
+  def fileList = {
     Seq(
-      height := dom.window.innerHeight - 230, //nbElements * 21, //  <-- Select the height of the body
+      height := (dom.window.innerHeight - 230).toString, //nbElements * 21, //  <-- Select the height of the body
       absolutePosition,
-      fontSize := 14,
+      fontSize := "14",
       listStyleType := "none",
-      marginTop := 50,
-      paddingTop := 5,
-      marginLeft := -7,
-      paddingLeft := 10,
-      width := 370,
+      marginTop := "50",
+      paddingTop := "5",
+      marginLeft := "-7",
+      paddingLeft := "10",
+      width := "370",
       overflowY := "auto",
       overflowX := "hidden"
     )
   }
 
-  lazy val tabClose: ModifierSeq = Seq(
+  lazy val tabClose = Seq(
     relativePosition,
-    fontSize := 17,
-    right := -7
+    fontSize := "17",
+    right := "-7"
   )
 
   //EDITOR
-  lazy val editorContainer: ModifierSeq = Seq(
-    padding := 0,
+  lazy val editorContainer = Seq(
+    padding := "0",
     relativePosition,
     height := "100%",
     width := "100%"
   )
 
-  lazy val activeTab: ModifierSeq = Seq(
+  lazy val activeTab = Seq(
     backgroundColor := FUN_GREY,
     bold
   )
 
-  lazy val unActiveTab: ModifierSeq = Seq(
+  lazy val unActiveTab = Seq(
     border := s"1px solid $VERY_LIGHT_GREY"
   )
 
   //PANELS
-  def panelWidth(ratio: Int): ModifierSeq = Seq(
+  def panelWidth(ratio: Int) = Seq(
     width := s"${ratio.toString}%",
-    maxWidth := 1250
+    maxWidth := "1250"
   )
 
   //MARKET PANEL
-  lazy val docEntry: ModifierSeq = Seq(
-    pointer,
-    color(WHITE),
+  lazy val docEntry = Seq(
+    cursor.pointer,
+    color := WHITE,
     backgroundColor := DARK_GREY,
     borderRadius := "4px",
-    marginTop := 3,
-    paddingTop := 6,
+    marginTop := "3",
+    paddingTop := "6",
     verticalAlign := "middle",
-    paddingBottom := 4,
-    paddingLeft := 15,
-    minHeight := 46
+    paddingBottom := "4",
+    paddingLeft := "15",
+    minHeight := "46"
   )
 
-  lazy val docTitleEntry: ModifierSeq = Seq(
-    paddingTop := 6
+  lazy val docTitleEntry = Seq(
+    paddingTop := "6"
   )
 
   //EXECUTION PANEL
-  lazy val execOutput: ModifierSeq = Seq(
-    marginRight := -10,
-    marginTop := 5
+  lazy val execOutput = Seq(
+    marginRight := "-10",
+    marginTop := "5"
   )
 
-  lazy val execLevel: ModifierSeq = Seq(
-    marginRight := -25,
-    marginTop := -3
+  lazy val execLevel = Seq(
+    marginRight := "-25",
+    marginTop := "-3"
   )
 
-  lazy val errorTable: ModifierSeq = Seq(
+  lazy val errorTable = Seq(
     lineHeight := "30px",
     borderWidth := "0.1em",
     borderStyle := "solid",
     borderColor := "#ccc",
-    borderLeft := 0,
-    borderRight := 0
+    borderLeft := "0",
+    borderRight := "0"
   )
 
-  lazy val executionVisible: ModifierSeq = Seq(
-    color(BLUE)
+  lazy val executionVisible = Seq(
+    color := BLUE
   )
 
-  def executionState(state: ExecutionInfo): ModifierSeq = Seq(
+  def executionState(state: ExecutionInfo) = Seq(
     state match {
-      case _: ExecutionInfo.Failed   ⇒ color("#CC3A36")
-      case _: ExecutionInfo.Running  ⇒ color("yellow")
-      case _: ExecutionInfo.Finished ⇒ color("#a6bf26")
-      case _: ExecutionInfo.Canceled ⇒ color("orange")
-      case _                         ⇒ color("#fff")
+      case _: ExecutionInfo.Failed   ⇒ color := "#CC3A36"
+      case _: ExecutionInfo.Running  ⇒ color := "yellow"
+      case _: ExecutionInfo.Finished ⇒ color := "#a6bf26"
+      case _: ExecutionInfo.Canceled ⇒ color := "orange"
+      case _                         ⇒ color := "#fff"
     },
     fontWeight := "bold"
   )
 
-  lazy val rowLayout: ModifierSeq = Seq(
+  lazy val rowLayout = Seq(
     display := "table",
     tableLayout := "fixed"
   //borderSpacing := 5
   )
 
-  lazy val columnLayout: ModifierSeq = Seq(
+  lazy val columnLayout = Seq(
     display := "table-cell"
   )
 
-  lazy val closeDetails: ModifierSeq = Seq(
-    pointer,
-    color(DARK_GREY),
-    fontSize := 22,
+  lazy val closeDetails = Seq(
+    cursor.pointer,
+    color := DARK_GREY,
+    fontSize := "22",
     verticalAlign := "middle",
     opacity := 0.4
   )
 
-  lazy val environmentErrorBadge: ModifierSeq = Seq(
-    color(DARK_GREY),
+  lazy val environmentErrorBadge = Seq(
+    color := DARK_GREY,
     backgroundColor := WHITE,
     width := "auto",
-    height := 15,
-    marginLeft := 8,
+    height := "15",
+    marginLeft := "8",
     padding := "1px 5px 5px 5px"
   )
 
   //OPTON DIVS
-  lazy val optionsdiv: ModifierSeq = Seq(
+  lazy val optionsdiv = Seq(
     relativePosition,
-    marginRight := 10,
-    top := -3
+    marginRight := "10",
+    top := "-3"
   )
 
   // SELECTS
-  lazy val selectFilter: ModifierSeq = Seq(
-    marginTop := 6,
-    fontSize := 14,
-    paddingLeft := 5,
-    borderBottomRightRadius := 0,
-    borderBottomLeftRadius := 0
+  lazy val selectFilter = Seq(
+    marginTop := "6",
+    fontSize := "14",
+    paddingLeft := "5",
+    borderBottomRightRadius := "0",
+    borderBottomLeftRadius := "0"
   )
 
   // ALERT PANELS
 
-  lazy val alertOverlay: ModifierSeq = Seq(
+  lazy val alertOverlay = Seq(
     background := s"$DARK_GREY none repeat scroll 0 0",
     opacity := 0.95,
-    color(WHITE),
+    color := WHITE,
     height := "100%",
     absolutePosition,
     width := "100%",
     zIndex := 1200,
     textAlign := "right",
-    top := 0
+    top := "0"
   )
 
   // POSTIONING
-  lazy val fullPageZone: ModifierSeq = Seq(
-    top := 0,
+  lazy val fullPageZone = Seq(
+    top := "0",
     height := "100%",
     width := "100%"
   )
 
-  lazy val fileZone: ModifierSeq = Seq(
-    top := 10,
+  lazy val fileZone = Seq(
+    top := "10",
     height := "100%",
-    width := 370
+    width := "370"
   )
 
-  lazy val topZone: ModifierSeq = Seq(
-    top := 0,
-    height := 100,
-    width := 100
+  lazy val topZone = Seq(
+    top := "0",
+    height := "100",
+    width := "100"
   )
 
-  def centerPage(topPosition: String = "45%"): ModifierSeq = Seq(
+  def centerPage(topPosition: String = "45%") = Seq(
     position := "fixed",
     top := topPosition,
-    styles.left := "50%",
-    minWidth := 250,
-    svgAttrs.transform := "translate (-50%,-50%)"
+    left := "50%",
+    minWidth := "250",
+   // svg.transform := "translate (-50%,-50%)"
   )
 
-  lazy val relativeCenter: ModifierSeq = Seq(
+  lazy val relativeCenter = Seq(
     relativePosition,
     top := "50%",
     textAlign := "center"
   )
 
-  lazy val rightPage: ModifierSeq = Seq(
-    styles.right := 0,
+  lazy val rightPage = Seq(
+    right := "0",
     margin := "10 20"
   )
 
   // AUTHENTICATION PANEL
-  lazy val certificate: ModifierSeq = Seq(
-    width := 130,
+  lazy val certificate = Seq(
+    width := "130",
     textAlign := "center"
   )
 
   // ENVIRONMENT ERROR PANEL
-  lazy val environmentPanelError: ModifierSeq = Seq(
+  lazy val environmentPanelError = Seq(
     backgroundColor := WHITE,
     margin := "10 10 0",
-    padding := 10
+    padding := "10"
   )
 
   //MODEL WIZARD PANEL
-  lazy val modelNameInput: ModifierSeq = Seq(
-    height := 34,
-    width := 150,
+  lazy val modelNameInput = Seq(
+    height := "34",
+    width := "150",
     borderRadius := "1px"
   )
 
-  lazy val rightBlock: ModifierSeq = Seq(
+  lazy val rightBlock = Seq(
     width := "70%",
-    floatRight
+    float.right
   )
 
-  lazy val onecolumn: ModifierSeq = Seq(
-    floatLeft,
+  lazy val onecolumn = Seq(
+    float.left,
     width := "100%"
   )
 
-  lazy val twocolumns: ModifierSeq = Seq(
-    floatLeft,
+  lazy val twocolumns = Seq(
+    float.left,
     width := "50%"
   )
 
-  lazy val modelIO: ModifierSeq = Seq(
+  lazy val modelIO = Seq(
     relativePosition,
     left := "50%",
-    marginLeft := -60,
-    paddingBottom := 20
+    marginLeft := "-60",
+    paddingBottom := "20"
   )
 
-  lazy val modelHelp: ModifierSeq = Seq(
+  lazy val modelHelp = Seq(
     height := "auto",
     backgroundColor := "rgb(255, 221, 85)",
-    padding := 10,
-    marginTop := 20,
-    top := 20,
+    padding := "10",
+    marginTop := "20",
+    top := "20",
     borderRadius := "5px",
-    color("#444")
+    color := "#444"
   )
 
-  lazy val columnCSS: ModifierSeq = Seq(
+  lazy val columnCSS = Seq(
     width := "50%",
     display := "inline-block",
-    padding := 15
+    padding := "15"
   )
 
   // PLUGIN PANEL
-  lazy val uploadPlugin: ModifierSeq = Seq(
-    marginRight := 50,
-    paddingBottom := 30,
-    width := 45,
-    height := 30
+  lazy val uploadPlugin = Seq(
+    marginRight := "50",
+    paddingBottom := "30",
+    width := "45",
+    height := "30"
   )
 
-  lazy val pluginRight: ModifierSeq = Seq(
-    right := -5,
-    marginTop := -9
+  lazy val pluginRight = Seq(
+    right := "-5",
+    marginTop := "-9"
   )
 
-  lazy val spinnerStyle: ModifierSeq = Seq(
+  lazy val spinnerStyle = Seq(
     backgroundColor := DARK_GREY,
     textAlign := "center",
     borderRadius := "4px"
   )
 
-  lazy val dateStyle: ModifierSeq = Seq(
+  lazy val dateStyle = Seq(
     absolutePosition,
     fontStyle := "italic",
-    paddingTop := 6,
-    floatRight,
-    right := 50,
-    color(WHITE)
+    paddingTop := "6",
+    float.right,
+    right := "50",
+    color := WHITE
   )
 
-  lazy val dropdownError: ModifierSeq = Seq(
-    height := 300,
+  lazy val dropdownError = Seq(
+    height := "300",
     width := "100%",
-    color(DARK_GREY),
+    color := DARK_GREY,
     relativePosition,
-    borderRadius := 5,
-    fontSize := 12,
+    borderRadius := "5",
+    fontSize := "12",
     border := "1px solid #ccc",
-    padding := 10,
+    padding := "10",
     lineHeight := "0.5cm",
     wordWrap := "break-word"
   )
 
-  lazy val fixedTable: ModifierSeq = Seq(
+  lazy val fixedTable = Seq(
     tableLayout := "fixed",
     width := "100%"
   )
 
   //FILE TOOL BAR
-  lazy val selectedTool: ModifierSeq = Seq(
+  lazy val selectedTool = Seq(
     opacity := 1,
-    svgAttrs.transform := "scale(1.2)",
-    color(BLUE)
+    svg.transform := "scale(1.2)",
+    color := BLUE
   )
 
-  lazy val borderRightFlat: ModifierSeq = Seq(
-    borderBottomRightRadius := 0,
-    borderTopRightRadius := 0
+  lazy val borderRightFlat = Seq(
+    borderBottomRightRadius := "0",
+    borderTopRightRadius := "0"
   )
 
-  lazy val smallInput: ModifierSeq = Seq(
-    width := 60,
-    paddingTop := 5,
-    paddingLeft := 3,
+  lazy val smallInput = Seq(
+    width := "60",
+    paddingTop := "5",
+    paddingLeft := "3",
     textAlign := "center",
-    height := 28,
-    fontSize := 14
+    height := "28",
+    fontSize := "14"
   )
 
-  lazy val filterElement: ModifierSeq = Seq(
-    floatLeft,
-    height := 30,
-    paddingLeft := 4,
-    fontSize := 12
+  lazy val filterElement = Seq(
+    float.left,
+    height := "30",
+    paddingLeft := "4",
+    fontSize := "12"
   )
 
-  lazy val selectedButton: ModifierSeq = Seq(
+  lazy val selectedButton = Seq(
     btn,
     backgroundColor := "#e3dbdb"
   )
 
-  lazy val sortingBar: ModifierSeq = Seq(
+  lazy val sortingBar = Seq(
     relativePosition,
-    height := 20,
-    floatRight,
-    top := -130
+    height := "20",
+    float.right,
+    top := "-130"
   )
 
-  lazy val labelStyle: ModifierSeq = Seq(
-    marginTop := 4,
-    color(WHITE),
+  lazy val labelStyle = Seq(
+    marginTop := "4",
+    color := WHITE,
     width := "auto",
-    fontSize := 14
+    fontSize := "14"
   )
 
-  lazy val tdStyle: ModifierSeq = Seq(
-    colMD(2),
-    marginBottom := 8,
-    paddingLeft := 5,
+  lazy val tdStyle = Seq(
+    colSM(2),
+    marginBottom := "8",
+    paddingLeft := "5",
     width := "auto",
-    height := 25
+    height := "25"
   )
 
   //TOOLTIP
-  lazy val warningTooltip: ModifierSeq = Seq(
+  lazy val warningTooltip = Seq(
     absolutePosition,
     display := "inline-block",
     width := "auto",
-    maxWidth := 200,
+    maxWidth := "200",
     height := "auto",
-    padding := 8,
+    padding := "8",
     borderRadius := "4px",
     backgroundColor := "pink",
-    color("red"),
+    color := "red",
     boxShadow := "0 8px 6px -6px black"
   )
 
   //DOC 
-  lazy val greenBold: ModifierSeq = Seq(
-    color("#a6bf26"),
+  lazy val greenBold = Seq(
+    color := "#a6bf26",
     fontWeight := "bold"
   )
 
-  lazy val labelInLine: ModifierSeq = Seq(
+  lazy val labelInLine = Seq(
     relativePosition,
     display := "inline"
   )
 
-  lazy val glyphText: ModifierSeq = Seq(
-    color("#a6bf26"),
-    fontSize := 22,
-    paddingRight := 5
+  lazy val glyphText = Seq(
+    color := "#a6bf26",
+    fontSize := "22",
+    paddingRight := "5"
   )
 
-  lazy val docContent: ModifierSeq = Seq(
+  lazy val docContent = Seq(
     opacity := 0.95,
     padding := "5 50"
   )
 
   //BANNER ALERT
-  lazy val bannerAlert: ModifierSeq = Seq(
+  lazy val bannerAlert = Seq(
     width := "100%",
     absolutePosition,
-    height := 70,
+    height := "70",
     zIndex := 5
   )
 
-  lazy val bannerAlertInner: ModifierSeq = Seq(
+  lazy val bannerAlertInner = Seq(
     width := "100%",
     relativePosition,
-    color(WHITE),
+    color := WHITE,
     opacity := 0.9,
-    paddingTop := 10,
-    paddingLeft := 15,
-    paddingRight := 15,
-    paddingBottom := 15
+    paddingTop := "10",
+    paddingLeft := "15",
+    paddingRight := "15",
+    paddingBottom := "15"
   )
 
   //GENERAL SETTINGS
-  lazy val highLine: ModifierSeq = Seq(
-    width := 130,
-    height := 50,
+  lazy val highLine = Seq(
+    width := "130",
+    height := "50",
     display := "table",
     overflow := "hidden"
   )
 
-  lazy val generalSettings: ModifierSeq = Seq(
-    height := 185,
-    marginBottom := 20
+  lazy val generalSettings = Seq(
+    height := "185",
+    marginBottom := "20"
   )
 
-  lazy val smallLine: ModifierSeq = Seq(
-    width := 130,
-    height := 15,
+  lazy val smallLine = Seq(
+    width := "130",
+    height := "15",
     display := "table",
     overflow := "hidden"
   )
-  lazy val centerCell: ModifierSeq = Seq(
+  lazy val centerCell = Seq(
     display := "table-cell",
     verticalAlign := "middle"
   )
 
-  lazy val mediumHalfColumn: ModifierSeq = (Seq(
-    fontSize := 18,
-    width := 60
-  ): ModifierSeq) ++ centerCell
+  lazy val mediumHalfColumn = (Seq(
+    fontSize := "18",
+    width := "60"
+  )) ++ centerCell
 
-  lazy val bigHalfColumn: ModifierSeq = (Seq(
-    fontSize := 26,
-    width := 60
-  ): ModifierSeq) ++ centerCell
+  lazy val bigHalfColumn = (Seq(
+    fontSize := "26",
+    width := "60"
+  )) ++ centerCell
 
-  lazy val smallHalfColumn: ModifierSeq = (Seq(
-    left := 65,
-    fontSize := 10,
-    color(BS_GREY)
-  ): ModifierSeq) ++ centerCell
+  lazy val smallHalfColumn = (Seq(
+    left := "65",
+    fontSize := "10",
+    color := BS_GREY
+  )) ++ centerCell
 
 }

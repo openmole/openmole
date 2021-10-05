@@ -7,7 +7,6 @@ import autowire._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
-import rx._
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExportTopLevel
@@ -39,7 +38,8 @@ object Plugins {
   }
 
   def buildJSObject[T](obj: GUIPluginAsJS) = {
-    scalajs.js.eval(s"${obj.jsObject.split('.').takeRight(2).head}").asInstanceOf[T]
+    val toBeEval = s"OpenMOLELibrary.${obj.jsObject.split('.').takeRight(2).head}"
+    scalajs.js.eval(toBeEval).asInstanceOf[T]
   }
 
   case class Parameters(authenticationFactories: Seq[AuthenticationPluginFactory], wizardFactories: Seq[WizardPluginFactory])

@@ -4,8 +4,6 @@ import org.openmole.gui.client.core.panels._
 
 import scala.scalajs.js.annotation._
 import org.scalajs.dom
-import rx._
-import scalatags.JsDom.all._
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.scalajs.dom.KeyboardEvent
@@ -21,7 +19,8 @@ import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.client.FileManager
 import org.openmole.gui.ext.client._
-import org.scalajs.dom.raw.HTMLDivElement
+import com.raquo.laminar.api.L._
+import scaladget.bootstrapnative.bsn._
 
 import scala.concurrent.duration._
 import scala.scalajs.js.timers._
@@ -43,39 +42,40 @@ import scala.scalajs.js.timers._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object ScriptClient {
+@JSExportTopLevel(name = "openmole_client") @JSExportAll
+object App {
 
-  @JSExportTopLevel("connection")
-  def connection(): Unit =
-    dom.document.body.appendChild(
+  def connection(): Unit = {
+    render(
+      dom.document.body,
       div(
         panels.connection.render,
         panels.alertPanel.alertDiv
-      ).render
+      )
     )
+  }
 
-  @JSExportTopLevel("stopped")
   def stopped(): Unit = {
 
-    val stoppedDiv = div(omsheet.connectionTabOverlay)(
+    val stoppedDiv = div(
+      omsheet.connectionTabOverlay,
       div(
         div(
           omsheet.centerPage(),
           div(omsheet.shutdown, "The OpenMOLE server has been stopped")
         )
       )
-    ).render
+    )
 
     Post()[Api].shutdown().call()
-    dom.document.body.appendChild(stoppedDiv)
+    render(dom.document.body, stoppedDiv)
   }
 
-  @JSExportTopLevel("restarted")
   def restarted(): Unit = {
     val timer: Var[Option[SetIntervalHandle]] = Var(None)
 
     def setTimer = {
-      timer() = Some(setInterval(5000) {
+      timer.set(Some(setInterval(5000) {
         Post(3 seconds, 5 minutes)[Api].isAlive().call().foreach { x ⇒
           if (x) {
             CoreUtils.setRoute(routes.connectionRoute)
@@ -85,36 +85,34 @@ object ScriptClient {
           }
         }
       })
+      )
     }
 
     setTimer
-    val restartedDiv = div(omsheet.connectionTabOverlay)(
+    val restartedDiv = div(
+      omsheet.connectionTabOverlay,
       div(
-        div(
-          omsheet.centerPage(),
-          div(omsheet.shutdown, "The OpenMOLE server is restarting, please wait.")
-        )
+        omsheet.centerPage(),
+        div(omsheet.shutdown, "The OpenMOLE server is restarting, please wait.")
       )
-    ).render
+    )
 
     Post()[Api].restart().call()
-    dom.document.body.appendChild(restartedDiv)
+    render(dom.document.body, restartedDiv)
   }
 
-  @JSExportTopLevel("resetPassword")
   def resetPassword(): Unit = {
     val resetPassword = new ResetPassword
-    dom.document.body.appendChild(
+    render(
+      dom.document.body,
       div(
         resetPassword.resetPassDiv,
         panels.alertPanel.alertDiv
-      ).render
+      )
     )
   }
 
-  @JSExportTopLevel("run")
   def run(): Unit = {
-    implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
     Plugins.fetch { plugins ⇒
       val maindiv = div()
@@ -125,20 +123,21 @@ object ScriptClient {
 
       val itemStyle = lineHeight := "35px"
 
-      val execItem = navItem(div(glyph_flash, itemStyle).tooltip("Executions"), () ⇒ openExecutionPanel)
+      val execItem = navItem(div(OMTags.glyph_flash, itemStyle).tooltip("Executions"), () ⇒ openExecutionPanel)
 
-      val authenticationItem = navItem(div(glyph_lock, itemStyle).tooltip("Authentications"), () ⇒ authenticationPanel.dialog.show)
+      val authenticationItem = navItem(div(glyph_lock, itemStyle).tooltip("Authentications"), () ⇒ authenticationPanel.authenticationDialog.show)
 
-      val pluginItem = navItem(div(OMTags.glyph_plug, itemStyle).tooltip("Plugins"), () ⇒ pluginPanel.dialog.show)
+      val pluginItem = navItem(div(OMTags.glyph_plug, itemStyle).tooltip("Plugins"), () ⇒ pluginPanel.pluginDialog.show)
 
-      val envItem = navItem(div(glyph_exclamation, itemStyle).render, () ⇒ stackPanel.open)
+      val envItem = navItem(div(glyph_exclamation, itemStyle), () ⇒ stackPanel.open)
 
-      val settingsItem = navItem(div(panels.settingsView.renderApp, itemStyle).render, () ⇒ {}).right
+      val settingsItem = navItem(div(
+        //panels.settingsViewApp,
+        itemStyle), () ⇒ {}).right
 
       val actionItem = navItem(div(
-        Rx {
-          treeNodeTabs.temporaryControl()
-        }).render)
+        child <-- treeNodeTabs.temporaryControl.signal
+      ))
 
       dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
         if (k.keyCode == 83 && k.ctrlKey) {
@@ -166,15 +165,17 @@ object ScriptClient {
 
       //START BUTTON
       lazy val theNavBar = div(
-        Rx {
+        child <-- openFileTree.signal.map { oft ⇒
           navBar(
-            omsheet.absoluteFullWidth +++ nav +++ navbar_pills +++ navbar_inverse +++ (fontSize := 20) +++ navbar_staticTop +++ {
-              if (openFileTree()) mainNav370 else mainNav0
-            },
+            Seq(
+              navbar_inverse,
+              omsheet.absoluteFullWidth, fontSize := "20",
+              if (oft) mainNav370 else mainNav0
+            ),
             navItem(
-              if (openFileTree()) div(glyph_chevron_left).render else div(glyph_chevron_right).render,
+              if (oft) div(glyph_chevron_left) else div(glyph_chevron_right),
               todo = () ⇒ {
-                openFileTree() = !openFileTree.now
+                openFileTree.update(!_)
               }
             ),
             navItem(menuActions.selector),
@@ -192,11 +193,11 @@ object ScriptClient {
       })
 
       lazy val fromURLProject = MenuAction("From URL", () ⇒ {
-        urlImportPanel.dialog.show
+        urlImportPanel.urlDialog.show
       })
 
       lazy val marketPlaceProject = MenuAction("From market place", () ⇒ {
-        marketPanel.dialog.show
+        marketPanel.modalDialog.show
       })
 
       lazy val elements = Seq(newEmpty, importModel, marketPlaceProject, fromURLProject)
@@ -215,41 +216,37 @@ object ScriptClient {
       Settings.settings.map { sets ⇒
         dom.document.body.appendChild(
           div(
-            div(`class` := "fullpanel")(
+            div(
+              cls := "fullpanel",
               panels.bannerAlert.banner,
               theNavBar,
               div(
-                `class` := Rx {
-                  "leftpanel " + {
-                    CoreUtils.ifOrNothing(openFileTree(), "open")
-                  }
-                }
-              )(
-                  div(omsheet.relativePosition +++ (paddingTop := -15))(
-                    treeNodePanel.fileToolBar.div,
-                    treeNodePanel.fileControler,
-                    treeNodePanel.labelArea,
-                    treeNodePanel.view
-                  )
-                ),
-              div(
-                `class` := Rx {
-                  "centerpanel " +
-                    CoreUtils.ifOrNothing(openFileTree(), "reduce") +
-                    CoreUtils.ifOrNothing(panels.bannerAlert.isOpen(), " banneropen")
-                }
-              )(
-                  treeNodeTabs.render,
-                  div(omsheet.textVersion)(
-                    div(
-                      fontSize := "1em"
-                    )(s"${sets.version} ${sets.versionName}"),
-                    div(fontSize := "0.8em")(s"built the ${sets.buildTime}")
-                  )
+                cls <-- openFileTree.signal.map { oft ⇒ "leftpanel" + CoreUtils.ifOrNothing(oft, "open") },
+                div(omsheet.relativePosition, paddingTop := "-15",
+                  treeNodePanel.fileToolBar.element,
+                  treeNodePanel.fileControler,
+                  treeNodePanel.labelArea,
+                  treeNodePanel.view
                 )
+              ),
+              div(
+                cls <-- openFileTree.signal.combineWith(panels.bannerAlert.isOpen).map {
+                  case (oft, io) ⇒
+                    "centerpanel " +
+                      CoreUtils.ifOrNothing(oft, "reduce") +
+                      CoreUtils.ifOrNothing(io, " banneropen")
+                },
+                treeNodeTabs.render,
+                div(
+                  omsheet.textVersion,
+                  div(
+                    fontSize := "1em", s"${sets.version} ${sets.versionName}"),
+                  div(fontSize := "0.8em", s"built the ${sets.buildTime}")
+                )
+              )
             ),
             panels.alertPanel.alertDiv
-          ).render
+          ).ref
         )
       }
     }

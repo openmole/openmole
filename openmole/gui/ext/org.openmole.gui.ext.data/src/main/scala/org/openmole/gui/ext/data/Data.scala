@@ -264,6 +264,8 @@ package object data {
     def nameWithNoExtension = name.split('.').head
 
     def normalizedPathString = path.tail.mkString("/")
+
+    def extension = FileExtension(name)
   }
 
   object ExtractResult {

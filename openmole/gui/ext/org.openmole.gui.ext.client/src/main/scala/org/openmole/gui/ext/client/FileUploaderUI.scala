@@ -25,29 +25,24 @@ import org.scalajs.dom.raw.HTMLInputElement
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import autowire._
-import rx._
-
-import scalatags.JsDom.all._
+import com.raquo.laminar.api.L._
 
 object FileUploaderUI {
   def empty = FileUploaderUI("", false)
 }
 
 case class FileUploaderUI(
-  keyName: String,
-  keySet:  Boolean,
+  keyName:  String,
+  keySet:   Boolean,
+  renaming: Option[String] = None) {
 
-  renaming: Option[String] = None
-) {
-
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val fileName = if (keyName == "") renaming.getOrElse(java.util.UUID.randomUUID.toString) else keyName
   val pathSet: Var[Boolean] = Var(keySet)
 
   val view = upButton
 
   lazy val upButton = label(
-    fileInput((fInput: HTMLInputElement) ⇒ {
+    fileInput((fInput: Input) ⇒ {
       FileManager.upload(
         fInput,
         SafePath.empty,
@@ -55,18 +50,24 @@ case class FileUploaderUI(
         },
         UploadAuthentication(),
         () ⇒ {
-          if (fInput.files.length > 0) {
-            val leaf = fInput.files.item(0).name
-            pathSet() = false
+          if (fInput.ref.files.length > 0) {
+            val leaf = fInput.ref.files.item(0).name
+            pathSet.set(false)
             OMPost()[Api].renameKey(leaf, fileName).call().foreach {
               b ⇒
-                pathSet() = true
+                pathSet.set(true)
             }
           }
         }
       )
-    }), Rx {
-      if (pathSet()) fileName else "No certificate"
-    }
-  )(Seq(paddingTop := 5, marginTop := 40) +++ omsheet.certificate +++ "inputFileStyle")
+    }),
+    child <-- pathSet.signal.map { ps ⇒
+      if (ps) fileName
+      else "No certificate"
+    },
+    paddingTop := "5",
+    marginTop := "40",
+    omsheet.certificate,
+    cls := "inputFileStyle"
+  )
 }

@@ -8,21 +8,18 @@ import boopickle.Default._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.client.{ InputFilter, OMPost }
 import scaladget.bootstrapnative.bsn._
+import com.raquo.laminar.api.L._
 import scaladget.tools._
 import autowire._
 import org.scalajs.dom.raw.HTMLElement
-import scaladget.bootstrapnative.SelectableButtons
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
-import scalatags.JsDom.TypedTag
-import scalatags.JsDom.all._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.DataUtils._
 import org.openmole.gui.ext.client
 import org.openmole.plugin.method.evolution.data.AnalysisData.Convergence
 import org.openmole.plugin.method.evolution.data.{ AnalysisData, EvolutionMetadata }
-import rx._
 
 import scala.scalajs.js
 
@@ -41,18 +38,18 @@ object TopLevelExports {
 
 class EvolutionAnalysis extends MethodAnalysisPlugin {
 
-  override def panel(safePath: SafePath, services: PluginServices): TypedTag[HTMLElement] = {
+  override def panel(safePath: SafePath, services: PluginServices): HtmlElement = {
     val metadata: Var[Option[Convergence]] = Var(None)
 
     OMPost()[EvolutionAnalysisAPI].analyse(safePath).call().foreach {
-      case Right(m) ⇒ metadata() = Some(m)
+      case Right(m) ⇒ metadata.set(Some(m))
       case Left(e)  ⇒ services.errorManager.signal("Error in evolution analysis", Some(ErrorData.stackTrace(e)))
     }
 
     div(
-      Rx {
-        metadata() match {
-          case None ⇒ p("").render
+      child <-- metadata.signal.map {
+        _ match {
+          case None ⇒ p("")
           case Some(value) ⇒
             value match {
               case c: AnalysisData.StochasticNSGA2.Convergence ⇒
@@ -81,12 +78,11 @@ class EvolutionAnalysis extends MethodAnalysisPlugin {
                 //
 
                 val config = Config.displayModeBar(false)
-                val plotDiv = div().render
-                Plotly.plot(plotDiv, js.Array(data), layout, config = config)
+                val plotDiv = div()
+                Plotly.plot(plotDiv.ref, js.Array(data), layout, config = config)
                 plotDiv
-              case _ ⇒ p(value.toString).render
+              case _ ⇒ p(value.toString)
             }
-
         }
       }
     )

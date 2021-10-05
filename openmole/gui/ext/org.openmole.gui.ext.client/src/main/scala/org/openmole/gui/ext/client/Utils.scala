@@ -18,11 +18,8 @@ package org.openmole.gui.ext.client
  */
 
 import org.openmole.gui.ext.data.GUIPluginFactory
-import org.scalajs.dom.raw.{ Event, HTMLElement }
-import scalatags.JsDom.all._
-import rx._
-import scalatags.JsDom.TypedTag
-import scaladget.tools._
+import org.scalajs.dom.raw.{ Event }
+import com.raquo.laminar.api.L._
 
 import scala.scalajs.js
 import scala.scalajs.js.Date
@@ -34,14 +31,15 @@ object Utils {
 
   def longToDate(date: Long) = s"${new Date(date).toLocaleDateString}, ${new Date(date).toLocaleTimeString}"
 
-  implicit class TagCollapserOnClickRX(triggerCondition: Rx[Boolean])(implicit ctx: Ctx.Owner) {
-    def expandDiv(inner: TypedTag[_ <: HTMLElement], onended: () ⇒ Unit = () ⇒ {}) = {
-      val expanded = div(`class` := Rx {
-        if (triggerCondition()) "hidden-div expanded"
-        else "hidden-div"
-      })(inner).render
+  implicit class TagCollapserOnClickRX(triggerCondition: Signal[Boolean]) {
+    def expandDiv(inner: HtmlElement, onended: () ⇒ Unit = () ⇒ {}) = {
+      val expanded = div(
+        cls := "hidden-div",
+        cls.toggle("expanded") <-- triggerCondition,
+        inner
+      )
 
-      expanded.addEventListener("transitionend", (e: Event) ⇒ {
+      expanded.ref.addEventListener("transitionend", (e: Event) ⇒ {
         onended()
       })
 

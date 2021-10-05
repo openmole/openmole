@@ -12,19 +12,16 @@ import scaladget.tools._
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw._
 import org.openmole.gui.client.core._
-import scalatags.JsDom.all._
-import scalatags.JsDom.{ TypedTag, tags }
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import TreeNode._
 import autowire._
-import rx._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.client.FileManager
 import org.scalajs.dom
 import scaladget.bootstrapnative.Popup
 import scaladget.bootstrapnative.Popup.Manual
+import com.raquo.laminar.api.L._
 
 /*
  * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org
@@ -45,66 +42,70 @@ import scaladget.bootstrapnative.Popup.Manual
 
 class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDisplayer, showExecution: () ⇒ Unit, treeNodeTabs: TreeNodeTabs, services: PluginServices) {
 
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val selectionMode = Var(false)
   val treeWarning = Var(true)
   val draggedNode: Var[Option[SafePath]] = Var(None)
 
-  selectionMode.trigger {
-    if (!selectionMode.now) treeNodeManager.clearSelection
+  val selectionModeObserver = Observer[Boolean] { b ⇒
+    if (!b) treeNodeManager.clearSelection
   }
 
-  def turnSelectionTo(b: Boolean) = selectionMode() = b
+  def turnSelectionTo(b: Boolean) = selectionMode.set(b)
 
   val fileToolBar = new FileToolBar(this)
-  val tree: Var[TypedTag[HTMLElement]] = Var(tags.div())
+  val tree: Var[HtmlElement] = Var(div())
 
-  val editNodeInput: Input = inputTag()(
+  val editNodeInput = inputTag("").amend(
     placeholder := "Name",
     width := "240px",
     height := "24px",
-    autofocus
-  ).render
+    onMountFocus
+  )
 
-  lazy val fileControler = Rx {
-    val current = treeNodeManager.current()
-    div(ms("tree-path"))(
-      goToDirButton(treeNodeManager.root, glyph_home +++ floatLeft +++ "treePathItems"),
-      Seq(current.parent, current).filterNot { sp ⇒
-        sp.isEmpty || sp == treeNodeManager.root
-      }.map { sp ⇒
-        goToDirButton(sp, "treePathItems", s"| ${sp.name}")
-      }
+  lazy val fileControler =
+    // val current = treeNodeManager.current()
+    div(
+      cls := "tree-path",
+      child <-- treeNodeManager.current.signal.map { curr ⇒
+        div(
+          goToDirButton(treeNodeManager.root).amend(glyph_home, float.left),
+          Seq(curr.parent, curr).filterNot { sp ⇒
+            sp.isEmpty || sp == treeNodeManager.root
+          }.map { sp ⇒
+            goToDirButton(sp, s"| ${sp.name}")
+          }
+        )
+      },
+      treeNodeManager.error --> treeNodeManager.errorObserver,
+      treeNodeManager.comment --> treeNodeManager.commentObserver
     )
-  }
 
   lazy val labelArea =
     div(
-      Rx {
-        div(
-          if (treeNodeManager.copied().isEmpty) tags.div
-          else
-            buttonGroup(omsheet.pasteLabel)(
-              button(btn_danger, "Paste", onclick := { () ⇒ paste(treeNodeManager.copied(), treeNodeManager.current()) }),
-              button(btn_default, "Cancel", onclick := { () ⇒
+      child <-- treeNodeManager.copied.signal.combineWith(treeNodeManager.current.signal).map {
+        case (copied, curr) ⇒
+          div(
+            div(
+              if (copied.isEmpty) div()
+              else
+                buttonGroup.amend(
+                  omsheet.pasteLabel,
+                  button(btn_danger, "Paste", onClick --> { _ ⇒ paste(copied, curr) })
+                ),
+              button(btn_secondary, "Cancel", onClick --> { _ ⇒
                 treeNodeManager.emptyCopied
                 fileToolBar.unselectTool
                 drawTree
-              }
-              )
+              })
             ),
-          fileToolBar.sortingGroup.div
-        )
+            fileToolBar.sortingGroup
+          )
       }
     )
 
   lazy val view = {
     drawTree
-    tags.div(
-      Rx {
-        tree()
-      }
-    ).render
+    div(child <-- tree.signal)
   }
 
   private def paste(safePaths: Seq[SafePath], to: SafePath) = {
@@ -158,30 +159,29 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
     FileManager.download(
       safePath,
-      (p: ProcessState) ⇒ { fileToolBar.transferring() = p },
+      (p: ProcessState) ⇒ {
+        fileToolBar.transferring.set(p)
+      },
       hash = hash,
       onLoaded = onLoaded
     )
   }
 
-  def goToDirButton(safePath: SafePath, ck: ModifierSeq, name: String = ""): TypedTag[_ <: HTMLElement] =
-    span(ck)(name)(
-      onclick := {
-        () ⇒
-          fileToolBar.clearMessage
-          treeNodeManager.switch(safePath)
-          drawTree
+  def goToDirButton(safePath: SafePath, name: String = ""): HtmlElement =
+    span(cls := "treePathItems", name,
+      onClick --> { _ ⇒
+        fileToolBar.clearMessage
+        treeNodeManager.switch(safePath)
+        drawTree
       },
       dropPairs,
-      ondragenter := {
-        (e: DragEvent) ⇒
-          false
+      onDragEnter --> { _ ⇒
+        false
       },
-      ondragleave := {
-        (e: DragEvent) ⇒
-          false
+      onDragLeave --> { _ ⇒
+        false
       },
-      ondrop := { (e: DragEvent) ⇒
+      onDrop --> { e ⇒
         e.dataTransfer
         e.preventDefault()
         dropAction(safePath, true)
@@ -200,6 +200,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
   }
 
   def refreshAnd(todo: () ⇒ Unit) = invalidCacheAnd(todo)
+
   def refreshAndDraw = invalidCacheAndDraw
 
   def computePluggables = fileToolBar.selectedTool.now match {
@@ -209,21 +210,22 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
   def drawTree: Unit = {
     computePluggables
-    tree() = treeNodeManager.computeCurrentSons(filter).withFutureWaiter("Get files", (sons: ListFiles) ⇒ {
+    tree.set(treeNodeManager.computeCurrentSons(filter).withFutureWaiter("Get files", (sons: ListFiles) ⇒ {
 
-      tags.table(
+      table(
         if (treeNodeManager.isRootCurrent && treeNodeManager.isProjectsEmpty) {
-          div("Create a first OpenMOLE script (.oms)")(ms("message"))
+          div("Create a first OpenMOLE script (.oms)", cls := "message")
         }
         else {
           tbody(
-            backgroundColor := Rx {
-              if (selectionMode()) omsheet.BLUE else omsheet.DARK_GREY
+            backgroundColor <-- selectionMode.signal.map { sM ⇒
+              if (sM) omsheet.BLUE else omsheet.DARK_GREY
             },
             omsheet.fileList,
-            Rx {
-              if (sons.list.length < sons.nbFilesOnServer && treeWarning()) {
-                div(omsheet.moreEntries)(
+            child <-- treeWarning.signal.map { tW ⇒
+              if (sons.list.length < sons.nbFilesOnServer && tW) {
+                div(
+                  omsheet.moreEntries,
                   div(
                     omsheet.moreEntriesText,
                     div(
@@ -232,8 +234,8 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
                         "Use the ",
                         span(
                           "Filter tool",
-                          pointer +++ omsheet.color(omsheet.BLUE),
-                          onclick := { () ⇒ fileToolBar.selectTool(FilterTool) }
+                          cursor.pointer, color := omsheet.BLUE,
+                          onClick --> { _ ⇒ fileToolBar.selectTool(FilterTool) }
                         ), " to refine your search"
                       )
                     )
@@ -245,14 +247,15 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
             for (tn ← sons.list) yield {
               drawNode(tn).render
             },
-            onscroll := { () ⇒
-              Popover.hide
-            }
-
+            //            onscroll := { () ⇒
+            //              Popover.hide
+            //            },
+            selectionMode --> selectionModeObserver
           )
         }
       )
     })
+    )
 
   }
 
@@ -262,18 +265,18 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
         displayNode(fn)
       })
     case dn: DirNode ⇒ ReactiveLine(dn, TreeNodeType.folder, () ⇒ {
-      treeNodeManager switch (dn.name.now)
+      treeNodeManager switch (dn.name)
       fileToolBar.clearMessage
       fileToolBar.unselectTool
-      treeWarning() = true
+      treeWarning.set(true)
       drawTree
     })
   }
 
   def displayNode(tn: TreeNode) = tn match {
     case fn: FileNode ⇒
-      val ext = FileExtension(tn.name.now)
-      val tnSafePath = treeNodeManager.current.now ++ tn.name.now
+      val ext = FileExtension(tn.name)
+      val tnSafePath = treeNodeManager.current.now ++ tn.name
       if (ext.displayable) {
         downloadFile(
           tnSafePath,
@@ -302,32 +305,34 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
   class ReactiveLine(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) {
 
-    val tnSafePath = treeNodeManager.current.now ++ tn.name.now
+    val tnSafePath = treeNodeManager.current.now ++ tn.name
 
     case class TreeStates(settingsSet: Boolean, edition: Boolean, replication: Boolean, selected: Boolean = treeNodeManager.isSelected(tn)) {
-      def settingsOn = treeStates() = copy(settingsSet = true)
+      def settingsOn = treeStates.set(copy(settingsSet = true))
 
-      def editionOn = treeStates() = copy(edition = true)
+      def editionOn = treeStates.set(copy(edition = true))
 
-      def replicationOn = treeStates() = copy(replication = true)
+      def replicationOn = treeStates.set(copy(replication = true))
 
-      def settingsOff = treeStates() = copy(settingsSet = false)
+      def settingsOff = treeStates.set(copy(settingsSet = false))
 
-      def editionOff = treeStates() = copy(edition = false)
+      def editionOff = treeStates.set(copy(edition = false))
 
-      def replicationOff = treeStates() = copy(replication = false)
+      def replicationOff = treeStates.set(copy(replication = false))
 
-      def editionAndReplicationOn = treeStates() = copy(edition = true, replication = true)
+      def editionAndReplicationOn = treeStates.set(copy(edition = true, replication = true))
 
-      def setSelected(b: Boolean) = treeStates() = copy(selected = b)
+      def setSelected(b: Boolean) = treeStates.set(copy(selected = b))
     }
 
     private val treeStates: Var[TreeStates] = Var(TreeStates(false, false, false))
 
     val clickablePair = {
-      val style = floatLeft +++ pointer +++ Seq(
+      val style = Seq(
+        float.left,
+        cursor.pointer,
         draggable := true,
-        onclick := { (e: MouseEvent) ⇒
+        onClick --> { e ⇒
           if (!selectionMode.now) {
             todo()
           }
@@ -335,12 +340,15 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
       )
 
       tn match {
-        case fn: FileNode ⇒ span(span(paddingTop := 4), omsheet.file +++ style)(div(omsheet.fileNameOverflow)(tn.name.now))
+        case fn: FileNode ⇒ span(span(paddingTop := "4", omsheet.file, style, div(omsheet.fileNameOverflow, tn.name)))
         case dn: DirNode ⇒
           span(
-            span(ms(dn.isEmpty, emptyMod, omsheet.fileIcon +++ glyph_plus)),
-            (omsheet.dir +++ style)
-          )(div(omsheet.fileNameOverflow +++ (paddingLeft := 22))(tn.name.now))
+            span(
+              if (dn.isEmpty) emptySetters
+              else omsheet.fileIcon, glyph_plus
+            ),
+            omsheet.dir, style, div(omsheet.fileNameOverflow, paddingLeft := "22"), tn.name
+          )
       }
     }
 
@@ -378,117 +386,118 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
       inPopover0(element, 0)
     }
 
-    dom.document.body.onclick = { (e: Event) ⇒
-      val element = e.target.asInstanceOf[HTMLElement]
-      if (!toolBox.actions(element)) {
-        if (!inPopover(element))
-          Popover.hide
-      }
-      else
-        e.preventDefault()
-    }
+    //    dom.document.body.onlick = { (e: Event) ⇒
+    //      val element = e.target.asInstanceOf[HTMLElement]
+    //      if (!toolBox.actions(element)) {
+    //        if (!inPopover(element))
+    //          Popover.hide
+    //      }
+    //      else
+    //        e.preventDefault()
+    //    }
 
-    def buildManualPopover(trigger: TypedTag[HTMLElement]) = {
-      lazy val pop = trigger.popover(toolBox.contentRoot.toString, Popup.Right, Manual, title = Some(toolBox.titleRoot.toString))
-      val popRender = pop.render
-
-      popRender.onclick = { (e: Event) ⇒
-        if (Popover.current.now == Some(pop)) Popover.hide
-        else {
-          Popover.current.now match {
-            case Some(p) ⇒ Popover.toggle(p)
-            case _       ⇒
-          }
-          Popover.toggle(pop)
+    def buildManualPopover(trigger: HtmlElement) = {
+      lazy val pop = trigger.popover(div(toolBox.contentRoot.toString), Popup.Right, Manual, title = Some(toolBox.titleRoot.toString))
+      val popRender = pop.render.amend(
+        onClick --> { e ⇒
+          //          if (Popover.current.now == Some(pop)) Popover.hide
+          //          else {
+          //            Popover.current.now match {
+          //              case Some(p) ⇒ Popover.toggle(p)
+          //              case _ ⇒
+          //            }
+          //            Popover.toggle(pop)
+          //          }
+          currentSafePath.set(Some(tnSafePath))
+          e.stopPropagation
         }
-        currentSafePath() = Some(tnSafePath)
-        e.stopPropagation
-      }
+      )
 
       popRender
     }
 
-    val render: TypedTag[dom.html.TableRow] = {
-      val settingsGlyph = ms("glyphitem") +++ glyph_settings +++ omsheet.color(WHITE) +++ (paddingLeft := 4)
+    val render: HtmlElement = {
+      val settingsGlyph = Seq(cls := "glyphitem", glyph_settings, color := WHITE, paddingLeft := "4")
 
       tr(
-        Rx {
-          td(
-            onclick := { (e: MouseEvent) ⇒
-              {
-                if (selectionMode.now) {
-                  addToSelection
-                  if (e.ctrlKey) clearSelectionExecpt(tnSafePath)
+        child <-- selectionMode.signal.combineWith(treeStates.signal, fileToolBar.selectedTool.signal, treeNodeManager.pluggables.signal).map {
+          case (sM, tS, sTools, pluggables) ⇒
+            td(
+              onClick --> { e ⇒
+                {
+                  if (sM) {
+                    addToSelection
+                    if (e.ctrlKey) clearSelectionExecpt(tnSafePath)
+                  }
                 }
-              }
-            },
-            dropPairs,
-            ondragstart := { (e: DragEvent) ⇒
-              e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
-              draggedNode() = Some(tnSafePath)
-            },
-            ondrop := { (e: DragEvent) ⇒
-              e.dataTransfer
-              e.preventDefault()
-              dropAction(treeNodeManager.current.now ++ tn.name.now, tn match {
-                case _: DirNode ⇒ true
-                case _          ⇒ false
-              })
-            },
-            ondragenter := {
-              (e: DragEvent) ⇒
+              },
+              dropPairs,
+              onDragStart --> { e ⇒
+                e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
+                draggedNode.set(Some(tnSafePath))
+              },
+              onDrop --> { e ⇒
+                e.dataTransfer
+                e.preventDefault()
+                dropAction(treeNodeManager.current.now ++ tn.name, tn match {
+                  case _: DirNode ⇒ true
+                  case _          ⇒ false
+                })
+              },
+              onDragEnter --> { _ ⇒
                 false
-            },
-            clickablePair, {
-              div(fileInfo)(
-                span(omsheet.fileSize)(
-                  tags.i(timeOrSize(tn)),
-                  buildManualPopover(
-                    div(settingsGlyph, onclick := { () ⇒ Popover.hide })
+              },
+              clickablePair, {
+                div(
+                  fileInfo,
+                  span(
+                    omsheet.fileSize,
+                    i(timeOrSize(tn)),
+                    buildManualPopover(
+                      div(settingsGlyph, onClick --> { _ ⇒ /*FIXME*/
+                        /*Popover.hide*/
+                      })
+                    )
                   )
                 )
-              )
-            },
-            div(
-              width := "100%",
-              if (treeStates().selected) {
-                fileToolBar.selectedTool() match {
-                  case Some(TrashTool) ⇒ omsheet.fileSelectedForDeletion
-                  case Some(PluginTool) if treeNodeManager.pluggables().contains(tn) ⇒ omsheet.fileSelected
-                  case _ ⇒ omsheet.fileSelected
+              },
+              div(
+                width := "100%",
+                if (tS.selected) {
+                  sTools match {
+                    case Some(TrashTool) ⇒ omsheet.fileSelectedForDeletion
+                    case Some(PluginTool) if pluggables.contains(tn) ⇒ omsheet.fileSelected
+                    case _ ⇒ omsheet.fileSelected
+                  }
                 }
-              }
-              else omsheet.fileSelectionOverlay,
-              span(omsheet.fileSelectionMessage)
+                else omsheet.fileSelectionOverlay,
+                span(omsheet.fileSelectionMessage)
+              )
             )
-          )
         }
       )
     }
   }
 
-  def dropPairs: ModifierSeq = Seq(
+  def dropPairs = Seq(
     draggable := true,
-    ondragenter := {
-      (e: DragEvent) ⇒
-        val el = e.target.asInstanceOf[HTMLElement]
-        val style = new CSSStyleDeclaration()
-        style.backgroundColor = "red"
-        el.style = style
-        false
+    onDragEnter --> { e ⇒
+      val el = e.target.asInstanceOf[HTMLElement]
+      val style = new CSSStyleDeclaration()
+      style.backgroundColor = "red"
+      el.style = style
+      false
     },
-    ondragleave := {
-      (e: DragEvent) ⇒
-        val style = new CSSStyleDeclaration
-        style.backgroundColor = "transparent"
-        e.target.asInstanceOf[HTMLElement].style = style
-        false
+    onDragLeave --> { e ⇒
+      val style = new CSSStyleDeclaration
+      style.backgroundColor = "transparent"
+      e.target.asInstanceOf[HTMLElement].style = style
+      false
     },
-    ondragover := {
-      (e: DragEvent) ⇒
-        e.dataTransfer.dropEffect = "move"
-        e.preventDefault
-        false
+    onDragOver --> { e ⇒
+      e.dataTransfer.dropEffect = "move"
+      e.preventDefault
+      false
     }
   )
 
@@ -509,7 +518,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
           }
         }
     }
-    draggedNode() = None
+    draggedNode.set(None)
     false
   }
 

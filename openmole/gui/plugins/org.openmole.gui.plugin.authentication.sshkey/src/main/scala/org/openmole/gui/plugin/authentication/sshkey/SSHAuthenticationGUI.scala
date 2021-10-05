@@ -28,7 +28,7 @@ import autowire._
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
-import scalatags.JsDom.all._
+import com.raquo.laminar.api.L._
 
 import scala.scalajs.js
 
@@ -54,19 +54,19 @@ class PrivateKeyAuthenticationFactory extends AuthenticationPluginFactory {
 class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = PrivateKeyAuthenticationData()) extends AuthenticationPlugin {
   type AuthType = PrivateKeyAuthenticationData
 
-  val passwordStyle: ModifierSeq = Seq(
-    width := 130,
-    passwordType
+  val passwordStyle: HESetters = Seq(
+    width := "130",
+    `type` := "password"
   )
   val privateKey = new FileUploaderUI(data.privateKey.getOrElse(""), data.privateKey.isDefined)
 
-  val loginInput = inputTag(data.login)(placeholder := "Login").render
+  val loginInput = inputTag(data.login).amend(placeholder := "Login")
 
-  val passwordInput = inputTag(data.cypheredPassword)(placeholder := "Password", passwordType).render
+  val passwordInput = inputTag(data.cypheredPassword).amend(placeholder := "Password", `type` := "password")
 
-  val targetInput = inputTag(data.target)(placeholder := "Host").render
+  val targetInput = inputTag(data.target).amend(placeholder := "Host")
 
-  val portInput = inputTag(data.port)(placeholder := "Port").render
+  val portInput = inputTag(data.port).amend(placeholder := "Port")
 
   def factory = new PrivateKeyAuthenticationFactory
 
@@ -80,8 +80,8 @@ class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = Priva
       passwordInput.withLabel("Password"),
       targetInput.withLabel("Host"),
       portInput.withLabel("Port")
-    ).render,
-    privateKey.view(marginTop := 10).render.withLabel("Private key")
+    ),
+    privateKey.view.amend(marginTop := "10").withLabel("Private key")
   )
 
   def save(onsave: () ⇒ Unit) = {
@@ -89,10 +89,10 @@ class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = Priva
       d ⇒
         OMPost()[PrivateKeyAuthenticationAPI].addAuthentication(PrivateKeyAuthenticationData(
           privateKey = Some(privateKey.fileName),
-          loginInput.value,
-          passwordInput.value,
-          targetInput.value,
-          portInput.value
+          loginInput.ref.value,
+          passwordInput.ref.value,
+          targetInput.ref.value,
+          portInput.ref.value
         )).call().foreach {
           b ⇒
             onsave()

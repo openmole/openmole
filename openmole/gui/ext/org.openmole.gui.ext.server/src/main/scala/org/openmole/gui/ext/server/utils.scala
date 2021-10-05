@@ -263,12 +263,14 @@ object utils {
 
   def getUUID: String = java.util.UUID.randomUUID.toString
 
-  val openmoleFileName = "openmole.js"
+  val openmoleFileName = "main.js"
+  val webpakedOpenmoleFileName = "openmole-webpacked.js"
   val depsFileName = "deps.js"
   val openmoleGrammarName = "openmole_grammar_template.js"
   val openmoleGrammarMode = "mode-openmole.js"
   val githubTheme = "theme-github.js"
   val webpackConfigTemplateName = "template.webpack.config.js"
+  val webpackJsonPackage = "package.json"
 
   def updateIfChanged(file: File)(update: File ⇒ Unit)(implicit fileService: FileService, newFile: TmpDirectory) = {
     import org.openmole.core.fileservice._

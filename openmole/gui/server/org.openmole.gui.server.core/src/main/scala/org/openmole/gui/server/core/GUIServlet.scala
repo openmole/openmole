@@ -156,30 +156,32 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   //FIXME val connectedUsers: Var[Seq[UserID]] = Var(Seq())
   val USER_ID = "UserID"
 
-  def connection = html("connection();")
+  val webpackLibrary = "OpenMOLELibrary.openmole_client"
 
-  def application = html("run();")
+  def connection = html(s"$webpackLibrary.connection();")
 
-  def stopped = html("stopped();")
+  def application = html(s"$webpackLibrary.run();")
 
-  def restarted = html("restarted();")
+  def stopped = html(s"$webpackLibrary.stopped();")
 
-  def resetPassword = html("resetPassword();")
+  def restarted = html(s"$webpackLibrary.restarted();")
+
+  def resetPassword = html(s"$webpackLibrary.resetPassword();")
 
   def html(javascritMethod: String) = tags.html(
     tags.head(
       tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset=UTF-8"),
       cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := "css/" + f) },
-      tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.openmoleFileName),
-      tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.openmoleGrammarMode),
-      tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.depsFileName),
+      tags.script(tags.`type` := "text/javascript", tags.src := "js/openmole-webpacked.js"),
+      //tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.githubTheme),
+      //tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.openmoleGrammarMode),
+      tags.link(tags.rel := "stylesheet", href := "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"),
       RawFrag(arguments.extraHeader)
     ),
     tags.body(
       tags.script(javascritMethod)
     )
   )
-
   // Get all the css files in the workspace (it is not working with js because of the order)
   val cssFiles = (arguments.webapp / "css").listFilesSafe.map {
     _.getName

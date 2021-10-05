@@ -1,9 +1,9 @@
 package org.openmole.gui.client.core.alert
 
-import scaladget.tools._
 import org.openmole.gui.ext.client._
 
-import scalatags.JsDom.all._
+import com.raquo.laminar.api.L._
+import scaladget.bootstrapnative.bsn._
 
 /*
  * Copyright (C) 04/08/15 // mathieu.leclaire@openmole.org
@@ -25,7 +25,7 @@ import scalatags.JsDom.all._
 object AbsolutePositioning {
 
   trait LayoutModifier {
-    def modifierClass: ModifierSeq
+    def modifierClass: HESetters
   }
 
   trait Position extends LayoutModifier

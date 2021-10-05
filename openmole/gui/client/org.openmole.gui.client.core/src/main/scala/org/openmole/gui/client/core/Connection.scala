@@ -1,12 +1,8 @@
 package org.openmole.gui.client.core
 
 import scaladget.bootstrapnative.bsn._
-
 import org.openmole.gui.ext.client._
-import org.scalajs.dom.raw.HTMLFormElement
-
-import scalatags.JsDom.all._
-import scalatags.JsDom.tags
+import com.raquo.laminar.api.L._
 
 /*
  * Copyright (C) 07/11/16 // mathieu.leclaire@openmole.org
@@ -27,32 +23,33 @@ import scalatags.JsDom.tags
 
 class Connection {
 
-  lazy val connectButton = tags.button("Connect", btn_primary, `type` := "submit").render
+  lazy val connectButton = button("Connect", btn_primary, `type` := "submit")
 
-  val passwordInput = inputTag("")(
+  val passwordInput = inputTag("").amend(
     placeholder := "Password",
     `type` := "password",
     width := "130px",
-    marginBottom := 15,
+    marginBottom := "15",
     name := "password",
-    autofocus := true
-  ).render
+    onMountFocus
+  )
 
   def cleanInputs = {
-    passwordInput.value = ""
+    passwordInput.ref.value = ""
   }
 
-  private val connectionForm: HTMLFormElement =
-    tags.form(
-      method := "post",
-      passwordInput,
-      connectButton
-    ).render
+  private val connectionForm = form(
+    method := "post",
+    passwordInput,
+    connectButton
+  )
 
   val render = {
     div(
-      panels.settingsView.renderConnection,
-      div(omsheet.connectionTabOverlay)(
+      div("RENDER CONNECTION"),
+      //panels.settingsView.renderConnection,
+      div(
+        omsheet.connectionTabOverlay,
         div(
           img(src := "img/openmole.png", omsheet.openmoleLogo),
           div(
@@ -64,7 +61,7 @@ class Connection {
           )
         )
       )
-    ).render
+    )
 
   }
 }

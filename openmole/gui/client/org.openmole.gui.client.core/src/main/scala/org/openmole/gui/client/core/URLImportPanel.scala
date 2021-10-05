@@ -14,11 +14,10 @@ import org.openmole.gui.ext.data._
 import Waiter._
 import autowire._
 import org.openmole.core.market.MarketIndexEntry
-import rx._
-import scalatags.JsDom.tags
-import scalatags.JsDom.all._
 import org.openmole.gui.ext.api.Api
+import com.raquo.laminar.api.L._
 import Waiter._
+import com.raquo.laminar.nodes.ReactiveElement.isActive
 
 class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
 
@@ -34,15 +33,15 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
 
   def exists(sp: SafePath, ifNotExists: () ⇒ {}) =
     Post()[Api].exists(sp).call().foreach { b ⇒
-      if (b) overwriteAlert.update(Some(sp))
+      if (b) overwriteAlert.set(Some(sp))
       else ifNotExists()
     }
 
   def download(url: String) = {
-    downloading.update(Processing())
-    Post()[Api].downloadHTTP(url, manager.current.now, extractCheckBox.checked).call().foreach { d ⇒
-      downloading.update(Processed())
-      dialog.hide
+    downloading.set(Processing())
+    Post()[Api].downloadHTTP(url, manager.current.now, extractCheckBox.ref.checked).call().foreach { d ⇒
+      downloading.set(Processed())
+      urlDialog.hide
       d match {
         case Left(_)   ⇒ panels.treeNodePanel.refreshAndDraw
         case Right(ex) ⇒ bannerAlert.registerWithDetails("Download failed", ErrorData.stackTrace(ex))
@@ -55,54 +54,52 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
       download(url)
     }
 
-  lazy val urlInput = input(placeholder := "Project URL (.oms / .tar.gz)", width := "100%").render
+  lazy val urlInput = input(placeholder := "Project URL (.oms / .tar.gz)", width := "100%")
 
-  lazy val extractCheckBox = checkbox(false).render
+  lazy val extractCheckBox = checkbox(false)
 
   lazy val downloadButton = button(
     btn_primary,
     downloading.withTransferWaiter { _ ⇒
-      tags.span("Download")
-    }(height := 20),
-    onclick := { () ⇒ download(urlInput.value) })
+      span("Download")
+    },
+    height := "20",
+    onClick --> { _ ⇒ download(urlInput.ref.value) }
+  )
 
-  val dialog = ModalDialog(
+  val alertObserver = Observer[Option[SafePath]] { osp ⇒
+    osp match {
+      case Some(sp: SafePath) ⇒
+        panels.alertPanel.string(
+          sp.name + " already exists. Overwrite ? ",
+          () ⇒ {
+            overwriteAlert.set(None)
+            deleteFileAndDownloadURL(manager.current.now, urlInput.ref.value)
+          }, () ⇒ {
+            overwriteAlert.set(None)
+          }, CenterPagePosition
+        )
+        div
+      case _ ⇒
+    }
+  }
+
+  val dialogBody = div(
+    urlInput,
+    span(display.flex, flexDirection.row, alignItems.flexEnd, paddingTop := "20",
+      extractCheckBox,
+      span("Extract archive (where applicable)", paddingLeft := "10", fontWeight.bold)
+    ),
+    overwriteAlert --> alertObserver
+  )
+
+  val urlDialog: ModalDialog = ModalDialog(
+    span(b("Import project from URL")),
+    dialogBody,
+    buttonGroup.amend(downloadButton, closeButton("Close")),
     omsheet.panelWidth(92),
-    onopen = () ⇒ {
-    }
+    onopen = () ⇒ {},
+    onclose = () ⇒ {}
   )
-
-  dialog.header(
-    tags.span(tags.b("Import project from URL"))
-  )
-  dialog.body({
-    Rx {
-      overwriteAlert() match {
-        case Some(sp: SafePath) ⇒
-          panels.alertPanel.string(
-            sp.name + " already exists. Overwrite ? ",
-            () ⇒ {
-              overwriteAlert() = None
-              deleteFileAndDownloadURL(manager.current() ++ sp.name, urlInput.value)
-            }, () ⇒ {
-              overwriteAlert() = None
-            }, CenterPagePosition
-          )
-          tags.div
-        case _ ⇒
-      }
-    }
-    tags.div(
-      urlInput,
-      span(display.flex, flexDirection.row, alignItems.flexEnd, paddingTop := 20)(
-        extractCheckBox,
-        span("Extract archive (where applicable)", paddingLeft := 10, fontWeight.bold))
-    )
-  })
-
-  dialog.footer(buttonGroup()(
-    downloadButton,
-    ModalDialog.closeButton(dialog, btn_default, "Close")
-  ))
 
 }

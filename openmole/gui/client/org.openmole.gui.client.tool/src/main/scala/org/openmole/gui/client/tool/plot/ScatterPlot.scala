@@ -5,7 +5,7 @@ import org.openmole.plotlyjs.all._
 import org.openmole.plotlyjs.PlotlyImplicits._
 import scala.scalajs.js.JSConverters._
 import scala.scalajs.js
-import scalatags.JsDom.all._
+import com.raquo.laminar.api.L._
 
 object ScatterPlot {
 
@@ -43,9 +43,9 @@ object ScatterPlot {
       else js.Array[PlotData]()
     }
 
-    Plotly.newPlot(plotDiv, plotDataArray, layout, Plot.baseConfig)
+    Plotly.newPlot(plotDiv.ref, plotDataArray, layout, Plot.baseConfig)
 
-    div(plotDiv.render).render
+    plotDiv
 
   }
 }

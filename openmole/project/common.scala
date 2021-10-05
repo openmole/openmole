@@ -11,12 +11,12 @@ object common {
   def bouncyCastleVersion = "1.68"
   def netLogo5Version = "5.3.1"
   def netLogo6Version = "6.2.0"
-  def scalaTagsVersion = "0.9.1"
-  def rxVersion = "0.4.3"
+  def scalaTagsVersion = "0.9.4"
+  def laminarVersion = "0.12.2"
   def boopickleVersion = "1.3.3"
-  def scalaAutowireVersion = "0.3.2"
+  def scalaAutowireVersion = "0.3.3"
   def sourcecodeVersion = "0.2.1"
-  def scaladgetVersion = "1.3.7"
+  def scaladgetVersion = "1.10.0-SNAPSHOT"
   def sortableVersion = "0.7.2"
   def json4sVersion = "3.6.7"
   def circeVersion = "0.13.0"
@@ -39,11 +39,10 @@ object common {
 
   def scalajsVersion = "1.5.1"
   def scalajsLoggingVersion = "1.1.0"
-  def scalaJSDomVersion = "1.0.0"
+  def scalaJSDomVersion = "1.1.0"
 
-  def scalatraVersion = "2.7.0"
-  def jettyVersion = "9.4.28.v20200408"
+  def scalatraVersion = "2.7.1"
+  def jettyVersion = "9.4.35.v20201120"
 
 }
-
 

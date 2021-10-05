@@ -17,17 +17,16 @@ package org.openmole.gui.client.core.files
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.{ CoreUtils, panels }
 import org.openmole.gui.ext.data.{ FileFilter, ListFilesData, SafePath }
-import rx._
+import com.raquo.laminar.api.L._
 import org.openmole.gui.client.core.files.TreeNode.ListFiles
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class TreeNodeManager {
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
+
   val ROOTDIR = "projects"
   val root = SafePath.sp(Seq(ROOTDIR))
 
@@ -45,65 +44,57 @@ class TreeNodeManager {
 
   val pluggables: Var[Seq[SafePath]] = Var(Seq())
 
-  error.trigger {
-    error.now.foreach(panels.alertPanel.treeNodeErrorDiv)
+  val errorObserver = Observer[Option[TreeNodeError]] { err ⇒
+    err.foreach(panels.alertPanel.treeNodeErrorDiv)
   }
 
-  comment.trigger {
-    comment.now.foreach(panels.alertPanel.treeNodeCommentDiv)
+  val commentObserver = Observer[Option[TreeNodeComment]] { tnc ⇒
+    tnc.foreach(panels.alertPanel.treeNodeCommentDiv)
   }
 
   def isSelected(tn: TreeNode) = selected.now.contains(tn)
 
-  def clearSelection = selected() = Seq()
+  def clearSelection = selected.set(Seq())
 
-  def clearSelectionExecpt(safePath: SafePath) = selected() = Seq(safePath)
+  def clearSelectionExecpt(safePath: SafePath) = selected.set(Seq(safePath))
 
   def setSelected(sp: SafePath, b: Boolean) = b match {
-    case true  ⇒ selected() = (selected.now :+ sp).distinct
-    case false ⇒ selected() = selected.now.filterNot(_ == sp)
+    case true  ⇒ selected.update(s ⇒ (s :+ sp).distinct)
+    case false ⇒ selected.update(s ⇒ s.filterNot(_ == sp))
   }
 
-  def setSelectedAsCopied = copied() = selected.now
+  def setSelectedAsCopied = copied.set(selected.now)
 
-  def emptyCopied = copied() = Seq()
+  def emptyCopied = copied.set(Seq())
 
-  def setFilesInError(question: String, files: Seq[SafePath], okaction: () ⇒ Unit, cancelaction: () ⇒ Unit) = error() = Some(TreeNodeError(question, files, okaction, cancelaction))
+  def setFilesInError(question: String, files: Seq[SafePath], okaction: () ⇒ Unit, cancelaction: () ⇒ Unit) = error.set(Some(TreeNodeError(question, files, okaction, cancelaction)))
 
-  def setFilesInComment(c: String, files: Seq[SafePath], okaction: () ⇒ Unit) = comment() = Some(TreeNodeComment(c, files, okaction))
+  def setFilesInComment(c: String, files: Seq[SafePath], okaction: () ⇒ Unit) = comment.set(Some(TreeNodeComment(c, files, okaction)))
 
   def noError = {
-    error() = None
-    comment() = None
+    error.set(None)
+    comment.set(None)
   }
 
   val current = dirNodeLine
 
-  def take(n: Int) = dirNodeLine.map { dn ⇒
-    SafePath.sp(dn.path.take(n))
-  }
-
-  def drop(n: Int) = dirNodeLine.map { dn ⇒
-    SafePath.sp(dn.path.drop(n))
-  }
-
   def switch(dir: String): Unit = switch(dirNodeLine.now.copy(path = dirNodeLine.now.path :+ dir))
 
   def switch(sp: SafePath): Unit = {
-    dirNodeLine() = sp
+    dirNodeLine.set(sp)
   }
 
   def invalidCurrentCache = invalidCache(current.now)
 
-  def invalidCache(sp: SafePath) = sons() = sons.now.filterNot(_._1.path == sp.path)
+  def invalidCache(sp: SafePath) = sons.update(_.filterNot(_._1.path == sp.path))
 
   def computeCurrentSons(fileFilter: FileFilter): Future[ListFiles] = {
     val cur = current.now
 
     def getAndUpdateSons(safePath: SafePath): Future[ListFiles] = CoreUtils.listFiles(safePath, fileFilter).map { newsons ⇒
-      sons() = {
+      sons.update { s ⇒
         val ns: ListFiles = newsons
-        sons.now.updated(cur, ns)
+        s.updated(cur, ns)
       }
       newsons
     }
@@ -112,7 +103,7 @@ class TreeNodeManager {
       case safePath: SafePath ⇒
         if (fileFilter.nameFilter.isEmpty) {
           if (sons.now.contains(safePath)) {
-            Future(sons.now(safePath))
+            Future(sons.now()(safePath))
           }
           else {
             getAndUpdateSons(safePath)
@@ -123,11 +114,11 @@ class TreeNodeManager {
     }
   }
 
-  def computePluggables(todo: () ⇒ Unit) = current.foreach { sp ⇒
+  def computePluggables(todo: () ⇒ Unit) = {
     CoreUtils.pluggables(
-      sp,
+      current.now,
       p ⇒ {
-        pluggables() = p
+        pluggables.set(p)
         todo()
       }
     )

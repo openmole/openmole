@@ -5,6 +5,7 @@ import org.scalajs.dom.raw._
 import autowire._
 import org.openmole.gui.ext.api.Api
 import boopickle.Default._
+import com.raquo.laminar.api.L._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -36,13 +37,13 @@ object FileManager {
   }
 
   def upload(
-    inputElement:      HTMLInputElement,
+    inputElement:      Input,
     destinationPath:   SafePath,
     fileTransferState: ProcessState ⇒ Unit,
     uploadType:        UploadType,
     onloaded:          () ⇒ Unit           = () ⇒ {}
   ) = {
-    val fileList = inputElement.files
+    val fileList = inputElement.ref.files
     val formData = new FormData
 
     uploadType match {
@@ -70,7 +71,7 @@ object FileManager {
     xhr.onloadend = (e: ProgressEvent) ⇒ {
       fileTransferState(Processed())
       onloaded()
-      inputElement.value = ""
+      inputElement.ref.value = ""
     }
 
     xhr.open("POST", "uploadFiles", true)

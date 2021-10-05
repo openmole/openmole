@@ -4,7 +4,7 @@ import org.openmole.plotlyjs._
 import org.openmole.plotlyjs.all._
 import org.openmole.plotlyjs.PlotlyImplicits._
 import scala.scalajs.js.JSConverters._
-import scalatags.JsDom.all._
+import com.raquo.laminar.api.L._
 
 object SplomPlot {
 
@@ -48,7 +48,7 @@ object SplomPlot {
       val colors = (0 to arraySize).toJSArray map { x ⇒ x.toDouble / arraySize }
 
       Plotly.newPlot(
-        plotDiv,
+        plotDiv.ref,
         scalajs.js.Array(serie.plotDataBuilder
           .set(dimensions)
           .set(plottype.splom)
@@ -61,6 +61,6 @@ object SplomPlot {
         Plot.baseConfig)
     }
 
-    div(plotDiv.render).render
+    plotDiv
   }
 }

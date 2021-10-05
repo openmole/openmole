@@ -17,7 +17,7 @@ class EvolutionAnalysisAPIImpl(services: Services) extends EvolutionAnalysisAPI 
       Right(Analysis.analyse(omrData, methodData, path.toFile.getParentFile))
     }
     catch {
-      case e ⇒ Left(ErrorData(e))
+      case e: Throwable ⇒ Left(ErrorData(e))
     }
   }
 
@@ -30,7 +30,7 @@ class EvolutionAnalysisAPIImpl(services: Services) extends EvolutionAnalysisAPI 
       Right(Analysis.generation(omrData, methodData, path.toFile.getParentFile, generation = generation, all = all))
     }
     catch {
-      case e ⇒ Left(ErrorData(e))
+      case e: Throwable ⇒ Left(ErrorData(e))
     }
   }
 

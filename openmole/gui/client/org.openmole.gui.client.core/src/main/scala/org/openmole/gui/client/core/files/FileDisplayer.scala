@@ -26,16 +26,13 @@ import org.openmole.gui.client.tool.plot.Plotter
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class FileDisplayer(val treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) {
+class FileDisplayer(treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) {
 
-  def alreadyDisplayed(safePath: SafePath) =
-    treeNodeTabs.tabs.now.find { t ⇒
-      t.safePathTab.now.path == safePath.path
-    }
+
 
   def display(safePath: SafePath, content: String, hash: String, fileExtension: FileExtension, pluginServices: PluginServices) = {
-    alreadyDisplayed(safePath) match {
-      case Some(t: TreeNodeTab) ⇒ treeNodeTabs.setActive(t)
+    treeNodeTabs.alreadyDisplayed(safePath) match {
+      case Some(t: TreeNodeTab) ⇒ treeNodeTabs.tabsElement.setActive(t.tabID)
       case _ ⇒
         fileExtension match {
           case OpenMOLEScript ⇒
@@ -45,7 +42,7 @@ class FileDisplayer(val treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) 
               content,
               hash,
               showExecution,
-              TreeNodeTabs.setErrors(treeNodeTabs, safePath, _)
+            //  TreeNodeTabs.setErrors(treeNodeTabs, safePath, _)
             )
             treeNodeTabs add tab
             tab.omsEditor.editor.focus

@@ -12,10 +12,9 @@ import boopickle.Default._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.client.OMPost
 import org.scalajs.dom
-import rx.Var
 
 import scala.util.{ Failure, Success }
-import scalatags.JsDom.all._
+import com.raquo.laminar.api.L._
 
 /*
  * Copyright (C) 22/12/15 // mathieu.leclaire@openmole.org
@@ -97,7 +96,7 @@ object CoreUtils {
   }
 
   def addJSScript(relativeJSPath: String) = {
-    org.scalajs.dom.document.body.appendChild(script(src := relativeJSPath).render)
+    org.scalajs.dom.document.body.appendChild(script(src := relativeJSPath).ref)
   }
 
   def approximatedYearMonthDay(duration: Long): String = {

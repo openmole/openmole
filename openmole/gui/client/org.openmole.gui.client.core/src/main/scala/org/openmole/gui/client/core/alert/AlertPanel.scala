@@ -17,8 +17,6 @@ package org.openmole.gui.client.core.alert
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
 import org.openmole.gui.client.core.alert.AbsolutePositioning._
 import org.openmole.gui.client.core.files.{ TreeNodeComment, TreeNodeError }
 import org.openmole.gui.client.core.panels._
@@ -26,98 +24,96 @@ import org.openmole.gui.client.tool.OMTags._
 import org.openmole.gui.ext.data.SafePath
 import org.openmole.gui.client.tool._
 import org.openmole.gui.ext.client._
-import org.scalajs.dom.html.Div
-import org.scalajs.dom.raw.HTMLDivElement
-import rx._
-
-import scalatags.JsDom.all._
-import scalatags.JsDom.{ TypedTag, tags }
+import com.raquo.laminar.api.L._
+import scaladget.bootstrapnative.bsn._
 
 class AlertPanel {
 
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-
   val visible: Var[Boolean] = Var(false)
-  val zoneModifier: Var[ModifierSeq] = Var(FullPage.modifierClass)
-  val positionModifier: Var[ModifierSeq] = Var(CenterPagePosition.modifierClass)
-  val alertElement: Var[TypedTag[Div]] = Var(tags.div)
+  val zoneModifier: Var[HESetters] = Var(FullPage.modifierClass)
+  val positionModifier: Var[HESetters] = Var(CenterPagePosition.modifierClass)
+  val alertElement: Var[HtmlElement] = Var(div())
 
-  val elementDiv = Rx {
+  val elementDiv =
     div(
-      positionModifier(),
-      alertElement()
+      child <-- positionModifier.signal.combineWith(alertElement.signal).map {
+        case (pm, ae) ⇒
+          div(pm, ae)
+      }
     )
-  }
 
-  val alertDiv = Rx {
+  val alertDiv =
     div(
-      if (visible()) alertOverlay +++ zoneModifier() else displayOff
-    )(elementDiv)
-  }
+      child <-- visible.signal.combineWith(zoneModifier.signal).map {
+        case (v, zm) ⇒
+          if (v) div(Seq(alertOverlay, zm)) else div(displayOff)
+      },
+      elementDiv
+    )
 
   def popup(
-    messageDiv:       TypedTag[HTMLDivElement],
+    messageDiv:       HtmlElement,
     actions:          Seq[AlertAction],
     position:         Position,
-    zone:             Zone                     = FullPage,
-    alertType:        ModifierSeq              = btn_danger,
-    buttonGroupClass: ModifierSeq              = floatLeft,
-    okString:         String                   = "OK",
-    cancelString:     String                   = "Cancel"
+    zone:             Zone             = FullPage,
+    alertType:        HESetters        = btn_danger,
+    buttonGroupClass: HESetters        = Seq(float := "left"),
+    okString:         String           = "OK",
+    cancelString:     String           = "Cancel"
   ) = {
-    alertElement() = OMTags.alert(alertType, messageDiv, actions.map { a ⇒ a.copy(action = actionWrapper(a.action)) }, buttonGroupClass, okString, cancelString)
-    zoneModifier() = zone.modifierClass
-    positionModifier() = position.modifierClass
-    visible() = true
+    alertElement.set(OMTags.alert(alertType, messageDiv, actions.map { a ⇒ a.copy(action = actionWrapper(a.action)) }, buttonGroupClass, okString, cancelString))
+    zoneModifier.set(zone.modifierClass)
+    positionModifier.set(position.modifierClass)
+    visible.set(true)
   }
 
   def actionWrapper(action: () ⇒ Unit): () ⇒ Unit = () ⇒ {
     action()
-    visible() = false
+    visible.set(false)
   }
 
   def alertDiv(
-    messageDiv:       TypedTag[HTMLDivElement],
+    messageDiv:       HtmlElement,
     okaction:         () ⇒ Unit,
-    cancelaction:     () ⇒ Unit                = () ⇒ {},
-    transform:        Position                 = CenterPagePosition,
-    zone:             Zone                     = FullPage,
-    alertType:        ModifierSeq              = btn_danger,
-    buttonGroupClass: ModifierSeq              = floatRight,
-    okString:         String                   = "OK",
-    cancelString:     String                   = "Cancel"
+    cancelaction:     () ⇒ Unit   = () ⇒ {},
+    transform:        Position    = CenterPagePosition,
+    zone:             Zone        = FullPage,
+    alertType:        HESetters   = Seq(btn_danger),
+    buttonGroupClass: HESetters   = Seq(float := "right"),
+    okString:         String      = "OK",
+    cancelString:     String      = "Cancel"
   ): Unit = {
     popup(messageDiv, Seq(AlertAction(okaction), AlertAction(cancelaction)), transform, zone, alertType, buttonGroupClass, okString, cancelString)
   }
 
   def treeNodeErrorDiv(error: TreeNodeError): Unit = alertDiv(
-    tags.div(
+    div(
       error.message,
-      OptionsDiv(error.filesInError, SafePath.naming).div
+      OptionsDiv(error.filesInError, SafePath.naming).render
     ), okaction = error.okaction, cancelaction = error.cancelaction, zone = FileZone
   )
 
   def treeNodeCommentDiv(error: TreeNodeComment): Unit = {
     popup(
-      tags.div(
+      div(
         error.message,
-        OptionsDiv(error.filesInError, SafePath.naming).div
-      ), Seq(AlertAction(error.okaction)), CenterPagePosition, FileZone, warning, floatRight
+        OptionsDiv(error.filesInError, SafePath.naming).render
+      ), Seq(AlertAction(error.okaction)), CenterPagePosition, FileZone, warning, float := "right"
     )
   }
 
   def string(
     message:          String,
     okaction:         () ⇒ Unit,
-    cancelaction:     () ⇒ Unit   = () ⇒ {},
-    transform:        Position    = CenterPagePosition,
-    zone:             Zone        = FullPage,
-    alertType:        ModifierSeq = btn_danger,
-    buttonGroupClass: ModifierSeq = Seq(floatLeft, marginLeft := 20),
-    okString:         String      = "OK",
-    cancelString:     String      = "Cancel"
+    cancelaction:     () ⇒ Unit = () ⇒ {},
+    transform:        Position  = CenterPagePosition,
+    zone:             Zone      = FullPage,
+    alertType:        HESetters = Seq(btn_danger),
+    buttonGroupClass: HESetters = Seq(float := "left", marginLeft := "20"),
+    okString:         String    = "OK",
+    cancelString:     String    = "Cancel"
   ): Unit = alertDiv(
-    tags.div(message),
+    div(message),
     okaction,
     cancelaction,
     transform,
@@ -130,16 +126,16 @@ class AlertPanel {
   def detail(
     message:          String,
     detail:           String,
-    cancelaction:     () ⇒ Unit   = () ⇒ {},
-    transform:        Position    = CenterPagePosition,
-    zone:             Zone        = FullPage,
-    alertType:        ModifierSeq = btn_danger,
-    buttonGroupClass: ModifierSeq = Seq(floatLeft, marginLeft := 20)
+    cancelaction:     () ⇒ Unit = () ⇒ {},
+    transform:        Position  = CenterPagePosition,
+    zone:             Zone      = FullPage,
+    alertType:        HESetters = Seq(btn_danger),
+    buttonGroupClass: HESetters = Seq(float := "left", marginLeft := "20")
   ): Unit =
     alertDiv(
-      tags.div(message),
+      div(message),
       () ⇒ {
-        stackPanel.content() = detail
+        stackPanel.content.set(detail)
         stackPanel.dialog.show
       }, cancelaction, transform, zone, alertType, buttonGroupClass, "Details"
     )

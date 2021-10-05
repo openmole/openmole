@@ -9,20 +9,19 @@ import openmole.common._
 object Libraries {
 
   lazy val bootstrapnative = libraryDependencies += "org.openmole.scaladget" %%% "bootstrapnative" % scaladgetVersion
-  lazy val lunr = libraryDependencies += "org.openmole.scaladget" %%% "lunr" % scaladgetVersion
+  //lazy val lunr = libraryDependencies += "org.openmole.scaladget" %%% "lunr" % scaladgetVersion
 
   lazy val sortable = libraryDependencies += "org.openmole" %%% "sortable-js-facade" % sortableVersion
   lazy val ace = libraryDependencies += "org.openmole.scaladget" %%% "ace" % scaladgetVersion
   lazy val scaladgetTools = libraryDependencies += "org.openmole.scaladget" %%% "tools" % scaladgetVersion
   lazy val scalajsDomJS = libraryDependencies += "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion
-  lazy val rxJS = libraryDependencies += "com.lihaoyi" %%% "scalarx" % rxVersion
-  lazy val scalaTagsJS = libraryDependencies += "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
+  lazy val laminarJS = libraryDependencies += "com.raquo" %%% "laminar" % laminarVersion
   lazy val autowireJS = libraryDependencies += "com.lihaoyi" %%% "autowire" % scalaAutowireVersion
   lazy val boopickleJS = libraryDependencies += "io.suzaku" %%% "boopickle" % boopickleVersion
   lazy val sourcecodeJS = libraryDependencies += "com.lihaoyi" %%% "sourcecode" % sourcecodeVersion
   lazy val highlightJS = libraryDependencies += "org.openmole.scaladget" %%% "highlightjs" % scaladgetVersion
   lazy val htmlparser2 = libraryDependencies += "com.definitelyscala" %%% "scala-js-htmlparser2" % "1.0.2"
-  lazy val plotlyJS =  libraryDependencies += "org.openmole" %%% "scala-js-plotlyjs" % "1.5.2"
+  lazy val plotlyJS =  libraryDependencies += "org.openmole" %%% "scala-js-plotlyjs" % "1.5.6"
   lazy val scalaCompatJS =  libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.6"
 
 
@@ -78,7 +77,6 @@ object Libraries {
   lazy val boopickle = "org.openmole.library" %% "boopickle" % boopickleVersion
   lazy val autowire = "org.openmole.library" %% "autowire" % scalaAutowireVersion
   lazy val scalaTags = "org.openmole.library" %% "com-scalatags" % scalaTagsVersion
-  lazy val rx = "org.openmole.library" %% "rx" % rxVersion
   lazy val netlogo5 = "org.openmole.library" % "ccl-northwestern-edu-netlogo5" % netLogo5Version
   lazy val netlogo6 = "org.openmole.library" % "ccl-northwestern-edu-netlogo6" % netLogo6Version
   lazy val sourceCode = "org.openmole.library" %% "sourcecode" % sourcecodeVersion
@@ -86,7 +84,7 @@ object Libraries {
   lazy val spatialsampling = "org.openmole.library" %% "org-openmole-spatialsampling" % spatialsamplingVersion
   lazy val xzJava = "org.openmole.library" %% "xzjava" % "1.8"
   lazy val guava = "org.openmole.library" %% "com-google-guava" % guavaVersion
-  
+
   def httpClientVersion = "4.5.3"
   lazy val httpClient =
     Seq(
@@ -98,12 +96,12 @@ object Libraries {
   lazy val toolxitBibtex = "org.openmole" %% "toolxit-bibtex" % "0.2"
 
   lazy val gridscale = "org.openmole.library" %% "gridscale" % gridscaleVersion
-  lazy val gridscaleSSH = 
+  lazy val gridscaleSSH =
     Seq(
       "org.openmole.library" %% "gridscale-ssh" % gridscaleVersion,
       "org.openmole.library" %% "com-hierynomus-sshj" % sshjVersion
     )
-  
+
   lazy val gridscalePBS = "org.openmole.library" %% "gridscale-pbs" % gridscaleVersion
   lazy val gridscaleSGE = "org.openmole.library" %% "gridscale-sge" % gridscaleVersion
   lazy val gridscaleCondor = "org.openmole.library" %% "gridscale-condor" % gridscaleVersion
