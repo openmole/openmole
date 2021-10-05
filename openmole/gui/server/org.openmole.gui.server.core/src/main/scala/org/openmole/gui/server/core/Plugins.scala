@@ -49,7 +49,11 @@ object Plugins extends JavaLogger {
 
     def update = {
       Log.logger.info("Building GUI plugins ...")
-      jsFile.delete
+
+      val jsDir = jsFile.getParentFile
+      DirUtils.deleteIfExists(jsDir)
+      jsDir.mkdir
+
       JSPack.link(jsPluginDirectory, jsFile, optimizedJS)
 
       Log.logger.info("Webpacking ...")
@@ -63,6 +67,7 @@ object Plugins extends JavaLogger {
 
     (jsPluginDirectory / "optimized_mode").content = optimizedJS.toString
 
+    println("JS FILLE " + jsFile.getAbsolutePath)
     if (!jsFile.exists) update
     else utils.updateIfChanged(jsPluginDirectory) { _ ⇒ update }
 
