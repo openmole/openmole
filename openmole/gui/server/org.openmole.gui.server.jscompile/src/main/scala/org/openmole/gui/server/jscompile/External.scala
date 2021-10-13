@@ -17,7 +17,6 @@ object External {
 
   private def runProcess[A](cmd: Seq[String], cwd: File): Unit = {
     val toErrorLog = (is: InputStream) ⇒ {
-      scala.io.Source.fromInputStream(is).getLines.foreach(msg ⇒ println("ERROR: " + msg))
       is.close()
     }
 
@@ -29,7 +28,6 @@ object External {
     //      ()
     //    }
 
-    println(s"INFO Command: ${cmd.mkString(" ")}")
     val process = Process(cmd, cwd)
     val processIO = BasicIO.standard(false) //.withError(toErrorLog)
     val code: Int = process.run(processIO).exitValue()

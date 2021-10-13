@@ -38,7 +38,7 @@ object Plugins {
   }
 
   def buildJSObject[T](obj: GUIPluginAsJS) = {
-    val toBeEval = s"OpenMOLELibrary.${obj.jsObject.split('.').takeRight(2).head}"
+    val toBeEval = s"openmole_library.${obj.jsObject.split('.').takeRight(2).head}"
     scalajs.js.eval(toBeEval).asInstanceOf[T]
   }
 

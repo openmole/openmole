@@ -55,8 +55,10 @@ object GUIServer {
     (from / "js" / utils.githubTheme) copy editorThemeFile
 
     val (openmoleJSFile, webpacked) = Plugins.openmoleFile(optimizedJS)
-    openmoleJSFile copy (to /> "js" / utils.openmoleFileName)
+
+    //openmoleJSFile copy (to /> "js" / utils.openmoleFileName)
     webpacked copy (to /> "js" / utils.webpakedOpenmoleFileName)
+    new File(webpacked.getAbsolutePath + ".map") copy (to /> "js" / (webpacked.getName + ".map"))
 
     to
   }

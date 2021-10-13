@@ -8,9 +8,9 @@
   },
   "devDependencies": {
     "concat-with-sourcemaps": "1.0.7",
-    "source-map-loader": "2.0.0",
-    "webpack": "5.24.3",
-    "webpack-cli": "4.5.0",
-    "webpack-dev-server": "3.11.2"
+    "source-map-loader": "0.2.3",
+    "webpack": "4.32.2",
+    "webpack-cli": "3.3.2",
+    "webpack-dev-server": "3.4.1"
   }
 }

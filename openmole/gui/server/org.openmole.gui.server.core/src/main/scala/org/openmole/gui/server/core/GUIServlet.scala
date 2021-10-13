@@ -156,7 +156,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
   //FIXME val connectedUsers: Var[Seq[UserID]] = Var(Seq())
   val USER_ID = "UserID"
 
-  val webpackLibrary = "OpenMOLELibrary.openmole_client"
+  val webpackLibrary = "openmole_library.openmole_library"
 
   def connection = html(s"$webpackLibrary.connection();")
 
@@ -179,6 +179,7 @@ class GUIServlet(val arguments: GUIServer.ServletArguments) extends ScalatraServ
       RawFrag(arguments.extraHeader)
     ),
     tags.body(
+      tags.div(id := "openmole-content"),
       tags.script(javascritMethod)
     )
   )

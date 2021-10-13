@@ -13,7 +13,7 @@ import boopickle.Default._
 import autowire._
 import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
-import org.openmole.gui.client.core.files.{ TreeNodePanel }
+import org.openmole.gui.client.core.files.TreeNodePanel
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
@@ -22,6 +22,7 @@ import org.openmole.gui.ext.client._
 import com.raquo.laminar.api.L._
 import scaladget.bootstrapnative.bsn._
 
+import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.scalajs.js.timers._
 
@@ -42,10 +43,11 @@ import scala.scalajs.js.timers._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-@JSExportTopLevel(name = "openmole_client") @JSExportAll
+@JSExportTopLevel(name = "openmole_library")
+@JSExportAll
 object App {
 
-  def connection(): Unit = {
+  def connection() = {
     render(
       dom.document.body,
       div(
@@ -112,7 +114,8 @@ object App {
     )
   }
 
-  def run(): Unit = {
+  def run() = {
+    val containerNode = dom.document.querySelector("#openmole-content")
 
     Plugins.fetch { plugins ⇒
       val maindiv = div()
@@ -121,7 +124,12 @@ object App {
 
       val openFileTree = Var(true)
 
-      val itemStyle = lineHeight := "35px"
+      val itemStyle = Seq(
+        height := "30",
+        fontSize := "25",
+        display.flex,
+        alignItems.center
+      )
 
       val execItem = navItem(div(OMTags.glyph_flash, itemStyle).tooltip("Executions"), () ⇒ openExecutionPanel)
 
@@ -165,28 +173,28 @@ object App {
 
       //START BUTTON
       lazy val theNavBar = div(
-        child <-- openFileTree.signal.map { oft ⇒
-          navBar(
-            Seq(
-              navbar_inverse,
-              omsheet.absoluteFullWidth, fontSize := "20",
-              if (oft) mainNav370 else mainNav0
-            ),
-            navItem(
-              if (oft) div(glyph_chevron_left) else div(glyph_chevron_right),
-              todo = () ⇒ {
-                openFileTree.update(!_)
-              }
-            ),
-            navItem(menuActions.selector),
-            execItem,
-            authenticationItem,
-            pluginItem,
-            actionItem,
-            settingsItem
-          ).render
-        }
-      )
+          child <-- openFileTree.signal.map { oft ⇒
+            navBar(
+              Seq(
+                backgroundColor := "#3f3d56",
+                omsheet.absoluteFullWidth, fontSize := "20",
+                if (oft) mainNav370 else mainNav0
+              ),
+              navItem(
+                if (oft) div(glyph_chevron_left) else div(glyph_chevron_right),
+                todo = () ⇒ {
+                  openFileTree.update(!_)
+                }
+              ),
+              navItem(menuActions.selector),
+              execItem,
+              authenticationItem,
+              pluginItem,
+              actionItem,
+              settingsItem
+            ).render
+          }
+        )
 
       lazy val importModel = MenuAction("Import your model", () ⇒ {
         modelWizardPanel(plugins.wizardFactories).dialog.show
@@ -213,8 +221,9 @@ object App {
 
       // Define the option sequence
 
-      Settings.settings.map { sets ⇒
-        dom.document.body.appendChild(
+      Settings.settings.foreach { sets ⇒
+        render(
+          containerNode,
           div(
             div(
               cls := "fullpanel",
@@ -246,7 +255,7 @@ object App {
               )
             ),
             panels.alertPanel.alertDiv
-          ).ref
+          )
         )
       }
     }

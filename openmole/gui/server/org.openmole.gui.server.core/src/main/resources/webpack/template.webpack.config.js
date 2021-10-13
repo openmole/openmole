@@ -8,13 +8,14 @@ module.exports = {
   "output": {
     "path": "##bundleOutputDir##",
     "filename": "##bundleName##",
-    "library": "OpenMOLELibrary",
+    "library": "openmole_library",
     "libraryTarget": "var"
   },
   "mode": "development",
   "devServer": {
     "port": 8080
   },
+  "devtool":"source-map",
   "module": {
     "rules": [{
       "test": new RegExp("\\.js$"),

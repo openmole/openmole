@@ -751,7 +751,7 @@ package object client {
   )
 
   lazy val tdStyle = Seq(
-    colSM(2),
+    colBS(2),
     marginBottom := "8",
     paddingLeft := "5",
     width := "auto",

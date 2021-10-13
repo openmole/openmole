@@ -2,10 +2,6 @@ package org.openmole.gui.server.jscompile
 
 import org.openmole.tool.file._
 import org.openmole.tool.logger.JavaLogger
-import org.openmole.tool.logger.LoggerService
-
-import java.io.{ File, InputStream }
-import scala.sys.process.{ BasicIO, Process }
 
 object Webpack extends JavaLogger {
 
