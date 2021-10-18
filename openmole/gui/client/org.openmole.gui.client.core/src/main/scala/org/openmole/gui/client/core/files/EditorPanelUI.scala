@@ -17,6 +17,9 @@ import scaladget.bootstrapnative.Popup.{ Manual, PopupPosition }
 import com.raquo.laminar.api.L._
 import com.raquo.laminar.builders.DomEventStreamPropBuilder
 import org.openmole.gui.client.core.panels
+import org.openmole.gui.ext.data
+
+import scala.scalajs.js.annotation.JSImport
 
 /*
  * Copyright (C) 07/04/15 // mathieu.leclaire@openmole.org
@@ -63,6 +66,10 @@ object EditorPanelUI {
     }
 
   case class HighlightedFile(highlighter: String)
+
+  @js.native
+  @JSImport("ace-builds/src-noconflict/mode-openmole.js", JSImport.Namespace)
+  object openmolemode extends js.Object
 }
 
 class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: FileExtension, containerHESetters: HESetters) {
@@ -75,8 +82,12 @@ class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: Fi
     js.Dynamic.global.ace.config.set("modePath", "js")
     js.Dynamic.global.ace.config.set("themePath", "js")
 
+    scalamode
+    EditorPanelUI.openmolemode
+    githubtheme
+    extLanguageTools
+
     ed.setTheme("ace/theme/github")
-    ace.require("ace/ext/language_tools")
 
     EditorPanelUI.highlightedFile(fileType).foreach { h ⇒
       ed.getSession().setMode("ace/mode/" + h.highlighter)

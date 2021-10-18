@@ -23,10 +23,11 @@ import org.scalajs.linker.interface._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import org.scalajs.linker._
-import java.io.File
 
+import java.io.File
 import org.openmole.tool.file._
 import org.openmole.core.workspace._
+import org.openmole.gui.server.jscompile.Webpack.ExtraModule
 import org.scalajs.logging.{ NullLogger, ScalaConsoleLogger }
 
 object JSPack {
@@ -60,7 +61,7 @@ object JSPack {
       Await.result(result, Duration.Inf)
     }
 
-  def webpack(entryJSFile: File, webpackJsonPackage: File, webpackConfigTemplateLocation: File, webpackOutputFile: File)(implicit newFile: TmpDirectory) = {
+  def webpack(entryJSFile: File, webpackJsonPackage: File, webpackConfigTemplateLocation: File, webpackOutputFile: File, extraModules: Seq[ExtraModule])(implicit newFile: TmpDirectory) = {
     newFile.withTmpDir { targetDir ⇒
 
       webpackJsonPackage copy targetDir / webpackJsonPackage.getName
@@ -72,7 +73,8 @@ object JSPack {
         entryJSFile,
         webpackConfigTemplateLocation,
         targetDir,
-        webpackOutputFile
+        webpackOutputFile,
+        extraModules
       )
     }
   }

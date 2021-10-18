@@ -5,26 +5,31 @@ import org.openmole.tool.logger.JavaLogger
 
 object Webpack extends JavaLogger {
 
-  def run(entry: java.io.File, webpackConfigTemplate: java.io.File, workingDirectory: java.io.File, depsOutput: java.io.File) = {
+  case class ExtraModule(jsFile: java.io.File, nodeModuleSubdirectory: String)
+
+  def run(entry: java.io.File, webpackConfigTemplate: java.io.File, workingDirectory: java.io.File, depsOutput: java.io.File, extraModules: Seq[ExtraModule]) = {
 
     val to = workingDirectory / "webpack.config.js"
 
     val configFile = setConfigFile(entry, depsOutput, webpackConfigTemplate, to)
 
-    println("-- CONFIG FILE " + configFile.toFile.content)
-
     val webpackPath = workingDirectory / "node_modules/webpack/bin/webpack"
 
     val cmd = Seq(
       webpackPath.getAbsolutePath,
-      "--profile",
+      "--progress",
       "--json",
       "--config",
       configFile.toFile.getAbsolutePath
     )
 
+    val fromNodeModules = workingDirectory / "node_modules"
     val nodeModulesDirectory = depsOutput.getParentFile / "node_modules"
-    if (!nodeModulesDirectory.exists) workingDirectory / "node_modules" copy nodeModulesDirectory
+
+    if (!nodeModulesDirectory.exists) {
+      fromNodeModules copy nodeModulesDirectory
+      extraModules.foreach { em ⇒ em.jsFile copy nodeModulesDirectory / em.nodeModuleSubdirectory / em.jsFile.getName }
+    }
 
     External.run("node", cmd, workingDirectory)
   }

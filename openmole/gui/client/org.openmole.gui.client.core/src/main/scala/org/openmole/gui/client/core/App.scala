@@ -173,28 +173,28 @@ object App {
 
       //START BUTTON
       lazy val theNavBar = div(
-          child <-- openFileTree.signal.map { oft ⇒
-            navBar(
-              Seq(
-                backgroundColor := "#3f3d56",
-                omsheet.absoluteFullWidth, fontSize := "20",
-                if (oft) mainNav370 else mainNav0
-              ),
-              navItem(
-                if (oft) div(glyph_chevron_left) else div(glyph_chevron_right),
-                todo = () ⇒ {
-                  openFileTree.update(!_)
-                }
-              ),
-              navItem(menuActions.selector),
-              execItem,
-              authenticationItem,
-              pluginItem,
-              actionItem,
-              settingsItem
-            ).render
-          }
-        )
+        child <-- openFileTree.signal.map { oft ⇒
+          navBar(
+            Seq(
+              backgroundColor := "#3f3d56",
+              omsheet.absoluteFullWidth, fontSize := "20",
+              if (oft) mainNav370 else mainNav0
+            ),
+            navItem(
+              if (oft) div(glyph_chevron_left) else div(glyph_chevron_right),
+              todo = () ⇒ {
+                openFileTree.update(!_)
+              }
+            ),
+            navItem(menuActions.selector),
+            execItem,
+            authenticationItem,
+            pluginItem,
+            actionItem,
+            settingsItem
+          ).render
+        }
+      )
 
       lazy val importModel = MenuAction("Import your model", () ⇒ {
         modelWizardPanel(plugins.wizardFactories).dialog.show

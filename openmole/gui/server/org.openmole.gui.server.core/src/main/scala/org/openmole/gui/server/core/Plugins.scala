@@ -12,8 +12,9 @@ import org.openmole.gui.server.jscompile.JSPack
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.core.services.Services
 import org.openmole.gui.ext.server._
+import org.openmole.gui.server.jscompile.Webpack.ExtraModule
 
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object Plugins extends JavaLogger {
 
@@ -61,17 +62,18 @@ object Plugins extends JavaLogger {
       val webpackJsonPackage = GUIServer.webpackLocation / utils.webpackJsonPackage
       val webpackOutput = webui / utils.webpakedOpenmoleFileName
 
-      JSPack.webpack(jsFile, webpackJsonPackage, webpackConfigTemplateLocation, webpackOutput)
+      val modeOpenMOLE = Plugins.expandDepsFile(GUIServer.fromWebAppLocation /> "js" / utils.openmoleGrammarName, webui / utils.openmoleGrammarMode)
+
+      JSPack.webpack(jsFile, webpackJsonPackage, webpackConfigTemplateLocation, webpackOutput, Seq(ExtraModule(modeOpenMOLE, utils.aceModuleSource)))
 
     }
 
     (jsPluginDirectory / "optimized_mode").content = optimizedJS.toString
 
-    println("JS FILLE " + jsFile.getAbsolutePath)
     if (!jsFile.exists) update
     else utils.updateIfChanged(jsPluginDirectory) { _ ⇒ update }
 
-    (jsFile, webui / utils.webpakedOpenmoleFileName)
+    webui / utils.webpakedOpenmoleFileName
   }
 
   def expandDepsFile(template: File, to: File) = {

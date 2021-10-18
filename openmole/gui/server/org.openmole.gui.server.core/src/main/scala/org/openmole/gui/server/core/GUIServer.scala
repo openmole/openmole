@@ -48,16 +48,11 @@ object GUIServer {
     from / "fonts" copy to / "fonts"
     from / "img" copy to / "img"
 
-    val grammarFile = to /> "js" / utils.openmoleGrammarMode
-    val editorThemeFile = to /> "js" / utils.githubTheme
+    val webpacked = Plugins.openmoleFile(optimizedJS)
 
-    Plugins.expandDepsFile(from / "js" / utils.openmoleGrammarName, grammarFile)
-    (from / "js" / utils.githubTheme) copy editorThemeFile
+    val jsTarget = to /> "js"
+    webpacked copy (jsTarget / utils.webpakedOpenmoleFileName)
 
-    val (openmoleJSFile, webpacked) = Plugins.openmoleFile(optimizedJS)
-
-    //openmoleJSFile copy (to /> "js" / utils.openmoleFileName)
-    webpacked copy (to /> "js" / utils.webpakedOpenmoleFileName)
     new File(webpacked.getAbsolutePath + ".map") copy (to /> "js" / (webpacked.getName + ".map"))
 
     to

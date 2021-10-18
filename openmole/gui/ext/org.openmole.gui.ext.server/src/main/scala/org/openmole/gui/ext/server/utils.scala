@@ -267,6 +267,7 @@ object utils {
   val webpakedOpenmoleFileName = "openmole-webpacked.js"
   val depsFileName = "deps.js"
   val openmoleGrammarName = "openmole_grammar_template.js"
+  val aceModuleSource = "ace-builds/src-noconflict"
   val openmoleGrammarMode = "mode-openmole.js"
   val githubTheme = "theme-github.js"
   val webpackConfigTemplateName = "template.webpack.config.js"
