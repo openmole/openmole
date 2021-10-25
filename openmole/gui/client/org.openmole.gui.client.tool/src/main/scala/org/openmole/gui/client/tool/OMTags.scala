@@ -49,6 +49,7 @@ object OMTags {
   //val options = cls("glyphicon glyphicon-option-horizontal")
   val glyph_eye_open = cls("bi-eye-fill")
   val glyph_flash = cls("lightning-charge")
+  val glyph_house = cls("bi-house-fill")
 
   case class AlertAction(action: () ⇒ Unit)
 

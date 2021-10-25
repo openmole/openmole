@@ -271,36 +271,6 @@ package object client {
     textDecoration := "none"
   )
 
-  lazy val dir = Seq(
-    backgroundColor := BLUE,
-    color := WHITE,
-    display := "inline-block",
-    height := "20",
-    marginBottom := "3",
-    marginTop := "2",
-    marginLeft := "1",
-    padding := "2",
-    width := "20",
-    borderRadius := "4px"
-  )
-
-  lazy val fileNameOverflow = Seq(
-    color := WHITE,
-    whiteSpace := "nowrap",
-    overflow := "hidden",
-    cursor.pointer,
-    width := "245",
-    textOverflow := "ellipsis"
-  )
-
-  lazy val fileIcon = Seq(
-    paddingLeft := "5",
-    paddingTop := "3",
-    fontSize := "8",
-    marginBottom := "-16",
-    zIndex := 2
-  )
-
   lazy val divAlertPosition = Seq(
     float.right,
     marginRight := "70",
@@ -495,11 +465,11 @@ package object client {
 
   def executionState(state: ExecutionInfo) = Seq(
     state match {
-      case _: ExecutionInfo.Failed   ⇒ color := "#CC3A36"
-      case _: ExecutionInfo.Running  ⇒ color := "yellow"
+      case _: ExecutionInfo.Failed ⇒ color := "#CC3A36"
+      case _: ExecutionInfo.Running ⇒ color := "yellow"
       case _: ExecutionInfo.Finished ⇒ color := "#a6bf26"
       case _: ExecutionInfo.Canceled ⇒ color := "orange"
-      case _                         ⇒ color := "#fff"
+      case _ ⇒ color := "#fff"
     },
     fontWeight := "bold"
   )
@@ -507,7 +477,7 @@ package object client {
   lazy val rowLayout = Seq(
     display := "table",
     tableLayout := "fixed"
-  //borderSpacing := 5
+    //borderSpacing := 5
   )
 
   lazy val columnLayout = Seq(
@@ -585,7 +555,7 @@ package object client {
     top := topPosition,
     left := "50%",
     minWidth := "250",
-   // svg.transform := "translate (-50%,-50%)"
+    // svg.transform := "translate (-50%,-50%)"
   )
 
   lazy val relativeCenter = Seq(

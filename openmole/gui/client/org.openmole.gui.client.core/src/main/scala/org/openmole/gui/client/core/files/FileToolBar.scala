@@ -321,8 +321,8 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   }
 
   val sortingGroup = {
-    val topTriangle = Seq(glyph_triangle_top, (fontSize := "10"))
-    val bottomTriangle = Seq(glyph_triangle_bottom, fontSize := "10")
+    val topTriangle = Seq(glyph_triangle_up, (fontSize := "10"))
+    val bottomTriangle = Seq(glyph_triangle_down, fontSize := "10")
     //    exclusiveButtonGroup(omsheet.sortingBar, cls := ("sortingTool", "selectedSortingTool"))(
     //      ExclusiveButton.twoGlyphSpan(
     //        topTriangle,
@@ -356,7 +356,8 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   lazy val element = {
 
-    div(paddingBottom := "10", paddingTop := "50",
+    div(
+      cls := "file-content",
       div(
         centerElement,
         buildAndSelectSpan(FilterTool, "Filter files by number of entries or by names"),

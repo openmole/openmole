@@ -13,6 +13,7 @@ body{
     user-select:none;
     -o-user-select:none;
     font-family:gi;
+    line-height:1;
 }
 
 .table.envError>tbody>tr>td{
@@ -70,24 +71,6 @@ ul{
     list-style-type: none;
 }
 
-/* EDITOR */
-#editor {
-    font-family: monospace;
-    height: 100%;
-}
-
-.ace_gutter-layer {
-    background-color: white;
-}
-
-#editor .ace_marker-layer .ace_active-line {
-    background: #f2f2f2 none repeat scroll 0 0;
-}
-
-#editor .ace_marker-layer .ace_selection {
-    background: #c8c8fa none repeat scroll 0 0;
-}
-
 
 /* TREENODE PANEL */
 .treePathItems{
@@ -120,14 +103,7 @@ ul{
 }
 
 .tree-path {
-    position: relative;
     min-height: 27px;
-    height: auto;
-    left: -10px;
-    padding-bottom:10px;
-    padding-left: 10px;
-    padding-right: 18px;
-    width: 373px;
     background-color: #f8f8f8;
     word-wrap: break-word;
 }
@@ -138,7 +114,7 @@ ul{
 }
 
 .tree-path .btn-group {
-}
+}*/
 
 .file-list tbody{
   overflow-y: scroll;
@@ -463,7 +439,7 @@ li.selectElement{
 padding-bottom: 90px;
 }
 
-
+/*
 .fullpanel .reduce{
     left: 390px;
     width: calc(100% - 390px);
@@ -480,8 +456,8 @@ padding-bottom: 90px;
 
 .fullpanel .open {
     left: 0;
-}
-
+}*/
+/*
 .leftpanel {
     background: #222 none repeat scroll 0 0;
     height: 100%;
@@ -493,7 +469,7 @@ padding-bottom: 90px;
     transition: all 0.1s ease-out 0s;
     width: 370px;
     z-index:6;
-}
+}*/
 
 .hidden-div {
   position: relative;
@@ -561,3 +537,147 @@ padding-bottom: 90px;
 .popover{
     max-width: 50%;
 }
+
+/* TREE NOOD PANEL*/
+.dir {
+  background-color : blue;
+  color : white;
+  height : 20px;
+  width : 20px;
+  border-radius : 4px;
+  display: flex;           /* establish flex container */
+  flex-direction: column;  /* make main axis vertical */
+  justify-content: center; /* center items vertically, in this case */
+  align-items: center;     /* center items horizontally, in this case */
+}
+
+.plus {
+  text-align: center;
+  margin: 3px;
+  width:20px;
+}
+
+.file0{
+  flex: 0 0 20px;
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+.file1{
+  flex: 1;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  cursor:pointer;
+}
+
+.file2{
+  flex: 0 0 50px;
+  font-size: 9px;
+  justify-content: flex-end;
+  display: flex;
+  margin-right: 10px;
+}
+
+.file3{
+ flex: 0 0 20px;
+}
+
+.app-container {
+  background: pink;
+  flex-grow: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  /* for Firefox */
+  min-height: 0;
+  width:100%;
+  height:100%;
+}
+
+
+.main-container {
+  background: #3F51B5;
+
+  /* give the outermost container a predefined size */
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: row;
+
+
+  width: 100%;
+  height: 100%;
+}
+
+.file-section {
+ margin: 10px;
+ background: #2196F3;
+ flex-grow: 1;
+
+ display: flex;
+ flex-direction: column;
+
+ /* for Firefox */
+ min-height: 0;
+ width: 400px;
+}
+
+.tab-section{
+  margin: 10px;
+  background: #2196F3;
+  flex-grow: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  /* for Firefox */
+  min-height: 0;
+  width:100%;
+}
+
+.file-content {
+  margin: 10px;
+  background: #BBDEFB;
+}
+
+.file-scrollable-content {
+  background: white;
+  flex-grow: 1;
+
+  overflow: auto;
+
+  /* for Firefox */
+  min-height: 0;
+}
+
+
+/* EDITOR */
+.ace_gutter-layer {
+    background-color: white;
+}
+
+#editor .ace_marker-layer .ace_active-line {
+    background: #f2f2f2 none repeat scroll 0 0;
+}
+
+#editor .ace_marker-layer .ace_selection {
+    background: #c8c8fa none repeat scroll 0 0;
+}
+
+.editor-content {
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+}
+
+#editor {
+   font-family: monospace;
+   top: 0;
+   right: 0;
+   bottom: 0;
+   left: 0;
+   height:100%;
+}
+

@@ -12,6 +12,7 @@ import scaladget.tools._
 import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw._
 import org.openmole.gui.client.core._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import TreeNode._
@@ -22,6 +23,7 @@ import org.scalajs.dom
 import scaladget.bootstrapnative.Popup
 import scaladget.bootstrapnative.Popup.Manual
 import com.raquo.laminar.api.L._
+import org.openmole.gui.client.tool.OMTags
 
 /*
  * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org
@@ -65,10 +67,10 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
   lazy val fileControler =
     // val current = treeNodeManager.current()
     div(
-      cls := "tree-path",
+      cls := "file-content tree-path",
       child <-- treeNodeManager.current.signal.map { curr ⇒
         div(
-          goToDirButton(treeNodeManager.root).amend(glyph_home, float.left),
+          goToDirButton(treeNodeManager.root).amend(OMTags.glyph_house, float.left),
           Seq(curr.parent, curr).filterNot { sp ⇒
             sp.isEmpty || sp == treeNodeManager.root
           }.map { sp ⇒
@@ -82,6 +84,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
   lazy val labelArea =
     div(
+      cls := "file-content",
       child <-- treeNodeManager.copied.signal.combineWith(treeNodeManager.current.signal).map {
         case (copied, curr) ⇒
           div(
@@ -105,7 +108,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
   lazy val view = {
     drawTree
-    div(child <-- tree.signal)
+    div(child <-- tree.signal, cls := "file-scrollable-content")
   }
 
   private def paste(safePaths: Seq[SafePath], to: SafePath) = {
@@ -208,52 +211,78 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     case _                ⇒
   }
 
+  //  def fileTable(rows: Seq[Seq[HtmlElement]]) = {
+  //    div(
+  //      rows.map { r ⇒
+  //        //        div(display.flex, alignItems.center,
+  //        //          r.zipWithIndex.map {
+  //        //            case (e, c) ⇒
+  //        //              e.amend(cls := s"file$c")
+  //        //          }
+  //        //        )
+  //      }
+  //    )
+  //  }
+
+  def dirBox(tn: TreeNode) = {
+    tn match {
+      case _: DirNode ⇒ div(
+        cls := "dir",
+        div(cls := "plus bi-plus")
+      )
+      case _ ⇒ div()
+    }
+  }
+
   def drawTree: Unit = {
     computePluggables
     tree.set(treeNodeManager.computeCurrentSons(filter).withFutureWaiter("Get files", (sons: ListFiles) ⇒ {
 
-      table(
-        if (treeNodeManager.isRootCurrent && treeNodeManager.isProjectsEmpty) {
-          div("Create a first OpenMOLE script (.oms)", cls := "message")
-        }
-        else {
-          tbody(
-            backgroundColor <-- selectionMode.signal.map { sM ⇒
-              if (sM) omsheet.BLUE else omsheet.DARK_GREY
-            },
-            omsheet.fileList,
-            child <-- treeWarning.signal.map { tW ⇒
-              if (sons.list.length < sons.nbFilesOnServer && tW) {
-                div(
-                  omsheet.moreEntries,
-                  div(
-                    omsheet.moreEntriesText,
-                    div(
-                      s"Max of 1,000 files (${100000 / sons.nbFilesOnServer}%) displayed simultaneously",
-                      div(
-                        "Use the ",
-                        span(
-                          "Filter tool",
-                          cursor.pointer, color := omsheet.BLUE,
-                          onClick --> { _ ⇒ fileToolBar.selectTool(FilterTool) }
-                        ), " to refine your search"
-                      )
-                    )
-                  )
-                )
-              }
-              else div()
-            },
-            for (tn ← sons.list) yield {
-              drawNode(tn).render
-            },
-            //            onscroll := { () ⇒
-            //              Popover.hide
-            //            },
-            selectionMode --> selectionModeObserver
-          )
-        }
-      )
+      if (treeNodeManager.isRootCurrent && treeNodeManager.isProjectsEmpty) {
+        div("Create a first OpenMOLE script (.oms)", cls := "message")
+      }
+      else {
+        //          tbody(
+        //            backgroundColor <-- selectionMode.signal.map { sM ⇒
+        //              if (sM) omsheet.BLUE else omsheet.DARK_GREY
+        //            },
+        //            omsheet.fileList,
+        //            child <-- treeWarning.signal.map { tW ⇒
+        //              if (sons.list.length < sons.nbFilesOnServer && tW) {
+        //                div(
+        //                  omsheet.moreEntries,
+        //                  div(
+        //                    omsheet.moreEntriesText,
+        //                    div(
+        //                      s"Max of 1,000 files (${100000 / sons.nbFilesOnServer}%) displayed simultaneously",
+        //                      div(
+        //                        "Use the ",
+        //                        span(
+        //                          "Filter tool",
+        //                          cursor.pointer, color := omsheet.BLUE,
+        //                          onClick --> { _ ⇒ fileToolBar.selectTool(FilterTool) }
+        //                        ), " to refine your search"
+        //                      )
+        //                    )
+        //                  )
+        //                )
+        //              }
+        //              else div()
+        //            },
+        //            for (tn ← sons.list) yield {
+        //              drawNode(tn).render
+        //            },
+        //            //            onscroll := { () ⇒
+        //            //              Popover.hide
+        //            //            },
+        //            selectionMode --> selectionModeObserver
+        //          )
+        div(
+          sons.list.map { tn ⇒
+            Seq(drawNode(tn).render)
+          }
+        )
+      }
     })
     )
 
@@ -327,30 +356,30 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
     private val treeStates: Var[TreeStates] = Var(TreeStates(false, false, false))
 
-    val clickablePair = {
-      val style = Seq(
-        float.left,
-        cursor.pointer,
-        draggable := true,
-        onClick --> { e ⇒
-          if (!selectionMode.now) {
-            todo()
-          }
-        }
-      )
-
-      tn match {
-        case fn: FileNode ⇒ span(span(paddingTop := "4", omsheet.file, style, div(omsheet.fileNameOverflow, tn.name)))
-        case dn: DirNode ⇒
-          span(
-            span(
-              if (dn.isEmpty) emptySetters
-              else omsheet.fileIcon, glyph_plus
-            ),
-            omsheet.dir, style, div(omsheet.fileNameOverflow, paddingLeft := "22"), tn.name
-          )
-      }
-    }
+    //    val clickablePair = {
+    //      val style = Seq(
+    //        float.left,
+    //        cursor.pointer,
+    //        draggable := true,
+    //        onClick --> { e ⇒
+    //          if (!selectionMode.now) {
+    //            todo()
+    //          }
+    //        }
+    //      )
+    //      println("TN " + tn.name)
+    //      tn match {
+    //        case fn: FileNode ⇒ span(span(paddingTop := "4", omsheet.file, style, div(omsheet.fileNameOverflow, tn.name)))
+    //        case dn: DirNode ⇒
+    //          div(omsheet.dir,
+    //            div(
+    //              if (dn.isEmpty) emptySetters
+    //              else glyph_plus
+    //            ),
+    //            , style, div(omsheet.fileNameOverflow, paddingLeft := "22"), tn.name
+    //          )
+    //      }
+    //    }
 
     def timeOrSize(tn: TreeNode): String = fileToolBar.fileFilter.now.fileSorting match {
       case TimeSorting() ⇒ CoreUtils.longTimeToString(tn.time)
@@ -416,66 +445,85 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
       popRender
     }
 
-    val render: HtmlElement = {
-      val settingsGlyph = Seq(cls := "glyphitem", glyph_settings, color := WHITE, paddingLeft := "4")
-
-      tr(
-        child <-- selectionMode.signal.combineWith(treeStates.signal, fileToolBar.selectedTool.signal, treeNodeManager.pluggables.signal).map {
-          case (sM, tS, sTools, pluggables) ⇒
-            td(
-              onClick --> { e ⇒
-                {
-                  if (sM) {
-                    addToSelection
-                    if (e.ctrlKey) clearSelectionExecpt(tnSafePath)
-                  }
-                }
-              },
-              dropPairs,
-              onDragStart --> { e ⇒
-                e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
-                draggedNode.set(Some(tnSafePath))
-              },
-              onDrop --> { e ⇒
-                e.dataTransfer
-                e.preventDefault()
-                dropAction(treeNodeManager.current.now ++ tn.name, tn match {
-                  case _: DirNode ⇒ true
-                  case _          ⇒ false
-                })
-              },
-              onDragEnter --> { _ ⇒
-                false
-              },
-              clickablePair, {
-                div(
-                  fileInfo,
-                  span(
-                    omsheet.fileSize,
-                    i(timeOrSize(tn)),
-                    buildManualPopover(
-                      div(settingsGlyph, onClick --> { _ ⇒ /*FIXME*/
-                        /*Popover.hide*/
-                      })
-                    )
-                  )
-                )
-              },
-              div(
-                width := "100%",
-                if (tS.selected) {
-                  sTools match {
-                    case Some(TrashTool) ⇒ omsheet.fileSelectedForDeletion
-                    case Some(PluginTool) if pluggables.contains(tn) ⇒ omsheet.fileSelected
-                    case _ ⇒ omsheet.fileSelected
-                  }
-                }
-                else omsheet.fileSelectionOverlay,
-                span(omsheet.fileSelectionMessage)
-              )
-            )
+    def fileClick =
+      onClick --> { e ⇒
+        if (!selectionMode.now) {
+          todo()
         }
+      }
+
+    val render: HtmlElement = {
+      // val settingsGlyph = Seq(cls := "glyphitem", glyph_settings, color := WHITE, paddingLeft := "4")
+
+      div(display.flex, alignItems.center, margin := "3",
+        //        child <-- selectionMode.signal.combineWith(treeStates.signal, fileToolBar.selectedTool.signal, treeNodeManager.pluggables.signal).map {
+        //          case (sM, tS, sTools, pluggables) ⇒
+        //            onClick --> { e ⇒ {
+        //              if (sM) {
+        //                addToSelection
+        //                if (e.ctrlKey) clearSelectionExecpt(tnSafePath)
+        //              }
+        //            }
+        //            },
+        //          dropPairs
+        //          ,
+        //          onDragStart --> { e ⇒
+        //            e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
+        //            draggedNode.set(Some(tnSafePath))
+        //          }
+        //          ,
+        //          onDrop --> { e ⇒
+        //            e.dataTransfer
+        //            e.preventDefault()
+        //            dropAction(treeNodeManager.current.now ++ tn.name, tn match {
+        //              case _: DirNode ⇒ true
+        //              case _ ⇒ false
+        //            })
+        //          }
+        //          ,
+        //          onDragEnter --> { _ ⇒
+        //            false
+        //          }
+        //,
+        // clickablePair,
+        //              {
+        //                div(
+        //                  fileInfo,
+        //                  span(
+        //                    omsheet.fileSize,
+        //                    i(timeOrSize(tn)),
+        //                    buildManualPopover(
+        //                      div(settingsGlyph, onClick --> { _ ⇒ /*FIXME*/
+        //                        /*Popover.hide*/
+        //                      })
+        //                    )
+        //                  )
+        //                )
+        //              },
+        dirBox(tn).amend(cls := "file0", fileClick),
+        div(tn.name, cls := "file1", fileClick),
+        i(timeOrSize(tn), cls := "file2"),
+        buildManualPopover(
+          div(cls := "bi-gear-fill", onClick --> { _ ⇒ /*FIXME*/
+            /*Popover.hide*/
+          })
+        )
+      //
+      //              div(
+      //                width := "100%",
+      //                if (tS.selected) {
+      //                  sTools match {
+      //                    case Some(TrashTool) ⇒ omsheet.fileSelectedForDeletion
+      //                    case Some(PluginTool) if pluggables.contains(tn) ⇒ omsheet.fileSelected
+      //                    case _ ⇒ omsheet.fileSelected
+      //                  }
+      //                }
+      //                else omsheet.fileSelectionOverlay,
+      //                span(omsheet.fileSelectionMessage)
+      //              )
       )
+      //}
+      //)
     }
   }
 

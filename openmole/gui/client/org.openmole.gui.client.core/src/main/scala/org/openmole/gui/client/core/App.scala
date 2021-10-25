@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import autowire._
 import scaladget.bootstrapnative.Selector.Options
-import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
+import org.openmole.gui.client.core.alert.{AlertPanel, BannerAlert}
 import org.openmole.gui.client.core.files.TreeNodePanel
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
@@ -176,9 +176,8 @@ object App {
         child <-- openFileTree.signal.map { oft ⇒
           navBar(
             Seq(
-              backgroundColor := "#3f3d56",
-              omsheet.absoluteFullWidth, fontSize := "20",
-              if (oft) mainNav370 else mainNav0
+              backgroundColor := "#3f3d56", fontSize := "20",
+              // if (oft) mainNav370 else mainNav0
             ),
             navItem(
               if (oft) div(glyph_chevron_left) else div(glyph_chevron_right),
@@ -225,34 +224,31 @@ object App {
         render(
           containerNode,
           div(
-            div(
-              cls := "fullpanel",
-              panels.bannerAlert.banner,
-              theNavBar,
-              div(
-                cls <-- openFileTree.signal.map { oft ⇒ "leftpanel" + CoreUtils.ifOrNothing(oft, "open") },
-                div(omsheet.relativePosition, paddingTop := "-15",
-                  treeNodePanel.fileToolBar.element,
-                  treeNodePanel.fileControler,
-                  treeNodePanel.labelArea,
-                  treeNodePanel.view
-                )
+            cls := "app-container",
+           // panels.bannerAlert.banner,
+            theNavBar,
+            div(cls := "main-container",
+              cls <-- openFileTree.signal.map { oft ⇒ "leftpanel" + CoreUtils.ifOrNothing(oft, "open") },
+              div(cls := "file-section",
+                treeNodePanel.fileToolBar.element,
+                treeNodePanel.fileControler,
+                treeNodePanel.labelArea,
+                treeNodePanel.view
               ),
-              div(
-                cls <-- openFileTree.signal.combineWith(panels.bannerAlert.isOpen).map {
-                  case (oft, io) ⇒
-                    "centerpanel " +
-                      CoreUtils.ifOrNothing(oft, "reduce") +
-                      CoreUtils.ifOrNothing(io, " banneropen")
-                },
-                treeNodeTabs.render,
-                div(
-                  omsheet.textVersion,
-                  div(
-                    fontSize := "1em", s"${sets.version} ${sets.versionName}"),
-                  div(fontSize := "0.8em", s"built the ${sets.buildTime}")
-                )
-              )
+              treeNodeTabs.render.amend(cls := "tab-section")
+              //                cls <-- openFileTree.signal.combineWith(panels.bannerAlert.isOpen).map {
+              //                  case (oft, io) ⇒
+              //                   // "centerpanel "
+              ////                    +
+              ////                      CoreUtils.ifOrNothing(oft, "reduce") +
+              ////                      CoreUtils.ifOrNothing(io, " banneropen")
+              //                },
+              //                  div(
+              //                    omsheet.textVersion,
+              //                    div(
+              //                      fontSize := "1em", s"${sets.version} ${sets.versionName}"),
+              //                    div(fontSize := "0.8em", s"built the ${sets.buildTime}")
+              //                  )
             ),
             panels.alertPanel.alertDiv
           )

@@ -226,7 +226,7 @@ object TreeNodeTab {
                dataTab: DataTab,
                plotter: Plotter) = {
 
-      val editor = EditorPanelUI(treeNodeTabs, safePath, FileExtension(safePath.name), content, hash, if (DataUtils.isCSV(safePath)) paddingBottom := "80" else emptySetters)
+      val editor = EditorPanelUI(treeNodeTabs, safePath, FileExtension(safePath.name), content, hash /*, if (DataUtils.isCSV(safePath)) paddingBottom := "80" else emptySetters*/)
 
       new Editable(
         treeNodeTabs = treeNodeTabs,
@@ -625,10 +625,10 @@ object TreeNodeTab {
             case _ ⇒
               val (newPlotter, newSequenceData) = plotterAndSeqencedata(dataTab, plotter)
               div()
-//              Plotter.plot(
-//                SequenceData(newSequenceData.header, newSequenceData.content),
-//                newPlotter
-//              )
+            //              Plotter.plot(
+            //                SequenceData(newSequenceData.header, newSequenceData.content),
+            //                newPlotter
+            //              )
           }
         )
       )
@@ -658,23 +658,16 @@ object TreeNodeTab {
     cancelString = "Server"
   )
 
-  def rawBlock(htmlContent: String) =
-    div(editorContainer, container,
-      div(panelClass, panelDefault,
-        div(panelBody, htmlContent)
-      )
-    )
+  def rawBlock(htmlContent: String) = div(panelBody, htmlContent)
+
 
   def mdBlock(htmlContent: String) =
-    div(editorContainer, container,
-      div(panelClass, panelDefault,
-        div(
-          panelBody,
-          cls := "mdRendering", padding := "10",
-          htmlContent
-        )
-      )
+    div(
+      panelBody,
+      cls := "mdRendering", padding := "10",
+      htmlContent
     )
+
 
   sealed trait EditableView {
     toString: String
@@ -964,7 +957,7 @@ class TreeNodeTabs {
   //  def setErrors(path: SafePath, errors: Seq[ErrorWithLocation]) =
   //    find(path).foreach { tab ⇒ tab.editor.foreach { _.setErrors(errors) } }
 
-  val fontSizeControl = div(display.flex, flexDirection.row, alignItems.baseline, justifyContent.flexEnd,
+  val fontSizeControl = div(cls := "file-content", display.flex, flexDirection.row, alignItems.baseline, justifyContent.flexEnd,
     fontSizeLink(15),
     fontSizeLink(25),
     fontSizeLink(35)
@@ -1064,11 +1057,10 @@ class TreeNodeTabs {
   //    }
   //  )
 
-  val render = div(
-    fontSizeControl,
-    tabsElement.render,
-    tabsElement.tabs --> tabsObserver,
-    timer --> timerObserver
-  )
+  val render =
+      tabsElement.render("file-content editor-content").amend(
+      tabsElement.tabs --> tabsObserver,
+      timer --> timerObserver
+    )
 
 }
