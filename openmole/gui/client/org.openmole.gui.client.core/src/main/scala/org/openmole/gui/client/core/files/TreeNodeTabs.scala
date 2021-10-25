@@ -1058,7 +1058,7 @@ class TreeNodeTabs {
   //  )
 
   val render =
-      tabsElement.render("file-content editor-content").amend(
+    tabsElement.render("file-content editor-content").amend(
       tabsElement.tabs --> tabsObserver,
       timer --> timerObserver
     )

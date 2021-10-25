@@ -439,38 +439,6 @@ li.selectElement{
 padding-bottom: 90px;
 }
 
-/*
-.fullpanel .reduce{
-    left: 390px;
-    width: calc(100% - 390px);
-}
-
-.centerpanel .reduce {
-    left: 390px;
-    padding-right: 400px;
-    position: relative;
-    top: 61px;
-    transition: all 0.1s ease-out 0s;
-    width: 99%;
-}
-
-.fullpanel .open {
-    left: 0;
-}*/
-/*
-.leftpanel {
-    background: #222 none repeat scroll 0 0;
-    height: 100%;
-    left: -370px;
-    opacity: 1;
-    padding-left: 7px;
-    position: fixed;
-    padding-top: 20px;
-    transition: all 0.1s ease-out 0s;
-    width: 370px;
-    z-index:6;
-}*/
-
 .hidden-div {
   position: relative;
   max-height: 0px;
@@ -612,16 +580,23 @@ padding-bottom: 90px;
 }
 
 .file-section {
- margin: 10px;
- background: #2196F3;
- flex-grow: 1;
+     transition: all 0.1s ease-out 0s;
+     margin: 10px;
+     background: #2196F3;
+     flex-grow: 1;
 
- display: flex;
- flex-direction: column;
+     display: flex;
+     flex-direction: column;
 
- /* for Firefox */
- min-height: 0;
- width: 400px;
+     /* for Firefox */
+     min-height: 0;
+     width: 400px;
+}
+
+.file-section.closed {
+    margin: 0px;
+    transition: all 0.1s ease-out 0s;
+    width: 0px;
 }
 
 .tab-section{
@@ -679,5 +654,9 @@ padding-bottom: 90px;
    bottom: 0;
    left: 0;
    height:100%;
+}
+
+.top-menu {
+  padding-left: 400px;
 }
 
