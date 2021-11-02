@@ -30,7 +30,7 @@ import org.openmole.core.workflow.test.TestTask
 
 import scala.util.Try
 
-class MoleTaskSpec extends FlatSpec with Matchers {
+class MoleTaskSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

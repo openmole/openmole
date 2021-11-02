@@ -26,7 +26,7 @@ import org.scalatest._
 import org.openmole.plugin.domain.bounds._
 import org.openmole.plugin.method.evolution.Genome.GenomeBound
 
-class WorkflowSpec extends FlatSpec with Matchers {
+class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

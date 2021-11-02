@@ -25,7 +25,7 @@ import org.openmole.tool.cache.Lazy
 
 import scala.util.Random
 
-class VariableExpansionSpec extends FlatSpec with Matchers {
+class VariableExpansionSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

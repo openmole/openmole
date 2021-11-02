@@ -288,7 +288,7 @@ object AggregationTransition {
     val resultValues = results.values.value
     val size = resultValues.size
 
-    def resultsArrays = (resultValues zip results.ids.value).sortBy(_._2).unzip._1.transpose
+    def resultsArrays = (resultValues zip results.ids.value).sortBy(_._2).map(_._1).transpose
 
     def variables = (resultsArrays zip vals).map {
       case (values, v) ⇒

@@ -24,7 +24,7 @@ import org.openmole.core.workflow.test.TestTask
 import org.openmole.tool.hash._
 import org.scalatest._
 
-class CopyFileHookSpec extends FlatSpec with Matchers {
+class CopyFileHookSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

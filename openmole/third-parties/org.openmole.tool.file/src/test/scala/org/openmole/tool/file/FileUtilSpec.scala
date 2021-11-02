@@ -24,7 +24,7 @@ import org.openmole.tool.stream._
 import org.scalatest.FlatSpec
 import org.scalatest._
 
-class FileUtilSpec extends FlatSpec with Matchers {
+class FileUtilSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   "A string" should "be appended to the stream" in {
     val t = "TestString"

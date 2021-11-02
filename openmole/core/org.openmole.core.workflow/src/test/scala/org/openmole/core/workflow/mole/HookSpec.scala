@@ -30,7 +30,7 @@ import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.test.{ TestHook, TestTask }
 import org.scalatest._
 
-class HookSpec extends FlatSpec with Matchers {
+class HookSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

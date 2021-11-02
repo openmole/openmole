@@ -20,7 +20,7 @@ package org.openmole.core.workflow.sampling
 import org.openmole.core.context.Val
 import org.scalatest._
 
-class PrototypeSpec extends FlatSpec with Matchers {
+class PrototypeSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
   "ToArray of dim 0" should "return the prototype itself" in {
     val a = Val[Int]("a")
     a.toArray(0) should equal(a)

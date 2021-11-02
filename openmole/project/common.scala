@@ -2,7 +2,8 @@
 package openmole
 
 object common {
-  def scalaVersionValue = "2.13.6"
+  def scalaVersionValue = "2.13.7"
+  def scala3VersionValue = "3.1.0"
 
   def scalaXMLVersion = "2.0.0"
   def gridscaleVersion = "2.39"
@@ -21,7 +22,7 @@ object common {
   def sortableVersion = "0.7.2"
   def json4sVersion = "4.0.1"
   def circeVersion = "0.13.0"
-  def catsVersion = "2.1.0"
+  def catsVersion = "2.6.1"
   def squantsVersion = "1.8.0"
   def xstreamVersion = "1.4.16"
   def scalaURIVersion = "1.1.1"

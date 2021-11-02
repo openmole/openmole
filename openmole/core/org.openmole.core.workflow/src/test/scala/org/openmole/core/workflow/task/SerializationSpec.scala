@@ -28,7 +28,7 @@ import org.openmole.core.workflow.sampling.ExplicitSampling
 import org.openmole.core.workflow.test.TestTask
 import org.openmole.core.workflow.tools.DefaultSet
 
-class SerializationSpec extends FlatSpec with Matchers {
+class SerializationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

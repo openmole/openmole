@@ -26,7 +26,7 @@ object Libraries {
   lazy val scalaCompatJS =  libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.6"
 
 
-  lazy val scalatest = "org.scalatest" %% "scalatest" % "3.1.2" % "test"
+  lazy val scalatest = "org.scalatest" %% "scalatest" % "3.2.9" % "test"
 
 
   /** ------- Bundles -------------- */
@@ -52,7 +52,7 @@ object Libraries {
   lazy val scopt = "org.openmole.library" %% "com-github-scopt" % scoptVersion
   lazy val scalabc = "org.openmole.library" %% "fr-iscpif-scalabc" % "0.4"
   lazy val scalatexSite = "org.openmole.library" %% "com-lihaoyi-scalatex-site" % "0.4.6"
-  lazy val math = "org.openmole.library" %% "org-apache-commons-math" % mathVersion
+  lazy val math = "org.openmole.library" %% "org-apache-commons-math" % mathVersion cross CrossVersion.for3Use2_13
   lazy val collections = "org.openmole.library" %% "org-apache-commons-collections" % "4.4"
   lazy val exec = "org.openmole.library" %% "org-apache-commons-exec" % "1.3"
   lazy val log4j = "org.openmole.library" %% "org-apache-log4j" % "1.2.17"
@@ -62,8 +62,8 @@ object Libraries {
   lazy val codec = "org.openmole.library" %% "org-apache-commons-codec" % "1.14"
   lazy val async = "org.openmole.library" %% "scala-async" % "0.10.0"
   lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % "5.6.0"
-  lazy val cats = "org.openmole.library" %% "cats" % catsVersion
-  lazy val squants = "org.openmole.library" %% "squants" % squantsVersion
+  lazy val cats = "org.openmole.library" %% "cats" % catsVersion cross CrossVersion.for3Use2_13
+  lazy val squants = "org.openmole.library" %% "squants" % squantsVersion cross CrossVersion.for3Use2_13
   lazy val clapper = "org.openmole.library" %% "org-clapper" % "1.5.1"
   lazy val asm = "org.openmole.library" %% "org-objectweb-asm" % asmVersion
   lazy val configuration = "org.openmole.library" %% "org-apache-commons-configuration2" % "2.6"
@@ -85,7 +85,7 @@ object Libraries {
   lazy val sourceCode = "org.openmole.library" %% "sourcecode" % sourcecodeVersion
   lazy val txtmark = "org.openmole.library" %% "com-github-rjeschke-txtmark" % "0.13"
   lazy val spatialsampling = "org.openmole.library" %% "org-openmole-spatialsampling" % spatialsamplingVersion
-  lazy val xzJava = "org.openmole.library" %% "xzjava" % "1.8"
+  lazy val xzJava = "org.openmole.library" %% "xzjava" % "1.8" cross CrossVersion.for3Use2_13
   lazy val guava = "org.openmole.library" %% "com-google-guava" % guavaVersion
 
   def httpClientVersion = "4.5.3"

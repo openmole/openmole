@@ -21,7 +21,7 @@ import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.scalatest._
 
-class RangeTest extends FlatSpec with Matchers {
+class RangeTest extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

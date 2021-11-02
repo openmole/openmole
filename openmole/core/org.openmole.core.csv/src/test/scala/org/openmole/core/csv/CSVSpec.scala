@@ -6,7 +6,7 @@ import org.openmole.tool.stream.StringOutputStream
 import org.scalatest._
 import org.openmole.core.context._
 
-class CSVSpec extends FlatSpec with Matchers {
+class CSVSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   def result(f: PrintStream ⇒ Unit): String = {
     val result = new StringOutputStream()

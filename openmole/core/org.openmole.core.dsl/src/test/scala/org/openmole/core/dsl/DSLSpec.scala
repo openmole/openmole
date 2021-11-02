@@ -21,7 +21,7 @@ import org.scalatest._
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
-class DSLSpec extends FlatSpec with Matchers {
+class DSLSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

@@ -26,7 +26,7 @@ import org.openmole.core.workflow.task.FromContextTask
 import org.scalatest._
 import org.openmole.core.workflow.test._
 
-class PatternSpec extends FlatSpec with Matchers {
+class PatternSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

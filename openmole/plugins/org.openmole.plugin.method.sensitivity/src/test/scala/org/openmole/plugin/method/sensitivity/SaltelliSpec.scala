@@ -11,7 +11,7 @@ import org.openmole.plugin.domain.collection._
 import org.scalatest._
 import org.openmole.plugin.domain.bounds._
 
-class Saltelli extends FlatSpec with Matchers {
+class Saltelli extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

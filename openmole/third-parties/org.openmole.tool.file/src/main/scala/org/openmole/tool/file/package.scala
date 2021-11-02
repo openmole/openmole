@@ -59,23 +59,21 @@ package file {
 
     def copyChannel(source: FileChannel, destination: FileChannel): Unit = source.transferTo(0, source.size, destination)
 
-    def retrieveResourceFromClassLoader(file: File, clazz: Class[_], resourceName: String, executable: Boolean = false) =
-      if (!file.exists()) {
-        withClosable(clazz.getClassLoader.getResourceAsStream(resourceName))(_.copy(file))
-        if (executable) file.setExecutable(true)
-        file
-      }
+    //    def retrieveResourceFromClassLoader(file: File, clazz: Class[_], resourceName: String, executable: Boolean = false) =
+    //      if (!file.exists()) {
+    //        withClosable(clazz.getClassLoader.getResourceAsStream(resourceName))(_.copy(file))
+    //        if (executable) file.setExecutable(true)
+    //        file
+    //      }
 
     // glad you were there...
-    implicit def file2Path(file: File) = file.toPath
+    implicit def file2Path(file: File): Path = file.toPath
 
-    implicit def path2File(path: Path) = path.toFile
+    implicit def path2File(path: Path): File = path.toFile
 
-    implicit val fileOrdering = Ordering.by((_: File).getPath)
+    implicit val fileOrdering: Ordering[File] = Ordering.by((_: File).getPath)
 
-    implicit def predicateToFileFilter(predicate: File ⇒ Boolean) = new FileFilter {
-      def accept(p1: File) = predicate(p1)
-    }
+    implicit def predicateToFileFilter(predicate: File ⇒ Boolean): FileFilter = p1 ⇒ predicate(p1)
 
     def getCopyOptions(followSymlinks: Boolean) = Seq(StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING) ++
       (if (followSymlinks) Seq.empty[CopyOption] else Seq(LinkOption.NOFOLLOW_LINKS))
@@ -93,9 +91,9 @@ package file {
         if (file.isDirectory) isDirectoryEmpty
         else file.size == 0L
 
-      def listFilesSafe = Option(file.listFiles).getOrElse(Array.empty)
+      def listFilesSafe = Option(file.listFiles).getOrElse(Array.empty[File])
 
-      def listFilesSafe(filter: File ⇒ Boolean) = Option(file.listFiles(filter)).getOrElse(Array.empty)
+      def listFilesSafe(filter: File ⇒ Boolean) = Option(file.listFiles(filter)).getOrElse(Array.empty[File])
 
       def getParentFileSafe: File =
         file.getParentFile() match {

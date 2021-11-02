@@ -33,7 +33,7 @@ import org.openmole.core.workflow.validation.Validation
 
 import scala.util.Try
 
-class AggregationTransitionSpec extends FlatSpec with Matchers {
+class AggregationTransitionSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 
