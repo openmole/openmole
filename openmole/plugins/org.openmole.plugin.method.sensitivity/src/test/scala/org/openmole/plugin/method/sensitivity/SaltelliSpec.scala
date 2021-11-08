@@ -1,7 +1,5 @@
 package org.openmole.plugin.method.sensitivity
 
-import org.scalatest.{ FlatSpec, Matchers }
-
 import org.openmole.core.workflow.test._
 import scala.util.Random
 

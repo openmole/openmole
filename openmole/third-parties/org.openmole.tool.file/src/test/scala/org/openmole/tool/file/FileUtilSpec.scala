@@ -21,7 +21,6 @@ import java.nio.file.{ Files, Paths }
 
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
-import org.scalatest.FlatSpec
 import org.scalatest._
 
 class FileUtilSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {

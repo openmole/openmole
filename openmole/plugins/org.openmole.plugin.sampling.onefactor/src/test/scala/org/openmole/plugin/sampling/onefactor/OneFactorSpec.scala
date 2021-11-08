@@ -2,7 +2,7 @@ package org.openmole.plugin.sampling.onefactor
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest._
 import org.openmole.plugin.domain.collection._
 
 /*

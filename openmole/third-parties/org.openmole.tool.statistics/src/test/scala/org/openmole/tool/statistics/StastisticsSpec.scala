@@ -1,6 +1,6 @@
 package org.openmole.tool.statistics
 
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest._
 
 class StastisticsSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
