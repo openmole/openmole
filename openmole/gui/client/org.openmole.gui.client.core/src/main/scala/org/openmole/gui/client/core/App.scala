@@ -173,12 +173,11 @@ object App {
 
       //START BUTTON
       lazy val theNavBar = div(
+        cls := "nav-container",
+        img(src := "img/openmole_dark.png", width := "300px"),
         child <-- openFileTree.signal.map { oft ⇒
           navBar(
-            Seq(
-              backgroundColor := "#3f3d56", fontSize := "20", marginLeft := "310px"
-            // if (oft) mainNav370 else mainNav0
-            ),
+            emptySetters,
             navItem(
               if (oft) div(glyph_chevron_left) else div(glyph_chevron_right),
               todo = () ⇒ {

@@ -48,22 +48,17 @@ class ResetPassword {
   def setPasswordForm =
     form(
       method := "post",
+      cls := "connection-form",
       passwordInput,
       passwordAgainInput,
       resetButton
     )
 
   val resetPassDiv =
-    div(omsheet.connectionTabOverlay,
-      div(
-        img(src := "img/openmole.png", omsheet.openmoleLogo),
-        div(
-          omsheet.centerPage(),
-          div(
-            omsheet.connectionBlock,
-            setPasswordForm
-          )
-        )
-      )
+    div(
+      cls := "screen-center",
+      img(src := "img/openmole_light.png"),
+      setPasswordForm
     )
+
 }

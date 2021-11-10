@@ -124,14 +124,6 @@ package object client {
     top := "0"
   )
 
-  lazy val openmoleLogo = Seq(
-    fixedPosition,
-    width := "600",
-    top := "-30",
-    zIndex := "-1",
-    right := "calc(50% - 250px)"
-  )
-
   lazy val displayOff = Seq(
     display := "none"
   )
@@ -234,12 +226,12 @@ package object client {
     cursor.pointer
   )
 
-  lazy val connectionBlock = Seq(
-    display := "inline-block",
-    textAlign := "right",
-    float := "right",
-    marginRight := "15"
-  )
+//  lazy val connectionBlock = Seq(
+//    display := "inline-block",
+//    textAlign := "right",
+//    float := "right",
+//    marginRight := "15"
+//  )
 
   lazy val textVersion = Seq(
     color := "grey",
@@ -465,11 +457,11 @@ package object client {
 
   def executionState(state: ExecutionInfo) = Seq(
     state match {
-      case _: ExecutionInfo.Failed ⇒ color := "#CC3A36"
-      case _: ExecutionInfo.Running ⇒ color := "yellow"
+      case _: ExecutionInfo.Failed   ⇒ color := "#CC3A36"
+      case _: ExecutionInfo.Running  ⇒ color := "yellow"
       case _: ExecutionInfo.Finished ⇒ color := "#a6bf26"
       case _: ExecutionInfo.Canceled ⇒ color := "orange"
-      case _ ⇒ color := "#fff"
+      case _                         ⇒ color := "#fff"
     },
     fontWeight := "bold"
   )
@@ -477,7 +469,7 @@ package object client {
   lazy val rowLayout = Seq(
     display := "table",
     tableLayout := "fixed"
-    //borderSpacing := 5
+  //borderSpacing := 5
   )
 
   lazy val columnLayout = Seq(
@@ -551,11 +543,13 @@ package object client {
   )
 
   def centerPage(topPosition: String = "45%") = Seq(
-    position := "fixed",
-    top := topPosition,
-    left := "50%",
-    minWidth := "250",
-    // svg.transform := "translate (-50%,-50%)"
+    //cf screen-center css rule
+    backgroundColor := "red",
+  //    position := "fixed",
+  //    top := topPosition,
+  //    left := "50%",
+  //    minWidth := "250",
+  // svg.transform := "translate (-50%,-50%)"
   )
 
   lazy val relativeCenter = Seq(

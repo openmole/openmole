@@ -40,27 +40,17 @@ class Connection {
 
   private val connectionForm = form(
     method := "post",
+    cls := "connection-form",
     passwordInput,
     connectButton
   )
 
   val render = {
+    //panels.settingsView.renderConnection,
     div(
-      div("RENDER CONNECTION"),
-      //panels.settingsView.renderConnection,
-      div(
-        omsheet.connectionTabOverlay,
-        div(
-          img(src := "img/openmole.png", omsheet.openmoleLogo),
-          div(
-            omsheet.centerPage(),
-            div(
-              omsheet.connectionBlock,
-              connectionForm
-            )
-          )
-        )
-      )
+      cls := "screen-center",
+      img(src := "img/openmole_light.png", width := "600px"),
+      connectionForm
     )
 
   }
