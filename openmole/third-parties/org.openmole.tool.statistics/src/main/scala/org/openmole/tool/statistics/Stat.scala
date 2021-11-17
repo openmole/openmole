@@ -206,4 +206,12 @@ trait Stat {
       Some(test.kolmogorovSmirnovTest(new NormalDistribution(null, mu, sigma), data.toArray))
     }
 
+  def klDivergence(p1: Array[Double], p2: Array[Double]) = {
+    val s = (p1 zip p2).
+      filter { case (p1, p2) ⇒ p1 == 0.0 || p2 == 0.0 }.
+      map { case (p1, p2) ⇒ p1 * math.log(p1 / p2) }.sum
+
+    s / math.log(2)
+  }
+
 }
