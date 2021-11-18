@@ -718,7 +718,6 @@ class TreeNodeTabs {
   val tabsElement = Tabs.tabs[TreeNodeTab](Seq()).build
 
   val timer: Var[Option[SetIntervalHandle]] = Var(None)
-  val temporaryControl: Var[HtmlElement] = Var(div())
 
   val tabsObserver = Observer[Seq[Tab[TreeNodeTab]]] { tNodeTabs =>
     if (tNodeTabs.isEmpty) {

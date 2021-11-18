@@ -3,6 +3,7 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.client.core._
 import autowire._
 import boopickle.Default._
+import com.raquo.domtypes.jsdom.defs.events.TypedTargetMouseEvent
 import org.openmole.gui.client.core.alert.AbsolutePositioning._
 import org.openmole.gui.client.core.alert.AlertPanel
 
@@ -16,6 +17,7 @@ import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.client._
 import org.scalajs.dom.raw._
 import com.raquo.laminar.api.L._
+import com.raquo.laminar.modifiers.EventListener
 
 import scala.annotation.tailrec
 
@@ -50,133 +52,138 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
   import scaladget.tools._
 
   val baseGlyph: HESetters = Seq(cls := "glyphitem", color := DARK_GREY, padding := "5")
-  val trash: HESetters = Seq(baseGlyph, glyph_trash)
+  // val trash: HESetters = Seq(baseGlyph, glyph_trash)
   val edit: HESetters = Seq(baseGlyph, glyph_edit)
-  val download_alt: HESetters = Seq(baseGlyph, glyph_download_alt)
   val archive: HESetters = Seq(baseGlyph, glyph_archive)
-  val arrow_right_and_left: HESetters = Seq(baseGlyph, glyph_arrow_right_and_left)
-  val execute: HESetters = Seq(baseGlyph, OMTags.glyph_flash)
-  val toScript: HESetters = Seq(baseGlyph, OMTags.glyph_share)
 
-  def iconAction(faction: FileAction, icon: HESetters, text: String) = div(idAttr := faction, icon, div(text, giFontFamily, fontSize := "12px", paddingTop := "5", flex := "1"))
+  def iconAction(icon: HESetters, text: String, todo: () ⇒ Unit) =
+    div(fileActionItems, icon, text, onClick --> { _ ⇒ todo() })
 
-  val trashTrigger = iconAction(fileaction.trash, trash, "delete")
-  val downloadTrigger = iconAction(fileaction.download, download_alt, "download")
+  //val trashTrigger = iconAction(fileaction.trash, trash, "delete")
   val confirmTrashTrigger = button(btn_danger, "Delete file", idAttr := fileaction.confirmTrash)
   val cancelTrashTrigger = button(btn_secondary, "Cancel", idAttr := fileaction.cancelTrash)
   val confirmationGroup = buttonGroup.amend(confirmTrashTrigger, cancelTrashTrigger)
 
   val renameTrigger = span(edit, idAttr := fileaction.rename)
 
-  def confirmRename(tag: String, confirmString: String) = button(btn_danger, confirmString, idAttr := tag)
+  def closeToolBox = treeNodePanel.currentLine.set(-1)
 
-  val cancelRename = button(btn_secondary, "Cancel", idAttr := fileaction.cancelRename)
-
-  val duplicateTrigger = iconAction(fileaction.duplicate, arrow_right_and_left, "duplicate")
-
-  def actions(element0: HTMLElement): Boolean = {
-    if (element0 != null) {
-      val parent0 = element0.parentNode
-      if (parent0 != null) {
-        val (testID, element, parent) =
-          if (element0.id.isEmpty) (element0.parentElement.id, parent0, parent0.parentNode)
-          else (element0.id, element0, parent0)
-        testID match {
-          case fileaction.trash ⇒
-            parent.parentNode.replaceChild(confirmationGroup.ref, parent)
-            true
-          case fileaction.confirmTrash ⇒
-            withSafePath { safePath ⇒
-              CoreUtils.trashNode(safePath) {
-                () ⇒
-                  treeNodeTabs remove safePath
-                  treeNodeTabs.checkTabs
-                  treeNodePanel.invalidCacheAndDraw
-                //Popover.hide
-              }
-            }
-            true
-          case fileaction.cancelTrash ⇒
-            parent.parentNode.replaceChild(contentRoot.ref, parent)
-            true
-          case fileaction.rename ⇒
-            withSafePath { sp ⇒
-              editTitle.ref.value = sp.name
-              parent.parentNode.replaceChild(editDiv(fileaction.confirmRename, "Rename").ref, parent)
-            }
-            true
-          case fileaction.editInput ⇒ true
-          case fileaction.confirmRename ⇒
-            withSafePath { sp ⇒
-              testRename(sp, parent, parent, element.parentNode)
-            }
-            true
-          case fileaction.confirmOverwrite ⇒
-            withSafePath { sp ⇒
-              rename(sp, () ⇒ {})
-              parentNode(parent, 3).replaceChild(buildTitleRoot(sp.name).ref, parentNode(parent, 2))
-              //Popover.hide
-            }
-            true
-          case fileaction.cancelRename ⇒
-            withSafePath { sp ⇒
-              parent.parentNode.parentNode.replaceChild(buildTitleRoot(sp.name).ref, parent.parentNode)
-            }
-            true
-          case fileaction.download ⇒
-            withSafePath { sp ⇒
-              org.scalajs.dom.document.location.href = routes.downloadFile(client.Utils.toURI(sp.path))
-              //Popover.hide
-            }
-            true
-          case fileaction.extract ⇒
-            withSafePath { sp ⇒
-              extractTGZ(sp)
-              //Popover.hide
-            }
-            true
-          case fileaction.duplicate ⇒
-            withSafePath { sp ⇒
-              val newName = {
-                val prefix = sp.path.last
-                if (prefix.contains(".")) prefix.replaceFirst("[.]", "_1.")
-                else prefix + "_1"
-              }
-              CoreUtils.duplicate(sp, newName)
-              //Popover.hide
-            }
-            true
-          case fileaction.execute ⇒
-            import scala.concurrent.duration._
-            withSafePath { sp ⇒
-              Post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(sp), true).call().foreach { execInfo ⇒
-                //Popover.hide
-                showExecution()
-              }
-            }
-            true
-          case fileaction.toScript ⇒
-            withSafePath { sp ⇒
-              Plugins.fetch { p ⇒
-                val wizardPanel = panels.modelWizardPanel(p.wizardFactories)
-                wizardPanel.dialog.show
-                wizardPanel.fromSafePath(sp)
-                //Popover.hide
-              }
-            }
-            true
-          case _ ⇒ false
-        }
-      }
-      else false
-    }
-    else false
+  def download = withSafePath { sp ⇒
+    closeToolBox
+    org.scalajs.dom.document.location.href = routes.downloadFile(client.Utils.toURI(sp.path))
   }
 
-  def withSafePath(action: SafePath ⇒ Unit) =
+  def trash = withSafePath { safePath ⇒
+    closeToolBox
+    CoreUtils.trashNode(safePath) {
+      () ⇒
+        treeNodeTabs remove safePath
+        treeNodeTabs.checkTabs
+        treeNodePanel.invalidCacheAndDraw
+    }
+  }
+
+  def duplicate = withSafePath { sp ⇒
+    val newName = {
+      val prefix = sp.path.last
+      if (prefix.contains(".")) prefix.replaceFirst("[.]", "_1.")
+      else prefix + "_1"
+    }
+    closeToolBox
+    CoreUtils.duplicate(sp, newName)
+  }
+
+  def extract = withSafePath { sp ⇒
+    Post()[Api].extractTGZ(sp).call().foreach {
+      r ⇒
+        r.error match {
+          case Some(e: org.openmole.gui.ext.data.ErrorData) ⇒
+            panels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
+          case _ ⇒ treeNodePanel.invalidCacheAndDraw
+        }
+    }
+    closeToolBox
+  }
+
+  def execute = {
+    import scala.concurrent.duration._
+    withSafePath { sp ⇒
+      Post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(sp), true).call().foreach { execInfo ⇒
+        showExecution()
+      }
+      closeToolBox
+    }
+  }
+
+  def toScript =
+    withSafePath { sp ⇒
+      closeToolBox
+      Plugins.fetch { p ⇒
+        val wizardPanel = panels.modelWizardPanel(p.wizardFactories)
+        wizardPanel.dialog.show
+        wizardPanel.fromSafePath(sp)
+      }
+    }
+
+  //  def actions(element0: HTMLElement): Boolean = {
+  //    if (element0 != null) {
+  //      val parent0 = element0.parentNode
+  //      if (parent0 != null) {
+  //        val (testID, element, parent) =
+  //          if (element0.id.isEmpty) (element0.parentElement.id, parent0, parent0.parentNode)
+  //          else (element0.id, element0, parent0)
+  //        testID match {
+  //          case fileaction.trash ⇒
+  //            parent.parentNode.replaceChild(confirmationGroup.ref, parent)
+  //            true
+  //          case fileaction.rename ⇒
+  //            withSafePath { sp ⇒
+  //              editTitle.ref.value = sp.name
+  //              parent.parentNode.replaceChild(editDiv(fileaction.confirmRename, "Rename").ref, parent)
+  //            }
+  //            true
+  //          case fileaction.editInput ⇒ true
+  //          case fileaction.confirmRename ⇒
+  //            withSafePath { sp ⇒
+  //              testRename(sp, parent, parent, element.parentNode)
+  //            }
+  //            true
+  //          case fileaction.confirmOverwrite ⇒
+  //            withSafePath { sp ⇒
+  //              rename(sp, () ⇒ {})
+  //              parentNode(parent, 3).replaceChild(buildTitleRoot(sp.name).ref, parentNode(parent, 2))
+  //              //Popover.hide
+  //            }
+  //            true
+  //          case fileaction.cancelRename ⇒
+  //            withSafePath { sp ⇒
+  //              parent.parentNode.parentNode.replaceChild(buildTitleRoot(sp.name).ref, parent.parentNode)
+  //            }
+  //            true
+  //          case fileaction.toScript ⇒
+  //            withSafePath { sp ⇒
+  //              Plugins.fetch { p ⇒
+  //                val wizardPanel = panels.modelWizardPanel(p.wizardFactories)
+  //                wizardPanel.dialog.show
+  //                wizardPanel.fromSafePath(sp)
+  //                //Popover.hide
+  //              }
+  //            }
+  //            true
+  //          case _ ⇒ false
+  //        }
+  //      }
+  //      else false
+  //    }
+  //    else false
+  //  }
+
+  def withSafePath(action: SafePath ⇒ Unit) = {
+    println("WSP " + treeNodePanel.currentSafePath.now())
     treeNodePanel.currentSafePath.now.foreach { sp ⇒
       action(sp)
     }
+  }
 
   val editTitle = inputTag().amend(
     placeholder := "File name",
@@ -187,96 +194,103 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
 
   val overwriting = Var(false)
 
-  val editForm: FormElement = form(
-    editTitle,
-    onSubmit --> { _ ⇒
-      {
-        withSafePath { sp ⇒
-          if (overwriting.now) {
-            rename(sp, () ⇒ {})
-            //Popover.hide
-          }
-          else
-            testRename(sp, editTitle.ref, editForm.ref, editForm.ref.parentNode.lastChild)
-        }
-        false
-      }
-    }
-  )
+  //  val editForm: FormElement = form(
+  //    editTitle,
+  //    onSubmit --> { _ ⇒
+  //      {
+  //        withSafePath { sp ⇒
+  //          if (overwriting.now) {
+  //            rename(sp, () ⇒ {})
+  //            //Popover.hide
+  //          }
+  //          else
+  //            testRename(sp, editTitle.ref, editForm.ref, editForm.ref.parentNode.lastChild)
+  //        }
+  //        false
+  //      }
+  //    }
+  //  )
 
-  def replaceTitle(element: org.scalajs.dom.raw.Node) = {
-    parentNode(element, 2).replaceChild(buildTitleRoot(editTitle.ref.value).ref, parentNode(element, 1))
-    ()
-  }
+  //  def replaceTitle(element: org.scalajs.dom.raw.Node) = {
+  //    parentNode(element, 2).replaceChild(buildTitleRoot(editTitle.ref.value).ref, parentNode(element, 1))
+  //    ()
+  //  }
 
-  def editDiv(tag: String, confirmString: String) = span(height := "24", width := "250",
-    editForm,
-    buttonGroup.amend(
-      confirmRename(tag, confirmString),
-      cancelRename
-    )
-  )
+  //  def editDiv(tag: String, confirmString: String) = span(height := "24", width := "250",
+  //    editForm,
+  //    buttonGroup.amend(
+  //      confirmRename(tag, confirmString),
+  //      cancelRename
+  //    )
+  //  )
 
-  def buildTitleRoot(title: String) = div(
-    span(wordWrap := "break-word", title),
-    renameTrigger
-  )
+  def glyphItemize(icon: HESetter) = icon.appended(cls := "glyphitem popover-item")
 
-  val titleRoot = buildTitleRoot(initSafePath.name)
+  val actionConfirmation: Var[Option[Div]] = Var(None)
 
-  val contentRoot = {
+  def confirmation(text: String, todo: () ⇒ Unit) =
     div(
-      omsheet.centerElement,
-      downloadTrigger,
-      FileExtension(initSafePath.name) match {
-        case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP | FileExtension.TXZ ⇒
-          iconAction(fileaction.extract, archive, "extract")
-        case _ ⇒ span()
-      },
-      FileExtension(initSafePath.name) match {
-        case FileExtension.OMS ⇒
-          iconAction(fileaction.execute, execute, "run")
-        case _ ⇒ span()
-      },
-      FileExtension(initSafePath.name) match {
-        case FileExtension.JAR | FileExtension.NETLOGO | FileExtension.R | FileExtension.TGZ ⇒
-          iconAction(fileaction.toScript, toScript, "to OMS")
-        case _ ⇒ span()
-      },
-      duplicateTrigger,
-      trashTrigger
+      fileActions,
+      div(text, width := "50%", margin := "10px"),
+      div(fileItemCancel, "Cancel", onClick --> { _ ⇒ actionConfirmation.set(None) }),
+      div(fileItemWarning, "OK", onClick --> { _ ⇒
+        todo()
+        actionConfirmation.set(None)
+      })
+    )
+
+  def contentRoot = {
+    div(
+      height := "80px",
+      child <-- actionConfirmation.signal.map { ac ⇒
+        ac match {
+          case Some(c) ⇒ c
+          case None ⇒
+            div(
+              fileActions,
+              iconAction(glyphItemize(glyph_download), "download", () ⇒ download),
+              iconAction(glyphItemize(glyph_trash), "trash", () ⇒ actionConfirmation.set(Some(confirmation(s"Delete ${initSafePath.name} ?", () ⇒ trash)))),
+              iconAction(glyphItemize(OMTags.glyph_arrow_left_right), "duplicate", () ⇒ duplicate),
+              FileExtension(initSafePath.name) match {
+                case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP | FileExtension.TXZ ⇒
+                  iconAction(glyphItemize(OMTags.glyph_extract), "extract", () ⇒ extract)
+                case _ ⇒ emptyMod
+              },
+              FileExtension(initSafePath.name) match {
+                case FileExtension.OMS ⇒
+                  iconAction(glyphItemize(OMTags.glyph_flash), "run", () ⇒ execute)
+                case _ ⇒ emptyMod
+              },
+              FileExtension(initSafePath.name) match {
+                case FileExtension.JAR | FileExtension.NETLOGO | FileExtension.R | FileExtension.TGZ ⇒
+                  iconAction(OMTags.glyph_share, "to OMS", () ⇒ toScript)
+                case _ ⇒ emptyMod
+              }
+            )
+        }
+      }
     )
   }
 
-  def extractTGZ(safePath: SafePath) =
-    Post()[Api].extractTGZ(safePath).call().foreach {
-      r ⇒
-        r.error match {
-          case Some(e: org.openmole.gui.ext.data.ErrorData) ⇒
-            panels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
-          case _ ⇒ treeNodePanel.invalidCacheAndDraw
-        }
-    }
-
-  def testRename(safePath: SafePath, parent: org.scalajs.dom.raw.Node, pivot: org.scalajs.dom.raw.Node, cancelNode: org.scalajs.dom.raw.Node) = {
-    val newTitle = editTitle.ref.value
-    val newSafePath = safePath.parent ++ newTitle
-    //treeNodeTabs.saveAllTabs(() ⇒ {
-    Post()[Api].existsExcept(newSafePath, false).call().foreach {
-      b ⇒
-        if (b) {
-          overwriting.set(true)
-          cancelNode.parentNode.replaceChild(editDiv(fileaction.confirmOverwrite, "Overwrite ?").ref, cancelNode)
-          editTitle
-        }
-        else {
-          overwriting.set(false)
-          rename(safePath, () ⇒ replaceTitle(pivot))
-          //Popover.hide
-        }
-    }
-    //})
-  }
+  //  def testRename(safePath: SafePath, parent: org.scalajs.dom.raw.Node, pivot: org.scalajs.dom.raw.Node, cancelNode: org.scalajs.dom.raw.Node) = {
+  //    val newTitle = editTitle.ref.value
+  //    val newSafePath = safePath.parent ++ newTitle
+  //    //treeNodeTabs.saveAllTabs(() ⇒ {
+  //    Post()[Api].existsExcept(newSafePath, false).call().foreach {
+  //      b ⇒
+  //        if (b) {
+  //          overwriting.set(true)
+  //          cancelNode.parentNode.replaceChild(editDiv(fileaction.confirmOverwrite, "Overwrite ?").ref, cancelNode)
+  //          editTitle
+  //        }
+  //        else {
+  //          overwriting.set(false)
+  //          rename(safePath, () ⇒ replaceTitle(pivot))
+  //          //Popover.hide
+  //        }
+  //    }
+  //    //})
+  //  }
 
   def rename(safePath: SafePath, replacing: () ⇒ Unit) = {
     val newTitle = editTitle.ref.value
@@ -290,11 +304,12 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     }
   }
 
-  import org.scalajs.dom.raw._
-  @tailrec
-  private def parentNode(node: Node, depth: Int): Node = {
-    if (depth == 0) node
-    else parentNode(node.parentNode, depth - 1)
-  }
+  //  import org.scalajs.dom.raw._
+  //
+  //  @tailrec
+  //  private def parentNode(node: Node, depth: Int): Node = {
+  //    if (depth == 0) node
+  //    else parentNode(node.parentNode, depth - 1)
+  //  }
 
 }

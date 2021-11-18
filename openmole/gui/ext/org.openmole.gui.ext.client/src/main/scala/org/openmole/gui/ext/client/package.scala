@@ -75,6 +75,22 @@ package object client {
 
   lazy val fixedPosition = position := "fixed"
 
+  lazy val flexColumn = cls := "flex-column"
+
+  lazy val flexRow = cls := "flex-row"
+
+  lazy val centerInDiv = cls := "center-in-div"
+
+  lazy val fileItemWarning = cls := "file-item-warning"
+
+  lazy val fileItemCancel = cls := "file-item-cancel"
+
+  lazy val fileActions = cls := "file-actions"
+
+  lazy val fileActionItems = cls := "file-action-items"
+
+  lazy val navBarItem = cls := "navbar-item"
+
   lazy val centerElement = Seq(
     display := "flex",
     justifyContent := "center",

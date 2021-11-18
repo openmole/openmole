@@ -124,28 +124,13 @@ object App {
 
       val openFileTree = Var(true)
 
-      val itemStyle = Seq(
-        height := "30",
-        fontSize := "25",
-        display.flex,
-        alignItems.center
-      )
-
-      val execItem = navItem(div(OMTags.glyph_flash, itemStyle).tooltip("Executions"), () ⇒ openExecutionPanel)
-
-      val authenticationItem = navItem(div(glyph_lock, itemStyle).tooltip("Authentications"), () ⇒ authenticationPanel.authenticationDialog.show)
-
-      val pluginItem = navItem(div(OMTags.glyph_plug, itemStyle).tooltip("Plugins"), () ⇒ pluginPanel.pluginDialog.show)
-
-      val envItem = navItem(div(glyph_exclamation, itemStyle), () ⇒ stackPanel.open)
-
-      val settingsItem = navItem(div(
-        //panels.settingsViewApp,
-        itemStyle), () ⇒ {}).right
-
-      val actionItem = navItem(div(
-        child <-- treeNodeTabs.temporaryControl.signal
-      ))
+      //      val settingsItem = navItem(div(
+      //        //panels.settingsViewApp,
+      //        itemStyle), () ⇒ {}).right
+      //
+      //      val actionItem = navItem(div(
+      //        child <-- treeNodeTabs.temporaryControl.signal
+      //      ))
 
       dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
         if (k.keyCode == 83 && k.ctrlKey) {
@@ -174,24 +159,20 @@ object App {
       //START BUTTON
       lazy val theNavBar = div(
         cls := "nav-container",
-        img(src := "img/openmole_dark.png", width := "300px"),
         child <-- openFileTree.signal.map { oft ⇒
-          navBar(
-            emptySetters,
-            navItem(
-              if (oft) div(glyph_chevron_left) else div(glyph_chevron_right),
-              todo = () ⇒ {
-                openFileTree.update(!_)
-              }
-            ),
-            navItem(menuActions.selector),
-            execItem,
-            authenticationItem,
-            pluginItem,
-            actionItem,
-            settingsItem
-          ).render
-        }
+          div(
+            navBarItem,
+            if (oft) div(glyph_chevron_left) else div(glyph_chevron_right),
+            onClick --> { _ ⇒
+              openFileTree.update(!_)
+            }
+          )
+        },
+        menuActions.selector,
+        div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ openExecutionPanel }).tooltip("Executions"),
+        div(glyph_lock, navBarItem, onClick --> { _ ⇒ authenticationPanel.authenticationDialog.show }).tooltip("Authentications"),
+        div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒ pluginPanel.pluginDialog.show }).tooltip("Plugins")
+      //            settingsItem
       )
 
       lazy val importModel = MenuAction("Import your model", () ⇒ {
@@ -225,7 +206,7 @@ object App {
           div(
             cls := "app-container",
             // panels.bannerAlert.banner,
-            theNavBar,
+            //theNavBar,
             div(
               cls := "main-container",
               div(
@@ -234,6 +215,7 @@ object App {
                     if (oft) "" else " closed"
                   }
                 },
+                div(img(src := "img/openmole_dark.png", height := "70px"), cls := "nav-container"),
                 treeNodePanel.fileToolBar.element,
                 treeNodePanel.fileControler,
                 treeNodePanel.labelArea,
@@ -241,6 +223,7 @@ object App {
               ),
               div(
                 cls := "tab-section",
+                theNavBar,
                 treeNodeTabs.fontSizeControl,
                 treeNodeTabs.render.amend(cls := "tab-section")
               )

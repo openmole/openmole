@@ -21,7 +21,7 @@ import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.client.FileManager
 import org.scalajs.dom
 import scaladget.bootstrapnative.Popup
-import scaladget.bootstrapnative.Popup.Manual
+import scaladget.bootstrapnative.Popup.{ ClickPopup, Manual }
 import com.raquo.laminar.api.L._
 import org.openmole.gui.client.tool.OMTags
 
@@ -278,8 +278,9 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
         //            selectionMode --> selectionModeObserver
         //          )
         div(
-          sons.list.map { tn ⇒
-            Seq(drawNode(tn).render)
+          sons.list.zipWithIndex.map {
+            case (tn, id) ⇒
+              Seq(drawNode(tn, id).render)
           }
         )
       }
@@ -288,12 +289,12 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
   }
 
-  def drawNode(node: TreeNode) = node match {
+  def drawNode(node: TreeNode, i: Int) = node match {
     case fn: FileNode ⇒
-      ReactiveLine(fn, TreeNodeType.file, () ⇒ {
+      ReactiveLine(i, fn, TreeNodeType.file, () ⇒ {
         displayNode(fn)
       })
-    case dn: DirNode ⇒ ReactiveLine(dn, TreeNodeType.folder, () ⇒ {
+    case dn: DirNode ⇒ ReactiveLine(i, dn, TreeNodeType.folder, () ⇒ {
       treeNodeManager switch (dn.name)
       fileToolBar.clearMessage
       fileToolBar.unselectTool
@@ -326,13 +327,14 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
   def stringAlertWithDetails(message: String, detail: String) =
     panels.alertPanel.detail(message, detail, transform = RelativeCenterPosition, zone = FileZone)
 
-  var currentSafePath: Var[Option[SafePath]] = Var(None)
+  val currentSafePath: Var[Option[SafePath]] = Var(None)
+  val currentLine = Var(-1)
 
   object ReactiveLine {
-    def apply(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) = new ReactiveLine(tn, treeNodeType, todo)
+    def apply(i: Int, tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) = new ReactiveLine(i, tn, treeNodeType, todo)
   }
 
-  class ReactiveLine(tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) {
+  class ReactiveLine(id: Int, tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) {
 
     val tnSafePath = treeNodeManager.current.now ++ tn.name
 
@@ -400,51 +402,6 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
     val toolBox = new FileToolBox(tnSafePath, showExecution, treeNodeTabs)
 
-    def inPopover(element: HTMLElement) = {
-      val popClass = "popover"
-
-      def inPopover0(e: HTMLElement, depth: Int): Boolean = {
-        if (e != null) {
-          val b = e.className.contains(popClass)
-          if (b || depth > 2) b
-          else inPopover0(e.parentElement, depth + 1)
-        }
-        else false
-      }
-
-      inPopover0(element, 0)
-    }
-
-    //    dom.document.body.onlick = { (e: Event) ⇒
-    //      val element = e.target.asInstanceOf[HTMLElement]
-    //      if (!toolBox.actions(element)) {
-    //        if (!inPopover(element))
-    //          Popover.hide
-    //      }
-    //      else
-    //        e.preventDefault()
-    //    }
-
-    def buildManualPopover(trigger: HtmlElement) = {
-      lazy val pop = trigger.popover(div(toolBox.contentRoot.toString), Popup.Right, Manual, title = Some(toolBox.titleRoot.toString))
-      val popRender = pop.render.amend(
-        onClick --> { e ⇒
-          //          if (Popover.current.now == Some(pop)) Popover.hide
-          //          else {
-          //            Popover.current.now match {
-          //              case Some(p) ⇒ Popover.toggle(p)
-          //              case _ ⇒
-          //            }
-          //            Popover.toggle(pop)
-          //          }
-          currentSafePath.set(Some(tnSafePath))
-          e.stopPropagation
-        }
-      )
-
-      popRender
-    }
-
     def fileClick =
       onClick --> { e ⇒
         if (!selectionMode.now) {
@@ -454,73 +411,78 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
     val render: HtmlElement = {
       // val settingsGlyph = Seq(cls := "glyphitem", glyph_settings, color := WHITE, paddingLeft := "4")
-
-      div(display.flex, alignItems.center, margin := "3",
-        //        child <-- selectionMode.signal.combineWith(treeStates.signal, fileToolBar.selectedTool.signal, treeNodeManager.pluggables.signal).map {
-        //          case (sM, tS, sTools, pluggables) ⇒
-        //            onClick --> { e ⇒ {
-        //              if (sM) {
-        //                addToSelection
-        //                if (e.ctrlKey) clearSelectionExecpt(tnSafePath)
-        //              }
-        //            }
-        //            },
-        //          dropPairs
-        //          ,
-        //          onDragStart --> { e ⇒
-        //            e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
-        //            draggedNode.set(Some(tnSafePath))
-        //          }
-        //          ,
-        //          onDrop --> { e ⇒
-        //            e.dataTransfer
-        //            e.preventDefault()
-        //            dropAction(treeNodeManager.current.now ++ tn.name, tn match {
-        //              case _: DirNode ⇒ true
-        //              case _ ⇒ false
-        //            })
-        //          }
-        //          ,
-        //          onDragEnter --> { _ ⇒
-        //            false
-        //          }
-        //,
-        // clickablePair,
-        //              {
-        //                div(
-        //                  fileInfo,
-        //                  span(
-        //                    omsheet.fileSize,
-        //                    i(timeOrSize(tn)),
-        //                    buildManualPopover(
-        //                      div(settingsGlyph, onClick --> { _ ⇒ /*FIXME*/
-        //                        /*Popover.hide*/
-        //                      })
-        //                    )
-        //                  )
-        //                )
-        //              },
-        dirBox(tn).amend(cls := "file0", fileClick),
-        div(tn.name, cls := "file1", fileClick),
-        i(timeOrSize(tn), cls := "file2"),
-        buildManualPopover(
-          div(cls := "bi-gear-fill", onClick --> { _ ⇒ /*FIXME*/
-            /*Popover.hide*/
+      div(display.flex, flexDirection.column,
+        div(display.flex, alignItems.center, margin := "5",
+          //        child <-- selectionMode.signal.combineWith(treeStates.signal, fileToolBar.selectedTool.signal, treeNodeManager.pluggables.signal).map {
+          //          case (sM, tS, sTools, pluggables) ⇒
+          //            onClick --> { e ⇒ {
+          //              if (sM) {
+          //                addToSelection
+          //                if (e.ctrlKey) clearSelectionExecpt(tnSafePath)
+          //              }
+          //            }
+          //            },
+          //          dropPairs
+          //          ,
+          //          onDragStart --> { e ⇒
+          //            e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
+          //            draggedNode.set(Some(tnSafePath))
+          //          }
+          //          ,
+          //          onDrop --> { e ⇒
+          //            e.dataTransfer
+          //            e.preventDefault()
+          //            dropAction(treeNodeManager.current.now ++ tn.name, tn match {
+          //              case _: DirNode ⇒ true
+          //              case _ ⇒ false
+          //            })
+          //          }
+          //          ,
+          //          onDragEnter --> { _ ⇒
+          //            false
+          //          }
+          //,
+          // clickablePair,
+          //              {
+          //                div(
+          //                  fileInfo,
+          //                  span(
+          //                    omsheet.fileSize,
+          //                    i(timeOrSize(tn)),
+          //                    buildManualPopover(
+          //                      div(settingsGlyph, onClick --> { _ ⇒ /*FIXME*/
+          //                        /*Popover.hide*/
+          //                      })
+          //                    )
+          //                  )
+          //                )
+          //              },
+          dirBox(tn).amend(cls := "file0", fileClick),
+          div(tn.name, cls := "file1", fileClick),
+          i(timeOrSize(tn), cls := "file2"),
+          button(cls := "bi-three-dots transparent-button", cursor.pointer, opacity := "0.5", onClick --> { _ ⇒
+            currentSafePath.set(Some(tnSafePath))
+            currentLine.set(
+              if (id == currentLine.now) -1
+              else id
+            )
           })
-        )
-      //
-      //              div(
-      //                width := "100%",
-      //                if (tS.selected) {
-      //                  sTools match {
-      //                    case Some(TrashTool) ⇒ omsheet.fileSelectedForDeletion
-      //                    case Some(PluginTool) if pluggables.contains(tn) ⇒ omsheet.fileSelected
-      //                    case _ ⇒ omsheet.fileSelected
-      //                  }
-      //                }
-      //                else omsheet.fileSelectionOverlay,
-      //                span(omsheet.fileSelectionMessage)
-      //              )
+
+        //
+        //              div(
+        //                width := "100%",
+        //                if (tS.selected) {
+        //                  sTools match {
+        //                    case Some(TrashTool) ⇒ omsheet.fileSelectedForDeletion
+        //                    case Some(PluginTool) if pluggables.contains(tn) ⇒ omsheet.fileSelected
+        //                    case _ ⇒ omsheet.fileSelected
+        //                  }
+        //                }
+        //                else omsheet.fileSelectionOverlay,
+        //                span(omsheet.fileSelectionMessage)
+        //              )
+        ),
+        currentLine.signal.map { i ⇒ i == id }.expand(toolBox.contentRoot)
       )
       //}
       //)
