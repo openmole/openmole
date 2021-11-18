@@ -3,10 +3,7 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.client.core._
 import autowire._
 import boopickle.Default._
-import com.raquo.domtypes.jsdom.defs.events.TypedTargetMouseEvent
 import org.openmole.gui.client.core.alert.AbsolutePositioning._
-import org.openmole.gui.client.core.alert.AlertPanel
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.ext.api.Api
 import scaladget.bootstrapnative.bsn._
@@ -15,56 +12,12 @@ import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.client
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.client._
-import org.scalajs.dom.raw._
 import com.raquo.laminar.api.L._
-import com.raquo.laminar.modifiers.EventListener
-
-import scala.annotation.tailrec
-
-object FileToolBox {
-  type FileAction = String
-
-  object fileaction {
-    val trash: FileAction = "trash"
-    val confirmTrash: FileAction = "co-trash"
-    val cancelTrash: FileAction = "ca-trash"
-
-    val rename: FileAction = "rename"
-    val editInput: FileAction = "edit-input"
-    val confirmRename: FileAction = "co-rename"
-    val confirmOverwrite: FileAction = "co-overwrite"
-    val cancelRename: FileAction = "ca-rename"
-
-    val download: FileAction = "download"
-
-    val extract: FileAction = "extract"
-    val duplicate: FileAction = "duplicate"
-    val execute: FileAction = "execute"
-    val toScript: FileAction = "to-script"
-  }
-
-}
-
-import FileToolBox._
 
 class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTabs: TreeNodeTabs) {
 
-  import scaladget.tools._
-
-  val baseGlyph: HESetters = Seq(cls := "glyphitem", color := DARK_GREY, padding := "5")
-  // val trash: HESetters = Seq(baseGlyph, glyph_trash)
-  val edit: HESetters = Seq(baseGlyph, glyph_edit)
-  val archive: HESetters = Seq(baseGlyph, glyph_archive)
-
   def iconAction(icon: HESetters, text: String, todo: () ⇒ Unit) =
     div(fileActionItems, icon, text, onClick --> { _ ⇒ todo() })
-
-  //val trashTrigger = iconAction(fileaction.trash, trash, "delete")
-  val confirmTrashTrigger = button(btn_danger, "Delete file", idAttr := fileaction.confirmTrash)
-  val cancelTrashTrigger = button(btn_secondary, "Cancel", idAttr := fileaction.cancelTrash)
-  val confirmationGroup = buttonGroup.amend(confirmTrashTrigger, cancelTrashTrigger)
-
-  val renameTrigger = span(edit, idAttr := fileaction.rename)
 
   def closeToolBox = treeNodePanel.currentLine.set(-1)
 
@@ -125,58 +78,33 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
       }
     }
 
-  //  def actions(element0: HTMLElement): Boolean = {
-  //    if (element0 != null) {
-  //      val parent0 = element0.parentNode
-  //      if (parent0 != null) {
-  //        val (testID, element, parent) =
-  //          if (element0.id.isEmpty) (element0.parentElement.id, parent0, parent0.parentNode)
-  //          else (element0.id, element0, parent0)
-  //        testID match {
-  //          case fileaction.trash ⇒
-  //            parent.parentNode.replaceChild(confirmationGroup.ref, parent)
-  //            true
-  //          case fileaction.rename ⇒
-  //            withSafePath { sp ⇒
-  //              editTitle.ref.value = sp.name
-  //              parent.parentNode.replaceChild(editDiv(fileaction.confirmRename, "Rename").ref, parent)
-  //            }
-  //            true
-  //          case fileaction.editInput ⇒ true
-  //          case fileaction.confirmRename ⇒
-  //            withSafePath { sp ⇒
-  //              testRename(sp, parent, parent, element.parentNode)
-  //            }
-  //            true
-  //          case fileaction.confirmOverwrite ⇒
-  //            withSafePath { sp ⇒
-  //              rename(sp, () ⇒ {})
-  //              parentNode(parent, 3).replaceChild(buildTitleRoot(sp.name).ref, parentNode(parent, 2))
-  //              //Popover.hide
-  //            }
-  //            true
-  //          case fileaction.cancelRename ⇒
-  //            withSafePath { sp ⇒
-  //              parent.parentNode.parentNode.replaceChild(buildTitleRoot(sp.name).ref, parent.parentNode)
-  //            }
-  //            true
-  //          case fileaction.toScript ⇒
-  //            withSafePath { sp ⇒
-  //              Plugins.fetch { p ⇒
-  //                val wizardPanel = panels.modelWizardPanel(p.wizardFactories)
-  //                wizardPanel.dialog.show
-  //                wizardPanel.fromSafePath(sp)
-  //                //Popover.hide
-  //              }
-  //            }
-  //            true
-  //          case _ ⇒ false
-  //        }
-  //      }
-  //      else false
-  //    }
-  //    else false
-  //  }
+  def testRename(safePath: SafePath, to: String) = {
+    val newSafePath = safePath.parent ++ to
+    Post()[Api].existsExcept(newSafePath, false).call().foreach {
+      b ⇒
+        if (b) {
+          actionEdit.set(None)
+          actionConfirmation.set(Some(confirmation(s"Overwrite ${safePath.name} ?", () ⇒ rename(safePath, to, () ⇒ closeToolBox))))
+        }
+        else {
+          rename(safePath, to, () ⇒ closeToolBox)
+          actionEdit.set(None)
+          actionConfirmation.set(None)
+        }
+    }
+  }
+
+  def rename(safePath: SafePath, to: String, replacing: () ⇒ Unit) = {
+    Post()[Api].renameFile(safePath, to).call().foreach {
+      newNode ⇒
+        println("rename file")
+        treeNodeTabs.rename(safePath, newNode)
+        treeNodePanel.invalidCacheAndDraw
+        treeNodeTabs.checkTabs
+        treeNodePanel.currentSafePath.set(Some(safePath.parent ++ to))
+        replacing()
+    }
+  }
 
   def withSafePath(action: SafePath ⇒ Unit) = {
     println("WSP " + treeNodePanel.currentSafePath.now())
@@ -185,131 +113,87 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     }
   }
 
-  val editTitle = inputTag().amend(
-    placeholder := "File name",
-    //  width := 200,
-    onMountFocus,
-    idAttr := fileaction.editInput
-  )
-
-  val overwriting = Var(false)
-
-  //  val editForm: FormElement = form(
-  //    editTitle,
-  //    onSubmit --> { _ ⇒
-  //      {
-  //        withSafePath { sp ⇒
-  //          if (overwriting.now) {
-  //            rename(sp, () ⇒ {})
-  //            //Popover.hide
-  //          }
-  //          else
-  //            testRename(sp, editTitle.ref, editForm.ref, editForm.ref.parentNode.lastChild)
-  //        }
-  //        false
-  //      }
-  //    }
-  //  )
-
-  //  def replaceTitle(element: org.scalajs.dom.raw.Node) = {
-  //    parentNode(element, 2).replaceChild(buildTitleRoot(editTitle.ref.value).ref, parentNode(element, 1))
-  //    ()
-  //  }
-
-  //  def editDiv(tag: String, confirmString: String) = span(height := "24", width := "250",
-  //    editForm,
-  //    buttonGroup.amend(
-  //      confirmRename(tag, confirmString),
-  //      cancelRename
-  //    )
-  //  )
-
   def glyphItemize(icon: HESetter) = icon.appended(cls := "glyphitem popover-item")
 
   val actionConfirmation: Var[Option[Div]] = Var(None)
+  val actionEdit: Var[Option[Div]] = Var(None)
+
+  def editForm(sp: SafePath): Div = {
+    val renameInput = inputTag(sp.name).amend(
+      placeholder := "File name",
+      onMountFocus
+    )
+
+    div(
+      child <-- actionConfirmation.signal.map { ac ⇒
+        ac match {
+          case Some(c) ⇒ c
+          case None ⇒
+            form(
+              renameInput,
+              onSubmit.preventDefault --> { _ ⇒
+                println("sabmit")
+                withSafePath { sp ⇒
+                  testRename(sp, renameInput.ref.value)
+                }
+              }
+            )
+        }
+      }
+    )
+
+  }
 
   def confirmation(text: String, todo: () ⇒ Unit) =
     div(
       fileActions,
       div(text, width := "50%", margin := "10px"),
-      div(fileItemCancel, "Cancel", onClick --> { _ ⇒ actionConfirmation.set(None) }),
-      div(fileItemWarning, "OK", onClick --> { _ ⇒
-        todo()
-        actionConfirmation.set(None)
+      div(fileItemCancel, "Cancel", onClick --> {
+        _ ⇒ actionConfirmation.set(None)
+      }),
+      div(fileItemWarning, "OK", onClick --> {
+        _ ⇒
+          todo()
+          actionConfirmation.set(None)
       })
     )
 
   def contentRoot = {
     div(
       height := "80px",
-      child <-- actionConfirmation.signal.map { ac ⇒
-        ac match {
-          case Some(c) ⇒ c
-          case None ⇒
-            div(
-              fileActions,
-              iconAction(glyphItemize(glyph_download), "download", () ⇒ download),
-              iconAction(glyphItemize(glyph_trash), "trash", () ⇒ actionConfirmation.set(Some(confirmation(s"Delete ${initSafePath.name} ?", () ⇒ trash)))),
-              iconAction(glyphItemize(OMTags.glyph_arrow_left_right), "duplicate", () ⇒ duplicate),
-              FileExtension(initSafePath.name) match {
-                case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP | FileExtension.TXZ ⇒
-                  iconAction(glyphItemize(OMTags.glyph_extract), "extract", () ⇒ extract)
-                case _ ⇒ emptyMod
-              },
-              FileExtension(initSafePath.name) match {
-                case FileExtension.OMS ⇒
-                  iconAction(glyphItemize(OMTags.glyph_flash), "run", () ⇒ execute)
-                case _ ⇒ emptyMod
-              },
-              FileExtension(initSafePath.name) match {
-                case FileExtension.JAR | FileExtension.NETLOGO | FileExtension.R | FileExtension.TGZ ⇒
-                  iconAction(OMTags.glyph_share, "to OMS", () ⇒ toScript)
-                case _ ⇒ emptyMod
-              }
-            )
-        }
+      child <-- actionConfirmation.signal.combineWith(actionEdit.signal).map {
+        a ⇒
+          a match {
+            case (Some(ac), _) ⇒ ac
+            case (_, Some(ae)) ⇒ ae
+            case (None, None) ⇒
+              div(
+                fileActions,
+                iconAction(glyphItemize(glyph_download), "download", () ⇒ download),
+                iconAction(glyphItemize(glyph_trash), "trash", () ⇒ actionConfirmation.set(Some(confirmation(s"Delete ${
+                  initSafePath.name
+                } ?", () ⇒ trash)))),
+                iconAction(glyphItemize(OMTags.glyph_arrow_left_right), "duplicate", () ⇒ duplicate),
+                iconAction(glyphItemize(glyph_edit), "edit", () ⇒ actionEdit.set(Some(editForm(initSafePath)))),
+                FileExtension(initSafePath.name) match {
+                  case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP | FileExtension.TXZ ⇒
+                    iconAction(glyphItemize(OMTags.glyph_extract), "extract", () ⇒ extract)
+                  case _ ⇒ emptyMod
+                },
+                FileExtension(initSafePath.name) match {
+                  case FileExtension.OMS ⇒
+                    iconAction(glyphItemize(OMTags.glyph_flash), "run", () ⇒ execute)
+                  case _ ⇒ emptyMod
+                },
+                FileExtension(initSafePath.name) match {
+                  case FileExtension.JAR | FileExtension.NETLOGO | FileExtension.R | FileExtension.TGZ ⇒
+                    iconAction(OMTags.glyph_share, "to OMS", () ⇒ toScript)
+                  case _ ⇒ emptyMod
+                }
+              )
+          }
       }
     )
   }
-
-  //  def testRename(safePath: SafePath, parent: org.scalajs.dom.raw.Node, pivot: org.scalajs.dom.raw.Node, cancelNode: org.scalajs.dom.raw.Node) = {
-  //    val newTitle = editTitle.ref.value
-  //    val newSafePath = safePath.parent ++ newTitle
-  //    //treeNodeTabs.saveAllTabs(() ⇒ {
-  //    Post()[Api].existsExcept(newSafePath, false).call().foreach {
-  //      b ⇒
-  //        if (b) {
-  //          overwriting.set(true)
-  //          cancelNode.parentNode.replaceChild(editDiv(fileaction.confirmOverwrite, "Overwrite ?").ref, cancelNode)
-  //          editTitle
-  //        }
-  //        else {
-  //          overwriting.set(false)
-  //          rename(safePath, () ⇒ replaceTitle(pivot))
-  //          //Popover.hide
-  //        }
-  //    }
-  //    //})
-  //  }
-
-  def rename(safePath: SafePath, replacing: () ⇒ Unit) = {
-    val newTitle = editTitle.ref.value
-    Post()[Api].renameFile(safePath, newTitle).call().foreach {
-      newNode ⇒
-        treeNodeTabs.rename(safePath, newNode)
-        treeNodePanel.invalidCacheAndDraw
-        treeNodeTabs.checkTabs
-        treeNodePanel.currentSafePath.set(Some(safePath.parent ++ newTitle))
-        replacing()
-    }
-  }
-
-  //  import org.scalajs.dom.raw._
-  //
-  //  @tailrec
-  //  private def parentNode(node: Node, depth: Int): Node = {
-  //    if (depth == 0) node
-  //    else parentNode(node.parentNode, depth - 1)
-  //  }
 
 }
