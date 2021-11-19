@@ -45,6 +45,7 @@ object OMTags {
 
   val glyph_plug = cls("bi-plug-fill")
   val glyph_data = cls("bi-server")
+  val glyph_clock = cls("bi-clock")
   val glyph_share = cls("bi-forward-fill")
   //val options = cls("glyphicon glyphicon-option-horizontal")
   val glyph_eye_open = cls("bi-eye-fill")

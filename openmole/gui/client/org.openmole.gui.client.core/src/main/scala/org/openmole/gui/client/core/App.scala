@@ -218,7 +218,8 @@ object App {
                 div(img(src := "img/openmole_dark.png", height := "70px"), cls := "nav-container"),
                 treeNodePanel.fileToolBar.element,
                 treeNodePanel.fileControler,
-                treeNodePanel.labelArea,
+                //  treeNodePanel.labelArea,
+                treeNodePanel.fileToolBar.sortingGroup,
                 treeNodePanel.view
               ),
               div(

@@ -395,30 +395,6 @@ li.selectElement{
     filter: alpha(opacity=0);
 }
 
-.sortingTool{
-    color: white;
-    background-color: #222;
-    opacity: 0.5;
-    width : 35px;
-    position: fixed;
-    margin-top: 142px;
-}
-
-.sortingTool.btn:hover{
-    color: white;
-    background-color: #222;
-    opacity: 1;
-}
-
-.selectedSortingTool.btn, .selectedSortingTool.btn:hover{
-    color: white;
-    background-color: #222;
-    opacity: 1;
-    font-weight: bold;
-    width : 50px;
-    margin-top: 142px;
-    }
-
 .fullpanel {
     height: 100%;
     width: 100%;
@@ -538,7 +514,7 @@ padding-bottom: 90px;
 }
 
 .file2{
-  flex: 0 0 50px;
+  flex: 0 0 100px;
   font-size: 9px;
   justify-content: flex-end;
   display: flex;
@@ -596,7 +572,7 @@ padding-bottom: 90px;
 
      /* for Firefox */
      min-height: 0;
-     width: 400px;
+     width: 600px;
 }
 
 .file-section.closed {
@@ -700,7 +676,10 @@ padding-bottom: 90px;
     direction: column;
 }
 
-.flex-row {
+.flex-row,
+.sorting-files,
+.sorting-files-item,
+ sorting-files-group {
     display: flex;
     direction: row;
 }
@@ -763,3 +742,31 @@ padding-bottom: 90px;
     color: white;
     cursor: pointer;
    }
+
+.sorting-files {
+    justify-content : right;
+    padding : 20;
+    background-color: #3f3d56;
+}
+
+.sorting-files-item,
+.sorting-files-item-selected {
+    width: 25px;
+    opacity: 0.5;
+    color: white;
+    cursor: pointer;
+    font-size:14px;
+    padding: 0 20 0 20;
+}
+
+.sorting-files-item-selected {
+    opacity:1;
+    font-size:20px;
+}
+
+.sorting-file-item-caret {
+    font-size: 12px;
+    color: white;
+    width: 10px;
+    padding-left: 10px;
+}

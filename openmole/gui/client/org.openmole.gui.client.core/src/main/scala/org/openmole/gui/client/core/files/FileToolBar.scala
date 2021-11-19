@@ -240,7 +240,6 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     addRootDirButton.element,
     form(newNodeInput, onSubmit --> { _ ⇒
       createNewNode
-      false
     })
   )
 
@@ -321,33 +320,71 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   }
 
   val sortingGroup = {
-    val topTriangle = Seq(glyph_triangle_up, (fontSize := "10"))
-    val bottomTriangle = Seq(glyph_triangle_down, fontSize := "10")
-    //    exclusiveButtonGroup(omsheet.sortingBar, cls := ("sortingTool", "selectedSortingTool"))(
-    //      ExclusiveButton.twoGlyphSpan(
-    //        topTriangle,
-    //        bottomTriangle,
-    //        () ⇒ switchAlphaSorting,
-    //        () ⇒ switchAlphaSorting,
-    //        preString = "Aa",
-    //        cls := "sortingTool"
-    //      ),
-    //      ExclusiveButton.twoGlyphButtonStates(
-    //        topTriangle,
-    //        bottomTriangle,
-    //        () ⇒ switchTimeSorting,
-    //        () ⇒ switchTimeSorting,
-    //        preGlyph = Seq(twoGlyphButton, glyph_time)
-    //      ),
-    //      ExclusiveButton.twoGlyphButtonStates(
-    //        topTriangle,
-    //        bottomTriangle,
-    //        () ⇒ switchSizeSorting,
-    //        () ⇒ switchSizeSorting,
-    //        preGlyph = Seq(twoGlyphButton, OMTags.glyph_data, paddingTop := 10, fontSize := 12)
-    //      )
-    //  )
-    div()
+    trait Sorting
+    object Name extends Sorting
+    object Size extends Sorting
+    object Time extends Sorting
+
+    trait State
+    object Up extends State
+    object Down extends State
+
+    case class SortingState(sorting: Sorting, state: State)
+    val sortingState: Var[SortingState] = Var(SortingState(Name, Up))
+
+    def item(sorting: Sorting, sState: SortingState) = {
+      val isSelected = sorting == sState.sorting
+      div(
+        centerInDiv,
+        div(
+          sorting match {
+            case Name ⇒ "Aa"
+            case Time ⇒ OMTags.glyph_clock
+            case Size ⇒ OMTags.glyph_data
+          },
+          cls := "sorting-files-item" + {
+            if (isSelected) "-selected" else ""
+          }
+        ),
+        onClick --> { _ ⇒
+          sortingState.update(ss ⇒ SortingState(
+            sorting,
+            if (isSelected) {
+              if (ss.state == Up) Down
+              else Up
+            }
+            else Up))
+          sorting match {
+            case Name ⇒ switchAlphaSorting
+            case Size ⇒ switchSizeSorting
+            case Time ⇒ switchTimeSorting
+          }
+        }
+      )
+    }
+
+    div(
+      cls := "sorting-files",
+      div(
+        cls := "flex-row",
+        children <-- sortingState.signal.map { ss ⇒
+          Seq(
+            item(Name, ss),
+            item(Time, ss),
+            item(Size, ss),
+            div(
+              paddingLeft := "20px",
+              cls := "sorting-file-item-caret",
+              ss.state match {
+                case Up   ⇒ glyph_triangle_up
+                case Down ⇒ glyph_triangle_down
+              }
+            )
+          )
+        }
+      )
+    )
+
   }
 
   def getIfSelected(butt: HtmlElement) = manager.selected.now.map { m ⇒

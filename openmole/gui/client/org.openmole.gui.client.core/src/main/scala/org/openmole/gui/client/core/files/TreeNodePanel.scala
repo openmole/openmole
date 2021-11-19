@@ -59,7 +59,6 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
   )
 
   lazy val fileControler =
-    // val current = treeNodeManager.current()
     div(
       cls := "file-content tree-path",
       child <-- treeNodeManager.current.signal.map { curr ⇒
@@ -94,8 +93,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
                 fileToolBar.unselectTool
                 drawTree
               })
-            ),
-            fileToolBar.sortingGroup
+            )
           )
       }
     )
