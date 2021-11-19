@@ -1,15 +1,12 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
-import org.openmole.gui.client.core.alert.AlertPanel
-import org.openmole.gui.client.core.files.FileToolBar.{ FilterTool, PluginTool, TrashTool }
+import org.openmole.gui.client.core.files.FileToolBar._
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.client._
 import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
-import org.scalajs.dom.html.Input
 import org.scalajs.dom.raw._
 import org.openmole.gui.client.core._
 
@@ -19,9 +16,6 @@ import TreeNode._
 import autowire._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.client.FileManager
-import org.scalajs.dom
-import scaladget.bootstrapnative.Popup
-import scaladget.bootstrapnative.Popup.{ ClickPopup, Manual }
 import com.raquo.laminar.api.L._
 import org.openmole.gui.client.tool.OMTags
 
@@ -211,19 +205,6 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     case _                ⇒
   }
 
-  //  def fileTable(rows: Seq[Seq[HtmlElement]]) = {
-  //    div(
-  //      rows.map { r ⇒
-  //        //        div(display.flex, alignItems.center,
-  //        //          r.zipWithIndex.map {
-  //        //            case (e, c) ⇒
-  //        //              e.amend(cls := s"file$c")
-  //        //          }
-  //        //        )
-  //      }
-  //    )
-  //  }
-
   def dirBox(tn: TreeNode) = {
     tn match {
       case _: DirNode ⇒ div(
@@ -358,31 +339,6 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
     private val treeStates: Var[TreeStates] = Var(TreeStates(false, false, false))
 
-    //    val clickablePair = {
-    //      val style = Seq(
-    //        float.left,
-    //        cursor.pointer,
-    //        draggable := true,
-    //        onClick --> { e ⇒
-    //          if (!selectionMode.now) {
-    //            todo()
-    //          }
-    //        }
-    //      )
-    //      println("TN " + tn.name)
-    //      tn match {
-    //        case fn: FileNode ⇒ span(span(paddingTop := "4", omsheet.file, style, div(omsheet.fileNameOverflow, tn.name)))
-    //        case dn: DirNode ⇒
-    //          div(omsheet.dir,
-    //            div(
-    //              if (dn.isEmpty) emptySetters
-    //              else glyph_plus
-    //            ),
-    //            , style, div(omsheet.fileNameOverflow, paddingLeft := "22"), tn.name
-    //          )
-    //      }
-    //    }
-
     def timeOrSize(tn: TreeNode): String = fileToolBar.fileFilter.now.fileSorting match {
       case TimeSorting() ⇒ CoreUtils.longTimeToString(tn.time)
       case _             ⇒ CoreUtils.readableByteCountAsString(tn.size)
@@ -422,43 +378,24 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
           //              }
           //            }
           //            },
-          //          dropPairs
-          //          ,
-          //          onDragStart --> { e ⇒
-          //            e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
-          //            draggedNode.set(Some(tnSafePath))
-          //          }
-          //          ,
-          //          onDrop --> { e ⇒
-          //            e.dataTransfer
-          //            e.preventDefault()
-          //            dropAction(treeNodeManager.current.now ++ tn.name, tn match {
-          //              case _: DirNode ⇒ true
-          //              case _ ⇒ false
-          //            })
-          //          }
-          //          ,
-          //          onDragEnter --> { _ ⇒
-          //            false
-          //          }
-          //,
-          // clickablePair,
-          //              {
-          //                div(
-          //                  fileInfo,
-          //                  span(
-          //                    omsheet.fileSize,
-          //                    i(timeOrSize(tn)),
-          //                    buildManualPopover(
-          //                      div(settingsGlyph, onClick --> { _ ⇒ /*FIXME*/
-          //                        /*Popover.hide*/
-          //                      })
-          //                    )
-          //                  )
-          //                )
-          //              },
-          dirBox(tn).amend(cls := "file0", fileClick),
-          div(tn.name, cls := "file1", fileClick),
+          dropPairs,
+          onDragStart --> { e ⇒
+            e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
+            draggedNode.set(Some(tnSafePath))
+          },
+          onDrop --> { e ⇒
+            e.dataTransfer
+            e.preventDefault()
+            dropAction(treeNodeManager.current.now ++ tn.name, tn match {
+              case _: DirNode ⇒ true
+              case _          ⇒ false
+            })
+          },
+          onDragEnter --> { _ ⇒
+            false
+          },
+          dirBox(tn).amend(cls := "file0", fileClick, draggable := true),
+          div(tn.name, cls := "file1", fileClick, draggable := true),
           i(timeOrSize(tn), cls := "file2"),
           button(cls := "bi-three-dots transparent-button", cursor.pointer, opacity := "0.5", onClick --> { _ ⇒
             currentSafePath.set(Some(tnSafePath))

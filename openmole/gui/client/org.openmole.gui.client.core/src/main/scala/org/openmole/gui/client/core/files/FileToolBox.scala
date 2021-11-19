@@ -97,7 +97,6 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
   def rename(safePath: SafePath, to: String, replacing: () ⇒ Unit) = {
     Post()[Api].renameFile(safePath, to).call().foreach {
       newNode ⇒
-        println("rename file")
         treeNodeTabs.rename(safePath, newNode)
         treeNodePanel.invalidCacheAndDraw
         treeNodeTabs.checkTabs
@@ -107,7 +106,6 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
   }
 
   def withSafePath(action: SafePath ⇒ Unit) = {
-    println("WSP " + treeNodePanel.currentSafePath.now())
     treeNodePanel.currentSafePath.now.foreach { sp ⇒
       action(sp)
     }
@@ -132,7 +130,6 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
             form(
               renameInput,
               onSubmit.preventDefault --> { _ ⇒
-                println("sabmit")
                 withSafePath { sp ⇒
                   testRename(sp, renameInput.ref.value)
                 }
@@ -170,7 +167,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
               div(
                 fileActions,
                 iconAction(glyphItemize(glyph_download), "download", () ⇒ download),
-                iconAction(glyphItemize(glyph_trash), "trash", () ⇒ actionConfirmation.set(Some(confirmation(s"Delete ${
+                iconAction(glyphItemize(glyph_trash), "delete", () ⇒ actionConfirmation.set(Some(confirmation(s"Delete ${
                   initSafePath.name
                 } ?", () ⇒ trash)))),
                 iconAction(glyphItemize(OMTags.glyph_arrow_left_right), "duplicate", () ⇒ duplicate),
