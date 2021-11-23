@@ -178,16 +178,15 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   val thresholdChanged = Var(false)
 
   val thresholdInput = inputTag(fileNumberThreshold.toString).amend(
-    idAttr := thresholdTag,
     width := "60px",
     onMountFocus,
-    cls := "form-control",
+    cls := "form-control", marginTop := "11px",
     cls.toggle("colorTransition") <-- thresholdChanged.signal
   )
 
   val nameInput = inputTag("").amend(
-    idAttr := nameTag,
     width := "70px",
+    marginTop := "11px",
     onMountFocus
   )
 
@@ -213,18 +212,19 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   }
 
-  def filterSubmit: () ⇒ Boolean = () ⇒ {
+  def filterSubmit {
     resetFilterTools
     treeNodePanel.invalidCacheAndDraw
-    false
   }
 
+  val filterToolOpen = Var(false)
+
   val filterTool = div(
-    centerElement,
-    span(tdStyle, label("# of entries ", labelStyle)),
-    span(tdStyle, form(thresholdInput, onSubmit --> { _ ⇒ filterSubmit })),
-    span(tdStyle, label("name ", forId := nameTag, labelStyle)),
-    span(tdStyle, form(nameInput, onSubmit --> { _ ⇒ filterSubmit }))
+    cls := "file-filter",
+    label("# of entries ", width := "30px", margin := "0 15 0 10"),
+    form(thresholdInput, onSubmit.preventDefault --> { _ ⇒ filterSubmit }),
+    label("name ", width := "30px", margin := "0 15 0 10"),
+    form(nameInput, onSubmit.preventDefault --> { _ ⇒ filterSubmit })
   )
 
   def createNewNode = {
@@ -238,7 +238,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   val createFileTool = div(
     addRootDirButton.element,
-    form(newNodeInput, onSubmit --> { _ ⇒
+    form(newNodeInput, onSubmit.preventDefault --> { _ ⇒
       createNewNode
     })
   )
@@ -364,9 +364,16 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     }
 
     div(
-      cls := "sorting-files",
+      centerInDiv, backgroundColor := "#3f3d56", paddingBottom := "10px",
+      div(OMTags.glyph_filter, cls := "sorting-files-item", paddingLeft := "10px", onClick --> { _ ⇒ filterToolOpen.update(!_) }),
       div(
-        cls := "flex-row",
+        child <-- filterToolOpen.signal.map { fto ⇒
+          if (fto) filterTool
+          else div(minWidth := "300px")
+        }
+      ),
+      div(
+        cls := "sorting-files",
         children <-- sortingState.signal.map { ss ⇒
           Seq(
             item(Name, ss),
@@ -387,8 +394,9 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   }
 
-  def getIfSelected(butt: HtmlElement) = manager.selected.now.map { m ⇒
-    if (m.isEmpty) div() else butt
+  def getIfSelected(butt: HtmlElement) = manager.selected.now.map {
+    m ⇒
+      if (m.isEmpty) div() else butt
   }
 
   lazy val element = {

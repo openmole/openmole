@@ -679,9 +679,10 @@ padding-bottom: 90px;
 .flex-row,
 .sorting-files,
 .sorting-files-item,
- sorting-files-group {
+.sorting-files-group,
+.file-filter {
     display: flex;
-    direction: row;
+    flex-direction: row;
 }
 
 .center-in-div,
@@ -769,4 +770,13 @@ padding-bottom: 90px;
     color: white;
     width: 10px;
     padding-left: 10px;
+}
+
+.file-filter {
+    width: 300px;
+    align-items: center;
+    color: white;
+    font-size: 14px;
+    padding: 10px;
+    max-height: 60px;
 }

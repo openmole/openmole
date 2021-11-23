@@ -53,6 +53,7 @@ object OMTags {
   val glyph_house = cls("bi-house-fill")
   val glyph_arrow_left_right = cls("bi-arrow-left-right")
   val glyph_extract = cls("bi-file-earmark-zip-fill")
+  lazy val glyph_filter = cls("bi-funnel-fill")
 
   case class AlertAction(action: () ⇒ Unit)
 

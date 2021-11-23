@@ -723,13 +723,6 @@ package object client {
     top := "-130"
   )
 
-  lazy val labelStyle = Seq(
-    marginTop := "4",
-    color := WHITE,
-    width := "auto",
-    fontSize := "14"
-  )
-
   lazy val tdStyle = Seq(
     colBS(2),
     marginBottom := "8",

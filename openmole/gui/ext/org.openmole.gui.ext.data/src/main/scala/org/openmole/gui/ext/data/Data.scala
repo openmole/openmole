@@ -796,7 +796,7 @@ package object data {
   case class ListFilesData(list: Seq[TreeNodeData], nbFilesOnServer: Int)
 
   object FileFilter {
-    def defaultFilter = FileFilter.this (First(), Some(100), "", AlphaSorting())
+    def defaultFilter = FileFilter(First(), Some(100), "", AlphaSorting())
   }
 
   case class OMSettings(workspace: SafePath, version: String, versionName: String, buildTime: String, isDevelopment: Boolean)
