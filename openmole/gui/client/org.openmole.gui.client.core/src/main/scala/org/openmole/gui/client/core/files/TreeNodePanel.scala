@@ -62,12 +62,14 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     div(
       cls := "file-content tree-path",
       child <-- treeNodeManager.current.signal.map { curr ⇒
+        val parent = curr.parent
+        val grandParent = parent.parent
         div(
-          goToDirButton(treeNodeManager.root).amend(OMTags.glyph_house, float.left),
-          Seq(curr.parent, curr).filterNot { sp ⇒
+          goToDirButton(treeNodeManager.root).amend(OMTags.glyph_house),
+          Seq(grandParent.parent, grandParent, parent, curr).filterNot { sp ⇒
             sp.isEmpty || sp == treeNodeManager.root
           }.map { sp ⇒
-            goToDirButton(sp, s"| ${sp.name}")
+            goToDirButton(sp, s" / ${sp.name}")
           }
         )
       },
