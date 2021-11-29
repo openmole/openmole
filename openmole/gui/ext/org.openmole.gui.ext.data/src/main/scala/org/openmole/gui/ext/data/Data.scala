@@ -777,7 +777,7 @@ package object data {
       }
   }
 
-  case class FileFilter(firstLast: FirstLast = First(), threshold: Option[Int] = Some(20), nameFilter: String = "", fileSorting: ListSorting = AlphaSorting()) {
+  case class FileFilter(firstLast: FirstLast = First(), threshold: Option[Int] = Some(1000), nameFilter: String = "", fileSorting: ListSorting = AlphaSorting()) {
 
     def switchTo(newFileSorting: ListSorting) = {
       val fl = {
@@ -796,7 +796,7 @@ package object data {
   case class ListFilesData(list: Seq[TreeNodeData], nbFilesOnServer: Int)
 
   object FileFilter {
-    def defaultFilter = FileFilter(First(), Some(100), "", AlphaSorting())
+    def defaultFilter = FileFilter(First(), Some(1000), "", AlphaSorting())
   }
 
   case class OMSettings(workspace: SafePath, version: String, versionName: String, buildTime: String, isDevelopment: Boolean)

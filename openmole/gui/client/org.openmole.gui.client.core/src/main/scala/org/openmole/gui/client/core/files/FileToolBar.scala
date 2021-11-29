@@ -14,9 +14,9 @@ import org.openmole.gui.ext.client._
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import com.raquo.laminar.nodes.ReactiveHtmlElement
-import org.scalajs.dom.raw.{ HTMLButtonElement, HTMLElement, HTMLInputElement, HTMLSpanElement }
+import org.scalajs.dom.raw.{HTMLButtonElement, HTMLElement, HTMLInputElement, HTMLSpanElement}
 import org.openmole.gui.client.core.Waiter._
-import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
+import org.openmole.gui.client.core.alert.AbsolutePositioning.{FileZone, RelativeCenterPosition}
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.core.panels._
 import org.openmole.gui.client.tool._
@@ -45,10 +45,6 @@ object FileToolBar {
 
   trait SelectedTool {
     def glyph: Setter[ReactiveHtmlElement.Base]
-  }
-
-  object FilterTool extends SelectedTool {
-    val glyph = glyph_filter
   }
 
   object TrashTool extends SelectedTool {
@@ -94,16 +90,6 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   def clearMessage = message.set(div())
 
-  def resetFilter = {
-    selectedTool.now match {
-      case Some(FilterTool) ⇒ manager.invalidCurrentCache
-      case _                ⇒
-    }
-    nameInput.ref.value = ""
-    thresholdInput.ref.value = fileNumberThreshold.toString
-    resetFilterTools
-  }
-
   def buildSpan(tool: SelectedTool, legend: String, todo: () ⇒ Unit, modifierSeq: HESetters = emptySetters) = {
     span(
       tool.glyph, cursor.pointer, modifierSeq,
@@ -115,25 +101,20 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   def buildAndSelectSpan(tool: SelectedTool, legend: String, todo: Boolean ⇒ Unit = (Boolean) ⇒ {}) =
     buildSpan(tool, legend, { () ⇒
       val isSelectedTool = selectedTool.now == Some(tool)
-      if (isSelectedTool) selectedTool.now match {
-        case Some(FilterTool) ⇒ unselectToolAndRefreshTree
-        case _                ⇒ unselectTool
+      tool match {
+        case CopyTool | TrashTool ⇒ treeNodePanel.turnSelectionTo(true)
+        case PluginTool ⇒
+          manager.computePluggables(() ⇒
+            if (manager.pluggables.now.isEmpty)
+              message.set(div(color := WHITE, "No plugin could be found in this folder."))
+            else {
+              clearMessage
+              treeNodePanel.turnSelectionTo(true)
+            })
+        case _ ⇒
       }
-      else {
-        tool match {
-          case CopyTool | TrashTool ⇒ treeNodePanel.turnSelectionTo(true)
-          case PluginTool ⇒
-            manager.computePluggables(() ⇒
-              if (manager.pluggables.now.isEmpty)
-                message.set(div(color := WHITE, "No plugin could be found in this folder."))
-              else {
-                clearMessage
-                treeNodePanel.turnSelectionTo(true)
-              })
-          case _ ⇒
-        }
-        selectedTool.set(Some(tool))
-      }
+      selectedTool.set(Some(tool))
+
       // todo(isSelectedTool)
     })
 
@@ -178,15 +159,15 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   val thresholdChanged = Var(false)
 
   val thresholdInput = inputTag(fileNumberThreshold.toString).amend(
-    width := "60px",
+    width := "55px",
     onMountFocus,
-    cls := "form-control", marginTop := "11px",
+    cls := "form-control", marginTop := "12px", padding := "10px",
     cls.toggle("colorTransition") <-- thresholdChanged.signal
   )
 
   val nameInput = inputTag("").amend(
-    width := "70px",
-    marginTop := "11px",
+    width := "60px",
+    marginTop := "12px",
     onMountFocus
   )
 
@@ -231,7 +212,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     val newFile = newNodeInput.ref.value
     val currentDirNode = manager.current
     addRootDirButton.toggled.now match {
-      case true  ⇒ CoreUtils.addDirectory(currentDirNode.now, newFile, () ⇒ unselectToolAndRefreshTree)
+      case true ⇒ CoreUtils.addDirectory(currentDirNode.now, newFile, () ⇒ unselectToolAndRefreshTree)
       case false ⇒ CoreUtils.addFile(currentDirNode.now, newFile, () ⇒ unselectToolAndRefreshTree)
     }
   }
@@ -252,7 +233,6 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   def unselectTool = {
     clearMessage
-    resetFilter
     manager.clearSelection
     newNodeInput.ref.value = ""
     treeNodePanel.treeWarning.set(true)
@@ -261,21 +241,19 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     treeNodePanel.drawTree
   }
 
-  val deleteButton = button("Delete", btn_danger, onClick --> { _ ⇒
-    {
-      CoreUtils.trashNodes(manager.selected.now) {
-        () ⇒
-          unselectToolAndRefreshTree
-      }
+  val deleteButton = button("Delete", btn_danger, onClick --> { _ ⇒ {
+    CoreUtils.trashNodes(manager.selected.now) {
+      () ⇒
+        unselectToolAndRefreshTree
     }
+  }
   })
 
-  val copyButton = button("Copy", btn_secondary, onClick --> { _ ⇒
-    {
-      manager.setSelectedAsCopied
-      unselectTool
-      treeNodePanel.drawTree
-    }
+  val copyButton = button("Copy", btn_secondary, onClick --> { _ ⇒ {
+    manager.setSelectedAsCopied
+    unselectTool
+    treeNodePanel.drawTree
+  }
   })
 
   val pluginButton =
@@ -364,13 +342,22 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     }
 
     div(
-      centerInDiv, backgroundColor := "#3f3d56", paddingBottom := "10px",
-      div(OMTags.glyph_filter, cls := "sorting-files-item", paddingLeft := "10px", onClick --> { _ ⇒ filterToolOpen.update(!_) }),
-      div(
-        child <-- filterToolOpen.signal.map { fto ⇒
-          if (fto) filterTool
-          else div(minWidth := "300px")
-        }
+      centerInDiv, backgroundColor := "#3f3d56",
+      div(flexRow, justifyContent.right,
+        div(
+          cls <-- filterToolOpen.signal.map { o =>
+            if (o) "open-transition" else "close-transition"
+          },
+          filterTool
+        ),
+        div(OMTags.glyph_filter,
+          cls <-- fileFilter.signal.map { ff =>
+            "filtering-files-item" + {
+              if (ff.threshold != Some(1000) || ff.nameFilter != "") "-selected"
+              else ""
+            }
+          },
+          onClick --> { _ ⇒ filterToolOpen.update(!_) }),
       ),
       div(
         cls := "sorting-files",
@@ -380,10 +367,9 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
             item(Time, ss),
             item(Size, ss),
             div(
-              paddingLeft := "20px",
               cls := "sorting-file-item-caret",
               ss.state match {
-                case Up   ⇒ glyph_triangle_up
+                case Up ⇒ glyph_triangle_up
                 case Down ⇒ glyph_triangle_down
               }
             )
@@ -405,7 +391,6 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
       cls := "file-content",
       div(
         centerElement,
-        buildAndSelectSpan(FilterTool, "Filter files by number of entries or by names"),
         buildAndSelectSpan(FileCreationTool, "File or folder creation"),
         buildAndSelectSpan(CopyTool, "Copy selected files"),
         buildAndSelectSpan(TrashTool, "Delete selected files"),
@@ -423,12 +408,9 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
             centerFileToolBar,
             msg,
             sT match {
-              case Some(FilterTool) ⇒
-                treeNodePanel.treeWarning.set(false)
-                filterTool
               case Some(FileCreationTool) ⇒ createFileTool
-              case Some(TrashTool)        ⇒ getIfSelected(deleteButton)
-              case Some(PluginTool)       ⇒ getIfSelected(pluginButton)
+              case Some(TrashTool) ⇒ getIfSelected(deleteButton)
+              case Some(PluginTool) ⇒ getIfSelected(pluginButton)
               case Some(CopyTool) ⇒
                 manager.emptyCopied
                 getIfSelected(copyButton)
