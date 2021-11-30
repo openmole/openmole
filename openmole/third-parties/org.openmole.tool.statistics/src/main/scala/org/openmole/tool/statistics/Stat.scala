@@ -215,18 +215,23 @@ trait Stat {
     s / math.log(2)
   }
 
-  def probabilityDistribution(s: Seq[Double], classes: Int) = {
+  def probabilityDistribution(s: Seq[Double], beans: Int) = {
     val ssorted = s.sorted
-    val smin = s.head
-    val smax = s.last
-    val step = (smax - smin) / classes
+    val smin = ssorted.head
+    val smax = ssorted.last
+    val step = (smax - smin) / beans
 
-    @tailrec def recurse(hb: BigDecimal, ssorted: List[Double], distrib: List[Double]): List[Double] =
-      if (hb > smax) distrib.reverse
-      else recurse(hb + step, ssorted.dropWhile(_ <= hb), ssorted.takeWhile(_ <= hb).size :: distrib)
+    @tailrec def recurse(lowBound: BigDecimal, ssorted: List[Double], beans: List[Int]): List[Int] = {
+      val highBound = lowBound + step
+      if (highBound >= smax) (ssorted.size :: beans).reverse
+      else {
+        def bean = ssorted.takeWhile(_ <= highBound).size
+        recurse(highBound, ssorted.dropWhile(_ <= highBound), bean :: beans)
+      }
+    }
 
     val size = ssorted.size
-    recurse(BigDecimal(smin) + step, ssorted.toList, List()).toSeq.map(_.toDouble / size)
+    recurse(BigDecimal(smin), ssorted.toList, List()).map(_.toDouble / size)
   }
 
 }
