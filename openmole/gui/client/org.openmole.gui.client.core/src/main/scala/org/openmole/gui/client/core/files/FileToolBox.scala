@@ -166,12 +166,12 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
             case (None, None) ⇒
               div(
                 fileActions,
+                iconAction(glyphItemize(OMTags.glyph_arrow_left_right), "duplicate", () ⇒ duplicate),
+                iconAction(glyphItemize(glyph_edit), "rename", () ⇒ actionEdit.set(Some(editForm(initSafePath)))),
                 iconAction(glyphItemize(glyph_download), "download", () ⇒ download),
                 iconAction(glyphItemize(glyph_trash), "delete", () ⇒ actionConfirmation.set(Some(confirmation(s"Delete ${
                   initSafePath.name
                 } ?", () ⇒ trash)))),
-                iconAction(glyphItemize(OMTags.glyph_arrow_left_right), "duplicate", () ⇒ duplicate),
-                iconAction(glyphItemize(glyph_edit), "edit", () ⇒ actionEdit.set(Some(editForm(initSafePath)))),
                 FileExtension(initSafePath.name) match {
                   case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP | FileExtension.TXZ ⇒
                     iconAction(glyphItemize(OMTags.glyph_extract), "extract", () ⇒ extract)

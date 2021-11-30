@@ -79,7 +79,6 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   def manager = treeNodePanel.treeNodeManager
 
   val selectedTool: Var[Option[SelectedTool]] = Var(None)
-  val transferring: Var[ProcessState] = Var(Processed())
   val fileFilter = Var(FileFilter.defaultFilter)
   val message = Var[Div](div())
   val fileNumberThreshold = 1000
@@ -117,41 +116,6 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
       // todo(isSelectedTool)
     })
-
-  def fInputMultiple(todo: Input ⇒ Unit) =
-    inputTag().amend(cls := "upload", `type` := "file", multiple := true,
-      inContext { thisNode ⇒
-        onChange --> { _ ⇒
-          todo(thisNode)
-        }
-      }
-    )
-
-  //Upload tool
-  def upbtn(todo: Input ⇒ Unit): HtmlElement =
-    span(aria.hidden := true, glyph_upload, "fileUpload glyphmenu",
-      fInputMultiple(todo)
-    )
-
-  private val upButton = upbtn((fileInput: Input) ⇒ {
-    FileManager.upload(fileInput, manager.current.now, (p: ProcessState) ⇒ transferring.set(p), UploadProject(), () ⇒ treeNodePanel.invalidCacheAndDraw)
-  })
-
-  // New file tool
-  val newNodeInput = inputTag().amend(
-    placeholder := "File name",
-    width := "130px",
-    left := "-2px",
-    onMountFocus
-  )
-
-  lazy val addRootDirButton = {
-
-    val folder = ToggleState("Folder", btn_primary_string, () ⇒ {})
-    val file = ToggleState("File", btn_secondary_string, () ⇒ {})
-
-    toggle(folder, true, file, () ⇒ {})
-  }
 
   // Filter tool
   val thresholdTag = "threshold"
@@ -208,22 +172,6 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     form(nameInput, onSubmit.preventDefault --> { _ ⇒ filterSubmit })
   )
 
-  def createNewNode = {
-    val newFile = newNodeInput.ref.value
-    val currentDirNode = manager.current
-    addRootDirButton.toggled.now match {
-      case true ⇒ CoreUtils.addDirectory(currentDirNode.now, newFile, () ⇒ unselectToolAndRefreshTree)
-      case false ⇒ CoreUtils.addFile(currentDirNode.now, newFile, () ⇒ unselectToolAndRefreshTree)
-    }
-  }
-
-  val createFileTool = div(
-    addRootDirButton.element,
-    form(newNodeInput, onSubmit.preventDefault --> { _ ⇒
-      createNewNode
-    })
-  )
-
   def unselectToolAndRefreshTree: Unit = {
     unselectTool
     treeNodePanel.invalidCacheAndDraw
@@ -234,7 +182,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   def unselectTool = {
     clearMessage
     manager.clearSelection
-    newNodeInput.ref.value = ""
+   // newNodeInput.ref.value = ""
     treeNodePanel.treeWarning.set(true)
     treeNodePanel.turnSelectionTo(false)
     selectedTool.set(None)
@@ -391,7 +339,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
       cls := "file-content",
       div(
         centerElement,
-        buildAndSelectSpan(FileCreationTool, "File or folder creation"),
+       // buildAndSelectSpan(FileCreationTool, "File or folder creation"),
         buildAndSelectSpan(CopyTool, "Copy selected files"),
         buildAndSelectSpan(TrashTool, "Delete selected files"),
         buildAndSelectSpan(PluginTool, "Detect plugins that can be enabled in this folder"),
@@ -400,7 +348,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
           buildSpan(RefreshTool, "Refresh the current folder", () ⇒ {
             treeNodePanel.invalidCacheAndDraw
           })),
-        upButton.tooltip("Upload a file")
+       // upButton.tooltip("Upload a file")
       ),
       child <-- message.signal.combineWith(selectedTool.signal).map {
         case (msg, sT) ⇒
@@ -408,7 +356,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
             centerFileToolBar,
             msg,
             sT match {
-              case Some(FileCreationTool) ⇒ createFileTool
+             // case Some(FileCreationTool) ⇒ createFileTool
               case Some(TrashTool) ⇒ getIfSelected(deleteButton)
               case Some(PluginTool) ⇒ getIfSelected(pluginButton)
               case Some(CopyTool) ⇒
@@ -416,10 +364,6 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
                 getIfSelected(copyButton)
               case _ ⇒ div()
             },
-            transferring.withTransferWaiter {
-              _ ⇒
-                div()
-            }
           )
       }
     )

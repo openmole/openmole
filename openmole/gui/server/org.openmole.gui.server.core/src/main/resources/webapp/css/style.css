@@ -79,10 +79,11 @@ ul{
     cursor: pointer;
     font-weight: bold;
     height: 5px;
+    line-height: 25px;
 }
 
 .treePathItems:hover{
-    color: #222;
+    color: #3086b5;
 }
 
 .tree {
@@ -248,16 +249,11 @@ li.selectElement{
 
 .glyphmenu:hover {
     opacity: 1;
-    transform: scale(1.6);
+    transform: scale(1.4);
     color: #3086b5;
 }
 
 .glyphitem {
-    top: 0;
-    display: inline-block;
-    float: right;
-    opacity: 0.6;
-    padding-right: 5px;
     cursor: pointer;
     transition: transform 0.1s ease-out 0s;
     font-size: 15px;
@@ -265,7 +261,6 @@ li.selectElement{
 }
 
 .glyphitem:hover {
-    opacity: 1;
     transform: scale(1.2);
 }
 
@@ -310,12 +305,11 @@ li.selectElement{
 
 /* WAITER */
 .spinner-wave {
-    height: 30px;
-    margin: 0 auto;
-    text-align: center;
-    width: 50px;
-    display: inline-block;
-    vertical-align: middle;
+  height: 30px;
+  margin: 0 auto;
+  width: 50px;
+  display: flex;
+  flex-direction: row;
 }
 
 .spinner-wave > div {
@@ -360,20 +354,23 @@ li.selectElement{
 
 /* FILE TOOL BAR*/
 .fileUpload {
-    position: relative;
     overflow: hidden;
-    width: 24px;
+    color: white;
+    font-size: 25px;
+    background: #795c85;
+    border-radius: 50px;
+    padding: 10px;
 }
 .fileUpload input.upload {
-    position: absolute;
-    top: 0;
+    position: fixed;
+    top: 5;
     right: 0;
-    margin: 0;
+    margin: 5;
     padding: 0;
-    font-size: 20px;
     cursor: pointer;
     opacity: 0;
-    filter: alpha(opacity=0);
+    width: 30px;
+    height: 30px;
 }
 
 .fullpanel {
@@ -678,7 +675,7 @@ padding-bottom: 90px;
 .file-item-warning {
     background-color: #dc3545;
     cursor: pointer;
-    width: 25%;
+    width: 15%;
     height: 38px;
     color: white;
     border-top-right-radius: 5px;
@@ -686,20 +683,20 @@ padding-bottom: 90px;
 }
 
 .file-item-cancel {
-    background-color: #6c757d;
+    background-color: white;
     cursor: pointer;
-    width: 25%;
+    width: 15%;
     height: 38px;
-    color: white;
+    color: #6c757d;
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
 }
 
 .file-actions {
-    background-color: white;
-    color: #444;
+    color: white;
     margin: 10 0 10 0;
     padding: 10px;
+    background-color: #795c85;
 }
 
 .file-action-items {
@@ -780,4 +777,18 @@ padding-bottom: 90px;
 .close-transition {
    transition: width 0.5s ease-in-out;
    width: 0%;
+}
+
+.plus-button {
+    cursor: pointer;
+    border-radius: 50px;
+    background-color: white;
+    height: 25px;
+    width: 25px;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    font-size: 20px;
+    color: #3086b5;
+    margin-left:10px;
 }

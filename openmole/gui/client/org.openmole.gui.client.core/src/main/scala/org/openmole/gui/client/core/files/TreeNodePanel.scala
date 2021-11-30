@@ -58,21 +58,84 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     onMountFocus
   )
 
+  // New file tool
+  val newNodeInput = inputTag().amend(
+    placeholder := "File name",
+    width := "130px",
+    marginLeft := "10px",
+    onMountFocus
+  )
+
+  lazy val addRootDirButton = {
+
+    val folder = ToggleState("Folder", btn_primary_string, () ⇒ {})
+    val file = ToggleState("File", btn_secondary_string, () ⇒ {})
+
+    toggle(folder, true, file, () ⇒ {})
+  }
+
+  def createNewNode = {
+    val newFile = newNodeInput.ref.value
+    val currentDirNode = treeNodeManager.current
+    addRootDirButton.toggled.now match {
+      case true  ⇒ CoreUtils.addDirectory(currentDirNode.now, newFile, () ⇒ invalidCacheAndDraw)
+      case false ⇒ CoreUtils.addFile(currentDirNode.now, newFile, () ⇒ invalidCacheAndDraw)
+    }
+  }
+
+  //Upload tool
+  val transferring: Var[ProcessState] = Var(Processed())
+
+  def fInputMultiple(todo: Input ⇒ Unit) =
+    inputTag().amend(cls := "upload", `type` := "file", multiple := true,
+      inContext { thisNode ⇒
+        onChange --> { _ ⇒
+          todo(thisNode)
+        }
+      }
+    )
+
+  def upbtn(todo: Input ⇒ Unit): HtmlElement =
+    span(aria.hidden := true, glyph_upload, cls := "fileUpload glyphmenu", margin := "10 0 10 160",
+      fInputMultiple(todo)
+    )
+
+  private val upButton = upbtn((fileInput: Input) ⇒ {
+    FileManager.upload(fileInput, treeNodeManager.current.now, (p: ProcessState) ⇒ transferring.set(p), UploadProject(), () ⇒ invalidCacheAndDraw)
+  })
+
+  lazy val createFileTool =
+    form(flexRow, alignItems.center, height := "65px", color.white, margin := "0 10 0 10",
+      addRootDirButton.element,
+      newNodeInput.amend(marginLeft := "10px"),
+      upButton.amend(justifyContent.flexEnd).tooltip("Upload a file"),
+      transferring.withTransferWaiter {
+        _ ⇒
+          div()
+      }.amend(marginLeft := "10px"),
+      onSubmit.preventDefault --> { _ ⇒
+        createNewNode
+        newNodeInput.ref.value = ""
+        plusFile.set(false)
+      })
+
+  val plusFile = Var(false)
   lazy val fileControler =
     div(
-      cls := "file-content tree-path",
       child <-- treeNodeManager.current.signal.map { curr ⇒
         val parent = curr.parent
-        val grandParent = parent.parent
         div(
-          goToDirButton(treeNodeManager.root).amend(OMTags.glyph_house),
-          Seq(grandParent.parent, grandParent, parent, curr).filterNot { sp ⇒
+          cls := "file-content tree-path",
+          goToDirButton(treeNodeManager.root).amend(OMTags.glyph_house, padding := "5"),
+          Seq(parent.parent, parent, curr).filterNot { sp ⇒
             sp.isEmpty || sp == treeNodeManager.root
           }.map { sp ⇒
-            goToDirButton(sp, s" / ${sp.name}")
-          }
+            goToDirButton(sp, s" ${sp.name} / ")
+          },
+          div(glyph_plus, cls := "plus-button", onClick --> { _ ⇒ plusFile.update(!_) })
         )
       },
+      plusFile.signal.expand(createFileTool),
       treeNodeManager.error --> treeNodeManager.errorObserver,
       treeNodeManager.comment --> treeNodeManager.commentObserver
     )
@@ -157,7 +220,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     FileManager.download(
       safePath,
       (p: ProcessState) ⇒ {
-        fileToolBar.transferring.set(p)
+        transferring.set(p)
       },
       hash = hash,
       onLoaded = onLoaded
@@ -360,6 +423,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
     def fileClick =
       onClick --> { e ⇒
+        plusFile.set(false)
         if (!selectionMode.now) {
           todo()
         }
@@ -368,7 +432,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     val render: HtmlElement = {
       // val settingsGlyph = Seq(cls := "glyphitem", glyph_settings, color := WHITE, paddingLeft := "4")
       div(display.flex, flexDirection.column,
-        div(display.flex, alignItems.center, margin := "5",
+        div(display.flex, alignItems.center, lineHeight := "27px",
           //        child <-- selectionMode.signal.combineWith(treeStates.signal, fileToolBar.selectedTool.signal, treeNodeManager.pluggables.signal).map {
           //          case (sM, tS, sTools, pluggables) ⇒
           //            onClick --> { e ⇒ {

@@ -91,6 +91,8 @@ package object client {
 
   lazy val navBarItem = cls := "navbar-item"
 
+  lazy val toolBoxColor = "#795c85"
+
   lazy val centerElement = Seq(
     display := "flex",
     justifyContent := "center",
