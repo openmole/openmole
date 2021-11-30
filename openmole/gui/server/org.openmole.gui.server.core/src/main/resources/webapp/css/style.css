@@ -482,6 +482,7 @@ padding-bottom: 90px;
   flex: 0 0 20px;
   margin-right: 5px;
   cursor: pointer;
+  margin-left:10px;
 }
 
 .file1{
@@ -791,4 +792,18 @@ padding-bottom: 90px;
     font-size: 20px;
     color: #3086b5;
     margin-left:10px;
+}
+
+.plus-button.selected {
+    background-color: #3086b5;
+    color: white;
+}
+
+.btn.btn-danger .bi-caret-right-fill {
+    font-size: 14px;
+}
+
+.folder-or-file {
+     width: 80px;
+    padding: 5px;
 }
