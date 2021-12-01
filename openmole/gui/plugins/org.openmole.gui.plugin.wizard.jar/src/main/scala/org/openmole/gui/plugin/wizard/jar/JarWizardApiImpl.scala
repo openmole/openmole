@@ -82,7 +82,7 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
     Some(BasicLaunchingCommand(Some(JavaLikeLanguage()), ""))
 
   def jarClasses(jarPath: SafePath) = {
-    val zip = new ZipInputStream(jarPath.toFile.bufferedInputStream)
+    val zip = new ZipInputStream(jarPath.toFile.bufferedInputStream())
 
     var classes: Seq[FullClass] = Seq()
 

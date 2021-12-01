@@ -56,11 +56,11 @@ package object ssh {
 
       override def rmFile(t: SSHStorage, path: String): Unit = t.accessControl { gssh.rmFile(t, path) }
 
-      override def upload(t: SSHStorage, src: File, dest: String, options: TransferOptions): Unit =t.accessControl {
+      override def upload(t: SSHStorage, src: File, dest: String, options: TransferOptions): Unit = t.accessControl {
         StorageInterface.upload(false, gssh.writeFile(t, _, _))(src, dest, options)
       }
 
-      override def download(t: SSHStorage, src: String, dest: File, options: TransferOptions): Unit =t.accessControl {
+      override def download(t: SSHStorage, src: String, dest: File, options: TransferOptions): Unit = t.accessControl {
         StorageInterface.download(false, gssh.readFile[Unit](t, _, _))(src, dest, options)
       }
 

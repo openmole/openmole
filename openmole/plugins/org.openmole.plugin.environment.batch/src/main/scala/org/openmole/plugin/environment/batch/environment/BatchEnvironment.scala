@@ -236,7 +236,7 @@ object BatchEnvironment {
     /* ---- upload the execution message ----*/
     val inputPath =
       newFile.withTmpFile("job", ".tar") { executionMessageFile ⇒
-        serializerService.serializeAndArchiveFiles(executionMessage, executionMessageFile)
+        serializerService.serializeAndArchiveFiles(executionMessage, executionMessageFile, gz = true)
         signalUpload(eventDispatcher.eventId, upload(executionMessageFile, TransferOptions(noLink = true, canMove = true)), executionMessageFile, environment, storageId)
       }
 
@@ -244,7 +244,7 @@ object BatchEnvironment {
       services.newFile.withTmpFile("remoteStorage", ".tar") { storageFile ⇒
         import org.openmole.tool.hash._
         import services._
-        services.serializerService.serializeAndArchiveFiles(remoteStorage, storageFile)
+        services.serializerService.serializeAndArchiveFiles(remoteStorage, storageFile, gz = true)
         val hash = storageFile.hash().toString()
         val path = signalUpload(eventDispatcher.eventId, upload(storageFile, TransferOptions(noLink = true, canMove = true, raw = true)), storageFile, environment, storageId)
         FileMessage(path, hash)

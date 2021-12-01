@@ -36,7 +36,7 @@ package object osgi {
 
     def openInputStream(c: ClassSource) =
       c match {
-        case ClassFile(_, file)         ⇒ file.bufferedInputStream
+        case ClassFile(_, file)         ⇒ file.bufferedInputStream()
         case ClassByteCode(_, byteCode) ⇒ new ByteArrayInputStream(byteCode)
       }
   }
