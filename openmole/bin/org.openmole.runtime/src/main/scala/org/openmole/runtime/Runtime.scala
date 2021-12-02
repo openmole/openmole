@@ -84,7 +84,7 @@ class Runtime {
     val executionMessage =
       newFile.withTmpFile { executionMessageFileCache ⇒
         retry(storage.download(inputMessagePath, executionMessageFileCache), transferRetry)
-        serializerService.deserializeAndExtractFiles[ExecutionMessage](executionMessageFileCache, deleteFilesOnGC = true)
+        serializerService.deserializeAndExtractFiles[ExecutionMessage](executionMessageFileCache, deleteFilesOnGC = true, gz = true)
       }
 
     val systemOut = OutputManager.systemOutput

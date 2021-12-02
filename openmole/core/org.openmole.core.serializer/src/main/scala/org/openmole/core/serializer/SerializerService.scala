@@ -95,8 +95,8 @@ class SerializerService { service ⇒
 
   def deserialize[T](is: InputStream): T = buildXStream().fromXML(is).asInstanceOf[T]
 
-  def deserializeAndExtractFiles[T](file: File, deleteFilesOnGC: Boolean)(implicit newFile: TmpDirectory, fileService: FileService): T = {
-    val tis = new TarInputStream(file.bufferedInputStream)
+  def deserializeAndExtractFiles[T](file: File, deleteFilesOnGC: Boolean, gz: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService): T = {
+    val tis = new TarInputStream(file.bufferedInputStream(gz = gz))
     try deserializeAndExtractFiles(tis, deleteFilesOnGC = deleteFilesOnGC)
     finally tis.close
   }
@@ -110,8 +110,8 @@ class SerializerService { service ⇒
     }
   }
 
-  def serializeAndArchiveFiles(obj: Any, f: File)(implicit newFile: TmpDirectory): Unit = {
-    val os = new TarOutputStream(f.bufferedOutputStream())
+  def serializeAndArchiveFiles(obj: Any, f: File, gz: Boolean = false)(implicit newFile: TmpDirectory): Unit = {
+    val os = new TarOutputStream(f.bufferedOutputStream(gz = gz))
     try serializeAndArchiveFiles(obj, os)
     finally os.close
   }
@@ -127,8 +127,8 @@ class SerializerService { service ⇒
 
   def pluginsAndFiles(obj: Any) = pluginAndFileListing().list(obj)
 
-  def deserializeReplaceFiles[T](file: File, files: Map[String, File]): T = {
-    val is = file.bufferedInputStream
+  def deserializeReplaceFiles[T](file: File, files: Map[String, File], gz: Boolean = false): T = {
+    val is = file.bufferedInputStream(gz = gz)
     try deserializeReplaceFiles[T](is, files)
     finally is.close
   }

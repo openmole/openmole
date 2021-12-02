@@ -17,6 +17,7 @@
 
 package org.openmole.tool.statistics
 
+import scala.annotation.tailrec
 import scala.math._
 
 trait Stat {
@@ -212,6 +213,25 @@ trait Stat {
       map { case (p1, p2) ⇒ p1 * math.log(p1 / p2) }.sum
 
     s / math.log(2)
+  }
+
+  def probabilityDistribution(s: Seq[Double], beans: Int) = {
+    val ssorted = s.sorted
+    val smin = ssorted.head
+    val smax = ssorted.last
+    val step = (smax - smin) / beans
+
+    @tailrec def recurse(lowBound: BigDecimal, ssorted: List[Double], beans: List[Int]): List[Int] = {
+      val highBound = lowBound + step
+      if (highBound >= smax) (ssorted.size :: beans).reverse
+      else {
+        def bean = ssorted.takeWhile(_ <= highBound).size
+        recurse(highBound, ssorted.dropWhile(_ <= highBound), bean :: beans)
+      }
+    }
+
+    val size = ssorted.size
+    recurse(BigDecimal(smin), ssorted.toList, List()).map(_.toDouble / size)
   }
 
 }

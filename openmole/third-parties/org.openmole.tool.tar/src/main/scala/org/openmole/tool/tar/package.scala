@@ -146,7 +146,7 @@ package object tar {
       }
 
     def extract(dest: File, overwrite: Boolean = false) =
-      withClosable(new TarInputStream(file.bufferedInputStream)) {
+      withClosable(new TarInputStream(file.bufferedInputStream())) {
         _.extract(dest, overwrite)
       }
 

@@ -111,7 +111,7 @@ object SimExplorer extends JavaLogger {
 
               logger.fine("plugins: " + config.pluginPath.get + " " + new File(config.pluginPath.get).listFilesSafe.mkString(","))
 
-              val storage = serializerService.deserializeAndExtractFiles[RemoteStorage](new File(config.storage.get), deleteFilesOnGC = true)
+              val storage = serializerService.deserializeAndExtractFiles[RemoteStorage](new File(config.storage.get), deleteFilesOnGC = true, gz = true)
 
               new Runtime().apply(
                 storage,
