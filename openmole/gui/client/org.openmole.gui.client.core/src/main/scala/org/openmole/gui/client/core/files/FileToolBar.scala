@@ -157,6 +157,11 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
 
   }
 
+  def setDefaultFilter = {
+    thresholdInput.ref.value = "1000"
+    nameInput.ref.value = ""
+  }
+
   def filterSubmit {
     resetFilterTools
     treeNodePanel.invalidCacheAndDraw
@@ -169,7 +174,12 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     label("# of entries ", width := "30px", margin := "0 15 0 10"),
     form(thresholdInput, onSubmit.preventDefault --> { _ ⇒ filterSubmit }),
     label("name ", width := "30px", margin := "0 15 0 10"),
-    form(nameInput, onSubmit.preventDefault --> { _ ⇒ filterSubmit })
+    form(nameInput, onSubmit.preventDefault --> { _ ⇒ filterSubmit }),
+    div(cls := "close-button bi-x", onClick --> { _ =>
+      setDefaultFilter
+      filterSubmit
+      filterToolOpen.set(false)
+    })
   )
 
   def unselectToolAndRefreshTree: Unit = {
@@ -182,7 +192,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   def unselectTool = {
     clearMessage
     manager.clearSelection
-   // newNodeInput.ref.value = ""
+    // newNodeInput.ref.value = ""
     treeNodePanel.treeWarning.set(true)
     treeNodePanel.turnSelectionTo(false)
     selectedTool.set(None)
@@ -339,7 +349,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
       cls := "file-content",
       div(
         centerElement,
-       // buildAndSelectSpan(FileCreationTool, "File or folder creation"),
+        // buildAndSelectSpan(FileCreationTool, "File or folder creation"),
         buildAndSelectSpan(CopyTool, "Copy selected files"),
         buildAndSelectSpan(TrashTool, "Delete selected files"),
         buildAndSelectSpan(PluginTool, "Detect plugins that can be enabled in this folder"),
@@ -348,7 +358,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
           buildSpan(RefreshTool, "Refresh the current folder", () ⇒ {
             treeNodePanel.invalidCacheAndDraw
           })),
-       // upButton.tooltip("Upload a file")
+        // upButton.tooltip("Upload a file")
       ),
       child <-- message.signal.combineWith(selectedTool.signal).map {
         case (msg, sT) ⇒
@@ -356,7 +366,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
             centerFileToolBar,
             msg,
             sT match {
-             // case Some(FileCreationTool) ⇒ createFileTool
+              // case Some(FileCreationTool) ⇒ createFileTool
               case Some(TrashTool) ⇒ getIfSelected(deleteButton)
               case Some(PluginTool) ⇒ getIfSelected(pluginButton)
               case Some(CopyTool) ⇒

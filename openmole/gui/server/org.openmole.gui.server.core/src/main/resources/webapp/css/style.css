@@ -78,7 +78,6 @@ ul{
     color: white;
     cursor: pointer;
     font-weight: bold;
-    height: 5px;
     line-height: 25px;
 }
 
@@ -101,7 +100,7 @@ ul{
 
 .tree-path {
     min-height: 27px;
-    word-wrap: break-word;
+    flex-wrap: wrap;
     justify-items: flext-start;
 }
 
@@ -666,7 +665,8 @@ padding-bottom: 90px;
 .file-item-warning,
 .file-item-text,
 .file-confirmation,
-.file-actions
+.file-actions,
+.close-button
  {
     display: flex;
     align-items : center;
@@ -804,6 +804,24 @@ padding-bottom: 90px;
 }
 
 .folder-or-file {
-     width: 80px;
+    width: 80px;
     padding: 5px;
+    color: white;
+    background-color: #3086b5;
+    border-color: #3086b5;
+    height: 38px;
+}
+
+.close-button {
+  font-size: 18px;
+  color: white;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+
+.close-button:hover {
+    scale: 1.2;
+    border-radius: 50px;
+    background-color: #795c85;
 }
