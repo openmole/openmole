@@ -101,14 +101,14 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     buildSpan(tool, legend, { () ⇒
       val isSelectedTool = selectedTool.now == Some(tool)
       tool match {
-        case CopyTool | TrashTool ⇒ treeNodePanel.turnSelectionTo(true)
+        //case CopyTool | TrashTool ⇒ treeNodePanel.turnSelectionTo(true)
         case PluginTool ⇒
           manager.computePluggables(() ⇒
             if (manager.pluggables.now.isEmpty)
               message.set(div(color := WHITE, "No plugin could be found in this folder."))
             else {
               clearMessage
-              treeNodePanel.turnSelectionTo(true)
+          //    treeNodePanel.turnSelectionTo(true)
             })
         case _ ⇒
       }
@@ -182,34 +182,34 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     })
   )
 
-  def unselectToolAndRefreshTree: Unit = {
-    unselectTool
-    treeNodePanel.invalidCacheAndDraw
-  }
-
-  def selectTool(tool: SelectedTool) = selectedTool.set(Some(tool))
-
-  def unselectTool = {
-    clearMessage
-    manager.clearSelection
-    // newNodeInput.ref.value = ""
-    treeNodePanel.treeWarning.set(true)
-    treeNodePanel.turnSelectionTo(false)
-    selectedTool.set(None)
-    treeNodePanel.drawTree
-  }
+//  def unselectToolAndRefreshTree: Unit = {
+//    unselectTool
+//    treeNodePanel.invalidCacheAndDraw
+//  }
+//
+//  def selectTool(tool: SelectedTool) = selectedTool.set(Some(tool))
+//
+//  def unselectTool = {
+//    clearMessage
+//    manager.clearSelection
+//    // newNodeInput.ref.value = ""
+//    treeNodePanel.treeWarning.set(true)
+//  //  treeNodePanel.turnSelectionTo(false)
+//    selectedTool.set(None)
+//    treeNodePanel.drawTree
+//  }
 
   val deleteButton = button("Delete", btn_danger, onClick --> { _ ⇒ {
     CoreUtils.trashNodes(manager.selected.now) {
       () ⇒
-        unselectToolAndRefreshTree
+     //   unselectToolAndRefreshTree
     }
   }
   })
 
   val copyButton = button("Copy", btn_secondary, onClick --> { _ ⇒ {
     manager.setSelectedAsCopied
-    unselectTool
+//    unselectTool
     treeNodePanel.drawTree
   }
   })
@@ -228,7 +228,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
               if (errs.isEmpty) pluginPanel.pluginDialog.show
               else panels.alertPanel.detail("Plugin import failed", ErrorData.stackTrace(errs.head), transform = RelativeCenterPosition, zone = FileZone)
           }
-          unselectToolAndRefreshTree
+        //  unselectToolAndRefreshTree
         }
       }
     )

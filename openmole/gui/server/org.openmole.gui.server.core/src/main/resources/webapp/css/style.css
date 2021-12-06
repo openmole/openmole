@@ -466,7 +466,6 @@ padding-bottom: 90px;
   width : 20px;
   border-radius : 4px;
   display: flex;           /* establish flex container */
-  flex-direction: column;  /* make main axis vertical */
   justify-content: center; /* center items vertically, in this case */
   align-items: center;     /* center items horizontally, in this case */
 }
@@ -480,7 +479,6 @@ padding-bottom: 90px;
 .file0{
   flex: 0 0 20px;
   margin-right: 5px;
-  cursor: pointer;
   margin-left:10px;
 }
 
@@ -488,7 +486,6 @@ padding-bottom: 90px;
   flex: 1;
   text-overflow: ellipsis;
   overflow: hidden;
-  cursor:pointer;
 }
 
 .file2{
@@ -548,7 +545,8 @@ padding-bottom: 90px;
 
      /* for Firefox */
      min-height: 0;
-     width: 600px;
+     max-width: 500px;
+     min-width: 500px;
 }
 
 .file-section.closed {
@@ -655,7 +653,8 @@ padding-bottom: 90px;
 .sorting-files-item,
 .sorting-files-group,
 .file-filter,
-.tree-path {
+.tree-path,
+.file-refresh {
     display: flex;
     flex-direction: row;
 }
@@ -698,6 +697,7 @@ padding-bottom: 90px;
     margin: 10 0 10 0;
     padding: 10px;
     background-color: #795c85;
+    width: 100%;
 }
 
 .file-action-items {
@@ -803,7 +803,7 @@ padding-bottom: 90px;
     font-size: 14px;
 }
 
-.folder-or-file {
+.blue-button {
     width: 80px;
     padding: 5px;
     color: white;
@@ -824,4 +824,15 @@ padding-bottom: 90px;
     scale: 1.2;
     border-radius: 50px;
     background-color: #795c85;
+}
+
+.file-refresh {
+    justify-content: flex-end;
+    width: 100%;
+    margin-right: 10px;
+    font-size: 20px;
+}
+
+.cursor-pointer {
+    cursor: pointer;
 }
