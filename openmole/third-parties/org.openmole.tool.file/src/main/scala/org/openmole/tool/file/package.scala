@@ -456,13 +456,16 @@ package file {
 
       def withWriter[T](append: Boolean = false) = withClosable[Writer, T](Files.newBufferedWriter(file.toPath, writeOptions(append = append): _*))(_)
 
-      def withDirectoryStream[T](filter: Option[java.nio.file.DirectoryStream.Filter[Path]] = None) = {
+      def withDirectoryStream[T](filter: Option[java.nio.file.DirectoryStream.Filter[Path]] = None)(f: DirectoryStream[Path] ⇒ T): T = {
         def open =
           filter match {
             case None    ⇒ Files.newDirectoryStream(file)
             case Some(f) ⇒ Files.newDirectoryStream(file, f)
           }
-        withClosable[DirectoryStream[Path], T](open)(_)
+
+        val stream = open
+        try f(stream)
+        finally stream.close()
       }
 
       def withSource[T] = withClosable[Source, T](Source.fromInputStream(bufferedInputStream()))(_)
