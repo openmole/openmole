@@ -1,7 +1,6 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
-import org.openmole.gui.client.core.files.FileToolBar._
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.ext.data._
@@ -197,10 +196,11 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
   lazy val fileControler =
     div(
+      cls := "file-content",
       child <-- treeNodeManager.current.signal.map { curr ⇒
         val parent = curr.parent
         div(
-          cls := "file-content tree-path",
+          cls := "tree-path",
           goToDirButton(treeNodeManager.root).amend(OMTags.glyph_house, padding := "5"),
           Seq(parent.parent, parent, curr).filterNot { sp ⇒
             sp.isEmpty || sp == treeNodeManager.root
@@ -211,101 +211,38 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
             "plus-button" + {
               if (pf) " selected" else ""
             }
-          }, onClick --> { _ ⇒ plusFile.update(!_) }),
-          div(
-            cls := "file-refresh",
-            div(glyph_refresh, cls := "treePathItems", fontSize := "20px", onClick --> { _ ⇒ refreshAndDraw }),
-            div(cls := "bi-three-dots-vertical treePathItems", fontSize := "20px", onClick --> { _ ⇒
-              multiTool.update { mcot ⇒
-                mcot match {
-                  case Off ⇒ CopyOrTrash
-                  case _ ⇒
-                    confirmationDiv.set(None)
-                    treeNodeManager.clearSelection
-                    Off
-                }
-              }
-              multiTool.now match {
-                case Off ⇒ invalidCacheAndDraw
-                case _   ⇒
-              }
-            })
-          )
+          }, onClick --> { _ ⇒ plusFile.update(!_) })
         )
       },
+      div(
+        display.flex, justifyContent.flexEnd,
+        div(glyph_refresh, cls := "treePathItems file-refresh", onClick --> { _ ⇒ refreshAndDraw }),
+        div(cls := "bi-three-dots-vertical treePathItems", fontSize := "20px", onClick --> { _ ⇒
+          multiTool.update { mcot ⇒
+            mcot match {
+              case Off ⇒ CopyOrTrash
+              case _ ⇒
+                confirmationDiv.set(None)
+                treeNodeManager.clearSelection
+                Off
+            }
+          }
+          multiTool.now match {
+            case Off ⇒ invalidCacheAndDraw
+            case _   ⇒
+          }
+        })
+      ),
       plusFile.signal.expand(createFileTool),
       multiTool.signal.map { m ⇒ m != Off }.expand(copyOrTrashTool),
       treeNodeManager.error --> treeNodeManager.errorObserver,
       treeNodeManager.comment --> treeNodeManager.commentObserver
     )
 
-  //  lazy val labelArea =
-  //    div(
-  //      cls := "file-content",
-  //      child <-- treeNodeManager.copied.signal.combineWith(treeNodeManager.current.signal).map {
-  //        case (copied, curr) ⇒
-  //          div(
-  //            div(
-  //              if (copied.isEmpty) div()
-  //              else
-  //                buttonGroup.amend(
-  //                  omsheet.pasteLabel,
-  //                  button(btn_danger, "Paste", onClick --> { _ ⇒ paste(copied, curr) })
-  //                ),
-  //              button(btn_secondary, "Cancel", onClick --> { _ ⇒
-  //                treeNodeManager.emptyCopied
-  //                //  fileToolBar.unselectTool
-  //                drawTree
-  //              })
-  //            )
-  //          )
-  //      }
-  //    )
-
   lazy val view = {
     drawTree
     div(child <-- tree.signal, cls := "file-scrollable-content")
   }
-
-  //  private def paste(safePaths: Seq[SafePath], to: SafePath) = {
-  //    def refreshWithNoError = {
-  //      treeNodeManager.noError
-  //      invalidCacheAndDraw
-  //    }
-  //
-  //    def onpasted = {
-  //      treeNodeManager.emptyCopied
-  //      // unselectTool
-  //    }
-  //
-  //    val same = safePaths.filter { sp ⇒
-  //      sp == to
-  //    }
-  //    if (same.isEmpty) {
-  //      CoreUtils.testExistenceAndCopyProjectFilesTo(safePaths, to).foreach { existing ⇒
-  //        if (existing.isEmpty) {
-  //          refreshWithNoError
-  //          onpasted
-  //        }
-  //        else treeNodeManager.setFilesInError(
-  //          "Some files already exists, overwrite?",
-  //          existing,
-  //          () ⇒ CoreUtils.copyProjectFilesTo(safePaths, to).foreach { b ⇒
-  //            refreshWithNoError
-  //            onpasted
-  //          }, () ⇒ {
-  //            refreshWithNoError
-  //            // unselectTool
-  //          }
-  //        )
-  //      }
-  //    }
-  //    else treeNodeManager.setFilesInComment(
-  //      "Pasting a folder in itself is not allowed",
-  //      same,
-  //      () ⇒ treeNodeManager.noError
-  //    )
-  //  }
 
   def filter: FileFilter = fileToolBar.fileFilter.now
 
@@ -329,17 +266,10 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
   def goToDirButton(safePath: SafePath, name: String = ""): HtmlElement =
     span(cls := "treePathItems", name,
       onClick --> { _ ⇒
-        fileToolBar.clearMessage
         treeNodeManager.switch(safePath)
         drawTree
       },
       dropPairs,
-      onDragEnter --> { _ ⇒
-        false
-      },
-      onDragLeave --> { _ ⇒
-        false
-      },
       onDrop --> { e ⇒
         e.dataTransfer
         e.preventDefault()
@@ -449,9 +379,6 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
   val currentSafePath: Var[Option[SafePath]] = Var(None)
   val currentLine = Var(-1)
 
-  //  object ReactiveLine {
-  //    def apply(i: Int, tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) = new ReactiveLine(i, tn, treeNodeType, todo)
-  //  }
   def timeOrSize(tn: TreeNode): String = fileToolBar.fileFilter.now.fileSorting match {
     case TimeSorting() ⇒ CoreUtils.longTimeToString(tn.time)
     case _             ⇒ CoreUtils.readableByteCountAsString(tn.size)
@@ -485,50 +412,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
         }
       )
 
-    //    case class TreeStates(settingsSet: Boolean, edition: Boolean, replication: Boolean, selected: Boolean = treeNodeManager.isSelected(tn)) {
-    //      def settingsOn = treeStates.set(copy(settingsSet = true))
-    //
-    //      def editionOn = treeStates.set(copy(edition = true))
-    //
-    //      def replicationOn = treeStates.set(copy(replication = true))
-    //
-    //      def settingsOff = treeStates.set(copy(settingsSet = false))
-    //
-    //      def editionOff = treeStates.set(copy(edition = false))
-    //
-    //      def replicationOff = treeStates.set(copy(replication = false))
-    //
-    //      def editionAndReplicationOn = treeStates.set(copy(edition = true, replication = true))
-    //
-    //      def setSelected(b: Boolean) = treeStates.set(copy(selected = b))
-    //    }
-
-    // private val treeStates: Var[TreeStates] = Var(TreeStates(false, false, false))
-
-    //    def timeOrSize(tn: TreeNode): String = fileToolBar.fileFilter.now.fileSorting match {
-    //      case TimeSorting() ⇒ CoreUtils.longTimeToString(tn.time)
-    //      case _             ⇒ CoreUtils.readableByteCountAsString(tn.size)
-    //    }
-    //
-    //    def clearSelectionExecpt(safePath: SafePath) = {
-    //      treeStates.now.setSelected(true)
-    //      treeNodeManager.clearSelectionExecpt(safePath)
-    //    }
-    //
-    //    def addToSelection(b: Boolean): Unit = {
-    //      treeStates.now.setSelected(b)
-    //      treeNodeManager.setSelected(tnSafePath, treeStates.now.selected)
-    //    }
-    //
-    //    def addToSelection: Unit = addToSelection(!treeStates.now.selected)
-
     val toolBox = new FileToolBox(tnSafePath, showExecution, treeNodeTabs)
-
-    //        def fileClick =
-    //          onClick --> { _ ⇒
-    //            plusFile.set(false)
-    //            if (!multiCopyOrTrash.signal.now()) todo()
-    //          }
 
     val render: HtmlElement = {
       // val settingsGlyph = Seq(cls := "glyphitem", glyph_settings, color := WHITE, paddingLeft := "4")
@@ -557,9 +441,6 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
               case _          ⇒ false
             })
           },
-          onDragEnter --> { _ ⇒
-            false
-          },
           dirBox(tn).amend(cls := "file0", fileClick(todo), draggable := true),
           div(tn.name, cls.toggle("cursor-pointer") <-- multiTool.signal.map { mt ⇒
             mt == Off || mt == Paste
@@ -573,25 +454,9 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
               else id
             )
           })
-
-        //
-        //              div(
-        //                width := "100%",
-        //                if (tS.selected) {
-        //                  sTools match {
-        //                    case Some(TrashTool) ⇒ omsheet.fileSelectedForDeletion
-        //                    case Some(PluginTool) if pluggables.contains(tn) ⇒ omsheet.fileSelected
-        //                    case _ ⇒ omsheet.fileSelected
-        //                  }
-        //                }
-        //                else omsheet.fileSelectionOverlay,
-        //                span(omsheet.fileSelectionMessage)
-        //              )
         ),
         currentLine.signal.map { i ⇒ i == id }.expand(toolBox.contentRoot)
       )
-      //}
-      //)
     }
   }
 
@@ -602,18 +467,15 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
       val style = new CSSStyleDeclaration()
       style.backgroundColor = "red"
       el.style = style
-      false
     },
     onDragLeave --> { e ⇒
       val style = new CSSStyleDeclaration
       style.backgroundColor = "transparent"
       e.target.asInstanceOf[HTMLElement].style = style
-      false
     },
     onDragOver --> { e ⇒
       e.dataTransfer.dropEffect = "move"
       e.preventDefault
-      false
     }
   )
 
@@ -635,7 +497,6 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
         }
     }
     draggedNode.set(None)
-    false
   }
 
   def drawNode(node: TreeNode, i: Int) = node match {
@@ -645,7 +506,6 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
       })
     case dn: DirNode ⇒ ReactiveLine(i, dn, TreeNodeType.folder, () ⇒ {
       treeNodeManager switch (dn.name)
-      fileToolBar.clearMessage
       treeWarning.set(true)
       drawTree
     })

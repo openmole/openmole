@@ -138,7 +138,6 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
         }
       }
     )
-
   }
 
   def confirmation(text: String, todo: () ⇒ Unit) =

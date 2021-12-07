@@ -41,44 +41,9 @@ import org.openmole.gui.ext.client.FileManager
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object FileToolBar {
-
-  trait SelectedTool {
-    def glyph: Setter[ReactiveHtmlElement.Base]
-  }
-
-  object TrashTool extends SelectedTool {
-    val glyph = glyph_trash
-  }
-
-  object FileCreationTool extends SelectedTool {
-    val glyph = glyph_plus
-  }
-
-  object PluginTool extends SelectedTool {
-    val glyph = OMTags.glyph_plug
-  }
-
-  object CopyTool extends SelectedTool {
-    val glyph = glyph_copy
-  }
-
-  object PasteTool extends SelectedTool {
-    val glyph = glyph_paste
-  }
-
-  object RefreshTool extends SelectedTool {
-    val glyph = glyph_refresh
-  }
-
-}
-
-import FileToolBar._
-
 class FileToolBar(treeNodePanel: TreeNodePanel) {
   def manager = treeNodePanel.treeNodeManager
 
-  val selectedTool: Var[Option[SelectedTool]] = Var(None)
   val fileFilter = Var(FileFilter.defaultFilter)
   val message = Var[Div](div())
   val fileNumberThreshold = 1000
@@ -86,36 +51,6 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   implicit def someIntToString(i: Option[Int]): String = i.map {
     _.toString
   }.getOrElse("")
-
-  def clearMessage = message.set(div())
-
-  def buildSpan(tool: SelectedTool, legend: String, todo: () ⇒ Unit, modifierSeq: HESetters = emptySetters) = {
-    span(
-      tool.glyph, cursor.pointer, modifierSeq,
-      cls := "glyphmenu",
-      onClick --> { _ ⇒ todo() }
-    ).tooltip(legend)
-  }
-
-  def buildAndSelectSpan(tool: SelectedTool, legend: String, todo: Boolean ⇒ Unit = (Boolean) ⇒ {}) =
-    buildSpan(tool, legend, { () ⇒
-      val isSelectedTool = selectedTool.now == Some(tool)
-      tool match {
-        //case CopyTool | TrashTool ⇒ treeNodePanel.turnSelectionTo(true)
-        case PluginTool ⇒
-          manager.computePluggables(() ⇒
-            if (manager.pluggables.now.isEmpty)
-              message.set(div(color := WHITE, "No plugin could be found in this folder."))
-            else {
-              clearMessage
-          //    treeNodePanel.turnSelectionTo(true)
-            })
-        case _ ⇒
-      }
-      selectedTool.set(Some(tool))
-
-      // todo(isSelectedTool)
-    })
 
   // Filter tool
   val thresholdTag = "threshold"
@@ -182,56 +117,24 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     })
   )
 
-//  def unselectToolAndRefreshTree: Unit = {
-//    unselectTool
-//    treeNodePanel.invalidCacheAndDraw
-//  }
-//
-//  def selectTool(tool: SelectedTool) = selectedTool.set(Some(tool))
-//
-//  def unselectTool = {
-//    clearMessage
-//    manager.clearSelection
-//    // newNodeInput.ref.value = ""
-//    treeNodePanel.treeWarning.set(true)
-//  //  treeNodePanel.turnSelectionTo(false)
-//    selectedTool.set(None)
-//    treeNodePanel.drawTree
-//  }
-
-  val deleteButton = button("Delete", btn_danger, onClick --> { _ ⇒ {
-    CoreUtils.trashNodes(manager.selected.now) {
-      () ⇒
-     //   unselectToolAndRefreshTree
-    }
-  }
-  })
-
-  val copyButton = button("Copy", btn_secondary, onClick --> { _ ⇒ {
-    manager.setSelectedAsCopied
-//    unselectTool
-    treeNodePanel.drawTree
-  }
-  })
-
-  val pluginButton =
-    button(
-      "Plug",
-      btn_secondary,
-      onClick --> { _ ⇒
-        val directoryName = s"uploadPlugin${java.util.UUID.randomUUID().toString}"
-        Post()[Api].copyToPluginUploadDir(directoryName, manager.selected.now).call().foreach { _ ⇒
-          import scala.concurrent.duration._
-          val names = manager.selected.now.map(_.name)
-          Post(timeout = 5 minutes)[Api].addUploadedPlugins(directoryName, names).call().foreach {
-            errs ⇒
-              if (errs.isEmpty) pluginPanel.pluginDialog.show
-              else panels.alertPanel.detail("Plugin import failed", ErrorData.stackTrace(errs.head), transform = RelativeCenterPosition, zone = FileZone)
-          }
-        //  unselectToolAndRefreshTree
-        }
-      }
-    )
+//  val pluginButton =
+//    button(
+//      "Plug",
+//      btn_secondary,
+//      onClick --> { _ ⇒
+//        val directoryName = s"uploadPlugin${java.util.UUID.randomUUID().toString}"
+//        Post()[Api].copyToPluginUploadDir(directoryName, manager.selected.now).call().foreach { _ ⇒
+//          import scala.concurrent.duration._
+//          val names = manager.selected.now.map(_.name)
+//          Post(timeout = 5 minutes)[Api].addUploadedPlugins(directoryName, names).call().foreach {
+//            errs ⇒
+//              if (errs.isEmpty) pluginPanel.pluginDialog.show
+//              else panels.alertPanel.detail("Plugin import failed", ErrorData.stackTrace(errs.head), transform = RelativeCenterPosition, zone = FileZone)
+//          }
+//        //  unselectToolAndRefreshTree
+//        }
+//      }
+//    )
 
   //Filter
   implicit def stringToIntOption(s: String): Option[Int] = Try(s.toInt).toOption
@@ -336,47 +239,6 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
       )
     )
 
-  }
-
-  def getIfSelected(butt: HtmlElement) = manager.selected.now.map {
-    m ⇒
-      if (m.isEmpty) div() else butt
-  }
-
-  lazy val element = {
-
-    div(
-      cls := "file-content",
-      div(
-        centerElement,
-        // buildAndSelectSpan(FileCreationTool, "File or folder creation"),
-        buildAndSelectSpan(CopyTool, "Copy selected files"),
-        buildAndSelectSpan(TrashTool, "Delete selected files"),
-        buildAndSelectSpan(PluginTool, "Detect plugins that can be enabled in this folder"),
-        div(
-          centerElement,
-          buildSpan(RefreshTool, "Refresh the current folder", () ⇒ {
-            treeNodePanel.invalidCacheAndDraw
-          })),
-        // upButton.tooltip("Upload a file")
-      ),
-      child <-- message.signal.combineWith(selectedTool.signal).map {
-        case (msg, sT) ⇒
-          div(
-            centerFileToolBar,
-            msg,
-            sT match {
-              // case Some(FileCreationTool) ⇒ createFileTool
-              case Some(TrashTool) ⇒ getIfSelected(deleteButton)
-              case Some(PluginTool) ⇒ getIfSelected(pluginButton)
-              case Some(CopyTool) ⇒
-                manager.emptyCopied
-                getIfSelected(copyButton)
-              case _ ⇒ div()
-            },
-          )
-      }
-    )
   }
 
 }

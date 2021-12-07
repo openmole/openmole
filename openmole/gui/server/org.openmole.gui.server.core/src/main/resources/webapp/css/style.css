@@ -101,7 +101,7 @@ ul{
 .tree-path {
     min-height: 27px;
     flex-wrap: wrap;
-    justify-items: flext-start;
+    justify-content: flex-start;
 }
 
 .file-list {
@@ -827,10 +827,8 @@ padding-bottom: 90px;
 }
 
 .file-refresh {
-    justify-content: flex-end;
-    width: 100%;
-    margin-right: 10px;
-    font-size: 20px;
+   margin-right: 10px;
+   font-size: 20px;
 }
 
 .cursor-pointer {
