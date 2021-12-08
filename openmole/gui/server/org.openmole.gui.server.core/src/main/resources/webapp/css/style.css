@@ -102,6 +102,7 @@ ul{
     min-height: 27px;
     flex-wrap: wrap;
     justify-content: flex-start;
+    padding-top: 30px;
 }
 
 .file-list {
@@ -675,7 +676,7 @@ padding-bottom: 90px;
 .file-item-warning {
     background-color: #dc3545;
     cursor: pointer;
-    width: 15%;
+    width: 17%;
     height: 38px;
     color: white;
     border-top-right-radius: 5px;
@@ -685,7 +686,7 @@ padding-bottom: 90px;
 .file-item-cancel {
     background-color: white;
     cursor: pointer;
-    width: 15%;
+    width: 17%;
     height: 38px;
     color: #6c757d;
     border-top-left-radius: 5px;
