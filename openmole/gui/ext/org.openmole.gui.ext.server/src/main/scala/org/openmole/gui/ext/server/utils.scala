@@ -247,7 +247,9 @@ object utils {
   //copy safePaths files to 'to' folder in overwriting in they exist
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath)(implicit workspace: Workspace) = {
     import ServerFileSystemContext.project
-    safePaths.foreach { sp ⇒ sp.toFile.copy(to.toFile) }
+    safePaths.foreach { sp ⇒
+      sp.toFile.copy(new File(to.toFile, sp.name))
+    }
   }
 
   def deleteFile(safePath: SafePath, context: ServerFileSystemContext)(implicit workspace: Workspace): Unit = {

@@ -128,7 +128,6 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
       div(fileItemWarning, okText, onClick --> {
         _ ⇒
           todo()
-          closeMultiTool
       })
     )
 
