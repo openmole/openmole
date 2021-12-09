@@ -4,6 +4,7 @@ import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
 import org.openmole.gui.client.core.files.{ FileDisplayer, TreeNodeManager, TreeNodePanel, TreeNodeTabs }
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.{ ErrorManager, GUIPluginAsJS, PluginServices, WizardPluginFactory }
+import com.raquo.laminar.api.L._
 
 /*
  * Copyright (C) 24/07/15 // mathieu.leclaire@openmole.org
@@ -23,6 +24,8 @@ import org.openmole.gui.ext.data.{ ErrorManager, GUIPluginAsJS, PluginServices, 
  */
 
 object panels {
+  val pluginPanelOpen = Var(false)
+
   val pluginServices =
     PluginServices(
       errorManager = new ErrorManager {

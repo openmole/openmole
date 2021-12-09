@@ -552,8 +552,9 @@ padding-bottom: 90px;
 
 .file-section.closed {
     margin: 0px;
-    transition: all 0.1s ease-out 0s;
+    transition: all 0.2s ease-out 0s;
     width: 0px;
+    min-width: 0px;
 }
 
 .tab-section{
