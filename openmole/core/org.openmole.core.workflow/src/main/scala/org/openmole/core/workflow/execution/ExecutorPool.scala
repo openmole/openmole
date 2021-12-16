@@ -56,11 +56,11 @@ class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment],
 
   def runningJobs = executorMap.map(_._1).flatMap(_.runningJob)
 
-  override def finalize = executorMap.foreach {
+  override def finalize() = executorMap.foreach {
     case (exe, thread) ⇒ exe.stop = true; thread.interrupt
   }
 
-  private[execution] def takeNextJob: LocalExecutionJob = jobs.dequeue
+  private[execution] def takeNextJob: LocalExecutionJob = jobs.dequeue()
 
   def enqueue(job: LocalExecutionJob) = jobs.enqueue(job, priority(job))
 

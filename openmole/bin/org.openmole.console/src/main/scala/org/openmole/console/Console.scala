@@ -17,8 +17,10 @@
 
 package org.openmole.console
 
-import jline.console.ConsoleReader
-import org.openmole.core.compiler.ScalaREPL
+import org.jline.reader.*
+import org.jline.terminal.*
+import org.jline.keymap.*
+import org.openmole.core.compiler._
 import org.openmole.core.fileservice.{ FileService, FileServiceCache }
 import org.openmole.core.preference.Preference
 import org.openmole.core.project._
@@ -39,15 +41,15 @@ object Console extends JavaLogger {
 
   lazy val consoleUsage = "(Type :q to quit)"
 
-  private def passwordReader = {
-    val reader = new ConsoleReader()
-    reader.setExpandEvents(false)
+  private def reader = {
+    val terminal = TerminalBuilder.terminal()
+    val reader = LineReaderBuilder.builder().terminal(terminal).build()
     reader
   }
 
   @tailrec def askPassword(msg: String = "password"): String = {
-    val password = passwordReader.readLine(s"$msg             :", '*')
-    val confirmation = passwordReader.readLine(s"$msg confirmation:", '*')
+    val password = reader.readLine(s"$msg             :", '*')
+    val confirmation = reader.readLine(s"$msg confirmation:", '*')
     if (password != confirmation) {
       println("Password and confirmation don't match.")
       askPassword(msg)
@@ -69,7 +71,7 @@ object Console extends JavaLogger {
   @tailrec def initPassword(implicit preference: Preference): String =
     if (Preference.passwordChosen(preference) && Preference.passwordIsCorrect(Cypher(""), preference)) ""
     else if (Preference.passwordChosen(preference)) {
-      val password = passwordReader.readLine("Enter your OpenMOLE password (for preferences encryption): ", '*')
+      val password = reader.readLine("Enter your OpenMOLE password (for preferences encryption): ", '*')
       val cypher = Cypher(password)
       if (!Preference.passwordIsCorrect(cypher, preference)) initPassword(preference)
       else password
@@ -96,8 +98,14 @@ object Console extends JavaLogger {
     res.foreach { case (f, e) ⇒ Log.logger.log(Log.WARNING, s"Error loading bundle $f", e) }
     if (interactive && !res.isEmpty) {
       print(s"Would you like to remove the failing bundles (${res.unzip._1.map(_.getName).mkString(", ")})? [y/N] ")
-      val reader = new ConsoleReader()
-      val c = reader.readCharacter('y', 'n', 'Y', 'N').asInstanceOf[Char]
+      val terminal = TerminalBuilder.terminal()
+      val reader = new BindingReader(terminal.reader())
+
+      @scala.annotation.tailrec def readChar: Char =
+        val c = reader.readCharacter().asInstanceOf[Char]
+        if(Set('y', 'n', 'Y', 'N').contains(c)) c  else readChar
+
+      val c = readChar
       if (c.toLower == 'y') res.unzip._1.foreach(_.delete())
       println()
     }
@@ -124,8 +132,10 @@ class Console(script: Option[String] = None) {
         import services._
         val variables = ConsoleVariables(args = args, workDirectory = workDirectory.getOrElse(currentDirectory), experiment = ConsoleVariables.Experiment("console"))
         withREPL(variables) { loop ⇒
-          loop.storeErrors = false
-          loop.loopWithExitCode
+          //loop.storeErrors = false
+          //loop.loopWithExitCode
+          loop.loop
+          0
         }
       case Some(script) ⇒
         val scriptFile = new File(script)
@@ -166,21 +176,18 @@ class Console(script: Option[String] = None) {
     }
   }
 
-  def withREPL[T](args: ConsoleVariables)(f: ScalaREPL ⇒ T)(implicit newFile: TmpDirectory, fileService: FileService) = {
+  def withREPL[T](args: ConsoleVariables)(f: REPL ⇒ T)(implicit newFile: TmpDirectory, fileService: FileService) = {
     val loop =
       OpenMOLEREPL.newREPL(
         args,
         quiet = false
       )
 
-    loop.beQuietDuring {
-      loop.bind(commandsName, new Command(loop, args))
-      loop interpret s"import $commandsName._"
-    }
+    loop.bind(commandsName, new Command(loop, args))
+    loop.eval(s"import $commandsName._")
 
-    f(loop)
-    //    try f(loop)
-    //    finally loop.close
+    try f(loop)
+    finally loop.close
   }
 
 }

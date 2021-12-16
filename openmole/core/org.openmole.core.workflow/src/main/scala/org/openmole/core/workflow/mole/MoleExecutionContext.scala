@@ -30,6 +30,7 @@ import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.random.Seeder
 import org.openmole.tool.file._
 import org.openmole.core.compiler.CompilationContext
+import org.openmole.tool.random.RandomProvider
 
 object MoleExecutionContext {
   def apply()(implicit moleServices: MoleServices) = new MoleExecutionContext()
@@ -141,5 +142,5 @@ class MoleServices private (val applicationExecutionDirectory: File, val moleExe
   val networkService:    NetworkService
 ) {
   def newRandom = Lazy(seeder.newRNG)
-  implicit lazy val defaultRandom = newRandom
+  implicit lazy val defaultRandom: RandomProvider = newRandom
 }

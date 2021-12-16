@@ -3,8 +3,12 @@ package org.openmole.plugin.method.evolution
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.plugin.hook.omr.OMROutputFormat
+
 import io.circe._
 import io.circe.parser._
+import io.circe.generic.auto._
+import io.circe.generic.semiauto._
+
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.plugin.method.evolution.data._
@@ -23,7 +27,7 @@ object Analysis {
   }
 
   def dataFiles(directory: File, fileName: String, generation: Long, frequency: Option[Long])(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) = {
-    (0L to generation by frequency.getOrElse(1L)).drop(1).map { g ⇒ dataFile(directory, fileName, g) }.filter(_.exists)
+    (0L to generation by frequency.getOrElse(1L)).drop(1).map { (g: Long) ⇒ dataFile(directory, fileName, g) }.filter(_.exists)
   }
 
   def dataFile(directory: File, fileName: String, g: Long)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) =
@@ -108,7 +112,12 @@ object Analysis {
         } yield {
           val rObj = robustObjectives(generation.objective)
           def hv = nadir.flatMap { nadir ⇒ if (rObj.isEmpty) None else Some(Hypervolume(rObj, nadir)) }
-          def mins = if (rObj.isEmpty) None else Some(rObj.transpose.map(_.min))
+          def mins: Option[Vector[Double]] = 
+            if (rObj.isEmpty)
+            then None 
+            else 
+              def transposed: Vector[Vector[Double]] = rObj.transpose
+              Some(transposed.map(_.min))
 
           GenerationConvergence(generation.generation, hv, mins)
         }
@@ -125,7 +134,7 @@ object Analysis {
     def converge(generations: Vector[Generation], samples: Int) = {
       import _root_.mgo.tools.metric.Hypervolume
 
-      def robustObjectives(objectives: Vector[Objective]) =
+      def robustObjectives(objectives: Vector[Objective]): Vector[Vector[Double]] =
         objectives.filter(_.samples >= samples).map(_.objectives.map(_.toDouble))
 
       val nadir = {
@@ -140,7 +149,12 @@ object Analysis {
         } yield {
           val rObj = robustObjectives(generation.objective)
           def hv = nadir.flatMap { nadir ⇒ if (rObj.isEmpty) None else Some(Hypervolume(rObj, nadir)) }
-          def mins = if (rObj.isEmpty) None else Some(rObj.transpose.map(_.min))
+          def mins: Option[Vector[Double]] =
+             if (rObj.isEmpty) 
+             then None 
+             else 
+               def transposed: Vector[Vector[Double]] = rObj.transpose
+               Some(transposed.map(_.min))
 
           GenerationConvergence(generation.generation, hv, mins)
         }

@@ -19,23 +19,23 @@ package org.openmole.tool.types
 
 object FromArray {
 
-  implicit def iterableFromArray = new FromArray[Iterable] {
+  implicit def iterableFromArray: FromArray[Iterable] = new FromArray[Iterable] {
     def apply[T](a: Array[T]) = a.toIterable
   }
 
-  implicit def seqFromArray = new FromArray[Seq] {
+  implicit def seqFromArray: FromArray[Seq] = new FromArray[Seq] {
     def apply[T](a: Array[T]) = a.toSeq
   }
 
-  implicit def vectorFromArray = new FromArray[Vector] {
+  implicit def vectorFromArray: FromArray[Vector] = new FromArray[Vector] {
     def apply[T](a: Array[T]) = a.toVector
   }
 
-  implicit def listFromArray = new FromArray[List] {
+  implicit def listFromArray: FromArray[List] = new FromArray[List] {
     def apply[T](a: Array[T]) = a.toList
   }
 
-  implicit def arrayFromArray = new FromArray[Array] {
+  implicit def arrayFromArray: FromArray[Array] = new FromArray[Array] {
     def apply[T](a: Array[T]) = a
   }
 

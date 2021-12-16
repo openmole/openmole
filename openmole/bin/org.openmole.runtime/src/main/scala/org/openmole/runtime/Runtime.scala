@@ -112,6 +112,7 @@ class Runtime {
 
     val beginTime = System.currentTimeMillis
 
+    
     val result = try {
       logger.fine("Downloading plugins")
 
@@ -143,8 +144,8 @@ class Runtime {
           usedFiles.put(repliURI.originalPath, local)
         }
       }
-
-      val runnableTasks = serializerService.deserializeReplaceFiles[Iterable[RunnableTask]](executionMessage.jobs, Map() ++ usedFiles)
+      
+      val runnableTasks = serializerService.deserializeReplaceFiles[Iterable[RunnableTask]](executionMessage.jobs, Map() ++ usedFiles, gz = true)
 
       val saver = new ContextSaver(runnableTasks.size)
       val allMoleJobs = runnableTasks.map { t ⇒ Job(t.task, t.context, t.id, saver.save, () ⇒ false) }
@@ -192,13 +193,13 @@ class Runtime {
 
       def uploadArchive = {
         val contextResultFile = fileService.wrapRemoveOnGC(newFile.newFile("contextResult", "res"))
-        serializerService.serializeAndArchiveFiles(contextResults, contextResultFile)
+        serializerService.serializeAndArchiveFiles(contextResults, contextResultFile, gz = true)
         ArchiveContextResults(contextResultFile)
       }
 
       def uploadIndividualFiles = {
         val contextResultFile = fileService.wrapRemoveOnGC(newFile.newFile("contextResult", "res"))
-        serializerService.serialize(contextResults, contextResultFile)
+        serializerService.serialize(contextResults, contextResultFile, gz = true)
         val pac = serializerService.pluginsAndFiles(contextResults)
 
         val replicated =
@@ -215,7 +216,6 @@ class Runtime {
 
       val endTime = System.currentTimeMillis
       Success(result → RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime))
-
     }
     catch {
       case t: Throwable ⇒
@@ -235,7 +235,7 @@ class Runtime {
 
     newFile.withTmpFile("output", ".tgz") { outputLocal ⇒
       logger.fine(s"Serializing result to $outputLocal")
-      serializerService.serializeAndArchiveFiles(runtimeResult, outputLocal)
+      serializerService.serializeAndArchiveFiles(runtimeResult, outputLocal, gz = true)
       logger.fine(s"Upload the serialized result to $outputMessagePath on $storage")
       retry(storage.upload(outputLocal, Some(outputMessagePath), TransferOptions(noLink = true, canMove = true)), transferRetry)
     }

@@ -155,18 +155,18 @@ object BatchEnvironment {
 
   class Services(val compilationContext: Option[CompilationContext])(
     implicit
-    val threadProvider:             ThreadProvider,
-    implicit val preference:        Preference,
-    implicit val newFile:           TmpDirectory,
-    implicit val serializerService: SerializerService,
-    implicit val fileService:       FileService,
-    implicit val seeder:            Seeder,
-    implicit val randomProvider:    RandomProvider,
-    implicit val replicaCatalog:    ReplicaCatalog,
-    implicit val eventDispatcher:   EventDispatcher,
-    implicit val fileServiceCache:  FileServiceCache,
-    implicit val outputRedirection: OutputRedirection,
-    implicit val loggerService: LoggerService,
+    val threadProvider:    ThreadProvider,
+    val preference:        Preference,
+    val newFile:           TmpDirectory,
+    val serializerService: SerializerService,
+    val fileService:       FileService,
+    val seeder:            Seeder,
+    val randomProvider:    RandomProvider,
+    val replicaCatalog:    ReplicaCatalog,
+    val eventDispatcher:   EventDispatcher,
+    val fileServiceCache:  FileServiceCache,
+    val outputRedirection: OutputRedirection,
+    val loggerService: LoggerService,
   )
 
   def jobFiles(job: BatchExecutionJob, environment: BatchEnvironment) =
@@ -212,7 +212,7 @@ object BatchEnvironment {
 
     import services._
 
-    serializerService.serialize(job.runnableTasks, jobFile)
+    serializerService.serialize(job.runnableTasks, jobFile, gz = true)
 
     val plugins =
       new TreeSet[File]()(fileOrdering) ++
@@ -372,14 +372,14 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   val registry = new ExecutionJobRegistry()
 
-  def jobs = ExecutionJobRegistry.executionJobs(registry)
+  def jobs: Seq[BatchExecutionJob] = ExecutionJobRegistry.executionJobs(registry)
 
   lazy val environmentPlugins = PluginManager.pluginsForClass(this.getClass).toSeq.distinctBy(_.getCanonicalPath)
 
   lazy val scriptPlugins = {
     def closureBundleAndPlugins = services.compilationContext.toSeq.flatMap { c =>
       import services._
-      val (cb, file) = BatchExecutionJob.replClassesToPlugins(c.classDirectory, c.classLoader)
+      val (cb, file) = BatchExecutionJob.replClassesToPlugins(c.repl.classDirectory, c.repl.classLoader)
       cb.plugins ++ Seq(file)
     }
 

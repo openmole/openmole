@@ -23,7 +23,7 @@ import scala.collection.mutable.{ ListBuffer, WeakHashMap }
 
 object EventDispatcher {
   def apply() = new EventDispatcher
-  case class EventListnerKey(obj: Any, listner: Listner[_])
+  case class EventListnerKey[T](obj: Any, listner: Listner[T])
 }
 
 class EventDispatcher {
@@ -38,7 +38,7 @@ class EventDispatcher {
     EventDispatcher.EventListnerKey(obj, listener)
   }
 
-  def unregister(key: EventDispatcher.EventListnerKey) = listenerMap.synchronized {
+  def unregister[T](key: EventDispatcher.EventListnerKey[T]) = listenerMap.synchronized {
     listenerMap.get(key.obj).foreach(_ -= key.listner)
   }
 

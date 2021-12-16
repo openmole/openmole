@@ -336,15 +336,16 @@ object SensitivityMorris {
       ) ++ ScalarOrSequenceOfDouble.unflatten(factors, t.seed).from(context)
 
       // forge lists of lists of variables for the runs of the trajectory
-      val variablesForElementaryEffects = (t.points, t.deltas, t.variableOrder.zipWithIndex).zipped.map(
-        (point: Array[Double], delta: Double, order2idx: (Int, Int)) ⇒ {
-          val factoridx = order2idx._1
-          val iterationId = order2idx._2 + 1
-          List(
-            Variable(MorrisSampling.varFactorName, factors(factoridx).prototype.name),
-            Variable(MorrisSampling.varDelta, point(factoridx) - t.seed(factoridx))
-          ) ++ ScalarOrSequenceOfDouble.unflatten(factors, point).from(context)
-        })
+      val variablesForElementaryEffects = 
+        (t.points zip t.deltas zip t.variableOrder.zipWithIndex).map {
+          case ((point, delta), order2idx) ⇒ 
+            val factoridx = order2idx._1
+            val iterationId = order2idx._2 + 1
+            List(
+              Variable(MorrisSampling.varFactorName, factors(factoridx).prototype.name),
+              Variable(MorrisSampling.varDelta, point(factoridx) - t.seed(factoridx))
+            ) ++ ScalarOrSequenceOfDouble.unflatten(factors, point).from(context)
+        }
 
       variablesForRefRun :: variablesForElementaryEffects
 
@@ -372,7 +373,7 @@ object SensitivityMorris {
   }
 
   implicit def method: ExplorationMethod[SensitivityMorris, Method] = m ⇒ {
-    implicit def defScope = m.scope
+    implicit def defScope: DefinitionScope = m.scope
 
     // the sampling for Morris is a One At a Time one,
     // with respect to the user settings for repetitions, levels and inputs

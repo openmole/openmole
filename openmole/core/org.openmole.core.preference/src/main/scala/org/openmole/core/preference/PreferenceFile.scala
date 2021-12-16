@@ -98,15 +98,21 @@ object ConfigurationString {
       override def fromString(s: String) = implicitly[FromString[Int]].apply(s)
     }
 
+  implicit def LongConfigurationString: ConfigurationString[Long] =
+    new ConfigurationString[Long] {
+      override def toString(t: Long): String = t.toString
+      override def fromString(s: String) = implicitly[FromString[Long]].apply(s)
+    }
+
   implicit def timeConfigurationString: ConfigurationString[Time] =
     new ConfigurationString[Time] {
-      override def toString(t: Time): String = t.toString()
+      override def toString(t: Time): String = t.toString
       override def fromString(s: String) = implicitly[FromString[Time]].apply(s)
     }
 
   implicit def informationConfigurationString: ConfigurationString[Information] =
     new ConfigurationString[Information] {
-      override def toString(i: Information): String = i.toString()
+      override def toString(i: Information): String = i.toString
       override def fromString(s: String) = implicitly[FromString[Information]].apply(s)
     }
 
@@ -116,7 +122,7 @@ object ConfigurationString {
       def fromString(s: String) = implicitly[FromString[Double]].apply(s)
     }
 
-  implicit def seqConfiguration[T](implicit cs: ConfigurationString[T]) = new ConfigurationString[Seq[T]] {
+  implicit def seqConfiguration[T](implicit cs: ConfigurationString[T]): ConfigurationString[Seq[T]] = new ConfigurationString[Seq[T]] {
     override def toString(t: Seq[T]): String = t.map(cs.toString).mkString(",")
     override def fromString(s: String): Seq[T] = s.split(",").toSeq.map(cs.fromString)
   }

@@ -84,7 +84,7 @@ package object extension {
   type On[+A, +B] = org.openmole.core.keyword.On[A, B]
   type By[+A, +B] = org.openmole.core.keyword.By[A, B]
 
-  type ValueAssignment[T] = org.openmole.core.workflow.builder.ValueAssignment[T]
+  export org.openmole.core.workflow.builder.ValueAssignment
 
   def On = org.openmole.core.keyword.On
   def By = org.openmole.core.keyword.By

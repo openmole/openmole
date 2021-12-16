@@ -1,6 +1,6 @@
 package org.openmole.plugin.task.cormas
 
-import monocle.macros.Lenses
+import monocle.Focus
 
 import org.openmole.core.context.{ Context, Namespace }
 import org.openmole.core.expansion.FromContext
@@ -28,10 +28,10 @@ import org.openmole.core.dsl.extension._
 
 object CORMASTask {
 
-  implicit def isTask: InputOutputBuilder[CORMASTask] = InputOutputBuilder(CORMASTask.config)
-  implicit def isExternal: ExternalBuilder[CORMASTask] = ExternalBuilder(CORMASTask.external)
-  implicit def isInfo = InfoBuilder(CORMASTask.info)
-  implicit def isMapped = MappedInputOutputBuilder(CORMASTask.mapped)
+  implicit def isTask: InputOutputBuilder[CORMASTask] = InputOutputBuilder(Focus[CORMASTask](_.config))
+  implicit def isExternal: ExternalBuilder[CORMASTask] = ExternalBuilder(Focus[CORMASTask](_.external))
+  implicit def isInfo: InfoBuilder[CORMASTask] = InfoBuilder(Focus[CORMASTask](_.info))
+  implicit def isMapped: MappedInputOutputBuilder[CORMASTask] = MappedInputOutputBuilder(Focus[CORMASTask](_.mapped))
 
   def cormasImage(image: String, version: String) = DockerImage(image, version)
 
@@ -70,7 +70,7 @@ object CORMASTask {
 
 }
 
-@Lenses case class CORMASTask(
+case class CORMASTask(
   image:                PreparedImage,
   containerSystem:      ContainerSystem,
   script:               FromContext[String],
@@ -136,8 +136,8 @@ object CORMASTask {
           containerPoolKey = containerPoolKey) set (
           resources += (jsonInputs, inputJSONName, true),
           outputFiles += (outputJSONName, outputFile),
-          Mapped.files(mapped.inputs).map { case m ⇒ inputFiles +=[ContainerTask] (m.v, m.name, true) },
-          Mapped.files(mapped.outputs).map { case m ⇒ outputFiles +=[ContainerTask] (m.name, m.v) }
+          Mapped.files(mapped.inputs).map { m ⇒ inputFiles.+=[ContainerTask](m.v, m.name, true) },
+          Mapped.files(mapped.outputs).map { m ⇒ outputFiles.+=[ContainerTask](m.name, m.v) }
         )
 
       val resultContext = containerTask.process(executionContext).from(p.context)(p.random, p.newFile, p.fileService)

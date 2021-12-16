@@ -1,6 +1,7 @@
 package org.openmole.tool.stream
 
 import java.io.OutputStream
+import reflect.Selectable.reflectiveSelectable
 
 object MultiplexedOutputStream {
   type M = {

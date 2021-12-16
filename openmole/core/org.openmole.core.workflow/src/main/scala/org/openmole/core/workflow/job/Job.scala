@@ -25,7 +25,7 @@ case class RuntimeTask(task: Task, strain: Boolean)
 
 object Job {
 
-  implicit val moleJobOrdering = Ordering.by((_: Job).id)
+  implicit val moleJobOrdering: Ordering[Job] = Ordering.by((_: Job).id)
 
   /**
    * Construct from context and UUID

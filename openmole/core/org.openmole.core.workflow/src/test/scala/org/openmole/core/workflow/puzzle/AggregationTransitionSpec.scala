@@ -35,32 +35,39 @@ import scala.util.Try
 
 class AggregationTransitionSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
-  import org.openmole.core.workflow.test.Stubs._
+  import org.openmole.core.workflow.test._
 
   "Aggregation transition" should "turn results of exploration into a array of values" in {
-    @volatile var endCapsExecuted = 0
 
-    val data = List("A", "A", "B", "C")
-    val i = Val[String]
+    try {
+      @volatile var endCapsExecuted = 0
 
-    val emptyT = EmptyTask() set ((inputs, outputs) += i)
+      val data = List("A", "A", "B", "C")
+      val i = Val[String]
 
-    val testT = TestTask { context ⇒
-      context.contains(i.toArray) should equal(true)
-      context(i.toArray).sorted.toVector should equal(data.toVector)
-      endCapsExecuted += 1
-      context
-    } set (inputs += i.array)
+      val emptyT = EmptyTask() set ((inputs, outputs) += i)
 
-    val mole = ExplicitSampling(i, data) -< emptyT >- testT
+      val testT = TestTask { context ⇒
+        context.contains(i.toArray) should equal(true)
+        context(i.toArray).sorted.toVector should equal(data.toVector)
+        endCapsExecuted += 1
+        context
+      } set (inputs += i.array)
 
-    mole.run
-    endCapsExecuted should equal(1)
-    mole.run
-    endCapsExecuted should equal(2)
+      val mole = ExplicitSampling(i, data) -< emptyT >- testT
+
+      mole.run
+      endCapsExecuted should equal(1)
+
+      mole.run
+      endCapsExecuted should equal(2)
+    }
+    catch {
+      case e: Throwable => e.printStackTrace
+    }
   }
 
-  "Aggregation transition" should "should also work for native types" in {
+  "Aggregation transition" should "also work for native types" in {
     @volatile var endCapsExecuted = 0
 
     val data = List(1, 2, 3, 2)

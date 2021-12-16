@@ -19,7 +19,7 @@ package org.openmole.plugin.task.container
 
 import java.io.PrintStream
 
-import monocle.macros.Lenses
+import monocle.Focus
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.exception.UserBadDataError
@@ -42,9 +42,9 @@ import org.openmole.tool.stream._
 
 object ContainerTask {
 
-  implicit def isTask: InputOutputBuilder[ContainerTask] = InputOutputBuilder(ContainerTask.config)
-  implicit def isExternal: ExternalBuilder[ContainerTask] = ExternalBuilder(ContainerTask.external)
-  implicit def isInfo = InfoBuilder(ContainerTask.info)
+  implicit def isTask: InputOutputBuilder[ContainerTask] = InputOutputBuilder(Focus[ContainerTask](_.config))
+  implicit def isExternal: ExternalBuilder[ContainerTask] = ExternalBuilder(Focus[ContainerTask](_.external))
+  implicit def isInfo: InfoBuilder[ContainerTask] = InfoBuilder(Focus[ContainerTask](_.info))
 
   val RegistryTimeout = PreferenceLocation("ContainerTask", "RegistryTimeout", Some(1 minutes))
   val RegistryRetryOnError = PreferenceLocation("ContainerTask", "RegistryRetryOnError", Some(5))
@@ -54,10 +54,10 @@ object ContainerTask {
   case class Commands(value: Vector[FromContext[String]])
 
   object Commands {
-    implicit def fromContext(f: FromContext[String]) = Commands(Vector(f))
-    implicit def fromString(f: String) = Commands(Vector(f))
-    implicit def seqOfString(f: Seq[String]) = Commands(f.map(x ⇒ x: FromContext[String]).toVector)
-    implicit def seqOfFromContext(f: Seq[FromContext[String]]) = Commands(f.toVector)
+    implicit def fromContext(f: FromContext[String]): Commands = Commands(Vector(f))
+    implicit def fromString(f: String): Commands = Commands(Vector(f))
+    implicit def seqOfString(f: Seq[String]): Commands = Commands(f.map(x ⇒ x: FromContext[String]).toVector)
+    implicit def seqOfFromContext(f: Seq[FromContext[String]]): Commands = Commands(f.toVector)
   }
 
   def extractImage(image: SavedDockerImage, directory: File): _root_.container.SavedImage = {
@@ -174,7 +174,7 @@ object ContainerTask {
       info = InfoConfig(),
       external = External(),
       containerPoolKey = containerPoolKey) set (
-      outputs += (Seq(returnValue.option, stdOut.option, stdErr.option).flatten: _*)
+      outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
     )
   }
 
@@ -241,7 +241,7 @@ object ContainerTask {
 
 import ContainerTask._
 
-@Lenses case class ContainerTask(
+case class ContainerTask(
   containerSystem:      ContainerSystem,
   image:                PreparedImage,
   command:              Commands,

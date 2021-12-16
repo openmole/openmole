@@ -4,7 +4,7 @@ import org.openmole.core.project.Imports.{ ImportedFile }
 import org.openmole.tool.file._
 
 object ScriptSourceData {
-  implicit def defaultData = NoData
+  implicit def defaultData: ScriptSourceData = NoData
 
   case class ScriptData(workDirectory: File, script: File) extends ScriptSourceData {
     val content = if (script.exists()) script.content else ""

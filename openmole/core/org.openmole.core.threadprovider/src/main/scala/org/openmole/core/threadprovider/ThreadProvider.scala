@@ -20,7 +20,7 @@ object ThreadProvider {
 
   class RunClosure(queue: PriorityQueue[Closure]) extends Runnable {
     override def run = {
-      val job = queue.dequeue
+      val job = queue.dequeue()
       job.apply()
     }
   }
@@ -44,7 +44,7 @@ class ThreadProvider(poolSize: Int) {
 
   lazy val parentGroup = new ThreadGroup("provider-" + UUID.randomUUID().toString)
 
-  implicit lazy val pool =
+  implicit lazy val pool: ThreadPoolExecutor =
     new ThreadPoolExecutor(poolSize, poolSize, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue[Runnable](), threadFactory)
 
   lazy val scheduler = Executors.newScheduledThreadPool(1, threadFactory)

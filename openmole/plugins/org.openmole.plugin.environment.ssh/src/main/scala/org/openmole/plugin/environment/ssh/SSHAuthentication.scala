@@ -29,7 +29,7 @@ import org.openmole.tool.crypto.Cypher
 import scala.util.Try
 
 object SSHAuthentication {
-  implicit def isGridScaleAuthentication(implicit cypher: Cypher) = new _root_.gridscale.ssh.SSHAuthentication[org.openmole.plugin.environment.ssh.SSHAuthentication] {
+  implicit def isGridScaleAuthentication(implicit cypher: Cypher): _root_.gridscale.ssh.SSHAuthentication[org.openmole.plugin.environment.ssh.SSHAuthentication] = new _root_.gridscale.ssh.SSHAuthentication[org.openmole.plugin.environment.ssh.SSHAuthentication] {
     override def login(a: org.openmole.plugin.environment.ssh.SSHAuthentication) = a match {
       case a: LoginPassword ⇒ a.login
       case a: PrivateKey    ⇒ a.login

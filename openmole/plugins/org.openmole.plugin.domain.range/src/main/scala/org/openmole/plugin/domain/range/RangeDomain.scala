@@ -40,7 +40,7 @@ object RangeDomain {
       domain.validate
     )
 
-  implicit def toDomain[D, T](d: D)(implicit toRangeDomain: IsRangeDomain[D, T]) = toRangeDomain(d)
+  implicit def toDomain[D, T](d: D)(implicit toRangeDomain: IsRangeDomain[D, T]): RangeDomain[T] = toRangeDomain(d)
 
   def apply[T: RangeValue](
     min: FromContext[T],

@@ -24,12 +24,12 @@ import org.openmole.core.context._
 import org.openmole.core.workflow.builder.{ DefaultBuilder, InputBuilder }
 
 object DefaultSet {
-  implicit def seqToDefaultSet(s: Seq[Default[_]]) = DefaultSet(s: _*)
+  implicit def seqToDefaultSet(s: Seq[Default[_]]): DefaultSet = DefaultSet(s: _*)
   implicit def defaultSetToSeq(d: DefaultSet): Seq[Default[_]] = d.defaultMap.values.toSeq
 
-  implicit def defaultBuilder = new DefaultBuilder[DefaultSet] with InputBuilder[DefaultSet] {
+  implicit def defaultBuilder: DefaultBuilder[DefaultSet] & InputBuilder[DefaultSet] = new DefaultBuilder[DefaultSet] with InputBuilder[DefaultSet] {
     override def defaults: Lens[DefaultSet, DefaultSet] = Lens.id
-    override def inputs: Lens[DefaultSet, PrototypeSet] = Lens { _: DefaultSet ⇒ PrototypeSet.empty } { p ⇒ d ⇒ d }
+    override def inputs: Lens[DefaultSet, PrototypeSet] = Lens { (_: DefaultSet) ⇒ PrototypeSet.empty } { p ⇒ d ⇒ d }
   }
 
   lazy val empty = DefaultSet(Iterable.empty)

@@ -44,7 +44,7 @@ package systemexec {
 
   object Command {
     /** Make commands non-remote by default */
-    implicit def stringToCommand(s: String) = Command(s)
+    implicit def stringToCommand(s: String): Command = Command(s)
   }
 
   /**
@@ -60,7 +60,7 @@ package systemexec {
 
   object OSCommands {
     /** A single command can be a sequence  */
-    implicit def stringToCommands(s: String) = OSCommands(OS(), s)
+    implicit def stringToCommands(s: String): OSCommands = OSCommands(OS(), s)
 
     /** A sequence of command lines is considered local (non-remote) by default */
     implicit def seqOfStringToCommands(s: Seq[String]): OSCommands = OSCommands(OS(), s.map(s ⇒ Command(s)): _*)
@@ -292,7 +292,7 @@ package object systemexec {
         case p: Parsed ⇒ p.command.toVector
       }
 
-    implicit def stringToRaw(c: String) = Raw(c)
+    implicit def stringToRaw(c: String): Raw = Raw(c)
   }
 
   /**

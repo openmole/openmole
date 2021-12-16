@@ -22,7 +22,7 @@ import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder.{ InfoConfig, InputOutputConfig }
 import org.openmole.core.workflow.tools._
 
-trait Source <: Name {
+trait Source extends Name {
   def config: InputOutputConfig
   def info: InfoConfig
 

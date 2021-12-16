@@ -17,7 +17,7 @@
  */
 package org.openmole.core.project
 
-import org.openmole.core.compiler.ScalaREPL
+import org.openmole.core.compiler._
 import org.openmole.core.dsl._
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.fileservice.FileService
@@ -55,19 +55,14 @@ object OpenMOLEREPL {
     )
 
   def newREPL(args: ConsoleVariables, quiet: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService) = {
-    def initialise(loop: ScalaREPL) = {
+    def initialise(repl: REPL) = {
       args.workDirectory.mkdirs()
-      loop.beQuietDuring {
-        (loop interpret imports) match {
-          case scala.tools.nsc.interpreter.Results.Error ⇒
-            throw new InternalProcessingError(s"Error while interpreting imports: ${imports}")
-          case _ ⇒
-        }
-        ConsoleVariables.bindVariables(loop, args)
-      }
-      loop
+      repl.eval(imports)
+      ConsoleVariables.bindVariables(repl, args)
+      repl
     }
 
-    initialise(ScalaREPL(quiet = quiet))
+    initialise(REPL(quiet = quiet))
   }
+  
 }

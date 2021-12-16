@@ -18,10 +18,9 @@ class PuzzleSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
   }
 
   "HList containing dsl container" should "be usable like a dsl container" in {
-    import shapeless._
 
     val task = EmptyTask()
-    val test = DSLContainer(task, ()) :: 9 :: HNil
+    val test = (DSLContainer(task, ()), 9)
 
     (test: DSLContainer[_]).run()
     (test: MoleExecution).run()

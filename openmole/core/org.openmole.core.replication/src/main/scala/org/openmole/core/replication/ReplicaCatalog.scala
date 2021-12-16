@@ -68,7 +68,7 @@ class ReplicaCatalog(database: Database, preference: Preference) {
   type ReplicaCacheKey = (String, String, String)
 
   val replicaCache = CacheBuilder.newBuilder.asInstanceOf[CacheBuilder[ReplicaCacheKey, Replica]].
-    maximumSize(preference(ReplicaCacheSize)).
+    maximumSize(preference(ReplicaCacheSize).toLong).
     expireAfterAccess(preference(ReplicaCacheTime).millis, TimeUnit.MILLISECONDS).
     build[ReplicaCacheKey, Replica]
 
@@ -214,8 +214,8 @@ class ReplicaCatalog(database: Database, preference: Preference) {
     else replica
   }
 
-  def forPaths(paths: Seq[String], storageId: Seq[String]) = query { replicas.filter(r ⇒ (r.path inSetBind paths) && (r.storage inSetBind storageId)).result }
-  def forHashes(hashes: Seq[String], storageId: Seq[String]) = query { replicas.filter(r ⇒ (r.hash inSetBind hashes) && (r.storage inSetBind storageId)).result }
+  def forPaths(paths: Seq[String], storageId: Seq[String]): Seq[Replica] = query { replicas.filter(r ⇒ (r.path inSetBind paths) && (r.storage inSetBind storageId)).result }
+  def forHashes(hashes: Seq[String], storageId: Seq[String]): Seq[Replica] = query { replicas.filter(r ⇒ (r.hash inSetBind hashes) && (r.storage inSetBind storageId)).result }
 
   def deleteReplicas(storageId: String): Unit = {
     def q = replicas.filter { _.storage === storageId }

@@ -28,20 +28,20 @@ import org.openmole.core.workflow.validation._
 
 package container {
 
-  import monocle.Lens
+  import monocle.Focus
 
   object HostFile {
-    implicit def tupleToHostFile(t: (String, String)) = HostFile(t._1, t._2)
+    implicit def tupleToHostFile(t: (String, String)): HostFile = HostFile(t._1, t._2)
   }
 
   case class HostFile(path: String, destination: String)
 
   object ContainerImage {
-    implicit def fileToContainerImage(f: java.io.File) = {
+    implicit def fileToContainerImage(f: java.io.File): ContainerImage = {
       def compressed = f.getName.endsWith(".tgz") || f.getName.endsWith(".gz")
       SavedDockerImage(f, compressed)
     }
-    implicit def stringToContainerImage(s: String) =
+    implicit def stringToContainerImage(s: String): ContainerImage =
       if (s.contains(":")) {
         val Vector(image, tag) = s.split(":").toVector
         DockerImage(image, tag)

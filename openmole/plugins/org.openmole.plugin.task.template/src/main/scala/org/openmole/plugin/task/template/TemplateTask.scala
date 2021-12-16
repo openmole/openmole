@@ -18,7 +18,7 @@ package org.openmole.plugin.task.template
 
 import java.io.File
 
-import monocle.macros.Lenses
+import monocle.Focus
 import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.expansion.{ ExpandedString, FromContext }
 import org.openmole.core.workflow.builder._
@@ -27,8 +27,8 @@ import org.openmole.core.workflow.task._
 
 object TemplateTask {
 
-  implicit def isBuilder: InputOutputBuilder[TemplateTask] = InputOutputBuilder(TemplateTask.config)
-  implicit def isInfo = InfoBuilder(info)
+  implicit def isBuilder: InputOutputBuilder[TemplateTask] = InputOutputBuilder(Focus[TemplateTask](_.config))
+  implicit def isInfo: InfoBuilder[TemplateTask] = InfoBuilder(Focus[TemplateTask](_.info))
 
   def apply(
     template: String,
@@ -37,7 +37,7 @@ object TemplateTask {
 
 }
 
-@Lenses case class TemplateTask(
+case class TemplateTask(
   template: String,
   output:   Val[File],
   config:   InputOutputConfig,

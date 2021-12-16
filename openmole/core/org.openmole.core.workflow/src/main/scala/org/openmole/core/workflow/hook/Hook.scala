@@ -33,19 +33,20 @@ import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.random.RandomProvider
 
 case class HookExecutionContext(
-  cache:                          KeyValueCache,
-  ticket:                         Ticket,
-  implicit val preference:        Preference,
-  implicit val threadProvider:    ThreadProvider,
-  implicit val fileService:       FileService,
-  implicit val workspace:         Workspace,
-  implicit val outputRedirection: OutputRedirection,
-  implicit val loggerService:     LoggerService,
-  implicit val random:            RandomProvider,
-  implicit val newFile:           TmpDirectory,
-  implicit val serializerService: SerializerService)
+  cache:  KeyValueCache,
+  ticket: Ticket)(
+  implicit
+  val preference:        Preference,
+  val threadProvider:    ThreadProvider,
+  val fileService:       FileService,
+  val workspace:         Workspace,
+  val outputRedirection: OutputRedirection,
+  val loggerService:     LoggerService,
+  val random:            RandomProvider,
+  val newFile:           TmpDirectory,
+  val serializerService: SerializerService)
 
-trait Hook <: Name {
+trait Hook extends Name {
 
   def config: InputOutputConfig
   def info: InfoConfig

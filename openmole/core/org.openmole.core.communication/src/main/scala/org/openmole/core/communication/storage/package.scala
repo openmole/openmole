@@ -19,7 +19,7 @@ package org.openmole.core.communication
 
 package object storage {
   object TransferOptions {
-    implicit def default = TransferOptions()
+    implicit def default: TransferOptions = TransferOptions()
   }
 
   case class TransferOptions(raw: Boolean = false, noLink: Boolean = false, canMove: Boolean = false)

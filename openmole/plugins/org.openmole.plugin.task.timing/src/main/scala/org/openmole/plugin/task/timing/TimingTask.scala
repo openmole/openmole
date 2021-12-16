@@ -1,6 +1,6 @@
 package org.openmole.plugin.task.timing
 
-import monocle.macros.Lenses
+import monocle.Focus
 import org.openmole.core.context.Val
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder._
@@ -9,8 +9,8 @@ import org.openmole.core.workflow.dsl._
 
 object TimingTask {
 
-  implicit def isBuilder: InputOutputBuilder[TimingTask] = InputOutputBuilder(TimingTask.config)
-  implicit def isInfo = InfoBuilder(info)
+  implicit def isBuilder: InputOutputBuilder[TimingTask] = InputOutputBuilder(Focus[TimingTask](_.config))
+  implicit def isInfo: InfoBuilder[TimingTask] = InfoBuilder(Focus[TimingTask](_.info))
 
   def apply(
     task:    Task,
@@ -20,7 +20,7 @@ object TimingTask {
 
 }
 
-@Lenses case class TimingTask(
+case class TimingTask(
   task:    Task,
   tracker: Val[Long],
   config:  InputOutputConfig,

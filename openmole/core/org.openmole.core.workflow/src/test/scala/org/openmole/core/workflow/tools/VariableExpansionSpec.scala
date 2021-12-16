@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.tools
 
-import org.openmole.core.context.Context
+import org.openmole.core.context._
 import org.openmole.core.expansion.ExpandedString
 import org.scalatest._
 import org.openmole.core.workflow.dsl._
@@ -52,6 +52,12 @@ class VariableExpansionSpec extends flatspec.AnyFlatSpec with matchers.should.Ma
     val test = "tést"
     val res = ExpandedString(test).from(Context.empty)
     test should equal(res)
+  }
+
+  "String" should "be expanded" in {
+    val e = ExpandedString("${x} times 2 equals ${x * 2}")
+    val x = Val[Int]
+    e(Context(x -> 2)) should equal("2 times 2 equals 4")
   }
 
 }

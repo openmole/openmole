@@ -13,7 +13,7 @@ import scala.concurrent.duration.Duration
 import scala.io.Source
 import org.openmole.tool.file._
 import org.openmole.tool.logger.JavaLogger
-import slick.jdbc.H2Profile.backend.DatabaseDef
+//import slick.jdbc.H2Profile.backend.DatabaseDef
 
 package object db extends JavaLogger {
 

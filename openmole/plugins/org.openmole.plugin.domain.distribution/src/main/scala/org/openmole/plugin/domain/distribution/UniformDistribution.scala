@@ -44,11 +44,11 @@ object UniformDistribution {
       domain.seed.map(_.validate).toSeq
     )
 
-  def apply[T](
-    seed: OptionalArgument[FromContext[Long]] = None,
-    max:  OptionalArgument[T]                 = None
-  )(implicit distribution: Distribution[T]) = new UniformDistribution(seed, max, distribution)
+//  def apply[T](
+//    seed: OptionalArgument[FromContext[Long]] = None,
+//    max:  OptionalArgument[T]                 = None
+//  )(implicit distribution: Distribution[T]) = new UniformDistribution(seed, max, distribution)
 
 }
 
-case class UniformDistribution[T] private (seed: Option[FromContext[Long]], max: Option[T], distribution: Distribution[T])
+case class UniformDistribution[T] (seed: Option[FromContext[Long]] = None, max: Option[T] = None)(implicit val distribution: Distribution[T])

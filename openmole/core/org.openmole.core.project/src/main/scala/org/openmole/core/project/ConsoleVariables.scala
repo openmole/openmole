@@ -27,13 +27,12 @@ object ConsoleVariables {
   def variablesName = "_variables_"
   def workDirectory = "workDirectory"
 
-  def bindVariables(loop: ScalaREPL, variables: ConsoleVariables, variablesName: String = variablesName) =
-    loop.beQuietDuring {
-      loop.bind(variablesName, variables)
-      loop.eval(s"""
-        |import $variablesName._
-        |import $variablesName.services._""".stripMargin)
-    }
+  def bindVariables(repl: REPL, variables: ConsoleVariables, variablesName: String = variablesName) =
+    repl.bind(variablesName, variables)
+    repl.eval(s"""
+      |import $variablesName._
+      |import $variablesName.services._""".stripMargin)
+    
 
   def experimentName(f: File) = {
     val name = f.getName

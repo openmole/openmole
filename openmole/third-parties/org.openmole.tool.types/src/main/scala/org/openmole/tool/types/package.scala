@@ -16,14 +16,29 @@
  */
 package org.openmole.tool
 
-import shapeless._
-
 package types {
 
   trait TypesPackage {
-    implicit def hlistToA[H <: HList, A](h: H)(implicit s: ops.hlist.Selector[H, A]): A = s(h)
-  }
 
+    object SelectTuple {
+      implicit def selectHead[H, T <: Tuple]: SelectTuple[H, H *: T] = new SelectTuple[H, H *: T] {
+        def select(t: H *: T): H = t.head
+      }
+
+      implicit def selectInductive[H, T <: NonEmptyTuple](implicit selectTail: SelectTuple[H, Tuple.Tail[T]]): SelectTuple[H, T] = new SelectTuple[H, T] {
+        def select(t: T): H = selectTail.select(t.tail)
+      }
+    }
+
+    trait SelectTuple[H, T] {
+      def select(t: T): H
+    }
+
+    implicit def selectInTuple[H, T](t: T)(implicit select: SelectTuple[H, T]): H = select.select(t)
+    implicit def function1Manifest[A: Manifest, B: Manifest]: Manifest[A => B] = Manifest.classType(classOf[scala.Function1[A, B]], manifest[A], manifest[B])
+    implicit def arrayManifest[A: Manifest]: Manifest[Array[A]] = Manifest.arrayType(manifest[A])
+
+  }
 }
 
 package object types extends TypesPackage

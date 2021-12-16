@@ -50,8 +50,8 @@ import monocle.syntax.all._
 object PSEAlgorithm {
 
   import mgo.tools._
-  import monocle.macros.{ GenLens, Lenses }
-
+  import monocle.macros.{ GenLens }
+  
   import scala.language.higherKinds
   import cats.implicits._
   import mgo.evolution.algorithm._
@@ -59,7 +59,7 @@ object PSEAlgorithm {
   import GenomeVectorDouble._
   import CDGenome._
 
-  @Lenses case class Individual[P](
+  case class Individual[P](
     genome:        CDGenome.Genome,
     phenotype:     P,
     foundedIsland: Boolean         = false)
@@ -97,7 +97,7 @@ object PSEAlgorithm {
       discreteValues.get,
       discreteOperator.get,
       discrete,
-      Individual.phenotype[P].get _ andThen pattern,
+      i => pattern(i.phenotype),
       buildGenome,
       lambda,
       reject,
@@ -107,7 +107,7 @@ object PSEAlgorithm {
   def elitism[S, P: CanBeNaN](pattern: P ⇒ Vector[Int], continuous: Vector[C], hitmap: monocle.Lens[S, HitMap]) =
     PSEOperations.elitism[S, Individual[P], P](
       i ⇒ values(i.genome, continuous),
-      Individual.phenotype[P].get,
+      i => i.phenotype,
       pattern,
       hitmap)
 
@@ -127,7 +127,7 @@ object NoisyPSEAlgorithm {
   import algorithm._
   import algorithm.CDGenome._
 
-  @Lenses case class Individual[P](
+  case class Individual[P](
     genome:           CDGenome.Genome,
     historyAge:       Long,
     phenotypeHistory: Array[P])
@@ -173,7 +173,7 @@ object NoisyPSEAlgorithm {
       vectorPhenotype[P],
       aggregation,
       pattern,
-      Individual.historyAge,
+      Focus[Individual[P]](_.historyAge),
       historySize,
       hitmap)
 
@@ -188,7 +188,7 @@ object NoisyPSEAlgorithm {
       i.focus(_.genome) andThen discreteValues get,
       aggregation(vectorPhenotype.get(i)),
       (vectorPhenotype.get _ andThen aggregation andThen pattern)(i),
-      Individual.phenotypeHistory.get(i).size)
+      i.phenotypeHistory.size)
 
   case class Result[P](continuous: Vector[Double], discrete: Vector[Int], phenotype: Vector[Double], pattern: Vector[Int], replications: Int, individual: Individual[P])
 
@@ -222,7 +222,7 @@ object PSE {
     import mgo.evolution.algorithm.{ PSE ⇒ _, _ }
     import cats.data._
 
-    implicit def integration = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
+    implicit def integration: MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
       type G = CDGenome.Genome
       type I = PSEAlgorithm.Individual[Phenotype]
       type S = EvolutionState[HitMapState]
@@ -303,11 +303,11 @@ object PSE {
           (s4, elited)
         }
 
-        def migrateToIsland(population: Vector[I]) = population.map(PSEAlgorithm.Individual.foundedIsland.set(true))
+        def migrateToIsland(population: Vector[I]) = population.map(Focus[I](_.foundedIsland).set(true))
 
         def migrateFromIsland(population: Vector[I], state: S) =
-          population.filter(i ⇒ !PSEAlgorithm.Individual.foundedIsland.get(i)).
-            map(PSEAlgorithm.Individual.foundedIsland.set(false))
+          population.filter(i ⇒ !i.foundedIsland).
+            map(Focus[I](_.foundedIsland).set(false))
       }
 
     }
@@ -329,7 +329,7 @@ object PSE {
     import mgo.evolution.algorithm.{ PSE ⇒ _, NoisyPSE ⇒ _, _ }
     import cats.data._
 
-    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
+    implicit def integration: MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
       type G = CDGenome.Genome
       type I = NoisyPSEAlgorithm.Individual[Phenotype]
       type S = EvolutionState[HitMapState]
@@ -427,7 +427,7 @@ object PSE {
   }
 
   object PatternAxe {
-    implicit def fromInExactToPatternAxe[T, D](v: In[T, D])(implicit fix: FixDomain[D, Double], te: ToObjective[T]) = PatternAxe(te.apply(v.value), fix(v.domain).domain.toVector)
+    implicit def fromInExactToPatternAxe[T, D](v: In[T, D])(implicit fix: FixDomain[D, Double], te: ToObjective[T]): PatternAxe = PatternAxe(te.apply(v.value), fix(v.domain).domain.toVector)
     //    implicit def fromInNoisyToPatternAxe[T, D](v: In[T, D])(implicit fix: FixDomain[D, Double], te: ToNoisyObjective[T]) = PatternAxe(te.apply(v.value), fix(v.domain).domain.toVector)
 
     implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit fix: FixDomain[D, Double]): PatternAxe =
@@ -527,7 +527,7 @@ object PSEEvolution {
 
 }
 
-@Lenses case class PSEEvolution(
+case class PSEEvolution(
   genome:       Genome,
   objective:    Seq[PSE.PatternAxe],
   evaluation:   DSL,

@@ -18,7 +18,7 @@
 package org.openmole.plugin.method.evolution
 
 import cats.implicits._
-import monocle.macros.{ GenLens, Lenses }
+import monocle.macros.{ GenLens }
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.plugin.method.evolution.Genome.Suggestion
@@ -120,7 +120,7 @@ object NSGA2 {
   object StochasticParams {
     import mgo.evolution.algorithm.{ CDGenome, NoisyNSGA2 ⇒ MGONoisyNSGA2, _ }
 
-    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] {
+    implicit def integration: MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -280,7 +280,7 @@ object NSGA2Evolution {
 
 }
 
-@Lenses case class NSGA2Evolution(
+case class NSGA2Evolution(
   genome:         Genome,
   objective:      Objectives,
   evaluation:     DSL,

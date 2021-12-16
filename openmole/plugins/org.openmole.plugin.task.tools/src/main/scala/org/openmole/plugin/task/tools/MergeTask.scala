@@ -32,7 +32,7 @@ object MergeTask {
       val flattened = prototypes.map { p ⇒ context(p) }.flatten.toArray[S](ClassTag(result.fromArray.`type`.runtimeClass))
       Variable(result, flattened)
     } set (
-      dsl.inputs += (prototypes: _*),
+      dsl.inputs ++= prototypes,
       dsl.outputs += result
     )
 

@@ -26,7 +26,7 @@ object LogicalLinkStorage {
 
   import gridscale.effectaside._
 
-  implicit def interpreter = _root_.gridscale.local.Local()
+  implicit def interpreter: _root_.gridscale.effectaside.Effect[_root_.gridscale.local.Local] = _root_.gridscale.local.Local()
 
   def child(t: LogicalLinkStorage, parent: String, child: String): String = (File(parent) / child).getAbsolutePath
   def parent(t: LogicalLinkStorage, path: String): Option[String] = Option(File(path).getParent)

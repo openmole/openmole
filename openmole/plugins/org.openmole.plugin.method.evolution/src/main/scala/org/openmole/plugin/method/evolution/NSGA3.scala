@@ -22,8 +22,8 @@ object NSGA3 {
     case class Division(division: Int) extends References
     case class List(points: Vector[Vector[Double]]) extends References
 
-    implicit def fromInt(i: Int) = Division(i)
-    implicit def fromVector(p: Vector[Vector[Double]]) = List(p)
+    implicit def fromInt(i: Int): Division = Division(i)
+    implicit def fromVector(p: Vector[Vector[Double]]): List = List(p)
   }
 
   sealed trait References
@@ -110,7 +110,7 @@ object NSGA3 {
   object StochasticParams {
     import mgo.evolution.algorithm.{ CDGenome, NoisyNSGA3 ⇒ MGONoisyNSGA3, _ }
 
-    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] {
+    implicit def integration: MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -276,7 +276,7 @@ object NSGA3Evolution {
 
 }
 
-@Lenses case class NSGA3Evolution(
+case class NSGA3Evolution(
   genome:         Genome,
   objective:      Objectives,
   evaluation:     DSL,

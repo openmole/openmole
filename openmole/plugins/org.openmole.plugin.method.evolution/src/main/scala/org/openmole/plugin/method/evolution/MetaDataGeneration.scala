@@ -3,10 +3,10 @@ package org.openmole.plugin.method.evolution
 import org.openmole.plugin.method.evolution.data._
 import org.openmole.core.expansion.FromContext
 import io.circe._
-import io.circe.generic.extras.auto._
+import io.circe.generic.auto._
 import io.circe.parser._
-import io.circe.generic.extras.semiauto._
-import io.circe.generic.extras.Configuration
+import io.circe.generic.semiauto._
+//import io.circe.generic.extras.Configuration
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.tools.io.Prettifier._
 import Genome.GenomeBound

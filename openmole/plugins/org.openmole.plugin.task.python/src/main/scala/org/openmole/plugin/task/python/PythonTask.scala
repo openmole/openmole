@@ -1,7 +1,7 @@
 
 package org.openmole.plugin.task.python
 
-import monocle.macros._
+import monocle.Focus
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.fileservice.FileService
@@ -22,10 +22,10 @@ import org.openmole.plugin.task.container
 
 object PythonTask {
 
-  implicit def isTask: InputOutputBuilder[PythonTask] = InputOutputBuilder(PythonTask.config)
-  implicit def isExternal: ExternalBuilder[PythonTask] = ExternalBuilder(PythonTask.external)
-  implicit def isInfo = InfoBuilder(info)
-  implicit def isMapped = MappedInputOutputBuilder(PythonTask.mapped)
+  implicit def isTask: InputOutputBuilder[PythonTask] = InputOutputBuilder(Focus[PythonTask](_.config))
+  implicit def isExternal: ExternalBuilder[PythonTask] = ExternalBuilder(Focus[PythonTask](_.external))
+  implicit def isInfo: InfoBuilder[PythonTask] = InfoBuilder(Focus[PythonTask](_.info))
+  implicit def isMapped: MappedInputOutputBuilder[PythonTask] = MappedInputOutputBuilder(Focus[PythonTask](_.mapped))
 
   def dockerImage(version: String) = DockerImage("python", version)
 
@@ -71,11 +71,11 @@ object PythonTask {
       info = InfoConfig(),
       mapped = MappedInputOutputConfig(),
       major = major
-    ) set (outputs += (Seq(returnValue.option, stdOut.option, stdErr.option).flatten: _*))
+    ) set (outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
   }
 }
 
-@Lenses case class PythonTask(
+case class PythonTask(
   script:                 RunnableScript,
   image:                  PreparedImage,
   arguments:              Option[String],
@@ -165,8 +165,8 @@ object PythonTask {
               resources += (scriptFile, scriptName, true),
               resources += (jsonInputs, inputJSONName, true),
               outputFiles += (outputJSONName, outputFile),
-              Mapped.files(mapped.inputs).map { case m ⇒ inputFiles +=[ContainerTask] (m.v, m.name, true) },
-              Mapped.files(mapped.outputs).map { case m ⇒ outputFiles +=[ContainerTask] (m.name, m.v) }
+              Mapped.files(mapped.inputs).map { case m ⇒ inputFiles.+=[ContainerTask] (m.v, m.name, true) },
+              Mapped.files(mapped.outputs).map { case m ⇒ outputFiles.+=[ContainerTask] (m.name, m.v) }
             )
 
 

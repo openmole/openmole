@@ -97,7 +97,7 @@ object NoisyNichedNSGA2Algorithm {
   import CDGenome._
   import NoisyIndividual._
   import cats.implicits._
-  import shapeless._
+  //import shapeless._
 
   def aggregatedFitness[P: Manifest](aggregation: Vector[P] ⇒ Vector[Double]): Individual[P] ⇒ Vector[Double] = NoisyNSGA2.fitness[P](aggregation)
   case class Result[N, P](continuous: Vector[Double], discrete: Vector[Int], fitness: Vector[Double], niche: N, replications: Int, individual: Individual[P])
@@ -183,11 +183,11 @@ object NoisyNichedNSGA2Algorithm {
 object NichedNSGA2 {
 
   object NichedElement {
-    implicit def fromValInt(v: Val[Int]) = Discrete(v)
+    implicit def fromValInt(v: Val[Int]): Discrete = Discrete(v)
 
-    implicit def fromAggregateString[A](a: Aggregate[Val[A], String]) = Aggregated(a.value, a.aggregate)
+    implicit def fromAggregateString[A](a: Aggregate[Val[A], String]): Aggregated = Aggregated(a.value, a.aggregate)
 
-    implicit def fromAggregate[A, V[_]: FromArray](a: Aggregate[Val[A], V[A] ⇒ Int]) = {
+    implicit def fromAggregate[A, V[_]: FromArray](a: Aggregate[Val[A], V[A] ⇒ Int]): Aggregated = {
       val f =
         FromContext { p ⇒
           import p._
@@ -250,7 +250,7 @@ object NichedNSGA2 {
 
     import CDGenome.DeterministicIndividual
 
-    implicit def integration = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] {
+    implicit def integration: MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = DeterministicIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -344,7 +344,7 @@ object NichedNSGA2 {
       }
     }
 
-    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] {
+    implicit def integration: MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -525,7 +525,7 @@ object NichedNSGA2Evolution {
 
 }
 
-@Lenses case class NichedNSGA2Evolution(
+case class NichedNSGA2Evolution(
   evaluation:   DSL,
   termination:  OMTermination,
   niche:        Seq[NichedElement],

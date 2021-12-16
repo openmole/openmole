@@ -20,7 +20,7 @@ package org.openmole.core.context
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.tool.types.TypeTool._
 import org.openmole.tool.types.{ TypeTool, Id }
-import shapeless.{ TypeCase, Typeable }
+import shapeless3.typeable.{ TypeCase, Typeable }
 
 import scala.annotation.tailrec
 import scala.reflect._
@@ -178,7 +178,7 @@ object Val {
     def withName(name: String) = Val[T](name)(v.`type`)
   }
 
-  implicit def valToArrayConverter[T](p: Val[T]) = p.toArray
+  implicit def valToArrayConverter[T](p: Val[T]): Val[Array[T]] = p.toArray
 
   def apply[T](name: String, namespace: Namespace = Namespace.empty)(implicit t: ValType[T]): Val[T] = {
     assert(t != null)
@@ -187,19 +187,20 @@ object Val {
 
   def apply[T](implicit t: ValType[T], name: sourcecode.Name): Val[T] = apply[T](name.value)
 
-  implicit lazy val valOrderingOnName = new Ordering[Val[_]] {
+  implicit lazy val valOrderingOnName: Ordering[Val[_]] = new Ordering[Val[_]] {
     override def compare(left: Val[_], right: Val[_]) =
       left.name compare right.name
   }
 
   implicit def isTypeable[T: Manifest]: Typeable[Val[T]] =
     new Typeable[Val[T]] {
-      def cast(t: Any): Option[Val[T]] =
+      override def cast(t: Any): Option[Val[T]] =
         t match {
           case v: Val[_] if v.`type`.manifest == manifest[T] ⇒ Some(v.asInstanceOf[Val[T]])
           case _ ⇒ None
         }
-      def describe = s"Val[${manifest[T].toString}]"
+      override def castable(t: Any): Boolean = cast(t).isDefined
+      override def describe = s"Val[${manifest[T].toString}]"
     }
 
   val caseBoolean = TypeCase[Val[Boolean]]
@@ -237,7 +238,7 @@ object Val {
 object Namespace {
   def empty = Namespace()
 
-  implicit def fromSeqString(s: Seq[String]) = Namespace(s: _*)
+  implicit def fromSeqString(s: Seq[String]): Namespace = Namespace(s: _*)
 }
 
 case class Namespace(names: String*) {

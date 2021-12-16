@@ -28,7 +28,7 @@ import org.openmole.plugin.method.evolution.Genome.GenomeBound
 
 class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
-  import org.openmole.core.workflow.test.Stubs._
+  import org.openmole.core.workflow.test._
 
   def nsga2 = {
     import EvolutionWorkflow._
@@ -138,6 +138,26 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     nsga run
 
     executed should be >= 100
+  }
+
+  "Serialized Island Evolution" should "run" in {
+    val a = Val[Double]
+
+    val testTask =
+      FromContextTask("test") { p ⇒
+        import p._
+        context
+      } set ((inputs, outputs) += a)
+
+    val nsga = NSGA2Evolution(
+      evaluation = testTask,
+      objective = Seq(a),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 10,
+      parallelism = 1
+    ) by Island(5)
+
+    serializeDeserialize(nsga) run
   }
 
   "Hook" should "be valid" in {

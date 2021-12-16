@@ -32,7 +32,7 @@ object SensitivitySaltelli {
   case class Method(inputs: Seq[ScalarOrSequenceOfDouble], outputs: Seq[Val[_]])
 
   implicit def method: ExplorationMethod[SensitivitySaltelli, Method] = p => {
-    implicit def defScope = p.scope
+    implicit def defScope: DefinitionScope = p.scope
 
     val sampling = SaltelliSampling(p.sample, p.inputs: _*)
 

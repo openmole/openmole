@@ -18,7 +18,8 @@ package org.openmole.core
  */
 
 import org.openmole.tool.file.File
+import org.openmole.core.compiler.*
 
 package object compiler {
-  case class CompilationContext(classDirectory: File, classLoader: ClassLoader)
+  case class CompilationContext(repl: REPL)
 }

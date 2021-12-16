@@ -6,8 +6,8 @@ import org.openmole.core.workflow.hook.{ FromContextHook, HookExecutionContext }
 
 object OutputFormat {
   object OutputContent {
-    implicit def sectionToContent(s: Seq[OutputSection]) = SectionContent(s)
-    implicit def variablesToPlainContent(v: Seq[Variable[_]]) = PlainContent(v)
+    implicit def sectionToContent(s: Seq[OutputSection]): SectionContent = SectionContent(s)
+    implicit def variablesToPlainContent(v: Seq[Variable[_]]): PlainContent = PlainContent(v)
   }
 
   sealed trait OutputContent

@@ -30,7 +30,7 @@ package expansion {
 
   object Validate {
 
-    class Parameters(val inputs: Seq[Val[_]])(implicit val tmpDirectory: TmpDirectory, implicit val fileService: FileService)
+    class Parameters(val inputs: Seq[Val[_]])(implicit val tmpDirectory: TmpDirectory, val fileService: FileService)
 
     case class LeafValidate(validate: Parameters ⇒ Seq[Throwable]) extends Validate {
       def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable] = validate(new Parameters(inputs))
@@ -55,10 +55,10 @@ package expansion {
         case (v1, v2)                             ⇒ SeqValidate(toIterable(v1).toSeq ++ toIterable(v2))
       }
 
-    implicit def fromSeqValidate(v: Seq[Validate]) = apply(v: _*)
-    implicit def fromThrowables(t: Seq[Throwable]) = Validate { _ ⇒ t }
+    implicit def fromSeqValidate(v: Seq[Validate]): Validate = apply(v: _*)
+    implicit def fromThrowables(t: Seq[Throwable]): Validate = Validate { _ ⇒ t }
 
-    implicit def toIterable(v: Validate) =
+    implicit def toIterable(v: Validate): Iterable[Validate] =
       v match {
         case s: SeqValidate  ⇒ s.validate
         case l: LeafValidate ⇒ Iterable(l)

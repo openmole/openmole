@@ -24,12 +24,12 @@ import org.openmole.core.workflow.task._
 
 object AssignTask {
 
-  def apply(assignments: (Val[T], Val[T]) forSome { type T }*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(assignments: (Val[?], Val[?])*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     ClosureTask("AssignTask") { (context, _, _) ⇒
-      assignments.map { case (from, to) ⇒ Variable(to, context(from)) }
+      assignments.map { case (from, to) ⇒ Variable.unsecure(to, context(from)) }
     } set (
-      inputs += (assignments.map(_._1): _*),
-      outputs += (assignments.map(_._2): _*)
+      inputs ++= assignments.map(_._1),
+      outputs ++= assignments.map(_._2)
     )
 
 }

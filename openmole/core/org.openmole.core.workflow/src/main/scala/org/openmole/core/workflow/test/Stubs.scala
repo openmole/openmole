@@ -17,27 +17,27 @@ import org.openmole.tool.random.{ RandomProvider, Seeder }
 
 object Stubs {
 
-  implicit val scope = org.openmole.core.workflow.builder.DefinitionScope.User
+  implicit val scope: org.openmole.core.workflow.builder.DefinitionScope = org.openmole.core.workflow.builder.DefinitionScope.User
 
   val dir = java.io.File.createTempFile("test", "")
   dir.delete()
   dir.mkdirs()
 
-  implicit val workspace = Workspace(dir)
+  implicit val workspace: Workspace = Workspace(dir)
 
-  implicit lazy val cypher = Cypher("")
-  implicit lazy val preference = Preference(workspace.persistentDir)
-  implicit lazy val newFile = TmpDirectory(dir)
-  implicit lazy val seeder = Seeder()
-  implicit val serializer = SerializerService()
-  implicit val threadProvider = ThreadProvider(Some(10))
-  implicit val eventDispatcher = EventDispatcher()
-  implicit val fileService = FileService()
-  implicit val randomProvider = RandomProvider(seeder.newRNG)
-  implicit val outputRedirection = OutputRedirection()
-  implicit val network = NetworkService(None)
-  implicit val fileServiceCache = FileServiceCache()
-  implicit val loggerService = LoggerService()
+  implicit lazy val cypher: Cypher = Cypher("")
+  implicit lazy val preference: Preference = Preference(workspace.persistentDir)
+  implicit lazy val newFile: TmpDirectory = TmpDirectory(dir)
+  implicit lazy val seeder: Seeder = Seeder()
+  implicit val serializer: SerializerService = SerializerService()
+  implicit val threadProvider: ThreadProvider = ThreadProvider(Some(10))
+  implicit val eventDispatcher: EventDispatcher = EventDispatcher()
+  implicit val fileService: FileService = FileService()
+  implicit val randomProvider: RandomProvider = RandomProvider(seeder.newRNG)
+  implicit val outputRedirection: OutputRedirection = OutputRedirection()
+  implicit val network: NetworkService = NetworkService(None)
+  implicit val fileServiceCache: FileServiceCache = FileServiceCache()
+  implicit val loggerService: LoggerService = LoggerService()
 
   implicit val moleServices: MoleServices = MoleServices.create(dir)
 

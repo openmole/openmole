@@ -30,7 +30,7 @@ package external {
 
   trait ExternalPackage {
 
-    lazy val inputFiles = new {
+    class InputFilesKeyword {
       /**
        * Copy a file or directory from the dataflow to the task workspace
        */
@@ -38,7 +38,9 @@ package external {
         implicitly[ExternalBuilder[T]].inputFiles add External.InputFile(p, name, link) andThen (inputs += p)
     }
 
-    lazy val inputFileArrays = new {
+    lazy val inputFiles = new InputFilesKeyword
+
+    class InputFileArraysKeyword {
       /**
        * Copy an array of files or directory from the dataflow to the task workspace. The files
        * in the array are named prefix$nSuffix where $n i the index of the file in the array.
@@ -47,7 +49,9 @@ package external {
         (implicitly[ExternalBuilder[T]].inputFileArrays add External.InputFileArray(p, prefix, suffix, link)) andThen (inputs += p)
     }
 
-    lazy val outputFiles = new {
+    lazy val inputFileArrays = new InputFileArraysKeyword
+
+    class OutputFilesKeyword {
       /**
        * Get a file generate by the task and inject it in the dataflow
        *
@@ -56,15 +60,17 @@ package external {
         (implicitly[ExternalBuilder[T]].outputFiles add External.OutputFile(name, p)) andThen (outputs += p)
     }
 
-    lazy val resources =
-      new {
-        /**
-         * Copy a file from your computer in the workspace of the task
-         */
-        def +=[T: ExternalBuilder](file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean = false, os: OS = OS()): T ⇒ T =
-          implicitly[ExternalBuilder[T]].resources add External.Resource(file, name.getOrElse(file.getName), link = link, os = os)
+    lazy val outputFiles = new OutputFilesKeyword
 
-      }
+    class ResourcesKeyword {
+      /**
+       * Copy a file from your computer in the workspace of the task
+       */
+      def +=[T: ExternalBuilder](file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean = false, os: OS = OS()): T ⇒ T =
+        implicitly[ExternalBuilder[T]].resources add External.Resource(file, name.getOrElse(file.getName), link = link, os = os)
+    }
+
+    lazy val resources = new ResourcesKeyword
   }
 }
 

@@ -106,7 +106,7 @@ class SerializerService { service ⇒
       tis.extract(archiveExtractDir)
       val fileReplacement = FileSerialisation.deserialiseFileReplacements(archiveExtractDir, fileSerialisation(), deleteOnGC = deleteFilesOnGC)
       val contentFile = new File(archiveExtractDir, content)
-      deserializeReplaceFiles[T](contentFile, fileReplacement)
+      deserializeReplaceFiles[T](contentFile, fileReplacement, gz = false)
     }
   }
 
@@ -143,8 +143,8 @@ class SerializerService { service ⇒
 
   def serialize(obj: Any, os: OutputStream) = buildXStream().toXML(obj, os)
 
-  def serialize(obj: Any, file: File, json: Boolean = false): Unit = {
-    val os = file.bufferedOutputStream()
+  def serialize(obj: Any, file: File, json: Boolean = false, gz: Boolean = false): Unit = {
+    val os = file.bufferedOutputStream(gz = gz)
     try buildXStream(json = json).toXML(obj, os)
     finally os.close
   }

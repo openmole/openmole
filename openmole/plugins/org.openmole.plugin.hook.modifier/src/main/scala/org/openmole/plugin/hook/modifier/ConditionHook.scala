@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.hook.modifier
 
-import monocle.macros.Lenses
+import monocle.Focus
 import org.openmole.core.context._
 import org.openmole.core.expansion._
 import org.openmole.core.dsl._
@@ -27,8 +27,8 @@ import org.openmole.core.workflow.mole._
 
 object ConditionHook {
 
-  implicit def isIO = InputOutputBuilder(ConditionHook.config)
-  implicit def isInfo = InfoBuilder(info)
+  implicit def isIO: InputOutputBuilder[ConditionHook] = InputOutputBuilder(Focus[ConditionHook](_.config))
+  implicit def isInfo: InfoBuilder[ConditionHook] = InfoBuilder(Focus[ConditionHook](_.info))
 
   def apply(hook: Hook, condition: Condition)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new ConditionHook(
@@ -37,13 +37,13 @@ object ConditionHook {
       config = InputOutputConfig(),
       info = InfoConfig()
     ) set (
-      inputs += (hook.inputs.toSeq: _*),
-      outputs += (hook.outputs.toSeq: _*)
+      inputs ++= hook.inputs.toSeq,
+      outputs ++= hook.outputs.toSeq
     )
 
 }
 
-@Lenses case class ConditionHook(
+case class ConditionHook(
   hook:      Hook,
   condition: Condition,
   config:    InputOutputConfig,

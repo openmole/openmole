@@ -73,7 +73,7 @@ object Environment {
 
 }
 
-sealed trait Environment <: Name {
+sealed trait Environment extends Name {
   def submitted: Long
   def running: Long
   def done: Long
@@ -88,7 +88,7 @@ sealed trait Environment <: Name {
  *
  * This trait is implemented by environment plugins, and not the more generic [[Environment]]
  */
-trait SubmissionEnvironment <: Environment {
+trait SubmissionEnvironment extends Environment {
   def submit(job: JobGroup): Long
   def jobs: Iterable[ExecutionJob]
   def runningJobs: Seq[ExecutionJob]

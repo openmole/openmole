@@ -29,7 +29,7 @@ class OpenMOLEAppender extends AppenderBase[ILoggingEvent] with JavaLogger {
   val byteOutputStream = new ByteArrayOutputStream
   var encoder = new PatternLayoutEncoder
 
-  override def start {
+  override def start = {
     if (encoder != null) {
       try {
         val app = new OutputStreamAppender
@@ -44,7 +44,7 @@ class OpenMOLEAppender extends AppenderBase[ILoggingEvent] with JavaLogger {
     else addError("No encoder set for the appender named [" + name + "].")
   }
 
-  def append(event: ILoggingEvent) {
+  def append(event: ILoggingEvent) = {
     try {
       encoder.encode(event)
       Log.logger.fine(byteOutputStream.toString)
@@ -56,7 +56,7 @@ class OpenMOLEAppender extends AppenderBase[ILoggingEvent] with JavaLogger {
   }
 
   def getEncoder = encoder
-  def setEncoder(inEncoder: PatternLayoutEncoder) {
+  def setEncoder(inEncoder: PatternLayoutEncoder) = {
     encoder = inEncoder
   }
 }

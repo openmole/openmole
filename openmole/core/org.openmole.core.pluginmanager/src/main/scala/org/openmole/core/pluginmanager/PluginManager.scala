@@ -90,7 +90,7 @@ object PluginManager extends JavaLogger {
     }
   }
 
-  def updateBundles(bundles: Option[Seq[Bundle]] = None) {
+  def updateBundles(bundles: Option[Seq[Bundle]] = None) = {
     val listener = new FrameworkListener {
       val lock = new Semaphore(0)
 

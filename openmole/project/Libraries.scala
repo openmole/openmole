@@ -31,12 +31,14 @@ object Libraries {
 
   /** ------- Bundles -------------- */
 
-  def addScalaLang(scalaVersion: String) =
+  def addScalaLang =
     libraryDependencies ++= Seq(
-      "org.openmole.library" %% "org-scala-lang-scala-library" % scalaVersion,
-      "org.scalameta" %% "scalameta" % "4.3.15"
+      "org.openmole.library" %% "org-scala-lang-scala-library" % scala3VersionValue
+      //"org.scalameta" %% "scalameta" % "4.3.15"
     )
 
+  lazy val scalaMeta = "org.openmole.library" %% "org-scalameta" % scalaMetaVersion
+  lazy val scalaSTM = "org.openmole.library" %% "org-scala-stm" % scalaSTMVersion
   lazy val scalaXML = "org.openmole.library" %% "org-scala-lang-modules-xml" % scalaXMLVersion
   lazy val scalatra = "org.openmole.library" %% "org-scalatra" % scalatraVersion exclude("org.scala-lang.modules", "scala-xml_2.13")
   lazy val logback = "org.openmole.library" %% "ch-qos-logback" % logbackVersion
@@ -52,7 +54,7 @@ object Libraries {
   lazy val scopt = "org.openmole.library" %% "com-github-scopt" % scoptVersion
   lazy val scalabc = "org.openmole.library" %% "fr-iscpif-scalabc" % "0.4"
   lazy val scalatexSite = "org.openmole.library" %% "com-lihaoyi-scalatex-site" % "0.4.6"
-  lazy val math = "org.openmole.library" %% "org-apache-commons-math" % mathVersion cross CrossVersion.for3Use2_13
+  lazy val math = "org.openmole.library" %% "org-apache-commons-math" % mathVersion
   lazy val collections = "org.openmole.library" %% "org-apache-commons-collections" % "4.4"
   lazy val exec = "org.openmole.library" %% "org-apache-commons-exec" % "1.3"
   lazy val log4j = "org.openmole.library" %% "org-apache-log4j" % "1.2.17"
@@ -62,8 +64,8 @@ object Libraries {
   lazy val codec = "org.openmole.library" %% "org-apache-commons-codec" % "1.14"
   lazy val async = "org.openmole.library" %% "scala-async" % "0.10.0"
   lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % "5.6.0"
-  lazy val cats = "org.openmole.library" %% "cats" % catsVersion cross CrossVersion.for3Use2_13
-  lazy val squants = "org.openmole.library" %% "squants" % squantsVersion cross CrossVersion.for3Use2_13
+  lazy val cats = "org.openmole.library" %% "cats" % catsVersion
+  lazy val squants = "org.openmole.library" %% "squants" % squantsVersion
   lazy val clapper = "org.openmole.library" %% "org-clapper" % "1.5.1"
   lazy val asm = "org.openmole.library" %% "org-objectweb-asm" % asmVersion
   lazy val configuration = "org.openmole.library" %% "org-apache-commons-configuration2" % "2.6"
@@ -81,12 +83,13 @@ object Libraries {
   lazy val scalaTags = "org.openmole.library" %% "com-scalatags" % scalaTagsVersion
   lazy val rx = "org.openmole.library" %% "rx" % rxVersion
   lazy val netlogo5 = "org.openmole.library" % "ccl-northwestern-edu-netlogo5" % netLogo5Version
-  lazy val netlogo6 = "org.openmole.library" % "ccl-northwestern-edu-netlogo6" % netLogo6Version
+  lazy val netlogo6 = "org.openmole.library" % "ccl-northwestern-edu-netlogo6" % netLogo6Version 
   lazy val sourceCode = "org.openmole.library" %% "sourcecode" % sourcecodeVersion
   lazy val txtmark = "org.openmole.library" %% "com-github-rjeschke-txtmark" % "0.13"
-  lazy val spatialsampling = "org.openmole.library" %% "org-openmole-spatialsampling" % spatialsamplingVersion
-  lazy val xzJava = "org.openmole.library" %% "xzjava" % "1.8" cross CrossVersion.for3Use2_13
+  lazy val spatialsampling = "org.openmole.library" %% "org-openmole-spatialsampling" % spatialsamplingVersion cross CrossVersion.for3Use2_13
+  lazy val xzJava = "org.openmole.library" %% "xzjava" % "1.8"
   lazy val guava = "org.openmole.library" %% "com-google-guava" % guavaVersion
+  lazy val jline = "org.openmole.library" %% "org-jline-jline" % jlineVersion
 
   def httpClientVersion = "4.5.3"
   lazy val httpClient =
@@ -119,12 +122,12 @@ object Libraries {
   lazy val gridscaleLocal = "org.openmole.library" %% "gridscale-local" % gridscaleVersion
   lazy val gridscaleOAR = "org.openmole.library" %% "gridscale-oar" % gridscaleVersion
 
-  lazy val scalaz = "org.scalaz" %% "scalaz-core" % scalazVersion
+  lazy val scalaz = "org.scalaz" %% "scalaz-core" % scalazVersion cross CrossVersion.for3Use2_13
   lazy val spray = "io.spray" %% "spray-json" % "1.3.5"
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
   lazy val equinoxOSGi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.15.300"
   lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.3.1"
 
-  lazy val shapeless = "org.openmole.library" %% "com-chuusai-shapeless" % shapelessVersion
+  lazy val shapeless = "org.openmole.library" %% "org-typelevel-shapeless" % shapelessVersion
 
 }

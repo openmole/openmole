@@ -18,6 +18,6 @@ package org.openmole.plugin.hook
  */
 
 package object omr {
-  import io.circe.generic.extras.Configuration
-  implicit def genDevConfig: Configuration = Configuration.default.withDiscriminator("implementation").withKebabCaseMemberNames
+//  import io.circe.generic.extras.Configuration
+//  implicit def genDevConfig: Configuration = Configuration.default.withDiscriminator("implementation").withKebabCaseMemberNames
 }

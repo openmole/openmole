@@ -19,7 +19,7 @@ package org.openmole.plugin.task.scala
 
 import java.io.File
 
-import monocle.macros.Lenses
+import monocle.Focus
 import org.openmole.core.context.{ Context, Variable }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion.{ FromContext, ScalaCompilation }
@@ -37,13 +37,13 @@ import scala.util._
 
 object ScalaTask {
 
-  implicit def isTask: InputOutputBuilder[ScalaTask] = InputOutputBuilder(ScalaTask.config)
-  implicit def isExternal: ExternalBuilder[ScalaTask] = ExternalBuilder(ScalaTask.external)
-  implicit def isInfo = InfoBuilder(info)
+  implicit def isTask: InputOutputBuilder[ScalaTask] = InputOutputBuilder(Focus[ScalaTask](_.config))
+  implicit def isExternal: ExternalBuilder[ScalaTask] = ExternalBuilder(Focus[ScalaTask](_.external))
+  implicit def isInfo: InfoBuilder[ScalaTask] = InfoBuilder(Focus[ScalaTask](_.info))
 
   implicit def isJVM: JVMLanguageBuilder[ScalaTask] = new JVMLanguageBuilder[ScalaTask] {
-    override def libraries = ScalaTask.libraries
-    override def plugins = ScalaTask.plugins
+    override def libraries = Focus[ScalaTask](_.libraries)
+    override def plugins = Focus[ScalaTask](_.plugins)
   }
 
   def apply(source: String)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
@@ -65,7 +65,7 @@ object ScalaTask {
 
 }
 
-@Lenses case class ScalaTask(
+case class ScalaTask(
   sourceCode: String,
   plugins:    Vector[File],
   libraries:  Vector[File],
@@ -77,7 +77,7 @@ object ScalaTask {
   lazy val compilation = CacheKey[ScalaCompilation.ContextClosure[java.util.Map[String, Any]]]()
 
   def compile(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService) = {
-    implicit def m = manifest[java.util.Map[String, Any]]
+    //implicit def m: Manifest[java.util.Map[String, Any]] = manifest[java.util.Map[String, Any]]
     ScalaCompilation.static(
       sourceCode,
       inputs ++ Seq(JVMLanguageTask.workDirectory),

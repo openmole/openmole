@@ -4,7 +4,7 @@ import java.io.PrintStream
 
 object Progress {
 
-  implicit def appyl(out: PrintStream = System.out) = new Progress {
+  implicit def appyl(out: PrintStream = System.out): Progress = new Progress {
     override def logger = out
   }
 

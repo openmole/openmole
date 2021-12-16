@@ -52,7 +52,7 @@ object Profile {
   }
 
   object ProfileElement {
-    implicit def toProfileElement[T: ToProfileElement](t: T) = implicitly[ToProfileElement[T]].apply(t)
+    implicit def toProfileElement[T: ToProfileElement](t: T): ProfileElement = implicitly[ToProfileElement[T]].apply(t)
   }
 
   abstract trait ProfileElement
@@ -95,7 +95,7 @@ object Profile {
 
     import CDGenome.DeterministicIndividual
 
-    implicit def integration = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] {
+    implicit def integration: MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = DeterministicIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -207,7 +207,7 @@ object Profile {
       FromContext.value(mgo.evolution.niche.sequenceNiches[CDGenome.NoisyIndividual.Individual[Phenotype], Int](niches))
     }
 
-    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] {
+    implicit def integration: MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -385,7 +385,7 @@ object ProfileEvolution {
 
 import monocle.macros._
 
-@Lenses case class ProfileEvolution(
+case class ProfileEvolution(
   profile:      Profile.ProfileElements,
   genome:       Genome,
   objective:    Objectives,

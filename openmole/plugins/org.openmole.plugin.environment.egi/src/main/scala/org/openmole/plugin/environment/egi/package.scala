@@ -28,7 +28,7 @@ import scala.util.{ Failure, Success, Try }
 
 package object egi extends JavaLogger {
 
-  implicit def stringToBDII(s: String) = {
+  implicit def stringToBDII(s: String): _root_.gridscale.egi.BDIIServer = {
     val uri = new URI(s)
     _root_.gridscale.egi.BDIIServer(uri.getHost, uri.getPort)
   }

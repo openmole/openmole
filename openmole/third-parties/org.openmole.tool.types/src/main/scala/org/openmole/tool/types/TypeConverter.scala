@@ -5,8 +5,8 @@ object TypeConverter {
     def apply(x: F) = f(x)
   }
 
-  implicit def fromStringIsTypeConverter[T](implicit f: FromString[T]) = TypeConverter[String, T](f.apply)
-  implicit def toDoubleIsTypeConverter[T](implicit f: ToDouble[T]) = TypeConverter[T, Double](f.apply)
+  implicit def fromStringIsTypeConverter[T](implicit f: FromString[T]): TypeConverter[String, T] = TypeConverter[String, T](f.apply)
+  implicit def toDoubleIsTypeConverter[T](implicit f: ToDouble[T]): TypeConverter[T, Double] = TypeConverter[T, Double](f.apply)
 
 }
 trait TypeConverter[-F, +T] {

@@ -30,6 +30,7 @@ import org.openmole.core.services._
 import org.openmole.core.workflow.composition.DSL
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.hash._
+import monocle.Focus
 
 object Project {
 
@@ -126,7 +127,7 @@ object Project {
     def run(): Unit
   }
 
-  def compile(workDirectory: File, script: File, args: Seq[String], newREPL: Option[ConsoleVariables ⇒ ScalaREPL] = None, returnUnit: Boolean = false)(implicit services: Services): CompileResult = {
+  def compile(workDirectory: File, script: File, args: Seq[String], newREPL: Option[ConsoleVariables ⇒ REPL] = None, returnUnit: Boolean = false)(implicit services: Services): CompileResult = {
     import services._
 
     if (!script.exists) ScriptFileDoesNotExists()
@@ -163,32 +164,31 @@ object Project {
         val loop = newREPL.getOrElse { (v: project.ConsoleVariables) ⇒ Project.newREPL(v) }.apply(consoleVariables)
         try {
           Option(loop.compile(content)) match {
-            case Some(compiled) ⇒ Compiled(compiled, CompilationContext(loop.classDirectory, loop.classLoader))
+            case Some(compiled) ⇒ Compiled(compiled, CompilationContext(loop))
             case None           ⇒ throw new InternalProcessingError("The compiler returned null instead of a compiled script, it may append if your script contains an unclosed comment block ('/*' without '*/').")
           }
         }
         catch {
-          case ce: ScalaREPL.CompilationError ⇒
+          case ce: Interpreter.CompilationError ⇒
             def positionLens =
-              ScalaREPL.CompilationError.errorMessages composeTraversal
+              Focus[Interpreter.CompilationError](_.errorMessages) composeTraversal
                 each composeLens
-                ScalaREPL.ErrorMessage.position composePrism
+                Focus[Interpreter.ErrorMessage](_.position) composePrism
                 some
 
             def headerOffset = scriptHeader.size + 1
 
-            import ScalaREPL.ErrorPosition
+            import Interpreter.ErrorPosition
 
             def adjusted =
-              (positionLens composeLens ErrorPosition.line modify { _ - scriptHeader.split("\n").size }) andThen
-                (positionLens composeLens ErrorPosition.start modify { _ - headerOffset }) andThen
-                (positionLens composeLens ErrorPosition.end modify { _ - headerOffset }) andThen
-                (positionLens composeLens ErrorPosition.point modify { _ - headerOffset })
+              (positionLens composeLens Focus[ErrorPosition](_.line) modify { _ - scriptHeader.split("\n").size }) andThen
+                (positionLens composeLens Focus[ErrorPosition](_ .start) modify { _ - headerOffset }) andThen
+                (positionLens composeLens Focus[ErrorPosition](_.end) modify { _ - headerOffset }) andThen
+                (positionLens composeLens Focus[ErrorPosition](_.point) modify { _ - headerOffset })
 
             ErrorInCode(adjusted(ce))
           case e: Throwable ⇒ ErrorInCompiler(e)
         }
-        finally loop.close()
       }
 
       compile(compileContent, args)
@@ -202,17 +202,17 @@ case class ScriptFileDoesNotExists() extends CompileResult
 sealed trait CompilationError extends CompileResult {
   def error: Throwable
 }
-case class ErrorInCode(error: ScalaREPL.CompilationError) extends CompilationError
+case class ErrorInCode(error: Interpreter.CompilationError) extends CompilationError
 case class ErrorInCompiler(error: Throwable) extends CompilationError
 
-case class Compiled(result: ScalaREPL.Compiled, compilationContext: CompilationContext) extends CompileResult {
+case class Compiled(result: Interpreter.RawCompiled, compilationContext: CompilationContext) extends CompileResult {
 
-  def eval =
-    result.apply() match {
+  def eval = 
+    compilationContext.repl.evalCompiled(result) match {
       case p: Project.OMSScript ⇒
         p.run() match {
           case p: DSL ⇒ p
-          case e      ⇒ throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
+          case e ⇒ throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
         }
       case e ⇒ throw new InternalProcessingError(s"Script compilation should produce an OMScript (found ${if (e == null) null else e.getClass}).")
     }

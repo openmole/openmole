@@ -27,47 +27,47 @@ object Genome {
     import org.openmole.core.workflow.domain._
     import org.openmole.core.workflow.sampling._
 
-    implicit def factorIsScalarDouble[D](f: Factor[D, Double])(implicit bounded: BoundedDomain[D, Double]) = {
+    implicit def factorIsScalarDouble[D](f: Factor[D, Double])(implicit bounded: BoundedDomain[D, Double]): ScalarDouble = {
       val (min, max) = bounded(f.domain).domain
       ScalarDouble(f.value, min, max)
     }
 
-    implicit def factorOfDoubleRangeIsScalaDouble(f: Factor[DoubleRange, Double]) =
+    implicit def factorOfDoubleRangeIsScalaDouble(f: Factor[DoubleRange, Double]): ScalarDouble =
       ScalarDouble(f.value, f.domain.low, f.domain.high)
 
-    implicit def factorIsScalarInt[D](f: Factor[D, Int])(implicit bounded: BoundedDomain[D, Int]) = {
+    implicit def factorIsScalarInt[D](f: Factor[D, Int])(implicit bounded: BoundedDomain[D, Int]): ScalarInt = {
       val (min, max) = bounded(f.domain).domain
       ScalarInt(f.value, min, max)
     }
 
-    implicit def factorOfScalaRangeIsScalarInt(f: Factor[scala.Range, Int]) =
+    implicit def factorOfScalaRangeIsScalarInt(f: Factor[scala.Range, Int]): ScalarInt =
       ScalarInt(f.value, f.domain.min, f.domain.max)
 
-    implicit def factorIntIsContinuousInt[D](f: Factor[D, Int])(implicit bounded: BoundedDomain[D, Double]) = {
+    implicit def factorIntIsContinuousInt[D](f: Factor[D, Int])(implicit bounded: BoundedDomain[D, Double]): ContinuousInt = {
       val (min, max) = bounded(f.domain).domain
       ContinuousInt(f.value, min.toInt, max.toInt)
     }
 
-    implicit def factorOfIntRangeIsContinuousInt(f: Factor[DoubleRange, Int]) =
+    implicit def factorOfIntRangeIsContinuousInt(f: Factor[DoubleRange, Int]): ContinuousInt =
       ContinuousInt(f.value, f.domain.low.toInt, f.domain.high.toInt)
 
-    implicit def factorIsSequenceOfDouble[D](f: Factor[D, Array[Double]])(implicit bounded: BoundedDomain[D, Array[Double]], sized: DomainSize[D]) = {
+    implicit def factorIsSequenceOfDouble[D](f: Factor[D, Array[Double]])(implicit bounded: BoundedDomain[D, Array[Double]], sized: DomainSize[D]): SequenceOfDouble = {
       val (min, max) = bounded(f.domain).domain
       SequenceOfDouble(f.value, min, max, sized(f.domain))
     }
 
-    implicit def factorIsSequenceOfInt[D](f: Factor[D, Array[Int]])(implicit bounded: BoundedDomain[D, Array[Int]], sized: DomainSize[D]) = {
+    implicit def factorIsSequenceOfInt[D](f: Factor[D, Array[Int]])(implicit bounded: BoundedDomain[D, Array[Int]], sized: DomainSize[D]): SequenceOfInt = {
       val (min, max) = bounded(f.domain).domain
       SequenceOfInt(f.value, min, max, sized(f.domain))
     }
 
-    implicit def factorIsIsEnumeration[D, T](f: Factor[D, T])(implicit fix: FixDomain[D, T]) =
+    implicit def factorIsIsEnumeration[D, T](f: Factor[D, T])(implicit fix: FixDomain[D, T]): Enumeration[T] =
       Enumeration(f.value, fix(f.domain).domain.toVector)
 
-    implicit def factorIsSequenceOfEnumeration[D, T](f: Factor[D, Array[T]])(implicit fix: FixDomain[D, Array[T]]) =
+    implicit def factorIsSequenceOfEnumeration[D, T](f: Factor[D, Array[T]])(implicit fix: FixDomain[D, Array[T]]): SequenceOfEnumeration[T] =
       SequenceOfEnumeration(f.value, fix(f.domain).domain.toVector)
 
-    implicit def factorOfBooleanIsSequenceOfEnumeration(f: Factor[Int, Array[Boolean]]) =
+    implicit def factorOfBooleanIsSequenceOfEnumeration(f: Factor[Int, Array[Boolean]]): SequenceOfEnumeration[Boolean] =
       SequenceOfEnumeration(f.value, Vector.fill(f.domain)(Array(true, false)))
 
     def toVal(b: GenomeBound) = b match {
@@ -223,9 +223,8 @@ object Genome {
           val v = Variable(h.v, value)
           toVariables0(t, continuousValues, discreteValues.tail, v :: acc)
         case (h: GenomeBound.SequenceOfEnumeration[_]) :: t ⇒
-          implicit def tag = h.v.fromArray.`type`.manifest
           val value = (h.values zip discreteValues).take(h.values.size) map { case (vs, i) ⇒ vs(i) }
-          val v = Variable(h.v, value.toArray)
+          val v = Variable(h.v, value.toArray(h.v.fromArray.`type`.manifest))
           toVariables0(t, continuousValues, discreteValues.drop(h.values.size), v :: acc)
       }
     }
@@ -258,27 +257,27 @@ object Genome {
 
     def loadFromFile(f: File, genome: Genome) = {
       import org.openmole.core.csv.csvToVariables
-      import org.openmole.core.keyword.:=
+      import org.openmole.core.dsl._
 
-      def toAssignment[T](v: Variable[T]): :=[Val[T], FromContext[T]] = :=(v.prototype, v.value)
+      def toAssignment[T](v: Variable[T]) = ValueAssignment.untyped(v.prototype := v.value)
 
       val columns = genome.map(GenomeBound.toVal).map(v ⇒ v.name -> v)
       csvToVariables(f, columns).map(_.map(v ⇒ toAssignment(v)).toVector).toVector
     }
 
-    implicit def fromFile =
+    implicit def fromFile: ToSuggestion[File] =
       new ToSuggestion[File] {
         override def apply(t: File): Suggestion = genome ⇒ loadFromFile(t, genome)
       }
 
-    implicit def fromString =
+    implicit def fromString: ToSuggestion[String] =
       new ToSuggestion[String] {
         override def apply(t: String): Suggestion = genome ⇒ loadFromFile(new java.io.File(t), genome)
       }
 
-    implicit def fromAssignment[T] =
+    implicit def fromAssignment[T]: ToSuggestion[Seq[Seq[ValueAssignment[T]]]] =
       new ToSuggestion[Seq[Seq[ValueAssignment[T]]]] {
-        override def apply(t: Seq[Seq[ValueAssignment[T]]]): Suggestion = genome ⇒ t
+        override def apply(t: Seq[Seq[ValueAssignment[T]]]): Suggestion = genome ⇒ t.map(_.map(ValueAssignment.untyped))
       }
   }
 
@@ -292,6 +291,6 @@ object Genome {
     def empty = (genome: Genome) ⇒ Seq()
   }
 
-  type Suggestion = Genome ⇒ Seq[Seq[ValueAssignment[_]]]
+  type Suggestion = Genome ⇒ Seq[Seq[ValueAssignment.Untyped]]
 
 }
