@@ -163,7 +163,7 @@ class ReplicaCatalog(database: Database, preference: Preference) {
                           lastCheckExists = System.currentTimeMillis
                         )
 
-                        (replicas += newReplica).map(_ ⇒ Inserted(newReplica))
+                        ((replicas returning replicas.map(_.id)) += newReplica).map(id ⇒ Inserted(newReplica.copy(id = id)))
                     }
 
                     insert.transactionally
