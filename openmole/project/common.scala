@@ -31,7 +31,6 @@ object common {
   def logbackVersion = "1.2.3"
   def h2Version = "1.4.200"
   def shapelessVersion = "3.0.4"
-  def slickVersion = "3.4.0-SNAPSHOT"
   def jasyptVersion = "1.9.3"
   def monocleVersion = "3.0.0"
   def scalazVersion = "7.3.5"

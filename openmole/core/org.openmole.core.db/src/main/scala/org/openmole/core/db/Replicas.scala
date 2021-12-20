@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.db
+/*package org.openmole.core.db
 
 import slick.jdbc.H2Profile.api._
 
@@ -32,5 +32,5 @@ class Replicas(tag: Tag) extends Table[Replica](tag, "REPLICAS") {
   def idx3 = index("idx3", (hash, storage))
 
   def * = (id, source, storage, path, hash, lastCheckExists).mapTo[Replica] // <> (Tuple.fromProductTyped[Replica], summon[scala.deriving.Mirror.Of[Replica]].fromProduct)
-}
+}*/
 

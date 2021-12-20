@@ -91,6 +91,7 @@ package object services {
     def dispose(services: Services) = {
       util.Try(Workspace.clean(services.workspace))
       util.Try(services.threadProvider.stop())
+      util.Try(services.replicaCatalog.close())
     }
 
     /**
