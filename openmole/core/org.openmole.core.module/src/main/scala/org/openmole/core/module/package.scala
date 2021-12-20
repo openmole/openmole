@@ -68,19 +68,21 @@ package object module {
   def components(o: Object) = PluginManager.pluginsForClass(o.getClass).toSeq
 
   def addPluginsFiles(files: Seq[File], move: Boolean, directory: File)(implicit workspace: Workspace, newFile: TmpDirectory): Seq[(File, Throwable)] = synchronized {
-    val destinations = files.map { file ⇒ file → (directory / file.getName) }
+    PluginManager.tryLoad(files).toSeq
 
-    destinations.filter(_._2.exists).toList match {
-      case Nil ⇒
-        val plugins =
-          destinations.map {
-            case (file, dest) ⇒
-              if (!move) file copy dest else file move dest
-              dest
-          }
-        PluginManager.tryLoad(plugins).toSeq
-      case l ⇒
-        l.map(l ⇒ l._1 → new FileAlreadyExistsException(s"Plugin with file name ${l._1.getName} is already present in the plugin directory"))
-    }
+    //    val destinations = files.map { file ⇒ file → (directory / file.getName) }
+    //
+    //    destinations.filter(_._2.exists).toList match {
+    //      case Nil ⇒
+    //        val plugins =
+    //          destinations.map {
+    //            case (file, dest) ⇒
+    //              if (!move) file copy dest else file move dest
+    //              dest
+    //          }
+    //        PluginManager.tryLoad(plugins).toSeq
+    //      case l ⇒
+    //        l.map(l ⇒ l._1 → new FileAlreadyExistsException(s"Plugin with file name ${l._1.getName} is already present in the plugin directory"))
+    //    }
   }
 }

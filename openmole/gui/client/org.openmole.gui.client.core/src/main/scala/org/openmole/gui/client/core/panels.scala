@@ -24,7 +24,6 @@ import com.raquo.laminar.api.L._
  */
 
 object panels {
-  val pluginPanelOpen = Var(false)
 
   val pluginServices =
     PluginServices(
@@ -73,8 +72,22 @@ object panels {
       treeNodeManager,
       bannerAlert = bannerAlert)
 
+  val expandablePanel: Var[Option[HtmlElement]] = Var(None)
+
+  def closeExpandable = expandablePanel.set(None)
+
+  def expandTo(el: HtmlElement) = expandablePanel.update {
+    _ match {
+      case Some(_) ⇒ None
+      case None ⇒
+        println("Set to " + el)
+        Some(el)
+    }
+  }
+
+  val pluginPanel = new PluginPanel
+
   lazy val marketPanel = new MarketPanel(treeNodeManager)
-  lazy val pluginPanel = new PluginPanel(bannerAlert = bannerAlert)
 
   lazy val stackPanel = new TextPanel("Error stack")
   lazy val settingsView = new SettingsView(fileDisplayer)

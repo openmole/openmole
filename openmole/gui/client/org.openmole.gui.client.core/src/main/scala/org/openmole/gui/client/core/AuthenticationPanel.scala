@@ -100,13 +100,10 @@ class AuthenticationPanel(authenticationFactories: Seq[AuthenticationPluginFacto
       }
 
       lazy val render = {
-        tr(omsheet.docEntry, lineHeight := "35",
-          td(
-            colSM(4),
-            a(testedAuth.auth.data.name, omsheet.docTitleEntry, float.left, color.white, cursor.pointer, onClick --> { _ ⇒
-              authSetting.set(Some(testedAuth.auth))
-            })
-          ),
+        div(
+          a(testedAuth.auth.data.name, float.left, color.white, cursor.pointer, onClick --> { _ ⇒
+            authSetting.set(Some(testedAuth.auth))
+          }),
           td(colBS(4), paddingTop := "5", span(testedAuth.auth.factory.name, badge_primary)),
           td(
             colBS(2),

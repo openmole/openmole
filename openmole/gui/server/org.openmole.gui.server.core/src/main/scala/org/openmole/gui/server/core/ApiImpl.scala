@@ -2,17 +2,16 @@ package org.openmole.gui.server.core
 
 import java.io.File
 import java.text.SimpleDateFormat
-
 import org.openmole.core.buildinfo
 import org.openmole.core.event._
 import org.openmole.core.pluginmanager._
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
+
 import java.io._
 import java.net.URL
 import java.nio.file._
 import java.util.zip.GZIPInputStream
-
 import au.com.bytecode.opencsv.CSVReader
 import org.openmole.core.compiler.ScalaREPL
 import org.openmole.core.expansion.ScalaCompilation
@@ -27,12 +26,12 @@ import org.openmole.tool.tar._
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.module
 import org.openmole.core.market
-import org.openmole.core.preference.{ Preference, PreferenceLocation }
+import org.openmole.core.preference.{ ConfigurationString, Preference, PreferenceLocation }
 import org.openmole.core.project._
 import org.openmole.core.services.Services
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.dsl._
-import org.openmole.core.workspace.TmpDirectory
+import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.server.{ GUIPluginRegistry, utils }
 import org.openmole.gui.ext.server.utils._
@@ -129,7 +128,10 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     new File(safePath.toFile, fileName).createNewFile
   }
 
-  def deleteFile(safePath: SafePath, context: ServerFileSystemContext): Unit = utils.deleteFile(safePath, context)
+  def deleteFile(safePath: SafePath, context: ServerFileSystemContext): Unit = {
+    unplug(safePath)
+    utils.deleteFile(safePath, context)
+  }
 
   def deleteFiles(safePaths: Seq[SafePath], context: ServerFileSystemContext): Unit = utils.deleteFiles(safePaths, context)
 
@@ -181,7 +183,14 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
 
   def exists(safePath: SafePath): Boolean = utils.exists(safePath)
 
-  def existsExcept(exception: SafePath, exceptItSelf: Boolean): Boolean = utils.existsExcept(exception, exceptItSelf)
+  def existsExcept(exception: SafePath, exceptItSelf: Boolean): Boolean = {
+    val li = listFiles(exception.parent, data.FileFilter.defaultFilter)
+    val count = li.list.count(l ⇒ treeNodeToSafePath(l, exception.parent).path == exception.path)
+
+    val bound = if (exceptItSelf) 1 else 0
+    if (count > bound) true else false
+    // utils.existsExcept(exception, exceptItSelf)
+  }
 
   def copyFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = utils.copyFromTmp(tmpSafePath, filesToBeMovedTo)
 
@@ -233,7 +242,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   }
 
   def listFiles(sp: SafePath, fileFilter: data.FileFilter): ListFilesData = atomic { implicit ctx ⇒
-    utils.listFiles(sp, fileFilter)(org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace)
+    utils.listFiles(sp, fileFilter, listPlugins().toSeq)(org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace)
   }
 
   def isEmpty(sp: SafePath): Boolean = {
@@ -275,7 +284,9 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     file.withLock { _ ⇒
       def save() = {
         file.content = fileContent
+
         def newHash = services.fileService.hashNoCache(file).toString
+
         (true, newHash)
       }
 
@@ -493,25 +504,7 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
   }
 
   //PLUGINS
-  def addUploadedPlugins(directoryName: String, nodes: Seq[String]): Seq[ErrorData] = {
-    val pluginDirectory = utils.pluginUpdoadDirectory(directoryName)
-    try {
-      val files = nodes.map(pluginDirectory / _)
-      val errors = org.openmole.core.module.addPluginsFiles(files, true, org.openmole.core.module.pluginDirectory)
-      errors.map(e ⇒ ErrorData(e._2))
-    }
-    finally pluginDirectory.recursiveDelete
-  }
-
-  def copyToPluginUploadDir(directoryName: String, safePaths: Seq[SafePath]): Unit =
-    safePaths.map {
-      sp ⇒
-        val from = safePathToFile(sp)(ServerFileSystemContext.project, workspace)
-        val pluginDirectory = utils.pluginUpdoadDirectory(directoryName)
-        copyFile(from, pluginDirectory, create = true)
-    }
-
-  def autoAddPlugins(path: SafePath) = {
+  private def autoAddPlugins(path: SafePath) = {
 
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
@@ -525,17 +518,63 @@ class ApiImpl(s: Services, applicationControl: ApplicationControl) extends Api {
     module.addPluginsFiles(recurse(file), false, module.moduleDirectory)
   }
 
-  def isPlugin(path: SafePath): Boolean = utils.isPlugin(path)
+  private def pluggedList = {
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
-  def allPluggableIn(path: SafePath): Seq[SafePath] = utils.allPluggableIn(path)
+    if (!preference.isSet(GUIServer.plugins)) preference.setPreference(GUIServer.plugins, "")
 
-  def listPlugins(): Iterable[Plugin] =
-    module.pluginDirectory.listFilesSafe.map(p ⇒ Plugin(p.getName, new SimpleDateFormat("dd/MM/yyyy HH:mm").format(p.lastModified)))
+    val currentPlugins = Services.preference(workspace)(GUIServer.plugins).split(";").filterNot(_.isEmpty)
+    val currentPluginsSafePath = currentPlugins.map { s ⇒ SafePath(s.split("/")) }
 
-  def removePlugin(plugin: Plugin): Unit = utils.removePlugin(plugin)
+    currentPluginsSafePath.map { csp ⇒
+      Plugin(csp, new SimpleDateFormat("dd/MM/yyyy HH:mm") format (safePathToFile(csp).lastModified))
+    }
+  }
+
+  private def isPlugged(safePath: SafePath) = {
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    utils.isPlugged(safePathToFile(safePath), pluggedList)(workspace)
+  }
+
+  private def updatePluggedList(set: Array[Plugin] ⇒ Array[Plugin]): Unit = {
+    Services.preference(workspace).setPreference(
+      GUIServer.plugins,
+      set(pluggedList).map {
+        _.projectSafePath.path.mkString("/")
+      }.reduceOption((x, y) ⇒ x + ";" + y).getOrElse("")
+    )
+  }
+
+  private def addPlugin(safePath: SafePath): Seq[ErrorData] = {
+
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    val errors = utils.addPlugin(safePath)
+    if (errors.isEmpty) {
+      updatePluggedList { pList ⇒
+        pList :+ Plugin(safePath, "")
+      }
+    }
+    errors
+  }
+
+  def appendToPluggedIfPlugin(safePath: SafePath): Unit = {
+    val currentPluginsSafePath = pluggedList.map {
+      _.projectSafePath
+    }
+    if (utils.isPlugin(safePath) && !currentPluginsSafePath.contains(safePath))
+      addPlugin(safePath)
+  }
+
+  def listPlugins(): Iterable[Plugin] = pluggedList
+
+  def unplug(safePath: SafePath) = {
+    updatePluggedList { pList ⇒
+      pList.filterNot(_.projectSafePath == safePath)
+    }
+    utils.removePlugin(safePath)(workspace)
+  }
 
   //GUI OM PLUGINS
-
   def getGUIPlugins(): AllPluginExtensionData = {
     AllPluginExtensionData(GUIPluginRegistry.authentications, GUIPluginRegistry.wizards)
   }

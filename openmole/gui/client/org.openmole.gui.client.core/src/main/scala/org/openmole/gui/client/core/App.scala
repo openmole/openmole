@@ -12,7 +12,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import autowire._
 import scaladget.bootstrapnative.Selector.Options
-import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
 import org.openmole.gui.client.core.files.TreeNodePanel
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
@@ -171,7 +170,9 @@ object App {
         menuActions.selector,
         div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ openExecutionPanel }).tooltip("Executions"),
         div(glyph_lock, navBarItem, onClick --> { _ ⇒ authenticationPanel.authenticationDialog.show }).tooltip("Authentications"),
-        div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒ pluginPanel.pluginDialog.show }).tooltip("Plugins")
+        div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒
+          panels.expandTo(panels.pluginPanel.render)
+        }).tooltip("Plugins")
       //            settingsItem
       )
 
@@ -240,6 +241,13 @@ object App {
             //                    div(fontSize := "0.8em", s"built the ${sets.buildTime}")
             //                  )
             ),
+            panels.expandablePanel.signal.map {
+              _ != None
+            }.expand(
+              div(
+                div(cls := "splitter"),
+                cls := "expandable-panel", height := "800px",
+                div(child <-- panels.expandablePanel.signal.map { p ⇒ p.getOrElse(div()) }))),
             panels.alertPanel.alertDiv
           )
         )

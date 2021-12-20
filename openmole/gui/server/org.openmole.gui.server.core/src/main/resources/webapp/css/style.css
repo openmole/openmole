@@ -6,6 +6,13 @@
     font-style: normal;
 }
 
+@font-face {
+    font-family: 'agane';
+    src: url('../fonts/agane.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+
 body{
     -moz-user-select: none;
     -webkit-user-select: none;
@@ -249,7 +256,7 @@ li.selectElement{
 
 .glyphmenu:hover {
     opacity: 1;
-    transform: scale(1.4);
+    transform: scale(1.2);
     color: #3086b5;
 }
 
@@ -356,7 +363,7 @@ li.selectElement{
 .fileUpload {
     overflow: hidden;
     color: white;
-    font-size: 25px;
+    font-size: 20px;
     background: #795c85;
     border-radius: 50px;
     padding: 10px;
@@ -645,9 +652,10 @@ padding-bottom: 90px;
     padding : "5";
 }
 
-.flex-column {
+.flex-column,
+ .expandable-table{
     display: flex;
-    direction: column;
+    flex-direction: column;
 }
 
 .flex-row,
@@ -656,7 +664,9 @@ padding-bottom: 90px;
 .sorting-files-group,
 .file-filter,
 .tree-path,
-.file-refresh {
+.file-refresh,
+.docEntry,
+.expandable-title{
     display: flex;
     flex-direction: row;
 }
@@ -667,8 +677,8 @@ padding-bottom: 90px;
 .file-item-text,
 .file-confirmation,
 .file-actions,
-.close-button
- {
+.close-button,
+.plugin-file {
     display: flex;
     align-items : center;
     justify-content: center;
@@ -819,6 +829,8 @@ padding-bottom: 90px;
   color: white;
   margin-left: 10px;
   cursor: pointer;
+  width:25px;
+  height:25px;
 }
 
 
@@ -836,3 +848,61 @@ padding-bottom: 90px;
 .cursor-pointer {
     cursor: pointer;
 }
+
+.expandable-panel  {
+    width : 100%;
+    background: white;
+    }
+
+.splitter {
+    background: #795c85;
+    height: 7px;
+}
+
+.expandable-title {
+   font-size: 20px;
+   color: white;
+   padding: 10px;
+   background: #3f3d56;
+   font-family:agane;
+}
+
+.docEntry {
+    cursor: pointer;
+    color: white;
+    padding-left : 15;
+    min-height : 46;
+    align-items: center;
+    padding-bottom: 5px;
+  }
+
+ .expandable-table{
+ }
+
+ .table-time {
+    font-style : "italic";
+    color : white;
+    justify-content: flex-end;
+ }
+
+ .btn-outline-secondary{
+    color:white;
+     border-color: white;
+
+ }
+
+.plugin-file {
+    border-radius: 20px;
+    height: 20px;
+    font-weight: bold;
+ }
+
+.plugin-file.plugged {
+     background: #fc0;
+     color: #444;
+  }
+
+.plugin-file.unplugged {
+       background: lightgray;
+       color: #444;
+ }

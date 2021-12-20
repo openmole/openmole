@@ -296,11 +296,13 @@ package object data {
 
   case class DirData(isEmpty: Boolean)
 
+  case class PluginState(isPlugin: Boolean, isPlugged: Boolean)
   case class TreeNodeData(
                            name: String,
                            dirData: Option[DirData],
                            size: Long,
-                           time: Long
+                           time: Long,
+                           pluginState: PluginState
                          )
 
   case class ScriptData(scriptPath: SafePath)
@@ -476,7 +478,9 @@ package object data {
 
   case class PasswordState(chosen: Boolean, hasBeenSet: Boolean)
 
-  case class Plugin(name: String, time: String = "")
+  // projectSafePath is the plugin path in the project tree.
+  // The plugin is copied in the plugin directory with the same name.
+  case class Plugin(projectSafePath: SafePath, time: String = "")
 
   sealed trait Language {
     def name: String

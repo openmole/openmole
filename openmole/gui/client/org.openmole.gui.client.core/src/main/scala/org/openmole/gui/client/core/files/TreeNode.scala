@@ -61,13 +61,17 @@ object TreeNode {
 
   implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode = tnd.dirData match {
     case Some(dd: DirData) ⇒ DirNode(tnd.name, tnd.size, tnd.time, dd.isEmpty)
-    case _                 ⇒ FileNode(tnd.name, tnd.size, tnd.time)
+    case _                 ⇒ FileNode(tnd.name, tnd.size, tnd.time, tnd.pluginState)
   }
 
-  implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name, tn match {
-    case DirNode(_, _, _, isEmpty) ⇒ Some(DirData(isEmpty))
-    case _                         ⇒ None
-  }, tn.size, tn.time)
+  implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = {
+    val (dOf, pluginState) = tn match {
+      case DirNode(_, _, _, isEmpty) ⇒ (Some(DirData(isEmpty)), PluginState(false, false))
+      case f: FileNode               ⇒ (None, f.pluginState)
+    }
+
+    TreeNodeData(tn.name, dOf, tn.size, tn.time, pluginState)
+  }
 
   implicit def seqTreeNodeToSeqTreeNodeData(tns: Seq[TreeNode]): Seq[TreeNodeData] = tns.map {
     treeNodeToTreeNodeData
@@ -91,7 +95,8 @@ case class DirNode(
 ) extends TreeNode
 
 case class FileNode(
-  name: String,
-  size: Long,
-  time: Long
+  name:        String,
+  size:        Long,
+  time:        Long,
+  pluginState: PluginState
 ) extends TreeNode

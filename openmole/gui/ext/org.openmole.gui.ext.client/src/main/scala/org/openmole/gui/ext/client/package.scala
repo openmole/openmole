@@ -431,24 +431,6 @@ package object client {
     maxWidth := "1250"
   )
 
-  //MARKET PANEL
-  lazy val docEntry = Seq(
-    cursor.pointer,
-    color := WHITE,
-    backgroundColor := DARK_GREY,
-    borderRadius := "4px",
-    marginTop := "3",
-    paddingTop := "6",
-    verticalAlign := "middle",
-    paddingBottom := "4",
-    paddingLeft := "15",
-    minHeight := "46"
-  )
-
-  lazy val docTitleEntry = Seq(
-    paddingTop := "6"
-  )
-
   //EXECUTION PANEL
   lazy val execOutput = Seq(
     marginRight := "-10",
@@ -656,15 +638,6 @@ package object client {
     backgroundColor := DARK_GREY,
     textAlign := "center",
     borderRadius := "4px"
-  )
-
-  lazy val dateStyle = Seq(
-    absolutePosition,
-    fontStyle := "italic",
-    paddingTop := "6",
-    float.right,
-    right := "50",
-    color := WHITE
   )
 
   lazy val dropdownError = Seq(

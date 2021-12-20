@@ -59,6 +59,7 @@ object GUIServer {
   }
 
   val port = PreferenceLocation("GUIServer", "Port", Some(Network.freePort))
+  val plugins = PreferenceLocation[String]("GUIServer", "Plugins", None)
 
   def initialisePreference(preference: Preference) = {
     if (!preference.isSet(port)) preference.setPreference(port, Network.freePort)

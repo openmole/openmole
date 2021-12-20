@@ -7,17 +7,19 @@ import java.util.zip.ZipFile
 import scala.collection.JavaConverters._
 import org.openmole.core.fileservice._
 import org.openmole.core.highlight.HighLight
+import org.openmole.core.module
 import org.openmole.core.pluginmanager._
+import org.openmole.core.services.Services
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import org.openmole.tool.file._
 import org.openmole.tool.logger.JavaLogger
 
+import java.text.SimpleDateFormat
 import scala.annotation.tailrec
 import scala.io.{ BufferedSource, Codec }
 import scala.util.{ Failure, Success, Try }
-
 import collection.JavaConverters._
 
 object utils {
@@ -32,7 +34,14 @@ object utils {
 
   def isPlugin(path: SafePath)(implicit workspace: Workspace): Boolean = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
-    !PluginManager.listBundles(safePathToFile(path)).isEmpty
+    // !PluginManager.listBundles(safePathToFile(path)).isEmpty
+    PluginManager.isBundle(safePathToFile(path))
+  }
+
+  def isPlugged(file: File, pluggedList: Seq[Plugin])(implicit workspace: Workspace): Boolean = {
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    val safePath = fileToSafePath(file)
+    pluggedList.map { _.projectSafePath }.contains(safePath)
   }
 
   def allPluggableIn(path: SafePath)(implicit workspace: Workspace): Seq[SafePath] = {
@@ -74,7 +83,7 @@ object utils {
     }
   }
 
-  def fileToTreeNodeData(f: File)(implicit context: ServerFileSystemContext = ProjectFileSystem()): Option[TreeNodeData] = {
+  def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext = ProjectFileSystem(), workspace: Workspace): Option[TreeNodeData] = {
 
     val time = if (f.exists) Some(
       java.nio.file.Files.readAttributes(f, classOf[BasicFileAttributes]).lastModifiedTime.toMillis
@@ -83,11 +92,11 @@ object utils {
 
     val dirData = if (f.isDirectory) Some(DirData(f.isDirectoryEmpty)) else None
 
-    time.map(t ⇒ TreeNodeData(f.getName, dirData, f.length, t))
+    time.map(t ⇒ TreeNodeData(f.getName, dirData, f.length, t, PluginState(isPlugin(fileToSafePath(f)), isPlugged(f, pluggedList))))
   }
 
-  implicit def seqfileToSeqTreeNodeData(fs: Seq[File])(implicit context: ServerFileSystemContext): Seq[TreeNodeData] = fs.flatMap {
-    fileToTreeNodeData(_)
+  def seqfileToSeqTreeNodeData(fs: Seq[File], pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext, workspace: Workspace): Seq[TreeNodeData] = fs.flatMap { f ⇒
+    fileToTreeNodeData(f, pluggedList)
   }
 
   implicit def fileToOptionSafePath(f: File)(implicit context: ServerFileSystemContext, workspace: Workspace): Option[SafePath] = Some(fileToSafePath(f))
@@ -126,14 +135,14 @@ object utils {
     getFile0(paths, root)
   }
 
-  def listFiles(path: SafePath, fileFilter: data.FileFilter)(implicit context: ServerFileSystemContext, workspace: Workspace): ListFilesData = {
+  def listFiles(path: SafePath, fileFilter: data.FileFilter, pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext, workspace: Workspace): ListFilesData = {
 
     val allFiles = safePathToFile(path).listFilesSafe.toSeq
 
-    val filteredByName: Seq[TreeNodeData] = {
+    val filteredByName: Seq[TreeNodeData] = seqfileToSeqTreeNodeData({
       if (fileFilter.nameFilter.isEmpty) allFiles
       else allFiles.filter { f ⇒ f.getName.contains(fileFilter.nameFilter) }
-    }
+    }, pluggedList)
 
     val sorted = filteredByName.sorted(fileFilter.fileSorting)
     val threshold = fileFilter.threshold.getOrElse(1000)
@@ -192,15 +201,6 @@ object utils {
   def exists(safePath: SafePath)(implicit workspace: Workspace) = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     safePathToFile(safePath).exists
-  }
-
-  def existsExcept(in: SafePath, exceptItSelf: Boolean)(implicit workspace: Workspace): Boolean = {
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
-    val li = listFiles(in.parent, data.FileFilter.defaultFilter)
-    val count = li.list.count(l ⇒ treeNodeToSafePath(l, in.parent).path == in.path)
-
-    val bound = if (exceptItSelf) 1 else 0
-    if (count > bound) true else false
   }
 
   def existsIn(safePaths: Seq[SafePath], to: SafePath)(implicit workspace: Workspace): Seq[SafePath] = {
@@ -363,13 +363,20 @@ object utils {
     errors.map(e ⇒ ErrorData(e._2))
   }
 
-  def removePlugin(plugin: Plugin)(implicit workspace: Workspace): Unit = synchronized {
+  def addPlugin(safePath: SafePath)(implicit workspace: Workspace, newFile: TmpDirectory): Seq[ErrorData] = {
+
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+
+    val file = safePathToFile(safePath)
+    val errors = org.openmole.core.module.addPluginsFiles(Seq(file), false, org.openmole.core.module.pluginDirectory)
+    errors.map(e ⇒ ErrorData(e._2))
+  }
+
+  def removePlugin(safePath: SafePath)(implicit workspace: Workspace): Unit = synchronized {
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
     import org.openmole.core.module
-    val file = module.pluginDirectory / plugin.name
-    val allDependingFiles = PluginManager.allDepending(file, b ⇒ !b.isProvided)
+    val file: File = safePathToFile(safePath)
     val bundle = PluginManager.bundle(file)
     bundle.foreach(PluginManager.remove)
-    allDependingFiles.filter(f ⇒ !PluginManager.bundle(f).isDefined).foreach(_.recursiveDelete)
-    file.recursiveDelete
   }
 }

@@ -4,6 +4,7 @@ import org.openmole.gui.client.core._
 import autowire._
 import boopickle.Default._
 import org.openmole.gui.client.core.alert.AbsolutePositioning._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.ext.api.Api
 import scaladget.bootstrapnative.bsn._
@@ -14,7 +15,7 @@ import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.client._
 import com.raquo.laminar.api.L._
 
-class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTabs: TreeNodeTabs) {
+class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTabs: TreeNodeTabs, pluginState: PluginState) {
 
   def iconAction(icon: HESetters, text: String, todo: () ⇒ Unit) =
     div(fileActionItems, icon, text, onClick --> { _ ⇒ todo() })
@@ -105,6 +106,20 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     }
   }
 
+  def plugOrUplug(safePath: SafePath, pluginState: PluginState) = {
+    pluginState.isPlugged match {
+      case true ⇒ OMPost()[Api].unplug(safePath).call().foreach { _ ⇒
+        panels.pluginPanel.getPlugins
+        treeNodePanel.invalidCacheAndDraw
+      }
+      case false ⇒ OMPost()[Api].appendToPluggedIfPlugin(safePath).call().foreach {
+        _ ⇒
+          panels.pluginPanel.getPlugins
+          treeNodePanel.invalidCacheAndDraw
+      }
+    }
+  }
+
   def withSafePath(action: SafePath ⇒ Unit) = {
     treeNodePanel.currentSafePath.now.foreach { sp ⇒
       action(sp)
@@ -183,12 +198,22 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
                 },
                 FileExtension(initSafePath.name) match {
                   case FileExtension.JAR | FileExtension.NETLOGO | FileExtension.R | FileExtension.TGZ ⇒
-                    iconAction(OMTags.glyph_share, "to OMS", () ⇒ toScript)
+                    iconAction(glyphItemize(OMTags.glyph_share), "to OMS", () ⇒ toScript)
                   case _ ⇒ emptyMod
+                },
+                pluginState.isPlugin match {
+                  case true ⇒
+                    val (icon, text) = pluginState.isPlugged match {
+                      case true  ⇒ (OMTags.glyph_unpuzzle, "unplug")
+                      case false ⇒ (OMTags.glyph_puzzle, "plug")
+                    }
+                    iconAction(glyphItemize(icon), text, () ⇒ plugOrUplug(initSafePath, pluginState))
+                  case false ⇒ emptyMod
                 }
               )
           }
       }
+
     )
   }
 

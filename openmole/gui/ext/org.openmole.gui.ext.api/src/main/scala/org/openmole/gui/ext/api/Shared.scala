@@ -18,6 +18,7 @@ package org.openmole.gui.ext.api
 
 import org.openmole.core.buildinfo._
 import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
+import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.data._
 import org.openmole.tool.hash.Hash
 
@@ -57,7 +58,7 @@ trait Api {
   def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit
   def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath]
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Unit
-  def copyToPluginUploadDir(directoryName: String, safePaths: Seq[SafePath]): Unit
+  //def copyToPluginUploadDir(directoryName: String, safePaths: Seq[SafePath]): Unit
   def copyFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
   def uuid(): String = java.util.UUID.randomUUID.toString
   def renameFile(safePath: SafePath, name: String): SafePath
@@ -82,12 +83,9 @@ trait Api {
   def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Unit
 
   //CORE PLUGINS
-  def addUploadedPlugins(directoryName: String, nodes: Seq[String]): Seq[ErrorData]
-  def autoAddPlugins(path: SafePath): Unit
-  def isPlugin(path: SafePath): Boolean
-  def allPluggableIn(path: SafePath): Seq[SafePath]
+  def appendToPluggedIfPlugin(safePath: SafePath): Unit
   def listPlugins(): Iterable[Plugin]
-  def removePlugin(plugin: Plugin): Unit
+  def unplug(safePath: SafePath)
 
   //GUI PLUGINS
   def getGUIPlugins(): AllPluginExtensionData

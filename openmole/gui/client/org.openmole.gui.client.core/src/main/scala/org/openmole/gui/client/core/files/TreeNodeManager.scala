@@ -114,16 +114,6 @@ class TreeNodeManager {
     }
   }
 
-  def computePluggables(todo: () ⇒ Unit) = {
-    CoreUtils.pluggables(
-      current.now,
-      p ⇒ {
-        pluggables.set(p)
-        todo()
-      }
-    )
-  }
-
   def isRootCurrent = current.now == root
 
   def isProjectsEmpty = sons.now.getOrElse(root, ListFiles(Seq(), 0)).list.isEmpty

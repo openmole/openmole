@@ -75,7 +75,7 @@ class MarketPanel(manager: TreeNodeManager) {
             val isSelected = Some(entry) == sEntry
             Seq(
               div(
-                omsheet.docEntry,
+                cls := "docEntry",
                 div(colBS(3), (paddingTop := "7"),
                   a(entry.name, cursor := "pointer", color := omsheet.WHITE,
                     onClick --> { _ ⇒
@@ -94,8 +94,8 @@ class MarketPanel(manager: TreeNodeManager) {
                   label(entry.name, badge_primary, omsheet.tableTag)
                 ),
                 div(
-                  if (isSelected)
-                    omsheet.docEntry else emptyMod,
+                  // if (isSelected)
+                  cls := "docEntry", //else emptyMod,
                   sEntry.map { se ⇒
                     if (isSelected) div(cls := "mdRendering", paddingTop := "40", se.readme, colSpan := 12)
                     else div()

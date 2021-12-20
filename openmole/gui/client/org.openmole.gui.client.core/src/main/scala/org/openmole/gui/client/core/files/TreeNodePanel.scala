@@ -97,7 +97,11 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     )
 
   private val upButton = upbtn((fileInput: Input) ⇒ {
-    FileManager.upload(fileInput, treeNodeManager.current.now, (p: ProcessState) ⇒ transferring.set(p), UploadProject(), () ⇒ invalidCacheAndDraw)
+    val current = treeNodeManager.current.now
+    FileManager.upload(fileInput, current, (p: ProcessState) ⇒ transferring.set(p), UploadProject(), () ⇒ {
+      val sp: SafePath = current / fileInput.ref.value.split("\\\\").last
+      CoreUtils.appendToPluggedIfPlugin(sp)
+    })
   })
 
   lazy val createFileTool =
@@ -134,7 +138,6 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
   lazy val copyOrTrashTool = div(
     height := "70px", flexRow, alignItems.center, color.white, justifyContent.spaceBetween,
     children <-- confirmationDiv.signal.map { ac ⇒
-      println("ACCC " + ac)
       val selected = treeNodeManager.selected
       val isSelectionEmpty = selected.signal.map {
         _.isEmpty
@@ -262,11 +265,15 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     )
   }
 
+  def draw(safePath: SafePath) = {
+    treeNodeManager.switch(safePath)
+    drawTree
+  }
+
   def goToDirButton(safePath: SafePath, name: String = ""): HtmlElement =
     span(cls := "treePathItems", name,
       onClick --> { _ ⇒
-        treeNodeManager.switch(safePath)
-        drawTree
+        draw(safePath)
       },
       dropPairs,
       onDrop --> { e ⇒
@@ -404,29 +411,31 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
               !s
             }
           })
-          else tn match {
-            case _: DirNode ⇒ div(cls := "dir plus bi-plus", cursor.pointer)
-            case _          ⇒ emptyNode
+          else {
+            tn match {
+              case _: DirNode ⇒ div(cls := "dir plus bi-plus", cursor.pointer)
+              case f: FileNode ⇒
+                if (f.pluginState.isPlugin) {
+                  div("P", cls := "plugin-file" + {
+                    if (f.pluginState.isPlugged) " plugged"
+                    else " unplugged"
+                  })
+                }
+                else emptyNode
+            }
           }
         }
       )
 
-    val toolBox = new FileToolBox(tnSafePath, showExecution, treeNodeTabs)
+    val toolBox = new FileToolBox(tnSafePath, showExecution, treeNodeTabs, tn match {
+      case f: FileNode ⇒ PluginState(f.pluginState.isPlugin, f.pluginState.isPlugged)
+      case _           ⇒ PluginState(false, false)
+    })
 
     val render: HtmlElement = {
-      // val settingsGlyph = Seq(cls := "glyphitem", glyph_settings, color := WHITE, paddingLeft := "4")
       div(display.flex, flexDirection.column,
         div(display.flex, alignItems.center, lineHeight := "27px",
           backgroundColor <-- selected.signal.map { s ⇒ if (s) toolBoxColor else "" },
-          //        child <-- selectionMode.signal.combineWith(treeStates.signal, fileToolBar.selectedTool.signal, treeNodeManager.pluggables.signal).map {
-          //          case (sM, tS, sTools, pluggables) ⇒
-          //            onClick --> { e ⇒ {
-          //              if (sM) {
-          //                addToSelection
-          //                if (e.ctrlKey) clearSelectionExecpt(tnSafePath)
-          //              }
-          //            }
-          //            },
           dropPairs,
           onDragStart --> { e ⇒
             e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
