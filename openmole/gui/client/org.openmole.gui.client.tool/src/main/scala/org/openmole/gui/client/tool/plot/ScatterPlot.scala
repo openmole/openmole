@@ -19,31 +19,31 @@ object ScatterPlot {
 
     val nbDims = plotter.toBePlotted.indexes.length
 
-    lazy val baseLayout = Plot.baseLayout(title)
-      .width(800)
-      .xaxis(axis.title(serie.xValues.label))
+    //    lazy val baseLayout = Plot.baseLayout(title)
+    //      .width(800)
+    //      .xaxis(axis.title(serie.xValues.label))
+    //
+    //    val layout = {
+    //      if (nbDims == 2)
+    //        baseLayout
+    //          .xaxis(axis.title(serie.xValues.label))
+    //          .yaxis(axis.title(serie.yValues.head.label))
+    //      else baseLayout
+    //    }
+    //
+    //    val data = serie.yValues.map { y ⇒
+    //      serie.plotDataBuilder
+    //        .set(plottype.scatter).set(plotmode.markers)
+    //        .x(serie.xValues.values.toJSArray)
+    //        .y(y.values.toJSArray)
+    //    }.toJSArray
+    //
+    //    val plotDataArray = {
+    //      if (nbDims == 2) js.Array(ToolPlot.error(data.head, error)._result)
+    //      else js.Array[PlotData]()
+    //    }
 
-    val layout = {
-      if (nbDims == 2)
-        baseLayout
-          .xaxis(axis.title(serie.xValues.label))
-          .yaxis(axis.title(serie.yValues.head.label))
-      else baseLayout
-    }
-
-    val data = serie.yValues.map { y ⇒
-      serie.plotDataBuilder
-        .set(plottype.scatter).set(plotmode.markers)
-        .x(serie.xValues.values.toJSArray)
-        .y(y.values.toJSArray)
-    }.toJSArray
-
-    val plotDataArray = {
-      if (nbDims == 2) js.Array(ToolPlot.error(data.head, error)._result)
-      else js.Array[PlotData]()
-    }
-
-    Plotly.newPlot(plotDiv.ref, plotDataArray, layout, Plot.baseConfig)
+    //  Plotly.newPlot(plotDiv.ref, plotDataArray, layout, Plot.baseConfig)
 
     plotDiv
 

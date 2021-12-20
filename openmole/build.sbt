@@ -646,7 +646,7 @@ lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool
   Libraries.bootstrapnative,
   Libraries.scaladgetTools,
   Libraries.laminarJS,
-  Libraries.sortable,
+ // Libraries.sortable,
   Libraries.plotlyJS,
   Libraries.scalaCompatJS) dependsOn (extClient) settings (defaultSettings: _*)
 
