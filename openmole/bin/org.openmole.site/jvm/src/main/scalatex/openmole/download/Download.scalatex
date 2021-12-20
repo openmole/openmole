@@ -25,7 +25,7 @@ Please note that the service is reset every 6 hours, so don't be surprised if yo
 When Java is installed, you just need to download and extract the archive below, and you're done!
 OpenMOLE is installed and works out of the box!
 
-@br@br
+@br
 
 @linkButton(s"Download ${org.openmole.core.buildinfo.version.value} - ${org.openmole.core.buildinfo.version.name} ", Resource.script.openmole.file, classIs(btn, btn_danger))
 
@@ -33,17 +33,13 @@ OpenMOLE is installed and works out of the box!
 
 @h2{Run OpenMOLE}
 
-Once you downloaded OpenMOLE, you can then launch it by executing the @i{openmole} file in the installation directory with the @hl.code("./openmole") command.
+After downloading OpenMOLE, you can launch it by executing the @i{openmole} file in the installation directory with the @code{./openmole} command.
 It will bring up you web browser and you should see something like this:
 
-@br@br
+@img(src := Resource.img.mole.uiScreenshot.file, `class` := "uiScreenshot", width := "100%")
 
-@img(src := Resource.img.mole.uiScreenshot.file, `class` := "uiScreenshot", center(100))
-
-@br@br
-
-OpenMOLE supports Chrome and Firefox.
-If you are using another web browser, you will need to copy paste the OpenMOLE URL (something like @i{http://localhost:[port]}) in either Chrome or Firefox.
+OpenMOLE supports Chrome and Firefox.
+If you are using another web browser, you will need to copy paste the OpenMOLE URL (something like @code{http://localhost:[port]}) in either Chrome or Firefox.
 
 
 
@@ -51,8 +47,10 @@ If you are using another web browser, you will need to copy paste the OpenMOLE U
 
 To get started with OpenMOLE and see a few simple use cases, you can follow our @a("Step by Step Introduction to OpenMOLE", href := stepByStepIntro.file).
 Other @a("Tutorials", href := tutorials.file) are also available, and you should find all the info you need in our @a("Documentation", href := documentation.file) section.
+
 @br
-If you have questions or problems, don't hesitate to contact our great @a("Community", href := OMcommunity.file) through the @aa("forum", href := shared.link.mailingList) or the @aa("chat", href := shared.link.chat)!
+
+If you have questions or problems, don't hesitate to contact our great community through the @aa("forum", href := shared.link.forum) or the @aa("chat", href := shared.link.chat)!
 
 
 
@@ -67,26 +65,28 @@ If you prefer building the OpenMOLE application from sources you can do so as ex
 You can run OpenMOLE using a Docker container published @aa("on the Docker Hub", href := org.openmole.site.shared.link.dockerHub).
 Running OpenMOLE using Docker images facilitates the execution of multiple instances of OpenMOLE on different ports, possibly with different versions.
 It also facilitates the automatic restart of OpenMOLE or its update for a newer version.
+
 @br
+
 You can run it using @code{docker} or @code{docker-compose}.
 In order to use the latter, follow these steps:
 
 @ul
-  @li{@i{install docker-compose}: follow @aa("the docker documentation", href := "https://docs.docker.com/compose/install/") to install it on your system,}
-  @li{@i{create a @code{docker-compose.yml} file} in a directory containing the information found @aa("on the Docker Hub", href := org.openmole.site.shared.link.dockerHub),}
-  @li{@i{edit the @code{docker-compose.yml} file} as explained below,}
-  @li{@i{pull the docker image} by running @code{sudo docker-compose pull},}
-  @li{@i{start the docker image} by running @code{sudo docker-compose up -d},}
-  @li{@i{stop the docker image} by running @code{sudo docker-compose down},}
-  @li{@i{monitor the docker image} by running @code{sudo docker-compose top}, @code{sudo docker-compose ps}, or @code{sudo docker-compose logs -t}.}
+  @li{install @code{docker-compose}: follow @aa("the Docker documentation", href := "https://docs.docker.com/compose/install/") to install it on your system,}
+  @li{create a @code{docker-compose.yml} file in a directory containing the information found @aa("on the Docker Hub", href := org.openmole.site.shared.link.dockerHub),}
+  @li{edit the @code{docker-compose.yml} file as explained below,}
+  @li{pull the Docker image by running @code{sudo docker-compose pull},}
+  @li{start the Docker image by running @code{sudo docker-compose up -d},}
+  @li{stop the Docker image by running @code{sudo docker-compose down},}
+  @li{monitor the Docker image by running @code{sudo docker-compose top}, @code{sudo docker-compose ps}, or @code{sudo docker-compose logs -t}.}
 
 In general, report to the @code{docker-compose} documentation and your favorite search engine to solve your problems.
 
-@br@br
-
-The following docker-compose configuration runs the version ${org.openmole.core.buildinfo.version.value} OpenMOLE. It displays the OpenMOLE web user interface on port 55555, and mounts the local directory @code{./data/openmole} as the directory for OpenMOLE settings and results. It also restarts automatically on failure.
-
 @br
+
+The following @code{docker-compose} configuration runs the @org.openmole.core.buildinfo.version.value OpenMOLE version.
+It displays the OpenMOLE web user interface on port 55555, and mounts the local directory @code{./data/openmole} as the directory for OpenMOLE settings and results.
+It also restarts automatically on failure.
 
 @hl(s"""
 version: "3"
@@ -104,8 +104,6 @@ services:
 """, "plain")
 
 To set some OpenMOLE parameters (for instance an http proxy) you can do:
-
-@br
 
 @hl(s"""
 version: "3"

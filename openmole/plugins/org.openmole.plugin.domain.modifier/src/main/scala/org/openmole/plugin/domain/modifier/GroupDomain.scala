@@ -24,14 +24,15 @@ import cats.implicits._
 
 object GroupDomain {
 
-  implicit def isDiscrete[D, T: Manifest]: DiscreteFromContextDomain[GroupDomain[D, T], Array[T]] =
-    domain ⇒ {
-      import domain._
-      (discrete.iterator(d) map2 size)((it, s) ⇒ it.grouped(s) map (_.toArray))
-    }
-
-  implicit def inputs[D, T](implicit inputs: DomainInput[D]): DomainInput[GroupDomain[D, T]] = domain ⇒ inputs(domain.d) ++ domain.size.inputs
-  implicit def validate[D, T](implicit validate: DomainValidation[D]): DomainValidation[GroupDomain[D, T]] = domain ⇒ validate(domain.d) ++ domain.size.validate
+  implicit def isDiscrete[D, T: Manifest]: DiscreteFromContextDomain[GroupDomain[D, T], Array[T]] = domain ⇒ {
+    import domain._
+    def iterator = (discrete(d).domain map2 size)((it, s) ⇒ it.grouped(s) map (_.toArray))
+    Domain(
+      iterator,
+      discrete(d).inputs ++ domain.size.inputs,
+      discrete(d).validate ++ domain.size.validate
+    )
+  }
 
 }
 

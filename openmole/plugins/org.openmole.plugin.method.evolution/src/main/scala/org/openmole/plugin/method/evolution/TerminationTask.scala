@@ -17,27 +17,26 @@
 
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.context.{ Context, Variable }
-import org.openmole.core.workflow.builder.DefinitionScope
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.task._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 
 object TerminationTask {
+  import EvolutionWorkflow._
 
   def apply[T](evolution: EvolutionWorkflow, termination: OMTermination)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    ClosureTask("TerminationTask") { (context, _, _) ⇒
+    Task("TerminationTask") { p ⇒
+      import p._
       val term = OMTermination.toTermination(termination, evolution)
 
-      val state = context(evolution.statePrototype)
-      val te = term(state, context(evolution.populationPrototype).toVector)
+      val state = context(evolution.stateVal)
+      val te = term(state, context(evolution.populationVal).toVector)
 
       Context(
-        Variable(evolution.terminatedPrototype, te),
-        Variable(evolution.generationPrototype, evolution.operations.generationLens.get(state))
+        evolution.terminatedVal -> te
       )
     } set (
-      inputs += (evolution.statePrototype, evolution.populationPrototype),
-      outputs += (evolution.statePrototype, evolution.terminatedPrototype, evolution.generationPrototype)
+      inputs += (evolution.stateVal, evolution.populationVal),
+      outputs += (evolution.stateVal, evolution.terminatedVal)
     )
 
 }

@@ -1,18 +1,26 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
+@import DocumentationPages._
 
-Some useful functions are usable anywhere in OpenMOLE where you would use scala code. For instance you can use them in:
+
+
+Some useful functions are usable anywhere in OpenMOLE where you would use Scala code.
+For instance you can use them in:
     @ul
         @li
-            @a("ScalaTask", href := DocumentationPages.scala.file) code,
+            @a("ScalaTask", href := scala.file) code,
         @li
             string expanded by OpenMOLE (${scala code}),
         @li
-            OpenMOLE scripts.
+            OpenMOLE scripts.
+
+
 
 @h2{Data processing}
 
-OpenMOLE provides a useful functions to aggregate data. Theses functions can be called on array and vectors. For instance:
+OpenMOLE provides a useful functions to aggregate data.
+Theses functions can be called on array and vectors.
+For instance:
 
 @hl.openmole("""
 val pi = Val[Double]
@@ -25,48 +33,65 @@ val average =
     outputs += piAvg
 )""")
 
-This task takes place after an exploration and compute the average of many values of pi. The presently available functions are:
+This task takes place after an exploration and compute the average of many values of pi.
+The presently available functions are:
 @ul
   @li
-    @hl.code("""def median: Double"""), compute the median of the vector,
+    @code{def median: Double}, compute the median of the vector,
   @li
-    @hl.code("""def medianAbsoluteDeviation: Double"""), compute the median absolute deviation of the vector,
+    @code{def medianAbsoluteDeviation: Double}, compute the median absolute deviation of the vector,
   @li
-    @hl.code("""def average: Double"""), compute the average of the vector,
+    @code{def average: Double}, compute the average of the vector,
   @li
-    @hl.code("""def meanSquaredError: Double"""), compute the mean square error of the vector,
+    @code{def meanSquaredError: Double}, compute the mean square error of the vector,
   @li
-    @hl.code("""def rootMeanSquaredError: Double"""), compute the root of the mean square error of the vector.
+    @code{def rootMeanSquaredError: Double}, compute the root of the mean square error of the vector.
+
 
 
 @h2{Data comparison}
 
-OpenMOLE provides a useful functions to compare data series. This function can be called on array and vectors. For instance:
+OpenMOLE provides useful functions to compare data series.
+This function can be called on array and vectors.
+For instance:
 @ul
   @li
-    @hl.code("""def absoluteDistance(s1: Seq[Double], s2: Seq[Double]): Double"""), compute the sum of the absolute distance between the respective elements of s1 and s2,
+    @code{def absoluteDistance(s1: Seq[Double], s2: Seq[Double]): Double}, compute the sum of the absolute distance between the respective elements of s1 and s2,
   @li
-    @hl.code("""def squareDistance(s1: Seq[Double], s2: Seq[Double]): Double"""), compute the sum of the squared distance between the respective elements of s1 and s2.
+    @code{def squareDistance(s1: Seq[Double], s2: Seq[Double]): Double}, compute the sum of the squared distance between the respective elements of s1 and s2.
   @li
-    @code("""def dynamicTimeWarpingDistance(s1: Seq[Double], s2: Seq[Double]): Double"""), compute the @a(href := "https://en.wikipedia.org/wiki/Dynamic_time_warping", "dynamic time warping distance") between s1 and s2.
-    
+    @code{def dynamicTimeWarpingDistance(s1: Seq[Double], s2: Seq[Double]): Double}, compute the @a(href := "https://en.wikipedia.org/wiki/Dynamic_time_warping", "dynamic time warping distance") between s1 and s2.
+
+
+
 @h2{File creation}
 
-It might be useful to create files and folders in ScalaTask code. To do that use one of the folowing functions:
+It might be useful to create files and folders in ScalaTask code.
+To do that, use one of the following functions:
 @ul
     @li
-        @hl.code("def newFile(prefix: String, suffix: String): File"), this function creates a new file in the OpenMOLE workspace. You may optionally provide a prefix and suffix for the file name. It would generally be called @hl.code("newFile()").
+        @code{def newFile(prefix: String, suffix: String): File}, this function creates a new file in the OpenMOLE workspace. You may optionally provide a prefix and suffix for the file name. It would generally be called @code{newFile()}.
     @li
-        @hl.code("def newDir(prefix: String): File"), this function creates a new directory in the OpenMOLE workspace. You may optionally provide a prefix for the directory name. It would generally be called @hl.code("newDir()"). This function doesn't create the directory.
+        @code{def newDir(prefix: String): File}, this function creates a new directory in the OpenMOLE workspace. You may optionally provide a prefix for the directory name. It would generally be called @code{newDir()}. This function doesn't create the directory.
     @li
-        @hl.code("def mkDir(prefix: String): File"), this function creates a new directory in the OpenMOLE workspace. You may optionally provide a prefix for the directory name. It would generally be called @hl.code("mkDir()"). This function creates the directory.
+        @code{def mkDir(prefix: String): File}, this function creates a new directory in the OpenMOLE workspace. You may optionally provide a prefix for the directory name. It would generally be called @code{mkDir()}. This function creates the directory.
+
+
 
 @h2{Random number generator}
 
-@p
-  In scala code you may use a properly initialised random generator by calling @hl.code("""random()"""). For instance you may call @hl.code("""random().nextInt""").
-@p
-  It might sometimes be useful to create a new random number generator. To do that use @hl.code("def newRandom(seed: Long): Random"). The seed is optional. If it is not provided OpenMOLE will take care of the generator initialisation in a sound manner. It would generally be called @hl.code("newRNG()").
+In Scala code you may use a properly initialised random generator by calling @code{random()}.
+For instance you may call @code{random().nextInt}.
+
+@br
+
+It might sometimes be useful to create a new random number generator.
+To do that use @code{def newRandom(seed: Long): Random}.
+The seed is optional.
+If it is not provided OpenMOLE will take care of the generator initialisation in a sound manner.
+It would generally be called @code{newRNG()}.
+
+
 
 /* TODO: Document this part
 @h2{Technical functions}
@@ -77,7 +102,3 @@ It might be useful to create files and folders in ScalaTask code. To do that use
   def withThreadClassLoader[R](classLoader: ClassLoader)(f: ⇒ R) =
     org.openmole.tool.thread.withThreadClassLoader(classLoader)(f)
 */
-
-
-
-

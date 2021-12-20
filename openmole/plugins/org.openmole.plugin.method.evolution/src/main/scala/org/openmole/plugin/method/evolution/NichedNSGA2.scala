@@ -20,6 +20,9 @@ import org.openmole.core.dsl.extension._
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.types.FromArray
 
+import monocle._
+import monocle.syntax.all._
+
 object NichedNSGA2Algorithm {
 
   import CDGenome._
@@ -33,7 +36,7 @@ object NichedNSGA2Algorithm {
     individuals.map { i ⇒
       Result(
         scaleContinuousValues(continuousValues.get(i.genome), continuous),
-        Individual.genome composeLens discreteValues get i,
+        i.focus(_.genome) andThen discreteValues get,
         fitness(i.phenotype),
         niche(i),
         i
@@ -42,10 +45,10 @@ object NichedNSGA2Algorithm {
   }
 
   def continuousProfile[P](x: Int, nX: Int): Niche[Individual[P], Int] =
-    mgo.evolution.niche.continuousProfile[Individual[P]]((Individual.genome[P] composeLens continuousValues).get _, x, nX)
+    mgo.evolution.niche.continuousProfile[Individual[P]](_.focus(_.genome) andThen continuousValues get, x, nX)
 
   def discreteProfile[P](x: Int): Niche[Individual[P], Int] =
-    mgo.evolution.niche.discreteProfile[Individual[P]]((Individual.genome[P] composeLens discreteValues).get _, x)
+    mgo.evolution.niche.discreteProfile[Individual[P]](_.focus(_.genome) andThen discreteValues get, x)
 
   def boundedContinuousProfile[P](continuous: Vector[C], x: Int, nX: Int, min: Double, max: Double): Niche[Individual[P], Int] =
     mgo.evolution.niche.boundedContinuousProfile[Individual[P]](i ⇒ scaleContinuousValues(continuousValues.get(i.genome), continuous), x, nX, min, max)
@@ -65,7 +68,7 @@ object NichedNSGA2Algorithm {
   def adaptiveBreeding[S, P](lambda: Int, reject: Option[Genome ⇒ Boolean], operatorExploration: Double, discrete: Vector[D], fitness: P ⇒ Vector[Double]) =
     NSGA2Operations.adaptiveBreeding[S, Individual[P], Genome](
       i ⇒ fitness(i.phenotype),
-      Individual.genome.get,
+      Focus[Individual[P]](_.genome).get,
       continuousValues.get,
       continuousOperator.get,
       discreteValues.get,
@@ -83,7 +86,7 @@ object NichedNSGA2Algorithm {
   def elitism[S, N, P](niche: Niche[Individual[P], N], mu: Int, components: Vector[C], fitness: P ⇒ Vector[Double]) =
     ProfileOperations.elitism[S, Individual[P], N](
       i ⇒ fitness(i.phenotype),
-      i ⇒ values(Individual.genome.get(i), components),
+      i ⇒ values(i.genome, components),
       niche,
       mu)
 
@@ -125,10 +128,10 @@ object NoisyNichedNSGA2Algorithm {
   }
 
   def continuousProfile[P](x: Int, nX: Int): Niche[Individual[P], Int] =
-    mgo.evolution.niche.continuousProfile[Individual[P]]((Individual.genome[P] composeLens continuousValues).get _, x, nX)
+    mgo.evolution.niche.continuousProfile[Individual[P]](_.focus(_.genome) andThen continuousValues get, x, nX)
 
   def discreteProfile[P](x: Int): Niche[Individual[P], Int] =
-    mgo.evolution.niche.discreteProfile[Individual[P]]((Individual.genome[P] composeLens discreteValues).get _, x)
+    mgo.evolution.niche.discreteProfile[Individual[P]](_.focus(_.genome) andThen discreteValues get, x)
 
   def boundedContinuousProfile[P](continuous: Vector[C], x: Int, nX: Int, min: Double, max: Double): Niche[Individual[P], Int] =
     mgo.evolution.niche.boundedContinuousProfile[Individual[P]](i ⇒ scaleContinuousValues(continuousValues.get(i.genome), continuous), x, nX, min, max)
@@ -145,7 +148,7 @@ object NoisyNichedNSGA2Algorithm {
   def adaptiveBreeding[S, P: Manifest](lambda: Int, reject: Option[Genome ⇒ Boolean], operatorExploration: Double, cloneProbability: Double, aggregation: Vector[P] ⇒ Vector[Double], discrete: Vector[D]) =
     NoisyNSGA2Operations.adaptiveBreeding[S, Individual[P], Genome, P](
       aggregatedFitness(aggregation),
-      Individual.genome.get,
+      Focus[Individual[P]](_.genome).get,
       continuousValues.get,
       continuousOperator.get,
       discreteValues.get,
@@ -159,11 +162,11 @@ object NoisyNichedNSGA2Algorithm {
       cloneProbability)
 
   def elitism[S, N, P: Manifest](niche: Niche[Individual[P], N], muByNiche: Int, historySize: Int, aggregation: Vector[P] ⇒ Vector[Double], components: Vector[C]): Elitism[S, Individual[P]] = {
-    def individualValues(i: Individual[P]) = values(Individual.genome.get(i), components)
+    def individualValues(i: Individual[P]) = values(i.genome, components)
 
     NoisyProfileOperations.elitism[S, Individual[P], N, P](
       aggregatedFitness(aggregation),
-      mergeHistories(individualValues, vectorPhenotype, Individual.historyAge, historySize),
+      mergeHistories(individualValues, vectorPhenotype, Focus[Individual[P]](_.historyAge), historySize),
       individualValues,
       niche,
       muByNiche)
@@ -259,6 +262,7 @@ object NichedNSGA2 {
       def operations(om: DeterministicParams) = new Ops {
         def startTimeLens = GenLens[S](_.startTime)
         def generationLens = GenLens[S](_.generation)
+        def evaluatedLens = GenLens[S](_.evaluated)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
@@ -269,7 +273,7 @@ object NichedNSGA2 {
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
           import p._
-          val res = NichedNSGA2Algorithm.result(population, om.niche.from(context), Genome.continuous(om.genome), ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives), keepAll = keepAll)
+          val res = NichedNSGA2Algorithm.result(population, om.niche.from(context), Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
 
@@ -290,18 +294,20 @@ object NichedNSGA2 {
           import p._
           val discrete = Genome.discrete(om.genome)
           val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          mgo.evolution.algorithm.Profile.adaptiveBreeding[Phenotype](n, om.operatorExploration, discrete, ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives), rejectValue) apply (s, population, rng)
+          mgo.evolution.algorithm.Profile.adaptiveBreeding[Phenotype](n, om.operatorExploration, discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), rejectValue) apply (s, population, rng)
         }
 
-        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) = FromContext { p ⇒
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) = FromContext { p ⇒
           import p._
-          val (s2, elited) = NichedNSGA2Algorithm.elitism[S, Vector[Int], Phenotype](om.niche.from(context), om.nicheSize, Genome.continuous(om.genome), ExactObjective.toFitnessFunction(om.phenotypeContent, om.objectives)) apply (s, population, candidates, rng)
-          val s3 = EvolutionState.generation.modify(_ + 1)(s2)
-          (s3, elited)
+          val (s2, elited) = NichedNSGA2Algorithm.elitism[S, Vector[Int], Phenotype](om.niche.from(context), om.nicheSize, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)) apply (s, population, candidates, rng)
+          val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
+          val s4 = Focus[S](_.evaluated).modify(_ + evaluated)(s3)
+          (s4, elited)
         }
 
-        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, EvolutionState.generation)(s, population)
-        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, EvolutionState.startTime)(s, population)
+        def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
+        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
+        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
 
         def migrateToIsland(population: Vector[I]) = DeterministicGAIntegration.migrateToIsland(population)
         def migrateFromIsland(population: Vector[I], state: S) = DeterministicGAIntegration.migrateFromIsland(population)
@@ -315,7 +321,7 @@ object NichedNSGA2 {
     niche:               FromContext[Niche[CDGenome.DeterministicIndividual.Individual[Phenotype], Vector[Int]]],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[ExactObjective[_]],
+    objectives:          Seq[Objective],
     operatorExploration: Double,
     reject:              Option[Condition])
 
@@ -325,7 +331,7 @@ object NichedNSGA2 {
       import p._
 
       (i: CDGenome.NoisyIndividual.Individual[Phenotype]) ⇒ {
-        import org.openmole.tool.types.ClassUtils._
+        import org.openmole.tool.types.TypeTool._
         val values = i.phenotypeHistory.map(Phenotype.outputs(phenotypeContent, _)).transpose
         val context =
           (phenotypeContent.outputs zip values).map {
@@ -350,6 +356,7 @@ object NichedNSGA2 {
       def operations(om: StochasticParams) = new Ops {
         def startTimeLens = GenLens[S](_.startTime)
         def generationLens = GenLens[S](_.generation)
+        def evaluatedLens = GenLens[S](_.evaluated)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
@@ -361,10 +368,10 @@ object NichedNSGA2 {
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
           import p._
 
-          val res = NoisyNichedNSGA2Algorithm.result(population, NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context), om.niche.from(context), Genome.continuous(om.genome), onlyOldest = true, keepAll = keepAll)
+          val res = NoisyNichedNSGA2Algorithm.result(population, Objective.aggregate(om.phenotypeContent, om.objectives).from(context), om.niche.from(context), Genome.continuous(om.genome), onlyOldest = true, keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
-          val samples = Variable(GAIntegration.samples.array, res.map(_.replications).toArray)
+          val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
 
           val outputValues = if (includeOutputs) StochasticGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotypeHistory)) else Seq()
 
@@ -383,28 +390,30 @@ object NichedNSGA2 {
           import p._
           val discrete = Genome.discrete(om.genome)
           val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          NoisyNichedNSGA2Algorithm.adaptiveBreeding[S, Phenotype](n, rejectValue, om.operatorExploration, om.cloneProbability, NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context), discrete) apply (s, individuals, rng)
+          NoisyNichedNSGA2Algorithm.adaptiveBreeding[S, Phenotype](n, rejectValue, om.operatorExploration, om.cloneProbability, Objective.aggregate(om.phenotypeContent, om.objectives).from(context), discrete) apply (s, individuals, rng)
         }
 
-        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) =
           FromContext { p ⇒
             import p._
             val (s2, elited) = NoisyNichedNSGA2Algorithm.elitism[S, Vector[Int], Phenotype](
               om.niche.from(context),
               om.nicheSize,
               om.historySize,
-              NoisyObjective.aggregate(om.phenotypeContent, om.objectives).from(context),
+              Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
               Genome.continuous(om.genome)) apply (s, population, candidates, rng)
 
-            val s3 = EvolutionState.generation.modify(_ + 1)(s2)
-            (s3, elited)
+            val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
+            val s4 = Focus[S](_.evaluated).modify(_ + evaluated)(s3)
+            (s4, elited)
           }
 
-        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, EvolutionState.generation)(s, population)
-        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, EvolutionState.startTime)(s, population)
+        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
+        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
 
-        def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland[I](population, CDGenome.NoisyIndividual.Individual.historyAge)
-        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Phenotype](population, CDGenome.NoisyIndividual.Individual.historyAge, CDGenome.NoisyIndividual.Individual.phenotypeHistory)
+        def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
+        def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland[I](population, Focus[I](_.historyAge))
+        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Phenotype](population, Focus[I](_.historyAge), Focus[I](_.phenotypeHistory))
       }
 
     }
@@ -416,7 +425,7 @@ object NichedNSGA2 {
     operatorExploration: Double,
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[NoisyObjective[_]],
+    objectives:          Seq[Objective],
     historySize:         Int,
     cloneProbability:    Double,
     reject:              Option[Condition])
@@ -486,41 +495,47 @@ object NichedNSGA2 {
 
 }
 
+import EvolutionWorkflow._
+import monocle.macros._
+
 object NichedNSGA2Evolution {
 
-  def apply(
-    evaluation:   DSL,
-    termination:  OMTermination,
-    niche:        Seq[NichedElement],
-    genome:       Genome,
-    objective:    Objectives,
-    nicheSize:    Int,
-    stochastic:   OptionalArgument[Stochastic] = None,
-    parallelism:  Int                          = EvolutionWorkflow.parallelism,
-    reject:       OptionalArgument[Condition]  = None,
-    distribution: EvolutionPattern             = SteadyState(),
-    suggestion:   Suggestion                   = Suggestion.empty,
-    scope:        DefinitionScope              = "niched nsga2") = {
+  implicit def method: ExplorationMethod[NichedNSGA2Evolution, EvolutionWorkflow] =
+    p ⇒
+      EvolutionPattern.build(
+        algorithm =
+          NichedNSGA2(
+            niche = p.niche,
+            genome = p.genome,
+            outputs = p.evaluation.outputs,
+            nicheSize = p.nicheSize,
+            objective = p.objective,
+            stochastic = p.stochastic,
+            reject = p.reject
+          ),
+        evaluation = p.evaluation,
+        termination = p.termination,
+        parallelism = p.parallelism,
+        distribution = p.distribution,
+        suggestion = p.suggestion(p.genome),
+        scope = p.scope
+      )
 
-    EvolutionPattern.build(
-      algorithm =
-        NichedNSGA2(
-          niche = niche,
-          genome = genome,
-          outputs = evaluation.outputs,
-          nicheSize = nicheSize,
-          objective = objective,
-          stochastic = stochastic,
-          reject = reject
-        ),
-      evaluation = evaluation,
-      termination = termination,
-      parallelism = parallelism,
-      distribution = distribution,
-      suggestion = suggestion(genome),
-      scope = scope
-    )
-  }
+  implicit def patternContainer: ExplorationMethodSetter[NichedNSGA2Evolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
 
 }
+
+@Lenses case class NichedNSGA2Evolution(
+  evaluation:   DSL,
+  termination:  OMTermination,
+  niche:        Seq[NichedElement],
+  genome:       Genome,
+  objective:    Objectives,
+  nicheSize:    Int,
+  stochastic:   OptionalArgument[Stochastic] = None,
+  parallelism:  Int                          = EvolutionWorkflow.parallelism,
+  reject:       OptionalArgument[Condition]  = None,
+  distribution: EvolutionPattern             = SteadyState(),
+  suggestion:   Suggestion                   = Suggestion.empty,
+  scope:        DefinitionScope              = "niched nsga2")
 

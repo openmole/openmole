@@ -44,6 +44,27 @@ object JobScript {
 
     def resolve(dest: String) = gridscale.RemotePath.child(storageLocation, dest)
 
+    val retry = 5
+    val functions =
+      """
+        |retry() {
+        |    local -r -i max_attempts="$1"; shift
+        |    local -i attempt_num=1
+        |    until "$@"
+        |    do
+        |        if ((attempt_num==max_attempts))
+        |        then
+        |            echo "Attempt $attempt_num failed and there are no more attempts left!"
+        |            return 1
+        |        else
+        |            echo "Attempt $attempt_num failed! Trying again in $attempt_num seconds..."
+        |            sleep $((attempt_num++))
+        |        fi
+        |    done
+        |}
+        |
+        |""".stripMargin
+
     val debugInfo = s"echo $storageLocation ; hostname ; date -R ; cat /proc/meminfo ; ulimit -n 10240 ; ulimit -a ; " + "env ; echo $X509_USER_PROXY ; "
 
     val init = {
@@ -70,11 +91,11 @@ object JobScript {
 
       script +=
         "if [ `uname -m` = x86_64 ]; then " +
-        cpCommand.download(resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz") + "; else " +
+        s"retry $retry " + cpCommand.download(resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz") + "; else " +
         """echo "Unsupported architecture: " `uname -m`; exit 1; fi"""
       script += "tar -xzf jvm.tar.gz >/dev/null"
       script += "rm -f jvm.tar.gz"
-      script += cpCommand.download(resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")
+      script += s"retry $retry " + cpCommand.download(resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")
       script += "tar -xzf openmole.tar.gz >/dev/null"
       script += "rm -f openmole.tar.gz"
       script.mkString(" && ")
@@ -85,10 +106,10 @@ object JobScript {
 
       for { (plugin, index) ← runtime.environmentPlugins.zipWithIndex } {
         assert(plugin.path != null)
-        script += cpCommand.download(resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar")
+        script += s"retry $retry " + cpCommand.download(resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar")
       }
 
-      script += cpCommand.download(resolve(serializedJob.remoteStorage.path), "$CUR/storage.bin")
+      script += s"retry $retry " + cpCommand.download(resolve(serializedJob.remoteStorage.path), "$CUR/storage.bin")
 
       "mkdir -p envplugins && " + script.mkString(" && ")
     }
@@ -98,7 +119,7 @@ object JobScript {
 
       script += "export PATH=$PWD/jre/bin:$PATH"
       script += "export HOME=$PWD"
-      script += "/bin/sh run.sh " + memory + "m " + UUID.randomUUID + " -s $CUR/storage.bin -p $CUR/envplugins/ -i " + inputPath + " -o " + resultPath + " -t " + threads + (if (debug) " -d 2>&1" else "")
+      script += s"""/bin/sh run.sh ${memory}m ${UUID.randomUUID} -s $$CUR/storage.bin -p $$CUR/envplugins/ -i $inputPath -o $resultPath -t $threads --transfer-retry $retry""" + (if (debug) " -d 2>&1" else "")
       script.mkString(" && ")
     }
 
@@ -106,7 +127,7 @@ object JobScript {
 
     val finish = "cd .. &&  rm -rf $CUR"
 
-    debugInfo + init + " && " + install + " && " + dl + " && " + run + s"; RETURNCODE=${if (debug) "0" else "$?"};" + postDebugInfo + finish + "; exit $RETURNCODE;"
+    functions + debugInfo + init + " && " + install + " && " + dl + " && " + run + s"; RETURNCODE=${if (debug) "0" else "$?"};" + postDebugInfo + finish + "; exit $RETURNCODE;"
   }
 
   private def background(s: String) = "( " + s + " & )"

@@ -1,48 +1,61 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
+@import DocumentationPages._
 
 
-@aa("OpenMOLE GUI", href := DocumentationPages.gui.file) implements all the OpenMOLE features. However you may be interested in using OpenMOLE in interactive console mode.
-To do so, use the @i("-c") argument in your console : @hl("""./openmole -c""", "plain")
+The @aa("OpenMOLE GUI", href := gui.file) implements all the OpenMOLE features.
+However you may be interested in using OpenMOLE in interactive console mode.
+To do so, use the @code{-c} argument in your console: @code{./openmole -c}.
+
 @br
-The only difference between the script in the console mode and the ones from the editor concerns the way you launch the execution, you cancel it and you follow the execution progress. An console workflow is launched like this:
 
-  @br @hl.code("""val ex = exploration -< (model on env) start""")
+The only difference between the scripts in the console mode and the ones from the editor is the way you launch their execution, you cancel it, and you follow their progress.
+A console workflow is launched as follow:
 
-  @p Using the ex and the env variables you can follow the progress of the execution by using the commands: @hl("print(ex)", "plain") and @hl("print(env)", "plain"). To cancel the execution you should use: @hl("ex.cancel", "plain").
+@hl.code("""val ex = exploration -< (model on env) start""")
+
+Using the @code{ex} and the @code{env} variables, you can follow the progress of the execution by using the commands: @code{print(ex)} and @code{print(env)}.
+To cancel the execution, you should use @code{ex.cancel}.
+
 
 
 @h2{Authentications}
 
-In console mode, you can define an authentication using a pair of login / password with the following command:
-@br @hl.openmole("""
-  SSHAuthentication += LoginPassword("login", encrypted, "machine-name")""".stripMargin, header = """def encrypted = "" """)
+In console mode, you can define an authentication using a pair of login/password with the following command:
 
-@p Or to authenticate with a private key:
-@br @hl.openmole("""
-    SSHAuthentication += PrivateKey("/path/to/the/private/key", "login", encrypted, "machine-name")""", header = """def encrypted = "" """)
+@hl.openmole("""
+  SSHAuthentication += LoginPassword("login", encrypted, "machine-name")
+""".stripMargin, header = """def encrypted = "" """)
 
-@p It mentions the @i{encrypted} function. This function will prompt for the password/passphrase of the private key right after the call to the builder of the @i{Environment} using this @hl.openmole("SSHAuthentication").
+Or, to authenticate with a private key:
 
-@p The last part of the @hl.openmole("SSHAuthentication"): "machine-name" should match exactly the address of the machine in your execution environment. OpenMOLE searches the matching ssh keys using an @b{exact match} on @i{login} and @i{machine-name} between the environment and the stored keys.
+@hl.openmole("""
+  SSHAuthentication += PrivateKey("/path/to/the/private/key", "login", encrypted, "machine-name")
+""", header = """def encrypted = "" """)
+
+It mentions the @i{encrypted} function.
+This function will prompt for the password/passphrase of the private key, right after the call to the @code{Environment} builder, using @code{SSHAuthentication}.
+
+@br
+
+The last part of @code{SSHAuthentication}, @code{machine-name}, should match exactly the address of the machine in your execution environment.
+OpenMOLE searches the matching SSH keys using an @b{exact match} on @code{login} and @code{machine-name} between the environment and the stored keys.
+
+
 
 @h2{Run script}
 
 In console mode, you have to copy-paste your whole workflow to run it.
-The only difference between the script in the console mode and the ones from the editor concerns the way you launch the execution,
-you cancel it and you follow the execution progress.
 
 A console workflow is launched like this:
 @hl.code("""
-val ex = exploration -< (model on env) start""")
+val ex = exploration -< (model on env) start
+""")
 
-Note that you need to invoke the @hl("start", "plain") on your workflow, in contrary to Editor mode.
+Note that you need to invoke @code{start} on your workflow, contrary to Editor mode.
 
-@break
+@br
 
-Using the @i{ex} and the @i{env} variables you can follow the progress of the execution by using the commands:
-@hl("print(ex)", "plain") and @hl("print(env)","plain").
-
-@break
-
-To cancel the execution you should use: @hl("ex.cancel", "plain").
+Using the @code{ex} and the @code{env} variables you can follow the progress of the execution by using the commands:
+@code{print(ex)} and @code{print(env)}.
+To cancel the execution you should use @code{ex.cancel}.

@@ -12,21 +12,15 @@ See CheatsheetScalatex.txt for a reminder of the main Scalatex features needed i
 
 Some text to explain something.
 Another wonderful sentence with a word in @b{bold} and one in @i{italic}.
-@br
-A new sentence for a new line.
 
-@br@br
+@br
 
 A new paragraph opening for a code example:
-
-@br@br
 
 @hl.openmole("""
   // Define variables i and j of type Int
   val i = Val[Int]
   val j = Val[Int]""")
-
-@br
 
 Some text after the code bit.
 

@@ -28,12 +28,12 @@ object ToOffspringTask {
     import evolution.integration.iManifest
 
     ClosureTask("ToOffspringTask") { (context, _, _) ⇒
-      val i = evolution.buildIndividual(context(evolution.genomePrototype), context)
-      Context(Variable(evolution.offspringPrototype, Array(i)))
+      val i = evolution.buildIndividual(context(evolution.genomeVal), context)
+      Context(Variable(evolution.offspringPopulationVal, Array(i)))
     } set (
-      inputs += (evolution.outputPrototypes: _*),
-      inputs += (evolution.genomePrototype, evolution.statePrototype),
-      outputs += (evolution.statePrototype, evolution.offspringPrototype)
+      inputs += (evolution.outputVals: _*),
+      inputs += (evolution.genomeVal, evolution.stateVal),
+      outputs += (evolution.stateVal, evolution.offspringPopulationVal)
     )
   }
 

@@ -47,11 +47,11 @@ object KillActor {
     def clean(bj: BatchJobControl)(implicit services: BatchEnvironment.Services) = retry(services.preference(BatchEnvironment.cleanJobRetry))(bj.clean())
 
     try bj.foreach(kill) catch {
-      case e: Throwable ⇒ JobManager ! Error(job, environment, e, None)
+      case e: Throwable ⇒ JobManager ! Error(job, environment, e, None, None)
     }
 
     try bj.foreach(clean) catch {
-      case e: Throwable ⇒ JobManager ! Error(job, environment, e, None)
+      case e: Throwable ⇒ JobManager ! Error(job, environment, e, None, None)
     }
   }
 }

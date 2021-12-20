@@ -96,7 +96,18 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
 
     for {
       error ← filtered
-    } println(s"${error.level.toString}: ${exceptionToString(error.exception)}")
+    } {
+      def detail =
+        error.detail match {
+          case None    ⇒ ""
+          case Some(m) ⇒ s"\n$m\n"
+        }
+
+      println(
+        s"""${error.level.toString}: ${error.exception.getMessage}$detail
+        |${exceptionToString(error.exception)}""".stripMargin
+      )
+    }
   }
 
   def verify(mole: Mole)(implicit newFile: TmpDirectory, fileService: FileService): Unit = Validation(mole).foreach(println)
@@ -118,7 +129,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
       Project.compile(variables.workDirectory, file, args, newREPL = Some(newRepl)) match {
         case ScriptFileDoesNotExists() ⇒ throw new IOException("File " + file + " doesn't exist.")
         case e: CompilationError       ⇒ throw e.error
-        case Compiled(compiled)        ⇒ compiled.apply()
+        case Compiled(compiled, _)     ⇒ compiled.apply()
       }
     }
     finally ConsoleVariables.bindVariables(console, variables)

@@ -154,4 +154,18 @@ class ABCSpec extends FlatSpec with Matchers {
     (testTask -- abc).run()
   }
 
+  "abc" should "be hookable" in {
+    val abc =
+      ABC(
+        evaluation = testTaskSeed,
+        prior = priors,
+        observed = observed,
+        sample = 10,
+        generated = 10,
+        seed = seed
+      )
+
+    (abc hook "/tmp/test").run()
+  }
+
 }

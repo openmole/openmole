@@ -1,0 +1,67 @@
+@import org.openmole.site.tools._
+@import org.openmole.site._
+@import org.openmole.site.content.Native._
+@import DocumentationPages._
+
+
+@h2{JuliaTask syntax}
+
+@h3{Preliminary remark}
+
+@usesSingularity("JuliaTask")
+The @code{JuliaTask} relies on an underlying @code{ContainerTask}.
+
+@h3{Arguments of the JuliaTask}
+
+It takes the following arguments :
+
+@ul
+   @li{@code{script} String or File, mandatory. The Python script to be executed.}
+   @li{@code{version} String, optional. The version of Julia to run.}
+   @li{@code{install} Sequence of strings, optional (default = empty). The commands to be executed prior to any Julia packages installation and script execution (to install libraries on the system).}
+   @li{@code{libraries} Sequence of strings, optional (default = empty). The name of Julia libraries that need to be installed before the script execution (note: as detailed below, installations are only achieved during the first execution of the script, and then stored in a docker image in cache. To force an update, use the @i{forceUpdate} argument).}
+   @li{@code{forceUpdate} Boolean, optional (default = false). Should the libraries installation be forced (to ensure an update for example). If true, the task will perform the installation (and thus the update) even if the library was already installed.}
+
+@h2{Embedding a Julia script}
+
+The toy Julia script for this test case is:
+
+@code("""
+numericaloutput = arg * 2
+
+write(open("output.txt","w"),string("Hello world from Julia #",arg))
+""")
+
+We save this to @i{hello.jl} and upload it in your OpenMOLE workspace.
+You can then use the following script:
+
+@hl.openmole("""
+   // Declare the variable
+   val arg = Val[Int]
+   val arg2 = Val[Double]
+   val numericaloutput = Val[Int]
+   val fileoutput = Val[File]
+
+   // julia task
+   val juliaTask =
+     JuliaTask(workDirectory / "hello.jl") set (
+       inputs += arg.mapped,
+       inputs += arg2.mapped,
+       outputs += arg,
+       outputs += numericaloutput.mapped,
+       outputs += fileoutput mapped "output.txt"
+     )
+
+   val copy = CopyFileHook(fileoutput, workDirectory / "result/hello${arg}.txt")
+   val env = LocalEnvironment(2)
+
+   DirectSampling(
+     evaluation = juliaTask,
+     sampling = (arg in (0 to 10)) x (arg2 is 2.0)
+   ) hook copy on env
+""")
+
+Notions from OpenMOLE are reused in this example.
+If you're not too familiar with @a("Environments", href := scale.file), @a("Groupings", href := scale.file + "#Grouping"), @a("Hooks", href := hook.file) or @a("Samplings", href := samplings.file), check the relevant sections of the documentation.
+
+

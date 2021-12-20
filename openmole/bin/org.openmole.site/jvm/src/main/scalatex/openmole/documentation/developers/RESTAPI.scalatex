@@ -2,23 +2,34 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 
+
+
 @h2{REST API}
 
 Warning: The REST API of OpenMOLE is still experimental, it might be subject to some backward incompatible changes in the future.
 
-@p OpenMOLE ships with a web server providing a REST API to @b{start} workflows, @b{manage} their execution and @b{retrieve} their output data. To start the OpenMOLE REST API, run the command: "openmole --rest --port 8080" from the console. If you need to launch it automatically in a deamon for instance you should also you the --password-file argument to provide the password for encryption of the preferences.
+@br
 
-@p The web server can be accessed at the URL http://localhost:8080. Replace @i{localhost} with the remote machine's hostname or IP address if the web server is not running on your local system.
+OpenMOLE ships with a web server providing a REST API to @b{start} workflows, @b{manage} their execution, and @b{retrieve} their output data.
+To start the OpenMOLE REST API, run the command @code{openmole --rest --port 8080} from the console.
+If you need to launch it automatically in a deamon for instance, you should also give the --password-file argument to provide the password for encryption of the preferences.
+
+@br
+
+The web server can be accessed at the URL @i{http://localhost:8080}.
+Replace @i{localhost} with the remote machine's hostname or IP address if the web server is not running on your local system.
+
+
 
 @h2{API Reference}
 
-The API of exposes the following routes to submit and manage executions:
+The API exposes the following routes to submit and manage executions:
 @ul
     @li{@b{POST /job} - start a mole execution. It has the following parameters:
       @ul
         @li{@b{workDirectory} - a tar.gz archive containing the workDirectory for the script}
-        @li{@b{script} - the path (relative to the workDirectory) of script to execute, the last line should be a puzzle}
-      When successful, it return a structure containing:
+        @li{@b{script} - the path (relative to the workDirectory) of the script to execute, the last line should be a puzzle}
+      When successful, it returns a structure containing:
       @ul
         @li{@b{id} - the id of the execution}
       When something has failed, it returns a structure containing:
@@ -32,7 +43,7 @@ The API of exposes the following routes to submit and manage executions:
       When successful, it returns a structure representing the state:
       @ul
         @li{@b{state} - the state of the execution, it can be running, finished or failed}
-      When running the other fields are:
+      When running, the other fields are:
       @ul
         @li{@b{ready, running, completed} - the number of jobs in each of these states in the execution}
         @li{@b{environments} - that contains the state for each execution environment on the execution. This is a JSON structure containing, the name of the environment if it has been set (name), the number of jobs in submitted (submitted), running (running), done (done) and failed (failed) state, a list of errors that happened since the last state query (errors) with the message (message), the stack (stackTrace) and the error level (level).}
@@ -80,7 +91,7 @@ The API of exposes the following routes to submit and manage executions:
     @li{@b{GET /job/} - list execution ids on the server.}
 
 
-The API of exposes the following routes to submit and manage the plugins:
+The API exposes the following routes to submit and manage the plugins:
 @ul
   @li
     @b{GET /plugin/} - list all user plugins loaded in OpenMOLE
@@ -88,7 +99,7 @@ The API of exposes the following routes to submit and manage the plugins:
   @li
     @b{POST /plugin} - load one or several plugins in OpenMOLE. It has the following parameter:
     @ul
-      @li{ @b{file} - an OpenMOLE plugin file. Repeat this parameter to submit several plugins at once. }
+      @li{ @b{file} - an OpenMOLE plugin file. Repeat this parameter to submit several plugins at once. }
     When some errors occurs while loading some plugins it return a list containing the name of the plugin an the error that occurred while loading this plugins.
   @li
     @b{DELETE /plugin} - unload (and remove) one or several plugins in OpenMOLE. Depending plugin are unloaded as well. It has the following parameter:
@@ -96,9 +107,12 @@ The API of exposes the following routes to submit and manage the plugins:
       @li{ @b{name} - the name of an OpenMOLE plugin. Repeat this parameter to submit several plugins at once.}
     It return a list with the name of the plugins which have ben unloaded.
 
+
+
 @h2{Examples}
 
-Launch the REST server:
+@h3{Launch the REST server}
+
 @plain("""
 [reuillon:~] $ openmole --rest
 Enter your OpenMOLE password (for preferences encryption): *******
@@ -106,7 +120,8 @@ Jan 08, 2020 3:34:41 PM org.openmole.rest.server.RESTServer server$lzycompute
 INFO: binding HTTP REST API to port 8080
 """)
 
-Prepare the work directory:
+@h3{Prepare the work directory}
+
 @plain(s"""
 [reuillon:~] $$ cd /tmp/pi/
 [reuillon:/tmp/pi] $$ ls
@@ -146,7 +161,8 @@ Replication(
 [reuillon:/tmp/pi] $$ tar -cvzf pi.tgz *
 """)
 
-Submit the job:
+@h3{Submit the job}
+
 @plain("""
 [reuillon:/tmp/pi] $ curl -X POST -F 'script=Pi.oms' -F 'workDirectory=@/tmp/pi.tgz' http://localhost:8080/job
 {
@@ -181,7 +197,8 @@ curl: Saved to filename 'result.json.gz'
 """)
 
 
-List the plugins:
+@h3{List the plugins}
+
 @plain("""
 [reuillon:~/myopenmoleplugin] $ curl -X GET http://localhost:8080/plugin/
 [ {
@@ -193,7 +210,8 @@ List the plugins:
 } ]
 """)
 
-Load a plugin:
+@h3{Load a plugin}
+
 @plain("""
 [reuillon:~/myopenmoleplugin] $ curl -X POST http://localhost:8080/plugin -F 'file=@./target/scala-2.12/myopenmoleplugin_2.12-1.0.jar'
 """)

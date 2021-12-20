@@ -17,6 +17,7 @@ package org.openmole.plugin.environment.batch.environment
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.core.compiler.CompilationContext
 import org.openmole.core.communication.message.RunnableTask
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.pluginmanager.PluginManager
@@ -60,9 +61,7 @@ object BatchExecutionJob {
 
   case class ClosuresBundle(classes: Seq[ClassFile], exported: Seq[String], dependencies: Seq[VersionedPackage], plugins: Seq[File])
 
-  def replClassesToPlugins(replClasses: Seq[Class[_]])(implicit newFile: TmpDirectory, fileService: FileService) = {
-    val replDirectories = replClasses.map(c ⇒ c.getClassLoader -> BatchExecutionJob.replClassDirectory(c)).distinct
-
+  def replClassesToPlugins(classDirectory: File, classLoader: ClassLoader)(implicit newFile: TmpDirectory, fileService: FileService) = {
     def bundle(directory: File, classLoader: ClassLoader) = {
       val allClassFiles = BatchExecutionJob.allClasses(directory)
 
@@ -102,29 +101,14 @@ object BatchExecutionJob {
       fileService.wrapRemoveOnGC(bundle)
     }
 
-    val (bfs, plugins) =
-      replDirectories.map {
-        case (c, d) ⇒
-          val b = bundle(d, c)
-          (bundleFile(b), b.plugins)
-      }.unzip
-
-    bfs ++ plugins.flatten.toList.distinct
+    val closuresBundle = bundle(classDirectory, classLoader)
+    (closuresBundle, bundleFile(closuresBundle))
   }
 
-  def apply(id: Long, job: JobGroup, relpClassesCache: REPLClassCache, jobStore: JobStore)(implicit serializerService: SerializerService, tmpDirectory: TmpDirectory, fileService: FileService) = {
+  def apply(id: Long, job: JobGroup, jobStore: JobStore)(implicit serializerService: SerializerService, tmpDirectory: TmpDirectory, fileService: FileService) = {
     val pluginsAndFiles = serializerService.pluginsAndFiles(JobGroup.moleJobs(job).map(RunnableTask(_)))
-
-    def closureBundleAndPlugins = {
-      val replClasses = pluginsAndFiles.replClasses
-      relpClassesCache.cache(JobGroup.moleExecution(job), pluginsAndFiles.replClasses.map(_.getName).toSet, preCompute = false) { _ ⇒
-        BatchExecutionJob.replClassesToPlugins(replClasses)
-      }
-    }
-
-    val plugins = pluginsAndFiles.plugins ++ closureBundleAndPlugins
+    val plugins = pluginsAndFiles.plugins.distinctBy(_.getCanonicalPath)
     val storedJob = JobStore.store(jobStore, job)
-
     new BatchExecutionJob(id, storedJob, pluginsAndFiles.files, plugins)
   }
 }

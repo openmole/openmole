@@ -20,6 +20,8 @@ package org.openmole.plugin.environment.slurm
 
 import _root_.gridscale.effectaside
 import org.openmole.core.authentication._
+import org.openmole.core.preference.Preference
+import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
 import org.openmole.plugin.environment.batch.environment._
@@ -35,9 +37,9 @@ object SLURMEnvironment {
     user:                 OptionalArgument[String]      = None,
     host:                 OptionalArgument[String]      = None,
     port:                 OptionalArgument[Int]         = 22,
-    queue:                OptionalArgument[String]      = None,
+    partition:            OptionalArgument[String]      = None,
     openMOLEMemory:       OptionalArgument[Information] = None,
-    wallTime:             OptionalArgument[Time]        = None,
+    time:                 OptionalArgument[Time]        = None,
     memory:               OptionalArgument[Information] = None,
     qos:                  OptionalArgument[String]      = None,
     gres:                 Seq[Gres]                     = Vector(),
@@ -46,7 +48,7 @@ object SLURMEnvironment {
     nTasks:               OptionalArgument[Int]         = None,
     reservation:          OptionalArgument[String]      = None,
     wckey:                OptionalArgument[String]      = None,
-    coresByNode:          OptionalArgument[Int]         = None,
+    cpuPerTask:           OptionalArgument[Int]         = None,
     sharedDirectory:      OptionalArgument[String]      = None,
     workDirectory:        OptionalArgument[String]      = None,
     threads:              OptionalArgument[Int]         = None,
@@ -58,19 +60,18 @@ object SLURMEnvironment {
     refresh:              OptionalArgument[Time]        = None,
     modules:              Seq[String]                   = Vector(),
     debug:                Boolean                       = false
-  )(implicit services: BatchEnvironment.Services, authenticationStore: AuthenticationStore, cypher: Cypher, varName: sourcecode.Name) = {
-    import services._
+  )(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) = {
 
     val parameters = Parameters(
-      queue = queue,
+      partition = partition,
       openMOLEMemory = openMOLEMemory,
-      wallTime = wallTime,
+      time = time,
       memory = memory,
       qos = qos,
       gres = gres,
       constraints = constraints,
       nodes = nodes,
-      coresByNode = coresByNode,
+      cpuPerTask = cpuPerTask,
       nTasks = nTasks,
       reservation = reservation,
       wckey = wckey,
@@ -84,6 +85,8 @@ object SLURMEnvironment {
       debug = debug)
 
     EnvironmentProvider { ms ⇒
+      import ms._
+
       if (!localSubmission) {
         val userValue = user.mustBeDefined("user")
         val hostValue = host.mustBeDefined("host")
@@ -93,33 +96,33 @@ object SLURMEnvironment {
           user = userValue,
           host = hostValue,
           port = portValue,
-          timeout = timeout.getOrElse(services.preference(SSHEnvironment.timeOut)),
+          timeout = timeout.getOrElse(preference(SSHEnvironment.timeOut)),
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue),
-          services = services.set(ms)
+          services = BatchEnvironment.Services(ms)
         )
       }
       else
         new SLURMLocalEnvironment(
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
-          services = services.set(ms)
+          services = BatchEnvironment.Services(ms)
         )
     }
 
   }
 
   case class Parameters(
-    queue:                Option[String],
+    partition:            Option[String],
     openMOLEMemory:       Option[Information],
-    wallTime:             Option[Time],
+    time:                 Option[Time],
     memory:               Option[Information],
     qos:                  Option[String],
     gres:                 Seq[Gres],
     constraints:          Seq[String],
     nodes:                Option[Int],
-    coresByNode:          Option[Int],
+    cpuPerTask:           Option[Int],
     nTasks:               Option[Int],
     reservation:          Option[String],
     wckey:                Option[String],

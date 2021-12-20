@@ -352,6 +352,16 @@ object Validation {
       case _               ⇒ Seq()
     }
 
+  def apply(dsl: org.openmole.core.workflow.composition.DSL)(implicit tmpDirectory: TmpDirectory, fileService: FileService): List[Problem] = {
+    import org.openmole.core.workflow.dsl._
+    val puzzle = DSL.toPuzzle(dsl)
+    apply(
+      mole = puzzle.toMole,
+      sources = puzzle.sources,
+      hooks = puzzle.hooks
+    )
+  }
+
   def apply(mole: Mole, implicits: Context = Context.empty, sources: Sources = Sources.empty, hooks: Hooks = Hooks.empty)(implicit newFile: TmpDirectory, fileService: FileService): List[Problem] =
     allMoles(mole, sources, hooks).flatMap {
       case (m, mt) ⇒

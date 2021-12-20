@@ -1,14 +1,12 @@
 package org.openmole.plugin.method.sensitivity
 
 import org.scalatest.{ FlatSpec, Matchers }
-import org.openmole.core.dsl._
+
 import org.openmole.core.workflow.test._
 import scala.util.Random
 
 import org.openmole.core.dsl._
-import org.openmole.core.workflow.mole.Mole
-import org.openmole.core.workflow.task.FromContextTask
-import org.openmole.core.workflow.validation._
+import org.openmole.core.dsl.extension._
 import org.openmole.plugin.domain.collection._
 import org.scalatest._
 import org.openmole.plugin.domain.bounds._

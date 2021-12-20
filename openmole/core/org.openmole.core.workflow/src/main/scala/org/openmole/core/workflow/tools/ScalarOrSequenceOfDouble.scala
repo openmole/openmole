@@ -75,40 +75,44 @@ object Scalable {
 
   implicit def factorOfDoubleIsScalable[D, T: ScalableType](implicit bounded: BoundedFromContextDomain[D, T]) = new Scalable[Factor[D, T]] {
     def isScalar(t: Factor[D, T]) = true
-    override def inputs(t: Factor[D, T]) = Seq()
+    override def inputs(t: Factor[D, T]) = bounded(t.domain).inputs
     override def prototype(t: Factor[D, T]): Val[_] = t.value
     override def size(t: Factor[D, T]): FromContext[Int] = 1
 
-    override def unflatten(s: Factor[D, T])(values: Seq[Double], scale: Boolean): FromContext[Scaled] = {
+    override def unflatten(s: Factor[D, T])(values: Seq[Double], scale: Boolean): FromContext[Scaled] = FromContext { p ⇒
+      import p._
+
       val g = values.head
       assert(!g.isNaN)
 
-      (bounded.min(s.domain) map2 bounded.max(s.domain)) { (min, max) ⇒
-        val sc = if (scale) implicitly[ScalableType[T]].scale(g, min, max) else implicitly[ScalableType[T]].convert(g)
-        ScaledScalar(s.value, sc)
-      }
+      val (min, max) = bounded(s.domain).domain
+
+      val sc = if (scale) implicitly[ScalableType[T]].scale(g, min.from(context), max.from(context)) else implicitly[ScalableType[T]].convert(g)
+      ScaledScalar(s.value, sc)
     }
   }
 
   implicit def factorOfSequenceIsScalable[D, T: ScalableType: ClassTag](implicit bounded: BoundedFromContextDomain[D, Array[T]]) = new Scalable[Factor[D, Array[T]]] {
 
     def isScalar(t: Factor[D, Array[T]]) = false
-    override def inputs(t: Factor[D, Array[T]]) = Seq()
+    override def inputs(t: Factor[D, Array[T]]) = bounded(t.domain).inputs
     override def prototype(t: Factor[D, Array[T]]): Val[_] = t.value
 
-    override def size(t: Factor[D, Array[T]]): FromContext[Int] =
-      (bounded.min(t.domain) map2 bounded.max(t.domain)) { case (min, max) ⇒ math.min(min.size, max.size) }
+    override def size(t: Factor[D, Array[T]]): FromContext[Int] = FromContext { p ⇒
+      import p._
+      val (min, max) = bounded(t.domain).domain
+      math.min(min.from(context).size, max.from(context).size)
+    }
 
-    override def unflatten(t: Factor[D, Array[T]])(values: Seq[Double], scale: Boolean): FromContext[Scaled] = {
+    override def unflatten(t: Factor[D, Array[T]])(values: Seq[Double], scale: Boolean): FromContext[Scaled] = FromContext { p ⇒
+      import p._
 
+      val (min, max) = bounded(t.domain).domain
       def scaled =
-        (bounded.min(t.domain) map2 bounded.max(t.domain)) {
-          case (min, max) ⇒
-            if (scale) (values zip (min zip max)).map { case (g, (min, max)) ⇒ implicitly[ScalableType[T]].scale(g, min, max) }
-            else values.map(implicitly[ScalableType[T]].convert)
-        }
+        if (scale) (values zip (min.from(context) zip max.from(context))).map { case (g, (min, max)) ⇒ implicitly[ScalableType[T]].scale(g, min, max) }
+        else values.map(implicitly[ScalableType[T]].convert)
 
-      scaled.map { sc ⇒ ScaledSequence(t.value, sc.toArray) }
+      ScaledSequence(t.value, scaled.toArray)
     }
 
   }

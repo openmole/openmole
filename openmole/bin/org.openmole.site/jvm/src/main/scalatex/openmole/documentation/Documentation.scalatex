@@ -20,9 +20,14 @@
       @sitemap.siteMapSection(explorePages.diff(Seq(samplings)))
   @li
     @h3
-        @a(scale.title, href := scale.file)
+      @a(scale.title, href := scale.file)
     @ol
       @sitemap.siteMapSection(scalePages)
+  @li
+    @h3
+      @a(utilityTask.title, href := utilityTask.file)
+    @ol
+      @sitemap.siteMapSection(utilityTaskPages)
   @li
     @h3
         @a(language.title, href := language.file)

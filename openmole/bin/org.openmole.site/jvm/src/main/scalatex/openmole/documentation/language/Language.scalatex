@@ -9,7 +9,7 @@ It supports all the Scala constructs, and additional operators and classes speci
 OpenMOLE workflows expose explicit parallel aspect of the workload that can be delegated to distributed computing environments in a transparent manner.
 The philosophy of OpenMOLE is test small (on your computer) and scale for free (on remote distributed computing environments).
 
-@br@br
+@br
 
 A good way to get a first glimpse of what OpenMOLE can do is to read this @aa("research paper", href := Resource.paper.fgcs2013.file).
 
@@ -17,23 +17,19 @@ A good way to get a first glimpse of what OpenMOLE can do is to read this @aa("r
 
 @h2{OpenMOLE scripts}
 
-The OpenMOLE scripts are stored in the GUI in @b{.oms} files.
+The OpenMOLE scripts are stored in the GUI in @b{.oms} files.
 One workflow can be split into several files.
+
 @br
+
 To be able to use the content of a @b{.oms} file (let's call it @code{file2.oms}) in another one (say @code{file1.oms}), located in the same directory, @code{file2.oms} needs to be imported in @code{file1.oms}.
 The following line needs to be written at the beginning of @code{file1.oms}:
-
-@br@br
 
 @hl.openmoleNoTest("""
     import _file_.file2._
 """)
 
-@br
-
 To refer to a file located in a parent directory, use the @code{parent} keyword:
-
-@br@br
 
 @hl.openmoleNoTest("""
     import _parent_._file_.file2._
@@ -69,7 +65,7 @@ Under the hood, it calls a method that is in charge of building the file.
 @h3{Named parameters }
 Function calls generally require the parameters to be provided in a predefined order.
 In Scala you can get rid of this ordering constraint by using named parameters.
-OpenMOLE scripts will often make use of this pattern: @hl.openmoleNoTest("val t = SomeClass(value1, value2, otherParam = otherValue)").
+OpenMOLE scripts will often make use of this pattern: @code{val t = SomeClass(value1, value2, otherParam = otherValue)}.
 Here it means that @code{value1} and @code{value2} are the values for the first two (unnamed) parameters, and that the parameter named @code{otherParam} is set to the value @code{otherValue}.
 Unspecified parameters are set to their default value.
 
@@ -81,7 +77,7 @@ What you have read so far should be sufficient in order to get started with Open
 To begin with the OpenMOLE syntax you should have a look at the @a("Getting started", href := stepByStepIntro.file).
 You may also want to look at the @a("Task documentation", href := plug.file), and more generally the @a("Documentation", href := documentation.file).
 
-@br@br
+@br
 
 Scala is a very nice language, with an extensive and very well designed standard library.
 To get more insights on this language, check these links:

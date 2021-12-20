@@ -9,28 +9,19 @@
 @h2{Tutorials}
 
 In this section you will find some tutorials to help you build your first experiments.
-Feel free to suggest topics for new tutorials you would find helpful on the @aa("forum", href := shared.link.mailingList).
-
-@br@br
-
+Feel free to suggest topics for new tutorials you would find helpful on the @aa("forum", href := shared.link.forum).
 You can even write your own tutorial and share it with the OpenMOLE community on the forum!
 We'll make sure to integrate it with the next release.
 
-@br@br
-
-The available tutorials are the following:
-
-@br@br
-
-@b{Getting Started}
-  @ul
+@h3{Getting Started}
+@ul
     @li
       @a("A Step by Step Introduction to OpenMOLE", href := stepByStepIntro.file)
     @li
       @a("How to Execute an Exploration Task", href := exploreTuto.file)
 
-@b{NetLogo Tutorials}
-  @ul
+@h3{NetLogo Tutorials}
+@ul
     @li
       @a("Simple Sensitivity Analysis of the Fire NetLogo Model", href := simpleSAFire.file)
     @li

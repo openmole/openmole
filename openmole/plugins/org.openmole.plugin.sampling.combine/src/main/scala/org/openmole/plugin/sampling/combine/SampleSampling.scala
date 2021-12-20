@@ -22,17 +22,24 @@ import org.openmole.core.dsl.extension._
 
 object SampleSampling {
 
-  implicit def isSampling[S]: IsSampling[SampleSampling[S]] = new IsSampling[SampleSampling[S]] {
-    override def validate(s: SampleSampling[S]): Validate = s.sampling.validate(s.s) ++ s.size.validate
-    override def inputs(s: SampleSampling[S]): PrototypeSet = s.sampling.inputs(s.s)
-    override def outputs(s: SampleSampling[S]): Iterable[Val[_]] = s.sampling.outputs(s.s)
-    override def apply(s: SampleSampling[S]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+  implicit def isSampling[S]: IsSampling[SampleSampling[S]] = s ⇒ {
+    def validate: Validate = s.sampling(s.s).validate ++ s.size.validate
+    def inputs: PrototypeSet = s.sampling(s.s).inputs
+    def outputs: Iterable[Val[_]] = s.sampling(s.s).outputs
+    def apply: FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
       import p._
-      val sampled = s.sampling(s.s).from(context).toVector
+      val sampled = s.sampling(s.s).sampling.from(context).toVector
       val sampledSize = sampled.size
       val sizeValue = s.size.from(context)
       Iterator.continually(random().nextInt(sampledSize)).take(sizeValue).map(i ⇒ sampled(i))
     }
+
+    Sampling(
+      apply,
+      outputs,
+      inputs = inputs,
+      validate = validate
+    )
   }
 
 }

@@ -24,9 +24,12 @@ import cats.implicits._
 
 object SlidingDomain {
 
-  implicit def isDiscrete[D, T]: DiscreteFromContextDomain[SlidingDomain[D, T], Array[T]] = domain ⇒ domain.iterator
-  implicit def inputs[D, T](implicit domainInputs: DomainInput[D]): DomainInput[SlidingDomain[D, T]] = domain ⇒ domainInputs(domain.domain) ++ domain.size.inputs ++ domain.step.inputs
-  implicit def validate[D, T](implicit validate: DomainValidation[D]): DomainValidation[SlidingDomain[D, T]] = domain ⇒ validate(domain.domain) ++ domain.size.validate ++ domain.size.validate
+  implicit def isDiscrete[D, T]: DiscreteFromContextDomain[SlidingDomain[D, T], Array[T]] = domain ⇒
+    Domain(
+      domain.iterator,
+      domain.inputs,
+      domain.validate
+    )
 
 }
 
@@ -34,8 +37,11 @@ case class SlidingDomain[D, T: Manifest](domain: D, size: FromContext[Int], step
 
   // FIXME convoluted expression, might be simplified
   def iterator =
-    ((discrete.iterator(domain) map2 size)((a, b) ⇒ (a, b)) map2 step) {
+    ((discrete(domain).domain map2 size)((a, b) ⇒ (a, b)) map2 step) {
       case ((it, si), st) ⇒ it.sliding(si, st).map(_.toArray)
     }
+
+  def inputs = discrete(domain).inputs ++ size.inputs ++ step.inputs
+  def validate = discrete(domain).validate ++ size.validate ++ size.validate
 
 }

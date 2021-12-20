@@ -32,3 +32,4 @@ Here is a use example:
     @li{@threads,}
     @li{@workDirectory,}
     @li{@name.}
+    @li{@code{killAfter}: use the timeout command to kill the process after a given time, for exemple killAfter = 24 hours}

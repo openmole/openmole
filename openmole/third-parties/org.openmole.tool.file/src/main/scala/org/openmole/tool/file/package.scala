@@ -128,13 +128,13 @@ package file {
         else copyFile(toF, followSymlinks)
       }
 
-      def copy(to: OutputStream) = withClosable(bufferedInputStream) {
+      def copy(to: OutputStream) = withClosable(bufferedInputStream()) {
         _.copy(to)
       }
 
       // TODO replace with NIO
       def copy(to: OutputStream, maxRead: Int, timeout: Time)(implicit pool: ThreadPoolExecutor): Unit =
-        withClosable(bufferedInputStream) {
+        withClosable(bufferedInputStream()) {
           _.copy(to, maxRead, timeout)
         }
 
@@ -143,7 +143,7 @@ package file {
         toF
       }
 
-      def copyUncompressFile(toF: File): File = withClosable(new GZIPInputStream(file.bufferedInputStream)) { from ⇒
+      def copyUncompressFile(toF: File): File = withClosable(new GZIPInputStream(file.bufferedInputStream())) { from ⇒
         Files.copy(from, toF, StandardCopyOption.REPLACE_EXISTING)
         toF
       }
@@ -407,7 +407,9 @@ package file {
         finally lockFile.delete()
       }
 
-      def bufferedInputStream = new BufferedInputStream(Files.newInputStream(file))
+      def bufferedInputStream(gz: Boolean = false) =
+        if (!gz) new BufferedInputStream(Files.newInputStream(file))
+        else new GZIPInputStream(new BufferedInputStream(Files.newInputStream(file)))
 
       private def writeOptions(append: Boolean) = {
         import StandardOpenOption._
@@ -420,7 +422,7 @@ package file {
         else new BufferedOutputStream(Files.newOutputStream(file.toPath, writeOptions(append): _*).toGZ)
       }
 
-      def gzippedBufferedInputStream = new GZIPInputStream(bufferedInputStream)
+      def gzippedBufferedInputStream = new GZIPInputStream(bufferedInputStream())
 
       def gzippedBufferedOutputStream = new GZIPOutputStream(bufferedOutputStream())
 
@@ -448,22 +450,25 @@ package file {
 
       def withFileOutputStream[T] = withClosable[FileOutputStream, T](new FileOutputStream(file))(_)
 
-      def withInputStream[T] = withClosable[InputStream, T](bufferedInputStream)(_)
+      def withInputStream[T] = withClosable[InputStream, T](bufferedInputStream())(_)
 
       def withReader[T] = withClosable[Reader, T](Files.newBufferedReader(file.toPath))(_)
 
       def withWriter[T](append: Boolean = false) = withClosable[Writer, T](Files.newBufferedWriter(file.toPath, writeOptions(append = append): _*))(_)
 
-      def withDirectoryStream[T](filter: Option[java.nio.file.DirectoryStream.Filter[Path]] = None) = {
+      def withDirectoryStream[T](filter: Option[java.nio.file.DirectoryStream.Filter[Path]] = None)(f: DirectoryStream[Path] ⇒ T): T = {
         def open =
           filter match {
             case None    ⇒ Files.newDirectoryStream(file)
             case Some(f) ⇒ Files.newDirectoryStream(file, f)
           }
-        withClosable[DirectoryStream[Path], T](open)(_)
+
+        val stream = open
+        try f(stream)
+        finally stream.close()
       }
 
-      def withSource[T] = withClosable[Source, T](Source.fromInputStream(bufferedInputStream))(_)
+      def withSource[T] = withClosable[Source, T](Source.fromInputStream(bufferedInputStream()))(_)
 
       def wrapError[T](f: ⇒ T): T =
         try f

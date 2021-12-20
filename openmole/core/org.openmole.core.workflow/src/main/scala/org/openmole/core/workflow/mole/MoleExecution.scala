@@ -45,7 +45,7 @@ import org.openmole.tool.logger.{ JavaLogger, LoggerService }
 import scala.collection.mutable
 import scala.collection.mutable.{ Buffer, ListBuffer }
 
-object MoleExecution extends JavaLogger {
+object MoleExecution {
 
   class Started extends Event[MoleExecution]
   case class Finished(canceled: Boolean) extends Event[MoleExecution]
@@ -173,8 +173,8 @@ object MoleExecution extends JavaLogger {
             val ctx = try s.perform(subMoleExecutionState.moleExecution.implicits + context, subMoleExecutionState.moleExecution.executionContext)
             catch {
               case t: Throwable ⇒
-                Log.logger.log(Log.FINE, "Error in submole execution", t)
-                val event = MoleExecution.SourceExceptionRaised(s, capsule, t, Log.SEVERE)
+                LoggerService.fine("Error in submole execution", t)
+                val event = MoleExecution.SourceExceptionRaised(s, capsule, t, Level.SEVERE)
                 eventDispatcher.trigger(subMoleExecutionState.moleExecution, event)
                 cancel(subMoleExecutionState.moleExecution, Some(event))
                 throw new InternalProcessingError(t, s"Error in source execution that is plugged to $capsule")
@@ -259,6 +259,7 @@ object MoleExecution extends JavaLogger {
           val services = executionContext.services
           HookExecutionContext(
             cache = cache,
+            ticket = ticket,
             preference = services.preference,
             threadProvider = services.threadProvider,
             fileService = services.fileService,
@@ -275,7 +276,7 @@ object MoleExecution extends JavaLogger {
       catch {
         case e: Throwable ⇒
           import subMoleExecutionState.moleExecution.executionContext.services._
-          val event = MoleExecution.HookExceptionRaised(h, capsule, job, e, Log.SEVERE)
+          val event = MoleExecution.HookExceptionRaised(h, capsule, job, e, Level.SEVERE)
           eventDispatcher.trigger(subMoleExecutionState.moleExecution, event)
           cancel(subMoleExecutionState.moleExecution, Some(event))
           throw e
@@ -293,8 +294,9 @@ object MoleExecution extends JavaLogger {
     }
     catch {
       case t: Throwable ⇒
-        Log.logger.log(Log.FINE, "Error in submole execution", t)
-        val event = MoleExecution.ExceptionRaised(job, capsule, t, Log.SEVERE)
+        import subMoleExecutionState.moleExecution.executionContext.services._
+        LoggerService.fine("Error in submole execution", t)
+        val event = MoleExecution.ExceptionRaised(job, capsule, t, Level.SEVERE)
         import subMoleExecutionState.moleExecution.executionContext.services._
         eventDispatcher.trigger(subMoleExecutionState.moleExecution, event)
         cancel(subMoleExecutionState.moleExecution, Some(event))
@@ -319,9 +321,10 @@ object MoleExecution extends JavaLogger {
   def processFinalState(subMoleExecutionState: SubMoleExecutionState, job: JobId, result: Either[Context, Throwable], capsule: MoleCapsule, ticket: Ticket) = {
     result match {
       case Right(e) ⇒
+        import subMoleExecutionState.moleExecution.executionContext.services._
         val error = MoleExecution.JobFailed(job, capsule, e)
         cancel(subMoleExecutionState.moleExecution, Some(error))
-        Log.logger.log(Log.FINE, s"Error in user job execution for capsule $capsule, job state is FAILED.", e)
+        LoggerService.fine(s"Error in user job execution for capsule $capsule, job state is FAILED.", e)
         subMoleExecutionState.moleExecution.executionContext.services.eventDispatcher.trigger(subMoleExecutionState.moleExecution, error)
       case Left(context) ⇒
         subMoleExecutionState.moleExecution.completed(capsule) = subMoleExecutionState.moleExecution.completed(capsule) + 1
@@ -335,7 +338,7 @@ object MoleExecution extends JavaLogger {
   def start(moleExecution: MoleExecution, context: Option[Context]) =
     if (!moleExecution._started) {
       import moleExecution.executionContext.services._
-      LoggerService.log(Level.FINE, "Starting mole execution")
+      LoggerService.fine("Starting mole execution")
 
       def startEnvironments() = {
         if (moleExecution.startStopDefaultEnvironment) moleExecution.defaultEnvironment.start()
@@ -356,7 +359,7 @@ object MoleExecution extends JavaLogger {
   private def finish(moleExecution: MoleExecution, canceled: Boolean = false) =
     if (!moleExecution._finished) {
       import moleExecution.executionContext.services._
-      LoggerService.log(Level.FINE, s"finish mole execution $moleExecution, canceled ${canceled}")
+      LoggerService.fine(s"finish mole execution $moleExecution, canceled ${canceled}")
 
       moleExecution._finished = true
       moleExecution._endTime = Some(System.currentTimeMillis)
@@ -681,7 +684,7 @@ class MoleExecution(
   def endTime(implicit s: MoleExecution.SynchronisationContext) = sync(_endTime)
 
   private[mole] var ticketNumber = 1L
-  private[mole] val rootTicket = Ticket(id, 0)
+  private[mole] val rootTicket = Ticket.root(0L)
 
   private[mole] var moleId = 0L
 
@@ -709,6 +712,7 @@ class MoleExecution(
       preference = preference,
       threadProvider = threadProvider,
       fileService = fileService,
+      fileServiceCache = fileServiceCache,
       workspace = workspace,
       outputRedirection = outputRedirection,
       loggerService = loggerService,

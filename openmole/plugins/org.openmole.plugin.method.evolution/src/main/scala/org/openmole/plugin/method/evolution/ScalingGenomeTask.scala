@@ -26,10 +26,10 @@ object ScalingGenomeTask {
   def apply(evolution: EvolutionWorkflow)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     FromContextTask("ScalingGenomeTask") { p ⇒
       import p._
-      context ++ evolution.genomeToVariables(context(evolution.genomePrototype)).from(context)
+      context ++ evolution.genomeToVariables(context(evolution.genomeVal)).from(context)
     } set (
-      outputs += (evolution.inputPrototypes: _*),
-      (inputs, outputs) += evolution.genomePrototype
+      outputs += (evolution.inputVals: _*),
+      (inputs, outputs) += evolution.genomeVal
     )
 
 }

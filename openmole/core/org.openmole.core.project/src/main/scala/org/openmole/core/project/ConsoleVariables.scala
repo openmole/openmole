@@ -51,10 +51,9 @@ object ConsoleVariables {
 }
 
 case class ConsoleVariables(
-  args:          Seq[String],
-  workDirectory: File,
-  experiment:    ConsoleVariables.Experiment
+  args:                     Seq[String],
+  @transient workDirectory: File,
+  @transient experiment:    ConsoleVariables.Experiment
 )(
-  implicit
-  val services: Services
+  @transient implicit val services: Services
 )

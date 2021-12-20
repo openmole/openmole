@@ -142,7 +142,7 @@ public class Launcher {
 
             Method runMethod = main.getDeclaredMethod("run", String[].class);
             if(!java.lang.reflect.Modifier.isStatic(runMethod.getModifiers())) throw new RuntimeException("Run method should be static");
-            if(!int.class.isAssignableFrom(runMethod.getReturnType())) throw new RuntimeException("Run method should return int");
+            if(!int.class.isAssignableFrom(runMethod.getReturnType())) throw new RuntimeException("Run method " + runMethod + " returns " + runMethod.getReturnType() + ", it should return int");
 
             ret = (int) runMethod.invoke(null, (Object) forwardAgs);
 

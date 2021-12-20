@@ -43,13 +43,17 @@ package object tools {
 
   object hl {
 
-    def apply(content: String, lang: String) = highlight(content, lang)
+    def apply(content: String, lang: String, clazz: Option[String] = Some("doc-code")) = highlight(content, lang)
 
-    def highlight(string: String, lang: String) = {
+    def highlight(string: String, lang: String, clazz: Option[String] = Some("doc-code")) = {
       val lines = string.split("\n", -1)
+
+      val modif: Seq[Modifier] = clazz.toSeq.map(c ⇒ cls := c)
+
       if (lines.length == 1) {
         scalatags.Text.all.code(
           cls := lang + " " + "hljs",
+          modif,
           display := "inline",
           padding := 0,
           margin := 0,
@@ -62,6 +66,7 @@ package object tools {
           .mkString("\n")
 
         pre(
+          modif,
           scalatags.Text.all.code(
             cls := lang + " " + "hljs",
             stripped)
@@ -81,6 +86,7 @@ package object tools {
     }
 
     def code(code: String) = openmoleNoTest(code)
+
     def plain(code: String) = apply(code, "plain")
     def openmoleNoTest(code: String) = apply(code, "scala")
     def python(code: String) = apply(code, "python")
@@ -130,6 +136,9 @@ package object tools {
   def h3(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h3(elements.map(links.toModifier) ++ links.linkIcon(elements): _*))
 
   def anchor(title: String) = s"#${shared.anchor(title)}"
+
+  def img(xs: Modifier*) = scalatags.Text.all.img(Seq(cls := "doc-img") ++ xs: _*)
+  def br = scalatags.Text.all.br(cls := "doc-br")
 
   case class Parameter(name: String, `type`: String, description: String)
 

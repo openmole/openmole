@@ -1,7 +1,5 @@
 package org.openmole.core.dsl
 
-import org.openmole.core.workflow.domain.{ DomainValidation, DomainInput }
-
 package object extension {
 
   type FromContext[+T] = org.openmole.core.expansion.FromContext[T]
@@ -28,6 +26,8 @@ package object extension {
   type FromContextTask = org.openmole.core.workflow.task.FromContextTask
   def Task = org.openmole.core.workflow.task.FromContextTask
 
+  type Grouping = org.openmole.core.workflow.grouping.Grouping
+
   type Sampling = org.openmole.core.workflow.sampling.Sampling
   type FromContextSampling = org.openmole.core.workflow.sampling.FromContextSampling
   def Sampling = org.openmole.core.workflow.sampling.Sampling
@@ -36,14 +36,15 @@ package object extension {
   type BoundedFromContextDomain[-D, +T] = org.openmole.core.workflow.domain.BoundedFromContextDomain[D, T]
   type BoundedDomain[-D, +T] = org.openmole.core.workflow.domain.BoundedDomain[D, T]
   type FixDomain[-D, +T] = org.openmole.core.workflow.domain.FixDomain[D, T]
-  type SizedDomain[-D] = org.openmole.core.workflow.domain.SizedDomain[D]
   type DiscreteDomain[-D, +T] = org.openmole.core.workflow.domain.DiscreteDomain[D, T]
   type DiscreteFromContextDomain[-D, +T] = org.openmole.core.workflow.domain.DiscreteFromContextDomain[D, T]
-  type CenterDomain[-D, +T] = org.openmole.core.workflow.domain.CenterDomain[D, T]
-  type CenterFromContextDomain[-D, +T] = org.openmole.core.workflow.domain.CenterFromContextDomain[D, T]
 
-  type DomainInput[-D] = org.openmole.core.workflow.domain.DomainInput[D]
-  type DomainValidation[-D] = org.openmole.core.workflow.domain.DomainValidation[D]
+  type DomainCenter[-D, +T] = org.openmole.core.workflow.domain.DomainCenter[D, T]
+  type DomainCenterFromContext[-D, +T] = org.openmole.core.workflow.domain.DomainCenterFromContext[D, T]
+  type DomainSize[-D] = org.openmole.core.workflow.domain.DomainSize[D]
+
+  type Domain[+D] = org.openmole.core.workflow.domain.Domain[D]
+  def Domain = org.openmole.core.workflow.domain.Domain
 
   type Factor[D, T] = org.openmole.core.workflow.sampling.Factor[D, T]
   def Factor[D, T](p: Val[T], d: D) = org.openmole.core.workflow.sampling.Factor(p, d)
@@ -73,15 +74,20 @@ package object extension {
 
   def ExpandedString = org.openmole.core.expansion.ExpandedString
 
-  type Negative[A] = org.openmole.core.keyword.Negative[A]
-  type Under[A, B] = org.openmole.core.keyword.Under[A, B]
-  type In[A, B] = org.openmole.core.keyword.In[A, B]
-  type :=[A, B] = org.openmole.core.keyword.:=[A, B]
-  type Aggregate[A, B] = org.openmole.core.keyword.Aggregate[A, B]
-  type Delta[A, B] = org.openmole.core.keyword.Delta[A, B]
-  type As[A, B] = org.openmole.core.keyword.As[A, B]
-  type On[A, B] = org.openmole.core.keyword.On[A, B]
+  type Negative[+A] = org.openmole.core.keyword.Negative[A]
+  type Under[+A, +B] = org.openmole.core.keyword.Under[A, B]
+  type In[+A, +B] = org.openmole.core.keyword.In[A, B]
+  type :=[+A, +B] = org.openmole.core.keyword.:=[A, B]
+  type Aggregate[+A, B] = org.openmole.core.keyword.Aggregate[A, B]
+  type Delta[+A, +B] = org.openmole.core.keyword.Delta[A, B]
+  type As[+A, +B] = org.openmole.core.keyword.As[A, B]
+  type On[+A, +B] = org.openmole.core.keyword.On[A, B]
+  type By[+A, +B] = org.openmole.core.keyword.By[A, B]
 
+  type ValueAssignment[T] = org.openmole.core.workflow.builder.ValueAssignment[T]
+
+  def On = org.openmole.core.keyword.On
+  def By = org.openmole.core.keyword.By
   def Aggregate = org.openmole.core.keyword.Aggregate
 
   type TmpDirectory = org.openmole.core.workspace.TmpDirectory
@@ -96,8 +102,9 @@ package object extension {
   type RandomProvider = org.openmole.tool.random.RandomProvider
   type PrototypeSet = org.openmole.core.context.PrototypeSet
 
-  type ScriptSourceData = org.openmole.core.workflow.tools.ScriptSourceData
-  val ScriptSourceData = org.openmole.core.workflow.tools.ScriptSourceData
+  type Time = squants.Time
+  type Information = squants.information.Information
 
   type JavaLogger = org.openmole.tool.logger.JavaLogger
+  def Logger = org.openmole.tool.logger.LoggerService
 }

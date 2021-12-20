@@ -24,10 +24,10 @@ object MapReduce {
             (sampler -- aggregation block (wrapped.outputs: _*)) &
             (sampler -- Strain(output) block (aggregation.outputs ++ explored: _*))
 
-        DSLContainer(p, output = Some(output), delegate = wrapped.delegate)
+        DSLContainer(p, (), output = Some(output), delegate = wrapped.delegate)
       case None ⇒
         val p = Strain(sampler) -< Strain(wrapped) when condition
-        DSLContainer(p, delegate = wrapped.delegate)
+        DSLContainer(p, (), delegate = wrapped.delegate)
     }
   }
 

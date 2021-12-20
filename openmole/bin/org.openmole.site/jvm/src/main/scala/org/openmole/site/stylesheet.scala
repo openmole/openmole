@@ -34,13 +34,13 @@ package object stylesheet {
   //
   //  lazy val FUN_GREY = "#cccccc"
 
-  def center(percentage: Int) = Seq(
+  private def center(percentage: Int) = Seq(
     width := s"$percentage%",
     margin := "0 auto",
     display := "block"
   )
 
-  def centerW(w: Int) = Seq(
+  private def centerW(w: Int) = Seq(
     width := s"${w}px",
     margin := "0 auto",
     display := "block"

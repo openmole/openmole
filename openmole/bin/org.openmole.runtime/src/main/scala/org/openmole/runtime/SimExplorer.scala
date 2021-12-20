@@ -22,13 +22,13 @@ import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.tool.file._
 import org.openmole.tool.logger.{ JavaLogger, LoggerService }
 import scopt._
+
 import java.io.File
 import java.util.logging.Level
-
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.communication.storage.RemoteStorage
 import org.openmole.core.event.EventDispatcher
-import org.openmole.core.fileservice.FileService
+import org.openmole.core.fileservice.{ FileService, FileServiceCache }
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
@@ -47,8 +47,9 @@ object SimExplorer extends JavaLogger {
         inputMessage:  Option[String] = None,
         outputMessage: Option[String] = None,
         pluginPath:    Option[String] = None,
-        nbThread:      Option[Int]    = None,
+        thread:        Option[Int]    = None,
         workspace:     Option[String] = None,
+        transferRetry: Option[Int]    = None,
         test:          Boolean        = false,
         debug:         Boolean        = false
       )
@@ -67,11 +68,14 @@ object SimExplorer extends JavaLogger {
         opt[String]('p', "plugin") text ("Path for plugin category to preload") action {
           (v, c) ⇒ c.copy(pluginPath = Some(v))
         }
-        opt[Int]('t', "nbThread") text ("Number of thread for the execution") action {
-          (v, c) ⇒ c.copy(nbThread = Some(v))
+        opt[Int]('t', "thread") text ("Number of threads for the execution") action {
+          (v, c) ⇒ c.copy(thread = Some(v))
         }
         opt[String]('w', "workspace") text ("Workspace location") action {
           (v, c) ⇒ c.copy(workspace = Some(v))
+        }
+        opt[Int]("transfer-retry") text ("Retry fail transfer on failure") action {
+          (v, c) ⇒ c.copy(transferRetry = Some(v))
         }
         opt[Unit]('d', "debug") text ("Switch on the debug mode") action {
           (_, c) ⇒ c.copy(debug = true)
@@ -87,7 +91,8 @@ object SimExplorer extends JavaLogger {
 
             if (config.debug) LoggerConfig.level(Level.FINEST)
 
-            val threads = config.nbThread.getOrElse(1)
+            val threads = config.thread.getOrElse(1)
+            logger.fine(s"running with: $threads threads")
 
             implicit val workspace = Workspace(new File(config.workspace.get).getCanonicalFile)
             implicit val newFile = TmpDirectory(workspace)
@@ -95,24 +100,26 @@ object SimExplorer extends JavaLogger {
             implicit val preference = Preference.memory()
             implicit val threadProvider = ThreadProvider(threads + 5)
             implicit val fileService = FileService()
+            implicit val fileServiceCache = FileServiceCache()
             implicit val eventDispatcher = EventDispatcher()
             implicit val loggerService = if (config.debug) LoggerService(level = Some(finest)) else LoggerService()
             implicit val networkService = NetworkService(None)
 
             try {
-
               PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error starting bundle $b", e) }
-              logger.fine("plugins: " + config.pluginPath.get + " " + new File(config.pluginPath.get).listFilesSafe.mkString(","))
               PluginManager.tryLoad(new File(config.pluginPath.get).listFilesSafe).foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
 
-              val storage = serializerService.deserializeAndExtractFiles[RemoteStorage](new File(config.storage.get), deleteFilesOnGC = true)
+              logger.fine("plugins: " + config.pluginPath.get + " " + new File(config.pluginPath.get).listFilesSafe.mkString(","))
+
+              val storage = serializerService.deserializeAndExtractFiles[RemoteStorage](new File(config.storage.get), deleteFilesOnGC = true, gz = true)
 
               new Runtime().apply(
                 storage,
                 config.inputMessage.get,
                 config.outputMessage.get,
                 threads,
-                config.debug
+                config.debug,
+                config.transferRetry
               )
             }
             finally {

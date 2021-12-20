@@ -59,7 +59,8 @@ object LogicalLinkStorage {
         LogicalLinkStorage.upload(s, src, uploadDestination, options)
         uploadDestination
       }
-      override def download(src: String, dest: File, options: TransferOptions)(implicit newFile: TmpDirectory): Unit = LogicalLinkStorage.download(s, src, dest, options)
+      override def download(src: String, dest: File, options: TransferOptions)(implicit newFile: TmpDirectory): Unit =
+        LogicalLinkStorage.download(s, src, dest, options)
     }
 
 }

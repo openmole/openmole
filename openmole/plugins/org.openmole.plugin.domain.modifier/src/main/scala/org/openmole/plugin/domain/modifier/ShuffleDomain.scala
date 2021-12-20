@@ -23,16 +23,20 @@ import org.openmole.tool.random._
 
 object ShuffleDomain {
 
-  implicit def isDiscrete[D, T]: DiscreteFromContextDomain[ShuffleDomain[D, T], T] =
-    domain ⇒
-      FromContext { p ⇒
-        import p._
-        domain.discrete.iterator(domain.domain).from(context).toSeq.shuffled(random()).iterator
-      }
-
-  implicit def inputs[D, T](implicit inputs: DomainInput[D]): DomainInput[ShuffleDomain[D, T]] = domain ⇒ inputs(domain.domain)
-  implicit def validate[D, T](implicit validate: DomainValidation[D]): DomainValidation[ShuffleDomain[D, T]] = domain ⇒ validate(domain.domain)
-
+  implicit def isDiscrete[D, T]: DiscreteFromContextDomain[ShuffleDomain[D, T], T] = domain ⇒
+    Domain(
+      domain.iterator,
+      domain.inputs,
+      domain.validate
+    )
 }
 
-case class ShuffleDomain[D, +T](domain: D)(implicit val discrete: DiscreteFromContextDomain[D, T])
+case class ShuffleDomain[D, +T](domain: D)(implicit discrete: DiscreteFromContextDomain[D, T]) {
+  def iterator = FromContext { p ⇒
+    import p._
+    discrete(domain).domain.from(context).toSeq.shuffled(random()).iterator
+  }
+
+  def inputs = discrete(domain).inputs
+  def validate = discrete(domain).validate
+}

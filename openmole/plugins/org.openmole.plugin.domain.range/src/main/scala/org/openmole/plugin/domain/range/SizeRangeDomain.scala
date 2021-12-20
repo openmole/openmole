@@ -23,15 +23,22 @@ import cats.implicits._
 import org.openmole.core.workflow.domain
 
 object SizeRangeDomain {
-  implicit def isFinite[T] = new DiscreteFromContextDomain[SizeRangeDomain[T], T] with BoundedFromContextDomain[SizeRangeDomain[T], T] with CenterFromContextDomain[SizeRangeDomain[T], T] {
-    override def iterator(domain: SizeRangeDomain[T]) = domain.iterator
-    override def max(domain: SizeRangeDomain[T]) = domain.max
-    override def min(domain: SizeRangeDomain[T]) = domain.min
-    override def center(domain: SizeRangeDomain[T]) = RangeDomain.rangeCenter(domain.range)
-  }
 
-  implicit def inputs[T]: domain.DomainInput[SizeRangeDomain[T]] = domain ⇒ RangeDomain.inputs.apply(domain.range) ++ domain.size.inputs
-  implicit def validate[T]: domain.DomainValidation[SizeRangeDomain[T]] = domain ⇒ RangeDomain.validate.apply(domain.range) ++ domain.size.validate
+  implicit def isDiscrete[T]: DiscreteFromContextDomain[SizeRangeDomain[T], T] = domain ⇒
+    Domain(
+      domain.iterator,
+      domain.inputs,
+      domain.validate
+    )
+
+  implicit def isBounded[T]: BoundedFromContextDomain[SizeRangeDomain[T], T] = domain ⇒
+    Domain(
+      (domain.min, domain.max),
+      domain.inputs,
+      domain.validate
+    )
+
+  implicit def hasCenter[T]: DomainCenterFromContext[SizeRangeDomain[T], T] = domain ⇒ RangeDomain.rangeCenter(domain.range)
 
   def apply[T: RangeValue](min: FromContext[T], max: FromContext[T], size: FromContext[Int]): SizeRangeDomain[T] =
     apply(RangeDomain(min, max), size)
@@ -53,4 +60,8 @@ class SizeRangeDomain[T](val range: RangeDomain[T], val size: FromContext[Int]) 
 
   def min = range.min
   def max = range.max
+
+  def inputs = range.inputs ++ size.inputs
+  def validate = range.validate ++ size.validate
+
 }

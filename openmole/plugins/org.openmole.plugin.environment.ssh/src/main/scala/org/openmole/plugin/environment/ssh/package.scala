@@ -19,6 +19,7 @@ package org.openmole.plugin.environment
 import java.net.URI
 import _root_.gridscale.effectaside._
 import org.openmole.core.communication.storage.TransferOptions
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.preference.Preference
 import org.openmole.core.workflow.dsl.{File, uniqName}
 import org.openmole.core.workflow.execution.ExecutionState
@@ -56,13 +57,23 @@ package object ssh {
 
       override def rmFile(t: SSHStorage, path: String): Unit = t.accessControl { gssh.rmFile(t, path) }
 
-      override def upload(t: SSHStorage, src: File, dest: String, options: TransferOptions): Unit =t.accessControl {
-        StorageInterface.upload(false, gssh.writeFile(t, _, _))(src, dest, options)
-      }
+      override def upload(t: SSHStorage, src: File, dest: String, options: TransferOptions): Unit =
+        try {
+          t.accessControl {
+            StorageInterface.upload(false, gssh.writeFile(t, _, _))(src, dest, options)
+          }
+        } catch {
+          case e: Throwable => throw InternalProcessingError(s"Error uploading $src to $dest with options $options", e)
+        }
 
-      override def download(t: SSHStorage, src: String, dest: File, options: TransferOptions): Unit =t.accessControl {
-        StorageInterface.download(false, gssh.readFile[Unit](t, _, _))(src, dest, options)
-      }
+      override def download(t: SSHStorage, src: String, dest: File, options: TransferOptions): Unit =
+        try {
+          t.accessControl {
+            StorageInterface.download(false, gssh.readFile[Unit](t, _, _))(src, dest, options)
+          }
+        } catch {
+          case e: Throwable => throw InternalProcessingError(s"Error downloading $src to $dest with options $options", e)
+        }
 
       override def id(s: SSHStorage): String = s.id
       override def environment(s: SSHStorage): BatchEnvironment = s.environment

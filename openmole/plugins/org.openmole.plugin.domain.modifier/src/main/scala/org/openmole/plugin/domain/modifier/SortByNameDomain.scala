@@ -22,22 +22,28 @@ import org.openmole.core.dsl.extension._
 
 object SortByNameDomain {
 
-  implicit def isDiscrete[D]: DiscreteFromContextDomain[SortByNameDomain[D], File] =
-    domain ⇒
-      FromContext { p ⇒
-        import p._
-        def extractNumber(name: String) = {
-          val n = name.reverse.dropWhile(!_.isDigit).takeWhile(_.isDigit).reverse
-          if (n.isEmpty) throw new UserBadDataError("File name " + name + " doesn't contains a number")
-          else n.toInt
-        }
-
-        domain.discrete.iterator(domain.domain).from(context).toSeq.sortBy(f ⇒ extractNumber(f.getName)).iterator
-      }
-
-  implicit def inputs[D](implicit domainInputs: DomainInput[D]): DomainInput[SortByNameDomain[D]] = domain ⇒ domainInputs(domain.domain)
-  implicit def validate[D](implicit validate: DomainValidation[D]): DomainValidation[SortByNameDomain[D]] = domain ⇒ validate(domain.domain)
+  implicit def isDiscrete[D]: DiscreteFromContextDomain[SortByNameDomain[D], File] = domain ⇒
+    Domain(
+      domain.iterator,
+      domain.inputs,
+      domain.validate
+    )
 
 }
 
-case class SortByNameDomain[D](domain: D)(implicit val discrete: DiscreteFromContextDomain[D, File])
+case class SortByNameDomain[D](domain: D)(implicit val discrete: DiscreteFromContextDomain[D, File]) {
+  def iterator =
+    FromContext { p ⇒
+      import p._
+      def extractNumber(name: String) = {
+        val n = name.reverse.dropWhile(!_.isDigit).takeWhile(_.isDigit).reverse
+        if (n.isEmpty) throw new UserBadDataError("File name " + name + " doesn't contains a number")
+        else n.toInt
+      }
+
+      discrete(domain).domain.from(context).toSeq.sortBy(f ⇒ extractNumber(f.getName)).iterator
+    }
+
+  def inputs = discrete(domain).inputs
+  def validate = discrete(domain).validate
+}

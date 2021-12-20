@@ -50,7 +50,7 @@ trait PluginAndFilesListing { this: Serialiser ⇒
   def classUsed(c: Class[_]) = {
 
     if (!seenClasses.contains(c)) {
-      if (PluginManager.isClassProvidedByAPlugin(c)) PluginManager.pluginsForClass(c).foreach(pluginUsed)
+      PluginManager.pluginsForClass(c).foreach(pluginUsed)
 
       if (Option(c.getName).map(PluginAndFilesListing.looksLikeREPLClassName).getOrElse(false) &&
         !PluginManager.bundleForClass(c).isDefined) replClasses += c

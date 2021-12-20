@@ -10,23 +10,21 @@
 
 The default way to run the OpenMOLE application is with a graphical user interface (GUI).
 To do so, just execute the @code{openmole} file in the folder you @aa("downloaded", href := download.file), it will bring up the application in your web browser.
-OpenMOLE supports Chrome and Firefox, so if you are using another default web browser please copy paste the OpenMOLE url @b{http://localhost:[port]} in one of these browsers.
+OpenMOLE supports Chrome and Firefox, so if you are using another default web browser please copy-paste the OpenMOLE url @b{http://localhost:[port]} in one of these browsers.
 
 @br
 
 You should see something like below.
 The documentation concerning the GUI is provided within the GUI, some basic information can also be found @aa("here", href := gui.file).
 
-@br@br
-
-@img(src := Resource.img.mole.uiScreenshot.file, center(100))
+@img(src := Resource.img.mole.uiScreenshot.file, width := "100%")
 
 
 
 @h3{GUI on a remote machine}
 
 To run OpenMOLE on a remote machine you should execute the following command @code{openmole --remote --port portnumber}.
-The first time you launch it, you will be prompted for choosing a password.
+The first time you launch it, you will be prompted to choose a password.
 Then you can remotely connect to OpenMOLE using the url @b{https://remotemachine:portnumber} (note that the "https://" part is important).
 When you connect to OpenMOLE through your remote, you will be asked for the password you chose previously.
 
@@ -53,8 +51,6 @@ The only differences between the scripts in the console mode and the ones from t
 
 A console workflow is launched like this:
 
-@br@br
-
 @hl.code("""
   val exploration =
     DirectSampling(
@@ -65,8 +61,6 @@ A console workflow is launched like this:
   val ex = exploration start
 """)
 
-@br
-
 Using the @code{ex} and the @code{env} variables created above, you can follow the progress of the execution by using the commands @code{print(ex)} and @code{print(env)}.
 To cancel the execution you should use @code{ex.cancel}.
 
@@ -76,4 +70,3 @@ To cancel the execution you should use @code{ex.cancel}.
 
 OpenMOLE comes with several launching options.
 Execute @code{openmole -h} in a terminal to list them all.
-

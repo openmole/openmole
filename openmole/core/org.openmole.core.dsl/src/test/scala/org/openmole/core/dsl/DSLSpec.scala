@@ -20,7 +20,6 @@ package org.openmole.core.dsl
 import org.scalatest._
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import org.openmole.core.expansion.ToFromContext
 
 class DSLSpec extends FlatSpec with Matchers {
 
@@ -30,6 +29,10 @@ class DSLSpec extends FlatSpec with Matchers {
     val x = Val[Long]
     val testFromContext: FromContext[Long] = x
     val testOptionalArgument: OptionalArgument[FromContext[Long]] = x
+    val testOptionalFromContextLong: OptionalArgument[FromContext[Long]] = 42
+    val testOptionalFromContextBoolean: OptionalArgument[Condition] = true
+    val testoptionlaFromContextString: OptionalArgument[FromContext[String]] = "test"
+
   }
 
 }

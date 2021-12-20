@@ -28,11 +28,12 @@ val nbPreysInit = Val[Int]
 val mySeed = Val[Long]
 
 // Gama task
-// The first argument is the gaml file
+// The first argument is the project directory
+// The second argument is the relative path of the gaml file in the project directory
 // The second argument is the Gama experiment name
 // The third argument is the number of steps
 val gama =
-  GAMATask(workDirectory / "predatorPrey.gaml", experiment = "prey_predatorExp", finalStep = 100, seed = mySeed) set (
+  GAMATask(project = workDirectory / "predator", gaml = "predatorPrey.gaml", experiment = "prey_predatorExp", finalStep = 100, seed = mySeed) set (
     inputs += (nbPreysInit mapped "nb_preys_init"),
     outputs += (numberOfPreys mapped "Number of preys")
   )
@@ -54,12 +55,13 @@ DirectSampling(
 
 The GAMA task uses the following arguments:
   @ul
-    @li{@code{gamlOrWorkspace} the location of your @i{.gaml} file or the location of your GAMA workspace directory (in this case the model argument must be set), @b{mandatory}}
-    @li{@code{model} the relative path of your @i{.gaml} file in your work directory, @b{optional} this parameter must bet set only when @code{gamlOrWorkspace} is a directory}
+    @li{@code{project} the location of your GAMA project directory, @b{mandatory}, for instance @code{project = workDirectory / "gamaproject"}}
+    @li{@code{gaml} the relative path of your @i{.gaml} file in your work directory, @b{mandatory}, for instance @code{gaml = "model/model.gaml"}}
     @li{@code{experiment} the name of your experiment as implemented in the @i{.gaml} file, @b{mandatory}}
     @li{@code{finalStep} the last simulation step of you simulation, @b{mandatory}}
-    @li{@code{frameRate} the frame rate to sample you simulation dynamics, @b{optional}}
+    @li{@code{frameRate} the frame rate to sample you simulation dynamics, in this case the outputs should be arrays, @b{optional}}
     @li{@code{seed} the OpenMOLE variable used to set the GAMA random number generator seed, @b{optional} the seed is randomly drawn if not set}
-    @li{@code{version} the tag of the GAMA container used by OpenMOLE, @b{optional}}
+    @li{@code{containerImage} the label of a container image or a container file containing GAMA headless, @b{optional}, the default value is "gamaplatform/gama:1.8.1"}
+    @li{@code{memory} the memory allocated to the gama headless, @b{optional}, for example @code{memory = 3000 megabytes}}
     @li{@code{install} some command to run on the host system to initialise the container, for instance @code("""Seq("apt update", "apt install mylib")"""), @b{optional}}
     @li{@code{clearContainerCache} to remove existing GAMA container in OpenMOLE cache, download the image from the docker hub, and recreate it locally when set to true, @b{optional}}

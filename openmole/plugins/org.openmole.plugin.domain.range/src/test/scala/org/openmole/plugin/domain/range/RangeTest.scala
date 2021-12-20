@@ -40,6 +40,4 @@ class RangeTest extends FlatSpec with Matchers {
     val scalar: ScalarOrSequenceOfDouble = i in (0.0 to 1.0)
   }
 
-
-
 }

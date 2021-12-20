@@ -22,15 +22,17 @@ import org.openmole.core.dsl.extension._
 
 object DistinctDomain {
 
-  implicit def isDiscrete[D, T]: DiscreteFromContextDomain[DistinctDomain[D, T], T] =
-    domain ⇒
+  implicit def isDiscrete[D, T]: DiscreteFromContextDomain[DistinctDomain[D, T], T] = domain ⇒ {
+    val domainValue = domain.discrete(domain.domain)
+    Domain(
       FromContext { p ⇒
         import p._
-        domain.discrete.iterator(domain.domain).from(context).toSeq.distinct.iterator
-      }
-
-  implicit def inputs[D, T](implicit inputs: DomainInput[D]): DomainInput[DistinctDomain[D, T]] = domain ⇒ inputs(domain.domain)
-  implicit def validate[D, T](implicit validate: DomainValidation[D]): DomainValidation[DistinctDomain[D, T]] = domain ⇒ validate(domain.domain)
+        domainValue.domain.from(context).toSeq.distinct.iterator
+      },
+      domainValue.inputs,
+      domainValue.validation
+    )
+  }
 
 }
 

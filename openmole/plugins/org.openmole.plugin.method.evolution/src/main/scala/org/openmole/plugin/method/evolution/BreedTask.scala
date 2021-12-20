@@ -30,8 +30,8 @@ object BreedTask {
       def defaultSetToVariables(ds: Seq[ValueAssignment[_]]) = ds.map(v ⇒ Variable.unsecure(v.value, v.equal.from(context))).toVector
       val suggestedGenomes = suggestion.map(ds ⇒ evolution.operations.buildGenome(defaultSetToVariables(ds)))
 
-      val population = context(evolution.populationPrototype)
-      val s = context(evolution.statePrototype)
+      val population = context(evolution.populationVal)
+      val s = context(evolution.stateVal)
 
       (population.isEmpty, evolution.operations.generationLens.get(s), suggestedGenomes.isEmpty) match {
         case (true, 0, false) ⇒
@@ -42,26 +42,26 @@ object BreedTask {
             }
 
           Context(
-            evolution.genomePrototype.array -> random().shuffle(suggestedGenomes ++ gs).toArray(evolution.genomePrototype.`type`.manifest)
+            evolution.genomeVal.array -> random().shuffle(suggestedGenomes ++ gs).toArray(evolution.genomeVal.`type`.manifest)
           )
         case (true, _, _) ⇒
           val gs = evolution.operations.initialGenomes(size, random())(context)
 
           Context(
-            Variable(evolution.genomePrototype.array, gs.toArray(evolution.genomePrototype.`type`.manifest))
+            Variable(evolution.genomeVal.array, gs.toArray(evolution.genomeVal.`type`.manifest))
           )
         case (false, _, _) ⇒
           val breeded = evolution.operations.breeding(population.toVector, size, s, random()).from(context)
 
           Context(
-            Variable(evolution.genomePrototype.array, breeded.toArray(evolution.genomePrototype.`type`.manifest))
+            Variable(evolution.genomeVal.array, breeded.toArray(evolution.genomeVal.`type`.manifest))
           )
       }
 
     } set (
-      inputs += (evolution.populationPrototype, evolution.statePrototype),
-      outputs += (evolution.statePrototype),
-      exploredOutputs += (evolution.genomePrototype.array)
+      inputs += (evolution.populationVal, evolution.stateVal),
+      outputs += (evolution.stateVal),
+      exploredOutputs += (evolution.genomeVal.array)
     )
 
 }

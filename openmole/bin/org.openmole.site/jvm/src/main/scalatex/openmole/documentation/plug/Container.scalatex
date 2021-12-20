@@ -10,7 +10,7 @@ To call a native executable in an OpenMOLE task, you can either use:
   @li{the @code{ContainerTask} that runs your executable in a portable container,}
   @li{or the @code{SystemExecTask} that executes a local command line as if you where in a terminal.}
 
-@h2{The ContainerTask: Run Docker Containers}
+@h2{Execute Your Code In a Containers}
 
 The @code{ContainerTask} runs @a(href := "https://www.docker.com/resources/what-container", "docker containers") in OpenMOLE. When your model is written in a language for which a specific OpenMOLE task doesn't exist, or if it uses an assembly of tools, libraries, binaries, etc. you might want to use a container task to make it portable, so that you can send it to any machine (with potentially varying OS installations).
 
@@ -289,7 +289,7 @@ You may set the directory within the container where to start the execution from
 
 
 
-@h2{The SystemExecTask: Call Local Programs}
+@h2{Execute Any Program Available on the Machine}
 
 The @code{ContainerTask} was designed to be portable from one machine to another.
 However, some use-cases require executing specific commands installed on a given cluster.
@@ -346,3 +346,8 @@ If you need another behaviour you can use the same advanced options as the @code
 
 To provide files as input of a @code{ContainerTask} or @code{SystemExecTask} and to get files produced by these tasks, you should use the @code{inputFiles} and @code{outputFiles} keywords.
 See the @a("documentation on file management", href := fileManagement.file).
+
+
+@h2{Generate Complex Parameter Files}
+
+To generate complex input file for you model from OpenMOLE variable, you might want to use the @a("TemplateFileTask", href := templateTask.file).

@@ -108,11 +108,14 @@ package object range {
     def apply(t: D): RangeDomain[T]
   }
 
-  implicit def isRangeDomainIsBounded[D, T](implicit isRangeDomain: IsRangeDomain[D, T]) = new BoundedFromContextDomain[D, T] with CenterFromContextDomain[D, T] {
-    override def min(domain: D) = isRangeDomain(domain).min
-    override def max(domain: D) = isRangeDomain(domain).max
-    override def center(domain: D) = RangeDomain.rangeCenter(isRangeDomain(domain))
-  }
+  implicit def isRangeDomainIsBounded[D, T](implicit isRangeDomain: IsRangeDomain[D, T]): BoundedFromContextDomain[D, T] = domain ⇒
+    Domain(
+      (isRangeDomain(domain).min, isRangeDomain(domain).max),
+      isRangeDomain(domain).inputs,
+      isRangeDomain(domain).validate
+    )
+
+  implicit def isRangeDomainHasCenter[D, T](implicit isRangeDomain: IsRangeDomain[D, T]): DomainCenterFromContext[D, T] = domain ⇒ RangeDomain.rangeCenter(isRangeDomain(domain))
 
   @deprecated("Use RangeDomain", "13")
   def Range = RangeDomain

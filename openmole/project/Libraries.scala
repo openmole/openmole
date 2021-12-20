@@ -36,7 +36,8 @@ object Libraries {
       "org.scalameta" %% "scalameta" % "4.3.15"
     )
 
-  lazy val scalatra = "org.openmole.library" %% "org-scalatra" % scalatraVersion
+  lazy val scalaXML = "org.openmole.library" %% "org-scala-lang-modules-xml" % scalaXMLVersion
+  lazy val scalatra = "org.openmole.library" %% "org-scalatra" % scalatraVersion exclude("org.scala-lang.modules", "scala-xml_2.13")
   lazy val logback = "org.openmole.library" %% "ch-qos-logback" % logbackVersion
   lazy val h2 = "org.openmole.library" %% "org-h2" % h2Version
   lazy val bonecp = "org.openmole.library" %% "com-jolbox-bonecp" % "0.8.0.RELEASE"
@@ -119,7 +120,7 @@ object Libraries {
   lazy val scalaz = "org.scalaz" %% "scalaz-core" % scalazVersion
   lazy val spray = "io.spray" %% "spray-json" % "1.3.5"
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
-  lazy val equinoxOSGi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.13.200"
+  lazy val equinoxOSGi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.15.300"
   lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.3.1"
 
   lazy val shapeless = "org.openmole.library" %% "com-chuusai-shapeless" % shapelessVersion

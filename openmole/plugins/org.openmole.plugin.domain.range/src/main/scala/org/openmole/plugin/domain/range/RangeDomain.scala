@@ -24,18 +24,21 @@ import org.openmole.core.workflow.domain
 
 object RangeDomain {
 
-  implicit def isBounded[T] = new BoundedFromContextDomain[RangeDomain[T], T] with CenterFromContextDomain[RangeDomain[T], T] {
-    override def min(domain: RangeDomain[T]) = domain.min
-    override def max(domain: RangeDomain[T]) = domain.max
-    override def center(domain: RangeDomain[T]) = RangeDomain.rangeCenter(domain)
-  }
+  implicit def isBounded[T]: BoundedFromContextDomain[RangeDomain[T], T] = domain ⇒
+    Domain(
+      (domain.min, domain.max),
+      domain.inputs,
+      domain.validate
+    )
 
-  implicit def rangeWithDefaultStepIsDiscrete[T](implicit step: DefaultStep[T]) = new DiscreteFromContextDomain[RangeDomain[T], T] {
-    override def iterator(domain: RangeDomain[T]) = StepRangeDomain[T](domain, step.step).iterator
-  }
+  implicit def hasCenter[T]: DomainCenterFromContext[RangeDomain[T], T] = domain ⇒ RangeDomain.rangeCenter(domain)
 
-  implicit def inputs[T]: domain.DomainInput[RangeDomain[T]] = domain ⇒ domain.min.inputs ++ domain.max.inputs
-  implicit def validate[T]: domain.DomainValidation[RangeDomain[T]] = domain ⇒ domain.min.validate ++ domain.max.validate
+  implicit def rangeWithDefaultStepIsDiscrete[T](implicit step: DefaultStep[T]): DiscreteFromContextDomain[RangeDomain[T], T] = domain ⇒
+    Domain(
+      StepRangeDomain[T](domain, step.step).iterator,
+      domain.inputs,
+      domain.validate
+    )
 
   implicit def toDomain[D, T](d: D)(implicit toRangeDomain: IsRangeDomain[D, T]) = toRangeDomain(d)
 
@@ -65,4 +68,7 @@ object RangeDomain {
 
 }
 
-class RangeDomain[T](val min: FromContext[T], val max: FromContext[T])(implicit val ops: RangeValue[T])
+class RangeDomain[T](val min: FromContext[T], val max: FromContext[T])(implicit val ops: RangeValue[T]) {
+  def inputs = min.inputs ++ max.inputs
+  def validate = min.validate ++ max.validate
+}

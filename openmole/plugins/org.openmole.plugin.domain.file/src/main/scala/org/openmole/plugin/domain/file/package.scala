@@ -18,12 +18,10 @@
 package org.openmole.plugin.domain
 
 import java.io.File
-
-import org.openmole.core.context.Val
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.domain._
-import org.openmole.core.workflow.dsl._
+import org.openmole.core.dsl._
+import org.openmole.core.dsl.extension._
 import cats.implicits._
+import org.openmole.core.exception.UserBadDataError
 
 package object file {
 
@@ -45,12 +43,14 @@ package object file {
     def select(path: FromContext[String]) = SelectFileDomain(f, path)
   }
 
-  implicit def prototypeOfFileIsFinite = new DiscreteFromContextDomain[Val[File], File] {
-    override def iterator(prototype: Val[File]) = FromContext.prototype(prototype).map { _.listFilesSafe.iterator }
-  }
-
-  implicit def fileIsDiscrete = new DiscreteFromContextDomain[File, File] {
-    override def iterator(f: File) = FromContext.value(f.listFilesSafe.iterator)
-  }
+  implicit def prototypeOfFileIsFinite: DiscreteFromContextDomain[Val[File], File] = prototype ⇒ Domain(FromContext.prototype(prototype).map { _.listFilesSafe.iterator })
+  implicit def fileIsDiscrete: DiscreteFromContextDomain[File, File] = f ⇒
+    Domain(
+      FromContext.value(f.listFilesSafe.iterator),
+      validation = Validate { _ ⇒
+        if (!f.exists()) Seq(throw UserBadDataError(s"Directory $f used in domain doesn't exist"))
+        else if (!f.isDirectory) Seq(throw UserBadDataError(s"File $f used in domain, should be a directory")) else Seq()
+      }
+    )
 
 }

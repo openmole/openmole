@@ -30,7 +30,9 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 
-  def nsga2(wrap: Boolean = true) = {
+  def nsga2 = {
+    import EvolutionWorkflow._
+
     val x = Val[Double]
     val y = Val[Double]
     val z = Val[Int]
@@ -40,24 +42,19 @@ class WorkflowSpec extends FlatSpec with Matchers {
       z := 9
     )
 
-    // Define a builder to use NSGA2 generational EA algorithm.
-    // replicateModel is the fitness function to optimise.
-    // lambda is the size of the offspring (and the parallelism level).
-    SteadyStateEvolution(
-      algorithm =
-        NSGA2(
-          genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
-          objective = Seq(x, y),
-          stochastic = Stochastic()
-        ),
+    NSGA2Evolution(
+      genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
+      objective = Seq(x, y),
+      stochastic = Stochastic(),
       evaluation = puzzle,
       parallelism = 10,
-      termination = 10,
-      wrap = wrap
+      termination = 10
     )
   }
 
   def conflict = {
+    import EvolutionWorkflow._
+
     val population = Val[Double]
     val state = Val[Double]
 
@@ -65,57 +62,34 @@ class WorkflowSpec extends FlatSpec with Matchers {
       (inputs, outputs) += (population, state)
     )
 
-    // Define a builder to use NSGA2 generational EA algorithm.
-    // replicateModel is the fitness function to optimise.
-    // lambda is the size of the offspring (and the parallelism level).
-    SteadyStateEvolution(
-      algorithm =
-        PSE(
-          genome = Seq(population in (0.0, 1.0), state in (0.0, 1.0)),
-          objective =
-            Seq(
-              population in (0.0 to 1.0 by 0.1),
-              state in (0.0 to 1.0 by 0.1)
-            ),
-          stochastic = Stochastic()
+    PSEEvolution(
+      genome = Seq(population in (0.0, 1.0), state in (0.0, 1.0)),
+      objective =
+        Seq(
+          population in (0.0 to 1.0 by 0.1),
+          state in (0.0 to 1.0 by 0.1)
         ),
+      stochastic = Stochastic(),
       evaluation = puzzle,
       parallelism = 10,
       termination = 10
     )
   }
 
-  def boundArray = {
+  "Bounds" should "be accepted for arrays" in {
     val xArray = Val[Array[Double]]
     val yArray = Val[Array[Int]]
 
-    NSGA2(
-      populationSize = 200,
+    NSGA2Evolution(
       genome = Seq(xArray in Vector.fill(5)((0.0, 1.0)), yArray in Vector.fill(5)((0, 1))),
-      objective = Seq()
+      objective = Seq(),
+      parallelism = 10,
+      termination = 10,
+      evaluation = EmptyTask()
     )
   }
 
   import org.openmole.core.workflow.test.Stubs._
-
-  "Bound array" should "compile" in {
-    SteadyStateEvolution(
-      algorithm = boundArray,
-      evaluation = EmptyTask(),
-      parallelism = 10,
-      termination = 10
-    )
-  }
-
-  "Island evolution" should "compile" in {
-    val steady = SteadyStateEvolution(
-      algorithm = boundArray,
-      evaluation = EmptyTask(),
-      parallelism = 10,
-      termination = 10
-    )
-    IslandEvolution(steady, 10, 10)
-  }
 
   "Evolution" should "run" in {
     @volatile var executed = 0
@@ -158,17 +132,48 @@ class WorkflowSpec extends FlatSpec with Matchers {
       evaluation = testTask,
       objective = Seq(a),
       genome = Seq(a in (0.0, 1.0)),
-      termination = 100,
-      distribution = Island(5)
-    )
+      termination = 100
+    ) by Island(5)
 
     nsga run
 
-    executed should be >= 500
+    executed should be >= 100
+  }
+
+  "Hook" should "be valid" in {
+    @volatile var executed = 0
+
+    val a = Val[Double]
+
+    val testTask =
+      FromContextTask("test") { p ⇒
+        import p._
+        executed += 1
+        context
+      } set ((inputs, outputs) += a)
+
+    val nsga =
+      NSGA2Evolution(
+        evaluation = testTask,
+        objective = Seq(a),
+        genome = Seq(a in (0.0, 1.0)),
+        termination = 100
+      ) hook ("/tmp/test.txt")
+
+    Validation(nsga) match {
+      case Nil ⇒
+      case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
+    }
+
+    Validation(nsga by Island(10)) match {
+      case Nil ⇒
+      case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
+    }
   }
 
   "Steady state workflow" should "have no validation error" in {
-    val mole: Mole = nsga2()
+    val mole: Mole = nsga2
+
     Validation(mole).toList match {
       case Nil ⇒
       case l   ⇒ sys.error(s"Several validation errors have been found in ${mole}: " + l.mkString("\n"))
@@ -181,21 +186,14 @@ class WorkflowSpec extends FlatSpec with Matchers {
   }
 
   "Island workflow" should "have no validation error" in {
-    val islandEvolutionNSGA2 = IslandEvolution(nsga2(), 10, 50, 100)
+    import EvolutionWorkflow._
 
-    Validation(islandEvolutionNSGA2).toList match {
+    Validation(nsga2 by Island(10)).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
 
-    Validation(IslandEvolution(conflict, 10, 50, 100)).toList match {
-      case Nil ⇒
-      case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
-    }
-  }
-
-  "Steady state workflow with wrapping" should "have no validation error" in {
-    Validation(nsga2(wrap = false)).toList match {
+    Validation(conflict by Island(10)).toList match {
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
@@ -313,9 +311,8 @@ class WorkflowSpec extends FlatSpec with Matchers {
       objective = Seq(b),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
-      distribution = Island(1),
       stochastic = Stochastic()
-    )
+    ) by Island(1)
 
     Validation(nsga).isEmpty should equal(true)
   }
@@ -364,6 +361,23 @@ class WorkflowSpec extends FlatSpec with Matchers {
   }
 
   "Aggregation" should "be possible in NSGA" in {
+
+    val a = Val[Double]
+    val b = Val[Double]
+
+    def f(v: Double) = v / 2
+
+    val nsga = NSGA2Evolution(
+      evaluation = EmptyTask() set (inputs += a, outputs += (a, b)),
+      objective = Seq(b aggregate f _ as "aggF", a aggregate "a / 2"),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100
+    )
+
+    Validation(nsga).isEmpty should equal(true)
+  }
+
+  "Aggregation" should "be possible in stochastic NSGA" in {
 
     val a = Val[Double]
     val b = Val[Double]
@@ -427,6 +441,79 @@ class WorkflowSpec extends FlatSpec with Matchers {
       )
 
     nsga hook ("/tmp/test", format = OMROutputFormat())
+  }
+
+  "By" should "generate island" in {
+    val a = Val[Double]
+    val b = Val[Double]
+
+    val nsga =
+      NSGA2Evolution(
+        evaluation = EmptyTask() set (inputs += a, outputs += b),
+        objective = Seq(b),
+        genome = Seq(a in (0.0, 1.0)),
+        termination = 100
+      )
+
+    val wf: DSLContainer[_] = nsga hook ("/tmp/test")
+    val wf2: DSLContainer[_] = nsga hook ("/tmp/test") by Island(100)
+
+    // FIXME improve this test when more metadata are added to EvolutioWorkflow
+    tasks(wf.dsl).flatMap(_.task.name).exists(_.contains("island")) should equal(false)
+    tasks(wf2.dsl).flatMap(_.task.name).exists(_.contains("island")) should equal(true)
+  }
+
+  "by and hook" should "be supported by all evolution methods" in {
+    val a = Val[Double]
+    val b = Val[Double]
+
+    val p1: DSL = NSGA2Evolution(
+      evaluation = EmptyTask() set (inputs += a, outputs += b),
+      objective = Seq(b),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100
+    ) by Island(10) hook ("/tmp/test")
+
+    val p2: DSL = NSGA3Evolution(
+      evaluation = EmptyTask() set (inputs += a, outputs += b),
+      objective = Seq(b),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100
+    ) by Island(10) hook ("/tmp/test")
+
+    val p3: DSL = OSEEvolution(
+      evaluation = EmptyTask() set (inputs += a, outputs += b),
+      objective = Seq(b under 1.0),
+      origin = Seq(a in (0.0 to 1.0 by 0.1)),
+      termination = 100
+    ) by Island(10) hook ("/tmp/test")
+
+    val p4: DSL = ProfileEvolution(
+      evaluation = EmptyTask() set (inputs += a, outputs += b),
+      objective = Seq(b),
+      genome = Seq(a in (0.0, 1.0)),
+      profile = Seq(a),
+      termination = 100
+    ) by Island(10) hook ("/tmp/test")
+
+    val p5: DSL = PSEEvolution(
+      evaluation = EmptyTask() set (inputs += a, outputs += b),
+      objective = Seq(b in (0.0 to 1.0 by 0.1)),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100
+    ) by Island(10) hook ("/tmp/test")
+  }
+  "by Island" should "be usable with by" in {
+    val a = Val[Double]
+    val b = Val[Double]
+
+    val p: DSL =
+      NSGA2Evolution(
+        evaluation = EmptyTask() set (inputs += a, outputs += b),
+        objective = Seq(b),
+        genome = Seq(a in (0.0, 1.0)),
+        termination = 100
+      ) on LocalEnvironment(1) by Island(10) by 10
   }
 
 }

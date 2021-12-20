@@ -2,7 +2,6 @@ package org.openmole.site
 
 import scalatags.Text.tags2
 import scalatags.Text.all._
-import org.openmole.site.tools._
 import org.openmole.core.buildinfo._
 
 /*
@@ -24,7 +23,10 @@ import org.openmole.core.buildinfo._
 
 object Menu {
 
-  val navClass = classIs(navbar, navbar_default, navbar_staticTop, navbar_fixedTop, navbar_inverse)
+  val navClass = {
+    import tools._
+    classIs(navbar, navbar_default, navbar_staticTop, navbar_fixedTop, navbar_inverse)
+  }
   val liStyle = paddingTop := 0
   val inputStyle = paddingTop := 15
   val navId = "omwesite"
@@ -49,29 +51,29 @@ object Menu {
   //  }
 
   def build(sitePage: SitePage) = {
-    div(classIs("container"))(
+    div(cls := "container")(
       bannerSpace,
       tags2.nav(navClass, paddingRight := 20)(
-        div(classIs(container_fluid))(
-          div(classIs(navbar_header))(
+        div(cls := tools.container_fluid)(
+          div(cls := tools.navbar_header)(
             button(`type` := "button", `class` := "navbar-toggle", data("toggle") := "collapse", data("target") := s"#$navId", marginTop := 25)(
-              span(classIs("icon-bar")),
-              span(classIs("icon-bar")),
-              span(classIs("icon-bar"))
+              span(cls := "icon-bar"),
+              span(cls := "icon-bar"),
+              span(cls := "icon-bar")
             ),
-            a(classIs(navbar_brand), href := "#", padding := 0),
-            to(Pages.index)(
-              img(alt := "", src := Resource.img.mole.openmoleLogo.file, Seq(width := 300, padding := 10, pointer))
+            a(cls := tools.navbar_brand, href := "#", padding := 0),
+            tools.to("")(
+              img(alt := "", src := Resource.img.mole.openmoleLogo.file, Seq(width := 300, padding := 10, tools.pointer))
             )
           ),
-          div(classIs(collapse, navbar_collapse), aria.expanded := false, paddingTop := 20, id := navId)(
-            ul(classIs(nav, navbar_nav, navbar_left), marginLeft := 200)(
-              li(innerLink(DocumentationPages.documentation, "Documentation"), liStyle),
-              li(innerLink(DocumentationPages.tutorials, "Tutorials"), liStyle),
-              li(outerLink("Demo", shared.link.demo), liStyle),
-              li(innerLink(DocumentationPages.download, "Download"), liStyle),
-              li(innerLink(DocumentationPages.OMcommunity, "Community"), liStyle),
-              li(marginTop := -8, inputStyle)(img(id := shared.searchImg, src := Resource.img.menu.search.file, Seq(width := 35, paddingTop := 5, paddingLeft := 10, pointer)))(
+          div(tools.classIs(tools.collapse, tools.navbar_collapse), aria.expanded := false, paddingTop := 20, id := navId)(
+            ul(tools.classIs(tools.nav, tools.navbar_nav, tools.navbar_left), marginLeft := 200)(
+              li(tools.innerLink(DocumentationPages.documentation, "Documentation"), liStyle),
+              li(tools.innerLink(DocumentationPages.tutorials, "Tutorials"), liStyle),
+              li(tools.outerLink("Demo", shared.link.demo), liStyle),
+              li(tools.innerLink(DocumentationPages.download, "Download"), liStyle),
+              li(tools.innerLink(DocumentationPages.OMcommunity, "Community"), liStyle),
+              li(marginTop := -8, inputStyle)(img(id := shared.searchImg, src := Resource.img.menu.search.file, Seq(width := 35, paddingTop := 5, paddingLeft := 10, tools.pointer)))(
                 div(id := shared.searchDiv)
               )
             )

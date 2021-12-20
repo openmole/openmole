@@ -34,15 +34,11 @@ object GAMATask {
 
   def volumes(
     workspace: File,
-    model:     OptionalArgument[String]) =
-    model.option match {
-      case Some(model) ⇒ (model, Seq(workspace -> workspaceDirectory))
-      case None        ⇒ (workspace.getName, Seq(workspace -> s"$workspaceDirectory/${workspace.getName}"))
-    }
+    model:     String) = (model, Seq(workspace -> workspaceDirectory))
 
   def prepare(
     workspace:              File,
-    model:                  OptionalArgument[String],
+    model:                  String,
     experiment:             String,
     install:                Seq[String],
     installContainerSystem: ContainerSystem,
@@ -64,14 +60,15 @@ object GAMATask {
   }
 
   def apply(
-    workspace:              File,
+    project:                File,
+    gaml:                   String,
     experiment:             String,
     finalStep:              FromContext[Int],
-    model:                  OptionalArgument[String]         = None,
     seed:                   OptionalArgument[Val[Long]]      = None,
     frameRate:              OptionalArgument[Int]            = None,
     install:                Seq[String]                      = Seq.empty,
-    containerImage:          ContainerImage                  = "gamaplatform/gama:1.8.1",
+    containerImage:         ContainerImage                   = "gamaplatform/gama:1.8.1",
+    memory:                 OptionalArgument[Information]    = None,
     version:                OptionalArgument[String]         = None,
     errorOnReturnValue:     Boolean                          = true,
     returnValue:            OptionalArgument[Val[Int]]       = None,
@@ -84,12 +81,8 @@ object GAMATask {
     containerSystem:        ContainerSystem                  = ContainerSystem.default,
     installContainerSystem: ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): GAMATask = {
 
-    (model.option.isDefined, workspace.isDirectory) match {
-      case (false, true) ⇒ throw new UserBadDataError(s"""$workspace is a directory, in this case you must specify you model path, model = "model.gaml"""")
-      case (true, false) ⇒ throw new UserBadDataError(s"""$workspace is a file in this case you cannot provide a model path (model = "$model")""")
-      case (true, true) if !(workspace / model.get).exists() ⇒ throw new UserBadDataError(s"The model file you specify does not exist: ${workspace / model.get}")
-      case _ ⇒
-    }
+    if (!project.exists()) throw new UserBadDataError(s"The project directory you specify does not exist: ${project}")
+    if (!(project / gaml).exists()) throw new UserBadDataError(s"The model file you specify does not exist: ${project / gaml}")
 
     val gamaContainerImage: ContainerImage =
       (version.option, containerImage) match {
@@ -98,16 +91,17 @@ object GAMATask {
         case (Some(_), _: SavedDockerImage) => throw new UserBadDataError(s"Can not set both, a saved docker image, and, set the version of the container.")
       }
 
-    val preparedImage = prepare(workspace, model, experiment, install, installContainerSystem, gamaContainerImage, clearCache = clearContainerCache)
+    val preparedImage = prepare(project, gaml, experiment, install, installContainerSystem, gamaContainerImage, clearCache = clearContainerCache)
 
     GAMATask(
-      workspace = workspace,
-      model = model,
+      project = project,
+      gaml = gaml,
       experiment = experiment,
       finalStep = finalStep,
       seed = seed,
       frameRate = frameRate,
       image = preparedImage,
+      memory = memory,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
@@ -154,16 +148,30 @@ object GAMATask {
     new RuleTransformer(rewrite)
   }
 
+
+  def acceptedOutputType(frame: Boolean): Seq[Manifest[_]] = {
+    def scalar =
+      Seq(
+        manifest[Double],
+        manifest[Int],
+        manifest[String],
+        manifest[Boolean]
+      )
+
+    if(!frame) scalar else scalar.map(_.arrayManifest)
+  }
+
 }
 
 @Lenses case class GAMATask(
-  workspace:            File,
-  model:                OptionalArgument[String],
+  project:              File,
+  gaml:                 String,
   experiment:           String,
   finalStep:            FromContext[Int],
   seed:                 OptionalArgument[Val[Long]],
   frameRate:            OptionalArgument[Int],
   image:                PreparedImage,
+  memory:               OptionalArgument[Information],
   errorOnReturnValue:   Boolean,
   returnValue:          Option[Val[Int]],
   stdOut:               Option[Val[String]],
@@ -194,16 +202,17 @@ object GAMATask {
       def gamaOutputByName(name: String) =
         outputs.filter(e => e.attribute("name").flatMap(_.headOption).map(_.text) == Some(name)).headOption
 
-      def typeMatch(v: Val[_], t: String) =
-        v match {
-          case Val.caseInt(v) => t == "INT" | t == "FLOAT"
-          case Val.caseDouble(v) => t == "INT" | t == "FLOAT"
-          case Val.caseString(v) => t == "STRING"
-          case Val.caseBoolean(v) => t == "BOOLEAN"
-          case _ => false
-        }
 
-      def validateInputs =
+      def validateInputs = {
+        def typeMatch(v: Val[_], t: String) =
+          v match {
+            case Val.caseInt(v) => t == "INT" | t == "FLOAT"
+            case Val.caseDouble(v) => t == "INT" | t == "FLOAT"
+            case Val.caseString(v) => t == "STRING"
+            case Val.caseBoolean(v) => t == "BOOLEAN"
+            case _ => false
+          }
+
         mapped.inputs.flatMap { m =>
           gamaParameterByName(m.name) match {
             case Some(p) =>
@@ -212,14 +221,19 @@ object GAMATask {
             case None => Some(new UserBadDataError(s"""Mapped input "${m.name}" has not been found in the simulation among: ${gamaParameters.mkString(", ")}. Make sure it is defined in your gaml file"""))
           }
         }
+      }
 
-      def validateOutputs =
+      def validateOutputs = {
+        val acceptedOutputsTypes = GAMATask.acceptedOutputType(frameRate.option.isDefined)
+        def accepted(c: Manifest[_]) = acceptedOutputsTypes.exists(t => t == c)
+
         mapped.outputs.flatMap { m =>
           gamaOutputByName(m.name) match {
-            case Some(_) => None
+            case Some(_) => if(!accepted(m.v.`type`.manifest)) Some(new UserBadDataError(s"""Mapped output ${m} type is not supported (frameRate is ${frameRate.option.isDefined}, it implies that supported types are: ${acceptedOutputsTypes.mkString(", ")})""")) else None
             case None => Some(new UserBadDataError(s"""Mapped output "${m.name}" has not been found in the simulation among: ${gamaOutputs.mkString(", ")}. Make sure it is defined in your gaml file."""))
           }
         }
+      }
 
       if ((inputXML \ "Simulation").isEmpty) Seq(new UserBadDataError(s"Experiment ${experiment} has not been found, make sure it is defined in your gaml file"))
       else validateInputs ++ validateOutputs
@@ -239,9 +253,13 @@ object GAMATask {
       inputFile.content =
         s"""<?xml version="1.0" encoding="UTF-8" standalone="no"?>${inputXML.mkString("")}"""
 
-      val (_, volumes) = GAMATask.volumes(workspace, model)
+      val (_, volumes) = GAMATask.volumes(project, gaml)
 
-      def launchCommand = s"gama-headless -hpc 1 $inputFileName $outputDirectory"
+      def launchCommand =
+        memory.option match {
+          case None => s"gama-headless -hpc 1 $inputFileName $outputDirectory"
+          case Some(m) => s"gama-headless -m ${m.toMegabytes.toLong}m -hpc 1 $inputFileName $outputDirectory"
+      }
 
       newFile.withTmpDir { tmpOutputDirectory =>
         def containerTask =
@@ -269,6 +287,12 @@ object GAMATask {
 
         val resultContext = containerTask.process(executionContext).from(context)
 
+        def gamaOutputFile =
+          tmpOutputDirectory.
+            listFilesSafe.
+            filter(f => f.isFile && f.getName.startsWith("simulation-outputs") && f.getName.endsWith(".xml")).
+            sortBy(_.getName).headOption.getOrElse(throw new InternalProcessingError(s"""GAMA result file (simulation-outputsXX.xml) has not been found, the content of the output folder is: [${tmpOutputDirectory.list.mkString(", ")}]"""))
+
         (mapped.outputs.isEmpty, frameRate.option) match {
           case (true, _) => resultContext
           case (false, None) =>
@@ -280,7 +304,7 @@ object GAMATask {
                 case Val.caseDouble(v) => Variable(v, value.toDouble)
                 case Val.caseString(v) => Variable(v, value)
                 case Val.caseBoolean(v) => Variable(v, value.toBoolean)
-                case _ => throw new UserBadDataError(s"Unsupported type of output variable $v")
+                case _ => throw new UserBadDataError(s"Unsupported type of output variable $v (supported types are Int, Double, String, Boolean)")
               }
 
             val outputs = Map[String, Val[_]]() ++ mapped.outputs.map { m => (m.name, m.v) }
@@ -296,17 +320,7 @@ object GAMATask {
                 case _ => None
               }
 
-            val gamaOutputFile =
-              tmpOutputDirectory.
-                listFilesSafe.
-                filter(f => f.isFile && f.getName.startsWith("simulation-outputs") && f.getName.endsWith(".xml")).
-                sortBy(_.getName).headOption
-
-            val simulationOutput =
-              gamaOutputFile match {
-                case Some(f) =>  XML.loadFile(f) \ "Step"
-                case None => throw new InternalProcessingError(s"""GAMA result file (simulation-outputsXX.xml) has not been found, the content of the output folder is: [${tmpOutputDirectory.list.mkString(", ")}]""")
-              }
+            val simulationOutput = XML.loadFile(gamaOutputFile) \ "Step"
 
             resultContext ++ extractOutputs(simulationOutput.last)
           case (false, Some(f)) =>
@@ -318,7 +332,7 @@ object GAMATask {
                 case Val.caseArrayDouble(v) => Variable(v, value.map(_.toDouble))
                 case Val.caseArrayString(v) => Variable(v, value)
                 case Val.caseArrayBoolean(v) => Variable(v, value.map(_.toBoolean))
-                case _ => throw new UserBadDataError(s"Unsupported type of output variable $v")
+                case _ => throw new UserBadDataError(s"Unsupported type of output variable $v (supported types are Array[Int], Array[Double], Array[String], Array[Boolean])")
               }
 
             def outputValue(e: Elem, name: String) =
@@ -327,7 +341,7 @@ object GAMATask {
                 if a.text == name
               } yield e.child.text
 
-            val simulationOutput = XML.loadFile(tmpOutputDirectory / "simulation-outputs0.xml") \ "Step"
+            val simulationOutput = XML.loadFile(gamaOutputFile) \ "Step"
 
             resultContext ++ mapped.outputs.map { m =>
               val values =

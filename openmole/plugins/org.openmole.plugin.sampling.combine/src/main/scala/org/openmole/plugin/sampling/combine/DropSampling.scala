@@ -22,14 +22,21 @@ import org.openmole.core.dsl.extension._
 
 object DropSampling {
 
-  implicit def isSampling[S]: IsSampling[DropSampling[S]] = new IsSampling[DropSampling[S]] {
-    override def validate(s: DropSampling[S]): Validate = s.sampling.validate(s.s) ++ s.n.validate
-    override def inputs(s: DropSampling[S]): PrototypeSet = s.sampling.inputs(s.s)
-    override def outputs(s: DropSampling[S]): Iterable[Val[_]] = s.sampling.outputs(s.s)
-    override def apply(s: DropSampling[S]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+  implicit def isSampling[S]: IsSampling[DropSampling[S]] = s ⇒ {
+    def validate: Validate = s.sampling(s.s).validate ++ s.n.validate
+    def inputs: PrototypeSet = s.sampling(s.s).inputs
+    def outputs: Iterable[Val[_]] = s.sampling(s.s).outputs
+    def apply: FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
       import p._
-      s.sampling(s.s).from(context).drop(s.n.from(context))
+      s.sampling(s.s).sampling.from(context).drop(s.n.from(context))
     }
+
+    Sampling(
+      apply,
+      outputs,
+      inputs = inputs,
+      validate = validate
+    )
   }
 
 }

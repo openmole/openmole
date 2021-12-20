@@ -1,0 +1,82 @@
+@import org.openmole.site.tools._
+@import org.openmole.site._
+@import DocumentationPages._
+
+
+
+@h2{Get ready}
+
+You will need the following tools to design your plugin:
+@ul
+    @li
+        The @aa("git", href := shared.link.git) software
+    @li
+        @aa("SBT", href := shared.link.sbt), the Scala Building Tool
+
+The first step is to clone the github repository for OpenMOLE :
+
+@br
+
+@hl.code("""
+git clone https://gitlab.openmole.org/openmole/openmole.git
+""")
+
+In order to generate documentation with scalaTex, openMOLE need some libraries.
+Into your recently cloned openmole folder, call these three commands to compile libraries:
+
+@hl.code("""
+git lfs fetch
+(cd build-system && sbt publishLocal)
+(cd libraries && sbt publishLocal)
+""")
+
+
+
+@h2{Compiling documentation}
+
+You're now ready to compile the actual documentation.
+Move into the nested openmole folder and run sbt to generate the website:
+
+@hl.code("""
+cd openmole
+sbt buildSite
+""")
+
+The generated site is visible by opening @code{openmole/openmole/bin/org.openmole.site/jvm/target/site/index.html} in your browser !
+
+
+
+@h2{Adding a new page}
+
+Scalatex file are located into the bin folder @code{bin/org.openmole.site/jvm/src/main/scalatex/openmole}:
+
+@hl.plain("""
+cd openmole/openmole/bin/org.openmole.site/jvm/src/main/scalatex/openmole
+""")
+
+For this example, we try to add this current page "Documentation Generation" to @a("Developers", href := developers.file).
+
+ Into your favorite IDE :
+ @ul
+   @li{open @code{/org/openmole/site/Pages.scala} and search the @code{def developersPages} entry}
+   @li{add this new @code{compileDocumentation} variable}
+
+@hl.code("""
+lazy val compileDocumentation = DocumentationPage.fromScalatex(name = "Documentation generation", content = scalatex.documentation.developers.DocumentationGen)
+""")
+
+After that, we add @code{compileDocumentation} to the @code{pageNode} corresponding to the "Developers" entry on the website:
+
+@hl.code("""
+def developersPages = pageNode(developers, Vector(console, pluginDevelopment, extensionAPI, restAPI, documentationGen))
+""")
+
+Now, leave the @code{Pages.scala} file and create a new scalatex file @code{documentaionGen.scalatex} into @code{/openmole/community/documentation/developers/}.
+
+We add a new link to the list of pages using:
+
+@hl.code("""
+@li{How to compile and modify the @a("documentation", href := DocumentationPages.documentationGen.file)}
+""")
+
+@h2{Cheatsheet Scalatex}

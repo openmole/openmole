@@ -49,6 +49,8 @@ import squants.information.InformationConversions._
 import squants.time.TimeConversions._
 import org.openmole.tool.lock._
 import org.openmole.tool.outputredirection.OutputRedirection
+import org.openmole.core.compiler.CompilationContext
+
 
 import scala.collection.immutable.TreeSet
 
@@ -133,48 +135,16 @@ object BatchEnvironment {
 
   object Services {
 
-    implicit def fromServices(implicit services: org.openmole.core.services.Services): Services = {
-      import services._
-      new Services()
-    }
-
-    def copy(services: Services)(
-      threadProvider:             ThreadProvider = services.threadProvider,
-      preference:        Preference = services.preference,
-      newFile:           TmpDirectory = services.newFile,
-      serializerService: SerializerService = services.serializerService,
-      fileService:       FileService = services.fileService,
-      seeder:            Seeder = services.seeder,
-      randomProvider:    RandomProvider = services.randomProvider,
-      replicaCatalog:    ReplicaCatalog = services.replicaCatalog,
-      eventDispatcher:   EventDispatcher = services.eventDispatcher,
-      fileServiceCache:  FileServiceCache = services.fileServiceCache,
-      outputRedirection: OutputRedirection = services.outputRedirection,
-      loggerService: LoggerService) =
-      new Services()(
-        threadProvider = threadProvider,
-        preference = preference,
-        newFile = newFile,
-        serializerService = serializerService,
-        fileService = fileService,
-        seeder = seeder,
-        randomProvider = randomProvider,
-        replicaCatalog = replicaCatalog,
-        eventDispatcher = eventDispatcher,
-        fileServiceCache = fileServiceCache,
-        outputRedirection = outputRedirection,
-        loggerService = loggerService)
-
-    def set(services: Services)(ms: MoleServices) =
-      new Services() (
+    def apply(ms: MoleServices)(implicit replicaCatalog: ReplicaCatalog) =
+      new Services(ms.compilationContext) (
         threadProvider = ms.threadProvider,
         preference = ms.preference,
         newFile = ms.tmpDirectory,
-        serializerService = services.serializerService,
+        serializerService = ms.serializerService,
         fileService = ms.fileService,
         seeder = ms.seeder,
-        randomProvider = services.randomProvider,
-        replicaCatalog = services.replicaCatalog,
+        randomProvider = ms.newRandom,
+        replicaCatalog = replicaCatalog,
         eventDispatcher = ms.eventDispatcher,
         fileServiceCache = ms.fileServiceCache,
         outputRedirection = ms.outputRedirection,
@@ -183,56 +153,27 @@ object BatchEnvironment {
 
   }
 
-  class Services(
-                  implicit
-                  val threadProvider:             ThreadProvider,
-                  implicit val preference:        Preference,
-                  implicit val newFile:           TmpDirectory,
-                  implicit val serializerService: SerializerService,
-                  implicit val fileService:       FileService,
-                  implicit val seeder:            Seeder,
-                  implicit val randomProvider:    RandomProvider,
-                  implicit val replicaCatalog:    ReplicaCatalog,
-                  implicit val eventDispatcher:   EventDispatcher,
-                  implicit val fileServiceCache:  FileServiceCache,
-                  implicit val outputRedirection: OutputRedirection,
-                  implicit val loggerService: LoggerService
-  ) { services =>
-
-    def set(ms: MoleServices) = Services.set(services)(ms)
-
-    def copy (
-               threadProvider:    ThreadProvider = services.threadProvider,
-               preference:        Preference = services.preference,
-               newFile:           TmpDirectory = services.newFile,
-               serializerService: SerializerService = services.serializerService,
-               fileService:       FileService = services.fileService,
-               seeder:            Seeder = services.seeder,
-               randomProvider:    RandomProvider = services.randomProvider,
-               replicaCatalog:    ReplicaCatalog = services.replicaCatalog,
-               eventDispatcher:   EventDispatcher = services.eventDispatcher,
-               fileServiceCache:  FileServiceCache = services.fileServiceCache,
-               outputRedirection: OutputRedirection = services.outputRedirection,
-               loggerService: LoggerService = services.loggerService) =
-      Services.copy(services)(
-        threadProvider = threadProvider,
-        preference = preference,
-        newFile = newFile,
-        serializerService = serializerService,
-        fileService = fileService,
-        seeder = seeder,
-        randomProvider = randomProvider,
-        replicaCatalog = replicaCatalog,
-        eventDispatcher = eventDispatcher,
-        fileServiceCache = fileServiceCache,
-        outputRedirection = outputRedirection,
-        loggerService = loggerService)
-  }
+  class Services(val compilationContext: Option[CompilationContext])(
+    implicit
+    val threadProvider:             ThreadProvider,
+    implicit val preference:        Preference,
+    implicit val newFile:           TmpDirectory,
+    implicit val serializerService: SerializerService,
+    implicit val fileService:       FileService,
+    implicit val seeder:            Seeder,
+    implicit val randomProvider:    RandomProvider,
+    implicit val replicaCatalog:    ReplicaCatalog,
+    implicit val eventDispatcher:   EventDispatcher,
+    implicit val fileServiceCache:  FileServiceCache,
+    implicit val outputRedirection: OutputRedirection,
+    implicit val loggerService: LoggerService,
+  )
 
   def jobFiles(job: BatchExecutionJob, environment: BatchEnvironment) =
     job.files.toVector ++
       job.plugins ++
-      environment.plugins ++
+      environment.environmentPlugins ++
+      environment.scriptPlugins ++
       Seq(environment.jvmLinuxX64, environment.runtime)
 
   def toReplicatedFile(
@@ -260,7 +201,7 @@ object BatchEnvironment {
     val replica = services.replicaCatalog.uploadAndGet(uploadReplica, exist, remove, toReplicatePath, hash, storageId)
     ReplicatedFile(file.getPath, file.getName, isDir, hash, replica.path, fileMode)
   }
-  
+
   def serializeJob(
     environment: BatchEnvironment,
     job: BatchExecutionJob,
@@ -273,7 +214,13 @@ object BatchEnvironment {
 
     serializerService.serialize(job.runnableTasks, jobFile)
 
-    val plugins = new TreeSet[File]()(fileOrdering) ++ job.plugins -- environment.plugins ++ (job.files.toSet & environment.plugins.toSet)
+    val plugins =
+      new TreeSet[File]()(fileOrdering) ++
+        job.plugins ++
+        environment.scriptPlugins --
+        environment.environmentPlugins ++
+        (job.files.toSet & environment.environmentPlugins.toSet)
+
     val files = (new TreeSet[File]()(fileOrdering) ++ job.files) -- plugins
 
     val runtime = replicateTheRuntime(environment, replicate)
@@ -289,7 +236,7 @@ object BatchEnvironment {
     /* ---- upload the execution message ----*/
     val inputPath =
       newFile.withTmpFile("job", ".tar") { executionMessageFile ⇒
-        serializerService.serializeAndArchiveFiles(executionMessage, executionMessageFile)
+        serializerService.serializeAndArchiveFiles(executionMessage, executionMessageFile, gz = true)
         signalUpload(eventDispatcher.eventId, upload(executionMessageFile, TransferOptions(noLink = true, canMove = true)), executionMessageFile, environment, storageId)
       }
 
@@ -297,7 +244,7 @@ object BatchEnvironment {
       services.newFile.withTmpFile("remoteStorage", ".tar") { storageFile ⇒
         import org.openmole.tool.hash._
         import services._
-        services.serializerService.serializeAndArchiveFiles(remoteStorage, storageFile)
+        services.serializerService.serializeAndArchiveFiles(remoteStorage, storageFile, gz = true)
         val hash = storageFile.hash().toString()
         val path = signalUpload(eventDispatcher.eventId, upload(storageFile, TransferOptions(noLink = true, canMove = true, raw = true)), storageFile, environment, storageId)
         FileMessage(path, hash)
@@ -312,13 +259,13 @@ object BatchEnvironment {
     environment:      BatchEnvironment,
     replicate: (File, TransferOptions) => ReplicatedFile,
   )(implicit services: BatchEnvironment.Services) = {
-    val environmentPluginPath = shuffled(environment.plugins)(services.randomProvider()).map { p ⇒ replicate(p, TransferOptions(raw = true)) }.map { FileMessage(_) }
+    val environmentPluginPath = shuffled(environment.environmentPlugins)(services.randomProvider()).map { p ⇒ replicate(p, TransferOptions(raw = true)) }.map { FileMessage(_) }.sortBy(_.path)
     val runtimeFileMessage = FileMessage(replicate(environment.runtime, TransferOptions(raw = true)))
     val jvmLinuxX64FileMessage = FileMessage(replicate(environment.jvmLinuxX64, TransferOptions(raw = true)))
 
     Runtime(
       runtimeFileMessage,
-      environmentPluginPath.toSet,
+      environmentPluginPath,
       jvmLinuxX64FileMessage
     )
   }
@@ -335,8 +282,8 @@ object BatchEnvironment {
     val files = shuffled(serializationFile)(services.randomProvider()).map { replicate(_, TransferOptions()) }
 
     ExecutionMessage(
-      pluginReplicas,
-      files,
+      pluginReplicas.sortBy(_.originalPath),
+      files.sortBy(_.originalPath),
       jobFile,
       environment.runtimeSettings
     )
@@ -427,9 +374,18 @@ abstract class BatchEnvironment extends SubmissionEnvironment { env ⇒
 
   def jobs = ExecutionJobRegistry.executionJobs(registry)
 
-  lazy val relpClassesCache: BatchEnvironment.REPLClassCache = new AssociativeCache[Set[String], Seq[File]]
+  lazy val environmentPlugins = PluginManager.pluginsForClass(this.getClass).toSeq.distinctBy(_.getCanonicalPath)
 
-  lazy val plugins = PluginManager.pluginsForClass(this.getClass)
+  lazy val scriptPlugins = {
+    def closureBundleAndPlugins = services.compilationContext.toSeq.flatMap { c =>
+      import services._
+      val (cb, file) = BatchExecutionJob.replClassesToPlugins(c.classDirectory, c.classLoader)
+      cb.plugins ++ Seq(file)
+    }
+
+    closureBundleAndPlugins.distinctBy(_.getCanonicalPath)
+  }
+
   lazy val jobStore = JobStore(services.newFile.makeNewDir("jobstore"))
 
   override def submit(job: JobGroup) = {

@@ -17,33 +17,35 @@ object EvolutionMetadata {
   implicit def evolutionMetadataDecoder: Decoder[EvolutionMetadata] = deriveConfiguredDecoder[EvolutionMetadata]
 
   object GenomeBoundData {
-    case class DoubleBound(name: String, low: Double, high: Double) extends GenomeBoundData
-    case class IntBound(name: String, low: Int, high: Int) extends GenomeBoundData
-    case class DoubleSequenceBound(name: String, low: Array[Double], high: Array[Double]) extends GenomeBoundData
-    case class IntSequenceBound(name: String, low: Array[Int], high: Array[Int]) extends GenomeBoundData
-    case class Enumeration(name: String, values: Seq[String]) extends GenomeBoundData
+    import org.openmole.plugin.tool.methoddata._
+
+    sealed trait IntervalType
+    case object Discrete extends IntervalType
+    case object Continuous extends IntervalType
+
+    case class IntBound(value: ValData, low: Int, high: Int, intervalType: IntervalType) extends GenomeBoundData
+    case class DoubleBound(value: ValData, low: Double, high: Double, intervalType: IntervalType) extends GenomeBoundData
+    case class IntSequenceBound(value: ValData, low: Seq[Int], high: Seq[Int], intervalType: IntervalType) extends GenomeBoundData
+    case class DoubleSequenceBound(value: ValData, low: Seq[Double], high: Seq[Double], intervalType: IntervalType) extends GenomeBoundData
+    case class Enumeration(value: ValData, values: Seq[String]) extends GenomeBoundData
 
     def name(data: GenomeBoundData) =
       data match {
-        case d: DoubleBound         ⇒ d.name
-        case d: IntBound            ⇒ d.name
-        case d: DoubleSequenceBound ⇒ d.name
-        case d: IntSequenceBound    ⇒ d.name
-        case d: Enumeration         ⇒ d.name
+        case d: DoubleBound         ⇒ d.value.name
+        case d: IntBound            ⇒ d.value.name
+        case d: DoubleSequenceBound ⇒ d.value.name
+        case d: IntSequenceBound    ⇒ d.value.name
+        case d: Enumeration         ⇒ d.value.name
       }
   }
 
   sealed trait GenomeBoundData
 
-  case class ExactObjective(
+  case class Objective(
     name:     String,
     delta:    Option[Double],
-    negative: Boolean)
-
-  case class NoisyObjective(
-    name:     String,
-    delta:    Option[Double],
-    negative: Boolean)
+    negative: Boolean,
+    noisy:    Boolean)
 
   def method = "evolution"
   case object none extends EvolutionMetadata
@@ -55,14 +57,14 @@ object EvolutionMetadata {
 
   case class PSE(
     genome:     Seq[GenomeBoundData],
-    objective:  Seq[ExactObjective],
+    objective:  Seq[Objective],
     grid:       PSE.Grid,
     generation: Long,
     saveOption: SaveOption) extends EvolutionMetadata
 
   case class StochasticPSE(
     genome:     Seq[GenomeBoundData],
-    objective:  Seq[NoisyObjective],
+    objective:  Seq[Objective],
     grid:       PSE.Grid,
     sample:     Int,
     generation: Long,
@@ -70,14 +72,14 @@ object EvolutionMetadata {
 
   case class NSGA2(
     genome:         Seq[GenomeBoundData],
-    objective:      Seq[ExactObjective],
+    objective:      Seq[Objective],
     populationSize: Int,
     generation:     Long,
     saveOption:     SaveOption) extends EvolutionMetadata
 
   case class StochasticNSGA2(
     genome:         Seq[GenomeBoundData],
-    objective:      Seq[NoisyObjective],
+    objective:      Seq[Objective],
     populationSize: Int,
     sample:         Int,
     generation:     Long,
@@ -97,14 +99,14 @@ object AnalysisData {
 
   object NSGA2 {
     case class Generation(generation: Long, genome: Vector[Vector[GenomeData]], objective: Vector[Objective]) extends AnalysisData.Generation
-    case class Objective(objectives: Vector[ObjectiveData])
+    case class Objective(objectives: Vector[Double])
     case class Convergence(nadir: Option[Vector[Double]], generations: Vector[GenerationConvergence]) extends AnalysisData.Convergence
     case class GenerationConvergence(generation: Long, hypervolume: Option[Double], minimums: Option[Vector[Double]])
   }
 
   object StochasticNSGA2 {
     case class Generation(generation: Long, genome: Vector[Vector[GenomeData]], objective: Vector[Objective]) extends AnalysisData.Generation
-    case class Objective(objectives: Vector[ObjectiveData], samples: Int)
+    case class Objective(objectives: Vector[Double], samples: Int)
     case class Convergence(nadir: Option[Vector[Double]], generations: Vector[GenerationConvergence]) extends AnalysisData.Convergence
     case class GenerationConvergence(generation: Long, hypervolume: Option[Double], minimums: Option[Vector[Double]])
   }

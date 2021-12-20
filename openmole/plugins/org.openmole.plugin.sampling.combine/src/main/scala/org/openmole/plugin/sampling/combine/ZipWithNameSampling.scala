@@ -24,17 +24,24 @@ import org.openmole.plugin.domain.modifier.CanGetName
 
 object ZipWithNameSampling {
 
-  implicit def isSampling[D, T]: IsSampling[ZipWithNameSampling[D, T]] = new IsSampling[ZipWithNameSampling[D, T]] {
-    override def validate(s: ZipWithNameSampling[D, T]): Validate = Validate.success
-    override def inputs(s: ZipWithNameSampling[D, T]): PrototypeSet = Seq(s.factor.value)
-    override def outputs(s: ZipWithNameSampling[D, T]): Iterable[Val[_]] = List(s.factor.value, s.name)
-    override def apply(s: ZipWithNameSampling[D, T]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+  implicit def isSampling[D, T]: IsSampling[ZipWithNameSampling[D, T]] = s ⇒ {
+    def validate: Validate = s.discrete(s.factor.domain).validate
+    def inputs: PrototypeSet = Seq(s.factor.value)
+    def outputs: Iterable[Val[_]] = List(s.factor.value, s.name)
+    def apply: FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
       import p._
 
       for {
-        v ← s.discrete.iterator(s.factor.domain).from(context)
+        v ← s.discrete(s.factor.domain).domain.from(context)
       } yield List(Variable(s.factor.value, v), Variable(s.name, s.getName(v)))
     }
+
+    Sampling(
+      apply,
+      outputs,
+      inputs = inputs,
+      validate = validate
+    )
   }
 
 }

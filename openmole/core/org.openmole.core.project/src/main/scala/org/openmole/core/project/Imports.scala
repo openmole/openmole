@@ -105,17 +105,17 @@ object Imports {
       (1 to imp.stableIdentifier.size).map { i ⇒
         val part = imp.stableIdentifier.take(i)
         val path = toFile(directory, part.dropRight(1) ++ part.lastOption.map(_ + Project.scriptExtension))
-        ImportedFile(part, path)
+        ImportedFile(imp, part, path)
       }.find { importedFile ⇒ Project.isScript(importedFile.file) }
 
     def matchingFileInSelector(imp: Import): Seq[ImportedFile] =
       imp match {
         case Import(stableIdentifier, Alias(from, _)) ⇒
           val file = toFile(directory, stableIdentifier) / (from + Project.scriptExtension)
-          if (file.exists) Seq(ImportedFile(stableIdentifier, file)) else Seq.empty
+          if (file.exists) Seq(ImportedFile(imp, stableIdentifier, file)) else Seq.empty
         case Import(stableIdentifier, WildCard) ⇒
           listScripts(toFile(directory, stableIdentifier)) map {
-            script ⇒ ImportedFile(stableIdentifier, script)
+            script ⇒ ImportedFile(imp, stableIdentifier, script)
           }
         case _ ⇒ Seq.empty
       }
@@ -126,11 +126,13 @@ object Imports {
     }
   }
 
+  def directImportedFiles(source: File): Seq[ImportedFile] = level1ImportedFiles(parseImports(source.content), source.getParentFileSafe)
+
   def importedFiles(script: File): Seq[SourceFile] = {
     val alreadyImported = collection.mutable.Set[File](script.getCanonicalFile)
 
     def importedFiles0(source: File): List[SourceFile] = {
-      val imported = level1ImportedFiles(parseImports(source.content), source.getParentFileSafe)
+      val imported = directImportedFiles(source)
 
       val newlyImported = imported.map(_.file.getCanonicalFile).distinct.filter(i ⇒ !alreadyImported.contains(i))
       newlyImported.foreach(f ⇒ alreadyImported.add(f))
@@ -148,7 +150,11 @@ object Imports {
   case class WildCardBut(names: String*) extends ImportSelector
   case object WildCard extends ImportSelector
 
-  case class ImportedFile(stableIdentifier: Seq[String], file: File)
+  object ImportedFile {
+    def identifier(importedFile: ImportedFile) = importedFile.stableIdentifier.mkString(".")
+  }
+
+  case class ImportedFile(`import`: Import, stableIdentifier: Seq[String], file: File)
   case class SourceFile(file: File, importedFiles: Seq[ImportedFile])
 
   def toFile(dir: File, path: Seq[String]) =

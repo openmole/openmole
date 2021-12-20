@@ -127,8 +127,7 @@ object Site {
 
           val (sitePage, elementClass) =
             pageTree.page match {
-              case Pages.indexPage ⇒ (ContentPage(div, div(pageTree.content)), `class` := "")
-              case _               ⇒ (UserGuide.integrate(pageTree), `class` := "page-element")
+              case _ ⇒ (UserGuide.integrate(pageTree), `class` := "page-element")
             }
 
           body(position := "relative", minHeight := "100%")(
@@ -158,11 +157,10 @@ object Site {
           def commonJS = s"$siteJS.main();$siteJS.loadIndex(index);"
 
           sitepage.page match {
-            case Pages.index | DocumentationPages.training ⇒ s"$siteJS.loadBlogPosts();" + commonJS
-            case DocumentationPages.profile                ⇒ s"$siteJS.profileAnimation();" + commonJS
-            case DocumentationPages.pse                    ⇒ s"$siteJS.pseAnimation();" + commonJS
-            case DocumentationPages.simpleSAFire           ⇒ s"$siteJS.sensitivityAnimation();" + commonJS
-            case _                                         ⇒ commonJS
+            case DocumentationPages.profile      ⇒ s"$siteJS.profileAnimation();" + commonJS
+            case DocumentationPages.pse          ⇒ s"$siteJS.pseAnimation();" + commonJS
+            case DocumentationPages.simpleSAFire ⇒ s"$siteJS.sensitivityAnimation();" + commonJS
+            case _                               ⇒ commonJS
           }
         }
 

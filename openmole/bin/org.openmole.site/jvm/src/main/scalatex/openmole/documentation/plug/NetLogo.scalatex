@@ -1,3 +1,5 @@
+
+
 @import org.openmole.site.tools._
 @import org.openmole.{site=> site}
 @import org.openmole.site.stylesheet._
@@ -41,7 +43,7 @@ NetLogo is a widely used agent-based modeling platform and language developed by
 It is conceived to be accessible to non-programmers and thus enhances inter-disciplinarity in the construction of simulation models, but can also be used to program large scale complex models (despite its bad reputation, see @aa("this paper", href := "http://jasss.soc.surrey.ac.uk/20/1/3.html") testing NetLogo speed performance and suggesting code improvements).
 As it runs on the JVM, it is naturally integrated into OpenMOLE.
 
-@br@br
+@br
 
 OpenMOLE provides a NetLogo task which expects the following parameters:
   @ul
@@ -79,7 +81,7 @@ It is written as @code{netLogoOutputs} in the definition of the task.
 
 @br@br
 
-@img(src := Resource.img.model.netlogoMapping.file, center(100))
+@img(src := Resource.img.model.netlogoMapping.file, width := "100%")
 
 @br@br
 
@@ -123,7 +125,7 @@ This model has one input: @code{density}, and one output: @code{percent-burned}.
 
 @br@br
 
-@img(src := Resource.img.example.fireScreen.file, stylesheet.center(50))
+@img(src := Resource.img.example.fireScreen.file, width := "50%")
 
 
 @h3{The simulation}
@@ -280,7 +282,7 @@ They can be used directly in OpenMOLE.
 
 @br@br
 
-@img(src := Resource.img.example.fireGlobals.file, center(50))
+@img(src := Resource.img.example.fireGlobals.file, width := "50%")
 
 @br@br
 
@@ -289,28 +291,28 @@ We propose here a simple method to better organise your code in order to make it
     @li
         First we do not use the implicit globals, so we create an @b{explicit global variable}, @code{myDensity}, corresponding to the implicit one (@code{density}) :
         @br
-        @img(src := Resource.img.example.fireNewGlobals.file, center(60))
+        @img(src := Resource.img.example.fireNewGlobals.file, width := "60%")
 
     @li
         Second, we use this new variable in the setup procedure (it replaces the former):
         @br
-        @img(src := Resource.img.example.fireMyDensity.file, center(55))
+        @img(src := Resource.img.example.fireMyDensity.file, width := "55%")
         @break
         And we update the explicit variable with the former implicit density variable
-        @img(src := Resource.img.example.fireNewFunction.file, center(70))
+        @img(src := Resource.img.example.fireNewFunction.file, width := "70%")
             @br
         At this moment, your program does not work any more in NetLogo, @b{it’s normal, don’t panic :)}.
         @break
 
     @li
         Third, we call this function in our setup function, after the @code{clear-all} primitives.
-        @img(src := Resource.img.example.fireOldSetup.file, center(50))
+        @img(src := Resource.img.example.fireOldSetup.file, width := "50%")
 
     @li
         Now, the program works in NetLogo’s graphical mode.
         We still need to create another setup function without the call to @code{clear-all} and to @code{init-globals}.
         Remember that these two calls don't cope well with distributed executions.
-    @img(src := Resource.img.example.fireRemoveClearAll.file,center(50) )
+    @img(src := Resource.img.example.fireRemoveClearAll.file, width := "50%")
 
 The program is now ready to be parameterised and manipulated by OpenMOLE \o/
 

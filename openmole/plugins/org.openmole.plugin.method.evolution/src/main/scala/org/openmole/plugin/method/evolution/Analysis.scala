@@ -27,7 +27,7 @@ object Analysis {
   }
 
   def dataFile(directory: File, fileName: String, g: Long)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) =
-    directory / (fileName: FromContext[String]).from(Context(GAIntegration.generationPrototype -> g))
+    directory / (fileName: FromContext[String]).from(Context(GAIntegration.generationVal -> g))
 
   object EvolutionAnalysis {
     object none extends EvolutionAnalysis
@@ -72,9 +72,9 @@ object Analysis {
     def loadFile(metaData: EvolutionMetadata.NSGA2, f: File) = {
       val json = parse(f.content(gz = true)).right.get.asObject.get
 
-      def objectives: Vector[Vector[ObjectiveData]] =
+      def objectives: Vector[Vector[Double]] =
         metaData.objective.toVector.map {
-          o ⇒ json(o.name).get.asArray.get.map(_.toString)
+          o ⇒ json(o.name).get.asArray.get.map(_.as[Double].toOption.get)
         }.transpose
 
       def genomes =
@@ -86,7 +86,7 @@ object Analysis {
         }
 
       def savedObjectives = objectives map { o ⇒ Objective(o) }
-      def generation = json(GAIntegration.generationPrototype.name).get.asNumber.get.toLong.get
+      def generation = json(GAIntegration.generationVal.name).get.asNumber.get.toLong.get
 
       Generation(generation, genomes, savedObjectives)
     }
@@ -159,9 +159,9 @@ object Analysis {
     def loadFile(metaData: EvolutionMetadata.StochasticNSGA2, f: File) = {
       val json = parse(f.content(gz = true)).right.get.asObject.get
 
-      def objectives: Vector[Vector[ObjectiveData]] =
+      def objectives: Vector[Vector[Double]] =
         metaData.objective.toVector.map {
-          o ⇒ json(o.name).get.asArray.get.map(_.toString)
+          o ⇒ json(o.name).get.asArray.get.map(_.as[Double].toOption.get)
         }.transpose
 
       def genomes =
@@ -172,9 +172,9 @@ object Analysis {
               map(_.toString)
         }
 
-      def samples = json(GAIntegration.samples.name).get.asArray.get.map(_.asNumber.get.toInt.get)
+      def samples = json(GAIntegration.samplesVal.name).get.asArray.get.map(_.asNumber.get.toInt.get)
       def savedObjectives = (objectives zip samples) map { case (o, s) ⇒ Objective(o, s) }
-      def generation = json(GAIntegration.generationPrototype.name).get.asNumber.get.toLong.get
+      def generation = json(GAIntegration.generationVal.name).get.asNumber.get.toLong.get
 
       Generation(generation, genomes, savedObjectives)
     }

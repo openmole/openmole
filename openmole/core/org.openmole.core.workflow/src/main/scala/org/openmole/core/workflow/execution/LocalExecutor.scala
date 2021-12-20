@@ -82,7 +82,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                     case Right(e) ⇒
                       environment._failed.incrementAndGet()
                       environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob.id, executionJob, ExecutionState.FAILED, ExecutionState.RUNNING))
-                      environment.eventDispatcherService.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob.id))
+                      environment.eventDispatcherService.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob.id, None))
                     case _ ⇒
                       environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob.id, executionJob, ExecutionState.DONE, ExecutionState.RUNNING))
                       environment._done.incrementAndGet()
@@ -108,7 +108,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
             case e: Throwable ⇒
               logger.log(SEVERE, "Error in execution", e)
               executionJob.moleExecution.foreach { me ⇒ MoleExecutionMessage.send(me)(MoleExecutionMessage.MoleExecutionError(e)) }
-              val er = ExecutionJobExceptionRaised(executionJob, e, SEVERE)
+              val er = ExecutionJobExceptionRaised(executionJob, e, SEVERE, None)
               environment.eventDispatcherService.trigger(environment: Environment, er)
           }
         case None ⇒ stop = true

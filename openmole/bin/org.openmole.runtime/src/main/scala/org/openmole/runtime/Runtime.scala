@@ -19,7 +19,6 @@ package org.openmole.runtime
 
 import java.io.File
 import java.io.PrintStream
-
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
@@ -32,7 +31,7 @@ import org.openmole.core.workflow.execution._
 import org.openmole.core.communication.message._
 import org.openmole.core.communication.storage._
 import org.openmole.core.event.EventDispatcher
-import org.openmole.core.fileservice.FileService
+import org.openmole.core.fileservice.{ FileService, FileServiceCache }
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer._
@@ -47,11 +46,20 @@ import org.openmole.core.workflow.job.Job
 import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.lock._
 import org.openmole.tool.outputredirection.OutputRedirection
+import org.openmole.tool.stream.MultiplexedOutputStream
 import squants._
 
 object Runtime extends JavaLogger {
-  val NbRetry = 3
-  def retry[T](f: ⇒ T, coolDown: Option[Time] = None) = Retry.retry(f, NbRetry, coolDown)
+
+  import squants.time.TimeConversions._
+
+  def retry[T](f: ⇒ T, retry: Option[Int]) = {
+    retry match {
+      case None    ⇒ f
+      case Some(r) ⇒ Retry.retry(f, r, Some(1 seconds))
+    }
+
+  }
 }
 
 class Runtime {
@@ -64,8 +72,9 @@ class Runtime {
     inputMessagePath:  String,
     outputMessagePath: String,
     threads:           Int,
-    debug:             Boolean
-  )(implicit serializerService: SerializerService, newFile: TmpDirectory, fileService: FileService, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace, loggerService: LoggerService, networkService: NetworkService) = {
+    debug:             Boolean,
+    transferRetry:     Option[Int]
+  )(implicit serializerService: SerializerService, newFile: TmpDirectory, fileService: FileService, fileServiceCache: FileServiceCache, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace, loggerService: LoggerService, networkService: NetworkService) = {
 
     /*--- get execution message and job for runtime---*/
     val usedFiles = new HashMap[String, File]
@@ -74,27 +83,28 @@ class Runtime {
 
     val executionMessage =
       newFile.withTmpFile { executionMessageFileCache ⇒
-        retry(storage.download(inputMessagePath, executionMessageFileCache))
-        serializerService.deserializeAndExtractFiles[ExecutionMessage](executionMessageFileCache, deleteFilesOnGC = true)
+        retry(storage.download(inputMessagePath, executionMessageFileCache), transferRetry)
+        serializerService.deserializeAndExtractFiles[ExecutionMessage](executionMessageFileCache, deleteFilesOnGC = true, gz = true)
       }
 
-    val oldOut = System.out
-    val oldErr = System.err
+    val systemOut = OutputManager.systemOutput
+    val systemErr = OutputManager.systemError
 
     val out = newFile.newFile("openmole", ".out")
     val outSt = new PrintStream(out)
 
-    if (!debug) {
-      OutputManager.redirectSystemOutput(outSt)
-      OutputManager.redirectSystemError(outSt)
-    }
+    val multiplexedOut = new PrintStream(MultiplexedOutputStream(outSt, systemOut), true)
+    val multiplexedErr = new PrintStream(MultiplexedOutputStream(outSt, systemErr), true)
 
-    val outputRedirection = if (!debug) OutputRedirection(outSt) else OutputRedirection(System.out, System.err)
+    OutputManager.redirectSystemOutput(multiplexedOut)
+    OutputManager.redirectSystemError(multiplexedErr)
+
+    val outputRedirection = OutputRedirection(multiplexedOut)
 
     def getReplicatedFile(replicatedFile: ReplicatedFile, transferOptions: TransferOptions) =
       ReplicatedFile.download(replicatedFile) {
         (path, file) ⇒
-          try retry(storage.download(path, file, transferOptions))
+          try retry(storage.download(path, file, transferOptions), transferRetry)
           catch {
             case e: Exception ⇒ throw new InternalProcessingError(s"Error downloading $replicatedFile", e)
           }
@@ -143,7 +153,7 @@ class Runtime {
 
       /* --- Submit all jobs to the local environment --*/
       logger.fine("Run the jobs")
-      val environment = new LocalEnvironment(nbThreads = threads, false, Some("runtime local"))
+      val environment = new LocalEnvironment(threads = threads, false, Some("runtime local"))
       environment.start()
 
       try {
@@ -153,6 +163,7 @@ class Runtime {
           preference = preference,
           threadProvider = threadProvider,
           fileService = fileService,
+          fileServiceCache = fileServiceCache,
           workspace = workspace,
           outputRedirection = outputRedirection,
           loggerService = loggerService,
@@ -192,7 +203,7 @@ class Runtime {
 
         val replicated =
           pac.files.map { file ⇒
-            def uploadOnStorage(f: File) = retry(storage.upload(f, None, TransferOptions(noLink = true, canMove = true)))
+            def uploadOnStorage(f: File) = retry(storage.upload(f, None, TransferOptions(noLink = true, canMove = true)), transferRetry)
             ReplicatedFile.upload(file, uploadOnStorage)
           }
 
@@ -212,9 +223,10 @@ class Runtime {
         Failure(t)
     }
     finally {
-      outSt.close
-      System.setOut(oldOut)
-      System.setErr(oldErr)
+      multiplexedOut.close()
+      multiplexedErr.close()
+      outSt.close()
+      OutputManager.uninstall
     }
 
     val outputMessage = if (out.length != 0) Some(out) else None
@@ -225,7 +237,7 @@ class Runtime {
       logger.fine(s"Serializing result to $outputLocal")
       serializerService.serializeAndArchiveFiles(runtimeResult, outputLocal)
       logger.fine(s"Upload the serialized result to $outputMessagePath on $storage")
-      retry(storage.upload(outputLocal, Some(outputMessagePath), TransferOptions(noLink = true, canMove = true)))
+      retry(storage.upload(outputLocal, Some(outputMessagePath), TransferOptions(noLink = true, canMove = true)), transferRetry)
     }
 
     result

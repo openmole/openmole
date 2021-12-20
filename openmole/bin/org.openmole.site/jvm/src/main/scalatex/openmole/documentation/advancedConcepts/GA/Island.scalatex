@@ -3,59 +3,46 @@
 
 
 @def model = """
-  //model inputs
+  // model inputs
   val x = Val[Double]
   val y = Val[Double]
-  //model outputs
+
+  // model outputs
   val o1 = Val[Double]
   val o2 = Val[Double]
 
-  val model =
-    ScalaTask("val o1 = x; val o2 = y") set (
-      inputs += (x, y),
-      outputs += (o1, o2)
-    )
+  val model = ScalaTask("val o1 = x; val o2 = y") set (
+    inputs += (x, y),
+    outputs += (o1, o2)
+  )
 """
 
 
 
-@h2{A custom distribution method}
+@h2{Distribution scheme}
 
-For distributed environments, the island distribution scheme is well adapted.
-Islands of population evolve for a while on a remote node.
-When an island is finished, its final population is merged back into a global archive.
-A new island is then generated until the termination criterion, @i{i.e.} the total number of islands to generate, is met.
+For distributed environments, the island distribution scheme of evolutionary algorithms is especially well adapted.
+Islands of population evolve for a while on a remote node before being merged back into the global population.
+A new island is then generated until the termination criterion, @i{i.e.} the max total number of individual evaluation, has been reached.
 
-@br@br
+@br
 
-The island scheme is used via the specific task @code{Island} to be added in the workflow.
-This task takes three parameters:
-
-  @ul
-    @li
-        an evolution task method, which is the calibration task (@code{SteadyStateEvolution} in the example below), to be distributed on the nodes of the distributed environment
-    @li
-       @code{parallelism} is the maximum number of concurrent islands
-    @li
-       the @code{termination} criterion is the total number of evolutions performed by all the islands.
-       It can be a number of evolution or a duration.
-       In the example below, each island performs its evolution tasks for 5 minutes.
-
+The island scheme is enabled using the @code{by Island} syntax.
+For instance:
 
 @hl.openmole("""
   // Generate a workflow that orchestrates 100 concurrent islands.
-  // The workflow stops when 10,000 islands of 5 minutes have completed.
+  // The workflow stops when 10,000 individuals have been evaluated.
   val evolution =
     NSGA2Evolution(
       genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
       objective = Seq(o1, o2),
       evaluation = model,
       termination = 10000,
-      parallelism = 100,
-      distribution = Island(5 minutes)
-    ) hook (workDirectory / "evolution")
+      parallelism = 100
+    ) by Island(5 minutes) hook (workDirectory / "evolution")
 
   // Construction of the complete mole with the execution environment, and the hook.
   // Here the generated workflow will run using 4 threads of the local machine.
-  (evolution on LocalEnvironment(4))""", header = model)
-
+  (evolution on LocalEnvironment(4))
+""", header = model)

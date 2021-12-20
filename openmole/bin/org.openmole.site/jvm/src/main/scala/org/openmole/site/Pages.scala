@@ -30,11 +30,7 @@ import scalatags.Text
 import PageTree._
 object Pages {
 
-  // Toutes les pages à la racine du site
-  val indexPage = Page("index", scalatex.Index(), title = Some("OpenMOLE: the Model Exploration Software"))
-  val index = pageNode(indexPage)
-
-  val all: Vector[PageTree] = (DocumentationPages.allPages :+ index).toVector
+  val all: Vector[PageTree] = DocumentationPages.allPages.toVector
 
   //def rawFile(page: Page) = page.location.mkString("_") + ".html"
   def file(page: Page) = java.net.URLEncoder.encode(page.location, "UTF-8") + ".html"
@@ -181,15 +177,7 @@ object DocumentationPages {
 
   def allPages = docPages.flatMap { _.sons } ++ tutoPages.sons ++ communityPages.sons ++ downloadPages.sons ++ headPages
 
-  def headPages: Seq[PageTree] = docPages ++ Seq(plugPages, explorePages, scalePages, languagePages, developersPages, tutoPages, communityPages, downloadPages)
-
-  val mainDocPages = plugPages.sons.map {
-    _.page
-  } ++ explorePages.sons.map {
-    _.page
-  } ++ scalePages.sons.map {
-    _.page
-  } ++ Seq(scale, explore, plug)
+  def headPages: Seq[PageTree] = docPages ++ Seq(plugPages, explorePages, scalePages, utilityTaskPages, languagePages, developersPages, tutoPages, communityPages, downloadPages)
 
   // Documentation
   lazy val documentation = DocumentationPage.fromScalatex(name = "Documentation", content = scalatex.documentation.Documentation)
@@ -199,6 +187,7 @@ object DocumentationPages {
     explorePages,
     samplingPages,
     scalePages,
+    utilityTaskPages,
     languagePages,
     advancedConceptsPages,
     developersPages,
@@ -212,7 +201,7 @@ object DocumentationPages {
   val faq = DocumentationPage.fromScalatex(name = "FAQ", content = scalatex.FAQ, title = Some("Frequently Asked Questions"))
 
   // Plug
-  def plugPages = pageNode(plug, Vector(scala, java, container, python, r, netLogo, gama, scilab, tool))
+  def plugPages = pageNode(plug, Vector(scala, java, python, r, netLogo, gama, scilab, julia, container))
 
   lazy val plug = DocumentationPage.fromScalatex(name = "Plug", content = scalatex.documentation.plug.Plug, title = Some("Plug Your Model"))
   lazy val scala = DocumentationPage.fromScalatex(name = "Scala", content = scalatex.documentation.plug.Scala)
@@ -222,15 +211,15 @@ object DocumentationPages {
   lazy val r = DocumentationPage.fromScalatex(name = "R", content = scalatex.documentation.plug.R)
   lazy val scilab = DocumentationPage.fromScalatex(name = "Scilab", content = scalatex.documentation.plug.Scilab)
   lazy val gama = DocumentationPage.fromScalatex(name = "GAMA", content = scalatex.documentation.plug.GAMA)
-  lazy val container = DocumentationPage.fromScalatex(name = "Executable", content = scalatex.documentation.plug.Container)
-  lazy val tool = DocumentationPage.fromScalatex(name = "Tool", content = scalatex.documentation.plug.Tool)
+  lazy val julia = DocumentationPage.fromScalatex(name = "Julia", content = scalatex.documentation.plug.Julia)
+  lazy val container = DocumentationPage.fromScalatex(name = "Any Other Executable", content = scalatex.documentation.plug.Container)
 
   // Explore
   def explorePages = pageNode(explore, Vector(samplings, calibration, sensitivity, profile, pse, ose, abc))
 
   lazy val explore = DocumentationPage.fromScalatex(name = "Explore", content = scalatex.documentation.explore.Explore, title = Some("Explore Your Model"))
 
-  def samplingPages = pageNode(samplings, Vector(elementarySamplings, highDimensionSamplings, uniformSampling, fileSampling, spatialSampling, customSampling, advancedSampling, aggregationSampling))
+  def samplingPages = pageNode(samplings, Vector(elementarySamplings, highDimensionSamplings, uniformSampling, fileSampling, customSampling, advancedSampling, aggregationSampling))
 
   lazy val samplings = DocumentationPage.fromScalatex(name = "Samplings", content = scalatex.documentation.explore.sampling.Samplings)
   lazy val elementarySamplings = DocumentationPage.fromScalatex(name = "Elementary Samplings", content = scalatex.documentation.explore.sampling.ElementarySamplings)
@@ -242,7 +231,6 @@ object DocumentationPages {
   //  lazy val sobolSampling = DocumentationPage.fromScalatex(name = "Sobol Sampling", content = scalatex.documentation.explore.sampling.SobolSampling)
   lazy val customSampling = DocumentationPage.fromScalatex(name = "Custom Sampling", content = scalatex.documentation.explore.sampling.CustomSampling)
   lazy val fileSampling = DocumentationPage.fromScalatex(name = "Sampling Over Files", content = scalatex.documentation.explore.sampling.FileSampling)
-  lazy val spatialSampling = DocumentationPage.fromScalatex(name = "Spatial Sampling", content = scalatex.documentation.explore.sampling.SpatialSampling)
   lazy val advancedSampling = DocumentationPage.fromScalatex(name = "Operations on Samplings", content = scalatex.documentation.explore.sampling.AdvancedSampling, title = Some("Advanced Operations on Samplings"))
   lazy val aggregationSampling = DocumentationPage.fromScalatex(name = "Aggregate Sampling Results", content = scalatex.documentation.explore.sampling.Aggregation)
 
@@ -264,7 +252,7 @@ object DocumentationPages {
   lazy val dispatch = DocumentationPage.fromScalatex(name = "Dispatch", content = scalatex.documentation.scale.Dispatch, title = Some("Dispatch Jobs on Multiple Environments"))
 
   // Language
-  def languagePages = pageNode(language, Vector(fileManagement, scalaFunction, hook, transition, source, capsule, moleTask))
+  def languagePages = pageNode(language, Vector(fileManagement, scalaFunction, hook, transition, source, capsule))
 
   lazy val language = DocumentationPage.fromScalatex(name = "Language", content = scalatex.documentation.language.Language, title = Some("The OpenMOLE Language"))
   lazy val fileManagement = DocumentationPage.fromScalatex(name = "File Management", content = scalatex.documentation.language.FileManagement)
@@ -274,7 +262,13 @@ object DocumentationPages {
   lazy val transition = DocumentationPage.fromScalatex(name = "Transitions", content = scalatex.documentation.language.advanced.Transition)
   lazy val source = DocumentationPage.fromScalatex(name = "Source", content = scalatex.documentation.language.advanced.Source)
   lazy val capsule = DocumentationPage.fromScalatex(name = "Capsule", content = scalatex.documentation.language.advanced.Capsule)
-  lazy val moleTask = DocumentationPage.fromScalatex(name = "Mole Task", content = scalatex.documentation.language.advanced.MoleTask)
+
+  def utilityTaskPages = pageNode(utilityTask, Vector(templateTask, moleTask, spatialTask))
+
+  lazy val utilityTask = DocumentationPage.fromScalatex(name = "Utility Tasks", content = scalatex.documentation.utilityTask.Task)
+  lazy val templateTask = DocumentationPage.fromScalatex(name = "Template Task", content = scalatex.documentation.utilityTask.TemplateTask)
+  lazy val moleTask = DocumentationPage.fromScalatex(name = "Mole Task", content = scalatex.documentation.utilityTask.MoleTask)
+  lazy val spatialTask = DocumentationPage.fromScalatex(name = "Spatial Task", content = scalatex.documentation.utilityTask.SpatialTask)
 
   // Advanced Concepts
   def advancedConceptsPages = pageNode(advancedConcepts, Vector(geneticAlgorithm, island, stochasticityManagement))
@@ -287,13 +281,15 @@ object DocumentationPages {
   lazy val stochasticityManagement = DocumentationPage.fromScalatex(name = "Stochasticity Management", content = scalatex.documentation.advancedConcepts.GA.StochasticityManagement)
 
   // Developers
-  def developersPages = pageNode(developers, Vector(console, pluginDevelopment, extensionAPI, restAPI))
+  def developersPages = pageNode(developers, Vector(console, pluginDevelopment, extensionAPI, restAPI, documentationGen))
 
   lazy val developers = DocumentationPage.fromScalatex(name = "Developers", content = scalatex.documentation.developers.Developers, title = Some("Advanced Concepts for Developers"))
   lazy val console = DocumentationPage.fromScalatex(name = "Console Mode", content = scalatex.documentation.developers.Console)
   lazy val pluginDevelopment = DocumentationPage.fromScalatex(name = "Plugin Development", content = scalatex.documentation.developers.PluginDevelopment)
   lazy val restAPI = DocumentationPage.fromScalatex(name = "Rest API", content = scalatex.documentation.developers.RESTAPI)
   lazy val extensionAPI = DocumentationPage.fromScalatex(name = "Extension API", content = scalatex.documentation.developers.ExtensionAPI)
+
+  lazy val documentationGen = DocumentationPage.fromScalatex(name = "Documentation generation", content = scalatex.documentation.developers.DocumentationGen)
 
   // Tutorials
   def tutoPages = pageNode(tutorials, Vector(stepByStepIntro, exploreTuto, simpleSAFire, netLogoGA, market))

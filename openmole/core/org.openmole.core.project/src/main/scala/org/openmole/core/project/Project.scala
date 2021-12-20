@@ -28,7 +28,6 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.project
 import org.openmole.core.services._
 import org.openmole.core.workflow.composition.DSL
-import org.openmole.core.workflow.tools.ScriptSourceData
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.hash._
 
@@ -48,12 +47,12 @@ object Project {
     def makePackage(name: String, tree: Tree): String =
       if (!tree.files.isEmpty) tree.files.distinct.map(f ⇒ makeVal(name, f)).mkString("\n")
       else
-        s"""lazy val $name = new {
+        s"""@transient lazy val $name = new {
             |${makeImportTree(tree)}
             |}""".stripMargin
 
     def makeVal(identifier: String, file: File) =
-      s"""lazy val ${identifier} = ${uniqueName(file)}"""
+      s"""@transient lazy val ${identifier} = ${uniqueName(file)}"""
 
     def makeScriptWithImports(sourceFile: SourceFile) = {
       def imports = makeImportTree(Tree.insertAll(sourceFile.importedFiles))
@@ -61,11 +60,11 @@ object Project {
       val name = uniqueName(sourceFile.file)
 
       s"""class ${name}Class {
-           |lazy val _imports = new {
+           |@transient lazy val _imports = new {
            |$imports
            |}
            |}
-           |lazy val ${name} = new ${name}Class
+           |@transient lazy val ${name} = new ${name}Class
            """
     }
 
@@ -94,13 +93,13 @@ object Project {
 
       val classContent =
         s"""object ${name} {
-           |lazy val _imports = new {
+           |@transient lazy val _imports = new {
            |$imports
            |}
            |
            |import _imports._
            |
-           |private lazy val ${ConsoleVariables.workDirectory} = File(new java.net.URI("${sourceFile.file.getParentFileSafe.toURI}").getPath)
+           |@transient private lazy val ${ConsoleVariables.workDirectory} = File(new java.net.URI("${sourceFile.file.getParentFileSafe.toURI}").getPath)
            |
            |${sourceFile.file.content}
            |}
@@ -146,7 +145,7 @@ object Project {
            |new $traitName {
            |
            |$functionPrototype = {
-           |implicit def _scriptSourceData = ${classOf[ScriptSourceData.ScriptData].getCanonicalName}(File(\"\"\"$workDirectory\"\"\"), File(\"\"\"$script\"\"\"))
+           |implicit def _scriptSourceData = ${ScriptSourceData.applySource(workDirectory, script)}
            |import ${Project.uniqueName(script)}._imports._""".stripMargin
 
       def scriptFooter =
@@ -164,7 +163,7 @@ object Project {
         val loop = newREPL.getOrElse { (v: project.ConsoleVariables) ⇒ Project.newREPL(v) }.apply(consoleVariables)
         try {
           Option(loop.compile(content)) match {
-            case Some(compiled) ⇒ Compiled(compiled)
+            case Some(compiled) ⇒ Compiled(compiled, CompilationContext(loop.classDirectory, loop.classLoader))
             case None           ⇒ throw new InternalProcessingError("The compiler returned null instead of a compiled script, it may append if your script contains an unclosed comment block ('/*' without '*/').")
           }
         }
@@ -206,7 +205,7 @@ sealed trait CompilationError extends CompileResult {
 case class ErrorInCode(error: ScalaREPL.CompilationError) extends CompilationError
 case class ErrorInCompiler(error: Throwable) extends CompilationError
 
-case class Compiled(result: ScalaREPL.Compiled) extends CompileResult {
+case class Compiled(result: ScalaREPL.Compiled, compilationContext: CompilationContext) extends CompileResult {
 
   def eval =
     result.apply() match {

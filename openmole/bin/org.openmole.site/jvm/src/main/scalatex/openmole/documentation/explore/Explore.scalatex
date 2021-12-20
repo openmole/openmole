@@ -22,11 +22,7 @@ These are just some of the many questions a model developer has to answer in ord
 
 Simulation models can be abstracted as a program that transforms a set of @b{inputs} into a set of @b{outputs}.
 
-@br@br
-
-@img(src := Resource.img.method.modelIO.file, center(40))
-
-@br@br
+@img(src := Resource.img.method.modelIO.file, width := "40%")
 
 Any type of data can be used as input for simulation models: locally-defined parameters, pictures, CSV files, DB connections, etc.
 However, simulation experiments usually revolve around @b{parameter space exploration} (e.g. sensitivity analysis).

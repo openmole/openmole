@@ -1,58 +1,59 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
+@import DocumentationPages._
 
 
 @def model = s"""
-  //model inputs
+  // model inputs
   val x = Val[Double]
   val y = Val[Double]
   val s = Val[String]
 
-  //model outputs
+  // model outputs
   val o1 = Val[Double]
   val o2 = Val[Double]
 
-  val model =
-    ScalaTask($tq
+  val model = ScalaTask($tq
     val o1 = x
-    val o2 =
-      s match {
-        case "apple" => y
-        case "banana" => -y
-        case "strawberry" => -2 * y
-      }
-    $tq) set (
+    val o2 = s match {
+      case "apple" => y
+      case "banana" => -y
+      case "strawberry" => -2 * y
+    }$tq) set (
       inputs += (x, y, s),
       outputs += (o1, o2)
     )
 """
 
 
-The various @a("methods", href:= DocumentationPages.explore.file) available in OpenMOLE make an extensive use of genetic algorithms (GA).
-For instance, it is the case for @a("the model calibration method", href := DocumentationPages.calibration.file) (which is an optimization problem), or the search for output diversity with the @a("PSE", href:= DocumentationPages.pse.file) method (which boils down to a GA with a novelty incentive).
+The various @aa("methods", href := explore.file) available in OpenMOLE make an extensive use of genetic algorithms (GA).
+For instance, it is the case for the @aa("model calibration method", href := calibration.file), which is an optimization problem, or the search for output diversity with the @a("PSE method", href:= pse.file), which boils down to a GA with a novelty incentive.
+
 @br
-GAs can be smartly distributed on grid environments using an @a("island scheme", href:= DocumentationPages.island.file), and are able to deal with @a("stochastic", href:=DocumentationPages.stochasticityManagement.file) models.
+
+GAs can be smartly distributed on grid environments using an @aa("island scheme", href := island.file), and are able to deal with @aa("stochastic models", href:=stochasticityManagement.file).
 
 
 
 @h2{About Calibration and GA }
 
 OpenMOLE provides advanced methods to help you calibrate your model.
-These methods automatically generate workflows to explore the parameter space of your model towards the best parameter set, according to a previously defined @b{criterion} or @b{objective}.
+These methods automatically generate workflows to explore the parameter space of your model towards the "best" parameter set, according to a previously defined @b{criterion} or @b{objective}.
 This is commonly addressed in the literature as a calibration, or optimization, problem.
+
 @br
-The different calibration methods in OpenMOLE use GAs to explore the parameter space of a simulation model, looking for parameter sets that will produce outputs reaching one or several given @b{objectives}.
+
+The different calibration methods in OpenMOLE use GAs to explore the parameter space of a simulation model, looking for parameter sets that will produce outputs reaching one or several given objectives.
 @b{Objectives functions}, also called @b{fitness functions}, compute quantities from the model outputs that have to be minimized or maximized.
 They are a quantification of the @i{optimal model output} you are looking for.
 
-@br@br
+@br
 
 A common optimization problem is data fitting.
-In this particular case, the objective function could compute the distance between simulation results and data, a classical example is the Squared Error function.
-@br
+In this particular case, the objective function could compute the distance between simulation results and data points, a classical example is the Squared Error function.
 If you want your model to reproduce several characteristics (sometimes called stylised facts), you need several objectives, each of them quantifying the similarity between your model outputs and the characteristics you want to reproduce.
 
-@br@br
+@br
 
 To calibrate your model, you need to define:
  @ul
@@ -68,15 +69,12 @@ To calibrate your model, you need to define:
 
 @h2{Dummy Model Optimization Example}
 
-This workflow optimizes a dummy model using the generational NSGA II multi-objective algorithm.
-You can replace the instances of @i{model} by your own model, and adapt the variation range of the input variables.
-If you are not familiar with parameter tuning using GA, you should first consult the @aa("tutorial", href := DocumentationPages.netLogoGA.file) explaining how to calibrate a NetLogo model with a GA.
-
-@br@br
+This workflow optimizes a dummy model using the generational NSGA-II multi-objective algorithm.
+You can replace the instances of @code{model} by your own model, and adapt the variation range of the input variables.
+If you are not familiar with parameter tuning using GA, you should first consult the @aa("tutorial", href := netLogoGA.file) explaining how to calibrate a NetLogo model with a GA.
 
 @hl.openmole(s"""
 $model
-
 // Construction of the workflow orchestrating the genetic algorithm
 // genome is the inputs prototype and their variation ranges
 // objective sets the objectives to minimize
@@ -98,14 +96,11 @@ val evolution =
 // Construction of the complete workflow with the execution environment, and the hook.
 // A hook is attached to save the population of solutions to  workDirectory /evolution on the local machine running OpenMOLE
 // Here the generated workflow will run using 4 threads of the local machine.
-evolution hook (workDirectory / "evolution") on LocalEnvironment(4)""", name = "nsga2 example")
+evolution hook (workDirectory / "evolution") on LocalEnvironment(4)
+""", name = "nsga2 example")
 
-@br
-
-Notice that the objectives are given as a sequence of model outputs variables to @b{minimize}.
+Note that the objectives are given as a sequence of model outputs variables to be @b{minimized}.
 So if you want to reach specific target values, like Pi and 42, you can use the @code{delta} keyword:
-
-@br@br
 
 @hl.openmole(s"""
 $model
@@ -121,16 +116,12 @@ NSGA2Evolution(
   termination = 100
 ) hook (workDirectory / "evolution")""", name = "nsga2 delta example")
 
-@br
-
 NB: in this case the results in the saved file will be the difference between the outputs of the model and your objectives.
 
-@br@br
+@br
 
 Obviously, maximization problems are performed by taking the opposite of variables as objectives.
-You may use a @code{-} keyword to minimise the opposite of o1 (i.e. maximize o1).
-
-@br@br
+You may use a @code{-} keyword to minimise the opposite of o1 (@i{i.e.} maximize o1).
 
 @hl.openmole(s"""
 $model
@@ -146,20 +137,19 @@ NSGA2Evolution(
   objective = Seq(-o1, o2),
   evaluation = model,
   parallelism = 10,
-  termination = 100) hook (workDirectory / "evolution")""", name = "nsga2 maximize example")
-
-@br
+  termination = 100) hook (workDirectory / "evolution")
+""", name = "nsga2 maximize example")
 
 
 
 @h2{Outputs of NSGA2Evolution}
 
-As an output, the method produce a population file for each generation in the directory provided to the hook, named with the generation number as @code{populationN.csv}.
+As an output, the method produces a population file for each generation, in the directory provided to the hook, named with the generation number as @code{populationN.csv}.
 Each csv file contains a column with the generation number, the values of parameters, the median value of the objectives at each point, and in the variable @code{evolution$samples}, the number of runs of the model used for the evaluation (in the case of stochastic models).
 
 
 
 @h2{Real world Example}
 
-This @a("tutorial", href:=DocumentationPages.netLogoGA.file) exposes how to use Genetic Algorithms to perform optimization on a NetLogo model.
+This @aa("tutorial", href:=netLogoGA.file) exposes how to use Genetic Algorithms to perform optimization on a NetLogo model.
 

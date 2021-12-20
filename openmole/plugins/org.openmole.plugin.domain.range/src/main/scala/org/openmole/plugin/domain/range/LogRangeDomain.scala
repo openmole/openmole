@@ -26,16 +26,21 @@ import org.openmole.core.workflow.domain
 
 object LogRangeDomain {
 
-  implicit def isDiscrete[T] =
-    new DiscreteFromContextDomain[LogRangeDomain[T], T] with CenterFromContextDomain[LogRangeDomain[T], T] with BoundedFromContextDomain[LogRangeDomain[T], T] {
-      override def iterator(domain: LogRangeDomain[T]) = domain.iterator
-      override def center(domain: LogRangeDomain[T]) = RangeDomain.rangeCenter(domain.range)
-      override def max(domain: LogRangeDomain[T]) = domain.max
-      override def min(domain: LogRangeDomain[T]) = domain.min
-    }
+  implicit def isDiscrete[T]: DiscreteFromContextDomain[LogRangeDomain[T], T] = domain ⇒
+    Domain(
+      domain.iterator,
+      domain.inputs,
+      domain.validate
+    )
 
-  implicit def inputs[T]: domain.DomainInput[LogRangeDomain[T]] = domain ⇒ RangeDomain.inputs.apply(domain.range) ++ domain.steps.inputs
-  implicit def validate[T]: domain.DomainValidation[LogRangeDomain[T]] = domain ⇒ RangeDomain.validate.apply(domain.range) ++ domain.steps.validate
+  implicit def isBounded[T]: BoundedFromContextDomain[LogRangeDomain[T], T] = domain ⇒
+    Domain(
+      (domain.min, domain.max),
+      domain.inputs,
+      domain.validate
+    )
+
+  implicit def center[T]: DomainCenterFromContext[LogRangeDomain[T], T] = domain ⇒ RangeDomain.rangeCenter(domain.range)
 
   def apply[T: Log](range: RangeDomain[T], steps: FromContext[Int]) =
     new LogRangeDomain[T](range, steps)
@@ -65,5 +70,8 @@ sealed class LogRangeDomain[T](val range: RangeDomain[T], val steps: FromContext
 
   def max = range.max
   def min = range.min
+
+  def inputs = range.inputs ++ range.inputs ++ steps.inputs
+  def validate = range.validate ++ steps.validate
 
 }
