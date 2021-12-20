@@ -35,4 +35,10 @@ class DSLSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   }
 
+  "range of double" should "be of correct size" in {
+    val r = (0.0 to 10.0 by 0.2)
+    assert(r.size == 51)
+  }
+
+
 }

@@ -11,7 +11,7 @@ def settings = Seq(
   resolvers += Resolver.sonatypeRepo("releases"),
   resolvers += Resolver.sonatypeRepo("staging"),
   resolvers += "netlogo" at "https://dl.cloudsmith.io/public/netlogo/netlogo/maven/", // netlogo 6.2
-  Global / scalaVersion := scalaVersionValue,
+  scalaVersion := scalaVersionValue,
   scalacOptions ++= Seq("-deprecation", "-Ytasty-reader"),
   publishLocal / packageDoc / publishArtifact := false,
   publishLocal / packageSrc / publishArtifact := false,
@@ -21,7 +21,7 @@ def settings = Seq(
 
 
 def scala3Settings = Seq(
-  scalaVersion := scala3VersionValue
+  scalaVersion := scala3VersionValue,
 )
 
 lazy val scalatra = OsgiProject(dir, "org.scalatra",

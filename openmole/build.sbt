@@ -25,6 +25,12 @@ name := "openmole-root"
     scalariformAutoformat := true
   )*/
 
+def scala2(scalaVersion: String): Boolean =
+  CrossVersion.partialVersion(scalaVersion) match {
+    case Some((2, _))  => true
+    case _             => false
+  }
+
 def defaultSettings =
   Seq(
     organization := "org.openmole",
@@ -35,7 +41,7 @@ def defaultSettings =
     resolvers += Resolver.sonatypeRepo("staging"),
     resolvers += Resolver.bintrayRepo("definitelyscala", "maven"), // For plotlyjs
     Global / scalaVersion := scala3VersionValue, // + "-bin-typelevel-4",
-    scalacOptions ++= Seq("-Xtarget:11", "-language:higherKinds", "-language:postfixOps", "-language:implicitConversions", "-Xmax-inlines:50"),
+    scalacOptions ++= (if(scala2(scalaVersion.value)) Seq("-Ymacro-annotations", "-language:postfixOps", "-Ytasty-reader", "-Ydelambdafy:inline") else Seq("-Xtarget:11", "-language:higherKinds", "-language:postfixOps", "-language:implicitConversions", "-Xmax-inlines:50")),
     //scalacOptions += "-Yinduction-heuristics",
     //scalacOptions ++= Seq("-Xmax-classfile-name", "140"),
     javacOptions ++= Seq("-source", "11", "-target", "11"),
@@ -898,12 +904,14 @@ lazy val api = Project("api", binDir / "target" / "api") settings (defaultSettin
 
 lazy val site = crossProject(JSPlatform, JVMPlatform).in(binDir / "org.openmole.site") settings (defaultSettings: _*) jvmSettings (scalatex.SbtPlugin.projectSettings) jvmSettings(
   libraryDependencies += Libraries.scalatexSite,
-  libraryDependencies += Libraries.json4s,
+  //libraryDependencies +=  "org.json4s" %% "json4s-jackson" % json4sVersion,
+  libraryDependencies += Libraries.json4s cross CrossVersion.for2_13Use3,
   libraryDependencies += Libraries.spray,
   libraryDependencies += Libraries.txtmark,
   libraryDependencies += Libraries.scalaTags,
   libraryDependencies += Libraries.scalajHttp,
-  libraryDependencies += Libraries.scalaXML
+  libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % scalaXMLVersion,
+  //libraryDependencies += Libraries.scalaXML cross CrossVersion.for2_13Use3
 ) jsSettings(
   Libraries.rxJS,
   Libraries.bootstrapnative,
@@ -911,11 +919,21 @@ lazy val site = crossProject(JSPlatform, JVMPlatform).in(binDir / "org.openmole.
   Libraries.scaladgetTools,
   Libraries.scalajsDomJS,
   Libraries.highlightJS
+) settings(
+  scalaVersion := scalaVersionValue
 )
 
 lazy val siteJS = site.js enablePlugins (ExecNpmPlugin) settings (test := {}, scalacOptions := Seq())
 lazy val siteJVM = site.jvm dependsOn(tools, project, serializer, openmoleBuildInfo, marketIndex) settings (
-  libraryDependencies += Libraries.sourceCode)
+  libraryDependencies += "com.lihaoyi" %% "sourcecode" % sourcecodeVersion,
+  excludeDependencies ++= Seq(
+    ExclusionRule("com.lihaoyi", "sourcecode_3"),
+    ExclusionRule("org.typelevel", "cats-kernel_3"),
+    ExclusionRule("org.typelevel", "cats-core_3"),
+    ExclusionRule("org.scala-lang.modules", "scala-xml_3")
+  )
+  //libraryDependencies ~= _.map(_ excludeAll (ExclusionRule(organization = "com.lihaoyi", name = "sourcecode_2.13"))),
+)
 
 lazy val cloneMarket = taskKey[Unit]("cloning market place")
 lazy val defineMarketBranch = taskKey[Option[String]]("define market place branch")

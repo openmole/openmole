@@ -37,7 +37,7 @@ class CSVSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     val k = Val[String]
 
     def iValues = Array(89, 88, 72)
-    def jValue = Array(Array(iValues, iValues), Array(65))
+    def jValue = Array[Any](Array(iValues, iValues), Array(65))
 
     def headerValue = header(Seq(i, j, k), Seq(iValues, jValue, "youpi"), arrayOnRow = true)
 
