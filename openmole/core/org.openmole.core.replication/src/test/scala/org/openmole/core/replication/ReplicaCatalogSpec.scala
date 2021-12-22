@@ -25,7 +25,7 @@ class ReplicaCatalogSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     val file = tmp.newFile("replica", ".txt")
     file.content = "This is a test"
 
-    val hash = file.hash.toString
+    val hash: String = file.hash.toString()
     val storageID = "test"
     val path = "replica/test"
 
