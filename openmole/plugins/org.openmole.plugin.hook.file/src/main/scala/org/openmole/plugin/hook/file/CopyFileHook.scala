@@ -18,19 +18,17 @@
 package org.openmole.plugin.hook.file
 
 import java.io.File
-
-import monocle.Lens
-import monocle.macros.Lenses
-import org.openmole.core.context.{ Context, Val, Variable }
+import monocle.{Focus, Lens}
+import org.openmole.core.context.{Context, Val, Variable}
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.hook.{ Hook, HookExecutionContext }
-import org.openmole.core.workflow.mole.{ MoleExecutionContext, _ }
-import org.openmole.core.workflow.validation._
-import org.openmole.plugin.hook.file.CopyFileHook._
-import org.openmole.tool.random._
-import org.openmole.tool.tar._
+import org.openmole.core.workflow.builder.*
+import org.openmole.core.workflow.dsl.*
+import org.openmole.core.workflow.hook.{Hook, HookExecutionContext}
+import org.openmole.core.workflow.mole.{MoleExecutionContext, *}
+import org.openmole.core.workflow.validation.*
+import org.openmole.plugin.hook.file.CopyFileHook.*
+import org.openmole.tool.random.*
+import org.openmole.tool.tar.*
 
 object CopyFileHook {
 
@@ -40,12 +38,8 @@ object CopyFileHook {
     def copies: Lens[T, Vector[(Val[File], FromContext[File], CopyOptions)]]
   }
 
-  implicit def isIO: InputOutputBuilder[CopyFileHook] = InputOutputBuilder(CopyFileHook.config)
-  implicit def isInfo = InfoBuilder(info)
-
-  implicit def isCopy: CopyFileHookBuilder[CopyFileHook] = new CopyFileHookBuilder[CopyFileHook] {
-    override def copies = CopyFileHook.copies
-  }
+  implicit def isIO: InputOutputBuilder[CopyFileHook] = InputOutputBuilder(Focus[CopyFileHook](_.config))
+  implicit def isInfo: InfoBuilder[CopyFileHook] = InfoBuilder(Focus[CopyFileHook](_.info))
 
   def apply(
     prototype:   Val[File],
@@ -53,19 +47,19 @@ object CopyFileHook {
     remove:      Boolean           = false,
     compress:    Boolean           = false,
     move:        Boolean           = false
-  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): CopyFileHook =
-    apply() set (pack.copies += (prototype, destination, remove, compress, move))
-
-  def apply()(implicit name: sourcecode.Name, definitionScope: DefinitionScope): CopyFileHook =
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): CopyFileHook = {
     new CopyFileHook(
-      Vector.empty,
+      Vector((prototype, destination, CopyOptions(remove, compress, move))),
       config = InputOutputConfig(),
       info = InfoConfig()
+    ) set (
+      inputs += prototype,
+      if(move) outputs += prototype else identity
     )
-
+  }
 }
 
-@Lenses case class CopyFileHook(
+case class CopyFileHook(
   copies: Vector[(Val[File], FromContext[File], CopyOptions)],
   config: InputOutputConfig,
   info:   InfoConfig

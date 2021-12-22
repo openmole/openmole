@@ -28,11 +28,11 @@ object SeedVariable {
   implicit def noneToSeeder(none: None.type): SeedVariable = empty
 
   object SeedType {
-    implicit val longIsSeed = new SeedType[Long] {
+    implicit val longIsSeed: SeedType[Long] = new SeedType[Long] {
       override def apply(rng: Random): Long = rng.nextLong()
     }
 
-    implicit val intIsSeed = new SeedType[Int] {
+    implicit val intIsSeed: SeedType[Int] = new SeedType[Int] {
       override def apply(rng: Random): Int = rng.nextInt()
     }
   }

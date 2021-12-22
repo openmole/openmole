@@ -37,7 +37,7 @@ package object market {
 
   import org.json4s._
   import org.json4s.jackson.Serialization
-  implicit val formats = Serialization.formats(NoTypeHints)
+  implicit val formats: Formats = Serialization.formats(NoTypeHints)
 
   def indexURL(implicit preference: Preference, randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
     ExpandedString(preference(MarketIndex.marketIndexLocation)).from(Context("version" → buildinfo.version))

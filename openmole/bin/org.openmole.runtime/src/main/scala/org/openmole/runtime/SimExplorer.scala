@@ -94,16 +94,16 @@ object SimExplorer extends JavaLogger {
             val threads = config.thread.getOrElse(1)
             logger.fine(s"running with: $threads threads")
 
-            implicit val workspace = Workspace(new File(config.workspace.get).getCanonicalFile)
-            implicit val newFile = TmpDirectory(workspace)
-            implicit val serializerService = SerializerService()
-            implicit val preference = Preference.memory()
-            implicit val threadProvider = ThreadProvider(threads + 5)
-            implicit val fileService = FileService()
-            implicit val fileServiceCache = FileServiceCache()
-            implicit val eventDispatcher = EventDispatcher()
-            implicit val loggerService = if (config.debug) LoggerService(level = Some(finest)) else LoggerService()
-            implicit val networkService = NetworkService(None)
+            implicit val workspace: Workspace = Workspace(new File(config.workspace.get).getCanonicalFile)
+            implicit val newFile: TmpDirectory = TmpDirectory(workspace)
+            implicit val serializerService: SerializerService = SerializerService()
+            implicit val preference: Preference = Preference.memory()
+            implicit val threadProvider: ThreadProvider = ThreadProvider(threads + 5)
+            implicit val fileService: FileService = FileService()
+            implicit val fileServiceCache: FileServiceCache = FileServiceCache()
+            implicit val eventDispatcher: EventDispatcher = EventDispatcher()
+            implicit val loggerService: LoggerService = if (config.debug) LoggerService(level = Some(finest)) else LoggerService()
+            implicit val networkService: NetworkService = NetworkService(None)
 
             try {
               PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error starting bundle $b", e) }

@@ -61,7 +61,7 @@ object Authentication extends JavaLogger {
 
   protected def inCategory(store: AuthenticationStore, category: String)(implicit serializerService: SerializerService) = {
     val d = new File(store.baseDir, category)
-    d.listFilesSafe { f: File ⇒ f.getName.matches(Authentication.pattern) }.flatMap {
+    d.listFilesSafe { (f: File) ⇒ f.getName.matches(Authentication.pattern) }.flatMap {
       f ⇒
         Try(store.loadFile[Any](f)) match {
           case Success(t) ⇒ Some(f.getName → t)
@@ -73,6 +73,6 @@ object Authentication extends JavaLogger {
   }
 
   def allByCategory(implicit store: AuthenticationStore, serializerService: SerializerService): Map[String, Seq[Any]] =
-    store.baseDir.listFilesSafe { f: File ⇒ f.isDirectory }.map { d ⇒ d.getName → inCategory(store, d.getName).map(_._2) }.toMap
+    store.baseDir.listFilesSafe { (f: File) ⇒ f.isDirectory }.map { d ⇒ d.getName → inCategory(store, d.getName).map(_._2) }.toMap
 
 }

@@ -9,7 +9,7 @@ import org.openmole.core.workflow.test.TestHook
 import org.openmole.core.workflow.validation.Validation
 import org.scalatest._
 
-class PuzzleSpec extends FlatSpec with Matchers {
+class PuzzleSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
   import org.openmole.core.workflow.test.Stubs._
 
   "A single task" should "be a valid mole" in {
@@ -18,10 +18,9 @@ class PuzzleSpec extends FlatSpec with Matchers {
   }
 
   "HList containing dsl container" should "be usable like a dsl container" in {
-    import shapeless._
 
     val task = EmptyTask()
-    val test = DSLContainer(task, ()) :: 9 :: HNil
+    val test = (DSLContainer(task, ()), 9)
 
     (test: DSLContainer[_]).run()
     (test: MoleExecution).run()

@@ -6,7 +6,7 @@ import org.openmole.tool.stream.StringOutputStream
 import org.scalatest._
 import org.openmole.core.context._
 
-class CSVSpec extends FlatSpec with Matchers {
+class CSVSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   def result(f: PrintStream ⇒ Unit): String = {
     val result = new StringOutputStream()
@@ -37,7 +37,7 @@ class CSVSpec extends FlatSpec with Matchers {
     val k = Val[String]
 
     def iValues = Array(89, 88, 72)
-    def jValue = Array(Array(iValues, iValues), Array(65))
+    def jValue = Array[Any](Array(iValues, iValues), Array(65))
 
     def headerValue = header(Seq(i, j, k), Seq(iValues, jValue, "youpi"), arrayOnRow = true)
 

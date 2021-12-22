@@ -21,7 +21,7 @@ import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.tools.io.Prettifier._
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.random
-import shapeless.Typeable
+import shapeless3.typeable.Typeable
 
 import scala.reflect.ClassTag
 import scala.util.Random
@@ -62,7 +62,7 @@ object Variable {
   def copy[@specialized T](v: Variable[T])(prototype: Val[T] = v.prototype, value: T = v.value): Variable[T] = apply(prototype, value)
 
   object ConstructArray {
-    implicit def javaCollection = new ConstructArray[java.util.AbstractCollection[Any]] {
+    implicit def javaCollection: ConstructArray[java.util.AbstractCollection[Any]] = new ConstructArray[java.util.AbstractCollection[Any]] {
       def size(c: java.util.AbstractCollection[Any]) = c.size()
       def iterable(c: java.util.AbstractCollection[Any]) = c
     }
@@ -148,7 +148,7 @@ object Variable {
  */
 case class Variable[@specialized T](prototype: Val[T], value: T) {
   override def toString: String = prettified(Int.MaxValue)
-  def prettified(snipArray: Int) = prototype.name + "=" + (if (value != null) value.prettify(snipArray) else "null")
+  def prettified(snipArray: Int): String = s"${prototype.name}=${if (value != null) value.prettify(snipArray) else "null"}"
   def name = prototype.name
 }
 

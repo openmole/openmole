@@ -22,8 +22,10 @@ import java.util.concurrent.atomic.AtomicLong
 import scala.collection.mutable.{ ListBuffer, WeakHashMap }
 
 object EventDispatcher {
+  type Listner[T] = PartialFunction[(T, Event[T]), Unit]
+
   def apply() = new EventDispatcher
-  case class EventListnerKey(obj: Any, listner: Listner[_])
+  case class EventListnerKey[T](obj: Any, listner: Listner[T])
 }
 
 class EventDispatcher {
@@ -33,12 +35,12 @@ class EventDispatcher {
 
   def eventId = _eventId.getAndIncrement()
 
-  def listen[T](obj: T)(listener: Listner[T]) = listenerMap.synchronized {
+  def listen[T](obj: T)(listener: EventDispatcher.Listner[T]) = listenerMap.synchronized {
     listenerMap.getOrElseUpdate(obj, collection.mutable.Set()) += listener.asInstanceOf[Listner[Any]]
     EventDispatcher.EventListnerKey(obj, listener)
   }
 
-  def unregister(key: EventDispatcher.EventListnerKey) = listenerMap.synchronized {
+  def unregister[T](key: EventDispatcher.EventListnerKey[T]) = listenerMap.synchronized {
     listenerMap.get(key.obj).foreach(_ -= key.listner)
   }
 

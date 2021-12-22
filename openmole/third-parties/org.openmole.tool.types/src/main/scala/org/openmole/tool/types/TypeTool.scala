@@ -25,7 +25,6 @@ import scala.collection.mutable.ListBuffer
 import java.lang.reflect.{ Type ⇒ JType, Array ⇒ _, _ }
 import scala.reflect.ClassTag
 import scala.reflect.Manifest.{ classType, intersectionType, arrayType, wildcardType }
-import scala.reflect.runtime.universe._
 
 object TypeTool {
 
@@ -41,11 +40,11 @@ object TypeTool {
     def fromArray: Manifest[T] = m.typeArguments.head.asInstanceOf[Manifest[T]]
   }
 
-  implicit class TypeDecoration(t: Type) {
-    def isArray = t <:< typeTag[Array[_]].tpe
+  /*   implicit class TypeDecoration(t: TypeRepr) {
+    def isArray = t <:< definitions.ArrayClass.toType
     def fromArray = t.typeArgs.head
     def toArray = appliedType(definitions.ArrayClass.toType, List(t))
-  }
+  } */
 
   implicit class ClassTagDecoration[T](c: ClassTag[T]) {
     def isArray = c.runtimeClass.isArray
@@ -61,7 +60,7 @@ object TypeTool {
     else unArrayify(m1.asArray.fromArray, m2.asArray.fromArray, level + 1)
   }
 
-  case class NativeType[T](native: Class[_], java: Class[_], scala: Class[T])(implicit val typeTag: TypeTag[T], val manifest: Manifest[T])
+  case class NativeType[T](native: Class[_], java: Class[_], scala: Class[T])(implicit val manifest: Manifest[T])
 
   lazy val classEquivalences = Seq(
     NativeType(java.lang.Byte.TYPE, classOf[java.lang.Byte], classOf[Byte]),
@@ -78,7 +77,7 @@ object TypeTool {
     classEquivalences.find(_.java == c) orElse
       classEquivalences.find(_.scala == c)
 
-  def typeEquivalence(t: Type) = classEquivalences.find(_.typeTag.tpe == t)
+  //def typeEquivalence(t: Type) = classEquivalences.find(_.typeTag.tpe == t)
 
   def toClass(s: String) = classEquivalence(
     s match {
@@ -150,10 +149,14 @@ object TypeTool {
     values
   }
 
-  def toString[T](implicit manifest: Manifest[T]) =
-    manifest.toString.
-      replace(".package$", ".").
-      replace("$", ".")
+  def toString[T](implicit manifest: Manifest[T]) = {
+    val tpe =
+      manifest.toString.
+        replace(".package$", ".").
+        replace("$", ".").trim
+    val wildCard = "_ <: "
+    if(tpe.startsWith(wildCard)) tpe.drop(wildCard.size) else tpe
+  }
 
 }
 

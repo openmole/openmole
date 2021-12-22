@@ -24,7 +24,7 @@ import org.openmole.core.dsl.extension._
 
 import org.openmole.plugin.domain.collection._
 
-class CombineSpec extends FlatSpec with Matchers {
+class CombineSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
   import org.openmole.core.workflow.test.Stubs._
 
   "x keyword" should "create a complete sampling" in {

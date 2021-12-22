@@ -33,14 +33,13 @@ package object directsampling {
     def method = "direct sampling"
 
     import io.circe._
-    import io.circe.generic.extras.auto._
+    import io.circe.generic.auto._
     import io.circe.parser._
-    import io.circe.generic.extras.semiauto._
     import org.openmole.plugin.hook.omr._
 
-    implicit def methodData = MethodData[DirectSamplingMetadata](_ ⇒ DirectSamplingMetadata.method)
-    implicit def metadataEncoder: Encoder[DirectSamplingMetadata] = deriveConfiguredEncoder[DirectSamplingMetadata]
-    implicit def metadataDecoder: Decoder[DirectSamplingMetadata] = deriveConfiguredDecoder[DirectSamplingMetadata]
+    implicit def methodData: MethodData[DirectSamplingMetadata] = MethodData[DirectSamplingMetadata](_ ⇒ DirectSamplingMetadata.method)
+    //implicit def metadataEncoder: Encoder[DirectSamplingMetadata] = deriveEncoder[DirectSamplingMetadata]
+    //implicit def metadataDecoder: Decoder[DirectSamplingMetadata] = deriveDecoder[DirectSamplingMetadata]
 
     case class DirectSampling(sampled: Seq[ValData], aggregation: Option[Seq[Aggregation]], output: Seq[ValData]) extends DirectSamplingMetadata
     case class Replication(seed: ValData, sample: Int, aggregation: Option[Seq[Aggregation]]) extends DirectSamplingMetadata
@@ -59,7 +58,7 @@ package object directsampling {
     case class Method(seed: Val[_], sample: Int, aggregation: Seq[Aggregation])
 
     implicit def method[T]: ExplorationMethod[Replication[T], Method] = r ⇒ {
-      implicit def defScope = r.scope
+      implicit def defScope: DefinitionScope = r.scope
 
       val aggregateTask: OptionalArgument[DSL] =
         r.aggregation match {
@@ -98,10 +97,10 @@ package object directsampling {
     scope:            DefinitionScope                     = "replication"
   ) {
     def exploration = {
-      implicit def s = scope
+      implicit def s: DefinitionScope = scope
       index.option match {
-        case None        ⇒ ExplorationTask(seed in TakeDomain(UniformDistribution[T](distributionSeed), sample))
-        case Some(index) ⇒ ExplorationTask((seed in TakeDomain(UniformDistribution[T](distributionSeed), sample)) withIndex index)
+        case None        ⇒ ExplorationTask(seed in TakeDomain(UniformDistribution[T](seed = distributionSeed), sample))
+        case Some(index) ⇒ ExplorationTask((seed in TakeDomain(UniformDistribution[T](seed = distributionSeed), sample)) withIndex index)
       }
     }
   }
@@ -113,7 +112,7 @@ package object directsampling {
       includeSeed: Boolean        = false,
       format:      F              = CSVOutputFormat(append = true))(implicit outputFormat: OutputFormat[F, DirectSamplingMetadata]): Hooked[M] = {
       val dsl = method(t)
-      implicit val defScope = dsl.scope
+      implicit val defScope: DefinitionScope = dsl.scope
       val exclude = if (!includeSeed) Seq(dsl.method.seed) else Seq()
       val aggregation = if (dsl.method.aggregation.isEmpty) None else Some(dsl.method.aggregation.map(DirectSamplingMetadata.aggregation))
       val metadata = DirectSamplingMetadata.Replication(seed = ValData(dsl.method.seed), dsl.method.sample, aggregation)
@@ -125,7 +124,7 @@ package object directsampling {
     case class Method(sampled: Seq[Val[_]], aggregation: Seq[Aggregation], output: Seq[Val[_]])
 
     implicit def method[S]: ExplorationMethod[DirectSampling[S], Method] = m ⇒ {
-      implicit def defScope = m.scope
+      implicit def defScope: DefinitionScope = m.scope
 
       val aggregateTask: OptionalArgument[DSL] =
         m.aggregation match {
@@ -164,7 +163,7 @@ package object directsampling {
     scope:       DefinitionScope  = "direct sampling") {
 
     def explorationTask = {
-      implicit def s = scope
+      implicit def s: DefinitionScope = scope
       ExplorationTask(sampling)
     }
 
@@ -177,7 +176,7 @@ package object directsampling {
       values: Seq[Val[_]]    = Vector.empty,
       format: F              = CSVOutputFormat(append = true))(implicit outputFormat: OutputFormat[F, DirectSamplingMetadata]): Hooked[M] = {
       val dsl = method(t)
-      implicit val defScope = dsl.scope
+      implicit val defScope: DefinitionScope = dsl.scope
 
       val aggregation = if (dsl.method.aggregation.isEmpty) None else Some(dsl.method.aggregation.map(DirectSamplingMetadata.aggregation))
       val metadata = DirectSamplingMetadata.DirectSampling(dsl.method.sampled.map(v ⇒ ValData(v)), aggregation, dsl.method.output.map(v ⇒ ValData(v)))

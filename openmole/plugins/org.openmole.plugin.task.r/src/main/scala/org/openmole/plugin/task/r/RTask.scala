@@ -1,6 +1,6 @@
 package org.openmole.plugin.task.r
 
-import monocle.macros.Lenses
+import monocle.Focus
 import org.openmole.core.context.{Namespace, Val}
 import org.openmole.core.dsl._
 import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
@@ -23,10 +23,10 @@ import org.openmole.tool.outputredirection.OutputRedirection
 
 object RTask {
 
-  implicit def isTask: InputOutputBuilder[RTask] = InputOutputBuilder(RTask.config)
-  implicit def isExternal: ExternalBuilder[RTask] = ExternalBuilder(RTask.external)
-  implicit def isInfo = InfoBuilder(info)
-  implicit def isMapped = MappedInputOutputBuilder(RTask.mapped)
+  implicit def isTask: InputOutputBuilder[RTask] = InputOutputBuilder(Focus[RTask](_.config))
+  implicit def isExternal: ExternalBuilder[RTask] = ExternalBuilder(Focus[RTask](_.external))
+  implicit def isInfo: InfoBuilder[RTask] = InfoBuilder(Focus[RTask](_.info))
+  implicit def isMapped: MappedInputOutputBuilder[RTask] = MappedInputOutputBuilder(Focus[RTask](_.mapped))
 
   sealed trait InstallCommand
   object InstallCommand {
@@ -96,12 +96,12 @@ object RTask {
       external = External(),
       info = InfoConfig(),
       mapped = MappedInputOutputConfig()
-    ) set (outputs += (Seq(returnValue.option, stdOut.option, stdErr.option).flatten: _*))
+    ) set (outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
   }
 
 }
 
-@Lenses case class RTask(
+case class RTask(
   script:               RunnableScript,
   image:                PreparedImage,
   errorOnReturnValue:   Boolean,
@@ -126,8 +126,8 @@ object RTask {
     import p._
 
     def writeInputsJSON(file: File) = {
-      def values = noFile(mapped.inputs).map { m ⇒ Array(context(m.v)) }
-      file.content = compact(render(toJSONValue(values.toArray)))
+      def values = noFile(mapped.inputs).map { m ⇒ Array(context(m.v))(m.v.`type`.manifest) }
+      file.content = compact(render(toJSONValue(values.toArray[Any])))
     }
 
     def rInputMapping(arrayName: String) =
@@ -183,8 +183,8 @@ object RTask {
             resources += (scriptFile, rScriptName, true),
             resources += (jsonInputs, inputJSONName, true),
             outputFiles += (outputJSONName, outputFile),
-            Mapped.files(mapped.inputs).map { case m ⇒ inputFiles +=[ContainerTask] (m.v, m.name, true) },
-            Mapped.files(mapped.outputs).map { case m ⇒ outputFiles +=[ContainerTask] (m.name, m.v) }
+            Mapped.files(mapped.inputs).map { case m ⇒ inputFiles.+=[ContainerTask] (m.v, m.name, true) },
+            Mapped.files(mapped.outputs).map { case m ⇒ outputFiles.+=[ContainerTask] (m.name, m.v) }
           )
 
         val resultContext =

@@ -19,7 +19,7 @@ package org.openmole.plugin.source.file
 
 import java.io.File
 
-import monocle.macros.Lenses
+import monocle.Focus
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.dsl._
 import org.openmole.core.expansion.FromContext
@@ -28,8 +28,8 @@ import org.openmole.core.workflow.mole._
 
 object ListDirectoriesSource {
 
-  implicit def isIO = InputOutputBuilder(ListDirectoriesSource.config)
-  implicit def isInfo = InfoBuilder(info)
+  implicit def isIO: InputOutputBuilder[ListDirectoriesSource] = InputOutputBuilder(Focus[ListDirectoriesSource](_.config))
+  implicit def isInfo: InfoBuilder[ListDirectoriesSource] = InfoBuilder(Focus[ListDirectoriesSource](_.info))
 
   def apply(path: FromContext[String], prototype: Val[Array[File]], regExp: FromContext[String] = ".*")(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new ListDirectoriesSource(
@@ -41,7 +41,7 @@ object ListDirectoriesSource {
     ) set (outputs += prototype)
 }
 
-@Lenses case class ListDirectoriesSource(
+case class ListDirectoriesSource(
   path:      FromContext[String],
   prototype: Val[Array[File]],
   regExp:    FromContext[String],
@@ -55,7 +55,7 @@ object ListDirectoriesSource {
     val expandedRegExp = regExp.from(context)
     Variable(
       prototype,
-      expandedPath.listRecursive { f: File ⇒ f.isDirectory && f.getName.matches(expandedRegExp) } toArray
+      expandedPath.listRecursive { (f: File) ⇒ f.isDirectory && f.getName.matches(expandedRegExp) } toArray
     )
   }
 }

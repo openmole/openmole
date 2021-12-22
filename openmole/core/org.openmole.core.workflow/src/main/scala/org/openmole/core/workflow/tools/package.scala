@@ -29,16 +29,16 @@ package tools {
     }
 
     implicit class SeqOfEndofunctorDecorator[T](f: Seq[T ⇒ T]) {
-      def sequence: T ⇒ T = { t: T ⇒ f.foldLeft(t)((a, f) ⇒ f(a)) }
+      def sequence: T ⇒ T = { (t: T) ⇒ f.foldLeft(t)((a, f) ⇒ f(a)) }
     }
 
-    implicit def seqOfFunction[T](s: Seq[T ⇒ T]) = s.sequence
-    implicit def arrayOfFunction[T](s: Array[T ⇒ T]) = s.toSeq.sequence
+    implicit def seqOfFunction[T](s: Seq[T ⇒ T]): T => T = s.sequence
+    implicit def arrayOfFunction[T](s: Array[T ⇒ T]): T => T = s.toSeq.sequence
 
     def OptionalArgument = tools.OptionalArgument
     type OptionalArgument[T] = tools.OptionalArgument[T]
 
-    implicit def optionalArgumentToOption[T](optionalArgument: OptionalArgument[T]) = optionalArgument.option
+    implicit def optionalArgumentToOption[T](optionalArgument: OptionalArgument[T]): Option[T] = optionalArgument.option
 
     def Expression[T] = new {
       def apply[S](s: S)(implicit expandable: Expandable[S, T]) = expandable.expand(s)

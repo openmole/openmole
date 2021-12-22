@@ -90,7 +90,7 @@ object PluginManager extends JavaLogger {
     }
   }
 
-  def updateBundles(bundles: Option[Seq[Bundle]] = None) {
+  def updateBundles(bundles: Option[Seq[Bundle]] = None) = {
     val listener = new FrameworkListener {
       val lock = new Semaphore(0)
 
@@ -158,8 +158,6 @@ object PluginManager extends JavaLogger {
     val bundleFiles = files.flatMap { listBundles }
     val loaded = bundleFiles.map { b ⇒ b → Try(installBundle(b)) }
     def bundles = loaded.collect { case (f, Success(b)) ⇒ f → b }
-    println("bnudele file " + bundleFiles.map { _.getAbsolutePath })
-    println("LOADED " + bundles.map { _._1.getAbsolutePath })
     def loadError = loaded.collect { case (f, Failure(e)) ⇒ f → e }
     loadError ++ bundles.flatMap {
       case (f, b) ⇒

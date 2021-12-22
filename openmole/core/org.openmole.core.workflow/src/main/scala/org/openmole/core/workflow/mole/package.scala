@@ -15,42 +15,37 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow
+package org.openmole.core.workflow.mole
 
 import org.openmole.core.workflow.hook.Hook
 
 import scala.language.implicitConversions
 
-package mole {
-
-  trait MolePackage {
-    type FromContextSource = mole.FromContextSource
-  }
+trait MolePackage {
+  type FromContextSource = org.openmole.core.workflow.mole.FromContextSource
 }
 
-package object mole {
+type SubMoleExecution = Long
 
-  type SubMoleExecution = Long
+def Source = FromContextSource
 
-  def Source = FromContextSource
+case class Hooks(map: Map[MoleCapsule, Iterable[Hook]])
+case class Sources(map: Map[MoleCapsule, Iterable[Source]])
 
-  case class Hooks(map: Map[MoleCapsule, Iterable[Hook]])
-  case class Sources(map: Map[MoleCapsule, Iterable[Source]])
+implicit def hooksToMap(h: Hooks): Map[MoleCapsule, Iterable[Hook]] = h.map.withDefault(_ ⇒ List.empty)
+implicit def sourcesToMap(s: Sources): Map[MoleCapsule, Iterable[Source]] = s.map.withDefault(_ ⇒ List.empty)
 
-  implicit def hooksToMap(h: Hooks): Map[MoleCapsule, Iterable[Hook]] = h.map.withDefault(_ ⇒ List.empty)
-  implicit def mapToHooks(m: Map[MoleCapsule, Iterable[Hook]]): Hooks = new Hooks(m)
+object Hooks {
+  def empty = Map.empty[MoleCapsule, Iterable[Hook]]
+
   implicit def iterableTupleToHooks(h: Iterable[(MoleCapsule, Hook)]): Hooks = new Hooks(h.groupBy(_._1).map { case (k, v) ⇒ k -> v.map(_._2) })
+  implicit def mapToHooks(m: Map[MoleCapsule, Iterable[Hook]]): Hooks = new Hooks(m)
+}
 
-  implicit def sourcesToMap(s: Sources): Map[MoleCapsule, Iterable[Source]] = s.map.withDefault(_ ⇒ List.empty)
+object Sources {
+  def empty = Map.empty[MoleCapsule, Iterable[Source]]
+
   implicit def mapToSources(m: Map[MoleCapsule, Iterable[Source]]): Sources = new Sources(m)
   implicit def iterableTupleToSources(s: Iterable[(MoleCapsule, Source)]): Sources = new Sources(s.groupBy(_._1).map { case (k, v) ⇒ k -> v.map(_._2) })
-
-  object Hooks {
-    def empty = Map.empty[MoleCapsule, Iterable[Hook]]
-  }
-
-  object Sources {
-    def empty = Map.empty[MoleCapsule, Iterable[Source]]
-  }
-
 }
+

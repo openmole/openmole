@@ -19,7 +19,7 @@ object DispatchEnvironment {
   val updateInterval = PreferenceLocation("DispatchEnvironment", "UpdateInterval", Some(10 seconds))
 
   object DestinationProvider {
-    implicit def toDestinationProvider(on: On[Int, EnvironmentProvider]) = DestinationProvider(on.on, on.value)
+    implicit def toDestinationProvider(on: On[Int, EnvironmentProvider]): DestinationProvider = DestinationProvider(on.on, on.value)
   }
 
   case class DestinationProvider(environment: EnvironmentProvider, slot: Int)

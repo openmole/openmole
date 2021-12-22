@@ -56,7 +56,7 @@ package object random {
     shuffle((0 until a.size).toArray).toIndexedSeq.map(i ⇒ indexed(i))
   }
 
-  implicit def randomDecorator(rng: util.Random) = new {
+  implicit class RandomDecorator(rng: util.Random) {
     def shuffle[T](a: Array[T]): Array[T] = random.shuffle(a)(rng)
 
     def nextLong(max: Long): Long = {
@@ -65,7 +65,7 @@ package object random {
     }
   }
 
-  implicit def iterableShuffleDecorator[T](a: Iterable[T]) = new {
+  implicit class IterableShuffleDecorator[T](a: Iterable[T]) {
     def shuffled(implicit rng: util.Random): Seq[T] = random.shuffled(a)(rng).toSeq
   }
 

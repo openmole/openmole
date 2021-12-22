@@ -221,7 +221,7 @@ case class CurlRemoteStorage(location: String, jobDirectory: String, voName: Str
 }
 
 object WebDavStorage {
-  implicit def webdavlocationIsStorage(implicit httpEffect: Effect[_root_.gridscale.http.HTTP]) = new StorageInterface[WebDavStorage] with EnvironmentStorage[WebDavStorage] with HierarchicalStorageInterface[WebDavStorage] {
+  implicit def webdavlocationIsStorage(implicit httpEffect: Effect[_root_.gridscale.http.HTTP]): StorageInterface[WebDavStorage] with EnvironmentStorage[WebDavStorage] with HierarchicalStorageInterface[WebDavStorage] = new StorageInterface[WebDavStorage] with EnvironmentStorage[WebDavStorage] with HierarchicalStorageInterface[WebDavStorage] {
 
     def webdavServer(location: WebDavStorage) = gridscale.webdav.WebDAVSServer(location.url, location.proxyCache().factory)
 

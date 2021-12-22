@@ -2,7 +2,7 @@ package org.openmole.plugin.task.gama
 
 import java.io.FileNotFoundException
 
-import monocle.macros._
+import monocle.Focus
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
@@ -24,10 +24,10 @@ import scala.xml.XML
 
 object GAMATask {
 
-  implicit def isTask: InputOutputBuilder[GAMATask] = InputOutputBuilder(GAMATask.config)
-  implicit def isExternal: ExternalBuilder[GAMATask] = ExternalBuilder(GAMATask.external)
-  implicit def isInfo = InfoBuilder(info)
-  implicit def isMapped = MappedInputOutputBuilder(GAMATask.mapped)
+  implicit def isTask: InputOutputBuilder[GAMATask] = InputOutputBuilder(Focus[GAMATask](_.config))
+  implicit def isExternal: ExternalBuilder[GAMATask] = ExternalBuilder(Focus[GAMATask](_.external))
+  implicit def isInfo: InfoBuilder[GAMATask] = InfoBuilder(Focus[GAMATask](_.info))
+  implicit def isMapped: MappedInputOutputBuilder[GAMATask] = MappedInputOutputBuilder(Focus[GAMATask](_.mapped))
 
   def inputXML = "/_model_input_.xml"
   def workspaceDirectory = "/_workspace_"
@@ -114,8 +114,8 @@ object GAMATask {
       info = InfoConfig(),
       mapped = MappedInputOutputConfig()
     ) set (
-        inputs += (seed.option.toSeq: _*),
-        outputs += (Seq(returnValue.option, stdOut.option, stdErr.option).flatten: _*)
+        inputs ++= seed.option.toSeq,
+        outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
       )
   }
 
@@ -163,7 +163,7 @@ object GAMATask {
 
 }
 
-@Lenses case class GAMATask(
+case class GAMATask(
   project:              File,
   gaml:                 String,
   experiment:           String,
@@ -281,7 +281,7 @@ object GAMATask {
             info = info,
             containerPoolKey = containerPoolKey) set(
             resources += (inputFile, inputFileName, true),
-            volumes.map { case (lv, cv) ⇒ resources +=[ContainerTask](lv, cv, true) },
+            volumes.map { case (lv, cv) ⇒ resources.+=[ContainerTask](lv, cv, true) },
             resources += (tmpOutputDirectory, outputDirectory, true)
           )
 

@@ -43,7 +43,7 @@ package object collection extends LowPriorityImplicits {
   //implicit def iteratorIsDiscrete[T]: DiscreteFromContextDomain[Iterator[T], T] = domain ⇒ Domain(domain)
   implicit def fromContextIteratorIsDiscrete[T]: DiscreteFromContextDomain[FromContext[Iterator[T]], T] = domain ⇒ Domain(domain)
 
-  implicit def booleanValIsFactor(p: Val[Boolean]) = Factor(p, Vector(true, false))
+  implicit def booleanValIsFactor(p: Val[Boolean]): Factor[Vector[Boolean], Boolean] = Factor(p, Vector(true, false))
 
   implicit def arrayValIsFinite[T]: DiscreteFromContextDomain[Val[Array[T]], T] = domain ⇒
     Domain(

@@ -7,9 +7,9 @@ import org.openmole.core.workflow.task._
 
 object FilterTask {
 
-  def apply(variable: Val[T] forSome { type T }*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(variable: Val[?]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     ClosureTask("FilterTask") { (context, _, _) ⇒ context } set (
-      (inputs, outputs) += (variable: _*)
+      (inputs, outputs) ++= variable
     )
 
 }

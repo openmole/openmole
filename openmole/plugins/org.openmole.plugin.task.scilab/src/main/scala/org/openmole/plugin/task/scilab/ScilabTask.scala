@@ -1,6 +1,6 @@
 package org.openmole.plugin.task.scilab
 
-import monocle.macros._
+import monocle.Focus
 import org.openmole.core.dsl._
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion._
@@ -23,10 +23,10 @@ import scala.reflect.ClassTag
 
 object ScilabTask {
 
-  implicit def isTask: InputOutputBuilder[ScilabTask] = InputOutputBuilder(ScilabTask.config)
-  implicit def isExternal: ExternalBuilder[ScilabTask] = ExternalBuilder(ScilabTask.external)
-  implicit def isInfo = InfoBuilder(info)
-  implicit def isMapped = MappedInputOutputBuilder(ScilabTask.mapped)
+  implicit def isTask: InputOutputBuilder[ScilabTask] = InputOutputBuilder(Focus[ScilabTask](_.config))
+  implicit def isExternal: ExternalBuilder[ScilabTask] = ExternalBuilder(Focus[ScilabTask](_.external))
+  implicit def isInfo: InfoBuilder[ScilabTask] = InfoBuilder(Focus[ScilabTask](_.info))
+  implicit def isMapped: MappedInputOutputBuilder[ScilabTask] = MappedInputOutputBuilder(Focus[ScilabTask](_.mapped))
 
   def scilabImage(version: String) = DockerImage("openmole/scilab", version)
 
@@ -60,8 +60,8 @@ object ScilabTask {
       mapped = MappedInputOutputConfig(),
       version = version
     ) set (
-        outputs += (Seq(returnValue.option, stdOut.option, stdErr.option).flatten: _*)
-      )
+      outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
+    )
   }
 
   /**
@@ -165,7 +165,7 @@ object ScilabTask {
 
 }
 
-@Lenses case class ScilabTask(
+case class ScilabTask(
   script:               RunnableScript,
   image:                PreparedImage,
   errorOnReturnValue:   Boolean,

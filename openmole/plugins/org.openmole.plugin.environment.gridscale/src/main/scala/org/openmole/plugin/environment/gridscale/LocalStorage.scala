@@ -32,7 +32,7 @@ object LocalStorage {
   def home(implicit interpreter: Effect[local.Local]) = interpreter().home()
   def child(parent: String, child: String) = (File(parent) / child).getAbsolutePath
 
-  implicit def isStorage(implicit interpreter: Effect[local.Local]) = new StorageInterface[LocalStorage] with HierarchicalStorageInterface[LocalStorage] with EnvironmentStorage[LocalStorage] {
+  implicit def isStorage(implicit interpreter: Effect[local.Local]): StorageInterface[LocalStorage] with HierarchicalStorageInterface[LocalStorage] with EnvironmentStorage[LocalStorage] = new StorageInterface[LocalStorage] with HierarchicalStorageInterface[LocalStorage] with EnvironmentStorage[LocalStorage] {
     override def child(t: LocalStorage, parent: String, child: String): String = LocalStorage.child(parent, child)
     override def parent(t: LocalStorage, path: String): Option[String] = Option(File(path).getParent)
     override def name(t: LocalStorage, path: String): String = File(path).getName

@@ -139,7 +139,7 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   val services:             BatchEnvironment.Services
 ) extends BatchEnvironment { env ⇒
 
-  implicit def servicesImplicit = services
+  implicit def servicesImplicit: BatchEnvironment.Services = services
   import services._
 
   lazy val jobUpdater = new SSHJobService.Updater(WeakReference(this))
@@ -149,9 +149,9 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   lazy val stateRegistry = new SSHEnvironment.SSHJobStateRegistry
 
-  implicit val sshInterpreter = gridscale.ssh.SSH()
-  implicit val systemInterpreter = System()
-  implicit val localInterpreter = gridscale.local.Local()
+  implicit val sshInterpreter: gridscale.effectaside.Effect[gridscale.ssh.SSH] = gridscale.ssh.SSH()
+  implicit val systemInterpreter: gridscale.effectaside.Effect[System] = System()
+  implicit val localInterpreter: gridscale.effectaside.Effect[gridscale.local.Local] = gridscale.local.Local()
 
   def timeout = services.preference(SSHEnvironment.timeOut)
 

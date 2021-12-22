@@ -14,7 +14,7 @@ object DeltaTask {
         case DeltaLong(v, o)   ⇒ Variable(v, math.abs(context(v) - o))
       }
     } set (
-      (inputs, outputs) += (objective.map(Delta.v): _*)
+      (inputs, outputs) ++= objective.map(Delta.v)
     )
 
   sealed trait Delta
@@ -23,9 +23,9 @@ object DeltaTask {
   case class DeltaLong(v: Val[Long], objective: Long) extends Delta
 
   object Delta {
-    implicit def fromTupleDouble[T](t: (Val[Double], T))(implicit toDouble: ToDouble[T]) = DeltaDouble(t._1, toDouble(t._2))
-    implicit def fromTupleInt(t: (Val[Int], Int)) = DeltaInt(t._1, t._2)
-    implicit def fromTupleLong(t: (Val[Long], Long)) = DeltaLong(t._1, t._2)
+    implicit def fromTupleDouble[T](t: (Val[Double], T))(implicit toDouble: ToDouble[T]): DeltaDouble = DeltaDouble(t._1, toDouble(t._2))
+    implicit def fromTupleInt(t: (Val[Int], Int)): DeltaInt = DeltaInt(t._1, t._2)
+    implicit def fromTupleLong(t: (Val[Long], Long)): DeltaLong = DeltaLong(t._1, t._2)
 
     def v(delta: Delta) =
       delta match {

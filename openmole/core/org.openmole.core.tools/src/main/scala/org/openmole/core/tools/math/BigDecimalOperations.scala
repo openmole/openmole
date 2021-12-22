@@ -85,7 +85,7 @@ object BigDecimalOperations {
 
     // Loop until the approximations converge
     // (two successive approximations are equal after rounding).
-    do {
+    while {
       // x^(index-1)
       val xToIm1 = intPower(x, index - 1, sp1)
 
@@ -102,7 +102,8 @@ object BigDecimalOperations {
       xPrev = x
       x = numerator.divide(denominator, sp1, BigDecimal.ROUND_DOWN)
 
-    } while (x.subtract(xPrev).abs().compareTo(tolerance) > 0)
+      (x.subtract(xPrev).abs().compareTo(tolerance) > 0)
+    } do () 
 
     return x
   }
@@ -169,7 +170,7 @@ object BigDecimalOperations {
     // Loop until the sums converge
     // (two successive sums are equal after rounding).
     var i = 2
-    do {
+    while {
       // x^i
       xPower = xPower.multiply(x).setScale(scale, BigDecimal.ROUND_HALF_EVEN)
 
@@ -184,7 +185,9 @@ object BigDecimalOperations {
       sum = sum.add(term)
 
       i += 1
-    } while (sum.compareTo(sumPrev) != 0);
+
+      (sum.compareTo(sumPrev) != 0)
+    } do () 
 
     return sum;
   }
@@ -232,7 +235,7 @@ object BigDecimalOperations {
 
     // Loop until the approximations converge
     // (two successive approximations are within the tolerance).
-    do {
+    while {
 
       // e^x
       val eToX = exp(x, sp1)
@@ -244,7 +247,9 @@ object BigDecimalOperations {
       // x - (e^x - n)/e^x
       x = x.subtract(term)
 
-    } while (term.compareTo(tolerance) > 0);
+      (term.compareTo(tolerance) > 0)
+    } do()
+
     return x.setScale(scale, BigDecimal.ROUND_HALF_EVEN)
   }
 
@@ -290,7 +295,7 @@ object BigDecimalOperations {
 
     // Loop until the approximations converge
     // (two successive approximations are within the tolerance).
-    do {
+    while {
       // x^i
       power = power.multiply(x).multiply(x).setScale(sp1, BigDecimal.ROUND_HALF_EVEN)
 
@@ -303,9 +308,10 @@ object BigDecimalOperations {
       i += 2
       addFlag = !addFlag;
 
-    } while (term.compareTo(tolerance) > 0)
+      (term.compareTo(tolerance) > 0)
+    } do()
 
-    return sum;
+    return sum
   }
 
   /**
@@ -331,13 +337,14 @@ object BigDecimalOperations {
 
     // Loop until the approximations converge
     // (two successive approximations are equal after rounding).
-    do {
+    while {
       ixPrev = ix
 
       // x = (x + n/x)/2
       ix = ix.add(n.divide(ix)).shiftRight(1)
 
-    } while (ix.compareTo(ixPrev) != 0)
+      (ix.compareTo(ixPrev) != 0)
+    } do ()
 
     return new BigDecimal(ix, scale)
   }

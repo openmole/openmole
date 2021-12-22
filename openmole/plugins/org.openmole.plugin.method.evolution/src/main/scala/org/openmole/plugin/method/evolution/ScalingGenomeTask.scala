@@ -28,7 +28,7 @@ object ScalingGenomeTask {
       import p._
       context ++ evolution.genomeToVariables(context(evolution.genomeVal)).from(context)
     } set (
-      outputs += (evolution.inputVals: _*),
+      outputs ++= evolution.inputVals,
       (inputs, outputs) += evolution.genomeVal
     )
 

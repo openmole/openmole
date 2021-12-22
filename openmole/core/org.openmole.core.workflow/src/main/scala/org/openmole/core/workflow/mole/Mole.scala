@@ -17,13 +17,13 @@
 
 package org.openmole.core.workflow.mole
 
-import monocle.macros.Lenses
 import org.openmole.core.context.PrototypeSet
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.workflow.transition._
 import org.openmole.core.expansion.Validate
 
 import scala.collection._
+import monocle.Focus
 
 object Mole {
 
@@ -73,7 +73,7 @@ object Mole {
  * @param dataChannels
  * @param inputs
  */
-@Lenses case class Mole(
+case class Mole(
   root:         MoleCapsule,
   transitions:  Iterable[Transition]  = Iterable.empty,
   dataChannels: Iterable[DataChannel] = Iterable.empty,

@@ -27,8 +27,8 @@ object Prettifier extends JavaLogger {
 
   import Log._
 
-  implicit def objectPrettifier(o: Any) = new {
-    def prettify(snipArray: Int = Int.MaxValue) = Prettifier.prettify(o, snipArray)
+  implicit class objectPrettifier(o: Any) {
+    def prettify(snipArray: Int = Int.MaxValue): String = Prettifier.prettify(o, snipArray)
   }
 
   def snip[T <: Any](o: Iterable[T], size: Int = Int.MaxValue) =

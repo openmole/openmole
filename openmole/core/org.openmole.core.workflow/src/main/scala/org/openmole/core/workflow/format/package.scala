@@ -1,16 +1,10 @@
-package org.openmole.core.workflow
+package org.openmole.core.workflow.format
 
-package format {
+import org.openmole.tool.outputredirection._
 
-  import org.openmole.tool.outputredirection._
-
-  trait FormatPackage {
-    type Display = WritableOutput.Display
-    def display(implicit outputRedirection: OutputRedirection): Display = WritableOutput.Display(outputRedirection.output)
-    def CSVOutputFormat = format.CSVOutputFormat
-  }
+trait FormatPackage {
+  type Display = WritableOutput.Display
+  def display(implicit outputRedirection: OutputRedirection): Display = WritableOutput.Display(outputRedirection.output)
+  def CSVOutputFormat = org.openmole.core.workflow.format.CSVOutputFormat
 }
 
-package object format {
-
-}

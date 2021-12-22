@@ -33,7 +33,7 @@ object Generate extends App {
       s"${buildinfo.version.major}-dev"
     )
 
-  implicit val formats = Serialization.formats(NoTypeHints)
+  implicit val formats: Formats = Serialization.formats(NoTypeHints)
   val index = parameters.target.get / buildinfo.marketName
   index.content = Serialization.writePretty(MarketIndex(entries.map(_.toDeployedMarketEntry)))
 

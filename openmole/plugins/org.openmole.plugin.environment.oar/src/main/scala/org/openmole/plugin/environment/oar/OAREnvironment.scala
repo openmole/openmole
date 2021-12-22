@@ -135,9 +135,9 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
 
   import services._
 
-  implicit val sshInterpreter = gridscale.ssh.SSH()
-  implicit val systemInterpreter = effectaside.System()
-  implicit val localInterpreter = gridscale.local.Local()
+  implicit val sshInterpreter: gridscale.effectaside.Effect[gridscale.ssh.SSH] = gridscale.ssh.SSH()
+  implicit val systemInterpreter: gridscale.effectaside.Effect[gridscale.effectaside.System] = effectaside.System()
+  implicit val localInterpreter: gridscale.effectaside.Effect[gridscale.local.Local] = gridscale.local.Local()
 
   override def start() = {
     storageService
@@ -201,8 +201,8 @@ class OARLocalEnvironment(
 ) extends BatchEnvironment { env ⇒
 
   import services._
-  implicit val localInterpreter = gridscale.local.Local()
-  implicit val systemInterpreter = effectaside.System()
+  implicit val localInterpreter: gridscale.effectaside.Effect[gridscale.local.Local] = gridscale.local.Local()
+  implicit val systemInterpreter: gridscale.effectaside.Effect[gridscale.effectaside.System] = effectaside.System()
 
   override def start() = { storage; space }
   override def stop() = {

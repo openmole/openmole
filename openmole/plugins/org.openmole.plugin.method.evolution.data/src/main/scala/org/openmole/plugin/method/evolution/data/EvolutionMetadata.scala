@@ -7,14 +7,15 @@ case class SaveOption(
 object EvolutionMetadata {
 
   import io.circe._
-  import io.circe.generic.extras.auto._
   import io.circe.parser._
-  import io.circe.generic.extras.semiauto._
+  import io.circe.generic.auto._
+  import io.circe.`export`.Exported
   import org.openmole.plugin.hook.omr._
 
-  implicit def methodData = MethodData[EvolutionMetadata](_ ⇒ EvolutionMetadata.method)
-  implicit def evolutionMetadataEncoder: Encoder[EvolutionMetadata] = deriveConfiguredEncoder[EvolutionMetadata]
-  implicit def evolutionMetadataDecoder: Decoder[EvolutionMetadata] = deriveConfiguredDecoder[EvolutionMetadata]
+  implicit def methodData: MethodData[EvolutionMetadata] = MethodData[EvolutionMetadata](_ ⇒ EvolutionMetadata.method)
+
+  implicit def evolutionMetadataEncoder: Exported[Encoder[EvolutionMetadata]] = io.circe.generic.auto.deriveEncoder[EvolutionMetadata]
+  implicit def evolutionMetadataDecoder: Exported[Decoder[EvolutionMetadata]] = io.circe.generic.auto.deriveDecoder[EvolutionMetadata]
 
   object GenomeBoundData {
     import org.openmole.plugin.tool.methoddata._

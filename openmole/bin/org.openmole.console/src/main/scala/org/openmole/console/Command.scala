@@ -21,7 +21,7 @@ import java.io.{ File, IOException, StringReader }
 import java.util.logging.Level
 
 import org.openmole.core.buildinfo
-import org.openmole.core.compiler.ScalaREPL
+import org.openmole.core.compiler._
 import org.openmole.core.dsl._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice.FileService
@@ -40,7 +40,7 @@ import org.openmole.core.services._
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.random.{ RandomProvider, Seeder }
 
-class Command(val console: ScalaREPL, val variables: ConsoleVariables) { commands ⇒
+class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
 
   def print(environment: Environment): Unit = {
     for {
@@ -86,7 +86,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
 
   private def exceptionToString(e: Throwable) = e.stackString
 
-  implicit def stringToLevel(s: String) = Level.parse(s.toUpperCase)
+  implicit def stringToLevel(s: String): Level = Level.parse(s.toUpperCase)
 
   def errors(environment: Environment, level: Level = Level.INFO) = {
     def filtered =
@@ -129,7 +129,7 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
       Project.compile(variables.workDirectory, file, args, newREPL = Some(newRepl)) match {
         case ScriptFileDoesNotExists() ⇒ throw new IOException("File " + file + " doesn't exist.")
         case e: CompilationError       ⇒ throw e.error
-        case Compiled(compiled, _)     ⇒ compiled.apply()
+        case compiled: Compiled     ⇒ compiled.eval
       }
     }
     finally ConsoleVariables.bindVariables(console, variables)

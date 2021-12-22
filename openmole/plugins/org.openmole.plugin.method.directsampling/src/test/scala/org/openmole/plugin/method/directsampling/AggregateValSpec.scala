@@ -10,7 +10,7 @@ import org.openmole.plugin.tool.pattern._
 import org.scalatest._
 import org.openmole.core.workflow.test._
 
-class AggregateValSpec extends FlatSpec with Matchers {
+class AggregateValSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import AggregateTask._
 

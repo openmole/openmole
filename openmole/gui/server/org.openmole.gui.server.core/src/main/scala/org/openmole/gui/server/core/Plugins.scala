@@ -65,7 +65,6 @@ object Plugins extends JavaLogger {
       val modeOpenMOLE = Plugins.expandDepsFile(GUIServer.fromWebAppLocation /> "js" / utils.openmoleGrammarName, webui / utils.openmoleGrammarMode)
 
       JSPack.webpack(jsFile, webpackJsonPackage, webpackConfigTemplateLocation, webpackOutput, Seq(ExtraModule(modeOpenMOLE, utils.aceModuleSource)))
-
     }
 
     (jsPluginDirectory / "optimized_mode").content = optimizedJS.toString

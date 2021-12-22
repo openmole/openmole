@@ -12,8 +12,7 @@ import java.io._
 import java.net.URL
 import java.nio.file._
 import java.util.zip.GZIPInputStream
-import au.com.bytecode.opencsv.CSVReader
-import org.openmole.core.compiler.ScalaREPL
+import org.openmole.core.compiler._
 import org.openmole.core.expansion.ScalaCompilation
 import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
 
@@ -393,8 +392,8 @@ class ApiImpl(services: Services, applicationControl: ApplicationControl) extend
 
     def error(t: Throwable): ErrorData = {
       t match {
-        case ce: ScalaREPL.CompilationError ⇒
-          def toErrorWithLocation(em: ScalaREPL.ErrorMessage) =
+        case ce: Interpreter.CompilationError ⇒
+          def toErrorWithLocation(em: Interpreter.ErrorMessage) =
             ErrorWithLocation(em.rawMessage, em.position.map {
               _.line
             }, em.position.map {
@@ -475,16 +474,10 @@ class ApiImpl(services: Services, applicationControl: ApplicationControl) extend
     execution.addStaticInfo(execId, StaticExecutionInfo(scriptData.scriptPath, content, System.currentTimeMillis()))
     execution.addOutputStreams(execId, outputStream)
 
-    import org.openmole.tool.thread._
-
-    val compilationFuture =
-      threadProvider.submit(ThreadProvider.maxPriority) {
-        () ⇒
-          val errorData = synchronousCompilation(execId, scriptData, outputStream, onEvaluated, onCompiled)
-          errorData.foreach {
-            ed ⇒ execution.addError(execId, Failed(Vector.empty, ed, Seq.empty))
-          }
-      }
+    val compilationFuture: java.util.concurrent.Future[_] = threadProvider.submit(ThreadProvider.maxPriority) { () ⇒
+      val errorData = synchronousCompilation(execId, scriptData, outputStream, onEvaluated, onCompiled)
+      errorData.foreach { ed ⇒ execution.addError(execId, Failed(Vector.empty, ed, Seq.empty)) }
+    }
 
     execution.addCompilation(execId, compilationFuture)
   }

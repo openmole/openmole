@@ -30,8 +30,10 @@ object RepeatSampling {
       import p._
 
       def sampled =
+        val samplingValue: Seq[Seq[Variable[_]]] = s.sampling(s.s).sampling.from(context).map(_.toSeq).toSeq.transpose
+
         for {
-          vs ← s.sampling(s.s).sampling.from(context).map(_.toSeq).toSeq.transpose
+          vs ← samplingValue
         } yield {
           val p = vs.head.prototype
           Variable.unsecure(p.toArray, vs.map(_.value).toArray(p.`type`.manifest.asInstanceOf[Manifest[Any]]))

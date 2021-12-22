@@ -11,7 +11,7 @@ import org.openmole.plugin.tool.pattern._
 import org.scalatest._
 import org.openmole.core.workflow.test._
 
-class DirectSamplingSpec extends FlatSpec with Matchers {
+class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
   import org.openmole.core.workflow.test.Stubs._
 
   "Direct sampling" should "transmit explored inputs" in {

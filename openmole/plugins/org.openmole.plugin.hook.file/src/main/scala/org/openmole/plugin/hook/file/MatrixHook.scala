@@ -1,33 +1,29 @@
 package org.openmole.plugin.hook.file
 
-import monocle.macros.Lenses
+import monocle.Focus
 import org.openmole.core.context.Context
-import org.openmole.core.dsl._
-import org.openmole.core.expansion._
-import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.hook.{ Hook, HookExecutionContext }
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.validation._
+import org.openmole.core.dsl.*
+import org.openmole.core.expansion.*
+import org.openmole.core.workflow.builder.*
+import org.openmole.core.workflow.hook.{Hook, HookExecutionContext}
+import org.openmole.core.workflow.mole.*
+import org.openmole.core.workflow.validation.*
 
 import scala.annotation.implicitNotFound
 
 object MatrixHook {
 
-  implicit def isIO: InputOutputBuilder[MatrixHook] = InputOutputBuilder(MatrixHook.config)
-  implicit def isInfo = InfoBuilder(info)
+  implicit def isIO: InputOutputBuilder[MatrixHook] = InputOutputBuilder(Focus[MatrixHook](_.config))
+  implicit def isInfo: InfoBuilder[MatrixHook] = InfoBuilder(Focus[MatrixHook](_.info))
 
   object ToMatrix {
-    def apply[T](f: T ⇒ Iterator[String]) = new ToMatrix[T] {
-      def apply(t: T) = f(t)
-    }
+    implicit def arrayInt: ToMatrix[Array[Int]] = a ⇒ a.toIterator.map(_.toString)
+    implicit def arrayDouble: ToMatrix[Array[Double]] = a ⇒ a.toIterator.map(_.toString)
+    implicit def arrayLong: ToMatrix[Array[Long]] = a ⇒ a.toIterator.map(_.toString)
 
-    implicit def arrayInt = ToMatrix[Array[Int]] { a ⇒ a.toIterator.map(_.toString) }
-    implicit def arrayDouble = ToMatrix[Array[Double]] { a ⇒ a.toIterator.map(_.toString) }
-    implicit def arrayLong = ToMatrix[Array[Long]] { a ⇒ a.toIterator.map(_.toString) }
-
-    implicit def arrayArrayInt = ToMatrix[Array[Array[Int]]] { a ⇒ a.toIterator.map(_.mkString(",")) }
-    implicit def arrayArrayLong = ToMatrix[Array[Array[Long]]] { a ⇒ a.toIterator.map(_.mkString(",")) }
-    implicit def arrayArrayDouble = ToMatrix[Array[Array[Double]]] { a ⇒ a.toIterator.map(_.mkString(",")) }
+    implicit def arrayArrayInt: ToMatrix[Array[Array[Int]]] = a ⇒ a.toIterator.map(_.mkString(","))
+    implicit def arrayArrayLong: ToMatrix[Array[Array[Long]]] = a ⇒ a.toIterator.map(_.mkString(","))
+    implicit def arrayArrayDouble: ToMatrix[Array[Array[Double]]] = a ⇒ a.toIterator.map(_.mkString(","))
   }
 
   @implicitNotFound("${T} is not a matrix")
@@ -51,7 +47,7 @@ object MatrixHook {
 
 }
 
-@Lenses case class MatrixHook(
+case class MatrixHook(
   file:   FromContext[File],
   matrix: MatrixHook.MatrixObject[_],
   config: InputOutputConfig,

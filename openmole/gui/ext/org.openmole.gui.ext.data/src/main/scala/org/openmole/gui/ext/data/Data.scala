@@ -17,8 +17,6 @@ package org.openmole.gui.ext
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import monocle.macros.Lenses
-
 package object data {
 
   trait Data
@@ -84,15 +82,15 @@ package object data {
 
   }
 
-  trait InputData <: Data {
+  trait InputData extends Data {
     def inputs: Seq[InOutput]
   }
 
-  trait OutputData <: Data {
+  trait OutputData extends Data {
     def outputs: Seq[InOutput]
   }
 
-  trait InAndOutputData <: Data {
+  trait InAndOutputData extends Data {
     def inAndOutputs: Seq[InAndOutput]
   }
 
@@ -367,15 +365,15 @@ package object data {
     def compare(that: EnvironmentError) = date compare that.date
   }
 
-  @Lenses case class NetworkActivity(
-                                      downloadingFiles: Int = 0,
-                                      downloadedSize: Long = 0L,
-                                      readableDownloadedSize: String = "",
-                                      uploadingFiles: Int = 0,
-                                      uploadedSize: Long = 0L,
-                                      readableUploadedSize: String = "")
+  case class NetworkActivity(
+    downloadingFiles: Int = 0,
+    downloadedSize: Long = 0L,
+    readableDownloadedSize: String = "",
+    uploadingFiles: Int = 0,
+    uploadedSize: Long = 0L,
+    readableUploadedSize: String = "")
 
-  @Lenses case class ExecutionActivity(executionTime: Long = 0)
+  case class ExecutionActivity(executionTime: Long = 0)
 
   object EnvironmentErrorData {
     def empty = EnvironmentErrorData(Seq())
@@ -653,7 +651,7 @@ package object data {
     def updateVariables(variableArgs: Seq[VariableElement]) = copy(arguments = statics ++ variableArgs)
   }
 
-  case class ProtoTypePair(name: String, `type`: ProtoTYPE.ProtoTYPE, default: String = "", mapping: Option[String] = None)
+  case class ProtoTypePair(name: String, `type`: org.openmole.gui.ext.data.ProtoTYPE.ProtoTYPE, default: String = "", mapping: Option[String] = None)
 
   sealed trait ClassTree {
     def name: String

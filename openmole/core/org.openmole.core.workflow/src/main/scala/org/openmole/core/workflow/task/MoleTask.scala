@@ -19,7 +19,6 @@ package org.openmole.core.workflow.task
 
 import java.util.concurrent.locks.ReentrantLock
 
-import monocle.macros.Lenses
 import org.openmole.core.context._
 import org.openmole.core.event._
 import org.openmole.core.exception._
@@ -33,11 +32,12 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.lock._
 import org.openmole.tool.random.Seeder
+import monocle.Focus
 
 object MoleTask {
 
-  implicit def isTask = InputOutputBuilder(MoleTask.config)
-  implicit def isInfo = InfoBuilder(MoleTask.info)
+  implicit def isTask: InputOutputBuilder[MoleTask] = InputOutputBuilder(Focus[MoleTask](_.config))
+  implicit def isInfo: InfoBuilder[MoleTask] = InfoBuilder(Focus[MoleTask](_.info))
 
   /**
    * Constructor used to construct the MoleTask corresponding to the full puzzle
@@ -58,8 +58,8 @@ object MoleTask {
     val mt = new MoleTask(mole, last, Vector.empty, InputOutputConfig(), InfoConfig())
 
     mt set (
-      dsl.inputs += (mole.root.inputs(mole, Sources.empty, Hooks.empty).toSeq: _*),
-      dsl.outputs += (last.outputs(mole, Sources.empty, Hooks.empty).toSeq: _*),
+      dsl.inputs ++= mole.root.inputs(mole, Sources.empty, Hooks.empty).toSeq,
+      dsl.outputs ++= last.outputs(mole, Sources.empty, Hooks.empty).toSeq,
       isTask.defaults.set(mole.root.task(mole, Sources.empty, Hooks.empty).defaults)
     )
   }
@@ -89,7 +89,7 @@ object MoleTask {
  * @param config inputs and outputs prototypes, and defaults
  * @param info name and definition scope
  */
-@Lenses case class MoleTask(
+case class MoleTask(
   mole:      Mole,
   last:      MoleCapsule,
   implicits: Vector[String],

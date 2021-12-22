@@ -22,7 +22,7 @@ import org.openmole.core.serializer.converter.Serialiser
 
 import java.io.{ File, InputStream }
 
-trait FileInjection <: Serialiser {
+trait FileInjection extends Serialiser {
   var injectedFiles: Map[String, File] = Map.empty
 
   xStream.registerConverter(new FileConverterInjecter(this))

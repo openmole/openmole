@@ -6,7 +6,7 @@ import org.openmole.plugin.tool.json._
 
 object JSONOutputFormat {
 
-  implicit def outputFormat = new OutputFormat[JSONOutputFormat, Any] {
+  implicit def outputFormat: OutputFormat[JSONOutputFormat, Any] = new OutputFormat[JSONOutputFormat, Any] {
     override def write(executionContext: HookExecutionContext)(format: JSONOutputFormat, output: WritableOutput, content: OutputContent, method: Any): FromContext[Unit] = FromContext { p ⇒
       import p._
       import org.json4s._

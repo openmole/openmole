@@ -25,28 +25,29 @@ object Libraries {
   lazy val scalaCompatJS =  libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.6"
 
 
-  lazy val scalatest = "org.scalatest" %% "scalatest" % "3.1.2" % "test"
+  lazy val scalatest = "org.scalatest" %% "scalatest" % "3.2.9" % "test"
 
 
   /** ------- Bundles -------------- */
 
-  def addScalaLang(scalaVersion: String) =
+  def addScalaLang =
     libraryDependencies ++= Seq(
-      "org.openmole.library" %% "org-scala-lang-scala-library" % scalaVersion,
-      "org.scalameta" %% "scalameta" % "4.3.15"
+      "org.openmole.library" %% "org-scala-lang-scala-library" % scala3VersionValue
+      //"org.scalameta" %% "scalameta" % "4.3.15"
     )
 
+  lazy val scalaMeta = "org.openmole.library" %% "org-scalameta" % scalaMetaVersion
+  lazy val scalaSTM = "org.openmole.library" %% "org-scala-stm" % scalaSTMVersion
   lazy val scalaXML = "org.openmole.library" %% "org-scala-lang-modules-xml" % scalaXMLVersion
-  lazy val scalatra = "org.openmole.library" %% "org-scalatra" % scalatraVersion exclude("org.scala-lang.modules", "scala-xml_2.13")
+  lazy val scalatra = "org.openmole.library" %% "org-scalatra" % scalatraVersion exclude("org.scala-lang.modules", "scala-xml_2.13") cross CrossVersion.for3Use2_13
   lazy val logback = "org.openmole.library" %% "ch-qos-logback" % logbackVersion
   lazy val h2 = "org.openmole.library" %% "org-h2" % h2Version
   lazy val bonecp = "org.openmole.library" %% "com-jolbox-bonecp" % "0.8.0.RELEASE"
-  lazy val slick = "org.openmole.library" %% "com-typesafe-slick" % slickVersion
   lazy val slf4j = "org.openmole.library" %% "org-slf4j" % "1.7.30"
   lazy val xstream = "org.openmole.library" %% "com-thoughtworks-xstream" % xstreamVersion
   lazy val jasypt = "org.openmole.library" %% "org-jasypt-encryption" % jasyptVersion
   lazy val opencsv = "org.openmole.library" %% "au-com-bytecode-opencsv" % "2.3"
-  lazy val arm = "org.openmole.library" %% "com-jsuereth-scala-arm" % "2.1"
+  //lazy val arm = "org.openmole.library" %% "com-jsuereth-scala-arm" % "2.1" cross CrossVersion.for3Use2_13
   lazy val scalajHttp = "org.openmole.library" %% "org-scalaj-scalaj-http" % "2.4.2"
   lazy val scopt = "org.openmole.library" %% "com-github-scopt" % scoptVersion
   lazy val scalabc = "org.openmole.library" %% "fr-iscpif-scalabc" % "0.4"
@@ -66,7 +67,7 @@ object Libraries {
   lazy val clapper = "org.openmole.library" %% "org-clapper" % "1.5.1"
   lazy val asm = "org.openmole.library" %% "org-objectweb-asm" % asmVersion
   lazy val configuration = "org.openmole.library" %% "org-apache-commons-configuration2" % "2.6"
-  lazy val json4s = "org.openmole.library" %% "org-json4s" % json4sVersion
+  lazy val json4s = "org.openmole.library" %% "org-json4s" % json4sVersion cross CrossVersion.for2_13Use3
   lazy val circe = "org.openmole.library" %% "io-circe" % circeVersion
   lazy val scalajsLinker = "org.openmole.library" %% "scalajs-linker" % scalajsVersion
   lazy val scalajsLogging = "org.openmole.library" %% "scalajs-logging" % scalajsLoggingVersion
@@ -79,12 +80,13 @@ object Libraries {
   lazy val autowire = "org.openmole.library" %% "autowire" % scalaAutowireVersion
   lazy val scalaTags = "org.openmole.library" %% "com-scalatags" % scalaTagsVersion
   lazy val netlogo5 = "org.openmole.library" % "ccl-northwestern-edu-netlogo5" % netLogo5Version
-  lazy val netlogo6 = "org.openmole.library" % "ccl-northwestern-edu-netlogo6" % netLogo6Version
+  lazy val netlogo6 = "org.openmole.library" % "ccl-northwestern-edu-netlogo6" % netLogo6Version 
   lazy val sourceCode = "org.openmole.library" %% "sourcecode" % sourcecodeVersion
   lazy val txtmark = "org.openmole.library" %% "com-github-rjeschke-txtmark" % "0.13"
-  lazy val spatialsampling = "org.openmole.library" %% "org-openmole-spatialsampling" % spatialsamplingVersion
+  lazy val spatialsampling = "org.openmole.library" %% "org-openmole-spatialsampling" % spatialsamplingVersion cross CrossVersion.for3Use2_13
   lazy val xzJava = "org.openmole.library" %% "xzjava" % "1.8"
   lazy val guava = "org.openmole.library" %% "com-google-guava" % guavaVersion
+  lazy val jline = "org.openmole.library" %% "org-jline-jline" % jlineVersion
 
   def httpClientVersion = "4.5.3"
   lazy val httpClient =
@@ -117,12 +119,28 @@ object Libraries {
   lazy val gridscaleLocal = "org.openmole.library" %% "gridscale-local" % gridscaleVersion
   lazy val gridscaleOAR = "org.openmole.library" %% "gridscale-oar" % gridscaleVersion
 
-  lazy val scalaz = "org.scalaz" %% "scalaz-core" % scalazVersion
+  lazy val scalaz = "org.scalaz" %% "scalaz-core" % scalazVersion cross CrossVersion.for3Use2_13
   lazy val spray = "io.spray" %% "spray-json" % "1.3.5"
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
   lazy val equinoxOSGi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.15.300"
   lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.3.1"
 
-  lazy val shapeless = "org.openmole.library" %% "com-chuusai-shapeless" % shapelessVersion
+  lazy val shapeless = "org.openmole.library" %% "org-typelevel-shapeless" % shapelessVersion
 
+  lazy val monocleScala2 =
+    Seq(
+    libraryDependencies ++=
+      Seq(
+        "dev.optics" %% "monocle-core" % monocleVersion,
+        "dev.optics" %% "monocle-macro" % monocleVersion
+      ),
+      excludeDependencies ++= Seq(
+        ExclusionRule("org.openmole.library", "cats_3"),
+        ExclusionRule("org.openmole.library", "monocle_3"),
+        ExclusionRule("org.openmole.library", "io-circe_3")
+//        ExclusionRule("dev.optics", "monocle-core_3"),
+//        ExclusionRule("dev.optics", "monocle-macro_3"),
+//        ExclusionRule("dev.optics", "monocle-macro_3"),
+      )
+    )
 }

@@ -17,24 +17,24 @@
 
 package org.openmole.plugin.hook.file
 
-import java.io.File
+import monocle.Focus
 
-import monocle.macros.Lenses
-import org.openmole.core.context._
-import org.openmole.core.exception._
-import org.openmole.core.expansion._
-import org.openmole.core.serializer._
-import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.hook.{ Hook, HookExecutionContext }
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.validation._
-import org.openmole.tool.random._
-import org.openmole.tool.file._
+import java.io.File
+import org.openmole.core.context.*
+import org.openmole.core.exception.*
+import org.openmole.core.expansion.*
+import org.openmole.core.serializer.*
+import org.openmole.core.workflow.builder.*
+import org.openmole.core.workflow.hook.{Hook, HookExecutionContext}
+import org.openmole.core.workflow.mole.*
+import org.openmole.core.workflow.validation.*
+import org.openmole.tool.random.*
+import org.openmole.tool.file.*
 
 object SaveHook {
 
-  implicit def isIO = InputOutputBuilder(SaveHook.config)
-  implicit def isInfo = InfoBuilder(info)
+  implicit def isIO: InputOutputBuilder[SaveHook] = InputOutputBuilder(Focus[SaveHook](_.config))
+  implicit def isInfo: InfoBuilder[SaveHook] = InfoBuilder(Focus[SaveHook](_.info))
 
   def apply(file: FromContext[File], prototypes: Val[_]*)(implicit serializerService: SerializerService, name: sourcecode.Name, definitionScope: DefinitionScope) =
     new SaveHook(
@@ -46,7 +46,7 @@ object SaveHook {
     )
 }
 
-@Lenses case class SaveHook(
+case class SaveHook(
   file:              FromContext[File],
   prototypes:        Vector[Val[_]],
   config:            InputOutputConfig,

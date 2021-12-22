@@ -19,7 +19,7 @@ package org.openmole.plugin.source.file
 
 import java.io.File
 
-import monocle.macros.Lenses
+import monocle.Focus
 import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.dsl._
 import org.openmole.core.exception.UserBadDataError
@@ -30,8 +30,8 @@ import org.openmole.core.workflow.mole._
 
 object LoadSource {
 
-  implicit def isIO = InputOutputBuilder(LoadSource.config)
-  implicit def isInfo = InfoBuilder(info)
+  implicit def isIO: InputOutputBuilder[LoadSource] = InputOutputBuilder(Focus[LoadSource](_.config))
+  implicit def isInfo: InfoBuilder[LoadSource] = InfoBuilder(Focus[LoadSource](_.info))
 
   def apply(file: FromContext[String], prototypes: Val[_]*)(implicit serializerService: SerializerService, name: sourcecode.Name, definitionScope: DefinitionScope) =
     new LoadSource(
@@ -40,11 +40,11 @@ object LoadSource {
       config = InputOutputConfig(),
       info = InfoConfig(),
       serializerService = serializerService
-    ) set (outputs += (prototypes: _*))
+    ) set (outputs ++= prototypes)
 
 }
 
-@Lenses case class LoadSource(
+case class LoadSource(
   file:              FromContext[String],
   prototypes:        Vector[Val[_]],
   config:            InputOutputConfig,
@@ -55,7 +55,7 @@ object LoadSource {
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
     import parameters._
     val from = new File(file.from(context))
-    val loadedContext = serializerService.deserializeAndExtractFiles[Context](from, deleteFilesOnGC = true)
+    val loadedContext = serializerService.deserializeAndExtractFiles[Context](from, deleteFilesOnGC = true, gz = false)
     context ++ prototypes.map(p ⇒ loadedContext.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p has not been found in the loaded context")))
   }
 

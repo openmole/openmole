@@ -259,7 +259,7 @@ object MoleExecution {
           val services = executionContext.services
           HookExecutionContext(
             cache = cache,
-            ticket = ticket,
+            ticket = ticket)(
             preference = services.preference,
             threadProvider = services.threadProvider,
             fileService = services.fileService,
@@ -565,7 +565,7 @@ object MoleExecution {
   }
 
   object SynchronisationContext {
-    implicit def default = Synchronized
+    implicit def default: Synchronized.type = Synchronized
     def apply[T](th: Any, op: ⇒ T)(implicit s: SynchronisationContext) =
       s match {
         case MoleExecution.Synchronized ⇒ synchronized(op)
@@ -637,7 +637,7 @@ object MoleExecutionMessage {
 
   def dispatcher(moleExecution: MoleExecution) =
     while (!(moleExecution._cleaned)) {
-      val msg = moleExecution.messageQueue.dequeue
+      val msg = moleExecution.messageQueue.dequeue()
       dispatch(moleExecution, msg)
     }
 

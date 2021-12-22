@@ -32,7 +32,7 @@ class GZipedInputStream(is: InputStream) extends InputStream {
   bufferizeByteArrayStream()
 
   override def read(): Int = synchronized {
-    while (bufferEmpty && !end) readFromInput
+    while (bufferEmpty && !end) readFromInput()
     if (!bufferEmpty) readBuffer() & 0xFF
     else -1
   }

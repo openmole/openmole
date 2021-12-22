@@ -26,7 +26,7 @@ import org.scalatest._
 
 import scala.collection.mutable.ListBuffer
 
-class DataChannelSpec extends FlatSpec with Matchers {
+class DataChannelSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

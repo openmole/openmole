@@ -30,7 +30,7 @@ package object json {
 
   def jValueToVariable(jValue: JValue, v: Val[_]): Variable[_] = {
     import org.json4s._
-    import shapeless._
+    //import shapeless._
 
     def cannotConvert[T: Manifest](jValue: JValue) = throw new UserBadDataError(s"Can not fetch value of type $jValue to type ${manifest[T]}")
 
@@ -97,7 +97,7 @@ package object json {
             case c ⇒ throw new UserBadDataError(s"Can not fetch value of type $jValue to type ${c}")
           }
 
-        implicit def jArrayConstruct =
+        implicit def jArrayConstruct: Variable.ConstructArray[JArray] =
           new Variable.ConstructArray[JArray] {
             def size(t: JArray) = t.arr.size
             def iterable(t: JArray) = t.arr.asJava.asInstanceOf[java.lang.Iterable[Any]]

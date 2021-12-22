@@ -15,22 +15,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow
+package org.openmole.core.workflow.task
 
 import org.openmole.core.workflow.mole._
+import monocle.Focus
 
-package task {
+import org.openmole.core.context._
 
-  import org.openmole.core.context._
+trait TaskPackage {
 
-  trait TaskPackage {
+  def newRNG(context: Context) = Task.buildRNG(context)
 
-    def newRNG(context: Context) = Task.buildRNG(context)
-
-    def implicits = new {
-      def +=(p: Val[_]) = MoleTask.implicits.modify(_ ++ Seq(p.name))
-    }
-
+  object implicits {
+    def +=(p: Val[_]) = Focus[MoleTask](_.implicits).modify(_ ++ Seq(p.name))
   }
 
 }
+
+
+import scala.quoted._
+inline def inspect[T](x: T): T = ${ inspectCode('x) }
+def inspectCode[T](x: Expr[T])(using Quotes): Expr[T] =
+  println(x)
+  x

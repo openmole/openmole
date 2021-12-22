@@ -27,7 +27,7 @@ object GUIPluginRegistry {
 
   def toGUIPlugins(c: Class[_]): GUIPluginAsJS = GUIPluginAsJS(c.getName)
 
-  def routers = plugins.flatMap(_._2.router).toSeq
+  def routers: Seq[Services => OMRouter] = plugins.flatMap(_._2.router).toSeq
 
   def authentications: Seq[GUIPluginAsJS] = plugins.values.flatMap(_.authentication).map(toGUIPlugins).toSeq
   def wizards: Seq[GUIPluginAsJS] = plugins.values.flatMap(_.wizard).map(toGUIPlugins).toSeq

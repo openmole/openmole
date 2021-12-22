@@ -28,7 +28,7 @@ import org.openmole.core.workflow.validation.DataflowProblem._
 import org.openmole.core.workflow.validation.TopologyProblem._
 import org.scalatest._
 
-class ValidationSpec extends FlatSpec with Matchers {
+class ValidationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

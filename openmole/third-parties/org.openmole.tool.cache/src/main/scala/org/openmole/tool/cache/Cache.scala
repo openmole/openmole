@@ -18,7 +18,7 @@ object Cache {
   /**
    * Defines ordering on lazy proxies
    */
-  implicit def lazyOrdering[T](implicit ord: Ordering[T]): Ordering[Cache[T]] = Ordering.by(_.apply)
+  implicit def lazyOrdering[T](implicit ord: Ordering[T]): Ordering[Cache[T]] = Ordering.by(_.apply())
 
 }
 

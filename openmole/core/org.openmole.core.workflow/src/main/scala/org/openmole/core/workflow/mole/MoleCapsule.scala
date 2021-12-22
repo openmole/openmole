@@ -26,6 +26,7 @@ import org.openmole.core.workflow.tools.DefaultSet
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.validation._
 import org.openmole.tool.random._
+import monocle.Focus
 
 object MoleCapsule {
 
@@ -115,7 +116,7 @@ class MoleCapsule(val _task: Task, val strain: Boolean, val funnel: Boolean, val
   def runtimeTask(mole: Mole, sources: Sources, hooks: Hooks) = {
     val withInputs =
       _task match {
-        case task: MoleTask ⇒ (MoleTask.mole composeLens Mole.inputs) modify (_ ++ inputs(mole, sources, hooks)) apply task
+        case task: MoleTask ⇒ Focus[MoleTask](_.mole.inputs) modify (_ ++ inputs(mole, sources, hooks)) apply task
         case task           ⇒ task
       }
     RuntimeTask(withInputs, strain)

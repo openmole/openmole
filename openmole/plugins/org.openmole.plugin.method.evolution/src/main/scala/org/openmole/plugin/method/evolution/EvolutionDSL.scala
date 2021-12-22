@@ -56,7 +56,7 @@ object EvolutionWorkflow {
       type V = (Vector[Double], Vector[Int])
       type P = Phenotype
 
-      lazy val integration = algorithm
+      val integration = algorithm
 
       def validate = _validate
 
@@ -89,7 +89,7 @@ object EvolutionWorkflow {
       type V = (Vector[Double], Vector[Int])
       type P = Phenotype
 
-      lazy val integration = algorithm
+      val integration = algorithm
 
       def validate = _validate
 
@@ -131,7 +131,7 @@ object EvolutionWorkflow {
       termination:  OMTermination,
       parallelism:  Int                          = 1,
       distribution: EvolutionPattern             = SteadyState(),
-      suggestion:   Seq[Seq[ValueAssignment[_]]],
+      suggestion:   Seq[Seq[ValueAssignment.Untyped]],
       scope:        DefinitionScope): DSLContainer[EvolutionWorkflow] =
       distribution match {
         case s: SteadyState ⇒
@@ -189,10 +189,10 @@ object EvolutionWorkflow {
     evaluation:  DSL,
     termination: OMTermination,
     parallelism: Int                          = 1,
-    suggestion:  Seq[Seq[ValueAssignment[_]]] = Seq.empty,
+    suggestion:  Seq[Seq[ValueAssignment.Untyped]] = Seq.empty,
     wrap:        Boolean                      = false,
     scope:       DefinitionScope              = "steady state evolution") = {
-    implicit def defScope = scope
+    implicit def defScope: DefinitionScope = scope
     val evolution = algorithm
 
     val wrapped = pattern.wrap(evaluation, evolution.inputVals, evolution.outputVals, wrap)
@@ -202,12 +202,12 @@ object EvolutionWorkflow {
     val toOffspring = ToOffspringTask(evolution)
     val elitism = ElitismTask(evolution, evolution.evaluatedVal) set (evolution.evaluatedVal := 1)
     val terminationTask = TerminationTask(evolution, termination)
-    val breed = BreedTask(evolution, 1)
+    val breed = BreedTask(evolution, 1, Seq())
 
     val masterFirst =
       EmptyTask() set (
         (inputs, outputs) += (evolution.populationVal, evolution.genomeVal, evolution.stateVal),
-        (inputs, outputs) += (evolution.outputVals: _*)
+        (inputs, outputs) ++= evolution.outputVals
       )
 
     val masterLast =
@@ -220,7 +220,7 @@ object EvolutionWorkflow {
       )
 
     val master =
-      ((masterFirst -- toOffspring keep (Seq(evolution.stateVal, evolution.genomeVal) ++ evolution.outputVals: _*)) -- elitism -- terminationTask -- breed -- masterLast) &
+      ((masterFirst -- toOffspring keepAll (Seq(evolution.stateVal, evolution.genomeVal) ++ evolution.outputVals)) -- elitism -- terminationTask -- breed -- masterLast) &
         (masterFirst -- elitism keep evolution.populationVal) &
         (elitism -- breed keep evolution.populationVal) &
         (elitism -- masterLast keep evolution.populationVal) &
@@ -260,7 +260,7 @@ object EvolutionWorkflow {
     scope:       DefinitionScope                 = "island evolution"
   ) = {
 
-    implicit def defScope = scope
+    implicit def defScope: DefinitionScope = scope
 
     val t = island.method
 
@@ -356,7 +356,7 @@ trait EvolutionWorkflow {
   def stateType = ValType[S]
   def individualType = ValType[I]
 
-  def populationType: ValType[Pop] = ValType[Pop]
+  def populationType: ValType[Pop] = ValType[Pop](using Manifest.arrayType[I](manifest[I]))
 
   def buildIndividual(genome: G, context: Context): I
 

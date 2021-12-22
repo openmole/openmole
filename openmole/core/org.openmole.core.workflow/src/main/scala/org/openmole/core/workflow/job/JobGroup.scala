@@ -58,6 +58,6 @@ object JobGroup {
       case mj: MultiJobGroup  ⇒ mj.moleExecution
     }
 
-  implicit def ordering = Ordering.by[JobGroup, Iterable[Job]](moleJobs)
+  implicit def ordering: Ordering[JobGroup] = Ordering.by[JobGroup, Iterable[Job]](moleJobs)
 
 }

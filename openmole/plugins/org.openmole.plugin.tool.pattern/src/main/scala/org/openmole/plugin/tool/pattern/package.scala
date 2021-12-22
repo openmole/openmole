@@ -24,12 +24,12 @@ package object pattern {
 
   def wrap(evaluation: DSL, inputVals: Seq[Val[_]], outputVals: Seq[Val[_]], wrap: Boolean = true)(implicit definitionScope: DefinitionScope) =
     if (wrap) {
-      val moleTask = MoleTask(evaluation) set (inputs += (inputVals: _*), outputs += (outputVals: _*))
+      val moleTask = MoleTask(evaluation) set (inputs ++= inputVals, outputs ++= outputVals)
       DSLContainer(moleTask, (), delegate = Vector(moleTask))
     }
     else {
-      val firstEvaluation = EmptyTask() set ((inputs, outputs) += (inputVals: _*))
-      val lastEvaluation = EmptyTask() set ((inputs, outputs) += (outputVals: _*))
+      val firstEvaluation = EmptyTask() set ((inputs, outputs) ++= inputVals)
+      val lastEvaluation = EmptyTask() set ((inputs, outputs) ++= outputVals)
       val puzzle = Strain(firstEvaluation) -- Capsule(evaluation) -- lastEvaluation
       DSLContainer(puzzle, (), delegate = DSL.delegate(evaluation))
     }

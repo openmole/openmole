@@ -98,10 +98,10 @@ trait Preference {
 
   def isSet[T](location: PreferenceLocation[T]) = synchronized { getRawPreference(location).isDefined }
 
-  def clearPreference[T](location: PreferenceLocation[T])
-  def clear()
+  def clearPreference[T](location: PreferenceLocation[T]): Unit
+  def clear(): Unit
 
-  protected def setRawPreference(location: PreferenceLocation[_], value: String)
+  protected def setRawPreference(location: PreferenceLocation[_], value: String): Unit
   protected def getRawPreference[T](location: PreferenceLocation[T]): Option[String]
 }
 

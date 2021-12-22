@@ -37,7 +37,7 @@ import org.openmole.tool.tar._
 package object message {
 
   object FileMessage {
-    implicit def replicatedFile2FileMessage(r: ReplicatedFile) = FileMessage(r)
+    implicit def replicatedFile2FileMessage(r: ReplicatedFile): FileMessage = FileMessage(r)
     def apply(replicatedFile: ReplicatedFile): FileMessage = apply(replicatedFile.path, replicatedFile.hash)
   }
 

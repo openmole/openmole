@@ -28,7 +28,7 @@ import org.openmole.core.workflow.puzzle._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.test.Stubs._
 
-class TypeUtilSpec extends FlatSpec with Matchers {
+class TypeUtilSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   "To array finder" should "not detect a toArray case" in {
     val p = Val[Int]("p")

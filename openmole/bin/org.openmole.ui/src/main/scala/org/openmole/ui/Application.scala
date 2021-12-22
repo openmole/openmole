@@ -23,8 +23,6 @@ import java.util.logging.Level
 import java.net.URI
 import org.openmole.console.Console.ExitCodes
 import org.openmole.core.project._
-import org.openmole.core.compiler.ScalaREPL
-import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.logconfig.LoggerConfig
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
@@ -172,7 +170,7 @@ object Application extends JavaLogger {
 
     PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error staring bundle $b", e) }
 
-    val config = parse(args.map(_.trim).toList)
+    val config = parse(args.toVector.map(_.trim).toList)
 
     val logLevel = config.loggerLevel.map(l ⇒ Level.parse(l.toUpperCase))
     logLevel.foreach(LoggerConfig.level)
@@ -182,7 +180,7 @@ object Application extends JavaLogger {
 
     val workspaceDirectory = config.workspace.getOrElse(org.openmole.core.workspace.defaultOpenMOLEDirectory)
 
-    implicit val workspace = Workspace(workspaceDirectory)
+    implicit val workspace: Workspace = Workspace(workspaceDirectory)
     import org.openmole.tool.thread._
 
     //Runtime.getRuntime.addShutdownHook(thread(Workspace.clean(workspace)))

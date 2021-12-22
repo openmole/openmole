@@ -20,5 +20,5 @@ trait StatisticsPackage extends Stat { stat ⇒
     def dynamicTimeWarpingDistance[T2](to: Seq[T2], fast: Boolean = true)(implicit td2: ToDouble[T2]) = stat.dynamicTimeWarpingDistance(s.map(td.apply), to.map(td2.apply))
   }
 
-  implicit def statisticArrayOfDoubleDecorator[T: ToDouble](s: Array[T]) = new StatisticIterableOfDoubleDecorator(s.toVector)
+  implicit def statisticArrayOfDoubleDecorator[T: ToDouble](s: Array[T]): StatisticIterableOfDoubleDecorator[T] = new StatisticIterableOfDoubleDecorator(s.toVector)
 }

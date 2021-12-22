@@ -29,7 +29,7 @@ import org.openmole.core.workflow.transition.TransitionSlot
 import org.openmole.core.workflow.validation.Validation
 import org.scalatest._
 
-class TransitionSpec extends FlatSpec with Matchers {
+class TransitionSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

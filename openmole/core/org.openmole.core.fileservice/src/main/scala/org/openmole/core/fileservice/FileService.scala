@@ -38,10 +38,10 @@ import scala.ref.{ PhantomReference, ReferenceQueue, WeakReference }
 object FileService {
   val GCInterval = PreferenceLocation("FileService", "GCInterval", Some(1 minutes))
 
-  val hashCacheSize = PreferenceLocation("FileService", "HashCacheSize", Some(1000))
+  val hashCacheSize = PreferenceLocation("FileService", "HashCacheSize", Some(1000L))
   val hashCacheTime = PreferenceLocation("FileService", "HashCacheTime", Some(10 minutes))
 
-  val archiveCacheSize = PreferenceLocation("FileService", "ArchiveCacheSize", Some(1000))
+  val archiveCacheSize = PreferenceLocation("FileService", "ArchiveCacheSize", Some(1000L))
   val archiveCacheTime = PreferenceLocation("FileService", "ArchiveCacheTime", Some(10 minutes))
 
   def apply()(implicit preference: Preference, threadProvider: ThreadProvider) = {
@@ -56,7 +56,7 @@ object FileService {
   }
 
   class FileWithGC(path: String, fileService: FileService) extends java.io.File(path) {
-    override protected def finalize = fileService.asynchronousRemove(new java.io.File(getPath))
+    override protected def finalize() = fileService.asynchronousRemove(new java.io.File(getPath))
   }
 }
 

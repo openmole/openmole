@@ -85,7 +85,7 @@ trait Api {
   //CORE PLUGINS
   def appendToPluggedIfPlugin(safePath: SafePath): Unit
   def listPlugins(): Iterable[Plugin]
-  def unplug(safePath: SafePath)
+  def unplug(safePath: SafePath): Unit
 
   //GUI PLUGINS
   def getGUIPlugins(): AllPluginExtensionData

@@ -18,11 +18,9 @@ package org.openmole.gui.server.core
  */
 
 import java.util.concurrent.Future
-
-import monocle.macros.Lenses
-import org.openmole.core.event.Listner
+import org.openmole.core.event.{EventDispatcher, Listner}
 import org.openmole.core.workflow.builder.DefinitionScope
-import org.openmole.core.workflow.execution.{ Environment, SubmissionEnvironment }
+import org.openmole.core.workflow.execution.{Environment, SubmissionEnvironment}
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.server.utils
@@ -31,10 +29,11 @@ import org.openmole.plugin.environment.batch._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment
 import org.openmole.tool.file.readableByteCount
 import org.openmole.tool.stream.StringPrintStream
+import monocle._
 
 import scala.concurrent.stm._
 
-@Lenses case class RunningEnvironment(
+case class RunningEnvironment(
   environment:       Environment,
   networkActivity:   NetworkActivity   = NetworkActivity(),
   executionActivity: ExecutionActivity = ExecutionActivity())
@@ -66,44 +65,46 @@ class Execution {
     instantiation.put(ex, instantiation.get(ex).get.copy(compiled = true))
   }
 
-  def environmentListener(envId: EnvironmentId): Listner[Environment] = {
-    case (env, bdl: BeginDownload) ⇒
+  def environmentListener(envId: EnvironmentId): EventDispatcher.Listner[Environment] = {
+    case (env: Environment, bdl: BeginDownload) ⇒
       updateRunningEnvironment(envId) {
-        RunningEnvironment.networkActivity composeLens NetworkActivity.downloadingFiles modify (_ + 1)
+        Focus[RunningEnvironment](_.networkActivity.downloadingFiles) modify (_ + 1)
       }
 
-    case (env, edl: EndDownload) ⇒ updateRunningEnvironment(envId) {
-      RunningEnvironment.networkActivity.modify { na ⇒
-        val size = na.downloadedSize + (if (edl.success) edl.size else 0)
-
-        na.copy(
-          downloadingFiles = na.downloadingFiles - 1,
-          downloadedSize = size,
-          readableDownloadedSize = readableByteCount(size)
-        )
-      }
-    }
-
-    case (env, bul: BeginUpload) ⇒
+    case (env: Environment, edl: EndDownload) ⇒
       updateRunningEnvironment(envId) {
-        RunningEnvironment.networkActivity composeLens NetworkActivity.uploadingFiles modify (_ + 1)
+        Focus[RunningEnvironment](_.networkActivity).modify { na ⇒
+          val size = na.downloadedSize + (if (edl.success) edl.size else 0)
+
+          na.copy(
+            downloadingFiles = na.downloadingFiles - 1,
+            downloadedSize = size,
+            readableDownloadedSize = readableByteCount(size)
+          )
+        }
       }
 
-    case (env, eul: EndUpload) ⇒ updateRunningEnvironment(envId) {
-      RunningEnvironment.networkActivity.modify { na ⇒
-        val size = na.uploadedSize + (if (eul.success) eul.size else 0)
-
-        na.copy(
-          uploadedSize = size,
-          readableUploadedSize = readableByteCount(size),
-          uploadingFiles = na.uploadingFiles - 1
-        )
-      }
-    }
-
-    case (env, j: Environment.JobCompleted) ⇒
+    case (env: Environment, bul: BeginUpload) ⇒
       updateRunningEnvironment(envId) {
-        RunningEnvironment.executionActivity composeLens ExecutionActivity.executionTime modify (_ + (j.log.executionEndTime - j.log.executionBeginTime))
+        Focus[RunningEnvironment](_.networkActivity.uploadingFiles) modify (_ + 1)
+      }
+
+    case (env: Environment, eul: EndUpload) ⇒
+      updateRunningEnvironment(envId) {
+        Focus[RunningEnvironment](_.networkActivity).modify { na ⇒
+          val size = na.uploadedSize + (if (eul.success) eul.size else 0)
+
+          na.copy(
+            uploadedSize = size,
+            readableUploadedSize = readableByteCount(size),
+            uploadingFiles = na.uploadingFiles - 1
+          )
+        }
+      }
+
+    case (env: Environment, j: Environment.JobCompleted) ⇒
+      updateRunningEnvironment(envId) {
+        Focus[RunningEnvironment](_.executionActivity.executionTime) modify (_ + (j.log.executionEndTime - j.log.executionBeginTime))
       }
   }
 

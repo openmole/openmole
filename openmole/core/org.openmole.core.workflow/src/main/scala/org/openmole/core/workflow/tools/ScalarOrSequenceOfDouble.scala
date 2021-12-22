@@ -51,17 +51,17 @@ object Scalable {
   }
 
   object ScalableType {
-    implicit def doubleIsScalable = new ScalableType[Double] {
+    implicit def doubleIsScalable: ScalableType[Double] = new ScalableType[Double] {
       def scale(v: Double, min: Double, max: Double) = v.scale(min, max)
       def convert(v: Double) = v
     }
 
-    implicit def intIsScalable = new ScalableType[Int] {
+    implicit def intIsScalable: ScalableType[Int] = new ScalableType[Int] {
       def scale(v: Double, min: Int, max: Int) = v.scale(min.toDouble, max.toDouble + 1).toInt
       def convert(v: Double) = v.toInt
     }
 
-    implicit def longIsScalable = new ScalableType[Long] {
+    implicit def longIsScalable: ScalableType[Long] = new ScalableType[Long] {
       def scale(v: Double, min: Long, max: Long) = v.scale(min.toDouble, max.toDouble + 1).toLong
       def convert(v: Double) = v.toLong
     }
@@ -73,7 +73,7 @@ object Scalable {
     def convert(v: Double): T
   }
 
-  implicit def factorOfDoubleIsScalable[D, T: ScalableType](implicit bounded: BoundedFromContextDomain[D, T]) = new Scalable[Factor[D, T]] {
+  implicit def factorOfDoubleIsScalable[D, T: ScalableType](implicit bounded: BoundedFromContextDomain[D, T]): Scalable[Factor[D, T]] = new Scalable[Factor[D, T]] {
     def isScalar(t: Factor[D, T]) = true
     override def inputs(t: Factor[D, T]) = bounded(t.domain).inputs
     override def prototype(t: Factor[D, T]): Val[_] = t.value
@@ -92,7 +92,7 @@ object Scalable {
     }
   }
 
-  implicit def factorOfSequenceIsScalable[D, T: ScalableType: ClassTag](implicit bounded: BoundedFromContextDomain[D, Array[T]]) = new Scalable[Factor[D, Array[T]]] {
+  implicit def factorOfSequenceIsScalable[D, T: ScalableType: ClassTag](implicit bounded: BoundedFromContextDomain[D, Array[T]]): Scalable[Factor[D, Array[T]]] = new Scalable[Factor[D, Array[T]]] {
 
     def isScalar(t: Factor[D, Array[T]]) = false
     override def inputs(t: Factor[D, Array[T]]) = bounded(t.domain).inputs

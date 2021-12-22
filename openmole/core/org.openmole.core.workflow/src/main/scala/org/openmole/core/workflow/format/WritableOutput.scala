@@ -25,8 +25,8 @@ object WritableOutput {
 
   implicit def fromString(s: String): Store = fromFile(new File(s))
   implicit def fromFile(file: File): Store = Store(file)
-  implicit def fromFileContext(file: FromContext[File]) = Store(file)
-  implicit def fromPrintStream(ps: PrintStream) = Display(ps)
+  implicit def fromFileContext(file: FromContext[File]): Store = Store(file)
+  implicit def fromPrintStream(ps: PrintStream): Display = Display(ps)
 
   case class Store(file: FromContext[File]) extends WritableOutput
   case class Display(stream: PrintStream) extends WritableOutput

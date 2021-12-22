@@ -1,7 +1,5 @@
 package org.openmole.plugin.method.sensitivity
 
-import org.scalatest.{ FlatSpec, Matchers }
-
 import org.openmole.core.workflow.test._
 import scala.util.Random
 
@@ -11,7 +9,7 @@ import org.openmole.plugin.domain.collection._
 import org.scalatest._
 import org.openmole.plugin.domain.bounds._
 
-class Saltelli extends FlatSpec with Matchers {
+class Saltelli extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

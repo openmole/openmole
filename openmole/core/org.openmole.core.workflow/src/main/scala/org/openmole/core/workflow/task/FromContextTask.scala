@@ -1,6 +1,5 @@
 package org.openmole.core.workflow.task
 
-import monocle.macros.Lenses
 import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.expansion.{ FromContext, Validate }
 import org.openmole.core.fileservice.FileService
@@ -10,22 +9,24 @@ import org.openmole.core.workflow.task
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.random.RandomProvider
+import monocle.Focus
 
 object FromContextTask {
 
-  implicit def isBuilder: InputOutputBuilder[FromContextTask] = InputOutputBuilder(FromContextTask.config)
-  implicit def isInfo = InfoBuilder(FromContextTask.info)
-  implicit def isMapped = MappedInputOutputBuilder(FromContextTask.mapped)
+  implicit def isBuilder: InputOutputBuilder[FromContextTask] = InputOutputBuilder(Focus[FromContextTask](_.config))
+  implicit def isInfo: InfoBuilder[FromContextTask] = InfoBuilder(Focus[FromContextTask](_.info))
+  implicit def isMapped: MappedInputOutputBuilder[FromContextTask] = MappedInputOutputBuilder(Focus[FromContextTask](_.mapped))
 
   case class Parameters(
-    context:                  Context,
-    executionContext:         TaskExecutionContext,
-    io:                       InputOutputConfig,
-    mapped:                   MappedInputOutputConfig,
-    implicit val preference:  Preference,
-    implicit val random:      RandomProvider,
-    implicit val newFile:     TmpDirectory,
-    implicit val fileService: FileService
+    context:          Context,
+    executionContext: TaskExecutionContext,
+    io:               InputOutputConfig,
+    mapped:           MappedInputOutputConfig)(
+    implicit
+    val preference:  Preference,
+    val random:      RandomProvider,
+    val newFile:     TmpDirectory,
+    val fileService: FileService
   )
 
   /**
@@ -54,7 +55,7 @@ object FromContextTask {
  * @param config
  * @param info
  */
-@Lenses case class FromContextTask(
+case class FromContextTask(
   f:                      FromContextTask.Parameters ⇒ Context,
   v:                      Validate                             = Validate.success,
   override val className: String,
@@ -66,10 +67,9 @@ object FromContextTask {
   override def validate = v
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { p ⇒
-    val tp = FromContextTask.Parameters(p.context, executionContext, config, mapped, executionContext.preference, p.random, p.newFile, p.fileService)
+    val tp = FromContextTask.Parameters(p.context, executionContext, config, mapped)(executionContext.preference, p.random, p.newFile, p.fileService)
     f(tp)
   }
 
   def withValidate(validate: Validate) = copy(v = v ++ validate)
-
 }

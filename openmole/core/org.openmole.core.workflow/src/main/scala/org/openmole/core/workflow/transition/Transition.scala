@@ -285,10 +285,11 @@ object AggregationTransition {
 
   def aggregateOutputs(moleExecution: MoleExecution, transition: AggregationTransition, results: AggregationTransitionRegistryRecord): Context = {
     val vals = aggregatedOutputs(moleExecution, transition)
+
     val resultValues = results.values.value
     val size = resultValues.size
 
-    def resultsArrays = (resultValues zip results.ids.value).sortBy(_._2).unzip._1.transpose
+    def resultsArrays = (resultValues zip results.ids.value).sortBy(_._2).map(_._1).transpose
 
     def variables = (resultsArrays zip vals).map {
       case (values, v) ⇒
@@ -396,7 +397,7 @@ class EndExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, 
 
   override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
     MoleExecutionMessage.PerformTransition(subMole) { subMoleState ⇒
-      def perform() {
+      def perform() = {
         val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("End exploration transition should take place after an exploration."))
         val subMoleParent = subMoleState.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
         //subMoleParent.transitionLock { ITransition.submitNextJobsIfReady(this)(context.values, parentTicket, subMoleParent) }

@@ -178,7 +178,7 @@ package object tar {
     if (!Files.isDirectory(directory)) throw new IOException(directory.toString + " is not a directory.")
 
     val toArchive = new Stack[(File, String)]
-    if (!includeDirectoryName) toArchive.push(directory → "") else toArchive.push(directory → directory.getName)
+    if (!includeDirectoryName) toArchive.push(directory -> "") else toArchive.push(directory -> directory.getName)
 
     while (!toArchive.isEmpty) {
 

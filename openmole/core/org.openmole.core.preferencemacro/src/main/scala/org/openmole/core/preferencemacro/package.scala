@@ -1,6 +1,6 @@
 package org.openmole.core
 
-import scala.reflect.macros.whitebox._
+//import scala.reflect.macros.whitebox._
 
 /*
  * Copyright (C) 2019 Romain Reuillon
@@ -19,7 +19,11 @@ import scala.reflect.macros.whitebox._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package object preferencemacro {
-  import scala.language.experimental.macros
+
+  // FIXME reactivate after scala3 migration
+  def list[T](t: T): Vector[PreferenceLocation[_]] = Vector.empty
+
+  /*   import scala.language.experimental.macros
 
   def list[T](t: T): Vector[PreferenceLocation[_]] = macro list_impl[T]
 
@@ -39,5 +43,5 @@ package object preferencemacro {
     val result = q"""Vector(..$configurationValues)"""
 
     c.Expr[Vector[PreferenceLocation[_]]](result)
-  }
+  } */
 }

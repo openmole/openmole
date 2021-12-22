@@ -52,7 +52,7 @@ package object combine {
     def bootstrap(samples: FromContext[Int], number: FromContext[Int]) = s sample samples repeat number
   }
 
-  implicit def withNameFactorDecorator[D, T: CanGetName](factor: Factor[D, T])(implicit discrete: DiscreteFromContextDomain[D, T]) = new {
+  implicit class WithNameFactorDecorator[D, T: CanGetName](factor: Factor[D, T])(implicit discrete: DiscreteFromContextDomain[D, T]) {
     @deprecated("Use withName", "5")
     def zipWithName(name: Val[String]): ZipWithNameSampling[D, T] = withName(name)
     def withName(name: Val[String]): ZipWithNameSampling[D, T] = new ZipWithNameSampling(factor, name)

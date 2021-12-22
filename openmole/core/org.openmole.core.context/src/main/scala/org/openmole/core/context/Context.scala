@@ -27,7 +27,7 @@ object Context {
 
   def ErrorArraySnipSize = PreferenceLocation[Int]("Display", "ErrorArraySnipSize", Some(10))
 
-  implicit def variableToContextConverter(variable: Variable[_]) = Context(variable)
+  implicit def variableToContextConverter(variable: Variable[_]): Context = Context(variable)
   implicit def variablesToContextConverter(variables: Iterable[Variable[_]]): Context = Context(variables.toSeq: _*)
 
   def fromMap(v: Iterable[(String, Variable[_])]) = new Context {

@@ -34,9 +34,9 @@ import scala.util.Try
  */
 object ExpandedString {
 
-  implicit def fromStringToVariableExpansion(s: String) = ExpandedString(s)
-  implicit def fromTraversableOfStringToTraversableOfVariableExpansion(t: Iterable[String]) = t.map(ExpandedString(_))
-  implicit def fromFileToExpandedString(f: java.io.File) = ExpandedString(f.getPath)
+  implicit def fromStringToVariableExpansion(s: String): FromContext[String] = ExpandedString(s)
+  implicit def fromTraversableOfStringToTraversableOfVariableExpansion(t: Iterable[String]): Iterable[FromContext[String]] = t.map(ExpandedString(_))
+  implicit def fromFileToExpandedString(f: java.io.File): FromContext[String] = ExpandedString(f.getPath)
 
   def apply(s: String): FromContext[String] = apply(new StringInputStream(s))
 

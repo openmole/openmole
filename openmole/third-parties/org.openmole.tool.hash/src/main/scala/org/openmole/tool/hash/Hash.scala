@@ -36,7 +36,7 @@ object Hash {
     new String(hex, "ASCII")
   }
 
-  implicit val ordering = Ordering.by[Hash, String](_.toString)
+  implicit val ordering: Ordering[Hash] = Ordering.by[Hash, String](_.toString)
 }
 
 case class Hash(content: Array[Byte]) {

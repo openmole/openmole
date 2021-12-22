@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.task.external
 
-import monocle.macros.Lenses
 import org.openmole.core.tools.service.OS
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.`extension`._
@@ -136,7 +135,7 @@ object External {
       (f → d)
     }
 
-  def deployInputFiles(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) = {
+  def deployInputFiles(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): (Context, Iterable[(External.DeployedFile, File)]) = {
     val (copiedFilesVariable, copiedFilesInfo) =
       listInputFiles(external.inputFiles, context).map {
         case (p, f) ⇒
@@ -227,7 +226,7 @@ object External {
 
 import org.openmole.plugin.task.external.External._
 
-@Lenses case class External(
+case class External(
   inputFileArrays: Vector[External.InputFileArray] = Vector.empty,
   inputFiles:      Vector[External.InputFile]      = Vector.empty,
   outputFiles:     Vector[External.OutputFile]     = Vector.empty,

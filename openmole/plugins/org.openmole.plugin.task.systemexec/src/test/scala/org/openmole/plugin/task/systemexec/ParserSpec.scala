@@ -2,7 +2,7 @@ package org.openmole.plugin.task.systemexec
 
 import org.scalatest._
 
-class ParserSpec extends FlatSpec with Matchers {
+class ParserSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   "Backslashed strings" should "be parsed propely" in {
     val l1 = """R -e "install.packages(c(\"lib\"), dependencies = T)""""

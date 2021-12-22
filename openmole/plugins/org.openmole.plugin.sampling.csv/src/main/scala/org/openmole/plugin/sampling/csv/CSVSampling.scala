@@ -18,8 +18,7 @@
 package org.openmole.plugin.sampling.csv
 
 import java.io.File
-import monocle.Lens
-import monocle.macros.Lenses
+import monocle.{ Lens, Focus }
 import org.openmole.core.context.{ PrototypeSet, Val, Variable }
 import org.openmole.core.expansion.{ FromContext, Validate }
 import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig, Mapped, MappedOutputBuilder }
@@ -28,10 +27,10 @@ import org.openmole.core.workflow.tools._
 
 object CSVSampling {
 
-  implicit def isIO = InputOutputBuilder(CSVSampling.config)
+  implicit def isIO: InputOutputBuilder[CSVSampling] = InputOutputBuilder(Focus[CSVSampling](_.config))
 
-  implicit def isBuilder = new MappedOutputBuilder[CSVSampling] {
-    override def mappedOutputs: Lens[CSVSampling, Vector[Mapped[_]]] = CSVSampling.columns
+  implicit def isBuilder: MappedOutputBuilder[CSVSampling] = new MappedOutputBuilder[CSVSampling] {
+    override def mappedOutputs: Lens[CSVSampling, Vector[Mapped[_]]] = Focus[CSVSampling](_.columns)
   }
 
   implicit def isSampling: IsSampling[CSVSampling] = s ⇒
@@ -55,7 +54,7 @@ object CSVSampling {
 
 }
 
-@Lenses case class CSVSampling(
+case class CSVSampling(
   file:      FromContext[File],
   config:    InputOutputConfig,
   columns:   Vector[Mapped[_]],
@@ -64,8 +63,9 @@ object CSVSampling {
 
   def validate = file.validate
 
-  def inputs = InputOutputConfig.inputs.get(config)
-  def outputs = InputOutputConfig.outputs.get(config)
+  def inputs = config.inputs
+  def outputs = config.outputs
+  
   def apply() = FromContext { p ⇒
     import p._
     import org.openmole.core.csv

@@ -24,18 +24,18 @@ import org.openmole.tool.types.{ FromArray, ToDouble }
 object AggregateTask {
 
   object AggregateVal {
-    implicit def fromAggregateToDouble[A: ToDouble, B: Manifest, V[_]: FromArray](a: Aggregate[Val[A], V[Double] ⇒ B]) = AggregateVal.applyToDouble(a, a.value.withType[B])
-    implicit def fromAggregate[A, B: Manifest, V[_]: FromArray](a: Aggregate[Val[A], V[A] ⇒ B]) = AggregateVal(a, a.value.withType[B])
+    //implicit def fromAggregateToDouble[A: ToDouble, B: Manifest, V[_]: FromArray](a: Aggregate[Val[A], V[Double] ⇒ B]): AggregateVal[A, B] = AggregateVal.applyToDouble(a, a.value.withType[B])
+    implicit def fromAggregate[A, B: Manifest, V[_]: FromArray](a: Aggregate[Val[A], V[A] ⇒ B]): AggregateVal[A, B] = AggregateVal(a, a.value.withType[B])
 
-    implicit def fromAsAggregateToDouble[A: ToDouble, B: Manifest, V[_]: FromArray](as: As[Aggregate[Val[A], V[Double] ⇒ B], Val[B]]) = AggregateVal.applyToDouble(as.value, as.as)
-    implicit def fromAsAggregate[A, B: Manifest, V[_]: FromArray](as: As[Aggregate[Val[A], V[A] ⇒ B], Val[B]]) = AggregateVal(as.value, as.as)
+    //implicit def fromAsAggregateToDouble[A: ToDouble, B: Manifest, V[_]: FromArray](as: As[Aggregate[Val[A], V[Double] ⇒ B], Val[B]]): AggregateVal[A, B] = AggregateVal.applyToDouble(as.value, as.as)
+    implicit def fromAsAggregate[A, B: Manifest, V[_]: FromArray](as: As[Aggregate[Val[A], V[A] ⇒ B], Val[B]]): AggregateVal[A, B] = AggregateVal(as.value, as.as)
 
-    implicit def fromAsStringAggregateToDouble[A: ToDouble, B: Manifest, V[_]: FromArray](as: As[Aggregate[Val[A], V[Double] ⇒ B], String]) = AggregateVal.applyToDouble(as.value, Val[B](as.as))
-    implicit def fromAsStringAggregate[A, B: Manifest, V[_]: FromArray](as: As[Aggregate[Val[A], V[A] ⇒ B], String]) = AggregateVal(as.value, Val[B](as.as))
+    //implicit def fromAsStringAggregateToDouble[A: ToDouble, B: Manifest, V[_]: FromArray](as: As[Aggregate[Val[A], V[Double] ⇒ B], String]):  AggregateVal[A, B] = AggregateVal.applyToDouble(as.value, Val[B](as.as))
+    implicit def fromAsStringAggregate[A, B: Manifest, V[_]: FromArray](as: As[Aggregate[Val[A], V[A] ⇒ B], String]):  AggregateVal[A, B] = AggregateVal(as.value, Val[B](as.as))
 
-    implicit def fromVal[A: Manifest](v: Val[A]) = AggregateVal[A, Array[A], Array](v aggregate identity _, v.toArray)
-    implicit def fromAsVal[A: Manifest](v: As[Val[A], Val[Array[A]]]) = AggregateVal[A, Array[A], Array](Aggregate[Val[A], Array[A] ⇒ Array[A]](v.value, identity), v.as)
-    implicit def fromAsValString[A: Manifest](v: As[Val[A], String]) = AggregateVal[A, Array[A], Array](Aggregate[Val[A], Array[A] ⇒ Array[A]](v.value, identity), Val[Array[A]](v.as))
+    implicit def fromVal[A: Manifest](v: Val[A]): AggregateVal[A, Array[A]] = AggregateVal[A, Array[A], Array](Aggregate(v, identity), v.toArray)
+    implicit def fromAsVal[A: Manifest](v: As[Val[A], Val[Array[A]]]): AggregateVal[A, Array[A]] = AggregateVal[A, Array[A], Array](Aggregate[Val[A], Array[A] ⇒ Array[A]](v.value, identity), v.as)
+    implicit def fromAsValString[A: Manifest](v: As[Val[A], String]): AggregateVal[A, Array[A]] = AggregateVal[A, Array[A], Array](Aggregate[Val[A], Array[A] ⇒ Array[A]](v.value, identity), Val[Array[A]](v.as))
 
     def apply[A, B: Manifest, V[_]: FromArray](a: Aggregate[Val[A], V[A] ⇒ B], _outputVal: Val[B]): AggregateVal[A, B] = new AggregateVal[A, B] {
       def aggregate(context: Context): Variable[B] = {
@@ -69,8 +69,8 @@ object AggregateTask {
       import p._
       context ++ aggregates.map { case a ⇒ a.aggregate(context) }
     } set (
-      inputs += (aggregates.map(_.value.toArray): _*),
-      outputs += (aggregates.map(_.outputVal): _*)
+      inputs ++= aggregates.map(_.value.toArray),
+      outputs ++= aggregates.map(_.outputVal)
     )
 
 }
