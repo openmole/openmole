@@ -29,8 +29,6 @@ import org.openmole.plugin.environment.batch._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment
 import org.openmole.tool.file.readableByteCount
 import org.openmole.tool.stream.StringPrintStream
-import monocle._
-
 import scala.concurrent.stm._
 
 case class RunningEnvironment(
@@ -67,44 +65,53 @@ class Execution {
 
   def environmentListener(envId: EnvironmentId): EventDispatcher.Listner[Environment] = {
     case (env: Environment, bdl: BeginDownload) ⇒
-      updateRunningEnvironment(envId) {
-        Focus[RunningEnvironment](_.networkActivity.downloadingFiles) modify (_ + 1)
+      updateRunningEnvironment(envId) { env =>
+        val na = env.networkActivity
+        env.copy(networkActivity = na.copy(downloadingFiles = na.downloadingFiles + 1))
       }
 
     case (env: Environment, edl: EndDownload) ⇒
-      updateRunningEnvironment(envId) {
-        Focus[RunningEnvironment](_.networkActivity).modify { na ⇒
-          val size = na.downloadedSize + (if (edl.success) edl.size else 0)
+      updateRunningEnvironment(envId) { env =>
+        val na = env.networkActivity
+        env.copy(
+          networkActivity = {
+            val size = na.downloadedSize + (if (edl.success) edl.size else 0)
 
-          na.copy(
-            downloadingFiles = na.downloadingFiles - 1,
-            downloadedSize = size,
-            readableDownloadedSize = readableByteCount(size)
-          )
-        }
+            na.copy(
+              downloadingFiles = na.downloadingFiles - 1,
+              downloadedSize = size,
+              readableDownloadedSize = readableByteCount(size)
+            )
+          }
+        )
       }
 
     case (env: Environment, bul: BeginUpload) ⇒
-      updateRunningEnvironment(envId) {
-        Focus[RunningEnvironment](_.networkActivity.uploadingFiles) modify (_ + 1)
+      updateRunningEnvironment(envId) { env =>
+        val na = env.networkActivity
+        env.copy(networkActivity = na.copy(uploadingFiles = na.uploadingFiles + 1))
       }
 
     case (env: Environment, eul: EndUpload) ⇒
-      updateRunningEnvironment(envId) {
-        Focus[RunningEnvironment](_.networkActivity).modify { na ⇒
-          val size = na.uploadedSize + (if (eul.success) eul.size else 0)
+      updateRunningEnvironment(envId) { env =>
+        val na = env.networkActivity
+        env.copy(
+          networkActivity = {
+            val size = na.uploadedSize + (if (eul.success) eul.size else 0)
 
-          na.copy(
-            uploadedSize = size,
-            readableUploadedSize = readableByteCount(size),
-            uploadingFiles = na.uploadingFiles - 1
-          )
-        }
+            na.copy(
+              uploadedSize = size,
+              readableUploadedSize = readableByteCount(size),
+              uploadingFiles = na.uploadingFiles - 1
+            )
+          }
+        )
       }
 
     case (env: Environment, j: Environment.JobCompleted) ⇒
-      updateRunningEnvironment(envId) {
-        Focus[RunningEnvironment](_.executionActivity.executionTime) modify (_ + (j.log.executionEndTime - j.log.executionBeginTime))
+      updateRunningEnvironment(envId) { env =>
+        val ex = env.executionActivity
+        env.copy(executionActivity = ex.copy(executionTime = ex.executionTime + j.log.executionEndTime - j.log.executionBeginTime))
       }
   }
 

@@ -700,7 +700,6 @@ def guiServerDir = guiDir / "server"
 
 lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", dynamicImports = Seq("org.eclipse.jetty.*")) settings(
   libraryDependencies ++= Seq(Libraries.autowire, Libraries.boopickle, Libraries.scalaTags, Libraries.scalatra, Libraries.clapper),
-  Libraries.monocleScala2,
   guiSettings,
   scala2Settings) dependsOn(
   sharedGUI,

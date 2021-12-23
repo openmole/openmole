@@ -127,20 +127,4 @@ object Libraries {
 
   lazy val shapeless = "org.openmole.library" %% "org-typelevel-shapeless" % shapelessVersion
 
-  lazy val monocleScala2 =
-    Seq(
-    libraryDependencies ++=
-      Seq(
-        "dev.optics" %% "monocle-core" % monocleVersion,
-        "dev.optics" %% "monocle-macro" % monocleVersion
-      ),
-      excludeDependencies ++= Seq(
-        ExclusionRule("org.openmole.library", "cats_3"),
-        ExclusionRule("org.openmole.library", "monocle_3"),
-        ExclusionRule("org.openmole.library", "io-circe_3")
-//        ExclusionRule("dev.optics", "monocle-core_3"),
-//        ExclusionRule("dev.optics", "monocle-macro_3"),
-//        ExclusionRule("dev.optics", "monocle-macro_3"),
-      )
-    )
 }
