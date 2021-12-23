@@ -75,7 +75,7 @@ object SystemExecTask {
 
 }
 
-case class SystemExecTask(
+case class SystemExecTask private (
   command:              Vector[OSCommands],
   workDirectory:        Option[String],
   errorOnReturnValue:   Boolean,

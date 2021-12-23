@@ -35,14 +35,16 @@ package tools {
     implicit def seqOfFunction[T](s: Seq[T ⇒ T]): T => T = s.sequence
     implicit def arrayOfFunction[T](s: Array[T ⇒ T]): T => T = s.toSeq.sequence
 
-    def OptionalArgument = tools.OptionalArgument
-    type OptionalArgument[T] = tools.OptionalArgument[T]
+    export tools.OptionalArgument
 
     implicit def optionalArgumentToOption[T](optionalArgument: OptionalArgument[T]): Option[T] = optionalArgument.option
 
-    def Expression[T] = new {
+
+    class ExpressionClass[T] {
       def apply[S](s: S)(implicit expandable: Expandable[S, T]) = expandable.expand(s)
     }
+
+    def Expression[T] = new ExpressionClass[T]
 
   }
 }

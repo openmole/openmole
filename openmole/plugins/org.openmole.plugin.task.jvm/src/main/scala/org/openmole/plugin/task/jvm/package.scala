@@ -24,8 +24,9 @@ package jvm {
   import org.openmole.core.exception.UserBadDataError
   import org.openmole.core.pluginmanager.PluginManager
 
-  trait JVMPackage extends external.ExternalPackage {
-    lazy val libraries = new {
+  trait JVMPackage {
+
+    object libraries {
       /**
        * Add a library and make it available to the task
        *
@@ -41,7 +42,7 @@ package jvm {
         implicitly[JVMLanguageBuilder[T]].libraries.modify(_ ++ l)
     }
 
-    lazy val plugins = new {
+    object plugins {
       def +=[T: JVMLanguageBuilder](plugins: Seq[File]*) = {
         plugins.flatten.foreach {
           plugin ⇒
@@ -53,6 +54,7 @@ package jvm {
         implicitly[JVMLanguageBuilder[T]].plugins.modify(_ ++ plugins.flatten)
       }
     }
+
     def pluginsOf(o: Any): Seq[File] = pluginsOf(o.getClass)
     def pluginsOf[T](implicit m: Manifest[T]): Seq[File] = pluginsOf(manifest[T].runtimeClass)
     def pluginsOf(clazz: Class[_]): Seq[File] = PluginManager.pluginsForClass(clazz).toSeq

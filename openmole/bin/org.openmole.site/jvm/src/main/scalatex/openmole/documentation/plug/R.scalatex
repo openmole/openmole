@@ -223,15 +223,15 @@ If you have several outputs, you can combine mapped outputs with classic outputs
 
     // Task
     val rTask5 =
-    RTask($tq
+      RTask($tq
         # Define the function
         f <- function(x) {
-            x + 1
+          x + 1
         }
 
         # Use the function
         j <- f(i)
-    $tq) set (
+      $tq) set (
         inputs += i.mapped,
         inputs += c,
 
@@ -242,7 +242,7 @@ If you have several outputs, you can combine mapped outputs with classic outputs
         // Default values
         i := 3,
         c := 2
-    )
+      )
 
     // Workflow
     rTask5 hook display

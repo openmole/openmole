@@ -48,8 +48,11 @@ object Project {
     def makePackage(name: String, tree: Tree): String =
       if (!tree.files.isEmpty) tree.files.distinct.map(f ⇒ makeVal(name, f)).mkString("\n")
       else
-        s"""@transient lazy val $name = new {
+        s"""
+            |class ${name}Clazz {
             |${makeImportTree(tree)}
+            |}
+            |@transient final lazy val $name = new ${name}Class
             |}""".stripMargin
 
     def makeVal(identifier: String, file: File) =
@@ -61,9 +64,10 @@ object Project {
       val name = uniqueName(sourceFile.file)
 
       s"""class ${name}Class {
-           |@transient lazy val _imports = new {
+           |class _importsClazz {
            |$imports
            |}
+           |@transient final lazy val _imports = new _importsClazz
            |}
            |@transient lazy val ${name} = new ${name}Class
            """
@@ -94,9 +98,10 @@ object Project {
 
       val classContent =
         s"""object ${name} {
-           |@transient lazy val _imports = new {
+           |class _importsClazz {
            |$imports
            |}
+           |@transient lazy val _imports = new _importsClazz
            |
            |import _imports._
            |
@@ -146,7 +151,7 @@ object Project {
            |new $traitName {
            |
            |$functionPrototype = {
-           |implicit def _scriptSourceData = ${ScriptSourceData.applySource(workDirectory, script)}
+           |implicit def _scriptSourceData: ${classOf[ScriptSourceData.ScriptData].getCanonicalName} = ${ScriptSourceData.applySource(workDirectory, script)}
            |import ${Project.uniqueName(script)}._imports._""".stripMargin
 
       def scriptFooter =

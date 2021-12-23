@@ -24,7 +24,7 @@ package netlogo {
 
   import org.openmole.core.workflow.builder._
 
-  trait NetLogoPackage extends external.ExternalPackage {
+  trait NetLogoPackage {
     @deprecated
     lazy val netLogoInputs = new {
       def +=[T: MappedInputBuilder: InputOutputBuilder](p: Val[_], n: String): T ⇒ T = inputs += p mapped n

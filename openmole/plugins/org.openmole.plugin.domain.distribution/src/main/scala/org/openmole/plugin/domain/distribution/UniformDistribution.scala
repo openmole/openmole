@@ -17,8 +17,9 @@
 
 package org.openmole.plugin.domain.distribution
 
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
+import org.openmole.core.workflow.tools.OptionalArgument
 
 object UniformDistribution {
 
@@ -44,11 +45,11 @@ object UniformDistribution {
       domain.seed.map(_.validate).toSeq
     )
 
-//  def apply[T](
-//    seed: OptionalArgument[FromContext[Long]] = None,
-//    max:  OptionalArgument[T]                 = None
-//  )(implicit distribution: Distribution[T]) = new UniformDistribution(seed, max, distribution)
+  def apply[T](
+    seed: OptionalArgument[FromContext[Long]] = None,
+    max:  OptionalArgument[T]                 = OptionalArgument.empty[T]
+  )(implicit distribution: Distribution[T]) = new UniformDistribution(seed, max, distribution)
 
 }
 
-case class UniformDistribution[T] (seed: Option[FromContext[Long]] = None, max: Option[T] = None)(implicit val distribution: Distribution[T])
+case class UniformDistribution[T](seed: Option[FromContext[Long]], max: Option[T], distribution: Distribution[T])

@@ -47,6 +47,8 @@ package systemexec {
     implicit def stringToCommand(s: String): Command = Command(s)
   }
 
+  implicit def seqStringToCommand(s: Seq[String]): Seq[Command] = s.map(s => Command(s))
+
   /**
    * Sequence of commands for a particular OS
    *

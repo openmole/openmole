@@ -18,7 +18,7 @@
 package org.openmole.plugin.task
 
 package scala {
-  trait ScalaPackage extends jvm.JVMPackage
+  trait ScalaPackage
 }
 
 package object scala extends ScalaPackage
