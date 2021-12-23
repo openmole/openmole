@@ -1086,7 +1086,8 @@ lazy val modules =
     resourcesAssemble += (launcher / assemble).value -> (assemblyPath.value / "launcher"),
     libraryDependencies ++= requieredRuntimeLibraries,
     dependencyFilter := bundleFilter,
-    dependencyName := rename) dependsOn (toDependencies(openmoleNakedDependencies): _*) dependsOn (toDependencies(openmoleDependencies): _*)
+    dependencyName := rename,
+    excludeTransitiveScala2) dependsOn (toDependencies(openmoleNakedDependencies): _*) dependsOn (toDependencies(openmoleDependencies): _*)
 
 
 lazy val launcher = OsgiProject(binDir, "org.openmole.launcher", imports = Seq("*"), settings = assemblySettings) settings(
@@ -1095,12 +1096,14 @@ lazy val launcher = OsgiProject(binDir, "org.openmole.launcher", imports = Seq("
   resourcesAssemble += {
     val bundle = (OsgiKeys.bundle).value
     bundle -> (assemblyPath.value / bundle.getName)
-  }
-) settings (defaultSettings: _*)
+  },
+  defaultSettings
+)
 
 
 lazy val consoleBin = OsgiProject(binDir, "org.openmole.console", imports = Seq("*")) settings (
-  libraryDependencies += Libraries.jline
+  libraryDependencies += Libraries.jline,
+  defaultSettings
   ) dependsOn(
   workflow,
   openmoleCompiler,
@@ -1108,7 +1111,7 @@ lazy val consoleBin = OsgiProject(binDir, "org.openmole.console", imports = Seq(
   openmoleDSL,
   openmoleBuildInfo,
   module
-) settings (defaultSettings: _*)
+)
 
 val generateDocker = taskKey[Unit]("Prepare the docker build")
 
