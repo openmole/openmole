@@ -17,13 +17,13 @@
 
 package org.openmole.core.expansion
 
-import org.openmole.core.context._
-import org.openmole.core.exception._
-import org.openmole.tool.cache._
-import org.openmole.tool.random._
-import org.openmole.tool.file._
-import cats._
-import cats.implicits._
+import org.openmole.core.context.*
+import org.openmole.core.exception.*
+import org.openmole.tool.cache.*
+import org.openmole.tool.random.*
+import org.openmole.tool.file.*
+import cats.*
+import cats.implicits.*
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.workspace.TmpDirectory
 
@@ -56,7 +56,9 @@ object ToFromContext extends LowPriorityToFromContext {
   implicit def fileToFile: ToFromContext[File, File] = ToFromContext[File, File](f ⇒ ExpandedString(f.getPath).map(s ⇒ File(s)))
   implicit def intToLong: ToFromContext[Int, Long] = ToFromContext[Int, Long](i ⇒ FromContext.value(i.toLong))
   implicit def intToInt: ToFromContext[Int, Int] = ToFromContext[Int, Int](i ⇒ FromContext.value(i))
-  
+  implicit def intToDouble: ToFromContext[Int, Double] = ToFromContext[Int, Double](i ⇒ FromContext.value(i))
+  implicit def longToDouble: ToFromContext[Long, Double] = ToFromContext[Long, Double](i ⇒ FromContext.value(i))
+
   implicit def fromContextToFromContext[T]: ToFromContext[FromContext[T], T] = ToFromContext[FromContext[T], T](identity)
 
   implicit def booleanToCondition: ToFromContext[Boolean, Boolean] = ToFromContext[Boolean, Boolean](b ⇒ FromContext.value(b))

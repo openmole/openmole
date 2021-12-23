@@ -98,13 +98,13 @@ package object db extends JavaLogger {
     lazy val selectSameSourceQuery = 
       connection.prepareStatement("SELECT * FROM REPLICAS WHERE SOURCE LIKE ? AND STORAGE LIKE ? AND HASH LIKE ?")
     
-    lazy val selectSourcesStoragesQuery = 
-      connection.prepareStatement("SELECT * FROM REPLICAS WHERE SOURCE = ANY(?) AND STORAGE = ANY(?)")
+    lazy val selectPathsStoragesQuery =
+      connection.prepareStatement("SELECT * FROM REPLICAS WHERE PATH = ANY(?) AND STORAGE = ANY(?)")
 
-    lazy val selectHashesStoragesQuery = 
+    lazy val selectHashesStoragesQuery =
       connection.prepareStatement("SELECT * FROM REPLICAS WHERE HASH = ANY(?) AND STORAGE = ANY(?)")
 
-    lazy val updateLastCheckExistsQuery = 
+    lazy val updateLastCheckExistsQuery =
       connection.prepareStatement("UPDATE REPLICAS SET LAST_CHECK_EXISTS = ? WHERE ID = ?")
 
     def insert(source: String, storage: String, path: String, hash: String, lastCheckExists: Long) = transact {
@@ -112,8 +112,8 @@ package object db extends JavaLogger {
       selectSameSourceQuery.setString(2, storage)
       selectSameSourceQuery.setString(3, hash)
       val res = Transactor.unrollResut(selectSameSourceQuery.executeQuery)
-      
-      if(res.isEmpty) 
+
+      if(res.isEmpty)
       then
         inserQuery.setString(1, source)
         inserQuery.setString(2, storage)
@@ -161,12 +161,12 @@ package object db extends JavaLogger {
       Transactor.unrollResut(selectHashQuery.executeQuery)
     }
 
-    def selectSourcesStorages(sources: Seq[String], storages: Seq[String])  = transact {
+    def selectPathsStorages(sources: Seq[String], storages: Seq[String])  = transact {
        val sourcesArray = connection.createArrayOf("VARCHAR", sources.toArray[Any])
        val storagesArray = connection.createArrayOf("VARCHAR", storages.toArray[Any])
-       selectSourcesStoragesQuery.setArray(1, sourcesArray)
-       selectSourcesStoragesQuery.setArray(2, storagesArray)
-       Transactor.unrollResut(selectSourcesStoragesQuery.executeQuery)
+       selectPathsStoragesQuery.setArray(1, sourcesArray)
+       selectPathsStoragesQuery.setArray(2, storagesArray)
+       Transactor.unrollResut(selectPathsStoragesQuery.executeQuery)
     }
 
     def selectHashesStorages(sources: Seq[String], storages: Seq[String])  = transact {

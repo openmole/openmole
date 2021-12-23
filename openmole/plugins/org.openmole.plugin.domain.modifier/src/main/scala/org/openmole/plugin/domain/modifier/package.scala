@@ -33,7 +33,7 @@ package object modifier {
   implicit val fileGetName: CanGetName[File] = new CanGetName[File] { def apply(f: File) = f.getName }
   implicit val pathGetName: CanGetName[Path] = new CanGetName[Path] { def apply(p: Path) = p.toFile.getName }
 
-  implicit class DomainModifierDecorator[D, T: TypeTag](domain: D)(implicit discrete: DiscreteFromContextDomain[D, T]) {
+  implicit class DomainModifierDecorator[D, T](domain: D)(implicit discrete: DiscreteFromContextDomain[D, T]) {
     def take(n: FromContext[Int]) = TakeDomain(domain, n)
     def group(n: FromContext[Int])(implicit m: Manifest[T]) = GroupDomain(domain, n)
     def sliding(n: FromContext[Int], s: FromContext[Int] = 1)(implicit m: Manifest[T]) = SlidingDomain(domain, n, s)

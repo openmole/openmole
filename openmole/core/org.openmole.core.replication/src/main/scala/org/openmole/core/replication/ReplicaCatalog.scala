@@ -187,7 +187,7 @@ class ReplicaCatalog(database: Database, preference: Preference) {
     else replica
   }
 
-  def forPaths(paths: Seq[String], storageId: Seq[String]): Seq[Replica] = database.selectSourcesStorages(paths, storageId)
+  def forPaths(paths: Seq[String], storageId: Seq[String]): Seq[Replica] = database.selectPathsStorages(paths, storageId)
   def forHashes(hashes: Seq[String], storageId: Seq[String]): Seq[Replica] = database.selectHashesStorages(hashes, storageId)
 
   def deleteReplicas(storageId: String): Unit = {

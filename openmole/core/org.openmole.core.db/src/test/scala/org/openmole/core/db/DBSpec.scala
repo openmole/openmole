@@ -41,7 +41,7 @@ class DBSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     t.selectSameSourceWithDifferentHash("source", "storage", "hh").size should equal(1)
     t.selectSameSourceWithDifferentHash("source", "storage", "hash").size should equal(0)
     t.selectSameSource("source", "storage", "hash").size should equal(1)
-    t.selectSourcesStorages(Seq("source"), Seq("storage")).size should equal(1)
+    t.selectPathsStorages(Seq("path"), Seq("storage")).size should equal(1)
     t.selectHashesStorages(Seq("hash"), Seq("storage")).size should equal(1)
     t.updateLastCheckExists(1, 43)
     t.selectSameSource("source", "storage", "hash").head.lastCheckExists should equal(43)
