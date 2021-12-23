@@ -160,16 +160,22 @@ case class Objective(
 
 object Objectives {
 
-  def onlyExact(o: Objectives) = o.collect { case x if !x.noisy ⇒ x }.size == o.size
-  def toExact(o: Objectives) = o.map(o ⇒ Objective.toExact(o))
-  def toNoisy(o: Objectives) = o.map(o ⇒ Objective.toNoisy(o))
+  def toSeq(o: Objectives) =
+    o match {
+      case o: Objective => Seq(o)
+      case o: Seq[Objective] => o
+    }
 
-  def resultPrototypes(o: Objectives) = o.map(Objective.resultPrototype)
+  def onlyExact(o: Objectives) = toSeq(o).collect { case x if !x.noisy ⇒ x }.size == toSeq(o).size
+  def toExact(o: Objectives) = toSeq(o).map(o ⇒ Objective.toExact(o))
+  def toNoisy(o: Objectives) = toSeq(o).map(o ⇒ Objective.toNoisy(o))
+
+  def resultPrototypes(o: Objectives) = toSeq(o).map(Objective.resultPrototype)
 
   def validate(o: Objectives, outputs: Seq[Val[_]]) = Validate { p ⇒
     import p._
-    o flatMap { o ⇒ o.validate(inputs ++ outputs) }
+    toSeq(o) flatMap { o ⇒ o.validate(inputs ++ outputs) }
   }
 
-  def prototypes(o: Objectives) = o.map(Objective.prototype)
+  def prototypes(o: Objectives) = toSeq(o).map(Objective.prototype)
 }

@@ -107,8 +107,8 @@ Here is an example :
 
   ProfileEvolution(
     evaluation = modelTask,
-    objective = Seq(fitness),
-    profile = Seq(param1 in 20),
+    objective = fitness,
+    profile = param1,
     genome = Seq(
         param1 in (0.0, 99.0),
         param2 in (0.0, 99.0)

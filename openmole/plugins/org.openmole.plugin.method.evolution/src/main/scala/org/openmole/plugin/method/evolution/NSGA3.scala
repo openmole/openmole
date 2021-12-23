@@ -247,8 +247,8 @@ object NSGA3Evolution {
     p ⇒ {
       val refPoints =
         p.references match {
-          case NSGA3.References.None        ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(50, p.objective.size)
-          case NSGA3.References.Division(i) ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(i, p.objective.size)
+          case NSGA3.References.None        ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(50, Objectives.toSeq(p.objective).size)
+          case NSGA3.References.Division(i) ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(i, Objectives.toSeq(p.objective).size)
           case NSGA3.References.List(p)     ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(p)
         }
 

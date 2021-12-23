@@ -60,7 +60,7 @@ object Profile {
   case class IntervalIntProfileElement(v: Val[Int]) extends ProfileElement
   case class FixDomainProfileElement(v: Val[Double], intervals: Vector[Double]) extends ProfileElement
 
-  type ProfileElements = Seq[ProfileElement]
+  type ProfileElements = Seq[ProfileElement] | ProfileElement
 
   object DeterministicParams {
 
@@ -360,10 +360,16 @@ object ProfileEvolution {
 
   implicit def method: ExplorationMethod[ProfileEvolution, EvolutionWorkflow] =
     p ⇒
+      def profile =
+        p.profile match {
+          case p: Profile.ProfileElement => Seq(p)
+          case p: Seq[Profile.ProfileElement] => p
+        }
+
       EvolutionPattern.build(
         algorithm =
           Profile(
-            niche = p.profile,
+            niche = profile,
             genome = p.genome,
             objective = p.objective,
             outputs = p.evaluation.outputs,

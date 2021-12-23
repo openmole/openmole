@@ -29,7 +29,7 @@ import org.openmole.plugin.tool.pattern
 import org.openmole.plugin.tool.pattern.MasterSlave
 import squants.time.Time
 
-type Objectives = Seq[Objective]
+type Objectives = Seq[Objective] | Objective
 type Genome = Seq[Genome.GenomeBound]
 
 implicit def intToCounterTerminationConverter(n: Long): EvolutionWorkflow.AfterEvaluated = EvolutionWorkflow.AfterEvaluated(n)

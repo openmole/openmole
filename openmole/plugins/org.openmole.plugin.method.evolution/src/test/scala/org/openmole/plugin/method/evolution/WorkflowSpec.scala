@@ -116,6 +116,19 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     executed should be >= 100
   }
 
+  "Evolution" should "support single objective" in {
+    val a = Val[Double]
+
+    val nsga = NSGA2Evolution(
+      evaluation = EmptyTask(),
+      objective = a,
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100,
+      parallelism = 10
+    )
+  }
+
+
   "Island evolution" should "run" in {
     @volatile var executed = 0
 

@@ -175,7 +175,7 @@ val model = ScalaTask("val distance = param1.sum * param2") set (inputs += (para
 
 NSGA2Evolution(
   evaluation = model ,
-  objective = Seq(distance),
+  objective = distance,
   populationSize = 200,
   genome = Seq(
     param1 in Array.fill(100)(0.0, 99.0),
