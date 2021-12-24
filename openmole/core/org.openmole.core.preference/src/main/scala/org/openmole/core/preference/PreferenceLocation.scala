@@ -1,4 +1,4 @@
-package org.openmole.core.preferencemacro
+package org.openmole.core.preference
 
 /*
  * Copyright (C) 2019 Romain Reuillon
@@ -16,6 +16,29 @@ package org.openmole.core.preferencemacro
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+
+object PreferenceLocation {
+
+  //TODO Would be cleaner implemented using scala macro
+  def list(t: Any): Vector[PreferenceLocation[_]] = {
+    import java.lang.reflect.Modifier
+    val preferencesField =
+      t.getClass.getDeclaredFields.
+        filter(f => classOf[PreferenceLocation[_]].isAssignableFrom(f.getType) && Modifier.isPublic(f.getModifiers)).
+        map(f => f.get(t).asInstanceOf[PreferenceLocation[_]])
+
+    val preferenceMethod =
+      t.getClass.getDeclaredMethods.
+        filter(m => classOf[PreferenceLocation[_]].isAssignableFrom(m.getReturnType) && m.getParameterCount == 0 && Modifier.isPublic(m.getModifiers)).
+        map(m => m.invoke(t).asInstanceOf[PreferenceLocation[_]])
+
+    (preferencesField ++ preferenceMethod).sortBy(_.toString).toVector
+  }
+
+  def apply[T](group: String, name: String, default: ⇒ Option[T]) = new ClearPreferenceLocation[T](group, name, default)
+  def cyphered[T](group: String, name: String, default: ⇒ Option[T]) = new CypheredPreferenceLocation[T](group, name, default)
+}
 
 sealed trait PreferenceLocation[T] {
   def group: String

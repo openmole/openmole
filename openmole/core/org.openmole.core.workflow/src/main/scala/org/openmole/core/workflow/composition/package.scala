@@ -645,7 +645,7 @@ trait CompositionPackage {
   implicit def toMole[T](t: T)(using toMole: org.openmole.core.workflow.composition.DSL.ToMole[T]): Mole = toMole.apply(t)
   implicit def toMoleExecution[T](t: T)(using toMoleExecution: org.openmole.core.workflow.composition.DSL.ToMoleExecution[T]): MoleExecution = toMoleExecution.apply(t)
 
-  implicit class DSLDecorator(t1: DSL) {
+  extension (t1: DSL) {
     def &(t2: DSL) = new &(t1, t2)
     def and(t2: DSL) = new &(t1, t2)
   

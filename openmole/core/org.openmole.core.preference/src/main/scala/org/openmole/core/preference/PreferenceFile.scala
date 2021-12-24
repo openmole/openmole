@@ -23,19 +23,12 @@ import org.openmole.tool.file._
 import org.apache.commons.configuration2._
 import org.apache.commons.configuration2.builder._
 import org.apache.commons.configuration2.builder.fluent._
-import org.openmole.core.preferencemacro._
 import org.openmole.tool.types._
 import org.openmole.tool.thread._
 import org.openmole.tool.lock._
 import squants._
 import squants.information._
 
-object PreferenceLocation {
-  def list[T](t: T): Vector[PreferenceLocation[_]] = org.openmole.core.preferencemacro.list[T](t)
-
-  def apply[T](group: String, name: String, default: ⇒ Option[T]) = new ClearPreferenceLocation[T](group, name, default)
-  def cyphered[T](group: String, name: String, default: ⇒ Option[T]) = new CypheredPreferenceLocation[T](group, name, default)
-}
 
 object ConfigurationFile {
   def apply(file: File) = {
