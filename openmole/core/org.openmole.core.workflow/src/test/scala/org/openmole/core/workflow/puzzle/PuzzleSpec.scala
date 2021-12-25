@@ -17,16 +17,16 @@ class PuzzleSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     t.run()
   }
 
-  "HList containing dsl container" should "be usable like a dsl container" in {
-
-    val task = EmptyTask()
-    val test = (DSLContainer(task, ()), 9)
-
-    (test: DSLContainer[_]).run()
-    (test: MoleExecution).run()
-    test.run()
-    test on LocalEnvironment(1)
-  }
+//  "HList containing dsl container" should "be usable like a dsl container" in {
+//
+//    val task = EmptyTask()
+//    val test = (DSLContainer(task, ()), 9)
+//
+//    (test: DSLContainer[_]).run()
+//    (test: MoleExecution).run()
+//    test.run()
+//    test on LocalEnvironment(1)
+//  }
 
   "Strain" should "pass a val through a single of task" in {
     @volatile var lastExecuted = false

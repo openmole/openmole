@@ -23,13 +23,14 @@ package types {
     object SelectTuple {
       implicit def selectHead[H, T <: Tuple]: SelectTuple[H, H *: T] = t => t.head
       implicit def selectInductive[H, T <: NonEmptyTuple](implicit selectTail: SelectTuple[H, Tuple.Tail[T]]): SelectTuple[H, T] = t => selectTail.select(t.tail)
+
+      def apply[H, T](t: T)(implicit select: SelectTuple[H, T]): H = select.select(t)
     }
 
     @FunctionalInterface trait SelectTuple[H, T] {
       def select(t: T): H
     }
 
-    implicit def selectInTuple[H, T](t: T)(implicit select: SelectTuple[H, T]): H = select.select(t)
     implicit def function1Manifest[A: Manifest, B: Manifest]: Manifest[A => B] = Manifest.classType(classOf[scala.Function1[A, B]], manifest[A], manifest[B])
     implicit def arrayManifest[A: Manifest]: Manifest[Array[A]] = Manifest.arrayType(manifest[A])
 
