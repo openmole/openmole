@@ -14,7 +14,7 @@ case class InfoConfig(
 object InfoBuilder {
 
   def apply[T](lens: Lens[T, InfoConfig]) = new InfoBuilder[T] {
-    def name = lens composeLens Focus[InfoConfig](_.name)
+    def name = lens andThen Focus[InfoConfig](_.name)
   }
 
 }

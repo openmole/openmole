@@ -25,8 +25,8 @@ import monocle.Focus
 
 object ClosureTask {
 
-  implicit def isBuilder: InputOutputBuilder[ClosureTask] = InputOutputBuilder(Focus[ClosureTask](_.config))
-  implicit def isInfo: InfoBuilder[ClosureTask] = InfoBuilder(Focus[ClosureTask](_.info))
+  given InputOutputBuilder[ClosureTask] = InputOutputBuilder(Focus[ClosureTask](_.config))
+  given InfoBuilder[ClosureTask] = InfoBuilder(Focus[ClosureTask](_.info))
 
   /**
    * Construct from a name and a function (no input-output nor info configs)

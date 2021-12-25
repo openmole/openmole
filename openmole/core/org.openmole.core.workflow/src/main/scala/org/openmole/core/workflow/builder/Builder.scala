@@ -36,8 +36,8 @@ object InputOutputBuilder {
 
   def apply[T](taskInfo: Lens[T, InputOutputConfig]) = new InputOutputBuilder[T] {
     override def inputs: Lens[T, PrototypeSet] = taskInfo andThen Focus[InputOutputConfig](_.inputs)
-    override def defaults: Lens[T, DefaultSet] = taskInfo composeLens Focus[InputOutputConfig](_.defaults)
-    override def outputs: Lens[T, PrototypeSet] = taskInfo composeLens Focus[InputOutputConfig](_.outputs)
+    override def defaults: Lens[T, DefaultSet] = taskInfo andThen Focus[InputOutputConfig](_.defaults)
+    override def outputs: Lens[T, PrototypeSet] = taskInfo andThen Focus[InputOutputConfig](_.outputs)
   }
 
 }
@@ -45,8 +45,8 @@ object InputOutputBuilder {
 object MappedInputOutputBuilder {
 
   def apply[T](mapped: Lens[T, MappedInputOutputConfig]) = new MappedInputOutputBuilder[T] {
-    override def mappedInputs: Lens[T, Vector[Mapped[_]]] = mapped composeLens Focus[MappedInputOutputConfig](_.inputs)
-    override def mappedOutputs: Lens[T, Vector[Mapped[_]]] = mapped composeLens Focus[MappedInputOutputConfig](_.outputs)
+    override def mappedInputs: Lens[T, Vector[Mapped[_]]] = mapped andThen Focus[MappedInputOutputConfig](_.inputs)
+    override def mappedOutputs: Lens[T, Vector[Mapped[_]]] = mapped andThen Focus[MappedInputOutputConfig](_.outputs)
   }
 
 }

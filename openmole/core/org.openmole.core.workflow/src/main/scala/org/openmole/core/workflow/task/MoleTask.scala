@@ -36,8 +36,8 @@ import monocle.Focus
 
 object MoleTask {
 
-  implicit def isTask: InputOutputBuilder[MoleTask] = InputOutputBuilder(Focus[MoleTask](_.config))
-  implicit def isInfo: InfoBuilder[MoleTask] = InfoBuilder(Focus[MoleTask](_.info))
+  given InputOutputBuilder[MoleTask] = InputOutputBuilder(Focus[MoleTask](_.config))
+  given InfoBuilder[MoleTask] = InfoBuilder(Focus[MoleTask](_.info))
 
   /**
    * Constructor used to construct the MoleTask corresponding to the full puzzle
@@ -60,7 +60,7 @@ object MoleTask {
     mt set (
       dsl.inputs ++= mole.root.inputs(mole, Sources.empty, Hooks.empty).toSeq,
       dsl.outputs ++= last.outputs(mole, Sources.empty, Hooks.empty).toSeq,
-      isTask.defaults.set(mole.root.task(mole, Sources.empty, Hooks.empty).defaults)
+      summon[InputOutputBuilder[MoleTask]].defaults.set(mole.root.task(mole, Sources.empty, Hooks.empty).defaults)
     )
   }
 

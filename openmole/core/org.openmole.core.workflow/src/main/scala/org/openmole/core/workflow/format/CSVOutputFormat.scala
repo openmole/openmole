@@ -57,7 +57,7 @@ object CSVOutputFormat {
       }
     }
 
-    override def validate(format: CSVOutputFormat) = format.header.option.toSeq.map(_.validate)
+    override def validate(format: CSVOutputFormat) = format.header.toOption.toSeq.map(_.validate)
 
     override def appendable(format: CSVOutputFormat): Boolean = format.append
   }

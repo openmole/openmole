@@ -103,7 +103,7 @@ object LocalEnvironment {
   def apply(
     threads:      OptionalArgument[Int]    = None,
     deinterleave: Boolean                  = false,
-    name:         OptionalArgument[String] = OptionalArgument()
+    name:         OptionalArgument[String] = None
   )(implicit varName: sourcecode.Name) =
     EnvironmentProvider { ms ⇒
       import ms._

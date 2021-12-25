@@ -269,7 +269,7 @@ object DSL {
     //def apply[T](implicit selector: DSLSelector[T]): DSLSelector[T] = selector
     //implicit def select[T <: HList]: DSLSelector[DSL :: T] = (l: DSL :: T) ⇒ l.head
     //implicit def recurse[H, T <: HList](implicit st: DSLSelector[T]): DSLSelector[H :: T] = (l: H :: T) ⇒ st(l.tail)
-    implicit def select[T](implicit select: org.openmole.tool.types.SelectTuple[DSL, T]): DSLSelector[T] = t => select.select(t)
+    given [T](using select: org.openmole.tool.types.SelectTuple[DSL, T]): DSLSelector[T] = t => select.select(t)
   }
 
   trait DSLSelector[T] {
@@ -280,67 +280,67 @@ object DSL {
 
   object ToOrigin {
     import org.openmole.core.workflow.sampling.IsSampling
-    implicit def taskToOrigin: ToOrigin[Task] = t ⇒ TaskOrigin(TaskNode(t))
-    implicit def transitionDSLToOrigin: ToOrigin[DSL] = TransitionDSLOrigin(_)
-    implicit def toDSLContainerToOrigin[T](implicit tc: org.openmole.core.workflow.composition.DSLContainer.ExplorationMethod[T, _]): ToOrigin[T] = t ⇒ TransitionDSLOrigin(tc(t))
-    implicit def taskNodeToOrigin[T: ToNode]: ToOrigin[T] = t ⇒ TaskOrigin(implicitly[ToNode[T]].apply(t))
-    implicit def samplingToOrigin[T: IsSampling](implicit scope: DefinitionScope): ToOrigin[T] = s ⇒ taskToOrigin(ExplorationTask(s))
+    given ToOrigin[Task] = t ⇒ TaskOrigin(TaskNode(t))
+    given ToOrigin[DSL] = TransitionDSLOrigin(_)
+    given [T](using tc: org.openmole.core.workflow.composition.DSLContainer.ExplorationMethod[T, _]): ToOrigin[T] = t ⇒ TransitionDSLOrigin(tc(t))
+    given [T: ToNode]: ToOrigin[T] = t ⇒ TaskOrigin(summon[ToNode[T]].apply(t))
+    given [T: IsSampling](using scope: DefinitionScope): ToOrigin[T] = s ⇒ summon[ToOrigin[Task]](ExplorationTask(s))
   }
 
-  trait ToOrigin[-T] {
+  @FunctionalInterface trait ToOrigin[-T] {
     def apply(t: T): TransitionOrigin
   }
 
   object ToDestination {
     import org.openmole.core.workflow.sampling.IsSampling
-    implicit def taskToDestination: ToDestination[Task] = t ⇒ TaskDestination(TaskNode(t))
-    implicit def taskNodeToDestination[T: ToNode]: ToDestination[T] = t ⇒ TaskDestination(implicitly[ToNode[T]].apply(t))
-    implicit def samplingToDestination[T: IsSampling](implicit scope: DefinitionScope): ToDestination[T] = s ⇒ taskToDestination(ExplorationTask(s))
-    implicit def transitionDSLToDestination: ToDestination[DSL] = TransitionDSLDestination(_)
-    implicit def toDSLContainerToDestination[T](implicit tc: org.openmole.core.workflow.composition.DSLContainer.ExplorationMethod[T, _]): ToDestination[T] = t ⇒ TransitionDSLDestination(tc(t))
+    given ToDestination[Task] = t ⇒ TaskDestination(TaskNode(t))
+    given [T: ToNode]: ToDestination[T] = t ⇒ TaskDestination(implicitly[ToNode[T]].apply(t))
+    given [T: IsSampling](using scope: DefinitionScope): ToDestination[T] = s ⇒ summon[ToDestination[Task]](ExplorationTask(s))
+    given ToDestination[DSL] = TransitionDSLDestination(_)
+    given [T](using tc: org.openmole.core.workflow.composition.DSLContainer.ExplorationMethod[T, _]): ToDestination[T] = t ⇒ TransitionDSLDestination(tc(t))
   }
 
-  trait ToDestination[-T] {
+  @FunctionalInterface trait ToDestination[-T] {
     def apply(t: T): TransitionDestination
   }
 
   object ToNode {
-    implicit def taskToNode[T <: Task]: ToNode[T] = t ⇒ TaskNode(t)
-    implicit def nodeToNode: ToNode[TaskNode] = t => t
-    implicit def byToNode[T: ToNode]: ToNode[By[T, Grouping]] = t ⇒ implicitly[ToNode[T]].apply(t.value).copy(grouping = Some(t.by))
-    implicit def byIntToNode[T: ToNode]: ToNode[By[T, Int]] = t ⇒ implicitly[ToNode[T]].apply(t.value).copy(grouping = Some(ByGrouping(t.by)))
-    implicit def onToNode[T: ToNode]: ToNode[On[T, EnvironmentProvider]] = t ⇒ implicitly[ToNode[T]].apply(t.value).copy(environment = Some(t.on))
+    given [T <: Task]: ToNode[T] = t ⇒ TaskNode(t)
+    given ToNode[TaskNode] = t => t
+    given byToNode[T: ToNode]: ToNode[By[T, Grouping]] = t ⇒ summon[ToNode[T]](t.value).copy(grouping = Some(t.by))
+    given byIntToNode[T: ToNode]: ToNode[By[T, Int]] = t ⇒ summon[ToNode[T]](t.value).copy(grouping = Some(ByGrouping(t.by)))
+    given [T: ToNode]: ToNode[On[T, EnvironmentProvider]] = t ⇒ summon[ToNode[T]](t.value).copy(environment = Some(t.on))
   }
 
-  trait ToNode[-T] {
+  @FunctionalInterface trait ToNode[-T] {
     def apply(t: T): TaskNode
   }
 
   object ToDSL {
-    implicit def dslToDSL: ToDSL[DSL] = t => t
-    implicit def toDSLContainerToDSL[T](implicit tc: org.openmole.core.workflow.composition.DSLContainer.ExplorationMethod[T, _]): ToDSL[T] = t ⇒ tc(t)
-    implicit def toNodeToDSL[T: ToNode]: ToDSL[T] = t ⇒ TaskNodeDSL(implicitly[ToNode[T]].apply(t))
-    implicit def dslSelectorToDSL[T](implicit dslSelector: DSLSelector[T]): ToDSL[T] = t ⇒ dslSelector.select(t)
+    given ToDSL[DSL] = t => t
+    given [T](using tc: org.openmole.core.workflow.composition.DSLContainer.ExplorationMethod[T, _]): ToDSL[T] = t ⇒ tc(t)
+    given [T: ToNode]: ToDSL[T] = t ⇒ TaskNodeDSL(summon[ToNode[T]](t))
+    given [T](using dslSelector: DSLSelector[T]): ToDSL[T] = t ⇒ dslSelector.select(t)
   }
 
-  trait ToDSL[-T] {
+  @FunctionalInterface trait ToDSL[-T] {
     def apply(t: T): DSL
   }
 
   object ToMole {
-    implicit def transitionDSLToMole: ToMole[DSL] = t ⇒ DSL.toPuzzle(t).toMole
-    implicit def toTransitionDSLToMoleExecution[T: ToDSL]: ToMole[T] = t ⇒ transitionDSLToMole.apply(implicitly[ToDSL[T]].apply(t))
+    given ToMole[DSL] = t ⇒ DSL.toPuzzle(t).toMole
+    given [T: ToDSL]: ToMole[T] = t ⇒ summon[ToMole[DSL]](summon[ToDSL[T]](t))
   }
 
-  trait ToMole[-T] {
+  @FunctionalInterface trait ToMole[-T] {
     def apply(t: T): Mole
   }
 
   object ToMoleExecution {
-    implicit def toDSLToMoleExecution[T: ToDSL](implicit moleServices: MoleServices): ToMoleExecution[T] = t ⇒ DSL.toPuzzle(implicitly[ToDSL[T]].apply(t)).toExecution
+    given [T: ToDSL](using moleServices: MoleServices): ToMoleExecution[T] = t ⇒ DSL.toPuzzle(implicitly[ToDSL[T]].apply(t)).toExecution
   }
 
-  trait ToMoleExecution[-T] {
+  @FunctionalInterface trait ToMoleExecution[-T] {
     def apply(t: T): MoleExecution
   }
 
@@ -536,17 +536,17 @@ object DSLContainer {
   }
 
   object ExplorationMethod {
-    implicit def id[T]: ExplorationMethod[DSLContainer[T], T] = t ⇒ t
-    implicit def byGrouping[T, C](implicit toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[By[T, Grouping], C] = t ⇒ toDSLContainer(t.value).copy(grouping = Some(t.by))
-    implicit def byInt[T, C](implicit toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[By[T, Int], C] = t ⇒ toDSLContainer(t.value).copy(grouping = Some(ByGrouping(t.by)))
-    implicit def on[T, C](implicit toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[On[T, EnvironmentProvider], C] = t ⇒ toDSLContainer(t.value).copy(environment = Some(t.on))
-    implicit def hooked[T, C](implicit toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[Hooked[T], C] = t ⇒ {
+    given [T]: ExplorationMethod[DSLContainer[T], T] = t ⇒ t
+    given byGrouping[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[By[T, Grouping], C] = t ⇒ toDSLContainer(t.value).copy(grouping = Some(t.by))
+    given byInt[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[By[T, Int], C] = t ⇒ toDSLContainer(t.value).copy(grouping = Some(ByGrouping(t.by)))
+    given on[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[On[T, EnvironmentProvider], C] = t ⇒ toDSLContainer(t.value).copy(environment = Some(t.on))
+    given hooked[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[Hooked[T], C] = t ⇒ {
       val container = toDSLContainer(t.value)
       container.copy(hooks = container.hooks ++ Seq(t.h))
     }
   }
 
-  trait ExplorationMethod[-T, +D] {
+  @FunctionalInterface trait ExplorationMethod[-T, +D] {
     def apply(t: T): DSLContainer[D]
   }
 
@@ -641,7 +641,7 @@ trait CompositionPackage {
 
   implicit def toNode[T](t: T)(using toNode: org.openmole.core.workflow.composition.DSL.ToNode[T]): TaskNode = toNode.apply(t)
   implicit def toDSL[T](t: T)(using td: org.openmole.core.workflow.composition.DSL.ToDSL[T]): DSL = td.apply(t)
-  implicit def toOptionalDSL[T](t: T)(using td: org.openmole.core.workflow.composition.DSL.ToDSL[T]): OptionalArgument[DSL] = OptionalArgument(Some(toDSL(t)))
+  implicit def toOptionalDSL[T](t: T)(using td: org.openmole.core.workflow.composition.DSL.ToDSL[T]): OptionalArgument[DSL] = OptionalArgument(toDSL(t))
   implicit def toMole[T](t: T)(using toMole: org.openmole.core.workflow.composition.DSL.ToMole[T]): Mole = toMole.apply(t)
   implicit def toMoleExecution[T](t: T)(using toMoleExecution: org.openmole.core.workflow.composition.DSL.ToMoleExecution[T]): MoleExecution = toMoleExecution.apply(t)
 

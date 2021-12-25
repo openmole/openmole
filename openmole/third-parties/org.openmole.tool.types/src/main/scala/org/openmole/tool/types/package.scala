@@ -21,16 +21,11 @@ package types {
   trait TypesPackage {
 
     object SelectTuple {
-      implicit def selectHead[H, T <: Tuple]: SelectTuple[H, H *: T] = new SelectTuple[H, H *: T] {
-        def select(t: H *: T): H = t.head
-      }
-
-      implicit def selectInductive[H, T <: NonEmptyTuple](implicit selectTail: SelectTuple[H, Tuple.Tail[T]]): SelectTuple[H, T] = new SelectTuple[H, T] {
-        def select(t: T): H = selectTail.select(t.tail)
-      }
+      implicit def selectHead[H, T <: Tuple]: SelectTuple[H, H *: T] = t => t.head
+      implicit def selectInductive[H, T <: NonEmptyTuple](implicit selectTail: SelectTuple[H, Tuple.Tail[T]]): SelectTuple[H, T] = t => selectTail.select(t.tail)
     }
 
-    trait SelectTuple[H, T] {
+    @FunctionalInterface trait SelectTuple[H, T] {
       def select(t: T): H
     }
 

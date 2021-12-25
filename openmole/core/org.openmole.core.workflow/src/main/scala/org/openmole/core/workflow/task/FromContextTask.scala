@@ -13,9 +13,9 @@ import monocle.Focus
 
 object FromContextTask {
 
-  implicit def isBuilder: InputOutputBuilder[FromContextTask] = InputOutputBuilder(Focus[FromContextTask](_.config))
-  implicit def isInfo: InfoBuilder[FromContextTask] = InfoBuilder(Focus[FromContextTask](_.info))
-  implicit def isMapped: MappedInputOutputBuilder[FromContextTask] = MappedInputOutputBuilder(Focus[FromContextTask](_.mapped))
+  given InputOutputBuilder[FromContextTask] = InputOutputBuilder(Focus[FromContextTask](_.config))
+  given InfoBuilder[FromContextTask] = InfoBuilder(Focus[FromContextTask](_.info))
+  given MappedInputOutputBuilder[FromContextTask] = MappedInputOutputBuilder(Focus[FromContextTask](_.mapped))
 
   case class Parameters(
     context:          Context,

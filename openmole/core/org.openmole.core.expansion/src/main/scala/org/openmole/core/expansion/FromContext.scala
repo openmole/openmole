@@ -30,42 +30,38 @@ import org.openmole.core.workspace.TmpDirectory
 import scala.annotation.tailrec
 
 trait LowPriorityToFromContext {
-  implicit def fromTToContext[T]: ToFromContext[T, T] = ToFromContext[T, T](t ⇒ FromContext.value[T](t))
+  given [T]: ToFromContext[T, T] = t ⇒ FromContext.value[T](t)
 }
 
 object ToFromContext extends LowPriorityToFromContext {
   import FromContext._
 
-  def apply[F, T](func: F ⇒ FromContext[T]): ToFromContext[F, T] = new ToFromContext[F, T] {
-    def apply(f: F) = func(f)
-  }
-
   //implicit def functionToFromContext[T]: ToFromContext[T, T] = ToFromContext[T, T](f ⇒ FromContext { p ⇒ import p._; f(context) })
 
-  implicit def codeToFromContextFloat: ToFromContext[String, Float] = ToFromContext(codeToFromContext[Float])
-  implicit def codeToFromContextDouble: ToFromContext[String, Double] = ToFromContext(codeToFromContext[Double])
-  implicit def codeToFromContextLong: ToFromContext[String, Long] = ToFromContext(codeToFromContext[Long])
-  implicit def codeToFromContextInt: ToFromContext[String, Int] = ToFromContext(codeToFromContext[Int])
-  implicit def codeToFromContextBigDecimal: ToFromContext[String, BigDecimal] = ToFromContext(codeToFromContext[BigDecimal])
-  implicit def codeToFromContextBigInt: ToFromContext[String, BigInt] = ToFromContext(codeToFromContext[BigInt])
-  implicit def codeToFromContextBoolean: ToFromContext[String, Boolean] = ToFromContext(codeToFromContext[Boolean])
+  given ToFromContext[String, Float] = codeToFromContext[Float]
+  given ToFromContext[String, Double] = codeToFromContext[Double]
+  given ToFromContext[String, Long] = codeToFromContext[Long]
+  given ToFromContext[String, Int] = codeToFromContext[Int]
+  given ToFromContext[String, BigDecimal] = codeToFromContext[BigDecimal]
+  given ToFromContext[String, BigInt] = codeToFromContext[BigInt]
+  given ToFromContext[String, Boolean] = codeToFromContext[Boolean]
 
-  implicit def fileToString: ToFromContext[File, String] = ToFromContext[File, String](f ⇒ ExpandedString(f.getPath))
-  implicit def stringToString: ToFromContext[String, String] = ToFromContext[String, String](s ⇒ ExpandedString(s))
-  implicit def stringToFile: ToFromContext[String, File] = ToFromContext[String, File](s ⇒ ExpandedString(s).map(s ⇒ File(s)))
-  implicit def fileToFile: ToFromContext[File, File] = ToFromContext[File, File](f ⇒ ExpandedString(f.getPath).map(s ⇒ File(s)))
-  implicit def intToLong: ToFromContext[Int, Long] = ToFromContext[Int, Long](i ⇒ FromContext.value(i.toLong))
-  implicit def intToInt: ToFromContext[Int, Int] = ToFromContext[Int, Int](i ⇒ FromContext.value(i))
-  implicit def intToDouble: ToFromContext[Int, Double] = ToFromContext[Int, Double](i ⇒ FromContext.value(i))
-  implicit def longToDouble: ToFromContext[Long, Double] = ToFromContext[Long, Double](i ⇒ FromContext.value(i))
+  given ToFromContext[File, String] = f ⇒ ExpandedString(f.getPath)
+  given ToFromContext[String, String] = s ⇒ ExpandedString(s)
+  given ToFromContext[String, File] = s ⇒ ExpandedString(s).map(s ⇒ File(s))
+  given ToFromContext[File, File] = f ⇒ ExpandedString(f.getPath).map(s ⇒ File(s))
+  given ToFromContext[Int, Long] = i ⇒ FromContext.value(i.toLong)
+  given ToFromContext[Int, Int] = i ⇒ FromContext.value(i)
+  given ToFromContext[Int, Double] = i ⇒ FromContext.value(i)
+  given ToFromContext[Long, Double] = i ⇒ FromContext.value(i)
 
-  implicit def fromContextToFromContext[T]: ToFromContext[FromContext[T], T] = ToFromContext[FromContext[T], T](identity)
+  given [T]: ToFromContext[FromContext[T], T] = identity
 
-  implicit def booleanToCondition: ToFromContext[Boolean, Boolean] = ToFromContext[Boolean, Boolean](b ⇒ FromContext.value(b))
-  implicit def prototypeIsFromContext[T]: ToFromContext[Val[T], T] = ToFromContext[Val[T], T](p ⇒ prototype(p))
+  given ToFromContext[Boolean, Boolean] = b ⇒ FromContext.value(b)
+  given [T]: ToFromContext[Val[T], T] = p ⇒ prototype(p)
 }
 
-trait ToFromContext[F, T] {
+@FunctionalInterface trait ToFromContext[F, T] {
   def apply(f: F): FromContext[T]
 }
 
@@ -87,7 +83,7 @@ object FromContext extends LowPriorityFromContext {
    * A [[FromContext]] can be seen as a monad
    */
   object asMonad {
-    implicit val monad: Monad[FromContext] = new Monad[FromContext] {
+    given Monad[FromContext] with
       def tailRecM[A, B](a: A)(f: A ⇒ FromContext[Either[A, B]]): FromContext[B] = {
 
         @tailrec def computeB(a: A, context: Context)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): B = {
@@ -110,12 +106,12 @@ object FromContext extends LowPriorityFromContext {
       }
       override def pure[A](x: A): FromContext[A] = FromContext.value(x)
     }
-  }
+
 
   /**
    * Implicitly define an Applicative on FromContext
    */
-  implicit val applicative: Applicative[FromContext] = new Applicative[FromContext] {
+  given Applicative[FromContext] with
     override def pure[A](x: A): FromContext[A] = FromContext.value(x)
     override def ap[A, B](ff: FromContext[(A) ⇒ B])(fa: FromContext[A]): FromContext[B] =
       FromContext[B] { p ⇒
@@ -123,7 +119,7 @@ object FromContext extends LowPriorityFromContext {
         val res = fa.from(context)
         ff.from(context).apply(res)
       } withValidate { fa.validate ++ ff.validate }
-  }
+
 
   /**
    * Convert scala code to a FromContext (code is compiled by [[ScalaCompilation]])
@@ -210,7 +206,7 @@ object FromContext extends LowPriorityFromContext {
    * Operators for boolean FromContext ([[Condition]] ~ FromContext[Boolean])
    * @param f
    */
-  implicit class ConditionDecorator(f: Condition) {
+  extension (f: Condition)
     def unary_! = f.map(v ⇒ !v)
 
     def &&(d: Condition): Condition =
@@ -224,13 +220,13 @@ object FromContext extends LowPriorityFromContext {
         import p._
         f.from(context) || d.from(context)
       } withValidate { f.validate ++ d.validate }
-  }
 
-  implicit class ExpandedStringOperations(s1: FromContext[String]) {
+
+  extension (s1: FromContext[String]) {
     def +(s2: FromContext[String]) = (s1 map2 s2)(_ + _)
   }
 
-  implicit class FromContextFileDecorator(f: FromContext[File]) {
+  extension (f: FromContext[File]) {
     def exists = f.map(_.exists)
     def isEmpty = f.map(_.isEmpty)
     def /(path: FromContext[String]) = (f map2 path)(_ / _)
@@ -280,9 +276,9 @@ object Expandable {
     override def expand(s: S): FromContext[T] = f(s)
   }
 
-  implicit def stringToString: Expandable[String, String] = Expandable[String, String](s ⇒ s: FromContext[String])
-  implicit def stringToFile: Expandable[String, File] = Expandable[String, File](s ⇒ s: FromContext[File])
-  implicit def fileToFile: Expandable[File, File] = Expandable[File, File](f ⇒ f: FromContext[File])
+  given Expandable[String, String] = Expandable[String, String](s ⇒ s: FromContext[String])
+  given Expandable[String, File] = Expandable[String, File](s ⇒ s: FromContext[File])
+  given Expandable[File, File] = Expandable[File, File](f ⇒ f: FromContext[File])
 }
 
 trait Expandable[S, T] {

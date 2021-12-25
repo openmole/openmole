@@ -39,7 +39,6 @@ package tools {
 
     implicit def optionalArgumentToOption[T](optionalArgument: OptionalArgument[T]): Option[T] = optionalArgument.option
 
-
     class ExpressionClass[T] {
       def apply[S](s: S)(implicit expandable: Expandable[S, T]) = expandable.expand(s)
     }
