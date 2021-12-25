@@ -19,13 +19,13 @@ package object abc {
     object Observed {
 
       object Observable {
-        implicit def intObservable: Observable[Int] = i ⇒ Array(i.toDouble)
-        implicit def doubleObservable: Observable[Double] = d ⇒ Array(d)
-        implicit def arrayDouble: Observable[Array[Double]] = identity
-        implicit def arrayInt: Observable[Array[Int]] = i => i.map(_.toDouble)
+        given Observable[Int] = i ⇒ Array(i.toDouble)
+        given Observable[Double] = d ⇒ Array(d)
+        given arrayDouble: Observable[Array[Double]] = identity
+        given arrayInt: Observable[Array[Int]] = i => i.map(_.toDouble)
       }
 
-      trait Observable[T] {
+      @FunctionalInterface trait Observable[T] {
         def apply(t: T): Array[Double]
       }
 
@@ -41,7 +41,7 @@ package object abc {
       def value[T](observed: Observed[T]) = observed.obs(observed.observed)
     }
 
-    case class Observed[T](v: Val[T], observed: T)(implicit val obs: Observed.Observable[T])
+    case class Observed[T](v: Val[T], observed: T)(using val obs: Observed.Observable[T])
 
     case class ABCParameters(state: Val[MonAPMC.MonState], step: Val[Int], prior: IndependentPriors)
 

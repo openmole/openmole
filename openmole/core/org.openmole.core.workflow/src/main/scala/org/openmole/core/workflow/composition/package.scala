@@ -590,7 +590,7 @@ trait CompositionPackage {
 
   implicit def hookDecorator[T](container: T)(implicit method: ExplorationMethod[T, Unit]): MethodHookDecorator[T, Unit] = new MethodHookDecorator[T, Unit](container)
 
-  type ExplorationMethodSetter[T, P] = org.openmole.core.workflow.composition.ExplorationMethodSetter[T, P]
+  export org.openmole.core.workflow.composition.ExplorationMethodSetter
 
   def DSLContainer[T](
     dsl:         DSL,
@@ -626,11 +626,9 @@ trait CompositionPackage {
           definitionScope)
     }
 
-  type DSLContainer[+T] = org.openmole.core.workflow.composition.DSLContainer[T]
-  type ExplorationMethod[-T, +C] = org.openmole.core.workflow.composition.DSLContainer.ExplorationMethod[T, C]
-
-  type Hooked[T] = org.openmole.core.workflow.composition.Hooked[T]
-  def Hooked = org.openmole.core.workflow.composition.Hooked
+  export org.openmole.core.workflow.composition.DSLContainer
+  export org.openmole.core.workflow.composition.DSLContainer.ExplorationMethod
+  export org.openmole.core.workflow.composition.Hooked
 
   def Slot(dsl: DSL) = org.openmole.core.workflow.composition.Slot(dsl)
   def Capsule(node: DSL) = org.openmole.core.workflow.composition.Capsule(node)
