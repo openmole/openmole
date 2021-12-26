@@ -132,41 +132,48 @@ object Project {
     def run(): Unit
   }
 
+  def craftedScript(workDirectory: File, script: File, returnUnit: Boolean) = {
+    def functionPrototype =
+      if (returnUnit) "def run(): Unit"
+      else s"def run(): ${classOf[DSL].getCanonicalName}"
+
+    def traitName =
+      if (returnUnit) s"${classOf[Project.OMSScriptUnit].getCanonicalName}"
+      else s"${classOf[Project.OMSScript].getCanonicalName}"
+
+    def scriptHeader =
+      s"""${scriptsObjects(script)}
+         |
+         |new $traitName {
+         |
+         |$functionPrototype = {
+         |implicit def _scriptSourceData: ${classOf[ScriptSourceData.ScriptData].getCanonicalName} = ${ScriptSourceData.applySource(workDirectory, script)}
+         |import ${Project.uniqueName(script)}._imports._""".stripMargin
+
+    def scriptFooter =
+      s"""}
+         |}
+         """.stripMargin
+
+    def compileContent =
+      s"""$scriptHeader
+         |${script.content}
+         |$scriptFooter""".stripMargin
+
+    (compileContent, scriptHeader)
+  }
+
+  def buildREPL(newREPL: Option[ConsoleVariables ⇒ REPL], consoleVariables: ConsoleVariables)(implicit tmpDirectory: TmpDirectory, fileService: FileService) =
+    newREPL.getOrElse { (v: project.ConsoleVariables) ⇒ Project.newREPL(v) }.apply(consoleVariables)
+
   def compile(workDirectory: File, script: File, args: Seq[String], newREPL: Option[ConsoleVariables ⇒ REPL] = None, returnUnit: Boolean = false)(implicit services: Services): CompileResult = {
     import services._
 
     if (!script.exists) ScriptFileDoesNotExists()
     else {
-      def functionPrototype =
-        if (returnUnit) "def run(): Unit"
-        else s"def run(): ${classOf[DSL].getCanonicalName}"
-
-      def traitName =
-        if (returnUnit) s"${classOf[Project.OMSScriptUnit].getCanonicalName}"
-        else s"${classOf[Project.OMSScript].getCanonicalName}"
-
-      def scriptHeader =
-        s"""${scriptsObjects(script)}
-           |
-           |new $traitName {
-           |
-           |$functionPrototype = {
-           |implicit def _scriptSourceData: ${classOf[ScriptSourceData.ScriptData].getCanonicalName} = ${ScriptSourceData.applySource(workDirectory, script)}
-           |import ${Project.uniqueName(script)}._imports._""".stripMargin
-
-      def scriptFooter =
-        s"""}
-           |}
-         """.stripMargin
-
-      def compileContent =
-        s"""$scriptHeader
-           |${script.content}
-           |$scriptFooter""".stripMargin
-
-      def compile(content: String, args: Seq[String]): CompileResult = {
+      def compile(content: String, scriptHeader: String, args: Seq[String]): CompileResult = {
         def consoleVariables = ConsoleVariables(args, workDirectory, experiment = ConsoleVariables.Experiment(ConsoleVariables.experimentName(script)))
-        val loop = newREPL.getOrElse { (v: project.ConsoleVariables) ⇒ Project.newREPL(v) }.apply(consoleVariables)
+        val loop = buildREPL(newREPL, consoleVariables)
         try {
           Option(loop.compile(content)) match {
             case Some(compiled) ⇒ Compiled(compiled, CompilationContext(loop))
@@ -196,8 +203,19 @@ object Project {
         }
       }
 
-      compile(compileContent, args)
+      val (compileContent, scriptHeader) = craftedScript(workDirectory, script, returnUnit = returnUnit)
+      compile(compileContent, scriptHeader, args)
     }
+  }
+
+  def completion(workDirectory: File, script: File, position: Int, newREPL: Option[ConsoleVariables ⇒ REPL] = None)(implicit services: Services) = {
+    import services._
+    if(!script.exists()) Vector()
+    else
+      val (compileContent, scriptHeader) = craftedScript(workDirectory, script, returnUnit = false)
+      def consoleVariables = ConsoleVariables(Seq(), workDirectory, experiment = ConsoleVariables.Experiment(ConsoleVariables.experimentName(script)))
+      val loop = buildREPL(newREPL, consoleVariables)
+      loop.completion(compileContent, position + scriptHeader.size + 1)
   }
 
 }

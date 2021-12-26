@@ -58,8 +58,9 @@ import scala.util.Using
 //                 imports: Map[Int, List[tpd.Import]],
 //                 context: Context)
 
-object ReplDriver {
+object REPLDriver {
   type Compiled = (dotty.tools.repl.results.Result[(CompilationUnit, State)], State)
+  type CompilerState = dotty.tools.repl.State
 }
 
 def newStoreReporter: dotty.tools.dotc.reporting.StoreReporter = {
@@ -69,7 +70,7 @@ def newStoreReporter: dotty.tools.dotc.reporting.StoreReporter = {
 }
 
 /** Main REPL instance, orchestrating input, compilation and presentation */
-class ReplDriver(settings: Array[String],
+class REPLDriver(settings: Array[String],
                  out: PrintStream = Console.out,
                  classLoader: Option[ClassLoader] = None) extends Driver {
 
@@ -201,7 +202,7 @@ class ReplDriver(settings: Array[String],
   }
 
   /** Extract possible completions at the index of `cursor` in `expr` */
-  protected final def completions(cursor: Int, expr: String, state0: State): List[Candidate] = {
+  final def completions(cursor: Int, expr: String, state0: State): List[Candidate] = {
     def makeCandidate(label: String) = {
       new Candidate(
         /* value    = */ label,
@@ -251,7 +252,7 @@ class ReplDriver(settings: Array[String],
 
 
   /** Compile `parsed` trees and evolve `state` in accordance */
-  def justCompile(input: String, istate: State): ReplDriver.Compiled | SyntaxErrors  = {
+  def justCompile(input: String, istate: State): REPLDriver.Compiled | SyntaxErrors  = {
     ParseResult(input)(istate) match {
       case parsed: Parsed =>
         implicit val state = {
@@ -266,7 +267,7 @@ class ReplDriver(settings: Array[String],
   }
 
 
-  def justRun(compiled: ReplDriver.Compiled): State = {
+  def justRun(compiled: REPLDriver.Compiled): State = {
     implicit val s = compiled._2
 
     def extractNewestWrapper(tree: untpd.Tree): Name = tree match {

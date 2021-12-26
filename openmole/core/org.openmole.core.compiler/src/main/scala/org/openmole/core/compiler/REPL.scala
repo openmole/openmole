@@ -25,13 +25,14 @@ class REPL(interpreter: Interpreter) {
     val compiled = compile(code)
     evalCompiled(compiled)
 
-  def evalCompiled(compiled: repl.ReplDriver.Compiled) = synchronized {
+  def evalCompiled(compiled: repl.REPLDriver.Compiled) = synchronized {
     val (result, s1) = interpreter.run(compiled)
     state = s1
     result
   }
 
   def compile(code: String): Interpreter.RawCompiled = interpreter.dottyCompile(code, state)
+  def completion(code: String, position: Int): Vector[Interpreter.CompletionCandidate] = synchronized(interpreter.completion(code, position, state))
 
   def bind[T: Manifest](name: String, value: T) = synchronized {
     val mutableName = s"__${name}_mutable_value"

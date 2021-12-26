@@ -49,223 +49,6 @@ import monocle.macros._
 import org.openmole.tool.outputredirection.OutputRedirection
 import dotty.tools.dotc.semanticdb.Diagnostic.Severity
 
-//object ScalaREPL {
-//
-//  def apply(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = {
-//    val classDirectory = fileService.wrapRemoveOnGC(newFile.newDir("classDirectory"))
-//    val settings = OSGiScalaCompiler.createSettings(new Settings, priorityBundles, jars, classDirectory)
-//    new ScalaREPL(priorityBundles, jars, quiet, classDirectory, settings)
-//  }
-//
-//  def compilationMessage(errorMessages: List[ErrorMessage], code: String, lineOffset: Int = 0) = {
-//    def readableErrorMessages(error: ErrorMessage) =
-//      error.position.map(p ⇒ s"(line ${p.line - lineOffset}) ").getOrElse("") + error.decoratedMessage
-//
-//    val (importsErrors, codeErrors) = errorMessages.partition(e ⇒ e.position.map(_.line < 0).getOrElse(false))
-//
-//    (if (!codeErrors.isEmpty) codeErrors.map(readableErrorMessages).mkString("\n") + "\n" else "") +
-//      (if (!importsErrors.filter(_.error).isEmpty) "Error in imports header:\n" + importsErrors.filter(_.error).map(readableErrorMessages).mkString("\n") + "\n" else "") +
-//      s"""Compiling code:
-//        |${code}""".stripMargin
-//  }
-//
-//  @Lenses case class CompilationError(cause: Throwable, errorMessages: List[ErrorMessage], code: String) extends Exception(compilationMessage(errorMessages, code), cause)
-//
-//  @Lenses case class ErrorMessage(decoratedMessage: String, rawMessage: String, position: Option[ErrorPosition], error: Boolean)
-//  @Lenses case class ErrorPosition(line: Int, start: Int, end: Int, point: Int)
-//
-//  case class HeaderInfo(file: String)
-//  def firstLine(file: String) = HeaderInfo(file)
-//
-//  case class BundledClass(name: String, bundle: Option[Bundle])
-//  case class REPLClass(name: String, path: String, classLoader: REPLClassloader) {
-//    //    def byteCode = classLoader.findClassFile(name).getOrElse(throw new InternalProcessingError("Class not found in this classloader")).toByteArray
-//  }
-//  case class ReferencedClasses(repl: Vector[REPLClass], other: Vector[BundledClass]) {
-//    def plugins = other.flatMap(_.bundle).flatMap(PluginManager.allPluginDependencies).distinct.map(_.file)
-//  }
-//
-//  object ReferencedClasses {
-//    def merge(rc1: ReferencedClasses, rc2: ReferencedClasses) =
-//      ReferencedClasses(rc1.repl ++ rc2.repl, rc1.other ++ rc2.other)
-//    def empty = ReferencedClasses(Vector.empty, Vector.empty)
-//  }
-//
-//  class OMReporter(settings: Settings, quiet: Boolean) extends ReplReporterImpl(ShellConfig(settings), settings) {
-//    var storeErrors: Boolean = true
-//    var errorMessage: List[ErrorMessage] = Nil
-//
-//    lazy val firstLineTag = "/*" + UUID.randomUUID().toString + "*/"
-//
-//    override def doReport(pos: Position, msg: String, severity: Severity): Unit = {
-//      if (storeErrors) {
-//        val error =
-//          pos match {
-//            case NoPosition ⇒ ErrorMessage(msg, msg, None, severity == ERROR)
-//            case _ ⇒
-//              val compiled = new String(pos.source.content).split("\n")
-//
-//              val firstLine = compiled.zipWithIndex.find { case (l, _) ⇒ l.contains(firstLineTag) }.map(_._2 + 1).getOrElse(0)
-//              val offset = compiled.take(firstLine).map(_.length + 1).sum
-//
-//              def errorPos = ErrorPosition(pos.line - firstLine, pos.start - offset, pos.end - offset, pos.point - offset)
-//              def decoratedMessage = {
-//                val offsetOfError = pos.point - compiled.take(pos.line - 1).map(_.length + 1).sum
-//                s"""$msg
-//                     |${compiled(pos.line - 1)}
-//                     |${(" " * offsetOfError)}^""".stripMargin
-//              }
-//
-//              ErrorMessage(decoratedMessage, msg, Some(errorPos), severity == ERROR)
-//          }
-//
-//        error.position match {
-//          case None                   ⇒ errorMessage ::= error
-//          case Some(p) if p.line >= 0 ⇒ errorMessage ::= error
-//          case _                      ⇒
-//        }
-//      }
-//
-//      if (severity == ERROR) super.doReport(pos, msg, severity)
-//    }
-//
-//    override def printMessage(msg: String) = if (!quiet) super.printMessage(msg)
-//
-//  }
-//
-//  object OMIMain {
-//    def apply(settings: Settings, omReporter: OMReporter, priorityBundles: ⇒ Seq[Bundle], jars: Seq[JFile], classDirectory: JFile, firstPackageLineNumber: Int) = {
-//      val osgiSettings = OSGiScalaCompiler.createSettings(settings, priorityBundles, jars, classDirectory)
-//
-//      val omIMain = new OMIMain(osgiSettings, classLoader(priorityBundles, jars), omReporter)
-//      /* To avoid name clash with remote environment scala code interpretation
-//       when repl classes are copied to a bundle and shipped away. If some
-//       package name $linex are exported from a bundle it prevents the compilation
-//       of the matching line in the interpreter.*/
-//      val clField = omIMain.naming.getClass.getDeclaredFields.find(_.getName.contains("_freshLineId")).get
-//      //  val freshLineId = {
-//      //    var x = firstPackageLineNumber
-//      //    () ⇒ { x += 1; x }
-//      //  }
-//      clField.setAccessible(true)
-//      clField.set(omIMain.naming, firstPackageLineNumber)
-//
-//      omIMain
-//    }
-//
-//    def classLoader(priorityBundles: ⇒ Seq[Bundle], jars: Seq[JFile]) = {
-//      new CompositeClassLoader(
-//        priorityBundles.map(_.classLoader) ++
-//          List(new URLClassLoader(jars.toArray.map(_.toURI.toURL))) ++
-//          List(classOf[OSGiScalaCompiler].getClassLoader): _*
-//      )
-//    }
-//  }
-//
-//  class OMIMain(settings: Settings, parentClassLoader: ClassLoader, val omReporter: OMReporter) extends IMain(settings, Some(parentClassLoader), settings, omReporter) {
-//    def firstLineTag = omReporter.firstLineTag
-//  }
-//
-//  type Compiled = () ⇒ Any
-//
-//}
-//
-//import ScalaREPL._
-//
-//class REPLClassloader(val file: AbstractFile, classLoader: ClassLoader) extends scala.reflect.internal.util.AbstractFileClassLoader(file, null) { cl ⇒
-//
-//  lazy val abstractFileLoader = new scala.reflect.internal.util.AbstractFileClassLoader(file, null)
-//  lazy val compositeClassLoader = new CompositeClassLoader(abstractFileLoader, classLoader)
-//
-//  override def loadClass(s: String, b: Boolean): Class[_] = compositeClassLoader.loadClass(s, b)
-//  override def getResource(s: String) = compositeClassLoader.getResource(s)
-//  override def getResources(s: String) = compositeClassLoader.getResources(s)
-//  override def getResourceAsStream(s: String) = compositeClassLoader.getResourceAsStream(s)
-//  override def getPackage(name: String): Package = abstractFileLoader.getPackage(name)
-//  override def getPackages(): Array[Package] = abstractFileLoader.getPackages()
-//
-//}
-//
-//import shell._
-//
-//class ScalaREPL(
-//  priorityBundles:        ⇒ Seq[Bundle],
-//  jars:                   Seq[JFile],
-//  quiet:                  Boolean,
-//  val classDirectory:     java.io.File,
-//  settings:               Settings,
-//  firstPackageLineNumber: Int           = 100000000)
-//  extends ILoop(
-//    ShellConfig.apply(settings)
-//  ) { repl ⇒
-//
-//  def storeErrors = omIMain.omReporter.storeErrors
-//  def storeErrors_=(b: Boolean) = omIMain.omReporter.storeErrors = b
-//
-//  var loopExitCode = 0
-//
-//  System.setProperty("jline.shutdownhook", "true")
-//  override lazy val prompt = "\nOpenMOLE> "
-//
-//  //  val globalFutureField = classOf[ILoop].getDeclaredFields.find(_.getName.contains("interpreterInitialized")).get
-//  //  globalFutureField.setAccessible(true)
-//  //  globalFutureField.set(this, (new java.util.concurrent.CountDownLatch(0)).asInstanceOf[AnyRef])
-//
-//  //settings = OSGiScalaCompiler.createSettings(new Settings, priorityBundles, jars, classDirectory)
-//  // in = chooseReader(settings)
-//
-//  //settings.Yreplclassbased.value = true
-//  //settings.Yreplsync.value = true
-//  //settings.verbose.value = true
-//  //settings.debug.value = true
-//
-//  private def messageToException(e: Throwable, messages: List[ErrorMessage], code: String): Throwable =
-//    CompilationError(e, messages.reverse, code)
-//
-//  def eval(code: String) = compile(code).apply()
-//
-//  def compile(code: String): ScalaREPL.Compiled = synchronized {
-//    omIMain.omReporter.errorMessage = Nil
-//    val scripted = new OMScripted(new interpreter.shell.Scripted.Factory, omIMain)
-//
-//    try {
-//      val compiled = scripted.compile("\n" + omIMain.firstLineTag + "\n" + code)
-//      () ⇒ compiled.eval()
-//    }
-//    catch {
-//      case e: Throwable ⇒ throw messageToException(e, omIMain.omReporter.errorMessage, code)
-//    }
-//  }
-//
-//  def loopWithExitCode = {
-//    run(settings)
-//    loopExitCode
-//  }
-//
-//  def interpretAllFromWithExitCode(file: reflect.io.File) = {
-//    interpretAllFrom(file)
-//    loopExitCode
-//  }
-//
-//  override def commands: List[LoopCommand] = super.commands.filter(_.name != "quit") ++ List(
-//    LoopCommand.cmd("quit", "[code]", "exit the application with a return code", exit)
-//  )
-//
-//  def exit(s: String) = {
-//    if (!s.isEmpty) loopExitCode = s.toInt
-//    Result(keepRunning = false, None)
-//  }
-//
-//  lazy val reporter = new OMReporter(settings, quiet)
-//  lazy val omIMain = OMIMain(settings, reporter, priorityBundles, jars, classDirectory, firstPackageLineNumber)
-//
-//  def classLoader = omIMain.classLoader
-//
-//  intp = omIMain
-//  override def Repl(config: ShellConfig, interpreterSettings: Settings, out: java.io.PrintWriter) = omIMain
-//
-//}
-
 object Interpreter {
   import java.io.File
   import java.net.URL
@@ -290,6 +73,8 @@ object Interpreter {
   case class CompilationError(errorMessages: List[ErrorMessage], code: String) extends Exception(compilationMessage(errorMessages, code))
   case class ErrorMessage(decoratedMessage: String, rawMessage: String, position: Option[ErrorPosition], error: Boolean)
   case class ErrorPosition(line: Int, start: Int, end: Int, point: Int)
+
+  case class CompletionCandidate(value: String)
 
   case class HeaderInfo(file: String)
   def firstLine(file: String) = HeaderInfo(file)
@@ -343,14 +128,14 @@ object Interpreter {
       Activator.context.get.getBundles.filter(!_.isSystem).map(toPath)
   }.distinct
 
-  def driver(classDirectory: File, priorityBundles: Seq[Bundle], jars: Seq[File], quiet: Boolean): repl.ReplDriver =
+  def driver(classDirectory: File, priorityBundles: Seq[Bundle], jars: Seq[File], quiet: Boolean): repl.REPLDriver =
     def commonOptions = Seq("-language:postfixOps", "-language:implicitConversions", "-nowarn")
 
     classDirectory.mkdirs()
 
     Activator.context match {
       case Some(_) =>
-        new repl.ReplDriver(
+        new repl.REPLDriver(
           Array(
             "-classpath", classPath(priorityBundles, jars).mkString(":"),
             //"-usejavacp",
@@ -363,7 +148,7 @@ object Interpreter {
       case None =>
         //          println(System.getProperty("java.class.path"))
 
-        new repl.ReplDriver(
+        new repl.REPLDriver(
           Array(
             "-classpath", System.getProperty("java.class.path"),
             //"-usejavacp",
@@ -376,11 +161,8 @@ object Interpreter {
         )
     }
 
-
-
-
   type Compiled = () ⇒ Any
-  type RawCompiled = repl.ReplDriver.Compiled
+  type RawCompiled = repl.REPLDriver.Compiled
 
   def apply(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = {
     val classDirectory = fileService.wrapRemoveOnGC(newFile.newDir("classDirectory"))
@@ -393,7 +175,7 @@ object Interpreter {
 
 
 // TODO actively clean classDirectory after usage
-class Interpreter(val driver: repl.ReplDriver, val classDirectory: java.io.File) {
+class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File) {
 
   def initialState = driver.initialState 
 
@@ -402,14 +184,14 @@ class Interpreter(val driver: repl.ReplDriver, val classDirectory: java.io.File)
     val compiled = dottyCompile(code)
     () => run(compiled)._1
 
-  def dottyCompile(code: String, state: dotty.tools.repl.State = initialState) = 
+  def dottyCompile(code: String, state: repl.REPLDriver.CompilerState = initialState) =
      synchronized {
       import dotty.tools.dotc.reporting.Diagnostic._
 
       val compiled = driver.justCompile(code, state)
 
       compiled match 
-        case c: repl.ReplDriver.Compiled => 
+        case c: repl.REPLDriver.Compiled =>
           c._1 match 
             case Left(diagnostics) => 
               throw Interpreter.errorMessagesToException(diagnostics.map(Interpreter.diagnosticToErrorMessage), code)
@@ -418,7 +200,7 @@ class Interpreter(val driver: repl.ReplDriver, val classDirectory: java.io.File)
             throw Interpreter.errorMessagesToException(errors.errors.map(Interpreter.diagnosticToErrorMessage), code)
      }
 
-  def run(c: repl.ReplDriver.Compiled) =
+  def run(c: repl.REPLDriver.Compiled) =
     val runResult = driver.justRun(c)
     def getResult(state: dotty.tools.repl.State): Any =
       if(state.valIndex > 0)
@@ -426,6 +208,10 @@ class Interpreter(val driver: repl.ReplDriver, val classDirectory: java.io.File)
         m.invoke(null)
       else ()
     (getResult(runResult), runResult)
+
+  def completion(code: String, position: Int, state: repl.REPLDriver.CompilerState) = synchronized {
+    driver.completions(position, code, state).map(c => Interpreter.CompletionCandidate(value = c.value())).toVector
+  }
 
   def resultClass(state: dotty.tools.repl.State) = 
     Class.forName(s"repl$$.rs$$line$$${state.objectIndex}", true, classLoader(state.context))
