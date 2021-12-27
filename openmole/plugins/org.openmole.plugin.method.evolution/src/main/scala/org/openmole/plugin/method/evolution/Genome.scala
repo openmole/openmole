@@ -11,6 +11,43 @@ import java.io.File
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
 
+object GenomeDouble {
+
+  def toVariables(genome: GenomeDouble, continuousValues: Vector[Double], scale: Boolean = true) = {
+
+    @tailrec def toVariables0(genome: List[Genome.GenomeBound.ScalarDouble], continuousValues: List[Double], acc: List[Variable[_]]): Vector[Variable[_]] = {
+      genome match {
+        case Nil ⇒ acc.reverse.toVector
+        case (h: Genome.GenomeBound.ScalarDouble) :: t ⇒
+          val value =
+            if (scale) continuousValues.head.scale(h.low, h.high)
+            else continuousValues.head
+          val v = Variable(h.v, value)
+          toVariables0(t, continuousValues.tail, v :: acc)
+      }
+    }
+
+    toVariables0(genome.toList, continuousValues.toList, List.empty)
+  }
+
+  def toArrayVariable(genomeBound: Genome.GenomeBound.ScalarDouble, value: Seq[Any]) = genomeBound match {
+    case b: Genome.GenomeBound.ScalarDouble ⇒
+      Variable(b.v.toArray, value.map(_.asInstanceOf[Double]).toArray[Double])
+  }
+
+  def fromVariables(variables: Seq[Variable[_]], genome: GenomeDouble) = {
+    val vContext = Context() ++ variables
+
+    @tailrec def fromVariables0(genome: List[Genome.GenomeBound.ScalarDouble], accDouble: List[Double]): Vector[Double] =
+      genome match {
+        case Nil                                       ⇒ accDouble.reverse.toVector
+        case (h: Genome.GenomeBound.ScalarDouble) :: t ⇒ fromVariables0(t, Genome.valueOf(vContext, h.v).asInstanceOf[Double].normalize(h.low, h.high) :: accDouble)
+      }
+
+    fromVariables0(genome.toList, List())
+  }
+}
+
 object Genome {
 
   sealed trait GenomeBound
@@ -149,34 +186,33 @@ object Genome {
     indexOf0(genome.toList, 0)
   }
 
+  def valueOf(context: Context, v: Val[_]) =
+    context.get(v.name) match {
+      case None ⇒ throw new UserBadDataError(s"Values $v has not been provided among $context")
+      case Some(f) ⇒
+        if (!v.accepts(f.value)) throw new UserBadDataError(s"Values ${f.value} is incompatible with genome part of type ${v}")
+        else f.value
+    }
+
   def fromVariables(variables: Seq[Variable[_]], genome: Genome) = {
-
     val vContext = Context() ++ variables
-
-    def valueOf(v: Val[_]) =
-      vContext.get(v.name) match {
-        case None ⇒ throw new UserBadDataError(s"Values $v has not been provided among $vContext")
-        case Some(f) ⇒
-          if (!v.accepts(f.value)) throw new UserBadDataError(s"Values ${f.value} is incompatible with genome part of type ${v}")
-          else f.value
-      }
 
     @tailrec def fromVariables0(genome: List[Genome.GenomeBound], accInt: List[Int], accDouble: List[Double]): (Vector[Double], Vector[Int]) =
       genome match {
         case Nil                                 ⇒ (accDouble.reverse.toVector, accInt.reverse.toVector)
-        case (h: GenomeBound.ScalarDouble) :: t  ⇒ fromVariables0(t, accInt, valueOf(h.v).asInstanceOf[Double].normalize(h.low, h.high) :: accDouble)
-        case (h: GenomeBound.ContinuousInt) :: t ⇒ fromVariables0(t, accInt, valueOf(h.v).asInstanceOf[Double].normalize(h.low, h.high) :: accDouble)
+        case (h: GenomeBound.ScalarDouble) :: t  ⇒ fromVariables0(t, accInt, valueOf(vContext, h.v).asInstanceOf[Double].normalize(h.low, h.high) :: accDouble)
+        case (h: GenomeBound.ContinuousInt) :: t ⇒ fromVariables0(t, accInt, valueOf(vContext, h.v).asInstanceOf[Double].normalize(h.low, h.high) :: accDouble)
         case (h: GenomeBound.SequenceOfDouble) :: t ⇒
-          val values = (h.low zip h.high zip valueOf(h.v).asInstanceOf[Array[Double]]).map { case ((low, high), v) ⇒ v.normalize(low, high) }.toList
+          val values = (h.low zip h.high zip valueOf(vContext, h.v).asInstanceOf[Array[Double]]).map { case ((low, high), v) ⇒ v.normalize(low, high) }.toList
           fromVariables0(t, accInt, values ::: accDouble)
-        case (h: GenomeBound.ScalarInt) :: t     ⇒ fromVariables0(t, valueOf(h.v).asInstanceOf[Int] :: accInt, accDouble)
-        case (h: GenomeBound.SequenceOfInt) :: t ⇒ fromVariables0(t, valueOf(h.v).asInstanceOf[Array[Int]].toList ::: accInt, accDouble)
+        case (h: GenomeBound.ScalarInt) :: t     ⇒ fromVariables0(t, valueOf(vContext, h.v).asInstanceOf[Int] :: accInt, accDouble)
+        case (h: GenomeBound.SequenceOfInt) :: t ⇒ fromVariables0(t, valueOf(vContext, h.v).asInstanceOf[Array[Int]].toList ::: accInt, accDouble)
         case (h: GenomeBound.Enumeration[_]) :: t ⇒
-          val i = h.values.indexOf(valueOf(h.v))
-          if (i == -1) throw new UserBadDataError(s"Value ${valueOf(h.v)} doesn't match a element of enumeration ${h.values} for input ${h.v}")
+          val i = h.values.indexOf(valueOf(vContext, h.v))
+          if (i == -1) throw new UserBadDataError(s"Value ${valueOf(vContext, h.v)} doesn't match a element of enumeration ${h.values} for input ${h.v}")
           fromVariables0(t, i :: accInt, accDouble)
         case (h: GenomeBound.SequenceOfEnumeration[_]) :: t ⇒
-          val vs = valueOf(h.v).asInstanceOf[Array[_]]
+          val vs = valueOf(vContext, h.v).asInstanceOf[Array[_]]
           val is =
             (vs zip h.values).zipWithIndex.map {
               case ((v, hv), index) ⇒

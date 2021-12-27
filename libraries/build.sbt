@@ -309,10 +309,11 @@ lazy val squants =
 lazy val mgo = OsgiProject(
   dir,
   "mgo",
-  exports = Seq("mgo.*"),
-  imports = Seq("scala.*", "monocle.*", "cats.*", "squants.*", "!com.oracle.svm.*", "!*"), //Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "*"),
+  exports = Seq("mgo.*", "ppse.*"),
+  imports = Seq("!scala.collection.compat.*", "scala.*", "monocle.*", "cats.*", "squants.*", "!com.oracle.svm.*", "!*"), //Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "*"),
   privatePackages = Seq("!scala.*", "!monocle.*", "!squants.*", "!cats.*", "*") /*Seq("!scala.*", "!monocle.*", "!org.apache.commons.math3.*", "!cats.*", "!squants.*", "!scalaz.*", "*")*/) settings(
   libraryDependencies += "org.openmole" %% "mgo" % mgoVersion,
+  excludeDependencies += ExclusionRule(organization = "org.typelevel", name = "cats-kernel_2.13"),
   version := mgoVersion) /*dependsOn(monocle,cats, squants)*/ settings(settings: _*) settings(scala3Settings: _*)
 
 //FIXME add monocle after migration to scala 3 is completed

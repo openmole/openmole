@@ -483,7 +483,9 @@ lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolutio
   openmoleDSL, toolsTask, pattern, evolutionData, collectionDomain % "test", boundsDomain % "test"
 ) settings(
   libraryDependencies += Libraries.mgo,
-  libraryDependencies += Libraries.circe) settings (pluginSettings: _*)
+  libraryDependencies += Libraries.circe,
+  excludeDependencies += ExclusionRule(organization = "org.typelevel", name = "cats-kernel_2.13")
+) settings (pluginSettings: _*)
 
 lazy val evolutionData = OsgiProject(pluginDir, "org.openmole.plugin.method.evolution.data", imports = Seq("*")) settings(
   pluginSettings,

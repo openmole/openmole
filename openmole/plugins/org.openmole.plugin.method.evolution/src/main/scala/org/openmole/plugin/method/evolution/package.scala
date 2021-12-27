@@ -31,6 +31,7 @@ import squants.time.Time
 
 type Objectives = Seq[Objective] | Objective
 type Genome = Seq[Genome.GenomeBound]
+type GenomeDouble = Seq[Genome.GenomeBound.ScalarDouble]
 
 implicit def intToCounterTerminationConverter(n: Long): EvolutionWorkflow.AfterEvaluated = EvolutionWorkflow.AfterEvaluated(n)
 implicit def durationToDurationTerminationConverter(d: Time): EvolutionWorkflow.AfterDuration = EvolutionWorkflow.AfterDuration(d)

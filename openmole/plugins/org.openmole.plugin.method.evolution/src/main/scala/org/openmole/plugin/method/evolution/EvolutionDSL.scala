@@ -42,18 +42,18 @@ object EvolutionWorkflow {
       case (false, None)    ⇒ throw new UserBadDataError("Aggregation have been specified for some objective, but no stochastic parameter is provided.")
     }
 
-  def deterministicGAIntegration[AG](
+  def deterministicGAIntegration[AG, VA](
     ag:               AG,
     genome:           Genome,
     phenotypeContent: PhenotypeContent,
-    validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype]): EvolutionWorkflow = {
+    validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, VA, Phenotype]): EvolutionWorkflow = {
     val _validate = validate
     new EvolutionWorkflow {
       type MGOAG = AG
 
       def mgoAG = ag
 
-      type V = (Vector[Double], Vector[Int])
+      type V = VA
       type P = Phenotype
 
       val integration = algorithm
@@ -66,10 +66,8 @@ object EvolutionWorkflow {
       def inputVals = Genome.toVals(genome)
       def outputVals = PhenotypeContent.toVals(phenotypeContent)
 
-      def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
-        val (cs, is) = operations.genomeValues(g)
-        Genome.toVariables(genome, cs, is, scale = true)
-      }
+      def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] =
+        operations.genomeToVariables(genome)
 
       def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, phenotypeContent)
     }
@@ -410,6 +408,20 @@ object GAIntegration {
     genome.zipWithIndex.map { case (g, i) ⇒ Genome.toArrayVariable(g, variables.map(_(i).value)) }.toVector
   }
 
+  def genomeDoubleToVariable(
+    genome: GenomeDouble,
+    values: Vector[Double],
+    scale:  Boolean) = GenomeDouble.toVariables(genome, values, scale)
+
+  def genomesDoubleOfPopulationToVariables[I](
+    genome: GenomeDouble,
+    values: Vector[Vector[Double]],
+    scale:  Boolean): Vector[Variable[_]] = {
+
+    val variables = values.map { case continuous ⇒ GenomeDouble.toVariables(genome, continuous, scale) }
+    genome.zipWithIndex.map { case (g, i) ⇒ GenomeDouble.toArrayVariable(g, variables.map(_(i).value)) }.toVector
+  }
+
   def objectivesOfPopulationToVariables[I](objectives: Seq[Objective], phenotypeValues: Vector[Vector[Double]]): Vector[Variable[_]] =
     Objectives.resultPrototypes(objectives).toVector.zipWithIndex.map {
       case (objective, i) ⇒
@@ -473,7 +485,8 @@ object MGOAPI {
       def metadata(generation: Long, data: SaveOption): EvolutionMetadata = EvolutionMetadata.none
 
       def genomeValues(genome: G): V
-      def buildGenome(values: V): G
+      def genomeToVariables(genome: G): FromContext[Vector[Variable[_]]]
+
       def buildGenome(context: Vector[Variable[_]]): G
       def buildIndividual(genome: G, phenotype: P, context: Context): I
 
