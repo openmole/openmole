@@ -22,9 +22,9 @@ import org.openmole.core.compiler
 import java.net.URLClassLoader
 import java.util
 import java.util.UUID
-import javax.script._
-import org.openmole.core.exception._
-import org.openmole.core.pluginmanager._
+import javax.script.*
+import org.openmole.core.exception.*
+import org.openmole.core.pluginmanager.*
 import org.osgi.framework.Bundle
 
 import scala.annotation.tailrec
@@ -162,7 +162,7 @@ object Interpreter {
     }
 
   type Compiled = () ⇒ Any
-  type RawCompiled = repl.REPLDriver.Compiled
+  case class RawCompiled(compiled: repl.REPLDriver.Compiled, classDirectory: java.io.File)
 
   def apply(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = {
     val classDirectory = fileService.wrapRemoveOnGC(newFile.newDir("classDirectory"))
@@ -180,7 +180,7 @@ class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File)
   def initialState = driver.initialState 
 
   def eval(code: String) = compile(code)()
-  def compile(code: String): compiler.Interpreter.Compiled =
+  def compile(code: String): Interpreter.Compiled =
     val compiled = dottyCompile(code)
     () => run(compiled)._1
 
@@ -195,13 +195,13 @@ class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File)
           c._1 match 
             case Left(diagnostics) => 
               throw Interpreter.errorMessagesToException(diagnostics.map(Interpreter.diagnosticToErrorMessage), code)
-            case Right(_) => c
+            case Right(_) => Interpreter.RawCompiled(c, classDirectory)
         case errors: dotty.tools.repl.SyntaxErrors =>
             throw Interpreter.errorMessagesToException(errors.errors.map(Interpreter.diagnosticToErrorMessage), code)
      }
 
-  def run(c: repl.REPLDriver.Compiled) =
-    val runResult = driver.justRun(c)
+  def run(c: Interpreter.RawCompiled) =
+    val runResult = driver.justRun(c.compiled)
     def getResult(state: dotty.tools.repl.State): Any =
       if(state.valIndex > 0)
         val m = resultClass(state).getDeclaredMethod(s"res${state.valIndex - 1}")
@@ -235,19 +235,5 @@ class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File)
 
 }
 
-//class Interpreter(priorityBundles: ⇒ Seq[Bundle], jars: Seq[JFile], quiet: Boolean, classDirectory: java.io.File, settings: Settings) {
-//  def eval(code: String) = compile(code).apply()
-//  def compile(code: String): ScalaREPL.Compiled = synchronized {
-//    if (org.openmole.core.compiler.Activator.osgi) {
-//      val s = new ScalaREPL(priorityBundles, jars, quiet, classDirectory, settings, 1)
-//      s.compile(code)
-//    }
-//    else {
-//      import scala.reflect.runtime.universe
-//      import scala.tools.reflect.ToolBox
-//      val tb = universe.runtimeMirror(getClass.getClassLoader).mkToolBox()
-//      tb.compile(tb.parse(code))
-//    }
-//  }
-//}
+
 

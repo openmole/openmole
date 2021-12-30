@@ -30,7 +30,7 @@ import org.openmole.tool.random._
 
 import scala.util._
 
-trait CompilationClosure[+T] extends ScalaCompilation.ContextClosure[T] {
+trait CompilationClosure[+T] { //extends ScalaCompilation.ContextClosure[T] {
   def apply(context: Context, rng: RandomProvider, newFile: TmpDirectory): T
 }
 
@@ -87,7 +87,7 @@ object ScalaCompilation {
       if (osgiMode) s"""in osgi mode with priority bundles [${priorityBundles(plugins).map(b ⇒ s"${b.getSymbolicName}").mkString(", ")}], libraries [${libraries.mkString(", ")}], classpath [${Interpreter.classPath(priorityBundles(plugins), libraries).mkString(", ")}]."""
       else s"""in non osgi mode with libraries ${libraries.mkString(", ")}"""
 
-    Try[RETURN] {
+    Try {
       val evaluated = interpreter.eval(addImports(script.code))
 
       if (evaluated == null) throw new InternalProcessingError(
@@ -95,7 +95,7 @@ object ScalaCompilation {
            |${script.code}""".stripMargin
       )
 
-      evaluated.asInstanceOf[RETURN]
+      (evaluated.asInstanceOf[RETURN], interpreter)
     } match {
       case util.Success(s) ⇒ Success(s)
       case util.Failure(e: Interpreter.CompilationError) ⇒
@@ -185,9 +185,12 @@ object ScalaCompilation {
           case Nil ⇒
             def sortedInputNames = inputs.map(_.name).distinct.sorted
             val scriptInputs = sortedInputNames.map(n ⇒ allInputMap(n).head)
+            def update =
+              closure[R](scriptInputs, code, Seq.empty, Seq.empty, wrapping, returnType).map { (r, i) => ContextClosure[R](r.apply, i) }
+
             cache().getOrElseUpdate(
               scriptInputs,
-              closure[R](scriptInputs, code, Seq.empty, Seq.empty, wrapping, returnType)
+              update
             )
           case duplicated ⇒ throw new UserBadDataError("Duplicated inputs: " + duplicated.mkString(", "))
         }
@@ -223,7 +226,9 @@ object ScalaCompilation {
   def dynamic[R: Manifest](code: String, wrapping: OutputWrapping[R] = RawOutput[R]()) =
     new ScalaWrappedCompilation[R](code, wrapping)
 
-  type ContextClosure[+R] = (Context, RandomProvider, TmpDirectory) ⇒ R
+  case class ContextClosure[+R](f: (Context, RandomProvider, TmpDirectory) ⇒ R, interpreter: Interpreter) {
+    def apply(context: Context, randomProvider: RandomProvider, tmpDirectory: TmpDirectory): R = f(context, randomProvider, tmpDirectory)
+  }
 
   trait OutputWrapping[+R] {
     def wrapOutput: String

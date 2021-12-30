@@ -25,7 +25,7 @@ class REPL(interpreter: Interpreter) {
     val compiled = compile(code)
     evalCompiled(compiled)
 
-  def evalCompiled(compiled: repl.REPLDriver.Compiled) = synchronized {
+  def evalCompiled(compiled: Interpreter.RawCompiled) = synchronized {
     val (result, s1) = interpreter.run(compiled)
     state = s1
     result
