@@ -488,12 +488,12 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
         termination = 100
       )
 
-    val wf: DSLContainer[_] = nsga hook ("/tmp/test")
-    val wf2: DSLContainer[_] = nsga hook ("/tmp/test") by Island(100)
+    val wf: DSL = nsga hook ("/tmp/test")
+    val wf2: DSL = nsga hook ("/tmp/test") by Island(100)
 
     // FIXME improve this test when more metadata are added to EvolutioWorkflow
-    tasks(wf.dsl).flatMap(_.task.name).exists(_.contains("island")) should equal(false)
-    tasks(wf2.dsl).flatMap(_.task.name).exists(_.contains("island")) should equal(true)
+    tasks(wf).flatMap(_.task.name).exists(_.contains("island")) should equal(false)
+    tasks(wf2).flatMap(_.task.name).exists(_.contains("island")) should equal(true)
   }
 
   "by and hook" should "be supported by all evolution methods" in {
