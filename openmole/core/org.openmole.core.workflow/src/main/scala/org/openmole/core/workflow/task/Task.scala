@@ -228,12 +228,6 @@ object Task {
   def apply(className: String)(fromContext: FromContextTask.Parameters ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextTask =
     FromContextTask.apply(className)(fromContext)
 
-}
-
-/**
- * A Task is a fundamental unit for the execution of a workflow.
- */
-trait Task extends Name with Id {
 
   /**
    * Perform this task.
@@ -242,10 +236,18 @@ trait Task extends Name with Id {
    * @param executionContext context of the environment in which the Task is executed
    * @return
    */
-  def perform(context: Context, executionContext: TaskExecutionContext): Context = {
+  def perform(task: Task, context: Context, executionContext: TaskExecutionContext): Context = {
     lazy val rng = Lazy(Task.buildRNG(context))
-    InputOutputCheck.perform(this, inputs, outputs, defaults, process(executionContext))(executionContext.preference).from(context)(rng, TmpDirectory(executionContext.moleExecutionDirectory), executionContext.fileService)
+    InputOutputCheck.perform(task, task.inputs, task.outputs, task.defaults, task.process(executionContext))(executionContext.preference).from(context)(rng, TmpDirectory(executionContext.moleExecutionDirectory), executionContext.fileService)
   }
+
+
+}
+
+/**
+ * A Task is a fundamental unit for the execution of a workflow.
+ */
+trait Task extends Name with Id {
 
   /**
    * The actual processing of the Task, wrapped by the [[perform]] method
