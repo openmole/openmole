@@ -2,7 +2,7 @@
 package openmole
 
 object common {
-  def scalaVersionValue = "2.13.6"
+  def scalaVersionValue = "2.13.8"
 
   def scalaXMLVersion = "2.0.0"
   def gridscaleVersion = "2.39"
@@ -38,7 +38,7 @@ object common {
   def asmVersion = "7.2"
   def guavaVersion = "30.0-jre"
 
-  def scalajsVersion = "1.5.1"
+  def scalajsVersion = "1.8.0"
   def scalajsLoggingVersion = "1.1.0"
   def scalaJSDomVersion = "1.0.0"
 
