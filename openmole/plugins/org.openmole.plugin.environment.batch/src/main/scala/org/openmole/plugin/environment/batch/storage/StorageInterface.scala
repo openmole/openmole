@@ -36,14 +36,21 @@ object StorageInterface {
 
   def upload(compressed: Boolean, uploadStream: (() ⇒ InputStream, String) ⇒ Unit)(src: File, dest: String, options: TransferOptions = TransferOptions.default): Unit = {
     def fileStream() = src.bufferedInputStream()
-    def compressedFileStream() = src.bufferedInputStream(gz = true)
-    if (compressed && !options.raw) uploadStream(compressedFileStream, dest) else uploadStream(fileStream, dest)
+
+    if (compressed) {
+      def compressedFileStream() = src.bufferedInputStream().toGZiped
+      if (!options.raw) uploadStream(compressedFileStream, dest) else uploadStream(fileStream, dest)
+    }
+    else uploadStream(fileStream, dest)
   }
 
   def download(compressed: Boolean, downloadStream: (String, InputStream ⇒ Unit) ⇒ Unit)(src: String, dest: File, options: TransferOptions = TransferOptions.default): Unit = {
     def downloadFile(is: InputStream) = Files.copy(is, dest.toPath)
-    def uncompressed(is: InputStream) = downloadFile(is.toGZ)
-    if (compressed && !options.raw) downloadStream(src, uncompressed) else downloadStream(src, downloadFile)
+    if (compressed) {
+      def uncompressed(is: InputStream) = downloadFile(is.toGZ)
+      if (!options.raw) downloadStream(src, uncompressed) else downloadStream(src, downloadFile)
+    }
+    else downloadStream(src, downloadFile)
   }
 
   def isDirectory(name: String) = name.endsWith("/")
