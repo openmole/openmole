@@ -2,7 +2,7 @@
 package openmole
 
 object common {
-  def scalaVersionValue = "2.13.7"
+  def scalaVersionValue = "2.13.8"
   def scala3VersionValue = "3.1.1-RC2"
 
   def scalaXMLVersion = "2.0.1"
