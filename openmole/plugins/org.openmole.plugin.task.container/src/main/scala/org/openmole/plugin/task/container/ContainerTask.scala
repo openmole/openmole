@@ -311,11 +311,13 @@ case class ContainerTask(
       val containerEnvironmentVariables =
         environmentVariables.map { v ⇒ v.name.from(preparedContext) -> v.value.from(preparedContext) }
 
+      val commandValue = command.value.map(_.from(context))
+
       val retCode =
         runCommandInContainer(
           containerSystem,
           image = container,
-          commands = command.value.map(_.from(context)),
+          commands = commandValue,
           workDirectory = Some(workDirectoryValue),
           output = out,
           error = err,
@@ -324,7 +326,7 @@ case class ContainerTask(
         )
 
       if (errorOnReturnValue && !returnValue.isDefined && retCode != 0)
-        throw new UserBadDataError(s"Process exited a non 0 return code ($retCode), you can chose ignore this by settings errorOnReturnValue = true")
+        throw new UserBadDataError(s"Process \"$commandValue\" exited with an error code $retCode (it should equal 0). The process might have written some errors on the standard output. You may want to check the log of the standard output for more information on this error.")
 
       val rootDirectory = container.file / _root_.container.FlatImage.rootfsName
 
