@@ -280,13 +280,22 @@ import ContainerTask._
     val outBuilder = new StringOutputStream
     val errBuilder = new StringOutputStream
 
-    val out: PrintStream =
-      if (stdOut.isDefined) new PrintStream(MultiplexedOutputStream(outBuilder, executionContext.outputRedirection.output))
-      else executionContext.outputRedirection.output
+    val tailSize = 10000
+    val tailBuilder = new StringOutputStream(maxCharacters = Some(tailSize))
 
-    val err =
-      if (stdErr.isDefined) new PrintStream(MultiplexedOutputStream(errBuilder, executionContext.outputRedirection.error))
-      else executionContext.outputRedirection.error
+    val out: PrintStream = {
+      val out =
+        if (stdOut.isDefined) new PrintStream(MultiplexedOutputStream(outBuilder, executionContext.outputRedirection.output))
+        else executionContext.outputRedirection.output
+      new PrintStream(MultiplexedOutputStream(out, tailBuilder))
+    }
+
+    val err: PrintStream = {
+      val err =
+        if (stdErr.isDefined) new PrintStream(MultiplexedOutputStream(errBuilder, executionContext.outputRedirection.error))
+        else executionContext.outputRedirection.error
+      new PrintStream(MultiplexedOutputStream(err, tailBuilder))
+    }
 
     def prepareVolumes(
       preparedFilesInfo:     Iterable[FileInfo],
@@ -325,8 +334,24 @@ import ContainerTask._
           environmentVariables = containerEnvironmentVariables
         )
 
-      if (errorOnReturnValue && !returnValue.isDefined && retCode != 0)
-        throw new UserBadDataError(s"Process \"$commandValue\" exited with an error code $retCode (it should equal 0). The process might have written some errors on the standard output. You may want to check the log of the standard output for more information on this error.")
+      if (errorOnReturnValue && !returnValue.isDefined && retCode != 0) {
+        def log = {
+          // last line might have been truncated
+          val lst = tailBuilder.toString
+          if (lst.size >= tailSize) lst.split('\n').drop(1).map(l ⇒ s"|$l").mkString("\n")
+          else lst.split('\n').map(l ⇒ s"|$l").mkString("\n")
+        }
+
+        def command = commandValue.mkString(" ; ")
+
+        val error =
+          s"""Process \"$command\" exited with an error code $retCode (it should equal 0).
+             |The last lines of the standard output were:
+             |$log
+             |You may want to check the log of the standard outputs for more information on this error.""".stripMargin
+
+        throw new UserBadDataError(error)
+      }
 
       val rootDirectory = container.file / _root_.container.FlatImage.rootfsName
 
