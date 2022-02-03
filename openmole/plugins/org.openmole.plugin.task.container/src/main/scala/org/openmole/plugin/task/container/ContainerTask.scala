@@ -283,19 +283,13 @@ case class ContainerTask(
     val tailSize = 10000
     val tailBuilder = new StringOutputStream(maxCharacters = Some(tailSize))
 
-    val out: PrintStream = {
-      val out =
-        if (stdOut.isDefined) new PrintStream(MultiplexedOutputStream(outBuilder, executionContext.outputRedirection.output))
-        else executionContext.outputRedirection.output
-      new PrintStream(MultiplexedOutputStream(out, tailBuilder))
-    }
+    val out: PrintStream =
+      if (stdOut.isDefined) new PrintStream(MultiplexedOutputStream(outBuilder, executionContext.outputRedirection.output, tailBuilder))
+      else new PrintStream(MultiplexedOutputStream(executionContext.outputRedirection.output, tailBuilder))
 
-    val err: PrintStream = {
-      val err =
-        if (stdErr.isDefined) new PrintStream(MultiplexedOutputStream(errBuilder, executionContext.outputRedirection.error))
-        else executionContext.outputRedirection.error
-      new PrintStream(MultiplexedOutputStream(err, tailBuilder))
-    }
+    val err: PrintStream =
+      if (stdErr.isDefined) new PrintStream(MultiplexedOutputStream(errBuilder, executionContext.outputRedirection.error, tailBuilder))
+      else new PrintStream(MultiplexedOutputStream(executionContext.outputRedirection.error, tailBuilder))
 
     def prepareVolumes(
       preparedFilesInfo:     Iterable[FileInfo],
