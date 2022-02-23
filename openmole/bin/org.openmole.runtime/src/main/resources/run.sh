@@ -66,6 +66,9 @@ if [ -n "$OM_LOCAL" ]; then
   export LANG=$OM_LOCAL
 fi
 
+## Just to be sure
+export _JAVA_OPTIONS=-Duser.home="${HOME}"
+
 java -Djava.io.tmpdir="${TMPDIR}" -Dsun.jnu.encoding=UTF-8 -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.home="${HOME}" -Xss2M -Xms64m -Xmx${MEMORY} -Dosgi.locking=none -Dosgi.configuration.area="${OSGI_CONFIGDIR}" $FLAG -XX:ReservedCodeCacheSize=128m -XX:MaxMetaspaceSize=256m -XX:CompressedClassSpaceSize=128m \
   -XX:+UseG1GC -XX:ParallelGCThreads=1 -XX:CICompilerCount=2 -XX:ConcGCThreads=1 -XX:G1ConcRefinementThreads=1 -XX:+UseStringDeduplication \
   --add-opens java.base/java.lang.invoke=ALL-UNNAMED \
