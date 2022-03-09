@@ -71,7 +71,7 @@ object JobScript {
       val script = ListBuffer[String]()
 
       proxy.foreach { p ⇒ script += s"export X509_USER_PROXY=$$PWD/$p" }
-      
+
       script += "unset http_proxy"
       script += "unset https_proxy"
       script += "BASEPATH=$PWD"
