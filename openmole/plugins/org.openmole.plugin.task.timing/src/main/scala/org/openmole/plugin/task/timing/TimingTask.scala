@@ -32,7 +32,7 @@ case class TimingTask(
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
     val starttime = System.currentTimeMillis()
-    val taskcontext = parameters.context + task.perform(parameters.context, executionContext)
+    val taskcontext = parameters.context + Task.perform(task, parameters.context, executionContext)
     val executiontime = (System.currentTimeMillis() - starttime)
     taskcontext + (tracker, executiontime)
   }

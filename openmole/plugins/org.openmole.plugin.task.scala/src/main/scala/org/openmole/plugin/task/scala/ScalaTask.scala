@@ -46,10 +46,12 @@ object ScalaTask {
     override def plugins = Focus[ScalaTask](_.plugins)
   }
 
+  def defaultPlugins = pluginsOf(scala.xml.XML).toVector
+
   def apply(source: String)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
     new ScalaTask(
       source,
-      plugins = Vector.empty,
+      plugins = defaultPlugins,
       libraries = Vector.empty,
       config = InputOutputConfig(),
       external = External(),

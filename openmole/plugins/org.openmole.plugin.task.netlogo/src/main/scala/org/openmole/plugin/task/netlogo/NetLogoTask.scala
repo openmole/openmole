@@ -170,6 +170,30 @@ object NetLogoTask {
     }
   }
 
+  // Manually do conversions to java native types ; necessary to add an output cast feature,
+  // e.g. NetLogo numeric ~ java.lang.Double -> Int or String and not necessarily Double,
+  // the target type being the one of the prototype
+  def cast(value: Any, clazz: Class[_]) = {
+    try {
+      clazz match {
+        // all netlogo numeric are java.lang.Double
+        case c if c == classOf[Double]  ⇒ value.asInstanceOf[java.lang.Double].doubleValue()
+        case c if c == classOf[Float]   ⇒ value.asInstanceOf[java.lang.Double].floatValue()
+        case c if c == classOf[Int]     ⇒ value.asInstanceOf[java.lang.Double].intValue()
+        case c if c == classOf[Long]    ⇒ value.asInstanceOf[java.lang.Double].longValue()
+        // target boolean
+        case c if c == classOf[Boolean] ⇒ value.asInstanceOf[java.lang.Boolean].booleanValue()
+        // target string assume the origin type has a toString
+        case c if c == classOf[String]  ⇒ value.toString
+        // try casting anyway - NOTE : untested
+        case c                          ⇒ c.cast(value)
+      }
+    }
+    catch {
+      case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when casting a variable of type ${value.getClass} to target type ${clazz}")
+    }
+  }
+
   /**
    * Convert a netlogo collection to a Variable for which the prototype is expected to have the corresponding depth.
    *
@@ -177,33 +201,8 @@ object NetLogoTask {
    * @param prototype
    * @return
    */
-  def netLogoArrayToVariable(netlogoCollection: AbstractCollection[Any], prototype: Val[_]) = {
-    // Manually do conversions to java native types ; necessary to add an output cast feature,
-    // e.g. NetLogo numeric ~ java.lang.Double -> Int or String and not necessarily Double,
-    // the target type being the one of the prototype
-    def safeOutput(value: Any, arrayType: Class[_]) = {
-      try {
-        arrayType match {
-          // all netlogo numeric are java.lang.Double
-          case c if c == classOf[Double]  ⇒ value.asInstanceOf[java.lang.Double].doubleValue()
-          case c if c == classOf[Float]   ⇒ value.asInstanceOf[java.lang.Double].floatValue()
-          case c if c == classOf[Int]     ⇒ value.asInstanceOf[java.lang.Double].intValue()
-          case c if c == classOf[Long]    ⇒ value.asInstanceOf[java.lang.Double].longValue()
-          // target boolean
-          case c if c == classOf[Boolean] ⇒ value.asInstanceOf[java.lang.Boolean].booleanValue()
-          // target string assume the origin type has a toString
-          case c if c == classOf[String]  ⇒ value.toString
-          // try casting anyway - NOTE : untested
-          case c                          ⇒ c.cast(value)
-        }
-      }
-      catch {
-        case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when casting a variable of type ${value.getClass} to target type ${arrayType}")
-      }
-    }
-
-    Variable.constructArray[java.util.AbstractCollection[Any]](prototype, netlogoCollection, safeOutput(_, _))
-  }
+  def netLogoArrayToVariable(netlogoCollection: AbstractCollection[Any], prototype: Val[_]) =
+    Variable.constructArray[java.util.AbstractCollection[Any]](prototype, netlogoCollection, cast(_, _))
 
   /**
    * Check if provided inputs are compatible with NetLogo
@@ -300,7 +299,8 @@ trait NetLogoTask extends Task with ValidateTask {
             try {
               val outputValue = NetLogoTask.report(instance.netLogo, mapped.name)
               if (outputValue == null) throw new InternalProcessingError(s"Value of netlogo output ${mapped.name} has been reported as null by netlogo")
-              if (!mapped.v.`type`.runtimeClass.isArray) Variable.unsecure(mapped.v, outputValue)
+              val runtimeClass = mapped.v.`type`.runtimeClass
+              if (!runtimeClass.isArray) Variable.unsecure(mapped.v, NetLogoTask.cast(outputValue, runtimeClass))
               else {
                 val netLogoCollection: util.AbstractCollection[Any] =
                   if (classOf[AbstractCollection[Any]].isAssignableFrom(outputValue.getClass)) outputValue.asInstanceOf[AbstractCollection[Any]]

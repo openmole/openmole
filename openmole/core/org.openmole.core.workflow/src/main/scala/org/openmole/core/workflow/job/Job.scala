@@ -98,7 +98,7 @@ class Job(
     if (!callBack.subMoleCanceled()) {
       val ctx = context
       try {
-        val performResult = task.task.perform(ctx, executionContext)
+        val performResult = Task.perform(task.task, ctx, executionContext)
         Left(if (task.strain) ctx + performResult else performResult)
       }
       catch {

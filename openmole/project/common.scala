@@ -2,8 +2,8 @@
 package openmole
 
 object common {
-  def scalaVersionValue = "2.13.7"
-  def scala3VersionValue = "3.1.1-RC2"
+  def scalaVersionValue = "2.13.8"
+  def scala3VersionValue = "3.1.1"
 
   def scalaXMLVersion = "2.0.1"
   def gridscaleVersion = "2.41"
@@ -14,7 +14,7 @@ object common {
   def scalaTagsVersion = "0.9.4"
   def laminarVersion = "0.14.2"
   def netLogo5Version = "5.3.1"
-  def netLogo6Version = "6.2.1"
+  def netLogo6Version = "6.2.2"
   def boopickleVersion = "1.3.3"
   def scalaAutowireVersion = "0.3.3"
   def sourcecodeVersion = "0.2.7"

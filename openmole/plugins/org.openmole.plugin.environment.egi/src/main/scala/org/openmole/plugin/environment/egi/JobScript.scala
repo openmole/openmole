@@ -72,8 +72,6 @@ object JobScript {
 
       proxy.foreach { p ⇒ script += s"export X509_USER_PROXY=$$PWD/$p" }
 
-      if (debug) script += "voms-proxy-info -all"
-
       script += "unset http_proxy"
       script += "unset https_proxy"
       script += "BASEPATH=$PWD"

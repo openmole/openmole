@@ -280,13 +280,16 @@ case class ContainerTask(
     val outBuilder = new StringOutputStream
     val errBuilder = new StringOutputStream
 
-    val out: PrintStream =
-      if (stdOut.isDefined) new PrintStream(MultiplexedOutputStream(outBuilder, executionContext.outputRedirection.output))
-      else executionContext.outputRedirection.output
+    val tailSize = 10000
+    val tailBuilder = new StringOutputStream(maxCharacters = Some(tailSize))
 
-    val err =
-      if (stdErr.isDefined) new PrintStream(MultiplexedOutputStream(errBuilder, executionContext.outputRedirection.error))
-      else executionContext.outputRedirection.error
+    val out: PrintStream =
+      if (stdOut.isDefined) new PrintStream(MultiplexedOutputStream(outBuilder, executionContext.outputRedirection.output, tailBuilder))
+      else new PrintStream(MultiplexedOutputStream(executionContext.outputRedirection.output, tailBuilder))
+
+    val err: PrintStream =
+      if (stdErr.isDefined) new PrintStream(MultiplexedOutputStream(errBuilder, executionContext.outputRedirection.error, tailBuilder))
+      else new PrintStream(MultiplexedOutputStream(executionContext.outputRedirection.error, tailBuilder))
 
     def prepareVolumes(
       preparedFilesInfo:     Iterable[FileInfo],
@@ -311,11 +314,13 @@ case class ContainerTask(
       val containerEnvironmentVariables =
         environmentVariables.map { v ⇒ v.name.from(preparedContext) -> v.value.from(preparedContext) }
 
+      val commandValue = command.value.map(_.from(context))
+
       val retCode =
         runCommandInContainer(
           containerSystem,
           image = container,
-          commands = command.value.map(_.from(context)),
+          commands = commandValue,
           workDirectory = Some(workDirectoryValue),
           output = out,
           error = err,
@@ -323,8 +328,24 @@ case class ContainerTask(
           environmentVariables = containerEnvironmentVariables
         )
 
-      if (errorOnReturnValue && !returnValue.isDefined && retCode != 0)
-        throw new UserBadDataError(s"Process exited a non 0 return code ($retCode), you can chose ignore this by settings errorOnReturnValue = true")
+      if (errorOnReturnValue && !returnValue.isDefined && retCode != 0) {
+        def log = {
+          // last line might have been truncated
+          val lst = tailBuilder.toString
+          if (lst.size >= tailSize) lst.split('\n').drop(1).map(l ⇒ s"|$l").mkString("\n")
+          else lst.split('\n').map(l ⇒ s"|$l").mkString("\n")
+        }
+
+        def command = commandValue.mkString(" ; ")
+
+        val error =
+          s"""Process \"$command\" exited with an error code $retCode (it should equal 0).
+             |The last lines of the standard output were:
+             |$log
+             |You may want to check the log of the standard outputs for more information on this error.""".stripMargin
+
+        throw new UserBadDataError(error)
+      }
 
       val rootDirectory = container.file / _root_.container.FlatImage.rootfsName
 
