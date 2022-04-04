@@ -33,6 +33,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
       () ⇒
         treeNodeTabs remove safePath
         treeNodeTabs.checkTabs
+        panels.pluginPanel.getPlugins
         treeNodePanel.invalidCacheAndDraw
     }
   }
@@ -106,7 +107,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     }
   }
 
-  def plugOrUplug(safePath: SafePath, pluginState: PluginState) = {
+  def plugOrUnplug(safePath: SafePath, pluginState: PluginState) = {
     pluginState.isPlugged match {
       case true ⇒ OMPost()[Api].unplug(safePath).call().foreach { _ ⇒
         panels.pluginPanel.getPlugins
@@ -207,7 +208,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
                       case true  ⇒ (OMTags.glyph_unpuzzle, "unplug")
                       case false ⇒ (OMTags.glyph_puzzle, "plug")
                     }
-                    iconAction(glyphItemize(icon), text, () ⇒ plugOrUplug(initSafePath, pluginState))
+                    iconAction(glyphItemize(icon), text, () ⇒ plugOrUnplug(initSafePath, pluginState))
                   case false ⇒ emptyMod
                 }
               )

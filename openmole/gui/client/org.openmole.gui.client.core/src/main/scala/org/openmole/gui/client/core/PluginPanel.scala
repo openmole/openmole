@@ -44,13 +44,12 @@ class PluginPanel {
         cls := "expandable-table",
         children <-- plugins.signal.combineWith(panels.expandablePanel.signal).map {
           case (ps, _) ⇒
-            ps.map { p ⇒
-              println("PLUG " + p.projectSafePath)
+            ps.zipWithIndex.map { case(p,i) ⇒
               div(
                 cls := "docEntry",
-                backgroundColor := "#3f3d56",
+                backgroundColor := {if(i%2 == 0) "white" else "#ececec"},
                 div(p.projectSafePath.name, justifyContent.flexStart),
-                div(p.time, cls := "table-time"),
+                div(p.time, cls := "table-time", marginLeft := "20px"),
                 onClick --> { (e: MouseEvent) ⇒
                   panels.treeNodePanel.draw(p.projectSafePath.parent)
                 }

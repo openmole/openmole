@@ -869,7 +869,7 @@ padding-bottom: 90px;
 
 .docEntry {
     cursor: pointer;
-    color: white;
+    color: #222;
     padding-left : 15;
     min-height : 46;
     align-items: center;
@@ -881,7 +881,7 @@ padding-bottom: 90px;
 
  .table-time {
     font-style : "italic";
-    color : white;
+    color : #222;
     justify-content: flex-end;
  }
 
