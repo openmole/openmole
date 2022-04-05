@@ -1,6 +1,6 @@
 package org.openmole.core.compiler.repl
 
-import dotty.tools.repl.*
+import dotty.tools.repl.* // OM
 
 import java.io.{File => JFile, PrintStream}
 import java.nio.charset.StandardCharsets
@@ -19,9 +19,10 @@ import dotty.tools.dotc.core.NameOps._
 import dotty.tools.dotc.core.Names.Name
 import dotty.tools.dotc.core.StdNames._
 import dotty.tools.dotc.core.Symbols.{Symbol, defn}
+// OM import dotty.tools.dotc.interfaces 
 import dotty.tools.dotc.interactive.Completion
 import dotty.tools.dotc.printing.SyntaxHighlighting
-import dotty.tools.dotc.reporting.{MessageRendering, StoreReporter}
+import dotty.tools.dotc.reporting.{MessageRendering, StoreReporter} // OM
 import dotty.tools.dotc.reporting.{Message, Diagnostic}
 import dotty.tools.dotc.util.Spans.Span
 import dotty.tools.dotc.util.{SourceFile, SourcePosition}
@@ -53,16 +54,19 @@ import scala.util.Using
  *  @param imports     a map from object index to the list of user defined imports
  *  @param context     the latest compiler context
  */
+// OM
 //case class State(objectIndex: Int,
 //                 valIndex: Int,
 //                 imports: Map[Int, List[tpd.Import]],
 //                 context: Context)
 
+// OM
 object REPLDriver {
   type Compiled = (dotty.tools.repl.results.Result[(CompilationUnit, State)], State)
   type CompilerState = dotty.tools.repl.State
 }
 
+// OM
 def newStoreReporter: dotty.tools.dotc.reporting.StoreReporter = {
   import dotty.tools.dotc.reporting.{HideNonSensicalMessages, StoreReporter, UniqueMessagePositions}
   new StoreReporter(null)
@@ -117,7 +121,7 @@ class REPLDriver(settings: Array[String],
   private var compiler: ReplCompiler = _
   private var rendering: Rendering = _
 
-  def rederingValue = rendering
+  def rederingValue = rendering  // OM
 
   // initialize the REPL session as part of the constructor so that once `run`
   // is called, we're in business
@@ -142,9 +146,9 @@ class REPLDriver(settings: Array[String],
 
   //val terminal = LineReaderBuilder.builder().terminal(org.jline.terminal.TerminalBuilder.terminal()).build() // new JLineTerminal
 
-//    out.println(
-//      s"""Welcome to OpenMOLE $simpleVersionString ($javaVersion, Java $javaVmName).
-//         |Type in expressions for evaluation. Or try :help.""".stripMargin)
+// OM    out.println(
+// OM     s"""Welcome to OpenMOLE $simpleVersionString ($javaVersion, Java $javaVmName).
+// OM        |Type in expressions for evaluation. Or try :help.""".stripMargin)
 
     /** Blockingly read a line, getting back a parse result */
     def readLine(state: State): ParseResult = {
@@ -158,7 +162,7 @@ class REPLDriver(settings: Array[String],
         ParseResult(line)(state)
       } catch {
         case _: EndOfFileException |
-             _: UserInterruptException => // Ctrl+D or Ctrl+C
+            _: UserInterruptException => // Ctrl+D or Ctrl+C
           Quit
       }
     }
@@ -202,7 +206,7 @@ class REPLDriver(settings: Array[String],
   }
 
   /** Extract possible completions at the index of `cursor` in `expr` */
-  final def completions(cursor: Int, expr: String, state0: State): List[Candidate] = {
+  final def completions(cursor: Int, expr: String, state0: State): List[Candidate] = { // OM
     def makeCandidate(label: String) = {
       new Candidate(
         /* value    = */ label,
@@ -251,7 +255,7 @@ class REPLDriver(settings: Array[String],
 
 
 
-  /** Compile `parsed` trees and evolve `state` in accordance */
+  /** OM Compile `parsed` trees and evolve `state` in accordance */
   def justCompile(input: String, istate: State): REPLDriver.Compiled | SyntaxErrors  = {
     ParseResult(input)(istate) match {
       case parsed: Parsed =>
@@ -266,7 +270,7 @@ class REPLDriver(settings: Array[String],
     }
   }
 
-
+  /** OM */
   def justRun(compiled: REPLDriver.Compiled): State = {
     implicit val s = compiled._2
 
@@ -335,16 +339,12 @@ class REPLDriver(settings: Array[String],
       val state0 = newRun(istate, parsed.reporter)
       state0.copy(context = state0.context.withSource(parsed.source))
     }
-
     compiler
       .compile(parsed)
       .fold(
         displayErrors,
         {
           case (unit: CompilationUnit, newState: State) =>
-            //println(unit.untpdTree.asInstanceOf[PackageDef[_]].stats.head.asInstanceOf[dotty.tools.dotc.ast.untpd.ModuleDef].impl)
-            //println(unit.untpdTree.asInstanceOf[PackageDef[_]].stats.head.asInstanceOf[TypeDef[_]])
-
             val newestWrapper = extractNewestWrapper(unit.untpdTree)
             val newImports = extractTopLevelImports(newState.context)
             var allImports = newState.imports
@@ -354,7 +354,7 @@ class REPLDriver(settings: Array[String],
 
             val warnings = newState.context.reporter
               .removeBufferedMessages(using newState.context)
-              .map(rendering.formatError)
+              .map(rendering.formatError)  // OM
 
             inContext(newState.context) {
               val (updatedState, definitions) =
@@ -367,12 +367,12 @@ class REPLDriver(settings: Array[String],
               // shown before infos (eg. typedefs) for the same line. column
               // ordering is mostly to make tests deterministic
               implicit val diagnosticOrdering: Ordering[Diagnostic] =
-              Ordering[(Int, Int, Int)].on(d => (d.pos.line, -d.level, d.pos.column))
+                Ordering[(Int, Int, Int)].on(d => (d.pos.line, -d.level, d.pos.column))
 
               (definitions ++ warnings)
                 .sorted
-                .map(_.msg)
-                .foreach(out.println)
+                .map(_.msg)  // OM
+                .foreach(out.println) // OM
 
               updatedState
             }
@@ -401,7 +401,7 @@ class REPLDriver(settings: Array[String],
           .membersBasedOnFlags(required = Method, excluded = Accessor | ParamAccessor | Synthetic | Private)
           .filterNot { denot =>
             defn.topClasses.contains(denot.symbol.owner) || denot.symbol.isConstructor
-              || denot.symbol.name.is(DefaultGetterName)
+             || denot.symbol.name.is(DefaultGetterName)
           }
 
       val vals =
@@ -515,7 +515,20 @@ class REPLDriver(settings: Array[String],
 
   /** shows all errors nicely formatted */
   private def displayErrors(errs: Seq[Diagnostic])(implicit state: State): State = {
-    errs.map(rendering.formatError).map(_.msg).foreach(out.println)
+    errs.map(rendering.formatError).map(_.msg).foreach(out.println) // OM
     state
   }
+
+  /** Like ConsoleReporter, but without file paths, -Xprompt displaying,
+   *  and using a PrintStream rather than a PrintWriter so messages aren't re-encoded. */
+  //private object ReplConsoleReporter extends ConsoleReporter.AbstractConsoleReporter {
+  //  override def posFileStr(pos: SourcePosition) = "" // omit file paths
+  //  override def printMessage(msg: String): Unit = out.println(msg)
+  //  override def flush()(using Context): Unit    = out.flush()
+  //}
+
+  /** Print warnings & errors using ReplConsoleReporter, and info straight to out */
+  //private def printDiagnostic(dia: Diagnostic)(implicit state: State) = dia.level match
+  //  case interfaces.Diagnostic.INFO => out.println(dia.msg) // print REPL's special info diagnostics directly to out
+  //  case _                          => ReplConsoleReporter.doReport(dia)(using state.context)
 }
