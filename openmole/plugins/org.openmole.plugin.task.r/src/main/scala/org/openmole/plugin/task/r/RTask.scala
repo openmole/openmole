@@ -20,6 +20,7 @@ import org.openmole.plugin.task.container._
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.tool.json._
 import org.openmole.tool.outputredirection.OutputRedirection
+import org.openmole.core.dsl.extension._
 
 object RTask {
 
@@ -126,7 +127,7 @@ case class RTask(
     import p._
 
     def writeInputsJSON(file: File) = {
-      def values = noFile(mapped.inputs).map { m ⇒ Array(context(m.v))(m.v.`type`.manifest) }
+      def values = noFile(mapped.inputs).map { m ⇒ m.v.`type`.manifest.array(context(m.v)) }
       file.content = compact(render(toJSONValue(values.toArray[Any])))
     }
 

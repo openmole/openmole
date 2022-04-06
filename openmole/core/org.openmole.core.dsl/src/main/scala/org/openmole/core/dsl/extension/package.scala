@@ -107,4 +107,6 @@ package object extension {
 
   type JavaLogger = org.openmole.tool.logger.JavaLogger
   def Logger = org.openmole.tool.logger.LoggerService
+
+  export org.openmole.tool.types.TypeTool.ManifestDecoration
 }

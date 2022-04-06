@@ -26,7 +26,7 @@ object BreedTask {
     Task("BreedTask") { p ⇒
       import p._
 
-      def defaultSetToVariables(ds: Seq[ValueAssignment.Untyped]) = ds.map(v ⇒ Variable.unsecure(v.value, v.equal.from(context))).toVector
+      def defaultSetToVariables(ds: Seq[ValueAssignment.Untyped]) = ds.map(v ⇒ Variable.unsecureUntyped(v.value, v.equal.from(context))).toVector
       val suggestedGenomes = suggestion.map(ds ⇒ evolution.operations.buildGenome(defaultSetToVariables(ds)))
 
       val population = context(evolution.populationVal)

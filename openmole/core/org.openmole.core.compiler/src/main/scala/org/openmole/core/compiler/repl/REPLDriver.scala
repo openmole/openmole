@@ -7,8 +7,10 @@ import java.nio.charset.StandardCharsets
 
 import dotty.tools.dotc.ast.Trees._
 import dotty.tools.dotc.ast.{tpd, untpd}
+import dotty.tools.dotc.config.CommandLineParser.tokenize
 import dotty.tools.dotc.config.Properties.{javaVersion, javaVmName, simpleVersionString}
 import dotty.tools.dotc.core.Contexts._
+import dotty.tools.dotc.core.Decorators._
 import dotty.tools.dotc.core.Phases.{unfusedPhases, typerPhase}
 import dotty.tools.dotc.core.Denotations.Denotation
 import dotty.tools.dotc.core.Flags._
@@ -19,16 +21,17 @@ import dotty.tools.dotc.core.NameOps._
 import dotty.tools.dotc.core.Names.Name
 import dotty.tools.dotc.core.StdNames._
 import dotty.tools.dotc.core.Symbols.{Symbol, defn}
-// OM import dotty.tools.dotc.interfaces 
+// OM import dotty.tools.dotc.interfaces
 import dotty.tools.dotc.interactive.Completion
 import dotty.tools.dotc.printing.SyntaxHighlighting
 import dotty.tools.dotc.reporting.{MessageRendering, StoreReporter} // OM
-import dotty.tools.dotc.reporting.{Message, Diagnostic}
+import dotty.tools.dotc.reporting.Diagnostic
 import dotty.tools.dotc.util.Spans.Span
 import dotty.tools.dotc.util.{SourceFile, SourcePosition}
 import dotty.tools.dotc.{CompilationUnit, Driver}
 import dotty.tools.dotc.config.CompilerCommand
 import dotty.tools.io._
+import dotty.tools.runner.ScalaClassLoader.*
 import org.jline.reader._
 
 import scala.annotation.tailrec
@@ -52,13 +55,16 @@ import scala.util.Using
  *  @param objectIndex the index of the next wrapper
  *  @param valIndex    the index of next value binding for free expressions
  *  @param imports     a map from object index to the list of user defined imports
+ *  @param invalidObjectIndexes the set of object indexes that failed to initialize
  *  @param context     the latest compiler context
  */
 // OM
 //case class State(objectIndex: Int,
 //                 valIndex: Int,
 //                 imports: Map[Int, List[tpd.Import]],
-//                 context: Context)
+//                 invalidObjectIndexes: Set[Int],
+//                 context: Context):
+//  def validObjectIndexes = (1 to objectIndex).filterNot(invalidObjectIndexes.contains(_))
 
 // OM
 object REPLDriver {
@@ -76,7 +82,7 @@ def newStoreReporter: dotty.tools.dotc.reporting.StoreReporter = {
 /** Main REPL instance, orchestrating input, compilation and presentation */
 class REPLDriver(settings: Array[String],
                  out: PrintStream = Console.out,
-                 classLoader: Option[ClassLoader] = None) extends Driver {
+                 classLoader: Option[ClassLoader] = None) extends Driver:
 
   /** Overridden to `false` in order to not have to give sources on the
    *  commandline
@@ -84,15 +90,21 @@ class REPLDriver(settings: Array[String],
   override def sourcesRequired: Boolean = false
 
   /** Create a fresh and initialized context with IDE mode enabled */
-  private def initialCtx = {
+  private def initialCtx(settings: List[String]) = {
     val rootCtx = initCtx.fresh.addMode(Mode.ReadPositions | Mode.Interactive)
     rootCtx.setSetting(rootCtx.settings.YcookComments, true)
     rootCtx.setSetting(rootCtx.settings.YreadComments, true)
+    setupRootCtx(this.settings ++ settings, rootCtx)
+  }
+
+  private def setupRootCtx(settings: Array[String], rootCtx: Context) = {
     setup(settings, rootCtx) match
-      case Some((files, ictx)) =>
+      case Some((files, ictx)) => inContext(ictx) {
         shouldStart = true
-        ictx.base.initialize()(using ictx)
+        if files.nonEmpty then out.println(i"Ignoring spurious arguments: $files%, %")
+        ictx.base.initialize()
         ictx
+      }
       case None =>
         shouldStart = false
         rootCtx
@@ -107,8 +119,8 @@ class REPLDriver(settings: Array[String],
    *  such, when the user enters `:reset` this method should be called to reset
    *  everything properly
    */
-  protected def resetToInitial(): Unit = {
-    rootCtx = initialCtx
+  protected def resetToInitial(settings: List[String] = Nil): Unit = {
+    rootCtx = initialCtx(settings)
     if (rootCtx.settings.outputDir.isDefault(using rootCtx))
       rootCtx = rootCtx.fresh
         .setSetting(rootCtx.settings.outputDir, new VirtualDirectory("<REPL compilation output>"))
@@ -173,14 +185,16 @@ class REPLDriver(settings: Array[String],
       else loop(interpret(res)(state))
     }
 
-    try withRedirectedOutput { loop(initialState) }
+    try runBody { loop(initialState) }
     finally terminal.close()
   }
 
-  final def run(input: String)(implicit state: State): State = withRedirectedOutput {
+  final def run(input: String)(implicit state: State): State = runBody {
     val parsed = ParseResult(input)(state)
     interpret(parsed)
   }
+
+  private def runBody(body: => State): State = rendering.classLoader()(using rootCtx).asContext(withRedirectedOutput(body))
 
   // TODO: i5069
   final def bind(name: String, value: Any)(implicit state: State): State = state
@@ -204,6 +218,12 @@ class REPLDriver(settings: Array[String],
     val run = compiler.newRun(rootCtx.fresh.setReporter(reporter), state)
     state.copy(context = run.runContext)
   }
+
+  private def stripBackTicks(label: String) =
+    if label.startsWith("`") && label.endsWith("`") then
+      label.drop(1).dropRight(1)
+    else
+      label
 
   /** Extract possible completions at the index of `cursor` in `expr` */
   final def completions(cursor: Int, expr: String, state0: State): List[Candidate] = { // OM
@@ -335,6 +355,12 @@ class REPLDriver(settings: Array[String],
     def extractTopLevelImports(ctx: Context): List[tpd.Import] =
       unfusedPhases(using ctx).collectFirst { case phase: CollectTopLevelImports => phase.imports }.get
 
+    def contextWithNewImports(ctx: Context, imports: List[tpd.Import]): Context =
+      if imports.isEmpty then ctx
+      else
+        imports.foldLeft(ctx.fresh.setNewScope)((ctx, imp) =>
+          ctx.importContext(imp, imp.symbol(using ctx)))
+
     implicit val state = {
       val state0 = newRun(istate, parsed.reporter)
       state0.copy(context = state0.context.withSource(parsed.source))
@@ -414,8 +440,8 @@ class REPLDriver(settings: Array[String],
 
       val formattedMembers =
         typeAliases.map(rendering.renderTypeAlias) ++
-          defs.map(rendering.renderMethod) ++
-          vals.flatMap(rendering.renderVal)
+        defs.map(rendering.renderMethod) ++
+        vals.flatMap(rendering.renderVal)
 
       val diagnostics = if formattedMembers.isEmpty then rendering.forceModule(symbol) else formattedMembers
 
@@ -464,8 +490,8 @@ class REPLDriver(settings: Array[String],
       out.println(Help.text)
       state
 
-    case Reset =>
-      resetToInitial()
+    case Reset(arg) =>
+      resetToInitial(tokenize(arg))
       initialState
 
     case Imports =>
@@ -508,6 +534,16 @@ class REPLDriver(settings: Array[String],
       }
       state
 
+    case Settings(arg) => arg match
+      case "" =>
+        given ctx: Context = state.context
+        for (s <- ctx.settings.userSetSettings(ctx.settingsState).sortBy(_.name))
+          out.println(s"${s.name} = ${if s.value == "" then "\"\"" else s.value}")
+        state
+      case _  =>
+        rootCtx = setupRootCtx(tokenize(arg).toArray, rootCtx)
+        state.copy(context = rootCtx)
+
     case Quit =>
       // end of the world!
       state
@@ -531,4 +567,5 @@ class REPLDriver(settings: Array[String],
   //private def printDiagnostic(dia: Diagnostic)(implicit state: State) = dia.level match
   //  case interfaces.Diagnostic.INFO => out.println(dia.msg) // print REPL's special info diagnostics directly to out
   //  case _                          => ReplConsoleReporter.doReport(dia)(using state.context)
-}
+
+end REPLDriver

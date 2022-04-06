@@ -300,7 +300,7 @@ trait NetLogoTask extends Task with ValidateTask {
               val outputValue = NetLogoTask.report(instance.netLogo, mapped.name)
               if (outputValue == null) throw new InternalProcessingError(s"Value of netlogo output ${mapped.name} has been reported as null by netlogo")
               val runtimeClass = mapped.v.`type`.runtimeClass
-              if (!runtimeClass.isArray) Variable.unsecure(mapped.v, NetLogoTask.cast(outputValue, runtimeClass))
+              if (!runtimeClass.isArray) Variable.unsecureUntyped(mapped.v, NetLogoTask.cast(outputValue, runtimeClass))
               else {
                 val netLogoCollection: util.AbstractCollection[Any] =
                   if (classOf[AbstractCollection[Any]].isAssignableFrom(outputValue.getClass)) outputValue.asInstanceOf[AbstractCollection[Any]]
