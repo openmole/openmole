@@ -126,7 +126,7 @@ object Imports {
     }
   }
 
-  def directImportedFiles(source: File): Seq[ImportedFile] = level1ImportedFiles(parseImports(source.content), source.getParentFileSafe)
+  def directImportedFiles(source: File): Seq[ImportedFile] = level1ImportedFiles(parseImports(source.content), source.getParentFileSafe.getCanonicalFile)
 
   def importedFiles(script: File): Seq[SourceFile] = {
     val alreadyImported = collection.mutable.Set[File](script.getCanonicalFile)
