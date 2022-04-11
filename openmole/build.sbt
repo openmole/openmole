@@ -363,7 +363,7 @@ lazy val netLogoAPI = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo",
 lazy val netLogo5API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo5", imports = Seq("*")) dependsOn (netLogoAPI) settings(
   crossPaths := false,
   autoScalaLibrary := false,
-  libraryDependencies += Libraries.netlogo5 intransitive(),
+  libraryDependencies += Libraries.netlogo5,
   libraryDependencies -= Libraries.scalatest
 ) settings (toolsSettings: _*)
 
@@ -371,7 +371,7 @@ lazy val netLogo5API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo5
 lazy val netLogo6API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo6", imports = Seq("*")) dependsOn (netLogoAPI) settings(
   crossPaths := false,
   autoScalaLibrary := false,
-  libraryDependencies += Libraries.netlogo6 intransitive(),
+  libraryDependencies += Libraries.netlogo6,
   libraryDependencies -= Libraries.scalatest,
 ) settings (toolsSettings: _*) 
 
@@ -538,7 +538,11 @@ lazy val netLogo = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo", im
 
 lazy val netLogo5 = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo5") dependsOn(netLogo, openmoleDSL, external, netLogo5API) settings (pluginSettings: _*)
 
-lazy val netLogo6 = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo6") dependsOn(netLogo, openmoleDSL, external, netLogo6API) settings (pluginSettings: _*)
+lazy val netLogo6 = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo6", imports = Seq("*")) dependsOn(netLogo, openmoleDSL, external, netLogo6API) settings (pluginSettings: _*) settings (
+  excludeDependencies ++= Seq(
+    ExclusionRule("org.openmole.library", "ccl-northwestern-edu-netlogo6")
+  )
+)
 
 lazy val jvm = OsgiProject(pluginDir, "org.openmole.plugin.task.jvm", imports = Seq("*")) dependsOn(openmoleDSL, external, workspace) settings (pluginSettings: _*)
 
