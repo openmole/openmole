@@ -52,8 +52,7 @@ object Project {
             |class ${name}Clazz {
             |${makeImportTree(tree)}
             |}
-            |@transient final lazy val $name = new ${name}Class
-            |}""".stripMargin
+            |@transient lazy val $name = new ${name}Clazz""".stripMargin
 
     def makeVal(identifier: String, file: File) =
       s"""@transient lazy val ${identifier} = ${uniqueName(file)}"""
