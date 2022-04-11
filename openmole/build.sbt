@@ -536,7 +536,11 @@ lazy val external = OsgiProject(pluginDir, "org.openmole.plugin.task.external", 
 
 lazy val netLogo = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo", imports = Seq("*")) dependsOn(openmoleDSL, external, netLogoAPI) settings (pluginSettings: _*)
 
-lazy val netLogo5 = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo5") dependsOn(netLogo, openmoleDSL, external, netLogo5API) settings (pluginSettings: _*)
+lazy val netLogo5 = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo5") dependsOn(netLogo, openmoleDSL, external, netLogo5API) settings (pluginSettings: _*) settings (
+  excludeDependencies ++= Seq(
+    ExclusionRule("org.openmole.library", "ccl-northwestern-edu-netlogo5")
+  )
+)
 
 lazy val netLogo6 = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo6", imports = Seq("*")) dependsOn(netLogo, openmoleDSL, external, netLogo6API) settings (pluginSettings: _*) settings (
   excludeDependencies ++= Seq(
