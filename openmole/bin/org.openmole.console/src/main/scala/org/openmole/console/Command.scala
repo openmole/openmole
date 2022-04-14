@@ -17,28 +17,28 @@
 
 package org.openmole.console
 
-import java.io.{ File, IOException, StringReader }
+import java.io.{File, IOException, StringReader}
 import java.util.logging.Level
-
 import org.openmole.core.buildinfo
-import org.openmole.core.compiler._
-import org.openmole.core.dsl._
+import org.openmole.core.compiler.*
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.project._
-import org.openmole.core.tools.io.Prettifier._
+import org.openmole.core.project.*
+import org.openmole.core.tools.io.Prettifier.*
 import org.openmole.core.workflow.execution.Environment
-import org.openmole.core.workflow.mole.{ Mole, MoleExecution }
+import org.openmole.core.workflow.mole.{Mole, MoleExecution, MoleServices}
 import org.openmole.core.workflow.validation.Validation
 import org.openmole.core.module
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.preference.Preference
 import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
-import org.openmole.core.services._
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
+import org.openmole.core.services.*
 import org.openmole.tool.crypto.Cypher
-import org.openmole.tool.random.{ RandomProvider, Seeder }
+import org.openmole.tool.random.{RandomProvider, Seeder}
 
 class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
 
@@ -83,6 +83,9 @@ class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
       case None ⇒
     }
   }
+
+  def start(dsl: DSL)(implicit moleServices: MoleServices): MoleExecution =
+    dsl.start(true)
 
   private def exceptionToString(e: Throwable) = e.stackString
 
