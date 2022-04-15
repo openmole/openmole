@@ -45,57 +45,20 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
   def manager = treeNodePanel.treeNodeManager
 
   val message = Var[Div](div())
-  // val fileNumberThreshold = 1000
 
   implicit def someIntToString(i: Option[Int]): String = i.map {
     _.toString
   }.getOrElse("")
 
   // Filter tool
-  // val thresholdTag = "threshold"
   val nameTag = "names"
   val thresholdChanged = Var(false)
-
-  //  val thresholdInput = inputTag(fileNumberThreshold.toString).amend(
-  //    width := "55px",
-  //    onMountFocus,
-  //    cls := "form-control", marginTop := "12px", padding := "10px",
-  //    cls.toggle("colorTransition") <-- thresholdChanged.signal
-  //  )
 
   val findInput = inputTag("").amend(
     width := "180px",
     marginTop := "12px",
     onMountFocus
   )
-
- // def updateFilter = manager.fileFilter.now.copy(findString = Some(findInput.ref.value))
-
-  //  def resetFilterThresold = {
-  //    thresholdInput.ref.value = "1000"
-  //    thresholdChanged.set(true)
-  //  }
-
-  def resetFilterTools: Unit = {
-    val cont = {
-      if (findInput.ref.value == "") None
-      else Some(findInput.ref.value)
-    }
-  //  updateFilter(manager.fileFilter.now.copy(findString = cont))
-  }
-
-  def setDefaultFilter = {
-    //  thresholdInput.ref.value = "1000"
-   // resetFilterTools
-   // treeNodeManager.invalidRootCache
-    findInput.ref.value = None
-    filterToolOpen.set(false)
-  }
-
-  def filterSubmit = {
-    resetFilterTools
-    treeNodeManager.invalidCurrentCache
-  }
 
   val filterToolOpen = Var(false)
 
@@ -104,10 +67,11 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
     //  label("# of entries ", width := "30px", margin := "0 15 0 10"),
     // form(thresholdInput, onSubmit.preventDefault --> { _ ⇒ filterSubmit }),
     label("Find ", width := "30px", margin := "0 15 0 10"),
-    form(findInput, onSubmit.preventDefault --> { _ ⇒ filterSubmit }),
+    form(findInput, onMountFocus, onSubmit.preventDefault --> { _ ⇒ treeNodeManager.find(findInput.ref.value) }),
     div(cls := "close-button bi-x", onClick --> { _ =>
-      setDefaultFilter
-      filterSubmit
+      filterToolOpen.set(false)
+      findInput.ref.value = ""
+      treeNodeManager.resetFileFinder
     })
   )
 
@@ -185,29 +149,25 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
             if (o) "open-transition" else "close-transition"
           },
           filterTool
-        ),
-        div(OMTags.glyph_filter,
-          cls := "filtering-files-item-selected",
-          onClick --> { _ ⇒ filterToolOpen.update(!_) }),
-      ),
-      div(
-        cls := "sorting-files",
-        children <-- sortingState.signal.map { ss ⇒
-          Seq(
-            item(Name, ss),
-            item(Time, ss),
-            item(Size, ss),
-            div(
-              cls := "sorting-file-item-caret",
-              ss.state match {
-                case Up ⇒ glyph_triangle_up
-                case Down ⇒ glyph_triangle_down
-              }
+        )),
+        div(
+          cls := "sorting-files",
+          children <-- sortingState.signal.map { ss ⇒
+            Seq(
+              item(Name, ss),
+              item(Time, ss),
+              item(Size, ss),
+              div(
+                cls := "sorting-file-item-caret",
+                ss.state match {
+                  case Up ⇒ glyph_triangle_up
+                  case Down ⇒ glyph_triangle_down
+                }
+              )
             )
-          )
-        }
+          }
+        )
       )
-    )
 
   }
 

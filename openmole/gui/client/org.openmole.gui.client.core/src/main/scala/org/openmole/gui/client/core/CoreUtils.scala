@@ -90,7 +90,11 @@ object CoreUtils {
   def listFiles(safePath: SafePath, fileFilter: FileFilter): Future[ListFilesData] = {
     Post()[Api].listFiles(safePath, fileFilter).call()
   }
-
+  
+ def findFilesContaining(safePath: SafePath, findString: String): Future[Seq[(SafePath, Boolean)]] = {
+    Post()[Api].recursiveListFiles(safePath, findString).call()
+  }
+ 
   def appendToPluggedIfPlugin(safePath: SafePath) = {
     Post()[Api].appendToPluggedIfPlugin(safePath).call().foreach { _ ⇒
       panels.treeNodeManager.invalidCurrentCache

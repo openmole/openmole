@@ -735,7 +735,7 @@ padding-bottom: 90px;
   justify-content: right;
   padding: 10 50 14 10;
   background-color: #3f3d56;
-  margin-right: -30px;
+  margin-right: -100px;
 }
 
 .sorting-files-item,
@@ -904,4 +904,11 @@ padding-bottom: 90px;
 .plugin-file.unplugged {
        background: lightgray;
        color: #444;
+ }
+
+ .findFile{
+  fontStyle:italic;
+  cursor: pointer;
+  margin-left: 20px;
+  line-height: 27px;
  }

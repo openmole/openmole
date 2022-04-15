@@ -273,11 +273,11 @@ class ApiImpl(services: Services, applicationControl: ApplicationControl) extend
     utils.listFiles(sp, fileFilter, listPlugins().toSeq)(org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace)
   }
 
-   def recursiveListFiles(sp: SafePath, fileFilter: data.FileFilter, findString: String): ListFilesData = atomic { implicit ctx ⇒
+   def recursiveListFiles(sp: SafePath, findString: String): Seq[(SafePath, Boolean)] = atomic { implicit ctx ⇒
     import services._
-    utils.recursiveListFiles(sp, fileFilter, listPlugins().toSeq, findString: String)(org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace)
+    utils.recursiveListFiles(sp, findString)(org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace)
   }
-   
+
   def isEmpty(sp: SafePath): Boolean = {
     import services._
     import org.openmole.gui.ext.data.ServerFileSystemContext.project

@@ -137,7 +137,8 @@ object utils {
     getFile0(paths, root)
   }
 
-  private def listFilesFilter(treeNodesData: Seq[TreeNodeData], fileFilter: FileFilter)(implicit context: ServerFileSystemContext, workspace: Workspace): ListFilesData = {
+  def listFiles(path: SafePath, fileFilter: FileFilter, pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext, workspace: Workspace): ListFilesData = {
+    val treeNodesData = seqfileToSeqTreeNodeData(safePathToFile(path).listFilesSafe.toSeq, pluggedList)
 
     val sorted = treeNodesData.sorted(fileFilter.fileSorting)
     val nbFiles = treeNodesData.size
@@ -148,16 +149,10 @@ object utils {
     }
   }
 
-  def listFiles(path: SafePath, fileFilter: FileFilter, pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext, workspace: Workspace): ListFilesData = {
-    val allFiles: Seq[File] = safePathToFile(path).listFilesSafe.toSeq
-    listFilesFilter(seqfileToSeqTreeNodeData(allFiles, pluggedList), fileFilter)
-  }
-
-  def recursiveListFiles(path: SafePath, fileFilter: FileFilter, pluggedList: Seq[Plugin], findString: String)(implicit context: ServerFileSystemContext, workspace: Workspace): ListFilesData = {
+  def recursiveListFiles(path: SafePath, findString: String)(implicit context: ServerFileSystemContext, workspace: Workspace): Seq[(SafePath, Boolean)] = {
     val fPath = safePathToFile(path).getAbsolutePath
     val allFiles = safePathToFile(path).recursiveListFilesSafe((f: File) => fPath != f.getAbsolutePath && f.getName.contains(findString))
-    listFilesFilter(seqfileToSeqTreeNodeData(allFiles.filter { f ⇒ f.getName.contains(findString) }, pluggedList), fileFilter)
-
+    allFiles.filter { case (f) ⇒ f.getName.contains(findString) }.map{f=> (fileToSafePath(f), f.isDirectory)}
   }
 
 

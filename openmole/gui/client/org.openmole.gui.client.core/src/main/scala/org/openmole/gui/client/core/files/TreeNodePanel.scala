@@ -217,6 +217,9 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
       },
       div(
         display.flex, justifyContent.flexEnd,
+        div(OMTags.glyph_search,
+          cls := "filtering-files-item-selected",
+          onClick --> { _ ⇒ fileToolBar.filterToolOpen.update(!_) }),
         div(glyph_refresh, cls := "treePathItems file-refresh", onClick --> { _ ⇒ treeNodeManager.invalidCurrentCache }),
         div(cls := "bi-three-dots-vertical treePathItems", fontSize := "20px", onClick --> { _ ⇒
           multiTool.update { mcot ⇒
@@ -233,10 +236,14 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
             case _ ⇒
           }
         })
-      ),
-      plusFile.signal.expand(createFileTool),
-      multiTool.signal.map { m ⇒ m != Off }.expand(copyOrTrashTool),
-      treeNodeManager.error --> treeNodeManager.errorObserver,
+      )
+      ,
+      plusFile.signal.expand(createFileTool)
+      ,
+      multiTool.signal.map { m ⇒ m != Off }.expand(copyOrTrashTool)
+      ,
+      treeNodeManager.error --> treeNodeManager.errorObserver
+      ,
       treeNodeManager.comment --> treeNodeManager.commentObserver
     )
 
@@ -262,7 +269,6 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
   def goToDirButton(safePath: SafePath, name: String = ""): HtmlElement =
     span(cls := "treePathItems", name,
       onClick --> { _ ⇒
-        fileToolBar.setDefaultFilter
         treeNodeManager.switch(safePath)
       },
       dropPairs,
@@ -284,80 +290,55 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
   //  }
 
   val treeView: Div = {
-    // computePluggables
-    //tree.set(treeNodeManager.computeCurrentSons(fileFilter).withFutureWaiter("Get files", (sons: ListFiles) ⇒ {
-
-    println("KEYS :" + treeNodeManager.sons.now().keys)
     div(cls := "file-scrollable-content",
-      children <-- treeNodeManager.sons.signal.combineWith(treeNodeManager.dirNodeLine.signal).map {
-        case (sons, currentDir) ⇒
-          if (currentDir == treeNodeManager.root && sons.isEmpty) {
-            Seq(div("Create a first OpenMOLE script (.oms)", cls := "message"))
-          }
-          else {
-            if (sons.contains(currentDir)) {
-              sons(currentDir).list.zipWithIndex.flatMap { case (tn, id) =>
-                Seq(drawNode(tn, id).render)
-              }
+      children <-- treeNodeManager.sons.signal.combineWith(treeNodeManager.dirNodeLine.signal).combineWith(treeNodeManager.findFilesContaining.signal).map {
+        case (sons, currentDir, findString, foundFiles) ⇒
+          if (!foundFiles.isEmpty) {
+            foundFiles.map { case (sp, isDir) => div(s"${sp.normalizedPathString}", cls := "findFile", onClick --> { _ =>
+              fileToolBar.filterToolOpen.set(false)
+              treeNodeManager.resetFileFinder
+              fileToolBar.findInput.ref.value = ""
+              val switchTarget = if (isDir) sp else sp.parent
+              treeNodeManager.switch(switchTarget)
+              treeNodeManager.computeCurrentSons()
+              displayNode(sp)
+            })
             }
-            else Seq(div())
+          } else {
+            if (currentDir == treeNodeManager.root && sons.isEmpty) {
+              Seq(div("Create a first OpenMOLE script (.oms)", cls := "message"))
+            }
+            else {
+              if (sons.contains(currentDir)) {
+                sons(currentDir).list.zipWithIndex.flatMap { case (tn, id) =>
+                  Seq(drawNode(tn, id).render)
+                }
+              }
+              else Seq(div())
+            }
           }
       }
-
-      //          tbody(
-      //            backgroundColor <-- selectionMode.signal.map { sM ⇒
-      //              if (sM) omsheet.BLUE else omsheet.DARK_GREY
-      //            },
-      //            omsheet.fileList,
-      //            child <-- treeWarning.signal.map { tW ⇒
-      //              if (sons.list.length < sons.nbFilesOnServer && tW) {
-      //                div(
-      //                  omsheet.moreEntries,
-      //                  div(
-      //                    omsheet.moreEntriesText,
-      //                    div(
-      //                      s"Max of 1,000 files (${100000 / sons.nbFilesOnServer}%) displayed simultaneously",
-      //                      div(
-      //                        "Use the ",
-      //                        span(
-      //                          "Filter tool",
-      //                          cursor.pointer, color := omsheet.BLUE,
-      //                          onClick --> { _ ⇒ fileToolBar.selectTool(FilterTool) }
-      //                        ), " to refine your search"
-      //                      )
-      //                    )
-      //                  )
-      //                )
-      //              }
-      //              else div()
-      //            },
-      //            for (tn ← sons.list) yield {
-      //              drawNode(tn).render
-      //            },
-      //            //            onscroll := { () ⇒
-      //            //              Popover.hide
-      //            //            },
-      //            selectionMode --> selectionModeObserver
-      //          )
-
     )
   }
 
-  def displayNode(tn: TreeNode) = tn match {
+  def displayNode(safePath: SafePath): Unit = {
+    if (safePath.extension.displayable) {
+      downloadFile(
+        safePath,
+        saveFile = false,
+        hash = true,
+        onLoaded = (content: String, hash: Option[String]) ⇒ {
+          fileDisplayer.display(safePath, content, hash.get, safePath.extension, services)
+          treeNodeManager.invalidCurrentCache
+        }
+      )
+    }
+  }
+
+  def displayNode(tn: TreeNode): Unit = tn match {
     case fn: FileNode ⇒
-      val ext = FileExtension(tn.name)
       val tnSafePath = treeNodeManager.dirNodeLine.now ++ tn.name
-      if (ext.displayable) {
-        downloadFile(
-          tnSafePath,
-          saveFile = false,
-          hash = true,
-          onLoaded = (content: String, hash: Option[String]) ⇒ {
-            fileDisplayer.display(tnSafePath, content, hash.get, ext, services)
-            treeNodeManager.invalidCurrentCache
-          }
-        )
-      }
+      displayNode(tnSafePath)
     case _ ⇒
   }
 
@@ -380,23 +361,9 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
       plusFile.set(false)
       val currentMultiTool = multiTool.signal.now()
       if (currentMultiTool == Off || currentMultiTool == Paste) todo()
-      // treeNodeManager.fileFilter.update(ff => ff.copy(findString = None))
       fileToolBar.filterToolOpen.set(false)
       treeNodeManager.computeCurrentSons()
     }
-
-  def path(tn: TreeNode) = {
-    //    findString match {
-    //      case Some(s) =>
-    //        val dirPath = tn match {
-    //          case (f: FileNode) => s"${f.normalizedPathString}/"
-    //          case _ => ""
-    //        }
-    //        div(s"$dirPath${tn.name}", fontStyle.italic)
-    //  case _ =>
-    div(tn.name)
-    //}
-  }
 
   case class ReactiveLine(id: Int, tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) {
 
@@ -451,7 +418,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
             })
           },
           dirBox(tn).amend(cls := "file0", fileClick(todo), draggable := true),
-          div(child <-- treeNodeManager.fileFilter.signal.map { ff => path(tn) }).amend(
+          div(tn.name,
             cls.toggle("cursor-pointer") <-- multiTool.signal.map { mt ⇒
               mt == Off || mt == Paste
             },

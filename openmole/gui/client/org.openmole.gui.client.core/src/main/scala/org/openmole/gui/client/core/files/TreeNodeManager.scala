@@ -48,6 +48,8 @@ class TreeNodeManager {
 
   val fileFilter = Var(FileFilter.defaultFilter)
 
+  val findFilesContaining: Var[(Option[String], Seq[(SafePath, Boolean)])] = Var((None, Seq()))
+
   val errorObserver = Observer[Option[TreeNodeError]] { err ⇒
     err.foreach(panels.alertPanel.treeNodeErrorDiv)
   }
@@ -114,7 +116,6 @@ class TreeNodeManager {
     val cur = dirNodeLine.now
 
     def updateSons(safePath: SafePath) = {
-      println("UPDATE ....")
       CoreUtils.listFiles(safePath, fileFilter.now()).foreach { lf =>
         sons.update { s =>
           s.updated(cur, lf)
@@ -127,6 +128,24 @@ class TreeNodeManager {
         if (!sons.now().contains(safePath))
           updateSons(safePath)
       case _ ⇒ Future(ListFilesData(Seq(), 0))
+    }
+  }
+
+  def resetFileFinder = findFilesContaining.set((None, Seq()))
+
+  def find(findString: String) = {
+    def updateSearch = {
+      val safePath: SafePath = dirNodeLine.now()
+      CoreUtils.findFilesContaining(safePath, findString).foreach { fs =>
+        findFilesContaining.set((Some(findString), fs))
+      }
+    }
+
+    if (!findString.isEmpty) {
+      findFilesContaining.now() match {
+        case (Some(fs), _) if (fs != findString) => updateSearch
+        case (None, _) => updateSearch
+      }
     }
   }
 

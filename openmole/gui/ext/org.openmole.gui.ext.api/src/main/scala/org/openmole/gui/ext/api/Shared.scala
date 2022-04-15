@@ -51,7 +51,7 @@ trait Api {
   def existsExcept(exception: SafePath, exceptItSelf: Boolean): Boolean
   def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
   def listFiles(path: SafePath, fileFilter: FileFilter = FileFilter()): ListFilesData
-  def recursiveListFiles(path: SafePath, fileFilter: FileFilter = FileFilter(), findString: String = ""): ListFilesData
+  def recursiveListFiles(path: SafePath, findString: String = ""): Seq[(SafePath, Boolean)]
   def isEmpty(safePath: SafePath): Boolean
   def mdToHtml(safePath: SafePath): String
   def move(from: SafePath, to: SafePath): Unit
