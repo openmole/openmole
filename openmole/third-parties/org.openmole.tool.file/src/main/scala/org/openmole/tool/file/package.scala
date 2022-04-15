@@ -94,6 +94,8 @@ package file {
       def listFilesSafe = Option(file.listFiles).getOrElse(Array.empty[File])
 
       def listFilesSafe(filter: File ⇒ Boolean) = Option(file.listFiles(filter)).getOrElse(Array.empty[File])
+      
+      def recursiveListFilesSafe(filter: File ⇒ Boolean) = Option(file.listRecursive(filter).toArray).getOrElse(Array.empty[File])
 
       def getParentFileSafe: File =
         file.getParentFile() match {

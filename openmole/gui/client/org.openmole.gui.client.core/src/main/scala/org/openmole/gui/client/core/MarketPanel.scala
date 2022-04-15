@@ -48,7 +48,7 @@ class MarketPanel(manager: TreeNodeManager) {
   }.getOrElse(Seq()))
   val overwriteAlert: Var[Option[MarketIndexEntry]] = Var(None)
 
-  overwriteAlert.signal.combineWith(manager.current.signal).map {
+  overwriteAlert.signal.combineWith(manager.dirNodeLine.signal).map {
     case (oAlert, current) ⇒
       oAlert match {
         case Some(e: MarketIndexEntry) ⇒
@@ -88,7 +88,7 @@ class MarketPanel(manager: TreeNodeManager) {
                 div(
                   colBS(2),
                   downloadButton(entry, () ⇒ {
-                    exists(manager.current.now ++ entry.name, entry)
+                    exists(manager.dirNodeLine.now ++ entry.name, entry)
                   })),
                 div(colBS(7), (paddingTop := "7"),
                   label(entry.name, badge_primary, omsheet.tableTag)
@@ -115,12 +115,12 @@ class MarketPanel(manager: TreeNodeManager) {
     }
 
   def download(entry: MarketIndexEntry) = {
-    val path = manager.current.now ++ entry.name
+    val path = manager.dirNodeLine.now ++ entry.name
     downloading.set(downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processing()))))
     Post()[Api].getMarketEntry(entry, path).call().foreach { d ⇒
       downloading.update(d ⇒ d.updatedFirst(_._1 == entry, (entry, Var(Processed()))))
       downloading.now.headOption.foreach(_ ⇒ modalDialog.hide)
-      panels.treeNodePanel.refreshAndDraw
+      panels.treeNodeManager.invalidCurrentCache
     }
   }
 

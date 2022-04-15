@@ -10,7 +10,7 @@ import org.openmole.core.highlight.HighLight
 import org.openmole.core.module
 import org.openmole.core.pluginmanager._
 import org.openmole.core.services.Services
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.gui.ext.data
 import org.openmole.gui.ext.data._
 import org.openmole.tool.file._
@@ -18,8 +18,8 @@ import org.openmole.tool.logger.JavaLogger
 
 import java.text.SimpleDateFormat
 import scala.annotation.tailrec
-import scala.io.{ BufferedSource, Codec }
-import scala.util.{ Failure, Success, Try }
+import scala.io.{BufferedSource, Codec}
+import scala.util.{Failure, Success, Try}
 import collection.JavaConverters._
 
 object utils {
@@ -41,7 +41,9 @@ object utils {
   def isPlugged(file: File, pluggedList: Seq[Plugin])(implicit workspace: Workspace): Boolean = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     val safePath = fileToSafePath(file)
-    pluggedList.map { _.projectSafePath }.contains(safePath)
+    pluggedList.map {
+      _.projectSafePath
+    }.contains(safePath)
   }
 
   def allPluggableIn(path: SafePath)(implicit workspace: Workspace): Seq[SafePath] = {
@@ -72,18 +74,18 @@ object utils {
   def fileToSafePath(f: File)(implicit context: ServerFileSystemContext, workspace: Workspace): SafePath = {
     context match {
       case _: ProjectFileSystem ⇒ SafePath(getPathArray(f, projectsDirectory))
-      case _                    ⇒ SafePath(getPathArray(f, new File("")))
+      case _ ⇒ SafePath(getPathArray(f, new File("")))
     }
   }
 
   def safePathToFile(s: SafePath)(implicit context: ServerFileSystemContext, workspace: Workspace): File = {
     context match {
       case _: ProjectFileSystem ⇒ getFile(webUIDirectory, s.path)
-      case _                    ⇒ getFile(new File(""), s.path)
+      case _ ⇒ getFile(new File(""), s.path)
     }
   }
 
-  def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext = ProjectFileSystem(), workspace: Workspace): Option[TreeNodeData] = {
+  def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin], findPath: Boolean = false)(implicit context: ServerFileSystemContext = ProjectFileSystem(), workspace: Workspace): Option[TreeNodeData] = {
 
     val time = if (f.exists) Some(
       java.nio.file.Files.readAttributes(f, classOf[BasicFileAttributes]).lastModifiedTime.toMillis
@@ -135,24 +137,29 @@ object utils {
     getFile0(paths, root)
   }
 
-  def listFiles(path: SafePath, fileFilter: data.FileFilter, pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext, workspace: Workspace): ListFilesData = {
+  private def listFilesFilter(treeNodesData: Seq[TreeNodeData], fileFilter: FileFilter)(implicit context: ServerFileSystemContext, workspace: Workspace): ListFilesData = {
 
-    val allFiles = safePathToFile(path).listFilesSafe.toSeq
-
-    val filteredByName: Seq[TreeNodeData] = seqfileToSeqTreeNodeData({
-      if (fileFilter.nameFilter.isEmpty) allFiles
-      else allFiles.filter { f ⇒ f.getName.contains(fileFilter.nameFilter) }
-    }, pluggedList)
-
-    val sorted = filteredByName.sorted(fileFilter.fileSorting)
-    val threshold = fileFilter.threshold.getOrElse(1000)
-    val nbFiles = allFiles.size
+    val sorted = treeNodesData.sorted(fileFilter.fileSorting)
+    val nbFiles = treeNodesData.size
 
     fileFilter.firstLast match {
-      case First() ⇒ ListFilesData(sorted.take(threshold), nbFiles)
-      case Last()  ⇒ ListFilesData(sorted.takeRight(threshold).reverse, nbFiles)
+      case First() ⇒ ListFilesData(sorted, nbFiles)
+      case Last() ⇒ ListFilesData(sorted.reverse, nbFiles)
     }
   }
+
+  def listFiles(path: SafePath, fileFilter: FileFilter, pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext, workspace: Workspace): ListFilesData = {
+    val allFiles: Seq[File] = safePathToFile(path).listFilesSafe.toSeq
+    listFilesFilter(seqfileToSeqTreeNodeData(allFiles, pluggedList), fileFilter)
+  }
+
+  def recursiveListFiles(path: SafePath, fileFilter: FileFilter, pluggedList: Seq[Plugin], findString: String)(implicit context: ServerFileSystemContext, workspace: Workspace): ListFilesData = {
+    val fPath = safePathToFile(path).getAbsolutePath
+    val allFiles = safePathToFile(path).recursiveListFilesSafe((f: File) => fPath != f.getAbsolutePath && f.getName.contains(findString))
+    listFilesFilter(seqfileToSeqTreeNodeData(allFiles.filter { f ⇒ f.getName.contains(findString) }, pluggedList), fileFilter)
+
+  }
+
 
   def copyProjectFile(safePath: SafePath, newName: String, followSymlinks: Boolean = false)(implicit workspace: Workspace): SafePath = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project

@@ -51,7 +51,7 @@ class PluginPanel {
                 div(p.projectSafePath.name, justifyContent.flexStart),
                 div(p.time, cls := "table-time", marginLeft := "20px"),
                 onClick --> { (e: MouseEvent) ⇒
-                  panels.treeNodePanel.draw(p.projectSafePath.parent)
+                  panels.treeNodeManager.switch(p.projectSafePath.parent)
                 }
               )
             }

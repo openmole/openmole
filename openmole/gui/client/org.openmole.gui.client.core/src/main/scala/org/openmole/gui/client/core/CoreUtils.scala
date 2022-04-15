@@ -66,19 +66,19 @@ object CoreUtils {
 
   def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {
     Post()[Api].deleteFile(path, ServerFileSystemContext.project).call().foreach { d ⇒
-      panels.treeNodePanel.refreshAnd(ontrashed)
+      panels.treeNodePanel.invalidCacheAnd(ontrashed)
     }
   }
 
   def trashNodes(paths: Seq[SafePath])(ontrashed: () ⇒ Unit): Unit = {
     Post()[Api].deleteFiles(paths, ServerFileSystemContext.project).call().foreach { d ⇒
-      panels.treeNodePanel.refreshAnd(ontrashed)
+      panels.treeNodePanel.invalidCacheAnd(ontrashed)
     }
   }
 
   def duplicate(safePath: SafePath, newName: String): Unit =
     Post()[Api].duplicate(safePath, newName).call().foreach { y ⇒
-      panels.treeNodePanel.refreshAndDraw
+      panels.treeNodeManager.invalidCurrentCache
     }
 
   def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Seq[SafePath]] =
@@ -93,7 +93,7 @@ object CoreUtils {
 
   def appendToPluggedIfPlugin(safePath: SafePath) = {
     Post()[Api].appendToPluggedIfPlugin(safePath).call().foreach { _ ⇒
-      panels.treeNodePanel.refreshAndDraw
+      panels.treeNodeManager.invalidCurrentCache
       panels.pluginPanel.getPlugins
     }
   }
@@ -182,7 +182,7 @@ object CoreUtils {
   //      b ⇒
   //        treeNodeTabs -- b
   //        treeNodePanel.displayNode(FileNode(Var(b.name), 0L, 0L))
-  //        TreeNodePanel.refreshAndDraw
+  //        treeNodeManager.invalidCurrentCache
   //    }
 
 }

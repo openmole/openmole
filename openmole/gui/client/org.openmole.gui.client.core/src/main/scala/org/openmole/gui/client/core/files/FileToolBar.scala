@@ -44,119 +44,94 @@ import org.openmole.gui.ext.client.FileManager
 class FileToolBar(treeNodePanel: TreeNodePanel) {
   def manager = treeNodePanel.treeNodeManager
 
-  val fileFilter = Var(FileFilter.defaultFilter)
   val message = Var[Div](div())
-  val fileNumberThreshold = 1000
+  // val fileNumberThreshold = 1000
 
   implicit def someIntToString(i: Option[Int]): String = i.map {
     _.toString
   }.getOrElse("")
 
   // Filter tool
-  val thresholdTag = "threshold"
+  // val thresholdTag = "threshold"
   val nameTag = "names"
   val thresholdChanged = Var(false)
 
-  val thresholdInput = inputTag(fileNumberThreshold.toString).amend(
-    width := "55px",
-    onMountFocus,
-    cls := "form-control", marginTop := "12px", padding := "10px",
-    cls.toggle("colorTransition") <-- thresholdChanged.signal
-  )
+  //  val thresholdInput = inputTag(fileNumberThreshold.toString).amend(
+  //    width := "55px",
+  //    onMountFocus,
+  //    cls := "form-control", marginTop := "12px", padding := "10px",
+  //    cls.toggle("colorTransition") <-- thresholdChanged.signal
+  //  )
 
-  val nameInput = inputTag("").amend(
-    width := "60px",
+  val findInput = inputTag("").amend(
+    width := "180px",
     marginTop := "12px",
     onMountFocus
   )
 
-  def updateFilter: Unit = updateFilter(fileFilter.now.copy(threshold = thresholdInput.ref.value, nameFilter = nameInput.ref.value))
+ // def updateFilter = manager.fileFilter.now.copy(findString = Some(findInput.ref.value))
 
-  def resetFilterThresold = {
-    thresholdInput.ref.value = "1000"
-    thresholdChanged.set(true)
-  }
+  //  def resetFilterThresold = {
+  //    thresholdInput.ref.value = "1000"
+  //    thresholdChanged.set(true)
+  //  }
 
   def resetFilterTools: Unit = {
-    Try {
-      val th = thresholdInput.ref.value.toInt
-      if (th > 1000 || thresholdInput.ref.value == "") resetFilterThresold
-      else thresholdChanged.set(false)
-    } match {
-      case Failure(exception) ⇒
-        resetFilterThresold
-        resetFilterTools
-      case Success(_) ⇒
-        updateFilter(fileFilter.now.copy(threshold = thresholdInput.ref.value, nameFilter = nameInput.ref.value))
+    val cont = {
+      if (findInput.ref.value == "") None
+      else Some(findInput.ref.value)
     }
-
+  //  updateFilter(manager.fileFilter.now.copy(findString = cont))
   }
 
   def setDefaultFilter = {
-    thresholdInput.ref.value = "1000"
-    nameInput.ref.value = ""
+    //  thresholdInput.ref.value = "1000"
+   // resetFilterTools
+   // treeNodeManager.invalidRootCache
+    findInput.ref.value = None
+    filterToolOpen.set(false)
   }
 
-  def filterSubmit {
+  def filterSubmit = {
     resetFilterTools
-    treeNodePanel.invalidCacheAndDraw
+    treeNodeManager.invalidCurrentCache
   }
 
   val filterToolOpen = Var(false)
 
   val filterTool = div(
     cls := "file-filter",
-    label("# of entries ", width := "30px", margin := "0 15 0 10"),
-    form(thresholdInput, onSubmit.preventDefault --> { _ ⇒ filterSubmit }),
-    label("name ", width := "30px", margin := "0 15 0 10"),
-    form(nameInput, onSubmit.preventDefault --> { _ ⇒ filterSubmit }),
+    //  label("# of entries ", width := "30px", margin := "0 15 0 10"),
+    // form(thresholdInput, onSubmit.preventDefault --> { _ ⇒ filterSubmit }),
+    label("Find ", width := "30px", margin := "0 15 0 10"),
+    form(findInput, onSubmit.preventDefault --> { _ ⇒ filterSubmit }),
     div(cls := "close-button bi-x", onClick --> { _ =>
       setDefaultFilter
       filterSubmit
-      filterToolOpen.set(false)
     })
   )
 
-//  val pluginButton =
-//    button(
-//      "Plug",
-//      btn_secondary,
-//      onClick --> { _ ⇒
-//        val directoryName = s"uploadPlugin${java.util.UUID.randomUUID().toString}"
-//        Post()[Api].copyToPluginUploadDir(directoryName, manager.selected.now).call().foreach { _ ⇒
-//          import scala.concurrent.duration._
-//          val names = manager.selected.now.map(_.name)
-//          Post(timeout = 5 minutes)[Api].addUploadedPlugins(directoryName, names).call().foreach {
-//            errs ⇒
-//              if (errs.isEmpty) pluginPanel.pluginDialog.show
-//              else panels.alertPanel.detail("Plugin import failed", ErrorData.stackTrace(errs.head), transform = RelativeCenterPosition, zone = FileZone)
-//          }
-//        //  unselectToolAndRefreshTree
-//        }
-//      }
-//    )
+  //  val pluginButton =
+  //    button(
+  //      "Plug",
+  //      btn_secondary,
+  //      onClick --> { _ ⇒
+  //        val directoryName = s"uploadPlugin${java.util.UUID.randomUUID().toString}"
+  //        Post()[Api].copyToPluginUploadDir(directoryName, manager.selected.now).call().foreach { _ ⇒
+  //          import scala.concurrent.duration._
+  //          val names = manager.selected.now.map(_.name)
+  //          Post(timeout = 5 minutes)[Api].addUploadedPlugins(directoryName, names).call().foreach {
+  //            errs ⇒
+  //              if (errs.isEmpty) pluginPanel.pluginDialog.show
+  //              else panels.alertPanel.detail("Plugin import failed", ErrorData.stackTrace(errs.head), transform = RelativeCenterPosition, zone = FileZone)
+  //          }
+  //        //  unselectToolAndRefreshTree
+  //        }
+  //      }
+  //    )
 
   //Filter
   implicit def stringToIntOption(s: String): Option[Int] = Try(s.toInt).toOption
-
-  def updateFilter(newFilter: FileFilter) = {
-    fileFilter.set(newFilter)
-  }
-
-  def switchAlphaSorting = {
-    updateFilter(fileFilter.now.switchTo(AlphaSorting()))
-    treeNodePanel.invalidCacheAndDraw
-  }
-
-  def switchTimeSorting = {
-    updateFilter(fileFilter.now.switchTo(TimeSorting()))
-    treeNodePanel.invalidCacheAndDraw
-  }
-
-  def switchSizeSorting = {
-    updateFilter(fileFilter.now.switchTo(SizeSorting()))
-    treeNodePanel.invalidCacheAndDraw
-  }
 
   val sortingGroup = {
     trait Sorting
@@ -194,9 +169,9 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
             }
             else Up))
           sorting match {
-            case Name ⇒ switchAlphaSorting
-            case Size ⇒ switchSizeSorting
-            case Time ⇒ switchTimeSorting
+            case Name ⇒ manager.switchAlphaSorting
+            case Size ⇒ manager.switchSizeSorting
+            case Time ⇒ manager.switchTimeSorting
           }
         }
       )
@@ -212,12 +187,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel) {
           filterTool
         ),
         div(OMTags.glyph_filter,
-          cls <-- fileFilter.signal.map { ff =>
-            "filtering-files-item" + {
-              if (ff.threshold != Some(1000) || ff.nameFilter != "") "-selected"
-              else ""
-            }
-          },
+          cls := "filtering-files-item-selected",
           onClick --> { _ ⇒ filterToolOpen.update(!_) }),
       ),
       div(

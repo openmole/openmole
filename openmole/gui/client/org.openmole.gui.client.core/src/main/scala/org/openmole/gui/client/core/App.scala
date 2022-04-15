@@ -142,13 +142,13 @@ object App {
 
       lazy val newEmpty = MenuAction("Empty project", () ⇒ {
         val fileName = "newProject.oms"
-        CoreUtils.addFile(panels.treeNodeManager.current.now, fileName, () ⇒ {
-          val toDisplay = panels.treeNodeManager.current.now ++ fileName
+        CoreUtils.addFile(panels.treeNodeManager.dirNodeLine.now, fileName, () ⇒ {
+          val toDisplay = panels.treeNodeManager.dirNodeLine.now ++ fileName
           FileManager.download(
             toDisplay,
             hash = true,
             onLoaded = (content, hash) ⇒ {
-              panels.treeNodePanel.refreshAndDraw
+              treeNodeManager.invalidCurrentCache
               fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OMS, panels.pluginServices)
             }
           )
@@ -173,7 +173,7 @@ object App {
         div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒
           panels.expandTo(panels.pluginPanel.render)
         }).tooltip("Plugins")
-      //            settingsItem
+        //            settingsItem
       )
 
       lazy val importModel = MenuAction("Import your model", () ⇒ {
@@ -200,7 +200,6 @@ object App {
       )
 
       // Define the option sequence
-
       Settings.settings.foreach { sets ⇒
         render(
           containerNode,
@@ -219,7 +218,7 @@ object App {
                 div(img(src := "img/openmole_dark.png", height := "70px"), cls := "nav-container"),
                 treeNodePanel.fileControler,
                 treeNodePanel.fileToolBar.sortingGroup,
-                treeNodePanel.view
+                treeNodePanel.treeView
               ),
               div(
                 cls := "tab-section",
@@ -227,19 +226,19 @@ object App {
                 treeNodeTabs.fontSizeControl,
                 treeNodeTabs.render.amend(cls := "tab-section")
               )
-            //                cls <-- openFileTree.signal.combineWith(panels.bannerAlert.isOpen).map {
-            //                  case (oft, io) ⇒
-            //                   // "centerpanel "
-            ////                    +
-            ////                      CoreUtils.ifOrNothing(oft, "reduce") +
-            ////                      CoreUtils.ifOrNothing(io, " banneropen")
-            //                },
-            //                  div(
-            //                    omsheet.textVersion,
-            //                    div(
-            //                      fontSize := "1em", s"${sets.version} ${sets.versionName}"),
-            //                    div(fontSize := "0.8em", s"built the ${sets.buildTime}")
-            //                  )
+              //                cls <-- openFileTree.signal.combineWith(panels.bannerAlert.isOpen).map {
+              //                  case (oft, io) ⇒
+              //                   // "centerpanel "
+              ////                    +
+              ////                      CoreUtils.ifOrNothing(oft, "reduce") +
+              ////                      CoreUtils.ifOrNothing(io, " banneropen")
+              //                },
+              //                  div(
+              //                    omsheet.textVersion,
+              //                    div(
+              //                      fontSize := "1em", s"${sets.version} ${sets.versionName}"),
+              //                    div(fontSize := "0.8em", s"built the ${sets.buildTime}")
+              //                  )
             ),
             panels.expandablePanel.signal.map {
               _ != None
@@ -252,6 +251,7 @@ object App {
           )
         )
       }
+      panels.treeNodeManager.invalidCurrentCache
     }
   }
 
