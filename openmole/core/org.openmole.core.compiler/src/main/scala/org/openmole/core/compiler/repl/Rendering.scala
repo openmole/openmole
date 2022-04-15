@@ -1,7 +1,7 @@
 package org.openmole.core.compiler.repl
 
-import dotty.tools.repl.*
-import dotty.tools.dotc
+import dotty.tools.repl.* // OM
+import dotty.tools.dotc // OM
 
 import java.io.{ StringWriter, PrintWriter }
 import java.lang.{ ClassLoader, ExceptionInInitializerError }
@@ -27,28 +27,28 @@ import dotc.util.SourcePosition
  *       `ReplDriver#resetToInitial` is called, the accompanying instance of
  *       `Rendering` is no longer valid.
  */
-class Rendering(parentClassLoader: Option[ClassLoader] = None) {
+class Rendering(parentClassLoader: Option[ClassLoader] = None) { // OM
 
   import Rendering._
 
   private val MaxStringElements: Int = 1000  // no need to mkString billions of elements
 
-  /** A `MessageRenderer` for the REPL without file positions */
+  /** OM A `MessageRenderer` for the REPL without file positions */
   private val messageRenderer = new MessageRendering {
     override def posStr(pos: SourcePosition, diagnosticLevel: String, message: Message)(using Context): String =
       hl(diagnosticLevel)(s"-- $diagnosticLevel:")
   }
 
-  private var myClassLoader: ClassLoader = _
+  private var myClassLoader: AbstractFileClassLoader = _
 
   private var myReplStringOf: Object => String = _
 
 
   /** Class loader used to load compiled code */
-  def classLoader()(using Context) =
-    if (myClassLoader != null) myClassLoader
+  def classLoader()(using Context) = // OM
+    if (myClassLoader != null && myClassLoader.root == ctx.settings.outputDir.value) myClassLoader
     else {
-      val parent = parentClassLoader.getOrElse {
+      val parent = Option(myClassLoader).orElse(parentClassLoader).getOrElse {
         val compilerClasspath = ctx.platform.classPath(using ctx).asURLs
         // We can't use the system classloader as a parent because it would
         // pollute the user classpath with everything passed to the JVM
@@ -61,7 +61,6 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None) {
       }
 
       myClassLoader = new AbstractFileClassLoader(ctx.settings.outputDir.value, parent)
-
       myReplStringOf = {
         // We need to use the ScalaRunTime class coming from the scala-library
         // on the user classpath, and not the one available in the current
@@ -91,7 +90,7 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None) {
    * then this bug will surface, so perhaps better not?
    * https://github.com/scala/bug/issues/12337
    */
-  private def truncate(str: String): String = {
+  private def truncate(str: String): String = { // OM
     val showTruncated = " ... large output truncated, print value to show all"
     val ncp = str.codePointCount(0, str.length) // to not cut inside code point
     if ncp <= MaxStringElements then str
@@ -99,7 +98,7 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None) {
   }
 
   /** Return a String representation of a value we got from `classLoader()`. */
-  private def replStringOf(value: Object)(using Context): String = {
+  private def replStringOf(value: Object)(using Context): String = { // OM
     assert(myReplStringOf != null,
       "replStringOf should only be called on values creating using `classLoader()`, but `classLoader()` has not been called so far")
     val res = myReplStringOf(value)
@@ -129,7 +128,7 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None) {
       }
   }
 
-  /** Formats errors using the `messageRenderer` */
+  /** OM Formats errors using the `messageRenderer` */
   def formatError(dia: Diagnostic)(implicit state: State): Diagnostic =
     new Diagnostic(
       messageRenderer.messageAndPos(dia)(using state.context),
@@ -175,8 +174,8 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None) {
     //at repl$.rs$line$2$.<clinit>(rs$line$2:1)
     //at repl$.rs$line$2.res1(rs$line$2)
     def isWrapperInitialization(ste: StackTraceElement) =
-      ste.getClassName.startsWith(nme.REPL_PACKAGE.toString + ".")  // d.symbol.owner.name.show is simple name
-        && (ste.getMethodName == nme.STATIC_CONSTRUCTOR.show || ste.getMethodName == nme.CONSTRUCTOR.show)
+      ste.getClassName.startsWith(REPL_WRAPPER_NAME_PREFIX)  // d.symbol.owner.name.show is simple name
+      && (ste.getMethodName == nme.STATIC_CONSTRUCTOR.show || ste.getMethodName == nme.CONSTRUCTOR.show)
 
     cause.formatStackTracePrefix(!isWrapperInitialization(_))
   end renderError
@@ -187,7 +186,7 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None) {
 }
 
 object Rendering {
-  final val REPL_WRAPPER_NAME_PREFIX = s"${nme.REPL_PACKAGE}.${str.REPL_SESSION_LINE}"
+  final val REPL_WRAPPER_NAME_PREFIX = str.REPL_SESSION_LINE
 
   extension (s: Symbol)
     def showUser(using Context): String = {

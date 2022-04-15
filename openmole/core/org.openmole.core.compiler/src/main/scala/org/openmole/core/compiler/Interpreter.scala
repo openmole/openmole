@@ -207,6 +207,7 @@ class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File)
         val m = resultClass(state).getDeclaredMethod(s"res${state.valIndex - 1}")
         m.invoke(null)
       else ()
+
     (getResult(runResult), runResult)
 
   def completion(code: String, position: Int, state: repl.REPLDriver.CompilerState) = synchronized {
@@ -214,7 +215,7 @@ class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File)
   }
 
   def resultClass(state: dotty.tools.repl.State) = 
-    Class.forName(s"repl$$.rs$$line$$${state.objectIndex}", true, classLoader(state.context))
+    Class.forName(s"rs$$line$$${state.objectIndex}", true, classLoader(state.context))
 
   def classLoader(context: dotty.tools.dotc.core.Contexts.Context) = driver.rederingValue.classLoader()(using context)
 

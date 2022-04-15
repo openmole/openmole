@@ -53,6 +53,7 @@ object Variable {
    * @return
    */
   def unsecure[@specialized T](p: Val[T], v: Any): Variable[T] = Variable[T](p, v.asInstanceOf[T])
+  def unsecureUntyped(p: Val[_], v: Any): Variable[_] = Variable(p.asInstanceOf[Val[Any]], v)
 
   /**
    * Seed for rng

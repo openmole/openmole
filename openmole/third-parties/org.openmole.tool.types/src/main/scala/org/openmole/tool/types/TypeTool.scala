@@ -32,6 +32,12 @@ object TypeTool {
     def isArray = m.runtimeClass.isArray
     def toArray = m.arrayManifest
     def asArray = m.asInstanceOf[Manifest[Array[T]]]
+    def toClassTag = ClassTag[T](m.runtimeClass)
+    def array(ts: T*): Array[T] = {
+      val a = m.newArray(ts.size)
+      for { (t, i) <- ts.zipWithIndex } a(i) = t
+      a
+    }
   }
 
   def manifestFromArrayUnsecure(m: Manifest[Array[_]]) = m.typeArguments.head.asInstanceOf[Manifest[Any]]
