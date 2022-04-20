@@ -46,7 +46,10 @@ sealed trait TreeNodeTab {
 
   val buildTab: Tab[TreeNodeTab] = Tab(
     this,
-    span(safePath.name),
+    span(display.flex, flexDirection.row, alignItems.center, safePath.name, span(cls := "close-button close-button-tab bi-x"), onClick --> { _ =>
+      saveContent()
+      panels.treeNodeTabs.remove(safePath)
+    }),
     block
   )
 
@@ -1057,7 +1060,7 @@ class TreeNodeTabs {
   //  )
 
   val render =
-    tabsElement.render("file-content editor-content").amend(
+    tabsElement.render("editor-content").amend(
       tabsElement.tabs --> tabsObserver,
       timer --> timerObserver
     )
