@@ -54,6 +54,7 @@ object OMTags {
   val glyph_arrow_left_right = cls("bi-arrow-left-right")
   val glyph_extract = cls("bi-file-earmark-zip-fill")
   lazy val glyph_filter = cls("bi-funnel-fill")
+  lazy val glyph_search = cls("bi-search")
   val glyph_puzzle = cls("bi-puzzle-fill")
   val glyph_unpuzzle = cls("bi-clock")
 

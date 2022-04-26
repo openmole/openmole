@@ -34,7 +34,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
         treeNodeTabs remove safePath
         treeNodeTabs.checkTabs
         panels.pluginPanel.getPlugins
-        treeNodePanel.invalidCacheAndDraw
+        treeNodeManager.invalidCurrentCache
     }
   }
 
@@ -54,7 +54,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
         r.error match {
           case Some(e: org.openmole.gui.ext.data.ErrorData) ⇒
             panels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
-          case _ ⇒ treeNodePanel.invalidCacheAndDraw
+          case _ ⇒treeNodeManager.invalidCurrentCache
         }
     }
     closeToolBox
@@ -100,7 +100,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     Post()[Api].renameFile(safePath, to).call().foreach {
       newNode ⇒
         treeNodeTabs.rename(safePath, newNode)
-        treeNodePanel.invalidCacheAndDraw
+        treeNodeManager.invalidCurrentCache
         treeNodeTabs.checkTabs
         treeNodePanel.currentSafePath.set(Some(safePath.parent ++ to))
         replacing()
@@ -111,12 +111,12 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     pluginState.isPlugged match {
       case true ⇒ OMPost()[Api].unplug(safePath).call().foreach { _ ⇒
         panels.pluginPanel.getPlugins
-        treeNodePanel.invalidCacheAndDraw
+        treeNodeManager.invalidCurrentCache
       }
       case false ⇒ OMPost()[Api].appendToPluggedIfPlugin(safePath).call().foreach {
         _ ⇒
           panels.pluginPanel.getPlugins
-          treeNodePanel.invalidCacheAndDraw
+          treeNodeManager.invalidCurrentCache
       }
     }
   }

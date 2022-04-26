@@ -39,11 +39,11 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
 
   def download(url: String) = {
     downloading.set(Processing())
-    Post()[Api].downloadHTTP(url, manager.current.now, extractCheckBox.ref.checked).call().foreach { d ⇒
+    Post()[Api].downloadHTTP(url, manager.dirNodeLine.now, extractCheckBox.ref.checked).call().foreach { d ⇒
       downloading.set(Processed())
       urlDialog.hide
       d match {
-        case Left(_)   ⇒ panels.treeNodePanel.refreshAndDraw
+        case Left(_)   ⇒ panels.treeNodeManager.invalidCurrentCache
         case Right(ex) ⇒ bannerAlert.registerWithDetails("Download failed", ErrorData.stackTrace(ex))
       }
     }
@@ -74,7 +74,7 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
           sp.name + " already exists. Overwrite ? ",
           () ⇒ {
             overwriteAlert.set(None)
-            deleteFileAndDownloadURL(manager.current.now, urlInput.ref.value)
+            deleteFileAndDownloadURL(manager.dirNodeLine.now, urlInput.ref.value)
           }, () ⇒ {
             overwriteAlert.set(None)
           }, CenterPagePosition

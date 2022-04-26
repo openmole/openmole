@@ -46,7 +46,13 @@ sealed trait TreeNodeTab {
 
   val buildTab: Tab[TreeNodeTab] = Tab(
     this,
-    span(safePath.name),
+    span(display.flex, flexDirection.row, alignItems.center,
+      span(safePath.name),
+      span(cls := "close-button close-button-tab bi-x", onClick --> { e =>
+        saveContent()
+        panels.treeNodeTabs.remove(safePath)
+        e.stopPropagation()
+      })),
     block
   )
 
@@ -748,14 +754,16 @@ class TreeNodeTabs {
       t.t.safePath.path == safePath.path
     }
 
-  def setActive(treeNodeTab: TreeNodeTab) = {
-    tabsElement.tabs.update { ts =>
-      indexOf(treeNodeTab.safePath) match {
-        case Some(i) => ts.updated(i, treeNodeTab.buildTab)
-        case _ => ts
-      }
-    }
-  }
+//  def setActive(treeNodeTab: TreeNodeTab) = {
+//    tabsElement.tabs.update { ts =>
+//      indexOf(treeNodeTab.safePath) match {
+//        case Some(i) => ts.updated(i, treeNodeTab.buildTab)
+//        case _ => ts
+//      }
+//    }
+//  }
+
+
   //  def stopTimerIfNoTabs = {
   //    if (tabs.now.isEmpty) {
   //      timer.signal.map {
@@ -875,15 +883,15 @@ class TreeNodeTabs {
   //  setActive(tab)
 
 
-  def remove(treeNodeTab: TreeNodeTab) = {
+  def remove(treeNodeTab: TreeNodeTab): Unit = {
     //tab.desactivate
     //    val newTabs = tabsElement.tabs.now.filterNot {
     //      _ == tab
     //    }
     //    tabsElement.set(newTabs)
-    tab(treeNodeTab.safePath).foreach { t =>
-      tabsElement.remove(t.tabID)
-    }
+
+    remove(treeNodeTab.safePath)
+
     //    if (tabs.now.isEmpty) temporaryControl.set(div())
     //    newTabs.lastOption.map {
     //      t ⇒ setActive(t)
@@ -891,7 +899,10 @@ class TreeNodeTabs {
   }
 
   def remove(safePath: SafePath): Unit = findOMSTab(safePath).map { t =>
-    remove(t)
+
+      tab(safePath).foreach { t =>
+      tabsElement.remove(t.tabID)
+    }
   }
 
   //  def switchEditableTo(tab: TreeNodeTab, dataTab: DataTab, plotter: Plotter) =
@@ -1057,7 +1068,7 @@ class TreeNodeTabs {
   //  )
 
   val render =
-    tabsElement.render("file-content editor-content").amend(
+    tabsElement.render("editor-content").amend(
       tabsElement.tabs --> tabsObserver,
       timer --> timerObserver
     )

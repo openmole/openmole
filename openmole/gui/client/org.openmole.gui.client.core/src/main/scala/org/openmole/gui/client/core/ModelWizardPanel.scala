@@ -293,7 +293,7 @@ class ModelWizardPanel(treeNodeManager: TreeNodeManager, treeNodeTabs: TreeNodeT
 //        factory(safePath).foreach { factory ⇒
 //          scriptNameInput.ref.value = safePath.nameWithNoExtension
 //          fileToUploadPath.set(Some(safePath))
-//          panels.treeNodePanel.refreshAndDraw
+//          treeNodeManager.invalidCurrentCache
 //          factory.parse(safePath).foreach { b ⇒
 //            currentPluginPanel.set(Some(factory.build(safePath, (lc: LaunchingCommand) ⇒ {
 //              setLaunchingComand(Some(lc), safePath)
@@ -405,7 +405,7 @@ class ModelWizardPanel(treeNodeManager: TreeNodeManager, treeNodeTabs: TreeNodeT
 //            if (wtt.errors.isEmpty) {
 //              treeNodeTabs remove wtt.safePath
 //              treeNodePanel.displayNode(FileNode(Var(wtt.safePath.name), 0L, 0L))
-//              panels.treeNodePanel.refreshAndDraw
+//              treeNodeManager.invalidCurrentCache
 //            }
 //            else {
 //              dialog.hide
