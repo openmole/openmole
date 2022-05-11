@@ -199,7 +199,9 @@ object ScilabTask {
       def outputFileName(v: Val[_]) = s"/${v.name}.openmole"
       def outputValName(v: Val[_]) = v.withName(v.name + "File").withType[File]
       def scilabOutputMapping =
-        mapped.outputs.map { m ⇒ s"""print("${outputFileName(m.v)}", ${m.name})""" }.mkString("\n")
+        //mapped.outputs.map { m ⇒ s"""print("${outputFileName(m.v)}", ${m.name})""" }.mkString("\n")
+        // JR 20220511: quick local fix to handle properly large double matrices - will fail with scalar, boolean/string array and matrices
+        mapped.outputs.map { m ⇒ s"""fprintfMat("${outputFileName(m.v)}", ${m.name}, "%.16e")""" }.mkString("\n")
 
       scriptFile.content =
         s"""
