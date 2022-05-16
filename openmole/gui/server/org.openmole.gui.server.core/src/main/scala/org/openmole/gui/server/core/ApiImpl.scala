@@ -428,7 +428,7 @@ class ApiImpl(services: Services, applicationControl: ApplicationControl) extend
     }
 
     try {
-      Project.compile(script.getParentFileSafe, script, Seq.empty)(runServices) match {
+      Project.compile(script.getParentFileSafe, script)(runServices) match {
         case ScriptFileDoesNotExists() ⇒ Some(message("Script file does not exist"))
         case ErrorInCode(e)            ⇒ Some(error(e))
         case ErrorInCompiler(e)        ⇒ Some(error(e))
@@ -445,7 +445,7 @@ class ApiImpl(services: Services, applicationControl: ApplicationControl) extend
           onCompiled.foreach {
             _(execId)
           }
-          catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval)) match {
+          catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval(Seq.empty)(runServices))) match {
             case Failure(e) ⇒ Some(error(e))
             case Success(dsl) ⇒
               Try(DSL.toPuzzle(dsl).toExecution()(executionServices)) match {

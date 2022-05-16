@@ -113,11 +113,11 @@ trait RESTAPI extends ScalatraServlet
           )
         }
 
-        Project.compile(directory.workDirectory, directory.workDirectory / script, Seq.empty)(jobServices) match {
+        Project.compile(directory.workDirectory, directory.workDirectory / script)(jobServices) match {
           case ScriptFileDoesNotExists() ⇒ ExpectationFailed(Error("The script doesn't exist").toJson)
           case e: CompilationError       ⇒ error(e.error)
           case compiled: Compiled ⇒
-            Try(compiled.eval) match {
+            Try(compiled.eval(Seq.empty)(jobServices)) match {
               case Success(res) ⇒
                 import jobServices._
 

@@ -166,7 +166,7 @@ class Console(script: Option[String] = None) {
       Services.copy(services)(fileServiceCache = FileServiceCache())
     }
 
-    Project.compile(workDirectory.getOrElse(script.getParentFileSafe), script, args)(runServices) match {
+    Project.compile(workDirectory.getOrElse(script.getParentFileSafe), script)(runServices) match {
       case ScriptFileDoesNotExists() ⇒
         println("File " + script + " doesn't exist.")
         Left(ExitCodes.scriptDoesNotExist)
@@ -175,7 +175,7 @@ class Console(script: Option[String] = None) {
         println(e.error.stackString)
         Left(ExitCodes.compilationError)
       case compiled: Compiled ⇒
-        Try(compiled.eval) match {
+        Try(compiled.eval(args)) match {
           case Success(res) ⇒ Right(Console.CompiledDSL(res, compiled.compilationContext, compiled.result))
           case Failure(e) ⇒
             services.tmpDirectory.directory.recursiveDelete
@@ -187,11 +187,14 @@ class Console(script: Option[String] = None) {
     }
 
   def withREPL[T](args: ConsoleVariables)(f: REPL ⇒ T)(implicit newFile: TmpDirectory, fileService: FileService) = {
+    args.workDirectory.mkdirs()
+
     val loop =
       OpenMOLEREPL.newREPL(
-        args,
         quiet = false
       )
+
+    ConsoleVariables.bindVariables(loop, args)
 
     loop.bind(commandsName, new Command(loop, args))
     loop.eval(s"import $commandsName._")

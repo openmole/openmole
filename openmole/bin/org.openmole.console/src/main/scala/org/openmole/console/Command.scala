@@ -56,21 +56,16 @@ object Command:
 
   def load(console: REPL, variables: ConsoleVariables, file: File, args: Seq[String] = Seq.empty)(implicit services: Services): Console.CompiledDSL =
     def loadAny(file: File, args: Seq[String] = Seq.empty)(implicit services: Services) =
-      try {
-        def newRepl(v: ConsoleVariables) =
-          ConsoleVariables.bindVariables(console, v)
-          console
+      Project.compile(variables.workDirectory, file, repl = Some(console)) match {
+        case ScriptFileDoesNotExists() ⇒ throw new IOException("File " + file + " doesn't exist.")
+        case e: CompilationError ⇒ throw e.error
+        case compiled: Compiled ⇒
+          util.Try(compiled.eval(args)) match {
+            case util.Success(res) ⇒ Console.CompiledDSL(res, compiled.compilationContext, compiled.result)
+            case util.Failure(e) ⇒ throw UserBadDataError(s"Error during evaluation of the script $file", e)
+          }
+      }
 
-        Project.compile(variables.workDirectory, file, args, newREPL = Some(newRepl)) match {
-          case ScriptFileDoesNotExists() ⇒ throw new IOException("File " + file + " doesn't exist.")
-          case e: CompilationError ⇒ throw e.error
-          case compiled: Compiled ⇒
-            util.Try(compiled.eval) match {
-              case util.Success(res) ⇒ Console.CompiledDSL(res, compiled.compilationContext, compiled.result)
-              case util.Failure(e) ⇒ throw UserBadDataError(s"Error during evaluation of the script $file", e)
-            }
-        }
-      } finally ConsoleVariables.bindVariables(console, variables)
 
     loadAny(file)
   end load

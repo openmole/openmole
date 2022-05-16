@@ -54,11 +54,9 @@ object OpenMOLEREPL {
       autoImportTraitsCode
     )
 
-  def newREPL(args: ConsoleVariables, quiet: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService) = {
+  def newREPL(quiet: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService) = {
     def initialise(repl: REPL) = {
-      args.workDirectory.mkdirs()
       repl.eval(imports)
-      ConsoleVariables.bindVariables(repl, args)
       repl
     }
 
