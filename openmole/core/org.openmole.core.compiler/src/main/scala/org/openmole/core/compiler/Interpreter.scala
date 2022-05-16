@@ -204,7 +204,7 @@ class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File)
     def getResult(state: dotty.tools.repl.State): Any =
       //(1 to (state.valIndex + 4)).map(i => scala.util.Try(resultClass(state, Some(i)).getDeclaredMethods.toList)).map(println)
       if(state.valIndex > c.compiled._2.valIndex)
-        val m = resultClass(state).getDeclaredMethod(s"res${state.valIndex - 1}") //getDeclaredMethods.head //(s"res${state.valIndex - 1}")
+        val m = resultClass(state).getDeclaredMethods.head //(s"res${state.valIndex - 1}")
         m.invoke(null)
       else ()
 

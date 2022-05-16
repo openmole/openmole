@@ -66,7 +66,6 @@ object Command:
           }
       }
 
-
     loadAny(file)
   end load
 
@@ -115,12 +114,12 @@ class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
     }
   }
 
-  //  def load(file: File, args: Seq[String] = Seq.empty)(implicit services: Services): Console.CompiledDSL =
-  //    Command.load(console, variables, file, args)
+//  def load(file: File, args: Seq[String] = Seq.empty)(implicit services: Services): Console.CompiledDSL =
+//    Command.load(console, variables, file, args)
 
   def start(dsl: DSL)(implicit services: Services): MoleExecution = Command.start(dsl, CompilationContext(console))
 
-  //  def start(dsl: Console.CompiledDSL)(implicit services: Services): MoleExecution = Command.start(dsl.dsl, dsl.compilationContext)
+//  def start(dsl: Console.CompiledDSL)(implicit services: Services): MoleExecution = Command.start(dsl.dsl, dsl.compilationContext)
 
   private def exceptionToString(e: Throwable) = e.stackString
 
