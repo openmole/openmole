@@ -119,6 +119,8 @@ object Console extends JavaLogger {
     res
   }
 
+  case class CompiledDSL(dsl: DSL, compilationContext: CompilationContext, raw: Interpreter.RawCompiled)
+
 }
 
 import org.openmole.console.Console._
@@ -146,42 +148,43 @@ class Console(script: Option[String] = None) {
         }
       case Some(script) ⇒
         val scriptFile = new File(script)
-        val runServices = {
-          import services._
-          Services.copy(services)(fileServiceCache = FileServiceCache())
-        }
-
-        Project.compile(workDirectory.getOrElse(scriptFile.getParentFileSafe), scriptFile, args)(runServices) match {
-          case ScriptFileDoesNotExists() ⇒
-            println("File " + scriptFile + " doesn't exist.")
-            ExitCodes.scriptDoesNotExist
-          case e: CompilationError ⇒
-            services.tmpDirectory.directory.recursiveDelete
-            println(e.error.stackString)
-            ExitCodes.compilationError
-          case compiled: Compiled ⇒
-            Try(compiled.eval) match {
-              case Success(res) ⇒
-                import runServices._
-                val moleServices = MoleServices.create(applicationExecutionDirectory = services.workspace.tmpDirectory, compilationContext = Some(compiled.compilationContext))
-                val ex = DSL.toPuzzle(res).toExecution()(moleServices)
-                Try(ex.run) match {
-                  case Failure(e) ⇒
-                    println(e.stackString)
-                    ExitCodes.executionError
-                  case Success(_) ⇒
-                    ExitCodes.ok
-                }
+        load(scriptFile, args, workDirectory) match
+          case Right(dsl) =>
+            Try(Command.start(dsl.dsl, dsl.compilationContext).hangOn()) match
               case Failure(e) ⇒
-                services.tmpDirectory.directory.recursiveDelete
-                println(s"Error during script evaluation: ")
-                print(e.stackString)
-                ExitCodes.compilationError
-            }
-
-        }
+                println(e.stackString)
+                ExitCodes.executionError
+              case Success(_) ⇒
+                ExitCodes.ok
+          case Left(c) => c
     }
   }
+
+  def load(script: File, args: Seq[String], workDirectory: Option[File])(implicit services: Services): Either[Int, Console.CompiledDSL] =
+    val runServices = {
+      import services._
+      Services.copy(services)(fileServiceCache = FileServiceCache())
+    }
+
+    Project.compile(workDirectory.getOrElse(script.getParentFileSafe), script, args)(runServices) match {
+      case ScriptFileDoesNotExists() ⇒
+        println("File " + script + " doesn't exist.")
+        Left(ExitCodes.scriptDoesNotExist)
+      case e: CompilationError ⇒
+        services.tmpDirectory.directory.recursiveDelete
+        println(e.error.stackString)
+        Left(ExitCodes.compilationError)
+      case compiled: Compiled ⇒
+        Try(compiled.eval) match {
+          case Success(res) ⇒ Right(Console.CompiledDSL(res, compiled.compilationContext, compiled.result))
+          case Failure(e) ⇒
+            services.tmpDirectory.directory.recursiveDelete
+            println(s"Error during script evaluation: ")
+            print(e.stackString)
+            Left(ExitCodes.compilationError)
+        }
+
+    }
 
   def withREPL[T](args: ConsoleVariables)(f: REPL ⇒ T)(implicit newFile: TmpDirectory, fileService: FileService) = {
     val loop =

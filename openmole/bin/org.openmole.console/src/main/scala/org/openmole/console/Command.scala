@@ -24,7 +24,7 @@ import org.openmole.core.compiler.*
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.fileservice.FileService
+import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.project.*
 import org.openmole.core.tools.io.Prettifier.*
 import org.openmole.core.workflow.execution.Environment
@@ -39,6 +39,42 @@ import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.core.services.*
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.random.{RandomProvider, Seeder}
+
+object Command:
+  def start(dsl: DSL, compilationContext: CompilationContext)(implicit services: Services): MoleExecution =
+    val runServices = {
+      import services._
+      Services.copy(services)(fileServiceCache = FileServiceCache())
+    }
+
+    import runServices._
+    val moleServices = MoleServices.create(applicationExecutionDirectory = services.workspace.tmpDirectory, compilationContext = Some(compilationContext))
+
+    val ex = DSL.toPuzzle(dsl).toExecution()(moleServices)
+    ex.start(true)
+  end start
+
+  def load(console: REPL, variables: ConsoleVariables, file: File, args: Seq[String] = Seq.empty)(implicit services: Services): Console.CompiledDSL =
+    def loadAny(file: File, args: Seq[String] = Seq.empty)(implicit services: Services) =
+      try {
+        def newRepl(v: ConsoleVariables) =
+          ConsoleVariables.bindVariables(console, v)
+          console
+
+        Project.compile(variables.workDirectory, file, args, newREPL = Some(newRepl)) match {
+          case ScriptFileDoesNotExists() ⇒ throw new IOException("File " + file + " doesn't exist.")
+          case e: CompilationError ⇒ throw e.error
+          case compiled: Compiled ⇒
+            util.Try(compiled.eval) match {
+              case util.Success(res) ⇒ Console.CompiledDSL(res, compiled.compilationContext, compiled.result)
+              case util.Failure(e) ⇒ throw UserBadDataError(s"Error during evaluation of the script $file", e)
+            }
+        }
+      } finally ConsoleVariables.bindVariables(console, variables)
+
+    loadAny(file)
+  end load
+
 
 class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
 
@@ -84,8 +120,12 @@ class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
     }
   }
 
-  def start(dsl: DSL)(implicit moleServices: MoleServices): MoleExecution =
-    dsl.start(true)
+  //  def load(file: File, args: Seq[String] = Seq.empty)(implicit services: Services): Console.CompiledDSL =
+  //    Command.load(console, variables, file, args)
+
+  def start(dsl: DSL)(implicit services: Services): MoleExecution = Command.start(dsl, CompilationContext(console))
+
+  //  def start(dsl: Console.CompiledDSL)(implicit services: Services): MoleExecution = Command.start(dsl.dsl, dsl.compilationContext)
 
   private def exceptionToString(e: Throwable) = e.stackString
 
@@ -121,27 +161,6 @@ class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
     println(s"""You are running OpenMOLE ${buildinfo.version} - ${buildinfo.name}
        |built on the ${buildinfo.version.generationDate}.""".stripMargin)
 
-  def loadAny(file: File, args: Seq[String] = Seq.empty)(implicit services: Services): Any =
-    try {
-      val newRepl =
-        (v: ConsoleVariables) ⇒ {
-          ConsoleVariables.bindVariables(console, v)
-          console
-        }
-
-      Project.compile(variables.workDirectory, file, args, newREPL = Some(newRepl)) match {
-        case ScriptFileDoesNotExists() ⇒ throw new IOException("File " + file + " doesn't exist.")
-        case e: CompilationError       ⇒ throw e.error
-        case compiled: Compiled     ⇒ compiled.eval
-      }
-    }
-    finally ConsoleVariables.bindVariables(console, variables)
-
-  def load(file: File, args: Seq[String] = Seq.empty)(implicit services: Services): DSL =
-    loadAny(file) match {
-      case res: DSL ⇒ res
-      case x        ⇒ throw new UserBadDataError("The result is not a puzzle")
-    }
 
   def modules(urls: OptionalArgument[Seq[String]] = None)(implicit preference: Preference, randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService): Unit = {
     val installedBundles = PluginManager.bundleHashes.map(_.toString).toSet

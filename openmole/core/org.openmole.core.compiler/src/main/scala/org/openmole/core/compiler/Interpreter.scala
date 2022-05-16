@@ -146,8 +146,6 @@ object Interpreter {
           Some(classLoader(priorityBundles, jars))
         )
       case None =>
-        //          println(System.getProperty("java.class.path"))
-
         new repl.REPLDriver(
           Array(
             "-classpath", System.getProperty("java.class.path"),
@@ -202,9 +200,11 @@ class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File)
 
   def run(c: Interpreter.RawCompiled) =
     val runResult = driver.justRun(c.compiled)
+
     def getResult(state: dotty.tools.repl.State): Any =
-      if(state.valIndex > 0)
-        val m = resultClass(state).getDeclaredMethod(s"res${state.valIndex - 1}")
+      //(1 to (state.valIndex + 4)).map(i => scala.util.Try(resultClass(state, Some(i)).getDeclaredMethods.toList)).map(println)
+      if(state.valIndex > c.compiled._2.valIndex)
+        val m = resultClass(state).getDeclaredMethod(s"res${state.valIndex - 1}") //getDeclaredMethods.head //(s"res${state.valIndex - 1}")
         m.invoke(null)
       else ()
 
@@ -214,8 +214,8 @@ class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File)
     driver.completions(position, code, state).map(c => Interpreter.CompletionCandidate(value = c.value())).toVector
   }
 
-  def resultClass(state: dotty.tools.repl.State) = 
-    Class.forName(s"rs$$line$$${state.objectIndex}", true, classLoader(state.context))
+  def resultClass(state: dotty.tools.repl.State, index: Option[Int] = None) =
+    Class.forName(s"rs$$line$$${index.getOrElse(state.objectIndex)}", true, classLoader(state.context))
 
   def classLoader(context: dotty.tools.dotc.core.Contexts.Context) = driver.rederingValue.classLoader()(using context)
 
