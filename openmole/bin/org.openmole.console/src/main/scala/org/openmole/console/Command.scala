@@ -54,9 +54,9 @@ object Command:
     ex.start(true)
   end start
 
-  def load(console: REPL, variables: ConsoleVariables, file: File, args: Seq[String] = Seq.empty)(implicit services: Services): Console.CompiledDSL =
+  def load(variables: ConsoleVariables, file: File, args: Seq[String] = Seq.empty)(implicit services: Services): Console.CompiledDSL =
     def loadAny(file: File, args: Seq[String] = Seq.empty)(implicit services: Services) =
-      Project.compile(variables.workDirectory, file, repl = Some(console)) match {
+      Project.compile(variables.workDirectory, file) match {
         case ScriptFileDoesNotExists() ⇒ throw new IOException("File " + file + " doesn't exist.")
         case e: CompilationError ⇒ throw e.error
         case compiled: Compiled ⇒
@@ -114,12 +114,12 @@ class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
     }
   }
 
-//  def load(file: File, args: Seq[String] = Seq.empty)(implicit services: Services): Console.CompiledDSL =
-//    Command.load(console, variables, file, args)
+  def load(file: File, args: Seq[String] = Seq.empty)(implicit services: Services): Console.CompiledDSL =
+    Command.load(variables, file, args)
 
   def start(dsl: DSL)(implicit services: Services): MoleExecution = Command.start(dsl, CompilationContext(console))
 
-//  def start(dsl: Console.CompiledDSL)(implicit services: Services): MoleExecution = Command.start(dsl.dsl, dsl.compilationContext)
+  def start(dsl: Console.CompiledDSL)(implicit services: Services): MoleExecution = Command.start(dsl.dsl, dsl.compilationContext)
 
   private def exceptionToString(e: Throwable) = e.stackString
 

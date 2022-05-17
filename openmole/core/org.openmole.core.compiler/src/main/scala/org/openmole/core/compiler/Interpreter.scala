@@ -79,8 +79,6 @@ object Interpreter {
   case class HeaderInfo(file: String)
   def firstLine(file: String) = HeaderInfo(file)
 
-
-
   def diagnosticToErrorMessage(diagnostic: dotty.tools.dotc.interfaces.Diagnostic): ErrorMessage = 
     import scala.jdk.OptionConverters._
     diagnostic.position.toScala match 

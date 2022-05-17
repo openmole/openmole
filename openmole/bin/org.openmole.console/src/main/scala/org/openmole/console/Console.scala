@@ -189,13 +189,9 @@ class Console(script: Option[String] = None) {
   def withREPL[T](args: ConsoleVariables)(f: REPL ⇒ T)(implicit newFile: TmpDirectory, fileService: FileService) = {
     args.workDirectory.mkdirs()
 
-    val loop =
-      OpenMOLEREPL.newREPL(
-        quiet = false
-      )
+    val loop = OpenMOLEREPL.newREPL(quiet = false)
 
     ConsoleVariables.bindVariables(loop, args)
-
     loop.bind(commandsName, new Command(loop, args))
     loop.eval(s"import $commandsName._")
 

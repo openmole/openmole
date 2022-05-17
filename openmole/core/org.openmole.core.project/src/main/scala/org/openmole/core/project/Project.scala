@@ -240,7 +240,7 @@ case class Compiled(result: Interpreter.RawCompiled, compilationContext: Compila
           case p: DSL ⇒ p
           case e ⇒ throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
         }
-      case e ⇒ throw new InternalProcessingError(s"Script compilation should produce an OMScript (found ${if (e == null) null else e.getClass}).")
+      case e ⇒ throw new InternalProcessingError(s"Script should produce an OMScript (found ${if (e == null) null else e.getClass}).")
     }
 
 }
