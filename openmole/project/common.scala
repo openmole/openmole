@@ -35,7 +35,7 @@ object common {
   def monocleVersion = "3.0.0"
   def scalazVersion = "7.3.5"
   def mathVersion = "3.6.1"
-  def asmVersion = "7.2"
+  def asmVersion = "9.3"
   def guavaVersion = "30.0-jre"
   def scalaMetaVersion = "4.4.30"
   def scalaSTMVersion = "0.11.1"

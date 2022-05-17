@@ -72,29 +72,56 @@ object Command:
 
 class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
 
-  def print(environment: Environment): Unit = {
-    for {
-      (label, number) ← List(
-        "Submitted" → environment.submitted,
-        "Running" → environment.running,
-        "Done" → environment.done,
-        "Failed" → environment.failed
-      )
-    } println(s"$label: $number")
-    val errors = Environment.errors(environment)
-    def low = errors.count(_.level.intValue() <= Level.INFO.intValue())
-    def warning = errors.count(_.level.intValue() == Level.WARNING.intValue())
-    def severe = errors.count(_.level.intValue() == Level.SEVERE.intValue())
-    println(s"$severe critical errors, $warning warning and $low low-importance errors. Use the errors() function to display them.")
-  }
-
   def print(mole: Mole): Unit = {
     println("root: " + mole.root)
     mole.transitions.foreach(println)
     mole.dataChannels.foreach(println)
   }
 
-  def print(moleExecution: MoleExecution): Unit = {
+  def print(moleExecution: MoleExecution, debug: Boolean = false): Unit = {
+
+    def environmentErrors(environment: Environment, level: Level) = {
+      def filtered =
+        Environment.clearErrors(environment).filter {
+          e ⇒ e.level.intValue() >= level.intValue()
+        }
+
+      for {
+        error ← filtered
+      } {
+        def detail =
+          error.detail match {
+            case None    ⇒ ""
+            case Some(m) ⇒ s"\n$m\n"
+          }
+
+        println(
+          s"""${error.level.toString}: ${error.exception.getMessage}$detail
+             |${exceptionToString(error.exception)}""".stripMargin
+        )
+      }
+    }
+
+    def printEnvironment(environment: Environment, debug: Boolean): Unit = {
+      println(environment.simpleName + ":")
+      for {
+        (label, number) ← List(
+          "Submitted" → environment.submitted,
+          "Running" → environment.running,
+          "Done" → environment.done,
+          "Failed" → environment.failed
+        )
+      } println(s"  $label: $number")
+      val errors = Environment.errors(environment)
+      def low = errors.count(_.level.intValue() <= Level.INFO.intValue())
+      def warning = errors.count(_.level.intValue() == Level.WARNING.intValue())
+      def severe = errors.count(_.level.intValue() == Level.SEVERE.intValue())
+      println(s"$severe critical errors, $warning warning and $low low-importance errors. Use the errors() function to display them.")
+      environmentErrors(environment, (if(debug) Level.FINE else Level.INFO))
+    }
+
+    println("\n--- Execution ---\n")
+
     val statuses = moleExecution.capsuleStatuses
 
     val msg =
@@ -103,6 +130,9 @@ class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
       } yield s"${capsule}: ${stat.ready} ready, ${stat.running} running, ${stat.completed} completed"
 
     println(msg.mkString("\n"))
+
+    println("\n--- Errors ---\n")
+
     moleExecution.exception match {
       case Some(e) ⇒
         MoleExecution.MoleExecutionFailed.capsule(e) match {
@@ -112,6 +142,14 @@ class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
         System.out.println(exceptionToString(e.exception))
       case None ⇒
     }
+
+    println("\n--- Environments ---\n")
+
+    for
+      env <- moleExecution.allEnvironments
+    do
+      printEnvironment(env, debug = debug)
+      println()
   }
 
   def load(file: File, args: Seq[String] = Seq.empty)(implicit services: Services): Console.CompiledDSL =
@@ -125,27 +163,7 @@ class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
 
   implicit def stringToLevel(s: String): Level = Level.parse(s.toUpperCase)
 
-  def errors(environment: Environment, level: Level = Level.INFO) = {
-    def filtered =
-      Environment.clearErrors(environment).filter {
-        e ⇒ e.level.intValue() >= level.intValue()
-      }
 
-    for {
-      error ← filtered
-    } {
-      def detail =
-        error.detail match {
-          case None    ⇒ ""
-          case Some(m) ⇒ s"\n$m\n"
-        }
-
-      println(
-        s"""${error.level.toString}: ${error.exception.getMessage}$detail
-        |${exceptionToString(error.exception)}""".stripMargin
-      )
-    }
-  }
 
   def verify(mole: Mole)(implicit newFile: TmpDirectory, fileService: FileService): Unit = Validation(mole).foreach(println)
 

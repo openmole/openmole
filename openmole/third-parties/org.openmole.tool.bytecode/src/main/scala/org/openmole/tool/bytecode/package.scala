@@ -31,7 +31,7 @@ package object bytecode {
         classes += Type.getObjectType(name)
 
       override def visitAttribute(attr: Attribute): Unit =
-        classes += Type.getType(attr.`type`)
+        if(attr.`type` != "TASTY") classes += Type.getType(attr.`type`)
 
       override def visitMethod(access: Int, name: String, desc: String, signature: String, exceptions: Array[String]): MethodVisitor = {
         classes ++= Type.getArgumentTypes(desc)
