@@ -1,3 +1,3 @@
 addSbtPlugin("org.openmole" % "openmole-buildsystem-plugin" % "1.8-SNAPSHOT")
 
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.3.0")
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.10.0")

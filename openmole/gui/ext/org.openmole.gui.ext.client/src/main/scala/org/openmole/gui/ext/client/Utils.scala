@@ -25,8 +25,6 @@ import scala.scalajs.js
 import scala.scalajs.js.Date
 
 object Utils {
-  def getUUID: String = java.util.UUID.randomUUID.toString
-
   def toURI(path: Seq[String]): String = new java.net.URI(null, null, path.mkString("/"), null).toString
 
   def longToDate(date: Long) = s"${new Date(date).toLocaleDateString}, ${new Date(date).toLocaleTimeString}"

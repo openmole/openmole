@@ -36,7 +36,7 @@ case class FileUploaderUI(
   keySet:   Boolean,
   renaming: Option[String] = None) {
 
-  val fileName = if (keyName == "") renaming.getOrElse(java.util.UUID.randomUUID.toString) else keyName
+  val fileName = if (keyName == "") renaming.getOrElse(DataUtils.uuID) else keyName
   val pathSet: Var[Boolean] = Var(keySet)
 
   val view = upButton

@@ -1,9 +1,9 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
-import org.openmole.gui.client.core.files.{ FileDisplayer, TreeNodeManager, TreeNodePanel, TreeNodeTabs }
+import org.openmole.gui.client.core.alert.{AlertPanel, BannerAlert}
+import org.openmole.gui.client.core.files.{FileDisplayer, TreeNodeManager, TreeNodePanel, TreeNodeTabs}
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.data.{ ErrorManager, GUIPluginAsJS, PluginServices, WizardPluginFactory }
+import org.openmole.gui.ext.data.{ErrorManager, GUIPluginAsJS, PluginServices, WizardPluginFactory}
 import com.raquo.laminar.api.L._
 
 /*

@@ -325,7 +325,7 @@ li.selectElement{
     height: 100%;
     margin-left: 5px;
     width: 6px;
-    background-color: #fff;
+    background-color: #222;
 }
 
 .spinner-wave div:nth-child(2) {
@@ -356,7 +356,7 @@ li.selectElement{
 }
 
 .spinner-wave-ratio{
-	color: white;
+	color: #222;
 }
 
 /* FILE TOOL BAR*/
@@ -422,6 +422,12 @@ padding-bottom: 90px;
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+.ace_gutter-cell.ace_breakpoint {
+  background-color: #d35f5f;
+  color: white;
+  font-weight: bold;
 }
 
 .gutterDecoration{
@@ -852,6 +858,7 @@ padding-bottom: 90px;
     color: #222;
     width: 20px;
     height: 20px;
+    margin-left: 0px;
 }
 
 .file-refresh {
@@ -899,12 +906,6 @@ padding-bottom: 90px;
     justify-content: flex-end;
  }
 
- .btn-outline-secondary{
-    color:white;
-     border-color: white;
-
- }
-
 .plugin-file {
     border-radius: 20px;
     height: 20px;
@@ -927,3 +928,61 @@ padding-bottom: 90px;
   margin-left: 20px;
   line-height: 27px;
  }
+
+ .testButton {
+ font-weight: bold;
+ padding: 4px;
+ height: 32px;
+ }
+
+
+.ace_gutter-cell.ace_breakpoint {
+  background-color: #rd35f5f;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.mypopover{
+    position: absolute;
+    z-index: 1060;
+    min-width: 200px;
+    min-height: 20px;
+    max-width: 276px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: left;
+    text-align: start;
+    text-decoration: none;
+    text-shadow: none;
+    text-transform: none;
+    letter-spacing: normal;
+    word-break: normal;
+    word-spacing: normal;
+    white-space: normal;
+    line-break: auto;
+    font-size: 0.875rem;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 0.3rem;
+}
+
+.mypopover-top {
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.left-arrow {
+    width: 12px;
+    height:12px;
+    margin-top:5px;
+    margin-left:-7px;
+    background-color: white;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    border-left: 1px solid rgba(0, 0, 0, 0.2);
+    transform: translateX(-50%) rotate(45deg);
+                    }
