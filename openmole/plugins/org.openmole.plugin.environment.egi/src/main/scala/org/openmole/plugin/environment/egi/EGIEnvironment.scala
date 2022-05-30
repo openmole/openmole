@@ -202,8 +202,8 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   val debug:             Boolean,
   val name:              Option[String],
   val authentication:    A,
-  implicit val services: BatchEnvironment.Services
-)(implicit workspace: Workspace) extends BatchEnvironment { env ⇒
+  implicit val services: BatchEnvironment.Services,
+)(implicit workspace: Workspace) extends BatchEnvironment(BatchEnvironmentState()) { env ⇒
 
   import services._
 
@@ -227,7 +227,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   }
 
   override def stop() = {
-    stopped = true
+    state.stopped = true
     storages().map(_.toOption).flatten.foreach { case (space, storage) ⇒ HierarchicalStorageSpace.clean(storage, space, background = false) }
     BatchEnvironment.waitJobKilled(this)
   }

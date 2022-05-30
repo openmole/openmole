@@ -131,7 +131,7 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
   val name:              Option[String],
   val authentication:    A,
   implicit val services: BatchEnvironment.Services
-) extends BatchEnvironment { env ⇒
+) extends BatchEnvironment(BatchEnvironmentState()) { env ⇒
 
   import services._
 
@@ -144,7 +144,7 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
   }
 
   override def stop() = {
-    stopped = true
+    state.stopped = true
     cleanSSHStorage(storageService, background = false)
     BatchEnvironment.waitJobKilled(this)
     sshInterpreter().close
@@ -198,7 +198,7 @@ class OARLocalEnvironment(
   val parameters:        OAREnvironment.Parameters,
   val name:              Option[String],
   implicit val services: BatchEnvironment.Services
-) extends BatchEnvironment { env ⇒
+) extends BatchEnvironment(BatchEnvironmentState()) { env ⇒
 
   import services._
   implicit val localInterpreter: gridscale.effectaside.Effect[gridscale.local.Local] = gridscale.local.Local()
@@ -206,7 +206,7 @@ class OARLocalEnvironment(
 
   override def start() = { storage; space }
   override def stop() = {
-    stopped = true
+    state.stopped = true
     HierarchicalStorageSpace.clean(storage, space, background = false)
     BatchEnvironment.waitJobKilled(this)
   }

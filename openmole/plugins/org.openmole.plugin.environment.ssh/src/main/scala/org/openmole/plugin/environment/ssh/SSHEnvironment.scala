@@ -137,7 +137,7 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   val modules:              Seq[String],
   val debug:                Boolean,
   val services:             BatchEnvironment.Services
-) extends BatchEnvironment { env ⇒
+) extends BatchEnvironment(BatchEnvironmentState()(using services)) { env ⇒
 
   implicit def servicesImplicit: BatchEnvironment.Services = services
   import services._
@@ -162,7 +162,7 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   }
 
   override def stop() = {
-    stopped = true
+    state.stopped = true
     cleanSSHStorage(storageService, background = false)
     jobUpdater.stop = true
     BatchEnvironment.waitJobKilled(this)

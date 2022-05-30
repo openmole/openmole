@@ -157,7 +157,7 @@ class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
   val parameters:        SLURMEnvironment.Parameters,
   val name:              Option[String],
   val authentication:    A,
-  implicit val services: BatchEnvironment.Services) extends BatchEnvironment {
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState()) {
   env ⇒
 
   import services._
@@ -169,7 +169,7 @@ class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
   override def start() = { storageService }
 
   override def stop() = {
-    stopped = true
+    state.stopped = true
     cleanSSHStorage(storageService, background = false)
     BatchEnvironment.waitJobKilled(this)
     sshInterpreter().close
@@ -225,7 +225,7 @@ class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
 class SLURMLocalEnvironment(
   val parameters:        SLURMEnvironment.Parameters,
   val name:              Option[String],
-  implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState()) { env ⇒
 
   import services._
 
@@ -234,7 +234,7 @@ class SLURMLocalEnvironment(
 
   override def start() = { storage; space; HierarchicalStorageSpace.clean(storage, space, background = true) }
   override def stop() = {
-    stopped = true
+    state.stopped = true
     HierarchicalStorageSpace.clean(storage, space, background = false)
     BatchEnvironment.waitJobKilled(this)
   }
