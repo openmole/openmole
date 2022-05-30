@@ -60,4 +60,6 @@ object DataUtils {
     if (name.length > 4) name.takeRight(4) == ".csv"
     else false
   }
+
+  def uuID = scala.util.Random.alphanumeric.take(10).mkString
 }

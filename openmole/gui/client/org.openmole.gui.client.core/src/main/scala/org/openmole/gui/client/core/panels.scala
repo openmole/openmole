@@ -1,9 +1,9 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
-import org.openmole.gui.client.core.files.{ FileDisplayer, TreeNodeManager, TreeNodePanel, TreeNodeTabs }
+import org.openmole.gui.client.core.alert.{AlertPanel, BannerAlert}
+import org.openmole.gui.client.core.files.{FileDisplayer, TreeNodeManager, TreeNodePanel, TreeNodeTabs}
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.data.{ ErrorManager, GUIPluginAsJS, PluginServices, WizardPluginFactory }
+import org.openmole.gui.ext.data.{ErrorManager, GUIPluginAsJS, PluginServices, WizardPluginFactory}
 import com.raquo.laminar.api.L._
 
 /*
@@ -71,17 +71,17 @@ object panels {
     new URLImportPanel(
       treeNodeManager,
       bannerAlert = bannerAlert)
-
-  val expandablePanel: Var[Option[HtmlElement]] = Var(None)
+    
+  case class ExpandablePanel(id: Int, element: HtmlElement)
+  
+  val expandablePanel: Var[Option[ExpandablePanel]] = Var(None)
 
   def closeExpandable = expandablePanel.set(None)
 
-  def expandTo(el: HtmlElement) = expandablePanel.update {
+  def expandTo(el: HtmlElement, id: Int) = expandablePanel.update {
     _ match {
-      case Some(_) ⇒ None
-      case None ⇒
-        println("Set to " + el)
-        Some(el)
+      case Some(ep: ExpandablePanel) ⇒ if(ep.id == id) None else Some(ExpandablePanel(id, el))
+      case None ⇒ Some(ExpandablePanel(id,el))
     }
   }
 

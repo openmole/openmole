@@ -383,7 +383,7 @@ class ApiImpl(services: Services, applicationControl: ApplicationControl) extend
 
   private def compilationData(scriptData: ScriptData) = {
     import services._
-    (ExecutionId(getUUID) /*, safePathToFile(scriptData.scriptPath)*/ , StringPrintStream(Some(preference(outputSize))))
+    (ExecutionId(DataUtils.uuID) /*, safePathToFile(scriptData.scriptPath)*/ , StringPrintStream(Some(preference(outputSize))))
   }
 
   def synchronousCompilation(
@@ -490,7 +490,7 @@ class ApiImpl(services: Services, applicationControl: ApplicationControl) extend
   def processRun(ex: MoleExecution, execId: ExecutionId, validateScript: Boolean) = {
     import services._
     val envIds = (ex.allEnvironments).map {
-      env ⇒ EnvironmentId(getUUID) → env
+      env ⇒ EnvironmentId(DataUtils.uuID) → env
     }
     execution.addRunning(execId, envIds)
     envIds.foreach {

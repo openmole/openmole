@@ -61,7 +61,6 @@ trait Api {
   def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Unit
   //def copyToPluginUploadDir(directoryName: String, safePaths: Seq[SafePath]): Unit
   def copyFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
-  def uuid(): String = java.util.UUID.randomUUID.toString
   def renameFile(safePath: SafePath, name: String): SafePath
   def saveFile(path: SafePath, fileContent: String, hash: Option[String], overwrite: Boolean): (Boolean, String)
   //  def saveFiles(fileContents: Seq[AlterableFileContent]): Seq[(SafePath, Boolean)]

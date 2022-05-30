@@ -37,7 +37,6 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) {
         fileExtension match {
           case OpenMOLEScript ⇒
             val tab = TreeNodeTab.OMS(
-              treeNodeTabs,
               safePath,
               content,
               hash,
@@ -63,20 +62,19 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) {
             if (DataUtils.isCSV(safePath))
               Post()[Api].sequence(safePath).call().foreach { seq ⇒
                 val tab = TreeNodeTab.Editable(
-                  treeNodeTabs,
                   safePath,
-                  content, hash,
                   DataTab.build(seq, view = TreeNodeTab.Table, editing = !editableFile.onDemand),
+                  content,
+                  hash,
                   Plotter.default)
                 treeNodeTabs add tab
               }
             else {
               val tab = TreeNodeTab.Editable(
-                treeNodeTabs,
                 safePath,
+                DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw),
                 content,
                 hash,
-                DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw),
                 Plotter.default)
 
               treeNodeTabs add tab

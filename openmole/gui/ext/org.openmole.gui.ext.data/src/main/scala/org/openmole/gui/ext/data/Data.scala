@@ -340,9 +340,9 @@ package object data {
     def id: String
   }
 
-  case class ExecutionId(id: String = java.util.UUID.randomUUID.toString) extends ID
+  case class ExecutionId(id: String = DataUtils.uuID) extends ID
 
-  case class EnvironmentId(id: String = java.util.UUID.randomUUID.toString) extends ID
+  case class EnvironmentId(id: String = DataUtils.uuID) extends ID
 
   sealed trait ErrorStateLevel {
     def name: String

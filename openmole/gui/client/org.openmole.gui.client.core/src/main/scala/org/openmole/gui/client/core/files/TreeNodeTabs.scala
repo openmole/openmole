@@ -44,16 +44,18 @@ sealed trait TreeNodeTab {
 
   //val id: String = getUUID
 
-  val buildTab: Tab[TreeNodeTab] = Tab(
+  lazy val buildTab: Tab[TreeNodeTab] = Tab(
     this,
     span(display.flex, flexDirection.row, alignItems.center,
       span(safePath.name),
+      controlElement,
       span(cls := "close-button close-button-tab bi-x", onClick --> { e =>
         saveContent()
         panels.treeNodeTabs.remove(safePath)
         e.stopPropagation()
       })),
-    block
+    block,
+    onClicked = ()=> editor.foreach{_.editor.focus()}
   )
 
   def clone(newSafePath: SafePath): TreeNodeTab
@@ -83,30 +85,9 @@ object TreeNodeTab {
 
   case class EditableContent(content: String, hash: String)
 
-  object OMS {
-    def apply(
-               treeNodeTabs: TreeNodeTabs,
-               safePath: SafePath,
-               initialContent: String,
-               initialHash: String,
-               showExecution: () ⇒ Unit,
-               //setEditorErrors: Seq[ErrorWithLocation] ⇒ Unit
-             ) = {
-      val omsEditor = EditorPanelUI(treeNodeTabs, safePath, FileExtension.OMS, initialContent, initialHash)
-      new OMS(
-        treeNodeTabs,
-        safePath,
-        omsEditor,
-        showExecution,
-        //   setEditorErrors
-      )
-    }
-  }
-
-  case class OMS(
-                  treeNodeTabs: TreeNodeTabs,
-                  safePath: SafePath,
-                  omsEditor: EditorPanelUI,
+  case class OMS( safePath: SafePath,
+                  initialContent: String,
+                  initialHash: String,
                   showExecution: () ⇒ Unit,
                   //  setEditorErrors: Seq[ErrorWithLocation] ⇒ Unit
                 ) extends TreeNodeTab {
@@ -114,6 +95,7 @@ object TreeNodeTab {
     def clone(newSafePath: SafePath) = copy(safePath = newSafePath)
 
     val errors = Var(EditorErrors())
+    val omsEditor = EditorPanelUI(this, safePath.extension, initialContent, initialHash)
 
     def editor = Some(omsEditor)
 
@@ -139,7 +121,10 @@ object TreeNodeTab {
       val compileDisabled = Var(false)
       val runOption = Var(false)
 
-      def unsetErrors = errors.set(EditorErrors()) //setEditorErrors(Seq())
+      def unsetErrors = {
+        errors.set(EditorErrors())
+        editor.foreach{_.errorMessageOpen.set(false)}
+      } //setEditorErrors(Seq())
 
       def setError(errorDataOption: Option[ErrorData]) = {
         compileDisabled.set(false)
@@ -148,8 +133,8 @@ object TreeNodeTab {
             errors.set(EditorErrors(
               errorsFromCompiler = ce.errors.map { ewl ⇒
                 ErrorFromCompiler(ewl, ewl.line.flatMap { l ⇒
-                  editor.map {
-                    _.editor.getSession().doc.getLine(l)
+                  editor.map { x =>
+                    x.editor.getSession().doc.getLine(l)
                   }
                 }.getOrElse(""))
               },
@@ -173,12 +158,14 @@ object TreeNodeTab {
         child <-- compileDisabled.signal.map { compDisabled ⇒
           if (compDisabled) Waiter.waiter
           else
-            button("Test", btn_secondary, onClick --> { _ ⇒
+            button("CHECK", btn_secondary_outline, cls := "testButton", onClick --> { _ ⇒
               unsetErrors
+              omsEditor.editor.getSession().clearBreakpoints()
               compileDisabled.set(true)
               saveContent(() ⇒
                 Post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].compileScript(ScriptData(safePath)).call().foreach { errorDataOption ⇒
                   setError(errorDataOption)
+                  omsEditor.editor.focus()
                 })
             })
         },
@@ -207,7 +194,7 @@ object TreeNodeTab {
     lazy val block = omsEditor.view
   }
 
-  case class HTML(safePath: SafePath, _block: HtmlElement) extends TreeNodeTab {
+  case class HTML(safePath: SafePath, content: HtmlElement) extends TreeNodeTab {
 
     def clone(newSafePath: SafePath) = copy(safePath = newSafePath)
 
@@ -220,35 +207,15 @@ object TreeNodeTab {
     def resizeEditor = {}
 
     lazy val controlElement: HtmlElement = div()
-    lazy val block: HtmlElement = _block
-  }
 
-  object Editable {
-    def apply(
-               treeNodeTabs: TreeNodeTabs,
-               safePath: SafePath,
-               content: String,
-               hash: String,
-               dataTab: DataTab,
-               plotter: Plotter) = {
-
-      val editor = EditorPanelUI(treeNodeTabs, safePath, FileExtension(safePath.name), content, hash /*, if (DataUtils.isCSV(safePath)) paddingBottom := "80" else emptySetters*/)
-
-      new Editable(
-        treeNodeTabs = treeNodeTabs,
-        safePath = safePath,
-        editorValue = editor,
-        dataTab = dataTab,
-        plotter = plotter
-      )
-    }
+    lazy val block: HtmlElement = content
   }
 
   case class Editable(
-                       treeNodeTabs: TreeNodeTabs,
                        safePath: SafePath,
-                       editorValue: EditorPanelUI,
                        dataTab: DataTab,
+                       initialContent: String,
+                       initialHash: String,
                        plotter: Plotter) extends TreeNodeTab {
 
     def clone(newSafePath: SafePath): TreeNodeTab = copy(safePath = newSafePath)
@@ -261,7 +228,8 @@ object TreeNodeTab {
     //      ed
     //    }
 
-    def editor = Some(editorValue)
+    private lazy val editorValue = EditorPanelUI(this, safePath.extension, initialContent, initialHash)
+    lazy val editor = Some(editorValue)
 
     def editableContent = {
       val (code, hash) = editorValue.code
@@ -745,23 +713,25 @@ class TreeNodeTabs {
     }
   }
 
-  def tab(safePath: SafePath) = tabsElement.tabs.now.filter { tab =>
-    tab.t.safePath == safePath
-  }.headOption
+  def tab(safePath: SafePath) = {
+    tabsElement.tabs.now.filter { tab =>
+      tab.t.safePath == safePath
+    }.headOption
+  }
 
   def alreadyDisplayed(safePath: SafePath) =
     tabsElement.tabs.now.find { t ⇒
       t.t.safePath.path == safePath.path
     }
 
-//  def setActive(treeNodeTab: TreeNodeTab) = {
-//    tabsElement.tabs.update { ts =>
-//      indexOf(treeNodeTab.safePath) match {
-//        case Some(i) => ts.updated(i, treeNodeTab.buildTab)
-//        case _ => ts
-//      }
-//    }
-//  }
+  //  def setActive(treeNodeTab: TreeNodeTab) = {
+  //    tabsElement.tabs.update { ts =>
+  //      indexOf(treeNodeTab.safePath) match {
+  //        case Some(i) => ts.updated(i, treeNodeTab.buildTab)
+  //        case _ => ts
+  //      }
+  //    }
+  //  }
 
 
   //  def stopTimerIfNoTabs = {
@@ -795,7 +765,13 @@ class TreeNodeTabs {
 
   // def isActive(safePath: SafePath) = tabsElement.activeTab.map{at => at.t.safePathTab.signal.map{_ == safePath}}.getOrElse(Var(false))
 
-  def isActive(safePath: SafePath) = tabsElement.activeTab.map { at => at.t.safePath == safePath }.getOrElse(false)
+
+  def isActive(safePath: SafePath) = tabsElement.activeTab.map { at => at.map {
+    _.t.safePath == safePath
+  }
+  }
+  // def isActive(safePath: SafePath) = tabsElement.activeTab.map { at => at.t.safePath == safePath }.getOrElse(false)
+
 
   //  def isActive(safePath: SafePath) =
   //    tabs.now.filter {
@@ -878,6 +854,7 @@ class TreeNodeTabs {
   //}
 
   def add(treeNodeTab: TreeNodeTab) = tabsElement.add(treeNodeTab.buildTab)
+
   //  tabs.update(t => t :+ tab)
   //  startTimerIfStopped
   //  setActive(tab)
@@ -900,7 +877,7 @@ class TreeNodeTabs {
 
   def remove(safePath: SafePath): Unit = findOMSTab(safePath).map { t =>
 
-      tab(safePath).foreach { t =>
+    tab(safePath).foreach { t =>
       tabsElement.remove(t.tabID)
     }
   }

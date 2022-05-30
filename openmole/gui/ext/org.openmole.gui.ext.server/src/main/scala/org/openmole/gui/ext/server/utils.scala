@@ -265,8 +265,6 @@ object utils {
     }
   }
 
-  def getUUID: String = java.util.UUID.randomUUID.toString
-
   val openmoleFileName = "main.js"
   val webpakedOpenmoleFileName = "openmole-webpacked.js"
   val depsFileName = "deps.js"

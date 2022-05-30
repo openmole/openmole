@@ -32,16 +32,14 @@ object FileUploaderUI {
 }
 
 case class FileUploaderUI(
-  keyName:  String,
-  keySet:   Boolean,
-  renaming: Option[String] = None) {
+                           keyName: String,
+                           keySet: Boolean,
+                           renaming: Option[String] = None) {
 
-  val fileName = if (keyName == "") renaming.getOrElse(java.util.UUID.randomUUID.toString) else keyName
+  val fileName = if (keyName == "") renaming.getOrElse(DataUtils.uuID) else keyName
   val pathSet: Var[Boolean] = Var(keySet)
 
-  val view = upButton
-
-  lazy val upButton = label(
+  val view = label(
     fileInput((fInput: Input) ⇒ {
       FileManager.upload(
         fInput,
@@ -62,12 +60,9 @@ case class FileUploaderUI(
       )
     }),
     child <-- pathSet.signal.map { ps ⇒
-      if (ps) fileName
-      else "No certificate"
+      if (ps) span(fileName, badge_success, cls := "badgeOM")
+      else span("No certificate", badge_secondary, cls := "badgeOM")
     },
-    paddingTop := "5",
-    marginTop := "40",
-    omsheet.certificate,
     cls := "inputFileStyle"
   )
 }

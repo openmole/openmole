@@ -17,13 +17,13 @@ package org.openmole.gui.client.tool
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.UUID
-
-import scala.scalajs.js.annotation.JSExportTopLevel
-
-object ID {
-  def get: String = UUID.randomUUID.toString
-}
-
-@JSExportTopLevel("ID")
-case class ID(id: String = ID.get)
+//import java.util.UUID
+//
+//import scala.scalajs.js.annotation.JSExportTopLevel
+//
+//object ID {
+//  def get: String = UUID.randomUUID.toString
+//}
+//
+//@JSExportTopLevel("ID")
+//case class ID(id: String = ID.get)
