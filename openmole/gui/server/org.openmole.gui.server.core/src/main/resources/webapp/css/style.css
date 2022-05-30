@@ -284,13 +284,6 @@ li.selectElement{
 
 /* File management*/
 .inputFileStyle {
-    position: relative;
-    background-color: #3086b5;
-    border-radius: 4px;
-    color: white;
-    cursor: pointer;
-    padding: 8px 25px 8px 20px;
-    text-align: center;
 }
 .inputFileStyle input[type="file"] {
     display: none;
@@ -665,8 +658,7 @@ padding-bottom: 90px;
     padding : "5";
 }
 
-.flex-column,
- .expandable-table{
+.flex-column{
     display: flex;
     flex-direction: column;
 }
@@ -679,7 +671,8 @@ padding-bottom: 90px;
 .tree-path,
 .file-refresh,
 .docEntry,
-.expandable-title{
+.expandable-title,
+.verticalFormItem {
     display: flex;
     flex-direction: row;
 }
@@ -894,17 +887,8 @@ padding-bottom: 90px;
     padding-left : 15;
     min-height : 46;
     align-items: center;
-    padding-bottom: 5px;
+    padding: 10px;
   }
-
- .expandable-table{
- }
-
- .table-time {
-    font-style : "italic";
-    color : #222;
-    justify-content: flex-end;
- }
 
 .plugin-file {
     border-radius: 20px;
@@ -986,3 +970,24 @@ padding-bottom: 90px;
     border-left: 1px solid rgba(0, 0, 0, 0.2);
     transform: translateX(-50%) rotate(45deg);
                     }
+
+.badgeOM {
+    margin-left : 10px;
+    font-size : 14px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.newButton {
+    font-size: 14;
+    padding: 5px;
+    height: 30;
+    color: #3f3d56;
+    background-color: white;
+    margin: 0 10 0 50;
+}
+
+.verticalFormItem {
+    align-items: center;
+    padding-top: 15px;
+}

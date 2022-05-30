@@ -18,9 +18,8 @@
 package org.openmole.gui.plugin.authentication.egi
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory }
-import org.openmole.gui.ext.client.{ FileUploaderUI, OMPost }
-
+import org.openmole.gui.ext.data.{AuthenticationPlugin, AuthenticationPluginFactory}
+import org.openmole.gui.ext.client._
 import scaladget.bootstrapnative.bsn._
 import boopickle.Default._
 import autowire._
@@ -53,14 +52,9 @@ class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory {
 class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationData()) extends AuthenticationPlugin {
   type AuthType = EGIAuthenticationData
 
-  val passwordStyle: HESetters = Seq(
-    width := "130",
-    `type` := "password"
-  )
+  val password = inputTag(data.cypheredPassword).amend(placeholder := "Password", `type` := "password")
 
-  val password = inputTag(data.cypheredPassword).amend(placeholder := "Password", passwordStyle)
-
-  def shorten(path: String): String = if (path.length > 10) s"...${path.takeRight(10)}" else path
+  def shorten(path: String): String = path.split("/").last//if (path.length > 10) s"...${path.takeRight(10)}" else path
 
   val privateKey =
     FileUploaderUI(data.privateKey.map(shorten).getOrElse(""), data.privateKey.isDefined, Some("egi.p12"))
@@ -81,10 +75,11 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
 
   lazy val panel = {
     import scaladget.tools._
-    vForm(
-      password.withLabel("Password"),
-      privateKey.view.amend(marginTop := "10").withLabel("Certificate"),
-      voInput.withLabel("Test EGI credential on", paddingTop := "40")
+    div(
+      flexColumn, width := "400px", height := "220",
+      div(cls := "verticalFormItem", div("Password", width := "150px"), password),
+      div(cls := "verticalFormItem", div("Certificate", width := "150px"), display.flex, div(privateKey.view.amend(flexRow, justifyContent.flexEnd), width := "100%")),
+      div(cls := "verticalFormItem", div("Test EGI credential on", width := "150px"), voInput)
     )
   }
 

@@ -119,9 +119,10 @@ object App {
     Plugins.fetch { plugins ⇒
       val maindiv = div()
 
-      val authenticationPanel = new AuthenticationPanel(plugins.authenticationFactories)
+      val authenticationPanel = AuthenticationPanel.render(plugins.authenticationFactories)
 
       val openFileTree = Var(true)
+      val openAuthentication = Var(false)
 
       //      val settingsItem = navItem(div(
       //        //panels.settingsViewApp,
@@ -169,10 +170,8 @@ object App {
         },
         menuActions.selector,
         div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ openExecutionPanel }).tooltip("Executions"),
-        div(glyph_lock, navBarItem, onClick --> { _ ⇒ authenticationPanel.authenticationDialog.show }).tooltip("Authentications"),
-        div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒
-          panels.expandTo(panels.pluginPanel.render)
-        }).tooltip("Plugins")
+        div(glyph_lock, navBarItem, onClick --> { _ ⇒ panels.expandTo(authenticationPanel, 2)}).tooltip("Authentications"),
+        div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒ panels.expandTo(panels.pluginPanel.render, 1)}).tooltip("Plugins")
         //            settingsItem
       )
 
@@ -223,6 +222,7 @@ object App {
               div(
                 cls := "tab-section",
                 theNavBar,
+                openAuthentication.signal.expand(authenticationPanel),
                 treeNodeTabs.fontSizeControl,
                 treeNodeTabs.render.amend(cls := "tab-section")
               )
@@ -245,8 +245,9 @@ object App {
             }.expand(
               div(
                 div(cls := "splitter"),
-                cls := "expandable-panel", height := "800px",
-                div(child <-- panels.expandablePanel.signal.map { p ⇒ p.getOrElse(div()) }))),
+                cls := "expandable-panel", height := "900px",
+                div(child <-- panels.expandablePanel.signal.map { p ⇒ p.map{_.element}.getOrElse(div()) })
+              )),
             panels.alertPanel.alertDiv
           )
         )

@@ -563,12 +563,6 @@ package object client {
     margin := "10 20"
   )
 
-  // AUTHENTICATION PANEL
-  lazy val certificate = Seq(
-    width := "130",
-    textAlign := "center"
-  )
-
   // ENVIRONMENT ERROR PANEL
   lazy val environmentPanelError = Seq(
     backgroundColor := WHITE,

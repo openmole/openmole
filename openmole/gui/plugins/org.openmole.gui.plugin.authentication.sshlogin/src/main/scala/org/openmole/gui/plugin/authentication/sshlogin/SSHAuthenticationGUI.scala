@@ -19,8 +19,8 @@ package org.openmole.gui.plugin.authentication.sshlogin
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
-import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory }
-import org.openmole.gui.ext.client.OMPost
+import org.openmole.gui.ext.data.{AuthenticationPlugin, AuthenticationPluginFactory}
+import org.openmole.gui.ext.client.{OMPost, flexColumn, flexRow}
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import autowire._
@@ -30,6 +30,7 @@ import org.openmole.gui.ext.data._
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
 import com.raquo.laminar.api.L._
+
 import scalajs.js
 
 object TopLevelExports {
@@ -68,11 +69,12 @@ class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthentica
 
   val portInput = inputTag(data.port).amend(placeholder := "Port")
 
-  def panel: HtmlElement = hForm(
-    loginInput.withLabel("Login"),
-    passwordInput.withLabel("Password"),
-    targetInput.withLabel("Target"),
-    portInput.withLabel("Port")
+  def panel: HtmlElement = div(
+    flexColumn, width := "400px", height := "220",
+    div(cls := "verticalFormItem", div("Login", width:="150px"), loginInput),
+    div(cls := "verticalFormItem", div("Password", width:="150px"), passwordInput),
+    div(cls := "verticalFormItem", div("Target", width:="150px"), targetInput),
+    div(cls := "verticalFormItem", div("Port", width:="150px"), portInput)
   )
 
   def save(onsave: () ⇒ Unit): Unit = {

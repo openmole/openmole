@@ -3,11 +3,13 @@ package org.openmole.gui.client.core
 import org.openmole.gui.ext.data._
 import org.scalajs.dom.raw.MouseEvent
 import scaladget.bootstrapnative.bsn._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import autowire._
 import org.openmole.gui.ext.api.Api
 import com.raquo.laminar.api.L._
+import scaladget.bootstrapnative.bsn
 
 //
 ///*
@@ -38,37 +40,35 @@ class PluginPanel {
     }
   }
 
-  val pluginTable = {
-    div(
+  val pluginTable =
       div(
-        cls := "expandable-table",
         children <-- plugins.signal.combineWith(panels.expandablePanel.signal).map {
           case (ps, _) ⇒
-            ps.zipWithIndex.map { case(p,i) ⇒
+            ps.zipWithIndex.map { case (p, i) ⇒
               div(
                 cls := "docEntry",
-                backgroundColor := {if(i%2 == 0) "white" else "#ececec"},
-                div(p.projectSafePath.name, justifyContent.flexStart),
-                div(p.time, cls := "table-time", marginLeft := "20px"),
-                onClick --> { (e: MouseEvent) ⇒
+                backgroundColor := {
+                  if (i % 2 == 0) "white" else "#ececec"
+                },
+                div(p.projectSafePath.name, width := "350px"),
+                div(
+                  cls := "badgeOM",
+                  bsn.badge_dark, p.time
+                ), onClick --> { (e: MouseEvent) ⇒
                   panels.treeNodeManager.switch(p.projectSafePath.parent)
                 }
               )
             }
         }
       )
-    )
-  }
 
-  def render: HtmlElement = {
-
+  def render: HtmlElement =
     div(
       div(
         cls := "expandable-title",
-        div("Plugins"),
+        div("Plugins",  padding := "10px"),
         div(cls := "close-button bi-chevron-down", onClick --> { _ ⇒ panels.closeExpandable })
       ),
       pluginTable
     )
-  }
 }

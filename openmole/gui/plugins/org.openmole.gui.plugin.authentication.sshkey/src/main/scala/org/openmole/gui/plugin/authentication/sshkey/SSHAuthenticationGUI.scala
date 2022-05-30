@@ -19,9 +19,8 @@ package org.openmole.gui.plugin.authentication.sshkey
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
-import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory }
-import org.openmole.gui.ext.client.{ FileUploaderUI, OMPost }
-
+import org.openmole.gui.ext.data.{AuthenticationPlugin, AuthenticationPluginFactory}
+import org.openmole.gui.ext.client.{FileUploaderUI, OMPost, flexColumn, flexRow}
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import autowire._
@@ -74,15 +73,15 @@ class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = Priva
     onremove()
   }
 
-  lazy val panel = vForm(
-    hForm(
-      loginInput.withLabel("Login"),
-      passwordInput.withLabel("Password"),
-      targetInput.withLabel("Host"),
-      portInput.withLabel("Port")
-    ),
-    privateKey.view.amend(marginTop := "10").withLabel("Private key")
+  lazy val panel = div(
+    flexColumn, width := "400px", height := "220",
+    div(cls := "verticalFormItem", div("Login", width := "150px"), loginInput),
+    div(cls := "verticalFormItem", div("Password", width := "150px"), passwordInput),
+    div(cls := "verticalFormItem", div("Target", width := "150px"), targetInput),
+    div(cls := "verticalFormItem", div("Port", width := "150px"), portInput),
+    div(cls := "verticalFormItem", div("Private key", width := "150px"), display.flex, div(privateKey.view.amend(flexRow, justifyContent.flexEnd), width := "100%"))
   )
+
 
   def save(onsave: () ⇒ Unit) = {
     OMPost()[PrivateKeyAuthenticationAPI].removeAuthentication(data).call().foreach {

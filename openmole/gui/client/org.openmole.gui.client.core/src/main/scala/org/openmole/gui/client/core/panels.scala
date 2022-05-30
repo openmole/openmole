@@ -71,17 +71,17 @@ object panels {
     new URLImportPanel(
       treeNodeManager,
       bannerAlert = bannerAlert)
-
-  val expandablePanel: Var[Option[HtmlElement]] = Var(None)
+    
+  case class ExpandablePanel(id: Int, element: HtmlElement)
+  
+  val expandablePanel: Var[Option[ExpandablePanel]] = Var(None)
 
   def closeExpandable = expandablePanel.set(None)
 
-  def expandTo(el: HtmlElement) = expandablePanel.update {
+  def expandTo(el: HtmlElement, id: Int) = expandablePanel.update {
     _ match {
-      case Some(_) ⇒ None
-      case None ⇒
-        println("Set to " + el)
-        Some(el)
+      case Some(ep: ExpandablePanel) ⇒ if(ep.id == id) None else Some(ExpandablePanel(id, el))
+      case None ⇒ Some(ExpandablePanel(id,el))
     }
   }
 
