@@ -6,7 +6,7 @@ object common {
   def scala3VersionValue = "3.1.2"
 
   def scalaXMLVersion = "2.0.1"
-  def gridscaleVersion = "2.41"
+  def gridscaleVersion = "2.42"
   def mgoVersion = "3.55"
   def sshjVersion = "0.31.0"
   def containerVersion = "1.20"
@@ -18,7 +18,7 @@ object common {
   def boopickleVersion = "1.3.3"
   def scalaAutowireVersion = "0.3.3"
   def sourcecodeVersion = "0.2.7"
-  def scaladgetVersion = "1.9.3"
+  def scaladgetVersion = "1.9.2"
   def sortableVersion = "0.7.2"
   def json4sVersion = "4.0.3"
   def circeVersion = "0.15.0-M1"

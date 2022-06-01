@@ -48,7 +48,9 @@ object EGIEnvironment extends JavaLogger {
   val CACertificatesSite = PreferenceLocation("EGIEnvironment", "CACertificatesSite", Some("https://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/"))
   val CACertificatesCacheTime = PreferenceLocation("EGIEnvironment", "CACertificatesCacheTime", Some(7 days))
   val CACertificatesDownloadTimeOut = PreferenceLocation("EGIEnvironment", "CACertificatesDownloadTimeOut", Some(2 minutes))
-  val VOInformationSite = PreferenceLocation("EGIEnvironment", "VOInformationSite", Some("https://operations-portal.egi.eu/xml/voIDCard/public/all/true"))
+
+  val VOPortalAPIKey = PreferenceLocation("EGIEnvironment", "VOPortalAPIKey", Some("60a6668c7ac56"))
+
   val VOCardDownloadTimeOut = PreferenceLocation("EGIEnvironment", "VOCardDownloadTimeOut", Some(2 minutes))
   val VOCardCacheTime = PreferenceLocation("EGIEnvironment", "VOCardCacheTime", Some(6 hours))
 
