@@ -88,39 +88,11 @@ object EGIAuthentication extends JavaLogger {
     }
   }
 
-  def getVOMS(vo: String)(implicit workspace: Workspace, preference: Preference): Option[Seq[String]] = {
-    def openVOCards(implicit workspace: Workspace, preference: Preference) =
-      EGIAuthentication.getClass.getClassLoader.getResourceAsStream("/voCards.xml")
+  def getVOMS(vo: String)(implicit workspace: Workspace, preference: Preference): Option[Seq[String]] =
+    gridscale.egi.VOMS.get(vo, preference(EGIEnvironment.VOPortalAPIKey))
 
-    val is = openVOCards
-    try getVOMS(vo, xml.XML.load(is))
-    finally is.close()
-  }
-  def getVMOSOrError(vo: String)(implicit workspace: Workspace, preference: Preference) = getVOMS(vo).getOrElse(throw new UserBadDataError(s"ID card for VO $vo not found."))
-
-  def getVOMS(vo: String, x: xml.Node) = {
-    import xml._
-
-    def attributeIsDefined(name: String, value: String) =
-      (_: Node).attribute(name).filter(_.text == value).isDefined
-
-    val card = (x \ "IDCard" filter (attributeIsDefined("Name", vo))).headOption
-
-    card map {
-      card ⇒
-        val vomses = (card \ "gLiteConf" \ "VOMSServers" \ "VOMS_Server")
-
-        def vomsUrl(voms: Node) = {
-          val host = (voms \ "hostname").head.text
-          val port = (voms.attribute("VomsesPort").get.text)
-          //val dn = (voms \ "X509Cert" \ "DN").headOption.map(_.text)
-          //s"voms://$host:${port}${dn.getOrElse("")}"
-          s"$host:$port"
-        }
-
-        vomses.map(vomsUrl)
-    }
-  }
+  def getVMOSOrError(vo: String)(implicit workspace: Workspace, preference: Preference) =
+    getVOMS(vo).getOrElse(throw new UserBadDataError(s"No ID card for VO $vo found on VO portal."))
 
   def update(a: EGIAuthentication, test: Boolean = true)(implicit cypher: Cypher, workspace: Workspace, authenticationStore: AuthenticationStore, serializerService: SerializerService) = {
     if (test) testPassword(a).get
