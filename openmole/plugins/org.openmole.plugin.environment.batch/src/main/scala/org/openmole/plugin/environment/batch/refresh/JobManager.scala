@@ -72,10 +72,8 @@ object JobManager { self ⇒
       case msg: Error       ⇒ dispatch(msg)
       case msg: Kill        ⇒ dispatch(msg)
 
-      case Manage(id, job, environment) ⇒
-        val bej = BatchExecutionJob(id, job, environment.jobStore)
-        ExecutionJobRegistry.register(environment.registry, bej)
-        services.eventDispatcher.trigger(environment, Environment.JobSubmitted(id, bej))
+      case Manage(bej, environment) ⇒
+        services.eventDispatcher.trigger(environment, Environment.JobSubmitted(bej.id, bej))
         self ! Submit(bej, environment)
 
       case Delay(msg, delay) ⇒

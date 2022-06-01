@@ -119,7 +119,7 @@ class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
   val parameters:        SGEEnvironment.Parameters,
   val name:              Option[String],
   val authentication:    A,
-  implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState()) { env ⇒
 
   import services._
 
@@ -132,7 +132,7 @@ class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
   }
 
   override def stop() = {
-    stopped = true
+    state.stopped = true
     cleanSSHStorage(storageService, background = false)
     BatchEnvironment.waitJobKilled(this)
     sshInterpreter().close
@@ -184,7 +184,7 @@ class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
 class SGELocalEnvironment(
   val parameters:        SGEEnvironment.Parameters,
   val name:              Option[String],
-  implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState()) { env ⇒
 
   import services._
 
@@ -193,7 +193,7 @@ class SGELocalEnvironment(
 
   override def start() = { storage; space }
   override def stop() = {
-    stopped = true
+    state.stopped = true
     HierarchicalStorageSpace.clean(storage, space, background = false)
     BatchEnvironment.waitJobKilled(this)
   }
