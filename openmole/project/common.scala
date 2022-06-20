@@ -11,7 +11,7 @@ object common {
   def sshjVersion = "0.33.0"
   def containerVersion = "1.20"
   def bouncyCastleVersion = "1.70"
-  def scalaTagsVersion = "0.9.4"
+  def scalaTagsVersion = "0.11.1"
   def laminarVersion = "0.14.2"
   def netLogo5Version = "5.3.1"
   def netLogo6Version = "6.2.2"
