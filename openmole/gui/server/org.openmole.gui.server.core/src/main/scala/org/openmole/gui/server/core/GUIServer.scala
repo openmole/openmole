@@ -133,7 +133,7 @@ class StartingPage extends ScalatraServlet with LifeCycle {
 
 import org.openmole.gui.server.core.GUIServer._
 
-class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServerServices, password: Option[String], extraHeader: String, optimizedJS: Boolean, subDir: Option[String]) {
+class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, password: Option[String], extraHeader: String, optimizedJS: Boolean, subDir: Option[String]) {
 
   lazy val server = new Server()
   var exitStatus: GUIServer.ExitStatus = GUIServer.Ok
@@ -142,23 +142,7 @@ class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServe
   import services._
 
   def start() = {
-    //org.eclipse.jetty.util.log.Log.setLog(new log.StdErrLog())
-
-    lazy val contextFactory = {
-      val contextFactory = new org.eclipse.jetty.util.ssl.SslContextFactory()
-
-      def keyStorePassword = "openmole"
-
-      val ks = KeyStore(services.workspace.persistentDir /> "keystoregui", keyStorePassword)
-      contextFactory.setKeyStore(ks.keyStore)
-      contextFactory.setKeyStorePassword(keyStorePassword)
-      contextFactory.setKeyManagerPassword(keyStorePassword)
-      contextFactory.setTrustStore(ks.keyStore)
-      contextFactory.setTrustStorePassword(keyStorePassword)
-      contextFactory
-    }
-
-    val connector = if (!http) new ServerConnector(server, contextFactory) else new ServerConnector(server)
+    val connector = new ServerConnector(server)
     connector.setPort(port)
 
     if (!localhost) connector.setHost("localhost")

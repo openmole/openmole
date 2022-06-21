@@ -72,7 +72,6 @@ object Application extends JavaLogger {
       loggerFileLevel:          Option[String]  = None,
       unoptimizedJS:            Boolean         = false,
       remote:                   Boolean         = false,
-      http:                     Boolean         = false,
       browse:                   Boolean         = true,
       proxyURI:                 Option[String]  = None,
       httpSubDirectory:         Option[String]  = None,
@@ -107,7 +106,6 @@ object Application extends JavaLogger {
       |[--workspace directory] run openmole with an alternative workspace location
       |[--rest] run the REST server
       |[--remote] enable remote connection to the web interface
-      |[--http] force http connection instead of https in remote mode for the web interface
       |[--no-browser] don't automatically launch the browser in GUI mode
       |[--unoptimized-js] do not optimize JS (do not use Google Closure Compiler)
       |[--extra-header path] specify a file containing a piece of html code to be inserted in the GUI html header file
@@ -147,7 +145,6 @@ object Application extends JavaLogger {
         case "--logger-level" :: tail                ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
         case "--logger-file-level" :: tail           ⇒ parse(tail.tail, c.copy(loggerFileLevel = Some(tail.head)))
         case "--remote" :: tail                      ⇒ parse(tail, c.copy(remote = true))
-        case "--http" :: tail                        ⇒ parse(tail, c.copy(http = true))
         case "--no-browser" :: tail                  ⇒ parse(tail, c.copy(browse = false))
         case "--unoptimizedJS" :: tail               ⇒ parse(tail, c.copy(unoptimizedJS = true))
         case "--unoptimized-js" :: tail              ⇒ parse(tail, c.copy(unoptimizedJS = true))
@@ -282,17 +279,13 @@ object Application extends JavaLogger {
 
             val extraHeader = config.extraHeader.map { _.content }.getOrElse("")
 
-            def useHTTP = config.http || !config.remote
-
-            def protocol = if (useHTTP) "http" else "https"
-
-            val url = s"$protocol://localhost:$port"
+            val url = s"http://localhost:$port"
 
             GUIServer.urlFile.content = url
 
             GUIServerServices.withServices(workspace, config.proxyURI, logLevel, logFileLevel) { services ⇒
               Runtime.getRuntime.addShutdownHook(thread(GUIServerServices.dispose(services)))
-              val server = new GUIServer(port, config.remote, useHTTP, services, config.password, extraHeader, !config.unoptimizedJS, config.httpSubDirectory)
+              val server = new GUIServer(port, config.remote, services, config.password, extraHeader, !config.unoptimizedJS, config.httpSubDirectory)
               server.start()
               if (config.browse && !config.remote) browse(url)
               server.launchApplication()
