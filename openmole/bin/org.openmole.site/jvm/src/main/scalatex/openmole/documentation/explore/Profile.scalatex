@@ -61,6 +61,7 @@ This means that @b{j} and @b{k} values vary for each point of the @b{i} paramete
 
 @h2{Profile within OpenMOLE}
 @h3{Specific constructor}
+@a("check code source", href:="https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.method.evolution/src/main/scala/org/openmole/plugin/method/evolution/Profile.scala#L388:L400")
 
 The @code{ProfileEvolution} constructor takes the following arguments:
 
