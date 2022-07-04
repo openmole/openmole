@@ -22,7 +22,7 @@ You can also use your own DoE in OpenMOLE, by providing a @a("CSV file", href :=
 
 
 @h2{The DirectSampling constructor}
-@lnk{"check code source", "https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.method.directsampling/src/main/scala/org/openmole/plugin/method/directsampling/package.scala#L158:L164"}
+@a("check code source", href:="https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.method.directsampling/src/main/scala/org/openmole/plugin/method/directsampling/package.scala#L158:L164")
 
 In OpenMOLE, a DoE is set up through the @code{DirectSampling} constructor.
 This constructor will generate a workflow, which is illustrated below.
@@ -125,7 +125,7 @@ For more details about hooks, check the corresponding @aa("Language", href := ho
 
 
 @h2{Model replication}
-@lnk{"check code source", "https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.method.directsampling/src/main/scala/org/openmole/plugin/method/directsampling/package.scala#L90:L98"}
+@a("check code source", href:="https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.method.directsampling/src/main/scala/org/openmole/plugin/method/directsampling/package.scala#L90:L98")
 
 If your model is stochastic, you may want to define a replication task to run several replications of the model for the same parameter values.
 This is similar to using a uniform distribution sampling on the seed of the model, and OpenMOLE provides a specific constructor for this, the @code{Replication} task.
