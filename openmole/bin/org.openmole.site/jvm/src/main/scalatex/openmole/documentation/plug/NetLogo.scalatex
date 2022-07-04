@@ -38,6 +38,7 @@
 
 
 @h2{NetLogo Task}
+@a("source code", href:="https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.task.netlogo6/src/main/scala/org/openmole/plugin/task/netlogo6/NetLogo6Task.scala#L131-L143")
 
 NetLogo is a widely used agent-based modeling platform and language developed by CCL at Northwestern University (see @aa("the official website", href:= "https://ccl.northwestern.edu/netlogo/")).
 It is conceived to be accessible to non-programmers and thus enhances inter-disciplinarity in the construction of simulation models, but can also be used to program large scale complex models (despite its bad reputation, see @aa("this paper", href := "http://jasss.soc.surrey.ac.uk/20/1/3.html") testing NetLogo speed performance and suggesting code improvements).
