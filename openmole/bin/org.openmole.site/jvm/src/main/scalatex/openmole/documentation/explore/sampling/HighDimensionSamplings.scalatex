@@ -26,7 +26,7 @@ These methods are not expensive @i{per se}, it depends on the magnitude of the i
 
 
 @h2{Latin Hypercube Sampling}
-@lnk{"check code source","https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.sampling.lhs/src/main/scala/org/openmole/plugin/sampling/lhs/LHS.scala"}
+@aa("check code source",href:="https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.sampling.lhs/src/main/scala/org/openmole/plugin/sampling/lhs/LHS.scala")
 
 The @aa("Latin Hypercube Sampling", href := "https://en.wikipedia.org/wiki/Latin_hypercube_sampling") is a statistical method for generating a near-random sample of parameter values from a multidimensional distribution.
 The syntax of the LHS sampling in OpenMOLE is the following:
