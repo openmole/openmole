@@ -22,6 +22,7 @@ colD, i
 
 
 @h2{Use your custom sampling in OpenMOLE}
+@lnk{"check code source","https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.sampling.csv/src/main/scala/org/openmole/plugin/sampling/csv/CSVSampling.scala#L58:L64"}
 
 The @code{CSVSampling} task is used to import your custom sampling into OpenMOLE.
 Here is an example of how to use this task in a simple workflow:
