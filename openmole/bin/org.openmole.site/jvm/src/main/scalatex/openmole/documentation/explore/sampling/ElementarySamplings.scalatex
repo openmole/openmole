@@ -23,6 +23,7 @@ Grid sampling is hampered by input space dimensionality, as high dimension space
 
 
 @h3{Use within OpenMOLE}
+@lnk{"check code source", "https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.method.directsampling/src/main/scala/org/openmole/plugin/method/directsampling/package.scala#L158:L164"}
 
 A grid sampling is declared via the @code{DirectSampling} constructor, in which the bounds and discretisation steps of each input to vary  are declared:
 
