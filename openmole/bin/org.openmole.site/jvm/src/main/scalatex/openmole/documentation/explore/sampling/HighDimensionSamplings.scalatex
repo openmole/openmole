@@ -69,6 +69,7 @@ For example, supposing you have already declared inputs, outputs, and a model ta
 
 
 @h2{Sobol Sequence}
+@a("check code source",href:="https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.sampling.quasirandom/src/main/scala/org/openmole/plugin/sampling/quasirandom/SobolSampling.scala")
 
 A @aa("Sobol sequence", href := "https://en.wikipedia.org/wiki/Sobol_sequence") is a quasi-random low-discrepancy sequence.
 The syntax of the Sobol sequence sampling in OpenMOLE is the following:
