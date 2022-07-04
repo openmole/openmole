@@ -12,6 +12,7 @@
 The @code{JuliaTask} relies on an underlying @code{ContainerTask}.
 
 @h3{Arguments of the JuliaTask}
+@a("source code", href:="https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.task.scilab/src/main/scala/org/openmole/plugin/task/scilab/ScilabTask.scala#L168-L182")
 
 It takes the following arguments :
 
