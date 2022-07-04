@@ -17,6 +17,7 @@ It may be convenient to use specific R libraries within a workflow, and therefor
 
 
 @h3{RTask syntax}
+@a("source code", href:="https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.task.r/src/main/scala/org/openmole/plugin/task/r/RTask.scala#L104-L117")
 
 The @code{RTask} relies on an underlying @code{ContainerTask} but is designed to be transparent and takes only R-related arguments.
 The current version of R used is @shared.rTask.rVersion.
