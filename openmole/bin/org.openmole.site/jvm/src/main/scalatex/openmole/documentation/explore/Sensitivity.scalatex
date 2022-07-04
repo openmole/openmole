@@ -63,7 +63,7 @@ These are computed as summary statistics on simulated elementary effects and are
 
 @h2{Morris' method within OpenMOLE}
 @h3{Specific constructor}
-@lnk{"check code source", "https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.method.sensitivity/src/main/scala/org/openmole/plugin/method/sensitivity/SensitivityMorris.scala#L407:L413"}
+@a("check code source", href:="https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.method.sensitivity/src/main/scala/org/openmole/plugin/method/sensitivity/SensitivityMorris.scala#L407:L413")
 
 The @code{SensitivityMorris} constructor is defined in OpenMOLE and takes the following parameters:
 
