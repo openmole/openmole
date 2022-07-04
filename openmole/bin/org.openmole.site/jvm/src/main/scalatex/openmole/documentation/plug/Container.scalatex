@@ -7,8 +7,8 @@
 
 To call a native executable in an OpenMOLE task, you can either use:
 @ul
-  @li{the @code{ContainerTask} that runs your executable in a portable container,}
-  @li{or the @code{SystemExecTask} that executes a local command line as if you where in a terminal.}
+  @li{the @code{ContainerTask} that runs your executable in a portable container,} (@a("source code", href:="https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.task.container/src/main/scala/org/openmole/plugin/task/container/ContainerTask.scala#L244-L260"))
+  @li{or the @code{SystemExecTask} that executes a local command line as if you where in a terminal.} (@a("source code", href:="https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.task.systemexec/src/main/scala/org/openmole/plugin/task/systemexec/SystemExecTask.scala#L77-L88"))
 
 @h2{Execute Your Code In a Containers}
 
