@@ -9,7 +9,7 @@
 The Origin Space Exploration (OSE) method is used to @b{explore the multiples antecedents of a pattern}. Input parameter values which produce a given pattern are selected. OSE optimize the fitness and when it founds solutions that are good enough it keep them and blacklist the part of the inputs space containing these solution. The optimization process keep going in order to find multiple solution producing the pattern.
 
 @h3{Exemple}
-@lnk{"check code source","https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.method.evolution/src/main/scala/org/openmole/plugin/method/evolution/OSE.scala#L20:L30"}
+@a("check code source",href:="https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.method.evolution/src/main/scala/org/openmole/plugin/method/evolution/OSE.scala#L20:L30")
 
 Here is a use example of the OSE method in an OpenMOLE script:
 
