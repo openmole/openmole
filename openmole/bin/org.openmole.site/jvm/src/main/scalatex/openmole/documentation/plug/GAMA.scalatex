@@ -15,6 +15,7 @@ OpenMOLE supports GAMA model natively through the @code{GAMATask}.
 
 @h2{The GAMATask}
 @h3{GAMA by example}
+@a("source code", href:="https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.task.gama/src/main/scala/org/openmole/plugin/task/gama/GAMATask.scala#L166-L185")
 
 You can provide your @i{.gaml} file to the @code{GAMATask} to run your model and explore it with OpenMOLE.
 The example below illustrates an exploration of the predator-prey model of the GAMA model library using a direct sampling:
