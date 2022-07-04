@@ -102,12 +102,13 @@ lazy val scalaLang = OsgiProject(
   dir,
   "org.scala-lang.scala-library",
   global = true,
-  exports = Seq("akka.*", "com.typesafe.*", "scala.*", "dotty.*", "scalax.*" /*"jline.*"*/),
+  exports = Seq("com.typesafe.*", "scala.*", "dotty.*", "scalax.*" /*"jline.*"*/),
   privatePackages = Seq("!org.jline.*", "**", "META-INF.native.**"),
   imports = Seq("!org.apache.sshd.*", "!org.mozilla.*", "!org.apache.tools.ant.*", "!sun.misc.*", "!javax.annotation.*", "*")) settings
   (libraryDependencies ++= {
     Seq(
       "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4",
+      "org.scala-lang.modules" % "scala-java8-compat_3" % "1.0.2",
       //"org.scala-lang" % "scala-library" % scalaVersion.value,
       //"org.scala-lang" % "scala-reflect" % scalaVersion.value,
       //"org.scala-lang" % "scalap" % scalaVersion.value ,
@@ -294,6 +295,8 @@ lazy val cats =
   OsgiProject(dir, "cats") settings (
     libraryDependencies += "org.typelevel" %% "cats-core" % catsVersion,
     libraryDependencies += "org.typelevel" %% "cats-free" % catsVersion,
+    libraryDependencies += "org.typelevel" %% "cats-effect" % catsEffectVersion,
+    libraryDependencies += "org.typelevel" %% "cats-parse" % catsParseVersion,
     version := catsVersion
   ) settings(settings: _*) settings(scala3Settings: _*)
 
@@ -510,3 +513,13 @@ lazy val guava = OsgiProject(dir, "com.google.guava", imports = Seq("*"), export
   libraryDependencies += "com.google.guava" % "guava" % guavaVersion,
   version := guavaVersion
 ) settings(settings: _*) settings(scala3Settings: _*)
+
+lazy val http4s = OsgiProject(dir, "org.endpoints4s.http4s-server", imports = Seq("!sun.security.*", "*"), exports = Seq("endpoints4s.*", "org.http4s.*"), privatePackages = Seq("!scala.*", "!cats.*", "!org.slf4j.*", "*")) settings (
+  libraryDependencies += "org.endpoints4s" %% "http4s-server" % endpoint4SHttp4SVersion,
+  libraryDependencies += "org.endpoints4s" %%% "json-schema-generic" % endpoints4SVersion,
+  libraryDependencies +=  "org.http4s" %% "http4s-blaze-server" % http4sBlazeServerVersion,
+  libraryDependencies += "com.github.jnr" % "jnr-unixsocket" % "0.38.17",
+  version := endpoint4SHttp4SVersion
+) settings(settings: _*) settings(scala3Settings: _*) dependsOn(cats)
+
+

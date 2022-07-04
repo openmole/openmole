@@ -58,8 +58,9 @@ object GUIServer {
     to
   }
 
-  val port = PreferenceLocation("GUIServer", "Port", Some(Network.freePort))
-  val plugins = PreferenceLocation[String]("GUIServer", "Plugins", None)
+  lazy val port = PreferenceLocation("GUIServer", "Port", Some(Network.freePort))
+
+  lazy val plugins = PreferenceLocation[String]("GUIServer", "Plugins", None)
 
   def initialisePreference(preference: Preference) = {
     if (!preference.isSet(port)) preference.setPreference(port, Network.freePort)
@@ -145,7 +146,7 @@ class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, pass
     val connector = new ServerConnector(server)
     connector.setPort(port)
 
-    if (!localhost) connector.setHost("localhost")
+    if (localhost) connector.setHost("localhost")
 
     server.addConnector(connector)
 

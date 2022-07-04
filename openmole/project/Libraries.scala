@@ -24,9 +24,15 @@ object Libraries {
   lazy val plotlyJS =  libraryDependencies += "org.openmole" %%% "scala-js-plotlyjs" % "1.6.0"
   lazy val scalaCompatJS =  libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.6"
 
+  lazy val endpoints4SJS =
+    libraryDependencies ++= Seq(
+      "org.endpoints4s" %%% "algebra" % endpoints4SVersion,
+      "org.endpoints4s" %%% "json-schema-generic" % endpoints4SVersion)
+
+  lazy val endpoints4SXhrClient =
+    libraryDependencies += "org.endpoints4s" %%% "xhr-client" % "5.0.0+n"
 
   lazy val scalatest = "org.scalatest" %% "scalatest" % "3.2.9" % "test"
-
 
   /** ------- Bundles -------------- */
 
@@ -126,5 +132,7 @@ object Libraries {
   lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.3.1"
 
   lazy val shapeless = "org.openmole.library" %% "org-typelevel-shapeless" % shapelessVersion
+
+  lazy val endpoints4SHTTP4SSServer = "org.openmole.library" %% "org-endpoints4s-http4s-server" % endpoint4SHttp4SVersion
 
 }

@@ -23,6 +23,8 @@ object common {
   def json4sVersion = "4.0.3"
   def circeVersion = "0.15.0-M1"
   def catsVersion = "2.7.0"
+  def catsEffectVersion = "3.3.12"
+  def catsParseVersion = "0.3.7"
   def squantsVersion = "1.8.3"
   def xstreamVersion = "1.4.18"
   def scalaURIVersion = "1.1.1"
@@ -40,6 +42,11 @@ object common {
   def scalaMetaVersion = "4.4.30"
   def scalaSTMVersion = "0.11.1"
   def jlineVersion = "3.21.0"
+
+  def http4sBlazeServerVersion = "0.23.12"
+
+  def endpoint4SHttp4SVersion = "9.0.0+n"
+  def endpoints4SVersion = "1.7.0+n"
 
   def scalajsVersion = "1.8.0"
   def scalajsLoggingVersion = "1.1.0"

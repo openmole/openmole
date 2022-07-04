@@ -610,6 +610,8 @@ def guiExt = guiDir / "ext"
 def guiExtTarget = guiExt / "target"
 
 def guiSettings = defaultSettings ++ scala2Settings
+def guiSettings3 = defaultSettings ++ excludeTransitiveScala2
+
 def scala2Settings =
   Seq(
     scalaVersion := scalaVersionValue,
@@ -625,7 +627,7 @@ def scala2Settings =
 lazy val dataGUI = OsgiProject(guiExt, "org.openmole.gui.ext.data") enablePlugins (ScalaJSPlugin) settings(
   Libraries.scalajsDomJS,
   Libraries.laminarJS,
-  //libraryDependencies ++= Libraries.monocle
+  Libraries.endpoints4SJS,
   guiSettings,
   scala2Settings,
   scalaJSSettings)
@@ -645,10 +647,11 @@ lazy val extClient = OsgiProject(guiExt, "org.openmole.gui.ext.client") enablePl
   Libraries.scalajsDomJS,
   Libraries.scaladgetTools,
   Libraries.bootstrapnative,
+  Libraries.endpoints4SXhrClient,
   guiSettings,
   scalaJSSettings)
 
-lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.ext.api") dependsOn(dataGUI, market) settings (guiSettings)
+lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.ext.api", dynamicImports = Seq("shapeless.*")) dependsOn(dataGUI, market) enablePlugins (ScalaJSPlugin) settings (guiSettings)
 
 lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompile", imports = Seq("*")) dependsOn(pluginManager, fileService, workspace, dataGUI) settings(
   guiSettings,
@@ -673,7 +676,7 @@ lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompil
 )
 
 
-val clientPrivatePackages = Seq("autowire.*", "boopickle.*", "com.raquo.*", "org.scalajs.dom.*", "scaladget.*", "net.scalapro.sortable.*", "org.openmole.plotlyjs.*", "org.querki.jsext.*", "scala.collection.compat.*", "app.tulz.tuplez.*")
+val clientPrivatePackages = Seq("autowire.*", "boopickle.*", "com.raquo.*", "org.scalajs.dom.*", "scaladget.*", "net.scalapro.sortable.*", "org.openmole.plotlyjs.*", "org.querki.jsext.*", "scala.collection.compat.*", "app.tulz.tuplez.*", "endpoints4s.*", "ujson.*", "geny.*", "upickle.*")
 
 def guiClientDir = guiDir / "client"
 lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core")  enablePlugins(ScalaJSPlugin) settings (
@@ -696,6 +699,7 @@ lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool
   Libraries.bootstrapnative,
   Libraries.scaladgetTools,
   Libraries.laminarJS,
+  Libraries.endpoints4SXhrClient,
  // Libraries.sortable,
   Libraries.plotlyJS,
   Libraries.scalaCompatJS) dependsOn (extClient)
@@ -704,6 +708,33 @@ lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool
 /* -------------------------- Server ----------------------- */
 
 def guiServerDir = guiDir / "server"
+
+lazy val newServerGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.newcore", dynamicImports = Seq("endpoints4s.*")) settings(
+  libraryDependencies ++= Seq(Libraries.endpoints4SHTTP4SSServer),
+  guiSettings3) dependsOn(
+  sharedGUI,
+  dataGUI,
+  workflow,
+  openmoleBuildInfo,
+  openmoleFile,
+  openmoleTar,
+  openmoleHash,
+  openmoleCollection,
+  project,
+  openmoleDSL,
+  batch,
+  omrHook,
+  openmoleStream,
+  txtmark,
+  openmoleCrypto,
+  module,
+  market,
+  extServer,
+  jsCompile,
+  services,
+  location,
+  serverGUI)
+
 
 lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", dynamicImports = Seq("org.eclipse.jetty.*")) settings(
   libraryDependencies ++= Seq(Libraries.autowire, Libraries.boopickle, Libraries.scalaTags, Libraries.scalatra, Libraries.clapper),
@@ -814,7 +845,14 @@ def bundleFilter(m: ModuleID, artifact: Artifact) = {
         (m.name contains "protobuf") ||
         (m.name contains "jts-core") || (m.name contains "si-quantity") || (m.name contains "systems-common-java8") || (m.name contains "uom-lib-common") || (m.name contains "unit-api") || (m.name contains "uom-se") // geotools bundled dependancies */
 
-  def includeOtherBundles = Set[String]("scala-parser-combinators")
+  def includeOtherBundles =
+    Set[(String, String)](
+      ("", "scala-parser-combinators"),
+      // akka http stream
+//      ("", "akka-stream"),
+//      ("", "akka-actor"),
+//      ("com.typesafe", "config")
+    )
 
   def include =
     (artifact.`type` == "bundle" && m.name != "osgi" && m.organization == "org.openmole.library") ||
@@ -822,7 +860,7 @@ def bundleFilter(m: ModuleID, artifact: Artifact) = {
       (m.name == "httpclient-osgi") ||
       (m.name == "httpcore-osgi") ||
       (m.organization == "org.osgi" && m.name != "osgi") ||
-      includeOtherBundles.exists(m.name.contains)
+      includeOtherBundles.exists { case (org, name) => m.organization.contains(org) && m.name.contains(name) }
 
   include && !exclude
 }
@@ -849,11 +887,14 @@ def excludeTransitiveScala2 =
     ExclusionRule("org.typelevel", "cats-free_2.13"),
     ExclusionRule("dev.optics", "monocle-macro_2.13"),
     ExclusionRule("com.lihaoyi", "sourcecode_2.13"),
+    ExclusionRule("com.lihaoyi", "geny_2.13"),
     ExclusionRule("org.typelevel", "simulacrum-scalafix-annotations_2.13"),
     ExclusionRule("org.typelevel:cats-kernel_2.13"),
     ExclusionRule("dev.optics", "monocle-core_2.13"),
     ExclusionRule("org.typelevel", "cats-core_2.13"),
-    ExclusionRule("org.scala-lang.modules", "scala-parallel-collections_2.13")
+    ExclusionRule("org.scala-lang.modules", "scala-parallel-collections_2.13"),
+    ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13"),
+    ExclusionRule("org.scala-lang.modules", "scala-java8-compat_2.13")
   )
 
 lazy val openmoleUI = OsgiProject(binDir, "org.openmole.ui", singleton = true, imports = Seq("*")) settings (
@@ -868,6 +909,7 @@ lazy val openmoleUI = OsgiProject(binDir, "org.openmole.ui", singleton = true, i
   pluginManager,
   workflow,
   serverGUI,
+  newServerGUI,
   clientGUI,
   logconfig,
   server,
@@ -937,7 +979,8 @@ lazy val openmole =
     resourcesAssemble += (openmoleNaked / assemble).value -> assemblyPath.value,
     resourcesAssemble ++= (Compile / Osgi.bundleDependencies).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
     assemblyDependenciesPath := assemblyPath.value / "plugins",
-    cleanFiles ++= (openmoleNaked / cleanFiles).value) dependsOn (toDependencies(openmoleDependencies): _*) settings(excludeTransitiveScala2)
+    cleanFiles ++= (openmoleNaked / cleanFiles).value
+  ) dependsOn (toDependencies(openmoleDependencies): _*) settings(excludeTransitiveScala2)
 
 lazy val openmoleRuntime =
   OsgiProject(binDir, "org.openmole.runtime", singleton = true, imports = Seq("*")) enablePlugins (TarPlugin) settings (assemblySettings: _*) dependsOn(workflow, communication, serializer, logconfig, event, exception) settings(

@@ -18,27 +18,28 @@
 package org.openmole.ui
 
 import java.awt.Desktop
-import java.io.{ File, FileOutputStream, IOException }
+import java.io.{File, FileOutputStream, IOException}
 import java.util.logging.Level
 import java.net.URI
 import org.openmole.console.Console.ExitCodes
-import org.openmole.core.project._
+import org.openmole.core.project.*
 import org.openmole.core.logconfig.LoggerConfig
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.rest.server.RESTServer
 import org.openmole.tool.logger.JavaLogger
 
 import annotation.tailrec
-import org.openmole.gui.server.core._
-import org.openmole.console._
-import org.openmole.tool.file._
-import org.openmole.tool.hash._
-import org.openmole.core.{ location, module }
+import org.openmole.gui.server.core.*
+import org.openmole.console.*
+import org.openmole.tool.file.*
+import org.openmole.tool.hash.*
+import org.openmole.core.{location, module}
 import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.preference._
-import org.openmole.core.services._
-import org.openmole.core.networkservice._
+import org.openmole.core.preference.*
+import org.openmole.core.services.*
+import org.openmole.core.networkservice.*
+import org.openmole.gui.server.newcore.*
 import org.openmole.tool.outputredirection.OutputRedirection
 
 object Application extends JavaLogger {
@@ -276,7 +277,6 @@ object Application extends JavaLogger {
           if (launch) {
             GUIServer.initialisePreference(preference)
             val port = config.port.getOrElse(preference(GUIServer.port))
-
             val extraHeader = config.extraHeader.map { _.content }.getOrElse("")
 
             val url = s"http://localhost:$port"
@@ -286,7 +286,10 @@ object Application extends JavaLogger {
             GUIServerServices.withServices(workspace, config.proxyURI, logLevel, logFileLevel) { services ⇒
               Runtime.getRuntime.addShutdownHook(thread(GUIServerServices.dispose(services)))
               val server = new GUIServer(port, config.remote, services, config.password, extraHeader, !config.unoptimizedJS, config.httpSubDirectory)
+              val newServer = new NewGUIServer(port + 1, config.remote, services)
+
               server.start()
+              val s = newServer.start()
               if (config.browse && !config.remote) browse(url)
               server.launchApplication()
               logger.info(
@@ -297,6 +300,7 @@ object Application extends JavaLogger {
                 case GUIServer.Ok      ⇒ Console.ExitCodes.ok
                 case GUIServer.Restart ⇒ Console.ExitCodes.restart
               }
+              //newServer.stop()
             }
           }
           else {

@@ -49,7 +49,7 @@ object WizardUtils {
     val resourcesString = if (!resources.isEmpty) s"""  resources += (${resources.map { r ⇒ s"workDirectory / $r" }.mkString(",")})\n""" else ""
 
     val defaults =
-      "\n  // Default values. Can be removed if OpenMOLE Vals are set by values coming from the workflow\n" +
+      "\n  // Default values. Can be removed if OpenMOLE Vals are set by values coming from the workflow\n" +
         (inputs.map { p ⇒ (p.name, testBoolean(p)) } ++
           ifilemappings.map { p ⇒ (p.name, " workDirectory / \"" + p.mapping.getOrElse("") + "\"") }).filterNot {
           _._2.isEmpty
