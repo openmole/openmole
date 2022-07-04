@@ -5,6 +5,7 @@
 
 
 @h2("Simple ScalaTask")
+@a("source code", href:="https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.task.scala/src/main/scala/org/openmole/plugin/task/scala/ScalaTask.scala#L70-L76")
 
 You can write Scala code to be executed in the workflow using the @code("ScalaTask"). For instance, the following workflow sums all the elements of an array using a @code("ScalaTask"), and displays the result. Similarly, you could use such a task to generate some model parameter values or perform some data analysis. To get more details on the hook part you can check the doc on @aa("hooks", href := hook.file).
 
