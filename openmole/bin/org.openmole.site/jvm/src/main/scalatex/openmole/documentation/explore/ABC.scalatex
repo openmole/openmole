@@ -12,6 +12,7 @@
 
 
 @h2{An example}
+@a("check code source",href:="https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.method.abc/src/main/scala/org/openmole/plugin/method/abc/package.scala#L153-L165")
 
  @hl.openmole(s"""
 
