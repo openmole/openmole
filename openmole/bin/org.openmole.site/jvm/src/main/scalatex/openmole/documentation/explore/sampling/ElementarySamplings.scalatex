@@ -106,6 +106,7 @@ The computational load in terms of number of model runs will then be only the su
 For example, with two factors @b{x@sub{1}} and @b{x@sub{2}} varying each between 0 and 1 with a step of 0.1, if their nominal value is 0.5, the one factor sampling will take first @b{x@sub{1} = 0, 0.1, ... , 1} while @b{x@sub{2} = 0.5}, and then the contrary.
 
 @h3{Use within OpenMOLE}
+@lnk{"check code source", "https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.sampling.onefactor/src/main/scala/org/openmole/plugin/sampling/onefactor/OneFactorSampling.scala"}
 
 The sampling primitive @code{OneFactorSampling} does so and takes as arguments any number of factors decorated by the keyword @code{nominal} and the nominal value.
 
