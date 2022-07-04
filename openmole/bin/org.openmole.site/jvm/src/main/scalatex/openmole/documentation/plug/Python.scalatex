@@ -14,6 +14,7 @@ The @code{PythonTask} relies on an underlying @code{ContainerTask} but is design
 
 
 @h3{Arguments of the PythonTask}
+@a("source code",href:="https://github.com/openmole/openmole/blob/14-dev/openmole/plugins/org.openmole.plugin.task.python/src/main/scala/org/openmole/plugin/task/python/PythonTask.scala#L78-L93")
 
 It takes the following arguments :
 
