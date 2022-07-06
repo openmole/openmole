@@ -100,8 +100,9 @@ object SLURMEnvironment {
           timeout = timeout.getOrElse(preference(SSHEnvironment.timeOut)),
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
-          sshProxy = sshProxy,
           authentication = SSHAuthentication.find(userValue, hostValue, portValue),
+          sshProxy = sshProxy,
+          proxyAuthentication = if (sshProxy.isDefined) Some(SSHAuthentication.find(sshProxy.get.user, sshProxy.get.host, sshProxy.get.port)) else None,
           services = BatchEnvironment.Services(ms)
         )
       }
@@ -151,16 +152,17 @@ object SLURMEnvironment {
 
 }
 
-class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
-  val user:              String,
-  val host:              String,
-  val port:              Int,
-  val timeout:           Time,
-  val parameters:        SLURMEnvironment.Parameters,
-  val name:              Option[String],
-  val sshProxy:          Option[SSHProxy],
-  val authentication:    A,
-  implicit val services: BatchEnvironment.Services) extends BatchEnvironment {
+class SLURMEnvironment[Authentication: gridscale.ssh.SSHAuthentication, ProxyAuthentication: gridscale.ssh.SSHAuthentication](
+  val user:                String,
+  val host:                String,
+  val port:                Int,
+  val timeout:             Time,
+  val parameters:          SLURMEnvironment.Parameters,
+  val name:                Option[String],
+  val authentication:      Authentication,
+  val sshProxy:            Option[SSHProxy],
+  val proxyAuthentication: Option[ProxyAuthentication],
+  implicit val services:   BatchEnvironment.Services) extends BatchEnvironment {
   env ⇒
 
   import services._
@@ -181,8 +183,8 @@ class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
   import env.services.{ threadProvider, preference }
   import org.openmole.plugin.environment.ssh._
 
-  lazy val sshServer = if (sshProxy.isDefined) {
-    val proxyServer = gridscale.ssh.SSHServer(host = sshProxy.get.host, port = sshProxy.get.port, timeout = timeout)(authentication)
+  lazy val sshServer = if (sshProxy.isDefined && proxyAuthentication.isDefined) {
+    val proxyServer = gridscale.ssh.SSHServer(host = sshProxy.get.host, port = sshProxy.get.port, timeout = timeout)(proxyAuthentication.get)
     gridscale.ssh.SSHServer(host = host, port = port, timeout = timeout, sshProxy = Some(proxyServer))(authentication)
   }
   else gridscale.ssh.SSHServer(host, port, timeout)(authentication)

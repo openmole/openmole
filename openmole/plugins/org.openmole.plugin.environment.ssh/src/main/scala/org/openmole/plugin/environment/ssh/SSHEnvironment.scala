@@ -178,8 +178,8 @@ class SSHEnvironment[AuthenticationType: gridscale.ssh.SSHAuthentication, ProxyA
 
   lazy val accessControl = AccessControl(preference(SSHEnvironment.maxConnections))
 
-  lazy val sshServer = if (sshProxy.isDefined) {
-    val proxyServer = gridscale.ssh.SSHServer(host = sshProxy.get.host, port = sshProxy.get.port, timeout = env.timeout)(env.authentication)
+  lazy val sshServer = if (sshProxy.isDefined && env.proxyAuthentication.isDefined) {
+    val proxyServer = gridscale.ssh.SSHServer(host = sshProxy.get.host, port = sshProxy.get.port, timeout = env.timeout)(env.proxyAuthentication.get)
     gridscale.ssh.SSHServer(host = env.host, port = env.port, timeout = env.timeout, sshProxy = Some(proxyServer))(env.authentication)
   }
   else gridscale.ssh.SSHServer(env.host, env.port, env.timeout)(env.authentication)
