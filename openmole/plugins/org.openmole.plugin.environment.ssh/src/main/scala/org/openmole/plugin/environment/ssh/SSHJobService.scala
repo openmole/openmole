@@ -13,7 +13,7 @@ import scala.ref.WeakReference
 
 object SSHJobService extends JavaLogger {
 
-  class Updater(environment: WeakReference[SSHEnvironment[_]]) extends IUpdatable {
+  class Updater(environment: WeakReference[SSHEnvironment[_, _]]) extends IUpdatable {
 
     var stop = false
 
@@ -52,7 +52,7 @@ object SSHJobService extends JavaLogger {
 
 }
 
-class SSHJobService[S](s: S, tmpDirectory: String, services: BatchEnvironment.Services, installation: RuntimeInstallation[_], env: SSHEnvironment[_], val accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], sshEffect: effectaside.Effect[_root_.gridscale.ssh.SSH], systemEffect: effectaside.Effect[effectaside.System]) {
+class SSHJobService[S](s: S, tmpDirectory: String, services: BatchEnvironment.Services, installation: RuntimeInstallation[_], env: SSHEnvironment[_, _], val accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], sshEffect: effectaside.Effect[_root_.gridscale.ssh.SSH], systemEffect: effectaside.Effect[effectaside.System]) {
 
   def register(batchExecutionJob: BatchExecutionJob, serializedJob: SerializedJob, outputPath: String, jobDirectory: String) = {
 
