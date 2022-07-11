@@ -10,7 +10,7 @@ USER root
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt update && apt install -y openjdk-11-jdk curl gnupg2 apt-transport-https && apt-get clean
 
-RUN echo "deb https://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list.d/sbt.list
+RUN echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | tee /etc/apt/sources.list.d/sbt.list
 RUN curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | apt-key add
 RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
 
@@ -25,4 +25,8 @@ COPY ./scripts/clone /usr/local/bin
 COPY ./scripts/compile /usr/local/bin
 RUN chmod +x /usr/local/*
 WORKDIR /sources/
+
+RUN cd /sources && /usr/local/bin/clone
+RUN /usr/local/bin/compile
+RUN ln -s /sources/openmole/openmole/bin/openmole/target/assemble/openmole /usr/local/bin/openmole
 
