@@ -23,10 +23,14 @@ RUN (curl https://rclone.org/install.sh | bash) && apt-get clean
 RUN mkdir /sources/ && chmod 777 /sources/
 COPY ./scripts/clone /usr/local/bin
 COPY ./scripts/compile /usr/local/bin
+COPY ./scripts/openmole-docker /usr/local/bin
 RUN chmod +x /usr/local/*
 WORKDIR /sources/
 
 RUN cd /sources && /usr/local/bin/clone
 RUN /usr/local/bin/compile
 RUN ln -s /sources/openmole/openmole/bin/openmole/target/assemble/openmole /usr/local/bin/openmole
+RUN chmod a+x /usr/local/bin/openmole-docker
+
+CMD openmole-docker
 

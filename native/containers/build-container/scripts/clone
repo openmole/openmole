@@ -4,8 +4,6 @@ cd $PWD/openmole
 git submodule init
 git submodule update
 git checkout proxyjump
-
 cd ..
-
 git clone https://github.com/openmole/gridscale.git
 

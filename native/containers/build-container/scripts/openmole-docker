@@ -1,0 +1,4 @@
+#!/bin/bash
+#export HOME=/var/openmole && mkdir -p $HOME && chown openmole:openmole $HOME && sudo -u openmole openmole --http --mem 2G --port 8080 --remote $@
+useradd openmole
+export HOME=/var/openmole && mkdir -p $HOME && chown openmole:openmole $HOME && openmole --http --mem 2G --port 8080 --remote $@
