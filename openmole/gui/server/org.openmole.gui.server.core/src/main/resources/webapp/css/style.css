@@ -21,6 +21,7 @@ body{
     -o-user-select:none;
     font-family:gi;
     line-height:1;
+    overflow: hidden;
 }
 
 .table.envError>tbody>tr>td{
@@ -48,14 +49,6 @@ textarea {
   resize: none;
 }
 
-a {
-    color: #3086b5;
-}
-
-a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-focus-inner, input[type="reset"]::-moz-focus-inner, input[type="button"]::-moz-focus-inner, input[type="submit"]::-moz-focus-inner, select::-moz-focus-inner {
-    border: medium none;
-    outline: medium none;
-}
 
 div table tr {
     text-align: left;
@@ -736,6 +729,7 @@ padding-bottom: 90px;
     font-weight: bold;
     color: white;
     cursor: pointer;
+    font-size: 20px;
    }
 
 .sorting-files {
@@ -863,11 +857,6 @@ padding-bottom: 90px;
     cursor: pointer;
 }
 
-.expandable-panel  {
-    width : 100%;
-    background: white;
-    }
-
 .splitter {
     background: #795c85;
     height: 7px;
@@ -976,12 +965,20 @@ padding-bottom: 90px;
     font-size : 14px;
     padding: 10px;
     cursor: pointer;
+    height: 34px;
+}
+
+.badgeUploadModel {
+  display: flex;
+  justify-content: center;
+  width: 150px;
+  padding: 5px;
+  margin-left: 10px;
+  height: 38px;
 }
 
 .newButton {
-    font-size: 14;
     padding: 5px;
-    height: 30;
     color: #3f3d56;
     background-color: white;
     margin: 0 10 0 50;
@@ -990,4 +987,28 @@ padding-bottom: 90px;
 .verticalFormItem {
     align-items: center;
     padding-top: 15px;
+}
+
+.btn.btn-success {
+    background-color: #a6bf26;
+    border-color: #a6bf26;
+}
+
+.collapse-bottom {
+   position: absolute;
+   width: 100%;
+   height : 500px;
+   transition: top 1s ease 0s;
+   top: 500px;
+   overflow: hidden;
+   background-color: rgb(236,236,236);
+   color: #FFF;
+   background: white;
+   z-index: 100;
+
+}
+
+.collapse-bottom.close {
+    top: 1000px;
+    background: white;
 }

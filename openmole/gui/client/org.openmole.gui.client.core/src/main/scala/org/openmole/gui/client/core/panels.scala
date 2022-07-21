@@ -60,21 +60,15 @@ object panels {
       treeNodeTabs = treeNodeTabs,
       services = pluginServices)
 
-  def modelWizardPanel(wizards: Seq[WizardPluginFactory]) =
-    new ModelWizardPanel(
-      treeNodeManager = treeNodeManager,
-      treeNodeTabs = treeNodeTabs,
-      bannerAlert = bannerAlert,
-      wizards = wizards)
-
   def urlImportPanel =
     new URLImportPanel(
       treeNodeManager,
       bannerAlert = bannerAlert)
-    
+
   case class ExpandablePanel(id: Int, element: HtmlElement)
-  
+
   val expandablePanel: Var[Option[ExpandablePanel]] = Var(None)
+  //val openExpandablePanel = Var(false)
 
   def closeExpandable = expandablePanel.set(None)
 

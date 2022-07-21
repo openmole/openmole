@@ -120,9 +120,10 @@ object App {
       val maindiv = div()
 
       val authenticationPanel = AuthenticationPanel.render(plugins.authenticationFactories)
+      val newProjectPanel = ProjectPanel.render(plugins.wizardFactories)
 
       val openFileTree = Var(true)
-      val openAuthentication = Var(false)
+      //   val openAuthentication = Var(false)
 
       //      val settingsItem = navItem(div(
       //        //panels.settingsViewApp,
@@ -139,22 +140,22 @@ object App {
         }
       }
 
-      case class MenuAction(name: String, action: () ⇒ Unit)
-
-      lazy val newEmpty = MenuAction("Empty project", () ⇒ {
-        val fileName = "newProject.oms"
-        CoreUtils.addFile(panels.treeNodeManager.dirNodeLine.now, fileName, () ⇒ {
-          val toDisplay = panels.treeNodeManager.dirNodeLine.now ++ fileName
-          FileManager.download(
-            toDisplay,
-            hash = true,
-            onLoaded = (content, hash) ⇒ {
-              treeNodeManager.invalidCurrentCache
-              fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OMS, panels.pluginServices)
-            }
-          )
-        })
-      })
+      //      case class MenuAction(name: String, action: () ⇒ Unit)
+      //
+      //      lazy val newEmpty = MenuAction("Empty project", () ⇒ {
+      //        val fileName = "newProject.oms"
+      //        CoreUtils.addFile(panels.treeNodeManager.dirNodeLine.now, fileName, () ⇒ {
+      //          val toDisplay = panels.treeNodeManager.dirNodeLine.now ++ fileName
+      //          FileManager.download(
+      //            toDisplay,
+      //            hash = true,
+      //            onLoaded = (content, hash) ⇒ {
+      //              treeNodeManager.invalidCurrentCache
+      //              fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OMS, panels.pluginServices)
+      //            }
+      //          )
+      //        })
+      //      })
 
       //START BUTTON
       lazy val theNavBar = div(
@@ -168,35 +169,36 @@ object App {
             }
           )
         },
-        menuActions.selector,
+        //   menuActions.selector,
+        button(btn_danger, "New project", onClick --> { _ => panels.expandTo(newProjectPanel, 3) }),
         div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ openExecutionPanel }).tooltip("Executions"),
-        div(glyph_lock, navBarItem, onClick --> { _ ⇒ panels.expandTo(authenticationPanel, 2)}).tooltip("Authentications"),
-        div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒ panels.expandTo(panels.pluginPanel.render, 1)}).tooltip("Plugins")
+        div(glyph_lock, navBarItem, onClick --> { _ ⇒ panels.expandTo(authenticationPanel, 2) }).tooltip("Authentications"),
+        div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒ panels.expandTo(panels.pluginPanel.render, 1) }).tooltip("Plugins")
         //            settingsItem
       )
 
-      lazy val importModel = MenuAction("Import your model", () ⇒ {
-        modelWizardPanel(plugins.wizardFactories).dialog.show
-      })
+      //      lazy val importModel = MenuAction("Import your model", () ⇒ {
+      //        panels.expandTo(modelWizardPanel(plugins.wizardFactories).render, 3)
+      //      })
 
-      lazy val fromURLProject = MenuAction("From URL", () ⇒ {
-        urlImportPanel.urlDialog.show
-      })
+      //      lazy val fromURLProject = MenuAction("From URL", () ⇒ {
+      //        urlImportPanel.urlDialog.show
+      //      })
+      //
+      //      lazy val marketPlaceProject = MenuAction("From market place", () ⇒ {
+      //        marketPanel.modalDialog.show
+      //      })
 
-      lazy val marketPlaceProject = MenuAction("From market place", () ⇒ {
-        marketPanel.modalDialog.show
-      })
+      // lazy val elements = Seq(newEmpty, importModel, marketPlaceProject, fromURLProject)
 
-      lazy val elements = Seq(newEmpty, importModel, marketPlaceProject, fromURLProject)
-
-      lazy val menuActions: Options[MenuAction] = elements.options(
-        key = btn_danger,
-        naming = (m: MenuAction) ⇒ m.name,
-        onclose = () ⇒ menuActions.content.now.foreach {
-          _.action()
-        },
-        fixedTitle = Some("New project")
-      )
+      //      lazy val menuActions: Options[MenuAction] = elements.options(
+      //        key = btn_danger,
+      //        naming = (m: MenuAction) ⇒ m.name,
+      //        onclose = () ⇒ menuActions.content.now.foreach {
+      //          _.action()
+      //        },
+      //        fixedTitle = Some("New project")
+      //      )
 
       // Define the option sequence
       Settings.settings.foreach { sets ⇒
@@ -222,7 +224,7 @@ object App {
               div(
                 cls := "tab-section",
                 theNavBar,
-                openAuthentication.signal.expand(authenticationPanel),
+                //openAuthentication.signal.expand(authenticationPanel),
                 treeNodeTabs.fontSizeControl,
                 treeNodeTabs.render.amend(cls := "tab-section")
               )
@@ -240,14 +242,36 @@ object App {
               //                    div(fontSize := "0.8em", s"built the ${sets.buildTime}")
               //                  )
             ),
-            panels.expandablePanel.signal.map {
-              _ != None
-            }.expand(
-              div(
+            //            openExpandablePanel.signal.expand(
+            //              div(
+            //                cls := "collapse-bottom",
+            //                div(cls := "splitter"),
+            //                child <-- panels.expandablePanel.signal.map { p ⇒
+            //                  p.map {
+            //                    _.element
+            //                  }.getOrElse(div())
+            //                }
+            //              )
+            //            ),
+
+            div(
+              div(cls <-- expandablePanel.signal.map { x =>
+                "collapse-bottom " + {
+                  x match {
+                    case Some(ep: ExpandablePanel) => ""
+                    case _ => "close"
+                  }
+                }
+              },
                 div(cls := "splitter"),
-                cls := "expandable-panel", height := "900px",
-                div(child <-- panels.expandablePanel.signal.map { p ⇒ p.map{_.element}.getOrElse(div()) })
-              )),
+                child <-- panels.expandablePanel.signal.map { p ⇒
+                  p.map {
+                    _.element
+                  }.getOrElse(div(top := "1000px", color.white))
+                }
+              )
+            ),
+
             panels.alertPanel.alertDiv
           )
         )

@@ -31,36 +31,37 @@ class NetlogoWizardApiImpl(s: Services) extends NetlogoWizardAPI {
   import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
   def toTask(
-    target:         SafePath,
-    executableName: String,
-    command:        String,
-    inputs:         Seq[ProtoTypePair],
-    outputs:        Seq[ProtoTypePair],
-    libraries:      Option[String],
-    resources:      Resources,
-    data:           NetlogoWizardData): WizardToTask = {
+              target: SafePath,
+              mmd: ModelMetadata): Unit = {
 
-    val modelData = WizardUtils.wizardModelData(inputs, outputs, resources.all.map {
-      _.safePath.name
-    }, Some("inputs"), Some("outputs"))
-    val task = s"${executableName.split('.').head.toLowerCase}Task"
+    //  val modelMetadata = parse(target)
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+
+    val modelData = WizardUtils.wizardModelData(mmd.inputs, mmd.outputs, Some("inputs"), Some("outputs"))
+    val task = s"${mmd.executableName.map{_.split('.').head.toLowerCase}.getOrElse("")}Task"
+    
+    val embeddWS = mmd.sourcesDirectory.toFile.listFiles.exists(f => f.getName.contains("netlogo") || f.getName.contains("nls"))
+    val targetFile = (target / (task + ".oms")).toFile
 
     val content = modelData.vals +
-      s"""\n\nval launch = List("${(Seq("setup") ++ (command.split('\n').toSeq)).mkString("\", \"")}")
-            \nval $task = NetLogo6Task(\n  workDirectory / ${executableName.split('/').map { s ⇒ s"""\"$s\"""" }.mkString(" / ")},\n  launch,\n  embedWorkspace = ${data.embedWorkspace},\n  seed = mySeed\n) set (\n""".stripMargin +
+      s"""\n\nval launch = List("${mmd.command.map{_.split('\n').toSeq.mkString("\", \"")}.getOrElse("")}")
+            \nval $task = NetLogo6Task(\n  workDirectory / ${mmd.executableName.map{_.split('/')}.getOrElse(Array()).map { s ⇒ s"""\"$s\"""" }.mkString(" / ")},\n  launch,\n  embedWorkspace = ${embeddWS},\n  seed = mySeed\n) set (\n""".stripMargin +
       WizardUtils.expandWizardData(modelData) +
       s"""\n)\n\n$task hook display"""
 
-    target.toFile.content = content
-    WizardToTask(target)
+
+    targetFile.content = content
+
+
+    // WizardToTask(target)
   }
 
-  def parse(safePath: SafePath): Option[LaunchingCommand] = {
+  def parse(safePath: SafePath): Option[ModelMetadata] = {
 
     val lines = safePath.toFile.lines
 
     def parse0(lines: Seq[(String, Int)], args: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair]): (Seq[ProtoTypePair], Seq[ProtoTypePair]) = {
-      if (lines.isEmpty) (ProtoTypePair("mySeed", ProtoTYPE.INT, "0", None) +: args, outputs)
+      if (lines.isEmpty) (ProtoTypePair("mySeed", ProtoTYPE.LONG, "0", None) +: args, outputs)
       else {
         val (line, index) = lines.head
         val tail = lines.tail
@@ -100,16 +101,15 @@ class NetlogoWizardApiImpl(s: Services) extends NetlogoWizardAPI {
       ProtoTypePair(name.clean, ProtoTYPE.STRING, lines(start + 7).split(' ').head, Some(name))
     }
 
-    val (args, outputs) = parse0(lines.toSeq.zipWithIndex, Seq(), Seq())
+    val (inputs, outputs) = parse0(lines.toSeq.zipWithIndex, Seq(), Seq())
 
-    Some(BasicLaunchingCommand(
-      Some(NetLogoLanguage()), "",
-      args.distinct.zipWithIndex.map {
-        case (a, i) ⇒ VariableElement(i, a, NetLogoTaskType())
-      },
-      outputs.distinct.zipWithIndex.map {
-        case (o, i) ⇒ VariableElement(i, o, NetLogoTaskType())
-      }
+    Some(ModelMetadata(
+      Some(NetLogoLanguage()),
+      inputs,
+      outputs,
+      None,
+      Some(safePath.name),
+      safePath.parent
     ))
   }
 

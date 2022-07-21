@@ -163,30 +163,6 @@ object CoreUtils {
 
   def setRoute(route: String) = dom.window.location.href = route.split("/").last
 
-  //  def buildModelScript[T<: WizardData](
-  //    wizardPluginFactory: WizardPluginFactory,
-  //    executableName:      String,
-  //    command:             String,
-  //    target:              SafePath,
-  //    resources:           Resources,
-  //    data:                T,
-  //    inputs:              Seq[ProtoTypePair]      = Seq(),
-  //    outputs:             Seq[ProtoTypePair]      = Seq(),
-  //    libraries:           Option[String]          = None) =
-  //    wizardPluginFactory.toTask(
-  //      target,
-  //      executableName,
-  //      command,
-  //      inputs,
-  //      outputs,
-  //      libraries,
-  //      resources,
-  //      data
-  //    ).foreach {
-  //      b ⇒
-  //        treeNodeTabs -- b
-  //        treeNodePanel.displayNode(FileNode(Var(b.name), 0L, 0L))
-  //        treeNodeManager.invalidCurrentCache
-  //    }
+
 
 }

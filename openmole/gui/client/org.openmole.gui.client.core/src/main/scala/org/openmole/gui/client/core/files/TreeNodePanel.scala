@@ -82,14 +82,18 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
   //Upload tool
   val transferring: Var[ProcessState] = Var(Processed())
 
-  def fInputMultiple(todo: Input ⇒ Unit) =
-    inputTag().amend(cls := "upload", `type` := "file", multiple := true,
+  def fInputMultiple(todo: Input ⇒ Unit) = {
+    val webkitdirectory: Prop[Boolean] = customProp("webkitdirectory", com.raquo.domtypes.generic.codecs.BooleanAsIsCodec)
+    val mozdirectory: Prop[Boolean] = customProp("mozdirectory", com.raquo.domtypes.generic.codecs.BooleanAsIsCodec)
+
+    inputTag().amend(cls := "upload", `type` := "file", multiple := true, webkitdirectory := true, mozdirectory := true,
       inContext { thisNode ⇒
         onChange --> { _ ⇒
           todo(thisNode)
         }
       }
     )
+  }
 
   def upbtn(todo: Input ⇒ Unit): HtmlElement =
     span(aria.hidden := true, glyph_upload, cls := "fileUpload glyphmenu", margin := "10 0 10 160",

@@ -295,6 +295,7 @@ package object data {
   case class DirData(isEmpty: Boolean)
 
   case class PluginState(isPlugin: Boolean, isPlugged: Boolean)
+
   case class TreeNodeData(
                            name: String,
                            dirData: Option[DirData],
@@ -366,12 +367,12 @@ package object data {
   }
 
   case class NetworkActivity(
-    downloadingFiles: Int = 0,
-    downloadedSize: Long = 0L,
-    readableDownloadedSize: String = "",
-    uploadingFiles: Int = 0,
-    uploadedSize: Long = 0L,
-    readableUploadedSize: String = "")
+                              downloadingFiles: Int = 0,
+                              downloadedSize: Long = 0L,
+                              readableDownloadedSize: String = "",
+                              uploadingFiles: Int = 0,
+                              uploadedSize: Long = 0L,
+                              readableUploadedSize: String = "")
 
   case class ExecutionActivity(executionTime: Long = 0)
 
@@ -603,54 +604,56 @@ package object data {
     def clone(newName: String, newType: ProtoTYPE, newMapping: Option[String]): VariableElement = clone(prototype.copy(name = newName, `type` = newType, mapping = newMapping))
   }
 
-  sealed trait LaunchingCommand {
-    def language: Option[Language]
+  case class ModelMetadata(language: Option[Language], inputs: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair], command: Option[String], executableName: Option[String], sourcesDirectory: SafePath)
 
-    def arguments: Seq[CommandElement]
-
-    def outputs: Seq[VariableElement]
-
-    def fullCommand: String
-
-    def statics: Seq[StaticElement] = arguments.collect { case a: StaticElement ⇒ a }
-
-    def updateVariables(variableArgs: Seq[VariableElement]): LaunchingCommand
-  }
-
-  case class BasicLaunchingCommand(language: Option[Language], codeName: String, arguments: Seq[CommandElement] = Seq(), outputs: Seq[VariableElement] = Seq()) extends LaunchingCommand {
-    def fullCommand: String = language match {
-      case Some(NetLogoLanguage()) ⇒ "go ;; You should set your running/stopping criteria here instead"
-      case _ ⇒ (Seq(language.map {
-        _.name
-      }.getOrElse(""), codeName) ++ arguments.sortBy {
-        _.index
-      }.map {
-        _.expand
-      }).mkString(" ")
-    }
-
-    def updateVariables(variableArgs: Seq[VariableElement]) = copy(arguments = statics ++ variableArgs)
-  }
-
-  case class JavaLaunchingCommand(jarMethod: JarMethod, arguments: Seq[CommandElement] = Seq(), outputs: Seq[VariableElement] = Seq()) extends LaunchingCommand {
-
-    val language = Some(JavaLikeLanguage())
-
-    def fullCommand: String = {
-      if (jarMethod.methodName.isEmpty) ""
-      else {
-        if (jarMethod.isStatic) jarMethod.clazz + "." else s"val constr = new ${jarMethod.clazz}() // You should initialize this constructor first\nconstr."
-      } +
-        jarMethod.methodName + "(" + arguments.sortBy {
-        _.index
-      }.map {
-        _.expand
-      }.mkString(", ") + ")"
-    }
-
-    def updateVariables(variableArgs: Seq[VariableElement]) = copy(arguments = statics ++ variableArgs)
-  }
-
+  //  sealed trait LaunchingCommand {
+  //    def language: Option[Language]
+  //
+  //    def arguments: Seq[CommandElement]
+  //
+  //    def outputs: Seq[VariableElement]
+  //
+  //    def fullCommand: String
+  //
+  //    def statics: Seq[StaticElement] = arguments.collect { case a: StaticElement ⇒ a }
+  //
+  //    def updateVariables(variableArgs: Seq[VariableElement]): LaunchingCommand
+  //  }
+  //
+  //  case class BasicLaunchingCommand(language: Option[Language], codeName: String, arguments: Seq[CommandElement] = Seq(), outputs: Seq[VariableElement] = Seq()) extends LaunchingCommand {
+  //    def fullCommand: String = language match {
+  //      case Some(NetLogoLanguage()) ⇒ "go ;; You should set your running/stopping criteria here instead"
+  //      case _ ⇒ (Seq(language.map {
+  //        _.name
+  //      }.getOrElse(""), codeName) ++ arguments.sortBy {
+  //        _.index
+  //      }.map {
+  //        _.expand
+  //      }).mkString(" ")
+  //    }
+  //
+  //    def updateVariables(variableArgs: Seq[VariableElement]) = copy(arguments = statics ++ variableArgs)
+  //  }
+  //
+  //  case class JavaLaunchingCommand(jarMethod: JarMethod, arguments: Seq[CommandElement] = Seq(), outputs: Seq[VariableElement] = Seq()) extends LaunchingCommand {
+  //
+  //    val language = Some(JavaLikeLanguage())
+  //
+  //    def fullCommand: String = {
+  //      if (jarMethod.methodName.isEmpty) ""
+  //      else {
+  //        if (jarMethod.isStatic) jarMethod.clazz + "." else s"val constr = new ${jarMethod.clazz}() // You should initialize this constructor first\nconstr."
+  //      } +
+  //        jarMethod.methodName + "(" + arguments.sortBy {
+  //        _.index
+  //      }.map {
+  //        _.expand
+  //      }.mkString(", ") + ")"
+  //    }
+  //
+  //    def updateVariables(variableArgs: Seq[VariableElement]) = copy(arguments = statics ++ variableArgs)
+  //  }
+  
   case class ProtoTypePair(name: String, `type`: org.openmole.gui.ext.data.ProtoTYPE.ProtoTYPE, default: String = "", mapping: Option[String] = None)
 
   sealed trait ClassTree {
@@ -873,7 +876,7 @@ package object data {
                               inputFileMapping: String,
                               outputFileMapping: String,
                               defaults: String,
-                              resources: String,
+                              //   resources: String,
                               specificInputMapping: Option[String] = None,
                               specificOutputMapping: Option[String] = None,
                             )

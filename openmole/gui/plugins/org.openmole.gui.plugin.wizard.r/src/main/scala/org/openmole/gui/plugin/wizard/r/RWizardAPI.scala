@@ -22,13 +22,7 @@ import org.openmole.gui.ext.data._
 trait RWizardAPI {
   def toTask(
     target:         SafePath,
-    executableName: String,
-    command:        String,
-    inputs:         Seq[ProtoTypePair],
-    outputs:        Seq[ProtoTypePair],
-    libraries:      Option[String],
-    resources:      Resources,
-    data:           RWizardData): WizardToTask
+    modelMetadata: ModelMetadata): Unit
 
-  def parse(safePath: SafePath): Option[LaunchingCommand]
+  def parse(safePath: SafePath): Option[ModelMetadata]
 }

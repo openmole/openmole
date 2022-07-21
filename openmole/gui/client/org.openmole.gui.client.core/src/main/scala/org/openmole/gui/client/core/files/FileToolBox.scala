@@ -74,9 +74,10 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     withSafePath { sp ⇒
       closeToolBox
       Plugins.fetch { p ⇒
-        val wizardPanel = panels.modelWizardPanel(p.wizardFactories)
-        wizardPanel.dialog.show
-        wizardPanel.fromSafePath(sp)
+//FIXME
+        //        val wizardPanel = panels.modelWizardPanel(p.wizardFactories)
+//        wizardPanel.dialog.show
+//        wizardPanel.fromSafePath(sp)
       }
     }
 
