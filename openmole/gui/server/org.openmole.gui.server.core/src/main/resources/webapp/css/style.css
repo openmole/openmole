@@ -643,7 +643,8 @@ padding-bottom: 90px;
     cursor: pointer;
     overflow: hidden;
     outline: none;
-    color: white
+    color: white;
+    margin-right:10px;
 }
 
 .popover-glyph {
