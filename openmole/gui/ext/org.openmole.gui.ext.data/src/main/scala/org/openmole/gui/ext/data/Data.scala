@@ -1,5 +1,7 @@
 package org.openmole.gui.ext
 
+import endpoints4s.algebra
+
 /*
  * Copyright (C) 25/09/14 // mathieu.leclaire@openmole.org
  *
@@ -18,6 +20,22 @@ package org.openmole.gui.ext
  */
 
 package object data {
+
+
+  trait DataJsonSchemas extends endpoints4s.algebra.Endpoints
+    with endpoints4s.algebra.JsonEntitiesFromSchemas
+    with endpoints4s.generic.JsonSchemas {
+    implicit lazy val errorDataSchema: JsonSchema[ErrorData] = genericJsonSchema
+    implicit lazy val optionErrorDataSchema: JsonSchema[Option[ErrorData]] = genericJsonSchema
+    implicit lazy val errorWithLocationSchema: JsonSchema[ErrorWithLocation] = genericJsonSchema
+    implicit lazy val optionIntSchema: JsonSchema[Option[Int]] = genericJsonSchema
+    implicit lazy val testSchema: JsonSchema[Test] = genericJsonSchema
+    implicit lazy val serverFileSystemContextSchema: JsonSchema[ServerFileSystemContext] = genericJsonSchema
+    implicit lazy val safePathSchema: JsonSchema[SafePath] = genericJsonSchema
+    //implicit lazy val listSafePathSchema: JsonSchema[List[SafePath]] = genericJsonSchema
+    //implicit lazy val extractResultSchema: JsonSchema[ExtractResult] = genericJsonSchema
+  }
+
 
   trait Data
 
@@ -266,12 +284,6 @@ package object data {
     def extension = FileExtension(name)
   }
 
-  object ExtractResult {
-    def ok = ExtractResult(None)
-  }
-
-  case class ExtractResult(error: Option[ErrorData])
-
   sealed trait UploadType {
     def typeName: String
   }
@@ -296,12 +308,11 @@ package object data {
 
   case class PluginState(isPlugin: Boolean, isPlugged: Boolean)
   case class TreeNodeData(
-                           name: String,
-                           dirData: Option[DirData],
-                           size: Long,
-                           time: Long,
-                           pluginState: PluginState
-                         )
+    name: String,
+    dirData: Option[DirData],
+    size: Long,
+    time: Long,
+    pluginState: PluginState)
 
   case class ScriptData(scriptPath: SafePath)
 
@@ -357,11 +368,11 @@ package object data {
   }
 
   case class EnvironmentError(
-                               environmentId: EnvironmentId,
-                               errorMessage: String,
-                               stack: ErrorData,
-                               date: Long,
-                               level: ErrorStateLevel) extends Ordered[EnvironmentError] {
+    environmentId: EnvironmentId,
+    errorMessage: String,
+    stack: ErrorData,
+    date: Long,
+    level: ErrorStateLevel) extends Ordered[EnvironmentError] {
     def compare(that: EnvironmentError) = date compare that.date
   }
 
@@ -387,22 +398,22 @@ package object data {
   case class StaticExecutionInfo(path: SafePath, script: String, startDate: Long)
 
   case class EnvironmentState(
-                               envId: EnvironmentId,
-                               taskName: String,
-                               running: Long,
-                               done: Long,
-                               submitted: Long,
-                               failed: Long,
-                               networkActivity: NetworkActivity,
-                               executionActivity: ExecutionActivity,
-                               numberOfErrors: Int)
+    envId: EnvironmentId,
+    taskName: String,
+    running: Long,
+    done: Long,
+    submitted: Long,
+    failed: Long,
+    networkActivity: NetworkActivity,
+    executionActivity: ExecutionActivity,
+    numberOfErrors: Int)
 
   sealed trait ExecutionInfo {
     def state: String
 
     def duration: Long
 
-    def capsules: Vector[ExecutionInfo.CapsuleExecution]
+    def capsules: Seq[ExecutionInfo.CapsuleExecution]
 
     def ready: Long = capsules.map(_.statuses.ready).sum
 
@@ -420,11 +431,11 @@ package object data {
     case class JobStatuses(ready: Long, running: Long, completed: Long)
 
     case class Failed(
-                       capsules: Vector[ExecutionInfo.CapsuleExecution],
-                       error: ErrorData,
-                       environmentStates: Seq[EnvironmentState],
-                       duration: Long = 0L,
-                       clean: Boolean = true) extends ExecutionInfo {
+      capsules: Seq[ExecutionInfo.CapsuleExecution],
+      error: ErrorData,
+      environmentStates: Seq[EnvironmentState],
+      duration: Long = 0L,
+      clean: Boolean = true) extends ExecutionInfo {
       def state: String = "failed"
     }
 
@@ -808,9 +819,9 @@ package object data {
   object AuthenticationExtension extends PluginExtensionType
 
   //TODO: add other extension points
-  case class AllPluginExtensionData(authentications: Seq[GUIPluginAsJS], wizards: Seq[GUIPluginAsJS])
+  case class PluginExtensionData(authentications: Seq[GUIPluginAsJS], wizards: Seq[GUIPluginAsJS])
 
-  case class GUIPluginAsJS(jsObject: String)
+  type GUIPluginAsJS = String
 
   trait AuthenticationData {
     def name: String
@@ -820,9 +831,7 @@ package object data {
 
   sealed trait Test {
     def passed: Boolean
-
     def message: String
-
     def error: Option[ErrorData]
   }
 
@@ -834,7 +843,8 @@ package object data {
     def error = None
   }
 
-  case class FailedTest(message: String, error: Some[ErrorData]) extends Test {
+  case class FailedTest(message: String, errorValue: ErrorData) extends Test {
+    def error = Some(errorValue)
     def passed = false
   }
 
@@ -849,14 +859,14 @@ package object data {
 
     def pending = PendingTest()
 
-    def error(msg: String, err: ErrorData) = FailedTest(msg, Some(err))
+    def error(msg: String, err: ErrorData) = FailedTest(msg, err)
   }
 
   case class JVMInfos(javaVersion: String, jvmImplementation: String, processorAvailable: Int, allocatedMemory: Long, totalMemory: Long)
 
   type SequenceHeader = Seq[String]
 
-  case class SequenceData(header: SequenceHeader = Seq(), content: Seq[Array[String]] = Seq()) {
+  case class SequenceData(header: SequenceHeader = Seq(), content: Seq[Seq[String]] = Seq()) {
 
     def withRowIndexes = {
       val lineIndexes = (1 to content.length).map {
@@ -867,16 +877,15 @@ package object data {
   }
 
   case class WizardModelData(
-                              vals: String,
-                              inputs: String,
-                              outputs: String,
-                              inputFileMapping: String,
-                              outputFileMapping: String,
-                              defaults: String,
-                              resources: String,
-                              specificInputMapping: Option[String] = None,
-                              specificOutputMapping: Option[String] = None,
-                            )
+    vals: String,
+    inputs: String,
+    outputs: String,
+    inputFileMapping: String,
+    outputFileMapping: String,
+    defaults: String,
+    resources: String,
+    specificInputMapping: Option[String] = None,
+    specificOutputMapping: Option[String] = None)
 
   case class WizardToTask(safePath: SafePath, errors: Seq[ErrorData] = Seq())
 

@@ -136,7 +136,7 @@ class TreeNodeManager {
   def find(findString: String) = {
     def updateSearch = {
       val safePath: SafePath = dirNodeLine.now()
-      CoreUtils.findFilesContaining(safePath, findString).foreach { fs =>
+      CoreUtils.findFilesContaining(safePath, Some(findString)).foreach { fs =>
         findFilesContaining.set((Some(findString), fs))
       }
     }

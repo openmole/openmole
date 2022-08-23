@@ -298,7 +298,7 @@ lazy val cats =
     libraryDependencies += "org.typelevel" %% "cats-effect" % catsEffectVersion,
     libraryDependencies += "org.typelevel" %% "cats-parse" % catsParseVersion,
     version := catsVersion
-  ) settings(settings: _*) settings(scala3Settings: _*)
+  ) settings(settings: _*) //settings(scala3Settings: _*)
 
 lazy val squants =
   OsgiProject(dir, "squants") settings (
@@ -514,12 +514,12 @@ lazy val guava = OsgiProject(dir, "com.google.guava", imports = Seq("*"), export
   version := guavaVersion
 ) settings(settings: _*) settings(scala3Settings: _*)
 
-lazy val http4s = OsgiProject(dir, "org.endpoints4s.http4s-server", imports = Seq("!sun.security.*", "*"), exports = Seq("endpoints4s.*", "org.http4s.*"), privatePackages = Seq("!scala.*", "!cats.*", "!org.slf4j.*", "*")) settings (
+lazy val http4s = OsgiProject(dir, "org.endpoints4s.http4s-server", imports = Seq("!sun.security.*", "*"), exports = Seq("endpoints4s.*", "org.http4s.*", "shapeless.*", "fs2.*", "org.typelevel.ci.*"), privatePackages = Seq("!scala.*", "!cats.*", "!org.slf4j.*", "*")) settings (
   libraryDependencies += "org.endpoints4s" %% "http4s-server" % endpoint4SHttp4SVersion,
   libraryDependencies += "org.endpoints4s" %%% "json-schema-generic" % endpoints4SVersion,
   libraryDependencies +=  "org.http4s" %% "http4s-blaze-server" % http4sBlazeServerVersion,
   libraryDependencies += "com.github.jnr" % "jnr-unixsocket" % "0.38.17",
   version := endpoint4SHttp4SVersion
-) settings(settings: _*) settings(scala3Settings: _*) dependsOn(cats)
+) settings(settings: _*) /*settings(scala3Settings: _*)*/ dependsOn(cats)
 
 

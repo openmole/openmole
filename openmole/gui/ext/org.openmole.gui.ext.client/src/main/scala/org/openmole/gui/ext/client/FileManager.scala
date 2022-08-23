@@ -85,7 +85,7 @@ object FileManager {
     hash:              Boolean                         = false,
   ) = {
 
-    OMPost()[Api].size(safePath).call().foreach { size ⇒
+    OMFetch(coreAPIClient).future(_.size(safePath).future).foreach { size ⇒
       val xhr = new XMLHttpRequest
 
       xhr.onprogress = (e: ProgressEvent) ⇒ {

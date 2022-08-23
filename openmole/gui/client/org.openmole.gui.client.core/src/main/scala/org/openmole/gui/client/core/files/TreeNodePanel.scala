@@ -74,8 +74,8 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     val newFile = newNodeInput.ref.value
     val currentDirNode = treeNodeManager.dirNodeLine
     addRootDirButton.toggled.now match {
-      case true ⇒ CoreUtils.addDirectory(currentDirNode.now, newFile, () ⇒ treeNodeManager.invalidCurrentCache)
-      case false ⇒ CoreUtils.addFile(currentDirNode.now, newFile, () ⇒ treeNodeManager.invalidCurrentCache)
+      case true ⇒ CoreUtils.createDirectory(currentDirNode.now, newFile, () ⇒ treeNodeManager.invalidCurrentCache)
+      case false ⇒ CoreUtils.createFile(currentDirNode.now, newFile, () ⇒ treeNodeManager.invalidCurrentCache)
     }
   }
 
@@ -148,14 +148,14 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
           button(cls := "btn blue-button", marginLeft := "80px", "Copy", onClick --> { _ ⇒
             multiTool.set(Paste)
             confirmationDiv.set(Some(confirmation(s"${selected.now().size} files copied. Browse to the target folder and press Paste", "Paste", () ⇒
-              CoreUtils.testExistenceAndCopyProjectFilesTo(selected.now(), treeNodeManager.dirNodeLine.now()).foreach { existing ⇒
+              CoreUtils.copyProjectFiles(selected.now(), treeNodeManager.dirNodeLine.now(), overwrite = false).foreach { existing ⇒
                 if (existing.isEmpty) {
                   treeNodeManager.invalidCurrentCache
                   closeMultiTool
                 }
                 else {
                   confirmationDiv.set(Some(confirmation(s"${existing.size} files have already the same name. Overwrite them ?", "Overwrite", () ⇒
-                    CoreUtils.copyProjectFilesTo(selected.now(), treeNodeManager.dirNodeLine.now()).foreach { b ⇒
+                    CoreUtils.copyProjectFiles(selected.now(), treeNodeManager.dirNodeLine.now(), overwrite = true).foreach { b ⇒
                       treeNodeManager.invalidCurrentCache
                       closeMultiTool
                     })))
@@ -462,7 +462,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
         if (isDir) {
           if (dragged != to) {
             //treeNodeTabs.saveAllTabs(() ⇒ {
-            Post()[Api].move(dragged, to).call().foreach {
+            Fetch.future(_.move(dragged, to).future).foreach {
               b ⇒
                 treeNodeManager.invalidCache(to)
                 treeNodeManager.invalidCache(dragged)

@@ -79,7 +79,7 @@ object App {
       timer.set(Some(setInterval(5000) {
         Post(3 seconds, 5 minutes)[Api].isAlive().call().foreach { x ⇒
           if (x) {
-            CoreUtils.setRoute(routes.connectionRoute)
+            CoreUtils.setRoute(routes.slashConnectionRoute)
             timer.now.foreach {
               clearInterval
             }
@@ -115,7 +115,8 @@ object App {
 
   def run() = {
     val containerNode = dom.document.querySelector("#openmole-content")
-
+    
+    //import scala.concurrent.ExecutionContext.Implicits.global
     Plugins.fetch { plugins ⇒
       val maindiv = div()
 
@@ -138,12 +139,11 @@ object App {
           false
         }
       }
-
       case class MenuAction(name: String, action: () ⇒ Unit)
 
       lazy val newEmpty = MenuAction("Empty project", () ⇒ {
         val fileName = "newProject.oms"
-        CoreUtils.addFile(panels.treeNodeManager.dirNodeLine.now, fileName, () ⇒ {
+        CoreUtils.createFile(panels.treeNodeManager.dirNodeLine.now, fileName, () ⇒ {
           val toDisplay = panels.treeNodeManager.dirNodeLine.now ++ fileName
           FileManager.download(
             toDisplay,
@@ -198,62 +198,62 @@ object App {
         fixedTitle = Some("New project")
       )
 
-      // Define the option sequence
-      Settings.settings.foreach { sets ⇒
-        render(
-          containerNode,
+    // Define the option sequence
+    //Fetch(_.omSettings(())) { sets ⇒
+      render(
+        containerNode,
+        div(
+          cls := "app-container",
+          // panels.bannerAlert.banner,
+          //theNavBar,
           div(
-            cls := "app-container",
-            // panels.bannerAlert.banner,
-            //theNavBar,
+            cls := "main-container",
             div(
-              cls := "main-container",
-              div(
-                cls <-- openFileTree.signal.map { oft ⇒
-                  "file-section" + {
-                    if (oft) "" else " closed"
-                  }
-                },
-                div(img(src := "img/openmole_dark.png", height := "70px"), cls := "nav-container"),
-                treeNodePanel.fileControler,
-                treeNodePanel.fileToolBar.sortingGroup,
-                treeNodePanel.treeView
-              ),
-              div(
-                cls := "tab-section",
-                theNavBar,
-                openAuthentication.signal.expand(authenticationPanel),
-                treeNodeTabs.fontSizeControl,
-                treeNodeTabs.render.amend(cls := "tab-section")
-              )
-              //                cls <-- openFileTree.signal.combineWith(panels.bannerAlert.isOpen).map {
-              //                  case (oft, io) ⇒
-              //                   // "centerpanel "
-              ////                    +
-              ////                      CoreUtils.ifOrNothing(oft, "reduce") +
-              ////                      CoreUtils.ifOrNothing(io, " banneropen")
-              //                },
-              //                  div(
-              //                    omsheet.textVersion,
-              //                    div(
-              //                      fontSize := "1em", s"${sets.version} ${sets.versionName}"),
-              //                    div(fontSize := "0.8em", s"built the ${sets.buildTime}")
-              //                  )
+              cls <-- openFileTree.signal.map { oft ⇒
+                "file-section" + {
+                  if (oft) "" else " closed"
+                }
+              },
+              div(img(src := "img/openmole_dark.png", height := "70px"), cls := "nav-container"),
+              treeNodePanel.fileControler,
+              treeNodePanel.fileToolBar.sortingGroup,
+              treeNodePanel.treeView
             ),
-            panels.expandablePanel.signal.map {
-              _ != None
-            }.expand(
-              div(
-                div(cls := "splitter"),
-                cls := "expandable-panel", height := "900px",
-                div(child <-- panels.expandablePanel.signal.map { p ⇒ p.map{_.element}.getOrElse(div()) })
-              )),
-            panels.alertPanel.alertDiv
-          )
+            div(
+              cls := "tab-section",
+              theNavBar,
+              openAuthentication.signal.expand(authenticationPanel),
+              treeNodeTabs.fontSizeControl,
+              treeNodeTabs.render.amend(cls := "tab-section")
+            )
+            //                cls <-- openFileTree.signal.combineWith(panels.bannerAlert.isOpen).map {
+            //                  case (oft, io) ⇒
+            //                   // "centerpanel "
+            ////                    +
+            ////                      CoreUtils.ifOrNothing(oft, "reduce") +
+            ////                      CoreUtils.ifOrNothing(io, " banneropen")
+            //                },
+            //                  div(
+            //                    omsheet.textVersion,
+            //                    div(
+            //                      fontSize := "1em", s"${sets.version} ${sets.versionName}"),
+            //                    div(fontSize := "0.8em", s"built the ${sets.buildTime}")
+            //                  )
+          ),
+          panels.expandablePanel.signal.map {
+            _ != None
+          }.expand(
+            div(
+              div(cls := "splitter"),
+              cls := "expandable-panel", height := "900px",
+              div(child <-- panels.expandablePanel.signal.map { p ⇒ p.map{_.element}.getOrElse(div()) })
+            )),
+          panels.alertPanel.alertDiv
         )
-      }
-      panels.treeNodeManager.invalidCurrentCache
+      )
     }
+    panels.treeNodeManager.invalidCurrentCache
+  //}
   }
 
 }

@@ -94,8 +94,8 @@ object Plugins extends JavaLogger {
 
   }
 
-  def addPluginRoutes(route: OMRouter ⇒ Unit, services: Services) = {
-    Log.logger.info(s"Loading GUI plugins")
-    GUIPluginRegistry.routers.foreach { r ⇒ route(r(services)) }
-  }
+//  def addPluginRoutes(route: OMRouter ⇒ Unit, services: Services) = {
+//    Log.logger.info(s"Loading GUI plugins")
+//    GUIPluginRegistry.routers.foreach { r ⇒ route(r(services)) }
+//  }
 }

@@ -109,7 +109,7 @@ class MarketPanel(manager: TreeNodeManager) {
   )
 
   def exists(sp: SafePath, entry: MarketIndexEntry) =
-    Post()[Api].exists(sp).call().foreach { b ⇒
+    Fetch.future(_.exists(sp).future).foreach { b ⇒
       if (b) overwriteAlert.set(Some(entry))
       else download(entry)
     }
@@ -117,11 +117,13 @@ class MarketPanel(manager: TreeNodeManager) {
   def download(entry: MarketIndexEntry) = {
     val path = manager.dirNodeLine.now ++ entry.name
     downloading.set(downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processing()))))
-    Post()[Api].getMarketEntry(entry, path).call().foreach { d ⇒
-      downloading.update(d ⇒ d.updatedFirst(_._1 == entry, (entry, Var(Processed()))))
-      downloading.now.headOption.foreach(_ ⇒ modalDialog.hide)
-      panels.treeNodeManager.invalidCurrentCache
-    }
+
+    // FIXME Reactivate when scala 3
+//    Post()[Api].getMarketEntry(entry, path).call().foreach { d ⇒
+//      downloading.update(d ⇒ d.updatedFirst(_._1 == entry, (entry, Var(Processed()))))
+//      downloading.now.headOption.foreach(_ ⇒ modalDialog.hide)
+//      panels.treeNodeManager.invalidCurrentCache
+//    }
   }
 
   def downloadButton(entry: MarketIndexEntry, todo: () ⇒ Unit = () ⇒ {}) = div()
@@ -139,7 +141,7 @@ class MarketPanel(manager: TreeNodeManager) {
   //}
 
   def deleteFile(sp: SafePath, marketIndexEntry: MarketIndexEntry) =
-    Post()[Api].deleteFile(sp, ServerFileSystemContext.project).call().foreach { d ⇒
+    Fetch.future(_.deleteFiles(Seq(sp), ServerFileSystemContext.project).future).foreach { d ⇒
       download(marketIndexEntry)
     }
 
@@ -159,9 +161,12 @@ class MarketPanel(manager: TreeNodeManager) {
     omsheet.panelWidth(92),
     onopen = () ⇒ {
       marketIndex.now match {
-        case None ⇒ Post()[Api].marketIndex.call().foreach { m ⇒
-          marketIndex.set(Some(m))
-        }
+        case None ⇒
+
+          // FIXME Reactivate when scala 3
+//          Post()[Api].marketIndex.call().foreach { m ⇒
+//          marketIndex.set(Some(m))
+//        }
         case _ ⇒
       }
     },

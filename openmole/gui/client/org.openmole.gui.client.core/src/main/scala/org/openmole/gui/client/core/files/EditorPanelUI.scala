@@ -51,8 +51,8 @@ object EditorPanelUI {
              initHash: String,
              //containerHESetters: HESetters     = emptySetters
            ) = {
-    import scala.concurrent.ExecutionContext.Implicits.global
-    org.openmole.gui.client.core.APIClient.uuid(()).future.onComplete { i => println("uuid " + i.get.uuid) }
+//    import scala.concurrent.ExecutionContext.Implicits.global
+//    org.openmole.gui.client.core.APIClient.uuid(()).future.onComplete { i => println("uuid " + i.get.uuid) }
     val editor = {
       fileType match {
         case OMS ⇒ new EditorPanelUI(treeNodeTab, OMS)

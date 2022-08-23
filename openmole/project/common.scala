@@ -21,7 +21,7 @@ object common {
   def scaladgetVersion = "1.9.2"
   def sortableVersion = "0.7.2"
   def json4sVersion = "4.0.3"
-  def circeVersion = "0.15.0-M1"
+  def circeVersion = "0.14.2"
   def catsVersion = "2.7.0"
   def catsEffectVersion = "3.3.12"
   def catsParseVersion = "0.3.7"
@@ -45,8 +45,8 @@ object common {
 
   def http4sBlazeServerVersion = "0.23.12"
 
-  def endpoint4SHttp4SVersion = "9.0.0+n"
-  def endpoints4SVersion = "1.7.0+n"
+  def endpoint4SHttp4SVersion = "10.0.0+n"
+  def endpoints4SVersion = "1.8.0+n"
 
   def scalajsVersion = "1.8.0"
   def scalajsLoggingVersion = "1.1.0"

@@ -54,13 +54,13 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) {
               case None ⇒
             }
           case MDScript ⇒
-            Post()[Api].mdToHtml(safePath).call().foreach { htmlString ⇒
+            Fetch.future(_.mdToHtml(safePath).future).foreach { htmlString ⇒
               treeNodeTabs add TreeNodeTab.HTML(safePath, TreeNodeTab.mdBlock(htmlString))
             }
           case SVGExtension ⇒ treeNodeTabs add TreeNodeTab.HTML(safePath, TreeNodeTab.rawBlock(content))
           case editableFile: EditableFile ⇒
             if (DataUtils.isCSV(safePath))
-              Post()[Api].sequence(safePath).call().foreach { seq ⇒
+              Fetch.future(_.sequence(safePath).future).foreach { seq ⇒
                 val tab = TreeNodeTab.Editable(
                   safePath,
                   DataTab.build(seq, view = TreeNodeTab.Table, editing = !editableFile.onDemand),

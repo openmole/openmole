@@ -26,11 +26,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class Activator extends BundleActivator {
 
-  def info = GUIPluginInfo(
-    analysis = Some(EvolutionMetadata.method -> classOf[EvolutionAnalysis]),
-    router = Some(s ⇒ OMRouter[EvolutionAnalysisAPI](AutowireServer.route[EvolutionAnalysisAPI](new EvolutionAnalysisAPIImpl(s))))
-  )
-
-  override def start(context: BundleContext): Unit = GUIPluginRegistry.register(this, info)
-  override def stop(context: BundleContext): Unit = GUIPluginRegistry.unregister(this)
+//  def info = GUIPluginInfo(
+//    analysis = Some(EvolutionMetadata.method -> classOf[EvolutionAnalysis]),
+//    router = Some(s ⇒ OMRouter[EvolutionAnalysisAPI](AutowireServer.route[EvolutionAnalysisAPI](new EvolutionAnalysisAPIImpl(s))))
+//  )
+//
+//  override def start(context: BundleContext): Unit = GUIPluginRegistry.register(this, info)
+//  override def stop(context: BundleContext): Unit = GUIPluginRegistry.unregister(this)
 }

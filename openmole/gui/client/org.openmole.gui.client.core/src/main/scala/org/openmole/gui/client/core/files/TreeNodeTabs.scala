@@ -30,7 +30,6 @@ object TreeNodeTabs {
   object Active extends Activity
 
   object UnActive extends Activity
-
 }
 
 import TreeNodeTabs._
@@ -163,7 +162,7 @@ object TreeNodeTab {
               omsEditor.editor.getSession().clearBreakpoints()
               compileDisabled.set(true)
               saveContent(() ⇒
-                Post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].compileScript(ScriptData(safePath)).call().foreach { errorDataOption ⇒
+                Fetch.future(_.compileScript(ScriptData(safePath)).future, timeout = 120 seconds, warningTimeout = 60 seconds).foreach { errorDataOption ⇒
                   setError(errorDataOption)
                   omsEditor.editor.focus()
                 })
@@ -174,7 +173,7 @@ object TreeNodeTab {
           button("Run", btn_primary, marginLeft := "10", onClick --> { _ ⇒
             unsetErrors
             saveContent(() ⇒
-              Post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePath), validateButton.toggled.now).call().foreach { execInfo ⇒
+              Fetch.future(_.runScript(ScriptData(safePath), validateButton.toggled.now).future, timeout = 120 seconds, warningTimeout = 60 seconds).foreach { execInfo ⇒
                 showExecution()
               }
             )
@@ -264,7 +263,7 @@ object TreeNodeTab {
         (cont: String, hash) ⇒ {
           editorValue.setCode(cont, hash.get)
           if (isCSV) {
-            Post()[Api].sequence(safePath).call().foreach {
+            Fetch.future(_.sequence(safePath).future).foreach {
               seq ⇒ //switchView(seq)
             }
           }
@@ -399,9 +398,7 @@ object TreeNodeTab {
     lazy val axisCheckBoxes = {
       val (newPlotter, newSequenceData) = plotterAndSeqencedata(dataTab, plotter)
 
-      val arrayColIndexes = newSequenceData.content.headOption.map {
-        Tools.dataArrayIndexes
-      }.getOrElse(Array()).toSeq
+      val arrayColIndexes = newSequenceData.content.headOption.map { s => Tools.dataArrayIndexes(s.toArray) }.getOrElse(Array()).toSeq
 
       val ind = plotter.plotMode match {
         case XYMode ⇒ arrayColIndexes
@@ -612,7 +609,7 @@ object TreeNodeTab {
   def save(safePath: SafePath, editorPanelUI: EditorPanelUI, afterSave: String ⇒ Unit, overwrite: Boolean = false): Unit =
     editorPanelUI.synchronized {
       val (content, hash) = editorPanelUI.code
-      Post()[Api].saveFile(safePath, content, Some(hash), overwrite).call().foreach {
+      Fetch.future(_.saveFile(safePath, content, Some(hash), overwrite).future).foreach {
         case (saved, savedHash) ⇒
           if (saved) afterSave(savedHash)
           else serverConflictAlert(safePath, editorPanelUI, afterSave)
@@ -911,9 +908,8 @@ class TreeNodeTabs {
   //  }
 
   def checkTabs = tabsElement.tabs.now.foreach { tab =>
-    org.openmole.gui.client.core.Post()[Api].exists(tab.t.safePath).call().foreach {
-      e ⇒
-        if (!e) remove(tab.t)
+    Fetch.future(_.exists(tab.t.safePath).future).foreach {
+      e ⇒ if (!e) remove(tab.t)
     }
   }
 

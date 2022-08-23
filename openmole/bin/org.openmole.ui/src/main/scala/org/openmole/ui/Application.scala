@@ -31,6 +31,7 @@ import org.openmole.tool.logger.JavaLogger
 
 import annotation.tailrec
 import org.openmole.gui.server.core.*
+import org.openmole.gui.server.core.e4s.*
 import org.openmole.console.*
 import org.openmole.tool.file.*
 import org.openmole.tool.hash.*
@@ -39,7 +40,7 @@ import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.preference.*
 import org.openmole.core.services.*
 import org.openmole.core.networkservice.*
-import org.openmole.gui.server.newcore.*
+import org.openmole.gui.server.core.e4s.NewGUIServer
 import org.openmole.tool.outputredirection.OutputRedirection
 
 object Application extends JavaLogger {
@@ -285,18 +286,18 @@ object Application extends JavaLogger {
 
             GUIServerServices.withServices(workspace, config.proxyURI, logLevel, logFileLevel) { services ⇒
               Runtime.getRuntime.addShutdownHook(thread(GUIServerServices.dispose(services)))
-              val server = new GUIServer(port, config.remote, services, config.password, extraHeader, !config.unoptimizedJS, config.httpSubDirectory)
-              val newServer = new NewGUIServer(port + 1, config.remote, services)
+              //val server = new GUIServer(port, config.remote, services, config.password, extraHeader, !config.unoptimizedJS, config.httpSubDirectory)
+              val newServer = NewGUIServer(port, config.remote, services, config.password, !config.unoptimizedJS, extraHeader)
 
-              server.start()
+              ///server.start()
               val s = newServer.start()
               if (config.browse && !config.remote) browse(url)
-              server.launchApplication()
+              //server.launchApplication()
               logger.info(
                 "\n" + org.openmole.core.buildinfo.consoleSplash + "\n" +
                   s"Server listening on port $port."
               )
-              server.join() match {
+              s.join() match {
                 case GUIServer.Ok      ⇒ Console.ExitCodes.ok
                 case GUIServer.Restart ⇒ Console.ExitCodes.restart
               }

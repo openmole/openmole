@@ -74,7 +74,7 @@ class SettingsView(fileDisplayer: FileDisplayer) {
     )
 
   val docButton = a(href := "#", onClick --> { _ ⇒
-    Settings.settings.map { sets ⇒
+    Fetch(_.omSettings(()).future) { sets ⇒
       org.scalajs.dom.window.open(s"https://${if (sets.isDevelopment) "next." else ""}openmole.org/GUI.html", "_blank")
     }
   }, span("Documentation"))

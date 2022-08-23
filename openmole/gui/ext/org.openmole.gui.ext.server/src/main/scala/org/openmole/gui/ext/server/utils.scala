@@ -4,23 +4,24 @@ import java.io.FileOutputStream
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.logging.Level
 import java.util.zip.ZipFile
-import scala.collection.JavaConverters._
-import org.openmole.core.fileservice._
+import scala.collection.JavaConverters.*
+import org.openmole.core.fileservice.*
 import org.openmole.core.highlight.HighLight
 import org.openmole.core.module
-import org.openmole.core.pluginmanager._
+import org.openmole.core.pluginmanager.*
 import org.openmole.core.services.Services
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.gui.ext.data
-import org.openmole.gui.ext.data._
-import org.openmole.tool.file._
+import org.openmole.gui.ext.data.*
+import org.openmole.tool.file.*
 import org.openmole.tool.logger.JavaLogger
 
 import java.text.SimpleDateFormat
 import scala.annotation.tailrec
 import scala.io.{BufferedSource, Codec}
 import scala.util.{Failure, Success, Try}
-import collection.JavaConverters._
+import collection.JavaConverters.*
+import scala.collection.mutable.ListBuffer
 
 object utils {
 
@@ -149,10 +150,10 @@ object utils {
     }
   }
 
-  def recursiveListFiles(path: SafePath, findString: String)(implicit context: ServerFileSystemContext, workspace: Workspace): Seq[(SafePath, Boolean)] = {
+  def recursiveListFiles(path: SafePath, findString: Option[String])(implicit context: ServerFileSystemContext, workspace: Workspace): Seq[(SafePath, Boolean)] = {
     val fPath = safePathToFile(path).getAbsolutePath
-    val allFiles = safePathToFile(path).recursiveListFilesSafe((f: File) => fPath != f.getAbsolutePath && f.getName.contains(findString))
-    allFiles.filter { case (f) ⇒ f.getName.contains(findString) }.map{f=> (fileToSafePath(f), f.isDirectory)}
+    val allFiles = safePathToFile(path).recursiveListFilesSafe((f: File) => fPath != f.getAbsolutePath && findString.map(s => f.getName.contains(s)).getOrElse(true))
+    allFiles.filter { case f ⇒ f.getName.contains(findString) }.map{f=> (fileToSafePath(f), f.isDirectory)}
   }
 
 
@@ -238,21 +239,27 @@ object utils {
 
   }
 
-  // Test if files exist in the 'to' directory, return the lists of already existing files or copy them otherwise
-  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath)(implicit workspace: Workspace): Seq[SafePath] = {
-    val existing = existsIn(safePaths, to)
-
-    if (existing.isEmpty) safePaths.foreach { sp ⇒ sp.copy(to) }
-    existing
-  }
+//  // Test if files exist in the 'to' directory, return the lists of already existing files or copy them otherwise
+//  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath)(implicit workspace: Workspace): Seq[SafePath] = {
+//
+//  }
 
   //copy safePaths files to 'to' folder in overwriting in they exist
-  def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath)(implicit workspace: Workspace) = {
-    import ServerFileSystemContext.project
-    safePaths.foreach { sp ⇒
-      sp.toFile.copy(new File(to.toFile, sp.name))
+  def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean)(implicit workspace: Workspace): Seq[SafePath] =
+    if(overwrite) {
+      import ServerFileSystemContext.project
+      val existing = ListBuffer[SafePath]()
+      safePaths.foreach { sp ⇒
+        val destination = new File(to.toFile, sp.name)
+        if(destination.exists()) existing.append(sp)
+        sp.toFile.copy(destination)
+      }
+      existing.toSeq
+    } else {
+      val existing = existsIn(safePaths, to)
+      if (existing.isEmpty) safePaths.foreach { sp ⇒ sp.copy(to) }
+      existing
     }
-  }
 
   def deleteFile(safePath: SafePath, context: ServerFileSystemContext)(implicit workspace: Workspace): Unit = {
     implicit val ctx = context
@@ -278,7 +285,7 @@ object utils {
   def updateIfChanged(file: File)(update: File ⇒ Unit)(implicit fileService: FileService, newFile: TmpDirectory) = {
     import org.openmole.core.fileservice._
 
-    def hash(f: File) = new File(f + "-hash")
+    def hash(f: File) = new File(f.toString + "-hash")
 
     lockFile(file).withLock { _ ⇒
       val hashFile = hash(file)

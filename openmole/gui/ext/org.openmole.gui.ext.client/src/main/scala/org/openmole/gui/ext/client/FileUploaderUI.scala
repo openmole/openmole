@@ -51,9 +51,8 @@ case class FileUploaderUI(
           if (fInput.ref.files.length > 0) {
             val leaf = fInput.ref.files.item(0).name
             pathSet.set(false)
-            OMPost()[Api].renameKey(leaf, fileName).call().foreach {
-              b ⇒
-                pathSet.set(true)
+            OMFetch(coreAPIClient).future(_.renameKey(leaf, fileName).future).foreach { b ⇒
+              pathSet.set(true)
             }
           }
         }

@@ -1,6 +1,8 @@
 package org.openmole.gui.ext.server
 
-import boopickle.Default._
+import boopickle.Default.*
+import cats.effect.IO
+import org.http4s.HttpRoutes
 
 import scala.reflect.ClassTag
 import java.nio.ByteBuffer
@@ -21,18 +23,18 @@ import java.nio.ByteBuffer
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+//
+//object AutowireServer extends autowire.Server[ByteBuffer, Pickler, Pickler] {
+//
+//  def read[R: Pickler](p: ByteBuffer) = Unpickle[R].fromBytes(p)
+//
+//  def write[R: Pickler](r: R) = Pickle.intoBytes(r)
+//
+//}
+//
+//object OMRouter {
+//  def route[T: ClassTag] = reflect.classTag[T].runtimeClass.getCanonicalName.replace('.', '/')
+//  def apply[T: ClassTag](router: AutowireServer.Router): OMRouter = new OMRouter(router, route[T])
+//}
 
-object AutowireServer extends autowire.Server[ByteBuffer, Pickler, Pickler] {
-
-  def read[R: Pickler](p: ByteBuffer) = Unpickle[R].fromBytes(p)
-
-  def write[R: Pickler](r: R) = Pickle.intoBytes(r)
-
-}
-
-object OMRouter {
-  def route[T: ClassTag] = reflect.classTag[T].runtimeClass.getCanonicalName.replace('.', '/')
-  def apply[T: ClassTag](router: AutowireServer.Router): OMRouter = new OMRouter(router, route[T])
-}
-
-case class OMRouter(router: AutowireServer.Router, route: String)
+case class OMRouter(router: HttpRoutes[IO])

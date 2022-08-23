@@ -19,14 +19,14 @@ package org.openmole.gui.plugin.authentication.egi
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.ext.data.{AuthenticationPlugin, AuthenticationPluginFactory}
-import org.openmole.gui.ext.client._
-import scaladget.bootstrapnative.bsn._
-import boopickle.Default._
-import autowire._
+import org.openmole.gui.ext.client.*
+import scaladget.bootstrapnative.bsn.*
+import boopickle.Default.*
+import autowire.*
 
 import scala.concurrent.Future
-import scala.scalajs.js.annotation._
-import com.raquo.laminar.api.L._
+import scala.scalajs.js.annotation.*
+import com.raquo.laminar.api.L.*
 
 import scala.scalajs.js
 
@@ -46,7 +46,8 @@ class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory {
 
   def name = "EGI"
 
-  def getData: Future[Seq[AuthType]] = OMPost()[EGIAuthenticationAPI].egiAuthentications().call()
+  def getData: Future[Seq[AuthType]] =
+    OMFetch(apiClient).future(_.egiAuthentications(()).future)
 }
 
 class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationData()) extends AuthenticationPlugin {
@@ -61,7 +62,7 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
 
   val voInput = inputTag("").amend(placeholder := "vo1,vo2")
 
-  OMPost()[EGIAuthenticationAPI].geVOTest().call().foreach {
+  OMFetch(apiClient).future(_.getVOTests(()).future).foreach {
     _.foreach { c ⇒
       voInput.ref.value = c
     }
@@ -69,9 +70,10 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
 
   def factory = new EGIAuthenticationGUIFactory
 
-  def remove(onremove: () ⇒ Unit) = OMPost()[EGIAuthenticationAPI].removeAuthentication().call().foreach { _ ⇒
-    onremove()
-  }
+  def remove(onremove: () ⇒ Unit) =
+    OMFetch(apiClient).future(_.removeAuthentications(()).future).foreach { _ ⇒
+      onremove()
+    }
 
   lazy val panel = {
     import scaladget.tools._
@@ -84,20 +86,21 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
   }
 
   def save(onsave: () ⇒ Unit) = {
-    OMPost()[EGIAuthenticationAPI].removeAuthentication().call().foreach {
+    OMFetch(apiClient).future(_.removeAuthentications(()).future).foreach {
       d ⇒
-        OMPost()[EGIAuthenticationAPI].addAuthentication(EGIAuthenticationData(
-          cypheredPassword = password.ref.value,
-          privateKey = if (privateKey.pathSet.now) Some(EGIAuthenticationData.authenticationDirectory + "/egi.p12") else None
-        )).call().foreach {
-          b ⇒
-            onsave()
-        }
+        OMFetch(apiClient).future {
+          _.addAuthentication(
+            EGIAuthenticationData(
+              cypheredPassword = password.ref.value,
+              privateKey = if (privateKey.pathSet.now) Some(EGIAuthenticationData.authenticationDirectory + "/egi.p12") else None
+            )
+          ).future
+        }.foreach { b ⇒ onsave() }
     }
 
-    OMPost()[EGIAuthenticationAPI].setVOTest(voInput.ref.value.split(",").map(_.trim).toSeq).call()
+    OMFetch(apiClient).future(_.setVOTests(voInput.ref.value.split(",").map(_.trim).toSeq).future)
   }
 
-  def test = OMPost()[EGIAuthenticationAPI].testAuthentication(data).call()
+  def test = OMFetch(apiClient).future(_.testAuthentication(data).future)
 
 }

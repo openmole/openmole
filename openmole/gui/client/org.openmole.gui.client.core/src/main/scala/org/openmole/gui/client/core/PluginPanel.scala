@@ -35,7 +35,7 @@ class PluginPanel {
   getPlugins
 
   def getPlugins = {
-    Post()[Api].listPlugins.call().foreach { p ⇒
+    Fetch(_.listPlugins(()).future) { p ⇒
       plugins.set(p.toSeq)
     }
   }

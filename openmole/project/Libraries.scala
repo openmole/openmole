@@ -30,7 +30,7 @@ object Libraries {
       "org.endpoints4s" %%% "json-schema-generic" % endpoints4SVersion)
 
   lazy val endpoints4SXhrClient =
-    libraryDependencies += "org.endpoints4s" %%% "xhr-client" % "5.0.0+n"
+    libraryDependencies += "org.endpoints4s" %%% "xhr-client" % "5.1.0+n"
 
   lazy val scalatest = "org.scalatest" %% "scalatest" % "3.2.9" % "test"
 
@@ -68,7 +68,7 @@ object Libraries {
   lazy val codec = "org.openmole.library" %% "org-apache-commons-codec" % "1.14"
   lazy val async = "org.openmole.library" %% "scala-async" % "0.10.0"
   lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % "5.6.0"
-  lazy val cats = "org.openmole.library" %% "cats" % catsVersion
+  lazy val cats = "org.openmole.library" %% "cats" % catsVersion cross CrossVersion.for3Use2_13
   lazy val squants = "org.openmole.library" %% "squants" % squantsVersion
   lazy val clapper = "org.openmole.library" %% "org-clapper" % "1.5.1"
   lazy val asm = "org.openmole.library" %% "org-objectweb-asm" % asmVersion
@@ -133,6 +133,6 @@ object Libraries {
 
   lazy val shapeless = "org.openmole.library" %% "org-typelevel-shapeless" % shapelessVersion
 
-  lazy val endpoints4SHTTP4SSServer = "org.openmole.library" %% "org-endpoints4s-http4s-server" % endpoint4SHttp4SVersion
-
+  lazy val endpoints4SHTTP4SSServer = "org.openmole.library" %% "org-endpoints4s-http4s-server" % endpoint4SHttp4SVersion //cross CrossVersion.for2_13Use3
+  //lazy val endpoint4SJsonSchemaGeneric = "org.openmole.library" %% "org-endpoints4s-json-schema-generic" % endpoints4SVersion //cross CrossVersion.for3Use2_13
 }
