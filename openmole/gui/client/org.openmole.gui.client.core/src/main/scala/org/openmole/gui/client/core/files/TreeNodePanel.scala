@@ -10,9 +10,7 @@ import org.scalajs.dom.raw._
 import org.openmole.gui.client.core._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
 import TreeNode._
-import autowire._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.client.FileManager
 import com.raquo.laminar.api.L._

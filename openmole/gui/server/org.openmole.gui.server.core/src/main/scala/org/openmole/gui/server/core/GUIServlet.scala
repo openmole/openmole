@@ -18,13 +18,6 @@ package org.openmole.gui.server.core
 
 import java.nio.ByteBuffer
 
-import org.scalatra._
-import org.scalatra.auth.{ ScentryConfig, ScentrySupport }
-import org.scalatra.auth.strategy.BasicAuthSupport
-import org.scalatra.servlet.{ FileItem, FileSingleParams, FileUploadSupport, MultipartConfig }
-import org.scalatra.util.MultiMapHeadView
-import boopickle.Default._
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.Await

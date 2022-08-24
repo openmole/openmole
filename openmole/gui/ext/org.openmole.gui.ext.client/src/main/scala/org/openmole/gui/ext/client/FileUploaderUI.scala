@@ -23,8 +23,6 @@ import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
 import org.scalajs.dom.raw.HTMLInputElement
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-import autowire._
 import com.raquo.laminar.api.L._
 
 object FileUploaderUI {

@@ -619,6 +619,7 @@ def scala2Settings =
     excludeDependencies ++= Seq(
       ExclusionRule("com.lihaoyi", "sourcecode_3"),
       ExclusionRule("org.scala-lang.modules", "scala-parallel-collections_3")
+      //ExclusionRule("org.scala-lang.modules", "scala-xml_3")
     )
   )
 
@@ -634,8 +635,8 @@ lazy val dataGUI = OsgiProject(guiExt, "org.openmole.gui.ext.data") enablePlugin
   scalaJSSettings)
 
 lazy val extServer = OsgiProject(guiExt, "org.openmole.gui.ext.server") dependsOn(dataGUI, workspace, module, services) settings(
-  libraryDependencies += Libraries.autowire,
-  libraryDependencies += Libraries.boopickle,
+//  libraryDependencies += Libraries.autowire,
+//  libraryDependencies += Libraries.boopickle,
   libraryDependencies += Libraries.equinoxOSGi,
   libraryDependencies ++= Seq(Libraries.endpoints4SHTTP4SSServer, Libraries.cats),
   guiSettings,
@@ -643,8 +644,8 @@ lazy val extServer = OsgiProject(guiExt, "org.openmole.gui.ext.server") dependsO
   scalaJSSettings)
 
 lazy val extClient = OsgiProject(guiExt, "org.openmole.gui.ext.client") enablePlugins (ScalaJSPlugin) dependsOn(dataGUI, sharedGUI) settings(
-  Libraries.boopickleJS,
-  Libraries.autowireJS,
+//  Libraries.boopickleJS,
+//  Libraries.autowireJS,
   Libraries.laminarJS,
   Libraries.scalajsDomJS,
   Libraries.scaladgetTools,
@@ -698,8 +699,8 @@ lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core")  
 lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool", privatePackages = clientPrivatePackages) enablePlugins(ScalaJSPlugin) settings(
   guiSettings,
   scalaJSSettings,
-  Libraries.autowireJS,
-  Libraries.boopickleJS,
+//  Libraries.autowireJS,
+//  Libraries.boopickleJS,
   Libraries.scalajsDomJS,
   Libraries.ace,
   Libraries.bootstrapnative,
@@ -747,7 +748,7 @@ def guiServerDir = guiDir / "server"
 
 
 lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", dynamicImports = Seq("org.eclipse.jetty.*")) settings(
-  libraryDependencies ++= Seq(Libraries.autowire, Libraries.boopickle, Libraries.scalaTags, Libraries.scalatra, Libraries.clapper),
+  libraryDependencies ++= Seq(/*Libraries.autowire, Libraries.boopickle, */Libraries.scalaTags, /*Libraries.scalatra, */Libraries.clapper),
   libraryDependencies ++= Seq(Libraries.endpoints4SHTTP4SSServer, Libraries.cats),
   guiSettings,
   scala2Settings) dependsOn(
@@ -909,8 +910,10 @@ def excludeTransitiveScala2 =
     ExclusionRule("org.scala-lang.modules", "scala-parallel-collections_2.13"),
     ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13"),
     ExclusionRule("org.scala-lang.modules", "scala-java8-compat_2.13"),
+    //ExclusionRule("org.scala-lang.modules", "scala-xml_2.13"),
 
-//    ExclusionRule("org.typelevel" ,"cats_2.13"),
+
+    //    ExclusionRule("org.typelevel" ,"cats_2.13"),
 //    ExclusionRule("org.typelevel" ,"cats-effect-std_2.13"),
 //    ExclusionRule("org.typelevel" ,"cats-effect_2.13"),
 //    ExclusionRule("org.typelevel", "cats-parse_2.13"),

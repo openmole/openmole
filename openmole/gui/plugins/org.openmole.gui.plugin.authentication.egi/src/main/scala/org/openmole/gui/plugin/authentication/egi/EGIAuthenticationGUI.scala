@@ -21,8 +21,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.ext.data.{AuthenticationPlugin, AuthenticationPluginFactory}
 import org.openmole.gui.ext.client.*
 import scaladget.bootstrapnative.bsn.*
-import boopickle.Default.*
-import autowire.*
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation.*

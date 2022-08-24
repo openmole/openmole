@@ -5,14 +5,12 @@ import AbsolutePositioning.CenterPagePosition
 import org.openmole.gui.ext.client._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
 import org.openmole.gui.client.core.files.{ TreeNodeManager, TreeNodePanel }
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.openmole.gui.client.core.CoreUtils._
 import org.openmole.gui.ext.data._
 import Waiter._
-import autowire._
 import org.openmole.core.market.MarketIndexEntry
 import org.openmole.gui.ext.api.Api
 import com.raquo.laminar.api.L._

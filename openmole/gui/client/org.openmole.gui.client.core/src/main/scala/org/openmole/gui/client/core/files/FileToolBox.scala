@@ -1,8 +1,6 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core._
-import autowire._
-import boopickle.Default._
 import org.openmole.gui.client.core.alert.AbsolutePositioning._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -109,15 +107,17 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
 
   def plugOrUnplug(safePath: SafePath, pluginState: PluginState) = {
     pluginState.isPlugged match {
-      case true ⇒ OMPost()[Api].unplug(safePath).call().foreach { _ ⇒
-        panels.pluginPanel.getPlugins
-        treeNodeManager.invalidCurrentCache
-      }
-      case false ⇒ OMPost()[Api].appendToPluggedIfPlugin(safePath).call().foreach {
-        _ ⇒
-          panels.pluginPanel.getPlugins
-          treeNodeManager.invalidCurrentCache
-      }
+      case true ⇒
+//        OMPost()[Api].unplug(safePath).call().foreach { _ ⇒
+//          panels.pluginPanel.getPlugins
+//          treeNodeManager.invalidCurrentCache
+//        }
+      case false ⇒
+//        OMPost()[Api].appendToPluggedIfPlugin(safePath).call().foreach {
+//          _ ⇒
+//            panels.pluginPanel.getPlugins
+//            treeNodeManager.invalidCurrentCache
+//        }
     }
   }
 

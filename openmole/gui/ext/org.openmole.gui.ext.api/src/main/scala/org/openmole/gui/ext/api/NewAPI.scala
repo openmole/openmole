@@ -177,6 +177,13 @@ trait NewAPI extends algebra.Endpoints
     endpoint(get(path / "gui-plugins"), ok(jsonResponse[PluginExtensionData]))
 
 
+  // To port
+  //def appendToPluggedIfPlugin(safePath: SafePath): Unit
+  //def unplug(safePath: SafePath): Unit
+  //def isOSGI(safePath: SafePath): Boolean
+  //def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS]
+
+
   // ---- Model Wizards --------------
   //def models(archivePath: SafePath): Seq[SafePath]
   val models: Endpoint[SafePath, Seq[SafePath]] =
@@ -202,6 +209,13 @@ trait NewAPI extends algebra.Endpoints
 //  val getMarketEntry: Endpoint[(MarketIndexEntry, SafePath), Unit] =
 //    endpoint(post(path / "market" / "get-entry", jsonRequest[(MarketIndexEntry, SafePath)]), ok(jsonResponse[Unit]))
 
+
+  // ---------- Application ------------
+
+  //  def shutdown(): Unit
+  //  def restart(): Unit
+  //  def isAlive(): Boolean
+  //  def jvmInfos(): JVMInfos
 
   //TODO ------------ refactor -------------------
   // def appendToPluggedIfPlugin(safePath: SafePath): Unit =

@@ -18,10 +18,6 @@ package org.openmole.gui.server.core
  */
 
 import java.util.concurrent.Semaphore
-import javax.servlet.ServletContext
-import org.eclipse.jetty.server.{ Server, ServerConnector }
-import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
-import org.eclipse.jetty.webapp._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.location._
 import org.openmole.core.preference.{ Preference, PreferenceLocation }
@@ -31,8 +27,6 @@ import org.openmole.gui.server.jscompile.{ JSPack, Webpack }
 import org.openmole.tool.crypto.KeyStore
 import org.openmole.tool.file._
 import org.openmole.tool.network.Network
-import org.scalatra._
-import org.scalatra.servlet.ScalatraListener
 
 object GUIServer {
 
@@ -85,6 +79,24 @@ object GUIServer {
     subDir:             Option[String]
   )
 
+  // TODO scala 3
+  def waitingOpenMOLEContent = "reactivate after scala 3 migration"
+  //      <html>
+  //        <head>
+  //          <script>
+  //            { """setTimeout(function(){ window.location.reload(1); }, 3000);""" }
+  //          </script>
+  //        </head>
+  //        <link href="/css/style.css" rel="stylesheet"/>
+  //        <body>
+  //          <div>
+  //            OpenMOLE is launching...
+  //            <div class="loader" style="float: right"></div><br/>
+  //          </div>
+  //          (for the first launch, and after an update, it may take several minutes)
+  //        </body>
+  //      </html>
+
   case class ApplicationControl(restart: () ⇒ Unit, stop: () ⇒ Unit)
 
   sealed trait ExitStatus
@@ -93,111 +105,3 @@ object GUIServer {
 
 }
 
-//class GUIBootstrap extends LifeCycle {
-//  override def init(context: ServletContext) = {
-//    val args = context.get(GUIServer.servletArguments).get.asInstanceOf[GUIServer.ServletArguments]
-//    context mount (GUIServlet(args), "/*")
-//  }
-//}
-
-class StartingPage extends ScalatraServlet with LifeCycle {
-
-  override def init(context: ServletContext) = {
-    context mount (this, "/*")
-  }
-
-  get("/*") {
-
-    def content =
-      <html>
-        <head>
-          <script>
-            { """setTimeout(function(){ window.location.reload(1); }, 3000);""" }
-          </script>
-        </head>
-        <link href="/css/style.css" rel="stylesheet"/>
-        <body>
-          <div>
-            OpenMOLE is launching...
-            <div class="loader" style="float: right"></div><br/>
-          </div>
-          (for the first launch, and after an update, it may take several minutes)
-        </body>
-      </html>
-
-    ServiceUnavailable(content)
-  }
-
-}
-
-//import org.openmole.gui.server.core.GUIServer._
-//
-//class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, password: Option[String], extraHeader: String, optimizedJS: Boolean, subDir: Option[String]) {
-//
-//  lazy val server = new Server()
-//  var exitStatus: GUIServer.ExitStatus = GUIServer.Ok
-//  val semaphore = new Semaphore(0)
-//
-//  import services._
-//
-//  def start() = {
-//    val connector = new ServerConnector(server)
-//    connector.setPort(port)
-//
-//    if (localhost) connector.setHost("localhost")
-//
-//    server.addConnector(connector)
-//
-//    val startingContext = new WebAppContext()
-//
-//    startingContext.setContextPath(subDir.map { s ⇒ "/" + s }.getOrElse("") + "/")
-//
-//    startingContext.setBaseResource(Res.newResource(classOf[StartingPage].getClassLoader.getResource("/")))
-//    startingContext.setClassLoader(classOf[StartingPage].getClassLoader)
-//    startingContext.setInitParameter(ScalatraListener.LifeCycleKey, classOf[StartingPage].getCanonicalName)
-//
-//    startingContext.addEventListener(new ScalatraListener)
-//
-//    server.setHandler(startingContext)
-//    server.start()
-//  }
-//
-//  def launchApplication() = {
-//    val context = new WebAppContext()
-//    val applicationControl =
-//      ApplicationControl(
-//        () ⇒ {
-//          exitStatus = GUIServer.Restart
-//          stop()
-//        },
-//        () ⇒ stop()
-//      )
-//
-//    val webappCache = webapp(optimizedJS)
-//
-//    context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(services, password, applicationControl, webappCache, extraHeader, subDir))
-//
-//    context.setContextPath(subDir.map { s ⇒ "/" + s }.getOrElse("") + "/")
-//
-//    context.setResourceBase(webappCache.getAbsolutePath)
-//    context.setClassLoader(classOf[GUIServer].getClassLoader)
-//    context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[GUIBootstrap].getCanonicalName)
-//    context.addEventListener(new ScalatraListener)
-//
-//    server.stop()
-//    server.setHandler(context)
-//    server.start()
-//  }
-//
-//  def join(): GUIServer.ExitStatus = {
-//    semaphore.acquire()
-//    semaphore.release()
-//    exitStatus
-//  }
-//
-//  def stop() = {
-//    semaphore.release()
-//    server.stop()
-//  }
-//
-//}

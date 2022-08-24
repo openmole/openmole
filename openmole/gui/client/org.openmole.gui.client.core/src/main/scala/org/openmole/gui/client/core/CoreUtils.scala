@@ -2,15 +2,12 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.files.{ FileNode, TreeNodePanel }
 import org.openmole.gui.ext.data._
-import autowire._
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
 import org.openmole.gui.client.core.alert.AlertPanel
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.client.OMPost
 import org.scalajs.dom
 
 import scala.util.{ Failure, Success }
@@ -96,10 +93,10 @@ object CoreUtils {
   }
  
   def appendToPluggedIfPlugin(safePath: SafePath) = {
-    Post()[Api].appendToPluggedIfPlugin(safePath).call().foreach { _ ⇒
-      panels.treeNodeManager.invalidCurrentCache
-      panels.pluginPanel.getPlugins
-    }
+//    Post()[Api].appendToPluggedIfPlugin(safePath).call().foreach { _ ⇒
+//      panels.treeNodeManager.invalidCurrentCache
+//      panels.pluginPanel.getPlugins
+//    }
   }
 
   def addJSScript(relativeJSPath: String) = {

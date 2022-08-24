@@ -3,10 +3,8 @@ package org.openmole.gui.client.core
 import org.openmole.gui.ext.data.GUIPluginAsJS
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.{ PluginExtensionData, AuthenticationPluginFactory, GUIPluginFactory, WizardPluginFactory }
-import autowire._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExportTopLevel

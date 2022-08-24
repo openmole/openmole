@@ -1,6 +1,6 @@
 package org.openmole.gui.ext.server
 
-import boopickle.Default.*
+//import boopickle.Default.*
 import cats.effect.IO
 import org.http4s.HttpRoutes
 

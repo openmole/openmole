@@ -9,8 +9,6 @@ import scaladget.tools._
 import org.scalajs.dom.KeyboardEvent
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-import autowire._
 import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.client.core.files.TreeNodePanel
 import org.openmole.gui.client.tool.OMTags
@@ -68,7 +66,7 @@ object App {
       )
     )
 
-    Post()[Api].shutdown().call()
+    //Post()[Api].shutdown().call()
     render(dom.document.body, stoppedDiv)
   }
 
@@ -77,14 +75,14 @@ object App {
 
     def setTimer = {
       timer.set(Some(setInterval(5000) {
-        Post(3 seconds, 5 minutes)[Api].isAlive().call().foreach { x ⇒
-          if (x) {
-            CoreUtils.setRoute(routes.slashConnectionRoute)
-            timer.now.foreach {
-              clearInterval
-            }
-          }
-        }
+//        Post(3 seconds, 5 minutes)[Api].isAlive().call().foreach { x ⇒
+//          if (x) {
+//            CoreUtils.setRoute(routes.slashConnectionRoute)
+//            timer.now.foreach {
+//              clearInterval
+//            }
+//          }
+//        }
       })
       )
     }
@@ -98,7 +96,7 @@ object App {
       )
     )
 
-    Post()[Api].restart().call()
+//    Post()[Api].restart().call()
     render(dom.document.body, restartedDiv)
   }
 

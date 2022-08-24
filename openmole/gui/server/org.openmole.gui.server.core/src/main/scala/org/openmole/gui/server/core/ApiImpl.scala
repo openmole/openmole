@@ -720,7 +720,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   }
 
   // Method plugins
-  override def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS] = {
+  def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS] = {
     import services._
     val omrFile = safePathToFile(result)(ServerFileSystemContext.project, workspace)
     val data = OMROutputFormat.omrData(omrFile)

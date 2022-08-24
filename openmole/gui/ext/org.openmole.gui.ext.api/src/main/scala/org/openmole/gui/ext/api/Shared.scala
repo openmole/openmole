@@ -26,10 +26,10 @@ trait Api {
 
   //  //GENERAL
   // def settings(): OMSettings
-  def shutdown(): Unit
-  def restart(): Unit
-  def isAlive(): Boolean
-  def jvmInfos(): JVMInfos
+//  def shutdown(): Unit
+//  def restart(): Unit
+//  def isAlive(): Boolean
+//  def jvmInfos(): JVMInfos
 
   //AUTHENTICATIONS
   //def renameKey(keyName: String, newName: String): Unit
@@ -86,19 +86,19 @@ trait Api {
 //  def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Unit
 
   //CORE PLUGINS
-   def appendToPluggedIfPlugin(safePath: SafePath): Unit
-  //def listPlugins(): Iterable[Plugin]
-  def unplug(safePath: SafePath): Unit
-
-  //GUI PLUGINS
-  //def getGUIPlugins(): AllPluginExtensionData
-  def isOSGI(safePath: SafePath): Boolean
-
-//  //MODEL WIZARDS
-//  def models(archivePath: SafePath): Seq[SafePath]
-//  def expandResources(resources: Resources): Resources
-//  def downloadHTTP(url: String, path: SafePath, extract: Boolean): Either[Unit, ErrorData]
-
-  //METHOD PLUGINS
-  def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS]
+//   def appendToPluggedIfPlugin(safePath: SafePath): Unit
+//  //def listPlugins(): Iterable[Plugin]
+//  def unplug(safePath: SafePath): Unit
+//
+//  //GUI PLUGINS
+//  //def getGUIPlugins(): AllPluginExtensionData
+//  def isOSGI(safePath: SafePath): Boolean
+//
+////  //MODEL WIZARDS
+////  def models(archivePath: SafePath): Seq[SafePath]
+////  def expandResources(resources: Resources): Resources
+////  def downloadHTTP(url: String, path: SafePath, extract: Boolean): Either[Unit, ErrorData]
+//
+//  //METHOD PLUGINS
+//  def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS]
 }

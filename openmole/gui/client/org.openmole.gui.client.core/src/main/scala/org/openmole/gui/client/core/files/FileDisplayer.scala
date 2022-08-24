@@ -3,8 +3,6 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.ext.data._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-import autowire._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.client.core._
 import org.openmole.gui.client.tool.plot.Plotter
@@ -46,13 +44,13 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) {
             treeNodeTabs add tab
             tab.omsEditor.editor.focus
           case OpenMOLEResult ⇒
-            Post()[Api].findAnalysisPlugin(safePath).call.foreach {
-              case Some(plugin) ⇒
-                val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
-                val tab = TreeNodeTab.HTML(safePath, analysis.panel(safePath, pluginServices))
-                treeNodeTabs add tab
-              case None ⇒
-            }
+//            Post()[Api].findAnalysisPlugin(safePath).call.foreach {
+//              case Some(plugin) ⇒
+//                val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
+//                val tab = TreeNodeTab.HTML(safePath, analysis.panel(safePath, pluginServices))
+//                treeNodeTabs add tab
+//              case None ⇒
+//            }
           case MDScript ⇒
             Fetch.future(_.mdToHtml(safePath).future).foreach { htmlString ⇒
               treeNodeTabs add TreeNodeTab.HTML(safePath, TreeNodeTab.mdBlock(htmlString))

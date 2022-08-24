@@ -109,7 +109,7 @@ lazy val scalaLang = OsgiProject(
     Seq(
       "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4",
       "org.scala-lang.modules" % "scala-java8-compat_3" % "1.0.2",
-      //"org.scala-lang" % "scala-library" % scalaVersion.value,
+    //"org.scala-lang" % "scala-library" % scalaVersion.value,
       //"org.scala-lang" % "scala-reflect" % scalaVersion.value,
       //"org.scala-lang" % "scalap" % scalaVersion.value ,
       //"jline" % "jline" % "2.12.1",
@@ -276,13 +276,7 @@ lazy val scalatexSite =
     libraryDependencies += "org.openmole" %% "scalatex-site" % "0.4.6",
     version := "0.4.6") settings(settings: _*)
 
-lazy val boopickle = OsgiProject(dir, "boopickle", exports = Seq("boopickle.*"), imports = Seq("*")) settings(
-  libraryDependencies ++= Seq("io.suzaku" %% "boopickle" % boopickleVersion),
-  version := boopickleVersion) settings(settings: _*)
-
-lazy val autowire = OsgiProject(dir, "autowire", exports = Seq("autowire.*")) settings(
-  libraryDependencies ++= Seq("com.lihaoyi" %% "autowire" % scalaAutowireVersion),
-  version := scalaAutowireVersion) settings(settings: _*)
+//lazy val boopicklexAutowireVersion) settings(settings: _*)
 
 //lazy val jsonSimple = OsgiProject(dir, "json-simple", exports = Seq("org.json.simple.*")) settings(
 //  libraryDependencies += "com.googlecode.json-simple" % "json-simple" % jsonSimpleVersion, version := jsonSimpleVersion) settings(settings: _*)

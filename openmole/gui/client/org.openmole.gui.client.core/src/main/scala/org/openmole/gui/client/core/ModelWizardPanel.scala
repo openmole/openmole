@@ -22,11 +22,9 @@ import org.openmole.gui.client.core.files._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.FileType._
 import org.openmole.gui.client.core.panels._
-import autowire._
 import org.scalajs.dom.html.TextArea
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
 import org.scalajs.dom.raw.{HTMLDivElement, HTMLElement, HTMLInputElement}
 import org.openmole.gui.ext.client._
 import com.raquo.laminar.api.L._

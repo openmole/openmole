@@ -22,7 +22,6 @@ import scaladget.tools._
 import org.openmole.gui.ext.client._
 
 import scala.concurrent.Future
-import boopickle.Default._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.ext.data._
