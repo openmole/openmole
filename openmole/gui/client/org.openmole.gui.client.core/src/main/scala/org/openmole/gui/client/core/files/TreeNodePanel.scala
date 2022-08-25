@@ -86,7 +86,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     val webkitdirectory: Prop[Boolean] = customProp("webkitdirectory", com.raquo.domtypes.generic.codecs.BooleanAsIsCodec)
     val mozdirectory: Prop[Boolean] = customProp("mozdirectory", com.raquo.domtypes.generic.codecs.BooleanAsIsCodec)
 
-    inputTag().amend(cls := "upload", `type` := "file", multiple := true, webkitdirectory := true, mozdirectory := true,
+    inputTag().amend(cls := "upload", `type` := "file", multiple := true,
       inContext { thisNode ⇒
         onChange --> { _ ⇒
           todo(thisNode)
@@ -476,7 +476,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
                 treeNodeManager.invalidCache(to)
                 treeNodeManager.invalidCache(dragged)
                 treeNodeManager.invalidCurrentCache
-                treeNodeTabs.checkTabs
+                TabContent.checkTabs
             }
             //})
           }

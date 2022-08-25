@@ -26,7 +26,7 @@ import org.openmole.gui.client.tool.plot.Plotter
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class FileDisplayer(treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) {
+class FileDisplayer(treeNodeTabs: TreeNodeTabs) {
 
 
 
@@ -36,15 +36,16 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) {
       case _ ⇒
         fileExtension match {
           case OpenMOLEScript ⇒
-            val tab = TreeNodeTab.OMS(
-              safePath,
-              content,
-              hash,
-              showExecution,
-            //  TreeNodeTabs.setErrors(treeNodeTabs, safePath, _)
-            )
-            treeNodeTabs add tab
-            tab.omsEditor.editor.focus
+            OMSContent.addTab(safePath, content, hash)
+//            val tab = TreeNodeTab.OMS(
+//              safePath,
+//              content,
+//              hash,
+//              showExecution,
+//            //  TreeNodeTabs.setErrors(treeNodeTabs, safePath, _)
+//            )
+//            treeNodeTabs add tab
+//            tab.omsEditor.editor.focus
           case OpenMOLEResult ⇒
             Post()[Api].findAnalysisPlugin(safePath).call.foreach {
               case Some(plugin) ⇒

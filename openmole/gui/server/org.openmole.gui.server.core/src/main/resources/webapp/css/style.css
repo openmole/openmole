@@ -298,9 +298,9 @@ li.selectElement{
 
 /* WAITER */
 .spinner-wave {
-  height: 30px;
-  margin: 0 auto;
-  width: 50px;
+  height: 32px;
+  width: 60px;
+  margin-left:20px;
   display: flex;
   flex-direction: row;
 }
@@ -311,7 +311,7 @@ li.selectElement{
     height: 100%;
     margin-left: 5px;
     width: 6px;
-    background-color: #222;
+    background-color: #3f3d56;
 }
 
 .spinner-wave div:nth-child(2) {
@@ -517,7 +517,6 @@ padding-bottom: 90px;
     height : 70px;
     display: flex;
     flex-direction: row;
-    justify-content: left;
     align-items: center;
 }
 
@@ -555,18 +554,17 @@ padding-bottom: 90px;
     min-width: 0px;
 }
 
-.tab-section{
+.tab-section {
   flex-grow: 1;
   background-color: #f4f4f4;
   display: flex;
   flex-direction: column;
-
-  /* for Firefox */
   min-height: 0;
-  width:100%;
+  width: 100%;
   margin-left: 10px;
-  overflow-x: hidden;
-}
+  overflow: hidden;
+  margin-bottom: 10px;
+ }
 
 .file-content {
   margin: 10px;
@@ -606,12 +604,15 @@ padding-bottom: 90px;
 }
 
 #editor {
-   font-family: monospace;
-   top: 0;
-   right: 0;
-   bottom: 0;
-   left: 0;
-   height:100%;
+  font-family: monospace;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 80vh;
+  overflow: auto;
+  border: 3px solid #3f3d5677;
+  border-radius: 3px;
 }
 
 .top-menu {
@@ -903,10 +904,12 @@ padding-bottom: 90px;
   line-height: 27px;
  }
 
- .testButton {
- font-weight: bold;
- padding: 4px;
- height: 32px;
+ .omsControlButton {
+     font-weight: bold;
+     padding: 4px;
+     height: 32px;
+     width: 60px;
+     margin-left: 20px;
  }
 
 

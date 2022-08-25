@@ -31,8 +31,8 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     closeToolBox
     CoreUtils.trashNode(safePath) {
       () ⇒
-        treeNodeTabs remove safePath
-        treeNodeTabs.checkTabs
+        TabContent.removeTab(safePath)
+        TabContent.checkTabs
         panels.pluginPanel.getPlugins
         treeNodeManager.invalidCurrentCache
     }
@@ -100,9 +100,9 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
   def rename(safePath: SafePath, to: String, replacing: () ⇒ Unit) = {
     Post()[Api].renameFile(safePath, to).call().foreach {
       newNode ⇒
-        treeNodeTabs.rename(safePath, newNode)
+        TabContent.rename(safePath, newNode)
         treeNodeManager.invalidCurrentCache
-        treeNodeTabs.checkTabs
+        TabContent.checkTabs
         treeNodePanel.currentSafePath.set(Some(safePath.parent ++ to))
         replacing()
     }

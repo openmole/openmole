@@ -48,8 +48,7 @@ object panels {
 
   lazy val fileDisplayer =
     new FileDisplayer(
-      treeNodeTabs = treeNodeTabs,
-      showExecution = () ⇒ openExecutionPanel
+      treeNodeTabs = treeNodeTabs
     )
 
   lazy val treeNodePanel =

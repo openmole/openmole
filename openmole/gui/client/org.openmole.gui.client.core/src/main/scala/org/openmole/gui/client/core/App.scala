@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
 import autowire._
 import scaladget.bootstrapnative.Selector.Options
-import org.openmole.gui.client.core.files.TreeNodePanel
+import org.openmole.gui.client.core.files.{TabContent, TreeNodePanel}
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
@@ -170,10 +170,12 @@ object App {
           )
         },
         //   menuActions.selector,
-        button(btn_danger, "New project", onClick --> { _ => panels.expandTo(newProjectPanel, 3) }),
-        div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ openExecutionPanel }).tooltip("Executions"),
-        div(glyph_lock, navBarItem, onClick --> { _ ⇒ panels.expandTo(authenticationPanel, 2) }).tooltip("Authentications"),
-        div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒ panels.expandTo(panels.pluginPanel.render, 1) }).tooltip("Plugins")
+        div(row, justifyContent.flexStart, marginLeft := "20px",
+          button(btn_danger, "New project", onClick --> { _ => panels.expandTo(newProjectPanel, 3) }),
+          div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ openExecutionPanel }).tooltip("Executions"),
+          div(glyph_lock, navBarItem, onClick --> { _ ⇒ panels.expandTo(authenticationPanel, 2) }).tooltip("Authentications"),
+          div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒ panels.expandTo(panels.pluginPanel.render, 1) }).tooltip("Plugins")
+        )
         //            settingsItem
       )
 
@@ -225,8 +227,8 @@ object App {
                 cls := "tab-section",
                 theNavBar,
                 //openAuthentication.signal.expand(authenticationPanel),
-                treeNodeTabs.fontSizeControl,
-                treeNodeTabs.render.amend(cls := "tab-section")
+               // treeNodeTabs.render.amend(cls := "tab-section")
+                TabContent.render //.amend(cls := "tab-section")
               )
               //                cls <-- openFileTree.signal.combineWith(panels.bannerAlert.isOpen).map {
               //                  case (oft, io) ⇒
