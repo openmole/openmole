@@ -16,7 +16,7 @@ import scala.scalajs.js.timers.{SetIntervalHandle, clearInterval, setInterval}
 
 object TabContent {
 
-  case class TabData(safePath: SafePath, editorPanelUI: EditorPanelUI)
+  case class TabData(safePath: SafePath, editorPanelUI: Option[EditorPanelUI])
 
   val tabsUI = Tabs.tabs[TabData](Seq()).build
 
@@ -90,47 +90,50 @@ object TabContent {
     }
   }
 
-  def save(tabData: TabData, afterRefresh: TabData => Unit = _ => {}, overwrite: Boolean = false): Unit =
-    tabData.editorPanelUI.synchronized {
-      val (content, hash) = tabData.editorPanelUI.code
-      Post()[Api].saveFile(tabData.safePath, content, Some(hash), overwrite).call().foreach {
-        case (saved, savedHash) ⇒
-          if (saved) {
-            tabData.editorPanelUI.onSaved(savedHash)
-            afterRefresh(tabData)
-          }
-          else serverConflictAlert(tabData)
-      }
-    }
-
-    def checkTabs = tabsUI.tabs.now.foreach { tab =>
-      org.openmole.gui.client.core.Post()[Api].exists(tab.t.safePath).call().foreach {
-        e ⇒
-          if (!e) removeTab(tab.t.safePath)
-      }
-    }
-
-    def rename(sp: SafePath, newSafePath: SafePath) = {
-      tabsUI.tabs.update {
-        _.map { tab =>
-          tab.copy(title = span(newSafePath.name), t = tab.t.copy(safePath = newSafePath))
+  def save(tabData: TabData, afterRefresh: TabData => Unit = _ => {}, overwrite: Boolean = false): Unit = {
+    tabData.editorPanelUI.foreach { editorPanelUI =>
+      editorPanelUI.synchronized {
+        val (content, hash) = editorPanelUI.code
+        Post()[Api].saveFile(tabData.safePath, content, Some(hash), overwrite).call().foreach {
+          case (saved, savedHash) ⇒
+            if (saved) {
+              editorPanelUI.onSaved(savedHash)
+              afterRefresh(tabData)
+            }
+            else serverConflictAlert(tabData)
         }
       }
     }
+  }
 
-    def fontSizeLink(size: Int) = {
-      div("A", fontSize := s"${
-        size
-      }px", cursor.pointer, padding := "3", onClick --> {
-        _ ⇒
-          for {
-            ts ← tabsUI.tabs.now
-          } yield {
-            ts.t.editorPanelUI.updateFont(size)
-          }
-      }
-      )
+  def checkTabs = tabsUI.tabs.now.foreach { tab =>
+    org.openmole.gui.client.core.Post()[Api].exists(tab.t.safePath).call().foreach {
+      e ⇒
+        if (!e) removeTab(tab.t.safePath)
     }
+  }
+
+  def rename(sp: SafePath, newSafePath: SafePath) = {
+    tabsUI.tabs.update {
+      _.map { tab =>
+        tab.copy(title = span(newSafePath.name), t = tab.t.copy(safePath = newSafePath))
+      }
+    }
+  }
+
+  def fontSizeLink(size: Int) = {
+    div("A", fontSize := s"${
+      size
+    }px", cursor.pointer, padding := "3", onClick --> {
+      _ ⇒
+        for {
+          ts ← tabsUI.tabs.now
+        } yield {
+          ts.t.editorPanelUI.foreach(_.updateFont(size))
+        }
+    }
+    )
+  }
 
   //  def setErrors(path: SafePath, errors: Seq[ErrorWithLocation]) =
   //    find(path).foreach { tab ⇒ tab.editor.foreach { _.setErrors(errors) } }

@@ -119,9 +119,6 @@ ul{
 
 
 /* MARKET PANEL*/
-.mdRendering p {
-    text-align: left;
-}
 
 .whiteBold:hover{
     color: white;
@@ -1015,4 +1012,9 @@ padding-bottom: 90px;
 .collapse-bottom.close {
     top: 1000px;
     background: white;
+}
+
+.fullOverflow {
+    height: 100vh;
+    overflow: auto;
 }

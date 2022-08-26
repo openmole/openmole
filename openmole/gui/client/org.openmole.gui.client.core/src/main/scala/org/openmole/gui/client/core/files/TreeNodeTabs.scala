@@ -86,116 +86,116 @@ object TreeNodeTab {
 
   case class EditableContent(content: String, hash: String)
 
-  case class OMS(safePath: SafePath,
-                 initialContent: String,
-                 initialHash: String,
-                 showExecution: () ⇒ Unit,
-                 //  setEditorErrors: Seq[ErrorWithLocation] ⇒ Unit
-                ) extends TreeNodeTab {
-
-    def clone(newSafePath: SafePath) = copy(safePath = newSafePath)
-
-    val errors = Var(EditorErrors())
-    val omsEditor = EditorPanelUI(safePath.extension, initialContent, initialHash)
-
-    def editor = Some(omsEditor)
-
-    def editableContent = {
-      val (code, hash) = omsEditor.code
-      Some(TreeNodeTab.EditableContent(code, hash))
-    }
-
-    def saveContent(onsaved: () ⇒ Unit) = {
-      def saved(hash: String) = {
-        omsEditor.initialContentHash = hash
-        onsaved()
-      }
-
-      save(safePath, omsEditor)
-    }
-
-    def resizeEditor = omsEditor.editor.resize()
-
-    def indexAxises(header: SequenceHeader) = header.zipWithIndex.map { afe ⇒ IndexedAxis(afe._1, afe._2) }
-
-    lazy val controlElement = {
-      val compileDisabled = Var(false)
-      val runOption = Var(false)
-
-      def unsetErrors = {
-        errors.set(EditorErrors())
-        editor.foreach {
-          _.errorMessageOpen.set(false)
-        }
-      } //setEditorErrors(Seq())
-
-      def setError(errorDataOption: Option[ErrorData]) = {
-        compileDisabled.set(false)
-        errorDataOption match {
-          case Some(ce: CompilationErrorData) ⇒
-            errors.set(EditorErrors(
-              errorsFromCompiler = ce.errors.map { ewl ⇒
-                ErrorFromCompiler(ewl, ewl.line.flatMap { l ⇒
-                  editor.map { x =>
-                    x.editor.getSession().doc.getLine(l)
-                  }
-                }.getOrElse(""))
-              },
-              errorsInEditor = ce.errors.flatMap {
-                _.line
-              }
-            )
-            )
-          case _ ⇒
-        }
-      }
-
-      val yes = ToggleState("Yes", btn_primary_string, () ⇒ {})
-      val no = ToggleState("No", btn_secondary_string, () ⇒ {})
-      lazy val validateButton = toggle(yes, true, no, () ⇒ {})
-
-
-      import scala.concurrent.duration._
-
-      div(display.flex, flexDirection.row,
-        child <-- compileDisabled.signal.map { compDisabled ⇒
-          if (compDisabled) Waiter.waiter
-          else
-            button("CHECK", btn_secondary_outline, cls := "testButton", onClick --> { _ ⇒
-              unsetErrors
-              omsEditor.editor.getSession().clearBreakpoints()
-              compileDisabled.set(true)
-              saveContent(() ⇒
-                Post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].compileScript(ScriptData(safePath)).call().foreach { errorDataOption ⇒
-                  setError(errorDataOption)
-                  omsEditor.editor.focus()
-                })
-            })
-        },
-
-        div(display.flex, flexDirection.row,
-          button("Run", btn_primary, marginLeft := "10", onClick --> { _ ⇒
-            unsetErrors
-            saveContent(() ⇒
-              Post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePath), validateButton.toggled.now).call().foreach { execInfo ⇒
-                showExecution()
-              }
-            )
-          }),
-          child <-- runOption.signal.map { rOption ⇒
-            if (rOption) div(display.flex, flexDirection.row,
-              div("Script validation", giFontFamily, fontSize := "13px", marginLeft := "10", display.flex, alignItems.center),
-              validateButton.element,
-              button(cls := "close closeRunOptions", tabClose, paddingBottom := "8", `type` := "button", onClick --> { _ ⇒ runOption.set(false) }, "x")
-            )
-            else div(cursor.pointer, marginLeft := "10", display.flex, alignItems.center, onClick --> { _ ⇒ runOption.set(true) })
-          }
-        )
-      )
-    }
-
-    lazy val block = omsEditor.view
-  }
+//  case class OMS(safePath: SafePath,
+//                 initialContent: String,
+//                 initialHash: String,
+//                 showExecution: () ⇒ Unit,
+//                 //  setEditorErrors: Seq[ErrorWithLocation] ⇒ Unit
+//                ) extends TreeNodeTab {
+//
+//    def clone(newSafePath: SafePath) = copy(safePath = newSafePath)
+//
+//    val errors = Var(EditorErrors())
+//    val omsEditor = EditorPanelUI(safePath.extension, initialContent, initialHash)
+//
+//    def editor = Some(omsEditor)
+//
+//    def editableContent = {
+//      val (code, hash) = omsEditor.code
+//      Some(TreeNodeTab.EditableContent(code, hash))
+//    }
+//
+//    def saveContent(onsaved: () ⇒ Unit) = {
+//      def saved(hash: String) = {
+//        omsEditor.initialContentHash = hash
+//        onsaved()
+//      }
+//
+//      save(safePath, omsEditor)
+//    }
+//
+//    def resizeEditor = omsEditor.editor.resize()
+//
+//    def indexAxises(header: SequenceHeader) = header.zipWithIndex.map { afe ⇒ IndexedAxis(afe._1, afe._2) }
+//
+//    lazy val controlElement = {
+//      val compileDisabled = Var(false)
+//      val runOption = Var(false)
+//
+//      def unsetErrors = {
+//        errors.set(EditorErrors())
+//        editor.foreach {
+//          _.errorMessageOpen.set(false)
+//        }
+//      } //setEditorErrors(Seq())
+//
+//      def setError(errorDataOption: Option[ErrorData]) = {
+//        compileDisabled.set(false)
+//        errorDataOption match {
+//          case Some(ce: CompilationErrorData) ⇒
+//            errors.set(EditorErrors(
+//              errorsFromCompiler = ce.errors.map { ewl ⇒
+//                ErrorFromCompiler(ewl, ewl.line.flatMap { l ⇒
+//                  editor.map { x =>
+//                    x.editor.getSession().doc.getLine(l)
+//                  }
+//                }.getOrElse(""))
+//              },
+//              errorsInEditor = ce.errors.flatMap {
+//                _.line
+//              }
+//            )
+//            )
+//          case _ ⇒
+//        }
+//      }
+//
+//      val yes = ToggleState("Yes", btn_primary_string, () ⇒ {})
+//      val no = ToggleState("No", btn_secondary_string, () ⇒ {})
+//      lazy val validateButton = toggle(yes, true, no, () ⇒ {})
+//
+//
+//      import scala.concurrent.duration._
+//
+//      div(display.flex, flexDirection.row,
+//        child <-- compileDisabled.signal.map { compDisabled ⇒
+//          if (compDisabled) Waiter.waiter
+//          else
+//            button("CHECK", btn_secondary_outline, cls := "testButton", onClick --> { _ ⇒
+//              unsetErrors
+//              omsEditor.editor.getSession().clearBreakpoints()
+//              compileDisabled.set(true)
+//              saveContent(() ⇒
+//                Post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].compileScript(ScriptData(safePath)).call().foreach { errorDataOption ⇒
+//                  setError(errorDataOption)
+//                  omsEditor.editor.focus()
+//                })
+//            })
+//        },
+//
+//        div(display.flex, flexDirection.row,
+//          button("Run", btn_primary, marginLeft := "10", onClick --> { _ ⇒
+//            unsetErrors
+//            saveContent(() ⇒
+//              Post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePath), validateButton.toggled.now).call().foreach { execInfo ⇒
+//                showExecution()
+//              }
+//            )
+//          }),
+//          child <-- runOption.signal.map { rOption ⇒
+//            if (rOption) div(display.flex, flexDirection.row,
+//              div("Script validation", giFontFamily, fontSize := "13px", marginLeft := "10", display.flex, alignItems.center),
+//              validateButton.element,
+//              button(cls := "close closeRunOptions", tabClose, paddingBottom := "8", `type` := "button", onClick --> { _ ⇒ runOption.set(false) }, "x")
+//            )
+//            else div(cursor.pointer, marginLeft := "10", display.flex, alignItems.center, onClick --> { _ ⇒ runOption.set(true) })
+//          }
+//        )
+//      )
+//    }
+//
+//    lazy val block = omsEditor.view
+//  }
 
   case class HTML(safePath: SafePath, content: HtmlElement) extends TreeNodeTab {
 
@@ -621,7 +621,7 @@ object TreeNodeTab {
       Post()[Api].saveFile(safePath, content, Some(hash), overwrite).call().foreach {
         case (saved, savedHash) ⇒
           if (saved) editorPanelUI.onSaved(savedHash)
-          else serverConflictAlert(TabData(safePath, editorPanelUI))
+          else serverConflictAlert(TabData(safePath, Some(editorPanelUI)))
       }
     }
 
@@ -630,7 +630,7 @@ object TreeNodeTab {
     okaction = { () ⇒ TabContent.save(tabData, overwrite = true) },
     cancelaction = { () ⇒
       panels.treeNodePanel.downloadFile(tabData.safePath, saveFile = false, hash = true, onLoaded = (content: String, hash: Option[String]) ⇒ {
-        tabData.editorPanelUI.setCode(content, hash.get)
+        tabData.editorPanelUI.foreach(_.setCode(content, hash.get))
       })
     },
     transform = CenterPagePosition,
@@ -641,12 +641,12 @@ object TreeNodeTab {
   def rawBlock(htmlContent: String) = div(panelBody, htmlContent)
 
 
-  def mdBlock(htmlContent: String) =
-    div(
-      panelBody,
-      cls := "mdRendering", padding := "10",
-      htmlContent
-    )
+//  def mdBlock(htmlContent: String) =
+//    div(
+//      panelBody,
+//      cls := "mdRendering", padding := "10",
+//      htmlContent
+//    )
 
 
   sealed trait EditableView {
@@ -715,7 +715,7 @@ class TreeNodeTabs {
         //          _.t.saveContent()
         //        }
         TabContent.tabsUI.tabs.now.foreach { t =>
-          save(t.t.safePath, t.t.editorPanelUI)
+          t.t.editorPanelUI.foreach(epUI=> save(t.t.safePath, epUI))
         }
       }))
       case _ =>
@@ -819,9 +819,9 @@ class TreeNodeTabs {
   //    t.safePathTab.now == safePath
   //  }
 
-  def findOMSTab(safePath: SafePath) = find(safePath).map {
-    _.t
-  }.collect { case x: TreeNodeTab.OMS ⇒ x }
+//  def findOMSTab(safePath: SafePath) = find(safePath).map {
+//    _.t
+//  }.collect { case x: TreeNodeTab.OMS ⇒ x }
 
 
   //  def errorsFromCompiler(safePath: SafePath) = //: Rx[Seq[ErrorFromCompiler]] =

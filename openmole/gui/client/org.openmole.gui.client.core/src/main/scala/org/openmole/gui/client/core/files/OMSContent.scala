@@ -16,7 +16,7 @@ object OMSContent {
   def addTab(safePath: SafePath, initialContent: String, initialHash: String) = {
 
     val editor = EditorPanelUI(safePath.extension, initialContent, initialHash)
-    val tabData = TabData(safePath, editor)
+    val tabData = TabData(safePath, Some(editor))
 
     lazy val controlElement = {
       val compileDisabled = Var(false)
@@ -82,5 +82,6 @@ object OMSContent {
     val content = div(display.flex, flexDirection.column, controlElement, editor.view)
 
     TabContent.addTab(tabData, content)
+    editor.editor.focus
   }
 }

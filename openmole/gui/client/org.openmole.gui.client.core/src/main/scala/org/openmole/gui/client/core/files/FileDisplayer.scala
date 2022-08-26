@@ -37,15 +37,13 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs) {
         fileExtension match {
           case OpenMOLEScript ⇒
             OMSContent.addTab(safePath, content, hash)
-//            val tab = TreeNodeTab.OMS(
-//              safePath,
-//              content,
-//              hash,
-//              showExecution,
-//            //  TreeNodeTabs.setErrors(treeNodeTabs, safePath, _)
-//            )
-//            treeNodeTabs add tab
-//            tab.omsEditor.editor.focus
+          case MDScript ⇒
+            Post()[Api].mdToHtml(safePath).call().foreach { htmlString ⇒
+              println("Add " + safePath )
+              val htmlDiv = com.raquo.laminar.api.L.div()
+              htmlDiv.ref.innerHTML = htmlString
+              HTMLContent.addTab(safePath, htmlDiv)
+            }
           case OpenMOLEResult ⇒
             Post()[Api].findAnalysisPlugin(safePath).call.foreach {
               case Some(plugin) ⇒
@@ -53,10 +51,6 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs) {
                 val tab = TreeNodeTab.HTML(safePath, analysis.panel(safePath, pluginServices))
                 treeNodeTabs add tab
               case None ⇒
-            }
-          case MDScript ⇒
-            Post()[Api].mdToHtml(safePath).call().foreach { htmlString ⇒
-              treeNodeTabs add TreeNodeTab.HTML(safePath, TreeNodeTab.mdBlock(htmlString))
             }
           case SVGExtension ⇒ treeNodeTabs add TreeNodeTab.HTML(safePath, TreeNodeTab.rawBlock(content))
           case editableFile: EditableFile ⇒
