@@ -38,7 +38,7 @@ def defaultSettings =
     resolvers += Resolver.sonatypeRepo("releases"),
     resolvers += Resolver.sonatypeRepo("snapshots"),
     resolvers += Resolver.sonatypeRepo("staging"),
-    resolvers += Resolver.bintrayRepo("definitelyscala", "maven"), // For plotlyjs
+    //resolvers += Resolver.bintrayRepo("definitelyscala", "maven"), // For plotlyjs
     Global / scalaVersion := scala3VersionValue, // + "-bin-typelevel-4",
     scalacOptions ++=
       (if(scala2(scalaVersion.value)) Seq("-target:11", "-Ymacro-annotations", "-language:postfixOps", "-Ytasty-reader", "-Ydelambdafy:inline", "-language:higherKinds", "-Xsource:3") else Seq("-Xtarget:11", "-language:higherKinds", "-language:postfixOps", "-language:implicitConversions", "-Xmax-inlines:50")),
@@ -610,8 +610,8 @@ def guiDir = file("gui")
 def guiExt = guiDir / "ext"
 def guiExtTarget = guiExt / "target"
 
-def guiSettings = defaultSettings ++ scala2Settings
-def guiSettings3 = defaultSettings ++ excludeTransitiveScala2
+def guiSettings = defaultSettings ++ excludeTransitiveScala2
+//def guiSettings3 = defaultSettings ++ excludeTransitiveScala2
 
 def scala2Settings =
   Seq(
@@ -629,18 +629,16 @@ def scala2Settings =
 lazy val dataGUI = OsgiProject(guiExt, "org.openmole.gui.ext.data") enablePlugins (ScalaJSPlugin) settings(
   Libraries.scalajsDomJS,
   Libraries.laminarJS,
-  Libraries.endpoints4SJS,
+  libraryDependencies += Libraries.endpoints4s,
   guiSettings,
-  scala2Settings,
   scalaJSSettings)
 
 lazy val extServer = OsgiProject(guiExt, "org.openmole.gui.ext.server") dependsOn(dataGUI, workspace, module, services) settings(
 //  libraryDependencies += Libraries.autowire,
 //  libraryDependencies += Libraries.boopickle,
   libraryDependencies += Libraries.equinoxOSGi,
-  libraryDependencies ++= Seq(Libraries.endpoints4SHTTP4SSServer, Libraries.cats),
+  libraryDependencies ++= Seq(Libraries.endpoints4s, Libraries.http4s, Libraries.cats),
   guiSettings,
-  scala2Settings,
   scalaJSSettings)
 
 lazy val extClient = OsgiProject(guiExt, "org.openmole.gui.ext.client") enablePlugins (ScalaJSPlugin) dependsOn(dataGUI, sharedGUI) settings(
@@ -650,14 +648,13 @@ lazy val extClient = OsgiProject(guiExt, "org.openmole.gui.ext.client") enablePl
   Libraries.scalajsDomJS,
   Libraries.scaladgetTools,
   Libraries.bootstrapnative,
-  Libraries.endpoints4SJS,
-  Libraries.endpoints4SXhrClient,
+  libraryDependencies += Libraries.endpoints4s,
   guiSettings,
   scalaJSSettings)
 
 lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.ext.api", imports = Seq("*") /*dynamicImports = Seq("shapeless.*", "endpoints4s.generic.*", "endpoints4s.algebra.*")*/) dependsOn(dataGUI, market) enablePlugins (ScalaJSPlugin) settings (guiSettings) settings(
   //libraryDependencies += Libraries.endpoint4SJsonSchemaGeneric,
-  Libraries.endpoints4SJS
+  libraryDependencies += Libraries.endpoints4s
 )
 
 lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompile", imports = Seq("*")) dependsOn(pluginManager, fileService, workspace, dataGUI) settings(
@@ -683,7 +680,7 @@ lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompil
 )
 
 
-val clientPrivatePackages = Seq("autowire.*", "boopickle.*", "com.raquo.*", "org.scalajs.dom.*", "scaladget.*", "net.scalapro.sortable.*", "org.openmole.plotlyjs.*", "org.querki.jsext.*", "scala.collection.compat.*", "app.tulz.tuplez.*", "endpoints4s.*", "ujson.*", "geny.*", "upickle.*", "shapeless.*")
+val clientPrivatePackages = Seq("com.raquo.*", "org.scalajs.dom.*", "scaladget.*", "net.scalapro.sortable.*", "org.openmole.plotlyjs.*", "org.querki.jsext.*", "scala.collection.compat.*", "app.tulz.tuplez.*", "shapeless3.*", "scala.deriving.*" /*"io.circe.*", "cats.*"*/)
 
 def guiClientDir = guiDir / "client"
 lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core")  enablePlugins(ScalaJSPlugin) settings (
@@ -699,6 +696,7 @@ lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core")  
 lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool", privatePackages = clientPrivatePackages) enablePlugins(ScalaJSPlugin) settings(
   guiSettings,
   scalaJSSettings,
+  libraryDependencies += Libraries.scalajs,
 //  Libraries.autowireJS,
 //  Libraries.boopickleJS,
   Libraries.scalajsDomJS,
@@ -706,10 +704,10 @@ lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool
   Libraries.bootstrapnative,
   Libraries.scaladgetTools,
   Libraries.laminarJS,
-  Libraries.endpoints4SJS,
+  //Libraries.endpoints4SJS,
+  //Libraries.catsJS,
  // Libraries.sortable,
-  Libraries.plotlyJS,
-  Libraries.scalaCompatJS) dependsOn (extClient)
+  Libraries.plotlyJS) dependsOn (extClient)
 
 
 /* -------------------------- Server ----------------------- */
@@ -749,9 +747,8 @@ def guiServerDir = guiDir / "server"
 
 lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", dynamicImports = Seq("org.eclipse.jetty.*")) settings(
   libraryDependencies ++= Seq(/*Libraries.autowire, Libraries.boopickle, */Libraries.scalaTags, /*Libraries.scalatra, */Libraries.clapper),
-  libraryDependencies ++= Seq(Libraries.endpoints4SHTTP4SSServer, Libraries.cats),
-  guiSettings,
-  scala2Settings) dependsOn(
+  libraryDependencies ++= Seq(Libraries.endpoints4s, Libraries.http4s, Libraries.cats),
+  guiSettings) dependsOn(
   sharedGUI,
   dataGUI,
   workflow,

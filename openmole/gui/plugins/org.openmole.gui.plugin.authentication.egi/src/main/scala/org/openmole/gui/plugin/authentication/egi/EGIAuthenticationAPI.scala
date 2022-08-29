@@ -1,12 +1,9 @@
 package org.openmole.gui.plugin.authentication.egi
 
-import endpoints4s.{algebra, generic}
-import org.openmole.gui.ext.data.{ErrorData, Test, DataJsonSchemas}
+import org.openmole.gui.ext.data.{ErrorData, Test}
+import org.openmole.gui.ext.api.*
 
-trait EGIAuthenticationAPI extends algebra.Endpoints
-  with algebra.JsonEntitiesFromSchemas
-  with generic.JsonSchemas
-  with DataJsonSchemas {
+trait EGIAuthenticationAPI extends RESTAPI {
 
   val egiAuthentications =
     endpoint(get(path / "egi" / "authentications"), ok(jsonResponse[Seq[EGIAuthenticationData]]))
@@ -38,10 +35,6 @@ trait EGIAuthenticationAPI extends algebra.Endpoints
 //  def setVOTest(vos: Seq[String]): Unit
 //
 //  def geVOTest(): Seq[String]
-
-
-  implicit lazy val optionStringSchema: JsonSchema[Option[String]] = genericJsonSchema
-  implicit lazy val egiAuthenticationDataSchema: JsonSchema[EGIAuthenticationData] = genericJsonSchema
 
 }
 

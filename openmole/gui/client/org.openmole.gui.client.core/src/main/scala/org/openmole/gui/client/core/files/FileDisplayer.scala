@@ -42,7 +42,7 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) {
             //  TreeNodeTabs.setErrors(treeNodeTabs, safePath, _)
             )
             treeNodeTabs add tab
-            tab.omsEditor.editor.focus
+            tab.omsEditor.editor.focus()
           case OpenMOLEResult ⇒
 //            Post()[Api].findAnalysisPlugin(safePath).call.foreach {
 //              case Some(plugin) ⇒

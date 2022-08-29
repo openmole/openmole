@@ -1,4 +1,7 @@
-package org.openmole.gui.plugin.authentication
+package org.openmole.gui.ext
+
+import cats.effect.IO
+import endpoints4s.http4s.server
 
 /*
  * Copyright (C) 2022 Romain Reuillon
@@ -17,14 +20,6 @@ package org.openmole.gui.plugin.authentication
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-import org.openmole.gui.ext.client.*
-
-package object egi {
-
- class APIClientImpl(val settings: ClientSettings)
-   extends EGIAuthenticationAPI with APIClient
-
- def apiClient(endpointsSettings: ClientSettings) = new APIClientImpl(endpointsSettings)
-
+package object server {
+  abstract class APIServer extends server.Endpoints[IO] with server.JsonEntitiesFromCodecs
 }

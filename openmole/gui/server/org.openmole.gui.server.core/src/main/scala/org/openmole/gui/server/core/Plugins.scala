@@ -37,7 +37,11 @@ object Plugins extends JavaLogger {
     } {
       val destFile = dest / jsir.getPath
       destFile.getParentFile.mkdirs()
-      b.classLoader.getResourceAsStream(jsir.getPath) copy destFile
+
+      b.classLoader.getResourceAsStream(jsir.getPath) match {
+        case null =>
+        case s => s copy destFile
+      }
     }
   }
 

@@ -71,9 +71,9 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
   def createNewNode = {
     val newFile = newNodeInput.ref.value
     val currentDirNode = treeNodeManager.dirNodeLine
-    addRootDirButton.toggled.now match {
-      case true ⇒ CoreUtils.createDirectory(currentDirNode.now, newFile, () ⇒ treeNodeManager.invalidCurrentCache)
-      case false ⇒ CoreUtils.createFile(currentDirNode.now, newFile, () ⇒ treeNodeManager.invalidCurrentCache)
+    addRootDirButton.toggled.now() match {
+      case true ⇒ CoreUtils.createDirectory(currentDirNode.now(), newFile, () ⇒ treeNodeManager.invalidCurrentCache)
+      case false ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, () ⇒ treeNodeManager.invalidCurrentCache)
     }
   }
 
@@ -95,7 +95,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     )
 
   private val upButton = upbtn((fileInput: Input) ⇒ {
-    val current = treeNodeManager.dirNodeLine.now
+    val current = treeNodeManager.dirNodeLine.now()
     FileManager.upload(fileInput, current, (p: ProcessState) ⇒ transferring.set(p), UploadProject(), () ⇒ {
       val sp: SafePath = current / fileInput.ref.value.split("\\\\").last
       CoreUtils.appendToPluggedIfPlugin(sp)
@@ -164,7 +164,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
           ),
           button(btn_danger, "Delete", marginRight := "80px", onClick --> { _ ⇒
             confirmationDiv.set(Some(confirmation(s"Delete ${treeNodeManager.selected.now().size} files ?", "OK", () ⇒
-              CoreUtils.trashNodes(treeNodeManager.selected.now) { () ⇒
+              CoreUtils.trashNodes(treeNodeManager.selected.now()) { () ⇒
                 treeNodeManager.invalidCurrentCache
                 closeMultiTool
               })))
@@ -229,7 +229,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
                 Off
             }
           }
-          multiTool.now match {
+          multiTool.now() match {
             case Off ⇒ treeNodeManager.invalidCurrentCache
             case _ ⇒
           }
@@ -335,7 +335,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
   def displayNode(tn: TreeNode): Unit = tn match {
     case fn: FileNode ⇒
-      val tnSafePath = treeNodeManager.dirNodeLine.now ++ tn.name
+      val tnSafePath = treeNodeManager.dirNodeLine.now() ++ tn.name
       displayNode(tnSafePath)
     case _ ⇒
   }
@@ -349,7 +349,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
   val currentSafePath: Var[Option[SafePath]] = Var(None)
   val currentLine = Var(-1)
 
-  def timeOrSize(tn: TreeNode): String = treeNodeManager.fileFilter.now.fileSorting match {
+  def timeOrSize(tn: TreeNode): String = treeNodeManager.fileFilter.now().fileSorting match {
     case TimeSorting() ⇒ CoreUtils.longTimeToString(tn.time)
     case _ ⇒ CoreUtils.readableByteCountAsString(tn.size)
   }
@@ -365,7 +365,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
   case class ReactiveLine(id: Int, tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) {
 
-    val tnSafePath = treeNodeManager.dirNodeLine.now ++ tn.name
+    val tnSafePath = treeNodeManager.dirNodeLine.now() ++ tn.name
     val selected = Var(false)
 
     def dirBox(tn: TreeNode) =
@@ -410,7 +410,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
           onDrop --> { e ⇒
             e.dataTransfer
             e.preventDefault()
-            dropAction(treeNodeManager.dirNodeLine.now ++ tn.name, tn match {
+            dropAction(treeNodeManager.dirNodeLine.now() ++ tn.name, tn match {
               case _: DirNode ⇒ true
               case _ ⇒ false
             })
@@ -425,7 +425,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
           button(cls := "bi-three-dots transparent-button", cursor.pointer, opacity := "0.5", onClick --> { _ ⇒
             currentSafePath.set(Some(tnSafePath))
             currentLine.set(
-              if (id == currentLine.now) -1
+              if (id == currentLine.now()) -1
               else id
             )
           })
@@ -450,12 +450,12 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     },
     onDragOver --> { e ⇒
       e.dataTransfer.dropEffect = "move"
-      e.preventDefault
+      e.preventDefault()
     }
   )
 
   def dropAction(to: SafePath, isDir: Boolean) = {
-    draggedNode.now.map {
+    draggedNode.now().map {
       dragged ⇒
         if (isDir) {
           if (dragged != to) {

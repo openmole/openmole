@@ -39,7 +39,7 @@ class MarketPanel(manager: TreeNodeManager) {
   private val marketIndex: Var[Option[MarketIndex]] = Var(None)
   val tagFilter = InputFilter(pHolder = "Filter")
   val selectedEntry: Var[Option[MarketIndexEntry]] = Var(None)
-  lazy val downloading: Var[Seq[(MarketIndexEntry, Var[_ <: ProcessState])]] = Var(marketIndex.now.map {
+  lazy val downloading: Var[Seq[(MarketIndexEntry, Var[_ <: ProcessState])]] = Var(marketIndex.now().map {
     _.entries.map {
       (_, Var(Processed()))
     }
@@ -86,7 +86,7 @@ class MarketPanel(manager: TreeNodeManager) {
                 div(
                   colBS(2),
                   downloadButton(entry, () ⇒ {
-                    exists(manager.dirNodeLine.now ++ entry.name, entry)
+                    exists(manager.dirNodeLine.now() ++ entry.name, entry)
                   })),
                 div(colBS(7), (paddingTop := "7"),
                   label(entry.name, badge_primary, omsheet.tableTag)
@@ -113,8 +113,8 @@ class MarketPanel(manager: TreeNodeManager) {
     }
 
   def download(entry: MarketIndexEntry) = {
-    val path = manager.dirNodeLine.now ++ entry.name
-    downloading.set(downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processing()))))
+    val path = manager.dirNodeLine.now() ++ entry.name
+    downloading.set(downloading.now().updatedFirst(_._1 == entry, (entry, Var(Processing()))))
 
     // FIXME Reactivate when scala 3
 //    Post()[Api].getMarketEntry(entry, path).call().foreach { d ⇒
@@ -158,7 +158,7 @@ class MarketPanel(manager: TreeNodeManager) {
     marketFooter,
     omsheet.panelWidth(92),
     onopen = () ⇒ {
-      marketIndex.now match {
+      marketIndex.now() match {
         case None ⇒
 
           // FIXME Reactivate when scala 3

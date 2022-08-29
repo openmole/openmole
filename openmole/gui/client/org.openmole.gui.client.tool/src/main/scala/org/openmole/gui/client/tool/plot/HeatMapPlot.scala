@@ -1,10 +1,9 @@
 package org.openmole.gui.client.tool.plot
 
-import org.openmole.plotlyjs._
-import org.openmole.plotlyjs.all._
-import org.openmole.plotlyjs.PlotlyImplicits._
-import scala.scalajs.js.JSConverters._
-import com.raquo.laminar.api.L._
+import org.openmole.plotlyjs.*
+import org.openmole.plotlyjs.all.*
+import scala.scalajs.js.JSConverters.*
+import com.raquo.laminar.api.L.*
 import scala.scalajs.js
 
 object HeatMapPlot {

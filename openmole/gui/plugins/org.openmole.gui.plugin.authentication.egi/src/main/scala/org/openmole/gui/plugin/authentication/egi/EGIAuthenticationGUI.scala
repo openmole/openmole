@@ -37,13 +37,9 @@ object TopLevelExports {
 
 class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory {
   type AuthType = EGIAuthenticationData
-
   def buildEmpty: AuthenticationPlugin = new EGIAuthenticationGUI
-
   def build(data: AuthType): AuthenticationPlugin = new EGIAuthenticationGUI(data)
-
   def name = "EGI"
-
   def getData: Future[Seq[AuthType]] =
     OMFetch(apiClient).future(_.egiAuthentications(()).future)
 }
@@ -90,7 +86,7 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
           _.addAuthentication(
             EGIAuthenticationData(
               cypheredPassword = password.ref.value,
-              privateKey = if (privateKey.pathSet.now) Some(EGIAuthenticationData.authenticationDirectory + "/egi.p12") else None
+              privateKey = if (privateKey.pathSet.now()) Some(EGIAuthenticationData.authenticationDirectory + "/egi.p12") else None
             )
           ).future
         }.foreach { b ⇒ onsave() }

@@ -95,7 +95,7 @@ object panels {
 
   lazy val bannerAlert =
     new BannerAlert(
-      resizeTabs = () ⇒ treeNodeTabs.tabsElement.tabs.now.foreach { t ⇒ t.t.resizeEditor }
+      resizeTabs = () ⇒ treeNodeTabs.tabsElement.tabs.now().foreach { t ⇒ t.t.resizeEditor }
     )
 
   lazy val alertPanel = new AlertPanel

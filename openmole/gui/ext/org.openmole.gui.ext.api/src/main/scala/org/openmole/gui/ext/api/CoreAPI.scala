@@ -17,21 +17,10 @@ package org.openmole.gui.ext.api
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import endpoints4s.{algebra, generic}
 import org.openmole.core.market.{MarketIndex, MarketIndexEntry}
 import org.openmole.gui.ext.data.*
 
-object NewAPI {
-  case class Test(uuid: String)
-}
-
-trait NewAPI extends algebra.Endpoints
-  with algebra.JsonEntitiesFromSchemas
-  with generic.JsonSchemas
-  with DataJsonSchemas {
-
-  val uuid: Endpoint[Unit, NewAPI.Test] =
-    endpoint(get(path / "uuid"), ok(jsonResponse[NewAPI.Test]))
+trait CoreAPI extends RESTAPI {
 
   val omSettings: Endpoint[Unit, OMSettings] =
     endpoint(get(path / "settings"), ok(jsonResponse[OMSettings]))
@@ -53,7 +42,7 @@ trait NewAPI extends algebra.Endpoints
     endpoint(post(path / "size", jsonRequest[SafePath]), ok(jsonResponse[Long]))
 
   //def saveFile(path: SafePath, fileContent: String, hash: Option[String], overwrite: Boolean): (Boolean, String)
-  implicit lazy val saveFileRequestSchema: JsonSchema[(SafePath, String, Option[String], Boolean)] = genericJsonSchema
+//  implicit lazy val saveFileRequestSchema: JsonSchema[(SafePath, String, Option[String], Boolean)] = genericJsonSchema
   val saveFile: Endpoint[(SafePath, String, Option[String], Boolean), (Boolean, String)] =
     endpoint(post(path / "save-file", jsonRequest[(SafePath, String, Option[String], Boolean)]), ok(jsonResponse[(Boolean, String)]))
 
@@ -75,7 +64,7 @@ trait NewAPI extends algebra.Endpoints
 
   //def recursiveListFiles(path: SafePath, findString: String = ""): Seq[(SafePath, Boolean)]
 
-  implicit lazy val listRecursiveRequestSchema: JsonSchema[(SafePath, Option[String])] = genericJsonSchema
+//  implicit lazy val listRecursiveRequestSchema: JsonSchema[(SafePath, Option[String])] = genericJsonSchema
 //  implicit lazy val listRecursiveResponseSchema: JsonSchema[(SafePath, Boolean)] = genericJsonSchema
   val listRecursive: Endpoint[(SafePath, Option[String]), Seq[(SafePath, Boolean)]] =
     endpoint(post(path / "list-recursive", jsonRequest[(SafePath, Option[String])]), ok(jsonResponse[Seq[(SafePath, Boolean)]]))
@@ -219,38 +208,5 @@ trait NewAPI extends algebra.Endpoints
 
   //TODO ------------ refactor -------------------
   // def appendToPluggedIfPlugin(safePath: SafePath): Unit =
-
-  implicit lazy val fooSchema: JsonSchema[NewAPI.Test] = genericJsonSchema
-  implicit lazy val omSettingsSchema: JsonSchema[OMSettings] = genericJsonSchema
-  implicit lazy val pluginSchema: JsonSchema[Plugin] = genericJsonSchema
-  implicit lazy val allPluginExtensionDataSchema: JsonSchema[PluginExtensionData] = genericJsonSchema
-  implicit lazy val fileFilterSchema: JsonSchema[FileFilter] = genericJsonSchema
-  implicit lazy val listFilesDataSchema: JsonSchema[ListFilesData] = genericJsonSchema
-  implicit lazy val firstLastSchema: JsonSchema[FirstLast] = genericJsonSchema
-  implicit lazy val listSorting: JsonSchema[ListSorting] = genericJsonSchema
-  implicit lazy val treeNodeDataSchema: JsonSchema[TreeNodeData] = genericJsonSchema
-  implicit lazy val dirDataSchema: JsonSchema[DirData] = genericJsonSchema
-  implicit lazy val pluginStateSchema: JsonSchema[PluginState] = genericJsonSchema
-  implicit lazy val sequenceDataSchema: JsonSchema[SequenceData] = genericJsonSchema
-  implicit lazy val executionIdSchema: JsonSchema[ExecutionId] = genericJsonSchema
-  implicit lazy val jobStatusesSchema: JsonSchema[ExecutionInfo.JobStatuses] = genericJsonSchema
-  implicit lazy val capsuleExecutionSchema: JsonSchema[ExecutionInfo.CapsuleExecution] = genericJsonSchema
-  implicit lazy val environmentIdSchema: JsonSchema[EnvironmentId] = genericJsonSchema
-  implicit lazy val networkActivitySchema: JsonSchema[NetworkActivity] = genericJsonSchema
-  implicit lazy val executionActivitySchema: JsonSchema[ExecutionActivity] = genericJsonSchema
-  implicit lazy val environmentStateSchema: JsonSchema[EnvironmentState] = genericJsonSchema
-  implicit lazy val executionInfoSchema: JsonSchema[ExecutionInfo] = genericJsonSchema
-  implicit lazy val outputStreamDataSchema: JsonSchema[OutputStreamData] = genericJsonSchema
-  implicit lazy val staticExecutionInfoSchema: JsonSchema[StaticExecutionInfo] = genericJsonSchema
-  implicit lazy val scriptDataSchema: JsonSchema[ScriptData] = genericJsonSchema
-  implicit lazy val errorStateLevelSchema: JsonSchema[ErrorStateLevel] = genericJsonSchema
-  implicit lazy val environmentErrorSchema: JsonSchema[EnvironmentError] = genericJsonSchema
-  implicit lazy val environmentErrorDataSchema: JsonSchema[EnvironmentErrorData] = genericJsonSchema
-  implicit lazy val resourceSchema: JsonSchema[Resource] = genericJsonSchema
-  implicit lazy val resourcesSchema: JsonSchema[Resources] = genericJsonSchema
-
-  // Uncomment when scala 3
-//  implicit lazy val marketIndexEntrySchema: JsonSchema[MarketIndexEntry] = genericJsonSchema
-//  implicit lazy val marketIndexSchema: JsonSchema[MarketIndex] = genericJsonSchema
 
 }

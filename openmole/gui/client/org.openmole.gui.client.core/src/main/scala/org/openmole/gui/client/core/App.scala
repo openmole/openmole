@@ -133,7 +133,7 @@ object App {
 
       dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
         if (k.keyCode == 83 && k.ctrlKey) {
-          k.preventDefault
+          k.preventDefault()
           false
         }
       }
@@ -141,8 +141,8 @@ object App {
 
       lazy val newEmpty = MenuAction("Empty project", () ⇒ {
         val fileName = "newProject.oms"
-        CoreUtils.createFile(panels.treeNodeManager.dirNodeLine.now, fileName, () ⇒ {
-          val toDisplay = panels.treeNodeManager.dirNodeLine.now ++ fileName
+        CoreUtils.createFile(panels.treeNodeManager.dirNodeLine.now(), fileName, () ⇒ {
+          val toDisplay = panels.treeNodeManager.dirNodeLine.now() ++ fileName
           FileManager.download(
             toDisplay,
             hash = true,
@@ -190,7 +190,7 @@ object App {
       lazy val menuActions: Options[MenuAction] = elements.options(
         key = btn_danger,
         naming = (m: MenuAction) ⇒ m.name,
-        onclose = () ⇒ menuActions.content.now.foreach {
+        onclose = () ⇒ menuActions.content.now().foreach {
           _.action()
         },
         fixedTitle = Some("New project")

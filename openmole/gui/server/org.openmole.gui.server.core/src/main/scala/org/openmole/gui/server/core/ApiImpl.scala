@@ -73,7 +73,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
     OMSettings(
-      utils.projectsDirectory().toSafePath,
+      utils.projectsDirectory.toSafePath,
       buildinfo.version.value,
       buildinfo.name,
       new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(buildinfo.BuildInfo.buildTime),

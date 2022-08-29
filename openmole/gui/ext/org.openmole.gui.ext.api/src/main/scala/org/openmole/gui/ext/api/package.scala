@@ -1,4 +1,4 @@
-package org.openmole.gui.plugin.authentication
+package org.openmole.gui.ext
 
 /*
  * Copyright (C) 2022 Romain Reuillon
@@ -17,14 +17,8 @@ package org.openmole.gui.plugin.authentication
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-import org.openmole.gui.ext.client.*
-
-package object egi {
-
- class APIClientImpl(val settings: ClientSettings)
-   extends EGIAuthenticationAPI with APIClient
-
- def apiClient(endpointsSettings: ClientSettings) = new APIClientImpl(endpointsSettings)
-
+package object api {
+  trait RESTAPI extends endpoints4s.algebra.Endpoints with endpoints4s.algebra.circe.JsonEntitiesFromCodecs with endpoints4s.circe.JsonSchemas {
+     export io.circe.generic.auto.*
+  }
 }

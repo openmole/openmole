@@ -86,8 +86,8 @@ class BannerAlert(resizeTabs: () ⇒ Unit) {
     }
 
   private def color = {
-    if (bannerMessages.now.exists(_.bannerLevel == BannerLevel.Critical)) omsheet.RED
-    else if (bannerMessages.now.isEmpty) omsheet.DARK_GREY
+    if (bannerMessages.now().exists(_.bannerLevel == BannerLevel.Critical)) omsheet.RED
+    else if (bannerMessages.now().isEmpty) omsheet.DARK_GREY
     else omsheet.BLUE
   }
 

@@ -78,7 +78,7 @@ class SettingsView(fileDisplayer: FileDisplayer) {
   }, span("Documentation"))
 
   val jvmInfoButton = button("JVM stats", btn_secondary, marginLeft := "12", glyph_stats, onClick --> { _ ⇒
-    timer.now match {
+    timer.now() match {
       case Some(t) ⇒ stopJVMTimer(t)
       case _       ⇒ setJVMTimer
     }

@@ -22,19 +22,19 @@ import endpoints4s.algebra
 package object data {
 
 
-  trait DataJsonSchemas extends endpoints4s.algebra.Endpoints
-    with endpoints4s.algebra.JsonEntitiesFromSchemas
-    with endpoints4s.generic.JsonSchemas {
-    implicit lazy val errorDataSchema: JsonSchema[ErrorData] = genericJsonSchema
-    implicit lazy val optionErrorDataSchema: JsonSchema[Option[ErrorData]] = genericJsonSchema
-    implicit lazy val errorWithLocationSchema: JsonSchema[ErrorWithLocation] = genericJsonSchema
-    implicit lazy val optionIntSchema: JsonSchema[Option[Int]] = genericJsonSchema
-    implicit lazy val testSchema: JsonSchema[Test] = genericJsonSchema
-    implicit lazy val serverFileSystemContextSchema: JsonSchema[ServerFileSystemContext] = genericJsonSchema
-    implicit lazy val safePathSchema: JsonSchema[SafePath] = genericJsonSchema
-    //implicit lazy val listSafePathSchema: JsonSchema[List[SafePath]] = genericJsonSchema
-    //implicit lazy val extractResultSchema: JsonSchema[ExtractResult] = genericJsonSchema
-  }
+//  trait DataJsonSchemas extends endpoints4s.algebra.Endpoints
+//    with endpoints4s.algebra.circe.JsonEntitiesFromCodecs
+//    with endpoints4s.circe.JsonSchemas {
+//    implicit lazy val errorDataSchema: JsonSchema[ErrorData] = genericJsonSchema
+//    implicit lazy val optionErrorDataSchema: JsonSchema[Option[ErrorData]] = genericJsonSchema
+//    implicit lazy val errorWithLocationSchema: JsonSchema[ErrorWithLocation] = genericJsonSchema
+//    implicit lazy val optionIntSchema: JsonSchema[Option[Int]] = genericJsonSchema
+//    implicit lazy val testSchema: JsonSchema[Test] = genericJsonSchema
+//    implicit lazy val serverFileSystemContextSchema: JsonSchema[ServerFileSystemContext] = genericJsonSchema
+//    implicit lazy val safePathSchema: JsonSchema[SafePath] = genericJsonSchema
+//    //implicit lazy val listSafePathSchema: JsonSchema[List[SafePath]] = genericJsonSchema
+//    //implicit lazy val extractResultSchema: JsonSchema[ExtractResult] = genericJsonSchema
+//  }
 
 
   trait Data

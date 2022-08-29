@@ -88,7 +88,7 @@ class NewGUIServer(port: Int, localhost: Boolean, services: GUIServerServices, p
       )
 
     val apiImpl = new ApiImpl(GUIServerServices.ServicesProvider(services, () => Cypher(password)), Some(applicationControl))
-    val apiServer = new APIServer(apiImpl)
+    val apiServer = new CoreAPIServer(apiImpl)
     val applicationServer = new ApplicationServer(webappCache, extraHeaders, password, services)
 
 

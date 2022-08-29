@@ -122,7 +122,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
   }
 
   def withSafePath(action: SafePath ⇒ Unit) = {
-    treeNodePanel.currentSafePath.now.foreach { sp ⇒
+    treeNodePanel.currentSafePath.now().foreach { sp ⇒
       action(sp)
     }
   }

@@ -2,6 +2,9 @@
 package openmole
 
 object common {
+
+  def sjs(name: String) = name + "_sjs1"
+
   def scalaVersionValue = "2.13.8"
   def scala3VersionValue = "3.1.2"
 
@@ -22,7 +25,7 @@ object common {
   def sortableVersion = "0.7.2"
   def json4sVersion = "4.0.3"
   def circeVersion = "0.14.2"
-  def catsVersion = "2.7.0"
+  def catsVersion = "2.8.0"
   def catsEffectVersion = "3.3.12"
   def catsParseVersion = "0.3.7"
   def squantsVersion = "1.8.3"
@@ -43,10 +46,12 @@ object common {
   def scalaSTMVersion = "0.11.1"
   def jlineVersion = "3.21.0"
 
-  def http4sBlazeServerVersion = "0.23.12"
+  def http4sVersion = "0.23.12"
 
   def endpoint4SHttp4SVersion = "10.0.0+n"
   def endpoints4SVersion = "1.8.0+n"
+  def endpoint4SCirceSchemaVersion = "2.2.0+n"
+  def endpoint4SXHRClientVersion = "5.1.0+n"
 
   def scalajsVersion = "1.8.0"
   def scalajsLoggingVersion = "1.1.0"

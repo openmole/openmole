@@ -41,7 +41,7 @@ import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.gui.ext.data.routes._
 import org.openmole.gui.ext.server.{ OMRouter, utils }
 import org.openmole.tool.crypto.Cypher
-import org.openmole.tool.file._
+import org.openmole.tool.file.*
 import org.openmole.tool.lock.LockRepository
 import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
@@ -54,43 +54,53 @@ import scala.util.{ Failure, Success, Try }
 object GUIServerServices {
 
   case class ServicesProvider(guiServices: GUIServerServices, cypherProvider: () ⇒ Cypher) extends Services {
-    implicit def services = guiServices
-    implicit def workspace = guiServices.workspace
-    implicit def preference = guiServices.preference
-    implicit def cypher = cypherProvider()
-    implicit def threadProvider = guiServices.threadProvider
-    implicit def seeder = guiServices.seeder
-    implicit def replicaCatalog = guiServices.replicaCatalog
-    implicit def tmpDirectory = guiServices.newFile
-    implicit def authenticationStore = guiServices.authenticationStore
-    implicit def serializerService = guiServices.serializerService
-    implicit def fileService = guiServices.fileService
-    implicit def fileServiceCache = guiServices.fileServiceCache
-    implicit def randomProvider = guiServices.randomProvider
-    implicit def eventDispatcher: EventDispatcher = guiServices.eventDispatcher
-    implicit def networkService: NetworkService = guiServices.networkService
-    implicit def outputRedirection: OutputRedirection = guiServices.outputRedirection
-    implicit def loggerService: LoggerService = guiServices.loggerService
-    implicit def timeService: TimeService = guiServices.timeService
+    implicit def services: GUIServerServices = guiServices
+
+    implicit def cypher: Cypher = cypherProvider()
+
+    export guiServices.*
+//    implicit def workspace: Workspace = guiServices.workspace
+//
+//    implicit def preference: Preference = guiServices.preference
+//    implicit def threadProvider: ThreadProvider = guiServices.threadProvider
+//
+//    implicit def seeder: Seeder = guiServices.seeder
+//
+//    implicit def replicaCatalog: ReplicaCatalog = guiServices.replicaCatalog
+//
+//    implicit def tmpDirectory: TmpDirectory = guiServices.tmpDirectory
+//
+//    implicit def authenticationStore: AuthenticationStore = guiServices.authenticationStore
+//
+//    implicit def serializerService: SerializerService = guiServices.serializerService
+//
+//    implicit def fileService: FileService = guiServices.fileService
+//    implicit def fileServiceCache = guiServices.fileServiceCache
+//    implicit def randomProvider = guiServices.randomProvider
+//    implicit def eventDispatcher: EventDispatcher = guiServices.eventDispatcher
+//    implicit def networkService: NetworkService = guiServices.networkService
+//    implicit def outputRedirection: OutputRedirection = guiServices.outputRedirection
+//    implicit def loggerService: LoggerService = guiServices.loggerService
+//    implicit def timeService: TimeService = guiServices.timeService
   }
 
   def apply(workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level], logFileLevel: Option[Level]) = {
-    implicit val ws = workspace
-    implicit val preference = Preference(ws.persistentDir)
-    implicit val newFile = TmpDirectory(workspace)
-    implicit val seeder = Seeder()
-    implicit val serializerService = SerializerService()
-    implicit val threadProvider = ThreadProvider()
-    implicit val authenticationStore = AuthenticationStore(ws.persistentDir)
-    implicit val fileService = FileService()
-    implicit val randomProvider = RandomProvider(seeder.newRNG)
-    implicit val eventDispatcher = EventDispatcher()
-    implicit val outputRedirection = OutputRedirection()
-    implicit val networkService = NetworkService(httpProxy)
-    implicit val fileServiceCache = FileServiceCache()
-    implicit val replicaCatalog = ReplicaCatalog(ws)
-    implicit val loggerService = LoggerService(logLevel, file = Some(workspace.location / Workspace.logLocation), fileLevel = logFileLevel)
-    implicit val timeService = TimeService()
+    implicit val ws: Workspace = workspace
+    implicit val preference: Preference = Preference(ws.persistentDir)
+    implicit val newFile: TmpDirectory = TmpDirectory(workspace)
+    implicit val seeder: Seeder = Seeder()
+    implicit val serializerService: SerializerService = SerializerService()
+    implicit val threadProvider: ThreadProvider = ThreadProvider()
+    implicit val authenticationStore: AuthenticationStore = AuthenticationStore(ws.persistentDir)
+    implicit val fileService: FileService = FileService()
+    implicit val randomProvider: RandomProvider = RandomProvider(seeder.newRNG)
+    implicit val eventDispatcher: EventDispatcher = EventDispatcher()
+    implicit val outputRedirection: OutputRedirection = OutputRedirection()
+    implicit val networkService: NetworkService = NetworkService(httpProxy)
+    implicit val fileServiceCache: FileServiceCache = FileServiceCache()
+    implicit val replicaCatalog: ReplicaCatalog = ReplicaCatalog(ws)
+    implicit val loggerService: LoggerService = LoggerService(logLevel, file = Some(workspace.location / Workspace.logLocation), fileLevel = logFileLevel)
+    implicit val timeService: TimeService = TimeService()
 
     new GUIServerServices()
   }
@@ -109,23 +119,23 @@ object GUIServerServices {
 }
 
 class GUIServerServices(
-  implicit
-  val workspace:           Workspace,
-  val preference:          Preference,
-  val threadProvider:      ThreadProvider,
-  val seeder:              Seeder,
-  val replicaCatalog:      ReplicaCatalog,
-  val newFile:             TmpDirectory,
-  val authenticationStore: AuthenticationStore,
-  val serializerService:   SerializerService,
-  val fileService:         FileService,
-  val fileServiceCache:    FileServiceCache,
-  val randomProvider:      RandomProvider,
-  val eventDispatcher:     EventDispatcher,
-  val outputRedirection:   OutputRedirection,
-  val networkService:      NetworkService,
-  val loggerService:       LoggerService,
-  val timeService:         TimeService
+                         implicit
+                         val workspace:           Workspace,
+                         val preference:          Preference,
+                         val threadProvider:      ThreadProvider,
+                         val seeder:              Seeder,
+                         val replicaCatalog:      ReplicaCatalog,
+                         val tmpDirectory:             TmpDirectory,
+                         val authenticationStore: AuthenticationStore,
+                         val serializerService:   SerializerService,
+                         val fileService:         FileService,
+                         val fileServiceCache:    FileServiceCache,
+                         val randomProvider:      RandomProvider,
+                         val eventDispatcher:     EventDispatcher,
+                         val outputRedirection:   OutputRedirection,
+                         val networkService:      NetworkService,
+                         val loggerService:       LoggerService,
+                         val timeService:         TimeService
 )
 
 object GUIServlet {

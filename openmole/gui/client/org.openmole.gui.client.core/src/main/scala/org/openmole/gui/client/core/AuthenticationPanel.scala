@@ -66,7 +66,7 @@ object AuthenticationPanel {
         }
 
         authenticationFactories.options(currentInd, bsn.btn_warning, (a: AuthenticationPluginFactory) ⇒ a.name, onclose = () ⇒
-          authSetting.set(authenticationSelector.content.now.map {
+          authSetting.set(authenticationSelector.content.now().map {
             _.buildEmpty
           }))
       }
@@ -78,7 +78,7 @@ object AuthenticationPanel {
     }
 
     def save = {
-      authSetting.now.map {
+      authSetting.now().map {
         _.save(() ⇒ {
           getAuthentications
         })
@@ -113,7 +113,7 @@ object AuthenticationPanel {
       }
     })
 
-    if (!initialCheck.now) {
+    if (!initialCheck.now()) {
       getAuthentications
     }
 

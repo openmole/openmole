@@ -28,22 +28,14 @@ import org.http4s.*
 import org.http4s.dsl.io.*
 import org.http4s.headers.*
 import org.openmole.gui.ext
+import org.openmole.gui.ext.server.{APIServer, *}
 
 /** Defines a Play router (and reverse router) for the endpoints described
  * in the `CounterEndpoints` trait.
  */
-class APIServer(apiImpl: ApiImpl)
-  extends server.Endpoints[IO]
-    with api.NewAPI
-    with server.JsonEntitiesFromSchemas {
-
-
-  /** Simple implementation of an in-memory counter */
-  // val counter = Ref(0)
-
-  // Implements the `currentValue` endpoint
-  val uuidRoute =
-    uuid.implementedBy(_ => api.NewAPI.Test(java.util.UUID.randomUUID().toString))
+class CoreAPIServer(apiImpl: ApiImpl)
+  extends APIServer
+    with api.CoreAPI {
 
   val settingsRoute =
     omSettings.implementedBy(_ => apiImpl.settings)
@@ -154,7 +146,6 @@ class APIServer(apiImpl: ApiImpl)
 
   val endpointRoutes: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(
-      uuidRoute,
       settingsRoute,
       isPasswordCorrectRoute,
       resetPasswordRoute,
@@ -213,7 +204,7 @@ class APIServer(apiImpl: ApiImpl)
                   st.copy(destination)
                   destination.setExecutable(true)
                 }
-              }.unsafeRunSync
+              }.unsafeRunSync()
               //finally stream.close
             }
 
@@ -227,7 +218,7 @@ class APIServer(apiImpl: ApiImpl)
 
         req.decode[Multipart[IO]] { parts =>
           def partContent(name: String) =
-            parts.parts.find(_.name.exists(_ == name)).map(_.bodyText.compile.string.unsafeRunSync)
+            parts.parts.find(_.name.exists(_ == name)).map(_.bodyText.compile.string.unsafeRunSync())
 
           def getFileParts = parts.parts.filter(_.filename.isDefined)
 
@@ -261,16 +252,16 @@ class APIServer(apiImpl: ApiImpl)
                 }
               }
 
-              Ok(st).map { r =>
-                val r2 =
-                  r.withHeaders(
-                    //org.http4s.headers.`Content-Length`(test.length()),
-                    org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> s"${f.getName}.tgz"))
-                  )
+            Ok(st).map { r =>
+              val r2 =
+                r.withHeaders(
+                  //org.http4s.headers.`Content-Length`(test.length()),
+                  org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> s"${f.getName}.tgz"))
+                )
 
-                if (hash) r2.withHeaders(Header.Raw(CIString(org.openmole.gui.ext.data.routes.hashHeader), apiImpl.services.fileService.hashNoCache(f).toString))
-                else r2
-              }
+              if (hash) r2.withHeaders(Header.Raw(CIString(org.openmole.gui.ext.data.routes.hashHeader), apiImpl.services.fileService.hashNoCache(f).toString))
+              else r2
+            }
           }
           else {
             f.withLock { _ ⇒

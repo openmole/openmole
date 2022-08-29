@@ -18,7 +18,7 @@ object Popover {
       onClick --> { (e: Event) ⇒
         //thisNode.hide
         pop1.toggle
-        e.stopPropagation
+        e.stopPropagation()
       }
     )
   }

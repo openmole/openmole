@@ -37,7 +37,7 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
 
   def download(url: String) = {
     downloading.set(Processing())
-    Fetch.future(_.downloadHTTP(url, manager.dirNodeLine.now, extractCheckBox.ref.checked).future).foreach { d ⇒
+    Fetch.future(_.downloadHTTP(url, manager.dirNodeLine.now(), extractCheckBox.ref.checked).future).foreach { d ⇒
       downloading.set(Processed())
       urlDialog.hide
       d match {
@@ -72,7 +72,7 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
           sp.name + " already exists. Overwrite ? ",
           () ⇒ {
             overwriteAlert.set(None)
-            deleteFileAndDownloadURL(manager.dirNodeLine.now, urlInput.ref.value)
+            deleteFileAndDownloadURL(manager.dirNodeLine.now(), urlInput.ref.value)
           }, () ⇒ {
             overwriteAlert.set(None)
           }, CenterPagePosition

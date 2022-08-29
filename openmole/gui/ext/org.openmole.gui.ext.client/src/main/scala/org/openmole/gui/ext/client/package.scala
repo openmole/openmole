@@ -30,12 +30,13 @@ import endpoints4s.xhr.EndpointsSettings
 
 package object client {
 
-  class CoreAPIClientImpl(val settings: EndpointsSettings)
-    extends api.NewAPI
-      with xhr.future.Endpoints
-      with xhr.JsonEntitiesFromSchemas
+  type ClientSettings = EndpointsSettings
+  trait APIClient extends xhr.future.Endpoints with xhr.JsonEntitiesFromCodecs
 
-  def coreAPIClient(endpointsSettings: EndpointsSettings) =
+  class CoreAPIClientImpl(val settings: ClientSettings)
+    extends api.CoreAPI with APIClient
+
+  def coreAPIClient(endpointsSettings: ClientSettings) =
     new CoreAPIClientImpl(endpointsSettings)
 
 

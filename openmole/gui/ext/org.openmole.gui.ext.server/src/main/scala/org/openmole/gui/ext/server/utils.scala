@@ -27,11 +27,11 @@ object utils {
 
   def pluginUpdoadDirectory(tmpDirectory: String)(implicit newFile: TmpDirectory) = newFile.directory / tmpDirectory
 
-  def webUIDirectory()(implicit workspace: Workspace) = workspace.location /> "webui"
+  def webUIDirectory(implicit workspace: Workspace) = workspace.location /> "webui"
 
-  def projectsDirectory()(implicit workspace: Workspace) = webUIDirectory /> "projects"
+  def projectsDirectory(implicit workspace: Workspace) = webUIDirectory /> "projects"
 
-  def workspaceRoot()(implicit workspace: Workspace) = workspace.location
+  def workspaceRoot(implicit workspace: Workspace) = workspace.location
 
   def isPlugin(path: SafePath)(implicit workspace: Workspace): Boolean = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
@@ -257,7 +257,7 @@ object utils {
       existing.toSeq
     } else {
       val existing = existsIn(safePaths, to)
-      if (existing.isEmpty) safePaths.foreach { sp ⇒ sp.copy(to) }
+      if (existing.isEmpty) safePaths.foreach { sp ⇒ SafePathDecorator(sp).copy(to) }
       existing
     }
 
@@ -332,7 +332,7 @@ object utils {
           )(Codec.ISO8859)
 
           val ostream = new FileOutputStream(new File(to, entryPath))
-          inputSrc foreach { c: Char ⇒ ostream.write(c) }
+          inputSrc foreach { (c: Char) ⇒ ostream.write(c) }
           inputSrc.close
           ostream.close
 

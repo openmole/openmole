@@ -72,10 +72,10 @@ sealed trait TreeNodeTab {
   def resizeEditor: Unit
 
   // controller to be added in menu bar
-  val controlElement: HtmlElement
+  lazy val controlElement: HtmlElement
 
   // Graphical representation
-  val block: HtmlElement
+  lazy val block: HtmlElement
 }
 
 object TreeNodeTab {
@@ -171,7 +171,7 @@ object TreeNodeTab {
           button("Run", btn_primary, marginLeft := "10", onClick --> { _ ⇒
             unsetErrors
             saveContent(() ⇒
-              Fetch.future(_.runScript(ScriptData(safePath), validateButton.toggled.now).future, timeout = 120 seconds, warningTimeout = 60 seconds).foreach { execInfo ⇒
+              Fetch.future(_.runScript(ScriptData(safePath), validateButton.toggled.now()).future, timeout = 120 seconds, warningTimeout = 60 seconds).foreach { execInfo ⇒
                 showExecution()
               }
             )
@@ -396,11 +396,11 @@ object TreeNodeTab {
     lazy val axisCheckBoxes = {
       val (newPlotter, newSequenceData) = plotterAndSeqencedata(dataTab, plotter)
 
-      val arrayColIndexes = newSequenceData.content.headOption.map { s => Tools.dataArrayIndexes(s.toArray) }.getOrElse(Array()).toSeq
+      val arrayColIndexes = newSequenceData.content.headOption.map { s => Tools.dataArrayIndexes(s.toArray).toSeq }.getOrElse(Seq())
 
       val ind = plotter.plotMode match {
         case XYMode ⇒ arrayColIndexes
-        case _ ⇒ (0 to dataNbColumns - 1).toArray.filterNot(arrayColIndexes.contains).toSeq
+        case _ ⇒ (0 to dataNbColumns - 1).filterNot(arrayColIndexes.contains)
       }
 
       val axisToggleStates = {
@@ -439,7 +439,7 @@ object TreeNodeTab {
         btn_secondary,
         (indexedAxis: IndexedAxis) ⇒ indexedAxis.title,
         () ⇒ {
-          if (errorOptions.content.now.map {
+          if (errorOptions.content.now().map {
             _.fullSequenceIndex
           }.getOrElse(-1) != -1) ??? //toView(errorOptions.content.now)
           else ??? //toView(None)
@@ -459,10 +459,10 @@ object TreeNodeTab {
         btn_secondary,
         (indexedAxis: IndexedAxis) ⇒ indexedAxis.title,
         () ⇒ {
-          if (filterAxisOptions.content.now.map {
+          if (filterAxisOptions.content.now().map {
             _.fullSequenceIndex
           }.getOrElse(-1) != -1) {
-            toClosureView(Some(ClosureFilter(closure = closureInput.ref.value, filteredAxis = filterAxisOptions.content.now)))
+            toClosureView(Some(ClosureFilter(closure = closureInput.ref.value, filteredAxis = filterAxisOptions.content.now())))
           }
           else toClosureView(None)
         }
@@ -559,12 +559,14 @@ object TreeNodeTab {
               case Plot ⇒
                 div(
                   vForm(
-                    div(switchButton, filterRadios, plotModeRadios, plotModeInfo),
-                    plotter.plotDimension match {
-                      case LinePlot ⇒ div()
-                      case _ ⇒ span(axisCheckBoxes).withLabel("x|y axis")
-                    },
-                    options
+                    Seq[FormTag](
+                      div(switchButton, filterRadios, plotModeRadios, plotModeInfo),
+                      plotter.plotDimension match {
+                        case LinePlot ⇒ div()
+                        case _ ⇒ span(axisCheckBoxes).withLabel("x|y axis")
+                      },
+                      options
+                    )*
                   )
                 )
               case _ ⇒ div(switchButton)
@@ -690,7 +692,7 @@ class TreeNodeTabs {
 
   val tabsObserver = Observer[Seq[Tab[TreeNodeTab]]] { tNodeTabs =>
     if (tNodeTabs.isEmpty) {
-      timer.now.foreach { handle =>
+      timer.now().foreach { handle =>
         clearInterval(handle)
       }
       timer.set(None)
@@ -700,7 +702,7 @@ class TreeNodeTabs {
   val timerObserver = Observer[Option[SetIntervalHandle]] { handle =>
     handle match {
       case None => timer.set(Some(setInterval(15000) {
-        tabsElement.tabs.now.foreach {
+        tabsElement.tabs.now().foreach {
           _.t.saveContent()
         }
       }))
@@ -709,13 +711,13 @@ class TreeNodeTabs {
   }
 
   def tab(safePath: SafePath) = {
-    tabsElement.tabs.now.filter { tab =>
+    tabsElement.tabs.now().filter { tab =>
       tab.t.safePath == safePath
     }.headOption
   }
 
   def alreadyDisplayed(safePath: SafePath) =
-    tabsElement.tabs.now.find { t ⇒
+    tabsElement.tabs.now().find { t ⇒
       t.t.safePath.path == safePath.path
     }
 
@@ -786,7 +788,7 @@ class TreeNodeTabs {
   //  }
 
   def find(safePath: SafePath) = {
-    tabsElement.tabs.now.find { tab => tab.t.safePath == safePath }
+    tabsElement.tabs.now().find { tab => tab.t.safePath == safePath }
   }
 
   def indexOf(safePath: SafePath) = {
@@ -905,7 +907,7 @@ class TreeNodeTabs {
   //    org.openmole.gui.client.core.Post()[Api].saveFiles(alterables).call().foreach { s ⇒ onsave() }
   //  }
 
-  def checkTabs = tabsElement.tabs.now.foreach { tab =>
+  def checkTabs = tabsElement.tabs.now().foreach { tab =>
     Fetch.future(_.exists(tab.t.safePath).future).foreach {
       e ⇒ if (!e) remove(tab.t)
     }
@@ -925,7 +927,7 @@ class TreeNodeTabs {
     }px", cursor.pointer, padding := "3", onClick --> {
       _ ⇒
         for {
-          ts ← tabsElement.tabs.now
+          ts ← tabsElement.tabs.now()
           t ← ts.t.editor
         } yield {
           t.updateFont(size)

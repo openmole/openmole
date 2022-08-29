@@ -35,7 +35,7 @@ class InputFilter(initValue: String, pHolder: String, size: String = "100%") {
     inContext { node ⇒ onInput --> { _ ⇒ nameFilter.set(node.ref.value) } }
   )
 
-  def contains(st: String) = st.toUpperCase.contains(nameFilter.now.toUpperCase)
+  def contains(st: String) = st.toUpperCase.contains(nameFilter.now().toUpperCase)
 
   def exists(seqString: Seq[String]) = seqString.exists(contains)
 

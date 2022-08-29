@@ -61,12 +61,12 @@ object GUIServer {
   }
 
   def lockFile(implicit workspace: Workspace) = {
-    val file = utils.webUIDirectory() / "GUI.lock"
+    val file = utils.webUIDirectory / "GUI.lock"
     file.createNewFile
     file
   }
 
-  def urlFile(implicit workspace: Workspace) = utils.webUIDirectory() / "GUI.url"
+  def urlFile(implicit workspace: Workspace) = utils.webUIDirectory / "GUI.url"
 
   val servletArguments = "servletArguments"
 

@@ -26,17 +26,17 @@ import org.openmole.gui.ext.server.utils
 import org.openmole.plugin.environment.egi._
 import scala.util.{Try, Success, Failure}
 import org.openmole.gui.ext.data._
+import org.openmole.gui.ext.server.*
 
 object EGIAuthenticationAPIServer {
   val voTest = PreferenceLocation[Seq[String]]("AuthenicationPanel", "voTest", Some(Seq[String]()))
 }
 
 class EGIAuthenticationEGIServer(s: Services)
-  extends server.Endpoints[IO]
-  with EGIAuthenticationAPI
-  with server.JsonEntitiesFromSchemas {
+  extends APIServer
+  with EGIAuthenticationAPI {
 
-  implicit val services = s
+  implicit val services: Services = s
   import services._
 
   val egiAuthenticationsRoute =
