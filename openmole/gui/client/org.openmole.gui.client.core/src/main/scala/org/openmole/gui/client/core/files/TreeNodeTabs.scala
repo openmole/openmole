@@ -728,10 +728,10 @@ class TreeNodeTabs {
 //    }.headOption
 //  }
 
-  def alreadyDisplayed(safePath: SafePath) =
-    tabsElement.tabs.now.find { t ⇒
-      t.t.safePath.path == safePath.path
-    }
+//  def alreadyDisplayed(safePath: SafePath) =
+//    tabsElement.tabs.now.find { t ⇒
+//      t.t.safePath.path == safePath.path
+//    }
 
   //  def setActive(treeNodeTab: TreeNodeTab) = {
   //    tabsElement.tabs.update { ts =>

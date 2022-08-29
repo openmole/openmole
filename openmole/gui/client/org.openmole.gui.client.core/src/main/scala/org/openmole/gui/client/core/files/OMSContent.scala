@@ -82,6 +82,5 @@ object OMSContent {
     val content = div(display.flex, flexDirection.column, controlElement, editor.view)
 
     TabContent.addTab(tabData, content)
-    editor.editor.focus
   }
 }
