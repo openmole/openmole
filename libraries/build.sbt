@@ -45,19 +45,25 @@ lazy val json4s = OsgiProject(dir, "org.json4s",
 lazy val shapeless =  OsgiProject(dir, "org.typelevel.shapeless", exports = Seq("shapeless3.*")) settings (
   libraryDependencies += "org.typelevel" %% "shapeless3-deriving" % shapelessVersion,
   libraryDependencies += "org.typelevel" %% "shapeless3-typeable" % shapelessVersion,
+
+  libraryDependencies += "org.typelevel" %% sjs("shapeless3-deriving") % shapelessVersion,
+  libraryDependencies += "org.typelevel" %% sjs("shapeless3-typeable") % shapelessVersion,
+
   version := shapelessVersion
 ) settings(settings: _*) settings(scala3Settings: _*)
 
 lazy val circe = OsgiProject(dir, "io.circe",
-  exports = Seq("io.circe.*", "!cats.*", "!scala.*", "!shapeless.*"),
+  exports = Seq("io.circe.*", "!cats.*", "!scala.*", "!shapeless3.*"),
   privatePackages = Seq("org.typelevel.jawn.*"),
-  imports = Seq("scala.*", "cats.*", "shapeless.*")) settings (
+  imports = Seq("scala.*", "cats.*", "shapeless3.*"))  settings (
   libraryDependencies ++= Seq(
     "io.circe" %% "circe-core",
     "io.circe" %% "circe-generic",
     //"io.circe" %% "circe-extras",
-    "io.circe" %% "circe-parser"
-  ).map(_ % circeVersion),
+    "io.circe" %% "circe-parser",
+    "io.circe" %% sjs("circe-core"),
+    "io.circe" %% sjs("circe-generic"),
+    "io.circe" %% sjs("circe-parser")).map(_ % circeVersion),
   version := circeVersion) settings(settings: _*) settings(scala3Settings: _*) //dependsOn(shapeless) 
 
 lazy val logback = OsgiProject(dir, "ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl"), dynamicImports = Seq("*")) settings
@@ -102,13 +108,14 @@ lazy val scalaLang = OsgiProject(
   dir,
   "org.scala-lang.scala-library",
   global = true,
-  exports = Seq("akka.*", "com.typesafe.*", "scala.*", "dotty.*", "scalax.*" /*"jline.*"*/),
+  exports = Seq("com.typesafe.*", "scala.*", "dotty.*", "scalax.*" /*"jline.*"*/),
   privatePackages = Seq("!org.jline.*", "**", "META-INF.native.**"),
   imports = Seq("!org.apache.sshd.*", "!org.mozilla.*", "!org.apache.tools.ant.*", "!sun.misc.*", "!javax.annotation.*", "*")) settings
   (libraryDependencies ++= {
     Seq(
       "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4",
-      //"org.scala-lang" % "scala-library" % scalaVersion.value,
+      "org.scala-lang.modules" %% "scala-java8-compat" % "1.0.2",
+    //"org.scala-lang" % "scala-library" % scalaVersion.value,
       //"org.scala-lang" % "scala-reflect" % scalaVersion.value,
       //"org.scala-lang" % "scalap" % scalaVersion.value ,
       //"jline" % "jline" % "2.12.1",
@@ -117,6 +124,9 @@ lazy val scalaLang = OsgiProject(
       "org.scala-lang" %% "scala3-library" % scalaVersion.value,
       "org.scala-lang" %% "scala3-compiler" % scalaVersion.value,
       "org.scalameta" %% "scalameta" % scalaMetaVersion cross(CrossVersion.for3Use2_13) excludeAll(ExclusionRule(organization = "com.lihaoyi")),
+
+      "org.scala-lang" %% sjs("scala3-library") % scalaVersion.value,
+      //"org.scala-lang.modules" %% sjs("scala-collection-compat") % "2.1.6"
     )
   },
   version := scalaVersion.value) settings(settings: _*) settings(scala3Settings: _*) dependsOn(jline)
@@ -263,6 +273,7 @@ lazy val scalajsLogging = OsgiProject(dir, "scalajs-logging", exports = Seq("org
   
 lazy val scalaJS = OsgiProject(dir, "scalajs", exports = Seq("scala.scalajs.*"), imports = Seq("*")) settings (
   libraryDependencies += "org.scala-js" %% "scalajs-library" % scalajsVersion,
+  libraryDependencies += "org.scala-lang" % "scala3-library_sjs1_3" % scala3VersionValue,
   version := scalajsVersion
   ) settings(settings: _*)
 
@@ -275,13 +286,7 @@ lazy val scalatexSite =
     libraryDependencies += "org.openmole" %% "scalatex-site" % "0.4.6",
     version := "0.4.6") settings(settings: _*)
 
-lazy val boopickle = OsgiProject(dir, "boopickle", exports = Seq("boopickle.*"), imports = Seq("*")) settings(
-  libraryDependencies ++= Seq("io.suzaku" %% "boopickle" % boopickleVersion),
-  version := boopickleVersion) settings(settings: _*)
-
-lazy val autowire = OsgiProject(dir, "autowire", exports = Seq("autowire.*")) settings(
-  libraryDependencies ++= Seq("com.lihaoyi" %% "autowire" % scalaAutowireVersion),
-  version := scalaAutowireVersion) settings(settings: _*)
+//lazy val boopicklexAutowireVersion) settings(settings: _*)
 
 //lazy val jsonSimple = OsgiProject(dir, "json-simple", exports = Seq("org.json.simple.*")) settings(
 //  libraryDependencies += "com.googlecode.json-simple" % "json-simple" % jsonSimpleVersion, version := jsonSimpleVersion) settings(settings: _*)
@@ -294,6 +299,12 @@ lazy val cats =
   OsgiProject(dir, "cats") settings (
     libraryDependencies += "org.typelevel" %% "cats-core" % catsVersion,
     libraryDependencies += "org.typelevel" %% "cats-free" % catsVersion,
+    libraryDependencies += "org.typelevel" %% "cats-parse" % catsParseVersion,
+    libraryDependencies += "org.typelevel" %% "cats-effect" % catsEffectVersion,
+    libraryDependencies += "org.typelevel" %% sjs("cats-core") % catsVersion,
+    libraryDependencies += "org.typelevel" %% sjs("cats-free") % catsVersion,
+    libraryDependencies += "org.typelevel" %% sjs("cats-parse") % catsParseVersion,
+    libraryDependencies += "org.typelevel" %% sjs("cats-effect") % catsEffectVersion,
     version := catsVersion
   ) settings(settings: _*) settings(scala3Settings: _*)
 
@@ -400,7 +411,6 @@ lazy val clapper = OsgiProject(dir, "org.clapper", exports = Seq("!scala.*","!gr
 lazy val scalaz = OsgiProject(dir, "org.scalaz", exports = Seq("!scala.*","*")) settings (
   libraryDependencies += "org.scalaz" %% "scalaz-core" % scalazVersion cross CrossVersion.for3Use2_13, version := scalazVersion) settings(settings: _*)
 
-// FIXME add cats dependency after scala 3 migration
 lazy val monocle = OsgiProject(dir, "monocle",
   privatePackages = Seq("!scala.*", "!cats.*", "*"),
   imports = Seq("scala.*", "cats.*")) settings(
@@ -409,7 +419,7 @@ lazy val monocle = OsgiProject(dir, "monocle",
     //"dev.optics" %% "monocle-generic",
     "dev.optics" %% "monocle-macro"
   ).map(_ % monocleVersion cross CrossVersion.for2_13Use3),
-  version := monocleVersion) settings(settings: _*) settings(scala3Settings) //dependsOn(cats)
+  version := monocleVersion) settings(settings: _*) settings(scala3Settings) dependsOn(cats)
 
 lazy val asm = OsgiProject(dir, "org.objectweb.asm") settings (
   libraryDependencies += "org.ow2.asm" % "asm" % asmVersion,
@@ -510,3 +520,36 @@ lazy val guava = OsgiProject(dir, "com.google.guava", imports = Seq("*"), export
   libraryDependencies += "com.google.guava" % "guava" % guavaVersion,
   version := guavaVersion
 ) settings(settings: _*) settings(scala3Settings: _*)
+
+//lazy val endpoint4SAPI = OsgiProject(dir, "org.endpoints4s.api", imports = Seq("!sun.security.*", "*"), exports = Seq("endpoint4s.algebra.*", "endpoint4s.circe.*"), privatePackages = Seq("!scala.*", "endpoint4s.*")) enablePlugins(ScalaJSPlugin) settings (
+//  libraryDependencies += "org.openmole.endpoints4s" %%% "json-schema-circe" % endpoint4SCirceSchemaVersion,
+//  libraryDependencies += "org.openmole.endpoints4s" %%% "algebra" % endpoints4SVersion,
+//  version := endpoints4SVersion
+//) settings(settings: _*) settings(scala3Settings: _*) dependsOn(circe)
+
+lazy val endpoint4s = OsgiProject(dir, "org.endpoints4s", imports = Seq("!sun.security.*", "!scalajs.*", "!org.scalajs.*", "*"), exports = Seq("endpoints4s.*"), privatePackages = Seq("ujson.*", "geny.*", "upickle.*")) settings (
+  libraryDependencies += "org.openmole.endpoints4s" %% "http4s-server" % endpoint4SHttp4SVersion,
+  libraryDependencies += "com.github.jnr" % "jnr-unixsocket" % "0.38.17",
+  libraryDependencies += "org.openmole.endpoints4s" %% "http4s-server" % endpoint4SHttp4SVersion,
+
+  libraryDependencies += "org.openmole.endpoints4s" %% "json-schema-circe" % endpoint4SCirceSchemaVersion,
+  libraryDependencies += "org.openmole.endpoints4s" %% "algebra" % endpoints4SVersion,
+
+  libraryDependencies += "org.openmole.endpoints4s" %% sjs("json-schema-circe") % endpoint4SCirceSchemaVersion,
+  libraryDependencies += "org.openmole.endpoints4s" %% sjs("algebra") % endpoints4SVersion,
+  
+  libraryDependencies += "org.openmole.endpoints4s" %% sjs("xhr-client") % "5.1.0+n",
+
+  version := endpoints4SVersion
+) settings(settings: _*) settings(scala3Settings: _*) dependsOn(cats, circe, http4s)
+
+
+lazy val http4s = OsgiProject(dir, "org.http4s", imports = Seq("!sun.security.*", "!scalajs.*", "!org.scalajs.*",  "*"), exports = Seq("org.http4s.*", "fs2.*", "org.typelevel.ci.*", "org.typelevel.vault.*"), privatePackages = Seq("com.comcast.ip4s.*", "com.twitter.hpack.*", "jnr.*", "com.kenai.*", "org.log4s.*", "org.typelevel.literally.*", "scodec.*")) settings (
+  libraryDependencies += "org.http4s" %% "http4s-blaze-server" % http4sVersion,
+  libraryDependencies += "org.http4s" %% "http4s-dsl" % http4sVersion,
+  libraryDependencies += "com.github.jnr" % "jnr-unixsocket" % "0.38.17",
+  version := http4sVersion
+) settings(settings: _*) settings(scala3Settings: _*) dependsOn(cats)
+
+
+

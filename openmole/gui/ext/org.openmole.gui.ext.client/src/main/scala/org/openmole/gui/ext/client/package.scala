@@ -25,7 +25,20 @@ import org.scalajs.dom
 
 import com.raquo.laminar.api.L._
 
+import endpoints4s.xhr
+import endpoints4s.xhr.EndpointsSettings
+
 package object client {
+
+  type ClientSettings = EndpointsSettings
+  trait APIClient extends xhr.future.Endpoints with xhr.JsonEntitiesFromCodecs
+
+  class CoreAPIClientImpl(val settings: ClientSettings)
+    extends api.CoreAPI with APIClient
+
+  def coreAPIClient(endpointsSettings: ClientSettings) =
+    new CoreAPIClientImpl(endpointsSettings)
+
 
   lazy val omsheet = this
 

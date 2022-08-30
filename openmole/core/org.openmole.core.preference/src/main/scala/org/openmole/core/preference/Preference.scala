@@ -95,6 +95,13 @@ trait Preference {
     setRawPreference(location, prop)
   }
 
+  def updatePreference[T: ConfigurationString](location: PreferenceLocation[T])(value: Option[T] => Option[T])(implicit cypher: Cypher) = synchronized {
+    val v = preferenceOption(location)
+    val newValue = value(v)
+    if(!newValue.isDefined) clearPreference(location)
+    newValue
+  }
+
   def isSet[T](location: PreferenceLocation[T]) = synchronized { getRawPreference(location).isDefined }
 
   def clearPreference[T](location: PreferenceLocation[T]): Unit

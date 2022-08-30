@@ -18,12 +18,10 @@
 package org.openmole.gui.plugin.authentication.sshkey
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
 import org.openmole.gui.ext.data.{AuthenticationPlugin, AuthenticationPluginFactory}
-import org.openmole.gui.ext.client.{FileUploaderUI, OMPost, flexColumn, flexRow}
+import org.openmole.gui.ext.client.{FileUploaderUI, flexColumn, flexRow}
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
-import autowire._
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
@@ -47,7 +45,7 @@ class PrivateKeyAuthenticationFactory extends AuthenticationPluginFactory {
 
   def name = "SSH Private key"
 
-  def getData: Future[Seq[AuthType]] = OMPost()[PrivateKeyAuthenticationAPI].privateKeyAuthentications().call()
+  def getData: Future[Seq[AuthType]] = PluginFetch.future(_.privateKeyAuthentications(()).future)
 }
 
 class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = PrivateKeyAuthenticationData()) extends AuthenticationPlugin {
@@ -69,7 +67,7 @@ class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = Priva
 
   def factory = new PrivateKeyAuthenticationFactory
 
-  def remove(onremove: () ⇒ Unit) = OMPost()[PrivateKeyAuthenticationAPI].removeAuthentication(data).call().foreach { _ ⇒
+  def remove(onremove: () ⇒ Unit) = PluginFetch.future(_.removeAuthentication(data).future).foreach { _ ⇒
     onremove()
   }
 
@@ -84,21 +82,18 @@ class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = Priva
 
 
   def save(onsave: () ⇒ Unit) = {
-    OMPost()[PrivateKeyAuthenticationAPI].removeAuthentication(data).call().foreach {
+    PluginFetch.future(_.removeAuthentication(data).future).foreach {
       d ⇒
-        OMPost()[PrivateKeyAuthenticationAPI].addAuthentication(PrivateKeyAuthenticationData(
+        PluginFetch.future(_.addAuthentication(PrivateKeyAuthenticationData(
           privateKey = Some(privateKey.fileName),
           loginInput.ref.value,
           passwordInput.ref.value,
           targetInput.ref.value,
           portInput.ref.value
-        )).call().foreach {
-          b ⇒
-            onsave()
-        }
+        )).future).foreach { b ⇒ onsave() }
     }
   }
 
-  def test = OMPost()[PrivateKeyAuthenticationAPI].testAuthentication(data).call()
+  def test = PluginFetch.future(_.testAuthentication(data).future)
 
 }

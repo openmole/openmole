@@ -2,15 +2,12 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.files.{ FileNode, TreeNodePanel }
 import org.openmole.gui.ext.data._
-import autowire._
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
 import org.openmole.gui.client.core.alert.AlertPanel
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.client.OMPost
 import org.scalajs.dom
 
 import scala.util.{ Failure, Success }
@@ -46,60 +43,61 @@ object CoreUtils {
       sequence.find(cond).map { e ⇒ updatedFirst(e, s) }.getOrElse(sequence)
   }
 
-  def withTmpFile(todo: SafePath ⇒ Unit): Unit = {
-    Post()[Api].temporaryFile.call().foreach { tempFile ⇒
-      todo(tempFile)
+  def withTmpDirectory(todo: SafePath ⇒ Unit): Unit = {
+    Fetch.future(_.temporaryDirectory(()).future).foreach { tempFile ⇒
+      try todo(tempFile)
+      finally Fetch.future(_.deleteFiles(Seq(tempFile)).future)
     }
   }
 
-  def addDirectory(in: SafePath, dirName: String, onadded: () ⇒ Unit = () ⇒ {}) =
-    Post()[Api].addDirectory(in, dirName).call().foreach { b ⇒
+  def createDirectory(in: SafePath, dirName: String, onadded: () ⇒ Unit = () ⇒ {}) =
+    Fetch.future(_.createDirectory(in, dirName).future).foreach { b ⇒
       if (b) onadded()
       else panels.alertPanel.string(s"$dirName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
     }
 
-  def addFile(safePath: SafePath, fileName: String, onadded: () ⇒ Unit = () ⇒ {}) =
-    Post()[Api].addFile(safePath, fileName).call().foreach { b ⇒
+  def createFile(safePath: SafePath, fileName: String, onadded: () ⇒ Unit = () ⇒ {}) =
+    Fetch.future(_.createFile(safePath, fileName).future).foreach { b ⇒
       if (b) onadded()
       else panels.alertPanel.string(s" $fileName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
     }
 
-  def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {
-    Post()[Api].deleteFile(path, ServerFileSystemContext.project).call().foreach { d ⇒
-      panels.treeNodePanel.invalidCacheAnd(ontrashed)
-    }
-  }
+//  def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {
+//    Post()[Api].deleteFiles(Seq(path), ServerFileSystemContext.project).call().foreach { d ⇒
+//      panels.treeNodePanel.invalidCacheAnd(ontrashed)
+//    }
+//  }
 
   def trashNodes(paths: Seq[SafePath])(ontrashed: () ⇒ Unit): Unit = {
-    Post()[Api].deleteFiles(paths, ServerFileSystemContext.project).call().foreach { d ⇒
+    Fetch.future(_.deleteFiles(paths).future).foreach { d ⇒
       panels.treeNodePanel.invalidCacheAnd(ontrashed)
     }
   }
 
   def duplicate(safePath: SafePath, newName: String): Unit =
-    Post()[Api].duplicate(safePath, newName).call().foreach { y ⇒
+    Fetch.future(_.duplicate(safePath, newName).future).foreach { y ⇒
       panels.treeNodeManager.invalidCurrentCache
     }
 
-  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Seq[SafePath]] =
-    Post()[Api].testExistenceAndCopyProjectFilesTo(safePaths, to).call()
+//  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Seq[SafePath]] =
+//    Post()[Api].testExistenceAndCopyProjectFilesTo(safePaths, to).call()
 
-  def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Unit] =
-    Post()[Api].copyProjectFilesTo(safePaths, to).call()
+  def copyProjectFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean): Future[Seq[SafePath]] =
+    Fetch.future(_.copyProjectFiles(safePaths, to, overwrite).future)
 
-  def listFiles(safePath: SafePath, fileFilter: FileFilter): Future[ListFilesData] = {
-    Post()[Api].listFiles(safePath, fileFilter).call()
+  def listFiles(safePath: SafePath, fileFilter: FileFilter = FileFilter()): Future[ListFilesData] = {
+    Fetch.future(_.listFiles(safePath, fileFilter).future)
   }
   
- def findFilesContaining(safePath: SafePath, findString: String): Future[Seq[(SafePath, Boolean)]] = {
-    Post()[Api].recursiveListFiles(safePath, findString).call()
+ def findFilesContaining(safePath: SafePath, findString: Option[String]): Future[Seq[(SafePath, Boolean)]] = {
+    Fetch.future(_.listRecursive(safePath, findString).future)
   }
  
   def appendToPluggedIfPlugin(safePath: SafePath) = {
-    Post()[Api].appendToPluggedIfPlugin(safePath).call().foreach { _ ⇒
-      panels.treeNodeManager.invalidCurrentCache
-      panels.pluginPanel.getPlugins
-    }
+//    Post()[Api].appendToPluggedIfPlugin(safePath).call().foreach { _ ⇒
+//      panels.treeNodeManager.invalidCurrentCache
+//      panels.pluginPanel.getPlugins
+//    }
   }
 
   def addJSScript(relativeJSPath: String) = {

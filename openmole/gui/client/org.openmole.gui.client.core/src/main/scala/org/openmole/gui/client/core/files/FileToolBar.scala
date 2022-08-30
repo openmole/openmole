@@ -8,11 +8,9 @@ import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.client.core.CoreUtils
-import autowire._
 import org.openmole.gui.ext.client._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
 import com.raquo.laminar.nodes.ReactiveHtmlElement
 import org.scalajs.dom.raw.{HTMLButtonElement, HTMLElement, HTMLInputElement, HTMLSpanElement}
 import org.openmole.gui.client.core.Waiter._

@@ -59,7 +59,7 @@ import scala.collection.JavaConverters._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class ApiImpl(services: Services, applicationControl: ApplicationControl) extends Api {
+class ApiImpl(val services: Services, applicationControl: Option[ApplicationControl]) extends Api {
 
   import ExecutionInfo._
 
@@ -73,7 +73,7 @@ class ApiImpl(services: Services, applicationControl: ApplicationControl) extend
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
     OMSettings(
-      utils.projectsDirectory().toSafePath,
+      utils.projectsDirectory.toSafePath,
       buildinfo.version.value,
       buildinfo.name,
       new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(buildinfo.BuildInfo.buildTime),
@@ -81,13 +81,12 @@ class ApiImpl(services: Services, applicationControl: ApplicationControl) extend
     )
   }
 
-  def shutdown = applicationControl.stop()
+  def shutdown() = applicationControl.foreach(_.stop())
+  def restart() = applicationControl.foreach(_.restart())
 
-  def restart = applicationControl.restart()
+  def isAlive() = true
 
-  def isAlive = true
-
-  def jvmInfos = {
+  def jvmInfos() = {
     val runtime = Runtime.getRuntime
     val totalMemory = runtime.totalMemory
     val allocatedMemory = totalMemory - runtime.freeMemory
@@ -120,27 +119,27 @@ class ApiImpl(services: Services, applicationControl: ApplicationControl) extend
   }
 
   // FILES
-  def addDirectory(safePath: SafePath, directoryName: String): Boolean = {
+  def createDirectory(safePath: SafePath, directoryName: String): Boolean = {
     import services._
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     new File(safePath.toFile, directoryName).mkdirs
   }
 
-  def addFile(safePath: SafePath, fileName: String): Boolean = {
+  def createFile(safePath: SafePath, fileName: String): Boolean = {
     import services._
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     new File(safePath.toFile, fileName).createNewFile
   }
 
-  def deleteFile(safePath: SafePath, context: ServerFileSystemContext): Unit = {
-    unplug(safePath)
-    import services._
-    utils.deleteFile(safePath, context)
-  }
+//  def deleteFile(safePath: SafePath, context: ServerFileSystemContext): Unit = {
+//    unplug(safePath)
+//    import services._
+//    utils.deleteFile(safePath, context)
+//  }
 
-  def deleteFiles(safePaths: Seq[SafePath], context: ServerFileSystemContext): Unit = {
+  def deleteFiles(safePaths: Seq[SafePath]): Unit = {
     import services._
-    utils.deleteFiles(safePaths, context)
+    utils.deleteFiles(safePaths)
   }
 
   private def getExtractedArchiveTo(from: File, to: File)(implicit context: ServerFileSystemContext): Seq[SafePath] = {
@@ -149,9 +148,9 @@ class ApiImpl(services: Services, applicationControl: ApplicationControl) extend
     to.listFilesSafe.map(utils.fileToSafePath).toSeq
   }
 
-  def unknownFormat(name: String) = ExtractResult(Some(ErrorData("Unknown compression format for " + name)))
+  def unknownFormat(name: String) = Some(ErrorData("Unknown compression format for " + name))
 
-  private def extractArchiveFromFiles(from: File, to: File)(implicit context: ServerFileSystemContext): ExtractResult = {
+  private def extractArchiveFromFiles(from: File, to: File)(implicit context: ServerFileSystemContext) = {
     Try {
       val ext = FileExtension(from.getName)
       ext match {
@@ -168,12 +167,12 @@ class ApiImpl(services: Services, applicationControl: ApplicationControl) extend
         case _ ⇒ throw new Throwable("Unknown compression format for " + from.getName)
       }
     } match {
-      case Success(_) ⇒ ExtractResult.ok
-      case Failure(t) ⇒ ExtractResult(Some(ErrorData(t)))
+      case Success(_) ⇒ None
+      case Failure(t) ⇒ Some(ErrorData(t))
     }
   }
 
-  def extractTGZ(safePath: SafePath): ExtractResult = {
+  def extractTGZ(safePath: SafePath) = {
     import services._
     FileExtension(safePath.name) match {
       case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP | FileExtension.TXZ ⇒
@@ -184,7 +183,7 @@ class ApiImpl(services: Services, applicationControl: ApplicationControl) extend
     }
   }
 
-  def temporaryFile(): SafePath = {
+  def temporaryDirectory(): SafePath = {
     import services._
     import org.openmole.gui.ext.data.ServerFileSystemContext.absolute
     val dir = services.tmpDirectory.newDir("openmoleGUI")
@@ -214,18 +213,18 @@ class ApiImpl(services: Services, applicationControl: ApplicationControl) extend
 
   def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit = {
     import services._
-    utils.copyAllTmpTo(tmpSafePath, to)
+    utils.copyAllFromTmp(tmpSafePath, to)
   }
 
-  def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath) = {
+  def copyProjectFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean) = {
     import services._
-    utils.copyProjectFilesTo(safePaths, to)
+    utils.copyProjectFilesTo(safePaths, to, overwrite)
   }
 
-  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath] = {
-    import services._
-    utils.testExistenceAndCopyProjectFilesTo(safePaths, to)
-  }
+//  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath] = {
+//    import services._
+//    utils.testExistenceAndCopyProjectFilesTo(safePaths, to)
+//  }
 
   // Test whether safePathToTest exists in "in"
   def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath] = {
@@ -268,12 +267,12 @@ class ApiImpl(services: Services, applicationControl: ApplicationControl) extend
     }
   }
 
-  def listFiles(sp: SafePath, fileFilter: data.FileFilter): ListFilesData = atomic { implicit ctx ⇒
+  def listFiles(sp: SafePath, fileFilter: data.FileFilter = data.FileFilter()): ListFilesData = {
     import services._
     utils.listFiles(sp, fileFilter, listPlugins().toSeq)(org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace)
   }
 
-   def recursiveListFiles(sp: SafePath, findString: String): Seq[(SafePath, Boolean)] = atomic { implicit ctx ⇒
+   def recursiveListFiles(sp: SafePath, findString: Option[String]): Seq[(SafePath, Boolean)] = {
     import services._
     utils.recursiveListFiles(sp, findString)(org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace)
   }
@@ -358,7 +357,7 @@ class ApiImpl(services: Services, applicationControl: ApplicationControl) extend
     content.headOption.map { h ⇒
       SequenceData(
         h.split(',').toSeq,
-        content.tail.map { row ⇒ regex.findAllIn(row).toArray }.toSeq
+        content.tail.map { row ⇒ regex.findAllIn(row).toSeq }.toSeq
       )
     }.getOrElse(SequenceData())
   }
@@ -630,8 +629,8 @@ class ApiImpl(services: Services, applicationControl: ApplicationControl) extend
   }
 
   //GUI OM PLUGINS
-  def getGUIPlugins(): AllPluginExtensionData = {
-    AllPluginExtensionData(GUIPluginRegistry.authentications, GUIPluginRegistry.wizards)
+  def getGUIPlugins(): PluginExtensionData = {
+    PluginExtensionData(GUIPluginRegistry.authentications, GUIPluginRegistry.wizards)
   }
 
   def isOSGI(safePath: SafePath): Boolean = {
@@ -672,7 +671,7 @@ class ApiImpl(services: Services, applicationControl: ApplicationControl) extend
     )
   }
 
-  def downloadHTTP(url: String, path: SafePath, extract: Boolean): Either[Unit, ErrorData] = {
+  def downloadHTTP(url: String, path: SafePath, extract: Boolean): Option[ErrorData] = {
     import services._
     import org.openmole.tool.stream._
 
@@ -715,16 +714,19 @@ class ApiImpl(services: Services, applicationControl: ApplicationControl) extend
       }
 
     result match {
-      case Success(value) ⇒ Left(value)
-      case Failure(e)     ⇒ Right(ErrorData(e))
+      case Success(value) ⇒ None
+      case Failure(e)     ⇒ Some(ErrorData(e))
     }
   }
 
   // Method plugins
-  override def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS] = {
+  def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS] = {
     import services._
     val omrFile = safePathToFile(result)(ServerFileSystemContext.project, workspace)
     val data = OMROutputFormat.omrData(omrFile)
     GUIPluginRegistry.analysis.find(_._1 == data.method).map(_._2)
   }
+
+  def pluginRoutes =
+    GUIPluginRegistry.all.flatMap(_.router).map(p => p(services))
 }

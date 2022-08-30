@@ -5,8 +5,6 @@ import org.scalajs.dom.raw.MouseEvent
 import scaladget.bootstrapnative.bsn._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-import autowire._
 import org.openmole.gui.ext.api.Api
 import com.raquo.laminar.api.L._
 import scaladget.bootstrapnative.bsn
@@ -35,7 +33,7 @@ class PluginPanel {
   getPlugins
 
   def getPlugins = {
-    Post()[Api].listPlugins.call().foreach { p ⇒
+    Fetch(_.listPlugins(()).future) { p ⇒
       plugins.set(p.toSeq)
     }
   }

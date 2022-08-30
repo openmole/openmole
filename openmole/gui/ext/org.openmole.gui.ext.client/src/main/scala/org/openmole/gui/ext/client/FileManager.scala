@@ -2,9 +2,7 @@ package org.openmole.gui.ext.client
 
 import org.openmole.gui.ext.data._
 import org.scalajs.dom.raw._
-import autowire._
 import org.openmole.gui.ext.api.Api
-import boopickle.Default._
 import com.raquo.laminar.api.L._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -85,7 +83,7 @@ object FileManager {
     hash:              Boolean                         = false,
   ) = {
 
-    OMPost()[Api].size(safePath).call().foreach { size ⇒
+    OMFetch(coreAPIClient).future(_.size(safePath).future).foreach { size ⇒
       val xhr = new XMLHttpRequest
 
       xhr.onprogress = (e: ProgressEvent) ⇒ {

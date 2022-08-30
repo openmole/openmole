@@ -1,19 +1,24 @@
 package org.openmole.gui.plugin.authentication.sshlogin
 
-import org.openmole.gui.ext.data._
+import org.openmole.gui.ext.data.*
+import org.openmole.gui.ext.api.*
 
-trait LoginAuthenticationAPI {
-  //  def authentications(): Seq[AuthenticationData]
-  def loginAuthentications(): Seq[LoginAuthenticationData]
+trait LoginAuthenticationAPI extends RESTAPI {
 
-  def addAuthentication(data: LoginAuthenticationData): Unit
+  //def loginAuthentications(): Seq[LoginAuthenticationData]
+  val loginAuthentications: Endpoint[Unit, Seq[LoginAuthenticationData]] =
+    endpoint(get(path / "ssh" / "login-authentications"), ok(jsonResponse[Seq[LoginAuthenticationData]]))
 
-  def removeAuthentication(data: LoginAuthenticationData): Unit
+  //def addAuthentication(data: LoginAuthenticationData): Unit
+  val addAuthentication: Endpoint[LoginAuthenticationData, Unit] =
+    endpoint(post(path / "ssh" / "add-login-authentication", jsonRequest[LoginAuthenticationData]), ok(jsonResponse[Unit]))
 
-  def testAuthentication(data: LoginAuthenticationData): Seq[Test]
-  /*def deleteAuthenticationKey(keyName: String): Unit
+  //def removeAuthentication(data: LoginAuthenticationData): Unit
+  val removeAuthentication: Endpoint[LoginAuthenticationData, Unit] =
+    endpoint(post(path / "ssh" / "remove-login-authentication", jsonRequest[LoginAuthenticationData]), ok(jsonResponse[Unit]))
 
-  def renameKey(keyName: String, newName: String): Unit
+  //def testAuthentication(data: LoginAuthenticationData): Seq[Test]
+  val testAuthentication: Endpoint[LoginAuthenticationData, Seq[Test]] =
+    endpoint(post(path / "ssh" / "test-login-authentication", jsonRequest[LoginAuthenticationData]), ok(jsonResponse[Seq[Test]]))
 
-  def testAuthentication(data: AuthenticationData, vos: Seq[String] = Seq()): Seq[AuthenticationTest]*/
 }

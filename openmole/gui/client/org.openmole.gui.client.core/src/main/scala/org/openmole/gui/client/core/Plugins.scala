@@ -2,11 +2,9 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.ext.data.GUIPluginAsJS
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.data.{ AllPluginExtensionData, AuthenticationPluginFactory, GUIPluginFactory, WizardPluginFactory }
-import autowire._
+import org.openmole.gui.ext.data.{ PluginExtensionData, AuthenticationPluginFactory, GUIPluginFactory, WizardPluginFactory }
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExportTopLevel
@@ -30,7 +28,7 @@ import scala.scalajs.js.annotation.JSExportTopLevel
 object Plugins {
 
   def fetch(f: Parameters ⇒ Unit) = {
-    Post()[Api].getGUIPlugins.call().foreach { p ⇒
+    Fetch(_.guiPlugins(()).future) { p ⇒
       val authFact = p.authentications.map { gp ⇒ Plugins.buildJSObject[AuthenticationPluginFactory](gp) }
       val wizardFactories = p.wizards.map { gp ⇒ Plugins.buildJSObject[WizardPluginFactory](gp) }
       f(Parameters(authFact, wizardFactories))
@@ -38,7 +36,7 @@ object Plugins {
   }
 
   def buildJSObject[T](obj: GUIPluginAsJS) = {
-    val toBeEval = s"openmole_library.${obj.jsObject.split('.').takeRight(2).head}"
+    val toBeEval = s"openmole_library.${obj.split('.').takeRight(2).head}"
     scalajs.js.eval(toBeEval).asInstanceOf[T]
   }
 

@@ -20,14 +20,13 @@ package org.openmole.gui.plugin.wizard.r
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
 import org.openmole.gui.ext.server._
 
 class Activator extends BundleActivator {
 
   def info = GUIPluginInfo(
     wizard = Some(classOf[RWizardFactory]),
-    router = Some(s ⇒ OMRouter[RWizardAPI](AutowireServer.route[RWizardAPI](new RWizardApiImpl(s))))
+    router = Some(s ⇒ OMRouter(new RWizardServer(s).routes))
   )
 
   override def start(context: BundleContext): Unit = GUIPluginRegistry.register(this, info)

@@ -3,8 +3,6 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.ext.data._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-import autowire._
 import org.openmole.gui.ext.client.Utils._
 import scaladget.bootstrapnative.bsn._
 import org.openmole.gui.ext.api.Api
@@ -29,7 +27,6 @@ object TreeNodeTabs {
   object Active extends Activity
 
   object UnActive extends Activity
-
 }
 
 import TreeNodeTabs._
@@ -76,10 +73,10 @@ sealed trait TreeNodeTab {
   def resizeEditor: Unit
 
   // controller to be added in menu bar
-  val controlElement: HtmlElement
+  lazy val controlElement: HtmlElement
 
   // Graphical representation
-  val block: HtmlElement
+  lazy val block: HtmlElement
 }
 
 object TreeNodeTab {
@@ -267,7 +264,7 @@ object TreeNodeTab {
         (cont: String, hash) ⇒ {
           editorValue.setCode(cont, hash.get)
           if (isCSV) {
-            Post()[Api].sequence(safePath).call().foreach {
+            Fetch.future(_.sequence(safePath).future).foreach {
               seq ⇒ //switchView(seq)
             }
           }
@@ -404,13 +401,11 @@ object TreeNodeTab {
     lazy val axisCheckBoxes = {
       val (newPlotter, newSequenceData) = plotterAndSeqencedata(dataTab, plotter)
 
-      val arrayColIndexes = newSequenceData.content.headOption.map {
-        Tools.dataArrayIndexes
-      }.getOrElse(Array()).toSeq
+      val arrayColIndexes = newSequenceData.content.headOption.map { s => Tools.dataArrayIndexes(s.toArray).toSeq }.getOrElse(Seq())
 
       val ind = plotter.plotMode match {
         case XYMode ⇒ arrayColIndexes
-        case _ ⇒ (0 to dataNbColumns - 1).toArray.filterNot(arrayColIndexes.contains).toSeq
+        case _ ⇒ (0 to dataNbColumns - 1).filterNot(arrayColIndexes.contains)
       }
 
       val axisToggleStates = {
@@ -449,7 +444,7 @@ object TreeNodeTab {
         btn_secondary,
         (indexedAxis: IndexedAxis) ⇒ indexedAxis.title,
         () ⇒ {
-          if (errorOptions.content.now.map {
+          if (errorOptions.content.now().map {
             _.fullSequenceIndex
           }.getOrElse(-1) != -1) ??? //toView(errorOptions.content.now)
           else ??? //toView(None)
@@ -469,10 +464,10 @@ object TreeNodeTab {
         btn_secondary,
         (indexedAxis: IndexedAxis) ⇒ indexedAxis.title,
         () ⇒ {
-          if (filterAxisOptions.content.now.map {
+          if (filterAxisOptions.content.now().map {
             _.fullSequenceIndex
           }.getOrElse(-1) != -1) {
-            toClosureView(Some(ClosureFilter(closure = closureInput.ref.value, filteredAxis = filterAxisOptions.content.now)))
+            toClosureView(Some(ClosureFilter(closure = closureInput.ref.value, filteredAxis = filterAxisOptions.content.now())))
           }
           else toClosureView(None)
         }
@@ -569,12 +564,14 @@ object TreeNodeTab {
               case Plot ⇒
                 div(
                   vForm(
-                    div(switchButton, filterRadios, plotModeRadios, plotModeInfo),
-                    plotter.plotDimension match {
-                      case LinePlot ⇒ div()
-                      case _ ⇒ span(axisCheckBoxes).withLabel("x|y axis")
-                    },
-                    options
+                    Seq[FormTag](
+                      div(switchButton, filterRadios, plotModeRadios, plotModeInfo),
+                      plotter.plotDimension match {
+                        case LinePlot ⇒ div()
+                        case _ ⇒ span(axisCheckBoxes).withLabel("x|y axis")
+                      },
+                      options
+                    )*
                   )
                 )
               case _ ⇒ div(switchButton)
@@ -618,7 +615,7 @@ object TreeNodeTab {
   def save(safePath: SafePath, editorPanelUI: EditorPanelUI, overwrite: Boolean = false): Unit =
     editorPanelUI.synchronized {
       val (content, hash) = editorPanelUI.code
-      Post()[Api].saveFile(safePath, content, Some(hash), overwrite).call().foreach {
+      Fetch.future(_.saveFile(safePath, content, Some(hash), overwrite).future).foreach {
         case (saved, savedHash) ⇒
           if (saved) editorPanelUI.onSaved(savedHash)
           else serverConflictAlert(TabData(safePath, Some(editorPanelUI)))
@@ -701,7 +698,7 @@ class TreeNodeTabs {
 
   val tabsObserver = Observer[Seq[Tab[TreeNodeTab]]] { tNodeTabs =>
     if (tNodeTabs.isEmpty) {
-      timer.now.foreach { handle =>
+      timer.now().foreach { handle =>
         clearInterval(handle)
       }
       timer.set(None)
@@ -714,7 +711,7 @@ class TreeNodeTabs {
         //        tabsElement.tabs.now.foreach {
         //          _.t.saveContent()
         //        }
-        TabContent.tabsUI.tabs.now.foreach { t =>
+        TabContent.tabsUI.tabs.now().foreach { t =>
           t.t.editorPanelUI.foreach(epUI=> save(t.t.safePath, epUI))
         }
       }))
@@ -801,7 +798,7 @@ class TreeNodeTabs {
   //  }
 
   def find(safePath: SafePath) = {
-    tabsElement.tabs.now.find { tab => tab.t.safePath == safePath }
+    tabsElement.tabs.now().find { tab => tab.t.safePath == safePath }
   }
 
   def indexOf(safePath: SafePath) = {

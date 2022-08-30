@@ -24,8 +24,6 @@ import org.openmole.gui.ext.client._
 
 import scala.scalajs.js.timers._
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-import autowire._
 import org.openmole.gui.ext.data.{ ErrorData ⇒ ExecError }
 import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.alert.{ BannerAlert, BannerLevel }

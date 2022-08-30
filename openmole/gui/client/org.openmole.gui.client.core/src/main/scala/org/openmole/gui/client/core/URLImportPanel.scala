@@ -5,14 +5,12 @@ import AbsolutePositioning.CenterPagePosition
 import org.openmole.gui.ext.client._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
 import org.openmole.gui.client.core.files.{ TreeNodeManager, TreeNodePanel }
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.openmole.gui.client.core.CoreUtils._
 import org.openmole.gui.ext.data._
 import Waiter._
-import autowire._
 import org.openmole.core.market.MarketIndexEntry
 import org.openmole.gui.ext.api.Api
 import com.raquo.laminar.api.L._
@@ -32,25 +30,25 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
   val overwriteAlert: Var[Option[SafePath]] = Var(None)
 
   def exists(sp: SafePath, ifNotExists: () ⇒ {}) =
-    Post()[Api].exists(sp).call().foreach { b ⇒
+    Fetch.future(_.exists(sp).future).foreach { b ⇒
       if (b) overwriteAlert.set(Some(sp))
       else ifNotExists()
     }
 
   def download(url: String) = {
     downloading.set(Processing())
-    Post()[Api].downloadHTTP(url, manager.dirNodeLine.now, extractCheckBox.ref.checked).call().foreach { d ⇒
+    Fetch.future(_.downloadHTTP(url, manager.dirNodeLine.now(), extractCheckBox.ref.checked).future).foreach { d ⇒
       downloading.set(Processed())
       urlDialog.hide
       d match {
-        case Left(_)   ⇒ panels.treeNodeManager.invalidCurrentCache
-        case Right(ex) ⇒ bannerAlert.registerWithDetails("Download failed", ErrorData.stackTrace(ex))
+        case None   ⇒ panels.treeNodeManager.invalidCurrentCache
+        case Some(ex) ⇒ bannerAlert.registerWithDetails("Download failed", ErrorData.stackTrace(ex))
       }
     }
   }
 
   def deleteFileAndDownloadURL(sp: SafePath, url: String) =
-    Post()[Api].deleteFile(sp, ServerFileSystemContext.project).call().foreach { d ⇒
+    Fetch.future(_.deleteFiles(Seq(sp)).future).foreach { d ⇒
       download(url)
     }
 
@@ -74,7 +72,7 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
           sp.name + " already exists. Overwrite ? ",
           () ⇒ {
             overwriteAlert.set(None)
-            deleteFileAndDownloadURL(manager.dirNodeLine.now, urlInput.ref.value)
+            deleteFileAndDownloadURL(manager.dirNodeLine.now(), urlInput.ref.value)
           }, () ⇒ {
             overwriteAlert.set(None)
           }, CenterPagePosition

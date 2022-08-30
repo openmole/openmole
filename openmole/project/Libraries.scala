@@ -16,17 +16,34 @@ object Libraries {
   lazy val scaladgetTools = libraryDependencies += "org.openmole.scaladget" %%% "tools" % scaladgetVersion
   lazy val scalajsDomJS = libraryDependencies += "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion
   lazy val laminarJS = libraryDependencies += "com.raquo" %%% "laminar" % laminarVersion
-  lazy val autowireJS = libraryDependencies += "com.lihaoyi" %%% "autowire" % scalaAutowireVersion
-  lazy val boopickleJS = libraryDependencies += "io.suzaku" %%% "boopickle" % boopickleVersion
+//  lazy val autowireJS = libraryDependencies += "com.lihaoyi" %%% "autowire" % scalaAutowireVersion
+//  lazy val boopickleJS = libraryDependencies += "io.suzaku" %%% "boopickle" % boopickleVersion
   lazy val sourcecodeJS = libraryDependencies += "com.lihaoyi" %%% "sourcecode" % sourcecodeVersion
   lazy val highlightJS = libraryDependencies += "org.openmole.scaladget" %%% "highlightjs" % scaladgetVersion
   lazy val htmlparser2 = libraryDependencies += "com.definitelyscala" %%% "scala-js-htmlparser2" % "1.0.2"
   lazy val plotlyJS =  libraryDependencies += "org.openmole" %%% "scala-js-plotlyjs" % "1.6.0"
-  lazy val scalaCompatJS =  libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.6"
 
+  //lazy val scalaCompatJS =  libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.6"
+
+//  lazy val endpoints4SJS =
+//    libraryDependencies ++= Seq(
+//      "org.openmole.endpoints4s" %%% "algebra" % endpoints4SVersion,
+//      "org.openmole.endpoints4s" %%% "json-schema-circe" % endpoint4SCirceSchemaVersion) ++
+//      Seq(
+//        "io.circe" %%% "circe-core",
+//        "io.circe" %%% "circe-generic",
+//        "io.circe" %%% "circe-parser").map(_ % circeVersion)
+
+//  lazy val catsJS = libraryDependencies ++= Seq(
+//    "org.typelevel" %%% "cats-core" % catsVersion,
+//    "org.typelevel" %%% "cats-free" % catsVersion,
+//    "org.typelevel" %%% "cats-effect" % catsEffectVersion,
+//    "org.typelevel" %%% "cats-parse" % catsParseVersion)
+
+//  lazy val endpoints4SXhrClient =
+//    libraryDependencies += "org.openmole.endpoints4s" %%% "xhr-client" % "5.1.0+n"
 
   lazy val scalatest = "org.scalatest" %% "scalatest" % "3.2.9" % "test"
-
 
   /** ------- Bundles -------------- */
 
@@ -60,11 +77,11 @@ object Libraries {
   lazy val lang3 = "org.openmole.library" %% "org-apache-commons-lang3" % "3.9"
   lazy val ant = "org.openmole.library" %% "org-apache-ant" % "1.10.7"
   lazy val codec = "org.openmole.library" %% "org-apache-commons-codec" % "1.14"
-  lazy val async = "org.openmole.library" %% "scala-async" % "0.10.0"
+  lazy val async = "org.openmole.library" %% "scala-async" % "0.10.0" cross CrossVersion.for3Use2_13
   lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % "5.6.0"
   lazy val cats = "org.openmole.library" %% "cats" % catsVersion
   lazy val squants = "org.openmole.library" %% "squants" % squantsVersion
-  lazy val clapper = "org.openmole.library" %% "org-clapper" % "1.5.1"
+  lazy val clapper = "org.openmole.library" %% "org-clapper" % "1.5.1" cross CrossVersion.for3Use2_13
   lazy val asm = "org.openmole.library" %% "org-objectweb-asm" % asmVersion
   lazy val configuration = "org.openmole.library" %% "org-apache-commons-configuration2" % "2.6"
   lazy val json4s = "org.openmole.library" %% "org-json4s" % json4sVersion cross CrossVersion.for2_13Use3
@@ -72,13 +89,13 @@ object Libraries {
   lazy val scalajsLinker = "org.openmole.library" %% "scalajs-linker" % scalajsVersion
   lazy val scalajsLogging = "org.openmole.library" %% "scalajs-logging" % scalajsLoggingVersion
   lazy val scalaCompat = "org.openmole.library" %% "scala-collection-compat" % "2.1.4"
-  lazy val scalajs = "org.openmole.library" %% "scalajs" % scalajsVersion
+  lazy val scalajs = "org.openmole.library" %% "scalajs" % scalajsVersion cross CrossVersion.for3Use2_13
   lazy val mgo = "org.openmole.library" %% "mgo" % mgoVersion
   lazy val monocle = Seq("org.openmole.library" %% "monocle" % monocleVersion, scalaz)
   lazy val container = "org.openmole.library" %% "container" % containerVersion
-  lazy val boopickle = "org.openmole.library" %% "boopickle" % boopickleVersion
-  lazy val autowire = "org.openmole.library" %% "autowire" % scalaAutowireVersion
-  lazy val scalaTags = "org.openmole.library" %% "com-scalatags" % scalaTagsVersion
+//  lazy val boopickle = "org.openmole.library" %% "boopickle" % boopickleVersion
+//  lazy val autowire = "org.openmole.library" %% "autowire" % scalaAutowireVersion
+  lazy val scalaTags = "org.openmole.library" %% "com-scalatags" % scalaTagsVersion cross CrossVersion.for3Use2_13
   lazy val netlogo5 = "org.openmole.library" % "ccl-northwestern-edu-netlogo5" % netLogo5Version
   lazy val netlogo6 = "org.openmole.library" % "ccl-northwestern-edu-netlogo6" % netLogo6Version 
   lazy val sourceCode = "org.openmole.library" %% "sourcecode" % sourcecodeVersion
@@ -127,4 +144,7 @@ object Libraries {
 
   lazy val shapeless = "org.openmole.library" %% "org-typelevel-shapeless" % shapelessVersion
 
+  lazy val endpoints4s = "org.openmole.library" %% "org-endpoints4s" % endpoints4SVersion //cross CrossVersion.for2_13Use3
+  lazy val http4s = "org.openmole.library" %% "org-http4s" % http4sVersion
+  //lazy val endpoint4SJsonSchemaGeneric = "org.openmole.library" %% "org-endpoints4s-json-schema-generic" % endpoints4SVersion //cross CrossVersion.for3Use2_13
 }

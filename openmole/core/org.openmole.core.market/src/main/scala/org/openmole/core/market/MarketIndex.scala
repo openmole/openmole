@@ -25,7 +25,7 @@ object MarketIndex {
   val marketIndexLocation = PreferenceLocation("Market", "Index", Some(buildinfo.marketAddress))
 }
 
-case class MarketIndexEntry(name: String, archive: String, readme: Option[String], tags: Seq[String]) {
+case class MarketIndexEntry(name: String, archive: String, readme: Option[String], tags: List[String]) {
   def url: String = org.openmole.core.buildinfo.marketURL(archive)
 }
-case class MarketIndex(entries: Seq[MarketIndexEntry])
+case class MarketIndex(entries: List[MarketIndexEntry])

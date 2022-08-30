@@ -3,8 +3,6 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.ext.data._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-import autowire._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.client.core._
 import org.openmole.gui.client.core.files.TabContent.TabData
@@ -33,7 +31,6 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs) {
 
 
   def display(safePath: SafePath, content: String, hash: String, fileExtension: FileExtension, pluginServices: PluginServices) = {
-    println("EXTENSION " + fileExtension)
     TabContent.alreadyDisplayed(safePath) match {
       case Some(tabID: bsn.TabID) ⇒ TabContent.tabsUI.setActive(tabID)
       case _ ⇒
@@ -43,19 +40,20 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs) {
           case FileExtension.CSV | FileExtension.OMR=> ResultContent.addTab(safePath, content, hash)
           case _: EditableFile=> AnyTextContent.addTab(safePath, content, hash)
           case MDScript ⇒
-            Post()[Api].mdToHtml(safePath).call().foreach { htmlString ⇒
+            Fetch.future(_.mdToHtml(safePath).future).foreach { htmlString ⇒
               val htmlDiv = com.raquo.laminar.api.L.div()
               htmlDiv.ref.innerHTML = htmlString
               HTMLContent.addTab(safePath, htmlDiv)
             }
           case OpenMOLEResult ⇒
-            Post()[Api].findAnalysisPlugin(safePath).call.foreach {
-              case Some(plugin) ⇒
-                val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
-                val tab = TreeNodeTab.HTML(safePath, analysis.panel(safePath, pluginServices))
-                treeNodeTabs add tab
-              case None ⇒
-            }
+            // TODO implement
+//            Post()[Api].findAnalysisPlugin(safePath).call.foreach {
+//              case Some(plugin) ⇒
+//                val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
+//                val tab = TreeNodeTab.HTML(safePath, analysis.panel(safePath, pluginServices))
+//                treeNodeTabs add tab
+//              case None ⇒
+//            }
           case SVGExtension ⇒ treeNodeTabs add TreeNodeTab.HTML(safePath, TreeNodeTab.rawBlock(content))
 //          case editableFile: EditableFile ⇒
 //            if (DataUtils.isCSV(safePath))

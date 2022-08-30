@@ -22,11 +22,9 @@ import org.openmole.gui.client.core.files._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.FileType._
 import org.openmole.gui.client.core.panels._
-import autowire._
 import org.scalajs.dom.html.TextArea
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
 import org.scalajs.dom.raw.{HTMLDivElement, HTMLElement, HTMLInputElement}
 import org.openmole.gui.ext.client._
 import com.raquo.laminar.api.L._
@@ -169,7 +167,7 @@ object ModelWizardPanel {
     }
 
     def moveFilesAndBuildForm(fInput: Input, fileName: String, uploadPath: SafePath) =
-      CoreUtils.withTmpFile {
+      CoreUtils.withTmpDirectory {
         tempFile ⇒
           FileManager.upload(
             fInput,
@@ -179,7 +177,7 @@ object ModelWizardPanel {
             },
             UploadAbsolute(),
             () ⇒ {
-              Post()[Api].extractAndTestExistence(tempFile ++ fileName, uploadPath.parent).call().foreach {
+              Fetch.future(_.extractTestExist(tempFile ++ fileName, uploadPath.parent).future).foreach {
                 existing ⇒
                   val fileType: FileType = uploadPath
                   val targetPath = fileType match {
@@ -189,10 +187,10 @@ object ModelWizardPanel {
 
                   // Move files from tmp to target path
                   //if (existing.isEmpty) {
-                  Post()[Api].copyAllTmpTo(tempFile, targetPath).call().foreach {
+                  Fetch.future(_.copyAllFromTmp(tempFile, targetPath).future).foreach {
                     b ⇒
                       fileToUploadPath.set(Some(uploadPath))
-                      Post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
+                      //Post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
                       factory(uploadPath).foreach { f =>
                         f.parse(uploadPath).foreach { mmd =>
                           modelMetadata.set(mmd)
@@ -227,8 +225,8 @@ object ModelWizardPanel {
                   fileToUploadPath.set(None)
                   val fileName = fInput.ref.files.item(0).name
                   labelName.set(Some(fileName))
-                  filePath.set(Some(treeNodeManager.dirNodeLine.now ++ fileName))
-                  filePath.now.map {
+                  filePath.set(Some(treeNodeManager.dirNodeLine.now() ++ fileName))
+                  filePath.now().map {
                     fp ⇒
                       moveFilesAndBuildForm(fInput, fileName, fp)
                   }
@@ -361,8 +359,8 @@ object ModelWizardPanel {
         modelMetadata.now().foreach { mmd =>
           println("in build " + mmd.sourcesDirectory)
           val modifiedMMD = mmd.copy(
-            inputs = inputTags.tags.now.map { t => inferProtoTyePair(t.ref.innerText) },
-            outputs = outputTags.tags.now.map { t => inferProtoTyePair(t.ref.innerText) },
+            inputs = inputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
+            outputs = outputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
             command = commandeInput.ref.value
           )
           f.toTask(safePath.parent, modifiedMMD)

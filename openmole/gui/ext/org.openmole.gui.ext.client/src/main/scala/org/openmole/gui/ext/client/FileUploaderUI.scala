@@ -23,8 +23,6 @@ import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
 import org.scalajs.dom.raw.HTMLInputElement
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-import autowire._
 import com.raquo.laminar.api.L._
 
 object FileUploaderUI {
@@ -51,9 +49,8 @@ case class FileUploaderUI(
           if (fInput.ref.files.length > 0) {
             val leaf = fInput.ref.files.item(0).name
             pathSet.set(false)
-            OMPost()[Api].renameKey(leaf, fileName).call().foreach {
-              b ⇒
-                pathSet.set(true)
+            OMFetch(coreAPIClient).future(_.renameKey(leaf, fileName).future).foreach { b ⇒
+              pathSet.set(true)
             }
           }
         }

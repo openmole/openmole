@@ -3,7 +3,6 @@ package org.openmole.gui.client.core
 import org.openmole.gui.client.core.alert.AbsolutePositioning.CenterPagePosition
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.scalajs.dom
 import org.openmole.gui.ext.client.Utils._
@@ -12,7 +11,6 @@ import scaladget.tools._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.{ JVMInfos, routes }
 import org.openmole.gui.ext.client._
-import autowire._
 import org.openmole.gui.client.core.files.FileDisplayer
 import com.raquo.laminar.api.L._
 
@@ -74,22 +72,22 @@ class SettingsView(fileDisplayer: FileDisplayer) {
     )
 
   val docButton = a(href := "#", onClick --> { _ ⇒
-    Settings.settings.map { sets ⇒
+    Fetch(_.omSettings(()).future) { sets ⇒
       org.scalajs.dom.window.open(s"https://${if (sets.isDevelopment) "next." else ""}openmole.org/GUI.html", "_blank")
     }
   }, span("Documentation"))
 
   val jvmInfoButton = button("JVM stats", btn_secondary, marginLeft := "12", glyph_stats, onClick --> { _ ⇒
-    timer.now match {
+    timer.now() match {
       case Some(t) ⇒ stopJVMTimer(t)
       case _       ⇒ setJVMTimer
     }
   })
 
   def updateJVMInfos = {
-    Post()[Api].jvmInfos.call().foreach { j ⇒
-      jvmInfos.set(Some(j))
-    }
+//    Post()[Api].jvmInfos.call().foreach { j ⇒
+//      jvmInfos.set(Some(j))
+//    }
   }
 
   def setJVMTimer = {

@@ -18,7 +18,6 @@
 package org.openmole.gui.plugin.authentication.sshlogin
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
 import org.openmole.gui.ext.server._
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
@@ -26,7 +25,7 @@ class Activator extends BundleActivator {
 
   def info = GUIPluginInfo(
     authentication = Some(classOf[LoginAuthenticationFactory]),
-    router = Some(s ⇒ OMRouter[LoginAuthenticationAPI](AutowireServer.route[LoginAuthenticationAPI](new LoginAuthenticationApiImpl(s))))
+    router = Some(s ⇒ OMRouter(new LoginAuthenticationServer(s).routes))
   )
 
   override def start(context: BundleContext): Unit = GUIPluginRegistry.register(this, info)

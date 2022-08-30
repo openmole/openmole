@@ -25,77 +25,80 @@ import org.openmole.tool.hash.Hash
 trait Api {
 
   //  //GENERAL
-  def settings(): OMSettings
-  def shutdown(): Unit
-  def restart(): Unit
-  def isAlive(): Boolean
-  def jvmInfos(): JVMInfos
+  // def settings(): OMSettings
+//  def shutdown(): Unit
+//  def restart(): Unit
+//  def isAlive(): Boolean
+//  def jvmInfos(): JVMInfos
 
   //AUTHENTICATIONS
-  def renameKey(keyName: String, newName: String): Unit
+  //def renameKey(keyName: String, newName: String): Unit
 
   //WORKSPACE
-  def isPasswordCorrect(pass: String): Boolean
-  def resetPassword(): Unit
+  //  def isPasswordCorrect(pass: String): Boolean
+  //  def resetPassword(): Unit
   //  def getConfigurationValue(configData: ConfigData): Option[String]
   //  def setConfigurationValue(configData: ConfigData, value: String): Unit
 
   //FILES
-  def addDirectory(safePath: SafePath, directoryName: String): Boolean
-  def addFile(safePath: SafePath, fileName: String): Boolean
-  def extractTGZ(safePath: SafePath): ExtractResult
-  def deleteFile(safePath: SafePath, context: ServerFileSystemContext): Unit
-  def deleteFiles(safePath: Seq[SafePath], context: ServerFileSystemContext): Unit
-  def temporaryFile(): SafePath
-  def exists(safePath: SafePath): Boolean
-  def existsExcept(exception: SafePath, exceptItSelf: Boolean): Boolean
-  def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
-  def listFiles(path: SafePath, fileFilter: FileFilter = FileFilter()): ListFilesData
-  def recursiveListFiles(path: SafePath, findString: String = ""): Seq[(SafePath, Boolean)]
-  def isEmpty(safePath: SafePath): Boolean
-  def mdToHtml(safePath: SafePath): String
-  def move(from: SafePath, to: SafePath): Unit
-  def duplicate(safePath: SafePath, newName: String): SafePath
-  def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit
-  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath]
-  def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Unit
+  //def addDirectory(safePath: SafePath, directoryName: String): Boolean
+  //def addFile(safePath: SafePath, fileName: String): Boolean
+//  def extractTGZ(safePath: SafePath): ExtractResult
+//  def deleteFile(safePath: SafePath, context: ServerFileSystemContext): Unit
+//  def deleteFiles(safePath: Seq[SafePath], context: ServerFileSystemContext): Unit
+//  def temporaryFile(): SafePath
+//  def exists(safePath: SafePath): Boolean
+//  def existsExcept(exception: SafePath, exceptItSelf: Boolean): Boolean
+  //def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
+  //def listFiles(path: SafePath, fileFilter: FileFilter = FileFilter()): ListFilesData
+//  def recursiveListFiles(path: SafePath, findString: String = ""): Seq[(SafePath, Boolean)]
+//  def isEmpty(safePath: SafePath): Boolean
+//  def move(from: SafePath, to: SafePath): Unit
+//  def duplicate(safePath: SafePath, newName: String): SafePath
+//  def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit
+
+//  def mdToHtml(safePath: SafePath): String
+//  def copyFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
+//  def renameFile(safePath: SafePath, name: String): SafePath
+//
+  //  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath]
+//  def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Unit
   //def copyToPluginUploadDir(directoryName: String, safePaths: Seq[SafePath]): Unit
-  def copyFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
-  def renameFile(safePath: SafePath, name: String): SafePath
-  def saveFile(path: SafePath, fileContent: String, hash: Option[String], overwrite: Boolean): (Boolean, String)
+
+  //def saveFile(path: SafePath, fileContent: String, hash: Option[String], overwrite: Boolean): (Boolean, String)
   //  def saveFiles(fileContents: Seq[AlterableFileContent]): Seq[(SafePath, Boolean)]
-  def size(safePath: SafePath): Long
+  //def size(safePath: SafePath): Long
   //  def hash(safePath: SafePath): String
-  def sequence(safePath: SafePath, separator: Char = ','): SequenceData
+  //def sequence(safePath: SafePath, separator: Char = ','): SequenceData
 
-  //EXECUTIONS
-  def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])
-  def staticInfos(): Seq[(ExecutionId, StaticExecutionInfo)]
-  def cancelExecution(id: ExecutionId): Unit
-  def removeExecution(id: ExecutionId): Unit
-  def compileScript(scriptData: ScriptData): Option[ErrorData]
-  def runScript(scriptData: ScriptData, validateScript: Boolean): Unit
-  def clearEnvironmentErrors(environmentId: EnvironmentId): Unit
-  def runningErrorEnvironmentData(environmentId: EnvironmentId, lines: Int): EnvironmentErrorData
+//  //EXECUTIONS
+//  def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])
+//  def staticInfos(): Seq[(ExecutionId, StaticExecutionInfo)]
+//  def cancelExecution(id: ExecutionId): Unit
+//  def removeExecution(id: ExecutionId): Unit
+//  def compileScript(scriptData: ScriptData): Option[ErrorData]
+//  def runScript(scriptData: ScriptData, validateScript: Boolean): Unit
+//  def clearEnvironmentErrors(environmentId: EnvironmentId): Unit
+//  def runningErrorEnvironmentData(environmentId: EnvironmentId, lines: Int): EnvironmentErrorData
 
-  //MARKET
-  def marketIndex(): MarketIndex
-  def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Unit
+//  //MARKET
+//  def marketIndex(): MarketIndex
+//  def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Unit
 
   //CORE PLUGINS
-  def appendToPluggedIfPlugin(safePath: SafePath): Unit
-  def listPlugins(): Iterable[Plugin]
-  def unplug(safePath: SafePath): Unit
-
-  //GUI PLUGINS
-  def getGUIPlugins(): AllPluginExtensionData
-  def isOSGI(safePath: SafePath): Boolean
-
-  //MODEL WIZARDS
-  def models(archivePath: SafePath): Seq[SafePath]
-  def expandResources(resources: Resources): Resources
-  def downloadHTTP(url: String, path: SafePath, extract: Boolean): Either[Unit, ErrorData]
-
-  //METHOD PLUGINS
-  def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS]
+//   def appendToPluggedIfPlugin(safePath: SafePath): Unit
+//  //def listPlugins(): Iterable[Plugin]
+//  def unplug(safePath: SafePath): Unit
+//
+//  //GUI PLUGINS
+//  //def getGUIPlugins(): AllPluginExtensionData
+//  def isOSGI(safePath: SafePath): Boolean
+//
+////  //MODEL WIZARDS
+////  def models(archivePath: SafePath): Seq[SafePath]
+////  def expandResources(resources: Resources): Resources
+////  def downloadHTTP(url: String, path: SafePath, extract: Boolean): Either[Unit, ErrorData]
+//
+//  //METHOD PLUGINS
+//  def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS]
 }

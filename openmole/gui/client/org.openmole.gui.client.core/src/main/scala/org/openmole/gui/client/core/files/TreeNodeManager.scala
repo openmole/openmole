@@ -58,14 +58,13 @@ class TreeNodeManager {
     tnc.foreach(panels.alertPanel.treeNodeCommentDiv)
   }
 
-  def isSelected(tn: TreeNode) = selected.now.contains(tn)
+  def isSelected(tn: TreeNode) = selected.now().contains(tn)
 
   def clearSelection = selected.set(Seq())
 
   def clearSelectionExecpt(safePath: SafePath) = selected.set(Seq(safePath))
 
   def setSelected(sp: SafePath, b: Boolean) = {
-    println("Turn to " + b)
     b match {
       case true ⇒ selected.update(s ⇒ (s :+ sp).distinct)
       case false ⇒ selected.update(s ⇒ s.filterNot(_ == sp))
@@ -82,7 +81,7 @@ class TreeNodeManager {
 
   def switchAllSelection(safePaths: Seq[SafePath], b: Boolean) = safePaths.map { f => setSelected(f, b) }
 
-  def setSelectedAsCopied = copied.set(selected.now)
+  def setSelectedAsCopied = copied.set(selected.now())
 
   def emptyCopied = copied.set(Seq())
 
@@ -95,7 +94,7 @@ class TreeNodeManager {
     comment.set(None)
   }
 
-  def switch(dir: String): Unit = switch(dirNodeLine.now.copy(path = dirNodeLine.now.path :+ dir))
+  def switch(dir: String): Unit = switch(dirNodeLine.now().copy(path = dirNodeLine.now().path :+ dir))
 
   def switch(sp: SafePath): Unit = dirNodeLine.set(sp)
 
@@ -104,21 +103,21 @@ class TreeNodeManager {
   }
 
   def switchAlphaSorting = {
-    updateFilter(fileFilter.now.switchTo(AlphaSorting()))
+    updateFilter(fileFilter.now().switchTo(AlphaSorting()))
     invalidCurrentCache
   }
 
   def switchTimeSorting = {
-    updateFilter(fileFilter.now.switchTo(TimeSorting()))
+    updateFilter(fileFilter.now().switchTo(TimeSorting()))
     invalidCurrentCache
   }
 
   def switchSizeSorting = {
-    updateFilter(fileFilter.now.switchTo(SizeSorting()))
+    updateFilter(fileFilter.now().switchTo(SizeSorting()))
     invalidCurrentCache
   }
 
-  def invalidCurrentCache = invalidCache(dirNodeLine.now)
+  def invalidCurrentCache = invalidCache(dirNodeLine.now())
 
   def invalidCache(sp: SafePath) = {
     sons.update(_.filterNot(_._1.path == sp.path))
@@ -126,7 +125,7 @@ class TreeNodeManager {
   }
 
   def computeCurrentSons() = {
-    val cur = dirNodeLine.now
+    val cur = dirNodeLine.now()
 
     def updateSons(safePath: SafePath) = {
       CoreUtils.listFiles(safePath, fileFilter.now()).foreach { lf =>
@@ -149,7 +148,7 @@ class TreeNodeManager {
   def find(findString: String) = {
     def updateSearch = {
       val safePath: SafePath = dirNodeLine.now()
-      CoreUtils.findFilesContaining(safePath, findString).foreach { fs =>
+      CoreUtils.findFilesContaining(safePath, Some(findString)).foreach { fs =>
         findFilesContaining.set((Some(findString), fs))
       }
     }

@@ -24,12 +24,10 @@ import org.openmole.gui.ext.data.{ ProcessState, Processing }
 import org.openmole.gui.ext.client._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
 import scaladget.bootstrapnative.bsn._
 import org.openmole.gui.client.core.CoreUtils._
 import org.openmole.gui.ext.data._
 import Waiter._
-import autowire._
 import org.openmole.gui.client.core.files.TreeNodeManager
 
 import com.raquo.laminar.api.L._
@@ -41,7 +39,7 @@ class MarketPanel(manager: TreeNodeManager) {
   private val marketIndex: Var[Option[MarketIndex]] = Var(None)
   val tagFilter = InputFilter(pHolder = "Filter")
   val selectedEntry: Var[Option[MarketIndexEntry]] = Var(None)
-  lazy val downloading: Var[Seq[(MarketIndexEntry, Var[_ <: ProcessState])]] = Var(marketIndex.now.map {
+  lazy val downloading: Var[Seq[(MarketIndexEntry, Var[_ <: ProcessState])]] = Var(marketIndex.now().map {
     _.entries.map {
       (_, Var(Processed()))
     }
@@ -88,7 +86,7 @@ class MarketPanel(manager: TreeNodeManager) {
                 div(
                   colBS(2),
                   downloadButton(entry, () ⇒ {
-                    exists(manager.dirNodeLine.now ++ entry.name, entry)
+                    exists(manager.dirNodeLine.now() ++ entry.name, entry)
                   })),
                 div(colBS(7), (paddingTop := "7"),
                   label(entry.name, badge_primary, omsheet.tableTag)
@@ -109,19 +107,21 @@ class MarketPanel(manager: TreeNodeManager) {
   )
 
   def exists(sp: SafePath, entry: MarketIndexEntry) =
-    Post()[Api].exists(sp).call().foreach { b ⇒
+    Fetch.future(_.exists(sp).future).foreach { b ⇒
       if (b) overwriteAlert.set(Some(entry))
       else download(entry)
     }
 
   def download(entry: MarketIndexEntry) = {
-    val path = manager.dirNodeLine.now ++ entry.name
-    downloading.set(downloading.now.updatedFirst(_._1 == entry, (entry, Var(Processing()))))
-    Post()[Api].getMarketEntry(entry, path).call().foreach { d ⇒
-      downloading.update(d ⇒ d.updatedFirst(_._1 == entry, (entry, Var(Processed()))))
-      downloading.now.headOption.foreach(_ ⇒ modalDialog.hide)
-      panels.treeNodeManager.invalidCurrentCache
-    }
+    val path = manager.dirNodeLine.now() ++ entry.name
+    downloading.set(downloading.now().updatedFirst(_._1 == entry, (entry, Var(Processing()))))
+
+    // FIXME Reactivate when scala 3
+//    Post()[Api].getMarketEntry(entry, path).call().foreach { d ⇒
+//      downloading.update(d ⇒ d.updatedFirst(_._1 == entry, (entry, Var(Processed()))))
+//      downloading.now.headOption.foreach(_ ⇒ modalDialog.hide)
+//      panels.treeNodeManager.invalidCurrentCache
+//    }
   }
 
   def downloadButton(entry: MarketIndexEntry, todo: () ⇒ Unit = () ⇒ {}) = div()
@@ -139,7 +139,7 @@ class MarketPanel(manager: TreeNodeManager) {
   //}
 
   def deleteFile(sp: SafePath, marketIndexEntry: MarketIndexEntry) =
-    Post()[Api].deleteFile(sp, ServerFileSystemContext.project).call().foreach { d ⇒
+    Fetch.future(_.deleteFiles(Seq(sp)).future).foreach { d ⇒
       download(marketIndexEntry)
     }
 
@@ -158,10 +158,13 @@ class MarketPanel(manager: TreeNodeManager) {
     marketFooter,
     omsheet.panelWidth(92),
     onopen = () ⇒ {
-      marketIndex.now match {
-        case None ⇒ Post()[Api].marketIndex.call().foreach { m ⇒
-          marketIndex.set(Some(m))
-        }
+      marketIndex.now() match {
+        case None ⇒
+
+          // FIXME Reactivate when scala 3
+//          Post()[Api].marketIndex.call().foreach { m ⇒
+//          marketIndex.set(Some(m))
+//        }
         case _ ⇒
       }
     },

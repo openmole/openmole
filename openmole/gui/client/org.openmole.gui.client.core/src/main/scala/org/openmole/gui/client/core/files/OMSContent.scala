@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.{Post, Waiter, panels}
+import org.openmole.gui.client.core.{Waiter, panels}
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data._
 import com.raquo.laminar.api.L._
@@ -9,8 +9,7 @@ import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.client._
 import scaladget.bootstrapnative.bsn._
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-import autowire._
+import org.openmole.gui.client.core.Fetch
 
 object OMSContent {
   def addTab(safePath: SafePath, initialContent: String, initialHash: String) = {
@@ -57,7 +56,7 @@ object OMSContent {
               editor.editor.getSession().clearBreakpoints()
               compileDisabled.set(true)
               TabContent.save(tabData, _ ⇒
-              Post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].compileScript(ScriptData(safePath)).call().foreach { errorDataOption ⇒
+              Fetch.future(_.compileScript(ScriptData(safePath)).future, timeout = 120 seconds, warningTimeout = 60 seconds).foreach { errorDataOption ⇒
                 setError(errorDataOption)
                 editor.editor.focus()
               }
@@ -68,7 +67,7 @@ object OMSContent {
           button("RUN", btn_primary_outline, cls := "omsControlButton", marginLeft := "10", onClick --> { _ ⇒
             unsetErrors
             TabContent.save(tabData, _ ⇒
-              Post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(safePath), true).call().foreach { execInfo ⇒
+              Fetch.future(_.runScript(ScriptData(safePath), true).future, timeout = 120 seconds, warningTimeout = 60 seconds).foreach { execInfo ⇒
                 panels.openExecutionPanel
               }
             )

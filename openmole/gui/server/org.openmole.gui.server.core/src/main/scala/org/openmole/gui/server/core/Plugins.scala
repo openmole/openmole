@@ -37,7 +37,11 @@ object Plugins extends JavaLogger {
     } {
       val destFile = dest / jsir.getPath
       destFile.getParentFile.mkdirs()
-      b.classLoader.getResourceAsStream(jsir.getPath) copy destFile
+
+      b.classLoader.getResourceAsStream(jsir.getPath) match {
+        case null =>
+        case s => s copy destFile
+      }
     }
   }
 
@@ -94,8 +98,8 @@ object Plugins extends JavaLogger {
 
   }
 
-  def addPluginRoutes(route: OMRouter ⇒ Unit, services: Services) = {
-    Log.logger.info(s"Loading GUI plugins")
-    GUIPluginRegistry.routers.foreach { r ⇒ route(r(services)) }
-  }
+//  def addPluginRoutes(route: OMRouter ⇒ Unit, services: Services) = {
+//    Log.logger.info(s"Loading GUI plugins")
+//    GUIPluginRegistry.routers.foreach { r ⇒ route(r(services)) }
+//  }
 }

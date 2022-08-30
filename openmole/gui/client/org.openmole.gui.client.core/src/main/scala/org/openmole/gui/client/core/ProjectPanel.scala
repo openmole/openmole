@@ -4,10 +4,8 @@ import org.openmole.gui.ext.data.{FileType, Resources, SafePath, WizardPluginFac
 import com.raquo.laminar.api.L._
 import org.openmole.gui.client.core.panels.{fileDisplayer, treeNodeManager}
 import org.openmole.gui.client.tool.TagBadge
-import autowire._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
 import scaladget.bootstrapnative.bsn._
 import org.openmole.gui.ext.data._
 import Waiter._
@@ -33,8 +31,8 @@ object ProjectPanel {
     // 1- Empty project
     def emptyProject = {
       val fileName = "newProject.oms"
-      CoreUtils.addFile(panels.treeNodeManager.dirNodeLine.now, fileName, () ⇒ {
-        val toDisplay = panels.treeNodeManager.dirNodeLine.now ++ fileName
+      CoreUtils.createFile(panels.treeNodeManager.dirNodeLine.now(), fileName, () ⇒ {
+        val toDisplay = panels.treeNodeManager.dirNodeLine.now() ++ fileName
         FileManager.download(
           toDisplay,
           hash = true,

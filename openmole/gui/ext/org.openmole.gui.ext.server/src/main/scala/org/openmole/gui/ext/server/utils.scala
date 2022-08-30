@@ -4,33 +4,34 @@ import java.io.FileOutputStream
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.logging.Level
 import java.util.zip.ZipFile
-import scala.collection.JavaConverters._
-import org.openmole.core.fileservice._
+import scala.collection.JavaConverters.*
+import org.openmole.core.fileservice.*
 import org.openmole.core.highlight.HighLight
 import org.openmole.core.module
-import org.openmole.core.pluginmanager._
+import org.openmole.core.pluginmanager.*
 import org.openmole.core.services.Services
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.gui.ext.data
-import org.openmole.gui.ext.data._
-import org.openmole.tool.file._
+import org.openmole.gui.ext.data.*
+import org.openmole.tool.file.*
 import org.openmole.tool.logger.JavaLogger
 
 import java.text.SimpleDateFormat
 import scala.annotation.tailrec
 import scala.io.{BufferedSource, Codec}
 import scala.util.{Failure, Success, Try}
-import collection.JavaConverters._
+import collection.JavaConverters.*
+import scala.collection.mutable.ListBuffer
 
 object utils {
 
   def pluginUpdoadDirectory(tmpDirectory: String)(implicit newFile: TmpDirectory) = newFile.directory / tmpDirectory
 
-  def webUIDirectory()(implicit workspace: Workspace) = workspace.location /> "webui"
+  def webUIDirectory(implicit workspace: Workspace) = workspace.location /> "webui"
 
-  def projectsDirectory()(implicit workspace: Workspace) = webUIDirectory /> "projects"
+  def projectsDirectory(implicit workspace: Workspace) = webUIDirectory /> "projects"
 
-  def workspaceRoot()(implicit workspace: Workspace) = workspace.location
+  def workspaceRoot(implicit workspace: Workspace) = workspace.location
 
   def isPlugin(path: SafePath)(implicit workspace: Workspace): Boolean = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
@@ -149,10 +150,10 @@ object utils {
     }
   }
 
-  def recursiveListFiles(path: SafePath, findString: String)(implicit context: ServerFileSystemContext, workspace: Workspace): Seq[(SafePath, Boolean)] = {
+  def recursiveListFiles(path: SafePath, findString: Option[String])(implicit context: ServerFileSystemContext, workspace: Workspace): Seq[(SafePath, Boolean)] = {
     val fPath = safePathToFile(path).getAbsolutePath
-    val allFiles = safePathToFile(path).recursiveListFilesSafe((f: File) => fPath != f.getAbsolutePath && f.getName.contains(findString))
-    allFiles.filter { case (f) ⇒ f.getName.contains(findString) }.map{f=> (fileToSafePath(f), f.isDirectory)}
+    val allFiles = safePathToFile(path).recursiveListFilesSafe((f: File) => fPath != f.getAbsolutePath && findString.map(s => f.getName.contains(s)).getOrElse(true))
+    allFiles.filter { case f ⇒ f.getName.contains(findString) }.map{f=> (fileToSafePath(f), f.isDirectory)}
   }
 
 
@@ -222,7 +223,7 @@ object utils {
 
   }
 
-  def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath)(implicit workspace: Workspace): Unit = {
+  def copyAllFromTmp(tmpSafePath: SafePath, to: SafePath)(implicit workspace: Workspace): Unit = {
 
     val f: File = safePathToFile(tmpSafePath)(ServerFileSystemContext.absolute, workspace)
     val toFile: File = safePathToFile(to)(ServerFileSystemContext.project, workspace)
@@ -238,30 +239,36 @@ object utils {
 
   }
 
-  // Test if files exist in the 'to' directory, return the lists of already existing files or copy them otherwise
-  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath)(implicit workspace: Workspace): Seq[SafePath] = {
-    val existing = existsIn(safePaths, to)
-
-    if (existing.isEmpty) safePaths.foreach { sp ⇒ sp.copy(to) }
-    existing
-  }
+//  // Test if files exist in the 'to' directory, return the lists of already existing files or copy them otherwise
+//  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath)(implicit workspace: Workspace): Seq[SafePath] = {
+//
+//  }
 
   //copy safePaths files to 'to' folder in overwriting in they exist
-  def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath)(implicit workspace: Workspace) = {
-    import ServerFileSystemContext.project
-    safePaths.foreach { sp ⇒
-      sp.toFile.copy(new File(to.toFile, sp.name))
+  def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean)(implicit workspace: Workspace): Seq[SafePath] =
+    if(overwrite) {
+      import ServerFileSystemContext.project
+      val existing = ListBuffer[SafePath]()
+      safePaths.foreach { sp ⇒
+        val destination = new File(to.toFile, sp.name)
+        if(destination.exists()) existing.append(sp)
+        sp.toFile.copy(destination)
+      }
+      existing.toSeq
+    } else {
+      val existing = existsIn(safePaths, to)
+      if (existing.isEmpty) safePaths.foreach { sp ⇒ SafePathDecorator(sp).copy(to) }
+      existing
     }
-  }
 
-  def deleteFile(safePath: SafePath, context: ServerFileSystemContext)(implicit workspace: Workspace): Unit = {
-    implicit val ctx = context
+  def deleteFile(safePath: SafePath)(implicit workspace: Workspace): Unit = {
+    implicit val ctx = safePath.context
     safePathToFile(safePath).recursiveDelete
   }
 
-  def deleteFiles(safePaths: Seq[SafePath], context: ServerFileSystemContext)(implicit workspace: Workspace): Unit = {
+  def deleteFiles(safePaths: Seq[SafePath])(implicit workspace: Workspace): Unit = {
     safePaths.foreach { sp ⇒
-      deleteFile(sp, context)
+      deleteFile(sp)
     }
   }
 
@@ -278,7 +285,7 @@ object utils {
   def updateIfChanged(file: File)(update: File ⇒ Unit)(implicit fileService: FileService, newFile: TmpDirectory) = {
     import org.openmole.core.fileservice._
 
-    def hash(f: File) = new File(f + "-hash")
+    def hash(f: File) = new File(f.toString + "-hash")
 
     lockFile(file).withLock { _ ⇒
       val hashFile = hash(file)
@@ -325,7 +332,7 @@ object utils {
           )(Codec.ISO8859)
 
           val ostream = new FileOutputStream(new File(to, entryPath))
-          inputSrc foreach { c: Char ⇒ ostream.write(c) }
+          inputSrc foreach { (c: Char) ⇒ ostream.write(c) }
           inputSrc.close
           ostream.close
 

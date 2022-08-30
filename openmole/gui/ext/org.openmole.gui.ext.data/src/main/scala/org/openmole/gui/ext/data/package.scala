@@ -17,15 +17,22 @@ package org.openmole.gui.ext.data
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package object routes {
-  val connectionRoute = "/connection"
+  val connectionRoute = "connection"
+  val slashConnectionRoute = s"/$connectionRoute"
+
   val shutdownRoute = "/shutdown"
   val restartRoute = "/restart"
-  val appRoute = "/app"
-  val downloadFileRoute = "/downloadFile"
+
+  val appRoute = "app"
+  val slashAppRoute = s"/$appRoute"
+
+  val downloadFileRoute = "downloadFile"
+  val slashDownloadFileRoute = s"/$downloadFileRoute"
   val downloadPluginsRoute = "/downloadPlugins"
-  val uploadFilesRoute = "/uploadFiles"
+  val uploadFilesRoute = "uploadFiles"
+  val slashUploadFilesRoute = s"/$uploadFilesRoute"
   val resetPasswordRoute = "/resetPassword"
 
-  def downloadFile(uri: String, hash: Boolean = false) = s"downloadFile?path=$uri&hash=$hash"
+  def downloadFile(uri: String, hash: Boolean = false) = s"${slashDownloadFileRoute.drop(1)}?path=$uri&hash=$hash"
   def hashHeader = "Content-Hash"
 }

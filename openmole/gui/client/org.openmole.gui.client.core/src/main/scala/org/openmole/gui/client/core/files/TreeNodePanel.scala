@@ -10,9 +10,7 @@ import org.scalajs.dom.raw._
 import org.openmole.gui.client.core._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
 import TreeNode._
-import autowire._
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.client.FileManager
 import com.raquo.laminar.api.L._
@@ -73,9 +71,9 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
   def createNewNode = {
     val newFile = newNodeInput.ref.value
     val currentDirNode = treeNodeManager.dirNodeLine
-    addRootDirButton.toggled.now match {
-      case true ⇒ CoreUtils.addDirectory(currentDirNode.now, newFile, () ⇒ treeNodeManager.invalidCurrentCache)
-      case false ⇒ CoreUtils.addFile(currentDirNode.now, newFile, () ⇒ treeNodeManager.invalidCurrentCache)
+    addRootDirButton.toggled.now() match {
+      case true ⇒ CoreUtils.createDirectory(currentDirNode.now(), newFile, () ⇒ treeNodeManager.invalidCurrentCache)
+      case false ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, () ⇒ treeNodeManager.invalidCurrentCache)
     }
   }
 
@@ -101,7 +99,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     )
 
   private val upButton = upbtn((fileInput: Input) ⇒ {
-    val current = treeNodeManager.dirNodeLine.now
+    val current = treeNodeManager.dirNodeLine.now()
     FileManager.upload(fileInput, current, (p: ProcessState) ⇒ transferring.set(p), UploadProject(), () ⇒ {
       val sp: SafePath = current / fileInput.ref.value.split("\\\\").last
       CoreUtils.appendToPluggedIfPlugin(sp)
@@ -152,14 +150,14 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
           button(cls := "btn blue-button", marginLeft := "80px", "Copy", onClick --> { _ ⇒
             multiTool.set(Paste)
             confirmationDiv.set(Some(confirmation(s"${selected.now().size} files copied. Browse to the target folder and press Paste", "Paste", () ⇒
-              CoreUtils.testExistenceAndCopyProjectFilesTo(selected.now(), treeNodeManager.dirNodeLine.now()).foreach { existing ⇒
+              CoreUtils.copyProjectFiles(selected.now(), treeNodeManager.dirNodeLine.now(), overwrite = false).foreach { existing ⇒
                 if (existing.isEmpty) {
                   treeNodeManager.invalidCurrentCache
                   closeMultiTool
                 }
                 else {
                   confirmationDiv.set(Some(confirmation(s"${existing.size} files have already the same name. Overwrite them ?", "Overwrite", () ⇒
-                    CoreUtils.copyProjectFilesTo(selected.now(), treeNodeManager.dirNodeLine.now()).foreach { b ⇒
+                    CoreUtils.copyProjectFiles(selected.now(), treeNodeManager.dirNodeLine.now(), overwrite = true).foreach { b ⇒
                       treeNodeManager.invalidCurrentCache
                       closeMultiTool
                     })))
@@ -170,7 +168,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
           ),
           button(btn_danger, "Delete", marginRight := "80px", onClick --> { _ ⇒
             confirmationDiv.set(Some(confirmation(s"Delete ${treeNodeManager.selected.now().size} files ?", "OK", () ⇒
-              CoreUtils.trashNodes(treeNodeManager.selected.now) { () ⇒
+              CoreUtils.trashNodes(treeNodeManager.selected.now()) { () ⇒
                 treeNodeManager.invalidCurrentCache
                 closeMultiTool
               })))
@@ -235,7 +233,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
                 Off
             }
           }
-          multiTool.now match {
+          multiTool.now() match {
             case Off ⇒ treeNodeManager.invalidCurrentCache
             case _ ⇒
           }
@@ -347,7 +345,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
   def displayNode(tn: TreeNode): Unit = tn match {
     case fn: FileNode ⇒
-      val tnSafePath = treeNodeManager.dirNodeLine.now ++ tn.name
+      val tnSafePath = treeNodeManager.dirNodeLine.now() ++ tn.name
       displayNode(tnSafePath)
     case _ ⇒
   }
@@ -361,7 +359,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
   val currentSafePath: Var[Option[SafePath]] = Var(None)
   val currentLine = Var(-1)
 
-  def timeOrSize(tn: TreeNode): String = treeNodeManager.fileFilter.now.fileSorting match {
+  def timeOrSize(tn: TreeNode): String = treeNodeManager.fileFilter.now().fileSorting match {
     case TimeSorting() ⇒ CoreUtils.longTimeToString(tn.time)
     case _ ⇒ CoreUtils.readableByteCountAsString(tn.size)
   }
@@ -377,7 +375,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
   case class ReactiveLine(id: Int, tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) {
 
-    val tnSafePath = treeNodeManager.dirNodeLine.now ++ tn.name
+    val tnSafePath = treeNodeManager.dirNodeLine.now() ++ tn.name
 
     // val selected = Var(false)
     def isSelected(selection: Seq[SafePath]) = selection.contains(tnSafePath)
@@ -421,7 +419,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
           onDrop --> { e ⇒
             e.dataTransfer
             e.preventDefault()
-            dropAction(treeNodeManager.dirNodeLine.now ++ tn.name, tn match {
+            dropAction(treeNodeManager.dirNodeLine.now() ++ tn.name, tn match {
               case _: DirNode ⇒ true
               case _ ⇒ false
             })
@@ -436,7 +434,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
           button(cls := "bi-three-dots transparent-button", cursor.pointer, opacity := "0.5", onClick --> { _ ⇒
             currentSafePath.set(Some(tnSafePath))
             currentLine.set(
-              if (id == currentLine.now) -1
+              if (id == currentLine.now()) -1
               else id
             )
           })
@@ -461,17 +459,17 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     },
     onDragOver --> { e ⇒
       e.dataTransfer.dropEffect = "move"
-      e.preventDefault
+      e.preventDefault()
     }
   )
 
   def dropAction(to: SafePath, isDir: Boolean) = {
-    draggedNode.now.map {
+    draggedNode.now().map {
       dragged ⇒
         if (isDir) {
           if (dragged != to) {
             //treeNodeTabs.saveAllTabs(() ⇒ {
-            Post()[Api].move(dragged, to).call().foreach {
+            Fetch.future(_.move(dragged, to).future).foreach {
               b ⇒
                 treeNodeManager.invalidCache(to)
                 treeNodeManager.invalidCache(dragged)

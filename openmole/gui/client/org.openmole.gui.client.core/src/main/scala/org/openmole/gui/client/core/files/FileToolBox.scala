@@ -1,8 +1,6 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core._
-import autowire._
-import boopickle.Default._
 import org.openmole.gui.client.core.alert.AbsolutePositioning._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -29,7 +27,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
 
   def trash = withSafePath { safePath ⇒
     closeToolBox
-    CoreUtils.trashNode(safePath) {
+    CoreUtils.trashNodes(Seq(safePath)) {
       () ⇒
         TabContent.removeTab(safePath)
         TabContent.checkTabs
@@ -49,9 +47,9 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
   }
 
   def extract = withSafePath { sp ⇒
-    Post()[Api].extractTGZ(sp).call().foreach {
-      r ⇒
-        r.error match {
+    Fetch.future(_.extract(sp).future).foreach {
+      error ⇒
+        error match {
           case Some(e: org.openmole.gui.ext.data.ErrorData) ⇒
             panels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
           case _ ⇒treeNodeManager.invalidCurrentCache
@@ -63,7 +61,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
   def execute = {
     import scala.concurrent.duration._
     withSafePath { sp ⇒
-      Post(timeout = 120 seconds, warningTimeout = 60 seconds)[Api].runScript(ScriptData(sp), true).call().foreach { execInfo ⇒
+      Fetch.future(_.runScript(ScriptData(sp), true).future, timeout = 120 seconds, warningTimeout = 60 seconds).foreach { execInfo ⇒
         showExecution()
       }
       closeToolBox
@@ -83,7 +81,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
 
   def testRename(safePath: SafePath, to: String) = {
     val newSafePath = safePath.parent ++ to
-    Post()[Api].existsExcept(newSafePath, false).call().foreach {
+    Fetch.future(_.existsExcept(newSafePath, false).future).foreach {
       b ⇒
         if (b) {
           actionEdit.set(None)
@@ -98,7 +96,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
   }
 
   def rename(safePath: SafePath, to: String, replacing: () ⇒ Unit) = {
-    Post()[Api].renameFile(safePath, to).call().foreach {
+    Fetch.future(_.rename(safePath, to).future).foreach {
       newNode ⇒
         TabContent.rename(safePath, newNode)
         treeNodeManager.invalidCurrentCache
@@ -110,20 +108,22 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
 
   def plugOrUnplug(safePath: SafePath, pluginState: PluginState) = {
     pluginState.isPlugged match {
-      case true ⇒ OMPost()[Api].unplug(safePath).call().foreach { _ ⇒
-        panels.pluginPanel.getPlugins
-        treeNodeManager.invalidCurrentCache
-      }
-      case false ⇒ OMPost()[Api].appendToPluggedIfPlugin(safePath).call().foreach {
-        _ ⇒
-          panels.pluginPanel.getPlugins
-          treeNodeManager.invalidCurrentCache
-      }
+      case true ⇒
+//        OMPost()[Api].unplug(safePath).call().foreach { _ ⇒
+//          panels.pluginPanel.getPlugins
+//          treeNodeManager.invalidCurrentCache
+//        }
+      case false ⇒
+//        OMPost()[Api].appendToPluggedIfPlugin(safePath).call().foreach {
+//          _ ⇒
+//            panels.pluginPanel.getPlugins
+//            treeNodeManager.invalidCurrentCache
+//        }
     }
   }
 
   def withSafePath(action: SafePath ⇒ Unit) = {
-    treeNodePanel.currentSafePath.now.foreach { sp ⇒
+    treeNodePanel.currentSafePath.now().foreach { sp ⇒
       action(sp)
     }
   }

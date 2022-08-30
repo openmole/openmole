@@ -38,10 +38,10 @@ def defaultSettings =
     resolvers += Resolver.sonatypeRepo("releases"),
     resolvers += Resolver.sonatypeRepo("snapshots"),
     resolvers += Resolver.sonatypeRepo("staging"),
-    resolvers += Resolver.bintrayRepo("definitelyscala", "maven"), // For plotlyjs
+    //resolvers += Resolver.bintrayRepo("definitelyscala", "maven"), // For plotlyjs
     Global / scalaVersion := scala3VersionValue, // + "-bin-typelevel-4",
     scalacOptions ++=
-      (if(scala2(scalaVersion.value)) Seq("-target:11", "-Ymacro-annotations", "-language:postfixOps", "-Ytasty-reader", "-Ydelambdafy:inline", "-language:higherKinds") else Seq("-Xtarget:11", "-language:higherKinds", "-language:postfixOps", "-language:implicitConversions", "-Xmax-inlines:50")),
+      (if(scala2(scalaVersion.value)) Seq("-target:11", "-Ymacro-annotations", "-language:postfixOps", "-Ytasty-reader", "-Ydelambdafy:inline", "-language:higherKinds", "-Xsource:3") else Seq("-Xtarget:11", "-language:higherKinds", "-language:postfixOps", "-language:implicitConversions", "-Xmax-inlines:50")),
     //scalacOptions += "-Yinduction-heuristics",
     //scalacOptions ++= Seq("-Xmax-classfile-name", "140"),
     javacOptions ++= Seq("-source", "11", "-target", "11"),
@@ -55,7 +55,8 @@ def defaultSettings =
     shellPrompt := { s => Project.extract(s).currentProject.id + " > " },
     libraryDependencies += Libraries.scalatest,
     Test / fork := true,
-    Test / javaOptions ++= Seq("-Xss2M", "--add-opens", "java.base/java.lang.invoke=ALL-UNNAMED")
+    Test / javaOptions ++= Seq("-Xss2M", "--add-opens", "java.base/java.lang.invoke=ALL-UNNAMED"),
+    excludeTransitiveScala3
   )
 
 ThisBuild / publishTo :=
@@ -284,7 +285,7 @@ lazy val openmoleCompiler = OsgiProject(coreDir, "org.openmole.core.compiler", g
   OsgiKeys.importPackage := Seq("*"),
   Libraries.addScalaLang,
   libraryDependencies ++= Libraries.monocle,
-  defaultActivator
+  defaultActivator,
 ) dependsOn(openmoleOSGi, workspace, fileService, openmoleTypes) settings (coreSettings: _*) 
 
 lazy val project = OsgiProject(coreDir, "org.openmole.core.project", imports = Seq("*")) dependsOn(namespace, openmoleCompiler, openmoleDSL, services) settings (OsgiKeys.importPackage := Seq("*")) settings (coreSettings: _*) settings (
@@ -609,13 +610,16 @@ def guiDir = file("gui")
 def guiExt = guiDir / "ext"
 def guiExtTarget = guiExt / "target"
 
-def guiSettings = defaultSettings ++ scala2Settings
+def guiSettings = defaultSettings ++ excludeTransitiveScala2
+//def guiSettings3 = defaultSettings ++ excludeTransitiveScala2
+
 def scala2Settings =
   Seq(
     scalaVersion := scalaVersionValue,
     excludeDependencies ++= Seq(
       ExclusionRule("com.lihaoyi", "sourcecode_3"),
       ExclusionRule("org.scala-lang.modules", "scala-parallel-collections_3")
+      //ExclusionRule("org.scala-lang.modules", "scala-xml_3")
     )
   )
 
@@ -625,30 +629,33 @@ def scala2Settings =
 lazy val dataGUI = OsgiProject(guiExt, "org.openmole.gui.ext.data") enablePlugins (ScalaJSPlugin) settings(
   Libraries.scalajsDomJS,
   Libraries.laminarJS,
-  //libraryDependencies ++= Libraries.monocle
+  libraryDependencies += Libraries.endpoints4s,
   guiSettings,
-  scala2Settings,
   scalaJSSettings)
 
 lazy val extServer = OsgiProject(guiExt, "org.openmole.gui.ext.server") dependsOn(dataGUI, workspace, module, services) settings(
-  libraryDependencies += Libraries.autowire,
-  libraryDependencies += Libraries.boopickle,
+//  libraryDependencies += Libraries.autowire,
+//  libraryDependencies += Libraries.boopickle,
   libraryDependencies += Libraries.equinoxOSGi,
+  libraryDependencies ++= Seq(Libraries.endpoints4s, Libraries.http4s, Libraries.cats),
   guiSettings,
-  scala2Settings,
   scalaJSSettings)
 
 lazy val extClient = OsgiProject(guiExt, "org.openmole.gui.ext.client") enablePlugins (ScalaJSPlugin) dependsOn(dataGUI, sharedGUI) settings(
-  Libraries.boopickleJS,
-  Libraries.autowireJS,
+//  Libraries.boopickleJS,
+//  Libraries.autowireJS,
   Libraries.laminarJS,
   Libraries.scalajsDomJS,
   Libraries.scaladgetTools,
   Libraries.bootstrapnative,
+  libraryDependencies += Libraries.endpoints4s,
   guiSettings,
   scalaJSSettings)
 
-lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.ext.api") dependsOn(dataGUI, market) settings (guiSettings)
+lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.ext.api", imports = Seq("*") /*dynamicImports = Seq("shapeless.*", "endpoints4s.generic.*", "endpoints4s.algebra.*")*/) dependsOn(dataGUI, market) enablePlugins (ScalaJSPlugin) settings (guiSettings) settings(
+  //libraryDependencies += Libraries.endpoint4SJsonSchemaGeneric,
+  libraryDependencies += Libraries.endpoints4s
+)
 
 lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompile", imports = Seq("*")) dependsOn(pluginManager, fileService, workspace, dataGUI) settings(
   guiSettings,
@@ -673,7 +680,7 @@ lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompil
 )
 
 
-val clientPrivatePackages = Seq("autowire.*", "boopickle.*", "com.raquo.*", "org.scalajs.dom.*", "scaladget.*", "net.scalapro.sortable.*", "org.openmole.plotlyjs.*", "org.querki.jsext.*", "scala.collection.compat.*", "app.tulz.tuplez.*")
+val clientPrivatePackages = Seq("com.raquo.*", "org.scalajs.dom.*", "scaladget.*", "net.scalapro.sortable.*", "org.openmole.plotlyjs.*", "org.querki.jsext.*", /*"scala.collection.compat.*",*/ "app.tulz.tuplez.*", /*"shapeless3.*",*/ "scala.deriving.*")
 
 def guiClientDir = guiDir / "client"
 lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core")  enablePlugins(ScalaJSPlugin) settings (
@@ -689,26 +696,59 @@ lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core")  
 lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool", privatePackages = clientPrivatePackages) enablePlugins(ScalaJSPlugin) settings(
   guiSettings,
   scalaJSSettings,
-  Libraries.autowireJS,
-  Libraries.boopickleJS,
+  libraryDependencies += Libraries.scalajs,
+//  Libraries.autowireJS,
+//  Libraries.boopickleJS,
   Libraries.scalajsDomJS,
   Libraries.ace,
   Libraries.bootstrapnative,
   Libraries.scaladgetTools,
   Libraries.laminarJS,
+  //Libraries.endpoints4SJS,
+  //Libraries.catsJS,
  // Libraries.sortable,
-  Libraries.plotlyJS,
-  Libraries.scalaCompatJS) dependsOn (extClient)
+  Libraries.plotlyJS) dependsOn (extClient)
 
 
 /* -------------------------- Server ----------------------- */
 
 def guiServerDir = guiDir / "server"
 
+//lazy val newServerGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.newcore", imports = Seq("*")) settings(
+//  libraryDependencies ++= Seq(Libraries.endpoints4SHTTP4SSServer, Libraries.endpoint4SJsonSchemaGeneric, Libraries.cats),
+////  excludeDependencies += ExclusionRule(organization = "org.endpoints4s", name = "algebra_3"),
+////  excludeDependencies += ExclusionRule(organization = "org.endpoints4s", name = "algebra-json-schema_3"),
+////  excludeDependencies += ExclusionRule(organization = "com.lihaoyi", name = "geny_3"),
+//  //excludeTransitiveScala2,
+//  guiSettings) dependsOn(
+//  sharedGUI,
+//  dataGUI,
+//  workflow,
+//  openmoleBuildInfo,
+//  openmoleFile,
+//  openmoleTar,
+//  openmoleHash,
+//  openmoleCollection,
+//  project,
+//  openmoleDSL,
+//  batch,
+//  omrHook,
+//  openmoleStream,
+//  txtmark,
+//  openmoleCrypto,
+//  module,
+//  market,
+//  extServer,
+//  jsCompile,
+//  services,
+//  location,
+//  serverGUI)
+
+
 lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", dynamicImports = Seq("org.eclipse.jetty.*")) settings(
-  libraryDependencies ++= Seq(Libraries.autowire, Libraries.boopickle, Libraries.scalaTags, Libraries.scalatra, Libraries.clapper),
-  guiSettings,
-  scala2Settings) dependsOn(
+  libraryDependencies ++= Seq(/*Libraries.autowire, Libraries.boopickle, */Libraries.scalaTags, /*Libraries.scalatra, */Libraries.clapper),
+  libraryDependencies ++= Seq(Libraries.endpoints4s, Libraries.http4s, Libraries.cats),
+  guiSettings) dependsOn(
   sharedGUI,
   dataGUI,
   workflow,
@@ -795,10 +835,13 @@ def guiPlugins = Seq(
   guiEnvironmentSSHKeyPlugin,
   guiEnvironmentEGIPlugin,
   netlogoWizardPlugin,
-  //nativeWizardPlugin,
   rWizardPlugin,
+  evolutionAnalysisPlugin
+
+  // Obsolete
+  //nativeWizardPlugin,
   // jarWizardPlugin,
-  evolutionAnalysisPlugin) //, guiEnvironmentDesktopGridPlugin)
+) //, guiEnvironmentDesktopGridPlugin)
 
 /* -------------------- Bin ------------------------- */
 
@@ -814,7 +857,14 @@ def bundleFilter(m: ModuleID, artifact: Artifact) = {
         (m.name contains "protobuf") ||
         (m.name contains "jts-core") || (m.name contains "si-quantity") || (m.name contains "systems-common-java8") || (m.name contains "uom-lib-common") || (m.name contains "unit-api") || (m.name contains "uom-se") // geotools bundled dependancies */
 
-  def includeOtherBundles = Set[String]("scala-parser-combinators")
+  def includeOtherBundles =
+    Set[(String, String)](
+      ("", "scala-parser-combinators"),
+      // akka http stream
+//      ("", "akka-stream"),
+//      ("", "akka-actor"),
+//      ("com.typesafe", "config")
+    )
 
   def include =
     (artifact.`type` == "bundle" && m.name != "osgi" && m.organization == "org.openmole.library") ||
@@ -822,7 +872,7 @@ def bundleFilter(m: ModuleID, artifact: Artifact) = {
       (m.name == "httpclient-osgi") ||
       (m.name == "httpcore-osgi") ||
       (m.organization == "org.osgi" && m.name != "osgi") ||
-      includeOtherBundles.exists(m.name.contains)
+      includeOtherBundles.exists { case (org, name) => m.organization.contains(org) && m.name.contains(name) }
 
   include && !exclude
 }
@@ -849,11 +899,32 @@ def excludeTransitiveScala2 =
     ExclusionRule("org.typelevel", "cats-free_2.13"),
     ExclusionRule("dev.optics", "monocle-macro_2.13"),
     ExclusionRule("com.lihaoyi", "sourcecode_2.13"),
+    ExclusionRule("com.lihaoyi", "geny_2.13"),
     ExclusionRule("org.typelevel", "simulacrum-scalafix-annotations_2.13"),
     ExclusionRule("org.typelevel:cats-kernel_2.13"),
     ExclusionRule("dev.optics", "monocle-core_2.13"),
     ExclusionRule("org.typelevel", "cats-core_2.13"),
-    ExclusionRule("org.scala-lang.modules", "scala-parallel-collections_2.13")
+    ExclusionRule("org.scala-lang.modules", "scala-parallel-collections_2.13"),
+    ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13"),
+    ExclusionRule("org.scala-lang.modules", "scala-java8-compat_2.13"),
+    //ExclusionRule("org.scala-lang.modules", "scala-xml_2.13"),
+
+
+    //    ExclusionRule("org.typelevel" ,"cats_2.13"),
+//    ExclusionRule("org.typelevel" ,"cats-effect-std_2.13"),
+//    ExclusionRule("org.typelevel" ,"cats-effect_2.13"),
+//    ExclusionRule("org.typelevel", "cats-parse_2.13"),
+//    ExclusionRule("org.typelevel", "simulacrum-scalafix-annotations_2.13"),
+//    ExclusionRule("org.typelevel", "cats-kernel_2.13"),
+//    ExclusionRule("org.typelevel", "cats-effect-kernel_2.13"),
+//    ExclusionRule("org.typelevel", "cats-core_2.13")
+  )
+
+def excludeTransitiveScala3 =
+  excludeDependencies ++= Seq(
+    ExclusionRule("org.typelevel", "cats-free_3"),
+    ExclusionRule("org.typelevel", "cats-kernel_3"),
+    ExclusionRule("org.typelevel", "cats-core_3")
   )
 
 lazy val openmoleUI = OsgiProject(binDir, "org.openmole.ui", singleton = true, imports = Seq("*")) settings (
@@ -937,7 +1008,8 @@ lazy val openmole =
     resourcesAssemble += (openmoleNaked / assemble).value -> assemblyPath.value,
     resourcesAssemble ++= (Compile / Osgi.bundleDependencies).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
     assemblyDependenciesPath := assemblyPath.value / "plugins",
-    cleanFiles ++= (openmoleNaked / cleanFiles).value) dependsOn (toDependencies(openmoleDependencies): _*) settings(excludeTransitiveScala2)
+    cleanFiles ++= (openmoleNaked / cleanFiles).value
+  ) dependsOn (toDependencies(openmoleDependencies): _*) settings(excludeTransitiveScala2)
 
 lazy val openmoleRuntime =
   OsgiProject(binDir, "org.openmole.runtime", singleton = true, imports = Seq("*")) enablePlugins (TarPlugin) settings (assemblySettings: _*) dependsOn(workflow, communication, serializer, logconfig, event, exception) settings(

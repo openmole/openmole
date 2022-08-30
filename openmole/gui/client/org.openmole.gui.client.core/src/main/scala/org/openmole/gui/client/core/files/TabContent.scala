@@ -1,16 +1,14 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.{Post, panels}
-import org.openmole.gui.ext.data._
-import scaladget.bootstrapnative.bsn._
-import com.raquo.laminar.api.L._
+import org.openmole.gui.client.core.{Fetch, panels}
+import org.openmole.gui.ext.data.*
+import scaladget.bootstrapnative.bsn.*
+import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TreeNodeTab.{save, serverConflictAlert}
 import org.openmole.gui.ext.api.Api
 import scaladget.tools.Utils.uuID
-import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-import autowire._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.timers.{SetIntervalHandle, clearInterval, setInterval}
 
 
@@ -24,7 +22,7 @@ object TabContent {
 
   val tabsObserver = Observer[Seq[Tab[TabData]]] { tabs =>
     if (tabs.isEmpty) {
-      timer.now.foreach { handle =>
+      timer.now().foreach { handle =>
         clearInterval(handle)
       }
       timer.set(None)
@@ -34,7 +32,7 @@ object TabContent {
   val timerObserver = Observer[Option[SetIntervalHandle]] { handle =>
     handle match {
       case None => timer.set(Some(setInterval(15000) {
-        TabContent.tabsUI.tabs.now.foreach { t =>
+        TabContent.tabsUI.tabs.now().foreach { t =>
           save(t.t)
         }
       }))
@@ -91,7 +89,7 @@ object TabContent {
   }
 
   def alreadyDisplayed(safePath: SafePath) =
-    tabsUI.tabs.now.find { t ⇒
+    tabsUI.tabs.now().find { t ⇒
       t.t.safePath.path == safePath.path
     }.map{_.tabID}
 
@@ -99,7 +97,7 @@ object TabContent {
     tabData.editorPanelUI.foreach { editorPanelUI =>
       editorPanelUI.synchronized {
         val (content, hash) = editorPanelUI.code
-        Post()[Api].saveFile(tabData.safePath, content, Some(hash), overwrite).call().foreach {
+        Fetch.future(_.saveFile(tabData.safePath, content, Some(hash), overwrite).future).foreach {
           case (saved, savedHash) ⇒
             if (saved) {
               editorPanelUI.onSaved(savedHash)
@@ -111,8 +109,8 @@ object TabContent {
     }
   }
 
-  def checkTabs = tabsUI.tabs.now.foreach { tab =>
-    org.openmole.gui.client.core.Post()[Api].exists(tab.t.safePath).call().foreach {
+  def checkTabs = tabsUI.tabs.now().foreach { tab =>
+    Fetch.future(_.exists(tab.t.safePath).future).foreach {
       e ⇒
         if (!e) removeTab(tab.t.safePath)
     }
@@ -132,7 +130,7 @@ object TabContent {
     }px", cursor.pointer, padding := "3", onClick --> {
       _ ⇒
         for {
-          ts ← tabsUI.tabs.now
+          ts ← tabsUI.tabs.now()
         } yield {
           ts.t.editorPanelUI.foreach(_.updateFont(size))
         }

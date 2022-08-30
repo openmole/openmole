@@ -121,7 +121,7 @@ class EditorPanelUI(fileType: FileExtension) {
   val lineHeightObserver = Observer[Int] { (i: Int) ⇒
     editor.container.style.lineHeight = s"${i}px"
     editor.container.style.fontSize = s"${i - 3}px"
-    editor.renderer.updateFontSize
+    editor.renderer.updateFontSize()
   }
 
 
@@ -132,7 +132,7 @@ class EditorPanelUI(fileType: FileExtension) {
 
   def setErrorMessage = {
     errorsWithLocation.now().find {
-      _.line == Some(editor.selection.getCursor.row.toInt)
+      _.line == Some(editor.selection.getCursor().row.toInt)
     } match {
       case Some(e) =>
         val message = s"${

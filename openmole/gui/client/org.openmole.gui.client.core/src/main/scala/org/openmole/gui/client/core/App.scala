@@ -9,8 +9,6 @@ import scaladget.tools._
 import org.scalajs.dom.KeyboardEvent
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-import autowire._
 import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.client.core.files.{TabContent, TreeNodePanel}
 import org.openmole.gui.client.tool.OMTags
@@ -68,7 +66,7 @@ object App {
       )
     )
 
-    Post()[Api].shutdown().call()
+    //Post()[Api].shutdown().call()
     render(dom.document.body, stoppedDiv)
   }
 
@@ -77,14 +75,14 @@ object App {
 
     def setTimer = {
       timer.set(Some(setInterval(5000) {
-        Post(3 seconds, 5 minutes)[Api].isAlive().call().foreach { x ⇒
-          if (x) {
-            CoreUtils.setRoute(routes.connectionRoute)
-            timer.now.foreach {
-              clearInterval
-            }
-          }
-        }
+//        Post(3 seconds, 5 minutes)[Api].isAlive().call().foreach { x ⇒
+//          if (x) {
+//            CoreUtils.setRoute(routes.slashConnectionRoute)
+//            timer.now.foreach {
+//              clearInterval
+//            }
+//          }
+//        }
       })
       )
     }
@@ -98,7 +96,7 @@ object App {
       )
     )
 
-    Post()[Api].restart().call()
+//    Post()[Api].restart().call()
     render(dom.document.body, restartedDiv)
   }
 
@@ -115,7 +113,8 @@ object App {
 
   def run() = {
     val containerNode = dom.document.querySelector("#openmole-content")
-
+    
+    //import scala.concurrent.ExecutionContext.Implicits.global
     Plugins.fetch { plugins ⇒
       val maindiv = div()
 
@@ -135,7 +134,7 @@ object App {
 
       dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
         if (k.keyCode == 83 && k.ctrlKey) {
-          k.preventDefault
+          k.preventDefault()
           false
         }
       }
@@ -202,14 +201,16 @@ object App {
       //        fixedTitle = Some("New project")
       //      )
 
-      // Define the option sequence
-      Settings.settings.foreach { sets ⇒
-        render(
-          containerNode,
+    // Define the option sequence
+    //Fetch(_.omSettings(())) { sets ⇒
+      render(
+        containerNode,
+        div(
+          cls := "app-container",
+          // panels.bannerAlert.banner,
+          //theNavBar,
           div(
-            cls := "app-container",
-            // panels.bannerAlert.banner,
-            //theNavBar,
+            cls := "main-container",
             div(
               cls := "main-container",
               div(
@@ -277,9 +278,10 @@ object App {
             panels.alertPanel.alertDiv
           )
         )
-      }
-      panels.treeNodeManager.invalidCurrentCache
+      )
     }
+    panels.treeNodeManager.invalidCurrentCache
+  //}
   }
 
 }

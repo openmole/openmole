@@ -1,7 +1,7 @@
-package org.openmole.gui.client.core
+package org.openmole.gui.plugin.wizard
 
 /*
- * Copyright (C) 04/07/15 // mathieu.leclaire@openmole.org
+ * Copyright (C) 2022 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -13,18 +13,13 @@ package org.openmole.gui.client.core
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scala.concurrent.Future
-import autowire._
-import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.data.OMSettings
-import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
+import org.openmole.gui.ext.client.*
 
-object Settings {
-
-  val settings: Future[OMSettings] = Post()[Api].settings().call()
+package object r {
+  class APIClientImpl(val settings: ClientSettings) extends RWizardAPI with APIClient
+  def PluginFetch = OMFetch(new APIClientImpl(_))
 }

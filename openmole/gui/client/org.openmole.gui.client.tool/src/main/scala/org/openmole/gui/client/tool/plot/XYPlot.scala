@@ -1,7 +1,6 @@
 package org.openmole.gui.client.tool.plot
 
 import org.openmole.plotlyjs._
-import org.openmole.plotlyjs.PlotlyImplicits._
 import scala.scalajs.js.JSConverters._
 
 import com.raquo.laminar.api.L._
