@@ -57,7 +57,7 @@ object EditorPanelUI {
         case _ ⇒ new EditorPanelUI(NO_EXTENSION)
       }
     }
-    println(" ---- Init code " + initCode)
+    
     editor.setCode(initCode, initHash)
     editor
   }
@@ -78,8 +78,7 @@ object EditorPanelUI {
 
 class EditorPanelUI(fileType: FileExtension) {
 
-  println("class EDITOR")
-  val edDiv = div(idAttr := "editor")
+  val edDiv = div(idAttr := "editor", fontFamily := "monospace")
   val editor = {
     val ed = ace.edit(edDiv.ref)
     val session = ed.getSession()

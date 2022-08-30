@@ -40,8 +40,7 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs) {
         fileExtension match {
           case OpenMOLEScript ⇒
             OMSContent.addTab(safePath, content, hash)
-          case FileExtension.CSV =>
-            println("CSV")
+          case FileExtension.CSV | FileExtension.OMR=> ResultContent.addTab(safePath, content, hash)
           case _: EditableFile=> AnyTextContent.addTab(safePath, content, hash)
           case MDScript ⇒
             Post()[Api].mdToHtml(safePath).call().foreach { htmlString ⇒
