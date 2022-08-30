@@ -19,9 +19,9 @@ package org.openmole.gui.plugin.authentication
 
 import org.openmole.gui.ext.client.*
 
-package object sshlogin {
+package object sshkey {
 
-  class APIClientImpl(val settings: ClientSettings) extends LoginAuthenticationAPI with APIClient
+ class APIClientImpl(val settings: ClientSettings) extends PrivateKeyAuthenticationAPI with APIClient
+ def PluginFetch = OMFetch(new APIClientImpl(_))
 
-  def PluginFetch = OMFetch(new APIClientImpl(_))
 }

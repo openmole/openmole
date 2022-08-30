@@ -832,7 +832,7 @@ lazy val evolutionAnalysisPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.p
 
 def guiPlugins = Seq(
   guiEnvironmentSSHLoginPlugin,
-  //guiEnvironmentSSHKeyPlugin,
+  guiEnvironmentSSHKeyPlugin,
   guiEnvironmentEGIPlugin,
   //netlogoWizardPlugin,
   //rWizardPlugin,
