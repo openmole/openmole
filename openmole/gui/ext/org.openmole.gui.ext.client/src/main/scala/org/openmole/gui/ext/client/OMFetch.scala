@@ -23,7 +23,7 @@ import endpoints4s.xhr.EndpointsSettings
 import scala.concurrent.duration.*
 import scala.util.{Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
-
+import scala.scalajs.js.timers
 object OMFetch {
   def apply[API](api: EndpointsSettings => API) = new OMFetch(api)
 }
@@ -37,14 +37,22 @@ class OMFetch[API](api: EndpointsSettings => API) {
     onTimeout: () ⇒ Unit = () ⇒ {},
     onWarningTimeout: () ⇒ Unit = () ⇒ {},
     onFailed: Throwable => Unit = _ => {}) = {
+    val timeoutSet = timers.setTimeout(warningTimeout.toMillis) {
+      onWarningTimeout()
+    }
 
-    //TODO implement warning timeout
-    //TODO add timoeut in settings
-    val future = f(api(EndpointsSettings()))
+    def stopTimeout = timers.clearTimeout(timeoutSet)
+
+    val future = f(api(EndpointsSettings().withTimeout(Some(timeout))))
     future.onComplete {
-      case Failure(_: scala.concurrent.TimeoutException) ⇒ onTimeout()
-      case Failure(t) => onFailed(t)
+      case Failure(_: scala.concurrent.TimeoutException) ⇒
+        stopTimeout
+        onTimeout()
+      case Failure(t) =>
+        stopTimeout
+        onFailed(t)
       case _ =>
+        stopTimeout
     }
 
     future
