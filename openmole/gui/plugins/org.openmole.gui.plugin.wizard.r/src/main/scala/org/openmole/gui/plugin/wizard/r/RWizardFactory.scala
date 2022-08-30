@@ -42,36 +42,9 @@ object TopLevelExports {
 class RWizardFactory extends WizardPluginFactory {
   val fileType = CodeFile(RLanguage())
 
-  def build(safePath: SafePath, onPanelFilled: (LaunchingCommand) ⇒ Unit = (LaunchingCommand) ⇒ {}): WizardGUIPlugin = new RWizardGUI
+  def parse(safePath: SafePath): Future[Option[ModelMetadata]] = OMPost()[RWizardAPI].parse(safePath).call()
 
-  def parse(safePath: SafePath): Future[Option[LaunchingCommand]] = OMPost()[RWizardAPI].parse(safePath).call()
+  def toTask(safePath: SafePath, modelMetadata: ModelMetadata) = OMPost()[RWizardAPI].toTask(safePath, modelMetadata).call()
 
   def name: String = "R"
-}
-
-case class RWizardData() extends WizardData
-
-class RWizardGUI extends WizardGUIPlugin {
-
-  def factory = new RWizardFactory
-
-  lazy val panel = div(client.modelHelp, "If your R sript depends on plugins, you should upload an archive (tar.gz, tgz) containing the root workspace.")
-
-  def save(
-    target:         SafePath,
-    executableName: String,
-    command:        String,
-    inputs:         Seq[ProtoTypePair],
-    outputs:        Seq[ProtoTypePair],
-    libraries:      Option[String],
-    resources:      Resources) =
-    OMPost()[RWizardAPI].toTask(
-      target,
-      executableName,
-      command,
-      inputs,
-      outputs,
-      libraries,
-      resources,
-      RWizardData()).call()
 }

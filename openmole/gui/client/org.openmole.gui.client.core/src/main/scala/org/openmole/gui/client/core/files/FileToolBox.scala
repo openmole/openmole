@@ -29,8 +29,8 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     closeToolBox
     CoreUtils.trashNodes(Seq(safePath)) {
       () ⇒
-        treeNodeTabs remove safePath
-        treeNodeTabs.checkTabs
+        TabContent.removeTab(safePath)
+        TabContent.checkTabs
         panels.pluginPanel.getPlugins
         treeNodeManager.invalidCurrentCache
     }
@@ -72,9 +72,10 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     withSafePath { sp ⇒
       closeToolBox
       Plugins.fetch { p ⇒
-        val wizardPanel = panels.modelWizardPanel(p.wizardFactories)
-        wizardPanel.dialog.show
-        wizardPanel.fromSafePath(sp)
+//FIXME
+        //        val wizardPanel = panels.modelWizardPanel(p.wizardFactories)
+//        wizardPanel.dialog.show
+//        wizardPanel.fromSafePath(sp)
       }
     }
 
@@ -97,9 +98,9 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
   def rename(safePath: SafePath, to: String, replacing: () ⇒ Unit) = {
     Fetch.future(_.rename(safePath, to).future).foreach {
       newNode ⇒
-        treeNodeTabs.rename(safePath, newNode)
+        TabContent.rename(safePath, newNode)
         treeNodeManager.invalidCurrentCache
-        treeNodeTabs.checkTabs
+        TabContent.checkTabs
         treeNodePanel.currentSafePath.set(Some(safePath.parent ++ to))
         replacing()
     }

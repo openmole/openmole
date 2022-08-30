@@ -22,13 +22,7 @@ import org.openmole.gui.ext.data._
 trait NetlogoWizardAPI {
   def toTask(
     target:         SafePath,
-    executableName: String,
-    command:        String,
-    inputs:         Seq[ProtoTypePair],
-    outputs:        Seq[ProtoTypePair],
-    libraries:      Option[String],
-    resources:      Resources,
-    data:           NetlogoWizardData): WizardToTask
+    modelMetadata: ModelMetadata)
 
-  def parse(safePath: SafePath): Option[LaunchingCommand]
+  def parse(safePath: SafePath): Option[ModelMetadata]
 }

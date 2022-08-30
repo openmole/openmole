@@ -10,7 +10,7 @@ import org.scalajs.dom.KeyboardEvent
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scaladget.bootstrapnative.Selector.Options
-import org.openmole.gui.client.core.files.TreeNodePanel
+import org.openmole.gui.client.core.files.{TabContent, TreeNodePanel}
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
@@ -119,9 +119,10 @@ object App {
       val maindiv = div()
 
       val authenticationPanel = AuthenticationPanel.render(plugins.authenticationFactories)
+      val newProjectPanel = ProjectPanel.render(plugins.wizardFactories)
 
       val openFileTree = Var(true)
-      val openAuthentication = Var(false)
+      //   val openAuthentication = Var(false)
 
       //      val settingsItem = navItem(div(
       //        //panels.settingsViewApp,
@@ -137,22 +138,23 @@ object App {
           false
         }
       }
-      case class MenuAction(name: String, action: () ⇒ Unit)
 
-      lazy val newEmpty = MenuAction("Empty project", () ⇒ {
-        val fileName = "newProject.oms"
-        CoreUtils.createFile(panels.treeNodeManager.dirNodeLine.now(), fileName, () ⇒ {
-          val toDisplay = panels.treeNodeManager.dirNodeLine.now() ++ fileName
-          FileManager.download(
-            toDisplay,
-            hash = true,
-            onLoaded = (content, hash) ⇒ {
-              treeNodeManager.invalidCurrentCache
-              fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OMS, panels.pluginServices)
-            }
-          )
-        })
-      })
+      //      case class MenuAction(name: String, action: () ⇒ Unit)
+      //
+      //      lazy val newEmpty = MenuAction("Empty project", () ⇒ {
+      //        val fileName = "newProject.oms"
+      //        CoreUtils.addFile(panels.treeNodeManager.dirNodeLine.now, fileName, () ⇒ {
+      //          val toDisplay = panels.treeNodeManager.dirNodeLine.now ++ fileName
+      //          FileManager.download(
+      //            toDisplay,
+      //            hash = true,
+      //            onLoaded = (content, hash) ⇒ {
+      //              treeNodeManager.invalidCurrentCache
+      //              fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OMS, panels.pluginServices)
+      //            }
+      //          )
+      //        })
+      //      })
 
       //START BUTTON
       lazy val theNavBar = div(
@@ -166,35 +168,38 @@ object App {
             }
           )
         },
-        menuActions.selector,
-        div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ openExecutionPanel }).tooltip("Executions"),
-        div(glyph_lock, navBarItem, onClick --> { _ ⇒ panels.expandTo(authenticationPanel, 2)}).tooltip("Authentications"),
-        div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒ panels.expandTo(panels.pluginPanel.render, 1)}).tooltip("Plugins")
+        //   menuActions.selector,
+        div(row, justifyContent.flexStart, marginLeft := "20px",
+          button(btn_danger, "New project", onClick --> { _ => panels.expandTo(newProjectPanel, 3) }),
+          div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ openExecutionPanel }).tooltip("Executions"),
+          div(glyph_lock, navBarItem, onClick --> { _ ⇒ panels.expandTo(authenticationPanel, 2) }).tooltip("Authentications"),
+          div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒ panels.expandTo(panels.pluginPanel.render, 1) }).tooltip("Plugins")
+        )
         //            settingsItem
       )
 
-      lazy val importModel = MenuAction("Import your model", () ⇒ {
-        modelWizardPanel(plugins.wizardFactories).dialog.show
-      })
+      //      lazy val importModel = MenuAction("Import your model", () ⇒ {
+      //        panels.expandTo(modelWizardPanel(plugins.wizardFactories).render, 3)
+      //      })
 
-      lazy val fromURLProject = MenuAction("From URL", () ⇒ {
-        urlImportPanel.urlDialog.show
-      })
+      //      lazy val fromURLProject = MenuAction("From URL", () ⇒ {
+      //        urlImportPanel.urlDialog.show
+      //      })
+      //
+      //      lazy val marketPlaceProject = MenuAction("From market place", () ⇒ {
+      //        marketPanel.modalDialog.show
+      //      })
 
-      lazy val marketPlaceProject = MenuAction("From market place", () ⇒ {
-        marketPanel.modalDialog.show
-      })
+      // lazy val elements = Seq(newEmpty, importModel, marketPlaceProject, fromURLProject)
 
-      lazy val elements = Seq(newEmpty, importModel, marketPlaceProject, fromURLProject)
-
-      lazy val menuActions: Options[MenuAction] = elements.options(
-        key = btn_danger,
-        naming = (m: MenuAction) ⇒ m.name,
-        onclose = () ⇒ menuActions.content.now().foreach {
-          _.action()
-        },
-        fixedTitle = Some("New project")
-      )
+      //      lazy val menuActions: Options[MenuAction] = elements.options(
+      //        key = btn_danger,
+      //        naming = (m: MenuAction) ⇒ m.name,
+      //        onclose = () ⇒ menuActions.content.now.foreach {
+      //          _.action()
+      //        },
+      //        fixedTitle = Some("New project")
+      //      )
 
     // Define the option sequence
     //Fetch(_.omSettings(())) { sets ⇒
@@ -207,46 +212,71 @@ object App {
           div(
             cls := "main-container",
             div(
-              cls <-- openFileTree.signal.map { oft ⇒
-                "file-section" + {
-                  if (oft) "" else " closed"
+              cls := "main-container",
+              div(
+                cls <-- openFileTree.signal.map { oft ⇒
+                  "file-section" + {
+                    if (oft) "" else " closed"
+                  }
+                },
+                div(img(src := "img/openmole_dark.png", height := "70px"), cls := "nav-container"),
+                treeNodePanel.fileControler,
+                treeNodePanel.fileToolBar.sortingGroup,
+                treeNodePanel.treeView
+              ),
+              div(
+                cls := "tab-section",
+                theNavBar,
+                //openAuthentication.signal.expand(authenticationPanel),
+               // treeNodeTabs.render.amend(cls := "tab-section")
+                TabContent.render //.amend(cls := "tab-section")
+              )
+              //                cls <-- openFileTree.signal.combineWith(panels.bannerAlert.isOpen).map {
+              //                  case (oft, io) ⇒
+              //                   // "centerpanel "
+              ////                    +
+              ////                      CoreUtils.ifOrNothing(oft, "reduce") +
+              ////                      CoreUtils.ifOrNothing(io, " banneropen")
+              //                },
+              //                  div(
+              //                    omsheet.textVersion,
+              //                    div(
+              //                      fontSize := "1em", s"${sets.version} ${sets.versionName}"),
+              //                    div(fontSize := "0.8em", s"built the ${sets.buildTime}")
+              //                  )
+            ),
+            //            openExpandablePanel.signal.expand(
+            //              div(
+            //                cls := "collapse-bottom",
+            //                div(cls := "splitter"),
+            //                child <-- panels.expandablePanel.signal.map { p ⇒
+            //                  p.map {
+            //                    _.element
+            //                  }.getOrElse(div())
+            //                }
+            //              )
+            //            ),
+
+            div(
+              div(cls <-- expandablePanel.signal.map { x =>
+                "collapse-bottom " + {
+                  x match {
+                    case Some(ep: ExpandablePanel) => ""
+                    case _ => "close"
+                  }
                 }
               },
-              div(img(src := "img/openmole_dark.png", height := "70px"), cls := "nav-container"),
-              treeNodePanel.fileControler,
-              treeNodePanel.fileToolBar.sortingGroup,
-              treeNodePanel.treeView
+                div(cls := "splitter"),
+                child <-- panels.expandablePanel.signal.map { p ⇒
+                  p.map {
+                    _.element
+                  }.getOrElse(div(top := "1000px", color.white))
+                }
+              )
             ),
-            div(
-              cls := "tab-section",
-              theNavBar,
-              openAuthentication.signal.expand(authenticationPanel),
-              treeNodeTabs.fontSizeControl,
-              treeNodeTabs.render.amend(cls := "tab-section")
-            )
-            //                cls <-- openFileTree.signal.combineWith(panels.bannerAlert.isOpen).map {
-            //                  case (oft, io) ⇒
-            //                   // "centerpanel "
-            ////                    +
-            ////                      CoreUtils.ifOrNothing(oft, "reduce") +
-            ////                      CoreUtils.ifOrNothing(io, " banneropen")
-            //                },
-            //                  div(
-            //                    omsheet.textVersion,
-            //                    div(
-            //                      fontSize := "1em", s"${sets.version} ${sets.versionName}"),
-            //                    div(fontSize := "0.8em", s"built the ${sets.buildTime}")
-            //                  )
-          ),
-          panels.expandablePanel.signal.map {
-            _ != None
-          }.expand(
-            div(
-              div(cls := "splitter"),
-              cls := "expandable-panel", height := "900px",
-              div(child <-- panels.expandablePanel.signal.map { p ⇒ p.map{_.element}.getOrElse(div()) })
-            )),
-          panels.alertPanel.alertDiv
+
+            panels.alertPanel.alertDiv
+          )
         )
       )
     }

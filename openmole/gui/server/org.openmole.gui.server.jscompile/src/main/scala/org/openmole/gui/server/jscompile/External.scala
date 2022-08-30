@@ -29,7 +29,7 @@ object External {
     //    }
 
     val process = Process(cmd, cwd)
-    val processIO = BasicIO.standard(false) //.withError(toErrorLog)
+    val processIO = BasicIO.standard(_ => ()).withError(_=> ())
     val code: Int = process.run(processIO).exitValue()
 
     //    if (code != 0) {

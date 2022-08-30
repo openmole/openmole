@@ -183,7 +183,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     }
   }
 
-  def temporaryFile(): SafePath = {
+  def temporaryDirectory(): SafePath = {
     import services._
     import org.openmole.gui.ext.data.ServerFileSystemContext.absolute
     val dir = services.tmpDirectory.newDir("openmoleGUI")
@@ -213,7 +213,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit = {
     import services._
-    utils.copyAllTmpTo(tmpSafePath, to)
+    utils.copyAllFromTmp(tmpSafePath, to)
   }
 
   def copyProjectFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean) = {

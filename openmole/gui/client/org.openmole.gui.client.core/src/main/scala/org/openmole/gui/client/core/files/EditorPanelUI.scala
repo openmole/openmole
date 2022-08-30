@@ -44,22 +44,20 @@ import scala.scalajs.js.annotation.JSImport
 
 object EditorPanelUI {
 
-  def apply(
-             treeNodeTab: TreeNodeTab,
-             fileType: FileExtension,
-             initCode: String,
-             initHash: String,
-             //containerHESetters: HESetters     = emptySetters
+  def apply(fileType: FileExtension,
+            initCode: String,
+            initHash: String
+            //containerHESetters: HESetters     = emptySetters
            ) = {
-//    import scala.concurrent.ExecutionContext.Implicits.global
-//    org.openmole.gui.client.core.APIClient.uuid(()).future.onComplete { i => println("uuid " + i.get.uuid) }
+
     val editor = {
       fileType match {
-        case OMS ⇒ new EditorPanelUI(treeNodeTab, OMS)
-        case SCALA ⇒ new EditorPanelUI(treeNodeTab, SCALA)
-        case _ ⇒ new EditorPanelUI(treeNodeTab, NO_EXTENSION)
+        case OMS ⇒ new EditorPanelUI(OMS)
+        case SCALA ⇒ new EditorPanelUI(SCALA)
+        case _ ⇒ new EditorPanelUI(NO_EXTENSION)
       }
     }
+    println(" ---- Init code " + initCode)
     editor.setCode(initCode, initHash)
     editor
   }
@@ -78,8 +76,9 @@ object EditorPanelUI {
   object openmolemode extends js.Object
 }
 
-class EditorPanelUI(treeNodeTab: TreeNodeTab, fileType: FileExtension) {
+class EditorPanelUI(fileType: FileExtension) {
 
+  println("class EDITOR")
   val edDiv = div(idAttr := "editor")
   val editor = {
     val ed = ace.edit(edDiv.ref)
@@ -116,6 +115,8 @@ class EditorPanelUI(treeNodeTab: TreeNodeTab, fileType: FileExtension) {
 
   var initialContentHash = ""
 
+  def onSaved(hash: String) = initialContentHash = hash
+
   lazy val lineHeight = Var(15)
 
   val lineHeightObserver = Observer[Int] { (i: Int) ⇒
@@ -124,6 +125,8 @@ class EditorPanelUI(treeNodeTab: TreeNodeTab, fileType: FileExtension) {
     editor.renderer.updateFontSize()
   }
 
+
+  val errors = Var(EditorErrors())
   val errorMessage = Var("")
   val errorMessageOpen = Var(false)
   val errorsWithLocation: Var[Seq[ErrorWithLocation]] = Var(Seq())
@@ -133,7 +136,11 @@ class EditorPanelUI(treeNodeTab: TreeNodeTab, fileType: FileExtension) {
       _.line == Some(editor.selection.getCursor().row.toInt)
     } match {
       case Some(e) =>
-        val message = s"${e.line.map{_+1}.getOrElse("")}: ${e.stackTrace}"
+        val message = s"${
+          e.line.map {
+            _ + 1
+          }.getOrElse("")
+        }: ${e.stackTrace}"
         if (errorMessage.now() == message) {
           errorMessageOpen.update(!_)
         }
@@ -173,11 +180,9 @@ class EditorPanelUI(treeNodeTab: TreeNodeTab, fileType: FileExtension) {
         backgroundColor := "#d35f5f", color := "white", height := "100", padding := "10", fontFamily := "gi")),
       edDiv.amend(
         lineHeight --> lineHeightObserver,
-        treeNodeTab match {
-          case oms: TreeNodeTab.OMS ⇒
-            oms.errors --> omsErrorObserver
-          case _ =>
-            emptyMod
+        fileType match {
+          case FileExtension.OMS ⇒ errors --> omsErrorObserver
+          case _ => emptyMod
         },
         onClick --> { _ =>
           setErrorMessage

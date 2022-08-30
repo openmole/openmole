@@ -31,7 +31,6 @@ import org.openmole.tool.logger.JavaLogger
 
 import annotation.tailrec
 import org.openmole.gui.server.core.*
-import org.openmole.gui.server.core.e4s.*
 import org.openmole.console.*
 import org.openmole.tool.file.*
 import org.openmole.tool.hash.*
@@ -40,7 +39,6 @@ import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.preference.*
 import org.openmole.core.services.*
 import org.openmole.core.networkservice.*
-import org.openmole.gui.server.core.e4s.NewGUIServer
 import org.openmole.tool.outputredirection.OutputRedirection
 
 object Application extends JavaLogger {
@@ -287,7 +285,7 @@ object Application extends JavaLogger {
             GUIServerServices.withServices(workspace, config.proxyURI, logLevel, logFileLevel) { services ⇒
               Runtime.getRuntime.addShutdownHook(thread(GUIServerServices.dispose(services)))
               //val server = new GUIServer(port, config.remote, services, config.password, extraHeader, !config.unoptimizedJS, config.httpSubDirectory)
-              val newServer = NewGUIServer(port, config.remote, services, config.password, !config.unoptimizedJS, extraHeader)
+              val newServer = GUIServer(port, config.remote, services, config.password, !config.unoptimizedJS, extraHeader)
 
               ///server.start()
               val s = newServer.start()

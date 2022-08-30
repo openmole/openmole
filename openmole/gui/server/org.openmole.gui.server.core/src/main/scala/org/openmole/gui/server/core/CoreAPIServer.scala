@@ -1,4 +1,4 @@
-package org.openmole.gui.server.core.e4s
+package org.openmole.gui.server.core
 
 /*
  * Copyright (C) 2022 Romain Reuillon
@@ -20,15 +20,13 @@ package org.openmole.gui.server.core.e4s
 import cats.effect.*
 import endpoints4s.http4s.server
 import org.http4s.*
-import org.openmole.core.outputmanager.OutputManager
-import org.openmole.gui.ext.api
-import org.openmole.gui.server.core.{ApiImpl, GUIServerServices}
-import cats.effect.*
-import org.http4s.*
 import org.http4s.dsl.io.*
 import org.http4s.headers.*
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.gui.ext
-import org.openmole.gui.ext.server.{APIServer, *}
+import org.openmole.gui.ext.server.*
+import org.openmole.gui.ext.{api, data}
+import org.openmole.gui.server.core.{ApiImpl, GUIServerServices}
 
 /** Defines a Play router (and reverse router) for the endpoints described
  * in the `CounterEndpoints` trait.
@@ -76,8 +74,8 @@ class CoreAPIServer(apiImpl: ApiImpl)
   val extractRoute =
     extract.implementedBy { sp => apiImpl.extractTGZ(sp) }
 
-//  val extractTestExistRoute =
-//    extractTestExist.implementedBy { case(a, b) => apiImpl.extractAndTestExistence(a, b) }
+  val extractTestExistRoute =
+    extractTestExist.implementedBy { case(a, b) => apiImpl.extractAndTestExistence(a, b) }
 
   val deleteFilesRoute =
     deleteFiles.implementedBy { case(sp, context) => apiImpl.deleteFiles(sp, context) }
@@ -139,7 +137,13 @@ class CoreAPIServer(apiImpl: ApiImpl)
 
   val downloadHTTPRoute =
     downloadHTTP.implementedBy { case(s, p, b) => apiImpl.downloadHTTP(s, p, b) }
-  
+
+  val temporaryDirectoryRoute =
+    temporaryDirectory.implementedBy { _ => apiImpl.temporaryDirectory() }
+
+  val copyAllFromTmpRoute =
+    copyAllFromTmp.implementedBy { case(f, t) => apiImpl.copyAllTmpTo(f, t) }
+
   // FIXME implement when scala 3
   //  val marketIndex: Endpoint[Unit, MarketIndex]
   //  val getMarketEntry: Endpoint[(MarketIndexEntry, SafePath), Unit]
@@ -177,18 +181,21 @@ class CoreAPIServer(apiImpl: ApiImpl)
       runningErrorEnvironmentDataRoute,
       modelsRoute,
       expandResourcesRoute,
-      downloadHTTPRoute
+      downloadHTTPRoute,
+      temporaryDirectoryRoute,
+      extractTestExistRoute,
+      copyAllFromTmpRoute
     )
   ) //.map(_.putHeaders(Header("Access-Control-Allow-Origin", "*")))
 
   val routes: HttpRoutes[IO]  =
     HttpRoutes.of {
       case req @ POST -> Root / org.openmole.gui.ext.data.routes.`uploadFilesRoute` =>
-        import org.openmole.gui.ext.server.utils
-        import apiImpl.services._
-        import org.http4s.multipart._
-        import org.openmole.tool.stream._
+        import apiImpl.services.*
         import cats.effect.unsafe.implicits.global
+        import org.http4s.multipart.*
+        import org.openmole.gui.ext.server.utils
+        import org.openmole.tool.stream.*
 
         def move(fileParts: Vector[Part[IO]], fileType: String, directoryName: Option[String]) = {
 
@@ -227,21 +234,21 @@ class CoreAPIServer(apiImpl: ApiImpl)
         }
 
       case req @ GET -> Root / org.openmole.gui.ext.data.routes.`downloadFileRoute` =>
-        import apiImpl.services._
-        import org.openmole.tool.file._
+        import apiImpl.services.*
+        import org.openmole.tool.file.*
 
         val path = req.params("path")
         val hash = req.params.get("hash").flatMap(_.toBooleanOption).getOrElse(false)
 
-        import org.typelevel.ci._
+        import org.typelevel.ci.*
 
         val f = new java.io.File(org.openmole.gui.ext.server.utils.webUIDirectory, path)
 
         if (!f.exists()) Status.NotFound.apply(s"The file $path does not exist.")
         else {
           if (f.isDirectory) {
-            import org.openmole.tool.tar._
-            import org.openmole.tool.stream._
+            import org.openmole.tool.stream.*
+            import org.openmole.tool.tar.*
 
             val st =
               fs2.io.readOutputStream[IO](64 * 1024) { out =>

@@ -1,4 +1,4 @@
-package org.openmole.gui.server.core.e4s
+package org.openmole.gui.server.core
 
 /*
  * Copyright (C) 2022 Romain Reuillon
@@ -18,19 +18,17 @@ package org.openmole.gui.server.core.e4s
  */
 
 
-import org.openmole.gui.server.core.{GUIServer, GUIServerServices, GUIServlet}
-import org.openmole.gui.ext
-import org.http4s.HttpRoutes
-import scalatags.Text.all.*
-import scalatags.Text.all as tags
 import cats.effect.*
 import org.http4s.*
 import org.http4s.dsl.io.*
-import org.http4s.headers.{`Content-Type`, Location}
+import org.http4s.headers.{Location, `Content-Type`}
 import org.http4s.syntax.all.*
 import org.openmole.core.preference.Preference
+import org.openmole.gui.ext
+import org.openmole.gui.server.core.{GUIServer, GUIServerServices, GUIServlet}
 import org.openmole.tool.crypto.Cypher
-
+import scalatags.Text.all as tags
+import scalatags.Text.all.*
 
 import java.io.File
 import java.util.concurrent.atomic.AtomicReference
@@ -98,6 +96,6 @@ class ApplicationServer(webapp: File, extraHeader: String, password: Option[Stri
       StaticFile.fromFile(new File(webapp, s"img/$path"), Some(request)).getOrElseF(NotFound())
     case request @ GET -> Root / "fonts" / path =>
       StaticFile.fromFile(new File(webapp, s"fonts/$path"), Some(request)).getOrElseF(NotFound())
-    case GET -> Root / path => ApplicationServer.redirect(ext.data.routes.appRoute)
+    case GET -> Root => ApplicationServer.redirect(ext.data.routes.appRoute)
   }
 }

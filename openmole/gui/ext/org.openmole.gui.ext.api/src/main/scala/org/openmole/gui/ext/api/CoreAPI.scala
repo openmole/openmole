@@ -79,11 +79,12 @@ trait CoreAPI extends RESTAPI {
    endpoint(post(path / "duplicate", jsonRequest[(SafePath, String)]), ok(jsonResponse[SafePath]))
 
   //  def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit
-
+  val copyAllFromTmp: Endpoint[(SafePath, SafePath), Unit] =
+    endpoint(post(path / "copy-from-tmp", jsonRequest[(SafePath, SafePath)]), ok(jsonResponse[Unit]))
 
   //  def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
-//  val extractTestExist: Endpoint[(SafePath, SafePath), Seq[SafePath]] =
-//    endpoint(post(path / "extract-test-exist", jsonRequest[(SafePath, SafePath)]), ok(jsonResponse[Seq[SafePath]]))
+  val extractTestExist: Endpoint[(SafePath, SafePath), Seq[SafePath]] =
+    endpoint(post(path / "extract-test-exist", jsonRequest[(SafePath, SafePath)]), ok(jsonResponse[Seq[SafePath]]))
 
 
   //  def deleteFile(safePath: SafePath, context: ServerFileSystemContext): Unit
@@ -116,6 +117,8 @@ trait CoreAPI extends RESTAPI {
   val sequence: Endpoint[SafePath, SequenceData] =
     endpoint(post(path / "sequence", jsonRequest[SafePath]), ok(jsonResponse[SequenceData]))
 
+  val temporaryDirectory: Endpoint[Unit, SafePath] =
+    endpoint(get(path / "temporary-directory"), ok(jsonResponse[SafePath]))
 
   // ---------- Executions --------------------
   //def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])

@@ -5,7 +5,9 @@ import org.openmole.gui.ext.data._
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.ext.api.Api
 import org.openmole.gui.client.core._
+import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.tool.plot.Plotter
+import scaladget.bootstrapnative.bsn
 
 /*
  * Copyright (C) 07/05/15 // mathieu.leclaire@openmole.org
@@ -24,26 +26,28 @@ import org.openmole.gui.client.tool.plot.Plotter
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class FileDisplayer(treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) {
+class FileDisplayer(treeNodeTabs: TreeNodeTabs) {
 
 
 
   def display(safePath: SafePath, content: String, hash: String, fileExtension: FileExtension, pluginServices: PluginServices) = {
-    treeNodeTabs.alreadyDisplayed(safePath) match {
-      case Some(t: TreeNodeTab) ⇒ treeNodeTabs.tabsElement.setActive(t.tabID)
+    TabContent.alreadyDisplayed(safePath) match {
+      case Some(tabID: bsn.TabID) ⇒ TabContent.tabsUI.setActive(tabID)
       case _ ⇒
         fileExtension match {
           case OpenMOLEScript ⇒
-            val tab = TreeNodeTab.OMS(
-              safePath,
-              content,
-              hash,
-              showExecution,
-            //  TreeNodeTabs.setErrors(treeNodeTabs, safePath, _)
-            )
-            treeNodeTabs add tab
-            tab.omsEditor.editor.focus()
+            OMSContent.addTab(safePath, content, hash)
+          case FileExtension.CSV =>
+            println("CSV")
+          case _: EditableFile=> AnyTextContent.addTab(safePath, content, hash)
+          case MDScript ⇒
+            Fetch.future(_.mdToHtml(safePath).future).foreach { htmlString ⇒
+              val htmlDiv = com.raquo.laminar.api.L.div()
+              htmlDiv.ref.innerHTML = htmlString
+              HTMLContent.addTab(safePath, htmlDiv)
+            }
           case OpenMOLEResult ⇒
+            // TODO implement
 //            Post()[Api].findAnalysisPlugin(safePath).call.foreach {
 //              case Some(plugin) ⇒
 //                val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
@@ -51,32 +55,28 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) {
 //                treeNodeTabs add tab
 //              case None ⇒
 //            }
-          case MDScript ⇒
-            Fetch.future(_.mdToHtml(safePath).future).foreach { htmlString ⇒
-              treeNodeTabs add TreeNodeTab.HTML(safePath, TreeNodeTab.mdBlock(htmlString))
-            }
           case SVGExtension ⇒ treeNodeTabs add TreeNodeTab.HTML(safePath, TreeNodeTab.rawBlock(content))
-          case editableFile: EditableFile ⇒
-            if (DataUtils.isCSV(safePath))
-              Fetch.future(_.sequence(safePath).future).foreach { seq ⇒
-                val tab = TreeNodeTab.Editable(
-                  safePath,
-                  DataTab.build(seq, view = TreeNodeTab.Table, editing = !editableFile.onDemand),
-                  content,
-                  hash,
-                  Plotter.default)
-                treeNodeTabs add tab
-              }
-            else {
-              val tab = TreeNodeTab.Editable(
-                safePath,
-                DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw),
-                content,
-                hash,
-                Plotter.default)
-
-              treeNodeTabs add tab
-            }
+//          case editableFile: EditableFile ⇒
+//            if (DataUtils.isCSV(safePath))
+//              Post()[Api].sequence(safePath).call().foreach { seq ⇒
+//                val tab = TreeNodeTab.Editable(
+//                  safePath,
+//                  DataTab.build(seq, view = TreeNodeTab.Table, editing = !editableFile.onDemand),
+//                  content,
+//                  hash,
+//                  Plotter.default)
+//                treeNodeTabs add tab
+//              }
+//            else {
+//              val tab = TreeNodeTab.Editable(
+//                safePath,
+//                DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw),
+//                content,
+//                hash,
+//                Plotter.default)
+//
+//              treeNodeTabs add tab
+//            }
 
           case _ ⇒ //FIXME for GUI workflows
         }

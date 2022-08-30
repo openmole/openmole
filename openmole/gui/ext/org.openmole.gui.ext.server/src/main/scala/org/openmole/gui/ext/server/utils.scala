@@ -223,7 +223,7 @@ object utils {
 
   }
 
-  def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath)(implicit workspace: Workspace): Unit = {
+  def copyAllFromTmp(tmpSafePath: SafePath, to: SafePath)(implicit workspace: Workspace): Unit = {
 
     val f: File = safePathToFile(tmpSafePath)(ServerFileSystemContext.absolute, workspace)
     val toFile: File = safePathToFile(to)(ServerFileSystemContext.project, workspace)

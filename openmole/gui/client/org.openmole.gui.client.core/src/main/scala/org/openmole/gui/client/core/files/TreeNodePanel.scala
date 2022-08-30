@@ -80,7 +80,10 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
   //Upload tool
   val transferring: Var[ProcessState] = Var(Processed())
 
-  def fInputMultiple(todo: Input ⇒ Unit) =
+  def fInputMultiple(todo: Input ⇒ Unit) = {
+    val webkitdirectory: Prop[Boolean] = customProp("webkitdirectory", com.raquo.domtypes.generic.codecs.BooleanAsIsCodec)
+    val mozdirectory: Prop[Boolean] = customProp("mozdirectory", com.raquo.domtypes.generic.codecs.BooleanAsIsCodec)
+
     inputTag().amend(cls := "upload", `type` := "file", multiple := true,
       inContext { thisNode ⇒
         onChange --> { _ ⇒
@@ -88,6 +91,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
         }
       }
     )
+  }
 
   def upbtn(todo: Input ⇒ Unit): HtmlElement =
     span(aria.hidden := true, glyph_upload, cls := "fileUpload glyphmenu", margin := "10 0 10 160",
@@ -289,8 +293,8 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
   val treeView: Div = {
     div(cls := "file-scrollable-content",
-      children <-- treeNodeManager.sons.signal.combineWith(treeNodeManager.dirNodeLine.signal).combineWith(treeNodeManager.findFilesContaining.signal).map {
-        case (sons, currentDir, findString, foundFiles) ⇒
+      children <-- treeNodeManager.sons.signal.combineWith(treeNodeManager.dirNodeLine.signal).combineWith(treeNodeManager.findFilesContaining.signal).combineWith(multiTool.signal).map {
+        case (sons, currentDir, findString, foundFiles, multiTool) ⇒
           if (!foundFiles.isEmpty) {
             foundFiles.map { case (sp, isDir) => div(s"${sp.normalizedPathString}", cls := "findFile", onClick --> { _ =>
               fileToolBar.filterToolOpen.set(false)
@@ -308,9 +312,15 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
             }
             else {
               if (sons.contains(currentDir)) {
-                sons(currentDir).list.zipWithIndex.flatMap { case (tn, id) =>
-                  Seq(drawNode(tn, id).render)
-                }
+                (if (multiTool == CopyOrTrash) {
+                  lazy val allCheck: Input = checkbox(false).amend(cls := "file0", marginBottom := "3px", onClick --> { _ ⇒
+                    treeNodeManager.switchAllSelection(sons(currentDir).list.map { tn => currentDir ++ tn.name }, allCheck.ref.checked)
+                  })
+                  allCheck
+                } else emptyNode) +:
+                  sons(currentDir).list.zipWithIndex.flatMap { case (tn, id) =>
+                    Seq(drawNode(tn, id).render)
+                  }
               }
               else Seq(div())
             }
@@ -366,16 +376,15 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
   case class ReactiveLine(id: Int, tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) {
 
     val tnSafePath = treeNodeManager.dirNodeLine.now() ++ tn.name
-    val selected = Var(false)
+
+    // val selected = Var(false)
+    def isSelected(selection: Seq[SafePath]) = selection.contains(tnSafePath)
 
     def dirBox(tn: TreeNode) =
       div(
-        child <-- multiTool.signal.map { mcot ⇒
-          if (mcot == CopyOrTrash) checkbox(selected.now()).amend(onClick --> { _ ⇒
-            selected.update { s ⇒
-              treeNodeManager.setSelected(tnSafePath, !s)
-              !s
-            }
+        child <-- multiTool.signal.combineWith(treeNodeManager.selected.signal).map { case (mcot, selected) ⇒
+          if (mcot == CopyOrTrash) checkbox(isSelected(selected)).amend(onClick --> { _ ⇒
+              treeNodeManager.switchSelection(tnSafePath)
           })
           else {
             tn match {
@@ -401,7 +410,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     val render: HtmlElement = {
       div(display.flex, flexDirection.column,
         div(display.flex, alignItems.center, lineHeight := "27px",
-          backgroundColor <-- selected.signal.map { s ⇒ if (s) toolBoxColor else "" },
+          backgroundColor <-- treeNodeManager.selected.signal.map { s ⇒ if (isSelected(s)) toolBoxColor else "" },
           dropPairs,
           onDragStart --> { e ⇒
             e.dataTransfer.setData("text/plain", "nothing") //  FIREFOX TRICK
@@ -465,7 +474,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
                 treeNodeManager.invalidCache(to)
                 treeNodeManager.invalidCache(dragged)
                 treeNodeManager.invalidCurrentCache
-                treeNodeTabs.checkTabs
+                TabContent.checkTabs
             }
             //})
           }

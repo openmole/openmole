@@ -23,7 +23,7 @@ object WizardUtils {
 
   def wizardModelData(inputs: Seq[ProtoTypePair],
                       outputs: Seq[ProtoTypePair],
-                      resources: Seq[String],
+                     // resources: Seq[String],
                       specificInputPattern: Option[String] = None,
                       specificOutputPattern: Option[String] = None,
                      ) = {
@@ -46,7 +46,7 @@ object WizardUtils {
     val (ifilemappings, imappings) = rawimappings.partition(_.`type` == ProtoTYPE.FILE)
     val (ofilemappings, omappings) = rawomappings.partition(_.`type` == ProtoTYPE.FILE)
 
-    val resourcesString = if (!resources.isEmpty) s"""  resources += (${resources.map { r ⇒ s"workDirectory / $r" }.mkString(",")})\n""" else ""
+    //val resourcesString = if (!resources.isEmpty) s"""  resources += (${resources.map { r ⇒ s"workDirectory / $r" }.mkString(",")})\n""" else ""
 
     val defaults =
       "\n  // Default values. Can be removed if OpenMOLE Vals are set by values coming from the workflow\n" +
@@ -67,7 +67,7 @@ object WizardUtils {
       imapString(ifilemappings, "inputFiles"),
       omapString(ofilemappings, "outputFiles"),
       defaults,
-      resourcesString,
+   //   resourcesString,
       specificInputPattern.map { sip => imapString(imappings, sip) },
       specificOutputPattern.map { sop => omapString(omappings, sop) }
     )
@@ -80,6 +80,6 @@ object WizardUtils {
       modelData.specificOutputMapping.getOrElse("") +
       modelData.inputFileMapping +
       modelData.outputFileMapping +
-      modelData.resources +
+    //  modelData.resources +
       modelData.defaults
 }

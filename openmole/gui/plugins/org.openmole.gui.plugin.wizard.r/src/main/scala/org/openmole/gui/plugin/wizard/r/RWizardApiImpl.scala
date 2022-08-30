@@ -31,30 +31,21 @@ class RWizardApiImpl(s: Services) extends RWizardAPI {
   import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
   def toTask(
-    target:         SafePath,
-    executableName: String,
-    command:        String,
-    inputs:         Seq[ProtoTypePair],
-    outputs:        Seq[ProtoTypePair],
-    libraries:      Option[String],
-    resources:      Resources,
-    data:           RWizardData): WizardToTask = {
+              target: SafePath,
+              modelMetadata: ModelMetadata): Unit = {
 
-    val modelData = WizardUtils.wizardModelData(inputs, outputs, resources.all.map {
-      _.safePath.name
-    } :+ executableName, Some("inputs"), Some("ouputs"))
+    val modelData = WizardUtils.wizardModelData(modelMetadata.inputs, modelMetadata.outputs, Some("inputs"), Some("ouputs"))
 
-    val task = s"${executableName.split('.').head.toLowerCase}Task"
+    val task = s"${modelMetadata.executableName.map{_.split('.')}.getOrElse(Array()).head.toLowerCase}Task"
 
     val content = modelData.vals +
-      s"""\nval $task = RTask(\"\"\"\n   source("$executableName")\n   \"\"\") set(\n""".stripMargin +
+      s"""\nval $task = RTask(\"\"\"\n   source("${modelMetadata.executableName.getOrElse("")}")\n   \"\"\") set(\n""".stripMargin +
       WizardUtils.expandWizardData(modelData) +
       s""")\n\n$task hook ToStringHook()"""
 
     target.toFile.content = content
-    WizardToTask(target)
   }
 
-  def parse(safePath: SafePath): Option[LaunchingCommand] = None
+  def parse(safePath: SafePath): Option[ModelMetadata] = None
 
 }

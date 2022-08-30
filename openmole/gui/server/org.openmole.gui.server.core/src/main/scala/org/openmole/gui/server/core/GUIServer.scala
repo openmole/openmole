@@ -17,16 +17,37 @@ package org.openmole.gui.server.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import cats.effect.IO
+import org.http4s.blaze.server.BlazeServerBuilder
+import org.http4s.server.Router
+
 import java.util.concurrent.Semaphore
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.location._
-import org.openmole.core.preference.{ Preference, PreferenceLocation }
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
+import org.openmole.core.location.*
+import org.openmole.core.preference.{Preference, PreferenceLocation}
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.gui.ext.server.utils
-import org.openmole.gui.server.jscompile.{ JSPack, Webpack }
-import org.openmole.tool.crypto.KeyStore
-import org.openmole.tool.file._
+import org.openmole.gui.server.jscompile.{JSPack, Webpack}
+import org.openmole.tool.crypto.{Cypher, KeyStore}
+import org.openmole.tool.file.*
 import org.openmole.tool.network.Network
+import cats.effect.*
+import org.http4s.*
+import org.http4s.blaze.server.*
+import org.http4s.dsl.io.*
+import org.http4s.implicits.*
+import org.http4s.server.Router
+import org.openmole.gui.ext.server.GUIPluginRegistry
+import org.openmole.gui.server.core.{ApiImpl, GUIServer, GUIServerServices}
+import org.openmole.tool.crypto.Cypher
+
+import java.io.File
+import java.util.concurrent.Semaphore
+import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.*
+
+import java.io.File
 
 object GUIServer {
 
@@ -102,6 +123,90 @@ object GUIServer {
   sealed trait ExitStatus
   case object Restart extends ExitStatus
   case object Ok extends ExitStatus
+
+
+  def apply(port: Int, localhost: Boolean, services: GUIServerServices, password: Option[String], optimizedJS: Boolean, extraHeaders: String) = {
+    import services.*
+    val webappCache = GUIServer.webapp(optimizedJS)
+    new GUIServer(
+      port,
+      localhost,
+      services,
+      password,
+      webappCache,
+      extraHeaders
+    )
+  }
+
+  case class Control() {
+    var cancel: () => _ = null
+
+    @volatile var exitStatus: GUIServer.ExitStatus = GUIServer.Ok
+    val semaphore = new Semaphore(0)
+
+    def join(): GUIServer.ExitStatus = {
+      semaphore.acquire()
+      semaphore.release()
+      exitStatus
+    }
+
+    def stop() = {
+      cancel()
+      semaphore.release()
+    }
+
+  }
+}
+
+
+class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, password: Option[String], webappCache: File, extraHeaders: String) {
+
+
+  def start() = {
+    import cats.effect.unsafe.IORuntime
+    import cats.effect.unsafe.IORuntimeConfig
+    import cats.effect.unsafe.Scheduler
+
+
+    val control = GUIServer.Control()
+    val applicationControl =
+      GUIServer.ApplicationControl(
+        () ⇒ {
+          control.exitStatus = GUIServer.Restart
+          control.stop()
+        },
+        () ⇒ control.stop()
+      )
+
+    val apiImpl = new ApiImpl(GUIServerServices.ServicesProvider(services, () => Cypher(password)), Some(applicationControl))
+    val apiServer = new CoreAPIServer(apiImpl)
+    val applicationServer = new ApplicationServer(webappCache, extraHeaders, password, services)
+
+
+    //    implicit val runtime: IORuntime =
+    //      cats.effect.unsafe.IORuntime(
+    //        compute = services.threadProvider.executionContext,
+    //        blocking = services.threadProvider.executionContext,
+    //        scheduler = Scheduler.createDefaultScheduler()._1,
+    //        shutdown = () => (),
+    //        config = IORuntimeConfig()
+    //      )
+
+    val pluginsRoutes = apiImpl.pluginRoutes.map(r => "/" -> r.router).toSeq
+    val httpApp = Router(Seq("/" -> applicationServer.routes, "/" -> apiServer.routes, "/" -> apiServer.endpointRoutes) ++ pluginsRoutes: _*).orNotFound
+
+    implicit val runtime = cats.effect.unsafe.IORuntime.global
+
+    val shutdown =
+      BlazeServerBuilder[IO]
+        .bindHttp(port, "localhost")
+        .withHttpApp(httpApp).allocated.unsafeRunSync()._2 // feRunSync()._2
+
+    control.cancel = shutdown.unsafeRunSync
+    control
+  }
+
+
 
 }
 

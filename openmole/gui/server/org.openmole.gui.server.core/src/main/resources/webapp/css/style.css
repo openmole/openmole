@@ -21,6 +21,7 @@ body{
     -o-user-select:none;
     font-family:gi;
     line-height:1;
+    overflow: hidden;
 }
 
 .table.envError>tbody>tr>td{
@@ -48,14 +49,6 @@ textarea {
   resize: none;
 }
 
-a {
-    color: #3086b5;
-}
-
-a:focus, a:active, .btn:active, .btn:focus, button::-moz-focus-inner, btn::-moz-focus-inner, input[type="reset"]::-moz-focus-inner, input[type="button"]::-moz-focus-inner, input[type="submit"]::-moz-focus-inner, select::-moz-focus-inner {
-    border: medium none;
-    outline: medium none;
-}
 
 div table tr {
     text-align: left;
@@ -126,9 +119,6 @@ ul{
 
 
 /* MARKET PANEL*/
-.mdRendering p {
-    text-align: left;
-}
 
 .whiteBold:hover{
     color: white;
@@ -305,9 +295,9 @@ li.selectElement{
 
 /* WAITER */
 .spinner-wave {
-  height: 30px;
-  margin: 0 auto;
-  width: 50px;
+  height: 32px;
+  width: 60px;
+  margin-left:20px;
   display: flex;
   flex-direction: row;
 }
@@ -318,7 +308,7 @@ li.selectElement{
     height: 100%;
     margin-left: 5px;
     width: 6px;
-    background-color: #222;
+    background-color: #3f3d56;
 }
 
 .spinner-wave div:nth-child(2) {
@@ -524,7 +514,6 @@ padding-bottom: 90px;
     height : 70px;
     display: flex;
     flex-direction: row;
-    justify-content: left;
     align-items: center;
 }
 
@@ -562,18 +551,17 @@ padding-bottom: 90px;
     min-width: 0px;
 }
 
-.tab-section{
+.tab-section {
   flex-grow: 1;
   background-color: #f4f4f4;
   display: flex;
   flex-direction: column;
-
-  /* for Firefox */
   min-height: 0;
-  width:100%;
+  width: 100%;
   margin-left: 10px;
-  overflow-x: hidden;
-}
+  overflow: hidden;
+  margin-bottom: 10px;
+ }
 
 .file-content {
   margin: 10px;
@@ -613,12 +601,15 @@ padding-bottom: 90px;
 }
 
 #editor {
-   font-family: monospace;
-   top: 0;
-   right: 0;
-   bottom: 0;
-   left: 0;
-   height:100%;
+  font-family: monospace;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 80vh;
+  overflow: auto;
+  border: 3px solid #3f3d5677;
+  border-radius: 3px;
 }
 
 .top-menu {
@@ -650,7 +641,8 @@ padding-bottom: 90px;
     cursor: pointer;
     overflow: hidden;
     outline: none;
-    color: white
+    color: white;
+    margin-right:10px;
 }
 
 .popover-glyph {
@@ -736,6 +728,7 @@ padding-bottom: 90px;
     font-weight: bold;
     color: white;
     cursor: pointer;
+    font-size: 20px;
    }
 
 .sorting-files {
@@ -863,11 +856,6 @@ padding-bottom: 90px;
     cursor: pointer;
 }
 
-.expandable-panel  {
-    width : 100%;
-    background: white;
-    }
-
 .splitter {
     background: #795c85;
     height: 7px;
@@ -913,10 +901,12 @@ padding-bottom: 90px;
   line-height: 27px;
  }
 
- .testButton {
- font-weight: bold;
- padding: 4px;
- height: 32px;
+ .omsControlButton {
+     font-weight: bold;
+     padding: 4px;
+     height: 32px;
+     width: 60px;
+     margin-left: 20px;
  }
 
 
@@ -976,12 +966,20 @@ padding-bottom: 90px;
     font-size : 14px;
     padding: 10px;
     cursor: pointer;
+    height: 34px;
+}
+
+.badgeUploadModel {
+  display: flex;
+  justify-content: center;
+  width: 150px;
+  padding: 5px;
+  margin-left: 10px;
+  height: 38px;
 }
 
 .newButton {
-    font-size: 14;
     padding: 5px;
-    height: 30;
     color: #3f3d56;
     background-color: white;
     margin: 0 10 0 50;
@@ -990,4 +988,33 @@ padding-bottom: 90px;
 .verticalFormItem {
     align-items: center;
     padding-top: 15px;
+}
+
+.btn.btn-success {
+    background-color: #a6bf26;
+    border-color: #a6bf26;
+}
+
+.collapse-bottom {
+   position: absolute;
+   width: 100%;
+   height : 500px;
+   transition: top 1s ease 0s;
+   top: 500px;
+   overflow: hidden;
+   background-color: rgb(236,236,236);
+   color: #FFF;
+   background: white;
+   z-index: 100;
+
+}
+
+.collapse-bottom.close {
+    top: 1000px;
+    background: white;
+}
+
+.fullOverflow {
+    height: 100vh;
+    overflow: auto;
 }

@@ -43,11 +43,12 @@ object CoreUtils {
       sequence.find(cond).map { e ⇒ updatedFirst(e, s) }.getOrElse(sequence)
   }
 
-//  def withTmpFile(todo: SafePath ⇒ Unit): Unit = {
-//    Post()[Api].temporaryFile.call().foreach { tempFile ⇒
-//      todo(tempFile)
-//    }
-//  }
+  def withTmpDirectory(todo: SafePath ⇒ Unit): Unit = {
+    Fetch.future(_.temporaryDirectory(()).future).foreach { tempFile ⇒
+      try todo(tempFile)
+      finally Fetch.future(_.deleteFiles(Seq(tempFile), tempFile.context).future)
+    }
+  }
 
   def createDirectory(in: SafePath, dirName: String, onadded: () ⇒ Unit = () ⇒ {}) =
     Fetch.future(_.createDirectory(in, dirName).future).foreach { b ⇒
@@ -160,30 +161,6 @@ object CoreUtils {
 
   def setRoute(route: String) = dom.window.location.href = route.split("/").last
 
-  //  def buildModelScript[T<: WizardData](
-  //    wizardPluginFactory: WizardPluginFactory,
-  //    executableName:      String,
-  //    command:             String,
-  //    target:              SafePath,
-  //    resources:           Resources,
-  //    data:                T,
-  //    inputs:              Seq[ProtoTypePair]      = Seq(),
-  //    outputs:             Seq[ProtoTypePair]      = Seq(),
-  //    libraries:           Option[String]          = None) =
-  //    wizardPluginFactory.toTask(
-  //      target,
-  //      executableName,
-  //      command,
-  //      inputs,
-  //      outputs,
-  //      libraries,
-  //      resources,
-  //      data
-  //    ).foreach {
-  //      b ⇒
-  //        treeNodeTabs -- b
-  //        treeNodePanel.displayNode(FileNode(Var(b.name), 0L, 0L))
-  //        treeNodeManager.invalidCurrentCache
-  //    }
+
 
 }

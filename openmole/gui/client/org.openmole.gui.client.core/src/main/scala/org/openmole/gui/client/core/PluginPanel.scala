@@ -39,32 +39,33 @@ class PluginPanel {
   }
 
   val pluginTable =
-      div(
-        children <-- plugins.signal.combineWith(panels.expandablePanel.signal).map {
-          case (ps, _) ⇒
-            ps.zipWithIndex.map { case (p, i) ⇒
+    div(
+      children <-- plugins.signal.combineWith(panels.expandablePanel.signal).map {
+        case (ps, _) ⇒
+          ps.zipWithIndex.map { case (p, i) ⇒
+            div(
+              cls := "docEntry",
+              backgroundColor := {
+                if (i % 2 == 0) "white" else "#ececec"
+              },
+              div(p.projectSafePath.name, width := "350px"),
               div(
-                cls := "docEntry",
-                backgroundColor := {
-                  if (i % 2 == 0) "white" else "#ececec"
-                },
-                div(p.projectSafePath.name, width := "350px"),
-                div(
-                  cls := "badgeOM",
-                  bsn.badge_dark, p.time
-                ), onClick --> { (e: MouseEvent) ⇒
-                  panels.treeNodeManager.switch(p.projectSafePath.parent)
-                }
-              )
-            }
-        }
-      )
+                cls := "badgeOM",
+                bsn.badge_dark, p.time
+              ), onClick --> { _ ⇒
+                panels.treeNodeManager.switch(p.projectSafePath.parent)
+                panels.treeNodeManager.computeCurrentSons()
+              }
+            )
+          }
+      }
+    )
 
   def render: HtmlElement =
     div(
       div(
         cls := "expandable-title",
-        div("Plugins",  padding := "10px"),
+        div("Plugins", padding := "10px"),
         div(cls := "close-button bi-chevron-down", onClick --> { _ ⇒ panels.closeExpandable })
       ),
       pluginTable

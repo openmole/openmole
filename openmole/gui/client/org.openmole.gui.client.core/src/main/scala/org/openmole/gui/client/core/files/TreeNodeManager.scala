@@ -64,10 +64,22 @@ class TreeNodeManager {
 
   def clearSelectionExecpt(safePath: SafePath) = selected.set(Seq(safePath))
 
-  def setSelected(sp: SafePath, b: Boolean) = b match {
-    case true ⇒ selected.update(s ⇒ (s :+ sp).distinct)
-    case false ⇒ selected.update(s ⇒ s.filterNot(_ == sp))
+  def setSelected(sp: SafePath, b: Boolean) = {
+    b match {
+      case true ⇒ selected.update(s ⇒ (s :+ sp).distinct)
+      case false ⇒ selected.update(s ⇒ s.filterNot(_ == sp))
+    }
   }
+
+  def switchSelection(sp: SafePath) = {
+    selected.update(s => s.contains(sp) match {
+      case true => s.filterNot(_ == sp)
+      case _ => (s :+ sp).distinct
+    }
+    )
+  }
+
+  def switchAllSelection(safePaths: Seq[SafePath], b: Boolean) = safePaths.map { f => setSelected(f, b) }
 
   def setSelectedAsCopied = copied.set(selected.now())
 
