@@ -41,7 +41,7 @@ class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory {
   def build(data: AuthType): AuthenticationPlugin = new EGIAuthenticationGUI(data)
   def name = "EGI"
   def getData: Future[Seq[AuthType]] =
-    OMFetch(apiClient).future(_.egiAuthentications(()).future)
+    PluginFetch.future(_.egiAuthentications(()).future)
 }
 
 class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationData()) extends AuthenticationPlugin {
@@ -56,7 +56,7 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
 
   val voInput = inputTag("").amend(placeholder := "vo1,vo2")
 
-  OMFetch(apiClient).future(_.getVOTests(()).future).foreach {
+  PluginFetch.future(_.getVOTests(()).future).foreach {
     _.foreach { c ⇒
       voInput.ref.value = c
     }
@@ -65,7 +65,7 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
   def factory = new EGIAuthenticationGUIFactory
 
   def remove(onremove: () ⇒ Unit) =
-    OMFetch(apiClient).future(_.removeAuthentications(()).future).foreach { _ ⇒
+    PluginFetch.future(_.removeAuthentications(()).future).foreach { _ ⇒
       onremove()
     }
 
@@ -80,9 +80,9 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
   }
 
   def save(onsave: () ⇒ Unit) = {
-    OMFetch(apiClient).future(_.removeAuthentications(()).future).foreach {
+    PluginFetch.future(_.removeAuthentications(()).future).foreach {
       d ⇒
-        OMFetch(apiClient).future {
+        PluginFetch.future {
           _.addAuthentication(
             EGIAuthenticationData(
               cypheredPassword = password.ref.value,
@@ -92,9 +92,9 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
         }.foreach { b ⇒ onsave() }
     }
 
-    OMFetch(apiClient).future(_.setVOTests(voInput.ref.value.split(",").map(_.trim).toSeq).future)
+    PluginFetch.future(_.setVOTests(voInput.ref.value.split(",").map(_.trim).toSeq).future)
   }
 
-  def test = OMFetch(apiClient).future(_.testAuthentication(data).future)
+  def test = PluginFetch.future(_.testAuthentication(data).future)
 
 }

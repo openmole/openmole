@@ -20,11 +20,9 @@ package org.openmole.gui.plugin.authentication
 
 import org.openmole.gui.ext.client.*
 
-package object egi {
+package object sshlogin {
 
- class APIClientImpl(val settings: ClientSettings)
-   extends EGIAuthenticationAPI with APIClient
+  class APIClientImpl(val settings: ClientSettings) extends LoginAuthenticationAPI with APIClient
 
- def PluginFetch = OMFetch(new APIClientImpl(_))
-
+  def PluginFetch = OMFetch(new APIClientImpl(_))
 }

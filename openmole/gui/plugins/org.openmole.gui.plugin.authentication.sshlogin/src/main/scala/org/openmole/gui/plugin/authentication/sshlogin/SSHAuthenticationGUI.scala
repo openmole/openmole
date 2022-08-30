@@ -18,12 +18,10 @@
 package org.openmole.gui.plugin.authentication.sshlogin
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
 import org.openmole.gui.ext.data.{AuthenticationPlugin, AuthenticationPluginFactory}
-import org.openmole.gui.ext.client.{OMPost, flexColumn, flexRow}
+import org.openmole.gui.ext.client.{flexColumn, flexRow}
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
-import autowire._
 import org.scalajs.dom.raw.HTMLElement
 import org.openmole.gui.ext.data._
 
@@ -49,7 +47,7 @@ class LoginAuthenticationFactory extends AuthenticationPluginFactory {
 
   def name = "SSH Login/Password"
 
-  def getData: Future[Seq[AuthType]] = OMPost()[LoginAuthenticationAPI].loginAuthentications().call()
+  def getData: Future[Seq[AuthType]] = PluginFetch.future(_.loginAuthentications(()).future)
 }
 
 class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthenticationData()) extends AuthenticationPlugin {
@@ -57,7 +55,7 @@ class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthentica
 
   def factory = new LoginAuthenticationFactory
 
-  def remove(onremove: () ⇒ Unit) = OMPost()[LoginAuthenticationAPI].removeAuthentication(data).call().foreach { _ ⇒
+  def remove(onremove: () ⇒ Unit) = PluginFetch.future(_.removeAuthentication(data).future).foreach { _ ⇒
     onremove()
   }
 
@@ -78,12 +76,12 @@ class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthentica
   )
 
   def save(onsave: () ⇒ Unit): Unit = {
-    OMPost()[LoginAuthenticationAPI].removeAuthentication(data).call().foreach { d ⇒
-      OMPost()[LoginAuthenticationAPI].addAuthentication(LoginAuthenticationData(loginInput.ref.value, passwordInput.ref.value, targetInput.ref.value, portInput.ref.value)).call().foreach { b ⇒
+    PluginFetch.future(_.removeAuthentication(data).future).foreach { d ⇒
+      PluginFetch.future(_.addAuthentication(LoginAuthenticationData(loginInput.ref.value, passwordInput.ref.value, targetInput.ref.value, portInput.ref.value)).future).foreach { b ⇒
         onsave()
       }
     }
   }
 
-  def test: Future[Seq[Test]] = OMPost()[LoginAuthenticationAPI].testAuthentication(data).call()
+  def test: Future[Seq[Test]] = PluginFetch.future(_.testAuthentication(data).future)
 }

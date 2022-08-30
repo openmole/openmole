@@ -831,7 +831,7 @@ lazy val evolutionAnalysisPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.p
 ) dependsOn(extServer, extClient, extServer, workspace, evolution) enablePlugins (ScalaJSPlugin)
 
 def guiPlugins = Seq(
-  //guiEnvironmentSSHLoginPlugin,
+  guiEnvironmentSSHLoginPlugin,
   //guiEnvironmentSSHKeyPlugin,
   guiEnvironmentEGIPlugin,
   //netlogoWizardPlugin,
