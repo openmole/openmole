@@ -836,7 +836,7 @@ def guiPlugins = Seq(
   guiEnvironmentEGIPlugin,
   netlogoWizardPlugin,
   rWizardPlugin,
-  //evolutionAnalysisPlugin
+  evolutionAnalysisPlugin
 
   // Obsolete
   //nativeWizardPlugin,

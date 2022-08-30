@@ -4,13 +4,11 @@ import org.openmole.plugin.method.evolution._
 import org.openmole.gui.ext.data.MethodAnalysisPlugin
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
 import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.client.{ InputFilter, OMPost }
+import org.openmole.gui.ext.client.{ InputFilter }
 import scaladget.bootstrapnative.bsn._
 import com.raquo.laminar.api.L._
-import scaladget.tools._
-import autowire._
+import scaladget.tools.*
 import org.scalajs.dom.raw.HTMLElement
 
 import scala.concurrent.Future
@@ -29,6 +27,9 @@ import org.openmole.plotlyjs.all._
 import org.openmole.plotlyjs.plotlyConts._
 import scala.scalajs.js.JSConverters._
 
+
+import org.openmole.gui.ext.data.*
+
 object TopLevelExports {
   @JSExportTopLevel("evolution")
   val egi = js.Object {
@@ -41,7 +42,7 @@ class EvolutionAnalysis extends MethodAnalysisPlugin {
   override def panel(safePath: SafePath, services: PluginServices): HtmlElement = {
     val metadata: Var[Option[Convergence]] = Var(None)
 
-    OMPost()[EvolutionAnalysisAPI].analyse(safePath).call().foreach {
+    PluginFetch.future(_.analyse(safePath).future).foreach {
       case Right(m) ⇒ metadata.set(Some(m))
       case Left(e)  ⇒ services.errorManager.signal("Error in evolution analysis", Some(ErrorData.stackTrace(e)))
     }
@@ -53,34 +54,35 @@ class EvolutionAnalysis extends MethodAnalysisPlugin {
           case Some(value) ⇒
             value match {
               case c: AnalysisData.StochasticNSGA2.Convergence ⇒
-                val layout = Layout
-                  .title("Hypervolume")
-                  .yaxis(Axis.title("Hypervolume"))
-                  .xaxis(Axis.title("Generation"))
-
-                val hvData =
-                  c.generations.flatMap { g ⇒
-                    g.hypervolume.map(hv ⇒ g.generation -> hv)
-                  }
-
-                val data = PlotData
-                  .x(hvData.map(_._1.toDouble).toJSArray)
-                  .y(hvData.map(_._2).toJSArray)
-                //.customdata((1 to 10).toJSArray.map(_.toString))
-                //                  .set(plotlymode.markers)
-                //                  .set(plotlytype.scatter)
-                //                  .set(plotlymarker
-                //                    //.set(plotlysizemode.area)
-                //                    .size(15)
-                //                    .set(plotlycolor.array(colorDim.toJSArray))
-                //                    .set(Color.rgb(40, 125, 255))
-                //                  )
-                //
-
-                val config = Config.displayModeBar(false)
-                val plotDiv = div()
-                Plotly.plot(plotDiv.ref, js.Array(data), layout, config = config)
-                plotDiv
+//                val layout = Layout
+//                  .title("Hypervolume")
+//                  .yaxis(Axis.title("Hypervolume"))
+//                  .xaxis(Axis.title("Generation"))
+//
+//                val hvData =
+//                  c.generations.flatMap { g ⇒
+//                    g.hypervolume.map(hv ⇒ g.generation -> hv)
+//                  }
+//
+//                val data = PlotData
+//                  .x(hvData.map(_._1.toDouble).toJSArray)
+//                  .y(hvData.map(_._2).toJSArray)
+//                //.customdata((1 to 10).toJSArray.map(_.toString))
+//                //                  .set(plotlymode.markers)
+//                //                  .set(plotlytype.scatter)
+//                //                  .set(plotlymarker
+//                //                    //.set(plotlysizemode.area)
+//                //                    .size(15)
+//                //                    .set(plotlycolor.array(colorDim.toJSArray))
+//                //                    .set(Color.rgb(40, 125, 255))
+//                //                  )
+//                //
+//
+//                val config = Config.displayModeBar(false)
+//                val plotDiv = div()
+//                Plotly.plot(plotDiv.ref, js.Array(data), layout, config = config)
+//                plotDiv
+                  p("implement vizualisation")
               case _ ⇒ p(value.toString)
             }
         }

@@ -19,18 +19,17 @@ package org.openmole.gui.plugin.analysis.evolution
 
 import org.openmole.gui.ext.server._
 import org.osgi.framework.{ BundleActivator, BundleContext }
-import boopickle.Default._
 import org.openmole.plugin.method.evolution.data.EvolutionMetadata
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class Activator extends BundleActivator {
 
-//  def info = GUIPluginInfo(
-//    analysis = Some(EvolutionMetadata.method -> classOf[EvolutionAnalysis]),
-//    router = Some(s ⇒ OMRouter[EvolutionAnalysisAPI](AutowireServer.route[EvolutionAnalysisAPI](new EvolutionAnalysisAPIImpl(s))))
-//  )
-//
-//  override def start(context: BundleContext): Unit = GUIPluginRegistry.register(this, info)
-//  override def stop(context: BundleContext): Unit = GUIPluginRegistry.unregister(this)
+  def info = GUIPluginInfo(
+    analysis = Some(EvolutionMetadata.method -> classOf[EvolutionAnalysis]),
+    router = Some(s ⇒ OMRouter(new EvolutionAnalysisServer(s).routes))
+  )
+
+  override def start(context: BundleContext): Unit = GUIPluginRegistry.register(this, info)
+  override def stop(context: BundleContext): Unit = GUIPluginRegistry.unregister(this)
 }
