@@ -17,12 +17,13 @@
  */
 package org.openmole.gui.plugin.wizard.r
 
-import org.openmole.gui.ext.data._
+import org.openmole.gui.ext.data.*
+import org.openmole.gui.ext.api.*
 
-trait RWizardAPI {
-  def toTask(
-    target:         SafePath,
-    modelMetadata: ModelMetadata): Unit
+trait RWizardAPI extends RESTAPI {
+  val toTask: Endpoint[(SafePath, ModelMetadata), Unit] =
+    endpoint(post(path / "wizard" / "r" / "to-task", jsonRequest[(SafePath, ModelMetadata)]), ok(jsonResponse[Unit]))
 
-  def parse(safePath: SafePath): Option[ModelMetadata]
+  val parse: Endpoint[SafePath, Option[ModelMetadata]] =
+    endpoint(post(path / "wizard" / "r" / "parse", jsonRequest[SafePath]), ok(jsonResponse[Option[ModelMetadata]]))
 }

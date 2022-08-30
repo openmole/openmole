@@ -19,8 +19,7 @@ package org.openmole.gui.plugin.wizard
 
 import org.openmole.gui.ext.client.*
 
-package object netlogo {
-
- class APIClientImpl(val settings: ClientSettings) extends NetlogoWizardAPI with APIClient
- def PluginFetch = OMFetch(new APIClientImpl(_))
+package object r {
+  class APIClientImpl(val settings: ClientSettings) extends RWizardAPI with APIClient
+  def PluginFetch = OMFetch(new APIClientImpl(_))
 }
