@@ -90,9 +90,8 @@ trait CoreAPI extends RESTAPI {
   //  def deleteFile(safePath: SafePath, context: ServerFileSystemContext): Unit
   //  def deleteFiles(safePath: Seq[SafePath], context: ServerFileSystemContext): Unit
   //implicit lazy val deleteFileRequestSchema: JsonSchema[(Seq[SafePath], ServerFileSystemContext)] = genericJsonSchema
-  val deleteFiles: Endpoint[(Seq[SafePath], ServerFileSystemContext), Unit] =
-    endpoint(post(path / "delete-files", jsonRequest[(Seq[SafePath], ServerFileSystemContext)]), ok(jsonResponse[Unit]))
-
+  val deleteFiles: Endpoint[Seq[SafePath], Unit] =
+    endpoint(post(path / "delete-files", jsonRequest[Seq[SafePath]]), ok(jsonResponse[Unit]))
 
   //def exists(safePath: SafePath): Boolean
   val exists: Endpoint[SafePath, Boolean] =

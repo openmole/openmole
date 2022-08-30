@@ -46,7 +46,7 @@ object CoreUtils {
   def withTmpDirectory(todo: SafePath ⇒ Unit): Unit = {
     Fetch.future(_.temporaryDirectory(()).future).foreach { tempFile ⇒
       try todo(tempFile)
-      finally Fetch.future(_.deleteFiles(Seq(tempFile), tempFile.context).future)
+      finally Fetch.future(_.deleteFiles(Seq(tempFile)).future)
     }
   }
 
@@ -69,7 +69,7 @@ object CoreUtils {
 //  }
 
   def trashNodes(paths: Seq[SafePath])(ontrashed: () ⇒ Unit): Unit = {
-    Fetch.future(_.deleteFiles(paths, ServerFileSystemContext.project).future).foreach { d ⇒
+    Fetch.future(_.deleteFiles(paths).future).foreach { d ⇒
       panels.treeNodePanel.invalidCacheAnd(ontrashed)
     }
   }

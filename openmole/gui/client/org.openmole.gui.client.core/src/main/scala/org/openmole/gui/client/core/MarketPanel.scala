@@ -139,7 +139,7 @@ class MarketPanel(manager: TreeNodeManager) {
   //}
 
   def deleteFile(sp: SafePath, marketIndexEntry: MarketIndexEntry) =
-    Fetch.future(_.deleteFiles(Seq(sp), ServerFileSystemContext.project).future).foreach { d ⇒
+    Fetch.future(_.deleteFiles(Seq(sp)).future).foreach { d ⇒
       download(marketIndexEntry)
     }
 

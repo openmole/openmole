@@ -131,15 +131,15 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     new File(safePath.toFile, fileName).createNewFile
   }
 
-  def deleteFile(safePath: SafePath, context: ServerFileSystemContext): Unit = {
-    unplug(safePath)
-    import services._
-    utils.deleteFile(safePath, context)
-  }
+//  def deleteFile(safePath: SafePath, context: ServerFileSystemContext): Unit = {
+//    unplug(safePath)
+//    import services._
+//    utils.deleteFile(safePath, context)
+//  }
 
-  def deleteFiles(safePaths: Seq[SafePath], context: ServerFileSystemContext): Unit = {
+  def deleteFiles(safePaths: Seq[SafePath]): Unit = {
     import services._
-    utils.deleteFiles(safePaths, context)
+    utils.deleteFiles(safePaths)
   }
 
   private def getExtractedArchiveTo(from: File, to: File)(implicit context: ServerFileSystemContext): Seq[SafePath] = {

@@ -261,14 +261,14 @@ object utils {
       existing
     }
 
-  def deleteFile(safePath: SafePath, context: ServerFileSystemContext)(implicit workspace: Workspace): Unit = {
-    implicit val ctx = context
+  def deleteFile(safePath: SafePath)(implicit workspace: Workspace): Unit = {
+    implicit val ctx = safePath.context
     safePathToFile(safePath).recursiveDelete
   }
 
-  def deleteFiles(safePaths: Seq[SafePath], context: ServerFileSystemContext)(implicit workspace: Workspace): Unit = {
+  def deleteFiles(safePaths: Seq[SafePath])(implicit workspace: Workspace): Unit = {
     safePaths.foreach { sp ⇒
-      deleteFile(sp, context)
+      deleteFile(sp)
     }
   }
 

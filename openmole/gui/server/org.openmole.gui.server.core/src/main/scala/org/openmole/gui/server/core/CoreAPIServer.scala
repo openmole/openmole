@@ -78,7 +78,7 @@ class CoreAPIServer(apiImpl: ApiImpl)
     extractTestExist.implementedBy { case(a, b) => apiImpl.extractAndTestExistence(a, b) }
 
   val deleteFilesRoute =
-    deleteFiles.implementedBy { case(sp, context) => apiImpl.deleteFiles(sp, context) }
+    deleteFiles.implementedBy { sp => apiImpl.deleteFiles(sp) }
 
   val existsRoute=
     exists.implementedBy { sp => apiImpl.exists(sp) }
@@ -103,7 +103,6 @@ class CoreAPIServer(apiImpl: ApiImpl)
 
   val sequenceRoute =
     sequence.implementedBy { p => apiImpl.sequence(p) }
-
 
   val allStatesRoute =
     allStates.implementedBy { i => apiImpl.allStates(i) }

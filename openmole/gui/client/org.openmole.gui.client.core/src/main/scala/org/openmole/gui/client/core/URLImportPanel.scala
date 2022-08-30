@@ -48,7 +48,7 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
   }
 
   def deleteFileAndDownloadURL(sp: SafePath, url: String) =
-    Fetch.future(_.deleteFiles(Seq(sp), ServerFileSystemContext.project).future).foreach { d ⇒
+    Fetch.future(_.deleteFiles(Seq(sp)).future).foreach { d ⇒
       download(url)
     }
 
