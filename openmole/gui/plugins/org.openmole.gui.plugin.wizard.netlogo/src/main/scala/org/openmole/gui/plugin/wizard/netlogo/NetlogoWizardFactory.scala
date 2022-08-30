@@ -18,12 +18,9 @@
 package org.openmole.gui.plugin.wizard.netlogo
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.client.OMPost
+import org.openmole.gui.ext.data.*
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
-import autowire._
 import org.openmole.gui.ext.client
 import org.scalajs.dom.raw.HTMLElement
 
@@ -43,9 +40,9 @@ class NetlogoWizardFactory extends WizardPluginFactory {
 
   val fileType = CodeFile(NetLogoLanguage())
 
-  def parse(safePath: SafePath): Future[Option[ModelMetadata]] = OMPost()[NetlogoWizardAPI].parse(safePath).call()
+  def parse(safePath: SafePath): Future[Option[ModelMetadata]] = PluginFetch.future(_.parse(safePath).future)
   
-  def toTask(safePath: SafePath, modelMetadata: ModelMetadata) = OMPost()[NetlogoWizardAPI].toTask(safePath, modelMetadata).call()
+  def toTask(safePath: SafePath, modelMetadata: ModelMetadata) = PluginFetch.future(_.toTask(safePath, modelMetadata).future)
 
   def name: String = "NetLogo"
 }

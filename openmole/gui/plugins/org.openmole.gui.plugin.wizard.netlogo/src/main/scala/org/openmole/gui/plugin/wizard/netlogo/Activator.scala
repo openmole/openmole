@@ -20,14 +20,13 @@ package org.openmole.gui.plugin.wizard.netlogo
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-import org.openmole.gui.ext.server._
+import org.openmole.gui.ext.server.*
 
 class Activator extends BundleActivator {
 
   def info = GUIPluginInfo(
     wizard = Some(classOf[NetlogoWizardFactory]),
-    router = Some(s ⇒ OMRouter[NetlogoWizardAPI](AutowireServer.route[NetlogoWizardAPI](new NetlogoWizardApiImpl(s))))
+    router = Some(s ⇒ OMRouter(new NetlogoWizardServer(s).routes))
   )
 
   override def start(context: BundleContext): Unit = GUIPluginRegistry.register(this, info)

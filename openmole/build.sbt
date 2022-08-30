@@ -834,7 +834,7 @@ def guiPlugins = Seq(
   guiEnvironmentSSHLoginPlugin,
   guiEnvironmentSSHKeyPlugin,
   guiEnvironmentEGIPlugin,
-  //netlogoWizardPlugin,
+  netlogoWizardPlugin,
   //rWizardPlugin,
   //evolutionAnalysisPlugin
 

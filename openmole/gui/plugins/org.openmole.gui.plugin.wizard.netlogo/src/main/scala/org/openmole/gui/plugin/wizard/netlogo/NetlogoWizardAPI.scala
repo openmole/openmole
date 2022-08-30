@@ -17,12 +17,15 @@
  */
 package org.openmole.gui.plugin.wizard.netlogo
 
-import org.openmole.gui.ext.data._
+import org.openmole.gui.ext.data.*
+import org.openmole.gui.ext.api.*
 
-trait NetlogoWizardAPI {
-  def toTask(
-    target:         SafePath,
-    modelMetadata: ModelMetadata)
+trait NetlogoWizardAPI extends RESTAPI {
+  //def toTask(target:         SafePath, modelMetadata: ModelMetadata)
+  val toTask: Endpoint[(SafePath, ModelMetadata), Unit] =
+    endpoint(post(path / "wizard" / "netlogo" / "to-task", jsonRequest[(SafePath, ModelMetadata)]), ok(jsonResponse[Unit]))
 
-  def parse(safePath: SafePath): Option[ModelMetadata]
+  //def parse(safePath: SafePath): Option[ModelMetadata]
+  val parse: Endpoint[SafePath, Option[ModelMetadata]] =
+    endpoint(post(path / "wizard" / "netlogo" / "parse", jsonRequest[SafePath]), ok(jsonResponse[Option[ModelMetadata]]))
 }
