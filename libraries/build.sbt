@@ -45,6 +45,10 @@ lazy val json4s = OsgiProject(dir, "org.json4s",
 lazy val shapeless =  OsgiProject(dir, "org.typelevel.shapeless", exports = Seq("shapeless3.*")) settings (
   libraryDependencies += "org.typelevel" %% "shapeless3-deriving" % shapelessVersion,
   libraryDependencies += "org.typelevel" %% "shapeless3-typeable" % shapelessVersion,
+
+  libraryDependencies += "org.typelevel" %% sjs("shapeless3-deriving") % shapelessVersion,
+  libraryDependencies += "org.typelevel" %% sjs("shapeless3-typeable") % shapelessVersion,
+
   version := shapelessVersion
 ) settings(settings: _*) settings(scala3Settings: _*)
 
@@ -110,7 +114,7 @@ lazy val scalaLang = OsgiProject(
   (libraryDependencies ++= {
     Seq(
       "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4",
-      "org.scala-lang.modules" % "scala-java8-compat_3" % "1.0.2",
+      "org.scala-lang.modules" %% "scala-java8-compat" % "1.0.2",
     //"org.scala-lang" % "scala-library" % scalaVersion.value,
       //"org.scala-lang" % "scala-reflect" % scalaVersion.value,
       //"org.scala-lang" % "scalap" % scalaVersion.value ,
@@ -118,9 +122,11 @@ lazy val scalaLang = OsgiProject(
       //"com.typesafe" % "config" % "1.2.1",
       "org.scala-lang" %% "scala3-tasty-inspector"% scalaVersion.value,
       "org.scala-lang" %% "scala3-library" % scalaVersion.value,
-      "org.scala-lang" %% sjs("scala3-library") % scalaVersion.value,
       "org.scala-lang" %% "scala3-compiler" % scalaVersion.value,
       "org.scalameta" %% "scalameta" % scalaMetaVersion cross(CrossVersion.for3Use2_13) excludeAll(ExclusionRule(organization = "com.lihaoyi")),
+
+      "org.scala-lang" %% sjs("scala3-library") % scalaVersion.value,
+      //"org.scala-lang.modules" %% sjs("scala-collection-compat") % "2.1.6"
     )
   },
   version := scalaVersion.value) settings(settings: _*) settings(scala3Settings: _*) dependsOn(jline)

@@ -22,7 +22,8 @@ object Libraries {
   lazy val highlightJS = libraryDependencies += "org.openmole.scaladget" %%% "highlightjs" % scaladgetVersion
   lazy val htmlparser2 = libraryDependencies += "com.definitelyscala" %%% "scala-js-htmlparser2" % "1.0.2"
   lazy val plotlyJS =  libraryDependencies += "org.openmole" %%% "scala-js-plotlyjs" % "1.6.0"
-  lazy val scalaCompatJS =  libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.6"
+
+  //lazy val scalaCompatJS =  libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.6"
 
 //  lazy val endpoints4SJS =
 //    libraryDependencies ++= Seq(
