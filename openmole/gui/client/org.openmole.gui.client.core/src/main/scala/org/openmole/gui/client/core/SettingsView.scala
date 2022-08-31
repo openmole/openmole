@@ -144,7 +144,7 @@ class SettingsView(fileDisplayer: FileDisplayer) {
       "reset password",
       glyph_lock,
       "Careful! Resetting your password will wipe out all your preferences! Reset anyway?",
-      routes.resetPasswordRoute
+      routes.slashResetPasswordRoute
     )
 
   val shutdownButton = serverActions(

@@ -24,14 +24,12 @@ package object routes {
   val restartRoute = "/restart"
 
   val appRoute = "app"
-  val slashAppRoute = s"/$appRoute"
 
   val downloadFileRoute = "downloadFile"
   val slashDownloadFileRoute = s"/$downloadFileRoute"
-  val downloadPluginsRoute = "/downloadPlugins"
   val uploadFilesRoute = "uploadFiles"
-  val slashUploadFilesRoute = s"/$uploadFilesRoute"
-  val resetPasswordRoute = "/resetPassword"
+  val resetPasswordRoute = "resetPassword"
+  val slashResetPasswordRoute = s"/$resetPasswordRoute"
 
   def downloadFile(uri: String, hash: Boolean = false) = s"${slashDownloadFileRoute.drop(1)}?path=$uri&hash=$hash"
   def hashHeader = "Content-Hash"
