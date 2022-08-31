@@ -285,7 +285,7 @@ object Application extends JavaLogger {
             GUIServerServices.withServices(workspace, config.proxyURI, logLevel, logFileLevel) { services ⇒
               Runtime.getRuntime.addShutdownHook(thread(GUIServerServices.dispose(services)))
               //val server = new GUIServer(port, config.remote, services, config.password, extraHeader, !config.unoptimizedJS, config.httpSubDirectory)
-              val newServer = GUIServer(port, config.remote, services, config.password, !config.unoptimizedJS, extraHeader)
+              val newServer = GUIServer(port, !config.remote, services, config.password, !config.unoptimizedJS, extraHeader)
 
               ///server.start()
               val s = newServer.start()

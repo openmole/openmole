@@ -100,23 +100,22 @@ object GUIServer {
     subDir:             Option[String]
   )
 
-  // TODO scala 3
-  def waitingOpenMOLEContent = "reactivate after scala 3 migration"
-  //      <html>
-  //        <head>
-  //          <script>
-  //            { """setTimeout(function(){ window.location.reload(1); }, 3000);""" }
-  //          </script>
-  //        </head>
-  //        <link href="/css/style.css" rel="stylesheet"/>
-  //        <body>
-  //          <div>
-  //            OpenMOLE is launching...
-  //            <div class="loader" style="float: right"></div><br/>
-  //          </div>
-  //          (for the first launch, and after an update, it may take several minutes)
-  //        </body>
-  //      </html>
+//  def waitingOpenMOLEContent =
+//    <html>
+//      <head>
+//        <script>
+//          { """setTimeout(function(){ window.location.reload(1); }, 3000);""" }
+//        </script>
+//      </head>
+//      <link href="/css/style.css" rel="stylesheet"/>
+//      <body>
+//        <div>
+//          OpenMOLE is launching...
+//          <div class="loader" style="float: right"></div><br/>
+//        </div>
+//        (for the first launch, and after an update, it may take several minutes)
+//      </body>
+//    </html>
 
   case class ApplicationControl(restart: () ⇒ Unit, stop: () ⇒ Unit)
 
@@ -197,11 +196,12 @@ class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, pass
     val httpApp = Router(Seq("/" -> applicationServer.routes, "/" -> apiServer.routes, "/" -> apiServer.endpointRoutes) ++ pluginsRoutes: _*).orNotFound
 
     implicit val runtime = cats.effect.unsafe.IORuntime.global
+    
+    def server =
+      if(localhost) BlazeServerBuilder[IO].bindHttp(port, "localhost")
+      else BlazeServerBuilder[IO].bindHttp(port, "0.0.0.0")
 
-    val shutdown =
-      BlazeServerBuilder[IO]
-        .bindHttp(port, "localhost")
-        .withHttpApp(httpApp).allocated.unsafeRunSync()._2 // feRunSync()._2
+    val shutdown = server.withHttpApp(httpApp).allocated.unsafeRunSync()._2 // feRunSync()._2
 
     control.cancel = shutdown.unsafeRunSync
     control
