@@ -155,9 +155,11 @@ class CoreAPIServer(apiImpl: ApiImpl)
   val jvmInfosRoute =
     jvmInfos.implementedBy { _ => apiImpl.jvmInfos() }
 
-  // FIXME implement when scala 3
-  //  val marketIndex: Endpoint[Unit, MarketIndex]
-  //  val getMarketEntry: Endpoint[(MarketIndexEntry, SafePath), Unit]
+  val marketIndexRoute =
+    marketIndex.implementedBy { _ => apiImpl.marketIndex() }
+
+  val getMarketEntryRoute =
+    getMarketEntry.implementedBy { case(e, p) => apiImpl.getMarketEntry(e, p) }
 
   val endpointRoutes: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(
@@ -195,7 +197,9 @@ class CoreAPIServer(apiImpl: ApiImpl)
       downloadHTTPRoute,
       temporaryDirectoryRoute,
       extractTestExistRoute,
-      copyAllFromTmpRoute
+      copyAllFromTmpRoute,
+      marketIndexRoute,
+      getMarketEntryRoute
     )
   ) //.map(_.putHeaders(Header("Access-Control-Allow-Origin", "*")))
 

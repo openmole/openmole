@@ -192,13 +192,13 @@ trait CoreAPI extends RESTAPI {
 
   // FIXME wait for scala 3
 
-//  //def marketIndex(): MarketIndex
-//  val marketIndex: Endpoint[Unit, MarketIndex] =
-//    endpoint(get(path / "market" / "index"), ok(jsonResponse[MarketIndex]))
-//
-////    def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Unit
-//  val getMarketEntry: Endpoint[(MarketIndexEntry, SafePath), Unit] =
-//    endpoint(post(path / "market" / "get-entry", jsonRequest[(MarketIndexEntry, SafePath)]), ok(jsonResponse[Unit]))
+  //def marketIndex(): MarketIndex
+  val marketIndex: Endpoint[Unit, MarketIndex] =
+    endpoint(get(path / "market" / "index"), ok(jsonResponse[MarketIndex]))
+
+//    def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Unit
+  val getMarketEntry: Endpoint[(MarketIndexEntry, SafePath), Unit] =
+    endpoint(post(path / "market" / "get-entry", jsonRequest[(MarketIndexEntry, SafePath)]), ok(jsonResponse[Unit]))
 
 
   // ---------- Application ------------
