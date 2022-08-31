@@ -680,7 +680,7 @@ lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompil
 )
 
 
-val clientPrivatePackages = Seq("com.raquo.*", "org.scalajs.dom.*", "scaladget.*", "net.scalapro.sortable.*", "org.openmole.plotlyjs.*", "org.querki.jsext.*", "app.tulz.tuplez.*", "scala.deriving.*")
+val clientPrivatePackages = Seq("com.raquo.*", "org.scalajs.dom.*", "scaladget.*", "net.scalapro.sortable.*", "org.openmole.plotlyjs.*", "org.querki.jsext.*", "app.tulz.tuplez.*")
 
 def guiClientDir = guiDir / "client"
 lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core")  enablePlugins(ScalaJSPlugin) settings (
