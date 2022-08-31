@@ -66,7 +66,7 @@ object App {
       )
     )
 
-    //Post()[Api].shutdown().call()
+    Fetch.future(_.shutdown(()).future)
     render(dom.document.body, stoppedDiv)
   }
 
@@ -75,14 +75,14 @@ object App {
 
     def setTimer = {
       timer.set(Some(setInterval(5000) {
-//        Post(3 seconds, 5 minutes)[Api].isAlive().call().foreach { x ⇒
-//          if (x) {
-//            CoreUtils.setRoute(routes.slashConnectionRoute)
-//            timer.now.foreach {
-//              clearInterval
-//            }
-//          }
-//        }
+        Fetch.future(_.isAlive(()).future, 3 seconds, 5 minutes).foreach { x ⇒
+          if (x) {
+            CoreUtils.setRoute(routes.slashConnectionRoute)
+            timer.now().foreach {
+              clearInterval
+            }
+          }
+        }
       })
       )
     }
@@ -96,7 +96,7 @@ object App {
       )
     )
 
-//    Post()[Api].restart().call()
+    Fetch.future(_.restart(()).future)
     render(dom.document.body, restartedDiv)
   }
 

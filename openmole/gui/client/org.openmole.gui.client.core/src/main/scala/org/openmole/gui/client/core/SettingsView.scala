@@ -85,9 +85,9 @@ class SettingsView(fileDisplayer: FileDisplayer) {
   })
 
   def updateJVMInfos = {
-//    Post()[Api].jvmInfos.call().foreach { j ⇒
-//      jvmInfos.set(Some(j))
-//    }
+    Fetch.future(_.jvmInfos(()).future).foreach { j ⇒
+      jvmInfos.set(Some(j))
+    }
   }
 
   def setJVMTimer = {

@@ -203,10 +203,21 @@ trait CoreAPI extends RESTAPI {
 
   // ---------- Application ------------
 
-  //  def shutdown(): Unit
+  // def shutdown(): Unit
+  val shutdown: Endpoint[Unit, Unit] =
+    endpoint(get(path / "application" / "shutdown"), ok(jsonResponse[Unit]))
+
   //  def restart(): Unit
+  val restart: Endpoint[Unit, Unit] =
+    endpoint(get(path / "application" / "restart"), ok(jsonResponse[Unit]))
+
   //  def isAlive(): Boolean
+  val isAlive: Endpoint[Unit, Boolean] =
+    endpoint(get(path / "application" / "is-alive"), ok(jsonResponse[Boolean]))
+
   //  def jvmInfos(): JVMInfos
+  val jvmInfos: Endpoint[Unit, JVMInfos] =
+    endpoint(get(path / "application" / "jvm-infos"), ok(jsonResponse[JVMInfos]))
 
   //TODO ------------ refactor -------------------
   // def appendToPluggedIfPlugin(safePath: SafePath): Unit =

@@ -143,6 +143,18 @@ class CoreAPIServer(apiImpl: ApiImpl)
   val copyAllFromTmpRoute =
     copyAllFromTmp.implementedBy { case(f, t) => apiImpl.copyAllTmpTo(f, t) }
 
+  val shutdownRoute =
+    shutdown.implementedBy { _ => apiImpl.shutdown() }
+
+  val restartRoute =
+    restart.implementedBy { _ => apiImpl.restart() }
+
+  val isAliveRoute =
+    isAlive.implementedBy { _ => apiImpl.isAlive() }
+
+  val jvmInfosRoute =
+    jvmInfos.implementedBy { _ => apiImpl.jvmInfos() }
+
   // FIXME implement when scala 3
   //  val marketIndex: Endpoint[Unit, MarketIndex]
   //  val getMarketEntry: Endpoint[(MarketIndexEntry, SafePath), Unit]
