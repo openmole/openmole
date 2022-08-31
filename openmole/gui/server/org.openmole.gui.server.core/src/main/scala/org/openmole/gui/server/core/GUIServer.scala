@@ -178,9 +178,10 @@ class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, pass
         () ⇒ control.stop()
       )
 
-    val apiImpl = new ApiImpl(GUIServerServices.ServicesProvider(services, () => Cypher(password)), Some(applicationControl))
+    val serviceProvider = GUIServerServices.ServicesProvider(services, () => Cypher(password))
+    val apiImpl = new ApiImpl(serviceProvider, Some(applicationControl))
     val apiServer = new CoreAPIServer(apiImpl)
-    val applicationServer = new ApplicationServer(webappCache, extraHeaders, password, services)
+    val applicationServer = new ApplicationServer(webappCache, extraHeaders, password, serviceProvider)
 
 
     //    implicit val runtime: IORuntime =

@@ -115,7 +115,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def resetPassword(): Unit = {
     import services._
-    Services.resetPassword
+    org.openmole.core.services.Services.resetPassword
   }
 
   // FILES

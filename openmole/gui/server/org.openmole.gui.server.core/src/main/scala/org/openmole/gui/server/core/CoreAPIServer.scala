@@ -41,8 +41,8 @@ class CoreAPIServer(apiImpl: ApiImpl)
   val isPasswordCorrectRoute =
     isPasswordCorrect.implementedBy(apiImpl.isPasswordCorrect _)
 
-  val resetPasswordRoute =
-    resetPassword.implementedBy(_ => apiImpl.resetPassword())
+//  val resetPasswordRoute =
+//    resetPassword.implementedBy(_ => apiImpl.resetPassword())
 
   val listPluginsRoute =
     listPlugins.implementedBy(_ => apiImpl.listPlugins())
@@ -163,7 +163,7 @@ class CoreAPIServer(apiImpl: ApiImpl)
     routesFromEndpoints(
       settingsRoute,
       isPasswordCorrectRoute,
-      resetPasswordRoute,
+//      resetPasswordRoute,
       listPluginsRoute,
       guiPluginsRoute,
       listFilesRoute,
@@ -296,7 +296,6 @@ class CoreAPIServer(apiImpl: ApiImpl)
             }
           }
         }
-
     }
 
 

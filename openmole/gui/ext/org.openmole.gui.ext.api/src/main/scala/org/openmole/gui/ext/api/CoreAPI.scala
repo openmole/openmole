@@ -30,8 +30,8 @@ trait CoreAPI extends RESTAPI {
   val isPasswordCorrect: Endpoint[String, Boolean] =
     endpoint(post(path / "is-password-correct", jsonRequest[String]), ok(jsonResponse[Boolean]))
 
-  val resetPassword: Endpoint[Unit, Unit] =
-    endpoint(get(path / "reset-password"), ok(jsonResponse[Unit]))
+//  val resetPassword: Endpoint[Unit, Unit] =
+//    endpoint(get(path / "reset-password"), ok(jsonResponse[Unit]))
 
   // ------ Files ------------
 

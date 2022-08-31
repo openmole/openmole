@@ -25,7 +25,8 @@ import org.http4s.headers.{Location, `Content-Type`}
 import org.http4s.syntax.all.*
 import org.openmole.core.preference.Preference
 import org.openmole.gui.ext
-import org.openmole.gui.server.core.{GUIServer, GUIServerServices, GUIServlet}
+import org.openmole.gui.server.core
+import org.openmole.gui.server.core.{GUIServer, GUIServlet}
 import org.openmole.tool.crypto.Cypher
 import scalatags.Text.all as tags
 import scalatags.Text.all.*
@@ -35,9 +36,10 @@ import java.util.concurrent.atomic.AtomicReference
 
 object ApplicationServer {
   def redirect(s: String) = SeeOther.apply(Location.parse(s"/$s").right.get)
+
 }
 
-class ApplicationServer(webapp: File, extraHeader: String, password: Option[String], services: GUIServerServices) {
+class ApplicationServer(webapp: File, extraHeader: String, password: Option[String], services: GUIServerServices.ServicesProvider) {
   
   val cypher = new AtomicReference[Cypher](Cypher(password))
   def passwordProvided = password.isDefined
@@ -72,6 +74,11 @@ class ApplicationServer(webapp: File, extraHeader: String, password: Option[Stri
 //        Ok.apply(ht.render).map(_.withContentType(`Content-Type`(MediaType.text.html)))
       }
       else ApplicationServer.redirect(ext.data.routes.resetPasswordRoute)
+    case GET -> Root / ext.data.routes.resetPasswordRoute =>
+      import services._
+      org.openmole.core.services.Services.resetPassword
+      val ht = GUIServlet.html(s"${GUIServlet.webpackLibrary}.resetPassword();", GUIServlet.cssFiles(webapp), extraHeader)
+      Ok.apply(ht.render).map(_.withContentType(`Content-Type`(MediaType.text.html)))
     case req @ POST -> Root / ext.data.routes.connectionRoute =>
 
       //      response.setHeader("Access-Control-Allow-Origin", "*")
@@ -85,6 +92,18 @@ class ApplicationServer(webapp: File, extraHeader: String, password: Option[Stri
           case true ⇒ ApplicationServer.redirect(ext.data.routes.appRoute)
           case _ ⇒ ApplicationServer.redirect(ext.data.routes.connectionRoute)
         }
+      }
+    case req@POST -> Root / org.openmole.gui.ext.data.routes.`resetPasswordRoute` =>
+      req.decode[UrlForm] { m =>
+        val password = m.getFirstOrElse("password", "")
+        val passwordAgain = m.getFirstOrElse("passwordagain", "")
+
+        if (password == passwordAgain) {
+          org.openmole.core.preference.Preference.setPasswordTest(services.preference, Cypher(password))
+          cypher.set(Cypher(password))
+        }
+
+        ApplicationServer.redirect(ext.data.routes.connectionRoute)
       }
     case request@GET -> Root / "js" / "snippets" / path =>
       StaticFile.fromFile(new File(webapp, s"js/$path"), Some(request)).getOrElseF(NotFound())
