@@ -647,7 +647,7 @@ object TreeNodeTab {
 
 
   sealed trait EditableView {
-    toString: String
+    def toString: String
   }
 
   object Raw extends EditableView {
