@@ -654,7 +654,8 @@ lazy val extClient = OsgiProject(guiExt, "org.openmole.gui.ext.client") enablePl
 
 lazy val sharedGUI = OsgiProject(guiExt, "org.openmole.gui.ext.api", imports = Seq("*") /*dynamicImports = Seq("shapeless.*", "endpoints4s.generic.*", "endpoints4s.algebra.*")*/) dependsOn(dataGUI, market) enablePlugins (ScalaJSPlugin) settings (guiSettings) settings(
   //libraryDependencies += Libraries.endpoint4SJsonSchemaGeneric,
-  libraryDependencies += Libraries.endpoints4s
+  libraryDependencies += Libraries.endpoints4s,
+  scalaJSSettings
 )
 
 lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompile", imports = Seq("*")) dependsOn(pluginManager, fileService, workspace, dataGUI) settings(
