@@ -116,12 +116,11 @@ class MarketPanel(manager: TreeNodeManager) {
     val path = manager.dirNodeLine.now() ++ entry.name
     downloading.set(downloading.now().updatedFirst(_._1 == entry, (entry, Var(Processing()))))
 
-    // FIXME Reactivate when scala 3
-//    Post()[Api].getMarketEntry(entry, path).call().foreach { d ⇒
-//      downloading.update(d ⇒ d.updatedFirst(_._1 == entry, (entry, Var(Processed()))))
-//      downloading.now.headOption.foreach(_ ⇒ modalDialog.hide)
-//      panels.treeNodeManager.invalidCurrentCache
-//    }
+    Fetch.future(_.getMarketEntry(entry, path).future).foreach { d ⇒
+      downloading.update(d ⇒ d.updatedFirst(_._1 == entry, (entry, Var(Processed()))))
+      downloading.now().headOption.foreach(_ ⇒ modalDialog.hide)
+      panels.treeNodeManager.invalidCurrentCache
+    }
   }
 
   def downloadButton(entry: MarketIndexEntry, todo: () ⇒ Unit = () ⇒ {}) = div()

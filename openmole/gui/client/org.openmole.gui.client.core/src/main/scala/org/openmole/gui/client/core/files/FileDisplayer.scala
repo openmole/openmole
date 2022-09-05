@@ -46,14 +46,13 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs) {
               HTMLContent.addTab(safePath, htmlDiv)
             }
           case OpenMOLEResult ⇒
-            // TODO implement
-//            Post()[Api].findAnalysisPlugin(safePath).call.foreach {
-//              case Some(plugin) ⇒
-//                val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
-//                val tab = TreeNodeTab.HTML(safePath, analysis.panel(safePath, pluginServices))
-//                treeNodeTabs add tab
-//              case None ⇒
-//            }
+            Fetch.future(_.findAnalysisPlugin(safePath).future).foreach {
+              case Some(plugin) ⇒
+                val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
+                val tab = TreeNodeTab.HTML(safePath, analysis.panel(safePath, pluginServices))
+                treeNodeTabs add tab
+              case None ⇒
+            }
           case SVGExtension ⇒ treeNodeTabs add TreeNodeTab.HTML(safePath, TreeNodeTab.rawBlock(content))
 //          case editableFile: EditableFile ⇒
 //            if (DataUtils.isCSV(safePath))

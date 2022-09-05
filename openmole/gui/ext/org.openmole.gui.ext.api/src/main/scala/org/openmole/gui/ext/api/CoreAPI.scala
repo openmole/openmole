@@ -172,8 +172,10 @@ trait CoreAPI extends RESTAPI {
   //def appendToPluggedIfPlugin(safePath: SafePath): Unit
   //def unplug(safePath: SafePath): Unit
   //def isOSGI(safePath: SafePath): Boolean
-  //def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS]
 
+  //def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS]
+  val findAnalysisPlugin: Endpoint[SafePath, Option[GUIPluginAsJS]] =
+    endpoint(post(path / "find-analysis-plugin", jsonRequest[SafePath]), ok(jsonResponse[Option[GUIPluginAsJS]]))
 
   // ---- Model Wizards --------------
   //def models(archivePath: SafePath): Seq[SafePath]
@@ -189,8 +191,6 @@ trait CoreAPI extends RESTAPI {
     endpoint(post(path / "wizard" / "download-http", jsonRequest[(String, SafePath, Boolean)]), ok(jsonResponse[Option[ErrorData]]))
 
   // ---------- Market ----------
-
-  // FIXME wait for scala 3
 
   //def marketIndex(): MarketIndex
   val marketIndex: Endpoint[Unit, MarketIndex] =
