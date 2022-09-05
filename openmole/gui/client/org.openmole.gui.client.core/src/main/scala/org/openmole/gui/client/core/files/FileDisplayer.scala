@@ -38,7 +38,7 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs) {
           case OpenMOLEScript ⇒
             OMSContent.addTab(safePath, content, hash)
           case FileExtension.CSV | FileExtension.OMR=> ResultContent.addTab(safePath, content, hash)
-          case _: EditableFile=> AnyTextContent.addTab(safePath, content, hash)
+          case _: EditableFile => AnyTextContent.addTab(safePath, content, hash)
           case MDScript ⇒
             Fetch.future(_.mdToHtml(safePath).future).foreach { htmlString ⇒
               val htmlDiv = com.raquo.laminar.api.L.div()

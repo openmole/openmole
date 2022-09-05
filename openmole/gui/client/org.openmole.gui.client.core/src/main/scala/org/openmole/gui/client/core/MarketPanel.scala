@@ -159,11 +159,9 @@ class MarketPanel(manager: TreeNodeManager) {
     onopen = () ⇒ {
       marketIndex.now() match {
         case None ⇒
-
-          // FIXME Reactivate when scala 3
-//          Post()[Api].marketIndex.call().foreach { m ⇒
-//          marketIndex.set(Some(m))
-//        }
+          Fetch.future(_.marketIndex(()).future).foreach { m ⇒
+            marketIndex.set(Some(m))
+          }
         case _ ⇒
       }
     },
