@@ -19,7 +19,7 @@ package org.openmole.core.workflow.builder
 
 import monocle.*
 import org.openmole.core.context.{ PrototypeSet, Val }
-import org.openmole.core.workflow.tools.DefaultSet
+import org.openmole.core.expansion.DefaultSet
 
 object InputOutputConfig {
 

@@ -1,5 +1,9 @@
+package org.openmole.core.expansion
+
+import org.openmole.core.context.{Val, Variable}
+
 /*
- * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 2022 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,11 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.tools
-
-import org.openmole.core.context._
-import org.openmole.core.expansion._
-import cats.implicits._
+import cats.implicits.*
 
 /**
  * The parameter is a variable which is injected in the data flow during the
@@ -27,8 +27,8 @@ import cats.implicits._
  * useful for testing purposes and for defining default value of inputs of a
  * task.
  *
- * @param prototype prototype taking the value by default
- * @param value value by default from the context
+ * @param prototype  prototype taking the value by default
+ * @param value      value by default from the context
  * @param `override` should the default value override conflicting variable values
  * @tparam T type of the Val
  */

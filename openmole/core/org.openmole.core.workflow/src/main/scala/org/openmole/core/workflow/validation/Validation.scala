@@ -18,11 +18,11 @@
 package org.openmole.core.workflow.validation
 
 import org.openmole.core.context._
+import org.openmole.core.expansion.{Default, DefaultSet}
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools.{ Default, DefaultSet }
 import org.openmole.core.workflow.validation.DataflowProblem._
 import org.openmole.core.workflow.validation.TopologyProblem._
 import org.openmole.core.workflow.validation.TypeUtil._

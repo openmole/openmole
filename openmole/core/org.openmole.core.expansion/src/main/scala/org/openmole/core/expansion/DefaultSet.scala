@@ -15,22 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.tools
+package org.openmole.core.expansion
 
 import monocle.Lens
-
+import org.openmole.core.context.*
+import org.openmole.core.expansion.Default
+import org.openmole.tool.random.RandomProvider
+import org.openmole.core.fileservice.FileService
+import org.openmole.core.workspace.TmpDirectory
 import scala.collection.immutable.TreeMap
-import org.openmole.core.context._
-import org.openmole.core.workflow.builder.{ DefaultBuilder, InputBuilder }
 
 object DefaultSet {
   implicit def seqToDefaultSet(s: Seq[Default[_]]): DefaultSet = DefaultSet(s: _*)
   implicit def defaultSetToSeq(d: DefaultSet): Seq[Default[_]] = d.defaultMap.values.toSeq
-
-  implicit def defaultBuilder: DefaultBuilder[DefaultSet] & InputBuilder[DefaultSet] = new DefaultBuilder[DefaultSet] with InputBuilder[DefaultSet] {
-    override def defaults: Lens[DefaultSet, DefaultSet] = Lens.id
-    override def inputs: Lens[DefaultSet, PrototypeSet] = Lens { (_: DefaultSet) ⇒ PrototypeSet.empty } { p ⇒ d ⇒ d }
-  }
 
   lazy val empty = DefaultSet(Iterable.empty)
 
@@ -38,6 +35,21 @@ object DefaultSet {
   def fromAssignments(assignments: Seq[DefaultAssignment]): DefaultSet = assignments.foldLeft(empty)((ds, a) ⇒ a(ds))
 
   def apply(p: Default[_]*): DefaultSet = DefaultSet(p)
+
+  /**
+   * Extend a context with default values (taken into account if overriding is activated or variable is missing in previous context)
+   *
+   * @param defaults default value
+   * @param context  context to be extended
+   * @return the new context
+   */
+  def completeContext(defaults: DefaultSet, context: Context)(implicit randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService): Context =
+    context ++
+      defaults.flatMap {
+        parameter ⇒
+          if (parameter.`override` || !context.contains(parameter.prototype.name)) Some(parameter.toVariable.from(context))
+          else Option.empty[Variable[_]]
+      }
 
 }
 

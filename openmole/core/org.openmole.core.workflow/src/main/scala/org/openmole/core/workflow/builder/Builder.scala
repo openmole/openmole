@@ -1,9 +1,10 @@
 package org.openmole.core.workflow.builder
 
-import monocle.Lens
-import org.openmole.core.context._
-import org.openmole.core.workflow.tools._
+import monocle.{Lens, Iso}
+import org.openmole.core.context.*
+import org.openmole.core.workflow.tools.*
 import monocle.Focus
+import org.openmole.core.expansion.{DefaultSet, FromContext}
 
 trait InputBuilder[T] {
   def inputs: monocle.Lens[T, PrototypeSet]
@@ -20,6 +21,21 @@ trait MappedInputBuilder[T] {
 trait MappedOutputBuilder[T] {
   def mappedOutputs: monocle.Lens[T, Vector[Mapped[_]]]
 }
+
+object DefaultBuilder {
+
+  implicit def defaultSetDefaultBuilder: DefaultBuilder[DefaultSet] & InputBuilder[DefaultSet] = new DefaultBuilder[DefaultSet] with InputBuilder[DefaultSet] {
+    override def defaults: Lens[DefaultSet, DefaultSet] = Iso.id
+    override def inputs: Lens[DefaultSet, PrototypeSet] = Lens { (_: DefaultSet) ⇒ PrototypeSet.empty } { p ⇒ d ⇒ d }
+  }
+
+  implicit def fromContextDefaultBuilder[T]: DefaultBuilder[FromContext[T]] & InputBuilder[FromContext[T]] = new DefaultBuilder[FromContext[T]] with InputBuilder[FromContext[T]]  {
+    override def defaults: Lens[FromContext[T], DefaultSet] = Focus[FromContext[T]](_.defaults)
+    override def inputs: Lens[FromContext[T], PrototypeSet] = Lens { (_: FromContext[T]) ⇒ PrototypeSet.empty } { p ⇒ d ⇒ d }
+  }
+
+}
+
 
 trait DefaultBuilder[T] {
   def defaults: monocle.Lens[T, DefaultSet]

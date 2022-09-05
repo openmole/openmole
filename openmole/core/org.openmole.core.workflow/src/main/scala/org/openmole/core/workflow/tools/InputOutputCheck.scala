@@ -17,13 +17,13 @@
 
 package org.openmole.core.workflow.tools
 
-import org.openmole.core.context._
-import org.openmole.core.exception._
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.context.*
+import org.openmole.core.exception.*
+import org.openmole.core.expansion.{DefaultSet, FromContext}
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.workspace.TmpDirectory
-import org.openmole.tool.random._
+import org.openmole.tool.random.*
 
 /**
  * Methods for the validation of inputs/outputs
@@ -98,24 +98,9 @@ object InputOutputCheck {
   def filterOutput(outputs: PrototypeSet, context: Context): Context =
     Context(outputs.toList.flatMap(o ⇒ context.variable(o): Option[Variable[_]]): _*)
 
-  /**
-   * Extend a context with default values (taken into account if overriding is activated or variable is missing in previous context)
-   *
-   * @param defaults default value
-   * @param context context to be extended
-   * @return the new context
-   */
-  def initializeInput(defaults: DefaultSet, context: Context)(implicit randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService): Context =
-    context ++
-      defaults.flatMap {
-        parameter ⇒
-          if (parameter.`override` || !context.contains(parameter.prototype.name)) Some(parameter.toVariable.from(context))
-          else Option.empty[Variable[_]]
-      }
-
   def perform(obj: Any, inputs: PrototypeSet, outputs: PrototypeSet, defaults: DefaultSet, process: FromContext[Context])(implicit preference: Preference) = FromContext { p ⇒
     import p._
-    val initializedContext = initializeInput(defaults, context)
+    val initializedContext = DefaultSet.completeContext(defaults, context)
     val inputErrors = verifyInput(inputs, initializedContext)
     if (!inputErrors.isEmpty) throw new InternalProcessingError(s"Input errors have been found in ${obj}: ${inputErrors.mkString(", ")}.")
 

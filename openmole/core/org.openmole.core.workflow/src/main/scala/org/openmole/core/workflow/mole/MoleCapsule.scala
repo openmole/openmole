@@ -19,10 +19,9 @@ package org.openmole.core.workflow.mole
 
 import org.openmole.core.context._
 import org.openmole.core.exception._
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.expansion.{DefaultSet, FromContext}
 import org.openmole.core.workflow.job.RuntimeTask
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools.DefaultSet
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.validation._
 import org.openmole.tool.random._

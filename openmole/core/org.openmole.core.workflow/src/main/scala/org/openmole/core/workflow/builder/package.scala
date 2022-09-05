@@ -17,10 +17,11 @@
 
 package org.openmole.core.workflow.builder
 
-import org.openmole.core.context._
-import org.openmole.core.expansion._
+import org.openmole.core.context.*
+import org.openmole.core.expansion
+import org.openmole.core.expansion.*
 import org.openmole.core.keyword.:=
-import org.openmole.core.workflow.tools._
+import org.openmole.core.workflow.tools.*
 import scalaz.Alpha.T
 
 /**
@@ -156,16 +157,16 @@ trait BuilderPackage {
   implicit def setterToFunction[O, S](o: O)(implicit setter: Setter[O, S]): S => S = implicitly[Setter[O, S]].set(o)(_)
 
   implicit def equalToAssignDefaultFromContext[T, U: DefaultBuilder: InputBuilder]: Setter[:=[Val[T], (FromContext[T], Boolean)], U] =
-    Setter[:=[Val[T], (FromContext[T], Boolean)], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + Default[T](v.value, v.equal._1, v.equal._2)) andThen (inputs += v.value) }
+    Setter[:=[Val[T], (FromContext[T], Boolean)], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + expansion.Default[T](v.value, v.equal._1, v.equal._2)) andThen (inputs += v.value) }
 
   implicit def equalToAssignDefaultFromContext2[T, U: DefaultBuilder: InputBuilder]: Setter[:=[Val[T], FromContext[T]], U] =
-    Setter[:=[Val[T], FromContext[T]], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + Default[T](v.value, v.equal, false)) andThen (inputs += v.value) }
+    Setter[:=[Val[T], FromContext[T]], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + expansion.Default[T](v.value, v.equal, false)) andThen (inputs += v.value) }
 
   implicit def equalToAssignDefaultValue[T, U: DefaultBuilder: InputBuilder]: Setter[:=[Val[T], (T, Boolean)], U] =
-    Setter[:=[Val[T], (T, Boolean)], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + Default[T](v.value, v.equal._1: FromContext[T], v.equal._2)) andThen (inputs += v.value) }
+    Setter[:=[Val[T], (T, Boolean)], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + expansion.Default[T](v.value, v.equal._1: FromContext[T], v.equal._2)) andThen (inputs += v.value) }
 
   implicit def equalToAssignDefaultValue2[T, U: DefaultBuilder: InputBuilder]: Setter[:=[Val[T], T], U] =
-    Setter[:=[Val[T], T], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + Default[T](v.value, v.equal: FromContext[T], false)) andThen (inputs += v.value) }
+    Setter[:=[Val[T], T], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + expansion.Default[T](v.value, v.equal: FromContext[T], false)) andThen (inputs += v.value) }
 
   implicit def equalToAssignDefaultSeqValue[T, U: DefaultBuilder: InputBuilder]: Setter[:=[Iterable[Val[T]], (Iterable[T], Boolean)], U] =
     Setter[:=[Iterable[Val[T]], (Iterable[T], Boolean)], U] { v ⇒
