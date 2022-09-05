@@ -169,8 +169,6 @@ object Interpreter {
   }
 }
 
-
-// TODO actively clean classDirectory after usage
 class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File) {
 
   def initialState = driver.initialState 

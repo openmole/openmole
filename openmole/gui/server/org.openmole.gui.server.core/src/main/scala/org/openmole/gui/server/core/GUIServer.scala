@@ -100,22 +100,27 @@ object GUIServer {
     subDir:             Option[String]
   )
 
-//  def waitingOpenMOLEContent =
-//    <html>
-//      <head>
-//        <script>
-//          { """setTimeout(function(){ window.location.reload(1); }, 3000);""" }
-//        </script>
-//      </head>
-//      <link href="/css/style.css" rel="stylesheet"/>
-//      <body>
-//        <div>
-//          OpenMOLE is launching...
-//          <div class="loader" style="float: right"></div><br/>
-//        </div>
-//        (for the first launch, and after an update, it may take several minutes)
-//      </body>
-//    </html>
+  def waitingOpenMOLEContent = """
+    |<html>
+    |  <head>
+    |    <script>setTimeout(function(){ window.location.reload(1); }, 3000);</script>
+    |  </head>
+    |  <link href="/css/style.css" rel="stylesheet"/>
+    |  <body>
+    |    <div>
+    |      OpenMOLE is launching...
+    |      <div class="loader" style="float: right"></div><br/>
+    |    </div>
+    |    (for the first launch, and after an update, it may take several minutes)
+    |  </body>
+    |</html>""".stripMargin
+
+  def waitRouter =
+    import org.http4s.headers.{`Content-Type`}
+    val routes: HttpRoutes[IO] = HttpRoutes.of {
+      case _ =>  org.http4s.dsl.io.Ok.apply(waitingOpenMOLEContent).map(_.withContentType(`Content-Type`(MediaType.text.html)))
+    }
+    Router("/" -> routes)
 
   case class ApplicationControl(restart: () ⇒ Unit, stop: () ⇒ Unit)
 
@@ -126,7 +131,13 @@ object GUIServer {
 
   def apply(port: Int, localhost: Boolean, services: GUIServerServices, password: Option[String], optimizedJS: Boolean, extraHeaders: String) = {
     import services.*
-    val webappCache = GUIServer.webapp(optimizedJS)
+    implicit val runtime = cats.effect.unsafe.IORuntime.global
+
+    val waitingServerShutdown = server(port, localhost).withHttpApp(waitRouter.orNotFound).allocated.unsafeRunSync()._2
+    val webappCache =
+      try GUIServer.webapp(optimizedJS)
+      finally waitingServerShutdown.unsafeRunSync()
+      
     new GUIServer(
       port,
       localhost,
@@ -155,6 +166,15 @@ object GUIServer {
     }
 
   }
+
+  def server(port: Int, localhost: Boolean) =
+    val s =
+      if (localhost) BlazeServerBuilder[IO].bindHttp(port, "localhost")
+      else BlazeServerBuilder[IO].bindHttp(port, "0.0.0.0")
+
+    s.enableHttp2(true)
+  end server
+
 }
 
 
@@ -196,12 +216,8 @@ class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, pass
     val httpApp = Router(Seq("/" -> applicationServer.routes, "/" -> apiServer.routes, "/" -> apiServer.endpointRoutes) ++ pluginsRoutes: _*).orNotFound
 
     implicit val runtime = cats.effect.unsafe.IORuntime.global
-    
-    def server =
-      if(localhost) BlazeServerBuilder[IO].bindHttp(port, "localhost")
-      else BlazeServerBuilder[IO].bindHttp(port, "0.0.0.0")
 
-    val shutdown = server.withHttpApp(httpApp).allocated.unsafeRunSync()._2 // feRunSync()._2
+    val shutdown = GUIServer.server(port, localhost).withHttpApp(httpApp).allocated.unsafeRunSync()._2 // feRunSync()._2
 
     control.cancel = shutdown.unsafeRunSync
     control
