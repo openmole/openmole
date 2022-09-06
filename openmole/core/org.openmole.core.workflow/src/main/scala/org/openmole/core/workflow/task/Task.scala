@@ -246,11 +246,10 @@ object Task {
     )(executionContext.preference).from(context)(rng, TmpDirectory(executionContext.moleExecutionDirectory), executionContext.fileService)
   }
 
-  extension (task: Task)
-    def inputs: PrototypeSet = task.config.inputs ++ DefaultSet.completVals(task.config.inputs, defaults)
-    def outputs: PrototypeSet = task.config.outputs
-    def defaults: DefaultSet = task.config.defaults
-
+  def inputs(task: Task): PrototypeSet = task.config.inputs ++ DefaultSet.defaultVals(task.config.inputs, Task.defaults(task))
+  def outputs(task: Task): PrototypeSet = task.config.outputs
+  def defaults(task: Task): DefaultSet = task.config.defaults
+  
 }
 
 /**
@@ -285,6 +284,10 @@ trait Task extends Name with Id {
    * (this trick allows to still benefit of the power of case classes while staying in a standard object oriented scheme)
    */
   lazy val id = new Object {}
+
+  def inputs: PrototypeSet = Task.inputs(this)
+  def outputs: PrototypeSet = Task.outputs(this)
+  def defaults: DefaultSet = Task.defaults(this)
 
 }
 

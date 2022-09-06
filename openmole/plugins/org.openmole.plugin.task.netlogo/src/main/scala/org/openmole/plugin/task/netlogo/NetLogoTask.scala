@@ -229,7 +229,7 @@ object NetLogoTask {
 /**
  * Generic NetLogoTask
  */
-trait NetLogoTask extends Task with ValidateTask {
+trait NetLogoTask extends Task with ValidateTask { netlogoTask =>
 
   lazy val netLogoInstanceKey = CacheKey[WithInstance[NetLogoTask.NetoLogoInstance]]()
 
@@ -294,7 +294,7 @@ trait NetLogoTask extends Task with ValidateTask {
       for (cmd ← go.map(_.from(context))) NetLogoTask.executeNetLogo(instance.netLogo, cmd, ignoreError)
 
       val contextResult =
-        External.fetchOutputFiles(external, this.outputs, preparedContext, resolver, Seq(instance.workspaceDirectory)) ++ mapped.outputs.map {
+        External.fetchOutputFiles(external, netlogoTask.outputs, preparedContext, resolver, Seq(instance.workspaceDirectory)) ++ mapped.outputs.map {
           case mapped ⇒
             try {
               val outputValue = NetLogoTask.report(instance.netLogo, mapped.name)

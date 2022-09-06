@@ -6,14 +6,7 @@ import org.openmole.core.workflow.tools.*
 import monocle.Focus
 import org.openmole.core.expansion.{DefaultSet, FromContext, ScalaCode}
 
-object InputBuilder {
-  def empty[T]: InputBuilder[T] =
-    new InputBuilder[T] {
-      def inputs = monocle.Lens { (_: T) => PrototypeSet.empty } { p ⇒ d ⇒ d }
-    }
-}
-
-@FunctionalInterface trait InputBuilder[T] {
+trait InputBuilder[T] {
   def inputs: monocle.Lens[T, PrototypeSet]
 }
 
@@ -43,7 +36,7 @@ object DefaultBuilder {
 
 }
 
-@FunctionalInterface trait DefaultBuilder[T] {
+trait DefaultBuilder[T] {
   def defaults: monocle.Lens[T, DefaultSet]
 }
 

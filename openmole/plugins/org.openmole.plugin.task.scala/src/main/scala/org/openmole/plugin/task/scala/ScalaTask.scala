@@ -26,7 +26,6 @@ import org.openmole.core.expansion.{ FromContext, ScalaCompilation }
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
 import org.openmole.plugin.task.jvm._
@@ -74,7 +73,7 @@ case class ScalaTask(
   config:     InputOutputConfig,
   external:   External,
   info:       InfoConfig
-) extends Task with ValidateTask with Plugins {
+) extends Task with ValidateTask with Plugins { scalaTask =>
 
   lazy val compilation = CacheKey[ScalaCompilation.ContextClosure[java.util.Map[String, Any]]]()
 
@@ -83,7 +82,7 @@ case class ScalaTask(
     ScalaCompilation.static(
       sourceCode,
       inputs ++ Seq(JVMLanguageTask.workDirectory),
-      ScalaCompilation.WrappedOutput(this.outputs),
+      ScalaCompilation.WrappedOutput(scalaTask.outputs),
       libraries = libraries,
       plugins = plugins
     )
@@ -115,15 +114,15 @@ case class ScalaTask(
       FromContext { p ⇒
         import p._
 
-        val scalaCompilation = taskExecutionContext.cache.getOrElseUpdate(compilation, compile(this.inputs.toSeq))
+        val scalaCompilation = taskExecutionContext.cache.getOrElseUpdate(compilation, compile(scalaTask.inputs.toSeq))
 
         val map = scalaCompilation(context, p.random, p.newFile)
-        this.outputs.toSeq.map {
+        scalaTask.outputs.toSeq.map {
           o ⇒ Variable.unsecure(o, Option(map.get(o.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
         }: Context
       }
 
-    JVMLanguageTask.process(taskExecutionContext, libraries, external, processCode, this.outputs)
+    JVMLanguageTask.process(taskExecutionContext, libraries, external, processCode, scalaTask.outputs)
   }
 }
 

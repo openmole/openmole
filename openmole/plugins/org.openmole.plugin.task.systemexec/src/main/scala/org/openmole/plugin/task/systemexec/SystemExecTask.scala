@@ -87,7 +87,7 @@ case class SystemExecTask private (
   config:               InputOutputConfig,
   external:             External,
   info:                 InfoConfig
-) extends Task with ValidateTask {
+) extends Task with ValidateTask { systemExecTask =>
 
   override def validate = Validate { p ⇒
     import p._
@@ -146,7 +146,7 @@ case class SystemExecTask private (
           stdErr = executionContext.outputRedirection.output
         )
 
-      val retContext: Context = External.fetchOutputFiles(external, this.outputs, preparedContext, External.relativeResolver(workDir), Seq(tmpDir))
+      val retContext: Context = External.fetchOutputFiles(external, systemExecTask.outputs, preparedContext, External.relativeResolver(workDir), Seq(tmpDir))
 
       retContext ++
         List(

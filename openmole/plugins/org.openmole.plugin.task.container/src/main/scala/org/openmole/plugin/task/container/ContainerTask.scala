@@ -358,7 +358,7 @@ case class ContainerTask(
           rootDirectory
         ) _
 
-      val retContext = External.fetchOutputFiles(external, this.outputs, preparedContext, outputPathResolverValue, Seq(rootDirectory, executionContext.taskExecutionDirectory))
+      val retContext = External.fetchOutputFiles(external, self.outputs, preparedContext, outputPathResolverValue, Seq(rootDirectory, executionContext.taskExecutionDirectory))
 
       retContext ++
         returnValue.map(v ⇒ Variable(v, retCode)) ++
