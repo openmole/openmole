@@ -1,8 +1,9 @@
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.workflow.tools.ContextAggregator
 import org.openmole.plugin.method.evolution.Objective.ToObjective
 import org.openmole.tool.types.ToDouble
@@ -18,35 +19,43 @@ object Objective {
     implicit def asIsToExact[T](implicit exact: ToObjective[T]): ToObjective[As[T, String]] = t ⇒ exact.apply(t.value).copy(as = Some(t.as))
     implicit def asValIsToExact[T, P](implicit exact: ToObjective[T]): ToObjective[As[T, Val[P]]] = t ⇒ exact.apply(t.value).copy(as = Some(t.as.name))
 
+
+    def buildAggregateCodeObjective[T: ClassTag](o: Val[T], fromContext: FromContext[Double]) =
+      def value(noisy: Boolean) =
+        if (!noisy) {
+          def aggregate = FromContext { p ⇒
+            import p._
+            (v: T) ⇒ fromContext.from(Context(o -> v))
+          }
+
+          ComputeValue(o, aggregate, aggregateString = true)
+        }
+        else {
+          def aggregate = FromContext { p ⇒
+            import p._
+            (v: Array[T]) ⇒ fromContext.from(Context(o.toArray -> v))
+          }
+
+          ComputeValue(o.array, aggregate, aggregateString = true)
+        }
+
+      Objective(
+        value,
+        negative = false,
+        delta = None,
+        as = None,
+        validate = fromContext.validate
+      )
+
     implicit def aggregateStringIsObjective[T: ClassTag]: ToObjective[Aggregate[Val[T], String]] =
-      (t: Aggregate[Val[T], String]) ⇒ {
+      (t: Aggregate[Val[T], String]) ⇒
         val fromContext: FromContext[Double] = t.aggregate
+        buildAggregateCodeObjective(t.value, fromContext)
 
-        def value(noisy: Boolean) =
-          if (!noisy) {
-            def aggregate = FromContext { p ⇒
-              import p._
-              (v: T) ⇒ fromContext.from(Context(t.value -> v))
-            }
-
-            ComputeValue(t.value, aggregate, aggregateString = true)
-          }
-          else {
-            def aggregate = FromContext { p ⇒
-              import p._
-              (v: Array[T]) ⇒ fromContext.from(Context(t.value.toArray -> v))
-            }
-
-            ComputeValue(t.value.array, aggregate, aggregateString = true)
-          }
-
-        Objective(
-          value,
-          negative = false,
-          delta = None,
-          as = None,
-          validate = fromContext.validate)
-      }
+    implicit def aggregateScalaCodeIsObjective[T: ClassTag]: ToObjective[Aggregate[Val[T], ScalaCode]] =
+      (t: Aggregate[Val[T], ScalaCode]) ⇒
+        val fromContext: FromContext[Double] = ScalaCode.fromContext(t.aggregate)
+        buildAggregateCodeObjective(t.value, fromContext)
 
     implicit def aggregateIsToObjective[T: ClassTag]: ToObjective[Aggregate[Val[T], T ⇒ Double]] = a ⇒ {
       Objective(_ ⇒ ComputeValue(a.value, a.aggregate), negative = false, delta = None, as = None)

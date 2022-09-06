@@ -1,12 +1,25 @@
 package org.openmole.core.workflow.builder
 
-import monocle.{Lens, Iso}
+import monocle.{Iso, Lens}
 import org.openmole.core.context.*
 import org.openmole.core.workflow.tools.*
 import monocle.Focus
-import org.openmole.core.expansion.{DefaultSet, FromContext}
+import org.openmole.core.expansion.{DefaultSet, FromContext, ScalaCode}
 
-trait InputBuilder[T] {
+object InputBuilder {
+  def empty[T]: InputBuilder[T] =
+    new InputBuilder[T] {
+      def inputs = monocle.Lens { (_: T) => PrototypeSet.empty } { p ⇒ d ⇒ d }
+    }
+
+  // Input builder is required for default assignment
+  given InputBuilder[DefaultSet] = empty
+  given [T]: InputBuilder[FromContext[T]] = empty
+  given InputBuilder[ScalaCode] = empty
+}
+
+
+@FunctionalInterface trait InputBuilder[T] {
   def inputs: monocle.Lens[T, PrototypeSet]
 }
 
@@ -24,20 +37,19 @@ trait MappedOutputBuilder[T] {
 
 object DefaultBuilder {
 
-  implicit def defaultSetDefaultBuilder: DefaultBuilder[DefaultSet] & InputBuilder[DefaultSet] = new DefaultBuilder[DefaultSet] with InputBuilder[DefaultSet] {
-    override def defaults: Lens[DefaultSet, DefaultSet] = Iso.id
-    override def inputs: Lens[DefaultSet, PrototypeSet] = Lens { (_: DefaultSet) ⇒ PrototypeSet.empty } { p ⇒ d ⇒ d }
+  given DefaultBuilder[DefaultSet] = new DefaultBuilder[DefaultSet] {
+    def defaults = Iso.id[DefaultSet]
   }
-
-  implicit def fromContextDefaultBuilder[T]: DefaultBuilder[FromContext[T]] & InputBuilder[FromContext[T]] = new DefaultBuilder[FromContext[T]] with InputBuilder[FromContext[T]]  {
-    override def defaults: Lens[FromContext[T], DefaultSet] = Focus[FromContext[T]](_.defaults)
-    override def inputs: Lens[FromContext[T], PrototypeSet] = Lens { (_: FromContext[T]) ⇒ PrototypeSet.empty } { p ⇒ d ⇒ d }
+  given[T]: DefaultBuilder[FromContext[T]] = new DefaultBuilder[FromContext[T]] {
+    def defaults = Focus[FromContext[T]](_.defaults)
+  }
+  given DefaultBuilder[ScalaCode] = new DefaultBuilder[ScalaCode] {
+    def defaults = Focus[ScalaCode](_.defaults)
   }
 
 }
 
-
-trait DefaultBuilder[T] {
+@FunctionalInterface trait DefaultBuilder[T] {
   def defaults: monocle.Lens[T, DefaultSet]
 }
 

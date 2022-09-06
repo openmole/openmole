@@ -51,6 +51,16 @@ object DefaultSet {
           else Option.empty[Variable[_]]
       }
 
+  def vals(defaults: DefaultSet): Seq[Val[_]] = defaults.defaults.map(_.prototype).toSeq
+
+  def completVals(inputs: Seq[Val[_]], defaults: DefaultSet): Seq[Val[_]] =
+    val inputsNames = inputs.map(_.name).toSet
+    defaults.flatMap {
+      parameter ⇒
+        if (parameter.`override` || !inputsNames.contains(parameter.prototype.name)) Some(parameter.prototype)
+        else Option.empty[Val[_]]
+    }
+
 }
 
 /**

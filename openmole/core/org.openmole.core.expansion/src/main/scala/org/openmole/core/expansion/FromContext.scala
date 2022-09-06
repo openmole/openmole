@@ -250,7 +250,7 @@ case class FromContext[+T](c: FromContext.Parameters ⇒ T, v: Validate, inputs:
 
   def from(context: ⇒ Context)(implicit rng: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): T = apply(context)
 
-  def validate = v
+  def validate = Validate.withExtraInputs(v, i => DefaultSet.completVals(i, defaults))
 
   def withValidate(validate: Validate): FromContext[T] = copy(v = v ++ validate)
   def withInputs(v: Seq[Val[_]]): FromContext[T] = copy(inputs = inputs ++ v)

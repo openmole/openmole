@@ -23,6 +23,12 @@ package expansion {
   import org.openmole.core.fileservice.FileService
   import org.openmole.core.workspace.TmpDirectory
 
+  object ScalaCode {
+    def fromContext[T: Manifest](code: ScalaCode) = FromContext.codeToFromContext[T](code.source) copy(defaults = code.defaults)
+  }
+
+  case class ScalaCode(source: String, defaults: DefaultSet = DefaultSet.empty)
+
   sealed trait Validate {
     def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable]
     def ++(v: Validate) = Validate.++(this, v)
@@ -42,6 +48,10 @@ package expansion {
 
     def apply(f: Parameters ⇒ Seq[Throwable]): Validate = LeafValidate(f)
     def apply(vs: Validate*): Validate = SeqValidate(vs)
+
+    def withExtraInputs(v: Validate, extraInputs: Seq[Val[_]] => Seq[Val[_]]): Validate = new Validate {
+      def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable] = v(inputs ++ extraInputs(inputs))
+    }
 
     case object success extends Validate {
       def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable] = Seq()
@@ -70,6 +80,9 @@ package expansion {
     implicit def seqToSeqOfFromContext[T](s: Seq[T])(implicit toFromContext: ToFromContext[T, T]): Seq[FromContext[T]] = s.map(e ⇒ toFromContext(e))
     type Condition = expansion.Condition
     lazy val Condition = expansion.Condition
+
+    type ScalaCode = org.openmole.core.expansion.ScalaCode
+    lazy val ScalaCode = org.openmole.core.expansion.ScalaCode
   }
 
 }
