@@ -90,6 +90,6 @@ object ExplorationTask {
    * @param c
    * @return
    */
-  def explored(c: MoleCapsule, mole: Mole, sources: Sources, hooks: Hooks) = (p: Val[_]) ⇒ c.task(mole, sources, hooks).outputs.explored(p)
+  def explored(c: MoleCapsule, mole: Mole, sources: Sources, hooks: Hooks) = (p: Val[_]) ⇒ Task.outputs(c.task(mole, sources, hooks)).explored(p)
 
 }

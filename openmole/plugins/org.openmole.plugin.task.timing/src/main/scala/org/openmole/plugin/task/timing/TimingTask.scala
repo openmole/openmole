@@ -16,7 +16,15 @@ object TimingTask {
     task:    Task,
     tracker: Val[Long]
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    new TimingTask(task, tracker, InputOutputConfig(task.inputs, task.outputs), task.info) set (outputs += tracker)
+    new TimingTask(
+      task,
+      tracker,
+      InputOutputConfig(),
+      task.info
+    ) set (
+      inputs ++= Task.inputs(task),
+      outputs ++= Task.outputs(task) ++ Seq(tracker)
+    )
 
 }
 
@@ -26,9 +34,6 @@ case class TimingTask(
   config:  InputOutputConfig,
   info:    InfoConfig
 ) extends Task {
-
-  override def inputs = task.inputs
-  override def outputs = task.outputs ++ Seq(tracker)
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
     val starttime = System.currentTimeMillis()

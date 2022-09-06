@@ -18,8 +18,8 @@
 package org.openmole.core.workflow.task
 
 import java.io.File
-import org.openmole.core.context._
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.context.*
+import org.openmole.core.expansion.*
 import org.openmole.core.fileservice.{ FileService, FileServiceCache }
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
@@ -228,7 +228,6 @@ object Task {
   def apply(className: String)(fromContext: FromContextTask.Parameters ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextTask =
     FromContextTask.apply(className)(fromContext)
 
-
   /**
    * Perform this task.
    *
@@ -238,9 +237,19 @@ object Task {
    */
   def perform(task: Task, context: Context, executionContext: TaskExecutionContext): Context = {
     lazy val rng = Lazy(Task.buildRNG(context))
-    InputOutputCheck.perform(task, task.inputs, task.outputs, task.defaults, task.process(executionContext))(executionContext.preference).from(context)(rng, TmpDirectory(executionContext.moleExecutionDirectory), executionContext.fileService)
+    InputOutputCheck.perform(
+      task,
+      Task.inputs(task),
+      Task.outputs(task),
+      Task.defaults(task),
+      task.process(executionContext)
+    )(executionContext.preference).from(context)(rng, TmpDirectory(executionContext.moleExecutionDirectory), executionContext.fileService)
   }
 
+  extension (task: Task)
+    def inputs: PrototypeSet = task.config.inputs ++ DefaultSet.completVals(task.config.inputs, defaults)
+    def outputs: PrototypeSet = task.config.outputs
+    def defaults: DefaultSet = task.config.defaults
 
 }
 
@@ -268,9 +277,6 @@ trait Task extends Name with Id {
    */
   def info: InfoConfig
 
-  def inputs = config.inputs
-  def outputs = config.outputs
-  def defaults = config.defaults
   def name = info.name
 
   /**

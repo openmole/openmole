@@ -11,13 +11,7 @@ object InputBuilder {
     new InputBuilder[T] {
       def inputs = monocle.Lens { (_: T) => PrototypeSet.empty } { p ⇒ d ⇒ d }
     }
-
-  // Input builder is required for default assignment
-  given InputBuilder[DefaultSet] = empty
-  given [T]: InputBuilder[FromContext[T]] = empty
-  given InputBuilder[ScalaCode] = empty
 }
-
 
 @FunctionalInterface trait InputBuilder[T] {
   def inputs: monocle.Lens[T, PrototypeSet]

@@ -156,28 +156,28 @@ trait BuilderPackage {
 
   implicit def setterToFunction[O, S](o: O)(implicit setter: Setter[O, S]): S => S = implicitly[Setter[O, S]].set(o)(_)
 
-  implicit def equalToAssignDefaultFromContext[T, U: DefaultBuilder: InputBuilder]: Setter[:=[Val[T], (FromContext[T], Boolean)], U] =
-    Setter[:=[Val[T], (FromContext[T], Boolean)], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + expansion.Default[T](v.value, v.equal._1, v.equal._2)) andThen (inputs += v.value) }
+  implicit def equalToAssignDefaultFromContext[T, U: DefaultBuilder]: Setter[:=[Val[T], (FromContext[T], Boolean)], U] =
+    Setter[:=[Val[T], (FromContext[T], Boolean)], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + expansion.Default[T](v.value, v.equal._1, v.equal._2)) }
 
-  implicit def equalToAssignDefaultFromContext2[T, U: DefaultBuilder: InputBuilder]: Setter[:=[Val[T], FromContext[T]], U] =
-    Setter[:=[Val[T], FromContext[T]], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + expansion.Default[T](v.value, v.equal, false)) andThen (inputs += v.value) }
+  implicit def equalToAssignDefaultFromContext2[T, U: DefaultBuilder]: Setter[:=[Val[T], FromContext[T]], U] =
+    Setter[:=[Val[T], FromContext[T]], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + expansion.Default[T](v.value, v.equal, false)) }
 
-  implicit def equalToAssignDefaultValue[T, U: DefaultBuilder: InputBuilder]: Setter[:=[Val[T], (T, Boolean)], U] =
-    Setter[:=[Val[T], (T, Boolean)], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + expansion.Default[T](v.value, v.equal._1: FromContext[T], v.equal._2)) andThen (inputs += v.value) }
+  implicit def equalToAssignDefaultValue[T, U: DefaultBuilder]: Setter[:=[Val[T], (T, Boolean)], U] =
+    Setter[:=[Val[T], (T, Boolean)], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + expansion.Default[T](v.value, v.equal._1: FromContext[T], v.equal._2)) }
 
-  implicit def equalToAssignDefaultValue2[T, U: DefaultBuilder: InputBuilder]: Setter[:=[Val[T], T], U] =
-    Setter[:=[Val[T], T], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + expansion.Default[T](v.value, v.equal: FromContext[T], false)) andThen (inputs += v.value) }
+  implicit def equalToAssignDefaultValue2[T, U: DefaultBuilder]: Setter[:=[Val[T], T], U] =
+    Setter[:=[Val[T], T], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + expansion.Default[T](v.value, v.equal: FromContext[T], false)) }
 
-  implicit def equalToAssignDefaultSeqValue[T, U: DefaultBuilder: InputBuilder]: Setter[:=[Iterable[Val[T]], (Iterable[T], Boolean)], U] =
+  implicit def equalToAssignDefaultSeqValue[T, U: DefaultBuilder]: Setter[:=[Iterable[Val[T]], (Iterable[T], Boolean)], U] =
     Setter[:=[Iterable[Val[T]], (Iterable[T], Boolean)], U] { v ⇒
       def defaults(u: U) = (v.value zip v.equal._1).foldLeft(u) { case (u, (p, lv)) ⇒ new :=(p, (lv, v.equal._2))(u) }
-      defaults _ andThen (inputs ++= v.value)
+      defaults _
     }
 
-  implicit def equalToAssignDefaultSeqValue2[T, U: DefaultBuilder: InputBuilder]: Setter[:=[Iterable[Val[T]], Iterable[T]], U] =
+  implicit def equalToAssignDefaultSeqValue2[T, U: DefaultBuilder]: Setter[:=[Iterable[Val[T]], Iterable[T]], U] =
     Setter[:=[Iterable[Val[T]], Iterable[T]], U] { v ⇒
       def defaults(u: U) = (v.value zip v.equal).foldLeft(u) { case (u, (p, v)) ⇒ new :=(p, v)(u) }
-      defaults _ andThen (inputs ++= v.value)
+      defaults _
     }
 
   /**

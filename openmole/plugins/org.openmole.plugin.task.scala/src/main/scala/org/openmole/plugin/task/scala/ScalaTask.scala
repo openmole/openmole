@@ -83,7 +83,7 @@ case class ScalaTask(
     ScalaCompilation.static(
       sourceCode,
       inputs ++ Seq(JVMLanguageTask.workDirectory),
-      ScalaCompilation.WrappedOutput(outputs),
+      ScalaCompilation.WrappedOutput(this.outputs),
       libraries = libraries,
       plugins = plugins
     )
@@ -115,15 +115,15 @@ case class ScalaTask(
       FromContext { p ⇒
         import p._
 
-        val scalaCompilation = taskExecutionContext.cache.getOrElseUpdate(compilation, compile(inputs.toSeq))
+        val scalaCompilation = taskExecutionContext.cache.getOrElseUpdate(compilation, compile(this.inputs.toSeq))
 
         val map = scalaCompilation(context, p.random, p.newFile)
-        outputs.toSeq.map {
+        this.outputs.toSeq.map {
           o ⇒ Variable.unsecure(o, Option(map.get(o.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
         }: Context
       }
 
-    JVMLanguageTask.process(taskExecutionContext, libraries, external, processCode, outputs)
+    JVMLanguageTask.process(taskExecutionContext, libraries, external, processCode, this.outputs)
   }
 }
 

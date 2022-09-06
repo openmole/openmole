@@ -73,8 +73,8 @@ object Validation {
       s ← mole.slots(c)
       computedTypes = TypeUtil.validTypes(mole, sources, hooks)(s)
       receivedInputs = TreeMap(computedTypes.map { p ⇒ p.name → p }.toSeq: _*)
-      (defaultsOverride, defaultsNonOverride) = separateDefaults(c.task(mole, sources, hooks).defaults)
-      input ← c.task(mole, sources, hooks).inputs
+      (defaultsOverride, defaultsNonOverride) = separateDefaults(Task.defaults(c.task(mole, sources, hooks)))
+      input ← Task.inputs(c.task(mole, sources, hooks))
     } yield {
       def checkPrototypeMatch(p: Val[_]) =
         if (!input.isAssignableFrom(p)) Some(WrongType(s, input, p))
@@ -109,7 +109,7 @@ object Validation {
     def taskValidates = mole.capsules.map(_.task(mole, sources, hooks)).collect { case v: ValidateTask ⇒ v }
 
     taskValidates.flatMap { t ⇒
-      t.validate(t.inputs.toSeq).toList match {
+      t.validate(Task.inputs(t).toSeq).toList match {
         case Nil ⇒ None
         case e   ⇒ Some(TaskValidationProblem(t, e))
       }
@@ -266,7 +266,7 @@ object Validation {
 
   private def moleTaskInputMaps(moleTask: MoleTask) =
     (moleTask.mole.root.inputs(moleTask.mole, Sources.empty, Hooks.empty).toList ++
-      moleTask.inputs).map(i ⇒ i.name → i).toMap[String, Val[_]]
+      Task.inputs(moleTask)).map(i ⇒ i.name → i).toMap[String, Val[_]]
 
   def moleTaskImplicitsErrors(moleTask: MoleTask, capsule: MoleCapsule) = {
     val inputs = moleTaskInputMaps(moleTask)
