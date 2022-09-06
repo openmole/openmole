@@ -60,7 +60,7 @@ object MoleTask {
     mt set (
       dsl.inputs ++= mole.root.inputs(mole, Sources.empty, Hooks.empty).toSeq,
       dsl.outputs ++= last.outputs(mole, Sources.empty, Hooks.empty).toSeq,
-      summon[InputOutputBuilder[MoleTask]].defaults.set(mole.root.task(mole, Sources.empty, Hooks.empty).defaults)
+      summon[InputOutputBuilder[MoleTask]].defaults.set(Task.defaults(mole.root.task(mole, Sources.empty, Hooks.empty)))
     )
   }
 

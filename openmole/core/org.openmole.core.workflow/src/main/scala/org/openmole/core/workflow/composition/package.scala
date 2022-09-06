@@ -179,7 +179,7 @@ class Puzzle(
   def slots: Set[TransitionSlot] = (firstSlot :: transitions.map(_.end).toList).toSet
   def first = firstSlot.capsule
   def inputs = first.inputs(toMole, sources, hooks).toSeq
-  def defaults = first.task(toMole, sources, hooks).defaults
+  def defaults = Task.defaults(first.task(toMole, sources, hooks))
 }
 
 case class TaskNode(task: Task, strain: Boolean = false, funnel: Boolean = false, master: Boolean = false, persist: Seq[Val[_]] = Seq.empty, environment: Option[EnvironmentProvider] = None, grouping: Option[Grouping] = None, hooks: Vector[Hook] = Vector.empty, sources: Vector[Source] = Vector.empty) {

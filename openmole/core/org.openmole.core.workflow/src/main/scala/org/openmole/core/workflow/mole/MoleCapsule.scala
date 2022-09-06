@@ -145,10 +145,10 @@ class MoleCapsule(val _task: Task, val strain: Boolean, val funnel: Boolean, val
     else capsuleOutputs(mole, sources, hooks)
 
   def capsuleInputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
-    _task.inputs -- sources(this).flatMap(_.outputs) -- sources(this).flatMap(_.inputs) ++ sources(this).flatMap(_.inputs)
+    Task.inputs(_task) -- sources(this).flatMap(_.outputs) -- sources(this).flatMap(_.inputs) ++ sources(this).flatMap(_.inputs)
 
   def capsuleOutputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
-    _task.outputs -- hooks(this).flatMap(_.outputs) ++ hooks(this).flatMap(_.outputs)
+    Task.outputs(_task) -- hooks(this).flatMap(_.outputs) ++ hooks(this).flatMap(_.outputs)
 
   private def receivedInputs(mole: Mole, sources: Sources, hooks: Hooks) = {
     lazy val capsInputs = capsuleInputs(mole, sources, hooks)
