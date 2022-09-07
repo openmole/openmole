@@ -49,6 +49,7 @@ object RTask {
     implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name, None)
     implicit def stringCoupleToRLibrary(couple: (String, String)): InstallCommand = RLibrary(couple._1, Some(couple._2))
     implicit def stringOptionCoupleToRLibrary(couple: (String, Option[String])): InstallCommand = RLibrary(couple._1, couple._2)
+    implicit def tupleToRLibrary(tuple: (String, String, Boolean)): InstallCommand = RLibrary(tuple._1, Some(tuple._2), tuple._3)
 
     def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommand.toCommand)
   }
@@ -77,7 +78,7 @@ object RTask {
       if (libraries.exists { case l: InstallCommand.RLibrary ⇒ l.version.isDefined }) {
         install ++
           Seq("apt update", "apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev").map(c => ContainerSystem.sudo(containerSystem, c)) ++
-          Seq("""R --slave -e 'install.packages("devtools", dependencies = T); library(devtools);""") ++
+          Seq("""R --slave -e 'install.packages("devtools", dependencies = T); library(devtools);'""") ++
           InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
       }
       else install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
