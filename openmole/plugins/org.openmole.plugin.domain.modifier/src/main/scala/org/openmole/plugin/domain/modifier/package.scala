@@ -26,13 +26,16 @@ import scala.reflect.runtime.universe._
 
 package object modifier {
 
+  object CanGetName {
+    implicit def fileGetName: CanGetName[File] = _.getName
+    implicit def pathGetName: CanGetName[Path] = _.toFile.getName
+  }
+
   trait CanGetName[A] {
     def apply(a: A): String
   }
 
-  implicit val fileGetName: CanGetName[File] = new CanGetName[File] { def apply(f: File) = f.getName }
-  implicit val pathGetName: CanGetName[Path] = new CanGetName[Path] { def apply(p: Path) = p.toFile.getName }
-
+  
   implicit class DomainModifierDecorator[D, T](domain: D)(implicit discrete: DiscreteFromContextDomain[D, T]) {
     def take(n: FromContext[Int]) = TakeDomain(domain, n)
     def group(n: FromContext[Int])(implicit m: Manifest[T]) = GroupDomain(domain, n)
