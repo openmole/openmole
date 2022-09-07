@@ -37,6 +37,8 @@ trait SamplingPackage {
 
   implicit def fromContextIsDiscrete[T]: DiscreteFromContextDomain[FromContext[T], T] = domain ⇒ Domain(domain.map(v ⇒ Vector(v).iterator))
 
+  implicit def scalaCodeIsDiscrete[T: Manifest]: DiscreteFromContextDomain[ScalaCode, T] = code ⇒ implicitly[DiscreteFromContextDomain[FromContext[T], T]].apply(ScalaCode.fromContext[T](code))
+
   implicit def factorIsSampling[D, T](implicit domain: DiscreteFromContextDomain[D, T]): IsSampling[Factor[D, T]] = f => {
     def inputs = {
       val domainValue = domain(f.domain)

@@ -35,7 +35,7 @@ package object modifier {
     def apply(a: A): String
   }
 
-  
+
   implicit class DomainModifierDecorator[D, T](domain: D)(implicit discrete: DiscreteFromContextDomain[D, T]) {
     def take(n: FromContext[Int]) = TakeDomain(domain, n)
     def group(n: FromContext[Int])(implicit m: Manifest[T]) = GroupDomain(domain, n)
