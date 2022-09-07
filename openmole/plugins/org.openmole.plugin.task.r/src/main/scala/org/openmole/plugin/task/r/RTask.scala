@@ -77,7 +77,7 @@ object RTask {
     val installCommands =
       if (libraries.exists { case l: InstallCommand.RLibrary ⇒ l.version.isDefined }) {
         install ++
-          Seq("apt update", "apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev").map(c => ContainerSystem.sudo(containerSystem, c)) ++
+          Seq("apt update", "apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev fontconfig libfontconfig1-dev libharfbuzz-dev libfribidi-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev").map(c => ContainerSystem.sudo(containerSystem, c)) ++
           Seq("""R --slave -e 'install.packages("devtools", dependencies = T); library(devtools);'""") ++
           InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
       }
