@@ -18,15 +18,15 @@
 package org.openmole.core.workflow.hook
 
 import org.openmole.core.context.Context
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.expansion.{DefaultSet, FromContext}
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workflow.builder.{ InfoConfig, InputOutputConfig }
+import org.openmole.core.workflow.builder.{InfoConfig, InputOutputConfig}
 import org.openmole.core.workflow.mole.Ticket
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
+import org.openmole.core.workflow.tools.*
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
@@ -50,7 +50,7 @@ trait Hook extends Name {
 
   def config: InputOutputConfig
   def info: InfoConfig
-  def inputs = config.inputs
+  def inputs = config.inputs ++ DefaultSet.defaultVals(config.inputs, defaults)
   def outputs = config.outputs
   def defaults = config.defaults
   def name = info.name

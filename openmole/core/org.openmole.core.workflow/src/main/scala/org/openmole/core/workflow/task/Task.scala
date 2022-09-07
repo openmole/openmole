@@ -249,7 +249,7 @@ object Task {
   def inputs(task: Task): PrototypeSet = task.config.inputs ++ DefaultSet.defaultVals(task.config.inputs, Task.defaults(task))
   def outputs(task: Task): PrototypeSet = task.config.outputs
   def defaults(task: Task): DefaultSet = task.config.defaults
-  
+
 }
 
 /**
