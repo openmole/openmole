@@ -213,9 +213,9 @@ package object systemexec {
       val runtime = Runtime.getRuntime
 
       import scala.jdk.CollectionConverters._
-      val inheritedEnvironment = System.getenv.asScala.map { case (key, value) ⇒ s"$key=$value" }.toArray
+      val inheritedEnvironment: Array[String] = System.getenv.asScala.map { case (key, value) ⇒ s"$key=$value" }.toArray
 
-      val openmoleEnvironment = environmentVariables.map { case (name, value) ⇒ name + "=" + value }.toArray
+      val openmoleEnvironment: Array[String] = environmentVariables.map { case (name, value) ⇒ name + "=" + value }.toArray
 
       //FIXES java.io.IOException: error=26
       val process = runtime.synchronized {
