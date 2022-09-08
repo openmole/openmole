@@ -31,8 +31,10 @@ package types {
       def select(t: T): H
     }
 
-    implicit def function1Manifest[A: Manifest, B: Manifest]: Manifest[A => B] = Manifest.classType(classOf[scala.Function1[A, B]], manifest[A], manifest[B])
-    implicit def arrayManifest[A: Manifest]: Manifest[Array[A]] = Manifest.arrayType(manifest[A])
+    //implicit def function1Manifest[A: Manifest, B: Manifest]: Manifest[A => B] = Manifest.classType(classOf[scala.Function1[A, B]], manifest[A], manifest[B])
+    //implicit def arrayManifest[A: Manifest]: Manifest[Array[A]] = Manifest.arrayType(manifest[A])
+    implicit def manifestOrder1[A, T[_]](implicit aManifest: Manifest[A], tClassTag: scala.reflect.ClassTag[T[A]]): Manifest[T[A]] = Manifest.classType[T[A]](tClassTag.runtimeClass.asInstanceOf[Class[T[A]]], aManifest)
+    implicit def manifestOrder2[A, B, T[_, _]](implicit aManifest: Manifest[A], bManifest: Manifest[B], tClassTag: scala.reflect.ClassTag[T[A, B]]): Manifest[T[A, B]] = Manifest.classType[T[A, B]](tClassTag.runtimeClass.asInstanceOf[Class[T[A, B]]], aManifest, bManifest)
 
   }
 }
