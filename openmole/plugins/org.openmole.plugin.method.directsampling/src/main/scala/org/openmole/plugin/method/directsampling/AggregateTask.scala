@@ -37,21 +37,51 @@ object AggregateTask {
     implicit def fromAsVal[A: Manifest](v: As[Val[A], Val[Array[A]]]): AggregateVal[A, Array[A]] = AggregateVal[A, Array[A], Array](Aggregate[Val[A], Array[A] ⇒ Array[A]](v.value, identity), v.as)
     implicit def fromAsValString[A: Manifest](v: As[Val[A], String]): AggregateVal[A, Array[A]] = AggregateVal[A, Array[A], Array](Aggregate[Val[A], Array[A] ⇒ Array[A]](v.value, identity), Val[Array[A]](v.as))
 
+    implicit def fromScalaCode[A](v: Aggregate[Val[A], ScalaCode | String]): AggregateVal[A, A] = {
+      implicit val aManifest: Manifest[A] = v.value.`type`.manifest
+      val fromContext =
+        v.aggregate match {
+          case s: ScalaCode => ScalaCode.fromContext[A](s)
+          case s: String => ScalaCode.fromContext[A](ScalaCode(s))
+        }
+      val aggregate = Aggregate(v.value, fromContext)
+      AggregateVal.applyFromContext(aggregate, v.value)
+    }
+
+    implicit def fromAsScalaCode[A, B](v: As[Aggregate[Val[A], ScalaCode | String], Val[B]]): AggregateVal[A, B] = {
+      implicit val bManifest: Manifest[B] = v.as.`type`.manifest
+      val fromContext =
+        v.value.aggregate match {
+          case s: ScalaCode => ScalaCode.fromContext[B](s)
+          case s: String => ScalaCode.fromContext[B](ScalaCode(s))
+        }
+      val aggregate = Aggregate(v.value.value, fromContext)
+      AggregateVal.applyFromContext(aggregate, v.as)
+    }
+
     def apply[A, B: Manifest, V[_]: FromArray](a: Aggregate[Val[A], V[A] ⇒ B], _outputVal: Val[B]): AggregateVal[A, B] = new AggregateVal[A, B] {
-      def aggregate(context: Context): Variable[B] = {
+      def aggregate = FromContext[B] { p =>
+        import p._
         val fromArray = implicitly[FromArray[V]]
-        Variable(outputVal, a.aggregate(fromArray(context.apply(a.value.toArray))))
+        a.aggregate(fromArray(context.apply(a.value.toArray)))
       }
       def outputVal: Val[B] = _outputVal
       def value: Val[A] = a.value
     }
 
     def applyToDouble[A: ToDouble, B: Manifest, V[_]: FromArray](a: Aggregate[Val[A], V[Double] ⇒ B], _outputVal: Val[B]): AggregateVal[A, B] = new AggregateVal[A, B] {
-      def aggregate(context: Context): Variable[B] = {
+      def aggregate = FromContext[B] { p =>
+        import p._
         val fromArray = implicitly[FromArray[V]]
         val toDouble = implicitly[ToDouble[A]]
-        Variable(outputVal, a.aggregate(fromArray(context.apply(a.value.toArray).map(toDouble.apply))))
+        a.aggregate(fromArray(context.apply(a.value.toArray).map(toDouble.apply)))
       }
+      def outputVal: Val[B] = _outputVal
+      def value: Val[A] = a.value
+    }
+
+    def applyFromContext[A, B](a: Aggregate[Val[A], FromContext[B]], _outputVal: Val[B]): AggregateVal[A, B] = new AggregateVal[A, B] {
+      def aggregate = a.aggregate
       def outputVal: Val[B] = _outputVal
       def value: Val[A] = a.value
     }
@@ -59,7 +89,7 @@ object AggregateTask {
   }
 
   trait AggregateVal[A, B] {
-    def aggregate(context: Context): Variable[B]
+    def aggregate: FromContext[B]
     def outputVal: Val[B]
     def value: Val[A]
   }
@@ -67,7 +97,7 @@ object AggregateTask {
   def apply(aggregates: Seq[AggregateVal[_, _]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     Task("AggregateTask") { p ⇒
       import p._
-      context ++ aggregates.map { case a ⇒ a.aggregate(context) }
+      context ++ aggregates.map { case a ⇒ Variable(a.outputVal, a.aggregate(context)) }
     } set (
       inputs ++= aggregates.map(_.value.toArray),
       outputs ++= aggregates.map(_.outputVal)
