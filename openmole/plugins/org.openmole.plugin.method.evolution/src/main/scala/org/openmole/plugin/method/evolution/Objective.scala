@@ -47,15 +47,9 @@ object Objective {
         validate = fromContext.validate
       )
 
-    implicit def aggregateStringIsObjective[T: ClassTag]: ToObjective[Aggregate[Val[T], String]] =
-      (t: Aggregate[Val[T], String]) ⇒
-        val fromContext: FromContext[Double] = t.aggregate
-        buildAggregateCodeObjective(t.value, fromContext)
-
-    implicit def aggregateScalaCodeIsObjective[T: ClassTag]: ToObjective[Aggregate[Val[T], ScalaCode]] =
-      (t: Aggregate[Val[T], ScalaCode]) ⇒
-        val fromContext: FromContext[Double] = ScalaCode.fromContext(t.aggregate)
-        buildAggregateCodeObjective(t.value, fromContext)
+    implicit def aggregateScalaCodeIsObjective[T: ClassTag]: ToObjective[Aggregate[Val[T], ScalaCode | String]] = t ⇒
+      val fromContext: FromContext[Double] = ScalaCode.fromContext(t.aggregate)
+      buildAggregateCodeObjective(t.value, fromContext)
 
     implicit def aggregateIsToObjective[T: ClassTag]: ToObjective[Aggregate[Val[T], T ⇒ Double]] = a ⇒ {
       Objective(_ ⇒ ComputeValue(a.value, a.aggregate), negative = false, delta = None, as = None)

@@ -24,7 +24,11 @@ package expansion {
   import org.openmole.core.workspace.TmpDirectory
 
   object ScalaCode {
-    def fromContext[T: Manifest](code: ScalaCode) = FromContext.codeToFromContext[T](code.source) copy(defaults = code.defaults)
+    def fromContext[T: Manifest](code: ScalaCode | String) =
+      code match {
+        case code: ScalaCode => FromContext.codeToFromContext[T](code.source) copy (defaults = code.defaults)
+        case code: String => FromContext.codeToFromContext[T](code)
+      }
   }
 
   case class ScalaCode(source: String, defaults: DefaultSet = DefaultSet.empty)
