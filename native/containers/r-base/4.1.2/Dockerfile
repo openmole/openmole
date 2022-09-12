@@ -64,6 +64,4 @@ RUN apt-get update \
 
 RUN R --slave -e 'install.packages(c("jsonlite", "remotes"))'
 
-RUN R --slave -e 'library(remotes); remotes::install_github("mdneuzerling/getsysreqs")'
-
 CMD ["R"]

@@ -21,6 +21,9 @@ import org.openmole.plugin.task.external._
 import org.openmole.plugin.tool.json._
 import org.openmole.tool.outputredirection.OutputRedirection
 
+import org.json4s.jackson.JsonMethods._
+import org.json4s._
+
 object RTask {
 
   implicit def isTask: InputOutputBuilder[RTask] = InputOutputBuilder(RTask.config)
@@ -55,12 +58,13 @@ object RTask {
     def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommand.toCommand)
   }
 
-  def rImage(version: String) = DockerImage("openmole/r-base", version)
+  def rImage(image: String, version: String) = DockerImage(image, version)
 
   def apply(
     script:               RunnableScript,
     install:              Seq[String]                        = Seq.empty,
     libraries:            Seq[InstallCommand]                = Seq.empty,
+    image:                String                             = "openmole/r-base",
     version:              String                             = "4.1.2",
     errorOnReturnValue:   Boolean                            = true,
     returnValue:          OptionalArgument[Val[Int]]         = None,
@@ -74,11 +78,23 @@ object RTask {
     installContainerSystem: ContainerSystem                  = ContainerSystem.default,
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): RTask = {
 
-    val installCommands = install ++ InstallCommand.installCommands(libraries.toVector)
+    // get system dependencies using the rstudio packagemanager API
+    // API doc: https://packagemanager.rstudio.com/__api__/swagger/index.html
+    // inspired from https://github.com/mdneuzerling/getsysreqs 
+    // ! networkService is not used here to get the http url: pb with proxy?
+    //println(gridscale.http.HTTP())
+    val sysdeps: String = parse(gridscale.http.get[String]("http://packagemanager.rstudio.com/__api__/repos/1/sysreqs?all=false&"+
+      libraries.map{case InstallCommand.RLibrary(name,_,_) => "pkgname="+name+"&"}.mkString("")+"distribution=ubuntu&release=20.04")).
+      asInstanceOf[JObject].values.get("requirements").asInstanceOf[JArray].arr.map(_.asInstanceOf[JObject].values.get("requirements").asInstanceOf[JObject].values.get("packages").asInstanceOf[JArray].arr.map(_.toString).mkString(" ")).mkString(" ")
+
+    println("SYSDEPS = "+sysdeps)
+
+    val installCommands = install ++ Seq("apt update", "apt-get -y install "+sysdeps.mkString(" ")).map(c => ContainerSystem.sudo(containerSystem, c)) ++
+      InstallCommand.installCommands(libraries.toVector)
 
     RTask(
       script = script,
-      image = ContainerTask.prepare(installContainerSystem, rImage(version), installCommands, clearCache = clearContainerCache),
+      image = ContainerTask.prepare(installContainerSystem, rImage(image, version), installCommands, clearCache = clearContainerCache),
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
