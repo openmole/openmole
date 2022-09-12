@@ -291,9 +291,9 @@ lazy val scalatexSite =
 //lazy val jsonSimple = OsgiProject(dir, "json-simple", exports = Seq("org.json.simple.*")) settings(
 //  libraryDependencies += "com.googlecode.json-simple" % "json-simple" % jsonSimpleVersion, version := jsonSimpleVersion) settings(settings: _*)
 
-lazy val closureCompilerVersion = "v20130603"
-lazy val closureCompiler = OsgiProject(dir, "closure-compiler", exports = Seq("com.google.javascript.*")) settings(
-  libraryDependencies += "com.google.javascript" % "closure-compiler" % closureCompilerVersion, version := closureCompilerVersion) settings(settings: _*)
+//lazy val closureCompilerVersion = "v20130603"
+//lazy val closureCompiler = OsgiProject(dir, "closure-compiler", exports = Seq("com.google.javascript.*")) settings(
+//  libraryDependencies += "com.google.javascript" % "closure-compiler" % closureCompilerVersion, version := closureCompilerVersion) settings(settings: _*)
 
 lazy val cats =
   OsgiProject(dir, "cats") settings (
@@ -366,12 +366,12 @@ lazy val scalajHttp = OsgiProject(dir, "org.scalaj.scalaj-http") settings(
 lazy val scopt = OsgiProject(dir, "com.github.scopt", exports = Seq("scopt.*")) settings(
   libraryDependencies += "com.github.scopt" %% "scopt" % scoptVersion,
   version := scoptVersion
-  ) settings(settings: _*)  settings(scala3Settings: _*)
+  ) settings(settings: _*) settings(scala3Settings: _*)
 
 lazy val async =
   OsgiProject(dir, "scala-async") settings (
-    libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.10.0",
-    version := "0.10.0",
+    libraryDependencies += "org.scala-lang.modules" %% "scala-async" % asyncVersion,
+    version := asyncVersion,
     exportPackage := Seq("scala.async.*")) settings(settings: _*)
 
 lazy val math = OsgiProject(dir, "org.apache.commons.math", exports = Seq("org.apache.commons.math3.*"), privatePackages = Seq("assets.*")) settings
@@ -500,7 +500,7 @@ lazy val gridscaleEGI = OsgiProject(dir, "gridscale.egi", imports = Seq("*")) se
 lazy val gridscaleDIRAC = OsgiProject(dir, "gridscale.dirac", imports = Seq("*"), privatePackages = Seq("gridscale.dirac.*", "org.apache.commons.compress.*", "org.brotli.*", "org.tukaani.*", "com.github.luben.*")) settings (
   libraryDependencies += "org.openmole.gridscale" %% "dirac" % gridscaleVersion,
   libraryDependencies += "org.brotli" % "dec" % "0.1.2",
-  libraryDependencies += "org.tukaani" % "xz" % "1.8",
+  libraryDependencies += "org.tukaani" % "xz" % "1.9",
   libraryDependencies += "com.github.luben" % "zstd-jni" % "1.4.4-3",
   version := gridscaleVersion
 ) settings(settings: _*) dependsOn(gridscale, gridscaleHTTP) settings(scala3Settings: _*)
@@ -511,8 +511,8 @@ lazy val gridscaleWebDAV = OsgiProject(dir, "gridscale.webdav", imports = Seq("*
 ) settings(settings: _*) dependsOn(gridscale, gridscaleHTTP) settings(scala3Settings: _*)
 
 lazy val xzJava = OsgiProject(dir, "xzjava", imports = Seq("*"), exports = Seq("org.tukaani.*")) settings (
-  libraryDependencies +=  "org.tukaani" % "xz" % "1.8",
-  version := "1.8"
+  libraryDependencies +=  "org.tukaani" % "xz" % xzVersion,
+  version := xzVersion
 ) settings(settings: _*) settings(scala3Settings: _*)
 
 

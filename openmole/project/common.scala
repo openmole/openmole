@@ -26,12 +26,12 @@ object common {
   def json4sVersion = "4.0.3"
   def circeVersion = "0.14.2"
   def catsVersion = "2.8.0"
-  def catsEffectVersion = "3.3.12"
-  def catsParseVersion = "0.3.7"
+  def catsEffectVersion = "3.3.14"
+  def catsParseVersion = "0.3.8"
   def squantsVersion = "1.8.3"
   def xstreamVersion = "1.4.18"
   def scalaURIVersion = "1.1.1"
-  def scoptVersion = "4.0.1"
+  def scoptVersion = "4.1.0"
   def spatialsamplingVersion = "0.3"
   def logbackVersion = "1.2.3"
   def h2Version = "1.4.200"
@@ -41,7 +41,7 @@ object common {
   def scalazVersion = "7.3.5"
   def mathVersion = "3.6.1"
   def asmVersion = "9.3"
-  def guavaVersion = "30.0-jre"
+  def guavaVersion = "31.1-jre"
   def scalaMetaVersion = "4.4.30"
   def scalaSTMVersion = "0.11.1"
   def jlineVersion = "3.21.0"
@@ -53,7 +53,11 @@ object common {
   def endpoint4SCirceSchemaVersion = "2.2.0+n"
   def endpoint4SXHRClientVersion = "5.1.0+n"
 
-  def scalajsVersion = "1.8.0"
+  def xzVersion = "1.9"
+
+  def asyncVersion = "1.0.1"
+
+  def scalajsVersion = "1.10.1"
   def scalajsLoggingVersion = "1.1.0"
   def scalaJSDomVersion = "2.0.0"
 
