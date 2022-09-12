@@ -2,7 +2,7 @@
  
 FROM debian:testing-20220125-slim
 
-MAINTAINER "Romain Reuillon"
+LABEL maintainer="Romain Reuillon <romain.reuillon@iscpif.fr>; Juste Raimbault <juste.raimbault@ign.fr>"
 
 ## Set a default user. Available via runtime flag `--user docker` 
 ## Add user to 'staff' group, granting them write privileges to /usr/local/lib/R/site.library
@@ -57,6 +57,8 @@ RUN apt-get update \
 	&& rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN R --slave -e 'install.packages(c("jsonlite"), dependencies = T)'
+RUN R --slave -e 'install.packages(c("jsonlite", "remotes"), dependencies = T)'
+
+RUN R --slave -e 'library(remotes); remotes::install_github("mdneuzerling/getsysreqs")'
 
 CMD ["R"]
