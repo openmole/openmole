@@ -387,13 +387,13 @@ lazy val logging = OsgiProject(dir, "org.apache.commons.logging") settings
   (libraryDependencies += "commons-logging" % "commons-logging" % "1.2", version := "1.2") settings(settings: _*) settings(scala3Settings: _*)
 
 lazy val lang3 = OsgiProject(dir, "org.apache.commons.lang3") settings (
-  libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.9", version := "3.9") settings(settings: _*) settings(scala3Settings: _*)
+  libraryDependencies += "org.apache.commons" % "commons-lang3" % lang3Version, version := lang3Version) settings(settings: _*) settings(scala3Settings: _*)
 
-lazy val ant = OsgiProject(dir, "org.apache.ant") settings
-  (libraryDependencies += "org.apache.ant" % "ant" % "1.10.7", version := "1.10.7") settings(settings: _*)
+//lazy val ant = OsgiProject(dir, "org.apache.ant") settings
+//  (libraryDependencies += "org.apache.ant" % "ant" % "1.10.7", version := "1.10.7") settings(settings: _*)
 
 lazy val codec = OsgiProject(dir, "org.apache.commons.codec") settings
-  (libraryDependencies += "commons-codec" % "commons-codec" % "1.14", version := "1.14") settings(settings: _*) settings(scala3Settings)
+  (libraryDependencies += "commons-codec" % "commons-codec" % codecVersion, version := codecVersion) settings(settings: _*) settings(scala3Settings)
 
 lazy val collections = OsgiProject(dir, "org.apache.commons.collections", exports = Seq("org.apache.commons.collections4.*")) settings
   (libraryDependencies += "org.apache.commons" % "commons-collections4" % "4.4", version := "4.4") settings(settings: _*) settings(scala3Settings)
@@ -428,9 +428,9 @@ lazy val asm = OsgiProject(dir, "org.objectweb.asm") settings (
 lazy val config = OsgiProject(dir, "org.apache.commons.configuration2",
   privatePackages = Seq("!scala.*", "!org.apache.commons.logging.*","*"),
   imports = Seq("org.apache.commons.logging.*")) settings (
-  libraryDependencies += "org.apache.commons" % "commons-configuration2" % "2.6",
+  libraryDependencies += "org.apache.commons" % "commons-configuration2" % configuration2Version,
   libraryDependencies += "commons-beanutils" % "commons-beanutils" % "1.9.4",
-  version := "2.6") settings(settings: _*) dependsOn (logging) settings(scala3Settings)
+  version := configuration2Version) settings(settings: _*) dependsOn (logging) settings(scala3Settings)
 
 lazy val sourceCode = OsgiProject(dir, "sourcecode") settings (
   libraryDependencies += "com.lihaoyi" %% "sourcecode" % sourcecodeVersion,
