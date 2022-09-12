@@ -37,12 +37,9 @@ object RTask {
 
       installCommands match {
         case RLibrary(name, None, d) ⇒
-          //Vector(s"""R -e 'install.packages(c(${names.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'""")
           s"""R --slave -e 'install.packages(c("$name"), dependencies = ${dependencies(d)}); library("$name")'"""
         case RLibrary(name, Some(version), d) ⇒
-          // need to install devtools to get older packages versions
-          //apt update; apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev;
-          s"""R --slave -e 'library(devtools); install_version("$name",version = "$version", dependencies = ${dependencies(d)}); library("$name")'"""
+          s"""R --slave -e 'library(remotes); remotes::install_version("$name",version = "$version", dependencies = ${dependencies(d)}); library("$name")'"""
       }
     }
 
@@ -73,12 +70,10 @@ object RTask {
     installContainerSystem: ContainerSystem                  = ContainerSystem.default,
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): RTask = {
 
-    // add additional installation of devtools only if needed
+    // add additional installation of remotes only if needed
     val installCommands =
       if (libraries.exists { case l: InstallCommand.RLibrary ⇒ l.version.isDefined }) {
-        install ++
-          Seq("apt update", "apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev fontconfig libfontconfig1-dev libharfbuzz-dev libfribidi-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev").map(c => ContainerSystem.sudo(containerSystem, c)) ++
-          Seq("""R --slave -e 'install.packages("devtools", dependencies = T); library(devtools);'""") ++
+        install ++ Seq("""R --slave -e 'install.packages("remotes", dependencies = T)'""") ++
           InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
       }
       else install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
