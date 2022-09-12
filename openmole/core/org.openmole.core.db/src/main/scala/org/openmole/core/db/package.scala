@@ -223,7 +223,7 @@ package object db extends JavaLogger {
 
   }
 
-  def dbVersion = 2
+  def dbVersion = 3
   def dbName = s"replica-$dbVersion"
   def dbInfoName = s"$dbName.info"
 
@@ -265,7 +265,7 @@ package object db extends JavaLogger {
     transactor.execute(
       """
       CREATE TABLE IF NOT EXISTS Replicas (
-        ID bigint unsigned auto_increment not null,
+        ID bigint auto_increment not null,
         SOURCE VARCHAR(255),
         STORAGE VARCHAR(255),
         PATH VARCHAR(255),
