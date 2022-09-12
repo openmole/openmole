@@ -43,7 +43,7 @@ ENV LANG en_US.UTF-8
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		littler \
-                r-cran-littler \
+        r-cran-littler \
 		r-base \
 		r-base-dev \
 		r-recommended \
@@ -57,7 +57,12 @@ RUN apt-get update \
 	&& rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN R --slave -e 'install.packages(c("jsonlite", "remotes"), dependencies = T)'
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends \
+		libcurl4-openssl-dev \
+        libssl-dev
+
+RUN R --slave -e 'install.packages(c("jsonlite", "remotes"))'
 
 RUN R --slave -e 'library(remotes); remotes::install_github("mdneuzerling/getsysreqs")'
 

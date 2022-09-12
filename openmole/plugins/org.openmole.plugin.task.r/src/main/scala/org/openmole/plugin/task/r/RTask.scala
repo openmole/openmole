@@ -32,14 +32,15 @@ object RTask {
   object InstallCommand {
     case class RLibrary(name: String, version: Option[String] = None, dependencies: Boolean = false) extends InstallCommand
 
-    def toCommand(installCommands: InstallCommand) = {
+    def toCommand(installCommand: InstallCommand) = {
       def dependencies(d: Boolean) = if(d) "T" else "NA"
 
-      installCommands match {
+      installCommand match {
         case RLibrary(name, None, d) ⇒
           s"""R --slave -e 'install.packages(c("$name"), dependencies = ${dependencies(d)}); library("$name")'"""
         case RLibrary(name, Some(version), d) ⇒
           s"""R --slave -e 'library(remotes); remotes::install_version("$name",version = "$version", dependencies = ${dependencies(d)}); library("$name")'"""
+        //case Sysdep(name) => ""
       }
     }
 
@@ -47,6 +48,9 @@ object RTask {
     implicit def stringCoupleToRLibrary(couple: (String, String)): InstallCommand = RLibrary(couple._1, Some(couple._2))
     implicit def stringOptionCoupleToRLibrary(couple: (String, Option[String])): InstallCommand = RLibrary(couple._1, couple._2)
     implicit def tupleToRLibrary(tuple: (String, String, Boolean)): InstallCommand = RLibrary(tuple._1, Some(tuple._2), tuple._3)
+
+    // not needed, for each package separate call to get sys
+    //case class Sysdep(rpackage: String) extends InstallCommand
 
     def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommand.toCommand)
   }
@@ -70,12 +74,7 @@ object RTask {
     installContainerSystem: ContainerSystem                  = ContainerSystem.default,
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): RTask = {
 
-    val installCommands =
-      if (libraries.exists { case l: InstallCommand.RLibrary ⇒ l.version.isDefined }) {
-        install ++ Seq("""""") ++
-          InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
-      }
-      else install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
+    val installCommands = install ++ InstallCommand.installCommands(libraries.toVector)
 
     RTask(
       script = script,
