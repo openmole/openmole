@@ -45,7 +45,7 @@ object RTask {
           s"""R --slave -e 'install.packages(c("$name"), dependencies = ${dependencies(d)}); library("$name")'"""
         case RLibrary(name, Some(version), d) ⇒
           s"""R --slave -e 'library(remotes); remotes::install_version("$name",version = "$version", dependencies = ${dependencies(d)}); library("$name")'"""
-        //case Sysdep(name) => ""
+
       }
     }
 
