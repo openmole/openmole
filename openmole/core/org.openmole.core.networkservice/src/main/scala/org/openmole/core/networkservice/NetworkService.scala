@@ -44,6 +44,9 @@ object NetworkService {
   object HttpHost {
     def toString(host: HttpHost) = host.hostURI
   }
+
+  //def get(url: String)
+
 }
 
 class NetworkService(val httpProxy: Option[HttpHost])

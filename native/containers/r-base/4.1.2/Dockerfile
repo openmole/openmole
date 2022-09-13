@@ -2,7 +2,7 @@
  
 FROM debian:testing-20220125-slim
 
-MAINTAINER "Romain Reuillon"
+LABEL maintainer="Romain Reuillon <romain.reuillon@iscpif.fr>; Juste Raimbault <juste.raimbault@ign.fr>"
 
 ## Set a default user. Available via runtime flag `--user docker` 
 ## Add user to 'staff' group, granting them write privileges to /usr/local/lib/R/site.library
@@ -43,7 +43,7 @@ ENV LANG en_US.UTF-8
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		littler \
-                r-cran-littler \
+        r-cran-littler \
 		r-base \
 		r-base-dev \
 		r-recommended \
@@ -57,6 +57,11 @@ RUN apt-get update \
 	&& rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN R --slave -e 'install.packages(c("jsonlite"), dependencies = T)'
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends \
+		libcurl4-openssl-dev \
+        libssl-dev
+
+RUN R --slave -e 'install.packages(c("jsonlite", "remotes"))'
 
 CMD ["R"]

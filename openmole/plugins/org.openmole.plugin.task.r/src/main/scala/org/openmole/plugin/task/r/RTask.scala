@@ -22,6 +22,10 @@ import org.openmole.plugin.tool.json._
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.core.dsl.extension._
 
+import org.json4s.jackson.JsonMethods._
+import org.json4s._
+import org.openmole.core.workflow.tools.OptionalArgument
+
 object RTask {
 
   implicit def isTask: InputOutputBuilder[RTask] = InputOutputBuilder(Focus[RTask](_.config))
@@ -33,17 +37,15 @@ object RTask {
   object InstallCommand {
     case class RLibrary(name: String, version: Option[String] = None, dependencies: Boolean = false) extends InstallCommand
 
-    def toCommand(installCommands: InstallCommand) = {
+    def toCommand(installCommand: InstallCommand) = {
       def dependencies(d: Boolean) = if(d) "T" else "NA"
 
-      installCommands match {
+      installCommand match {
         case RLibrary(name, None, d) ⇒
-          //Vector(s"""R -e 'install.packages(c(${names.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'""")
           s"""R --slave -e 'install.packages(c("$name"), dependencies = ${dependencies(d)}); library("$name")'"""
         case RLibrary(name, Some(version), d) ⇒
-          // need to install devtools to get older packages versions
-          //apt update; apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev;
-          s"""R --slave -e 'library(devtools); install_version("$name",version = "$version", dependencies = ${dependencies(d)}); library("$name")'"""
+          s"""R --slave -e 'library(remotes); remotes::install_version("$name",version = "$version", dependencies = ${dependencies(d)}); library("$name")'"""
+        //case Sysdep(name) => ""
       }
     }
 
@@ -52,15 +54,19 @@ object RTask {
     implicit def stringOptionCoupleToRLibrary(couple: (String, Option[String])): InstallCommand = RLibrary(couple._1, couple._2)
     implicit def tupleToRLibrary(tuple: (String, String, Boolean)): InstallCommand = RLibrary(tuple._1, Some(tuple._2), tuple._3)
 
+    // not needed, for each package separate call to get sys
+    //case class Sysdep(rpackage: String) extends InstallCommand
+
     def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommand.toCommand)
   }
 
-  def rImage(version: String) = DockerImage("openmole/r-base", version)
+  def rImage(image: String, version: String) = DockerImage(image, version)
 
   def apply(
     script:               RunnableScript,
     install:              Seq[String]                        = Seq.empty,
     libraries:            Seq[InstallCommand]                = Seq.empty,
+    image:                String                             = "openmole/r-base",
     version:              String                             = "4.1.2",
     errorOnReturnValue:   Boolean                            = true,
     returnValue:          OptionalArgument[Val[Int]]         = None,
@@ -74,19 +80,32 @@ object RTask {
     installContainerSystem: ContainerSystem                  = ContainerSystem.default,
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): RTask = {
 
-    // add additional installation of devtools only if needed
-    val installCommands =
-      if (libraries.exists { case l: InstallCommand.RLibrary ⇒ l.version.isDefined }) {
-        install ++
-          Seq("apt update", "apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev fontconfig libfontconfig1-dev libharfbuzz-dev libfribidi-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev").map(c => ContainerSystem.sudo(containerSystem, c)) ++
-          Seq("""R --slave -e 'install.packages("devtools", dependencies = T); library(devtools);'""") ++
-          InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
-      }
-      else install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
+    // get system dependencies using the rstudio packagemanager API
+    // API doc: https://packagemanager.rstudio.com/__api__/swagger/index.html
+    // inspired from https://github.com/mdneuzerling/getsysreqs
+    // ! networkService is not used here to get the http url: pb with proxy?
+    //println(gridscale.http.HTTP())
+    val apicallurl = "http://packagemanager.rstudio.com/__api__/repos/1/sysreqs?all=false&"+
+      libraries.map{case InstallCommand.RLibrary(name,_,_) => "pkgname="+name+"&"}.mkString("")+
+      "distribution=ubuntu&release=20.04"
+    val jsonDeps = gridscale.http.get[String](apicallurl) // pb with calling package object at runtime -> gridscale.http methods are not available
+    /*networkService.httpProxy match {
+      case Some(httpHost: HttpHost) ⇒ HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).setProxy(httpHost).build()
+      case _ ⇒ builder(preventGetHeaderForward = preventGetHeaderForward).build()
+    }*/
+    val sysdeps: String = parse(jsonDeps).
+      asInstanceOf[JObject].values.get("requirements").asInstanceOf[JArray].
+      arr.map(_.asInstanceOf[JObject].values.get("requirements").asInstanceOf[JObject].values.get("packages").
+      asInstanceOf[JArray].arr.map(_.toString).mkString(" ")).mkString(" ")
+
+    println("SYSDEPS = "+sysdeps)
+
+    val installCommands = install ++ Seq("apt update", "apt-get -y install "+sysdeps.mkString(" ")).map(c => ContainerSystem.sudo(containerSystem, c)) ++
+      InstallCommand.installCommands(libraries.toVector)
 
     RTask(
       script = script,
-      image = ContainerTask.prepare(installContainerSystem, rImage(version), installCommands, clearCache = clearContainerCache),
+      image = ContainerTask.prepare(installContainerSystem, rImage(image, version), installCommands, clearCache = clearContainerCache),
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,

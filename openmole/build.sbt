@@ -564,7 +564,10 @@ lazy val systemexec = OsgiProject(pluginDir, "org.openmole.plugin.task.systemexe
 lazy val container = OsgiProject(pluginDir, "org.openmole.plugin.task.container", imports = Seq("*")) dependsOn(openmoleFile, pluginManager, external, expansion, exception) settings (pluginSettings: _*) settings (
   libraryDependencies += Libraries.container)
 
-lazy val r = OsgiProject(pluginDir, "org.openmole.plugin.task.r", imports = Seq("*")) dependsOn(container, json) settings (pluginSettings: _*)
+lazy val r = OsgiProject(pluginDir, "org.openmole.plugin.task.r", imports = Seq("*")) dependsOn(container, json) settings (
+  //libraryDependencies ++= Libraries.httpClient
+  libraryDependencies ++= Libraries.gridscaleHTTP
+  ) settings (pluginSettings: _*)
 
 lazy val scilab = OsgiProject(pluginDir, "org.openmole.plugin.task.scilab", imports = Seq("*")) dependsOn (container) settings (pluginSettings: _*)
 
