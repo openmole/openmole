@@ -45,7 +45,7 @@ object NetworkService {
     def toString(host: HttpHost) = host.hostURI
   }
 
-  //def get(url: String)
+  def get(url: String)(implicit networkService: NetworkService): String = ""
 
 }
 
