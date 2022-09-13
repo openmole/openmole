@@ -20,9 +20,11 @@ import org.openmole.plugin.task.container._
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.tool.json._
 import org.openmole.tool.outputredirection.OutputRedirection
-
 import org.json4s.jackson.JsonMethods._
 import org.json4s._
+import org.apache.http.HttpHost
+import org.apache.http.impl.client.HttpClients
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager
 
 object RTask {
 
@@ -80,12 +82,21 @@ object RTask {
 
     // get system dependencies using the rstudio packagemanager API
     // API doc: https://packagemanager.rstudio.com/__api__/swagger/index.html
-    // inspired from https://github.com/mdneuzerling/getsysreqs 
+    // inspired from https://github.com/mdneuzerling/getsysreqs
     // ! networkService is not used here to get the http url: pb with proxy?
     //println(gridscale.http.HTTP())
-    val sysdeps: String = parse(gridscale.http.get[String]("http://packagemanager.rstudio.com/__api__/repos/1/sysreqs?all=false&"+
-      libraries.map{case InstallCommand.RLibrary(name,_,_) => "pkgname="+name+"&"}.mkString("")+"distribution=ubuntu&release=20.04")).
-      asInstanceOf[JObject].values.get("requirements").asInstanceOf[JArray].arr.map(_.asInstanceOf[JObject].values.get("requirements").asInstanceOf[JObject].values.get("packages").asInstanceOf[JArray].arr.map(_.toString).mkString(" ")).mkString(" ")
+    val apicallurl = "http://packagemanager.rstudio.com/__api__/repos/1/sysreqs?all=false&"+
+      libraries.map{case InstallCommand.RLibrary(name,_,_) => "pkgname="+name+"&"}.mkString("")+
+      "distribution=ubuntu&release=20.04"
+    val jsonDeps = gridscale.http.get[String](apicallurl) // pb with calling package object at runtime -> gridscale.http methods are not available
+    /*networkService.httpProxy match {
+      case Some(httpHost: HttpHost) ⇒ HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).setProxy(httpHost).build()
+      case _ ⇒ builder(preventGetHeaderForward = preventGetHeaderForward).build()
+    }*/
+    val sysdeps: String = parse(jsonDeps).
+      asInstanceOf[JObject].values.get("requirements").asInstanceOf[JArray].
+      arr.map(_.asInstanceOf[JObject].values.get("requirements").asInstanceOf[JObject].values.get("packages").
+      asInstanceOf[JArray].arr.map(_.toString).mkString(" ")).mkString(" ")
 
     println("SYSDEPS = "+sysdeps)
 
