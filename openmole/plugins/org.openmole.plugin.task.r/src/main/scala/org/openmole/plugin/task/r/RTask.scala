@@ -88,14 +88,9 @@ object RTask {
     val sysdeps: String = try {
       val jsonDeps = NetworkService.get(apicallurl)
       val reqs = parse(jsonDeps).asInstanceOf[JObject].values
-      println(reqs)
       if (reqs.contains("requirements")) {
         reqs("requirements").asInstanceOf[List[_]].map {
-          r => val pkgreqs = r.asInstanceOf[Map[String, Any]]("requirements").asInstanceOf[Map[String, Any]]
-            println(pkgreqs)
-            val pkgs = pkgreqs("packages").asInstanceOf[List[String]]
-              println(pkgs)
-              pkgs.mkString(" ")
+          _.asInstanceOf[Map[String, Any]]("requirements").asInstanceOf[Map[String, Any]]("packages").asInstanceOf[List[String]].mkString(" ")
         }.mkString(" ")
       }
       else {
@@ -103,12 +98,10 @@ object RTask {
         ""
       }
     } catch {case e: Throwable =>
-      e.printStackTrace()
+      //e.printStackTrace()
       //Log.logger.log(Log.WARNING, s"Error while fetching system dependencies for R packages $libraries", e)
        ""
     }
-
-    println("SYSDEPS = "+sysdeps)
 
     val installCommands = install ++
       (if (sysdeps.nonEmpty) Seq("apt update", "apt-get -y install "+sysdeps).map(c => ContainerSystem.sudo(containerSystem, c)) else Seq.empty) ++
