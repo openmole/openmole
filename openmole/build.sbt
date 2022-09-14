@@ -565,8 +565,7 @@ lazy val container = OsgiProject(pluginDir, "org.openmole.plugin.task.container"
   libraryDependencies += Libraries.container)
 
 lazy val r = OsgiProject(pluginDir, "org.openmole.plugin.task.r", imports = Seq("*")) dependsOn(tools, container, json) settings (
-  //libraryDependencies ++= Libraries.httpClient
-  libraryDependencies ++= Libraries.gridscaleHTTP
+  libraryDependencies ++= Libraries.httpClient
   ) settings (pluginSettings: _*)
 
 lazy val scilab = OsgiProject(pluginDir, "org.openmole.plugin.task.scilab", imports = Seq("*")) dependsOn (container) settings (pluginSettings: _*)
