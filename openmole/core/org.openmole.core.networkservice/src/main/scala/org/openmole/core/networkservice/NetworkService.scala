@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2018 Samuel Thiriot
+ *  and 2022 Juste Raimbault
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,8 +18,15 @@
 
 package org.openmole.core.networkservice
 
-import org.openmole.core.networkservice.NetworkService.HttpHost
-import org.openmole.core.preference.{ PreferenceLocation, Preference }
+import org.openmole.core.preference.{Preference, PreferenceLocation}
+import org.openmole.core.exception.UserBadDataError
+
+import scala.io.Source
+import org.apache.http
+import org.apache.http.impl.client.HttpClients
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.message.BasicHeader
 
 object NetworkService {
 
@@ -33,21 +41,43 @@ object NetworkService {
       case (Some(false) | None, _)                            ⇒ None
       case (_, Some(hostURI: String)) if hostURI.trim.isEmpty ⇒ None
       case (_, Some(hostURI))                                 ⇒ Some(HttpHost(hostURI))
+      case _ => None
     }
   }
 
   def apply(hostURI: Option[String])(implicit preference: Preference) =
     new NetworkService(hostURI.map(HttpHost(_)).orElse(httpHostFromPreferences))
 
-  case class HttpHost(hostURI: String)
-
-  object HttpHost {
-    def toString(host: HttpHost) = host.hostURI
+  case class HttpHost(hostURI: String) {
+    def toHost: http.HttpHost = http.HttpHost.create(hostURI)
+    override def toString: String = hostURI
   }
 
-  def get(url: String)(implicit networkService: NetworkService): String = ""
+
+  /**
+   * Simple http get with implicit NetworkService
+   * @param url url
+   * @param headers optional headers
+   * @param networkService network service (proxy)
+   * @return
+   */
+  def get(url: String,  headers: Seq[(String, String)] = Seq.empty)(implicit networkService: NetworkService): String = {
+    val client = networkService.httpProxy match {
+      case Some(httpHost: HttpHost) ⇒ HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).setProxy(httpHost.toHost).build()
+      case _ ⇒ HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).build()
+    }
+    val getReq = new HttpGet(url)
+    headers.foreach{case (k,v) => getReq.setHeader(new BasicHeader(k, v))}
+    val httpResponse = client.execute(getReq)
+    if (httpResponse.getStatusLine.getStatusCode >= 300) throw new UserBadDataError(s"HTTP GET for $url responded with $httpResponse")
+    val res = Source.fromInputStream(httpResponse.getEntity.getContent).mkString
+    httpResponse.close()
+    res
+  }
+
+
 
 }
 
-class NetworkService(val httpProxy: Option[HttpHost])
+class NetworkService(val httpProxy: Option[NetworkService.HttpHost])
 
