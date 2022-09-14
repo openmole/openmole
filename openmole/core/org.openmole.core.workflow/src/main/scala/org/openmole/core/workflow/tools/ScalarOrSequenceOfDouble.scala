@@ -145,7 +145,7 @@ object ScalarOrSequenceOfDouble {
     FromContext { p ⇒ scaled0(scales.toList, values.toList)(p.context, p.random, p.newFile, p.fileService) }
   }
 
-  implicit def fromScalable[T: Scalable](t: T): ScalarOrSequenceOfDouble = new ScalarOrSequenceOfDouble(ScalableValue(t, implicitly[Scalable[T]]))
+  implicit def fromScalable[T: Scalable](t: T): ScalarOrSequenceOfDouble = ScalableValue(t, implicitly[Scalable[T]])
 
   case class ScalableValue[T](t: T, scalable: Scalable[T]) {
     def isScalar = scalable.isScalar(t)
@@ -154,12 +154,12 @@ object ScalarOrSequenceOfDouble {
     def size = scalable.size(t)
     def unflatten(values: Seq[Double], scale: Boolean = true) = scalable.unflatten(t)(values, scale)
   }
+
+  extension (s: ScalarOrSequenceOfDouble)
+    def inputs = s.inputs
+    def prototype = s.prototype
+    def size = s.size
+    def isScalar = s.isScalar
 }
 
-class ScalarOrSequenceOfDouble(v: ScalarOrSequenceOfDouble.ScalableValue[_]) {
-  def isScalar = v.isScalar
-  def inputs = v.inputs
-  def prototype = v.prototype
-  def size = v.size
-  def unflatten(values: Seq[Double], scale: Boolean = true) = v.unflatten(values, scale)
-}
+opaque type ScalarOrSequenceOfDouble = ScalarOrSequenceOfDouble.ScalableValue[_]
