@@ -63,25 +63,25 @@ object RTask {
   def rImage(image: String, version: String) = DockerImage(image, version)
 
   def apply(
-    script:               RunnableScript,
-    install:              Seq[String]                        = Seq.empty,
-    libraries:            Seq[InstallCommand]                = Seq.empty,
-    autoInstallSystemDeps:Boolean = true,
-    image:                String                             = "openmole/r-base",
-    version:              String                             = "4.2.1",
-    errorOnReturnValue:   Boolean                            = true,
-    returnValue:          OptionalArgument[Val[Int]]         = None,
-    stdOut:               OptionalArgument[Val[String]]      = None,
-    stdErr:               OptionalArgument[Val[String]]      = None,
-    hostFiles:            Seq[HostFile]                      = Vector.empty,
-    workDirectory:        OptionalArgument[String]           = None,
-    environmentVariables: Seq[EnvironmentVariable]           = Vector.empty,
-    clearContainerCache:    Boolean                          = false,
-    containerSystem:        ContainerSystem                  = ContainerSystem.default,
-    installContainerSystem: ContainerSystem                  = ContainerSystem.default,
+    script:                     RunnableScript,
+    install:                    Seq[String]                        = Seq.empty,
+    libraries:                  Seq[InstallCommand]                = Seq.empty,
+    installSystemDependencies:  Boolean                            = true,
+    image:                      String                             = "openmole/r-base",
+    version:                    String                             = "4.2.1",
+    errorOnReturnValue:         Boolean                            = true,
+    returnValue:                OptionalArgument[Val[Int]]         = None,
+    stdOut:                     OptionalArgument[Val[String]]      = None,
+    stdErr:                     OptionalArgument[Val[String]]      = None,
+    hostFiles:                  Seq[HostFile]                      = Vector.empty,
+    workDirectory:              OptionalArgument[String]           = None,
+    environmentVariables:       Seq[EnvironmentVariable]           = Vector.empty,
+    clearContainerCache:        Boolean                          = false,
+    containerSystem:            ContainerSystem                  = ContainerSystem.default,
+    installContainerSystem:     ContainerSystem                  = ContainerSystem.default,
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): RTask = {
 
-    val sysdeps: String = if (autoInstallSystemDeps) {
+    val sysdeps: String = if (installSystemDependencies) {
       // Get system dependencies using the rstudio packagemanager API, inspired from https://github.com/mdneuzerling/getsysreqs
       // API doc: https://packagemanager.rstudio.com/__api__/swagger/index.html
       val apicallurl = "http://packagemanager.rstudio.com/__api__/repos/1/sysreqs?all=false&" +
