@@ -68,7 +68,7 @@ object RTask {
     libraries:            Seq[InstallCommand]                = Seq.empty,
     autoInstallSystemDeps:Boolean = true,
     image:                String                             = "openmole/r-base",
-    version:              String                             = "4.1.2",
+    version:              String                             = "4.2.1",
     errorOnReturnValue:   Boolean                            = true,
     returnValue:          OptionalArgument[Val[Int]]         = None,
     stdOut:               OptionalArgument[Val[String]]      = None,
