@@ -254,7 +254,7 @@ lazy val pluginRegistry = OsgiProject(coreDir, "org.openmole.core.pluginregistry
 
 lazy val fileService = OsgiProject(coreDir, "org.openmole.core.fileservice", imports = Seq("*")) dependsOn(tools, workspace, openmoleTar, preference, threadProvider, pluginRegistry) settings (coreSettings: _*) settings (defaultActivator) settings (libraryDependencies += Libraries.guava)
 
-lazy val networkService = OsgiProject(coreDir, "org.openmole.core.networkservice", imports = Seq("*")) dependsOn(tools, workspace, preference, pluginRegistry) settings (coreSettings: _*) settings (defaultActivator)
+lazy val networkService = OsgiProject(coreDir, "org.openmole.core.networkservice", imports = Seq("*")) dependsOn(tools, workspace, preference, pluginRegistry) settings (coreSettings, libraryDependencies ++= Libraries.httpClient) settings (defaultActivator)
 
 lazy val timeService = OsgiProject(coreDir, "org.openmole.core.timeservice", imports = Seq("*")) settings (coreSettings: _*)
 
@@ -564,7 +564,10 @@ lazy val systemexec = OsgiProject(pluginDir, "org.openmole.plugin.task.systemexe
 lazy val container = OsgiProject(pluginDir, "org.openmole.plugin.task.container", imports = Seq("*")) dependsOn(openmoleFile, pluginManager, external, expansion, exception) settings (pluginSettings: _*) settings (
   libraryDependencies += Libraries.container)
 
-lazy val r = OsgiProject(pluginDir, "org.openmole.plugin.task.r", imports = Seq("*")) dependsOn(container, json) settings (pluginSettings: _*)
+lazy val r = OsgiProject(pluginDir, "org.openmole.plugin.task.r", imports = Seq("*")) dependsOn(tools, container, json) settings (
+  //libraryDependencies ++= Libraries.httpClient
+  libraryDependencies ++= Libraries.gridscaleHTTP
+  ) settings (pluginSettings: _*)
 
 lazy val scilab = OsgiProject(pluginDir, "org.openmole.plugin.task.scilab", imports = Seq("*")) dependsOn (container) settings (pluginSettings: _*)
 
