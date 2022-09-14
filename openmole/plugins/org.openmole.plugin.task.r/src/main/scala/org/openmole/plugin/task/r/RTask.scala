@@ -80,27 +80,38 @@ object RTask {
     installContainerSystem: ContainerSystem                  = ContainerSystem.default,
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): RTask = {
 
-    // get system dependencies using the rstudio packagemanager API
+    // Get system dependencies using the rstudio packagemanager API, inspired from https://github.com/mdneuzerling/getsysreqs
     // API doc: https://packagemanager.rstudio.com/__api__/swagger/index.html
-    // inspired from https://github.com/mdneuzerling/getsysreqs
-    // ! networkService is not used here to get the http url: pb with proxy?
-    //println(gridscale.http.HTTP())
     val apicallurl = "http://packagemanager.rstudio.com/__api__/repos/1/sysreqs?all=false&"+
       libraries.map{case InstallCommand.RLibrary(name,_,_) => "pkgname="+name+"&"}.mkString("")+
       "distribution=ubuntu&release=20.04"
-    val jsonDeps = gridscale.http.get[String](apicallurl) // pb with calling package object at runtime -> gridscale.http methods are not available
-    /*networkService.httpProxy match {
-      case Some(httpHost: HttpHost) ⇒ HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).setProxy(httpHost).build()
-      case _ ⇒ builder(preventGetHeaderForward = preventGetHeaderForward).build()
-    }*/
-    val sysdeps: String = parse(jsonDeps).
-      asInstanceOf[JObject].values.get("requirements").asInstanceOf[JArray].
-      arr.map(_.asInstanceOf[JObject].values.get("requirements").asInstanceOf[JObject].values.get("packages").
-      asInstanceOf[JArray].arr.map(_.toString).mkString(" ")).mkString(" ")
+    val sysdeps: String = try {
+      val jsonDeps = NetworkService.get(apicallurl)
+      val reqs = parse(jsonDeps).asInstanceOf[JObject].values
+      println(reqs)
+      if (reqs.contains("requirements")) {
+        reqs("requirements").asInstanceOf[List[_]].map {
+          r => val pkgreqs = r.asInstanceOf[Map[String, Any]]("requirements").asInstanceOf[Map[String, Any]]
+            println(pkgreqs)
+            val pkgs = pkgreqs("packages").asInstanceOf[List[String]]
+              println(pkgs)
+              pkgs.mkString(" ")
+        }.mkString(" ")
+      }
+      else {
+        //Log.logger.log(Log.WARNING, s"Error while fetching system dependencies for R packages $libraries")
+        ""
+      }
+    } catch {case e: Throwable =>
+      e.printStackTrace()
+      //Log.logger.log(Log.WARNING, s"Error while fetching system dependencies for R packages $libraries", e)
+       ""
+    }
 
     println("SYSDEPS = "+sysdeps)
 
-    val installCommands = install ++ Seq("apt update", "apt-get -y install "+sysdeps.mkString(" ")).map(c => ContainerSystem.sudo(containerSystem, c)) ++
+    val installCommands = install ++
+      (if (sysdeps.nonEmpty) Seq("apt update", "apt-get -y install "+sysdeps).map(c => ContainerSystem.sudo(containerSystem, c)) else Seq.empty) ++
       InstallCommand.installCommands(libraries.toVector)
 
     RTask(
