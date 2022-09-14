@@ -66,6 +66,7 @@ object RTask {
     script:               RunnableScript,
     install:              Seq[String]                        = Seq.empty,
     libraries:            Seq[InstallCommand]                = Seq.empty,
+    autoInstallSystemDeps:Boolean = true,
     image:                String                             = "openmole/r-base",
     version:              String                             = "4.1.2",
     errorOnReturnValue:   Boolean                            = true,
@@ -80,28 +81,26 @@ object RTask {
     installContainerSystem: ContainerSystem                  = ContainerSystem.default,
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): RTask = {
 
-    // Get system dependencies using the rstudio packagemanager API, inspired from https://github.com/mdneuzerling/getsysreqs
-    // API doc: https://packagemanager.rstudio.com/__api__/swagger/index.html
-    val apicallurl = "http://packagemanager.rstudio.com/__api__/repos/1/sysreqs?all=false&"+
-      libraries.map{case InstallCommand.RLibrary(name,_,_) => "pkgname="+name+"&"}.mkString("")+
-      "distribution=ubuntu&release=20.04"
-    val sysdeps: String = try {
-      val jsonDeps = NetworkService.get(apicallurl)
-      val reqs = parse(jsonDeps).asInstanceOf[JObject].values
-      if (reqs.contains("requirements")) {
-        reqs("requirements").asInstanceOf[List[_]].map {
-          _.asInstanceOf[Map[String, Any]]("requirements").asInstanceOf[Map[String, Any]]("packages").asInstanceOf[List[String]].mkString(" ")
-        }.mkString(" ")
+    val sysdeps: String = if (autoInstallSystemDeps) {
+      // Get system dependencies using the rstudio packagemanager API, inspired from https://github.com/mdneuzerling/getsysreqs
+      // API doc: https://packagemanager.rstudio.com/__api__/swagger/index.html
+      val apicallurl = "http://packagemanager.rstudio.com/__api__/repos/1/sysreqs?all=false&" +
+        libraries.map { case InstallCommand.RLibrary(name, _, _) => "pkgname=" + name + "&" }.mkString("") +
+        "distribution=ubuntu&release=20.04"
+      try {
+        val jsonDeps = NetworkService.get(apicallurl)
+        val reqs = parse(jsonDeps).asInstanceOf[JObject].values
+        if (reqs.contains("requirements")) {
+          reqs("requirements").asInstanceOf[List[_]].map {
+            _.asInstanceOf[Map[String, Any]]("requirements").asInstanceOf[Map[String, Any]]("packages").asInstanceOf[List[String]].mkString(" ")
+          }.mkString(" ")
+        }
+        else throw InternalProcessingError(s"Error while fetching system dependencies for R packages $libraries\nInconsistent API response\nTry setting the autoInstallSystemDeps argument to false and adjusting customised install argument accordingly.")
+      } catch {
+        case t: Throwable =>
+          throw InternalProcessingError(s"Error while fetching system dependencies for R packages $libraries\nTry setting the autoInstallSystemDeps argument to false and adjusting customised install argument accordingly.", t)
       }
-      else {
-        //Log.logger.log(Log.WARNING, s"Error while fetching system dependencies for R packages $libraries")
-        ""
-      }
-    } catch {case e: Throwable =>
-      //e.printStackTrace()
-      //Log.logger.log(Log.WARNING, s"Error while fetching system dependencies for R packages $libraries", e)
-       ""
-    }
+    } else ""
 
     val installCommands = install ++
       (if (sysdeps.nonEmpty) Seq("apt update", "apt-get -y install "+sysdeps).map(c => ContainerSystem.sudo(containerSystem, c)) else Seq.empty) ++
