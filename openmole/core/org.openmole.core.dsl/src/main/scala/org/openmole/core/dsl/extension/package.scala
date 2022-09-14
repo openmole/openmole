@@ -11,9 +11,8 @@ package object extension {
   type CacheKey[T] = org.openmole.tool.cache.CacheKey[T]
   def CacheKey = org.openmole.tool.cache.CacheKey
 
-  type ScalarOrSequenceOfDouble = org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
-  def ScalarOrSequenceOfDouble = org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
-
+  export org.openmole.core.workflow.tools.ScalableValue
+  
   type Hook = org.openmole.core.workflow.hook.FromContextHook
   def Hook = org.openmole.core.workflow.hook.Hook
   def FormattedFileHook = org.openmole.core.workflow.hook.FormattedFileHook

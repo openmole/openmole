@@ -28,7 +28,7 @@ object LHS {
       val s = lhs.sample.from(context)
       val vectorSize = lhs.factor.map(_.size(context)).sum
       def values = LHS.lhsValues(vectorSize, s, random())
-      values.map(v ⇒ ScalarOrSequenceOfDouble.unflatten(lhs.factor, v).from(context)).iterator
+      values.map(v ⇒ ScalableValue.toVariables(lhs.factor, v).from(context)).iterator
     }
 
     Sampling(
@@ -45,5 +45,5 @@ object LHS {
 
 }
 
-case class LHS(sample: FromContext[Int], factor: Seq[ScalarOrSequenceOfDouble])
+case class LHS(sample: FromContext[Int], factor: Seq[ScalableValue])
 

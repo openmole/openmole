@@ -27,7 +27,7 @@ object SensitivityMorris {
   def muStar(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("muStar", output.name))
   def sigma(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("sigma", output.name))
 
-  case class Method(inputs: Seq[ScalarOrSequenceOfDouble], outputs: Seq[Val[_]])
+  case class Method(inputs: Seq[ScalableValue], outputs: Seq[Val[_]])
 
   object MorrisHook {
 
@@ -36,7 +36,7 @@ object SensitivityMorris {
         import p._
         import WritableOutput._
 
-        val inputs = ScalarOrSequenceOfDouble.prototypes(method.inputs)
+        val inputs = ScalableValue.prototypes(method.inputs)
 
         import OutputFormat._
 
@@ -138,14 +138,14 @@ object SensitivityMorris {
      */
 
     def apply[T](
-      modelInputs:  Seq[ScalarOrSequenceOfDouble],
+      modelInputs:  Seq[ScalableValue],
       modelOutputs: Seq[Val[Double]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
 
       def morrisOutputs(
-        modelInputs:  Seq[ScalarOrSequenceOfDouble],
+        modelInputs:  Seq[ScalableValue],
         modelOutputs: Seq[Val[Double]]) =
         for {
-          i ← ScalarOrSequenceOfDouble.prototypes(modelInputs)
+          i ← ScalableValue.prototypes(modelInputs)
           o ← modelOutputs
         } yield (i, o)
 
@@ -222,7 +222,7 @@ object SensitivityMorris {
     def apply(
       repetitions: FromContext[Int],
       levels:      FromContext[Int],
-      factors:     Seq[ScalarOrSequenceOfDouble]) =
+      factors:     Seq[ScalableValue]) =
       new MorrisSampling(repetitions, levels, factors)
 
     /**
@@ -312,7 +312,7 @@ object SensitivityMorris {
   sealed class MorrisSampling(
     val repetitions: FromContext[Int],
     val levels:      FromContext[Int],
-    val factors:     Seq[ScalarOrSequenceOfDouble]) {
+    val factors:     Seq[ScalableValue]) {
 
     def validate = repetitions.validate ++ levels.validate
 
@@ -333,7 +333,7 @@ object SensitivityMorris {
       val variablesForRefRun: List[Variable[_]] = List(
         Variable(MorrisSampling.varFactorName, ""),
         Variable(MorrisSampling.varDelta, 0.0)
-      ) ++ ScalarOrSequenceOfDouble.unflatten(factors, t.seed).from(context)
+      ) ++ ScalableValue.toVariables(factors, t.seed).from(context)
 
       // forge lists of lists of variables for the runs of the trajectory
       val variablesForElementaryEffects = 
@@ -344,7 +344,7 @@ object SensitivityMorris {
             List(
               Variable(MorrisSampling.varFactorName, factors(factoridx).prototype.name),
               Variable(MorrisSampling.varDelta, point(factoridx) - t.seed(factoridx))
-            ) ++ ScalarOrSequenceOfDouble.unflatten(factors, point).from(context)
+            ) ++ ScalableValue.toVariables(factors, point).from(context)
         }
 
       variablesForRefRun :: variablesForElementaryEffects
@@ -407,7 +407,7 @@ object SensitivityMorris {
  */
 case class SensitivityMorris(
   evaluation: DSL,
-  inputs:     Seq[ScalarOrSequenceOfDouble],
+  inputs:     Seq[ScalableValue],
   outputs:    Seq[Val[Double]],
   sample:     Int,
   level:      Int,

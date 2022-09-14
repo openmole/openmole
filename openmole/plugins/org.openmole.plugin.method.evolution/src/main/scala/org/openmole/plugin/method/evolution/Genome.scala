@@ -50,53 +50,47 @@ object GenomeDouble {
 
 object Genome {
 
-  sealed trait GenomeBound
+  enum GenomeBound:
+    case SequenceOfDouble(v: Val[Array[Double]], low: Array[Double], high: Array[Double], size: Int)
+    case ScalarDouble(v: Val[Double], low: Double, high: Double)
+    case SequenceOfInt(v: Val[Array[Int]], low: Array[Int], high: Array[Int], size: Int)
+    case ScalarInt(v: Val[Int], low: Int, high: Int)
+    case ContinuousInt(v: Val[Int], low: Int, high: Int)
+    case Enumeration[T](v: Val[T], values: Vector[T])
+    case SequenceOfEnumeration[T](v: Val[Array[T]], values: Vector[Array[T]])
 
-  object GenomeBound {
-    case class SequenceOfDouble(v: Val[Array[Double]], low: Array[Double], high: Array[Double], size: Int) extends GenomeBound
-    case class ScalarDouble(v: Val[Double], low: Double, high: Double) extends GenomeBound
-    case class SequenceOfInt(v: Val[Array[Int]], low: Array[Int], high: Array[Int], size: Int) extends GenomeBound
-    case class ScalarInt(v: Val[Int], low: Int, high: Int) extends GenomeBound
-    case class ContinuousInt(v: Val[Int], low: Int, high: Int) extends GenomeBound
-    case class Enumeration[T](v: Val[T], values: Vector[T]) extends GenomeBound
-    case class SequenceOfEnumeration[T](v: Val[Array[T]], values: Vector[Array[T]]) extends GenomeBound
-
+  object GenomeBound:
     import org.openmole.core.workflow.domain._
     import org.openmole.core.workflow.sampling._
 
-    implicit def factorIsScalarDouble[D](f: Factor[D, Double])(implicit bounded: BoundedDomain[D, Double]): ScalarDouble = {
+    implicit def factorIsScalarDouble[D](f: Factor[D, Double])(implicit bounded: BoundedDomain[D, Double]): ScalarDouble =
       val (min, max) = bounded(f.domain).domain
       ScalarDouble(f.value, min, max)
-    }
 
     implicit def factorOfDoubleRangeIsScalaDouble(f: Factor[DoubleRange, Double]): ScalarDouble =
       ScalarDouble(f.value, f.domain.low, f.domain.high)
 
-    implicit def factorIsScalarInt[D](f: Factor[D, Int])(implicit bounded: BoundedDomain[D, Int]): ScalarInt = {
+    implicit def factorIsScalarInt[D](f: Factor[D, Int])(implicit bounded: BoundedDomain[D, Int]): ScalarInt =
       val (min, max) = bounded(f.domain).domain
       ScalarInt(f.value, min, max)
-    }
 
     implicit def factorOfScalaRangeIsScalarInt(f: Factor[scala.Range, Int]): ScalarInt =
       ScalarInt(f.value, f.domain.min, f.domain.max)
 
-    implicit def factorIntIsContinuousInt[D](f: Factor[D, Int])(implicit bounded: BoundedDomain[D, Double]): ContinuousInt = {
+    implicit def factorIntIsContinuousInt[D](f: Factor[D, Int])(implicit bounded: BoundedDomain[D, Double]): ContinuousInt =
       val (min, max) = bounded(f.domain).domain
       ContinuousInt(f.value, min.toInt, max.toInt)
-    }
 
     implicit def factorOfIntRangeIsContinuousInt(f: Factor[DoubleRange, Int]): ContinuousInt =
       ContinuousInt(f.value, f.domain.low.toInt, f.domain.high.toInt)
 
-    implicit def factorIsSequenceOfDouble[D](f: Factor[D, Array[Double]])(implicit bounded: BoundedDomain[D, Array[Double]], sized: DomainSize[D]): SequenceOfDouble = {
+    implicit def factorIsSequenceOfDouble[D](f: Factor[D, Array[Double]])(implicit bounded: BoundedDomain[D, Array[Double]], sized: DomainSize[D]): SequenceOfDouble =
       val (min, max) = bounded(f.domain).domain
       SequenceOfDouble(f.value, min, max, sized(f.domain))
-    }
 
-    implicit def factorIsSequenceOfInt[D](f: Factor[D, Array[Int]])(implicit bounded: BoundedDomain[D, Array[Int]], sized: DomainSize[D]): SequenceOfInt = {
+    implicit def factorIsSequenceOfInt[D](f: Factor[D, Array[Int]])(implicit bounded: BoundedDomain[D, Array[Int]], sized: DomainSize[D]): SequenceOfInt =
       val (min, max) = bounded(f.domain).domain
       SequenceOfInt(f.value, min, max, sized(f.domain))
-    }
 
     implicit def factorIsIsEnumeration[D, T](f: Factor[D, T])(implicit fix: FixDomain[D, T]): Enumeration[T] =
       Enumeration(f.value, fix(f.domain).domain.toVector)
@@ -107,17 +101,17 @@ object Genome {
     implicit def factorOfBooleanIsSequenceOfEnumeration(f: Factor[Int, Array[Boolean]]): SequenceOfEnumeration[Boolean] =
       SequenceOfEnumeration(f.value, Vector.fill(f.domain)(Array(true, false)))
 
-    def toVal(b: GenomeBound) = b match {
-      case b: GenomeBound.ScalarDouble             ⇒ b.v
-      case b: GenomeBound.ScalarInt                ⇒ b.v
-      case b: GenomeBound.ContinuousInt            ⇒ b.v
-      case b: GenomeBound.SequenceOfDouble         ⇒ b.v
-      case b: GenomeBound.SequenceOfInt            ⇒ b.v
-      case b: GenomeBound.Enumeration[_]           ⇒ b.v
-      case b: GenomeBound.SequenceOfEnumeration[_] ⇒ b.v
-    }
+    def toVal(b: GenomeBound) =
+      b match
+        case b: GenomeBound.ScalarDouble             ⇒ b.v
+        case b: GenomeBound.ScalarInt                ⇒ b.v
+        case b: GenomeBound.ContinuousInt            ⇒ b.v
+        case b: GenomeBound.SequenceOfDouble         ⇒ b.v
+        case b: GenomeBound.SequenceOfInt            ⇒ b.v
+        case b: GenomeBound.Enumeration[_]           ⇒ b.v
+        case b: GenomeBound.SequenceOfEnumeration[_] ⇒ b.v
 
-  }
+  end GenomeBound
 
   import _root_.mgo.evolution.{ C, D }
   import cats.implicits._

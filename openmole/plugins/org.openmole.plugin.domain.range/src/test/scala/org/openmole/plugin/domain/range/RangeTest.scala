@@ -37,7 +37,7 @@ class RangeTest extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     val r3: RangeDomain[Double] = 0 to 10
 
     val i = Val[Double]
-    val scalar: ScalarOrSequenceOfDouble = i in (0.0 to 1.0)
+    val scalar: ScalableValue = i in (0.0 to 1.0)
   }
 
 }
