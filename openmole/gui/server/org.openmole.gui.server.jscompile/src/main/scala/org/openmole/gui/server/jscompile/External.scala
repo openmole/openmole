@@ -1,8 +1,8 @@
 package org.openmole.gui.server.jscompile
 
-import java.io.{ File, InputStream }
-import scala.sys.process.{ BasicIO, Process }
-import org.openmole.tool.file._
+import java.io.{File, InputStream}
+import scala.sys.process.{BasicIO, Process, ProcessLogger}
+import org.openmole.tool.file.*
 
 object External {
 
@@ -28,9 +28,18 @@ object External {
     //      ()
     //    }
 
-    val process = Process(cmd, cwd)
-    val processIO = BasicIO.standard(_ => ()).withError(_=> ())
-    val code: Int = process.run(processIO).exitValue()
+    val log = new ProcessLogger {
+      override def out(s: => String): Unit = {}
+      override def err(s: => String): Unit = {
+        println(s)
+      }
+      override def buffer[T](f: => T): T = f
+    }
+
+
+    val process = Process(cmd, cwd).!(log)
+//    val processIO = BasicIO.standard(_ => ()).withError(_=> ())
+//    val code: Int = process.run(processIO).exitValue()
 
     //    if (code != 0) {
     //      Left(s"Non-zero exit code: $code")
