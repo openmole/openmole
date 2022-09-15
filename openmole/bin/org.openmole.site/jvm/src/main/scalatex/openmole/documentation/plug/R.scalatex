@@ -24,8 +24,7 @@ It takes the following arguments :
 
 @ul
    @li{@code{script} String, @b{mandatory}. The R script to be executed, either R code directly or a R script file.}
-   @li{@code{install} Sequence of strings, @b{optional} (default = empty). The commands to be executed prior to any R packages installation and R script execution (see example below: some R libraries may have system dependencies, that have to be installed first).}
-   @li{@code{libraries} Sequence of strings, @b{optional} (default = empty). The name of R libraries that will be used by the script and need to be installed beforehand (note: as detailed below, installations are only done during the first execution of the R script, and then stored in a cached docker image.}
+   @li{@code{libraries} Sequence of strings, @b{optional} (default = empty). The name of R libraries that will be used by the script and need to be installed beforehand (note: as detailed below, installations are only done during the first execution of the R script, and then stored in a cached docker image. System dependencies for R libraries are by default automatically resolved and installed (see advanced arguments below).}
    @li{@code{clearContainerCache} Boolean, @b{optional} (default = @code{false}). Should the R image and libraries be cleared and reinstalled (to ensure an update for example)? If @code{true}, the task will perform the installation (and thus the update) even if the library was already installed.}
 
 @br
@@ -38,6 +37,20 @@ The following properties must be defined using @code{set}:
    @li{mapped output: similar syntax as inputs to collect outputs of the model.}
 
 @br
+
+The following arguments are optional arguments for an advanced usage
+
+@ul
+   @li{@code{autoInstallSystemDeps} Boolean, @b{optional}} (default = @code{true}). Should system dependencies for required packages be automatically installed (these are resolved using the RSTudio packagemanager API).
+   @li{@code{install} Sequence of strings, @b{optional} (default = empty). System commands to be executed prior to any R packages installation and R script execution. This can be used for example if automatic system dependencies installation fails, after deactivating the option.}
+   @li{@code{image} String, @b{optional} (default = "openmole/r-base"). Changes the docker image used by the RTask.}
+   @li{@code{version} String, @b{optional} (default = "4.1.2"). Version of the docker image. openmole/r-base images are tagged corresponding to some R versions, check the docker hub to see which are available. If you use your own image, you will need to provide the corresponding tag.}
+
+Other advanced container options are also available to build the RTask (see ContainerTask): @code{errorOnReturnValue}, @code{returnValue}, @code{stdOut}, @code{stdErr}, @code{hostFiles}, @code{workDirectory}, @code{environmentVariables}, @code{containerSystem}, @code{installContainerSystem}.
+
+@br
+
+
 
 We develop below a detailed example of how to use a @code{RTask}, from a very simple use case to a more elaborate one, with system libraries and R libraries.
 
@@ -322,11 +335,12 @@ We use the function @code{CHullArea} of the library @code{GeoRange} to compute t
 @br@br
 
 We need to write the names of the libraries we need in the field @code{libraries}, as a sequence, and they will be installed from the CRAN repository.
-You might need to write or adapt the @code{install} field accordingly.
-It is a sequence of system commands which are executed prior to the installation of the R libraries on the machine which executes OpenMOLE.
-It can be used to install the system packages which are required by the R libraries.
+
 @br
+
+System libraries required by the R library are automatically installed by the RTask. You can deactivate this behavior by setting the option @code{autoInstallSystemDeps} to false, and provide yourself the installation commands.
 The @code{RTask} is based on a Debian container, therefore you can use any Debian command here including @code{apt} installation tool.
+See advanced usage below for examples of custom commands in specific use cases.
 
 @br@br
 
@@ -353,7 +367,6 @@ Note: the first time you use R with @code{libraries} or @code{packages}, it take
         # require GeoRange
         area <- CHullArea(hull[, 1], hull[, 2])
         $tq,
-        install = Seq("fakeroot apt-get update", "fakeroot apt-get install -y libgdal-dev libproj-dev"),
         libraries = Seq("GeoRange")
     ) set(
         outputs += area.mapped
@@ -369,8 +382,8 @@ Note: the first time you use R with @code{libraries} or @code{packages}, it take
 
 @h3{Use a library within Docker}
 
-If you are starting OpenMOLE within docker, installing @code{R} packages in a @code{RTask} might require a slighlty different parameter setting.
-If you compare our example below with the example of library above, you'll observe differences in the @code{install} field: we prefix install commands with @code{fakeroot} to get the permissions to use the Debian command @code{apt} for installation.
+If you are starting OpenMOLE within docker, installing @code{R} packages in a @code{RTask} might require a specific parameter setting.
+The @code{install} field must be used with particular commands: we prefix install commands with @code{fakeroot} to get the permissions to use the Debian command @code{apt} for installation.
 
 @br@br
 
@@ -393,6 +406,7 @@ If you compare our example below with the example of library above, you'll obser
         # require GeoRange
         area <- CHullArea(hull[, 1], hull[, 2])
         $tq,
+        autoInstallSystemDeps = false,
         install = Seq("fakeroot apt-get update", "fakeroot apt-get install -y libgdal-dev libproj-dev"),
         libraries = Seq("GeoRange")
     ) set(
@@ -414,7 +428,7 @@ This proxy will also be used by the @code{RTask} to download packages from the w
 
 @h3{Use alternative Debian repositories}
 
-We show how using the @code{install} parameter of a @code{RTask} enables to use Debian installation tools such as @code{apt} to install packages in the container running R.
+We showed how using the @code{install} parameter of a @code{RTask} enables to use Debian installation tools such as @code{apt} to install packages in the container running R.
 This downloads Debian packages from the default international repositories (servers) for Debian.
 In some cases, you might be willing to use alternative repositories.
 
@@ -442,6 +456,7 @@ You can do so by making a smart use of the @code{install} parameter to define yo
         # your R script here
         # [...]
         $tq,
+        autoInstallSystemDeps = false,
         install = Seq(
            // replace the initial Debian repositories by my repository
            "fakeroot sed -i 's/deb.debian.org/linux.myinstitute.org/g' /etc/apt/sources.list",

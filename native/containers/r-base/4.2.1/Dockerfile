@@ -1,6 +1,6 @@
 ## Emacs, make this -*- mode: sh; -*-
  
-FROM debian:testing-20220125-slim
+FROM debian:testing-20220912-slim
 
 LABEL maintainer="Romain Reuillon <romain.reuillon@iscpif.fr>; Juste Raimbault <juste.raimbault@ign.fr>"
 
@@ -10,7 +10,7 @@ LABEL maintainer="Romain Reuillon <romain.reuillon@iscpif.fr>; Juste Raimbault <
 RUN useradd docker \
 	&& mkdir /home/docker \
 	&& chown docker:docker /home/docker \
-	&& addgroup docker staff
+	&& adduser docker staff
 
 RUN apt-get update \ 
 	&& apt-get install -y --no-install-recommends \
