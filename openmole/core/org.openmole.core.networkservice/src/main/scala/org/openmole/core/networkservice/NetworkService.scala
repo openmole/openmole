@@ -19,7 +19,7 @@
 package org.openmole.core.networkservice
 
 import org.openmole.core.preference.{Preference, PreferenceLocation}
-import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.exception.InternalProcessingError
 
 import scala.io.Source
 import org.apache.http
@@ -27,6 +27,9 @@ import org.apache.http.impl.client.HttpClients
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.message.BasicHeader
+import org.bouncycastle.mime.Headers
+
+import java.io.InputStream
 
 object NetworkService {
 
@@ -38,9 +41,9 @@ object NetworkService {
     val hostURIOpt: Option[String] = preference.preferenceOption(NetworkService.httpProxyURI)
 
     (isEnabledOpt, hostURIOpt) match {
-      case (Some(false) | None, _)                            ⇒ None
+      case (Some(false) | None, _) ⇒ None
       case (_, Some(hostURI: String)) if hostURI.trim.isEmpty ⇒ None
-      case (_, Some(hostURI))                                 ⇒ Some(HttpHost(hostURI))
+      case (_, Some(hostURI)) ⇒ Some(HttpHost(hostURI))
       case _ => None
     }
   }
@@ -50,31 +53,40 @@ object NetworkService {
 
   case class HttpHost(hostURI: String) {
     def toHost: http.HttpHost = http.HttpHost.create(hostURI)
+
     override def toString: String = hostURI
   }
 
 
   /**
    * Simple http get with implicit NetworkService
-   * @param url url
-   * @param headers optional headers
+   *
+   * @param url            url
+   * @param headers        optional headers
    * @param networkService network service (proxy)
    * @return
    */
-  def get(url: String,  headers: Seq[(String, String)] = Seq.empty)(implicit networkService: NetworkService): String = {
+  def get(url: String, headers: Seq[(String, String)] = Seq.empty)(implicit networkService: NetworkService): String = {
+    val is = getInputStream(url, headers)
+    val res = Source.fromInputStream(is).mkString
+    is.close()
+    res
+  }
+
+  def getInputStream(url: String, headers: Seq[(String, String)] = Seq.empty)(implicit networkService: NetworkService): InputStream = {
     val client = networkService.httpProxy match {
       case Some(httpHost: HttpHost) ⇒ HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).setProxy(httpHost.toHost).build()
       case _ ⇒ HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).build()
     }
     val getReq = new HttpGet(url)
     headers.foreach{case (k,v) => getReq.setHeader(new BasicHeader(k, v))}
-    val httpResponse = client.execute(getReq)
-    if (httpResponse.getStatusLine.getStatusCode >= 300) throw new UserBadDataError(s"HTTP GET for $url responded with $httpResponse")
-    val res = Source.fromInputStream(httpResponse.getEntity.getContent).mkString
-    httpResponse.close()
-    res
+    try {
+      val httpResponse = client.execute(getReq)
+      if (httpResponse.getStatusLine.getStatusCode >= 300) throw new InternalProcessingError(s"HTTP GET for $url responded with $httpResponse")
+      httpResponse.getEntity.getContent
+    } catch case t: Throwable => throw new InternalProcessingError(s"HTTP GET for $url failed", t)
+    //finally client.close()
   }
-
 
 
 }

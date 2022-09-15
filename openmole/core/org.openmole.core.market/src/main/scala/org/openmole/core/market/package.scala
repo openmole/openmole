@@ -20,10 +20,10 @@ package org.openmole.core
 import java.util.zip.GZIPInputStream
 import org.openmole.tool.file.*
 import org.openmole.tool.tar.*
-import gridscale.http
 import org.openmole.core.context.*
 import org.openmole.core.expansion.*
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.{Preference, PreferenceLocation}
 import org.openmole.core.workspace.*
 import org.openmole.tool.random.*
@@ -43,16 +43,14 @@ package object market {
   def indexURL(implicit preference: Preference, randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
     ExpandedString(preference(marketIndexLocation)).from(Context("version" → buildinfo.version))
 
-  def marketIndex(implicit preference: Preference, randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
-    Serialization.read[MarketIndex](http.get(indexURL))
+  def marketIndex(implicit preference: Preference, randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService, networkService: NetworkService) =
+    Serialization.read[MarketIndex](NetworkService.get(indexURL))
 
-  def downloadEntry(entry: MarketIndexEntry, path: File) = try {
-    http.getStream(entry.url) { is ⇒
-      val tis = new TarInputStream(new GZIPInputStream(is))
-      try tis.extract(path)
-      finally tis.close
-      path.applyRecursive(_.setExecutable(true))
-    }
+  def downloadEntry(entry: MarketIndexEntry, path: File)(implicit networkService: NetworkService) = try {
+    val tis = new TarInputStream(new GZIPInputStream(NetworkService.getInputStream(entry.url)))
+    try tis.extract(path)
+    finally tis.close()
+    path.applyRecursive(_.setExecutable(true))
   }
   catch {
     case e: IOException ⇒ throw new InternalProcessingError(s"Cannot download entry at url ${entry.url}", e)
