@@ -28,7 +28,7 @@ import java.io.File
 import org.openmole.tool.file._
 import org.openmole.core.workspace._
 import org.openmole.gui.server.jscompile.Webpack.ExtraModule
-import org.scalajs.logging.{ NullLogger, ScalaConsoleLogger }
+import org.scalajs.logging.{NullLogger, ScalaConsoleLogger}
 
 object JSPack {
 
@@ -46,9 +46,9 @@ object JSPack {
         (containers, _) ← PathIRContainer.fromClasspath(Seq(jar.toPath, inputDirectory.toPath))
         sjsirFiles ← irCache.cached(containers)
         config = StandardConfig()
-          //.withOptimizer(true)
           .withSourceMap(true)
-          .withClosureCompilerIfAvailable(optimizedJS)
+          .withOptimizer(optimizedJS)
+          .withClosureCompiler(optimizedJS)
           .withModuleKind(ModuleKind.CommonJSModule)
 
         linker = StandardImpl.linker(config)
