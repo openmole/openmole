@@ -113,7 +113,7 @@ object App {
 
   def run() = {
     val containerNode = dom.document.querySelector("#openmole-content")
-    
+
     //import scala.concurrent.ExecutionContext.Implicits.global
     Plugins.fetch { plugins ⇒
       val maindiv = div()
@@ -201,8 +201,8 @@ object App {
       //        fixedTitle = Some("New project")
       //      )
 
-    // Define the option sequence
-    //Fetch(_.omSettings(())) { sets ⇒
+      // Define the option sequence
+      //Fetch(_.omSettings(())) { sets ⇒
       render(
         containerNode,
         div(
@@ -212,50 +212,48 @@ object App {
           div(
             cls := "main-container",
             div(
-              cls := "main-container",
-              div(
-                cls <-- openFileTree.signal.map { oft ⇒
-                  "file-section" + {
-                    if (oft) "" else " closed"
-                  }
-                },
-                div(img(src := "img/openmole_dark.png", height := "70px"), cls := "nav-container"),
-                treeNodePanel.fileControler,
-                treeNodePanel.fileToolBar.sortingGroup,
-                treeNodePanel.treeView
-              ),
-              div(
-                cls := "tab-section",
-                theNavBar,
-                //openAuthentication.signal.expand(authenticationPanel),
-               // treeNodeTabs.render.amend(cls := "tab-section")
-                TabContent.render //.amend(cls := "tab-section")
-              )
-              //                cls <-- openFileTree.signal.combineWith(panels.bannerAlert.isOpen).map {
-              //                  case (oft, io) ⇒
-              //                   // "centerpanel "
-              ////                    +
-              ////                      CoreUtils.ifOrNothing(oft, "reduce") +
-              ////                      CoreUtils.ifOrNothing(io, " banneropen")
-              //                },
-              //                  div(
-              //                    omsheet.textVersion,
-              //                    div(
-              //                      fontSize := "1em", s"${sets.version} ${sets.versionName}"),
-              //                    div(fontSize := "0.8em", s"built the ${sets.buildTime}")
-              //                  )
+              cls <-- openFileTree.signal.map { oft ⇒
+                "file-section" + {
+                  if (oft) "" else " closed"
+                }
+              },
+              div(img(src := "img/openmole_dark.png", height := "70px"), cls := "nav-container"),
+              treeNodePanel.fileControler,
+              treeNodePanel.fileToolBar.sortingGroup,
+              treeNodePanel.treeView
             ),
-            //            openExpandablePanel.signal.expand(
-            //              div(
-            //                cls := "collapse-bottom",
-            //                div(cls := "splitter"),
-            //                child <-- panels.expandablePanel.signal.map { p ⇒
-            //                  p.map {
-            //                    _.element
-            //                  }.getOrElse(div())
-            //                }
-            //              )
-            //            ),
+            div(
+              cls := "tab-section",
+              theNavBar,
+              //openAuthentication.signal.expand(authenticationPanel),
+              // treeNodeTabs.render.amend(cls := "tab-section")
+              TabContent.render //.amend(cls := "tab-section")
+            )
+            //                cls <-- openFileTree.signal.combineWith(panels.bannerAlert.isOpen).map {
+            //                  case (oft, io) ⇒
+            //                   // "centerpanel "
+            ////                    +
+            ////                      CoreUtils.ifOrNothing(oft, "reduce") +
+            ////                      CoreUtils.ifOrNothing(io, " banneropen")
+            //                },
+            //                  div(
+            //                    omsheet.textVersion,
+            //                    div(
+            //                      fontSize := "1em", s"${sets.version} ${sets.versionName}"),
+            //                    div(fontSize := "0.8em", s"built the ${sets.buildTime}")
+            //                  )
+          ),
+          //            openExpandablePanel.signal.expand(
+          //              div(
+          //                cls := "collapse-bottom",
+          //                div(cls := "splitter"),
+          //                child <-- panels.expandablePanel.signal.map { p ⇒
+          //                  p.map {
+          //                    _.element
+          //                  }.getOrElse(div())
+          //                }
+          //              )
+          //            ),
 
             div(
               div(cls <-- expandablePanel.signal.map { x =>
@@ -275,13 +273,12 @@ object App {
               )
             ),
 
-            panels.alertPanel.alertDiv
-          )
+          panels.alertPanel.alertDiv
         )
       )
     }
     panels.treeNodeManager.invalidCurrentCache
-  //}
+    //}
   }
 
 }
