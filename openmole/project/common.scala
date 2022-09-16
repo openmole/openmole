@@ -24,7 +24,7 @@ object common {
   def scaladgetVersion = "1.9.2"
   def sortableVersion = "0.7.2"
   def json4sVersion = "4.0.5"
-  def circeVersion = "0.14.2"
+  def circeVersion = "0.14.3"
   def catsVersion = "2.8.0"
   def catsEffectVersion = "3.3.14"
   def catsParseVersion = "0.3.8"
