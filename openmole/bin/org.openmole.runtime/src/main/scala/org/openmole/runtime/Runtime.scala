@@ -23,31 +23,32 @@ import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.task.TaskExecutionContext
-import org.openmole.tool.logger.{ JavaLogger, LoggerService }
+import org.openmole.tool.logger.{JavaLogger, LoggerService}
 import org.openmole.core.tools.service.Retry
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
-import org.openmole.core.tools.service._
-import org.openmole.core.workflow.execution._
-import org.openmole.core.communication.message._
-import org.openmole.core.communication.storage._
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
+import org.openmole.core.tools.service.*
+import org.openmole.core.workflow.execution.*
+import org.openmole.core.communication.message.*
+import org.openmole.core.communication.storage.*
 import org.openmole.core.event.EventDispatcher
-import org.openmole.core.fileservice.{ FileService, FileServiceCache }
+import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
-import org.openmole.core.serializer._
+import org.openmole.core.serializer.*
 import org.openmole.core.threadprovider.ThreadProvider
+import org.openmole.core.timeservice.TimeService
 import org.openmole.tool.file.uniqName
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 import scala.collection.mutable.HashMap
-import util.{ Failure, Success }
+import util.{Failure, Success}
 import org.openmole.core.workflow.execution.Environment.RuntimeLog
 import org.openmole.core.workflow.job.Job
 import org.openmole.tool.cache.KeyValueCache
-import org.openmole.tool.lock._
+import org.openmole.tool.lock.*
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.stream.MultiplexedOutputStream
-import squants._
+import squants.*
 
 object Runtime extends JavaLogger {
 
@@ -74,7 +75,7 @@ class Runtime {
     threads:           Int,
     debug:             Boolean,
     transferRetry:     Option[Int]
-  )(implicit serializerService: SerializerService, newFile: TmpDirectory, fileService: FileService, fileServiceCache: FileServiceCache, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace, loggerService: LoggerService, networkService: NetworkService) = {
+  )(implicit serializerService: SerializerService, newFile: TmpDirectory, fileService: FileService, fileServiceCache: FileServiceCache, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace, loggerService: LoggerService, networkService: NetworkService, timeService: TimeService) = {
 
     /*--- get execution message and job for runtime---*/
     val usedFiles = new HashMap[String, File]
@@ -172,6 +173,7 @@ class Runtime {
           lockRepository = LockRepository[LockKey](),
           serializerService = serializerService,
           networkService = networkService,
+          timeService = timeService,
           remote = Some(TaskExecutionContext.Remote(threads))
         )
 

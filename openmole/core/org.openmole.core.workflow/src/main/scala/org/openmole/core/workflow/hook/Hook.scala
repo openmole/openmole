@@ -23,6 +23,7 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
+import org.openmole.core.timeservice.TimeService
 import org.openmole.core.workflow.builder.{InfoConfig, InputOutputConfig}
 import org.openmole.core.workflow.mole.Ticket
 import org.openmole.core.workflow.tools.*
@@ -34,7 +35,8 @@ import org.openmole.tool.random.RandomProvider
 
 case class HookExecutionContext(
   cache:  KeyValueCache,
-  ticket: Ticket)(
+  ticket: Ticket,
+  moleLaunchTime: Long)(
   implicit
   val preference:        Preference,
   val threadProvider:    ThreadProvider,
@@ -44,7 +46,8 @@ case class HookExecutionContext(
   val loggerService:     LoggerService,
   val random:            RandomProvider,
   val newFile:           TmpDirectory,
-  val serializerService: SerializerService)
+  val serializerService: SerializerService,
+  val timeService:       TimeService)
 
 trait Hook extends Name {
 

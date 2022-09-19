@@ -17,22 +17,23 @@
 
 package org.openmole.runtime
 
-import org.openmole.core.logconfig._
+import org.openmole.core.logconfig.*
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.tool.file._
-import org.openmole.tool.logger.{ JavaLogger, LoggerService }
-import scopt._
+import org.openmole.tool.file.*
+import org.openmole.tool.logger.{JavaLogger, LoggerService}
+import scopt.*
 
 import java.io.File
 import java.util.logging.Level
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.communication.storage.RemoteStorage
 import org.openmole.core.event.EventDispatcher
-import org.openmole.core.fileservice.{ FileService, FileServiceCache }
+import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
+import org.openmole.core.timeservice.TimeService
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
 
 object SimExplorer extends JavaLogger {
 
@@ -104,6 +105,7 @@ object SimExplorer extends JavaLogger {
             implicit val eventDispatcher: EventDispatcher = EventDispatcher()
             implicit val loggerService: LoggerService = if (config.debug) LoggerService(level = Some(finest)) else LoggerService()
             implicit val networkService: NetworkService = NetworkService(None)
+            implicit val timeService: TimeService = TimeService()
 
             try {
               PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error starting bundle $b", e) }

@@ -105,7 +105,7 @@ object MoleExecution {
       defaultEnvironment.getOrElse(defaultDefaultEnvironment),
       cleanOnFinish,
       implicits,
-      MoleExecutionContext()(moleServices),
+      MoleExecutionContext(moleLaunchTime = moleServices.timeService.currentTime)(moleServices),
       startStopDefaultEnvironment,
       id = UUID.randomUUID().toString,
       keyValueCache = taskCache,
@@ -259,7 +259,8 @@ object MoleExecution {
           val services = executionContext.services
           HookExecutionContext(
             cache = cache,
-            ticket = ticket)(
+            ticket = ticket,
+            moleLaunchTime = executionContext.moleLaunchTime)(
             preference = services.preference,
             threadProvider = services.threadProvider,
             fileService = services.fileService,
@@ -268,7 +269,8 @@ object MoleExecution {
             loggerService = services.loggerService,
             random = services.newRandom,
             newFile = services.tmpDirectory,
-            serializerService = services.serializerService)
+            serializerService = services.serializerService,
+            timeService = services.timeService)
         }
 
         h.perform(ctxForHooks, toHookExecutionContext(subMoleExecutionState.moleExecution.keyValueCache, subMoleExecutionState.moleExecution.executionContext))
@@ -720,7 +722,8 @@ class MoleExecution(
       lockRepository = lockRepository,
       moleExecution = Some(moleExecution),
       serializerService = serializerService,
-      networkService = networkService
+      networkService = networkService,
+      timeService = timeService
     )
   }
 

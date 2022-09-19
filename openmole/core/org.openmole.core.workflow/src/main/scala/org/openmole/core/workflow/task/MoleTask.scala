@@ -116,6 +116,7 @@ case class MoleTask(
       import executionContext.serializerService
       import executionContext.networkService
       implicit val fileServiceCache = executionContext.fileServiceCache
+      implicit val timeService = executionContext.timeService
 
       val localEnvironment =
         LocalEnvironment(1, executionContext.localEnvironment.deinterleave)

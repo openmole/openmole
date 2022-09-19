@@ -1,19 +1,19 @@
 package org.openmole.core.workflow.test
 
 import java.util.logging.Level
-
 import org.openmole.core.event.EventDispatcher
-import org.openmole.core.fileservice.{ FileService, FileServiceCache }
+import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
+import org.openmole.core.timeservice.TimeService
 import org.openmole.core.workflow.mole.MoleServices
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
-import org.openmole.tool.random.{ RandomProvider, Seeder }
+import org.openmole.tool.random.{RandomProvider, Seeder}
 
 object Stubs {
 
@@ -38,6 +38,7 @@ object Stubs {
   implicit val network: NetworkService = NetworkService(None)
   implicit val fileServiceCache: FileServiceCache = FileServiceCache()
   implicit val loggerService: LoggerService = LoggerService()
+  implicit val timeService: TimeService = TimeService()
 
   implicit val moleServices: MoleServices = MoleServices.create(dir)
 

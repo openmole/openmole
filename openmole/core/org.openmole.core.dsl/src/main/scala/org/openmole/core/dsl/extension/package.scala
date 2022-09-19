@@ -110,4 +110,6 @@ package object extension {
   def Logger = org.openmole.tool.logger.LoggerService
 
   export org.openmole.tool.types.TypeTool.ManifestDecoration
+
+  export org.openmole.core.timeservice.TimeService
 }

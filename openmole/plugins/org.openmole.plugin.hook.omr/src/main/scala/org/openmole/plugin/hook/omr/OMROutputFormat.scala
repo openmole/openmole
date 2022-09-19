@@ -20,10 +20,13 @@ object OMROutputFormat {
   def methodNameField = "method"
   def fileNameField = "data"
   def omrVersionField = "version"
-  def omrVersion = "0.1"
+  def omrVersion = "0.2"
   def scriptField = "script"
   def importsField = "imports"
   def openMOLEVersionField = "openmole-version"
+
+  def startTime = "start-time"
+  def saveTime = "save-time"
 
   implicit def outputFormat[MD](implicit encoder: Encoder[MD], methodData: MethodData[MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD] {
     override def write(executionContext: HookExecutionContext)(format: OMROutputFormat, output: WritableOutput, content: OutputContent, method: MD): FromContext[Unit] = FromContext { p ⇒
@@ -39,12 +42,16 @@ object OMROutputFormat {
           val directory = file.from(context)
 
           def methodFormat(json: Json, fileName: String) = {
+            import executionContext.timeService
+
             json.deepDropNullValues.mapObject { o ⇒
               val o2 =
                 o.add(methodNameField, Json.fromString(methodData.name(method)))
                   .add(fileNameField, Json.fromString(fileName))
                   .add(omrVersionField, Json.fromString(omrVersion))
                   .add(openMOLEVersionField, Json.fromString(org.openmole.core.buildinfo.version.value))
+                  .add(startTime, Json.fromLong(executionContext.moleLaunchTime))
+                  .add(saveTime, Json.fromLong(TimeService.currentTime))
 
               scriptData match {
                 case data: ScriptSourceData.ScriptData if format.script ⇒
