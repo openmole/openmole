@@ -482,7 +482,7 @@ object MGOAPI {
     def operations(a: A): Ops
 
     trait Ops {
-      def metadata(generation: Long, data: SaveOption): EvolutionMetadata = EvolutionMetadata.none
+      def metadata(state: S, data: SaveOption): EvolutionMetadata = EvolutionMetadata.none
 
       def genomeValues(genome: G): V
       def genomeToVariables(genome: G): FromContext[Vector[Variable[_]]]

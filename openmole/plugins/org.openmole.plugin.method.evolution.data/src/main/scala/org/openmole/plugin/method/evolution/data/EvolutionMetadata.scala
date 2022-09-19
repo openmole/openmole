@@ -11,24 +11,25 @@ object EvolutionMetadata {
   import io.circe.generic.auto._
   import io.circe.`export`.Exported
   import org.openmole.plugin.hook.omr._
+  import org.openmole.plugin.tool.methoddata._
 
-  implicit def methodData: MethodData[EvolutionMetadata] = MethodData[EvolutionMetadata](_ ⇒ EvolutionMetadata.method)
+  given MethodData[EvolutionMetadata] = MethodData[EvolutionMetadata](_ ⇒ EvolutionMetadata.method)
+  given Exported[Encoder[EvolutionMetadata]] = io.circe.generic.auto.deriveEncoder[EvolutionMetadata]
+  given Exported[Decoder[EvolutionMetadata]] = io.circe.generic.auto.deriveDecoder[EvolutionMetadata]
 
-  implicit def evolutionMetadataEncoder: Exported[Encoder[EvolutionMetadata]] = io.circe.generic.auto.deriveEncoder[EvolutionMetadata]
-  implicit def evolutionMetadataDecoder: Exported[Decoder[EvolutionMetadata]] = io.circe.generic.auto.deriveDecoder[EvolutionMetadata]
+  enum GenomeBoundData:
+    case IntBound(value: ValData, low: Int, high: Int, intervalType: GenomeBoundData.IntervalType)
+    case DoubleBound(value: ValData, low: Double, high: Double, intervalType: GenomeBoundData.IntervalType)
+    case IntSequenceBound(value: ValData, low: Seq[Int], high: Seq[Int], intervalType: GenomeBoundData.IntervalType)
+    case DoubleSequenceBound(value: ValData, low: Seq[Double], high: Seq[Double], intervalType: GenomeBoundData.IntervalType)
+    case Enumeration(value: ValData, values: Seq[String])
 
   object GenomeBoundData {
-    import org.openmole.plugin.tool.methoddata._
 
-    sealed trait IntervalType
-    case object Discrete extends IntervalType
-    case object Continuous extends IntervalType
+    enum IntervalType:
+      case Continuous, Discrete
 
-    case class IntBound(value: ValData, low: Int, high: Int, intervalType: IntervalType) extends GenomeBoundData
-    case class DoubleBound(value: ValData, low: Double, high: Double, intervalType: IntervalType) extends GenomeBoundData
-    case class IntSequenceBound(value: ValData, low: Seq[Int], high: Seq[Int], intervalType: IntervalType) extends GenomeBoundData
-    case class DoubleSequenceBound(value: ValData, low: Seq[Double], high: Seq[Double], intervalType: IntervalType) extends GenomeBoundData
-    case class Enumeration(value: ValData, values: Seq[String]) extends GenomeBoundData
+    export IntervalType.{Continuous, Discrete}
 
     def name(data: GenomeBoundData) =
       data match {
@@ -40,8 +41,6 @@ object EvolutionMetadata {
       }
   }
 
-  sealed trait GenomeBoundData
-
   case class Objective(
     name:     String,
     delta:    Option[Double],
@@ -51,10 +50,9 @@ object EvolutionMetadata {
   def method = "evolution"
   case object none extends EvolutionMetadata
 
-  object PSE {
+  object PSE:
     type Grid = Seq[PSE.GridAxe]
     case class GridAxe(objective: String, grid: Seq[Double])
-  }
 
   case class PSE(
     genome:     Seq[GenomeBoundData],
@@ -68,6 +66,14 @@ object EvolutionMetadata {
     objective:  Seq[Objective],
     grid:       PSE.Grid,
     sample:     Int,
+    generation: Long,
+    saveOption: SaveOption) extends EvolutionMetadata
+
+  object Profile
+
+  case class Profile(
+    genome:     Seq[GenomeBoundData],
+    objective:  Seq[Objective],
     generation: Long,
     saveOption: SaveOption) extends EvolutionMetadata
 

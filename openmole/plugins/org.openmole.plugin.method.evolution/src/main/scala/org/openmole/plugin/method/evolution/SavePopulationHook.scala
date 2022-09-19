@@ -54,7 +54,8 @@ object SavePopulationHook {
     format:         F                      = CSVOutputFormat(unrollArray = true))(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, EvolutionMetadata]) = Hook("SavePopulationHook") { p ⇒
     import p._
 
-    val generation = evolution.operations.generationLens.get(context(evolution.stateVal))
+    val state = context(evolution.stateVal)
+    val generation = evolution.operations.generationLens.get(state)
 
     def fileName =
       (frequency.option, last) match {
@@ -67,7 +68,7 @@ object SavePopulationHook {
     fileName match {
       case Some(fileName) ⇒
         def saveOption = SaveOption(frequency = frequency, last = last)
-        def evolutionData = evolution.operations.metadata(generation, saveOption)
+        def evolutionData = evolution.operations.metadata(state, saveOption)
 
         val augmentedContext =
           context + (evolution.generationVal -> generation)

@@ -33,7 +33,7 @@ object NSGA2 {
   object DeterministicParams {
     import mgo.evolution.algorithm.{ CDGenome, NSGA2 ⇒ MGONSGA2, _ }
 
-    implicit def integration: MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] {
+    given MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -60,12 +60,12 @@ object NSGA2 {
 
         def initialState = EvolutionState[Unit](s = ())
 
-        override def metadata(generation: Long, saveOption: SaveOption) =
+        override def metadata(state: S, saveOption: SaveOption) =
           EvolutionMetadata.NSGA2(
             genome = MetadataGeneration.genomeData(om.genome),
             objective = om.objectives.map(MetadataGeneration.objectiveData),
             populationSize = om.mu,
-            generation = generation,
+            generation = generationLens.get(state),
             saveOption = saveOption
           )
 
@@ -126,7 +126,7 @@ object NSGA2 {
   object StochasticParams {
     import mgo.evolution.algorithm.{ CDGenome, NoisyNSGA2 ⇒ MGONoisyNSGA2, _ }
 
-    implicit def integration: MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] {
+    given MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -137,13 +137,13 @@ object NSGA2 {
 
       def operations(om: StochasticParams) = new Ops {
 
-        override def metadata(generation: Long, saveOption: SaveOption) =
+        override def metadata(state: S, saveOption: SaveOption) =
           EvolutionMetadata.StochasticNSGA2(
             genome = MetadataGeneration.genomeData(om.genome),
             objective = om.objectives.map(MetadataGeneration.objectiveData),
             sample = om.historySize,
             populationSize = om.mu,
-            generation = generation,
+            generation = generationLens.get(state),
             saveOption = saveOption
           )
 

@@ -32,6 +32,7 @@ import org.openmole.plugin.method.evolution.NichedNSGA2.NichedElement
 import squants.time.Time
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.`extension`._
+import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SaveOption }
 
 import monocle._
 import monocle.syntax.all._
@@ -95,7 +96,7 @@ object Profile {
 
     import CDGenome.DeterministicIndividual
 
-    implicit def integration: MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] {
+    given MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = DeterministicIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -105,6 +106,14 @@ object Profile {
       def sManifest = implicitly
 
       def operations(om: DeterministicParams) = new Ops {
+        override def metadata(state: S, saveOption: SaveOption): EvolutionMetadata =
+          EvolutionMetadata.Profile(
+            genome = MetadataGeneration.genomeData(om.genome),
+            objective = om.objectives.map(MetadataGeneration.objectiveData),
+            generation = generationLens.get(state),
+            saveOption = saveOption
+          )
+
         def startTimeLens = GenLens[S](_.startTime)
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
@@ -212,7 +221,7 @@ object Profile {
       FromContext.value(mgo.evolution.niche.sequenceNiches[CDGenome.NoisyIndividual.Individual[Phenotype], Int](niches))
     }
 
-    implicit def integration: MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] {
+    given MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]

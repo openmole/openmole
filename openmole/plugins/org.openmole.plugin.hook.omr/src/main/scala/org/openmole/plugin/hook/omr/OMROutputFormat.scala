@@ -68,7 +68,7 @@ object OMROutputFormat {
                 val (fileName, f) =
                   name match {
                     case Some(n) ⇒
-                      def fromContextValue = n.stringValue.map { s => s"FromContext($s)" }.getOrElse(throw new InternalProcessingError("From context for name should have a clean string value"))
+                      def fromContextValue = n.stringValue.getOrElse(throw new InternalProcessingError("From context for name should have a clean string value"))
                       (s"""$dataDirectory/${fromContextValue}.json.gz""", directory / dataDirectory / s"${n.from(context)}.json.gz")
                     case None    ⇒ (s"$dataDirectory/data.json.gz", directory / dataDirectory / "data.json.gz")
                   }

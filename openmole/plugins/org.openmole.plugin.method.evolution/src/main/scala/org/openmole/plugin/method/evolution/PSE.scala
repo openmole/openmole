@@ -222,7 +222,7 @@ object PSE {
     import mgo.evolution.algorithm.{ PSE ⇒ _, _ }
     import cats.data._
 
-    implicit def integration: MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
+    given MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
       type G = CDGenome.Genome
       type I = PSEAlgorithm.Individual[Phenotype]
       type S = EvolutionState[HitMapState]
@@ -232,12 +232,12 @@ object PSE {
       def sManifest = implicitly
 
       def operations(om: DeterministicParams) = new Ops {
-        override def metadata(generation: Long, saveOption: SaveOption): EvolutionMetadata =
+        override def metadata(state: S, saveOption: SaveOption): EvolutionMetadata =
           EvolutionMetadata.PSE(
             genome = MetadataGeneration.genomeData(om.genome),
             objective = om.objectives.map(MetadataGeneration.objectiveData),
             grid = MetadataGeneration.grid(om.grid),
-            generation = generation,
+            generation = generationLens.get(state),
             saveOption = saveOption
           )
 
@@ -334,7 +334,7 @@ object PSE {
     import mgo.evolution.algorithm.{ PSE ⇒ _, NoisyPSE ⇒ _, _ }
     import cats.data._
 
-    implicit def integration: MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
+    given MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
       type G = CDGenome.Genome
       type I = NoisyPSEAlgorithm.Individual[Phenotype]
       type S = EvolutionState[HitMapState]
@@ -344,13 +344,13 @@ object PSE {
       def sManifest = implicitly
 
       def operations(om: StochasticParams) = new Ops {
-        override def metadata(generation: Long, saveOption: SaveOption) =
+        override def metadata(state: S, saveOption: SaveOption) =
           EvolutionMetadata.StochasticPSE(
             genome = MetadataGeneration.genomeData(om.genome),
             objective = om.objectives.map(MetadataGeneration.objectiveData),
             sample = om.historySize,
             grid = MetadataGeneration.grid(om.grid),
-            generation = generation,
+            generation = generationLens.get(state),
             saveOption = saveOption
           )
 
