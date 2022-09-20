@@ -30,7 +30,7 @@ object Search {
 
   implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
-  def build(getIndex: () ⇒ Unit) {
+  def build(getIndex: () ⇒ Unit) = {
 
     val centerSearch = Seq(
       width := 150,
