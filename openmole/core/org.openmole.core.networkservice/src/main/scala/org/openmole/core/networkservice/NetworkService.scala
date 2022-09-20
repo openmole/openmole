@@ -30,6 +30,7 @@ import org.apache.http.message.BasicHeader
 import org.bouncycastle.mime.Headers
 
 import java.io.InputStream
+import java.net.URI
 
 object NetworkService {
 
@@ -52,7 +53,12 @@ object NetworkService {
     new NetworkService(hostURI.map(HttpHost(_)).orElse(httpHostFromPreferences))
 
   case class HttpHost(hostURI: String) {
-    def toHost: http.HttpHost = http.HttpHost.create(hostURI)
+    /**
+     * Convert to a HttpHost
+     * Trailing slash is removed if needed
+     * @return
+     */
+    def toHost: http.HttpHost = http.HttpHost.create(hostURI.substring(0, hostURI.length() - (if (hostURI.endsWith("/")) 1 else 0)))
 
     override def toString: String = hostURI
   }
@@ -60,6 +66,7 @@ object NetworkService {
 
   /**
    * Simple http get with implicit NetworkService
+   *  Apache HttpClient works transparently with https, no need to add a custom protocol here https://hc.apache.org/httpcomponents-client-5.1.x/
    *
    * @param url            url
    * @param headers        optional headers
@@ -87,6 +94,9 @@ object NetworkService {
     } catch case t: Throwable => throw new InternalProcessingError(s"HTTP GET for $url failed", t)
     //finally client.close()
   }
+
+  def urlProtocol(url: String): String = new URI(url).getScheme
+
 
 
 }

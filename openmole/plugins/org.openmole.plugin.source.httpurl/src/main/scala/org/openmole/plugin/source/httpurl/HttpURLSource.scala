@@ -19,7 +19,7 @@ package org.openmole.plugin.source.url
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import gridscale.http
+import org.openmole.core.networkservice._
 
 import java.io.File
 
@@ -29,7 +29,8 @@ object URLSource {
     Source("URLSource") { p ⇒
       import p._
 
-      val response = http.get(url.from(context))
+      val url = 
+      val response = NetworkService.get(url.from(context))
 
       val value: AnyRef = prototype.`type`.runtimeClass match {
         case s if s == classOf[String] ⇒ response
