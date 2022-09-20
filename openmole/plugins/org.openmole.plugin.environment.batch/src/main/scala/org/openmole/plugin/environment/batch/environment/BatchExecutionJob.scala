@@ -34,7 +34,7 @@ import org.openmole.tool.osgi.{ ClassFile, VersionedPackage, createBundle }
 import java.io.File
 import java.nio.file.Files
 import java.util.UUID
-import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
+import java.net.URLClassLoader
 
 object BatchExecutionJob {
 

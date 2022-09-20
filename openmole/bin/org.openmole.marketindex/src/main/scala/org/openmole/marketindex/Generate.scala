@@ -8,7 +8,7 @@ import org.openmole.core.market.MarketIndex
 
 import scala.annotation.tailrec
 
-object Generate extends App {
+@main def generate(args: String*) = {
 
   case class Parameters(
     target:  Option[File] = None,

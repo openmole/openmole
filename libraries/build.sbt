@@ -110,26 +110,34 @@ lazy val scalaLang = OsgiProject(
   global = true,
   exports = Seq("com.typesafe.*", "scala.*", "dotty.*", "scalax.*" /*"jline.*"*/),
   privatePackages = Seq("!org.jline.*", "**", "META-INF.native.**"),
-  imports = Seq("!org.apache.sshd.*", "!org.mozilla.*", "!org.apache.tools.ant.*", "!sun.misc.*", "!javax.annotation.*", "*")) settings
-  (libraryDependencies ++= {
-    Seq(
-      "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4",
-      "org.scala-lang.modules" %% "scala-java8-compat" % "1.0.2",
+  imports = Seq("org.jline.*" /*"!org.apache.sshd.*", "!org.mozilla.*", "!org.apache.tools.ant.*", "!sun.misc.*", "!javax.annotation.*", "!scala.*", "*"*/)) settings (
+  libraryDependencies ++= Seq(
+    "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4",
+    "org.scala-lang.modules" %% "scala-java8-compat" % "1.0.2",
     //"org.scala-lang" % "scala-library" % scalaVersion.value,
-      //"org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      //"org.scala-lang" % "scalap" % scalaVersion.value ,
-      //"jline" % "jline" % "2.12.1",
-      //"com.typesafe" % "config" % "1.2.1",
-      "org.scala-lang" %% "scala3-tasty-inspector"% scalaVersion.value,
-      "org.scala-lang" %% "scala3-library" % scalaVersion.value,
-      "org.scala-lang" %% "scala3-compiler" % scalaVersion.value,
-      "org.scalameta" %% "scalameta" % scalaMetaVersion cross(CrossVersion.for3Use2_13) excludeAll(ExclusionRule(organization = "com.lihaoyi")),
-
-      "org.scala-lang" %% sjs("scala3-library") % scalaVersion.value,
-      //"org.scala-lang.modules" %% sjs("scala-collection-compat") % "2.1.6"
-    )
-  },
-  version := scalaVersion.value) settings(settings: _*) settings(scala3Settings: _*) dependsOn(jline)
+    //"org.scala-lang" % "scala-reflect" % scalaVersion.value,
+    //"org.scala-lang" % "scalap" % scalaVersion.value ,
+    //"jline" % "jline" % "2.12.1",
+    //"com.typesafe" % "config" % "1.2.1",
+    "org.scala-lang" %% "scala3-tasty-inspector"% scalaVersion.value,
+    "org.scala-lang" %% "scala3-library" % scalaVersion.value,
+    "org.scala-lang" %% "scala3-compiler" % scalaVersion.value,
+    //"org.scala-lang.modules" %% "scala-collection-compat" % "2.8.0",
+    "org.scalameta" %% "scalameta" % scalaMetaVersion cross(CrossVersion.for3Use2_13) excludeAll(
+      ExclusionRule(organization = "com.lihaoyi"),
+      ExclusionRule(organization = "org.scala-lang.modules"),
+      ExclusionRule(organization = "org.scala-lang")
+    ),
+    "org.scala-lang" %% sjs("scala3-library") % scalaVersion.value,
+    //"org.scala-lang.modules" %% sjs("scala-collection-compat") % "2.1.6"
+    ),
+//  excludeDependencies ++= Seq(
+//    ExclusionRule(organization = "com.lihaoyi"),
+//    ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13"),
+//    ExclusionRule(organization = "org.scala-lang", "scala-compiler")
+//  ),
+  version := scalaVersion.value
+) settings(settings: _*) settings(scala3Settings: _*) dependsOn(jline)
 
 
 lazy val jline = OsgiProject(dir, "org.jline.jline", exports = Seq("org.jline.*")) settings (
@@ -271,15 +279,18 @@ lazy val scalajsLogging = OsgiProject(dir, "scalajs-logging", exports = Seq("org
   libraryDependencies += "org.scala-js" %% "scalajs-logging" % scalajsLoggingVersion,
   version := scalajsLoggingVersion) settings(settings: _*)
   
-lazy val scalaJS = OsgiProject(dir, "scalajs", exports = Seq("scala.scalajs.*"), imports = Seq("*")) settings (
+lazy val scalaJS = OsgiProject(dir, "scalajs", exports = Seq("scala.scalajs.*"), imports = Seq("*"), privatePackages = Seq("org.scalajs.*")) settings (
   libraryDependencies += "org.scala-js" %% "scalajs-library" % scalajsVersion,
   libraryDependencies += "org.scala-lang" % "scala3-library_sjs1_3" % scala3VersionValue,
   version := scalajsVersion
   ) settings(settings: _*)
 
 lazy val scalaTags = OsgiProject(dir, "com.scalatags", exports = Seq("scalatags.*"), privatePackages = Seq("geny.*")) settings(
-  libraryDependencies ++= Seq("com.lihaoyi" %% "scalatags" % scalaTagsVersion),
-  version := scalaTagsVersion) settings(settings: _*)
+  libraryDependencies ++= Seq(
+    "com.lihaoyi" %% "scalatags" % scalaTagsVersion,
+    "com.lihaoyi" %% sjs("scalatags") % scalaTagsVersion,
+  ),
+  version := scalaTagsVersion) settings(settings: _*) settings(scala3Settings: _*)
 
 lazy val scalatexSite =
   OsgiProject(dir, "com.lihaoyi.scalatex-site", exports = Seq("scalatex.*", "ammonite.*", "fastparse.*"), privatePackages = Seq("META-INF.**", "pprint.*", "scalaj.*", "scalaparse.*", "geny.*"), imports = Seq("*")) settings (
@@ -316,27 +327,27 @@ lazy val squants =
   ) settings(settings: _*) settings(scala3Settings: _*)
 
 
-//FIXME add monocle after migration to scala 3 is completed
+val noReflectScala2 = Seq("!scala.reflect.api", "!scala.reflect.macros", "!scala.reflect.macros.*")
+
 lazy val mgo = OsgiProject(
   dir,
   "mgo",
   exports = Seq("mgo.*", "ppse.*"),
-  imports = Seq("!scala.collection.compat.*", "scala.*", "monocle.*", "cats.*", "squants.*", "!com.oracle.svm.*", "!*"), //Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "*"),
+  imports = noReflectScala2 ++ Seq("!scala.collection.compat.*", "scala.*", "monocle.*", "cats.*", "squants.*", "!com.oracle.svm.*", "!*"), //Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "*"),
   privatePackages = Seq("!scala.*", "!monocle.*", "!squants.*", "!cats.*", "*") /*Seq("!scala.*", "!monocle.*", "!org.apache.commons.math3.*", "!cats.*", "!squants.*", "!scalaz.*", "*")*/) settings(
   libraryDependencies += "org.openmole" %% "mgo" % mgoVersion,
   excludeDependencies += ExclusionRule(organization = "org.typelevel", name = "cats-kernel_2.13"),
-  version := mgoVersion) /*dependsOn(monocle,cats, squants)*/ settings(settings: _*) settings(scala3Settings: _*)
+  version := mgoVersion) dependsOn(monocle, cats, squants) settings(settings: _*) settings(scala3Settings: _*)
 
-//FIXME add monocle after migration to scala 3 is completed
 lazy val container = OsgiProject(
   dir,
   "container",
   exports = Seq("container.*"),
-  imports = Seq("scala.*", "squants.*", "monocle.*", "!com.oracle.svm.*", "!org.graalvm.*", "!*"),
-  privatePackages = Seq("!scala.*", "!monocle.*", "!squants.*", "*")) settings(
+  imports = noReflectScala2 ++ Seq( "scala.*", "squants.*", "monocle.*", "cats.*", "io.circe.*", "!com.oracle.svm.*", "!org.graalvm.*", "!*"),
+  privatePackages = Seq("!scala.*", "!monocle.*", "!squants.*", "!cats.*", "!io.circe.*" ,"*")) settings(
   libraryDependencies += "org.openmole" %% "container" % containerVersion,
   //libraryDependencies += "com.github.luben" % "zstd-jni" % "1.4.3-1",
-  version := containerVersion) /*dependsOn(cats, squants)*/ settings(settings: _*) settings(scala3Settings)
+  version := containerVersion) dependsOn(cats, squants, monocle, circe) settings(settings: _*) settings(scala3Settings)
 
 lazy val spatialdata = OsgiProject(dir, "org.openmole.spatialsampling",
   exports = Seq("org.openmole.spatialsampling.*"),

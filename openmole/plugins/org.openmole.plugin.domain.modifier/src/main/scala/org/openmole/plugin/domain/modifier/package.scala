@@ -22,8 +22,6 @@ import java.nio.file.Path
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
-import scala.reflect.runtime.universe._
-
 package object modifier {
 
   object CanGetName {
