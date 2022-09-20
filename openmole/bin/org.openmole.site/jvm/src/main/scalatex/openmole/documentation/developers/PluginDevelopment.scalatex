@@ -23,7 +23,7 @@ You will need the following tools to design your plugin:
 
 
 @hl.code("""
-git clone git://github.com/openmole/myopenmoleplugin.git
+git clone https://github.com/openmole/myopenmoleplugin.git
 """)
 
 This repository contains a template to help you create OpenMOLE plugins easily.
@@ -98,7 +98,7 @@ val j = Val[Int]
 val hello = ScalaTask("val j = myopenmoleplugin.Hello.world(i)") set (
   inputs += i,
   outputs += (i, j),
-  plugins += pluginsOf(myopenmoleplugin.Hello)
+  plugins += pluginsOf[myopenmoleplugin.Hello]
 )
 
 DirectSampling(
