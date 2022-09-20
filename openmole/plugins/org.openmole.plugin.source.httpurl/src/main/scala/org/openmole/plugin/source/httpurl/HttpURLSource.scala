@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.source.url
+package org.openmole.plugin.source.httpurl
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
@@ -23,14 +23,16 @@ import org.openmole.core.networkservice._
 
 import java.io.File
 
-object URLSource {
+object HttpURLSource {
 
-  def apply[T](url: FromContext[String], prototype: Val[T])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply[T](url: FromContext[String], prototype: Val[T])(implicit name: sourcecode.Name, definitionScope: DefinitionScope, networkService: NetworkService) =
     Source("URLSource") { p ⇒
       import p._
 
-      val url = 
-      val response = NetworkService.get(url.from(context))
+      val urlraw = url.from(context)
+      val protocol = NetworkService.urlProtocol(urlraw)
+      if (protocol!="http"||protocol!="https") throw new UserBadDataError(s"Unsupported protocol: $protocol")
+      val response = NetworkService.get(urlraw)
 
       val value: AnyRef = prototype.`type`.runtimeClass match {
         case s if s == classOf[String] ⇒ response

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.source.url
+package org.openmole.plugin.source.httpurl
 
 import org.openmole.core.highlight.HighLight
 import org.openmole.core.pluginregistry.PluginRegistry
@@ -30,7 +30,7 @@ class Activator extends BundleActivator {
 
     val keyWords: Vector[HighLight] =
       Vector(
-        SourceHighLight(objectName(URLSource))
+        SourceHighLight(objectName(HttpURLSource))
       )
 
     PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords)
