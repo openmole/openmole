@@ -565,9 +565,11 @@ lazy val quasirandomSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampl
 
 /* Source */
 
-def allSource = Seq(fileSource)
+def allSource = Seq(fileSource, httpURLSource)
 
 lazy val fileSource = OsgiProject(pluginDir, "org.openmole.plugin.source.file", imports = Seq("*")) dependsOn(openmoleDSL, serializer, exception) settings (pluginSettings: _*)
+
+lazy val httpURLSource = OsgiProject(pluginDir, "org.openmole.plugin.source.httpurl", imports = Seq("*")) dependsOn(openmoleDSL, exception, networkService) settings (pluginSettings: _*)
 
 
 /* Task */
