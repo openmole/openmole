@@ -24,5 +24,5 @@ object ModuleIndex {
   val moduleIndexes = PreferenceLocation("Module", "Indexes", Some(Seq[String](buildinfo.moduleAddress)))
 }
 
-case class Component(location: String, hash: String)
+case class Component(name: String, hash: String)
 case class Module(name: String, description: String, components: Seq[Component])

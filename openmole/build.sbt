@@ -51,7 +51,7 @@ def scala3Settings =
   commonSettings ++
     Seq(
       Global / scalaVersion := scala3VersionValue, // + "-bin-typelevel-4",
-      scalacOptions ++= Seq("-Xtarget:11", "-language:higherKinds", "-language:postfixOps", "-language:implicitConversions", "-Xmax-inlines:50"),
+      scalacOptions ++= Seq("-java-output-version:11", "-language:higherKinds", "-language:postfixOps", "-language:implicitConversions", "-Xmax-inlines:50"),
       excludeTransitiveScala2
     )
 
@@ -580,18 +580,18 @@ lazy val toolsTask = OsgiProject(pluginDir, "org.openmole.plugin.task.tools", im
 
 lazy val external = OsgiProject(pluginDir, "org.openmole.plugin.task.external", imports = Seq("*")) dependsOn(openmoleDSL, workspace) settings (pluginSettings: _*)
 
+// Because NetLogo bundle contains scala classes
+def noNetLogoInClassPath =
+  Compile / dependencyClasspath := (Compile / dependencyClasspath).value.filter(!_.data.name.contains("ccl-northwestern-edu-netlogo"))
+
 lazy val netLogo = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo", imports = Seq("*")) dependsOn(openmoleDSL, external, netLogoAPI) settings (pluginSettings: _*)
 
 lazy val netLogo5 = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo5") dependsOn(netLogo, openmoleDSL, external, netLogo5API) settings (pluginSettings: _*) settings (
-  excludeDependencies ++= Seq(
-    ExclusionRule("org.openmole.library", "ccl-northwestern-edu-netlogo5")
-  )
+  noNetLogoInClassPath
 )
 
 lazy val netLogo6 = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo6", imports = Seq("*")) dependsOn(netLogo, openmoleDSL, external, netLogo6API) settings (pluginSettings: _*) settings (
-  excludeDependencies ++= Seq(
-    ExclusionRule("org.openmole.library", "ccl-northwestern-edu-netlogo6")
-  )
+  noNetLogoInClassPath
 )
 
 lazy val jvm = OsgiProject(pluginDir, "org.openmole.plugin.task.jvm", imports = Seq("*")) dependsOn(openmoleDSL, external, workspace) settings (pluginSettings: _*)
@@ -1200,7 +1200,8 @@ lazy val modules = OsgiProject(binDir, "org.openmole.modules", singleton = true,
     libraryDependencies ++= requieredRuntimeLibraries,
     dependencyFilter := bundleFilter,
     dependencyName := rename,
-    excludeTransitiveScala2
+    excludeTransitiveScala2,
+    noNetLogoInClassPath
   ) dependsOn(openmoleBuildInfo, openmoleFile, module) dependsOn (toDependencies(openmoleDependencies): _*)
 
 

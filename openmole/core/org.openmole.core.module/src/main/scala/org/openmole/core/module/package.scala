@@ -57,8 +57,8 @@ package object module {
     val hashes = downloadableComponents.map(_.component.hash).distinct.toSet -- PluginManager.bundleHashes.map(_.toString)
     val files = downloadableComponents.filter(c ⇒ hashes.contains(c.component.hash)).map {
       c ⇒
-        val f = dir / gridscale.RemotePath.name(c.component.location)
-        http.getStream(gridscale.RemotePath.child(c.baseURL, c.component.location))(_.copy(f))
+        val f = dir / gridscale.RemotePath.name(c.component.name)
+        http.getStream(gridscale.RemotePath.child(c.baseURL, c.component.name))(_.copy(f))
         f
     }
     addPluginsFiles(files, true, moduleDirectory)
