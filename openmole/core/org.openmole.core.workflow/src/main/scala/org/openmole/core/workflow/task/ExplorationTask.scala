@@ -44,14 +44,16 @@ object ExplorationTask {
    * @param sampling
    * @return
    */
-  inline def apply[S](s: S)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, inline isSampling: IsSampling[S]) = {
-    def sampling = isSampling(s)
+  inline def apply[S](s: S)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, inline isSampling: IsSampling[S]) =
+    def sampling() = isSampling(s)
+    build(sampling)
 
+  def build(sampling: () => Sampling)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     FromContextTask("ExplorationTask") { p ⇒
       import p._
 
       val variablesValues = {
-        val sValue = sampling
+        val sValue = sampling()
         val samplingValue = sValue.sampling.from(context).toVector
 
         val values =
@@ -78,11 +80,10 @@ object ExplorationTask {
            }
        }: Context
      } set (
-       inputs ++= sampling.inputs.toSeq,
-       exploredOutputs ++= sampling.outputs.toSeq.map(_.toArray)
-     ) withValidate { sampling.validate }
-  }
-  
+       inputs ++= sampling().inputs.toSeq,
+       exploredOutputs ++= sampling().outputs.toSeq.map(_.toArray)
+     ) withValidate { sampling().validate }
+
 
 
   /**
