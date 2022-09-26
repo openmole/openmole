@@ -4,7 +4,7 @@ import org.json4s.JsonAST.{ JObject, JValue }
 import org.openmole.core.context._
 import org.openmole.core.exception.UserBadDataError
 
-package object json {
+package object json:
 
   org.json4s.jackson.JsonMethods.mapper.enable(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS)
 
@@ -116,5 +116,3 @@ package object json {
     }
 
   }
-
-}

@@ -18,7 +18,7 @@ object OMROutputFormat {
   def methodFile = "method.omr"
 
   def methodNameField = "method"
-  def fileNameField = "data"
+  def dataFileField = "data"
   def omrVersionField = "version"
   def omrVersion = "0.2"
   def scriptField = "script"
@@ -28,11 +28,13 @@ object OMROutputFormat {
   def startTime = "start-time"
   def saveTime = "save-time"
 
-  implicit def outputFormat[MD](implicit encoder: Encoder[MD], methodData: MethodData[MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD] {
+  implicit def outputFormat[MD](implicit methodData: MethodData[MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD] {
     override def write(executionContext: HookExecutionContext)(format: OMROutputFormat, output: WritableOutput, content: OutputContent, method: MD): FromContext[Unit] = FromContext { p ⇒
       import p._
       import org.json4s._
       import org.json4s.jackson.JsonMethods._
+
+      implicit val encoder = methodData.encoder
 
       output match {
         case WritableOutput.Display(_) ⇒
@@ -48,7 +50,7 @@ object OMROutputFormat {
             json.deepDropNullValues.mapObject { o ⇒
               val o2 =
                 o.add(methodNameField, Json.fromString(methodData.name(method)))
-                  .add(fileNameField, Json.fromString(fileName))
+                  .add(dataFileField, Json.fromString(fileName))
                   .add(omrVersionField, Json.fromString(omrVersion))
                   .add(openMOLEVersionField, Json.fromString(org.openmole.core.buildinfo.version.value))
                   .add(startTime, Json.fromLong(executionContext.moleLaunchTime))
@@ -132,7 +134,7 @@ object OMROutputFormat {
           }
         OMRData(
           method = readField(methodNameField),
-          fileName = readField(fileNameField),
+          fileName = readField(dataFileField),
           version = readField(omrVersionField)
         )
       case Left(e) ⇒ throw new InternalProcessingError(s"Error while parsing omr file $file with content:\n$content", e)

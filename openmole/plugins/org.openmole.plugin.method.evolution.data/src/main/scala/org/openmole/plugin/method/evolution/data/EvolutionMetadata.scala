@@ -14,7 +14,6 @@ object EvolutionMetadata {
   import org.openmole.plugin.tool.methoddata._
 
   given MethodData[EvolutionMetadata] = MethodData[EvolutionMetadata](_ ⇒ EvolutionMetadata.method)
-  given Exported[Encoder[EvolutionMetadata]] = io.circe.generic.auto.deriveEncoder[EvolutionMetadata]
   given Exported[Decoder[EvolutionMetadata]] = io.circe.generic.auto.deriveDecoder[EvolutionMetadata]
 
   enum GenomeBoundData:
