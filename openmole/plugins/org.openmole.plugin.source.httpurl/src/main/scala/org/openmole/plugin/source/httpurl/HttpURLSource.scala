@@ -31,7 +31,7 @@ object HttpURLSource {
 
       val urlraw = url.from(context)
       val protocol = NetworkService.urlProtocol(urlraw)
-      if (protocol!="http"||protocol!="https") throw new UserBadDataError(s"Unsupported protocol: $protocol")
+      if ((!protocol.equals("http"))&&(!protocol.equals("https"))) throw new UserBadDataError(s"Unsupported protocol: $protocol")
       val response = NetworkService.get(urlraw)
 
       val value: AnyRef = prototype.`type`.runtimeClass match {
