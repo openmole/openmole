@@ -10,7 +10,7 @@ Sources have been designed as a possible way to inject data in the dataflow from
 
 @br
 
-At the moment, only file-based Sources are available in OpenMOLE.
+At the moment, only file-based and http(s) url Sources are available in OpenMOLE.
 If you need to interface OpenMOLE with an external datasource, check the @aa("contact information page", href := whoWeAre.file) to see how to reach the OpenMOLE development team.
 
 
@@ -110,3 +110,25 @@ SystemExecTask(s"${myWorkDirectory}/re-execute.sh") set (
 val exploration = ExplorationTask(inDir in directoriesToAnalyze)
 
 (exploration source s) -< analysisTask""", name = "complete example with source")
+
+
+@h2{Retrieve data from a HTTP URL}
+
+You can inject data into your workflow from a HTTP/HTTPS URL using the @code{HttpURLSource}.
+This is a preferred method to making network calls from within your model: when model runs are distributed on a cluster or the grid, such requests may fail.
+This source will retrieve raw content from the provided URL, and attribute to a String or a File prototype (in the second case, the content is written as file content).
+This is illustrated in the following example with a String prototype:
+
+@hl.openmole("""
+val stringOutput = Val[String]
+val s = HttpURLSource("http://api.ipify.org",stringOutput)
+ScalaTask("println(input.stringOutput)") set ((inputs,outputs) += (stringOutput)) source s hook display
+""", name = "example http url source")
+
+and in the following example with a File prototype.
+
+@hl.openmole("""
+val fileOutput = Val[File]
+val s = HttpURLSource("http://api.ipify.org",fileOutput)
+ScalaTask("println(input.fileOutput)") set ((inputs,outputs) += (fileOutput)) source s hook CopyFileHook(fileOutput,"test.txt")
+""", name = "example http url source file")
