@@ -51,7 +51,7 @@ OsgiKeys.exportPackage := Seq("myopenmoleplugin.*")
 
 OsgiKeys.importPackage := Seq("*;resolution:=optional")
 
-OsgiKeys.privatePackage := Seq("*")
+OsgiKeys.privatePackage := Seq("!scala.*","*")
 
 OsgiKeys.requireCapability := ${tq}osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"${tq}
 """)
