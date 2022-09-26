@@ -5,7 +5,7 @@ import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.{ FromContext }
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.format.OutputFormat.PlainContent
+import org.openmole.core.workflow.format.OutputFormat.*
 import org.openmole.core.workflow.format._
 
 object FormattedFileHook {
@@ -29,7 +29,10 @@ object FormattedFileHook {
 
       val experimentContext: Context = context + Variable(experiment, executionContext.ticket.content)
       val variables = (ps ++ Seq(experiment)).map(p ⇒ experimentContext.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p not found in hook $this")))
-      val content = PlainContent(variables = variables, name = fileName.map(FromContext.fromString))
+      val content = 
+        name match 
+          case None => PlainContent(variables = variables)
+          case Some(name) => NamedContent(variables = variables, name = FromContext.fromString(name))
 
       fileFormat.write(executionContext)(format, output, content, metadata).from(experimentContext)
 

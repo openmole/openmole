@@ -7,7 +7,7 @@ import org.openmole.core.project._
 import org.openmole.plugin.tool.json._
 import io.circe._
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.workflow.format.OutputFormat.{ PlainContent, SectionContent }
+import org.openmole.core.workflow.format.OutputFormat.*
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
@@ -35,13 +35,14 @@ object OMROutputFormat {
       import org.json4s.jackson.JsonMethods._
 
       output match {
-        case WritableOutput.Display(_) ⇒ implicitly[OutputFormat[CSVOutputFormat, Any]].write(executionContext)(CSVOutputFormat(), output, content, method).from(context)
+        case WritableOutput.Display(_) ⇒
+          implicitly[OutputFormat[CSVOutputFormat, Any]].write(executionContext)(CSVOutputFormat(), output, content, method).from(context)
         case WritableOutput.Store(file) ⇒
           def dataDirectory = "data"
 
           val directory = file.from(context)
 
-          def methodFormat(json: Json, fileName: String) = {
+          def methodFormat(json: Json, fileName: String) = 
             import executionContext.timeService
 
             json.deepDropNullValues.mapObject { o ⇒
@@ -65,22 +66,29 @@ object OMROutputFormat {
                 case _ ⇒ o2
               }
             }
-          }
+
 
           directory.withLockInDirectory {
 
-            content match {
-              case PlainContent(variables, name) ⇒
+            content match 
+              case PlainContent(variables) =>
+                val fileName = s"$dataDirectory/data.json.gz"
+                val dataFile = directory / dataDirectory / "data.json.gz"
 
-                val (fileName, f) =
-                  name match {
-                    case Some(n) ⇒
-                      def fromContextValue = n.stringValue.getOrElse(throw new InternalProcessingError("From context for name should have a clean string value"))
-                      (s"""$dataDirectory/${fromContextValue}.json.gz""", directory / dataDirectory / s"${n.from(context)}.json.gz")
-                    case None    ⇒ (s"$dataDirectory/data.json.gz", directory / dataDirectory / "data.json.gz")
-                  }
+                dataFile.withPrintStream(append = false, create = true, gz = true) { ps ⇒
+                  ps.print(compact(render(variablesToJValue(variables))))
+                }
 
-                f.withPrintStream(append = false, create = true, gz = true) { ps ⇒
+                val m = directory / methodFile
+
+                m.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, fileName).noSpaces))
+              case NamedContent(variables, name) ⇒
+                def fromContextValue = name.stringValue.getOrElse(throw new InternalProcessingError("From context for name should have a clean string value"))
+                  
+                val fileName = s"""$dataDirectory/${fromContextValue}.json.gz"""
+                val dataFile = directory / dataDirectory / s"${name.from(context)}.json.gz"
+                   
+                dataFile.withPrintStream(append = false, create = true, gz = true) { ps ⇒
                   ps.print(compact(render(variablesToJValue(variables))))
                 }
 
@@ -102,7 +110,6 @@ object OMROutputFormat {
 
                 val m = directory / methodFile
                 m.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, fileName).noSpaces))
-            }
           }
       }
     }

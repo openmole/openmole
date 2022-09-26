@@ -35,23 +35,23 @@ object CSVOutputFormat {
             csv.writeVariablesToCSV(ps, header, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow, margin = "  ")
         }
 
-      import OutputFormat._
-      import WritableOutput._
+      import OutputFormat.*
+      import WritableOutput.*
 
       (output, content) match {
-        case (Store(file), PlainContent(variables, name)) ⇒
-          val f =
-            name match {
-              case None       ⇒ file.from(context)
-              case Some(name) ⇒ file.from(context) / s"${name.from(context)}.csv"
-            }
-
+        case (Store(file), NamedContent(variables, name)) ⇒
+          val f = file.from(context) / s"${name.from(context)}.csv"
+          writeFile(f, variables)        
+        case (Store(file), PlainContent(variables)) ⇒
+          val f = file.from(context)
           writeFile(f, variables)
         case (Store(file), SectionContent(sections)) ⇒
           val directory = file.from(context)
           for { section ← sections } writeFile(directory / s"${section.name.from(context)}.csv", section.variables)
-        case (Display(ps), PlainContent(variables, name)) ⇒
-          writeStream(ps, name.map(_.from(context)), variables)
+        case (Display(ps), NamedContent(variables, name)) ⇒
+          writeStream(ps, Some(name.from(context)), variables)
+        case (Display(ps), PlainContent(variables)) ⇒
+          writeStream(ps, None, variables)
         case (Display(ps), SectionContent(sections)) ⇒
           for { section ← sections } writeStream(ps, Some(section.name.from(context)), section.variables)
       }

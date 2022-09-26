@@ -12,7 +12,8 @@ object OutputFormat {
 
   sealed trait OutputContent
   case class SectionContent(sections: Seq[OutputSection]) extends OutputContent
-  case class PlainContent(variables: Seq[Variable[_]], name: Option[FromContext[String]] = None) extends OutputContent
+  case class PlainContent(variables: Seq[Variable[_]]) extends OutputContent
+  case class NamedContent(variables: Seq[Variable[_]], name: FromContext[String]) extends OutputContent
 
   case class OutputSection(name: FromContext[String], variables: Seq[Variable[_]])
 }

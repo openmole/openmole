@@ -56,27 +56,19 @@ object SavePopulationHook {
 
     val state = context(evolution.stateVal)
     val generation = evolution.operations.generationLens.get(state)
+    val shouldBeSaved = frequency.map(generation % _ == 0).getOrElse(true)
 
-    def fileName =
-      (frequency.option, last) match {
-        case (_, true)                           ⇒ Some("population")
-        case (None, _)                           ⇒ Some("population${" + evolution.generationVal.name + "}")
-        case (Some(f), _) if generation % f == 0 ⇒ Some("population${" + evolution.generationVal.name + "}")
-        case _                                   ⇒ None
-      }
+    if shouldBeSaved
+    then
+      def fileName = if last then "population" else "population${" + evolution.generationVal.name + "}"
+      def saveOption = SaveOption(frequency = frequency, last = last)
+      def evolutionData = evolution.operations.metadata(state, saveOption)
 
-    fileName match {
-      case Some(fileName) ⇒
-        def saveOption = SaveOption(frequency = frequency, last = last)
-        def evolutionData = evolution.operations.metadata(state, saveOption)
+      val augmentedContext =
+        context + (evolution.generationVal -> generation)
 
-        val augmentedContext =
-          context + (evolution.generationVal -> generation)
-
-        val content = OutputFormat.PlainContent(resultVariables(evolution, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter.map(_.name)).from(augmentedContext), Some(fileName))
-        outputFormat.write(executionContext)(format, output, content, evolutionData).from(augmentedContext)
-      case None ⇒
-    }
+      val content = OutputFormat.NamedContent(resultVariables(evolution, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter.map(_.name)).from(augmentedContext), fileName)
+      outputFormat.write(executionContext)(format, output, content, evolutionData).from(augmentedContext)
 
     context
   } withValidate { outputFormat.validate(format) } set (inputs += (evolution.populationVal, evolution.stateVal))
