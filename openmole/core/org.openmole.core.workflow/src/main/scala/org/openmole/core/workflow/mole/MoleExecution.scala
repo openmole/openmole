@@ -190,7 +190,7 @@ object MoleExecution {
           subMoleExecutionState.masterCapsuleExecutor.submit {
             try {
               val savedContext = subMoleExecutionState.masterCapsuleRegistry.remove(capsule, ticket.parentOrException).getOrElse(Context.empty)
-              val runtimeTask = capsule.runtimeTask(subMoleExecutionState.moleExecution.mole, subMoleExecutionState.moleExecution.sources, subMoleExecutionState.moleExecution.hooks)
+              val runtimeTask = subMoleExecutionState.moleExecution.runtimeTask(capsule)
               val moleJob: Job = Job(runtimeTask, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, (_, _) ⇒ (), () ⇒ subMoleExecutionState.canceled)
 
               eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
@@ -229,7 +229,7 @@ object MoleExecution {
           }
 
           val newContext = subMoleExecutionState.moleExecution.implicits + sourced + context
-          val runtimeTask = capsule.runtimeTask(subMoleExecutionState.moleExecution.mole, subMoleExecutionState.moleExecution.sources, subMoleExecutionState.moleExecution.hooks)
+          val runtimeTask = subMoleExecutionState.moleExecution.runtimeTask(capsule)
           val moleJob: Job = Job(runtimeTask, newContext, jobId, JobCallBackClosure(subMoleExecutionState, capsule, ticket))
 
           eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
@@ -731,6 +731,8 @@ class MoleExecution(
   lazy val environmentForCapsule = environmentProviders.toVector.map { case (k, v) ⇒ k → environments(v) }.toMap
   lazy val defaultEnvironment = EnvironmentProvider.buildLocal(defaultEnvironmentProvider, executionContext.services)
 
+  lazy val runtimeTask = mole.capsules.map(c => c -> c.runtimeTask(mole, sources, hooks)).toMap
+              
   def allEnvironments = (environments.values ++ Seq(defaultEnvironment)).toVector.distinct
 
   lazy val rootSubMoleExecution = MoleExecution.newSubMoleExecution(None, this)
