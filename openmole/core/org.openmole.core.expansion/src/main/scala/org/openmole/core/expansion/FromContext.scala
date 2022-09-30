@@ -189,7 +189,7 @@ object FromContext extends LowPriorityFromContext {
    * @return
    */
   def value[T](t: T): FromContext[T] = FromContext[T] { _ ⇒ t } copy(stringValue = Some(t.toString))
-  def fromString(s: String): FromContext[String] = value(s)
+  def fromString(s: String): FromContext[String] = s
 
   /**
    * Parameters wrap a Context and implicit services

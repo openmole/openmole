@@ -32,10 +32,10 @@ import org.http4s.HttpRoutes
 class EvolutionAnalysisServer(services: Services) extends APIServer with EvolutionAnalysisAPI {
 
   val analyseRoute = analyse.implementedBy { p => impl.analyse(p) }
-  val generationRoute = generation.implementedBy { case(p, g, a) => impl.generation(p, g, a)}
+  //val generationRoute = generation.implementedBy { case(p, g, a) => impl.generation(p, g, a)}
 
   val routes: HttpRoutes[IO] = HttpRoutes.of(
-    routesFromEndpoints(analyseRoute, generationRoute)
+    routesFromEndpoints(analyseRoute)
   )
 
   object impl {
@@ -53,7 +53,7 @@ class EvolutionAnalysisServer(services: Services) extends APIServer with Evoluti
       }
     }
 
-    def generation(path: SafePath, generation: Option[Long], all: Boolean) = {
+    /*def generation(path: SafePath, generation: Option[Long], all: Boolean) = {
       import ServerFileSystemContext.project
       import services._
 
@@ -64,7 +64,7 @@ class EvolutionAnalysisServer(services: Services) extends APIServer with Evoluti
       catch {
         case e: Throwable ⇒ Left(ErrorData(e))
       }
-    }
+    }*/
 
   }
 

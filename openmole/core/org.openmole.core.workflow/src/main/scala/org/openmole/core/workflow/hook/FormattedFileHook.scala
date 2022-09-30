@@ -30,7 +30,7 @@ object FormattedFileHook {
       val experimentContext: Context = context + Variable(experiment, executionContext.ticket.content)
       val variables = (ps ++ Seq(experiment)).map(p ⇒ experimentContext.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p not found in hook $this")))
       val content = 
-        name match 
+        fileName match 
           case None => PlainContent(variables = variables)
           case Some(name) => NamedContent(variables = variables, name = FromContext.fromString(name))
 

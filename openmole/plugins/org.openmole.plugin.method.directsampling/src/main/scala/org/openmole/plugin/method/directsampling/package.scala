@@ -109,7 +109,8 @@ package object directsampling {
       val exclude = if (!includeSeed) Seq(dsl.method.seed) else Seq()
       val aggregation = if (dsl.method.aggregation.isEmpty) None else Some(dsl.method.aggregation.map(DirectSamplingMetadata.aggregation))
       val metadata = DirectSamplingMetadata.Replication(seed = ValData(dsl.method.seed), dsl.method.sample, aggregation)
-      Hooked(t, FormattedFileHook(output = output, values = values, exclude = exclude, format = format, metadata = metadata))
+      def fileName = if (outputFormat.appendable(format)) None else Some("experiment${" + FormattedFileHook.experiment.name + "}")
+      Hooked(t, FormattedFileHook(output = output, values = values, exclude = exclude, format = format, metadata = metadata, fileName = fileName))
     }
   }
 

@@ -12,7 +12,7 @@ trait EvolutionAnalysisAPI extends RESTAPI {
     endpoint(post(path / "evolution" / "analyse", jsonRequest[SafePath]), ok(jsonResponse[Either[ErrorData, AnalysisData.Convergence]]))
 
   //def generation(path: SafePath, generation: Option[Long] = None, all: Boolean = false): Either[ErrorData, Seq[AnalysisData.Generation]]
-  val generation: Endpoint[(SafePath, Option[Long], Boolean), Either[ErrorData, Seq[AnalysisData.Generation]]] =
-    endpoint(post(path / "evolution" / "generation", jsonRequest[(SafePath, Option[Long], Boolean)]), ok(jsonResponse[Either[ErrorData, Seq[AnalysisData.Generation]]]))
+  //val generation: Endpoint[(SafePath, Option[Long], Boolean), Either[ErrorData, Seq[AnalysisData.Generation]]] =
+  //  endpoint(post(path / "evolution" / "generation", jsonRequest[(SafePath, Option[Long], Boolean)]), ok(jsonResponse[Either[ErrorData, Seq[AnalysisData.Generation]]]))
 
 }

@@ -47,13 +47,13 @@ object Analysis {
     }
   }
 
-  def generation(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata, directory: File, generation: Option[Long] = None, all: Boolean = false)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): Seq[AnalysisData.Generation] = {
+  /*def generation(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata, directory: File, generation: Option[Long] = None, all: Boolean = false)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): Seq[AnalysisData.Generation] = {
     metaData match {
       case m: EvolutionMetadata.StochasticNSGA2 ⇒ Analysis.StochasticNSGA2.generation(omrData, m, directory, generation = generation, all = all)
       case m: EvolutionMetadata.NSGA2           ⇒ Analysis.NSGA2.generation(omrData, m, directory, generation = generation, all = all)
       case _                                    ⇒ ???
     }
-  }
+  }*/
 
   object NSGA2 {
     import AnalysisData.NSGA2._
@@ -162,13 +162,13 @@ object Analysis {
       Convergence(nadir, generationsConvergence)
     }
 
-    def generation(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata.StochasticNSGA2, directory: File, generation: Option[Long], all: Boolean)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) = {
+    /*def generation(omrData: OMROutputFormat.OMRData, metaData: EvolutionMetadata.StochasticNSGA2, directory: File, generation: Option[Long], all: Boolean)(implicit randomProvider: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService) = {
       (all, generation) match {
-        case (_, Some(g)) ⇒ Seq(loadFile(metaData, dataFile(directory, omrData.fileName, g)))
-        case (false, _)   ⇒ Seq(loadFile(metaData, dataFile(directory, omrData.fileName, metaData.generation)))
+        case (_, Some(g)) ⇒ Seq(loadFile(metaData, dataFile(directory, omrData.ithaschangedfixit, g)))
+        case (false, _)   ⇒ Seq(loadFile(metaData, dataFile(directory, omrData.ithaschangedfixit, metaData.generation)))
         case (true, _)    ⇒ allGenerations(omrData, metaData, directory)
       }
-    }
+    }*/
 
     def loadFile(metaData: EvolutionMetadata.StochasticNSGA2, f: File) = {
       val json = parse(f.content(gz = true)).right.get.asObject.get

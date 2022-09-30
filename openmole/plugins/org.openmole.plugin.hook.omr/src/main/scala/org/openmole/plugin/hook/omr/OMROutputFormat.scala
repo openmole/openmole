@@ -8,14 +8,14 @@ import org.openmole.plugin.tool.json._
 import io.circe._
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.format.OutputFormat.*
-import io.circe.generic.auto._
-import io.circe.parser._
-import io.circe.syntax._
+import io.circe.generic.auto.*
+import io.circe.parser.*
+import io.circe.syntax.*
 import org.openmole.core.project.Imports.ImportedFile
 
 object OMROutputFormat {
 
-  def methodFile = "method.omr"
+  def methodFileName = "method.omr"
 
   def methodNameField = "method"
   def dataFileField = "data"
@@ -44,13 +44,15 @@ object OMROutputFormat {
 
           val directory = file.from(context)
 
-          def methodFormat(json: Json, fileName: String) = 
+          def methodFormat(json: Json, fileName: String, existingData: Seq[String]) = 
             import executionContext.timeService
+
+            def updatedData = Json.fromValues((existingData :+ fileName).map(Json.fromString))
 
             json.deepDropNullValues.mapObject { o ⇒
               val o2 =
                 o.add(methodNameField, Json.fromString(methodData.name(method)))
-                  .add(dataFileField, Json.fromString(fileName))
+                  .add(dataFileField, updatedData)
                   .add(omrVersionField, Json.fromString(omrVersion))
                   .add(openMOLEVersionField, Json.fromString(org.openmole.core.buildinfo.version.value))
                   .add(startTime, Json.fromLong(executionContext.moleLaunchTime))
@@ -69,8 +71,22 @@ object OMROutputFormat {
               }
             }
 
+          def parseExistingData(file: File): Seq[String] = 
+            import org.json4s.DefaultReaders.*
+            try 
+              if file.exists 
+              then
+                val j = parse(file.content(gz = true)) 
+                (j \ dataFileField).getAs[Seq[String]].get
+              else Seq()
+            catch 
+             case e: Throwable => throw new InternalProcessingError(s"Error parsing existing method file ${file}", e)
+            
 
           directory.withLockInDirectory {
+            val methodFile = directory / methodFileName
+            val existingData =
+              if methodFile.exists then parseExistingData(methodFile) else Seq()
 
             content match 
               case PlainContent(variables) =>
@@ -81,22 +97,19 @@ object OMROutputFormat {
                   ps.print(compact(render(variablesToJValue(variables))))
                 }
 
-                val m = directory / methodFile
-
-                m.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, fileName).noSpaces))
+                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, fileName, existingData).noSpaces))
               case NamedContent(variables, name) ⇒
-                def fromContextValue = name.stringValue.getOrElse(throw new InternalProcessingError("From context for name should have a clean string value"))
+                //def fromContextValue = name.stringValue.getOrElse(throw new InternalProcessingError("From context for name should have a clean string value"))
                   
-                val fileName = s"""$dataDirectory/${fromContextValue}.json.gz"""
-                val dataFile = directory / dataDirectory / s"${name.from(context)}.json.gz"
+                //val fileName = s"""$dataDirectory/${fromContextValue}.json.gz"""
+                val fileName = s"$dataDirectory/${name.from(context)}.json.gz"
+                val dataFile = directory / fileName 
                    
                 dataFile.withPrintStream(append = false, create = true, gz = true) { ps ⇒
                   ps.print(compact(render(variablesToJValue(variables))))
                 }
 
-                val m = directory / methodFile
-
-                m.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, fileName).noSpaces))
+                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, fileName, existingData).noSpaces))
               case sections: SectionContent ⇒
                 def sectionContent(sections: SectionContent) =
                   JObject(
@@ -110,8 +123,7 @@ object OMROutputFormat {
                   ps.print(compact(render(sectionContent(sections))))
                 }
 
-                val m = directory / methodFile
-                m.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, fileName).noSpaces))
+                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, fileName, existingData).noSpaces))
           }
       }
     }
