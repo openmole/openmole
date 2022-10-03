@@ -22,7 +22,7 @@ import java.nio.CharBuffer
 
 import ammonite.ops._
 import org.openmole.site.tools._
-import scalatags.Text.{ TypedTag, all }
+import scalatags.Text.{TypedTag, all}
 import scalatags.Text.all._
 
 import scala.annotation.tailrec
@@ -57,25 +57,25 @@ object Site {
 
   def main(args: Array[String]): Unit = {
     case class Parameters(
-      target:   Option[File] = None,
-      test:     Boolean      = false,
-      testUrls: Boolean      = false,
-      ignored:  List[String] = Nil
-    )
+                           target: Option[File] = None,
+                           test: Boolean = false,
+                           testUrls: Boolean = false,
+                           ignored: List[String] = Nil
+                         )
 
     @tailrec def parse(args: List[String], c: Parameters = Parameters()): Parameters = args match {
-      case "--target" :: tail    ⇒ parse(tail.tail, c.copy(target = tail.headOption.map(new File(_))))
-      case "--test" :: tail      ⇒ parse(tail, c.copy(test = true))
+      case "--target" :: tail ⇒ parse(tail.tail, c.copy(target = tail.headOption.map(new File(_))))
+      case "--test" :: tail ⇒ parse(tail, c.copy(test = true))
       case "--test-urls" :: tail ⇒ parse(tail, c.copy(testUrls = true))
-      case s :: tail             ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
-      case Nil                   ⇒ c
+      case s :: tail ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
+      case Nil ⇒ c
     }
 
     val parameters = parse(args.toList.map(_.trim))
 
     val dest = parameters.target match {
       case Some(t) ⇒ t
-      case None    ⇒ throw new RuntimeException("Missing argument --target")
+      case None ⇒ throw new RuntimeException("Missing argument --target")
     }
 
     if (parameters.test) {
@@ -111,12 +111,12 @@ object Site {
             script(src := Resource.js.highlight.file),
             script("hljs.initHighlightingOnLoad();"),
 
-            script(`type` := "text/javascript", src := Resource.js.siteJS.file),
-            script(`type` := "text/javascript", src := Resource.js.depsJS.file),
+            // script(`type` := "text/javascript", src := Resource.js.depsJS.file),
 
             script(src := Resource.js.index.file),
             meta(charset := "UTF-8"),
-            piwik
+            piwik,
+            script(`type` := "text/javascript", src := Resource.js.siteJS.file)
           )
 
         /**
@@ -144,17 +144,19 @@ object Site {
             ),
             sitePage match {
               case s: IntegratedPage ⇒ Seq(s.leftMenu) ++ s.rightMenu.toSeq
-              case _                 ⇒ div()
+              case _ ⇒ div()
             },
             Footer.build,
+            //onload := "SiteJS.toto();",
+            //onload := "SiteJS.SiteJS.toto();",
             onload := onLoadString(pageTree)
           )
         }
 
         private def onLoadString(sitepage: org.openmole.site.PageTree) = {
-          def siteJS = "SiteJS"
+          def siteJS = "openmole_site"
 
-          def commonJS = s"$siteJS.main();$siteJS.loadIndex(index);"
+          def commonJS = s"$siteJS.loadIndex(index);"
 
           sitepage.page match {
             case DocumentationPages.profile      ⇒ s"$siteJS.profileAnimation();" + commonJS

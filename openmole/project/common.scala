@@ -22,7 +22,7 @@ object common {
   def boopickleVersion = "1.3.3"
   def scalaAutowireVersion = "0.3.3"
   def sourcecodeVersion = "0.3.0"
-  def scaladgetVersion = "1.9.2"
+  def scaladgetVersion = "1.9.3"
   def sortableVersion = "0.7.2"
   def json4sVersion = "4.0.5"
   def circeVersion = "0.14.3"
