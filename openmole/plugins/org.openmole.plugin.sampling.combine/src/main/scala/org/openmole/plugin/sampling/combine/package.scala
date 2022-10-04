@@ -25,7 +25,6 @@ import org.openmole.core.workflow.sampling._
 import org.openmole.plugin.domain.collection._
 import org.openmole.plugin.domain.modifier._
 import org.openmole.core.expansion._
-import cats.implicits._
 
 package object combine {
 
@@ -60,6 +59,7 @@ package object combine {
 
   implicit class TupleToZipSampling[T1, T2](ps: (Val[T1], Val[T2])) {
     def in[D](d: D)(implicit discrete: DiscreteFromContextDomain[D, (T1, T2)]) = {
+      import cats.implicits.*
       val d1 = discrete(d).domain.map(_.map(_._1))
       val d2 = discrete(d).domain.map(_.map(_._2))
       ZipSampling(ps._1 in d1, ps._2 in d2)

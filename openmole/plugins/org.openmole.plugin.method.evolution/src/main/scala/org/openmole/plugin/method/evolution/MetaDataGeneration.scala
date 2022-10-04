@@ -10,7 +10,7 @@ import io.circe.generic.semiauto._
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.tools.io.Prettifier._
 import Genome.GenomeBound
-import org.openmole.plugin.hook.omr.MethodData
+import org.openmole.plugin.hook.omr.*
 import org.openmole.tool.types.TypeTool
 
 object MetadataGeneration {

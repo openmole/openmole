@@ -32,7 +32,7 @@ package object directsampling {
   object DirectSamplingMetadata {
     def method = "direct sampling"
 
-    implicit def methodData: MethodData[DirectSamplingMetadata] = MethodData[DirectSamplingMetadata](_ ⇒ DirectSamplingMetadata.method)
+    given MethodData[DirectSamplingMetadata] = MethodData[DirectSamplingMetadata](_ ⇒ DirectSamplingMetadata.method)
 
     case class DirectSampling(sampled: Seq[ValData], aggregation: Option[Seq[Aggregation]], output: Seq[ValData]) extends DirectSamplingMetadata
     case class Replication(seed: ValData, sample: Int, aggregation: Option[Seq[Aggregation]]) extends DirectSamplingMetadata

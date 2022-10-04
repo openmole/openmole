@@ -18,20 +18,36 @@ package org.openmole.plugin.method.sensitivity
  */
 
 import org.openmole.core.dsl
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import org.openmole.plugin.sampling.lhs.LHS
 import org.openmole.plugin.sampling.quasirandom.SobolSampling
 import org.openmole.plugin.tool.pattern.MapReduce
+import org.openmole.plugin.tool.methoddata.*
 
 object SensitivitySaltelli {
+
+  def methodName = "saltelli"
 
   def firstOrder(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("firstOrder", output.name))
   def totalOrder(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("totalOrder", output.name))
 
+  object MetaData:
+    given MethodData[MetaData] = MethodData(_ => SensitivitySaltelli.methodName)
+    def apply(method: Method) =
+      new MetaData(
+        inputs = method.inputs.map(_.prototype).map(ValData.apply),
+        outputs = method.outputs.map(ValData.apply)
+      )
+
+  case class MetaData(
+    inputs: Seq[ValData],
+    outputs: Seq[ValData]
+  )
+
   case class Method(inputs: Seq[ScalableValue], outputs: Seq[Val[_]])
 
-  implicit def method: ExplorationMethod[SensitivitySaltelli, Method] = p => {
+  given ExplorationMethod[SensitivitySaltelli, Method] = p => {
     implicit def defScope: DefinitionScope = p.scope
 
     val sampling = SaltelliSampling(p.sample, p.inputs: _*)
@@ -185,7 +201,7 @@ object SensitivitySaltelli {
 
   object SaltelliHook {
 
-    def apply[F](method: Method, output: WritableOutput, format: F = CSVOutputFormat())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, Method]) =
+    def apply[F](method: Method, output: WritableOutput, format: F = CSVOutputFormat())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, MetaData]) =
       Hook("SaltelliHook") { p ⇒
         import p._
         import WritableOutput._
@@ -200,7 +216,7 @@ object SensitivitySaltelli {
             OutputSection("totalOrderIndices", Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.totalOrder(_, _)).from(context))
           )
 
-        outputFormat.write(executionContext)(format, output, sections, method).from(context)
+        outputFormat.write(executionContext)(format, output, sections, MetaData(method)).from(context)
 
         context
       }

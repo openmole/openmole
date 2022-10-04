@@ -10,8 +10,8 @@ object EvolutionMetadata {
   import io.circe.parser._
   import io.circe.generic.auto._
   import io.circe.`export`.Exported
-  import org.openmole.plugin.hook.omr._
-  import org.openmole.plugin.tool.methoddata._
+  import org.openmole.plugin.hook.omr.*
+  import org.openmole.plugin.tool.methoddata.*
 
   given MethodData[EvolutionMetadata] = MethodData[EvolutionMetadata](_ ⇒ EvolutionMetadata.method)
   given Exported[Decoder[EvolutionMetadata]] = io.circe.generic.auto.deriveDecoder[EvolutionMetadata]

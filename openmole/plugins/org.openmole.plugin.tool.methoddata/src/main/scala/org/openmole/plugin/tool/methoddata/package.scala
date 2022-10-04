@@ -1,4 +1,4 @@
-package org.openmole.plugin.tool
+package org.openmole.plugin.tool.methoddata
 
 /*
  * Copyright (C) 2021 Romain Reuillon
@@ -17,15 +17,13 @@ package org.openmole.plugin.tool
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 
-package object methoddata {
-
-  object ValData {
-    def apply[T](v: Val[T]) = new ValData(v.name, ValType.toTypeString(v.`type`))
-  }
-
-  case class ValData(name: String, `type`: String)
-
+object ValData {
+  def apply[T](v: Val[T]) = new ValData(v.name, ValType.toTypeString(v.`type`))
 }
+
+case class ValData(name: String, `type`: String)
+
+export io.circe.generic.auto.*

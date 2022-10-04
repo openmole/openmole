@@ -267,7 +267,7 @@ object NSGA2Evolution {
 
   import org.openmole.core.dsl.DSL
 
-  implicit def method: ExplorationMethod[NSGA2Evolution, EvolutionWorkflow] =
+  given ExplorationMethod[NSGA2Evolution, EvolutionWorkflow] =
     p ⇒
       EvolutionPattern.build(
         algorithm =
@@ -287,7 +287,7 @@ object NSGA2Evolution {
         scope = p.scope
       )
 
-  implicit def patternContainer: ExplorationMethodSetter[NSGA2Evolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
+  given ExplorationMethodSetter[NSGA2Evolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
 
 }
 

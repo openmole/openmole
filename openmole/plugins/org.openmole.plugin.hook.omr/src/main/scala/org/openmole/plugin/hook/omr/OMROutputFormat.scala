@@ -12,6 +12,7 @@ import io.circe.generic.auto.*
 import io.circe.parser.*
 import io.circe.syntax.*
 import org.openmole.core.project.Imports.ImportedFile
+import org.openmole.plugin.tool.methoddata.*
 
 object OMROutputFormat {
 
@@ -44,10 +45,10 @@ object OMROutputFormat {
 
           val directory = file.from(context)
 
-          def methodFormat(json: Json, fileName: String, existingData: Seq[String]) = 
+          def methodFormat(json: Json, fileName: Seq[String], existingData: Seq[String]) = 
             import executionContext.timeService
 
-            def updatedData = Json.fromValues((existingData :+ fileName).map(Json.fromString))
+            def updatedData = Json.fromValues((existingData ++ fileName).map(Json.fromString))
 
             json.deepDropNullValues.mapObject { o ⇒
               val o2 =
@@ -85,8 +86,6 @@ object OMROutputFormat {
 
           directory.withLockInDirectory {
             val methodFile = directory / methodFileName
-            val existingData =
-              if methodFile.exists then parseExistingData(methodFile) else Seq()
 
             content match 
               case PlainContent(variables) =>
@@ -97,11 +96,10 @@ object OMROutputFormat {
                   ps.print(compact(render(variablesToJValue(variables))))
                 }
 
-                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, fileName, existingData).noSpaces))
+                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, Seq(fileName), Seq()).noSpaces))
               case NamedContent(variables, name) ⇒
-                //def fromContextValue = name.stringValue.getOrElse(throw new InternalProcessingError("From context for name should have a clean string value"))
-                  
-                //val fileName = s"""$dataDirectory/${fromContextValue}.json.gz"""
+                def existingData = if methodFile.exists then parseExistingData(methodFile) else Seq()
+
                 val fileName = s"$dataDirectory/${name.from(context)}.json.gz"
                 val dataFile = directory / fileName 
                    
@@ -109,21 +107,24 @@ object OMROutputFormat {
                   ps.print(compact(render(variablesToJValue(variables))))
                 }
 
-                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, fileName, existingData).noSpaces))
+                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, Seq(fileName), existingData).noSpaces))
               case sections: SectionContent ⇒
-                def sectionContent(sections: SectionContent) =
-                  JObject(
-                    sections.sections.map { section ⇒ section.name.from(context) -> variablesToJValue(section.variables) }.toList
-                  )
+                val sectionContent =
+                  for section <- sections.sections 
+                  yield
+                    val fileName = s"$dataDirectory/${section.name.from(context)}.json.gz"
+                    val content = variablesToJValue(section.variables) 
+                    (fileName, content)
+              
+                for 
+                  (fileName, content) <- sectionContent
+                do 
+                  val f = directory / fileName
+                  f.withPrintStream(append = false, create = true, gz = true) { ps ⇒
+                    ps.print(compact(render(content)))
+                  }
 
-                val fileName = s"$dataDirectory/data.json.gz"
-                val f = directory / fileName
-
-                f.withPrintStream(append = false, create = true, gz = true) { ps ⇒
-                  ps.print(compact(render(sectionContent(sections))))
-                }
-
-                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, fileName, existingData).noSpaces))
+                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, sectionContent.map(_._1), Seq()).noSpaces))
           }
       }
     }

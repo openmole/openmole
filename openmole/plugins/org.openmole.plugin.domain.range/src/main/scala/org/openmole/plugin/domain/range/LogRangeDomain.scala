@@ -19,9 +19,6 @@ package org.openmole.plugin.domain.range
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import cats._
-import cats.implicits._
-import cats.syntax._
 import org.openmole.core.workflow.domain
 
 object LogRangeDomain {
@@ -58,20 +55,24 @@ sealed class LogRangeDomain[T](val range: RangeDomain[T], val steps: FromContext
 
   import range._
 
-  def iterator = (min, max, steps) mapN { (min, max, steps) ⇒
-    val logMin: T = lg.log(min)
-    val logMax: T = lg.log(max)
+  def iterator = FromContext { p =>
+    import p.*
+    
+    val logMin: T = lg.log(range.min.from(context))
+    val logMax: T = lg.log(range.max.from(context))
+
+    val stepsValue = steps.from(context)
 
     import ops._
 
-    val logStep = (logMax - logMin) / (fromInt(steps - 1))
-    Iterator.iterate(logMin)(_ + logStep).map(lg.exp).take(steps)
+    val logStep = (logMax - logMin) / (fromInt(stepsValue - 1))
+    Iterator.iterate(logMin)(_ + logStep).map(lg.exp).take(stepsValue)
   }
 
   def max = range.max
   def min = range.min
 
-  def inputs = range.inputs ++ range.inputs ++ steps.inputs
+  def inputs = range.inputs ++ steps.inputs
   def validate = range.validate ++ steps.validate
 
 }

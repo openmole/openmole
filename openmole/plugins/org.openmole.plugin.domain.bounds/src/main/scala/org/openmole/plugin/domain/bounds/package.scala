@@ -1,9 +1,10 @@
 package org.openmole.plugin.domain
 
-import org.openmole.core.expansion._
-import org.openmole.core.workflow.domain._
-import org.openmole.tool.types._
-import cats.implicits._
+import org.openmole.core.expansion.*
+import org.openmole.core.workflow.domain.*
+import org.openmole.tool.types.*
+
+import cats.implicits.*
 
 package object bounds {
 

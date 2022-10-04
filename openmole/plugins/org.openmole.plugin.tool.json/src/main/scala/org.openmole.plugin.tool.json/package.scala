@@ -9,9 +9,9 @@ package object json:
   org.json4s.jackson.JsonMethods.mapper.enable(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS)
 
   def variablesToJValue(variables: Seq[Variable[_]]) =
-    JObject(variables.toList.map { v ⇒ v.name -> toJSONValue(v.value) })
+    JObject(variables.toList.map { v ⇒ v.name -> toJSONValue(v.value, Some(v)) })
 
-  def toJSONValue(v: Any): org.json4s.JValue = {
+  def toJSONValue(v: Any, variable: Option[Variable[_]] = None): org.json4s.JValue = {
     import org.json4s._
 
     v match {
@@ -21,10 +21,13 @@ package object json:
       case v: Float        ⇒ JDouble(v)
       case v: Double       ⇒ JDouble(v)
       case v: Boolean      ⇒ JBool(v)
-      case v: Array[_]     ⇒ JArray(v.map(toJSONValue).toList)
+      case v: Array[_]     ⇒ JArray(v.map(v => toJSONValue(v, variable)).toList)
       case v: java.io.File ⇒ JString(v.getAbsolutePath)
-      case v: Seq[_]       ⇒ JArray(v.map(toJSONValue).toList)
-      case _               ⇒ throw new UserBadDataError(s"Value $v of type ${v.getClass} is not convertible to JSON")
+      case v: Seq[_]       ⇒ JArray(v.map(v => toJSONValue(v, variable)).toList)
+      case _               ⇒ 
+        variable match 
+          case Some(variable) => throw new UserBadDataError(s"Value $v of type ${v.getClass} from variable $variable is not convertible to JSON")
+          case None => throw new UserBadDataError(s"Value $v of type ${v.getClass} is not convertible to JSON")
     }
   }
 

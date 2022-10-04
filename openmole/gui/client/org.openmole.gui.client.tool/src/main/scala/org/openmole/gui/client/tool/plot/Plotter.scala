@@ -4,7 +4,7 @@ import org.openmole.gui.ext.data.{ SequenceData, SequenceHeader }
 import Plot._
 import org.openmole.gui.client.tool.plot
 import scaladget.bootstrapnative.bsn._
-import scaladget.bootstrapnative.{ Table, DataTable }
+import scaladget.bootstrapnative.{ Table }
 import com.raquo.laminar.api.L._
 
 case class IndexedAxis(title: String, fullSequenceIndex: Int)

@@ -194,11 +194,9 @@ case class TaskNode(task: Task, strain: Boolean = false, funnel: Boolean = false
 object TransitionOrigin {
 
   def tasks(d: TransitionOrigin) =
-    d match {
+    d match 
       case TaskOrigin(n)          ⇒ Vector(n)
       case TransitionDSLOrigin(o) ⇒ DSL.tasks(o)
-      case _                      ⇒ Vector.empty
-    }
 
   def dsl(o: TransitionOrigin) =
     o match {
@@ -225,11 +223,9 @@ case class TransitionDSLOrigin(t: DSL) extends TransitionOrigin
 object TransitionDestination {
 
   def tasks(d: TransitionDestination) =
-    d match {
+    d match
       case TaskDestination(n)          ⇒ Vector(n)
       case TransitionDSLDestination(t) ⇒ DSL.tasks(t)
-      case _                           ⇒ Vector.empty
-    }
 
   def dsl(o: TransitionDestination) =
     o match {

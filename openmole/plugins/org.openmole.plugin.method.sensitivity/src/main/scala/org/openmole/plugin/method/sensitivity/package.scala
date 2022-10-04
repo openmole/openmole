@@ -50,19 +50,20 @@ package object sensitivity {
      */
     def toValDouble(v: Val[_]): Val[Double] = v match {
       case Val.caseDouble(vd) ⇒ vd
-      case _                  ⇒ throw new IllegalArgumentException("expect inputs to be of type Double, but received " + v)
+      case _                  ⇒ throw new IllegalArgumentException("expect inputs of type Double, but received " + v)
     }
 
-    def variableResults[F, D](inputs: Seq[Val[_]], outputs: Seq[Val[_]], coefficient: (Val[_], Val[_]) ⇒ Val[_])(implicit outputFormat: OutputFormat[F, D]) = FromContext { p ⇒
+    def variableResults(inputs: Seq[Val[_]], outputs: Seq[Val[_]], coefficient: (Val[_], Val[_]) ⇒ Val[_]) = FromContext { p ⇒
       import p._
 
-      def results = outputs.map { o ⇒
-        val vs = inputs.map { i ⇒ coefficient(i, o) }
-        Seq(o.name) ++ vs.map(v ⇒ context(v))
-      }
+      def results = 
+        outputs.map { o ⇒
+          val vs = inputs.map { i ⇒ coefficient(i, o) }
+          Seq(o.name) ++ vs.map(v ⇒ context(v))
+        }
 
       def allVals = Seq(Val[String]("output")) ++ inputs
-      (results.transpose zip allVals).map { case (value, v) ⇒ Variable.unsecure(v.array, value) }
+      (results.transpose(using identity) zip allVals).map { (value, v) ⇒ Variable.unsecure(v.array, value) }
     }
 
   }
@@ -84,7 +85,7 @@ package object sensitivity {
    * @param dsl
    */
   implicit class SaltelliHookDecorator[M](m: M)(implicit method: ExplorationMethod[M, SensitivitySaltelli.Method]) extends MethodHookDecorator[M, SensitivitySaltelli.Method](m) {
-    def hook[F](output: WritableOutput, format: F = CSVOutputFormat(unrollArray = true))(implicit outputFormat: OutputFormat[F, SensitivitySaltelli.Method]): Hooked[M] = {
+    def hook[F](output: WritableOutput, format: F = CSVOutputFormat(unrollArray = true))(implicit outputFormat: OutputFormat[F, SensitivitySaltelli.MetaData]): Hooked[M] = {
       val dsl = method(m)
       implicit val defScope = dsl.scope
       Hooked(m, SensitivitySaltelli.SaltelliHook(dsl.method, output, format))

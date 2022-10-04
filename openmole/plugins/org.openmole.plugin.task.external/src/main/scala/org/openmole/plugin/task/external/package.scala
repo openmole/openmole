@@ -78,7 +78,7 @@ package object external extends ExternalPackage {
 
   object EnvironmentVariable {
     implicit def fromTuple[N, V](tuple: (N, V))(implicit toFromContextN: ToFromContext[N, String], toFromContextV: ToFromContext[V, String]): EnvironmentVariable =
-      EnvironmentVariable(toFromContextN(tuple._1), toFromContextV(tuple._2))
+      EnvironmentVariable(toFromContextN.convert(tuple._1), toFromContextV.convert(tuple._2))
 
   }
 

@@ -19,8 +19,6 @@ import org.openmole.core.context.{Val, Variable}
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import cats.implicits.*
-
 /**
  * The parameter is a variable which is injected in the data flow during the
  * workflow execution just before the beginning of a task execution. It can be

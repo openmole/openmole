@@ -1,4 +1,4 @@
-package org.openmole.plugin.hook.omr
+package org.openmole.plugin.tool.methoddata
 
 import io.circe.*
 
@@ -13,3 +13,4 @@ trait MethodData[T] {
   def name(t: T): String
   def encoder: Encoder[T]
 }
+
