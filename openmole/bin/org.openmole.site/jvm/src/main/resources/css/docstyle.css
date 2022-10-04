@@ -464,3 +464,10 @@ code,
 .doc-br {
     margin-bottom: 20px;
 }
+
+.searchInput{
+    background-color: #3f3d56;
+    color: white;
+    max-height: 300px;
+    min-height:50px;
+}

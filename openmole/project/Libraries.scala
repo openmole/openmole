@@ -9,7 +9,7 @@ import openmole.common._
 object Libraries {
 
   lazy val bootstrapnative = libraryDependencies += "org.openmole.scaladget" %%% "bootstrapnative" % scaladgetVersion
-  //lazy val lunr = libraryDependencies += "org.openmole.scaladget" %%% "lunr" % scaladgetVersion
+  lazy val lunr = libraryDependencies += "org.openmole.scaladget" %%% "lunr" % scaladgetVersion
 
 //  lazy val sortable = libraryDependencies += "org.openmole" %%% "sortable-js-facade" % sortableVersion
   lazy val ace = libraryDependencies += "org.openmole.scaladget" %%% "ace" % scaladgetVersion

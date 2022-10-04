@@ -50,6 +50,7 @@ object Menu {
   //    case _ ⇒ div
   //  }
 
+  import scalatags.generic._
   def build(sitePage: SitePage) = {
     div(cls := "container")(
       bannerSpace,
@@ -73,11 +74,10 @@ object Menu {
               li(tools.outerLink("Demo", shared.link.demo), liStyle),
               li(tools.innerLink(DocumentationPages.download, "Download"), liStyle),
               li(tools.innerLink(DocumentationPages.OMcommunity, "Community"), liStyle),
-              li(marginTop := -8, inputStyle)(img(id := shared.searchImg, src := Resource.img.menu.search.file, Seq(width := 35, paddingTop := 5, paddingLeft := 10, tools.pointer)))(
-                div(id := shared.searchDiv)
-              )
+              li(marginTop := -8, inputStyle)(img(id := shared.searchImg, src := Resource.img.menu.search.file, Seq(width := 35, paddingTop := 5, paddingLeft := 10, tools.pointer)))
             )
-          )
+          ),
+          div(id := shared.searchDiv)
         )
       )
     )
