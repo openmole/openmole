@@ -26,11 +26,30 @@ object Plugins extends JavaLogger {
   }
 
   def gatherJSIRFiles(dest: File) = {
+    import scala.jdk.CollectionConverters.*
+
     def bundles =
       PluginManager.bundles.filter { b ⇒
         !b.openMOLEScope.exists(_.toLowerCase == "gui-provided")
       }
 
+    for 
+      b ← bundles
+    do 
+      val jar = new java.util.jar.JarFile(b.file)
+      try 
+        for 
+          entry <- jar.entries().asScala
+          if entry.getName().endsWith(".sjsir")
+        do
+          val destFile = dest / entry.getName()
+          destFile.getParentFile.mkdirs()
+          val is = jar.getInputStream(entry)
+          try is.copy(destFile, replace = true)
+          finally is.close
+      finally jar.close()
+
+  /* This code does'nt copy the java.* jsir for some classloader reasons
     for {
       b ← bundles
       jsir ← Option(b.findEntries("/", "*.sjsir", true)).map(_.asScala).getOrElse(Seq.empty)
@@ -38,11 +57,13 @@ object Plugins extends JavaLogger {
       val destFile = dest / jsir.getPath
       destFile.getParentFile.mkdirs()
 
+      println(b.file)
+
       b.classLoader.getResourceAsStream(jsir.getPath) match {
-        case null =>
+        case null => 
         case s => s copy destFile
       }
-    }
+    }*/
   }
 
   def openmoleFile(optimizedJS: Boolean)(implicit workspace: Workspace, newFile: TmpDirectory, fileService: FileService) = {

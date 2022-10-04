@@ -54,7 +54,7 @@ package object pluginmanager {
         else noProtocol
       }
 
-      val decodedLocation = URLDecoder.decode(location, "UTF-8")
+      val decodedLocation = location //URLDecoder.decode(location, "UTF-8")
 
       if (ref)
         openMOLELocationOption match {
