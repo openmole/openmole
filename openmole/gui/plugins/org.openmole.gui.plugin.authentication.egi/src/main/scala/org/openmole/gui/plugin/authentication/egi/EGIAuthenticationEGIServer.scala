@@ -29,7 +29,7 @@ import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.server.*
 
 object EGIAuthenticationAPIServer {
-  val voTest = PreferenceLocation[Seq[String]]("AuthenicationPanel", "voTest", Some(Seq[String]()))
+  val voTest = PreferenceLocation[Seq[String]]("AuthenticationPanel", "voTest", Some(Seq[String]()))
 }
 
 class EGIAuthenticationEGIServer(s: Services)

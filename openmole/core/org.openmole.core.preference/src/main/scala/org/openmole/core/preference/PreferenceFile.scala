@@ -17,17 +17,18 @@
  */
 package org.openmole.core.preference
 
-import java.util.concurrent.locks._
+import java.util.concurrent.locks.*
+import org.openmole.tool.file.*
+import org.apache.commons.configuration2.*
+import org.apache.commons.configuration2.builder.*
+import org.apache.commons.configuration2.builder.fluent.*
+import org.openmole.tool.types.*
+import org.openmole.tool.thread.*
+import org.openmole.tool.lock.*
+import squants.*
+import squants.information.*
 
-import org.openmole.tool.file._
-import org.apache.commons.configuration2._
-import org.apache.commons.configuration2.builder._
-import org.apache.commons.configuration2.builder.fluent._
-import org.openmole.tool.types._
-import org.openmole.tool.thread._
-import org.openmole.tool.lock._
-import squants._
-import squants.information._
+import java.io.StringWriter
 
 
 object ConfigurationFile {
@@ -73,52 +74,61 @@ class ConfigurationFile private (val file: File) {
 
 object ConfigurationString {
 
-  implicit def stringConfigurationString: ConfigurationString[String] =
+  given ConfigurationString[String] =
     new ConfigurationString[String] {
       def toString(t: String): String = t
       def fromString(s: String) = implicitly[FromString[String]].apply(s)
     }
 
-  implicit def booleanConfigurationString: ConfigurationString[Boolean] =
+  given ConfigurationString[Boolean] =
     new ConfigurationString[Boolean] {
       def toString(t: Boolean): String = t.toString
       def fromString(s: String) = implicitly[FromString[Boolean]].apply(s)
     }
 
-  implicit def intConfigurationString: ConfigurationString[Int] =
+  given ConfigurationString[Int] =
     new ConfigurationString[Int] {
       override def toString(t: Int): String = t.toString
       override def fromString(s: String) = implicitly[FromString[Int]].apply(s)
     }
 
-  implicit def LongConfigurationString: ConfigurationString[Long] =
+  given ConfigurationString[Long] =
     new ConfigurationString[Long] {
       override def toString(t: Long): String = t.toString
       override def fromString(s: String) = implicitly[FromString[Long]].apply(s)
     }
 
-  implicit def timeConfigurationString: ConfigurationString[Time] =
+  given ConfigurationString[Time] =
     new ConfigurationString[Time] {
       override def toString(t: Time): String = t.toString
       override def fromString(s: String) = implicitly[FromString[Time]].apply(s)
     }
 
-  implicit def informationConfigurationString: ConfigurationString[Information] =
+  given ConfigurationString[Information] =
     new ConfigurationString[Information] {
       override def toString(i: Information): String = i.toString
       override def fromString(s: String) = implicitly[FromString[Information]].apply(s)
     }
 
-  implicit def doubleConfigurationString: ConfigurationString[Double] =
+  given ConfigurationString[Double] =
     new ConfigurationString[Double] {
       def toString(t: Double): String = t.toString
       def fromString(s: String) = implicitly[FromString[Double]].apply(s)
     }
 
-  implicit def seqConfiguration[T](implicit cs: ConfigurationString[T]): ConfigurationString[Seq[T]] = new ConfigurationString[Seq[T]] {
-    override def toString(t: Seq[T]): String = t.map(cs.toString).mkString(",")
-    override def fromString(s: String): Seq[T] = s.split(",").toSeq.map(cs.fromString)
-  }
+  given [T](using cs: ConfigurationString[T]): ConfigurationString[Seq[T]] = new ConfigurationString[Seq[T]]:
+    import au.com.bytecode.opencsv.{CSVParser, CSVWriter}
+
+    override def toString(t: Seq[T]): String =
+      val writer = new StringWriter()
+      val csvWriter = new CSVWriter(writer, CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER, "")
+      csvWriter.writeNext(t.map(cs.toString).toArray)
+      csvWriter.flush()
+      writer.toString
+
+    override def fromString(s: String): Seq[T] =
+      val parser = new CSVParser()
+      parser.parseLine(s).toSeq.map(cs.fromString)
 
 }
 

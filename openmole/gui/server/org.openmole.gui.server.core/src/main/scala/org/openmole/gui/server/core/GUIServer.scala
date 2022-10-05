@@ -75,7 +75,7 @@ object GUIServer {
 
   lazy val port = PreferenceLocation("GUIServer", "Port", Some(Network.freePort))
 
-  lazy val plugins = PreferenceLocation[String]("GUIServer", "Plugins", None)
+  lazy val plugins = PreferenceLocation[Seq[String]]("GUIServer", "Plugins", None)
 
   def initialisePreference(preference: Preference) = {
     if (!preference.isSet(port)) preference.setPreference(port, Network.freePort)

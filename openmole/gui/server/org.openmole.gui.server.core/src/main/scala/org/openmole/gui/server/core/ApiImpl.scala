@@ -567,13 +567,12 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     module.addPluginsFiles(recurse(file), false, module.moduleDirectory)
   }
 
+
   private def pluggedList = {
     import services._
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
-    if (!preference.isSet(GUIServer.plugins)) preference.setPreference(GUIServer.plugins, "")
-
-    val currentPlugins = Services.preference(workspace)(GUIServer.plugins).split(";").filterNot(_.isEmpty)
+    val currentPlugins = Services.preference(workspace)(GUIServer.plugins)
     val currentPluginsSafePath = currentPlugins.map { s ⇒ SafePath(s.split("/")) }
 
     currentPluginsSafePath.map { csp ⇒
@@ -587,14 +586,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     utils.isPlugged(safePathToFile(safePath), pluggedList)(workspace)
   }
 
-  private def updatePluggedList(set: Array[Plugin] ⇒ Array[Plugin]): Unit = {
+  private def updatePluggedList(set: Seq[Plugin] ⇒ Seq[Plugin]): Unit = {
     import services._
-    Services.preference(workspace).setPreference(
-      GUIServer.plugins,
-      set(pluggedList).map {
-        _.projectSafePath.path.mkString("/")
-      }.reduceOption((x, y) ⇒ x + ";" + y).getOrElse("")
-    )
+    Services.preference(workspace).setPreference(GUIServer.plugins, set(pluggedList).map(_.projectSafePath.path.mkString("/")))
   }
 
   private def addPlugin(safePath: SafePath): Seq[ErrorData] = {
