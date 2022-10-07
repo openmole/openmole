@@ -63,7 +63,12 @@ def scala2Settings =
       ExclusionRule("com.lihaoyi", "sourcecode_3"),
       ExclusionRule("org.scala-lang.modules", "scala-parallel-collections_2.13"),
       ExclusionRule("org.typelevel", "cats-kernel_2.13"),
-      ExclusionRule("org.typelevel", "cats-core_2.13")
+      ExclusionRule("org.typelevel", "cats-core_2.13"),
+      ExclusionRule("io.circe", "circe-parser_2.13"),
+      ExclusionRule("io.circe", "circe-core_2.13"),
+      ExclusionRule("io.circe", "circe-jawn_2.13"),
+      ExclusionRule("io.circe", "circe-generic_2.13"),
+      ExclusionRule("io.circe", "circe-number_2.13"),
       //ExclusionRule("org.scala-lang.modules", "scala-xml_3")
     )
   )
@@ -277,7 +282,9 @@ lazy val preference = OsgiProject(coreDir, "org.openmole.core.preference", impor
 lazy val workspace = OsgiProject(coreDir, "org.openmole.core.workspace", imports = Seq("*")) dependsOn
   (exception, event, tools, openmoleCrypto) settings (coreSettings: _*)
 
-lazy val authentication = OsgiProject(coreDir, "org.openmole.core.authentication", imports = Seq("*")) dependsOn(workspace, serializer) settings (coreSettings: _*)
+lazy val authentication = OsgiProject(coreDir, "org.openmole.core.authentication", imports = Seq("*")) dependsOn(workspace) settings (coreSettings) settings (
+  libraryDependencies += Libraries.circe
+)
 
 lazy val services = OsgiProject(coreDir, "org.openmole.core.services", imports = Seq("*")) dependsOn(workspace, serializer, preference, fileService, networkService, threadProvider, replication, authentication, openmoleOutputRedirection, timeService) settings (coreSettings: _*)
 
@@ -424,7 +431,9 @@ lazy val netLogo6API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo6
 lazy val pattern = OsgiProject(pluginDir, "org.openmole.plugin.tool.pattern", imports = Seq("*")) dependsOn(exception, openmoleDSL) settings (toolsSettings: _*) settings (defaultActivator)
 
 lazy val json = OsgiProject(pluginDir, "org.openmole.plugin.tool.json", imports = Seq("*")) dependsOn(exception, openmoleDSL) settings (toolsSettings: _*) settings (
-  libraryDependencies += Libraries.json4s)
+  libraryDependencies += Libraries.json4s,
+  libraryDependencies += Libraries.circe
+)
 
 
 lazy val methodData = OsgiProject(pluginDir, "org.openmole.plugin.tool.methoddata", imports = Seq("*")) settings(
@@ -477,7 +486,7 @@ lazy val oar = OsgiProject(pluginDir, "org.openmole.plugin.environment.oar", imp
   (libraryDependencies += Libraries.gridscaleOAR) settings (pluginSettings: _*)
 
 
-lazy val egi = OsgiProject(pluginDir, "org.openmole.plugin.environment.egi") dependsOn(openmoleDSL, batch, workspace, fileService, gridscale) settings(
+lazy val egi = OsgiProject(pluginDir, "org.openmole.plugin.environment.egi") dependsOn(openmoleDSL, batch, workspace, fileService, gridscale, json) settings(
   libraryDependencies ++= Libraries.gridscaleEGI, Libraries.addScalaLang) settings (pluginSettings: _*)
 
 lazy val gridscale = OsgiProject(pluginDir, "org.openmole.plugin.environment.gridscale", imports = Seq("*")) settings (
@@ -495,7 +504,7 @@ lazy val condor = OsgiProject(pluginDir, "org.openmole.plugin.environment.condor
 lazy val slurm = OsgiProject(pluginDir, "org.openmole.plugin.environment.slurm", imports = Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh) settings
   (libraryDependencies += Libraries.gridscaleSLURM) settings (pluginSettings: _*)
 
-lazy val ssh = OsgiProject(pluginDir, "org.openmole.plugin.environment.ssh", imports = Seq("*")) dependsOn(openmoleDSL, event, batch, gridscale) settings
+lazy val ssh = OsgiProject(pluginDir, "org.openmole.plugin.environment.ssh", imports = Seq("*")) dependsOn(openmoleDSL, event, batch, gridscale, json) settings
   (libraryDependencies ++= Libraries.gridscaleSSH) settings (pluginSettings: _*)
 
 lazy val dispatch = OsgiProject(pluginDir, "org.openmole.plugin.environment.dispatch", imports = Seq("*")) dependsOn(openmoleDSL, event, batch, gridscale) settings (pluginSettings: _*)
@@ -1081,7 +1090,7 @@ lazy val siteJVM = site.jvm dependsOn(tools, project, serializer, openmoleBuildI
   //libraryDependencies ~= _.map(_ excludeAll (ExclusionRule(organization = "com.lihaoyi", name = "sourcecode_2.13"))),
 ) settings (
   scala2Settings
-  )
+)
 
 lazy val cloneMarket = taskKey[Unit]("cloning market place")
 lazy val defineMarketBranch = taskKey[Option[String]]("define market place branch")

@@ -6,6 +6,13 @@ import org.openmole.core.exception.UserBadDataError
 
 package object json:
 
+  import io.circe.*
+
+  given Encoder[java.io.File] = f => Json.fromString(f.getAbsolutePath)
+
+  given Decoder[java.io.File] = j => j.as[String].map(new java.io.File(_))
+
+
   org.json4s.jackson.JsonMethods.mapper.enable(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS)
 
   def variablesToJValue(variables: Seq[Variable[_]]) =
@@ -119,3 +126,4 @@ package object json:
     }
 
   }
+  

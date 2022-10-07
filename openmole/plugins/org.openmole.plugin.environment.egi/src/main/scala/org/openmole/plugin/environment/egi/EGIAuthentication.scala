@@ -37,6 +37,9 @@ import org.openmole.core.preference._
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.tar.TarInputStream
 
+import io.circe.generic.auto.*
+import org.openmole.plugin.tool.json.given
+
 object EGIAuthentication extends JavaLogger {
 
   import Log._
@@ -94,15 +97,13 @@ object EGIAuthentication extends JavaLogger {
   def getVMOSOrError(vo: String)(implicit workspace: Workspace, preference: Preference) =
     getVOMS(vo).getOrElse(throw new UserBadDataError(s"No ID card for VO $vo found on VO portal."))
 
-  def update(a: EGIAuthentication, test: Boolean = true)(implicit cypher: Cypher, workspace: Workspace, authenticationStore: AuthenticationStore, serializerService: SerializerService) = {
+  def update(a: EGIAuthentication, test: Boolean = true)(implicit cypher: Cypher, workspace: Workspace, authenticationStore: AuthenticationStore) = {
     if (test) testPassword(a).get
-    Authentication.set(a)
+    Authentication.save[EGIAuthentication](a, (_, _) => true)
   }
 
   def apply()(implicit workspace: Workspace, authenticationStore: AuthenticationStore, serializerService: SerializerService) =
-    Authentication.allByCategory.
-      getOrElse(classOf[EGIAuthentication].getName, Seq.empty).
-      map(_.asInstanceOf[EGIAuthentication]).headOption
+    Authentication.load[EGIAuthentication].headOption
 
   def clear(implicit workspace: Workspace, authenticationStore: AuthenticationStore) =
     Authentication.clear[EGIAuthentication]
@@ -191,7 +192,7 @@ object P12Certificate {
     new P12Certificate(cypheredPassword, certificate)
 }
 
-class P12Certificate(val cypheredPassword: String, val certificate: File) extends CypheredPassword with EGIAuthentication
+case class P12Certificate(cypheredPassword: String, certificate: File) extends CypheredPassword with EGIAuthentication
 
 object EGIAuthenticationInterface {
   implicit def p12CertificateIsEGIAuthentication(implicit cypher: Cypher): EGIAuthenticationInterface[EGIAuthentication] =
