@@ -46,8 +46,8 @@ import java.util.concurrent.Semaphore
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.*
-
 import java.io.File
+import java.util.concurrent.atomic.AtomicReference
 
 object GUIServer {
 
@@ -197,7 +197,7 @@ class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, pass
         () ⇒ control.stop()
       )
 
-    val serviceProvider = GUIServerServices.ServicesProvider(services, () => Cypher(password))
+    val serviceProvider = GUIServerServices.ServicesProvider(services, new AtomicReference(Cypher(password)))
     val apiImpl = new ApiImpl(serviceProvider, Some(applicationControl))
     val apiServer = new CoreAPIServer(apiImpl)
     val applicationServer = new ApplicationServer(webappCache, extraHeaders, password, serviceProvider)

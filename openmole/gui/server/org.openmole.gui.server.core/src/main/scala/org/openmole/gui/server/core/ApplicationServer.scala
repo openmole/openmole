@@ -41,10 +41,11 @@ object ApplicationServer {
 
 class ApplicationServer(webapp: File, extraHeader: String, password: Option[String], services: GUIServerServices.ServicesProvider) {
   
-  val cypher = new AtomicReference[Cypher](Cypher(password))
+//  val cypher = new AtomicReference[Cypher](Cypher(password))
+
   def passwordProvided = password.isDefined
   def passwordIsChosen = Preference.passwordChosen(services.preference)
-  def passwordIsCorrect = Preference.passwordIsCorrect(cypher.get, services.preference)
+  def passwordIsCorrect = Preference.passwordIsCorrect(services.cypher, services.preference)
 
   def connectionContent = {
     val ht = GUIServlet.html(s"${GUIServlet.webpackLibrary}.connection();", GUIServlet.cssFiles(webapp), extraHeader)
@@ -55,7 +56,7 @@ class ApplicationServer(webapp: File, extraHeader: String, password: Option[Stri
     case GET -> Root / ext.data.routes.appRoute =>
       def application = GUIServlet.html(s"${GUIServlet.webpackLibrary}.run();", GUIServlet.cssFiles(webapp), extraHeader)
 
-      if(!passwordIsChosen && passwordProvided) Preference.setPasswordTest(services.preference, cypher.get)
+      if(!passwordIsChosen && passwordProvided) Preference.setPasswordTest(services.preference, services.cypher)
 
       if (!passwordIsChosen && !passwordProvided) ApplicationServer.redirect(ext.data.routes.connectionRoute)
       else
@@ -87,7 +88,7 @@ class ApplicationServer(webapp: File, extraHeader: String, password: Option[Stri
 
       req.decode[UrlForm] { m =>
         val password = m.getFirstOrElse("password", "")
-        cypher.set(Cypher(password))
+        services.cypherProvider.set(Cypher(password))
         passwordIsCorrect match {
           case true ⇒ ApplicationServer.redirect(ext.data.routes.appRoute)
           case _ ⇒ ApplicationServer.redirect(ext.data.routes.connectionRoute)
@@ -100,7 +101,7 @@ class ApplicationServer(webapp: File, extraHeader: String, password: Option[Stri
 
         if (password == passwordAgain) {
           org.openmole.core.preference.Preference.setPasswordTest(services.preference, Cypher(password))
-          cypher.set(Cypher(password))
+          services.cypherProvider.set(Cypher(password))
         }
 
         ApplicationServer.redirect(ext.data.routes.connectionRoute)

@@ -53,10 +53,10 @@ import scala.util.{ Failure, Success, Try }
 
 object GUIServerServices {
 
-  case class ServicesProvider(guiServices: GUIServerServices, cypherProvider: () ⇒ Cypher) extends Services {
+  case class ServicesProvider(guiServices: GUIServerServices, cypherProvider: AtomicReference[Cypher]) extends Services {
     implicit def services: GUIServerServices = guiServices
 
-    implicit def cypher: Cypher = cypherProvider()
+    implicit def cypher: Cypher = cypherProvider.get()
 
     export guiServices.*
 //    implicit def workspace: Workspace = guiServices.workspace
