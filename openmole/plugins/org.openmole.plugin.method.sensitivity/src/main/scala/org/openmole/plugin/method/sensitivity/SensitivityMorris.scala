@@ -38,10 +38,10 @@ object SensitivityMorris {
 
         val inputs = ScalableValue.prototypes(method.inputs)
 
-        import OutputFormat._
+        import OutputFormat.*
 
         def sections =
-          Seq(
+          SectionContent(
             OutputSection("mu", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.mu(_, _)).from(context)),
             OutputSection("muStar", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.muStar(_, _)).from(context)),
             OutputSection("sigma", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.sigma(_, _)).from(context))

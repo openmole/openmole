@@ -208,10 +208,10 @@ object SensitivitySaltelli {
 
         val inputs = ScalableValue.prototypes(method.inputs)
 
-        import OutputFormat._
+        import OutputFormat.*
 
         def sections =
-          Seq(
+          SectionContent(
             OutputSection("firstOrderIndices", Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.firstOrder(_, _)).from(context)),
             OutputSection("totalOrderIndices", Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.totalOrder(_, _)).from(context))
           )

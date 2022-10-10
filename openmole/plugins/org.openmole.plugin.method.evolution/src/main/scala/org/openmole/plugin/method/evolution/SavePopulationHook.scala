@@ -67,7 +67,12 @@ object SavePopulationHook {
       val augmentedContext =
         context + (evolution.generationVal -> generation)
 
-      val content = OutputFormat.NamedContent(resultVariables(evolution, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter.map(_.name)).from(augmentedContext), fileName)
+      val content =
+        OutputFormat.NamedContent(
+          fileName,
+          resultVariables(evolution, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter.map(_.name)).from(augmentedContext)
+        )
+
       outputFormat.write(executionContext)(format, output, content, evolutionData).from(augmentedContext)
 
     context

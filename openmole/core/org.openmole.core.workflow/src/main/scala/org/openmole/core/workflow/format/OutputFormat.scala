@@ -5,15 +5,10 @@ import org.openmole.core.expansion._
 import org.openmole.core.workflow.hook.{ FromContextHook, HookExecutionContext }
 
 object OutputFormat {
-  object OutputContent {
-    implicit def sectionToContent(s: Seq[OutputSection]): SectionContent = SectionContent(s)
-    implicit def variablesToPlainContent(v: Seq[Variable[_]]): PlainContent = PlainContent(v)
-  }
-
   sealed trait OutputContent
-  case class SectionContent(sections: Seq[OutputSection]) extends OutputContent
-  case class PlainContent(variables: Seq[Variable[_]]) extends OutputContent
-  case class NamedContent(variables: Seq[Variable[_]], name: FromContext[String]) extends OutputContent
+  case class SectionContent(sections: OutputSection*) extends OutputContent
+  case class NamedContent(name: FromContext[String], variables: Seq[Variable[_]]) extends OutputContent
+
 
   case class OutputSection(name: FromContext[String], variables: Seq[Variable[_]])
 }

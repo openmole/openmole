@@ -87,17 +87,8 @@ object OMROutputFormat {
           directory.withLockInDirectory {
             val methodFile = directory / methodFileName
 
-            content match 
-              case PlainContent(variables) =>
-                val fileName = s"$dataDirectory/data.json.gz"
-                val dataFile = directory / dataDirectory / "data.json.gz"
-
-                dataFile.withPrintStream(append = false, create = true, gz = true) { ps ⇒
-                  ps.print(compact(render(variablesToJValue(variables))))
-                }
-
-                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, Seq(fileName), Seq()).noSpaces))
-              case NamedContent(variables, name) ⇒
+            content match
+              case NamedContent(name, variables) ⇒
                 def existingData = if methodFile.exists then parseExistingData(methodFile) else Seq()
 
                 val fileName = s"$dataDirectory/${name.from(context)}.json.gz"

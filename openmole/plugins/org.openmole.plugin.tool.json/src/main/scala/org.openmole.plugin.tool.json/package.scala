@@ -1,19 +1,18 @@
 package org.openmole.plugin.tool
 
-import org.json4s.JsonAST.{ JObject, JValue }
-import org.openmole.core.context._
+import com.fasterxml.jackson.core.json.JsonReadFeature
+import org.json4s.JsonAST.{JObject, JValue}
+import org.openmole.core.context.*
 import org.openmole.core.exception.UserBadDataError
 
 package object json:
+  // Allow NaN value for numbers in JSON files
+  org.json4s.jackson.JsonMethods.mapper.enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS.mappedFeature())
 
   import io.circe.*
 
   given Encoder[java.io.File] = f => Json.fromString(f.getAbsolutePath)
-
   given Decoder[java.io.File] = j => j.as[String].map(new java.io.File(_))
-
-
-  org.json4s.jackson.JsonMethods.mapper.enable(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS)
 
   def variablesToJValue(variables: Seq[Variable[_]]) =
     JObject(variables.toList.map { v ⇒ v.name -> toJSONValue(v.value, Some(v)) })
@@ -40,7 +39,6 @@ package object json:
 
   def jValueToVariable(jValue: JValue, v: Val[_]): Variable[_] = {
     import org.json4s._
-    //import shapeless._
 
     def cannotConvert[T: Manifest](jValue: JValue) = throw new UserBadDataError(s"Can not fetch value of type $jValue to type ${manifest[T]}")
 
