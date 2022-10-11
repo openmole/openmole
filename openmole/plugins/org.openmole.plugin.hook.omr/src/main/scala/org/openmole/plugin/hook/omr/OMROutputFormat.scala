@@ -45,10 +45,12 @@ object OMROutputFormat {
 
           val directory = file.from(context)
 
-          def methodFormat(json: Json, fileName: Seq[String], existingData: Seq[String]) = 
+          def methodFormat(json: Json, fileName: String, existingData: Seq[String]) = 
             import executionContext.timeService
 
-            def updatedData = Json.fromValues((existingData ++ fileName).map(Json.fromString))
+            def updatedData = 
+              val dataFiles = (existingData ++ Seq(fileName)).distinct
+              Json.fromValues(dataFiles.map(Json.fromString))
 
             json.deepDropNullValues.mapObject { o ⇒
               val o2 =
@@ -83,39 +85,34 @@ object OMROutputFormat {
             catch 
              case e: Throwable => throw new InternalProcessingError(s"Error parsing existing method file ${file}", e)
             
-
           directory.withLockInDirectory {
             val methodFile = directory / methodFileName
+            def existingData = if methodFile.exists then parseExistingData(methodFile) else Seq()
 
             content match
-              case NamedContent(name, variables) ⇒
-                def existingData = if methodFile.exists then parseExistingData(methodFile) else Seq()
-
-                val fileName = s"$dataDirectory/${name.from(context)}.json.gz"
+              case Content(name, variables) ⇒
+                val fileName = s"$dataDirectory/${name}.json.gz"
                 val dataFile = directory / fileName 
                    
                 dataFile.withPrintStream(append = false, create = true, gz = true) { ps ⇒
                   ps.print(compact(render(variablesToJValue(variables))))
                 }
 
-                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, Seq(fileName), existingData).noSpaces))
+                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, fileName, existingData).noSpaces))
               case sections: SectionContent ⇒
-                val sectionContent =
-                  for section <- sections.sections 
-                  yield
-                    val fileName = s"$dataDirectory/${section.name.from(context)}.json.gz"
-                    val content = variablesToJValue(section.variables) 
-                    (fileName, content)
-              
-                for 
-                  (fileName, content) <- sectionContent
-                do 
-                  val f = directory / fileName
-                  f.withPrintStream(append = false, create = true, gz = true) { ps ⇒
-                    ps.print(compact(render(content)))
-                  }
+                val fileName = s"$dataDirectory/${sections.name}.json.gz"
+                val dataFile = directory / fileName
 
-                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, sectionContent.map(_._1), Seq()).noSpaces))
+                val content =
+                  JObject(
+                    sections.content.map { section ⇒ section.name -> variablesToJValue(section.variables) }.toList
+                  )
+
+                dataFile.withPrintStream(append = false, create = true, gz = true) { ps ⇒
+                  ps.print(compact(render(content)))
+                }
+
+                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, fileName, existingData).noSpaces))
           }
       }
     }

@@ -60,7 +60,7 @@ object SavePopulationHook {
 
     if shouldBeSaved
     then
-      def fileName = if last then "population" else "population${" + evolution.generationVal.name + "}"
+      def fileName = if last then "population" else s"population${context(evolution.generationVal)}" 
       def saveOption = SaveOption(frequency = frequency, last = last)
       def evolutionData = evolution.operations.metadata(state, saveOption)
 
@@ -68,7 +68,7 @@ object SavePopulationHook {
         context + (evolution.generationVal -> generation)
 
       val content =
-        OutputFormat.NamedContent(
+        OutputFormat.Content(
           fileName,
           resultVariables(evolution, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter.map(_.name)).from(augmentedContext)
         )

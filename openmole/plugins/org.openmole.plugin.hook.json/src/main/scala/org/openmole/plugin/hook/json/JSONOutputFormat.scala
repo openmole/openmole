@@ -22,12 +22,12 @@ object JSONOutputFormat {
 
       def sectionContent(sections: SectionContent) =
         JObject(
-          sections.sections.map { section ⇒ section.name.from(context) -> variablesToJValue(section.variables) }.toList
+          sections.content.map { section ⇒ section.name -> variablesToJValue(section.variables) }.toList
         )
 
       (output, content) match {
-        case (Store(file), NamedContent(name, variables)) ⇒
-          val f = file / s"${name.from(context)}.json"
+        case (Store(file), Content(name, variables)) ⇒
+          val f = file / s"$name.json"
           f.from(context).withPrintStream(append = false, create = true) { ps ⇒
             ps.print(compact(render(variablesToJValue(variables))))
           }
@@ -35,8 +35,8 @@ object JSONOutputFormat {
           file.from(context).withPrintStream(append = false, create = true) { ps ⇒
             ps.print(compact(render(sectionContent(sections))))
           }
-        case (Display(ps), NamedContent(name, variables)) ⇒
-          ps.println(s"${name.from(context)}:")
+        case (Display(ps), Content(name, variables)) ⇒
+          ps.println(name)
           ps.println(pretty(render(variablesToJValue(variables))).split("\n").map("  " + _).mkString("\n"))
         case (Display(ps), sections: SectionContent) ⇒
           ps.println(pretty(render(sectionContent(sections))))

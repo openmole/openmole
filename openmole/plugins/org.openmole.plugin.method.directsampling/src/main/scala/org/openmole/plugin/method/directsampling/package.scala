@@ -109,7 +109,16 @@ package object directsampling {
       val exclude = if (!includeSeed) Seq(dsl.method.seed) else Seq()
       val aggregation = if (dsl.method.aggregation.isEmpty) None else Some(dsl.method.aggregation.map(DirectSamplingMetadata.aggregation))
       val metadata = DirectSamplingMetadata.Replication(seed = ValData(dsl.method.seed), dsl.method.sample, aggregation)
-      def fileName = if (outputFormat.appendable(format)) None else Some("experiment${" + FormattedFileHook.experiment.name + "}")
+      def fileName =
+        if (outputFormat.appendable(format))
+        then None
+        else
+          val value = FromContext { p =>
+            import p.*
+            s"experiment${context(FormattedFileHook.experiment)}"
+          }
+          Some(value)
+
       Hooked(t, FormattedFileHook(output = output, values = values, exclude = exclude, format = format, metadata = metadata, fileName = fileName))
     }
   }
@@ -174,7 +183,16 @@ package object directsampling {
 
       val aggregation = if (dsl.method.aggregation.isEmpty) None else Some(dsl.method.aggregation.map(DirectSamplingMetadata.aggregation))
       val metadata = DirectSamplingMetadata.DirectSampling(dsl.method.sampled.map(v ⇒ ValData(v)), aggregation, dsl.method.output.map(v ⇒ ValData(v)))
-      def fileName = if (outputFormat.appendable(format)) None else Some("experiment${" + FormattedFileHook.experiment.name + "}")
+      def fileName =
+        if (outputFormat.appendable(format))
+        then None
+        else
+          val value = FromContext { p =>
+            import p.*
+            s"experiment${context(FormattedFileHook.experiment)}"
+          }
+          Some(value)
+
       Hooked(t, FormattedFileHook(output = output, values = values, format = format, metadata = metadata, fileName = fileName))
     }
   }

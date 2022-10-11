@@ -18,7 +18,7 @@ object FormattedFileHook {
     values:   Seq[Val[_]]    = Vector.empty,
     exclude:  Seq[Val[_]]    = Vector.empty,
     metadata: M              = None,
-    fileName: Option[String] = None,
+    fileName: Option[FromContext[String]] = None,
     name:     Option[String] = None)(implicit valName: sourcecode.Name, definitionScope: DefinitionScope, fileFormat: OutputFormat[T, M]): FromContextHook =
 
     Hook(name getOrElse "FileFormatHook") { parameters ⇒
@@ -29,7 +29,7 @@ object FormattedFileHook {
 
       val experimentContext: Context = context + Variable(experiment, executionContext.ticket.content)
       val variables = (ps ++ Seq(experiment)).map(p ⇒ experimentContext.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p not found in hook $this")))
-      val content = NamedContent(variables = variables, name = fileName.map(FromContext.fromString).getOrElse("data"))
+      val content = Content(variables = variables, name = fileName.map(_.from(context)).getOrElse("data"))
       fileFormat.write(executionContext)(format, output, content, metadata).from(experimentContext)
 
       context

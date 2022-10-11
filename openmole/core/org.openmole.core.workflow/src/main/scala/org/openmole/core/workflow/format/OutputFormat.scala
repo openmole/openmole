@@ -6,11 +6,8 @@ import org.openmole.core.workflow.hook.{ FromContextHook, HookExecutionContext }
 
 object OutputFormat {
   sealed trait OutputContent
-  case class SectionContent(sections: OutputSection*) extends OutputContent
-  case class NamedContent(name: FromContext[String], variables: Seq[Variable[_]]) extends OutputContent
-
-
-  case class OutputSection(name: FromContext[String], variables: Seq[Variable[_]])
+  case class SectionContent(name: String, content: Seq[Content]) extends OutputContent
+  case class Content(name: String, variables: Seq[Variable[_]]) extends OutputContent
 }
 
 trait OutputFormat[T, -M] {
