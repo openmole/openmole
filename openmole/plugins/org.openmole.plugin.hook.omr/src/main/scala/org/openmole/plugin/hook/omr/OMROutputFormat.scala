@@ -31,9 +31,9 @@ object OMROutputFormat {
 
   implicit def outputFormat[MD](implicit methodData: MethodData[MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD] {
     override def write(executionContext: HookExecutionContext)(format: OMROutputFormat, output: WritableOutput, content: OutputContent, method: MD): FromContext[Unit] = FromContext { p ⇒
-      import p._
-      import org.json4s._
-      import org.json4s.jackson.JsonMethods._
+      import p.*
+      import org.json4s.*
+      import org.json4s.jackson.JsonMethods.*
 
       implicit val encoder = methodData.encoder
 
