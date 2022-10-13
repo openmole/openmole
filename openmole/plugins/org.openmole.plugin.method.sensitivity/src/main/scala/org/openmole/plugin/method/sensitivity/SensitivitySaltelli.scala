@@ -215,8 +215,8 @@ object SensitivitySaltelli {
             name = "saltelli",
             content = 
               Seq(
-                Content("firstOrderIndices", Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.firstOrder(_, _)).from(context)),
-                Content("totalOrderIndices", Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.totalOrder(_, _)).from(context))
+                PlainContent("firstOrderIndices", Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.firstOrder(_, _)).from(context)),
+                PlainContent("totalOrderIndices", Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.totalOrder(_, _)).from(context))
               )
           )
 

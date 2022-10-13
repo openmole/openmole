@@ -26,7 +26,7 @@ object JSONOutputFormat {
         )
 
       (output, content) match {
-        case (Store(file), Content(name, variables)) ⇒
+        case (Store(file), PlainContent(name, variables)) ⇒
           val f = file / s"$name.json"
           f.from(context).withPrintStream(append = false, create = true) { ps ⇒
             ps.print(compact(render(variablesToJValue(variables))))
@@ -35,7 +35,7 @@ object JSONOutputFormat {
           file.from(context).withPrintStream(append = false, create = true) { ps ⇒
             ps.print(compact(render(sectionContent(sections))))
           }
-        case (Display(ps), Content(name, variables)) ⇒
+        case (Display(ps), PlainContent(name, variables)) ⇒
           ps.println(name)
           ps.println(pretty(render(variablesToJValue(variables))).split("\n").map("  " + _).mkString("\n"))
         case (Display(ps), sections: SectionContent) ⇒

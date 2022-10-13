@@ -226,6 +226,10 @@ object Val {
     if (namespace.isEmpty) simpleName
     else s"${namespace.toString}$$$simpleName"
 
+  def parseName(name: String) =
+    val parts = name.split('$')
+    (Namespace(parts.dropRight(1).toSeq*), parts.reverse.head)
+
   def copy[T](v: Val[T])(
     name:      String    = v.simpleName,
     namespace: Namespace = v.namespace

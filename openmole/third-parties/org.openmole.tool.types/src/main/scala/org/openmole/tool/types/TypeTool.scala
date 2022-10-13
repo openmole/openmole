@@ -164,7 +164,7 @@ object TypeTool {
     if(tpe.startsWith(wildCard)) tpe.drop(wildCard.size) else tpe
   }
 
-  def typeStringToManifest(s: String): Manifest[_] =
+  def toManifest(s: String): Manifest[_] =
     def loadClass(c: String) = Class.forName(c, true, TypeTool.getClass.getClassLoader)
 
     def simpleType(st: String): Manifest[_] =
@@ -238,7 +238,7 @@ object TypeTool {
         }
 
     parseType(s)
-  end typeStringToManifest
+  end toManifest
 
 }
 

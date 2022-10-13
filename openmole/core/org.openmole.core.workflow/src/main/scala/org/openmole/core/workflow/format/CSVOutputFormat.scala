@@ -39,13 +39,13 @@ object CSVOutputFormat {
       import WritableOutput.*
 
       (output, content) match {
-        case (Store(file), Content(name, variables)) ⇒
+        case (Store(file), PlainContent(name, variables)) ⇒
           val f = file.from(context) / s"${name}.csv"
           writeFile(f, variables)
         case (Store(file), s: SectionContent) ⇒
           val directory = file.from(context)
           for { section ← s.content } writeFile(directory / s"${section.name}.csv", section.variables)
-        case (Display(ps), Content(name, variables)) ⇒
+        case (Display(ps), PlainContent(name, variables)) ⇒
           writeStream(ps, Some(name), variables)
         case (Display(ps), s: SectionContent) ⇒
           for { section ← s.content } writeStream(ps, Some(section.name), section.variables)

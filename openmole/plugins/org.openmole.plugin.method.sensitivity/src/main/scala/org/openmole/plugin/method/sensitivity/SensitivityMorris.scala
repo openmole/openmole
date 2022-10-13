@@ -45,9 +45,9 @@ object SensitivityMorris {
             name = "morris",
             content = 
               Seq(
-                Content("mu", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.mu(_, _)).from(context)),
-                Content("muStar", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.muStar(_, _)).from(context)),
-                Content("sigma", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.sigma(_, _)).from(context))
+                PlainContent("mu", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.mu(_, _)).from(context)),
+                PlainContent("muStar", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.muStar(_, _)).from(context)),
+                PlainContent("sigma", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.sigma(_, _)).from(context))
               )
           )
 

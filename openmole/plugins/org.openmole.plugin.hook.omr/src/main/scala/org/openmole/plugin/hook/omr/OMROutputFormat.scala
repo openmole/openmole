@@ -5,12 +5,13 @@ import org.openmole.core.dsl.extension._
 import org.openmole.core.workflow.format.CSVOutputFormat
 import org.openmole.core.project._
 import org.openmole.plugin.tool.json._
-import io.circe._
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.format.OutputFormat.*
+import io.circe.*
 import io.circe.generic.auto.*
 import io.circe.parser.*
 import io.circe.syntax.*
+
 import org.openmole.core.project.Imports.ImportedFile
 import org.openmole.plugin.tool.methoddata.*
 
@@ -29,6 +30,8 @@ object OMROutputFormat {
   def startTime = "start-time"
   def saveTime = "save-time"
 
+  def contentData = "content-data"
+
   implicit def outputFormat[MD](implicit methodData: MethodData[MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD] {
     override def write(executionContext: HookExecutionContext)(format: OMROutputFormat, output: WritableOutput, content: OutputContent, method: MD): FromContext[Unit] = FromContext { p ⇒
       import p.*
@@ -45,7 +48,7 @@ object OMROutputFormat {
 
           val directory = file.from(context)
 
-          def methodFormat(json: Json, fileName: String, existingData: Seq[String]) = 
+          def methodFormat(json: Json, fileName: String, existingData: Seq[String], contentDataValue: ContentData) =
             import executionContext.timeService
 
             def updatedData = 
@@ -60,6 +63,7 @@ object OMROutputFormat {
                   .add(openMOLEVersionField, Json.fromString(org.openmole.core.buildinfo.version.value))
                   .add(startTime, Json.fromLong(executionContext.moleLaunchTime))
                   .add(saveTime, Json.fromLong(TimeService.currentTime))
+                  .add(contentData, contentDataValue.asJson)
 
               scriptData match {
                 case data: ScriptSourceData.ScriptData if format.script ⇒
@@ -87,18 +91,20 @@ object OMROutputFormat {
             
           directory.withLockInDirectory {
             val methodFile = directory / methodFileName
-            def existingData = if methodFile.exists then parseExistingData(methodFile) else Seq()
+            val existingData = if methodFile.exists then parseExistingData(methodFile) else Seq()
 
             content match
-              case Content(name, variables) ⇒
+              case PlainContent(name, variables) ⇒
                 val fileName = s"$dataDirectory/${name}.json.gz"
-                val dataFile = directory / fileName 
-                   
+                val dataFile = directory / fileName
+
                 dataFile.withPrintStream(append = false, create = true, gz = true) { ps ⇒
                   ps.print(compact(render(variablesToJValue(variables))))
                 }
 
-                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, fileName, existingData).noSpaces))
+                def content = ContentData.Plain(variables.map(v => ValData(v.prototype)))
+
+                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, fileName, existingData, content).noSpaces))
               case sections: SectionContent ⇒
                 val fileName = s"$dataDirectory/${sections.name}.json.gz"
                 val dataFile = directory / fileName
@@ -112,7 +118,9 @@ object OMROutputFormat {
                   ps.print(compact(render(content)))
                 }
 
-                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, fileName, existingData).noSpaces))
+                def contentData = ContentData.Section(sections.content.map(s => s.name -> s.variables.map(v => ValData(v.prototype))))
+
+                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, fileName, existingData, contentData).noSpaces))
           }
       }
     }
