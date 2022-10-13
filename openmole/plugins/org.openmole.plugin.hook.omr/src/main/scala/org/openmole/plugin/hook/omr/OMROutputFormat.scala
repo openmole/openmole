@@ -118,7 +118,7 @@ object OMROutputFormat {
                   ps.print(compact(render(content)))
                 }
 
-                def contentData = ContentData.Section(sections.content.map(s => s.name -> s.variables.map(v => ValData(v.prototype))))
+                def contentData = ContentData.Section(sections.content.map(s => ContentData.SectionData(s.name, s.variables.map(v => ValData(v.prototype)))))
 
                 methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, fileName, existingData, contentData).noSpaces))
           }
