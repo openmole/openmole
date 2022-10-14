@@ -17,14 +17,17 @@ import org.openmole.plugin.tool.methoddata.*
 
 object OMROutputFormat {
 
-  def methodFileName = "method.omr"
+  def methodFileName = "result.omr"
 
-  def methodNameField = "method"
-  def dataFileField = "data"
-  def omrVersionField = "version"
+  def methodField = "method"
+  def methodNameField = "type"
+
+  def dataFileField = "data-file"
+  def omrVersionField = "format-version"
   def omrVersion = "0.2"
   def scriptField = "script"
-  def importsField = "imports"
+  def scriptContentField = "content"
+  def scriptImportField = "import"
   def openMOLEVersionField = "openmole-version"
 
   def startTime = "start-time"
@@ -48,35 +51,43 @@ object OMROutputFormat {
 
           val directory = file.from(context)
 
-          def methodFormat(json: Json, fileName: String, existingData: Seq[String], contentDataValue: ContentData) =
+          def methodFormat(method: MD, fileName: String, existingData: Seq[String], contentDataValue: ContentData) =
             import executionContext.timeService
 
             def updatedData = 
               val dataFiles = (existingData ++ Seq(fileName)).distinct
               Json.fromValues(dataFiles.map(Json.fromString))
 
-            json.deepDropNullValues.mapObject { o ⇒
-              val o2 =
-                o.add(methodNameField, Json.fromString(methodData.name(method)))
-                  .add(dataFileField, updatedData)
-                  .add(omrVersionField, Json.fromString(omrVersion))
-                  .add(openMOLEVersionField, Json.fromString(org.openmole.core.buildinfo.version.value))
-                  .add(startTime, Json.fromLong(executionContext.moleLaunchTime))
-                  .add(saveTime, Json.fromLong(TimeService.currentTime))
-                  .add(contentData, contentDataValue.asJson)
+            def methodJson = 
+              method.asJson.mapObject(_.add(methodNameField, Json.fromString(methodData.name(method))))
 
-              scriptData match {
-                case data: ScriptSourceData.ScriptData if format.script ⇒
-                  case class OMRImport(`import`: String, content: String)
+            val o2 = Json.obj(
+              methodField -> methodJson,
+              dataFileField -> updatedData,
+              omrVersionField -> Json.fromString(omrVersion),
+              openMOLEVersionField -> Json.fromString(org.openmole.core.buildinfo.version.value),
+              startTime -> Json.fromLong(executionContext.moleLaunchTime),
+              saveTime -> Json.fromLong(TimeService.currentTime),
+              contentData -> contentDataValue.asJson
+            )
+  
+            scriptData match
+              case data: ScriptSourceData.ScriptData if format.script ⇒
+                case class OMRImport(`import`: String, content: String)
 
-                  val scriptContent = ScriptSourceData.scriptContent(scriptData)
-                  val imports = Imports.directImportedFiles(data.script)
+                val scriptContent = ScriptSourceData.scriptContent(scriptData)
+                val imports = Imports.directImportedFiles(data.script)
 
-                  o2.add(scriptField, Json.fromString(scriptContent))
-                    .add(importsField, Json.fromValues(imports.map(i ⇒ OMRImport(ImportedFile.identifier(i), i.file.content).asJson)))
-                case _ ⇒ o2
-              }
-            }
+                o2.mapObject {
+                  _.add(
+                    scriptField,
+                    Json.obj (
+                      scriptContentField -> Json.fromString(scriptContent),
+                      scriptImportField -> Json.fromValues(imports.map(i ⇒ OMRImport(ImportedFile.identifier(i), i.file.content).asJson))
+                    )
+                  )
+                 }
+              case _ ⇒ o2
 
           def parseExistingData(file: File): Seq[String] = 
             import org.json4s.DefaultReaders.*
@@ -104,7 +115,7 @@ object OMROutputFormat {
 
                 def content = ContentData.Plain(variables.map(v => ValData(v.prototype)))
 
-                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, fileName, existingData, content).noSpaces))
+                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method, fileName, existingData, content).noSpaces))
               case sections: SectionContent ⇒
                 val fileName = s"$dataDirectory/${sections.name}.json.gz"
                 val dataFile = directory / fileName
@@ -120,7 +131,7 @@ object OMROutputFormat {
 
                 def contentData = ContentData.Section(sections.content.map(s => ContentData.SectionData(s.name, s.variables.map(v => ValData(v.prototype)))))
 
-                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method.asJson, fileName, existingData, contentData).noSpaces))
+                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method, fileName, existingData, contentData).noSpaces))
           }
       }
     }
