@@ -17,23 +17,24 @@ import org.openmole.plugin.tool.methoddata.*
 
 object OMROutputFormat {
 
-  def methodFileName = "result.omr"
+  def methodFileName = "index.omr"
+
+  object Index:
+    case class Import(`import`: String, content: String)
+    case class Script(content: String, `import`: Option[Seq[Import]])
+    case class Time(start: Long, save: Long)
+
+  case class Index(
+    `format-version`: String,
+    `openmole-version`: String,
+    `data-file`: Seq[String],
+    script: Option[Index.Script],
+    `content-data`: ContentData,
+    time: Index.Time)
 
   def methodField = "method"
   def methodNameField = "type"
-
-  def dataFileField = "data-file"
-  def omrVersionField = "format-version"
   def omrVersion = "0.2"
-  def scriptField = "script"
-  def scriptContentField = "content"
-  def scriptImportField = "import"
-  def openMOLEVersionField = "openmole-version"
-
-  def startTime = "start-time"
-  def saveTime = "save-time"
-
-  def contentData = "content-data"
 
   implicit def outputFormat[MD](implicit methodData: MethodData[MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD] {
     override def write(executionContext: HookExecutionContext)(format: OMROutputFormat, output: WritableOutput, content: OutputContent, method: MD): FromContext[Unit] = FromContext { p ⇒
@@ -54,48 +55,41 @@ object OMROutputFormat {
           def methodFormat(method: MD, fileName: String, existingData: Seq[String], contentDataValue: ContentData) =
             import executionContext.timeService
 
-            def updatedData = 
-              val dataFiles = (existingData ++ Seq(fileName)).distinct
-              Json.fromValues(dataFiles.map(Json.fromString))
-
             def methodJson = 
               method.asJson.mapObject(_.add(methodNameField, Json.fromString(methodData.name(method))))
 
-            val o2 = Json.obj(
-              methodField -> methodJson,
-              dataFileField -> updatedData,
-              omrVersionField -> Json.fromString(omrVersion),
-              openMOLEVersionField -> Json.fromString(org.openmole.core.buildinfo.version.value),
-              startTime -> Json.fromLong(executionContext.moleLaunchTime),
-              saveTime -> Json.fromLong(TimeService.currentTime),
-              contentData -> contentDataValue.asJson
-            )
-  
-            scriptData match
-              case data: ScriptSourceData.ScriptData if format.script ⇒
-                case class OMRImport(`import`: String, content: String)
+            val script =
+              scriptData match
+                case data: ScriptSourceData.ScriptData if format.script ⇒
+                  val scriptContent = ScriptSourceData.scriptContent(scriptData)
+                  val imports =
+                    val is = Imports.directImportedFiles(data.script).map(i ⇒ Index.Import(ImportedFile.identifier(i), i.file.content))
+                    if is.isEmpty then None else Some(is)
 
-                val scriptContent = ScriptSourceData.scriptContent(scriptData)
-                val imports = Imports.directImportedFiles(data.script)
+                  Some(Index.Script(scriptContent, imports))
+                case _ ⇒ None
 
-                o2.mapObject {
-                  _.add(
-                    scriptField,
-                    Json.obj (
-                      scriptContentField -> Json.fromString(scriptContent),
-                      scriptImportField -> Json.fromValues(imports.map(i ⇒ OMRImport(ImportedFile.identifier(i), i.file.content).asJson))
-                    )
-                  )
-                 }
-              case _ ⇒ o2
+            val result =
+              Index(
+                `format-version` = omrVersion,
+                `openmole-version` = org.openmole.core.buildinfo.version.value,
+                `data-file` = (existingData ++ Seq(fileName)).distinct,
+                script = script,
+                `content-data` = contentDataValue,
+                time = Index.Time(
+                  start = executionContext.moleLaunchTime,
+                  save = TimeService.currentTime
+                )
+              )
 
-          def parseExistingData(file: File): Seq[String] = 
-            import org.json4s.DefaultReaders.*
+            result.asJson.
+              mapObject { _.add(methodField, methodJson) }.
+              deepDropNullValues
+
+          def parseExistingData(file: File): Seq[String] =
             try 
               if file.exists 
-              then
-                val j = parse(file.content(gz = true)) 
-                (j \ dataFileField).getAs[Seq[String]].get
+              then indexData(file).`data-file`
               else Seq()
             catch 
              case e: Throwable => throw new InternalProcessingError(s"Error parsing existing method file ${file}", e)
@@ -139,28 +133,17 @@ object OMROutputFormat {
     override def validate(format: OMROutputFormat) = Validate.success
   }
 
-  case class OMRData(method: String, fileName: String, version: String)
-
-  def omrData(file: File): OMRData = {
-    import io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
+  def indexData(file: File): Index =
     val content = file.content(gz = true)
-    val parseResult = parse(content)
-    parseResult match {
-      case Right(r) ⇒
-        def readField(f: String) =
-          r.hcursor.downField(f).as[String] match {
-            case Right(r) ⇒ r
-            case Left(e)  ⇒ throw new InternalProcessingError(s"Unable to get field $f in json:\n$content", e)
-          }
-        OMRData(
-          method = readField(methodNameField),
-          fileName = readField(dataFileField),
-          version = readField(omrVersionField)
-        )
-      case Left(e) ⇒ throw new InternalProcessingError(s"Error while parsing omr file $file with content:\n$content", e)
-    }
+    decode[Index](content).toTry.get
 
-  }
+
+  def methodName(file: File): String =
+    val j = parse(file.content(gz = true)).toTry.get
+    j.hcursor.
+      downField(methodField).
+      downField( methodNameField).as[String].
+      toTry.get
 
 }
 

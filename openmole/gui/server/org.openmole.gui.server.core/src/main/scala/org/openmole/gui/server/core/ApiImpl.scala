@@ -665,7 +665,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     )
   }
 
-  def downloadHTTP(url: String, path: SafePath, extract: Boolean): Option[ErrorData] = {
+  // FIXME use network service provider
+  def downloadHTTP(url: String, path: SafePath, extract: Boolean): Option[ErrorData] =
     import services._
     import org.openmole.tool.stream._
 
@@ -711,16 +712,15 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       case Success(value) ⇒ None
       case Failure(e)     ⇒ Some(ErrorData(e))
     }
-  }
 
   // Method plugins
-  def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS] = {
+  def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS] =
     import services._
     val omrFile = safePathToFile(result)(ServerFileSystemContext.project, workspace)
-    val data = OMROutputFormat.omrData(omrFile)
-    GUIPluginRegistry.analysis.find(_._1 == data.method).map(_._2)
-  }
+    val methodName = OMROutputFormat.methodName(omrFile)
+    GUIPluginRegistry.analysis.find(_._1 == methodName).map(_._2)
 
   def pluginRoutes =
     GUIPluginRegistry.all.flatMap(_.router).map(p => p(services))
+
 }

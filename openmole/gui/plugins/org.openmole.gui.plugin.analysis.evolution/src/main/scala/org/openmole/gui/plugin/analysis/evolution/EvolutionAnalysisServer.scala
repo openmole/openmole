@@ -31,7 +31,7 @@ import org.http4s.HttpRoutes
 
 class EvolutionAnalysisServer(services: Services) extends APIServer with EvolutionAnalysisAPI {
 
-  val analyseRoute = analyse.implementedBy { p => impl.analyse(p) }
+  val analyseRoute = analyse.implementedBy { p => ??? /*impl.analyse(p)*/ }
   //val generationRoute = generation.implementedBy { case(p, g, a) => impl.generation(p, g, a)}
 
   val routes: HttpRoutes[IO] = HttpRoutes.of(
@@ -40,18 +40,18 @@ class EvolutionAnalysisServer(services: Services) extends APIServer with Evoluti
 
   object impl {
 
-    def analyse(path: SafePath) = {
-      import ServerFileSystemContext.project
-      import services._
-
-      try {
-        val (omrData, methodData) = Analysis.loadMetadata(path.toFile)
-        Right(Analysis.analyse(omrData, methodData, path.toFile.getParentFile))
-      }
-      catch {
-        case e: Throwable ⇒ Left(ErrorData(e))
-      }
-    }
+//    def analyse(path: SafePath) = {
+//      import ServerFileSystemContext.project
+//      import services._
+//
+//      try {
+//        val (omrData, methodData) = Analysis.loadMetadata(path.toFile)
+//        Right(Analysis.analyse(omrData, methodData, path.toFile.getParentFile))
+//      }
+//      catch {
+//        case e: Throwable ⇒ Left(ErrorData(e))
+//      }
+//    }
 
     /*def generation(path: SafePath, generation: Option[Long], all: Boolean) = {
       import ServerFileSystemContext.project

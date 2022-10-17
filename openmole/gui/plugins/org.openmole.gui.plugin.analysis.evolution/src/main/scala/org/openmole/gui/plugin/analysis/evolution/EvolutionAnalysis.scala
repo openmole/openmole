@@ -53,7 +53,7 @@ class EvolutionAnalysis extends MethodAnalysisPlugin {
           case None ⇒ p("")
           case Some(value) ⇒
             value match {
-              case c: AnalysisData.StochasticNSGA2.Convergence ⇒
+//              case c: AnalysisData.StochasticNSGA2.Convergence ⇒
 //                val layout = Layout
 //                  .title("Hypervolume")
 //                  .yaxis(Axis.title("Hypervolume"))
@@ -82,7 +82,6 @@ class EvolutionAnalysis extends MethodAnalysisPlugin {
 //                val plotDiv = div()
 //                Plotly.plot(plotDiv.ref, js.Array(data), layout, config = config)
 //                plotDiv
-                  p("implement vizualisation")
               case _ ⇒ p(value.toString)
             }
         }

@@ -1,9 +1,9 @@
 -J-Xmx2500M
--J-Xss2M
+#-J-Xss2M
 -J-Dfile.encoding=UTF-8
--J-XX:MetaspaceSize=200m
+#-J-XX:MetaspaceSize=200m
 #-J-XX:MaxMetaspaceSize=1G
--J-XX:MinHeapFreeRatio=10
--J-XX:MaxHeapFreeRatio=20
+#-J-XX:MinHeapFreeRatio=10
+#-J-XX:MaxHeapFreeRatio=20
 #-Dlog4j2.disable.jmx=true 
 -Dlog4j.shutdownHookEnabled=false
