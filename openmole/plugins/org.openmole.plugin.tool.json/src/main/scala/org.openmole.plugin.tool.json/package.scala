@@ -37,7 +37,7 @@ package object json:
     }
   }
 
-  def jValueToVariable(jValue: JValue, v: Val[_]): Variable[_] = {
+  def jValueToVariable(jValue: JValue, v: Val[_], unwrapArrays: Boolean = false): Variable[_] = {
     import org.json4s._
 
     def cannotConvert[T: Manifest](jValue: JValue) = throw new UserBadDataError(s"Can not fetch value of type $jValue to type ${manifest[T]}")
@@ -86,11 +86,11 @@ package object json:
       }
 
     (jValue, v) match {
-      case (value: JArray, Val.caseInt(v))     ⇒ Variable(v, jValueToInt(value.arr.head))
-      case (value: JArray, Val.caseLong(v))    ⇒ Variable(v, jValueToLong(value.arr.head))
-      case (value: JArray, Val.caseDouble(v))  ⇒ Variable(v, jValueToDouble(value.arr.head))
-      case (value: JArray, Val.caseString(v))  ⇒ Variable(v, jValueToString(value.arr.head))
-      case (value: JArray, Val.caseBoolean(v)) ⇒ Variable(v, jValueToBoolean(value.arr.head))
+      case (value: JArray, Val.caseInt(v)) if unwrapArrays     ⇒ Variable(v, jValueToInt(value.arr.head))
+      case (value: JArray, Val.caseLong(v)) if unwrapArrays    ⇒ Variable(v, jValueToLong(value.arr.head))
+      case (value: JArray, Val.caseDouble(v)) if unwrapArrays  ⇒ Variable(v, jValueToDouble(value.arr.head))
+      case (value: JArray, Val.caseString(v)) if unwrapArrays  ⇒ Variable(v, jValueToString(value.arr.head))
+      case (value: JArray, Val.caseBoolean(v)) if unwrapArrays ⇒ Variable(v, jValueToBoolean(value.arr.head))
 
       case (value: JArray, v) ⇒
         import scala.jdk.CollectionConverters._

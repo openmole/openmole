@@ -107,7 +107,10 @@ case class CORMASTask(
       val outputValues = parse(file.content)
       val outputMap = outputValues.asInstanceOf[JObject].obj.toMap
       noFile(mapped.outputs).map { o ⇒
-        jValueToVariable(outputMap.getOrElse(o.name, throw new UserBadDataError(s"Output named $name not found in the resulting json file ($outputJSONName) content is ${file.content}.")).asInstanceOf[JValue], o.v)
+        jValueToVariable(
+          outputMap.getOrElse(o.name, throw new UserBadDataError(s"Output named $name not found in the resulting json file ($outputJSONName) content is ${file.content}.")).asInstanceOf[JValue], 
+          o.v,
+          unwrapArrays = true)
       }
     }
 
