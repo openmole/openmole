@@ -41,6 +41,7 @@ object OMROutputFormat {
       import p.*
       import org.json4s.*
       import org.json4s.jackson.JsonMethods.*
+      import executionContext.serializerService
 
       implicit val encoder = methodData.encoder
 
@@ -104,7 +105,7 @@ object OMROutputFormat {
                 val dataFile = directory / fileName
 
                 dataFile.withPrintStream(append = false, create = true, gz = true) { ps ⇒
-                  ps.print(compact(render(variablesToJValue(variables))))
+                  ps.print(compact(render(variablesToJValue(variables, default = Some(anyToJValue)))))
                 }
 
                 def content = ContentData.Plain(variables.map(v => ValData(v.prototype)))
@@ -116,7 +117,7 @@ object OMROutputFormat {
 
                 val content =
                   JObject(
-                    sections.content.map { section ⇒ section.name -> variablesToJValue(section.variables) }.toList
+                    sections.content.map { section ⇒ section.name -> variablesToJValue(section.variables, default = Some(anyToJValue)) }.toList
                   )
 
                 dataFile.withPrintStream(append = false, create = true, gz = true) { ps ⇒

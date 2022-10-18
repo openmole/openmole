@@ -8,9 +8,10 @@ object JSONOutputFormat {
 
   implicit def outputFormat: OutputFormat[JSONOutputFormat, Any] = new OutputFormat[JSONOutputFormat, Any] {
     override def write(executionContext: HookExecutionContext)(format: JSONOutputFormat, output: WritableOutput, content: OutputContent, method: Any): FromContext[Unit] = FromContext { p ⇒
-      import p._
-      import org.json4s._
-      import org.json4s.jackson.JsonMethods._
+      import p.*
+      import org.json4s.*
+      import org.json4s.jackson.JsonMethods.*
+      import executionContext.serializerService
 
       implicit val formats = DefaultFormats
 

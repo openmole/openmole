@@ -14,13 +14,13 @@ package object json:
   given Encoder[java.io.File] = f => Json.fromString(f.getAbsolutePath)
   given Decoder[java.io.File] = j => j.as[String].map(new java.io.File(_))
 
-  def variablesToJValue(variables: Seq[Variable[_]]) =
-    JObject(variables.toList.map { v ⇒ v.name -> toJSONValue(v.value, Some(v)) })
+  def variablesToJValue(variables: Seq[Variable[_]], default: Option[Any => org.json4s.JValue] = None) =
+    JObject(variables.toList.map { v ⇒ v.name -> toJSONValue(v.value, Some(v), default = default) })
 
-  def toJSONValue(v: Any, variable: Option[Variable[_]] = None): org.json4s.JValue = {
-    import org.json4s._
+  def toJSONValue(v: Any, variable: Option[Variable[_]] = None, default: Option[Any => org.json4s.JValue] = None): org.json4s.JValue = {
+    import org.json4s.*
 
-    v match {
+    v match 
       case v: Int          ⇒ JInt(v)
       case v: Long         ⇒ JLong(v)
       case v: String       ⇒ JString(v)
@@ -31,14 +31,17 @@ package object json:
       case v: java.io.File ⇒ JString(v.getAbsolutePath)
       case v: Seq[_]       ⇒ JArray(v.map(v => toJSONValue(v, variable)).toList)
       case _               ⇒ 
-        variable match 
-          case Some(variable) => throw new UserBadDataError(s"Value $v of type ${v.getClass} from variable $variable is not convertible to JSON")
-          case None => throw new UserBadDataError(s"Value $v of type ${v.getClass} is not convertible to JSON")
-    }
+        default match
+          case None => 
+            variable match 
+              case Some(variable) => throw new UserBadDataError(s"Value $v of type ${v.getClass} from variable $variable is not convertible to JSON")
+              case None => throw new UserBadDataError(s"Value $v of type ${v.getClass} is not convertible to JSON")
+          case Some(serialize) => serialize(v)
+    
   }
 
-  def jValueToVariable(jValue: JValue, v: Val[_], unwrapArrays: Boolean = false): Variable[_] = {
-    import org.json4s._
+  def jValueToVariable(jValue: JValue, v: Val[_], unwrapArrays: Boolean = false, default: Option[org.json4s.JValue => Any] = None): Variable[_] = {
+    import org.json4s.*
 
     def cannotConvert[T: Manifest](jValue: JValue) = throw new UserBadDataError(s"Can not fetch value of type $jValue to type ${manifest[T]}")
 
@@ -88,7 +91,7 @@ package object json:
     (jValue, v) match {
       case (value: JArray, Val.caseInt(v)) if unwrapArrays     ⇒ Variable(v, jValueToInt(value.arr.head))
       case (value: JArray, Val.caseLong(v)) if unwrapArrays    ⇒ Variable(v, jValueToLong(value.arr.head))
-      case (value: JArray, Val.caseDouble(v)) if unwrapArrays  ⇒ Variable(v, jValueToDouble(value.arr.head))
+      case (value: JArray, Val.caseDouble(v)experiment3.json.gz) if unwrapArrays  ⇒ Variable(v, jValueToDouble(value.arr.head))
       case (value: JArray, Val.caseString(v)) if unwrapArrays  ⇒ Variable(v, jValueToString(value.arr.head))
       case (value: JArray, Val.caseBoolean(v)) if unwrapArrays ⇒ Variable(v, jValueToBoolean(value.arr.head))
 
@@ -102,7 +105,10 @@ package object json:
             case (value: JValue, c) if c == classOf[Long] ⇒ jValueToLong(value)
             case (value: JValue, c) if c == classOf[Boolean] ⇒ jValueToBoolean(value)
             case (value: JValue, c) if c == classOf[String] ⇒ jValueToString(value)
-            case c ⇒ throw new UserBadDataError(s"Can not fetch value of type $jValue to type ${c}")
+            case (jValue, c) ⇒ 
+              (jValue, default) match
+                case (value: JValue, Some(serializer)) => serializer(value)
+                case _ => throw new UserBadDataError(s"Can not fetch value of type $jValue to type ${c}")
           }
 
         implicit def jArrayConstruct: Variable.ConstructArray[JArray] =
@@ -119,9 +125,19 @@ package object json:
       case (value: JValue, Val.caseString(v))  ⇒ Variable(v, jValueToString(value))
       case (value: JValue, Val.caseBoolean(v)) ⇒ Variable(v, jValueToBoolean(value))
       case (value: JValue, Val.caseFile(v))    ⇒ Variable(v, new java.io.File(jValueToString(value)))
-
-      case _                                   ⇒ throw new UserBadDataError(s"Can not fetch value of type $jValue to OpenMOLE variable ${v}")
+      case (value, v) => 
+        (value, v, default) match 
+          case (value: JValue, v, Some(serializer)) => Variable.unsecureUntyped(v, serializer(value))
+          case _                                    ⇒ throw new UserBadDataError(s"Can not fetch value of type $jValue to OpenMOLE variable ${v}")
     }
-
   }
-  
+
+  def anyToJValue(using s: org.openmole.core.serializer.SerializerService): Any => org.json4s.JValue =
+    a => 
+      import org.json4s.jackson.JsonMethods.*
+      parse(s.serializeToString(a, json = true))
+
+  def jValueToAny(using s: org.openmole.core.serializer.SerializerService): JValue => Any =
+    value => 
+      import org.json4s.jackson.JsonMethods.*
+      s.deserializeFromString[Any](compact(render(value)))
