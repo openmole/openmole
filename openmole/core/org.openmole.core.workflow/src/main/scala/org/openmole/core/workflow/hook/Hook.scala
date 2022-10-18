@@ -32,11 +32,13 @@ import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.random.RandomProvider
+import org.openmole.core.workflow.job.JobId
 
 case class HookExecutionContext(
   cache:  KeyValueCache,
   ticket: Ticket,
-  moleLaunchTime: Long)(
+  moleLaunchTime: Long,
+  jobId: JobId)(
   implicit
   val preference:        Preference,
   val threadProvider:    ThreadProvider,

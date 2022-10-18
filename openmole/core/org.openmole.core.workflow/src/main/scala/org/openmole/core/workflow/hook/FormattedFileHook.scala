@@ -10,8 +10,6 @@ import org.openmole.core.workflow.format._
 
 object FormattedFileHook {
 
-  val experiment = Val[Long]("experiment", Variable.openMOLENameSpace)
-
   def apply[T, M](
     format:   T,
     output:   WritableOutput,
@@ -27,10 +25,9 @@ object FormattedFileHook {
       val excludeSet = exclude.map(_.name).toSet
       val ps = { if (values.isEmpty) context.variables.values.map { _.prototype }.toVector else values }.filter { v ⇒ !excludeSet.contains(v.name) }
 
-      val experimentContext: Context = context + Variable(experiment, executionContext.ticket.content)
-      val variables = (ps ++ Seq(experiment)).map(p ⇒ experimentContext.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p not found in hook $this")))
-      val content = PlainContent(variables = variables, name = fileName.map(_.from(experimentContext)).getOrElse("data"))
-      fileFormat.write(executionContext)(format, output, content, metadata).from(experimentContext)
+      val variables = ps.map(p ⇒ context.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p not found in hook $this")))
+      val content = PlainContent(variables = variables, name = fileName.map(_.from(context)).getOrElse("data"))
+      fileFormat.write(executionContext)(format, output, content, metadata).from(context)
 
       context
     } withValidate { WritableOutput.file(output).toSeq.flatMap(_.validate) ++ fileFormat.validate(format) } set (inputs ++= values)

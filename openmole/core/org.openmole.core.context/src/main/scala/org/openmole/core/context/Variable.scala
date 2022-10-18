@@ -59,6 +59,7 @@ object Variable {
    * Seed for rng
    */
   val openMOLESeed = Val[Long]("seed", namespace = openMOLENameSpace)
+  val openMOLEExperiment = Val[Long]("experiment", namespace = openMOLENameSpace)
 
   def copy[@specialized T](v: Variable[T])(prototype: Val[T] = v.prototype, value: T = v.value): Variable[T] = apply(prototype, value)
 

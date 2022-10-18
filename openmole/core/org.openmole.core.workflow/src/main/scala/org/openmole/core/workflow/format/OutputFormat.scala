@@ -13,5 +13,4 @@ object OutputFormat {
 trait OutputFormat[T, -M] {
   def write(executionContext: HookExecutionContext)(format: T, output: WritableOutput, content: OutputFormat.OutputContent, method: M): FromContext[Unit]
   def validate(format: T): Validate
-  def appendable(format: T) = false
 }

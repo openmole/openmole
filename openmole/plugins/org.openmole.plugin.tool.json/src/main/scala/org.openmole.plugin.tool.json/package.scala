@@ -91,7 +91,7 @@ package object json:
     (jValue, v) match {
       case (value: JArray, Val.caseInt(v)) if unwrapArrays     ⇒ Variable(v, jValueToInt(value.arr.head))
       case (value: JArray, Val.caseLong(v)) if unwrapArrays    ⇒ Variable(v, jValueToLong(value.arr.head))
-      case (value: JArray, Val.caseDouble(v)experiment3.json.gz) if unwrapArrays  ⇒ Variable(v, jValueToDouble(value.arr.head))
+      case (value: JArray, Val.caseDouble(v)) if unwrapArrays  ⇒ Variable(v, jValueToDouble(value.arr.head))
       case (value: JArray, Val.caseString(v)) if unwrapArrays  ⇒ Variable(v, jValueToString(value.arr.head))
       case (value: JArray, Val.caseBoolean(v)) if unwrapArrays ⇒ Variable(v, jValueToBoolean(value.arr.head))
 

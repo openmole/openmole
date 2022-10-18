@@ -251,7 +251,7 @@ object MoleExecution {
   def performHooksAndTransitions(subMoleExecutionState: SubMoleExecutionState, job: JobId, context: Context, capsule: MoleCapsule, ticket: Ticket) = {
     val mole = subMoleExecutionState.moleExecution.mole
 
-    def ctxForHooks = (subMoleExecutionState.moleExecution.implicits + context) - Variable.openMOLESeed
+    def ctxForHooks = (subMoleExecutionState.moleExecution.implicits + context) - Variable.openMOLESeed + Variable(Variable.openMOLEExperiment, ticket.content)
 
     def executeHook(h: Hook) =
       try {
@@ -260,7 +260,8 @@ object MoleExecution {
           HookExecutionContext(
             cache = cache,
             ticket = ticket,
-            moleLaunchTime = executionContext.moleLaunchTime)(
+            moleLaunchTime = executionContext.moleLaunchTime,
+            jobId = job)(
             preference = services.preference,
             threadProvider = services.threadProvider,
             fileService = services.fileService,
