@@ -38,15 +38,22 @@ object CSVOutputFormat {
       import OutputFormat.*
       import WritableOutput.*
 
+
       (output, content) match {
-        case (Store(file), PlainContent(name, variables)) ⇒
-          val f = file.from(context) / s"${name}.csv"
+        case (Store(file), PlainContent(variables)) ⇒
+          val f =
+            format.name.option match
+              case Some(name) => file.from(context) / s"${name}.csv"
+              case None => file.from(context)
           writeFile(f, variables)
         case (Store(file), s: SectionContent) ⇒
-          val directory = file.from(context)
+          val directory = 
+            format.name.option match
+              case None => file.from(context)
+              case Some(name) => file.from(context) / name.from(context)
           for { section ← s.content } writeFile(directory / s"${section.name}.csv", section.variables)
-        case (Display(ps), PlainContent(name, variables)) ⇒
-          writeStream(ps, Some(name), variables)
+        case (Display(ps), PlainContent(variables)) ⇒
+          writeStream(ps, format.name.map(_.from(context)), variables)
         case (Display(ps), s: SectionContent) ⇒
           for { section ← s.content } writeStream(ps, Some(section.name), section.variables)
       }
@@ -58,7 +65,8 @@ object CSVOutputFormat {
 }
 
 case class CSVOutputFormat(
-  header:      OptionalArgument[FromContext[String]] = None,
-  unrollArray: Boolean                               = false,
-  arrayOnRow:  Boolean                               = false,
-  append:      Boolean                               = false)
+  header:      OptionalArgument[FromContext[String]]  = None,
+  unrollArray: Boolean                                = false,
+  arrayOnRow:  Boolean                                = false,
+  append:      Boolean                                = false,
+  name:        OptionalArgument[FromContext[String]]  = None)

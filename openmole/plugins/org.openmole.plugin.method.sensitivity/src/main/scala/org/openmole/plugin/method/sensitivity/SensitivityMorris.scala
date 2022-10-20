@@ -42,13 +42,11 @@ object SensitivityMorris {
 
         def sections =
           SectionContent(
-            name = "morris",
-            content = 
-              Seq(
-                PlainContent("mu", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.mu(_, _)).from(context)),
-                PlainContent("muStar", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.muStar(_, _)).from(context)),
-                PlainContent("sigma", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.sigma(_, _)).from(context))
-              )
+            Seq(
+              Section("mu", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.mu(_, _)).from(context)),
+              Section("muStar", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.muStar(_, _)).from(context)),
+              Section("sigma", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.sigma(_, _)).from(context))
+            )
           )
 
         outputFormat.write(executionContext)(format, output, sections, method).from(context)

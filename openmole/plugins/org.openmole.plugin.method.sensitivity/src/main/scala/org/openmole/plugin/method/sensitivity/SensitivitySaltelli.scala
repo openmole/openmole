@@ -212,12 +212,10 @@ object SensitivitySaltelli {
 
         def sections =
           SectionContent(
-            name = "saltelli",
-            content = 
-              Seq(
-                PlainContent("firstOrderIndices", Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.firstOrder(_, _)).from(context)),
-                PlainContent("totalOrderIndices", Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.totalOrder(_, _)).from(context))
-              )
+            Seq(
+              Section("firstOrderIndices", Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.firstOrder(_, _)).from(context)),
+              Section("totalOrderIndices", Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.totalOrder(_, _)).from(context))
+            )
           )
 
         outputFormat.write(executionContext)(format, output, sections, MetaData(method)).from(context)

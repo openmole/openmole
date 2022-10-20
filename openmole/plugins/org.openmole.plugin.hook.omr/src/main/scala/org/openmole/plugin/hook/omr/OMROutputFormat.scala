@@ -101,7 +101,7 @@ object OMROutputFormat {
             val fileName = s"$dataDirectory/${executionContext.jobId}.json.gz"
 
             content match
-              case PlainContent(name, variables) ⇒
+              case PlainContent(variables) ⇒
                 val dataFile = directory / fileName
 
                 dataFile.withPrintStream(append = false, create = true, gz = true) { ps ⇒

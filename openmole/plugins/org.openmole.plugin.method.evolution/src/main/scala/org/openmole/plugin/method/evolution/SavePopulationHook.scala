@@ -43,6 +43,11 @@ object SavePopulationHook {
     all.filter(v ⇒ !filterSet.contains(v.name))
   }
 
+  def fileName = FromContext { p =>
+    import p.*
+    s"population${context(GAIntegration.generationVal)}" 
+  }
+
   def apply[T, F](
     evolution:      EvolutionWorkflow,
     output:         WritableOutput,
@@ -51,7 +56,7 @@ object SavePopulationHook {
     keepAll:        Boolean                = false,
     includeOutputs: Boolean                = true,
     filter:         Seq[Val[_]]            = Vector.empty,
-    format:         F                      = CSVOutputFormat(unrollArray = true))(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, EvolutionMetadata]) = Hook("SavePopulationHook") { p ⇒
+    format:         F                      = CSVOutputFormat(unrollArray = true, name = OptionalArgument(fileName)))(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, EvolutionMetadata]) = Hook("SavePopulationHook") { p ⇒
     import p._
 
     val state = context(evolution.stateVal)
@@ -60,7 +65,6 @@ object SavePopulationHook {
 
     if shouldBeSaved
     then
-      def fileName = if last then "population" else s"population${context(evolution.generationVal)}" 
       def saveOption = SaveOption(frequency = frequency, last = last)
       def evolutionData = evolution.operations.metadata(state, saveOption)
 
@@ -69,7 +73,6 @@ object SavePopulationHook {
 
       val content =
         OutputFormat.PlainContent(
-          fileName,
           resultVariables(evolution, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter.map(_.name)).from(augmentedContext)
         )
 
