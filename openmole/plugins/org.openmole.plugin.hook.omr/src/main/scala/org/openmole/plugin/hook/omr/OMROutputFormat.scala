@@ -57,7 +57,8 @@ object OMROutputFormat {
             import executionContext.timeService
 
             def methodJson = 
-              method.asJson.mapObject(_.add(methodNameField, Json.fromString(methodData.name(method))))
+              method.asJson.asObject.get.toList.head._2.
+              mapObject(_.add(methodNameField, Json.fromString(methodData.name(method))))
 
             val script =
               scriptData match
@@ -84,7 +85,8 @@ object OMROutputFormat {
               )
 
             result.asJson.
-              mapObject { _.add(methodField, methodJson) }.
+              mapObject(_.add(methodField, methodJson)).
+              asJson.
               deepDropNullValues
 
           def parseExistingData(file: File): Seq[String] =
@@ -100,32 +102,17 @@ object OMROutputFormat {
             val existingData = if methodFile.exists then parseExistingData(methodFile) else Seq()
             val fileName = s"$dataDirectory/${executionContext.jobId}.json.gz"
 
-            content match
-              case PlainContent(variables) ⇒
-                val dataFile = directory / fileName
+            val dataFile = directory / fileName
 
-                dataFile.withPrintStream(append = false, create = true, gz = true) { ps ⇒
-                  ps.print(compact(render(variablesToJValue(variables, default = Some(anyToJValue)))))
-                }
+            def jsonContent = JArray(content.section.map { s => variablesToJValue(s.variables, default = Some(anyToJValue)) }.toList)
 
-                def content = ContentData.Plain(variables.map(v => ValData(v.prototype)))
+            dataFile.withPrintStream(append = false, create = true, gz = true) { ps ⇒
+              ps.print(compact(render(jsonContent)))
+            }
 
-                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method, fileName, existingData, content).noSpaces))
-              case sections: SectionContent ⇒
-                val dataFile = directory / fileName
+            def contentData = ContentData(content.section.map { s => ContentData.SectionData(s.name, s.variables.map(v => ValData(v.prototype))) })
 
-                val content =
-                  JObject(
-                    sections.content.map { section ⇒ section.name -> variablesToJValue(section.variables, default = Some(anyToJValue)) }.toList
-                  )
-
-                dataFile.withPrintStream(append = false, create = true, gz = true) { ps ⇒
-                  ps.print(compact(render(content)))
-                }
-
-                def contentData = ContentData.Section(sections.content.map(s => ContentData.SectionData(s.name, s.variables.map(v => ValData(v.prototype)))))
-
-                methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method, fileName, existingData, contentData).noSpaces))
+            methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method, fileName, existingData, contentData).noSpaces))
           }
       }
     }

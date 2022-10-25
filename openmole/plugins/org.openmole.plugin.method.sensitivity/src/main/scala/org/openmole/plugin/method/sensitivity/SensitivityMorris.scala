@@ -31,7 +31,7 @@ object SensitivityMorris {
 
   object MorrisHook {
 
-    def apply[F](method: Method, output: WritableOutput, format: F = CSVOutputFormat())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, Method]) =
+    def apply[F](method: Method, output: WritableOutput, format: F = CSVOutputFormat(directory = true))(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, Method]) =
       Hook("MorrisHook") { p ⇒
         import p._
         import WritableOutput._
@@ -41,12 +41,10 @@ object SensitivityMorris {
         import OutputFormat.*
 
         def sections =
-          SectionContent(
-            Seq(
-              Section("mu", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.mu(_, _)).from(context)),
-              Section("muStar", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.muStar(_, _)).from(context)),
-              Section("sigma", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.sigma(_, _)).from(context))
-            )
+          OutputContent(
+            ("mu", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.mu(_, _)).from(context)),
+            ("muStar", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.muStar(_, _)).from(context)),
+            ("sigma", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.sigma(_, _)).from(context))
           )
 
         outputFormat.write(executionContext)(format, output, sections, method).from(context)

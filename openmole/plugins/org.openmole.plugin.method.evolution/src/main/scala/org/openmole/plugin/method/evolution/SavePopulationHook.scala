@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import org.openmole.core.workflow.format.WritableOutput
 import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SaveOption }
 
@@ -43,10 +43,6 @@ object SavePopulationHook {
     all.filter(v ⇒ !filterSet.contains(v.name))
   }
 
-  def fileName = FromContext { p =>
-    import p.*
-    s"population${context(GAIntegration.generationVal)}" 
-  }
 
   def apply[T, F](
     evolution:      EvolutionWorkflow,
@@ -56,7 +52,7 @@ object SavePopulationHook {
     keepAll:        Boolean                = false,
     includeOutputs: Boolean                = true,
     filter:         Seq[Val[_]]            = Vector.empty,
-    format:         F                      = CSVOutputFormat(unrollArray = true, name = OptionalArgument(fileName)))(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, EvolutionMetadata]) = Hook("SavePopulationHook") { p ⇒
+    format:         F                      = CSVOutputFormat(unrollArray = true, postfix = GAIntegration.generationVal, directory = true))(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, EvolutionMetadata]) = Hook("SavePopulationHook") { p ⇒
     import p._
 
     val state = context(evolution.stateVal)
@@ -72,8 +68,8 @@ object SavePopulationHook {
         context + (evolution.generationVal -> generation)
 
       val content =
-        OutputFormat.PlainContent(
-          resultVariables(evolution, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter.map(_.name)).from(augmentedContext)
+        OutputContent(
+          "population" -> resultVariables(evolution, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter.map(_.name)).from(augmentedContext)
         )
 
       outputFormat.write(executionContext)(format, output, content, evolutionData).from(augmentedContext)

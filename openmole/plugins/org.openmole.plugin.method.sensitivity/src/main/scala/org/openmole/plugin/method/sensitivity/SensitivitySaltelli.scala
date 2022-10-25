@@ -201,7 +201,7 @@ object SensitivitySaltelli {
 
   object SaltelliHook {
 
-    def apply[F](method: Method, output: WritableOutput, format: F = CSVOutputFormat())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, MetaData]) =
+    def apply[F](method: Method, output: WritableOutput, format: F = CSVOutputFormat(directory = true))(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, MetaData]) =
       Hook("SaltelliHook") { p ⇒
         import p._
         import WritableOutput._
@@ -211,11 +211,9 @@ object SensitivitySaltelli {
         import OutputFormat.*
 
         def sections =
-          SectionContent(
-            Seq(
-              Section("firstOrderIndices", Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.firstOrder(_, _)).from(context)),
-              Section("totalOrderIndices", Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.totalOrder(_, _)).from(context))
-            )
+          OutputContent(
+            "firstOrderIndices" -> Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.firstOrder(_, _)).from(context),
+            "totalOrderIndices" -> Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.totalOrder(_, _)).from(context)
           )
 
         outputFormat.write(executionContext)(format, output, sections, MetaData(method)).from(context)

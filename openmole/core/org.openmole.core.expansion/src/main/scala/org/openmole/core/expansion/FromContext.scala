@@ -62,6 +62,11 @@ object ToFromContext extends LowPriorityToFromContext {
 
   given ToFromContext[Boolean, Boolean] = b ⇒ FromContext.value(b).copy(stringValue = Some(b.toString))
   given [T]: ToFromContext[Val[T], T] = p ⇒ FromContext.prototype(p)
+
+  given [T]: ToFromContext[Val[T], String] = p => FromContext { c =>
+    import c.*
+    context(p).toString
+  }
 }
 
 @FunctionalInterface trait ToFromContext[F, T]: 

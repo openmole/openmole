@@ -20,20 +20,6 @@ package org.openmole.plugin.tool.methoddata
 import io.circe.*
 
 object ContentData:
-  case class Plain(variables: Seq[ValData]) extends ContentData
-  case class Section(section: Seq[SectionData]) extends ContentData
-  case class SectionData(name: String, variables: Seq[ValData])
+  case class SectionData(name: Option[String], variables: Seq[ValData])
 
-  given Encoder[ContentData] = c =>
-    c match
-      case p: Plain => Encoder.forProduct2[Plain, String, Seq[ValData]]("type", "content") { p => ("plain", p.variables) }.apply(p)
-      case s: Section => Encoder.forProduct2[Section, String, Seq[SectionData]]("type", "content") { s => ("section", s.section) }.apply(s)
-
-  given Decoder[ContentData] = j =>
-    j.downField("type").as[String] match
-      case Right("plain") => j.downField("content").as[Seq[ValData]].map(Plain.apply)
-      case Right("section") => j.downField("content").as[Seq[SectionData]].map(Section.apply)
-      case Right(s) => Left(DecodingFailure(DecodingFailure.Reason.CustomReason(s"Error deserializing ContentData, unknown type $s"), j))
-      case Left(f) => Left(f)
-
-sealed trait ContentData
+case class ContentData(section: Seq[ContentData.SectionData]) 
