@@ -33,7 +33,7 @@ object OMROutputFormat {
     time: Index.Time)
 
   def methodField = "method"
-  def methodNameField = "type"
+  def methodNameField = "name"
   def omrVersion = "0.2"
 
   implicit def outputFormat[MD](implicit methodData: MethodData[MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD] {
