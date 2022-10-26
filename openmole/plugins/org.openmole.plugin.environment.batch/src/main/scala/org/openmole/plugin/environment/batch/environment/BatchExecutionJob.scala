@@ -90,17 +90,18 @@ object BatchExecutionJob {
       BatchExecutionJob.ClosuresBundle(replClassFiles, exported, packages, plugins)
     }
 
-    def bundleFile(closures: ClosuresBundle) = {
-      val bundle = newFile.newFile("closureBundle", ".jar")
-      try createBundle("closure-" + UUID.randomUUID.toString, "1.0", closures.classes, closures.exported, closures.dependencies, bundle)
-      catch {
-        case e: Throwable ⇒
-          bundle.delete()
-          throw e
-      }
-      fileService.wrapRemoveOnGC(bundle)
-    }
-
+    def bundleFile(closures: ClosuresBundle): Option[File] = 
+      if closures.classes.isEmpty then None
+      else
+        val bundle = newFile.newFile("closureBundle", ".jar")
+        try createBundle("closure-" + UUID.randomUUID.toString, "1.0", closures.classes, closures.exported, closures.dependencies, bundle)
+        catch {
+          case e: Throwable ⇒
+            bundle.delete()
+            throw e
+        }
+        Some(fileService.wrapRemoveOnGC(bundle))
+    
     val closuresBundle = bundle(classDirectory, classLoader)
     (closuresBundle, bundleFile(closuresBundle))
   }

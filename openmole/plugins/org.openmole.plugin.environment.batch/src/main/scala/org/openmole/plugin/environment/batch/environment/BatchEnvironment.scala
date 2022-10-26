@@ -331,7 +331,7 @@ object BatchEnvironment {
     def closureBundleAndPlugins = services.compilationContext.toSeq.flatMap { c =>
       import services._
       val (cb, file) = BatchExecutionJob.replClassesToPlugins(c.repl.classDirectory, c.repl.classLoader)
-      cb.plugins ++ Seq(file)
+      cb.plugins ++ file.toSeq
     }
 
     closureBundleAndPlugins.distinctBy(_.getCanonicalPath)
