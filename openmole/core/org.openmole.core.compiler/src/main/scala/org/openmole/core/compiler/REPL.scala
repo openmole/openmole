@@ -64,7 +64,7 @@ class REPL(interpreter: Interpreter) {
   }
 
   def loop = synchronized {
-    state = interpreter.driver.runUntilQuit(state)
+    state = interpreter.driver.runUntilQuit(using state)()
   }
 
   def classLoader = synchronized { interpreter.classLoader(state.context) }
