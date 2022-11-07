@@ -572,9 +572,13 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     val currentPluginsSafePath = currentPlugins.map { s ⇒ SafePath(s.split("/")) }
 
-    currentPluginsSafePath.map { csp ⇒
-      val date = org.openmole.gui.ext.server.utils.formatDate(safePathToFile(csp).lastModified)
-      Plugin(csp, date)
+    currentPluginsSafePath.flatMap { csp ⇒
+      val file = safePathToFile(csp)
+      if file.exists
+      then
+        val date = org.openmole.gui.ext.server.utils.formatDate(file.lastModified)
+        Some(Plugin(csp, date))
+      else None
     }
   }
 
@@ -606,7 +610,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 //  }
 
   def listPlugins(): Iterable[Plugin] = {
-    val currentPlugins = services.preference.apply(GUIServer.plugins)
+    val currentPlugins = services.preference.preferenceOption(GUIServer.plugins).getOrElse(Seq())
     toPluginList(currentPlugins)
   }
 

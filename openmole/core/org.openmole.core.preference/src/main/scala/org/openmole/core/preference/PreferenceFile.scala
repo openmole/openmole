@@ -128,7 +128,9 @@ object ConfigurationString {
 
     override def fromString(s: String): Seq[T] =
       val parser = new CSVParser()
-      parser.parseLine(s).toSeq.map(cs.fromString)
+      if s.trim.isEmpty
+      then Seq()
+      else parser.parseLine(s).toSeq.map(cs.fromString)
 
 }
 
