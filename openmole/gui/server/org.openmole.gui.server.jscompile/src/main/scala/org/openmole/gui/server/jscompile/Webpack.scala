@@ -31,7 +31,7 @@ object Webpack extends JavaLogger {
       extraModules.foreach { em ⇒ em.jsFile copy nodeModulesDirectory / em.nodeModuleSubdirectory / em.jsFile.getName }
     }
 
-    External.run("node", cmd, workingDirectory)
+    External.run("node", cmd, workingDirectory, env = Seq("NODE_OPTIONS" -> "--openssl-legacy-provider"))
   }
 
   def setConfigFile(entry: java.io.File, depsOutput: java.io.File, template: java.io.File, to: java.io.File) = {

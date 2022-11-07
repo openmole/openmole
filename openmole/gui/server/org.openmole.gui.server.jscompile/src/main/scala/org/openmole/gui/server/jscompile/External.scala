@@ -6,16 +6,16 @@ import org.openmole.tool.file.*
 
 object External {
 
-  def run(name: String, args: Seq[String], workingDir: File): Unit = {
+  def run(name: String, args: Seq[String], workingDir: File, env: Seq[(String, String)] = Seq()): Unit = {
     val cmd = sys.props("os.name").toLowerCase match {
       case os if os.contains("win") ⇒ Seq("cmd", "/c", name)
       case _                        ⇒ Seq(name)
     }
 
-    runProcess(cmd ++: args, workingDir)
+    runProcess(cmd ++: args, workingDir, env)
   }
 
-  private def runProcess[A](cmd: Seq[String], cwd: File): Unit = {
+  private def runProcess[A](cmd: Seq[String], cwd: File, env: Seq[(String, String)] = Seq()): Unit = {
     val toErrorLog = (is: InputStream) ⇒ {
       is.close()
     }
@@ -37,7 +37,7 @@ object External {
     }
 
 
-    val process = Process(cmd, cwd).!(log)
+    val process = Process(command = cmd, cwd = Some(cwd), extraEnv = env: _*).!(log)
 //    val processIO = BasicIO.standard(_ => ()).withError(_=> ())
 //    val code: Int = process.run(processIO).exitValue()
 
