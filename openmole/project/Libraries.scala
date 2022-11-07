@@ -122,7 +122,7 @@ object Libraries {
   lazy val scalaz = "org.scalaz" %% "scalaz-core" % scalazVersion
   lazy val spray = "io.spray" %% "spray-json" % "1.3.5"
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
-  lazy val equinoxOSGi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.15.300"
+  lazy val equinoxOSGi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.18.100"
   lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.3.1"
 
   lazy val shapeless = "org.openmole.library" %% "com-chuusai-shapeless" % shapelessVersion
