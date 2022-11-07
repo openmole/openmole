@@ -1077,7 +1077,7 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     maintainer("Romain Reuillon <romain.reuillon@iscpif.fr>, Jonathan Passerat-Palmbach <j.passerat-palmbach@imperial.ac.uk>")
     copy((openmole / assemble).value, s"/openmole")
     runRaw(
-      """cp /etc/apt/sources.list /etc/apt/sources.list.d/unsable.list && sed -i "s/testing/unstable/g" /etc/apt/sources.list.d/unsable.list && \
+      """cp /etc/apt/sources.list /etc/apt/sources.list.d/unsable.list && sed -i "s/testing/unstable/g" /etc/apt/sources.list.d/unsable.list && sed -i "/unstable-security/d" /etc/apt/sources.list.d/unsable.list && \
        apt-get update && \
        apt-get install --no-install-recommends -y ca-certificates default-jre-headless ca-certificates-java bash tar gzip sudo locales singularity-container && \
        apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \
