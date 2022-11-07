@@ -1,5 +1,6 @@
 package org.openmole.launcher;
 
+import org.eclipse.osgi.internal.location.LocationHelper;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -35,6 +36,7 @@ public class Launcher {
         String run = null;
         String osgiDirectory = null;
         List<String> priority = new LinkedList<String>();
+        Boolean osgiLockingNone = false;
 
         String[] forwardAgs = new String[0];
 
@@ -59,6 +61,11 @@ public class Launcher {
                 i++;
                 priority.add(args[i]);
                 i++;
+                continue;
+            } else if(args[i].contentEquals("--osgi-locking-none")) {
+                i++;
+                osgiLockingNone = true;
+                continue;
             } else if(args[i].contentEquals("--")) {
                 i++;
                 forwardAgs = Arrays.copyOfRange(args, i, args.length);
@@ -75,7 +82,7 @@ public class Launcher {
         osgiConfig.put(Constants.FRAMEWORK_STORAGE, "");
         osgiConfig.put(Constants.FRAMEWORK_STORAGE_CLEAN, "true");
         osgiConfig.put(Constants.FRAMEWORK_BOOTDELEGATION, "*");
-
+        if(osgiLockingNone) osgiConfig.put(LocationHelper.PROP_OSGI_LOCKING, LocationHelper.LOCKING_NONE);
 
         StringBuffer versions = new StringBuffer();
         StringBuffer executionEnvironments = new StringBuffer();
