@@ -19,7 +19,6 @@ package org.openmole.gui.ext.client
 
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
-import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
 import org.scalajs.dom.raw.HTMLInputElement
 import scala.concurrent.ExecutionContext.Implicits.global

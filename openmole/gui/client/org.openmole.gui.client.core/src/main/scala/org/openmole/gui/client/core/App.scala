@@ -12,7 +12,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.client.core.files.{TabContent, TreeNodePanel}
 import org.openmole.gui.client.tool.OMTags
-import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.client.FileManager
 import org.openmole.gui.ext.client._

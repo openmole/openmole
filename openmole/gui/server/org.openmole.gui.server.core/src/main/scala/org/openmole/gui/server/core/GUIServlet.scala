@@ -36,7 +36,6 @@ import org.openmole.core.services.Services
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.networkservice._
 import org.openmole.core.timeservice.TimeService
-import org.openmole.gui.ext.api.Api
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.gui.ext.data.routes._
 import org.openmole.gui.ext.server.{ OMRouter, utils }

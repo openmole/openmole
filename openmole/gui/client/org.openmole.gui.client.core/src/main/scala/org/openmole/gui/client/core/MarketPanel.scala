@@ -31,7 +31,6 @@ import Waiter._
 import org.openmole.gui.client.core.files.TreeNodeManager
 
 import com.raquo.laminar.api.L._
-import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.client.InputFilter
 
 class MarketPanel(manager: TreeNodeManager) {

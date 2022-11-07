@@ -11,7 +11,6 @@ import org.openmole.gui.client.core._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import TreeNode._
-import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.client.FileManager
 import com.raquo.laminar.api.L._
 import org.openmole.gui.client.tool.OMTags
@@ -100,10 +99,11 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
   private val upButton = upbtn((fileInput: Input) ⇒ {
     val current = treeNodeManager.dirNodeLine.now()
-    FileManager.upload(fileInput, current, (p: ProcessState) ⇒ transferring.set(p), UploadProject(), () ⇒ {
-      val sp: SafePath = current / fileInput.ref.value.split("\\\\").last
-      CoreUtils.appendToPluggedIfPlugin(sp)
-    })
+    FileManager.upload(fileInput, current, (p: ProcessState) ⇒ transferring.set(p), UploadProject())
+//    , () ⇒ {
+//      val sp: SafePath = current / fileInput.ref.value.split("\\\\").last
+//      CoreUtils.appendToPluggedIfPlugin(sp)
+//    })
   })
 
   lazy val createFileTool =

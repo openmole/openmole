@@ -4,7 +4,6 @@ import org.openmole.gui.client.core._
 import org.openmole.gui.client.core.alert.AbsolutePositioning._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.ext.api.Api
 import scaladget.bootstrapnative.bsn._
 import org.openmole.gui.client.core.panels._
 import org.openmole.gui.client.tool.OMTags
@@ -109,11 +108,21 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
   def plugOrUnplug(safePath: SafePath, pluginState: PluginState) = {
     pluginState.isPlugged match {
       case true ⇒
-//        OMPost()[Api].unplug(safePath).call().foreach { _ ⇒
+        CoreUtils.removePlugin(safePath).foreach { _ ⇒
+          panels.pluginPanel.getPlugins
+          treeNodeManager.invalidCurrentCache
+        }
+          //        OMPost()[Api].unplug(safePath).call().foreach { _ ⇒
 //          panels.pluginPanel.getPlugins
 //          treeNodeManager.invalidCurrentCache
 //        }
       case false ⇒
+        CoreUtils.addPlugin(safePath).foreach { errors ⇒
+          for e <- errors
+          do panels.alertPanel.detail("An error occurred while adding plugin", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
+          panels.pluginPanel.getPlugins
+          treeNodeManager.invalidCurrentCache
+        }
 //        OMPost()[Api].appendToPluggedIfPlugin(safePath).call().foreach {
 //          _ ⇒
 //            panels.pluginPanel.getPlugins

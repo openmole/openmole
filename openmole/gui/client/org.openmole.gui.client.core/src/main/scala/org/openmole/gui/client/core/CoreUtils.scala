@@ -7,7 +7,6 @@ import org.openmole.gui.client.core.alert.AlertPanel
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.ext.api.Api
 import org.scalajs.dom
 
 import scala.util.{ Failure, Success }
@@ -93,12 +92,19 @@ object CoreUtils {
     Fetch.future(_.listRecursive(safePath, findString).future)
   }
  
-  def appendToPluggedIfPlugin(safePath: SafePath) = {
-//    Post()[Api].appendToPluggedIfPlugin(safePath).call().foreach { _ ⇒
-//      panels.treeNodeManager.invalidCurrentCache
-//      panels.pluginPanel.getPlugins
-//    }
-  }
+//  def appendToPluggedIfPlugin(safePath: SafePath) = {
+////    Post()[Api].appendToPluggedIfPlugin(safePath).call().foreach { _ ⇒
+////      panels.treeNodeManager.invalidCurrentCache
+////      panels.pluginPanel.getPlugins
+////    }
+//  }
+
+  def addPlugin(safePath: SafePath) =
+    Fetch.future(_.addPlugin(safePath).future)
+
+  def removePlugin(safePath: SafePath) =
+    Fetch.future(_.removePlugin(safePath).future)
+
 
   def addJSScript(relativeJSPath: String) = {
     org.scalajs.dom.document.body.appendChild(script(src := relativeJSPath).ref)

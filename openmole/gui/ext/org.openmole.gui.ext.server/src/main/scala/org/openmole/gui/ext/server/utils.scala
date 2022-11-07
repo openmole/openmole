@@ -375,8 +375,8 @@ object utils {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
     val file = safePathToFile(safePath)
-    val errors = org.openmole.core.module.addPluginsFiles(Seq(file), false, org.openmole.core.module.pluginDirectory)
-    errors.map(e ⇒ ErrorData(e._2))
+    val errors = org.openmole.core.pluginmanager.PluginManager.tryLoad(Seq(file))
+    errors.map(e ⇒ ErrorData(e._2)).toSeq
   }
 
   def removePlugin(safePath: SafePath)(implicit workspace: Workspace): Unit = synchronized {
@@ -386,4 +386,7 @@ object utils {
     val bundle = PluginManager.bundle(file)
     bundle.foreach(PluginManager.remove)
   }
+
+  def formatDate(t: Long) = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(t)
+
 }

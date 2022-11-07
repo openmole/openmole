@@ -162,11 +162,16 @@ trait CoreAPI extends RESTAPI {
 
   // ---- Plugins -----
   val listPlugins: Endpoint[Unit, Iterable[Plugin]] =
-    endpoint(get(path / "list-plugins"), ok(jsonResponse[Iterable[Plugin]]))
+    endpoint(get(path / "plugin" / "list"), ok(jsonResponse[Iterable[Plugin]]))
 
   val guiPlugins: Endpoint[Unit, PluginExtensionData] =
-    endpoint(get(path / "gui-plugins"), ok(jsonResponse[PluginExtensionData]))
+    endpoint(get(path / "plugin" / "gui"), ok(jsonResponse[PluginExtensionData]))
 
+  val addPlugin: Endpoint[SafePath, Seq[ErrorData]] =
+    endpoint(post(path / "plugin" / "add", jsonRequest[SafePath]), ok(jsonResponse[Seq[ErrorData]]))
+
+  val removePlugin: Endpoint[SafePath, Unit] =
+    endpoint(post(path / "plugin" / "remove", jsonRequest[SafePath]), ok(jsonResponse[Unit]))
 
   // To port
   //def appendToPluggedIfPlugin(safePath: SafePath): Unit

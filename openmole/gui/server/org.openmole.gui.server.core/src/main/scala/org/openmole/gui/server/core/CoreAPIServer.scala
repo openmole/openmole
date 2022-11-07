@@ -164,6 +164,12 @@ class CoreAPIServer(apiImpl: ApiImpl)
   val findAnalysisPluginRoute =
     findAnalysisPlugin.implementedBy { p => apiImpl.findAnalysisPlugin(p) }
 
+  val addPluginRoute =
+    addPlugin.implementedBy { p => apiImpl.addPlugin(p) }
+
+  val removePluginRoute =
+    removePlugin.implementedBy { p => apiImpl.removePlugin(p) }
+  
   val endpointRoutes: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(
       settingsRoute,
@@ -203,7 +209,9 @@ class CoreAPIServer(apiImpl: ApiImpl)
       copyAllFromTmpRoute,
       marketIndexRoute,
       getMarketEntryRoute,
-      findAnalysisPluginRoute
+      findAnalysisPluginRoute,
+      addPluginRoute,
+      removePluginRoute
     )
   ) //.map(_.putHeaders(Header("Access-Control-Allow-Origin", "*")))
 

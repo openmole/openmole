@@ -5,7 +5,6 @@ import org.openmole.gui.ext.data._
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.ext.client.Utils._
 import scaladget.bootstrapnative.bsn._
-import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.client._
 import org.openmole.gui.client.core._
 import org.openmole.gui.client.core.alert.AbsolutePositioning.CenterPagePosition

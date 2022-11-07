@@ -9,7 +9,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scaladget.bootstrapnative.bsn._
 import org.openmole.gui.ext.data._
 import Waiter._
-import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.client.FileManager
 
 object ProjectPanel {

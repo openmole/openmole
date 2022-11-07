@@ -13,7 +13,6 @@ import org.scalajs.dom.raw.HTMLElement
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
-import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.DataUtils._
 import org.openmole.gui.ext.client
 import org.openmole.plugin.method.evolution.data.AnalysisData.Convergence

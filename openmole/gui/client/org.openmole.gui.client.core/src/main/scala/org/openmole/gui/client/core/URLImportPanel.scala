@@ -12,7 +12,6 @@ import org.openmole.gui.client.core.CoreUtils._
 import org.openmole.gui.ext.data._
 import Waiter._
 import org.openmole.core.market.MarketIndexEntry
-import org.openmole.gui.ext.api.Api
 import com.raquo.laminar.api.L._
 import Waiter._
 import com.raquo.laminar.nodes.ReactiveElement.isActive

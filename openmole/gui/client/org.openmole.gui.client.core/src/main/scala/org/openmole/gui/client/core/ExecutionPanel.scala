@@ -29,7 +29,6 @@ import org.openmole.gui.ext.data._
 import org.openmole.gui.client.core.alert.{ BannerAlert, BannerLevel }
 import org.openmole.gui.client.core.files.TreeNodeTabs
 import org.openmole.gui.client.tool.OMTags
-import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.client.Utils
 import org.openmole.gui.ext.data.ExecutionInfo.Failed
 import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement, HTMLSpanElement }

@@ -8,7 +8,6 @@ import org.scalajs.dom
 import org.openmole.gui.ext.client.Utils._
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
-import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.data.{ JVMInfos, routes }
 import org.openmole.gui.ext.client._
 import org.openmole.gui.client.core.files.FileDisplayer

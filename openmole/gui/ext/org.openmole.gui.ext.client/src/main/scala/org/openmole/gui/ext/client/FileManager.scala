@@ -2,7 +2,6 @@ package org.openmole.gui.ext.client
 
 import org.openmole.gui.ext.data._
 import org.scalajs.dom.raw._
-import org.openmole.gui.ext.api.Api
 import com.raquo.laminar.api.L._
 
 import scala.concurrent.ExecutionContext.Implicits.global

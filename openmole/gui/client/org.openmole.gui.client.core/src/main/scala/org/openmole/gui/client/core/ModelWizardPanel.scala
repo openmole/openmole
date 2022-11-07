@@ -33,7 +33,6 @@ import org.openmole.gui.ext.data.DataUtils._
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.openmole.gui.client.tool.{OMTags, OptionsDiv, TagBadge}
-import org.openmole.gui.ext.api.Api
 import org.openmole.gui.ext.client.FileManager
 import scaladget.bootstrapnative.Selector.Options
 
