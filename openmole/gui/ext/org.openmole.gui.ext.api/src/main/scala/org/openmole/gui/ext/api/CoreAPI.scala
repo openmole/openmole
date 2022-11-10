@@ -161,8 +161,8 @@ trait CoreAPI extends RESTAPI {
     endpoint(post(path / "rename-key", jsonRequest[(String, String)]), ok(jsonResponse[Unit]))
 
   // ---- Plugins -----
-  val listPlugins: Endpoint[Unit, Iterable[Plugin]] =
-    endpoint(get(path / "plugin" / "list"), ok(jsonResponse[Iterable[Plugin]]))
+  val listPlugins: Endpoint[Unit, Seq[Plugin]] =
+    endpoint(get(path / "plugin" / "list"), ok(jsonResponse[Seq[Plugin]]))
 
   val guiPlugins: Endpoint[Unit, PluginExtensionData] =
     endpoint(get(path / "plugin" / "gui"), ok(jsonResponse[PluginExtensionData]))

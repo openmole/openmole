@@ -172,7 +172,10 @@ object App {
           button(btn_danger, "New project", onClick --> { _ => panels.expandTo(newProjectPanel, 3) }),
           div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ openExecutionPanel }).tooltip("Executions"),
           div(glyph_lock, navBarItem, onClick --> { _ ⇒ panels.expandTo(authenticationPanel, 2) }).tooltip("Authentications"),
-          div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒ panels.expandTo(panels.pluginPanel.render, 1) }).tooltip("Plugins")
+          div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒
+            panels.pluginPanel.getPlugins
+            panels.expandTo(panels.pluginPanel.render, 1)
+          }).tooltip("Plugins")
         )
         //            settingsItem
       )

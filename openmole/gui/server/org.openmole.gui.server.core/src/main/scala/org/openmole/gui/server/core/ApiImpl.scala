@@ -137,7 +137,23 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 //  }
 
   def deleteFiles(safePaths: Seq[SafePath]): Unit = {
-    import services._
+    import services.*
+    import org.openmole.tool.file.*
+    
+    val allPlugins = listPlugins()
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+
+    def unplug(f: File) =
+      if utils.isPlugged(f, allPlugins.toSeq)(workspace) then removePlugin(utils.fileToSafePath(f))
+
+    for
+      safePath <- safePaths
+      file = safePathToFile(safePath)
+    do
+     if file.isDirectory
+     then file.applyRecursive(unplug)
+     else unplug(file)
+
     utils.deleteFiles(safePaths)
   }
 
@@ -268,7 +284,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def listFiles(sp: SafePath, fileFilter: data.FileFilter = data.FileFilter()): ListFilesData = {
     import services._
-    utils.listFiles(sp, fileFilter, listPlugins().toSeq)(org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace)
+    utils.listFiles(sp, fileFilter, listPlugins())(org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace)
   }
 
    def recursiveListFiles(sp: SafePath, findString: Option[String]): Seq[(SafePath, Boolean)] = {
@@ -566,59 +582,47 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     module.addPluginsFiles(recurse(file), false, module.moduleDirectory)
   }
 
-
-  private def toPluginList(currentPlugins: Seq[String]) = {
-    import services._
+  private def toPluginList(currentPlugins: Seq[String]) =
+    import services.*
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     val currentPluginsSafePath = currentPlugins.map { s ⇒ SafePath(s.split("/")) }
 
-    currentPluginsSafePath.flatMap { csp ⇒
+    currentPluginsSafePath.map { csp ⇒
       val file = safePathToFile(csp)
-      if file.exists
-      then
-        val date = org.openmole.gui.ext.server.utils.formatDate(file.lastModified)
-        Some(Plugin(csp, date))
-      else None
+      val date = org.openmole.gui.ext.server.utils.formatDate(file.lastModified)
+      Plugin(csp, date, file.exists && PluginManager.bundle(file).isDefined)
     }
-  }
 
-  private def isPlugged(safePath: SafePath) = {
+  def activatePlugins =
+    import services.*
+    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    val plugins = services.preference.preferenceOption(GUIServer.plugins).getOrElse(Seq()).map(s ⇒ safePathToFile(SafePath(s.split("/")))).filter(_.exists)
+    PluginManager.tryLoad(plugins)
+
+  private def isPlugged(safePath: SafePath) =
     import services._
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
-    utils.isPlugged(safePathToFile(safePath), listPlugins().toSeq)(workspace)
-  }
+    utils.isPlugged(safePathToFile(safePath), listPlugins())(workspace)
 
-  private def updatePluggedList(set: Seq[String] ⇒ Seq[String]): Unit = {
+  private def updatePluggedList(set: Seq[String] ⇒ Seq[String]): Unit =
     import services._
-    preference.updatePreference(GUIServer.plugins)(p =>
-      Some(set(p.getOrElse(Seq())))
-    )
-  }
+    preference.updatePreference(GUIServer.plugins)(p => Some(set(p.getOrElse(Seq()))))
 
-  def addPlugin(safePath: SafePath): Seq[ErrorData] = {
+  def addPlugin(safePath: SafePath): Seq[ErrorData] = 
     import services._
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     val errors = utils.addPlugin(safePath)
     if (errors.isEmpty) { updatePluggedList { pList ⇒ (pList :+ safePath.path.mkString("/")).distinct } }
     errors
-  }
 
-//  def addPlugin(safePath: SafePath): Unit = {
-//    import services._
-//    val currentPluginsSafePath = pluggedList.map { _.projectSafePath }
-//    if (utils.isPlugin(safePath) && !currentPluginsSafePath.contains(safePath)) addPlugin(safePath)
-//  }
-
-  def listPlugins(): Iterable[Plugin] = {
+  def listPlugins(): Seq[Plugin] =
     val currentPlugins = services.preference.preferenceOption(GUIServer.plugins).getOrElse(Seq())
     toPluginList(currentPlugins)
-  }
 
-  def removePlugin(safePath: SafePath) = {
-    import services._
+  def removePlugin(safePath: SafePath) =
+    import services.*
     updatePluggedList { _.filterNot(_ == safePath.path.mkString("/")) }
     utils.removePlugin(safePath)(workspace)
-  }
 
   //GUI OM PLUGINS
   def getGUIPlugins(): PluginExtensionData = {

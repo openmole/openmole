@@ -326,7 +326,7 @@ package file {
       }
 
       // TODO replace with DirectoryStream
-      def listRecursive(filter: File ⇒ Boolean) = {
+      def listRecursive(filter: File ⇒ Boolean = _ => true) = {
         val ret = new ListBuffer[File]
         applyRecursive((f: File) ⇒ if (filter(f)) ret += f)
         ret

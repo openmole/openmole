@@ -199,6 +199,8 @@ class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, pass
 
     val serviceProvider = GUIServerServices.ServicesProvider(services, new AtomicReference(Cypher(password)))
     val apiImpl = new ApiImpl(serviceProvider, Some(applicationControl))
+    apiImpl.activatePlugins
+
     val apiServer = new CoreAPIServer(apiImpl)
     val applicationServer = new ApplicationServer(webappCache, extraHeaders, password, serviceProvider)
 

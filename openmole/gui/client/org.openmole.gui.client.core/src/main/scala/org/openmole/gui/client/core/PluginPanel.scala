@@ -29,13 +29,8 @@ import scaladget.bootstrapnative.bsn
 class PluginPanel {
 
   private lazy val plugins: Var[Seq[Plugin]] = Var(Seq())
-  getPlugins
 
-  def getPlugins = {
-    Fetch(_.listPlugins(()).future) { p ⇒
-      plugins.set(p.toSeq)
-    }
-  }
+  def getPlugins = Fetch(_.listPlugins(()).future) { p ⇒ plugins.set(p.toSeq) }
 
   val pluginTable =
     div(

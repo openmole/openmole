@@ -474,7 +474,7 @@ package object data {
 
   // projectSafePath is the plugin path in the project tree.
   // The plugin is copied in the plugin directory with the same name.
-  case class Plugin(projectSafePath: SafePath, time: String)
+  case class Plugin(projectSafePath: SafePath, time: String, plugged: Boolean)
 
   sealed trait Language {
     def name: String

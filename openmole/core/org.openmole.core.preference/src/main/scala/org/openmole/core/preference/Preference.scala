@@ -98,7 +98,11 @@ trait Preference {
   def updatePreference[T: ConfigurationString](location: PreferenceLocation[T])(value: Option[T] => Option[T])(implicit cypher: Cypher) = synchronized {
     val v = preferenceOption(location)
     val newValue = value(v)
-    if(!newValue.isDefined) clearPreference(location)
+
+    newValue match
+      case None => clearPreference(location)
+      case Some(v) => setPreference(location, v)
+
     newValue
   }
 

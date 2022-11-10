@@ -45,10 +45,10 @@ class CoreAPIServer(apiImpl: ApiImpl)
 //    resetPassword.implementedBy(_ => apiImpl.resetPassword())
 
   val listPluginsRoute =
-    listPlugins.implementedBy(_ => apiImpl.listPlugins())
+    listPlugins.implementedBy{ _ => apiImpl.listPlugins() }
 
   val guiPluginsRoute =
-    guiPlugins.implementedBy ( _ => apiImpl.getGUIPlugins())
+    guiPlugins.implementedBy ( _ => apiImpl.getGUIPlugins() )
 
   val listFilesRoute =
     listFiles.implementedBy { case(path, filter) => apiImpl.listFiles(path, filter) }
