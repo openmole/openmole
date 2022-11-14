@@ -69,23 +69,19 @@ class EGIAuthenticationEGIServer(s: Services)
     }
 
     private def coreObject(data: EGIAuthenticationData) = data.privateKey.map { pk ⇒
-      P12Certificate(
-        cypher.encrypt(data.cypheredPassword),
-        authenticationFile(pk)
-      )
+      P12Certificate(data.cypheredPassword, authenticationFile(pk) )
     }
 
     def egiAuthentications(): Seq[EGIAuthenticationData] =
-      EGIAuthentication() match {
+      EGIAuthentication() match
         case Some(p12: P12Certificate) ⇒
           Seq(
             EGIAuthenticationData(
-              cypher.decrypt(p12.cypheredPassword),
+              p12.cypheredPassword,
               Some(p12.certificate.getPath)
             )
           )
-        case x: Any ⇒ Seq()
-      }
+        case _ ⇒ Seq()
 
     def addAuthentication(data: EGIAuthenticationData): Unit =
       coreObject(data).foreach { a ⇒
