@@ -162,7 +162,7 @@ class CoreAPIServer(apiImpl: ApiImpl)
     getMarketEntry.implementedBy { case(e, p) => apiImpl.getMarketEntry(e, p) }
 
   val findAnalysisPluginRoute =
-    findAnalysisPlugin.implementedBy { p => apiImpl.findAnalysisPlugin(p) }
+    findVisualisationPlugin.implementedBy { p => apiImpl.findAnalysisPlugin(p) }
 
   val addPluginRoute =
     addPlugin.implementedBy { p => apiImpl.addPlugin(p) }

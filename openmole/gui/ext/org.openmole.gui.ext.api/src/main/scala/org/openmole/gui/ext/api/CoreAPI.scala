@@ -173,14 +173,16 @@ trait CoreAPI extends RESTAPI {
   val removePlugin: Endpoint[SafePath, Unit] =
     endpoint(post(path / "plugin" / "remove", jsonRequest[SafePath]), ok(jsonResponse[Unit]))
 
+  val findVisualisationPlugin: Endpoint[SafePath, Option[GUIPluginAsJS]] =
+    endpoint(post(path / "plugin" / "visualisation", jsonRequest[SafePath]), ok(jsonResponse[Option[GUIPluginAsJS]]))
+
   // To port
   //def appendToPluggedIfPlugin(safePath: SafePath): Unit
   //def unplug(safePath: SafePath): Unit
   //def isOSGI(safePath: SafePath): Boolean
 
   //def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS]
-  val findAnalysisPlugin: Endpoint[SafePath, Option[GUIPluginAsJS]] =
-    endpoint(post(path / "find-analysis-plugin", jsonRequest[SafePath]), ok(jsonResponse[Option[GUIPluginAsJS]]))
+
 
   // ---- Model Wizards --------------
   //def models(archivePath: SafePath): Seq[SafePath]

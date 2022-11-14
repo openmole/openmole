@@ -624,6 +624,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     updatePluggedList { _.filterNot(_ == safePath.path.mkString("/")) }
     utils.removePlugin(safePath)(workspace)
 
+  def pluginRoutes =
+    GUIPluginRegistry.all.flatMap(_.router).map(p => p(services))
+
   //GUI OM PLUGINS
   def getGUIPlugins(): PluginExtensionData = {
     PluginExtensionData(GUIPluginRegistry.authentications, GUIPluginRegistry.wizards)
@@ -635,6 +638,13 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
     PluginManager.isOSGI(safePathToFile(safePath))
   }
+
+  // Analysis plugins
+  def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS] =
+    import services._
+    val omrFile = safePathToFile(result)(ServerFileSystemContext.project, workspace)
+    val methodName = OMROutputFormat.methodName(omrFile)
+    GUIPluginRegistry.analysis.find(_._1 == methodName).map(_._2)
 
   //MODEL WIZARDS
 
@@ -715,14 +725,5 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       case Failure(e)     ⇒ Some(ErrorData(e))
     }
 
-  // Method plugins
-  def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS] =
-    import services._
-    val omrFile = safePathToFile(result)(ServerFileSystemContext.project, workspace)
-    val methodName = OMROutputFormat.methodName(omrFile)
-    GUIPluginRegistry.analysis.find(_._1 == methodName).map(_._2)
-
-  def pluginRoutes =
-    GUIPluginRegistry.all.flatMap(_.router).map(p => p(services))
 
 }

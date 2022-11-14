@@ -36,7 +36,7 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs) {
         fileExtension match {
           case OpenMOLEScript ⇒
             OMSContent.addTab(safePath, content, hash)
-          case FileExtension.CSV | FileExtension.OMR=> ResultContent.addTab(safePath, content, hash)
+          case FileExtension.CSV => ResultContent.addTab(safePath, content, hash)
           case _: EditableFile => AnyTextContent.addTab(safePath, content, hash)
           case MDScript ⇒
             Fetch.future(_.mdToHtml(safePath).future).foreach { htmlString ⇒
@@ -45,7 +45,7 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs) {
               HTMLContent.addTab(safePath, htmlDiv)
             }
           case OpenMOLEResult ⇒
-            Fetch.future(_.findAnalysisPlugin(safePath).future).foreach {
+            Fetch.future(_.findVisualisationPlugin(safePath).future).foreach {
               case Some(plugin) ⇒
                 val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
                 val tab = TreeNodeTab.HTML(safePath, analysis.panel(safePath, pluginServices))
