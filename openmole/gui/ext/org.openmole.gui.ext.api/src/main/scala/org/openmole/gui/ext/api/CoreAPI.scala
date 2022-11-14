@@ -36,19 +36,19 @@ trait CoreAPI extends RESTAPI {
   // ------ Files ------------
 
   val listFiles: Endpoint[(SafePath, FileFilter), ListFilesData] =
-    endpoint(post(path / "list-files", jsonRequest[(SafePath,FileFilter)]), ok(jsonResponse[ListFilesData]))
+    endpoint(post(path / "file" / "list", jsonRequest[(SafePath,FileFilter)]), ok(jsonResponse[ListFilesData]))
 
   val size: Endpoint[SafePath, Long] =
-    endpoint(post(path / "size", jsonRequest[SafePath]), ok(jsonResponse[Long]))
+    endpoint(post(path / "file" / "size", jsonRequest[SafePath]), ok(jsonResponse[Long]))
 
   //def saveFile(path: SafePath, fileContent: String, hash: Option[String], overwrite: Boolean): (Boolean, String)
 //  implicit lazy val saveFileRequestSchema: JsonSchema[(SafePath, String, Option[String], Boolean)] = genericJsonSchema
   val saveFile: Endpoint[(SafePath, String, Option[String], Boolean), (Boolean, String)] =
-    endpoint(post(path / "save-file", jsonRequest[(SafePath, String, Option[String], Boolean)]), ok(jsonResponse[(Boolean, String)]))
+    endpoint(post(path / "file"/ "save", jsonRequest[(SafePath, String, Option[String], Boolean)]), ok(jsonResponse[(Boolean, String)]))
 
   //def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean) = {
-  val copyProjectFiles: Endpoint[(Seq[SafePath], SafePath, Boolean), Seq[SafePath]] =
-    endpoint(post(path / "copy-project-file", jsonRequest[(Seq[SafePath], SafePath, Boolean)]), ok(jsonResponse[Seq[SafePath]]))
+  val copyFiles: Endpoint[(Seq[SafePath], SafePath, Boolean), Seq[SafePath]] =
+    endpoint(post(path / "file" / "copy", jsonRequest[(Seq[SafePath], SafePath, Boolean)]), ok(jsonResponse[Seq[SafePath]]))
 
   //def addDirectory(safePath: SafePath, directoryName: String): Boolean
   val createDirectory: Endpoint[(SafePath, String), Boolean] =

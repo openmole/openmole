@@ -231,9 +231,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     utils.copyAllFromTmp(tmpSafePath, to)
   }
 
-  def copyProjectFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean) = {
+  def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean) = {
     import services._
-    utils.copyProjectFilesTo(safePaths, to, overwrite)
+    utils.copyFilesTo(safePaths, to, overwrite)
   }
 
 //  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath] = {

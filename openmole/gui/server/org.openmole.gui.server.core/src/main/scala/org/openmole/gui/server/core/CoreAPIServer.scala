@@ -59,8 +59,8 @@ class CoreAPIServer(apiImpl: ApiImpl)
   val saveFileRoute =
     saveFile.implementedBy { case(path, fileContent, hash, overwrite) => apiImpl.saveFile(path, fileContent, hash, overwrite) }
 
-  val copyProjectFilesRoute =
-    copyProjectFiles.implementedBy { case(sp, to, overwrite) => apiImpl.copyProjectFiles(sp, to, overwrite) }
+  val copyFilesRoute =
+    copyFiles.implementedBy { case(sp, to, overwrite) => apiImpl.copyFiles(sp, to, overwrite) }
 
   val renameKeyRoute =
     renameKey.implementedBy { case(name, newName) => apiImpl.renameKey(name, newName) }

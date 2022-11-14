@@ -55,7 +55,9 @@ object utils {
   def treeNodeToSafePath(tnd: TreeNodeData, parent: SafePath): SafePath = parent ++ tnd.name
 
   implicit class SafePathDecorator(s: SafePath) {
-    def toFile(implicit context: ServerFileSystemContext, workspace: Workspace) = safePathToFile(s)
+    def toFile(implicit workspace: Workspace) =
+      given ServerFileSystemContext = s.context
+      safePathToFile(s)
 
     def copy(toPath: SafePath, withName: Option[String] = None)(implicit workspace: Workspace) = {
       import org.openmole.gui.ext.data.ServerFileSystemContext.project
@@ -245,9 +247,8 @@ object utils {
 //  }
 
   //copy safePaths files to 'to' folder in overwriting in they exist
-  def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean)(implicit workspace: Workspace): Seq[SafePath] =
+  def copyFilesTo(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean)(implicit workspace: Workspace): Seq[SafePath] =
     if(overwrite) {
-      import ServerFileSystemContext.project
       val existing = ListBuffer[SafePath]()
       safePaths.foreach { sp ⇒
         val destination = new File(to.toFile, sp.name)

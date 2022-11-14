@@ -56,7 +56,7 @@ object OMROutputFormat {
           def methodFormat(method: MD, fileName: String, existingData: Seq[String], contentDataValue: ContentData) =
             import executionContext.timeService
 
-            def methodJson = 
+            def methodJson =
               method.asJson.asObject.get.toList.head._2.
               mapObject(_.add(methodNameField, Json.fromString(methodData.name(method))))
 

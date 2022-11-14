@@ -81,8 +81,8 @@ object CoreUtils {
 //  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Seq[SafePath]] =
 //    Post()[Api].testExistenceAndCopyProjectFilesTo(safePaths, to).call()
 
-  def copyProjectFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean): Future[Seq[SafePath]] =
-    Fetch.future(_.copyProjectFiles(safePaths, to, overwrite).future)
+  def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean): Future[Seq[SafePath]] =
+    Fetch.future(_.copyFiles(safePaths, to, overwrite).future)
 
   def listFiles(safePath: SafePath, fileFilter: FileFilter = FileFilter()): Future[ListFilesData] = {
     Fetch.future(_.listFiles(safePath, fileFilter).future)
